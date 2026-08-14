@@ -396,8 +396,25 @@ class DispatchTests(unittest.TestCase):
 
 class ExperimentTests(unittest.TestCase):
     def test_required_baselines_and_threshold_grid(self):
-        self.assertEqual(len(required_matrix()), 7)
+        matrix = required_matrix()
+        self.assertEqual(len(matrix), 7)
         self.assertEqual(len(threshold_sensitivity_matrix()), 27)
+        exact = matrix[0]
+        self.assertEqual(exact.scored_issues_per_month, 54)
+        self.assertEqual(
+            exact.evaluation_scope,
+            "MONTHLY_PREDECLARED_54_ISSUE_ORACLE_WINDOW",
+        )
+        self.assertTrue(all(case.scored_issues_per_month == 2016 for case in matrix[1:]))
+
+        contract = json.loads((ROOT / "r26/config/r26_contract.json").read_text())
+        sampling = contract["annual_execution_after_validation"]
+        self.assertEqual(sampling["scored_days_per_month"], 7)
+        self.assertEqual(sampling["scored_steps_per_month"], 2016)
+        self.assertEqual(sampling["total_scored_steps"], 24192)
+        self.assertEqual(sampling["monthly_waves"], 3)
+        self.assertEqual(sampling["exact_oracle"]["issues_per_month"], 54)
+        self.assertFalse(sampling["exact_oracle"]["full_7day_exact_run_required"])
 
     def test_exact_online_degradation_and_route_fraction(self):
         comparison = exact_online_comparison(

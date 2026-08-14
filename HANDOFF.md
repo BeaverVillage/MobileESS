@@ -62,10 +62,10 @@ R25W repairs a post-solve thread audit exposed at issue 157. The issue itself
 passed the global certificate at `2.999394%`, but Gurobi used one worker after
 the root start closed the solve and the wrapper incorrectly required the last
 message to equal four. `Threads=4` is now audited as a cap: the parameter must
-remain four and every observed count must lie in `[1,4]`. R25W also raises the
-exact root pricing batch from 32 to 64; issues 154--157 showed that KKT calls
-matched CG iterations plus only zero/one numerical retry, so the safe reduction
-is fewer exact CG round trips rather than deleting dual recovery.
+remain four and every observed count must lie in `[1,4]`. KKT calls matched CG
+iterations plus only zero/one numerical retry. A measured batch-64 trial was
+rejected because issue 157 regressed from 17 iterations/187.5 seconds to 24
+iterations/324.5 seconds; the production exact batch remains 32.
 
 These changes have passed unit/static and licensed-Gurobi multi-start smoke
 tests, but their issue-154 wall-time improvement is not yet runtime evidence.
@@ -111,5 +111,16 @@ From the repository in WSL:
 
 The 54/54 Stage-1 run is an offline one-time validation sequence, not a solve
 that the eventual R26 controller performs 54 times every operating day.
+
+## Annual evaluation sampling
+
+The production evaluation now scores one deterministic contiguous seven-day
+block per calendar month: 2,016 five-minute issues/month and 24,192 scored
+issues/year. Every monthly episode has 48 hours of unscored causal burn-in.
+Four monthly processes with four threads each execute the 12 months in three
+waves. R26 and operational baselines run all seven scored days; R25T exact is a
+54-issue oracle window inside each selected week and is never imputed over the
+remaining issues. The current Stage-1 54/54 must still complete once to validate
+the exact causal/certificate pipeline before those oracle windows are used.
 
 Do not create a PR until the user explicitly requests it.

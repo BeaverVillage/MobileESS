@@ -66,7 +66,8 @@ code does not claim a general Lyapunov proof.
 
 Use identical causal inputs for:
 
-- R25R exact five-minute reference;
+- R25T exact five-minute reference on the predeclared monthly 54-issue oracle
+  windows;
 - fixed 15-, 30-, and 60-minute mobility refresh;
 - event-triggered with maximum refresh of 15, 30, and 60 minutes.
 
@@ -77,6 +78,22 @@ predeclared SOC reserve threshold. Report economic degradation
 five-minute opportunities, travel energy, minimum SOC and rack-support margins,
 AC violations, runtime median/p95/p99/max, and deadline misses. No policy winner
 is declared until every required cell has validated results.
+
+## Monthly evaluation sampling
+
+The primary annual score uses one contiguous seven-day block per calendar
+month, for 84 scored days and 24,192 five-minute issues. The block is selected
+before policy results using a deterministic minimum normalized-feature-distance
+rule relative to the full month's empirical centroid. Candidate blocks require
+complete input data and 48 hours of prior causal history. The burn-in is run but
+excluded from reported metrics. Months receive equal weight so longer months do
+not dominate the annual score.
+
+Operational policies run each complete seven-day block. R25T is retained as an
+exact global-3% oracle on one predeclared 54-issue window inside the same block;
+its objective is compared only against the matching online window and is never
+imputed over the rest of the week. Extreme/stress cases are disclosed
+separately and do not silently change the primary sample.
 
 The principal plot is economic degradation versus route replans per day, with
 fixed-period and event-triggered policies shown together. This directly tests

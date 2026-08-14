@@ -2096,23 +2096,23 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   except Exception:
    snap=cbstate.get("latest_mip")
    if snap:final_pass_gap=snap.get("relative_gap");final_pass_obj=snap.get("objbst");final_pass_bound=snap.get("objbnd")
-  actual_thread_counts=list(cbstate.get("thread_counts_message",[]))
-  concurrent_req=int(_cm) if _cm is not None else 1
-  # Threads is a solver cap, not a promise that every solve phase will consume
-  # exactly that many workers.  In particular, a MIP start can satisfy the
-  # global certificate at the root and Gurobi may then report one worker even
-  # though Params.Threads remains four.  Verify the configured cap and reject
-  # only missing/invalid observations or use above that cap.  Do not let the
-  # last (often tiny continuous-polish) message overwrite a valid four-thread
-  # observation from the economic solve.
-  configured_thread_cap_verified=bool(int(m.Params.Threads)==threads_req)
-  observed_thread_counts_within_requested_cap=bool(
-    actual_thread_counts and all(1<=int(v)<=threads_req for v in actual_thread_counts))
-  normal_thread_verified=bool(configured_thread_cap_verified and observed_thread_counts_within_requested_cap)
-  concurrent_parameter_verified=bool(
-    concurrent_req>1 and configured_thread_cap_verified and
-    int(m.Params.ConcurrentMIP)==concurrent_req)
-  thread_verified=normal_thread_verified if concurrent_req<=1 else concurrent_parameter_verified
+ actual_thread_counts=list(cbstate.get("thread_counts_message",[]))
+ concurrent_req=int(_cm) if _cm is not None else 1
+ # Threads is a solver cap, not a promise that every solve phase will consume
+ # exactly that many workers.  In particular, a MIP start can satisfy the
+ # global certificate at the root and Gurobi may then report one worker even
+ # though Params.Threads remains four.  Verify the configured cap and reject
+ # only missing/invalid observations or use above that cap.  Do not let the
+ # last (often tiny continuous-polish) message overwrite a valid four-thread
+ # observation from the economic solve.
+ configured_thread_cap_verified=bool(int(m.Params.Threads)==threads_req)
+ observed_thread_counts_within_requested_cap=bool(
+   actual_thread_counts and all(1<=int(v)<=threads_req for v in actual_thread_counts))
+ normal_thread_verified=bool(configured_thread_cap_verified and observed_thread_counts_within_requested_cap)
+ concurrent_parameter_verified=bool(
+   concurrent_req>1 and configured_thread_cap_verified and
+   int(m.Params.ConcurrentMIP)==concurrent_req)
+ thread_verified=normal_thread_verified if concurrent_req<=1 else concurrent_parameter_verified
 
  _full_obj=float(m.ObjVal) if m.SolCount>0 else float("inf")
  # B6-C5R1: one and only one scientific lower-bound authority.  If external

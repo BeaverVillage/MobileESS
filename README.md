@@ -33,6 +33,10 @@ full-planning horizon. The generalized-Benders cut cache is an integration
 interface, not yet a production master/subproblem solver.
 It does not weaken or replace the R25R offline 3% certificate. See
 `docs/R26_ARCHITECTURE.md` and `r26/config/r26_contract.json`.
+The annual evaluation uses one contiguous seven-day block per month (84 scored
+days total), with four monthly processes in three waves and a 48-hour unscored
+causal burn-in. R25T exact certification is sampled on one 54-issue window per
+month rather than run across every five-minute issue in all seven days.
 The manuscript-facing novelty boundary and experiment contract are in
 `docs/R26_METHOD_REVIEW_DEFENSE.md`.
 
@@ -59,9 +63,9 @@ The R25V continuation accelerates this exact portfolio with a causal shifted
 previous-plan start plus a same-issue restricted-master start, a larger exact
 pricing batch, and shorter non-authoritative primal-phase stall limits. It does
 not change the AC QCP, feasible set, objective, or global 3% rule.
-R25W treats `Threads=4` correctly as a solver cap and uses a 64-path exact
-pricing batch to reduce repeated KKT-dual CG round trips without changing
-pricing closure.
+R25W treats `Threads=4` correctly as a solver cap. A measured 64-path pricing
+trial was slower, so the exact root batch remains 32 and pricing closure is
+unchanged.
 
 ```bash
 MOBILEESS_R25T_PREFLIGHT_ONLY=1 \

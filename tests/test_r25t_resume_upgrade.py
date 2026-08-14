@@ -43,7 +43,7 @@ class R25TResumeUpgradeTests(unittest.TestCase):
         self.assertIn("CAUSAL_SHIFTED_PREVIOUS_PLAN", decomp)
         self.assertIn("SAME_ISSUE_RESTRICTED_MASTER", decomp)
         self.assertIn("cm.NumStart=len(starts)", decomp)
-        self.assertIn('"MOBILEESS_R25M_B6_PRICING_BATCH": "64"', driver)
+        self.assertIn('"MOBILEESS_R25M_B6_PRICING_BATCH": "32"', driver)
         self.assertIn('"MOBILEESS_R25T_PRIMAL_STALL_SECONDS": "60"', driver)
 
     def test_r25w_thread_cap_accepts_solver_downshift_but_rejects_oversubscription(self):
@@ -58,6 +58,32 @@ class R25TResumeUpgradeTests(unittest.TestCase):
         observed = [4, 1]
         self.assertTrue(configured == requested and all(1 <= v <= requested for v in observed))
         self.assertFalse(configured == requested and all(1 <= v <= requested for v in [4, 5]))
+
+        # Regression for the issue-157 rerun: these audit assignments must be
+        # unconditional statements in build_full, not nested under the
+        # non-B6 multiobjective ``else`` branch.
+        import ast
+
+        tree = ast.parse(main)
+        build_full = next(
+            node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "build_full"
+        )
+        direct_assignments = {
+            target.id
+            for node in build_full.body
+            if isinstance(node, ast.Assign)
+            for target in node.targets
+            if isinstance(target, ast.Name)
+        }
+        self.assertIn("actual_thread_counts", direct_assignments)
+        self.assertIn("concurrent_req", direct_assignments)
+        self.assertIn("thread_verified", direct_assignments)
+
+    def test_r25w_rejects_regressive_pricing_batch_64(self):
+        driver = (REPO / "driver_r25t_stage1_resume_latest.py").read_text(encoding="utf-8")
+        self.assertIn('"MOBILEESS_R25M_B6_PRICING_BATCH": "32"', driver)
+        self.assertNotIn('"MOBILEESS_R25M_B6_PRICING_BATCH": "64"', driver)
+        self.assertIn("24 iterations / 324.5 s", driver)
 
     def test_r25v_resume_guidance_is_persisted_and_reloaded(self):
         main = (REPO / "science" / "main.py").read_text(encoding="utf-8")

@@ -14,11 +14,19 @@ class ExperimentCase:
     policy: str
     max_refresh_steps: int
     cadence_seconds: int = 300
+    evaluation_scope: str = "MONTHLY_7DAY_BLOCK"
+    scored_issues_per_month: int = 2016
 
 
 def required_matrix() -> Tuple[ExperimentCase, ...]:
     return (
-        ExperimentCase("r25r_exact_5min_reference", "OFFLINE_EXACT_REFERENCE", 1),
+        ExperimentCase(
+            "r25t_exact_5min_oracle",
+            "OFFLINE_EXACT_REFERENCE",
+            1,
+            evaluation_scope="MONTHLY_PREDECLARED_54_ISSUE_ORACLE_WINDOW",
+            scored_issues_per_month=54,
+        ),
         ExperimentCase("fixed_route_refresh_15m", "FIXED_PERIODIC", 3),
         ExperimentCase("event_route_refresh_max15m", "EVENT_TRIGGERED", 3),
         ExperimentCase("fixed_route_refresh_30m", "FIXED_PERIODIC", 6),

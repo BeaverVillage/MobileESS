@@ -1,5 +1,5 @@
 {
-  "schema_version": "r26.controller_contract.v1",
+  "schema_version": "r26.controller_contract.v2",
   "cadence_seconds": 300,
   "horizon_steps": 54,
   "commit_steps": 1,
@@ -50,8 +50,25 @@
     "restricted_master_objbound_global_authority": false
   },
   "annual_execution_after_validation": {
+    "calendar_months": 12,
+    "scored_days_per_month": 7,
+    "scored_steps_per_month": 2016,
+    "total_scored_days": 84,
+    "total_scored_steps": 24192,
+    "window_shape": "ONE_CONTIGUOUS_SEVEN_DAY_BLOCK_PER_MONTH",
+    "window_selector": "PREDECLARED_MINIMUM_NORMALIZED_FEATURE_DISTANCE_TO_MONTHLY_CENTROID",
+    "full_calendar_month_evaluation": false,
     "monthly_processes": 4,
     "solver_threads_per_process": 4,
-    "causal_burn_in_hours": 48
+    "monthly_waves": 3,
+    "causal_burn_in_hours": 48,
+    "burn_in_steps_per_month": 576,
+    "burn_in_excluded_from_reported_metrics": true,
+    "exact_oracle": {
+      "solver": "R25T_GLOBAL_3PCT",
+      "issues_per_month": 54,
+      "coverage": "ONE_PREDECLARED_4P5H_WINDOW_WITHIN_EACH_MONTHLY_7DAY_BLOCK",
+      "full_7day_exact_run_required": false
+    }
   }
 }

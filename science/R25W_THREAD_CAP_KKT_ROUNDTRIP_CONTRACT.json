@@ -12,7 +12,9 @@
     "last_observation_must_equal_cap": false
   },
   "root_pricing": {
-    "paths_per_mess_per_qcp_solve": 64,
+    "paths_per_mess_per_qcp_solve": 32,
+    "rejected_batch": 64,
+    "rejection_evidence": "issue157 root CG regressed from 17 iterations/187.5 seconds at batch32 to 24 iterations/324.5 seconds at batch64",
     "exact_true_dual_closure_retained": true,
     "reduced_cost_audit_retained": true,
     "numerical_retry_policy_retained": true
@@ -21,6 +23,12 @@
     "issues": [154, 155, 156, 157],
     "cg_iterations": [24, 23, 23, 17],
     "kkt_dual_solves": [25, 23, 23, 18],
-    "numerical_retries": [1, 0, 0, 1]
+    "numerical_retries": [1, 0, 0, 1],
+    "batch64_issue157_trial": {
+      "cg_iterations": 24,
+      "cg_seconds": 324.48908744502114,
+      "global_certified_gap": 0.02993374490438135,
+      "accepted_for_production": false
+    }
   }
 }

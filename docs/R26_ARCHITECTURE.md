@@ -84,9 +84,19 @@ refreshed sensitivities, OpenDSS verification, and corrective fallback.
 The R25R exact reference plus fixed and event-triggered 15/30/60-minute matrix
 and threshold-sensitivity grid must be completed before selecting a policy. A real-time claim requires every measured
 five-minute fast-loop runtime to be below 300 seconds, with p95/p99/max reported.
-Annual execution is authorized only after that validation and uses four
-independent monthly processes, four solver threads per process, and a causal
-48-hour monthly burn-in.
+Annual evaluation is authorized only after that validation. It scores one
+predeclared contiguous seven-day block per calendar month, selected before
+policy results by minimum normalized feature distance to the monthly centroid.
+Each block has 2,016 five-minute issues and a causal 48-hour burn-in that is not
+included in reported metrics. Four independent monthly processes use four
+solver threads each, so the 12 months run in three waves.
+
+The R25T global-3% solver is not run for all 2,016 issues. It remains the exact
+oracle on one predeclared 54-issue (4.5-hour) window inside each selected week.
+R26 and the operational comparison policies run the complete seven-day blocks.
+Exact and online objectives are compared only on matching oracle windows; an
+exact value is never imputed for the rest of a week. Stress cases are reported
+separately from the equal-month-weight primary score.
 
 See `R26_METHOD_REVIEW_DEFENSE.md` for the novelty boundary, conditional
 recursive-feasibility statement, sensitivity design, and reviewer-facing

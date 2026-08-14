@@ -25,3 +25,7 @@
   structural-signature-scoped generalized-Benders cut cache.
 - Added exact-safe initial path seeding and compact VarHint transfer, final-gap
   reporting repair, and legacy R25T nested-gap resume compatibility.
+- Changed annual evaluation from full calendar months to one predeclared
+  contiguous seven-day block per month. R26/baselines score all 2,016 monthly
+  issues; R25T supplies one matching 54-issue oracle window per month. Monthly
+  burn-in remains 48 causal hours and is excluded from reported metrics.
