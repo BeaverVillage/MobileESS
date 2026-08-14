@@ -61,10 +61,19 @@ portfolio because the original compact model gives Gurobi access to its native
 presolve, cuts, propagation, branching, heuristics, node management, and valid
 global bound.
 
-R25V reduces exact root-CG synchronization cost by requesting 32 negative-
-reduced-cost paths per MESS and QCP solve instead of 16. Pricing is still run to
-the same conservative closure gate, so this changes the number of round trips,
-not the all-column relaxation or its certified lower bound.
+R25V first reduced exact root-CG synchronization cost from 16 to 32 negative-
+reduced-cost paths per MESS and QCP solve. R25W raises the batch to 64 after
+issues 154--157 showed that 17--24 CG iterations caused 18--25 KKT dual solves,
+with only zero or one numerical retry. Pricing is still run to the same
+conservative closure gate, so this changes the number of round trips, not the
+all-column relaxation or its certified lower bound.
+
+`Threads=4` is a maximum worker policy. Gurobi may legitimately report one
+worker when a valid start closes the certificate at the root or during a small
+polish phase. The runtime audit therefore verifies that `Params.Threads` is
+four and every observed worker count lies in `[1,4]`; it rejects a missing
+observation, a parameter mismatch, or use above the configured cap. It no
+longer mistakes the final one-worker message for a policy failure.
 
 ## Retry policy
 

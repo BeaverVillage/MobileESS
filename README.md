@@ -59,6 +59,9 @@ The R25V continuation accelerates this exact portfolio with a causal shifted
 previous-plan start plus a same-issue restricted-master start, a larger exact
 pricing batch, and shorter non-authoritative primal-phase stall limits. It does
 not change the AC QCP, feasible set, objective, or global 3% rule.
+R25W treats `Threads=4` correctly as a solver cap and uses a 64-path exact
+pricing batch to reduce repeated KKT-dual CG round trips without changing
+pricing closure.
 
 ```bash
 MOBILEESS_R25T_PREFLIGHT_ONLY=1 \

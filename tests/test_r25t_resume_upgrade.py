@@ -43,8 +43,21 @@ class R25TResumeUpgradeTests(unittest.TestCase):
         self.assertIn("CAUSAL_SHIFTED_PREVIOUS_PLAN", decomp)
         self.assertIn("SAME_ISSUE_RESTRICTED_MASTER", decomp)
         self.assertIn("cm.NumStart=len(starts)", decomp)
-        self.assertIn('"MOBILEESS_R25M_B6_PRICING_BATCH": "32"', driver)
+        self.assertIn('"MOBILEESS_R25M_B6_PRICING_BATCH": "64"', driver)
         self.assertIn('"MOBILEESS_R25T_PRIMAL_STALL_SECONDS": "60"', driver)
+
+    def test_r25w_thread_cap_accepts_solver_downshift_but_rejects_oversubscription(self):
+        main = (REPO / "science" / "main.py").read_text(encoding="utf-8")
+        self.assertIn("configured_thread_cap_verified", main)
+        self.assertIn("observed_thread_counts_within_requested_cap", main)
+        self.assertIn("all(1<=int(v)<=threads_req for v in actual_thread_counts)", main)
+        self.assertIn("max(actual_thread_counts)", main)
+        self.assertIn("THREADS_PARAMETER_PLUS_MESSAGE_CAP", main)
+
+        requested = configured = 4
+        observed = [4, 1]
+        self.assertTrue(configured == requested and all(1 <= v <= requested for v in observed))
+        self.assertFalse(configured == requested and all(1 <= v <= requested for v in [4, 5]))
 
     def test_r25v_resume_guidance_is_persisted_and_reloaded(self):
         main = (REPO / "science" / "main.py").read_text(encoding="utf-8")

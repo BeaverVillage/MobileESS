@@ -359,6 +359,11 @@ except Exception:
  r25v={}
 c["r25v_exact_safe_contract"]=q.returncode==0 and r25v.get("status")=="PASS" and all(r25v.get("checks",{}).values())
 c["r25v_native_smoke_present"]=(R/"r25v_native_multistart_smoke.py").is_file()
+c["r25w_thread_cap_not_exact_last_count"]=(
+ "configured_thread_cap_verified" in mt and
+ "observed_thread_counts_within_requested_cap" in mt and
+ "max(actual_thread_counts)" in mt and
+ "actual_thread_counts[-1]==threads_req" not in mt)
 c["PASS"]=all(bool(v) for k,v in c.items() if k!="PASS")
 print(json.dumps(c,indent=2,sort_keys=True))
 if not c["PASS"]:raise SystemExit(2)

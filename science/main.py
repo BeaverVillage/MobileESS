@@ -2096,11 +2096,23 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   except Exception:
    snap=cbstate.get("latest_mip")
    if snap:final_pass_gap=snap.get("relative_gap");final_pass_obj=snap.get("objbst");final_pass_bound=snap.get("objbnd")
- actual_thread_counts=list(cbstate.get("thread_counts_message",[]))
- concurrent_req=int(_cm) if _cm is not None else 1
- normal_thread_verified=bool(actual_thread_counts and actual_thread_counts[-1]==threads_req)
- concurrent_parameter_verified=bool(concurrent_req>1 and int(m.Params.ConcurrentMIP)==concurrent_req and int(m.Params.Threads)==threads_req)
- thread_verified=normal_thread_verified if concurrent_req<=1 else concurrent_parameter_verified
+  actual_thread_counts=list(cbstate.get("thread_counts_message",[]))
+  concurrent_req=int(_cm) if _cm is not None else 1
+  # Threads is a solver cap, not a promise that every solve phase will consume
+  # exactly that many workers.  In particular, a MIP start can satisfy the
+  # global certificate at the root and Gurobi may then report one worker even
+  # though Params.Threads remains four.  Verify the configured cap and reject
+  # only missing/invalid observations or use above that cap.  Do not let the
+  # last (often tiny continuous-polish) message overwrite a valid four-thread
+  # observation from the economic solve.
+  configured_thread_cap_verified=bool(int(m.Params.Threads)==threads_req)
+  observed_thread_counts_within_requested_cap=bool(
+    actual_thread_counts and all(1<=int(v)<=threads_req for v in actual_thread_counts))
+  normal_thread_verified=bool(configured_thread_cap_verified and observed_thread_counts_within_requested_cap)
+  concurrent_parameter_verified=bool(
+    concurrent_req>1 and configured_thread_cap_verified and
+    int(m.Params.ConcurrentMIP)==concurrent_req)
+  thread_verified=normal_thread_verified if concurrent_req<=1 else concurrent_parameter_verified
 
  _full_obj=float(m.ObjVal) if m.SolCount>0 else float("inf")
  # B6-C5R1: one and only one scientific lower-bound authority.  If external
@@ -2178,8 +2190,11 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
        "final_economic_target_mip_gap":econ_gap,"final_economic_achieved_mip_gap":final_pass_gap,"final_economic_incumbent":final_pass_obj,"final_economic_bound":final_pass_bound,
        "requested_threads":int(threads_req),"requested_concurrent_mip":int(concurrent_req),
        "actual_thread_counts_from_message_callback":actual_thread_counts,
-       "actual_economic_threads":actual_thread_counts[-1] if actual_thread_counts else (threads_req if concurrent_req>1 else None),
-       "thread_policy_verified":bool(thread_verified),"thread_verification_mode":"CONCURRENT_PARAMETER_PLUS_EXTERNAL_LOG" if concurrent_req>1 else "MESSAGE_CALLBACK",
+       "actual_economic_threads":max(actual_thread_counts) if actual_thread_counts else (threads_req if concurrent_req>1 else None),
+       "last_observed_solver_threads":actual_thread_counts[-1] if actual_thread_counts else None,
+       "configured_thread_cap_verified":bool(configured_thread_cap_verified),
+       "observed_thread_counts_within_requested_cap":bool(observed_thread_counts_within_requested_cap),
+       "thread_policy_verified":bool(thread_verified),"thread_verification_mode":"CONCURRENT_PARAMETER_PLUS_EXTERNAL_LOG" if concurrent_req>1 else "THREADS_PARAMETER_PLUS_MESSAGE_CAP",
        "root_Method":root_method,"MIPFocus_economic":int(m.Params.MIPFocus),
        "rolling_primal_recovery":bool(_rolling_primal_recovery),
        "rolling_var_hints_applied":bool(warm_audit.get("rolling_var_hints_applied",False)),
@@ -2258,8 +2273,10 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   if status==GRB.MEM_LIMIT:raise RuntimeError(f"BUILD7BR6 graceful MEM_LIMIT status={status} soft_limit_GB={soft_mem_gb} sol_count={m.SolCount}")
   if not _r12_certified_gap_accept:
    raise RuntimeError(f"BUILD7BR6 nonoptimal status={status} sol_count={m.SolCount}")
- if not term.get("thread_policy_verified",False):
-  raise RuntimeError(f"BUILD7BR6 requested {threads_req} threads but MESSAGE callback verified {term.get('actual_economic_threads')}")
+  if not term.get("thread_policy_verified",False):
+   raise RuntimeError(
+    f"BUILD7BR6 thread cap audit failed requested={threads_req} "
+    f"configured={int(m.Params.Threads)} observed={actual_thread_counts}")
  # Extract.
  if b6_result is not None:
   class _R25MProxy:

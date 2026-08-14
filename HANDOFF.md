@@ -58,6 +58,15 @@ R25V adds three exact-safe runtime reductions for issue 154 onward:
 - restricted primal waits 30/60/300 seconds (minimum/stall/maximum) instead of
   60/120/600, and primal path enrichment is capped at 64 instead of 96.
 
+R25W repairs a post-solve thread audit exposed at issue 157. The issue itself
+passed the global certificate at `2.999394%`, but Gurobi used one worker after
+the root start closed the solve and the wrapper incorrectly required the last
+message to equal four. `Threads=4` is now audited as a cap: the parameter must
+remain four and every observed count must lie in `[1,4]`. R25W also raises the
+exact root pricing batch from 32 to 64; issues 154--157 showed that KKT calls
+matched CG iterations plus only zero/one numerical retry, so the safe reduction
+is fewer exact CG round trips rather than deleting dual recovery.
+
 These changes have passed unit/static and licensed-Gurobi multi-start smoke
 tests, but their issue-154 wall-time improvement is not yet runtime evidence.
 

@@ -34,9 +34,9 @@ SCI = ROOT / "science"
 PARENT_R25P = ART / "ConversationA_R25P_STAGE1_54_OF_54_RUNTIME_RESULT_20260814T021940.tar.gz"
 PARENT_R25Q = ART / "ConversationA_R25Q_STAGE1_54_OF_54_RUNTIME_RESULT_20260814T101350.tar.gz"
 EXPECTED = {
-    "main": "b26fce53b72ed12db0bc49431109b7a54d63898edfc199c04d2310ade7e1809b",
+    "main": "5ce919ac417da91b73fa4bd5175873070e7ae12e9b1b6a48145ce4b65289857e",
     "decomp": "2dfe42a718be07afade9d504f0a08a9bbb85c5d3d073dca235d805cbc1d42178",
-    "checksums": "94a78b06d20046a45c98652c87c4dcd3607151b6b7924ff6afdf0a30fb05d50f",
+    "checksums": "2fabb0a00dbe2af997fe80692c6b39cdd97117b4d14a951d77890e252bf191cf",
     "r25p": "0ed41aa7bdc1f055dde5fd7c50e4ceffb4d4cc0a1795d0ec1b37d49481fa9833",
     "r25q": "8d8c8f15bdfbc3e9200aeebb88f8a262f4da2e727d1155ac76b989f42b7cc2b0",
 }
@@ -355,9 +355,11 @@ def runtime_environment(resume_issue: int, resume_dir: Path, state_hash: str) ->
             "MOBILEESS_R25K_B4_ROOT_BRANCH_STRENGTHENING": "1",
             "MOBILEESS_R25M_B6_EXACT_DECOMPOSITION": "1",
             "MOBILEESS_R25M_B6_KBEST": "64",
-            # R25V: each exact QCP re-solve dominates DAG pricing.  Generate twice
-            # as many negative-RC paths per solve to reduce root-CG round trips.
-            "MOBILEESS_R25M_B6_PRICING_BATCH": "32",
+            # R25W: runtime issues 154--157 showed one KKT dual solve per exact
+            # CG iteration and only zero/one numerical retry.  Generate 64
+            # negative-RC paths per MESS/solve to reduce those exact QCP round
+            # trips; pricing still runs to the unchanged closure oracle.
+            "MOBILEESS_R25M_B6_PRICING_BATCH": "64",
             "MOBILEESS_R25M_B6_RC_AUDIT_TOL": "1e-4",
             "MOBILEESS_R25M_B6_PRICING_TOL": "1e-7",
             "MOBILEESS_R25N_B6C5R2_BARQCP_TOL": "1e-9",
@@ -522,7 +524,8 @@ def main() -> int:
             "global_gap_target": 0.03,
             "overall_solver_time_limit": None,
             "restricted_primal_phase": {"min_s": 30, "stall_s": 60, "max_s": 300, "max_nodes": 200000},
-            "exact_root_pricing_batch": 32,
+            "exact_root_pricing_batch": 64,
+            "thread_policy": "Threads=4 cap; observed solver use may be 1..4",
             "causal_rolling_multi_start": True,
             "AC_QCP_changed": False,
             "exclusive_runtime_lock_held": True,
