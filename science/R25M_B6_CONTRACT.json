@@ -1,0 +1,37 @@
+{
+  "conversation": "A",
+  "release": "R25M_B6_CERTIFIED_RELAX_AND_PRICE_EXACT_DECOMPOSITION",
+  "stage": "B6/7",
+  "trigger": "R25L/B5 NO_GO_MONOLITHIC_ADVANCE_B6_EXACT_DECOMPOSITION",
+  "selected_architecture": "FULL_COLUMN_DANTZIG_WOLFE_MESS_PATH_REFORMULATION_WITH_EXACT_ROOT_PRICING_AND_GLOBAL_RELAXATION_CERTIFICATE",
+  "why_not_full_branch_and_price": "Frozen acceptance only requires a 3% global certificate. Once exact pricing closes the full continuous path-master relaxation, that objective is a valid global lower bound. Any feasible restricted integer path-master incumbent within 3% of that lower bound is globally certified without branching/pricing at every MIP node.",
+  "exactness": {
+    "full_path_mapping": "one source-to-H path per MESS; STAY/MOVE/node-occupancy extended variables are exact path incidences",
+    "matrix_projection": "path-column coefficient is the exact sum of original mobility-variable coefficients in every retained linear master row",
+    "quadratic_gate": "fail closed if any mobility variable occurs in a quadratic constraint",
+    "pricing": "exact acyclic shortest-path DP over A1/A2 frozen causal mobility DAG",
+    "lower_bound": "all non-mobility integrality relaxed; exact negative-reduced-cost pricing until closure",
+    "upper_bound": "binary generated path columns + original non-mobility integrality; any solution is feasible in the full original integer model",
+    "acceptance": "(U-L)/abs(U) <= 0.03 with exact all-column relaxation L",
+    "restricted_master_internal_bound_is_authoritative": false
+  },
+  "scientific_contract": {
+    "H": 54,
+    "cadence_min": 5,
+    "MIPGap_target": 0.03,
+    "Threads": 1,
+    "future_actual_used": false,
+    "future_D2_state_reinjected": false,
+    "posthoc_same_issue_MIP_start": false,
+    "Fresh_Exact_OpenDSS": "retained after certificate"
+  },
+  "runtime_screen": {
+    "issue": 152,
+    "cg_time_limit_s": 420,
+    "integer_time_limit_s": 600,
+    "kbest_paths_per_MESS": 16,
+    "diagnostic_only": true,
+    "physical_commit": false
+  },
+  "next_stage": "B7 final 152->166 closure only after B6 runtime certificate architecture passes"
+}

@@ -1,0 +1,65 @@
+{
+  "conversation": "A",
+  "stage": "B6-C2",
+  "release": "R25M_B6C2_GLOBAL_PATH_CACHE_CHILD_BATCH_PRICING",
+  "status": "PASS_STATIC_RELEASE_VALIDATION",
+  "parent_B6C1": {
+    "final_freeze_status": "PASS_B6_C1_FINAL_FREEZE",
+    "final_freeze_validation_sha256": "19a145d4cc9c2a46ff864031d8e710e3cce052005e273d3b1a4c50a7feaa5731",
+    "solver_lifecycle": "FROZEN_PASS"
+  },
+  "C2_changes": {
+    "global_path_cache": true,
+    "cache_sparse_master_columns_once": true,
+    "parent_child_and_sibling_inheritance": true,
+    "child_kbest_batch_pricing": 8,
+    "exact_minimum_path_remains_closure_oracle": true,
+    "batch_columns_certificate_authority": false,
+    "restricted_master_bound_authority": false,
+    "scientific_feasible_set_changed": false,
+    "objective_changed": false,
+    "main_py_byte_identical_to_C1": true
+  },
+  "proof": {
+    "batch_paths_are_acceleration_only": true,
+    "exact_minimum_path_remains_closure_oracle": true,
+    "global_cache_inheritance_pass": true,
+    "global_cache_shares_only_original_DAG_valid_paths": true,
+    "kbest_k": 8,
+    "long_issue152_solve": false,
+    "objective_changed": false,
+    "restricted_kbest_mismatches": 0,
+    "restricted_kbest_random_cases": 800,
+    "scientific_feasible_set_changed": false,
+    "status": "PASS"
+  },
+  "checks": {
+    "python_compile": true,
+    "release_self_test": true,
+    "checksum_count": 157,
+    "checksums_exclude_pycache": true,
+    "restricted_kbest_random_cases": 800,
+    "restricted_kbest_mismatches": 0,
+    "global_cache_inheritance_proof": true,
+    "long_issue152_solve_run_here": false
+  },
+  "ast_change_scope": {
+    "decomposition_functions_added": [
+      "k_shortest_paths_with_node_restrictions"
+    ],
+    "decomposition_functions_modified": [
+      "certified_path_decomposition_solve"
+    ],
+    "decomposition_functions_removed": [],
+    "main_py_changed": false
+  },
+  "sha256": {
+    "main_py": "f7b5d12f3e0f1933a928d3955d573e4c12597686aa1512302f2f791d34973bf6",
+    "decomposition_module": "7de328aa1dc99e3cdf969360d98830fa5170d9093c27622d06fe963280d98dcb",
+    "C2_contract": "fd133990abff97858a8495c7be4120973a11dde74711eb3a1d33c801eb777e7d",
+    "C2_proof": "476989a024052e9754e1feef84ae6eb68e3fb69fa67f8ba0a575fe08803fc3a9",
+    "C1_final_freeze_validation_embedded": "19a145d4cc9c2a46ff864031d8e710e3cce052005e273d3b1a4c50a7feaa5731"
+  },
+  "next_stage": "B6-C3_DUAL_STABILIZATION",
+  "runtime_note": "No user bash execution is required for B6-C2; C2 is implementation/proof only."
+}

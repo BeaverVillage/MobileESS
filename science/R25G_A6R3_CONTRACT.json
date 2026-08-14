@@ -1,0 +1,23 @@
+{
+  "release": "R25G_A6R3_HYBRID_STAY_BINARY_EXACT_ACCEL",
+  "status": "STATIC_FREEZE",
+  "foundation": "R25F_A6R2/A5 node-occupancy + A4 radial projection",
+  "changes": {
+    "STAY_arcs_binary": true,
+    "MOVE_arcs_continuous": true,
+    "node_occupancy_binary": true,
+    "future_resource_cover_cuts": true,
+    "MIPGap": 0.03,
+    "Threads": 1,
+    "Horizon": 54,
+    "cadence_minutes": 5
+  },
+  "exactness": {
+    "STAY_binary_is_redundant_integrality_on_R25E_integer_path_set": true,
+    "debt_stay_cover_implied": true,
+    "soc_stay_cover_implied": true,
+    "scientific_feasible_set_changed": false,
+    "objective_changed": false
+  },
+  "purpose": "restore an explicit economically meaningful STAY-vs-DEPART branch variable while retaining >90% mobility-binary compression; strengthen root/node relaxation with exact resource-cover cuts."
+}

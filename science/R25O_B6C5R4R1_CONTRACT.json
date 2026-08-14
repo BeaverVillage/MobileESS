@@ -1,0 +1,40 @@
+{
+  "release": "R25O_B6C5R4R1_RC_DUAL_RECOVERY",
+  "parent": "R25N_B6C5R4_NUMERICAL_CONDITIONING_POLISH",
+  "screen_issue": 152,
+  "root_dual_recovery": {
+    "BarQCPConvTol_retry": [1e-09, 3e-10, 1e-10],
+    "reduced_cost_accounting_mismatch_triggers_retry": true,
+    "retry_ScaleFlag": 2,
+    "retry_NumericFocus": 2,
+    "fresh_KKT_reset_before_retry": true,
+    "rc_audit_tolerance": 0.0001,
+    "tolerance_relaxation": false
+  },
+  "child_qcp": {
+    "ScaleFlag": 2,
+    "NumericFocus": 2,
+    "exact_reoptimization": true,
+    "exact_pricing_closure": true,
+    "full_RC_accounting_audit": true,
+    "coefficient_range_audit": true
+  },
+  "polish": {
+    "ScaleFlag": 2,
+    "NumericFocus": 3,
+    "ConstrVio_gate": 1e-06,
+    "BoundVio_gate": 1e-07
+  },
+  "preflight_smokes": {
+    "native_vs_normalized_Gurobi_MIQCP": true,
+    "Model_fixed_continuous_QCP": true
+  },
+  "scientific_contract": {
+    "H54": true,
+    "cadence_minutes": 5,
+    "full_modeled_cost_gap": 0.03,
+    "feasible_set_changed": false,
+    "objective_changed": false,
+    "causality_changed": false
+  }
+}

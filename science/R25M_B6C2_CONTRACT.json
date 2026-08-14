@@ -1,0 +1,38 @@
+{
+  "release": "R25M_B6C2_GLOBAL_PATH_CACHE_CHILD_BATCH_PRICING",
+  "conversation": "A",
+  "stage": "B6-C2",
+  "status": "STATIC_IMPLEMENTATION_READY",
+  "parent": "R25M_B6C1_FINAL_FREEZE",
+  "purpose": "Eliminate repeated trajectory rediscovery across exact branch-and-price nodes without changing the scientific model or certificate logic.",
+  "changes": {
+    "global_path_cache": true,
+    "parent_child_and_sibling_column_inheritance": true,
+    "cached_sparse_master_column_coefficients": true,
+    "child_kbest_batch_pricing": 8,
+    "exact_minimum_reduced_cost_path_remains_closure_oracle": true,
+    "global_cache_only_contains_original_DAG_valid_paths": true
+  },
+  "scientific_contract": {
+    "H": 54,
+    "cadence_min": 5,
+    "economic_mipgap_target": 0.03,
+    "threads": 1,
+    "future_actual_optimizer_use": false,
+    "future_D2_reinjection": false,
+    "posthoc_same_issue_MIP_start": false,
+    "physical_feasible_set_changed": false,
+    "objective_changed": false,
+    "fresh_exact_opendss_gate_changed": false
+  },
+  "certificate_contract": {
+    "restricted_master_bound_is_authority": false,
+    "batch_kbest_columns_are_authority": false,
+    "pricing_closure_requires_true_current_dual_exact_minimum_path": true,
+    "child_node_lower_bound_requires_all_column_pricing_closure": true
+  },
+  "runtime_policy": {
+    "long_issue152_solve_in_C2": false,
+    "C2_is_implementation_and_proof_only": true
+  }
+}

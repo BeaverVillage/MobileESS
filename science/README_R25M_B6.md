@@ -1,0 +1,3 @@
+# R25M — B6/7 Certified Relax-and-Price Exact Decomposition
+
+B5 rejected the monolithic extended formulation. B6 projects the complete MESS mobility unit-flow network into full-path columns. Exact root pricing closes the all-column continuous relaxation and supplies a global lower bound. The compact generated-column integer master supplies a feasible incumbent. If the incumbent is within the frozen 3% target of the exact relaxation bound, this is already a valid global 3% certificate; full branch-and-price is not needed. If pricing does not close or the global gap remains above 3%, B6 fails closed and no restricted-master bound is accepted.
