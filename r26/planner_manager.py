@@ -20,6 +20,28 @@ class PlannerRequest:
     source_state_hash: str
     reasons: Tuple[str, ...]
     runtime_budget_seconds: float
+    mode: str = "FULL_REPLAN"
+    affected_mess_ids: Tuple[str, ...] = ()
+    affected_job_ids: Tuple[str, ...] = ()
+    horizon_steps: int = 54
+    stage_durations_minutes: Tuple[int, ...] = ()
+
+    def validate(self) -> None:
+        if self.runtime_budget_seconds <= 0:
+            raise ValueError("planner runtime budget must be positive")
+        if self.mode not in {"LOCAL_REPAIR", "FULL_REPLAN"}:
+            raise ValueError(f"unsupported planner mode: {self.mode}")
+        if self.horizon_steps < 1:
+            raise ValueError("planner horizon must be positive")
+        if self.stage_durations_minutes:
+            if len(self.stage_durations_minutes) != self.horizon_steps:
+                raise ValueError("stage-duration count must equal planner horizon steps")
+            if any(minutes <= 0 for minutes in self.stage_durations_minutes):
+                raise ValueError("planner stage durations must be positive")
+        if self.mode == "LOCAL_REPAIR" and not (
+            self.affected_mess_ids or self.affected_job_ids
+        ):
+            raise ValueError("local repair requires an explicit affected scope")
 
 
 @dataclass(frozen=True)
@@ -59,8 +81,7 @@ class AsyncPlannerManager:
         self._audit.emit("PLANNER_STARTED", asdict(request))
 
     def request(self, request: PlannerRequest) -> PlannerRequestResult:
-        if request.runtime_budget_seconds <= 0:
-            raise ValueError("planner runtime budget must be positive")
+        request.validate()
         with self._lock:
             if self._future is None:
                 self._submit_locked(request)
@@ -69,12 +90,37 @@ class AsyncPlannerManager:
                 merged = set(request.reasons)
                 if self._pending_request is not None:
                     merged.update(self._pending_request.reasons)
+                previous = self._pending_request
+                mode = (
+                    "FULL_REPLAN"
+                    if request.mode == "FULL_REPLAN"
+                    or (previous is not None and previous.mode == "FULL_REPLAN")
+                    else "LOCAL_REPAIR"
+                )
+                affected_mess = set(request.affected_mess_ids)
+                affected_jobs = set(request.affected_job_ids)
+                horizon_steps = request.horizon_steps
+                stage_durations = request.stage_durations_minutes
+                if previous is not None:
+                    affected_mess.update(previous.affected_mess_ids)
+                    affected_jobs.update(previous.affected_job_ids)
+                    if previous.mode == "FULL_REPLAN" and request.mode != "FULL_REPLAN":
+                        horizon_steps = previous.horizon_steps
+                        stage_durations = previous.stage_durations_minutes
+                    elif request.mode != "FULL_REPLAN" and previous.horizon_steps > horizon_steps:
+                        horizon_steps = previous.horizon_steps
+                        stage_durations = previous.stage_durations_minutes
                 self._pending_request = PlannerRequest(
                     issue=request.issue,
                     cutoff_timestamp_utc=request.cutoff_timestamp_utc,
                     source_state_hash=request.source_state_hash,
                     reasons=tuple(sorted(merged)),
                     runtime_budget_seconds=request.runtime_budget_seconds,
+                    mode=mode,
+                    affected_mess_ids=tuple(sorted(affected_mess)),
+                    affected_job_ids=tuple(sorted(affected_jobs)),
+                    horizon_steps=horizon_steps,
+                    stage_durations_minutes=stage_durations,
                 )
                 disposition = "COALESCED"
                 self._audit.emit("PLANNER_REQUEST_COALESCED", asdict(self._pending_request))

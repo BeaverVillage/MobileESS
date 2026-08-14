@@ -27,6 +27,10 @@ packages are intentionally kept outside Git.
 The `r26/` package is a separate event-triggered hierarchical controller. It
 keeps the AC-aware radial QCP dispatch and mandatory Fresh nonlinear OpenDSS h0
 gate, while moving route planning to a single nonblocking asynchronous worker.
+It distinguishes scoped local repair from full replanning, provides an
+authority-safe opportunity-gap trigger, and defines a 26-stage multiresolution
+full-planning horizon. The generalized-Benders cut cache is an integration
+interface, not yet a production master/subproblem solver.
 It does not weaken or replace the R25R offline 3% certificate. See
 `docs/R26_ARCHITECTURE.md` and `r26/config/r26_contract.json`.
 The manuscript-facing novelty boundary and experiment contract are in
@@ -50,6 +54,11 @@ phase followed by the untouched original compact MIQCP. Its global lower bound
 is the maximum of the exact priced-root bound and the compact model's native
 Gurobi bound; the restricted-master bound remains diagnostic only. To verify
 the current causal prefix without starting a solve:
+
+The R25V continuation accelerates this exact portfolio with a causal shifted
+previous-plan start plus a same-issue restricted-master start, a larger exact
+pricing batch, and shorter non-authoritative primal-phase stall limits. It does
+not change the AC QCP, feasible set, objective, or global 3% rule.
 
 ```bash
 MOBILEESS_R25T_PREFLIGHT_ONLY=1 \

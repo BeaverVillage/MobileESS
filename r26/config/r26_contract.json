@@ -10,6 +10,20 @@
     "online_exact_gap_claim": false,
     "prior_plan_usage": "WARM_START_OR_VAR_HINT_ONLY",
     "candidate_swap": "ISSUE_BOUNDARY_ATOMIC_VALIDATED",
+    "request_modes": ["LOCAL_REPAIR", "FULL_REPLAN"],
+    "local_repair": {
+      "requires_explicit_affected_scope": true,
+      "default_horizon_steps": 12,
+      "unaffected_decisions_fixed": true,
+      "empty_scope_action": "ESCALATE_TO_FULL_REPLAN"
+    },
+    "full_replan_horizon": {
+      "first_60_minutes_step_minutes": 5,
+      "remaining_210_minutes_step_minutes": 15,
+      "integer_stages": 26,
+      "offline_r25t_certificate_uses_this_approximation": false
+    },
+    "opportunity_gap_lower_bound_authority": "GLOBAL_SAME_CAUSAL_STATE_ONLY",
     "recursive_feasibility": {
       "claim": "CONDITIONAL_SHIFTED_PLAN_ADMISSIBILITY_NOT_GENERAL_STABILITY",
       "prevalidated_safe_fallback": true,

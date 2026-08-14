@@ -34,14 +34,16 @@ SCI = ROOT / "science"
 PARENT_R25P = ART / "ConversationA_R25P_STAGE1_54_OF_54_RUNTIME_RESULT_20260814T021940.tar.gz"
 PARENT_R25Q = ART / "ConversationA_R25Q_STAGE1_54_OF_54_RUNTIME_RESULT_20260814T101350.tar.gz"
 EXPECTED = {
-    "main": "a44ea59574395e30127b889eb38f379853b5773b202339f2a0d683a7ded81230",
-    "decomp": "109645df1662513eb312bc46761976fc9e0db81169e70ca0451d07425f09b937",
-    "checksums": "9325e5a65131c11c6eff46ef2a8c4406e9fa0c0b8f286d083e397e875b0ebb3f",
+    "main": "b26fce53b72ed12db0bc49431109b7a54d63898edfc199c04d2310ade7e1809b",
+    "decomp": "2dfe42a718be07afade9d504f0a08a9bbb85c5d3d073dca235d805cbc1d42178",
+    "checksums": "94a78b06d20046a45c98652c87c4dcd3607151b6b7924ff6afdf0a30fb05d50f",
     "r25p": "0ed41aa7bdc1f055dde5fd7c50e4ceffb4d4cc0a1795d0ec1b37d49481fa9833",
     "r25q": "8d8c8f15bdfbc3e9200aeebb88f8a262f4da2e727d1155ac76b989f42b7cc2b0",
 }
 LEGACY_R25T_DECOMP_SHA256 = "fd606351cbd17b7cfc63a79d08177e3d3a8485bab86f3870e352bb2eab3a3786"
 COPY_AUDIT_R25T_DECOMP_SHA256 = "f4434abd4ef98cdc66fb3148dc8497f11dba706499069aafdeba8290205995ab"
+PRE_ACCEL_R25T_DECOMP_SHA256 = "109645df1662513eb312bc46761976fc9e0db81169e70ca0451d07425f09b937"
+PRE_R25V_R25T_DECOMP_SHA256 = "6a353fd88a90f67f52beeda263b660a53101bd0895889ec987a2ddab0147d301"
 THREADS = 4
 _RUNTIME_LOCK_HANDLE = None
 
@@ -124,6 +126,30 @@ def write_json(path: Path, value: dict) -> None:
     )
 
 
+def authoritative_decomposition_gap(decomp: dict) -> float:
+    """Read the final authority while remaining compatible with early R25T output.
+
+    Early R25T audits correctly stored the compact certificate in the nested
+    phase but left the pre-compact gap in the top-level convenience field.
+    Completed causal commits are immutable, so resume validation reads the
+    nested compact/polished authority instead of forcing a recomputation.
+    """
+
+    if decomp.get("revision") == "R25T_B6C6_GLOBAL_BOUND_PORTFOLIO":
+        compact = decomp.get("compact_exact_global_phase") or {}
+        for key in ("global_gap_after_polish", "global_gap_before_polish"):
+            try:
+                gap = float(compact[key])
+            except Exception:
+                continue
+            if math.isfinite(gap):
+                return gap
+    try:
+        return float(decomp["global_certified_gap"])
+    except Exception:
+        return math.inf
+
+
 def verify_science_manifest(root: Path) -> None:
     manifest = root / "CHECKSUMS.sha256"
     if not manifest.is_file() or sha(manifest) != EXPECTED["checksums"]:
@@ -161,10 +187,7 @@ def validate_issue(issue: int) -> dict:
     transition = load_json(directory / "BUILD7C_FIRSTSTEP_TRANSITION_CERTIFICATE.json")
     exact = load_json(directory / f"exact_grid/FRESH_EXACT_OPENDSS_24SERVICE_ISSUE_{issue}.json")
     post = load_json(directory / "BUILD7C_POSTCOMMIT_STATE.json")
-    try:
-        gap = float(decomp["global_certified_gap"])
-    except Exception:
-        gap = math.inf
+    gap = authoritative_decomposition_gap(decomp)
     numerical = True
     for key, gate in (("ConstrVio", 1e-6), ("BoundVio", 1e-6), ("IntVio", 1e-5)):
         try:
@@ -253,6 +276,8 @@ def initialize() -> None:
             EXPECTED["decomp"],
             LEGACY_R25T_DECOMP_SHA256,
             COPY_AUDIT_R25T_DECOMP_SHA256,
+            PRE_ACCEL_R25T_DECOMP_SHA256,
+            PRE_R25V_R25T_DECOMP_SHA256,
         ):
             raise RuntimeError("existing R25T runtime uses a different solver authority")
         if not SCI.is_dir():
@@ -330,11 +355,13 @@ def runtime_environment(resume_issue: int, resume_dir: Path, state_hash: str) ->
             "MOBILEESS_R25K_B4_ROOT_BRANCH_STRENGTHENING": "1",
             "MOBILEESS_R25M_B6_EXACT_DECOMPOSITION": "1",
             "MOBILEESS_R25M_B6_KBEST": "64",
-            "MOBILEESS_R25M_B6_PRICING_BATCH": "16",
+            # R25V: each exact QCP re-solve dominates DAG pricing.  Generate twice
+            # as many negative-RC paths per solve to reduce root-CG round trips.
+            "MOBILEESS_R25M_B6_PRICING_BATCH": "32",
             "MOBILEESS_R25M_B6_RC_AUDIT_TOL": "1e-4",
             "MOBILEESS_R25M_B6_PRICING_TOL": "1e-7",
             "MOBILEESS_R25N_B6C5R2_BARQCP_TOL": "1e-9",
-            "MOBILEESS_R25M_B6R3_PRIMAL_KBEST": "96",
+            "MOBILEESS_R25M_B6R3_PRIMAL_KBEST": "64",
             "MOBILEESS_R25N_B6C5R3_PRIMAL_HEURISTICS": "0.20",
             "MOBILEESS_R25M_B6R3_BRANCH_PRICE": "1",
             "MOBILEESS_R25M_B6C2_CHILD_PRICING_BATCH": "16",
@@ -353,16 +380,22 @@ def runtime_environment(resume_issue: int, resume_dir: Path, state_hash: str) ->
             "MOBILEESS_R25Q_RC_ENVELOPE_HARD_CAP": "5e-4",
             "MOBILEESS_R25R_RC_STRICT_RETRY_BUDGET": "2",
             "MOBILEESS_R25T_GLOBAL_PORTFOLIO": "1",
-            "MOBILEESS_R25T_PRIMAL_MIN_SECONDS": "60",
-            "MOBILEESS_R25T_PRIMAL_STALL_SECONDS": "120",
-            "MOBILEESS_R25T_PRIMAL_MAX_SECONDS": "600",
+            "MOBILEESS_R25T_PRIMAL_MIN_SECONDS": "30",
+            "MOBILEESS_R25T_PRIMAL_STALL_SECONDS": "60",
+            "MOBILEESS_R25T_PRIMAL_MAX_SECONDS": "300",
             "MOBILEESS_R25T_PRIMAL_MAX_NODES": "200000",
             "MOBILEESS_R25T_MEANINGFUL_IMPROVEMENT_FRACTION": "0.02",
             "MOBILEESS_R25T_COMPACT_MIPFOCUS": "3",
+            "MOBILEESS_R25U_INITIAL_HINT_KBEST": "8",
+            "MOBILEESS_R25U_INITIAL_OBJECTIVE_KBEST": "8",
+            "MOBILEESS_R25U_RMP_HINT_PRIORITY": "50",
+            "MOBILEESS_R25V_CAUSAL_ROLLING_MIPSTART": "1",
             "MOBILEESS_R25Q_RESUME_STATE_PATH": str(resume_dir / "resume_state.json"),
             "MOBILEESS_R25Q_RESUME_HINT_DIR": str(resume_dir),
+            "MOBILEESS_R25V_RESUME_JOB_PLAN_NAME": "resume_jobs.csv",
             "MOBILEESS_R25Q_RESUME_MOVE_PLAN_NAME": "resume_moves.csv",
             "MOBILEESS_R25Q_RESUME_MESS_PLAN_NAME": "resume_mess.csv",
+            "MOBILEESS_R25V_RESUME_GUIDANCE_PATH": str(resume_dir / "resume_guidance.json"),
             "MOBILEESS_R25Q_RESUME_SOURCE": f"R25T verified causal POST through issue {resume_issue - 1}",
             "MOBILEESS_R25Q_VERIFIED_PREFIX_ISSUES": str(resume_issue - 113),
             "MOBILEESS_RESUME_STATE_SHA256": state_hash,
@@ -488,7 +521,9 @@ def main() -> int:
             "threads": THREADS,
             "global_gap_target": 0.03,
             "overall_solver_time_limit": None,
-            "restricted_primal_phase": {"min_s": 60, "stall_s": 120, "max_s": 600, "max_nodes": 200000},
+            "restricted_primal_phase": {"min_s": 30, "stall_s": 60, "max_s": 300, "max_nodes": 200000},
+            "exact_root_pricing_batch": 32,
+            "causal_rolling_multi_start": True,
             "AC_QCP_changed": False,
             "exclusive_runtime_lock_held": True,
             "preflight_mutates_issue_directories": False,
@@ -504,8 +539,14 @@ def main() -> int:
     resume = ROOT / "resume_authority"
     resume.mkdir(exist_ok=True)
     shutil.copy2(source_dir / "BUILD7C_POSTCOMMIT_STATE.json", resume / "resume_state.json")
+    job_plan = source_dir / "BUILD7B_FULL54_JOB_PLAN.csv"
+    if job_plan.is_file():
+        shutil.copy2(job_plan, resume / "resume_jobs.csv")
     shutil.copy2(source_dir / "BUILD7B_FULL54_MOVE_ARCS_SELECTED.csv", resume / "resume_moves.csv")
     shutil.copy2(source_dir / "BUILD7B_FULL54_MESS_PLAN.csv", resume / "resume_mess.csv")
+    guidance = source_dir / "BUILD7C_ROLLING_GUIDANCE_NEXT_ISSUE.json"
+    if guidance.is_file():
+        shutil.copy2(guidance, resume / "resume_guidance.json")
 
     incomplete = RUN / f"issue_{resume_issue:06d}"
     if incomplete.exists():

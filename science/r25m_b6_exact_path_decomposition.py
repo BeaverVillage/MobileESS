@@ -639,6 +639,13 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
     r25t_primal_max_nodes=max(1,int(os.environ.get('MOBILEESS_R25T_PRIMAL_MAX_NODES','200000')))
     r25t_meaningful_fraction=float(os.environ.get('MOBILEESS_R25T_MEANINGFUL_IMPROVEMENT_FRACTION','0.02'))
     r25t_compact_mip_focus=int(os.environ.get('MOBILEESS_R25T_COMPACT_MIPFOCUS','3'))
+    # R25U exact-safe search guidance.  These controls add only mathematically
+    # feasible path columns to the continuous working master and transfer a
+    # feasible RMP solution as native MIP hints.  They do not remove a path,
+    # alter a row, or promote a restricted bound to global authority.
+    r25u_initial_hint_kbest=max(1,int(os.environ.get('MOBILEESS_R25U_INITIAL_HINT_KBEST','1')))
+    r25u_initial_objective_kbest=max(1,int(os.environ.get('MOBILEESS_R25U_INITIAL_OBJECTIVE_KBEST','1')))
+    r25u_rmp_hint_priority=max(0,int(os.environ.get('MOBILEESS_R25U_RMP_HINT_PRIORITY','50')))
     root_forensic_only=(os.environ.get('MOBILEESS_R25N_B6C5R2_ROOT_FORENSIC_ONLY','0')=='1')
     c5r4r1_root_pricing_only=(os.environ.get('MOBILEESS_R25O_B6C5R4R1_ROOT_PRICING_ONLY','0')=='1')
     block_diag_time=float(os.environ.get('MOBILEESS_R25N_B6C5R2_BLOCK_DIAG_TIMELIMIT','20'))
@@ -790,12 +797,18 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
         pools[mid][path]=RuntimePath(mid,path,sink);lvars[mid][path]=lam
         if mid in conv:m.chgCoeff(conv[mid],lam,1.0)
         return True
+    initial_seed_enrichment={mid:{'zero':0,'objective':0,'hint':0} for mid in mids}
     for mid in mids:
         zcost={a.arc_id:0.0 for a in graphs[mid]};_,p,s=shortest_path_pricing(graphs[mid],source[mid],H,zcost);add_path(mid,p,s,'zero')
+        initial_seed_enrichment[mid]['zero']=1
         ocost={a.arc_id:objcoef.get(arc_varname[a.arc_id],0.0)+objcoef.get(node_varname.get((mid,a.head[0],a.head[1]),''),0.0) for a in graphs[mid]}
-        _,p,s=shortest_path_pricing(graphs[mid],source[mid],H,ocost);add_path(mid,p,s,'objective')
+        for _,p,s in k_shortest_paths_dag(graphs[mid],source[mid],H,ocost,r25u_initial_objective_kbest):
+            if add_path(mid,p,s,'objective'):
+                initial_seed_enrichment[mid]['objective']+=1
         hcost={a.arc_id:-(hint_score.get(arc_varname[a.arc_id],0.0)+hint_score.get(node_varname.get((mid,a.head[0],a.head[1]),''),0.0)) for a in graphs[mid]}
-        _,p,s=shortest_path_pricing(graphs[mid],source[mid],H,hcost);add_path(mid,p,s,'hint')
+        for _,p,s in k_shortest_paths_dag(graphs[mid],source[mid],H,hcost,r25u_initial_hint_kbest):
+            if add_path(mid,p,s,'hint'):
+                initial_seed_enrichment[mid]['hint']+=1
         m.update();conv[mid]=m.addLConstr(gp.quicksum(lvars[mid].values())==1.0,name=f'b6_path_convexity_{mid}')
     m.update()
 
@@ -807,7 +820,8 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
     # exactly aggregated into the path columns.
     m.remove(flow_rows);m.remove(mob_vars);m.update()
     projected_stats={'removed_STAY':len(stay),'removed_MOVE':len(mv),'removed_node_occupancy':len(node_occ),'removed_flow_rows':len(flow_rows),
-                     'initial_columns':{mid:len(pools[mid]) for mid in mids},'post_projection_variables':int(m.NumVars),'post_projection_linear_rows':int(m.NumConstrs),'post_projection_qrows':int(m.NumQConstrs)}
+                      'initial_columns':{mid:len(pools[mid]) for mid in mids},'post_projection_variables':int(m.NumVars),'post_projection_linear_rows':int(m.NumConstrs),'post_projection_qrows':int(m.NumQConstrs)}
+    projected_stats['initial_exact_seed_enrichment']=initial_seed_enrichment
 
     # B6-C4 selection-only reliability strong branching.  Probe objectives and
     # pseudocosts are NEVER scientific lower-bound authority; they select only
@@ -1363,6 +1377,8 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
         'bounded':bool(r25t_global_portfolio),'termination_reason':None,
         'last_meaningful_runtime_s':0.0,'last_meaningful_node':0.0,
         'last_meaningful_incumbent':None,'best_incumbent':None,
+        'last_improvement_runtime_s':0.0,'last_improvement_node':0.0,
+        'incumbent_improvement_count':0,
         'target_incumbent_at_exact_root':incumbent_required_for_gap(full_lb,target_gap),
         'min_seconds':float(r25t_primal_min_s),'stall_seconds':float(r25t_primal_stall_s),
         'max_seconds':float(r25t_primal_max_s),'max_nodes':int(r25t_primal_max_nodes),
@@ -1382,6 +1398,11 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
                 runtime=float(model.cbGet(GRB.Callback.RUNTIME))
                 nodes=float(model.cbGet(GRB.Callback.MIP_NODCNT if where==GRB.Callback.MIP else GRB.Callback.MIPSOL_NODCNT))
                 if math.isfinite(u):
+                    previous_best=primal_phase['best_incumbent']
+                    if previous_best is None or u<float(previous_best)-1e-9*max(1.0,abs(u)):
+                        primal_phase['last_improvement_runtime_s']=runtime
+                        primal_phase['last_improvement_node']=nodes
+                        primal_phase['incumbent_improvement_count']+=1
                     g=global_relative_gap(u,full_lb)
                     cert.update({'gap':g,'incumbent':u})
                     primal_phase['best_incumbent']=u
@@ -1543,30 +1564,80 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
         if int(cm.IsMIP)!=1 or int(cm.NumIntVars)<=0:
             raise RuntimeError('R25T compact authority is not the original mixed-integer model')
 
-        # Clear stale starts, then map the complete restricted incumbent back to
-        # original variables.  Gurobi independently checks this start; it has no
-        # feasibility or lower-bound authority.
-        for vv in cm.getVars():vv.Start=GRB.UNDEFINED
+        # R25V rolling multi-start portfolio. Preserve the causal shifted start
+        # attached by main.py, then build the same-issue restricted-master start
+        # independently. Gurobi completes/checks both against the unchanged
+        # compact model; neither has feasibility or lower-bound authority.
+        rolling_start={}
+        for vv in cm.getVars():
+            try:z=float(vv.Start)
+            except Exception:continue
+            if math.isfinite(z) and abs(z)<0.5*float(GRB.INFINITY):rolling_start[vv.VarName]=z
         mip_start={'attempted':False,'nonmob_values':0,'mobility_zero_values':0,
-                   'mobility_one_values':0,'source':'NONE'}
+                   'mobility_one_values':0,'integer_hint_values':0,
+                   'hint_priority':int(r25u_rmp_hint_priority),'source':'NONE',
+                   'causal_rolling_start_values':len(rolling_start),
+                   'causal_rolling_start_integer_values':sum(
+                       1 for name in rolling_start
+                       if cm.getVarByName(name) is not None and cm.getVarByName(name).VType in (GRB.BINARY,GRB.INTEGER)),
+                   'causal_rolling_start_source':'PREVIOUS_OPTIMIZER_PLAN_SHIFTED_ONE_STEP' if rolling_start else 'NONE'}
+        rmp_start={}
         if int(m.SolCount)>0:
             mip_start['attempted']=True;mip_start['source']='RESTRICTED_MASTER_FEASIBLE_INCUMBENT'
             for wv in m.getVars():
                 if wv.VarName.startswith('b6lam_'):continue
                 cv=cm.getVarByName(wv.VarName)
                 if cv is None:continue
-                cv.Start=float(wv.X);mip_start['nonmob_values']+=1
+                rmp_start[cv.VarName]=float(wv.X);mip_start['nonmob_values']+=1
+                if cv.VType in (GRB.BINARY,GRB.INTEGER) and r25u_rmp_hint_priority>0:
+                    cv.VarHintVal=float(wv.X)
+                    cv.VarHintPri=max(int(cv.VarHintPri),int(r25u_rmp_hint_priority))
+                    mip_start['integer_hint_values']+=1
             for name in mob_names:
                 cv=cm.getVarByName(name)
                 if cv is not None:
-                    cv.Start=0.0;mip_start['mobility_zero_values']+=1
+                    rmp_start[cv.VarName]=0.0;mip_start['mobility_zero_values']+=1
+                    if cv.VType in (GRB.BINARY,GRB.INTEGER) and r25u_rmp_hint_priority>0:
+                        cv.VarHintVal=0.0
+                        cv.VarHintPri=max(int(cv.VarHintPri),int(r25u_rmp_hint_priority))
+                        mip_start['integer_hint_values']+=1
             for mid,path in selected.items():
                 for name in path_varnames(mid,path):
                     cv=cm.getVarByName(name)
                     if cv is None:raise RuntimeError('R25T compact MIP-start variable missing '+str(name))
-                    cv.Start=1.0;mip_start['mobility_one_values']+=1
+                    rmp_start[cv.VarName]=1.0;mip_start['mobility_one_values']+=1
+                    if cv.VType in (GRB.BINARY,GRB.INTEGER) and r25u_rmp_hint_priority>0:
+                        cv.VarHintVal=1.0
+        starts=[]
+        if rolling_start:starts.append(('CAUSAL_SHIFTED_PREVIOUS_PLAN',rolling_start))
+        if rmp_start:starts.append(('SAME_ISSUE_RESTRICTED_MASTER',rmp_start))
+        if starts:
+            cm.NumStart=len(starts)
+            for sn,(_,values) in enumerate(starts):
+                cm.Params.StartNumber=sn
+                for vv in cm.getVars():vv.Start=GRB.UNDEFINED
+                for name,z in values.items():
+                    cv=cm.getVarByName(name)
+                    if cv is None:raise RuntimeError('R25V compact MIP-start variable missing '+str(name))
+                    cv.Start=float(z)
+            cm.Params.StartNumber=0
+        else:
+            cm.NumStart=0
+            for vv in cm.getVars():vv.Start=GRB.UNDEFINED
+        mip_start['native_start_count']=len(starts)
+        mip_start['native_start_sources']=[label for label,_ in starts]
+        mip_start['rmp_start_values']=len(rmp_start)
+        mip_start['all_starts_nonbinding_solver_guidance']=True
+        mip_start['current_compact_feasibility_check_required']=True
         cm.update()
         compact_exact['mip_start']=mip_start
+        compact_exact['hard_tail_classifier']={
+            'compact_integer_variables':int(cm.NumIntVars),
+            'compact_binary_variables':int(cm.NumBinVars),
+            'compact_variables':int(cm.NumVars),
+            'classified_hard_tail':bool(int(cm.NumIntVars)>=8000 or int(cm.NumVars)>=100000),
+            'classification_is_diagnostic_only':True,
+        }
         # The projected master has finished its only R25T role.  Release its
         # native search tree before the compact exact tree starts so the two
         # potentially large node stores never overlap in memory.
@@ -2328,7 +2399,7 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
     result={'revision':('R25T_B6C6_GLOBAL_BOUND_PORTFOLIO' if r25t_global_portfolio else 'R25R_B6C5R4R4_RETAINED_OPTIMAL_DUAL_RESUME'),
             'status':'PASS_GLOBAL_3PCT_CERTIFICATE' if cert['reached'] else 'NO_GLOBAL_3PCT_CERTIFICATE',
             'pricing_closed':pricing_closed,'full_all_column_relaxation_lower_bound':full_lb,'certificate_lower_bound':float(certificate_lb),'raw_pricing_closed_rmp_objective':raw_full_lb,'numerical_lower_bound_safety':float(raw_full_lb-full_lb),'pricing_batch':int(pricing_batch),'rc_audit_tolerance':float(rc_audit_tol),'qcp_barrier_tolerance':float(qcp_barrier_tol),'BarConvTol_not_qcp_authority':float(m.Params.BarConvTol),
-            'gap_certificate_diagnostics':(gap_certificate_diagnostics(float(m.ObjVal),float(certificate_lb),float(target_gap)) if int(m.SolCount)>0 else None),
+            'gap_certificate_diagnostics':(gap_certificate_diagnostics(float(cert['incumbent']),float(certificate_lb),float(target_gap)) if cert.get('incumbent') is not None and math.isfinite(float(cert['incumbent'])) else None),
             'fixed_dual_mobility_prepass':fixed_dual_prepass,
             'fixed_integer_continuous_qcp_polish':fixed_integer_polish,
             'restricted_primal_phase':primal_phase,
@@ -2374,11 +2445,15 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
                                'compact_model_role':'ORIGINAL_EXACT_MIQCP_INCUMBENT_AND_GLOBAL_BOUND_AUTHORITY',
                                'global_bound_rule':'max(EXACT_PRICED_ROOT_LB, ORIGINAL_COMPACT_MIQCP_OBJBOUND)',
                                'compact_mip_focus':int(r25t_compact_mip_focus),
+                               'initial_hint_kbest':int(r25u_initial_hint_kbest),
+                               'initial_objective_kbest':int(r25u_initial_objective_kbest),
+                               'rmp_integer_hint_priority':int(r25u_rmp_hint_priority),
                                'overall_exact_completion_time_limit_s':None if unlimited_completion else _audit_limit(bp_time_limit),
                                'scientific_feasible_set_changed':False,'objective_changed':False,
                                'gap_semantics_changed':False,'AC_QCP_changed':False,
                                'restricted_master_objbound_global_authority':False},
-            'global_certified_gap':None if not math.isfinite(g) else float(g),'target_gap':float(target_gap),
+            'global_certified_gap':(None if cert.get('gap') is None or not math.isfinite(float(cert['gap'])) else float(cert['gap'])),'target_gap':float(target_gap),
+            'final_certified_incumbent':(None if cert.get('incumbent') is None or not math.isfinite(float(cert['incumbent'])) else float(cert['incumbent'])),
             'certificate_pass':bool(cert['reached']),'cg_iterations':len(cg_records),'cg_seconds':cg_seconds,'integer_seconds':int_seconds,
             'total_decomposition_seconds':time.monotonic()-t0,'columns_by_mess':{mid:len(pools[mid]) for mid in mids},
             'kbest_columns_added':added_kbest,'primal_enrichment':primal_enrichment,'projected_stats':projected_stats,'pricing_records':cg_records,
@@ -2387,7 +2462,7 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
             'selected_move_keys':[list(x) for x in sorted(selected_move)],
             'restricted_master_status':restricted_master_snapshot['status'],'restricted_master_solution_count':restricted_master_snapshot['solution_count'],
             'restricted_master_incumbent_before_polish':restricted_master_snapshot['incumbent'],
-            'restricted_master_incumbent':float(m.ObjVal) if int(m.SolCount)>0 else None,
+            'restricted_master_incumbent':restricted_master_snapshot['incumbent'],
             'restricted_master_bound':restricted_master_snapshot['bound'],
             'restricted_master_native_gap':restricted_master_snapshot['native_gap'],
             'original_mobility_path_set_changed':False,'objective_changed':False,'future_actual_used':False,'future_D2_state_reinjected':False,

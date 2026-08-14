@@ -24,6 +24,48 @@ def load_driver():
 
 
 class R25TResumeUpgradeTests(unittest.TestCase):
+    def test_new_r25t_audit_uses_final_certificate_not_stale_local_gap(self):
+        text = (REPO / "science" / "r25m_b6_exact_path_decomposition.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("float(cert['gap'])", text)
+        self.assertIn("'restricted_master_incumbent':restricted_master_snapshot['incumbent']", text)
+
+    def test_r25v_causal_multistart_and_round_trip_reduction_are_enabled(self):
+        main = (REPO / "science" / "main.py").read_text(encoding="utf-8")
+        decomp = (REPO / "science" / "r25m_b6_exact_path_decomposition.py").read_text(
+            encoding="utf-8"
+        )
+        driver = (REPO / "driver_r25t_stage1_resume_latest.py").read_text(encoding="utf-8")
+        self.assertIn("MOBILEESS_R25V_CAUSAL_ROLLING_MIPSTART", main)
+        self.assertIn("native_start_must_pass_current_model_feasibility", main)
+        self.assertIn("terminal_completion_policy", main)
+        self.assertIn("CAUSAL_SHIFTED_PREVIOUS_PLAN", decomp)
+        self.assertIn("SAME_ISSUE_RESTRICTED_MASTER", decomp)
+        self.assertIn("cm.NumStart=len(starts)", decomp)
+        self.assertIn('"MOBILEESS_R25M_B6_PRICING_BATCH": "32"', driver)
+        self.assertIn('"MOBILEESS_R25T_PRIMAL_STALL_SECONDS": "60"', driver)
+
+    def test_r25v_resume_guidance_is_persisted_and_reloaded(self):
+        main = (REPO / "science" / "main.py").read_text(encoding="utf-8")
+        driver = (REPO / "driver_r25t_stage1_resume_latest.py").read_text(encoding="utf-8")
+        self.assertIn("BUILD7C_ROLLING_GUIDANCE_NEXT_ISSUE.json", main)
+        self.assertIn("MOBILEESS_R25V_RESUME_GUIDANCE_PATH", main)
+        self.assertIn("resume_guidance.json", driver)
+        self.assertIn("resume_jobs.csv", driver)
+
+    def test_early_r25t_nested_compact_gap_is_resume_authority(self):
+        driver = load_driver()
+        audit = {
+            "revision": "R25T_B6C6_GLOBAL_BOUND_PORTFOLIO",
+            "global_certified_gap": 0.042,
+            "compact_exact_global_phase": {
+                "global_gap_before_polish": 0.02999,
+                "global_gap_after_polish": 0.02994,
+            },
+        }
+        self.assertAlmostEqual(driver.authoritative_decomposition_gap(audit), 0.02994)
+
     def test_preflight_returns_before_incomplete_issue_quarantine(self):
         text = (REPO / "driver_r25t_stage1_resume_latest.py").read_text(encoding="utf-8")
         main = text[text.index("def main() -> int:") :]

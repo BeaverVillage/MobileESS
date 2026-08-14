@@ -9,6 +9,7 @@ from typing import Any, Mapping, Optional, Protocol
 from .audit import AuditLogger
 from .dispatch import DispatchBackend, DispatchResult, OpenDssResult, OpenDssVerifier
 from .event_engine import EventDecision, EventEngine
+from .multires_horizon import build_multires_horizon
 from .planner_manager import (
     AsyncPlannerManager,
     AtomicRoutePlanStore,
@@ -160,20 +161,59 @@ class R26FastController:
         self.audit.emit("EVENT_DECISION", decision.as_record())
         planner_disposition: Optional[str] = None
         if decision.request_replan:
+            requested_mode = decision.requested_mode
+            affected_mess = tuple(
+                sorted(map(str, frame.payload.get("affected_mess_ids", ())))
+            )
+            affected_jobs = tuple(
+                sorted(map(str, frame.payload.get("affected_job_ids", ())))
+            )
+            request_reasons = decision.reasons
+            full_stages = build_multires_horizon()
+            horizon_steps = len(full_stages)
+            stage_durations = tuple(stage.duration_minutes for stage in full_stages)
+            if requested_mode == "LOCAL_REPAIR":
+                horizon_steps = self.events.config.local_repair_horizon_steps
+                stage_durations = (5,) * horizon_steps
+                # An unscoped local model could silently become a full joint
+                # solve. Escalate explicitly instead of pretending it is local.
+                if not (affected_mess or affected_jobs):
+                    requested_mode = "FULL_REPLAN"
+                    horizon_steps = len(full_stages)
+                    stage_durations = tuple(
+                        stage.duration_minutes for stage in full_stages
+                    )
+                    request_reasons = tuple(
+                        sorted((*request_reasons, "LOCAL_SCOPE_EMPTY_ESCALATION"))
+                    )
             request_result = self.planner.request(
                 PlannerRequest(
                     issue=frame.planner_target_issue,
                     cutoff_timestamp_utc=frame.cutoff_timestamp_utc,
                     source_state_hash=frame.planner_target_state_hash,
-                    reasons=decision.reasons,
+                    reasons=request_reasons,
                     runtime_budget_seconds=self.planner_runtime_budget_seconds,
+                    mode=requested_mode,
+                    affected_mess_ids=affected_mess,
+                    affected_job_ids=affected_jobs,
+                    horizon_steps=horizon_steps,
+                    stage_durations_minutes=stage_durations,
                 )
             )
             planner_disposition = request_result.disposition
             self.events.mark_request_accepted(issue)
             self.audit.emit(
                 "PLANNER_REQUEST",
-                {"issue": issue, **asdict(request_result), "reasons": decision.reasons},
+                {
+                    "issue": issue,
+                    **asdict(request_result),
+                    "reasons": request_reasons,
+                    "mode": requested_mode,
+                    "affected_mess_ids": affected_mess,
+                    "affected_job_ids": affected_jobs,
+                    "horizon_steps": horizon_steps,
+                    "stage_durations_minutes": stage_durations,
+                },
             )
 
         invalidating_reasons = {

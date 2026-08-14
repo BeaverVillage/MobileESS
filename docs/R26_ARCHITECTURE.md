@@ -51,6 +51,26 @@ are coalesced. Invalid, infeasible, hash-mismatched, or stale candidates are
 rejected. An invalidated active plan may be replaced only by a prevalidated
 boundary-compatible fallback; otherwise the controller fails closed.
 
+Planner requests have two explicit scopes. `LOCAL_REPAIR` frees only the
+affected MESS/jobs over the configured near horizon (default 12 five-minute
+steps); all unaffected decisions remain fixed by the solver adapter.
+`FULL_REPLAN` dominates a queued local request. Maximum refresh, configured
+global hard flags, and economic opportunity always request full replanning. If
+an event asks for local repair without any affected IDs, the controller records
+the escalation and submits a full request rather than silently solving an
+unscoped joint model.
+
+The standard full-planner grid has 26 integer stages: 12 five-minute stages for
+the first 60 minutes and 14 fifteen-minute stages for the remaining 210
+minutes. This is an R26 online approximation and is not used to certify the
+frozen H54 R25T benchmark. The Benders cut-cache interface admits only cuts
+with an authoritative QCP status and the same structural signature; actual
+master/subproblem solver integration is a separate implementation gate.
+
+Economic opportunity is computed as
+`(J_keep - L_relax) / max(1, abs(J_keep))`. `L_relax` must be a finite global
+lower bound for the same causal state. Restricted-native bounds are rejected.
+
 ## AC physics decision
 
 The fast layer initially keeps the current AC-aware radial QCP, followed by

@@ -17,3 +17,11 @@
   adapter.
 - Added R25S, an interruption-safe wrapper that resumes immutable R25R science
   from the latest verified causal POST state without deleting completed issues.
+- Added explicit `LOCAL_REPAIR` versus `FULL_REPLAN` requests. Local scopes are
+  unions of affected MESS/jobs, full requests dominate coalescing, and an empty
+  local scope escalates fail-closed to a full request.
+- Added an authority-checked opportunity-gap trigger, the 60-minute five-minute
+  plus 210-minute fifteen-minute horizon (26 integer stages), and a
+  structural-signature-scoped generalized-Benders cut cache.
+- Added exact-safe initial path seeding and compact VarHint transfer, final-gap
+  reporting repair, and legacy R25T nested-gap resume compatibility.

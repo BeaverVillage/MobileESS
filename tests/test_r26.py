@@ -27,6 +27,9 @@ from r26.gap_reporting import (
     make_global_certificate_callback,
     minimization_relative_gap,
 )
+from r26.benders import BendersCut, BendersCutCache
+from r26.multires_horizon import build_multires_horizon
+from r26.opportunity_gap import GlobalRelaxationBound, evaluate_opportunity_gap
 from r26.planner_manager import AsyncPlannerManager, AtomicRoutePlanStore, PlannerRequest
 from r26.route_plan import MessRoute, RoutePlan, RouteState, RouteStep, WorkAssignment
 
@@ -114,6 +117,43 @@ class GapTests(unittest.TestCase):
         model.stopped = False
         callback(model, Callback.MIPSOL)
         self.assertFalse(model.stopped)
+
+    def test_opportunity_gap_requires_same_state_global_authority(self):
+        bound = GlobalRelaxationBound(-103.0, "EXACT_RELAXATION", "state-a", True)
+        decision = evaluate_opportunity_gap(
+            keep_objective=-100.0,
+            lower_bound=bound,
+            source_state_hash="state-a",
+            trigger_threshold=0.025,
+        )
+        self.assertAlmostEqual(decision.opportunity_gap, 0.03)
+        self.assertTrue(decision.request_full_replan)
+        with self.assertRaises(ValueError):
+            evaluate_opportunity_gap(
+                keep_objective=-100.0,
+                lower_bound=replace(bound, globally_valid=False),
+                source_state_hash="state-a",
+                trigger_threshold=0.025,
+            )
+
+
+class HierarchicalPlanningTests(unittest.TestCase):
+    def test_multires_h54_becomes_26_integer_stages(self):
+        stages = build_multires_horizon()
+        self.assertEqual(len(stages), 26)
+        self.assertEqual(sum(stage.duration_minutes for stage in stages), 270)
+        self.assertEqual([stage.duration_minutes for stage in stages[:12]], [5] * 12)
+        self.assertEqual([stage.duration_minutes for stage in stages[12:]], [15] * 14)
+
+    def test_benders_cut_reuse_is_structure_scoped_and_deduplicated(self):
+        cut = BendersCut(
+            "OPTIMALITY", (("route:MESS01", 1.0),), 3.0, "topology-a", 151, "OPTIMAL"
+        )
+        cache = BendersCutCache()
+        self.assertTrue(cache.add(cut))
+        self.assertFalse(cache.add(cut))
+        self.assertEqual(cache.applicable("topology-a"), (cut,))
+        self.assertEqual(cache.applicable("topology-b"), ())
 
 
 class RoutePlanTests(unittest.TestCase):
@@ -216,6 +256,17 @@ class EventTests(unittest.TestCase):
         self.assertIn("HARD:hard", decision.reasons)
         self.assertIn("MAX_REFRESH", decision.reasons)
 
+    def test_local_repair_for_local_event_and_full_for_refresh(self):
+        config = replace(event_config(), local_repair_enabled=True)
+        local = EventEngine(config).evaluate(
+            issue=1, hard_flags={"hard": True}, soft_metrics={"error": 0}, steps_since_plan=0
+        )
+        refresh = EventEngine(config).evaluate(
+            issue=7, hard_flags={}, soft_metrics={"error": 0}, steps_since_plan=6
+        )
+        self.assertEqual(local.requested_mode, "LOCAL_REPAIR")
+        self.assertEqual(refresh.requested_mode, "FULL_REPLAN")
+
 
 class PlannerTests(unittest.TestCase):
     def test_delayed_planner_poll_does_not_wait(self):
@@ -279,6 +330,36 @@ class PlannerTests(unittest.TestCase):
             self.assertEqual(store.load().checksum, plan.checksum)
             with self.assertRaises(ValueError):
                 store.swap(plan, issue=114, source_state_hash="pre113")
+
+    def test_pending_full_replan_dominates_and_local_scopes_union(self):
+        gate = threading.Event()
+
+        def planner(request):
+            gate.wait(1)
+            return sample_plan(issue=request.issue, state_hash=request.source_state_hash)
+
+        manager = AsyncPlannerManager(planner)
+        try:
+            manager.request(PlannerRequest(114, "t0", "a", ("A",), 10))
+            manager.request(
+                PlannerRequest(
+                    115, "t1", "b", ("B",), 10, "LOCAL_REPAIR", ("MESS01",), (), 12
+                )
+            )
+            manager.request(
+                PlannerRequest(
+                    116, "t2", "c", ("C",), 10, "FULL_REPLAN", (), (), 26,
+                    (5,) * 12 + (15,) * 14,
+                )
+            )
+            pending = manager._pending_request
+            self.assertEqual(pending.mode, "FULL_REPLAN")
+            self.assertEqual(pending.affected_mess_ids, ("MESS01",))
+            self.assertEqual(pending.horizon_steps, 26)
+            self.assertEqual(sum(pending.stage_durations_minutes), 270)
+        finally:
+            gate.set()
+            manager.close(wait=True)
 
 
 class FakeVar:

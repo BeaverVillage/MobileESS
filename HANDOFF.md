@@ -1,138 +1,106 @@
-# R25R Stage-1 handoff
+# Mobile ESS current handoff
 
-## R25T solver continuation (current working revision)
+## Stage-1 status
 
-R25T is now the intended continuation path from the verified 36/54 prefix. It
-does not alter the scientific model or global 3% rule. It bounds the restricted
-integer-master primal phase and then solves the untouched original compact
-MIQCP, using only
-`max(exact priced-root LB, original compact MIQCP ObjBound)` as global lower
-bound authority. The restricted-master `ObjBound` remains diagnostic only.
+R25T remains the authoritative offline continuation. It keeps the five-minute
+H54 model, h0-only causal commit, four-thread policy, unchanged AC-aware QCP,
+Fresh OpenDSS gate, and globally certified 3% modeled-objective rule.
 
-`driver_r25t_stage1_resume_latest.py` verified the existing WSL prefix and
-reported `verified=36/54`, `resume_issue=149`, and `remaining=18`. The issue 149
-copy audit was validated against the real 128,094-variable model: the two
-complete mathematical-structure digests matched even though Gurobi's diagnostic
-fingerprints differed. Codex interrupted immediately after root pricing began;
-the full R25T solve remains for the user. See
-`docs/R25T_GLOBAL_BOUND_PORTFOLIO.md` for the lifecycle and run commands.
+Issue 153 has now completed and committed. The expected WSL preflight after the
+R25V science refresh is:
 
-The resume drivers hold an exclusive lifetime lock and pass its descriptor to
-the solver child. Diagnostic preflight returns before any incomplete issue or
-failure archive is moved, preventing a concurrent invocation from invalidating
-live Gurobi log and nodefile paths.
+```text
+PASS_R25T_PREFLIGHT verified=41/54 resume_issue=154 remaining=13
+```
 
-The R25T restricted incumbent phase now spills nodes from 0.1 GB, has a 4 GB
-phase-local memory cap, and treats Gurobi error 10001 only in that heuristic
-phase as a transition to the original compact exact authority. All other solver
-errors remain fail-closed and the restricted `ObjBound` is never promoted.
+Issues 113 through 153 are preserved. No
+R25T driver or solver process was running at the time of this handoff.
 
-## Objective
+## Issue 151 and 152 diagnosis
 
-Complete and verify the 54 causally chained Stage-1 rolling issues 113–166 with
-the frozen scientific contract:
+Both are hard-tail cases, not a single anomaly:
 
-- five-minute cadence;
-- H54 look-ahead (4.5 hours), with h0-only physical commit;
-- four Gurobi threads;
-- no solver time or node limit in the current exact completion run;
-- globally certified modeled-total-objective gap at or below 3%;
-- numerical, causality, transition, and Fresh Exact OpenDSS gates before commit.
+| Issue | Root CG | Restricted primal | Compact exact | Compact nodes | Final global gap |
+|---|---:|---:|---:|---:|---:|
+| 151 | 126.6 s | 121.7 s | 3,281.8 s | 14,708 | 2.9947% |
+| 152 | 84.0 s | 119.7 s | 3,253.8 s | 12,494 | 2.9994% |
+| 153 | 241.6 s | 116.5 s | 1,612.0 s | 3,957 | 2.9031% |
 
-Do not treat the restricted-master native Gurobi MIP gap as the scientific gap.
-Only `global_certified_gap`, formed from a feasible incumbent and an exact
-all-column lower bound, is authoritative.
-
-## R25Q failure and R25R correction
-
-R25Q stopped at issue 136, root column-generation iteration 4. A reduced-cost
-accounting discrepancy of `0.00011129066137919501` exceeded the fixed `0.0001`
-audit tolerance. A stricter retry then returned Gurobi status 13 (`SUBOPTIMAL`).
-The implementation had discarded the preceding fully `OPTIMAL`, finite dual
-snapshot even though its measured error was within the conservative hard cap of
-`0.0005`.
-
-R25R:
-
-- retains the best fully `OPTIMAL` root and child dual snapshots;
-- retains the matching branch candidate and numerical parameter state;
-- accepts a retained bounded snapshot only within the hard cap;
-- weakens the minimization lower bound by the measured numerical guard;
-- limits stricter retries to two when a bounded candidate is available, while
-  retaining the full retry schedule when no safe candidate exists;
-- verifies the R25Q prefix and resumes at issue 136 without rewriting the
-  committed issues 113–135.
-
-No physical feasible set, objective, causality rule, or 3% gap semantics was
-changed.
-
-## Frozen lineage
-
-- R25P parent result SHA-256:
-  `0ed41aa7bdc1f055dde5fd7c50e4ceffb4d4cc0a1795d0ec1b37d49481fa9833`
-- R25Q parent result SHA-256:
-  `8d8c8f15bdfbc3e9200aeebb88f8a262f4da2e727d1155ac76b989f42b7cc2b0`
-- issue 135 post-wrapper SHA-256:
-  `9800ab463f99727ecf551f228953dbe1467f9e748ef1727e2bad92673568e66a`
-- issue 136 PRE/internal-state SHA-256:
-  `94eb40044d0089ce26fcc298675952a5a154277e48371412c4871edb447b7625`
-- R25R science bundle SHA-256:
-  `4c2e39b4f136f36a6d3c13f61acb93a7f32b256cfc75d06404cef8fe9ddf312d`
-
-## Validation already completed
-
-- full `science/release_self_test.py`: PASS;
-- R25R retained-optimal-dual proof: PASS;
-- exact packaged issue 136 root diagnostic: PASS;
-- issue 136 root pricing closed in 19 iterations with guarded lower bound
-  `-767.2110384345891` and maximum reduced-cost audit error
-  `7.10743213610563e-05`;
-- diagnostic performed no h0 commit and no long integer/B&P solve.
-
-## Runtime snapshot
-
-At the 2026-08-14 handoff snapshot, the external WSL run was still healthy and
-must not be interrupted by repository work:
-
-- issues 113–148 completed and committed: 36/54;
-- issue 149 was `OPTIMIZING` on four threads;
-- process CPU was about 382%, RSS about 3.5 GiB, with no memory pressure;
-- issue 149 exact all-column root objective was about `-1698.079891`;
-- current incumbent was about `-1645.691820`;
-- conservative global certified gap was about 3.18%, not the displayed native
-  restricted-master gap of about 1.83%;
-- a root-only 3% certificate would require an incumbent of approximately
-  `-1648.62` or better.
-
-The active runtime and its result archives are intentionally not committed.
-After completion, inspect the generated `ConversationA_R25R...tar.gz` before
-declaring the Stage-1 final freeze.
-
-## Performance finding and next decision
-
-The slow issue is dominated by integer search, not AC power flow. On issue 149,
-root exact pricing/QCP took about 132 seconds while the restricted integer master
-ran for more than 3,300 seconds and explored roughly 600,000 nodes. Replacing the
-grid model alone with a sensitivity OPF therefore does not address the primary
+Fixed-integer AC-QCP polish took under two seconds. The dominant cost is the
+original compact mixed-integer tree raising a valid global bound, not AC power
+flow. Replacing AC with sensitivity OPF would therefore not solve this Stage-1
 bottleneck.
 
-Proposed next work, pending explicit approval:
+## Exact-safe acceleration in the current source
 
-1. Add honest progress output that labels the Gurobi value as
-   `RMP_NATIVE_GAP` and separately reports `GLOBAL_CERTIFIED_GAP` and the 3%
-   incumbent threshold.
-2. Stop using unlimited `MIPGap=0` optimization for a restricted master whose
-   scientific role is incumbent generation. Use a bounded primal-search phase
-   with an objective stop at the exact certificate threshold, then transition to
-   an explicitly selected bound-strengthening or fail-closed path.
-3. For operational real-time use, separate the exact offline certificate from a
-   hierarchical controller: slower discrete route/work scheduling and a fast
-   five-minute continuous dispatch layer.
-4. A sensitivity-based linear OPF may be used in that fast lower layer with a
-   trust region, refreshed sensitivities, Fresh OpenDSS h0 verification, and a
-   corrective fallback. It should not be presented as the fix for the current
-   mobility-integrality bottleneck.
+The R25T working master now starts with multiple exact feasible paths ranked by
+the previous-plan hint and raw route objective. A feasible restricted-master
+solution is transferred to the untouched compact authority as integer VarHints
+as well as a MIP start. These changes affect search guidance only:
 
-Do not relax the scientific 3% criterion or alter the causal state chain merely
-to improve runtime. Any online/offline contract split must be explicit and
-separately validated.
+- no feasible path is removed;
+- no physical row, objective, AC QCP, or causal rule is changed;
+- restricted-master `ObjBound` remains diagnostic only;
+- the global lower bound remains
+  `max(exact priced-root LB, original compact MIQCP ObjBound)`.
+
+New audits report the final compact/polished gap at the top level. Early R25T
+files for issues 151/152 contain the correct final value in the nested compact
+phase but a stale pre-compact top-level convenience value; resume validation
+now reads that immutable nested authority rather than recomputing the issues.
+
+R25V adds three exact-safe runtime reductions for issue 154 onward:
+
+- the prior causal plan is shifted into a solver-checked partial native MIP
+  start, while the same-issue restricted-master solution remains a second start;
+- exact root pricing batch is 32 instead of 16, reducing expensive QCP/dual
+  synchronization rounds without changing pricing closure;
+- restricted primal waits 30/60/300 seconds (minimum/stall/maximum) instead of
+  60/120/600, and primal path enrichment is capped at 64 instead of 96.
+
+These changes have passed unit/static and licensed-Gurobi multi-start smoke
+tests, but their issue-154 wall-time improvement is not yet runtime evidence.
+
+## R26 operational design
+
+R26 avoids running the full H54 discrete solve at every five-minute boundary:
+
+1. Every five minutes: shift the valid route/work plan, solve conditioned
+   P/Q/SOC AC-aware dispatch, run Fresh OpenDSS, then commit h0.
+2. Local event: free only affected MESS/jobs over the near horizon; keep all
+   unrelated decisions fixed.
+3. Full asynchronous replan: only for configured global hard events, economic
+   opportunity, local-repair escalation, or maximum refresh.
+4. Full online horizon: 12 five-minute stages plus 14 fifteen-minute stages,
+   reducing 54 route/work integer stages to 26.
+5. Generalized-Benders cuts may be reused only with a matching structural
+   signature and authoritative QCP provenance.
+
+The local/full orchestration, opportunity-gap authority gate, multiresolution
+grid, and Benders cut cache are implemented. Production Gurobi
+master/subproblem integration is still a separate future implementation gate;
+the code does not claim that the cache alone accelerates the current R25T run.
+AC remains in the fast layer. Sensitivity OPF is deferred unless the conditioned
+fast dispatch itself later violates the 300-second maximum deadline.
+
+## Validation completed
+
+- Windows unit/integration suite: 33 tests passed, one WSL-only lock test skipped.
+- WSL R25T global-bound proof: PASS.
+- WSL Gurobi compact-authority smoke: PASS.
+- WSL full `science/release_self_test.py`: PASS.
+- WSL native two-start Gurobi smoke: PASS.
+
+## Run command
+
+From the repository in WSL:
+
+```bash
+/home/jaewon/miniconda3/envs/power_v61/bin/python \
+  driver_r25t_stage1_resume_latest.py
+```
+
+The 54/54 Stage-1 run is an offline one-time validation sequence, not a solve
+that the eventual R26 controller performs 54 times every operating day.
+
+Do not create a PR until the user explicitly requests it.

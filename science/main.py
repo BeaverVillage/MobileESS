@@ -551,6 +551,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  r25k_b4_root_branch_strengthening=(os.environ.get("MOBILEESS_R25K_B4_ROOT_BRANCH_STRENGTHENING","0")=="1")
  r25m_b6_exact_decomposition=(os.environ.get("MOBILEESS_R25M_B6_EXACT_DECOMPOSITION","0")=="1")
  r25n_b6c5r4_complete_unit_normalization=(os.environ.get("MOBILEESS_R25N_B6C5R4_COMPLETE_UNIT_NORMALIZATION","0")=="1")
+ r25v_causal_rolling_mipstart=(os.environ.get("MOBILEESS_R25V_CAUSAL_ROLLING_MIPSTART","0")=="1")
  if r25a_fb_prune and not r24_exact_rebase:
   raise RuntimeError("R25A forward/backward compiler requires the adopted R24 exact-rebase foundation")
  if r25b_route_dominance and not r25a_fb_prune:
@@ -571,6 +572,8 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   raise RuntimeError("R25M B6 exact path decomposition requires frozen R25K B4 foundation")
  if r25n_b6c5r4_complete_unit_normalization and not r25m_b6_exact_decomposition:
   raise RuntimeError("B6-C5R4 complete unit normalization requires exact path decomposition")
+ if r25v_causal_rolling_mipstart and not r25m_b6_exact_decomposition:
+  raise RuntimeError("R25V causal rolling MIP start requires exact path decomposition")
  # C5R4 exact coordinate substitution. Physical inputs, rolling state, reports and
  # Fresh Exact OpenDSS remain kW/kvar/kWh. Only optimization variables use
  # MW/Mvar/MWh, so every affected row is divided by the same positive scale and
@@ -1813,110 +1816,120 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
      "job_rows":len(wjob),"selected_move_rows":len(wmove),"mess_rows":len(wmess),
      "policy":"full causal start for pilot initial issue"})
   elif rolling_warmstart is not None:
-   # BUILD7C-R6 ROOT-CAUSE FIX:
-   # issue>113 is a RELATED but changed MIP.  Do not force a complete Start
-   # from the previous optimizer plan.  Use non-binding VarHint guidance.
+   # R25V exact-safe rolling acceleration. The preceding optimizer plan is
+   # available at the current causal boundary. It remains a non-binding hint and,
+   # when enabled, a partial native MIP start checked by every current constraint.
    prev_plan=rolling_warmstart.get("plan",[])
    prev_routes=rolling_warmstart.get("route_rows",[])
    prev_mess=rolling_warmstart.get("mess_rows",[])
    prev_defer=set(map(str,rolling_warmstart.get("deferred_jobs",[])))
    prev_known_jobs=set(str(r["job_uid"]) for r in prev_plan)|prev_defer
-
-   # Clear every inherited/pending rolling MIP Start. Physical current state is
-   # imposed by model constraints, not by Start values.
-   for v in m.getVars():
-    v.Start=GRB.UNDEFINED
-
+   for v in m.getVars():v.Start=GRB.UNDEFINED
    hint_counts={"job_zero":0,"job_one":0,"defer":0,
                 "move_zero":0,"move_one":0,"stay_zero":0,"stay_one":0,
                 "occ_zero":0,"occ_one":0,"mode":0}
+   start_counts={k:0 for k in hint_counts}
 
-   # R25E moves/stays are continuous implied-path arcs; binary guidance belongs on
-   # node occupancy.  Arc hints are retained only as weak continuous guidance.
-   for v in mv.values():
+   for (mid,h,slot),v in mv.items():
     v.VarHintVal=0.0;v.VarHintPri=1;hint_counts["move_zero"]+=1
-   for v in stay.values():
+    if r25v_causal_rolling_mipstart and int(h)<H-1:v.Start=0.0;start_counts["move_zero"]+=1
+   for (mid,h,sid),v in stay.items():
     v.VarHintVal=0.0;v.VarHintPri=1;hint_counts["stay_zero"]+=1
+    if r25v_causal_rolling_mipstart and int(h)<H-1:v.Start=0.0;start_counts["stay_zero"]+=1
    if r25e_node_arc_exact:
-    for v in node_occ.values():v.VarHintVal=0.0;v.VarHintPri=1;hint_counts["occ_zero"]+=1
+    for (mid,h,sid),v in node_occ.items():
+     v.VarHintVal=0.0;v.VarHintPri=1;hint_counts["occ_zero"]+=1
+     if r25v_causal_rolling_mipstart and int(h)<H-1:v.Start=0.0;start_counts["occ_zero"]+=1
+   for (mid,h),v in mode.items():
+    if r25v_causal_rolling_mipstart and int(h)<H-1:v.Start=0.0;start_counts["mode"]+=1
+   if r25v_causal_rolling_mipstart and r25e_node_arc_exact:
+    for mid in mids:
+     kk=(mid,int(avail_h[mid]),str(initial_sid[mid]))
+     if kk not in node_occ:raise RuntimeError("R25V current source occupancy missing "+repr(kk))
+     node_occ[kk].Start=1.0;start_counts["occ_one"]+=1
 
-   # Shift previous selected moves only where the exact CURRENT variable exists.
-   # These are hints, not a required feasible path.
    for r in prev_routes:
     ph=int(r["horizon_step"])
     if ph<1:continue
     k=(str(r["mess_id"]),ph-1,int(r["slot"]))
     if k in mv:
-     mv[k].VarHintVal=1.0;mv[k].VarHintPri=12
-     hint_counts["move_one"]+=1
+     mv[k].VarHintVal=1.0;mv[k].VarHintPri=12;hint_counts["move_one"]+=1
+     if r25v_causal_rolling_mipstart:mv[k].Start=1.0;start_counts["move_one"]+=1
      if r25e_node_arc_exact:
       mm=moves[(ph-1,int(r["slot"]))]
       kt=(str(r["mess_id"]),ph-1,str(mm["source"]));kh=(str(r["mess_id"]),ph-1+int(mm["D"]),str(mm["dest"]))
       for kk in (kt,kh):
-       if kk in node_occ:node_occ[kk].VarHintVal=1.0;node_occ[kk].VarHintPri=10;hint_counts["occ_one"]+=1
+       if kk in node_occ:
+        node_occ[kk].VarHintVal=1.0;node_occ[kk].VarHintPri=10;hint_counts["occ_one"]+=1
+        if r25v_causal_rolling_mipstart:node_occ[kk].Start=1.0;start_counts["occ_one"]+=1
 
-   # Shift previous STAY occupancy where the current state variable exists.
    for r in prev_mess:
     ph=int(r["horizon_step"])
     if ph<1:continue
     h=ph-1;mid=str(r["mess_id"]);sid=str(r["service_id"])
     if str(r["state"])=="STAY" and (mid,h,sid) in stay:
-     stay[(mid,h,sid)].VarHintVal=1.0;stay[(mid,h,sid)].VarHintPri=8
-     hint_counts["stay_one"]+=1
+     stay[(mid,h,sid)].VarHintVal=1.0;stay[(mid,h,sid)].VarHintPri=8;hint_counts["stay_one"]+=1
+     if r25v_causal_rolling_mipstart:stay[(mid,h,sid)].Start=1.0;start_counts["stay_one"]+=1
      if r25e_node_arc_exact and (mid,h,sid) in node_occ:
       node_occ[(mid,h,sid)].VarHintVal=1.0;node_occ[(mid,h,sid)].VarHintPri=8;hint_counts["occ_one"]+=1
-
-   # Weak mode hints only; current price/grid state may differ.
-   for r in prev_mess:
-    ph=int(r["horizon_step"])
-    if ph<1:continue
-    h=ph-1;mid=str(r["mess_id"])
+      if r25v_causal_rolling_mipstart:node_occ[(mid,h,sid)].Start=1.0;start_counts["occ_one"]+=1
     if (mid,h) in mode:
-     mode[(mid,h)].VarHintVal=1.0 if float(r["P_discharge_kW"])>1e-8 else 0.0
-     mode[(mid,h)].VarHintPri=2;hint_counts["mode"]+=1
+     zmode=1.0 if float(r["P_discharge_kW"])>1e-8 else 0.0
+     mode[(mid,h)].VarHintVal=zmode;mode[(mid,h)].VarHintPri=2;hint_counts["mode"]+=1
+     if r25v_causal_rolling_mipstart:mode[(mid,h)].Start=zmode
 
-   # Jobs known at t-1 get hints; newly arrived current jobs intentionally do not.
    for k,v in x.items():
-    j=str(k[0])
-    if j in prev_known_jobs:
+    if str(k[0]) in prev_known_jobs:
      v.VarHintVal=0.0;v.VarHintPri=3;hint_counts["job_zero"]+=1
+     if r25v_causal_rolling_mipstart:v.Start=0.0;start_counts["job_zero"]+=1
    for r in prev_plan:
     st=int(r["start_step"]);j=str(r["job_uid"])
     if st<int(issue):continue
     k=(j,str(r["destination_IDC_id"]),str(r["rack_pool_id"]),st)
     if k in x:
      x[k].VarHintVal=1.0;x[k].VarHintPri=9;hint_counts["job_one"]+=1
+     if r25v_causal_rolling_mipstart:x[k].Start=1.0;start_counts["job_one"]+=1
    for j,v in defer.items():
     if str(j) in prev_known_jobs:
-     v.VarHintVal=1.0 if str(j) in prev_defer else 0.0
-     v.VarHintPri=5;hint_counts["defer"]+=1
+     zdef=1.0 if str(j) in prev_defer else 0.0
+     v.VarHintVal=zdef;v.VarHintPri=5;hint_counts["defer"]+=1
+     if r25v_causal_rolling_mipstart:v.Start=zdef;start_counts["defer"]+=1
+    elif r25v_causal_rolling_mipstart:
+     v.Start=1.0;start_counts["defer"]+=1
 
    m.update()
    _intvars=[v for v in m.getVars() if v.VType in (GRB.BINARY,GRB.INTEGER,GRB.SEMIINT)]
    _defined=[str(v.VarName) for v in _intvars if abs(float(v.Start))<1e100]
-   if _defined:
+   if r25v_causal_rolling_mipstart and not _defined:
+    raise RuntimeError("R25V causal rolling MIP start enabled but no integer start was defined")
+   if not r25v_causal_rolling_mipstart and _defined:
     raise RuntimeError("BUILD7C-R6 rolling MIP Start must be empty; defined="+repr(_defined[:16]))
-
    jw(out/"BUILD7C_R6_ROLLING_VAR_HINT_AUDIT.json",{
       "status":"PASS","issue":int(issue),
-      "guidance_type":"VarHintVal/VarHintPri only",
-      "defined_integer_mip_start_count":0,
-      "hint_counts":hint_counts,
-      "future_realized_used":False,
-      "physical_state_source":"committed h0 checkpoint constraints only"})
-
+      "guidance_type":("causal shifted partial MIP Start + VarHintVal/VarHintPri" if r25v_causal_rolling_mipstart else "VarHintVal/VarHintPri only"),
+      "defined_integer_mip_start_count":len(_defined),
+      "defined_integer_mip_start_names_sample":_defined[:24],
+      "hint_counts":hint_counts,"start_counts":start_counts,
+      "terminal_completion_policy":"current h=H-1 decisions and h=H occupancy left undefined for native start completion",
+      "native_start_is_nonbinding":True,"native_start_must_pass_current_model_feasibility":True,
+      "future_realized_used":False,"physical_state_source":"committed h0 checkpoint constraints only"})
    warm_audit.update({
-      "applied":False,
-      "source":"none for rolling issue>113",
-      "policy":"previous optimizer plan is non-binding variable hint only",
-      "rolling_var_hints_applied":True,
-      "rolling_var_hint_audit":"BUILD7C_R6_ROLLING_VAR_HINT_AUDIT.json",
-      "defined_integer_mip_start_count":0,
-      "future_realized_used":False})
+      "applied":bool(r25v_causal_rolling_mipstart),
+      "source":("previous causal optimizer plan shifted one step" if r25v_causal_rolling_mipstart else "none for rolling issue>113"),
+      "policy":("previous optimizer plan is a solver-checked non-binding partial MIP start plus variable hints" if r25v_causal_rolling_mipstart else "previous optimizer plan is non-binding variable hint only"),
+      "rolling_var_hints_applied":True,"rolling_var_hint_audit":"BUILD7C_R6_ROLLING_VAR_HINT_AUDIT.json",
+      "defined_integer_mip_start_count":len(_defined),"future_realized_used":False})
   else:
    warm_audit.update({"source":"none","reason":"no previous rolling plan available"})
  except Exception as e:
   warm_audit["error"]=repr(e)
+  if r25v_causal_rolling_mipstart:
+   # Search guidance is never allowed to make the scientific solve fail or leave
+   # a half-written native start. Fall back atomically to the same-issue RMP start.
+   for v in m.getVars():v.Start=GRB.UNDEFINED
+   m.update()
+   warm_audit.update({"applied":False,"fallback":"SAME_ISSUE_RMP_ONLY",
+                      "defined_integer_mip_start_count":0})
  jw(out/"BUILD7BR6_WARMSTART_AUDIT.json",warm_audit)
  if r25k_b4_root_branch_strengthening:
   # Branch on the physical STAY-vs-DEPART disjunction first, then location occupancy.
@@ -2695,23 +2708,31 @@ def rolling54_main(out,base):
    mess_E={str(k):float(v) for k,v in state["mess_E_kWh"].items()}
    mess_DE={str(k):float(v) for k,v in state["mess_support_debt_kWh"].items()}
    workload_debt={str(k):float(v) for k,v in state["workload_debt_GPUh"].items()}
-   # Reconstruct exactly the preceding issue's non-binding VarHint payload. No MIP Start.
+   # Reconstruct exactly the preceding issue's causal solver-guidance payload.
+   # It may be submitted as a non-binding, current-model-checked partial MIP start;
+   # the committed POST state remains the only physical PRE-state authority.
    def _resume_csv_records(name):
     _hint_dir=os.environ.get("MOBILEESS_R25Q_RESUME_HINT_DIR","")
     p=(Path(_hint_dir)/name) if _hint_dir else HERE/f"embedded/{name}"
     if not p.exists() or p.stat().st_size==0:return []
     return pd.read_csv(p).to_dict("records")
+   _guidance_path=os.environ.get("MOBILEESS_R25V_RESUME_GUIDANCE_PATH","")
+   _guidance={}
+   if _guidance_path and Path(_guidance_path).is_file():
+    _guidance=json.loads(Path(_guidance_path).read_text())
+    if not isinstance(_guidance,dict):raise RuntimeError("R25V resume guidance must be a JSON object")
    rolling_warmstart={
-    "plan":[],
-    "route_rows":_resume_csv_records(os.environ.get("MOBILEESS_R25Q_RESUME_MOVE_PLAN_NAME","R23C1_ISSUE151_MOVE_PLAN.csv")),
-    "mess_rows":_resume_csv_records(os.environ.get("MOBILEESS_R25Q_RESUME_MESS_PLAN_NAME","R23C1_ISSUE151_MESS_PLAN.csv")),
-    "wan_all":{},"deferred_jobs":[]}
+    "plan":list(_guidance.get("plan",_resume_csv_records(os.environ.get("MOBILEESS_R25V_RESUME_JOB_PLAN_NAME","resume_jobs.csv")))),
+    "route_rows":list(_guidance.get("route_rows",_resume_csv_records(os.environ.get("MOBILEESS_R25Q_RESUME_MOVE_PLAN_NAME","R23C1_ISSUE151_MOVE_PLAN.csv")))),
+    "mess_rows":list(_guidance.get("mess_rows",_resume_csv_records(os.environ.get("MOBILEESS_R25Q_RESUME_MESS_PLAN_NAME","R23C1_ISSUE151_MESS_PLAN.csv")))),
+    "wan_all":{},"deferred_jobs":list(map(str,_guidance.get("deferred_jobs",[])))}
    jw(out/"R24_RESUME_AUTHORITY.json",{
     "status":"PASS","resume_issue":resume_issue,"resume_state_sha256":actual,
      "source":os.environ.get("MOBILEESS_R25Q_RESUME_SOURCE","R23 issue151 committed POST == issue152 PRE"),
      "verified_prefix_issues":int(r25q_verified_prefix),
-    "previous_plan_guidance":"VarHintVal/VarHintPri only","defined_integer_mip_start_count":0,
-    "same_issue_partial_incumbent_used":False,"future_realized_used":False,
+     "previous_plan_guidance":("causal shifted partial MIP Start + VarHint" if os.environ.get("MOBILEESS_R25V_CAUSAL_ROLLING_MIPSTART","0")=="1" else "VarHintVal/VarHintPri only"),
+     "resume_guidance_json_loaded":bool(_guidance),
+     "same_issue_partial_incumbent_used":False,"future_realized_used":False,
     "scientific_model_changed":False,"feasible_set_changed":False,"objective_changed":False})
 
   run_expected=list(range(resume_issue,end_issue+1))
@@ -2797,6 +2818,15 @@ def rolling54_main(out,base):
     raise RuntimeError("R25J_B3_DIAGNOSTIC_STOP_BEFORE_PHYSICAL_COMMIT")
 
    rolling_warmstart=sol["rolling_warmstart_payload"]
+   jw(issue_out/"BUILD7C_ROLLING_GUIDANCE_NEXT_ISSUE.json",{
+     "schema_version":"r25v.causal_rolling_guidance.v1",
+     "current_issue":int(issue),"next_issue":int(issue+1) if issue<end_issue else None,
+     "plan":rolling_warmstart["plan"],
+     "route_rows":rolling_warmstart["route_rows"],
+     "mess_rows":rolling_warmstart["mess_rows"],
+     "deferred_jobs":rolling_warmstart.get("deferred_jobs",[]),
+     "future_realized_used":False,"physical_state_authority":False,
+     "solver_guidance_only":True})
    jw(issue_out/"BUILD7C_ROLLING_WARMSTART_NEXT_ISSUE_AUDIT.json",{
      "status":"PASS","current_issue":int(issue),
      "next_issue":int(issue+1) if issue<end_issue else None,

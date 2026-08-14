@@ -349,6 +349,20 @@ c["PASS"]=all(bool(v) for k,v in c.items() if k!="PASS")
 print(json.dumps(c,indent=2,sort_keys=True))
 if not c["PASS"]:raise SystemExit(2)
 
+# R25V causal rolling multi-start and exact-CG round-trip reduction.
+for _n in ["r25v_causal_multistart_proof_test.py","r25v_native_multistart_smoke.py"]:
+ ast.parse((R/_n).read_text());c["syntax_"+_n]=True
+q=subprocess.run([sys.executable,str(R/"r25v_causal_multistart_proof_test.py")],capture_output=True,text=True)
+try:
+ r25v=json.loads(q.stdout)
+except Exception:
+ r25v={}
+c["r25v_exact_safe_contract"]=q.returncode==0 and r25v.get("status")=="PASS" and all(r25v.get("checks",{}).values())
+c["r25v_native_smoke_present"]=(R/"r25v_native_multistart_smoke.py").is_file()
+c["PASS"]=all(bool(v) for k,v in c.items() if k!="PASS")
+print(json.dumps(c,indent=2,sort_keys=True))
+if not c["PASS"]:raise SystemExit(2)
+
 # R25T/B6-C6 bounded primal phase plus original compact exact authority.
 ast.parse((R/"r25t_global_bound_portfolio_proof_test.py").read_text())
 q=subprocess.run([sys.executable,str(R/"r25t_global_bound_portfolio_proof_test.py")],capture_output=True,text=True)
