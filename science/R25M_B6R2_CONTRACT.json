@@ -1,0 +1,45 @@
+{
+  "conversation": "A",
+  "release": "R25M_B6R2_BATCH_PRICING_NUMERICAL_GUARD",
+  "stage": "B6/7",
+  "date": "2026-08-13",
+  "parent": "R25M_B6R1_OBJVAL_LIFECYCLE_FIX",
+  "parent_runtime_result_sha256": "1a1c5a2907f76ddc4dc2319f721cfc5512d5c0bac302902154e3d28c6de6e8db",
+  "observed_parent_failure": {
+    "iteration": 90,
+    "elapsed_s": 208.64936489899992,
+    "rmp_objective": -2017.4052901958783,
+    "columns_per_mess": 94,
+    "max_existing_lambda_rc_check_error_before_failure": 2.9326910823594413e-06,
+    "fatal_next_rc_mismatch": 1.2187140804908386e-05,
+    "min_reduced_cost_at_last_live": {
+      "MESS01": -0.41346454057186577,
+      "MESS02": -0.07129231850757378,
+      "MESS03": -0.4133610874895197,
+      "MESS04": -1.342139703194718
+    }
+  },
+  "changes": {
+    "pricing_batch_per_mess": 8,
+    "exact_shortest_path_remains_closure_oracle": true,
+    "rc_audit_tolerance": 0.0001,
+    "pricing_tolerance": 1e-07,
+    "barrier_convergence_tolerance": 1e-09,
+    "cg_numeric_focus": 1,
+    "conservative_lower_bound_safety": "N_MESS*rc_audit_tol + max(1e-6,1e-9*abs(rmp_obj))",
+    "integer_phase_restores_parent_numeric_settings": true
+  },
+  "scientific_contract": {
+    "H54": true,
+    "cadence_5min": true,
+    "MIPGap_target": 0.03,
+    "Threads": 1,
+    "future_actual_used": false,
+    "future_D2_state_reinjected": false,
+    "posthoc_same_issue_MIP_start_used": false,
+    "physical_h0_commit_in_screen": false,
+    "feasible_set_changed": false,
+    "objective_changed": false
+  },
+  "fallback_if_no_certificate": "B6R3_FULL_CERTIFIED_BRANCH_AND_PRICE_OR_PRICING_STABILIZATION"
+}

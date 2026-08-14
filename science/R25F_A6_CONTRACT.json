@@ -1,0 +1,51 @@
+{
+  "conversation": "A",
+  "release": "R25F_A6_FINAL_STAGE1_CLOSURE",
+  "stage": "A6/6",
+  "foundation": "R25E A5 exact node-binary/continuous-arc mobility + R25D A4 radial grid projection + R25A/A2 exact pruning + R24 exact rebase",
+  "resume": {
+    "issue": 152,
+    "authoritative_prefix": "issue113..151",
+    "resume_state_sha256": "75dad8245bccfdefa83b1e3fba123155bf20df1e067c55424567eb8b2ff3eca9",
+    "prior_master_sha256": "b66fb6790709a3fd1e0b1a9952ecdba55bf2759597239c5adeab36593d505388",
+    "prior_child_sha256": "385a343e8878ae9f7bc5d69e8a974055c5e6a08a2fc910232cd9eadb8d26df50"
+  },
+  "scientific_contract": {
+    "issue_range": [152, 166],
+    "Horizon": 54,
+    "cadence_minutes": 5,
+    "MIPGap": 0.03,
+    "Threads": 1,
+    "h0_only_physical_commit": true,
+    "future_actual_used": false,
+    "future_D2_state_reinjected": false,
+    "future_regeneration_precredit": false,
+    "Fresh_Exact_OpenDSS_each_issue": true,
+    "posthoc_issue152_solution_as_MIPStart": false
+  },
+  "performance_safety": {
+    "per_issue_TimeLimit_seconds": 1800,
+    "meaning": "engineering fail-fast ceiling only; scientific acceptance still requires certified MIPGap <= 3%. If the exact-rebased architecture cannot close a hard issue within 30 minutes, A6 fails rather than spending multi-hour runtime.",
+    "WorkLimit": null,
+    "multithreading": false,
+    "LNS": false,
+    "parameter_portfolio": false
+  },
+  "required_flags": {
+    "MOBILEESS_R24_PERMANENT_EXACT_REBASE": "1",
+    "MOBILEESS_R25A_FORWARD_BACKWARD_PRUNE": "1",
+    "MOBILEESS_R25B_ROUTE_DOMINANCE_AUDIT": "1",
+    "MOBILEESS_R25D_RADIAL_GRID_PROJECTION": "1",
+    "MOBILEESS_R25E_NODE_ARC_EXACT": "1",
+    "MOBILEESS_R25E_PERSISTENT_STATIC_CONTEXT": "1",
+    "MOBILEESS_EXACT_PCC_LEAF_ELIM": "0"
+  },
+  "completion_rule": {
+    "required_status": "PASS_STAGE1_CLOSURE",
+    "issue_pass_count": 54,
+    "all_54_pass": true,
+    "A5_runtime_exactness_certificate_each_continuation_issue": true,
+    "A4_runtime_projection_certificate_each_continuation_issue": true,
+    "PRE_POST_chain_53_links": true
+  }
+}

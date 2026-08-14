@@ -1,0 +1,85 @@
+{
+  "conversation": "A",
+  "release": "R25E_A5_EXACT_NODE_ARC_INTEGRALITY_COMPRESSION_PERSISTENT_STATIC_FREEZE",
+  "stage": "A5/6",
+  "foundation": "R25D A4 radial exact projection + R25C A3 decomposition architecture + R25B A2 + R25A A1 + R24 exact rebase",
+  "long_solver_validation": "FORBIDDEN_IN_A5; deferred to A6",
+  "architecture_decision": {
+    "A3_branch_and_price_status": "RETAINED_AS_EXACT_FALLBACK_NOT_PRIMARY",
+    "primary_A5_mobility_formulation": "BINARY_NODE_OCCUPANCY_PLUS_CONTINUOUS_SIMPLE_DAG_ARCS",
+    "reason": "A5 found an exact full-arc reformulation that removes the 99k MOVE variables from the integer domain without restricted-column completeness risk; it satisfies A3's requirement to abandon the 99k MOVE-binary monolith while retaining every A1/A2 feasible arc.",
+    "all_feasible_A1_A2_arcs_retained": true,
+    "missing_column_risk": false,
+    "branch_and_price_required_for_primary": false
+  },
+  "exactness_conditions": {
+    "mobility_graph_acyclic": true,
+    "parallel_tail_head_arcs_forbidden_fail_closed": true,
+    "A2_dominance_equivalence_gate_required": true,
+    "node_occupancy_binary": true,
+    "MOVE_arcs_continuous_0_1": true,
+    "STAY_arcs_continuous_0_1": true,
+    "unit_source_flow": true,
+    "sink_unit_flow": true,
+    "proof": "On a simple acyclic state graph, binary node inflow/outflow occupancy uniquely identifies the unsplit source-to-H path. A fractional split would create a fractional occupied child before any merge; the only direct split-and-merge exception requires parallel tail-head arcs, which are rejected.",
+    "traffic_K3_authority_changed": false,
+    "D2_connection_delay_changed": false,
+    "route_energy_semantics_changed": false,
+    "objective_changed": false,
+    "scientific_feasible_set_changed": false
+  },
+  "historical_issue152_structural_projection": {
+    "R24_move_binary_count": 99283,
+    "R24_stay_state_count_h0_to_Hminus1": 4299,
+    "R24_integer_count_estimate": 99499,
+    "A5_terminal_node_occupancy_extra_upper_bound": 96,
+    "A5_node_occupancy_binary_upper_bound": 4395,
+    "A5_charge_discharge_mode_binaries": 216,
+    "A5_dynamic_job_binary_assumption_for_issue152": 0,
+    "A5_total_integer_upper_bound_before_dynamic_job_binaries": 4611,
+    "minimum_integer_reduction_fraction_vs_R24_estimate": 0.953657825706791,
+    "note": "This is a structural upper-bound projection from previously audited issue152 counts, not a new long solve/model-build measurement. Exact A6 counts will be recorded at runtime."
+  },
+  "A4_plus_A5_structural_net_projection_vs_R24": {
+    "A4_continuous_variables_removed": 13122,
+    "A5_new_node_binary_variables_upper_bound": 4395,
+    "net_total_variable_reduction_lower_bound": 8727,
+    "A4_linear_equalities_removed": 13068,
+    "A5_additional_node_occupancy_equalities_upper_bound": 4395,
+    "net_linear_row_reduction_lower_bound": 8673,
+    "A4_line_QCP_removed": 3510,
+    "integer_domain_reduction_is_primary_gain": true
+  },
+  "persistent_rolling_architecture": {
+    "persistent_static_context": true,
+    "reused_assets": [
+      "immutable NPZ arrays",
+      "CSV/parquet authority tables",
+      "decoded static route table",
+      "radial topology and A4 projection topology",
+      "R24 one-pass pre-extracted causal mobility archive members"
+    ],
+    "topology_identity_rechecked_each_issue": true,
+    "future_actual_cached": false,
+    "future_realized_state_cached": false,
+    "full_cross_issue_Gurobi_model_reuse": false,
+    "reason_full_model_reuse_rejected": "Current actual queue/running/WAN state and issue-specific causal mobility coefficients are dynamic scientific inputs. Reusing a mutated full model risks stale constraints or future-state leakage. A5 freezes causal-safe persistent static context while rebuilding the compact dynamic master per issue."
+  },
+  "required_A6_flags": {
+    "MOBILEESS_R24_PERMANENT_EXACT_REBASE": "1",
+    "MOBILEESS_R25A_FORWARD_BACKWARD_PRUNE": "1",
+    "MOBILEESS_R25B_ROUTE_DOMINANCE_AUDIT": "1",
+    "MOBILEESS_R25D_RADIAL_GRID_PROJECTION": "1",
+    "MOBILEESS_R25E_NODE_ARC_EXACT": "1",
+    "MOBILEESS_R25E_PERSISTENT_STATIC_CONTEXT": "1",
+    "MOBILEESS_EXACT_PCC_LEAF_ELIM": "0"
+  },
+  "causality": {
+    "future_actual_used": false,
+    "future_D2_state_reinjected": false,
+    "future_regeneration_precredit": false,
+    "h0_only_physical_commit": true,
+    "Fresh_Exact_OpenDSS_retained": true
+  },
+  "next_stage": "A6 builds the final one-command runner from this frozen A5 carrier, resumes authoritative issue152 PRE state, executes 152..166, and performs combined 54/54 audit."
+}

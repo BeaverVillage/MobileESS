@@ -1,0 +1,26 @@
+{
+  "conversation": "A",
+  "release": "R25B_A2_K3_ROUTE_DOMINANCE_EQUIVALENT_STATE_AUDIT",
+  "stage": "A2/6",
+  "foundation": "R25A A1 + R24 permanent exact rebase",
+  "long_solver_validation": "FORBIDDEN_IN_A2; deferred to A6",
+  "implementation": [
+    "post-A1 optimizer-active MOVE graph grouped by MESS/h/source/destination",
+    "continuation-aware exact duration/Safe-energy route-dominance completeness audit",
+    "equivalent planning-state duplicate audit",
+    "perfect-K3-collapse structural floor measurement"
+  ],
+  "important_result_expected_from_code_structure": "the upstream pareto_moves compiler already performs the same K<=3 duration/Safe-energy dominance; A2 therefore acts as a completeness certificate and structural ceiling audit rather than silently applying another result-changing pruning layer",
+  "exactness": {
+    "same_source_destination": true,
+    "dominating_ready_arrival_no_later": true,
+    "dominating_safe_energy_no_larger": true,
+    "zero_dispatch_stay_emulation_required": true,
+    "traffic_K3_authority_changed": false,
+    "optimizer_domain_changed_in_A2": false,
+    "integer_feasible_set_changed": false,
+    "objective_changed": false,
+    "physical_constraints_relaxed": false
+  },
+  "next_stage": "A3 compactness decision gate; if route-rank pruning is already exhausted and the destination/time state floor remains large, transition to exact decomposition"
+}
