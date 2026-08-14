@@ -6,14 +6,14 @@ R25T remains the authoritative offline continuation. It keeps the five-minute
 H54 model, h0-only causal commit, four-thread policy, unchanged AC-aware QCP,
 Fresh OpenDSS gate, and globally certified 3% modeled-objective rule.
 
-Issue 153 has now completed and committed. The expected WSL preflight after the
-R25V science refresh is:
+Issues through 163 have completed and committed. The expected WSL preflight
+after the R25X science refresh is:
 
 ```text
-PASS_R25T_PREFLIGHT verified=41/54 resume_issue=154 remaining=13
+PASS_R25T_PREFLIGHT verified=51/54 resume_issue=164 remaining=3
 ```
 
-Issues 113 through 153 are preserved. No
+Issues 113 through 163 are preserved. No
 R25T driver or solver process was running at the time of this handoff.
 
 ## Issue 151 and 152 diagnosis
@@ -67,8 +67,26 @@ iterations plus only zero/one numerical retry. A measured batch-64 trial was
 rejected because issue 157 regressed from 17 iterations/187.5 seconds to 24
 iterations/324.5 seconds; the production exact batch remains 32.
 
-These changes have passed unit/static and licensed-Gurobi multi-start smoke
-tests, but their issue-154 wall-time improvement is not yet runtime evidence.
+R25X responds to the issue-164 near-final failure and the measured CG/KKT tail.
+Issue 164 reached a native global gap of `2.9963%`, then the strict fixed-integer
+continuous QCP corrected the objective from `-866.7846857454` to
+`-866.7845933850`. The old wrapper incorrectly failed because the stricter,
+more feasible result was about `9.24e-5` worse. The polish now accepts either
+objective direction only when its strict feasibility/bound gates pass and the
+polished incumbent still has the unchanged global 3% certificate.
+
+The same archive showed that issue 163 used 23 CG iterations but 45 KKT dual
+solves, while issue 164 used 27 CG iterations but 69 KKT dual solves. The extra
+22/42 solves were strict numerical retries after an OPTIMAL snapshot was already
+inside the conservative RC envelope. Production now accepts that bounded
+snapshot immediately and subtracts its measured error from the certified lower
+bound exactly as before. The base pricing batch remains 32. A batch of 64 is
+used only for saturated blocks when at most two MESS blocks remain active in the
+late CG tail; every added path must have negative reduced cost under the true
+current dual, and exact pricing closure is unchanged.
+
+These changes have passed unit/static and licensed-Gurobi release gates. Their
+issue-164 wall-time improvement still requires the user's resumed runtime run.
 
 ## R26 operational design
 
@@ -94,11 +112,13 @@ fast dispatch itself later violates the 300-second maximum deadline.
 
 ## Validation completed
 
-- Windows unit/integration suite: 33 tests passed, one WSL-only lock test skipped.
+- Windows unit/integration suite: 37 passed, one WSL-only lock test skipped.
+- WSL unit/integration suite: 38 passed.
 - WSL R25T global-bound proof: PASS.
 - WSL Gurobi compact-authority smoke: PASS.
 - WSL full `science/release_self_test.py`: PASS.
 - WSL native two-start Gurobi smoke: PASS.
+- Actual runtime preflight: `51/54`, resume issue 164, three issues remaining.
 
 ## Run command
 

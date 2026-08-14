@@ -23,6 +23,22 @@ def load_driver():
     return module
 
 
+def load_decomposition():
+    science = REPO / "science"
+    sys.path.insert(0, str(science))
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "r25t_decomposition_for_test", science / "r25m_b6_exact_path_decomposition.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        assert spec.loader is not None
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        return module
+    finally:
+        sys.path.remove(str(science))
+
+
 class R25TResumeUpgradeTests(unittest.TestCase):
     def test_new_r25t_audit_uses_final_certificate_not_stale_local_gap(self):
         text = (REPO / "science" / "r25m_b6_exact_path_decomposition.py").read_text(
@@ -84,6 +100,41 @@ class R25TResumeUpgradeTests(unittest.TestCase):
         self.assertIn('"MOBILEESS_R25M_B6_PRICING_BATCH": "32"', driver)
         self.assertNotIn('"MOBILEESS_R25M_B6_PRICING_BATCH": "64"', driver)
         self.assertIn("24 iterations / 324.5 s", driver)
+
+    def test_r25x_sparse_tail_expands_only_saturated_late_blocks(self):
+        decomp = load_decomposition()
+        policy = decomp.sparse_tail_pricing_blocks
+        self.assertEqual(
+            policy({"MESS01": 32, "MESS02": 7, "MESS03": 0, "MESS04": 0}, 32, 2),
+            ("MESS01",),
+        )
+        self.assertEqual(
+            policy({"MESS01": 32, "MESS02": 32, "MESS03": 32, "MESS04": 32}, 32, 2),
+            (),
+        )
+        self.assertEqual(policy({"MESS01": 31, "MESS02": 0}, 32, 2), ())
+        self.assertEqual(policy({"MESS01": 0, "MESS02": 0}, 32, 2), ())
+
+        driver = load_driver()
+        env = driver.runtime_environment(164, Path("resume"), "state-hash")
+        self.assertEqual(env["MOBILEESS_R25M_B6_PRICING_BATCH"], "32")
+        self.assertEqual(env["MOBILEESS_R25X_SPARSE_TAIL_PRICING_BATCH"], "64")
+        self.assertEqual(env["MOBILEESS_R25X_SPARSE_TAIL_MAX_ACTIVE_MESS"], "2")
+
+    def test_r25x_bounded_optimal_snapshot_skips_redundant_kkt_retries(self):
+        driver = load_driver()
+        env = driver.runtime_environment(164, Path("resume"), "state-hash")
+        self.assertEqual(env["MOBILEESS_R25Q_BOUNDED_RC_ENVELOPE"], "1")
+        self.assertEqual(env["MOBILEESS_R25R_RC_STRICT_RETRY_BUDGET"], "0")
+
+    def test_r25x_strict_polish_accepts_feasible_certified_numerical_correction(self):
+        text = (REPO / "science" / "r25m_b6_exact_path_decomposition.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("R25T compact polish worsened objective", text)
+        self.assertIn("objective_worsening_after_strict_feasibility", text)
+        self.assertIn("R25T compact polish lost global certificate", text)
+        self.assertIn("acceptance_requires_quality_and_global_certificate", text)
 
     def test_r25v_resume_guidance_is_persisted_and_reloaded(self):
         main = (REPO / "science" / "main.py").read_text(encoding="utf-8")

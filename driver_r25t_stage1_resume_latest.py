@@ -35,8 +35,8 @@ PARENT_R25P = ART / "ConversationA_R25P_STAGE1_54_OF_54_RUNTIME_RESULT_20260814T
 PARENT_R25Q = ART / "ConversationA_R25Q_STAGE1_54_OF_54_RUNTIME_RESULT_20260814T101350.tar.gz"
 EXPECTED = {
     "main": "1177ac8814f1008907f89ebf513bf9fe3e469d2c09a51ba85303c46c428f76b9",
-    "decomp": "2dfe42a718be07afade9d504f0a08a9bbb85c5d3d073dca235d805cbc1d42178",
-    "checksums": "05288f83be7a15c367504223f096ad234b9cca2230509b9f72ef7265863d07f0",
+    "decomp": "639c9e104cf58318140c283c02a9e2df53ad4a5c2702799dc69d784a4959c82d",
+    "checksums": "81fb762c8b6a82b8d0fae36596290cbfd9285c30a6cf7ca317a73cab77598f4b",
     "r25p": "0ed41aa7bdc1f055dde5fd7c50e4ceffb4d4cc0a1795d0ec1b37d49481fa9833",
     "r25q": "8d8c8f15bdfbc3e9200aeebb88f8a262f4da2e727d1155ac76b989f42b7cc2b0",
 }
@@ -44,6 +44,7 @@ LEGACY_R25T_DECOMP_SHA256 = "fd606351cbd17b7cfc63a79d08177e3d3a8485bab86f3870e35
 COPY_AUDIT_R25T_DECOMP_SHA256 = "f4434abd4ef98cdc66fb3148dc8497f11dba706499069aafdeba8290205995ab"
 PRE_ACCEL_R25T_DECOMP_SHA256 = "109645df1662513eb312bc46761976fc9e0db81169e70ca0451d07425f09b937"
 PRE_R25V_R25T_DECOMP_SHA256 = "6a353fd88a90f67f52beeda263b660a53101bd0895889ec987a2ddab0147d301"
+PRE_R25X_R25T_DECOMP_SHA256 = "2dfe42a718be07afade9d504f0a08a9bbb85c5d3d073dca235d805cbc1d42178"
 THREADS = 4
 _RUNTIME_LOCK_HANDLE = None
 
@@ -278,6 +279,7 @@ def initialize() -> None:
             COPY_AUDIT_R25T_DECOMP_SHA256,
             PRE_ACCEL_R25T_DECOMP_SHA256,
             PRE_R25V_R25T_DECOMP_SHA256,
+            PRE_R25X_R25T_DECOMP_SHA256,
         ):
             raise RuntimeError("existing R25T runtime uses a different solver authority")
         if not SCI.is_dir():
@@ -380,7 +382,17 @@ def runtime_environment(resume_issue: int, resume_dir: Path, state_hash: str) ->
             "MOBILEESS_R25P_STAGE1_UNLIMITED_COMPLETION": "1",
             "MOBILEESS_R25Q_BOUNDED_RC_ENVELOPE": "1",
             "MOBILEESS_R25Q_RC_ENVELOPE_HARD_CAP": "5e-4",
-            "MOBILEESS_R25R_RC_STRICT_RETRY_BUDGET": "2",
+            # R25X runtime forensics: issue 163 used 22 and issue 164 used 42
+            # extra QCP/KKT solves after an OPTIMAL snapshot was already inside
+            # the conservative 5e-4 RC envelope.  The measured error is still
+            # charged to the lower bound, so no strict re-solve is required once
+            # that bounded candidate exists.
+            "MOBILEESS_R25R_RC_STRICT_RETRY_BUDGET": "0",
+            # Keep the empirically superior all-block batch=32.  Extend to 64
+            # only in the sparse CG tail when no more than two MESS blocks remain
+            # active and a block exhausted all 32 true-negative-RC candidates.
+            "MOBILEESS_R25X_SPARSE_TAIL_PRICING_BATCH": "64",
+            "MOBILEESS_R25X_SPARSE_TAIL_MAX_ACTIVE_MESS": "2",
             "MOBILEESS_R25T_GLOBAL_PORTFOLIO": "1",
             "MOBILEESS_R25T_PRIMAL_MIN_SECONDS": "30",
             "MOBILEESS_R25T_PRIMAL_STALL_SECONDS": "60",
@@ -525,6 +537,9 @@ def main() -> int:
             "overall_solver_time_limit": None,
             "restricted_primal_phase": {"min_s": 30, "stall_s": 60, "max_s": 300, "max_nodes": 200000},
             "exact_root_pricing_batch": 32,
+            "exact_root_sparse_tail_batch": 64,
+            "exact_root_sparse_tail_max_active_mess": 2,
+            "rc_strict_retries_after_bounded_optimal_snapshot": 0,
             "thread_policy": "Threads=4 cap; observed solver use may be 1..4",
             "causal_rolling_multi_start": True,
             "AC_QCP_changed": False,

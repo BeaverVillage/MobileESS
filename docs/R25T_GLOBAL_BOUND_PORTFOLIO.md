@@ -66,7 +66,10 @@ reduced-cost paths per MESS and QCP solve. Issues 154--157 showed that 17--24 CG
 iterations caused 18--25 KKT dual solves, with only zero or one numerical retry.
 R25W tested 64 on issue 157, but it increased root CG from 17 iterations and
 187.5 seconds to 24 iterations and 324.5 seconds. The production batch therefore
-remains 32. Pricing still runs to the same conservative closure gate.
+remains 32. R25X may extend a saturated block to 64 only when at most two MESS
+blocks remain active in the late tail. Every extra column must be negative under
+the true current dual. This targeted extension cannot declare closure; pricing
+still runs to the same conservative shortest-path closure gate.
 
 `Threads=4` is a maximum worker policy. Gurobi may legitimately report one
 worker when a valid start closes the certificate at the root or during a small
@@ -78,10 +81,16 @@ longer mistakes the final one-worker message for a policy failure.
 ## Retry policy
 
 R25T retains the R25R bounded reduced-cost envelope. A fully optimal finite
-dual snapshot inside the hard envelope is preserved, no more than two stricter
-retries are attempted when such a snapshot exists, and the measured error is
-subtracted conservatively from the minimization lower bound. The first
-fixed-integer polish attempt that passes the numerical gates ends polishing.
+dual snapshot inside the hard envelope is preserved and its measured error is
+subtracted conservatively from the minimization lower bound. Issue 163 used 22
+and issue 164 used 42 additional KKT solves trying to improve snapshots already
+inside that envelope. R25X therefore performs no stricter re-solve after a
+bounded OPTIMAL snapshot exists; missing, nonfinite, or out-of-envelope duals
+still fail closed or follow the strict recovery schedule. The first fixed-
+integer polish attempt that passes the numerical gates ends polishing. A tiny
+objective correction in either direction is permitted because the strict QCP
+may remove residual feasibility error from the MIQCP incumbent; acceptance
+still requires both strict quality gates and the unchanged global 3% certificate.
 
 ## Resume and progress
 

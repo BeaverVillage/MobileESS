@@ -66,6 +66,14 @@ not change the AC QCP, feasible set, objective, or global 3% rule.
 R25W treats `Threads=4` correctly as a solver cap. A measured 64-path pricing
 trial was slower, so the exact root batch remains 32 and pricing closure is
 unchanged.
+R25X removes repeated KKT re-solves after an OPTIMAL dual snapshot is already
+inside the conservative reduced-cost envelope, whose measured error is still
+subtracted from the global lower bound. It also extends pricing from 32 to 64
+only for saturated blocks in a one/two-MESS late tail. The all-block batch stays
+32, true-current-dual negative reduced cost remains mandatory for every added
+column, and exact closure is unchanged. Strict fixed-integer QCP polish may make
+a tiny feasibility correction in either objective direction, but is accepted
+only if its quality gates and the global 3% certificate both pass.
 
 ```bash
 MOBILEESS_R25T_PREFLIGHT_ONLY=1 \
