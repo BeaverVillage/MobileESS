@@ -92,6 +92,14 @@ objective correction in either direction is permitted because the strict QCP
 may remove residual feasibility error from the MIQCP incumbent; acceptance
 still requires both strict quality gates and the unchanged global 3% certificate.
 
+Numerical recovery parameters are scoped to one solved RMP. Issue 166 showed
+that carrying `BarQCPConvTol=1e-11`, homogeneous barrier, and NumericFocus=3
+into the next column-enlarged master can itself cause a SUBOPTIMAL termination.
+R25Y restores the primary profile before every new root-CG solve. A NUMERIC or
+SUBOPTIMAL result may be retried after clearing solution state with deterministic
+scaled/tighter profiles, but the iteration remains non-authoritative unless a
+retry finishes OPTIMAL. Other non-optimal statuses continue to fail closed.
+
 ## Resume and progress
 
 The R25T driver imports only completed, verified R25R/R25S POST states. An

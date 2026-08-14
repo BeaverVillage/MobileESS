@@ -6,14 +6,14 @@ R25T remains the authoritative offline continuation. It keeps the five-minute
 H54 model, h0-only causal commit, four-thread policy, unchanged AC-aware QCP,
 Fresh OpenDSS gate, and globally certified 3% modeled-objective rule.
 
-Issues through 163 have completed and committed. The expected WSL preflight
-after the R25X science refresh is:
+Issues through 165 have completed and committed. The expected WSL preflight
+after the R25Y science refresh is:
 
 ```text
-PASS_R25T_PREFLIGHT verified=51/54 resume_issue=164 remaining=3
+PASS_R25T_PREFLIGHT verified=53/54 resume_issue=166 remaining=1
 ```
 
-Issues 113 through 163 are preserved. No
+Issues 113 through 165 are preserved. No
 R25T driver or solver process was running at the time of this handoff.
 
 ## Issue 151 and 152 diagnosis
@@ -85,8 +85,24 @@ used only for saturated blocks when at most two MESS blocks remain active in the
 late CG tail; every added path must have negative reduced cost under the true
 current dual, and exact pricing closure is unchanged.
 
-These changes have passed unit/static and licensed-Gurobi release gates. Their
-issue-164 wall-time improvement still requires the user's resumed runtime run.
+The R25X rerun produced direct wall-time evidence. Issue 164 fell from 27 CG
+rounds / 1,153.0 CG seconds to 23 rounds / 366.6 seconds and committed at
+2.9431%. Issue 165 committed at 2.9961%; its sparse tail added 96 targeted
+columns. Both runs needed only one strict dual retry. The continuation is now
+53/54.
+
+Issue 166 then exposed a separate numerical-state carryover: root CG iteration
+17 inherited an extreme prior recovery profile (`BarQCPConvTol=1e-11`,
+`BarHomogeneous=1`, `NumericFocus=3`) and Gurobi returned SUBOPTIMAL even though
+the preceding convex RMPs were optimal. R25Y restores the reviewed primary
+barrier profile at the start of every newly enlarged RMP. Only NUMERIC or
+SUBOPTIMAL statuses enter a cleared-state numerical recovery portfolio, and no
+RMP is used unless the final status is OPTIMAL. Scientific rows, objective,
+pricing closure, AC QCP, and certificate authority are unchanged.
+
+These changes have passed unit/static and licensed-Gurobi release gates. R25X
+has positive issue-164 runtime evidence; R25Y still requires the final issue-166
+resume run.
 
 ## R26 operational design
 
@@ -113,12 +129,12 @@ fast dispatch itself later violates the 300-second maximum deadline.
 ## Validation completed
 
 - Windows unit/integration suite: 37 passed, one WSL-only lock test skipped.
-- WSL unit/integration suite: 38 passed.
+- WSL unit/integration suite: 48 passed (including current period-selection tests).
 - WSL R25T global-bound proof: PASS.
 - WSL Gurobi compact-authority smoke: PASS.
 - WSL full `science/release_self_test.py`: PASS.
 - WSL native two-start Gurobi smoke: PASS.
-- Actual runtime preflight: `51/54`, resume issue 164, three issues remaining.
+- Actual runtime preflight: `53/54`, resume issue 166, one issue remaining.
 
 ## Run command
 

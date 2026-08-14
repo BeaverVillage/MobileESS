@@ -74,6 +74,11 @@ only for saturated blocks in a one/two-MESS late tail. The all-block batch stays
 column, and exact closure is unchanged. Strict fixed-integer QCP polish may make
 a tiny feasibility correction in either objective direction, but is accepted
 only if its quality gates and the global 3% certificate both pass.
+R25Y prevents a successful but extreme QCP-dual recovery profile from leaking
+into the next column-enlarged root RMP. Every CG iteration starts from the
+reviewed primary numerical profile; only NUMERIC/SUBOPTIMAL terminations enter
+a cleared-state recovery portfolio, and no bound or pricing dual is used until
+Gurobi returns OPTIMAL.
 
 ```bash
 MOBILEESS_R25T_PREFLIGHT_ONLY=1 \

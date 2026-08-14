@@ -136,6 +136,23 @@ class R25TResumeUpgradeTests(unittest.TestCase):
         self.assertIn("R25T compact polish lost global certificate", text)
         self.assertIn("acceptance_requires_quality_and_global_certificate", text)
 
+    def test_r25y_root_rmp_recovery_does_not_inherit_extreme_retry_profile(self):
+        text = (REPO / "science" / "r25m_b6_exact_path_decomposition.py").read_text(
+            encoding="utf-8"
+        )
+        start = text.index("for it in (itertools.count() if max_iter is None")
+        end = text.index("# C5R2: QCP dual recovery is explicit", start)
+        root_solve = text[start:end]
+        self.assertLess(
+            root_solve.index("m.Params.BarQCPConvTol=float(qcp_barrier_tol)"),
+            root_solve.index("m.optimize()"),
+        )
+        self.assertIn("m.Params.BarHomogeneous=int(_old_barhom)", root_solve)
+        self.assertIn("if int(m.Status) in (GRB.NUMERIC,GRB.SUBOPTIMAL)", root_solve)
+        self.assertIn("m.reset();rt=time.monotonic();m.optimize()", root_solve)
+        self.assertIn("if int(m.Status)!=GRB.OPTIMAL", root_solve)
+        self.assertIn("not optimal after numerical recovery", root_solve)
+
     def test_r25v_resume_guidance_is_persisted_and_reloaded(self):
         main = (REPO / "science" / "main.py").read_text(encoding="utf-8")
         driver = (REPO / "driver_r25t_stage1_resume_latest.py").read_text(encoding="utf-8")

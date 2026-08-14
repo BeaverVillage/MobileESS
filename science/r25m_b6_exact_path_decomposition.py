@@ -974,12 +974,49 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
                      'center_beta':float(dual_center_beta),'batch':int(dual_stab_batch)}
     cg_start=time.monotonic()
     for it in (itertools.count() if max_iter is None else range(max_iter)):
+        # R25Y: numerical-recovery parameters belong to one solved RMP only.
+        # Carrying an extreme successful retry (for example BarQCPConvTol=1e-11
+        # with homogeneous barrier) into the next, column-enlarged RMP caused
+        # issue 166 to terminate SUBOPTIMAL.  Restore the reviewed primary
+        # profile before every new CG master solve; this changes no model row,
+        # objective, column, dual authority, or pricing tolerance.
+        m.Params.BarQCPConvTol=float(qcp_barrier_tol)
+        m.Params.ScaleFlag=int(_old_scale_flag)
+        m.Params.NumericFocus=max(1,int(_old_numeric_focus))
+        m.Params.BarHomogeneous=int(_old_barhom)
+        m.Params.Quad=int(_old_quad)
         rem=cg_limit-(time.monotonic()-cg_start)
         if rem<=0:break
         _set_solve_time_limit(m,rem)
         solve_t0=time.monotonic();m.optimize();rmp_solve_seconds=time.monotonic()-solve_t0
+        rmp_optimality_retry_history=[]
+        # A convex RMP that stops with NUMERIC/SUBOPTIMAL has not supplied an
+        # authoritative optimum.  Retry from a cleared solution state under a
+        # small deterministic recovery portfolio.  Infeasible/unbounded/limited
+        # statuses are not re-labelled and continue to fail closed.
+        if int(m.Status) in (GRB.NUMERIC,GRB.SUBOPTIMAL):
+            first_status=int(m.Status)
+            for recovery_index,newtol in enumerate(qcp_dual_retry_tols[1:],start=1):
+                m.Params.BarQCPConvTol=float(newtol)
+                m.Params.ScaleFlag=2
+                m.Params.NumericFocus=(2 if recovery_index==1 else 3)
+                m.Params.BarHomogeneous=(0 if recovery_index<=2 else 1)
+                if recovery_index>=4:m.Params.Quad=1
+                rem_recovery=cg_limit-(time.monotonic()-cg_start)
+                if rem_recovery<=0:break
+                _set_solve_time_limit(m,rem_recovery)
+                m.reset();rt=time.monotonic();m.optimize();elapsed=time.monotonic()-rt
+                rmp_solve_seconds+=elapsed
+                rmp_optimality_retry_history.append({
+                    'retry':int(recovery_index),'source_status':int(first_status),
+                    'result_status':int(m.Status),'BarQCPConvTol':float(m.Params.BarQCPConvTol),
+                    'ScaleFlag':int(m.Params.ScaleFlag),'NumericFocus':int(m.Params.NumericFocus),
+                    'BarHomogeneous':int(m.Params.BarHomogeneous),'Quad':int(m.Params.Quad),
+                    'elapsed_s':float(elapsed),
+                })
+                if int(m.Status)==GRB.OPTIMAL:break
         if int(m.Status)!=GRB.OPTIMAL:
-            raise RuntimeError(f'B6 continuous RMP not optimal; status={m.Status} iter={it}')
+            raise RuntimeError(f'B6 continuous RMP not optimal after numerical recovery; status={m.Status} iter={it} history={rmp_optimality_retry_history!r}')
         # C5R2: QCP dual recovery is explicit.  C5R1 failed at root iteration 22
         # because Gurobi reported an inaccurate QCP-dual KKT solve while the code
         # had tightened BarConvTol, which does not control QCP barrier convergence.
@@ -1170,6 +1207,8 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
         effective_rc_guard=max(float(rc_audit_tol),float(max_rc_err))
         cg_records.append({'iteration':it,'rmp_objective':rmp_obj,'new_columns':new,'new_columns_by_mid':new_by_mid,'pricing_batch':pricing_batch,'min_reduced_cost':mins,'max_existing_lambda_rc_check_error':max_rc_err,'rc_audit_tolerance':rc_audit_tol,'effective_rc_guard':effective_rc_guard,'bounded_rc_envelope_used':bounded_rc_envelope_used,'column_count':{mid:len(pools[mid]) for mid in mids},
                            'rmp_solve_seconds':float(rmp_solve_seconds),'threads':int(m.Params.Threads),
+                           'rmp_optimality_retry_count':len(rmp_optimality_retry_history),
+                           'rmp_optimality_retry_history':rmp_optimality_retry_history,
                            'BarQCPConvTol':float(m.Params.BarQCPConvTol),'ScaleFlag':int(m.Params.ScaleFlag),'NumericFocus':int(m.Params.NumericFocus),'qcp_dual_retry_count':int(dual_retry_count),
                            'qcp_dual_retry_history':dual_retry_history,'qcp_pi_count':len(_qcp_pi),
                            'sparse_tail_pricing':{'base_batch':int(pricing_batch),'tail_batch':int(sparse_tail_pricing_batch),
@@ -1190,6 +1229,8 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
                 'dual_stabilization':{'enabled':bool(dual_stab_enabled),'alpha':float(dual_stab_alpha),'center_beta':float(dual_center_beta),
                                       'stabilized_candidates_examined_by_mid':stab_examined_by_mid,'stabilized_candidates_added_by_mid':stab_added_by_mid},
                 'elapsed_s':time.monotonic()-cg_start,'rmp_solve_seconds':float(rmp_solve_seconds),
+                'rmp_optimality_retry_count':len(rmp_optimality_retry_history),
+                'rmp_optimality_retry_history':rmp_optimality_retry_history,
                 'threads':int(m.Params.Threads),'BarQCPConvTol':float(m.Params.BarQCPConvTol),'ScaleFlag':int(m.Params.ScaleFlag),'NumericFocus':int(m.Params.NumericFocus),
                 'qcp_dual_retry_count':int(dual_retry_count),'qcp_dual_retry_history':dual_retry_history},indent=2)+'\n',encoding='utf-8')
         except Exception:
@@ -2459,6 +2500,11 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
             'sparse_tail_pricing_policy':{'enabled':bool(sparse_tail_pricing_batch>pricing_batch),'base_batch':int(pricing_batch),
                                           'tail_batch':int(sparse_tail_pricing_batch),'max_active_blocks':int(sparse_tail_max_active),
                                           'certificate_authority':False,'true_dual_negative_rc_filter_required':True},
+            'root_rmp_optimality_recovery_policy':{'primary_profile_restored_each_cg_iteration':True,
+                                                    'recoverable_statuses':['NUMERIC','SUBOPTIMAL'],
+                                                    'recovery_requires_final_optimal_status':True,
+                                                    'certificate_authority_changed':False,
+                                                    'total_retries':sum(int(r.get('rmp_optimality_retry_count',0)) for r in cg_records)},
             'rc_audit_tolerance':float(rc_audit_tol),'qcp_barrier_tolerance':float(qcp_barrier_tol),'BarConvTol_not_qcp_authority':float(m.Params.BarConvTol),
             'gap_certificate_diagnostics':(gap_certificate_diagnostics(float(cert['incumbent']),float(certificate_lb),float(target_gap)) if cert.get('incumbent') is not None and math.isfinite(float(cert['incumbent'])) else None),
             'fixed_dual_mobility_prepass':fixed_dual_prepass,

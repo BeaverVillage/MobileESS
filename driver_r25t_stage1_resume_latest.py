@@ -35,8 +35,8 @@ PARENT_R25P = ART / "ConversationA_R25P_STAGE1_54_OF_54_RUNTIME_RESULT_20260814T
 PARENT_R25Q = ART / "ConversationA_R25Q_STAGE1_54_OF_54_RUNTIME_RESULT_20260814T101350.tar.gz"
 EXPECTED = {
     "main": "1177ac8814f1008907f89ebf513bf9fe3e469d2c09a51ba85303c46c428f76b9",
-    "decomp": "639c9e104cf58318140c283c02a9e2df53ad4a5c2702799dc69d784a4959c82d",
-    "checksums": "81fb762c8b6a82b8d0fae36596290cbfd9285c30a6cf7ca317a73cab77598f4b",
+    "decomp": "937f2585547a80d5dcd9e1fa2650ccdc865ea1e1a215fbacfa95a2c09aeb6961",
+    "checksums": "2adce0577a79ae5011ff048799f1944aede42c688d1fa4a0609aac464aedf04b",
     "r25p": "0ed41aa7bdc1f055dde5fd7c50e4ceffb4d4cc0a1795d0ec1b37d49481fa9833",
     "r25q": "8d8c8f15bdfbc3e9200aeebb88f8a262f4da2e727d1155ac76b989f42b7cc2b0",
 }
@@ -45,6 +45,7 @@ COPY_AUDIT_R25T_DECOMP_SHA256 = "f4434abd4ef98cdc66fb3148dc8497f11dba706499069aa
 PRE_ACCEL_R25T_DECOMP_SHA256 = "109645df1662513eb312bc46761976fc9e0db81169e70ca0451d07425f09b937"
 PRE_R25V_R25T_DECOMP_SHA256 = "6a353fd88a90f67f52beeda263b660a53101bd0895889ec987a2ddab0147d301"
 PRE_R25X_R25T_DECOMP_SHA256 = "2dfe42a718be07afade9d504f0a08a9bbb85c5d3d073dca235d805cbc1d42178"
+PRE_R25Y_R25T_DECOMP_SHA256 = "639c9e104cf58318140c283c02a9e2df53ad4a5c2702799dc69d784a4959c82d"
 THREADS = 4
 _RUNTIME_LOCK_HANDLE = None
 
@@ -280,6 +281,7 @@ def initialize() -> None:
             PRE_ACCEL_R25T_DECOMP_SHA256,
             PRE_R25V_R25T_DECOMP_SHA256,
             PRE_R25X_R25T_DECOMP_SHA256,
+            PRE_R25Y_R25T_DECOMP_SHA256,
         ):
             raise RuntimeError("existing R25T runtime uses a different solver authority")
         if not SCI.is_dir():
@@ -540,6 +542,8 @@ def main() -> int:
             "exact_root_sparse_tail_batch": 64,
             "exact_root_sparse_tail_max_active_mess": 2,
             "rc_strict_retries_after_bounded_optimal_snapshot": 0,
+            "root_qcp_primary_profile_restored_each_cg_iteration": True,
+            "root_qcp_recoverable_nonoptimal_statuses": ["NUMERIC", "SUBOPTIMAL"],
             "thread_policy": "Threads=4 cap; observed solver use may be 1..4",
             "causal_rolling_multi_start": True,
             "AC_QCP_changed": False,
