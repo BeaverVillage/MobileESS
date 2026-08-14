@@ -1999,14 +1999,18 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   # Capture latest MIP state on every MIP callback even when heartbeat output is throttled.
   if where in (GRB.Callback.MIP,GRB.Callback.MIPSOL,GRB.Callback.MIPNODE):
    try:
-    bst=float(model.cbGet(GRB.Callback.MIP_OBJBST));bnd=float(model.cbGet(GRB.Callback.MIP_OBJBND))
+    if where==GRB.Callback.MIP:
+     bst=float(model.cbGet(GRB.Callback.MIP_OBJBST));bnd=float(model.cbGet(GRB.Callback.MIP_OBJBND));nodecnt=float(model.cbGet(GRB.Callback.MIP_NODCNT));solcnt=int(model.cbGet(GRB.Callback.MIP_SOLCNT))
+    elif where==GRB.Callback.MIPSOL:
+     bst=float(model.cbGet(GRB.Callback.MIPSOL_OBJ));bnd=float(model.cbGet(GRB.Callback.MIPSOL_OBJBND));nodecnt=float(model.cbGet(GRB.Callback.MIPSOL_NODCNT));solcnt=int(model.cbGet(GRB.Callback.MIPSOL_SOLCNT))
+    else:
+     bst=float(model.cbGet(GRB.Callback.MIPNODE_OBJBST));bnd=float(model.cbGet(GRB.Callback.MIPNODE_OBJBND));nodecnt=float(model.cbGet(GRB.Callback.MIPNODE_NODCNT));solcnt=int(model.cbGet(GRB.Callback.MIPNODE_SOLCNT))
     gap=None
     if math.isfinite(bst) and math.isfinite(bnd) and abs(bst)>1e-12:
      gap=abs(bst-bnd)/abs(bst)
     snap={"pass":int(cbstate["multiobj_pass"]),"objbst":bst if math.isfinite(bst) else None,
           "objbnd":bnd if math.isfinite(bnd) else None,"relative_gap":gap,
-          "nodecnt":float(model.cbGet(GRB.Callback.MIP_NODCNT)),
-          "solcnt":int(model.cbGet(GRB.Callback.MIP_SOLCNT))}
+          "nodecnt":nodecnt,"solcnt":solcnt}
     cbstate["latest_mip"]=snap;cbstate["latest_by_pass"][str(cbstate["multiobj_pass"])]=snap
    except Exception:pass
   if now-last_hb[0]<20.0:return
@@ -2039,6 +2043,8 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
     (status==GRB.TIME_LIMIT and int(m.SolCount)>0 and
      float(m.MIPGap)<=float(econ_gap)+1e-12)
   )
+ _b6_compact_exact=bool(b6_result is not None and (b6_result.get("compact_exact_global_phase") or {}).get("certificate_pass") is True)
+ _b6_acceptance_basis=("R25T exact priced-root/complete compact-MIQCP combined global lower bound + feasible incumbent <= frozen target" if _b6_compact_exact else "R25M B6 exact all-column/branch-price lower bound + feasible integer path-master incumbent <= frozen target")
  jw(out/"ConversationA_BUILD7C_R12R1_CERTIFIED_GAP_ACCEPTANCE.json",{
    "issue":int(issue),
    "status_code":int(status),
@@ -2047,7 +2053,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
    "certified_mip_gap":(float(b6_result.get("global_certified_gap")) if b6_result is not None and b6_result.get("global_certified_gap") is not None else (float(m.MIPGap) if int(m.SolCount)>0 else None)),
    "target_mip_gap":float(econ_gap),
    "accepted":bool(_r12_certified_gap_accept),
-   "acceptance_basis":("R25M B6 exact all-column/branch-price lower bound + feasible integer path-master incumbent <= frozen target" if b6_result is not None else "OPTIMAL status OR TIME_LIMIT with incumbent and certified MIPGap <= frozen target"),
+   "acceptance_basis":(_b6_acceptance_basis if b6_result is not None else "OPTIMAL status OR TIME_LIMIT with incumbent and certified MIPGap <= frozen target"),
    "scientific_model_changed":False,
    "feasible_set_changed":False,
    "objective_changed":False})
@@ -2192,7 +2198,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
    if isinstance(_pm,dict):
     _pm["pass"]=1
  term["R12_certified_gap_acceptance"]=bool(_r12_certified_gap_accept)
- term["R12_acceptance_basis"]=("B6 exact certificate_lower_bound + globally feasible integer path-master incumbent <= explicit frozen 3% target" if b6_result is not None else "OPTIMAL or TIME_LIMIT with incumbent and certified Gurobi MIPGap <= frozen target")
+ term["R12_acceptance_basis"]=(_b6_acceptance_basis if b6_result is not None else "OPTIMAL or TIME_LIMIT with incumbent and certified Gurobi MIPGap <= frozen target")
  term["restricted_master_native_mip_gap_is_scientific_authority"]=False if b6_result is not None else True
  jw(out/"BUILD7BR6_GUROBI_TERMINATION.json",term)
  if int(m.SolCount)>0:
@@ -2227,7 +2233,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  # closed explicitly on B6 before any physical h0 extraction or commit.
  if b6_result is not None and not _r12_certified_gap_accept:
   raise RuntimeError(
-   f"R25P B6 global 3% certificate not reached gap={b6_result.get('global_certified_gap')} "
+    f"R25P B6 global 3% certificate not reached gap={b6_result.get('global_certified_gap')} "
    f"target={econ_gap} incomplete={(b6_result.get('branch_price') or {}).get('incomplete')}")
  if status!=GRB.OPTIMAL:
   if int(m.SolCount)>0:

@@ -28,7 +28,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple
-import itertools, math, os, time, heapq
+import hashlib, itertools, math, os, time, heapq
 from r25c_exact_path_decomposition import Arc, shortest_path_pricing, validate_dag
 
 Node=Tuple[int,str]
@@ -38,6 +38,117 @@ class RuntimePath:
     mid:str
     arc_ids:Tuple[str,...]
     sink:Node
+
+
+def _exact_float_token(value:float)->str:
+    """Stable, bit-exact token for an in-process model-copy audit."""
+    return float(value).hex()
+
+
+def _digest_token(digest, value)->None:
+    data=str(value).encode('utf-8')
+    digest.update(len(data).to_bytes(8,'big'))
+    digest.update(data)
+
+
+def exact_gurobi_model_structure_digest(model)->Tuple[str,Dict[str,Any]]:
+    """Digest the mathematical model copied for the R25T projection phase.
+
+    Gurobi's ``Fingerprint`` is useful provenance, but it is not a documented
+    postcondition of ``Model.copy()`` for a large model carrying solver-guidance
+    attributes.  This audit instead covers the complete mathematical structure
+    used by R25T: variable domains and linear objective, every linear matrix
+    coefficient, all quadratic rows, and any quadratic objective.  Search-only
+    attributes such as starts, hints, and branch priorities are deliberately not
+    part of the scientific-equivalence contract.
+    """
+    model.update()
+    counts={
+        'variables':int(model.NumVars),
+        'linear_constraints':int(model.NumConstrs),
+        'linear_nonzeros':int(model.DNumNZs),
+        'quadratic_constraints':int(model.NumQConstrs),
+        'quadratic_objective_nonzeros':int(model.NumQNZs),
+        'sos_constraints':int(model.NumSOS),
+        'general_constraints':int(model.NumGenConstrs),
+        'integer_variables':int(model.NumIntVars),
+        'binary_variables':int(model.NumBinVars),
+    }
+    # The current exact AC-QCP authority contains neither SOS nor general
+    # constraints.  Refuse an un-audited future model class instead of silently
+    # declaring two partially inspected models equivalent.
+    if counts['sos_constraints'] or counts['general_constraints']:
+        raise RuntimeError('R25T copy audit does not support SOS/general constraints: '+repr(counts))
+
+    digest=hashlib.sha256()
+    _digest_token(digest,'R25T_EXACT_GUROBI_STRUCTURE_V1')
+    for key in sorted(counts):
+        _digest_token(digest,key);_digest_token(digest,counts[key])
+    _digest_token(digest,'ModelSense');_digest_token(digest,int(model.ModelSense))
+    _digest_token(digest,'ObjCon');_digest_token(digest,_exact_float_token(model.ObjCon))
+
+    variables=model.getVars()
+    for index,var in enumerate(variables):
+        _digest_token(digest,index)
+        _digest_token(digest,var.VarName)
+        _digest_token(digest,var.VType)
+        _digest_token(digest,_exact_float_token(var.LB))
+        _digest_token(digest,_exact_float_token(var.UB))
+        _digest_token(digest,_exact_float_token(var.Obj))
+
+    constraints=model.getConstrs()
+    for index,constr in enumerate(constraints):
+        _digest_token(digest,index)
+        _digest_token(digest,constr.ConstrName)
+        _digest_token(digest,constr.Sense)
+        _digest_token(digest,_exact_float_token(constr.RHS))
+        _digest_token(digest,int(constr.Lazy))
+
+    # getA() provides the complete linear matrix in model row/column order.  The
+    # order itself is audited above, so hashing the CSR buffers is both exact and
+    # far cheaper than 6.6 million Python-level coefficient lookups on issue 149.
+    matrix=model.getA().tocsr(copy=True)
+    matrix.sort_indices()
+    _digest_token(digest,matrix.shape)
+    for array in (matrix.indptr,matrix.indices,matrix.data):
+        _digest_token(digest,array.dtype.str)
+        digest.update(array.tobytes(order='C'))
+    del matrix
+
+    for index,qconstr in enumerate(model.getQConstrs()):
+        _digest_token(digest,index)
+        _digest_token(digest,qconstr.QCName)
+        _digest_token(digest,qconstr.QCSense)
+        _digest_token(digest,_exact_float_token(qconstr.QCRHS))
+        expression=model.getQCRow(qconstr)
+        linear=expression.getLinExpr()
+        linear_terms=sorted(
+            (linear.getVar(i).VarName,_exact_float_token(linear.getCoeff(i)))
+            for i in range(linear.size())
+        )
+        quadratic_terms=sorted(
+            (min(expression.getVar1(i).VarName,expression.getVar2(i).VarName),
+             max(expression.getVar1(i).VarName,expression.getVar2(i).VarName),
+             _exact_float_token(expression.getCoeff(i)))
+            for i in range(expression.size())
+        )
+        for term in linear_terms:_digest_token(digest,term)
+        for term in quadratic_terms:_digest_token(digest,term)
+
+    if counts['quadratic_objective_nonzeros']:
+        objective=model.getObjective()
+        linear=objective.getLinExpr()
+        quadratic_terms=sorted(
+            (min(objective.getVar1(i).VarName,objective.getVar2(i).VarName),
+             max(objective.getVar1(i).VarName,objective.getVar2(i).VarName),
+             _exact_float_token(objective.getCoeff(i)))
+            for i in range(objective.size())
+        )
+        for i in range(linear.size()):
+            _digest_token(digest,(linear.getVar(i).VarName,_exact_float_token(linear.getCoeff(i))))
+        for term in quadratic_terms:_digest_token(digest,term)
+
+    return digest.hexdigest(),counts
 
 
 
@@ -66,6 +177,15 @@ def global_relative_gap(incumbent:float, lower_bound:float)->float:
     den=abs(u)
     if den<=1e-12:return 0.0 if abs(u-l)<=1e-12 else float('inf')
     return max(0.0,(u-l)/den)
+
+def incumbent_required_for_gap(lower_bound:float,target:float)->float:
+    """Best incumbent threshold that certifies ``target`` at a fixed bound."""
+    l=float(lower_bound);g=float(target)
+    if not (math.isfinite(l) and math.isfinite(g) and 0.0<=g<1.0):
+        raise ValueError('invalid incumbent target inputs')
+    if l<0.0:return float(l/(1.0+g))
+    if l>0.0:return float(l/(1.0-g))
+    return 0.0
 
 def gap_target_lower_bound(incumbent:float,target:float)->float:
     """Minimum node lower bound needed to certify the incumbent at target gap.
@@ -503,6 +623,18 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
     c5r4_polish_time=(math.inf if unlimited_completion else float(os.environ.get('MOBILEESS_R25N_B6C5R4_POLISH_TIMELIMIT','180')))
     c5r4_polish_constr_gate=float(os.environ.get('MOBILEESS_R25N_B6C5R4_POLISH_CONSTR_GATE','1e-6'))
     c5r4_polish_bound_gate=float(os.environ.get('MOBILEESS_R25N_B6C5R4_POLISH_BOUND_GATE','1e-7'))
+    # R25T changes solver orchestration only.  The original compact MIQCP is
+    # retained as a separate exact authority while path decomposition runs on a
+    # copy.  A bounded restricted-master phase supplies incumbents; the original
+    # compact model then supplies both feasible incumbents and a native global
+    # bound.  No restricted-master ObjBound is promoted to global authority.
+    r25t_global_portfolio=(os.environ.get('MOBILEESS_R25T_GLOBAL_PORTFOLIO','0')=='1')
+    r25t_primal_min_s=float(os.environ.get('MOBILEESS_R25T_PRIMAL_MIN_SECONDS','60'))
+    r25t_primal_stall_s=float(os.environ.get('MOBILEESS_R25T_PRIMAL_STALL_SECONDS','120'))
+    r25t_primal_max_s=float(os.environ.get('MOBILEESS_R25T_PRIMAL_MAX_SECONDS','600'))
+    r25t_primal_max_nodes=max(1,int(os.environ.get('MOBILEESS_R25T_PRIMAL_MAX_NODES','200000')))
+    r25t_meaningful_fraction=float(os.environ.get('MOBILEESS_R25T_MEANINGFUL_IMPROVEMENT_FRACTION','0.02'))
+    r25t_compact_mip_focus=int(os.environ.get('MOBILEESS_R25T_COMPACT_MIPFOCUS','3'))
     root_forensic_only=(os.environ.get('MOBILEESS_R25N_B6C5R2_ROOT_FORENSIC_ONLY','0')=='1')
     c5r4r1_root_pricing_only=(os.environ.get('MOBILEESS_R25O_B6C5R4R1_ROOT_PRICING_ONLY','0')=='1')
     block_diag_time=float(os.environ.get('MOBILEESS_R25N_B6C5R2_BLOCK_DIAG_TIMELIMIT','20'))
@@ -513,6 +645,9 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
     bp_node_cg_limit=(math.inf if unlimited_completion else float(os.environ.get('MOBILEESS_R25M_B6R3_BP_NODE_CG_TIMELIMIT','90')))
     if not (pricing_tol>0 and rc_audit_tol>pricing_tol and rc_envelope_hard_cap>=rc_audit_tol and qcp_barrier_tol>0 and block_diag_time>0 and bp_time_limit>0 and bp_node_cg_limit>0 and c5r4_polish_time>0 and c5r4_polish_constr_gate>0 and c5r4_polish_bound_gate>0):
         raise ValueError('invalid B6R3 numerical/pricing/branch-price tolerances')
+    if not (0.0<=r25t_primal_min_s<=r25t_primal_max_s and r25t_primal_stall_s>0.0 and
+            0.0<r25t_meaningful_fraction<=1.0 and r25t_compact_mip_focus in (0,1,2,3)):
+        raise ValueError('invalid R25T global-portfolio controls')
     if not (0.0 < dual_stab_alpha <= 1.0 and 0.0 <= dual_center_beta < 1.0 and dual_stab_batch >= 1):
         raise ValueError('invalid B6-C3 dual-stabilization controls')
     if not (strong_branch_candidates>=1 and strong_probe_time>0 and strong_early_weight>=0 and pseudocost_reliability>=1):
@@ -523,6 +658,50 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
     def _audit_limit(value):
         return None if value is None or not math.isfinite(float(value)) else float(value)
     m.update()
+    # Keep the exact compact authority alive for R25T and perform every path
+    # projection/mutation on a separate model object.  The dictionaries supplied
+    # by main.py contain model-bound Var handles, so remap them by immutable names.
+    compact_authority=m if r25t_global_portfolio else None
+    compact_stay=dict(stay) if r25t_global_portfolio else None
+    compact_mv=dict(mv) if r25t_global_portfolio else None
+    compact_node_occ=dict(node_occ) if r25t_global_portfolio else None
+    if r25t_global_portfolio:
+        work=m.copy();work.update()
+        compact_digest,compact_counts=exact_gurobi_model_structure_digest(compact_authority)
+        work_digest,work_counts=exact_gurobi_model_structure_digest(work)
+        copy_audit={
+            'status':'PASS' if compact_digest==work_digest and compact_counts==work_counts else 'FAIL_CLOSED',
+            'revision':'R25T_B6C6_COPY_STRUCTURE_AUDIT_V1',
+            'audit_scope':'complete mathematical model before path projection',
+            'scientific_structure_equal':bool(compact_digest==work_digest and compact_counts==work_counts),
+            'scientific_structure_sha256':compact_digest,
+            'working_copy_structure_sha256':work_digest,
+            'counts':compact_counts,
+            'working_copy_counts':work_counts,
+            'compact_fingerprint':int(compact_authority.Fingerprint),
+            'working_copy_fingerprint':int(work.Fingerprint),
+            'fingerprint_equal_diagnostic_only':bool(int(work.Fingerprint)==int(compact_authority.Fingerprint)),
+            'search_guidance_attributes_excluded':['Start','VarHintVal','VarHintPri','BranchPriority'],
+            'AC_QCP_changed':False,
+        }
+        out.mkdir(parents=True,exist_ok=True)
+        import json as _copy_json
+        (out/'ConversationA_R25T_EXACT_COPY_STRUCTURE_AUDIT.json').write_text(
+            _copy_json.dumps(copy_audit,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+        if not copy_audit['scientific_structure_equal']:
+            raise RuntimeError('R25T exact working copy mathematical structure differs before projection')
+        print('[R25T COPY_AUDIT] scientific_structure_equal=true '
+              f'fingerprint_equal={str(copy_audit["fingerprint_equal_diagnostic_only"]).lower()} '
+              f'sha256={compact_digest}',flush=True)
+        def _remap_vars(mapping):
+            ans={}
+            for key,var in mapping.items():
+                vv=work.getVarByName(var.VarName)
+                if vv is None:raise RuntimeError('R25T working copy missing variable '+str(var.VarName))
+                ans[key]=vv
+            return ans
+        stay=_remap_vars(stay);mv=_remap_vars(mv);node_occ=_remap_vars(node_occ)
+        m=work
 
     # Runtime DAGs and exact correspondence to the original mobility variables.
     graphs={};byid={};arc_varname={};node_varname={};source={}
@@ -1131,7 +1310,7 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
     # solve.  This keeps Pi/RC/QCPi lifecycle requirements explicit and local.
     bp_continuous_authority=None
     bp_continuous_authority_meta=None
-    if b6r3_branch_price:
+    if b6r3_branch_price and not r25t_global_portfolio:
         bp_continuous_authority=m.copy()
         bp_continuous_authority.Params.QCPDual=1
         bp_continuous_authority.Params.Method=2
@@ -1170,20 +1349,55 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
     # Single lower-bound authority variable.  It begins at the exact priced root
     # bound and may only be raised by a separately certified gap-closing procedure.
     certificate_lb=float(full_lb)
+    primal_phase={
+        'bounded':bool(r25t_global_portfolio),'termination_reason':None,
+        'last_meaningful_runtime_s':0.0,'last_meaningful_node':0.0,
+        'last_meaningful_incumbent':None,'best_incumbent':None,
+        'target_incumbent_at_exact_root':incumbent_required_for_gap(full_lb,target_gap),
+        'min_seconds':float(r25t_primal_min_s),'stall_seconds':float(r25t_primal_stall_s),
+        'max_seconds':float(r25t_primal_max_s),'max_nodes':int(r25t_primal_max_nodes),
+        'meaningful_improvement_fraction_of_initial_deficit':float(r25t_meaningful_fraction),
+    }
+    _initial_deficit=[None]
     def cb(model,where):
         if base_callback is not None:
             try:base_callback(model,where)
             except Exception:pass
         if where in (GRB.Callback.MIP,GRB.Callback.MIPSOL):
             try:
-                u=float(model.cbGet(GRB.Callback.MIP_OBJBST))
+                u=float(model.cbGet(GRB.Callback.MIP_OBJBST if where==GRB.Callback.MIP else GRB.Callback.MIPSOL_OBJ))
+                runtime=float(model.cbGet(GRB.Callback.RUNTIME))
+                nodes=float(model.cbGet(GRB.Callback.MIP_NODCNT if where==GRB.Callback.MIP else GRB.Callback.MIPSOL_NODCNT))
                 if math.isfinite(u):
                     g=global_relative_gap(u,full_lb)
                     cert.update({'gap':g,'incumbent':u})
+                    primal_phase['best_incumbent']=u
+                    target_u=float(primal_phase['target_incumbent_at_exact_root'])
+                    deficit=max(0.0,u-target_u)
+                    if _initial_deficit[0] is None:_initial_deficit[0]=max(deficit,1e-9)
+                    meaningful=max(1e-7*max(1.0,abs(u)),r25t_meaningful_fraction*float(_initial_deficit[0]))
+                    last=primal_phase['last_meaningful_incumbent']
+                    if last is None or u<float(last)-meaningful:
+                        primal_phase['last_meaningful_incumbent']=u
+                        primal_phase['last_meaningful_runtime_s']=runtime
+                        primal_phase['last_meaningful_node']=nodes
                     if g<=float(target_gap)+1e-12:
-                        cert['reached']=True;model.terminate()
+                        cert['reached']=True;primal_phase['termination_reason']='GLOBAL_3PCT_AT_EXACT_ROOT';model.terminate();return
+                if r25t_global_portfolio and runtime>=r25t_primal_min_s:
+                    reason=None
+                    if runtime>=r25t_primal_max_s:reason='PRIMAL_PHASE_MAX_SECONDS'
+                    elif nodes>=r25t_primal_max_nodes:reason='PRIMAL_PHASE_MAX_NODES'
+                    elif runtime-float(primal_phase['last_meaningful_runtime_s'])>=r25t_primal_stall_s:
+                        reason='PRIMAL_INCUMBENT_STALL'
+                    if reason is not None:
+                        primal_phase['termination_reason']=reason;model.terminate()
             except Exception:pass
     int_start=time.monotonic();m.optimize(cb);int_seconds=time.monotonic()-int_start
+    if primal_phase['termination_reason'] is None:
+        primal_phase['termination_reason']='SOLVER_NATIVE_TERMINATION'
+    primal_phase['elapsed_s']=float(int_seconds)
+    try:primal_phase['nodes']=float(m.NodeCount)
+    except Exception:primal_phase['nodes']=None
     if int(m.SolCount)>0:
         u=float(m.ObjVal);g=global_relative_gap(u,full_lb);cert.update({'gap':g,'incumbent':u,'reached':bool(g<=float(target_gap)+1e-12)})
     else:
@@ -1215,7 +1429,7 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
         'enabled':bool(c5r4_polish_enabled),'attempted':False,'pass':False,
         'same_issue_MIP_start_used':False,'integer_decisions_changed':False,
     }
-    if c5r4_polish_enabled:
+    if c5r4_polish_enabled and not r25t_global_portfolio:
         if int(m.SolCount)<=0:raise RuntimeError('B6-C5R4 polish requires a feasible restricted-master incumbent')
         fixed_integer_polish['attempted']=True
         pre_obj=float(m.ObjVal);fixed_values={};bad_integrality=[]
@@ -1277,6 +1491,219 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
         })
         u=post_obj;g=global_relative_gap(u,full_lb)
         cert.update({'gap':g,'incumbent':u,'reached':bool(g<=float(target_gap)+1e-12)})
+
+    # R25T exact global portfolio.  The bounded path-master solve above is used
+    # only to create a good incumbent.  Continue on the untouched original
+    # compact MIQCP, whose native ObjBound is valid for the complete model.  The
+    # exact priced-root bound and the compact-tree bound are independent valid
+    # lower bounds, so their maximum remains globally valid.
+    compact_exact={
+        'enabled':bool(r25t_global_portfolio),'attempted':False,
+        'certificate_pass':False,'restricted_objbound_promoted':False,
+    }
+    if r25t_global_portfolio:
+        compact_exact['attempted']=True
+        cm=compact_authority
+        if cm is None:raise RuntimeError('R25T compact authority missing')
+        cm.update()
+        compact_exact['pre_solve_structure']={
+            'fingerprint':int(cm.Fingerprint),'num_vars':int(cm.NumVars),
+            'num_linear_rows':int(cm.NumConstrs),'num_qrows':int(cm.NumQConstrs),
+            'num_int_vars':int(cm.NumIntVars),'num_bin_vars':int(cm.NumBinVars),
+            'is_mip':int(cm.IsMIP),
+        }
+        if int(cm.IsMIP)!=1 or int(cm.NumIntVars)<=0:
+            raise RuntimeError('R25T compact authority is not the original mixed-integer model')
+
+        # Clear stale starts, then map the complete restricted incumbent back to
+        # original variables.  Gurobi independently checks this start; it has no
+        # feasibility or lower-bound authority.
+        for vv in cm.getVars():vv.Start=GRB.UNDEFINED
+        mip_start={'attempted':False,'nonmob_values':0,'mobility_zero_values':0,
+                   'mobility_one_values':0,'source':'NONE'}
+        if int(m.SolCount)>0:
+            mip_start['attempted']=True;mip_start['source']='RESTRICTED_MASTER_FEASIBLE_INCUMBENT'
+            for wv in m.getVars():
+                if wv.VarName.startswith('b6lam_'):continue
+                cv=cm.getVarByName(wv.VarName)
+                if cv is None:continue
+                cv.Start=float(wv.X);mip_start['nonmob_values']+=1
+            for name in mob_names:
+                cv=cm.getVarByName(name)
+                if cv is not None:
+                    cv.Start=0.0;mip_start['mobility_zero_values']+=1
+            for mid,path in selected.items():
+                for name in path_varnames(mid,path):
+                    cv=cm.getVarByName(name)
+                    if cv is None:raise RuntimeError('R25T compact MIP-start variable missing '+str(name))
+                    cv.Start=1.0;mip_start['mobility_one_values']+=1
+        cm.update()
+        compact_exact['mip_start']=mip_start
+        # The projected master has finished its only R25T role.  Release its
+        # native search tree before the compact exact tree starts so the two
+        # potentially large node stores never overlap in memory.
+        m.dispose()
+        compact_exact['restricted_work_model_disposed_before_compact']=True
+        cm.Params.QCPDual=0;cm.Params.MIPGap=0.0;cm.Params.MIPGapAbs=0.0
+        cm.Params.MIPFocus=int(r25t_compact_mip_focus)
+        cm.Params.Heuristics=max(float(cm.Params.Heuristics),float(c5r3_primal_heur))
+        _set_solve_time_limit(cm,math.inf if unlimited_completion else bp_time_limit)
+        compact_live={
+            'best_global_lower_bound':float(full_lb),'best_incumbent':None,
+            'global_gap':None,'termination_reason':None,'callback_updates':0,
+            'last_write_monotonic':0.0,
+        }
+        def _compact_cb(model,where):
+            if base_callback is not None:
+                try:base_callback(model,where)
+                except Exception:pass
+            if where not in (GRB.Callback.MIP,GRB.Callback.MIPSOL):return
+            try:
+                if where==GRB.Callback.MIP:
+                    cu=float(model.cbGet(GRB.Callback.MIP_OBJBST));cbnd=float(model.cbGet(GRB.Callback.MIP_OBJBND))
+                    cnodes=float(model.cbGet(GRB.Callback.MIP_NODCNT))
+                else:
+                    cu=float(model.cbGet(GRB.Callback.MIPSOL_OBJ));cbnd=float(model.cbGet(GRB.Callback.MIPSOL_OBJBND))
+                    cnodes=float(model.cbGet(GRB.Callback.MIPSOL_NODCNT))
+                if not math.isfinite(cu):return
+                glb=float(full_lb)
+                if math.isfinite(cbnd) and cbnd<=cu+1e-7*max(1.0,abs(cu),abs(cbnd)):
+                    glb=max(glb,cbnd)
+                cg=global_relative_gap(cu,glb)
+                compact_live.update({'best_global_lower_bound':glb,'best_incumbent':cu,
+                                     'global_gap':cg,'callback_updates':compact_live['callback_updates']+1})
+                now=time.monotonic()
+                if now-float(compact_live['last_write_monotonic'])>=10.0:
+                    import json as _json
+                    compact_live['last_write_monotonic']=now
+                    (out/'ConversationA_R25T_COMPACT_EXACT_LIVE.json').write_text(_json.dumps({
+                        'schema_version':'r25t.compact_exact_live.v1',
+                        'phase':'ORIGINAL_COMPACT_MIQCP_EXACT_BB',
+                        'incumbent':cu,'compact_native_lower_bound':cbnd,
+                        'exact_priced_root_lower_bound':float(full_lb),
+                        'combined_global_lower_bound':glb,'global_certified_gap':cg,
+                        'runtime_s':float(model.cbGet(GRB.Callback.RUNTIME)),
+                        'nodes':cnodes,
+                        'restricted_objbound_global_authority':False,
+                        'compact_objbound_global_authority':True,
+                    },indent=2)+'\n',encoding='utf-8')
+                if cg<=float(target_gap)+1e-12:
+                    compact_live['termination_reason']='GLOBAL_3PCT_COMBINED_BOUND';model.terminate()
+            except Exception:pass
+        compact_t0=time.monotonic();cm.optimize(_compact_cb);compact_seconds=time.monotonic()-compact_t0
+        if int(cm.SolCount)<=0:
+            raise RuntimeError(f'R25T compact exact solve produced no feasible incumbent status={int(cm.Status)}')
+        compact_u=float(cm.ObjVal);compact_native_lb=float(cm.ObjBound)
+        if compact_native_lb>compact_u+1e-7*max(1.0,abs(compact_u),abs(compact_native_lb)):
+            raise RuntimeError(f'R25T compact lower bound exceeds incumbent L={compact_native_lb} U={compact_u}')
+        combined_lb=max(float(full_lb),compact_native_lb)
+        combined_gap=global_relative_gap(compact_u,combined_lb)
+        compact_pass=bool(combined_gap<=float(target_gap)+1e-12)
+        compact_exact.update({
+            'status':int(cm.Status),'solution_count':int(cm.SolCount),
+            'elapsed_s':float(compact_seconds),'nodes':float(cm.NodeCount),
+            'incumbent_before_polish':compact_u,'compact_native_lower_bound':compact_native_lb,
+            'exact_priced_root_lower_bound':float(full_lb),'combined_global_lower_bound':combined_lb,
+            'global_gap_before_polish':combined_gap,'certificate_pass':compact_pass,
+            'termination_reason':compact_live['termination_reason'] or 'SOLVER_NATIVE_TERMINATION',
+            'callback_updates':int(compact_live['callback_updates']),
+            'global_bound_rule':'max(EXACT_PRICED_ROOT_LB, ORIGINAL_COMPACT_MIQCP_OBJBOUND)',
+            'compact_objbound_is_global_authority':True,
+            'restricted_objbound_promoted':False,
+            'overall_time_limit_s':None if unlimited_completion else _audit_limit(bp_time_limit),
+        })
+        if not compact_pass:
+            raise RuntimeError('R25T compact exact solve ended without global 3% certificate '+repr(compact_exact))
+        certificate_lb=float(combined_lb)
+        cert.update({'gap':combined_gap,'incumbent':compact_u,'reached':True})
+
+        # Final numerical authority: fix every original discrete variable at the
+        # compact feasible incumbent and reoptimize the unchanged continuous QCP.
+        fixed_integer_polish={
+            'enabled':bool(c5r4_polish_enabled),'attempted':False,'pass':False,
+            'same_issue_MIP_start_used':bool(mip_start['attempted']),
+            'integer_decisions_changed':False,'source':'R25T_ORIGINAL_COMPACT_MIQCP_INCUMBENT',
+        }
+        if c5r4_polish_enabled:
+            fixed_integer_polish['attempted']=True
+            pre_obj=float(cm.ObjVal);fixed_values={};bad_integrality=[]
+            for vv in cm.getVars():
+                if vv.VType not in (GRB.BINARY,GRB.INTEGER):continue
+                x=float(vv.X);z=float(round(x))
+                if abs(x-z)>1e-5:bad_integrality.append((vv.VarName,x))
+                fixed_values[vv.VarName]=z
+            if bad_integrality:raise RuntimeError('R25T compact incumbent integrality drift '+repr(bad_integrality[:8]))
+            for name,z in fixed_values.items():
+                vv=cm.getVarByName(name)
+                if z<float(vv.LB)-1e-9 or z>float(vv.UB)+1e-9:
+                    raise RuntimeError('R25T compact polish value outside bounds '+name)
+                vv.LB=z;vv.UB=z;vv.VType=GRB.CONTINUOUS
+            cm.update()
+            if int(cm.NumIntVars)!=0 or int(cm.NumBinVars)!=0 or int(cm.IsMIP)!=0:
+                raise RuntimeError('R25T compact fixed model is not continuous')
+            cm.Params.QCPDual=0;cm.Params.Method=2;cm.Params.NumericFocus=3;cm.Params.ScaleFlag=2
+            cm.Params.FeasibilityTol=min(float(cm.Params.FeasibilityTol),1e-9)
+            cm.Params.OptimalityTol=min(float(cm.Params.OptimalityTol),1e-9)
+            polish_t0=time.monotonic();attempts=[]
+            for ptol in (1e-9,3e-10,1e-10):
+                remaining=float(c5r4_polish_time)-(time.monotonic()-polish_t0)
+                if remaining<=0:break
+                cm.Params.BarQCPConvTol=float(ptol);_set_solve_time_limit(cm,remaining)
+                st0=time.monotonic();cm.optimize();elapsed=time.monotonic()-st0
+                rec={'BarQCPConvTol':float(ptol),'status':int(cm.Status),'elapsed_s':float(elapsed)}
+                if int(cm.Status)==GRB.OPTIMAL and int(cm.SolCount)>0:
+                    for attr in ('ConstrVio','BoundVio','IntVio','MaxVio'):
+                        try:rec[attr]=float(getattr(cm,attr))
+                        except Exception:pass
+                    rec['objective']=float(cm.ObjVal)
+                    rec['quality_pass']=bool(
+                        math.isfinite(float(rec.get('ConstrVio',float('inf')))) and rec['ConstrVio']<=c5r4_polish_constr_gate and
+                        math.isfinite(float(rec.get('BoundVio',float('inf')))) and rec['BoundVio']<=c5r4_polish_bound_gate)
+                else:rec['quality_pass']=False
+                attempts.append(rec)
+                if rec['quality_pass']:break
+            if not attempts or not attempts[-1].get('quality_pass'):
+                raise RuntimeError('R25T compact continuous polish failed '+repr(attempts[-3:]))
+            post_obj=float(cm.ObjVal)
+            if post_obj>pre_obj+1e-7*max(1.0,abs(pre_obj)):
+                raise RuntimeError(f'R25T compact polish worsened objective pre={pre_obj} post={post_obj}')
+            max_fix_error=max((abs(float(cm.getVarByName(name).X)-z) for name,z in fixed_values.items()),default=0.0)
+            if max_fix_error>1e-8:raise RuntimeError(f'R25T compact polish fixed-value drift {max_fix_error}')
+            polished_gap=global_relative_gap(post_obj,certificate_lb)
+            if polished_gap>float(target_gap)+1e-12:
+                raise RuntimeError('R25T compact polish lost global certificate')
+            fixed_integer_polish.update({
+                'pass':True,'pre_objective':pre_obj,'post_objective':post_obj,
+                'objective_improvement':pre_obj-post_obj,'fixed_integer_count':len(fixed_values),
+                'max_fixed_value_error':max_fix_error,'elapsed_s':time.monotonic()-polish_t0,
+                'attempts':attempts,'continuous_model_num_int_vars':int(cm.NumIntVars),
+                'continuous_model_num_bin_vars':int(cm.NumBinVars),'continuous_model_is_mip':int(cm.IsMIP),
+                'acceptance_gate':{'ConstrVio':c5r4_polish_constr_gate,'BoundVio':c5r4_polish_bound_gate},
+                'authority':'original compact MIQCP integer incumbent fixed; unchanged continuous convex QCP reoptimized',
+            })
+            compact_exact['incumbent_after_polish']=post_obj
+            compact_exact['global_gap_after_polish']=polished_gap
+            cert.update({'gap':polished_gap,'incumbent':post_obj,'reached':True})
+
+        # Reconstruct the mobility path selected by the final compact authority.
+        selected={};selected_stay=set();selected_move=set()
+        for mid in mids:
+            chosen=[]
+            for a in graphs[mid]:
+                vv=cm.getVarByName(arc_varname[a.arc_id])
+                if vv is not None and float(vv.X)>0.5:chosen.append(a)
+            chosen.sort(key=lambda a:(int(a.tail[0]),int(a.head[0]),a.arc_id))
+            cur=source[mid];ordered=[]
+            while int(cur[0])<H:
+                hits=[a for a in chosen if a.tail==cur]
+                if len(hits)!=1:raise RuntimeError(f'R25T compact path reconstruction {mid} at {cur}: {len(hits)}')
+                a=hits[0];ordered.append(a.arc_id);cur=a.head
+            selected[mid]=tuple(ordered)
+        for key,vv in compact_stay.items():
+            if float(vv.X)>0.5:selected_stay.add(key)
+        for key,vv in compact_mv.items():
+            if float(vv.X)>0.5:selected_move.add(key)
+        m=cm
 
 
     # B6-C5R1 gap-targeted fixed-dual mobility certificate prepass.
@@ -1453,8 +1880,10 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
     # node-occupancy decisions (path-compatible) and original non-mobility
     # integers.  Every tree node re-prices to all-column closure, so no
     # restricted-master ObjBound is ever promoted to scientific authority.
-    bp_summary={'enabled':bool(b6r3_branch_price),'attempted':False,'certificate_pass':False}
-    if b6r3_branch_price and not cert['reached'] and int(m.SolCount)>0:
+    bp_summary={'enabled':bool(b6r3_branch_price and not r25t_global_portfolio),'attempted':False,
+                'certificate_pass':False,
+                'disabled_reason':('R25T uses original compact MIQCP native global B&B authority' if r25t_global_portfolio else None)}
+    if b6r3_branch_price and not r25t_global_portfolio and not cert['reached'] and int(m.SolCount)>0:
         bp_summary['attempted']=True
         bp_t0=time.monotonic()
         incumbent=float(m.ObjVal)
@@ -1868,12 +2297,14 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
             g=global_relative_gap(incumbent,float(certificate_lb))
             cert.update({'gap':g,'incumbent':incumbent,'reached':bool(g<=float(target_gap)+1e-12)})
 
-    result={'revision':'R25R_B6C5R4R4_RETAINED_OPTIMAL_DUAL_RESUME',
+    result={'revision':('R25T_B6C6_GLOBAL_BOUND_PORTFOLIO' if r25t_global_portfolio else 'R25R_B6C5R4R4_RETAINED_OPTIMAL_DUAL_RESUME'),
             'status':'PASS_GLOBAL_3PCT_CERTIFICATE' if cert['reached'] else 'NO_GLOBAL_3PCT_CERTIFICATE',
             'pricing_closed':pricing_closed,'full_all_column_relaxation_lower_bound':full_lb,'certificate_lower_bound':float(certificate_lb),'raw_pricing_closed_rmp_objective':raw_full_lb,'numerical_lower_bound_safety':float(raw_full_lb-full_lb),'pricing_batch':int(pricing_batch),'rc_audit_tolerance':float(rc_audit_tol),'qcp_barrier_tolerance':float(qcp_barrier_tol),'BarConvTol_not_qcp_authority':float(m.Params.BarConvTol),
             'gap_certificate_diagnostics':(gap_certificate_diagnostics(float(m.ObjVal),float(certificate_lb),float(target_gap)) if int(m.SolCount)>0 else None),
             'fixed_dual_mobility_prepass':fixed_dual_prepass,
             'fixed_integer_continuous_qcp_polish':fixed_integer_polish,
+            'restricted_primal_phase':primal_phase,
+            'compact_exact_global_phase':compact_exact,
             'b6c2_child_pricing_batch':int(child_pricing_batch),'b6c2_global_path_cache_size':{mid:len(global_path_cache[mid]) for mid in mids} if 'global_path_cache' in locals() else {},'b6c2_global_cache_stats':dict(global_cache_stats) if 'global_cache_stats' in locals() else {},
             'b6c3_dual_stabilization':{'enabled':bool(dual_stab_enabled),'alpha':float(dual_stab_alpha),'center_beta':float(dual_center_beta),'candidate_batch':int(dual_stab_batch),
                                       'root_stats':dict(root_stab_stats),'authority':'TRUE_CURRENT_DUAL_EXACT_MINIMUM_PATH_ONLY','stabilized_dual_certificate_authority':False},
@@ -1905,6 +2336,20 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
                                'bounded_RC_envelope_hard_cap':float(rc_envelope_hard_cap),
                                'bounded_RC_strict_retry_budget':int(bounded_rc_strict_retry_budget),
                                'bounded_RC_envelope_rule':'measured error is subtracted per MESS from minimization lower bound; never added to feasibility or objective tolerances'},
+            'r25t_global_portfolio_policy':{
+                               'enabled':bool(r25t_global_portfolio),
+                               'restricted_master_role':'BOUNDED_FEASIBLE_INCUMBENT_GENERATOR_ONLY',
+                               'restricted_primal_min_seconds':float(r25t_primal_min_s),
+                               'restricted_primal_stall_seconds':float(r25t_primal_stall_s),
+                               'restricted_primal_max_seconds':float(r25t_primal_max_s),
+                               'restricted_primal_max_nodes':int(r25t_primal_max_nodes),
+                               'compact_model_role':'ORIGINAL_EXACT_MIQCP_INCUMBENT_AND_GLOBAL_BOUND_AUTHORITY',
+                               'global_bound_rule':'max(EXACT_PRICED_ROOT_LB, ORIGINAL_COMPACT_MIQCP_OBJBOUND)',
+                               'compact_mip_focus':int(r25t_compact_mip_focus),
+                               'overall_exact_completion_time_limit_s':None if unlimited_completion else _audit_limit(bp_time_limit),
+                               'scientific_feasible_set_changed':False,'objective_changed':False,
+                               'gap_semantics_changed':False,'AC_QCP_changed':False,
+                               'restricted_master_objbound_global_authority':False},
             'global_certified_gap':None if not math.isfinite(g) else float(g),'target_gap':float(target_gap),
             'certificate_pass':bool(cert['reached']),'cg_iterations':len(cg_records),'cg_seconds':cg_seconds,'integer_seconds':int_seconds,
             'total_decomposition_seconds':time.monotonic()-t0,'columns_by_mess':{mid:len(pools[mid]) for mid in mids},
@@ -1918,5 +2363,6 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
             'restricted_master_bound':restricted_master_snapshot['bound'],
             'restricted_master_native_gap':restricted_master_snapshot['native_gap'],
             'original_mobility_path_set_changed':False,'objective_changed':False,'future_actual_used':False,'future_D2_state_reinjected':False,
-            'posthoc_same_issue_MIP_start_used':False,'certificate_logic':'exact root pricing; fixed-integer continuous-QCP incumbent polish; conservative partial/exact branch-and-price bounds with exact child pricing closure; restricted integer master contributes only a globally feasible incumbent'}
+            'posthoc_same_issue_MIP_start_used':bool(r25t_global_portfolio and (compact_exact.get('mip_start') or {}).get('attempted')),
+            'certificate_logic':('exact all-column priced-root lower bound; bounded restricted primal incumbent generation; original exact compact MIQCP native global bound; maximum of independent valid lower bounds; fixed-integer continuous-QCP polish' if r25t_global_portfolio else 'exact root pricing; fixed-integer continuous-QCP incumbent polish; conservative partial/exact branch-and-price bounds with exact child pricing closure; restricted integer master contributes only a globally feasible incumbent')}
     return result

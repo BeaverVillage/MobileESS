@@ -349,6 +349,29 @@ c["PASS"]=all(bool(v) for k,v in c.items() if k!="PASS")
 print(json.dumps(c,indent=2,sort_keys=True))
 if not c["PASS"]:raise SystemExit(2)
 
+# R25T/B6-C6 bounded primal phase plus original compact exact authority.
+ast.parse((R/"r25t_global_bound_portfolio_proof_test.py").read_text())
+q=subprocess.run([sys.executable,str(R/"r25t_global_bound_portfolio_proof_test.py")],capture_output=True,text=True)
+try:
+ r25t=json.loads(q.stdout)
+except Exception:
+ r25t={}
+rtchecks=r25t.get("checks",{}) if isinstance(r25t,dict) else {}
+c["r25t_global_bound_portfolio_proof"]=q.returncode==0 and r25t.get("PASS") is True
+c["r25t_restricted_bound_not_authority"]=rtchecks.get("restricted_bound_never_promoted") is True
+c["r25t_original_compact_bound_authority"]=rtchecks.get("compact_bound_is_global_authority") is True
+c["r25t_combined_bound_safe"]=rtchecks.get("max_of_valid_lower_bounds_is_valid") is True and rtchecks.get("combined_bound_gap_is_monotone") is True
+c["r25t_ac_qcp_unchanged"]=rtchecks.get("ac_qcp_not_changed") is True
+q=subprocess.run([sys.executable,str(R/"r25t_gurobi_compact_authority_smoke.py")],capture_output=True,text=True)
+try:
+ r25t_smoke=json.loads(q.stdout[q.stdout.find("{"):])
+except Exception:
+ r25t_smoke={}
+c["r25t_gurobi_compact_authority_smoke"]=q.returncode==0 and r25t_smoke.get("status")=="PASS" and r25t_smoke.get("fixed_continuous_qcp_optimal") is True
+c["PASS"]=all(bool(v) for k,v in c.items() if k!="PASS")
+print(json.dumps(c,indent=2,sort_keys=True))
+if not c["PASS"]:raise SystemExit(2)
+
 # R25N/B6-C5R4 complete internal MW/MWh normalization, fixed-integer
 # continuous-QCP polish, and removal of the ineffective fixed-dual prepass.
 q=subprocess.run([sys.executable,str(R/"r25n_b6c5r4_numerical_conditioning_polish_proof_test.py")],capture_output=True,text=True)

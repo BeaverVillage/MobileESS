@@ -1,5 +1,22 @@
 # R25R Stage-1 handoff
 
+## R25T solver continuation (current working revision)
+
+R25T is now the intended continuation path from the verified 36/54 prefix. It
+does not alter the scientific model or global 3% rule. It bounds the restricted
+integer-master primal phase and then solves the untouched original compact
+MIQCP, using only
+`max(exact priced-root LB, original compact MIQCP ObjBound)` as global lower
+bound authority. The restricted-master `ObjBound` remains diagnostic only.
+
+`driver_r25t_stage1_resume_latest.py` verified the existing WSL prefix and
+reported `verified=36/54`, `resume_issue=149`, and `remaining=18`. The issue 149
+copy audit was validated against the real 128,094-variable model: the two
+complete mathematical-structure digests matched even though Gurobi's diagnostic
+fingerprints differed. Codex interrupted immediately after root pricing began;
+the full R25T solve remains for the user. See
+`docs/R25T_GLOBAL_BOUND_PORTFOLIO.md` for the lifecycle and run commands.
+
 ## Objective
 
 Complete and verify the 54 causally chained Stage-1 rolling issues 113–166 with
