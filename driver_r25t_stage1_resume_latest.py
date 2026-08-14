@@ -35,13 +35,69 @@ PARENT_R25P = ART / "ConversationA_R25P_STAGE1_54_OF_54_RUNTIME_RESULT_20260814T
 PARENT_R25Q = ART / "ConversationA_R25Q_STAGE1_54_OF_54_RUNTIME_RESULT_20260814T101350.tar.gz"
 EXPECTED = {
     "main": "a44ea59574395e30127b889eb38f379853b5773b202339f2a0d683a7ded81230",
-    "decomp": "f4434abd4ef98cdc66fb3148dc8497f11dba706499069aafdeba8290205995ab",
-    "checksums": "b766bbe87f567bc37da3510a43feb59054afdc154462093491e209a619251718",
+    "decomp": "109645df1662513eb312bc46761976fc9e0db81169e70ca0451d07425f09b937",
+    "checksums": "9325e5a65131c11c6eff46ef2a8c4406e9fa0c0b8f286d083e397e875b0ebb3f",
     "r25p": "0ed41aa7bdc1f055dde5fd7c50e4ceffb4d4cc0a1795d0ec1b37d49481fa9833",
     "r25q": "8d8c8f15bdfbc3e9200aeebb88f8a262f4da2e727d1155ac76b989f42b7cc2b0",
 }
 LEGACY_R25T_DECOMP_SHA256 = "fd606351cbd17b7cfc63a79d08177e3d3a8485bab86f3870e352bb2eab3a3786"
+COPY_AUDIT_R25T_DECOMP_SHA256 = "f4434abd4ef98cdc66fb3148dc8497f11dba706499069aafdeba8290205995ab"
 THREADS = 4
+_RUNTIME_LOCK_HANDLE = None
+
+
+def acquire_runtime_lock(mode: str) -> None:
+    """Hold one exclusive lock for the complete driver/child lifetime.
+
+    The lock lives outside ``ROOT`` so a second invocation cannot refresh the
+    science copy or quarantine an issue directory while Gurobi is using its log
+    and nodefile paths.  The descriptor is explicitly inherited by the child,
+    which also protects an orphaned solve if the parent driver is killed.
+    """
+    global _RUNTIME_LOCK_HANDLE
+    if _RUNTIME_LOCK_HANDLE is not None:
+        raise RuntimeError("R25T runtime lock was requested twice in one process")
+    try:
+        import fcntl
+    except ImportError as exc:
+        raise RuntimeError("R25T driver must run in WSL/Linux for process locking") from exc
+    WORK.mkdir(parents=True, exist_ok=True)
+    path = WORK / ".r25t_stage1_global_bound_portfolio.lock"
+    handle = path.open("a+", encoding="utf-8")
+    try:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError as exc:
+        handle.seek(0)
+        owner = handle.read().strip() or "unknown owner"
+        handle.close()
+        raise RuntimeError(
+            "another R25T driver/solver is active; refusing concurrent mutation; "
+            f"lock={path} owner={owner}"
+        ) from exc
+    handle.seek(0)
+    handle.truncate()
+    handle.write(
+        json.dumps(
+            {
+                "schema_version": "r25t.runtime_lock.v1",
+                "pid": os.getpid(),
+                "mode": str(mode),
+                "started_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            },
+            sort_keys=True,
+        )
+        + "\n"
+    )
+    handle.flush()
+    os.fsync(handle.fileno())
+    os.set_inheritable(handle.fileno(), True)
+    _RUNTIME_LOCK_HANDLE = handle
+
+
+def runtime_lock_fd() -> int:
+    if _RUNTIME_LOCK_HANDLE is None:
+        raise RuntimeError("R25T runtime lock is not held")
+    return int(_RUNTIME_LOCK_HANDLE.fileno())
 
 
 def sha(path: Path) -> str:
@@ -193,7 +249,11 @@ def initialize() -> None:
         if marker.get("schema_version") not in ("r25t.resumable.v1", "r25t.resumable.v2"):
             raise RuntimeError(f"refusing to reuse unrecognized directory: {ROOT}")
         prior_decomp = marker.get("source_decomp_sha256")
-        if prior_decomp not in (EXPECTED["decomp"], LEGACY_R25T_DECOMP_SHA256):
+        if prior_decomp not in (
+            EXPECTED["decomp"],
+            LEGACY_R25T_DECOMP_SHA256,
+            COPY_AUDIT_R25T_DECOMP_SHA256,
+        ):
             raise RuntimeError("existing R25T runtime uses a different solver authority")
         if not SCI.is_dir():
             raise RuntimeError(f"existing R25T runtime is missing science directory: {SCI}")
@@ -216,7 +276,7 @@ def initialize() -> None:
                 "created_at": marker.get("created_at"),
                 "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                 "upgraded_from_decomp_sha256": prior_decomp if prior_decomp != EXPECTED["decomp"] else None,
-                "upgrade_scope": "copy-equivalence audit only; mathematical authority unchanged",
+                "upgrade_scope": "solver orchestration and runtime safety only; mathematical authority unchanged",
             },
         )
         return
@@ -381,6 +441,8 @@ def scientific_progress_monitor(stop: threading.Event, first_issue: int) -> None
 
 
 def main() -> int:
+    preflight_only = os.environ.get("MOBILEESS_R25T_PREFLIGHT_ONLY", "0") == "1"
+    acquire_runtime_lock("PREFLIGHT" if preflight_only else "FULL_RESUME")
     for path, digest in ((PARENT_R25P, EXPECTED["r25p"]), (PARENT_R25Q, EXPECTED["r25q"])):
         if not path.is_file() or sha(path) != digest:
             raise RuntimeError(f"missing or changed frozen parent authority: {path}")
@@ -414,6 +476,31 @@ def main() -> int:
     source_dir = issue_dir(last_issue)
     state_wrapper = load_json(source_dir / "BUILD7C_POSTCOMMIT_STATE.json")
     state_hash = str(state_wrapper["sha256"])
+    write_json(
+        ROOT / "R25T_RESUME_PREFLIGHT.json",
+        {
+            "status": "PASS",
+            "solver_revision": "R25T_B6C6_GLOBAL_BOUND_PORTFOLIO",
+            "verified_authoritative_issues": resume_issue - 113,
+            "resume_issue": resume_issue,
+            "resume_state_sha256": state_hash,
+            "remaining_issues": 167 - resume_issue,
+            "threads": THREADS,
+            "global_gap_target": 0.03,
+            "overall_solver_time_limit": None,
+            "restricted_primal_phase": {"min_s": 60, "stall_s": 120, "max_s": 600, "max_nodes": 200000},
+            "AC_QCP_changed": False,
+            "exclusive_runtime_lock_held": True,
+            "preflight_mutates_issue_directories": False,
+        },
+    )
+    # This return must remain before resume-authority writes, incomplete-issue
+    # quarantine, child generation, and process launch.  Preflight is diagnostic
+    # and can never rename paths belonging to a solver.
+    if preflight_only:
+        print(f"PASS_R25T_PREFLIGHT verified={resume_issue - 113}/54 resume_issue={resume_issue} remaining={167 - resume_issue}", flush=True)
+        return 0
+
     resume = ROOT / "resume_authority"
     resume.mkdir(exist_ok=True)
     shutil.copy2(source_dir / "BUILD7C_POSTCOMMIT_STATE.json", resume / "resume_state.json")
@@ -444,25 +531,6 @@ def main() -> int:
         encoding="utf-8",
     )
     subprocess.run([sys.executable, "-m", "py_compile", str(child), str(SCI / "main.py"), str(SCI / "r25m_b6_exact_path_decomposition.py")], check=True)
-    write_json(
-        ROOT / "R25T_RESUME_PREFLIGHT.json",
-        {
-            "status": "PASS",
-            "solver_revision": "R25T_B6C6_GLOBAL_BOUND_PORTFOLIO",
-            "verified_authoritative_issues": resume_issue - 113,
-            "resume_issue": resume_issue,
-            "resume_state_sha256": state_hash,
-            "remaining_issues": 167 - resume_issue,
-            "threads": THREADS,
-            "global_gap_target": 0.03,
-            "overall_solver_time_limit": None,
-            "restricted_primal_phase": {"min_s": 60, "stall_s": 120, "max_s": 600, "max_nodes": 200000},
-            "AC_QCP_changed": False,
-        },
-    )
-    if os.environ.get("MOBILEESS_R25T_PREFLIGHT_ONLY", "0") == "1":
-        print(f"PASS_R25T_PREFLIGHT verified={resume_issue - 113}/54 resume_issue={resume_issue} remaining={167 - resume_issue}", flush=True)
-        return 0
     print(
         f"[R25T] verified {resume_issue - 113}/54; resuming issue {resume_issue}; remaining {167 - resume_issue}; "
         "AC/QCP/OpenDSS/global-3% contract unchanged.",
@@ -477,6 +545,7 @@ def main() -> int:
         process = subprocess.Popen(
             [sys.executable, str(child), str(SCI), str(RUN), str(WORK)],
             env=runtime_environment(resume_issue, resume, state_hash),
+            pass_fds=(runtime_lock_fd(),),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,

@@ -11,6 +11,7 @@ from pathlib import Path
 from r25m_b6_exact_path_decomposition import (
     global_relative_gap,
     incumbent_required_for_gap,
+    r25t_recoverable_restricted_error,
 )
 
 
@@ -40,6 +41,10 @@ for _ in range(2000):
     ) + 1e-15
 checks["max_of_valid_lower_bounds_is_valid"] = safe
 checks["combined_bound_gap_is_monotone"] = monotone
+checks["restricted_oom_is_phase_transition"] = r25t_recoverable_restricted_error(10001)
+checks["non_oom_errors_still_fail_closed"] = all(
+    not r25t_recoverable_restricted_error(code) for code in (0, 10003, 10005, 20001)
+)
 
 tokens = {
     "portfolio_is_opt_in": "MOBILEESS_R25T_GLOBAL_PORTFOLIO",
@@ -50,6 +55,9 @@ tokens = {
     "restricted_phase_has_stall_transition": "PRIMAL_INCUMBENT_STALL",
     "restricted_phase_has_node_transition": "PRIMAL_PHASE_MAX_NODES",
     "restricted_phase_has_time_transition": "PRIMAL_PHASE_MAX_SECONDS",
+    "restricted_phase_spills_early": "m.Params.NodefileStart=min(float(m.Params.NodefileStart),0.1)",
+    "restricted_phase_caps_memory": "m.Params.SoftMemLimit=min(float(m.Params.SoftMemLimit),4.0)",
+    "restricted_oom_never_promotes_bound": "PRIMAL_PHASE_MEMORY_PRESSURE",
     "restricted_bound_never_promoted": "'restricted_objbound_promoted':False",
     "compact_bound_is_global_authority": "'compact_objbound_is_global_authority':True",
     "combined_bound_rule_explicit": "max(EXACT_PRICED_ROOT_LB, ORIGINAL_COMPACT_MIQCP_OBJBOUND)",

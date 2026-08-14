@@ -26,7 +26,11 @@ seconds while the globally certified gap remained above 3%.
    the retained-optimal-dual numerical-envelope rules.
 3. Run the restricted integer master only as a bounded primal phase. Stop at a
    global 3% certificate, meaningful-incumbent stall, 600 seconds, or 200,000
-   nodes. These are phase-transition limits, not total solve limits.
+   nodes. Its tree spills to disk from 0.1 GB and is capped at 4 GB because the
+   original compact authority remains resident. An out-of-memory signal in this
+   heuristic phase is also a phase transition: any feasible incumbent is kept,
+   the restricted working model is released, and no restricted bound is used.
+   These are phase-transition limits, not total solve limits.
 4. Map any feasible restricted incumbent back to the original variables as a
    Gurobi-validated MIP start.
 5. Solve the untouched original compact MIQCP with no overall time or node
@@ -62,7 +66,13 @@ fixed-integer polish attempt that passes the numerical gates ends polishing.
 The R25T driver imports only completed, verified R25R/R25S POST states. An
 incomplete issue is quarantined and recomputed; completed causal commits are
 not overwritten. A legacy `r25t.resumable.v1` directory is upgraded in place to
-the hash-locked `v2` science copy; this migration changes only the copy audit.
+the hash-locked `v2` science copy; this migration changes solver orchestration
+and runtime safety only, not the mathematical authority.
+Every full run and preflight holds the same exclusive process lock. A second
+invocation fails before touching the runtime, and the lock descriptor is
+inherited by the solver child so an orphaned child remains protected. Preflight
+returns before resume-authority writes, failure archival, or incomplete-issue
+quarantine, so it cannot rename a live Gurobi `LogFile`/`NodefileDir` path.
 During execution it reports either
 `BOUNDED_RESTRICTED_PRIMAL` or `COMPACT_EXACT_BB`, and
 `GLOBAL_CERTIFIED_GAP` remains the sole Stage-1 acceptance metric.

@@ -41,6 +41,55 @@ EXPECTED = {
     "r25q": "8d8c8f15bdfbc3e9200aeebb88f8a262f4da2e727d1155ac76b989f42b7cc2b0",
 }
 THREADS = 4
+_RUNTIME_LOCK_HANDLE = None
+
+
+def acquire_runtime_lock(mode: str) -> None:
+    """Prevent concurrent preflight/resume mutation of the R25S runtime."""
+    global _RUNTIME_LOCK_HANDLE
+    if _RUNTIME_LOCK_HANDLE is not None:
+        raise RuntimeError("R25S runtime lock was requested twice in one process")
+    try:
+        import fcntl
+    except ImportError as exc:
+        raise RuntimeError("R25S driver must run in WSL/Linux for process locking") from exc
+    WORK.mkdir(parents=True, exist_ok=True)
+    path = WORK / ".r25s_stage1_resumable.lock"
+    handle = path.open("a+", encoding="utf-8")
+    try:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError as exc:
+        handle.seek(0)
+        owner = handle.read().strip() or "unknown owner"
+        handle.close()
+        raise RuntimeError(
+            "another R25S driver/solver is active; refusing concurrent mutation; "
+            f"lock={path} owner={owner}"
+        ) from exc
+    handle.seek(0)
+    handle.truncate()
+    handle.write(
+        json.dumps(
+            {
+                "schema_version": "r25s.runtime_lock.v1",
+                "pid": os.getpid(),
+                "mode": str(mode),
+                "started_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            },
+            sort_keys=True,
+        )
+        + "\n"
+    )
+    handle.flush()
+    os.fsync(handle.fileno())
+    os.set_inheritable(handle.fileno(), True)
+    _RUNTIME_LOCK_HANDLE = handle
+
+
+def runtime_lock_fd() -> int:
+    if _RUNTIME_LOCK_HANDLE is None:
+        raise RuntimeError("R25S runtime lock is not held")
+    return int(_RUNTIME_LOCK_HANDLE.fileno())
 
 
 def sha(path: Path) -> str:
@@ -330,6 +379,8 @@ def scientific_progress_monitor(stop: threading.Event, first_issue: int) -> None
 
 
 def main() -> int:
+    preflight_only = os.environ.get("MOBILEESS_R25S_PREFLIGHT_ONLY", "0") == "1"
+    acquire_runtime_lock("PREFLIGHT" if preflight_only else "FULL_RESUME")
     for path, digest in ((SCI_BUNDLE, EXPECTED["science_bundle"]), (PARENT_R25P, EXPECTED["r25p"]), (PARENT_R25Q, EXPECTED["r25q"])):
         if not path.is_file() or sha(path) != digest:
             raise RuntimeError(f"missing or changed frozen authority: {path}")
@@ -365,6 +416,31 @@ def main() -> int:
     source_dir = issue_dir(last_issue)
     state_wrapper = load_json(source_dir / "BUILD7C_POSTCOMMIT_STATE.json")
     state_hash = str(state_wrapper["sha256"])
+    write_json(
+        ROOT / "R25S_RESUME_PREFLIGHT.json",
+        {
+            "status": "PASS",
+            "immutable_r25r_science": True,
+            "verified_authoritative_issues": resume_issue - 113,
+            "resume_issue": resume_issue,
+            "resume_state_sha256": state_hash,
+            "remaining_issues": 167 - resume_issue,
+            "threads": THREADS,
+            "global_gap_target": 0.03,
+            "solver_time_limits": None,
+            "node_limits": None,
+            "exclusive_runtime_lock_held": True,
+            "preflight_mutates_issue_directories": False,
+        },
+    )
+    if preflight_only:
+        print(
+            f"PASS_R25S_PREFLIGHT verified={resume_issue - 113}/54 "
+            f"resume_issue={resume_issue} remaining={167 - resume_issue}",
+            flush=True,
+        )
+        return 0
+
     resume = ROOT / "resume_authority"
     resume.mkdir(exist_ok=True)
     shutil.copy2(source_dir / "BUILD7C_POSTCOMMIT_STATE.json", resume / "resume_state.json")
@@ -397,28 +473,6 @@ def main() -> int:
         encoding="utf-8",
     )
     subprocess.run([sys.executable, "-m", "py_compile", str(child), str(SCI / "main.py")], check=True)
-    write_json(
-        ROOT / "R25S_RESUME_PREFLIGHT.json",
-        {
-            "status": "PASS",
-            "immutable_r25r_science": True,
-            "verified_authoritative_issues": resume_issue - 113,
-            "resume_issue": resume_issue,
-            "resume_state_sha256": state_hash,
-            "remaining_issues": 167 - resume_issue,
-            "threads": THREADS,
-            "global_gap_target": 0.03,
-            "solver_time_limits": None,
-            "node_limits": None,
-        },
-    )
-    if os.environ.get("MOBILEESS_R25S_PREFLIGHT_ONLY", "0") == "1":
-        print(
-            f"PASS_R25S_PREFLIGHT verified={resume_issue - 113}/54 "
-            f"resume_issue={resume_issue} remaining={167 - resume_issue}",
-            flush=True,
-        )
-        return 0
     print(
         f"[R25S] verified {resume_issue - 113}/54; resuming issue {resume_issue}; "
         f"remaining {167 - resume_issue}; frozen AC/QCP/OpenDSS/3% contract unchanged.",
@@ -438,6 +492,7 @@ def main() -> int:
         process = subprocess.Popen(
             [sys.executable, str(child), str(SCI), str(RUN), str(WORK)],
             env=runtime_environment(resume_issue, resume, state_hash),
+            pass_fds=(runtime_lock_fd(),),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,

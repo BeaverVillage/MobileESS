@@ -156,6 +156,10 @@ def exact_gurobi_model_structure_digest(model)->Tuple[str,Dict[str,Any]]:
 def rc_audit_pass(max_err:float,tol:float)->bool:
     return math.isfinite(float(max_err)) and 0.0 <= float(max_err) <= float(tol)
 
+def r25t_recoverable_restricted_error(error_code:int)->bool:
+    """Only OOM is a phase transition, and only for R25T's heuristic RMP."""
+    return int(error_code)==10001
+
 def guarded_full_lb(rmp_obj:float,mess_count:int,rc_audit_tol:float)->Tuple[float,float]:
     """Conservative numerical guard used only after priced closure.
 
@@ -1344,6 +1348,12 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
     c5r3_primal_heur=float(os.environ.get('MOBILEESS_R25N_B6C5R3_PRIMAL_HEURISTICS','0.20'))
     if not (0.0<=c5r3_primal_heur<=1.0):raise ValueError('invalid C5R3 primal heuristic effort')
     m.Params.Heuristics=c5r3_primal_heur
+    if r25t_global_portfolio:
+        # The original compact authority is intentionally resident at the same
+        # time.  Spill the heuristic RMP tree early and cap its own memory so it
+        # cannot starve the subsequent exact compact phase.
+        m.Params.NodefileStart=min(float(m.Params.NodefileStart),0.1)
+        m.Params.SoftMemLimit=min(float(m.Params.SoftMemLimit),4.0)
     _set_solve_time_limit(m,int_limit)
     cert={'reached':False,'gap':None,'incumbent':None}
     # Single lower-bound authority variable.  It begins at the exact priced root
@@ -1357,6 +1367,9 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
         'min_seconds':float(r25t_primal_min_s),'stall_seconds':float(r25t_primal_stall_s),
         'max_seconds':float(r25t_primal_max_s),'max_nodes':int(r25t_primal_max_nodes),
         'meaningful_improvement_fraction_of_initial_deficit':float(r25t_meaningful_fraction),
+        'nodefile_start_gb':float(m.Params.NodefileStart),
+        'soft_memory_limit_gb':float(m.Params.SoftMemLimit),
+        'recoverable_memory_transition':False,
     }
     _initial_deficit=[None]
     def cb(model,where):
@@ -1392,7 +1405,22 @@ def certified_path_decomposition_solve(*,m,mids,H,avail_h,initial_sid,reachable_
                     if reason is not None:
                         primal_phase['termination_reason']=reason;model.terminate()
             except Exception:pass
-    int_start=time.monotonic();m.optimize(cb);int_seconds=time.monotonic()-int_start
+    int_start=time.monotonic()
+    try:
+        m.optimize(cb)
+    except gp.GurobiError as exc:
+        error_code=int(getattr(exc,'errno',-1))
+        if not (r25t_global_portfolio and r25t_recoverable_restricted_error(error_code)):
+            raise
+        # This tree has no lower-bound authority in R25T.  Preserve any feasible
+        # incumbent it produced, then release the working model before starting
+        # the untouched compact exact authority.  With no incumbent the compact
+        # model simply starts without a MIP start.
+        primal_phase['termination_reason']='PRIMAL_PHASE_MEMORY_PRESSURE'
+        primal_phase['recoverable_memory_transition']=True
+        primal_phase['gurobi_error_code']=error_code
+        primal_phase['gurobi_error_message']=str(exc)
+    int_seconds=time.monotonic()-int_start
     if primal_phase['termination_reason'] is None:
         primal_phase['termination_reason']='SOLVER_NATIVE_TERMINATION'
     primal_phase['elapsed_s']=float(int_seconds)

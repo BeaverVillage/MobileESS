@@ -17,6 +17,16 @@ fingerprints differed. Codex interrupted immediately after root pricing began;
 the full R25T solve remains for the user. See
 `docs/R25T_GLOBAL_BOUND_PORTFOLIO.md` for the lifecycle and run commands.
 
+The resume drivers hold an exclusive lifetime lock and pass its descriptor to
+the solver child. Diagnostic preflight returns before any incomplete issue or
+failure archive is moved, preventing a concurrent invocation from invalidating
+live Gurobi log and nodefile paths.
+
+The R25T restricted incumbent phase now spills nodes from 0.1 GB, has a 4 GB
+phase-local memory cap, and treats Gurobi error 10001 only in that heuristic
+phase as a transition to the original compact exact authority. All other solver
+errors remain fail-closed and the restricted `ObjBound` is never promoted.
+
 ## Objective
 
 Complete and verify the 54 causally chained Stage-1 rolling issues 113–166 with

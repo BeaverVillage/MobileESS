@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -21,6 +24,49 @@ def load_driver():
 
 
 class R25TResumeUpgradeTests(unittest.TestCase):
+    def test_preflight_returns_before_incomplete_issue_quarantine(self):
+        text = (REPO / "driver_r25t_stage1_resume_latest.py").read_text(encoding="utf-8")
+        main = text[text.index("def main() -> int:") :]
+        self.assertLess(main.index("if preflight_only:"), main.index("incomplete = RUN"))
+        self.assertLess(main.index("acquire_runtime_lock("), main.index("initialize()"))
+        self.assertIn("pass_fds=(runtime_lock_fd(),)", main)
+
+        r25s_text = (REPO / "driver_r25s_stage1_resume_latest.py").read_text(encoding="utf-8")
+        r25s_main = r25s_text[r25s_text.index("def main() -> int:") :]
+        self.assertLess(r25s_main.index("if preflight_only:"), r25s_main.index("incomplete = RUN"))
+        self.assertLess(r25s_main.index("acquire_runtime_lock("), r25s_main.index("initialize()"))
+        self.assertIn("pass_fds=(runtime_lock_fd(),)", r25s_main)
+
+    @unittest.skipUnless(os.name == "posix", "fcntl runtime-lock test requires WSL/Linux")
+    def test_runtime_lock_rejects_a_second_driver(self):
+        driver = load_driver()
+        with tempfile.TemporaryDirectory(prefix="r25t_lock_") as directory:
+            driver.WORK = Path(directory)
+            driver.acquire_runtime_lock("TEST_OWNER")
+            script = (
+                "import importlib.util,sys\n"
+                "from pathlib import Path\n"
+                f"p=Path({str(REPO / 'driver_r25t_stage1_resume_latest.py')!r})\n"
+                "s=importlib.util.spec_from_file_location('r25t_lock_contender',p)\n"
+                "m=importlib.util.module_from_spec(s);s.loader.exec_module(m)\n"
+                f"m.WORK=Path({directory!r})\n"
+                "try:\n"
+                " m.acquire_runtime_lock('TEST_CONTENDER')\n"
+                "except RuntimeError as exc:\n"
+                " print(str(exc));raise SystemExit(23)\n"
+                "raise SystemExit(0)\n"
+            )
+            contender = subprocess.run(
+                [sys.executable, "-c", script], capture_output=True, text=True, check=False
+            )
+            self.assertEqual(contender.returncode, 23, contender.stdout + contender.stderr)
+            self.assertIn("refusing concurrent mutation", contender.stdout)
+            import fcntl
+
+            fcntl.flock(driver._RUNTIME_LOCK_HANDLE.fileno(), fcntl.LOCK_UN)
+            driver._RUNTIME_LOCK_HANDLE.close()
+            driver._RUNTIME_LOCK_HANDLE = None
+
     def test_legacy_runtime_science_is_refreshed_without_touching_commits(self):
         driver = load_driver()
         with tempfile.TemporaryDirectory(prefix="r25t_upgrade_") as directory:
