@@ -9,6 +9,11 @@ Each rolling issue has a 54-slot, five-minute horizon and commits only its first
 slot. The frozen Stage-1 acceptance rule is a globally certified relative gap of
 at most 3%, followed by the numerical, causal, and Fresh OpenDSS gates.
 
+The authoritative offline Stage-1 run is complete: all 54 issues passed the
+global 3% certificate, first-step transition, and Fresh Exact OpenDSS gates.
+The final issue 166 closed at a 2.98751% certified gap, and the resulting causal
+state chain covers issues 113 through 166 without future-actual leakage.
+
 ## Repository layout
 
 - `science/`: R25T authoritative model, global-bound portfolio solver,

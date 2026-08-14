@@ -6,15 +6,11 @@ R25T remains the authoritative offline continuation. It keeps the five-minute
 H54 model, h0-only causal commit, four-thread policy, unchanged AC-aware QCP,
 Fresh OpenDSS gate, and globally certified 3% modeled-objective rule.
 
-Issues through 165 have completed and committed. The expected WSL preflight
-after the R25Y science refresh is:
-
-```text
-PASS_R25T_PREFLIGHT verified=53/54 resume_issue=166 remaining=1
-```
-
-Issues 113 through 165 are preserved. No
-R25T driver or solver process was running at the time of this handoff.
+Stage-1 is complete. Issues 113 through 166 form one verified causal chain and
+the final runtime reports `PASS_STAGE1_FINAL_FREEZE`, authoritative 54/54,
+all global gaps at or below 3%, all first-step transitions closed, and all Fresh
+Exact OpenDSS gates passed. No R25T driver or solver process was running at the
+time of this handoff.
 
 ## Issue 151 and 152 diagnosis
 
@@ -89,7 +85,7 @@ The R25X rerun produced direct wall-time evidence. Issue 164 fell from 27 CG
 rounds / 1,153.0 CG seconds to 23 rounds / 366.6 seconds and committed at
 2.9431%. Issue 165 committed at 2.9961%; its sparse tail added 96 targeted
 columns. Both runs needed only one strict dual retry. The continuation is now
-53/54.
+53/54 at that checkpoint; R25Y completed the final issue below.
 
 Issue 166 then exposed a separate numerical-state carryover: root CG iteration
 17 inherited an extreme prior recovery profile (`BarQCPConvTol=1e-11`,
@@ -100,9 +96,17 @@ SUBOPTIMAL statuses enter a cleared-state numerical recovery portfolio, and no
 RMP is used unless the final status is OPTIMAL. Scientific rows, objective,
 pricing closure, AC QCP, and certificate authority are unchanged.
 
-These changes have passed unit/static and licensed-Gurobi release gates. R25X
-has positive issue-164 runtime evidence; R25Y still requires the final issue-166
-resume run.
+The final R25Y issue-166 run passed without an RMP optimality recovery retry:
+23 exact CG iterations in 240.8 seconds, 32 sparse-tail columns, priced-root
+closure, strict polish PASS, and global certified gap 2.98751%. Compact exact
+B&B remained the dominant phase at 1,657.0 seconds; total decomposition time was
+1,997.0 seconds. The final incumbent/lower bound were `-816.8581803795` and
+`-841.2618981842`. This supplies positive runtime evidence for the per-iteration
+primary-profile reset while preserving every scientific authority.
+
+The final external result archive is
+`ConversationA_R25T_STAGE1_RUNTIME_RESULT_20260815T021614.tar.gz`, SHA-256
+`4bedaab45a4270b4c4bdc5d6f744c0a4060a7f6b05cfac82db037c44453964fb`.
 
 ## R26 operational design
 
@@ -134,7 +138,9 @@ fast dispatch itself later violates the 300-second maximum deadline.
 - WSL Gurobi compact-authority smoke: PASS.
 - WSL full `science/release_self_test.py`: PASS.
 - WSL native two-start Gurobi smoke: PASS.
-- Actual runtime preflight: `53/54`, resume issue 166, one issue remaining.
+- Actual runtime: `PASS_STAGE1_FINAL_FREEZE`, authoritative `54/54`.
+- Every issue: globally certified gap <= 3%.
+- Final issue 166: transition PASS and Fresh Exact OpenDSS hard-constraint PASS.
 
 ## Run command
 
@@ -145,8 +151,8 @@ From the repository in WSL:
   driver_r25t_stage1_resume_latest.py
 ```
 
-The 54/54 Stage-1 run is an offline one-time validation sequence, not a solve
-that the eventual R26 controller performs 54 times every operating day.
+The 54/54 Stage-1 run is a completed offline one-time validation sequence, not a
+solve that the eventual R26 controller performs 54 times every operating day.
 
 ## Annual evaluation sampling
 
@@ -156,7 +162,5 @@ issues/year. Every monthly episode has 48 hours of unscored causal burn-in.
 Four monthly processes with four threads each execute the 12 months in three
 waves. R26 and operational baselines run all seven scored days; R25T exact is a
 54-issue oracle window inside each selected week and is never imputed over the
-remaining issues. The current Stage-1 54/54 must still complete once to validate
-the exact causal/certificate pipeline before those oracle windows are used.
-
-Do not create a PR until the user explicitly requests it.
+remaining issues. The completed Stage-1 54/54 validates the exact
+causal/certificate pipeline required before those oracle windows are used.

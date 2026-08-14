@@ -100,6 +100,15 @@ SUBOPTIMAL result may be retried after clearing solution state with deterministi
 scaled/tighter profiles, but the iteration remains non-authoritative unless a
 retry finishes OPTIMAL. Other non-optimal statuses continue to fail closed.
 
+## Final Stage-1 evidence
+
+The R25Y continuation completed issue 166 and closed the authoritative Stage-1
+chain at 54/54. Issue 166 used 23 exact-CG iterations (240.8 seconds), added 32
+sparse-tail columns, required no RMP optimality recovery retry, and finished at
+a 2.98751% global certified gap. Strict fixed-integer QCP polish, the causal
+first-step transition certificate, and Fresh Exact OpenDSS all passed. The final
+runtime status is `PASS_STAGE1_FINAL_FREEZE`, with no remaining Stage-1 blocker.
+
 ## Resume and progress
 
 The R25T driver imports only completed, verified R25R/R25S POST states. An
