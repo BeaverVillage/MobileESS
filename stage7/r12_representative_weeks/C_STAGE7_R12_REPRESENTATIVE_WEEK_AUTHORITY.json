@@ -1,0 +1,188 @@
+{
+  "schema_version": "conversation_c.stage7.representative_week_authority.r12",
+  "status": "FROZEN_BEFORE_R12_CONTROLLER_OUTCOMES",
+  "authority_basis": {
+    "user_supersession": "PR #3 representative-week plan adopted as the new experiment-period authority",
+    "github_pr": "https://github.com/BeaverVillage/MobileESS/pull/3",
+    "github_pr_state_at_refreeze": "OPEN_DRAFT",
+    "github_head_commit": "bfbbc7cb4bc03c131f4c26df82c7c55d231cbfc8",
+    "period_selection_rerun": false,
+    "controller_outcomes_inspected_before_refreeze": false
+  },
+  "scientific_source_authority": {
+    "commit": "358a2699501d7465a543179c2ad40db64a383cf9",
+    "science_main_sha256": "1177ac8814f1008907f89ebf513bf9fe3e469d2c09a51ba85303c46c428f76b9",
+    "optimization_equations_changed": false,
+    "ac_power_flow_retained": true
+  },
+  "frozen_input_sha256": {
+    "frozen_authority/REPRESENTATIVE_PERIOD_RESULT_20260815.json": "d2a0dac2a82ba2727ccba0830e3abaaa07095b35df7be6b23b6650b26f34cb39",
+    "frozen_authority/REP_WEEK_SELECTION_2025_K12.csv": "0e32d3257fdc1fafc0bbdd95ca01f270b164a9be18ffa45c060e3c490bed2577",
+    "frozen_authority/STRESS_PERIOD_CANDIDATES_2025.csv": "02ae634eb308470fbe9307984aea60f5baa755ba3c4ef77d5073425418c50bbd"
+  },
+  "episode_contract": {
+    "episode_count": 12,
+    "episode_type": "INDEPENDENT_REPRESENTATIVE_WEEK",
+    "timezone": "AEST UTC+10",
+    "dst": false,
+    "cadence_seconds": 300,
+    "burn_in_steps": 576,
+    "evaluation_steps": 2016,
+    "stage7_executed_steps_per_episode": 576,
+    "stage7_endpoint": "evaluation_start_before_the_first_evaluation_step",
+    "evaluation_steps_executed_by_stage7": 0,
+    "downstream_period_total_steps": 2592,
+    "horizon_steps": 54,
+    "cluster_weight_sum": 1.0,
+    "cross_episode_hidden_state_carry": false,
+    "representative_week_selection_is_input_only": true
+  },
+  "source_architecture": {
+    "mode": "ONE_COMMON_2025_AUTHORITY_CACHE_THEN_WINDOW_SLICE",
+    "full_year_exogenous_arrays_reused": true,
+    "full_year_105120_issue_mobility_packaging_required": false,
+    "heavy_source_pipeline_restart_per_week": false,
+    "stage7_primary_window": "burn_in_start_index_to_week_start_index_half_open",
+    "evaluation_window_source_materialization_by_stage7": false,
+    "primary_window_raw_issue_references": 6912,
+    "primary_window_unique_issue_count": 6912,
+    "deduplicated_overlaps": [],
+    "common_cache_key": "absolute issue_step plus source-authority SHA set",
+    "common_cache_content": [
+      "R10 corrected mobility/runtime issue artifact",
+      "R9/full-year P/Q/PV forecast slice",
+      "full-year price forecast slice",
+      "independent 2025 jobs/rack source reference"
+    ],
+    "materialization_policy": "one resumable union build in 12 exact 576-origin contexts; bounded checkpoints allowed without recomputing committed cache entries",
+    "exact_two_phase_order": [
+      "traffic model loaded once in a dedicated Python process; 12 traffic blocks persisted",
+      "traffic Python process exits so its CUDA state cannot be inherited",
+      "fresh E3/E4 process loads E4 authority, forks CPU workers, then parent alone loads E3 CUDA and streams the shared issue CAS"
+    ],
+    "traffic_block_count": 12,
+    "traffic_block_steps": 576,
+    "traffic_intermediate_estimated_gib_upper_bound": 7,
+    "e3_e4_issue_cache_policy": "each required absolute burn-in issue generated at most once; canonical, restart, and initializer lanes reuse the same SHA artifact",
+    "lazy_prefetch_policy": "OPTIONAL_ENGINEERING_OPTIMIZATION_NOT_A_STAGE7_PASS_GATE",
+    "issue_materialization_topology": {
+      "gpu_e3_producers": 1,
+      "cpu_e4_metadata_compression_workers_max": 14,
+      "cpu_worker_execution": "fork process pool created before parent E3 CUDA load",
+      "os_process_count_max": 15,
+      "gpu_model_replication": false,
+      "shared_e4_authority_via_fork_copy_on_write": true,
+      "traffic_and_e3_e4_run_in_separate_python_processes": true,
+      "ordered_prefix_index_commit": true,
+      "restart_quarantines_unindexed_or_temporary_artifacts": true,
+      "scientific_array_equivalence_required": "R10 all-key array exact",
+      "measured_54_issue_artifact_span_speedup_vs_serial": 1.730,
+      "measured_54_issue_artifact_span_speedup_vs_14_threads": 1.251
+    },
+    "dual_horizon_boundary_contract": {
+      "runtime_main_sha256": "1b0ac60ae49e1b4573d469e95c2b2857d17dbe64b7184bc81a28d433c02adbcc",
+      "energy_horizon_axis": "frozen Q50-based bin",
+      "selector_horizon_axis": "Safe-ETA profile step = ceil((Q90 + frozen margin)/300)",
+      "unseen_safe_step_policy": "collision-proof unseen token followed by the frozen selector hierarchy",
+      "allowed_unseen_selector_levels": ["physical_route", "global"],
+      "continuous_profile_duration_preserved": true,
+      "per_issue_index_evidence": ["unseen_safe_row_count", "unseen_safe_steps"],
+      "evidence_survives_bounded_restart": true,
+      "clamp_to_highest_calibrated_bin": false,
+      "tolerance_relaxation": false
+    },
+    "reason_two_phase_is_mandatory": "loading E3/E4 before traffic changes the frozen CUDA numerical path; R10 54-issue exact regression requires traffic completion first",
+    "per_episode_output": "SHA-bound index/slice manifest referencing the common cache",
+    "copying_or_recomputing_shared_issue_artifacts": false,
+    "future_actual_used": false
+  },
+  "execution_topology": {
+    "episode_processes": 4,
+    "gurobi_threads_per_process": 4,
+    "waves": 3,
+    "controller_runtime_shard_max_steps": 576,
+    "canonical_controller_shard_lengths": [576],
+    "checkpoint_candidate_shard_lengths": [288],
+    "canonical_transition_count": 6912,
+    "restart_candidate_transition_count": 3456,
+    "initializer_candidate_transition_count": 6912,
+    "stage7_max_committed_transition_count": 17280,
+    "post_pre_hash_chain_across_shards": "EXACT",
+    "resume_from_last_fully_committed_post": true,
+    "heavy_run_before_preflight_pass": false
+  },
+  "checkpoint_restart_validation": {
+    "paired_uninterrupted_vs_restart_scope": "all 12 representative weeks",
+    "reference": "uninterrupted 576-step burn-in from the canonical initializer",
+    "candidate": "new process starts from the SHA-bound canonical POST after 288 steps and executes only the remaining 288 steps",
+    "duplicated_first_half_solve_required": false,
+    "comparison_at_week_start": "FULL_CANONICAL_STATE_HASH_EXACT",
+    "required_paired_lanes": 12,
+    "all_required": true
+  },
+  "initializer_burn_in_robustness": {
+    "design": "12 paired lanes: medoid_rank r receives frozen T3 ensemble seed r-1",
+    "required_lanes": 12,
+    "uses_all_representative_weeks": true,
+    "uses_all_t3_seeds_once": true,
+    "outcome_based_seed_or_period_selection": false,
+    "copies_continuous_hidden_state": false,
+    "comparison_time": "week_start_after_576_step_burn_in",
+    "reference": "same-week canonical initializer burn-in state",
+    "candidate": "same-week T3 seed assigned before outcomes",
+    "tolerances": {
+      "MESS_energy_kWh_abs": 1e-06,
+      "support_energy_debt_kWh_abs": 1e-06,
+      "workload_debt_GPUh_abs": 1e-06,
+      "discrete_container_and_hash_fields": "exact"
+    },
+    "pass_rule": "all 12 paired lanes must satisfy the pre-frozen comparison and all causal/solver/AC gates",
+    "full_seed_by_week_factorial_claimed": false
+  },
+  "stress_periods": {
+    "count": 4,
+    "steps_each": 576,
+    "annual_weight_each": 0.0,
+    "separate_from_primary_representative_results": true,
+    "stage7_primary_pass_gate": false,
+    "execution_requires_separate_explicit_launch": true
+  },
+  "stage7_pass_contract": {
+    "authority_and_source_preflight": "PASS",
+    "canonical_burn_in_episodes_required": 12,
+    "checkpoint_restart_pairs_required": 12,
+    "independent_initializer_pairs_required": 12,
+    "comparison_time": "week_start_before_evaluation_h0",
+    "seven_day_evaluation_required": false,
+    "lazy_prefetch_required": false,
+    "pass_rule": "all required lanes and every preserved hard gate pass; authority freeze or preflight alone cannot declare Stage 7 complete"
+  },
+  "preserved_hard_gates": [
+    "R10 corrected mobility consumed; R9 mobility rejected",
+    "R9 P/Q/PV and price retained with exact SHA",
+    "no future actual",
+    "future_D2_state_reinjected=false",
+    "future_plans_persisted=false",
+    "h0-only physical commit",
+    "exact pricing closure",
+    "solver-checked feasible incumbent",
+    "global certified gap <= 3 percent",
+    "numerical gates",
+    "Fresh Exact OpenDSS hard-constraint PASS",
+    "first-step transition certificate PASS",
+    "failure evidence preserved"
+  ],
+  "forbidden": [
+    "365-day annual controller run",
+    "7-day evaluation execution as a Stage 7 PASS requirement",
+    "12 calendar-month materialization",
+    "11 month-boundary validation",
+    "automatic reuse of the old 132-lane E7B matrix",
+    "representative-period reselection",
+    "pilot splice or tiled source data",
+    "future actual reads",
+    "h>=1 optimizer plans persisted as physical state",
+    "post-outcome tolerance relaxation",
+    "post-outcome lane selection"
+  ]
+}
