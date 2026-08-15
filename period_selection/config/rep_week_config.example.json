@@ -1,0 +1,64 @@
+{
+  "schema_version": "rep_period_config_v3",
+  "calendar_years": [2024, 2025],
+  "calibration_year": 2024,
+  "application_year": 2025,
+  "timezone": "fixed AEST UTC+10 no DST",
+  "raw_audit_path": "period_selection/audit/REP_PERIOD_RAW_INVENTORY_2024_2025.json",
+  "pv_repair_audit_path": "period_selection/audit/AEMO_ROOFTOP_PV_AUDITED_REPAIR_2024_2025.json",
+  "pv_repair_output_root": "period_selection/output",
+  "traffic_congestion_tti_threshold": 1.5,
+  "normalization": {
+    "method": "2024_median_iqr_with_q95_q05_and_range_fallback",
+    "minimum_scale": 1e-09
+  },
+  "distance_components": {
+    "time_aligned_profile_rmse": 0.5,
+    "weekly_distribution_summary_rmse": 1.0
+  },
+  "domain_weight_contract": "equal total weight per domain; equal split inside each domain",
+  "feature_weights": {
+    "regional_total_demand_mw": 0.5,
+    "rooftop_pv_actual_mw": 0.5,
+    "vic1_rrp_aud_per_mwh": 1.0,
+    "traffic_mean_tti": 0.3333333333333333,
+    "traffic_p95_tti": 0.3333333333333333,
+    "traffic_congested_fraction": 0.3333333333333333,
+    "job_arrival_count": 0.25,
+    "arriving_gpu": 0.25,
+    "arriving_gpuh": 0.25,
+    "arriving_wan_nominal_gb": 0.25
+  },
+  "seasonal_quotas": {
+    "4": {"summer": 1, "autumn": 1, "winter": 1, "spring": 1},
+    "8": {"summer": 2, "autumn": 2, "winter": 2, "spring": 2},
+    "12": {"summer": 3, "autumn": 3, "winter": 3, "spring": 3}
+  },
+  "selection_constraints": {
+    "seasonal_mean_relative_error_max": 0.20,
+    "applies_to": "all ten exogenous features; enforced within each season before minimum-distance tie-breaking"
+  },
+  "k_acceptance_thresholds": {
+    "annual_mean_relative_error_max": 0.15,
+    "seasonal_mean_relative_error_max": 0.20,
+    "continuous_p95_relative_error_max": 0.10,
+    "continuous_ramp_p95_relative_error_max": 0.10,
+    "correlation_matrix_mean_absolute_error_max": 0.10,
+    "seasonal_quota_required": true,
+    "continuous_features": [
+      "regional_total_demand_mw",
+      "rooftop_pv_actual_mw",
+      "vic1_rrp_aud_per_mwh",
+      "traffic_mean_tti",
+      "traffic_p95_tti",
+      "traffic_congested_fraction"
+    ],
+    "sparse_workload_policy": "Job/WAN 5-minute p95 and ramp-p95 are structurally zero-dominated; assess annual/seasonal means plus the separate workload-WAN stress episode"
+  },
+  "fallback": {
+    "primary_k_selected_on_2024_only": true,
+    "fallback_k": 12,
+    "trigger": "2025 exogenous-only audit violates a pre-registered threshold before any controller run"
+  },
+  "status": "FROZEN_PRE_CONTROLLER_EXOGENOUS_ONLY"
+}

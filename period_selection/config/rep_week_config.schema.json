@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rep_week_config.schema.json",
+  "title": "Mobile ESS 2024-locked representative-week configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "calendar_years", "calibration_year", "application_year", "timezone", "raw_audit_path", "pv_repair_audit_path", "pv_repair_output_root", "traffic_congestion_tti_threshold", "normalization", "distance_components", "domain_weight_contract", "feature_weights", "seasonal_quotas", "selection_constraints", "k_acceptance_thresholds", "fallback", "status"],
+  "properties": {
+    "schema_version": {"const": "rep_period_config_v3"},
+    "calendar_years": {"const": [2024, 2025]},
+    "calibration_year": {"const": 2024},
+    "application_year": {"const": 2025},
+    "timezone": {"const": "fixed AEST UTC+10 no DST"},
+    "raw_audit_path": {"type": "string", "minLength": 1},
+    "pv_repair_audit_path": {"type": "string", "minLength": 1},
+    "pv_repair_output_root": {"type": "string", "minLength": 1},
+    "traffic_congestion_tti_threshold": {"type": "number", "exclusiveMinimum": 1.0},
+    "normalization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "minimum_scale"],
+      "properties": {
+        "method": {"const": "2024_median_iqr_with_q95_q05_and_range_fallback"},
+        "minimum_scale": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "distance_components": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["time_aligned_profile_rmse", "weekly_distribution_summary_rmse"],
+      "properties": {
+        "time_aligned_profile_rmse": {"type": "number", "minimum": 0},
+        "weekly_distribution_summary_rmse": {"type": "number", "minimum": 0}
+      }
+    },
+    "domain_weight_contract": {"type": "string"},
+    "feature_weights": {
+      "type": "object",
+      "minProperties": 10,
+      "maxProperties": 10,
+      "additionalProperties": {"type": "number", "exclusiveMinimum": 0}
+    },
+    "seasonal_quotas": {"type": "object", "required": ["4", "8", "12"]},
+    "selection_constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seasonal_mean_relative_error_max", "applies_to"],
+      "properties": {
+        "seasonal_mean_relative_error_max": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "applies_to": {"type": "string"}
+      }
+    },
+    "k_acceptance_thresholds": {"type": "object"},
+    "fallback": {"type": "object"},
+    "status": {"const": "FROZEN_PRE_CONTROLLER_EXOGENOUS_ONLY"}
+  }
+}
