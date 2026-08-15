@@ -1,0 +1,73 @@
+{
+  "release": "R25N_B6C5_INTEGRATED_RUNTIME_GATE",
+  "conversation": "A",
+  "stage": "B6-C5",
+  "status": "STATIC_IMPLEMENTATION_READY",
+  "parent": "R25M_B6C4_RELIABILITY_STRONG_BRANCHING",
+  "purpose": "Integrate C1-C4 and admit B6 FINAL freeze only after one issue152 runtime gate demonstrates certified exact branch-and-price operation.",
+  "frozen_scientific_contract": {
+    "H": 54,
+    "cadence_min": 5,
+    "economic_mipgap_target": 0.03,
+    "threads": 1,
+    "future_actual_optimizer_use": false,
+    "future_D2_reinjection": false,
+    "posthoc_same_issue_MIP_start": false,
+    "physical_feasible_set_changed": false,
+    "objective_changed": false,
+    "fresh_exact_opendss_gate_changed": false
+  },
+  "integrated_components": {
+    "C1_pristine_continuous_certificate_authority": true,
+    "C2_global_path_cache": true,
+    "C2_parent_child_sibling_inheritance": true,
+    "C2_child_kbest_batch_pricing": 8,
+    "C3_true_dual_certified_stabilization": true,
+    "C3_stabilized_dual_certificate_authority": false,
+    "C4_reliability_strong_branching": true,
+    "C4_probe_bound_certificate_authority": false,
+    "C4_exact_child_pricing_required": true
+  },
+  "runtime_gate": {
+    "issue": 152,
+    "diagnostic_only": true,
+    "physical_h0_commit": false,
+    "cg_time_limit_s": 420,
+    "integer_time_limit_s": 300,
+    "bp_time_limit_s": 600,
+    "bp_node_limit": 64,
+    "bp_node_cg_time_limit_s": 90,
+    "admit_final_freeze_only_if_global_3pct_certificate": true,
+    "required_runtime_guards": [
+      "pricing_closed",
+      "C1 continuous authority int=0 bin=0 IsMIP=0",
+      "branch-price child duals available",
+      "no incomplete B&P node",
+      "global certified gap <= 0.03"
+    ],
+    "performance_metrics": [
+      "cg_iterations",
+      "cg_seconds",
+      "columns_by_mess",
+      "global_cache_stats",
+      "child_pricing_batch",
+      "stabilization root stats",
+      "strong_branch selection records",
+      "bp nodes solved",
+      "bp global lower bound",
+      "bp global gap"
+    ]
+  },
+  "baseline_B6R4": {
+    "result_bundle_sha256": "a4f46c1771cbc7708a5a95944c7d80a6f7e776732c66099db909922c0faa553a",
+    "cg_iterations": 43,
+    "cg_seconds": 306.38203132199124,
+    "root_lb": -2017.405958952327,
+    "bp_nodes_solved": 1,
+    "failure_reason": "linear_dual_unavailable_AttributeError"
+  },
+  "hashes": {
+    "main_py_sha256": "f7b5d12f3e0f1933a928d3955d573e4c12597686aa1512302f2f791d34973bf6",
+    "decomposition_module_sha256": "a740625c51c31bee5e8c88b99bafad5687c2cee743f8e9919553d9db3da35ca4"
+  }
+}

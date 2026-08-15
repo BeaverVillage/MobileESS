@@ -1,0 +1,56 @@
+{
+  "activation_env": {
+    "MOBILEESS_R25I_B2_NUMERICAL_RESCALING": "1"
+  },
+  "added_functions": [],
+  "b2_main_sha256": "ebb075e1aa9f42b99572609d3a049453c5cd83f802716a3b1bf5a326b0abe72d",
+  "exact_transform": {
+    "balance": "divide branch-flow balance by 1000",
+    "reference_flow": "reference FP/FQ divided by same scale",
+    "thermal_circle": "P_kW^2+Q_kvar^2<=S_kVA^2 iff P_MW^2+Q_Mvar^2<=(S_kVA/1000)^2",
+    "voltage": "0.002*(r*P_kW+x*Q_kvar) == 2.0*(r*P_MW+x*Q_Mvar)"
+  },
+  "foundation": "R25H_B1_CERTIFICATE_FOCUSED_SEARCH_POLICY",
+  "long_solver_run_performed": false,
+  "model_api_call_counts_unchanged": true,
+  "modified_existing_functions": [
+    "build_full"
+  ],
+  "numerical_evidence": {
+    "B2_grid_voltage_min_coefficient": 2e-06,
+    "actual_BUILD7AR2_min_nonzero_r_or_x_ohm": 1e-06,
+    "actual_full_model_matrix_range_measured": false,
+    "actual_measurement_deferred_to": "B3 fixed-budget kernel batch screen",
+    "baseline_grid_voltage_min_coefficient": 2e-09,
+    "improvement_factor": 1000.0,
+    "predicted_grid_driven_matrix_ratio": 350000000.0,
+    "prior_R25F_matrix_range": [
+      2e-09,
+      700.0
+    ]
+  },
+  "parent_main_sha256": "500fcf693843b16ddc2cc064b9c68022a4d5c629aff3d79ec6f1ab837702c979",
+  "release": "R25I_B2_EXACT_NUMERICAL_RESCALING",
+  "removed_functions": [],
+  "scope": {
+    "changed_internal_variables": "R25D dynamic-skeleton FP/FQ only",
+    "new_units": "MW/Mvar",
+    "old_units": "kW/kvar",
+    "positive_scale_kW_per_model_unit": 1000.0
+  },
+  "stage": "B2/7",
+  "status": "STATIC_FREEZE",
+  "unchanged": {
+    "Fresh_Exact_OpenDSS_units": true,
+    "Horizon": 54,
+    "MESS_dispatch_kW": true,
+    "MIPGap": 0.03,
+    "Rack_WAN_gates": true,
+    "SOC_kWh": true,
+    "cadence_minutes": 5,
+    "future_D2_reinjection_forbidden": true,
+    "future_actual_forbidden": true,
+    "objective": true,
+    "scientific_feasible_set": true
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "release": "R25V_CAUSAL_ROLLING_MULTISTART_AND_CG_ROUNDTRIP_REDUCTION",
+  "scope": "solver search guidance and non-authoritative phase budgets only",
+  "causal_shifted_start": {
+    "source": "previous optimizer plan available before the current issue",
+    "shift_steps": 1,
+    "terminal_extension_defined": false,
+    "current_model_feasibility_check_required": true,
+    "future_realized_data_used": false,
+    "physical_state_authority": false
+  },
+  "native_start_portfolio": [
+    "causal shifted previous plan",
+    "same-issue restricted-master feasible incumbent"
+  ],
+  "root_column_generation": {
+    "pricing_batch_per_mess": 32,
+    "pricing_closure_changed": false,
+    "lower_bound_authority_changed": false
+  },
+  "restricted_primal_phase_seconds": {
+    "minimum": 30,
+    "meaningful_incumbent_stall": 60,
+    "maximum": 300
+  },
+  "invariants": {
+    "AC_QCP_changed": false,
+    "feasible_set_changed": false,
+    "objective_changed": false,
+    "global_gap_target": 0.03,
+    "restricted_master_objbound_is_global_authority": false,
+    "compact_native_objbound_is_global_authority": true
+  }
+}

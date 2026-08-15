@@ -1,0 +1,63 @@
+{
+  "release": "R25M_B6C4_RELIABILITY_STRONG_BRANCHING",
+  "conversation": "A",
+  "stage": "B6-C4",
+  "status": "STATIC_IMPLEMENTATION_READY",
+  "parent": "R25M_B6C3_TRUE_DUAL_CERTIFIED_DUAL_STABILIZATION",
+  "purpose": "Replace fractionality-only branching with selection-only reliability strong branching while preserving exact child pricing as the sole lower-bound authority.",
+  "changes": {
+    "fractionality_only_branching_removed": true,
+    "strong_branching_enabled_default": true,
+    "candidate_limit_default": 4,
+    "probe_time_limit_s_default": 1.5,
+    "early_horizon_shortlist_weight_default": 0.35,
+    "pseudocost_reliability_default": 2,
+    "mobility_and_nonmobility_candidate_classes_compared": true,
+    "selection_only_probe_objectives": true,
+    "exact_child_all_column_pricing_still_required": true,
+    "pseudocost_updated_from_exact_child_lower_bound_improvement": true
+  },
+  "scientific_contract": {
+    "H": 54,
+    "cadence_min": 5,
+    "economic_mipgap_target": 0.03,
+    "threads": 1,
+    "future_actual_optimizer_use": false,
+    "future_D2_reinjection": false,
+    "posthoc_same_issue_MIP_start": false,
+    "physical_feasible_set_changed": false,
+    "objective_changed": false,
+    "fresh_exact_opendss_gate_changed": false
+  },
+  "certificate_contract": {
+    "strong_probe_bound_is_authority": false,
+    "pseudocost_is_authority": false,
+    "branch_partition_is_exact": true,
+    "child_lower_bound_requires_true_dual_all_column_pricing_closure": true,
+    "restricted_probe_master_can_only_select_branch": true
+  },
+  "runtime_policy": {
+    "long_issue152_solve_in_C4": false,
+    "C4_is_implementation_and_proof_only": true,
+    "performance_effect_measured_at_C5_integrated_gate": true
+  },
+  "hashes": {
+    "main_py_sha256": "f7b5d12f3e0f1933a928d3955d573e4c12597686aa1512302f2f791d34973bf6",
+    "decomposition_module_sha256": "a740625c51c31bee5e8c88b99bafad5687c2cee743f8e9919553d9db3da35ca4",
+    "parent_C3_decomposition_module_sha256": "df4802da78538dd5c48f1ecc07c2d8d69e91e5fe89882a9b7e42477e7d8e56ed"
+  },
+  "proof_summary": {
+    "exact_child_pricing_closure_still_required": true,
+    "integer_branch_partition_cases": 1000,
+    "late_horizon_fractionality_only_rule_removed": true,
+    "long_issue152_solve": false,
+    "mobility_branch_partition_cases": 400,
+    "mobility_branch_partition_failures": 0,
+    "objective_changed": false,
+    "pseudocost_certificate_authority": false,
+    "scientific_feasible_set_changed": false,
+    "shortlist_early_horizon_tie_bias": true,
+    "status": "PASS",
+    "strong_branch_probe_certificate_authority": false
+  }
+}

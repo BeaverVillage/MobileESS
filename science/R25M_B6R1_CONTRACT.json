@@ -1,0 +1,26 @@
+{
+  "conversation": "A",
+  "release": "R25M_B6R1_OBJVAL_LIFECYCLE_FIX",
+  "stage": "B6/7",
+  "parent": "R25M_B6_CERTIFIED_RELAX_AND_PRICE_EXACT_DECOMPOSITION",
+  "trigger": "B6 runtime failed after an optimal continuous RMP because newly priced columns invalidated Gurobi ObjVal before audit capture",
+  "scope": "solver-orchestration lifecycle only",
+  "scientific_model_changed": false,
+  "feasible_set_changed": false,
+  "objective_changed": false,
+  "pricing_algorithm_changed": false,
+  "certificate_logic_changed": false,
+  "fix": {
+    "cache_rmp_objective_before_model_mutation": true,
+    "cache_full_relaxation_lower_bound_at_pricing_closure": true,
+    "defer_model_update_until_after_solution_attributes_are_consumed": true,
+    "write_live_column_generation_audit": true
+  },
+  "runtime_screen": {
+    "issue": 152,
+    "cg_time_limit_s": 420,
+    "integer_time_limit_s": 600,
+    "diagnostic_only": true,
+    "physical_commit": false
+  }
+}

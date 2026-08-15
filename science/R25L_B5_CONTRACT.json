@@ -1,0 +1,44 @@
+{
+  "conversation": "A",
+  "release": "R25L_B5_MONOLITHIC_GO_NO_GO_GATE",
+  "stage": "B5/7",
+  "parent": "R25K_B4_ROOT_BRANCH_STRENGTHENING",
+  "science_main_byte_identical_to_B4": true,
+  "screen_issue": 152,
+  "screen_time_limit_s": 600,
+  "diagnostic_only": true,
+  "physical_commit_forbidden": true,
+  "frozen_solver_policy": {
+    "Threads": 1,
+    "MIPGap": 0.03,
+    "MIPFocus": 3,
+    "ImproveStartGap": 0.0,
+    "MIQCPMethod": -1,
+    "CutPasses": 3,
+    "BranchPriority": {"STAY": 30, "node_occupancy": 20, "job_or_defer": 10, "charge_discharge_mode": 5}
+  },
+  "gate": {
+    "GO_immediate": "MIPGap <= 0.03 within 600 s",
+    "GO_promising_requires_all": [
+      "root_exit_s <= 120",
+      "nodes >= 300",
+      "nodes_per_second >= 0.5",
+      "MIPGap <= 0.0310",
+      "certificate_closure_fraction >= 0.80",
+      "linear_bound_slope_projected_remaining_s <= 300"
+    ],
+    "otherwise": "NO_GO_MONOLITHIC_ADVANCE_B6_EXACT_DECOMPOSITION"
+  },
+  "scientific_contract": {
+    "H54_preserved": true,
+    "cadence_5min_preserved": true,
+    "MIPGap_3pct_preserved": true,
+    "future_actual_used": false,
+    "future_D2_reinjected": false,
+    "physical_feasible_set_changed": false,
+    "objective_changed": false,
+    "Fresh_Exact_OpenDSS_contract_preserved": true
+  },
+  "next_stage_if_GO": "B7_FINAL_CLOSURE_AFTER_B5_MONOLITHIC_FREEZE",
+  "next_stage_if_NO_GO": "B6_EXACT_DECOMPOSITION"
+}

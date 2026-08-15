@@ -1,0 +1,43 @@
+{
+  "H54_structural_reduction": {
+    "FP_FQ_continuous_variables_removed": 7344,
+    "P_Q_balance_equalities_removed": 7344,
+    "dU_continuous_variables_removed": 5778,
+    "line_circle_QCP_constraints_removed_by_constant_precheck": 3510,
+    "total_continuous_variables_removed_structural": 13122,
+    "total_linear_equalities_removed_structural": 13068,
+    "voltage_recursion_equalities_removed": 5724
+  },
+  "PASS": true,
+  "actual_BUILD7AR2_topology": {
+    "decision_injection_node_count": 36,
+    "decision_skeleton_node_count": 100,
+    "edge_count": 167,
+    "node_count": 168,
+    "retained_voltage_variable_nodes_per_h": 61,
+    "root_voltage_is_constant": true,
+    "skeleton_line_node_count": 61,
+    "skeleton_transformer_node_count": 38,
+    "static_line_node_count": 65,
+    "static_node_count": 68,
+    "static_root_count": 31,
+    "static_transformer_node_count": 3
+  },
+  "expected_reduction_match": true,
+  "expected_topology_match": true,
+  "long_solver_run_executed": false,
+  "max_projected_voltage_error": 1.734723475976807e-18,
+  "max_skeleton_balance_error": 1.4210854715202004e-14,
+  "max_static_branch_flow_error": 4.440892098500626e-16,
+  "projected_voltage_bound_interval_equivalence": true,
+  "random_equivalence_trials": 300,
+  "scientific_claim": "Static-subtree branch flows are decision-independent because all 36 possible IDC/MESS decision injections are included in the retained ancestor skeleton. Eliminated voltage states are exact affine functions of one retained LINE-node dU or the anchored root constant.",
+  "source_sha256": {
+    "BUILD7AR2_PASS.tar.gz": "3b9588046cf202e2843c81e6874e0dc36d4794405eb91696c23496f9260079b0",
+    "BUILD7_GRID_LINEAR_COEFFICIENTS.npz": "f110e32b71b97c3e9374d9ff89823b0c8a96be7591832152706083146452e56a",
+    "idc12_csv": "471b7dbbf0e77ae4db01a0628ca76366757a84f33e68beb792e21c5655a6d672",
+    "service24_csv": "6b308b51bb9d40995c407fe455c681044a162d446e63dd4b95da19819977645e"
+  },
+  "stage": "A4/6",
+  "static_line_QCP_constant_replacement_equivalence": true
+}
