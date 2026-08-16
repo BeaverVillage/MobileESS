@@ -1,0 +1,3 @@
+# Stage-7 representative-week initialization method
+
+Each representative-week controller episode begins directly at the selected week boundary from a deterministic canonical cold-start physical state shared by all methods. No controller burn-in is executed. The canonical state fixes MESS energy, location, queue/running job state, WAN state, and accumulated debt before any method-specific decision. The 48-hour pre-history associated with representative-period selection is retained only as selection/input-window provenance and is not used as controller state burn-in. This is an experimental initialization assumption, not a claim about the actual physical state preceding a selected week.

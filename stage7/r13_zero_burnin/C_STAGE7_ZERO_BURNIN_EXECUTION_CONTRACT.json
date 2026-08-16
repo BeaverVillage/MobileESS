@@ -1,0 +1,49 @@
+{
+  "schema_version": "conversation_c.stage7.r13.zero_burnin_execution_contract.v1",
+  "status": "FROZEN_BEFORE_ZERO_BURNIN_CONTROLLER_OUTCOMES",
+  "representative_period_authority": {
+    "github_commit": "bfbbc7cb4bc03c131f4c26df82c7c55d231cbfc8",
+    "selection_file": "frozen_authority/REP_WEEK_SELECTION_2025_K12.csv",
+    "selection_file_sha256": "0e32d3257fdc1fafc0bbdd95ca01f270b164a9be18ffa45c060e3c490bed2577",
+    "period_selection_rerun": false
+  },
+  "controller_burn_in_steps": 0,
+  "controller_burn_in_hours": 0,
+  "selection_window_pre_history_steps": 576,
+  "selection_window_pre_history_role": "representative-period selection/input-window provenance only; not controller state evolution",
+  "episode_start": "representative_week.week_start_aest",
+  "episode_count": 12,
+  "episode_type": "INDEPENDENT_REPRESENTATIVE_WEEK_COLD_START",
+  "initialization_mode": "DETERMINISTIC_CANONICAL_COLD_START",
+  "method_independent_initial_state": true,
+  "same_initialization_rule_across_all_12_representative_weeks": true,
+  "initial_state_assumption": "experimental cold-start control variable; not the actual physical state preceding the selected week",
+  "future_actual_used": false,
+  "future_D2_reinjected": false,
+  "future_plans_persisted": false,
+  "h0_only_physical_commit": true,
+  "stage7_evaluation_steps_executed": 0,
+  "seven_day_result_generation_downstream": true,
+  "restart_validation": {
+    "rule": "lowest frozen medoid_rank in each season",
+    "candidate_ids": [
+      "W02_2025-01-13",
+      "W10_2025-03-10",
+      "W25_2025-06-23",
+      "W38_2025-09-22"
+    ],
+    "required_count": 4,
+    "transition_count_per_candidate": 1,
+    "comparison": "accepted h0 POST state hash equals recreated-controller next PRE state hash"
+  },
+  "forbidden": [
+    "12x576 controller burn-in",
+    "old 11 month-boundary E7A execution",
+    "old E7B washout matrix execution",
+    "12x2016 evaluation as a Stage-7 prerequisite",
+    "future actual",
+    "future D2 reinjection",
+    "future optimizer plans in physical state",
+    "post-outcome initialization retuning"
+  ]
+}
