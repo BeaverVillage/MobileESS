@@ -5209,10 +5209,10 @@ index 0000000..5f666dc
 +}
 diff --git a/performance/post_stage15_runtime_acceleration/PERFORMANCE_RESULT/FINAL/FINAL_SOURCE_MANIFEST.json b/performance/post_stage15_runtime_acceleration/PERFORMANCE_RESULT/FINAL/FINAL_SOURCE_MANIFEST.json
 new file mode 100644
-index 0000000..2c415c9
+index 0000000..4e921f6
 --- /dev/null
 +++ b/performance/post_stage15_runtime_acceleration/PERFORMANCE_RESULT/FINAL/FINAL_SOURCE_MANIFEST.json
-@@ -0,0 +1,51 @@
+@@ -0,0 +1,67 @@
 +{
 +  "actual_evidence_directories": [
 +    "/home/jaewon/mobile_ess_work/frozen_artifacts/POST_STAGE15_RUNTIME_CANDIDATES/M1_7ISSUE_SEED0_LEGACY",
@@ -5226,11 +5226,27 @@ index 0000000..2c415c9
 +    },
 +    {
 +      "path": "performance/post_stage15_runtime_acceleration/package/runtime/W02_POLICY_EPISODE_RUNNER.py",
-+      "sha256": "c8713ed222814b0bb895e9d72dc3d4a8003ab03be664006f3e6a296175cd4246"
++      "sha256": "8645bf3891147eb5ca3205c461cbd3e9254b1f38fa43478dbfa1b9299e267d82"
 +    },
 +    {
 +      "path": "performance/post_stage15_runtime_acceleration/package/RUN_W02_4POLICY_ACTUAL.sh",
 +      "sha256": "74776197f13c4b191abfa8a897eeac83f0ba209277c659397063873d0aaad664"
++    },
++    {
++      "path": "performance/post_stage15_runtime_acceleration/package/RUN_FIRST6_REP_WEEKS_ACTUAL.sh",
++      "sha256": "a263d984fd093a28061c67fd7d1eb4b3266d58b537fbd922e3b9f0190ee1c755"
++    },
++    {
++      "path": "performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_REP_WEEK_SHARED_SOURCES.sh",
++      "sha256": "f0be03ac8031e1b224539f23c336a26962e6060528fda1cd8ff086c0bfc30389"
++    },
++    {
++      "path": "performance/post_stage15_runtime_acceleration/package/tools/PREFLIGHT_FIRST6_REP_WEEKS.py",
++      "sha256": "f3e9ec0215e2793fa52dbd0bb7146fda29b8a0a7126d52bd8c491af473bc2584"
++    },
++    {
++      "path": "performance/post_stage15_runtime_acceleration/package/tools/SHOW_FIRST6_REP_WEEKS_PROGRESS.py",
++      "sha256": "c7314b8b1e071fecd08baa2cc4afc90b364a081bcbf9095a7172abe83b211880"
 +    },
 +    {
 +      "path": "performance/post_stage15_runtime_acceleration/package/tools/BENCHMARK_POST15_4X4_SHORT.sh",
@@ -20003,10 +20019,10 @@ index 0000000..897c83e
 +}
 diff --git a/performance/post_stage15_runtime_acceleration/package/00_READ_FIRST.md b/performance/post_stage15_runtime_acceleration/package/00_READ_FIRST.md
 new file mode 100644
-index 0000000..253b597
+index 0000000..5fdbc5d
 --- /dev/null
 +++ b/performance/post_stage15_runtime_acceleration/package/00_READ_FIRST.md
-@@ -0,0 +1,13 @@
+@@ -0,0 +1,15 @@
 +# W02 final M1–M4 production binding
 +
 +This package binds W02 to the final post-Stage15 comparison: M1 proposed Event30 + Local Repair mobile, M2 Fixed30 mobile, M3 Event30 without Local Repair mobile, and M4 fixed-location ESS mobility ablation. P4 Fixed15 is supplementary only. All four methods share canonical zero-burn-in PRE state `4fd2b4e8a6ef052fd08454f9888ad1e08e2706ed99d1118cac6d96d33c8a5a7b` and the outcome-blind sites MESS01=STA09, MESS02=IDC12, MESS03=STA07, MESS04=STA11.
@@ -20015,6 +20031,8 @@ index 0000000..253b597
 +
 +Bounded actual validation ran 7 of 2016 issues per method; it did not run a full week or the other 11 weeks. The measured contended ETA bottleneck is 2.229 h/week; use 2.3–2.5 h/week for planning. See `../PERFORMANCE_RESULT/` for evidence and rollback instructions.
 +
++`RUN_FIRST6_REP_WEEKS_ACTUAL.sh` runs W02, W07, W10, W17, W18, and W25 sequentially; each week runs M1–M4 concurrently at 4 processes × 4 threads and is resumable.
++
 +Run the full W02 episode only when ready:
 +```bash
 +cd /home/jaewon/mobile_ess_work/post_stage15_runtime_acceleration/performance/post_stage15_runtime_acceleration/package
@@ -20022,10 +20040,10 @@ index 0000000..253b597
 +```
 diff --git a/performance/post_stage15_runtime_acceleration/package/A_TO_B_10_W02_4POLICY_PRODUCTION_BINDING.json b/performance/post_stage15_runtime_acceleration/package/A_TO_B_10_W02_4POLICY_PRODUCTION_BINDING.json
 new file mode 100644
-index 0000000..fd4f189
+index 0000000..4605bfd
 --- /dev/null
 +++ b/performance/post_stage15_runtime_acceleration/package/A_TO_B_10_W02_4POLICY_PRODUCTION_BINDING.json
-@@ -0,0 +1,103 @@
+@@ -0,0 +1,105 @@
 +{
 +  "B_request_archive_sha256": "6c9b50922c2093679e06c5b890ffcb3597439571ac9ac9e8c11d1a89b6cdda5f",
 +  "D_current_handoff_sha256": "a9a2c16426786f01543f4a772007cdb1fc2b02c0377dd45b8138545e5d67fbf1",
@@ -20044,6 +20062,8 @@ index 0000000..fd4f189
 +  "delivery_root": "/home/jaewon/mobile_ess_work/frozen_artifacts/B_W02_4POLICY_ACTUAL_PILOT_CURRENT",
 +  "evaluation_end_step_inclusive": 5471,
 +  "evaluation_start_step": 3456,
++  "first6_launcher_relpath": "RUN_FIRST6_REP_WEEKS_ACTUAL.sh",
++  "first6_launcher_sha256": "a263d984fd093a28061c67fd7d1eb4b3266d58b537fbd922e3b9f0190ee1c755",
 +  "fixed_policy_soft_event_semantics": "SOFT/DEVIATION_EVENT_DISABLED; PERIODIC_MAX_REFRESH + UNIVERSAL_HARD_FAIL_CLOSED_HANDLING",
 +  "future_actual_used": false,
 +  "future_plans_persisted": false,
@@ -20101,7 +20121,7 @@ index 0000000..fd4f189
 +    }
 +  ],
 +  "production_adapter_entrypoint": "runtime.W02_POLICY_EPISODE_RUNNER:main",
-+  "production_adapter_sha256": "c8713ed222814b0bb895e9d72dc3d4a8003ab03be664006f3e6a296175cd4246",
++  "production_adapter_sha256": "8645bf3891147eb5ca3205c461cbd3e9254b1f38fa43478dbfa1b9299e267d82",
 +  "r26_parent_adapter_relpath": "runtime/production_adapter.py",
 +  "r26_parent_adapter_sha256": "85eb2334b0fde228bc82a603ab07ec145f63794866ce2bb203dff63a3de1ebd2",
 +  "remaining_11_weeks_executed_by_this_launcher": false,
@@ -20129,6 +20149,75 @@ index 0000000..fd4f189
 +  "source_cache_root": "/home/jaewon/mobile_ess_work/frozen_artifacts/B_W02_SHARED_EXOGENOUS_SOURCE_CURRENT",
 +  "status": "PASS_POST_STAGE15_ACCELERATION_READY_FOR_W02_ACTUAL_EXECUTION"
 +}
+diff --git a/performance/post_stage15_runtime_acceleration/package/RUN_FIRST6_REP_WEEKS_ACTUAL.sh b/performance/post_stage15_runtime_acceleration/package/RUN_FIRST6_REP_WEEKS_ACTUAL.sh
+new file mode 100644
+index 0000000..be43d48
+--- /dev/null
++++ b/performance/post_stage15_runtime_acceleration/package/RUN_FIRST6_REP_WEEKS_ACTUAL.sh
+@@ -0,0 +1,63 @@
++#!/usr/bin/env bash
++set -Eeuo pipefail
++HERE="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
++PY="/home/jaewon/miniconda3/envs/power_v61/bin/python"
++REPO="/home/jaewon/mobile_ess_work/post_stage15_runtime_acceleration"
++DELIVERY="/home/jaewon/mobile_ess_work/frozen_artifacts/B_FIRST6_REP_WEEKS_ACTUAL_CURRENT"
++LOGROOT="/home/jaewon/mobile_ess_work/logs/B_FIRST6_REP_WEEKS_ACTUAL_CURRENT"
++mkdir -p "$DELIVERY" "$LOGROOT"
++exec 9>"$DELIVERY/.FIRST6_RUN.lock"
++flock -n 9 || { echo "FAIL_CLOSED: another first-six launcher is active" >&2; exit 2; }
++export PYTHONHASHSEED=0 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
++
++mapfile -t groups < <($PY "$HERE/tools/CPU_AFFINITY_4X4.py" --plain)
++[[ ${#groups[@]} -eq 4 ]] || { echo "FAIL_CLOSED: CPU 4x4 topology unavailable" >&2; exit 2; }
++$PY "$HERE/tools/PREFLIGHT_W02_4POLICY.py" --repo "$REPO"
++$PY "$HERE/tools/PREFLIGHT_FIRST6_REP_WEEKS.py" --repo "$REPO"
++
++weeks=(W02_2025-01-13 W07_2025-02-17 W10_2025-03-10 W17_2025-04-28 W18_2025-05-05 W25_2025-06-23)
++starts=(3456 13536 19584 33696 35712 49824)
++slots=(M1_PROPOSED_EVENT30_LOCAL_REPAIR_MOBILE M2_FIXED30_MOBILE M3_EVENT30_NO_LOCAL_REPAIR_MOBILE M4_FIXED_LOCATION_ESS_MOBILITY_ABLATION)
++configs=(
++ "$HERE/configs/P1_PROPOSED_EVENT30_LOCAL_REPAIR.json"
++ "$HERE/configs/P2_FIXED30.json"
++ "$HERE/configs/P3_EVENT30_NO_LOCAL_REPAIR.json"
++ "$HERE/configs/M4_FIXED_LOCATION_ESS_MOBILITY_ABLATION.json"
++)
++active_pids=()
++cleanup() {
++  if (( ${#active_pids[@]} )); then kill "${active_pids[@]}" 2>/dev/null || true; wait "${active_pids[@]}" 2>/dev/null || true; fi
++}
++trap cleanup INT TERM
++
++for wi in 0 1 2 3 4 5; do
++  week="${weeks[$wi]}"; start="${starts[$wi]}"; weekroot="$DELIVERY/$week"; weeklog="$LOGROOT/$week"
++  mkdir -p "$weekroot" "$weeklog"
++  if [[ -f "$weekroot/WEEK_STATUS.json" ]] && grep -q '"status":"PASS"' "$weekroot/WEEK_STATUS.json"; then
++    echo "[FIRST6] skip completed $week"; continue
++  fi
++  echo "[FIRST6] prepare/reuse source $week start=$start"
++  bash "$HERE/scripts/PREPARE_REP_WEEK_SHARED_SOURCES.sh" "$week" "$start" "$REPO"
++  if [[ "$week" == "W02_2025-01-13" ]]; then shared="/home/jaewon/mobile_ess_work/frozen_artifacts/B_W02_SHARED_EXOGENOUS_SOURCE_CURRENT";
++  else shared="/home/jaewon/mobile_ess_work/frozen_artifacts/B_${week}_SHARED_EXOGENOUS_SOURCE_CURRENT"; fi
++  active_pids=()
++  for mi in 0 1 2 3; do
++    out="$weekroot/${slots[$mi]}"; mkdir -p "$out"
++    taskset -c "${groups[$mi]}" "$PY" -u "$HERE/runtime/W02_POLICY_EPISODE_RUNNER.py" \
++      --repo "$REPO" --config "${configs[$mi]}" --output "$out" --candidate-id "$week" --shared-root "$shared" \
++      >"$weeklog/${slots[$mi]}.log" 2>&1 &
++    active_pids+=("$!")
++  done
++  failed=0
++  for pid in "${active_pids[@]}"; do if ! wait "$pid"; then failed=1; fi; done
++  active_pids=()
++  (( failed == 0 )) || { echo "[FIRST6] FAIL $week; partial results preserved" >&2; exit 2; }
++  "$PY" "$HERE/authority/D/tools/validate_B_W02_4POLICY_delivery_structure.py" \
++    --delivery-root "$weekroot" --candidate-id "$week" --start-index "$start" >"$weeklog/STRUCTURE_VALIDATION.json"
++  printf '{"status":"PASS","candidate_id":"%s","start_index":%s,"methods":4,"issues_per_method":2016}\n' "$week" "$start" >"$weekroot/WEEK_STATUS.json"
++  echo "[FIRST6] PASS $week"
++done
++trap - INT TERM
++echo "FIRST6_REP_WEEKS_STATUS=PASS"
++echo "FIRST6_DELIVERY_ROOT=$DELIVERY"
++echo "FIRST6_LOG_ROOT=$LOGROOT"
 diff --git a/performance/post_stage15_runtime_acceleration/package/RUN_W02_4POLICY_ACTUAL.sh b/performance/post_stage15_runtime_acceleration/package/RUN_W02_4POLICY_ACTUAL.sh
 new file mode 100644
 index 0000000..fcacb1a
@@ -20225,14 +20314,15 @@ index 0000000..fcacb1a
 +exit "$overall"
 diff --git a/performance/post_stage15_runtime_acceleration/package/SHA256SUMS.txt b/performance/post_stage15_runtime_acceleration/package/SHA256SUMS.txt
 new file mode 100644
-index 0000000..19e6676
+index 0000000..d63f80e
 --- /dev/null
 +++ b/performance/post_stage15_runtime_acceleration/package/SHA256SUMS.txt
-@@ -0,0 +1,60 @@
-+e3d1bdce28cb2d64973e300b86ba70ef58f599bb46bb8bb1c7917c60b9a5abf8  00_READ_FIRST.md
-+eee15d1e38a8fbb7b3448dd5136dd4abe110a69c90d98b54d09353295108e60b  A_TO_B_10_W02_4POLICY_PRODUCTION_BINDING.json
+@@ -0,0 +1,64 @@
++3e4041759c6d9018d61ae42c83bfe6bacc6abb33419323663132365d75c49682  00_READ_FIRST.md
++c9670f93dd325cd4eee700e278dd47dbd84e6ed26e727f3c5c025312e34519dd  A_TO_B_10_W02_4POLICY_PRODUCTION_BINDING.json
++a263d984fd093a28061c67fd7d1eb4b3266d58b537fbd922e3b9f0190ee1c755  RUN_FIRST6_REP_WEEKS_ACTUAL.sh
 +74776197f13c4b191abfa8a897eeac83f0ba209277c659397063873d0aaad664  RUN_W02_4POLICY_ACTUAL.sh
-+bdf10c3d4ca5bb2853322182b7707fbc59b7ca2697ed15fdd4f304fb263d23eb  STATIC_VALIDATION.json
++3a726fcbabf4b3efc31d12a57dc24fac96402bd13676b3b3d4d3057adab76193  STATIC_VALIDATION.json
 +46623e1b171f1cf3a34ec0b8a532fdc9582851f68decacf9aefa70b4d3ce822e  authority/A/CHECKPOINT_FAILURE_PERSISTENCE.json
 +2c76aea0cc7ede0daf2cd7fa76c7cfe0b00fc6e0f035a11228b791d61d534918  authority/A/F7_INDEPENDENT_JOB_AUTHORITY_BINDING.json
 +85d3d723d3f29c0fd24c1310c71b1b3279d028838775aa679ed93c4763851f38  authority/A/FRESH_EXACT_OPENDSS_BINDING.json
@@ -20265,7 +20355,7 @@ index 0000000..19e6676
 +38e9a70a53fc72feebd995835def6cc3cd3131088fe7f5c34b14b3fae9ed2829  authority/D/A_TO_B_10_W02_4POLICY_PRODUCTION_BINDING_TEMPLATE.json
 +d024942f357e455e08c3beec5158430bb663c9eb5bd8efcf3d311c3c111d7c66  authority/D/B_TO_A_10_W02_4POLICY_PRODUCTION_BINDING_REQUEST.json
 +09c0f4adea436a879820363203899726a4f07f514cc411ec2749c2e2dfa7bf24  authority/D/tools/build_B_TO_D_W02_handoff.sh
-+fa56563ad49f426e12efeaa829e008053e6db54d11b98e1f23ffaef9797cc88a  authority/D/tools/validate_B_W02_4POLICY_delivery_structure.py
++a98ef1bc40e419f8624afc5c368c659509cda1495d80ca6438f33321e83f8006  authority/D/tools/validate_B_W02_4POLICY_delivery_structure.py
 +f0eef024f5a3291a8aa8bb2db19822191f0dab7c2ff495606c1e5f5787066378  authority/POST_STAGE15_M1_M4_SUPERSESSION.json
 +919a30ebe9c2d349a281a0021bc453fb43b969dd447c915e86de4a0d7e235a8e  configs/M4_FIXED_LOCATION_ESS_MOBILITY_ABLATION.json
 +a33f90af96e8d861154e1caa182ac9d47d024a49e24a9ace0b700b5b12e9c0e1  configs/P1_PROPOSED_EVENT30_LOCAL_REPAIR.json
@@ -20276,22 +20366,25 @@ index 0000000..19e6676
 +c09ff129e8d52ef1fa279d9dd229d7dd41620a519f58a27509ab79933a0a7f90  runtime/MobileESS_A_STEP4_LOCAL_RUNNER_20260815_R4.py
 +3d59df820b1348d0efb04d590547b9a43536efb45e58fbfea0d4c21a5d8ace77  runtime/MobileESS_A_STEP5_LOCAL_REPAIR_RUNNER_20260815_R3.py
 +b397734132b68655ac200ea2144dd0b5b8500e47ec1a2288971f3905821ccd78  runtime/MobileESS_A_STEP6_ASYNC_FULL_REPLAN_RUNNER_20260815_R2.py
-+c8713ed222814b0bb895e9d72dc3d4a8003ab03be664006f3e6a296175cd4246  runtime/W02_POLICY_EPISODE_RUNNER.py
++8645bf3891147eb5ca3205c461cbd3e9254b1f38fa43478dbfa1b9299e267d82  runtime/W02_POLICY_EPISODE_RUNNER.py
 +a1f33c51863bbf0e8abffedd360f1cd89f1cc2c0e86ae8aa996ba8f9ef3c8e6c  runtime/W02_POLICY_EPISODE_RUNNER_FROZEN_A1F33C.py
 +4b98bdd3588d7a6449df9ad9896dcd8ab3999909c7354c7ada16e416a974b705  runtime/a_b9_plan_binding.py
 +297dd5d69a140a3962f974ca6e6feb9b546c0fc6f601a21634b05dc72c2beadf  runtime/a_b9_portable_factories.py
 +85eb2334b0fde228bc82a603ab07ec145f63794866ce2bb203dff63a3de1ebd2  runtime/production_adapter.py
-+c567278325994322dc93e9d252a44581bd437fb00f81e65545061cbf4856a562  scripts/PREPARE_W02_MOBILITY_SOURCE.py
-+750dd27ccc2240958167c8f438c48071af8579db30f4f89652b68ab061e7b8e6  scripts/PREPARE_W02_POWER_PRICE_SOURCE.py
++f0be03ac8031e1b224539f23c336a26962e6060528fda1cd8ff086c0bfc30389  scripts/PREPARE_REP_WEEK_SHARED_SOURCES.sh
++4886b829fb19efc90926eca6cb4f2fedaa03d27663c6c72830997806011b7ed0  scripts/PREPARE_W02_MOBILITY_SOURCE.py
++5c976a2c2476b3816908ede45ce776c086c094541dd9bcfa0a979b32662be467  scripts/PREPARE_W02_POWER_PRICE_SOURCE.py
 +c07b8b8ba46738425a6ada59c0d1667e9c7ea88b8d9a54f1ec033593a73fca9f  scripts/PREPARE_W02_SHARED_SOURCES.sh
 +b13043a5ce797635e50ad5c06647b069037be65ee12906101cffee4ff5797021  tools/BENCHMARK_POST15_4X4_SHORT.sh
 +1919df7f013d09474353c28f89afd4fa32112f2df95b152aef045e50f85c72ce  tools/CPU_AFFINITY_4X4.py
 +c9c7882558cb13b0c4a56ed49df8b2991ccc613a3748cbdc0188e30e87692500  tools/ENSURE_PR4_WORKTREE.py
-+b31897ea28296ef4bc9438cd2e76ad9e5595f2cbb913227ac976908ddcc01871  tools/PREFLIGHT_W02_4POLICY.py
++f3e9ec0215e2793fa52dbd0bb7146fda29b8a0a7126d52bd8c491af473bc2584  tools/PREFLIGHT_FIRST6_REP_WEEKS.py
++5891dce134c2c51c3e2b84885335e7e63dfbc9a612880d25db7f24f0f742276e  tools/PREFLIGHT_W02_4POLICY.py
++c7314b8b1e071fecd08baa2cc4afc90b364a081bcbf9095a7172abe83b211880  tools/SHOW_FIRST6_REP_WEEKS_PROGRESS.py
 +2ddd7cc76d6701240882ac048de742dd7494f41c67e0233ec2b4bd2201a372a4  tools/SHOW_W02_PROGRESS.py
 diff --git a/performance/post_stage15_runtime_acceleration/package/STATIC_VALIDATION.json b/performance/post_stage15_runtime_acceleration/package/STATIC_VALIDATION.json
 new file mode 100644
-index 0000000..8f35fb5
+index 0000000..0424703
 --- /dev/null
 +++ b/performance/post_stage15_runtime_acceleration/package/STATIC_VALIDATION.json
 @@ -0,0 +1,71 @@
@@ -20354,14 +20447,14 @@ index 0000000..8f35fb5
 +  ],
 +  "python_ast": {
 +    "all_pass": true,
-+    "checked": 18,
++    "checked": 20,
 +    "errors": []
 +  },
 +  "remaining_11_weeks_executed": false,
 +  "schema_version": "mobileess.post_stage15.m1_m4.static_validation.v2",
 +  "shell_syntax": {
 +    "all_pass": true,
-+    "checked": 4,
++    "checked": 6,
 +    "errors": []
 +  },
 +  "status": "PASS_STATIC_AND_BOUNDED_ACTUAL"
@@ -76326,10 +76419,10 @@ index 0000000..a543fd9
 +echo "B_TO_D_W02_HANDOFF=$OUT"
 diff --git a/performance/post_stage15_runtime_acceleration/package/authority/D/tools/validate_B_W02_4POLICY_delivery_structure.py b/performance/post_stage15_runtime_acceleration/package/authority/D/tools/validate_B_W02_4POLICY_delivery_structure.py
 new file mode 100644
-index 0000000..ab63eee
+index 0000000..aae1dc7
 --- /dev/null
 +++ b/performance/post_stage15_runtime_acceleration/package/authority/D/tools/validate_B_W02_4POLICY_delivery_structure.py
-@@ -0,0 +1,50 @@
+@@ -0,0 +1,52 @@
 +#!/usr/bin/env python3
 +from __future__ import annotations
 +import argparse,csv,json,hashlib
@@ -76348,8 +76441,10 @@ index 0000000..ab63eee
 +]
 +def load(p): return json.loads(Path(p).read_text(encoding="utf-8"))
 +def main():
-+ ap=argparse.ArgumentParser(); ap.add_argument("--delivery-root",required=True); a=ap.parse_args()
++ ap=argparse.ArgumentParser(); ap.add_argument("--delivery-root",required=True)
++ ap.add_argument("--candidate-id",default="W02_2025-01-13");ap.add_argument("--start-index",type=int,default=3456);a=ap.parse_args()
 + root=Path(a.delivery_root)
++ expected_end=a.start_index+2015
 + failures=[]; details=[]
 + for pd,expected_policy_id in POLICIES.items():
 +  p=root/pd
@@ -76363,8 +76458,8 @@ index 0000000..ab63eee
 +  if missing: failures.append(f"{pd}: missing result tables {missing}")
 +  if (p/"episode_manifest.json").is_file():
 +   m=load(p/"episode_manifest.json")
-+   if m.get("scenario_id",m.get("candidate_id"))!="W02_2025-01-13": failures.append(f"{pd}: wrong W02 scenario")
-+   if int(m.get("evaluation_start_step",-1))!=3456 or int(m.get("evaluation_end_step_inclusive",-1))!=5471:
++   if m.get("scenario_id",m.get("candidate_id"))!=a.candidate_id: failures.append(f"{pd}: wrong representative-week scenario")
++   if int(m.get("evaluation_start_step",-1))!=a.start_index or int(m.get("evaluation_end_step_inclusive",-1))!=expected_end:
 +    failures.append(f"{pd}: wrong evaluation boundaries")
 +   if int(m.get("controller_burn_in_steps",-1))!=0: failures.append(f"{pd}: burn-in must be 0")
 +   if m.get("method_id")!="B5": failures.append(f"{pd}: method_id must be B5")
@@ -80226,12 +80321,12 @@ index 0000000..f3a834d
 +    raise SystemExit(main())
 diff --git a/performance/post_stage15_runtime_acceleration/package/runtime/W02_POLICY_EPISODE_RUNNER.py b/performance/post_stage15_runtime_acceleration/package/runtime/W02_POLICY_EPISODE_RUNNER.py
 new file mode 100644
-index 0000000..af4d22d
+index 0000000..4e7c69c
 --- /dev/null
 +++ b/performance/post_stage15_runtime_acceleration/package/runtime/W02_POLICY_EPISODE_RUNNER.py
-@@ -0,0 +1,1230 @@
+@@ -0,0 +1,1268 @@
 +#!/usr/bin/env python3
-+"""W02 2016-issue actual B5 hierarchical-controller policy runner.
++"""Representative-week 2016-issue actual B5 hierarchical-controller runner.
 +
 +Scientific core:
 +- exact PR4/PR2 frozen science/main.py (SHA locked);
@@ -80267,6 +80362,9 @@ index 0000000..af4d22d
 +START=3456
 +END=5471
 +COUNT=2016
++CANDIDATE_ID="W02_2025-01-13"
++CANDIDATE_MONTH="2025-01"
++PROGRESS_FILE="W02_PROGRESS.json"
 +H=54
 +PR4="06a94bccc0a232ae7ea09cbc7b00962162c10f4d"
 +SCIENCE_SHA="cfdc7fe3069966d53d9d9246eb9c009a63a5536d265cddc9e5df145b5c6f33e8"
@@ -80279,6 +80377,7 @@ index 0000000..af4d22d
 +SHARED=Path("/home/jaewon/mobile_ess_work/frozen_artifacts/B_W02_SHARED_EXOGENOUS_SOURCE_CURRENT")
 +DELIVERY=Path("/home/jaewon/mobile_ess_work/frozen_artifacts/B_W02_4POLICY_ACTUAL_PILOT_CURRENT")
 +LOGROOT=Path("/home/jaewon/mobile_ess_work/logs/B_W02_4POLICY_ACTUAL_PILOT_CURRENT")
++PRE_RESUME_PATH=HERE.parent/"INITIALIZATION/PRODUCTION_INPUT/W02_2025-01-13.resume_state.json"
 +
 +POWER_KEYS=(
 + "issues","target_steps","q90_gross_background_p_kw","q10_pv_available_kw",
@@ -80414,13 +80513,13 @@ index 0000000..af4d22d
 +  axis0=pd.Timestamp("2024-12-31T14:00:00Z");first=axis0+pd.Timedelta(minutes=5*START);last=axis0+pd.Timedelta(minutes=5*END)
 +  for name,frame,mult in (("actual",actual,48),("inference",inference,12)):
 +   cov=frame[(frame["timestamp_utc"]>=first)&(frame["timestamp_utc"]<=last)]
-+   if cov["timestamp_utc"].nunique()!=COUNT or len(cov)!=COUNT*mult:raise RuntimeError(f"W02 rack {name} coverage drift")
++   if cov["timestamp_utc"].nunique()!=COUNT or len(cov)!=COUNT*mult:raise RuntimeError(f"{CANDIDATE_ID} rack {name} coverage drift")
 +  fcov=forecast[(forecast["timestamp_utc"]>=first)&(forecast["timestamp_utc"]<=last)]
-+  if fcov["timestamp_utc"].nunique()!=COUNT:raise RuntimeError("W02 rack forecast coverage drift")
++  if fcov["timestamp_utc"].nunique()!=COUNT:raise RuntimeError(f"{CANDIDATE_ID} rack forecast coverage drift")
 +  self.aidx=actual.set_index(["timestamp_utc","rack_pool_id"]).sort_index()
 +  self.iidx=inference.set_index(["timestamp_utc","idc_id"]).sort_index()
 +  self.qidx=forecast.set_index("timestamp_utc").sort_index()
-+  # Compact W02-only scalar indexes preserve the exact legacy arithmetic while
++  # Compact episode-only scalar indexes preserve the exact legacy arithmetic while
 +  # avoiding thousands of pandas MultiIndex scalar extractions per issue.
 +  aw=actual[(actual["timestamp_utc"]>=first)&(actual["timestamp_utc"]<=last)]
 +  iw=inference[(inference["timestamp_utc"]>=first)&(inference["timestamp_utc"]<=last+pd.Timedelta(minutes=5*53))]
@@ -80435,7 +80534,7 @@ index 0000000..af4d22d
 +  env=scope["env"];env.aidx=self.aidx;env.iidx=self.iidx;env.qidx=self.qidx
 +  p=Path(out)/"A_B10_FULL_YEAR_RACK_BINDING.json"
 +  if not p.is_file():
-+   jw(p,{"status":"PASS","candidate_id":"W02_2025-01-13","actual_sha256":self.helper.RACK_ACTUAL_SHA,
++   jw(p,{"status":"PASS","candidate_id":CANDIDATE_ID,"actual_sha256":self.helper.RACK_ACTUAL_SHA,
 +         "inference_sha256":self.helper.RACK_INFERENCE_SHA,"forecast_sha256":self.helper.RACK_FORECAST_SHA,
 +         "source_loaded_once_per_policy_process":True,"current_actual_read_policy":"current issue only","future_actual_used":False})
 +
@@ -80474,7 +80573,9 @@ index 0000000..af4d22d
 + def __init__(self,root:Path,required_end:int=END,allow_partial:bool=False):
 +  self.root=root
 +  self._block=-1;self._power={};self._price={}
-+  self.pp=load_json(root/"power_price/A_B10_W02_POWER_PRICE_SOURCE_AUTHORITY.json")
++  pp_generic=root/"power_price/REP_WEEK_POWER_PRICE_SOURCE_AUTHORITY.json"
++  pp_w02=root/"power_price/A_B10_W02_POWER_PRICE_SOURCE_AUTHORITY.json"
++  self.pp=load_json(pp_generic if pp_generic.is_file() else pp_w02)
 +  shared_path=root/"SHARED_EXOGENOUS_AUTHORITY.json"
 +  self.shared=load_json(shared_path) if shared_path.is_file() else {"status":"BOUNDED_PARTIAL_SOURCE_ONLY"}
 +  if self.pp.get("status")!="PASS":raise RuntimeError("power/price source authority not PASS")
@@ -80485,10 +80586,10 @@ index 0000000..af4d22d
 +  if not self.mob_index.is_file() or (self.mob_index==partial_index and not allow_partial):
 +   raise RuntimeError("final mobility index unavailable outside bounded benchmark mode")
 +  self.mob_rows={int(r["issue_step"]):r for r in load_csv(self.mob_index)}
-+  if any(i not in self.mob_rows for i in range(START,required_end+1)):raise RuntimeError("W02 requested mobility coverage incomplete")
++  if any(i not in self.mob_rows for i in range(START,required_end+1)):raise RuntimeError(f"{CANDIDATE_ID} requested mobility coverage incomplete")
 +  self.mobility_shas=frozenset(str(r.get("sha256","")).lower() for r in self.mob_rows.values())
 +  if any(len(x)!=64 or any(c not in "0123456789abcdef" for c in x) for x in self.mobility_shas):
-+   raise RuntimeError("W02 mobility index contains an invalid SHA-256")
++   raise RuntimeError(f"{CANDIDATE_ID} mobility index contains an invalid SHA-256")
 +  self.bank=root/"mobility/E4B_FULLFIT_TEMPLATE_BANK_129.parquet"
 +  if not self.bank.is_file():raise RuntimeError("shared mobility template bank missing")
 + def _ensure(self,issue:int):
@@ -80578,7 +80679,7 @@ index 0000000..af4d22d
 +  "MOBILEESS_R25Q_VERIFIED_PREFIX_ISSUES":"0",
 +  "MOBILEESS_R25Q_RESUME_STATE_PATH":str(state_path),
 +  "MOBILEESS_RESUME_STATE_SHA256":str(state_hash),
-+  "MOBILEESS_R25Q_RESUME_SOURCE":"A-B10 W02 policy canonical PRE or preceding committed POST",
++  "MOBILEESS_R25Q_RESUME_SOURCE":f"post-Stage15 {CANDIDATE_ID} canonical PRE or preceding committed POST",
 +  "MOBILEESS_R25Q_RESUME_HINT_DIR":str(control/"empty_hints"),
 +  "MOBILEESS_R25Q_RESUME_MOVE_PLAN_NAME":"NONE.csv",
 +  "MOBILEESS_R25Q_RESUME_MESS_PLAN_NAME":"NONE.csv",
@@ -80809,8 +80910,8 @@ index 0000000..af4d22d
 +
 +def write_policy_manifest(root:Path,cfg:Mapping[str,Any],config_sha:str,source_auth:Mapping[str,Any],shared_authority_sha:str):
 + jw(root/"CONTROLLER_POLICY_MANIFEST.json",{
-+  "schema_version":"a_to_b.10.controller_policy_manifest.v1","status":"FROZEN_BEFORE_W02_POLICY_OUTCOME",
-+  "candidate_id":"W02_2025-01-13","method_id":"B5","method_config_sha256":B5_SHA,
++  "schema_version":"mobileess.post_stage15.controller_policy_manifest.v2","status":"FROZEN_BEFORE_REP_WEEK_POLICY_OUTCOME",
++  "candidate_id":CANDIDATE_ID,"method_id":"B5","method_config_sha256":B5_SHA,
 +  "policy_id":cfg["policy_id"],"slot":cfg["slot"],"resolved_config_sha256":config_sha,
 +  "base_policy":cfg["base_policy"],"event_triggered":cfg["event_triggered"],
 +  "local_repair_enabled":cfg["local_repair_enabled"],"max_refresh_steps":cfg["max_refresh_steps"],
@@ -80827,7 +80928,7 @@ index 0000000..af4d22d
 + return load_json(HERE/"authority/D/04_RESULT_CONTRACT/K9H7_RESULT_V1_SCHEMA_INVENTORY_R10.json")
 +
 +def build_results(policy_root:Path,engine:Path,cfg:Mapping[str,Any],issue_audits:list[dict[str,Any]]):
-+ schema=load_schema();run_id=f"B_W02_{cfg['slot']}_{cfg['policy_id']}";scenario="W02_2025-01-13"
++ schema=load_schema();run_id=f"B_{CANDIDATE_ID}_{cfg['slot']}_{cfg['policy_id']}";scenario=CANDIDATE_ID
 + common={"result_schema_version":RESULT_SCHEMA,"run_id":run_id,"method_id":"B5","scenario_id":scenario}
 + rolling=[];mess=[];debt=[];grid=[];opt=[];constraints=[];wan=[];rack=[];forecast=[];busphase=[]
 + started_meta={};completed=set()
@@ -80844,7 +80945,8 @@ index 0000000..af4d22d
 +  fr=load_json(d/f"exact_grid/FRESH_EXACT_OPENDSS_24SERVICE_ISSUE_{issue}.json")
 +  pre=load_json(d/"BUILD7C_PRECOMMIT_STATE.json");post=load_json(d/"BUILD7C_POSTCOMMIT_STATE.json")
 +  pst=pre.get("state",pre);qst=post.get("state",post)
-+  ts=int(fr.get("timestamp_utc_ns",0));dt=datetime.fromtimestamp(ts/1e9,tz=timezone.utc) if ts else datetime(2025,1,13,tzinfo=timezone.utc)
++  ts=int(fr.get("timestamp_utc_ns",0));fallback_date=datetime.fromisoformat(CANDIDATE_ID.split("_",1)[1]).replace(tzinfo=timezone(timedelta(hours=10)))
++  dt=datetime.fromtimestamp(ts/1e9,tz=timezone.utc) if ts else fallback_date.astimezone(timezone.utc)
 +  aest=dt.astimezone(timezone(timedelta(hours=10))).isoformat()
 +  mp=load_csv(d/"BUILD7B_FULL54_MESS_PLAN.csv")
 +  mv=load_csv(d/"BUILD7B_FULL54_MOVE_ARCS_SELECTED.csv")
@@ -80970,10 +81072,10 @@ index 0000000..af4d22d
 +  "solve_time_total_s":sum(runtimes),"solve_time_mean_s":statistics.mean(runtimes) if runtimes else None,
 +  "solve_time_p95_s":quantile(runtimes,.95),"solve_time_max_s":max(runtimes) if runtimes else None,
 +  "MIP_gap_max":max(gaps) if gaps else None,"MIP_nodes_total":sum(nodes),
-+  "notes":"W02 actual 2016-issue B5 policy episode. Slow-planner runtime is reported separately in RUNTIME_CHARACTERIZATION.json; real-time claim is not inferred from this development host."}
++  "notes":f"{CANDIDATE_ID} actual 2016-issue B5 policy episode. Slow-planner runtime is reported separately in RUNTIME_CHARACTERIZATION.json; real-time claim is not inferred from this development host."}
 + tables["run_summary"]=[summary]
 + for name in TABLES:write_csv(policy_root/f"{name}.csv",schema[name]["fields"],tables[name])
-+ obs={"schema_version":"a_to_b.10.w02.observability.v1","header_only_tables":[n for n in TABLES if n!="run_summary" and not tables[n]],
++ obs={"schema_version":"mobileess.post_stage15.rep_week.observability.v1","candidate_id":CANDIDATE_ID,"header_only_tables":[n for n in TABLES if n!="run_summary" and not tables[n]],
 +      "reason":"No trustworthy row-level source persisted by the frozen scientific engine for these tables; values are not fabricated.",
 +      "job_event_expected_cohort_from_independent_authority":True}
 + jw(policy_root/"OBSERVABILITY_GAPS.json",obs)
@@ -80995,8 +81097,13 @@ index 0000000..af4d22d
 + if cp2.returncode:raise RuntimeError("F7 validator failed")
 +
 +def main():
++ global START,END,COUNT,CANDIDATE_ID,CANDIDATE_MONTH,PROGRESS_FILE,PRE_SHA,PRE_FILE_SHA,PRE_RESUME_PATH,SHARED
 + ap=argparse.ArgumentParser()
 + ap.add_argument("--repo",required=True);ap.add_argument("--config",required=True);ap.add_argument("--output",required=True)
++ ap.add_argument("--candidate-id",default="W02_2025-01-13",
++                 help="Frozen representative-week candidate id from INITIAL_STATE_MANIFEST.json.")
++ ap.add_argument("--shared-root",default="",
++                 help="Candidate-specific immutable exogenous source root; defaults under frozen_artifacts.")
 + ap.add_argument("--benchmark-issues",type=int,default=0,
 +                 help="Run only the first N real issues, including Fresh OpenDSS and POST commit; 0 keeps the frozen full episode.")
 + ap.add_argument("--benchmark-force-modes",default="",
@@ -81024,6 +81131,28 @@ index 0000000..af4d22d
 + ap.add_argument("--legacy-dense-planner",action="store_true",
 +                 help="Rollback to the pre-acceleration dense planner and automatic Presolve; physical constraints/objective are unchanged.")
 + a=ap.parse_args()
++ CANDIDATE_ID=str(a.candidate_id)
++ manifest_path=HERE.parent/"INITIALIZATION/INITIAL_STATES/INITIAL_STATE_MANIFEST.json"
++ initialization_root=HERE.parent/"INITIALIZATION"
++ initial_manifest=load_json(manifest_path)
++ matches=[x for x in initial_manifest.get("files",[]) if x.get("candidate_id")==CANDIDATE_ID]
++ if len(matches)!=1:raise RuntimeError(f"candidate must occur exactly once in frozen initial-state manifest: {CANDIDATE_ID}")
++ episode_authority=matches[0]
++ START=int(episode_authority["week_start_index"]);END=START+2015;COUNT=2016
++ CANDIDATE_MONTH=CANDIDATE_ID.split("_",1)[1][:7]
++ PROGRESS_FILE=("W02_PROGRESS.json" if CANDIDATE_ID=="W02_2025-01-13" else f"{CANDIDATE_ID}_PROGRESS.json")
++ PRE_SHA=str(episode_authority["state_sha256"])
++ PRE_FILE_SHA=str(episode_authority["file_sha256"])
++ PRE_RESUME_PATH=initialization_root/str(episode_authority["production_resume_relpath"])
++ canonical_pre_path=initialization_root/str(episode_authority["path"])
++ if not canonical_pre_path.is_file() or sha(canonical_pre_path)!=PRE_FILE_SHA:
++  raise RuntimeError(f"{CANDIDATE_ID} canonical PRE file SHA drift")
++ if not PRE_RESUME_PATH.is_file() or sha(PRE_RESUME_PATH)!=str(episode_authority["production_resume_file_sha256"]):
++  raise RuntimeError(f"{CANDIDATE_ID} production PRE envelope SHA drift")
++ default_shared=("B_W02_SHARED_EXOGENOUS_SOURCE_CURRENT" if CANDIDATE_ID=="W02_2025-01-13"
++                 else f"B_{CANDIDATE_ID}_SHARED_EXOGENOUS_SOURCE_CURRENT")
++ SHARED=(Path(a.shared_root).resolve() if a.shared_root else
++         Path("/home/jaewon/mobile_ess_work/frozen_artifacts")/default_shared)
 + if a.benchmark_issues<0 or a.benchmark_issues>COUNT:raise RuntimeError("--benchmark-issues must be in [0,2016]")
 + if a.benchmark_planner_presolve is not None and not a.benchmark_issues:
 +  raise RuntimeError("--benchmark-planner-presolve is allowed only for bounded regression")
@@ -81057,7 +81186,7 @@ index 0000000..af4d22d
 + run_end=END if a.benchmark_issues==0 else START+a.benchmark_issues-1
 + run_count=run_end-START+1
 + if not a.benchmark_issues and os.environ.get("PYTHONHASHSEED")!="0":
-+  raise RuntimeError("production execution requires PYTHONHASHSEED=0; use RUN_W02_4POLICY_ACTUAL.sh")
++  raise RuntimeError("production execution requires PYTHONHASHSEED=0; use a frozen representative-week launcher")
 + book=PerformanceBook();current_performance={"issue":None,"record":None}
 + repo=Path(a.repo).resolve();cfg_path=Path(a.config).resolve();cfg=load_json(cfg_path);policy_root=Path(a.output).resolve()
 + fixed_location=bool(cfg.get("fixed_location_projection",False))
@@ -81074,14 +81203,15 @@ index 0000000..af4d22d
 + planner_presolve=(a.benchmark_planner_presolve if a.benchmark_planner_presolve is not None
 +                   else (1 if use_sparse_restore else -1))
 + if sha(repo/"science/main.py")!=SCIENCE_SHA:raise RuntimeError("science/main.py SHA drift")
-+ if cfg["candidate_id"]!="W02_2025-01-13" or cfg["method_config_sha256"]!=B5_SHA:raise RuntimeError("policy config identity drift")
++ if cfg["candidate_id"]!="W02_2025-01-13" or cfg["method_config_sha256"]!=B5_SHA:
++  raise RuntimeError("common policy-template identity drift")
 + if not SITE_AUTHORITY.is_file() or sha(SITE_AUTHORITY)!=SITE_AUTHORITY_SHA:raise RuntimeError("prospective four-site authority drift")
 + site_authority=load_json(SITE_AUTHORITY)
 + homes={str(k):str(v) for k,v in site_authority.get("assignment",{}).items()}
 + if site_authority.get("status")!="PASS_EXACTLY_FOUR_SITES" or set(homes)!={f"MESS{x:02d}" for x in range(1,5)} or len(set(homes.values()))!=4:
 +  raise RuntimeError(f"invalid prospective four-site authority {homes}")
-+ if cfg.get("canonical_pre_state_sha256")!=PRE_SHA or cfg.get("canonical_pre_file_sha256")!=PRE_FILE_SHA:
-+  raise RuntimeError("policy config prospective canonical PRE binding drift")
++ if CANDIDATE_ID=="W02_2025-01-13" and (cfg.get("canonical_pre_state_sha256")!=PRE_SHA or cfg.get("canonical_pre_file_sha256")!=PRE_FILE_SHA):
++  raise RuntimeError("W02 policy-template canonical PRE binding drift")
 + if cfg.get("initial_service_sites")!=homes or cfg.get("initial_service_authority_sha256")!=SITE_AUTHORITY_SHA:
 +  raise RuntimeError("policy config common initial-site binding drift")
 + if fixed_location and cfg.get("fixed_location_sites")!=homes:
@@ -81098,7 +81228,8 @@ index 0000000..af4d22d
 +  if not a.benchmark_issues:raise RuntimeError("shared exogenous source authority missing for production run")
 +  partial=SHARED/"mobility/R12_COMMON_MOBILITY_INDEX.partial.csv"
 +  bank=SHARED/"mobility/E4B_FULLFIT_TEMPLATE_BANK_129.parquet"
-+  power_auth=SHARED/"power_price/A_B10_W02_POWER_PRICE_SOURCE_AUTHORITY.json"
++  power_auth=SHARED/"power_price/REP_WEEK_POWER_PRICE_SOURCE_AUTHORITY.json"
++  if not power_auth.is_file():power_auth=SHARED/"power_price/A_B10_W02_POWER_PRICE_SOURCE_AUTHORITY.json"
 +  if not partial.is_file() or not bank.is_file() or not power_auth.is_file():raise RuntimeError("bounded source inputs incomplete")
 +  bounded={"schema_version":"mobileess.post_stage15.bounded_source_authority.v1",
 +           "status":"PASS_BOUNDED_PROFILE_SOURCE_ONLY","start_issue":START,"end_issue":run_end,
@@ -81108,13 +81239,15 @@ index 0000000..af4d22d
 +  shared_path=control/"BOUNDED_SHARED_EXOGENOUS_AUTHORITY.json";jw(shared_path,bounded)
 + shared=load_json(shared_path)
 + if shared.get("status") not in {"PASS","PASS_BOUNDED_PROFILE_SOURCE_ONLY"}:raise RuntimeError("shared exogenous source not PASS")
++ if shared.get("candidate_id",CANDIDATE_ID)!=CANDIDATE_ID or int(shared.get("scored_issue_first",START))!=START:
++  raise RuntimeError(f"shared exogenous candidate/boundary drift for {CANDIDATE_ID}")
 + shared_authority_sha=sha(shared_path)
 + source_auth=load_json(HERE/"authority/A/SOURCE_AUTHORITY.json")
 + write_policy_manifest(policy_root,cfg,config_sha,source_auth,shared_authority_sha)
-+ episode_id=f"W02_{cfg['slot']}_{cfg['policy_id']}_B5"
++ episode_id=f"{CANDIDATE_ID}_{cfg['slot']}_{cfg['policy_id']}_B5"
 + jw(policy_root/"episode_manifest.json",{
-+  "schema_version":"a_to_b.10.w02_episode_manifest.v1","episode_id":episode_id,"run_id":episode_id,
-+  "scenario_id":"W02_2025-01-13","candidate_id":"W02_2025-01-13","month":"2025-01",
++  "schema_version":"mobileess.post_stage15.rep_week_episode_manifest.v2","episode_id":episode_id,"run_id":episode_id,
++  "scenario_id":CANDIDATE_ID,"candidate_id":CANDIDATE_ID,"month":CANDIDATE_MONTH,
 +  "method_id":"B5","method_config_sha256":B5_SHA,"policy_id":cfg["policy_id"],"slot":cfg["slot"],
 +  "evaluation_start_step":START,"evaluation_end_step":END,"evaluation_end_step_inclusive":END,
 +  "scored_issues":COUNT,"controller_burn_in_steps":0,"selection_window_pre_history_steps":576,
@@ -81165,11 +81298,11 @@ index 0000000..af4d22d
 +    # Stage7 production binding supplies the science-compatible {state,sha256}
 +    # envelope.  The descriptive canonical file uses the key state_sha256 and
 +    # is not itself the rolling engine's resume schema.
-+    state_path=HERE.parent/"INITIALIZATION/PRODUCTION_INPUT/W02_2025-01-13.resume_state.json"
++    state_path=PRE_RESUME_PATH
 +   else:
 +    state_path=engine/f"issue_{i-1:06d}/BUILD7C_POSTCOMMIT_STATE.json"
 +   state=load_json(state_path);pre_hash=str(state["sha256"])
-+   if i==START and pre_hash!=PRE_SHA:raise RuntimeError("canonical W02 PRE hash drift")
++   if i==START and pre_hash!=PRE_SHA:raise RuntimeError(f"canonical {CANDIDATE_ID} PRE hash drift")
 +   power,price=sources.row(i)
 +   env=runtime_env(i,state_path,pre_hash,sources.mob_index,control,fixed_location,
 +                   not a.benchmark_disable_worker_cache,
@@ -81400,7 +81533,7 @@ index 0000000..af4d22d
 +   if tr.get("selected_h0_moves") not in ({},None):raise RuntimeError(f"M4 selected movement issue={i}")
 +   if load_csv(d/"BUILD7B_FULL54_MOVE_ARCS_SELECTED.csv"):raise RuntimeError(f"M4 move plan is not empty issue={i}")
 +  prepost=float(issue_runtime["pre_to_post_wall_s"] or wall);slow=float(issue_runtime["slow_planner_runtime_s"] or 0)
-+  issue_runtime.update({"schema_version":"a_to_b.10.w02.policy_issue.v1","issue":i,"status":"PASS_COMMITTED",
++  issue_runtime.update({"schema_version":"mobileess.post_stage15.rep_week.policy_issue.v2","issue":i,"status":"PASS_COMMITTED",
 +    "policy_id":cfg["policy_id"],"pre_state_sha256":tr["pre_state_sha256"],"post_state_sha256":tr["post_state_sha256"],
 +    "full_issue_wall_s":wall,"commit_critical_runtime_s":max(0.0,prepost-slow),
 +    "development_host_deadline_overrun":max(0.0,prepost-slow)>=300.0,
@@ -81409,19 +81542,19 @@ index 0000000..af4d22d
 +  jw(d/"POLICY_ISSUE_AUDIT.json",issue_runtime);issue_audits.append(issue_runtime)
 +  jw(checkpoint_path,{"status":"RUNNING","last_completed_issue":i,"last_replan_issue":last_replan,
 +      "event_engine_state":event_state(ev),"completed_issue_count":len(issue_audits),"future_actual_used":False})
-+  jw(policy_root/"progress/W02_PROGRESS.json",{"status":"RUNNING_BOUNDED_PROFILE" if a.benchmark_issues else "RUNNING",
++  jw(policy_root/"progress"/PROGRESS_FILE,{"candidate_id":CANDIDATE_ID,"status":"RUNNING_BOUNDED_PROFILE" if a.benchmark_issues else "RUNNING",
 +      "completed":len(issue_audits),"required":run_count,"last_issue":i,"benchmark_only":bool(a.benchmark_issues)})
 +  if (i-START+1)%12==0 or i==START:
 +   print(f"[{cfg['slot']} {cfg['policy_id']}] {i-START+1}/{run_count} issue={i} commit={issue_runtime['commit_critical_runtime_s']:.2f}s planner={slow:.2f}s mode={issue_runtime['planner_mode']}",flush=True)
 + if a.benchmark_issues:
 +  result=book.document("PASS_BOUNDED_ACTUAL_PROFILE_NOT_SCIENTIFIC_EPISODE",run_count)
-+  result.update({"candidate_id":"W02_2025-01-13","policy_id":cfg["policy_id"],"slot":cfg["slot"],
++  result.update({"candidate_id":CANDIDATE_ID,"policy_id":cfg["policy_id"],"slot":cfg["slot"],
 +                 "start_issue":START,"end_issue":run_end,"actual_gurobi_and_fresh_opendss":True,
 +                 "full_episode_finalization_performed":False,"F7_performed":False})
 +  jw(policy_root/"PERFORMANCE_BOUNDED_RUN.json",result)
-+  jw(policy_root/"progress/W02_PROGRESS.json",{"status":result["status"],"completed":len(issue_audits),
++  jw(policy_root/"progress"/PROGRESS_FILE,{"candidate_id":CANDIDATE_ID,"status":result["status"],"completed":len(issue_audits),
 +      "required":run_count,"last_issue":run_end,"benchmark_only":True})
-+  print(f"W02_BOUNDED_PROFILE_STATUS=PASS slot={cfg['slot']} policy={cfg['policy_id']} issues={run_count}")
++  print(f"REP_WEEK_BOUNDED_PROFILE_STATUS=PASS candidate={CANDIDATE_ID} slot={cfg['slot']} policy={cfg['policy_id']} issues={run_count}")
 +  restore_performance_wrappers()
 +  return 0
 + if len(issue_audits)!=COUNT:raise RuntimeError(f"policy issue count {len(issue_audits)} != {COUNT}")
@@ -81431,7 +81564,7 @@ index 0000000..af4d22d
 + commit=[float(x["commit_critical_runtime_s"]) for x in issue_audits];planner=[float(x["slow_planner_runtime_s"]) for x in issue_audits if float(x["slow_planner_runtime_s"])>0]
 + hw={"platform":sys.platform,"python":sys.version,"cpu_affinity":sorted(os.sched_getaffinity(0)) if hasattr(os,"sched_getaffinity") else [],
 +     "process_cpu_count":os.cpu_count()}
-+ jw(policy_root/"RUNTIME_CHARACTERIZATION.json",{"schema_version":"a_to_b.10.w02.runtime_characterization.v1","status":"PASS",
++ jw(policy_root/"RUNTIME_CHARACTERIZATION.json",{"schema_version":"mobileess.post_stage15.rep_week.runtime_characterization.v2","candidate_id":CANDIDATE_ID,"status":"PASS",
 +   "hardware":hw,"outer_processes_expected":4,"threads_per_process":4,
 +   "commit_critical":{"p50_s":quantile(commit,.50),"p95_s":quantile(commit,.95),"p99_s":quantile(commit,.99),"max_s":max(commit),
 +                      "deadline_miss_count":sum(x>=300 for x in commit),"development_host_realtime_claim":"DEMONSTRATED" if max(commit)<300 else "NOT_DEMONSTRATED"},
@@ -81440,14 +81573,14 @@ index 0000000..af4d22d
 +   "target_hardware_realtime_claim":"NOT_QUALIFIED_BY_THIS_RUN"})
 + run_f7(policy_root,cfg)
 + jw(policy_root/"PERFORMANCE_FULL_RUN.json",book.document("PASS_FULL_EPISODE",COUNT))
-+ jw(policy_root/"progress/W02_PROGRESS.json",{"status":"PASS","completed":COUNT,"required":COUNT,"last_issue":END})
++ jw(policy_root/"progress"/PROGRESS_FILE,{"candidate_id":CANDIDATE_ID,"status":"PASS","completed":COUNT,"required":COUNT,"last_issue":END})
 + jw(checkpoint_path,{"status":"PASS_COMPLETE","last_completed_issue":END,"last_replan_issue":last_replan,
 +    "event_engine_state":event_state(ev),"completed_issue_count":COUNT,"future_actual_used":False})
 + # policy-level checksums
 + sf=policy_root/"SHA256SUMS.txt"
 + sf.write_text("".join(f"{sha(p)}  {p.relative_to(policy_root).as_posix()}\n" for p in sorted(policy_root.rglob("*")) if p.is_file() and p!=sf),encoding="utf-8")
 + restore_performance_wrappers()
-+ print(f"W02_POLICY_STATUS=PASS slot={cfg['slot']} policy={cfg['policy_id']} issues={COUNT}")
++ print(f"REP_WEEK_POLICY_STATUS=PASS candidate={CANDIDATE_ID} slot={cfg['slot']} policy={cfg['policy_id']} issues={COUNT}")
 + return 0
 +
 +if __name__=="__main__":
@@ -83207,14 +83340,87 @@ index 0000000..dfad3cb
 +    "compare_fixed_plan_observations",
 +    "create_controller",
 +]
+diff --git a/performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_REP_WEEK_SHARED_SOURCES.sh b/performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_REP_WEEK_SHARED_SOURCES.sh
+new file mode 100644
+index 0000000..3a12744
+--- /dev/null
++++ b/performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_REP_WEEK_SHARED_SOURCES.sh
+@@ -0,0 +1,67 @@
++#!/usr/bin/env bash
++set -Eeuo pipefail
++HERE="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
++CANDIDATE="${1:?usage: PREPARE_REP_WEEK_SHARED_SOURCES.sh CANDIDATE_ID START_INDEX [WORKTREE]}"
++START="${2:?missing START_INDEX}"
++PY="/home/jaewon/miniconda3/envs/power_v61/bin/python"
++BASE="/home/jaewon/mobile_ess_work"
++if [[ "$CANDIDATE" == "W02_2025-01-13" ]]; then
++  SHARED="$BASE/frozen_artifacts/B_W02_SHARED_EXOGENOUS_SOURCE_CURRENT"
++  LOGROOT="$BASE/logs/B_W02_SHARED_EXOGENOUS_SOURCE_CURRENT"
++else
++  SHARED="$BASE/frozen_artifacts/B_${CANDIDATE}_SHARED_EXOGENOUS_SOURCE_CURRENT"
++  LOGROOT="$BASE/logs/B_${CANDIDATE}_SHARED_EXOGENOUS_SOURCE_CURRENT"
++fi
++mkdir -p "$SHARED" "$LOGROOT"
++WORKTREE="${3:-}"
++if [[ -z "$WORKTREE" ]]; then
++  WORKTREE="$($PY "$HERE/tools/ENSURE_PR4_WORKTREE.py" | python3 -c 'import sys,json; print(json.load(sys.stdin)["worktree"])')"
++fi
++
++$PY -u "$HERE/scripts/PREPARE_W02_POWER_PRICE_SOURCE.py" --repo "$WORKTREE" \
++  --output-root "$SHARED/power_price" --candidate-id "$CANDIDATE" --start-index "$START" \
++  2>&1 | tee "$LOGROOT/power_price.log"
++
++GPU_PY="$($PY - <<'PY'
++import subprocess
++from pathlib import Path
++for p in (Path('/home/jaewon/miniconda3/envs/scats_parser/bin/python3.12'),
++          Path('/home/jaewon/miniconda3/envs/scats_parser/bin/python'),
++          Path('/home/jaewon/miniconda3/envs/power_v61/bin/python')):
++ if not p.is_file(): continue
++ cp=subprocess.run([str(p),'-c','import torch,numpy,pandas,scipy,sklearn,pyarrow; print(int(torch.cuda.is_available()))'],capture_output=True,text=True)
++ if cp.returncode==0 and cp.stdout.strip().endswith('1'):
++  print(p);break
++else: raise SystemExit('no CUDA-capable Python with frozen mobility dependencies')
++PY
++)"
++for PHASE in traffic full; do
++  "$GPU_PY" -u "$HERE/scripts/PREPARE_W02_MOBILITY_SOURCE.py" --repo "$WORKTREE" \
++    --output-root "$SHARED/mobility" --candidate-id "$CANDIDATE" --start-index "$START" \
++    --phase "$PHASE" --cpu-workers 4 2>&1 | tee "$LOGROOT/mobility_${PHASE}.log"
++done
++
++$PY - "$SHARED" "$CANDIDATE" "$START" <<'PY'
++import csv,hashlib,json,sys
++from pathlib import Path
++r=Path(sys.argv[1]);candidate=sys.argv[2];start=int(sys.argv[3]);end=start+2015
++pa=json.loads((r/'power_price/REP_WEEK_POWER_PRICE_SOURCE_AUTHORITY.json').read_text())
++ma=json.loads((r/'mobility/R12_COMMON_MOBILITY_CACHE_AUTHORITY.json').read_text())
++rows=list(csv.DictReader((r/'mobility/R12_COMMON_MOBILITY_INDEX.csv').open()))
++assert pa['status']=='PASS' and pa['candidate_id']==candidate and pa['scored_issue_first']==start
++assert ma['status']=='PASS' and len(rows)==2304
++assert [int(x['issue_step']) for x in rows[:2016]]==list(range(start,end+1))
++assert all(str(x['future_actual_target_read']).lower() in {'false','0'} for x in rows)
++h=hashlib.sha256()
++for p in sorted(r.rglob('*')):
++ if p.is_file() and p.name!='SHARED_EXOGENOUS_AUTHORITY.json':
++  h.update(str(p.relative_to(r)).encode()+b'\0');h.update(hashlib.sha256(p.read_bytes()).digest())
++out={'schema_version':'mobileess.post_stage15.rep_week.shared_exogenous.v2','status':'PASS',
++     'candidate_id':candidate,'scored_issue_first':start,'scored_issue_last':end,
++     'scored_issue_count':2016,'mobility_source_cache_issues':2304,
++     'power_price_source_cache_issues':2304,'same_source_for_all_methods':True,
++     'future_actual_used_by_optimizer':False,'source_tree_digest':h.hexdigest()}
++(r/'SHARED_EXOGENOUS_AUTHORITY.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n')
++print(json.dumps(out,indent=2))
++PY
++echo "REP_WEEK_SHARED_SOURCE_STATUS=PASS candidate=$CANDIDATE"
 diff --git a/performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_W02_MOBILITY_SOURCE.py b/performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_W02_MOBILITY_SOURCE.py
 new file mode 100644
-index 0000000..99b55a7
+index 0000000..dd65826
 --- /dev/null
 +++ b/performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_W02_MOBILITY_SOURCE.py
-@@ -0,0 +1,50 @@
+@@ -0,0 +1,54 @@
 +#!/usr/bin/env python3
-+"""Run PR4's exact R12 mobility materializer on W02 evaluation contexts.
++"""Run PR4's exact R12 mobility materializer on one representative week.
 +
 +The frozen traffic numerical contract requires exact 576-origin contexts.
 +W02 has 2016 scored issues, so source preparation uses four causal 576-issue
@@ -83240,13 +83446,15 @@ index 0000000..99b55a7
 +def main():
 + ap=argparse.ArgumentParser()
 + ap.add_argument("--repo",required=True);ap.add_argument("--output-root",required=True)
++ ap.add_argument("--candidate-id",default="W02_2025-01-13");ap.add_argument("--start-index",type=int,default=START)
 + ap.add_argument("--phase",choices=("traffic","full"),required=True)
 + ap.add_argument("--base-work",default="/home/jaewon/mobile_ess_work")
 + ap.add_argument("--cpu-workers",type=int,default=4)
 + a=ap.parse_args()
 + repo=Path(a.repo).resolve();out=Path(a.output_root).resolve()
++ start=int(a.start_index);padded_end_excl=start+COUNT;scored_end=start+2015
 + mod=load(repo/"stage7/r12_representative_weeks/materialize_r12_common_mobility_cache.py")
-+ mod.required_issues=lambda _authority: np.arange(START,PADDED_END_EXCL,dtype=np.int64)
++ mod.required_issues=lambda _authority: np.arange(start,padded_end_excl,dtype=np.int64)
 + # Main still requires an authority-root argument, but the monkeypatched selector
 + # no longer reads representative-week burn-in ranges.
 + sys.argv=[str(Path(__file__).name),
@@ -83255,22 +83463,24 @@ index 0000000..99b55a7
 +  "--batch-size","576","--phase",a.phase,"--cpu-workers",str(a.cpu_workers)]
 + rc=int(mod.main())
 + if rc==0:
-+  rec={"status":"PASS","phase":a.phase,"source_issue_first":START,"source_issue_last":PADDED_END_EXCL-1,
-+       "source_issue_count":COUNT,"scored_issue_first":3456,"scored_issue_last":5471,
++  rec={"status":"PASS","candidate_id":a.candidate_id,"phase":a.phase,"source_issue_first":start,"source_issue_last":padded_end_excl-1,
++       "source_issue_count":COUNT,"scored_issue_first":start,"scored_issue_last":scored_end,
 +       "scored_issue_count":2016,"padding_issue_count":288,
 +       "padding_role":"CAUSAL_SOURCE_CONTEXT_ONLY_NOT_SCORED_NOT_LOOKAHEAD",
 +       "future_actual_used":False}
-+  (out/f"A_B10_W02_MOBILITY_{a.phase.upper()}_AUTHORITY.json").write_text(json.dumps(rec,indent=2,sort_keys=True)+"\n")
++  (out/f"REP_WEEK_MOBILITY_{a.phase.upper()}_AUTHORITY.json").write_text(json.dumps(rec,indent=2,sort_keys=True)+"\n")
++  if a.candidate_id=="W02_2025-01-13":
++   (out/f"A_B10_W02_MOBILITY_{a.phase.upper()}_AUTHORITY.json").write_text(json.dumps(rec,indent=2,sort_keys=True)+"\n")
 + return rc
 +if __name__=="__main__":raise SystemExit(main())
 diff --git a/performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_W02_POWER_PRICE_SOURCE.py b/performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_W02_POWER_PRICE_SOURCE.py
 new file mode 100644
-index 0000000..6661d69
+index 0000000..d56d20f
 --- /dev/null
 +++ b/performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_W02_POWER_PRICE_SOURCE.py
-@@ -0,0 +1,81 @@
+@@ -0,0 +1,85 @@
 +#!/usr/bin/env python3
-+"""Materialize W02 P/Q/PV and price in four frozen 576-issue source blocks."""
++"""Materialize one representative week's P/Q/PV and price source blocks."""
 +from __future__ import annotations
 +import argparse,hashlib,importlib.util,json,shutil,sys,tempfile
 +from pathlib import Path
@@ -83303,8 +83513,10 @@ index 0000000..6661d69
 + p.write_text(json.dumps(o,indent=2,sort_keys=True,allow_nan=False)+"\n",encoding="utf-8")
 +def main():
 + ap=argparse.ArgumentParser();ap.add_argument("--repo",required=True);ap.add_argument("--output-root",required=True)
++ ap.add_argument("--candidate-id",default="W02_2025-01-13");ap.add_argument("--start-index",type=int,default=START)
 + ap.add_argument("--base-work",default="/home/jaewon/mobile_ess_work");a=ap.parse_args()
 + repo=Path(a.repo).resolve();out=Path(a.output_root).resolve();base=Path(a.base_work).resolve()
++ start=int(a.start_index);scored_end=start+2015;padded_end=start+BLOCK*BLOCKS-1
 + out.mkdir(parents=True,exist_ok=True)
 + helper=load(repo/"stage7/r12_representative_weeks/materialize_r12_episode_power_price.py","a_b10_pp_helper")
 + forecast=base/"execution_packages/Mobile_ESS_stage_p6a4h1b_p7a3f1b_conditional_dag_parallel_v3_0_1/assets/forecast/P6A3_FULL_YEAR_CAUSAL_FORECAST.npz"
@@ -83316,12 +83528,12 @@ index 0000000..6661d69
 + records=[]
 + try:
 +  for bi in range(BLOCKS):
-+   lo=START+bi*BLOCK;hi=lo+BLOCK;issues=np.arange(lo,hi,dtype=np.int32)
++   lo=start+bi*BLOCK;hi=lo+BLOCK;issues=np.arange(lo,hi,dtype=np.int32)
 +   bd=out/f"block_{bi:02d}_{lo}_{hi-1}";bd.mkdir(exist_ok=True)
 +   auth=bd/"BLOCK_AUTHORITY.json"
 +   if auth.is_file():
 +    old=json.loads(auth.read_text())
-+    if old.get("status")!="PASS" or old.get("issue_first")!=lo or old.get("issue_last")!=hi-1:raise RuntimeError("existing source block authority drift")
++    if old.get("status")!="PASS" or old.get("candidate_id",a.candidate_id)!=a.candidate_id or old.get("issue_first")!=lo or old.get("issue_last")!=hi-1:raise RuntimeError("existing source block authority drift")
 +    records.append(old);continue
 +   pdir=bd/"power_tmp";pdir.mkdir()
 +   prec=helper.materialize_power(r7,resolved,kernel,work,issues,pdir)
@@ -83336,19 +83548,21 @@ index 0000000..6661d69
 +   psha={key:sha(bd/f"power__{key}.npy") for key in KEEP_POWER}
 +   qsha={key:sha(bd/f"price__{key}.npy") for key in KEEP_PRICE}
 +   pnpz.unlink(missing_ok=True);price_npz.unlink(missing_ok=True);shutil.rmtree(pdir,ignore_errors=True)
-+   rec={"status":"PASS","block":bi,"issue_first":lo,"issue_last":hi-1,"issue_count":BLOCK,
++   rec={"status":"PASS","candidate_id":a.candidate_id,"block":bi,"issue_first":lo,"issue_last":hi-1,"issue_count":BLOCK,
 +        "power_fields":psha,"price_fields":qsha,"forecast_sha256":FORECAST_SHA,
 +        "r7_source_sha256":R7_SOURCE_SHA,"future_actual_used":False,
-+        "scored_overlap_first":max(lo,START),"scored_overlap_last":min(hi-1,SCORED_END)}
++        "scored_overlap_first":max(lo,start),"scored_overlap_last":min(hi-1,scored_end)}
 +   jw(auth,rec);records.append(rec)
 + finally:
 +  for t in temps:shutil.rmtree(t,ignore_errors=True)
-+ top={"schema_version":"a_to_b.10.w02.power_price_blocks.v1","status":"PASS","candidate_id":"W02_2025-01-13",
-+      "scored_issue_first":START,"scored_issue_last":SCORED_END,"scored_issue_count":2016,
-+      "source_issue_last":PADDED_END,"source_block_steps":BLOCK,"block_count":BLOCKS,
++ top={"schema_version":"mobileess.post_stage15.rep_week.power_price_blocks.v2","status":"PASS","candidate_id":a.candidate_id,
++      "scored_issue_first":start,"scored_issue_last":scored_end,"scored_issue_count":2016,
++      "source_issue_last":padded_end,"source_block_steps":BLOCK,"block_count":BLOCKS,
 +      "extra_source_cache_steps":288,"extra_source_cache_role":"UNSCORED_CAUSAL_SOURCE_PADDING",
 +      "future_actual_used":False,"blocks":records}
-+ jw(out/"A_B10_W02_POWER_PRICE_SOURCE_AUTHORITY.json",top);print(json.dumps(top,indent=2))
++ jw(out/"REP_WEEK_POWER_PRICE_SOURCE_AUTHORITY.json",top)
++ if a.candidate_id=="W02_2025-01-13":jw(out/"A_B10_W02_POWER_PRICE_SOURCE_AUTHORITY.json",top)
++ print(json.dumps(top,indent=2))
 +if __name__=="__main__":raise SystemExit(main())
 diff --git a/performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_W02_SHARED_SOURCES.sh b/performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_W02_SHARED_SOURCES.sh
 new file mode 100644
@@ -83588,12 +83802,51 @@ index 0000000..c43d897
 + print(json.dumps(rec,indent=2))
 + return 0
 +if __name__=="__main__":raise SystemExit(main())
+diff --git a/performance/post_stage15_runtime_acceleration/package/tools/PREFLIGHT_FIRST6_REP_WEEKS.py b/performance/post_stage15_runtime_acceleration/package/tools/PREFLIGHT_FIRST6_REP_WEEKS.py
+new file mode 100644
+index 0000000..197ae2d
+--- /dev/null
++++ b/performance/post_stage15_runtime_acceleration/package/tools/PREFLIGHT_FIRST6_REP_WEEKS.py
+@@ -0,0 +1,33 @@
++#!/usr/bin/env python3
++from __future__ import annotations
++import argparse,hashlib,json,os
++from pathlib import Path
++
++HERE=Path(__file__).resolve().parents[1]
++EXPECTED=["W02_2025-01-13","W07_2025-02-17","W10_2025-03-10","W17_2025-04-28","W18_2025-05-05","W25_2025-06-23"]
++
++def sha(path:Path)->str:
++ h=hashlib.sha256()
++ with path.open('rb') as f:
++  for b in iter(lambda:f.read(1<<20),b''):h.update(b)
++ return h.hexdigest()
++
++def main()->int:
++ ap=argparse.ArgumentParser();ap.add_argument('--repo',required=True);a=ap.parse_args()
++ manifest=HERE.parent/'INITIALIZATION/INITIAL_STATES/INITIAL_STATE_MANIFEST.json'
++ x=json.loads(manifest.read_text());rows=x.get('files',[])[:6]
++ if [r.get('candidate_id') for r in rows]!=EXPECTED:raise RuntimeError('first-six representative-week order drift')
++ checks=[]
++ for r in rows:
++  pre=HERE.parent/'INITIALIZATION'/r['path'];resume=HERE.parent/'INITIALIZATION'/r['production_resume_relpath']
++  ok=(sha(pre)==r['file_sha256'] and sha(resume)==r['production_resume_file_sha256']
++      and int(r['week_start_index'])>=0 and json.loads(resume.read_text())['sha256']==r['state_sha256'])
++  if not ok:raise RuntimeError(f"initial-state authority drift {r['candidate_id']}")
++  checks.append({'candidate_id':r['candidate_id'],'start_index':int(r['week_start_index']),
++                 'end_index_inclusive':int(r['week_start_index'])+2015,'state_sha256':r['state_sha256'],'pass':True})
++ groups=json.loads(os.popen(f"{os.sys.executable} '{HERE/'tools/CPU_AFFINITY_4X4.py'}'").read())
++ if len(groups.get('groups',[]))!=4 or any(len(g)!=4 for g in groups['groups']):raise RuntimeError('4x4 CPU topology drift')
++ out={'schema_version':'mobileess.post_stage15.first6_preflight.v1','status':'PASS','weeks':checks,
++      'outer_processes':4,'threads_per_process':4,'week_parallelism':1,'full_week_executed':False}
++ print(json.dumps(out,indent=2));return 0
++if __name__=='__main__':raise SystemExit(main())
 diff --git a/performance/post_stage15_runtime_acceleration/package/tools/PREFLIGHT_W02_4POLICY.py b/performance/post_stage15_runtime_acceleration/package/tools/PREFLIGHT_W02_4POLICY.py
 new file mode 100644
-index 0000000..752d60b
+index 0000000..5edbc19
 --- /dev/null
 +++ b/performance/post_stage15_runtime_acceleration/package/tools/PREFLIGHT_W02_4POLICY.py
-@@ -0,0 +1,83 @@
+@@ -0,0 +1,89 @@
 +#!/usr/bin/env python3
 +from __future__ import annotations
 +import argparse,hashlib,json,os,platform,subprocess,sys
@@ -83614,16 +83867,22 @@ index 0000000..752d60b
 + "configs/P3_EVENT30_NO_LOCAL_REPAIR.json":"7caa33d7db378705130e6549f7de03cd1124672d0ee6369446fb31368e6ea814",
 + "configs/M4_FIXED_LOCATION_ESS_MOBILITY_ABLATION.json":"919a30ebe9c2d349a281a0021bc453fb43b969dd447c915e86de4a0d7e235a8e",
 + "configs/P4_FIXED15.json":"20b562999551f06c0cdf9a4b7d8dde7e3846775f991904b1248147ffaa0daa21",
-+ "runtime/W02_POLICY_EPISODE_RUNNER.py":"c8713ed222814b0bb895e9d72dc3d4a8003ab03be664006f3e6a296175cd4246",
++ "runtime/W02_POLICY_EPISODE_RUNNER.py":"8645bf3891147eb5ca3205c461cbd3e9254b1f38fa43478dbfa1b9299e267d82",
 + "runtime/production_adapter.py":"85eb2334b0fde228bc82a603ab07ec145f63794866ce2bb203dff63a3de1ebd2",
 + "runtime/MobileESS_A_STEP2_3_LOCAL_RUNNER_20260815_R2.py":"c95f0641ba30806db74770ae1246ffeb20c551cf39b8074f8fd3fb55e0788a03",
 + "RUN_W02_4POLICY_ACTUAL.sh":"74776197f13c4b191abfa8a897eeac83f0ba209277c659397063873d0aaad664",
 + "tools/BENCHMARK_POST15_4X4_SHORT.sh":"b13043a5ce797635e50ad5c06647b069037be65ee12906101cffee4ff5797021",
 + "tools/CPU_AFFINITY_4X4.py":"1919df7f013d09474353c28f89afd4fa32112f2df95b152aef045e50f85c72ce",
-+ "authority/D/tools/validate_B_W02_4POLICY_delivery_structure.py":"fa56563ad49f426e12efeaa829e008053e6db54d11b98e1f23ffaef9797cc88a",
++ "authority/D/tools/validate_B_W02_4POLICY_delivery_structure.py":"a98ef1bc40e419f8624afc5c368c659509cda1495d80ca6438f33321e83f8006",
 + "authority/D/tools/build_B_TO_D_W02_handoff.sh":"09c0f4adea436a879820363203899726a4f07f514cc411ec2749c2e2dfa7bf24",
 + "authority/POST_STAGE15_M1_M4_SUPERSESSION.json":"f0eef024f5a3291a8aa8bb2db19822191f0dab7c2ff495606c1e5f5787066378",
 + "authority/D/06_W02_EXECUTION/W02_M1_M4_PRODUCTION_REQUEST.json":"72608c8febe5c1468663775f3420ff48d0a09316468f4704f1284a2acbabd5d4",
++ "RUN_FIRST6_REP_WEEKS_ACTUAL.sh":"a263d984fd093a28061c67fd7d1eb4b3266d58b537fbd922e3b9f0190ee1c755",
++ "scripts/PREPARE_REP_WEEK_SHARED_SOURCES.sh":"f0be03ac8031e1b224539f23c336a26962e6060528fda1cd8ff086c0bfc30389",
++ "scripts/PREPARE_W02_POWER_PRICE_SOURCE.py":"5c976a2c2476b3816908ede45ce776c086c094541dd9bcfa0a979b32662be467",
++ "scripts/PREPARE_W02_MOBILITY_SOURCE.py":"4886b829fb19efc90926eca6cb4f2fedaa03d27663c6c72830997806011b7ed0",
++ "tools/PREFLIGHT_FIRST6_REP_WEEKS.py":"f3e9ec0215e2793fa52dbd0bb7146fda29b8a0a7126d52bd8c491af473bc2584",
++ "tools/SHOW_FIRST6_REP_WEEKS_PROGRESS.py":"c7314b8b1e071fecd08baa2cc4afc90b364a081bcbf9095a7172abe83b211880",
 +}
 +
 +def sha(p:Path)->str:
@@ -83677,6 +83936,32 @@ index 0000000..752d60b
 + out=Path("/home/jaewon/mobile_ess_work/frozen_artifacts/B_W02_4POLICY_PREFLIGHT.json");out.parent.mkdir(parents=True,exist_ok=True)
 + out.write_text(json.dumps(rec,indent=2,sort_keys=True)+"\n");print(json.dumps(rec,indent=2));return 0
 +if __name__=="__main__":raise SystemExit(main())
+diff --git a/performance/post_stage15_runtime_acceleration/package/tools/SHOW_FIRST6_REP_WEEKS_PROGRESS.py b/performance/post_stage15_runtime_acceleration/package/tools/SHOW_FIRST6_REP_WEEKS_PROGRESS.py
+new file mode 100644
+index 0000000..dcd5e9f
+--- /dev/null
++++ b/performance/post_stage15_runtime_acceleration/package/tools/SHOW_FIRST6_REP_WEEKS_PROGRESS.py
+@@ -0,0 +1,20 @@
++#!/usr/bin/env python3
++from __future__ import annotations
++import json
++from pathlib import Path
++
++ROOT=Path('/home/jaewon/mobile_ess_work/frozen_artifacts/B_FIRST6_REP_WEEKS_ACTUAL_CURRENT')
++WEEKS=['W02_2025-01-13','W07_2025-02-17','W10_2025-03-10','W17_2025-04-28','W18_2025-05-05','W25_2025-06-23']
++METHODS=['M1_PROPOSED_EVENT30_LOCAL_REPAIR_MOBILE','M2_FIXED30_MOBILE','M3_EVENT30_NO_LOCAL_REPAIR_MOBILE','M4_FIXED_LOCATION_ESS_MOBILITY_ABLATION']
++rows=[];done=0
++for week in WEEKS:
++ for method in METHODS:
++  d=ROOT/week/method;p=d/'progress'/('W02_PROGRESS.json' if week=='W02_2025-01-13' else f'{week}_PROGRESS.json');fail=d/'FAILURE.json';final=d/'RUNTIME_CHARACTERIZATION.json'
++  if final.is_file():status='PASS';completed=2016
++  elif fail.is_file():status='FAIL_CLOSED';completed=0
++  elif p.is_file():
++   x=json.loads(p.read_text());status=x.get('status','RUNNING');completed=int(x.get('completed',0) or 0)
++  else:status='NOT_STARTED';completed=0
++  done+=completed;rows.append({'week':week,'method':method.split('_',1)[0],'status':status,'completed':completed,'required':2016})
++print(json.dumps({'status':'PASS' if done==6*4*2016 else 'RUNNING_OR_NOT_STARTED','completed_issue_runs':done,
++                  'required_issue_runs':6*4*2016,'weeks':rows},indent=2))
 diff --git a/performance/post_stage15_runtime_acceleration/package/tools/SHOW_W02_PROGRESS.py b/performance/post_stage15_runtime_acceleration/package/tools/SHOW_W02_PROGRESS.py
 new file mode 100644
 index 0000000..30166bb
@@ -83709,10 +83994,10 @@ index 0000000..30166bb
 +print(json.dumps({"delivery_root":str(ROOT),"policies":rows},indent=2))
 diff --git a/performance/post_stage15_runtime_acceleration/tools/BUILD_FINAL_EVIDENCE.py b/performance/post_stage15_runtime_acceleration/tools/BUILD_FINAL_EVIDENCE.py
 new file mode 100644
-index 0000000..60712a9
+index 0000000..c3eb9c6
 --- /dev/null
 +++ b/performance/post_stage15_runtime_acceleration/tools/BUILD_FINAL_EVIDENCE.py
-@@ -0,0 +1,537 @@
+@@ -0,0 +1,540 @@
 +#!/usr/bin/env python3
 +"""Build the post-Stage15 siting/comparison/performance evidence from actual runs.
 +
@@ -84117,7 +84402,7 @@ index 0000000..60712a9
 +        "final_fast_issue_wall_seconds": stats([float(x["full_issue_wall_s"]) for x in final if x["planner_mode"] == "NONE"]),
 +        "four_process_wall_seconds_7issues": four_summary["wall_seconds"], "policy_week_eta": policy_eta,
 +    })
-+    source_files = [repo / "science/main.py", package / "runtime/W02_POLICY_EPISODE_RUNNER.py", package / "RUN_W02_4POLICY_ACTUAL.sh", package / "tools/BENCHMARK_POST15_4X4_SHORT.sh", site_path, manifest_path] + [package / "configs" / n for n in config_names]
++    source_files = [repo / "science/main.py", package / "runtime/W02_POLICY_EPISODE_RUNNER.py", package / "RUN_W02_4POLICY_ACTUAL.sh", package / "RUN_FIRST6_REP_WEEKS_ACTUAL.sh", package / "scripts/PREPARE_REP_WEEK_SHARED_SOURCES.sh", package / "tools/PREFLIGHT_FIRST6_REP_WEEKS.py", package / "tools/SHOW_FIRST6_REP_WEEKS_PROGRESS.py", package / "tools/BENCHMARK_POST15_4X4_SHORT.sh", site_path, manifest_path] + [package / "configs" / n for n in config_names]
 +    dump(result / "FINAL/FINAL_SOURCE_MANIFEST.json", {
 +        "schema_version": "mobileess.final_source_manifest.v1", "status": "PASS",
 +        "files": [{"path": str(p.relative_to(repo)), "sha256": sha(p)} for p in source_files],
@@ -84160,6 +84445,8 @@ index 0000000..60712a9
 +        "main_population": "12 representative weeks x M1/M2/M3/M4 = 48 episodes",
 +        "P4_FIXED15_role": "SUPPLEMENTARY_ONLY_NOT_MAIN",
 +        "performance_result_relpath": "../PERFORMANCE_RESULT",
++        "first6_launcher_relpath": "RUN_FIRST6_REP_WEEKS_ACTUAL.sh",
++        "first6_launcher_sha256": sha(package / "RUN_FIRST6_REP_WEEKS_ACTUAL.sh"),
 +    })
 +    binding["policy_bindings"] = [{"slot": c["slot"], "policy_id": c["policy_id"], "config_relpath": f"configs/{n}", "config_sha256": sha(package / "configs" / n), "threads": 4} for c, n in zip(configs, config_names)]
 +    dump(binding_path, binding)
@@ -84233,6 +84520,7 @@ index 0000000..60712a9
 +        "Bounded actual validation ran 7 of 2016 issues per method; it did not run a full week or the other 11 weeks. "
 +        f"The measured contended ETA bottleneck is {measured_week_h:.3f} h/week; use 2.3–2.5 h/week for planning. "
 +        "See `../PERFORMANCE_RESULT/` for evidence and rollback instructions.\n\n"
++        "`RUN_FIRST6_REP_WEEKS_ACTUAL.sh` runs W02, W07, W10, W17, W18, and W25 sequentially; each week runs M1–M4 concurrently at 4 processes × 4 threads and is resumable.\n\n"
 +        "Run the full W02 episode only when ready:\n"
 +        "```bash\ncd /home/jaewon/mobile_ess_work/post_stage15_runtime_acceleration/performance/post_stage15_runtime_acceleration/package\n"
 +        "bash RUN_W02_4POLICY_ACTUAL.sh\n```\n",
@@ -84252,10 +84540,10 @@ index 0000000..60712a9
 +    raise SystemExit(main())
 diff --git a/performance/post_stage15_runtime_acceleration/tools/FINALIZE_RELEASE_EVIDENCE.py b/performance/post_stage15_runtime_acceleration/tools/FINALIZE_RELEASE_EVIDENCE.py
 new file mode 100644
-index 0000000..9393262
+index 0000000..cf04af8
 --- /dev/null
 +++ b/performance/post_stage15_runtime_acceleration/tools/FINALIZE_RELEASE_EVIDENCE.py
-@@ -0,0 +1,75 @@
+@@ -0,0 +1,79 @@
 +#!/usr/bin/env python3
 +"""Freeze package, exact patch, and release SHA manifests without running science."""
 +from __future__ import annotations
@@ -84306,8 +84594,12 @@ index 0000000..9393262
 +
 +    patch_path = root / "PERFORMANCE_RESULT/FINAL/EXACT_SOURCE_PATCH.diff"
 +    patch = subprocess.check_output([
-+        "git", "-C", str(repo), "diff", "--cached", "--binary", "--",
++        "git", "-C", str(repo), "diff", "--cached", "--binary",
++        "06a94bccc0a232ae7ea09cbc7b00962162c10f4d", "--",
 +        "science/main.py", "performance/post_stage15_runtime_acceleration",
++        ":(exclude)performance/post_stage15_runtime_acceleration/PERFORMANCE_RESULT/FINAL/EXACT_SOURCE_PATCH.diff",
++        ":(exclude)performance/post_stage15_runtime_acceleration/PERFORMANCE_RESULT/FINAL/FINAL_SHA256SUMS.txt",
++        ":(exclude)performance/post_stage15_runtime_acceleration/SHA256SUMS.txt",
 +    ])
 +    if not patch:
 +        raise RuntimeError("staged source patch is empty")

@@ -6,6 +6,8 @@ The launcher prepares or reuses one read-only W02 exogenous source, then runs th
 
 Bounded actual validation ran 7 of 2016 issues per method; it did not run a full week or the other 11 weeks. The measured contended ETA bottleneck is 2.229 h/week; use 2.3–2.5 h/week for planning. See `../PERFORMANCE_RESULT/` for evidence and rollback instructions.
 
+`RUN_FIRST6_REP_WEEKS_ACTUAL.sh` runs W02, W07, W10, W17, W18, and W25 sequentially; each week runs M1–M4 concurrently at 4 processes × 4 threads and is resumable.
+
 Run the full W02 episode only when ready:
 ```bash
 cd /home/jaewon/mobile_ess_work/post_stage15_runtime_acceleration/performance/post_stage15_runtime_acceleration/package

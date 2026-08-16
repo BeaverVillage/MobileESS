@@ -48,8 +48,12 @@ def main() -> int:
 
     patch_path = root / "PERFORMANCE_RESULT/FINAL/EXACT_SOURCE_PATCH.diff"
     patch = subprocess.check_output([
-        "git", "-C", str(repo), "diff", "--cached", "--binary", "--",
+        "git", "-C", str(repo), "diff", "--cached", "--binary",
+        "06a94bccc0a232ae7ea09cbc7b00962162c10f4d", "--",
         "science/main.py", "performance/post_stage15_runtime_acceleration",
+        ":(exclude)performance/post_stage15_runtime_acceleration/PERFORMANCE_RESULT/FINAL/EXACT_SOURCE_PATCH.diff",
+        ":(exclude)performance/post_stage15_runtime_acceleration/PERFORMANCE_RESULT/FINAL/FINAL_SHA256SUMS.txt",
+        ":(exclude)performance/post_stage15_runtime_acceleration/SHA256SUMS.txt",
     ])
     if not patch:
         raise RuntimeError("staged source patch is empty")

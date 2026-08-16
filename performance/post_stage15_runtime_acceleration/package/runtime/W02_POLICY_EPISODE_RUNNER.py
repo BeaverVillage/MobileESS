@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""W02 2016-issue actual B5 hierarchical-controller policy runner.
+"""Representative-week 2016-issue actual B5 hierarchical-controller runner.
 
 Scientific core:
 - exact PR4/PR2 frozen science/main.py (SHA locked);
@@ -35,6 +35,9 @@ import MobileESS_A_STEP5_LOCAL_REPAIR_RUNNER_20260815_R3 as astep5
 START=3456
 END=5471
 COUNT=2016
+CANDIDATE_ID="W02_2025-01-13"
+CANDIDATE_MONTH="2025-01"
+PROGRESS_FILE="W02_PROGRESS.json"
 H=54
 PR4="06a94bccc0a232ae7ea09cbc7b00962162c10f4d"
 SCIENCE_SHA="cfdc7fe3069966d53d9d9246eb9c009a63a5536d265cddc9e5df145b5c6f33e8"
@@ -47,6 +50,7 @@ RESULT_SCHEMA="K9H7_RESULT_V1"
 SHARED=Path("/home/jaewon/mobile_ess_work/frozen_artifacts/B_W02_SHARED_EXOGENOUS_SOURCE_CURRENT")
 DELIVERY=Path("/home/jaewon/mobile_ess_work/frozen_artifacts/B_W02_4POLICY_ACTUAL_PILOT_CURRENT")
 LOGROOT=Path("/home/jaewon/mobile_ess_work/logs/B_W02_4POLICY_ACTUAL_PILOT_CURRENT")
+PRE_RESUME_PATH=HERE.parent/"INITIALIZATION/PRODUCTION_INPUT/W02_2025-01-13.resume_state.json"
 
 POWER_KEYS=(
  "issues","target_steps","q90_gross_background_p_kw","q10_pv_available_kw",
@@ -182,13 +186,13 @@ class RackCache:
   axis0=pd.Timestamp("2024-12-31T14:00:00Z");first=axis0+pd.Timedelta(minutes=5*START);last=axis0+pd.Timedelta(minutes=5*END)
   for name,frame,mult in (("actual",actual,48),("inference",inference,12)):
    cov=frame[(frame["timestamp_utc"]>=first)&(frame["timestamp_utc"]<=last)]
-   if cov["timestamp_utc"].nunique()!=COUNT or len(cov)!=COUNT*mult:raise RuntimeError(f"W02 rack {name} coverage drift")
+   if cov["timestamp_utc"].nunique()!=COUNT or len(cov)!=COUNT*mult:raise RuntimeError(f"{CANDIDATE_ID} rack {name} coverage drift")
   fcov=forecast[(forecast["timestamp_utc"]>=first)&(forecast["timestamp_utc"]<=last)]
-  if fcov["timestamp_utc"].nunique()!=COUNT:raise RuntimeError("W02 rack forecast coverage drift")
+  if fcov["timestamp_utc"].nunique()!=COUNT:raise RuntimeError(f"{CANDIDATE_ID} rack forecast coverage drift")
   self.aidx=actual.set_index(["timestamp_utc","rack_pool_id"]).sort_index()
   self.iidx=inference.set_index(["timestamp_utc","idc_id"]).sort_index()
   self.qidx=forecast.set_index("timestamp_utc").sort_index()
-  # Compact W02-only scalar indexes preserve the exact legacy arithmetic while
+  # Compact episode-only scalar indexes preserve the exact legacy arithmetic while
   # avoiding thousands of pandas MultiIndex scalar extractions per issue.
   aw=actual[(actual["timestamp_utc"]>=first)&(actual["timestamp_utc"]<=last)]
   iw=inference[(inference["timestamp_utc"]>=first)&(inference["timestamp_utc"]<=last+pd.Timedelta(minutes=5*53))]
@@ -203,7 +207,7 @@ class RackCache:
   env=scope["env"];env.aidx=self.aidx;env.iidx=self.iidx;env.qidx=self.qidx
   p=Path(out)/"A_B10_FULL_YEAR_RACK_BINDING.json"
   if not p.is_file():
-   jw(p,{"status":"PASS","candidate_id":"W02_2025-01-13","actual_sha256":self.helper.RACK_ACTUAL_SHA,
+   jw(p,{"status":"PASS","candidate_id":CANDIDATE_ID,"actual_sha256":self.helper.RACK_ACTUAL_SHA,
          "inference_sha256":self.helper.RACK_INFERENCE_SHA,"forecast_sha256":self.helper.RACK_FORECAST_SHA,
          "source_loaded_once_per_policy_process":True,"current_actual_read_policy":"current issue only","future_actual_used":False})
 
@@ -242,7 +246,9 @@ class SourceBlocks:
  def __init__(self,root:Path,required_end:int=END,allow_partial:bool=False):
   self.root=root
   self._block=-1;self._power={};self._price={}
-  self.pp=load_json(root/"power_price/A_B10_W02_POWER_PRICE_SOURCE_AUTHORITY.json")
+  pp_generic=root/"power_price/REP_WEEK_POWER_PRICE_SOURCE_AUTHORITY.json"
+  pp_w02=root/"power_price/A_B10_W02_POWER_PRICE_SOURCE_AUTHORITY.json"
+  self.pp=load_json(pp_generic if pp_generic.is_file() else pp_w02)
   shared_path=root/"SHARED_EXOGENOUS_AUTHORITY.json"
   self.shared=load_json(shared_path) if shared_path.is_file() else {"status":"BOUNDED_PARTIAL_SOURCE_ONLY"}
   if self.pp.get("status")!="PASS":raise RuntimeError("power/price source authority not PASS")
@@ -253,10 +259,10 @@ class SourceBlocks:
   if not self.mob_index.is_file() or (self.mob_index==partial_index and not allow_partial):
    raise RuntimeError("final mobility index unavailable outside bounded benchmark mode")
   self.mob_rows={int(r["issue_step"]):r for r in load_csv(self.mob_index)}
-  if any(i not in self.mob_rows for i in range(START,required_end+1)):raise RuntimeError("W02 requested mobility coverage incomplete")
+  if any(i not in self.mob_rows for i in range(START,required_end+1)):raise RuntimeError(f"{CANDIDATE_ID} requested mobility coverage incomplete")
   self.mobility_shas=frozenset(str(r.get("sha256","")).lower() for r in self.mob_rows.values())
   if any(len(x)!=64 or any(c not in "0123456789abcdef" for c in x) for x in self.mobility_shas):
-   raise RuntimeError("W02 mobility index contains an invalid SHA-256")
+   raise RuntimeError(f"{CANDIDATE_ID} mobility index contains an invalid SHA-256")
   self.bank=root/"mobility/E4B_FULLFIT_TEMPLATE_BANK_129.parquet"
   if not self.bank.is_file():raise RuntimeError("shared mobility template bank missing")
  def _ensure(self,issue:int):
@@ -346,7 +352,7 @@ def runtime_env(issue:int,state_path:Path,state_hash:str,mob_idx:Path,control:Pa
   "MOBILEESS_R25Q_VERIFIED_PREFIX_ISSUES":"0",
   "MOBILEESS_R25Q_RESUME_STATE_PATH":str(state_path),
   "MOBILEESS_RESUME_STATE_SHA256":str(state_hash),
-  "MOBILEESS_R25Q_RESUME_SOURCE":"A-B10 W02 policy canonical PRE or preceding committed POST",
+  "MOBILEESS_R25Q_RESUME_SOURCE":f"post-Stage15 {CANDIDATE_ID} canonical PRE or preceding committed POST",
   "MOBILEESS_R25Q_RESUME_HINT_DIR":str(control/"empty_hints"),
   "MOBILEESS_R25Q_RESUME_MOVE_PLAN_NAME":"NONE.csv",
   "MOBILEESS_R25Q_RESUME_MESS_PLAN_NAME":"NONE.csv",
@@ -577,8 +583,8 @@ def event_state(event):
 
 def write_policy_manifest(root:Path,cfg:Mapping[str,Any],config_sha:str,source_auth:Mapping[str,Any],shared_authority_sha:str):
  jw(root/"CONTROLLER_POLICY_MANIFEST.json",{
-  "schema_version":"a_to_b.10.controller_policy_manifest.v1","status":"FROZEN_BEFORE_W02_POLICY_OUTCOME",
-  "candidate_id":"W02_2025-01-13","method_id":"B5","method_config_sha256":B5_SHA,
+  "schema_version":"mobileess.post_stage15.controller_policy_manifest.v2","status":"FROZEN_BEFORE_REP_WEEK_POLICY_OUTCOME",
+  "candidate_id":CANDIDATE_ID,"method_id":"B5","method_config_sha256":B5_SHA,
   "policy_id":cfg["policy_id"],"slot":cfg["slot"],"resolved_config_sha256":config_sha,
   "base_policy":cfg["base_policy"],"event_triggered":cfg["event_triggered"],
   "local_repair_enabled":cfg["local_repair_enabled"],"max_refresh_steps":cfg["max_refresh_steps"],
@@ -595,7 +601,7 @@ def load_schema()->dict[str,Any]:
  return load_json(HERE/"authority/D/04_RESULT_CONTRACT/K9H7_RESULT_V1_SCHEMA_INVENTORY_R10.json")
 
 def build_results(policy_root:Path,engine:Path,cfg:Mapping[str,Any],issue_audits:list[dict[str,Any]]):
- schema=load_schema();run_id=f"B_W02_{cfg['slot']}_{cfg['policy_id']}";scenario="W02_2025-01-13"
+ schema=load_schema();run_id=f"B_{CANDIDATE_ID}_{cfg['slot']}_{cfg['policy_id']}";scenario=CANDIDATE_ID
  common={"result_schema_version":RESULT_SCHEMA,"run_id":run_id,"method_id":"B5","scenario_id":scenario}
  rolling=[];mess=[];debt=[];grid=[];opt=[];constraints=[];wan=[];rack=[];forecast=[];busphase=[]
  started_meta={};completed=set()
@@ -612,7 +618,8 @@ def build_results(policy_root:Path,engine:Path,cfg:Mapping[str,Any],issue_audits
   fr=load_json(d/f"exact_grid/FRESH_EXACT_OPENDSS_24SERVICE_ISSUE_{issue}.json")
   pre=load_json(d/"BUILD7C_PRECOMMIT_STATE.json");post=load_json(d/"BUILD7C_POSTCOMMIT_STATE.json")
   pst=pre.get("state",pre);qst=post.get("state",post)
-  ts=int(fr.get("timestamp_utc_ns",0));dt=datetime.fromtimestamp(ts/1e9,tz=timezone.utc) if ts else datetime(2025,1,13,tzinfo=timezone.utc)
+  ts=int(fr.get("timestamp_utc_ns",0));fallback_date=datetime.fromisoformat(CANDIDATE_ID.split("_",1)[1]).replace(tzinfo=timezone(timedelta(hours=10)))
+  dt=datetime.fromtimestamp(ts/1e9,tz=timezone.utc) if ts else fallback_date.astimezone(timezone.utc)
   aest=dt.astimezone(timezone(timedelta(hours=10))).isoformat()
   mp=load_csv(d/"BUILD7B_FULL54_MESS_PLAN.csv")
   mv=load_csv(d/"BUILD7B_FULL54_MOVE_ARCS_SELECTED.csv")
@@ -738,10 +745,10 @@ def build_results(policy_root:Path,engine:Path,cfg:Mapping[str,Any],issue_audits
   "solve_time_total_s":sum(runtimes),"solve_time_mean_s":statistics.mean(runtimes) if runtimes else None,
   "solve_time_p95_s":quantile(runtimes,.95),"solve_time_max_s":max(runtimes) if runtimes else None,
   "MIP_gap_max":max(gaps) if gaps else None,"MIP_nodes_total":sum(nodes),
-  "notes":"W02 actual 2016-issue B5 policy episode. Slow-planner runtime is reported separately in RUNTIME_CHARACTERIZATION.json; real-time claim is not inferred from this development host."}
+  "notes":f"{CANDIDATE_ID} actual 2016-issue B5 policy episode. Slow-planner runtime is reported separately in RUNTIME_CHARACTERIZATION.json; real-time claim is not inferred from this development host."}
  tables["run_summary"]=[summary]
  for name in TABLES:write_csv(policy_root/f"{name}.csv",schema[name]["fields"],tables[name])
- obs={"schema_version":"a_to_b.10.w02.observability.v1","header_only_tables":[n for n in TABLES if n!="run_summary" and not tables[n]],
+ obs={"schema_version":"mobileess.post_stage15.rep_week.observability.v1","candidate_id":CANDIDATE_ID,"header_only_tables":[n for n in TABLES if n!="run_summary" and not tables[n]],
       "reason":"No trustworthy row-level source persisted by the frozen scientific engine for these tables; values are not fabricated.",
       "job_event_expected_cohort_from_independent_authority":True}
  jw(policy_root/"OBSERVABILITY_GAPS.json",obs)
@@ -763,8 +770,13 @@ def run_f7(policy_root:Path,cfg:Mapping[str,Any]):
  if cp2.returncode:raise RuntimeError("F7 validator failed")
 
 def main():
+ global START,END,COUNT,CANDIDATE_ID,CANDIDATE_MONTH,PROGRESS_FILE,PRE_SHA,PRE_FILE_SHA,PRE_RESUME_PATH,SHARED
  ap=argparse.ArgumentParser()
  ap.add_argument("--repo",required=True);ap.add_argument("--config",required=True);ap.add_argument("--output",required=True)
+ ap.add_argument("--candidate-id",default="W02_2025-01-13",
+                 help="Frozen representative-week candidate id from INITIAL_STATE_MANIFEST.json.")
+ ap.add_argument("--shared-root",default="",
+                 help="Candidate-specific immutable exogenous source root; defaults under frozen_artifacts.")
  ap.add_argument("--benchmark-issues",type=int,default=0,
                  help="Run only the first N real issues, including Fresh OpenDSS and POST commit; 0 keeps the frozen full episode.")
  ap.add_argument("--benchmark-force-modes",default="",
@@ -792,6 +804,28 @@ def main():
  ap.add_argument("--legacy-dense-planner",action="store_true",
                  help="Rollback to the pre-acceleration dense planner and automatic Presolve; physical constraints/objective are unchanged.")
  a=ap.parse_args()
+ CANDIDATE_ID=str(a.candidate_id)
+ manifest_path=HERE.parent/"INITIALIZATION/INITIAL_STATES/INITIAL_STATE_MANIFEST.json"
+ initialization_root=HERE.parent/"INITIALIZATION"
+ initial_manifest=load_json(manifest_path)
+ matches=[x for x in initial_manifest.get("files",[]) if x.get("candidate_id")==CANDIDATE_ID]
+ if len(matches)!=1:raise RuntimeError(f"candidate must occur exactly once in frozen initial-state manifest: {CANDIDATE_ID}")
+ episode_authority=matches[0]
+ START=int(episode_authority["week_start_index"]);END=START+2015;COUNT=2016
+ CANDIDATE_MONTH=CANDIDATE_ID.split("_",1)[1][:7]
+ PROGRESS_FILE=("W02_PROGRESS.json" if CANDIDATE_ID=="W02_2025-01-13" else f"{CANDIDATE_ID}_PROGRESS.json")
+ PRE_SHA=str(episode_authority["state_sha256"])
+ PRE_FILE_SHA=str(episode_authority["file_sha256"])
+ PRE_RESUME_PATH=initialization_root/str(episode_authority["production_resume_relpath"])
+ canonical_pre_path=initialization_root/str(episode_authority["path"])
+ if not canonical_pre_path.is_file() or sha(canonical_pre_path)!=PRE_FILE_SHA:
+  raise RuntimeError(f"{CANDIDATE_ID} canonical PRE file SHA drift")
+ if not PRE_RESUME_PATH.is_file() or sha(PRE_RESUME_PATH)!=str(episode_authority["production_resume_file_sha256"]):
+  raise RuntimeError(f"{CANDIDATE_ID} production PRE envelope SHA drift")
+ default_shared=("B_W02_SHARED_EXOGENOUS_SOURCE_CURRENT" if CANDIDATE_ID=="W02_2025-01-13"
+                 else f"B_{CANDIDATE_ID}_SHARED_EXOGENOUS_SOURCE_CURRENT")
+ SHARED=(Path(a.shared_root).resolve() if a.shared_root else
+         Path("/home/jaewon/mobile_ess_work/frozen_artifacts")/default_shared)
  if a.benchmark_issues<0 or a.benchmark_issues>COUNT:raise RuntimeError("--benchmark-issues must be in [0,2016]")
  if a.benchmark_planner_presolve is not None and not a.benchmark_issues:
   raise RuntimeError("--benchmark-planner-presolve is allowed only for bounded regression")
@@ -825,7 +859,7 @@ def main():
  run_end=END if a.benchmark_issues==0 else START+a.benchmark_issues-1
  run_count=run_end-START+1
  if not a.benchmark_issues and os.environ.get("PYTHONHASHSEED")!="0":
-  raise RuntimeError("production execution requires PYTHONHASHSEED=0; use RUN_W02_4POLICY_ACTUAL.sh")
+  raise RuntimeError("production execution requires PYTHONHASHSEED=0; use a frozen representative-week launcher")
  book=PerformanceBook();current_performance={"issue":None,"record":None}
  repo=Path(a.repo).resolve();cfg_path=Path(a.config).resolve();cfg=load_json(cfg_path);policy_root=Path(a.output).resolve()
  fixed_location=bool(cfg.get("fixed_location_projection",False))
@@ -842,14 +876,15 @@ def main():
  planner_presolve=(a.benchmark_planner_presolve if a.benchmark_planner_presolve is not None
                    else (1 if use_sparse_restore else -1))
  if sha(repo/"science/main.py")!=SCIENCE_SHA:raise RuntimeError("science/main.py SHA drift")
- if cfg["candidate_id"]!="W02_2025-01-13" or cfg["method_config_sha256"]!=B5_SHA:raise RuntimeError("policy config identity drift")
+ if cfg["candidate_id"]!="W02_2025-01-13" or cfg["method_config_sha256"]!=B5_SHA:
+  raise RuntimeError("common policy-template identity drift")
  if not SITE_AUTHORITY.is_file() or sha(SITE_AUTHORITY)!=SITE_AUTHORITY_SHA:raise RuntimeError("prospective four-site authority drift")
  site_authority=load_json(SITE_AUTHORITY)
  homes={str(k):str(v) for k,v in site_authority.get("assignment",{}).items()}
  if site_authority.get("status")!="PASS_EXACTLY_FOUR_SITES" or set(homes)!={f"MESS{x:02d}" for x in range(1,5)} or len(set(homes.values()))!=4:
   raise RuntimeError(f"invalid prospective four-site authority {homes}")
- if cfg.get("canonical_pre_state_sha256")!=PRE_SHA or cfg.get("canonical_pre_file_sha256")!=PRE_FILE_SHA:
-  raise RuntimeError("policy config prospective canonical PRE binding drift")
+ if CANDIDATE_ID=="W02_2025-01-13" and (cfg.get("canonical_pre_state_sha256")!=PRE_SHA or cfg.get("canonical_pre_file_sha256")!=PRE_FILE_SHA):
+  raise RuntimeError("W02 policy-template canonical PRE binding drift")
  if cfg.get("initial_service_sites")!=homes or cfg.get("initial_service_authority_sha256")!=SITE_AUTHORITY_SHA:
   raise RuntimeError("policy config common initial-site binding drift")
  if fixed_location and cfg.get("fixed_location_sites")!=homes:
@@ -866,7 +901,8 @@ def main():
   if not a.benchmark_issues:raise RuntimeError("shared exogenous source authority missing for production run")
   partial=SHARED/"mobility/R12_COMMON_MOBILITY_INDEX.partial.csv"
   bank=SHARED/"mobility/E4B_FULLFIT_TEMPLATE_BANK_129.parquet"
-  power_auth=SHARED/"power_price/A_B10_W02_POWER_PRICE_SOURCE_AUTHORITY.json"
+  power_auth=SHARED/"power_price/REP_WEEK_POWER_PRICE_SOURCE_AUTHORITY.json"
+  if not power_auth.is_file():power_auth=SHARED/"power_price/A_B10_W02_POWER_PRICE_SOURCE_AUTHORITY.json"
   if not partial.is_file() or not bank.is_file() or not power_auth.is_file():raise RuntimeError("bounded source inputs incomplete")
   bounded={"schema_version":"mobileess.post_stage15.bounded_source_authority.v1",
            "status":"PASS_BOUNDED_PROFILE_SOURCE_ONLY","start_issue":START,"end_issue":run_end,
@@ -876,13 +912,15 @@ def main():
   shared_path=control/"BOUNDED_SHARED_EXOGENOUS_AUTHORITY.json";jw(shared_path,bounded)
  shared=load_json(shared_path)
  if shared.get("status") not in {"PASS","PASS_BOUNDED_PROFILE_SOURCE_ONLY"}:raise RuntimeError("shared exogenous source not PASS")
+ if shared.get("candidate_id",CANDIDATE_ID)!=CANDIDATE_ID or int(shared.get("scored_issue_first",START))!=START:
+  raise RuntimeError(f"shared exogenous candidate/boundary drift for {CANDIDATE_ID}")
  shared_authority_sha=sha(shared_path)
  source_auth=load_json(HERE/"authority/A/SOURCE_AUTHORITY.json")
  write_policy_manifest(policy_root,cfg,config_sha,source_auth,shared_authority_sha)
- episode_id=f"W02_{cfg['slot']}_{cfg['policy_id']}_B5"
+ episode_id=f"{CANDIDATE_ID}_{cfg['slot']}_{cfg['policy_id']}_B5"
  jw(policy_root/"episode_manifest.json",{
-  "schema_version":"a_to_b.10.w02_episode_manifest.v1","episode_id":episode_id,"run_id":episode_id,
-  "scenario_id":"W02_2025-01-13","candidate_id":"W02_2025-01-13","month":"2025-01",
+  "schema_version":"mobileess.post_stage15.rep_week_episode_manifest.v2","episode_id":episode_id,"run_id":episode_id,
+  "scenario_id":CANDIDATE_ID,"candidate_id":CANDIDATE_ID,"month":CANDIDATE_MONTH,
   "method_id":"B5","method_config_sha256":B5_SHA,"policy_id":cfg["policy_id"],"slot":cfg["slot"],
   "evaluation_start_step":START,"evaluation_end_step":END,"evaluation_end_step_inclusive":END,
   "scored_issues":COUNT,"controller_burn_in_steps":0,"selection_window_pre_history_steps":576,
@@ -933,11 +971,11 @@ def main():
     # Stage7 production binding supplies the science-compatible {state,sha256}
     # envelope.  The descriptive canonical file uses the key state_sha256 and
     # is not itself the rolling engine's resume schema.
-    state_path=HERE.parent/"INITIALIZATION/PRODUCTION_INPUT/W02_2025-01-13.resume_state.json"
+    state_path=PRE_RESUME_PATH
    else:
     state_path=engine/f"issue_{i-1:06d}/BUILD7C_POSTCOMMIT_STATE.json"
    state=load_json(state_path);pre_hash=str(state["sha256"])
-   if i==START and pre_hash!=PRE_SHA:raise RuntimeError("canonical W02 PRE hash drift")
+   if i==START and pre_hash!=PRE_SHA:raise RuntimeError(f"canonical {CANDIDATE_ID} PRE hash drift")
    power,price=sources.row(i)
    env=runtime_env(i,state_path,pre_hash,sources.mob_index,control,fixed_location,
                    not a.benchmark_disable_worker_cache,
@@ -1168,7 +1206,7 @@ def main():
    if tr.get("selected_h0_moves") not in ({},None):raise RuntimeError(f"M4 selected movement issue={i}")
    if load_csv(d/"BUILD7B_FULL54_MOVE_ARCS_SELECTED.csv"):raise RuntimeError(f"M4 move plan is not empty issue={i}")
   prepost=float(issue_runtime["pre_to_post_wall_s"] or wall);slow=float(issue_runtime["slow_planner_runtime_s"] or 0)
-  issue_runtime.update({"schema_version":"a_to_b.10.w02.policy_issue.v1","issue":i,"status":"PASS_COMMITTED",
+  issue_runtime.update({"schema_version":"mobileess.post_stage15.rep_week.policy_issue.v2","issue":i,"status":"PASS_COMMITTED",
     "policy_id":cfg["policy_id"],"pre_state_sha256":tr["pre_state_sha256"],"post_state_sha256":tr["post_state_sha256"],
     "full_issue_wall_s":wall,"commit_critical_runtime_s":max(0.0,prepost-slow),
     "development_host_deadline_overrun":max(0.0,prepost-slow)>=300.0,
@@ -1177,19 +1215,19 @@ def main():
   jw(d/"POLICY_ISSUE_AUDIT.json",issue_runtime);issue_audits.append(issue_runtime)
   jw(checkpoint_path,{"status":"RUNNING","last_completed_issue":i,"last_replan_issue":last_replan,
       "event_engine_state":event_state(ev),"completed_issue_count":len(issue_audits),"future_actual_used":False})
-  jw(policy_root/"progress/W02_PROGRESS.json",{"status":"RUNNING_BOUNDED_PROFILE" if a.benchmark_issues else "RUNNING",
+  jw(policy_root/"progress"/PROGRESS_FILE,{"candidate_id":CANDIDATE_ID,"status":"RUNNING_BOUNDED_PROFILE" if a.benchmark_issues else "RUNNING",
       "completed":len(issue_audits),"required":run_count,"last_issue":i,"benchmark_only":bool(a.benchmark_issues)})
   if (i-START+1)%12==0 or i==START:
    print(f"[{cfg['slot']} {cfg['policy_id']}] {i-START+1}/{run_count} issue={i} commit={issue_runtime['commit_critical_runtime_s']:.2f}s planner={slow:.2f}s mode={issue_runtime['planner_mode']}",flush=True)
  if a.benchmark_issues:
   result=book.document("PASS_BOUNDED_ACTUAL_PROFILE_NOT_SCIENTIFIC_EPISODE",run_count)
-  result.update({"candidate_id":"W02_2025-01-13","policy_id":cfg["policy_id"],"slot":cfg["slot"],
+  result.update({"candidate_id":CANDIDATE_ID,"policy_id":cfg["policy_id"],"slot":cfg["slot"],
                  "start_issue":START,"end_issue":run_end,"actual_gurobi_and_fresh_opendss":True,
                  "full_episode_finalization_performed":False,"F7_performed":False})
   jw(policy_root/"PERFORMANCE_BOUNDED_RUN.json",result)
-  jw(policy_root/"progress/W02_PROGRESS.json",{"status":result["status"],"completed":len(issue_audits),
+  jw(policy_root/"progress"/PROGRESS_FILE,{"candidate_id":CANDIDATE_ID,"status":result["status"],"completed":len(issue_audits),
       "required":run_count,"last_issue":run_end,"benchmark_only":True})
-  print(f"W02_BOUNDED_PROFILE_STATUS=PASS slot={cfg['slot']} policy={cfg['policy_id']} issues={run_count}")
+  print(f"REP_WEEK_BOUNDED_PROFILE_STATUS=PASS candidate={CANDIDATE_ID} slot={cfg['slot']} policy={cfg['policy_id']} issues={run_count}")
   restore_performance_wrappers()
   return 0
  if len(issue_audits)!=COUNT:raise RuntimeError(f"policy issue count {len(issue_audits)} != {COUNT}")
@@ -1199,7 +1237,7 @@ def main():
  commit=[float(x["commit_critical_runtime_s"]) for x in issue_audits];planner=[float(x["slow_planner_runtime_s"]) for x in issue_audits if float(x["slow_planner_runtime_s"])>0]
  hw={"platform":sys.platform,"python":sys.version,"cpu_affinity":sorted(os.sched_getaffinity(0)) if hasattr(os,"sched_getaffinity") else [],
      "process_cpu_count":os.cpu_count()}
- jw(policy_root/"RUNTIME_CHARACTERIZATION.json",{"schema_version":"a_to_b.10.w02.runtime_characterization.v1","status":"PASS",
+ jw(policy_root/"RUNTIME_CHARACTERIZATION.json",{"schema_version":"mobileess.post_stage15.rep_week.runtime_characterization.v2","candidate_id":CANDIDATE_ID,"status":"PASS",
    "hardware":hw,"outer_processes_expected":4,"threads_per_process":4,
    "commit_critical":{"p50_s":quantile(commit,.50),"p95_s":quantile(commit,.95),"p99_s":quantile(commit,.99),"max_s":max(commit),
                       "deadline_miss_count":sum(x>=300 for x in commit),"development_host_realtime_claim":"DEMONSTRATED" if max(commit)<300 else "NOT_DEMONSTRATED"},
@@ -1208,14 +1246,14 @@ def main():
    "target_hardware_realtime_claim":"NOT_QUALIFIED_BY_THIS_RUN"})
  run_f7(policy_root,cfg)
  jw(policy_root/"PERFORMANCE_FULL_RUN.json",book.document("PASS_FULL_EPISODE",COUNT))
- jw(policy_root/"progress/W02_PROGRESS.json",{"status":"PASS","completed":COUNT,"required":COUNT,"last_issue":END})
+ jw(policy_root/"progress"/PROGRESS_FILE,{"candidate_id":CANDIDATE_ID,"status":"PASS","completed":COUNT,"required":COUNT,"last_issue":END})
  jw(checkpoint_path,{"status":"PASS_COMPLETE","last_completed_issue":END,"last_replan_issue":last_replan,
     "event_engine_state":event_state(ev),"completed_issue_count":COUNT,"future_actual_used":False})
  # policy-level checksums
  sf=policy_root/"SHA256SUMS.txt"
  sf.write_text("".join(f"{sha(p)}  {p.relative_to(policy_root).as_posix()}\n" for p in sorted(policy_root.rglob("*")) if p.is_file() and p!=sf),encoding="utf-8")
  restore_performance_wrappers()
- print(f"W02_POLICY_STATUS=PASS slot={cfg['slot']} policy={cfg['policy_id']} issues={COUNT}")
+ print(f"REP_WEEK_POLICY_STATUS=PASS candidate={CANDIDATE_ID} slot={cfg['slot']} policy={cfg['policy_id']} issues={COUNT}")
  return 0
 
 if __name__=="__main__":

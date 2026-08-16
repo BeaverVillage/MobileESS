@@ -16,8 +16,10 @@ TABLES=[
 ]
 def load(p): return json.loads(Path(p).read_text(encoding="utf-8"))
 def main():
- ap=argparse.ArgumentParser(); ap.add_argument("--delivery-root",required=True); a=ap.parse_args()
+ ap=argparse.ArgumentParser(); ap.add_argument("--delivery-root",required=True)
+ ap.add_argument("--candidate-id",default="W02_2025-01-13");ap.add_argument("--start-index",type=int,default=3456);a=ap.parse_args()
  root=Path(a.delivery_root)
+ expected_end=a.start_index+2015
  failures=[]; details=[]
  for pd,expected_policy_id in POLICIES.items():
   p=root/pd
@@ -31,8 +33,8 @@ def main():
   if missing: failures.append(f"{pd}: missing result tables {missing}")
   if (p/"episode_manifest.json").is_file():
    m=load(p/"episode_manifest.json")
-   if m.get("scenario_id",m.get("candidate_id"))!="W02_2025-01-13": failures.append(f"{pd}: wrong W02 scenario")
-   if int(m.get("evaluation_start_step",-1))!=3456 or int(m.get("evaluation_end_step_inclusive",-1))!=5471:
+   if m.get("scenario_id",m.get("candidate_id"))!=a.candidate_id: failures.append(f"{pd}: wrong representative-week scenario")
+   if int(m.get("evaluation_start_step",-1))!=a.start_index or int(m.get("evaluation_end_step_inclusive",-1))!=expected_end:
     failures.append(f"{pd}: wrong evaluation boundaries")
    if int(m.get("controller_burn_in_steps",-1))!=0: failures.append(f"{pd}: burn-in must be 0")
    if m.get("method_id")!="B5": failures.append(f"{pd}: method_id must be B5")

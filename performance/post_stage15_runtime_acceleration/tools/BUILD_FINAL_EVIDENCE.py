@@ -402,7 +402,7 @@ def main() -> int:
         "final_fast_issue_wall_seconds": stats([float(x["full_issue_wall_s"]) for x in final if x["planner_mode"] == "NONE"]),
         "four_process_wall_seconds_7issues": four_summary["wall_seconds"], "policy_week_eta": policy_eta,
     })
-    source_files = [repo / "science/main.py", package / "runtime/W02_POLICY_EPISODE_RUNNER.py", package / "RUN_W02_4POLICY_ACTUAL.sh", package / "tools/BENCHMARK_POST15_4X4_SHORT.sh", site_path, manifest_path] + [package / "configs" / n for n in config_names]
+    source_files = [repo / "science/main.py", package / "runtime/W02_POLICY_EPISODE_RUNNER.py", package / "RUN_W02_4POLICY_ACTUAL.sh", package / "RUN_FIRST6_REP_WEEKS_ACTUAL.sh", package / "scripts/PREPARE_REP_WEEK_SHARED_SOURCES.sh", package / "tools/PREFLIGHT_FIRST6_REP_WEEKS.py", package / "tools/SHOW_FIRST6_REP_WEEKS_PROGRESS.py", package / "tools/BENCHMARK_POST15_4X4_SHORT.sh", site_path, manifest_path] + [package / "configs" / n for n in config_names]
     dump(result / "FINAL/FINAL_SOURCE_MANIFEST.json", {
         "schema_version": "mobileess.final_source_manifest.v1", "status": "PASS",
         "files": [{"path": str(p.relative_to(repo)), "sha256": sha(p)} for p in source_files],
@@ -445,6 +445,8 @@ def main() -> int:
         "main_population": "12 representative weeks x M1/M2/M3/M4 = 48 episodes",
         "P4_FIXED15_role": "SUPPLEMENTARY_ONLY_NOT_MAIN",
         "performance_result_relpath": "../PERFORMANCE_RESULT",
+        "first6_launcher_relpath": "RUN_FIRST6_REP_WEEKS_ACTUAL.sh",
+        "first6_launcher_sha256": sha(package / "RUN_FIRST6_REP_WEEKS_ACTUAL.sh"),
     })
     binding["policy_bindings"] = [{"slot": c["slot"], "policy_id": c["policy_id"], "config_relpath": f"configs/{n}", "config_sha256": sha(package / "configs" / n), "threads": 4} for c, n in zip(configs, config_names)]
     dump(binding_path, binding)
@@ -518,6 +520,7 @@ def main() -> int:
         "Bounded actual validation ran 7 of 2016 issues per method; it did not run a full week or the other 11 weeks. "
         f"The measured contended ETA bottleneck is {measured_week_h:.3f} h/week; use 2.3–2.5 h/week for planning. "
         "See `../PERFORMANCE_RESULT/` for evidence and rollback instructions.\n\n"
+        "`RUN_FIRST6_REP_WEEKS_ACTUAL.sh` runs W02, W07, W10, W17, W18, and W25 sequentially; each week runs M1–M4 concurrently at 4 processes × 4 threads and is resumable.\n\n"
         "Run the full W02 episode only when ready:\n"
         "```bash\ncd /home/jaewon/mobile_ess_work/post_stage15_runtime_acceleration/performance/post_stage15_runtime_acceleration/package\n"
         "bash RUN_W02_4POLICY_ACTUAL.sh\n```\n",
