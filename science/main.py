@@ -552,6 +552,10 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  r25m_b6_exact_decomposition=(os.environ.get("MOBILEESS_R25M_B6_EXACT_DECOMPOSITION","0")=="1")
  r25n_b6c5r4_complete_unit_normalization=(os.environ.get("MOBILEESS_R25N_B6C5R4_COMPLETE_UNIT_NORMALIZATION","0")=="1")
  r25v_causal_rolling_mipstart=(os.environ.get("MOBILEESS_R25V_CAUSAL_ROLLING_MIPSTART","0")=="1")
+ fixed_location_projection=(os.environ.get("MOBILEESS_FIXED_LOCATION_MOBILITY_ABLATION","0")=="1")
+ active_plan_mobility_projection=(os.environ.get("MOBILEESS_ACTIVE_PLAN_MOBILITY_PROJECTION","0")=="1")
+ post15_skip_redundant_dense_b4_cuts=(os.environ.get("MOBILEESS_POST15_SKIP_REDUNDANT_DENSE_B4_CUTS","0")=="1")
+ mobility_domain_projected=bool(fixed_location_projection or active_plan_mobility_projection)
  if r25a_fb_prune and not r24_exact_rebase:
   raise RuntimeError("R25A forward/backward compiler requires the adopted R24 exact-rebase foundation")
  if r25b_route_dominance and not r25a_fb_prune:
@@ -589,8 +593,9 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   raise RuntimeError("R24 permanent exact rebase locks PCC-leaf elimination OFF: prior exact candidate was not performance-authoritative")
  if exact_implied_bounds:
   _route_energy=np.asarray([float(mm["energy_kWh"]) for mm in moves.values()],dtype=np.float64)
-  if _route_energy.size==0:raise RuntimeError("BR14 implied-bound proof gate: empty planning move set")
-  _emin=float(np.min(_route_energy));_emax=float(np.max(_route_energy))
+  if _route_energy.size==0 and not fixed_location_projection:raise RuntimeError("BR14 implied-bound proof gate: empty planning move set")
+  _emin=(0.0 if fixed_location_projection else float(np.min(_route_energy)))
+  _emax=(0.0 if fixed_location_projection else float(np.max(_route_energy)))
   _etol=1e-9
   _proof={
    "status":"PASS" if _emin>=-_etol else "FAIL_CLOSED",
@@ -791,6 +796,17 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   rollstate={str(k):dict(v) for k,v in rolling_mess_state.items()}
   mids=sorted(rollstate)
  if set(mids)!=set(mess_E):raise RuntimeError(f"rolling MESS key mismatch state={sorted(mids)} energy={sorted(mess_E)}")
+ fixed_homes={}
+ if fixed_location_projection:
+  _fixed_homes_raw=os.environ.get("MOBILEESS_FIXED_LOCATION_HOME_MAP_JSON","")
+  if not _fixed_homes_raw:
+   raise RuntimeError("M4 exact fixed-location projection requires MOBILEESS_FIXED_LOCATION_HOME_MAP_JSON")
+  try:fixed_homes={str(k):str(v) for k,v in json.loads(_fixed_homes_raw).items()}
+  except Exception as exc:raise RuntimeError("invalid M4 fixed-location home-map JSON") from exc
+  if set(mids)!=set(fixed_homes):
+   raise RuntimeError(f"M4 fixed-location fleet identity drift state={sorted(mids)} authority={sorted(fixed_homes)}")
+  if len(set(fixed_homes.values()))!=len(fixed_homes) or any(sid not in sidx for sid in fixed_homes.values()):
+   raise RuntimeError(f"M4 fixed-location authority requires four distinct valid service PCCs: {fixed_homes}")
  initial_sid={};avail_h={};committed_profile={}
  for mid in mids:
   rs=rollstate[mid];phase=str(rs.get("phase","STAY"))
@@ -807,6 +823,9 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
    committed_profile[mid]=prof
   else:raise RuntimeError(f"MESS {mid} unknown rolling phase {phase}")
   if initial_sid[mid] not in sidx:raise RuntimeError(f"MESS {mid} invalid service {initial_sid[mid]}")
+  if fixed_location_projection:
+   if phase!="STAY" or rem!=0 or initial_sid[mid]!=fixed_homes[mid] or committed_profile[mid]:
+    raise RuntimeError(f"M4 fixed-location PRE drift {mid}: phase={phase} rem={rem} sid={initial_sid[mid]}")
  stay={};mv={};incoming=defaultdict(list);outgoing=defaultdict(list)
  move_arr=[[None for _ in SERVICES] for _ in range(H)];tmp=defaultdict(list)
  for (hh,slot),mm in moves.items():
@@ -966,18 +985,19 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  stay_keys=[];mv_keys=[]
  for mid in mids:
   reachable=reachable_by_mid[mid]
-  for h in range(H):
-   for sid in sorted(reachable[h]):stay_keys.append((mid,h,sid))
-  byh=defaultdict(list)
-  for h0,slot in allowed_by_mid[mid]:byh[h0].append(slot)
-  for h in range(H):
-   for slot in sorted(byh.get(h,[])):mv_keys.append((mid,h,slot))
+  if not mobility_domain_projected:
+   for h in range(H):
+    for sid in sorted(reachable[h]):stay_keys.append((mid,h,sid))
+   byh=defaultdict(list)
+   for h0,slot in allowed_by_mid[mid]:byh[h0].append(slot)
+   for h in range(H):
+    for slot in sorted(byh.get(h,[])):mv_keys.append((mid,h,slot))
  # R25E/A5 exact integrality compression.  The post-A2 mobility DAG is simple:
  # there is at most one arc for each (tail state, head state).  Binary node occupancy
  # therefore uniquely identifies the source-to-H path.  MOVE and STAY arc variables can
  # both be continuous [0,1] while preserving the original integer path set exactly.
  node_occ={}
- if r25e_node_arc_exact:
+ if r25e_node_arc_exact and not mobility_domain_projected:
   # Fail closed if parallel state transitions survived A2.  Parallel arcs are the only
   # case in which identical binary node occupancy could leave a fractional route mixture.
   _seen_transition={}
@@ -1014,7 +1034,9 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   mm=moves[(h,slot)];outgoing[(mid,h,mm["source"])].append(v);incoming[(mid,h+mm["D"],mm["dest"])].append(v)
  for mid in mids:
   reachable=reachable_by_mid[mid]
-  if r25e_node_arc_exact:
+  if mobility_domain_projected:
+   pass
+  elif r25e_node_arc_exact:
    for h in range(H):
     for sid in sorted(reachable[h]):
      y=node_occ[(mid,h,sid)]
@@ -1046,6 +1068,40 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  for (m0,hh,slot),v in mv.items():mv_by_mid_h[(m0,hh)].append((slot,v))
  stay_by_mid_h=defaultdict(list)
  for (m0,hh,sid),v in stay.items():stay_by_mid_h[(m0,hh)].append((sid,v))
+ if fixed_location_projection:
+  for mid in mids:
+   for h in range(H):stay_by_mid_h[(mid,h)].append((fixed_homes[mid],1.0))
+ elif active_plan_mobility_projection:
+  active_ref=globals().get("_A_B10_ACTIVE_REFERENCE")
+  if not isinstance(active_ref,dict):raise RuntimeError("active mobility projection reference unavailable")
+  sdf=active_ref["BUILD7B_FULL54_MESS_PLAN.csv"];mdf=active_ref["BUILD7B_FULL54_MOVE_ARCS_SELECTED.csv"]
+  selected_stay={(str(r.mess_id),int(r.horizon_step),str(r.service_id)) for r in sdf.itertuples(index=False) if str(r.state)=="STAY"}
+  selected_move={(str(r.mess_id),int(r.horizon_step),int(r.slot)) for r in mdf.itertuples(index=False)}
+  for mid,h,sid in selected_stay:
+   if mid not in mids or not (0<=h<H) or sid not in reachable_by_mid[mid][h]:
+    raise RuntimeError(f"A_B10_ACTIVE_PLAN_MOBILITY_PROJECTION_INVALID stay={(mid,h,sid)}")
+   stay_by_mid_h[(mid,h)].append((sid,1.0))
+  for mid,h,slot in selected_move:
+   if mid not in mids or (h,slot) not in set(allowed_by_mid[mid]):
+    raise RuntimeError(f"A_B10_ACTIVE_PLAN_MOBILITY_PROJECTION_INVALID move={(mid,h,slot)}")
+   mv_by_mid_h[(mid,h)].append((slot,1.0))
+  for mid in mids:
+   t=int(avail_h[mid]);sid=str(initial_sid[mid])
+   while t<H:
+    ss=[x for x in selected_stay if x[0]==mid and x[1]==t]
+    mm=[x for x in selected_move if x[0]==mid and x[1]==t]
+    if len(ss)+len(mm)!=1:raise RuntimeError(f"A_B10_ACTIVE_PLAN_MOBILITY_PROJECTION_INVALID path cardinality {mid} h={t}")
+    if ss:
+     if ss[0][2]!=sid:raise RuntimeError(f"A_B10_ACTIVE_PLAN_MOBILITY_PROJECTION_INVALID stay source {ss[0]}")
+     t+=1
+    else:
+     move=moves[(t,mm[0][2])]
+     if str(move["source"])!=sid:raise RuntimeError(f"A_B10_ACTIVE_PLAN_MOBILITY_PROJECTION_INVALID move source {mm[0]}")
+     t+=int(move["D"]);sid=str(move["dest"])
+  jw(out/"A_B10_ACTIVE_PLAN_MOBILITY_PROJECTION_AUDIT.json",{
+   "status":"PASS","selected_stay_constants":len(selected_stay),"selected_move_constants":len(selected_move),
+   "mobility_variables_created":0,"future_actual_used":False,"objective_changed":False,
+   "conditioning":"EXACT_ACTIVE_PLAN_DOMAIN_PROJECTION"})
  route_prune["candidate_move_binary_count_after_exact_pruning"]=0 if r25e_node_arc_exact else len(mv)
  route_prune["candidate_move_continuous_arc_count_after_exact_pruning"]=len(mv) if r25e_node_arc_exact else 0
  route_prune["stay_binary_count_after_reachable_state_pruning"]=len(stay) if r25g_hybrid_stay_binary else (0 if (r24_exact_rebase or r25e_node_arc_exact) else len(stay))
@@ -1167,25 +1223,37 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
      # B4 dense projected resource cuts. R25G exposed these implications only every
      # six steps.  The missing checkpoints are exact consequences of the retained
      # SOC/debt recursions plus charge <= eta_ch*DT*Pmax*STAY.
-     for hh in range(H):
-      if hh%6==0:continue
-      _future_stay=gp.quicksum(s for t in range(hh,H) for sid,s in stay_by_mid_h.get((mid,t),[]))
-      _future_dis=gp.quicksum(r24_energy_terms[(mid,t)]["discharge"] for t in range(hh,H))
-      _future_dep=gp.quicksum(r24_energy_terms[(mid,t)]["depart"] for t in range(hh,H))
-      _future_comm=sum(float(r24_energy_terms[(mid,t)]["committed"]) for t in range(hh,H))
-      m.addLConstr(DE[(mid,hh)]+_future_dis<=_C*_future_stay,name=f"r25k_debt_stay_cover_dense_{mid}_{hh}")
-      m.addLConstr(E[(mid,hh)]+_C*_future_stay-_future_dep-_future_comm>=_E_FLOOR_MODEL,name=f"r25k_soc_stay_cover_dense_{mid}_{hh}")
-     # Pure mobility/SOC projection: eliminate dispatch variables from every prefix
-     # using charge_t <= C*STAY_t and discharge_t >= 0.  This exposes a route-energy
-     # cover directly on STAY/MOVE decisions without changing the physical feasible set.
-     _E0=float(mess_E[mid])/_c5r4_energy_scale_kwh_per_model_unit
-     _cum_dep=0.0;_cum_stay=0.0;_cum_comm=0.0
-     for kk in range(1,H+1):
-      t=kk-1
-      _cum_dep=_cum_dep+r24_energy_terms[(mid,t)]["depart"]
-      _cum_stay=_cum_stay+gp.quicksum(s for sid,s in stay_by_mid_h.get((mid,t),[]))
-      _cum_comm=_cum_comm+float(r24_energy_terms[(mid,t)]["committed"])
-      m.addLConstr(_E0+_C*_cum_stay-_cum_dep-_cum_comm>=_E_FLOOR_MODEL,name=f"r25k_mobility_soc_prefix_cover_{mid}_{kk}")
+     if not post15_skip_redundant_dense_b4_cuts:
+      for hh in range(H):
+       if hh%6==0:continue
+       _future_stay=gp.quicksum(s for t in range(hh,H) for sid,s in stay_by_mid_h.get((mid,t),[]))
+       _future_dis=gp.quicksum(r24_energy_terms[(mid,t)]["discharge"] for t in range(hh,H))
+       _future_dep=gp.quicksum(r24_energy_terms[(mid,t)]["depart"] for t in range(hh,H))
+       _future_comm=sum(float(r24_energy_terms[(mid,t)]["committed"]) for t in range(hh,H))
+       m.addLConstr(DE[(mid,hh)]+_future_dis<=_C*_future_stay,name=f"r25k_debt_stay_cover_dense_{mid}_{hh}")
+       m.addLConstr(E[(mid,hh)]+_C*_future_stay-_future_dep-_future_comm>=_E_FLOOR_MODEL,name=f"r25k_soc_stay_cover_dense_{mid}_{hh}")
+      # Pure mobility/SOC projection: eliminate dispatch variables from every prefix
+      # using charge_t <= C*STAY_t and discharge_t >= 0.  This exposes a route-energy
+      # cover directly on STAY/MOVE decisions without changing the physical feasible set.
+      _E0=float(mess_E[mid])/_c5r4_energy_scale_kwh_per_model_unit
+      _cum_dep=0.0;_cum_stay=0.0;_cum_comm=0.0
+      for kk in range(1,H+1):
+       t=kk-1
+       _cum_dep=_cum_dep+r24_energy_terms[(mid,t)]["depart"]
+       _cum_stay=_cum_stay+gp.quicksum(s for sid,s in stay_by_mid_h.get((mid,t),[]))
+       _cum_comm=_cum_comm+float(r24_energy_terms[(mid,t)]["committed"])
+       m.addLConstr(_E0+_C*_cum_stay-_cum_dep-_cum_comm>=_E_FLOOR_MODEL,name=f"r25k_mobility_soc_prefix_cover_{mid}_{kk}")
+ if post15_skip_redundant_dense_b4_cuts:
+  jw(out/"POST15_DENSE_B4_REDUNDANT_CUT_PROJECTION_AUDIT.json",{
+   "status":"PASS_EXACT_REDUNDANT_ROW_OMISSION","issue":int(issue),
+   "omitted_linear_rows":int(len(mids)*(2*(H-len(range(0,H,6)))+H)),
+   "retained_SOC_recursion":True,"retained_support_debt_recursion":True,
+   "retained_terminal_support_debt_zero":True,"retained_dispatch_STAY_gates":True,
+   "retained_sparse_R24_R25G_strengthening":True,
+   "proof":"omitted R25K dense suffix/prefix rows are documented algebraic consequences of the retained SOC/debt recursions, terminal debt equality, and per-STAY charge ceiling",
+   "integer_feasible_set_changed":False,"continuous_feasible_set_changed":False,
+   "objective_changed":False,"scientific_tolerance_changed":False,
+   "future_actual_used":False})
  # Prospective workload debt by origin IDC, using local shadow start obligations.
  DW={};repW={}
  if zero_lex_cert:
@@ -1842,7 +1910,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
      if r25v_causal_rolling_mipstart and int(h)<H-1:v.Start=0.0;start_counts["occ_zero"]+=1
    for (mid,h),v in mode.items():
     if r25v_causal_rolling_mipstart and int(h)<H-1:v.Start=0.0;start_counts["mode"]+=1
-   if r25v_causal_rolling_mipstart and r25e_node_arc_exact:
+   if r25v_causal_rolling_mipstart and r25e_node_arc_exact and not mobility_domain_projected:
     for mid in mids:
      kk=(mid,int(avail_h[mid]),str(initial_sid[mid]))
      if kk not in node_occ:raise RuntimeError("R25V current source occupancy missing "+repr(kk))
@@ -1952,7 +2020,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  actual_fp=int(m.Fingerprint)&0xffffffff
  model_equiv={"fingerprint_hex":f"0x{actual_fp:08x}","variables":int(m.NumVars),"constraints":int(m.NumConstrs),"qconstraints":int(m.NumQConstrs),"linear_nonzeros":float(m.DNumNZs),"binary_variables":int(m.NumBinVars),"golden":golden}
  model_equiv["PASS"]=(model_equiv["fingerprint_hex"]==golden["fingerprint_hex"] and model_equiv["variables"]==golden["variables"] and model_equiv["constraints"]==golden["constraints"] and model_equiv["qconstraints"]==golden["qconstraints"] and model_equiv["linear_nonzeros"]==golden["linear_nonzeros"] and model_equiv["binary_variables"]==golden["binary_variables"])
- structural_projection_mode=bool(exact_pcc_leaf_elim or exact_implied_bounds or r25k_b4_root_branch_strengthening)
+ structural_projection_mode=bool(exact_pcc_leaf_elim or exact_implied_bounds or r25k_b4_root_branch_strengthening or mobility_domain_projected)
  model_equiv["gate_mode"]="STRUCTURAL_PROJECTION_EXPECTED_MODEL_CHANGE" if structural_projection_mode else "STRICT_BR9_IDENTITY"
  model_equiv["strict_BR9_identity_pass"]=bool(model_equiv["PASS"])
  model_equiv["execution_gate_pass"]=bool(model_equiv["PASS"] or structural_projection_mode)
@@ -2301,8 +2369,8 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  chosen_move={}
  for mid in mids:
   for h in range(H):
-   stsid=[sid for sid,v in stay_by_mid_h.get((mid,h),[]) if v.X>0.5]
-   mm=[(slot,moves[(h,slot)]) for slot,v in mv_by_mid_h.get((mid,h),[]) if v.X>0.5]
+   stsid=[sid for sid,v in stay_by_mid_h.get((mid,h),[]) if _r25p_solution_scalar(v)>0.5]
+   mm=[(slot,moves[(h,slot)]) for slot,v in mv_by_mid_h.get((mid,h),[]) if _r25p_solution_scalar(v)>0.5]
    if stsid:
     state="STAY";sid=stsid[0];slot=None;dest=sid;dur=1;ek=0.0
    elif mm:
@@ -2657,17 +2725,35 @@ def rolling54_main(out,base):
   if r25q_verified_prefix!=resume_issue-113 or not os.environ.get("MOBILEESS_R25Q_RESUME_STATE_PATH"):
    raise RuntimeError("R25Q continuation requires a verified contiguous prefix and cryptographically bound PRE state")
  try:
-  # Static authority setup once. This is correctness infrastructure, not a speed claim.
-  tmp=Path(tempfile.mkdtemp(prefix="build7c_"));temps.append(tmp)
-  ar2=extract_root(HERE/"embedded/BUILD7AR2_PASS.tar.gz",C["parents"]["BUILD7AR2"],tmp)
-  b6=extract_root(HERE/"embedded/BUILD6R3R5_PASS.tar.gz",C["parents"]["BUILD6R3R5"],tmp)
-  sa=extract_root(HERE/"embedded/SOURCEAUTH_FIX1R1_PASS.tar.gz",C["parents"]["SOURCEAUTH_FIX1R1"],tmp)
-  engine=reconstruct_b4(base,ar2,out,tmp);sys.path.insert(0,str(engine));b4=loadmod(engine/"main.py","build4r1_build7c")
-  tds,p3,b2=b4.bind_parents(engine,out);temps.extend(tds)
-  rack,op1,cr,grid,metrics=b4.preload(engine);scope=b4.prepare_scope(Path(base),rack,op1,out);temps.extend(scope["temps"])
-  gstatic=b4.build_grid_static(engine,grid,metrics,scope,b2);gwork=gstatic["work"]
-  sys.path.insert(0,str(engine/"embedded"));grid24=loadmod(HERE/"EXACT_GRID_RUNNER_24SERVICE.py","grid24_build7c")
-  el=verify_24_elements(gstatic["paths"],metrics);jw(out/"BUILD7C_24SERVICE_ELEMENT_PREFLIGHT.json",el)
+  # Immutable source/module/grid foundation is process-scoped. Dynamic queue,
+  # running, WAN, MESS, forecast, and Gurobi model state remain issue-scoped.
+  use_worker_cache=(os.environ.get("MOBILEESS_WORKER_FOUNDATION_CACHE","0")=="1")
+  if use_worker_cache:
+   f,foundation_hit=_worker_foundation(base,out)
+   ar2,b6,sa,engine,b4=f["ar2"],f["b6"],f["sa"],f["engine"],f["b4"]
+   rack,op1,cr,grid,metrics,b2,grid24=f["rack"],f["op1"],f["cr"],f["grid"],f["metrics"],f["b2"],f["grid24"]
+   if f.get("scope") is None:
+    f["scope"]=b4.prepare_scope(Path(base),rack,op1,out)
+   scope=f["scope"]
+   if f.get("gstatic") is None:f["gstatic"]=b4.build_grid_static(engine,grid,metrics,scope,b2)
+   gstatic=f["gstatic"]
+   if f.get("elements") is None:f["elements"]=verify_24_elements(gstatic["paths"],metrics)
+   el=f["elements"]
+   jw(out/"BUILD7C_WORKER_FOUNDATION_CACHE_AUDIT.json",{
+    "status":"PASS","cache_hit":bool(foundation_hit),"immutable_scope_reused":bool(foundation_hit),
+    "dynamic_physical_state_cached":False,"future_actual_cached":False,"gurobi_model_reused":False})
+  else:
+   tmp=Path(tempfile.mkdtemp(prefix="build7c_"));temps.append(tmp)
+   ar2=extract_root(HERE/"embedded/BUILD7AR2_PASS.tar.gz",C["parents"]["BUILD7AR2"],tmp)
+   b6=extract_root(HERE/"embedded/BUILD6R3R5_PASS.tar.gz",C["parents"]["BUILD6R3R5"],tmp)
+   sa=extract_root(HERE/"embedded/SOURCEAUTH_FIX1R1_PASS.tar.gz",C["parents"]["SOURCEAUTH_FIX1R1"],tmp)
+   engine=reconstruct_b4(base,ar2,out,tmp);sys.path.insert(0,str(engine));b4=loadmod(engine/"main.py","build4r1_build7c")
+   tds,p3,b2=b4.bind_parents(engine,out);temps.extend(tds)
+   rack,op1,cr,grid,metrics=b4.preload(engine);scope=b4.prepare_scope(Path(base),rack,op1,out);temps.extend(scope["temps"])
+   gstatic=b4.build_grid_static(engine,grid,metrics,scope,b2);gwork=gstatic["work"]
+   sys.path.insert(0,str(engine/"embedded"));grid24=loadmod(HERE/"EXACT_GRID_RUNNER_24SERVICE.py","grid24_build7c")
+   el=verify_24_elements(gstatic["paths"],metrics)
+  jw(out/"BUILD7C_24SERVICE_ELEMENT_PREFLIGHT.json",el)
 
   runtime_index=ar2/"BUILD5R3_SELECTED_RUNTIME/ROLLING54_MOBILITY_RUNTIME_INDEX.csv"
   ridx=pd.read_csv(runtime_index)
@@ -2803,17 +2889,26 @@ def rolling54_main(out,base):
    else:
     static_ctx=prepare_static_context(ar2,b6,ref,b4)
 
-   # Issue-specific causal mobility forecast.
-   if r24_issue_npz is not None:
-    issue_npz=r24_issue_npz[int(issue)]
+   # Issue-specific causal mobility forecast. M4 is an exact fixed-location
+   # projection, so no route forecast can enter any remaining equation.
+   fixed_location=(os.environ.get("MOBILEESS_FIXED_LOCATION_MOBILITY_ABLATION","0")=="1")
+   if fixed_location:
+    issue_npz=None;bank=None;z=None;route_df=None;conn_delay={};moves={};counts=[0]*H
+    jw(issue_out/"BUILD7C_ROUTE_CAUSAL_AUDIT.json",{
+     "issue":issue,"move_count":0,"future_actual_used":False,
+     "fixed_location_projection":True,"route_forecast_loaded":False,
+     "implementation":"EXACT_DEAD_PATH_ELIMINATION"})
    else:
-    b5tmp=Path(tempfile.mkdtemp(prefix=f"build7c_b5_{issue}_"));temps.append(b5tmp)
-    issue_npz,bank=extract_b5_issue_and_bank(b5arc,b5tmp,issue,runtime_index)
-   z=_npz_immutable(issue_npz)
-   route_df=static_ctx["route_df"]
-   conn_delay=d2_connection_delay_steps(scope,issue_out)
-   moves,counts=pareto_moves_cached(route_df,z,conn_delay,issue_npz,static_ctx["route_path"],issue_out)
-   jw(issue_out/"BUILD7C_ROUTE_CAUSAL_AUDIT.json",{"issue":issue,"move_count":len(moves),"future_actual_used":False})
+    if r24_issue_npz is not None:
+     issue_npz=r24_issue_npz[int(issue)]
+    else:
+     b5tmp=Path(tempfile.mkdtemp(prefix=f"build7c_b5_{issue}_"));temps.append(b5tmp)
+     issue_npz,bank=extract_b5_issue_and_bank(b5arc,b5tmp,issue,runtime_index)
+    z=_npz_immutable(issue_npz)
+    route_df=static_ctx["route_df"]
+    conn_delay=d2_connection_delay_steps(scope,issue_out)
+    moves,counts=pareto_moves_cached(route_df,z,conn_delay,issue_npz,static_ctx["route_path"],issue_out)
+    jw(issue_out/"BUILD7C_ROUTE_CAUSAL_AUDIT.json",{"issue":issue,"move_count":len(moves),"future_actual_used":False})
 
    # The full joint H54 solve receives ONLY committed rolling state.
    sol=build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref,ar2,b6,z,route_df,moves,

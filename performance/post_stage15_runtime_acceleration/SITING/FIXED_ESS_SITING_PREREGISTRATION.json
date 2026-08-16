@@ -1,0 +1,90 @@
+{
+  "schema_version": "mobileess.post_stage15.fixed_ess_siting_preregistration.v1",
+  "status": "FROZEN_BEFORE_SITE_IDENTITY_COMPUTATION",
+  "authority_scope": "Post-Stage15 prospective M1-M4 common initial siting amendment",
+  "outcome_blind_contract": {
+    "controller_year_used_for_siting": 2024,
+    "2025_controller_outcomes_used": false,
+    "W02_controller_outcomes_used": false,
+    "random_selection_used": false,
+    "manual_favorable_override_allowed": false
+  },
+  "candidate_definition": {
+    "service_axis": "current frozen BUILD7 24-service PCC axis",
+    "required_ids": "IDC01..IDC12 plus STA01..STA12",
+    "arbitrary_ieee123_buses_forbidden": true
+  },
+  "physical_feasibility": {
+    "all_required": [
+      "frozen service-to-electrical-host mapping exists",
+      "PCC transformer and three-phase connection exist in Generated_ThreePhase_PCC_v3.dss",
+      "host bus is present and energized in the exact frozen IEEE-123 model",
+      "base snapshot Fresh Exact OpenDSS converges without command errors",
+      "frozen traffic-node identity exists",
+      "frozen 24-service route-graph audit passes"
+    ],
+    "failed_candidate_action": "exclude before ranking"
+  },
+  "snapshot_selection": {
+    "data_year": 2024,
+    "timezone_semantics": "AEMO fixed AEST interval-end timestamps converted to UTC interval starts",
+    "rooftop_pv_repair": {
+      "authority": "PR3 period_selection/aemo_pv_repair.py AUTHORIZED_DEFECTS[2024]",
+      "raw_archives_modified": false,
+      "allowed_sequence": "exact deduplication; same-timestamp satellite fallback; linear interpolation only when measurement and satellite are both absent for an explicitly authorized defect",
+      "same_fixed_aest_day_bracketing_required": true,
+      "unexpected_missing_or_blank_action": "fail closed"
+    },
+    "selection_occurs_before_any_ess_perturbation": true,
+    "duplicate_resolution": "for each rule inspect candidates in deterministic criterion order and take the earliest UTC timestamp not already selected",
+    "rules_in_order": [
+      "maximum feeder operational net load",
+      "maximum reconstructed gross feeder load",
+      "maximum rooftop PV among intervals at or below the annual median net load",
+      "maximum operational net load among intervals at or below the annual 20th percentile rooftop PV",
+      "maximum positive 30-minute operational-net-load ramp",
+      "most negative 30-minute operational-net-load ramp",
+      "minimum operational net load",
+      "multivariate median condition by normalized L1 distance over net load, gross load, PV, and 30-minute ramp",
+      "summer nearest 90th-percentile operational net load",
+      "autumn nearest 90th-percentile operational net load",
+      "winter nearest 90th-percentile operational net load",
+      "spring nearest 90th-percentile operational net load"
+    ],
+    "season_definition_southern_hemisphere": {
+      "summer": [12, 1, 2],
+      "autumn": [3, 4, 5],
+      "winter": [6, 7, 8],
+      "spring": [9, 10, 11]
+    }
+  },
+  "standardized_ess_perturbation": {
+    "active_power_delta_kw": 50.0,
+    "reactive_power_delta_kvar": 50.0,
+    "experiments_per_candidate_snapshot": ["+DeltaP", "-DeltaP", "+DeltaQ", "-DeltaQ"],
+    "dispatch_optimization_in_siting": false,
+    "same_perturbation_for_every_candidate": true
+  },
+  "staged_selection_no_weighted_sum": {
+    "stage_1": "retain only physical-feasibility PASS candidates",
+    "stage_2": "retain candidates at or above the feasible-candidate median source-path |Z|",
+    "stage_3": "lexicographically rank by smaller minimum voltage margin, then larger voltage-deviation p95, then larger local/downstream loading-risk p95, then service_id; retain the first eight",
+    "stage_4": "require positive standardized grid-support response: +DeltaP or +DeltaQ improves candidate-region voltage-deviation L1 by more than 1e-8 pu while increasing neither global voltage-deviation L1 nor global maximum thermal loading by more than 1e-8; if fewer than four pass, fail closed",
+    "stage_5": "evaluate every four-site combination from the remaining eligible set and choose lexicographically: largest minimum pairwise electrical-tree |Z| distance; smallest maximum common source-path impedance overlap ratio; best sorted vulnerability-rank tuple; best sorted support-rank tuple; largest sorted source-distance tuple; lexicographically smallest sorted service-id tuple"
+  },
+  "metric_definitions": {
+    "candidate_region": "candidate host bus plus descendants in the deterministic source-rooted shortest-|Z| tree",
+    "voltage_deviation": "mean absolute voltage magnitude deviation from 1.0 pu over the stated region (normalized L1)",
+    "voltage_margin": "minimum of voltage_pu-0.95 and 1.05-voltage_pu",
+    "thermal_loading": "maximum exact OpenDSS line or transformer loading in per unit",
+    "local_downstream_loading_risk": "per-snapshot maximum loading among the source-to-host path and candidate descendant subtree, aggregated as p95 across snapshots",
+    "network_loss": "negative sum of OpenDSS Circuit.Losses converted from watts to kW is not used; positive real Circuit.Losses/1000 is reported",
+    "electrical_distance": "accumulated positive-sequence series R and X on the deterministic source-rooted energized path; regulator/transformer series impedance is included on its source-side base where available"
+  },
+  "assignment_rule": {
+    "selected_site_order": "final selected sites sorted by the frozen final selection trace, then service_id",
+    "MESS01_to_MESS04": "assign in that deterministic order",
+    "2025_result_based_reassignment_forbidden": true
+  },
+  "full_campaign_authorized": false
+}

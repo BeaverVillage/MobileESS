@@ -1,0 +1,95 @@
+{
+  "K9H7_result_tables_per_episode": 12,
+  "causal_policies": [
+    {
+      "base_policy": "EVENT_TRIGGERED",
+      "event_triggered": true,
+      "local_repair_enabled": true,
+      "max_refresh_minutes": 30,
+      "max_refresh_steps": 6,
+      "paper_role": "PROPOSED",
+      "policy_id": "PROPOSED_EVENT30_LOCAL_REPAIR",
+      "slot": "P1"
+    },
+    {
+      "base_policy": "FIXED_PERIODIC",
+      "event_triggered": false,
+      "local_repair_enabled": false,
+      "max_refresh_minutes": 30,
+      "max_refresh_steps": 6,
+      "paper_role": "MAIN_PERIODIC_BASELINE",
+      "policy_id": "FIXED30",
+      "slot": "P2"
+    },
+    {
+      "base_policy": "EVENT_TRIGGERED",
+      "event_triggered": true,
+      "local_repair_enabled": false,
+      "max_refresh_minutes": 30,
+      "max_refresh_steps": 6,
+      "paper_role": "LOCAL_REPAIR_ABLATION",
+      "policy_id": "EVENT30_NO_LOCAL_REPAIR",
+      "slot": "P3"
+    },
+    {
+      "base_policy": "FIXED_PERIODIC",
+      "event_triggered": false,
+      "local_repair_enabled": false,
+      "max_refresh_minutes": 15,
+      "max_refresh_steps": 3,
+      "paper_role": "HIGHER_FREQUENCY_PERIODIC_BASELINE",
+      "policy_id": "FIXED15",
+      "slot": "P4"
+    }
+  ],
+  "causal_policy_count": 4,
+  "causal_policy_week_episodes": 48,
+  "causal_scored_issues_total": 96768,
+  "contract_id": "D12_PAPER_MINIMAL_4POLICY_12REP_WEEK_V1",
+  "controller_burn_in_steps": 0,
+  "main_causal_result_tables_expected": 576,
+  "pairing_rule": "Within a representative week, all four policies use the exact same canonical PRE state and exogenous realization.",
+  "reference": {
+    "full_week_online_policy": false,
+    "matched_window_issues": 54,
+    "method": "B6/R25T certified offline reference",
+    "never_impute_to_full_week": true,
+    "role": "SEPARATE_MATCHED_WINDOW_ECONOMIC_ANCHOR"
+  },
+  "representative_weeks": [
+    "W02_2025-01-13",
+    "W07_2025-02-17",
+    "W10_2025-03-10",
+    "W17_2025-04-28",
+    "W18_2025-05-05",
+    "W25_2025-06-23",
+    "W26_2025-06-30",
+    "W32_2025-08-11",
+    "W38_2025-09-22",
+    "W41_2025-10-13",
+    "W44_2025-11-03",
+    "W51_2025-12-22"
+  ],
+  "resolution_minutes": 5,
+  "scientific_method_config_sha256": "3f712ec02c4c5ebb6a424267b043f07469d29f4a4abeaea7fcdd8b765e13624a",
+  "scientific_method_id_for_all_causal_policies": "B5",
+  "scored_issues_per_week": 2016,
+  "sensitivity_deferred": [
+    "FIXED60",
+    "EVENT_MAX15",
+    "EVENT_MAX60",
+    "no_hysteresis",
+    "no_opportunity_check",
+    "no_max_refresh",
+    "26_vs_54_stage"
+  ],
+  "status": "FROZEN_BEFORE_LONG_DURATION_CONTROLLER_RESULTS",
+  "stress_periods": {
+    "annual_weight": 0.0,
+    "count": 4,
+    "initial_draft_execution_status": "DEFERRED_UNTIL_MAIN_4_POLICY_PIPELINE_IS_ACCEPTED",
+    "pooled_with_representative_weeks": false
+  },
+  "weeks_count": 12,
+  "winner_declaration_before_complete_validated_main_results": false
+}
