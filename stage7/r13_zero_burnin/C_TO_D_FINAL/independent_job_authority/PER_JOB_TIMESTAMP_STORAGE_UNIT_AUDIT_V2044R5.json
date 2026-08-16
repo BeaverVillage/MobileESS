@@ -1,0 +1,88 @@
+{
+  "all_three_columns_same_unit": true,
+  "arrival": {
+    "arrival_window_end_exclusive_utc": "2025-12-31T14:00:00+00:00",
+    "arrival_window_start_utc": "2024-12-31T14:00:00+00:00",
+    "candidate_units": {
+      "ms": {
+        "decoded_max_utc": "57968-05-02T08:13:20+00:00",
+        "decoded_min_utc": "56971-09-28T18:16:40+00:00",
+        "primary_axis_fraction": 0.0,
+        "primary_axis_rows": 0,
+        "rows": 59901,
+        "unit": "ms",
+        "valid_rows": 59901
+      },
+      "ns": {
+        "decoded_max_utc": "1970-01-21T10:52:16.724000+00:00",
+        "decoded_min_utc": "1970-01-21T02:08:07.333000+00:00",
+        "primary_axis_fraction": 0.0,
+        "primary_axis_rows": 0,
+        "rows": 59901,
+        "unit": "ns",
+        "valid_rows": 59901
+      },
+      "s": {
+        "decoded_max_utc": "56000303-07-22T14:13:20+00:00",
+        "decoded_min_utc": "55003712-01-10T13:46:40+00:00",
+        "primary_axis_fraction": 0.0,
+        "primary_axis_rows": 0,
+        "rows": 59901,
+        "unit": "s",
+        "valid_rows": 59901
+      },
+      "us": {
+        "decoded_max_utc": "2025-12-30T23:18:44+00:00",
+        "decoded_min_utc": "2024-12-31T23:22:13+00:00",
+        "primary_axis_fraction": 1.0,
+        "primary_axis_rows": 59901,
+        "rows": 59901,
+        "unit": "us",
+        "valid_rows": 59901
+      }
+    },
+    "column_suffix_matches_storage_unit": false,
+    "selected_arrival_audit": {
+      "decoded_max_utc": "2025-12-30T23:18:44+00:00",
+      "decoded_min_utc": "2024-12-31T23:22:13+00:00",
+      "label": "arrival_timestamp_ns",
+      "raw_integer_max": 1767136724000000,
+      "raw_integer_min": 1735687333000000,
+      "raw_max_decimal_digits": 16,
+      "raw_min_decimal_digits": 16,
+      "rows": 59901,
+      "selected_storage_unit": "us"
+    },
+    "selected_common_storage_unit": "us",
+    "selection_anchor": "arrival_timestamp_ns",
+    "selection_contract": "Every Job arrival must lie inside the frozen 2025 primary axis. Latest-start and completion may extend into a carry-out tail.",
+    "source_column_suffix_claim": "ns",
+    "unique_unit_resolution_pass": true
+  },
+  "column_suffix_claim": "ns",
+  "column_suffix_semantically_correct": false,
+  "contract": "Resolve one common epoch unit from the 2025 arrival cohort, then decode latest-start and latest-completion with the same unit.",
+  "latest_completion": {
+    "decoded_max_utc": "2026-01-03T09:48:30+00:00",
+    "decoded_min_utc": "2025-01-01T17:17:13+00:00",
+    "label": "latest_completion_timestamp_ns",
+    "raw_integer_max": 1767433710000000,
+    "raw_integer_min": 1735751833000000,
+    "raw_max_decimal_digits": 16,
+    "raw_min_decimal_digits": 16,
+    "rows": 59901,
+    "selected_storage_unit": "us"
+  },
+  "latest_start": {
+    "decoded_max_utc": "2025-12-30T23:48:44+00:00",
+    "decoded_min_utc": "2024-12-31T23:52:13+00:00",
+    "label": "latest_start_timestamp_ns",
+    "raw_integer_max": 1767138524000000,
+    "raw_integer_min": 1735689133000000,
+    "raw_max_decimal_digits": 16,
+    "raw_min_decimal_digits": 16,
+    "rows": 59901,
+    "selected_storage_unit": "us"
+  },
+  "selected_common_storage_unit": "us"
+}

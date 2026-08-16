@@ -1,0 +1,37 @@
+{
+  "conversation": "A",
+  "release": "R25C_A3_COMPACTNESS_GATE_EXACT_DECOMPOSITION_ARCHITECTURE",
+  "stage": "A3/6",
+  "foundation": "R25B A2 + R25A A1 + R24 permanent exact rebase",
+  "long_solver_validation": "FORBIDDEN_IN_A3; deferred to A6",
+  "decision_policy": {
+    "monolithic_move_binary_ceiling": 80000,
+    "monolithic_move_share_of_integer_ceiling": 0.90,
+    "minimum_existing_exact_pruning_fraction": 0.10,
+    "historical_long_run_certificate_must_pass": true,
+    "if_any_gate_fails": "EXACT_DECOMPOSITION_REQUIRED"
+  },
+  "selected_architecture": "DANTZIG_WOLFE_MESS_PATH_REFORMULATION_WITH_EXACT_DAG_PRICING",
+  "exact_full_column_mapping": {
+    "original_integer_mobility_object": "one unit-flow source-to-H path per MESS in an acyclic time-expanded graph",
+    "column_object": "one complete H54 mobility path/trajectory per MESS",
+    "mapping": "x_arc = sum_p incidence(arc,p) * lambda_p; sum_p lambda_p = 1",
+    "bijection_scope": "integer mobility paths when all feasible columns are represented",
+    "traffic_K3_authority_changed": false,
+    "route_energy_semantics_changed": false,
+    "D2_connection_delay_changed": false,
+    "scientific_feasible_set_changed": false,
+    "objective_changed": false
+  },
+  "pricing": {
+    "kernel": "acyclic shortest-path dynamic programming over the exact A1/A2 mobility DAG",
+    "master_couplings_encoded_as_additive_column_signatures": [
+      "STAY service/time occupancy",
+      "MOVE departure route/slot",
+      "Safe route-energy departure coefficient",
+      "route tie-break coefficient"
+    ],
+    "production_exactness_requirement": "A5 must use certified branch-and-price (pricing at every required branch node) or an equivalent all-column certificate. Heuristic restricted-column MILP is not authoritative."
+  },
+  "next_stage": "A4 radial-grid exact projection/node-QCP reduction on the compact operational master while A3 decomposition contract remains frozen"
+}

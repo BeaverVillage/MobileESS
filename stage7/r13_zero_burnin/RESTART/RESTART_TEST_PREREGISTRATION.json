@@ -1,0 +1,22 @@
+{
+  "schema_version": "conversation_c.stage7.r13.restart_preregistration.v1",
+  "status": "FROZEN_BEFORE_RESTART_OUTCOMES",
+  "selection_rule": "choose the lowest frozen medoid_rank within each of summer, autumn, winter, spring",
+  "selected": [
+    {"season": "summer", "medoid_rank": 1, "candidate_id": "W02_2025-01-13", "week_start_index": 3456},
+    {"season": "autumn", "medoid_rank": 3, "candidate_id": "W10_2025-03-10", "week_start_index": 19584},
+    {"season": "winter", "medoid_rank": 6, "candidate_id": "W25_2025-06-23", "week_start_index": 49824},
+    {"season": "spring", "medoid_rank": 9, "candidate_id": "W38_2025-09-22", "week_start_index": 76032}
+  ],
+  "test_sequence": [
+    "load canonical PRE through production initializer path",
+    "execute exactly one accepted h0 transition",
+    "persist canonical POST/checkpoint",
+    "recreate controller in a clean process",
+    "restore exact POST as next PRE without executing another controller transition",
+    "require POST state SHA equals restored PRE state SHA"
+  ],
+  "required_pass_count": 4,
+  "controller_burn_in_steps": 0,
+  "outcomes_inspected_before_selection": false
+}

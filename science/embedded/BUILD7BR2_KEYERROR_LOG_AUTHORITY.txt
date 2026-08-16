@@ -1,0 +1,117 @@
+[2026-08-10T11:28:11+09:00] START V2044R12B1D1B2_JOINTMASTER_BUILD7BR2_SPARSE_MEMORY_HARDENING
+[0/12] PAYLOAD CHECKSUM
+BUILD7B_CONTRACT.json: OK
+EXACT_GRID_RUNNER_24SERVICE.py: OK
+README.md: OK
+README_BUILD7BR1.md: OK
+README_BUILD7BR2.md: OK
+embedded/BUILD6R3R5_PASS.tar.gz: OK
+embedded/BUILD7AR2_PASS.tar.gz: OK
+embedded/BUILD7BR1_ABRUPT_STOP_LOG_AUTHORITY.txt: OK
+embedded/BUILD7B_FAILURE_ARITY_AUTHORITY.tar.gz: OK
+embedded/SOURCEAUTH_FIX1R1_PASS.tar.gz: OK
+ensure_failure.py: OK
+main.py: OK
+release_self_test.py: OK
+write_checksums.py: OK
+[1/12] RELEASE SELF-TEST
+{
+  "PASS": true,
+  "ar2_sha": true,
+  "b6_sha": true,
+  "br1_abrupt_log_sha": true,
+  "br1_abrupt_signature": true,
+  "br2_guard_BUILD7BR2_PREOPT_MODEL_AUDIT.json": true,
+  "br2_guard_FP[(h,n)]==ownP[n]": true,
+  "br2_guard_FQ[(h,n)]==ownQ[n]": true,
+  "br2_guard_GRB.MEM_LIMIT": true,
+  "br2_guard_MIQCPMethod=1": true,
+  "br2_guard_NodefileStart=0.5": true,
+  "br2_guard_PreSparsify=2": true,
+  "br2_guard_SoftMemLimit=soft_mem_gb": true,
+  "br2_guard__LIVE_HEARTBEAT.json": true,
+  "br2_guard_dU[(h,n)]==dU[(h,p)]": true,
+  "br2_guard_m.dispose()": true,
+  "br2_guard_reachable_by_mid": true,
+  "br2_guard_svcS_{h}_{sid}": true,
+  "build7b_failure_sha": true,
+  "dense_recursive_grid_removed": true,
+  "failure_json_unique": true,
+  "failure_semantics": true,
+  "grid_service_api": true,
+  "guard_Fresh_Exact_OpenDSS_24service_firststep_pass": true,
+  "guard_K9H7_RESULT_V1_DATA": true,
+  "guard_exact_profile_cert": true,
+  "guard_full_54step_joint_master_executed": true,
+  "guard_future_actual_used_for_optimizer": true,
+  "guard_global_departure_prefix_reserve_kWh": true,
+  "guard_lineS_": true,
+  "guard_mess_location_service_id": true,
+  "guard_pareto_moves": true,
+  "guard_profile_safe_horizon_steps": true,
+  "guard_ratio2_ref": true,
+  "guard_safe_Q_bus_kvar": true,
+  "guard_safe_netP_bus_kW": true,
+  "guard_single_issue_full_54step_joint_master_execute": true,
+  "guard_support_debt_terminal": true,
+  "guard_workload_debt_terminal": true,
+  "mv_key_arity_static_audit": true,
+  "new_3tuple_depflag_present": true,
+  "old_bad_depflag_removed": true,
+  "sa_sha": true,
+  "semantic_selftest": true,
+  "syntax_EXACT_GRID_RUNNER_24SERVICE.py": true,
+  "syntax_ensure_failure.py": true,
+  "syntax_main.py": true,
+  "syntax_write_checksums.py": true
+}
+[2/12] SELECT SCIENTIFIC PYTHON
+PYTHON_RUNTIME=/home/jaewon/miniconda3/envs/power_v61/bin/python
+[3/12] VERIFY AR2/B6/SOURCEAUTH PARENTS + LOCATE EXACT BUILD5R3
+[4/12] RECONSTRUCT EXACT BUILD4R1 ENGINE FROM BASE SHA + R1 OVERLAY SHA
+[5/12] VERIFY 24-SERVICE OPENDSS ELEMENT DOMAIN
+[6/12] AUDIT D2 CONNECTION DELAY + BUILD PARETO K3 TIME-EXPANDED ROUTE GRAPH
+[7/12] BUILD ISSUE113 CURRENT INFORMATION STATE ONLY (NO FUTURE ACTUAL JOB ARRIVALS)
+[8/12] SOLVE SPARSE MEMORY-HARDENED FULL 54-STEP JOINT MASTER
+[9/12] CERTIFY CURRENT/COMMITMENT RACK + WAN + SELECTED H0 SIGNED MOBILITY PROFILES
+[10/12] FRESH EXACT OPENDSS 24-SERVICE FIRST-STEP GATE + K9H7_RESULT_V1
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2848159
+Academic license 2848159 - for non-commercial use only - registered to ha___@gmail.com
+Set parameter OutputFlag to value 1
+Set parameter LogFile to value "/home/jaewon/mobile_ess_work/frozen_artifacts/stage_k9h7_v2044r12b1d1b2_jointmaster_build7br2_issue113_full54_20260810T112811/GUROBI_BUILD7B_ISSUE113.log"
+Set parameter Threads to value 1
+Set parameter Seed to value 0
+Set parameter MIPGap to value 0
+Set parameter MIPGapAbs to value 0
+Set parameter NumericFocus to value 3
+Set parameter FeasibilityTol to value 1e-09
+Set parameter IntFeasTol to value 1e-09
+Set parameter OptimalityTol to value 1e-09
+Set parameter MIQCPMethod to value 1
+Set parameter PreSparsify to value 2
+Set parameter NodefileStart to value 0.5
+Set parameter NodefileDir to value "/home/jaewon/mobile_ess_work/frozen_artifacts/stage_k9h7_v2044r12b1d1b2_jointmaster_build7br2_issue113_full54_20260810T112811/gurobi_nodefiles"
+Set parameter SoftMemLimit to value 15.0221142016
+{
+  "stage": "V2044R12B1D1B2_JOINTMASTER_BUILD7BR2_SPARSE_MEMORY_HARDENING",
+  "status": "FAILED_V2044R12B1D1B2_BUILD7B_SINGLE_ISSUE113_FULL54_INTEGRATION_PILOT",
+  "error": "KeyError(('MESS01', 0, 70))",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/jaewon/mobile_ess_work/run_packages/K9H7_V2044R12B1D1B2_JOINTMASTER_BUILD7BR2_SPARSE_MEMORY_HARDENING_20260810T112811/payload/main.py\", line 664, in main\n    sol=build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref,ar2,b6,z,route_df,moves,conn_delay,price,out)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/jaewon/mobile_ess_work/run_packages/K9H7_V2044R12B1D1B2_JOINTMASTER_BUILD7BR2_SPARSE_MEMORY_HARDENING_20260810T112811/payload/main.py\", line 361, in build_full\n    depart=gp.quicksum(float(mm[\"energy_kWh\"])*mv[(mid,h,slot)] for (hh,slot),mm in moves.items() if hh==h)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"src/gurobipy/_helpers.pyx\", line 41, in gurobipy._helpers.quicksum\n  File \"/home/jaewon/mobile_ess_work/run_packages/K9H7_V2044R12B1D1B2_JOINTMASTER_BUILD7BR2_SPARSE_MEMORY_HARDENING_20260810T112811/payload/main.py\", line 361, in <genexpr>\n    depart=gp.quicksum(float(mm[\"energy_kWh\"])*mv[(mid,h,slot)] for (hh,slot),mm in moves.items() if hh==h)\n                                               ~~^^^^^^^^^^^^^^\nKeyError: ('MESS01', 0, 70)\n",
+  "future_actual_used_for_optimizer": false,
+  "full_54step_joint_master_executed": false
+}
+[11/12] ARCHIVE
+14ac736fe36f76d128bdb9ebd6729654ad5c8af0a2ceb22222e14ccf887e3713  /home/jaewon/mobile_ess_work/frozen_artifacts/stage_k9h7_v2044r12b1d1b2_jointmaster_build7br2_issue113_full54_20260810T112811.tar.gz
+[12/12] OUTPUT
+ONLY_HANDOFF_FILE=/home/jaewon/mobile_ess_work/frozen_artifacts/stage_k9h7_v2044r12b1d1b2_jointmaster_build7br2_issue113_full54_20260810T112811.tar.gz
+LOG_FILE=/home/jaewon/mobile_ess_work/logs/K9H7_V2044R12B1D1B2_JOINTMASTER_BUILD7BR2_SPARSE_MEMORY_HARDENING_20260810T112811.txt
+{
+  "error": "KeyError(('MESS01', 0, 70))",
+  "full_54step_joint_master_executed": false,
+  "future_actual_used_for_optimizer": false,
+  "stage": "V2044R12B1D1B2_JOINTMASTER_BUILD7BR2_SPARSE_MEMORY_HARDENING",
+  "status": "FAILED_V2044R12B1D1B2_BUILD7B_SINGLE_ISSUE113_FULL54_INTEGRATION_PILOT",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/jaewon/mobile_ess_work/run_packages/K9H7_V2044R12B1D1B2_JOINTMASTER_BUILD7BR2_SPARSE_MEMORY_HARDENING_20260810T112811/payload/main.py\", line 664, in main\n    sol=build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref,ar2,b6,z,route_df,moves,conn_delay,price,out)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/jaewon/mobile_ess_work/run_packages/K9H7_V2044R12B1D1B2_JOINTMASTER_BUILD7BR2_SPARSE_MEMORY_HARDENING_20260810T112811/payload/main.py\", line 361, in build_full\n    depart=gp.quicksum(float(mm[\"energy_kWh\"])*mv[(mid,h,slot)] for (hh,slot),mm in moves.items() if hh==h)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"src/gurobipy/_helpers.pyx\", line 41, in gurobipy._helpers.quicksum\n  File \"/home/jaewon/mobile_ess_work/run_packages/K9H7_V2044R12B1D1B2_JOINTMASTER_BUILD7BR2_SPARSE_MEMORY_HARDENING_20260810T112811/payload/main.py\", line 361, in <genexpr>\n    depart=gp.quicksum(float(mm[\"energy_kWh\"])*mv[(mid,h,slot)] for (hh,slot),mm in moves.items() if hh==h)\n                                               ~~^^^^^^^^^^^^^^\nKeyError: ('MESS01', 0, 70)\n"
+}

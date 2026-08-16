@@ -1,0 +1,19 @@
+{
+  "start_issue": 113,
+  "planner_runtime_budget_seconds": 60,
+  "event_config": {
+    "hard_flags": ["ACTIVE_PLAN_INFEASIBLE"],
+    "soft_rules": [
+      {
+        "name": "load_forecast_error_pct",
+        "direction": "ABOVE",
+        "trigger": 10.0,
+        "release": 7.0,
+        "units": "percent",
+        "tier": "PREDICTION_DEVIATION"
+      }
+    ],
+    "soft_dwell_steps": 2,
+    "max_refresh_steps": 6
+  }
+}

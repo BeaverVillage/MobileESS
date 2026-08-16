@@ -1,0 +1,48 @@
+{
+  "release": "R25O_B6C5R4R1_RC_DUAL_RECOVERY",
+  "status": "PASS_STATIC_RELEASE_VALIDATION",
+  "parent_C5R4_failure": {
+    "max_RC_accounting_error": 0.00015031077743739003,
+    "RC_audit_tolerance": 0.0001,
+    "failure_before_restricted_MIP_polish_and_branch_price": true
+  },
+  "repairs": {
+    "RC_mismatch_enters_QCP_dual_retry": true,
+    "RC_audit_tolerance_loosened": false,
+    "root_retry_ScaleFlag": 2,
+    "root_retry_NumericFocus": 2,
+    "child_ScaleFlag": 2,
+    "child_NumericFocus": 2,
+    "child_full_RC_accounting_audit": true,
+    "child_coefficient_range_audit": true
+  },
+  "verification": {
+    "algebraic_equivalence_cases": 20000,
+    "algebraic_equivalence_failures": 0,
+    "native_normalized_Gurobi_MIQCP": "PASS",
+    "Model_fixed_continuous_QCP": "PASS",
+    "full_release_self_test": "PASS",
+    "issue152_root_pricing": {
+      "status": "PASS_ROOT_PRICING_CLOSED",
+      "pricing_closed": true,
+      "cg_iterations": 22,
+      "cg_seconds": 118.4866579020163,
+      "raw_root_objective": -2017.4056025287102,
+      "guarded_full_all_column_lower_bound": -2017.4060045461158,
+      "max_RC_accounting_error": 0.00008267929507576921,
+      "RC_audit_tolerance": 0.0001,
+      "QCP_dual_retries": 1,
+      "retry_trigger_max_RC_accounting_error": 0.00012546523554987418,
+      "final_BarQCPConvTol": 3e-10,
+      "final_ScaleFlag": 2,
+      "final_NumericFocus": 2,
+      "diagnostic_only": true,
+      "physical_h0_committed": false
+    }
+  },
+  "scientific_feasible_set_changed": false,
+  "objective_changed": false,
+  "gap_semantics_changed": false,
+  "long_issue152_run_performed": false,
+  "issue152_root_pricing_validation_performed": true
+}

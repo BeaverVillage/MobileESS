@@ -1,0 +1,110 @@
+{
+  "conversation": "A",
+  "release": "R24_PERMANENT_EXACT_FORMULATION_REBASE",
+  "created_kst": "2026-08-13 09:37+09:00",
+  "purpose": "permanently strengthen exact-equivalent BUILD7C formulation before the final long Stage-1 closure run",
+  "resume_issue": 152,
+  "end_issue": 166,
+  "authoritative_prefix_before_run": "113..151 = 39/54",
+  "frozen_scientific_contract": {
+    "Horizon": 54,
+    "cadence_minutes": 5,
+    "MIPGap": 0.03,
+    "Threads": 1,
+    "h0_only_commit": true,
+    "future_actual_forbidden": true,
+    "future_D2_reinjection_forbidden": true,
+    "Fresh_Exact_OpenDSS_each_committed_issue": true
+  },
+  "adopted_without_long_runtime_validation": [
+    {
+      "id": "R24-A",
+      "change": "STAY arc BINARY -> bounded CONTINUOUS [0,1] with MOVE arcs remaining binary",
+      "proof": "acyclic unit-flow induction; STAY is the 0/1 residual for every integer MOVE solution",
+      "integer_feasible_set_changed": false,
+      "historical_evidence": "R18R1 hard150 runtime confirmed max STAY fractionality 0.0"
+    },
+    {
+      "id": "R24-B",
+      "change": "merge two location active-power gates into Pdis+Pchg <= P_MAX*STAY",
+      "proof": "retained global charge/discharge mode rows enforce mutual exclusivity and P_MAX; merged row is exact",
+      "integer_feasible_set_changed": false
+    },
+    {
+      "id": "R24-C",
+      "change": "strengthen departure floor with max(PEAK_RESERVE, route_energy) per selected route",
+      "proof": "route-energy part is implied by retained SOC recursion and next-state protected floor",
+      "integer_feasible_set_changed": false
+    },
+    {
+      "id": "R24-D",
+      "change": "bound branch FP/FQ components by retained line apparent-power circle limits",
+      "proof": "|FP|,|FQ| <= S follows from FP^2+FQ^2 <= S^2",
+      "integer_feasible_set_changed": false
+    },
+    {
+      "id": "R24-E",
+      "change": "remove unused rootP/rootQ definitional auxiliaries; move voltage inequality rows to dU bounds",
+      "proof": "algebraic projection / identical bound semantics",
+      "integer_feasible_set_changed": false
+    },
+    {
+      "id": "R24-F",
+      "change": "add sparse 6-step support-debt suffix valid inequalities",
+      "proof": "DE_H=0 and DE_{t+1}=DE_t+discharge-repE with repE<=charge imply DE_h+sum(discharge)<=sum(charge)",
+      "integer_feasible_set_changed": false
+    },
+    {
+      "id": "R24-G",
+      "change": "add sparse 6-step SOC prefix valid inequalities",
+      "proof": "direct summation of retained SOC equalities plus E_k>=E_FLOOR",
+      "integer_feasible_set_changed": false
+    },
+    {
+      "id": "R24-H",
+      "change": "one-pass BUILD5 causal issue/profile extraction for issues152..166 plus template-bank cache",
+      "proof": "byte SHA checked per selected member; scientific values unchanged",
+      "scientific_values_changed": false
+    },
+    {
+      "id": "R24-I",
+      "change": "empty local-shadow fast path",
+      "proof": "empty queue has exact empty schedule; no optimization needed",
+      "scientific_values_changed": false
+    }
+  ],
+  "explicitly_not_adopted": [
+    {
+      "candidate": "R17 SOS1 mobility compression",
+      "reason": "exact but historical R17 presolved formulation expanded severely and fixed-work gap regressed 3.20594458% -> 3.9467267%"
+    },
+    {
+      "candidate": "R16 PCC-leaf elimination",
+      "reason": "exact structural proof retained but prior quickscreen did not improve certification; locked OFF in R24"
+    },
+    {
+      "candidate": "post-hoc issue152 incumbent MIP Start",
+      "reason": "would violate final clean rolling issue>113 no same-issue post-hoc start authority"
+    },
+    {
+      "candidate": "MIPGap relaxation to 3.1%",
+      "reason": "scientific acceptance remains frozen at <=3%"
+    },
+    {
+      "candidate": "multithreading tuning",
+      "reason": "outside current frozen Threads=1 authority and user explicitly deferred it"
+    }
+  ],
+  "historical_R18R1_support": {
+    "hard150_baseline_gap": 0.032059445800038174,
+    "hard150_exact_projection_gap": 0.031447054341730604,
+    "raw_binary_variables_after_projection": 96604,
+    "stay_count_projected": 4183,
+    "max_runtime_stay_fractionality": 0.0
+  },
+  "long_validation_policy": "DEFERRED_TO_FINAL_STAGE1_RUN; no hours-long candidate-by-candidate validation now",
+  "TimeLimit": "ABSENT in final R24 continuation; long run occurs once after all exact improvements are bundled",
+  "posthoc_issue152_MIPStart_used": false,
+  "PCC_leaf_elimination": false,
+  "SOS1_added": false
+}

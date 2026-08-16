@@ -1,0 +1,41 @@
+{
+  "release": "R25N_B6C5R3_FINAL_ALGORITHM_CORRECTION",
+  "threads": 4,
+  "qcp_dual": {
+    "QCPDual": 1,
+    "Method": 2,
+    "BarQCPConvTol": 1e-09,
+    "retry": [
+      1e-09,
+      3e-10,
+      1e-10
+    ]
+  },
+  "pricing": {
+    "root_batch": 16,
+    "child_batch": 16,
+    "dual_stabilization": false
+  },
+  "branching": {
+    "mobility_integrality_first": true,
+    "strong_qcp_probe": false,
+    "fixed_dual_multiway_time_layer": true,
+    "max_explicit_service_children": 4
+  },
+  "primal": {
+    "primal_kbest": 96,
+    "final_dual_kbest": 64,
+    "heuristics": 0.2,
+    "integer_time_limit_s": 300
+  },
+  "certificate": {
+    "target_gap": 0.03,
+    "restricted_master_bound_authority": false,
+    "fixed_dual_authority": "exact restricted DAG reduced-cost bound",
+    "branch_price_authority": "exact all-column child pricing or conservative ancestor bounds"
+  },
+  "scientific_change": false,
+  "objective_change": false,
+  "gap_semantics_change": false,
+  "B6_final_freeze_requires_actual_issue152_pass": true
+}

@@ -1,0 +1,111 @@
+{
+  "bash_execution_required_now": false,
+  "checksum_entry_count": 62,
+  "compactness_gate": {
+    "conversation": "A",
+    "decision": "EXACT_DECOMPOSITION_REQUIRED",
+    "evidence_sha256": {
+      "BUILD7BR14_IMPLIED_BOUND_PROOF_AUDIT.json": "cab4796d0a7fbf77e5576c83c6f2658ebf2b266f2e153f3df247dd28550890a6",
+      "BUILD7BR2_PREOPT_MODEL_AUDIT.json": "3f6369975ce4ef91f97825b54edc7723a8b0c9213dbc0990e7ed4383b52658b4",
+      "BUILD7BR3_MV_DOMAIN_AUDIT.json": "0308f2476b3285dac8f9a0b08a4a9a1d4c8e4e0979d9a4f9c601af586f9dba3c",
+      "BUILD7BR6_EXACT_ROUTE_PRUNING_AUDIT.json": "78248f2169ec85a2978fdd32f361a93bc70b9a641228e3a127b2967e99a918f4",
+      "BUILD7BR6_GUROBI_TERMINATION.json": "b5043be5defff82d74237231be69ba1990efab313319ebd41404b442000298ac"
+    },
+    "fixed_gate_policy": {
+      "long_run_certificate_must_already_pass": true,
+      "max_MOVE_binary_for_monolithic_continuation": 80000,
+      "max_MOVE_share_of_integer_for_monolithic_continuation": 0.9,
+      "min_existing_exact_pruning_fraction_for_monolithic_continuation": 0.1,
+      "rationale": "A3 was precommitted to stop monolithic tuning when the post-A1/A2 model remains in the 80k-90k+ MOVE regime. Scale-free concentration and pruning-efficiency gates prevent a decision based on one arbitrary count alone."
+    },
+    "gate_results": {
+      "absolute_move_binary_gate": false,
+      "eight_hour_certificate_gate": false,
+      "exact_pruning_fraction_gate": false,
+      "mobility_share_gate": false
+    },
+    "issue152_historical_authority": {
+      "MOVE_fraction_of_R24_integer_estimate": 0.997829123910793,
+      "R24_estimated_integer_after_STAY_projection": 99499,
+      "absolute_optimistic_one_of_K3_floor_from_current_MOVE": 33095,
+      "baseline_reachable_MOVE_binary": 101919,
+      "candidate_MOVE_binary": 99283,
+      "candidate_MOVE_by_MESS": {
+        "MESS01": 24967,
+        "MESS02": 24376,
+        "MESS03": 24376,
+        "MESS04": 25564
+      },
+      "eight_hour_gap": 0.0309825386888505,
+      "eight_hour_runtime_s": 28800.0663189888,
+      "existing_exact_MOVE_reduction": 2636,
+      "existing_exact_MOVE_reduction_fraction": 0.02586367605647622,
+      "historical_stay_binary": 4299,
+      "historical_total_integer_binary": 103798,
+      "linear_constraints": 89016,
+      "node_count": 42066.0,
+      "nodes_per_second": 1.4606216365642377,
+      "quadratic_constraints": 8129,
+      "route_level_pareto_move_records": 31782,
+      "target_gap": 0.03,
+      "variables": 144567
+    },
+    "stage": "A3/6",
+    "status": "PASS_COMPACTNESS_DECISION_GATE",
+    "structural_interpretation": {
+      "K3_authority_changed": false,
+      "dominant_block": "MESS time-expanded MOVE decisions",
+      "long_solver_run_executed_in_A3": false,
+      "scientific_feasible_set_changed": false,
+      "why_decomposition": "R24 removes STAY integrality but leaves essentially all integer combinatorics in MOVE. A2 confirms K3 duration/Safe-energy dominance is already compiled upstream, so further route-rank-only work cannot attack the source\u00d7destination\u00d7time\u00d7MESS state explosion."
+    }
+  },
+  "conversation": "A",
+  "decision": "EXACT_DECOMPOSITION_REQUIRED",
+  "decomposition_kernel": {
+    "A5_branch_and_price_or_all_column_certificate_required": true,
+    "full_column_integer_path_equivalence_contract": true,
+    "heuristic_restricted_column_authority_forbidden": true,
+    "module_sha256": "b02e5c91665412a440d98da2761de02b39e30c5c9d0d828a6c583bd1425daf96",
+    "pricing_kernel_exact_for_additive_reduced_cost": true,
+    "proof_test": {
+      "PASS": true,
+      "full_column_path_arc_bijection_tiny_graph": true,
+      "linear_coupling_signature_additive": true,
+      "pricing_equals_full_enumeration": true,
+      "pricing_random_trials": 200,
+      "production_claim": "Kernel proof only. Exact production replacement requires branch-and-price or equivalent all-column certification; heuristic restricted columns are forbidden.",
+      "stage": "A3/6",
+      "tiny_graph_path_count": 5,
+      "unsplit_path_incidence": true
+    },
+    "proof_test_sha256": "e1ac7b253c917758969bc2233b68e8d96205df3a31692626e72f6dea4f67f6a4"
+  },
+  "foundation": {
+    "A2_bundle_sha256": "834410ffab9f262727ab44e6951e2c89072ae160e8bd0a9ce0cb48dc966a919c",
+    "A2_main_sha256": "dd022fa1c0cfefd256d01dcfef47b32d09cc5774cd23ac5c73999d10acc99446",
+    "A3_main_sha256": "dd022fa1c0cfefd256d01dcfef47b32d09cc5774cd23ac5c73999d10acc99446",
+    "scientific_main_byte_identical_to_A2": true
+  },
+  "long_issue152_solver_run_executed": false,
+  "next_stage": "A4/6 radial-grid exact projection/node-QCP reduction; decomposition contract remains frozen and is integrated in A5.",
+  "python_compile_PASS": true,
+  "release": "R25C_A3_COMPACTNESS_GATE_EXACT_DECOMPOSITION_ARCHITECTURE",
+  "release_self_test_PASS": true,
+  "scientific_contract": {
+    "D2_changed": false,
+    "H54_changed": false,
+    "K3_traffic_authority_changed": false,
+    "MIPGap_changed": false,
+    "cadence_changed": false,
+    "feasible_set_changed": false,
+    "fresh_exact_opendss_removed": false,
+    "future_D2_reinjected": false,
+    "future_actual_used": false,
+    "future_regeneration_precredit": false,
+    "objective_changed": false
+  },
+  "selected_architecture": "DANTZIG_WOLFE_MESS_PATH_REFORMULATION_WITH_EXACT_DAG_PRICING",
+  "stage": "A3/6",
+  "status": "PASS_STATIC_RELEASE_VALIDATION"
+}

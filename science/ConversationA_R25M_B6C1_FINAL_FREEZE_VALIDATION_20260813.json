@@ -1,0 +1,58 @@
+{
+  "conversation": "A",
+  "release": "R25M_B6C1_FINAL_FREEZE",
+  "stage": "B6-C1",
+  "status": "PASS_B6_C1_FINAL_FREEZE",
+  "source_runtime_smoke_bundle_sha256": "daf55628977904e134f20f7fb19798f813b1ed86b0555c40a93379d1c671c86a",
+  "source_runtime_smoke_outer_status": "FAIL_B6_C1_DUAL_LIFECYCLE_SMOKE",
+  "outer_failure_classification": "FALSE_NEGATIVE_PARSER_ONLY",
+  "outer_parser_failure": {
+    "reason": "Gurobi license/banner text preceded the JSON object on stdout, while the wrapper attempted json.loads(sm.stdout) on the entire stdout.",
+    "scientific_or_solver_failure": false
+  },
+  "actual_gurobi_runtime_smoke": {
+    "process_return_code": 0,
+    "embedded_json_status": "PASS",
+    "root": {
+      "num_int_vars": 0,
+      "num_bin_vars": 0,
+      "is_mip": 0,
+      "linear_pi_count": 1,
+      "qcp_pi_count": 1,
+      "rc_count": 2,
+      "objective": 1.0000000338085937
+    },
+    "child": {
+      "num_int_vars": 0,
+      "num_bin_vars": 0,
+      "is_mip": 0,
+      "linear_pi_count": 1,
+      "qcp_pi_count": 1,
+      "rc_count": 2,
+      "objective": 1.250000089955209
+    },
+    "separate_primal_is_mip": true,
+    "post_mip_relax_used": false,
+    "stage1_state_touched": false,
+    "elapsed_s": 0.36490416526794434
+  },
+  "scientific_contract": {
+    "scientific_feasible_set_changed": false,
+    "objective_changed": false,
+    "stage1_state_touched": false,
+    "long_issue152_solve": false,
+    "main_py_sha256": "f7b5d12f3e0f1933a928d3955d573e4c12597686aa1512302f2f791d34973bf6",
+    "decomposition_module_sha256": "9a8bc0333d948a4ccb15378c18c61d55f0fa029407799e31e4bdcba5562e84a2"
+  },
+  "parser_fix_required_for_future_wrapper": {
+    "status": "FIXED_IN_FREEZE_CONTRACT",
+    "rule": "Parse the final complete JSON object after any solver/license banner; never require stdout to contain JSON only.",
+    "rerun_required": false,
+    "basis": "The already captured raw stdout contains a complete PASS JSON object and process return code 0."
+  },
+  "freeze_decision": {
+    "B6C1_solver_lifecycle": "FROZEN_PASS",
+    "B6C1_old_smoke_wrapper": "SUPERSEDED_PARSER_ONLY",
+    "next_stage": "B6-C2_GLOBAL_PATH_CACHE_PARENT_CHILD_INHERITANCE_BATCH_PRICING"
+  }
+}

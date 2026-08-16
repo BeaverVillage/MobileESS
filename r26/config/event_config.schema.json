@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/BeaverVillage/MobileESS/r26/event_config.schema.json",
+  "title": "R26 event engine configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["hard_flags", "soft_rules", "soft_dwell_steps", "max_refresh_steps"],
+  "properties": {
+    "hard_flags": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "soft_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "direction", "trigger", "release", "units", "tier"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "direction": {"enum": ["ABOVE", "BELOW"]},
+          "trigger": {"type": "number"},
+          "release": {"type": "number"},
+          "units": {"type": "string", "minLength": 1},
+          "tier": {"enum": ["SECURITY_MARGIN", "PREDICTION_DEVIATION", "ECONOMIC"]}
+        }
+      }
+    },
+    "soft_dwell_steps": {"type": "integer", "minimum": 1},
+    "max_refresh_steps": {"type": "integer", "minimum": 1},
+    "local_repair_enabled": {"type": "boolean", "default": false},
+    "local_repair_horizon_steps": {"type": "integer", "minimum": 1, "default": 12},
+    "full_replan_hard_flags": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1},
+      "default": []
+    }
+  }
+}
