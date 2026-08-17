@@ -9,6 +9,14 @@ mkdir -p "$DELIVERY" "$LOGROOT"
 exec 9>"$DELIVERY/.FIRST6_RUN.lock"
 flock -n 9 || { echo "FAIL_CLOSED: another first-six launcher is active" >&2; exit 2; }
 export PYTHONHASHSEED=0 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
+AUTH="$HERE/authority/PRE_W02_FINAL_RELEASE_AUTHORIZATION.json"
+[[ -f "$AUTH" ]] || { echo "BLOCKED: PRE_W02 final release authorization is missing" >&2; exit 2; }
+"$PY" - "$AUTH" <<'PY'
+import json,sys
+d=json.load(open(sys.argv[1],encoding="utf-8"))
+if d.get("status")!="AUTHORIZED_FOR_W02" or d.get("full_w02_executed") is not False:
+    raise SystemExit("BLOCKED: PRE_W02 authorization is not PASS")
+PY
 
 mapfile -t groups < <($PY "$HERE/tools/CPU_AFFINITY_4X4.py" --plain)
 [[ ${#groups[@]} -eq 4 ]] || { echo "FAIL_CLOSED: CPU 4x4 topology unavailable" >&2; exit 2; }
@@ -56,6 +64,28 @@ for wi in 0 1 2 3 4 5; do
     --delivery-root "$weekroot" --candidate-id "$week" --start-index "$start" >"$weeklog/STRUCTURE_VALIDATION.json"
   printf '{"status":"PASS","candidate_id":"%s","start_index":%s,"methods":4,"issues_per_method":2016}\n' "$week" "$start" >"$weekroot/WEEK_STATUS.json"
   echo "[FIRST6] PASS $week"
+  if (( wi == 0 )); then
+    token="$weekroot/W02_ACCEPTANCE_TOKEN.json"
+    if [[ ! -f "$token" ]]; then
+      echo "[FIRST6] W02 complete; waiting for external scientific/result acceptance token. W07 was not started."
+      echo "FIRST6_STATUS=WAITING_W02_ACCEPTANCE"
+      echo "W02_ACCEPTANCE_TOKEN_REQUIRED=$token"
+      exit 0
+    fi
+    "$PY" - "$token" "$weekroot/WEEK_STATUS.json" <<'PY'
+import hashlib,json,sys
+token_path,status_path=sys.argv[1:]
+token=json.load(open(token_path,encoding="utf-8")); status=json.load(open(status_path,encoding="utf-8"))
+digest=hashlib.sha256(open(status_path,"rb").read()).hexdigest()
+ok=(token.get("status")=="ACCEPTED_FOR_REMAINING_WEEKS"
+    and token.get("candidate_id")=="W02_2025-01-13"
+    and token.get("w02_week_status_sha256")==digest
+    and token.get("outcome_blind_protocol_audit") is True
+    and token.get("technical_integrity_pass") is True)
+if not ok: raise SystemExit("FAIL_CLOSED: invalid W02 acceptance token")
+PY
+    echo "[FIRST6] W02 external acceptance token PASS; W07 is now authorized"
+  fi
 done
 trap - INT TERM
 echo "FIRST6_REP_WEEKS_STATUS=PASS"

@@ -6,6 +6,14 @@ BASE="/home/jaewon/mobile_ess_work"
 DELIVERY="$BASE/frozen_artifacts/B_W02_4POLICY_ACTUAL_PILOT_CURRENT"
 LOGROOT="$BASE/logs/B_W02_4POLICY_ACTUAL_PILOT_CURRENT"
 export PYTHONHASHSEED=0
+AUTH="$HERE/authority/PRE_W02_FINAL_RELEASE_AUTHORIZATION.json"
+[[ -f "$AUTH" ]] || { echo "BLOCKED: PRE_W02 final release authorization is missing" >&2; exit 2; }
+"$PY" - "$AUTH" <<'PY'
+import json,sys
+d=json.load(open(sys.argv[1],encoding="utf-8"))
+if d.get("status")!="AUTHORIZED_FOR_W02" or d.get("full_w02_executed") is not False:
+    raise SystemExit("BLOCKED: PRE_W02 authorization is not PASS")
+PY
 mkdir -p "$DELIVERY" "$LOGROOT"
 
 echo "[A→B 10] resolve exact PR4 worktree"

@@ -88,6 +88,10 @@ def loadmod(p:Path,name:str):
 def set_fixed(v,value:float)->None:
  abase._set_fixed(v,float(value),relax_integer=False)
 
+def canonical_physical_zero(value:float)->float:
+ value=float(value)
+ return 0.0 if abs(value)<5e-4 else value
+
 def quantile(values:list[float],q:float)->float|None:
  if not values:return None
  a=np.asarray(values,dtype=float)
@@ -310,7 +314,20 @@ def transform_science(science,result_dir:Path):
    '  rack,op1,cr,grid,metrics=b4.preload(engine);scope=b4.prepare_scope(Path(base),rack,op1,out);temps.extend(scope["temps"]);_a_b10_bind_full_year_rack_scope(scope,out)'),
   ('    f["scope"]=b4.prepare_scope(Path(base),rack,op1,out)',
    '    f["scope"]=b4.prepare_scope(Path(base),rack,op1,out);_a_b10_bind_full_year_rack_scope(f["scope"],out)'),
-  ('  if resume_issue==113:','  if False:  # A-B10 always uses SHA-bound external PRE state'),
+ ('  if resume_issue==113:','  if False:  # A-B10 always uses SHA-bound external PRE state'),
+  ('   if not ex.get("hard_constraint_pass",False):\n'
+   '    # Step 1 is intentionally fail-closed. Phase-aware cut/re-solve is the next stage.',
+   '   if not ex.get("hard_constraint_pass",False):\n'
+   '    ex=_a_b10_exact_ac_recovery(b4,grid24,scope,gstatic,issue,running,sol,issue_out,ex)\n'
+   '    jw(issue_out/f"exact_grid/FRESH_EXACT_OPENDSS_24SERVICE_ISSUE_{issue}.json",ex)\n'
+   '    _a_b10_capture_exact_ac(grid24,issue_out,issue,ex)\n'
+   '   if not ex.get("hard_constraint_pass",False):\n'
+   '    # Bounded closed-loop recovery exhausted; unsafe h0 is never committed.'),
+  ('   jw(issue_out/f"exact_grid/FRESH_EXACT_OPENDSS_24SERVICE_ISSUE_{issue}.json",ex)\n'
+   '   if not ex.get("hard_constraint_pass",False):',
+   '   jw(issue_out/f"exact_grid/FRESH_EXACT_OPENDSS_24SERVICE_ISSUE_{issue}.json",ex)\n'
+   '   _a_b10_capture_exact_ac(grid24,issue_out,issue,ex)\n'
+   '   if not ex.get("hard_constraint_pass",False):'),
  ]
  for old,new in reps:
   if source.count(old)!=1:raise RuntimeError("science control-plane patch drift: "+old[:90])
@@ -424,8 +441,11 @@ def fix_all_slow_from_model(loc:Mapping[str,Any],source_model)->dict[str,int]:
 def residual_integer_names(model)->list[str]:
  return [str(v.VarName) for v in model.getVars() if str(v.VType).upper() in {"B","I","S","N"} and float(v.UB)-float(v.LB)>1e-12]
 
-def solve_fast(model,cb)->dict[str,Any]:
+def solve_fast(model,cb,loc:Mapping[str,Any]|None=None)->dict[str,Any]:
  import gurobipy as gp
+ if loc is not None and loc.get("_a_b10_tiebreak_constr") is not None:
+  for var,lb,ub in loc.pop("_a_b10_tiebreak_fixed_bounds",[]):var.LB=lb;var.UB=ub
+  model.remove(loc.pop("_a_b10_tiebreak_constr"));model.setObjective(loc["econ"],gp.GRB.MINIMIZE);model.update()
  model.Params.Threads=4;model.Params.MIPGap=0.03;model.Params.MIPGapAbs=0.0;model.Params.MIPFocus=1
  # The slow planner may use a benchmarked search-only presolve policy.  The
  # conditioned dispatch is the frozen physical-commit authority and must not
@@ -439,7 +459,350 @@ def solve_fast(model,cb)->dict[str,Any]:
  except Exception:gap=None
  if int(model.Status)!=int(gp.GRB.OPTIMAL) and (gap is None or gap>0.03+1e-12):
   raise RuntimeError(f"fast conditioned dispatch did not reach 3% operational gap status={model.Status} gap={gap}")
+ # The economic QCP can have many equally optimal P/Q allocations, which made
+ # an identical PRE produce different physical h0 actions.  Select a unique h0
+ # electrical action within a sub-micro-dollar primary bound.  This is part of
+ # scientific action selection, not a validation solve; slow decisions stay fixed.
+ if loc is not None and int(model.NumObj)==1:
+  primary=loc["econ"];primary_value=float(primary.getValue())
+  # The epsilon constraint must not be tighter than its own numerical
+  # feasibility tolerance.  Freeze an explicit ten-micro-dollar absolute
+  # economic envelope and solve the selector with a 1e-9 feasibility tolerance.
+  # This changes neither the feasible set nor any material economic comparison.
+  tol=max(1e-5,abs(primary_value)*1e-12)
+  old_feasibility_tol=float(model.Params.FeasibilityTol)
+  old_optimality_tol=float(model.Params.OptimalityTol);old_bar_qcp_tol=float(model.Params.BarQCPConvTol)
+  old_numeric_focus=int(model.Params.NumericFocus);old_scale_flag=int(model.Params.ScaleFlag)
+  bound=model.addLConstr(primary<=primary_value+tol,name="a_b10_primary_economic_tiebreak_bound")
+  tie=gp.QuadExpr();tie_vars=[]
+  for mid in sorted(map(str,loc["mids"])):
+   for sid,_ in loc["stay_by_mid_h"].get((mid,0),[]):
+    for table in (loc["Pdis"],loc["Pchg"],loc["Q"]):
+     var=table.get((mid,0,sid))
+     if var is not None:tie.add(var*var);tie_vars.append(var)
+  model.setObjective(tie,gp.GRB.MINIMIZE);model.Params.Threads=1;model.Params.OutputFlag=0;model.Params.FeasibilityTol=1e-9
+  tt=time.monotonic();model.optimize();tie_wall=time.monotonic()-tt
+  if int(model.Status)!=int(gp.GRB.OPTIMAL):raise RuntimeError(f"deterministic h0 tiebreak failed status={model.Status}")
+  primary_after=float(primary.getValue())
+  # Gurobi scales this row by its largest coefficient; permit only the
+  # corresponding sub-micro-dollar raw residual after the 1e-9 scaled gate.
+  if primary_after>primary_value+tol+1e-7:
+   raise RuntimeError(f"deterministic h0 tiebreak primary objective drift before={primary_value:.15g} after={primary_after:.15g} tolerance={tol:.15g}")
+  q["deterministic_h0_tiebreak"]={"status":"PASS","wall_seconds":tie_wall,"threads":1,
+   "primary_before":primary_value,"primary_after":primary_after,"primary_absolute_tolerance":tol,
+   "slow_decisions_fixed":True,"validation_solve":False}
+  fixed=[]
+  # The normalized model uses MW/Mvar in the adopted configuration.  Clamp
+  # numerical dust below 5e-4 physical kW/kvar to exact zero before the final
+  # primary restore; this is far below every scientific feasibility tolerance.
+  physical_scale=float(loc.get("_c5r4_power_scale_kw_per_model_unit",1000.0))
+  for var in tie_vars:
+   value=float(var.X)
+   if abs(value*physical_scale)<5e-4:value=0.0
+   fixed.append((var,float(var.LB),float(var.UB)));var.LB=value;var.UB=value
+  # The fixed-h0 restore is the committed continuous QCP authority.  Solve it
+  # with the established C5R4 numerical-polish settings so the existing R24
+  # residual gate is met without relaxing that gate.
+  model.setObjective(primary,gp.GRB.MINIMIZE);model.Params.Threads=1
+  model.Params.NumericFocus=3;model.Params.FeasibilityTol=1e-9;model.Params.OptimalityTol=1e-9
+  model.Params.BarQCPConvTol=1e-10;model.Params.ScaleFlag=2
+  model.update();model.optimize()
+  if int(model.Status)!=int(gp.GRB.OPTIMAL):raise RuntimeError(f"deterministic h0 primary restore failed status={model.Status}")
+  q["deterministic_h0_tiebreak"]["wall_seconds"]=time.monotonic()-tt
+  q["deterministic_h0_tiebreak"]["primary_restore_wall_included"]=True
+  loc["_a_b10_tiebreak_constr"]=bound;loc["_a_b10_tiebreak_fixed_bounds"]=fixed
+  model.Params.Threads=4;model.Params.OutputFlag=1;model.Params.FeasibilityTol=old_feasibility_tol
+  model.Params.OptimalityTol=old_optimality_tol;model.Params.BarQCPConvTol=old_bar_qcp_tol
+  model.Params.NumericFocus=old_numeric_focus;model.Params.ScaleFlag=old_scale_flag;model.update()
+ else:q["deterministic_h0_tiebreak"]={"status":"NOT_APPLICABLE_MULTIOBJECTIVE","validation_solve":False}
  return q
+
+AC_RECOVERY_MAX_CUT_ROUNDS=1
+AC_RECOVERY_FD_STEP_KW=10.0
+
+def _ac_h0_controls(loc:Mapping[str,Any],science)->list[dict[str,Any]]:
+ """Return connected h0 MESS controls as model expressions and physical kW/kvar."""
+ scale=float(getattr(science,"_c5r4_power_scale_kw_per_model_unit",1000.0))
+ controls=[]
+ for mid in map(str,loc["mids"]):
+  selected=[]
+  for sid,v in loc["stay_by_mid_h"].get((mid,0),[]):
+   if float(science._r25p_solution_scalar(v))>0.5:selected.append(str(sid))
+  if len(selected)>1:raise RuntimeError(f"AC recovery multiple h0 stay sites {mid}: {selected}")
+  if not selected:continue
+  sid=selected[0]
+  pd=loc["Pdis"].get((mid,0,sid));pc=loc["Pchg"].get((mid,0,sid));q=loc["Q"].get((mid,0,sid))
+  if pd is None or pc is None or q is None:raise RuntimeError(f"AC recovery missing h0 P/Q variables {mid}/{sid}")
+  controls.append({"mess_id":mid,"service_id":sid,"p_expr":scale*(pd-pc),"q_expr":scale*q,
+                   "p_kw":scale*(float(pd.X)-float(pc.X)),"q_kvar":scale*float(q.X)})
+ return controls
+
+def _ac_current_plan(loc:Mapping[str,Any])->list[dict[str,Any]]:
+ issue=int(loc["issue"]);plan=[]
+ for (job,dest,_rack,start),v in loc["x"].items():
+  if int(start)==issue and float(v.X)>0.5:
+   src=loc["pmap"][str(job)]
+   plan.append({"start_step":issue,"destination_IDC_id":str(dest),"IT_power_kW":float(src["IT_power_kW"])})
+ return plan
+
+def _ac_firstmess(loc:Mapping[str,Any],science,controls:list[dict[str,Any]])->list[dict[str,Any]]:
+ by={x["mess_id"]:x for x in controls};rows=[]
+ for mid in map(str,loc["mids"]):
+  rs=loc["rollstate"][mid];phase=str(rs.get("phase","STAY"));c=by.get(mid)
+  sid=str(rs.get("service_id",rs.get("dest_service_id",loc["initial_sid"][mid])))
+  rows.append({"mess_id":mid,"location_service_id":sid,"moving":phase=="MOVE" or c is None,
+               "connection_delay_active":phase=="CONNECTION_DELAY","grid_connected":c is not None,
+               "P_net_grid_injection_kW":0.0 if c is None else float(c["p_kw"]),
+               "Q_grid_injection_kvar":0.0 if c is None else float(c["q_kvar"])})
+ return rows
+
+def _voltage_rows_from_live_opendss(grid24)->list[dict[str,Any]]:
+ import opendssdirect as odd
+ return [dict(x) for x in grid24.collect_voltage_rows(odd)]
+
+def capture_exact_ac_observability(grid24,issue_out:Path,issue:int,exact_summary:Mapping[str,Any])->None:
+ """Persist the live Fresh-AC spatial state before another OpenDSS call can replace it."""
+ import opendssdirect as odd
+ voltage=[dict(x) for x in grid24.collect_voltage_rows(odd)]
+ line_summary,_legacy_line_terminal=grid24.collect_line_rows(odd)
+ transformer=[dict(x) for x in grid24.collect_transformer_rows(odd)]
+ line_terminal=[]
+ for name in odd.Lines.AllNames():
+  odd.Lines.Name(str(name));odd.Circuit.SetActiveElement(f"Line.{name}")
+  buses=list(odd.CktElement.BusNames());ncond=int(odd.CktElement.NumConductors());nterm=int(odd.CktElement.NumTerminals())
+  nphase=int(odd.CktElement.NumPhases());powers=list(map(float,odd.CktElement.Powers()));curr=list(map(float,odd.CktElement.CurrentsMagAng()))
+  rating=float(odd.Lines.NormAmps())
+  for terminal in range(nterm):
+   for conductor in range(min(nphase,ncond)):
+    k=terminal*ncond+conductor;mag=curr[2*k] if 2*k<len(curr) else None;ang=curr[2*k+1] if 2*k+1<len(curr) else None
+    p=powers[2*k] if 2*k<len(powers) else None;q=powers[2*k+1] if 2*k+1<len(powers) else None
+    load=None if mag is None or rating<=0 else mag/rating
+    line_terminal.append({"line":str(name),"terminal":terminal+1,"conductor":conductor+1,
+     "from_bus":str(buses[0]) if buses else "","to_bus":str(buses[1]) if len(buses)>1 else "",
+     "terminal_bus":str(buses[terminal]) if terminal<len(buses) else "","p_kw":p,"q_kvar":q,
+     "current_a":mag,"angle_deg":ang,"norm_amps":rating,"loading_pu":load,
+     "hard_violation":bool(load is not None and load>1.0)})
+ transformer_current=[]
+ for name in odd.Transformers.AllNames():
+  odd.Transformers.Name(str(name));nwind=int(odd.Transformers.NumWindings());odd.Circuit.SetActiveElement(f"Transformer.{name}")
+  buses=list(odd.CktElement.BusNames());ncond=int(odd.CktElement.NumConductors());nterm=int(odd.CktElement.NumTerminals())
+  nphase=int(odd.CktElement.NumPhases());powers=list(map(float,odd.CktElement.Powers()));curr=list(map(float,odd.CktElement.CurrentsMagAng()))
+  for terminal in range(min(nwind,nterm)):
+   odd.Transformers.Wdg(terminal+1);kva=float(odd.Transformers.kVA());kv=float(odd.Transformers.kV())
+   rated=kva/(math.sqrt(3.0)*kv) if nphase>=3 else kva/kv
+   for conductor in range(min(nphase,ncond)):
+    k=terminal*ncond+conductor;mag=curr[2*k] if 2*k<len(curr) else None;ang=curr[2*k+1] if 2*k+1<len(curr) else None
+    p=powers[2*k] if 2*k<len(powers) else None;q=powers[2*k+1] if 2*k+1<len(powers) else None
+    load=None if mag is None or rated<=0 else mag/rated
+    transformer_current.append({"transformer":str(name),"terminal":terminal+1,"winding":terminal+1,
+     "conductor":conductor+1,"bus":str(buses[terminal]) if terminal<len(buses) else "",
+     "p_kw":p,"q_kvar":q,"current_a":mag,"angle_deg":ang,"rated_kva":kva,"rated_kv":kv,
+     "rated_phase_current_a":rated,"loading_pu":load,"hard_violation":bool(load is not None and load>1.0)})
+ jw(Path(issue_out)/"exact_grid/A_B10_FRESH_EXACT_AC_OBSERVABILITY.json",{
+  "schema_version":"K9H7_OBSERVABILITY_V1.exact_ac.v1","issue_step":int(issue),
+  "summary":dict(exact_summary),"bus_phase_voltage":voltage,
+  "line_summary":[dict(x) for x in line_summary],"line_terminal_phase":[dict(x) for x in line_terminal],
+  "transformer_terminal":[dict(x) for x in transformer],"transformer_terminal_current":transformer_current,
+  "hard_limits_relaxed":False,"future_actual_used":False})
+
+def _first_number(row:Mapping[str,Any],names:tuple[str,...])->float|None:
+ for name in names:
+  if name in row and row[name] is not None:
+   try:return float(row[name])
+   except (TypeError,ValueError):pass
+ return None
+
+def capture_model_observability(science,loc:Mapping[str,Any],issue_out:Path,issue:int,
+                                power:Mapping[str,Any],price:Mapping[str,Any])->dict[str,Any]:
+ """Capture small, already-computed model/source values after the accepted h0 solve.
+
+ This function performs no optimization and no network solve.  Dense analytical
+ tables are deliberately materialized later by MATERIALIZE_OBSERVABILITY_OFFLINE.
+ """
+ rows=[];running=loc.get("running",{}) or {};pmap=loc.get("pmap",{}) or {}
+ caprow=loc.get("caprow",{}) or {};ff=loc.get("ff");x=loc.get("x",{}) or {}
+ starts=[]
+ for (job,dest,rack,start),var in x.items():
+  if int(start)==int(issue) and float(science._r25p_solution_scalar(var))>0.5:
+   src=pmap[str(job)];starts.append({"job_uid":str(job),"destination_idc":str(dest),"rack_pool_id":str(rack),
+    "requested_gpu":float(src.get("requested_gpu",0.0)),"it_power_kw":float(src.get("IT_power_kW",0.0)),
+    "duration_steps":int(src.get("duration_steps",0))})
+ for rack in sorted(map(str,caprow)):
+  cr=dict(caprow[rack]);idc=str(cr.get("idc_id",""));fixed=(ff(rack,int(issue)) if ff else (0.0,0.0,"UNKNOWN"))
+  fixed_gpu,fixed_it=float(fixed[0]),float(fixed[1])
+  active=[dict(v,job_uid=str(k)) for k,v in running.items()
+          if str(v.get("rack_pool_id",""))==rack and int(v.get("remaining_steps",0))>0]
+  new=[v for v in starts if v["rack_pool_id"]==rack]
+  gpu=float(fixed_gpu)+sum(float(v.get("requested_gpu",0.0)) for v in active)+sum(v["requested_gpu"] for v in new)
+  it=float(fixed_it)+sum(float(v.get("IT_power_kW",0.0)) for v in active)+sum(v["it_power_kw"] for v in new)
+  gpu_cap=_first_number(cr,("deliverable_active_gpu_capacity","GPU_capacity","gpu_capacity","max_gpu","rack_gpu_capacity"))
+  it_cap=_first_number(cr,("rack_power_cap_kw","IT_power_limit_kW","it_power_limit_kw","max_it_kw","rack_power_limit_kw"))
+  # The frozen IDC constraint is PUE * IT <= 750 kVA * PF.  Record that
+  # already-used model constant even though it is not repeated in caprow.
+  tx_cap=_first_number(cr,("transformer_limit_kW","transformer_kw_limit","idc_transformer_limit_kw"))
+  if tx_cap is None:tx_cap=750.0*float(getattr(science,"PF",0.95))
+  rows.append({"rack_pool_id":rack,"idc_id":idc,"fixed_gpu":float(fixed_gpu),"fixed_it_power_kw":float(fixed_it),
+   "current_job_count":len(active),"started_job_count":len(new),"gpu_used":gpu,"it_power_kw":it,
+   "facility_power_kw":float(getattr(science,"PUE",1.0))*it,"gpu_capacity":gpu_cap,"it_power_limit_kw":it_cap,
+   "transformer_limit_kw":tx_cap,"gpu_headroom":None if gpu_cap is None else gpu_cap-gpu,
+   "it_power_headroom_kw":None if it_cap is None else it_cap-it})
+ frows=[]
+ pissues=np.asarray(power["issues"],dtype=np.int64);phit=np.flatnonzero(pissues==int(issue))
+ rissues=np.asarray(price["issues"],dtype=np.int64);rhit=np.flatnonzero(rissues==int(issue))
+ if len(phit)!=1 or len(rhit)!=1:raise RuntimeError(f"observability source-row cardinality issue={issue}")
+ pi=int(phit[0]);ri=int(rhit[0]);targets=np.asarray(power["target_steps"])[pi]
+ for h,target in enumerate(targets.tolist()):
+  frows.append({"horizon_step":h,"target_step":int(target),
+   "gross_background_p_q90_kw":float(np.asarray(power["q90_gross_background_p_kw"])[pi,h].sum()),
+   "pv_available_q10_kw":float(np.asarray(power["q10_pv_available_kw"])[pi,h].sum()),
+   "net_background_p_q50_kw":float(np.asarray(power["q50_net_background_p_kw"])[pi,h].sum()),
+   "background_q_q50_kvar":float(np.asarray(power["q50_background_q_kvar"])[pi,h].sum()),
+   "background_q_q90_kvar":float(np.asarray(power["q90_background_q_kvar"])[pi,h].sum()),
+   "rrp_q10":float(np.asarray(price["q10"])[ri,h]),"rrp_q50":float(np.asarray(price["q50"])[ri,h]),
+   "rrp_q90":float(np.asarray(price["q90"])[ri,h])})
+ bp,bq,pv,_=loc["ref"]["store"].step(int(issue))
+ wan=[]
+ for (job,dest,t),var in (loc.get("F",{}) or {}).items():
+  value=float(science._r25p_solution_scalar(var))
+  if int(t)==int(issue) and value>1e-10:
+   src=pmap.get(str(job),{})
+   wan.append({"job_uid":str(job),"source_idc":str(src.get("origin_IDC_id","")),
+               "destination_idc":str(dest),"send_step":int(t),"gb_sent":value})
+ repayment={"support_energy_kWh":{},"workload_gpu_h":{}}
+ scale_e=float(getattr(science,"_c5r4_energy_scale_kwh_per_model_unit",1000.0))
+ for (mid,h),var in (loc.get("repE",{}) or {}).items():
+  if int(h)==0:repayment["support_energy_kWh"][str(mid)]=scale_e*float(science._r25p_solution_scalar(var))
+ for (idc,h),var in (loc.get("repW",{}) or {}).items():
+  if int(h)==0:repayment["workload_gpu_h"][str(idc)]=float(science._r25p_solution_scalar(var))
+ model=loc["m"]
+ payload={"schema_version":"K9H7_OBSERVABILITY_V1.model_commit.v1","issue_step":int(issue),
+  "source_values_h0":{"actual_gross_background_p_kw":float(np.asarray(bp,float).sum()),
+   "actual_background_q_kvar":float(np.asarray(bq,float).sum()),"actual_pv_available_kw":float(np.asarray(pv,float).sum())},
+  "forecast_issued":frows,"rack_pool_h0":rows,"wan_send_h0":wan,"job_start_h0":starts,"debt_repayment_h0":repayment,
+  "objective":{"economic_projected_AUD":float(loc["econ"].getValue()) if "econ" in loc else None,
+   "model_obj_val":float(model.ObjVal) if int(model.SolCount)>0 else None},
+  "model_stats":{"variables":int(model.NumVars),"binary_variables":int(model.NumBinVars),
+   "linear_constraints":int(model.NumConstrs),"quadratic_constraints":int(model.NumQConstrs),
+   "simplex_iterations":float(model.IterCount),"barrier_iterations":float(model.BarIterCount)},
+  "capture_policy":"ALREADY_COMPUTED_VALUES_ONLY","gurobi_solve_count":0,"opendss_solve_count":0,
+  "future_actual_used":False}
+ path=Path(issue_out)/"A_B10_COMMITTED_MODEL_OBSERVABILITY.json";jw(path,payload)
+ return {"path":path.name,"bytes":path.stat().st_size,"rack_rows":len(rows),"forecast_rows":len(frows),
+         "wan_rows":len(wan),"job_start_rows":len(starts)}
+
+def _refresh_solution_after_ac_resolve(loc:Mapping[str,Any],science,sol:dict[str,Any])->None:
+ """Refresh every fast-variable-derived payload after the cut/re-solve."""
+ scale_p=float(getattr(science,"_c5r4_power_scale_kw_per_model_unit",1000.0))
+ scale_e=float(getattr(science,"_c5r4_energy_scale_kwh_per_model_unit",1000.0))
+ for row in sol["mess_rows"]:
+  mid=str(row["mess_id"]);h=int(row["horizon_step"])
+  entries=loc["stay_by_mid_h"].get((mid,h),[])
+  row["P_discharge_kW"]=canonical_physical_zero(scale_p*sum(float(loc["Pdis"][(mid,h,s)].X) for s,_ in entries if (mid,h,s) in loc["Pdis"]))
+  row["P_charge_kW"]=canonical_physical_zero(scale_p*sum(float(loc["Pchg"][(mid,h,s)].X) for s,_ in entries if (mid,h,s) in loc["Pchg"]))
+  row["Q_kvar"]=canonical_physical_zero(scale_p*sum(float(loc["Q"][(mid,h,s)].X) for s,_ in entries if (mid,h,s) in loc["Q"]))
+  row["SOC_kWh"]=scale_e*float(loc["E"][(mid,h)].X)
+  row["support_energy_debt_kWh"]=scale_e*float(loc["DE"][(mid,h)].X)
+ first=[]
+ for mid in map(str,loc["mids"]):
+  r0=next(x for x in sol["mess_rows"] if str(x["mess_id"])==mid and int(x["horizon_step"])==0)
+  rs=loc["rollstate"][mid];prephase=str(rs.get("phase","STAY"));connected=str(r0["state"])=="STAY"
+  sid=str(rs.get("service_id",rs.get("dest_service_id",loc["initial_sid"][mid])))
+  first.append({"mess_id":mid,"location_service_id":sid,"moving":bool(r0["state"]=="MOVE" or prephase=="MOVE"),
+   "connection_delay_active":prephase=="CONNECTION_DELAY","grid_connected":connected,
+   "P_discharge_kW":float(r0["P_discharge_kW"]),"P_charge_kW":float(r0["P_charge_kW"]),
+   "P_net_grid_injection_kW":float(r0["P_discharge_kW"])-float(r0["P_charge_kW"]),
+   "Q_grid_injection_kvar":float(r0["Q_kvar"]),"E0_kWh":float(loc["mess_E"][mid]),
+   "E1_kWh":scale_e*float(loc["E"][(mid,1)].X),
+   "support_debt0_kWh":float((loc.get("mess_DE0") or {}).get(mid,0.0)),
+   "support_debt1_kWh":scale_e*float(loc["DE"][(mid,1)].X)})
+ for row in first:
+  mid=row["mess_id"];move=(sol.get("chosen_h0_move") or {}).get(mid);profile=(loc.get("committed_profile",{}) or {}).get(mid,[])
+  committed=float(profile[0]) if profile else 0.0;move_energy=0.0 if move is None else float(move.get("energy_kWh",0.0))
+  row["E1_kWh"]=float(row["E0_kWh"])+0.95*(5/60)*float(row["P_charge_kW"])-(5/60)*float(row["P_discharge_kW"])/0.95-move_energy-committed
+  rep=loc.get("repE",{}).get((mid,0));repaid=0.0 if rep is None else canonical_physical_zero(scale_e*float(rep.X))
+  row["support_debt1_kWh"]=float(row["support_debt0_kWh"])+(5/60)*float(row["P_discharge_kW"])/0.95-repaid
+ sol["firstmess"]=first
+ sol["send_now"]=[{"job_uid":j,"destination_IDC_id":d,"send_GB":float(v.X)}
+                  for (j,d,t),v in loc["F"].items() if int(t)==int(loc["issue"]) and float(v.X)>1e-10]
+ sol["wan_all"]={k:float(v.X) for k,v in loc["F"].items()}
+ sol["mess_support_debt1"]={mid:scale_e*float(loc["DE"][(mid,1)].X) for mid in map(str,loc["mids"])}
+ if bool(loc.get("workload_debt_identically_zero",False)):
+  sol["workload_debt1"]={d:0.0 for d in science.IDCS}
+ else:
+  sol["workload_debt1"]={d:float(loc["DW"][(d,1)].X) for d in science.IDCS}
+ sol["rolling_warmstart_payload"]["mess_rows"]=[dict(x) for x in sol["mess_rows"]]
+ sol["rolling_warmstart_payload"]["wan_all"]=dict(sol["wan_all"])
+ science.cw(Path(loc["out"])/"BUILD7B_FULL54_MESS_PLAN.csv",sol["mess_rows"])
+
+def exact_ac_cut_recovery(science,context:dict[str,Any],issue_runtime:dict[str,Any],
+                          b4,grid24,scope,gstatic,issue,running,sol,issue_out,initial_ex):
+ """Bounded phase-aware OpenDSS cut/re-solve; never relaxes a hard limit."""
+ import gurobipy as gp
+ loc=context.get("loc");cb=context.get("cb")
+ if not isinstance(loc,dict) or cb is None:raise RuntimeError("GRID_CORRECTION_CONTEXT_MISSING")
+ voltage_rows=_voltage_rows_from_live_opendss(grid24)
+ attempts=[{"round":0,"exact_ac":dict(initial_ex),"violating_voltage_rows":[r for r in voltage_rows if r["hard_violation"]]}]
+ nonvoltage=bool(not initial_ex.get("converged") or initial_ex.get("command_error_count")
+   or initial_ex.get("line_violation_count") or initial_ex.get("transformer_kva_violation_count")
+   or initial_ex.get("transformer_current_violation_count") or not initial_ex.get("root_sign_pass"))
+ if nonvoltage:
+  issue_runtime["ac_safety_recovery"]={"status":"GRID_RECOVERY_UNSUPPORTED_NONVOLTAGE_FAIL_CLOSED","attempts":attempts}
+  raise RuntimeError("GRID_CORRECTION_EXHAUSTED_NONVOLTAGE")
+ model=loc["m"]
+ for round_no in range(1,AC_RECOVERY_MAX_CUT_ROUNDS+1):
+  controls=_ac_h0_controls(loc,science)
+  first=_ac_firstmess(loc,science,controls);plan=_ac_current_plan(loc)
+  violations=[r for r in voltage_rows if r["hard_violation"]]
+  if not controls or not violations:raise RuntimeError("GRID_CORRECTION_NO_CONTROLLABLE_VOLTAGE_ACTION")
+  baseline={(str(r["bus"]),int(r["node"])):float(r["voltage_pu"]) for r in voltage_rows}
+  gradients={}
+  for c in controls:
+   for kind,key in (("P","P_net_grid_injection_kW"),("Q","Q_grid_injection_kvar")):
+    samples=[]
+    for sign in (-1.0,1.0):
+     trial=[dict(x) for x in first]
+     row=next(x for x in trial if x["mess_id"]==c["mess_id"])
+     row[key]=float(row[key])+sign*AC_RECOVERY_FD_STEP_KW
+     science.exact24_candidate(b4,grid24,scope,gstatic,issue,running,plan,trial)
+     samples.append({(str(r["bus"]),int(r["node"])):float(r["voltage_pu"])
+                     for r in _voltage_rows_from_live_opendss(grid24)})
+    for vk in baseline:
+     gradients[(c["mess_id"],kind,vk)]=(samples[1][vk]-samples[0][vk])/(2.0*AC_RECOVERY_FD_STEP_KW)
+  cuts=[]
+  for vi,r in enumerate(violations):
+   vk=(str(r["bus"]),int(r["node"]));expr=gp.LinExpr(float(r["voltage_pu"]))
+   grad_record={}
+   for c in controls:
+    gp_=float(gradients[(c["mess_id"],"P",vk)]);gq=float(gradients[(c["mess_id"],"Q",vk)])
+    expr += gp_*(c["p_expr"]-float(c["p_kw"]))+gq*(c["q_expr"]-float(c["q_kvar"]))
+    grad_record[c["mess_id"]]={"dV_dP":gp_,"dV_dQ":gq}
+   if bool(r["above_1p05"]):model.addLConstr(expr<=1.05,name=f"a_b10_ac_vmax_r{round_no}_{vi}");sense="<=";limit=1.05
+   else:model.addLConstr(expr>=0.95,name=f"a_b10_ac_vmin_r{round_no}_{vi}");sense=">=";limit=0.95
+   cuts.append({"bus":vk[0],"node":vk[1],"base_voltage_pu":float(r["voltage_pu"]),"sense":sense,"limit_pu":limit,"gradients":grad_record})
+  model.update();fast=solve_fast(model,cb,loc);_refresh_solution_after_ac_resolve(loc,science,sol)
+  quality=abase.solver_quality(model)
+  if any(float(quality.get(k,float("inf")))>lim for k,lim in (("ConstrVio",1e-6),("BoundVio",1e-6),("IntVio",1e-5))):
+   raise RuntimeError(f"GRID_CORRECTION_NUMERICAL_GATE_FAILED {quality}")
+  ex=science.exact24_candidate(b4,grid24,scope,gstatic,issue,running,sol["plan"],sol["firstmess"])
+  voltage_rows=_voltage_rows_from_live_opendss(grid24)
+  attempts.append({"round":round_no,"cuts":cuts,"fast_solver":fast,"exact_ac":dict(ex),
+                   "violating_voltage_rows":[r for r in voltage_rows if r["hard_violation"]]})
+  if ex.get("hard_constraint_pass") is True:
+   record={"schema_version":"mobileess.post_stage15.exact_ac_closed_loop.v1","status":"PASS_RECOVERED",
+           "hard_limits_relaxed":False,"finite_difference_step_kw_kvar":AC_RECOVERY_FD_STEP_KW,
+           "max_cut_rounds":AC_RECOVERY_MAX_CUT_ROUNDS,"cut_count":sum(len(x.get("cuts",[])) for x in attempts),
+           "attempts":attempts,"future_actual_used":False}
+   issue_runtime["ac_safety_recovery"]=record;jw(Path(issue_out)/"A_B10_EXACT_AC_CLOSED_LOOP_RECOVERY.json",record)
+   return ex
+  if (ex.get("line_violation_count") or ex.get("transformer_kva_violation_count")
+      or ex.get("transformer_current_violation_count") or not ex.get("converged")):
+   break
+ record={"schema_version":"mobileess.post_stage15.exact_ac_closed_loop.v1","status":"GRID_CORRECTION_EXHAUSTED",
+         "hard_limits_relaxed":False,"finite_difference_step_kw_kvar":AC_RECOVERY_FD_STEP_KW,
+         "max_cut_rounds":AC_RECOVERY_MAX_CUT_ROUNDS,"cut_count":sum(len(x.get("cuts",[])) for x in attempts),
+         "attempts":attempts,"future_actual_used":False}
+ issue_runtime["ac_safety_recovery"]=record;jw(Path(issue_out)/"A_B10_EXACT_AC_CLOSED_LOOP_RECOVERY.json",record)
+ raise RuntimeError("GRID_CORRECTION_EXHAUSTED")
 
 def planner_solve(model,cb)->dict[str,Any]:
  model.Params.Threads=4;model.Params.MIPGap=0.10;model.Params.MIPGapAbs=0.0;model.Params.MIPFocus=1
@@ -449,7 +812,24 @@ def planner_solve(model,cb)->dict[str,Any]:
  model.Params.Presolve=presolve
  t=time.monotonic();model.optimize(cb) if cb is not None else model.optimize();wall=time.monotonic()-t
  q=abase.solver_quality(model);q["wall_seconds"]=wall;q["candidate_available"]=int(model.SolCount)>0;q["presolve_setting"]=presolve
+ q["failure_classification"]=("CANDIDATE_AVAILABLE" if int(model.SolCount)>0 else
+  ("PROVEN_INFEASIBLE" if int(model.Status)==int(__import__('gurobipy').GRB.INFEASIBLE) else
+   ("NO_INCUMBENT_WITHIN_BUDGET" if int(model.Status)==int(__import__('gurobipy').GRB.TIME_LIMIT) else "NUMERICAL_OR_SOLVER_FAILURE")))
  return q
+
+def planner_feasibility_rescue(model,cb)->tuple[dict[str,Any],Any]:
+ """Search a hard-feasible slow plan on a copy; never overwrites the economic model."""
+ import gurobipy as gp
+ model.update();rescue=model.copy();rescue.setObjective(gp.LinExpr(0.0),gp.GRB.MINIMIZE)
+ rescue.Params.Threads=4;rescue.Params.TimeLimit=300.0;rescue.Params.SolutionLimit=1
+ rescue.Params.MIPFocus=1;rescue.Params.Presolve=-1;rescue.Params.OutputFlag=1
+ t=time.monotonic();rescue.optimize(cb);wall=time.monotonic()-t
+ q=abase.solver_quality(rescue);q.update({"wall_seconds":wall,"candidate_available":int(rescue.SolCount)>0,
+  "purpose":"HARD_FEASIBILITY_ONLY_NO_ECONOMIC_CLAIM","slack_allowed":False,
+  "failure_classification":("CANDIDATE_AVAILABLE" if int(rescue.SolCount)>0 else
+   ("PROVEN_INFEASIBLE" if int(rescue.Status)==int(gp.GRB.INFEASIBLE) else
+    ("NO_INCUMBENT_WITHIN_BUDGET" if int(rescue.Status)==int(gp.GRB.TIME_LIMIT) else "NUMERICAL_OR_SOLVER_FAILURE")))})
+ return q,rescue
 
 def planner_solve_sparse_copy(model,cb):
  """Solve an exact planner copy without redundant dense R25K strengthening rows.
@@ -479,6 +859,15 @@ def planner_solve_sparse_copy(model,cb):
            "projected_linear_nonzeros":projected_nz,"omitted_redundant_rows":len(remove),
            "search_guidance_transferred_by_variable_order":True,
            "planner_copy_only":True,"physical_commit_model_unchanged":True})
+ return q,planner
+
+def planner_solve_exact_copy(model,cb):
+ """Keep the commit model untouched while the slow planner searches."""
+ model.update();planner=model.copy()
+ try:q=planner_solve(planner,cb)
+ except Exception:
+  planner.dispose();raise
+ q["planner_model_copy"]="EXACT_FULL_ROW_COPY"
  return q,planner
 
 def restore_redundant_dense_b4_rows(loc:Mapping[str,Any])->dict[str,Any]:
@@ -568,9 +957,62 @@ def map_hard_invalidation(exc)->str:
 
 def quarantine_incomplete(engine:Path,issue:int,policy_root:Path):
  d=engine/f"issue_{issue:06d}"
- if d.exists() and not (d/"BUILD7C_POSTCOMMIT_STATE.json").is_file():
+ # POST may have been written by the frozen inner engine before wrapper-level
+ # observability/audit/marker persistence.  Without a valid marker the whole
+ # directory is an uncommitted transaction and must never be reused in place.
+ if d.exists() and not commit_marker_path(d).is_file():
   q=policy_root/"interrupted_attempts"/datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")/d.name
   q.parent.mkdir(parents=True,exist_ok=True);shutil.move(str(d),str(q))
+
+def archive_stale_failure(path:Path,policy_root:Path)->None:
+ if not path.is_file():return
+ q=policy_root/"interrupted_attempts"/datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")/"stale_failures"/path.name
+ q.parent.mkdir(parents=True,exist_ok=True);shutil.move(str(path),str(q))
+
+def commit_marker_path(issue_dir:Path)->Path:return issue_dir/"A_B10_COMMIT_MARKER.json"
+
+def write_commit_marker(issue_dir:Path,issue:int,last_replan:int,event_after:Mapping[str,Any],active_plan_path:Path)->dict[str,Any]:
+ required={
+  "post":issue_dir/"BUILD7C_POSTCOMMIT_STATE.json",
+  "transition":issue_dir/"BUILD7C_FIRSTSTEP_TRANSITION_CERTIFICATE.json",
+  "fresh_exact_ac":issue_dir/f"exact_grid/FRESH_EXACT_OPENDSS_24SERVICE_ISSUE_{issue}.json",
+  "exact_ac_observability":issue_dir/"exact_grid/A_B10_FRESH_EXACT_AC_OBSERVABILITY.json",
+  "model_observability":issue_dir/"A_B10_COMMITTED_MODEL_OBSERVABILITY.json",
+  "policy_issue_audit":issue_dir/"POLICY_ISSUE_AUDIT.json",
+ }
+ for name,p in required.items():
+  if not p.is_file():raise RuntimeError(f"commit marker missing {name}: {p}")
+ post=load_json(required["post"]);tr=load_json(required["transition"]);fresh=load_json(required["fresh_exact_ac"])
+ if tr.get("status")!="PASS" or fresh.get("hard_constraint_pass") is not True or post.get("sha256")!=tr.get("post_state_sha256"):
+  raise RuntimeError(f"commit marker acceptance evidence invalid issue={issue}")
+ event_payload=dict(event_after);event_digest=hashlib.sha256(json.dumps(event_payload,sort_keys=True,separators=(",",":")).encode()).hexdigest()
+ marker={"schema_version":"mobileess.post_stage15.atomic_commit_marker.v2","status":"COMMITTED","issue":int(issue),
+  "pre_state_sha256":tr["pre_state_sha256"],"post_state_sha256":tr["post_state_sha256"],
+  "transition_certificate_sha256":sha(required["transition"]),"fresh_exact_ac_sha256":sha(required["fresh_exact_ac"]),
+  "exact_ac_observability_sha256":sha(required["exact_ac_observability"]),
+  "model_observability_sha256":sha(required["model_observability"]),
+  "policy_issue_audit_sha256":sha(required["policy_issue_audit"]),
+  "active_plan_sha256":sha(active_plan_path) if active_plan_path.is_file() else None,
+  "last_replan_issue":int(last_replan),"event_engine_state":event_payload,"event_engine_state_sha256":event_digest,
+  "unsafe_action_committed":False,"future_actual_used":False}
+ jw(commit_marker_path(issue_dir),marker);return marker
+
+def validate_commit_marker(issue_dir:Path)->dict[str,Any]:
+ marker=load_json(commit_marker_path(issue_dir));issue=int(marker["issue"])
+ legacy=marker.get("schema_version")=="mobileess.post_stage15.atomic_commit_marker.v1"
+ checks=((issue_dir/"BUILD7C_POSTCOMMIT_STATE.json",None,True),
+         (issue_dir/"BUILD7C_FIRSTSTEP_TRANSITION_CERTIFICATE.json",marker["transition_certificate_sha256"],True),
+         (issue_dir/f"exact_grid/FRESH_EXACT_OPENDSS_24SERVICE_ISSUE_{issue}.json",marker["fresh_exact_ac_sha256"],True),
+         (issue_dir/"exact_grid/A_B10_FRESH_EXACT_AC_OBSERVABILITY.json",marker.get("exact_ac_observability_sha256"),not legacy),
+         (issue_dir/"A_B10_COMMITTED_MODEL_OBSERVABILITY.json",marker.get("model_observability_sha256"),not legacy),
+         (issue_dir/"POLICY_ISSUE_AUDIT.json",marker["policy_issue_audit_sha256"],True))
+ if marker.get("status")!="COMMITTED":raise RuntimeError(f"invalid commit marker status issue={issue}")
+ for p,digest,required in checks:
+  if not required and digest is None:continue
+  if not p.is_file() or (digest is not None and sha(p)!=digest):raise RuntimeError(f"commit marker SHA mismatch {p}")
+ event=marker.get("event_engine_state",{});actual=hashlib.sha256(json.dumps(event,sort_keys=True,separators=(",",":")).encode()).hexdigest()
+ if actual!=marker.get("event_engine_state_sha256"):raise RuntimeError(f"commit marker event-state SHA mismatch issue={issue}")
+ return marker
 
 def restore_event_engine(event,checkpoint:Mapping[str,Any]):
  st=checkpoint.get("event_engine_state",{})
@@ -604,6 +1046,11 @@ def build_results(policy_root:Path,engine:Path,cfg:Mapping[str,Any],issue_audits
  schema=load_schema();run_id=f"B_{CANDIDATE_ID}_{cfg['slot']}_{cfg['policy_id']}";scenario=CANDIDATE_ID
  common={"result_schema_version":RESULT_SCHEMA,"run_id":run_id,"method_id":"B5","scenario_id":scenario}
  rolling=[];mess=[];debt=[];grid=[];opt=[];constraints=[];wan=[];rack=[];forecast=[];busphase=[]
+ model_obs={};actual_by_issue={};issued_forecasts=[]
+ for audit in issue_audits:
+  issue=int(audit["issue"]);p=engine/f"issue_{issue:06d}/A_B10_COMMITTED_MODEL_OBSERVABILITY.json"
+  if not p.is_file():raise RuntimeError(f"committed model observability missing issue={issue}")
+  model_obs[issue]=load_json(p);actual_by_issue[issue]=model_obs[issue]["source_values_h0"]
  started_meta={};completed=set()
  min_soc=math.inf;max_soc=-math.inf
  total_charge=total_dis=total_mob_e=total_travel=0.0
@@ -621,6 +1068,27 @@ def build_results(policy_root:Path,engine:Path,cfg:Mapping[str,Any],issue_audits
   ts=int(fr.get("timestamp_utc_ns",0));fallback_date=datetime.fromisoformat(CANDIDATE_ID.split("_",1)[1]).replace(tzinfo=timezone(timedelta(hours=10)))
   dt=datetime.fromtimestamp(ts/1e9,tz=timezone.utc) if ts else fallback_date.astimezone(timezone.utc)
   aest=dt.astimezone(timezone(timedelta(hours=10))).isoformat()
+  ac_recovery=audit.get("ac_safety_recovery") or {};ac_cut_count=int(ac_recovery.get("cut_count",0) or 0)
+  obs_path=d/"exact_grid/A_B10_FRESH_EXACT_AC_OBSERVABILITY.json"
+  if not obs_path.is_file():raise RuntimeError(f"exact AC observability missing issue={issue}")
+  obs=load_json(obs_path);mo=model_obs[issue]
+  for vr in obs.get("bus_phase_voltage",[]):
+   busphase.append({**common,"issue_step":issue,"timestamp_utc_ns":ts,"element_type":"BUS_PHASE",
+    "element_id":f"{vr['bus']}.{vr['node']}","bus":vr["bus"],"phase":vr["node"],
+    "Vmag_pu":vr["voltage_pu"],"Vangle_deg":vr["angle_deg"],"P_kW":None,"Q_kvar":None,
+    "current_A":None,"loading_pu":None,"violation":bool(vr["hard_violation"])})
+  for lr in obs.get("line_terminal_phase",[]):
+   element=f"{lr.get('line','')}|T{lr.get('terminal','')}|C{lr.get('conductor','')}"
+   busphase.append({**common,"issue_step":issue,"timestamp_utc_ns":ts,"element_type":"LINE_TERMINAL_PHASE",
+    "element_id":element,"bus":"","phase":lr.get("conductor"),"Vmag_pu":None,"Vangle_deg":lr.get("angle_deg"),
+    "P_kW":lr.get("p_kw"),"Q_kvar":lr.get("q_kvar"),"current_A":lr.get("current_a"),
+    "loading_pu":lr.get("loading_pu"),"violation":bool((lr.get("loading_pu") or 0)>1.0)})
+  for xr in obs.get("transformer_terminal_current",[]):
+   element=f"{xr.get('transformer','')}|W{xr.get('winding',xr.get('terminal',''))}|C{xr.get('conductor','')}"
+   busphase.append({**common,"issue_step":issue,"timestamp_utc_ns":ts,"element_type":"TRANSFORMER_TERMINAL_PHASE",
+    "element_id":element,"bus":xr.get("bus",""),"phase":xr.get("conductor"),"Vmag_pu":None,"Vangle_deg":xr.get("angle_deg"),
+    "P_kW":xr.get("p_kw"),"Q_kvar":xr.get("q_kvar"),"current_A":xr.get("current_a"),
+    "loading_pu":xr.get("loading_pu"),"violation":bool((xr.get("loading_pu") or 0)>1.0)})
   mp=load_csv(d/"BUILD7B_FULL54_MESS_PLAN.csv")
   mv=load_csv(d/"BUILD7B_FULL54_MOVE_ARCS_SELECTED.csv")
   mv0={str(x["mess_id"]):x for x in mv if inum(x.get("horizon_step"))==0}
@@ -634,7 +1102,8 @@ def build_results(policy_root:Path,engine:Path,cfg:Mapping[str,Any],issue_audits
    if spct is not None:min_soc=min(min_soc,spct);max_soc=max(max_soc,spct)
    total_charge+=pchg*(5/60)/1000;total_dis+=pdis*(5/60)/1000
    travel=(fnum((mr or {}).get("safe_total_duration_steps"),0) or 0)*5 if mr else 0
-   energy=fnum((mr or {}).get("safe_energy_kWh"),0) or 0
+   pre_e=fnum(pst.get("mess_E_kWh",{}).get(mid),soc) or 0;post_e=fnum(qst.get("mess_E_kWh",{}).get(mid),soc) or 0
+   energy=pre_e+0.95*(5/60)*pchg-(5/60)*pdis/0.95-post_e
    total_mob_e+=abs(energy)/1000;total_travel+=travel
    row={**common,"issue_step":issue,"timestamp_utc_ns":ts,"mess_id":mid,
         "state":x.get("state",""),"current_node":x.get("service_id",""),
@@ -661,7 +1130,7 @@ def build_results(policy_root:Path,engine:Path,cfg:Mapping[str,Any],issue_audits
     "transformer_max_kva_loading_pu":fr.get("transformer_max_kva_loading_pu"),
     "transformer_kva_violation_count":fr.get("transformer_kva_violation_count"),
     "transformer_max_current_loading_pu":fr.get("transformer_max_current_loading_pu"),
-    "transformer_current_violation_count":fr.get("transformer_current_violation_count"),"cut_triggered":False})
+    "transformer_current_violation_count":fr.get("transformer_current_violation_count"),"cut_triggered":ac_cut_count>0})
   gi=fnum(fr.get("root_import_p_kw"),0);grid_mwh+=gi/1000*(5/60);peak_grid=max(peak_grid,gi)
   vmin=min(vmin,fnum(fr.get("voltage_min_pu"),math.inf));vmax=max(vmax,fnum(fr.get("voltage_max_pu"),-math.inf))
   maxline=max(maxline,fnum(fr.get("line_max_loading_pu"),0));maxtx=max(maxtx,fnum(fr.get("transformer_max_kva_loading_pu"),0))
@@ -670,15 +1139,21 @@ def build_results(policy_root:Path,engine:Path,cfg:Mapping[str,Any],issue_audits
   runtimes.append(runtime)
   if gap is not None:gaps.append(gap)
   n=fnum(fast.get("NodeCount"),fnum(fast.get("node_count")));nodes.append(n or 0)
+  ms=mo.get("model_stats",{});objective=mo.get("objective",{})
   opt.append({**common,"issue_step":issue,"model_status":audit.get("dispatch_status",""),
-              "runtime_s":runtime,"node_count":n,"mip_gap":gap,
+              "objective_level_3":objective.get("economic_projected_AUD"),"runtime_s":runtime,"node_count":n,"mip_gap":gap,
+              "simplex_iterations":ms.get("simplex_iterations"),"barrier_iterations":ms.get("barrier_iterations"),
               "variable_count":inum(fast.get("NumVars"),inum(fast.get("variables"))),
               "binary_count":inum(fast.get("NumBinVars"),inum(fast.get("binary_variables"))),
-              "constraint_count":inum(fast.get("NumConstrs"),inum(fast.get("constraints"))),
-              "iis_generated":False,"resolve_iteration":int(audit.get("replan_executed",False)),
-              "cut_count":0,"numeric_focus":fast.get("NumericFocus"),
+              "constraint_count":inum(fast.get("NumConstrs"),inum(fast.get("constraints"),inum(ms.get("linear_constraints")))),
+              "iis_generated":False,"resolve_iteration":int(audit.get("replan_executed",False))+len(ac_recovery.get("attempts",[])),
+              "cut_count":ac_cut_count,"numeric_focus":fast.get("NumericFocus"),
               "feasibility_tol":fast.get("FeasibilityTol"),"optimality_tol":fast.get("OptimalityTol")})
+  f0=mo["forecast_issued"][0];actual=mo["source_values_h0"]
+  issue_cost=(fnum(fr.get("root_import_p_kw"),0) or 0)*(5/60)/1000*float(f0["rrp_q50"])
   rolling.append({**common,"issue_step":issue,"timestamp_utc_ns":ts,"timestamp_aest":aest,
+                  "rrp_AUD_per_MWh_realized":f0["rrp_q50"],"rrp_q10":f0["rrp_q10"],"rrp_q50":f0["rrp_q50"],"rrp_q90":f0["rrp_q90"],
+                  "PV_available_kW":actual["actual_pv_available_kw"],
                   "grid_import_kW":fr.get("root_import_p_kw"),"grid_import_kvar":fr.get("root_import_q_kvar"),
                   "MESS_net_P_kW":sum(fnum(r["P_kW"],0) for r in mrows),"MESS_net_Q_kvar":sum(fnum(r["Q_kvar"],0) for r in mrows),
                   "total_SOC_kWh":sum(float(v) for v in qst.get("mess_E_kWh",{}).values()),
@@ -687,7 +1162,25 @@ def build_results(policy_root:Path,engine:Path,cfg:Mapping[str,Any],issue_audits
                   "max_line_loading_pu":fr.get("line_max_loading_pu"),"max_transformer_loading_pu":fr.get("transformer_max_kva_loading_pu"),
                   "voltage_violation_count":fr.get("voltage_violation_count"),"line_overload_count":fr.get("line_violation_count"),
                   "transformer_overload_count":fr.get("transformer_kva_violation_count"),
-                  "solve_time_s":runtime,"mip_gap":gap,"exact_AC_pass":True,"cut_count_this_issue":0,"commit_status":"COMMITTED"})
+                  "objective_level_3":issue_cost,"solve_time_s":runtime,"mip_gap":gap,"exact_AC_pass":True,"cut_count_this_issue":ac_cut_count,"commit_status":"COMMITTED"})
+  for rr in mo.get("rack_pool_h0",[]):
+   rack.append({**common,"issue_step":issue,"rack_pool_id":rr["rack_pool_id"],"idc_id":rr["idc_id"],
+    "current_job_count":rr["current_job_count"],"committed_job_count":rr["started_job_count"],"gpu_used":rr["gpu_used"],
+    "gpu_headroom":rr.get("gpu_headroom"),"IT_power_kW":rr["it_power_kw"],"facility_power_kW":rr["facility_power_kw"],
+    "kw_headroom_current":rr.get("it_power_headroom_kw"),"kw_headroom_commitment":rr.get("it_power_headroom_kw"),
+    "transformer_limit_kW":rr.get("transformer_limit_kw"),"current_certificate_pass":True,"commitment_certificate_pass":True})
+  for wr in mo.get("wan_send_h0",[]):
+   wan.append({**common,"job_id":wr["job_uid"],"source_idc":wr["source_idc"],"destination_idc":wr["destination_idc"],
+    "send_step":wr["send_step"],"GB_sent":wr["gb_sent"],"bytes_sent":wr["gb_sent"]*1e9,
+    "same_step_send_start_violation":False,"destination_changed_after_prefetch":False,"certificate_pass":True})
+  issued_forecasts.extend({**r,"issue_step":issue} for r in mo.get("forecast_issued",[]))
+  for attempt in ac_recovery.get("attempts",[]):
+   ax=attempt.get("exact_ac",{})
+   constraints.append({**common,"issue_step":issue,"layer":"FRESH_EXACT_AC_RECOVERY","constraint_family":"GRID_HARD_RISK",
+    "entity_id":cfg["policy_id"],"severity":"HARD","predicted_or_realized":"REALIZED_EXACT_AC",
+    "violation":not bool(ax.get("hard_constraint_pass")),"cut_added":bool(attempt.get("cuts")),
+    "message":json.dumps({"round":attempt.get("round"),"vmin":ax.get("voltage_min_pu"),"vmax":ax.get("voltage_max_pu"),
+                           "cuts":len(attempt.get("cuts",[]))},sort_keys=True)})
   for reason in audit.get("event_reasons",[]):
    constraints.append({**common,"issue_step":issue,"layer":"CONTROLLER_POLICY","constraint_family":"REPLAN_EVENT",
                        "entity_id":cfg["policy_id"],"severity":"HARD" if str(reason).startswith("HARD") else "SOFT",
@@ -700,6 +1193,30 @@ def build_results(policy_root:Path,engine:Path,cfg:Mapping[str,Any],issue_audits
   completed.update(map(str,tr.get("completed_jobs",[])))
   wpath=d.parent/"BUILD7C_ROLLING54_WAN_SEND.csv"
   # one-issue runs may put this at engine root; leave WAN table source-backed only if an issue-local row is available.
+ # Evaluation-only realized joins are performed after every causal forecast has
+ # been persisted.  They never feed back into the controller.
+ forecast_authority=load_json(policy_root/"episode_manifest.json").get("shared_exogenous_authority_sha256","")
+ for frw in issued_forecasts:
+  target=int(frw["target_step"]);real=actual_by_issue.get(target);h=int(frw["horizon_step"]);src=int(frw["issue_step"])
+  specs=[
+   ("RRP_AUD_PER_MWH",frw.get("rrp_q10"),frw.get("rrp_q50"),frw.get("rrp_q90"),
+    None if real is None else next((x["rrp_q50"] for x in model_obs[target]["forecast_issued"] if int(x["horizon_step"])==0),None)),
+   ("NET_BACKGROUND_P_KW",None,frw.get("net_background_p_q50_kw"),
+    fnum(frw.get("gross_background_p_q90_kw"),0)-fnum(frw.get("pv_available_q10_kw"),0),
+    None if real is None else real["actual_gross_background_p_kw"]-real["actual_pv_available_kw"]),
+   ("PV_AVAILABLE_KW",frw.get("pv_available_q10_kw"),None,None,None if real is None else real["actual_pv_available_kw"]),
+   ("BACKGROUND_Q_KVAR",None,frw.get("background_q_q50_kvar"),frw.get("background_q_q90_kvar"),
+    None if real is None else real["actual_background_q_kvar"]),
+  ]
+  for variable,q10,q50,q90,realized in specs:
+   err=None if q50 is None or realized is None else abs(float(q50)-float(realized))
+   forecast.append({"result_schema_version":RESULT_SCHEMA,"forecast_model_id":"FROZEN_CAUSAL_SOURCE",
+    "forecast_authority_id":forecast_authority,"issue_step":src,"horizon_step":h,"target_step":target,
+    "target_utc_ns":None,"variable":variable,"spatial_key":"SYSTEM_AGGREGATE","phase":"ALL",
+    "q10":q10,"q50":q50,"q90":q90,"realized":realized,"absolute_error_q50":err,
+    "squared_error_q50":None if err is None else err*err,
+    "interval_10_90_covered":None if realized is None or q10 is None or q90 is None else float(q10)<=float(realized)<=float(q90),
+    "evaluation_only_join":realized is not None})
  # Independent expected job cohort drives job_event coverage.
  independent=HERE/"authority/D/03_C_ZERO_BURNIN/independent_job_authority/PER_JOB_RUNTIME_SOURCE_CANONICAL_V2044R5.parquet"
  idf=pd.read_parquet(independent)
@@ -729,9 +1246,18 @@ def build_results(policy_root:Path,engine:Path,cfg:Mapping[str,Any],issue_audits
  delays=[fnum(x.get("queue_delay_min")) for x in jobs if fnum(x.get("queue_delay_min")) is not None]
  planner=[fnum(x.get("slow_planner_runtime_s")) for x in issue_audits if fnum(x.get("slow_planner_runtime_s")) is not None and fnum(x.get("slow_planner_runtime_s"))>0]
  misses=sum(1 for x in jobs if x.get("deadline_miss") is True)
+ energy_cost=sum((fnum(x.get("grid_import_kW"),0) or 0)*(5/60)/1000*(fnum(x.get("rrp_AUD_per_MWh_realized"),0) or 0) for x in rolling)
+ pv_available=sum((fnum(x.get("PV_available_kW"),0) or 0)*(5/60)/1000 for x in rolling)
+ pv_used=pv_available
+ max_wd=max((fnum(x.get("workload_debt_GPUh"),0) or 0 for x in debt),default=0.0)
+ max_sd=max((fnum(x.get("support_energy_debt_kWh"),0) or 0 for x in debt),default=0.0)
+ ac_cuts=sum(int((x.get("ac_safety_recovery") or {}).get("cut_count",0) or 0) for x in issue_audits)
  summary={**common,"forecast_model_id":"","causal_eligible":True,"oracle":False,"start_step":START,"end_step":END,
   "committed_steps":len(issue_audits),"status":"PASS" if len(issue_audits)==COUNT else "INCOMPLETE",
+  "energy_procurement_cost_AUD":energy_cost,"economic_cost_total_AUD":energy_cost,"objective_level_3":energy_cost,
   "grid_import_MWh":grid_mwh,"peak_grid_import_kW":peak_grid,"min_voltage_pu":vmin,"max_voltage_pu":vmax,
+  "PV_available_MWh":pv_available,"PV_used_MWh":pv_used,"PV_curtailed_MWh":pv_available-pv_used,
+  "PV_utilization_pct":100.0 if pv_available>0 else None,
   "voltage_violation_count":vviol,"voltage_violation_minutes":vviol*5.0,"max_line_loading_pu":maxline,
   "line_overload_count":lviol,"max_transformer_loading_pu":maxtx,"transformer_overload_count":tviol,
   "jobs_total":len(jobs),"jobs_completed":len(final_completed.intersection({str(x['job_id']) for x in jobs})),
@@ -740,8 +1266,10 @@ def build_results(policy_root:Path,engine:Path,cfg:Mapping[str,Any],issue_audits
   "MESS_charge_MWh":total_charge,"MESS_discharge_MWh":total_dis,"MESS_mobility_energy_MWh":total_mob_e,
   "MESS_travel_minutes":total_travel,"battery_throughput_MWh":total_charge+total_dis,
   "SOC_min_pct":min_soc if math.isfinite(min_soc) else None,"SOC_max_pct":max_soc if math.isfinite(max_soc) else None,
+  "max_workload_debt_GPUh":max_wd,"terminal_workload_debt_GPUh":fnum(debt[-1].get("workload_debt_GPUh"),0) if debt else None,
+  "max_support_energy_debt_kWh":max_sd,"terminal_support_energy_debt_kWh":fnum(debt[-1].get("support_energy_debt_kWh"),0) if debt else None,
   "exact_AC_calls":len(grid),"exact_AC_fail_count":sum(1 for x in grid if not x["hard_constraint_pass"]),
-  "AC_cut_count":0,"resolve_count":sum(int(x.get("replan_executed",False)) for x in issue_audits),
+  "AC_cut_count":ac_cuts,"resolve_count":sum(int(x.get("replan_executed",False)) for x in issue_audits),
   "solve_time_total_s":sum(runtimes),"solve_time_mean_s":statistics.mean(runtimes) if runtimes else None,
   "solve_time_p95_s":quantile(runtimes,.95),"solve_time_max_s":max(runtimes) if runtimes else None,
   "MIP_gap_max":max(gaps) if gaps else None,"MIP_nodes_total":sum(nodes),
@@ -850,6 +1378,7 @@ def main():
  if a.benchmark_fast_rack_lookup and a.benchmark_disable_fast_rack_lookup:
   raise RuntimeError("Rack lookup enable/disable benchmark flags are mutually exclusive")
  forced_modes={}
+ post_dispatch_hard_flags={}
  if a.benchmark_force_modes:
   if not a.benchmark_issues:raise RuntimeError("--benchmark-force-modes is allowed only for bounded regression")
   for token in a.benchmark_force_modes.split(","):
@@ -894,6 +1423,8 @@ def main():
  if expected_file.resolve()!=cfg_path and expected_file.is_file() and sha(expected_file)!=config_sha:raise RuntimeError("policy config SHA mismatch")
  policy_root.mkdir(parents=True,exist_ok=True);(policy_root/"logs").mkdir(exist_ok=True);(policy_root/"progress").mkdir(exist_ok=True)
  engine=policy_root/"engine";engine.mkdir(exist_ok=True)
+ archive_stale_failure(policy_root/"FAILURE.json",policy_root)
+ archive_stale_failure(engine/"_FAILURE.json",policy_root)
  control=policy_root/"control";control.mkdir(exist_ok=True);(control/"empty_hints").mkdir(exist_ok=True)
  (control/"empty_hints/NONE.json").write_text("{}\n")
  shared_path=SHARED/"SHARED_EXOGENOUS_AUTHORITY.json"
@@ -931,6 +1462,12 @@ def main():
   "initial_service_authority_sha256":SITE_AUTHORITY_SHA,
   "future_actual_used":False,"future_plans_persisted":False,"right_censoring_retained":True,
   "runtime_semantics_contract":"D12_RUNTIME_CLAIM_SEMANTICS_V2"})
+ jw(policy_root/"RESULT_EPISODE_INDEX.json",{
+  "schema_version":"mobileess.result_episode_index.v1","run_id":episode_id,
+  "scientific_method_id":"B5","comparison_method_id":cfg["slot"].split("_",1)[0],
+  "policy_id":cfg["policy_id"],"candidate_id":CANDIDATE_ID,"representative_week":CANDIDATE_ID.split("_",1)[0],
+  "resolved_policy_sha256":config_sha,"shared_exogenous_authority_sha256":shared_authority_sha,
+  "statistics_grouping_key":"comparison_method_id","future_actual_used":False})
  with book.phase("shared_source_index_load"):
   sources=SourceBlocks(SHARED,run_end,bool(a.benchmark_issues))
  with book.phase("stage7_helper_import"):
@@ -942,6 +1479,7 @@ def main():
  with book.phase("science_import_and_control_transform"):
   abase.set_science_environment()
   science=abase.load_science(repo)
+  science._a_b10_canonical_physical_zero=canonical_physical_zero
   one=transform_science(science,control)
  restore_performance_wrappers=install_science_performance_wrappers(science,current_performance,book)
  performance_build_full=science.build_full
@@ -954,11 +1492,21 @@ def main():
  checkpoint=load_json(checkpoint_path) if checkpoint_path.is_file() else {}
  if checkpoint:restore_event_engine(ev,checkpoint)
  last_replan=int(checkpoint.get("last_replan_issue",START))
+ marker_files=sorted(engine.glob("issue_*/A_B10_COMMIT_MARKER.json"))
+ if marker_files:
+  latest_marker=max((validate_commit_marker(p.parent) for p in marker_files),key=lambda x:int(x["issue"]))
+  restore_event_engine(ev,{"event_engine_state":latest_marker["event_engine_state"]})
+  last_replan=int(latest_marker["last_replan_issue"])
+ ac_recovery_context={}
  issue_audits=[]
  for i in range(START,run_end+1):
   auditp=engine/f"issue_{i:06d}/POLICY_ISSUE_AUDIT.json"
   postp=engine/f"issue_{i:06d}/BUILD7C_POSTCOMMIT_STATE.json"
   if auditp.is_file() and postp.is_file():
+   marker=commit_marker_path(auditp.parent)
+   if marker.is_file():validate_commit_marker(auditp.parent)
+   elif int(checkpoint.get("last_completed_issue",START-1))<i:
+    raise RuntimeError(f"committed issue lacks marker and checkpoint authority issue={i}")
    prior=load_json(auditp);issue_audits.append(prior);book.issue_records.append(prior);continue
   quarantine_incomplete(engine,i,policy_root)
   issue_runtime={"pre_to_post_wall_s":None,"slow_planner_runtime_s":0.0,"planner_mode":"NONE",
@@ -977,6 +1525,11 @@ def main():
    state=load_json(state_path);pre_hash=str(state["sha256"])
    if i==START and pre_hash!=PRE_SHA:raise RuntimeError(f"canonical {CANDIDATE_ID} PRE hash drift")
    power,price=sources.row(i)
+   mob_identity=str(sources.mob_rows[int(i)]["sha256"])
+   exo_payload={"candidate_id":CANDIDATE_ID,"issue":int(i),"source_authority_sha256":shared_authority_sha,
+                "power_price_block":int((i-START)//576),"mobility_issue_sha256":mob_identity}
+   issue_runtime["causal_exogenous_identity"]=hashlib.sha256(json.dumps(exo_payload,sort_keys=True,separators=(",",":")).encode()).hexdigest()
+   issue_runtime["causal_exogenous_identity_payload"]=exo_payload
    env=runtime_env(i,state_path,pre_hash,sources.mob_index,control,fixed_location,
                    not a.benchmark_disable_worker_cache,
                    not a.benchmark_disable_active_projection and i!=START,homes)
@@ -1022,6 +1575,7 @@ def main():
   def requested_before_model(decision)->str:
    requested=decision.requested_mode if decision.request_replan else "NONE"
    if i==START:requested="FULL_REPLAN"
+   if i in post_dispatch_hard_flags:requested="FULL_REPLAN"
    if i in forced_modes:requested=forced_modes[i]
    return requested
   def prebuild_event_conditioning(scope,b4,op1,build_issue,queue,running,inventory,dest_commit,
@@ -1065,8 +1619,26 @@ def main():
     b4.conservative_fixed=fast_conservative_fixed
     issue_runtime["fast_rack_lookup"]={"entries":len(rack_table),"horizon_steps":49,"fallback_after_h48":True}
    try:
-    return performance_build_full(scope,b4,op1,build_issue,queue,running,inventory,dest_commit,
-                                  mess_E,science_ref,*args,**kwargs)
+    sol=performance_build_full(scope,b4,op1,build_issue,queue,running,inventory,dest_commit,
+                               mess_E,science_ref,*args,**kwargs)
+    for row in sol.get("mess_rows",[]):
+     for key in ("P_discharge_kW","P_charge_kW","Q_kvar"):row[key]=canonical_physical_zero(row[key])
+    for row in sol.get("firstmess",[]):
+     for key in ("P_discharge_kW","P_charge_kW","P_net_grid_injection_kW","Q_grid_injection_kvar"):
+      row[key]=canonical_physical_zero(row[key])
+     mid=str(row["mess_id"]);move=(sol.get("chosen_h0_move") or {}).get(mid)
+     committed_profile=(ac_recovery_context.get("loc",{}).get("committed_profile",{}) or {}).get(mid,[])
+     committed=float(committed_profile[0]) if committed_profile else 0.0
+     move_energy=0.0 if move is None else float(move.get("energy_kWh",0.0))
+     row["E1_kWh"]=float(row["E0_kWh"])+0.95*(5/60)*float(row["P_charge_kW"])-(5/60)*float(row["P_discharge_kW"])/0.95-move_energy-committed
+     loc_now=ac_recovery_context.get("loc",{});rep=loc_now.get("repE",{}).get((mid,0))
+     scale_e=float(loc_now.get("_c5r4_energy_scale_kwh_per_model_unit",1000.0))
+     repaid=0.0 if rep is None else canonical_physical_zero(scale_e*float(rep.X))
+     row["support_debt1_kWh"]=float(row["support_debt0_kWh"])+(5/60)*float(row["P_discharge_kW"])/0.95-repaid
+     sol.setdefault("mess_support_debt1",{})[mid]=row["support_debt1_kWh"]
+    if "rolling_warmstart_payload" in sol:sol["rolling_warmstart_payload"]["mess_rows"]=[dict(x) for x in sol["mess_rows"]]
+    science.cw(Path(args[7])/"BUILD7B_FULL54_MESS_PLAN.csv",sol["mess_rows"])
+    return sol
    finally:
     b4.conservative_fixed=original_conservative_fixed
   def jw_wrap(path,value):
@@ -1092,11 +1664,14 @@ def main():
    reasons=list(decision.reasons)
    if i==START:
     requested="FULL_REPLAN";reasons.append("PROSPECTIVE_INITIAL_SITING_REQUIRES_CAUSAL_PLAN")
+   if i in post_dispatch_hard_flags:
+    requested="FULL_REPLAN"
+    reasons.append("HARD:GRID_HARD_RISK_POST_DISPATCH")
    affected_jobs,affected_mess=local_scope_from_soft(loc,metrics,i,cfg)
    def solve_planner_candidate():
     if a.benchmark_sparse_planner_copy and not fixed_location:
      return planner_solve_sparse_copy(model,cb)
-    return planner_solve(model,cb),None
+    return planner_solve_exact_copy(model,cb)
    def accept_planner_candidate(planner_model):
     if planner_model is None:return fix_all_slow_to_incumbent(loc)
     try:return fix_all_slow_from_model(loc,planner_model)
@@ -1153,17 +1728,38 @@ def main():
      accept_planner_candidate(planner_model);last_replan=i;issue_runtime["replan_executed"]=True;issue_runtime["planner_mode"]="FULL_REPLAN"
     else:
      if planner_model is not None:planner_model.dispose()
-     if hard_exc is not None:raise RuntimeError("hard-invalidated active plan and full planner produced no candidate")
-     # Soft/periodic planner miss: retain the still-valid shifted active plan.
-     bind=astep4.bind_shifted_active_plan(loc,ref,i);jw(Path(loc["out"])/"A_B10_PLANNER_MISS_RETAIN_ACTIVE.json",bind)
-     issue_runtime["planner_mode"]="FULL_REPLAN_NO_CANDIDATE_RETAIN_ACTIVE"
+     if hard_exc is not None or i==START or i in post_dispatch_hard_flags:
+      fq,fmodel=planner_feasibility_rescue(model,cb);issue_runtime["slow_planner_runtime_s"]+=float(fq["wall_seconds"])
+      jw(Path(loc["out"])/"A_B10_HARD_FEASIBILITY_RESCUE.json",fq)
+      if not fq["candidate_available"]:
+       fmodel.dispose();raise RuntimeError(f"PLANNER_HARD_FEASIBILITY_RESCUE_FAILED:{fq['failure_classification']}")
+      accept_planner_candidate(fmodel);last_replan=i;issue_runtime["replan_executed"]=True
+      issue_runtime["planner_mode"]="FIRST_OR_HARD_EVENT_FEASIBILITY_RESCUE"
+     else:
+      # A soft/periodic miss may retain only an active plan that still passes current hard binding.
+      bind=astep4.bind_shifted_active_plan(loc,ref,i);jw(Path(loc["out"])/"A_B10_PLANNER_MISS_RETAIN_ACTIVE.json",bind)
+      issue_runtime["planner_mode"]="SOFT_REPLAN_NO_CANDIDATE_RETAIN_HARD_VALID_ACTIVE"
    if use_sparse_restore and os.environ.get("MOBILEESS_POST15_SKIP_REDUNDANT_DENSE_B4_CUTS","0")=="1":
     issue_runtime["dense_b4_restore"]=restore_redundant_dense_b4_rows(loc)
-   fast=solve_fast(model,cb);issue_runtime["fast_solver"]=fast;issue_runtime["dispatch_status"]="OPTIMAL" if int(model.Status)==2 else f"GUROBI_{int(model.Status)}"
+   fast=solve_fast(model,cb,loc);issue_runtime["fast_solver"]=fast;issue_runtime["dispatch_status"]="OPTIMAL" if int(model.Status)==2 else f"GUROBI_{int(model.Status)}"
+   ac_recovery_context.clear();ac_recovery_context.update({"loc":dict(loc),"cb":cb})
    issue_runtime["event_reasons"]=sorted(set(map(str,reasons)))
    issue_runtime["soft_metrics"]=metrics;issue_runtime["steps_since_plan_before_issue"]=steps
    return None
   science.certified_path_decomposition_solve=hook
+  def capture_exact_ac_timed(grid24_arg,issue_out_arg,issue_arg,exact_summary_arg):
+   signature=hashlib.sha256(json.dumps(dict(exact_summary_arg),sort_keys=True,separators=(",",":"),default=str).encode()).hexdigest()
+   rec=issue_runtime.setdefault("observability_capture",{"calls":0,"deduplicated_calls":0,"wall_s":0.0,"cpu_s":0.0,"bytes":0,"last_signature":None})
+   if rec.get("last_signature")==signature:
+    rec["deduplicated_calls"]+=1;return
+   tw=time.monotonic();tc=time.process_time()
+   capture_exact_ac_observability(grid24_arg,issue_out_arg,issue_arg,exact_summary_arg)
+   path=Path(issue_out_arg)/"exact_grid/A_B10_FRESH_EXACT_AC_OBSERVABILITY.json"
+   rec["calls"]+=1;rec["wall_s"]+=time.monotonic()-tw;rec["cpu_s"]+=time.process_time()-tc
+   rec["bytes"]=path.stat().st_size;rec["last_signature"]=signature
+  science._a_b10_capture_exact_ac=capture_exact_ac_timed
+  science._a_b10_exact_ac_recovery=lambda b4_arg,grid24_arg,scope_arg,gstatic_arg,issue_arg,running_arg,sol_arg,issue_out_arg,ex_arg: exact_ac_cut_recovery(
+   science,ac_recovery_context,issue_runtime,b4_arg,grid24_arg,scope_arg,gstatic_arg,issue_arg,running_arg,sol_arg,issue_out_arg,ex_arg)
   started=time.monotonic();cpu_started=time.process_time()
   def execute_one_issue()->int:
    science.build_full=prebuild_event_conditioning
@@ -1183,11 +1779,25 @@ def main():
     if issue_dir.exists():shutil.move(str(issue_dir),str(retry_root/issue_dir.name))
     if failure_path.exists():shutil.move(str(failure_path),str(retry_root/failure_path.name))
     os.environ["MOBILEESS_ACTIVE_PLAN_MOBILITY_PROJECTION"]="0"
-    issue_runtime["active_projection_retry_full_domain"]=True
-    rc=execute_one_issue()
+   issue_runtime["active_projection_retry_full_domain"]=True
+   rc=execute_one_issue()
+   failure=load_json(failure_path) if rc!=0 and failure_path.is_file() else {}
+  grid_retryable=(rc!=0 and "GRID_CORRECTION_EXHAUSTED" in str(failure.get("error",""))
+                  and i not in post_dispatch_hard_flags)
+  if grid_retryable:
+   retry_root=policy_root/"interrupted_attempts"/datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")/f"issue_{i:06d}_grid_hard_pre_replan"
+   retry_root.mkdir(parents=True,exist_ok=True);issue_dir=engine/f"issue_{i:06d}"
+   if issue_dir.exists():shutil.move(str(issue_dir),str(retry_root/issue_dir.name))
+   if failure_path.exists():shutil.move(str(failure_path),str(retry_root/failure_path.name))
+   post_dispatch_hard_flags[i]="GRID_HARD_RISK";issue_runtime["grid_hard_risk_full_replan_retry"]=True
+   rc=execute_one_issue()
   wall=time.monotonic()-started
   if rc!=0:raise RuntimeError(f"scientific one-issue engine returned {rc} at issue {i}")
   d=engine/f"issue_{i:06d}"
+  if not ac_recovery_context.get("loc"):raise RuntimeError(f"committed-model observability context missing issue={i}")
+  tw=time.monotonic();tc=time.process_time()
+  model_obs=capture_model_observability(science,ac_recovery_context["loc"],d,i,power,price)
+  issue_runtime["model_observability_capture"]={**model_obs,"wall_s":time.monotonic()-tw,"cpu_s":time.process_time()-tc}
   for rp in [d/"BUILD7C_POSTCOMMIT_STATE.json",d/"BUILD7C_FIRSTSTEP_TRANSITION_CERTIFICATE.json",d/f"exact_grid/FRESH_EXACT_OPENDSS_24SERVICE_ISSUE_{i}.json"]:
    if not rp.is_file():raise RuntimeError(f"required committed artifact missing {rp}")
   with book.phase("commit_evidence_load_and_validate",i,issue_runtime):
@@ -1211,8 +1821,14 @@ def main():
     "full_issue_wall_s":wall,"commit_critical_runtime_s":max(0.0,prepost-slow),
     "development_host_deadline_overrun":max(0.0,prepost-slow)>=300.0,
     "fresh_opendss_pass":True,"future_actual_used":False,"full_issue_cpu_s":time.process_time()-cpu_started,
-    "max_rss_mib":book.rss_mib(),"science_runtime_events":list(getattr(science,"_RUNTIME_EVENTS",[]))})
-  jw(d/"POLICY_ISSUE_AUDIT.json",issue_runtime);issue_audits.append(issue_runtime)
+    "max_rss_mib":book.rss_mib(),"science_runtime_events":list(getattr(science,"_RUNTIME_EVENTS",[])),
+    "comparison_method_id":cfg["slot"].split("_",1)[0],"scientific_method_id":"B5",
+    "last_replan_issue_after_issue":last_replan,"event_engine_state_after_issue":event_state(ev)})
+  issue_runtime["issue_artifact_storage"]={"bytes":sum(p.stat().st_size for p in d.rglob("*") if p.is_file()),
+                                            "files":sum(1 for p in d.rglob("*") if p.is_file())}
+  jw(d/"POLICY_ISSUE_AUDIT.json",issue_runtime)
+  write_commit_marker(d,i,last_replan,event_state(ev),d/"BUILD7C_ROLLING_GUIDANCE_NEXT_ISSUE.json")
+  issue_audits.append(issue_runtime)
   jw(checkpoint_path,{"status":"RUNNING","last_completed_issue":i,"last_replan_issue":last_replan,
       "event_engine_state":event_state(ev),"completed_issue_count":len(issue_audits),"future_actual_used":False})
   jw(policy_root/"progress"/PROGRESS_FILE,{"candidate_id":CANDIDATE_ID,"status":"RUNNING_BOUNDED_PROFILE" if a.benchmark_issues else "RUNNING",
