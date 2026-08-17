@@ -7,6 +7,34 @@ LOGROOT="$BASE/logs/B_W02_SHARED_EXOGENOUS_SOURCE_CURRENT"
 mkdir -p "$SHARED" "$LOGROOT"
 
 PY="/home/jaewon/miniconda3/envs/power_v61/bin/python"
+AUTH="$SHARED/SHARED_EXOGENOUS_AUTHORITY.json"
+
+# A completed shared source is immutable production authority.  Validate its
+# cardinality and referenced source authorities, then reuse it without running
+# the GPU/source pipeline or rewriting the authority file.
+if [[ -f "$AUTH" ]] && "$PY" - "$SHARED" <<'PY'
+import csv,json,sys
+from pathlib import Path
+r=Path(sys.argv[1]);a=json.loads((r/"SHARED_EXOGENOUS_AUTHORITY.json").read_text())
+pa_path=r/"power_price/REP_WEEK_POWER_PRICE_SOURCE_AUTHORITY.json"
+if not pa_path.is_file():pa_path=r/"power_price/A_B10_W02_POWER_PRICE_SOURCE_AUTHORITY.json"
+pa=json.loads(pa_path.read_text());ma=json.loads((r/"mobility/R12_COMMON_MOBILITY_CACHE_AUTHORITY.json").read_text())
+with (r/"mobility/R12_COMMON_MOBILITY_INDEX.csv").open(encoding="utf-8-sig",newline="") as f: rows=list(csv.DictReader(f))
+same=a.get("same_source_for_all_methods",a.get("same_source_for_all_policies")) is True
+ok=(a.get("status")=="PASS" and a.get("candidate_id")=="W02_2025-01-13" and a.get("scored_issue_count")==2016
+    and a.get("mobility_source_cache_issues")==2304 and a.get("power_price_source_cache_issues")==2304 and same
+    and pa.get("status")=="PASS" and pa.get("scored_issue_count")==2016 and ma.get("status")=="PASS"
+    and len(rows)==2304 and [int(x["issue_step"]) for x in rows[:2016]]==list(range(3456,5472))
+    and all((r/"mobility"/x["file"]).is_file() for x in rows))
+raise SystemExit(0 if ok else 2)
+PY
+then
+  echo "[W02 source] reuse frozen completed shared source"
+  echo "W02_SHARED_SOURCE_STATUS=PASS_REUSED"
+  echo "W02_SHARED_SOURCE_ROOT=$SHARED"
+  exit 0
+fi
+
 WORKTREE="$($PY "$HERE/tools/ENSURE_PR4_WORKTREE.py" "$@" | python3 -c 'import sys,json; print(json.load(sys.stdin)["worktree"])')"
 
 echo "[W02 source] PR4 worktree=$WORKTREE"

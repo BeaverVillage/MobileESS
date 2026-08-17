@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+PREFLIGHT_ONLY=0
+if [[ "${1:-}" == "--preflight-only" ]]; then PREFLIGHT_ONLY=1; shift; fi
+[[ $# -eq 0 ]] || { echo "usage: bash RUN_W02_4POLICY_ACTUAL.sh [--preflight-only]" >&2; exit 2; }
 HERE="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PY="/home/jaewon/miniconda3/envs/power_v61/bin/python"
 BASE="/home/jaewon/mobile_ess_work"
+WORKTREE="$BASE/post_stage15_runtime_acceleration"
 DELIVERY="$BASE/frozen_artifacts/B_W02_4POLICY_ACTUAL_PILOT_CURRENT"
 LOGROOT="$BASE/logs/B_W02_4POLICY_ACTUAL_PILOT_CURRENT"
 export PYTHONHASHSEED=0
@@ -16,8 +20,7 @@ if d.get("status")!="AUTHORIZED_FOR_W02" or d.get("full_w02_executed") is not Fa
 PY
 mkdir -p "$DELIVERY" "$LOGROOT"
 
-echo "[A→B 10] resolve exact PR4 worktree"
-WORKTREE="$($PY "$HERE/tools/ENSURE_PR4_WORKTREE.py" "$@" | python3 -c 'import sys,json; print(json.load(sys.stdin)["worktree"])')"
+echo "[A→B 10] use frozen post-Stage15 scientific worktree"
 echo "WORKTREE=$WORKTREE"
 
 echo "[A→B 10] static preflight"
@@ -28,6 +31,11 @@ bash "$HERE/scripts/PREPARE_W02_SHARED_SOURCES.sh"
 
 echo "[A→B 10] post-source preflight"
 $PY "$HERE/tools/PREFLIGHT_W02_4POLICY.py" --repo "$WORKTREE" --require-shared-source
+
+if (( PREFLIGHT_ONLY )); then
+  echo "W02_4POLICY_PREFLIGHT_ONLY_STATUS=PASS"
+  exit 0
+fi
 
 mapfile -t groups < <($PY "$HERE/tools/CPU_AFFINITY_4X4.py" --plain)
 if (( ${#groups[@]} != 4 )); then

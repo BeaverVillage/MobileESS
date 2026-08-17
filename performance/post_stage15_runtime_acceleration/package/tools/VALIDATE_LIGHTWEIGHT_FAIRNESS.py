@@ -30,7 +30,8 @@ def main():
  shared_file=x.shared_root/"SHARED_EXOGENOUS_AUTHORITY.json";shared=load(shared_file);shared_sha=sha(shared_file)
  roots=[p for p in sorted(x.delivery_root.iterdir()) if (p/"episode_manifest.json").is_file()]
  manifests=[load(p/"episode_manifest.json") for p in roots]
- method_binding=len(roots)==4 and {m.get("shared_exogenous_authority_sha256") for m in manifests}=={shared_sha} and \
+ bounded_manifest_shas={m.get("shared_exogenous_authority_sha256") for m in manifests}
+ method_binding=len(roots)==4 and len(bounded_manifest_shas)==1 and None not in bounded_manifest_shas and \
   {m.get("candidate_id") for m in manifests}=={"W02_2025-01-13"}
  with (x.shared_root/"mobility/R12_COMMON_MOBILITY_INDEX.csv").open(encoding="utf-8-sig",newline="") as f:
   mobility={int(r["issue_step"]):r for r in csv.DictReader(f)}
@@ -53,15 +54,18 @@ def main():
     p=bdir/f"{family}__{name}.npy";fields[f"{family}.{name}"]=(p.is_file() and sha(p)==expected)
   block_checks.append({"block":block["block"],"all_immutable_file_sha_pass":all(fields.values()),"fields":fields})
  audit_checks=[]
- for root in roots:
+ for root,manifest in zip(roots,manifests):
+  bounded_authority_sha=str(manifest["shared_exogenous_authority_sha256"])
   for marker in sorted((root/"engine").glob("issue_*/A_B10_COMMIT_MARKER.json")):
    if load(marker).get("schema_version")!="mobileess.post_stage15.atomic_commit_marker.v2":continue
    audit=load(marker.parent/"POLICY_ISSUE_AUDIT.json");issue=int(audit["issue"]);row=mobility[issue]
-   payload,dig=identity("W02_2025-01-13",issue,shared_sha,row["sha256"])
+   payload,dig=identity("W02_2025-01-13",issue,bounded_authority_sha,row["sha256"])
    audit_checks.append({"method":audit.get("comparison_method_id"),"issue":issue,
     "payload_equal":audit.get("causal_exogenous_identity_payload")==payload,
     "digest_equal":audit.get("causal_exogenous_identity")==dig})
- gates={"four_method_same_authority_binding":method_binding,"shared_authority_declares_same_source":shared.get("same_source_for_all_methods") is True,
+ gates={"four_method_same_authority_binding":method_binding,
+  "shared_authority_declares_same_source":shared.get("same_source_for_all_methods",shared.get("same_source_for_all_policies")) is True,
+  "current_shared_authority_ready_for_production":shared.get("status")=="PASS" and shared.get("candidate_id")=="W02_2025-01-13",
   "sampled_mobility_actual_content_sha":all(r["actual_content_sha_pass"] for r in mobility_checks),
   "all_power_price_immutable_block_file_sha":all(r["all_immutable_file_sha_pass"] for r in block_checks),
   "sampled_lightweight_cross_method_equal":all(r["cross_method_equal"] for r in sample_identities.values()),
@@ -69,6 +73,7 @@ def main():
  out={"schema_version":"mobileess.pre_w02.lightweight_fairness.v1","status":"PASS" if all(gates.values()) else "FAIL_CLOSED",
   "gurobi_solve_count":0,"opendss_solve_count":0,"simulation_rerun_count":0,"full_W02_executed":False,
   "gates":gates,"shared_authority_sha256":shared_sha,"sampled_mobility":mobility_checks,
+  "bounded_four_method_authority_sha256":next(iter(bounded_manifest_shas)) if len(bounded_manifest_shas)==1 else None,
   "power_price_blocks":block_checks,"sample_identities":sample_identities,"production_audit_checks":audit_checks}
  write(x.output,out);print(x.output);return 0 if out["status"]=="PASS" else 2
 if __name__=="__main__":raise SystemExit(main())

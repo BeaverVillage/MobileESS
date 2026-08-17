@@ -34,6 +34,19 @@ From the package directory:
 
 ```bash
 cd /home/jaewon/mobile_ess_work/post_stage15_runtime_acceleration/performance/post_stage15_runtime_acceleration/package
+bash RUN_W02_4POLICY_ACTUAL.sh --preflight-only
+```
+
+The preflight-only command performs no scientific Gurobi/OpenDSS episode run. A completed 2,304-issue shared source is validated and reused without GPU rematerialization. After it prints `W02_4POLICY_PREFLIGHT_ONLY_STATUS=PASS`, start the actual W02 run:
+
+```bash
+bash RUN_W02_4POLICY_ACTUAL.sh
+```
+
+Equivalent one-shot form:
+
+```bash
+cd /home/jaewon/mobile_ess_work/post_stage15_runtime_acceleration/performance/post_stage15_runtime_acceleration/package
 bash RUN_W02_4POLICY_ACTUAL.sh
 ```
 
