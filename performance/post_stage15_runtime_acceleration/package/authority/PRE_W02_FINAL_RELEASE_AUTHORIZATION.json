@@ -1,10 +1,10 @@
 {
-  "authorization_scope": "W02_2025-01-13 four-policy scientific episode only; remaining weeks require the frozen W02 acceptance token",
+  "authorization_scope": "Twelve representative weeks x four policies; one global queue with no W02 preacceptance barrier",
   "evidence": [
     {
       "pass": true,
       "path": "/home/jaewon/mobile_ess_work/frozen_artifacts/B_W02_4POLICY_PREFLIGHT.json",
-      "sha256": "3537e0801384961949cac0729bba3407d2e528908f83ed7d5926b1e41adbf43e",
+      "sha256": "4e6ee0e9b622be93d1901aca393b574ed838cc2d237bdd5ded51de685057f6a5",
       "status": "PASS"
     },
     {
@@ -35,6 +35,42 @@
       "pass": true,
       "path": "/home/jaewon/mobile_ess_work/frozen_artifacts/PRE_W02_POLICY_PATHS_CURRENT.json",
       "sha256": "39ed6c573d246ed813a502d9a4aa5ff1a259e99e860435c7294bc5ab10f1c9ac",
+      "status": "PASS"
+    },
+    {
+      "pass": true,
+      "path": "/home/jaewon/mobile_ess_work/frozen_artifacts/PRE_W02_SAFETY_RECOVERY_CONTRACT_CURRENT.json",
+      "sha256": "4a1ec643ff419b25f4d466f8cc4cc9b170e7ac4edf65e54d2aa5a366bdb3d819",
+      "status": "PASS"
+    },
+    {
+      "pass": true,
+      "path": "/home/jaewon/mobile_ess_work/frozen_artifacts/PRE_W02_SENSITIVITY_KEYERROR_CORRECTION_CURRENT.json",
+      "sha256": "94d9e1dd702ec71d7723a8fa1ba11ccb4dc88a0e3d846a4fa800ad559e174cf6",
+      "status": "PASS"
+    },
+    {
+      "pass": true,
+      "path": "/home/jaewon/mobile_ess_work/frozen_artifacts/PRE_W02_R3_ACTUAL_FAILURE_RECOVERY_CURRENT.json",
+      "sha256": "ab96c3c55ce0299a72a320774257cacd23482947c72203b3ed66d7d8d61d70c4",
+      "status": "PASS"
+    },
+    {
+      "pass": true,
+      "path": "/home/jaewon/mobile_ess_work/frozen_artifacts/PRE_W02_R3_ACTUAL_FAILURE_RECOVERY_4X4_CURRENT.json",
+      "sha256": "a9283fe261e73bd46f6c72ab2b90b0e58c090db1d1240398674eb1af2ced521b",
+      "status": "PASS"
+    },
+    {
+      "pass": true,
+      "path": "/home/jaewon/mobile_ess_work/frozen_artifacts/PRE_W02_R4_M4_ISSUE3518_RECOVERY_CURRENT.json",
+      "sha256": "3ae7a0f82b027e724451288555f40cf0d97eabf3a18a981cd591d69665bc4cf1",
+      "status": "PASS"
+    },
+    {
+      "pass": true,
+      "path": "/home/jaewon/mobile_ess_work/frozen_artifacts/PRE_W02_M4_ADAPTIVE_GRID_RECOVERY_CURRENT.json",
+      "sha256": "6900945f2ab973de698dfa8256a000c75e835dfe5495981d4de56fbc58bdc12c",
       "status": "PASS"
     },
     {
@@ -112,8 +148,21 @@
     "all_evidence_pass": true,
     "bounded_4process_x_4thread_pass": true,
     "full_W02_not_executed_by_hardening": true,
+    "m4_adaptive_voltage_line_grid_recovery_pass": true,
     "observability_contract_frozen_pre_outcome": true,
     "outcome_blind_acceptance": true,
+    "r20_1_planner_transfer_boundary_canonicalization_pass": true,
+    "r20_2_numerical_refinement_certificate_retry_pass": true,
+    "r20_3_rep12_isolated_task_failure_continuation_pass": true,
+    "r20_4_causal_route_tail_canonicalization_pass": true,
+    "r20_5_pcc_balance_numerical_polish_pass": true,
+    "r20_6_sparse_dense_equivalence_fallback_pass": true,
+    "r20_7_local_repair_variable_type_restore_pass": true,
+    "r20_m1_issue4499_continuous_commit_pass": true,
+    "r3_actual_failure_recovery_4x4_pass": true,
+    "r3_actual_failure_recovery_m1_m4_pass": true,
+    "r4_m4_issue3518_trust_region_recovery_pass": true,
+    "rep12_source_preparation_monitored_queue": true,
     "rerun_eligibility_frozen_pre_outcome": true,
     "resolved_episode_bindings_12x4": true,
     "static_validation_pass": true
@@ -124,26 +173,44 @@
     "PRE_W02_ANALYSIS_DRYRUN.py"
   ],
   "production_topology": {
-    "gurobi_threads_per_process": 4,
-    "outer_processes": 4
+    "campaign_pass_blocked_by_any_isolated_failure": true,
+    "causal_route_report_canonicalized_before_commit": true,
+    "completed_worker_starts_next_pending_episode": true,
+    "ctrl_c_accepts_only_final_atomic_commit_markers": true,
+    "episode_failure_isolated_to_worker_slot": true,
+    "failed_episode_not_retried_in_same_campaign": true,
+    "fixed_gurobi_threads_per_episode": 4,
+    "foreground_ctrl_c_resumable_process_group_cleanup": true,
+    "global_week_policy_episode_queue_all_48": true,
+    "other_workers_continue_after_episode_failure": true,
+    "rolling_policy_state_split_across_processes": false,
+    "shared_source_preparation_is_monitored_queue_work": true,
+    "source_failure_skips_blocked_week_and_continues": true,
+    "total_logical_cpu_budget": 16,
+    "w02_preacceptance_barrier": false,
+    "worker_slots": 4
   },
   "proposed_method_win_required": false,
   "release_source_files": [
     {
       "path": "runtime/W02_POLICY_EPISODE_RUNNER.py",
-      "sha256": "877835af53a7b961b0f02b07fcc9f97c4729c32efe67de292338b3818e2f2d6b"
+      "sha256": "5f9ed86a93094fc4b18ab3dfcfe9cdde646b6d4820d874e3cc51a29cff10b0c5"
     },
     {
       "path": "RUN_W02_4POLICY_ACTUAL.sh",
-      "sha256": "ba52e493cfbb19b5b83e772dc3c4c39847253891714976d112ff980405a3dfae"
+      "sha256": "d592b6901e65bbee811c8dc43debb381159becffc15f4b00c52ffe6e9c86d7a5"
     },
     {
       "path": "RUN_FIRST6_REP_WEEKS_ACTUAL.sh",
-      "sha256": "5ce831828c059f0c3f92fbd1fcf477097f34a497b8bd36a92ea7a8f47e94e3c0"
+      "sha256": "3dcd1f47222650777f642fca2f1f764cb0e4dcae915d55b927b08f957552a6d1"
+    },
+    {
+      "path": "RUN_12_REP_WEEKS_ACTUAL.sh",
+      "sha256": "d0fc1714e62fa9154820d19072ee41ce574d4b56cb45558d3bb1a30a7f35b9d9"
     },
     {
       "path": "STATIC_VALIDATION.json",
-      "sha256": "d3511138525ed3f8b033731383379a2f17404014adb7948b17d7fecbfffbf285"
+      "sha256": "78d8608e16ebb9d351c5a42eba7b6c2acdd0834f4941cc0e0f6de38f7a5bfe90"
     },
     {
       "path": "episode_bindings/MANIFEST.json",
@@ -170,12 +237,16 @@
       "sha256": "20b562999551f06c0cdf9a4b7d8dde7e3846775f991904b1248147ffaa0daa21"
     },
     {
+      "path": "tools/BIND_W02_RUN_SOURCE.py",
+      "sha256": "7c561c801467498790fd3d255c8f65bcfe78d3a896ae8d4200edbccdfb528da9"
+    },
+    {
       "path": "tools/BUILD_OBSERVABILITY_OVERHEAD_REPORT.py",
       "sha256": "dd1de7deca0b7c84095863a8ce6bbae49fd87d100218f12cadff10a471e55a98"
     },
     {
       "path": "tools/BUILD_PRE_W02_FINAL_RELEASE_AUTHORIZATION.py",
-      "sha256": "43fc64e10943d8083afe0b04c9f6d394647240e89c93fece4a7ce757c2123554"
+      "sha256": "81bd0974d9c1a5306ffa6e8894cdd1cac91798399bc3538a458eed8ea04be319"
     },
     {
       "path": "tools/CPU_AFFINITY_4X4.py",
@@ -198,24 +269,32 @@
       "sha256": "4d87dd178b4f149f7815ea0e999275fc9125312bda136153ac2f1e9a4b3cddf9"
     },
     {
+      "path": "tools/PREFLIGHT_12_REP_WEEKS.py",
+      "sha256": "711328c99e21137aea4f5d2fc26d98adc31e3f0bf5b1977ffcf8e9e625bb597b"
+    },
+    {
       "path": "tools/PREFLIGHT_FIRST6_REP_WEEKS.py",
       "sha256": "f3e9ec0215e2793fa52dbd0bb7146fda29b8a0a7126d52bd8c491af473bc2584"
     },
     {
       "path": "tools/PREFLIGHT_W02_4POLICY.py",
-      "sha256": "ec699825c3962a2c593bd58d87b57b98a80f75bba8f25ff5f9bc5a599f29e377"
+      "sha256": "85730f5cc25448d08ffe25338298417da6f2a3081eedda62f1e2ac2257af325b"
     },
     {
       "path": "tools/PRE_W02_ANALYSIS_DRYRUN.py",
       "sha256": "43fbc590055ae91fa6f594d666110c63b289158ad32e3cbeb1c8f46f5faf0a8d"
     },
     {
+      "path": "tools/SHOW_12_REP_WEEKS_PROGRESS.py",
+      "sha256": "5d004df01fd0a15bb95277a4188cccce080c92ae4835810eb252fc18df3c8a55"
+    },
+    {
       "path": "tools/SHOW_FIRST6_REP_WEEKS_PROGRESS.py",
-      "sha256": "c7314b8b1e071fecd08baa2cc4afc90b364a081bcbf9095a7172abe83b211880"
+      "sha256": "e2ce4b679d4d0610c51c6719ca48aed0772f4eef9012f95230457c7865927016"
     },
     {
       "path": "tools/SHOW_W02_PROGRESS.py",
-      "sha256": "2ddd7cc76d6701240882ac048de742dd7494f41c67e0233ec2b4bd2201a372a4"
+      "sha256": "96d1bf52f9dee47cde6e5e3c329474dd4f0114ddcbad945032d520c8b6df18f8"
     },
     {
       "path": "tools/VALIDATE_LIGHTWEIGHT_FAIRNESS.py",
@@ -224,6 +303,30 @@
     {
       "path": "tools/VALIDATE_POLICY_PATHS_OFFLINE.py",
       "sha256": "1c1238b15e1b2d5e743ed404a7c6ea19e92d957c4b2b492b351dfa05d03e61cd"
+    },
+    {
+      "path": "tools/VALIDATE_REP12_GLOBAL_QUEUE.py",
+      "sha256": "5167cf574cb15ea20e6dafa288f5f2bb37a8a607aec3e6ef6f9a017e6a838c39"
+    },
+    {
+      "path": "tools/VALIDATE_W02_M4_ADAPTIVE_GRID_RECOVERY.py",
+      "sha256": "5bc649e069e4526ece8c2422e726a5546ade111352eaa218a1435b5106010118"
+    },
+    {
+      "path": "tools/VALIDATE_W02_R3_ACTUAL_FAILURE_RECOVERY.py",
+      "sha256": "c7be2150d3f833a82083ef49dc4ea62412dac73c235602729d102697e55c8762"
+    },
+    {
+      "path": "tools/VALIDATE_W02_R4_M4_ISSUE3518_RECOVERY.py",
+      "sha256": "68c00bd60e92b73f9dcab61ec70d1f0ad2af6dd995cc41be2c113fff6aa7011b"
+    },
+    {
+      "path": "tools/VALIDATE_W02_SAFETY_RECOVERY_CONTRACT.py",
+      "sha256": "8ae166faaf451224d9e55c8d39cad98a6f3f64987e573ed99fe37a6b7b1450e1"
+    },
+    {
+      "path": "tools/VALIDATE_W02_SENSITIVITY_KEYERROR_CORRECTION.py",
+      "sha256": "e2a8cfaa75bb727267acc0bdc4df5f58fcf21ff27398f4698b39e1704a940480"
     },
     {
       "path": "tools/BENCHMARK_POST15_4X4_SHORT.sh",
@@ -254,6 +357,106 @@
       "sha256": "f0eef024f5a3291a8aa8bb2db19822191f0dab7c2ff495606c1e5f5787066378"
     },
     {
+      "path": "authority/POST_STAGE15_PRIMARY_ACTION_DIRECT_COMMIT_SUPERSESSION.json",
+      "sha256": "56c1814a7df3516eb5553813313d9beb8994705a9606f0e0efd24fc2651bd9ff"
+    },
+    {
+      "path": "authority/POST_STAGE15_REP12_R20_3_ISOLATED_TASK_FAILURE_CONTINUATION_ROOTCAUSE_CORRECTION.json",
+      "sha256": "90f864a50fd49f1081c499bae591062d79fdc95ab151ecb963f8d1f7f20e0395"
+    },
+    {
+      "path": "authority/POST_STAGE15_REP12_R20_4_CAUSAL_ROUTE_TAIL_ROOTCAUSE_CORRECTION.json",
+      "sha256": "54f4e5d049482453f734273b18ab2390301d1af3a5020fb0c8c18e0d3a29b0d2"
+    },
+    {
+      "path": "authority/POST_STAGE15_REP12_R20_5_PCC_BALANCE_NUMERICAL_POLISH_ROOTCAUSE_CORRECTION.json",
+      "sha256": "9d181601de891dd4ac48b5169a746ac33eca3ddda18b2a4622c3704e986be596"
+    },
+    {
+      "path": "authority/POST_STAGE15_REP12_R20_6_SPARSE_DENSE_EQUIVALENCE_FALLBACK_ROOTCAUSE_CORRECTION.json",
+      "sha256": "1ab2c5c9e2a9b77347774003e3c3966d426d7122473931af3dae3d6a7d2dcca7"
+    },
+    {
+      "path": "authority/POST_STAGE15_REP12_R20_7_LOCAL_REPAIR_VTYPE_RESTORE_ROOTCAUSE_CORRECTION.json",
+      "sha256": "8ef1a8f1ad3563c0f5224f559cbd643b4b7daee6507ef9566a746581e819ad8e"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_ACTUAL_FAILURE_CORRECTION.json",
+      "sha256": "73c50d5f80f0150339a4754a5b358efc1354b919c667718b92e9e2c099d68fd4"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_R10_M4_TAP_RELINEARIZATION_ROOTCAUSE_CORRECTION.json",
+      "sha256": "2f7190c2e603f1e70deea601f3b243b00ac50aab96cb1bdad931d4877e4faa76"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_R11_M4_THREE_STAGE_TAP_RECOVERY_ROOTCAUSE_CORRECTION.json",
+      "sha256": "cfe49939a35ca4f3c7e46eb783498a5d10fb705f1bbf4b212c258f246fac850e"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_R12_M4_BOUNDED_ITERATIVE_TAP_RECOVERY_ROOTCAUSE_CORRECTION.json",
+      "sha256": "3a3a5046d54707cccb1e7668a22d748044aa7f6cb0996724ac89bad386ba4844"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_R13_M4_UNIFIED_ITERATIVE_RECOVERY_ROOTCAUSE_CORRECTION.json",
+      "sha256": "2b784f097398dd820f59e551f18a8d547f48e09e4a586cf54aff321866545588"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_R14_BOUNDED_CONDITIONED_DISPATCH_ROOTCAUSE_CORRECTION.json",
+      "sha256": "d0f586f173a8355e714e6d730f85a35e67bb898de5609a97f1a8cd7d9a92f8b1"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_R15_FINAL_RECOVERY_ATOMIC_ROOTCAUSE_CORRECTION.json",
+      "sha256": "0ef3dd33fec62393cb5d878474241c88c55f60ee41acc8995884bcbe9e07b1c4"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_R19_POST_GRID_ROOT_SIGN_DYNAMIC_WORKERS_REP12_ROOTCAUSE_CORRECTION.json",
+      "sha256": "abce416c2eae34f2e379ad40a4524cd88fbb5ef6594d5a617c90103548f4c465"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_R20_1_PLANNER_TRANSFER_BOUND_CANONICALIZATION_ROOTCAUSE_CORRECTION.json",
+      "sha256": "911377e1955e3c66a76d43f7f8f764dc4f4d9f3d39b0de015a493e89c6a216c3"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_R20_2_NUMERICAL_REFINEMENT_CERTIFICATE_RETRY_ROOTCAUSE_CORRECTION.json",
+      "sha256": "8d9269882741e2459fc044ef96db3b6155301c47219ae423f706c19df6f2eee7"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_R20_M1_ISSUE4499_CONTINUOUS_COMMIT_ROOTCAUSE_CORRECTION.json",
+      "sha256": "b83ab13197bcf860a1b8ab28d174855d8eec6763a8c9d0f3ea8598cfe086f582"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_R3_ACTUAL_FAILURE_ROOTCAUSE_CORRECTION.json",
+      "sha256": "df48b36374da11216cbfcc1fd138d27be29bc2f44085170a729237cabb4b1139"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_R4_M4_ISSUE3518_ROOTCAUSE_CORRECTION.json",
+      "sha256": "e5e087c5c993d233f3b011d4bf40f1dff0f63bd6c050994be78f5f3267d69827"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_R5_M4_ADAPTIVE_GRID_RECOVERY_ROOTCAUSE_CORRECTION.json",
+      "sha256": "02a23906842f39cc573d594ab9b4a1dcb08911998e401005d3aa66e9526402eb"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_R7_M4_REGULATOR_SAFE_GRID_RECOVERY_ROOTCAUSE_CORRECTION.json",
+      "sha256": "978106fced793d7f49bef6a1033ece13439b6eb2115571dd0eb48297c42bfc02"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_R8_M4_TWO_STAGE_GRID_RECOVERY_ROOTCAUSE_CORRECTION.json",
+      "sha256": "91c5aff02441eb95043a7ec7dbe1d123d024b7a4b51acaed95fdeba0bbcedfc1"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_R9_M4_TAP_RISK_GRID_RECOVERY_ROOTCAUSE_CORRECTION.json",
+      "sha256": "05259c65859cba2f820f64a6bca57ce95cf6020c35c03caaa98216e535a9c6d0"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_SAFETY_RECOVERY_REFREEZE.json",
+      "sha256": "f2daeed9eb67bb38d6f0a8e9c49ef6aab529e4d4c1397791c272d8521a7f20a3"
+    },
+    {
+      "path": "authority/POST_STAGE15_W02_SENSITIVITY_KEYERROR_CORRECTION.json",
+      "sha256": "43ea9068aae25a1bd3e93d9400833d8bf04945164a334e61c7d4666f53c9739d"
+    },
+    {
       "path": "authority/RERUN_ELIGIBILITY_CONTRACT.json",
       "sha256": "40a1b8a3f9b6d8c99ade94bc9e8662fcee97a263d8adc3062e3273d58ae663b0"
     },
@@ -262,7 +465,7 @@
       "sha256": "a6b975c528667c0777b93495bfbbe450509341f6108c261ac1666ec55cdba2a6"
     }
   ],
-  "release_source_tree_sha256": "4298da009609c1bfcb04cb2e14b3555a993d50bb84775ca5be2cd86ee4afcef6",
+  "release_source_tree_sha256": "0049d761b4b8fb6de53482cc8fae32eb81204ac35e9e4566c12f9187e2e49deb",
   "schema_version": "mobileess.pre_w02.final_release_authorization.v1",
   "scientific_outcome_examined_for_authorization": false,
   "status": "AUTHORIZED_FOR_W02"
