@@ -1,0 +1,90 @@
+{
+  "schema_version": "mobileess.post_stage15.w02_sensitivity_keyerror_correction.v1",
+  "status": "PASS_KEYERROR_CORRECTION_AND_BOUNDED_REGRESSION",
+  "issued_utc": "2026-08-17T12:51:58Z",
+  "scope": "Common W02 M1-M4 Fresh Exact AC sensitivity-key recovery, R24 numerical refinement and clean R3 restart",
+  "root_cause": {
+    "classification": "SOFTWARE_RECOVERY_DEFECT_NOT_PROVEN_PHYSICAL_INFEASIBILITY",
+    "description": "The recovery cut iterated voltage rows whose keys were not guaranteed to exist in every finite-difference OpenDSS sample, then accessed the gradient map with an unguarded subscript. M1, M2 and M4 therefore stopped on the same KeyError before the bounded recovery state machine could finish.",
+    "common_error": "KeyError(('MESS01', 'P', ('83', 2)))",
+    "affected_r1_issues": {
+      "M1_PROPOSED_EVENT30_LOCAL_REPAIR_MOBILE": 3516,
+      "M2_FIXED30_MOBILE": 3516,
+      "M4_FIXED_LOCATION_ESS_MOBILITY_ABLATION": 3462
+    }
+  },
+  "corrections": [
+    "Build sensitivities only for voltage keys that are hard violations in the authoritative initial Fresh OpenDSS result.",
+    "Require each target voltage key to be present in the baseline and every finite-difference sample before forming a gradient.",
+    "Use guarded gradient lookup during cut assembly; each incomplete P or Q coordinate is fixed at its accepted base value before a zero coefficient is used, so the recovery feasible set is restricted rather than expanded.",
+    "Collect every feasible positive and negative finite-difference direction at the selected step rather than retaining only the last direction.",
+    "When and only when an otherwise accepted solution exceeds the frozen R24 numerical residual gate, re-optimize the same primary objective once with strict numerical settings; never relax the gate.",
+    "Do not relax voltage, P=550 kW, S=700 kVA, Fresh Exact OpenDSS, or no-future-actual constraints."
+  ],
+  "corrected_runner": {
+    "path": "runtime/W02_POLICY_EPISODE_RUNNER.py",
+    "sha256": "d14dd492c2e4f7e4a29861e77c0ef95be3ed389c9fa11d413fd559c0afcafd47"
+  },
+  "validator": {
+    "path": "tools/VALIDATE_W02_SENSITIVITY_KEYERROR_CORRECTION.py",
+    "sha256": "a49f822de7c46a87d2cac62394fe89dfb01e7de657b3efeb49df57c972cd7908",
+    "result": "/home/jaewon/mobile_ess_work/frozen_artifacts/PRE_W02_SENSITIVITY_KEYERROR_CORRECTION_CURRENT.json",
+    "result_sha256": "bdf6bd659a91f5c447bc65f63baa188c1cceedeb3ebb11ab759279e2976ca04d",
+    "status": "PASS"
+  },
+  "bounded_regression": {
+    "root": "/home/jaewon/mobile_ess_work/frozen_artifacts/POST15_R3_THREE_FAILURE_REGRESSION_R6_20260817",
+    "full_w02_executed": false,
+    "cases": [
+      {
+        "method": "M1",
+        "issue": 3516,
+        "status": "PASS_COMMITTED_FRESH_EXACT_AC",
+        "policy_issue_audit_sha256": "00497bd0109d8031cf463459088f94ae93f74783e501bfba279d0f25858a89b0",
+        "commit_marker_sha256": "e1dde4de21e1b1f30c01611c41167d88174be1d03c14c288e1d6065a9e7e786b"
+      },
+      {
+        "method": "M2",
+        "issue": 3516,
+        "status": "PASS_COMMITTED_FRESH_EXACT_AC",
+        "policy_issue_audit_sha256": "9663089f4c3c61414dd045d8428fc24821d1729aadec89c761fd364689109fc6",
+        "commit_marker_sha256": "cf9abc423379a07ba726a99e4cb606e2c6d0dca43175a88ceede309a4450ee5b"
+      },
+      {
+        "method": "M4",
+        "issue": 3462,
+        "status": "PASS_COMMITTED_FRESH_EXACT_AC",
+        "policy_issue_audit_sha256": "5606aecd69eed2468fb55d7acced25950febacef093fc83fc38c63a36fa4606b",
+        "commit_marker_sha256": "7e1945e39fc314709cdb88844f4d2970653966b191805b80f4daac759d714683"
+      }
+    ]
+  },
+  "r1_forensic_disposition": {
+    "delivery_root": "/home/jaewon/mobile_ess_work/frozen_artifacts/B_W02_4POLICY_ACTUAL_FINAL_R1",
+    "status": "PRESERVED_INCOMPLETE_MIXED_FAILURE_RUN",
+    "do_not_resume_as_final_episode": true,
+    "reason": "R1 contains committed prefixes produced by the pre-correction runner and must not be mixed with the corrected runner SHA."
+  },
+  "r2_forensic_disposition": {
+    "delivery_root": "/home/jaewon/mobile_ess_work/frozen_artifacts/B_W02_4POLICY_ACTUAL_FINAL_R2",
+    "status": "PRESERVED_INCOMPLETE_DUPLICATE_CANDIDATE_FAIL_CLOSED_RUN",
+    "do_not_resume_as_final_episode": true,
+    "failed_policy": "M4_FIXED_LOCATION_ESS_MOBILITY_ABLATION",
+    "failed_issue": 3462,
+    "reason": "R2 is source-bound to the prior runner SHA and cannot be mixed with the R3 recovery hardening."
+  },
+  "r3_execution_contract": {
+    "run_id": "B_W02_4POLICY_ACTUAL_FINAL_R3",
+    "canonical_pre_clean_start_required": true,
+    "source_binding_before_first_issue_required": true,
+    "full_w02_executed_by_this_correction": false
+  },
+  "scientific_contract": {
+    "objective_formula_changed": false,
+    "frozen_constraints_changed": false,
+    "hard_limits_relaxed": false,
+    "fresh_exact_opendss_remains_authoritative": true,
+    "future_actual_used": false,
+    "document_files_modified": false
+  }
+}

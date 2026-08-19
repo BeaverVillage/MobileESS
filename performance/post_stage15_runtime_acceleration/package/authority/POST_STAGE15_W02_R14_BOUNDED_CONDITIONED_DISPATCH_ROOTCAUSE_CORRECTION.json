@@ -1,0 +1,46 @@
+{
+  "schema_version": "mobileess.post_stage15.w02_r14_bounded_conditioned_dispatch.v1",
+  "status": "PASS_BOUNDED_CONDITIONED_DISPATCH_WITH_MIP_START",
+  "root_cause": {
+    "r13_actual_issue3583": "The Fresh-AC recovery added a valid linearized hard-safety cut, then solve_fast called model.reset() and launched the conditioned 216-binary MIQCP with no MIP start and an infinite time limit. The solver spent more than 377 seconds without an incumbent even though the preceding accepted solution already contained the integer search guidance.",
+    "design": "A complete feasible planner-copy solution is transferred by variable name after reset. Sequential AC-cut rounds reuse only the prior accepted integer choices so changed P/Q cuts can reconstruct continuous feasibility. Every conditioned solve has a 300-second hard time budget and still must satisfy the unchanged 3% operational gap and Fresh-AC hard gate.",
+    "power_scale_error": false,
+    "unsafe_action_committed": false
+  },
+  "correction": {
+    "runner": {"path": "runtime/W02_POLICY_EPISODE_RUNNER.py", "sha256": "d9159a4e81e8435d6e611e0301794637da9b2fb324940ed70311e16ea29f6007"},
+    "runner_sha256": "d9159a4e81e8435d6e611e0301794637da9b2fb324940ed70311e16ea29f6007",
+    "launcher_sha256": "21508221193fd9765d683926f6d132278122d13150d57c281b0587f12047b97b",
+    "run_id": "B_W02_4POLICY_ACTUAL_FINAL_R14",
+    "conditioned_dispatch_time_limit_seconds": 300.0,
+    "planner_complete_mip_start_after_reset": true,
+    "ac_recovery_prior_integer_start_after_reset": true,
+    "operational_gap_limit": 0.03,
+    "power_scale_kw_per_model_unit": 1000.0,
+    "power_scale_changed": false,
+    "hard_limits_relaxed": false,
+    "future_actual_used": false
+  },
+  "validation": {
+    "safety_validator_sha256": "0ea00516a2ccf50478db03f30845bd588788042153734b5a7406257e70a02172",
+    "safety_result_sha256": "11f55c245e460b137154061eab7b34886bd0c9a53125bca63bfb035d9d382deb",
+    "nine_boundary_validator_sha256": "5bc649e069e4526ece8c2422e726a5546ade111352eaa218a1435b5106010118",
+    "nine_boundary_result_sha256": "6900945f2ab973de698dfa8256a000c75e835dfe5495981d4de56fbc58bdc12c",
+    "r14_issue3583_policy_audit_sha256": "80555a2771733a428916c265780993b23746800c2e61e97116dd557d8038f134",
+    "r14_issue3583_recovery_evidence_sha256": "70e80369b806d3ee4433f0b08e6c041cbf3efe651ed4cd6f32c6e51a61b4641a",
+    "r14_issue3583_commit_marker_sha256": "a9dbb77c5131d74df7b6f0a6591fc6005d21f28c4075a4402baf5a42331e01b5",
+    "issue3583_initial_voltage_max_pu": 1.0578743914294677,
+    "issue3583_initial_line_loading_max_pu": 1.0560579321726125,
+    "issue3583_final_voltage_max_pu": 1.047857477888885,
+    "issue3583_final_line_loading_max_pu": 0.9968258289495496,
+    "issue3583_final_voltage_violations": 0,
+    "issue3583_final_line_violations": 0,
+    "issue3583_first_recovery_mip_start_kind": "PRIOR_ACCEPTED_INTEGER_ONLY",
+    "issue3583_first_recovery_solver_wall_seconds": 0.12758956497418694,
+    "actual_continuation_last_committed_issue": 3607,
+    "atomic_commit": true,
+    "full_W02_executed": false
+  },
+  "supersedes_for_current_runner_binding": ["authority/POST_STAGE15_W02_R13_M4_UNIFIED_ITERATIVE_RECOVERY_ROOTCAUSE_CORRECTION.json"],
+  "historical_authorities_remain_immutable": true
+}

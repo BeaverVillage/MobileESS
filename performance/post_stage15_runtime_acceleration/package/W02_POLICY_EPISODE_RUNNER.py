@@ -607,29 +607,6 @@ def fix_all_slow_from_model(loc:Mapping[str,Any],source_model)->dict[str,int]:
 def residual_integer_names(model)->list[str]:
  return [str(v.VarName) for v in model.getVars() if str(v.VType).upper() in {"B","I","S","N"} and float(v.UB)-float(v.LB)>1e-12]
 
-def numerical_constraint_offenders(model,limit:int=24)->list[dict[str,Any]]:
- """Return named residual evidence without changing the model or solution."""
- rows=[]
- for c in model.getConstrs():
-  try:
-   slack=float(c.Slack);sense=str(c.Sense)
-   # Gurobi Slack is RHS-LHS for every linear sense.
-   violation=(abs(slack) if sense=="=" else
-              (max(0.0,-slack) if sense=="<" else max(0.0,slack)))
-   if violation>0.0:rows.append({"kind":"LINEAR","name":str(c.ConstrName),
-                                 "sense":sense,"slack":slack,"violation":violation})
-  except Exception:continue
- for c in model.getQConstrs():
-  try:
-   slack=float(c.QCSlack);sense=str(c.QCSense)
-   # Gurobi QCSlack follows the same RHS-LHS convention.
-   violation=(abs(slack) if sense=="=" else
-              (max(0.0,-slack) if sense=="<" else max(0.0,slack)))
-   if violation>0.0:rows.append({"kind":"QUADRATIC","name":str(c.QCName),
-                                 "sense":sense,"slack":slack,"violation":violation})
-  except Exception:continue
- return sorted(rows,key=lambda r:float(r["violation"]),reverse=True)[:int(limit)]
-
 def solve_fast(model,cb,loc:Mapping[str,Any]|None=None)->dict[str,Any]:
  import gurobipy as gp
  if loc is not None and loc.get("_a_b10_tiebreak_constr") is not None:
@@ -820,8 +797,8 @@ def solve_fast(model,cb,loc:Mapping[str,Any]|None=None)->dict[str,Any]:
   refinement_mode="STRICT_1E9";refinement_solve_count=1
   # Some fixed-plan recursion rows are algebraically feasible only above 1e-9.
   # A strict polish can therefore prove its own model infeasible even when the
-  # original candidate merely has a marginal (>1e-6) residual.  Retry at a
-  # 2e-7 inner tolerance (five times stricter than the frozen 1e-6 gate) without forced
+  # original candidate merely has a marginal (>1e-6) bound residual.  Retry at
+  # a 5e-7 inner tolerance (stricter than the frozen 1e-6 gate) without forced
   # scaling, which can destabilize this QCP.  Acceptance below still requires
   # the unchanged R24 residual gates.
   try:strict_gap=float(model.MIPGap) if int(model.SolCount)>0 else None
@@ -830,14 +807,14 @@ def solve_fast(model,cb,loc:Mapping[str,Any]|None=None)->dict[str,Any]:
    (int(model.Status)==int(gp.GRB.OPTIMAL) or
     (strict_gap is not None and strict_gap<=0.03+1e-12)))
   if not strict_gap_pass:
-   model.Params.NumericFocus=3;model.Params.FeasibilityTol=2e-7
+   model.Params.NumericFocus=3;model.Params.FeasibilityTol=5e-7
    model.Params.IntFeasTol=5e-6;model.Params.OptimalityTol=1e-7
    model.Params.BarQCPConvTol=1e-9;model.Params.ScaleFlag=-1
    model.reset()
    for v in model.getVars():v.Start=refinement_start[str(v.VarName)]
    model.update();tt=time.monotonic()
    model.optimize(cb) if cb is not None else model.optimize()
-   refine_wall+=time.monotonic()-tt;refinement_mode="INNER_GATE_2E7_POLISH_AFTER_STRICT_NO_CERTIFICATE"
+   refine_wall+=time.monotonic()-tt;refinement_mode="INNER_GATE_5E7_POLISH_AFTER_STRICT_NO_CERTIFICATE"
    refinement_solve_count=2
   refined=abase.solver_quality(model);refined["wall_seconds"]=wall+refine_wall
   refined={k:(None if isinstance(v,float) and not math.isfinite(v) else v) for k,v in refined.items()}
@@ -849,8 +826,7 @@ def solve_fast(model,cb,loc:Mapping[str,Any]|None=None)->dict[str,Any]:
    raise RuntimeError(f"R24_NUMERICAL_REFINEMENT_GAP_FAILED status={model.Status} gap={refined_gap}")
   after={k:refined.get(k) for k in numerical_limits}
   if any(float(after[k])>limit for k,limit in numerical_limits.items()):
-   constraint_offenders=numerical_constraint_offenders(model)
-   raise RuntimeError(f"R24_NUMERICAL_REFINEMENT_GATE_FAILED before={before} after={after} constraint_offenders={constraint_offenders}")
+   raise RuntimeError(f"R24_NUMERICAL_REFINEMENT_GATE_FAILED before={before} after={after}")
   q=refined;q["conditional_numerical_refinement"]={
    "status":"PASS","triggered":True,"solve_count":refinement_solve_count,"same_primary_objective":True,
    "hard_gate_relaxed":False,"complete_feasible_mip_start_transferred":True,
@@ -878,15 +854,7 @@ def solve_fast(model,cb,loc:Mapping[str,Any]|None=None)->dict[str,Any]:
 
 AC_RECOVERY_MAX_CUT_ROUNDS=10
 GRID_HARD_RISK_FULL_REPLAN_MAX=1
-# The ordinary exact-state relinearization uses at most ten candidates.  A
-# discontinuous regulator can leave that local sequence oscillating between
-# voltage and phase-current states even when the unchanged PCS feasible set
-# contains a Fresh-AC hard pass.  Reserve a separate bounded budget for the
-# deterministic maximum-P/Q tap search below plus the same-PRE full replan.
-FRESH_AC_PRODUCTION_CANDIDATE_MAX=192
-AC_RECOVERY_POST_TAP_RESERVED_CANDIDATES=48
-AC_RECOVERY_COORDINATE_SEARCH_CANDIDATE_MAX=48
-AC_RECOVERY_BALANCED_Q_SEARCH_CANDIDATE_MAX=24
+FRESH_AC_PRODUCTION_CANDIDATE_MAX=11
 # The production-candidate contract counts the initial dispatch, every Fresh-AC
 # correction candidate, and the one same-PRE H54 full-replan candidate.  Using
 # all ten correction rounds consumed 11/11 candidates and made the intended
@@ -903,11 +871,6 @@ AC_RECOVERY_LOCAL_P_TRUST_REGION_KW=10.0
 AC_RECOVERY_LOCAL_Q_TRUST_REGION_KVAR=10.0
 AC_RECOVERY_SEVERE_VOLTAGE_THRESHOLD_PU=2.0e-3
 AC_RECOVERY_SEVERE_VOLTAGE_ONLY_THRESHOLD_PU=5.0e-4
-# A large line/transformer-current overload needs the same full active-power
-# authority even when the simultaneous voltage miss is numerically small.
-# Classifying only by voltage severity used six of nine exact candidates merely
-# walking P by 100 kW and left too few regulator-state relinearizations for Q.
-AC_RECOVERY_SEVERE_OVERLOAD_THRESHOLD_PU=2.0e-2
 # Severe voltage is a hard-safety event: permit the complete -550..+550 kW PCS
 # active-power span, while physical PCS/SOC constraints and the bounded anchor
 # sequence still bound the accepted correction.
@@ -1114,24 +1077,8 @@ def capture_exact_ac_observability(grid24,issue_out:Path,issue:int,exact_summary
   "schema_version":"K9H7_OBSERVABILITY_V1.exact_ac.v1","issue_step":int(issue),
   "summary":dict(exact_summary),"bus_phase_voltage":voltage,
   "line_summary":[dict(x) for x in line_summary],"line_terminal_phase":[dict(x) for x in line_terminal],
- "transformer_terminal":[dict(x) for x in transformer],"transformer_terminal_current":transformer_current,
+  "transformer_terminal":[dict(x) for x in transformer],"transformer_terminal_current":transformer_current,
   "hard_limits_relaxed":False,"future_actual_used":False})
-
-def _reg1a_causal_equivalent_kva_limit(observability_path:Path)->float|None:
- """Convert one preceding PASS exact-AC state into a causal 3-phase envelope."""
- if not observability_path.is_file():return None
- data=load_json(observability_path)
- if data.get("summary",{}).get("hard_constraint_pass") is not True:return None
- rows=[r for r in data.get("transformer_terminal_current",[])
-       if str(r.get("transformer","")).lower()=="reg1a" and int(r.get("terminal",0))==1]
- if len(rows)!=3:return None
- phase_kva=[math.hypot(float(r["p_kw"]),float(r["q_kvar"])) for r in rows]
- max_current_pu=max(float(r["loading_pu"]) for r in rows)
- if not math.isfinite(max_current_pu) or max_current_pu<=0:return None
- # Aggregate apparent power at which the preceding causal phase distribution
- # would put its largest phase at 1.0 pu.  The 0.5% inward guard absorbs small
- # forecast drift; the unchanged Fresh-AC nameplate remains final authority.
- return min(5000.0,0.995*sum(phase_kva)/max_current_pu)
 
 def _first_number(row:Mapping[str,Any],names:tuple[str,...])->float|None:
  for name in names:
@@ -1278,12 +1225,7 @@ def _refresh_solution_after_ac_resolve(loc:Mapping[str,Any],science,sol:dict[str
 
 def exact_ac_cut_recovery(science,context:dict[str,Any],issue_runtime:dict[str,Any],
                           b4,grid24,scope,gstatic,issue,running,sol,issue_out,initial_ex):
- """Bounded Fresh-AC correction around the current same-PRE plan.
-
- A mobile-policy failure may consume its single full H54 replan, then use only
- the remaining global Fresh-AC candidate budget for an H0 safety projection.
- The full-replan count, scientific limits and causal data authority stay fixed.
- """
+ """One bounded P/Q correction before, and never after, one same-PRE Full Replan."""
  import gurobipy as gp
  loc=context.get("loc");cb=context.get("cb")
  if not isinstance(loc,dict) or cb is None:raise RuntimeError("GRID_CORRECTION_CONTEXT_MISSING")
@@ -1291,9 +1233,20 @@ def exact_ac_cut_recovery(science,context:dict[str,Any],issue_runtime:dict[str,A
  line_rows=_line_rows_from_live_opendss(grid24)
  transformer_current_rows=_transformer_current_rows_from_live_opendss()
  initial_candidate=_record_recovery_candidate(loc,science,issue_runtime,Path(issue_out),
- "FULL_REPLAN" if issue_runtime.get("grid_hard_risk_full_replan_retry",False) else "INITIAL",
+  "FULL_REPLAN" if issue_runtime.get("grid_hard_risk_full_replan_retry",False) else "INITIAL",
   initial_ex,voltage_rows)
- after_full_replan=bool(issue_runtime.get("grid_hard_risk_full_replan_retry",False))
+ if issue_runtime.get("grid_hard_risk_full_replan_retry",False):
+  record={
+   "schema_version":"mobileess.post_stage15.exact_ac_closed_loop.v2",
+   "status":"FAIL_CLOSED_AFTER_SINGLE_SAME_PRE_H54_FULL_REPLAN",
+   "issue":int(issue),"max_cut_rounds":AC_RECOVERY_MAX_CUT_ROUNDS,
+   "cut_count":sum(1 for x in issue_runtime.get("fresh_ac_candidate_attempts",[]) if x.get("stage")=="AC_CORRECTION"),
+   "same_pre_h54_full_replan_limit":GRID_HARD_RISK_FULL_REPLAN_MAX,
+   "cut_after_full_replan":False,"failed_candidate":initial_candidate,
+   "hard_limits_relaxed":False,"future_actual_used":False,"unsafe_action_committed":False}
+  issue_runtime["ac_safety_recovery"]=record
+  jw(Path(issue_out)/"A_B10_EXACT_AC_CLOSED_LOOP_RECOVERY.json",record)
+  raise RuntimeError("GRID_HARD_RISK_FULL_REPLAN_RETRY_FAILED")
  attempts=[{"round":0,"candidate":initial_candidate,"exact_ac":dict(initial_ex),
             "violating_voltage_rows":[r for r in voltage_rows if r["hard_violation"]],
             "violating_line_rows":[r for r in line_rows if r["hard_violation"]],
@@ -1318,10 +1271,6 @@ def exact_ac_cut_recovery(science,context:dict[str,Any],issue_runtime:dict[str,A
  initial_voltage_severity_pu=max(
   [max(0.0,float(r["voltage_pu"])-1.05,0.95-float(r["voltage_pu"])) for r in initial_voltage_violations],
   default=0.0)
- initial_overload_severity_pu=max(
-  [max(0.0,float(r["loading_pu"])-1.0)
-   for r in initial_line_violations+initial_transformer_current_violations],
-  default=0.0)
  # Severe voltage events can cross several discrete regulator-tap boundaries.
  # Use a bounded sequential exact-state relinearization instead of treating
  # any one local model as globally valid.
@@ -1333,66 +1282,9 @@ def exact_ac_cut_recovery(science,context:dict[str,Any],issue_runtime:dict[str,A
  # this policy, reproduces the same economic H0 dispatch.  Spend the tenth slot
  # on a distinct P/Q correction instead.  Mobile policies reserve that slot for
  # the one same-PRE H54 full replan.
- remaining_candidate_budget=max(0,FRESH_AC_PRODUCTION_CANDIDATE_MAX-
-                                len(issue_runtime.get("fresh_ac_candidate_attempts",[])))
- recovery_round_limit=min(
-  (AC_RECOVERY_MAX_CUT_ROUNDS if fixed_location_recovery
-   else AC_RECOVERY_PRE_REPLAN_CUT_ROUNDS),remaining_candidate_budget)
+ recovery_round_limit=(AC_RECOVERY_MAX_CUT_ROUNDS if fixed_location_recovery
+                       else AC_RECOVERY_PRE_REPLAN_CUT_ROUNDS)
  model=loc["m"]
- def exact_candidate_score(exact):
-  """Order unsafe exact-AC points by distance to the unchanged hard box."""
-  excesses=(max(0.0,float(exact.get("voltage_max_pu",9.0))-1.05),
-            max(0.0,0.95-float(exact.get("voltage_min_pu",-9.0))),
-            max(0.0,float(exact.get("line_max_loading_pu",9.0))-1.0),
-            max(0.0,float(exact.get("transformer_max_current_loading_pu",9.0))-1.0),
-            max(0.0,float(exact.get("transformer_max_kva_loading_pu",9.0))-1.0))
-  authority_failure=int(not exact.get("converged",False) or exact.get("command_error_count",0)
-                        or not exact.get("root_sign_pass",False))
-  violation_count=sum(int(exact.get(k,0) or 0) for k in
-   ("voltage_violation_count","line_violation_count","transformer_current_violation_count",
-    "transformer_kva_violation_count"))
-  return (authority_failure,max(excesses),sum(excesses),violation_count)
- initial_controls=_ac_h0_controls(loc,science)
- best_recovery_bundle={
-  "score":exact_candidate_score(initial_ex),"exact":dict(initial_ex),
-  "controls":[dict(c) for c in initial_controls],
-  "first":[dict(row) for row in _ac_firstmess(loc,science,initial_controls)],
-  "plan":[dict(row) for row in _ac_current_plan(loc)],
-  "voltage_rows":[dict(row) for row in voltage_rows],
-  "line_rows":[dict(row) for row in line_rows],
-  "transformer_rows":[dict(row) for row in transformer_current_rows],
-  "stage":"INITIAL"}
- # Materialize the accepted incumbent above before removing any row: Gurobi
- # invalidates Var.X after model.remove()/update().  The nominal controller
- # holds four consecutive five-minute PCS support intervals at H1.  Once Fresh AC has
- # proved H0 unsafe, release only that H1 inward reserve for corrective
- # dispatch.  The unchanged 440 kWh physical floor remains in force at every
- # horizon step.
- recovery_energy_reserve_rows=list(loc.get("_a_b10_pcs_energy_reserve_rows",[]) or [])
- if recovery_energy_reserve_rows:
-  model.remove(recovery_energy_reserve_rows);model.update()
-  loc["_a_b10_pcs_energy_reserve_rows"]=[]
-  loc["_a_b10_pcs_energy_reserve_h1_rows"]=[]
- issue_runtime["pcs_h1_energy_reserve_recovery_release"]={
-  "status":"RELEASED_AFTER_FRESH_AC_FAILURE" if recovery_energy_reserve_rows else "NO_RESERVE_ROWS_TO_RELEASE",
-  "released_row_count":len(recovery_energy_reserve_rows),
-  "released_steps":[1],"h5_reserve_installed":False,
-  "release_semantics":"OPERATING_RESERVE_SPEND_ALLOWED_ONLY_AFTER_FRESH_AC_FAILURE",
-  "physical_soc_floor_kwh_unchanged":ENERGY_PHYSICAL_FLOOR_KWH,
-  "power_scale_changed":False,"hard_grid_limits_relaxed":False,"future_actual_used":False}
- def remember_best_exact_candidate(exact,stage):
-  nonlocal best_recovery_bundle
-  score=exact_candidate_score(exact)
-  if score>=best_recovery_bundle["score"]:return
-  controls_now=_ac_h0_controls(loc,science)
-  best_recovery_bundle={
-   "score":score,"exact":dict(exact),"controls":[dict(c) for c in controls_now],
-   "first":[dict(row) for row in _ac_firstmess(loc,science,controls_now)],
-   "plan":[dict(row) for row in _ac_current_plan(loc)],
-   "voltage_rows":[dict(row) for row in voltage_rows],
-   "line_rows":[dict(row) for row in line_rows],
-   "transformer_rows":[dict(row) for row in transformer_current_rows],
-   "stage":str(stage)}
  def solve_recovery_anchor():
   """Accept a feasible incumbent for the artificial low-stress selector.
 
@@ -1460,8 +1352,7 @@ def exact_ac_cut_recovery(science,context:dict[str,Any],issue_runtime:dict[str,A
   root_recovery_round_limit=(AC_RECOVERY_MAX_CUT_ROUNDS if fixed_location_recovery
                              else AC_RECOVERY_PRE_REPLAN_CUT_ROUNDS)
   for round_no in range(1,root_recovery_round_limit+1):
-   controls=([dict(c) for c in initial_controls] if round_no==1
-             else _ac_h0_controls(loc,science))
+   controls=_ac_h0_controls(loc,science)
    if not controls:raise RuntimeError("ROOT_SIGN_CORRECTION_NO_CONTROLLABLE_H0_PCS")
    root_power=_root_power_from_live_opendss()
    base_total_p_kw=sum(float(c["p_kw"]) for c in controls)
@@ -1529,32 +1420,19 @@ def exact_ac_cut_recovery(science,context:dict[str,Any],issue_runtime:dict[str,A
   jw(Path(issue_out)/"A_B10_EXACT_AC_CLOSED_LOOP_RECOVERY.json",record)
   raise RuntimeError("GRID_CORRECTION_EXHAUSTED_ROOT_SIGN")
  initial_control_point={str(c["mess_id"]):(float(c["p_kw"]),float(c["q_kvar"]))
-                        for c in initial_controls}
+                        for c in _ac_h0_controls(loc,science)}
  overload_endpoint=(initial_control_point if (not initial_voltage_violations
                     and (initial_line_violations or initial_transformer_current_violations)) else None)
  voltage_endpoint=(initial_control_point if (initial_voltage_violations
                    and not initial_line_violations and not initial_transformer_current_violations) else None)
- # The terminal low-stress anchors were introduced for voltage/tap-only
- # oscillation.  They are not a safe candidate selector for an event that
- # started with a line or transformer-current overload: driving every PCS
- # toward zero can restore the very upstream current that the preceding exact
- # relinearizations were monotonically relieving.  Keep all bounded rounds on
- # the measured P/Q sensitivities for those overload-origin events.  Fresh AC
- # remains the physical acceptance authority and no hard limit is relaxed.
- low_stress_anchor_eligible=not (initial_line_violations or initial_transformer_current_violations)
  complementary_bracket_steps=0
  round_constraint_refs=[]
  previous_grid_score=(len(initial_voltage_violations)+len(initial_line_violations)+len(initial_transformer_current_violations),
                       initial_voltage_severity_pu)
  ex=initial_ex
  for round_no in range(1,recovery_round_limit+1):
-  if round_no==1:
-   controls=[dict(c) for c in initial_controls]
-   first=[dict(row) for row in best_recovery_bundle["first"]]
-   plan=[dict(row) for row in best_recovery_bundle["plan"]]
-  else:
-   controls=_ac_h0_controls(loc,science)
-   first=_ac_firstmess(loc,science,controls);plan=_ac_current_plan(loc)
+  controls=_ac_h0_controls(loc,science)
+  first=_ac_firstmess(loc,science,controls);plan=_ac_current_plan(loc)
   # Capture the accepted previous-round solution before removing its local
   # approximation rows: model.remove() invalidates Gurobi X attributes.
   if round_constraint_refs:
@@ -1725,8 +1603,7 @@ def exact_ac_cut_recovery(science,context:dict[str,Any],issue_runtime:dict[str,A
    p_trust_radius=AC_RECOVERY_SEVERE_VOLTAGE_P_TRUST_REGION_KW
    q_trust_radius=AC_RECOVERY_POST_LINE_Q_TRUST_REGION_KVAR
   elif line_violations or transformer_current_violations:
-   if (initial_voltage_severity_pu>AC_RECOVERY_SEVERE_VOLTAGE_THRESHOLD_PU
-       or initial_overload_severity_pu>AC_RECOVERY_SEVERE_OVERLOAD_THRESHOLD_PU):
+   if initial_voltage_severity_pu>AC_RECOVERY_SEVERE_VOLTAGE_THRESHOLD_PU:
     trust_profile="SEVERE_VOLTAGE_LINE"
     p_trust_radius=AC_RECOVERY_SEVERE_LINE_P_TRUST_REGION_KW
     q_trust_radius=AC_RECOVERY_SEVERE_LINE_Q_TRUST_REGION_KVAR
@@ -2060,9 +1937,7 @@ def exact_ac_cut_recovery(science,context:dict[str,Any],issue_runtime:dict[str,A
       linearized_guidance_slack_fallback=True
       low_stress_final_anchor=True
       low_stress_anchor_trigger="INFEASIBLE_APPROXIMATION_LAYER"
-   if (low_stress_anchor_eligible
-       and round_no in {recovery_round_limit-2,recovery_round_limit-1}
-       and not low_stress_final_anchor):
+   if round_no in {recovery_round_limit-2,recovery_round_limit-1} and not low_stress_final_anchor:
     # Two exact-state guided safety anchors are reserved before the final
     # topology-agnostic zero-effort anchor.  The first can expose a regulator
     # tap state; if Fresh AC rejects it, the second is relinearized at that new
@@ -2083,9 +1958,7 @@ def exact_ac_cut_recovery(science,context:dict[str,Any],issue_runtime:dict[str,A
     low_stress_final_anchor=True
     low_stress_anchor_trigger=("GUIDED_ANCHOR_STAGE_1" if round_no==recovery_round_limit-2
                                else "GUIDED_ANCHOR_STAGE_2_RELINEARIZED")
-   if (low_stress_anchor_eligible
-       and round_no==recovery_round_limit
-       and not low_stress_final_anchor):
+   if round_no==recovery_round_limit and not low_stress_final_anchor:
     # The final candidate is the third exact-state guided low-stress anchor.
     # Remove the local trust box, but retain the cuts relinearized at round 9's
     # Fresh-AC state.  Dropping those newest cuts produced a zero-PCS point that
@@ -2149,7 +2022,6 @@ def exact_ac_cut_recovery(science,context:dict[str,Any],issue_runtime:dict[str,A
   voltage_rows=_voltage_rows_from_live_opendss(grid24)
   line_rows=_line_rows_from_live_opendss(grid24)
   transformer_current_rows=_transformer_current_rows_from_live_opendss()
-  remember_best_exact_candidate(ex,"AC_CORRECTION")
   recovery_candidate=_record_recovery_candidate(loc,science,issue_runtime,Path(issue_out),
    "AC_CORRECTION",ex,voltage_rows)
   attempts.append({"round":round_no,"cuts":cuts,"finite_difference_samples":fd_records,"trust_region":trust_region,
@@ -2198,794 +2070,7 @@ def exact_ac_cut_recovery(science,context:dict[str,Any],issue_runtime:dict[str,A
    made_grid_progress=(current_grid_score[1]<previous_grid_score[1]-1.0e-8)
   if not made_grid_progress:
    break
- previous_grid_score=current_grid_score
- # A regulator tap is discrete, so the local finite-difference cuts above can
- # alternate between two exact states without ever entering the feasible Q
- # region.  For any controllable voltage/current event, perform one bounded,
- # deterministic
- # nonlinear exploration of the *unchanged* H0 PCS feasible set before giving
- # up.  First maximize aggregate active injection under every original model,
- # PCS, SOC and mobility constraint.  Then test a small outcome-independent
- # bank of normalized reactive-power directions at that anchor.  These rows
- # generate candidates only: every point is still accepted solely by a fresh
- # OpenDSS solve with the original voltage/current/kVA/root hard limits.
- if initial_voltage_violations or initial_line_violations or initial_transformer_current_violations:
-  # Read the final round incumbent before removing its approximation rows:
-  # Gurobi invalidates every X attribute as soon as rows are removed.
-  controls=_ac_h0_controls(loc,science)
-  if round_constraint_refs:
-   model.remove(round_constraint_refs);model.update();round_constraint_refs=[]
-  if controls:
-   max_p_objective=gp.LinExpr(0.0)
-   for c in controls:max_p_objective-=c["p_expr"]/scale
-   model.setObjective(max_p_objective,gp.GRB.MINIMIZE);model.update()
-   try:
-    max_p_solve=solve_recovery_anchor()
-    anchor_controls=_ac_h0_controls(loc,science)
-    anchor_p={str(c["mess_id"]):float(c["p_kw"]) for c in anchor_controls}
-    # Materialize the most recent feasible incumbent before any candidate row
-    # is removed or a later solve can return infeasible.  Gurobi then clears
-    # Var.X, but these numeric P/Q, first-step and routing values remain valid
-    # as the causal base point for the next exact-AC relinearization.
-    last_feasible_controls=[dict(c) for c in anchor_controls]
-    last_feasible_first=_ac_firstmess(loc,science,last_feasible_controls)
-    last_feasible_plan=_ac_current_plan(loc)
-    # The H0 lossless LinDistFlow projection uses a fixed regulator ratio and
-    # can exclude a point that the current discrete-tap Fresh AC proves safe.
-    # Its own IIS identifies only H0 p/q balances and voltage-drop rows.  Drop
-    # that H0 candidate-generation projection after the maximum-P anchor; keep
-    # every PCS/SOC/mobility/service-kVA constraint and all H1..H53 planning
-    # rows.  Fresh OpenDSS below replaces (and is stronger than) the removed H0
-    # approximation for voltage, line current, transformer current/kVA and
-    # root sign.  No physical limit is changed or softened.
-    h0_grid_projection_prefixes=("du_line_0_",)
-    h0_grid_projection_refs=[row for row in model.getConstrs()
-                             if str(row.ConstrName).startswith(h0_grid_projection_prefixes)]
-    h0_grid_projection_names=[str(row.ConstrName) for row in h0_grid_projection_refs]
-    if h0_grid_projection_refs:model.remove(h0_grid_projection_refs);model.update()
-    issue_runtime["h0_exact_ac_candidate_projection_override"]={
-     "status":"H0_FIXED_TAP_LINDISTFLOW_REPLACED_BY_FRESH_EXACT_AC_GATE",
-     "removed_linear_row_count":len(h0_grid_projection_refs),
-     "removed_row_prefixes":list(h0_grid_projection_prefixes),
-     "removed_row_names_sha256":hashlib.sha256("\n".join(sorted(h0_grid_projection_names)).encode()).hexdigest(),
-     "h0_power_balance_rows_removed":0,"h0_line_thermal_rows_removed":0,
-     "future_horizon_grid_rows_removed":0,"pcs_soc_mobility_service_kva_rows_removed":0,
-     "fresh_exact_opendss_required":True,"hard_limits_relaxed":False,
-     "future_actual_used":False}
-    # The first nonzero pattern is a rounded low-discrepancy direction; cyclic
-    # rotations, sign reversals and two balanced directions make the search
-    # independent of a particular MESS/site identity while keeping it bounded.
-    seed_patterns=[
-     (0.0,0.0,0.0,0.0),(0.0,-1.0/3.0,-0.60,-5.0/7.0),
-     (0.20,0.30,0.45,-0.70),(0.20,0.30,0.30,-0.70),
-     (0.0,0.40,0.30,-0.60),
-     (0.40,0.30,-0.60,0.0),
-     (-0.70,-0.80,0.40,-0.97),(0.75,-0.50,0.25,-0.25),
-     (-0.50,0.75,-0.25,0.25)]
-    normalized_patterns=[]
-    def append_pattern(values):
-     values=list(values[:len(anchor_controls)])
-     while len(values)<len(anchor_controls):
-      values.append(((-1.0) if len(values)%2 else 1.0)*(0.20+0.10*(len(values)%5)))
-     key=tuple(round(float(value),9) for value in values)
-     if key not in normalized_patterns:normalized_patterns.append(key)
-    for seed in seed_patterns:append_pattern(seed)
-    # Deterministic low-discrepancy coverage avoids accumulating one-off
-    # patterns for successive regulator states.  No randomness, future actual,
-    # or outcome-dependent mutation is used.
-    def radical_inverse(index,base):
-     value=0.0;factor=1.0/float(base)
-     while index:
-      index,remainder=divmod(index,base);value+=float(remainder)*factor;factor/=float(base)
-     return value
-    halton_bases=(2,3,5,7,11,13,17,19)
-    for halton_index in range(1,49):
-     append_pattern([2.0*radical_inverse(halton_index,base)-1.0
-                     for base in halton_bases[:len(anchor_controls)]])
-    for seed in seed_patterns:
-     values=list(seed[:len(anchor_controls)])
-     while len(values)<len(anchor_controls):
-      values.append(((-1.0) if len(values)%2 else 1.0)*(0.20+0.10*(len(values)%5)))
-     rotations=[values[index:]+values[:index] for index in range(max(1,len(values)))]
-     for rotated in rotations:
-      for signed in (rotated,[-value for value in rotated]):
-       key=tuple(round(float(value),9) for value in signed)
-       if key not in normalized_patterns:normalized_patterns.append(key)
-    # Zero and the primary low-discrepancy direction are deliberately first;
-    # cap the bank so the production Fresh-AC bound remains auditable.
-    normalized_patterns=normalized_patterns[:64]
-    tap_search_refs=[]
-    tap_voltage_only_points=[]
-    tap_overload_only_points=[]
-    coordinate_search_executed=False
-    coordinate_search_candidate_count=0
-    balanced_q_search_candidate_count=0
-    def select_best_relinearization_base():
-     nonlocal ex,voltage_rows,line_rows,transformer_current_rows
-     nonlocal last_feasible_controls,last_feasible_first,last_feasible_plan
-     last_feasible_controls=[dict(c) for c in best_recovery_bundle["controls"]]
-     last_feasible_first=[dict(row) for row in best_recovery_bundle["first"]]
-     last_feasible_plan=[dict(row) for row in best_recovery_bundle["plan"]]
-     ex=dict(best_recovery_bundle["exact"])
-     voltage_rows=[dict(row) for row in best_recovery_bundle["voltage_rows"]]
-     line_rows=[dict(row) for row in best_recovery_bundle["line_rows"]]
-     transformer_current_rows=[dict(row) for row in best_recovery_bundle["transformer_rows"]]
-     issue_runtime["post_tap_relinearization_base"]={
-      "stage":best_recovery_bundle["stage"],"score":list(best_recovery_bundle["score"]),
-      "hard_limits_relaxed":False,"future_actual_used":False}
-    def exact_coordinate_search():
-     """Bounded coordinate search around the closest causal exact-AC point."""
-     nonlocal tap_search_refs,ex,voltage_rows,line_rows,transformer_current_rows
-     nonlocal coordinate_search_executed,coordinate_search_candidate_count,balanced_q_search_candidate_count
-     if coordinate_search_executed:return False
-     coordinate_search_executed=True
-     if tap_search_refs:
-      model.remove(tap_search_refs);model.update();tap_search_refs=[]
-     for sweep in range(1,3):
-      base_score=best_recovery_bundle["score"]
-      base_controls=[dict(c) for c in best_recovery_bundle["controls"]]
-      for step in (5.0,10.0,25.0,50.0):
-       for ci,control in enumerate(base_controls):
-        for coordinate in ("P","Q"):
-         for sign in (-1.0,1.0):
-          if (len(issue_runtime.get("fresh_ac_candidate_attempts",[]))
-              >= FRESH_AC_PRODUCTION_CANDIDATE_MAX-AC_RECOVERY_POST_TAP_RESERVED_CANDIDATES
-              or coordinate_search_candidate_count>=AC_RECOVERY_COORDINATE_SEARCH_CANDIDATE_MAX):
-           break
-          mid=str(control["mess_id"]);target_p=float(control["p_kw"]);target_q=float(control["q_kvar"])
-          if coordinate=="P":target_p+=sign*step
-          else:target_q+=sign*step
-          if (abs(target_p)>PCS_ACTIVE_LIMIT_KW+1e-8
-              or target_p*target_p+target_q*target_q>PCS_APPARENT_LIMIT_KVA**2+1e-6):
-           continue
-          target_by_mid={str(c["mess_id"]):(float(c["p_kw"]),float(c["q_kvar"]))
-                         for c in base_controls}
-          target_by_mid[mid]=(target_p,target_q)
-          refs=[]
-          for cj,c in enumerate(base_controls):
-           p_target,q_target=target_by_mid[str(c["mess_id"])]
-           refs.append(model.addLConstr(c["p_expr"]/scale==p_target/scale,
-            name=f"a_b10_exact_coordinate_p_{sweep}_{int(step)}_{ci}_{coordinate}_{int(sign)}_{cj}"))
-           refs.append(model.addLConstr(c["q_expr"]/scale==q_target/scale,
-            name=f"a_b10_exact_coordinate_q_{sweep}_{int(step)}_{ci}_{coordinate}_{int(sign)}_{cj}"))
-          model.setObjective(loc["econ"],gp.GRB.MINIMIZE);model.update()
-          try:coordinate_solve=solve_recovery_anchor()
-          except RuntimeError as coordinate_exc:
-           model.remove(refs);model.update()
-           attempts.append({"round":recovery_round_limit+len(search_specs)+60+sweep,
-            "recovery_stage":"EXACT_AC_COORDINATE_SEARCH","sweep":sweep,"step_kw_kvar":step,
-            "coordinate":coordinate,"sign":sign,"changed_mess_id":mid,
-            "fast_solver":{"status":"NO_FEASIBLE_INCUMBENT","error":repr(coordinate_exc)},
-            "exact_ac":None,"hard_limits_relaxed":False,"future_actual_used":False})
-           continue
-          coordinate_projections=_refresh_solution_after_ac_resolve(loc,science,sol)
-          quality=abase.solver_quality(model)
-          if any(float(quality.get(k,float("inf")))>lim for k,lim in
-                 (("ConstrVio",1e-6),("BoundVio",1e-6),("IntVio",1e-5))):
-           raise RuntimeError(f"EXACT_AC_COORDINATE_SEARCH_NUMERICAL_GATE_FAILED {quality}")
-          issue_runtime["fresh_ac_capture_stage"]="EXACT_AC_COORDINATE_SEARCH"
-          coordinate_ex=science.exact24_candidate(
-           b4,grid24,scope,gstatic,issue,running,sol["plan"],sol["firstmess"])
-          coordinate_search_candidate_count+=1
-          voltage_rows=_voltage_rows_from_live_opendss(grid24)
-          line_rows=_line_rows_from_live_opendss(grid24)
-          transformer_current_rows=_transformer_current_rows_from_live_opendss()
-          remember_best_exact_candidate(coordinate_ex,"EXACT_AC_COORDINATE_SEARCH")
-          coordinate_candidate=_record_recovery_candidate(
-           loc,science,issue_runtime,Path(issue_out),"EXACT_AC_COORDINATE_SEARCH",coordinate_ex,voltage_rows)
-          attempts.append({"round":recovery_round_limit+len(search_specs)+60+sweep,
-           "recovery_stage":"EXACT_AC_COORDINATE_SEARCH","sweep":sweep,"step_kw_kvar":step,
-           "coordinate":coordinate,"sign":sign,"changed_mess_id":mid,
-           "fast_solver":coordinate_solve,"pcs_numerical_boundary_projection":coordinate_projections,
-           "candidate":coordinate_candidate,"exact_ac":dict(coordinate_ex),
-           "hard_limits_relaxed":False,"future_actual_used":False})
-          if coordinate_ex.get("hard_constraint_pass") is True:
-           ex=coordinate_ex
-           record={"schema_version":"mobileess.post_stage15.exact_ac_closed_loop.v3",
-            "status":"PASS_RECOVERED_EXACT_AC_COORDINATE_SEARCH","issue":int(issue),
-            "selected_sweep":sweep,"selected_step_kw_kvar":step,"selected_coordinate":coordinate,
-            "selected_sign":sign,"selected_mess_id":mid,"attempts":attempts,
-            "hard_limits_relaxed":False,"future_actual_used":False}
-           issue_runtime["ac_safety_recovery"]=record
-           jw(Path(issue_out)/"A_B10_EXACT_AC_CLOSED_LOOP_RECOVERY.json",record)
-           return True
-          model.remove(refs);model.update()
-          if (best_recovery_bundle["score"][0]==0
-              and best_recovery_bundle["score"][1]<=0.01):
-           issue_runtime["coordinate_search_early_stop_for_exact_relinearization"]={
-            "stage":"EXACT_AC_COORDINATE_SEARCH",
-            "score":list(best_recovery_bundle["score"]),
-            "candidate_count":len(issue_runtime.get("fresh_ac_candidate_attempts",[])),
-            "hard_limits_relaxed":False,"future_actual_used":False}
-           return False
-      if best_recovery_bundle["score"]>=base_score:break
-     # Current and voltage can move in opposite directions under a single-Q
-     # perturbation.  Redistribute Q between two PCS while holding aggregate Q
-     # constant to expose the missing coupled direction.
-     base_controls=[dict(c) for c in best_recovery_bundle["controls"]]
-     for step in (5.0,10.0,25.0,50.0):
-      for left in range(len(base_controls)):
-       for right in range(left+1,len(base_controls)):
-        for sign in (-1.0,1.0):
-         if (len(issue_runtime.get("fresh_ac_candidate_attempts",[]))
-             >= FRESH_AC_PRODUCTION_CANDIDATE_MAX-AC_RECOVERY_POST_TAP_RESERVED_CANDIDATES
-             or balanced_q_search_candidate_count>=AC_RECOVERY_BALANCED_Q_SEARCH_CANDIDATE_MAX):
-          return False
-         target_by_mid={str(c["mess_id"]):(float(c["p_kw"]),float(c["q_kvar"]))
-                        for c in base_controls}
-         left_mid=str(base_controls[left]["mess_id"]);right_mid=str(base_controls[right]["mess_id"])
-         lp,lq=target_by_mid[left_mid];rp,rq=target_by_mid[right_mid]
-         lq+=sign*step;rq-=sign*step
-         if (lp*lp+lq*lq>PCS_APPARENT_LIMIT_KVA**2+1e-6
-             or rp*rp+rq*rq>PCS_APPARENT_LIMIT_KVA**2+1e-6):continue
-         target_by_mid[left_mid]=(lp,lq);target_by_mid[right_mid]=(rp,rq)
-         refs=[]
-         for ci,c in enumerate(base_controls):
-          p_target,q_target=target_by_mid[str(c["mess_id"])]
-          refs.append(model.addLConstr(c["p_expr"]/scale==p_target/scale,
-           name=f"a_b10_balanced_q_p_{int(step)}_{left}_{right}_{int(sign)}_{ci}"))
-          refs.append(model.addLConstr(c["q_expr"]/scale==q_target/scale,
-           name=f"a_b10_balanced_q_q_{int(step)}_{left}_{right}_{int(sign)}_{ci}"))
-         model.setObjective(loc["econ"],gp.GRB.MINIMIZE);model.update()
-         try:pair_solve=solve_recovery_anchor()
-         except RuntimeError as pair_exc:
-          model.remove(refs);model.update()
-          attempts.append({"round":recovery_round_limit+len(search_specs)+70,
-           "recovery_stage":"EXACT_AC_BALANCED_Q_SEARCH","step_kvar":step,"sign":sign,
-           "mess_pair":[left_mid,right_mid],
-           "fast_solver":{"status":"NO_FEASIBLE_INCUMBENT","error":repr(pair_exc)},
-           "exact_ac":None,"hard_limits_relaxed":False,"future_actual_used":False})
-          continue
-         pair_projections=_refresh_solution_after_ac_resolve(loc,science,sol)
-         quality=abase.solver_quality(model)
-         if any(float(quality.get(k,float("inf")))>lim for k,lim in
-                (("ConstrVio",1e-6),("BoundVio",1e-6),("IntVio",1e-5))):
-          raise RuntimeError(f"EXACT_AC_BALANCED_Q_SEARCH_NUMERICAL_GATE_FAILED {quality}")
-         issue_runtime["fresh_ac_capture_stage"]="EXACT_AC_BALANCED_Q_SEARCH"
-         pair_ex=science.exact24_candidate(
-          b4,grid24,scope,gstatic,issue,running,sol["plan"],sol["firstmess"])
-         balanced_q_search_candidate_count+=1
-         voltage_rows=_voltage_rows_from_live_opendss(grid24)
-         line_rows=_line_rows_from_live_opendss(grid24)
-         transformer_current_rows=_transformer_current_rows_from_live_opendss()
-         remember_best_exact_candidate(pair_ex,"EXACT_AC_BALANCED_Q_SEARCH")
-         pair_candidate=_record_recovery_candidate(
-          loc,science,issue_runtime,Path(issue_out),"EXACT_AC_BALANCED_Q_SEARCH",pair_ex,voltage_rows)
-         attempts.append({"round":recovery_round_limit+len(search_specs)+70,
-          "recovery_stage":"EXACT_AC_BALANCED_Q_SEARCH","step_kvar":step,"sign":sign,
-          "mess_pair":[left_mid,right_mid],"fast_solver":pair_solve,
-          "pcs_numerical_boundary_projection":pair_projections,
-          "candidate":pair_candidate,"exact_ac":dict(pair_ex),
-          "hard_limits_relaxed":False,"future_actual_used":False})
-         if pair_ex.get("hard_constraint_pass") is True:
-          ex=pair_ex
-          record={"schema_version":"mobileess.post_stage15.exact_ac_closed_loop.v3",
-           "status":"PASS_RECOVERED_EXACT_AC_BALANCED_Q_SEARCH","issue":int(issue),
-           "selected_step_kvar":step,"selected_sign":sign,"selected_mess_pair":[left_mid,right_mid],
-           "attempts":attempts,"hard_limits_relaxed":False,"future_actual_used":False}
-          issue_runtime["ac_safety_recovery"]=record
-          jw(Path(issue_out)/"A_B10_EXACT_AC_CLOSED_LOOP_RECOVERY.json",record)
-          return True
-         model.remove(refs);model.update()
-         if (best_recovery_bundle["score"][0]==0
-             and best_recovery_bundle["score"][1]<=0.01):
-          issue_runtime["coordinate_search_early_stop_for_exact_relinearization"]={
-           "stage":"EXACT_AC_BALANCED_Q_SEARCH",
-           "score":list(best_recovery_bundle["score"]),
-           "candidate_count":len(issue_runtime.get("fresh_ac_candidate_attempts",[])),
-           "hard_limits_relaxed":False,"future_actual_used":False}
-          return False
-     return False
-    def post_tap_exact_pq_relinearization():
-     """Resolve a narrow tap-boundary event in the full feasible P/Q space."""
-     nonlocal tap_search_refs,ex,voltage_rows,line_rows,transformer_current_rows
-     nonlocal last_feasible_controls,last_feasible_first,last_feasible_plan
-     controls=[dict(c) for c in last_feasible_controls]
-     voltage_keys=sorted((str(r["bus"]),int(r["node"])) for r in voltage_rows if r["hard_violation"])
-     line_keys=sorted((str(r["line"]),) for r in line_rows if r["hard_violation"])
-     transformer_keys=sorted((str(r["transformer"]),int(r["terminal"]),int(r["conductor"]))
-                             for r in transformer_current_rows if r["hard_violation"])
-     if not controls or not (voltage_keys or line_keys or transformer_keys):return False
-     # Keep the last feasible incumbent materialized outside Gurobi.  An
-     # infeasible trust-region solve clears every Var.X attribute, but it does
-     # not invalidate these model expressions or the last Fresh-AC base point.
-     first=[dict(row) for row in last_feasible_first]
-     plan=[dict(row) for row in last_feasible_plan]
-     focus_refs=[]
-     available=max(0,FRESH_AC_PRODUCTION_CANDIDATE_MAX
-     -len(issue_runtime.get("fresh_ac_candidate_attempts",[]))-1)
-     full_trust_infeasible_count=0;no_exact_improvement_rounds=0
-     for focus_round in range(1,available+1):
-      round_start_best_score=best_recovery_bundle["score"]
-      # Regulator movement can clear the original PCC row while exposing a
-      # different downstream bus.  Keep the original complementary boundary
-      # rows protected and monotonically add every newly hard-violating row.
-      voltage_keys=sorted(set(voltage_keys).union(
-       (str(r["bus"]),int(r["node"])) for r in voltage_rows if r["hard_violation"]))
-      line_keys=sorted(set(line_keys).union(
-       (str(r["line"]),) for r in line_rows if r["hard_violation"]))
-      transformer_keys=sorted(set(transformer_keys).union(
-       (str(r["transformer"]),int(r["terminal"]),int(r["conductor"]))
-       for r in transformer_current_rows if r["hard_violation"]))
-      base_voltage={(str(r["bus"]),int(r["node"])):float(r["voltage_pu"]) for r in voltage_rows}
-      base_line={(str(r["line"]),):float(r["loading_pu"]) for r in line_rows}
-      base_transformer={(str(r["transformer"]),int(r["terminal"]),int(r["conductor"])):
-                        float(r["loading_pu"]) for r in transformer_current_rows}
-      gradients={};fd_records=[]
-      for c in controls:
-       base_row=next(row for row in first if row["mess_id"]==c["mess_id"])
-       base_p=float(base_row["P_net_grid_injection_kW"])
-       base_q=float(base_row["Q_grid_injection_kvar"])
-       for kind,key in (("P","P_net_grid_injection_kW"),("Q","Q_grid_injection_kvar")):
-        scheme="NO_COMPLETE_METRIC"
-        deltas=[]
-        for step in (1.0,0.1,0.01):
-         deltas=[]
-         for sign in (-1.0,1.0):
-          delta=sign*step
-          trial_p=base_p+(delta if kind=="P" else 0.0)
-          trial_q=base_q+(delta if kind=="Q" else 0.0)
-          if (abs(trial_p)<=PCS_ACTIVE_LIMIT_KW+1e-8
-              and trial_p*trial_p+trial_q*trial_q<=PCS_APPARENT_LIMIT_KVA**2+1e-6):
-           deltas.append(delta)
-         if deltas:break
-        samples={}
-        for delta in deltas:
-         trial=[dict(row) for row in first]
-         row=next(item for item in trial if item["mess_id"]==c["mess_id"])
-         row[key]=float(row[key])+delta
-         science.exact24_candidate(b4,grid24,scope,gstatic,issue,running,plan,trial)
-         samples[delta]={
-          "voltage":{(str(r["bus"]),int(r["node"])):float(r["voltage_pu"])
-                     for r in _voltage_rows_from_live_opendss(grid24)},
-          "line":{(str(r["line"]),):float(r["loading_pu"])
-                  for r in _line_rows_from_live_opendss(grid24)},
-          "transformer":{(str(r["transformer"]),int(r["terminal"]),int(r["conductor"])):
-                         float(r["loading_pu"]) for r in _transformer_current_rows_from_live_opendss()}}
-        for family,keys,baseline in (("voltage",voltage_keys,base_voltage),
-                                     ("line",line_keys,base_line),
-                                     ("transformer",transformer_keys,base_transformer)):
-         for metric_key in keys:
-          if not deltas or metric_key not in baseline or any(metric_key not in samples[d][family] for d in deltas):
-           continue
-          if len(deltas)==2:
-           lo,hi=sorted(deltas);gradient=(samples[hi][family][metric_key]-samples[lo][family][metric_key])/(hi-lo)
-           scheme="CENTRAL_FEASIBLE"
-          else:
-           delta=deltas[0];gradient=(samples[delta][family][metric_key]-baseline[metric_key])/delta
-           scheme="ONE_SIDED_FEASIBLE"
-          gradients[(str(c["mess_id"]),kind,family,metric_key)]=float(gradient)
-        fd_records.append({"mess_id":str(c["mess_id"]),"coordinate":kind,"base_p_kw":base_p,
-                           "base_q_kvar":base_q,"deltas":deltas,
-                           "scheme":scheme if deltas else "UNAVAILABLE_AT_PCS_BOUNDARY"})
-      if tap_search_refs:
-       model.remove(tap_search_refs);model.update();tap_search_refs=[]
-      if focus_refs:
-       model.remove(focus_refs);model.update();focus_refs=[]
-      # A narrow 25 kW/kvar neighborhood is sufficient for the small 15180
-      # tap-boundary residual, but a larger first-step violation can have no
-      # conditioned incumbent in that neighborhood.  Solver infeasibility is
-      # not a Fresh-AC candidate and therefore must enlarge the deterministic
-      # trust region instead of terminating the recovery path.
-      trust_radius=(25.0 if focus_round<=2 else 100.0 if focus_round<=5
-                    else PCS_APPARENT_LIMIT_KVA)
-      objective=gp.QuadExpr(0.0)
-      for ci,c in enumerate(controls):
-       for kind,expr_key,value_key in (("P","p_expr","p_kw"),("Q","q_expr","q_kvar")):
-        expr=c[expr_key];base=float(c[value_key])
-        focus_refs.append(model.addLConstr(expr/scale<=(base+trust_radius)/scale,
-         name=f"a_b10_post_tap_trust_hi_{focus_round}_{kind}_{ci}"))
-        focus_refs.append(model.addLConstr(expr/scale>=(base-trust_radius)/scale,
-         name=f"a_b10_post_tap_trust_lo_{focus_round}_{kind}_{ci}"))
-        objective+=((expr-base)/scale)*((expr-base)/scale)
-      cut_rows=[];hard_cut_refs=[];soft_cut_specs=[]
-      for vi,vk in enumerate(voltage_keys):
-       expr=gp.LinExpr(base_voltage[vk]);grad_record={}
-       for c in controls:
-        mid=str(c["mess_id"]);gp_=gradients.get((mid,"P","voltage",vk));gq=gradients.get((mid,"Q","voltage",vk))
-        if gp_ is None or gq is None:continue
-        expr+=gp_*(c["p_expr"]-float(c["p_kw"]))+gq*(c["q_expr"]-float(c["q_kvar"]))
-        grad_record[mid]={"dV_dP":gp_,"dV_dQ":gq}
-       # The Fresh-AC pass/fail authority remains the unchanged 1.05 pu hard
-       # limit.  A fixed 1.0498 surrogate margin over-constrained the second
-       # relinearization after a discrete regulator tap exposed adjacent rows.
-       # Ask a violating row to cross just inside the true boundary, while a
-       # row already inside it only has to remain inside.  The small numerical
-       # guard is deterministic and does not relax the scientific limit.
-       voltage_limit=1.05-1.0e-5
-       ref=model.addLConstr(expr<=voltage_limit,
-        name=f"a_b10_post_tap_vmax_{focus_round}_{vi}")
-       focus_refs.append(ref);hard_cut_refs.append(ref)
-       soft_cut_specs.append((expr,voltage_limit,f"vmax_{vi}"))
-       cut_rows.append({"family":"VOLTAGE","key":list(vk),"base":base_voltage[vk],"limit":voltage_limit,
-                        "gradients":grad_record})
-      for ti,tk in enumerate(transformer_keys):
-       expr=gp.LinExpr(base_transformer[tk]);grad_record={}
-       for c in controls:
-        mid=str(c["mess_id"]);gp_=gradients.get((mid,"P","transformer",tk));gq=gradients.get((mid,"Q","transformer",tk))
-        if gp_ is None or gq is None:continue
-        expr+=gp_*(c["p_expr"]-float(c["p_kw"]))+gq*(c["q_expr"]-float(c["q_kvar"]))
-        grad_record[mid]={"dLoading_dP":gp_,"dLoading_dQ":gq}
-       transformer_limit=1.0-1.0e-5
-       ref=model.addLConstr(expr<=transformer_limit,
-        name=f"a_b10_post_tap_transformer_{focus_round}_{ti}")
-       focus_refs.append(ref);hard_cut_refs.append(ref)
-       soft_cut_specs.append((expr,transformer_limit,f"transformer_{ti}"))
-       cut_rows.append({"family":"TRANSFORMER_CURRENT","key":list(tk),"base":base_transformer[tk],
-                        "limit":transformer_limit,"gradients":grad_record})
-      for li,lk in enumerate(line_keys):
-       expr=gp.LinExpr(base_line[lk]);grad_record={}
-       for c in controls:
-        mid=str(c["mess_id"]);gp_=gradients.get((mid,"P","line",lk));gq=gradients.get((mid,"Q","line",lk))
-        if gp_ is None or gq is None:continue
-        expr+=gp_*(c["p_expr"]-float(c["p_kw"]))+gq*(c["q_expr"]-float(c["q_kvar"]))
-        grad_record[mid]={"dLoading_dP":gp_,"dLoading_dQ":gq}
-       line_limit=1.0-1.0e-5
-       ref=model.addLConstr(expr<=line_limit,
-        name=f"a_b10_post_tap_line_{focus_round}_{li}")
-       focus_refs.append(ref);hard_cut_refs.append(ref)
-       soft_cut_specs.append((expr,line_limit,f"line_{li}"))
-       cut_rows.append({"family":"LINE_CURRENT","key":list(lk),"base":base_line[lk],
-                        "limit":line_limit,"gradients":grad_record})
-      model.setObjective(objective+1.0e-9*loc["econ"],gp.GRB.MINIMIZE);model.update()
-      hard_surrogate_infeasible=False;surrogate_slack_sum_pu=None
-      try:focus_solve=solve_recovery_anchor()
-      except RuntimeError as hard_focus_exc:
-       # A discrete tap change can make several first-order rows mutually
-       # inconsistent even though the unchanged nonlinear AC feasible set is
-       # nonempty.  Relax only these candidate-generation surrogates, minimize
-       # their total violation, then require the ordinary Fresh OpenDSS hard
-       # gate below.  No physical voltage/current/kVA limit is softened.
-       hard_surrogate_infeasible=True
-       model.remove(hard_cut_refs)
-       removed_ids={id(ref) for ref in hard_cut_refs}
-       focus_refs=[ref for ref in focus_refs if id(ref) not in removed_ids]
-       slack_vars=[];slack_objective=gp.LinExpr(0.0)
-       for si,(expr,limit,label) in enumerate(soft_cut_specs):
-        slack=model.addVar(lb=0.0,name=f"a_b10_post_tap_cut_slack_{focus_round}_{si}")
-        ref=model.addLConstr(expr<=limit+slack,
-         name=f"a_b10_post_tap_cut_soft_{focus_round}_{label}")
-        slack_vars.append(slack);focus_refs.extend([slack,ref]);slack_objective+=slack
-       model.setObjective(slack_objective+1.0e-6*objective+1.0e-12*loc["econ"],gp.GRB.MINIMIZE)
-       model.update()
-       try:focus_solve=solve_recovery_anchor()
-       except RuntimeError as soft_focus_exc:
-        attempts.append({"round":recovery_round_limit+len(search_specs)+20+focus_round,
-         "recovery_stage":"POST_TAP_EXACT_PQ_RELINEARIZATION","finite_difference_samples":fd_records,
-         "cuts":cut_rows,"trust_radius_kw_kvar":trust_radius,
-         "hard_surrogate_error":repr(hard_focus_exc),
-         "fast_solver":{"status":"NO_FEASIBLE_INCUMBENT_WITH_SURROGATE_SLACK",
-                        "error":repr(soft_focus_exc)},
-         "exact_ac":None,"hard_limits_relaxed":False,"future_actual_used":False})
-        if trust_radius>=PCS_APPARENT_LIMIT_KVA-1e-9:
-         full_trust_infeasible_count+=1
-         if full_trust_infeasible_count>=3:break
-        else:full_trust_infeasible_count=0
-        continue
-       surrogate_slack_sum_pu=float(sum(slack.X for slack in slack_vars))
-      full_trust_infeasible_count=0
-      recovery_pcs_projections=_refresh_solution_after_ac_resolve(loc,science,sol)
-      quality=abase.solver_quality(model)
-      if any(float(quality.get(k,float("inf")))>lim for k,lim in
-             (("ConstrVio",1e-6),("BoundVio",1e-6),("IntVio",1e-5))):
-       raise RuntimeError(f"POST_TAP_EXACT_PQ_RELINEARIZATION_NUMERICAL_GATE_FAILED {quality}")
-      issue_runtime["fresh_ac_capture_stage"]="POST_TAP_EXACT_PQ_RELINEARIZATION"
-      ex=science.exact24_candidate(b4,grid24,scope,gstatic,issue,running,sol["plan"],sol["firstmess"])
-      voltage_rows=_voltage_rows_from_live_opendss(grid24);line_rows=_line_rows_from_live_opendss(grid24)
-      transformer_current_rows=_transformer_current_rows_from_live_opendss()
-      remember_best_exact_candidate(ex,"POST_TAP_EXACT_PQ_RELINEARIZATION")
-      recovery_candidate=_record_recovery_candidate(loc,science,issue_runtime,Path(issue_out),
-       "POST_TAP_EXACT_PQ_RELINEARIZATION",ex,voltage_rows)
-      attempts.append({"round":recovery_round_limit+len(search_specs)+20+focus_round,
-       "recovery_stage":"POST_TAP_EXACT_PQ_RELINEARIZATION","finite_difference_samples":fd_records,
-       "cuts":cut_rows,"trust_radius_kw_kvar":trust_radius,"fast_solver":focus_solve,
-       "hard_surrogate_infeasible":hard_surrogate_infeasible,
-       "surrogate_slack_sum_pu":surrogate_slack_sum_pu,
-       "pcs_numerical_boundary_projection":recovery_pcs_projections,"candidate":recovery_candidate,
-       "exact_ac":dict(ex),"violating_voltage_rows":[r for r in voltage_rows if r["hard_violation"]],
-       "violating_line_rows":[r for r in line_rows if r["hard_violation"]],
-       "violating_transformer_current_rows":[r for r in transformer_current_rows if r["hard_violation"]],
-       "hard_limits_relaxed":False,"future_actual_used":False})
-      if ex.get("hard_constraint_pass") is True:
-       record={"schema_version":"mobileess.post_stage15.exact_ac_closed_loop.v3",
-        "status":"PASS_RECOVERED_POST_TAP_EXACT_PQ_RELINEARIZATION","issue":int(issue),
-        "selected_round":focus_round,"attempts":attempts,
-        "hard_limits_relaxed":False,"future_actual_used":False}
-       issue_runtime["ac_safety_recovery"]=record
-       jw(Path(issue_out)/"A_B10_EXACT_AC_CLOSED_LOOP_RECOVERY.json",record)
-       return True
-      # A full surrogate-slack step can cross a discrete regulator boundary
-      # and be worse in exact AC even though its direction is useful.  Test
-      # deterministic damped points on the segment from the retained best base
-      # to that step.  Each point is materialized in the unchanged optimization
-      # model before Fresh OpenDSS; interpolation is never accepted directly.
-      candidate_controls=_ac_h0_controls(loc,science)
-      candidate_by_mid={str(c["mess_id"]):c for c in candidate_controls}
-      for alpha in (0.25,0.50,0.75):
-       if len(issue_runtime.get("fresh_ac_candidate_attempts",[]))>=FRESH_AC_PRODUCTION_CANDIDATE_MAX:break
-       interpolation_refs=[];targets={}
-       for ci,c in enumerate(controls):
-        mid=str(c["mess_id"]);candidate=candidate_by_mid[mid]
-        target_p=float(c["p_kw"])+alpha*(float(candidate["p_kw"])-float(c["p_kw"]))
-        target_q=float(c["q_kvar"])+alpha*(float(candidate["q_kvar"])-float(c["q_kvar"]))
-        targets[mid]={"p_kw":target_p,"q_kvar":target_q}
-        interpolation_refs.append(model.addLConstr(
-         c["p_expr"]/scale==target_p/scale,
-         name=f"a_b10_post_tap_damped_p_{focus_round}_{int(alpha*100)}_{ci}"))
-        interpolation_refs.append(model.addLConstr(
-         c["q_expr"]/scale==target_q/scale,
-         name=f"a_b10_post_tap_damped_q_{focus_round}_{int(alpha*100)}_{ci}"))
-       model.update()
-       try:damped_solve=solve_recovery_anchor()
-       except RuntimeError as damped_exc:
-        model.remove(interpolation_refs);model.update()
-        attempts.append({"round":recovery_round_limit+len(search_specs)+40+focus_round,
-         "recovery_stage":"POST_TAP_DAMPED_LINE_SEARCH","alpha":alpha,"targets":targets,
-         "fast_solver":{"status":"NO_FEASIBLE_INCUMBENT","error":repr(damped_exc)},
-         "exact_ac":None,"hard_limits_relaxed":False,"future_actual_used":False})
-        continue
-       damped_projections=_refresh_solution_after_ac_resolve(loc,science,sol)
-       quality=abase.solver_quality(model)
-       if any(float(quality.get(k,float("inf")))>lim for k,lim in
-              (("ConstrVio",1e-6),("BoundVio",1e-6),("IntVio",1e-5))):
-        raise RuntimeError(f"POST_TAP_DAMPED_LINE_SEARCH_NUMERICAL_GATE_FAILED {quality}")
-       issue_runtime["fresh_ac_capture_stage"]="POST_TAP_DAMPED_LINE_SEARCH"
-       damped_ex=science.exact24_candidate(
-        b4,grid24,scope,gstatic,issue,running,sol["plan"],sol["firstmess"])
-       voltage_rows=_voltage_rows_from_live_opendss(grid24)
-       line_rows=_line_rows_from_live_opendss(grid24)
-       transformer_current_rows=_transformer_current_rows_from_live_opendss()
-       remember_best_exact_candidate(damped_ex,"POST_TAP_DAMPED_LINE_SEARCH")
-       damped_candidate=_record_recovery_candidate(
-        loc,science,issue_runtime,Path(issue_out),"POST_TAP_DAMPED_LINE_SEARCH",damped_ex,voltage_rows)
-       attempts.append({"round":recovery_round_limit+len(search_specs)+40+focus_round,
-        "recovery_stage":"POST_TAP_DAMPED_LINE_SEARCH","alpha":alpha,"targets":targets,
-        "fast_solver":damped_solve,"pcs_numerical_boundary_projection":damped_projections,
-        "candidate":damped_candidate,"exact_ac":dict(damped_ex),
-        "hard_limits_relaxed":False,"future_actual_used":False})
-       if damped_ex.get("hard_constraint_pass") is True:
-        record={"schema_version":"mobileess.post_stage15.exact_ac_closed_loop.v3",
-         "status":"PASS_RECOVERED_POST_TAP_DAMPED_LINE_SEARCH","issue":int(issue),
-         "selected_round":focus_round,"selected_alpha":alpha,"attempts":attempts,
-         "hard_limits_relaxed":False,"future_actual_used":False}
-        issue_runtime["ac_safety_recovery"]=record
-        jw(Path(issue_out)/"A_B10_EXACT_AC_CLOSED_LOOP_RECOVERY.json",record)
-        return True
-       model.remove(interpolation_refs);model.update()
-      # Continue every relinearization from the globally closest exact point,
-      # not from the last or the largest surrogate-slack step.
-      controls=[dict(c) for c in best_recovery_bundle["controls"]]
-      first=[dict(row) for row in best_recovery_bundle["first"]]
-      plan=[dict(row) for row in best_recovery_bundle["plan"]]
-      voltage_rows=[dict(row) for row in best_recovery_bundle["voltage_rows"]]
-      line_rows=[dict(row) for row in best_recovery_bundle["line_rows"]]
-      transformer_current_rows=[dict(row) for row in best_recovery_bundle["transformer_rows"]]
-      # Only a feasible correction solve owns a new Var.X incumbent.  Capture
-      # it now for the next exact relinearization; the infeasible branch above
-      # deliberately continues from the preceding materialized base point.
-      last_feasible_controls=[dict(c) for c in controls]
-      last_feasible_first=[dict(row) for row in first]
-      last_feasible_plan=[dict(row) for row in plan]
-      if best_recovery_bundle["score"]>=round_start_best_score:
-       no_exact_improvement_rounds+=1
-       if no_exact_improvement_rounds>=3:break
-      else:no_exact_improvement_rounds=0
-     return False
-    # Searching Q only at the maximum-active-power anchor is incomplete: a
-    # safe discrete-tap/current point may lie at an interior P dispatch even
-    # though both the economic point and the maximum-P point are unsafe.  Add
-    # a bounded identity-neutral bank of zero/half/full P fractions.  Cyclic
-    # rotations prevent any MESS/site from receiving a privileged pattern.
-    # The original 64 maximum-P Q directions remain intact; the 32 interior-P
-    # candidates use only the small, fixed seed bank and stay within the
-    # global Fresh-AC candidate bound.
-    full_p_fraction=tuple(1.0 for _ in anchor_controls)
-    search_specs=[(full_p_fraction,pattern) for pattern in normalized_patterns]
-    active_fraction_seed=list((1.0,0.5,0.0,1.0)[:len(anchor_controls)])
-    while len(active_fraction_seed)<len(anchor_controls):active_fraction_seed.append(1.0)
-    active_fraction_patterns=[]
-    for rotation in range(max(1,len(active_fraction_seed))):
-     values=active_fraction_seed[rotation:]+active_fraction_seed[:rotation]
-     key=tuple(float(value) for value in values)
-     if key not in active_fraction_patterns:active_fraction_patterns.append(key)
-    for active_fractions in active_fraction_patterns:
-     for pattern in normalized_patterns[:8]:
-      spec=(active_fractions,pattern)
-      if spec not in search_specs:search_specs.append(spec)
-    # Run the broad maximum-P/Q bank before local coordinate refinement.  A
-    # near-boundary point in the original operating neighbourhood can sit on
-    # the wrong regulator-tap branch; spending the bounded Fresh-AC budget
-    # there can prevent evaluation of the causal high-active-power branch.
-    for search_index,(active_fractions,pattern) in enumerate(search_specs,1):
-     if len(issue_runtime.get("fresh_ac_candidate_attempts",[]))>=FRESH_AC_PRODUCTION_CANDIDATE_MAX:break
-     if tap_search_refs:
-      model.remove(tap_search_refs);model.update();tap_search_refs=[]
-     # Reuse the stored expressions.  Removing the preceding candidate rows
-     # invalidates X values, but not the model variables themselves.
-     current_controls=anchor_controls
-     target_q={}
-     for ci,c in enumerate(current_controls):
-      mid=str(c["mess_id"]);p_target=float(active_fractions[ci])*float(anchor_p[mid])
-      q_cap=math.sqrt(max(0.0,PCS_APPARENT_LIMIT_KVA**2-p_target**2))
-      q_target=float(pattern[ci])*q_cap;target_q[mid]=q_target
-      tap_search_refs.append(model.addLConstr(
-       c["p_expr"]/scale==p_target/scale,
-       name=f"a_b10_max_p_q_search_p_{search_index}_{ci}"))
-      tap_search_refs.append(model.addLConstr(
-       c["q_expr"]/scale==q_target/scale,
-       name=f"a_b10_max_p_q_search_q_{search_index}_{ci}"))
-     model.setObjective(loc["econ"],gp.GRB.MINIMIZE);model.update()
-     try:tap_search_solve=solve_recovery_anchor()
-     except RuntimeError as search_exc:
-      attempts.append({"round":recovery_round_limit+search_index,
-       "recovery_stage":"MAX_P_Q_TAP_SEARCH","normalized_q_pattern":list(pattern),
-       "normalized_p_anchor_fractions":list(active_fractions),
-       "anchor_p_kw":anchor_p,"target_q_kvar":target_q,
-       "fast_solver":{"status":"NO_FEASIBLE_INCUMBENT","error":repr(search_exc)},
-       "exact_ac":None,"hard_limits_relaxed":False,"future_actual_used":False})
-      continue
-     recovery_pcs_projections=_refresh_solution_after_ac_resolve(loc,science,sol)
-     quality=abase.solver_quality(model)
-     if any(float(quality.get(k,float("inf")))>lim for k,lim in
-            (("ConstrVio",1e-6),("BoundVio",1e-6),("IntVio",1e-5))):
-      raise RuntimeError(f"MAX_P_Q_TAP_SEARCH_NUMERICAL_GATE_FAILED {quality}")
-     issue_runtime["fresh_ac_capture_stage"]="MAX_P_Q_TAP_SEARCH"
-     ex=science.exact24_candidate(b4,grid24,scope,gstatic,issue,running,sol["plan"],sol["firstmess"])
-     voltage_rows=_voltage_rows_from_live_opendss(grid24)
-     line_rows=_line_rows_from_live_opendss(grid24)
-     transformer_current_rows=_transformer_current_rows_from_live_opendss()
-     remember_best_exact_candidate(ex,"MAX_P_Q_TAP_SEARCH")
-     recovery_candidate=_record_recovery_candidate(loc,science,issue_runtime,Path(issue_out),
-      "MAX_P_Q_TAP_SEARCH",ex,voltage_rows)
-     last_feasible_controls=_ac_h0_controls(loc,science)
-     last_feasible_first=_ac_firstmess(loc,science,last_feasible_controls)
-     last_feasible_plan=_ac_current_plan(loc)
-     attempts.append({"round":recovery_round_limit+search_index,
-      "recovery_stage":"MAX_P_Q_TAP_SEARCH","normalized_q_pattern":list(pattern),
-      "normalized_p_anchor_fractions":list(active_fractions),
-      "anchor_p_kw":anchor_p,"target_q_kvar":target_q,
-      "h0_exact_ac_candidate_projection_override":issue_runtime["h0_exact_ac_candidate_projection_override"],
-      "max_p_anchor_solver":max_p_solve,"fast_solver":tap_search_solve,
-      "pcs_numerical_boundary_projection":recovery_pcs_projections,
-      "candidate":recovery_candidate,"exact_ac":dict(ex),
-      "violating_voltage_rows":[r for r in voltage_rows if r["hard_violation"]],
-      "violating_line_rows":[r for r in line_rows if r["hard_violation"]],
-      "violating_transformer_current_rows":[r for r in transformer_current_rows if r["hard_violation"]],
-      "hard_limits_relaxed":False,"future_actual_used":False})
-     if ex.get("hard_constraint_pass") is True:
-      record={"schema_version":"mobileess.post_stage15.exact_ac_closed_loop.v2",
-       "status":"PASS_RECOVERED_MAX_P_Q_TAP_SEARCH","issue":int(issue),
-       "max_cut_rounds":recovery_round_limit,
-       "tap_search_candidate_limit":len(search_specs),
-       "tap_search_selected_index":search_index,"cut_count":sum(len(x.get("cuts",[])) for x in attempts),
-       "attempts":attempts,"hard_limits_relaxed":False,"future_actual_used":False}
-      issue_runtime["ac_safety_recovery"]=record
-      jw(Path(issue_out)/"A_B10_EXACT_AC_CLOSED_LOOP_RECOVERY.json",record)
-      return ex
-     tap_candidate_point={str(c["mess_id"]):(float(c["p_kw"]),float(c["q_kvar"]))
-                          for c in last_feasible_controls}
-     tap_voltage=bool(ex.get("voltage_violation_count"))
-     tap_overload=bool(ex.get("line_violation_count") or ex.get("transformer_current_violation_count"))
-     tap_point_record={"point":tap_candidate_point,"pattern":list(pattern),"exact_ac":dict(ex)}
-     if tap_voltage and not tap_overload and not ex.get("transformer_kva_violation_count"):
-      tap_voltage_only_points.append(tap_point_record)
-     elif tap_overload and not tap_voltage and not ex.get("transformer_kva_violation_count"):
-      tap_overload_only_points.append(tap_point_record)
-    # The low-discrepancy bank can straddle a narrow regulator/current safety
-    # boundary without sampling inside it.  Do not discard that exact causal
-    # information.  Select the closest complementary pair in normalized PCS-Q
-    # space and bisect it with Fresh OpenDSS as the sole acceptance authority.
-    # Both endpoints already satisfy the unchanged MIQCP and share the same P,
-    # routing and integer decisions, so every midpoint also preserves all
-    # PCS/SOC/mobility/service constraints.  Twenty samples keep the complete
-    # production path within the pre-existing 96-candidate hard bound.
-    if tap_voltage_only_points and tap_overload_only_points:
-     q_caps={mid:math.sqrt(max(0.0,PCS_APPARENT_LIMIT_KVA**2-float(anchor_p[mid])**2))
-             for mid in anchor_p}
-     def tap_pair_distance(pair):
-      left,right=pair
-      return sum(((left["point"][mid][1]-right["point"][mid][1])
-                  /max(1.0,q_caps[mid]))**2 for mid in sorted(anchor_p))
-     voltage_side,overload_side=min(
-      ((v,o) for v in tap_voltage_only_points for o in tap_overload_only_points),
-      key=tap_pair_distance)
-     tap_bracket_candidate_max=20
-     for bracket_index in range(1,tap_bracket_candidate_max+1):
-      if tap_search_refs:
-       model.remove(tap_search_refs);model.update();tap_search_refs=[]
-      midpoint={mid:((voltage_side["point"][mid][0]+overload_side["point"][mid][0])/2.0,
-                     (voltage_side["point"][mid][1]+overload_side["point"][mid][1])/2.0)
-                for mid in sorted(anchor_p)}
-      for ci,c in enumerate(anchor_controls):
-       mid=str(c["mess_id"]);p_target,q_target=midpoint[mid]
-       tap_search_refs.append(model.addLConstr(
-        c["p_expr"]/scale==p_target/scale,
-        name=f"a_b10_max_p_q_bracket_p_{bracket_index}_{ci}"))
-       tap_search_refs.append(model.addLConstr(
-        c["q_expr"]/scale==q_target/scale,
-        name=f"a_b10_max_p_q_bracket_q_{bracket_index}_{ci}"))
-      model.setObjective(loc["econ"],gp.GRB.MINIMIZE);model.update()
-      try:tap_bracket_solve=solve_recovery_anchor()
-      except RuntimeError as bracket_exc:
-       attempts.append({"round":recovery_round_limit+len(search_specs)+bracket_index,
-        "recovery_stage":"MAX_P_Q_TAP_BRACKET_SEARCH","midpoint":midpoint,
-        "fast_solver":{"status":"NO_FEASIBLE_INCUMBENT","error":repr(bracket_exc)},
-        "exact_ac":None,"hard_limits_relaxed":False,"future_actual_used":False})
-       break
-      recovery_pcs_projections=_refresh_solution_after_ac_resolve(loc,science,sol)
-      quality=abase.solver_quality(model)
-      if any(float(quality.get(k,float("inf")))>lim for k,lim in
-             (("ConstrVio",1e-6),("BoundVio",1e-6),("IntVio",1e-5))):
-       raise RuntimeError(f"MAX_P_Q_TAP_BRACKET_NUMERICAL_GATE_FAILED {quality}")
-      issue_runtime["fresh_ac_capture_stage"]="MAX_P_Q_TAP_BRACKET_SEARCH"
-      ex=science.exact24_candidate(b4,grid24,scope,gstatic,issue,running,sol["plan"],sol["firstmess"])
-      voltage_rows=_voltage_rows_from_live_opendss(grid24)
-      line_rows=_line_rows_from_live_opendss(grid24)
-      transformer_current_rows=_transformer_current_rows_from_live_opendss()
-      remember_best_exact_candidate(ex,"MAX_P_Q_TAP_BRACKET_SEARCH")
-      recovery_candidate=_record_recovery_candidate(loc,science,issue_runtime,Path(issue_out),
-       "MAX_P_Q_TAP_BRACKET_SEARCH",ex,voltage_rows)
-      last_feasible_controls=_ac_h0_controls(loc,science)
-      last_feasible_first=_ac_firstmess(loc,science,last_feasible_controls)
-      last_feasible_plan=_ac_current_plan(loc)
-      attempts.append({"round":recovery_round_limit+len(search_specs)+bracket_index,
-       "recovery_stage":"MAX_P_Q_TAP_BRACKET_SEARCH",
-       "selected_pair_normalized_distance":tap_pair_distance((voltage_side,overload_side)),
-       "voltage_side":voltage_side,"overload_side":overload_side,"midpoint":midpoint,
-       "fast_solver":tap_bracket_solve,"pcs_numerical_boundary_projection":recovery_pcs_projections,
-       "candidate":recovery_candidate,"exact_ac":dict(ex),
-       "violating_voltage_rows":[r for r in voltage_rows if r["hard_violation"]],
-       "violating_line_rows":[r for r in line_rows if r["hard_violation"]],
-       "violating_transformer_current_rows":[r for r in transformer_current_rows if r["hard_violation"]],
-       "hard_limits_relaxed":False,"future_actual_used":False})
-      if ex.get("hard_constraint_pass") is True:
-       record={"schema_version":"mobileess.post_stage15.exact_ac_closed_loop.v3",
-        "status":"PASS_RECOVERED_MAX_P_Q_TAP_BRACKET_SEARCH","issue":int(issue),
-        "max_cut_rounds":recovery_round_limit,"tap_search_candidate_limit":len(search_specs),
-        "tap_bracket_candidate_limit":tap_bracket_candidate_max,
-        "tap_bracket_selected_index":bracket_index,
-        "cut_count":sum(len(x.get("cuts",[])) for x in attempts),"attempts":attempts,
-        "hard_limits_relaxed":False,"future_actual_used":False}
-       issue_runtime["ac_safety_recovery"]=record
-       jw(Path(issue_out)/"A_B10_EXACT_AC_CLOSED_LOOP_RECOVERY.json",record)
-       return ex
-      bracket_point={str(c["mess_id"]):(float(c["p_kw"]),float(c["q_kvar"]))
-                     for c in last_feasible_controls}
-      bracket_record={"point":bracket_point,"pattern":None,"exact_ac":dict(ex)}
-      bracket_voltage=bool(ex.get("voltage_violation_count"))
-      bracket_overload=bool(ex.get("line_violation_count") or ex.get("transformer_current_violation_count"))
-      if (bracket_voltage and not bracket_overload
-          and not ex.get("transformer_kva_violation_count")):
-       voltage_side=bracket_record
-      elif (bracket_overload and not bracket_voltage
-            and not ex.get("transformer_kva_violation_count")):
-       overload_side=bracket_record
-      else:
-       break
-    # A simultaneous voltage/line/transformer violation has no complementary
-    # voltage-only/current-only bracket, but it is exactly the case that needs
-    # the full P/Q exact relinearization.  Start from the globally closest
-    # causal Fresh-AC point, not from the last enumeration-order pattern.
-    # If the broad bank already found a point within 0.005 pu/loading of all
-    # hard limits, spend the remaining budget on exact local relinearization
-    # immediately.  Otherwise use the wider coordinate search first.  This is
-    # only search ordering: the Fresh-AC limits and candidate cap are unchanged.
-    near_exact_boundary=(best_recovery_bundle["score"][0]==0
-                         and best_recovery_bundle["score"][1]<=0.005)
-    if near_exact_boundary:
-     select_best_relinearization_base()
-     if post_tap_exact_pq_relinearization():return ex
-     if exact_coordinate_search():return ex
-    else:
-     if exact_coordinate_search():return ex
-     select_best_relinearization_base()
-     if post_tap_exact_pq_relinearization():return ex
-    if tap_search_refs:model.remove(tap_search_refs);model.update()
-   except RuntimeError as anchor_exc:
-    attempts.append({"round":recovery_round_limit+1,
-     "recovery_stage":"MAX_P_Q_TAP_SEARCH_ANCHOR",
-     "fast_solver":{"status":"NO_FEASIBLE_INCUMBENT","error":repr(anchor_exc)},
-     "exact_ac":None,"hard_limits_relaxed":False,"future_actual_used":False})
+  previous_grid_score=current_grid_score
  record={"schema_version":"mobileess.post_stage15.exact_ac_closed_loop.v1","status":"GRID_CORRECTION_EXHAUSTED",
          "hard_limits_relaxed":False,"finite_difference_step_kw_kvar":AC_RECOVERY_FD_STEP_KW,
          "conservative_voltage_cut_margin_pu":AC_RECOVERY_VOLTAGE_CUT_MARGIN_PU,
@@ -3687,19 +2772,6 @@ def main():
   latest_marker=max((validate_commit_marker(p.parent) for p in marker_files),key=lambda x:int(x["issue"]))
   restore_event_engine(ev,{"event_engine_state":latest_marker["event_engine_state"]})
   last_replan=int(latest_marker["last_replan_issue"])
- # Learn only from already committed PASS boundaries.  The immediately
- # preceding boundary is the causal one-step phase-distribution estimate for
- # the rolling plan; an all-history minimum mixes obsolete regulator/voltage
- # states and can make the otherwise valid H54 problem artificially empty.
- # Uncommitted/future issues are never inspected.
- reg1a_prior_limits=[]
- for marker_path in marker_files:
-  marker_issue=int(marker_path.parent.name.split("_")[-1])
-  if marker_issue>=START:
-   value=_reg1a_causal_equivalent_kva_limit(
-    marker_path.parent/"exact_grid/A_B10_FRESH_EXACT_AC_OBSERVABILITY.json")
-   if value is not None:reg1a_prior_limits.append(float(value))
- reg1a_causal_limit_kva=reg1a_prior_limits[-1] if reg1a_prior_limits else None
  ac_recovery_context={}
  issue_audits=[]
  for i in range(START,run_end+1):
@@ -3822,57 +2894,9 @@ def main():
      return value if value is not None else original_conservative_fixed(op1_arg,scope_arg,rack,issue_arg,t)
     b4.conservative_fixed=fast_conservative_fixed
     issue_runtime["fast_rack_lookup"]={"entries":len(rack_table),"horizon_steps":49,"fallback_after_h48":True}
-   # R25D projects regulator states with a fixed tap ratio.  At a causal PRE
-   # boundary reached through exact-AC recovery, a current discrete tap can
-   # make an H0 projected *constant* voltage fall outside that approximation's
-   # interval before the model even exists.  Such a constant has no optimizer
-   # control because the approximation omitted the regulator tap decision.
-   # Expand only decision-independent fixed-tap constants enough to build the
-   # candidate model at every horizon step.  Decision-dependent voltage bounds
-   # stay intact.  In receding-horizon execution, each H0 action is accepted by
-   # Fresh OpenDSS with the real regulator controls and unchanged hard limits.
-   original_projection_bounds=science.propagate_projected_voltage_bounds
-   projection_call={"index":0}
-   h0_constant_projection_events=[]
-   def h0_exact_ac_projection_bounds(proj,vamap,vdev_bounds):
-    call_index=projection_call["index"];projection_call["index"]+=1
-    expanded=dict(vdev_bounds)
-    for node,(anchor,_scale,constant) in vamap.items():
-     if anchor is not None:continue
-     lo,hi=map(float,expanded[node]);value=float(constant)
-     if value<lo-1e-12 or value>hi+1e-12:
-      h0_constant_projection_events.append({"horizon_step":call_index,
-       "node":str(node),"projected_constant":value,
-       "original_lower":lo,"original_upper":hi,
-       "build_lower":min(lo,value),"build_upper":max(hi,value)})
-      expanded[node]=(min(lo,value),max(hi,value))
-    result=original_projection_bounds(proj,vamap,expanded)
-    issue_runtime["h0_constant_tap_projection_override"]={
-     "status":"FIXED_TAP_CONSTANT_PROJECTION_REPLACED_BY_RECEDING_FRESH_EXACT_AC_GATE",
-     "event_count":len(h0_constant_projection_events),"events":h0_constant_projection_events,
-     "future_horizon_fixed_tap_constants_changed":any(x["horizon_step"]>0 for x in h0_constant_projection_events),
-     "decision_dependent_projection_bounds_changed":False,
-     "fresh_exact_opendss_required":True,"hard_physical_limits_relaxed":False,
-     "future_actual_used":False}
-    return result
-   science.propagate_projected_voltage_bounds=h0_exact_ac_projection_bounds
    try:
     sol=performance_build_full(scope,b4,op1,build_issue,queue,running,inventory,dest_commit,
                                mess_E,science_ref,*args,**kwargs)
-    # The optimizer's PRE state plus selected move arcs are the causal mobility
-    # authority.  Canonicalize the human-readable MESS plan before commit so a
-    # sparse/node-occupancy extraction cannot serialize an arrived unit as
-    # perpetual TRANSIT and break the next shifted-plan boundary.
-    loc_now=ac_recovery_context.get("loc",{})
-    causal_rows,path_audit=astep4._canonicalize_mess_path_from_causal_route(
-     pd.DataFrame(sol.get("mess_rows",[])),pd.DataFrame(sol.get("route_rows",[])),
-     {"state":{"mess_state":dict(loc_now.get("rollstate",{}))}})
-    causal_lookup={(str(r.mess_id),int(r.horizon_step)):(str(r.state),str(r.service_id))
-                   for r in causal_rows.itertuples(index=False)}
-    for row in sol.get("mess_rows",[]):
-     state_value,service_value=causal_lookup[(str(row["mess_id"]),int(row["horizon_step"]))]
-     row["state"]=state_value;row["service_id"]=service_value
-    issue_runtime["causal_route_report_canonicalization"]=path_audit
     pcs_projections=[];coupled_state_projections=sol.setdefault("_coupled_soc_debt_projection_events",[])
     energy_state_projections=sol.setdefault("_energy_state_projection_events",[])
     preprojection_h0={}
@@ -3894,6 +2918,7 @@ def main():
      row["E1_kWh"],row["support_debt1_kWh"]=adjust_model_state_for_inward_pcs_projection(
       row["E1_kWh"],row["support_debt1_kWh"],old_pdis,old_pchg,
       row["P_discharge_kW"],row["P_charge_kW"])
+     loc_now=ac_recovery_context.get("loc",{})
      scale_e=float(loc_now.get("_c5r4_energy_scale_kwh_per_model_unit",1000.0))
      capacity_kwh=mess_physical_capacity_kwh(loc_now,mid,scale_e)
      row["E1_kWh"],energy_projection=canonicalize_energy_numerical_boundary(
@@ -3934,7 +2959,6 @@ def main():
     return sol
    finally:
     b4.conservative_fixed=original_conservative_fixed
-    science.propagate_projected_voltage_bounds=original_projection_bounds
   def jw_wrap(path,value):
    nonlocal pre_t
    out=original_jw(path,value);p=Path(path)
@@ -3947,131 +2971,6 @@ def main():
    nonlocal last_replan
    fr=inspect.currentframe();loc=fr.f_back.f_locals;model=kwargs["m"];cb=kwargs.get("base_callback")
    import gurobipy as gp
-   # H0 is executed immediately and receives a Fresh OpenDSS hard gate.  For
-   # forecast horizons where the omitted regulator-tap decision created a
-   # decision-independent constant-bound contradiction, the corresponding
-   # voltage-drop linkage is invalid too.  Remove only du_line rows at H0 and
-   # those evidenced horizon steps.  Power balance, line thermal circles,
-   # device/energy/mobility constraints, and unaffected future voltage rows
-   # remain unchanged.
-   fixed_tap_events=(issue_runtime.get("h0_constant_tap_projection_override",{}).get("events",[]))
-   fixed_tap_affected_steps={0}|{int(row["horizon_step"]) for row in fixed_tap_events}
-   h0_projection_prefixes=tuple(f"du_line_{h}_" for h in sorted(fixed_tap_affected_steps))
-   h0_projection_rows=[row for row in model.getConstrs()
-                       if str(row.ConstrName).startswith(h0_projection_prefixes)]
-   h0_projection_names=[str(row.ConstrName) for row in h0_projection_rows]
-   if h0_projection_rows:model.remove(h0_projection_rows);model.update()
-   issue_runtime["h0_planning_grid_projection_override"]={
-    "status":"FIXED_TAP_VOLTAGE_DROP_LINKS_REPLACED_BY_RECEDING_FRESH_EXACT_AC_GATE",
-    "removed_linear_row_count":len(h0_projection_rows),
-    "removed_row_prefixes":list(h0_projection_prefixes),
-    "affected_horizon_steps":sorted(fixed_tap_affected_steps),
-    "removed_row_names_sha256":hashlib.sha256("\n".join(sorted(h0_projection_names)).encode()).hexdigest(),
-   "power_balance_rows_removed":0,"line_thermal_rows_removed":0,
-    "device_energy_mobility_rows_removed":0,
-    "fresh_exact_opendss_required":True,"hard_physical_limits_relaxed":False,
-    "future_actual_used":False}
-   # The aggregate LinDistFlow planner has no per-phase transformer-current
-   # row, although Fresh OpenDSS rejects reg1a when any one phase exceeds its
-   # nameplate.  Protect future mobility decisions with the latest causal equivalent
-   # three-phase kVA limit observed at preceding committed PASS boundaries.
-   # This is causal and inward-only; H0 still uses the exact unchanged gate.
-   reg1a_rows=[]
-   reg1a_envelope_limit_kva=reg1a_causal_limit_kva
-   reg1a_envelope_source="IMMEDIATELY_PRECEDING_COMMITTED_PASS_EXACT_AC_EQUIVALENT_KVA"
-   reg1a_envelope_creation_issue=int(i)
-   reg1a_envelope_target_end_issue=int(i)+12
-   h0_envelope_enabled=False
-   # A shifted active plan must retain the envelope under which it was made.
-   # Re-estimating the bound every five minutes can invalidate the plan solely
-   # because of tiny causal phase-distribution drift and trigger plan churn.
-   if i>START and issue_runtime.get("prebuild_requested_mode")=="NONE":
-    prior_audit_path=engine/f"issue_{i-1:06d}/POLICY_ISSUE_AUDIT.json"
-    if prior_audit_path.is_file():
-     prior_envelope=load_json(prior_audit_path).get("reg1a_causal_phase_current_envelope",{})
-     prior_limit=prior_envelope.get("equivalent_limit_kva")
-     if prior_limit is not None:
-      reg1a_envelope_limit_kva=float(prior_limit)
-      reg1a_envelope_source="SHIFTED_ACTIVE_PLAN_CREATION_ENVELOPE"
-      reg1a_envelope_creation_issue=int(prior_envelope.get("envelope_creation_issue",i-1))
-      reg1a_envelope_target_end_issue=int(prior_envelope.get(
-       "envelope_target_end_issue",(i-1)+int(prior_envelope.get("future_horizon_rows",12))))
-   if reg1a_envelope_limit_kva is not None:
-    proj=loc.get("r25d_proj")
-    if proj is None:raise RuntimeError("REG1A_CAUSAL_ENVELOPE_REQUIRES_R25D_PROJECTION")
-    flow_scale=float(loc.get("_r25i_flow_scale_kw_per_model_unit",1.0))
-    fp_vars=loc.get("FP",{});fq_vars=loc.get("FQ",{})
-    bgp=np.asarray(loc["bgP"],dtype=float);bgq=np.asarray(loc["bgQ"],dtype=float)
-    buses=list(map(str,loc["bgbus"]));root_node=str(loc["root"])
-    limit_model=float(reg1a_envelope_limit_kva)/flow_scale
-    # Protect the three dispatch intervals in which a mobility action becomes
-    # committed and reaches its destination.  Longer load-error protection is
-    # supplied separately by the per-MESS energy reserve below; extending this
-    # one-step phase-distribution proxy farther can drive several batteries to
-    # their SOC floor while satisfying only an aggregate root quantity.
-    # distribution to the whole one-hour event window can falsely conflict
-    # with forecast charging/debt repayment at a later MAX_REFRESH boundary,
-    # before that later state is observable.  H0 and every realized successor
-    # still pass the unchanged Fresh OpenDSS per-phase current gate.
-    # This row is a route/workload/dispatch *planning* safeguard.  Include H0
-    # only in the single same-PRE full-replan recovery after Fresh OpenDSS has
-    # rejected the first candidate.  Normal replans leave H0 to the exact gate,
-    # avoiding needless perturbation of an already-safe operating point; the
-    # recovery replan must be able to undo a newly selected unsafe job start,
-    # which a downstream PCS-only P/Q correction cannot do.
-    # A shifted active plan
-    # was already selected under its creation forecast; reapplying the row with
-    # a newly issued forecast can invalidate the plan without any physical
-    # event.  Ordinary H0 execution remains protected by Fresh OpenDSS.
-    protected_steps=(0 if issue_runtime.get("prebuild_requested_mode")=="NONE"
-                     else min(3,max(0,reg1a_envelope_target_end_issue-int(i))))
-    h0_envelope_enabled=bool(issue_runtime.get("grid_hard_risk_full_replan_retry",False))
-    for h in range(0 if h0_envelope_enabled else 1,min(H,protected_steps+1)):
-     own_p={n:0.0 for n in proj.static_nodes};own_q={n:0.0 for n in proj.static_nodes}
-     root_own_p=root_own_q=0.0
-     for bi,bus in enumerate(buses):
-      if bus in own_p:
-       own_p[bus]+=float(bgp[h,bi]);own_q[bus]+=float(bgq[h,bi])
-      elif bus==root_node:
-       root_own_p+=float(bgp[h,bi]);root_own_q+=float(bgq[h,bi])
-     static_fp,static_fq=science.condense_static_subtree_flows(proj,own_p,own_q)
-     dynamic_children,constant_p,constant_q=science.skeleton_balance_child_terms(
-      proj,root_node,static_fp,static_fq)
-     missing=[child for child in dynamic_children if (h,child) not in fp_vars or (h,child) not in fq_vars]
-     if missing:raise RuntimeError(f"REG1A_ROOT_FLOW_VARIABLE_MISSING_H{h}:{missing}")
-     root_p=gp.LinExpr((root_own_p+float(constant_p))/flow_scale)
-     root_q=gp.LinExpr((root_own_q+float(constant_q))/flow_scale)
-     for child in dynamic_children:
-      root_p+=fp_vars[(h,child)];root_q+=fq_vars[(h,child)]
-     # At H0 use the unchanged 5 MVA transformer nameplate.  Applying the
-     # tighter one-step phase-distribution proxy to H0 can itself force an
-     # artificial reactive-power corner even though Fresh OpenDSS proves the
-     # existing state safe.  For H1..H3 retain the causal inward proxy that
-     # protects future phase current.  The H0 nameplate row is still enough to
-     # reject the unsafe ~5.9 MVA immediate workload start seen at issue 15183.
-     row_limit_model=(5000.0/flow_scale if h==0 else limit_model)
-     row=model.addQConstr(root_p*root_p+root_q*root_q<=row_limit_model*row_limit_model,
-                          name=f"a_b10_reg1a_phase_current_envelope_h{h}")
-     reg1a_rows.append(row)
-    model.update()
-   issue_runtime["reg1a_causal_phase_current_envelope"]={
-    "status":"PASS_CAUSAL_INWARD_PLANNING_ENVELOPE" if reg1a_rows else "NO_PRIOR_PASS_AUTHORITY",
-    "source":reg1a_envelope_source,
-    "preceding_authority_count":len(reg1a_prior_limits),
-    "equivalent_limit_kva":reg1a_envelope_limit_kva,"guard_factor":0.995,
-    "envelope_creation_issue":reg1a_envelope_creation_issue,
-    "envelope_target_end_issue":reg1a_envelope_target_end_issue,
-    "planning_envelope_rows":len(reg1a_rows),
-    "future_horizon_rows":max(0,len(reg1a_rows)-(1 if h0_envelope_enabled else 0)),
-    "h0_exact_gate_unchanged":True,
-    "h0_planning_envelope_rows":(1 if h0_envelope_enabled else 0),
-    "h0_planning_limit_kva":(5000.0 if h0_envelope_enabled else None),
-    "h0_planning_envelope_trigger":"SAME_PRE_GRID_HARD_FULL_REPLAN_RETRY" if h0_envelope_enabled else None,
-    "mobility_commitment_horizon_steps":3,
-    "transformer_nameplate_kva":5000.0,"power_scale_changed":False,
-    "hard_exact_limit_relaxed":False,"future_actual_used":False}
-   jw(Path(loc["out"])/"A_B10_REG1A_CAUSAL_PHASE_CURRENT_ENVELOPE.json",
-      issue_runtime["reg1a_causal_phase_current_envelope"])
    # Grid-voltage safety requires prospective controllable PCS reserve.  H0 is
    # already the immutable PRE mobility state: if all units are in an earlier
    # MOVE/CONNECTION_DELAY, no current optimization can reconnect one.  Record
@@ -4099,80 +2998,6 @@ def main():
     "decision_rows_h1_to_h53_where_controllable":True,
     "physical_reason":"RETAIN_CONTROLLABLE_PQ_FOR_EXACT_VOLTAGE_SAFETY",
     "power_scale_changed":False,"hard_grid_limits_relaxed":False,"future_actual_used":False})
-   # A connected PCS at the exact 440 kWh floor has reactive capability but no
-   # active-power headroom for an unobserved next-step load error.  Preserve at
-   # every MESS enough energy for four consecutive five-minute, 550 kW
-   # grid-support intervals
-   # at H1, the next state actually reached after committing H0.  H2--H53 are
-   # nonbinding guidance and are not persisted, so imposing the reserve there
-   # can distort future integer choices without preserving additional actual
-   # energy in this receding-horizon implementation.
-   # This value follows directly from the frozen
-   # 0.95 discharge efficiency and is an inward reserve above (not a change to)
-   # the physical SOC floor.  It also prevents an aggregate root envelope from
-   # satisfying itself by draining several site-specific resources to zero.
-   #
-   # The reserve is persistent receding-horizon policy, so install it on every
-   # issue rather than only on explicit replans.  H0 is not credited back here:
-   # the committed transition itself must leave H1 above the reserve floor.
-   # The unchanged 440 kWh physical floor still applies at every step.
-   energy_reserve_rows=[];energy_reserve_h1_rows=[]
-   # 550 kW is the existing frozen MESS PCS dispatch ceiling observed by the
-   # controller, not a rescaling.  Four full intervals require 192.9825 kWh at
-   # the frozen 0.95 discharge efficiency.
-   reserve_support_intervals=4
-   reserve_support_duration_minutes=5.0*reserve_support_intervals
-   energy_reserve_kwh=(550.0/0.95)*(reserve_support_duration_minutes/60.0)
-   energy_reserve_floor_kwh=ENERGY_PHYSICAL_FLOOR_KWH+energy_reserve_kwh
-   # After an emergency has spent the reserve, demanding a one-step return to
-   # the full floor can exceed the frozen charger capability.  Recover by at
-   # most a 100 kW charging interval, and
-   # never permit nominal dispatch to reduce the depleted pre-state further.
-   reserve_recovery_charge_kw=100.0
-   reserve_recovery_increment_kwh=reserve_recovery_charge_kw*0.95*(5.0/60.0)
-   energy_scale=float(loc.get("_c5r4_energy_scale_kwh_per_model_unit",1.0))
-   energy_vars=loc.get("E",{}) or {}
-   pre_energy_by_mid={str(mid):float((loc.get("mess_E",{}) or {})[str(mid)])
-                      for mid in map(str,loc["mids"])}
-   h1_target_by_mid={mid:min(energy_reserve_floor_kwh,
-                             max(ENERGY_PHYSICAL_FLOOR_KWH,pre_e)+reserve_recovery_increment_kwh)
-                     if pre_e<energy_reserve_floor_kwh else energy_reserve_floor_kwh
-                     for mid,pre_e in pre_energy_by_mid.items()}
-   protected_energy_steps=[h for h in (1,) if h<H]
-   for h in protected_energy_steps:
-    for mid in map(str,loc["mids"]):
-     var=energy_vars.get((mid,h))
-     if var is None:raise RuntimeError(f"PCS_ENERGY_RESERVE_VARIABLE_MISSING:{mid}:H{h}")
-     target_kwh=h1_target_by_mid[mid]
-     reserve_ref=model.addLConstr(
-      var>=target_kwh/energy_scale,
-      name=f"a_b10_pcs_energy_reserve_{mid}_h{h}")
-     energy_reserve_rows.append(reserve_ref)
-     if h==1:energy_reserve_h1_rows.append(reserve_ref)
-   model.update()
-   loc["_a_b10_pcs_energy_reserve_rows"]=energy_reserve_rows
-   loc["_a_b10_pcs_energy_reserve_h1_rows"]=energy_reserve_h1_rows
-   issue_runtime["pcs_near_horizon_energy_reserve"]={
-    "status":"PASS_INWARD_RESERVE_INSTALLED" if energy_reserve_rows else "SHIFTED_PLAN_NO_NEW_ROWS",
-    "row_count":len(energy_reserve_rows),"protected_steps":protected_energy_steps,
-    "protected_step_h1":1 in protected_energy_steps,"protected_step_h5":False,
-    "h2_to_h53_policy":"UNCHANGED_PHYSICAL_SOC_FLOOR_NONBINDING_GUIDANCE",
-    "per_mess_grid_support_kw":550.0,"support_interval_count":reserve_support_intervals,
-    "support_duration_minutes":reserve_support_duration_minutes,
-    "discharge_efficiency":0.95,"reserve_above_floor_kwh":energy_reserve_kwh,
-    "reserve_floor_kwh":energy_reserve_floor_kwh,
-    "depleted_reserve_recovery_charge_kw":reserve_recovery_charge_kw,
-    "depleted_reserve_recovery_increment_kwh":reserve_recovery_increment_kwh,
-    "pre_energy_kwh":pre_energy_by_mid,"h1_target_kwh":h1_target_by_mid,
-    "depleted_target_never_below_pre_energy":True,
-    "installed_on_every_issue":True,
-    "h0_discharge_credit_in_reserve_test":False,
-    "h1_operating_reserve_released_only_after_fresh_ac_failure":True,
-    "guard_semantics":"H1_FULL_RESERVE_OR_RATE_LIMITED_RECOVERY_TARGET_RELEASED_ONLY_FOR_FRESH_AC_FAILURE",
-    "physical_soc_floor_kwh_unchanged":ENERGY_PHYSICAL_FLOOR_KWH,
-    "power_scale_changed":False,"hard_grid_limits_relaxed":False,"future_actual_used":False}
-   jw(Path(loc["out"])/"A_B10_PCS_NEAR_HORIZON_ENERGY_RESERVE.json",
-      issue_runtime["pcs_near_horizon_energy_reserve"])
    metrics=current_soft_metrics(loc,sources,i)
    steps=max(0,i-last_replan)
    if "decision" not in decision_cache:
@@ -4206,19 +3031,6 @@ def main():
     issue_runtime["test_only_forced_mode"]=requested
    if requested!="NONE" and bool(loc.get("active_plan_mobility_projection",False)):
     raise RuntimeError("A_B10_ACTIVE_PLAN_MOBILITY_PROJECTION_REQUIRES_FULL_DOMAIN")
-   # The production sparse planner omits 576 R25K rows during search and adds
-   # them back before physical dispatch.  Preserve the exact unconditioned
-   # domain so a sparse candidate that is not feasible after row restoration
-   # can be rejected and re-solved once on the dense model from the same PRE.
-   # This is a bounded equivalence fallback, not a relaxation: the second
-   # planner contains every original row and the final physical gate is intact.
-   dense_equivalence_bound_snapshot=None
-   if use_sparse_restore and requested!="NONE":
-    dense_equivalence_bound_snapshot={
-     str(v.VarName):(v,float(v.LB),float(v.UB),str(v.VType))
-     for name in ("x","defer","stay","mv","node_occ","mode")
-     for v in (loc.get(name,{}) or {}).values()
-    }
    hard_exc=None
    if requested=="NONE":
     try:
@@ -4267,23 +3079,14 @@ def main():
     # bounds so an exact fail-closed escalation can restore the unconditioned
     # full planner model without rebuilding or changing any equations.
     slow_bound_snapshot=[
-     (v,float(v.LB),float(v.UB),str(v.VType))
+     (v,float(v.LB),float(v.UB))
      for name in ("x","defer","stay","mv","node_occ")
      for v in (loc.get(name,{}) or {}).values()
     ]
     def restore_slow_bounds():
-     for v,lb,ub,vtype in slow_bound_snapshot:
-      v.LB=lb;v.UB=ub;v.VType=vtype
+     for v,lb,ub in slow_bound_snapshot:
+      v.LB=lb;v.UB=ub
      model.update();model.reset()
-     restored_integer_types=sum(vtype.upper() in {"B","I","S","N"}
-                                for _,_,_,vtype in slow_bound_snapshot)
-     issue_runtime["local_repair_full_domain_restore"]={
-      "status":"PASS_BOUNDS_AND_VARIABLE_TYPES_ATOMICALLY_RESTORED",
-      "restored_variable_count":len(slow_bound_snapshot),
-      "restored_integer_variable_type_count":restored_integer_types,
-      "same_pre":True,"hard_constraints_relaxed":False,"future_actual_used":False}
-     jw(Path(loc["out"])/"A_B10_LOCAL_REPAIR_FULL_DOMAIN_RESTORE.json",
-        issue_runtime["local_repair_full_domain_restore"])
     try:
      scope=astep5.apply_actual_local_repair(loc=loc,ref=ref,issue=i,affected_job_ids=affected_jobs,
        affected_mess_ids=affected_mess,near_horizon_steps=12)
@@ -4338,44 +3141,7 @@ def main():
       issue_runtime["planner_mode"]="SOFT_REPLAN_NO_CANDIDATE_RETAIN_HARD_VALID_ACTIVE"
    if use_sparse_restore and os.environ.get("MOBILEESS_POST15_SKIP_REDUNDANT_DENSE_B4_CUTS","0")=="1":
     issue_runtime["dense_b4_restore"]=restore_redundant_dense_b4_rows(loc)
-   try:
-    fast=solve_fast(model,cb,loc)
-   except RuntimeError as exc:
-    sparse_dense_mismatch=(
-     str(exc)=="fast conditioned dispatch has no feasible incumbent"
-     and dense_equivalence_bound_snapshot is not None
-     and bool(issue_runtime.get("replan_executed",False))
-     and int(issue_runtime.get("dense_b4_restore",{}).get("rows_added",0))==576)
-    if not sparse_dense_mismatch:raise
-    for v,lb,ub,vtype in dense_equivalence_bound_snapshot.values():
-     v.LB=lb;v.UB=ub;v.VType=vtype
-    for key in ("_pending_complete_mip_start_by_name",
-                "_pending_future_mode_bound_snapshot_by_name",
-                "_pending_active_plan_mode_start_by_name",
-                "_pending_all_active_plan_mode_start_by_name"):
-     loc.pop(key,None)
-    loc["_conditioned_shifted_active_plan"]=False
-    model.update();model.reset()
-    dense_q,dense_planner=planner_solve_exact_copy(model,cb)
-    issue_runtime["slow_planner_runtime_s"]+=float(dense_q["wall_seconds"])
-    dense_q.update({
-     "schema_version":"mobileess.a_b10.sparse_dense_equivalence_fallback.v1",
-     "status":("PASS_DENSE_CANDIDATE_AVAILABLE" if dense_q["candidate_available"]
-               else "FAIL_DENSE_CANDIDATE_UNAVAILABLE"),
-     "trigger":"SPARSE_CANDIDATE_INFEASIBLE_AFTER_576_ROW_RESTORATION",
-     "same_pre":True,"full_unconditioned_domain_restored":True,
-     "dense_original_rows_authoritative":True,"power_scale_changed":False,
-     "hard_constraints_relaxed":False,"future_actual_used":False})
-    jw(Path(loc["out"])/"A_B10_SPARSE_DENSE_EQUIVALENCE_FALLBACK.json",dense_q)
-    if not dense_q["candidate_available"]:
-     dense_planner.dispose()
-     raise RuntimeError("SPARSE_DENSE_EQUIVALENCE_FALLBACK_NO_DENSE_CANDIDATE") from exc
-    accept_planner_candidate(dense_planner)
-    issue_runtime["planner_mode"]=(str(issue_runtime.get("planner_mode","UNKNOWN"))+
-                                   "+DENSE_EQUIVALENCE_FALLBACK")
-    issue_runtime["sparse_dense_equivalence_fallback_executed"]=True
-    fast=solve_fast(model,cb,loc)
-   issue_runtime["fast_solver"]=fast;issue_runtime["dispatch_status"]="OPTIMAL" if int(model.Status)==2 else f"GUROBI_{int(model.Status)}"
+   fast=solve_fast(model,cb,loc);issue_runtime["fast_solver"]=fast;issue_runtime["dispatch_status"]="OPTIMAL" if int(model.Status)==2 else f"GUROBI_{int(model.Status)}"
    loc["_a_b10_fixed_location_policy"]=fixed_location
    ac_recovery_context.clear();ac_recovery_context.update({"loc":dict(loc),"cb":cb})
    if issue_runtime.get("grid_hard_risk_full_replan_retry",False):
@@ -4511,11 +3277,6 @@ def main():
                                             "files":sum(1 for p in d.rglob("*") if p.is_file())}
   jw(d/"POLICY_ISSUE_AUDIT.json",issue_runtime)
   write_commit_marker(d,i,last_replan,event_state(ev),d/"BUILD7C_ROLLING_GUIDANCE_NEXT_ISSUE.json")
-  new_reg1a_limit=_reg1a_causal_equivalent_kva_limit(
-   d/"exact_grid/A_B10_FRESH_EXACT_AC_OBSERVABILITY.json")
-  if new_reg1a_limit is not None:
-   reg1a_prior_limits.append(float(new_reg1a_limit))
-   reg1a_causal_limit_kva=reg1a_prior_limits[-1]
   issue_audits.append(issue_runtime)
   jw(checkpoint_path,{"status":"RUNNING","last_completed_issue":i,"last_replan_issue":last_replan,
       "event_engine_state":event_state(ev),"completed_issue_count":len(issue_audits),"future_actual_used":False})

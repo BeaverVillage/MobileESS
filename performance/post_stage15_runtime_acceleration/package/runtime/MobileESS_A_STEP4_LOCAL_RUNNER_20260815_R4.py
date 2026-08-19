@@ -119,20 +119,113 @@ def _tail_extend_mess(previous:pd.DataFrame)->pd.DataFrame:
     return out.sort_values(["mess_id","horizon_step"],kind="mergesort").reset_index(drop=True)
 
 
+def _canonicalize_mess_path_from_causal_route(
+    previous:pd.DataFrame,
+    moves:pd.DataFrame,
+    pre_state:Mapping[str,Any],
+)->tuple[pd.DataFrame,dict[str,Any]]:
+    """Recover the unique MESS path from PRE state plus selected move arcs.
+
+    BUILD7B_FULL54_MESS_PLAN.csv is a report, while PRE state and the selected
+    route arcs are the causal mobility authorities.  Some Full-Replan solves
+    serialized connected node-occupancy steps as TRANSIT with a blank service
+    even though the unique route had already arrived.  Do not mutate the prior
+    committed artifact; canonicalize only the next-issue active reference and
+    fail closed on any non-unique or inconsistent route.
+    """
+    required={"mess_id","horizon_step","state","service_id"}
+    if not required.issubset(previous.columns):
+        raise RuntimeError(f"MESS plan columns missing: {sorted(required-set(previous.columns))}")
+    state_root=pre_state.get("state",{})
+    mess_state=state_root.get("mess_state",{}) if isinstance(state_root,dict) else {}
+    if not isinstance(mess_state,dict):raise RuntimeError("causal PRE mess_state missing")
+    move_rows:dict[tuple[str,int],dict[str,Any]]={}
+    if len(moves):
+        needed={"mess_id","horizon_step","source_service_id","destination_service_id","safe_total_duration_steps"}
+        if not needed.issubset(moves.columns):
+            raise RuntimeError(f"selected move columns missing: {sorted(needed-set(moves.columns))}")
+        for row in moves.to_dict("records"):
+            key=(str(row["mess_id"]),int(row["horizon_step"]))
+            if key in move_rows:raise RuntimeError(f"duplicate selected move at {key}")
+            move_rows[key]=dict(row)
+    out=previous.copy()
+    corrected=[];terminal={}
+    for mid,g in out.groupby("mess_id",sort=True):
+        mid=str(mid);idx_by_h={int(out.loc[idx,"horizon_step"]):idx for idx in g.index}
+        if set(idx_by_h)!=set(range(54)) or len(idx_by_h)!=54:
+            raise RuntimeError(f"{mid}: MESS report is not exactly h=0..53")
+        rs=mess_state.get(mid)
+        if not isinstance(rs,dict):raise RuntimeError(f"{mid}: causal PRE mobility state missing")
+        phase=str(rs.get("phase","STAY"))
+        current=str(rs.get("service_id") or rs.get("source_service_id") or "")
+        pending_dest=None;blocked_until=0
+        if phase in {"MOVE","CONNECTION_DELAY"}:
+            pending_dest=str(rs.get("dest_service_id") or "")
+            blocked_until=int(rs.get("remaining_total_steps",0))
+            if not pending_dest or blocked_until<=0:
+                raise RuntimeError(f"{mid}: invalid causal PRE {phase} state")
+        elif phase!="STAY" or not current:
+            raise RuntimeError(f"{mid}: unsupported causal PRE mobility state {rs}")
+        for h in range(54):
+            if pending_dest is not None and h>=blocked_until:
+                current=pending_dest;pending_dest=None
+            selected=move_rows.get((mid,h))
+            if pending_dest is not None:
+                if selected is not None:raise RuntimeError(f"{mid}: selected move while already in transit h={h}")
+                expected_state="TRANSIT";expected_service=""
+            elif selected is not None:
+                source=str(selected["source_service_id"]);dest=str(selected["destination_service_id"])
+                duration=int(selected["safe_total_duration_steps"])
+                if source!=current or not dest or duration<=0:
+                    raise RuntimeError(f"{mid}: selected move route discontinuity h={h} current={current} move={selected}")
+                expected_state="MOVE";expected_service=current
+                pending_dest=dest;blocked_until=h+duration
+            else:
+                expected_state="STAY";expected_service=current
+            idx=idx_by_h[h]
+            old_state=str(out.loc[idx,"state"])
+            raw_service=out.loc[idx,"service_id"]
+            old_service="" if pd.isna(raw_service) else str(raw_service)
+            if (old_state,old_service)!=(expected_state,expected_service):
+                corrected.append({"mess_id":mid,"horizon_step":h,
+                                  "reported_state":old_state,"reported_service_id":old_service,
+                                  "causal_state":expected_state,"causal_service_id":expected_service})
+                out.loc[idx,"state"]=expected_state
+                out.loc[idx,"service_id"]=expected_service
+        if pending_dest is not None and blocked_until>54:
+            raise RuntimeError(f"{mid}: selected route remains in transit beyond the active horizon")
+        terminal[mid]={"state":str(out.loc[idx_by_h[53],"state"]),
+                       "service_id":str(out.loc[idx_by_h[53],"service_id"])}
+    return out,{
+        "schema_version":"mobileess.active_plan.causal_route_canonicalization.v1",
+        "status":"PASS_CAUSAL_ROUTE_RECONSTRUCTED",
+        "authority_inputs":["BUILD7C_PRECOMMIT_STATE.json","BUILD7B_FULL54_MOVE_ARCS_SELECTED.csv"],
+        "reported_mess_plan_is_non_authoritative_view":True,
+        "prior_committed_artifact_modified":False,
+        "corrected_report_row_count":len(corrected),
+        "corrected_report_rows":corrected,
+        "terminal_path":terminal,
+        "future_actual_used":False,
+    }
+
+
 def shifted_reference_from_previous(issue:int,engine:Path)->dict[str,Any]:
     prev=engine/f"issue_{issue-1:06d}"
     job_path=prev/"BUILD7B_FULL54_JOB_PLAN.csv"
     mess_path=prev/"BUILD7B_FULL54_MESS_PLAN.csv"
     move_path=prev/"BUILD7B_FULL54_MOVE_ARCS_SELECTED.csv"
+    pre_path=prev/"BUILD7C_PRECOMMIT_STATE.json"
     post_path=prev/"BUILD7C_POSTCOMMIT_STATE.json"
-    for p in (job_path,mess_path,move_path,post_path):
+    for p in (job_path,mess_path,move_path,pre_path,post_path):
         if not p.is_file(): raise RuntimeError(f"previous committed plan artifact missing: {p}")
     jobs=_read_plan_csv(job_path)
     # Work starts at issue-1 were physically committed and must disappear from the active plan.
     if len(jobs):
         jobs=jobs[jobs["start_step"].astype(int)>=int(issue)].copy().reset_index(drop=True)
-    mess=_tail_extend_mess(_read_plan_csv(mess_path))
     moves=_read_plan_csv(move_path)
+    causal_mess,path_audit=_canonicalize_mess_path_from_causal_route(
+        _read_plan_csv(mess_path),moves,json.loads(pre_path.read_text()))
+    mess=_tail_extend_mess(causal_mess)
     if len(moves):
         moves=moves[moves["horizon_step"].astype(int)>=1].copy()
         moves["horizon_step"]=moves["horizon_step"].astype(int)-1
@@ -145,6 +238,7 @@ def shifted_reference_from_previous(issue:int,engine:Path)->dict[str,Any]:
         "BUILD7B_FULL54_MOVE_ARCS_SELECTED.csv":moves,
         "active_plan_parent_issue":issue-1,
         "active_plan_source_post_sha256":str(post["sha256"]),
+        "active_plan_path_canonicalization":path_audit,
         "authority":"SHIFTED_PREVIOUS_CAUSAL_ACTIVE_PLAN",
     }
 
@@ -274,6 +368,7 @@ def bind_shifted_active_plan(loc:Mapping[str,Any],ref:Mapping[str,Any],issue:int
         "authority":ref.get("authority"),
         "active_plan_parent_issue":ref.get("active_plan_parent_issue"),
         "active_plan_source_post_sha256":ref.get("active_plan_source_post_sha256"),
+        "active_plan_path_canonicalization":ref.get("active_plan_path_canonicalization"),
         "selected_job_choices":len(selected_x),
         "unplanned_deferrable_jobs":len([j for j in model_jobs if j not in selected_jobs]),
         "selected_move":len(selected_mv),

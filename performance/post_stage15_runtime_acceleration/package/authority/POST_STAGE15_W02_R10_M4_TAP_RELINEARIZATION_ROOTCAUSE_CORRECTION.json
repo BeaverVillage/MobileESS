@@ -1,0 +1,54 @@
+{
+  "schema_version": "mobileess.post_stage15.w02_r10_m4_tap_relinearization.v1",
+  "status": "PASS_TAP_RELINEARIZATION_GRID_RECOVERY_SIX_BOUNDARIES",
+  "root_cause": {
+    "r9_actual_issue3577": "The initial severe voltage-only state had 3 violating nodes and 1.0578721176023187 pu maximum voltage. The first Q-frozen P correction crossed to a new regulator state, reducing worst severity but spreading the smaller excess to 5 nodes. The previous count-first progress gate prevented a causal relinearization at that observed tap state.",
+    "design": "For voltage-only recovery, worst hard-limit distance is the monotone progress metric. Round 1 keeps Q frozen to expose the regulator state; a single round 2 relinearizes at that exact state and opens only a bounded 100 kvar Q neighbourhood.",
+    "power_scale_error": false,
+    "unsafe_action_committed": false
+  },
+  "correction": {
+    "runner": {
+      "path": "runtime/W02_POLICY_EPISODE_RUNNER.py",
+      "sha256": "8ddaed55c13af013a13997c3c4fda1f70370355dca7a1361db3eb51807f0b498"
+    },
+    "runner_sha256": "8ddaed55c13af013a13997c3c4fda1f70370355dca7a1361db3eb51807f0b498",
+    "launcher_sha256": "3b2df7c844def153dfbe69644180248b6635996a7baad0e68a24b0cf073b667e",
+    "run_id": "B_W02_4POLICY_ACTUAL_FINAL_R10",
+    "voltage_only_severe_threshold_pu": 0.0005,
+    "round1_p_kw": 1100.0,
+    "round1_q_kvar": 0.0,
+    "round2_p_kw": 1100.0,
+    "round2_q_kvar": 100.0,
+    "max_cut_rounds": 2,
+    "max_fresh_ac_candidates": 4,
+    "power_scale_kw_per_model_unit": 1000.0,
+    "power_scale_changed": false,
+    "hard_limits_relaxed": false,
+    "future_actual_used": false
+  },
+  "validation": {
+    "safety_validator_sha256": "19e646275889657936e5575150452ac21a1b476a907a5cdfca68e7fa94935137",
+    "safety_result_sha256": "69318aeca5e4448e91fe923494afa130feee5d72be24435cefd3ff182ce4c750",
+    "six_boundary_validator_sha256": "574843385fd097748e031807f3cd7bc70c13f5be6937e0f23e6588020c6bd542",
+    "six_boundary_result_sha256": "c962d67d3e3771f82388b09818fcb6b9f24bbc7edae7e5ef5f9fc8d3477bd936",
+    "r9_issue3577_evidence_sha256": "0002f265e7a13d6af1c16ce7cb9609ea2863bb2159ce4866b4242a6284490a28",
+    "causal_pre_state_sha256": "73cf11363d7daa636c5ae6f63d9a08d26cea78721850f7ab9844c1015e15069f",
+    "initial_voltage_max_pu": 1.0578721176023187,
+    "round1_voltage_max_pu": 1.0564095450809559,
+    "final_voltage_max_pu": 1.0498580696811932,
+    "initial_voltage_violations": 3,
+    "round1_voltage_violations": 5,
+    "final_voltage_violations": 0,
+    "final_line_loading_max_pu": 0.8477988671416761,
+    "final_line_violations": 0,
+    "all_six_boundaries_pass": true,
+    "same_causal_pre_state": true,
+    "atomic_commit": true,
+    "full_W02_executed": false
+  },
+  "supersedes_for_current_runner_binding": [
+    "authority/POST_STAGE15_W02_R9_M4_TAP_RISK_GRID_RECOVERY_ROOTCAUSE_CORRECTION.json"
+  ],
+  "historical_authorities_remain_immutable": true
+}

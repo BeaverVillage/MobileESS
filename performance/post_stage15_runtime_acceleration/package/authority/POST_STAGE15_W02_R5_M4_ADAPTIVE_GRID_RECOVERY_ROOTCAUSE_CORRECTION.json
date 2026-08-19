@@ -1,0 +1,80 @@
+{
+  "schema_version": "mobileess.post_stage15.w02_r5_m4_adaptive_grid_recovery_rootcause.v1",
+  "status": "PASS_ADAPTIVE_GRID_RECOVERY_ISSUES_3518_3573",
+  "root_cause": {
+    "failure": "A single global P/Q trust radius cannot cover both a local voltage-control discontinuity and coupled voltage-plus-line-current relief.",
+    "issue_3518": "A wide reactive-power neighborhood crossed the OpenDSS regulator/control regime and invalidated local finite-difference voltage direction.",
+    "issue_3573": "The old recovery rejected seven line-current violations as unsupported; a local 10/10 neighborhood was also too small to relieve line loading while maintaining voltage.",
+    "unsafe_action_committed": false
+  },
+  "correction": {
+    "runner": {
+      "path": "runtime/W02_POLICY_EPISODE_RUNNER.py",
+      "sha256": "e5d017a4f3723be40a4b816587fb6415def858cf957e82eb22a1780c3beffd8e"
+    },
+    "launcher": {
+      "path": "RUN_W02_4POLICY_ACTUAL.sh",
+      "sha256": "48503147b938b10e06554f10043e031928900cb0bfae7b23820f91d34173a11d",
+      "run_id": "B_W02_4POLICY_ACTUAL_FINAL_R6"
+    },
+    "selector": "PRE_RECOVERY_EXACT_VIOLATION_FAMILY",
+    "voltage_only_profile": {
+      "p_trust_radius_kw": 10.0,
+      "q_trust_radius_kvar": 10.0
+    },
+    "coupled_voltage_line_profile": {
+      "p_trust_radius_kw": 100.0,
+      "q_trust_radius_kvar": 50.0
+    },
+    "finite_difference_step_kw_kvar": 10.0,
+    "conservative_voltage_cut_margin_pu": 0.0001,
+    "conservative_line_cut_margin_pu": 0.005,
+    "model_constraints_normalized_by_power_scale": true,
+    "power_scale_kw_per_model_unit": 1000.0,
+    "power_scale_changed": false,
+    "max_ac_correction_rounds": 1,
+    "hard_limits_relaxed": false,
+    "future_actual_used": false
+  },
+  "regression": {
+    "validator": {
+      "path": "tools/VALIDATE_W02_M4_ADAPTIVE_GRID_RECOVERY.py",
+      "sha256": "3965c4c7aa818be8e99e5da3b4f2ef319a90881d14b08954a3ec977e75ad774c"
+    },
+    "result": {
+      "path": "/home/jaewon/mobile_ess_work/frozen_artifacts/PRE_W02_M4_ADAPTIVE_GRID_RECOVERY_CURRENT.json",
+      "sha256": "9b3ae7b526d42ab647530b08b9619e0756a0a7accca59c131ad34190425df015",
+      "status": "PASS"
+    },
+    "issue_3518": {
+      "same_causal_pre_state": true,
+      "same_initial_candidate": true,
+      "selected_profile": "LOCAL_VOLTAGE_ONLY",
+      "initial_voltage_max_pu": 1.0500591700016837,
+      "fresh_voltage_max_pu": 1.049050650357268,
+      "fresh_line_max_loading_pu": 0.5548888224944041,
+      "fresh_exact_ac_pass": true,
+      "atomic_commit": true
+    },
+    "issue_3573": {
+      "same_causal_pre_state": true,
+      "same_initial_candidate": true,
+      "selected_profile": "COUPLED_VOLTAGE_LINE",
+      "initial_voltage_max_pu": 1.0514464268780375,
+      "initial_line_max_loading_pu": 1.0568566720716068,
+      "initial_line_violation_count": 7,
+      "fresh_voltage_max_pu": 1.0460442489498898,
+      "fresh_line_max_loading_pu": 0.9887072414900083,
+      "fresh_line_violation_count": 0,
+      "fresh_exact_ac_pass": true,
+      "atomic_commit": true
+    },
+    "full_W02_executed": false
+  },
+  "supersedes_for_current_runner_binding": [
+    "authority/POST_STAGE15_W02_R3_ACTUAL_FAILURE_ROOTCAUSE_CORRECTION.json",
+    "authority/POST_STAGE15_W02_R4_M4_ISSUE3518_ROOTCAUSE_CORRECTION.json"
+  ],
+  "historical_authorities_remain_immutable": true,
+  "document_files_modified": false
+}

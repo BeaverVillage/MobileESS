@@ -1,0 +1,86 @@
+{
+  "schema_version": "mobileess.post_stage15.rep12.r20_5.pcc_balance_numerical_polish.v1",
+  "status": "PASS_ROOT_CAUSE_CORRECTED_TARGET_AND_NEXT_ISSUE_REPRODUCED_PREFIX_PRESERVED",
+  "created_date": "2026-08-18",
+  "run_id": "B_12_REP_WEEKS_ACTUAL_FINAL_R20",
+  "failure": {
+    "candidate_id": "W07_2025-02-17",
+    "policy": "M1_PROPOSED_EVENT30_LOCAL_REPAIR_MOBILE",
+    "failed_issue": 13706,
+    "last_committed_issue": 13705,
+    "error": "R24_NUMERICAL_REFINEMENT_GATE_FAILED",
+    "before_constraint_violation": 3.895670803045342e-06,
+    "old_fallback_constraint_violation": 1.0308911866973454e-06,
+    "frozen_final_constraint_gate": 1e-06
+  },
+  "root_cause": {
+    "category": "conditioned MIQCP inner-polish tolerance too close to the unscaled evidence gate",
+    "scientific_model_infeasible": false,
+    "power_scale_failure": false,
+    "power_scale_already_normalized": true,
+    "max_residual_constraint": "pbal_12_mess_idc02_pcc",
+    "max_residual_constraint_kind": "LINEAR_EQUALITY",
+    "max_residual_semantics": "normalized LinDistFlow MESS PCC active-power balance",
+    "old_inner_feasibility_tolerance": 5e-07,
+    "old_inner_to_final_gate_margin": 2.0,
+    "failure_gate_excess": 3.089118669734536e-08,
+    "strict_1e9_polish_status": "NO_FEASIBLE_CERTIFICATE",
+    "same_model_at_2e7_inner_tolerance_status": "OPTIMAL"
+  },
+  "correction": {
+    "fallback_inner_feasibility_tolerance": 2e-07,
+    "inner_to_final_gate_margin": 5.0,
+    "final_constraint_gate": 1e-06,
+    "hard_gate_relaxed": false,
+    "scientific_objective_changed": false,
+    "scientific_feasible_set_changed": false,
+    "power_scale_changed": false,
+    "physical_constraint_changed": false,
+    "complete_feasible_mip_start_transferred": true,
+    "named_constraint_offenders_persisted_on_future_failure": true,
+    "future_actual_used": false
+  },
+  "source": {
+    "runner_sha256_before": "46e4f8eae023b100059c4303113c4b1ae00957e339cba94078e02e1abbc83cdd",
+    "runner_sha256_after": "9364dfd356950ec7a7e5db3855ef0f3b07f7dfadb5cf6cc9c1e4063eb6d35117"
+  },
+  "actual_regression": {
+    "root": "/tmp/mobileess_r20_5_candidate_out",
+    "benchmark_isolated_from_production_results": true,
+    "target_issue_13706": {
+      "status": "COMMITTED",
+      "constraint_violation": 7.303370566343809e-07,
+      "bound_violation": 1.1238630899523816e-07,
+      "integer_violation": 0.0,
+      "mip_gap": 0.0004206992061321814,
+      "refinement_mode": "INNER_GATE_2E7_POLISH_AFTER_STRICT_NO_CERTIFICATE",
+      "atomic_commit_marker_sha256": "5e456ddefa4db7e3f2c709341ca5e37b5ae9b0dbf1e188f341a6462540f665df",
+      "policy_issue_audit_sha256": "c4baabda3961ab6b541c7c1f9d2f7b2073839931ddcfa82a3b441f1accc435c0",
+      "fresh_exact_ac_sha256": "2faa7f5c3ece77d5f7bb0b07fce472e8c5f63777c5950822118de4b394429d54",
+      "fresh_exact_ac_pass": true,
+      "unsafe_action_committed": false
+    },
+    "next_issue_13707": {
+      "status": "COMMITTED",
+      "constraint_violation": 2.3564361656402966e-08,
+      "bound_violation": 1.1102230246251565e-16,
+      "integer_violation": 0.0,
+      "mip_gap": 0.000424809857973338,
+      "atomic_commit_marker_sha256": "400762966d71b5deaa285a81ada3a4bde918f295f96d162a240866b86c758593",
+      "policy_issue_audit_sha256": "52d470334170fd5685c9e174c524a8ef572ec1c2f6a73988233a9228afd5a73e",
+      "fresh_exact_ac_sha256": "b2aebfcc4aee95a14134258ee3e2c7994a5aef169708bdc27f60b58a877f43af",
+      "fresh_exact_ac_pass": true,
+      "unsafe_action_committed": false
+    }
+  },
+  "preserved_production_prefix": {
+    "audit_path": "/home/jaewon/mobile_ess_work/frozen_artifacts/B_12_REP_WEEKS_ACTUAL_FINAL_R20/REP12_COMMITTED_PREFIX_INTEGRITY_AUDIT_R20_5.json",
+    "audit_sha256": "0b2f24ef1b645bb2018f39b7c9c554184e07dd0736bfa49415cd3be18ca3fbdc",
+    "status": "PASS_ALL_EXISTING_RESULTS_ATOMICALLY_COMMITTED_AND_CONTIGUOUS",
+    "total_committed_issues": 6003,
+    "W02": {"M1": 1233, "M2": 1471, "M3": 1098, "M4": 2016},
+    "W07": {"M1": 170, "M2": 15, "M3": 0, "M4": 0},
+    "ctrl_c_corrupted_committed_result": false,
+    "same_command_resume_safe": true
+  }
+}

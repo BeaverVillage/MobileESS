@@ -1,0 +1,66 @@
+{
+  "schema_version": "mobileess.post_stage15.w02.r20.issue4499_continuous_commit_rootcause.v1",
+  "status": "PASS_ROOT_CAUSE_CORRECTED_AND_TARGET_REPRODUCED",
+  "new_clean_formal_run_id": "B_12_REP_WEEKS_ACTUAL_FINAL_R20",
+  "failure": {
+    "prior_run_id": "B_12_REP_WEEKS_ACTUAL_FINAL_R19",
+    "candidate_id": "W02_2025-01-13",
+    "policy": "M1_PROPOSED_EVENT30_LOCAL_REPAIR_MOBILE",
+    "failed_issue": 4499,
+    "last_committed_issue": 4498,
+    "failure_class": "FAST_CONDITIONED_DISPATCH_NO_FEASIBLE_INCUMBENT",
+    "failure_json_sha256": "cd3e23789a521741c3e7aba269d6c6a15a4b5b9f1db25e8f7ff64cf97e387150"
+  },
+  "root_cause": {
+    "scientific_formulation": "BINARY_NODE_OCCUPANCY_PLUS_CONTINUOUS_SIMPLE_DAG_ARCS",
+    "continuous_move_arc_count_at_issue_4499": 94726,
+    "defect": "The planner-to-commit transfer rounded every slow variable, including continuous MOVE arcs, to 0 or 1 before fixing bounds.",
+    "effect": "The exact full planner had a feasible incumbent, but the transfer changed its continuous path assignment and the conditioned physical-dispatch model became infeasible.",
+    "power_scale_error": false,
+    "gurobi_time_limit_error": false,
+    "fresh_opendss_error": false
+  },
+  "correction": {
+    "integer_domains": "Canonicalize only B/I/S/N variables after enforcing the frozen 1e-5 integer-feasibility gate.",
+    "continuous_domains": "Preserve the planner incumbent value exactly when fixing continuous slow variables.",
+    "scientific_objective_changed": false,
+    "hard_constraint_relaxed": false,
+    "power_scale_changed": false,
+    "future_actual_used": false
+  },
+  "supervisor_correction": {
+    "defect": "Synchronous representative-week source preparation blocked wait-n, delaying detection of a failure in another active policy.",
+    "correction": "Source preparation is now a pid_kind=source monitored queue task; prerequisite waiters are dispatched as soon as the shared authority passes.",
+    "duplicate_source_preparation_blocked": true,
+    "ctrl_c_cleanup": "Each task has an internal process group and foreground SIGINT invokes resumable TERM cleanup for all active task groups."
+  },
+  "target_regression": {
+    "diagnostic_root": "/home/jaewon/mobile_ess_work/diagnostics/R20_M1_ISSUE4499_CONTINUOUS_COMMIT",
+    "runner_sha256": "0a25e74a5b2b10cfa0784d1c91d67fa4cdeb59334a97eb3e4a90ab1d59557523",
+    "bounded_real_issue_count": 1044,
+    "target_issue": 4499,
+    "target_status": "COMMITTED",
+    "planner_mode": "FULL_REPLAN",
+    "fresh_exact_ac_pass": true,
+    "transition_pass": true,
+    "unsafe_action_committed": false,
+    "pre_state_sha256": "a7660d3cdedadec332050182c32457a87623f8e7c107c2ec393d58549abac6ba",
+    "post_state_sha256": "c5734cfa23b6d5398dd2dad128f3e7ad392164e79db1861e1b7e5817b05d3a1d",
+    "commit_marker_sha256": "553d25059ddc8cb8b808fbec6f9e7a73f56588d5d6e0fd89545dc67f4983437d",
+    "policy_issue_audit_sha256": "2ad211dd4b9e39b0a0c8f13eab0299eae25fcd8b7c6d54449f02a429526f848e",
+    "fresh_exact_opendss_sha256": "1a9ed2832a12837dacae831187d03f26875a82cd856b939ebd7d2ac9fee4b188",
+    "fresh_exact_opendss": {
+      "root_import_p_kw": 1912.3062309098057,
+      "voltage_min_pu": 0.986446565141539,
+      "voltage_max_pu": 1.0421606224521323,
+      "line_max_loading_pu": 0.41627998570477404,
+      "transformer_max_current_loading_pu": 0.5261703891480373,
+      "hard_constraint_pass": true
+    }
+  },
+  "frozen_sources": {
+    "runtime/W02_POLICY_EPISODE_RUNNER.py": "0a25e74a5b2b10cfa0784d1c91d67fa4cdeb59334a97eb3e4a90ab1d59557523",
+    "RUN_FIRST6_REP_WEEKS_ACTUAL.sh": "de52c4ea5b4de97c8c5c9dc932ebaaae5ab3e6f16d41a4ae1d66d76c864f20db",
+    "tools/VALIDATE_REP12_GLOBAL_QUEUE.py": "295731b8fdbd9af1122418ce76c1d9219ab05e778a0e15f90b873de8b2c19ee1"
+  }
+}

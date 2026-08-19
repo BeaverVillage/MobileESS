@@ -1,0 +1,81 @@
+{
+  "schema_version": "mobileess.post_stage15.primary_action_direct_commit_supersession.v1",
+  "status": "ADOPTED_FOR_ALL_FOUR_COMPARISON_POLICIES",
+  "adopted_at_kst": "2026-08-17",
+  "scope": [
+    "M1_PROPOSED_EVENT30_LOCAL_REPAIR_MOBILE",
+    "M2_FIXED30_MOBILE",
+    "M3_EVENT30_NO_LOCAL_REPAIR_MOBILE",
+    "M4_FIXED_LOCATION_ESS_MOBILITY_ABLATION"
+  ],
+  "superseded_action_selector": "SECONDARY_FULL_MODEL_H0_PQ_NORM_QCP_PLUS_PRIMARY_RESTORE",
+  "adopted_action_selector": "PRIMARY_ECONOMIC_ACTION_DIRECT_COMMIT",
+  "scientific_basis": {
+    "primary_economic_objective_changed": false,
+    "physical_feasible_set_changed": false,
+    "primary_mip_gap_gate_changed": false,
+    "fresh_exact_opendss_gate_changed": false,
+    "future_actual_contract_changed": false,
+    "secondary_artificial_objective_removed": true,
+    "reason": "The superseded P/Q-norm selector was not the scientific economic objective, could reopen or numerically re-solve a 138k-variable model, and exhibited unbounded runtime and Gurobi NUMERIC failures. Directly committing the accepted primary economic solution is more faithful to the stated objective; Fresh OpenDSS remains the exact physical gate."
+  },
+  "runtime_corrections": {
+    "unconditional_second_execute_one_issue_removed": true,
+    "retry_now_only_runs_after_matching_projection_failure": true,
+    "secondary_qcp_solve_count_per_dispatch": 0,
+    "primary_restore_solve_count_per_dispatch": 0
+  },
+  "bounded_actual_validation": {
+    "artifact_roots": [
+      "/home/jaewon/mobile_ess_work/frozen_artifacts/POST15_H0_SELECTOR_FIX_BENCH_20260817T1725/M1",
+      "/home/jaewon/mobile_ess_work/frozen_artifacts/POST15_H0_SELECTOR_FIX_BENCH_20260817T1725_M4/M4"
+    ],
+    "full_W02_executed": false,
+    "issues": [
+      {
+        "issue": 3462,
+        "policy": "M1_PROPOSED_EVENT30_LOCAL_REPAIR_MOBILE",
+        "kind": "FULL_REPLAN",
+        "status": "PASS_COMMITTED",
+        "full_issue_wall_s": 19.718112247996,
+        "fresh_exact_opendss_pass": true,
+        "model_build_solve_extract_calls": 1
+      },
+      {
+        "issue": 3463,
+        "policy": "M1_PROPOSED_EVENT30_LOCAL_REPAIR_MOBILE",
+        "kind": "POST_REPLAN_COLD_CACHE",
+        "status": "PASS_COMMITTED",
+        "full_issue_wall_s": 10.011856401019,
+        "fresh_exact_opendss_pass": true,
+        "model_build_solve_extract_calls": 1
+      },
+      {
+        "issue": 3464,
+        "policy": "M1_PROPOSED_EVENT30_LOCAL_REPAIR_MOBILE",
+        "kind": "NORMAL_WARM_CACHE",
+        "status": "PASS_COMMITTED",
+        "full_issue_wall_s": 1.33980838200659,
+        "fresh_exact_opendss_pass": true,
+        "model_build_solve_extract_calls": 1
+      },
+      {
+        "issue": 3459,
+        "policy": "M4_FIXED_LOCATION_ESS_MOBILITY_ABLATION",
+        "kind": "FIXED_LOCATION_NORMAL",
+        "status": "PASS_COMMITTED",
+        "full_issue_wall_s": 6.0407709319843,
+        "fresh_exact_opendss_pass": true,
+        "model_build_solve_extract_calls": 1,
+        "fixed_location_and_zero_move_gate_pass": true
+      }
+    ]
+  },
+  "acceptance": {
+    "all_bounded_actual_issues_committed": true,
+    "all_fresh_exact_opendss_pass": true,
+    "single_scientific_execution_per_issue_verified": true,
+    "comparison_policy_symmetry": true,
+    "production_resume_authorized_after_preflight_rebind": true
+  }
+}

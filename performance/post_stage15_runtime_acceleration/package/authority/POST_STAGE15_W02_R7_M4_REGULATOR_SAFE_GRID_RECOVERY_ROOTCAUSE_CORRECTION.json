@@ -1,0 +1,106 @@
+{
+  "schema_version": "mobileess.post_stage15.w02_r7_m4_regulator_safe_grid_recovery_rootcause.v1",
+  "status": "PASS_REGULATOR_SAFE_GRID_RECOVERY_ISSUES_3518_3573_3574",
+  "root_cause": {
+    "failure": "The recovery layer used one P/Q neighborhood across continuous voltage, coupled line-current, and discrete regulator-tap regimes. In severe overvoltage, Q movement crossed a tap boundary and invalidated the local finite-difference direction.",
+    "runtime_error": "The original finite-difference sampling and gradient block was unreachable after feasible step selection; the corrected ordering now executes sampling before gradient construction and reads incumbent values before temporary constraints are removed.",
+    "issue_3518": "A local voltage-control boundary requires a matched 10 kW / 10 kvar normalized trust region.",
+    "issue_3573": "Coupled voltage and seven line-current violations require both voltage and line-current cuts with a 100 kW / 50 kvar profile.",
+    "issue_3574": "Severe overvoltage requires preserving the observed regulator Q state, allowing the physical active-power span, and applying minimum intervention only on that severe branch.",
+    "power_scale_error": false,
+    "unsafe_action_committed": false
+  },
+  "correction": {
+    "runner": {
+      "path": "runtime/W02_POLICY_EPISODE_RUNNER.py",
+      "sha256": "00e391379d64e48bc6a9e015680adf06505050b61807448bb1d591deb6dc5321"
+    },
+    "launcher": {
+      "path": "RUN_W02_4POLICY_ACTUAL.sh",
+      "sha256": "72ae032385942d5ebfe1e62b88d032842f17df77af4434d854b0f70626458d65",
+      "run_id": "B_W02_4POLICY_ACTUAL_FINAL_R7"
+    },
+    "selector": "PRE_RECOVERY_EXACT_VIOLATION_FAMILY",
+    "profiles": {
+      "LOCAL_VOLTAGE_ONLY": {"p_trust_radius_kw": 10.0, "q_trust_radius_kvar": 10.0},
+      "COUPLED_VOLTAGE_LINE": {"p_trust_radius_kw": 100.0, "q_trust_radius_kvar": 50.0},
+      "SEVERE_VOLTAGE_ONLY": {
+        "threshold_pu": 0.002,
+        "p_trust_radius_kw": 1100.0,
+        "q_trust_radius_kvar": 0.0,
+        "secondary_objective": "MIN_NORMALIZED_L1_H0_PQ_CHANGE",
+        "secondary_scope": "SEVERE_VOLTAGE_ONLY"
+      }
+    },
+    "finite_difference_step_kw_kvar": 10.0,
+    "power_scale_kw_per_model_unit": 1000.0,
+    "power_scale_changed": false,
+    "model_constraints_normalized_by_power_scale": true,
+    "max_ac_correction_rounds": 1,
+    "max_same_pre_full_replans": 1,
+    "max_production_fresh_ac_candidates": 3,
+    "hard_limits_relaxed": false,
+    "future_actual_used": false
+  },
+  "validation": {
+    "safety_contract": {
+      "validator_sha256": "08a094be6abae09296782f7c8f9502d50071b34f32f4ec075bf1b87b75224a81",
+      "result_path": "/home/jaewon/mobile_ess_work/frozen_artifacts/PRE_W02_SAFETY_RECOVERY_CONTRACT_CURRENT.json",
+      "result_sha256": "c7bb614e7a95d432680ade7fc7b5949a8efb3fdc2c6844659a204fc2ff34196b",
+      "status": "PASS"
+    },
+    "three_boundary_validator": {
+      "validator_sha256": "3694a36c4947d06385d713a8de9eeeb379b557d50919ae11b0ccffee54ac140d",
+      "result_path": "/home/jaewon/mobile_ess_work/frozen_artifacts/PRE_W02_M4_ADAPTIVE_GRID_RECOVERY_CURRENT.json",
+      "result_sha256": "0c03b94d1a66d8c83de93b2eaae2db8ac68d815b5bed174fc644d872d7ba9bc4",
+      "status": "PASS"
+    },
+    "boundaries": [
+      {
+        "issue": 3518,
+        "profile": "LOCAL_VOLTAGE_ONLY",
+        "initial_voltage_max_pu": 1.0500591700016837,
+        "fresh_voltage_max_pu": 1.049050650357268,
+        "initial_voltage_violations": 2,
+        "fresh_voltage_violations": 0,
+        "fresh_line_violations": 0,
+        "evidence_sha256": "715a5f424a19d326044a7734f65c10c30c687de79d5d7d8183706722349b96ab",
+        "atomic_commit": true
+      },
+      {
+        "issue": 3573,
+        "profile": "COUPLED_VOLTAGE_LINE",
+        "initial_voltage_max_pu": 1.0514464268780375,
+        "fresh_voltage_max_pu": 1.0460442489498898,
+        "initial_line_max_loading_pu": 1.0568566720716068,
+        "fresh_line_max_loading_pu": 0.9887072414900083,
+        "initial_voltage_violations": 2,
+        "fresh_voltage_violations": 0,
+        "initial_line_violations": 7,
+        "fresh_line_violations": 0,
+        "evidence_sha256": "66fc3ef759758f0d2bf2befe367ac63568fea11f4845e4ea2d37ea929b71ce05",
+        "atomic_commit": true
+      },
+      {
+        "issue": 3574,
+        "profile": "SEVERE_VOLTAGE_ONLY",
+        "initial_voltage_max_pu": 1.0577096997337452,
+        "fresh_voltage_max_pu": 1.0493772587025776,
+        "initial_voltage_violations": 9,
+        "fresh_voltage_violations": 0,
+        "fresh_line_max_loading_pu": 0.8739263839115,
+        "fresh_line_violations": 0,
+        "evidence_sha256": "bf299eb08796e073bc92810fd00d344e80f20a8e57f6e563eeccb8158b8d1817",
+        "atomic_commit": true
+      }
+    ],
+    "same_causal_pre_state": true,
+    "same_initial_candidate": true,
+    "full_W02_executed": false
+  },
+  "supersedes_for_current_runner_binding": [
+    "authority/POST_STAGE15_W02_R5_M4_ADAPTIVE_GRID_RECOVERY_ROOTCAUSE_CORRECTION.json"
+  ],
+  "historical_authorities_remain_immutable": true,
+  "document_files_modified": false
+}
