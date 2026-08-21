@@ -1,10 +1,10 @@
 {
   "stage": "PFR9",
-  "status": "PENDING_CORRECTED_FULL_DAY_RUN",
+  "status": "PASS",
   "gate": "JANUARY_2025_DAY01_288_ISSUES_X_B0_B7",
   "method_count": 8,
   "issues_per_method": 288,
-  "expected_commit_markers": 2304,
+  "valid_commit_markers": 2304,
   "required_factorized_uncertainty_decision_use": true,
   "required_daily_timezone": "FIXED_AEST_UTC_PLUS_10_NO_DST",
   "statistical_preregistration": {
@@ -17,7 +17,47 @@
   "controller_burn_in_steps": 0,
   "independent_daily_cold_start": true,
   "cross_day_endogenous_state_carryover": false,
+  "actual_gurobi_all_commits": true,
+  "fresh_exact_opendss_all_commits": true,
+  "robust_grid_fresh_opendss_all_commits": true,
+  "fast_layer_binary_state_unchanged_all_methods": true,
+  "state_chain_complete_all_methods": true,
+  "future_actual_used": false,
+  "observed_arrivals_per_method": 144,
+  "minimum_observed_mess_energy_kwh": 440.0,
+  "observed_robust_voltage_pu": {
+    "minimum": 0.9502128975103573,
+    "maximum": 1.048271251231974
+  },
+  "factorized_uncertainty_observation": {
+    "U_mob": {
+      "methods": ["B5", "B6", "B7"],
+      "first_observed_slow_miqp_issue": 114,
+      "actual_gurobi_used": true,
+      "num_integer_variables": 5,
+      "joint_safe_eta_energy_used": true,
+      "quadratic_destination_terms": 1,
+      "maximum_simultaneous_transit_mess": 1,
+      "observed_route_ranks": [1],
+      "mobility_energy_kwh_each_method": 7.558974742889404
+    },
+    "U_work": {
+      "methods": ["B5", "B6", "B7"],
+      "reserve_bound_issues_each_method": 288
+    },
+    "U_grid": {
+      "policy": "ROBUST_Q90_LOAD_Q10_PV_Q90_Q_FRESH_OPENDSS",
+      "verified_commit_markers": 2304
+    }
+  },
+  "right_censoring": {
+    "unfinished_jobs_carried_to_next_day": false,
+    "terminal_active_jobs_are_not_technical_failures": true
+  },
+  "artifact": "PFR9_JAN2025_DAY01_FULL288_FIXED_AEST_FACTORIZED_CURRENT",
+  "matrix_summary_sha256": "09485456d84ecaeed519cf433c043988461c6e5bd5649f80ff0dec9833342aba",
+  "run_manifest_sha256": "32b30eb4ecf5615be237799af5a69b0c6b798e6f1f0ec5236217e9fc1f02982d",
   "superseded_technical_only_artifact": "PFR9_JAN2025_DAY01_FULL288_B0_B7_CURRENT",
   "supersession_reason": "U_mob_U_work_U_grid_NOT_DECISION_BOUND_AND_JOB_COHORT_EPOCH_NOT_FIXED_AEST",
-  "next_authorized_stage": null
+  "next_authorized_stage": "PFR10"
 }
