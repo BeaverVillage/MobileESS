@@ -22,6 +22,7 @@ class FastOptimizationContext:
     job_destination: Mapping[str, str]
     job_deadline_step: Mapping[str, int]
     site_gpu_capacity: Mapping[str, int]
+    mess_operational_enabled: bool
 
     def validate(self, state: FastLayerState, limits: FastLayerLimits) -> None:
         jobs = set(state.remaining_work_gpu_hours)
@@ -149,9 +150,6 @@ class GurobiFastControlOptimizer:
             )
 
         mess_p = {}
-        mess_q = {}
-        median = max(abs(context.horizon_price_median_aud_per_mwh), 1.0)
-        price_ratio = context.current_price_aud_per_mwh / median
         for mess_id in sorted(state.mess_soc):
             capacity = float(limits.mess_energy_capacity_kwh[mess_id])
             soc = float(state.mess_soc[mess_id])
@@ -167,41 +165,39 @@ class GurobiFastControlOptimizer:
             )
             lower = -min(float(limits.mess_charge_limit_kw[mess_id]), max_charge_soc)
             upper = min(float(limits.mess_discharge_limit_kw[mess_id]), max_discharge_soc)
+            if not context.mess_operational_enabled:
+                lower = upper = 0.0
             p_var = model.addVar(lb=lower, ub=upper, name=f"mess_p[{mess_id}]")
-            q_limit = float(limits.mess_pcs_kva[mess_id])
-            q_var = model.addVar(lb=-q_limit, ub=q_limit, name=f"mess_q[{mess_id}]")
-            model.addQConstr(
-                p_var * p_var + q_var * q_var <= q_limit * q_limit,
-                name=f"pcs_circle[{mess_id}]",
-            )
             target = (
                 float(nominal.mess_discharge_kw.get(mess_id, 0.0))
                 - float(nominal.mess_charge_kw.get(mess_id, 0.0))
             )
             scale = max(float(limits.mess_discharge_limit_kw[mess_id]), 1.0)
             objective += ((p_var - target) / scale) * ((p_var - target) / scale)
-            objective += (q_var / q_limit) * (q_var / q_limit)
-            objective += -0.002 * price_ratio * p_var / scale
-            mess_p[mess_id], mess_q[mess_id] = p_var, q_var
+            mess_p[mess_id] = p_var
 
         model.setObjective(objective, GRB.MINIMIZE)
         model.optimize()
-        if model.Status != GRB.OPTIMAL or model.SolCount != 1:
+        primal_variables = tuple(compute.values()) + tuple(mess_p.values())
+        finite_primal = model.SolCount >= 1 and all(math.isfinite(float(variable.X)) for variable in primal_variables)
+        feasible_status = model.Status in {GRB.OPTIMAL, GRB.SUBOPTIMAL}
+        if not feasible_status or not finite_primal or float(model.MaxVio) > 1e-6:
             raise FastOptimizationError(
-                f"Gurobi fast recourse failed closed: status={model.Status}, solutions={model.SolCount}"
+                f"Gurobi fast recourse failed closed: status={model.Status}, "
+                f"solutions={model.SolCount}, max_violation={model.MaxVio if model.SolCount else None}"
             )
         charge = {mess_id: max(0.0, -variable.X) for mess_id, variable in mess_p.items()}
         discharge = {mess_id: max(0.0, variable.X) for mess_id, variable in mess_p.items()}
         control = FastControl(
             mess_charge_kw=charge,
             mess_discharge_kw=discharge,
-            mess_q_kvar={mess_id: variable.X for mess_id, variable in mess_q.items()},
+            mess_q_kvar={mess_id: 0.0 for mess_id in mess_p},
             job_compute_rate_fraction={job_id: variable.X for job_id, variable in compute.items()},
             site_throughput_fraction=dict(nominal.site_throughput_fraction),
         )
         certificate = FastOptimizationCertificate(
             solver=f"GUROBI_{gp.gurobi.version()[0]}.{gp.gurobi.version()[1]}",
-            status="OPTIMAL",
+            status="OPTIMAL" if model.Status == GRB.OPTIMAL else "SUBOPTIMAL_NUMERIC_FEASIBLE",
             actual_gurobi_used=True,
             solution_count=model.SolCount,
             objective_value=float(model.ObjVal),

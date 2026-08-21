@@ -42,6 +42,7 @@ MESS_IDS = tuple(f"MESS{i:02d}" for i in range(1, 5))
 STEP_HOURS = 5.0 / 60.0
 MESS_CAPACITY_KWH = 1080.0
 MESS_FLOOR_KWH = 440.0
+MESS_SAFETY_RESERVE_KWH = 760.0
 MODELED_GPU_CAPACITY_PER_IDC = 256
 
 
@@ -267,6 +268,7 @@ class _GurobiSensitivityProjector:
     def __init__(self, verifier: _PhysicalVerifierAdapter, *, allow_mess: bool) -> None:
         self.verifier = verifier
         self.allow_mess = allow_mess
+        self.trace: list[Mapping[str, Any]] = []
 
     @staticmethod
     def _objective_distance(nominal: FastControl, candidate: FastControl) -> float:
@@ -278,31 +280,80 @@ class _GurobiSensitivityProjector:
         )
         return sum((float(right[key]) - float(left[key])) ** 2 for left, right in maps for key in left)
 
-    def _target(self, control: FastControl, state: FastLayerState, exact: ExactAcResult) -> FastControl:
-        high_voltage = exact.maximum_voltage_pu > 1.05
-        compute = {
-            key: (1.0 if high_voltage else 0.0)
-            for key in control.job_compute_rate_fraction
+    @staticmethod
+    def _violation_score(exact: ExactAcResult) -> float:
+        violations = (
+            max(0.0, 0.95 - exact.minimum_voltage_pu),
+            max(0.0, exact.maximum_voltage_pu - 1.05),
+            max(0.0, exact.maximum_line_loading_fraction - 1.0),
+            max(0.0, exact.maximum_transformer_loading_fraction - 1.0),
+        )
+        return sum(value * value for value in violations)
+
+    def _targets(
+        self, control: FastControl, state: FastLayerState, exact: ExactAcResult
+    ) -> tuple[FastControl, FastControl]:
+        active_compute = {
+            key: 0.0 for key in control.job_compute_rate_fraction
         }
-        charge, discharge, reactive = {}, {}, {}
+        active_charge, active_discharge, active_q = {}, {}, {}
+        voltage_charge = dict(control.mess_charge_kw)
+        voltage_discharge = dict(control.mess_discharge_kw)
+        voltage_q = {}
         for mess_id in control.mess_charge_kw:
-            if not self.allow_mess:
-                charge[mess_id] = control.mess_charge_kw[mess_id]
-                discharge[mess_id] = control.mess_discharge_kw[mess_id]
-                reactive[mess_id] = control.mess_q_kvar[mess_id]
-                continue
             energy = state.mess_soc[mess_id] * MESS_CAPACITY_KWH
             max_charge = max(0.0, (MESS_CAPACITY_KWH - energy) / (0.95 * STEP_HOURS))
             max_discharge = max(0.0, (energy - MESS_FLOOR_KWH) * 0.95 / STEP_HOURS)
-            if high_voltage:
-                charge[mess_id], discharge[mess_id] = min(550.0, max_charge), 0.0
-                p = -charge[mess_id]
-                reactive[mess_id] = -math.sqrt(max(0.0, 700.0**2 - p**2))
+            if self.allow_mess:
+                active_charge[mess_id], active_discharge[mess_id] = 0.0, min(550.0, max_discharge)
             else:
-                charge[mess_id], discharge[mess_id] = 0.0, min(550.0, max_discharge)
-                p = discharge[mess_id]
-                reactive[mess_id] = math.sqrt(max(0.0, 700.0**2 - p**2))
-        return FastControl(charge, discharge, reactive, compute, dict(control.site_throughput_fraction))
+                active_charge[mess_id] = control.mess_charge_kw[mess_id]
+                active_discharge[mess_id] = control.mess_discharge_kw[mess_id]
+            active_q[mess_id] = control.mess_q_kvar[mess_id]
+            thermal_relief = (
+                exact.maximum_line_loading_fraction > 1.0
+                or exact.maximum_transformer_loading_fraction > 1.0
+            )
+            if self.allow_mess:
+                if thermal_relief:
+                    voltage_charge[mess_id] = control.mess_charge_kw[mess_id]
+                    voltage_discharge[mess_id] = control.mess_discharge_kw[mess_id]
+                elif exact.maximum_voltage_pu > 1.05:
+                    voltage_charge[mess_id] = control.mess_charge_kw[mess_id]
+                    voltage_discharge[mess_id] = control.mess_discharge_kw[mess_id]
+                elif exact.minimum_voltage_pu < 0.95:
+                    voltage_charge[mess_id] = 0.0
+                    voltage_discharge[mess_id] = min(550.0, max_discharge)
+            p = float(voltage_discharge[mess_id]) - float(voltage_charge[mess_id])
+            q_cap = math.sqrt(max(0.0, 700.0**2 - p**2))
+            if self.allow_mess and thermal_relief:
+                voltage_q[mess_id] = q_cap
+            elif self.allow_mess and exact.maximum_voltage_pu > 1.05:
+                voltage_q[mess_id] = -q_cap
+            elif self.allow_mess and exact.minimum_voltage_pu < 0.95:
+                voltage_q[mess_id] = q_cap
+            else:
+                voltage_q[mess_id] = control.mess_q_kvar[mess_id]
+        active = FastControl(
+            active_charge, active_discharge, active_q, active_compute,
+            dict(control.site_throughput_fraction),
+        )
+        voltage = FastControl(
+            voltage_charge, voltage_discharge, voltage_q,
+            dict(control.job_compute_rate_fraction), dict(control.site_throughput_fraction),
+        )
+        return active, voltage
+
+    @staticmethod
+    def _combine(base: FastControl, active: FastControl, voltage: FastControl, z_active: float, z_voltage: float) -> FastControl:
+        combine = lambda value, a, v: float(value) + z_active * (float(a) - float(value)) + z_voltage * (float(v) - float(value))
+        return FastControl(
+            mess_charge_kw={key: combine(base.mess_charge_kw[key], active.mess_charge_kw[key], voltage.mess_charge_kw[key]) for key in base.mess_charge_kw},
+            mess_discharge_kw={key: combine(base.mess_discharge_kw[key], active.mess_discharge_kw[key], voltage.mess_discharge_kw[key]) for key in base.mess_discharge_kw},
+            mess_q_kvar={key: combine(base.mess_q_kvar[key], active.mess_q_kvar[key], voltage.mess_q_kvar[key]) for key in base.mess_q_kvar},
+            job_compute_rate_fraction={key: combine(base.job_compute_rate_fraction[key], active.job_compute_rate_fraction[key], voltage.job_compute_rate_fraction[key]) for key in base.job_compute_rate_fraction},
+            site_throughput_fraction=dict(base.site_throughput_fraction),
+        )
 
     def project(
         self, *, nominal: FastControl, state: FastLayerState, slow_plan: SlowDiscretePlan
@@ -311,16 +362,56 @@ class _GurobiSensitivityProjector:
         current = nominal
         exact = self.verifier.verify_fresh(control=current, state=state, slow_plan=slow_plan)
         exact.validate()
-        for _ in range(6):
+        for _ in range(12):
             if exact.passed:
                 break
-            target = self._target(current, state, exact)
-            if self._objective_distance(current, target) <= 1e-18:
+            trace_row: dict[str, Any] = {
+                "base": {
+                    "vmin": exact.minimum_voltage_pu,
+                    "vmax": exact.maximum_voltage_pu,
+                    "line": exact.maximum_line_loading_fraction,
+                    "transformer": exact.maximum_transformer_loading_fraction,
+                }
+            }
+            active_target, voltage_target = self._targets(current, state, exact)
+            thermal_or_low_voltage = (
+                exact.minimum_voltage_pu < 0.95
+                or exact.maximum_line_loading_fraction > 1.0
+                or exact.maximum_transformer_loading_fraction > 1.0
+            )
+            voltage_violation = exact.maximum_voltage_pu > 1.05 or exact.minimum_voltage_pu < 0.95
+            active_enabled = thermal_or_low_voltage
+            voltage_enabled = not thermal_or_low_voltage and voltage_violation
+            active_distance = self._objective_distance(current, active_target) if active_enabled else 0.0
+            voltage_distance = self._objective_distance(current, voltage_target) if voltage_enabled else 0.0
+            if active_distance <= 1e-18 and voltage_distance <= 1e-18:
                 break
-            probe_fraction = 0.1
-            probe = _blend_control(current, target, probe_fraction)
-            probe_exact = self.verifier.verify_fresh(control=probe, state=state, slow_plan=slow_plan)
-            probe_exact.validate()
+            active_probe_fraction = 1.0
+            voltage_probe_fraction = 0.05
+            active_probe_exact = exact
+            voltage_probe_exact = exact
+            if active_distance > 1e-18:
+                active_probe = self._combine(current, active_target, voltage_target, active_probe_fraction, 0.0)
+                active_probe_exact = self.verifier.verify_fresh(control=active_probe, state=state, slow_plan=slow_plan)
+                active_probe_exact.validate()
+            if voltage_distance > 1e-18:
+                voltage_probe = self._combine(current, active_target, voltage_target, 0.0, voltage_probe_fraction)
+                voltage_probe_exact = self.verifier.verify_fresh(control=voltage_probe, state=state, slow_plan=slow_plan)
+                voltage_probe_exact.validate()
+            trace_row["active_probe"] = {
+                "fraction": active_probe_fraction,
+                "vmin": active_probe_exact.minimum_voltage_pu,
+                "vmax": active_probe_exact.maximum_voltage_pu,
+                "line": active_probe_exact.maximum_line_loading_fraction,
+                "transformer": active_probe_exact.maximum_transformer_loading_fraction,
+            }
+            trace_row["voltage_probe"] = {
+                "fraction": voltage_probe_fraction,
+                "vmin": voltage_probe_exact.minimum_voltage_pu,
+                "vmax": voltage_probe_exact.maximum_voltage_pu,
+                "line": voltage_probe_exact.maximum_line_loading_fraction,
+                "transformer": voltage_probe_exact.maximum_transformer_loading_fraction,
+            }
             try:
                 import gurobipy as gp
                 from gurobipy import GRB
@@ -330,28 +421,91 @@ class _GurobiSensitivityProjector:
             model.Params.OutputFlag = 0
             model.Params.Threads = 1
             model.Params.Seed = 0
-            z = model.addVar(lb=0.0, ub=1.0, name="projection_fraction")
+            z_active = model.addVar(lb=0.0, ub=1.0 if active_distance > 1e-18 else 0.0, name="active_relief_fraction")
+            z_voltage = model.addVar(lb=0.0, ub=1.0 if voltage_distance > 1e-18 else 0.0, name="voltage_support_fraction")
             metrics = (
-                (exact.minimum_voltage_pu, probe_exact.minimum_voltage_pu, GRB.GREATER_EQUAL, 0.9501),
-                (exact.maximum_voltage_pu, probe_exact.maximum_voltage_pu, GRB.LESS_EQUAL, 1.0499),
-                (exact.maximum_line_loading_fraction, probe_exact.maximum_line_loading_fraction, GRB.LESS_EQUAL, 0.999),
-                (exact.maximum_transformer_loading_fraction, probe_exact.maximum_transformer_loading_fraction, GRB.LESS_EQUAL, 0.999),
+                (exact.minimum_voltage_pu, active_probe_exact.minimum_voltage_pu, voltage_probe_exact.minimum_voltage_pu, GRB.GREATER_EQUAL, 0.95),
+                (exact.maximum_voltage_pu, active_probe_exact.maximum_voltage_pu, voltage_probe_exact.maximum_voltage_pu, GRB.LESS_EQUAL, 1.05),
+                (exact.maximum_line_loading_fraction, active_probe_exact.maximum_line_loading_fraction, voltage_probe_exact.maximum_line_loading_fraction, GRB.LESS_EQUAL, 1.0),
+                (exact.maximum_transformer_loading_fraction, active_probe_exact.maximum_transformer_loading_fraction, voltage_probe_exact.maximum_transformer_loading_fraction, GRB.LESS_EQUAL, 1.0),
             )
-            for index, (base, sampled, sense, bound) in enumerate(metrics):
-                slope = (sampled - base) / probe_fraction
-                expression = base + slope * z
+            for index, (base, sampled_active, sampled_voltage, sense, bound) in enumerate(metrics):
+                slope_active = (sampled_active - base) / active_probe_fraction
+                slope_voltage = (sampled_voltage - base) / voltage_probe_fraction
+                expression = base + slope_active * z_active + slope_voltage * z_voltage
                 constraint = expression >= bound if sense == GRB.GREATER_EQUAL else expression <= bound
                 model.addConstr(constraint, name=f"ac_envelope[{index}]")
-            model.setObjective(z * z, GRB.MINIMIZE)
+            model.setObjective(
+                max(active_distance, 1e-12) * z_active * z_active
+                + max(voltage_distance, 1e-12) * z_voltage * z_voltage,
+                GRB.MINIMIZE,
+            )
+            model.addConstr(z_active + z_voltage <= 1.0, name="opposing_active_power_axes")
             model.optimize()
-            if model.Status != GRB.OPTIMAL or model.SolCount != 1:
+            if model.Status not in {GRB.OPTIMAL, GRB.SUBOPTIMAL} or model.SolCount < 1 or float(model.MaxVio) > 1e-6:
+                trace_row["solver"] = {"status": int(model.Status), "solutions": int(model.SolCount)}
                 model.dispose()
-                break
-            fraction = min(1.0, max(probe_fraction, float(z.X) * 1.05))
+                improving_probes = []
+                base_score = self._violation_score(exact)
+                if active_distance > 1e-18 and self._violation_score(active_probe_exact) < base_score - 1e-12:
+                    improving_probes.append((active_probe, active_probe_exact, "active"))
+                if voltage_distance > 1e-18 and self._violation_score(voltage_probe_exact) < base_score - 1e-12:
+                    improving_probes.append((voltage_probe, voltage_probe_exact, "voltage"))
+                if not improving_probes:
+                    self.trace.append(trace_row)
+                    break
+                current, exact, accepted_axis = min(
+                    improving_probes, key=lambda item: self._violation_score(item[1])
+                )
+                trace_row["solver"]["fallback"] = f"EXACT_AC_IMPROVING_{accepted_axis.upper()}_PROBE"
+                trace_row["candidate"] = {
+                    "vmin": exact.minimum_voltage_pu,
+                    "vmax": exact.maximum_voltage_pu,
+                    "line": exact.maximum_line_loading_fraction,
+                    "transformer": exact.maximum_transformer_loading_fraction,
+                }
+                self.trace.append(trace_row)
+                continue
+            active_fraction = min(1.0, max(active_probe_fraction if active_distance > 1e-18 else 0.0, float(z_active.X) * 1.05))
+            voltage_fraction = min(1.0, max(voltage_probe_fraction if voltage_distance > 1e-18 else 0.0, float(z_voltage.X) * 1.05))
             model.dispose()
-            current = _blend_control(current, target, fraction)
-            exact = self.verifier.verify_fresh(control=current, state=state, slow_plan=slow_plan)
-            exact.validate()
+            base_score = self._violation_score(exact)
+            accepted = None
+            for backtrack in range(9):
+                candidate = self._combine(
+                    current,
+                    active_target,
+                    voltage_target,
+                    active_fraction,
+                    voltage_fraction,
+                )
+                candidate_exact = self.verifier.verify_fresh(
+                    control=candidate, state=state, slow_plan=slow_plan
+                )
+                candidate_exact.validate()
+                if candidate_exact.passed or self._violation_score(candidate_exact) < base_score - 1e-12:
+                    accepted = (candidate, candidate_exact, backtrack)
+                    break
+                active_fraction *= 0.5
+                voltage_fraction *= 0.5
+            if accepted is None:
+                trace_row["solver"] = {"status": "REJECTED_NONIMPROVING_EXACT_AC"}
+                self.trace.append(trace_row)
+                break
+            current, exact, backtrack = accepted
+            trace_row["solver"] = {
+                "status": "ACCEPTED_NUMERIC",
+                "active_fraction": active_fraction,
+                "voltage_fraction": voltage_fraction,
+                "exact_ac_backtracks": backtrack,
+            }
+            trace_row["candidate"] = {
+                "vmin": exact.minimum_voltage_pu,
+                "vmax": exact.maximum_voltage_pu,
+                "line": exact.maximum_line_loading_fraction,
+                "transformer": exact.maximum_transformer_loading_fraction,
+            }
+            self.trace.append(trace_row)
         return ProjectionCandidate(
             control=current,
             certificate=ProjectionCertificate(
@@ -496,12 +650,14 @@ def _nominal_control(state: MutableMethodState, config: MethodConfig, frame: Cau
         if job.lifecycle != "COMPLETED"
     }
     energy_enabled = config.energy_flexibility in {"MESS", "STATIONARY_BESS"}
+    high_price = frame.current_price_aud_per_mwh > 1.05 * frame.horizon_price_median_aud_per_mwh
+    charge = {mid: 0.0 for mid in MESS_IDS}
     discharge = {
-        mid: 20.0 if energy_enabled and state.mess_energy_kwh[mid] > MESS_FLOOR_KWH + 20.0 else 0.0
+        mid: 20.0 if energy_enabled and high_price and state.mess_energy_kwh[mid] > MESS_SAFETY_RESERVE_KWH + 20.0 else 0.0
         for mid in MESS_IDS
     }
     return FastControl(
-        mess_charge_kw={mid: 0.0 for mid in MESS_IDS},
+        mess_charge_kw=charge,
         mess_discharge_kw=discharge,
         mess_q_kvar={mid: 0.0 for mid in MESS_IDS},
         job_compute_rate_fraction=compute,
@@ -629,6 +785,7 @@ class PfrRuntimeRunner:
                     job_destination={uid: state.jobs[uid].destination_idc for uid in fast_state.remaining_work_gpu_hours},
                     job_deadline_step={uid: state.jobs[uid].source.deadline_step for uid in fast_state.remaining_work_gpu_hours},
                     site_gpu_capacity={site: MODELED_GPU_CAPACITY_PER_IDC for site in IDCS},
+                    mess_operational_enabled=config.energy_flexibility in {"MESS", "STATIONARY_BESS"},
                 ),
             )
             fast = execute_fast_recourse(
@@ -694,6 +851,7 @@ class PfrRuntimeRunner:
                         job_destination={uid: state.jobs[uid].destination_idc for uid in accepted_fast_state.remaining_work_gpu_hours},
                         job_deadline_step={uid: state.jobs[uid].source.deadline_step for uid in accepted_fast_state.remaining_work_gpu_hours},
                         site_gpu_capacity={site: MODELED_GPU_CAPACITY_PER_IDC for site in IDCS},
+                        mess_operational_enabled=config.energy_flexibility in {"MESS", "STATIONARY_BESS"},
                     ),
                 )
                 fast = execute_fast_recourse(
@@ -708,11 +866,9 @@ class PfrRuntimeRunner:
                 )
                 return EscalatedCandidate(state.active_plan, accepted_fast_state, fast.control, True, True)
 
+            safety_projector = _GurobiSensitivityProjector(verifier, allow_mess=True)
             safety = AcSafetyFilter(
-                projector=_GurobiSensitivityProjector(
-                    verifier,
-                    allow_mess=True,
-                ),
+                projector=safety_projector,
                 verifier=verifier,
             ).filter(
                 nominal=fast.control,
@@ -728,6 +884,7 @@ class PfrRuntimeRunner:
                     "issue": frame.issue,
                     "comparison_method_id": config.comparison_method_id.value,
                     "exact_ac": dict(verifier.last_commit.raw_metrics),
+                    "safety_projection_trace": safety_projector.trace,
                     "partial_results_preserved": True,
                 }
                 (method_root / "FAILURE.json").write_text(
@@ -812,6 +969,7 @@ class PfrRuntimeRunner:
                 "migration_payload_authority": "NULL_INPUT_BYTES_BLOCKS_MIGRATION",
                 "facility_p_kw_total": sum(facility_p),
                 "mess_p_kw_total": sum(fast.control.mess_discharge_kw.values()) - sum(fast.control.mess_charge_kw.values()),
+                "mess_q_kvar_total": sum(fast.control.mess_q_kvar.values()),
                 "minimum_mess_energy_kwh": min(state.mess_energy_kwh.values()),
                 "compute_debt_gpu_hours": state.compute_debt_gpu_hours,
                 "energy_debt_kwh": state.energy_debt_kwh,
