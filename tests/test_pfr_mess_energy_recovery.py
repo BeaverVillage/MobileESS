@@ -100,6 +100,28 @@ class PairwiseQVerifier:
         )
 
 
+class FleetQVerifier:
+    mess_in_transit = (False, False, False, False)
+
+    def verify_fresh(self, *, control, state, slow_plan):
+        del state, slow_plan
+        fleet_support = sum(control.mess_q_kvar.values()) / 700.0
+        vmin = 0.949 + 0.001 * fleet_support
+        vmax = 1.04
+        passed = 0.95 <= vmin <= vmax <= 1.05
+        return ExactAcResult(
+            passed,
+            "PASS" if passed else "VIOLATION",
+            True,
+            True,
+            vmin,
+            vmax,
+            0.5,
+            0.5,
+            0 if passed else 1,
+        )
+
+
 def test_projector_combines_active_relief_with_location_sensitive_q():
     nominal = FastControl(
         {mid: 50.0 for mid in MESS_IDS},
@@ -175,3 +197,24 @@ def test_pairwise_q_search_closes_opposing_voltage_axes():
     assert result is not None
     assert result[1].passed
     assert result[2]["status"] == "FRESH_OPENDSS_PAIRWISE_Q_SEARCH"
+
+
+def test_fleet_q_search_closes_multi_pcc_voltage_support():
+    control = FastControl(
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {},
+        {},
+    )
+    state = FastLayerState(0, {mid: 760.0 / 1080.0 for mid in MESS_IDS}, {})
+    verifier = FleetQVerifier()
+    projector = _GurobiSensitivityProjector(verifier, allow_mess=True)
+    slow_plan = SimpleNamespace(fingerprint="fixed-plan")
+    exact = verifier.verify_fresh(control=control, state=state, slow_plan=slow_plan)
+
+    result = projector._fleet_q_step(control, state, slow_plan, exact)
+
+    assert result is not None
+    assert result[1].passed
+    assert result[2]["status"] == "FRESH_OPENDSS_FLEET_Q_SEARCH"

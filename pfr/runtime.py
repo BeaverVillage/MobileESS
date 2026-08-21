@@ -672,6 +672,90 @@ class _GurobiSensitivityProjector:
             "passed": candidate_exact.passed,
         }
 
+    def _fleet_q_step(
+        self,
+        control: FastControl,
+        state: FastLayerState,
+        slow_plan: SlowDiscretePlan,
+        exact: ExactAcResult,
+    ) -> Optional[tuple[FastControl, ExactAcResult, Mapping[str, Any]]]:
+        if not self.allow_mess:
+            return None
+        base_score = self._violation_score(exact)
+        connected = [
+            mess_id
+            for mess_index, mess_id in enumerate(MESS_IDS)
+            if not self.verifier.mess_in_transit[mess_index]
+        ]
+        if len(connected) < 3:
+            return None
+        probes = []
+        for direction_mask in range(1 << len(connected)):
+            directions = tuple(
+                1.0 if direction_mask & (1 << index) else -1.0
+                for index in range(len(connected))
+            )
+            for fraction in (0.1, 0.25, 0.5, 1.0):
+                q = dict(control.mess_q_kvar)
+                for mess_id, direction in zip(connected, directions):
+                    p = (
+                        float(control.mess_discharge_kw[mess_id])
+                        - float(control.mess_charge_kw[mess_id])
+                    )
+                    target = direction * math.sqrt(max(0.0, 700.0**2 - p**2))
+                    q[mess_id] = float(q[mess_id]) + fraction * (
+                        target - float(q[mess_id])
+                    )
+                candidate = FastControl(
+                    dict(control.mess_charge_kw),
+                    dict(control.mess_discharge_kw),
+                    q,
+                    dict(control.job_compute_rate_fraction),
+                    dict(control.site_throughput_fraction),
+                )
+                candidate_exact = self.verifier.verify_fresh(
+                    control=candidate, state=state, slow_plan=slow_plan
+                )
+                candidate_exact.validate()
+                probes.append(
+                    (candidate, candidate_exact, directions, fraction)
+                )
+
+        def preserves_satisfied_constraints(candidate_exact: ExactAcResult) -> bool:
+            return (
+                (exact.minimum_voltage_pu < 0.95 or candidate_exact.minimum_voltage_pu >= 0.95)
+                and (exact.maximum_voltage_pu > 1.05 or candidate_exact.maximum_voltage_pu <= 1.05)
+                and (exact.maximum_line_loading_fraction > 1.0 or candidate_exact.maximum_line_loading_fraction <= 1.0)
+                and (exact.maximum_transformer_loading_fraction > 1.0 or candidate_exact.maximum_transformer_loading_fraction <= 1.0)
+                and ("ROOT_SIGN" in exact.status or "ROOT_SIGN" not in candidate_exact.status)
+            )
+
+        passing = [item for item in probes if item[1].passed]
+        admissible = passing or [
+            item
+            for item in probes
+            if preserves_satisfied_constraints(item[1])
+            and self._violation_score(item[1]) < base_score - 1e-12
+        ]
+        if not admissible:
+            return None
+        selected = min(
+            admissible,
+            key=(
+                (lambda item: self._objective_distance(control, item[0]))
+                if passing
+                else (lambda item: self._violation_score(item[1]))
+            ),
+        )
+        candidate, candidate_exact, directions, fraction = selected
+        return candidate, candidate_exact, {
+            "status": "FRESH_OPENDSS_FLEET_Q_SEARCH",
+            "mess_ids": connected,
+            "directions": directions,
+            "fraction": fraction,
+            "passed": candidate_exact.passed,
+        }
+
     def _active_coordinate_q_step(
         self,
         control: FastControl,
@@ -708,6 +792,15 @@ class _GurobiSensitivityProjector:
                 candidate, candidate_exact, pairwise_trace = pairwise
                 passing.append(
                     (candidate, candidate_exact, active_fraction, pairwise_trace)
+                )
+                continue
+            fleet = self._fleet_q_step(
+                active_candidate, state, slow_plan, active_exact
+            )
+            if fleet is not None and fleet[1].passed:
+                candidate, candidate_exact, fleet_trace = fleet
+                passing.append(
+                    (candidate, candidate_exact, active_fraction, fleet_trace)
                 )
         if not passing:
             return None
@@ -755,6 +848,18 @@ class _GurobiSensitivityProjector:
                 if pairwise is not None:
                     current, exact, pairwise_trace = pairwise
                     trace_row["pairwise_q"] = pairwise_trace
+                    trace_row["candidate"] = {
+                        "vmin": exact.minimum_voltage_pu,
+                        "vmax": exact.maximum_voltage_pu,
+                        "line": exact.maximum_line_loading_fraction,
+                        "transformer": exact.maximum_transformer_loading_fraction,
+                    }
+                    self.trace.append(trace_row)
+                    continue
+                fleet = self._fleet_q_step(current, state, slow_plan, exact)
+                if fleet is not None:
+                    current, exact, fleet_trace = fleet
+                    trace_row["fleet_q"] = fleet_trace
                     trace_row["candidate"] = {
                         "vmin": exact.minimum_voltage_pu,
                         "vmax": exact.maximum_voltage_pu,

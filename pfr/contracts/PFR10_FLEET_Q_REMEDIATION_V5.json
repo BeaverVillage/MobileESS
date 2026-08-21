@@ -1,0 +1,28 @@
+{
+  "schema_version": "PFR10_FLEET_Q_REMEDIATION_V5",
+  "status": "FROZEN_BEFORE_V5_REPLAY",
+  "trigger_artifact": "PFR10_JAN2025_DAY03_ENERGY_RECOVERY_PQ_V4",
+  "observed_failure": {
+    "comparison_method_id": "B7",
+    "global_issue": 816,
+    "minimum_mess_energy_kwh_previous_issue": 704.6976301381821,
+    "best_pairwise_robust_voltage_min_pu": 0.9483859667649369,
+    "failure_is_energy_depletion": false,
+    "outcome_exclusion": false
+  },
+  "technical_amendment": {
+    "name": "FRESH_OPENDSS_FLEET_LOCATION_SENSITIVE_Q_SEARCH",
+    "activation": "ONLY_AFTER_SINGLE_AND_PAIRWISE_Q_SEARCH_HAVE_NO_ADMISSIBLE_CANDIDATE",
+    "direction_combinations": "ALL_CONNECTED_MESS_BINARY_Q_DIRECTIONS",
+    "q_fractions": [0.1, 0.25, 0.5, 1.0],
+    "acceptance": "FRESH_EXACT_OPENDSS_PASS_OR_STRICTLY_IMPROVING_WITH_NO_NEW_HARD_CONSTRAINT_VIOLATION",
+    "passing_selection": "MINIMUM_SQUARED_DISTANCE_FROM_CURRENT_ACTION",
+    "slow_binary_state_fixed": true,
+    "future_actual_used": false
+  },
+  "required_replay_order": [
+    "PFR9_JAN01_FULL_DAY_B0_B7",
+    "PFR10_JAN03_DIAGNOSTIC",
+    "PFR10_JAN01_07_INDEPENDENT_B0_B7"
+  ]
+}
