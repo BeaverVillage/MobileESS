@@ -505,11 +505,11 @@ class _GurobiSensitivityProjector:
         if not improving:
             return None
         seed = min(improving, key=lambda item: self._violation_score(item[1]))
-        expanded = [seed]
+        expanded = []
         _, _, mess_id, direction, _ = seed
         p = float(control.mess_discharge_kw[mess_id]) - float(control.mess_charge_kw[mess_id])
         target = direction * math.sqrt(max(0.0, 700.0**2 - p**2))
-        for fraction in (0.5, 0.75, 1.0):
+        for fraction in tuple(index / 40.0 for index in range(1, 11)) + (0.5, 0.75, 1.0):
             q = dict(control.mess_q_kvar)
             q[mess_id] = float(q[mess_id]) + fraction * (target - float(q[mess_id]))
             candidate = FastControl(
@@ -524,9 +524,27 @@ class _GurobiSensitivityProjector:
             )
             candidate_exact.validate()
             expanded.append((candidate, candidate_exact, mess_id, direction, fraction))
-        passing = [item for item in expanded if item[1].passed]
+        def preserves_satisfied_constraints(candidate_exact: ExactAcResult) -> bool:
+            return (
+                (exact.minimum_voltage_pu < 0.95 or candidate_exact.minimum_voltage_pu >= 0.95)
+                and (exact.maximum_voltage_pu > 1.05 or candidate_exact.maximum_voltage_pu <= 1.05)
+                and (exact.maximum_line_loading_fraction > 1.0 or candidate_exact.maximum_line_loading_fraction <= 1.0)
+                and (exact.maximum_transformer_loading_fraction > 1.0 or candidate_exact.maximum_transformer_loading_fraction <= 1.0)
+                and ("ROOT_SIGN" in exact.status or "ROOT_SIGN" not in candidate_exact.status)
+            )
+        admissible = [
+            item for item in expanded
+            if item[1].passed
+            or (
+                preserves_satisfied_constraints(item[1])
+                and self._violation_score(item[1]) < base_score - 1e-12
+            )
+        ]
+        if not admissible:
+            return None
+        passing = [item for item in admissible if item[1].passed]
         selected = min(
-            passing if passing else expanded,
+            passing if passing else admissible,
             key=(
                 (lambda item: self._objective_distance(control, item[0]))
                 if passing
