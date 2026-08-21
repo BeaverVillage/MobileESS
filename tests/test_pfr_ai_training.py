@@ -24,16 +24,19 @@ from pfr.training import (
     JobLifecycle,
     KestrelOperationalJob,
     ParameterAuthority,
+    PreemptibilityMode,
     TrainingParameterization,
     TrainingStateError,
     advance_restart,
     arrive,
+    baseline_compute_work_gpu_hours,
     begin_migration,
     complete_migration,
     gang_allocation_feasible,
     mark_ready,
     migration_payload_bytes,
     run_compute_step,
+    run_compute_fraction_step,
     start_running,
     validate_assignment_transition,
 )
@@ -76,7 +79,32 @@ class PfrTrainingFoundationTests(unittest.TestCase):
     def running_job(self, *, checkpoint_steps: int = 2):
         state = arrive(self.job(checkpoint_steps=checkpoint_steps))
         state = mark_ready(state)
-        return start_running(state, site="IDC01")
+        return start_running(
+            state,
+            site="IDC01",
+            logical_rack="RACK01",
+            gang_membership=tuple(f"gpu-{index}" for index in range(8)),
+        )
+
+    def test_source_derived_initial_work_is_gang_times_baseline_runtime(self):
+        source = KestrelOperationalJob(
+            job_uid="job-source-derived",
+            arrival_step=0,
+            deadline_step=20,
+            requested_gpu_count=8,
+            runtime_seconds_source=7200.0,
+            input_bytes=0,
+            source_record_id="row-source-derived",
+        )
+        self.assertEqual(baseline_compute_work_gpu_hours(source), 16.0)
+        parameterization = replace(
+            self.parameterization(),
+            total_work=16.0,
+            authority_by_field={"total_work": ParameterAuthority.SOURCE_DERIVED},
+            preemptibility_mode=PreemptibilityMode.CHECKPOINT_ONLY,
+        )
+        state = source.to_training_state(parameterization)
+        self.assertEqual(state.total_work, 16.0)
 
     def test_scientific_rebase_authority_is_sealed(self):
         authority = load_scientific_rebase_authority()
@@ -146,7 +174,9 @@ class PfrTrainingFoundationTests(unittest.TestCase):
         )
         self.assertEqual(boundary.lifecycle, JobLifecycle.CHECKPOINT_READY)
         migrating = begin_migration(boundary, destination="IDC02")
-        restarting = complete_migration(migrating, restart_steps=2)
+        restarting = complete_migration(
+            migrating, restart_steps=2, destination_logical_rack="RACK02"
+        )
         self.assertEqual(restarting.current_site, "IDC02")
         self.assertEqual(advance_restart(restarting, elapsed_steps=2).lifecycle, JobLifecycle.RUNNING)
 
@@ -169,6 +199,19 @@ class PfrTrainingFoundationTests(unittest.TestCase):
         self.assertAlmostEqual(result.remaining_work, 8.5)
         self.assertAlmostEqual(result.resource_gpuh, 4.0)
         self.assertNotEqual(result.remaining_work, result.resource_gpuh)
+
+    def test_five_minute_fraction_progress_contract(self):
+        running = replace(
+            self.running_job(checkpoint_steps=10),
+            min_compute_rate_per_hour=0.0,
+            max_compute_rate_per_hour=8.0,
+        )
+        result = run_compute_fraction_step(
+            running,
+            allocated_gpus_by_site={"IDC01": 8},
+            compute_rate_fraction=0.75,
+        )
+        self.assertAlmostEqual(result.remaining_work, 9.5)
 
     def test_remaining_work_is_nonnegative(self):
         result = run_compute_step(
