@@ -578,6 +578,169 @@ class _GurobiSensitivityProjector:
             "passed": candidate_exact.passed,
         }
 
+    def _sensitivity_qp_step(
+        self,
+        control: FastControl,
+        state: FastLayerState,
+        slow_plan: SlowDiscretePlan,
+        exact: ExactAcResult,
+    ) -> Optional[tuple[FastControl, ExactAcResult, Mapping[str, Any]]]:
+        if not self.allow_mess:
+            return None
+        try:
+            import gurobipy as gp
+            from gurobipy import GRB
+        except ImportError as exc:
+            raise RuntimeContractError("gurobipy is required by the AC sensitivity QP") from exc
+
+        metric_names = ("vmin", "vmax", "line", "transformer")
+        base_metrics = {
+            "vmin": exact.minimum_voltage_pu,
+            "vmax": exact.maximum_voltage_pu,
+            "line": exact.maximum_line_loading_fraction,
+            "transformer": exact.maximum_transformer_loading_fraction,
+        }
+        q_bounds = {}
+        derivatives = {name: {} for name in metric_names}
+        for mess_index, mess_id in enumerate(MESS_IDS):
+            if self.verifier.mess_in_transit[mess_index]:
+                continue
+            p = (
+                float(control.mess_discharge_kw[mess_id])
+                - float(control.mess_charge_kw[mess_id])
+            )
+            q_cap = math.sqrt(max(0.0, 700.0**2 - p**2))
+            current_q = float(control.mess_q_kvar[mess_id])
+            lower_delta = -q_cap - current_q
+            upper_delta = q_cap - current_q
+            q_bounds[mess_id] = (lower_delta, upper_delta, q_cap)
+            negative_delta = max(lower_delta, -70.0)
+            positive_delta = min(upper_delta, 70.0)
+            if positive_delta - negative_delta <= 1e-6:
+                continue
+            probe_metrics = []
+            for delta in (negative_delta, positive_delta):
+                q = dict(control.mess_q_kvar)
+                q[mess_id] = current_q + delta
+                candidate = FastControl(
+                    dict(control.mess_charge_kw),
+                    dict(control.mess_discharge_kw),
+                    q,
+                    dict(control.job_compute_rate_fraction),
+                    dict(control.site_throughput_fraction),
+                )
+                candidate_exact = self.verifier.verify_fresh(
+                    control=candidate, state=state, slow_plan=slow_plan
+                )
+                candidate_exact.validate()
+                probe_metrics.append(
+                    {
+                        "vmin": candidate_exact.minimum_voltage_pu,
+                        "vmax": candidate_exact.maximum_voltage_pu,
+                        "line": candidate_exact.maximum_line_loading_fraction,
+                        "transformer": candidate_exact.maximum_transformer_loading_fraction,
+                    }
+                )
+            denominator = positive_delta - negative_delta
+            for name in metric_names:
+                derivatives[name][mess_id] = (
+                    probe_metrics[1][name] - probe_metrics[0][name]
+                ) / denominator
+        if not q_bounds:
+            return None
+
+        model = gp.Model("pfr_exact_ac_q_sensitivity")
+        model.Params.OutputFlag = 0
+        model.Params.Threads = 1
+        model.Params.Seed = 0
+        delta_q = {
+            mess_id: model.addVar(lb=bounds[0], ub=bounds[1], name=f"delta_q[{mess_id}]")
+            for mess_id, bounds in q_bounds.items()
+        }
+        expressions = {
+            name: base_metrics[name]
+            + gp.quicksum(
+                derivatives[name].get(mess_id, 0.0) * variable
+                for mess_id, variable in delta_q.items()
+            )
+            for name in metric_names
+        }
+        model.addConstr(expressions["vmin"] >= 0.9505, name="minimum_voltage")
+        model.addConstr(expressions["vmax"] <= 1.0495, name="maximum_voltage")
+        model.addConstr(expressions["line"] <= 1.0, name="line_loading")
+        model.addConstr(expressions["transformer"] <= 1.0, name="transformer_loading")
+        model.setObjective(
+            gp.quicksum(
+                (variable / max(q_bounds[mess_id][2], 1.0))
+                * (variable / max(q_bounds[mess_id][2], 1.0))
+                for mess_id, variable in delta_q.items()
+            ),
+            GRB.MINIMIZE,
+        )
+        model.optimize()
+        if model.Status not in {GRB.OPTIMAL, GRB.SUBOPTIMAL} or model.SolCount < 1 or float(model.MaxVio) > 1e-6:
+            status = int(model.Status)
+            model.dispose()
+            return None
+        solution = {mess_id: float(variable.X) for mess_id, variable in delta_q.items()}
+        model.dispose()
+
+        base_score = self._violation_score(exact)
+        candidates = []
+        for scale in (0.25, 0.5, 0.75, 1.0, 1.05):
+            q = dict(control.mess_q_kvar)
+            for mess_id, delta in solution.items():
+                lower, upper, _ = q_bounds[mess_id]
+                scaled_delta = min(upper, max(lower, scale * delta))
+                q[mess_id] = float(q[mess_id]) + scaled_delta
+            candidate = FastControl(
+                dict(control.mess_charge_kw),
+                dict(control.mess_discharge_kw),
+                q,
+                dict(control.job_compute_rate_fraction),
+                dict(control.site_throughput_fraction),
+            )
+            candidate_exact = self.verifier.verify_fresh(
+                control=candidate, state=state, slow_plan=slow_plan
+            )
+            candidate_exact.validate()
+            candidates.append((candidate, candidate_exact, scale))
+
+        def preserves_satisfied_constraints(candidate_exact: ExactAcResult) -> bool:
+            return (
+                (exact.minimum_voltage_pu < 0.95 or candidate_exact.minimum_voltage_pu >= 0.95)
+                and (exact.maximum_voltage_pu > 1.05 or candidate_exact.maximum_voltage_pu <= 1.05)
+                and (exact.maximum_line_loading_fraction > 1.0 or candidate_exact.maximum_line_loading_fraction <= 1.0)
+                and (exact.maximum_transformer_loading_fraction > 1.0 or candidate_exact.maximum_transformer_loading_fraction <= 1.0)
+                and ("ROOT_SIGN" in exact.status or "ROOT_SIGN" not in candidate_exact.status)
+            )
+
+        passing = [item for item in candidates if item[1].passed]
+        admissible = passing or [
+            item
+            for item in candidates
+            if preserves_satisfied_constraints(item[1])
+            and self._violation_score(item[1]) < base_score - 1e-12
+        ]
+        if not admissible:
+            return None
+        selected = min(
+            admissible,
+            key=(
+                (lambda item: self._objective_distance(control, item[0]))
+                if passing
+                else (lambda item: self._violation_score(item[1]))
+            ),
+        )
+        candidate, candidate_exact, scale = selected
+        return candidate, candidate_exact, {
+            "status": "FRESH_OPENDSS_CONTINUOUS_Q_SENSITIVITY_QP",
+            "scale": scale,
+            "passed": candidate_exact.passed,
+            "continuous_variables": len(solution),
+            "integer_variables": 0,
+        }
+
     def _pairwise_q_step(
         self,
         control: FastControl,
@@ -785,6 +948,15 @@ class _GurobiSensitivityProjector:
                     (candidate, candidate_exact, active_fraction, coordinate_trace)
                 )
                 continue
+            sensitivity = self._sensitivity_qp_step(
+                active_candidate, state, slow_plan, active_exact
+            )
+            if sensitivity is not None and sensitivity[1].passed:
+                candidate, candidate_exact, sensitivity_trace = sensitivity
+                passing.append(
+                    (candidate, candidate_exact, active_fraction, sensitivity_trace)
+                )
+                continue
             pairwise = self._pairwise_q_step(
                 active_candidate, state, slow_plan, active_exact
             )
@@ -836,6 +1008,20 @@ class _GurobiSensitivityProjector:
                 if coordinate is not None:
                     current, exact, coordinate_trace = coordinate
                     trace_row["coordinate_q"] = coordinate_trace
+                    trace_row["candidate"] = {
+                        "vmin": exact.minimum_voltage_pu,
+                        "vmax": exact.maximum_voltage_pu,
+                        "line": exact.maximum_line_loading_fraction,
+                        "transformer": exact.maximum_transformer_loading_fraction,
+                    }
+                    self.trace.append(trace_row)
+                    continue
+                sensitivity = self._sensitivity_qp_step(
+                    current, state, slow_plan, exact
+                )
+                if sensitivity is not None:
+                    current, exact, sensitivity_trace = sensitivity
+                    trace_row["sensitivity_qp"] = sensitivity_trace
                     trace_row["candidate"] = {
                         "vmin": exact.minimum_voltage_pu,
                         "vmax": exact.maximum_voltage_pu,

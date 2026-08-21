@@ -199,6 +199,28 @@ def test_pairwise_q_search_closes_opposing_voltage_axes():
     assert result[2]["status"] == "FRESH_OPENDSS_PAIRWISE_Q_SEARCH"
 
 
+def test_continuous_q_sensitivity_qp_closes_between_coarse_grid_points():
+    control = FastControl(
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {},
+        {},
+    )
+    state = FastLayerState(0, {mid: 760.0 / 1080.0 for mid in MESS_IDS}, {})
+    verifier = PairwiseQVerifier()
+    projector = _GurobiSensitivityProjector(verifier, allow_mess=True)
+    slow_plan = SimpleNamespace(fingerprint="fixed-plan")
+    exact = verifier.verify_fresh(control=control, state=state, slow_plan=slow_plan)
+
+    result = projector._sensitivity_qp_step(control, state, slow_plan, exact)
+
+    assert result is not None
+    assert result[1].passed
+    assert result[2]["status"] == "FRESH_OPENDSS_CONTINUOUS_Q_SENSITIVITY_QP"
+    assert result[2]["integer_variables"] == 0
+
+
 def test_fleet_q_search_closes_multi_pcc_voltage_support():
     control = FastControl(
         {mid: 0.0 for mid in MESS_IDS},
