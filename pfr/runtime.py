@@ -43,6 +43,12 @@ STEP_HOURS = 5.0 / 60.0
 MESS_CAPACITY_KWH = 1080.0
 MESS_FLOOR_KWH = 440.0
 MESS_SAFETY_RESERVE_KWH = 440.0
+MESS_CANONICAL_DAILY_PRE_KWH = 760.0
+MESS_CHARGE_LIMIT_KW = 550.0
+MESS_NOMINAL_DISCHARGE_KW = 20.0
+MESS_CHARGE_EFFICIENCY = 0.95
+MAXIMUM_REFRESH_STEPS = 6
+PRICE_DEADBAND_FRACTION = 0.05
 MODELED_GPU_CAPACITY_PER_IDC = 256
 
 
@@ -1113,6 +1119,45 @@ def _facility_power(
     return tuple(p[site] for site in IDCS), (0.0,) * len(IDCS)
 
 
+def _nominal_mess_dispatch(
+    *,
+    energy_kwh: Mapping[str, float],
+    in_transit: Mapping[str, bool],
+    energy_enabled: bool,
+    current_price_aud_per_mwh: float,
+    horizon_price_median_aud_per_mwh: float,
+) -> Tuple[Mapping[str, float], Mapping[str, float]]:
+    charge = {mid: 0.0 for mid in MESS_IDS}
+    discharge = {mid: 0.0 for mid in MESS_IDS}
+    if not energy_enabled:
+        return charge, discharge
+
+    price_margin = PRICE_DEADBAND_FRACTION * max(abs(horizon_price_median_aud_per_mwh), 1.0)
+    low_price = current_price_aud_per_mwh < horizon_price_median_aud_per_mwh - price_margin
+    high_price = current_price_aud_per_mwh > horizon_price_median_aud_per_mwh + price_margin
+    recovery_hours = MAXIMUM_REFRESH_STEPS * STEP_HOURS
+    for mid in MESS_IDS:
+        if in_transit[mid]:
+            continue
+        energy = float(energy_kwh[mid])
+        if low_price and energy < MESS_CAPACITY_KWH:
+            charge[mid] = min(
+                MESS_CHARGE_LIMIT_KW,
+                (MESS_CAPACITY_KWH - energy) / (MESS_CHARGE_EFFICIENCY * recovery_hours),
+            )
+        elif not high_price and energy < MESS_CANONICAL_DAILY_PRE_KWH:
+            charge[mid] = min(
+                MESS_CHARGE_LIMIT_KW,
+                (MESS_CANONICAL_DAILY_PRE_KWH - energy) / (MESS_CHARGE_EFFICIENCY * recovery_hours),
+            )
+        elif high_price and energy > MESS_SAFETY_RESERVE_KWH:
+            discharge[mid] = min(
+                MESS_NOMINAL_DISCHARGE_KW,
+                (energy - MESS_SAFETY_RESERVE_KWH) * MESS_CHARGE_EFFICIENCY / STEP_HOURS,
+            )
+    return charge, discharge
+
+
 def _nominal_control(state: MutableMethodState, config: MethodConfig, frame: CausalExperimentFrame) -> FastControl:
     compute = {
         uid: _compute_fraction(job, frame, config)
@@ -1120,12 +1165,13 @@ def _nominal_control(state: MutableMethodState, config: MethodConfig, frame: Cau
         if job.lifecycle != "COMPLETED"
     }
     energy_enabled = config.energy_flexibility in {"MESS", "STATIONARY_BESS"}
-    high_price = frame.current_price_aud_per_mwh > 1.05 * frame.horizon_price_median_aud_per_mwh
-    charge = {mid: 0.0 for mid in MESS_IDS}
-    discharge = {
-        mid: 20.0 if energy_enabled and not state.mess_in_transit[mid] and high_price and state.mess_energy_kwh[mid] > MESS_SAFETY_RESERVE_KWH + 20.0 else 0.0
-        for mid in MESS_IDS
-    }
+    charge, discharge = _nominal_mess_dispatch(
+        energy_kwh=state.mess_energy_kwh,
+        in_transit=state.mess_in_transit,
+        energy_enabled=energy_enabled,
+        current_price_aud_per_mwh=frame.current_price_aud_per_mwh,
+        horizon_price_median_aud_per_mwh=frame.horizon_price_median_aud_per_mwh,
+    )
     return FastControl(
         mess_charge_kw=charge,
         mess_discharge_kw=discharge,
