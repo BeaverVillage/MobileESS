@@ -76,6 +76,15 @@ from .safety import (
     ProjectionCertificate,
     SafetyFilterResult,
 )
+from .debt import (
+    DebtAblation,
+    DebtMetrics,
+    DebtState,
+    EnergyReachability,
+    RecoveryStep,
+    evaluate_recovery,
+    update_dual_debt,
+)
 
 __all__ = [
     "AuthorityKind",
