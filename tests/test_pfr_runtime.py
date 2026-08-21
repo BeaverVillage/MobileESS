@@ -21,6 +21,7 @@ class FakePhysical:
     def verify_fresh(self, **kwargs):
         self.calls += 1
         raw = {
+            "root_import_p_kw": 100.0,
             "voltage_min_pu": 0.98,
             "voltage_max_pu": 1.02,
             "line_max_loading_pu": 0.5,

@@ -1,0 +1,40 @@
+{
+  "schema_version": "PFR11_W02_PREREGISTRATION_V1",
+  "frozen_before_w02_outcome": true,
+  "representative_week_id": "W02_2025-01-13",
+  "start_issue": 3493,
+  "issues_per_method": 2016,
+  "methods": ["B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7"],
+  "technical_acceptance": {
+    "all_methods_complete": true,
+    "valid_commit_markers_per_method": 2016,
+    "fresh_ac_final_violation_count": 0,
+    "source_identity_match": true,
+    "job_rack_wan_mess_state_chain_complete": true,
+    "checkpoint_migration_policy_compliant": true,
+    "independent_recalculation_pass": true,
+    "future_actual_used": false
+  },
+  "event_gate": {
+    "comparison": "B7_VS_B5",
+    "minimum_full_slow_replan_or_communication_reduction_fraction": 0.30,
+    "maximum_realized_cost_degradation_fraction": 0.01,
+    "required_safety_violations": 0,
+    "required_B7_SLA_violations": 0,
+    "failure_action": "DEMOTE_EVENT_TRIGGER_FROM_HEADLINE_WITHOUT_HIDING_RESULTS"
+  },
+  "mess_value_gate": {
+    "treatment": "B5",
+    "workload_only_comparators": ["B2", "B3"],
+    "metrics": ["realized_grid_cost_aud", "root_import_peak_kw", "voltage_stress_pu", "congestion_loading_pu"],
+    "minimum_weekly_gain_fraction": 0.03,
+    "consistent_daily_blocks_required": 5,
+    "daily_block_count": 7,
+    "issues_per_daily_block": 288,
+    "failure_action": "REPORT_NO_W02_MESS_VALUE_SUPPORT_AND_RETAIN_ONLY_PREREGISTERED_PFR13_REGIME_TEST"
+  },
+  "validator_policy": {
+    "N_Gurobi_validator": 0,
+    "N_OpenDSS_validator": 0
+  }
+}

@@ -157,6 +157,8 @@ class MutableMethodState:
     active_plan_age_steps: int = 10**9
     full_replan_count: int = 0
     communication_bytes: int = 0
+    wan_transferred_bytes_cumulative: int = 0
+    wan_active_transfers: int = 0
     compute_debt_gpu_hours: float = 0.0
     energy_debt_kwh: float = 0.0
     last_exact: Optional[Mapping[str, Any]] = None
@@ -513,6 +515,8 @@ def _post_payload(state: MutableMethodState, method_id: str) -> Mapping[str, Any
         "issue": state.issue,
         "mess_energy_kwh": state.mess_energy_kwh,
         "mess_location": state.mess_location,
+        "wan_transferred_bytes_cumulative": state.wan_transferred_bytes_cumulative,
+        "wan_active_transfers": state.wan_active_transfers,
         "jobs": {
             uid: {
                 "destination_idc": job.destination_idc,
@@ -792,6 +796,9 @@ class PfrRuntimeRunner:
                 "replan_causes": replan_causes + (("AC_SAFETY_ESCALATION",) if safety_replan else ()),
                 "full_replan_count_cumulative": state.full_replan_count,
                 "communication_bytes_cumulative": state.communication_bytes,
+                "wan_transferred_bytes_cumulative": state.wan_transferred_bytes_cumulative,
+                "wan_active_transfers": state.wan_active_transfers,
+                "wan_transfer_authority": "NO_AUTHORIZED_MIGRATIONS_MISSING_PAYLOAD",
                 "risk_interface": risk.active_risk_interface,
                 "risk": risk.active_risk,
                 "risk_components": risk.calibrated_components if config.risk_interface == "CALIBRATED" else risk.raw_components,
@@ -821,6 +828,11 @@ class PfrRuntimeRunner:
                 "optimization_certificate": active_optimization.certificate.as_dict(),
                 "actual_fresh_opendss_used": verifier.last_commit.actual_fresh_opendss_used,
                 "exact_ac": dict(verifier.last_commit.raw_metrics),
+                "price_aud_per_mwh": frame.current_price_aud_per_mwh,
+                "realized_grid_cost_aud": (
+                    float(verifier.last_commit.raw_metrics["root_import_p_kw"])
+                    * frame.current_price_aud_per_mwh * STEP_HOURS / 1000.0
+                ),
                 "runtime_seconds": time.monotonic() - started,
             }
             issue_root = method_root / f"issue_{frame.issue:06d}"
