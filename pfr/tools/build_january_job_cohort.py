@@ -12,8 +12,8 @@ import pandas as pd
 
 
 CANONICAL_SHA256 = "0fe9399ece73e4e6906d036f3322697bd3c73b1498cf3e9c49b836631e19c98f"
-EPOCH = pd.Timestamp("2025-01-01T00:00:00Z")
-END = pd.Timestamp("2025-02-01T00:00:00Z")
+EPOCH = pd.Timestamp("2024-12-31T14:00:00Z")
+END = pd.Timestamp("2025-01-31T14:00:00Z")
 STEP_SECONDS = 300
 
 
@@ -51,12 +51,14 @@ def materialize(canonical: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     arrival_seconds = (arrivals.loc[mask] - EPOCH).dt.total_seconds()
     latest_seconds = (latest_start.loc[mask] - EPOCH).dt.total_seconds()
     completion_seconds = (completion.loc[mask] - EPOCH).dt.total_seconds()
-    selected["arrival_step"] = (arrival_seconds // STEP_SECONDS).astype(int)
-    selected["latest_start_step"] = (latest_seconds // STEP_SECONDS).astype(int)
-    selected["latest_start_step"] = selected[["arrival_step", "latest_start_step"]].max(axis=1)
-    selected["latest_completion_step"] = completion_seconds.map(
+    selected["arrival_step"] = arrival_seconds.map(
         lambda value: int(ceil(value / STEP_SECONDS))
     )
+    selected["latest_start_step"] = (latest_seconds // STEP_SECONDS).astype(int)
+    selected["latest_start_step"] = selected[["arrival_step", "latest_start_step"]].max(axis=1)
+    selected["latest_completion_step"] = (completion_seconds // STEP_SECONDS).astype(int)
+    quantized_after_period = selected["arrival_step"] >= 31 * 288
+    selected = selected.loc[~quantized_after_period].copy()
     selected["requested_gpu"] = selected["requested_gpu"].astype(int)
     selected["job_uid"] = selected["job_uid"].astype(str)
     selected = selected.sort_values(["arrival_step", "job_uid"]).reset_index(drop=True)
@@ -72,11 +74,18 @@ def materialize(canonical: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
         "schema_version": "PFR_JAN2025_INDEPENDENT_JOB_COHORT_V13_2",
         "status": "PASS",
         "timestamp_storage_unit": "microseconds_since_epoch_despite_legacy_ns_suffix",
+        "calendar_timezone": "FIXED_AEST_UTC_PLUS_10_NO_DST",
         "calendar_start_utc": str(EPOCH),
         "calendar_end_exclusive_utc": str(END),
+        "timestamp_quantization": {
+            "arrival": "CEIL_TO_FIVE_MINUTE_ISSUE",
+            "latest_start": "FLOOR_TO_FIVE_MINUTE_ISSUE",
+            "latest_completion": "FLOOR_TO_FIVE_MINUTE_ISSUE"
+        },
         "five_minute_issue_count": 31 * 288,
         "source_january_arrival_rows": int(((arrivals >= EPOCH) & (arrivals < END)).sum()),
         "authorized_valid_rows": int(len(selected)),
+        "quantized_after_period_excluded_rows": int(quantized_after_period.sum()),
         "synthetic_date_shift": False,
         "cross_day_state_carryover": False,
         "day_end_unfinished_job_policy": "RIGHT_CENSORED_NOT_CARRIED",

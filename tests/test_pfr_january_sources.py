@@ -2,29 +2,32 @@ from pathlib import Path
 
 import pandas as pd
 
-from pfr.tools.build_january_job_cohort import materialize
+from pfr.tools.build_january_job_cohort import END, EPOCH, materialize
 from pfr.tools.run_pfr_matrix import _runtime_initial_state
 
 
 def test_january_cohort_uses_source_microsecond_timestamps_without_shift() -> None:
+    def microseconds(timestamp: pd.Timestamp) -> int:
+        return int(timestamp.value // 1_000)
+
     frame = pd.DataFrame(
         {
             "job_uid": ["before", "jan", "feb"],
             "origin_IDC_id": ["IDC01"] * 3,
             "arrival_timestamp_ns": [
-                1735689599000000,
-                1735689601000000,
-                1738368000000000,
+                microseconds(EPOCH - pd.Timedelta(seconds=1)),
+                microseconds(EPOCH + pd.Timedelta(seconds=1)),
+                microseconds(END),
             ],
             "latest_start_timestamp_ns": [
-                1735689600000000,
-                1735689901000000,
-                1738368300000000,
+                microseconds(EPOCH + pd.Timedelta(seconds=1)),
+                microseconds(EPOCH + pd.Timedelta(seconds=301)),
+                microseconds(END + pd.Timedelta(seconds=301)),
             ],
             "latest_completion_timestamp_ns": [
-                1735690200000000,
-                1735690501000000,
-                1738368900000000,
+                microseconds(EPOCH + pd.Timedelta(seconds=601)),
+                microseconds(EPOCH + pd.Timedelta(seconds=601)),
+                microseconds(END + pd.Timedelta(seconds=601)),
             ],
             "requested_gpu": [8.0, 8.0, 8.0],
             "job_power_prefreeze_authorized": [True] * 3,
@@ -36,7 +39,10 @@ def test_january_cohort_uses_source_microsecond_timestamps_without_shift() -> No
     cohort, audit = materialize(frame)
 
     assert cohort["job_uid"].tolist() == ["jan"]
-    assert cohort["arrival_step"].tolist() == [0]
+    assert cohort["arrival_step"].tolist() == [1]
+    assert cohort["latest_start_step"].tolist() == [1]
+    assert cohort["latest_completion_step"].tolist() == [2]
+    assert audit["calendar_timezone"] == "FIXED_AEST_UTC_PLUS_10_NO_DST"
     assert audit["synthetic_date_shift"] is False
 
 
