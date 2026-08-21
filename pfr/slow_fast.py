@@ -74,7 +74,7 @@ class SlowDiscretePlan:
         if any(int(rank) not in {1, 2, 3} for rank in self.mess_native_route_rank.values()):
             raise SlowFastContractError("route rank must select one of the native K=3 routes")
         jobs = set(self.job_idc_placement)
-        if not jobs or set(self.checkpoint_migration) != jobs:
+        if set(self.checkpoint_migration) != jobs:
             raise SlowFastContractError("every job requires placement and migration decisions")
         if set(self.gpu_gang_allocation) != jobs or set(self.job_start_issue) != jobs:
             raise SlowFastContractError("every job requires gang allocation and start decision")
