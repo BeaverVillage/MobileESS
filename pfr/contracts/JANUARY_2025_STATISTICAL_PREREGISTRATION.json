@@ -1,0 +1,62 @@
+{
+  "schema_version": "JANUARY_2025_STATISTICAL_PREREGISTRATION_V13_2",
+  "status": "FROZEN_BEFORE_PFR9_OUTCOME_INSPECTION",
+  "population": {
+    "calendar_timezone": "FIXED_AEST_UTC_PLUS_10_NO_DST",
+    "calendar_dates": 31,
+    "methods": ["B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7"],
+    "independent_daily_episodes": 248,
+    "issues_per_episode": 288,
+    "primary_sample_unit": "PAIRED_CALENDAR_DAY",
+    "five_minute_rows_are_independent_samples": false
+  },
+  "primary_contrasts": [
+    {"id": "B7_MINUS_B5", "minuend": "B7", "subtrahend": "B5"},
+    {"id": "B7_MINUS_B6", "minuend": "B7", "subtrahend": "B6"}
+  ],
+  "daily_metrics": [
+    "realized_grid_cost_aud",
+    "deadline_misses",
+    "compute_debt_gpu_hours",
+    "energy_debt_kwh",
+    "full_replan_count",
+    "communication_bytes",
+    "safety_filter_interventions",
+    "mobility_energy_kwh"
+  ],
+  "inference": {
+    "confidence_level": 0.95,
+    "bootstrap_seed": 20250131,
+    "bootstrap_replicates": 10000,
+    "serial_dependence_diagnostic": "ABS_LAG1_AUTOCORRELATION",
+    "material_serial_dependence_threshold": 0.30,
+    "independent_mode": "PAIRED_DAY_IID_BOOTSTRAP",
+    "dependent_mode": "CIRCULAR_MOVING_BLOCK_BOOTSTRAP",
+    "moving_block_length_days": 4,
+    "point_estimator": "MEAN_PAIRED_DAILY_DIFFERENCE",
+    "interval": "PERCENTILE_2_5_97_5"
+  },
+  "regime_factorial": {
+    "controller": "B7_EVENT_CALIBRATED",
+    "timing_and_safety_semantics_identical": true,
+    "cells": {
+      "RC0": {"compute_flexibility": false, "energy_flexibility": false},
+      "RCE": {"compute_flexibility": false, "energy_flexibility": true},
+      "RCC": {"compute_flexibility": true, "energy_flexibility": false},
+      "RCEC": {"compute_flexibility": true, "energy_flexibility": true}
+    }
+  },
+  "exclusion_rules": {
+    "outcome_based_exclusion": false,
+    "scientific_failure_exclusion": false,
+    "required_episode_validity": [
+      "288_COMMIT_MARKERS",
+      "COMPLETE_STATE_CHAIN",
+      "ACTUAL_GUROBI_ALL_ISSUES",
+      "FRESH_EXACT_OPENDSS_ALL_ISSUES",
+      "NO_FUTURE_ACTUAL"
+    ],
+    "invalid_episode_policy": "FAIL_CLOSED_NO_INFERENCE_UNTIL_TECHNICAL_REMEDIATION",
+    "unfinished_jobs_at_day_end": "RIGHT_CENSORED_NOT_EXCLUDED"
+  }
+}
