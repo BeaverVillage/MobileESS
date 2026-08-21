@@ -85,6 +85,13 @@ from .debt import (
     evaluate_recovery,
     update_dual_debt,
 )
+from .methods import (
+    ComparisonMethod,
+    ExperimentAuthority,
+    K9H7ResultIdentityV2,
+    MethodConfig,
+    MethodFactory,
+)
 
 __all__ = [
     "AuthorityKind",
