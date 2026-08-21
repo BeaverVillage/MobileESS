@@ -120,6 +120,37 @@ def _load_curve(path: Path) -> H100UtilizationPowerCurve:
     return curve
 
 
+def _runtime_initial_state(pre: Mapping[str, Any], start_issue: int) -> RuntimeInitialState:
+    """Accept legacy runtime PRE or the v13.2 independent-daily manifest."""
+    if "canonical_pre" in pre:
+        canonical = pre["canonical_pre"]
+        energy = canonical["mess_energy_kwh"]
+        locations = canonical["mess_locations"]
+        if len(energy) != 4 or len(locations) != 4:
+            raise RuntimeError("v13.2 canonical PRE must contain exactly four MESS")
+        if canonical.get("ai_queue_empty") is not True or canonical.get("ai_running_empty") is not True:
+            raise RuntimeError("v13.2 daily PRE must start with empty controllable AI state")
+        if canonical.get("wan_inventory_empty") is not True or canonical.get("wan_pipeline_empty") is not True:
+            raise RuntimeError("v13.2 daily PRE must start with empty WAN state")
+        if canonical.get("active_slow_plan") is not None:
+            raise RuntimeError("v13.2 daily PRE must not carry an active slow plan")
+        return RuntimeInitialState(
+            issue=start_issue,
+            state_sha256=str(pre["canonical_pre_sha256"]),
+            mess_energy_kwh={f"MESS{i + 1:02d}": float(value) for i, value in enumerate(energy)},
+            mess_location={f"MESS{i + 1:02d}": str(value) for i, value in enumerate(locations)},
+        )
+
+    if int(pre["state"]["issue_step"]) > start_issue:
+        raise RuntimeError("canonical PRE starts after requested issue")
+    return RuntimeInitialState(
+        issue=start_issue,
+        state_sha256=str(pre["state_sha256"]),
+        mess_energy_kwh={key: float(value) for key, value in pre["state"]["mess_E_kWh"].items()},
+        mess_location={key: str(value["service_id"]) for key, value in pre["state"]["mess_state"].items()},
+    )
+
+
 def _block(shared: Path, issue: int) -> Path:
     if issue < 0:
         raise RuntimeError("issue must be non-negative")
@@ -238,17 +269,7 @@ def main() -> None:
         primary_root=str(args.primary_root.resolve()),
     )
     pre = json_load(args.initial_state)
-    if int(pre["state"]["issue_step"]) > args.start_issue:
-        raise RuntimeError("canonical PRE starts after requested issue")
-    # Bounded PFR9 may begin at the first nonempty causal arrival.  The physical
-    # state remains the frozen cold PRE because no prior jobs or control outcomes
-    # are imported; this is an explicit bounded regression, not a scientific episode.
-    initial = RuntimeInitialState(
-        issue=args.start_issue,
-        state_sha256=str(pre["state_sha256"]),
-        mess_energy_kwh={key: float(value) for key, value in pre["state"]["mess_E_kWh"].items()},
-        mess_location={key: str(value["service_id"]) for key, value in pre["state"]["mess_state"].items()},
-    )
+    initial = _runtime_initial_state(pre, args.start_issue)
     frames = _frames(
         shared=args.shared_root.resolve(), start_issue=args.start_issue, count=args.count,
         independent_jobs=args.independent_jobs.resolve(), canonical_jobs=args.canonical_jobs.resolve(),
@@ -292,7 +313,11 @@ def main() -> None:
         "actual_gurobi_used": matrix["all_actual_gurobi"],
         "actual_fresh_opendss_used": matrix["all_fresh_exact_opendss"],
         "opendss_metrics_common_sha256": sha256(args.exact_package_root / "opendss_metrics_common.py"),
-        "bounded_regression_not_full_scientific_episode": args.count < 2016,
+        "full_scientific_daily_episode_issues": 288,
+        "bounded_regression_not_full_scientific_episode": args.count != 288,
+        "independent_daily_cold_start": "canonical_pre" in pre,
+        "cross_day_endogenous_state_carryover": False,
+        "controller_burn_in_steps": 0,
         "future_actual_used": False,
     }
     (output / "RUN_MANIFEST.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
