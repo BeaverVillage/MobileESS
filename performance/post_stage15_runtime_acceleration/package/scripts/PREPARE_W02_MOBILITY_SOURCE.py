@@ -29,6 +29,7 @@ def main():
  ap.add_argument("--phase",choices=("traffic","full"),required=True)
  ap.add_argument("--base-work",default="/home/jaewon/mobile_ess_work")
  ap.add_argument("--cpu-workers",type=int,default=4)
+ ap.add_argument("--stage2a-runtime-override")
  a=ap.parse_args()
  repo=Path(a.repo).resolve();out=Path(a.output_root).resolve()
  start=int(a.start_index);padded_end_excl=start+COUNT;scored_end=start+2015
@@ -40,13 +41,15 @@ def main():
   "--authority-root",str(repo/"stage7/r12_representative_weeks"),
   "--output-root",str(out),"--base-work",str(Path(a.base_work).resolve()),
   "--batch-size","576","--phase",a.phase,"--cpu-workers",str(a.cpu_workers)]
+ if a.stage2a_runtime_override:
+  sys.argv.extend(["--stage2a-runtime-override",str(Path(a.stage2a_runtime_override).resolve())])
  rc=int(mod.main())
  if rc==0:
   rec={"status":"PASS","candidate_id":a.candidate_id,"phase":a.phase,"source_issue_first":start,"source_issue_last":padded_end_excl-1,
        "source_issue_count":COUNT,"scored_issue_first":start,"scored_issue_last":scored_end,
        "scored_issue_count":2016,"padding_issue_count":288,
        "padding_role":"CAUSAL_SOURCE_CONTEXT_ONLY_NOT_SCORED_NOT_LOOKAHEAD",
-       "future_actual_used":False}
+       "future_actual_used":False,"stage2a_runtime_override":a.stage2a_runtime_override}
   (out/f"REP_WEEK_MOBILITY_{a.phase.upper()}_AUTHORITY.json").write_text(json.dumps(rec,indent=2,sort_keys=True)+"\n")
   if a.candidate_id=="W02_2025-01-13":
    (out/f"A_B10_W02_MOBILITY_{a.phase.upper()}_AUTHORITY.json").write_text(json.dumps(rec,indent=2,sort_keys=True)+"\n")

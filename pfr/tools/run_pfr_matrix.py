@@ -121,8 +121,10 @@ def _load_curve(path: Path) -> H100UtilizationPowerCurve:
 
 
 def _block(shared: Path, issue: int) -> Path:
-    block = (issue - 3456) // 576
-    start = 3456 + block * 576
+    if issue < 0:
+        raise RuntimeError("issue must be non-negative")
+    block = issue // 576
+    start = block * 576
     return shared / "power_price" / f"block_{block:02d}_{start}_{start + 575}"
 
 
@@ -207,7 +209,7 @@ def _frames(
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo", type=Path, required=True)
-    parser.add_argument("--candidate-id", default="W02_2025-01-13")
+    parser.add_argument("--candidate-id", default="JAN2025_DAY01")
     parser.add_argument("--start-issue", type=int, required=True)
     parser.add_argument("--count", type=int, required=True)
     parser.add_argument("--shared-root", type=Path, required=True)

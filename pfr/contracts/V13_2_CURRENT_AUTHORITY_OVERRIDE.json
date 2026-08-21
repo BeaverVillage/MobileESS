@@ -1,0 +1,45 @@
+{
+  "schema_version": "V13_2_CURRENT_AUTHORITY_OVERRIDE_V1",
+  "status": "CURRENT",
+  "source_document_sha256": "ccba214d7a8bf6c142b34cf6f0abc3ce70bae00b9bfd23fe5152506e552e599d",
+  "professor_feedback_sha256": "a27a4a67f710bd9d321b7c88df0470612f6983e03c3b04404c553e8650c0b7c1",
+  "supersedes": [
+    "CONVERSATION_DERIVED_CROSS_DAY_CONTINUITY",
+    "CONVERSATION_DERIVED_PHYSICS_E_ONLY_RUNTIME",
+    "APPENDIX_F_HISTORICAL_PROTOCOL"
+  ],
+  "daily_protocol": {
+    "calendar_days": 31,
+    "methods_per_day": 8,
+    "daily_episodes": 248,
+    "scored_issues_per_episode": 288,
+    "committed_scored_issues": 71424,
+    "controller_burn_in_steps": 0,
+    "daily_state_reset": true,
+    "cross_day_state_carryover": false
+  },
+  "mobility_protocol": {
+    "route_geometry": "INHERITED_OD_TOP3_K_SHORTEST_FROZEN",
+    "original_generator_algorithm": "UNVERIFIED_DO_NOT_CLAIM_DIJKSTRA_OR_YEN",
+    "ml_generates_route_geometry": false,
+    "traffic_ml_role": "ETA_FORECAST_SUPPORTING_ONLY",
+    "energy_authority": "PHYSICS_BASELINE_PLUS_FROZEN_E3_E4_RESIDUAL_QUANTILES_SUPPORTING_ONLY",
+    "optimizer_forecast_input": "E5B_ONLY",
+    "realized_input": "E5C_POST_DECISION_REPLAY_ONLY",
+    "uncertainty": "JOINT_ETA_ENERGY_CALIBRATED_SET",
+    "paper_facing_physical_interpretation": "E_PHYSICS_CENTERED"
+  },
+  "controller_protocol": {
+    "slow": "EVENT_OR_TMAX_30_MINUTES_MIXED_INTEGER",
+    "fast": "CONTINUOUS_CONVEX_QP_EVERY_5_MINUTES_NUMINTVARS_0",
+    "uncertainty_factorization": "U_MOB_X_U_WORK_X_U_GRID",
+    "ac_safety": "PROJECTION_FRESH_OPENDSS_FAIL_CLOSED"
+  },
+  "staged_release": [
+    "PFR7_ONE_ISSUE_X_B0_B7",
+    "PFR8_24_ISSUES_X_B0_B7",
+    "PFR9_JAN01_288_ISSUES_X_B0_B7",
+    "PFR10_JAN01_07_INDEPENDENT_DAYS_X_B0_B7",
+    "PFR11_JAN08_31_INDEPENDENT_DAYS_X_B0_B7"
+  ]
+}
