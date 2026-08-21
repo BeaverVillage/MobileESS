@@ -1,0 +1,22 @@
+{
+  "schema_inventory_relpath": "authority/D/04_RESULT_CONTRACT/K9H7_RESULT_V1_SCHEMA_INVENTORY_R10.json",
+  "schema_version": "a_to_b.10.k9h7_writer_binding.v1",
+  "status": "PASS_STATIC_BINDING",
+  "table_count": 12,
+  "tables": [
+    "rolling_step",
+    "job_event",
+    "rack_step",
+    "wan_event",
+    "mess_step",
+    "debt_step",
+    "constraint_event",
+    "forecast_eval",
+    "grid_exact_ac_bus_phase",
+    "grid_exact_ac_summary",
+    "optimization_stats",
+    "run_summary"
+  ],
+  "unobserved_values_policy": "DO_NOT_FABRICATE; emit exact headers and OBSERVABILITY_GAPS.json when frozen engine did not persist trustworthy row-level values.",
+  "writer_implementation": "runtime/W02_POLICY_EPISODE_RUNNER.py:build_results"
+}

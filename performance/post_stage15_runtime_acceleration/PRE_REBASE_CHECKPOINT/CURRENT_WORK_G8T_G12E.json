@@ -1,0 +1,75 @@
+{
+  "checkpoint_role": "PRE_PROFESSOR_FEEDBACK_LEGACY_CHECKPOINT",
+  "final_12week_started": false,
+  "stages": {
+    "G8T": {
+      "status": "PASS",
+      "native_k": 3,
+      "move_arc_binary_count": 0,
+      "move_arc_continuous_count": 100704,
+      "node_occupancy_binary_count": 4596,
+      "separate_z_route_binary_layer": "REJECTED_AS_REDUNDANT",
+      "energy_internal_unit": "MWh",
+      "protected_floor_model_unit": 0.44,
+      "protected_floor_kWh": 440
+    },
+    "G9C": {
+      "status": "PASS_BOUNDED_ONE_ISSUE",
+      "m3_removed_linear_constraints": 256,
+      "constraint_counts": {
+        "support_debt_terminal": 4,
+        "r24_debt_suffix": 36,
+        "r25g_debt_stay_cover": 36,
+        "r25k_debt_stay_cover_dense": 180,
+        "workload_debt_terminal": 0
+      }
+    },
+    "G10F": {
+      "status": "PASS_FOUR_METHOD_ONE_ISSUE",
+      "methods": 4,
+      "commit_markers_per_method": 1,
+      "materializer_pass": true
+    },
+    "G11A": {
+      "status": "PASS_TASK_G11A_EVENT_TRIGGER_REPLAN_FREEZE",
+      "role": "legacy_pre_feedback_event_replan_freeze"
+    },
+    "G12A": {
+      "status": "RUNNER_PASS_MATERIALIZER_STRICTNESS_FAIL",
+      "issues_per_method": 24,
+      "commit_markers_per_method": 24,
+      "materializer_pass_per_method": 4
+    },
+    "G12B": {
+      "status": "PASS_OBSERVABILITY_GAP_AUDIT",
+      "missing_source": "A_B10_FULL_PLANNER_SOLVE.json",
+      "gap_per_method": 20
+    },
+    "G12C": {
+      "status": "PASS_TASK_G12C_SOLVE_OPTIONAL_MATERIALIZER_FIX",
+      "total_materialized_issues": 96,
+      "total_pass_issues": 96,
+      "optional_solve_missing_accepted_total": 80,
+      "solve_present_total": 16
+    },
+    "G12D": {
+      "status": "FAIL_PACKAGING_BEFORE_RUN",
+      "error": "ModuleNotFoundError: materializer_lib",
+      "scientific_failure": false
+    },
+    "G12E": {
+      "status": "FAIL_TASK_G12E_FULL_DAY_IMPORT_PACKAGING_FIX",
+      "issues_per_method": 288,
+      "methods": {
+        "M1": {"commit": 288, "materializer_pass": 288, "runner_returncode": 0},
+        "M2": {"commit": 288, "materializer_pass": 288, "runner_returncode": 0},
+        "M3": {"commit": 37, "materializer_pass": 37, "runner_returncode": 1, "fail_issue": 3493, "error": "G10F/G9C found zero explicit debt/rebound decision-use constraints to remove"},
+        "M4": {"commit": 37, "materializer_pass": 37, "runner_returncode": 1, "fail_issue": 3493, "error": "R62_FIXED77_DEFERRED_FREE_FEASIBILITY_FAILED:SKIP_NOT_M4_ISSUE5299_FIXED_LOCATION"}
+      },
+      "full_day_started": true,
+      "full_month_started": false,
+      "final_12week_started": false,
+      "scientific_interpretation": "legacy pre-feedback diagnostic; do not continue solely to make M3/M4 green"
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "schema_version": "mobileess.post_stage15.w02_safety_recovery_refreeze.v1",
+  "status": "PASS_CODE_AND_BOUNDED_REGRESSION",
+  "scope": "Common Fresh Exact AC safety recovery for W02 methods M1-M4",
+  "supersedes": {
+    "scope_only": "AC recovery attempt counts and ordering",
+    "prior_three_cut_contract": true,
+    "prior_full_replan_only_contract": true
+  },
+  "frozen_state_machine": [
+    "initial candidate -> Fresh Exact OpenDSS",
+    "on failure -> at most one bounded phase-aware P/Q correction -> Fresh Exact OpenDSS",
+    "on failure -> restore the same PRE/controller boundary -> GRID_HARD_RISK -> at most one H54 Full Replan",
+    "reject an electrically identical Full Replan candidate before a duplicate OpenDSS call",
+    "validate the distinct Full Replan candidate once with Fresh Exact OpenDSS",
+    "on remaining failure -> FAIL_CLOSED without commit"
+  ],
+  "budgets": {
+    "ac_pq_correction_rounds_max": 1,
+    "same_pre_h54_full_replan_max": 1,
+    "production_fresh_exact_ac_candidate_validations_max": 3,
+    "ac_cut_after_full_replan": 0
+  },
+  "method_binding": {
+    "methods": ["M1", "M2", "M3", "M4"],
+    "identical_common_runner_path": true,
+    "method_specific_recovery_budget": false
+  },
+  "safety_contract": {
+    "voltage_min_pu": 0.95,
+    "voltage_max_pu": 1.05,
+    "mess_active_power_limit_kw": 550.0,
+    "mess_apparent_power_limit_kva": 700.0,
+    "hard_limits_relaxed": false,
+    "future_actual_used": false,
+    "unsafe_action_committed": false,
+    "failed_and_recovery_candidate_fingerprints_required": true,
+    "duplicate_electrical_candidate_no_second_opendss_gate_required": true
+  },
+  "corrected_runner": {
+    "path": "runtime/W02_POLICY_EPISODE_RUNNER.py",
+    "sha256": "d14dd492c2e4f7e4a29861e77c0ef95be3ed389c9fa11d413fd559c0afcafd47"
+  },
+  "validator": {
+    "path": "tools/VALIDATE_W02_SAFETY_RECOVERY_CONTRACT.py",
+    "sha256": "802d01fd3faace71f9d2364c4e6f12ffad46d2c6f2def866ca27d1f2b08f64b9",
+    "result": "/home/jaewon/mobile_ess_work/frozen_artifacts/PRE_W02_SAFETY_RECOVERY_CONTRACT_CURRENT.json",
+    "result_sha256": "f440bfed661e59b2b9631bd225ceeffadd76910637f057301f630e96a0fef35a"
+  },
+  "bounded_actual_regression": {
+    "root": "/home/jaewon/mobile_ess_work/frozen_artifacts/POST15_SAFETY_RECOVERY_REGRESSION_20260817T2030",
+    "full_w02_executed": false,
+    "cases": [
+      {
+        "method": "M2",
+        "issue": 3573,
+        "status": "PASS_AFTER_ONE_SAME_PRE_H54_FULL_REPLAN",
+        "candidate_count": 2,
+        "candidate_stages": ["INITIAL", "FULL_REPLAN"],
+        "policy_issue_audit_sha256": "2493cf416a10b6dcf8bffab9ef0755bb97836f68898b81724d999bf1c2161fc7",
+        "fresh_exact_opendss_sha256": "380f75407751cac4dc9bead8f138ebf4d88aadd60adf813e1a82b87edb07d2f7"
+      },
+      {
+        "method": "M4",
+        "issue": 3519,
+        "status": "PASS_INITIAL_FRESH_AC",
+        "candidate_count": 1,
+        "candidate_stages": ["INITIAL"],
+        "policy_issue_audit_sha256": "4d470f0b28437325aeefb7498666575cb1853c0008894d37609478dc412230dc",
+        "fresh_exact_opendss_sha256": "623eaaa90eff84d707a113fe6d0a9dd2914bb8e7cc4929c91da367e00db5826e"
+      }
+    ]
+  },
+  "documentation": {
+    "modified_by_this_change": false,
+    "owner": "USER"
+  },
+  "next_action": "Regenerate fail-closed release hashes and run preflight only; do not start full W02 in this task."
+}

@@ -1,0 +1,67 @@
+{
+  "schema_version": "representative_period_paper_result_v1",
+  "information_boundary": {
+    "calibration_year": 2024,
+    "held_out_application_year": 2025,
+    "controller_outputs_used": false,
+    "controller_or_opendss_execution_performed": false
+  },
+  "rooftop_pv_repair": {
+    "same_timestamp_satellite_fallback_count": 5,
+    "linear_interpolation_no_satellite_count": 2,
+    "raw_archives_modified": false
+  },
+  "kestrel_f30": {
+    "2024_jobs": 10839,
+    "2025_jobs": 59901,
+    "wan_contract": "arriving GPUh multiplied by 3 GB/GPUh"
+  },
+  "selection_contract": {
+    "candidate_k": [4, 8, 12],
+    "annual_mean_relative_error_max": 0.15,
+    "seasonal_mean_relative_error_max": 0.20,
+    "continuous_p95_relative_error_max": 0.10,
+    "continuous_ramp_p95_relative_error_max": 0.10,
+    "correlation_matrix_mean_absolute_error_max": 0.10,
+    "burn_in_steps_5min": 576,
+    "stress_period_annual_weight": 0.0
+  },
+  "calibration_decisions_2024": {
+    "4": {"pass": false},
+    "8": {"pass": false},
+    "12": {
+      "pass": true,
+      "annual_mean_relative_error_max": 0.1247508958832359,
+      "seasonal_mean_relative_error_max": 0.19757534804422153,
+      "continuous_p95_relative_error_max": 0.031151481807164167,
+      "continuous_ramp_p95_relative_error_max": 0.06842266962187628,
+      "correlation_matrix_mean_absolute_error_max": 0.03057145261751145
+    }
+  },
+  "application_result_2025": {
+    "k": 12,
+    "pass": true,
+    "selected_candidate_ids": [
+      "W02_2025-01-13",
+      "W07_2025-02-17",
+      "W10_2025-03-10",
+      "W17_2025-04-28",
+      "W18_2025-05-05",
+      "W25_2025-06-23",
+      "W26_2025-06-30",
+      "W32_2025-08-11",
+      "W38_2025-09-22",
+      "W41_2025-10-13",
+      "W44_2025-11-03",
+      "W51_2025-12-22"
+    ],
+    "annual_mean_relative_error_max": 0.08500149278243646,
+    "seasonal_mean_relative_error_max": 0.1822324289153688,
+    "continuous_p95_relative_error_max": 0.07414217949539964,
+    "continuous_ramp_p95_relative_error_max": 0.04752753600498122,
+    "correlation_matrix_mean_absolute_error_max": 0.01848578738868882,
+    "seasonal_quota_pass": true,
+    "cluster_weight_sum": 1.0
+  },
+  "status": "FROZEN_PRE_CONTROLLER_EXOGENOUS_ONLY"
+}

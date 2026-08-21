@@ -1,0 +1,37 @@
+{
+  "candidate_id": "W02_2025-01-13",
+  "contract_id": "D12_W02_4POLICY_PILOT_ACCEPTANCE_V2",
+  "controller_burn_in_steps": 0,
+  "failure_policy": "FAIL_CLOSED_PRESERVE_PARTIAL_RESULTS_AND_LOGS",
+  "gates": [
+    "all four policies complete",
+    "12-table K9H7_RESULT_V1 schema per policy",
+    "PRE chain starts at C canonical W02 PRE",
+    "no future actual leakage",
+    "job_event.job_id = str(C.job_uid)",
+    "F7 independent coverage certificate PASS",
+    "right-censored jobs retained",
+    "fresh OpenDSS/certificate logs present for committed actions",
+    "commit-critical runtime reported separately from slow-planner runtime",
+    "no winner declaration before all four paired W02 results pass",
+    "commit-critical runtime reported separately from slow-planner runtime",
+    "commit-critical runtime >=300 s on development WSL host is recorded as a runtime overrun, not a scientific FAIL",
+    "development-host overrun sets realtime_claim_on_development_host = NOT_DEMONSTRATED",
+    "target-hardware real-time claim requires a separate measured qualification; no assumed speedup"
+  ],
+  "method_config_sha256": "3f712ec02c4c5ebb6a424267b043f07469d29f4a4abeaea7fcdd8b765e13624a",
+  "method_id": "B5",
+  "realtime_claim_requires_target_hardware_qualification": true,
+  "required_K9H7_tables_per_policy": 12,
+  "required_policies": [
+    "PROPOSED_EVENT30_LOCAL_REPAIR",
+    "FIXED30",
+    "EVENT30_NO_LOCAL_REPAIR",
+    "FIXED15"
+  ],
+  "required_scored_issues_per_policy": 2016,
+  "runtime_semantics_contract": "D12_RUNTIME_CLAIM_SEMANTICS_V2",
+  "same_canonical_PRE_required": true,
+  "same_exogenous_inputs_required": true,
+  "scientific_acceptance_independent_of_development_host_300s_deadline": true
+}

@@ -1,0 +1,17 @@
+{
+  "SOC_upper_bound_proof": "E[h+1]=E[h]+eta_ch*DT*Pchg-DT*Pdis/eta_dis-E_move; with Pchg<=P_MAX, Pdis>=0, E_move>=0 => E[h]<=E0+h*eta_ch*DT*P_MAX",
+  "feasible_set_relaxed": false,
+  "future_regeneration_precredit": false,
+  "original_SOC_dynamics_retained": true,
+  "original_support_debt_recursion_retained": true,
+  "planning_move_count": 31782,
+  "planning_route_energy_max_kWh": 72.12054443359375,
+  "planning_route_energy_min_kWh": 1.4238070249557495,
+  "planning_route_energy_nonnegative": true,
+  "repayment_upper_bound_proof": "repE[h]<=charge[h]=eta_ch*DT*Pchg[h]<=eta_ch*DT*P_MAX",
+  "route_energy_tolerance_kWh": 1e-09,
+  "signed_bucket_regeneration_allowed": true,
+  "status": "PASS",
+  "support_debt_upper_bound_proof": "DE[H]=0 and repE[k]<=eta_ch*DT*P_MAX => any feasible DE[h] <= (H-h)*eta_ch*DT*P_MAX",
+  "terminal_support_debt_constraint_retained": true
+}

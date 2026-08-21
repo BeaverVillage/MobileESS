@@ -1,0 +1,48 @@
+{
+  "schema_version": "mobileess.post_stage15.w02_r8_m4_two_stage_grid_recovery_rootcause.v1",
+  "status": "PASS_TWO_STAGE_GRID_RECOVERY_FOUR_BOUNDARIES",
+  "root_cause": {
+    "runtime": "Finite-difference sampling was unreachable in the original recovery path and temporary Gurobi rows were removed before incumbent X values were captured.",
+    "design": "One recovery neighborhood and a voltage-only progress gate cannot span local voltage, coupled line-current, and discrete regulator-tap regimes.",
+    "r7_actual_issue3573": "The first correction removed seven line violations but crossed a tap boundary. The old voltage-only monotonic gate rejected that total hard-violation improvement and the next round did not protect previously violated lines.",
+    "power_scale_error": false,
+    "unsafe_action_committed": false
+  },
+  "correction": {
+    "runner": {"path": "runtime/W02_POLICY_EPISODE_RUNNER.py", "sha256": "5d1cb008bf2807a1c52114a7afcf8f62bdcaffb5da272e7e62c16bd9c75836b8"},
+    "launcher": {"path": "RUN_W02_4POLICY_ACTUAL.sh", "sha256": "6282c02341e42c5ab73e7845f8c9a568c5a1935da2d15049d710a6acbc02d1c6", "run_id": "B_W02_4POLICY_ACTUAL_FINAL_R8"},
+    "selector": "PRE_RECOVERY_EXACT_VIOLATION_FAMILY",
+    "profiles": {
+      "LOCAL_VOLTAGE_ONLY": {"p_kw": 10.0, "q_kvar": 10.0, "max_rounds": 1},
+      "COUPLED_VOLTAGE_LINE": {"p_kw": 100.0, "q_kvar": 50.0, "max_rounds": 1},
+      "SEVERE_VOLTAGE_ONLY": {"p_kw": 1100.0, "q_kvar": 0.0, "max_rounds": 1},
+      "SEVERE_VOLTAGE_LINE": {"p_kw": 1100.0, "q_kvar": 100.0, "voltage_margin_pu": 0.003125, "max_rounds": 2},
+      "SEVERE_VOLTAGE_POST_LINE": {"p_kw": 1100.0, "q_kvar": 100.0, "protected_original_lines": true}
+    },
+    "progress_gate": "TOTAL_HARD_VIOLATION_COUNT_THEN_VOLTAGE_SEVERITY",
+    "max_production_fresh_ac_candidates": 4,
+    "max_same_pre_full_replans": 1,
+    "power_scale_kw_per_model_unit": 1000.0,
+    "power_scale_changed": false,
+    "hard_limits_relaxed": false,
+    "future_actual_used": false
+  },
+  "validation": {
+    "safety_contract": {"validator_sha256": "de1654a7651d9dd50bd9308a1b318c7673fdb7c5e39ab81d4015c1fd2b79d48e", "result_sha256": "2493941a3b168fcc5be185f425479ea8a3e018d1804ba0de5f37a07b32cd4b6e", "status": "PASS"},
+    "four_boundary_validator": {"validator_sha256": "cdf7a1060df36fdfe374f5f25f4c21d7451e2d5a92afb46f1e5dd28b7927c3ed", "result_sha256": "56d13724d1978736f84d866035765303129c5a940f418b838fb5e104a43c8261", "status": "PASS"},
+    "r7_actual_pre_issue3573": {
+      "evidence_sha256": "0382a1ac8f55258157bdff3355b831b35e638309237615f0317ed54f518e0956",
+      "initial": {"voltage_max_pu": 1.0545750070271243, "voltage_violations": 4, "line_max_loading_pu": 1.061052067681389, "line_violations": 7},
+      "round1": {"voltage_max_pu": 1.0570058138072547, "voltage_violations": 5, "line_max_loading_pu": 0.9944430578967102, "line_violations": 0},
+      "round2": {"voltage_max_pu": 1.0498677227820887, "voltage_violations": 0, "line_max_loading_pu": 0.9883232973193401, "line_violations": 0},
+      "status": "PASS_RECOVERED",
+      "atomic_commit": true
+    },
+    "all_four_boundaries_pass": true,
+    "same_causal_pre_state": true,
+    "full_W02_executed": false
+  },
+  "supersedes_for_current_runner_binding": ["authority/POST_STAGE15_W02_R7_M4_REGULATOR_SAFE_GRID_RECOVERY_ROOTCAUSE_CORRECTION.json"],
+  "historical_authorities_remain_immutable": true,
+  "document_files_modified": false
+}

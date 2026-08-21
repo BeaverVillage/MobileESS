@@ -1,0 +1,60 @@
+{
+  "release": "R25H_B1_CERTIFICATE_FOCUSED_SEARCH_POLICY",
+  "stage": "B1/7",
+  "status": "STATIC_FREEZE",
+  "foundation": "R25G_A6R3_HYBRID_STAY_BINARY_EXACT_ACCEL",
+  "parent_main_sha256": "1df2f74cc43b7fa8e6395afeabd58bc933ef847bd7821104a3049a960e45d65f",
+  "b1_main_sha256": "500fcf693843b16ddc2cc064b9c68022a4d5c629aff3d79ec6f1ab837702c979",
+  "activation_env": {
+    "MOBILEESS_R25H_B1_CERTIFICATE_FOCUS": "1"
+  },
+  "applies_to": "rolling issues >113; issue113 frozen baseline unchanged",
+  "search_policy": {
+    "MIPFocus": 3,
+    "ImproveStartGap": 0.0,
+    "Heuristics_rolling": 0.1,
+    "MIPGap": 0.03,
+    "Threads": 1,
+    "previous_plan_role": "VarHint only",
+    "rolling_MIP_start": "none for issue>113"
+  },
+  "changes": {
+    "legacy_rolling_MIPFocus_1_disabled_when_B1_active": true,
+    "pre_target_ImproveStartGap_0p032_disabled_when_B1_active": true,
+    "dedicated_runtime_policy_audit_added": true
+  },
+  "unchanged": {
+    "scientific_model": true,
+    "feasible_set": true,
+    "objective": true,
+    "Horizon": 54,
+    "cadence_minutes": 5,
+    "traffic_K3": true,
+    "D2_contract": true,
+    "Rack_WAN_OpenDSS_gates": true,
+    "future_actual_forbidden": true,
+    "future_D2_reinjection_forbidden": true,
+    "h0_only_commit": true
+  },
+  "model_api_call_counts_parent": {
+    "addVar": 33,
+    "addVars": 7,
+    "addConstr": 4,
+    "addLConstr": 61,
+    "addQConstr": 5,
+    "setObjective": 1,
+    "setObjectiveN": 7
+  },
+  "model_api_call_counts_b1": {
+    "addVar": 33,
+    "addVars": 7,
+    "addConstr": 4,
+    "addLConstr": 61,
+    "addQConstr": 5,
+    "setObjective": 1,
+    "setObjectiveN": 7
+  },
+  "model_api_call_counts_identical": true,
+  "long_solver_run_performed": false,
+  "purpose": "Remove solver-policy conflict with the 3% certificate tail: keep bound-focused search active and prevent a 3.2% solution-improvement switch before the 3.0% acceptance target."
+}

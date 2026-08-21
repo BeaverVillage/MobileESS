@@ -1,0 +1,56 @@
+{
+  "schema_version": "mobileess.post_stage15.w02_r11_m4_three_stage_tap_recovery.v1",
+  "status": "PASS_THREE_STAGE_TAP_RECOVERY_SEVEN_BOUNDARIES",
+  "root_cause": {
+    "r10_actual_issue3580": "The initial voltage-only event had 2 violations and 1.054553193415968 pu maximum. Its first Q-frozen correction crossed a regulator state and worsened to 3 violations at 1.0566751879887595 pu. The two-round policy then either stopped early or left one violation, while the same-PRE full replan reproduced the initial decision candidate byte-for-byte.",
+    "design": "Replace the ineffective duplicate full-replan slot with one more causal exact-state relinearization for severe voltage-only tap events. The state machine remains capped at four production Fresh-AC candidates: initial plus at most three corrections.",
+    "power_scale_error": false,
+    "unsafe_action_committed": false
+  },
+  "correction": {
+    "runner": {
+      "path": "runtime/W02_POLICY_EPISODE_RUNNER.py",
+      "sha256": "b887282c2b9b1b130cfc4445c8a7f94b4c5cd76eb829aa7e65aa8c93fb8accf7"
+    },
+    "runner_sha256": "b887282c2b9b1b130cfc4445c8a7f94b4c5cd76eb829aa7e65aa8c93fb8accf7",
+    "launcher_sha256": "6334f91090f022bb772ded34d8ed60d66c14ca0ba994819a278e15d85c960644",
+    "run_id": "B_W02_4POLICY_ACTUAL_FINAL_R11",
+    "severe_voltage_round1_p_kw": 1100.0,
+    "severe_voltage_round1_q_kvar": 0.0,
+    "relinearized_p_kw": 1100.0,
+    "relinearized_q_kvar": 200.0,
+    "relinearized_voltage_inner_margin_pu": 0.002,
+    "max_cut_rounds": 3,
+    "max_fresh_ac_candidates": 4,
+    "power_scale_kw_per_model_unit": 1000.0,
+    "power_scale_changed": false,
+    "hard_limits_relaxed": false,
+    "future_actual_used": false
+  },
+  "validation": {
+    "safety_validator_sha256": "6a7d887fb348fc06000122db3d50b2560ac10be190051b657828fbdc54bf0e15",
+    "safety_result_sha256": "5f5b1b45ee0ffb6835954f1fcf246592a83ad2373efee6fcd30ccfbefb5677a4",
+    "seven_boundary_validator_sha256": "af5b009522889befba5771aa5b49ba5d643881ce08d8cfcc2302e0a8c415fb8d",
+    "seven_boundary_result_sha256": "6333ef866d1e08f0a5d49b0d7d88a6556d8400900003afb33bdc428e9d4a5f72",
+    "r10_issue3580_evidence_sha256": "70ee7696e58af2b24795a8748b1a496db774965eaa9152596131efcd57e88445",
+    "causal_pre_state_sha256": "fee27194790bc491887c8368dae95018a3ce2cf8b9eb5fb1d38d8fe5819237c2",
+    "initial_voltage_max_pu": 1.054553193415968,
+    "round1_voltage_max_pu": 1.0566751879887595,
+    "round2_voltage_max_pu": 1.0511558626192012,
+    "final_voltage_max_pu": 1.0479903213398765,
+    "initial_voltage_violations": 2,
+    "round1_voltage_violations": 3,
+    "round2_voltage_violations": 1,
+    "final_voltage_violations": 0,
+    "final_line_loading_max_pu": 0.8078442401665474,
+    "final_line_violations": 0,
+    "all_seven_boundaries_pass": true,
+    "same_causal_pre_state": true,
+    "atomic_commit": true,
+    "full_W02_executed": false
+  },
+  "supersedes_for_current_runner_binding": [
+    "authority/POST_STAGE15_W02_R10_M4_TAP_RELINEARIZATION_ROOTCAUSE_CORRECTION.json"
+  ],
+  "historical_authorities_remain_immutable": true
+}

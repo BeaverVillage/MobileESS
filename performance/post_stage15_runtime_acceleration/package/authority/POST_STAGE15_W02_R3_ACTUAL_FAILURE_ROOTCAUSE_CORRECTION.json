@@ -1,0 +1,79 @@
+{
+  "schema_version": "mobileess.post_stage15.w02_r3_actual_failure_rootcause_correction.v1",
+  "status": "PASS_ROOT_CAUSE_FIXED_AND_R3_FAILURE_BOUNDARIES_REPLAYED",
+  "issued_utc": "2026-08-17T15:40:00Z",
+  "scope": "Common M1-M4 W02 Fresh Exact AC bounded P/Q recovery implementation",
+  "supersedes_scope_only": [
+    "The runner SHA and clean-production representativeness claims in POST_STAGE15_W02_SAFETY_RECOVERY_REFREEZE.json",
+    "The pre-R3 PRE_W02_FINAL_RELEASE_AUTHORIZATION.json"
+  ],
+  "root_cause": {
+    "classification": "DETERMINISTIC_CONTROL_FLOW_INDENTATION_DEFECT",
+    "failure": "After a feasible finite-difference step was found, break exited the coordinate loop before the sample and gradient block could run.",
+    "observable_effect": "The gradient map remained empty for every policy, raised GRID_CORRECTION_EXHAUSTED_NO_COMPLETE_SENSITIVITY, and skipped the one authorized AC_CORRECTION production candidate.",
+    "secondary_effect": "M2, M3, and M4 then produced duplicate same-PRE Full Replan candidates; M1 produced a distinct but still unsafe Full Replan candidate. The duplicate gate and final fail-closed behavior were correct and were not bypassed."
+  },
+  "correction": {
+    "description": "Keep the feasible-step break inside the step loop and execute finite-difference sampling, topology checks, gradient construction, and audit recording after step selection for each P/Q coordinate.",
+    "runner": {
+      "path": "runtime/W02_POLICY_EPISODE_RUNNER.py",
+      "sha256": "295f40a17116ab39df8aadfe1c388018fe11bd3e6ca43555e6cc5cf2ff58cfe5"
+    },
+    "launcher": {
+      "path": "RUN_W02_4POLICY_ACTUAL.sh",
+      "run_id": "B_W02_4POLICY_ACTUAL_FINAL_R4",
+      "sha256": "629d0ae50bc22768be5467b91a331fe0c858bc985f18d50364cfe0b971c294cd"
+    },
+    "ast_regression_guards": [
+      {
+        "path": "tools/VALIDATE_W02_SAFETY_RECOVERY_CONTRACT.py",
+        "sha256": "c555590c1ed10db471bca7554ffe5be3fb39bdb50b0fe83b4a7ac1f4c8734882"
+      },
+      {
+        "path": "tools/VALIDATE_W02_SENSITIVITY_KEYERROR_CORRECTION.py",
+        "sha256": "e2a8cfaa75bb727267acc0bdc4df5f58fcf21ff27398f4698b39e1704a940480"
+      }
+    ],
+    "actual_failure_validator": {
+      "path": "tools/VALIDATE_W02_R3_ACTUAL_FAILURE_RECOVERY.py",
+      "sha256": "c7be2150d3f833a82083ef49dc4ea62412dac73c235602729d102697e55c8762"
+    }
+  },
+  "scientific_contract": {
+    "science_main_changed": false,
+    "objective_formula_changed": false,
+    "hard_limits_relaxed": false,
+    "future_actual_used": false,
+    "same_pre_preserved": true,
+    "fresh_exact_opendss_before_commit": true,
+    "ac_pq_correction_rounds_max": 1,
+    "same_pre_h54_full_replan_max": 1,
+    "duplicate_candidate_second_opendss_allowed": false,
+    "unsafe_action_committed": false
+  },
+  "r3_actual_failure_replay": {
+    "failed_root": "/home/jaewon/mobile_ess_work/frozen_artifacts/B_W02_4POLICY_ACTUAL_FINAL_R3",
+    "causal_replay_root": "/home/jaewon/mobile_ess_work/frozen_artifacts/POST15_R3_ACTUAL_FAILURE_REPLAY_FIXED_20260818",
+    "validator_result": "/home/jaewon/mobile_ess_work/frozen_artifacts/PRE_W02_R3_ACTUAL_FAILURE_RECOVERY_CURRENT.json",
+    "validator_result_sha256": "ab96c3c55ce0299a72a320774257cacd23482947c72203b3ed66d7d8d61d70c4",
+    "status": "PASS",
+    "cases": [
+      {"method": "M1", "issue": 3551, "candidate_stages": ["INITIAL", "AC_CORRECTION"], "voltage_min_pu": 0.9771994696017153, "voltage_max_pu": 1.0467083333609764, "status": "PASS_COMMITTED"},
+      {"method": "M2", "issue": 3516, "candidate_stages": ["INITIAL", "AC_CORRECTION"], "voltage_min_pu": 0.9860186793669479, "voltage_max_pu": 1.0480849624260646, "status": "PASS_COMMITTED"},
+      {"method": "M3", "issue": 3516, "candidate_stages": ["INITIAL", "AC_CORRECTION"], "voltage_min_pu": 0.9858651300916460, "voltage_max_pu": 1.0478733955277753, "status": "PASS_COMMITTED"},
+      {"method": "M4", "issue": 3462, "candidate_stages": ["INITIAL", "AC_CORRECTION"], "voltage_min_pu": 0.9793854707374469, "voltage_max_pu": 1.0456194498777955, "status": "PASS_COMMITTED"}
+    ]
+  },
+  "r3_actual_failure_replay_4x4": {
+    "root": "/home/jaewon/mobile_ess_work/frozen_artifacts/POST15_R3_ACTUAL_FAILURE_REPLAY_FIXED_4X4_20260818",
+    "outer_processes": 4,
+    "gurobi_threads_per_process": 4,
+    "cpu_affinity_groups": ["0-3", "4-7", "8-11", "12-15"],
+    "validator_result": "/home/jaewon/mobile_ess_work/frozen_artifacts/PRE_W02_R3_ACTUAL_FAILURE_RECOVERY_4X4_CURRENT.json",
+    "validator_result_sha256": "a9283fe261e73bd46f6c72ab2b90b0e58c090db1d1240398674eb1af2ced521b",
+    "status": "PASS_M1_M2_M3_M4"
+  },
+  "full_W02_executed": false,
+  "remaining_11_weeks_executed": false,
+  "next_action": "Regenerate fail-closed release authorization and checksums, then let the user launch the new R4 full W02 run."
+}

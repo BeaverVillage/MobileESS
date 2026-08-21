@@ -1,0 +1,92 @@
+{
+  "schema_version": "mobileess.post_stage15.w02_actual_failure_correction.v1",
+  "status": "PASS_FAILURE_CORRECTION_WITH_RECOVERY_SCOPE_SUPERSEDED",
+  "recovery_scope_authority": "authority/POST_STAGE15_W02_SAFETY_RECOVERY_REFREEZE.json",
+  "issued_utc": "2026-08-17T09:40:00Z",
+  "scope": "W02 four-policy production runner failure correction before final scientific episode restart",
+  "corrected_runner": {
+    "path": "runtime/W02_POLICY_EPISODE_RUNNER.py",
+    "sha256": "d14dd492c2e4f7e4a29861e77c0ef95be3ed389c9fa11d413fd559c0afcafd47"
+  },
+  "scientific_contract": {
+    "science_main_changed": false,
+    "objective_formula_changed": false,
+    "frozen_constraints_changed": false,
+    "hard_limits_relaxed": false,
+    "fresh_opendss_remains_authoritative": true,
+    "future_actual_used": false,
+    "same_pre_retry_required": true
+  },
+  "root_causes": [
+    {
+      "policy": "M2_FIXED30_MOBILE",
+      "issue": 3573,
+      "cause": "MW/Mvar QCP serialization produced solver-scale P550/S700 outward residuals; the AC finite-difference reconstruction initially bypassed the common PCS boundary canonicalizer; accumulated local voltage cuts could also become infeasible without classification as a same-PRE full-replan trigger."
+    },
+    {
+      "policy": "M4_FIXED_LOCATION_ESS_MOBILITY_ABLATION",
+      "issue": 3519,
+      "cause": "A failed post-dispatch attempt retained attempt-local planner state before a same-PRE full replan, and one AC relinearization round was insufficient for the nonlinear Fresh OpenDSS voltage response."
+    }
+  ],
+  "corrections": [
+    "Project only solver-scale outward P or Q serialization dust inward to the original P=550 kW and S=700 kVA boundary; the maximum admitted preprojection excess is 0.001 kW or 0.001 kVA and every material excess remains fail-closed.",
+    "Apply the same PCS canonicalizer to every connected MESS reconstructed for AC finite-difference trials and to every cut/re-solve output.",
+    "Generate finite-difference samples only at points inside the original P550/S700 feasible set, using central or one-sided feasible differences.",
+    "Permit at most one bounded AC P/Q cut/relinearization before one same-PRE H54 Full Replan, with no cut after the Full Replan and without changing the 0.95-1.05 pu hard voltage limits.",
+    "Classify an infeasible accumulated linearized-cut model as GRID_CORRECTION_EXHAUSTED_LINEARIZED_CUT_INFEASIBLE and retry once through a same-PRE full replan.",
+    "Reset attempt-local planner and AC-recovery state transactionally before every same-PRE retry while preserving causal exogenous identity and preventing duplicate EventEngine mutation.",
+    "Report stopped/fail-closed progress using committed counts instead of replacing them with null values."
+  ],
+  "regression_root": "/home/jaewon/mobile_ess_work/frozen_artifacts/POST15_FAILED_ISSUE_REGRESSION_20260817T1815",
+  "regression_evidence_scope": "HISTORICAL_PRE_REFREEZE_FAILURE_CORRECTION; current recovery ordering is validated by POST_STAGE15_W02_SAFETY_RECOVERY_REFREEZE.json",
+  "regression_evidence": [
+    {
+      "policy": "M2_FIXED30_MOBILE",
+      "issue": 3573,
+      "status": "PASS_COMMITTED_AFTER_ONE_SAME_PRE_FULL_REPLAN",
+      "policy_issue_audit_sha256": "bbf7f53b3ee11f87d8ef6c5d6762986e3a6d61d91d7ad59fed149af0006eb1c6",
+      "commit_marker_sha256": "e4be63cf7f567d9af3124e4c1d9f2dcba6b13247428d5647c3a55f5a5c2e13bf",
+      "fresh_exact_opendss_sha256": "8899123018334adfc3ab2f53424cda59ef87f8bcb9e6781f1d1f8291bbca6653",
+      "archived_cut_infeasible_attempt_sha256": "6db6a287a9ff4b60f0fc01123e9040b5f1221bfccbf6dd6a1c975106a4ec43c3",
+      "fresh_voltage_min_pu": 0.9850892683886592,
+      "fresh_voltage_max_pu": 1.0479090899220234,
+      "voltage_violation_count": 0,
+      "line_violation_count": 0,
+      "transformer_violation_count": 0,
+      "root_sign_pass": true,
+      "active_projection_count": 4,
+      "maximum_observed_active_inward_adjustment_kw": 1.989685642911354e-7,
+      "hard_limits_relaxed": false,
+      "future_actual_used": false
+    },
+    {
+      "policy": "M4_FIXED_LOCATION_ESS_MOBILITY_ABLATION",
+      "issue": 3519,
+      "status": "PASS_COMMITTED_AFTER_BOUNDED_AC_RECOVERY",
+      "policy_issue_audit_sha256": "d12a9cf1530ce1798fb15a4060fcf95312a779833c0bf207965d6d244c086b89",
+      "commit_marker_sha256": "a5813186c07ef03857d78ec60dec5192fea79c351599eea4486b936bc69f1858",
+      "ac_recovery_sha256": "58c2038c5a826ce78c8fa7e38b2f8894e5563c7623c8bc95599825c427b9f981",
+      "fresh_exact_opendss_sha256": "b2dec6380f6aae966b4828e03dedd93970f00277f7a34966d20d8f9a50c83b07",
+      "ac_cut_count": 4,
+      "fresh_voltage_min_pu": 0.9799262667944492,
+      "fresh_voltage_max_pu": 1.0461242502993562,
+      "voltage_violation_count": 0,
+      "line_violation_count": 0,
+      "transformer_violation_count": 0,
+      "root_sign_pass": true,
+      "hard_limits_relaxed": false,
+      "future_actual_used": false
+    }
+  ],
+  "existing_partial_actual_run": {
+    "delivery_root": "/home/jaewon/mobile_ess_work/frozen_artifacts/B_W02_4POLICY_ACTUAL_PILOT_CURRENT",
+    "archived_delivery_root": "/home/jaewon/mobile_ess_work/frozen_artifacts/forensic_invalidated/B_W02_4POLICY_ACTUAL_PILOT_CURRENT_PRE_FIX_20260817T184707+09:00ST",
+    "archived_log_root": "/home/jaewon/mobile_ess_work/logs/forensic_invalidated/B_W02_4POLICY_ACTUAL_PILOT_CURRENT_PRE_FIX_20260817T184707+09:00ST",
+    "archived_at_kst": "2026-08-17T18:47:07+09:00",
+    "disposition": "PRESERVED_AS_FORENSIC_INVALIDATED_PARTIAL_RUN",
+    "do_not_resume_as_final_episode": true,
+    "reason": "The final episode must use one frozen runner SHA from canonical PRE through all 2016 issues; the stopped partial run predates this correction."
+  },
+  "next_authorized_action": "After final preflight and manifest verification, start B_W02_4POLICY_ACTUAL_FINAL_R3 from canonical PRE under the corrected runner SHA."
+}

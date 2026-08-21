@@ -1,0 +1,26 @@
+{
+  "schema_version": "conversation_c.stage7.r12.authority_validation.v1",
+  "status": "PASS_READY_FOR_SOURCE_PREFLIGHT_NO_HEAVY_RUN",
+  "failed_checks": [],
+  "week_count": 12,
+  "primary_unique_source_issue_count": 6912,
+  "checkpoint_pair_count": 12,
+  "initializer_washout_pair_count": 12,
+  "issue_materialization_topology_checks": {
+    "single_gpu_no_replication": true,
+    "bounded_14_cpu_processes_forked_before_cuda": true,
+    "ordered_prefix_commit_and_quarantine": true
+  },
+  "dual_horizon_boundary_checks": {
+    "runtime_sha_exact": true,
+    "unseen_safe_step_uses_frozen_hierarchy_fallback": true,
+    "continuous_safe_duration_preserved": true,
+    "per_issue_evidence_survives_bounded_restart": true,
+    "clamp_or_tolerance_relaxation": false
+  },
+  "gurobi_executed": false,
+  "opendss_executed": false,
+  "validator": "validate_r12_authority.py",
+  "all_validator_checks_passed": true,
+  "scope_note": "Authority, axes, SHA bindings, and the pre-outcome 12-by-12 test matrix passed. This is not a Stage 7 scientific PASS."
+}

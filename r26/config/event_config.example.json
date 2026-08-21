@@ -1,0 +1,35 @@
+{
+  "hard_flags": [
+    "ACTIVE_PLAN_INFEASIBLE",
+    "MESS_TRANSIT_CONFLICT",
+    "SOC_HARD_RISK",
+    "GRID_HARD_RISK",
+    "WORKLOAD_DEADLINE_RISK"
+  ],
+  "soft_rules": [
+    {
+      "name": "load_forecast_error_pct",
+      "direction": "ABOVE",
+      "trigger": 10.0,
+      "release": 7.0,
+      "units": "percent",
+      "tier": "PREDICTION_DEVIATION"
+    },
+    {
+      "name": "soc_reserve_margin_kwh",
+      "direction": "BELOW",
+      "trigger": 90.0,
+      "release": 120.0,
+      "units": "kWh",
+      "tier": "SECURITY_MARGIN"
+    }
+  ],
+  "soft_dwell_steps": 2,
+  "max_refresh_steps": 6,
+  "local_repair_enabled": true,
+  "local_repair_horizon_steps": 12,
+  "full_replan_hard_flags": [
+    "GRID_HARD_RISK",
+    "WORKLOAD_DEADLINE_RISK"
+  ]
+}

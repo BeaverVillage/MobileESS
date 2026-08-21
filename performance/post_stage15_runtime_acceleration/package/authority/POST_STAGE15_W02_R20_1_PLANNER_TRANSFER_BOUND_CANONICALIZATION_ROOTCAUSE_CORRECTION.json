@@ -1,0 +1,108 @@
+{
+  "actual_regressions": {
+    "failed_target_issue_3872": {
+      "commit_marker_sha256": "742a521a900cd6079a83006fc6603a366d323f00e5e831ea1daeef7da875f64b",
+      "fresh_exact_ac_pass": true,
+      "fresh_exact_opendss_sha256": "dcc4348b2ac0d4802fb0d6860311552364266c7e89963972282d848ac0852551",
+      "issue": 3872,
+      "policy_issue_audit_sha256": "bbcb95194fa15c8fde80dc38c3e049a0f93b34039644c244c07054d6aec693ce",
+      "post_state_sha256": "aaaf3c2894be345fc730ba033ede7f5b4b42c7fb1a150b08a3215a0ee391f926",
+      "pre_state_sha256": "4b5f5984970b7ba0af45c868dce90e84c07fe4fc4ecc2e9b4786fe5b1ddc67a0",
+      "status": "COMMITTED",
+      "unsafe_action_committed": false
+    },
+    "m1_contiguous_follow_on_3872_through_3885": {
+      "count": 14,
+      "end_issue": 3885,
+      "start_issue": 3872,
+      "status": "PASS_ALL_ATOMIC_COMMIT_AND_FRESH_EXACT_AC"
+    },
+    "m2_next_issue_3986": {
+      "commit_marker_sha256": "cb9e3882fad8b61ee85c8b8751738ce250f545c7d9ada1db421abfa49e084e54",
+      "fresh_exact_ac_pass": true,
+      "fresh_exact_opendss_sha256": "833ba01612bb7d89fa2bd8423156d7823fccc2014e6619333967abc8266bd151",
+      "issue": 3986,
+      "policy_issue_audit_sha256": "9569286a4df85be892b91cee29500654901275ae7def6493d618d759da0a5296",
+      "post_state_sha256": "4bb6d33f3613dba5fcdcca0b3333cf524d0d6a4b39ec73076aa502786704eb64",
+      "pre_state_sha256": "1a2b6d16fb568ab1065091401a5ddc9faf0f14f5e7c9e9fab10846d591f81095",
+      "status": "COMMITTED",
+      "unsafe_action_committed": false
+    },
+    "m3_next_issue_3783": {
+      "commit_marker_sha256": "8fa84a6c232a3a003983fa5e5891ded873865ce7e2a342a5fb70ec8f58adf506",
+      "fresh_exact_ac_pass": true,
+      "fresh_exact_opendss_sha256": "a3aa694023d13c16062df326547b1b1face441ee56f0e7c919e2ea3df93cc7ec",
+      "issue": 3783,
+      "policy_issue_audit_sha256": "ee9bde2f4f7f165369677f522123d9ebe9f2aac644d7b46e8a41425abea519ab",
+      "post_state_sha256": "46633a48b651726d9242ac95a3cfb86dbf87e1e5ae335be97692f923bed87af4",
+      "pre_state_sha256": "6c7ba5573ca94adb2eb5f42e6486a1a54857b67ff85343c2fa196a897f34689c",
+      "status": "COMMITTED",
+      "unsafe_action_committed": false
+    },
+    "m4_next_issue_5271": {
+      "commit_marker_sha256": "12542dda3c0387712e3f2c1c65213e17611e122481abe57900805aa812997dc4",
+      "fresh_exact_ac_pass": true,
+      "fresh_exact_opendss_sha256": "43d6145ffa81c9fb30afea273fddbb7d919fd7bd7af4fdc12b5e72c036cdc05b",
+      "issue": 5271,
+      "policy_issue_audit_sha256": "1e697618bd2d5b28b64b6a1f09228a51b9446b20bff3936a11a4ad093c69bdc9",
+      "post_state_sha256": "4c00421bfb3c8ebc7f3ade0823fbca1c9672c974522adca0ab7ad4819b765e18",
+      "pre_state_sha256": "867e90fc7c376c5b9adb98310d037e57aee86e93153bb6c1ff5b71206ea51408",
+      "status": "COMMITTED",
+      "unsafe_action_committed": false
+    },
+    "prior_continuous_arc_regression_issue_4499": {
+      "commit_marker_sha256": "d2334d30d56d6488717d1a1fbfb56f0035fefb0489c82f75da8fcc92b6eca3a8",
+      "fresh_exact_ac_pass": true,
+      "fresh_exact_opendss_sha256": "1a9ed2832a12837dacae831187d03f26875a82cd856b939ebd7d2ac9fee4b188",
+      "issue": 4499,
+      "policy_issue_audit_sha256": "4a78b882a96d37dd3eaa48cedf799da110b1ec14d100d87063966fe81e92687b",
+      "post_state_sha256": "c5734cfa23b6d5398dd2dad128f3e7ad392164e79db1861e1b7e5817b05d3a1d",
+      "pre_state_sha256": "a7660d3cdedadec332050182c32457a87623f8e7c107c2ec393d58549abac6ba",
+      "status": "COMMITTED",
+      "unsafe_action_committed": false
+    }
+  },
+  "correction": {
+    "complete_mip_start": "Apply the same finite/domain/boundary canonicalization to every planner-to-commit MIP-start transfer.",
+    "continuous_values": "Preserve interior values; clamp only excursions within the frozen solver feasibility tolerance to the declared bound.",
+    "future_actual_used": false,
+    "hard_constraint_relaxed": false,
+    "integer_values": "Retain the frozen integer-feasibility gate and canonicalize integral domains only.",
+    "material_bound_violation": "Fail closed when the excursion exceeds tolerance.",
+    "planner_transfer_bound_tolerance": 1.000001e-06,
+    "power_scale_changed": false,
+    "scientific_objective_changed": false
+  },
+  "created_utc": "2026-08-18T06:13:20.600689+00:00",
+  "failure": {
+    "candidate_id": "W02_2025-01-13",
+    "error": "RuntimeError('Fix value -8.793077895625385e-07 violates move[MESS03,1,165] bounds [0.0,1.0]')",
+    "failed_issue": 3872,
+    "failure_class": "SOLVER_FEASIBLE_CONTINUOUS_VALUE_REJECTED_BY_STRICT_TRANSFER_BOUND_CHECK",
+    "failure_json_sha256": "f3d4397e5645fb1a5a9c4d83fedad85f68bb48fccff211718907f795919f40aa",
+    "last_committed_issue": 3871,
+    "policy": "M1_PROPOSED_EVENT30_LOCAL_REPAIR_MOBILE"
+  },
+  "full_12week_executed_by_correction": false,
+  "root_cause": {
+    "declared_bounds": [
+      0.0,
+      1.0
+    ],
+    "defect": "Planner-to-commit transfer preserved a solver-feasible continuous value exactly but did not canonicalize a sub-tolerance bound excursion before strict fixed-bound validation.",
+    "physical_grid_failure": false,
+    "planner_feasibility_tolerance": 1e-06,
+    "power_scale_error": false,
+    "scheduler_failure": false,
+    "scientific_infeasibility": false,
+    "solver_value": -8.793077895625385e-07,
+    "variable": "move[MESS03,1,165]"
+  },
+  "run_id": "B_12_REP_WEEKS_ACTUAL_FINAL_R20",
+  "runner": {
+    "corrected_sha256": "c8c885d886f7b56b9b8e2e17161a9c653256277456232b9191e1883ac9e51ac6",
+    "prior_sha256": "0a25e74a5b2b10cfa0784d1c91d67fa4cdeb59334a97eb3e4a90ab1d59557523"
+  },
+  "schema_version": "mobileess.post_stage15.w02.r20_1.planner_transfer_boundary_canonicalization.v1",
+  "status": "PASS_ROOT_CAUSE_CORRECTED_ALL_TARGETS_REPRODUCED_AND_PREFIX_PRESERVED"
+}

@@ -1,0 +1,59 @@
+{
+  "conversation": "A",
+  "release": "R25D_A4_RADIAL_GRID_EXACT_PROJECTION_NODE_QCP_REDUCTION",
+  "stage": "A4/6",
+  "foundation": "R25C A3 exact decomposition architecture + R25B A2 + R25A A1 + R24 permanent exact rebase",
+  "long_solver_validation": "FORBIDDEN_IN_A4; deferred to A6",
+  "A3_architecture_frozen": "DANTZIG_WOLFE_MESS_PATH_REFORMULATION_WITH_EXACT_DAG_PRICING",
+  "A4_scope": {
+    "goal": "reduce operational-master node/QCP cost without changing the scientific feasible set",
+    "decision_injection_authority": "all 24 MESS PCC plus all 12 IDC PCC = 36 possible grid decision-injection nodes",
+    "static_subtree_definition": "nodes outside the ancestor closure of the 36 decision-injection nodes",
+    "static_subtree_condensation": "exact constant branch-flow substitution plus fail-closed constant line-thermal checks",
+    "voltage_projection": "retain dU only on decision-skeleton LINE nodes; project fixed-ratio transformer and static-subtree dU states as affine functions of one retained ancestor dU or anchored root zero",
+    "voltage_limits": "all original node hard voltage intervals propagated exactly into retained dU variable bounds",
+    "planning_output": "full 168-node voltage plan retained through affine expressions",
+    "Fresh_Exact_OpenDSS": "unchanged full 168-bus first-step certificate"
+  },
+  "actual_BUILD7AR2_topology": {
+    "node_count": 168,
+    "edge_count": 167,
+    "LINE_edges": 126,
+    "TRANSFORMER_FIXED_RATIO_edges": 41,
+    "decision_injection_nodes": 36,
+    "decision_skeleton_nodes": 100,
+    "static_nodes": 68,
+    "static_roots": 31,
+    "skeleton_LINE_nodes": 61,
+    "skeleton_transformer_nodes": 38,
+    "static_LINE_nodes": 65,
+    "static_transformer_nodes": 3,
+    "retained_dU_variable_nodes_per_h": 61
+  },
+  "H54_exact_structural_reduction_vs_R24_grid_form": {
+    "FP_FQ_continuous_variables_removed": 7344,
+    "FP_FQ_reduction_fraction": 0.40718562874251496,
+    "P_Q_balance_equalities_removed": 7344,
+    "dU_continuous_variables_removed": 5778,
+    "dU_reduction_fraction": 0.6369047619047619,
+    "voltage_recursion_equalities_removed": 5724,
+    "line_circle_QCP_constraints_removed_by_constant_precheck": 3510,
+    "line_circle_QCP_reduction_fraction": 0.5158730158730159,
+    "total_continuous_variables_removed_structural": 13122,
+    "total_linear_equalities_removed_structural": 13068
+  },
+  "exactness": {
+    "grid_topology_changed": false,
+    "line_limits_changed": false,
+    "voltage_limits_changed": false,
+    "service_transformer_kVA_constraints_changed": false,
+    "objective_changed": false,
+    "scientific_feasible_set_changed": false,
+    "future_actual_used": false,
+    "future_D2_state_reinjected": false,
+    "future_regeneration_precredit": false,
+    "static_line_QCP_removed_only_after_exact_constant_flow_proof": true,
+    "projected_voltage_bounds_are_exact_interval_intersections": true
+  },
+  "next_stage": "A5 integrates the frozen A3 branch-and-price/all-column exactness mechanism with this A4 compact grid master and persistent rolling execution"
+}

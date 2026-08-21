@@ -1,0 +1,99 @@
+{
+  "actual_regressions": {
+    "failed_target_issue_4172": {
+      "commit_marker_sha256": "e61b22409fd58264e399317f110d077321ca3439e5c52f630217f600df77c979",
+      "conditional_numerical_refinement": {
+        "after": {
+          "BoundVio": 0.0,
+          "ConstrVio": 4.153753729863041e-12,
+          "IntVio": 6.399250012238193e-10
+        },
+        "before": {
+          "BoundVio": 0.0,
+          "ConstrVio": 1.2724452859566235e-06,
+          "IntVio": 0.0
+        },
+        "complete_feasible_mip_start_transferred": true,
+        "hard_gate_relaxed": false,
+        "pre_refinement_bound_offenders": [],
+        "refinement_mode": "STRICT_1E9",
+        "same_primary_objective": true,
+        "solve_count": 1,
+        "status": "PASS",
+        "triggered": true,
+        "wall_seconds": 2.7500038759899326
+      },
+      "fresh_exact_ac_pass": true,
+      "fresh_exact_opendss_sha256": "76514b8398d24032e3402de38bac3524c186e5a5a34930df2854a70603ed9892",
+      "issue": 4172,
+      "policy_issue_audit_sha256": "5ec9959e3f18e28c145da9cd485e39d3acd815848e99dc51de4eee034b1c5d60",
+      "post_state_sha256": "367dbbbf816cca75990601f071b38d9b40597ea7af8720aaeb2f6812323adc99",
+      "pre_state_sha256": "36e5bdcf23cd50c4f608d1a746b56226d13668aee75f23b6a2371a632fbe0958",
+      "status": "COMMITTED",
+      "unsafe_action_committed": false
+    },
+    "next_chain_issue_4173": {
+      "commit_marker_sha256": "f3b870b49040bac560cad1df8b4a1420ed250950354a0561c9cde7770d41c53e",
+      "conditional_numerical_refinement": {
+        "hard_gate_relaxed": false,
+        "same_primary_objective": true,
+        "solve_count": 0,
+        "status": "NOT_NEEDED",
+        "triggered": false
+      },
+      "fresh_exact_ac_pass": true,
+      "fresh_exact_opendss_sha256": "5ca9b7fd26bf03af699b42a8520b292f12262d3dad2982e0a37448c3db23872c",
+      "issue": 4173,
+      "policy_issue_audit_sha256": "893d1e81d380ec6cadb4ebf64570cfea53987312d25b664899da969952bfdc0f",
+      "post_state_sha256": "b84b3a2595b3bb1f8525c35c2ccf6c39d2b27402c47f89427d7667f0fb92f9b5",
+      "pre_state_sha256": "367dbbbf816cca75990601f071b38d9b40597ea7af8720aaeb2f6812323adc99",
+      "status": "COMMITTED",
+      "unsafe_action_committed": false
+    }
+  },
+  "correction": {
+    "fallback_feasibility_tolerance": 5e-07,
+    "final_constraint_gate": 1e-06,
+    "future_actual_used": false,
+    "hard_gate_relaxed": false,
+    "power_scale_changed": false,
+    "retry_predicate": "Retry whenever strict refinement lacks an accepted 3% certificate, including no-incumbent, SUBOPTIMAL, NUMERIC, and gap>3% outcomes.",
+    "same_primary_objective": true,
+    "scientific_constraints_changed": false,
+    "scientific_objective_changed": false
+  },
+  "created_utc": "2026-08-18T07:33:28.682085+00:00",
+  "failure": {
+    "candidate_id": "W02_2025-01-13",
+    "error": "RuntimeError('R24_NUMERICAL_REFINEMENT_GAP_FAILED status=13 gap=0.052504413559069034')",
+    "failed_issue": 4172,
+    "failure_class": "STRICT_NUMERICAL_POLISH_RETURNED_INCUMBENT_WITHOUT_3_PERCENT_CERTIFICATE",
+    "inner_failure_sha256": "55a350f7daf970f685cf847a04d63f4deeeb9c3c6371124913af7ec1ea637bf2",
+    "last_committed_issue": 4171,
+    "outer_failure_sha256": "abff8d955132ea969a3b4beaa4ed69d4705db6e7973b29098f27baa823dd8040",
+    "policy": "M1_PROPOSED_EVENT30_LOCAL_REPAIR_MOBILE"
+  },
+  "full_campaign_executed_by_correction": false,
+  "original_failure_predicate_proof": {
+    "gap": 0.052504413559069034,
+    "new_predicate_retry": true,
+    "old_predicate_retry": false,
+    "sol_count_positive": true,
+    "status": 13
+  },
+  "root_cause": {
+    "defect": "The inner 5e-7 numerical polish was retried only when strict refinement had zero incumbents. Status SUBOPTIMAL with incumbents but gap above 3% bypassed the retry and failed closed.",
+    "fresh_opendss_failure": false,
+    "physical_infeasibility": false,
+    "power_scale_error": false,
+    "strict_refinement_gap": 0.052504413559069034,
+    "strict_refinement_status": 13
+  },
+  "run_id": "B_12_REP_WEEKS_ACTUAL_FINAL_R20",
+  "runner": {
+    "corrected_sha256": "90488dea741dd9b3f196f5806c93f182422d3f9c47123fa368a3019c44f6d458",
+    "prior_sha256": "c8c885d886f7b56b9b8e2e17161a9c653256277456232b9191e1883ac9e51ac6"
+  },
+  "schema_version": "mobileess.post_stage15.w02.r20_2.numerical_refinement_certificate_retry.v1",
+  "status": "PASS_ROOT_CAUSE_CORRECTED_TARGET_AND_NEXT_ISSUE_REPRODUCED_PREFIX_PRESERVED"
+}

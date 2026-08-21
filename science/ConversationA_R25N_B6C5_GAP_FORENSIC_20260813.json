@@ -1,0 +1,68 @@
+{
+  "conversation": "A",
+  "source_result": "ConversationA_R25N_B6C5_INTEGRATED_RUNTIME_GATE_RESULT_20260813T205033.tar.gz",
+  "status": "B6C5_FAIL_ANALYZED_GAP_AND_SEARCH_BOTTLENECKS",
+  "issue": 152,
+  "full_objective": {
+    "incumbent": -1937.9964663366604,
+    "certificate_lower_bound": -2017.405996772834,
+    "relative_gap": 0.040975064617263794,
+    "target": 0.03,
+    "target_lower_bound_for_current_incumbent": -1996.1363603267603,
+    "additional_bound_improvement_required": 21.26963644607372,
+    "incumbent_required_at_fixed_root_bound": -1958.6465988085765,
+    "additional_incumbent_improvement_required": 20.650132471916095
+  },
+  "objective_origin": {
+    "decision_independent_constant": -1596.625445057639,
+    "translated_incumbent": -341.37102127902153,
+    "translated_lower_bound": -420.7805517151951,
+    "translated_relative_gap": 0.23261942428108953,
+    "conclusion": "The fixed constant makes the frozen full-objective 3% test easier, not harder, on issue152; changing acceptance to translated controllable-cost 3% would materially tighten the gate."
+  },
+  "restricted_master": {
+    "native_bound": -2013.7811874054958,
+    "native_relative_gap": 0.039104674536424223,
+    "scientific_global_authority": false,
+    "global_bound_improvement_over_root_if_it_were_valid": 3.62480936733823
+  },
+  "C3_actual_performance": {
+    "baseline_root_cg_iterations": 43,
+    "C5_root_cg_iterations": 37,
+    "iteration_reduction_fraction": 0.13953488372093023,
+    "baseline_root_cg_seconds": 306.38203132199124,
+    "C5_root_cg_seconds": 366.76896554400446,
+    "runtime_increase_seconds": 60.386934222013224,
+    "runtime_increase_fraction": 0.1970968531067338,
+    "stabilized_candidate_paths_added": 366,
+    "verdict": "DISABLE_BY_DEFAULT_IN_C5R1_RUNTIME; code retained as optional acceleration only"
+  },
+  "C4_actual_performance": {
+    "strong_branch_selected_score": [
+      -1.0,
+      -1.0
+    ],
+    "probe_time_limit_s": 1.5,
+    "interpretation": "All shortlisted QCP probes failed to return usable optimal probe objectives inside the probe budget; strong probing provided no ranking information.",
+    "verdict": "DISABLE_QCP_STRONG_PROBES_IN_C5R1; replace primary target search with fixed-root-dual restricted-DAG bound prepass"
+  },
+  "branch_price_actual": {
+    "nodes_solved": 1,
+    "elapsed_s": 95.13391206998494,
+    "first_child_reason": "rmp_status_9",
+    "global_bound_lift": 0.0,
+    "global_cache_new_paths": 210,
+    "child_batch_columns": 140,
+    "design_issue": "A single incomplete child aborted the entire tree, discarding sibling exploration and making the global bound remain at the root."
+  },
+  "additional_gap_related_issues_found": [
+    "gap audit used root all-column lower bound rather than certificate_lower_bound",
+    "restricted-master native MIPGap was reported alongside scientific gap without sufficiently explicit non-authority labeling",
+    "Stage-1 B6 code retained a silent 1.5% default although wrappers supplied 3%; this can drift under direct execution",
+    "relative gap is objective-origin sensitive because the objective contains a large decision-independent constant",
+    "negative/near-zero objective values require explicit denominator/sign diagnostics",
+    "restricted-column RMP infeasibility is not a valid full branch-node infeasibility certificate without Phase-I/Farkas pricing",
+    "B&P threw away partial valid global-bound information unless the full 3% certificate was reached",
+    "B&P aborted on first incomplete child instead of conservatively preserving the ancestor bound and continuing other partitions"
+  ]
+}

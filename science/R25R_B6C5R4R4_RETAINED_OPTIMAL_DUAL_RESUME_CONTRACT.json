@@ -1,0 +1,22 @@
+{
+  "release": "R25R_B6C5R4R4_RETAINED_OPTIMAL_DUAL_RESUME",
+  "parent_runtime_archive": "ConversationA_R25Q_STAGE1_54_OF_54_RUNTIME_RESULT_20260814T101350.tar.gz",
+  "parent_runtime_sha256": "8d8c8f15bdfbc3e9200aeebb88f8a262f4da2e727d1155ac76b989f42b7cc2b0",
+  "verified_prefix": [113, 135],
+  "resume_issue": 136,
+  "resume_state_sha256": "94eb40044d0089ce26fcc298675952a5a154277e48371412c4871edb447b7625",
+  "failure_repaired": "a stricter QCP-dual retry returned SUBOPTIMAL and discarded a prior OPTIMAL finite RC snapshot",
+  "recovery_rule": {
+    "fixed_rc_audit_tolerance": 0.0001,
+    "bounded_rc_hard_cap": 0.0005,
+    "strict_retry_budget_when_bounded_candidate_exists": 2,
+    "retain_best_source_status": "OPTIMAL",
+    "nonoptimal_stricter_retry_may_fall_back": true,
+    "measured_error_weakens_lower_bound": true,
+    "fallback_branch_state_must_come_from_retained_optimal_solution": true
+  },
+  "scientific_feasible_set_changed": false,
+  "objective_changed": false,
+  "causality_changed": false,
+  "gap_semantics_changed": false
+}

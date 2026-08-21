@@ -1,0 +1,37 @@
+{
+  "asynchronous_internal_worker_rule": "Any slow-planner worker spawned inside a policy process remains inside that policy process's 4-core CPU budget; it may not acquire an additional 4-core budget.",
+  "contract_id": "D12_4PROCESS_X_4THREAD_WEEK_SERIAL_EXECUTION_V1",
+  "cpu_affinity": "REQUIRED_DISJOINT_4_CORE_BUDGET_PER_POLICY_PROCESS; exact CPU IDs assigned by B from host topology",
+  "execution_order": [
+    "W02_2025-01-13",
+    "W07_2025-02-17",
+    "W10_2025-03-10",
+    "W17_2025-04-28",
+    "W18_2025-05-05",
+    "W25_2025-06-23",
+    "W26_2025-06-30",
+    "W32_2025-08-11",
+    "W38_2025-09-22",
+    "W41_2025-10-13",
+    "W44_2025-11-03",
+    "W51_2025-12-22"
+  ],
+  "maximum_nominal_solver_thread_budget": 16,
+  "outer_processes": 4,
+  "pilot": {
+    "candidate_id": "W02_2025-01-13",
+    "must_pass_D_acceptance_before_remaining_weeks": true,
+    "required_policy_count": 4
+  },
+  "policy_parallelism_within_week": 4,
+  "rule": "Run one representative week at a time. For that week, launch all four causal policies concurrently. Advance to the next week only after all four artifacts are complete and accepted.",
+  "runtime_reporting": {
+    "commit_critical_runtime": "state load + fast dispatch + certificates + fresh OpenDSS + commit; must be reported separately",
+    "realtime_claim_gate_seconds": 300,
+    "slow_planner_runtime": "background/local/full replan runtime; reported separately",
+    "stage7_h0_validation_runtime_is_not_automatically_commit_path_runtime": true
+  },
+  "status": "FROZEN",
+  "threads_per_process": 4,
+  "week_parallelism": 1
+}
