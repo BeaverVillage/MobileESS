@@ -21,6 +21,7 @@ from .power import H100UtilizationPowerCurve
 from .risk import PlanValidityRiskMonitor, ReplanCost, RiskConstraint, RiskFamily
 from .safety import (
     AcSafetyFilter,
+    EscalatedCandidate,
     ExactAcResult,
     ProjectionCandidate,
     ProjectionCertificate,
@@ -202,18 +203,29 @@ class _PhysicalVerifierAdapter:
         self,
         backend: FreshPhysicalBackend,
         issue: int,
-        facility_p_kw: Sequence[float],
-        facility_q_kvar: Sequence[float],
+        jobs: Mapping[str, RuntimeJobState],
+        power_curve: H100UtilizationPowerCurve,
         mess_location: Sequence[str],
     ) -> None:
         self.backend = backend
         self.issue = issue
-        self.facility_p_kw = tuple(facility_p_kw)
-        self.facility_q_kvar = tuple(facility_q_kvar)
+        self.jobs = jobs
+        self.power_curve = power_curve
         self.mess_location = tuple(mess_location)
         self.last_commit: Optional[PhysicalCommit] = None
 
     def verify_fresh(self, *, control: FastControl, **_: Any) -> ExactAcResult:
+        facility_p = {site: 0.0 for site in IDCS}
+        for job_id, fraction in control.job_compute_rate_fraction.items():
+            job = self.jobs[job_id]
+            if job.lifecycle == "COMPLETED" or fraction <= 0.0:
+                continue
+            facility_p[job.destination_idc] += (
+                self.power_curve.gang_power_kw(job.source.requested_gpu, fraction)
+                + job.source.cpu_request_share_kw
+            )
+        if any(value > 750.0 + 1e-9 for value in facility_p.values()):
+            raise RuntimeContractError("projected AI load exceeds unchanged 750-kVA transformer rating")
         mess_p = tuple(
             control.mess_discharge_kw.get(mid, 0.0) - control.mess_charge_kw.get(mid, 0.0)
             for mid in MESS_IDS
@@ -221,8 +233,8 @@ class _PhysicalVerifierAdapter:
         mess_q = tuple(control.mess_q_kvar.get(mid, 0.0) for mid in MESS_IDS)
         self.last_commit = self.backend.verify_fresh(
             issue=self.issue,
-            facility_p_kw=self.facility_p_kw,
-            facility_q_kvar=self.facility_q_kvar,
+            facility_p_kw=tuple(facility_p[site] for site in IDCS),
+            facility_q_kvar=(0.0,) * len(IDCS),
             mess_location=self.mess_location,
             mess_p_kw=mess_p,
             mess_q_kvar=mess_q,
@@ -230,6 +242,124 @@ class _PhysicalVerifierAdapter:
         if not self.last_commit.actual_fresh_opendss_used:
             raise RuntimeContractError("physical backend did not execute Fresh OpenDSS")
         return self.last_commit.exact
+
+
+def _blend_control(left: FastControl, right: FastControl, weight: float) -> FastControl:
+    weight = min(max(float(weight), 0.0), 1.0)
+    blend = lambda a, b: float(a) + weight * (float(b) - float(a))
+    return FastControl(
+        mess_charge_kw={key: blend(left.mess_charge_kw[key], right.mess_charge_kw[key]) for key in left.mess_charge_kw},
+        mess_discharge_kw={key: blend(left.mess_discharge_kw[key], right.mess_discharge_kw[key]) for key in left.mess_discharge_kw},
+        mess_q_kvar={key: blend(left.mess_q_kvar[key], right.mess_q_kvar[key]) for key in left.mess_q_kvar},
+        job_compute_rate_fraction={
+            key: blend(left.job_compute_rate_fraction[key], right.job_compute_rate_fraction[key])
+            for key in left.job_compute_rate_fraction
+        },
+        site_throughput_fraction=dict(left.site_throughput_fraction),
+    )
+
+
+class _GurobiSensitivityProjector:
+    """Minimal continuous projection over a Fresh-AC finite-difference envelope."""
+
+    def __init__(self, verifier: _PhysicalVerifierAdapter, *, allow_mess: bool) -> None:
+        self.verifier = verifier
+        self.allow_mess = allow_mess
+
+    @staticmethod
+    def _objective_distance(nominal: FastControl, candidate: FastControl) -> float:
+        maps = (
+            (nominal.mess_charge_kw, candidate.mess_charge_kw),
+            (nominal.mess_discharge_kw, candidate.mess_discharge_kw),
+            (nominal.mess_q_kvar, candidate.mess_q_kvar),
+            (nominal.job_compute_rate_fraction, candidate.job_compute_rate_fraction),
+        )
+        return sum((float(right[key]) - float(left[key])) ** 2 for left, right in maps for key in left)
+
+    def _target(self, control: FastControl, state: FastLayerState, exact: ExactAcResult) -> FastControl:
+        high_voltage = exact.maximum_voltage_pu > 1.05
+        compute = {
+            key: (1.0 if high_voltage else 0.0)
+            for key in control.job_compute_rate_fraction
+        }
+        charge, discharge, reactive = {}, {}, {}
+        for mess_id in control.mess_charge_kw:
+            if not self.allow_mess:
+                charge[mess_id] = control.mess_charge_kw[mess_id]
+                discharge[mess_id] = control.mess_discharge_kw[mess_id]
+                reactive[mess_id] = control.mess_q_kvar[mess_id]
+                continue
+            energy = state.mess_soc[mess_id] * MESS_CAPACITY_KWH
+            max_charge = max(0.0, (MESS_CAPACITY_KWH - energy) / (0.95 * STEP_HOURS))
+            max_discharge = max(0.0, (energy - MESS_FLOOR_KWH) * 0.95 / STEP_HOURS)
+            if high_voltage:
+                charge[mess_id], discharge[mess_id] = min(550.0, max_charge), 0.0
+                p = -charge[mess_id]
+                reactive[mess_id] = -math.sqrt(max(0.0, 700.0**2 - p**2))
+            else:
+                charge[mess_id], discharge[mess_id] = 0.0, min(550.0, max_discharge)
+                p = discharge[mess_id]
+                reactive[mess_id] = math.sqrt(max(0.0, 700.0**2 - p**2))
+        return FastControl(charge, discharge, reactive, compute, dict(control.site_throughput_fraction))
+
+    def project(
+        self, *, nominal: FastControl, state: FastLayerState, slow_plan: SlowDiscretePlan
+    ) -> ProjectionCandidate:
+        started = time.monotonic()
+        current = nominal
+        exact = self.verifier.verify_fresh(control=current, state=state, slow_plan=slow_plan)
+        exact.validate()
+        for _ in range(6):
+            if exact.passed:
+                break
+            target = self._target(current, state, exact)
+            if self._objective_distance(current, target) <= 1e-18:
+                break
+            probe_fraction = 0.1
+            probe = _blend_control(current, target, probe_fraction)
+            probe_exact = self.verifier.verify_fresh(control=probe, state=state, slow_plan=slow_plan)
+            probe_exact.validate()
+            try:
+                import gurobipy as gp
+                from gurobipy import GRB
+            except ImportError as exc:
+                raise RuntimeContractError("gurobipy is required by the AC safety projector") from exc
+            model = gp.Model("pfr_ac_safety_projection")
+            model.Params.OutputFlag = 0
+            model.Params.Threads = 1
+            model.Params.Seed = 0
+            z = model.addVar(lb=0.0, ub=1.0, name="projection_fraction")
+            metrics = (
+                (exact.minimum_voltage_pu, probe_exact.minimum_voltage_pu, GRB.GREATER_EQUAL, 0.9501),
+                (exact.maximum_voltage_pu, probe_exact.maximum_voltage_pu, GRB.LESS_EQUAL, 1.0499),
+                (exact.maximum_line_loading_fraction, probe_exact.maximum_line_loading_fraction, GRB.LESS_EQUAL, 0.999),
+                (exact.maximum_transformer_loading_fraction, probe_exact.maximum_transformer_loading_fraction, GRB.LESS_EQUAL, 0.999),
+            )
+            for index, (base, sampled, sense, bound) in enumerate(metrics):
+                slope = (sampled - base) / probe_fraction
+                expression = base + slope * z
+                constraint = expression >= bound if sense == GRB.GREATER_EQUAL else expression <= bound
+                model.addConstr(constraint, name=f"ac_envelope[{index}]")
+            model.setObjective(z * z, GRB.MINIMIZE)
+            model.optimize()
+            if model.Status != GRB.OPTIMAL or model.SolCount != 1:
+                model.dispose()
+                break
+            fraction = min(1.0, max(probe_fraction, float(z.X) * 1.05))
+            model.dispose()
+            current = _blend_control(current, target, fraction)
+            exact = self.verifier.verify_fresh(control=current, state=state, slow_plan=slow_plan)
+            exact.validate()
+        return ProjectionCandidate(
+            control=current,
+            certificate=ProjectionCertificate(
+                "CONVEX_CONTINUOUS_QP", True, True, True, True, True, True, True, True
+            ),
+            slow_plan_fingerprint=slow_plan.fingerprint,
+            objective_nominal=0.0,
+            objective_projected=self._objective_distance(nominal, current),
+            runtime_seconds=time.monotonic() - started,
+        )
 
 
 def _method_uses_temporal(config: MethodConfig) -> bool:
@@ -507,24 +637,84 @@ class PfrRuntimeRunner:
                     True, "PFR6_CONSERVATIVE_PROJECTION_DOMAIN_SCREEN", 0.95, 1.05, 1.0
                 ),
             )
-            for uid, fraction in fast.control.job_compute_rate_fraction.items():
-                job = state.jobs[uid]
-                job.compute_rate_fraction = fraction
-                if fraction > 0.0 and job.lifecycle == "QUEUED":
-                    job.lifecycle = "RUNNING"
-                    job.start_issue = frame.issue
-            facility_p, facility_q = _facility_power(state.jobs.values(), self.power_curve)
             verifier = _PhysicalVerifierAdapter(
                 self.physical_backend,
                 frame.issue,
-                facility_p,
-                facility_q,
+                state.jobs,
+                self.power_curve,
                 tuple(state.mess_location[mid] for mid in MESS_IDS),
             )
-            safety = AcSafetyFilter(projector=_IdentityProjector(), verifier=verifier).filter(
+            accepted_fast_state = fast_state
+            accepted_limits = limits
+            active_optimization = optimized
+            safety_replan = False
+
+            def escalate_for_safety() -> EscalatedCandidate:
+                nonlocal accepted_fast_state, accepted_limits, active_optimization, fast, safety_replan
+                state.active_plan = _build_slow_plan(state, config, frame.issue)
+                state.active_plan_age_steps = 0
+                state.full_replan_count += 1
+                state.communication_bytes += len(
+                    json.dumps(asdict(state.active_plan), sort_keys=True, separators=(",", ":"))
+                )
+                safety_replan = True
+                accepted_fast_state = FastLayerState(
+                    issue=frame.issue,
+                    mess_soc={mid: state.mess_energy_kwh[mid] / MESS_CAPACITY_KWH for mid in MESS_IDS},
+                    remaining_work_gpu_hours={
+                        uid: job.remaining_work_gpu_hours
+                        for uid, job in state.jobs.items()
+                        if job.lifecycle != "COMPLETED" and uid in state.active_plan.job_idc_placement
+                    },
+                )
+                accepted_limits = FastLayerLimits(
+                    step_minutes=5,
+                    mess_energy_capacity_kwh={mid: MESS_CAPACITY_KWH for mid in MESS_IDS},
+                    mess_charge_limit_kw={mid: 550.0 for mid in MESS_IDS},
+                    mess_discharge_limit_kw={mid: 550.0 for mid in MESS_IDS},
+                    mess_pcs_kva={mid: 700.0 for mid in MESS_IDS},
+                    mess_soc_min={mid: MESS_FLOOR_KWH / MESS_CAPACITY_KWH for mid in MESS_IDS},
+                    mess_soc_max={mid: 1.0 for mid in MESS_IDS},
+                    job_gpu_count={uid: state.jobs[uid].source.requested_gpu for uid in accepted_fast_state.remaining_work_gpu_hours},
+                    site_throughput_limit={site: 1.0 for site in IDCS},
+                )
+                escalated_nominal = _nominal_control(state, config, frame)
+                active_optimization = self.fast_optimizer.optimize(
+                    nominal=escalated_nominal,
+                    state=accepted_fast_state,
+                    limits=accepted_limits,
+                    context=FastOptimizationContext(
+                        issue=frame.issue,
+                        current_price_aud_per_mwh=frame.current_price_aud_per_mwh,
+                        horizon_price_median_aud_per_mwh=frame.horizon_price_median_aud_per_mwh,
+                        job_destination={uid: state.jobs[uid].destination_idc for uid in accepted_fast_state.remaining_work_gpu_hours},
+                        job_deadline_step={uid: state.jobs[uid].source.deadline_step for uid in accepted_fast_state.remaining_work_gpu_hours},
+                        site_gpu_capacity={site: MODELED_GPU_CAPACITY_PER_IDC for site in IDCS},
+                    ),
+                )
+                fast = execute_fast_recourse(
+                    architecture=self.architecture,
+                    slow_plan=state.active_plan,
+                    state=accepted_fast_state,
+                    nominal=active_optimization.control,
+                    limits=accepted_limits,
+                    grid_screen=lambda control, candidate_state: GridScreenResult(
+                        True, "PFR6_CONSERVATIVE_PROJECTION_DOMAIN_SCREEN", 0.95, 1.05, 1.0
+                    ),
+                )
+                return EscalatedCandidate(state.active_plan, accepted_fast_state, fast.control, True, True)
+
+            safety = AcSafetyFilter(
+                projector=_GurobiSensitivityProjector(
+                    verifier,
+                    allow_mess=True,
+                ),
+                verifier=verifier,
+            ).filter(
                 nominal=fast.control,
-                state=fast.next_state,
+                state=accepted_fast_state,
                 slow_plan=state.active_plan,
+                escalate_full_replan=escalate_for_safety,
             )
             if verifier.last_commit is None:
                 raise RuntimeContractError("Fresh physical verifier produced no commit evidence")
@@ -540,6 +730,23 @@ class PfrRuntimeRunner:
                     json.dumps(failure, indent=2, sort_keys=True) + "\n", encoding="utf-8"
                 )
                 break
+            fast = execute_fast_recourse(
+                architecture=self.architecture,
+                slow_plan=state.active_plan,
+                state=accepted_fast_state,
+                nominal=safety.safe_control,
+                limits=accepted_limits,
+                grid_screen=lambda control, candidate_state: GridScreenResult(
+                    True, "PFR6_EXACT_ACCEPTED_CONTROL", 0.95, 1.05, 1.0
+                ),
+            )
+            for uid, fraction in fast.control.job_compute_rate_fraction.items():
+                job = state.jobs[uid]
+                job.compute_rate_fraction = fraction
+                if fraction > 0.0 and job.lifecycle == "QUEUED":
+                    job.lifecycle = "RUNNING"
+                    job.start_issue = frame.issue
+            facility_p, _ = _facility_power(state.jobs.values(), self.power_curve)
             for mid in MESS_IDS:
                 state.mess_energy_kwh[mid] = fast.next_state.mess_soc[mid] * MESS_CAPACITY_KWH
             for uid, remaining in fast.next_state.remaining_work_gpu_hours.items():
@@ -579,10 +786,10 @@ class PfrRuntimeRunner:
                 "causal_exogenous_sha256": frame.exogenous_sha256,
                 "future_actual_used": False,
                 "h0_only_committed": True,
-                "slow_plan_fingerprint": slow_fingerprint,
+                "slow_plan_fingerprint": state.active_plan.fingerprint,
                 "binary_state_unchanged": fast.binary_state_unchanged,
-                "full_replan_executed": replan,
-                "replan_causes": replan_causes,
+                "full_replan_executed": replan or safety_replan,
+                "replan_causes": replan_causes + (("AC_SAFETY_ESCALATION",) if safety_replan else ()),
                 "full_replan_count_cumulative": state.full_replan_count,
                 "communication_bytes_cumulative": state.communication_bytes,
                 "risk_interface": risk.active_risk_interface,
@@ -604,9 +811,14 @@ class PfrRuntimeRunner:
                 "fast_recourse_runtime_seconds": fast.runtime_seconds,
                 "safety_filter_runtime_seconds": safety.filter_runtime_seconds,
                 "safety_filter_intervention": safety.intervention,
+                "safety_filter_delta_p_kw": safety.delta_p_kw,
+                "safety_filter_delta_q_kvar": safety.delta_q_kvar,
+                "safety_filter_compute_throttling_fraction": safety.compute_throttling_fraction,
+                "safety_filter_escalation_count": safety.escalation_count,
+                "common_emergency_mess_override": safety.intervention and safety.delta_p_kw > 1e-12,
                 "fresh_exact_opendss": True,
-                "actual_gurobi_used": optimized.certificate.actual_gurobi_used,
-                "optimization_certificate": optimized.certificate.as_dict(),
+                "actual_gurobi_used": active_optimization.certificate.actual_gurobi_used,
+                "optimization_certificate": active_optimization.certificate.as_dict(),
                 "actual_fresh_opendss_used": verifier.last_commit.actual_fresh_opendss_used,
                 "exact_ac": dict(verifier.last_commit.raw_metrics),
                 "runtime_seconds": time.monotonic() - started,

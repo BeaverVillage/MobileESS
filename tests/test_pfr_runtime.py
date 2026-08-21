@@ -61,7 +61,7 @@ class PfrRuntimeTests(unittest.TestCase):
             )
         self.assertEqual(summary["status"], "PASS")
         self.assertEqual(summary["valid_commit_markers"], 16)
-        self.assertEqual(physical.calls, 16)
+        self.assertEqual(physical.calls, 32)
         self.assertTrue(summary["all_state_chains_complete"])
 
     def test_missing_payload_blocks_spatial_action_without_fabricating_zero(self):
