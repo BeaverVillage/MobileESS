@@ -1,0 +1,111 @@
+{
+  "manifest_version": "PFR1_V1",
+  "discovery_date_kst": "2026-08-21",
+  "download_performed": false,
+  "path_policy": "PORTABLE_LOCATORS_ONLY",
+  "sources": [
+    {
+      "dataset_family": "KESTREL_F30",
+      "status": "FOUND_AND_AUDITED",
+      "role": "MAIN_OPERATIONAL",
+      "portable_locator": {
+        "environment_variable": "MOBILEESS_KESTREL_F30_PATH",
+        "observed_basename": "CANONICAL_F30_RACK_POWER_JOB_BASE_PREFROZEN_R6C.parquet"
+      },
+      "sha256": "0fe9399ece73e4e6906d036f3322697bd3c73b1498cf3e9c49b836631e19c98f",
+      "bytes": 5017275,
+      "format": "parquet",
+      "row_count": 59901,
+      "gpu_types": [],
+      "measured_or_source_fields": [
+        "arrival_timestamp_ns",
+        "source_start_timestamp_ns",
+        "source_end_timestamp_ns",
+        "latest_start_timestamp_ns",
+        "latest_completion_timestamp_ns",
+        "runtime_seconds_source",
+        "requested_gpu",
+        "input_bytes",
+        "IT_power_kW"
+      ],
+      "not_measured_in_source": [
+        "model_family",
+        "training_throughput",
+        "checkpoint_interval",
+        "checkpoint_size",
+        "restart_overhead"
+      ],
+      "optimizer_use": "operational timing and resource backbone",
+      "limitations": [
+        "No reliable neural-network architecture identity",
+        "GPUh is resource accounting and not training progress"
+      ]
+    },
+    {
+      "dataset_family": "H100_B200_HIGH_RES_TRAINING",
+      "status": "FOUND_AND_AUDITED",
+      "role": "MEASURED_POWER_UTILIZATION",
+      "portable_locator": {
+        "environment_variable": "MOBILEESS_AI_TRAINING_DATASET_PATH",
+        "observed_basename": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare.zip"
+      },
+      "sha256": "c0ccebea568612f5445b70c3baa7ce659935a949e5cc8f345a0af907739fa6f3",
+      "bytes": 209685111,
+      "format": "zip_csv",
+      "row_count": null,
+      "archive_file_members": 105,
+      "archive_csv_members": 95,
+      "representative_node_session_rows": 45000,
+      "gpu_types": ["H100", "B200"],
+      "measured_or_source_fields": [
+        "timestamp",
+        "cpu_utilization_percent",
+        "cpu_power_W",
+        "gpu0_to_gpu7_utilization_percent",
+        "gpu0_to_gpu7_mem_utilization",
+        "gpu0_to_gpu7_power_W",
+        "gpu0_to_gpu7_temp_C"
+      ],
+      "not_measured_in_source": [
+        "training_throughput",
+        "completed_samples",
+        "tokens_per_second",
+        "checkpoint_interval",
+        "checkpoint_size",
+        "restart_overhead",
+        "migration_overhead"
+      ],
+      "optimizer_use": "not direct until a throughput authority is separately bound",
+      "calibration_use": "measured H100 primary and B200 sensitivity power-utilization envelopes",
+      "limitations": [
+        "No defensible throughput target in audited CSV schema",
+        "Repeated path variants can reference the same session member content",
+        "Checkpoint and restart semantics are not measured"
+      ]
+    },
+    {
+      "dataset_family": "MIT_SUPERCLOUD_GPU",
+      "status": "NOT_FOUND_IN_BOUNDED_SEARCH",
+      "role": "OPTIONAL_SEMANTIC",
+      "portable_locator": null,
+      "sha256": null,
+      "bytes": null,
+      "format": null,
+      "row_count": null,
+      "optimizer_use": "none",
+      "limitations": ["Optional source was not present; no substitute was downloaded"]
+    },
+    {
+      "dataset_family": "ALIBABA_GPU_2026",
+      "status": "NOT_FOUND_IN_BOUNDED_SEARCH",
+      "role": "OPTIONAL_SENSITIVITY",
+      "portable_locator": null,
+      "sha256": null,
+      "bytes": null,
+      "format": null,
+      "row_count": null,
+      "optimizer_use": "none",
+      "limitations": ["Optional source was not present; no substitute was downloaded"]
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+"""Post-feedback scientific-rebase foundation.
+
+PFR0-PFR2 deliberately stops at authority contracts and reusable AI-training
+primitives.  It does not start a scientific campaign or implement the future
+slow/fast controller.
+"""
+
+from .data_authority import (
+    AuthorityKind,
+    DataAuthorityError,
+    DatasetAuthority,
+    DatasetRole,
+    FixedInferenceLoad,
+    MeasuredPowerUtilizationEnvelope,
+    PowerUtilizationPoint,
+    reject_row_wise_cross_dataset_merge,
+)
+from .training import (
+    CheckpointStatePayload,
+    DatasetPayload,
+    JobLifecycle,
+    KestrelOperationalJob,
+    ParameterAuthority,
+    PowerState,
+    TrainingJobModelState,
+    TrainingParameterization,
+    WorkUnit,
+    advance_restart,
+    arrive,
+    begin_migration,
+    complete_migration,
+    gang_allocation_feasible,
+    mark_ready,
+    migration_payload_bytes,
+    run_compute_step,
+    start_prefetch,
+    start_running,
+    validate_assignment_transition,
+)
+
+__all__ = [
+    "AuthorityKind",
+    "CheckpointStatePayload",
+    "DataAuthorityError",
+    "DatasetAuthority",
+    "DatasetPayload",
+    "DatasetRole",
+    "FixedInferenceLoad",
+    "JobLifecycle",
+    "KestrelOperationalJob",
+    "MeasuredPowerUtilizationEnvelope",
+    "ParameterAuthority",
+    "PowerState",
+    "PowerUtilizationPoint",
+    "TrainingJobModelState",
+    "TrainingParameterization",
+    "WorkUnit",
+    "advance_restart",
+    "arrive",
+    "begin_migration",
+    "complete_migration",
+    "gang_allocation_feasible",
+    "mark_ready",
+    "migration_payload_bytes",
+    "reject_row_wise_cross_dataset_merge",
+    "run_compute_step",
+    "start_prefetch",
+    "start_running",
+    "validate_assignment_transition",
+]
