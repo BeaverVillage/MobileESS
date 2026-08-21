@@ -568,6 +568,45 @@ class _GurobiSensitivityProjector:
             "passed": candidate_exact.passed,
         }
 
+    def _active_coordinate_q_step(
+        self,
+        control: FastControl,
+        active_target: FastControl,
+        voltage_target: FastControl,
+        state: FastLayerState,
+        slow_plan: SlowDiscretePlan,
+    ) -> Optional[tuple[FastControl, ExactAcResult, Mapping[str, Any]]]:
+        passing = []
+        for active_fraction in (0.25, 0.5, 0.75, 1.0):
+            active_candidate = self._combine(
+                control, active_target, voltage_target, active_fraction, 0.0
+            )
+            active_exact = self.verifier.verify_fresh(
+                control=active_candidate, state=state, slow_plan=slow_plan
+            )
+            active_exact.validate()
+            if active_exact.passed:
+                passing.append((active_candidate, active_exact, active_fraction, None))
+                continue
+            coordinate = self._coordinate_q_step(
+                active_candidate, state, slow_plan, active_exact
+            )
+            if coordinate is not None and coordinate[1].passed:
+                candidate, candidate_exact, coordinate_trace = coordinate
+                passing.append(
+                    (candidate, candidate_exact, active_fraction, coordinate_trace)
+                )
+        if not passing:
+            return None
+        candidate, candidate_exact, active_fraction, coordinate_trace = min(
+            passing, key=lambda item: self._objective_distance(control, item[0])
+        )
+        return candidate, candidate_exact, {
+            "status": "FRESH_OPENDSS_PASSING_ACTIVE_COORDINATE_Q_SEARCH",
+            "active_fraction": active_fraction,
+            "coordinate_q": coordinate_trace,
+        }
+
     def project(
         self, *, nominal: FastControl, state: FastLayerState, slow_plan: SlowDiscretePlan
     ) -> ProjectionCandidate:
@@ -659,6 +698,24 @@ class _GurobiSensitivityProjector:
                 }
                 self.trace.append(trace_row)
                 continue
+            if active_distance > 1e-18 and (
+                active_probe_exact.minimum_voltage_pu < 0.95
+                or active_probe_exact.maximum_voltage_pu > 1.05
+            ):
+                joint = self._active_coordinate_q_step(
+                    current, active_target, voltage_target, state, slow_plan
+                )
+                if joint is not None:
+                    current, exact, joint_trace = joint
+                    trace_row["solver"] = joint_trace
+                    trace_row["candidate"] = {
+                        "vmin": exact.minimum_voltage_pu,
+                        "vmax": exact.maximum_voltage_pu,
+                        "line": exact.maximum_line_loading_fraction,
+                        "transformer": exact.maximum_transformer_loading_fraction,
+                    }
+                    self.trace.append(trace_row)
+                    continue
             try:
                 import gurobipy as gp
                 from gurobipy import GRB
