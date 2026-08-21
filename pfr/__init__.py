@@ -49,6 +49,16 @@ from .uncertainty import (
     finite_sample_upper_quantile,
     fit_joint_mobility_calibration,
 )
+from .slow_fast import (
+    FastControl,
+    FastLayerLimits,
+    FastLayerState,
+    FastRecourseResult,
+    GridScreenResult,
+    SlowDiscretePlan,
+    SlowFastArchitecture,
+    execute_fast_recourse,
+)
 
 __all__ = [
     "AuthorityKind",
