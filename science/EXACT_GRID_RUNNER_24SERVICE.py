@@ -316,6 +316,15 @@ def solve_step(paths:dict[str,str],step:int,state:dict[str,list[Any]])->dict[str
     import opendssdirect as odd
     store=PowerStore(Path(paths["primary"]),Path(paths["tail"]))
     bp,bq,pv,tns=store.step(step)
+    forecast_override="background_p_kw" in state
+    if forecast_override:
+        bp=np.asarray(state["background_p_kw"],dtype=float)
+        bq=np.asarray(state["background_q_kvar"],dtype=float)
+        pv=np.asarray(state["pv_available_kw"],dtype=float)
+        if bp.shape!=(131,3) or bq.shape!=(131,3) or pv.shape!=(131,3):
+            raise RuntimeError("forecast background override must be 131x3")
+        if not np.isfinite(bp).all() or not np.isfinite(bq).all() or not np.isfinite(pv).all():
+            raise RuntimeError("forecast background override contains nonfinite values")
     fac_p=np.asarray(state["facility_p_kw"],dtype=float)
     fac_q=np.asarray(state["facility_q_kvar"],dtype=float)
     if "mess_location_service_id" in state:
@@ -335,6 +344,26 @@ def solve_step(paths:dict[str,str],step:int,state:dict[str,list[Any]])->dict[str
     command_audit=[]
     odd.Basic.ClearAll()
     assets=Path(paths["assets"]); contract=Path(paths["contract"])
+    if forecast_override:
+        adapter=json.loads((contract/"opendss_runtime_adapter.json").read_text(encoding="utf-8"))
+        native_p=np.asarray(adapter["native_bus_p_kw"],dtype=float)
+        native_q=np.asarray(adapter["native_bus_q_kvar"],dtype=float)
+        pweights=np.zeros((131,3),dtype=float)
+        qweights=np.zeros((131,3),dtype=float)
+        for row in adapter["loads"]:
+            for phase in row["phases"]:
+                bi=int(row["bus_index"]); pi=int(phase)-1; count=len(row["phases"])
+                if abs(native_p[bi])>1e-12:
+                    pweights[bi,pi]+=float(row["base_p_kw"])/native_p[bi]/count
+                if abs(native_q[bi])>1e-12:
+                    qweights[bi,pi]+=float(row["base_q_kvar"])/native_q[bi]/count
+        def align_load_phases(values:np.ndarray,weights:np.ndarray)->np.ndarray:
+            totals=values.sum(axis=1)
+            if np.any((np.abs(weights).sum(axis=1)<1e-12)&(np.abs(totals)>1e-9)):
+                raise RuntimeError("forecast override has load on a bus without compiled phases")
+            return totals[:,None]*weights
+        bp=align_load_phases(bp,pweights)
+        bq=align_load_phases(bq,qweights)
     cmd(odd,f'Compile "{assets/"IEEE123Master.dss"}"',command_audit)
     cmd(odd,"MakeBusList",command_audit)
     base_bus_count=int(odd.Circuit.NumBuses())

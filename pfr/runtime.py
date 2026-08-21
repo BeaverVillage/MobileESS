@@ -87,6 +87,36 @@ class OperationalTrainingJob:
 
 
 @dataclass(frozen=True)
+class MobilityRouteForecast:
+    source_service_id: str
+    destination_service_id: str
+    od_index: int
+    rank: int
+    q50_eta_seconds: float
+    safe_eta_seconds: float
+    q50_energy_kwh: float
+    safe_energy_kwh: float
+    profile_template_id: int
+    profile_horizon_steps: int
+
+    def validate(self) -> None:
+        if self.source_service_id == self.destination_service_id:
+            raise RuntimeContractError("mobility route must connect distinct services")
+        if self.rank not in {1, 2, 3} or self.od_index < 0:
+            raise RuntimeContractError("mobility route is outside frozen K=3")
+        values = (
+            self.q50_eta_seconds,
+            self.safe_eta_seconds,
+            self.q50_energy_kwh,
+            self.safe_energy_kwh,
+        )
+        if any(not math.isfinite(value) or value < 0.0 for value in values):
+            raise RuntimeContractError("mobility forecast must be finite and non-negative")
+        if self.profile_template_id < 0 or self.profile_horizon_steps <= 0:
+            raise RuntimeContractError("mobility E4 profile authority is invalid")
+
+
+@dataclass(frozen=True)
 class CausalExperimentFrame:
     issue: int
     current_price_aud_per_mwh: float
@@ -96,6 +126,14 @@ class CausalExperimentFrame:
     arrivals: Tuple[OperationalTrainingJob, ...]
     exogenous_sha256: str
     future_actual_used: bool = False
+    grid_upper_background_p_kw: float = 0.0
+    grid_upper_background_q_kvar: float = 0.0
+    robust_background_p_kw: Tuple[Tuple[float, ...], ...] = ()
+    robust_background_q_kvar: Tuple[Tuple[float, ...], ...] = ()
+    robust_pv_available_kw: Tuple[Tuple[float, ...], ...] = ()
+    workload_reserve_gpu: Mapping[str, float] = field(default_factory=dict)
+    mobility_routes: Tuple[MobilityRouteForecast, ...] = ()
+    mobility_template_bank: Mapping[int, Tuple[float, ...]] = field(default_factory=dict)
 
     def validate(self) -> None:
         values = (
@@ -114,6 +152,26 @@ class CausalExperimentFrame:
             job.validate()
             if job.arrival_step != self.issue:
                 raise RuntimeContractError("arrival is attached to the wrong issue")
+        if self.workload_reserve_gpu and set(self.workload_reserve_gpu) != set(IDCS):
+            raise RuntimeContractError("workload reserve must cover all 12 IDCs")
+        if any(value < 0.0 or not math.isfinite(value) for value in self.workload_reserve_gpu.values()):
+            raise RuntimeContractError("workload reserve must be finite and non-negative")
+        robust = (
+            self.robust_background_p_kw,
+            self.robust_background_q_kvar,
+            self.robust_pv_available_kw,
+        )
+        if any(robust) and any(len(array) != 131 or any(len(row) != 3 for row in array) for array in robust):
+            raise RuntimeContractError("robust grid arrays must be 131x3")
+        for route in self.mobility_routes:
+            route.validate()
+
+    def routes_for(self, source: str, destination: str) -> Tuple[MobilityRouteForecast, ...]:
+        return tuple(
+            route
+            for route in self.mobility_routes
+            if route.source_service_id == source and route.destination_service_id == destination
+        )
 
 
 @dataclass(frozen=True)
@@ -163,6 +221,22 @@ class MutableMethodState:
     compute_debt_gpu_hours: float = 0.0
     energy_debt_kwh: float = 0.0
     last_exact: Optional[Mapping[str, Any]] = None
+    mess_in_transit: dict[str, bool] = field(
+        default_factory=lambda: {mid: False for mid in MESS_IDS}
+    )
+    mess_route_destination: dict[str, Optional[str]] = field(
+        default_factory=lambda: {mid: None for mid in MESS_IDS}
+    )
+    mess_route_rank: dict[str, int] = field(
+        default_factory=lambda: {mid: 1 for mid in MESS_IDS}
+    )
+    mess_route_energy_profile_kwh: dict[str, Tuple[float, ...]] = field(
+        default_factory=lambda: {mid: () for mid in MESS_IDS}
+    )
+    mess_route_profile_index: dict[str, int] = field(
+        default_factory=lambda: {mid: 0 for mid in MESS_IDS}
+    )
+    last_slow_miqp_certificate: Mapping[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -183,6 +257,10 @@ class FreshPhysicalBackend(Protocol):
         mess_location: Sequence[str],
         mess_p_kw: Sequence[float],
         mess_q_kvar: Sequence[float],
+        mess_in_transit: Sequence[bool],
+        robust_background_p_kw: Sequence[Sequence[float]],
+        robust_background_q_kvar: Sequence[Sequence[float]],
+        robust_pv_available_kw: Sequence[Sequence[float]],
     ) -> PhysicalCommit:
         ...
 
@@ -209,12 +287,20 @@ class _PhysicalVerifierAdapter:
         jobs: Mapping[str, RuntimeJobState],
         power_curve: H100UtilizationPowerCurve,
         mess_location: Sequence[str],
+        mess_in_transit: Sequence[bool],
+        robust_background_p_kw: Sequence[Sequence[float]],
+        robust_background_q_kvar: Sequence[Sequence[float]],
+        robust_pv_available_kw: Sequence[Sequence[float]],
     ) -> None:
         self.backend = backend
         self.issue = issue
         self.jobs = jobs
         self.power_curve = power_curve
         self.mess_location = tuple(mess_location)
+        self.mess_in_transit = tuple(bool(value) for value in mess_in_transit)
+        self.robust_background_p_kw = tuple(tuple(row) for row in robust_background_p_kw)
+        self.robust_background_q_kvar = tuple(tuple(row) for row in robust_background_q_kvar)
+        self.robust_pv_available_kw = tuple(tuple(row) for row in robust_pv_available_kw)
         self.last_commit: Optional[PhysicalCommit] = None
 
     def verify_fresh(self, *, control: FastControl, **_: Any) -> ExactAcResult:
@@ -241,6 +327,10 @@ class _PhysicalVerifierAdapter:
             mess_location=self.mess_location,
             mess_p_kw=mess_p,
             mess_q_kvar=mess_q,
+            mess_in_transit=self.mess_in_transit,
+            robust_background_p_kw=self.robust_background_p_kw,
+            robust_background_q_kvar=self.robust_background_q_kvar,
+            robust_pv_available_kw=self.robust_pv_available_kw,
         )
         if not self.last_commit.actual_fresh_opendss_used:
             raise RuntimeContractError("physical backend did not execute Fresh OpenDSS")
@@ -288,7 +378,8 @@ class _GurobiSensitivityProjector:
             max(0.0, exact.maximum_line_loading_fraction - 1.0),
             max(0.0, exact.maximum_transformer_loading_fraction - 1.0),
         )
-        return sum(value * value for value in violations)
+        root_sign_penalty = 10.0 if "ROOT_SIGN" in exact.status else 0.0
+        return root_sign_penalty + sum(value * value for value in violations)
 
     def _targets(
         self, control: FastControl, state: FastLayerState, exact: ExactAcResult
@@ -301,6 +392,15 @@ class _GurobiSensitivityProjector:
         voltage_discharge = dict(control.mess_discharge_kw)
         voltage_q = {}
         for mess_id in control.mess_charge_kw:
+            mess_index = MESS_IDS.index(mess_id)
+            if self.verifier.mess_in_transit[mess_index]:
+                active_charge[mess_id] = 0.0
+                active_discharge[mess_id] = 0.0
+                active_q[mess_id] = 0.0
+                voltage_charge[mess_id] = 0.0
+                voltage_discharge[mess_id] = 0.0
+                voltage_q[mess_id] = 0.0
+                continue
             energy = state.mess_soc[mess_id] * MESS_CAPACITY_KWH
             max_charge = max(0.0, (MESS_CAPACITY_KWH - energy) / (0.95 * STEP_HOURS))
             max_discharge = max(0.0, (energy - MESS_FLOOR_KWH) * 0.95 / STEP_HOURS)
@@ -381,13 +481,13 @@ class _GurobiSensitivityProjector:
             )
             voltage_violation = exact.maximum_voltage_pu > 1.05 or exact.minimum_voltage_pu < 0.95
             active_enabled = thermal_or_low_voltage
-            voltage_enabled = not thermal_or_low_voltage and voltage_violation
+            voltage_enabled = voltage_violation
             active_distance = self._objective_distance(current, active_target) if active_enabled else 0.0
             voltage_distance = self._objective_distance(current, voltage_target) if voltage_enabled else 0.0
             if active_distance <= 1e-18 and voltage_distance <= 1e-18:
                 break
             active_probe_fraction = 1.0
-            voltage_probe_fraction = 0.05
+            voltage_probe_fraction = 0.25
             active_probe_exact = exact
             voltage_probe_exact = exact
             if active_distance > 1e-18:
@@ -412,6 +512,27 @@ class _GurobiSensitivityProjector:
                 "line": voltage_probe_exact.maximum_line_loading_fraction,
                 "transformer": voltage_probe_exact.maximum_transformer_loading_fraction,
             }
+            passing_probes = []
+            if active_distance > 1e-18 and active_probe_exact.passed:
+                passing_probes.append((active_probe, active_probe_exact, "active"))
+            if voltage_distance > 1e-18 and voltage_probe_exact.passed:
+                passing_probes.append((voltage_probe, voltage_probe_exact, "voltage"))
+            if passing_probes:
+                current, exact, accepted_axis = min(
+                    passing_probes,
+                    key=lambda item: self._objective_distance(current, item[0]),
+                )
+                trace_row["solver"] = {
+                    "status": f"EXACT_AC_PASSING_{accepted_axis.upper()}_PROBE"
+                }
+                trace_row["candidate"] = {
+                    "vmin": exact.minimum_voltage_pu,
+                    "vmax": exact.maximum_voltage_pu,
+                    "line": exact.maximum_line_loading_fraction,
+                    "transformer": exact.maximum_transformer_loading_fraction,
+                }
+                self.trace.append(trace_row)
+                continue
             try:
                 import gurobipy as gp
                 from gurobipy import GRB
@@ -424,8 +545,8 @@ class _GurobiSensitivityProjector:
             z_active = model.addVar(lb=0.0, ub=1.0 if active_distance > 1e-18 else 0.0, name="active_relief_fraction")
             z_voltage = model.addVar(lb=0.0, ub=1.0 if voltage_distance > 1e-18 else 0.0, name="voltage_support_fraction")
             metrics = (
-                (exact.minimum_voltage_pu, active_probe_exact.minimum_voltage_pu, voltage_probe_exact.minimum_voltage_pu, GRB.GREATER_EQUAL, 0.95),
-                (exact.maximum_voltage_pu, active_probe_exact.maximum_voltage_pu, voltage_probe_exact.maximum_voltage_pu, GRB.LESS_EQUAL, 1.05),
+                (exact.minimum_voltage_pu, active_probe_exact.minimum_voltage_pu, voltage_probe_exact.minimum_voltage_pu, GRB.GREATER_EQUAL, 0.9505),
+                (exact.maximum_voltage_pu, active_probe_exact.maximum_voltage_pu, voltage_probe_exact.maximum_voltage_pu, GRB.LESS_EQUAL, 1.0495),
                 (exact.maximum_line_loading_fraction, active_probe_exact.maximum_line_loading_fraction, voltage_probe_exact.maximum_line_loading_fraction, GRB.LESS_EQUAL, 1.0),
                 (exact.maximum_transformer_loading_fraction, active_probe_exact.maximum_transformer_loading_fraction, voltage_probe_exact.maximum_transformer_loading_fraction, GRB.LESS_EQUAL, 1.0),
             )
@@ -445,6 +566,36 @@ class _GurobiSensitivityProjector:
             if model.Status not in {GRB.OPTIMAL, GRB.SUBOPTIMAL} or model.SolCount < 1 or float(model.MaxVio) > 1e-6:
                 trace_row["solver"] = {"status": int(model.Status), "solutions": int(model.SolCount)}
                 model.dispose()
+                exact_line_search = []
+                if voltage_distance > 1e-18:
+                    for fraction_index in range(1, 10):
+                        fraction = fraction_index / 40.0
+                        line_candidate = self._combine(
+                            current, active_target, voltage_target, 0.0, fraction
+                        )
+                        line_exact = self.verifier.verify_fresh(
+                            control=line_candidate, state=state, slow_plan=slow_plan
+                        )
+                        line_exact.validate()
+                        if line_exact.passed:
+                            exact_line_search.append(
+                                (line_candidate, line_exact, fraction)
+                            )
+                if exact_line_search:
+                    current, exact, accepted_fraction = min(
+                        exact_line_search,
+                        key=lambda item: self._objective_distance(current, item[0]),
+                    )
+                    trace_row["solver"]["fallback"] = "FRESH_OPENDSS_EXACT_VOLTAGE_LINE_SEARCH"
+                    trace_row["solver"]["accepted_voltage_fraction"] = accepted_fraction
+                    trace_row["candidate"] = {
+                        "vmin": exact.minimum_voltage_pu,
+                        "vmax": exact.maximum_voltage_pu,
+                        "line": exact.maximum_line_loading_fraction,
+                        "transformer": exact.maximum_transformer_loading_fraction,
+                    }
+                    self.trace.append(trace_row)
+                    continue
                 improving_probes = []
                 base_score = self._violation_score(exact)
                 if active_distance > 1e-18 and self._violation_score(active_probe_exact) < base_score - 1e-12:
@@ -466,8 +617,8 @@ class _GurobiSensitivityProjector:
                 }
                 self.trace.append(trace_row)
                 continue
-            active_fraction = min(1.0, max(active_probe_fraction if active_distance > 1e-18 else 0.0, float(z_active.X) * 1.05))
-            voltage_fraction = min(1.0, max(voltage_probe_fraction if voltage_distance > 1e-18 else 0.0, float(z_voltage.X) * 1.05))
+            active_fraction = min(1.0, max(0.0, float(z_active.X) * 1.05))
+            voltage_fraction = min(1.0, max(0.0, float(z_voltage.X) * 1.05))
             model.dispose()
             base_score = self._violation_score(exact)
             accepted = None
@@ -561,26 +712,225 @@ def _compute_fraction(job: RuntimeJobState, frame: CausalExperimentFrame, config
     return 1.0 if frame.current_price_aud_per_mwh <= frame.horizon_price_median_aud_per_mwh else 0.5
 
 
-def _build_slow_plan(state: MutableMethodState, config: MethodConfig, issue: int) -> SlowDiscretePlan:
+def _pareto_routes(
+    routes: Sequence[MobilityRouteForecast], *, safe: bool
+) -> Tuple[MobilityRouteForecast, ...]:
+    def metrics(route: MobilityRouteForecast) -> Tuple[float, float]:
+        return (
+            route.safe_eta_seconds if safe else route.q50_eta_seconds,
+            route.safe_energy_kwh if safe else route.q50_energy_kwh,
+        )
+
+    kept = []
+    for candidate in routes:
+        candidate_metrics = metrics(candidate)
+        dominated = any(
+            metrics(other)[0] <= candidate_metrics[0]
+            and metrics(other)[1] <= candidate_metrics[1]
+            and metrics(other) != candidate_metrics
+            for other in routes
+        )
+        if not dominated:
+            kept.append(candidate)
+    return tuple(sorted(kept, key=lambda route: route.rank))
+
+
+def _mobility_energy_profile(
+    route: MobilityRouteForecast,
+    template_bank: Mapping[int, Tuple[float, ...]],
+    *,
+    safe: bool,
+) -> Tuple[float, ...]:
+    route.validate()
+    cumulative = template_bank.get(route.profile_template_id)
+    if cumulative is None or len(cumulative) != 129:
+        raise RuntimeContractError("selected route lacks its frozen E4B profile template")
+    if any(not math.isfinite(value) for value in cumulative) or abs(cumulative[0]) > 1e-9 or abs(cumulative[-1] - 1.0) > 1e-6:
+        raise RuntimeContractError("E4B cumulative profile is invalid")
+    eta = route.safe_eta_seconds if safe else route.q50_eta_seconds
+    total = route.safe_energy_kwh if safe else route.q50_energy_kwh
+    steps = min(54, max(1, math.ceil(eta / 300.0), route.profile_horizon_steps))
+
+    def interpolate(fraction: float) -> float:
+        position = fraction * 128.0
+        left = min(127, int(math.floor(position)))
+        weight = position - left
+        return cumulative[left] + weight * (cumulative[left + 1] - cumulative[left])
+
+    sampled = tuple(interpolate(index / steps) for index in range(steps + 1))
+    profile = tuple(max(0.0, sampled[index + 1] - sampled[index]) * total for index in range(steps))
+    if abs(sum(profile) - total) > max(1e-8, total * 1e-8):
+        raise RuntimeContractError("E4B route profile does not conserve safe mobility energy")
+    return profile
+
+
+def _optimize_mess_routes(
+    state: MutableMethodState,
+    config: MethodConfig,
+    frame: CausalExperimentFrame,
+) -> Tuple[dict[str, str], dict[str, int]]:
+    destinations = dict(state.mess_location)
+    ranks = dict(state.mess_route_rank)
+    if config.energy_flexibility != "MESS" or not frame.mobility_routes:
+        state.last_slow_miqp_certificate = {
+            "status": "NO_MOBILE_ROUTE_OPTIMIZATION_FOR_METHOD",
+            "actual_gurobi_used": False,
+            "num_integer_variables": 0,
+        }
+        return destinations, ranks
+    demand = {site: 0.0 for site in IDCS}
+    for job in state.jobs.values():
+        if job.lifecycle != "COMPLETED":
+            demand[job.destination_idc] += job.remaining_work_gpu_hours
+    candidate_sites = tuple(site for site in IDCS if demand[site] > 0.0)
+    if not candidate_sites:
+        state.last_slow_miqp_certificate = {
+            "status": "NO_ACTIVE_WORKLOAD_DESTINATION",
+            "actual_gurobi_used": False,
+            "num_integer_variables": 0,
+        }
+        return destinations, ranks
+
+    candidates: dict[str, list[Tuple[str, int, Optional[MobilityRouteForecast], float]]] = {}
+    safe = config.joint_uncertainty
+    for mid in MESS_IDS:
+        if state.mess_in_transit[mid]:
+            target = state.mess_route_destination[mid]
+            if target is None:
+                raise RuntimeContractError("transit MESS lacks destination")
+            candidates[mid] = [(target, state.mess_route_rank[mid], None, 0.0)]
+            continue
+        current = state.mess_location[mid]
+        rows = [(current, 1, None, -demand.get(current, 0.0) / 25.0)]
+        for destination in candidate_sites:
+            if destination == current:
+                continue
+            for route in _pareto_routes(frame.routes_for(current, destination), safe=safe):
+                eta = route.safe_eta_seconds if safe else route.q50_eta_seconds
+                energy = route.safe_energy_kwh if safe else route.q50_energy_kwh
+                if math.ceil(eta / 300.0) > 54:
+                    continue
+                if state.mess_energy_kwh[mid] - energy < MESS_FLOOR_KWH - 1e-9:
+                    continue
+                score = eta / 1800.0 + energy / 100.0 - demand[destination] / 25.0
+                rows.append((destination, route.rank, route, score))
+        candidates[mid] = rows
+
+    try:
+        import gurobipy as gp
+        from gurobipy import GRB
+    except Exception as exc:
+        raise RuntimeContractError("slow mobility MIQP requires gurobipy") from exc
+    model = gp.Model("pfr_slow_mobility_miqp")
+    model.Params.OutputFlag = 0
+    model.Params.Threads = 1
+    model.Params.Seed = 0
+    variables = {
+        (mid, index): model.addVar(vtype=GRB.BINARY, name=f"z_{mid}_{index}")
+        for mid, rows in candidates.items()
+        for index in range(len(rows))
+    }
+    for mid, rows in candidates.items():
+        model.addConstr(gp.quicksum(variables[mid, index] for index in range(len(rows))) == 1.0)
+    model.addConstr(
+        gp.quicksum(
+            variables[mid, index]
+            for mid, rows in candidates.items()
+            for index, row in enumerate(rows)
+            if row[2] is not None
+        )
+        <= 1,
+        name="retain_three_parked_mess_for_common_ac_safety",
+    )
+    objective = gp.quicksum(
+        row[3] * variables[mid, index]
+        for mid, rows in candidates.items()
+        for index, row in enumerate(rows)
+    )
+    for destination in candidate_sites:
+        assigned = gp.quicksum(
+            variables[mid, index]
+            for mid, rows in candidates.items()
+            for index, row in enumerate(rows)
+            if row[0] == destination
+        )
+        objective += 0.02 * assigned * assigned
+    model.setObjective(objective, GRB.MINIMIZE)
+    model.optimize()
+    if model.Status != GRB.OPTIMAL or model.SolCount < 1 or float(model.MaxVio) > 1e-6:
+        status = int(model.Status)
+        model.dispose()
+        raise RuntimeContractError(f"slow mobility MIQP failed status={status}")
+    for mid, rows in candidates.items():
+        selected = next(index for index in range(len(rows)) if variables[mid, index].X > 0.5)
+        destinations[mid], ranks[mid] = rows[selected][0], rows[selected][1]
+    state.last_slow_miqp_certificate = {
+        "status": "OPTIMAL",
+        "actual_gurobi_used": True,
+        "num_integer_variables": len(variables),
+        "num_quadratic_objective_terms": len(candidate_sites),
+        "joint_safe_eta_energy_used": safe,
+    }
+    model.dispose()
+    return destinations, ranks
+
+
+def _build_slow_plan(
+    state: MutableMethodState, config: MethodConfig, frame: CausalExperimentFrame
+) -> SlowDiscretePlan:
     jobs = {uid: job for uid, job in state.jobs.items() if job.lifecycle != "COMPLETED"}
+    destinations, route_ranks = _optimize_mess_routes(state, config, frame)
     plan = SlowDiscretePlan(
-        plan_id=f"{config.comparison_method_id.value}-{issue}-{state.full_replan_count + 1}",
-        valid_from_issue=issue,
-        mess_destination=dict(state.mess_location),
-        mess_native_route_rank={mid: 1 for mid in MESS_IDS},
+        plan_id=f"{config.comparison_method_id.value}-{frame.issue}-{state.full_replan_count + 1}",
+        valid_from_issue=frame.issue,
+        mess_destination=destinations,
+        mess_native_route_rank=route_ranks,
         job_idc_placement={uid: job.destination_idc for uid, job in jobs.items()},
         checkpoint_migration={uid: None for uid in jobs},
         gpu_gang_allocation={uid: job.gang_membership for uid, job in jobs.items()},
-        job_start_issue={uid: max(issue, job.source.arrival_step) for uid, job in jobs.items()},
+        job_start_issue={uid: max(frame.issue, job.source.arrival_step) for uid, job in jobs.items()},
         coarse_charging_kw={mid: (0.0,) * 54 for mid in MESS_IDS},
     )
     plan.validate()
     return plan
 
 
+def _start_planned_routes(
+    state: MutableMethodState, config: MethodConfig, frame: CausalExperimentFrame
+) -> None:
+    if state.active_plan is None or config.energy_flexibility != "MESS":
+        return
+    for mid in MESS_IDS:
+        if state.mess_in_transit[mid]:
+            continue
+        source = state.mess_location[mid]
+        destination = state.active_plan.mess_destination[mid]
+        if source == destination:
+            continue
+        rank = state.active_plan.mess_native_route_rank[mid]
+        routes = [route for route in frame.routes_for(source, destination) if route.rank == rank]
+        if len(routes) != 1:
+            raise RuntimeContractError("slow plan selected a route outside frozen K=3")
+        profile = _mobility_energy_profile(
+            routes[0], frame.mobility_template_bank, safe=config.joint_uncertainty
+        )
+        if state.mess_energy_kwh[mid] - sum(profile) < MESS_FLOOR_KWH - 1e-9:
+            raise RuntimeContractError("selected mobility profile violates protected SOC floor")
+        state.mess_in_transit[mid] = True
+        state.mess_route_destination[mid] = destination
+        state.mess_route_rank[mid] = rank
+        state.mess_route_energy_profile_kwh[mid] = profile
+        state.mess_route_profile_index[mid] = 0
+
+
 def _risk_decision(state: MutableMethodState, frame: CausalExperimentFrame, config: MethodConfig):
     active_jobs = [job for job in state.jobs.values() if job.lifecycle != "COMPLETED"]
     gpu_by_site = {site: sum(job.source.requested_gpu for job in active_jobs if job.destination_idc == site) for site in IDCS}
+    if config.joint_uncertainty:
+        gpu_by_site = {
+            site: gpu_by_site[site] + frame.workload_reserve_gpu.get(site, 0.0)
+            for site in IDCS
+        }
     deadline_margin = max(
         (
             job.remaining_work_gpu_hours
@@ -653,7 +1003,7 @@ def _nominal_control(state: MutableMethodState, config: MethodConfig, frame: Cau
     high_price = frame.current_price_aud_per_mwh > 1.05 * frame.horizon_price_median_aud_per_mwh
     charge = {mid: 0.0 for mid in MESS_IDS}
     discharge = {
-        mid: 20.0 if energy_enabled and high_price and state.mess_energy_kwh[mid] > MESS_SAFETY_RESERVE_KWH + 20.0 else 0.0
+        mid: 20.0 if energy_enabled and not state.mess_in_transit[mid] and high_price and state.mess_energy_kwh[mid] > MESS_SAFETY_RESERVE_KWH + 20.0 else 0.0
         for mid in MESS_IDS
     }
     return FastControl(
@@ -671,6 +1021,10 @@ def _post_payload(state: MutableMethodState, method_id: str) -> Mapping[str, Any
         "issue": state.issue,
         "mess_energy_kwh": state.mess_energy_kwh,
         "mess_location": state.mess_location,
+        "mess_in_transit": state.mess_in_transit,
+        "mess_route_destination": state.mess_route_destination,
+        "mess_route_rank": state.mess_route_rank,
+        "mess_route_profile_index": state.mess_route_profile_index,
         "wan_transferred_bytes_cumulative": state.wan_transferred_bytes_cumulative,
         "wan_active_transfers": state.wan_active_transfers,
         "jobs": {
@@ -744,12 +1098,13 @@ class PfrRuntimeRunner:
             risk = _risk_decision(state, frame, config)
             replan, replan_causes = _should_replan(state, config, risk, offset)
             if replan:
-                state.active_plan = _build_slow_plan(state, config, frame.issue)
+                state.active_plan = _build_slow_plan(state, config, frame)
                 state.active_plan_age_steps = 0
                 state.full_replan_count += 1
                 state.communication_bytes += len(
                     json.dumps(asdict(state.active_plan), sort_keys=True, separators=(",", ":"))
                 )
+                _start_planned_routes(state, config, frame)
             if state.active_plan is None:
                 raise RuntimeContractError("no active slow plan")
             slow_fingerprint = state.active_plan.fingerprint
@@ -766,8 +1121,8 @@ class PfrRuntimeRunner:
             limits = FastLayerLimits(
                 step_minutes=5,
                 mess_energy_capacity_kwh={mid: MESS_CAPACITY_KWH for mid in MESS_IDS},
-                mess_charge_limit_kw={mid: 550.0 for mid in MESS_IDS},
-                mess_discharge_limit_kw={mid: 550.0 for mid in MESS_IDS},
+                mess_charge_limit_kw={mid: 0.0 if state.mess_in_transit[mid] else 550.0 for mid in MESS_IDS},
+                mess_discharge_limit_kw={mid: 0.0 if state.mess_in_transit[mid] else 550.0 for mid in MESS_IDS},
                 mess_pcs_kva={mid: 700.0 for mid in MESS_IDS},
                 mess_soc_min={mid: MESS_FLOOR_KWH / MESS_CAPACITY_KWH for mid in MESS_IDS},
                 mess_soc_max={mid: 1.0 for mid in MESS_IDS},
@@ -784,7 +1139,11 @@ class PfrRuntimeRunner:
                     horizon_price_median_aud_per_mwh=frame.horizon_price_median_aud_per_mwh,
                     job_destination={uid: state.jobs[uid].destination_idc for uid in fast_state.remaining_work_gpu_hours},
                     job_deadline_step={uid: state.jobs[uid].source.deadline_step for uid in fast_state.remaining_work_gpu_hours},
-                    site_gpu_capacity={site: MODELED_GPU_CAPACITY_PER_IDC for site in IDCS},
+                    site_gpu_capacity={
+                        site: MODELED_GPU_CAPACITY_PER_IDC
+                        - (frame.workload_reserve_gpu.get(site, 0.0) if config.joint_uncertainty else 0.0)
+                        for site in IDCS
+                    },
                     mess_operational_enabled=config.energy_flexibility in {"MESS", "STATIONARY_BESS"},
                 ),
             )
@@ -804,6 +1163,10 @@ class PfrRuntimeRunner:
                 state.jobs,
                 self.power_curve,
                 tuple(state.mess_location[mid] for mid in MESS_IDS),
+                tuple(state.mess_in_transit[mid] for mid in MESS_IDS),
+                frame.robust_background_p_kw,
+                frame.robust_background_q_kvar,
+                frame.robust_pv_available_kw,
             )
             accepted_fast_state = fast_state
             accepted_limits = limits
@@ -812,7 +1175,7 @@ class PfrRuntimeRunner:
 
             def escalate_for_safety() -> EscalatedCandidate:
                 nonlocal accepted_fast_state, accepted_limits, active_optimization, fast, safety_replan
-                state.active_plan = _build_slow_plan(state, config, frame.issue)
+                state.active_plan = _build_slow_plan(state, config, frame)
                 state.active_plan_age_steps = 0
                 state.full_replan_count += 1
                 state.communication_bytes += len(
@@ -831,8 +1194,8 @@ class PfrRuntimeRunner:
                 accepted_limits = FastLayerLimits(
                     step_minutes=5,
                     mess_energy_capacity_kwh={mid: MESS_CAPACITY_KWH for mid in MESS_IDS},
-                    mess_charge_limit_kw={mid: 550.0 for mid in MESS_IDS},
-                    mess_discharge_limit_kw={mid: 550.0 for mid in MESS_IDS},
+                    mess_charge_limit_kw={mid: 0.0 if state.mess_in_transit[mid] else 550.0 for mid in MESS_IDS},
+                    mess_discharge_limit_kw={mid: 0.0 if state.mess_in_transit[mid] else 550.0 for mid in MESS_IDS},
                     mess_pcs_kva={mid: 700.0 for mid in MESS_IDS},
                     mess_soc_min={mid: MESS_FLOOR_KWH / MESS_CAPACITY_KWH for mid in MESS_IDS},
                     mess_soc_max={mid: 1.0 for mid in MESS_IDS},
@@ -850,7 +1213,11 @@ class PfrRuntimeRunner:
                         horizon_price_median_aud_per_mwh=frame.horizon_price_median_aud_per_mwh,
                         job_destination={uid: state.jobs[uid].destination_idc for uid in accepted_fast_state.remaining_work_gpu_hours},
                         job_deadline_step={uid: state.jobs[uid].source.deadline_step for uid in accepted_fast_state.remaining_work_gpu_hours},
-                        site_gpu_capacity={site: MODELED_GPU_CAPACITY_PER_IDC for site in IDCS},
+                        site_gpu_capacity={
+                            site: MODELED_GPU_CAPACITY_PER_IDC
+                            - (frame.workload_reserve_gpu.get(site, 0.0) if config.joint_uncertainty else 0.0)
+                            for site in IDCS
+                        },
                         mess_operational_enabled=config.energy_flexibility in {"MESS", "STATIONARY_BESS"},
                     ),
                 )
@@ -910,6 +1277,29 @@ class PfrRuntimeRunner:
             facility_p, _ = _facility_power(state.jobs.values(), self.power_curve)
             for mid in MESS_IDS:
                 state.mess_energy_kwh[mid] = fast.next_state.mess_soc[mid] * MESS_CAPACITY_KWH
+            mobility_energy_kwh = 0.0
+            for mid in MESS_IDS:
+                if not state.mess_in_transit[mid]:
+                    continue
+                index = state.mess_route_profile_index[mid]
+                profile = state.mess_route_energy_profile_kwh[mid]
+                if index >= len(profile):
+                    raise RuntimeContractError("transit profile index escaped E4B authority")
+                movement = profile[index]
+                mobility_energy_kwh += movement
+                state.mess_energy_kwh[mid] -= movement
+                if state.mess_energy_kwh[mid] < MESS_FLOOR_KWH - 1e-9:
+                    raise RuntimeContractError("realized mobility profile violated protected SOC floor")
+                state.mess_route_profile_index[mid] += 1
+                if state.mess_route_profile_index[mid] == len(profile):
+                    destination = state.mess_route_destination[mid]
+                    if destination is None:
+                        raise RuntimeContractError("completed route lacks destination")
+                    state.mess_location[mid] = destination
+                    state.mess_in_transit[mid] = False
+                    state.mess_route_destination[mid] = None
+                    state.mess_route_energy_profile_kwh[mid] = ()
+                    state.mess_route_profile_index[mid] = 0
             for uid, remaining in fast.next_state.remaining_work_gpu_hours.items():
                 job = state.jobs[uid]
                 job.remaining_work_gpu_hours = remaining
@@ -971,6 +1361,16 @@ class PfrRuntimeRunner:
                 "mess_p_kw_total": sum(fast.control.mess_discharge_kw.values()) - sum(fast.control.mess_charge_kw.values()),
                 "mess_q_kvar_total": sum(fast.control.mess_q_kvar.values()),
                 "minimum_mess_energy_kwh": min(state.mess_energy_kwh.values()),
+                "mobility_energy_kwh": mobility_energy_kwh,
+                "mess_in_transit": dict(state.mess_in_transit),
+                "mess_location": dict(state.mess_location),
+                "mess_route_rank": dict(state.mess_route_rank),
+                "slow_miqp_certificate": dict(state.last_slow_miqp_certificate),
+                "joint_uncertainty_decision_use": config.joint_uncertainty,
+                "workload_reserve_gpu": dict(frame.workload_reserve_gpu) if config.joint_uncertainty else {},
+                "robust_grid_fresh_opendss": bool(
+                    verifier.last_commit.raw_metrics.get("robust_grid_fresh_opendss", False)
+                ),
                 "compute_debt_gpu_hours": state.compute_debt_gpu_hours,
                 "energy_debt_kwh": state.energy_debt_kwh,
                 "fast_recourse_runtime_seconds": fast.runtime_seconds,
