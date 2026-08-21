@@ -1,0 +1,24 @@
+{
+  "stage": "PFR5",
+  "risk_definition": "R_t = max_{xi in U_t} max_l violation_margin_l(xi) / predeclared_scale_l",
+  "required_families": [
+    "R_SOC",
+    "R_deadline",
+    "R_GPU",
+    "R_WAN",
+    "R_voltage",
+    "R_thermal"
+  ],
+  "safety_trigger": "R_t > 0",
+  "opportunity_trigger": "expected_benefit > C_solve + C_migration + C_communication + epsilon",
+  "maximum_refresh_steps": 12,
+  "interfaces": {
+    "B6": "RAW_UNCALIBRATED",
+    "B7": "CALIBRATED"
+  },
+  "prohibited": [
+    "direct maximum across dimensional margins",
+    "outcome-selected scale",
+    "Local Repair"
+  ]
+}
