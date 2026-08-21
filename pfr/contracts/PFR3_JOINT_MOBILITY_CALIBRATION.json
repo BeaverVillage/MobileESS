@@ -1,0 +1,125 @@
+{
+  "alpha": 0.05,
+  "authority": "2024_CALIBRATION_ONLY_OD_DATE_BLOCK_JOINT_CONFORMAL",
+  "block_aggregation": "maximum_within_shared_OD_date_block",
+  "calibration": {
+    "block_count": 96,
+    "fallback": "global_2024_OD_date_block_quantile",
+    "finite_sample_rank": 93,
+    "joint_quantile": 27.566650390625,
+    "row_count": 860,
+    "split": "calibration",
+    "year": 2024
+  },
+  "distribution_shift_residual_inflation": {
+    "1.1": {
+      "calibration": {
+        "block_count": 96,
+        "covered_blocks": 92,
+        "empirical_joint_coverage": 0.9583333333333334,
+        "maximum_joint_score": 160.99772949218752,
+        "wilson95_high": 0.9836792924637118,
+        "wilson95_low": 0.8977180853334191
+      },
+      "spatial_audit": {
+        "block_count": 96,
+        "covered_blocks": 91,
+        "empirical_joint_coverage": 0.9479166666666666,
+        "maximum_joint_score": 191.24370117187502,
+        "wilson95_high": 0.9775503995257587,
+        "wilson95_low": 0.8838152196850738
+      },
+      "temporal_audit": {
+        "block_count": 64,
+        "covered_blocks": 62,
+        "empirical_joint_coverage": 0.96875,
+        "maximum_joint_score": 492.4656494140625,
+        "wilson95_high": 0.9913878616538281,
+        "wilson95_low": 0.8930270822904169
+      }
+    },
+    "1.25": {
+      "calibration": {
+        "block_count": 96,
+        "covered_blocks": 91,
+        "empirical_joint_coverage": 0.9479166666666666,
+        "maximum_joint_score": 182.95196533203125,
+        "wilson95_high": 0.9775503995257587,
+        "wilson95_low": 0.8838152196850738
+      },
+      "spatial_audit": {
+        "block_count": 96,
+        "covered_blocks": 91,
+        "empirical_joint_coverage": 0.9479166666666666,
+        "maximum_joint_score": 217.3223876953125,
+        "wilson95_high": 0.9775503995257587,
+        "wilson95_low": 0.8838152196850738
+      },
+      "temporal_audit": {
+        "block_count": 64,
+        "covered_blocks": 62,
+        "empirical_joint_coverage": 0.96875,
+        "maximum_joint_score": 559.6200561523438,
+        "wilson95_high": 0.9913878616538281,
+        "wilson95_low": 0.8930270822904169
+      }
+    }
+  },
+  "empirical_coverage": {
+    "calibration": {
+      "block_count": 96,
+      "covered_blocks": 93,
+      "empirical_joint_coverage": 0.96875,
+      "maximum_joint_score": 146.361572265625,
+      "wilson95_high": 0.989315929628799,
+      "wilson95_low": 0.9121132067546303
+    },
+    "spatial_audit": {
+      "block_count": 96,
+      "covered_blocks": 91,
+      "empirical_joint_coverage": 0.9479166666666666,
+      "maximum_joint_score": 173.85791015625,
+      "wilson95_high": 0.9775503995257587,
+      "wilson95_low": 0.8838152196850738
+    },
+    "temporal_audit": {
+      "block_count": 64,
+      "covered_blocks": 62,
+      "empirical_joint_coverage": 0.96875,
+      "maximum_joint_score": 447.696044921875,
+      "wilson95_high": 0.9913878616538281,
+      "wilson95_low": 0.8930270822904169
+    }
+  },
+  "next_authorized_stage": "PFR4",
+  "no_2025_retuning": true,
+  "row_wise_cross_dataset_merge": false,
+  "score": "max((T_actual-T_q50)/max(T_q90-T_q50,1s),(E_actual-E_q50)/residual_scale_E)",
+  "source_sha256": {
+    "date_ordinals": "3834e32213cbb9ce3772b39133c53b727b2b2badc43efbfaea30a9b024957ad9",
+    "energy_v4": "98d484a9f9d9ba82837ce11d8d9e31796ad9f61487f802e18f9d74f64c1f6eb8",
+    "eta_quantiles": "8248ddbeab35e96fe7aaf3afd0ff35c12a9ece1e5e8e7628f60339f44660bd63",
+    "eta_truth": "8a17c02dea434e4204a7e866673857817406c9cd6f83ca6105a3fb3a3b57df95",
+    "origins": "748910d98496007886b987386b1b290106ab5f4567ae8e3fe660ae2dd9724e62"
+  },
+  "source_shapes": {
+    "energy_2024_rows": 2293,
+    "eta_origins": 2998,
+    "eta_quantiles": [
+      2998,
+      8,
+      1656,
+      3
+    ],
+    "eta_truth": [
+      2998,
+      8,
+      1656
+    ],
+    "joint_OD_date_blocks": 256
+  },
+  "stage": "PFR3",
+  "status": "PASS",
+  "target_joint_coverage": 0.95,
+  "uncertainty_universe_interface": "U_t = U_mob x U_work x U_grid"
+}
