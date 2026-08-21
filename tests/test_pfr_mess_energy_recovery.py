@@ -77,6 +77,29 @@ class CoupledPqVerifier:
         )
 
 
+class PairwiseQVerifier:
+    mess_in_transit = (False, False, False, False)
+
+    def verify_fresh(self, *, control, state, slow_plan):
+        del state, slow_plan
+        left = control.mess_q_kvar["MESS01"] / 700.0
+        right = -control.mess_q_kvar["MESS02"] / 700.0
+        vmin = 0.949 + 0.008 * left - 0.004 * right
+        vmax = 1.051 + 0.004 * left - 0.008 * right
+        passed = 0.95 <= vmin <= vmax <= 1.05
+        return ExactAcResult(
+            passed,
+            "PASS" if passed else "VIOLATION",
+            True,
+            True,
+            vmin,
+            vmax,
+            0.5,
+            0.5,
+            0 if passed else 1,
+        )
+
+
 def test_projector_combines_active_relief_with_location_sensitive_q():
     nominal = FastControl(
         {mid: 50.0 for mid in MESS_IDS},
@@ -131,3 +154,24 @@ def test_projector_blend_enforces_strict_p550_s700_boundary():
         assert abs(net_p) <= 550.0
         assert math.hypot(net_p, combined.mess_q_kvar[mid]) <= 700.0
         assert not (combined.mess_charge_kw[mid] > 0.0 and combined.mess_discharge_kw[mid] > 0.0)
+
+
+def test_pairwise_q_search_closes_opposing_voltage_axes():
+    control = FastControl(
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {},
+        {},
+    )
+    state = FastLayerState(0, {mid: 760.0 / 1080.0 for mid in MESS_IDS}, {})
+    verifier = PairwiseQVerifier()
+    projector = _GurobiSensitivityProjector(verifier, allow_mess=True)
+    slow_plan = SimpleNamespace(fingerprint="fixed-plan")
+    exact = verifier.verify_fresh(control=control, state=state, slow_plan=slow_plan)
+
+    result = projector._pairwise_q_step(control, state, slow_plan, exact)
+
+    assert result is not None
+    assert result[1].passed
+    assert result[2]["status"] == "FRESH_OPENDSS_PAIRWISE_Q_SEARCH"
