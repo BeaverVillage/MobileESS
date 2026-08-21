@@ -92,6 +92,7 @@ from .methods import (
     MethodConfig,
     MethodFactory,
 )
+from .power import H100UtilizationPowerCurve, PowerCurveContractError
 
 __all__ = [
     "AuthorityKind",
