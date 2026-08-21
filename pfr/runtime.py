@@ -455,6 +455,95 @@ class _GurobiSensitivityProjector:
             site_throughput_fraction=dict(base.site_throughput_fraction),
         )
 
+    def _coordinate_q_step(
+        self,
+        control: FastControl,
+        state: FastLayerState,
+        slow_plan: SlowDiscretePlan,
+        exact: ExactAcResult,
+    ) -> Optional[tuple[FastControl, ExactAcResult, Mapping[str, Any]]]:
+        if not self.allow_mess:
+            return None
+        base_score = self._violation_score(exact)
+        probes = []
+        for mess_index, mess_id in enumerate(MESS_IDS):
+            if self.verifier.mess_in_transit[mess_index]:
+                continue
+            p = float(control.mess_discharge_kw[mess_id]) - float(control.mess_charge_kw[mess_id])
+            q_cap = math.sqrt(max(0.0, 700.0**2 - p**2))
+            for direction in (-1.0, 1.0):
+                target = direction * q_cap
+                q = dict(control.mess_q_kvar)
+                q[mess_id] = float(q[mess_id]) + 0.25 * (target - float(q[mess_id]))
+                candidate = FastControl(
+                    dict(control.mess_charge_kw),
+                    dict(control.mess_discharge_kw),
+                    q,
+                    dict(control.job_compute_rate_fraction),
+                    dict(control.site_throughput_fraction),
+                )
+                candidate_exact = self.verifier.verify_fresh(
+                    control=candidate, state=state, slow_plan=slow_plan
+                )
+                candidate_exact.validate()
+                probes.append((candidate, candidate_exact, mess_id, direction, 0.25))
+        passing = [item for item in probes if item[1].passed]
+        if passing:
+            candidate, candidate_exact, mess_id, direction, fraction = min(
+                passing, key=lambda item: self._objective_distance(control, item[0])
+            )
+            return candidate, candidate_exact, {
+                "status": "FRESH_OPENDSS_PASSING_COORDINATE_Q_PROBE",
+                "mess_id": mess_id,
+                "direction": direction,
+                "fraction": fraction,
+            }
+        improving = [
+            item for item in probes
+            if self._violation_score(item[1]) < base_score - 1e-12
+        ]
+        if not improving:
+            return None
+        seed = min(improving, key=lambda item: self._violation_score(item[1]))
+        expanded = [seed]
+        _, _, mess_id, direction, _ = seed
+        p = float(control.mess_discharge_kw[mess_id]) - float(control.mess_charge_kw[mess_id])
+        target = direction * math.sqrt(max(0.0, 700.0**2 - p**2))
+        for fraction in (0.5, 0.75, 1.0):
+            q = dict(control.mess_q_kvar)
+            q[mess_id] = float(q[mess_id]) + fraction * (target - float(q[mess_id]))
+            candidate = FastControl(
+                dict(control.mess_charge_kw),
+                dict(control.mess_discharge_kw),
+                q,
+                dict(control.job_compute_rate_fraction),
+                dict(control.site_throughput_fraction),
+            )
+            candidate_exact = self.verifier.verify_fresh(
+                control=candidate, state=state, slow_plan=slow_plan
+            )
+            candidate_exact.validate()
+            expanded.append((candidate, candidate_exact, mess_id, direction, fraction))
+        passing = [item for item in expanded if item[1].passed]
+        selected = min(
+            passing if passing else expanded,
+            key=(
+                (lambda item: self._objective_distance(control, item[0]))
+                if passing
+                else (lambda item: self._violation_score(item[1]))
+            ),
+        )
+        if not selected[1].passed and self._violation_score(selected[1]) >= base_score - 1e-12:
+            return None
+        candidate, candidate_exact, mess_id, direction, fraction = selected
+        return candidate, candidate_exact, {
+            "status": "FRESH_OPENDSS_COORDINATE_Q_SEARCH",
+            "mess_id": mess_id,
+            "direction": direction,
+            "fraction": fraction,
+            "passed": candidate_exact.passed,
+        }
+
     def project(
         self, *, nominal: FastControl, state: FastLayerState, slow_plan: SlowDiscretePlan
     ) -> ProjectionCandidate:
@@ -473,6 +562,19 @@ class _GurobiSensitivityProjector:
                     "transformer": exact.maximum_transformer_loading_fraction,
                 }
             }
+            if exact.minimum_voltage_pu < 0.95 or exact.maximum_voltage_pu > 1.05:
+                coordinate = self._coordinate_q_step(current, state, slow_plan, exact)
+                if coordinate is not None:
+                    current, exact, coordinate_trace = coordinate
+                    trace_row["coordinate_q"] = coordinate_trace
+                    trace_row["candidate"] = {
+                        "vmin": exact.minimum_voltage_pu,
+                        "vmax": exact.maximum_voltage_pu,
+                        "line": exact.maximum_line_loading_fraction,
+                        "transformer": exact.maximum_transformer_loading_fraction,
+                    }
+                    self.trace.append(trace_row)
+                    continue
             active_target, voltage_target = self._targets(current, state, exact)
             thermal_or_low_voltage = (
                 exact.minimum_voltage_pu < 0.95
