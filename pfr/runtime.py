@@ -453,10 +453,20 @@ class _GurobiSensitivityProjector:
     @staticmethod
     def _combine(base: FastControl, active: FastControl, voltage: FastControl, z_active: float, z_voltage: float) -> FastControl:
         combine = lambda value, a, v: float(value) + z_active * (float(a) - float(value)) + z_voltage * (float(v) - float(value))
+        raw_charge = {key: combine(base.mess_charge_kw[key], active.mess_charge_kw[key], voltage.mess_charge_kw[key]) for key in base.mess_charge_kw}
+        raw_discharge = {key: combine(base.mess_discharge_kw[key], active.mess_discharge_kw[key], voltage.mess_discharge_kw[key]) for key in base.mess_discharge_kw}
+        raw_q = {key: combine(base.mess_q_kvar[key], active.mess_q_kvar[key], voltage.mess_q_kvar[key]) for key in base.mess_q_kvar}
+        charge, discharge, reactive = {}, {}, {}
+        for key in base.mess_charge_kw:
+            net_p = min(550.0, max(-550.0, raw_discharge[key] - raw_charge[key]))
+            charge[key] = max(0.0, -net_p)
+            discharge[key] = max(0.0, net_p)
+            q_cap = math.sqrt(max(0.0, 700.0**2 - net_p**2))
+            reactive[key] = min(q_cap, max(-q_cap, raw_q[key]))
         return FastControl(
-            mess_charge_kw={key: combine(base.mess_charge_kw[key], active.mess_charge_kw[key], voltage.mess_charge_kw[key]) for key in base.mess_charge_kw},
-            mess_discharge_kw={key: combine(base.mess_discharge_kw[key], active.mess_discharge_kw[key], voltage.mess_discharge_kw[key]) for key in base.mess_discharge_kw},
-            mess_q_kvar={key: combine(base.mess_q_kvar[key], active.mess_q_kvar[key], voltage.mess_q_kvar[key]) for key in base.mess_q_kvar},
+            mess_charge_kw=charge,
+            mess_discharge_kw=discharge,
+            mess_q_kvar=reactive,
             job_compute_rate_fraction={key: combine(base.job_compute_rate_fraction[key], active.job_compute_rate_fraction[key], voltage.job_compute_rate_fraction[key]) for key in base.job_compute_rate_fraction},
             site_throughput_fraction=dict(base.site_throughput_fraction),
         )

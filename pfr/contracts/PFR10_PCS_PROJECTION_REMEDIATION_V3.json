@@ -1,0 +1,20 @@
+{
+  "schema_version": "PFR10_PCS_PROJECTION_REMEDIATION_V3",
+  "status": "FROZEN_BEFORE_V3_REPLAY",
+  "trigger_artifact": "PFR10_JAN2025_DAY03_ENERGY_RECOVERY_PQ_V2",
+  "failure_classification": "IMPLEMENTATION_NUMERIC_BOUNDARY_NOT_SCIENTIFIC_FAILURE",
+  "observed_exception": "P550/S700 violation from floating-point interpolation at an exact active-relief endpoint",
+  "technical_amendment": {
+    "net_active_power_limit_kw": 550.0,
+    "apparent_power_limit_kva": 700.0,
+    "charge_discharge_exclusivity": "NORMALIZE_INTERPOLATED_ACTION_TO_SINGLE_NET_P",
+    "reactive_power_projection": "CLIP_TO_SQRT_S700_SQUARED_MINUS_P_SQUARED",
+    "slow_binary_state_fixed": true,
+    "future_actual_used": false
+  },
+  "required_replay_order": [
+    "PFR9_JAN01_FULL_DAY_B0_B7",
+    "PFR10_JAN03_DIAGNOSTIC",
+    "PFR10_JAN01_07_INDEPENDENT_B0_B7"
+  ]
+}

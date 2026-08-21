@@ -1,4 +1,5 @@
 import pytest
+import math
 from types import SimpleNamespace
 
 from pfr.runtime import MESS_IDS, _GurobiSensitivityProjector, _nominal_mess_dispatch
@@ -105,3 +106,28 @@ def test_projector_combines_active_relief_with_location_sensitive_q():
         == "FRESH_OPENDSS_PASSING_ACTIVE_COORDINATE_Q_SEARCH"
         for row in projector.trace
     )
+
+
+def test_projector_blend_enforces_strict_p550_s700_boundary():
+    base = FastControl(
+        {mid: 54.225320409655794 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {},
+        {},
+    )
+    target = FastControl(
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 550.0 for mid in MESS_IDS},
+        {mid: 700.0 for mid in MESS_IDS},
+        {},
+        {},
+    )
+
+    combined = _GurobiSensitivityProjector._combine(base, target, base, 1.0, 0.0)
+
+    for mid in MESS_IDS:
+        net_p = combined.mess_discharge_kw[mid] - combined.mess_charge_kw[mid]
+        assert abs(net_p) <= 550.0
+        assert math.hypot(net_p, combined.mess_q_kvar[mid]) <= 700.0
+        assert not (combined.mess_charge_kw[mid] > 0.0 and combined.mess_discharge_kw[mid] > 0.0)
