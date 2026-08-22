@@ -271,8 +271,6 @@ def _frames(
             profile_steps = np.asarray(mobility["profile_safe_horizon_steps"][0], dtype=int)
         routes = []
         for static in route_rows:
-            if static["destination_service_id"] not in {f"IDC{i:02d}" for i in range(1, 13)}:
-                continue
             slot = int(static["slot"])
             routes.append(MobilityRouteForecast(
                 source_service_id=str(static["source_service_id"]),

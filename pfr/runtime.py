@@ -1926,7 +1926,12 @@ def _optimize_mess_routes(
         if job.lifecycle != "COMPLETED":
             demand[job.destination_idc] += job.remaining_work_gpu_hours
     candidate_sites = tuple(site for site in IDCS if demand[site] > 0.0)
-    if not candidate_sites:
+    away_mess = tuple(
+        mid
+        for mid in MESS_IDS
+        if state.mess_location[mid] != MESS_CANONICAL_STAGING[mid]
+    )
+    if not candidate_sites and not away_mess:
         state.last_slow_miqp_certificate = {
             "status": "NO_ACTIVE_WORKLOAD_DESTINATION",
             "actual_gurobi_used": False,
@@ -1945,7 +1950,11 @@ def _optimize_mess_routes(
             continue
         current = state.mess_location[mid]
         rows = [(current, 1, None, -demand.get(current, 0.0) / 25.0)]
-        for destination in candidate_sites:
+        destinations = list(candidate_sites)
+        canonical_staging = MESS_CANONICAL_STAGING[mid]
+        if current != canonical_staging and canonical_staging not in destinations:
+            destinations.append(canonical_staging)
+        for destination in destinations:
             if destination == current:
                 continue
             for route in _pareto_routes(frame.routes_for(current, destination), safe=safe):
@@ -1955,7 +1964,13 @@ def _optimize_mess_routes(
                     continue
                 if state.mess_energy_kwh[mid] - energy < MESS_FLOOR_KWH - 1e-9:
                     continue
-                score = eta / 1800.0 + energy / 100.0 - demand[destination] / 25.0
+                return_to_staging = destination == canonical_staging
+                score = (
+                    eta / 1800.0
+                    + energy / 100.0
+                    - demand.get(destination, 0.0) / 25.0
+                    - (1000.0 if return_to_staging else 0.0)
+                )
                 rows.append((destination, route.rank, route, score))
         candidates[mid] = rows
 
