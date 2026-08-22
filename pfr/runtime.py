@@ -1950,11 +1950,14 @@ def _optimize_mess_routes(
             continue
         current = state.mess_location[mid]
         rows = [(current, 1, None, -demand.get(current, 0.0) / 25.0)]
-        destinations = list(candidate_sites)
+        candidate_destinations = list(candidate_sites)
         canonical_staging = MESS_CANONICAL_STAGING[mid]
-        if current != canonical_staging and canonical_staging not in destinations:
-            destinations.append(canonical_staging)
-        for destination in destinations:
+        if (
+            current != canonical_staging
+            and canonical_staging not in candidate_destinations
+        ):
+            candidate_destinations.append(canonical_staging)
+        for destination in candidate_destinations:
             if destination == current:
                 continue
             for route in _pareto_routes(frame.routes_for(current, destination), safe=safe):
