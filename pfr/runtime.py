@@ -1282,6 +1282,51 @@ class _GurobiSensitivityProjector:
                     }
                     self.trace.append(trace_row)
                     continue
+                emergency_candidates = []
+                for role, throttle_compute in (
+                    ("ZERO_MESS", False),
+                    ("ZERO_MESS_AND_COMPUTE", True),
+                ):
+                    fallback = FastControl(
+                        {mess_id: 0.0 for mess_id in MESS_IDS},
+                        {mess_id: 0.0 for mess_id in MESS_IDS},
+                        {mess_id: 0.0 for mess_id in MESS_IDS},
+                        (
+                            {job_id: 0.0 for job_id in current.job_compute_rate_fraction}
+                            if throttle_compute
+                            else dict(current.job_compute_rate_fraction)
+                        ),
+                        (
+                            {site_id: 0.0 for site_id in current.site_throughput_fraction}
+                            if throttle_compute
+                            else dict(current.site_throughput_fraction)
+                        ),
+                    )
+                    fallback_exact = self.verifier.verify_fresh(
+                        control=fallback, state=state, slow_plan=slow_plan
+                    )
+                    fallback_exact.validate()
+                    if fallback_exact.passed:
+                        emergency_candidates.append(
+                            (fallback, fallback_exact, role)
+                        )
+                if emergency_candidates:
+                    current, exact, role = min(
+                        emergency_candidates,
+                        key=lambda item: self._objective_distance(current, item[0]),
+                    )
+                    trace_row["emergency_fallback"] = {
+                        "status": f"FRESH_OPENDSS_PASSING_{role}_FALLBACK",
+                        "passed": True,
+                    }
+                    trace_row["candidate"] = {
+                        "vmin": exact.minimum_voltage_pu,
+                        "vmax": exact.maximum_voltage_pu,
+                        "line": exact.maximum_line_loading_fraction,
+                        "transformer": exact.maximum_transformer_loading_fraction,
+                    }
+                    self.trace.append(trace_row)
+                    continue
             active_target, voltage_target = self._targets(current, state, exact)
             thermal_or_low_voltage = (
                 exact.minimum_voltage_pu < 0.95
