@@ -1724,6 +1724,22 @@ def _optimize_mess_routes(
         <= 1,
         name="retain_three_parked_mess_for_common_ac_safety",
     )
+    candidate_destinations = sorted({
+        row[0]
+        for rows in candidates.values()
+        for row in rows
+    })
+    for destination in candidate_destinations:
+        model.addConstr(
+            gp.quicksum(
+                variables[mid, index]
+                for mid, rows in candidates.items()
+                for index, row in enumerate(rows)
+                if row[0] == destination
+            )
+            <= 1,
+            name=f"single_mess_connection_slot[{destination}]",
+        )
     objective = gp.quicksum(
         row[3] * variables[mid, index]
         for mid, rows in candidates.items()
@@ -1751,6 +1767,7 @@ def _optimize_mess_routes(
         "actual_gurobi_used": True,
         "num_integer_variables": len(variables),
         "num_quadratic_objective_terms": len(candidate_sites),
+        "destination_mess_occupancy_limit": 1,
         "joint_safe_eta_energy_used": safe,
     }
     model.dispose()
