@@ -929,6 +929,247 @@ class _GurobiSensitivityProjector:
             "integer_variables": 0,
         }
 
+    def _joint_pq_sensitivity_step(
+        self,
+        control: FastControl,
+        state: FastLayerState,
+        slow_plan: SlowDiscretePlan,
+        exact: ExactAcResult,
+    ) -> Optional[tuple[FastControl, ExactAcResult, Mapping[str, Any]]]:
+        if not self.allow_mess:
+            return None
+        try:
+            import gurobipy as gp
+            from gurobipy import GRB
+        except ImportError as exc:
+            raise RuntimeContractError(
+                "gurobipy is required by the joint AC P/Q sensitivity QCP"
+            ) from exc
+
+        metric_names = ("vmin", "vmax", "line", "transformer")
+        base_metrics = {
+            "vmin": exact.minimum_voltage_pu,
+            "vmax": exact.maximum_voltage_pu,
+            "line": exact.maximum_line_loading_fraction,
+            "transformer": exact.maximum_transformer_loading_fraction,
+        }
+        bounds = {}
+        derivatives_p = {name: {} for name in metric_names}
+        derivatives_q = {name: {} for name in metric_names}
+        for mess_index, mess_id in enumerate(MESS_IDS):
+            if self.verifier.mess_in_transit[mess_index]:
+                continue
+            current_p = (
+                float(control.mess_discharge_kw[mess_id])
+                - float(control.mess_charge_kw[mess_id])
+            )
+            current_q = float(control.mess_q_kvar[mess_id])
+            energy = float(state.mess_soc[mess_id]) * MESS_CAPACITY_KWH
+            max_charge = min(
+                MESS_CHARGE_LIMIT_KW,
+                max(
+                    0.0,
+                    (MESS_CAPACITY_KWH - energy)
+                    / (MESS_CHARGE_EFFICIENCY * STEP_HOURS),
+                ),
+            )
+            max_discharge = min(
+                MESS_CHARGE_LIMIT_KW,
+                max(
+                    0.0,
+                    (energy - MESS_FLOOR_KWH)
+                    * MESS_CHARGE_EFFICIENCY
+                    / STEP_HOURS,
+                ),
+            )
+            q_cap = math.sqrt(max(0.0, 700.0**2 - current_p**2))
+            lower_p, upper_p = -max_charge, max_discharge
+            lower_q, upper_q = -q_cap, q_cap
+            bounds[mess_id] = (
+                lower_p - current_p,
+                upper_p - current_p,
+                lower_q - current_q,
+                upper_q - current_q,
+                current_p,
+                current_q,
+            )
+            for axis, negative_delta, positive_delta, derivatives in (
+                (
+                    "p",
+                    max(lower_p - current_p, -50.0),
+                    min(upper_p - current_p, 50.0),
+                    derivatives_p,
+                ),
+                (
+                    "q",
+                    max(lower_q - current_q, -70.0),
+                    min(upper_q - current_q, 70.0),
+                    derivatives_q,
+                ),
+            ):
+                if positive_delta - negative_delta <= 1e-6:
+                    continue
+                probe_metrics = []
+                for delta in (negative_delta, positive_delta):
+                    candidate_p = current_p + (delta if axis == "p" else 0.0)
+                    candidate_q = current_q + (delta if axis == "q" else 0.0)
+                    candidate_q_cap = math.sqrt(
+                        max(0.0, 700.0**2 - candidate_p**2)
+                    )
+                    candidate_q = min(
+                        candidate_q_cap, max(-candidate_q_cap, candidate_q)
+                    )
+                    candidate = FastControl(
+                        {
+                            **control.mess_charge_kw,
+                            mess_id: max(0.0, -candidate_p),
+                        },
+                        {
+                            **control.mess_discharge_kw,
+                            mess_id: max(0.0, candidate_p),
+                        },
+                        {**control.mess_q_kvar, mess_id: candidate_q},
+                        dict(control.job_compute_rate_fraction),
+                        dict(control.site_throughput_fraction),
+                    )
+                    candidate_exact = self.verifier.verify_fresh(
+                        control=candidate, state=state, slow_plan=slow_plan
+                    )
+                    candidate_exact.validate()
+                    probe_metrics.append({
+                        "vmin": candidate_exact.minimum_voltage_pu,
+                        "vmax": candidate_exact.maximum_voltage_pu,
+                        "line": candidate_exact.maximum_line_loading_fraction,
+                        "transformer": candidate_exact.maximum_transformer_loading_fraction,
+                    })
+                denominator = positive_delta - negative_delta
+                for name in metric_names:
+                    derivatives[name][mess_id] = (
+                        probe_metrics[1][name] - probe_metrics[0][name]
+                    ) / denominator
+        if not bounds:
+            return None
+
+        model = gp.Model("pfr_exact_ac_joint_pq_sensitivity")
+        model.Params.OutputFlag = 0
+        model.Params.Threads = gurobi_thread_limit()
+        model.Params.Seed = 0
+        delta_p = {
+            mess_id: model.addVar(
+                lb=value[0], ub=value[1], name=f"delta_p[{mess_id}]"
+            )
+            for mess_id, value in bounds.items()
+        }
+        delta_q = {
+            mess_id: model.addVar(
+                lb=value[2], ub=value[3], name=f"delta_q[{mess_id}]"
+            )
+            for mess_id, value in bounds.items()
+        }
+        for mess_id, value in bounds.items():
+            current_p, current_q = value[4], value[5]
+            model.addQConstr(
+                (current_p + delta_p[mess_id])
+                * (current_p + delta_p[mess_id])
+                + (current_q + delta_q[mess_id])
+                * (current_q + delta_q[mess_id])
+                <= 700.0**2,
+                name=f"pcs_circle[{mess_id}]",
+            )
+        expressions = {
+            name: base_metrics[name]
+            + gp.quicksum(
+                derivatives_p[name].get(mess_id, 0.0) * delta_p[mess_id]
+                + derivatives_q[name].get(mess_id, 0.0) * delta_q[mess_id]
+                for mess_id in bounds
+            )
+            for name in metric_names
+        }
+        model.addConstr(expressions["vmin"] >= 0.9505, name="minimum_voltage")
+        model.addConstr(expressions["vmax"] <= 1.0495, name="maximum_voltage")
+        model.addConstr(expressions["line"] <= 1.0, name="line_loading")
+        model.addConstr(
+            expressions["transformer"] <= 1.0,
+            name="transformer_loading",
+        )
+        model.setObjective(
+            gp.quicksum(
+                (delta_p[mess_id] / 550.0) * (delta_p[mess_id] / 550.0)
+                + (delta_q[mess_id] / 700.0) * (delta_q[mess_id] / 700.0)
+                for mess_id in bounds
+            ),
+            GRB.MINIMIZE,
+        )
+        model.optimize()
+        if (
+            model.Status not in {GRB.OPTIMAL, GRB.SUBOPTIMAL}
+            or model.SolCount < 1
+            or float(model.MaxVio) > 1e-6
+        ):
+            model.dispose()
+            return None
+        solution = {
+            mess_id: (float(delta_p[mess_id].X), float(delta_q[mess_id].X))
+            for mess_id in bounds
+        }
+        model.dispose()
+
+        base_score = self._violation_score(exact)
+        candidates = []
+        for scale in (0.25, 0.5, 0.75, 1.0, 1.05, 1.25):
+            charge = dict(control.mess_charge_kw)
+            discharge = dict(control.mess_discharge_kw)
+            reactive = dict(control.mess_q_kvar)
+            for mess_id, (p_delta, q_delta) in solution.items():
+                value = bounds[mess_id]
+                candidate_p = value[4] + min(
+                    value[1], max(value[0], scale * p_delta)
+                )
+                candidate_q = value[5] + min(
+                    value[3], max(value[2], scale * q_delta)
+                )
+                q_cap = math.sqrt(max(0.0, 700.0**2 - candidate_p**2))
+                charge[mess_id] = max(0.0, -candidate_p)
+                discharge[mess_id] = max(0.0, candidate_p)
+                reactive[mess_id] = min(q_cap, max(-q_cap, candidate_q))
+            candidate = FastControl(
+                charge,
+                discharge,
+                reactive,
+                dict(control.job_compute_rate_fraction),
+                dict(control.site_throughput_fraction),
+            )
+            candidate_exact = self.verifier.verify_fresh(
+                control=candidate, state=state, slow_plan=slow_plan
+            )
+            candidate_exact.validate()
+            candidates.append((candidate, candidate_exact, scale))
+
+        passing = [item for item in candidates if item[1].passed]
+        admissible = passing or [
+            item
+            for item in candidates
+            if self._violation_score(item[1]) < base_score - 1e-12
+        ]
+        if not admissible:
+            return None
+        selected = min(
+            admissible,
+            key=(
+                (lambda item: self._objective_distance(control, item[0]))
+                if passing
+                else (lambda item: self._violation_score(item[1]))
+            ),
+        )
+        candidate, candidate_exact, scale = selected
+        return candidate, candidate_exact, {
+            "status": "FRESH_OPENDSS_CONTINUOUS_JOINT_PQ_SENSITIVITY_QCP",
+            "scale": scale,
+            "passed": candidate_exact.passed,
+            "continuous_variables": 2 * len(solution),
+            "integer_variables": 0,
+        }
+
     def _pairwise_q_step(
         self,
         control: FastControl,
@@ -1245,6 +1486,20 @@ class _GurobiSensitivityProjector:
                 if active_sensitivity is not None:
                     current, exact, active_sensitivity_trace = active_sensitivity
                     trace_row["active_sensitivity_qp"] = active_sensitivity_trace
+                    trace_row["candidate"] = {
+                        "vmin": exact.minimum_voltage_pu,
+                        "vmax": exact.maximum_voltage_pu,
+                        "line": exact.maximum_line_loading_fraction,
+                        "transformer": exact.maximum_transformer_loading_fraction,
+                    }
+                    self.trace.append(trace_row)
+                    continue
+                joint_sensitivity = self._joint_pq_sensitivity_step(
+                    current, state, slow_plan, exact
+                )
+                if joint_sensitivity is not None:
+                    current, exact, joint_trace = joint_sensitivity
+                    trace_row["joint_pq_sensitivity_qcp"] = joint_trace
                     trace_row["candidate"] = {
                         "vmin": exact.minimum_voltage_pu,
                         "vmax": exact.maximum_voltage_pu,
