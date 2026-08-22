@@ -320,6 +320,11 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--candidate-id", default="JAN2025_DAY01")
+    parser.add_argument(
+        "--diagnostic-method",
+        choices=tuple(f"B{index}" for index in range(8)),
+        help="Run one full state-chain method for technical diagnosis only.",
+    )
     parser.add_argument("--start-issue", type=int, required=True)
     parser.add_argument("--count", type=int, required=True)
     parser.add_argument("--shared-root", type=Path, required=True)
@@ -411,13 +416,47 @@ def main() -> None:
         physical_backend=ExactOpenDssBackend(exact, paths),
         fast_optimizer=GurobiFastControlOptimizer(),
     )
-    matrix = runner.run_matrix(
-        configs=MethodFactory(authority).all(),
-        frames=frames,
-        initial=initial,
-        representative_week_id=args.candidate_id,
-        output=output,
-    )
+    configs = MethodFactory(authority).all()
+    if args.diagnostic_method:
+        config = next(
+            item for item in configs
+            if item.comparison_method_id.value == args.diagnostic_method
+        )
+        method = runner.run_method(
+            config=config,
+            frames=frames,
+            initial=initial,
+            representative_week_id=args.candidate_id,
+            output=output,
+        )
+        matrix = {
+            "schema_version": "K9H7_RESULT_V2.diagnostic_single_method.v1",
+            "status": method["status"],
+            "representative_week_id": args.candidate_id,
+            "method_count": 1,
+            "diagnostic_method": args.diagnostic_method,
+            "issues_per_method": len(frames),
+            "expected_commit_markers": len(frames),
+            "valid_commit_markers": method["committed_issues"],
+            "all_fresh_exact_opendss": method["fresh_exact_opendss_count"] == len(frames),
+            "all_actual_gurobi": method["actual_gurobi_count"] == len(frames),
+            "all_state_chains_complete": method["state_chain_complete"],
+            "all_binary_states_unchanged_in_fast_layer": method["binary_state_unchanged"],
+            "future_actual_used": False,
+            "methods": [method],
+        }
+        (output / "MATRIX_SUMMARY.json").write_text(
+            json.dumps(matrix, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+    else:
+        matrix = runner.run_matrix(
+            configs=configs,
+            frames=frames,
+            initial=initial,
+            representative_week_id=args.candidate_id,
+            output=output,
+        )
     manifest = {
         "status": matrix["status"],
         "candidate_id": args.candidate_id,
@@ -430,6 +469,7 @@ def main() -> None:
         "opendss_metrics_common_sha256": sha256(args.exact_package_root / "opendss_metrics_common.py"),
         "full_scientific_daily_episode_issues": 288,
         "bounded_regression_not_full_scientific_episode": args.count != 288,
+        "diagnostic_single_method": args.diagnostic_method,
         "independent_daily_cold_start": "canonical_pre" in pre,
         "cross_day_endogenous_state_carryover": False,
         "controller_burn_in_steps": 0,

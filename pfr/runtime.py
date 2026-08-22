@@ -1283,6 +1283,7 @@ class _GurobiSensitivityProjector:
                     self.trace.append(trace_row)
                     continue
                 emergency_candidates = []
+                emergency_probes = []
                 for role, throttle_compute in (
                     ("ZERO_MESS", False),
                     ("ZERO_MESS_AND_COMPUTE", True),
@@ -1306,6 +1307,14 @@ class _GurobiSensitivityProjector:
                         control=fallback, state=state, slow_plan=slow_plan
                     )
                     fallback_exact.validate()
+                    emergency_probes.append({
+                        "role": role,
+                        "passed": fallback_exact.passed,
+                        "vmin": fallback_exact.minimum_voltage_pu,
+                        "vmax": fallback_exact.maximum_voltage_pu,
+                        "line": fallback_exact.maximum_line_loading_fraction,
+                        "transformer": fallback_exact.maximum_transformer_loading_fraction,
+                    })
                     if fallback_exact.passed:
                         emergency_candidates.append(
                             (fallback, fallback_exact, role)
@@ -1327,6 +1336,7 @@ class _GurobiSensitivityProjector:
                     }
                     self.trace.append(trace_row)
                     continue
+                trace_row["emergency_fallback_probes"] = emergency_probes
             active_target, voltage_target = self._targets(current, state, exact)
             thermal_or_low_voltage = (
                 exact.minimum_voltage_pu < 0.95
