@@ -929,6 +929,7 @@ class _GurobiSensitivityProjector:
         state: FastLayerState,
         slow_plan: SlowDiscretePlan,
         exact: ExactAcResult,
+        preferred_pair: Optional[tuple[str, str]] = None,
     ) -> Optional[tuple[FastControl, ExactAcResult, Mapping[str, Any]]]:
         if not self.allow_mess:
             return None
@@ -938,9 +939,18 @@ class _GurobiSensitivityProjector:
             for mess_index, mess_id in enumerate(MESS_IDS)
             if not self.verifier.mess_in_transit[mess_index]
         ]
+        all_pairs = [
+            (left_id, right_id)
+            for left_index, left_id in enumerate(connected)
+            for right_id in connected[left_index + 1:]
+        ]
+        pairs = (
+            [preferred_pair]
+            if preferred_pair is not None and preferred_pair in all_pairs
+            else all_pairs
+        )
         probes = []
-        for left_index, left_id in enumerate(connected):
-            for right_id in connected[left_index + 1:]:
+        for left_id, right_id in pairs:
                 for left_direction in (-1.0, 1.0):
                     for right_direction in (-1.0, 1.0):
                         for fraction in (0.1, 0.25, 0.5, 1.0):
@@ -1183,7 +1193,9 @@ class _GurobiSensitivityProjector:
         current = nominal
         exact = self.verifier.verify_fresh(control=current, state=state, slow_plan=slow_plan)
         exact.validate()
-        for _ in range(12):
+        fleet_attempted = False
+        pairwise_hint: Optional[tuple[str, str]] = None
+        for _ in range(24):
             if exact.passed:
                 break
             trace_row: dict[str, Any] = {
@@ -1235,7 +1247,10 @@ class _GurobiSensitivityProjector:
                     }
                     self.trace.append(trace_row)
                     continue
-                fleet = self._fleet_q_step(current, state, slow_plan, exact)
+                fleet = None
+                if not fleet_attempted:
+                    fleet_attempted = True
+                    fleet = self._fleet_q_step(current, state, slow_plan, exact)
                 if fleet is not None:
                     current, exact, fleet_trace = fleet
                     trace_row["fleet_q"] = fleet_trace
@@ -1247,9 +1262,17 @@ class _GurobiSensitivityProjector:
                     }
                     self.trace.append(trace_row)
                     continue
-                pairwise = self._pairwise_q_step(current, state, slow_plan, exact)
+                pairwise = self._pairwise_q_step(
+                    current, state, slow_plan, exact, pairwise_hint
+                )
+                if pairwise is None and pairwise_hint is not None:
+                    pairwise_hint = None
+                    pairwise = self._pairwise_q_step(
+                        current, state, slow_plan, exact
+                    )
                 if pairwise is not None:
                     current, exact, pairwise_trace = pairwise
+                    pairwise_hint = tuple(pairwise_trace["mess_ids"])
                     trace_row["pairwise_q"] = pairwise_trace
                     trace_row["candidate"] = {
                         "vmin": exact.minimum_voltage_pu,
