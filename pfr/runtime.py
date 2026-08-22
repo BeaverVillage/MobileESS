@@ -40,6 +40,7 @@ from .slow_fast import (
 
 IDCS = tuple(f"IDC{i:02d}" for i in range(1, 13))
 MESS_IDS = tuple(f"MESS{i:02d}" for i in range(1, 5))
+MOBILITY_ELIGIBLE_MESS_IDS = ("MESS03",)
 MESS_CANONICAL_STAGING = {
     "MESS01": "STA09",
     "MESS02": "IDC12",
@@ -1950,7 +1951,11 @@ def _optimize_mess_routes(
             continue
         current = state.mess_location[mid]
         rows = [(current, 1, None, -demand.get(current, 0.0) / 25.0)]
-        candidate_destinations = list(candidate_sites)
+        candidate_destinations = (
+            list(candidate_sites)
+            if mid in MOBILITY_ELIGIBLE_MESS_IDS
+            else []
+        )
         canonical_staging = MESS_CANONICAL_STAGING[mid]
         if (
             current != canonical_staging
@@ -2058,6 +2063,7 @@ def _optimize_mess_routes(
         "num_quadratic_objective_terms": len(candidate_sites),
         "destination_mess_occupancy_limit": 1,
         "maximum_mess_away_from_canonical_staging": 1,
+        "mobility_eligible_mess_ids": list(MOBILITY_ELIGIBLE_MESS_IDS),
         "joint_safe_eta_energy_used": safe,
     }
     model.dispose()
