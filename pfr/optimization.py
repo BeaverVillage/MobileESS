@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 import math
+import os
 import time
 from typing import Mapping, Protocol
 
@@ -12,6 +13,17 @@ from .slow_fast import FastControl, FastLayerLimits, FastLayerState
 
 class FastOptimizationError(RuntimeError):
     pass
+
+
+def gurobi_thread_limit() -> int:
+    """Return the configured per-process Gurobi thread limit."""
+    try:
+        value = int(os.environ.get("PFR_GUROBI_THREADS", "1"))
+    except ValueError as exc:
+        raise FastOptimizationError("PFR_GUROBI_THREADS must be an integer") from exc
+    if not 1 <= value <= 64:
+        raise FastOptimizationError("PFR_GUROBI_THREADS must be in [1, 64]")
+    return value
 
 
 @dataclass(frozen=True)
@@ -119,7 +131,7 @@ class GurobiFastControlOptimizer:
 
         model = gp.Model("pfr_fast_recourse_h0")
         model.Params.OutputFlag = 0
-        model.Params.Threads = 1
+        model.Params.Threads = gurobi_thread_limit()
         model.Params.Seed = 0
         model.Params.NumericFocus = 2
         model.Params.FeasibilityTol = 1e-8

@@ -7,6 +7,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import time
 from typing import Any, Iterable, Mapping, Optional, Protocol, Sequence, Tuple
@@ -54,6 +55,16 @@ MODELED_GPU_CAPACITY_PER_IDC = 256
 
 class RuntimeContractError(RuntimeError):
     pass
+
+
+def gurobi_thread_limit() -> int:
+    try:
+        value = int(os.environ.get("PFR_GUROBI_THREADS", "1"))
+    except ValueError as exc:
+        raise RuntimeContractError("PFR_GUROBI_THREADS must be an integer") from exc
+    if not 1 <= value <= 64:
+        raise RuntimeContractError("PFR_GUROBI_THREADS must be in [1, 64]")
+    return value
 
 
 def canonical_hash(value: object) -> str:
@@ -651,7 +662,7 @@ class _GurobiSensitivityProjector:
 
         model = gp.Model("pfr_exact_ac_q_sensitivity")
         model.Params.OutputFlag = 0
-        model.Params.Threads = 1
+        model.Params.Threads = gurobi_thread_limit()
         model.Params.Seed = 0
         delta_q = {
             mess_id: model.addVar(lb=bounds[0], ub=bounds[1], name=f"delta_q[{mess_id}]")
@@ -824,7 +835,7 @@ class _GurobiSensitivityProjector:
 
         model = gp.Model("pfr_exact_ac_active_sensitivity")
         model.Params.OutputFlag = 0
-        model.Params.Threads = 1
+        model.Params.Threads = gurobi_thread_limit()
         model.Params.Seed = 0
         delta_p = {
             mess_id: model.addVar(lb=bounds[0], ub=bounds[1], name=f"delta_p[{mess_id}]")
@@ -1137,15 +1148,6 @@ class _GurobiSensitivityProjector:
                     (candidate, candidate_exact, active_fraction, active_sensitivity_trace)
                 )
                 continue
-            pairwise = self._pairwise_q_step(
-                active_candidate, state, slow_plan, active_exact
-            )
-            if pairwise is not None and pairwise[1].passed:
-                candidate, candidate_exact, pairwise_trace = pairwise
-                passing.append(
-                    (candidate, candidate_exact, active_fraction, pairwise_trace)
-                )
-                continue
             fleet = self._fleet_q_step(
                 active_candidate, state, slow_plan, active_exact
             )
@@ -1153,6 +1155,15 @@ class _GurobiSensitivityProjector:
                 candidate, candidate_exact, fleet_trace = fleet
                 passing.append(
                     (candidate, candidate_exact, active_fraction, fleet_trace)
+                )
+                continue
+            pairwise = self._pairwise_q_step(
+                active_candidate, state, slow_plan, active_exact
+            )
+            if pairwise is not None and pairwise[1].passed:
+                candidate, candidate_exact, pairwise_trace = pairwise
+                passing.append(
+                    (candidate, candidate_exact, active_fraction, pairwise_trace)
                 )
         if not passing:
             return None
@@ -1224,10 +1235,10 @@ class _GurobiSensitivityProjector:
                     }
                     self.trace.append(trace_row)
                     continue
-                pairwise = self._pairwise_q_step(current, state, slow_plan, exact)
-                if pairwise is not None:
-                    current, exact, pairwise_trace = pairwise
-                    trace_row["pairwise_q"] = pairwise_trace
+                fleet = self._fleet_q_step(current, state, slow_plan, exact)
+                if fleet is not None:
+                    current, exact, fleet_trace = fleet
+                    trace_row["fleet_q"] = fleet_trace
                     trace_row["candidate"] = {
                         "vmin": exact.minimum_voltage_pu,
                         "vmax": exact.maximum_voltage_pu,
@@ -1236,10 +1247,10 @@ class _GurobiSensitivityProjector:
                     }
                     self.trace.append(trace_row)
                     continue
-                fleet = self._fleet_q_step(current, state, slow_plan, exact)
-                if fleet is not None:
-                    current, exact, fleet_trace = fleet
-                    trace_row["fleet_q"] = fleet_trace
+                pairwise = self._pairwise_q_step(current, state, slow_plan, exact)
+                if pairwise is not None:
+                    current, exact, pairwise_trace = pairwise
+                    trace_row["pairwise_q"] = pairwise_trace
                     trace_row["candidate"] = {
                         "vmin": exact.minimum_voltage_pu,
                         "vmax": exact.maximum_voltage_pu,
@@ -1333,7 +1344,7 @@ class _GurobiSensitivityProjector:
                 raise RuntimeContractError("gurobipy is required by the AC safety projector") from exc
             model = gp.Model("pfr_ac_safety_projection")
             model.Params.OutputFlag = 0
-            model.Params.Threads = 1
+            model.Params.Threads = gurobi_thread_limit()
             model.Params.Seed = 0
             z_active = model.addVar(lb=0.0, ub=1.0 if active_distance > 1e-18 else 0.0, name="active_relief_fraction")
             z_voltage = model.addVar(lb=0.0, ub=1.0 if voltage_distance > 1e-18 else 0.0, name="voltage_support_fraction")
@@ -1616,7 +1627,7 @@ def _optimize_mess_routes(
         raise RuntimeContractError("slow mobility MIQP requires gurobipy") from exc
     model = gp.Model("pfr_slow_mobility_miqp")
     model.Params.OutputFlag = 0
-    model.Params.Threads = 1
+    model.Params.Threads = gurobi_thread_limit()
     model.Params.Seed = 0
     variables = {
         (mid, index): model.addVar(vtype=GRB.BINARY, name=f"z_{mid}_{index}")
