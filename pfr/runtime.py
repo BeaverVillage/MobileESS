@@ -40,6 +40,12 @@ from .slow_fast import (
 
 IDCS = tuple(f"IDC{i:02d}" for i in range(1, 13))
 MESS_IDS = tuple(f"MESS{i:02d}" for i in range(1, 5))
+MESS_CANONICAL_STAGING = {
+    "MESS01": "STA09",
+    "MESS02": "IDC12",
+    "MESS03": "STA07",
+    "MESS04": "STA11",
+}
 STEP_HOURS = 5.0 / 60.0
 MESS_CAPACITY_KWH = 1080.0
 MESS_FLOOR_KWH = 440.0
@@ -1719,10 +1725,10 @@ def _optimize_mess_routes(
             variables[mid, index]
             for mid, rows in candidates.items()
             for index, row in enumerate(rows)
-            if row[2] is not None
+            if row[0] != MESS_CANONICAL_STAGING[mid]
         )
         <= 1,
-        name="retain_three_parked_mess_for_common_ac_safety",
+        name="retain_three_canonical_staging_mess_for_common_ac_safety",
     )
     candidate_destinations = sorted({
         row[0]
@@ -1768,6 +1774,7 @@ def _optimize_mess_routes(
         "num_integer_variables": len(variables),
         "num_quadratic_objective_terms": len(candidate_sites),
         "destination_mess_occupancy_limit": 1,
+        "maximum_mess_away_from_canonical_staging": 1,
         "joint_safe_eta_energy_used": safe,
     }
     model.dispose()
