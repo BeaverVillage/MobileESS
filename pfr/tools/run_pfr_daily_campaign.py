@@ -304,8 +304,10 @@ def campaign_payload(
     any_fail = any(row["status"] == "FAIL_CLOSED" for row in summaries)
     status = "PASS" if all_pass else ("FAIL_CLOSED" if final or any_fail else "IN_PROGRESS")
     return {
-        "schema_version": "PFR_JAN2025_INDEPENDENT_DAILY_CAMPAIGN_RUN_V13_2_1",
+        "schema_version": "PFR_JAN2025_POST_HOC_DAILY_VALIDATION_V13_3_FREEZE_20260822",
         "status": status,
+        "evaluation_classification": "POST_HOC_DESIGN_VALIDATION_NOT_INDEPENDENT_HOLDOUT",
+        "independent_holdout_claim": False,
         "calendar_timezone": "FIXED_AEST_UTC_PLUS_10_NO_DST",
         "start_day": start_day,
         "end_day": end_day,
@@ -351,6 +353,32 @@ def main() -> None:
     args = parser.parse_args()
     if not 1 <= args.day_workers <= 31:
         parser.error("--day-workers must be in [1, 31]")
+
+    native_authority_path = (
+        args.repo / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.json"
+    )
+    if not native_authority_path.is_file():
+        raise RuntimeError("native grid-control authority is missing")
+    native_authority = json.loads(
+        native_authority_path.read_text(encoding="utf-8")
+    )
+    post_hoc_authorized = bool(
+        native_authority.get("status")
+        == "FROZEN_APPROVED_POST_HOC_VALIDATION_ONLY"
+        and native_authority.get("january_2025_post_hoc_validation_authorized")
+        is True
+        and native_authority.get("evaluation_classification")
+        == "POST_HOC_DESIGN_VALIDATION_NOT_INDEPENDENT_HOLDOUT"
+    )
+    if not post_hoc_authorized:
+        print(
+            "BLOCKED before worker launch: native capacitor threshold/delay/dwell "
+            "authority is not frozen for January post-hoc validation. "
+            "No day process was started.",
+            file=sys.stderr,
+            flush=True,
+        )
+        raise SystemExit(2)
 
     specs = day_specs(args.start_day, args.end_day)
     args.output.mkdir(parents=True, exist_ok=True)

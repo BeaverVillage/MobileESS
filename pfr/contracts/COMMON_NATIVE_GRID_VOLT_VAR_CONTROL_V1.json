@@ -1,0 +1,119 @@
+{
+  "schema_version": "COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.authority.v1",
+  "status": "FROZEN_APPROVED_POST_HOC_VALIDATION_ONLY",
+  "scientific_authority_version": "V13_3_POST_HOC_FREEZE_20260822",
+  "identity": "COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1",
+  "common_to_B0_B7": true,
+  "optimized_by_B_method": false,
+  "outcome_informed_parameter_tuning": true,
+  "main_scientific_campaign_authorized": false,
+  "january_2025_post_hoc_validation_authorized": true,
+  "evaluation_classification": "POST_HOC_DESIGN_VALIDATION_NOT_INDEPENDENT_HOLDOUT",
+  "asset_audit_authority": "IEEE123_NATIVE_CONTROL_ASSET_AUDIT_V1",
+  "original_ieee123_master_sha256": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969",
+  "original_ieee123_master_modified": false,
+  "physical_topology_changed": false,
+  "capacitor_locations_or_ratings_changed": false,
+  "execution_order": [
+    "B_METHOD_NOMINAL_FAST_CONTROL",
+    "COMMON_DETERMINISTIC_FEEDER_NATIVE_STATE_TRANSITION",
+    "FREEZE_NATIVE_BINARY_STATE_FOR_ISSUE",
+    "METHOD_SCOPED_CONTINUOUS_AC_SAFETY_PROJECTION",
+    "FRESH_EXACT_AC_COMMIT"
+  ],
+  "literature_role": "ARCHITECTURE_REFERENCE_ONLY_NOT_PARAMETER_AUTHORITY",
+  "literature_references": [
+    {
+      "citation": "Aryanezhad (2018), International Journal of Electrical Power & Energy Systems 100, 178-192",
+      "doi": "10.1016/j.ijepes.2018.02.015",
+      "accepted_use": "existing LTC/SVR/shunt-capacitor/storage coordination architecture and chronological switching-state constraints",
+      "prohibited_use": "paper feeder loads, capacitor thresholds, deadbands, delays, setpoints, device ratings, and dispatch parameters"
+    },
+    {
+      "citation": "Zamzam et al. (2022), Electric Power Systems Research 207, 107843",
+      "doi": "10.1016/j.epsr.2022.107843",
+      "accepted_use": "two-timescale separation of conventional utility assets and faster DER recourse",
+      "prohibited_use": "paper-specific parameters or test-system values"
+    },
+    {
+      "citation": "Seydali Seyf Abad and Ma (2021), IEEE Transactions on Power Systems 36(1), 107-117",
+      "doi": "10.1109/TPWRS.2020.3007997",
+      "accepted_use": "autonomous local-measurement operation of conventional distribution voltage-control devices and the need to account for coordination and switching burden",
+      "prohibited_use": "paper-specific voltage-control settings, feeder modifications, or hosting-capacity parameters"
+    }
+  ],
+  "parameter_authority_resolution": {
+    "missing_from_frozen_asset": [
+      "capacitor_on_threshold",
+      "capacitor_off_threshold",
+      "capacitor_switch_delay",
+      "capacitor_minimum_dwell"
+    ],
+    "resolution": "user-authorized post-hoc freeze after January failure diagnosis; these values are not eligible for an independent-January claim",
+    "future_independent_holdout_required": "an unseen period such as February 2025 must be run without further tuning"
+  },
+  "frozen_post_hoc_control_basis": {
+    "secondary_voltage_v": 120.0,
+    "on_setting_v": 114.6,
+    "off_setting_v": 125.4,
+    "on_setting_pu": 0.955,
+    "off_setting_pu": 1.045,
+    "deadband_v": 10.8,
+    "hard_limit_guard_pu": 0.005,
+    "pt_ratio": 20.0,
+    "delay_seconds": 30.0,
+    "delay_off_seconds": 30.0,
+    "dead_time_seconds": 1800.0,
+    "opendss_control_mode": "STATIC",
+    "maximum_control_iterations": 100,
+    "source": "POST_FAILURE_ENGINEERING_DESIGN_DERIVED_FROM_UNCHANGED_HARD_ENVELOPE",
+    "independent_holdout_claim_prohibited": true
+  },
+  "existing_capacitors": [
+    {
+      "name": "C83",
+      "phases": 3,
+      "bus": "83",
+      "kvar": 600.0,
+      "kv": 4.16,
+      "monitored_element": "Line.L84",
+      "monitored_terminal": 2
+    },
+    {
+      "name": "C88a",
+      "phases": 1,
+      "bus": "88.1",
+      "kvar": 50.0,
+      "kv": 2.402,
+      "monitored_element": "Line.L87",
+      "monitored_terminal": 2
+    },
+    {
+      "name": "C90b",
+      "phases": 1,
+      "bus": "90.2",
+      "kvar": 50.0,
+      "kv": 2.402,
+      "monitored_element": "Line.L89",
+      "monitored_terminal": 2
+    },
+    {
+      "name": "C92c",
+      "phases": 1,
+      "bus": "92.3",
+      "kvar": 50.0,
+      "kv": 2.402,
+      "monitored_element": "Line.L91",
+      "monitored_terminal": 2
+    }
+  ],
+  "unchanged_hard_limits": {
+    "minimum_voltage_pu": 0.95,
+    "maximum_voltage_pu": 1.05,
+    "maximum_line_loading_pu": 1.0,
+    "maximum_transformer_kva_loading_pu": 1.0,
+    "maximum_transformer_current_loading_pu": 1.0
+  },
+  "failure_policy": "UNRESOLVED_FRESH_EXACT_AC_VIOLATION_REMAINS_FAIL_CLOSED",
+  "claim_boundary": "MODIFIED_AUGMENTED_IEEE_123_NODE_TEST_FEEDER_WITH_COMMON_NATIVE_VOLT_VAR_CONTROL; JANUARY_2025_POST_HOC_VALIDATION_ONLY"
+}

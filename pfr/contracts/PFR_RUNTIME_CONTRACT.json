@@ -17,6 +17,8 @@
   "gurobi_numerical_acceptance": "finite primal with OPTIMAL or SUBOPTIMAL status; a raw MaxVio above 1e-6 triggers one deterministic NumericFocus/ScaleFlag retry, followed by exact bound and per-site capacity projection with independently verified residual <=1e-9; every commit still requires Fresh Exact AC",
   "common_hard_safety_actuator": "B0-B7 share the same hard limits and fail-closed execution layer, while the safety projection is restricted to each arm's preregistered controllable-variable subset; disabled MESS or compute capability is never introduced by the safety layer",
   "overvoltage_control_direction": "for capability-enabled arms, absorb inverter Q, charge MESS when thermal headroom permits, and increase temporal compute within remaining-work, robust GPU-reserve, and unchanged 750-kVA limits; workload throttling is reserved for undervoltage or thermal relief",
+  "physical_execution_authority_version": "V13_3_POST_HOC_FREEZE_20260822",
+  "common_native_grid_control": "COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1 is frozen for January-2025 post-hoc validation over unchanged C83/C88a/C90b/C92c assets; it is not an independent-January holdout authority, and IEEE123Master.dss, capacitor locations, kvar ratings, source voltage, topology, input power, and hard limits remain unchanged",
   "mess_initial_energy_kwh": 760,
   "mess_safety_reserve_kwh": 440,
   "mess_operational_policy": "only energy-enabled methods may use nominal MESS P; dispatch and mobility must preserve the 440-kWh protected floor while each independent daily episode cold-starts at 760 kWh",

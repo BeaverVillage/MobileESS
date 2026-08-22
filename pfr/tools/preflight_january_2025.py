@@ -68,6 +68,94 @@ def validate_method_contracts() -> Mapping[str, Any]:
     }
 
 
+def validate_common_native_grid_control(
+    authority_path: Path, dss_path: Path, asset_audit_path: Path
+) -> Mapping[str, Any]:
+    authority = json.loads(authority_path.read_text(encoding="utf-8"))
+    asset_audit = json.loads(asset_audit_path.read_text(encoding="utf-8"))
+    capacitors = authority.get("existing_capacitors", ())
+    control = authority.get("frozen_post_hoc_control_basis", {})
+    dss = dss_path.read_text(encoding="utf-8")
+    expected_names = {"C83", "C88a", "C90b", "C92c"}
+    observed_names = {str(row.get("name")) for row in capacitors}
+    passed = bool(
+        authority.get("status")
+        == "FROZEN_APPROVED_POST_HOC_VALIDATION_ONLY"
+        and authority.get("scientific_authority_version")
+        == "V13_3_POST_HOC_FREEZE_20260822"
+        and authority.get("common_to_B0_B7") is True
+        and authority.get("optimized_by_B_method") is False
+        and authority.get("main_scientific_campaign_authorized") is False
+        and authority.get("january_2025_post_hoc_validation_authorized") is True
+        and authority.get("evaluation_classification")
+        == "POST_HOC_DESIGN_VALIDATION_NOT_INDEPENDENT_HOLDOUT"
+        and authority.get("asset_audit_authority")
+        == "IEEE123_NATIVE_CONTROL_ASSET_AUDIT_V1"
+        and asset_audit.get("status")
+        == "PASS_ASSET_AUDIT_PARAMETER_GAP_FOUND"
+        and asset_audit.get("source_sha256")
+        == authority.get("original_ieee123_master_sha256")
+        and asset_audit.get("compiled_audit", {}).get("capcontrol_count") == 0
+        and authority.get("original_ieee123_master_modified") is False
+        and authority.get("physical_topology_changed") is False
+        and authority.get("capacitor_locations_or_ratings_changed") is False
+        and observed_names == expected_names
+        and sum(float(row["kvar"]) for row in capacitors) == 750.0
+        and float(control.get("on_setting_v", float("nan"))) == 114.6
+        and float(control.get("off_setting_v", float("nan"))) == 125.4
+        and float(control.get("on_setting_pu", float("nan"))) == 0.955
+        and float(control.get("off_setting_pu", float("nan"))) == 1.045
+        and float(control.get("dead_time_seconds", float("nan"))) == 1800.0
+        and all(f"Capacitor={name}" in dss for name in expected_names)
+        and dss.count("New CapControl.") == 4
+    )
+    return {
+        "pass": passed,
+        "identity": authority.get("identity"),
+        "scientific_authority_version": authority.get(
+            "scientific_authority_version"
+        ),
+        "common_to_B0_B7": authority.get("common_to_B0_B7"),
+        "original_ieee123_master_modified": authority.get(
+            "original_ieee123_master_modified"
+        ),
+        "capacitors": sorted(observed_names),
+        "total_existing_capacitor_kvar": sum(
+            float(row.get("kvar", 0.0)) for row in capacitors
+        ),
+        "dss_sha256": sha256(dss_path),
+        "authority_sha256": sha256(authority_path),
+        "asset_audit_sha256": sha256(asset_audit_path),
+        "main_scientific_campaign_authorized": authority.get(
+            "main_scientific_campaign_authorized"
+        ),
+        "parameter_authority_resolution": authority.get(
+            "parameter_authority_resolution", {}
+        ),
+    }
+
+
+def validate_native_grid_control_release(authority_path: Path) -> Mapping[str, Any]:
+    authority = json.loads(authority_path.read_text(encoding="utf-8"))
+    released = bool(
+        authority.get("status")
+        == "FROZEN_APPROVED_POST_HOC_VALIDATION_ONLY"
+        and authority.get("january_2025_post_hoc_validation_authorized") is True
+        and authority.get("main_scientific_campaign_authorized") is False
+        and authority.get("outcome_informed_parameter_tuning") is True
+        and authority.get("evaluation_classification")
+        == "POST_HOC_DESIGN_VALIDATION_NOT_INDEPENDENT_HOLDOUT"
+    )
+    return {
+        "pass": released,
+        "status": authority.get("status"),
+        "main_scientific_campaign_authorized": authority.get(
+            "main_scientific_campaign_authorized"
+        ),
+        "blocker": None
+        if released
+        else "JANUARY_POST_HOC_CAPACITOR_AUTHORITY_NOT_FROZEN",
+    }
 def validate_daily_pre(path: Path) -> Mapping[str, Any]:
     data = json.loads(path.read_text(encoding="utf-8"))
     first = _runtime_initial_state(data, 0, require_population_identity=True)
@@ -254,6 +342,9 @@ def main() -> None:
         args.mobility_template_bank,
         args.workload_uncertainty,
         args.factorized_uncertainty,
+        args.repo / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.dss",
+        args.repo / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.json",
+        args.repo / "pfr/contracts/IEEE123_NATIVE_CONTROL_ASSET_AUDIT_V1.json",
     )
     checks: dict[str, Mapping[str, Any]] = {
         "required_files": require_files(basic_paths, "campaign authority files"),
@@ -286,6 +377,18 @@ def main() -> None:
         checks.update(
             {
                 "method_contracts": validate_method_contracts(),
+                "common_native_grid_control": validate_common_native_grid_control(
+                    args.repo
+                    / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.json",
+                    args.repo
+                    / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.dss",
+                    args.repo
+                    / "pfr/contracts/IEEE123_NATIVE_CONTROL_ASSET_AUDIT_V1.json",
+                ),
+                "native_grid_control_release_gate": validate_native_grid_control_release(
+                    args.repo
+                    / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.json"
+                ),
                 "daily_pre": validate_daily_pre(args.initial_state),
                 "power_sources": validate_power_sources(args.shared_root),
                 "mobility_sources": validate_mobility_sources(args.mobility_root),
@@ -306,7 +409,9 @@ def main() -> None:
         }
     status = "PASS" if checks and all(row.get("pass") is True for row in checks.values()) else "FAIL_CLOSED"
     report = {
-        "schema_version": "JAN2025_31DAY_PREFLIGHT_V13_2_1",
+        "schema_version": "JAN2025_31DAY_POST_HOC_PREFLIGHT_V13_3_FREEZE_20260822",
+        "evaluation_classification": "POST_HOC_DESIGN_VALIDATION_NOT_INDEPENDENT_HOLDOUT",
+        "independent_holdout_claim": False,
         "status": status,
         "campaign_days": len(day_specs(1, 31)),
         "expected_episodes": 31 * 8,

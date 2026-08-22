@@ -1,0 +1,26 @@
+! COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1
+! FROZEN 2026-08-22 FOR JANUARY-2025 POST-HOC VALIDATION ONLY.
+! Not eligible for an independent-January holdout claim.
+! Common physical-plant overlay for every B0-B7 arm.
+! Existing IEEE 123-node capacitor locations and kvar ratings are unchanged.
+! 120-V control basis, symmetric 114.6/125.4-V protection deadband,
+! corresponding to a 0.955/1.045-pu operational guard inside the unchanged
+! 0.95/1.05-pu hard acceptance envelope.  30-s action delay,
+! and 1800-s dead time. No further January-informed tuning is permitted after
+! this freeze. An unseen period is required for an independent evaluation.
+
+New CapControl.PFR_NATIVE_C83 Capacitor=C83 Element=Line.L84 Terminal=2 Type=Voltage
+~ PTRatio=20 ONSetting=114.6 OFFSetting=125.4
+~ Delay=30 DelayOff=30 DeadTime=1800
+
+New CapControl.PFR_NATIVE_C88A Capacitor=C88a Element=Line.L87 Terminal=2 Type=Voltage
+~ PTRatio=20 ONSetting=114.6 OFFSetting=125.4
+~ Delay=30 DelayOff=30 DeadTime=1800
+
+New CapControl.PFR_NATIVE_C90B Capacitor=C90b Element=Line.L89 Terminal=2 Type=Voltage
+~ PTRatio=20 ONSetting=114.6 OFFSetting=125.4
+~ Delay=30 DelayOff=30 DeadTime=1800
+
+New CapControl.PFR_NATIVE_C92C Capacitor=C92c Element=Line.L91 Terminal=2 Type=Voltage
+~ PTRatio=20 ONSetting=114.6 OFFSetting=125.4
+~ Delay=30 DelayOff=30 DeadTime=1800

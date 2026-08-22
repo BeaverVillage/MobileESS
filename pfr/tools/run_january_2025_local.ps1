@@ -4,7 +4,7 @@ param(
     [int]$EndDay = 31,
     [int]$DayWorkers = 4,
     [int]$GurobiThreads = 4,
-    [string]$OutputRoot = '/home/jaewon/mobile_ess_work/frozen_artifacts/PFR11_JAN2025_DAYS01_31_DESIGN_FREEZE_20260822',
+    [string]$OutputRoot = '/home/jaewon/mobile_ess_work/frozen_artifacts/JAN2025_POST_HOC_V13_3_FINAL_VALIDATION_20260822',
     [switch]$MonitorOnly,
     [switch]$PreflightOnly,
     [switch]$SkipPreflight,

@@ -11,7 +11,7 @@ from pathlib import Path
 import shutil
 import statistics
 import sys
-from typing import Any, Mapping, Sequence
+from typing import Any, Mapping, Optional, Sequence
 
 import numpy as np
 import pandas as pd
@@ -28,6 +28,7 @@ from pfr.runtime import (
     PhysicalCommit,
     PfrRuntimeRunner,
     RuntimeInitialState,
+    NativeGridControlDecision,
 )
 from pfr.safety import ExactAcResult
 
@@ -37,6 +38,17 @@ def sha256(path: Path) -> str:
     with path.open("rb") as stream:
         for block in iter(lambda: stream.read(8 << 20), b""):
             digest.update(block)
+    return digest.hexdigest()
+
+
+def sha256_files(paths: Sequence[Path]) -> str:
+    digest = hashlib.sha256()
+    for path in paths:
+        resolved = path.resolve()
+        encoded_name = resolved.name.encode("utf-8")
+        digest.update(len(encoded_name).to_bytes(4, "big"))
+        digest.update(encoded_name)
+        digest.update(bytes.fromhex(sha256(resolved)))
     return digest.hexdigest()
 
 
@@ -59,6 +71,94 @@ class ExactOpenDssBackend:
         self.exact = exact
         self.paths = dict(paths)
 
+    @staticmethod
+    def _state(
+        *,
+        facility_p_kw: Sequence[float],
+        facility_q_kvar: Sequence[float],
+        mess_location: Sequence[str],
+        mess_p_kw: Sequence[float],
+        mess_q_kvar: Sequence[float],
+        mess_in_transit: Sequence[bool],
+    ) -> dict[str, Any]:
+        return {
+            "facility_p_kw": list(facility_p_kw),
+            "facility_q_kvar": list(facility_q_kvar),
+            "mess_location_service_id": list(mess_location),
+            "mess_p_kw": list(mess_p_kw),
+            "mess_q_kvar": list(mess_q_kvar),
+            "mess_parked": [not value for value in mess_in_transit],
+            "mess_plugged": [not value for value in mess_in_transit],
+            "mess_grid_connected": [not value for value in mess_in_transit],
+            "mess_in_transit": list(mess_in_transit),
+        }
+
+    def select_native_control(
+        self,
+        *,
+        issue: int,
+        facility_p_kw: Sequence[float],
+        facility_q_kvar: Sequence[float],
+        mess_location: Sequence[str],
+        mess_p_kw: Sequence[float],
+        mess_q_kvar: Sequence[float],
+        mess_in_transit: Sequence[bool],
+        previous_capacitor_states: Mapping[str, Sequence[int]],
+        locked_capacitors: Sequence[str],
+    ) -> NativeGridControlDecision:
+        state = self._state(
+            facility_p_kw=facility_p_kw,
+            facility_q_kvar=facility_q_kvar,
+            mess_location=mess_location,
+            mess_p_kw=mess_p_kw,
+            mess_q_kvar=mess_q_kvar,
+            mess_in_transit=mess_in_transit,
+        )
+        state.update(
+            {
+                "native_grid_control_mode": "EVALUATE_TRANSITION",
+                "native_capacitor_initial_states": {
+                    str(name).lower(): list(values)
+                    for name, values in previous_capacitor_states.items()
+                },
+                "native_capacitor_locked": [
+                    str(name).lower() for name in locked_capacitors
+                ],
+            }
+        )
+        raw = self.exact.solve_step(self.paths, issue, state)
+        states = {
+            str(name).lower(): tuple(int(value) for value in values)
+            for name, values in raw.get("native_capacitor_states", {}).items()
+        }
+        return NativeGridControlDecision(
+            states=states,
+            raw_metrics={
+                "status": "COMMON_NATIVE_GRID_TRANSITION_EVALUATED_FRESH",
+                "issue": issue,
+                "native_grid_control_authority": raw.get(
+                    "native_grid_control_authority"
+                ),
+                "previous_states": {
+                    str(name).lower(): list(values)
+                    for name, values in previous_capacitor_states.items()
+                },
+                "selected_states": {
+                    name: list(values) for name, values in states.items()
+                },
+                "locked_capacitors": sorted(
+                    str(name).lower() for name in locked_capacitors
+                ),
+                "selection_hard_constraint_pass": bool(
+                    raw.get("hard_constraint_pass", False)
+                ),
+                "selection_voltage_min_pu": float(raw["voltage_min_pu"]),
+                "selection_voltage_max_pu": float(raw["voltage_max_pu"]),
+            },
+            fresh_instance=True,
+            common_to_all_methods=True,
+        )
+
     def verify_fresh(
         self,
         *,
@@ -72,18 +172,25 @@ class ExactOpenDssBackend:
         robust_background_p_kw: Sequence[Sequence[float]],
         robust_background_q_kvar: Sequence[Sequence[float]],
         robust_pv_available_kw: Sequence[Sequence[float]],
+        native_capacitor_states: Optional[Mapping[str, Sequence[int]]] = None,
     ) -> PhysicalCommit:
-        state = {
-                "facility_p_kw": list(facility_p_kw),
-                "facility_q_kvar": list(facility_q_kvar),
-                "mess_location_service_id": list(mess_location),
-                "mess_p_kw": list(mess_p_kw),
-                "mess_q_kvar": list(mess_q_kvar),
-                "mess_parked": [not value for value in mess_in_transit],
-                "mess_plugged": [not value for value in mess_in_transit],
-                "mess_grid_connected": [not value for value in mess_in_transit],
-                "mess_in_transit": list(mess_in_transit),
-        }
+        state = self._state(
+            facility_p_kw=facility_p_kw,
+            facility_q_kvar=facility_q_kvar,
+            mess_location=mess_location,
+            mess_p_kw=mess_p_kw,
+            mess_q_kvar=mess_q_kvar,
+            mess_in_transit=mess_in_transit,
+        )
+        state.update(
+            {
+                "native_grid_control_mode": "FIXED_STATE_VERIFICATION",
+                "native_capacitor_initial_states": {
+                    str(name).lower(): list(values)
+                    for name, values in (native_capacitor_states or {}).items()
+                },
+            }
+        )
         raw = self.exact.solve_step(self.paths, issue, state)
         robust = raw
         if robust_background_p_kw:
@@ -145,6 +252,12 @@ class ExactOpenDssBackend:
             "robust_grid_transformer_max_loading_pu": max(
                 float(robust["transformer_max_kva_loading_pu"]),
                 float(robust["transformer_max_current_loading_pu"]),
+            ),
+            "robust_grid_native_capacitor_states": dict(
+                robust.get("native_capacitor_states", {})
+            ),
+            "robust_grid_native_capcontrol_count": int(
+                robust.get("native_capcontrol_count", 0)
             ),
         })
         return PhysicalCommit(exact_result, combined, False, True)
@@ -364,6 +477,14 @@ def main() -> None:
         choices=tuple(f"B{index}" for index in range(8)),
         help="Run one full state-chain method for technical diagnosis only.",
     )
+    parser.add_argument(
+        "--allow-pending-native-grid-control-diagnostic",
+        action="store_true",
+        help=(
+            "Permit the explicitly non-frozen capacitor-control candidate only "
+            "with --diagnostic-method; never authorizes a B0-B7 campaign."
+        ),
+    )
     parser.add_argument("--start-issue", type=int, required=True)
     parser.add_argument("--count", type=int, required=True)
     parser.add_argument("--shared-root", type=Path, required=True)
@@ -384,6 +505,61 @@ def main() -> None:
     if args.count <= 0:
         parser.error("--count must be positive")
     repo = args.repo.resolve()
+    native_control_dss = (
+        repo / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.dss"
+    ).resolve()
+    native_control_authority = (
+        repo / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.json"
+    ).resolve()
+    native_asset_audit = (
+        repo / "pfr/contracts/IEEE123_NATIVE_CONTROL_ASSET_AUDIT_V1.json"
+    ).resolve()
+    if not all(
+        path.is_file()
+        for path in (
+            native_control_dss,
+            native_control_authority,
+            native_asset_audit,
+        )
+    ):
+        raise RuntimeError("common native grid-control authority is incomplete")
+    native_control_contract = json_load(native_control_authority)
+    native_asset_contract = json_load(native_asset_audit)
+    frozen_control_authorized = bool(
+        native_control_contract.get("status") == "FROZEN_APPROVED"
+        and native_control_contract.get("main_scientific_campaign_authorized")
+        is True
+    )
+    post_hoc_control_authorized = bool(
+        native_control_contract.get("status")
+        == "FROZEN_APPROVED_POST_HOC_VALIDATION_ONLY"
+        and native_control_contract.get(
+            "january_2025_post_hoc_validation_authorized"
+        )
+        is True
+        and native_control_contract.get("main_scientific_campaign_authorized")
+        is False
+    )
+    pending_diagnostic_authorized = bool(
+        args.diagnostic_method
+        and args.allow_pending_native_grid_control_diagnostic
+        and native_control_contract.get("status")
+        == "ARCHITECTURE_IMPLEMENTED_PARAMETER_AUTHORITY_PENDING"
+    )
+    if args.allow_pending_native_grid_control_diagnostic and not args.diagnostic_method:
+        parser.error(
+            "--allow-pending-native-grid-control-diagnostic requires --diagnostic-method"
+        )
+    if not (
+        frozen_control_authorized
+        or post_hoc_control_authorized
+        or pending_diagnostic_authorized
+    ):
+        raise SystemExit(
+            "BLOCKED: native capacitor parameters lack a frozen prospective "
+            "authority. The pending-control flag is restricted to an explicit "
+            "single-method engineering diagnostic."
+        )
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
     exact = _load_exact_module(repo, args.exact_package_root)
@@ -396,6 +572,21 @@ def main() -> None:
         v2038_root=str(args.exact_package_root.resolve()),
         primary_root=str(args.primary_root.resolve()),
     )
+    if (
+        native_control_contract.get("common_to_B0_B7") is not True
+        or native_control_contract.get("optimized_by_B_method") is not False
+        or native_asset_contract.get("status")
+        != "PASS_ASSET_AUDIT_PARAMETER_GAP_FOUND"
+    ):
+        raise RuntimeError("common native grid-control authority is invalid")
+    original_master = Path(paths["assets"]) / "IEEE123Master.dss"
+    if sha256(original_master) != native_control_contract.get(
+        "original_ieee123_master_sha256"
+    ):
+        raise RuntimeError(
+            "original IEEE123 master does not match native-control authority"
+        )
+    paths["native_grid_control"] = str(native_control_dss)
     pre = json_load(args.initial_state)
     if not args.diagnostic_method and "canonical_pre" not in pre:
         raise RuntimeError("main January B0-B7 execution requires canonical daily PRE")
@@ -445,12 +636,32 @@ def main() -> None:
         "workload_uncertainty_sha256": sha256(args.workload_uncertainty),
         "route_catalog_sha256": sha256(args.route_catalog),
         "mobility_template_bank_sha256": sha256(args.mobility_template_bank),
+        "physical_execution_authority_version": "V13_3_POST_HOC_FREEZE_20260822",
+        "common_native_grid_control_id": native_control_contract["identity"],
+        "common_native_grid_control_dss_sha256": sha256(native_control_dss),
+        "common_native_grid_control_authority_sha256": sha256(
+            native_control_authority
+        ),
+        "native_grid_asset_audit_sha256": sha256(native_asset_audit),
+        "native_grid_control_release_status": native_control_contract["status"],
+        "main_scientific_campaign_authorized": frozen_control_authorized,
+        "january_2025_post_hoc_validation_authorized": post_hoc_control_authorized,
+        "evaluation_classification": native_control_contract[
+            "evaluation_classification"
+        ],
+        "common_native_grid_control_applied_to": [f"B{index}" for index in range(8)],
+        "original_ieee123_master_modified": False,
     }
     contract_sha = hashlib.sha256(json.dumps(evaluation_contract, sort_keys=True).encode()).hexdigest()
     authority = ExperimentAuthority(
         exogenous_inputs_sha256=sha256(args.shared_root / "SHARED_EXOGENOUS_AUTHORITY.json"),
         initial_state_sha256=sha256(args.initial_state),
-        grid_model_sha256=sha256(Path(paths["assets"]) / "IEEE123Master.dss"),
+        grid_model_sha256=sha256_files(
+            (
+                Path(paths["assets"]) / "IEEE123Master.dss",
+                native_control_dss,
+            )
+        ),
         jobs_sha256=sha256(args.canonical_jobs),
         wan_sha256=sha256(repo / "pfr/contracts/DATA_GAPS_AND_NONAUTHORITATIVE_FIELDS.json"),
         evaluation_coefficients_sha256=contract_sha,
@@ -460,6 +671,18 @@ def main() -> None:
         power_curve=_load_curve(args.power_curve),
         physical_backend=ExactOpenDssBackend(exact, paths),
         fast_optimizer=GurobiFastControlOptimizer(),
+        native_control_initial_states={
+            str(row["name"]).lower(): tuple(row["initial_state"])
+            for row in native_asset_contract["capacitors"]
+        },
+        native_control_minimum_dwell_steps=int(
+            float(
+                native_control_contract[
+                    "frozen_post_hoc_control_basis"
+                ]["dead_time_seconds"]
+            )
+            // 300.0
+        ),
     )
     configs = MethodFactory(authority).all()
     if args.diagnostic_method:
@@ -529,6 +752,23 @@ def main() -> None:
         "scientific_implementation_fingerprint": scientific_implementation_fingerprint(
             repo
         ),
+        "physical_execution_authority_version": "V13_3_POST_HOC_FREEZE_20260822",
+        "evaluation_classification": native_control_contract[
+            "evaluation_classification"
+        ],
+        "independent_holdout_claim": False,
+        "common_native_grid_control": {
+            "identity": native_control_contract["identity"],
+            "common_to_B0_B7": True,
+            "original_ieee123_master_modified": False,
+            "dss_sha256": sha256(native_control_dss),
+            "authority_sha256": sha256(native_control_authority),
+            "asset_audit_sha256": sha256(native_asset_audit),
+            "release_status": native_control_contract["status"],
+            "main_scientific_campaign_authorized": frozen_control_authorized,
+            "january_2025_post_hoc_validation_authorized": post_hoc_control_authorized,
+            "diagnostic_candidate_override": pending_diagnostic_authorized,
+        },
     }
     (output / "RUN_MANIFEST.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps({"status": matrix["status"], "markers": matrix["valid_commit_markers"], "output": str(output)}))

@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 python_bin="${PFR_PYTHON:-/home/jaewon/miniconda3/envs/power_v61_gpu/bin/python}"
-output_root="/home/jaewon/mobile_ess_work/frozen_artifacts/PFR11_JAN2025_DAYS01_31_DESIGN_FREEZE_20260822"
+output_root="/home/jaewon/mobile_ess_work/frozen_artifacts/JAN2025_POST_HOC_V13_3_FINAL_VALIDATION_20260822"
 start_day=1
 end_day=31
 day_workers=4
@@ -142,6 +142,7 @@ export NUMEXPR_NUM_THREADS=1
 export PYTHONHASHSEED=0
 
 cd "$repo_dir"
+echo "Classification: JANUARY-2025 POST-HOC FINAL VALIDATION (not an independent holdout)."
 if ((skip_preflight == 0)); then
     echo "Running fail-closed January authority/source/design preflight."
     "$python_bin" -m pfr.tools.preflight_january_2025 \

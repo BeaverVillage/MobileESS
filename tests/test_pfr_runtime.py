@@ -10,6 +10,7 @@ from pfr.runtime import (
     PhysicalCommit,
     PfrRuntimeRunner,
     RuntimeInitialState,
+    NativeGridControlDecision,
 )
 from pfr.safety import ExactAcResult
 
@@ -35,6 +36,26 @@ class FakePhysical:
             False,
             True,
         )
+
+
+class NativeControlPhysical(FakePhysical):
+    def __init__(self):
+        super().__init__()
+        self.selected = 0
+        self.verified_states = []
+
+    def select_native_control(self, **kwargs):
+        self.selected += 1
+        return NativeGridControlDecision(
+            {"c83": (0,)},
+            {"status": "TEST_COMMON_NATIVE_TRANSITION"},
+            True,
+            True,
+        )
+
+    def verify_fresh(self, **kwargs):
+        self.verified_states.append(dict(kwargs["native_capacitor_states"]))
+        return super().verify_fresh(**kwargs)
 
 
 class MessOnlyRescuePhysical(FakePhysical):
@@ -122,6 +143,26 @@ class PfrRuntimeTests(unittest.TestCase):
         self.assertEqual(physical.calls, 32)
         self.assertTrue(summary["all_state_chains_complete"])
 
+    def test_common_native_binary_transition_precedes_and_is_fixed_during_safety(self):
+        physical = NativeControlPhysical()
+        with tempfile.TemporaryDirectory() as temporary:
+            PfrRuntimeRunner(
+                power_curve=self.curve,
+                physical_backend=physical,
+                native_control_initial_states={"c83": (1,)},
+                native_control_minimum_dwell_steps=6,
+            ).run_method(
+                config=self.configs[0],
+                frames=self.frames[:1],
+                initial=self.initial,
+                representative_week_id="TEST_NATIVE_CONTROL",
+                output=Path(temporary),
+            )
+        self.assertEqual(physical.selected, 1)
+        self.assertTrue(physical.verified_states)
+        self.assertTrue(
+            all(states == {"c83": (0,)} for states in physical.verified_states)
+        )
     def test_missing_payload_blocks_spatial_action_without_fabricating_zero(self):
         config = next(item for item in self.configs if item.comparison_method_id is ComparisonMethod.B3)
         with tempfile.TemporaryDirectory() as temporary:

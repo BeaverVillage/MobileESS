@@ -261,6 +261,11 @@ class MutableMethodState:
         default_factory=lambda: {mid: 0 for mid in MESS_IDS}
     )
     last_slow_miqp_certificate: Mapping[str, Any] = field(default_factory=dict)
+    native_capacitor_states: dict[str, Tuple[int, ...]] = field(default_factory=dict)
+    native_capacitor_dwell_remaining_steps: dict[str, int] = field(
+        default_factory=dict
+    )
+    native_capacitor_switch_count: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -271,7 +276,41 @@ class PhysicalCommit:
     actual_fresh_opendss_used: bool
 
 
+@dataclass(frozen=True)
+class NativeGridControlDecision:
+    states: Mapping[str, Tuple[int, ...]]
+    raw_metrics: Mapping[str, Any]
+    fresh_instance: bool
+    common_to_all_methods: bool
+
+    def validate(self) -> None:
+        if not self.fresh_instance or not self.common_to_all_methods:
+            raise RuntimeContractError(
+                "native grid-control decision must be Fresh and common to B0-B7"
+            )
+        if any(
+            not name or not values or any(value not in (0, 1) for value in values)
+            for name, values in self.states.items()
+        ):
+            raise RuntimeContractError("native capacitor state decision is invalid")
+
+
 class FreshPhysicalBackend(Protocol):
+    def select_native_control(
+        self,
+        *,
+        issue: int,
+        facility_p_kw: Sequence[float],
+        facility_q_kvar: Sequence[float],
+        mess_location: Sequence[str],
+        mess_p_kw: Sequence[float],
+        mess_q_kvar: Sequence[float],
+        mess_in_transit: Sequence[bool],
+        previous_capacitor_states: Mapping[str, Sequence[int]],
+        locked_capacitors: Sequence[str],
+    ) -> NativeGridControlDecision:
+        ...
+
     def verify_fresh(
         self,
         *,
@@ -285,6 +324,7 @@ class FreshPhysicalBackend(Protocol):
         robust_background_p_kw: Sequence[Sequence[float]],
         robust_background_q_kvar: Sequence[Sequence[float]],
         robust_pv_available_kw: Sequence[Sequence[float]],
+        native_capacitor_states: Optional[Mapping[str, Sequence[int]]] = None,
     ) -> PhysicalCommit:
         ...
 
@@ -315,6 +355,10 @@ class _PhysicalVerifierAdapter:
         robust_background_p_kw: Sequence[Sequence[float]],
         robust_background_q_kvar: Sequence[Sequence[float]],
         robust_pv_available_kw: Sequence[Sequence[float]],
+        previous_capacitor_states: Optional[
+            Mapping[str, Sequence[int]]
+        ] = None,
+        locked_capacitors: Sequence[str] = (),
     ) -> None:
         self.backend = backend
         self.issue = issue
@@ -325,9 +369,15 @@ class _PhysicalVerifierAdapter:
         self.robust_background_p_kw = tuple(tuple(row) for row in robust_background_p_kw)
         self.robust_background_q_kvar = tuple(tuple(row) for row in robust_background_q_kvar)
         self.robust_pv_available_kw = tuple(tuple(row) for row in robust_pv_available_kw)
+        self.previous_capacitor_states = {
+            str(name).lower(): tuple(int(value) for value in values)
+            for name, values in (previous_capacitor_states or {}).items()
+        }
+        self.locked_capacitors = tuple(str(name).lower() for name in locked_capacitors)
+        self.native_decision: Optional[NativeGridControlDecision] = None
         self.last_commit: Optional[PhysicalCommit] = None
 
-    def verify_fresh(self, *, control: FastControl, **_: Any) -> ExactAcResult:
+    def _physical_inputs(self, control: FastControl) -> tuple[tuple[float, ...], tuple[float, ...], tuple[float, ...]]:
         facility_p = {site: 0.0 for site in IDCS}
         for job_id, fraction in control.job_compute_rate_fraction.items():
             job = self.jobs[job_id]
@@ -344,9 +394,44 @@ class _PhysicalVerifierAdapter:
             for mid in MESS_IDS
         )
         mess_q = tuple(control.mess_q_kvar.get(mid, 0.0) for mid in MESS_IDS)
+        return tuple(facility_p[site] for site in IDCS), mess_p, mess_q
+
+    def select_native_control(self, *, control: FastControl) -> NativeGridControlDecision:
+        facility_p, mess_p, mess_q = self._physical_inputs(control)
+        selector = getattr(self.backend, "select_native_control", None)
+        if selector is None:
+            decision = NativeGridControlDecision(
+                states=dict(self.previous_capacitor_states),
+                raw_metrics={
+                    "status": "LEGACY_BACKEND_NO_NATIVE_CONTROL_SELECTOR",
+                    "native_grid_control_authority": "NONE",
+                },
+                fresh_instance=True,
+                common_to_all_methods=True,
+            )
+        else:
+            decision = selector(
+                issue=self.issue,
+                facility_p_kw=facility_p,
+                facility_q_kvar=(0.0,) * len(IDCS),
+                mess_location=self.mess_location,
+                mess_p_kw=mess_p,
+                mess_q_kvar=mess_q,
+                mess_in_transit=self.mess_in_transit,
+                previous_capacitor_states=self.previous_capacitor_states,
+                locked_capacitors=self.locked_capacitors,
+            )
+        decision.validate()
+        self.native_decision = decision
+        return decision
+
+    def verify_fresh(self, *, control: FastControl, **_: Any) -> ExactAcResult:
+        facility_p, mess_p, mess_q = self._physical_inputs(control)
+        if self.native_decision is None:
+            self.select_native_control(control=control)
         self.last_commit = self.backend.verify_fresh(
             issue=self.issue,
-            facility_p_kw=tuple(facility_p[site] for site in IDCS),
+            facility_p_kw=facility_p,
             facility_q_kvar=(0.0,) * len(IDCS),
             mess_location=self.mess_location,
             mess_p_kw=mess_p,
@@ -355,6 +440,7 @@ class _PhysicalVerifierAdapter:
             robust_background_p_kw=self.robust_background_p_kw,
             robust_background_q_kvar=self.robust_background_q_kvar,
             robust_pv_available_kw=self.robust_pv_available_kw,
+            native_capacitor_states=self.native_decision.states,
         )
         if not self.last_commit.actual_fresh_opendss_used:
             raise RuntimeContractError("physical backend did not execute Fresh OpenDSS")
@@ -2676,6 +2762,10 @@ class PfrRuntimeRunner:
         physical_backend: FreshPhysicalBackend,
         fast_optimizer: Optional[FastControlOptimizer] = None,
         controller_id: str = "PFR_V13_SLOW_FAST_AC_SAFE_V1",
+        native_control_initial_states: Optional[
+            Mapping[str, Sequence[int]]
+        ] = None,
+        native_control_minimum_dwell_steps: int = 0,
     ) -> None:
         power_curve.validate()
         self.power_curve = power_curve
@@ -2683,6 +2773,15 @@ class PfrRuntimeRunner:
         self.fast_optimizer = fast_optimizer or IdentityFastControlOptimizer()
         self.controller_id = controller_id
         self.architecture = SlowFastArchitecture()
+        self.native_control_initial_states = {
+            str(name).lower(): tuple(int(value) for value in values)
+            for name, values in (native_control_initial_states or {}).items()
+        }
+        if native_control_minimum_dwell_steps < 0:
+            raise RuntimeContractError("native control dwell steps cannot be negative")
+        self.native_control_minimum_dwell_steps = int(
+            native_control_minimum_dwell_steps
+        )
 
     def run_method(
         self,
@@ -2708,6 +2807,13 @@ class PfrRuntimeRunner:
             pre_state_sha256=initial.state_sha256,
             mess_energy_kwh=dict(initial.mess_energy_kwh),
             mess_location=dict(initial.mess_location),
+            native_capacitor_states=dict(self.native_control_initial_states),
+            native_capacitor_dwell_remaining_steps={
+                name: 0 for name in self.native_control_initial_states
+            },
+            native_capacitor_switch_count={
+                name: 0 for name in self.native_control_initial_states
+            },
         )
         records = []
         failure: Optional[Mapping[str, Any]] = None
@@ -2790,7 +2896,14 @@ class PfrRuntimeRunner:
                 frame.robust_background_p_kw,
                 frame.robust_background_q_kvar,
                 frame.robust_pv_available_kw,
+                state.native_capacitor_states,
+                tuple(
+                    name
+                    for name, remaining in state.native_capacitor_dwell_remaining_steps.items()
+                    if remaining > 0
+                ),
             )
+            native_decision = verifier.select_native_control(control=fast.control)
             accepted_fast_state = fast_state
             accepted_limits = limits
             active_optimization = optimized
@@ -2911,6 +3024,27 @@ class PfrRuntimeRunner:
                     job.lifecycle = "RUNNING"
                     job.start_issue = frame.issue
             facility_p, _ = _facility_power(state.jobs.values(), self.power_curve)
+            previous_native_states = dict(state.native_capacitor_states)
+            state.native_capacitor_states = {
+                str(name).lower(): tuple(int(value) for value in values)
+                for name, values in native_decision.states.items()
+            }
+            for name, values in state.native_capacitor_states.items():
+                previous = previous_native_states.get(name, values)
+                old_remaining = state.native_capacitor_dwell_remaining_steps.get(
+                    name, 0
+                )
+                if tuple(previous) != tuple(values):
+                    state.native_capacitor_switch_count[name] = (
+                        state.native_capacitor_switch_count.get(name, 0) + 1
+                    )
+                    state.native_capacitor_dwell_remaining_steps[name] = (
+                        self.native_control_minimum_dwell_steps
+                    )
+                else:
+                    state.native_capacitor_dwell_remaining_steps[name] = max(
+                        0, old_remaining - 1
+                    )
             for mid in MESS_IDS:
                 state.mess_energy_kwh[mid] = fast.next_state.mess_soc[mid] * MESS_CAPACITY_KWH
             mobility_energy_kwh = 0.0
@@ -3014,6 +3148,32 @@ class PfrRuntimeRunner:
                 "workload_reserve_gpu": dict(frame.workload_reserve_gpu) if config.joint_uncertainty else {},
                 "robust_grid_fresh_opendss": bool(
                     verifier.last_commit.raw_metrics.get("robust_grid_fresh_opendss", False)
+                ),
+                "native_grid_control_authority": verifier.last_commit.raw_metrics.get(
+                    "native_grid_control_authority"
+                ),
+                "native_capcontrol_count": int(
+                    verifier.last_commit.raw_metrics.get("native_capcontrol_count", 0)
+                ),
+                "native_capacitor_states": dict(
+                    verifier.last_commit.raw_metrics.get(
+                        "native_capacitor_states", {}
+                    )
+                ),
+                "native_grid_control_decision": dict(native_decision.raw_metrics),
+                "native_grid_control_execution_order": (
+                    "COMMON_DISCRETE_TRANSITION_THEN_FIXED_BINARY_AC_SAFETY"
+                ),
+                "native_capacitor_dwell_remaining_steps": dict(
+                    state.native_capacitor_dwell_remaining_steps
+                ),
+                "native_capacitor_switch_count_cumulative": dict(
+                    state.native_capacitor_switch_count
+                ),
+                "native_regulator_tap_numbers": dict(
+                    verifier.last_commit.raw_metrics.get(
+                        "native_regulator_tap_numbers", {}
+                    )
                 ),
                 "compute_debt_gpu_hours": state.compute_debt_gpu_hours,
                 "energy_debt_kwh": state.energy_debt_kwh,

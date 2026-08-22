@@ -10,6 +10,15 @@ def scientific_implementation_files(repo: Path) -> tuple[Path, ...]:
     repo = repo.resolve()
     files = sorted((repo / "pfr").glob("*.py"))
     files.append(repo / "pfr" / "tools" / "run_pfr_matrix.py")
+    files.extend(
+        (
+            repo / "science" / "EXACT_GRID_RUNNER_24SERVICE.py",
+            repo / "pfr" / "contracts" / "COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.dss",
+            repo / "pfr" / "contracts" / "COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.json",
+            repo / "pfr" / "contracts" / "IEEE123_NATIVE_CONTROL_ASSET_AUDIT_V1.json",
+            repo / "pfr" / "contracts" / "PFR_RUNTIME_CONTRACT.json",
+        )
+    )
     missing = [path for path in files if not path.is_file()]
     if missing:
         raise RuntimeError(f"scientific implementation source is missing: {missing}")
