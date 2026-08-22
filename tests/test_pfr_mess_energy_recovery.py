@@ -122,6 +122,28 @@ class FleetQVerifier:
         )
 
 
+class ActiveSensitivityVerifier:
+    mess_in_transit = (False, False, False, False)
+
+    def verify_fresh(self, *, control, state, slow_plan):
+        del state, slow_plan
+        support = control.mess_discharge_kw["MESS03"] - control.mess_charge_kw["MESS03"]
+        vmin = 0.949 + 0.00001 * support
+        vmax = 1.04
+        passed = 0.95 <= vmin <= vmax <= 1.05
+        return ExactAcResult(
+            passed,
+            "PASS" if passed else "VIOLATION",
+            True,
+            True,
+            vmin,
+            vmax,
+            0.5,
+            0.5,
+            0 if passed else 1,
+        )
+
+
 def test_projector_combines_active_relief_with_location_sensitive_q():
     nominal = FastControl(
         {mid: 50.0 for mid in MESS_IDS},
@@ -218,6 +240,29 @@ def test_continuous_q_sensitivity_qp_closes_between_coarse_grid_points():
     assert result is not None
     assert result[1].passed
     assert result[2]["status"] == "FRESH_OPENDSS_CONTINUOUS_Q_SENSITIVITY_QP"
+    assert result[2]["integer_variables"] == 0
+
+
+def test_continuous_active_sensitivity_qp_selects_effective_pcc():
+    control = FastControl(
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {},
+        {},
+    )
+    state = FastLayerState(0, {mid: 760.0 / 1080.0 for mid in MESS_IDS}, {})
+    verifier = ActiveSensitivityVerifier()
+    projector = _GurobiSensitivityProjector(verifier, allow_mess=True)
+    slow_plan = SimpleNamespace(fingerprint="fixed-plan")
+    exact = verifier.verify_fresh(control=control, state=state, slow_plan=slow_plan)
+
+    result = projector._active_sensitivity_qp_step(control, state, slow_plan, exact)
+
+    assert result is not None
+    assert result[1].passed
+    assert result[0].mess_discharge_kw["MESS03"] > 0.0
+    assert result[2]["status"] == "FRESH_OPENDSS_CONTINUOUS_P_SENSITIVITY_QP"
     assert result[2]["integer_variables"] == 0
 
 
