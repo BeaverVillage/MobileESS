@@ -4,6 +4,7 @@ import copy
 import unittest
 
 from pfr.daily import DailyInitializationError, build_daily_pre_artifacts
+from pfr.tools.run_pfr_matrix import _runtime_initial_state
 
 
 AUTHORITY_SHA = "ccba214d7a8bf6c142b34cf6f0abc3ce70bae00b9bfd23fe5152506e552e599d"
@@ -36,6 +37,35 @@ class JanuaryDailyInitializationTests(unittest.TestCase):
 
         with self.assertRaises(DailyInitializationError):
             certify_daily_pre_identity(corrupted)
+
+    def test_runtime_rejects_nonboundary_or_noncanonical_daily_soc(self):
+        manifest, _ = build_daily_pre_artifacts(AUTHORITY_SHA)
+        with self.assertRaises(RuntimeError):
+            _runtime_initial_state(manifest, 1, require_population_identity=True)
+
+        corrupted = copy.deepcopy(manifest)
+        corrupted["canonical_pre"]["mess_energy_kwh"] = (
+            759.0,
+            760.0,
+            760.0,
+            760.0,
+        )
+        with self.assertRaises(RuntimeError):
+            _runtime_initial_state(
+                corrupted, 0, require_population_identity=True
+            )
+
+    def test_runtime_accepts_exact_canonical_daily_soc_and_locations(self):
+        manifest, _ = build_daily_pre_artifacts(AUTHORITY_SHA)
+        state = _runtime_initial_state(
+            manifest, 288, require_population_identity=True
+        )
+        self.assertEqual(state.issue, 288)
+        self.assertEqual(tuple(state.mess_energy_kwh.values()), (760.0,) * 4)
+        self.assertEqual(
+            tuple(state.mess_location.values()),
+            ("STA09", "IDC12", "STA07", "STA11"),
+        )
 
 
 if __name__ == "__main__":

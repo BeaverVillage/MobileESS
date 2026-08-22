@@ -37,6 +37,63 @@ class FakePhysical:
         )
 
 
+class MessOnlyRescuePhysical(FakePhysical):
+    def __init__(self):
+        super().__init__()
+        self.mess_controls = []
+
+    def verify_fresh(self, **kwargs):
+        self.calls += 1
+        controls = tuple(kwargs["mess_p_kw"]) + tuple(kwargs["mess_q_kvar"])
+        self.mess_controls.append(controls)
+        rescued = any(abs(float(value)) > 1e-12 for value in controls)
+        raw = {
+            "root_import_p_kw": 100.0,
+            "voltage_min_pu": 0.96 if rescued else 0.94,
+            "voltage_max_pu": 1.02,
+            "line_max_loading_pu": 0.5,
+            "transformer_max_kva_loading_pu": 0.5,
+            "transformer_max_current_loading_pu": 0.5,
+            "hard_constraint_pass": rescued,
+        }
+        return PhysicalCommit(
+            ExactAcResult(
+                rescued,
+                "PASS" if rescued else "VOLTAGE_LOW",
+                True,
+                True,
+                raw["voltage_min_pu"],
+                1.02,
+                0.5,
+                0.5,
+                0 if rescued else 1,
+            ),
+            raw,
+            False,
+            True,
+        )
+
+
+class RaiseOncePhysical(FakePhysical):
+    def verify_fresh(self, **kwargs):
+        if self.calls == 0:
+            self.calls += 1
+            raise RuntimeError("synthetic B0 backend failure")
+        return super().verify_fresh(**kwargs)
+
+
+class RaiseAfterOneCommittedIssuePhysical(FakePhysical):
+    def __init__(self):
+        super().__init__()
+        self.raised = False
+
+    def verify_fresh(self, **kwargs):
+        if self.calls == 2 and not self.raised:
+            self.raised = True
+            raise RuntimeError("synthetic failure after one committed issue")
+        return super().verify_fresh(**kwargs)
+
+
 class PfrRuntimeTests(unittest.TestCase):
     def setUp(self):
         hashes = [format(index, "064x") for index in range(1, 8)]
@@ -86,6 +143,62 @@ class PfrRuntimeTests(unittest.TestCase):
                 representative_week_id="TEST", output=Path(temporary),
             )
         self.assertEqual(summary["status"], "PASS")
+
+    def test_b0_fail_closed_never_uses_mess_as_common_emergency_override(self):
+        physical = MessOnlyRescuePhysical()
+        with tempfile.TemporaryDirectory() as temporary:
+            summary = PfrRuntimeRunner(
+                power_curve=self.curve, physical_backend=physical
+            ).run_method(
+                config=self.configs[0], frames=self.frames[:1], initial=self.initial,
+                representative_week_id="TEST", output=Path(temporary),
+            )
+        self.assertEqual(summary["status"], "FAIL_CLOSED")
+        self.assertTrue(physical.mess_controls)
+        self.assertTrue(all(
+            all(abs(float(value)) <= 1e-12 for value in controls)
+            for controls in physical.mess_controls
+        ))
+
+    def test_matrix_isolates_one_method_exception_and_runs_remaining_methods(self):
+        physical = RaiseOncePhysical()
+        with tempfile.TemporaryDirectory() as temporary:
+            summary = PfrRuntimeRunner(
+                power_curve=self.curve, physical_backend=physical
+            ).run_matrix(
+                configs=self.configs, frames=self.frames[:1], initial=self.initial,
+                representative_week_id="TEST", output=Path(temporary),
+            )
+        self.assertEqual(summary["status"], "FAIL_CLOSED")
+        self.assertEqual(summary["failed_methods"], ["B0"])
+        self.assertEqual(len(summary["method_summaries"]), 8)
+        self.assertTrue(all(
+            row["status"] == "PASS" for row in summary["method_summaries"][1:]
+        ))
+
+    def test_exception_summary_preserves_and_counts_prior_commit_markers(self):
+        physical = RaiseAfterOneCommittedIssuePhysical()
+        with tempfile.TemporaryDirectory() as temporary:
+            summary = PfrRuntimeRunner(
+                power_curve=self.curve, physical_backend=physical
+            ).run_matrix(
+                configs=self.configs,
+                frames=self.frames,
+                initial=self.initial,
+                representative_week_id="TEST",
+                output=Path(temporary),
+            )
+            b0 = summary["method_summaries"][0]
+            failure = __import__("json").loads(
+                (Path(temporary) / "B0/FAILURE.json").read_text()
+            )
+
+        self.assertEqual(b0["status"], "FAIL_CLOSED")
+        self.assertEqual(b0["committed_issues"], 1)
+        self.assertEqual(b0["commit_marker_count"], 1)
+        self.assertTrue(b0["state_chain_complete"])
+        self.assertEqual(failure["issue"], 101)
+        self.assertEqual(failure["valid_partial_commit_markers"], 1)
 
 
 if __name__ == "__main__":

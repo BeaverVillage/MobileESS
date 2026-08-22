@@ -44,9 +44,26 @@ class MethodFactoryTests(unittest.TestCase):
         self.assertEqual((b3.temporal_workload_shift, b3.spatial_workload_migration), (False, True))
 
     def test_b5_is_periodic_and_b6_b7_are_event_triggered(self):
+        self.assertTrue(all(
+            self.factory.create(method).control_mode == "PERIODIC_MPC"
+            for method in (
+                ComparisonMethod.B1,
+                ComparisonMethod.B2,
+                ComparisonMethod.B3,
+                ComparisonMethod.B4,
+                ComparisonMethod.B5,
+            )
+        ))
         self.assertEqual(self.factory.create(ComparisonMethod.B5).control_mode, "PERIODIC_MPC")
         self.assertEqual(self.factory.create(ComparisonMethod.B6).control_mode, "EVENT_TRIGGERED")
         self.assertEqual(self.factory.create(ComparisonMethod.B7).control_mode, "EVENT_TRIGGERED")
+
+    def test_fast_recourse_toggle_matches_frozen_table(self):
+        self.assertFalse(self.factory.create(ComparisonMethod.B0).slow_fast_control)
+        self.assertTrue(all(
+            self.factory.create(method).slow_fast_control
+            for method in tuple(ComparisonMethod)[1:]
+        ))
 
     def test_b6_raw_and_b7_calibrated_are_explicit(self):
         self.assertEqual(self.factory.create(ComparisonMethod.B6).risk_interface, "RAW_UNCALIBRATED")

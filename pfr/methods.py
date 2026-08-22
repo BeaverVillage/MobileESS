@@ -91,10 +91,10 @@ class MethodConfig:
 
 _TREATMENTS: Mapping[ComparisonMethod, Tuple[object, ...]] = {
     ComparisonMethod.B0: ("No flexibility", "NONE", False, False, "FIXED", "NONE", False, False, False),
-    ComparisonMethod.B1: ("MESS only", "MESS", False, False, "FIXED", "NONE", False, False, False),
-    ComparisonMethod.B2: ("Temporal AI workload shifting only", "NONE", True, False, "FIXED", "NONE", True, False, False),
-    ComparisonMethod.B3: ("Spatial AI workload migration only", "NONE", False, True, "FIXED", "NONE", True, False, False),
-    ComparisonMethod.B4: ("Stationary BESS plus AI workload", "STATIONARY_BESS", True, True, "PERIODIC_MPC", "NONE", True, False, False),
+    ComparisonMethod.B1: ("MESS only", "MESS", False, False, "PERIODIC_MPC", "NONE", False, False, True),
+    ComparisonMethod.B2: ("Temporal AI workload shifting only", "NONE", True, False, "PERIODIC_MPC", "NONE", True, False, True),
+    ComparisonMethod.B3: ("Spatial AI workload migration only", "NONE", False, True, "PERIODIC_MPC", "NONE", True, False, True),
+    ComparisonMethod.B4: ("Stationary BESS plus AI workload", "STATIONARY_BESS", True, True, "PERIODIC_MPC", "NONE", True, False, True),
     ComparisonMethod.B5: ("Joint MESS plus workload periodic MPC", "MESS", True, True, "PERIODIC_MPC", "NONE", True, True, True),
     ComparisonMethod.B6: ("Joint event-triggered raw risk", "MESS", True, True, "EVENT_TRIGGERED", "RAW_UNCALIBRATED", True, True, True),
     ComparisonMethod.B7: ("Full proposed calibrated ICPS", "MESS", True, True, "EVENT_TRIGGERED", "CALIBRATED", True, True, True),

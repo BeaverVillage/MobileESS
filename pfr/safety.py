@@ -140,6 +140,7 @@ class SafetyFilterResult:
     delta_p_kw: float
     delta_q_kvar: float
     compute_throttling_fraction: float
+    compute_load_increase_fraction: float
     objective_degradation: float
     filter_runtime_seconds: float
     escalation_count: int
@@ -157,7 +158,9 @@ def _values(control: FastControl) -> Tuple[float, ...]:
     return tuple(float(value) for mapping in maps for _, value in sorted(mapping.items()))
 
 
-def _difference(nominal: FastControl, safe: FastControl) -> Tuple[float, float, float, float]:
+def _difference(
+    nominal: FastControl, safe: FastControl
+) -> Tuple[float, float, float, float, float]:
     nominal_values, safe_values = _values(nominal), _values(safe)
     if len(nominal_values) != len(safe_values):
         raise SafetyFilterContractError("nominal and projected control dimensions differ")
@@ -179,7 +182,15 @@ def _difference(nominal: FastControl, safe: FastControl) -> Tuple[float, float, 
         (nominal.job_compute_rate_fraction.get(key, 0.0) - safe.job_compute_rate_fraction.get(key, 0.0) for key in jobs),
         default=0.0,
     )
-    return distance, delta_p, delta_q, max(0.0, throttle)
+    increase = max(
+        (
+            safe.job_compute_rate_fraction.get(key, 0.0)
+            - nominal.job_compute_rate_fraction.get(key, 0.0)
+            for key in jobs
+        ),
+        default=0.0,
+    )
+    return distance, delta_p, delta_q, max(0.0, throttle), max(0.0, increase)
 
 
 class AcSafetyFilter:
@@ -219,7 +230,9 @@ class AcSafetyFilter:
                 nominal=active_nominal, state=escalated.state, slow_plan=active_plan
             )
             escalation_count = 1
-        distance, delta_p, delta_q, throttle = _difference(active_nominal, candidate.control)
+        distance, delta_p, delta_q, throttle, compute_increase = _difference(
+            active_nominal, candidate.control
+        )
         accepted = exact.passed and exact.final_ac_violation_count == 0
         return SafetyFilterResult(
             accepted=accepted,
@@ -231,6 +244,7 @@ class AcSafetyFilter:
             delta_p_kw=delta_p,
             delta_q_kvar=delta_q,
             compute_throttling_fraction=throttle,
+            compute_load_increase_fraction=compute_increase,
             objective_degradation=max(0.0, candidate.objective_projected - candidate.objective_nominal),
             filter_runtime_seconds=time.monotonic() - started,
             escalation_count=escalation_count,
@@ -246,6 +260,7 @@ class FilterMetricsSummary:
     delta_p_kw_sum: float
     delta_q_kvar_sum: float
     compute_throttling_sum: float
+    compute_load_increase_sum: float
     objective_degradation_sum: float
     runtime_p50_seconds: float
     runtime_p95_seconds: float
@@ -266,6 +281,9 @@ class FilterMetricsSummary:
             delta_p_kw_sum=sum(item.delta_p_kw for item in frozen),
             delta_q_kvar_sum=sum(item.delta_q_kvar for item in frozen),
             compute_throttling_sum=sum(item.compute_throttling_fraction for item in frozen),
+            compute_load_increase_sum=sum(
+                item.compute_load_increase_fraction for item in frozen
+            ),
             objective_degradation_sum=sum(item.objective_degradation for item in frozen),
             runtime_p50_seconds=statistics.median(runtimes),
             runtime_p95_seconds=runtimes[p95_index],

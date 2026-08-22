@@ -2,6 +2,7 @@ import pytest
 import math
 from types import SimpleNamespace
 
+from pfr.power import H100UtilizationPowerCurve
 from pfr.runtime import MESS_IDS, _GurobiSensitivityProjector, _nominal_mess_dispatch
 from pfr.safety import ExactAcResult
 from pfr.slow_fast import FastControl, FastLayerState
@@ -285,3 +286,48 @@ def test_fleet_q_search_closes_multi_pcc_voltage_support():
     assert result is not None
     assert result[1].passed
     assert result[2]["status"] == "FRESH_OPENDSS_FLEET_Q_SEARCH"
+
+
+def test_overvoltage_target_increases_compute_within_gpu_and_kva_limits():
+    job = SimpleNamespace(
+        lifecycle="RUNNING",
+        destination_idc="IDC01",
+        source=SimpleNamespace(
+            requested_gpu=8,
+            deadline_step=12,
+            cpu_request_share_kw=2.0,
+        ),
+    )
+    verifier = SimpleNamespace(
+        mess_in_transit=(False, False, False, False),
+        jobs={"job": job},
+        power_curve=H100UtilizationPowerCurve(
+            (0.0, 1.0), (0.1, 0.65), "a" * 64, ("b" * 64,)
+        ),
+    )
+    control = FastControl(
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {"job": 0.1},
+        {},
+    )
+    state = FastLayerState(
+        0,
+        {mid: 760.0 / 1080.0 for mid in MESS_IDS},
+        {"job": 8.0},
+    )
+    projector = _GurobiSensitivityProjector(
+        verifier,
+        allow_mess=False,
+        allow_compute=True,
+        compute_site_capacity={"IDC01": 4.0},
+    )
+    high_voltage = ExactAcResult(
+        False, "VOLTAGE_HIGH", True, True, 0.98, 1.051, 0.5, 0.5, 1
+    )
+
+    _, voltage_target = projector._targets(control, state, high_voltage)
+
+    assert voltage_target.job_compute_rate_fraction["job"] > 0.1
+    assert voltage_target.job_compute_rate_fraction["job"] == pytest.approx(0.5)

@@ -16,9 +16,11 @@ from typing import Any, Mapping, Sequence
 import numpy as np
 import pandas as pd
 
+from pfr.daily import DailyInitializationError, certify_daily_pre_identity
 from pfr.methods import ExperimentAuthority, MethodFactory
 from pfr.optimization import GurobiFastControlOptimizer
 from pfr.power import H100UtilizationPowerCurve
+from pfr.provenance import scientific_implementation_fingerprint
 from pfr.runtime import (
     CausalExperimentFrame,
     MobilityRouteForecast,
@@ -92,42 +94,51 @@ class ExactOpenDssBackend:
                 "pv_available_kw": robust_pv_available_kw,
             })
             robust = self.exact.solve_step(self.paths, issue, robust_state)
-        violation_count = sum(
-            int(raw[key]) + int(robust[key])
+        actual_violation_count = sum(
+            int(raw[key])
             for key in (
                 "voltage_violation_count",
                 "line_violation_count",
                 "transformer_kva_violation_count",
                 "transformer_current_violation_count",
             )
-        ) + (0 if raw["root_sign_pass"] else 1) + (0 if robust["root_sign_pass"] else 1)
-        passed = bool(raw["hard_constraint_pass"] and robust["hard_constraint_pass"])
+        ) + (0 if raw["root_sign_pass"] else 1)
+        robust_violation_count = sum(
+            int(robust[key])
+            for key in (
+                "voltage_violation_count",
+                "line_violation_count",
+                "transformer_kva_violation_count",
+                "transformer_current_violation_count",
+            )
+        ) + (0 if robust["root_sign_pass"] else 1)
+        passed = bool(raw["hard_constraint_pass"])
         if passed:
-            exact_status = "PASS_FRESH_EXACT_OPENDSS_ROBUST_GRID"
+            exact_status = "PASS_FRESH_EXACT_OPENDSS_REALIZED_H0"
         elif not raw["root_sign_pass"]:
             exact_status = "FAIL_FRESH_EXACT_OPENDSS_ACTUAL_ROOT_SIGN"
         else:
-            exact_status = "FAIL_FRESH_EXACT_OPENDSS_ROBUST_GRID"
+            exact_status = "FAIL_FRESH_EXACT_OPENDSS_REALIZED_H0"
         exact_result = ExactAcResult(
             passed=passed,
             status=exact_status,
             fresh_instance=True,
             exact_three_phase_authority=True,
-            minimum_voltage_pu=min(float(raw["voltage_min_pu"]), float(robust["voltage_min_pu"])),
-            maximum_voltage_pu=max(float(raw["voltage_max_pu"]), float(robust["voltage_max_pu"])),
-            maximum_line_loading_fraction=max(float(raw["line_max_loading_pu"]), float(robust["line_max_loading_pu"])),
+            minimum_voltage_pu=float(raw["voltage_min_pu"]),
+            maximum_voltage_pu=float(raw["voltage_max_pu"]),
+            maximum_line_loading_fraction=float(raw["line_max_loading_pu"]),
             maximum_transformer_loading_fraction=max(
                 float(raw["transformer_max_kva_loading_pu"]),
                 float(raw["transformer_max_current_loading_pu"]),
-                float(robust["transformer_max_kva_loading_pu"]),
-                float(robust["transformer_max_current_loading_pu"]),
             ),
-            final_ac_violation_count=violation_count,
+            final_ac_violation_count=actual_violation_count,
         )
         combined = dict(raw)
         combined.update({
             "robust_grid_fresh_opendss": bool(robust_background_p_kw),
+            "robust_grid_role": "CAUSAL_PLAN_VALIDITY_DIAGNOSTIC_NOT_H0_COMMIT_GATE",
             "robust_grid_hard_constraint_pass": bool(robust["hard_constraint_pass"]),
+            "robust_grid_violation_count": robust_violation_count,
             "robust_grid_voltage_min_pu": float(robust["voltage_min_pu"]),
             "robust_grid_voltage_max_pu": float(robust["voltage_max_pu"]),
             "robust_grid_line_max_loading_pu": float(robust["line_max_loading_pu"]),
@@ -152,9 +163,23 @@ def _load_curve(path: Path) -> H100UtilizationPowerCurve:
     return curve
 
 
-def _runtime_initial_state(pre: Mapping[str, Any], start_issue: int) -> RuntimeInitialState:
+def _runtime_initial_state(
+    pre: Mapping[str, Any],
+    start_issue: int,
+    *,
+    require_population_identity: bool = False,
+) -> RuntimeInitialState:
     """Accept legacy runtime PRE or the v13.2 independent-daily manifest."""
     if "canonical_pre" in pre:
+        if start_issue % 288 != 0:
+            raise RuntimeError("independent daily PRE must start on a 288-issue boundary")
+        if require_population_identity:
+            try:
+                certificate = certify_daily_pre_identity(dict(pre))
+            except DailyInitializationError as exc:
+                raise RuntimeError("daily PRE population identity is invalid") from exc
+            if certificate.get("status") != "PASS":
+                raise RuntimeError("daily PRE identity certificate did not pass")
         canonical = pre["canonical_pre"]
         energy = canonical["mess_energy_kwh"]
         locations = canonical["mess_locations"]
@@ -166,6 +191,22 @@ def _runtime_initial_state(pre: Mapping[str, Any], start_issue: int) -> RuntimeI
             raise RuntimeError("v13.2 daily PRE must start with empty WAN state")
         if canonical.get("active_slow_plan") is not None:
             raise RuntimeError("v13.2 daily PRE must not carry an active slow plan")
+        if tuple(map(float, energy)) != (760.0, 760.0, 760.0, 760.0):
+            raise RuntimeError("v13.2 daily PRE must reset every MESS to 760 kWh")
+        if tuple(map(str, locations)) != ("STA09", "IDC12", "STA07", "STA11"):
+            raise RuntimeError("v13.2 daily PRE MESS staging locations changed")
+        zero_fields = ("compute_debt_gpu_hours", "energy_debt_kwh", "rebound_state")
+        if require_population_identity and any(
+            float(canonical.get(field, float("nan"))) != 0.0
+            for field in zero_fields
+        ):
+            raise RuntimeError("v13.2 daily PRE debt/rebound state must reset to zero")
+        if require_population_identity:
+            encoded = json.dumps(
+                canonical, sort_keys=True, separators=(",", ":")
+            ).encode("utf-8")
+            if hashlib.sha256(encoded).hexdigest() != str(pre["canonical_pre_sha256"]):
+                raise RuntimeError("v13.2 canonical PRE content hash mismatch")
         return RuntimeInitialState(
             issue=start_issue,
             state_sha256=str(pre["canonical_pre_sha256"]),
@@ -356,7 +397,13 @@ def main() -> None:
         primary_root=str(args.primary_root.resolve()),
     )
     pre = json_load(args.initial_state)
-    initial = _runtime_initial_state(pre, args.start_issue)
+    if not args.diagnostic_method and "canonical_pre" not in pre:
+        raise RuntimeError("main January B0-B7 execution requires canonical daily PRE")
+    initial = _runtime_initial_state(
+        pre,
+        args.start_issue,
+        require_population_identity=not bool(args.diagnostic_method),
+    )
     factorized = json_load(args.factorized_uncertainty)
     workload_uncertainty = json_load(args.workload_uncertainty)
     if factorized.get("status") != "PASS" or workload_uncertainty.get("status") != "PASS":
@@ -474,9 +521,14 @@ def main() -> None:
         "factorized_uncertainty_decision_use": {
             "U_mob": "K3_ROUTE_MIQP_AND_E4_TRANSIT_SOC",
             "U_work": "SITE_GPU_CAPACITY_AND_PLAN_VALIDITY_RISK",
-            "U_grid": "ROBUST_Q90_LOAD_Q10_PV_Q90_Q_FRESH_OPENDSS",
+            "U_grid": "CAUSAL_ADAPTIVE_ENVELOPE_PLAN_VALIDITY_DIAGNOSTIC",
         },
+        "fresh_opendss_commit_gate": "REALIZED_H0_ONLY",
+        "robust_grid_forecast_is_commit_gate": False,
         "future_actual_used": False,
+        "scientific_implementation_fingerprint": scientific_implementation_fingerprint(
+            repo
+        ),
     }
     (output / "RUN_MANIFEST.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps({"status": matrix["status"], "markers": matrix["valid_commit_markers"], "output": str(output)}))

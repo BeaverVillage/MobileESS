@@ -6,16 +6,155 @@ import argparse
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 import json
 import os
+import signal
 import subprocess
 import sys
+import threading
+import time
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from pfr.provenance import scientific_implementation_fingerprint
+
 
 ISSUES_PER_DAY = 288
 METHOD_COUNT = 8
+_ACTIVE_CHILDREN: set[subprocess.Popen[str]] = set()
+_ACTIVE_CHILDREN_LOCK = threading.Lock()
+_STOP_REQUESTED = threading.Event()
+
+
+def signal_process_group(process: subprocess.Popen[str], signum: int) -> None:
+    if process.poll() is not None:
+        return
+    if os.name == "posix":
+        try:
+            os.killpg(process.pid, signum)
+            return
+        except ProcessLookupError:
+            return
+    process.send_signal(signum)
+
+
+def run_child(
+    command: Sequence[str],
+    *,
+    cwd: Path,
+    stdout: Any = None,
+) -> int:
+    if _STOP_REQUESTED.is_set():
+        return 130
+    process = subprocess.Popen(
+        command,
+        cwd=cwd,
+        stdout=stdout,
+        stderr=subprocess.STDOUT if stdout is not None else None,
+        text=True,
+        start_new_session=True,
+    )
+    with _ACTIVE_CHILDREN_LOCK:
+        _ACTIVE_CHILDREN.add(process)
+    if _STOP_REQUESTED.is_set() and process.poll() is None:
+        signal_process_group(process, signal.SIGINT)
+    try:
+        return process.wait()
+    finally:
+        with _ACTIVE_CHILDREN_LOCK:
+            _ACTIVE_CHILDREN.discard(process)
+
+
+def discover_campaign_process_groups(output: Path) -> set[int]:
+    """Find live matrix process groups, including children orphaned by a race."""
+    if os.name != "posix" or not Path("/proc").is_dir():
+        return set()
+    campaign_root = output.resolve()
+    groups: set[int] = set()
+    for entry in Path("/proc").iterdir():
+        if not entry.name.isdigit() or int(entry.name) == os.getpid():
+            continue
+        try:
+            argv = [
+                value.decode(errors="replace")
+                for value in (entry / "cmdline").read_bytes().split(b"\0")
+                if value
+            ]
+        except (OSError, PermissionError):
+            continue
+        if "pfr.tools.run_pfr_matrix" not in argv:
+            continue
+        try:
+            output_index = argv.index("--output")
+            child_output = Path(argv[output_index + 1]).resolve()
+        except (ValueError, IndexError, OSError):
+            continue
+        if child_output.parent != campaign_root:
+            continue
+        try:
+            groups.add(os.getpgid(int(entry.name)))
+        except ProcessLookupError:
+            continue
+    return groups
+
+
+def _signal_groups(groups: Sequence[int], signum: int) -> None:
+    for group in groups:
+        try:
+            os.killpg(group, signum)
+        except ProcessLookupError:
+            continue
+
+
+def stop_active_children(output: Path) -> None:
+    _STOP_REQUESTED.set()
+    with _ACTIVE_CHILDREN_LOCK:
+        active = tuple(_ACTIVE_CHILDREN)
+    groups = {
+        process.pid for process in active if process.poll() is None and os.name == "posix"
+    }
+    groups.update(discover_campaign_process_groups(output))
+    if os.name == "posix":
+        _signal_groups(sorted(groups), signal.SIGINT)
+    else:
+        for process in active:
+            signal_process_group(process, signal.SIGINT)
+    deadline = time.monotonic() + 3.0
+    while time.monotonic() < deadline and (
+        any(process.poll() is None for process in active)
+        or discover_campaign_process_groups(output)
+    ):
+        time.sleep(0.05)
+    remaining_groups = discover_campaign_process_groups(output)
+    remaining_groups.update(
+        process.pid
+        for process in active
+        if process.poll() is None and os.name == "posix"
+    )
+    if os.name == "posix":
+        _signal_groups(sorted(remaining_groups), signal.SIGTERM)
+    else:
+        for process in active:
+            if process.poll() is None:
+                signal_process_group(process, signal.SIGTERM)
+    deadline = time.monotonic() + 2.0
+    while time.monotonic() < deadline and (
+        any(process.poll() is None for process in active)
+        or discover_campaign_process_groups(output)
+    ):
+        time.sleep(0.05)
+    remaining_groups = discover_campaign_process_groups(output)
+    remaining_groups.update(
+        process.pid
+        for process in active
+        if process.poll() is None and os.name == "posix"
+    )
+    if os.name == "posix":
+        _signal_groups(sorted(remaining_groups), signal.SIGKILL)
+    else:
+        for process in active:
+            if process.poll() is None:
+                signal_process_group(process, signal.SIGKILL)
 
 
 @dataclass(frozen=True)
@@ -52,6 +191,39 @@ def summary_passes(summary: Mapping[str, Any]) -> bool:
     )
 
 
+def reusable_pass(day_root: Path, implementation_fingerprint: str) -> bool:
+    summary_path = day_root / "MATRIX_SUMMARY.json"
+    manifest_path = day_root / "RUN_MANIFEST.json"
+    if not summary_path.is_file() or not manifest_path.is_file():
+        return False
+    try:
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    return bool(
+        summary_passes(summary)
+        and manifest.get("scientific_implementation_fingerprint")
+        == implementation_fingerprint
+    )
+
+
+def preserve_existing_day(day_root: Path, output: Path) -> Path:
+    output_resolved = output.resolve()
+    day_resolved = day_root.resolve()
+    if day_resolved.parent != output_resolved:
+        raise RuntimeError("refusing to move a day artifact outside the campaign root")
+    archive_root = output_resolved / "_preserved_attempts"
+    archive_root.mkdir(parents=True, exist_ok=True)
+    suffix = time.time_ns()
+    target = archive_root / f"{day_root.name}__attempt_{suffix}"
+    while target.exists():
+        suffix += 1
+        target = archive_root / f"{day_root.name}__attempt_{suffix}"
+    day_resolved.replace(target)
+    return target
+
+
 def run_day(
     spec: DaySpec,
     *,
@@ -63,24 +235,25 @@ def run_day(
 ) -> Mapping[str, Any]:
     day_root = output / spec.calendar_date
     summary_path = day_root / "MATRIX_SUMMARY.json"
-    if reuse_passed_days and summary_path.is_file():
-        try:
-            existing = json.loads(summary_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            existing = {}
-        if summary_passes(existing):
-            return {
-                "calendar_date": spec.calendar_date,
-                "start_issue": spec.start_issue,
-                "status": "PASS",
-                "artifact": str(day_root),
-                "reused_existing_pass": True,
-            }
+    implementation_fingerprint = scientific_implementation_fingerprint(repo)
+    if reuse_passed_days and reusable_pass(day_root, implementation_fingerprint):
+        return {
+            "calendar_date": spec.calendar_date,
+            "start_issue": spec.start_issue,
+            "status": "PASS",
+            "artifact": str(day_root),
+            "reused_existing_pass": True,
+            "scientific_implementation_fingerprint": implementation_fingerprint,
+        }
 
+    preserved_attempt = None
+    if day_root.exists():
+        preserved_attempt = preserve_existing_day(day_root, output)
     day_root.mkdir(parents=True, exist_ok=True)
     command = [
         sys.executable,
-        str(repo / "pfr/tools/run_pfr_matrix.py"),
+        "-m",
+        "pfr.tools.run_pfr_matrix",
         *common,
         "--candidate-id", spec.candidate_id,
         "--start-issue", str(spec.start_issue),
@@ -88,29 +261,33 @@ def run_day(
     ]
     if capture_day_logs:
         with (day_root / "DAY_RUN.log").open("w", encoding="utf-8") as log:
-            completed = subprocess.run(
-                command, cwd=repo, check=False, stdout=log,
-                stderr=subprocess.STDOUT, text=True,
-            )
+            returncode = run_child(command, cwd=repo, stdout=log)
     else:
-        completed = subprocess.run(command, cwd=repo, check=False)
+        returncode = run_child(command, cwd=repo)
 
-    if completed.returncode != 0 or not summary_path.is_file():
-        return {
+    if returncode != 0 or not summary_path.is_file():
+        result = {
             "calendar_date": spec.calendar_date,
             "start_issue": spec.start_issue,
             "status": "FAIL_CLOSED",
-            "returncode": completed.returncode,
+            "returncode": returncode,
             "artifact": str(day_root),
         }
+        if preserved_attempt is not None:
+            result["preserved_previous_attempt"] = str(preserved_attempt)
+        return result
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
-    return {
+    result = {
         "calendar_date": spec.calendar_date,
         "start_issue": spec.start_issue,
         "status": "PASS" if summary_passes(summary) else "FAIL_CLOSED",
         "artifact": str(day_root),
         "reused_existing_pass": False,
+        "scientific_implementation_fingerprint": implementation_fingerprint,
     }
+    if preserved_attempt is not None:
+        result["preserved_previous_attempt"] = str(preserved_attempt)
+    return result
 
 
 def campaign_payload(
@@ -197,8 +374,10 @@ def main() -> None:
         common.extend(("--mobility-root", str(mobility_root)))
 
     summaries: list[Mapping[str, Any]] = []
-    with ThreadPoolExecutor(max_workers=args.day_workers) as pool:
-        futures: dict[Future[Mapping[str, Any]], DaySpec] = {
+    pool = ThreadPoolExecutor(max_workers=args.day_workers)
+    futures: dict[Future[Mapping[str, Any]], DaySpec] = {}
+    try:
+        futures = {
             pool.submit(
                 run_day,
                 spec,
@@ -211,7 +390,31 @@ def main() -> None:
             for spec in specs
         }
         for future in as_completed(futures):
-            row = future.result()
+            spec = futures[future]
+            try:
+                row = future.result()
+            except Exception as exc:
+                day_root = args.output / spec.calendar_date
+                day_root.mkdir(parents=True, exist_ok=True)
+                failure = {
+                    "status": "FAIL_CLOSED_ORCHESTRATION_EXCEPTION",
+                    "calendar_date": spec.calendar_date,
+                    "start_issue": spec.start_issue,
+                    "exception_type": type(exc).__name__,
+                    "message": str(exc),
+                    "partial_results_preserved": True,
+                }
+                (day_root / "ORCHESTRATION_FAILURE.json").write_text(
+                    json.dumps(failure, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+                row = {
+                    "calendar_date": spec.calendar_date,
+                    "start_issue": spec.start_issue,
+                    "status": "FAIL_CLOSED",
+                    "artifact": str(day_root),
+                    "orchestration_exception": failure,
+                }
             summaries.append(row)
             write_campaign(
                 args.output,
@@ -231,6 +434,32 @@ def main() -> None:
                 "percent": round(100.0 * done / len(specs), 1),
                 "status": row["status"],
             }), flush=True)
+    except KeyboardInterrupt:
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        for future in futures:
+            future.cancel()
+        stop_active_children(args.output)
+        pool.shutdown(wait=True, cancel_futures=True)
+        interrupted = dict(
+            campaign_payload(
+                start_day=args.start_day,
+                end_day=args.end_day,
+                day_workers=args.day_workers,
+                summaries=summaries,
+                final=False,
+            )
+        )
+        interrupted["status"] = "INTERRUPTED"
+        interrupted["signal"] = "SIGINT"
+        write_campaign(args.output, interrupted)
+        print(json.dumps({
+            "status": "INTERRUPTED",
+            "days": len(summaries),
+            "output": str(args.output),
+        }), flush=True)
+        raise SystemExit(130)
+    else:
+        pool.shutdown(wait=True)
 
     campaign = campaign_payload(
         start_day=args.start_day,

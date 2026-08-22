@@ -379,9 +379,27 @@ def _blend_control(left: FastControl, right: FastControl, weight: float) -> Fast
 class _GurobiSensitivityProjector:
     """Minimal continuous projection over a Fresh-AC finite-difference envelope."""
 
-    def __init__(self, verifier: _PhysicalVerifierAdapter, *, allow_mess: bool) -> None:
+    def __init__(
+        self,
+        verifier: _PhysicalVerifierAdapter,
+        *,
+        allow_mess: bool,
+        allow_compute: bool = True,
+        compute_site_capacity: Optional[Mapping[str, float]] = None,
+    ) -> None:
         self.verifier = verifier
         self.allow_mess = allow_mess
+        self.allow_compute = allow_compute
+        self.compute_site_capacity = {
+            site: float(
+                (compute_site_capacity or {}).get(
+                    site, MODELED_GPU_CAPACITY_PER_IDC
+                )
+            )
+            for site in IDCS
+        }
+        if any(value < 0.0 for value in self.compute_site_capacity.values()):
+            raise RuntimeContractError("compute site capacity cannot be negative")
         self.trace: list[Mapping[str, Any]] = []
 
     @staticmethod
@@ -405,16 +423,101 @@ class _GurobiSensitivityProjector:
         root_sign_penalty = 10.0 if "ROOT_SIGN" in exact.status else 0.0
         return root_sign_penalty + sum(value * value for value in violations)
 
+    def _maximum_compute_rates(
+        self, control: FastControl, state: FastLayerState
+    ) -> dict[str, float]:
+        """Increase flexible compute without changing placement or hard ratings.
+
+        Additional local demand is a legitimate over-voltage actuator for methods
+        that own temporal workload flexibility.  The construction preserves job
+        work, the 256-GPU site limit, and the unchanged 750-kVA facility rating.
+        """
+        rates = {
+            job_id: float(value)
+            for job_id, value in control.job_compute_rate_fraction.items()
+        }
+        if not self.allow_compute:
+            return rates
+
+        def site_gpu(site: str) -> float:
+            return sum(
+                self.verifier.jobs[job_id].source.requested_gpu * rates[job_id]
+                for job_id in rates
+                if self.verifier.jobs[job_id].destination_idc == site
+            )
+
+        def site_power(site: str) -> float:
+            total = 0.0
+            for job_id, fraction in rates.items():
+                job = self.verifier.jobs[job_id]
+                if (
+                    job.lifecycle == "COMPLETED"
+                    or job.destination_idc != site
+                    or fraction <= 0.0
+                ):
+                    continue
+                total += (
+                    self.verifier.power_curve.gang_power_kw(
+                        job.source.requested_gpu, fraction
+                    )
+                    + job.source.cpu_request_share_kw
+                )
+            return total
+
+        for job_id in sorted(
+            rates,
+            key=lambda uid: (
+                self.verifier.jobs[uid].source.deadline_step,
+                uid,
+            ),
+        ):
+            job = self.verifier.jobs[job_id]
+            gpu = job.source.requested_gpu
+            upper = min(
+                1.0,
+                float(state.remaining_work_gpu_hours[job_id])
+                / (gpu * STEP_HOURS),
+            )
+            lower = min(max(rates[job_id], 0.0), upper)
+            rates[job_id] = lower
+            site = job.destination_idc
+            gpu_headroom = max(0.0, self.compute_site_capacity[site] - site_gpu(site))
+            upper = min(upper, lower + gpu_headroom / gpu)
+            if upper <= lower + 1e-12:
+                continue
+            # The power curve need not be treated as linear.  Use a deterministic
+            # monotone bisection against the unchanged transformer rating.
+            trial_low, trial_high = lower, upper
+            rates[job_id] = trial_high
+            if site_power(site) <= 750.0 + 1e-9:
+                continue
+            rates[job_id] = trial_low
+            for _ in range(48):
+                trial = 0.5 * (trial_low + trial_high)
+                rates[job_id] = trial
+                if site_power(site) <= 750.0 + 1e-9:
+                    trial_low = trial
+                else:
+                    trial_high = trial
+            rates[job_id] = trial_low
+        return rates
+
     def _targets(
         self, control: FastControl, state: FastLayerState, exact: ExactAcResult
     ) -> tuple[FastControl, FastControl]:
         active_compute = {
-            key: 0.0 for key in control.job_compute_rate_fraction
+            key: (0.0 if self.allow_compute else float(value))
+            for key, value in control.job_compute_rate_fraction.items()
         }
         active_charge, active_discharge, active_q = {}, {}, {}
         voltage_charge = dict(control.mess_charge_kw)
         voltage_discharge = dict(control.mess_discharge_kw)
         voltage_q = {}
+        voltage_compute = dict(control.job_compute_rate_fraction)
+        if self.allow_compute and exact.maximum_voltage_pu > 1.05:
+            voltage_compute = self._maximum_compute_rates(control, state)
+        elif self.allow_compute and exact.minimum_voltage_pu < 0.95:
+            voltage_compute = dict(active_compute)
         for mess_id in control.mess_charge_kw:
             mess_index = MESS_IDS.index(mess_id)
             if self.verifier.mess_in_transit[mess_index]:
@@ -443,8 +546,8 @@ class _GurobiSensitivityProjector:
                     voltage_charge[mess_id] = control.mess_charge_kw[mess_id]
                     voltage_discharge[mess_id] = control.mess_discharge_kw[mess_id]
                 elif exact.maximum_voltage_pu > 1.05:
-                    voltage_charge[mess_id] = control.mess_charge_kw[mess_id]
-                    voltage_discharge[mess_id] = control.mess_discharge_kw[mess_id]
+                    voltage_charge[mess_id] = min(550.0, max_charge)
+                    voltage_discharge[mess_id] = 0.0
                 elif exact.minimum_voltage_pu < 0.95:
                     voltage_charge[mess_id] = 0.0
                     voltage_discharge[mess_id] = min(550.0, max_discharge)
@@ -464,7 +567,7 @@ class _GurobiSensitivityProjector:
         )
         voltage = FastControl(
             voltage_charge, voltage_discharge, voltage_q,
-            dict(control.job_compute_rate_fraction), dict(control.site_throughput_fraction),
+            voltage_compute, dict(control.site_throughput_fraction),
         )
         return active, voltage
 
@@ -1197,15 +1300,41 @@ class _GurobiSensitivityProjector:
             if preferred_pair is not None and preferred_pair in all_pairs
             else all_pairs
         )
-        probes = []
-        for left_id, right_id in pairs:
+        def preserves_satisfied_constraints(candidate_exact: ExactAcResult) -> bool:
+            return (
+                (exact.minimum_voltage_pu < 0.95 or candidate_exact.minimum_voltage_pu >= 0.95)
+                and (exact.maximum_voltage_pu > 1.05 or candidate_exact.maximum_voltage_pu <= 1.05)
+                and (exact.maximum_line_loading_fraction > 1.0 or candidate_exact.maximum_line_loading_fraction <= 1.0)
+                and (exact.maximum_transformer_loading_fraction > 1.0 or candidate_exact.maximum_transformer_loading_fraction <= 1.0)
+                and ("ROOT_SIGN" in exact.status or "ROOT_SIGN" not in candidate_exact.status)
+            )
+
+        fraction_batches = (
+            ((0.1, 0.1), (0.25, 0.25), (0.5, 0.5), (1.0, 1.0)),
+            (
+                (0.0125, 0.0125),
+                (0.0125, 0.025),
+                (0.025, 0.0125),
+                (0.025, 0.025),
+                (0.025, 0.05),
+                (0.05, 0.025),
+                (0.05, 0.05),
+                (0.05, 0.1),
+                (0.1, 0.05),
+                (0.1, 0.25),
+                (0.25, 0.1),
+            ),
+        )
+        for batch_index, fraction_pairs in enumerate(fraction_batches):
+            probes = []
+            for left_id, right_id in pairs:
                 for left_direction in (-1.0, 1.0):
                     for right_direction in (-1.0, 1.0):
-                        for fraction in (0.1, 0.25, 0.5, 1.0):
+                        for left_fraction, right_fraction in fraction_pairs:
                             q = dict(control.mess_q_kvar)
-                            for mess_id, direction in (
-                                (left_id, left_direction),
-                                (right_id, right_direction),
+                            for mess_id, direction, fraction in (
+                                (left_id, left_direction, left_fraction),
+                                (right_id, right_direction, right_fraction),
                             ):
                                 p = (
                                     float(control.mess_discharge_kw[mess_id])
@@ -1236,9 +1365,100 @@ class _GurobiSensitivityProjector:
                                     right_id,
                                     left_direction,
                                     right_direction,
-                                    fraction,
+                                    left_fraction,
+                                    right_fraction,
                                 )
                             )
+
+            passing = [item for item in probes if item[1].passed]
+            admissible = passing or [
+                item
+                for item in probes
+                if preserves_satisfied_constraints(item[1])
+                and self._violation_score(item[1]) < base_score - 1e-12
+            ]
+            if not admissible:
+                continue
+            selected = min(
+                admissible,
+                key=(
+                    (lambda item: self._objective_distance(control, item[0]))
+                    if passing
+                    else (lambda item: self._violation_score(item[1]))
+                ),
+            )
+            (
+                candidate,
+                candidate_exact,
+                left_id,
+                right_id,
+                left_direction,
+                right_direction,
+                left_fraction,
+                right_fraction,
+            ) = selected
+            return candidate, candidate_exact, {
+                "status": "FRESH_OPENDSS_PAIRWISE_Q_SEARCH",
+                "search_resolution": "COARSE" if batch_index == 0 else "FINE_ASYMMETRIC",
+                "mess_ids": [left_id, right_id],
+                "directions": [left_direction, right_direction],
+                "fractions": [left_fraction, right_fraction],
+                "passed": candidate_exact.passed,
+            }
+        return None
+
+    def _pairwise_p_step(
+        self,
+        control: FastControl,
+        state: FastLayerState,
+        slow_plan: SlowDiscretePlan,
+        exact: ExactAcResult,
+    ) -> Optional[tuple[FastControl, ExactAcResult, Mapping[str, Any]]]:
+        if not self.allow_mess:
+            return None
+        base_score = self._violation_score(exact)
+        connected = [
+            mess_id
+            for mess_index, mess_id in enumerate(MESS_IDS)
+            if not self.verifier.mess_in_transit[mess_index]
+        ]
+        bounds = {}
+        for mess_id in connected:
+            current_p = (
+                float(control.mess_discharge_kw[mess_id])
+                - float(control.mess_charge_kw[mess_id])
+            )
+            current_q = float(control.mess_q_kvar[mess_id])
+            energy = float(state.mess_soc[mess_id]) * MESS_CAPACITY_KWH
+            max_charge = min(
+                550.0,
+                max(
+                    0.0,
+                    (MESS_CAPACITY_KWH - energy)
+                    / (MESS_CHARGE_EFFICIENCY * STEP_HOURS),
+                ),
+            )
+            max_discharge = min(
+                550.0,
+                max(
+                    0.0,
+                    (energy - MESS_FLOOR_KWH)
+                    * MESS_CHARGE_EFFICIENCY
+                    / STEP_HOURS,
+                ),
+            )
+            apparent_p_cap = math.sqrt(max(0.0, 700.0**2 - current_q**2))
+            bounds[mess_id] = (
+                current_p,
+                max(-max_charge, -apparent_p_cap),
+                min(max_discharge, apparent_p_cap),
+            )
+
+        pairs = [
+            (left_id, right_id)
+            for left_index, left_id in enumerate(connected)
+            for right_id in connected[left_index + 1:]
+        ]
 
         def preserves_satisfied_constraints(candidate_exact: ExactAcResult) -> bool:
             return (
@@ -1249,31 +1469,98 @@ class _GurobiSensitivityProjector:
                 and ("ROOT_SIGN" in exact.status or "ROOT_SIGN" not in candidate_exact.status)
             )
 
-        passing = [item for item in probes if item[1].passed]
-        admissible = passing or [
-            item
-            for item in probes
-            if preserves_satisfied_constraints(item[1])
-            and self._violation_score(item[1]) < base_score - 1e-12
-        ]
-        if not admissible:
-            return None
-        selected = min(
-            admissible,
-            key=(
-                (lambda item: self._objective_distance(control, item[0]))
-                if passing
-                else (lambda item: self._violation_score(item[1]))
+        fraction_batches = (
+            ((0.1, 0.1), (0.25, 0.25), (0.5, 0.5), (1.0, 1.0)),
+            (
+                (0.025, 0.025),
+                (0.025, 0.05),
+                (0.05, 0.025),
+                (0.05, 0.05),
+                (0.05, 0.1),
+                (0.1, 0.05),
+                (0.1, 0.25),
+                (0.25, 0.1),
             ),
         )
-        candidate, candidate_exact, left_id, right_id, left_direction, right_direction, fraction = selected
-        return candidate, candidate_exact, {
-            "status": "FRESH_OPENDSS_PAIRWISE_Q_SEARCH",
-            "mess_ids": [left_id, right_id],
-            "directions": [left_direction, right_direction],
-            "fraction": fraction,
-            "passed": candidate_exact.passed,
-        }
+        for batch_index, fraction_pairs in enumerate(fraction_batches):
+            probes = []
+            for left_id, right_id in pairs:
+                for left_direction in (-1.0, 1.0):
+                    for right_direction in (-1.0, 1.0):
+                        for left_fraction, right_fraction in fraction_pairs:
+                            charge = dict(control.mess_charge_kw)
+                            discharge = dict(control.mess_discharge_kw)
+                            for mess_id, direction, fraction in (
+                                (left_id, left_direction, left_fraction),
+                                (right_id, right_direction, right_fraction),
+                            ):
+                                current_p, lower_p, upper_p = bounds[mess_id]
+                                target_p = lower_p if direction < 0.0 else upper_p
+                                candidate_p = current_p + fraction * (
+                                    target_p - current_p
+                                )
+                                charge[mess_id] = max(0.0, -candidate_p)
+                                discharge[mess_id] = max(0.0, candidate_p)
+                            candidate = FastControl(
+                                charge,
+                                discharge,
+                                dict(control.mess_q_kvar),
+                                dict(control.job_compute_rate_fraction),
+                                dict(control.site_throughput_fraction),
+                            )
+                            candidate_exact = self.verifier.verify_fresh(
+                                control=candidate, state=state, slow_plan=slow_plan
+                            )
+                            candidate_exact.validate()
+                            probes.append(
+                                (
+                                    candidate,
+                                    candidate_exact,
+                                    left_id,
+                                    right_id,
+                                    left_direction,
+                                    right_direction,
+                                    left_fraction,
+                                    right_fraction,
+                                )
+                            )
+
+            passing = [item for item in probes if item[1].passed]
+            admissible = passing or [
+                item
+                for item in probes
+                if preserves_satisfied_constraints(item[1])
+                and self._violation_score(item[1]) < base_score - 1e-12
+            ]
+            if not admissible:
+                continue
+            selected = min(
+                admissible,
+                key=(
+                    (lambda item: self._objective_distance(control, item[0]))
+                    if passing
+                    else (lambda item: self._violation_score(item[1]))
+                ),
+            )
+            (
+                candidate,
+                candidate_exact,
+                left_id,
+                right_id,
+                left_direction,
+                right_direction,
+                left_fraction,
+                right_fraction,
+            ) = selected
+            return candidate, candidate_exact, {
+                "status": "FRESH_OPENDSS_PAIRWISE_P_SEARCH",
+                "search_resolution": "COARSE" if batch_index == 0 else "FINE_ASYMMETRIC",
+                "mess_ids": [left_id, right_id],
+                "directions": [left_direction, right_direction],
+                "fractions": [left_fraction, right_fraction],
+                "passed": candidate_exact.passed,
+            }
+        return None
 
     def _fleet_q_step(
         self,
@@ -1443,6 +1730,7 @@ class _GurobiSensitivityProjector:
         exact.validate()
         fleet_attempted = False
         pairwise_hint: Optional[tuple[str, str]] = None
+        pairwise_q_steps = 0
         for _ in range(24):
             if exact.passed:
                 break
@@ -1524,18 +1812,35 @@ class _GurobiSensitivityProjector:
                     }
                     self.trace.append(trace_row)
                     continue
-                pairwise = self._pairwise_q_step(
-                    current, state, slow_plan, exact, pairwise_hint
-                )
-                if pairwise is None and pairwise_hint is not None:
-                    pairwise_hint = None
+                pairwise = None
+                if pairwise_q_steps < 8:
                     pairwise = self._pairwise_q_step(
-                        current, state, slow_plan, exact
+                        current, state, slow_plan, exact, pairwise_hint
                     )
+                    if pairwise is None and pairwise_hint is not None:
+                        pairwise_hint = None
+                        pairwise = self._pairwise_q_step(
+                            current, state, slow_plan, exact
+                        )
                 if pairwise is not None:
                     current, exact, pairwise_trace = pairwise
                     pairwise_hint = tuple(pairwise_trace["mess_ids"])
+                    pairwise_q_steps += 1
                     trace_row["pairwise_q"] = pairwise_trace
+                    trace_row["candidate"] = {
+                        "vmin": exact.minimum_voltage_pu,
+                        "vmax": exact.maximum_voltage_pu,
+                        "line": exact.maximum_line_loading_fraction,
+                        "transformer": exact.maximum_transformer_loading_fraction,
+                    }
+                    self.trace.append(trace_row)
+                    continue
+                pairwise_p = self._pairwise_p_step(
+                    current, state, slow_plan, exact
+                )
+                if pairwise_p is not None:
+                    current, exact, pairwise_p_trace = pairwise_p
+                    trace_row["pairwise_p"] = pairwise_p_trace
                     trace_row["candidate"] = {
                         "vmin": exact.minimum_voltage_pu,
                         "vmax": exact.maximum_voltage_pu,
@@ -1546,23 +1851,52 @@ class _GurobiSensitivityProjector:
                     continue
                 emergency_candidates = []
                 emergency_probes = []
-                for role, throttle_compute in (
-                    ("ZERO_MESS", False),
-                    ("ZERO_MESS_AND_COMPUTE", True),
-                ):
+                fallback_roles = []
+                if self.allow_mess:
+                    fallback_roles.append(("ZERO_MESS", True, None))
+                if self.allow_compute:
+                    compute_fallback = (
+                        self._maximum_compute_rates(current, state)
+                        if exact.maximum_voltage_pu > 1.05
+                        else {
+                            job_id: 0.0
+                            for job_id in current.job_compute_rate_fraction
+                        }
+                    )
+                    compute_role = (
+                        "INCREASE_COMPUTE"
+                        if exact.maximum_voltage_pu > 1.05
+                        else "THROTTLE_COMPUTE"
+                    )
+                    fallback_roles.append((compute_role, False, compute_fallback))
+                if self.allow_mess and self.allow_compute:
+                    fallback_roles.append(
+                        (f"ZERO_MESS_AND_{compute_role}", True, compute_fallback)
+                    )
+                for role, zero_mess, compute_override in fallback_roles:
                     fallback = FastControl(
-                        {mess_id: 0.0 for mess_id in MESS_IDS},
-                        {mess_id: 0.0 for mess_id in MESS_IDS},
-                        {mess_id: 0.0 for mess_id in MESS_IDS},
                         (
-                            {job_id: 0.0 for job_id in current.job_compute_rate_fraction}
-                            if throttle_compute
+                            {mess_id: 0.0 for mess_id in MESS_IDS}
+                            if zero_mess
+                            else dict(current.mess_charge_kw)
+                        ),
+                        (
+                            {mess_id: 0.0 for mess_id in MESS_IDS}
+                            if zero_mess
+                            else dict(current.mess_discharge_kw)
+                        ),
+                        (
+                            {mess_id: 0.0 for mess_id in MESS_IDS}
+                            if zero_mess
+                            else dict(current.mess_q_kvar)
+                        ),
+                        (
+                            dict(compute_override)
+                            if compute_override is not None
                             else dict(current.job_compute_rate_fraction)
                         ),
                         (
-                            {site_id: 0.0 for site_id in current.site_throughput_fraction}
-                            if throttle_compute
-                            else dict(current.site_throughput_fraction)
+                            dict(current.site_throughput_fraction)
                         ),
                     )
                     fallback_exact = self.verifier.verify_fresh(
@@ -1801,6 +2135,21 @@ class _GurobiSensitivityProjector:
                 "transformer": exact.maximum_transformer_loading_fraction,
             }
             self.trace.append(trace_row)
+        if not self.allow_mess and any(
+            candidate != nominal_map
+            for candidate, nominal_map in (
+                (current.mess_charge_kw, nominal.mess_charge_kw),
+                (current.mess_discharge_kw, nominal.mess_discharge_kw),
+                (current.mess_q_kvar, nominal.mess_q_kvar),
+            )
+        ):
+            raise RuntimeContractError("AC safety projection changed disabled MESS controls")
+        if (
+            not self.allow_compute
+            and current.job_compute_rate_fraction
+            != nominal.job_compute_rate_fraction
+        ):
+            raise RuntimeContractError("AC safety projection changed disabled compute controls")
         return ProjectionCandidate(
             control=current,
             certificate=ProjectionCertificate(
@@ -2146,6 +2495,44 @@ def _risk_decision(state: MutableMethodState, frame: CausalExperimentFrame, conf
             float(state.last_exact["line_max_loading_pu"]) - 1.0,
             float(state.last_exact["transformer_max_current_loading_pu"]) - 1.0,
         )
+        if config.joint_uncertainty:
+            # This is the previous issue's causal robust envelope, not a current-h0
+            # realization.  It may request a new plan but never substitutes for the
+            # current Fresh-OpenDSS commit gate.
+            voltage_margin = max(
+                voltage_margin,
+                0.95
+                - float(
+                    state.last_exact.get(
+                        "robust_grid_voltage_min_pu",
+                        state.last_exact["voltage_min_pu"],
+                    )
+                ),
+                float(
+                    state.last_exact.get(
+                        "robust_grid_voltage_max_pu",
+                        state.last_exact["voltage_max_pu"],
+                    )
+                )
+                - 1.05,
+            )
+            thermal_margin = max(
+                thermal_margin,
+                float(
+                    state.last_exact.get(
+                        "robust_grid_line_max_loading_pu",
+                        state.last_exact["line_max_loading_pu"],
+                    )
+                )
+                - 1.0,
+                float(
+                    state.last_exact.get(
+                        "robust_grid_transformer_max_loading_pu",
+                        state.last_exact["transformer_max_current_loading_pu"],
+                    )
+                )
+                - 1.0,
+            )
     calibrated = config.risk_interface == "CALIBRATED"
     constraints = (
         RiskConstraint("soc", RiskFamily.SOC, MESS_FLOOR_KWH - min_energy, 100.0),
@@ -2331,6 +2718,7 @@ class PfrRuntimeRunner:
                 raise RuntimeContractError("PRE state issue does not match causal frame")
             blocked_spatial = _admit_arrivals(state, frame, config)
             risk = _risk_decision(state, frame, config)
+            risk_used_previous_grid_envelope = state.last_exact is not None
             replan, replan_causes = _should_replan(state, config, risk, offset)
             if replan:
                 state.active_plan = _build_slow_plan(state, config, frame)
@@ -2468,7 +2856,20 @@ class PfrRuntimeRunner:
                 )
                 return EscalatedCandidate(state.active_plan, accepted_fast_state, fast.control, True, True)
 
-            safety_projector = _GurobiSensitivityProjector(verifier, allow_mess=True)
+            safety_projector = _GurobiSensitivityProjector(
+                verifier,
+                allow_mess=config.energy_flexibility in {"MESS", "STATIONARY_BESS"},
+                allow_compute=config.temporal_workload_shift,
+                compute_site_capacity={
+                    site: MODELED_GPU_CAPACITY_PER_IDC
+                    - (
+                        frame.workload_reserve_gpu.get(site, 0.0)
+                        if config.joint_uncertainty
+                        else 0.0
+                    )
+                    for site in IDCS
+                },
+            )
             safety = AcSafetyFilter(
                 projector=safety_projector,
                 verifier=verifier,
@@ -2602,6 +3003,14 @@ class PfrRuntimeRunner:
                 "mess_route_rank": dict(state.mess_route_rank),
                 "slow_miqp_certificate": dict(state.last_slow_miqp_certificate),
                 "joint_uncertainty_decision_use": config.joint_uncertainty,
+                "risk_grid_envelope_source": (
+                    "PREVIOUS_ISSUE_CAUSAL_ROBUST_ENVELOPE"
+                    if config.joint_uncertainty and risk_used_previous_grid_envelope
+                    else "REALIZED_PREVIOUS_ISSUE_OR_INITIAL_DEFAULT"
+                ),
+                "risk_grid_envelope_lag_steps": (
+                    1 if risk_used_previous_grid_envelope else None
+                ),
                 "workload_reserve_gpu": dict(frame.workload_reserve_gpu) if config.joint_uncertainty else {},
                 "robust_grid_fresh_opendss": bool(
                     verifier.last_commit.raw_metrics.get("robust_grid_fresh_opendss", False)
@@ -2614,8 +3023,12 @@ class PfrRuntimeRunner:
                 "safety_filter_delta_p_kw": safety.delta_p_kw,
                 "safety_filter_delta_q_kvar": safety.delta_q_kvar,
                 "safety_filter_compute_throttling_fraction": safety.compute_throttling_fraction,
+                "safety_filter_compute_load_increase_fraction": safety.compute_load_increase_fraction,
                 "safety_filter_escalation_count": safety.escalation_count,
-                "common_emergency_mess_override": safety.intervention and safety.delta_p_kw > 1e-12,
+                "safety_capability_mess_enabled": config.energy_flexibility
+                in {"MESS", "STATIONARY_BESS"},
+                "safety_capability_compute_throttle_enabled": config.temporal_workload_shift,
+                "common_emergency_mess_override": False,
                 "fresh_exact_opendss": True,
                 "actual_gurobi_used": active_optimization.certificate.actual_gurobi_used,
                 "optimization_certificate": active_optimization.certificate.as_dict(),
@@ -2681,18 +3094,114 @@ class PfrRuntimeRunner:
     ) -> Mapping[str, Any]:
         if tuple(config.comparison_method_id for config in configs) != tuple(ComparisonMethod):
             raise RuntimeContractError("runtime matrix must execute B0-B7 in order")
-        summaries = [
-            self.run_method(
-                config=config,
-                frames=frames,
-                initial=initial,
-                representative_week_id=representative_week_id,
-                output=output,
-            )
-            for config in configs
-        ]
+        summaries = []
+        for config in configs:
+            try:
+                summary = self.run_method(
+                    config=config,
+                    frames=frames,
+                    initial=initial,
+                    representative_week_id=representative_week_id,
+                    output=output,
+                )
+            except Exception as exc:
+                method_root = output / config.comparison_method_id.value
+                method_root.mkdir(parents=True, exist_ok=True)
+                partial_records = []
+                invalid_partial_markers = []
+                for marker_path in sorted(
+                    method_root.glob("issue_*/COMMIT_MARKER.json")
+                ):
+                    try:
+                        candidate = json.loads(marker_path.read_text(encoding="utf-8"))
+                        if (
+                            candidate.get("status") != "PASS_COMMITTED"
+                            or candidate.get("commit_marker") is not True
+                            or candidate.get("comparison_method_id")
+                            != config.comparison_method_id.value
+                        ):
+                            raise ValueError("marker contract mismatch")
+                        candidate["issue"] = int(candidate["issue"])
+                        if not candidate.get("pre_state_sha256") or not candidate.get(
+                            "post_state_sha256"
+                        ):
+                            raise ValueError("marker state-chain hashes are missing")
+                        partial_records.append(candidate)
+                    except (
+                        OSError,
+                        KeyError,
+                        ValueError,
+                        TypeError,
+                        json.JSONDecodeError,
+                    ) as marker_exc:
+                        invalid_partial_markers.append(
+                            {
+                                "path": str(marker_path),
+                                "error": f"{type(marker_exc).__name__}: {marker_exc}",
+                            }
+                        )
+                partial_records.sort(key=lambda row: int(row["issue"]))
+                next_issue = (
+                    int(partial_records[-1]["issue"]) + 1
+                    if partial_records
+                    else int(initial.issue)
+                )
+                failure = {
+                    "status": "FAIL_CLOSED_EXCEPTION",
+                    "comparison_method_id": config.comparison_method_id.value,
+                    "issue": next_issue,
+                    "exception_type": type(exc).__name__,
+                    "message": str(exc),
+                    "partial_results_preserved": True,
+                    "valid_partial_commit_markers": len(partial_records),
+                    "invalid_partial_commit_markers": invalid_partial_markers,
+                }
+                (method_root / "FAILURE.json").write_text(
+                    json.dumps(failure, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+                summary = {
+                    "schema_version": "K9H7_RESULT_V2.method_run.v1",
+                    "status": "FAIL_CLOSED",
+                    "comparison_method_id": config.comparison_method_id.value,
+                    "representative_week_id": representative_week_id,
+                    "requested_issues": len(frames),
+                    "committed_issues": len(partial_records),
+                    "commit_marker_count": len(partial_records),
+                    "fresh_exact_opendss_count": sum(
+                        bool(row.get("actual_fresh_opendss_used"))
+                        for row in partial_records
+                    ),
+                    "actual_gurobi_count": sum(
+                        bool(row.get("actual_gurobi_used"))
+                        for row in partial_records
+                    ),
+                    "state_chain_complete": bool(partial_records)
+                    and all(
+                        partial_records[index].get("post_state_sha256")
+                        == partial_records[index + 1].get("pre_state_sha256")
+                        for index in range(len(partial_records) - 1)
+                    ),
+                    "binary_state_unchanged": bool(partial_records)
+                    and all(
+                        bool(row.get("binary_state_unchanged"))
+                        for row in partial_records
+                    ),
+                    "future_actual_used": False,
+                    "failure": failure,
+                }
+                (method_root / "METHOD_SUMMARY.json").write_text(
+                    json.dumps(summary, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+            summaries.append(summary)
         expected = len(frames) * 8
         committed = sum(item["committed_issues"] for item in summaries)
+        failed_methods = [
+            item["comparison_method_id"]
+            for item in summaries
+            if item["status"] != "PASS"
+        ]
         matrix = {
             "schema_version": "K9H7_RESULT_V2.matrix_run.v1",
             "status": "PASS" if committed == expected and all(item["status"] == "PASS" for item in summaries) else "FAIL_CLOSED",
@@ -2706,6 +3215,8 @@ class PfrRuntimeRunner:
             "all_state_chains_complete": all(item["state_chain_complete"] for item in summaries),
             "all_binary_states_unchanged_in_fast_layer": all(item["binary_state_unchanged"] for item in summaries),
             "future_actual_used": False,
+            "failed_methods": failed_methods,
+            "method_failures_isolated": True,
             "method_summaries": summaries,
         }
         output.mkdir(parents=True, exist_ok=True)
