@@ -1992,8 +1992,8 @@ def _optimize_mess_routes(
             for index, row in enumerate(rows)
             if row[0] != MESS_CANONICAL_STAGING[mid]
         )
-        <= 2,
-        name="retain_two_canonical_grid_support_mess",
+        <= 1,
+        name="retain_three_canonical_grid_support_mess",
     )
     candidate_destinations = sorted({
         row[0]
@@ -2039,7 +2039,7 @@ def _optimize_mess_routes(
         "num_integer_variables": len(variables),
         "num_quadratic_objective_terms": len(candidate_sites),
         "destination_mess_occupancy_limit": 1,
-        "maximum_mess_away_from_canonical_staging": 2,
+        "maximum_mess_away_from_canonical_staging": 1,
         "joint_safe_eta_energy_used": safe,
     }
     model.dispose()
