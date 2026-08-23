@@ -6,21 +6,15 @@ import argparse
 import json
 import os
 from pathlib import Path
-import subprocess
 from typing import Any, Mapping
 
+from pfr.git_identity import run_git
 from pfr.methods import ComparisonMethod, ExperimentAuthority, MethodFactory
 from pfr.migration import load_migration_authority
 
 
 def git(repo: Path, *args: str) -> str:
-    process = subprocess.run(
-        ("git", "-C", str(repo), *args),
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    return process.stdout.strip()
+    return run_git(repo, args)
 
 
 def atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:

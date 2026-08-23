@@ -19,6 +19,7 @@ import numpy as np
 import pandas as pd
 
 from pfr.daily import DailyInitializationError, certify_daily_pre_identity
+from pfr.git_identity import run_git
 from pfr.methods import ComparisonMethod, ExperimentAuthority, MethodFactory
 from pfr.migration import MigrationAuthority, load_migration_authority
 from pfr.optimization import GurobiFastControlOptimizer, gurobi_thread_limit
@@ -46,13 +47,7 @@ def sha256(path: Path) -> str:
 
 def git_source_identity(repo: Path) -> Mapping[str, Any]:
     def git(*args: str) -> str:
-        process = subprocess.run(
-            ("git", "-C", str(repo), *args),
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        return process.stdout.strip()
+        return run_git(repo, args)
 
     full_commit = git("rev-parse", "HEAD")
     branch = git("branch", "--show-current")
