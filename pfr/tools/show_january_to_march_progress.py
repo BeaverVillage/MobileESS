@@ -11,8 +11,8 @@ from pathlib import Path
 import time
 
 
-METHODS = tuple(f"B{index}" for index in range(8))
-EXPECTED_PER_DAY = 288 * len(METHODS)
+MAIN_METHODS = tuple(f"B{index}" for index in range(8))
+B8_METHODS = ("B8",)
 
 
 @dataclass(frozen=True)
@@ -21,6 +21,7 @@ class Period:
     root: Path
     start: date
     days: int
+    methods: tuple[str, ...]
 
 
 def active_outputs() -> set[Path]:
@@ -56,7 +57,7 @@ def json_status(path: Path) -> str | None:
 
 
 def inspect_day(
-    day_root: Path, active: bool
+    day_root: Path, active: bool, methods: tuple[str, ...]
 ) -> tuple[str, int, list[str], dict[str, int]]:
     summary_path = day_root / "MATRIX_SUMMARY.json"
     if summary_path.is_file():
@@ -78,10 +79,12 @@ def inspect_day(
         ), done, failed, counts
     counts = {
         method: len(tuple((day_root / method).glob("issue_*/COMMIT_MARKER.json")))
-        for method in METHODS
+        for method in methods
     }
     failed = [
-        method for method in METHODS if (day_root / method / "FAILURE.json").is_file()
+        method
+        for method in methods
+        if (day_root / method / "FAILURE.json").is_file()
     ]
     if (day_root / "ORCHESTRATION_FAILURE.json").is_file():
         failed.append("ORCHESTRATION")
@@ -99,6 +102,7 @@ def snapshot(periods: list[Period]) -> str:
     lines: list[str] = []
     grand_done = grand_expected = grand_pass_days = grand_fail_days = 0
     for period in periods:
+        expected_per_day = 288 * len(period.methods)
         rows = []
         for offset in range(period.days):
             calendar_date = period.start + timedelta(days=offset)
@@ -106,11 +110,15 @@ def snapshot(periods: list[Period]) -> str:
             rows.append(
                 (
                     calendar_date.isoformat(),
-                    *inspect_day(day_root, day_root.resolve() in active),
+                    *inspect_day(
+                        day_root,
+                        day_root.resolve() in active,
+                        period.methods,
+                    ),
                 )
             )
         done = sum(row[2] for row in rows)
-        expected = period.days * EXPECTED_PER_DAY
+        expected = period.days * expected_per_day
         pass_days = sum(row[1] == "PASS" for row in rows)
         fail_days = sum("FAIL" in row[1] for row in rows)
         running = [row for row in rows if row[1].startswith("RUNNING")]
@@ -122,10 +130,11 @@ def snapshot(periods: list[Period]) -> str:
         for calendar_date, status, markers, failed, counts in latest:
             suffix = f" failed={','.join(failed)}" if failed else ""
             method_progress = " ".join(
-                f"{method}={counts.get(method, 0):03d}" for method in METHODS
+                f"{method}={counts.get(method, 0):03d}"
+                for method in period.methods
             )
             lines.append(
-                f"  {calendar_date} {markers}/{EXPECTED_PER_DAY} {status}{suffix} "
+                f"  {calendar_date} {markers}/{expected_per_day} {status}{suffix} "
                 f"{method_progress}"
             )
         grand_done += done
@@ -219,7 +228,12 @@ def main() -> None:
     parser.add_argument(
         "--january-root",
         type=Path,
-        default=base / "CODEX_PR6_V13_13_JAN2025_FULL_DAILY_20260823",
+        default=base / "JAN2025_IDC_REFREEZE_V1_B0_B7",
+    )
+    parser.add_argument(
+        "--january-b8-root",
+        type=Path,
+        default=base / "JAN2025_IDC_REFREEZE_V1_B8",
     )
     parser.add_argument(
         "--february-root",
@@ -231,12 +245,61 @@ def main() -> None:
         type=Path,
         default=base / "CODEX_PR6_V13_13_MAR2025_FULL_DAILY_20260823",
     )
+    parser.add_argument(
+        "--february-b8-root",
+        type=Path,
+        default=base / "CODEX_PR6_V13_13_FEB2025_FULL_B8_PERIODIC5_20260823",
+    )
+    parser.add_argument(
+        "--march-b8-root",
+        type=Path,
+        default=base / "CODEX_PR6_V13_13_MAR2025_FULL_B8_PERIODIC5_20260823",
+    )
     parser.add_argument("--watch-seconds", type=float, default=10.0)
     args = parser.parse_args()
     periods = [
-        Period("JANUARY", args.january_root, date(2025, 1, 1), 31),
-        Period("FEBRUARY", args.february_root, date(2025, 2, 1), 28),
-        Period("MARCH", args.march_root, date(2025, 3, 1), 31),
+        Period(
+            "JANUARY B0-B7",
+            args.january_root,
+            date(2025, 1, 1),
+            31,
+            MAIN_METHODS,
+        ),
+        Period(
+            "JANUARY B08",
+            args.january_b8_root,
+            date(2025, 1, 1),
+            31,
+            B8_METHODS,
+        ),
+        Period(
+            "FEBRUARY B0-B7",
+            args.february_root,
+            date(2025, 2, 1),
+            28,
+            MAIN_METHODS,
+        ),
+        Period(
+            "FEBRUARY B08",
+            args.february_b8_root,
+            date(2025, 2, 1),
+            28,
+            B8_METHODS,
+        ),
+        Period(
+            "MARCH B0-B7",
+            args.march_root,
+            date(2025, 3, 1),
+            31,
+            MAIN_METHODS,
+        ),
+        Period(
+            "MARCH B08",
+            args.march_b8_root,
+            date(2025, 3, 1),
+            31,
+            B8_METHODS,
+        ),
     ]
     while True:
         print(source_progress(), flush=True)
