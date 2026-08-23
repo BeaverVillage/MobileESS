@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import hashlib
 import json
 import os
@@ -113,11 +114,16 @@ def main() -> None:
                 block = json.loads((path / "BLOCK_AUTHORITY.json").read_text(encoding="utf-8"))
                 power_ranges.append((int(block["issue_first"]), int(block["issue_last"])))
         source_last = int(period["source_padding_issue_last"])
-        power_issues = {
+        power_issue_counts = Counter(
             issue
             for block_first, block_last in power_ranges
             for issue in range(block_first, block_last + 1)
             if first <= issue <= source_last
+        )
+        power_issues = {
+            issue
+            for issue, count in power_issue_counts.items()
+            if count > 0
         }
         source_checks.update(
             {
@@ -129,9 +135,13 @@ def main() -> None:
                     and authority.get("future_actual_used_by_optimizer") is False
                     and authority.get("period_contract_sha256") == sha256(contract_path)
                 ),
-                "mobility_exact_scored_coverage": mobility_issues == expected,
+                "mobility_exact_scored_coverage": (
+                    len(mobility_files) == len(expected)
+                    and mobility_issues == expected
+                ),
                 "power_exact_scored_and_padding_coverage": power_issues
-                == set(range(first, source_last + 1)),
+                == set(range(first, source_last + 1))
+                and all(count == 1 for count in power_issue_counts.values()),
                 "template_bank": (
                     args.shared_root / "mobility/E4B_FULLFIT_TEMPLATE_BANK_129.parquet"
                 ).is_file(),

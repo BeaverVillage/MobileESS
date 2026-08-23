@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 from datetime import date, timedelta
 import hashlib
 import json
@@ -43,7 +44,11 @@ def atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:
     temporary.replace(path)
 
 
-def inspect_method(method_root: Path, method: str) -> dict[str, Any]:
+def inspect_method(
+    method_root: Path,
+    method: str,
+    expected_first_issue: int,
+) -> dict[str, Any]:
     errors: list[str] = []
     markers: list[Mapping[str, Any]] = []
     for marker_path in sorted(method_root.glob("issue_*/COMMIT_MARKER.json")):
@@ -70,8 +75,13 @@ def inspect_method(method_root: Path, method: str) -> dict[str, Any]:
             errors.append(f"{marker_path}: {type(exc).__name__}: {exc}")
     markers.sort(key=lambda row: int(row["issue"]))
     issues = [int(row["issue"]) for row in markers]
+    expected_issues = list(
+        range(expected_first_issue, expected_first_issue + ISSUES_PER_DAY)
+    )
     if len(issues) != len(set(issues)):
         errors.append("duplicate committed issue")
+    if markers and issues != expected_issues[: len(issues)]:
+        errors.append("committed issue axis is not the exact daily 288-step range")
     if any(
         markers[index]["post_state_sha256"]
         != markers[index + 1]["pre_state_sha256"]
@@ -101,12 +111,41 @@ def inspect_method(method_root: Path, method: str) -> dict[str, Any]:
             errors.append("failed method has no FAILURE.json")
     elif method_root.exists() and (markers or failure is not None):
         errors.append("METHOD_SUMMARY.json missing")
+
+    csv_path = method_root / "MATERIALIZED_COMMIT_ROWS.csv"
+    csv_issues: list[int] = []
+    if csv_path.is_file():
+        try:
+            csv.field_size_limit(64 * 1024 * 1024)
+            with csv_path.open("r", encoding="utf-8", newline="") as handle:
+                reader = csv.DictReader(handle)
+                if reader.fieldnames is None or "issue" not in reader.fieldnames:
+                    raise ValueError("issue column missing")
+                for row in reader:
+                    csv_issues.append(int(row["issue"]))
+                    if row.get("comparison_method_id") != method:
+                        errors.append("materialized CSV method axis mismatch")
+            if csv_issues != issues:
+                errors.append("materialized CSV issue axis differs from commit markers")
+        except (OSError, ValueError, TypeError, csv.Error) as exc:
+            errors.append(f"materialized CSV: {type(exc).__name__}: {exc}")
+    elif summary is not None and summary.get("status") == "PASS":
+        errors.append("PASS method lacks MATERIALIZED_COMMIT_ROWS.csv")
+
+    issue_directories = sorted(
+        path.name for path in method_root.glob("issue_*") if path.is_dir()
+    )
+    expected_directories = [f"issue_{issue:06d}" for issue in expected_issues]
+    if summary is not None and summary.get("status") == "PASS":
+        if issue_directories != expected_directories:
+            errors.append("PASS method issue-directory axis is incomplete or contains extras")
     return {
         "method": method,
         "status": summary.get("status") if summary is not None else "NOT_RUN",
         "commit_markers": len(markers),
         "first_issue": min(issues) if issues else None,
         "last_issue": max(issues) if issues else None,
+        "materialized_csv_rows": len(csv_issues),
         "failure_evidence": failure is not None,
         "errors": errors,
     }
@@ -119,7 +158,13 @@ def inspect_day(
     methods: tuple[str, ...] = METHODS,
 ) -> dict[str, Any]:
     errors: list[str] = []
-    method_rows = [inspect_method(day_root / method, method) for method in methods]
+    expected_first_issue = (
+        date.fromisoformat(calendar_date) - date(2025, 1, 1)
+    ).days * ISSUES_PER_DAY
+    method_rows = [
+        inspect_method(day_root / method, method, expected_first_issue)
+        for method in methods
+    ]
     errors.extend(
         error for method in method_rows for error in method["errors"]
     )
@@ -152,6 +197,16 @@ def inspect_day(
         complete = True
         if int(summary.get("valid_commit_markers", -1)) != marker_count:
             errors.append("MATRIX_SUMMARY commit count mismatch")
+        if int(summary.get("method_count", -1)) != len(methods):
+            errors.append("MATRIX_SUMMARY method count mismatch")
+        if int(summary.get("issues_per_method", -1)) != ISSUES_PER_DAY:
+            errors.append("MATRIX_SUMMARY issue-axis size mismatch")
+        if int(summary.get("expected_commit_markers", -1)) != (
+            ISSUES_PER_DAY * len(methods)
+        ):
+            errors.append("MATRIX_SUMMARY expected marker matrix mismatch")
+        if summary.get("method_execution_order") != list(methods):
+            errors.append("MATRIX_SUMMARY method execution axis mismatch")
         if summary.get("continue_to_next_method_after_failure") is not True:
             errors.append("B-failure continuation policy missing")
         if scientific_status == "PASS":
@@ -176,6 +231,12 @@ def inspect_day(
             errors.append("RUN_MANIFEST/MATRIX_SUMMARY status mismatch")
         if int(manifest.get("count", -1)) != ISSUES_PER_DAY:
             errors.append("RUN_MANIFEST issue count mismatch")
+        if int(manifest.get("start_issue", -1)) != expected_first_issue:
+            errors.append("RUN_MANIFEST daily issue origin mismatch")
+        if len(str(manifest.get("git_full_commit_sha", ""))) != 40:
+            errors.append("RUN_MANIFEST full Git SHA missing")
+        if manifest.get("git_worktree_dirty") is not False:
+            errors.append("RUN_MANIFEST was produced from a dirty worktree")
         source_authority_path = Path(
             str(manifest.get("shared_exogenous_authority_path", ""))
         )
@@ -197,6 +258,59 @@ def inspect_day(
         "methods": method_rows,
         "orchestration_failure_evidence": orchestration_failure is not None,
         "temporary_files": temp_files,
+        "errors": errors,
+    }
+
+
+def inspect_campaign_registry(
+    root: Path,
+    expected_dates: list[str],
+    methods: tuple[str, ...],
+) -> dict[str, Any]:
+    path = root / "CAMPAIGN_SUMMARY.json"
+    errors: list[str] = []
+    if not path.is_file():
+        return {"present": False, "status": "MISSING", "errors": [
+            "CAMPAIGN_SUMMARY.json missing"
+        ]}
+    try:
+        summary = load_json(path)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        return {
+            "present": True,
+            "status": "UNREADABLE",
+            "errors": [f"CAMPAIGN_SUMMARY.json: {type(exc).__name__}: {exc}"],
+        }
+    rows = summary.get("daily_runs")
+    if not isinstance(rows, list):
+        rows = []
+        errors.append("campaign daily_runs registry missing")
+    dates = [str(row.get("calendar_date")) for row in rows if isinstance(row, dict)]
+    if dates != expected_dates:
+        errors.append("campaign daily date axis is incomplete, duplicated, or reordered")
+    if summary.get("method_ids") != list(methods):
+        errors.append("campaign method axis mismatch")
+    if int(summary.get("methods_per_day", -1)) != len(methods):
+        errors.append("campaign methods_per_day mismatch")
+    if int(summary.get("issues_per_method_per_day", -1)) != ISSUES_PER_DAY:
+        errors.append("campaign issue-axis size mismatch")
+    if summary.get("continue_to_next_method_after_failure") is not True:
+        errors.append("campaign method-failure continuation policy missing")
+    if summary.get("continue_to_next_day_after_failure") is not True:
+        errors.append("campaign day-failure continuation policy missing")
+    expected_b8 = methods == B8_METHODS
+    if summary.get("supplementary_b8_periodic_5min") is not expected_b8:
+        errors.append("campaign B8 supplementary classification mismatch")
+    if summary.get("status") == "PASS" and any(
+        not isinstance(row, dict) or row.get("status") != "PASS" for row in rows
+    ):
+        errors.append("PASS campaign registry contains a non-PASS day")
+    return {
+        "present": True,
+        "status": str(summary.get("status", "UNKNOWN")),
+        "registered_days": len(rows),
+        "registered_dates": dates,
+        "method_ids": summary.get("method_ids"),
         "errors": errors,
     }
 
@@ -231,7 +345,11 @@ def main() -> None:
         )
         for calendar_date in expected_dates
     ]
-    storage_ok = all(row["storage_integrity"] == "PASS" for row in rows)
+    campaign_registry = inspect_campaign_registry(args.root, expected_dates, methods)
+    storage_ok = (
+        all(row["storage_integrity"] == "PASS" for row in rows)
+        and not campaign_registry["errors"]
+    )
     complete = all(bool(row["complete"]) for row in rows)
     scientific_pass = complete and all(
         row["scientific_status"] == "PASS" for row in rows
@@ -262,6 +380,7 @@ def main() -> None:
         "total_commit_markers": sum(int(row["commit_markers"]) for row in rows),
         "scientific_implementation_fingerprint": fingerprint,
         "days": rows,
+        "campaign_registry": campaign_registry,
     }
     report_path = args.report or (args.root / "STORAGE_VERIFICATION.json")
     atomic_write_json(report_path, report)
