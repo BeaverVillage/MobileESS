@@ -11,7 +11,11 @@ from typing import Any, Mapping, Sequence
 import numpy as np
 import pandas as pd
 
-from pfr.methods import ComparisonMethod, ExperimentAuthority, MethodFactory
+from pfr.methods import (
+    ExperimentAuthority,
+    MAIN_COMPARISON_METHODS,
+    MethodFactory,
+)
 from pfr.provenance import scientific_implementation_fingerprint
 from pfr.tools.run_pfr_daily_campaign import ISSUES_PER_DAY, day_specs
 from pfr.tools.run_pfr_matrix import _runtime_initial_state
@@ -36,7 +40,9 @@ def require_files(paths: Sequence[Path], label: str) -> Mapping[str, Any]:
 
 def validate_method_contracts() -> Mapping[str, Any]:
     hashes = tuple(format(index, "064x") for index in range(1, 8))
-    configs = MethodFactory(ExperimentAuthority(*hashes)).all()
+    factory = MethodFactory(ExperimentAuthority(*hashes))
+    configs = factory.all()
+    b8 = factory.supplementary()[0]
     periodic = {
         item.comparison_method_id.value
         for item in configs
@@ -46,13 +52,18 @@ def validate_method_contracts() -> Mapping[str, Any]:
     b0 = configs[0]
     passed = bool(
         tuple(item.comparison_method_id for item in configs)
-        == tuple(ComparisonMethod)
+        == MAIN_COMPARISON_METHODS
         and periodic == expected_periodic
         and b0.energy_flexibility == "NONE"
         and not b0.temporal_workload_shift
         and not b0.spatial_workload_migration
         and not b0.slow_fast_control
         and all(item.ac_safety_filter for item in configs)
+        and b8.comparison_method_id.value == "B8"
+        and b8.control_mode == "PERIODIC_MPC"
+        and b8.periodic_replan_steps == 1
+        and b8.risk_interface == "CALIBRATED"
+        and b8.ac_safety_filter
     )
     return {
         "pass": passed,
@@ -65,6 +76,13 @@ def validate_method_contracts() -> Mapping[str, Any]:
         },
         "safety_filter_common": all(item.ac_safety_filter for item in configs),
         "safety_controllable_subset_is_method_restricted": True,
+        "supplementary_b8": {
+            "control_mode": b8.control_mode,
+            "periodic_replan_steps": b8.periodic_replan_steps,
+            "periodic_replan_minutes": 5,
+            "risk_interface": b8.risk_interface,
+            "main_registry_unchanged": True,
+        },
     }
 
 

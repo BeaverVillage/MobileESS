@@ -1,4 +1,4 @@
-"""PFR8 B0-B7 controlled method factory and K9H7_RESULT_V2 identity."""
+"""PFR B0-B7 main methods plus the B8 five-minute timing baseline."""
 
 from __future__ import annotations
 
@@ -27,6 +27,11 @@ class ComparisonMethod(str, Enum):
     B5 = "B5"
     B6 = "B6"
     B7 = "B7"
+    B8 = "B8"
+
+
+MAIN_COMPARISON_METHODS = tuple(ComparisonMethod(f"B{index}") for index in range(8))
+SUPPLEMENTARY_COMPARISON_METHODS = (ComparisonMethod.B8,)
 
 
 @dataclass(frozen=True)
@@ -73,6 +78,7 @@ class MethodConfig:
     ai_training_aware: bool
     joint_uncertainty: bool
     slow_fast_control: bool
+    periodic_replan_steps: Optional[int]
     ac_safety_filter: bool
     authority_fingerprint: str
 
@@ -81,6 +87,11 @@ class MethodConfig:
             raise MethodContractError("unknown energy flexibility")
         if self.control_mode not in {"FIXED", "PERIODIC_MPC", "EVENT_TRIGGERED"}:
             raise MethodContractError("unknown controller mode")
+        if self.control_mode == "PERIODIC_MPC":
+            if self.periodic_replan_steps is None or self.periodic_replan_steps <= 0:
+                raise MethodContractError("periodic MPC requires a positive refresh interval")
+        elif self.periodic_replan_steps is not None:
+            raise MethodContractError("non-periodic methods cannot define a periodic refresh interval")
         if self.risk_interface not in {"NONE", "RAW_UNCALIBRATED", "CALIBRATED"}:
             raise MethodContractError("unknown risk interface")
         if len(self.authority_fingerprint) != 64:
@@ -90,14 +101,15 @@ class MethodConfig:
 
 
 _TREATMENTS: Mapping[ComparisonMethod, Tuple[object, ...]] = {
-    ComparisonMethod.B0: ("No flexibility", "NONE", False, False, "FIXED", "NONE", False, False, False),
-    ComparisonMethod.B1: ("MESS only", "MESS", False, False, "PERIODIC_MPC", "NONE", False, False, True),
-    ComparisonMethod.B2: ("Temporal AI workload shifting only", "NONE", True, False, "PERIODIC_MPC", "NONE", True, False, True),
-    ComparisonMethod.B3: ("Spatial AI workload migration only", "NONE", False, True, "PERIODIC_MPC", "NONE", True, False, True),
-    ComparisonMethod.B4: ("Stationary BESS plus AI workload", "STATIONARY_BESS", True, True, "PERIODIC_MPC", "NONE", True, False, True),
-    ComparisonMethod.B5: ("Joint MESS plus workload periodic MPC", "MESS", True, True, "PERIODIC_MPC", "NONE", True, True, True),
-    ComparisonMethod.B6: ("Joint event-triggered raw risk", "MESS", True, True, "EVENT_TRIGGERED", "RAW_UNCALIBRATED", True, True, True),
-    ComparisonMethod.B7: ("Full proposed calibrated ICPS", "MESS", True, True, "EVENT_TRIGGERED", "CALIBRATED", True, True, True),
+    ComparisonMethod.B0: ("No flexibility", "NONE", False, False, "FIXED", "NONE", False, False, False, None),
+    ComparisonMethod.B1: ("MESS only", "MESS", False, False, "PERIODIC_MPC", "NONE", False, False, True, 6),
+    ComparisonMethod.B2: ("Temporal AI workload shifting only", "NONE", True, False, "PERIODIC_MPC", "NONE", True, False, True, 6),
+    ComparisonMethod.B3: ("Spatial AI workload migration only", "NONE", False, True, "PERIODIC_MPC", "NONE", True, False, True, 6),
+    ComparisonMethod.B4: ("Stationary BESS plus AI workload", "STATIONARY_BESS", True, True, "PERIODIC_MPC", "NONE", True, False, True, 6),
+    ComparisonMethod.B5: ("Joint MESS plus workload periodic MPC", "MESS", True, True, "PERIODIC_MPC", "NONE", True, True, True, 6),
+    ComparisonMethod.B6: ("Joint event-triggered raw risk", "MESS", True, True, "EVENT_TRIGGERED", "RAW_UNCALIBRATED", True, True, True, None),
+    ComparisonMethod.B7: ("Full proposed calibrated ICPS", "MESS", True, True, "EVENT_TRIGGERED", "CALIBRATED", True, True, True, None),
+    ComparisonMethod.B8: ("Joint calibrated five-minute periodic full-replan baseline", "MESS", True, True, "PERIODIC_MPC", "CALIBRATED", True, True, True, 1),
 }
 
 
@@ -119,6 +131,9 @@ class MethodFactory:
             ai_training_aware=bool(treatment[6]),
             joint_uncertainty=bool(treatment[7]),
             slow_fast_control=bool(treatment[8]),
+            periodic_replan_steps=(
+                None if treatment[9] is None else int(treatment[9])
+            ),
             ac_safety_filter=True,
             authority_fingerprint=self.authority.fingerprint,
         )
@@ -126,11 +141,21 @@ class MethodFactory:
         return config
 
     def all(self) -> Tuple[MethodConfig, ...]:
-        result = tuple(self.create(method) for method in ComparisonMethod)
+        """Return the frozen B0-B7 main registry for backward compatibility."""
+        result = tuple(self.create(method) for method in MAIN_COMPARISON_METHODS)
         if len({item.comparison_method_id for item in result}) != 8:
             raise MethodContractError("B0-B7 registry is incomplete")
         if len({item.authority_fingerprint for item in result}) != 1:
             raise MethodContractError("comparison methods do not share one authority")
+        return result
+
+    def supplementary(self) -> Tuple[MethodConfig, ...]:
+        """Return post-hoc supplementary timing baselines."""
+        result = tuple(
+            self.create(method) for method in SUPPLEMENTARY_COMPARISON_METHODS
+        )
+        if len({item.authority_fingerprint for item in result}) != 1:
+            raise MethodContractError("supplementary methods do not share one authority")
         return result
 
 
@@ -150,7 +175,7 @@ class K9H7ResultIdentityV2:
         if self.scientific_framework_id != "V13_AI_ICPS":
             raise MethodContractError("unknown current scientific framework")
         if self.comparison_method_id not in {method.value for method in ComparisonMethod}:
-            raise MethodContractError("comparison method must be B0-B7")
+            raise MethodContractError("comparison method must be B0-B8")
         if not self.controller_id or not self.representative_week_id:
             raise MethodContractError("controller and representative week identities are required")
         if len(self.shared_authority_fingerprint) != 64:

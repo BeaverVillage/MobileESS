@@ -143,6 +143,34 @@ class PfrRuntimeTests(unittest.TestCase):
         self.assertEqual(physical.calls, 32)
         self.assertTrue(summary["all_state_chains_complete"])
 
+    def test_b8_replans_every_five_minute_issue(self):
+        b8 = MethodFactory(
+            ExperimentAuthority(*[format(index, "064x") for index in range(1, 8)])
+        ).create(ComparisonMethod.B8)
+        with tempfile.TemporaryDirectory() as temporary:
+            summary = PfrRuntimeRunner(
+                power_curve=self.curve,
+                physical_backend=FakePhysical(),
+            ).run_method(
+                config=b8,
+                frames=self.frames,
+                initial=self.initial,
+                representative_week_id="TEST_B8_PERIODIC_5MIN",
+                output=Path(temporary),
+            )
+            rows = [
+                __import__("json").loads(path.read_text(encoding="utf-8"))
+                for path in sorted(
+                    (Path(temporary) / "B8").glob("issue_*/COMMIT_MARKER.json")
+                )
+            ]
+        self.assertEqual(summary["status"], "PASS")
+        self.assertEqual(summary["full_replan_count"], len(self.frames))
+        self.assertEqual(rows[0]["replan_causes"], ["INITIAL_PLAN"])
+        self.assertEqual(
+            rows[1]["replan_causes"], ["PERIODIC_5_MINUTE_REFRESH"]
+        )
+
     def test_common_native_binary_transition_precedes_and_is_fixed_during_safety(self):
         physical = NativeControlPhysical()
         with tempfile.TemporaryDirectory() as temporary:

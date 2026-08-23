@@ -89,6 +89,29 @@ def test_pass_reuse_requires_matching_implementation_fingerprint(
     assert not reusable_pass(day, "changed")
 
 
+def test_b8_pass_reuse_requires_288_markers(tmp_path: Path) -> None:
+    day = tmp_path / "2025-01-01"
+    day.mkdir()
+    (day / "MATRIX_SUMMARY.json").write_text(
+        """{
+          "status": "PASS",
+          "expected_commit_markers": 288,
+          "all_actual_gurobi": true,
+          "all_fresh_exact_opendss": true,
+          "all_state_chains_complete": true,
+          "future_actual_used": false
+        }""",
+        encoding="utf-8",
+    )
+    (day / "RUN_MANIFEST.json").write_text(
+        '{"scientific_implementation_fingerprint":"current"}',
+        encoding="utf-8",
+    )
+
+    assert reusable_pass(day, "current", method_count=1)
+    assert not reusable_pass(day, "current", method_count=8)
+
+
 @pytest.mark.skipif(os.name != "posix", reason="process groups use POSIX semantics")
 def test_ctrl_c_cleanup_discovers_and_stops_orphan_matrix_group(
     tmp_path: Path,

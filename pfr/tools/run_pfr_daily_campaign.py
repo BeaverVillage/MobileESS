@@ -22,6 +22,7 @@ from pfr.provenance import scientific_implementation_fingerprint
 
 ISSUES_PER_DAY = 288
 METHOD_COUNT = 8
+B8_METHOD_COUNT = 1
 _ACTIVE_CHILDREN: set[subprocess.Popen[str]] = set()
 _ACTIVE_CHILDREN_LOCK = threading.Lock()
 _STOP_REQUESTED = threading.Event()
@@ -181,10 +182,12 @@ def day_specs(start_day: int, end_day: int) -> tuple[DaySpec, ...]:
     )
 
 
-def summary_passes(summary: Mapping[str, Any]) -> bool:
+def summary_passes(
+    summary: Mapping[str, Any], *, method_count: int = METHOD_COUNT
+) -> bool:
     return bool(
         summary.get("status") == "PASS"
-        and summary.get("expected_commit_markers") == ISSUES_PER_DAY * METHOD_COUNT
+        and summary.get("expected_commit_markers") == ISSUES_PER_DAY * method_count
         and summary.get("all_actual_gurobi") is True
         and summary.get("all_fresh_exact_opendss") is True
         and summary.get("all_state_chains_complete") is True
@@ -204,6 +207,7 @@ def reusable_pass(
     day_root: Path,
     implementation_fingerprint: str,
     shared_authority_sha256: str | None = None,
+    method_count: int = METHOD_COUNT,
 ) -> bool:
     summary_path = day_root / "MATRIX_SUMMARY.json"
     manifest_path = day_root / "RUN_MANIFEST.json"
@@ -215,7 +219,7 @@ def reusable_pass(
     except (OSError, json.JSONDecodeError):
         return False
     return bool(
-        summary_passes(summary)
+        summary_passes(summary, method_count=method_count)
         and manifest.get("scientific_implementation_fingerprint")
         == implementation_fingerprint
         and (
@@ -250,6 +254,7 @@ def run_day(
     common: Sequence[str],
     capture_day_logs: bool,
     reuse_passed_days: bool,
+    supplementary_b8_periodic_5min: bool,
 ) -> Mapping[str, Any]:
     day_root = output / spec.calendar_date
     summary_path = day_root / "MATRIX_SUMMARY.json"
@@ -262,8 +267,12 @@ def run_day(
     shared_authority_sha256 = file_sha256(
         shared_root / "SHARED_EXOGENOUS_AUTHORITY.json"
     )
+    method_count = B8_METHOD_COUNT if supplementary_b8_periodic_5min else METHOD_COUNT
     if reuse_passed_days and reusable_pass(
-        day_root, implementation_fingerprint, shared_authority_sha256
+        day_root,
+        implementation_fingerprint,
+        shared_authority_sha256,
+        method_count,
     ):
         return {
             "calendar_date": spec.calendar_date,
@@ -288,6 +297,8 @@ def run_day(
         "--start-issue", str(spec.start_issue),
         "--output", str(day_root),
     ]
+    if supplementary_b8_periodic_5min:
+        command.append("--supplementary-b8-periodic-5min")
     if capture_day_logs:
         with (day_root / "DAY_RUN.log").open("w", encoding="utf-8") as log:
             returncode = run_child(command, cwd=repo, stdout=log)
@@ -309,7 +320,11 @@ def run_day(
     result = {
         "calendar_date": spec.calendar_date,
         "start_issue": spec.start_issue,
-        "status": "PASS" if summary_passes(summary) else "FAIL_CLOSED",
+        "status": (
+            "PASS"
+            if summary_passes(summary, method_count=method_count)
+            else "FAIL_CLOSED"
+        ),
         "artifact": str(day_root),
         "reused_existing_pass": False,
         "scientific_implementation_fingerprint": implementation_fingerprint,
@@ -327,6 +342,7 @@ def campaign_payload(
     day_workers: int,
     summaries: Sequence[Mapping[str, Any]],
     final: bool,
+    supplementary_b8_periodic_5min: bool,
 ) -> Mapping[str, Any]:
     expected_days = end_day - start_day + 1
     complete = len(summaries) == expected_days
@@ -334,7 +350,11 @@ def campaign_payload(
     any_fail = any(row["status"] == "FAIL_CLOSED" for row in summaries)
     status = "PASS" if all_pass else ("FAIL_CLOSED" if final or any_fail else "IN_PROGRESS")
     return {
-        "schema_version": "PFR_JAN2025_POST_HOC_DAILY_VALIDATION_V13_13_FREEZE_20260823",
+        "schema_version": (
+            "PFR_JAN2025_POST_HOC_B8_PERIODIC_5MIN_SUPPLEMENTARY_V1"
+            if supplementary_b8_periodic_5min
+            else "PFR_JAN2025_POST_HOC_DAILY_VALIDATION_V13_13_FREEZE_20260823"
+        ),
         "status": status,
         "evaluation_classification": "POST_HOC_DESIGN_VALIDATION_NOT_INDEPENDENT_HOLDOUT",
         "independent_holdout_claim": False,
@@ -350,7 +370,15 @@ def campaign_payload(
         "failure_evidence_preserved_before_continuation": True,
         "controller_burn_in_steps": 0,
         "issues_per_method_per_day": ISSUES_PER_DAY,
-        "methods_per_day": METHOD_COUNT,
+        "methods_per_day": (
+            B8_METHOD_COUNT if supplementary_b8_periodic_5min else METHOD_COUNT
+        ),
+        "method_ids": (
+            ["B8"]
+            if supplementary_b8_periodic_5min
+            else [f"B{index}" for index in range(METHOD_COUNT)]
+        ),
+        "supplementary_b8_periodic_5min": supplementary_b8_periodic_5min,
         "daily_runs": sorted(summaries, key=lambda row: str(row["calendar_date"])),
     }
 
@@ -369,6 +397,11 @@ def main() -> None:
     parser.add_argument("--day-workers", type=int, default=1)
     parser.add_argument("--capture-day-logs", action="store_true")
     parser.add_argument("--no-reuse-passed-days", action="store_true")
+    parser.add_argument(
+        "--supplementary-b8-periodic-5min",
+        action="store_true",
+        help="Run only the post-hoc B8 five-minute periodic timing baseline.",
+    )
     parser.add_argument("--shared-root", type=Path, required=True)
     parser.add_argument("--exact-package-root", type=Path, required=True)
     parser.add_argument("--authority-package-root", type=Path, required=True)
@@ -447,6 +480,9 @@ def main() -> None:
                 common=common,
                 capture_day_logs=args.capture_day_logs,
                 reuse_passed_days=not args.no_reuse_passed_days,
+                supplementary_b8_periodic_5min=(
+                    args.supplementary_b8_periodic_5min
+                ),
             ): spec
             for spec in specs
         }
@@ -487,6 +523,9 @@ def main() -> None:
                     day_workers=args.day_workers,
                     summaries=summaries,
                     final=False,
+                    supplementary_b8_periodic_5min=(
+                        args.supplementary_b8_periodic_5min
+                    ),
                 ),
             )
             done = len(summaries)
@@ -510,6 +549,9 @@ def main() -> None:
                 day_workers=args.day_workers,
                 summaries=summaries,
                 final=False,
+                supplementary_b8_periodic_5min=(
+                    args.supplementary_b8_periodic_5min
+                ),
             )
         )
         interrupted["status"] = "INTERRUPTED"
@@ -530,6 +572,7 @@ def main() -> None:
         day_workers=args.day_workers,
         summaries=summaries,
         final=True,
+        supplementary_b8_periodic_5min=args.supplementary_b8_periodic_5min,
     )
     write_campaign(args.output, campaign)
     print(json.dumps({"status": campaign["status"], "days": len(summaries), "output": str(args.output)}))

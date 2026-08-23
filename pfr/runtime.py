@@ -12,7 +12,12 @@ from pathlib import Path
 import time
 from typing import Any, Iterable, Mapping, Optional, Protocol, Sequence, Tuple
 
-from .methods import ComparisonMethod, K9H7ResultIdentityV2, MethodConfig
+from .methods import (
+    ComparisonMethod,
+    K9H7ResultIdentityV2,
+    MAIN_COMPARISON_METHODS,
+    MethodConfig,
+)
 from .optimization import (
     FastControlOptimizer,
     FastOptimizationContext,
@@ -2596,8 +2601,13 @@ def _risk_decision(state: MutableMethodState, frame: CausalExperimentFrame, conf
 def _should_replan(state: MutableMethodState, config: MethodConfig, risk: Any, issue_offset: int) -> Tuple[bool, Tuple[str, ...]]:
     if state.active_plan is None:
         return True, ("INITIAL_PLAN",)
-    if config.control_mode == "PERIODIC_MPC" and state.active_plan_age_steps >= 6:
-        return True, ("PERIODIC_30_MINUTE_REFRESH",)
+    if (
+        config.control_mode == "PERIODIC_MPC"
+        and config.periodic_replan_steps is not None
+        and state.active_plan_age_steps >= config.periodic_replan_steps
+    ):
+        minutes = config.periodic_replan_steps * 5
+        return True, (f"PERIODIC_{minutes}_MINUTE_REFRESH",)
     if config.control_mode == "EVENT_TRIGGERED" and risk.request_full_replan:
         return True, risk.trigger_causes
     return False, ()
@@ -3217,7 +3227,7 @@ class PfrRuntimeRunner:
         representative_week_id: str,
         output: Path,
     ) -> Mapping[str, Any]:
-        if tuple(config.comparison_method_id for config in configs) != tuple(ComparisonMethod):
+        if tuple(config.comparison_method_id for config in configs) != MAIN_COMPARISON_METHODS:
             raise RuntimeContractError("runtime matrix must execute B0-B7 in order")
         summaries = []
         for config in configs:
@@ -3314,7 +3324,7 @@ class PfrRuntimeRunner:
                 }
                 atomic_write_json(method_root / "METHOD_SUMMARY.json", summary)
             summaries.append(summary)
-        expected = len(frames) * 8
+        expected = len(frames) * len(configs)
         committed = sum(item["committed_issues"] for item in summaries)
         failed_methods = [
             item["comparison_method_id"]
@@ -3325,7 +3335,7 @@ class PfrRuntimeRunner:
             "schema_version": "K9H7_RESULT_V2.matrix_run.v1",
             "status": "PASS" if committed == expected and all(item["status"] == "PASS" for item in summaries) else "FAIL_CLOSED",
             "representative_week_id": representative_week_id,
-            "method_count": 8,
+            "method_count": len(configs),
             "issues_per_method": len(frames),
             "expected_commit_markers": expected,
             "valid_commit_markers": committed,
@@ -3337,7 +3347,9 @@ class PfrRuntimeRunner:
             "failed_methods": failed_methods,
             "method_failures_isolated": True,
             "continue_to_next_method_after_failure": True,
-            "method_execution_order": [item.value for item in ComparisonMethod],
+            "method_execution_order": [
+                config.comparison_method_id.value for config in configs
+            ],
             "method_summaries": summaries,
         }
         output.mkdir(parents=True, exist_ok=True)

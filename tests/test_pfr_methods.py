@@ -21,6 +21,21 @@ class MethodFactoryTests(unittest.TestCase):
         configs = self.factory.all()
         self.assertEqual([item.comparison_method_id.value for item in configs], [f"B{i}" for i in range(8)])
 
+    def test_b8_is_a_separate_five_minute_periodic_baseline(self):
+        main = self.factory.all()
+        supplementary = self.factory.supplementary()
+        self.assertNotIn(ComparisonMethod.B8, [item.comparison_method_id for item in main])
+        self.assertEqual(len(supplementary), 1)
+        b8 = supplementary[0]
+        b7 = self.factory.create(ComparisonMethod.B7)
+        self.assertEqual(b8.comparison_method_id, ComparisonMethod.B8)
+        self.assertEqual(b8.control_mode, "PERIODIC_MPC")
+        self.assertEqual(b8.periodic_replan_steps, 1)
+        self.assertEqual(b8.risk_interface, "CALIBRATED")
+        self.assertEqual(b8.energy_flexibility, b7.energy_flexibility)
+        self.assertEqual(b8.temporal_workload_shift, b7.temporal_workload_shift)
+        self.assertEqual(b8.spatial_workload_migration, b7.spatial_workload_migration)
+
     def test_all_methods_share_one_experiment_authority_and_ac_safety(self):
         configs = self.factory.all()
         self.assertEqual(len({item.authority_fingerprint for item in configs}), 1)
@@ -57,6 +72,7 @@ class MethodFactoryTests(unittest.TestCase):
         self.assertEqual(self.factory.create(ComparisonMethod.B5).control_mode, "PERIODIC_MPC")
         self.assertEqual(self.factory.create(ComparisonMethod.B6).control_mode, "EVENT_TRIGGERED")
         self.assertEqual(self.factory.create(ComparisonMethod.B7).control_mode, "EVENT_TRIGGERED")
+        self.assertEqual(self.factory.create(ComparisonMethod.B8).control_mode, "PERIODIC_MPC")
 
     def test_fast_recourse_toggle_matches_frozen_table(self):
         self.assertFalse(self.factory.create(ComparisonMethod.B0).slow_fast_control)

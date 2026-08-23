@@ -14,6 +14,7 @@ from pfr.provenance import scientific_implementation_fingerprint
 
 
 METHODS = tuple(f"B{index}" for index in range(8))
+B8_METHODS = ("B8",)
 ISSUES_PER_DAY = 288
 
 
@@ -112,12 +113,15 @@ def inspect_method(method_root: Path, method: str) -> dict[str, Any]:
 
 
 def inspect_day(
-    day_root: Path, calendar_date: str, implementation_fingerprint: str
+    day_root: Path,
+    calendar_date: str,
+    implementation_fingerprint: str,
+    methods: tuple[str, ...] = METHODS,
 ) -> dict[str, Any]:
     errors: list[str] = []
-    methods = [inspect_method(day_root / method, method) for method in METHODS]
+    method_rows = [inspect_method(day_root / method, method) for method in methods]
     errors.extend(
-        error for method in methods for error in method["errors"]
+        error for method in method_rows for error in method["errors"]
     )
     temp_files = [str(path) for path in day_root.rglob("*.tmp")]
     if temp_files:
@@ -140,7 +144,7 @@ def inspect_day(
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         errors.append(f"orchestration failure JSON: {type(exc).__name__}: {exc}")
 
-    marker_count = sum(int(row["commit_markers"]) for row in methods)
+    marker_count = sum(int(row["commit_markers"]) for row in method_rows)
     scientific_status = "NOT_RUN"
     complete = False
     if summary is not None:
@@ -151,8 +155,10 @@ def inspect_day(
         if summary.get("continue_to_next_method_after_failure") is not True:
             errors.append("B-failure continuation policy missing")
         if scientific_status == "PASS":
-            if marker_count != ISSUES_PER_DAY * len(METHODS):
-                errors.append("PASS day does not contain 2304 markers")
+            if marker_count != ISSUES_PER_DAY * len(methods):
+                errors.append(
+                    "PASS day does not contain the expected method-axis markers"
+                )
             if summary.get("all_actual_gurobi") is not True:
                 errors.append("PASS day lacks all-actual-Gurobi evidence")
             if summary.get("all_fresh_exact_opendss") is not True:
@@ -188,7 +194,7 @@ def inspect_day(
         "scientific_status": scientific_status,
         "storage_integrity": "PASS" if not errors else "FAIL",
         "commit_markers": marker_count,
-        "methods": methods,
+        "methods": method_rows,
         "orchestration_failure_evidence": orchestration_failure is not None,
         "temporary_files": temp_files,
         "errors": errors,
@@ -202,6 +208,11 @@ def main() -> None:
     parser.add_argument("--start-date", type=date.fromisoformat, required=True)
     parser.add_argument("--days", type=int, required=True)
     parser.add_argument("--report", type=Path)
+    parser.add_argument(
+        "--supplementary-b8-periodic-5min",
+        action="store_true",
+        help="Verify a B8-only supplementary daily campaign.",
+    )
     args = parser.parse_args()
     if not 1 <= args.days <= 31:
         parser.error("--days must be in [1, 31]")
@@ -210,8 +221,14 @@ def main() -> None:
         for offset in range(args.days)
     ]
     fingerprint = scientific_implementation_fingerprint(args.repo)
+    methods = B8_METHODS if args.supplementary_b8_periodic_5min else METHODS
     rows = [
-        inspect_day(args.root / calendar_date, calendar_date, fingerprint)
+        inspect_day(
+            args.root / calendar_date,
+            calendar_date,
+            fingerprint,
+            methods,
+        )
         for calendar_date in expected_dates
     ]
     storage_ok = all(row["storage_integrity"] == "PASS" for row in rows)
@@ -235,6 +252,11 @@ def main() -> None:
         "scientific_status": "PASS" if scientific_pass else "FAIL_OR_INCOMPLETE",
         "root": str(args.root),
         "expected_days": args.days,
+        "method_ids": list(methods),
+        "methods_per_day": len(methods),
+        "supplementary_b8_periodic_5min": (
+            args.supplementary_b8_periodic_5min
+        ),
         "completed_days": sum(bool(row["complete"]) for row in rows),
         "pass_days": sum(row["scientific_status"] == "PASS" for row in rows),
         "total_commit_markers": sum(int(row["commit_markers"]) for row in rows),

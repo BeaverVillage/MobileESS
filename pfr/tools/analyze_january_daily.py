@@ -82,33 +82,43 @@ def bootstrap_mean_ci(values: Sequence[float]) -> Mapping[str, float | int | str
     }
 
 
+def load_method_rows(root: Path, method: str) -> Sequence[Mapping[str, object]]:
+    marker_paths = sorted((root / method).glob("issue_*/COMMIT_MARKER.json"))
+    if len(marker_paths) != 288:
+        raise RuntimeError(f"{root.name}/{method} does not have 288 commit markers")
+    rows = [json.loads(path.read_text(encoding="utf-8")) for path in marker_paths]
+    accepted_statuses = {"PASS", "PASS_COMMITTED"}
+    if any(
+        row.get("status") not in accepted_statuses or not row.get("commit_marker")
+        for row in rows
+    ):
+        raise RuntimeError(f"{root.name}/{method} contains an invalid commit marker")
+    if any(not row.get("actual_gurobi_used") or not row.get("actual_fresh_opendss_used") for row in rows):
+        raise RuntimeError(f"{root.name}/{method} lacks required solver authority")
+    if any(row.get("future_actual_used") for row in rows):
+        raise RuntimeError(f"{root.name}/{method} used future actual")
+    for previous, current in zip(rows, rows[1:]):
+        if previous["post_state_sha256"] != current["pre_state_sha256"]:
+            raise RuntimeError(f"{root.name}/{method} state chain is incomplete")
+    return rows
+
+
+def load_method(root: Path, method: str) -> Mapping[str, float]:
+    rows = load_method_rows(root, method)
+    return {
+        "realized_grid_cost_aud": sum(float(row["realized_grid_cost_aud"]) for row in rows),
+        "deadline_misses": float(rows[-1]["deadline_misses"]),
+        "compute_debt_gpu_hours": float(rows[-1]["compute_debt_gpu_hours"]),
+        "energy_debt_kwh": float(rows[-1]["energy_debt_kwh"]),
+        "full_replan_count": float(rows[-1]["full_replan_count_cumulative"]),
+        "communication_bytes": float(rows[-1]["communication_bytes_cumulative"]),
+        "safety_filter_interventions": float(sum(bool(row["safety_filter_intervention"]) for row in rows)),
+        "mobility_energy_kwh": sum(float(row["mobility_energy_kwh"]) for row in rows),
+    }
+
+
 def load_episode(root: Path) -> Mapping[str, Mapping[str, float]]:
-    result = {}
-    for method in METHODS:
-        marker_paths = sorted((root / method).glob("issue_*/COMMIT_MARKER.json"))
-        if len(marker_paths) != 288:
-            raise RuntimeError(f"{root.name}/{method} does not have 288 commit markers")
-        rows = [json.loads(path.read_text(encoding="utf-8")) for path in marker_paths]
-        if any(row.get("status") != "PASS" or not row.get("commit_marker") for row in rows):
-            raise RuntimeError(f"{root.name}/{method} contains an invalid commit marker")
-        if any(not row.get("actual_gurobi_used") or not row.get("actual_fresh_opendss_used") for row in rows):
-            raise RuntimeError(f"{root.name}/{method} lacks required solver authority")
-        if any(row.get("future_actual_used") for row in rows):
-            raise RuntimeError(f"{root.name}/{method} used future actual")
-        for previous, current in zip(rows, rows[1:]):
-            if previous["post_state_sha256"] != current["pre_state_sha256"]:
-                raise RuntimeError(f"{root.name}/{method} state chain is incomplete")
-        result[method] = {
-            "realized_grid_cost_aud": sum(float(row["realized_grid_cost_aud"]) for row in rows),
-            "deadline_misses": float(rows[-1]["deadline_misses"]),
-            "compute_debt_gpu_hours": float(rows[-1]["compute_debt_gpu_hours"]),
-            "energy_debt_kwh": float(rows[-1]["energy_debt_kwh"]),
-            "full_replan_count": float(rows[-1]["full_replan_count_cumulative"]),
-            "communication_bytes": float(rows[-1]["communication_bytes_cumulative"]),
-            "safety_filter_interventions": float(sum(bool(row["safety_filter_intervention"]) for row in rows)),
-            "mobility_energy_kwh": sum(float(row["mobility_energy_kwh"]) for row in rows),
-        }
-    return result
+    return {method: load_method(root, method) for method in METHODS}
 
 
 def analyze(episodes: Iterable[tuple[str, Path]]) -> Mapping[str, object]:

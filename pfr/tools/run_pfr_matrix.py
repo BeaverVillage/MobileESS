@@ -1,4 +1,4 @@
-"""Run PFR B0-B7 against causal representative-week data and Fresh OpenDSS."""
+"""Run the PFR B0-B7 matrix or an isolated B8 timing baseline."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 
 from pfr.daily import DailyInitializationError, certify_daily_pre_identity
-from pfr.methods import ExperimentAuthority, MethodFactory
+from pfr.methods import ComparisonMethod, ExperimentAuthority, MethodFactory
 from pfr.optimization import GurobiFastControlOptimizer, gurobi_thread_limit
 from pfr.power import H100UtilizationPowerCurve
 from pfr.provenance import scientific_implementation_fingerprint
@@ -1037,8 +1037,16 @@ def main() -> None:
     parser.add_argument("--candidate-id", default="JAN2025_DAY01")
     parser.add_argument(
         "--diagnostic-method",
-        choices=tuple(f"B{index}" for index in range(8)),
+        choices=tuple(method.value for method in ComparisonMethod),
         help="Run one full state-chain method for technical diagnosis only.",
+    )
+    parser.add_argument(
+        "--supplementary-b8-periodic-5min",
+        action="store_true",
+        help=(
+            "Run only the post-hoc B8 five-minute periodic full-replan "
+            "timing baseline; the frozen B0-B7 main matrix remains unchanged."
+        ),
     )
     parser.add_argument(
         "--allow-pending-native-grid-control-diagnostic",
@@ -1065,6 +1073,10 @@ def main() -> None:
     parser.add_argument("--factorized-uncertainty", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    if args.diagnostic_method and args.supplementary_b8_periodic_5min:
+        parser.error(
+            "--diagnostic-method and --supplementary-b8-periodic-5min are mutually exclusive"
+        )
     if args.count <= 0:
         parser.error("--count must be positive")
     repo = args.repo.resolve()
@@ -1263,12 +1275,15 @@ def main() -> None:
             // 300.0
         ),
     )
-    configs = MethodFactory(authority).all()
-    if args.diagnostic_method:
-        config = next(
-            item for item in configs
-            if item.comparison_method_id.value == args.diagnostic_method
-        )
+    factory = MethodFactory(authority)
+    configs = factory.all()
+    single_method_id = (
+        ComparisonMethod.B8.value
+        if args.supplementary_b8_periodic_5min
+        else args.diagnostic_method
+    )
+    if single_method_id:
+        config = factory.create(ComparisonMethod(single_method_id))
         method = runner.run_method(
             config=config,
             frames=frames,
@@ -1277,11 +1292,25 @@ def main() -> None:
             output=output,
         )
         matrix = {
-            "schema_version": "K9H7_RESULT_V2.diagnostic_single_method.v1",
+            "schema_version": (
+                "K9H7_RESULT_V2.supplementary_b8_periodic_5min.v1"
+                if args.supplementary_b8_periodic_5min
+                else "K9H7_RESULT_V2.diagnostic_single_method.v1"
+            ),
             "status": method["status"],
             "representative_week_id": args.candidate_id,
             "method_count": 1,
             "diagnostic_method": args.diagnostic_method,
+            "supplementary_method": (
+                ComparisonMethod.B8.value
+                if args.supplementary_b8_periodic_5min
+                else None
+            ),
+            "comparison_scope": (
+                "POST_HOC_SUPPLEMENTARY_TIMING_BASELINE"
+                if args.supplementary_b8_periodic_5min
+                else "TECHNICAL_DIAGNOSTIC_ONLY"
+            ),
             "issues_per_method": len(frames),
             "expected_commit_markers": len(frames),
             "valid_commit_markers": method["committed_issues"],
@@ -1290,6 +1319,12 @@ def main() -> None:
             "all_state_chains_complete": method["state_chain_complete"],
             "all_binary_states_unchanged_in_fast_layer": method["binary_state_unchanged"],
             "future_actual_used": False,
+            "failed_methods": (
+                [] if method["status"] == "PASS" else [single_method_id]
+            ),
+            "method_failures_isolated": True,
+            "continue_to_next_method_after_failure": True,
+            "method_execution_order": [single_method_id],
             "methods": [method],
         }
         temporary_summary = output / "MATRIX_SUMMARY.json.tmp"
@@ -1324,6 +1359,12 @@ def main() -> None:
         "full_scientific_daily_episode_issues": 288,
         "bounded_regression_not_full_scientific_episode": args.count != 288,
         "diagnostic_single_method": args.diagnostic_method,
+        "supplementary_b8_periodic_5min": args.supplementary_b8_periodic_5min,
+        "comparison_scope": (
+            "POST_HOC_SUPPLEMENTARY_TIMING_BASELINE"
+            if args.supplementary_b8_periodic_5min
+            else "FROZEN_B0_B7_MAIN_OR_TECHNICAL_DIAGNOSTIC"
+        ),
         "independent_daily_cold_start": "canonical_pre" in pre,
         "cross_day_endogenous_state_carryover": False,
         "controller_burn_in_steps": 0,
@@ -1348,6 +1389,9 @@ def main() -> None:
         "common_native_grid_control": {
             "identity": native_control_contract["identity"],
             "common_to_B0_B7": True,
+            "also_applied_to_supplementary_B8": (
+                args.supplementary_b8_periodic_5min
+            ),
             "original_ieee123_master_modified": False,
             "dss_sha256": sha256(native_control_dss),
             "authority_sha256": sha256(native_control_authority),
