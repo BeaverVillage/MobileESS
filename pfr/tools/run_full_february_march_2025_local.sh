@@ -68,7 +68,8 @@ run_period() {
     local shared="$base/PFR_${period_id}_SHARED_EXOGENOUS_V13_13"
     local input_root="$base/PFR_${period_id}_V13_13_DAILY_INPUTS"
     local output="$base/CODEX_PR6_V13_13_${period_id}_DAILY_20260823"
-    local campaign_rc=0 verify_rc=0
+    local b8_output="$base/CODEX_PR6_V13_13_${period_id}_B8_PERIODIC5_20260823"
+    local campaign_rc=0 verify_rc=0 b8_campaign_rc=0 b8_verify_rc=0
     local expected_full_commit_sha="${PFR_EXPECTED_FULL_COMMIT_SHA:-}"
     local expected_branch="${PFR_EXPECTED_BRANCH:-codex/pr6-b8-periodic5}"
     if [[ ! "$expected_full_commit_sha" =~ ^[0-9a-f]{40}$ ]]; then
@@ -103,11 +104,34 @@ run_period() {
         --factorized-uncertainty "$base/PFR3_V13_2_FACTORIZED_UNCERTAINTY_CURRENT/PFR3_FACTORIZED_UNCERTAINTY_V13_2.json" \
         --migration-authority "$repo_dir/pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json" \
         --output "$output" || campaign_rc=$?
+    "$python_bin" -m pfr.tools.run_frozen_rep_week_daily_campaign \
+        --repo "$repo_dir" --period-id "$period_id" --period-contract "$contract" \
+        --day-workers 4 --capture-day-logs --continue-after-failure \
+        --supplementary-b8-periodic-5min \
+        --shared-root "$shared" \
+        --exact-package-root /mnt/c/Users/kjw39/Downloads/stage_mess_grid_v2038_exact_sweep_power_v70_final_v1_package \
+        --authority-package-root "$work/run_packages/K9H7_V2044R11R1_20260807T191351" \
+        --primary-root "$work/processed/power_v70_3ph" \
+        --initial-state "$input_root/pre/DAILY_CANONICAL_PRE_MANIFEST.json" \
+        --independent-jobs "$input_root/jobs/INDEPENDENT_JOB_COHORT.parquet" \
+        --canonical-jobs "$canonical" \
+        --power-curve "$repo_dir/pfr/contracts/H100_UTILIZATION_POWER_CURVE.json" \
+        --mobility-root "$shared/mobility" \
+        --route-catalog "$base/PFR3_FIXED_K3_PHYSICS_CURRENT/FROZEN_K3_PHYSICS_GEOMETRY.json" \
+        --mobility-template-bank "$shared/mobility/E4B_FULLFIT_TEMPLATE_BANK_129.parquet" \
+        --workload-uncertainty "$base/PFR3_V13_2_WORKLOAD_UNCERTAINTY_CURRENT/PFR3_WORKLOAD_UNCERTAINTY_V13_2.json" \
+        --factorized-uncertainty "$base/PFR3_V13_2_FACTORIZED_UNCERTAINTY_CURRENT/PFR3_FACTORIZED_UNCERTAINTY_V13_2.json" \
+        --migration-authority "$repo_dir/pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json" \
+        --output "$b8_output" || b8_campaign_rc=$?
     "$python_bin" -m pfr.tools.verify_daily_campaign_storage \
         --repo "$repo_dir" --root "$output" --start-date "$start_date" --days "$days" \
         --report "$output/STORAGE_VERIFICATION.json" || verify_rc=$?
-    if ((campaign_rc != 0 || verify_rc != 0)); then
-        echo "PERIOD_COMPLETED_WITH_RECORDED_FAILURE period=$period_id campaign_rc=$campaign_rc verify_rc=$verify_rc" >&2
+    "$python_bin" -m pfr.tools.verify_daily_campaign_storage \
+        --repo "$repo_dir" --root "$b8_output" --start-date "$start_date" --days "$days" \
+        --supplementary-b8-periodic-5min \
+        --report "$b8_output/STORAGE_VERIFICATION.json" || b8_verify_rc=$?
+    if ((campaign_rc != 0 || verify_rc != 0 || b8_campaign_rc != 0 || b8_verify_rc != 0)); then
+        echo "PERIOD_COMPLETED_WITH_RECORDED_FAILURE period=$period_id campaign_rc=$campaign_rc verify_rc=$verify_rc b8_campaign_rc=$b8_campaign_rc b8_verify_rc=$b8_verify_rc" >&2
         return 1
     fi
     echo "PERIOD_STATUS=PASS period=$period_id"

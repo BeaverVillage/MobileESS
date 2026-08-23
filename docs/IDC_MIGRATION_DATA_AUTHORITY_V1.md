@@ -72,3 +72,12 @@ branch, clean-worktree state, primary migration parameterization, or B7/B8
 capability contract differs. `RUN_MANIFEST.json` records the full commit SHA,
 branch, dirty flag, migration-contract SHA, parameterization SHA, and
 `rho_ckpt`.
+
+The safe local entrypoint is
+`pfr/tools/run_january_to_march_2025_local.sh`. It runs migration sensitivity,
+a fresh January B0-B8 campaign, artifact validation, daily analysis, and
+B7-versus-B8 timing analysis, then automatically continues to February and
+March. Scientific failures are preserved and reflected in the final nonzero
+status but do not suppress later methods, days, or months. `--january-only`
+explicitly stops after January. Source-identity and authority mismatches still
+fail closed before any campaign because their outputs would not be comparable.

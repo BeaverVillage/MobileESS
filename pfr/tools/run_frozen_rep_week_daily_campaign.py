@@ -50,6 +50,7 @@ def payload(
     workers: int,
     final: bool,
     continue_after_failure: bool,
+    supplementary_b8_periodic_5min: bool = False,
 ) -> Mapping[str, Any]:
     expected = int(period["days"])
     complete = len(rows) == expected
@@ -79,7 +80,13 @@ def payload(
         "continue_to_next_day_after_failure": continue_after_failure,
         "failure_evidence_preserved_before_continuation": True,
         "issues_per_method_per_day": ISSUES_PER_DAY,
-        "methods_per_day": 8,
+        "methods_per_day": 1 if supplementary_b8_periodic_5min else 8,
+        "method_ids": (
+            ["B8"]
+            if supplementary_b8_periodic_5min
+            else [f"B{index}" for index in range(8)]
+        ),
+        "supplementary_b8_periodic_5min": supplementary_b8_periodic_5min,
         "daily_runs": sorted(rows, key=lambda row: str(row["calendar_date"])),
     }
 
@@ -95,6 +102,11 @@ def main() -> None:
         "--continue-after-failure",
         action="store_true",
         help="Preserve a failed B/day and continue through the remaining B/day queue.",
+    )
+    parser.add_argument(
+        "--supplementary-b8-periodic-5min",
+        action="store_true",
+        help="Run only B8 for the frozen out-of-month daily period.",
     )
     parser.add_argument("--shared-root", type=Path, required=True)
     parser.add_argument("--exact-package-root", type=Path, required=True)
@@ -189,6 +201,9 @@ def main() -> None:
             common=common,
             capture_day_logs=args.capture_day_logs,
             reuse_passed_days=True,
+            supplementary_b8_periodic_5min=(
+                args.supplementary_b8_periodic_5min
+            ),
         ): spec
         for spec in specs
     }
@@ -230,6 +245,9 @@ def main() -> None:
                     workers=args.day_workers,
                     final=False,
                     continue_after_failure=args.continue_after_failure,
+                    supplementary_b8_periodic_5min=(
+                        args.supplementary_b8_periodic_5min
+                    ),
                 ),
             )
             print(
@@ -262,6 +280,9 @@ def main() -> None:
         workers=args.day_workers,
         final=True,
         continue_after_failure=args.continue_after_failure,
+        supplementary_b8_periodic_5min=(
+            args.supplementary_b8_periodic_5min
+        ),
     )
     write_campaign(args.output, campaign)
     print(json.dumps({"status": campaign["status"], "output": str(args.output)}))
