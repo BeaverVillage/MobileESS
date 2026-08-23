@@ -125,16 +125,27 @@ def run_idc_migration_canary(
     b8_root = output / "b8"
     b8_summary = runner.run_method(
         config=b8,
-        frames=_frames(authority, last_issue=105),
+        frames=_frames(authority, last_issue=106),
         initial=initial,
         representative_week_id="IDC_MIGRATION_CANARY_B8_PRECHECKPOINT",
         output=b8_root,
     )
     b8_markers = [_read_marker(b8_root, "B8", issue) for issue in range(100, 106)]
+    b8_boundary = _read_marker(b8_root, "B8", 106)
     b8_precheckpoint_blocked = all(
         not marker["migration_started"]
         and int(marker["wan_bytes_transferred_step"]) == 0
         for marker in b8_markers
+    )
+    b8_episode_boundary_blocked = bool(
+        not b8_boundary["migration_started"]
+        and int(b8_boundary["wan_bytes_transferred_step"]) == 0
+        and int(
+            b8_boundary["spatial_optimizer_certificate"].get(
+                "episode_boundary_blocked_candidate_count", 0
+            )
+        )
+        > 0
     )
     work_conserved = bool(
         len(completed) == 1
@@ -155,8 +166,9 @@ def run_idc_migration_canary(
         and len(restart["migration_restarts_completed"]) == 1
         and work_conserved
         and b8_summary["status"] == "PASS"
-        and b8_summary["full_replan_count"] == 6
+        and b8_summary["full_replan_count"] == 7
         and b8_precheckpoint_blocked
+        and b8_episode_boundary_blocked
     )
     return {
         "pass": passed,
@@ -178,4 +190,5 @@ def run_idc_migration_canary(
         "remaining_compute_work_conserved": work_conserved,
         "b8_every_five_minute_full_replans": b8_summary["full_replan_count"],
         "b8_precheckpoint_migration_blocked": b8_precheckpoint_blocked,
+        "b8_episode_boundary_migration_blocked": b8_episode_boundary_blocked,
     }

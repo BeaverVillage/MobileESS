@@ -281,6 +281,14 @@ class PfrRuntimeTests(unittest.TestCase):
         self.assertEqual(summary["wan_transferred_bytes"], 80_000_000_000)
         self.assertEqual(marker["wan_bytes_transferred_step"], 80_000_000_000)
         self.assertEqual(len(marker["migration_started"]), 1)
+        self.assertGreaterEqual(
+            marker["migration_started"][0]["checkpoint_steps_at_start"],
+            marker["migration_started"][0]["checkpoint_interval_steps"],
+        )
+        self.assertEqual(
+            marker["migration_started"][0]["required_transfer_restart_steps"],
+            2,
+        )
         self.assertEqual(len(marker["migration_completed"]), 1)
         self.assertEqual(len(initial_marker["prestart_spatial_placements"]), 1)
         self.assertEqual(initial_marker["wan_bytes_transferred_step"], 0)

@@ -2493,11 +2493,16 @@ def _build_slow_plan(
     config: MethodConfig,
     frame: CausalExperimentFrame,
     migration_authority: Optional[MigrationAuthority],
+    evaluation_steps_remaining: int,
 ) -> SlowDiscretePlan:
     jobs = {uid: job for uid, job in state.jobs.items() if job.lifecycle != "COMPLETED"}
     destinations, route_ranks = _optimize_mess_routes(state, config, frame)
     job_placements, checkpoint_migrations = _optimize_job_migrations(
-        state, config, frame, migration_authority
+        state,
+        config,
+        frame,
+        migration_authority,
+        evaluation_steps_remaining,
     )
     plan = SlowDiscretePlan(
         plan_id=f"{config.comparison_method_id.value}-{frame.issue}-{state.full_replan_count + 1}",
@@ -2531,7 +2536,10 @@ def _optimize_job_migrations(
     config: MethodConfig,
     frame: CausalExperimentFrame,
     authority: Optional[MigrationAuthority],
+    evaluation_steps_remaining: int,
 ) -> tuple[dict[str, str], dict[str, Optional[str]]]:
+    if evaluation_steps_remaining <= 0:
+        raise RuntimeContractError("migration optimizer lacks remaining evaluation steps")
     jobs = {uid: job for uid, job in state.jobs.items() if job.lifecycle != "COMPLETED"}
     placements = {uid: _effective_job_site(job) for uid, job in jobs.items()}
     migrations: dict[str, Optional[str]] = {
@@ -2615,6 +2623,7 @@ def _optimize_job_migrations(
             )
     baseline = sum(value * value for value in loads.values())
     candidates = []
+    episode_boundary_blocked_candidate_count = 0
     if state.wan_active_transfers < authority.maximum_active_transfers:
         for uid, job in sorted(jobs.items()):
             if (
@@ -2645,6 +2654,9 @@ def _optimize_job_migrations(
                     improvement >= authority.minimum_gpu_squared_improvement
                     and net_improvement > 0.0
                 ):
+                    if downtime_steps > evaluation_steps_remaining:
+                        episode_boundary_blocked_candidate_count += 1
+                        continue
                     candidates.append(
                         (
                             -net_improvement,
@@ -2679,6 +2691,10 @@ def _optimize_job_migrations(
         "baseline_sum_squared_reserved_gpu": baseline,
         "selected_migration": selected_payload,
         "maximum_migrations_per_replan": 1,
+        "evaluation_steps_remaining": evaluation_steps_remaining,
+        "episode_boundary_blocked_candidate_count": (
+            episode_boundary_blocked_candidate_count
+        ),
         "prestart_placements": prestart_placements,
     }
     return placements, migrations
@@ -2759,6 +2775,14 @@ def _start_planned_job_migrations(
                 "destination_idc": destination,
                 "payload_bytes": job.source.migration_payload_bytes,
                 "remaining_work_gpu_hours": job.remaining_work_gpu_hours,
+                "checkpoint_steps_at_start": job.steps_since_checkpoint,
+                "checkpoint_interval_steps": authority.checkpoint_interval_steps,
+                "required_transfer_restart_steps": (
+                    authority.transfer_steps(
+                        job.source.migration_payload_bytes, source, destination
+                    )
+                    + authority.restart_steps
+                ),
             }
         )
     return tuple(events)
@@ -3198,7 +3222,11 @@ class PfrRuntimeRunner:
             prestart_placement_events: tuple[Mapping[str, Any], ...] = ()
             if replan:
                 state.active_plan = _build_slow_plan(
-                    state, config, frame, self.migration_authority
+                    state,
+                    config,
+                    frame,
+                    self.migration_authority,
+                    len(frames) - offset,
                 )
                 state.active_plan_age_steps = 0
                 state.full_replan_count += 1
@@ -3292,7 +3320,11 @@ class PfrRuntimeRunner:
             def escalate_for_safety() -> EscalatedCandidate:
                 nonlocal accepted_fast_state, accepted_limits, active_optimization, fast, safety_replan, migration_started_events, prestart_placement_events
                 state.active_plan = _build_slow_plan(
-                    state, config, frame, self.migration_authority
+                    state,
+                    config,
+                    frame,
+                    self.migration_authority,
+                    len(frames) - offset,
                 )
                 state.active_plan_age_steps = 0
                 state.full_replan_count += 1

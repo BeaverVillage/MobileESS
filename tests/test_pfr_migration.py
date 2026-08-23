@@ -59,6 +59,7 @@ class MigrationAuthorityTests(unittest.TestCase):
         self.assertTrue(result["remaining_compute_work_conserved"])
         self.assertTrue(result["running_at_different_idc_after_restart"])
         self.assertTrue(result["b8_precheckpoint_migration_blocked"])
+        self.assertTrue(result["b8_episode_boundary_migration_blocked"])
 
 
 if __name__ == "__main__":
