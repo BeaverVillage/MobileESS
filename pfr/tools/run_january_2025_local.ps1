@@ -63,6 +63,23 @@ $commonArguments = @(
 ) -join ' '
 
 $environment = "PFR_GUROBI_THREADS=$GurobiThreads OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0"
+$expectedFullCommitSha = $env:PFR_EXPECTED_FULL_COMMIT_SHA
+if ($expectedFullCommitSha -notmatch '^[0-9a-f]{40}$') {
+    throw 'ABORT_MAIN_CAMPAIGN: set PFR_EXPECTED_FULL_COMMIT_SHA to the frozen 40-character commit.'
+}
+$expectedBranch = if ($env:PFR_EXPECTED_BRANCH) { $env:PFR_EXPECTED_BRANCH } else { 'codex/pr6-b8-periodic5' }
+$sourceGate = @(
+    '-m', 'pfr.tools.assert_experiment_source_freeze',
+    '--repo', (Quote-Bash $repoWsl),
+    '--expected-full-commit-sha', $expectedFullCommitSha,
+    '--expected-branch', (Quote-Bash $expectedBranch),
+    '--migration-authority', (Quote-Bash "$repoWsl/pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json"),
+    '--report', (Quote-Bash "$OutputRoot/SOURCE_FREEZE_GATE.json")
+) -join ' '
+& wsl bash -lc "cd $(Quote-Bash $repoWsl) && $environment $(Quote-Bash $python) $sourceGate"
+if ($LASTEXITCODE -ne 0) {
+    throw 'ABORT_MAIN_CAMPAIGN: source-freeze gate failed.'
+}
 if (-not $SkipPreflight) {
     $preflight = @(
         '-m', 'pfr.tools.preflight_january_2025',

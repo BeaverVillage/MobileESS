@@ -144,6 +144,18 @@ export PYTHONHASHSEED=0
 
 cd "$repo_dir"
 echo "Classification: JANUARY-2025 POST-HOC FINAL VALIDATION (not an independent holdout)."
+expected_full_commit_sha="${PFR_EXPECTED_FULL_COMMIT_SHA:-}"
+expected_branch="${PFR_EXPECTED_BRANCH:-codex/pr6-b8-periodic5}"
+if [[ ! "$expected_full_commit_sha" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "ABORT_MAIN_CAMPAIGN: set PFR_EXPECTED_FULL_COMMIT_SHA to the frozen 40-character commit." >&2
+    exit 2
+fi
+"$python_bin" -m pfr.tools.assert_experiment_source_freeze \
+    --repo "$repo_dir" \
+    --expected-full-commit-sha "$expected_full_commit_sha" \
+    --expected-branch "$expected_branch" \
+    --migration-authority "$repo_dir/pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json" \
+    --report "$output_root/SOURCE_FREEZE_GATE.json"
 if ((skip_preflight == 0)); then
     echo "Running fail-closed January authority/source/design preflight."
     "$python_bin" -m pfr.tools.preflight_january_2025 \

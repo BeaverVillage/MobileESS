@@ -26,9 +26,15 @@ The executable authority is
   job can be placed before start without a dataset WAN transfer. This is a
   scenario assumption, not a conversion of NULL `input_bytes` to zero.
 - A running job can move only after six completed five-minute compute steps.
-- Its checkpoint payload is modeled as requested GPU count multiplied by
-  80,000,000,000 bytes. This is a conservative full-H100-memory upper proxy,
-  not a Kestrel checkpoint measurement.
+- Its checkpoint payload is modeled as `rho_ckpt * requested GPU count *
+  80,000,000,000 bytes`. The primary `rho_ckpt=1.0` case is a conservative
+  aggregate-framebuffer engineering reference, not a Kestrel checkpoint
+  measurement and not a physical law that checkpoint state scales with GPU
+  count. Actual state depends on the model, optimizer, metadata, replication,
+  sharding, and parallelism configuration.
+- January development sensitivity is preregistered at
+  `rho_ckpt in {0.25, 0.5, 1.0}`, corresponding to 20/40/80 GB per allocated
+  H100-equivalent GPU. Each value receives a distinct parameterization SHA.
 - Restart downtime is modeled as one five-minute step.
 - Queued jobs receive deterministic capacity-feasible pre-start placement.
   Running jobs use exact deterministic single-action enumeration and at most
@@ -36,6 +42,20 @@ The executable authority is
 - Every run records the authority SHA-256, pre-start placement events,
   migration start/completion/restart events, per-step WAN bytes, and cumulative
   WAN bytes.
+- B7 and B8 share the same migration authority and actuator eligibility. B8's
+  five-minute full-plan invocation cannot bypass the 30-minute checkpoint
+  boundary; only the slow-planning invocation timing differs from B7.
+
+The deterministic preflight canary executes the full state chain and requires
+positive WAN bytes, transfer completion, one restart interval, execution at a
+different IDC, and exact preservation of remaining compute work. It also runs
+B8 for six five-minute replans and requires zero pre-checkpoint migrations.
+
+The January development sensitivity launcher is
+`pfr/tools/run_january_2025_migration_sensitivity_local.sh`. It runs B3-B8 at
+all three preregistered `rho_ckpt` values and aggregates migration count, WAN
+bytes, replan count, and deadline misses without selecting a factor to favor a
+method.
 
 ## Interpretation boundary
 
@@ -44,3 +64,11 @@ implementation and cannot support a claim that spatial migration was tested.
 January must be rerun under the new implementation fingerprint before its
 spatial arms are interpreted. This parameterization is post-hoc design
 validation and does not create an independent-holdout claim.
+
+Scientific launchers require `PFR_EXPECTED_FULL_COMMIT_SHA` to contain the
+frozen 40-character Git commit and default to branch
+`codex/pr6-b8-periodic5`. They abort before the main campaign if the commit,
+branch, clean-worktree state, primary migration parameterization, or B7/B8
+capability contract differs. `RUN_MANIFEST.json` records the full commit SHA,
+branch, dirty flag, migration-contract SHA, parameterization SHA, and
+`rho_ckpt`.

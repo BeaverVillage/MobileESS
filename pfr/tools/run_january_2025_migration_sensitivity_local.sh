@@ -3,46 +3,15 @@ set -Eeuo pipefail
 
 repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 python_bin="${PFR_PYTHON:-/home/jaewon/miniconda3/envs/power_v61_gpu/bin/python}"
-output_root="/home/jaewon/mobile_ess_work/frozen_artifacts/CODEX_PR6_V13_13_JAN2025_B8_PERIODIC5_SUPPLEMENTARY_20260823"
-start_day=1
-end_day=31
-day_workers=1
-gurobi_threads=4
+output_root="${PFR_MIGRATION_SENSITIVITY_OUTPUT:-/home/jaewon/mobile_ess_work/frozen_artifacts/JAN2025_IDC_MIGRATION_RHO_SENSITIVITY_V1}"
+day_workers="${PFR_DAY_WORKERS:-1}"
+gurobi_threads="${PFR_GUROBI_THREADS:-4}"
 
-usage() {
-    printf '%s\n' \
-        "Usage: bash pfr/tools/run_january_2025_b8_periodic5_local.sh [options]" \
-        "  --start-day N" \
-        "  --end-day N" \
-        "  --day-workers N" \
-        "  --gurobi-threads N" \
-        "  --output-root PATH"
-}
-
-while (($#)); do
-    case "$1" in
-        --start-day) start_day="$2"; shift 2 ;;
-        --end-day) end_day="$2"; shift 2 ;;
-        --day-workers) day_workers="$2"; shift 2 ;;
-        --gurobi-threads) gurobi_threads="$2"; shift 2 ;;
-        --output-root) output_root="$2"; shift 2 ;;
-        -h|--help) usage; exit 0 ;;
-        *) echo "Unknown option: $1" >&2; usage >&2; exit 64 ;;
-    esac
-done
-
-if ! [[ "$start_day" =~ ^[0-9]+$ && "$end_day" =~ ^[0-9]+$ && \
-        "$day_workers" =~ ^[0-9]+$ && "$gurobi_threads" =~ ^[0-9]+$ ]]; then
-    echo "Day and worker/thread arguments must be integers." >&2
-    exit 64
-fi
-if ((start_day < 1 || end_day > 31 || start_day > end_day)); then
-    echo "Day range must satisfy 1 <= start-day <= end-day <= 31." >&2
-    exit 64
-fi
-if ((day_workers < 1 || gurobi_threads < 1)); then
-    echo "day-workers and gurobi-threads must be positive." >&2
-    exit 64
+expected_full_commit_sha="${PFR_EXPECTED_FULL_COMMIT_SHA:-}"
+expected_branch="${PFR_EXPECTED_BRANCH:-codex/pr6-b8-periodic5}"
+if [[ ! "$expected_full_commit_sha" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "ABORT_MAIN_CAMPAIGN: set PFR_EXPECTED_FULL_COMMIT_SHA to the frozen 40-character commit." >&2
+    exit 2
 fi
 
 common_arguments=(
@@ -66,43 +35,37 @@ common_arguments=(
 )
 
 export PFR_GUROBI_THREADS="$gurobi_threads"
-export OMP_NUM_THREADS=1
-export MKL_NUM_THREADS=1
-export OPENBLAS_NUM_THREADS=1
-export NUMEXPR_NUM_THREADS=1
-export PYTHONHASHSEED=0
+export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+export NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0
 
 cd "$repo_dir"
-expected_full_commit_sha="${PFR_EXPECTED_FULL_COMMIT_SHA:-}"
-expected_branch="${PFR_EXPECTED_BRANCH:-codex/pr6-b8-periodic5}"
-if [[ ! "$expected_full_commit_sha" =~ ^[0-9a-f]{40}$ ]]; then
-    echo "ABORT_MAIN_CAMPAIGN: set PFR_EXPECTED_FULL_COMMIT_SHA to the frozen 40-character commit." >&2
-    exit 2
-fi
 "$python_bin" -m pfr.tools.assert_experiment_source_freeze \
     --repo "$repo_dir" \
     --expected-full-commit-sha "$expected_full_commit_sha" \
     --expected-branch "$expected_branch" \
     --migration-authority "$repo_dir/pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json" \
     --report "$output_root/SOURCE_FREEZE_GATE.json"
+
 "$python_bin" -m pfr.tools.preflight_january_2025 \
     --repo "$repo_dir" \
     "${common_arguments[@]}" \
     --report "$output_root/PREFLIGHT_REPORT.json"
 
-"$python_bin" -m pfr.tools.run_pfr_daily_campaign \
-    --repo "$repo_dir" \
-    --start-day "$start_day" \
-    --end-day "$end_day" \
-    --day-workers "$day_workers" \
-    --capture-day-logs \
-    --supplementary-b8-periodic-5min \
-    "${common_arguments[@]}" \
-    --output "$output_root"
+for factor in 0.25 0.5 1.0; do
+    factor_key="rho$(printf '%03d' "$(awk -v value="$factor" 'BEGIN {print value * 100}')")"
+    for method in B3 B4 B5 B6 B7 B8; do
+        "$python_bin" -m pfr.tools.run_pfr_daily_campaign \
+            --repo "$repo_dir" \
+            --start-day 1 --end-day 31 \
+            --day-workers "$day_workers" --capture-day-logs \
+            --no-reuse-passed-days \
+            --diagnostic-method "$method" \
+            --checkpoint-payload-occupancy-factor "$factor" \
+            "${common_arguments[@]}" \
+            --output "$output_root/$factor_key/$method"
+    done
+done
 
-"$python_bin" -m pfr.tools.verify_daily_campaign_storage \
-    --repo "$repo_dir" \
+"$python_bin" -m pfr.tools.analyze_january_migration_sensitivity \
     --root "$output_root" \
-    --start-date "2025-01-$(printf '%02d' "$start_day")" \
-    --days "$((end_day - start_day + 1))" \
-    --supplementary-b8-periodic-5min
+    --output "$output_root/JAN2025_IDC_MIGRATION_RHO_SENSITIVITY.json"

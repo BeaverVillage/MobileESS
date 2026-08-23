@@ -8,7 +8,8 @@ import hashlib
 import json
 import math
 from pathlib import Path
-from typing import Mapping, Sequence
+from fractions import Fraction
+from typing import Mapping, Optional, Sequence
 
 
 IDCS = tuple(f"IDC{index:02d}" for index in range(1, 13))
@@ -29,8 +30,11 @@ class WanLink:
 class MigrationAuthority:
     authority_id: str
     fingerprint: str
+    contract_fingerprint: str
     checkpoint_interval_steps: int
-    checkpoint_bytes_per_gpu: int
+    framebuffer_reference_bytes_per_gpu: int
+    checkpoint_payload_occupancy_factor: float
+    sensitivity_factors: tuple[float, ...]
     restart_steps: int
     maximum_active_transfers: int
     minimum_gpu_squared_improvement: float
@@ -43,8 +47,17 @@ class MigrationAuthority:
     def validate(self) -> None:
         if not self.authority_id or len(self.fingerprint) != 64:
             raise MigrationAuthorityError("migration authority identity is invalid")
-        if self.checkpoint_interval_steps <= 0 or self.checkpoint_bytes_per_gpu <= 0:
+        if (
+            self.checkpoint_interval_steps <= 0
+            or self.framebuffer_reference_bytes_per_gpu <= 0
+        ):
             raise MigrationAuthorityError("checkpoint authority must be positive")
+        if len(self.contract_fingerprint) != 64:
+            raise MigrationAuthorityError("migration contract SHA-256 is invalid")
+        if self.checkpoint_payload_occupancy_factor not in self.sensitivity_factors:
+            raise MigrationAuthorityError("checkpoint occupancy factor is not authorized")
+        if any(not 0.0 < factor <= 1.0 for factor in self.sensitivity_factors):
+            raise MigrationAuthorityError("checkpoint sensitivity factors are invalid")
         if self.restart_steps < 0 or self.maximum_active_transfers != 1:
             raise MigrationAuthorityError("only one serialized migration is authorized")
         if self.step_seconds != 300:
@@ -75,7 +88,15 @@ class MigrationAuthority:
     def checkpoint_payload_bytes(self, requested_gpu: int) -> int:
         if requested_gpu <= 0:
             raise MigrationAuthorityError("migration GPU gang must be positive")
-        return requested_gpu * self.checkpoint_bytes_per_gpu
+        factor = Fraction(str(self.checkpoint_payload_occupancy_factor))
+        numerator = (
+            requested_gpu
+            * self.framebuffer_reference_bytes_per_gpu
+            * factor.numerator
+        )
+        if numerator % factor.denominator:
+            raise MigrationAuthorityError("checkpoint payload is not an integer byte count")
+        return numerator // factor.denominator
 
     def route(self, source_idc: str, destination_idc: str) -> tuple[WanLink, ...]:
         if source_idc not in self.idc_to_wan_node or destination_idc not in self.idc_to_wan_node:
@@ -124,7 +145,11 @@ class MigrationAuthority:
         return math.ceil(payload_bytes / capacity)
 
 
-def load_migration_authority(path: Path) -> MigrationAuthority:
+def load_migration_authority(
+    path: Path,
+    *,
+    checkpoint_payload_occupancy_factor: Optional[float] = None,
+) -> MigrationAuthority:
     raw = path.read_bytes()
     payload = json.loads(raw.decode("utf-8"))
     if payload.get("schema_version") != "IDC_MIGRATION_AUTHORITY_V1":
@@ -135,11 +160,34 @@ def load_migration_authority(path: Path) -> MigrationAuthority:
     source_sha256 = str(wan["source"]["sha256"])
     if len(source_sha256) != 64:
         raise MigrationAuthorityError("WAN raw-source SHA-256 is invalid")
+    contract_fingerprint = hashlib.sha256(raw).hexdigest()
+    sensitivity_factors = tuple(
+        float(value)
+        for value in checkpoint["january_development_sensitivity_factors"]
+    )
+    occupancy_factor = float(
+        checkpoint["checkpoint_payload_occupancy_factor"]
+        if checkpoint_payload_occupancy_factor is None
+        else checkpoint_payload_occupancy_factor
+    )
+    parameterization = json.dumps(
+        {
+            "contract_sha256": contract_fingerprint,
+            "checkpoint_payload_occupancy_factor": occupancy_factor,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
     authority = MigrationAuthority(
         authority_id=str(payload["authority_id"]),
-        fingerprint=hashlib.sha256(raw).hexdigest(),
+        fingerprint=hashlib.sha256(parameterization).hexdigest(),
+        contract_fingerprint=contract_fingerprint,
         checkpoint_interval_steps=int(checkpoint["interval_steps"]),
-        checkpoint_bytes_per_gpu=int(checkpoint["checkpoint_bytes_per_gpu"]),
+        framebuffer_reference_bytes_per_gpu=int(
+            checkpoint["framebuffer_reference_bytes_per_gpu"]
+        ),
+        checkpoint_payload_occupancy_factor=occupancy_factor,
+        sensitivity_factors=sensitivity_factors,
         restart_steps=int(checkpoint["restart_steps"]),
         maximum_active_transfers=int(wan["maximum_active_transfers"]),
         minimum_gpu_squared_improvement=float(

@@ -11,9 +11,12 @@
   "checkpoint": {
     "interval_steps": 6,
     "interval_minutes": 30,
-    "payload_model": "requested_gpu * checkpoint_bytes_per_gpu",
-    "checkpoint_bytes_per_gpu": 80000000000,
-    "parameter_classification": "MODELED_CONSERVATIVE_FULL_H100_MEMORY_UPPER_PROXY",
+    "payload_model": "checkpoint_payload_occupancy_factor * requested_gpu * framebuffer_reference_bytes_per_gpu",
+    "checkpoint_payload_occupancy_factor": 1.0,
+    "january_development_sensitivity_factors": [0.25, 0.5, 1.0],
+    "framebuffer_reference_bytes_per_gpu": 80000000000,
+    "parameter_classification": "CONSERVATIVE_ENGINEERING_AGGREGATE_FRAMEBUFFER_REFERENCE_NOT_A_MEASURED_CHECKPOINT_SIZE",
+    "parallelism_interpretation": "The linear GPU-count scaling is an engineering scenario, not a physical law; actual checkpoint size depends on model state, optimizer state, metadata, replication, sharding, and parallelism configuration",
     "restart_steps": 1,
     "restart_minutes": 5,
     "hardware_source": {

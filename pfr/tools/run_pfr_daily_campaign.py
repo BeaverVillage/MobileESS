@@ -255,6 +255,7 @@ def run_day(
     capture_day_logs: bool,
     reuse_passed_days: bool,
     supplementary_b8_periodic_5min: bool,
+    diagnostic_method: str | None = None,
 ) -> Mapping[str, Any]:
     day_root = output / spec.calendar_date
     summary_path = day_root / "MATRIX_SUMMARY.json"
@@ -267,7 +268,11 @@ def run_day(
     shared_authority_sha256 = file_sha256(
         shared_root / "SHARED_EXOGENOUS_AUTHORITY.json"
     )
-    method_count = B8_METHOD_COUNT if supplementary_b8_periodic_5min else METHOD_COUNT
+    method_count = (
+        1
+        if supplementary_b8_periodic_5min or diagnostic_method is not None
+        else METHOD_COUNT
+    )
     if reuse_passed_days and reusable_pass(
         day_root,
         implementation_fingerprint,
@@ -299,6 +304,8 @@ def run_day(
     ]
     if supplementary_b8_periodic_5min:
         command.append("--supplementary-b8-periodic-5min")
+    if diagnostic_method is not None:
+        command.extend(("--diagnostic-method", diagnostic_method))
     if capture_day_logs:
         with (day_root / "DAY_RUN.log").open("w", encoding="utf-8") as log:
             returncode = run_child(command, cwd=repo, stdout=log)
@@ -343,6 +350,8 @@ def campaign_payload(
     summaries: Sequence[Mapping[str, Any]],
     final: bool,
     supplementary_b8_periodic_5min: bool,
+    checkpoint_payload_occupancy_factor: float | None = None,
+    diagnostic_method: str | None = None,
 ) -> Mapping[str, Any]:
     expected_days = end_day - start_day + 1
     complete = len(summaries) == expected_days
@@ -371,14 +380,29 @@ def campaign_payload(
         "controller_burn_in_steps": 0,
         "issues_per_method_per_day": ISSUES_PER_DAY,
         "methods_per_day": (
-            B8_METHOD_COUNT if supplementary_b8_periodic_5min else METHOD_COUNT
+            1
+            if supplementary_b8_periodic_5min or diagnostic_method is not None
+            else METHOD_COUNT
         ),
         "method_ids": (
             ["B8"]
             if supplementary_b8_periodic_5min
-            else [f"B{index}" for index in range(METHOD_COUNT)]
+            else (
+                [diagnostic_method]
+                if diagnostic_method is not None
+                else [f"B{index}" for index in range(METHOD_COUNT)]
+            )
         ),
+        "diagnostic_method": diagnostic_method,
         "supplementary_b8_periodic_5min": supplementary_b8_periodic_5min,
+        "checkpoint_payload_occupancy_factor": (
+            checkpoint_payload_occupancy_factor
+        ),
+        "checkpoint_payload_parameterization": (
+            "ENGINEERING_SCENARIO_NOT_MEASURED_CHECKPOINT_SIZE"
+            if checkpoint_payload_occupancy_factor is not None
+            else "FROZEN_PRIMARY_AUTHORITY_VALUE"
+        ),
         "daily_runs": sorted(summaries, key=lambda row: str(row["calendar_date"])),
     }
 
@@ -402,6 +426,11 @@ def main() -> None:
         action="store_true",
         help="Run only the post-hoc B8 five-minute periodic timing baseline.",
     )
+    parser.add_argument(
+        "--diagnostic-method",
+        choices=tuple(f"B{index}" for index in range(9)),
+        help="Run one method per day for a technical or sensitivity campaign.",
+    )
     parser.add_argument("--shared-root", type=Path, required=True)
     parser.add_argument("--exact-package-root", type=Path, required=True)
     parser.add_argument("--authority-package-root", type=Path, required=True)
@@ -420,8 +449,18 @@ def main() -> None:
         type=Path,
         help="Frozen IDC migration authority; defaults to the repository contract.",
     )
+    parser.add_argument(
+        "--checkpoint-payload-occupancy-factor",
+        type=float,
+        choices=(0.25, 0.5, 1.0),
+        help="January development sensitivity only.",
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    if args.diagnostic_method and args.supplementary_b8_periodic_5min:
+        parser.error(
+            "--diagnostic-method and --supplementary-b8-periodic-5min are mutually exclusive"
+        )
     if not 1 <= args.day_workers <= 31:
         parser.error("--day-workers must be in [1, 31]")
 
@@ -476,6 +515,13 @@ def main() -> None:
     ]
     for mobility_root in args.mobility_root:
         common.extend(("--mobility-root", str(mobility_root)))
+    if args.checkpoint_payload_occupancy_factor is not None:
+        common.extend(
+            (
+                "--checkpoint-payload-occupancy-factor",
+                str(args.checkpoint_payload_occupancy_factor),
+            )
+        )
 
     summaries: list[Mapping[str, Any]] = []
     pool = ThreadPoolExecutor(max_workers=args.day_workers)
@@ -489,10 +535,14 @@ def main() -> None:
                 output=args.output,
                 common=common,
                 capture_day_logs=args.capture_day_logs,
-                reuse_passed_days=not args.no_reuse_passed_days,
+                reuse_passed_days=(
+                    not args.no_reuse_passed_days
+                    and args.checkpoint_payload_occupancy_factor is None
+                ),
                 supplementary_b8_periodic_5min=(
                     args.supplementary_b8_periodic_5min
                 ),
+                diagnostic_method=args.diagnostic_method,
             ): spec
             for spec in specs
         }
@@ -536,6 +586,10 @@ def main() -> None:
                     supplementary_b8_periodic_5min=(
                         args.supplementary_b8_periodic_5min
                     ),
+                    checkpoint_payload_occupancy_factor=(
+                        args.checkpoint_payload_occupancy_factor
+                    ),
+                    diagnostic_method=args.diagnostic_method,
                 ),
             )
             done = len(summaries)
@@ -562,6 +616,10 @@ def main() -> None:
                 supplementary_b8_periodic_5min=(
                     args.supplementary_b8_periodic_5min
                 ),
+                checkpoint_payload_occupancy_factor=(
+                    args.checkpoint_payload_occupancy_factor
+                ),
+                diagnostic_method=args.diagnostic_method,
             )
         )
         interrupted["status"] = "INTERRUPTED"
@@ -583,6 +641,10 @@ def main() -> None:
         summaries=summaries,
         final=True,
         supplementary_b8_periodic_5min=args.supplementary_b8_periodic_5min,
+        checkpoint_payload_occupancy_factor=(
+            args.checkpoint_payload_occupancy_factor
+        ),
+        diagnostic_method=args.diagnostic_method,
     )
     write_campaign(args.output, campaign)
     print(json.dumps({"status": campaign["status"], "days": len(summaries), "output": str(args.output)}))

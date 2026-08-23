@@ -69,6 +69,18 @@ run_period() {
     local input_root="$base/PFR_${period_id}_V13_13_DAILY_INPUTS"
     local output="$base/CODEX_PR6_V13_13_${period_id}_DAILY_20260823"
     local campaign_rc=0 verify_rc=0
+    local expected_full_commit_sha="${PFR_EXPECTED_FULL_COMMIT_SHA:-}"
+    local expected_branch="${PFR_EXPECTED_BRANCH:-codex/pr6-b8-periodic5}"
+    if [[ ! "$expected_full_commit_sha" =~ ^[0-9a-f]{40}$ ]]; then
+        echo "ABORT_MAIN_CAMPAIGN: preprocessing is preserved, but PFR_EXPECTED_FULL_COMMIT_SHA is not a frozen 40-character commit." >&2
+        return 1
+    fi
+    "$python_bin" -m pfr.tools.assert_experiment_source_freeze \
+        --repo "$repo_dir" \
+        --expected-full-commit-sha "$expected_full_commit_sha" \
+        --expected-branch "$expected_branch" \
+        --migration-authority "$repo_dir/pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json" \
+        --report "$input_root/SOURCE_FREEZE_GATE.json" || return 1
     "$python_bin" -m pfr.tools.preflight_full_month_2025 \
         --repo "$repo_dir" --period-id "$period_id" \
         --shared-root "$shared" --input-root "$input_root" \

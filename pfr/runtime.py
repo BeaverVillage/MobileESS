@@ -266,6 +266,7 @@ class RuntimeJobState:
     migration_destination_idc: Optional[str] = None
     migration_payload_remaining_bytes: int = 0
     restart_remaining_steps: int = 0
+    migration_work_gpu_hours_at_start: Optional[float] = None
 
 
 @dataclass
@@ -2746,6 +2747,7 @@ def _start_planned_job_migrations(
         job.migration_source_idc = source
         job.migration_destination_idc = destination
         job.migration_payload_remaining_bytes = job.source.migration_payload_bytes
+        job.migration_work_gpu_hours_at_start = job.remaining_work_gpu_hours
         job.migration_state = "WAN_TRANSFER_ACTIVE"
         job.checkpoint_state = "CONSUMED_BY_MIGRATION"
         state.wan_active_transfers += 1
@@ -2756,6 +2758,7 @@ def _start_planned_job_migrations(
                 "source_idc": source,
                 "destination_idc": destination,
                 "payload_bytes": job.source.migration_payload_bytes,
+                "remaining_work_gpu_hours": job.remaining_work_gpu_hours,
             }
         )
     return tuple(events)
@@ -2789,6 +2792,14 @@ def _advance_job_migration_state(
         destination = job.migration_destination_idc
         if source is None or destination is None:
             raise RuntimeContractError("active migration lacks endpoints")
+        if (
+            job.migration_work_gpu_hours_at_start is None
+            or job.remaining_work_gpu_hours
+            != job.migration_work_gpu_hours_at_start
+        ):
+            raise RuntimeContractError(
+                "remaining compute work changed during checkpoint migration"
+            )
         capacity = authority.transfer_capacity_bytes_per_step(source, destination)
         sent = min(job.migration_payload_remaining_bytes, capacity)
         if sent <= 0:
@@ -2813,7 +2824,18 @@ def _advance_job_migration_state(
                 job.lifecycle = "RUNNING"
                 job.restart_remaining_steps = 0
                 job.migration_state = "COMPLETED"
-            completed_migrations.append(job.source.job_uid)
+            completed_migrations.append(
+                {
+                    "job_uid": job.source.job_uid,
+                    "source_idc": source,
+                    "destination_idc": destination,
+                    "remaining_work_gpu_hours_before": (
+                        job.migration_work_gpu_hours_at_start
+                    ),
+                    "remaining_work_gpu_hours_after": job.remaining_work_gpu_hours,
+                    "work_conserved": True,
+                }
+            )
     state.wan_transferred_bytes_cumulative += transferred
     completed_restarts = []
     for uid in sorted(restarting_before):
@@ -2822,10 +2844,19 @@ def _advance_job_migration_state(
             raise RuntimeContractError("restart state is inconsistent")
         job.restart_remaining_steps -= 1
         if job.restart_remaining_steps == 0:
+            if (
+                job.migration_work_gpu_hours_at_start is None
+                or job.remaining_work_gpu_hours
+                != job.migration_work_gpu_hours_at_start
+            ):
+                raise RuntimeContractError(
+                    "remaining compute work changed during migration restart"
+                )
             job.lifecycle = "RUNNING"
             job.migration_state = "COMPLETED"
             job.checkpoint_state = "INTERVAL_PENDING"
             completed_restarts.append(uid)
+            job.migration_work_gpu_hours_at_start = None
     state.wan_active_transfers = sum(
         job.lifecycle == "MIGRATING" for job in state.jobs.values()
     )
@@ -3076,6 +3107,9 @@ def _post_payload(state: MutableMethodState, method_id: str) -> Mapping[str, Any
                     job.migration_payload_remaining_bytes
                 ),
                 "restart_remaining_steps": job.restart_remaining_steps,
+                "migration_work_gpu_hours_at_start": (
+                    job.migration_work_gpu_hours_at_start
+                ),
             }
             for uid, job in sorted(state.jobs.items())
         },
@@ -3500,6 +3534,21 @@ class PfrRuntimeRunner:
                 "prestart_spatial_placements": list(prestart_placement_events),
                 "migration_completed": migration_progress["completed_migrations"],
                 "migration_restarts_completed": migration_progress["completed_restarts"],
+                "migration_job_state_evidence": {
+                    uid: {
+                        "lifecycle": job.lifecycle,
+                        "destination_idc": job.destination_idc,
+                        "checkpoint_state": job.checkpoint_state,
+                        "migration_state": job.migration_state,
+                        "remaining_work_gpu_hours": job.remaining_work_gpu_hours,
+                    }
+                    for uid, job in sorted(state.jobs.items())
+                    if job.migration_state
+                    not in {
+                        "NOT_REQUESTED",
+                        "ELIGIBLE_AT_AUTHORIZED_CHECKPOINT",
+                    }
+                },
                 "wan_transfer_authority": (
                     self.migration_authority.authority_id
                     if config.spatial_workload_migration

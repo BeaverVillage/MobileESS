@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 import shutil
 import statistics
+import subprocess
 import sys
 from typing import Any, Mapping, Optional, Sequence
 
@@ -41,6 +42,28 @@ def sha256(path: Path) -> str:
         for block in iter(lambda: stream.read(8 << 20), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def git_source_identity(repo: Path) -> Mapping[str, Any]:
+    def git(*args: str) -> str:
+        process = subprocess.run(
+            ("git", "-C", str(repo), *args),
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return process.stdout.strip()
+
+    full_commit = git("rev-parse", "HEAD")
+    branch = git("branch", "--show-current")
+    dirty = bool(git("status", "--porcelain"))
+    if len(full_commit) != 40:
+        raise RuntimeError("scientific source commit is not a full Git SHA")
+    return {
+        "git_full_commit_sha": full_commit,
+        "git_branch": branch,
+        "git_worktree_dirty": dirty,
+    }
 
 
 def sha256_files(paths: Sequence[Path]) -> str:
@@ -1086,6 +1109,15 @@ def main() -> None:
             "IDC_MIGRATION_AUTHORITY_V1 contract."
         ),
     )
+    parser.add_argument(
+        "--checkpoint-payload-occupancy-factor",
+        type=float,
+        choices=(0.25, 0.5, 1.0),
+        help=(
+            "January development sensitivity only. Defaults to the frozen "
+            "primary factor in the migration authority."
+        ),
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if args.diagnostic_method and args.supplementary_b8_periodic_5min:
@@ -1100,7 +1132,13 @@ def main() -> None:
         if args.migration_authority is not None
         else (repo / "pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json").resolve()
     )
-    migration_authority = load_migration_authority(migration_authority_path)
+    migration_authority = load_migration_authority(
+        migration_authority_path,
+        checkpoint_payload_occupancy_factor=(
+            args.checkpoint_payload_occupancy_factor
+        ),
+    )
+    source_identity = git_source_identity(repo)
     native_control_dss = (
         repo / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.dss"
     ).resolve()
@@ -1244,7 +1282,14 @@ def main() -> None:
         "factorized_uncertainty_sha256": sha256(args.factorized_uncertainty),
         "workload_uncertainty_sha256": sha256(args.workload_uncertainty),
         "migration_authority_sha256": migration_authority.fingerprint,
+        "migration_contract_sha256": migration_authority.contract_fingerprint,
         "migration_authority_id": migration_authority.authority_id,
+        "checkpoint_payload_occupancy_factor": (
+            migration_authority.checkpoint_payload_occupancy_factor
+        ),
+        "checkpoint_payload_parameterization": (
+            "ENGINEERING_SCENARIO_NOT_MEASURED_CHECKPOINT_SIZE"
+        ),
         "route_catalog_sha256": sha256(args.route_catalog),
         "mobility_template_bank_sha256": sha256(args.mobility_template_bank),
         "physical_execution_authority_version": (
@@ -1380,7 +1425,12 @@ def main() -> None:
         "evaluation_contract": evaluation_contract,
         "migration_authority_path": str(migration_authority_path),
         "migration_authority_sha256": migration_authority.fingerprint,
+        "migration_contract_sha256": migration_authority.contract_fingerprint,
         "migration_authority_id": migration_authority.authority_id,
+        "checkpoint_payload_occupancy_factor": (
+            migration_authority.checkpoint_payload_occupancy_factor
+        ),
+        **source_identity,
         "actual_gurobi_used": matrix["all_actual_gurobi"],
         "actual_fresh_opendss_used": matrix["all_fresh_exact_opendss"],
         "opendss_metrics_common_sha256": sha256(args.exact_package_root / "opendss_metrics_common.py"),

@@ -1,6 +1,8 @@
 from pathlib import Path
+import tempfile
 import unittest
 
+from pfr.canary import run_idc_migration_canary
 from pfr.migration import load_migration_authority
 
 
@@ -32,6 +34,31 @@ class MigrationAuthorityTests(unittest.TestCase):
             self.authority.transfer_steps(80_000_000_000, "IDC01", "IDC02"),
             1,
         )
+
+    def test_authorized_checkpoint_occupancy_sensitivity_is_explicit(self):
+        expected = {0.25: 20_000_000_000, 0.5: 40_000_000_000, 1.0: 80_000_000_000}
+        fingerprints = set()
+        for factor, payload in expected.items():
+            authority = load_migration_authority(
+                self.path,
+                checkpoint_payload_occupancy_factor=factor,
+            )
+            self.assertEqual(authority.checkpoint_payload_bytes(1), payload)
+            self.assertEqual(authority.checkpoint_payload_occupancy_factor, factor)
+            self.assertEqual(authority.contract_fingerprint, self.authority.contract_fingerprint)
+            fingerprints.add(authority.fingerprint)
+        self.assertEqual(len(fingerprints), 3)
+
+    def test_runtime_canary_proves_work_conservation_and_b8_fairness(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            result = run_idc_migration_canary(
+                self.authority, Path(temporary)
+            )
+        self.assertEqual(result["status"], "PASS")
+        self.assertGreater(result["wan_bytes_transferred"], 0)
+        self.assertTrue(result["remaining_compute_work_conserved"])
+        self.assertTrue(result["running_at_different_idc_after_restart"])
+        self.assertTrue(result["b8_precheckpoint_migration_blocked"])
 
 
 if __name__ == "__main__":
