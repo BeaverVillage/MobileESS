@@ -39,6 +39,7 @@ class MigrationAuthority:
     maximum_active_transfers: int
     minimum_gpu_squared_improvement: float
     downtime_penalty_per_gpu_step: float
+    episode_boundary_policy: str
     idc_to_wan_node: Mapping[str, str]
     links: tuple[WanLink, ...]
     dataset_residency_mode: str
@@ -64,6 +65,11 @@ class MigrationAuthority:
             raise MigrationAuthorityError("WAN authority must use the five-minute step")
         if self.dataset_residency_mode != "PRESTAGED_AT_ALL_12_IDCS":
             raise MigrationAuthorityError("unsupported dataset residency authority")
+        if (
+            self.episode_boundary_policy
+            != "START_ONLY_IF_TRANSFER_AND_RESTART_COMPLETE_WITHIN_EVALUATION_EPISODE"
+        ):
+            raise MigrationAuthorityError("unsupported migration episode-boundary policy")
         if set(self.idc_to_wan_node) != set(IDCS):
             raise MigrationAuthorityError("WAN node mapping must cover all 12 IDCs")
         nodes = set(self.idc_to_wan_node.values())
@@ -196,6 +202,7 @@ def load_migration_authority(
         downtime_penalty_per_gpu_step=float(
             optimizer["downtime_penalty_per_gpu_step"]
         ),
+        episode_boundary_policy=str(optimizer["episode_boundary_policy"]),
         idc_to_wan_node={
             str(key): str(value) for key, value in payload["idc_to_wan_node"].items()
         },

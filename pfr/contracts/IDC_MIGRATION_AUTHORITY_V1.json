@@ -46,6 +46,7 @@
   "placement_optimizer": {
     "action_set": "DETERMINISTIC_CAPACITY_FEASIBLE_PRESTART_PLACEMENT_FOR_QUEUED_JOBS_PLUS_AT_MOST_ONE_CHECKPOINT_READY_RUNNING_JOB_MIGRATION_PER_SLOW_REPLAN",
     "objective": "MINIMIZE_SUM_SQUARED_RESERVED_GPU_OCCUPANCY_WITH_TRANSFER_DOWNTIME_PENALTY",
+    "episode_boundary_policy": "START_ONLY_IF_TRANSFER_AND_RESTART_COMPLETE_WITHIN_EVALUATION_EPISODE",
     "minimum_gpu_squared_improvement": 1.0,
     "downtime_penalty_per_gpu_step": 0.25,
     "tie_break": "score_then_job_uid_then_destination_idc"

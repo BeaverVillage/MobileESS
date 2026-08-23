@@ -39,6 +39,9 @@ The executable authority is
 - Queued jobs receive deterministic capacity-feasible pre-start placement.
   Running jobs use exact deterministic single-action enumeration and at most
   one checkpoint migration per slow replan.
+- A running-job migration starts only when its modeled WAN transfer and restart
+  can both finish inside the current independent daily evaluation episode. This
+  prevents end-of-day WAN/restart boundary artifacts.
 - Every run records the authority SHA-256, pre-start placement events,
   migration start/completion/restart events, per-step WAN bytes, and cumulative
   WAN bytes.

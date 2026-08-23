@@ -24,6 +24,10 @@ class MigrationAuthorityTests(unittest.TestCase):
 
     def test_checkpoint_payload_and_transfer_capacity_are_exact(self):
         self.assertEqual(
+            self.authority.episode_boundary_policy,
+            "START_ONLY_IF_TRANSFER_AND_RESTART_COMPLETE_WITHIN_EVALUATION_EPISODE",
+        )
+        self.assertEqual(
             self.authority.checkpoint_payload_bytes(4), 320_000_000_000
         )
         self.assertEqual(
