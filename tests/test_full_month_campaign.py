@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from pfr.tools.run_frozen_rep_week_daily_campaign import payload
+from pfr.tools.preflight_january_2025 import validate_method_contracts
 
 
 CONTRACT = (
@@ -93,3 +94,16 @@ def test_full_month_campaign_has_separate_b0_b7_and_b8_registries() -> None:
     assert b8["status"] == "PASS"
     assert b8["methods_per_day"] == 1
     assert b8["method_ids"] == ["B8"]
+
+
+def test_common_b0_b8_contract_is_valid_for_all_month_preflights() -> None:
+    result = validate_method_contracts()
+    assert result["pass"] is True
+    assert result["periodic_methods"] == ["B1", "B2", "B3", "B4", "B5"]
+    assert result["supplementary_b8"]["periodic_replan_steps"] == 1
+    assert (
+        result["supplementary_b8"][
+            "same_capabilities_as_b7_except_replan_invocation_timing"
+        ]
+        is True
+    )

@@ -21,7 +21,7 @@ while (($#)); do
         -h|--help)
             echo "Usage: $0 [--preflight-only] [--skip-migration-sensitivity] [--january-only]"
             echo "Runs 4 daily processes x 4 Gurobi threads."
-            echo "Default: run and validate January, then automatically continue to February and March only after PASS."
+            echo "Default: attempt January, February, and March in order; preserve failures and continue."
             exit 0
             ;;
         *) echo "Unknown option: $1" >&2; exit 64 ;;

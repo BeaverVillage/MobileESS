@@ -14,6 +14,7 @@ import pandas as pd
 
 from pfr.canary import run_idc_migration_canary
 from pfr.migration import load_migration_authority
+from pfr.tools.preflight_january_2025 import validate_method_contracts
 
 
 def sha256(path: Path) -> str:
@@ -165,9 +166,23 @@ def main() -> None:
             migration_authority, Path(temporary)
         )
     migration_ok = migration_ok and migration_canary.get("pass") is True
-    ready_to_run = plan_ok and input_ok and source_ok and scale_ok and migration_ok
+    method_contracts = validate_method_contracts()
+    method_contracts_ok = method_contracts.get("pass") is True
+    ready_to_run = (
+        plan_ok
+        and input_ok
+        and source_ok
+        and scale_ok
+        and migration_ok
+        and method_contracts_ok
+    )
     ready_to_materialize = (
-        plan_ok and input_ok and scale_ok and migration_ok and not source_ready
+        plan_ok
+        and input_ok
+        and scale_ok
+        and migration_ok
+        and method_contracts_ok
+        and not source_ready
     )
     status = (
         "PASS_READY_TO_RUN"
@@ -193,6 +208,7 @@ def main() -> None:
             "feeder_scale_contract": scale_ok,
             "migration_authority": migration_ok,
             "migration_runtime_canary": migration_canary,
+            "b0_b8_method_contracts": method_contracts,
         },
         "job_count": len(jobs),
         "shared_authority_sha256": authority_sha,

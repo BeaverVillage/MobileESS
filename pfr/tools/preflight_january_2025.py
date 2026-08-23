@@ -51,45 +51,6 @@ def validate_method_contracts() -> Mapping[str, Any]:
         for item in configs
         if item.control_mode == "PERIODIC_MPC"
     }
-
-
-def validate_migration_authority(path: Path) -> Mapping[str, Any]:
-    authority = load_migration_authority(path)
-    passed = bool(
-        authority.authority_id == "PFR_IDC_MIGRATION_ABILENE12_H10080_V1"
-        and authority.dataset_residency_mode == "PRESTAGED_AT_ALL_12_IDCS"
-        and authority.checkpoint_interval_steps == 6
-        and authority.framebuffer_reference_bytes_per_gpu == 80_000_000_000
-        and authority.checkpoint_payload_occupancy_factor == 1.0
-        and authority.sensitivity_factors == (0.25, 0.5, 1.0)
-        and authority.restart_steps == 1
-        and authority.maximum_active_transfers == 1
-        and authority.transfer_capacity_bytes_per_step("IDC01", "IDC02") > 0
-    )
-    return {
-        "pass": passed,
-        "authority_id": authority.authority_id,
-        "sha256": authority.fingerprint,
-        "checkpoint_interval_steps": authority.checkpoint_interval_steps,
-        "framebuffer_reference_bytes_per_gpu": (
-            authority.framebuffer_reference_bytes_per_gpu
-        ),
-        "checkpoint_payload_occupancy_factor": (
-            authority.checkpoint_payload_occupancy_factor
-        ),
-        "january_development_sensitivity_factors": authority.sensitivity_factors,
-        "contract_sha256": authority.contract_fingerprint,
-        "parameterization_sha256": authority.fingerprint,
-        "restart_steps": authority.restart_steps,
-        "dataset_residency_mode": authority.dataset_residency_mode,
-        "parameter_classification": "MODELED_NOT_MEASURED",
-    }
-
-
-def validate_migration_runtime_canary(path: Path) -> Mapping[str, Any]:
-    authority = load_migration_authority(path)
-    with tempfile.TemporaryDirectory() as temporary:
-        return run_idc_migration_canary(authority, Path(temporary))
     expected_periodic = {"B1", "B2", "B3", "B4", "B5"}
     b0 = configs[0]
     b7 = configs[-1]
@@ -146,6 +107,45 @@ def validate_migration_runtime_canary(path: Path) -> Mapping[str, Any]:
             "migration_checkpoint_authority_is_runtime_common": True,
         },
     }
+
+
+def validate_migration_authority(path: Path) -> Mapping[str, Any]:
+    authority = load_migration_authority(path)
+    passed = bool(
+        authority.authority_id == "PFR_IDC_MIGRATION_ABILENE12_H10080_V1"
+        and authority.dataset_residency_mode == "PRESTAGED_AT_ALL_12_IDCS"
+        and authority.checkpoint_interval_steps == 6
+        and authority.framebuffer_reference_bytes_per_gpu == 80_000_000_000
+        and authority.checkpoint_payload_occupancy_factor == 1.0
+        and authority.sensitivity_factors == (0.25, 0.5, 1.0)
+        and authority.restart_steps == 1
+        and authority.maximum_active_transfers == 1
+        and authority.transfer_capacity_bytes_per_step("IDC01", "IDC02") > 0
+    )
+    return {
+        "pass": passed,
+        "authority_id": authority.authority_id,
+        "sha256": authority.fingerprint,
+        "checkpoint_interval_steps": authority.checkpoint_interval_steps,
+        "framebuffer_reference_bytes_per_gpu": (
+            authority.framebuffer_reference_bytes_per_gpu
+        ),
+        "checkpoint_payload_occupancy_factor": (
+            authority.checkpoint_payload_occupancy_factor
+        ),
+        "january_development_sensitivity_factors": authority.sensitivity_factors,
+        "contract_sha256": authority.contract_fingerprint,
+        "parameterization_sha256": authority.fingerprint,
+        "restart_steps": authority.restart_steps,
+        "dataset_residency_mode": authority.dataset_residency_mode,
+        "parameter_classification": "MODELED_NOT_MEASURED",
+    }
+
+
+def validate_migration_runtime_canary(path: Path) -> Mapping[str, Any]:
+    authority = load_migration_authority(path)
+    with tempfile.TemporaryDirectory() as temporary:
+        return run_idc_migration_canary(authority, Path(temporary))
 
 
 def validate_common_native_grid_control(
