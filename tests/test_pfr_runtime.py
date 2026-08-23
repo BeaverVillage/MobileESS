@@ -2,6 +2,7 @@ import tempfile
 from pathlib import Path
 import unittest
 
+from pfr.migration import load_migration_authority
 from pfr.methods import ComparisonMethod, ExperimentAuthority, MethodFactory
 from pfr.power import H100UtilizationPowerCurve
 from pfr.runtime import (
@@ -9,6 +10,7 @@ from pfr.runtime import (
     OperationalTrainingJob,
     PhysicalCommit,
     PfrRuntimeRunner,
+    RuntimeContractError,
     RuntimeInitialState,
     NativeGridControlDecision,
 )
@@ -125,7 +127,15 @@ class PfrRuntimeTests(unittest.TestCase):
             {f"MESS{i:02d}": 760.0 for i in range(1, 5)},
             {f"MESS{i:02d}": f"STA{i:02d}" for i in range(1, 5)},
         )
-        job = OperationalTrainingJob("j1", "IDC01", 100, 102, 110, 1, 3600, 0.01, None, "source-j1")
+        self.migration_authority = load_migration_authority(
+            Path(__file__).parents[1]
+            / "pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json"
+        )
+        job = OperationalTrainingJob(
+            "j1", "IDC01", 100, 102, 110, 1, 3600, 0.01, None, "source-j1",
+            self.migration_authority.checkpoint_payload_bytes(1),
+            self.migration_authority.fingerprint,
+        )
         self.frames = (
             CausalExperimentFrame(100, 100, 50, 1000, 100, (job,), "d" * 64),
             CausalExperimentFrame(101, 20, 50, 1000, 100, (), "e" * 64),
@@ -134,7 +144,11 @@ class PfrRuntimeTests(unittest.TestCase):
     def test_b0_b7_matrix_commits_every_issue_with_fresh_exact_gate(self):
         physical = FakePhysical()
         with tempfile.TemporaryDirectory() as temporary:
-            summary = PfrRuntimeRunner(power_curve=self.curve, physical_backend=physical).run_matrix(
+            summary = PfrRuntimeRunner(
+                power_curve=self.curve,
+                physical_backend=physical,
+                migration_authority=self.migration_authority,
+            ).run_matrix(
                 configs=self.configs, frames=self.frames, initial=self.initial,
                 representative_week_id="TEST", output=Path(temporary),
             )
@@ -151,6 +165,7 @@ class PfrRuntimeTests(unittest.TestCase):
             summary = PfrRuntimeRunner(
                 power_curve=self.curve,
                 physical_backend=FakePhysical(),
+                migration_authority=self.migration_authority,
             ).run_method(
                 config=b8,
                 frames=self.frames,
@@ -191,18 +206,89 @@ class PfrRuntimeTests(unittest.TestCase):
         self.assertTrue(
             all(states == {"c83": (0,)} for states in physical.verified_states)
         )
-    def test_missing_payload_blocks_spatial_action_without_fabricating_zero(self):
+    def test_spatial_method_fails_closed_without_frozen_migration_authority(self):
         config = next(item for item in self.configs if item.comparison_method_id is ComparisonMethod.B3)
         with tempfile.TemporaryDirectory() as temporary:
-            PfrRuntimeRunner(power_curve=self.curve, physical_backend=FakePhysical()).run_method(
-                config=config, frames=self.frames[:1], initial=self.initial,
-                representative_week_id="TEST", output=Path(temporary),
+            with self.assertRaises(RuntimeContractError):
+                PfrRuntimeRunner(
+                    power_curve=self.curve, physical_backend=FakePhysical()
+                ).run_method(
+                    config=config, frames=self.frames[:1], initial=self.initial,
+                    representative_week_id="TEST", output=Path(temporary),
+                )
+
+    def test_spatial_arm_executes_checkpoint_migration_and_accounts_wan_bytes(self):
+        config = next(
+            item
+            for item in self.configs
+            if item.comparison_method_id is ComparisonMethod.B5
+        )
+        jobs = tuple(
+            OperationalTrainingJob(
+                f"j{index}", "IDC01", 100, 102, 130, 1, 7200, 0.01,
+                None, f"source-j{index}",
+                self.migration_authority.checkpoint_payload_bytes(1),
+                self.migration_authority.fingerprint,
+            )
+            for index in (1, 2)
+        )
+        frames = tuple(
+            CausalExperimentFrame(
+                issue,
+                100.0,
+                100.0,
+                1000.0,
+                100.0,
+                jobs if issue == 100 else (),
+                format(issue, "064x"),
+                workload_reserve_gpu={
+                    site: (20.0 if issue >= 106 and site == "IDC01" else 0.0)
+                    for site in self.migration_authority.idc_to_wan_node
+                },
+            )
+            for issue in range(100, 109)
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            summary = PfrRuntimeRunner(
+                power_curve=self.curve,
+                physical_backend=FakePhysical(),
+                migration_authority=self.migration_authority,
+            ).run_method(
+                config=config,
+                frames=frames,
+                initial=self.initial,
+                representative_week_id="TEST_B5_MIGRATION",
+                output=root,
             )
             marker = __import__("json").loads(
-                (Path(temporary) / "B3/issue_000100/COMMIT_MARKER.json").read_text()
+                (root / "B5/issue_000106/COMMIT_MARKER.json").read_text(
+                    encoding="utf-8"
+                )
             )
-        self.assertEqual(marker["spatial_actions_blocked_missing_payload"], 1)
-        self.assertEqual(marker["migration_payload_authority"], "NULL_INPUT_BYTES_BLOCKS_MIGRATION")
+            initial_marker = __import__("json").loads(
+                (root / "B5/issue_000100/COMMIT_MARKER.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            restart_marker = __import__("json").loads(
+                (root / "B5/issue_000107/COMMIT_MARKER.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+        self.assertEqual(summary["status"], "PASS")
+        self.assertEqual(summary["migration_count"], 1)
+        self.assertEqual(summary["wan_transferred_bytes"], 80_000_000_000)
+        self.assertEqual(marker["wan_bytes_transferred_step"], 80_000_000_000)
+        self.assertEqual(len(marker["migration_started"]), 1)
+        self.assertEqual(len(marker["migration_completed"]), 1)
+        self.assertEqual(len(initial_marker["prestart_spatial_placements"]), 1)
+        self.assertEqual(initial_marker["wan_bytes_transferred_step"], 0)
+        self.assertEqual(len(restart_marker["migration_restarts_completed"]), 1)
+        self.assertEqual(
+            marker["migration_payload_authority"],
+            self.migration_authority.fingerprint,
+        )
 
     def test_empty_job_slow_plan_is_valid(self):
         frame = CausalExperimentFrame(100, 10, 10, 1000, 100, (), "f" * 64)
@@ -217,7 +303,9 @@ class PfrRuntimeTests(unittest.TestCase):
         physical = MessOnlyRescuePhysical()
         with tempfile.TemporaryDirectory() as temporary:
             summary = PfrRuntimeRunner(
-                power_curve=self.curve, physical_backend=physical
+                power_curve=self.curve,
+                physical_backend=physical,
+                migration_authority=self.migration_authority,
             ).run_method(
                 config=self.configs[0], frames=self.frames[:1], initial=self.initial,
                 representative_week_id="TEST", output=Path(temporary),
@@ -233,7 +321,9 @@ class PfrRuntimeTests(unittest.TestCase):
         physical = RaiseOncePhysical()
         with tempfile.TemporaryDirectory() as temporary:
             summary = PfrRuntimeRunner(
-                power_curve=self.curve, physical_backend=physical
+                power_curve=self.curve,
+                physical_backend=physical,
+                migration_authority=self.migration_authority,
             ).run_matrix(
                 configs=self.configs, frames=self.frames[:1], initial=self.initial,
                 representative_week_id="TEST", output=Path(temporary),
@@ -254,7 +344,9 @@ class PfrRuntimeTests(unittest.TestCase):
         physical = RaiseAfterOneCommittedIssuePhysical()
         with tempfile.TemporaryDirectory() as temporary:
             summary = PfrRuntimeRunner(
-                power_curve=self.curve, physical_backend=physical
+                power_curve=self.curve,
+                physical_backend=physical,
+                migration_authority=self.migration_authority,
             ).run_matrix(
                 configs=self.configs,
                 frames=self.frames,

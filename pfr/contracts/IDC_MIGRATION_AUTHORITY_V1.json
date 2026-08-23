@@ -1,0 +1,87 @@
+{
+  "schema_version": "IDC_MIGRATION_AUTHORITY_V1",
+  "status": "FROZEN_POST_HOC_CASE_STUDY_PARAMETERIZATION_BEFORE_RERUN",
+  "authority_id": "PFR_IDC_MIGRATION_ABILENE12_H10080_V1",
+  "independent_holdout_claim": false,
+  "dataset_residency": {
+    "mode": "PRESTAGED_AT_ALL_12_IDCS",
+    "missing_destination_dataset_bytes": 0,
+    "interpretation": "A declared case-study placement assumption, not NULL input_bytes converted to zero"
+  },
+  "checkpoint": {
+    "interval_steps": 6,
+    "interval_minutes": 30,
+    "payload_model": "requested_gpu * checkpoint_bytes_per_gpu",
+    "checkpoint_bytes_per_gpu": 80000000000,
+    "parameter_classification": "MODELED_CONSERVATIVE_FULL_H100_MEMORY_UPPER_PROXY",
+    "restart_steps": 1,
+    "restart_minutes": 5,
+    "hardware_source": {
+      "title": "NVIDIA H100 Tensor Core GPU product specifications",
+      "url": "https://www.nvidia.com/en-us/data-center/h100/",
+      "reported_h100_sxm_gpu_memory_gb": 80
+    }
+  },
+  "wan": {
+    "topology_role": "12_NODE_CAPACITY_BENCHMARK_NOT_MELBOURNE_MEASUREMENT",
+    "capacity_mode": "PREINSTALLED_LINK_CAPACITY",
+    "step_seconds": 300,
+    "routing": "DETERMINISTIC_MINIMUM_HOP_LEXICOGRAPHIC",
+    "capacity_sharing": "ONE_ACTIVE_MIGRATION_NETWORK_WIDE",
+    "maximum_active_transfers": 1,
+    "source": {
+      "portable_relative_path": "WAN/abilene_network_native.txt.txt",
+      "sha256": "e620c92985e6d8b8c09c8e32588d806c8c1c03e3e944a07119672d1804fda512",
+      "unit": "MBITPERSEC"
+    },
+    "background_traffic_sensitivity_source": {
+      "portable_relative_path": "WAN/directed-abilene-zhang-5min-over-6months-ALL-native.tgz",
+      "sha256": "2f311130d77e40db88da1aa6db8055b6fce8d077bf4bae87398563e1b84e70ce",
+      "primary_run_usage": "NOT_APPLIED_TO_PREINSTALLED_CAPACITY_PRIMARY_CASE"
+    }
+  },
+  "placement_optimizer": {
+    "action_set": "DETERMINISTIC_CAPACITY_FEASIBLE_PRESTART_PLACEMENT_FOR_QUEUED_JOBS_PLUS_AT_MOST_ONE_CHECKPOINT_READY_RUNNING_JOB_MIGRATION_PER_SLOW_REPLAN",
+    "objective": "MINIMIZE_SUM_SQUARED_RESERVED_GPU_OCCUPANCY_WITH_TRANSFER_DOWNTIME_PENALTY",
+    "minimum_gpu_squared_improvement": 1.0,
+    "downtime_penalty_per_gpu_step": 0.25,
+    "tie_break": "score_then_job_uid_then_destination_idc"
+  },
+  "idc_to_wan_node": {
+    "IDC01": "ATLAM5",
+    "IDC02": "ATLAng",
+    "IDC03": "CHINng",
+    "IDC04": "DNVRng",
+    "IDC05": "HSTNng",
+    "IDC06": "IPLSng",
+    "IDC07": "KSCYng",
+    "IDC08": "LOSAng",
+    "IDC09": "NYCMng",
+    "IDC10": "SNVAng",
+    "IDC11": "STTLng",
+    "IDC12": "WASHng"
+  },
+  "undirected_links": [
+    {"a": "ATLAng", "b": "ATLAM5", "capacity_mbps": 9920.0},
+    {"a": "HSTNng", "b": "ATLAng", "capacity_mbps": 9920.0},
+    {"a": "IPLSng", "b": "ATLAng", "capacity_mbps": 2480.0},
+    {"a": "WASHng", "b": "ATLAng", "capacity_mbps": 9920.0},
+    {"a": "IPLSng", "b": "CHINng", "capacity_mbps": 9920.0},
+    {"a": "NYCMng", "b": "CHINng", "capacity_mbps": 9920.0},
+    {"a": "KSCYng", "b": "DNVRng", "capacity_mbps": 9920.0},
+    {"a": "SNVAng", "b": "DNVRng", "capacity_mbps": 9920.0},
+    {"a": "STTLng", "b": "DNVRng", "capacity_mbps": 9920.0},
+    {"a": "KSCYng", "b": "HSTNng", "capacity_mbps": 9920.0},
+    {"a": "LOSAng", "b": "HSTNng", "capacity_mbps": 9920.0},
+    {"a": "KSCYng", "b": "IPLSng", "capacity_mbps": 9920.0},
+    {"a": "SNVAng", "b": "LOSAng", "capacity_mbps": 9920.0},
+    {"a": "WASHng", "b": "NYCMng", "capacity_mbps": 9920.0},
+    {"a": "STTLng", "b": "SNVAng", "capacity_mbps": 9920.0}
+  ],
+  "prohibited_claims": [
+    "CHECKPOINT_SIZE_MEASURED_BY_KESTREL",
+    "ABILENE_TOPOLOGY_IS_A_MEASURED_MELBOURNE_IDC_WAN",
+    "NULL_INPUT_BYTES_WAS_ZERO_FILLED",
+    "MIGRATION_WAS_IN_THE_COMPLETED_JANUARY_B0_B7_RESULTS"
+  ]
+}

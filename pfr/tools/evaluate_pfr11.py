@@ -10,6 +10,8 @@ from typing import Any, Mapping, Sequence
 
 
 METHODS = tuple(f"B{index}" for index in range(8))
+SPATIAL_METHODS = frozenset({"B3", "B4", "B5", "B6", "B7"})
+MIGRATION_AUTHORITY_ID = "PFR_IDC_MIGRATION_ABILENE12_H10080_V1"
 
 
 def load_rows(run_root: Path, method_id: str) -> list[Mapping[str, Any]]:
@@ -60,6 +62,28 @@ def evaluate(run_root: Path, contract: Mapping[str, Any]) -> Mapping[str, Any]:
     for method_id, method_rows in rows.items():
         axis = [int(row["issue"]) for row in method_rows]
         chain = all(method_rows[i]["post_state_sha256"] == method_rows[i + 1]["pre_state_sha256"] for i in range(max(0, len(method_rows) - 1)))
+        if method_id in SPATIAL_METHODS:
+            migration_policy_compliant = all(
+                row["checkpoint_authority"] == MIGRATION_AUTHORITY_ID
+                and row["wan_transfer_authority"] == MIGRATION_AUTHORITY_ID
+                and len(str(row["migration_payload_authority"])) == 64
+                and int(row["spatial_actions_blocked_missing_payload"]) == 0
+                and 0 <= int(row["wan_active_transfers"]) <= 1
+                and int(row["wan_bytes_transferred_step"]) >= 0
+                for row in method_rows
+            )
+        else:
+            migration_policy_compliant = all(
+                row["checkpoint_authority"]
+                == "NOT_APPLICABLE_METHOD_CAPABILITY_DISABLED"
+                and row["migration_payload_authority"]
+                == "NOT_APPLICABLE_METHOD_CAPABILITY_DISABLED"
+                and row["wan_transfer_authority"]
+                == "NOT_APPLICABLE_METHOD_CAPABILITY_DISABLED"
+                and int(row["wan_active_transfers"]) == 0
+                and int(row["wan_bytes_transferred_step"]) == 0
+                for row in method_rows
+            )
         technical[method_id] = {
             "complete": len(method_rows) == expected and materialized_count(run_root, method_id) == expected,
             "contiguous_issue_axis": axis == list(range(start, start + expected)),
@@ -68,12 +92,14 @@ def evaluate(run_root: Path, contract: Mapping[str, Any]) -> Mapping[str, Any]:
             "actual_gurobi_count": sum(bool(row["actual_gurobi_used"]) for row in method_rows),
             "final_ac_violation_count": sum(ac_violations(row) for row in method_rows),
             "future_actual_used": any(bool(row["future_actual_used"]) for row in method_rows),
-            "checkpoint_migration_policy_compliant": all(
-                row["checkpoint_authority"] == "UNAVAILABLE_NOT_MEASURED"
-                and row["migration_payload_authority"] == "NULL_INPUT_BYTES_BLOCKS_MIGRATION"
-                and row["wan_transfer_authority"] == "NO_AUTHORIZED_MIGRATIONS_MISSING_PAYLOAD"
-                and int(row["wan_active_transfers"]) == 0
-                for row in method_rows
+            "checkpoint_migration_policy_compliant": migration_policy_compliant,
+            "migration_count": (
+                int(method_rows[-1]["migration_count_cumulative"])
+                if method_rows else 0
+            ),
+            "wan_transferred_bytes": (
+                int(method_rows[-1]["wan_transferred_bytes_cumulative"])
+                if method_rows else 0
             ),
             "deadline_misses": int(method_rows[-1]["deadline_misses"]) if method_rows else 0,
             "full_slow_replans": int(method_rows[-1]["full_replan_count_cumulative"]) if method_rows else 0,

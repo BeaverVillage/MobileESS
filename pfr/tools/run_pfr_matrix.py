@@ -19,6 +19,7 @@ import pandas as pd
 
 from pfr.daily import DailyInitializationError, certify_daily_pre_identity
 from pfr.methods import ComparisonMethod, ExperimentAuthority, MethodFactory
+from pfr.migration import MigrationAuthority, load_migration_authority
 from pfr.optimization import GurobiFastControlOptimizer, gurobi_thread_limit
 from pfr.power import H100UtilizationPowerCurve
 from pfr.provenance import scientific_implementation_fingerprint
@@ -916,6 +917,7 @@ def _frames(
     mobility_template_bank: Mapping[int, tuple[float, ...]],
     workload_reserve_gpu: Mapping[str, float],
     feeder_scale: float,
+    migration_authority: MigrationAuthority,
 ) -> list[CausalExperimentFrame]:
     if not 0.0 < feeder_scale <= 1.0:
         raise RuntimeError("feeder scale must be in (0, 1]")
@@ -950,6 +952,10 @@ def _frames(
             cpu_request_share_kw=float(record["CPU_request_share_upper_component_kW"]),
             input_bytes=input_bytes,
             source_record_id=str(record["source_record_id"]),
+            migration_payload_bytes=migration_authority.checkpoint_payload_bytes(
+                int(record["requested_gpu"])
+            ),
+            migration_authority_sha256=migration_authority.fingerprint,
         )
         job.validate()
         arrivals.setdefault(job.arrival_step, []).append(job)
@@ -1010,6 +1016,7 @@ def _frames(
             "mobility_issue_sha256": sha256(mobility_path),
             "factorized_uncertainty_bound": True,
             "feeder_absolute_scale_alpha": feeder_scale,
+            "migration_authority_sha256": migration_authority.fingerprint,
         }
         frames.append(CausalExperimentFrame(
             issue=issue,
@@ -1071,6 +1078,14 @@ def main() -> None:
     parser.add_argument("--mobility-template-bank", type=Path, required=True)
     parser.add_argument("--workload-uncertainty", type=Path, required=True)
     parser.add_argument("--factorized-uncertainty", type=Path, required=True)
+    parser.add_argument(
+        "--migration-authority",
+        type=Path,
+        help=(
+            "Frozen IDC migration/WAN authority; defaults to the repository "
+            "IDC_MIGRATION_AUTHORITY_V1 contract."
+        ),
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if args.diagnostic_method and args.supplementary_b8_periodic_5min:
@@ -1080,6 +1095,12 @@ def main() -> None:
     if args.count <= 0:
         parser.error("--count must be positive")
     repo = args.repo.resolve()
+    migration_authority_path = (
+        args.migration_authority.resolve()
+        if args.migration_authority is not None
+        else (repo / "pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json").resolve()
+    )
+    migration_authority = load_migration_authority(migration_authority_path)
     native_control_dss = (
         repo / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.dss"
     ).resolve()
@@ -1212,6 +1233,7 @@ def main() -> None:
             key: float(value) for key, value in workload_uncertainty["idc_gpu_reserve"].items()
         },
         feeder_scale=feeder_scale,
+        migration_authority=migration_authority,
     )
     evaluation_contract = {
         "gpu_capacity_per_idc_modeled": 256,
@@ -1221,6 +1243,8 @@ def main() -> None:
         "future_actual_used": False,
         "factorized_uncertainty_sha256": sha256(args.factorized_uncertainty),
         "workload_uncertainty_sha256": sha256(args.workload_uncertainty),
+        "migration_authority_sha256": migration_authority.fingerprint,
+        "migration_authority_id": migration_authority.authority_id,
         "route_catalog_sha256": sha256(args.route_catalog),
         "mobility_template_bank_sha256": sha256(args.mobility_template_bank),
         "physical_execution_authority_version": (
@@ -1254,7 +1278,7 @@ def main() -> None:
             )
         ),
         jobs_sha256=sha256(args.canonical_jobs),
-        wan_sha256=sha256(repo / "pfr/contracts/DATA_GAPS_AND_NONAUTHORITATIVE_FIELDS.json"),
+        wan_sha256=migration_authority.fingerprint,
         evaluation_coefficients_sha256=contract_sha,
         physical_ratings_sha256=sha256(Path(paths["assets"]) / "Generated_Planning_Line_Ratings_u080.dss"),
     )
@@ -1274,6 +1298,7 @@ def main() -> None:
             )
             // 300.0
         ),
+        migration_authority=migration_authority,
     )
     factory = MethodFactory(authority)
     configs = factory.all()
@@ -1353,6 +1378,9 @@ def main() -> None:
             (args.shared_root / "SHARED_EXOGENOUS_AUTHORITY.json").resolve()
         ),
         "evaluation_contract": evaluation_contract,
+        "migration_authority_path": str(migration_authority_path),
+        "migration_authority_sha256": migration_authority.fingerprint,
+        "migration_authority_id": migration_authority.authority_id,
         "actual_gurobi_used": matrix["all_actual_gurobi"],
         "actual_fresh_opendss_used": matrix["all_fresh_exact_opendss"],
         "opendss_metrics_common_sha256": sha256(args.exact_package_root / "opendss_metrics_common.py"),

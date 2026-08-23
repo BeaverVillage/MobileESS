@@ -11,6 +11,8 @@ from typing import Any, Mapping
 
 import pandas as pd
 
+from pfr.migration import load_migration_authority
+
 
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -144,8 +146,20 @@ def main() -> None:
         and scale.get("scientific_authority_version")
         == contract.get("physical_execution_authority_version")
     )
-    ready_to_run = plan_ok and input_ok and source_ok and scale_ok
-    ready_to_materialize = plan_ok and input_ok and scale_ok and not source_ready
+    migration_authority = load_migration_authority(
+        args.repo / "pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json"
+    )
+    migration_ok = bool(
+        migration_authority.authority_id
+        == "PFR_IDC_MIGRATION_ABILENE12_H10080_V1"
+        and migration_authority.checkpoint_interval_steps == 6
+        and migration_authority.checkpoint_bytes_per_gpu == 80_000_000_000
+        and migration_authority.restart_steps == 1
+    )
+    ready_to_run = plan_ok and input_ok and source_ok and scale_ok and migration_ok
+    ready_to_materialize = (
+        plan_ok and input_ok and scale_ok and migration_ok and not source_ready
+    )
     status = (
         "PASS_READY_TO_RUN"
         if ready_to_run
@@ -168,9 +182,11 @@ def main() -> None:
             "source_ready": source_ok,
             "source": source_checks,
             "feeder_scale_contract": scale_ok,
+            "migration_authority": migration_ok,
         },
         "job_count": len(jobs),
         "shared_authority_sha256": authority_sha,
+        "migration_authority_sha256": migration_authority.fingerprint,
         "source_plan": str(plan_path),
     }
     atomic_write_json(args.report, report)

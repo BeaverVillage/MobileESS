@@ -12,5 +12,12 @@
   "arbitrary_preemption": false,
   "migration_boundary": "CHECKPOINT_READY_ONLY",
   "partial_gang_execution": false,
-  "migration_payload": "missing_destination_dataset_bytes + checkpoint_total_state_bytes"
+  "migration_payload": "declared_destination_dataset_bytes + modeled_checkpoint_total_state_bytes",
+  "migration_authority": {
+    "contract": "IDC_MIGRATION_AUTHORITY_V1.json",
+    "dataset_residency": "PRESTAGED_AT_ALL_12_IDCS_CASE_STUDY_ASSUMPTION",
+    "checkpoint_interval": "MODELED_30_MINUTES_NOT_MEASURED_BY_KESTREL",
+    "checkpoint_size": "MODELED_CONSERVATIVE_FULL_H100_MEMORY_UPPER_PROXY_NOT_MEASURED_BY_KESTREL",
+    "restart_overhead": "MODELED_5_MINUTES_NOT_MEASURED_BY_KESTREL"
+  }
 }

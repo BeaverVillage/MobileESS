@@ -16,6 +16,7 @@ from pfr.methods import (
     MAIN_COMPARISON_METHODS,
     MethodFactory,
 )
+from pfr.migration import load_migration_authority
 from pfr.provenance import scientific_implementation_fingerprint
 from pfr.tools.run_pfr_daily_campaign import ISSUES_PER_DAY, day_specs
 from pfr.tools.run_pfr_matrix import _runtime_initial_state
@@ -47,6 +48,29 @@ def validate_method_contracts() -> Mapping[str, Any]:
         item.comparison_method_id.value
         for item in configs
         if item.control_mode == "PERIODIC_MPC"
+    }
+
+
+def validate_migration_authority(path: Path) -> Mapping[str, Any]:
+    authority = load_migration_authority(path)
+    passed = bool(
+        authority.authority_id == "PFR_IDC_MIGRATION_ABILENE12_H10080_V1"
+        and authority.dataset_residency_mode == "PRESTAGED_AT_ALL_12_IDCS"
+        and authority.checkpoint_interval_steps == 6
+        and authority.checkpoint_bytes_per_gpu == 80_000_000_000
+        and authority.restart_steps == 1
+        and authority.maximum_active_transfers == 1
+        and authority.transfer_capacity_bytes_per_step("IDC01", "IDC02") > 0
+    )
+    return {
+        "pass": passed,
+        "authority_id": authority.authority_id,
+        "sha256": authority.fingerprint,
+        "checkpoint_interval_steps": authority.checkpoint_interval_steps,
+        "checkpoint_bytes_per_gpu": authority.checkpoint_bytes_per_gpu,
+        "restart_steps": authority.restart_steps,
+        "dataset_residency_mode": authority.dataset_residency_mode,
+        "parameter_classification": "MODELED_NOT_MEASURED",
     }
     expected_periodic = {"B1", "B2", "B3", "B4", "B5"}
     b0 = configs[0]
@@ -530,8 +554,18 @@ def main() -> None:
     parser.add_argument("--mobility-template-bank", type=Path, required=True)
     parser.add_argument("--workload-uncertainty", type=Path, required=True)
     parser.add_argument("--factorized-uncertainty", type=Path, required=True)
+    parser.add_argument(
+        "--migration-authority",
+        type=Path,
+        help="Frozen IDC migration authority; defaults to the repository contract.",
+    )
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args()
+    migration_authority_path = (
+        args.migration_authority
+        if args.migration_authority is not None
+        else args.repo / "pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json"
+    )
 
     basic_paths = (
         args.repo / "pfr/runtime.py",
@@ -555,6 +589,7 @@ def main() -> None:
         args.repo / "pfr/contracts/BACKGROUND_NATIVE_FEASIBILITY_GATE_V1.json",
         args.repo / "pfr/contracts/FEEDER_ABSOLUTE_SCALE_CONTRACT_V2.json",
         args.repo / "pfr/tools/run_background_native_feasibility_gate.py",
+        migration_authority_path,
     )
     checks: dict[str, Mapping[str, Any]] = {
         "required_files": require_files(basic_paths, "campaign authority files"),
@@ -587,6 +622,9 @@ def main() -> None:
         checks.update(
             {
                 "method_contracts": validate_method_contracts(),
+                "migration_authority": validate_migration_authority(
+                    migration_authority_path
+                ),
                 "common_native_grid_control": validate_common_native_grid_control(
                     args.repo
                     / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.json",

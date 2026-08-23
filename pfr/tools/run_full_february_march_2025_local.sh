@@ -89,6 +89,7 @@ run_period() {
         --mobility-template-bank "$shared/mobility/E4B_FULLFIT_TEMPLATE_BANK_129.parquet" \
         --workload-uncertainty "$base/PFR3_V13_2_WORKLOAD_UNCERTAINTY_CURRENT/PFR3_WORKLOAD_UNCERTAINTY_V13_2.json" \
         --factorized-uncertainty "$base/PFR3_V13_2_FACTORIZED_UNCERTAINTY_CURRENT/PFR3_FACTORIZED_UNCERTAINTY_V13_2.json" \
+        --migration-authority "$repo_dir/pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json" \
         --output "$output" || campaign_rc=$?
     "$python_bin" -m pfr.tools.verify_daily_campaign_storage \
         --repo "$repo_dir" --root "$output" --start-date "$start_date" --days "$days" \

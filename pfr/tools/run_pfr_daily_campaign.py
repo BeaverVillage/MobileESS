@@ -415,6 +415,11 @@ def main() -> None:
     parser.add_argument("--mobility-template-bank", type=Path, required=True)
     parser.add_argument("--workload-uncertainty", type=Path, required=True)
     parser.add_argument("--factorized-uncertainty", type=Path, required=True)
+    parser.add_argument(
+        "--migration-authority",
+        type=Path,
+        help="Frozen IDC migration authority; defaults to the repository contract.",
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if not 1 <= args.day_workers <= 31:
@@ -463,6 +468,11 @@ def main() -> None:
         "--mobility-template-bank", str(args.mobility_template_bank),
         "--workload-uncertainty", str(args.workload_uncertainty),
         "--factorized-uncertainty", str(args.factorized_uncertainty),
+        "--migration-authority", str(
+            args.migration_authority
+            if args.migration_authority is not None
+            else args.repo / "pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json"
+        ),
     ]
     for mobility_root in args.mobility_root:
         common.extend(("--mobility-root", str(mobility_root)))

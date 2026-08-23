@@ -17,6 +17,7 @@ def scientific_implementation_files(repo: Path) -> tuple[Path, ...]:
             repo / "pfr" / "contracts" / "COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.json",
             repo / "pfr" / "contracts" / "IEEE123_NATIVE_CONTROL_ASSET_AUDIT_V1.json",
             repo / "pfr" / "contracts" / "PFR_RUNTIME_CONTRACT.json",
+            repo / "pfr" / "contracts" / "IDC_MIGRATION_AUTHORITY_V1.json",
             repo / "pfr" / "contracts" / "AC_SAFETY_FILTER_CONTRACT.json",
             repo
             / "pfr"

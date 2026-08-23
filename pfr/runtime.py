@@ -18,6 +18,7 @@ from .methods import (
     MAIN_COMPARISON_METHODS,
     MethodConfig,
 )
+from .migration import MigrationAuthority
 from .optimization import (
     FastControlOptimizer,
     FastOptimizationContext,
@@ -112,6 +113,8 @@ class OperationalTrainingJob:
     cpu_request_share_kw: float
     input_bytes: Optional[int]
     source_record_id: str
+    migration_payload_bytes: Optional[int] = None
+    migration_authority_sha256: Optional[str] = None
 
     def validate(self) -> None:
         if not self.job_uid or self.origin_idc not in IDCS or not self.source_record_id:
@@ -124,6 +127,16 @@ class OperationalTrainingJob:
             raise RuntimeContractError("CPU request-share power must be finite and non-negative")
         if self.input_bytes is not None and self.input_bytes < 0:
             raise RuntimeContractError("input bytes cannot be negative")
+        if self.migration_payload_bytes is not None and self.migration_payload_bytes <= 0:
+            raise RuntimeContractError("authorized migration payload must be positive")
+        if self.migration_payload_bytes is None:
+            if self.migration_authority_sha256 is not None:
+                raise RuntimeContractError("migration fingerprint lacks a payload")
+        elif (
+            self.migration_authority_sha256 is None
+            or len(self.migration_authority_sha256) != 64
+        ):
+            raise RuntimeContractError("migration payload lacks authority SHA-256")
 
     @property
     def total_work_gpu_hours(self) -> float:
@@ -247,7 +260,12 @@ class RuntimeJobState:
     start_issue: Optional[int] = None
     completion_issue: Optional[int] = None
     checkpoint_state: str = "UNAVAILABLE_NOT_MEASURED"
-    migration_state: str = "BLOCKED_MISSING_PAYLOAD_AUTHORITY"
+    migration_state: str = "NOT_EVALUATED_METHOD_CAPABILITY"
+    steps_since_checkpoint: int = 0
+    migration_source_idc: Optional[str] = None
+    migration_destination_idc: Optional[str] = None
+    migration_payload_remaining_bytes: int = 0
+    restart_remaining_steps: int = 0
 
 
 @dataclass
@@ -263,6 +281,7 @@ class MutableMethodState:
     communication_bytes: int = 0
     wan_transferred_bytes_cumulative: int = 0
     wan_active_transfers: int = 0
+    migration_count_cumulative: int = 0
     compute_debt_gpu_hours: float = 0.0
     energy_debt_kwh: float = 0.0
     last_exact: Optional[Mapping[str, Any]] = None
@@ -282,6 +301,7 @@ class MutableMethodState:
         default_factory=lambda: {mid: 0 for mid in MESS_IDS}
     )
     last_slow_miqp_certificate: Mapping[str, Any] = field(default_factory=dict)
+    last_spatial_optimizer_certificate: Mapping[str, Any] = field(default_factory=dict)
     native_capacitor_states: dict[str, Tuple[int, ...]] = field(default_factory=dict)
     native_capacitor_dwell_remaining_steps: dict[str, int] = field(
         default_factory=dict
@@ -2216,20 +2236,19 @@ def _method_uses_temporal(config: MethodConfig) -> bool:
 
 def _admit_arrivals(state: MutableMethodState, frame: CausalExperimentFrame, config: MethodConfig) -> int:
     spatial_blocked = 0
-    site_counts = {site: sum(job.destination_idc == site for job in state.jobs.values()) for site in IDCS}
     for source in frame.arrivals:
         if source.job_uid in state.jobs:
             raise RuntimeContractError("duplicate job arrival")
         destination = source.origin_idc
         migration_state = "NOT_REQUESTED"
+        checkpoint_state = "NOT_APPLICABLE"
         if config.spatial_workload_migration:
-            if source.input_bytes is None:
-                migration_state = "BLOCKED_MISSING_PAYLOAD_AUTHORITY"
-                spatial_blocked += 1
-            else:
-                destination = min(IDCS, key=lambda site: (site_counts[site], site))
-                migration_state = "NEW_JOB_PLACEMENT_PAYLOAD_KNOWN"
-        site_counts[destination] += 1
+            if source.migration_payload_bytes is None:
+                raise RuntimeContractError(
+                    "spatial method lacks the frozen migration payload authority"
+                )
+            migration_state = "ELIGIBLE_AT_AUTHORIZED_CHECKPOINT"
+            checkpoint_state = "INTERVAL_PENDING"
         gang = tuple(f"{destination}:PFR-GPU:{source.job_uid}:{index}" for index in range(source.requested_gpu))
         state.jobs[source.job_uid] = RuntimeJobState(
             source=source,
@@ -2237,13 +2256,14 @@ def _admit_arrivals(state: MutableMethodState, frame: CausalExperimentFrame, con
             logical_rack_id=f"{destination}:PFR-H100-LOGICAL-POOL",
             gang_membership=gang,
             remaining_work_gpu_hours=source.total_work_gpu_hours,
+            checkpoint_state=checkpoint_state,
             migration_state=migration_state,
         )
     return spatial_blocked
 
 
 def _compute_fraction(job: RuntimeJobState, frame: CausalExperimentFrame, config: MethodConfig) -> float:
-    if job.lifecycle == "COMPLETED":
+    if job.lifecycle in {"COMPLETED", "MIGRATING", "RESTARTING"}:
         return 0.0
     remaining_full_steps = math.ceil(job.remaining_work_gpu_hours / (job.source.requested_gpu * STEP_HOURS))
     steps_to_deadline = job.source.deadline_step - frame.issue
@@ -2468,23 +2488,352 @@ def _optimize_mess_routes(
 
 
 def _build_slow_plan(
-    state: MutableMethodState, config: MethodConfig, frame: CausalExperimentFrame
+    state: MutableMethodState,
+    config: MethodConfig,
+    frame: CausalExperimentFrame,
+    migration_authority: Optional[MigrationAuthority],
 ) -> SlowDiscretePlan:
     jobs = {uid: job for uid, job in state.jobs.items() if job.lifecycle != "COMPLETED"}
     destinations, route_ranks = _optimize_mess_routes(state, config, frame)
+    job_placements, checkpoint_migrations = _optimize_job_migrations(
+        state, config, frame, migration_authority
+    )
     plan = SlowDiscretePlan(
         plan_id=f"{config.comparison_method_id.value}-{frame.issue}-{state.full_replan_count + 1}",
         valid_from_issue=frame.issue,
         mess_destination=destinations,
         mess_native_route_rank=route_ranks,
-        job_idc_placement={uid: job.destination_idc for uid, job in jobs.items()},
-        checkpoint_migration={uid: None for uid in jobs},
-        gpu_gang_allocation={uid: job.gang_membership for uid, job in jobs.items()},
+        job_idc_placement=job_placements,
+        checkpoint_migration=checkpoint_migrations,
+        gpu_gang_allocation={
+            uid: tuple(
+                f"{job_placements[uid]}:PFR-GPU:{uid}:{index}"
+                for index in range(job.source.requested_gpu)
+            )
+            for uid, job in jobs.items()
+        },
         job_start_issue={uid: max(frame.issue, job.source.arrival_step) for uid, job in jobs.items()},
         coarse_charging_kw={mid: (0.0,) * 54 for mid in MESS_IDS},
     )
     plan.validate()
     return plan
+
+
+def _effective_job_site(job: RuntimeJobState) -> str:
+    if job.lifecycle == "MIGRATING" and job.migration_destination_idc is not None:
+        return job.migration_destination_idc
+    return job.destination_idc
+
+
+def _optimize_job_migrations(
+    state: MutableMethodState,
+    config: MethodConfig,
+    frame: CausalExperimentFrame,
+    authority: Optional[MigrationAuthority],
+) -> tuple[dict[str, str], dict[str, Optional[str]]]:
+    jobs = {uid: job for uid, job in state.jobs.items() if job.lifecycle != "COMPLETED"}
+    placements = {uid: _effective_job_site(job) for uid, job in jobs.items()}
+    migrations: dict[str, Optional[str]] = {
+        uid: (
+            job.migration_destination_idc
+            if job.lifecycle == "MIGRATING"
+            else None
+        )
+        for uid, job in jobs.items()
+    }
+    if not config.spatial_workload_migration:
+        state.last_spatial_optimizer_certificate = {
+            "status": "NOT_APPLICABLE_METHOD_CAPABILITY_DISABLED",
+            "selected_migration": None,
+        }
+        return placements, migrations
+    if authority is None:
+        raise RuntimeContractError("spatial method requires migration authority")
+    authority.validate()
+    if any(
+        job.source.migration_authority_sha256 != authority.fingerprint
+        for job in jobs.values()
+    ):
+        raise RuntimeContractError(
+            "job migration payload does not match the frozen migration authority"
+        )
+    reserved = {
+        site: float(frame.workload_reserve_gpu.get(site, 0.0))
+        if config.joint_uncertainty
+        else 0.0
+        for site in IDCS
+    }
+    loads = dict(reserved)
+    for uid, job in jobs.items():
+        if job.lifecycle != "QUEUED":
+            loads[placements[uid]] += job.source.requested_gpu
+    if any(value > MODELED_GPU_CAPACITY_PER_IDC + 1e-9 for value in loads.values()):
+        raise RuntimeContractError("running GPU gang placement exceeds IDC capacity")
+    prestart_placements = []
+    for uid, job in sorted(
+        (
+            (uid, job)
+            for uid, job in jobs.items()
+            if job.lifecycle == "QUEUED"
+        ),
+        key=lambda row: (-row[1].source.requested_gpu, row[0]),
+    ):
+        gpu = job.source.requested_gpu
+        feasible = [
+            destination
+            for destination in IDCS
+            if loads[destination] + gpu <= MODELED_GPU_CAPACITY_PER_IDC + 1e-9
+        ]
+        if not feasible:
+            raise RuntimeContractError(
+                "no IDC has capacity for the queued pre-start GPU gang"
+            )
+        destination = min(
+            feasible,
+            key=lambda site: (
+                sum(
+                    (value + (gpu if candidate == site else 0.0)) ** 2
+                    for candidate, value in loads.items()
+                ),
+                loads[site],
+                site,
+            ),
+        )
+        placements[uid] = destination
+        loads[destination] += gpu
+        if destination != job.destination_idc:
+            prestart_placements.append(
+                {
+                    "job_uid": uid,
+                    "source_idc": job.destination_idc,
+                    "destination_idc": destination,
+                    "requested_gpu": gpu,
+                    "wan_bytes": 0,
+                    "reason": "DATASET_PRESTAGED_AND_JOB_NOT_STARTED",
+                }
+            )
+    baseline = sum(value * value for value in loads.values())
+    candidates = []
+    if state.wan_active_transfers < authority.maximum_active_transfers:
+        for uid, job in sorted(jobs.items()):
+            if (
+                job.lifecycle != "RUNNING"
+                or job.steps_since_checkpoint < authority.checkpoint_interval_steps
+                or job.source.migration_payload_bytes is None
+            ):
+                continue
+            source = job.destination_idc
+            gpu = job.source.requested_gpu
+            for destination in IDCS:
+                if destination == source:
+                    continue
+                if loads[destination] + gpu > MODELED_GPU_CAPACITY_PER_IDC + 1e-9:
+                    continue
+                after = dict(loads)
+                after[source] -= gpu
+                after[destination] += gpu
+                improvement = baseline - sum(value * value for value in after.values())
+                transfer_steps = authority.transfer_steps(
+                    job.source.migration_payload_bytes, source, destination
+                )
+                downtime_steps = transfer_steps + authority.restart_steps
+                net_improvement = improvement - (
+                    authority.downtime_penalty_per_gpu_step * gpu * downtime_steps
+                )
+                if (
+                    improvement >= authority.minimum_gpu_squared_improvement
+                    and net_improvement > 0.0
+                ):
+                    candidates.append(
+                        (
+                            -net_improvement,
+                            uid,
+                            destination,
+                            improvement,
+                            transfer_steps,
+                            downtime_steps,
+                        )
+                    )
+    selected = min(candidates) if candidates else None
+    if selected is not None:
+        _, uid, destination, improvement, transfer_steps, downtime_steps = selected
+        placements[uid] = destination
+        migrations[uid] = destination
+        selected_payload: Optional[Mapping[str, Any]] = {
+            "job_uid": uid,
+            "source_idc": jobs[uid].destination_idc,
+            "destination_idc": destination,
+            "payload_bytes": jobs[uid].source.migration_payload_bytes,
+            "gpu_squared_improvement": improvement,
+            "transfer_steps": transfer_steps,
+            "restart_steps": authority.restart_steps,
+            "total_downtime_steps": downtime_steps,
+        }
+    else:
+        selected_payload = None
+    state.last_spatial_optimizer_certificate = {
+        "status": "OPTIMAL_EXACT_SINGLE_ACTION_ENUMERATION",
+        "authority_sha256": authority.fingerprint,
+        "eligible_candidate_count": len(candidates),
+        "baseline_sum_squared_reserved_gpu": baseline,
+        "selected_migration": selected_payload,
+        "maximum_migrations_per_replan": 1,
+        "prestart_placements": prestart_placements,
+    }
+    return placements, migrations
+
+
+def _apply_planned_prestart_placements(
+    state: MutableMethodState,
+    config: MethodConfig,
+) -> tuple[Mapping[str, Any], ...]:
+    if not config.spatial_workload_migration:
+        return ()
+    if state.active_plan is None:
+        raise RuntimeContractError("pre-start placement lacks an active slow plan")
+    events = []
+    for uid, destination in sorted(state.active_plan.job_idc_placement.items()):
+        job = state.jobs[uid]
+        if job.lifecycle != "QUEUED" or destination == job.destination_idc:
+            continue
+        source = job.destination_idc
+        job.destination_idc = destination
+        job.logical_rack_id = f"{destination}:PFR-H100-LOGICAL-POOL"
+        job.gang_membership = tuple(
+            f"{destination}:PFR-GPU:{uid}:{index}"
+            for index in range(job.source.requested_gpu)
+        )
+        job.migration_state = "PRESTART_PLACED_DATASET_PRESTAGED"
+        events.append(
+            {
+                "job_uid": uid,
+                "source_idc": source,
+                "destination_idc": destination,
+                "requested_gpu": job.source.requested_gpu,
+                "wan_bytes": 0,
+            }
+        )
+    return tuple(events)
+
+
+def _start_planned_job_migrations(
+    state: MutableMethodState,
+    config: MethodConfig,
+    authority: Optional[MigrationAuthority],
+) -> tuple[Mapping[str, Any], ...]:
+    if not config.spatial_workload_migration:
+        return ()
+    if authority is None or state.active_plan is None:
+        raise RuntimeContractError("planned spatial action lacks migration authority")
+    events = []
+    for uid, destination in sorted(state.active_plan.checkpoint_migration.items()):
+        if destination is None:
+            continue
+        job = state.jobs[uid]
+        if job.lifecycle == "MIGRATING":
+            continue
+        if job.lifecycle != "RUNNING":
+            raise RuntimeContractError("migration plan selected a non-running job")
+        if job.steps_since_checkpoint < authority.checkpoint_interval_steps:
+            raise RuntimeContractError("migration plan violated checkpoint interval")
+        if job.source.migration_payload_bytes is None:
+            raise RuntimeContractError("migration plan lacks payload bytes")
+        if state.wan_active_transfers >= authority.maximum_active_transfers:
+            raise RuntimeContractError("migration plan exceeds WAN concurrency")
+        source = job.destination_idc
+        job.lifecycle = "MIGRATING"
+        job.compute_rate_fraction = 0.0
+        job.migration_source_idc = source
+        job.migration_destination_idc = destination
+        job.migration_payload_remaining_bytes = job.source.migration_payload_bytes
+        job.migration_state = "WAN_TRANSFER_ACTIVE"
+        job.checkpoint_state = "CONSUMED_BY_MIGRATION"
+        state.wan_active_transfers += 1
+        state.migration_count_cumulative += 1
+        events.append(
+            {
+                "job_uid": uid,
+                "source_idc": source,
+                "destination_idc": destination,
+                "payload_bytes": job.source.migration_payload_bytes,
+            }
+        )
+    return tuple(events)
+
+
+def _advance_job_migration_state(
+    state: MutableMethodState,
+    authority: Optional[MigrationAuthority],
+) -> Mapping[str, Any]:
+    active = [
+        job for job in state.jobs.values() if job.lifecycle == "MIGRATING"
+    ]
+    restarting_before = {
+        uid for uid, job in state.jobs.items() if job.lifecycle == "RESTARTING"
+    }
+    if not active and not restarting_before:
+        state.wan_active_transfers = 0
+        return {
+            "bytes_transferred": 0,
+            "completed_migrations": [],
+            "completed_restarts": [],
+        }
+    if authority is None:
+        raise RuntimeContractError("active migration state lacks authority")
+    if len(active) > authority.maximum_active_transfers:
+        raise RuntimeContractError("active migrations exceed WAN authority")
+    transferred = 0
+    completed_migrations = []
+    for job in sorted(active, key=lambda item: item.source.job_uid):
+        source = job.migration_source_idc
+        destination = job.migration_destination_idc
+        if source is None or destination is None:
+            raise RuntimeContractError("active migration lacks endpoints")
+        capacity = authority.transfer_capacity_bytes_per_step(source, destination)
+        sent = min(job.migration_payload_remaining_bytes, capacity)
+        if sent <= 0:
+            raise RuntimeContractError("active migration made no WAN progress")
+        job.migration_payload_remaining_bytes -= sent
+        transferred += sent
+        if job.migration_payload_remaining_bytes == 0:
+            job.destination_idc = destination
+            job.logical_rack_id = f"{destination}:PFR-H100-LOGICAL-POOL"
+            job.gang_membership = tuple(
+                f"{destination}:PFR-GPU:{job.source.job_uid}:{index}"
+                for index in range(job.source.requested_gpu)
+            )
+            job.migration_source_idc = None
+            job.migration_destination_idc = None
+            job.steps_since_checkpoint = 0
+            if authority.restart_steps:
+                job.lifecycle = "RESTARTING"
+                job.restart_remaining_steps = authority.restart_steps
+                job.migration_state = "TRANSFER_COMPLETE_RESTARTING"
+            else:
+                job.lifecycle = "RUNNING"
+                job.restart_remaining_steps = 0
+                job.migration_state = "COMPLETED"
+            completed_migrations.append(job.source.job_uid)
+    state.wan_transferred_bytes_cumulative += transferred
+    completed_restarts = []
+    for uid in sorted(restarting_before):
+        job = state.jobs[uid]
+        if job.lifecycle != "RESTARTING" or job.restart_remaining_steps <= 0:
+            raise RuntimeContractError("restart state is inconsistent")
+        job.restart_remaining_steps -= 1
+        if job.restart_remaining_steps == 0:
+            job.lifecycle = "RUNNING"
+            job.migration_state = "COMPLETED"
+            job.checkpoint_state = "INTERVAL_PENDING"
+            completed_restarts.append(uid)
+    state.wan_active_transfers = sum(
+        job.lifecycle == "MIGRATING" for job in state.jobs.values()
+    )
+    return {
+        "bytes_transferred": transferred,
+        "completed_migrations": completed_migrations,
+        "completed_restarts": completed_restarts,
+    }
 
 
 def _start_planned_routes(
@@ -2671,7 +3020,7 @@ def _nominal_control(state: MutableMethodState, config: MethodConfig, frame: Cau
     compute = {
         uid: _compute_fraction(job, frame, config)
         for uid, job in state.jobs.items()
-        if job.lifecycle != "COMPLETED"
+        if job.lifecycle not in {"COMPLETED", "MIGRATING", "RESTARTING"}
     }
     energy_enabled = config.energy_flexibility in {"MESS", "STATIONARY_BESS"}
     charge, discharge = _nominal_mess_dispatch(
@@ -2702,6 +3051,7 @@ def _post_payload(state: MutableMethodState, method_id: str) -> Mapping[str, Any
         "mess_route_profile_index": state.mess_route_profile_index,
         "wan_transferred_bytes_cumulative": state.wan_transferred_bytes_cumulative,
         "wan_active_transfers": state.wan_active_transfers,
+        "migration_count_cumulative": state.migration_count_cumulative,
         "native_capacitor_states": state.native_capacitor_states,
         "native_capacitor_dwell_remaining_steps": (
             state.native_capacitor_dwell_remaining_steps
@@ -2719,6 +3069,13 @@ def _post_payload(state: MutableMethodState, method_id: str) -> Mapping[str, Any
                 "completion_issue": job.completion_issue,
                 "checkpoint_state": job.checkpoint_state,
                 "migration_state": job.migration_state,
+                "steps_since_checkpoint": job.steps_since_checkpoint,
+                "migration_source_idc": job.migration_source_idc,
+                "migration_destination_idc": job.migration_destination_idc,
+                "migration_payload_remaining_bytes": (
+                    job.migration_payload_remaining_bytes
+                ),
+                "restart_remaining_steps": job.restart_remaining_steps,
             }
             for uid, job in sorted(state.jobs.items())
         },
@@ -2739,6 +3096,7 @@ class PfrRuntimeRunner:
             Mapping[str, Sequence[int]]
         ] = None,
         native_control_minimum_dwell_steps: int = 0,
+        migration_authority: Optional[MigrationAuthority] = None,
     ) -> None:
         power_curve.validate()
         self.power_curve = power_curve
@@ -2755,6 +3113,9 @@ class PfrRuntimeRunner:
         self.native_control_minimum_dwell_steps = int(
             native_control_minimum_dwell_steps
         )
+        if migration_authority is not None:
+            migration_authority.validate()
+        self.migration_authority = migration_authority
 
     def run_method(
         self,
@@ -2799,14 +3160,24 @@ class PfrRuntimeRunner:
             risk = _risk_decision(state, frame, config)
             risk_used_previous_grid_envelope = state.last_exact is not None
             replan, replan_causes = _should_replan(state, config, risk, offset)
+            migration_started_events: tuple[Mapping[str, Any], ...] = ()
+            prestart_placement_events: tuple[Mapping[str, Any], ...] = ()
             if replan:
-                state.active_plan = _build_slow_plan(state, config, frame)
+                state.active_plan = _build_slow_plan(
+                    state, config, frame, self.migration_authority
+                )
                 state.active_plan_age_steps = 0
                 state.full_replan_count += 1
                 state.communication_bytes += len(
                     json.dumps(asdict(state.active_plan), sort_keys=True, separators=(",", ":"))
                 )
                 _start_planned_routes(state, config, frame)
+                prestart_placement_events = _apply_planned_prestart_placements(
+                    state, config
+                )
+                migration_started_events = _start_planned_job_migrations(
+                    state, config, self.migration_authority
+                )
             if state.active_plan is None:
                 raise RuntimeContractError("no active slow plan")
             slow_fingerprint = state.active_plan.fingerprint
@@ -2817,7 +3188,8 @@ class PfrRuntimeRunner:
                 remaining_work_gpu_hours={
                     uid: job.remaining_work_gpu_hours
                     for uid, job in state.jobs.items()
-                    if job.lifecycle != "COMPLETED" and uid in state.active_plan.job_idc_placement
+                    if job.lifecycle not in {"COMPLETED", "MIGRATING", "RESTARTING"}
+                    and uid in state.active_plan.job_idc_placement
                 },
             )
             limits = FastLayerLimits(
@@ -2884,12 +3256,20 @@ class PfrRuntimeRunner:
             safety_replan = False
 
             def escalate_for_safety() -> EscalatedCandidate:
-                nonlocal accepted_fast_state, accepted_limits, active_optimization, fast, safety_replan
-                state.active_plan = _build_slow_plan(state, config, frame)
+                nonlocal accepted_fast_state, accepted_limits, active_optimization, fast, safety_replan, migration_started_events, prestart_placement_events
+                state.active_plan = _build_slow_plan(
+                    state, config, frame, self.migration_authority
+                )
                 state.active_plan_age_steps = 0
                 state.full_replan_count += 1
                 state.communication_bytes += len(
                     json.dumps(asdict(state.active_plan), sort_keys=True, separators=(",", ":"))
+                )
+                prestart_placement_events += _apply_planned_prestart_placements(
+                    state, config
+                )
+                migration_started_events += _start_planned_job_migrations(
+                    state, config, self.migration_authority
                 )
                 safety_replan = True
                 accepted_fast_state = FastLayerState(
@@ -2898,7 +3278,8 @@ class PfrRuntimeRunner:
                     remaining_work_gpu_hours={
                         uid: job.remaining_work_gpu_hours
                         for uid, job in state.jobs.items()
-                        if job.lifecycle != "COMPLETED" and uid in state.active_plan.job_idc_placement
+                        if job.lifecycle not in {"COMPLETED", "MIGRATING", "RESTARTING"}
+                        and uid in state.active_plan.job_idc_placement
                     },
                 )
                 accepted_limits = FastLayerLimits(
@@ -3057,6 +3438,24 @@ class PfrRuntimeRunner:
                     job.remaining_work_gpu_hours = 0.0
                     job.lifecycle = "COMPLETED"
                     job.completion_issue = frame.issue + 1
+                    job.checkpoint_state = "NOT_APPLICABLE_COMPLETED"
+                elif (
+                    job.lifecycle == "RUNNING"
+                    and float(fast.control.job_compute_rate_fraction.get(uid, 0.0)) > 0.0
+                ):
+                    job.steps_since_checkpoint += 1
+                    if (
+                        config.spatial_workload_migration
+                        and self.migration_authority is not None
+                        and job.steps_since_checkpoint
+                        >= self.migration_authority.checkpoint_interval_steps
+                    ):
+                        job.checkpoint_state = "READY"
+                    elif config.spatial_workload_migration:
+                        job.checkpoint_state = "INTERVAL_PENDING"
+            migration_progress = _advance_job_migration_state(
+                state, self.migration_authority
+            )
             state.compute_debt_gpu_hours = sum(
                 max(0.0, job.remaining_work_gpu_hours - max(0, job.source.deadline_step - frame.issue - 1) * job.source.requested_gpu * STEP_HOURS)
                 for job in state.jobs.values() if job.lifecycle != "COMPLETED"
@@ -3095,7 +3494,18 @@ class PfrRuntimeRunner:
                 "communication_bytes_cumulative": state.communication_bytes,
                 "wan_transferred_bytes_cumulative": state.wan_transferred_bytes_cumulative,
                 "wan_active_transfers": state.wan_active_transfers,
-                "wan_transfer_authority": "NO_AUTHORIZED_MIGRATIONS_MISSING_PAYLOAD",
+                "wan_bytes_transferred_step": migration_progress["bytes_transferred"],
+                "migration_count_cumulative": state.migration_count_cumulative,
+                "migration_started": list(migration_started_events),
+                "prestart_spatial_placements": list(prestart_placement_events),
+                "migration_completed": migration_progress["completed_migrations"],
+                "migration_restarts_completed": migration_progress["completed_restarts"],
+                "wan_transfer_authority": (
+                    self.migration_authority.authority_id
+                    if config.spatial_workload_migration
+                    and self.migration_authority is not None
+                    else "NOT_APPLICABLE_METHOD_CAPABILITY_DISABLED"
+                ),
                 "risk_interface": risk.active_risk_interface,
                 "risk": risk.active_risk,
                 "risk_components": risk.calibrated_components if config.risk_interface == "CALIBRATED" else risk.raw_components,
@@ -3105,8 +3515,21 @@ class PfrRuntimeRunner:
                 "deadline_misses": deadline_misses,
                 "remaining_work_gpu_hours": sum(job.remaining_work_gpu_hours for job in state.jobs.values()),
                 "spatial_actions_blocked_missing_payload": blocked_spatial,
-                "checkpoint_authority": "UNAVAILABLE_NOT_MEASURED",
-                "migration_payload_authority": "NULL_INPUT_BYTES_BLOCKS_MIGRATION",
+                "checkpoint_authority": (
+                    self.migration_authority.authority_id
+                    if config.spatial_workload_migration
+                    and self.migration_authority is not None
+                    else "NOT_APPLICABLE_METHOD_CAPABILITY_DISABLED"
+                ),
+                "migration_payload_authority": (
+                    self.migration_authority.fingerprint
+                    if config.spatial_workload_migration
+                    and self.migration_authority is not None
+                    else "NOT_APPLICABLE_METHOD_CAPABILITY_DISABLED"
+                ),
+                "spatial_optimizer_certificate": dict(
+                    state.last_spatial_optimizer_certificate
+                ),
                 "facility_p_kw_total": sum(facility_p),
                 "mess_p_kw_total": sum(fast.control.mess_discharge_kw.values()) - sum(fast.control.mess_charge_kw.values()),
                 "mess_q_kvar_total": sum(fast.control.mess_q_kvar.values()),
@@ -3202,6 +3625,13 @@ class PfrRuntimeRunner:
             "future_actual_used": False,
             "full_replan_count": state.full_replan_count,
             "communication_bytes": state.communication_bytes,
+            "migration_count": state.migration_count_cumulative,
+            "wan_transferred_bytes": state.wan_transferred_bytes_cumulative,
+            "migration_authority_sha256": (
+                self.migration_authority.fingerprint
+                if self.migration_authority is not None
+                else None
+            ),
             "deadline_misses": sum(row["deadline_misses"] for row in records[-1:]),
             "final_compute_debt_gpu_hours": state.compute_debt_gpu_hours,
             "final_energy_debt_kwh": state.energy_debt_kwh,
