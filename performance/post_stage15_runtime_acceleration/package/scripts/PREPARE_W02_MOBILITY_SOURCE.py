@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Run PR4's exact R12 mobility materializer on one representative week.
+"""Run PR4's exact R12 mobility materializer on one frozen source chunk.
 
 The frozen traffic numerical contract requires exact 576-origin contexts.
 W02 has 2016 scored issues, so source preparation uses four causal 576-issue
-contexts (2304 source issues total). Only issues 3456..5471 are scored/read by
-the controller. The extra 288 issue artifacts are unscored source-cache padding,
-never optimizer lookahead.
+contexts (2304 source issues total). Representative-week callers score 2016
+issues; a pre-frozen full-month caller may explicitly score all 2304 issues.
 """
 from __future__ import annotations
 import argparse,importlib.util,json,sys
@@ -26,13 +25,16 @@ def main():
  ap=argparse.ArgumentParser()
  ap.add_argument("--repo",required=True);ap.add_argument("--output-root",required=True)
  ap.add_argument("--candidate-id",default="W02_2025-01-13");ap.add_argument("--start-index",type=int,default=START)
+ ap.add_argument("--scored-count",type=int,default=2016)
  ap.add_argument("--phase",choices=("traffic","full"),required=True)
  ap.add_argument("--base-work",default="/home/jaewon/mobile_ess_work")
  ap.add_argument("--cpu-workers",type=int,default=4)
  ap.add_argument("--stage2a-runtime-override")
  a=ap.parse_args()
  repo=Path(a.repo).resolve();out=Path(a.output_root).resolve()
- start=int(a.start_index);padded_end_excl=start+COUNT;scored_end=start+2015
+ start=int(a.start_index);padded_end_excl=start+COUNT
+ if not 1<=a.scored_count<=COUNT:raise RuntimeError("scored-count must be in [1,2304]")
+ scored_end=start+a.scored_count-1
  mod=load(repo/"stage7/r12_representative_weeks/materialize_r12_common_mobility_cache.py")
  mod.required_issues=lambda _authority: np.arange(start,padded_end_excl,dtype=np.int64)
  # Main still requires an authority-root argument, but the monkeypatched selector
@@ -47,8 +49,8 @@ def main():
  if rc==0:
   rec={"status":"PASS","candidate_id":a.candidate_id,"phase":a.phase,"source_issue_first":start,"source_issue_last":padded_end_excl-1,
        "source_issue_count":COUNT,"scored_issue_first":start,"scored_issue_last":scored_end,
-       "scored_issue_count":2016,"padding_issue_count":288,
-       "padding_role":"CAUSAL_SOURCE_CONTEXT_ONLY_NOT_SCORED_NOT_LOOKAHEAD",
+       "scored_issue_count":a.scored_count,"padding_issue_count":COUNT-a.scored_count,
+       "padding_role":("NONE_ALL_SOURCE_ISSUES_SCORED" if a.scored_count==COUNT else "CAUSAL_SOURCE_CONTEXT_ONLY_NOT_SCORED_NOT_LOOKAHEAD"),
        "future_actual_used":False,"stage2a_runtime_override":a.stage2a_runtime_override}
   (out/f"REP_WEEK_MOBILITY_{a.phase.upper()}_AUTHORITY.json").write_text(json.dumps(rec,indent=2,sort_keys=True)+"\n")
   if a.candidate_id=="W02_2025-01-13":

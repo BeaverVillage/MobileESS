@@ -1,4 +1,5 @@
 import unittest
+from types import SimpleNamespace
 
 from pfr.safety import (
     AcSafetyFilter,
@@ -43,6 +44,37 @@ class Verifier:
         return ExactAcResult(
             self.passed, "PASS" if self.passed else "VOLTAGE_FAIL", self.fresh, True,
             0.97 if self.passed else 0.94, 1.03, 0.8, 0.7, 0 if self.passed else 1,
+        )
+
+
+class AlternatingNativeVerifier:
+    def __init__(self):
+        self.native_decision = SimpleNamespace(
+            states={"c83": (1,)}, regulator_taps={"creg4a": 5}
+        )
+        self.selections = 0
+
+    def select_native_control(self, *, control):
+        del control
+        self.selections += 1
+        self.native_decision = SimpleNamespace(
+            states={"c83": (0,)}, regulator_taps={"creg4a": 4}
+        )
+        return self.native_decision
+
+    def verify_fresh(self, **kwargs):
+        del kwargs
+        passed = self.selections > 0
+        return ExactAcResult(
+            passed,
+            "PASS" if passed else "VOLTAGE_FAIL",
+            True,
+            True,
+            0.97,
+            1.049 if passed else 1.051,
+            0.8,
+            0.7,
+            0 if passed else 1,
         )
 
 
@@ -93,6 +125,16 @@ class SafetyFilterTests(unittest.TestCase):
         )
         self.assertFalse(result.accepted)
         self.assertIsNone(result.safe_control)
+
+    def test_projected_control_reselects_common_native_grid_state(self):
+        verifier = AlternatingNativeVerifier()
+        result = AcSafetyFilter(
+            projector=Projector(control(5)), verifier=verifier
+        ).filter(nominal=control(10), state=self.state, slow_plan=plan())
+
+        self.assertTrue(result.accepted)
+        self.assertEqual(verifier.selections, 1)
+        self.assertEqual(verifier.native_decision.regulator_taps, {"creg4a": 4})
 
     def test_escalation_requires_full_replan_and_fast_recourse(self):
         filt = AcSafetyFilter(projector=Projector(), verifier=Verifier(passed=False))

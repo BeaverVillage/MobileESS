@@ -213,6 +213,11 @@ class PfrRuntimeTests(unittest.TestCase):
         self.assertEqual(summary["status"], "FAIL_CLOSED")
         self.assertEqual(summary["failed_methods"], ["B0"])
         self.assertEqual(len(summary["method_summaries"]), 8)
+        self.assertTrue(summary["continue_to_next_method_after_failure"])
+        self.assertEqual(
+            summary["method_execution_order"],
+            [f"B{index}" for index in range(8)],
+        )
         self.assertTrue(all(
             row["status"] == "PASS" for row in summary["method_summaries"][1:]
         ))

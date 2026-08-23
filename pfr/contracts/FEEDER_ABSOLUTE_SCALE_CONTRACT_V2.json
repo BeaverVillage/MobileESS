@@ -1,0 +1,55 @@
+{
+  "schema_version": "FEEDER_ABSOLUTE_SCALE_CONTRACT_V2",
+  "status": "FROZEN_POST_HOC_P100_FEEDER_SCALE",
+  "scientific_authority_version": "V13_13_POST_HOC_P100_FEEDER_SCALE_NATIVE_ELASTIC_AC_FREEZE_20260823",
+  "evaluation_classification": "JANUARY_2025_POST_HOC_DEVELOPMENT_THEN_UNSEEN_PERIOD_VALIDATION",
+  "problem_statement": "The previous p95 mapping intentionally made the exogenous background exceed the IEEE123 native feeder scale, while B0 has no MESS, compute, load-shedding, or emergency resource and every committed step must satisfy unchanged exact hard limits. Those two experiment requirements are mutually inconsistent at high-load timestamps.",
+  "normalization_basis": "Map the frozen 2025 AEMO VIC1 annual maximum, rather than its p95, to the unscaled IEEE123 native aggregate feeder load.",
+  "previous_aemo_reference_mw": 7100.2615,
+  "new_aemo_reference_mw": 9490.53,
+  "alpha_grid": 0.7481417265421424,
+  "formula": "alpha_grid = previous_p95_reference_mw / annual_max_reference_mw",
+  "scaled_quantities": [
+    "realized background_p_kw",
+    "realized background_q_kvar",
+    "realized pv_available_kw",
+    "causal q50 net-background P",
+    "causal q50 background Q",
+    "causal q90 gross-background P",
+    "causal q90 background Q",
+    "causal q10 PV availability"
+  ],
+  "unscaled_quantities": [
+    "IDC facility demand",
+    "MESS active/reactive capability",
+    "MESS energy capacity",
+    "native topology",
+    "native capacitor and regulator ratings",
+    "line and transformer ratings",
+    "0.95-1.05 voltage limits",
+    "1.0 line and transformer limits"
+  ],
+  "preserved_relationships": [
+    "AEMO temporal shape",
+    "Jemena spatial diversity",
+    "IEEE123 phase and bus distribution",
+    "background power factor",
+    "PV temporal and spatial profile",
+    "PV penetration relative to the synthesized feeder"
+  ],
+  "prohibited_features": {
+    "pv_inverter_kva_inferred_from_peak_available_kw": false,
+    "pv_reactive_power_enabled_without_nameplate_authority": false,
+    "emergency_mess": false,
+    "load_shedding": false,
+    "hard_limit_relaxation": false,
+    "rating_uprate": false
+  },
+  "parameter_selection_is_failure_ratio_fit": false,
+  "parameter_selection_evidence": "Both numerator and denominator were frozen before V13.13; alpha_grid is a reference-to-reference unit conversion, not 1 divided by an observed January loading violation.",
+  "development_and_validation_protocol": {
+    "january_2025": "POST_HOC_DEVELOPMENT_AND_REGRESSION",
+    "freeze_after_january": true,
+    "february_and_march_2025": "UNSEEN_PERIOD_VALIDATION_NO_FURTHER_TUNING"
+  }
+}

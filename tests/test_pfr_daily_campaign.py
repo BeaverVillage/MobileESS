@@ -79,10 +79,13 @@ def test_pass_reuse_requires_matching_implementation_fingerprint(
         encoding="utf-8",
     )
     (day / "RUN_MANIFEST.json").write_text(
-        '{"scientific_implementation_fingerprint":"current"}', encoding="utf-8"
+        '{"scientific_implementation_fingerprint":"current",'
+        '"shared_exogenous_authority_sha256":"source-a"}', encoding="utf-8"
     )
 
     assert reusable_pass(day, "current")
+    assert reusable_pass(day, "current", "source-a")
+    assert not reusable_pass(day, "current", "source-b")
     assert not reusable_pass(day, "changed")
 
 

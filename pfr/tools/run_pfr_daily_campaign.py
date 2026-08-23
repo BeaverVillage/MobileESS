@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
+import hashlib
 import json
 import os
 import signal
@@ -191,7 +192,19 @@ def summary_passes(summary: Mapping[str, Any]) -> bool:
     )
 
 
-def reusable_pass(day_root: Path, implementation_fingerprint: str) -> bool:
+def file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(8 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def reusable_pass(
+    day_root: Path,
+    implementation_fingerprint: str,
+    shared_authority_sha256: str | None = None,
+) -> bool:
     summary_path = day_root / "MATRIX_SUMMARY.json"
     manifest_path = day_root / "RUN_MANIFEST.json"
     if not summary_path.is_file() or not manifest_path.is_file():
@@ -205,6 +218,11 @@ def reusable_pass(day_root: Path, implementation_fingerprint: str) -> bool:
         summary_passes(summary)
         and manifest.get("scientific_implementation_fingerprint")
         == implementation_fingerprint
+        and (
+            shared_authority_sha256 is None
+            or manifest.get("shared_exogenous_authority_sha256")
+            == shared_authority_sha256
+        )
     )
 
 
@@ -236,7 +254,17 @@ def run_day(
     day_root = output / spec.calendar_date
     summary_path = day_root / "MATRIX_SUMMARY.json"
     implementation_fingerprint = scientific_implementation_fingerprint(repo)
-    if reuse_passed_days and reusable_pass(day_root, implementation_fingerprint):
+    try:
+        shared_index = common.index("--shared-root")
+        shared_root = Path(common[shared_index + 1])
+    except (ValueError, IndexError) as exc:
+        raise RuntimeError("daily command lacks --shared-root") from exc
+    shared_authority_sha256 = file_sha256(
+        shared_root / "SHARED_EXOGENOUS_AUTHORITY.json"
+    )
+    if reuse_passed_days and reusable_pass(
+        day_root, implementation_fingerprint, shared_authority_sha256
+    ):
         return {
             "calendar_date": spec.calendar_date,
             "start_issue": spec.start_issue,
@@ -244,6 +272,7 @@ def run_day(
             "artifact": str(day_root),
             "reused_existing_pass": True,
             "scientific_implementation_fingerprint": implementation_fingerprint,
+            "shared_exogenous_authority_sha256": shared_authority_sha256,
         }
 
     preserved_attempt = None
@@ -284,6 +313,7 @@ def run_day(
         "artifact": str(day_root),
         "reused_existing_pass": False,
         "scientific_implementation_fingerprint": implementation_fingerprint,
+        "shared_exogenous_authority_sha256": shared_authority_sha256,
     }
     if preserved_attempt is not None:
         result["preserved_previous_attempt"] = str(preserved_attempt)
@@ -304,7 +334,7 @@ def campaign_payload(
     any_fail = any(row["status"] == "FAIL_CLOSED" for row in summaries)
     status = "PASS" if all_pass else ("FAIL_CLOSED" if final or any_fail else "IN_PROGRESS")
     return {
-        "schema_version": "PFR_JAN2025_POST_HOC_DAILY_VALIDATION_V13_3_FREEZE_20260822",
+        "schema_version": "PFR_JAN2025_POST_HOC_DAILY_VALIDATION_V13_13_FREEZE_20260823",
         "status": status,
         "evaluation_classification": "POST_HOC_DESIGN_VALIDATION_NOT_INDEPENDENT_HOLDOUT",
         "independent_holdout_claim": False,
@@ -315,6 +345,9 @@ def campaign_payload(
         "gurobi_threads_per_process": int(os.environ.get("PFR_GUROBI_THREADS", "1")),
         "independent_daily_cold_start": True,
         "cross_day_endogenous_state_carryover": False,
+        "continue_to_next_method_after_failure": True,
+        "continue_to_next_day_after_failure": True,
+        "failure_evidence_preserved_before_continuation": True,
         "controller_burn_in_steps": 0,
         "issues_per_method_per_day": ISSUES_PER_DAY,
         "methods_per_day": METHOD_COUNT,
@@ -432,10 +465,12 @@ def main() -> None:
                     "message": str(exc),
                     "partial_results_preserved": True,
                 }
-                (day_root / "ORCHESTRATION_FAILURE.json").write_text(
+                temporary_failure = day_root / "ORCHESTRATION_FAILURE.json.tmp"
+                temporary_failure.write_text(
                     json.dumps(failure, indent=2, sort_keys=True) + "\n",
                     encoding="utf-8",
                 )
+                temporary_failure.replace(day_root / "ORCHESTRATION_FAILURE.json")
                 row = {
                     "calendar_date": spec.calendar_date,
                     "start_issue": spec.start_issue,

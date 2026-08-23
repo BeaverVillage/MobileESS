@@ -58,10 +58,26 @@ MESS_CHARGE_EFFICIENCY = 0.95
 MAXIMUM_REFRESH_STEPS = 6
 PRICE_DEADBAND_FRACTION = 0.05
 MODELED_GPU_CAPACITY_PER_IDC = 256
+EXACT_AC_PROJECTION_MARGIN_PU = 2e-5
+EXACT_AC_PROJECTION_VOLTAGE_MIN_PU = 0.95 + EXACT_AC_PROJECTION_MARGIN_PU
+EXACT_AC_PROJECTION_VOLTAGE_MAX_PU = 1.05 - EXACT_AC_PROJECTION_MARGIN_PU
+EXACT_AC_P_TRUST_REGION_KW = 150.0
+EXACT_AC_Q_TRUST_REGION_KVAR = 210.0
 
 
 class RuntimeContractError(RuntimeError):
     pass
+
+
+def atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:
+    """Durably publish JSON so a killed process cannot expose a partial artifact."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    with temporary.open("w", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+    temporary.replace(path)
 
 
 def gurobi_thread_limit() -> int:
@@ -266,6 +282,7 @@ class MutableMethodState:
         default_factory=dict
     )
     native_capacitor_switch_count: dict[str, int] = field(default_factory=dict)
+    native_regulator_tap_numbers: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -282,6 +299,8 @@ class NativeGridControlDecision:
     raw_metrics: Mapping[str, Any]
     fresh_instance: bool
     common_to_all_methods: bool
+    regulator_taps: Mapping[str, int] = field(default_factory=dict)
+    pv_q_fraction_by_phase: Tuple[float, float, float] = (0.0, 0.0, 0.0)
 
     def validate(self) -> None:
         if not self.fresh_instance or not self.common_to_all_methods:
@@ -293,6 +312,19 @@ class NativeGridControlDecision:
             for name, values in self.states.items()
         ):
             raise RuntimeContractError("native capacitor state decision is invalid")
+        if any(
+            not name or not -16 <= int(tap) <= 16
+            for name, tap in self.regulator_taps.items()
+        ):
+            raise RuntimeContractError("native regulator tap decision is invalid")
+        if (
+            len(self.pv_q_fraction_by_phase) != 3
+            or any(
+                not math.isfinite(float(value)) or abs(float(value)) > 1.0 + 1e-9
+                for value in self.pv_q_fraction_by_phase
+            )
+        ):
+            raise RuntimeContractError("common PV inverter Q fraction is invalid")
 
 
 class FreshPhysicalBackend(Protocol):
@@ -307,6 +339,7 @@ class FreshPhysicalBackend(Protocol):
         mess_q_kvar: Sequence[float],
         mess_in_transit: Sequence[bool],
         previous_capacitor_states: Mapping[str, Sequence[int]],
+        previous_regulator_taps: Mapping[str, int],
         locked_capacitors: Sequence[str],
     ) -> NativeGridControlDecision:
         ...
@@ -325,6 +358,8 @@ class FreshPhysicalBackend(Protocol):
         robust_background_q_kvar: Sequence[Sequence[float]],
         robust_pv_available_kw: Sequence[Sequence[float]],
         native_capacitor_states: Optional[Mapping[str, Sequence[int]]] = None,
+        native_regulator_taps: Optional[Mapping[str, int]] = None,
+        pv_q_fraction_by_phase: Sequence[float] = (0.0, 0.0, 0.0),
     ) -> PhysicalCommit:
         ...
 
@@ -358,6 +393,7 @@ class _PhysicalVerifierAdapter:
         previous_capacitor_states: Optional[
             Mapping[str, Sequence[int]]
         ] = None,
+        previous_regulator_taps: Optional[Mapping[str, int]] = None,
         locked_capacitors: Sequence[str] = (),
     ) -> None:
         self.backend = backend
@@ -374,6 +410,10 @@ class _PhysicalVerifierAdapter:
             for name, values in (previous_capacitor_states or {}).items()
         }
         self.locked_capacitors = tuple(str(name).lower() for name in locked_capacitors)
+        self.previous_regulator_taps = {
+            str(name).lower(): int(value)
+            for name, value in (previous_regulator_taps or {}).items()
+        }
         self.native_decision: Optional[NativeGridControlDecision] = None
         self.last_commit: Optional[PhysicalCommit] = None
 
@@ -419,8 +459,32 @@ class _PhysicalVerifierAdapter:
                 mess_q_kvar=mess_q,
                 mess_in_transit=self.mess_in_transit,
                 previous_capacitor_states=self.previous_capacitor_states,
+                previous_regulator_taps=self.previous_regulator_taps,
                 locked_capacitors=self.locked_capacitors,
             )
+        decision.validate()
+        self.native_decision = decision
+        return decision
+
+    def select_native_control_deep(
+        self, *, control: FastControl
+    ) -> NativeGridControlDecision:
+        facility_p, mess_p, mess_q = self._physical_inputs(control)
+        selector = getattr(self.backend, "select_native_control_deep", None)
+        if selector is None:
+            return self.select_native_control(control=control)
+        decision = selector(
+            issue=self.issue,
+            facility_p_kw=facility_p,
+            facility_q_kvar=(0.0,) * len(IDCS),
+            mess_location=self.mess_location,
+            mess_p_kw=mess_p,
+            mess_q_kvar=mess_q,
+            mess_in_transit=self.mess_in_transit,
+            previous_capacitor_states=self.previous_capacitor_states,
+            previous_regulator_taps=self.previous_regulator_taps,
+            locked_capacitors=self.locked_capacitors,
+        )
         decision.validate()
         self.native_decision = decision
         return decision
@@ -441,6 +505,8 @@ class _PhysicalVerifierAdapter:
             robust_background_q_kvar=self.robust_background_q_kvar,
             robust_pv_available_kw=self.robust_pv_available_kw,
             native_capacitor_states=self.native_decision.states,
+            native_regulator_taps=self.native_decision.regulator_taps,
+            pv_q_fraction_by_phase=self.native_decision.pv_q_fraction_by_phase,
         )
         if not self.last_commit.actual_fresh_opendss_used:
             raise RuntimeContractError("physical backend did not execute Fresh OpenDSS")
@@ -463,7 +529,16 @@ def _blend_control(left: FastControl, right: FastControl, weight: float) -> Fast
 
 
 class _GurobiSensitivityProjector:
-    """Minimal continuous projection over a Fresh-AC finite-difference envelope."""
+    """Sequential exact-verified projection over a Fresh-AC local envelope.
+
+    The internal voltage margin is only a numerical landing margin.  Earlier
+    revisions used a fixed 5e-4-pu engineering margin, which changed the
+    feasible set enough to make the projection QPs infeasible at simultaneous
+    voltage/thermal boundaries even when the unchanged exact limits still had
+    room.  Every accepted action is checked against the original 0.95/1.05
+    limits by a fresh OpenDSS instance, so a small solver-scale landing margin
+    is sufficient and does not relax physical acceptance.
+    """
 
     def __init__(
         self,
@@ -500,9 +575,14 @@ class _GurobiSensitivityProjector:
 
     @staticmethod
     def _violation_score(exact: ExactAcResult) -> float:
+        # Normalize unlike residuals before comparing successive Fresh-AC
+        # iterates.  A 0.05-pu voltage band and a 1.0-pu thermal rating are the
+        # physical scales of the four unchanged hard constraints.  This score
+        # is a feasibility-restoration merit function only; it is never an
+        # acceptance rule.
         violations = (
-            max(0.0, 0.95 - exact.minimum_voltage_pu),
-            max(0.0, exact.maximum_voltage_pu - 1.05),
+            max(0.0, 0.95 - exact.minimum_voltage_pu) / 0.05,
+            max(0.0, exact.maximum_voltage_pu - 1.05) / 0.05,
             max(0.0, exact.maximum_line_loading_fraction - 1.0),
             max(0.0, exact.maximum_transformer_loading_fraction - 1.0),
         )
@@ -872,8 +952,14 @@ class _GurobiSensitivityProjector:
             )
             for name in metric_names
         }
-        model.addConstr(expressions["vmin"] >= 0.9505, name="minimum_voltage")
-        model.addConstr(expressions["vmax"] <= 1.0495, name="maximum_voltage")
+        model.addConstr(
+            expressions["vmin"] >= EXACT_AC_PROJECTION_VOLTAGE_MIN_PU,
+            name="minimum_voltage",
+        )
+        model.addConstr(
+            expressions["vmax"] <= EXACT_AC_PROJECTION_VOLTAGE_MAX_PU,
+            name="maximum_voltage",
+        )
         model.addConstr(expressions["line"] <= 1.0, name="line_loading")
         model.addConstr(expressions["transformer"] <= 1.0, name="transformer_loading")
         model.setObjective(
@@ -1045,8 +1131,14 @@ class _GurobiSensitivityProjector:
             )
             for name in metric_names
         }
-        model.addConstr(expressions["vmin"] >= 0.9505, name="minimum_voltage")
-        model.addConstr(expressions["vmax"] <= 1.0495, name="maximum_voltage")
+        model.addConstr(
+            expressions["vmin"] >= EXACT_AC_PROJECTION_VOLTAGE_MIN_PU,
+            name="minimum_voltage",
+        )
+        model.addConstr(
+            expressions["vmax"] <= EXACT_AC_PROJECTION_VOLTAGE_MAX_PU,
+            name="maximum_voltage",
+        )
         model.addConstr(expressions["line"] <= 1.0, name="line_loading")
         model.addConstr(expressions["transformer"] <= 1.0, name="transformer_loading")
         model.setObjective(
@@ -1176,10 +1268,10 @@ class _GurobiSensitivityProjector:
             lower_p, upper_p = -max_charge, max_discharge
             lower_q, upper_q = -q_cap, q_cap
             bounds[mess_id] = (
-                lower_p - current_p,
-                upper_p - current_p,
-                lower_q - current_q,
-                upper_q - current_q,
+                max(lower_p - current_p, -EXACT_AC_P_TRUST_REGION_KW),
+                min(upper_p - current_p, EXACT_AC_P_TRUST_REGION_KW),
+                max(lower_q - current_q, -EXACT_AC_Q_TRUST_REGION_KVAR),
+                min(upper_q - current_q, EXACT_AC_Q_TRUST_REGION_KVAR),
                 current_p,
                 current_q,
             )
@@ -1275,19 +1367,48 @@ class _GurobiSensitivityProjector:
             )
             for name in metric_names
         }
-        model.addConstr(expressions["vmin"] >= 0.9505, name="minimum_voltage")
-        model.addConstr(expressions["vmax"] <= 1.0495, name="maximum_voltage")
-        model.addConstr(expressions["line"] <= 1.0, name="line_loading")
+        # A trust-region subproblem must remain solvable when the current
+        # operating point is farther than one trust radius from feasibility.
+        # Requiring every linearized hard limit in one step made the sequential
+        # method return INFEASIBLE before it could take an improving step.  The
+        # elastic residuals below form a convex feasibility-restoration QCP.
+        # They do not relax Fresh-AC acceptance: an iterate is committed only
+        # after the original 0.95/1.05/1.0 checks pass.
+        residual = {
+            name: model.addVar(lb=0.0, name=f"elastic_residual[{name}]")
+            for name in metric_names
+        }
         model.addConstr(
-            expressions["transformer"] <= 1.0,
-            name="transformer_loading",
+            expressions["vmin"] + residual["vmin"]
+            >= EXACT_AC_PROJECTION_VOLTAGE_MIN_PU,
+            name="minimum_voltage_elastic",
+        )
+        model.addConstr(
+            expressions["vmax"] - residual["vmax"]
+            <= EXACT_AC_PROJECTION_VOLTAGE_MAX_PU,
+            name="maximum_voltage_elastic",
+        )
+        model.addConstr(
+            expressions["line"] - residual["line"] <= 1.0,
+            name="line_loading_elastic",
+        )
+        model.addConstr(
+            expressions["transformer"] - residual["transformer"] <= 1.0,
+            name="transformer_loading_elastic",
+        )
+        normalized_residual = (
+            (residual["vmin"] / 0.05) * (residual["vmin"] / 0.05)
+            + (residual["vmax"] / 0.05) * (residual["vmax"] / 0.05)
+            + residual["line"] * residual["line"]
+            + residual["transformer"] * residual["transformer"]
+        )
+        normalized_movement = gp.quicksum(
+            (delta_p[mess_id] / 550.0) * (delta_p[mess_id] / 550.0)
+            + (delta_q[mess_id] / 700.0) * (delta_q[mess_id] / 700.0)
+            for mess_id in bounds
         )
         model.setObjective(
-            gp.quicksum(
-                (delta_p[mess_id] / 550.0) * (delta_p[mess_id] / 550.0)
-                + (delta_q[mess_id] / 700.0) * (delta_q[mess_id] / 700.0)
-                for mess_id in bounds
-            ),
+            1.0e6 * normalized_residual + normalized_movement,
             GRB.MINIMIZE,
         )
         model.optimize()
@@ -1301,6 +1422,9 @@ class _GurobiSensitivityProjector:
         solution = {
             mess_id: (float(delta_p[mess_id].X), float(delta_q[mess_id].X))
             for mess_id in bounds
+        }
+        predicted_residual = {
+            name: float(residual[name].X) for name in metric_names
         }
         model.dispose()
 
@@ -1353,10 +1477,14 @@ class _GurobiSensitivityProjector:
         )
         candidate, candidate_exact, scale = selected
         return candidate, candidate_exact, {
-            "status": "FRESH_OPENDSS_CONTINUOUS_JOINT_PQ_SENSITIVITY_QCP",
+            "status": "FRESH_OPENDSS_ELASTIC_JOINT_PQ_TRUST_REGION_QCP",
             "scale": scale,
             "passed": candidate_exact.passed,
+            "predicted_elastic_residual": predicted_residual,
+            "fresh_exact_violation_score_before": base_score,
+            "fresh_exact_violation_score_after": self._violation_score(candidate_exact),
             "continuous_variables": 2 * len(solution),
+            "elastic_variables": len(predicted_residual),
             "integer_variables": 0,
         }
 
@@ -1814,9 +1942,6 @@ class _GurobiSensitivityProjector:
         current = nominal
         exact = self.verifier.verify_fresh(control=current, state=state, slow_plan=slow_plan)
         exact.validate()
-        fleet_attempted = False
-        pairwise_hint: Optional[tuple[str, str]] = None
-        pairwise_q_steps = 0
         for _ in range(24):
             if exact.passed:
                 break
@@ -1828,197 +1953,39 @@ class _GurobiSensitivityProjector:
                     "transformer": exact.maximum_transformer_loading_fraction,
                 }
             }
-            if exact.minimum_voltage_pu < 0.95 or exact.maximum_voltage_pu > 1.05:
-                coordinate = self._coordinate_q_step(current, state, slow_plan, exact)
-                if coordinate is not None:
-                    current, exact, coordinate_trace = coordinate
-                    trace_row["coordinate_q"] = coordinate_trace
-                    trace_row["candidate"] = {
-                        "vmin": exact.minimum_voltage_pu,
-                        "vmax": exact.maximum_voltage_pu,
-                        "line": exact.maximum_line_loading_fraction,
-                        "transformer": exact.maximum_transformer_loading_fraction,
-                    }
-                    self.trace.append(trace_row)
-                    continue
-                sensitivity = self._sensitivity_qp_step(
-                    current, state, slow_plan, exact
-                )
-                if sensitivity is not None:
-                    current, exact, sensitivity_trace = sensitivity
-                    trace_row["sensitivity_qp"] = sensitivity_trace
-                    trace_row["candidate"] = {
-                        "vmin": exact.minimum_voltage_pu,
-                        "vmax": exact.maximum_voltage_pu,
-                        "line": exact.maximum_line_loading_fraction,
-                        "transformer": exact.maximum_transformer_loading_fraction,
-                    }
-                    self.trace.append(trace_row)
-                    continue
-                active_sensitivity = self._active_sensitivity_qp_step(
-                    current, state, slow_plan, exact
-                )
-                if active_sensitivity is not None:
-                    current, exact, active_sensitivity_trace = active_sensitivity
-                    trace_row["active_sensitivity_qp"] = active_sensitivity_trace
-                    trace_row["candidate"] = {
-                        "vmin": exact.minimum_voltage_pu,
-                        "vmax": exact.maximum_voltage_pu,
-                        "line": exact.maximum_line_loading_fraction,
-                        "transformer": exact.maximum_transformer_loading_fraction,
-                    }
-                    self.trace.append(trace_row)
-                    continue
-                joint_sensitivity = self._joint_pq_sensitivity_step(
-                    current, state, slow_plan, exact
-                )
-                if joint_sensitivity is not None:
-                    current, exact, joint_trace = joint_sensitivity
-                    trace_row["joint_pq_sensitivity_qcp"] = joint_trace
-                    trace_row["candidate"] = {
-                        "vmin": exact.minimum_voltage_pu,
-                        "vmax": exact.maximum_voltage_pu,
-                        "line": exact.maximum_line_loading_fraction,
-                        "transformer": exact.maximum_transformer_loading_fraction,
-                    }
-                    self.trace.append(trace_row)
-                    continue
-                fleet = None
-                if not fleet_attempted:
-                    fleet_attempted = True
-                    fleet = self._fleet_q_step(current, state, slow_plan, exact)
-                if fleet is not None:
-                    current, exact, fleet_trace = fleet
-                    trace_row["fleet_q"] = fleet_trace
-                    trace_row["candidate"] = {
-                        "vmin": exact.minimum_voltage_pu,
-                        "vmax": exact.maximum_voltage_pu,
-                        "line": exact.maximum_line_loading_fraction,
-                        "transformer": exact.maximum_transformer_loading_fraction,
-                    }
-                    self.trace.append(trace_row)
-                    continue
-                pairwise = None
-                if pairwise_q_steps < 8:
-                    pairwise = self._pairwise_q_step(
-                        current, state, slow_plan, exact, pairwise_hint
-                    )
-                    if pairwise is None and pairwise_hint is not None:
-                        pairwise_hint = None
-                        pairwise = self._pairwise_q_step(
-                            current, state, slow_plan, exact
-                        )
-                if pairwise is not None:
-                    current, exact, pairwise_trace = pairwise
-                    pairwise_hint = tuple(pairwise_trace["mess_ids"])
-                    pairwise_q_steps += 1
-                    trace_row["pairwise_q"] = pairwise_trace
-                    trace_row["candidate"] = {
-                        "vmin": exact.minimum_voltage_pu,
-                        "vmax": exact.maximum_voltage_pu,
-                        "line": exact.maximum_line_loading_fraction,
-                        "transformer": exact.maximum_transformer_loading_fraction,
-                    }
-                    self.trace.append(trace_row)
-                    continue
-                pairwise_p = self._pairwise_p_step(
-                    current, state, slow_plan, exact
-                )
-                if pairwise_p is not None:
-                    current, exact, pairwise_p_trace = pairwise_p
-                    trace_row["pairwise_p"] = pairwise_p_trace
-                    trace_row["candidate"] = {
-                        "vmin": exact.minimum_voltage_pu,
-                        "vmax": exact.maximum_voltage_pu,
-                        "line": exact.maximum_line_loading_fraction,
-                        "transformer": exact.maximum_transformer_loading_fraction,
-                    }
-                    self.trace.append(trace_row)
-                    continue
-                emergency_candidates = []
-                emergency_probes = []
-                fallback_roles = []
-                if self.allow_mess:
-                    fallback_roles.append(("ZERO_MESS", True, None))
-                if self.allow_compute:
-                    compute_fallback = (
-                        self._maximum_compute_rates(current, state)
-                        if exact.maximum_voltage_pu > 1.05
-                        else {
-                            job_id: 0.0
-                            for job_id in current.job_compute_rate_fraction
-                        }
-                    )
-                    compute_role = (
-                        "INCREASE_COMPUTE"
-                        if exact.maximum_voltage_pu > 1.05
-                        else "THROTTLE_COMPUTE"
-                    )
-                    fallback_roles.append((compute_role, False, compute_fallback))
-                if self.allow_mess and self.allow_compute:
-                    fallback_roles.append(
-                        (f"ZERO_MESS_AND_{compute_role}", True, compute_fallback)
-                    )
-                for role, zero_mess, compute_override in fallback_roles:
-                    fallback = FastControl(
-                        (
-                            {mess_id: 0.0 for mess_id in MESS_IDS}
-                            if zero_mess
-                            else dict(current.mess_charge_kw)
-                        ),
-                        (
-                            {mess_id: 0.0 for mess_id in MESS_IDS}
-                            if zero_mess
-                            else dict(current.mess_discharge_kw)
-                        ),
-                        (
-                            {mess_id: 0.0 for mess_id in MESS_IDS}
-                            if zero_mess
-                            else dict(current.mess_q_kvar)
-                        ),
-                        (
-                            dict(compute_override)
-                            if compute_override is not None
-                            else dict(current.job_compute_rate_fraction)
-                        ),
-                        (
-                            dict(current.site_throughput_fraction)
-                        ),
-                    )
-                    fallback_exact = self.verifier.verify_fresh(
-                        control=fallback, state=state, slow_plan=slow_plan
-                    )
-                    fallback_exact.validate()
-                    emergency_probes.append({
-                        "role": role,
-                        "passed": fallback_exact.passed,
-                        "vmin": fallback_exact.minimum_voltage_pu,
-                        "vmax": fallback_exact.maximum_voltage_pu,
-                        "line": fallback_exact.maximum_line_loading_fraction,
-                        "transformer": fallback_exact.maximum_transformer_loading_fraction,
-                    })
-                    if fallback_exact.passed:
-                        emergency_candidates.append(
-                            (fallback, fallback_exact, role)
-                        )
-                if emergency_candidates:
-                    current, exact, role = min(
-                        emergency_candidates,
-                        key=lambda item: self._objective_distance(current, item[0]),
-                    )
-                    trace_row["emergency_fallback"] = {
-                        "status": f"FRESH_OPENDSS_PASSING_{role}_FALLBACK",
-                        "passed": True,
-                    }
-                    trace_row["candidate"] = {
-                        "vmin": exact.minimum_voltage_pu,
-                        "vmax": exact.maximum_voltage_pu,
-                        "line": exact.maximum_line_loading_fraction,
-                        "transformer": exact.maximum_transformer_loading_fraction,
-                    }
-                    self.trace.append(trace_row)
-                    continue
-                trace_row["emergency_fallback_probes"] = emergency_probes
+            # Use the joint continuous P/Q projection first for every AC
+            # violation.  It relinearizes from Fresh exact finite differences
+            # after each accepted step.  Earlier releases tried coordinate,
+            # pairwise and fleet grids before this model; the archived January
+            # traces show those greedy steps converging to opposite voltage and
+            # line boundaries without finding their narrow feasible
+            # intersection.
+            formal_steps = (
+                (
+                    "joint_pq_trust_region_qcp",
+                    self._joint_pq_sensitivity_step,
+                ),
+                ("q_projection_qp", self._sensitivity_qp_step),
+                ("p_projection_qp", self._active_sensitivity_qp_step),
+            )
+            formal_step = None
+            for label, builder in formal_steps:
+                result = builder(current, state, slow_plan, exact)
+                if result is not None:
+                    formal_step = (label, *result)
+                    break
+            if formal_step is not None:
+                label, current, exact, formal_trace = formal_step
+                trace_row[label] = formal_trace
+                trace_row["candidate"] = {
+                    "vmin": exact.minimum_voltage_pu,
+                    "vmax": exact.maximum_voltage_pu,
+                    "line": exact.maximum_line_loading_fraction,
+                    "transformer": exact.maximum_transformer_loading_fraction,
+                }
+                self.trace.append(trace_row)
+                continue
+
             active_target, voltage_target = self._targets(current, state, exact)
             thermal_or_low_voltage = (
                 exact.minimum_voltage_pu < 0.95
@@ -2079,24 +2046,6 @@ class _GurobiSensitivityProjector:
                 }
                 self.trace.append(trace_row)
                 continue
-            if active_distance > 1e-18 and (
-                active_probe_exact.minimum_voltage_pu < 0.95
-                or active_probe_exact.maximum_voltage_pu > 1.05
-            ):
-                joint = self._active_coordinate_q_step(
-                    current, active_target, voltage_target, state, slow_plan
-                )
-                if joint is not None:
-                    current, exact, joint_trace = joint
-                    trace_row["solver"] = joint_trace
-                    trace_row["candidate"] = {
-                        "vmin": exact.minimum_voltage_pu,
-                        "vmax": exact.maximum_voltage_pu,
-                        "line": exact.maximum_line_loading_fraction,
-                        "transformer": exact.maximum_transformer_loading_fraction,
-                    }
-                    self.trace.append(trace_row)
-                    continue
             try:
                 import gurobipy as gp
                 from gurobipy import GRB
@@ -2109,8 +2058,20 @@ class _GurobiSensitivityProjector:
             z_active = model.addVar(lb=0.0, ub=1.0 if active_distance > 1e-18 else 0.0, name="active_relief_fraction")
             z_voltage = model.addVar(lb=0.0, ub=1.0 if voltage_distance > 1e-18 else 0.0, name="voltage_support_fraction")
             metrics = (
-                (exact.minimum_voltage_pu, active_probe_exact.minimum_voltage_pu, voltage_probe_exact.minimum_voltage_pu, GRB.GREATER_EQUAL, 0.9505),
-                (exact.maximum_voltage_pu, active_probe_exact.maximum_voltage_pu, voltage_probe_exact.maximum_voltage_pu, GRB.LESS_EQUAL, 1.0495),
+                (
+                    exact.minimum_voltage_pu,
+                    active_probe_exact.minimum_voltage_pu,
+                    voltage_probe_exact.minimum_voltage_pu,
+                    GRB.GREATER_EQUAL,
+                    EXACT_AC_PROJECTION_VOLTAGE_MIN_PU,
+                ),
+                (
+                    exact.maximum_voltage_pu,
+                    active_probe_exact.maximum_voltage_pu,
+                    voltage_probe_exact.maximum_voltage_pu,
+                    GRB.LESS_EQUAL,
+                    EXACT_AC_PROJECTION_VOLTAGE_MAX_PU,
+                ),
                 (exact.maximum_line_loading_fraction, active_probe_exact.maximum_line_loading_fraction, voltage_probe_exact.maximum_line_loading_fraction, GRB.LESS_EQUAL, 1.0),
                 (exact.maximum_transformer_loading_fraction, active_probe_exact.maximum_transformer_loading_fraction, voltage_probe_exact.maximum_transformer_loading_fraction, GRB.LESS_EQUAL, 1.0),
             )
@@ -2230,11 +2191,7 @@ class _GurobiSensitivityProjector:
             )
         ):
             raise RuntimeContractError("AC safety projection changed disabled MESS controls")
-        if (
-            not self.allow_compute
-            and current.job_compute_rate_fraction
-            != nominal.job_compute_rate_fraction
-        ):
+        if not self.allow_compute and current.job_compute_rate_fraction != nominal.job_compute_rate_fraction:
             raise RuntimeContractError("AC safety projection changed disabled compute controls")
         return ProjectionCandidate(
             control=current,
@@ -2735,6 +2692,12 @@ def _post_payload(state: MutableMethodState, method_id: str) -> Mapping[str, Any
         "mess_route_profile_index": state.mess_route_profile_index,
         "wan_transferred_bytes_cumulative": state.wan_transferred_bytes_cumulative,
         "wan_active_transfers": state.wan_active_transfers,
+        "native_capacitor_states": state.native_capacitor_states,
+        "native_capacitor_dwell_remaining_steps": (
+            state.native_capacitor_dwell_remaining_steps
+        ),
+        "native_capacitor_switch_count": state.native_capacitor_switch_count,
+        "native_regulator_tap_numbers": state.native_regulator_tap_numbers,
         "jobs": {
             uid: {
                 "destination_idc": job.destination_idc,
@@ -2897,6 +2860,7 @@ class PfrRuntimeRunner:
                 frame.robust_background_q_kvar,
                 frame.robust_pv_available_kw,
                 state.native_capacitor_states,
+                state.native_regulator_tap_numbers,
                 tuple(
                     name
                     for name, remaining in state.native_capacitor_dwell_remaining_steps.items()
@@ -2994,18 +2958,20 @@ class PfrRuntimeRunner:
             )
             if verifier.last_commit is None:
                 raise RuntimeContractError("Fresh physical verifier produced no commit evidence")
+            native_decision = verifier.native_decision or native_decision
             if not safety.accepted:
                 failure = {
                     "status": "FAIL_CLOSED_EXACT_AC",
                     "issue": frame.issue,
                     "comparison_method_id": config.comparison_method_id.value,
                     "exact_ac": dict(verifier.last_commit.raw_metrics),
+                    "native_grid_control_decision": dict(
+                        native_decision.raw_metrics
+                    ),
                     "safety_projection_trace": safety_projector.trace,
                     "partial_results_preserved": True,
                 }
-                (method_root / "FAILURE.json").write_text(
-                    json.dumps(failure, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-                )
+                atomic_write_json(method_root / "FAILURE.json", failure)
                 break
             fast = execute_fast_recourse(
                 architecture=self.architecture,
@@ -3045,6 +3011,10 @@ class PfrRuntimeRunner:
                     state.native_capacitor_dwell_remaining_steps[name] = max(
                         0, old_remaining - 1
                     )
+            state.native_regulator_tap_numbers = {
+                str(name).lower(): int(value)
+                for name, value in native_decision.regulator_taps.items()
+            }
             for mid in MESS_IDS:
                 state.mess_energy_kwh[mid] = fast.next_state.mess_soc[mid] * MESS_CAPACITY_KWH
             mobility_energy_kwh = 0.0
@@ -3162,7 +3132,7 @@ class PfrRuntimeRunner:
                 ),
                 "native_grid_control_decision": dict(native_decision.raw_metrics),
                 "native_grid_control_execution_order": (
-                    "COMMON_DISCRETE_TRANSITION_THEN_FIXED_BINARY_AC_SAFETY"
+                    "COMMON_DISCRETE_TRANSITION_ALTERNATING_WITH_FIXED_STATE_CONTINUOUS_AC_PROJECTION"
                 ),
                 "native_capacitor_dwell_remaining_steps": dict(
                     state.native_capacitor_dwell_remaining_steps
@@ -3188,7 +3158,6 @@ class PfrRuntimeRunner:
                 "safety_capability_mess_enabled": config.energy_flexibility
                 in {"MESS", "STATIONARY_BESS"},
                 "safety_capability_compute_throttle_enabled": config.temporal_workload_shift,
-                "common_emergency_mess_override": False,
                 "fresh_exact_opendss": True,
                 "actual_gurobi_used": active_optimization.certificate.actual_gurobi_used,
                 "optimization_certificate": active_optimization.certificate.as_dict(),
@@ -3203,9 +3172,7 @@ class PfrRuntimeRunner:
             }
             issue_root = method_root / f"issue_{frame.issue:06d}"
             issue_root.mkdir(parents=True, exist_ok=True)
-            (issue_root / "COMMIT_MARKER.json").write_text(
-                json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-            )
+            atomic_write_json(issue_root / "COMMIT_MARKER.json", record)
             records.append(record)
         summary = {
             "schema_version": "K9H7_RESULT_V2.method_run.v1",
@@ -3231,9 +3198,7 @@ class PfrRuntimeRunner:
             "final_minimum_mess_energy_kwh": min(state.mess_energy_kwh.values()),
             "failure": failure,
         }
-        (method_root / "METHOD_SUMMARY.json").write_text(
-            json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-        )
+        atomic_write_json(method_root / "METHOD_SUMMARY.json", summary)
         if records:
             fields = tuple(records[0])
             with (method_root / "MATERIALIZED_COMMIT_ROWS.csv").open("w", encoding="utf-8", newline="") as stream:
@@ -3316,10 +3281,7 @@ class PfrRuntimeRunner:
                     "valid_partial_commit_markers": len(partial_records),
                     "invalid_partial_commit_markers": invalid_partial_markers,
                 }
-                (method_root / "FAILURE.json").write_text(
-                    json.dumps(failure, indent=2, sort_keys=True) + "\n",
-                    encoding="utf-8",
-                )
+                atomic_write_json(method_root / "FAILURE.json", failure)
                 summary = {
                     "schema_version": "K9H7_RESULT_V2.method_run.v1",
                     "status": "FAIL_CLOSED",
@@ -3350,10 +3312,7 @@ class PfrRuntimeRunner:
                     "future_actual_used": False,
                     "failure": failure,
                 }
-                (method_root / "METHOD_SUMMARY.json").write_text(
-                    json.dumps(summary, indent=2, sort_keys=True) + "\n",
-                    encoding="utf-8",
-                )
+                atomic_write_json(method_root / "METHOD_SUMMARY.json", summary)
             summaries.append(summary)
         expected = len(frames) * 8
         committed = sum(item["committed_issues"] for item in summaries)
@@ -3377,10 +3336,10 @@ class PfrRuntimeRunner:
             "future_actual_used": False,
             "failed_methods": failed_methods,
             "method_failures_isolated": True,
+            "continue_to_next_method_after_failure": True,
+            "method_execution_order": [item.value for item in ComparisonMethod],
             "method_summaries": summaries,
         }
         output.mkdir(parents=True, exist_ok=True)
-        (output / "MATRIX_SUMMARY.json").write_text(
-            json.dumps(matrix, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-        )
+        atomic_write_json(output / "MATRIX_SUMMARY.json", matrix)
         return matrix

@@ -78,6 +78,35 @@ class CoupledPqVerifier:
         )
 
 
+class MultiTrustRegionPqVerifier:
+    """Feasibility requires several improving P/Q trust-region steps."""
+
+    mess_in_transit = (False, False, False, False)
+
+    def verify_fresh(self, *, control, state, slow_plan):
+        del state, slow_plan
+        net_p = sum(
+            control.mess_discharge_kw[mid] - control.mess_charge_kw[mid]
+            for mid in MESS_IDS
+        )
+        net_q = sum(control.mess_q_kvar.values())
+        vmin = 0.97 + net_q / 100000.0
+        vmax = 1.04 + net_p / 40000.0 + net_q / 20000.0
+        line = 1.30 - net_p / 7000.0
+        passed = 0.95 <= vmin <= vmax <= 1.05 and line <= 1.0
+        return ExactAcResult(
+            passed,
+            "PASS" if passed else "VIOLATION",
+            True,
+            True,
+            vmin,
+            vmax,
+            line,
+            0.8,
+            0 if passed else 1,
+        )
+
+
 class PairwiseQVerifier:
     mess_in_transit = (False, False, False, False)
 
@@ -169,10 +198,54 @@ def test_projector_combines_active_relief_with_location_sensitive_q():
 
     assert exact.passed
     assert sum(candidate.control.mess_q_kvar.values()) < 0.0
-    assert any(
+    assert any("joint_pq_trust_region_qcp" in row for row in projector.trace)
+    assert not any(
         row.get("solver", {}).get("status")
         == "FRESH_OPENDSS_PASSING_ACTIVE_COORDINATE_Q_SEARCH"
         for row in projector.trace
+    )
+
+
+def test_joint_projection_restores_feasibility_across_multiple_trust_regions():
+    nominal = FastControl(
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {},
+        {},
+    )
+    state = FastLayerState(0, {mid: 760.0 / 1080.0 for mid in MESS_IDS}, {})
+    verifier = MultiTrustRegionPqVerifier()
+    projector = _GurobiSensitivityProjector(verifier, allow_mess=True)
+    slow_plan = SimpleNamespace(fingerprint="fixed-plan")
+
+    candidate = projector.project(
+        nominal=nominal,
+        state=state,
+        slow_plan=slow_plan,
+    )
+    exact = verifier.verify_fresh(
+        control=candidate.control,
+        state=state,
+        slow_plan=slow_plan,
+    )
+
+    assert exact.passed
+    joint_rows = [
+        row["joint_pq_trust_region_qcp"]
+        for row in projector.trace
+        if "joint_pq_trust_region_qcp" in row
+    ]
+    assert len(joint_rows) >= 4
+    assert any(
+        row["predicted_elastic_residual"]["line"] > 0.0
+        for row in joint_rows[:-1]
+    )
+    assert all(
+        row["fresh_exact_violation_score_after"]
+        < row["fresh_exact_violation_score_before"]
+        for row in joint_rows
+        if not row["passed"]
     )
 
 

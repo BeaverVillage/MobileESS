@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import argparse
+from functools import lru_cache
 import hashlib
 import importlib
+import itertools
 import json
-import math
 from pathlib import Path
 import shutil
 import statistics
@@ -18,7 +19,7 @@ import pandas as pd
 
 from pfr.daily import DailyInitializationError, certify_daily_pre_identity
 from pfr.methods import ExperimentAuthority, MethodFactory
-from pfr.optimization import GurobiFastControlOptimizer
+from pfr.optimization import GurobiFastControlOptimizer, gurobi_thread_limit
 from pfr.power import H100UtilizationPowerCurve
 from pfr.provenance import scientific_implementation_fingerprint
 from pfr.runtime import (
@@ -104,7 +105,9 @@ class ExactOpenDssBackend:
         mess_q_kvar: Sequence[float],
         mess_in_transit: Sequence[bool],
         previous_capacitor_states: Mapping[str, Sequence[int]],
+        previous_regulator_taps: Mapping[str, int],
         locked_capacitors: Sequence[str],
+        deep_search: bool = False,
     ) -> NativeGridControlDecision:
         state = self._state(
             facility_p_kw=facility_p_kw,
@@ -124,19 +127,476 @@ class ExactOpenDssBackend:
                 "native_capacitor_locked": [
                     str(name).lower() for name in locked_capacitors
                 ],
+                "native_regulator_initial_tap_numbers": {
+                    str(name).lower(): int(value)
+                    for name, value in previous_regulator_taps.items()
+                },
             }
         )
         raw = self.exact.solve_step(self.paths, issue, state)
-        states = {
+        transition_states = {
             str(name).lower(): tuple(int(value) for value in values)
             for name, values in raw.get("native_capacitor_states", {}).items()
+        }
+        previous_states = {
+            str(name).lower(): tuple(int(value) for value in values)
+            for name, values in previous_capacitor_states.items()
+        }
+        transition_taps = {
+            str(name).lower(): int(round(float(value)))
+            for name, value in raw.get("native_regulator_tap_numbers", {}).items()
+        }
+        previous_taps = {
+            str(name).lower(): int(value)
+            for name, value in previous_regulator_taps.items()
+        }
+        locked = {str(name).lower() for name in locked_capacitors}
+
+        # OpenDSS CapControl objects use local measurements.  The January failure
+        # evidence showed that their local decisions can leave a different
+        # bus/phase just above the feeder-wide hard limit.  When that happens,
+        # coordinate the *existing* one-step capacitor assets against the exact
+        # feeder envelope.  This is a common feeder controller, not a B-method
+        # optimization variable: every arm runs the same deterministic law and
+        # method-disabled MESS/compute controls remain untouched.
+        candidate_evidence: list[dict[str, Any]] = []
+
+        def metrics(candidate_raw: Mapping[str, Any]) -> dict[str, float | bool]:
+            transformer = max(
+                float(candidate_raw["transformer_max_kva_loading_pu"]),
+                float(candidate_raw["transformer_max_current_loading_pu"]),
+            )
+            return {
+                "hard_constraint_pass": bool(candidate_raw["hard_constraint_pass"]),
+                "voltage_min_pu": float(candidate_raw["voltage_min_pu"]),
+                "voltage_max_pu": float(candidate_raw["voltage_max_pu"]),
+                "line_max_loading_pu": float(candidate_raw["line_max_loading_pu"]),
+                "transformer_max_loading_pu": transformer,
+            }
+
+        def violation_score(candidate_metrics: Mapping[str, float | bool]) -> float:
+            # Normalize voltage residuals by the 0.05-pu admissible span so the
+            # selector compares voltage and thermal violations dimensionlessly.
+            residuals = (
+                max(0.0, (0.95 - float(candidate_metrics["voltage_min_pu"])) / 0.05),
+                max(0.0, (float(candidate_metrics["voltage_max_pu"]) - 1.05) / 0.05),
+                max(0.0, float(candidate_metrics["line_max_loading_pu"]) - 1.0),
+                max(0.0, float(candidate_metrics["transformer_max_loading_pu"]) - 1.0),
+            )
+            return sum(value * value for value in residuals)
+
+        def guard_score(candidate_metrics: Mapping[str, float | bool]) -> float:
+            residuals = (
+                max(0.0, (0.955 - float(candidate_metrics["voltage_min_pu"])) / 0.005),
+                max(0.0, (float(candidate_metrics["voltage_max_pu"]) - 1.045) / 0.005),
+                max(0.0, (float(candidate_metrics["line_max_loading_pu"]) - 0.995) / 0.005),
+                max(0.0, (float(candidate_metrics["transformer_max_loading_pu"]) - 0.995) / 0.005),
+            )
+            return sum(value * value for value in residuals)
+
+        transition_metrics = metrics(raw)
+        beam_width = 4
+        maximum_tap_depth = 16
+        deep_trust_region_radius = 8
+        deep_maximum_relinearizations = 4
+        candidates: list[
+            tuple[
+                Mapping[str, tuple[int, ...]],
+                Mapping[str, int],
+                Mapping[str, Any],
+                Mapping[str, float | bool],
+            ]
+        ] = [
+            (transition_states, transition_taps, raw, transition_metrics)
+        ]
+        if not bool(transition_metrics["hard_constraint_pass"]):
+            names = tuple(sorted(transition_states))
+            mutable_names = tuple(name for name in names if name not in locked)
+            fixed = {
+                name: previous_states.get(name, transition_states[name])
+                for name in names
+                if name in locked
+            }
+            capacitor_hypotheses = []
+            for bits in itertools.product((0, 1), repeat=len(mutable_names)):
+                candidate_states = dict(fixed)
+                candidate_states.update(
+                    {name: (int(bit),) for name, bit in zip(mutable_names, bits)}
+                )
+                capacitor_hypotheses.append(candidate_states)
+
+            # RegControl may move several independent taps in one OpenDSS
+            # transition.  Searching only around that resulting tap vector can
+            # exclude the chronological pre-transition state even though it is
+            # the closest safe restoration anchor.  Evaluate every admissible
+            # capacitor hypothesis at both physical anchors before expanding
+            # one-tap neighbors.
+            tap_anchors = [transition_taps]
+            if previous_taps and previous_taps != transition_taps:
+                tap_anchors.append(previous_taps)
+            for candidate_states in capacitor_hypotheses:
+                for tap_anchor in tap_anchors:
+                    if (
+                        candidate_states == transition_states
+                        and tap_anchor == transition_taps
+                    ):
+                        continue
+                    candidate_state = dict(state)
+                    candidate_state.update(
+                        {
+                            "native_grid_control_mode": "FIXED_STATE_VERIFICATION",
+                            "native_capacitor_initial_states": {
+                                name: list(values)
+                                for name, values in candidate_states.items()
+                            },
+                            "native_capacitor_locked": [],
+                            "native_regulator_initial_tap_numbers": tap_anchor,
+                        }
+                    )
+                    candidate_raw = self.exact.solve_step(
+                        self.paths, issue, candidate_state
+                    )
+                    candidates.append(
+                        (
+                            candidate_states,
+                            tap_anchor,
+                            candidate_raw,
+                            metrics(candidate_raw),
+                        )
+                    )
+
+            # The capacitor and regulator decisions are coupled: a capacitor
+            # state that initially looks poor because of overvoltage can become
+            # the only feasible state after several regulator moves, while the
+            # locally best capacitor state can remain thermally infeasible.
+            # Preserve several capacitor/tap hypotheses in a bounded global
+            # beam and search their regulator neighbors jointly.  The two
+            # anchors prevent a multi-tap local transition from excluding the
+            # chronological restoration basin.  A deeper per-capacitor-state
+            # reachability search belongs to the background-native scaling gate,
+            # not this online controller: method-scoped continuous projection
+            # must not wait for thousands of native-only states when active or
+            # reactive recourse is the required actuator.
+            # Every candidate is still solved Fresh with all discrete controls
+            # disabled, and each edge changes one existing tap by one step.
+            seen = {
+                (
+                    tuple(sorted(candidate_states.items())),
+                    tuple(sorted(candidate_taps.items())),
+                )
+                for candidate_states, candidate_taps, _, _ in candidates
+            }
+            ranking = lambda item: (
+                violation_score(item[3]),
+                guard_score(item[3]),
+                tuple(item[0][name] for name in sorted(item[0])),
+                tuple(item[1][name] for name in sorted(item[1])),
+            )
+
+            def ranked_frontier(items):
+                return sorted(items, key=ranking)[:beam_width]
+
+            candidate_index = {
+                (
+                    tuple(sorted(candidate_states.items())),
+                    tuple(sorted(candidate_taps.items())),
+                ): item
+                for item in candidates
+                for candidate_states, candidate_taps, _, _ in (item,)
+            }
+
+            def evaluate_fixed(candidate_states, candidate_taps):
+                identity = (
+                    tuple(sorted(candidate_states.items())),
+                    tuple(sorted(candidate_taps.items())),
+                )
+                if identity in candidate_index:
+                    return candidate_index[identity]
+                candidate_state = dict(state)
+                candidate_state.update(
+                    {
+                        "native_grid_control_mode": "FIXED_STATE_VERIFICATION",
+                        "native_capacitor_initial_states": {
+                            name: list(values)
+                            for name, values in candidate_states.items()
+                        },
+                        "native_capacitor_locked": [],
+                        "native_regulator_initial_tap_numbers": candidate_taps,
+                    }
+                )
+                candidate_raw = self.exact.solve_step(
+                    self.paths, issue, candidate_state
+                )
+                item = (
+                    candidate_states,
+                    dict(candidate_taps),
+                    candidate_raw,
+                    metrics(candidate_raw),
+                )
+                seen.add(identity)
+                candidate_index[identity] = item
+                candidates.append(item)
+                return item
+
+            if not deep_search:
+                frontier = ranked_frontier(candidates)
+                for _ in range(maximum_tap_depth):
+                    if any(item[3]["hard_constraint_pass"] for item in candidates):
+                        break
+                    neighbors = []
+                    for base_states, base_taps, _, _ in frontier:
+                        for regulator_name in sorted(base_taps):
+                            for direction in (-1, 1):
+                                next_value = int(base_taps[regulator_name]) + direction
+                                if not -16 <= next_value <= 16:
+                                    continue
+                                candidate_taps = dict(base_taps)
+                                candidate_taps[regulator_name] = next_value
+                                identity = (
+                                    tuple(sorted(base_states.items())),
+                                    tuple(sorted(candidate_taps.items())),
+                                )
+                                if identity in seen:
+                                    continue
+                                neighbors.append(
+                                    evaluate_fixed(base_states, candidate_taps)
+                                )
+                    if not neighbors:
+                        break
+                    frontier = ranked_frontier(neighbors)
+            else:
+                # Deep restoration is a bounded sequential linearization over
+                # the seven existing integer regulator taps.  Each seed is the
+                # better of the two physical anchors for one admissible
+                # capacitor state.  Fresh exact +/- one-tap probes form a local
+                # Jacobian; a small elastic integer QP proposes a coordinated
+                # upstream/downstream tap vector.  Exact backtracking and
+                # relinearization handle the nonsmooth min/max envelope.  This
+                # preserves cascaded-regulator tradeoffs without enumerating
+                # tens of thousands of one-tap paths.
+                grouped = {}
+                for item in candidates:
+                    grouped.setdefault(tuple(sorted(item[0].items())), []).append(item)
+                active = [
+                    min(grouped[identity], key=ranking)
+                    for identity in sorted(grouped)
+                ]
+                metric_names = (
+                    "voltage_min_pu",
+                    "voltage_max_pu",
+                    "line_max_loading_pu",
+                    "transformer_max_loading_pu",
+                )
+                for _ in range(deep_maximum_relinearizations):
+                    if any(
+                        item[3]["hard_constraint_pass"] for item in candidates
+                    ):
+                        break
+                    next_active = []
+                    for base_states, base_taps, _, base_metrics in active:
+                        regulator_names = tuple(sorted(base_taps))
+                        probes = {}
+                        for regulator_name in regulator_names:
+                            for direction in (-1, 1):
+                                next_value = int(base_taps[regulator_name]) + direction
+                                if not -16 <= next_value <= 16:
+                                    continue
+                                probe_taps = dict(base_taps)
+                                probe_taps[regulator_name] = next_value
+                                probes[(regulator_name, direction)] = evaluate_fixed(
+                                    base_states, probe_taps
+                                )
+                        if not probes:
+                            continue
+                        try:
+                            import gurobipy as gp
+                            from gurobipy import GRB
+                        except ImportError as exc:
+                            raise RuntimeError(
+                                "gurobipy is required by deep native restoration"
+                            ) from exc
+                        model = gp.Model("pfr_native_tap_restoration")
+                        model.Params.OutputFlag = 0
+                        model.Params.Threads = gurobi_thread_limit()
+                        model.Params.Seed = 0
+                        delta = {}
+                        for regulator_name in regulator_names:
+                            current = int(base_taps[regulator_name])
+                            delta[regulator_name] = model.addVar(
+                                lb=max(-deep_trust_region_radius, -16 - current),
+                                ub=min(deep_trust_region_radius, 16 - current),
+                                vtype=GRB.INTEGER,
+                                name=f"delta[{regulator_name}]",
+                            )
+                        predicted = {}
+                        for metric_name in metric_names:
+                            expression = float(base_metrics[metric_name])
+                            for regulator_name in regulator_names:
+                                minus = probes.get((regulator_name, -1))
+                                plus = probes.get((regulator_name, 1))
+                                if minus is not None and plus is not None:
+                                    slope = 0.5 * (
+                                        float(plus[3][metric_name])
+                                        - float(minus[3][metric_name])
+                                    )
+                                elif plus is not None:
+                                    slope = (
+                                        float(plus[3][metric_name])
+                                        - float(base_metrics[metric_name])
+                                    )
+                                else:
+                                    slope = (
+                                        float(base_metrics[metric_name])
+                                        - float(minus[3][metric_name])
+                                    )
+                                expression += slope * delta[regulator_name]
+                            predicted[metric_name] = expression
+                        residual = {
+                            name: model.addVar(lb=0.0, name=f"residual[{name}]")
+                            for name in metric_names
+                        }
+                        model.addConstr(
+                            predicted["voltage_min_pu"]
+                            + residual["voltage_min_pu"]
+                            >= 0.95002
+                        )
+                        model.addConstr(
+                            predicted["voltage_max_pu"]
+                            - residual["voltage_max_pu"]
+                            <= 1.04998
+                        )
+                        model.addConstr(
+                            predicted["line_max_loading_pu"]
+                            - residual["line_max_loading_pu"]
+                            <= 0.99998
+                        )
+                        model.addConstr(
+                            predicted["transformer_max_loading_pu"]
+                            - residual["transformer_max_loading_pu"]
+                            <= 0.99998
+                        )
+                        feasibility = (
+                            (residual["voltage_min_pu"] / 0.05) ** 2
+                            + (residual["voltage_max_pu"] / 0.05) ** 2
+                            + residual["line_max_loading_pu"] ** 2
+                            + residual["transformer_max_loading_pu"] ** 2
+                        )
+                        movement = gp.quicksum(
+                            value * value for value in delta.values()
+                        )
+                        # Numerical feasibility has strict practical priority
+                        # over tap movement.  A 0.001-pu transformer residual
+                        # must never be cheaper than a coordinated two-tap
+                        # correction merely because the residual is squared.
+                        model.setObjective(
+                            1.0e9 * feasibility + 1.0e-3 * movement,
+                            GRB.MINIMIZE,
+                        )
+                        model.optimize()
+                        if model.SolCount < 1:
+                            model.dispose()
+                            continue
+                        proposed_delta = {
+                            name: int(round(float(value.X)))
+                            for name, value in delta.items()
+                        }
+                        model.dispose()
+                        proposals = []
+                        for numerator, denominator in ((1, 1), (1, 2), (1, 4), (1, 8)):
+                            proposed_taps = {
+                                name: int(
+                                    max(
+                                        -16,
+                                        min(
+                                            16,
+                                            int(base_taps[name])
+                                            + round(
+                                                proposed_delta[name]
+                                                * numerator
+                                                / denominator
+                                            ),
+                                        ),
+                                    )
+                                )
+                                for name in regulator_names
+                            }
+                            if proposed_taps == dict(base_taps):
+                                continue
+                            proposal = evaluate_fixed(base_states, proposed_taps)
+                            if proposal not in proposals:
+                                proposals.append(proposal)
+                        if not proposals:
+                            proposals = list(probes.values())
+                        best = min(proposals, key=ranking)
+                        if bool(best[3]["hard_constraint_pass"]):
+                            next_active.append(best)
+                            break
+                        if violation_score(best[3]) < violation_score(base_metrics) - 1e-10:
+                            next_active.append(best)
+                    active = next_active
+                    if not active:
+                        break
+
+        def switching_count(candidate_states: Mapping[str, tuple[int, ...]]) -> int:
+            return sum(
+                tuple(candidate_states[name])
+                != tuple(previous_states.get(name, candidate_states[name]))
+                for name in candidate_states
+            )
+
+        def tap_movement(candidate_taps: Mapping[str, int]) -> int:
+            baseline = previous_taps or transition_taps
+            return sum(
+                abs(int(value) - int(baseline.get(name, value)))
+                for name, value in candidate_taps.items()
+            )
+
+        combined_candidates = [(*item, (0.0, 0.0, 0.0)) for item in candidates]
+        passing = [
+            item for item in combined_candidates if item[3]["hard_constraint_pass"]
+        ]
+        pool = passing or combined_candidates
+        selected_states, selected_taps, selected_raw, _, selected_pv_q = min(
+            pool,
+            key=lambda item: (
+                guard_score(item[3]) if passing else violation_score(item[3]),
+                sum(abs(value) for value in item[4]),
+                switching_count(item[0]),
+                tap_movement(item[1]),
+                tuple(item[0][name] for name in sorted(item[0])),
+                tuple(item[1][name] for name in sorted(item[1])),
+            ),
+        )
+        for candidate_states, candidate_taps, _, candidate_metrics in candidates:
+            candidate_evidence.append(
+                {
+                    "states": {
+                        name: list(values)
+                        for name, values in sorted(candidate_states.items())
+                    },
+                    "regulator_taps": dict(sorted(candidate_taps.items())),
+                    **candidate_metrics,
+                    "hard_violation_score": violation_score(candidate_metrics),
+                    "guard_violation_score": guard_score(candidate_metrics),
+                    "switching_count_from_previous": switching_count(candidate_states),
+                    "regulator_tap_movement_from_previous": tap_movement(
+                        candidate_taps
+                    ),
+                }
+            )
+        states = {
+            name: tuple(values) for name, values in selected_states.items()
         }
         return NativeGridControlDecision(
             states=states,
             raw_metrics={
-                "status": "COMMON_NATIVE_GRID_TRANSITION_EVALUATED_FRESH",
+                "status": (
+                    "COMMON_NATIVE_GRID_GLOBAL_GUARD_SELECTED_FRESH"
+                    if len(candidates) > 1
+                    else "COMMON_NATIVE_GRID_TRANSITION_EVALUATED_FRESH"
+                ),
                 "issue": issue,
-                "native_grid_control_authority": raw.get(
+                "native_grid_control_authority": selected_raw.get(
                     "native_grid_control_authority"
                 ),
                 "previous_states": {
@@ -146,18 +606,80 @@ class ExactOpenDssBackend:
                 "selected_states": {
                     name: list(values) for name, values in states.items()
                 },
+                "previous_regulator_taps": dict(sorted(previous_taps.items())),
+                "selected_regulator_taps": dict(sorted(selected_taps.items())),
                 "locked_capacitors": sorted(
                     str(name).lower() for name in locked_capacitors
                 ),
                 "selection_hard_constraint_pass": bool(
-                    raw.get("hard_constraint_pass", False)
+                    selected_raw.get("hard_constraint_pass", False)
                 ),
-                "selection_voltage_min_pu": float(raw["voltage_min_pu"]),
-                "selection_voltage_max_pu": float(raw["voltage_max_pu"]),
+                "selection_voltage_min_pu": float(selected_raw["voltage_min_pu"]),
+                "selection_voltage_max_pu": float(selected_raw["voltage_max_pu"]),
+                "selection_line_max_loading_pu": float(
+                    selected_raw["line_max_loading_pu"]
+                ),
+                "selection_transformer_max_loading_pu": max(
+                    float(selected_raw["transformer_max_kva_loading_pu"]),
+                    float(selected_raw["transformer_max_current_loading_pu"]),
+                ),
+                "selection_voltage_min_bus_node": selected_raw.get(
+                    "voltage_min_bus_node"
+                ),
+                "selection_transformer_max_current_loading_name": selected_raw.get(
+                    "transformer_max_current_loading_name"
+                ),
+                "global_guard_search_triggered": len(candidates) > 1,
+                "global_guard_candidates_evaluated": (
+                    len(candidates)
+                ),
+                "global_guard_joint_discrete_search": {
+                    "algorithm": (
+                        (
+                            "FRESH_EXACT_DUAL_ANCHOR_SENSITIVITY_GUIDED_"
+                            "CAPACITOR_REGULATOR_RESTORATION"
+                        )
+                        if deep_search
+                        else (
+                            "FRESH_EXACT_DUAL_ANCHOR_GLOBAL_ONLINE_"
+                            "CAPACITOR_REGULATOR_BEAM_SEARCH"
+                        )
+                    ),
+                    "search_profile": "DEEP_RESTORATION" if deep_search else "ONLINE",
+                    "tap_anchors": [
+                        "LOCAL_TRANSITION",
+                        "CHRONOLOGICAL_PRE_TRANSITION",
+                    ],
+                    "beam_width": 4,
+                    "beam_width_per_capacitor_state": None,
+                    "frontier_policy": (
+                        "FINITE_DIFFERENCE_INTEGER_TRUST_REGION"
+                        if deep_search
+                        else "SCALAR_FEASIBILITY_BEAM"
+                    ),
+                    "frontier_width_per_capacitor_state": (
+                        1 if deep_search else None
+                    ),
+                    "voltage_tradeoff_bin_pu": None,
+                    "maximum_tap_depth": None if deep_search else maximum_tap_depth,
+                    "single_tap_change_per_search_edge": not deep_search,
+                    "integer_trust_region_radius": (
+                        deep_trust_region_radius if deep_search else None
+                    ),
+                    "maximum_relinearizations": (
+                        deep_maximum_relinearizations if deep_search else None
+                    ),
+                },
+                "global_guard_candidate_evidence": candidate_evidence,
             },
             fresh_instance=True,
             common_to_all_methods=True,
+            regulator_taps=dict(selected_taps),
+            pv_q_fraction_by_phase=(0.0, 0.0, 0.0),
         )
+
+    def select_native_control_deep(self, **kwargs: Any) -> NativeGridControlDecision:
+        return self.select_native_control(deep_search=True, **kwargs)
 
     def verify_fresh(
         self,
@@ -173,6 +695,8 @@ class ExactOpenDssBackend:
         robust_background_q_kvar: Sequence[Sequence[float]],
         robust_pv_available_kw: Sequence[Sequence[float]],
         native_capacitor_states: Optional[Mapping[str, Sequence[int]]] = None,
+        native_regulator_taps: Optional[Mapping[str, int]] = None,
+        pv_q_fraction_by_phase: Sequence[float] = (0.0, 0.0, 0.0),
     ) -> PhysicalCommit:
         state = self._state(
             facility_p_kw=facility_p_kw,
@@ -188,6 +712,10 @@ class ExactOpenDssBackend:
                 "native_capacitor_initial_states": {
                     str(name).lower(): list(values)
                     for name, values in (native_capacitor_states or {}).items()
+                },
+                "native_regulator_initial_tap_numbers": {
+                    str(name).lower(): int(value)
+                    for name, value in (native_regulator_taps or {}).items()
                 },
             }
         )
@@ -337,12 +865,43 @@ def _runtime_initial_state(
     )
 
 
+@lru_cache(maxsize=16)
+def _indexed_power_blocks(shared: Path) -> tuple[tuple[int, int, Path], ...]:
+    rows = []
+    for path in sorted((shared / "power_price").glob("block_*_*_*")):
+        if not path.is_dir():
+            continue
+        try:
+            first, last = map(int, path.name.rsplit("_", 2)[-2:])
+        except ValueError:
+            continue
+        rows.append((first, last, path))
+    if not rows:
+        raise RuntimeError(f"no power/price source blocks found under {shared}")
+    for (_, prior_last, _), (current_first, _, _) in zip(rows, rows[1:]):
+        if current_first <= prior_last:
+            raise RuntimeError("power/price source block ranges overlap")
+    return tuple(rows)
+
+
 def _block(shared: Path, issue: int) -> Path:
     if issue < 0:
         raise RuntimeError("issue must be non-negative")
     block = issue // 576
     start = block * 576
-    return shared / "power_price" / f"block_{block:02d}_{start}_{start + 575}"
+    aligned = shared / "power_price" / f"block_{block:02d}_{start}_{start + 575}"
+    if aligned.is_dir():
+        return aligned
+    matches = [
+        path
+        for first, last, path in _indexed_power_blocks(shared.resolve())
+        if first <= issue <= last
+    ]
+    if len(matches) != 1:
+        raise RuntimeError(
+            f"issue {issue} is covered by {len(matches)} power/price source blocks"
+        )
+    return matches[0]
 
 
 def _frames(
@@ -356,7 +915,10 @@ def _frames(
     route_rows: Sequence[Mapping[str, Any]],
     mobility_template_bank: Mapping[int, tuple[float, ...]],
     workload_reserve_gpu: Mapping[str, float],
+    feeder_scale: float,
 ) -> list[CausalExperimentFrame]:
+    if not 0.0 < feeder_scale <= 1.0:
+        raise RuntimeError("feeder scale must be in (0, 1]")
     independent = pd.read_parquet(independent_jobs)
     canonical_fields = [
         "job_uid", "source_record_id", "runtime_seconds_source", "CPU_request_share_upper_component_kW",
@@ -438,22 +1000,23 @@ def _frames(
                 profile_template_id=int(template_ids[slot]),
                 profile_horizon_steps=int(profile_steps[slot]),
             ))
-        robust_p = np.asarray(block["upper_p"][row, 0], dtype=float)
-        robust_q = np.asarray(block["upper_q"][row, 0], dtype=float)
-        robust_pv = np.asarray(block["lower_pv"][row, 0], dtype=float)
+        robust_p = feeder_scale * np.asarray(block["upper_p"][row, 0], dtype=float)
+        robust_q = feeder_scale * np.asarray(block["upper_q"][row, 0], dtype=float)
+        robust_pv = feeder_scale * np.asarray(block["lower_pv"][row, 0], dtype=float)
         payload = {
             "issue": issue,
             "power_block_authority_sha256": sha256(root / "BLOCK_AUTHORITY.json"),
             "arriving_job_uids": sorted(job.job_uid for job in arrivals.get(issue, ())),
             "mobility_issue_sha256": sha256(mobility_path),
             "factorized_uncertainty_bound": True,
+            "feeder_absolute_scale_alpha": feeder_scale,
         }
         frames.append(CausalExperimentFrame(
             issue=issue,
             current_price_aud_per_mwh=float(price_horizon[0]),
             horizon_price_median_aud_per_mwh=float(statistics.median(price_horizon.tolist())),
-            q50_background_p_kw=float(np.asarray(block["p"][row, 0], dtype=float).sum()),
-            q50_background_q_kvar=float(np.asarray(block["q"][row, 0], dtype=float).sum()),
+            q50_background_p_kw=feeder_scale * float(np.asarray(block["p"][row, 0], dtype=float).sum()),
+            q50_background_q_kvar=feeder_scale * float(np.asarray(block["q"][row, 0], dtype=float).sum()),
             arrivals=tuple(sorted(arrivals.get(issue, ()), key=lambda job: job.job_uid)),
             exogenous_sha256=hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
             grid_upper_background_p_kw=float((robust_p - robust_pv).sum()),
@@ -587,6 +1150,17 @@ def main() -> None:
             "original IEEE123 master does not match native-control authority"
         )
     paths["native_grid_control"] = str(native_control_dss)
+    feeder_scale_path = (
+        repo / "pfr/contracts/FEEDER_ABSOLUTE_SCALE_CONTRACT_V2.json"
+    ).resolve()
+    feeder_scale_contract = json_load(feeder_scale_path)
+    feeder_scale = float(feeder_scale_contract.get("alpha_grid", float("nan")))
+    if (
+        feeder_scale_contract.get("status") != "FROZEN_POST_HOC_P100_FEEDER_SCALE"
+        or not 0.0 < feeder_scale <= 1.0
+    ):
+        raise RuntimeError("feeder absolute-scale contract is invalid")
+    paths["feeder_scale_contract"] = str(feeder_scale_path)
     pre = json_load(args.initial_state)
     if not args.diagnostic_method and "canonical_pre" not in pre:
         raise RuntimeError("main January B0-B7 execution requires canonical daily PRE")
@@ -625,6 +1199,7 @@ def main() -> None:
         workload_reserve_gpu={
             key: float(value) for key, value in workload_uncertainty["idc_gpu_reserve"].items()
         },
+        feeder_scale=feeder_scale,
     )
     evaluation_contract = {
         "gpu_capacity_per_idc_modeled": 256,
@@ -636,7 +1211,11 @@ def main() -> None:
         "workload_uncertainty_sha256": sha256(args.workload_uncertainty),
         "route_catalog_sha256": sha256(args.route_catalog),
         "mobility_template_bank_sha256": sha256(args.mobility_template_bank),
-        "physical_execution_authority_version": "V13_3_POST_HOC_FREEZE_20260822",
+        "physical_execution_authority_version": (
+            "V13_13_POST_HOC_P100_FEEDER_SCALE_NATIVE_ELASTIC_AC_FREEZE_20260823"
+        ),
+        "feeder_absolute_scale_contract_sha256": sha256(feeder_scale_path),
+        "feeder_absolute_scale_alpha": feeder_scale,
         "common_native_grid_control_id": native_control_contract["identity"],
         "common_native_grid_control_dss_sha256": sha256(native_control_dss),
         "common_native_grid_control_authority_sha256": sha256(
@@ -713,10 +1292,11 @@ def main() -> None:
             "future_actual_used": False,
             "methods": [method],
         }
-        (output / "MATRIX_SUMMARY.json").write_text(
-            json.dumps(matrix, indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
+        temporary_summary = output / "MATRIX_SUMMARY.json.tmp"
+        temporary_summary.write_text(
+            json.dumps(matrix, indent=2, sort_keys=True) + "\n", encoding="utf-8"
         )
+        temporary_summary.replace(output / "MATRIX_SUMMARY.json")
     else:
         matrix = runner.run_matrix(
             configs=configs,
@@ -731,6 +1311,12 @@ def main() -> None:
         "start_issue": args.start_issue,
         "count": args.count,
         "shared_authority_fingerprint": authority.fingerprint,
+        "shared_exogenous_authority_sha256": sha256(
+            args.shared_root / "SHARED_EXOGENOUS_AUTHORITY.json"
+        ),
+        "shared_exogenous_authority_path": str(
+            (args.shared_root / "SHARED_EXOGENOUS_AUTHORITY.json").resolve()
+        ),
         "evaluation_contract": evaluation_contract,
         "actual_gurobi_used": matrix["all_actual_gurobi"],
         "actual_fresh_opendss_used": matrix["all_fresh_exact_opendss"],
@@ -752,7 +1338,9 @@ def main() -> None:
         "scientific_implementation_fingerprint": scientific_implementation_fingerprint(
             repo
         ),
-        "physical_execution_authority_version": "V13_3_POST_HOC_FREEZE_20260822",
+        "physical_execution_authority_version": (
+            "V13_13_POST_HOC_P100_FEEDER_SCALE_NATIVE_ELASTIC_AC_FREEZE_20260823"
+        ),
         "evaluation_classification": native_control_contract[
             "evaluation_classification"
         ],
@@ -770,7 +1358,11 @@ def main() -> None:
             "diagnostic_candidate_override": pending_diagnostic_authorized,
         },
     }
-    (output / "RUN_MANIFEST.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    temporary_manifest = output / "RUN_MANIFEST.json.tmp"
+    temporary_manifest.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    temporary_manifest.replace(output / "RUN_MANIFEST.json")
     print(json.dumps({"status": matrix["status"], "markers": matrix["valid_commit_markers"], "output": str(output)}))
     if matrix["status"] != "PASS":
         raise SystemExit(2)

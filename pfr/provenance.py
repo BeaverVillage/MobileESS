@@ -17,6 +17,23 @@ def scientific_implementation_files(repo: Path) -> tuple[Path, ...]:
             repo / "pfr" / "contracts" / "COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.json",
             repo / "pfr" / "contracts" / "IEEE123_NATIVE_CONTROL_ASSET_AUDIT_V1.json",
             repo / "pfr" / "contracts" / "PFR_RUNTIME_CONTRACT.json",
+            repo / "pfr" / "contracts" / "AC_SAFETY_FILTER_CONTRACT.json",
+            repo
+            / "pfr"
+            / "contracts"
+            / "BACKGROUND_LOAD_SCALE_CONSISTENCY_AUDIT_V1.json",
+            repo
+            / "pfr"
+            / "contracts"
+            / "BACKGROUND_NATIVE_FEASIBILITY_GATE_V1.json",
+            repo
+            / "pfr"
+            / "contracts"
+            / "FEEDER_ABSOLUTE_SCALE_CONTRACT_V2.json",
+            repo
+            / "pfr"
+            / "contracts"
+            / "PFR10_GLOBAL_AC_PROJECTION_REDESIGN_V8.json",
         )
     )
     missing = [path for path in files if not path.is_file()]

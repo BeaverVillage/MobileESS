@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 python_bin="${PFR_PYTHON:-/home/jaewon/miniconda3/envs/power_v61_gpu/bin/python}"
-output_root="/home/jaewon/mobile_ess_work/frozen_artifacts/JAN2025_POST_HOC_V13_3_FINAL_VALIDATION_20260822"
+output_root="/home/jaewon/mobile_ess_work/frozen_artifacts/CODEX_PR6_V13_13_JAN2025_DAILY_20260823"
 start_day=1
 end_day=31
 day_workers=4

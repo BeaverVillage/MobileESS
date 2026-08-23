@@ -1,7 +1,7 @@
 {
   "schema_version": "COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.authority.v1",
   "status": "FROZEN_APPROVED_POST_HOC_VALIDATION_ONLY",
-  "scientific_authority_version": "V13_3_POST_HOC_FREEZE_20260822",
+  "scientific_authority_version": "V13_13_POST_HOC_P100_FEEDER_SCALE_NATIVE_ELASTIC_AC_FREEZE_20260823",
   "identity": "COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1",
   "common_to_B0_B7": true,
   "optimized_by_B_method": false,
@@ -17,8 +17,10 @@
   "execution_order": [
     "B_METHOD_NOMINAL_FAST_CONTROL",
     "COMMON_DETERMINISTIC_FEEDER_NATIVE_STATE_TRANSITION",
-    "FREEZE_NATIVE_BINARY_STATE_FOR_ISSUE",
+    "FREEZE_NATIVE_CAPACITOR_AND_REGULATOR_STATE_FOR_CONTINUOUS_PROJECTION",
     "METHOD_SCOPED_CONTINUOUS_AC_SAFETY_PROJECTION",
+    "RESELECT_COMMON_NATIVE_STATE_IF_CONTINUOUS_ACTION_CHANGED_OPERATING_POINT",
+    "SENSITIVITY_GUIDED_DEEP_NATIVE_RESTORATION_IF_STILL_INFEASIBLE",
     "FRESH_EXACT_AC_COMMIT"
   ],
   "literature_role": "ARCHITECTURE_REFERENCE_ONLY_NOT_PARAMETER_AUTHORITY",
@@ -68,6 +70,45 @@
     "maximum_control_iterations": 100,
     "source": "POST_FAILURE_ENGINEERING_DESIGN_DERIVED_FROM_UNCHANGED_HARD_ENVELOPE",
     "independent_holdout_claim_prohibited": true
+  },
+  "feeder_wide_global_guard": {
+    "activation": "LOCAL_CAPCONTROL_AND_REGCONTROL_TRANSITION_FAILS_FRESH_EXACT_REALIZED_H0_HARD_ENVELOPE",
+    "candidate_domain": "ALL_DWELL_ADMISSIBLE_BINARY_STATES_OF_EXISTING_C83_C88A_C90B_C92C_AT_BOTH_THE_LOCAL_TRANSITION_AND_CHRONOLOGICAL_PRE_TRANSITION_TAP_ANCHORS_THEN_A_BOUNDED_GLOBAL_BEAM_SEARCH_OVER_ONE_TAP_EDGES_OF_THE_SEVEN_EXISTING_REGCONTROLS",
+    "maximum_capacitor_candidate_states": 16,
+    "regulator_search_beam_width": 4,
+    "regulator_search_tap_anchor_count": 2,
+    "maximum_regulator_search_iterations": 16,
+    "maximum_regulator_candidates_per_beam_state_per_iteration": 14,
+    "maximum_total_candidate_evaluations": 928,
+    "deep_restoration_activation": "ONLY_AFTER_ONLINE_NATIVE_SEARCH_AND_ALL_METHOD_AUTHORIZED_CONTINUOUS_PROJECTION_ATTEMPTS_REMAIN_FRESH_EXACT_INFEASIBLE",
+    "pv_volt_var": {
+      "enabled": false,
+      "reason": "The frozen 698-kW and pv_capacity_kw authorities are peak-available allocation quantities, not installed inverter kVA nameplates. Reactive capability must not be inferred from them."
+    },
+    "deep_restoration_algorithm": "FRESH_EXACT_FINITE_DIFFERENCE_INTEGER_TRUST_REGION",
+    "deep_restoration_seed_per_capacitor_state": 1,
+    "deep_restoration_integer_trust_region_radius": 8,
+    "deep_restoration_maximum_relinearizations": 4,
+    "deep_restoration_exact_backtracking_fractions": [1.0, 0.5, 0.25, 0.125],
+    "deep_restoration_maximum_native_candidate_evaluations": 1184,
+    "deep_restoration_maximum_total_candidate_evaluations": 1184,
+    "deep_restoration_adds_mess_compute_or_load_shedding": false,
+    "exact_evaluator": "FRESH_THREE_PHASE_OPENDSS_WITH_UNCHANGED_REALIZED_H0_INPUTS_AND_HARD_LIMITS",
+    "selection_order": [
+      "EXACT_HARD_PASS_FIRST",
+      "MINIMUM_DIMENSIONLESS_0_005_GUARD_RESIDUAL",
+      "MINIMUM_SWITCH_COUNT_FROM_PREVIOUS_STATE",
+      "MINIMUM_REGULATOR_TAP_MOVEMENT_FROM_PREVIOUS_STATE",
+      "DETERMINISTIC_CAPACITOR_BIT_VECTOR_AND_REGULATOR_TAP_VECTOR"
+    ],
+    "no_passing_state_policy": "SELECT_MINIMUM_DIMENSIONLESS_HARD_VIOLATION_FOR_METHOD_SCOPED_CONTINUOUS_SAFETY_PROJECTION_THEN_FAIL_CLOSED_IF_UNRESOLVED",
+    "b_method_variables_introduced": false,
+    "capacitor_assets_or_ratings_changed": false,
+    "regulator_assets_or_local_parameters_changed": false,
+    "chronological_regulator_tap_state_carried_between_issues": true,
+    "fixed_candidate_state_includes_capacitors_and_regulator_taps": true,
+    "alternating_discrete_continuous_iterations": 4,
+    "hard_limits_relaxed": false
   },
   "existing_capacitors": [
     {

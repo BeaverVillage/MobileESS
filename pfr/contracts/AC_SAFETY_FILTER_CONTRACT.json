@@ -16,7 +16,15 @@
     "bounded_training_throttle",
     "fixed_slow_discrete_state"
   ],
+  "sequential_feasibility_restoration": {
+    "primary_subproblem": "elastic_joint_P_Q_convex_trust_region_QCP",
+    "elastic_variables": "linearized_constraint_residuals_only",
+    "intermediate_acceptance": "strict_Fresh_Exact_normalized_violation_reduction",
+    "relinearization": "after_every_accepted_Fresh_Exact_intermediate_step",
+    "final_acceptance": "unchanged_0.95_1.05_voltage_and_1.0_thermal_Fresh_Exact_limits",
+    "hard_limits_relaxed": false
+  },
   "prohibited": "heuristic P/Q correction after OpenDSS failure",
-  "unresolved_policy": "full slow replan -> fast recourse -> safety projection -> Fresh OpenDSS -> fail closed",
+  "unresolved_policy": "method-scoped continuous projection <-> common fixed-state grid coordination -> Fresh OpenDSS -> full slow replan and repeat -> fail closed",
   "accepted_final_ac_violation_count": 0
 }

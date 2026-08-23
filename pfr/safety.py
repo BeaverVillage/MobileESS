@@ -201,12 +201,64 @@ class AcSafetyFilter:
     def _attempt(
         self, *, nominal: FastControl, state: FastLayerState, slow_plan: SlowDiscretePlan
     ) -> Tuple[ProjectionCandidate, ExactAcResult]:
-        candidate = self.projector.project(nominal=nominal, state=state, slow_plan=slow_plan)
-        candidate.validate()
-        if candidate.slow_plan_fingerprint != slow_plan.fingerprint:
-            raise SafetyFilterContractError("projection changed a fixed slow decision")
-        exact = self.verifier.verify_fresh(control=candidate.control, state=state, slow_plan=slow_plan)
-        exact.validate()
+        active_nominal = nominal
+        for _ in range(4):
+            candidate = self.projector.project(
+                nominal=active_nominal, state=state, slow_plan=slow_plan
+            )
+            candidate.validate()
+            if candidate.slow_plan_fingerprint != slow_plan.fingerprint:
+                raise SafetyFilterContractError(
+                    "projection changed a fixed slow decision"
+                )
+            exact = self.verifier.verify_fresh(
+                control=candidate.control, state=state, slow_plan=slow_plan
+            )
+            exact.validate()
+            if exact.passed:
+                return candidate, exact
+            if candidate.control == active_nominal:
+                break
+
+            # The common feeder devices are discrete while the method-scoped
+            # safety projection is continuous.  A projected P/Q or compute
+            # action changes the physical operating point, so the native
+            # device state selected before projection is no longer generally
+            # valid.  Alternate the two layers, fixing the discrete state
+            # during each continuous projection and Fresh-exact checking every
+            # iterate.  No method capability is added by this common step.
+            selector = getattr(self.verifier, "select_native_control", None)
+            if selector is None:
+                return candidate, exact
+            previous_decision = getattr(self.verifier, "native_decision", None)
+            refreshed_decision = selector(control=candidate.control)
+            refreshed_exact = self.verifier.verify_fresh(
+                control=candidate.control, state=state, slow_plan=slow_plan
+            )
+            refreshed_exact.validate()
+            if refreshed_exact.passed:
+                return candidate, refreshed_exact
+            if (
+                previous_decision is not None
+                and refreshed_decision.states == previous_decision.states
+                and refreshed_decision.regulator_taps
+                == previous_decision.regulator_taps
+            ):
+                return candidate, refreshed_exact
+            exact = refreshed_exact
+            active_nominal = candidate.control
+        # Only after the online common native search and every authorized
+        # method-scoped continuous attempt remain unresolved, use the common
+        # deep native restoration profile.  This adds no MESS/compute/load-
+        # shedding capability and prevents native-only enumeration from
+        # delaying a method's normal continuous actuator.
+        deep_selector = getattr(self.verifier, "select_native_control_deep", None)
+        if deep_selector is not None and not exact.passed:
+            deep_selector(control=candidate.control)
+            exact = self.verifier.verify_fresh(
+                control=candidate.control, state=state, slow_plan=slow_plan
+            )
+            exact.validate()
         return candidate, exact
 
     def filter(

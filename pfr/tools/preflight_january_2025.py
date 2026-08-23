@@ -82,7 +82,7 @@ def validate_common_native_grid_control(
         authority.get("status")
         == "FROZEN_APPROVED_POST_HOC_VALIDATION_ONLY"
         and authority.get("scientific_authority_version")
-        == "V13_3_POST_HOC_FREEZE_20260822"
+        == "V13_13_POST_HOC_P100_FEEDER_SCALE_NATIVE_ELASTIC_AC_FREEZE_20260823"
         and authority.get("common_to_B0_B7") is True
         and authority.get("optimized_by_B_method") is False
         and authority.get("main_scientific_campaign_authorized") is False
@@ -106,6 +106,74 @@ def validate_common_native_grid_control(
         and float(control.get("on_setting_pu", float("nan"))) == 0.955
         and float(control.get("off_setting_pu", float("nan"))) == 1.045
         and float(control.get("dead_time_seconds", float("nan"))) == 1800.0
+        and authority.get("feeder_wide_global_guard", {}).get(
+            "maximum_capacitor_candidate_states"
+        )
+        == 16
+        and authority.get("feeder_wide_global_guard", {}).get(
+            "maximum_total_candidate_evaluations"
+        )
+        == 928
+        and authority.get("feeder_wide_global_guard", {}).get(
+            "regulator_search_beam_width"
+        )
+        == 4
+        and authority.get("feeder_wide_global_guard", {}).get(
+            "regulator_search_tap_anchor_count"
+        )
+        == 2
+        and authority.get("feeder_wide_global_guard", {}).get(
+            "maximum_regulator_search_iterations"
+        )
+        == 16
+        and authority.get("feeder_wide_global_guard", {}).get(
+            "fixed_candidate_state_includes_capacitors_and_regulator_taps"
+        )
+        is True
+        and authority.get("feeder_wide_global_guard", {}).get(
+            "deep_restoration_algorithm"
+        )
+        == "FRESH_EXACT_FINITE_DIFFERENCE_INTEGER_TRUST_REGION"
+        and authority.get("feeder_wide_global_guard", {}).get(
+            "deep_restoration_seed_per_capacitor_state"
+        )
+        == 1
+        and authority.get("feeder_wide_global_guard", {}).get(
+            "deep_restoration_integer_trust_region_radius"
+        )
+        == 8
+        and authority.get("feeder_wide_global_guard", {}).get(
+            "deep_restoration_maximum_relinearizations"
+        )
+        == 4
+        and authority.get("feeder_wide_global_guard", {}).get(
+            "deep_restoration_exact_backtracking_fractions"
+        )
+        == [1.0, 0.5, 0.25, 0.125]
+        and authority.get("feeder_wide_global_guard", {}).get(
+            "deep_restoration_maximum_native_candidate_evaluations"
+        )
+        == 1184
+        and authority.get("feeder_wide_global_guard", {}).get(
+            "deep_restoration_maximum_total_candidate_evaluations"
+        )
+        == 1184
+        and authority.get("feeder_wide_global_guard", {})
+        .get("pv_volt_var", {})
+        .get("enabled")
+        is False
+        and authority.get("feeder_wide_global_guard", {}).get(
+            "deep_restoration_adds_mess_compute_or_load_shedding"
+        )
+        is False
+        and authority.get("feeder_wide_global_guard", {}).get(
+            "b_method_variables_introduced"
+        )
+        is False
+        and authority.get("feeder_wide_global_guard", {}).get(
+            "hard_limits_relaxed"
+        )
+        is False
         and all(f"Capacitor={name}" in dss for name in expected_names)
         and dss.count("New CapControl.") == 4
     )
@@ -156,6 +224,125 @@ def validate_native_grid_control_release(authority_path: Path) -> Mapping[str, A
         if released
         else "JANUARY_POST_HOC_CAPACITOR_AUTHORITY_NOT_FROZEN",
     }
+
+
+def validate_background_load_scale_audit(path: Path) -> Mapping[str, Any]:
+    audit = json.loads(path.read_text(encoding="utf-8"))
+    scale = audit.get("scaling_contract", {})
+    evidence = audit.get("feeder_evidence", {})
+    decision = audit.get("decision", {})
+    passed = bool(
+        audit.get("status")
+        == "SUPERSEDED_P95_IS_INTENTIONAL_BUT_INCOMPATIBLE_WITH_B0_HARD_FEASIBILITY"
+        and scale.get("configured_reference") == "p95"
+        and abs(float(scale.get("ieee123_native_active_load_kw", 0.0)) - 3490.0)
+        <= 1e-9
+        and abs(float(scale.get("ieee123_native_reactive_load_kvar", 0.0)) - 1920.0)
+        <= 1e-9
+        and abs(float(scale.get("p95_operational_net_target_kw", 0.0)) - 3490.0)
+        <= 0.001
+        and float(evidence.get("official_48h_max_transformer_current_loading_pu", 2.0))
+        < 1.0
+        and float(
+            evidence.get(
+                "annual_background_peak_max_transformer_current_loading_pu", 0.0
+            )
+        )
+        > 1.0
+        and audit.get("comparison_interpretation", {}).get("alpha_grid_applied")
+        is True
+        and audit.get("superseded_by") == "FEEDER_ABSOLUTE_SCALE_CONTRACT_V2"
+        and decision.get("classification")
+        == "CASE_B_INTENTIONAL_STRESS_SUPERSEDED_BY_EXPERIMENT_FEASIBILITY_CONTRACT"
+        and decision.get("background_load_scaling_change")
+        == "AUTHORIZED_ONLY_BY_FEEDER_ABSOLUTE_SCALE_CONTRACT_V2"
+    )
+    return {
+        "pass": passed,
+        "status": audit.get("status"),
+        "configured_reference": scale.get("configured_reference"),
+        "equivalent_active_mapping_kw_per_regional_mw": scale.get(
+            "equivalent_active_mapping_kw_per_regional_mw"
+        ),
+        "official_48h_max_transformer_current_loading_pu": evidence.get(
+            "official_48h_max_transformer_current_loading_pu"
+        ),
+        "annual_background_peak_max_transformer_current_loading_pu": evidence.get(
+            "annual_background_peak_max_transformer_current_loading_pu"
+        ),
+        "alpha_grid_applied": audit.get("comparison_interpretation", {}).get(
+            "alpha_grid_applied"
+        ),
+        "sha256": sha256(path),
+    }
+
+
+def validate_feeder_absolute_scale(path: Path) -> Mapping[str, Any]:
+    contract = json.loads(path.read_text(encoding="utf-8"))
+    expected = 7100.2615 / 9490.53
+    alpha = float(contract.get("alpha_grid", float("nan")))
+    prohibited = contract.get("prohibited_features", {})
+    passed = bool(
+        contract.get("status") == "FROZEN_POST_HOC_P100_FEEDER_SCALE"
+        and contract.get("scientific_authority_version")
+        == "V13_13_POST_HOC_P100_FEEDER_SCALE_NATIVE_ELASTIC_AC_FREEZE_20260823"
+        and abs(alpha - expected) <= 1e-15
+        and contract.get("parameter_selection_is_failure_ratio_fit") is False
+        and prohibited.get("pv_inverter_kva_inferred_from_peak_available_kw") is False
+        and prohibited.get("pv_reactive_power_enabled_without_nameplate_authority") is False
+        and prohibited.get("emergency_mess") is False
+        and prohibited.get("load_shedding") is False
+        and prohibited.get("hard_limit_relaxation") is False
+        and prohibited.get("rating_uprate") is False
+    )
+    return {
+        "pass": passed,
+        "status": contract.get("status"),
+        "alpha_grid": alpha,
+        "scaled_quantities": contract.get("scaled_quantities", ()),
+        "sha256": sha256(path),
+    }
+
+
+def validate_background_native_feasibility_gate(path: Path) -> Mapping[str, Any]:
+    gate = json.loads(path.read_text(encoding="utf-8"))
+    operating = gate.get("scan_operating_point", {})
+    acceptance = gate.get("exact_acceptance", {})
+    decisions = {
+        row.get("decision") for row in gate.get("decision_logic", ())
+    }
+    passed = bool(
+        gate.get("status") == "FROZEN_POST_HOC_GATE"
+        and float(operating.get("facility_idc_p_kw", float("nan"))) == 0.0
+        and float(operating.get("facility_idc_q_kvar", float("nan"))) == 0.0
+        and float(operating.get("mess_p_kw", float("nan"))) == 0.0
+        and float(operating.get("mess_q_kvar", float("nan"))) == 0.0
+        and operating.get("mess_mobility_or_dispatch") is False
+        and operating.get("load_shedding") is False
+        and float(acceptance.get("minimum_voltage_pu", float("nan"))) == 0.95
+        and float(acceptance.get("maximum_voltage_pu", float("nan"))) == 1.05
+        and float(acceptance.get("maximum_line_loading_pu", float("nan"))) == 1.0
+        and float(
+            acceptance.get(
+                "maximum_transformer_current_or_kva_loading_pu", float("nan")
+            )
+        )
+        == 1.0
+        and acceptance.get("hard_limits_relaxed") is False
+        and "KEEP_CURRENT_PHYSICAL_SCALE" in decisions
+        and "REQUIRE_SEPARATE_LEGAL_STATE_REACHABILITY_CERTIFICATE" in decisions
+        and "WHOLE_SYSTEM_SCALE_REDESIGN_REVIEW" in decisions
+    )
+    return {
+        "pass": passed,
+        "status": gate.get("status"),
+        "zero_idc": operating.get("facility_idc_p_kw") == 0.0,
+        "zero_mess": operating.get("mess_p_kw") == 0.0,
+        "hard_limits_relaxed": acceptance.get("hard_limits_relaxed"),
+        "decisions": sorted(value for value in decisions if value),
+    }
+
+
 def validate_daily_pre(path: Path) -> Mapping[str, Any]:
     data = json.loads(path.read_text(encoding="utf-8"))
     first = _runtime_initial_state(data, 0, require_population_identity=True)
@@ -345,6 +532,11 @@ def main() -> None:
         args.repo / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.dss",
         args.repo / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.json",
         args.repo / "pfr/contracts/IEEE123_NATIVE_CONTROL_ASSET_AUDIT_V1.json",
+        args.repo / "pfr/contracts/PFR10_GLOBAL_AC_PROJECTION_REDESIGN_V8.json",
+        args.repo / "pfr/contracts/BACKGROUND_LOAD_SCALE_CONSISTENCY_AUDIT_V1.json",
+        args.repo / "pfr/contracts/BACKGROUND_NATIVE_FEASIBILITY_GATE_V1.json",
+        args.repo / "pfr/contracts/FEEDER_ABSOLUTE_SCALE_CONTRACT_V2.json",
+        args.repo / "pfr/tools/run_background_native_feasibility_gate.py",
     )
     checks: dict[str, Mapping[str, Any]] = {
         "required_files": require_files(basic_paths, "campaign authority files"),
@@ -389,6 +581,18 @@ def main() -> None:
                     args.repo
                     / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.json"
                 ),
+                "background_load_scale_consistency": validate_background_load_scale_audit(
+                    args.repo
+                    / "pfr/contracts/BACKGROUND_LOAD_SCALE_CONSISTENCY_AUDIT_V1.json"
+                ),
+                "background_native_feasibility_gate": validate_background_native_feasibility_gate(
+                    args.repo
+                    / "pfr/contracts/BACKGROUND_NATIVE_FEASIBILITY_GATE_V1.json"
+                ),
+                "feeder_absolute_scale": validate_feeder_absolute_scale(
+                    args.repo
+                    / "pfr/contracts/FEEDER_ABSOLUTE_SCALE_CONTRACT_V2.json"
+                ),
                 "daily_pre": validate_daily_pre(args.initial_state),
                 "power_sources": validate_power_sources(args.shared_root),
                 "mobility_sources": validate_mobility_sources(args.mobility_root),
@@ -409,7 +613,7 @@ def main() -> None:
         }
     status = "PASS" if checks and all(row.get("pass") is True for row in checks.values()) else "FAIL_CLOSED"
     report = {
-        "schema_version": "JAN2025_31DAY_POST_HOC_PREFLIGHT_V13_3_FREEZE_20260822",
+        "schema_version": "JAN2025_31DAY_POST_HOC_PREFLIGHT_V13_13_FREEZE_20260823",
         "evaluation_classification": "POST_HOC_DESIGN_VALIDATION_NOT_INDEPENDENT_HOLDOUT",
         "independent_holdout_claim": False,
         "status": status,

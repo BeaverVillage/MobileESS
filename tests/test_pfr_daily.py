@@ -3,7 +3,11 @@ from __future__ import annotations
 import copy
 import unittest
 
-from pfr.daily import DailyInitializationError, build_daily_pre_artifacts
+from pfr.daily import (
+    DailyInitializationError,
+    build_calendar_daily_pre_artifacts,
+    build_daily_pre_artifacts,
+)
 from pfr.tools.run_pfr_matrix import _runtime_initial_state
 
 
@@ -11,6 +15,19 @@ AUTHORITY_SHA = "ccba214d7a8bf6c142b34cf6f0abc3ce70bae00b9bfd23fe5152506e552e599
 
 
 class JanuaryDailyInitializationTests(unittest.TestCase):
+    def test_generic_frozen_week_has_seven_independent_daily_populations(self) -> None:
+        dates = tuple(f"2025-02-{day:02d}" for day in range(17, 24))
+        manifest, certificate = build_calendar_daily_pre_artifacts(
+            AUTHORITY_SHA,
+            calendar_dates=dates,
+            campaign_id="W07_2025-02-17",
+        )
+
+        self.assertEqual(manifest["calendar_dates"], list(dates))
+        self.assertEqual(manifest["daily_episode_count"], 56)
+        self.assertEqual(certificate["calendar_date_count"], 7)
+        self.assertTrue(certificate["same_date_b0_b7_pre_identity"])
+
     def test_31_by_8_independent_daily_population(self):
         manifest, certificate = build_daily_pre_artifacts(AUTHORITY_SHA)
         self.assertEqual(manifest["daily_episode_count"], 248)

@@ -69,8 +69,28 @@ def january_dates() -> tuple[str, ...]:
 
 
 def build_daily_pre_artifacts(authority_document_sha256: str) -> tuple[dict[str, Any], dict[str, Any]]:
+    return build_calendar_daily_pre_artifacts(
+        authority_document_sha256,
+        calendar_dates=january_dates(),
+        campaign_id="JAN2025",
+        schema_prefix="JAN2025",
+    )
+
+
+def build_calendar_daily_pre_artifacts(
+    authority_document_sha256: str,
+    *,
+    calendar_dates: Iterable[str],
+    campaign_id: str,
+    schema_prefix: str = "CALENDAR_PERIOD",
+) -> tuple[dict[str, Any], dict[str, Any]]:
     if len(authority_document_sha256) != 64:
         raise DailyInitializationError("authority SHA-256 is required")
+    dates = tuple(str(value) for value in calendar_dates)
+    if not dates or len(set(dates)) != len(dates):
+        raise DailyInitializationError("calendar dates must be nonempty and unique")
+    if not campaign_id or not schema_prefix:
+        raise DailyInitializationError("campaign identity is required")
     canonical = CanonicalDailyPre()
     canonical_hash = canonical.sha256()
     rows = [
@@ -78,20 +98,21 @@ def build_daily_pre_artifacts(authority_document_sha256: str) -> tuple[dict[str,
             "calendar_date": calendar_date,
             "day_index": day_index,
             "comparison_method_id": method,
-            "daily_episode_id": f"JAN2025-D{day_index:02d}-{method}",
+            "daily_episode_id": f"{campaign_id}-D{day_index:02d}-{method}",
             "controller_burn_in_steps": 0,
             "daily_state_reset": True,
             "cross_day_state_carryover": False,
             "method_independent_pre_sha256": canonical_hash,
         }
-        for day_index, calendar_date in enumerate(january_dates(), 1)
+        for day_index, calendar_date in enumerate(dates, 1)
         for method in METHODS
     ]
     manifest = {
-        "schema_version": "JAN2025_DAILY_CANONICAL_PRE_MANIFEST_V13_2",
+        "schema_version": f"{schema_prefix}_DAILY_CANONICAL_PRE_MANIFEST_V13_13",
         "status": "PASS",
         "authority_document_sha256": authority_document_sha256,
-        "calendar_dates": list(january_dates()),
+        "campaign_id": campaign_id,
+        "calendar_dates": list(dates),
         "methods": list(METHODS),
         "daily_episode_count": len(rows),
         "scored_issues_per_episode": 288,
@@ -109,8 +130,12 @@ def certify_daily_pre_identity(manifest: dict[str, Any]) -> dict[str, Any]:
     rows = tuple(rows)
     dates = tuple(manifest.get("calendar_dates", ()))
     methods = tuple(manifest.get("methods", ()))
-    if len(dates) != 31 or methods != METHODS or len(rows) != 248:
-        raise DailyInitializationError("daily population must be 31 dates x B0-B7")
+    if not dates or methods != METHODS or len(rows) != len(dates) * len(METHODS):
+        raise DailyInitializationError(
+            "daily population must be one or more unique dates x B0-B7"
+        )
+    if len(set(dates)) != len(dates):
+        raise DailyInitializationError("daily population contains duplicate dates")
     for calendar_date in dates:
         daily = tuple(row for row in rows if row["calendar_date"] == calendar_date)
         if tuple(row["comparison_method_id"] for row in daily) != METHODS:
@@ -120,7 +145,7 @@ def certify_daily_pre_identity(manifest: dict[str, Any]) -> dict[str, Any]:
         if any(not row["daily_state_reset"] or row["cross_day_state_carryover"] for row in daily):
             raise DailyInitializationError(f"daily reset contract mismatch on {calendar_date}")
     return {
-        "schema_version": "JAN2025_DAILY_INITIAL_STATE_IDENTITY_CERTIFICATE_V13_2",
+        "schema_version": "CALENDAR_DAILY_INITIAL_STATE_IDENTITY_CERTIFICATE_V13_13",
         "status": "PASS",
         "calendar_date_count": len(dates),
         "methods_per_date": len(methods),

@@ -1,0 +1,51 @@
+{
+  "schema_version": "BACKGROUND_NATIVE_FEASIBILITY_GATE_V1",
+  "status": "FROZEN_POST_HOC_GATE",
+  "purpose": "Decide whether repeated native-only infeasibility justifies opening a whole-system feeder/DC/MESS scale redesign.",
+  "scan_operating_point": {
+    "included": [
+      "frozen background P/Q",
+      "frozen PV availability",
+      "COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1 regulator control",
+      "COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1 capacitor control"
+    ],
+    "facility_idc_p_kw": 0.0,
+    "facility_idc_q_kvar": 0.0,
+    "mess_p_kw": 0.0,
+    "mess_q_kvar": 0.0,
+    "mess_mobility_or_dispatch": false,
+    "load_shedding": false
+  },
+  "exact_acceptance": {
+    "minimum_voltage_pu": 0.95,
+    "maximum_voltage_pu": 1.05,
+    "maximum_line_loading_pu": 1.0,
+    "maximum_transformer_current_or_kva_loading_pu": 1.0,
+    "fresh_three_phase_opendss_required": true,
+    "hard_limits_relaxed": false
+  },
+  "decision_logic": [
+    {
+      "condition": "ALL_SCANNED_ISSUES_PASS_COMMON_NATIVE_CONTROLLER",
+      "decision": "KEEP_CURRENT_PHYSICAL_SCALE"
+    },
+    {
+      "condition": "BOUNDED_ONLINE_NATIVE_CONTROLLER_FAILS_ONE_OR_MORE_ISSUES",
+      "decision": "REQUIRE_SEPARATE_LEGAL_STATE_REACHABILITY_CERTIFICATE",
+      "scale_redesign_triggered": false
+    },
+    {
+      "condition": "FAILURES_REMAIN_AND_EACH_HAS_A_COMPLETE_LEGAL_STATE_REACHABILITY_INFEASIBILITY_CERTIFICATE",
+      "decision": "WHOLE_SYSTEM_SCALE_REDESIGN_REVIEW",
+      "scale_redesign_triggered": true
+    }
+  ],
+  "scale_redesign_scope_if_triggered": [
+    "alpha_feeder",
+    "alpha_DC",
+    "rho_P",
+    "rho_E"
+  ],
+  "prohibited_inference": "A bounded beam-search miss alone is not evidence that the feeder/load physical scale is inconsistent.",
+  "evaluation_classification": "JANUARY_2025_POST_HOC_DIAGNOSTIC_NOT_INDEPENDENT_HOLDOUT"
+}

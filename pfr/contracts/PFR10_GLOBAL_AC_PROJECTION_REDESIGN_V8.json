@@ -1,0 +1,233 @@
+{
+  "schema_version": "PFR10_GLOBAL_AC_PROJECTION_REDESIGN_V8",
+  "status": "IMPLEMENTED_TARGETED_FAILURE_REPLAYS_PASS_FULL_REPLAY_REQUIRED",
+  "scientific_classification": "TECHNICAL_SAFETY_REMEDIATION_NOT_OUTCOME_EXCLUSION",
+  "trigger_run": {
+    "artifact_id": "JAN2025_POST_HOC_V13_3_FINAL_VALIDATION_20260822",
+    "scientific_implementation_fingerprint": "061ad60b109afdb0918ba80b81dd5d24f8d2d834a6fb8b3c10518a33a0ae5597",
+    "campaign_was_complete": false,
+    "pass_claim_permitted": false
+  },
+  "preserved_failure_evidence": [
+    {
+      "relative_path": "2025-01-01/B2/FAILURE.json",
+      "sha256": "1af875d533d70fced11cee5cc56e7c8587a3eb16414dd59c8db8fafc70c0e7c5",
+      "issue": 209,
+      "method": "B2",
+      "voltage_max_pu": 1.0501256815916766,
+      "projection_trace_rows": 0
+    },
+    {
+      "relative_path": "2025-01-01/B3/FAILURE.json",
+      "sha256": "65fd6464c01d4ce3a978dd66d61fd13f5ed880ccdfd73567aa3831399343d1ea",
+      "issue": 209,
+      "method": "B3",
+      "voltage_max_pu": 1.0501256815916766,
+      "projection_trace_rows": 0
+    },
+    {
+      "relative_path": "2025-01-03/B0/FAILURE.json",
+      "sha256": "ea586c47e009fcface459ef0c80955ea610d1f8f659315823c2c148612e1da5a",
+      "issue": 764,
+      "method": "B0",
+      "voltage_max_pu": 1.0505385783848515,
+      "projection_trace_rows": 0
+    },
+    {
+      "relative_path": "2025-01-03/B1/FAILURE.json",
+      "sha256": "1430d30fed0c56bf2b242645de3fcacdadcf4459b5b85dc577e686f98082b3d",
+      "issue": 773,
+      "method": "B1",
+      "voltage_max_pu": 1.0504829349764375,
+      "line_max_loading_pu": 0.9999912021972847,
+      "projection_trace_rows": 48
+    },
+    {
+      "relative_path": "2025-01-03/B2/FAILURE.json",
+      "sha256": "2ffba398f67a8faa01f7553ee0fad89e1ccc81f53659b0b519bf72374e70193c",
+      "issue": 764,
+      "method": "B2",
+      "voltage_max_pu": 1.050550110246113,
+      "projection_trace_rows": 0
+    },
+    {
+      "relative_path": "2025-01-03/B3/FAILURE.json",
+      "sha256": "bd539b29741dd92ff52e5f4d40fee0301cab30a759fd9d790d1409d86f65f640",
+      "issue": 764,
+      "method": "B3",
+      "voltage_max_pu": 1.0505522702620698,
+      "projection_trace_rows": 0
+    },
+    {
+      "relative_path": "2025-01-04/B0/FAILURE.json",
+      "sha256": "3839923ab2fdab94533963a657bef41d912fec0db8d7f7563fa331f4d5c74154",
+      "issue": 1011,
+      "method": "B0",
+      "voltage_max_pu": 1.0508921256029915,
+      "projection_trace_rows": 0
+    }
+  ],
+  "root_causes": [
+    {
+      "id": "LOCAL_NATIVE_CONTROL_GLOBAL_ENVELOPE_BLIND_SPOT",
+      "evidence": "B0/B2/B3 failures retained C83=0 and C88a=C90b=C92c=1, had no method-scoped continuous projection trace, and violated only feeder-wide maximum voltage.",
+      "correction": "After the chronological local CapControl transition fails Fresh exact hard limits, evaluate every dwell-admissible binary state of the same four existing capacitors and select deterministically against the full feeder envelope."
+    },
+    {
+      "id": "LOCAL_MULTI_TAP_TRANSITION_EXCLUDED_CHRONOLOGICAL_RESTORATION_ANCHOR",
+      "evidence": "V13_5 January day 4 B0 issue 1058 failed only native transformer current at 1.014862 p.u. The local RegControl transition moved nine aggregate tap steps from the prior chronological state, while the global beam started only at that transition and had maximum depth eight. Its 363 saved candidates therefore contained no candidate at the prior tap vector and no feasible candidate.",
+      "correction": "Evaluate every dwell-admissible capacitor hypothesis at both the local-transition and chronological pre-transition tap anchors, then expand a bounded four-state global beam of one-tap edges to depth sixteen with Fresh exact evaluation. Keep complete native-only legal-state reachability analysis outside the online controller as a separate feeder-scaling Gate."
+    },
+    {
+      "id": "GREEDY_COORDINATE_PROJECTION_MISSES_COUPLED_BOUNDARY_INTERSECTION",
+      "evidence": "B1 issue 773 used 48 sequential coordinate/sensitivity rows and ended at line loading 0.9999912022 while maximum voltage remained 1.0504829350.",
+      "correction": "Make a joint continuous P/Q trust-region QCP the primary projection and relinearize after every accepted Fresh exact evaluation."
+    },
+    {
+      "id": "ONE_TRUST_RADIUS_HARD_FEASIBILITY_DEADLOCK",
+      "evidence": "The preserved B1 issue 288 point had line loading 1.219442 p.u. A full 4-MESS active probe relieved the line, but the QCP limited each connected MESS to a 150-kW P trust step and required all linearized hard constraints to pass in that single step. The 600-kW fleet trust envelope could improve but could not close the full overload, so Gurobi correctly returned infeasible and sequential relinearization never began.",
+      "correction": "Use nonnegative elastic residuals only inside the linearized trust-region subproblem, minimize normalized squared feasibility residuals before control movement, accept only a Fresh-exact PASS or strict Fresh-exact normalized violation reduction, and then relinearize. Elastic residuals never participate in final acceptance."
+    },
+    {
+      "id": "INTERNAL_MARGIN_CHANGED_FEASIBLE_SET",
+      "evidence": "The prior projection imposed 0.9505/1.0495 internally although the unchanged physical gate is 0.95/1.05, making narrow coupled boundary QPs artificially infeasible.",
+      "correction": "Use only a 0.00002-pu numerical landing margin internally; unchanged Fresh exact 0.95/1.05 limits remain the sole acceptance authority."
+    },
+    {
+      "id": "SCALAR_DEEP_BEAM_DISCARDS_CASCADED_REGULATOR_TRADEOFF_PATH",
+      "evidence": "V13_9 January day 5 B0 issue 1330 evaluated 12,284 Fresh exact native states. The best voltage-valid state remained at transformer current 1.0097115962 p.u. After aggregate tap movement 23, the scalar beam spent nine further depth levels following approximately 1e-8 metric changes on creg3c while upstream-tap states with lower transformer current but temporary low voltage were discarded by the two-state per-capacitor beam.",
+      "correction": "Use Fresh exact plus/minus one-tap probes to identify the coupled voltage and thermal sensitivity of all seven existing regulators, solve a bounded integer trust-region proposal, evaluate exact backtracking points, and relinearize only after strict exact improvement. This moves upstream and downstream taps together instead of requiring a scalar beam to retain every temporarily worse bridge state."
+    },
+    {
+      "id": "EPSILON_FRONTIER_EXACT_ENUMERATION_RUNTIME_FAILURE",
+      "evidence": "V13_10 expanded the deep search bound to 57,376 Fresh exact candidates. January day 5 remained at issue 178 for several minutes while day 6 had advanced far further, proving the remedy was not operationally bounded enough even before a physical FAILURE artifact was emitted.",
+      "correction": "Reject the V13_10 epsilon frontier. Bound sensitivity-guided restoration to at most 1,184 Fresh exact candidate evaluations: 32 dual-anchor seeds plus four relinearizations of fourteen one-tap probes and four exact backtracking proposals for each of sixteen capacitor states."
+    },
+    {
+      "id": "PHASE_A_BACKGROUND_REACTIVE_STRESS_WITH_PV_FIXED_AT_UNITY_POWER_FACTOR",
+      "evidence": "V13_11 issue 1330 failed B0 with zero IDC facility power and zero MESS P/Q. Frozen inputs contained phase-A net background-plus-PV apparent power 1,768.894 kVA before capacitor compensation versus the reg1a phase rating 1,666.667 kVA. Across 838 Fresh exact native candidates, every voltage-valid point remained at or above 1.01083058 p.u. transformer current, while every thermally valid point had voltage at or below 0.93585587 p.u. The model nevertheless fixed all existing phase PV generators to Q=0 even though phase-A output was 105.689 kW against 281.530 kW frozen nameplate.",
+      "correction": "Expose only the instantaneous reactive headroom of the existing phase-resolved PV generators, conservatively set S_rated equal to frozen active nameplate, allocate a common per-phase Q fraction proportional to each generator headroom, and solve that three-variable common Volt/VAR action with Fresh exact finite differences and trust-region backtracking. Do not curtail PV active power or add assets, ratings, MESS, compute control, load shedding, or relaxed limits."
+    }
+  ],
+  "invariants": {
+    "hard_limits_relaxed": false,
+    "existing_capacitor_assets_or_ratings_changed": false,
+    "b_method_capability_added": false,
+    "future_actual_used": false,
+    "fresh_exact_acceptance_required": true,
+    "fail_closed_if_unresolved": true
+  },
+  "targeted_regression_evidence": {
+    "b0_joint_native_issue_1057": {
+      "status": "PASS",
+      "voltage_min_pu": 0.953184,
+      "voltage_max_pu": 1.037127,
+      "line_max_loading_pu": 0.870134,
+      "transformer_max_loading_pu": 0.998849
+    },
+    "b1_elastic_projection_issue_288": {
+      "prior_failure_relative_path": "CODEX_PR6_V13_4_DIAG_B1_ISSUE288_20260822/B1/FAILURE.json",
+      "prior_failure_sha256": "c423f871b69418177411370e644be6698dfd47f122f41c9ea05ab2b70eeaf640",
+      "pass_commit_relative_path": "CODEX_PR6_V13_5_ELASTIC_DIAG_B1_ISSUE288_20260822/B1/issue_000288/COMMIT_MARKER.json",
+      "pass_commit_sha256": "ff7c901e2cf8c54e8cbdb0466fd010549efa52a0177477f8ba9a5c55102f2f90",
+      "status": "PASS",
+      "voltage_min_pu": 0.9904030765244681,
+      "voltage_max_pu": 1.0499909273638783,
+      "line_max_loading_pu": 0.9995223275725863,
+      "transformer_max_current_loading_pu": 0.8701473495072217,
+      "actual_gurobi": true,
+      "actual_fresh_opendss": true
+    },
+    "b0_dual_anchor_trigger_issue_1058": {
+      "failure_relative_path": "CODEX_PR6_V13_5_JAN01_10_20260822/2025-01-04/B0/FAILURE.json",
+      "failure_sha256": "a6c0bcde6fcd66b524f2a76b0099c59faaefed0c9090213a89e7a4d63f8b5e63",
+      "status": "DUAL_ANCHOR_REGRESSION_IMPLEMENTED_REPLAY_REQUIRED",
+      "local_transition_aggregate_tap_movement": 9,
+      "prior_search_maximum_tap_depth": 8,
+      "prior_tap_anchor_was_evaluated": false,
+      "prior_candidates_evaluated": 363,
+      "prior_feasible_candidates": 0,
+      "failed_transformer_current_loading_pu": 1.0148617911827769
+    },
+    "b3_depth_boundary_issue_1073": {
+      "failure_relative_path": "CODEX_PR6_V13_7_JAN01_10_20260822/2025-01-04/B3/FAILURE.json",
+      "failure_sha256": "270cce9978937d235dbfebb4cfb670665ed7ae0d0dbf3fefd4cce76393146df4",
+      "status": "DEPTH_16_REGRESSION_IMPLEMENTED_REPLAY_REQUIRED",
+      "prior_candidates_evaluated": 426,
+      "prior_best_candidate_was_at_depth_boundary": true,
+      "failed_transformer_current_loading_pu": 1.0000819120825535,
+      "failed_voltage_min_pu": 0.9552025009670216,
+      "failed_voltage_max_pu": 1.0269004911455146
+    },
+    "b0_online_beam_exhaustion_issue_1330": {
+      "failure_relative_path": "CODEX_PR6_V13_8_FAILED_DAYS_03_06_20260822/2025-01-05/B0/FAILURE.json",
+      "failure_sha256": "bd6bb23790b7fedff9aba7220c2c6dee1b6781534c5a4b1f1e90781af3024bf0",
+      "status": "HIERARCHICAL_DEEP_NATIVE_RESTORATION_IMPLEMENTED_REPLAY_REQUIRED",
+      "prior_candidates_evaluated": 767,
+      "prior_feasible_candidates": 0,
+      "prior_best_candidate_was_at_depth_boundary": true,
+      "failed_transformer_current_loading_pu": 1.009788221848338,
+      "failed_voltage_min_pu": 0.9502758713724396,
+      "failed_voltage_max_pu": 1.0498884973127705,
+      "method_scoped_continuous_projection_trace_rows": 0
+    },
+    "b0_scalar_deep_frontier_issue_1330": {
+      "failure_relative_path": "CODEX_PR6_V13_9_FAILED_DAYS_03_06_20260822/2025-01-05/B0/FAILURE.json",
+      "failure_sha256": "0eb88a2cecf4764da4d04e1a2878bb66d39aed4a24c707de80fc236c612f8c89",
+      "status": "V13_10_EPSILON_FRONTIER_REJECTED_V13_11_SENSITIVITY_TRUST_REGION_REPLAY_REQUIRED",
+      "prior_candidates_evaluated": 12284,
+      "prior_feasible_candidates": 0,
+      "prior_frontier_width_per_capacitor_state": 2,
+      "prior_search_maximum_tap_depth": 32,
+      "prior_best_transformer_current_loading_pu": 1.0097115962007028,
+      "prior_best_voltage_min_pu": 0.9508857460703833,
+      "prior_best_voltage_max_pu": 1.0499383800961237,
+      "numerically_flat_depth_levels_after_tap_movement_23": 9,
+      "rejected_v13_10_maximum_candidate_evaluations": 57376,
+      "v13_11_integer_trust_region_radius": 8,
+      "v13_11_maximum_relinearizations": 4,
+      "v13_11_maximum_candidate_evaluations": 1184
+    },
+    "b0_common_pv_volt_var_issue_1330": {
+      "v13_11_failure_relative_path": "CODEX_PR6_V13_11_JAN2025_DAILY_20260823/2025-01-05/B0/FAILURE.json",
+      "v13_11_failure_sha256": "4aa22e435a175b66d3b6d68d8ea5d4ab409897ec5df1d66f1efe37e5aebafdf9",
+      "status": "V13_12_INVALIDATED_PV_AVAILABLE_KW_IS_NOT_INVERTER_KVA",
+      "facility_p_kw_total": 0.0,
+      "mess_p_kw_total": 0.0,
+      "mess_q_kvar_total": 0.0,
+      "fresh_exact_candidates_evaluated": 112,
+      "selected_pv_q_fraction_by_phase": [0.2397451713, -0.0034905058, 0.0005117774],
+      "selected_pv_q_by_phase_kvar": [62.55871798767526, -0.6113285034925225, 0.10791807943184721],
+      "voltage_min_pu": 0.9568736335504375,
+      "voltage_max_pu": 1.0249826744557138,
+      "line_max_loading_pu": 0.8492332023908414,
+      "transformer_max_loading_pu": 0.9909720404373005,
+      "hard_limits_relaxed": false,
+      "invalidation_evidence": "The v13.2.1 authority explicitly states that the 698-kW rooftop PV quantity is peak available output and must not be represented as installed nameplate. V13.12 therefore had no authority to set S_rated equal to pv_capacity_kw."
+    },
+    "b0_p100_feeder_scale_issue_1340": {
+      "v13_12_failure_relative_path": "CODEX_PR6_V13_12_JAN2025_DAILY_20260823/2025-01-05/B0/FAILURE.json",
+      "v13_12_failure_sha256": "65643a85a2a7add8051e5223884ec2ee7200cf6b71c24a0cc98c7c8c8c1c9479",
+      "status": "V13_13_TARGETED_PASS_FULL_REPLAY_REQUIRED",
+      "root_cause": "Intentional p95 feeder scaling is incompatible with resource-free B0 hard feasibility at upper-tail AEMO demand.",
+      "alpha_grid": 0.7481417265421424,
+      "alpha_selection": "7100.2615_MW_P95_DIVIDED_BY_9490.53_MW_ANNUAL_MAX_NOT_FAILURE_RATIO",
+      "scaled_together": ["background_P", "background_Q", "PV_available", "causal_power_forecasts"],
+      "facility_p_kw_total": 0.0,
+      "mess_p_kw_total": 0.0,
+      "mess_q_kvar_total": 0.0,
+      "pv_q_kvar_total": 0.0,
+      "voltage_min_pu": 0.9781412296082792,
+      "voltage_max_pu": 1.0441223190426263,
+      "line_max_loading_pu": 0.6867157569404637,
+      "transformer_max_current_loading_pu": 0.7977733011252328,
+      "transformer_max_kva_loading_pu": 0.6651390810854417,
+      "hard_limits_relaxed": false
+    }
+  },
+  "required_acceptance": [
+    "FULL_UNIT_AND_CONTRACT_TEST_SUITE_PASS",
+    "JANUARY_2025_POST_HOC_PREFLIGHT_PASS",
+    "COMPLETE_31_DAY_X_B0_B7_POST_HOC_REPLAY_PASS"
+  ]
+}
