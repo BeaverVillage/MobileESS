@@ -894,9 +894,18 @@ def _indexed_power_blocks(shared: Path) -> tuple[tuple[int, int, Path], ...]:
             first, last = map(int, path.name.rsplit("_", 2)[-2:])
         except ValueError:
             continue
+        if first > last:
+            raise RuntimeError(
+                f"power/price source block has reversed range: {path.name}"
+            )
         rows.append((first, last, path))
     if not rows:
         raise RuntimeError(f"no power/price source blocks found under {shared}")
+    # A full-month source view joins several independently generated chunks.
+    # Each chunk legitimately restarts its local block ordinal at block_00, so
+    # directory-name order is not chronological.  Validate overlap only after
+    # ordering by the authoritative global issue interval encoded in the name.
+    rows.sort(key=lambda row: (row[0], row[1], row[2].name))
     for (_, prior_last, _), (current_first, _, _) in zip(rows, rows[1:]):
         if current_first <= prior_last:
             raise RuntimeError("power/price source block ranges overlap")
