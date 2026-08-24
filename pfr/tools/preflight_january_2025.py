@@ -20,6 +20,8 @@ from pfr.methods import (
     MethodFactory,
 )
 from pfr.migration import load_migration_authority
+from pfr.mobility_execution import Stage25fSumoExecutionAuthority
+from pfr.mobility_physics import MobilityPhysics
 from pfr.provenance import scientific_implementation_fingerprint
 from pfr.tools.run_pfr_daily_campaign import ISSUES_PER_DAY, day_specs
 from pfr.tools.run_pfr_matrix import _runtime_initial_state
@@ -555,6 +557,35 @@ def validate_physics_only_mobility_runtime(repo: Path) -> Mapping[str, Any]:
     }
 
 
+def validate_sumo_mobility_execution(
+    repo: Path, route_catalog_path: Path
+) -> Mapping[str, Any]:
+    """Open the execution-only authority without exposing it to causal frames."""
+    contract_path = repo / "pfr/contracts/MESS_MOBILITY_EXECUTION_SUMO_V1.json"
+    physics_path = repo / "pfr/contracts/MESS_MOBILITY_PHYSICS_V1.json"
+    try:
+        route_catalog = json.loads(route_catalog_path.read_text(encoding="utf-8"))
+        authority = Stage25fSumoExecutionAuthority(
+            contract_path=contract_path,
+            mobility_physics=MobilityPhysics.from_contract(physics_path),
+            route_rows=route_catalog.get("routes", ()),
+        )
+        return {
+            "pass": True,
+            "authority_id": authority.AUTHORITY_ID,
+            "authority_sha256": authority.fingerprint,
+            "optimizer_access": False,
+            "post_decision_only": True,
+        }
+    except Exception as exc:
+        return {
+            "pass": False,
+            "error": f"{type(exc).__name__}: {exc}",
+            "optimizer_access": False,
+            "post_decision_only": True,
+        }
+
+
 def validate_uncertainty(
     factorized_path: Path, workload_path: Path
 ) -> Mapping[str, Any]:
@@ -704,6 +735,7 @@ def main() -> None:
         args.power_curve,
         args.route_catalog,
         args.repo / "pfr/contracts/MESS_MOBILITY_PHYSICS_V1.json",
+        args.repo / "pfr/contracts/MESS_MOBILITY_EXECUTION_SUMO_V1.json",
         args.workload_uncertainty,
         args.factorized_uncertainty,
         args.repo / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.dss",
@@ -782,6 +814,9 @@ def main() -> None:
                 "mobility_sources": validate_mobility_sources(args.mobility_root),
                 "physics_only_mobility_runtime": validate_physics_only_mobility_runtime(
                     args.repo
+                ),
+                "sumo_mobility_execution": validate_sumo_mobility_execution(
+                    args.repo, args.route_catalog
                 ),
                 "uncertainty": validate_uncertainty(
                     args.factorized_uncertainty, args.workload_uncertainty

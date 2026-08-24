@@ -22,6 +22,7 @@ from pfr.daily import DailyInitializationError, certify_daily_pre_identity
 from pfr.git_identity import run_git
 from pfr.methods import ComparisonMethod, ExperimentAuthority, MethodFactory
 from pfr.migration import MigrationAuthority, load_migration_authority
+from pfr.mobility_execution import Stage25fSumoExecutionAuthority
 from pfr.mobility_physics import MobilityPhysics
 from pfr.native_predictive import (
     PREDICTIVE_NATIVE_HORIZON_STEPS,
@@ -1613,6 +1614,14 @@ def main() -> None:
     mobility_physics_path = args.repo / "pfr/contracts/MESS_MOBILITY_PHYSICS_V1.json"
     mobility_physics = MobilityPhysics.from_contract(mobility_physics_path)
     mobility_physics_fingerprint = sha256(mobility_physics_path)
+    mobility_execution_path = (
+        args.repo / "pfr/contracts/MESS_MOBILITY_EXECUTION_SUMO_V1.json"
+    )
+    mobility_execution = Stage25fSumoExecutionAuthority(
+        contract_path=mobility_execution_path,
+        mobility_physics=mobility_physics,
+        route_rows=route_rows,
+    )
     frames = _frames(
         shared=args.shared_root.resolve(), start_issue=args.start_issue, count=args.count,
         independent_jobs=args.independent_jobs.resolve(), canonical_jobs=args.canonical_jobs.resolve(),
@@ -1645,9 +1654,14 @@ def main() -> None:
         ),
         "route_catalog_sha256": sha256(args.route_catalog),
         "mobility_physics_sha256": mobility_physics_fingerprint,
+        "mobility_execution_authority_sha256": mobility_execution.fingerprint,
         "mobility_energy_authority": (
-            "DETERMINISTIC_LONGITUDINAL_PHYSICS_FROM_FROZEN_GEOMETRY_AND_CAUSAL_ETA"
+            "PLANNING_PHYSICS_AT_CAUSAL_ML_ETA_EXECUTION_PHYSICS_AT_SUMO_REALIZED_ETA"
         ),
+        "mobility_planning_time_authority": "CAUSAL_ML_ETA_Q10_Q50_Q90",
+        "mobility_execution_time_authority": mobility_execution.AUTHORITY_ID,
+        "mobility_execution_post_decision_only": True,
+        "mobility_execution_actual_used_by_optimizer": False,
         "legacy_mobility_energy_fields_ignored": [
             "energy_quantiles_kWh",
             "safe_energy_kWh",
@@ -1725,6 +1739,7 @@ def main() -> None:
             // 300.0
         ),
         migration_authority=migration_authority,
+        mobility_execution_authority=mobility_execution,
     )
     factory = MethodFactory(authority)
     configs = factory.all()
@@ -1804,6 +1819,13 @@ def main() -> None:
             (args.shared_root / "SHARED_EXOGENOUS_AUTHORITY.json").resolve()
         ),
         "evaluation_contract": evaluation_contract,
+        "mobility_execution_authority_path": str(
+            mobility_execution_path.resolve()
+        ),
+        "mobility_execution_authority_sha256": mobility_execution.fingerprint,
+        "mobility_execution_time_authority": mobility_execution.AUTHORITY_ID,
+        "mobility_execution_post_decision_only": True,
+        "mobility_execution_actual_used_by_optimizer": False,
         "migration_authority_path": str(migration_authority_path),
         "migration_authority_sha256": migration_authority.fingerprint,
         "migration_contract_sha256": migration_authority.contract_fingerprint,

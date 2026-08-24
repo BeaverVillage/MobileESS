@@ -19,6 +19,7 @@ from pfr.migration import load_migration_authority
 from pfr.tools.preflight_january_2025 import (
     validate_method_contracts,
     validate_physics_only_mobility_runtime,
+    validate_sumo_mobility_execution,
     validate_workload_scheduler_contract,
 )
 
@@ -46,6 +47,7 @@ def main() -> None:
     parser.add_argument("--period-id", required=True)
     parser.add_argument("--shared-root", type=Path, required=True)
     parser.add_argument("--input-root", type=Path, required=True)
+    parser.add_argument("--route-catalog", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--allow-unmaterialized", action="store_true")
     args = parser.parse_args()
@@ -181,6 +183,9 @@ def main() -> None:
         and physics.get("traffic_ml_role") == "ETA_ONLY"
     )
     physics_runtime = validate_physics_only_mobility_runtime(args.repo)
+    sumo_execution = validate_sumo_mobility_execution(
+        args.repo, args.route_catalog
+    )
     migration_authority = load_migration_authority(
         args.repo / "pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json"
     )
@@ -211,6 +216,7 @@ def main() -> None:
         and scale_ok
         and physics_ok
         and physics_runtime.get("pass") is True
+        and sumo_execution.get("pass") is True
         and migration_ok
         and method_contracts_ok
         and workload_scheduler_ok
@@ -221,6 +227,7 @@ def main() -> None:
         and scale_ok
         and physics_ok
         and physics_runtime.get("pass") is True
+        and sumo_execution.get("pass") is True
         and migration_ok
         and method_contracts_ok
         and workload_scheduler_ok
@@ -250,6 +257,7 @@ def main() -> None:
             "feeder_scale_contract": scale_ok,
             "mobility_physics_contract": physics_ok,
             "physics_only_mobility_runtime": physics_runtime,
+            "sumo_mobility_execution": sumo_execution,
             "migration_authority": migration_ok,
             "migration_runtime_canary": migration_canary,
             "b0_b8_method_contracts": method_contracts,

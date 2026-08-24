@@ -1,0 +1,33 @@
+{
+  "schema_version": "mobileess.mess_mobility_execution_sumo.v1",
+  "status": "FROZEN_EXECUTION_ONLY",
+  "authority_id": "STAGE25F_2025_SUMO_FINAL_OPERATIONAL_TT_EXECUTION_ONLY_V1",
+  "scientific_role": "COMMON_REALIZED_ENVIRONMENT_FOR_POST_DECISION_MESS_TRANSIT_AND_SOC",
+  "optimizer_access": false,
+  "post_decision_only": true,
+  "issue_zero_timestamp": "2025-01-01T00:00:00",
+  "step_seconds": 300,
+  "travel_time_column": "final_tt_sec",
+  "route_loading_rule": "TIME_DEPENDENT_LINK_ENTRY_FLOOR_5MIN_CLIP_END_OF_DAY_MATCHING_E5C_STAGE25F",
+  "energy_rule": "E_PHYS_FROZEN_GEOMETRY_AND_SUMO_REALIZED_TRAVEL_TIME",
+  "method_sharing_rule": "SAME_DATE_DEPARTURE_ROUTE_HAS_IDENTICAL_REALIZATION_FOR_ALL_METHODS",
+  "sources": {
+    "traffic_day_manifest": {
+      "path": "/home/jaewon/mobile_ess_sumo/research_pipeline/32b_energy_stage_e5c_2025_365day_sumo_me_single_open_v2/manifests/E5C_TRAFFIC_DAY_MANIFEST.csv",
+      "sha256": "e5a1bd36f8b172da071227674b61c065310aee7d33a07dd4eed9e898d8a6783e"
+    },
+    "route_sequences": {
+      "path": "/home/jaewon/mobile_ess_sumo/research_pipeline/21_ml_stage9_v11_fixed_station_full_traffic_freeze_v1/freeze_assets/stage8/optimizer_interface/final_od_k3_sequences.npz",
+      "sha256": "2a33659055f0fa185277d758a4e9b7537645ed71fd480a8767a28f1671eff20e"
+    },
+    "link_order": {
+      "path": "/home/jaewon/mobile_ess_sumo/research_pipeline/10_ml_stage1_multires_traffic_v1/graph/link_order_509.csv",
+      "sha256": "fed107185a874d5aed78252b4a9fb7a205fc15460e38b31f335cabf945e62ef1"
+    }
+  },
+  "prohibited_aliases": [
+    "ML_ACTUAL_ETA",
+    "Q50_REALIZED_ETA",
+    "SAFE_ETA_REALIZED_CONSUMPTION"
+  ]
+}

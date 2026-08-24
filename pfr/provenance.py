@@ -43,6 +43,10 @@ def scientific_implementation_files(repo: Path) -> tuple[Path, ...]:
             / "pfr"
             / "contracts"
             / "MESS_MOBILITY_PHYSICS_V1.json",
+            repo
+            / "pfr"
+            / "contracts"
+            / "MESS_MOBILITY_EXECUTION_SUMO_V1.json",
         )
     )
     missing = [path for path in files if not path.is_file()]

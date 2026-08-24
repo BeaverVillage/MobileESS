@@ -19,6 +19,7 @@ from .methods import (
     MethodConfig,
 )
 from .migration import MigrationAuthority
+from .mobility_execution import MobilityExecutionRealization
 from .native_predictive import PREDICTIVE_NATIVE_HORIZON_STEPS
 from .optimization import (
     FastControlOptimizer,
@@ -74,6 +75,17 @@ EXACT_AC_Q_TRUST_REGION_KVAR = 210.0
 
 class RuntimeContractError(RuntimeError):
     pass
+
+
+class MobilityExecutionAuthority(Protocol):
+    """Execution environment hidden from the planning optimizer."""
+
+    fingerprint: str
+
+    def realize(
+        self, *, issue: int, route: "MobilityRouteForecast"
+    ) -> MobilityExecutionRealization:
+        ...
 
 
 def atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:
@@ -2494,6 +2506,26 @@ def _mobility_energy_profile(
     return profile
 
 
+def _realized_mobility_energy_profile(
+    realization: MobilityExecutionRealization,
+) -> Tuple[float, ...]:
+    """Discretize only the post-decision SUMO realization for execution."""
+    realization.validate()
+    eta = realization.eta_seconds
+    total = realization.energy_kwh
+    steps = max(1, math.ceil(eta / 300.0))
+    durations = tuple(
+        min(300.0, max(0.0, eta - 300.0 * index)) for index in range(steps)
+    )
+    duration_sum = sum(durations)
+    if duration_sum <= 0.0 or abs(duration_sum - eta) > 1e-7:
+        raise RuntimeContractError("SUMO realized ETA cannot be discretized")
+    profile = tuple(total * duration / duration_sum for duration in durations)
+    if abs(sum(profile) - total) > max(1e-8, total * 1e-8):
+        raise RuntimeContractError("SUMO realized energy profile is not conserved")
+    return profile
+
+
 def _optimize_mess_routes(
     state: MutableMethodState,
     config: MethodConfig,
@@ -3169,10 +3201,14 @@ def _advance_job_migration_state(
 
 
 def _start_planned_routes(
-    state: MutableMethodState, config: MethodConfig, frame: CausalExperimentFrame
-) -> None:
+    state: MutableMethodState,
+    config: MethodConfig,
+    frame: CausalExperimentFrame,
+    execution_authority: Optional[MobilityExecutionAuthority],
+) -> Tuple[Mapping[str, Any], ...]:
     if state.active_plan is None or config.energy_flexibility != "MESS":
-        return
+        return ()
+    events = []
     for mid in MESS_IDS:
         if state.mess_in_transit[mid]:
             continue
@@ -3184,14 +3220,57 @@ def _start_planned_routes(
         routes = [route for route in frame.routes_for(source, destination) if route.rank == rank]
         if len(routes) != 1:
             raise RuntimeContractError("slow plan selected a route outside frozen K=3")
-        profile = _mobility_energy_profile(routes[0], safe=config.joint_uncertainty)
+        route = routes[0]
+        if execution_authority is None:
+            raise RuntimeContractError(
+                "MESS route execution requires post-decision SUMO authority"
+            )
+        # Ordering is scientifically material: the slow optimizer has already
+        # committed source/destination/rank above.  Only now may actual 2025
+        # SUMO travel time be opened for state transition and SOC deduction.
+        realization = execution_authority.realize(issue=frame.issue, route=route)
+        profile = _realized_mobility_energy_profile(realization)
         if state.mess_energy_kwh[mid] - sum(profile) < MESS_FLOOR_KWH - 1e-9:
-            raise RuntimeContractError("selected mobility profile violates protected SOC floor")
+            raise RuntimeContractError(
+                "selected route is infeasible under post-decision SUMO realization"
+            )
         state.mess_in_transit[mid] = True
         state.mess_route_destination[mid] = destination
         state.mess_route_rank[mid] = rank
         state.mess_route_energy_profile_kwh[mid] = profile
         state.mess_route_profile_index[mid] = 0
+        events.append(
+            {
+                "mess_id": mid,
+                "source_service_id": source,
+                "destination_service_id": destination,
+                "od_index": route.od_index,
+                "rank": rank,
+                "planned_q50_eta_seconds": route.q50_eta_seconds,
+                "reserved_safe_eta_seconds": route.safe_eta_seconds,
+                "planning_eta_seconds_used": (
+                    route.safe_eta_seconds
+                    if config.joint_uncertainty
+                    else route.q50_eta_seconds
+                ),
+                "planned_mobility_energy_kwh": route.q50_energy_kwh,
+                "reserved_safe_mobility_energy_kwh": route.safe_energy_kwh,
+                "planning_mobility_energy_kwh_used": (
+                    route.safe_energy_kwh
+                    if config.joint_uncertainty
+                    else route.q50_energy_kwh
+                ),
+                "sumo_realized_eta_seconds": realization.eta_seconds,
+                "realized_mobility_energy_route_total_kwh": (
+                    realization.energy_kwh
+                ),
+                "realized_source_authority": realization.source_authority,
+                "realized_source_day_sha256": realization.source_day_sha256,
+                "actual_opened_post_decision_only": True,
+                "actual_used_by_optimizer": False,
+            }
+        )
+    return tuple(events)
 
 
 def _risk_decision(state: MutableMethodState, frame: CausalExperimentFrame, config: MethodConfig):
@@ -3469,6 +3548,7 @@ class PfrRuntimeRunner:
         ] = None,
         native_control_minimum_dwell_steps: int = 0,
         migration_authority: Optional[MigrationAuthority] = None,
+        mobility_execution_authority: Optional[MobilityExecutionAuthority] = None,
     ) -> None:
         power_curve.validate()
         self.power_curve = power_curve
@@ -3488,6 +3568,7 @@ class PfrRuntimeRunner:
         if migration_authority is not None:
             migration_authority.validate()
         self.migration_authority = migration_authority
+        self.mobility_execution_authority = mobility_execution_authority
 
     def run_method(
         self,
@@ -3535,6 +3616,7 @@ class PfrRuntimeRunner:
             migration_started_events: tuple[Mapping[str, Any], ...] = ()
             prestart_placement_events: tuple[Mapping[str, Any], ...] = ()
             admission_plan_events: tuple[Mapping[str, Any], ...] = ()
+            mobility_started_events: tuple[Mapping[str, Any], ...] = ()
             if replan:
                 state.active_plan = _build_slow_plan(
                     state,
@@ -3548,7 +3630,12 @@ class PfrRuntimeRunner:
                 state.communication_bytes += len(
                     json.dumps(asdict(state.active_plan), sort_keys=True, separators=(",", ":"))
                 )
-                _start_planned_routes(state, config, frame)
+                mobility_started_events = _start_planned_routes(
+                    state,
+                    config,
+                    frame,
+                    self.mobility_execution_authority,
+                )
                 prestart_placement_events = _apply_planned_prestart_placements(
                     state, config
                 )
@@ -3828,7 +3915,7 @@ class PfrRuntimeRunner:
             }
             for mid in MESS_IDS:
                 state.mess_energy_kwh[mid] = fast.next_state.mess_soc[mid] * MESS_CAPACITY_KWH
-            mobility_energy_kwh = 0.0
+            realized_mobility_energy_kwh = 0.0
             for mid in MESS_IDS:
                 if not state.mess_in_transit[mid]:
                     continue
@@ -3837,7 +3924,7 @@ class PfrRuntimeRunner:
                 if index >= len(profile):
                     raise RuntimeContractError("transit profile index escaped physics authority")
                 movement = profile[index]
-                mobility_energy_kwh += movement
+                realized_mobility_energy_kwh += movement
                 state.mess_energy_kwh[mid] -= movement
                 if state.mess_energy_kwh[mid] < MESS_FLOOR_KWH - 1e-9:
                     raise RuntimeContractError("realized mobility profile violated protected SOC floor")
@@ -3913,6 +4000,7 @@ class PfrRuntimeRunner:
                 "post_state_sha256": post_hash,
                 "causal_exogenous_sha256": frame.exogenous_sha256,
                 "future_actual_used": False,
+                "future_actual_used_by_optimizer": False,
                 "h0_only_committed": True,
                 "slow_plan_fingerprint": state.active_plan.fingerprint,
                 "binary_state_unchanged": fast.binary_state_unchanged,
@@ -4024,7 +4112,30 @@ class PfrRuntimeRunner:
                 "mess_p_kw_total": sum(fast.control.mess_discharge_kw.values()) - sum(fast.control.mess_charge_kw.values()),
                 "mess_q_kvar_total": sum(fast.control.mess_q_kvar.values()),
                 "minimum_mess_energy_kwh": min(state.mess_energy_kwh.values()),
-                "mobility_energy_kwh": mobility_energy_kwh,
+                "planned_mobility_energy_kwh": sum(
+                    float(event["planned_mobility_energy_kwh"])
+                    for event in mobility_started_events
+                ),
+                "reserved_safe_mobility_energy_kwh": sum(
+                    float(event["reserved_safe_mobility_energy_kwh"])
+                    for event in mobility_started_events
+                ),
+                "realized_mobility_energy_kwh": realized_mobility_energy_kwh,
+                "mobility_energy_kwh": realized_mobility_energy_kwh,
+                "mobility_started_events": list(mobility_started_events),
+                "mobility_execution_actual_used_by_optimizer": False,
+                "mobility_execution_actual_opened_post_decision_only": bool(
+                    mobility_started_events
+                ),
+                "mobility_realized_actual_used_by_execution": bool(
+                    mobility_started_events
+                    or realized_mobility_energy_kwh > 0.0
+                ),
+                "mobility_execution_authority_sha256": (
+                    self.mobility_execution_authority.fingerprint
+                    if self.mobility_execution_authority is not None
+                    else None
+                ),
                 "mess_in_transit": dict(state.mess_in_transit),
                 "mess_location": dict(state.mess_location),
                 "mess_route_rank": dict(state.mess_route_rank),
@@ -4113,6 +4224,16 @@ class PfrRuntimeRunner:
             ),
             "binary_state_unchanged": all(row["binary_state_unchanged"] for row in records),
             "future_actual_used": False,
+            "future_actual_used_by_optimizer": False,
+            "mobility_execution_authority_sha256": (
+                self.mobility_execution_authority.fingerprint
+                if self.mobility_execution_authority is not None
+                else None
+            ),
+            "mobility_realized_actual_used_by_execution": any(
+                row["mobility_realized_actual_used_by_execution"]
+                for row in records
+            ),
             "full_replan_count": state.full_replan_count,
             "communication_bytes": state.communication_bytes,
             "admission_plan_revision_count": state.admission_plan_revision_count,

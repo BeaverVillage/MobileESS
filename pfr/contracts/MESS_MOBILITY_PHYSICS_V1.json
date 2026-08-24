@@ -1,11 +1,14 @@
 {
   "schema_version": "mobileess.mess_mobility_physics.v1",
   "status": "FROZEN_PHYSICS_ONLY",
-  "energy_authority": "DETERMINISTIC_LONGITUDINAL_PHYSICS_FROM_FROZEN_ROUTE_GEOMETRY_AND_CAUSAL_ETA",
+  "energy_authority": "DETERMINISTIC_LONGITUDINAL_PHYSICS_FROM_FROZEN_ROUTE_GEOMETRY_AND_STAGE_SPECIFIC_TRAVEL_TIME",
   "mobility_energy_ml_loaded": false,
   "mobility_profile_ml_loaded": false,
   "traffic_ml_role": "ETA_ONLY",
   "safe_energy_rule": "MAX_OF_PHYSICS_ENERGY_AT_CAUSAL_ETA_Q10_Q50_Q90",
+  "planning_time_authority": "CAUSAL_ML_ETA_Q10_Q50_Q90",
+  "execution_time_authority": "STAGE25F_2025_SUMO_FINAL_OPERATIONAL_TT_EXECUTION_ONLY_V1",
+  "execution_energy_rule": "PHYSICS_ENERGY_AT_SUMO_REALIZED_TRAVEL_TIME",
   "transit_profile_rule": "CONSTANT_LUMPED_PHYSICS_POWER_WITH_PARTIAL_FINAL_STEP",
   "parameters": {
     "gross_vehicle_mass_kg": 28000.0,

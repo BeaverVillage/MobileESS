@@ -89,6 +89,7 @@ if ((prepare_only)); then
         "$python_bin" -m pfr.tools.preflight_full_month_2025 \
             --repo "$repo_dir" --period-id "$period_id" \
             --shared-root "$shared" --input-root "$input_root" \
+            --route-catalog "$base/PFR3_FIXED_K3_PHYSICS_CURRENT/FROZEN_K3_PHYSICS_GEOMETRY.json" \
             --report "$gate_root/PREFLIGHT_REPORT.json" \
             --allow-unmaterialized || overall=1
     done
@@ -135,6 +136,7 @@ run_period() {
     "$python_bin" -m pfr.tools.preflight_full_month_2025 \
         --repo "$repo_dir" --period-id "$period_id" \
         --shared-root "$shared" --input-root "$input_root" \
+        --route-catalog "$base/PFR3_FIXED_K3_PHYSICS_CURRENT/FROZEN_K3_PHYSICS_GEOMETRY.json" \
         --report "$gate_root/PREFLIGHT_REPORT.json" || return 1
     "$python_bin" -m pfr.tools.run_frozen_rep_week_daily_campaign \
         --repo "$repo_dir" --period-id "$period_id" --period-contract "$contract" \
