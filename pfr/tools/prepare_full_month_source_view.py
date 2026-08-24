@@ -29,9 +29,11 @@ def atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:
 
 
 def period(
-    repo: Path, period_id: str
+    repo: Path, period_id: str, contract_path: Path | None = None
 ) -> tuple[Mapping[str, Any], Mapping[str, Any], Path]:
-    path = repo / "pfr/contracts/FROZEN_2025_FULL_MONTH_VALIDATION_PERIODS_V1.json"
+    path = contract_path or (
+        repo / "pfr/contracts/FROZEN_2025_FULL_MONTH_VALIDATION_PERIODS_V1.json"
+    )
     contract = json.loads(path.read_text(encoding="utf-8"))
     matches = [row for row in contract["periods"] if row["period_id"] == period_id]
     if len(matches) != 1:
@@ -77,11 +79,14 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--period-id", required=True)
+    parser.add_argument("--period-contract", type=Path)
     parser.add_argument("--shared-root", type=Path, required=True)
     parser.add_argument("--generated-mobility-root", type=Path, action="append", default=[])
     parser.add_argument("--plan-only", action="store_true")
     args = parser.parse_args()
-    selected_period, contract, contract_path = period(args.repo, args.period_id)
+    selected_period, contract, contract_path = period(
+        args.repo, args.period_id, args.period_contract
+    )
     first = int(selected_period["global_issue_first"])
     last = int(selected_period["global_issue_last"])
     expected = set(range(first, last + 1))
@@ -224,6 +229,16 @@ def main() -> None:
                 "view_path": str(target),
             }
         )
+    template_source = reused_roots[0] / "E4B_FULLFIT_TEMPLATE_BANK_129.parquet"
+    template_target = args.shared_root / "mobility/E4B_FULLFIT_TEMPLATE_BANK_129.parquet"
+    if template_target.exists() or template_target.is_symlink():
+        if (
+            not template_target.is_symlink()
+            or template_target.resolve() != template_source.resolve()
+        ):
+            raise RuntimeError("mobility template view drift")
+    else:
+        template_target.symlink_to(template_source.resolve())
     index_path = args.shared_root / "mobility/FULL_MONTH_MOBILITY_VIEW_INDEX.json"
     atomic_write_json(
         index_path,

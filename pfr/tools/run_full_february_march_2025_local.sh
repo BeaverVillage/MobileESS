@@ -9,6 +9,7 @@ contract="$repo_dir/pfr/contracts/FROZEN_2025_FULL_MONTH_VALIDATION_PERIODS_V1.j
 canonical="$base/stage_kestrel_f30_resource_aware_job_power_policy_v2_0_32_r6c_20260806T122335/CANONICAL_F30_RACK_POWER_JOB_BASE_PREFROZEN_R6C.parquet"
 prepare_only=0
 run_root=""
+risk_calibration=""
 
 interrupt_run() {
     trap - INT TERM
@@ -39,13 +40,24 @@ while (($#)); do
             run_root="$2"
             shift 2
             ;;
-        *) echo "Usage: $0 --run-root ABSOLUTE_PATH [--prepare-only]" >&2; exit 64 ;;
+        --risk-calibration)
+            if (($# < 2)); then echo "Missing value for --risk-calibration" >&2; exit 64; fi
+            risk_calibration="$2"
+            shift 2
+            ;;
+        *) echo "Usage: $0 --run-root ABSOLUTE_PATH --risk-calibration FILE [--prepare-only]" >&2; exit 64 ;;
     esac
 done
 if [[ -z "$run_root" || "$run_root" != /* ]]; then
     echo "ABORT_ISOLATION: --run-root must be an authorized absolute path." >&2
     exit 2
 fi
+cd "$repo_dir"
+if [[ -z "$risk_calibration" || ! -f "$risk_calibration" ]]; then
+    echo "ABORT_CALIBRATION: an existing frozen --risk-calibration is required." >&2
+    exit 2
+fi
+"$python_bin" -c 'from pathlib import Path; import sys; from pfr.risk_calibration import load_frozen_risk_calibration; load_frozen_risk_calibration(Path(sys.argv[1]))' "$risk_calibration" || exit 2
 
 authority_sha="$($python_bin -c 'import hashlib,sys; print(hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest())' "$contract")"
 
@@ -63,7 +75,6 @@ prepare_inputs() {
         --authority-output "$input_root/jobs/INDEPENDENT_JOB_COHORT_AUTHORITY.json"
 }
 
-cd "$repo_dir"
 overall=0
 expected_full_commit_sha="${PFR_EXPECTED_FULL_COMMIT_SHA:-}"
 expected_branch="${PFR_EXPECTED_BRANCH:-codex/feb03-predictive-native}"
@@ -155,6 +166,7 @@ run_period() {
         --workload-uncertainty "$base/PFR3_V13_2_WORKLOAD_UNCERTAINTY_CURRENT/PFR3_WORKLOAD_UNCERTAINTY_V13_2.json" \
         --factorized-uncertainty "$base/PFR3_V13_2_FACTORIZED_UNCERTAINTY_CURRENT/PFR3_FACTORIZED_UNCERTAINTY_V13_2.json" \
         --migration-authority "$repo_dir/pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json" \
+        --risk-calibration "$risk_calibration" \
         --output "$output" || campaign_rc=$?
     abort_if_interrupted "$campaign_rc" "${period_id}_b0_b7"
     "$python_bin" -m pfr.tools.run_frozen_rep_week_daily_campaign \
@@ -175,6 +187,7 @@ run_period() {
         --workload-uncertainty "$base/PFR3_V13_2_WORKLOAD_UNCERTAINTY_CURRENT/PFR3_WORKLOAD_UNCERTAINTY_V13_2.json" \
         --factorized-uncertainty "$base/PFR3_V13_2_FACTORIZED_UNCERTAINTY_CURRENT/PFR3_FACTORIZED_UNCERTAINTY_V13_2.json" \
         --migration-authority "$repo_dir/pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json" \
+        --risk-calibration "$risk_calibration" \
         --output "$b8_output" || b8_campaign_rc=$?
     abort_if_interrupted "$b8_campaign_rc" "${period_id}_b8"
     "$python_bin" -m pfr.tools.verify_daily_campaign_storage \

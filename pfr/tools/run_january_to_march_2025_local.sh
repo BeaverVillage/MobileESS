@@ -8,6 +8,7 @@ run_root=""
 preflight_only=0
 skip_migration_sensitivity=0
 january_only=0
+risk_calibration=""
 
 interrupt_run() {
     trap - INT TERM
@@ -40,12 +41,17 @@ while (($#)); do
             run_root="$2"
             shift 2
             ;;
+        --risk-calibration)
+            if (($# < 2)); then echo "Missing value for --risk-calibration" >&2; exit 64; fi
+            risk_calibration="$2"
+            shift 2
+            ;;
         --january-only)
             january_only=1
             shift
             ;;
         -h|--help)
-            echo "Usage: $0 --run-root ABSOLUTE_PATH [--preflight-only] [--skip-migration-sensitivity] [--january-only]"
+            echo "Usage: $0 --run-root ABSOLUTE_PATH --risk-calibration FILE [--preflight-only] [--skip-migration-sensitivity] [--january-only]"
             echo "Runs 4 daily processes x 4 Gurobi threads."
             echo "Default: attempt January, February, and March in order; preserve failures and continue."
             exit 0
@@ -62,6 +68,11 @@ if [[ -z "$run_root" || "$run_root" != /* ]]; then
     echo "ABORT_ISOLATION: --run-root must be a new or previously authorized absolute path." >&2
     exit 2
 fi
+if [[ -z "$risk_calibration" || ! -f "$risk_calibration" ]]; then
+    echo "ABORT_CALIBRATION: an existing frozen --risk-calibration is required." >&2
+    exit 2
+fi
+"$python_bin" -c 'from pathlib import Path; import sys; from pfr.risk_calibration import load_frozen_risk_calibration; load_frozen_risk_calibration(Path(sys.argv[1]))' "$risk_calibration" || exit 2
 if [[ ! "$expected_full_commit_sha" =~ ^[0-9a-f]{40}$ ]]; then
     echo "ABORT_ISOLATION: set PFR_EXPECTED_FULL_COMMIT_SHA to the frozen 40-character commit." >&2
     exit 2
@@ -78,14 +89,16 @@ echo "ISOLATED_JFM_RUN_ROOT=$run_root"
 run_january_preflight() {
     bash "$repo_dir/pfr/tools/run_january_2025_local.sh" \
         --preflight-only --start-day 1 --end-day 31 \
-        --day-workers 4 --gurobi-threads 4 --output-root "$jan_root"
+        --day-workers 4 --gurobi-threads 4 --output-root "$jan_root" \
+        --risk-calibration "$risk_calibration"
 }
 
 if ((preflight_only)); then
     if ! run_january_preflight; then overall=1; fi
     if ((january_only == 0)); then
         if ! bash "$repo_dir/pfr/tools/run_full_february_march_2025_local.sh" \
-            --prepare-only --run-root "$run_root"; then
+            --prepare-only --run-root "$run_root" \
+            --risk-calibration "$risk_calibration"; then
             overall=1
         fi
     fi
@@ -116,7 +129,8 @@ fi
 jan_campaign_rc=0
 bash "$repo_dir/pfr/tools/run_january_2025_local.sh" \
     --start-day 1 --end-day 31 --day-workers 4 --gurobi-threads 4 \
-    --output-root "$jan_root" || jan_campaign_rc=$?
+    --output-root "$jan_root" --risk-calibration "$risk_calibration" \
+    || jan_campaign_rc=$?
 abort_if_interrupted "$jan_campaign_rc" "january_b0_b7"
 
 jan_verify_rc=0
@@ -133,7 +147,8 @@ fi
 b8_campaign_rc=0
 bash "$repo_dir/pfr/tools/run_january_2025_b8_periodic5_local.sh" \
     --start-day 1 --end-day 31 --day-workers 4 --gurobi-threads 4 \
-    --output-root "$b8_root" || b8_campaign_rc=$?
+    --output-root "$b8_root" --risk-calibration "$risk_calibration" \
+    || b8_campaign_rc=$?
 abort_if_interrupted "$b8_campaign_rc" "january_b8"
 if ((b8_campaign_rc != 0)); then
     overall=1
@@ -189,7 +204,7 @@ fi
 
 rep_rc=0
 bash "$repo_dir/pfr/tools/run_full_february_march_2025_local.sh" \
-    --run-root "$run_root" || rep_rc=$?
+    --run-root "$run_root" --risk-calibration "$risk_calibration" || rep_rc=$?
 abort_if_interrupted "$rep_rc" "february_march"
 if ((rep_rc != 0)); then overall=1; fi
 

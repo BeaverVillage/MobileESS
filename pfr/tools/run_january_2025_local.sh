@@ -162,7 +162,7 @@ if [[ "$diagnostic_method" == "B6" ]]; then
     echo "Calibration role: JANUARY-2025 B6 RAW-RISK FITTING ONLY."
 fi
 expected_full_commit_sha="${PFR_EXPECTED_FULL_COMMIT_SHA:-}"
-expected_branch="${PFR_EXPECTED_BRANCH:-codex/pr6-b8-periodic5}"
+expected_branch="${PFR_EXPECTED_BRANCH:-codex/feb03-predictive-native}"
 if [[ ! "$expected_full_commit_sha" =~ ^[0-9a-f]{40}$ ]]; then
     echo "ABORT_MAIN_CAMPAIGN: set PFR_EXPECTED_FULL_COMMIT_SHA to the frozen 40-character commit." >&2
     exit 2

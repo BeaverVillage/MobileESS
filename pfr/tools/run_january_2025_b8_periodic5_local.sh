@@ -8,6 +8,7 @@ start_day=1
 end_day=31
 day_workers=1
 gurobi_threads=4
+risk_calibration=""
 
 interrupt_run() {
     trap - INT TERM
@@ -29,6 +30,7 @@ usage() {
         "  --end-day N" \
         "  --day-workers N" \
         "  --gurobi-threads N" \
+        "  --risk-calibration FILE" \
         "  --output-root PATH"
 }
 
@@ -38,6 +40,7 @@ while (($#)); do
         --end-day) end_day="$2"; shift 2 ;;
         --day-workers) day_workers="$2"; shift 2 ;;
         --gurobi-threads) gurobi_threads="$2"; shift 2 ;;
+        --risk-calibration) risk_calibration="$2"; shift 2 ;;
         --output-root) output_root="$2"; shift 2 ;;
         -h|--help) usage; exit 0 ;;
         *) echo "Unknown option: $1" >&2; usage >&2; exit 64 ;;
@@ -55,6 +58,10 @@ if ((start_day < 1 || end_day > 31 || start_day > end_day)); then
 fi
 if ((day_workers < 1 || gurobi_threads < 1)); then
     echo "day-workers and gurobi-threads must be positive." >&2
+    exit 64
+fi
+if [[ -z "$risk_calibration" || ! -f "$risk_calibration" ]]; then
+    echo "January B8 requires an existing frozen --risk-calibration artifact." >&2
     exit 64
 fi
 
@@ -87,7 +94,7 @@ export PYTHONHASHSEED=0
 
 cd "$repo_dir"
 expected_full_commit_sha="${PFR_EXPECTED_FULL_COMMIT_SHA:-}"
-expected_branch="${PFR_EXPECTED_BRANCH:-codex/pr6-b8-periodic5}"
+expected_branch="${PFR_EXPECTED_BRANCH:-codex/feb03-predictive-native}"
 if [[ ! "$expected_full_commit_sha" =~ ^[0-9a-f]{40}$ ]]; then
     echo "ABORT_MAIN_CAMPAIGN: set PFR_EXPECTED_FULL_COMMIT_SHA to the frozen 40-character commit." >&2
     exit 2
@@ -110,6 +117,7 @@ fi
     --day-workers "$day_workers" \
     --capture-day-logs \
     --supplementary-b8-periodic-5min \
+    --risk-calibration "$risk_calibration" \
     "${common_arguments[@]}" \
     --output "$output_root"
 
@@ -118,4 +126,5 @@ fi
     --root "$output_root" \
     --start-date "2025-01-$(printf '%02d' "$start_day")" \
     --days "$((end_day - start_day + 1))" \
-    --supplementary-b8-periodic-5min
+    --supplementary-b8-periodic-5min \
+    --report "$output_root/STORAGE_VERIFICATION.json"

@@ -1,4 +1,4 @@
-"""Fail-closed isolation authority for January-to-March campaign outputs."""
+"""Fail-closed isolation authority for January-to-April campaign outputs."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import re
 from typing import Any, Mapping
 
 
-SCHEMA_VERSION = "PFR_JFM_ISOLATED_RUN_ROOT_V1"
+SCHEMA_VERSION = "PFR_JAN_TO_APRIL_ISOLATED_RUN_ROOT_V2"
 MANIFEST_NAME = "JFM_ISOLATION_MANIFEST.json"
 LAYOUT = {
     "january_b0_b7": "january/B0_B7",
@@ -18,6 +18,8 @@ LAYOUT = {
     "february_b8": "february/B8",
     "march_b0_b7": "march/B0_B7",
     "march_b8": "march/B8",
+    "april_b0_b7": "april/B0_B7",
+    "april_b8": "april/B8",
 }
 
 

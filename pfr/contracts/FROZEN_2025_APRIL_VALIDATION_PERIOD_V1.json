@@ -1,0 +1,58 @@
+{
+  "schema_version": "FROZEN_2025_APRIL_VALIDATION_PERIOD_V1",
+  "status": "FROZEN_BEFORE_APRIL_EXECUTION",
+  "physical_execution_authority_version": "V13_13_POST_HOC_P100_FEEDER_SCALE_NATIVE_ELASTIC_AC_FREEZE_20260823",
+  "evaluation_classification": "POST_HOC_FULL_CALENDAR_MONTH_GENERALIZATION_VALIDATION_NOT_INDEPENDENT_HOLDOUT",
+  "independent_holdout_claim": false,
+  "calendar_timezone": "FIXED_AEST_UTC_PLUS_10_NO_DST",
+  "daily_cold_start": true,
+  "cross_day_endogenous_state_carryover": false,
+  "day_workers": 4,
+  "gurobi_threads_per_worker": 4,
+  "methods_per_day": 8,
+  "issues_per_method_per_day": 288,
+  "source_generator_sha256": {
+    "performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_W02_POWER_PRICE_SOURCE.py": "f8733de5d51dd2aca0ec91d24e75d8c0d5e721d0bcd0ca5fd782001979fe426f",
+    "performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_W02_MOBILITY_SOURCE.py": "6844917dbbc13928fae592c0c6d20e1b53c61c083ae4c40ad76672ee707b9ff6",
+    "stage7/r12_representative_weeks/materialize_r12_common_mobility_cache.py": "23639169abdade397fcf777d77c0f0b8220602994921c2ae0562f253cbe738ed"
+  },
+  "method_failure_policy": "PRESERVE_FAILURE_AND_CONTINUE_TO_NEXT_B",
+  "day_failure_policy": "PRESERVE_FAILURE_AND_CONTINUE_TO_NEXT_DAY",
+  "period_failure_policy": "PRESERVE_FAILURE_AND_STOP_BEFORE_NEXT_PERIOD",
+  "periods": [
+    {
+      "period_id": "APR2025_FULL",
+      "calendar_start": "2025-04-01",
+      "days": 30,
+      "global_issue_first": 25920,
+      "global_issue_last": 34559,
+      "expected_commit_markers": 69120,
+      "source_padding_issue_last": 35135,
+      "power_generation_starts": [25920, 28224, 30528, 32832],
+      "mobility_generation_chunks": [
+        {"start": 25920, "count": 2304},
+        {"start": 28224, "count": 2304},
+        {"start": 30528, "count": 2304},
+        {"start": 32832, "count": 2304}
+      ],
+      "reused_mobility_roots": [
+        "/home/jaewon/mobile_ess_work/frozen_artifacts/B_W17_2025-04-28_SHARED_EXOGENOUS_SOURCE_CURRENT/mobility"
+      ],
+      "reused_mobility_expected_ranges": [
+        {"first": 33696, "last": 34559}
+      ]
+    }
+  ],
+  "unchanged_hard_limits": {
+    "minimum_voltage_pu": 0.95,
+    "maximum_voltage_pu": 1.05,
+    "maximum_line_loading_pu": 1.0,
+    "maximum_transformer_loading_pu": 1.0
+  },
+  "prohibited_controls": [
+    "EMERGENCY_MESS",
+    "LOAD_SHEDDING",
+    "HARD_LIMIT_RELAXATION",
+    "ASSET_RATING_CHANGE"
+  ]
+}
