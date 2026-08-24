@@ -14,6 +14,7 @@ from typing import Any, Mapping
 
 from pfr.provenance import scientific_implementation_fingerprint
 from pfr.risk_calibration import RISK_FAMILY_SCALES
+from pfr.runtime import MESS_FLOOR_KWH
 
 
 METHODS = tuple(f"B{index}" for index in range(8))
@@ -56,6 +57,8 @@ def _prediction_actual_evidence_errors(marker: Mapping[str, Any]) -> list[str]:
         "mobility_started_route_count",
         "mobility_q50_eta_prediction_error_seconds_started_routes",
         "mobility_q50_energy_prediction_error_kwh_started_routes",
+        "mobility_realized_protected_floor_shortfall_kwh_started_routes",
+        "mobility_realized_protected_floor_violation_route_count",
         "migration_prediction_actual_events",
         "migration_prediction_actual_event_count",
         "migration_duration_prediction_error_seconds",
@@ -80,6 +83,8 @@ def _prediction_actual_evidence_errors(marker: Mapping[str, Any]) -> list[str]:
             energy_error = float(
                 event["realized_mobility_energy_route_total_kwh"]
             ) - float(event["planned_mobility_energy_kwh"])
+            terminal_energy = float(event["realized_terminal_energy_kwh"])
+            floor_shortfall = max(0.0, MESS_FLOOR_KWH - terminal_energy)
             if abs(eta_error - float(event["q50_eta_prediction_error_seconds"])) > tolerance:
                 errors.append("mobility ETA prediction/actual error arithmetic mismatch")
             if abs(
@@ -90,6 +95,15 @@ def _prediction_actual_evidence_errors(marker: Mapping[str, Any]) -> list[str]:
                 errors.append("mobility realized actual leaked to optimizer")
             if event.get("actual_opened_post_decision_only") is not True:
                 errors.append("mobility realized actual was not post-decision only")
+            if abs(
+                floor_shortfall
+                - float(event["realized_protected_floor_shortfall_kwh"])
+            ) > tolerance:
+                errors.append("mobility realized SOC-floor shortfall arithmetic mismatch")
+            if bool(event["realized_route_protected_floor_feasible"]) != (
+                terminal_energy >= MESS_FLOOR_KWH - 1e-9
+            ):
+                errors.append("mobility realized SOC-floor feasibility mismatch")
         except (KeyError, TypeError, ValueError):
             errors.append("mobility prediction/actual event is incomplete")
     for event in migrations:
@@ -112,6 +126,14 @@ def _prediction_actual_evidence_errors(marker: Mapping[str, Any]) -> list[str]:
         )
         mobility_energy_error = sum(
             float(event["q50_energy_prediction_error_kwh"])
+            for event in mobility
+        )
+        mobility_floor_shortfall = sum(
+            float(event["realized_protected_floor_shortfall_kwh"])
+            for event in mobility
+        )
+        mobility_floor_violations = sum(
+            not bool(event["realized_route_protected_floor_feasible"])
             for event in mobility
         )
         migration_duration_error = sum(
@@ -140,6 +162,19 @@ def _prediction_actual_evidence_errors(marker: Mapping[str, Any]) -> list[str]:
             marker["migration_duration_prediction_error_seconds"]
         ):
             errors.append("migration duration aggregate error mismatch")
+        if abs(
+            mobility_floor_shortfall
+            - float(
+                marker[
+                    "mobility_realized_protected_floor_shortfall_kwh_started_routes"
+                ]
+            )
+        ) > tolerance:
+            errors.append("mobility SOC-floor shortfall aggregate mismatch")
+        if mobility_floor_violations != int(
+            marker["mobility_realized_protected_floor_violation_route_count"]
+        ):
+            errors.append("mobility SOC-floor violation aggregate mismatch")
     except (KeyError, TypeError, ValueError):
         errors.append("prediction/actual aggregate evidence is incomplete")
     return errors

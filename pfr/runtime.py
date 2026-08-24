@@ -59,6 +59,7 @@ MESS_CANONICAL_STAGING = {
 STEP_HOURS = 5.0 / 60.0
 MESS_CAPACITY_KWH = 1080.0
 MESS_FLOOR_KWH = 440.0
+MESS_PHYSICAL_MIN_KWH = 0.0
 MESS_SAFETY_RESERVE_KWH = 440.0
 MESS_CANONICAL_DAILY_PRE_KWH = 760.0
 MESS_CHARGE_LIMIT_KW = 550.0
@@ -76,6 +77,16 @@ EXACT_AC_Q_TRUST_REGION_KVAR = 210.0
 
 class RuntimeContractError(RuntimeError):
     pass
+
+
+def _fast_recourse_soc_min(energy_kwh: float) -> float:
+    """Prevent control-induced worsening while preserving realized SOC violations."""
+    if not math.isfinite(energy_kwh) or energy_kwh < MESS_PHYSICAL_MIN_KWH - 1e-9:
+        raise RuntimeContractError("MESS energy violates physical battery bounds")
+    return min(
+        MESS_FLOOR_KWH / MESS_CAPACITY_KWH,
+        max(MESS_PHYSICAL_MIN_KWH, energy_kwh) / MESS_CAPACITY_KWH,
+    )
 
 
 class MobilityExecutionAuthority(Protocol):
@@ -3416,9 +3427,19 @@ def _start_planned_routes(
                 "post-decision SUMO mobility realization crosses the independent "
                 "episode boundary"
             )
-        if state.mess_energy_kwh[mid] - sum(profile) < MESS_FLOOR_KWH - 1e-9:
+        realized_terminal_energy_kwh = state.mess_energy_kwh[mid] - sum(profile)
+        if realized_terminal_energy_kwh < MESS_PHYSICAL_MIN_KWH - 1e-9:
             raise RuntimeContractError(
-                "selected route is infeasible under post-decision SUMO realization"
+                "selected route exhausts physical battery energy under post-decision "
+                "SUMO realization: "
+                f"issue={frame.issue} mess_id={mid} source={source} "
+                f"destination={destination} rank={rank} "
+                f"energy_before_kwh={state.mess_energy_kwh[mid]:.12g} "
+                f"planned_energy_kwh="
+                f"{(route.safe_energy_kwh if config.joint_uncertainty else route.q50_energy_kwh):.12g} "
+                f"realized_energy_kwh={sum(profile):.12g} "
+                f"realized_terminal_energy_kwh="
+                f"{realized_terminal_energy_kwh:.12g}"
             )
         state.mess_in_transit[mid] = True
         state.mess_route_destination[mid] = destination
@@ -3449,6 +3470,13 @@ def _start_planned_routes(
                 "sumo_realized_eta_seconds": realization.eta_seconds,
                 "realized_mobility_energy_route_total_kwh": (
                     realization.energy_kwh
+                ),
+                "realized_terminal_energy_kwh": realized_terminal_energy_kwh,
+                "realized_protected_floor_shortfall_kwh": max(
+                    0.0, MESS_FLOOR_KWH - realized_terminal_energy_kwh
+                ),
+                "realized_route_protected_floor_feasible": (
+                    realized_terminal_energy_kwh >= MESS_FLOOR_KWH - 1e-9
                 ),
                 "q50_eta_prediction_error_seconds": (
                     realization.eta_seconds - route.q50_eta_seconds
@@ -4036,7 +4064,10 @@ class PfrRuntimeRunner:
                 mess_charge_limit_kw={mid: 0.0 if state.mess_in_transit[mid] else 550.0 for mid in MESS_IDS},
                 mess_discharge_limit_kw={mid: 0.0 if state.mess_in_transit[mid] else 550.0 for mid in MESS_IDS},
                 mess_pcs_kva={mid: 700.0 for mid in MESS_IDS},
-                mess_soc_min={mid: MESS_FLOOR_KWH / MESS_CAPACITY_KWH for mid in MESS_IDS},
+                mess_soc_min={
+                    mid: _fast_recourse_soc_min(state.mess_energy_kwh[mid])
+                    for mid in MESS_IDS
+                },
                 mess_soc_max={mid: 1.0 for mid in MESS_IDS},
                 job_gpu_count={uid: state.jobs[uid].source.requested_gpu for uid in fast_state.remaining_work_gpu_hours},
                 site_throughput_limit={site: 1.0 for site in IDCS},
@@ -4154,7 +4185,10 @@ class PfrRuntimeRunner:
                     mess_charge_limit_kw={mid: 0.0 if state.mess_in_transit[mid] else 550.0 for mid in MESS_IDS},
                     mess_discharge_limit_kw={mid: 0.0 if state.mess_in_transit[mid] else 550.0 for mid in MESS_IDS},
                     mess_pcs_kva={mid: 700.0 for mid in MESS_IDS},
-                    mess_soc_min={mid: MESS_FLOOR_KWH / MESS_CAPACITY_KWH for mid in MESS_IDS},
+                    mess_soc_min={
+                        mid: _fast_recourse_soc_min(state.mess_energy_kwh[mid])
+                        for mid in MESS_IDS
+                    },
                     mess_soc_max={mid: 1.0 for mid in MESS_IDS},
                     job_gpu_count={uid: state.jobs[uid].source.requested_gpu for uid in accepted_fast_state.remaining_work_gpu_hours},
                     site_throughput_limit={site: 1.0 for site in IDCS},
@@ -4294,8 +4328,10 @@ class PfrRuntimeRunner:
                 movement = profile[index]
                 realized_mobility_energy_kwh += movement
                 state.mess_energy_kwh[mid] -= movement
-                if state.mess_energy_kwh[mid] < MESS_FLOOR_KWH - 1e-9:
-                    raise RuntimeContractError("realized mobility profile violated protected SOC floor")
+                if state.mess_energy_kwh[mid] < MESS_PHYSICAL_MIN_KWH - 1e-9:
+                    raise RuntimeContractError(
+                        "realized mobility profile exhausted physical battery energy"
+                    )
                 state.mess_route_profile_index[mid] += 1
                 if state.mess_route_profile_index[mid] == len(profile):
                     destination = state.mess_route_destination[mid]
@@ -4548,6 +4584,14 @@ class PfrRuntimeRunner:
                     float(event["realized_mobility_energy_route_total_kwh"])
                     for event in mobility_started_events
                 ),
+                "mobility_realized_protected_floor_shortfall_kwh_started_routes": sum(
+                    float(event["realized_protected_floor_shortfall_kwh"])
+                    for event in mobility_started_events
+                ),
+                "mobility_realized_protected_floor_violation_route_count": sum(
+                    not bool(event["realized_route_protected_floor_feasible"])
+                    for event in mobility_started_events
+                ),
                 "mobility_q50_eta_prediction_error_seconds_started_routes": sum(
                     float(event["q50_eta_prediction_error_seconds"])
                     for event in mobility_started_events
@@ -4755,6 +4799,18 @@ class PfrRuntimeRunner:
             ),
             "mobility_started_route_count": sum(
                 int(row["mobility_started_route_count"]) for row in records
+            ),
+            "mobility_realized_protected_floor_shortfall_kwh_started_routes": sum(
+                float(
+                    row[
+                        "mobility_realized_protected_floor_shortfall_kwh_started_routes"
+                    ]
+                )
+                for row in records
+            ),
+            "mobility_realized_protected_floor_violation_route_count": sum(
+                int(row["mobility_realized_protected_floor_violation_route_count"])
+                for row in records
             ),
             "mobility_q50_eta_mean_absolute_error_seconds": (
                 sum(

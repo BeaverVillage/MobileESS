@@ -163,6 +163,9 @@ def test_prediction_actual_storage_evidence_is_arithmetically_verified() -> None
                 "q50_eta_prediction_error_seconds": 50.0,
                 "planned_mobility_energy_kwh": 24.0,
                 "realized_mobility_energy_route_total_kwh": 13.0,
+                "realized_terminal_energy_kwh": 747.0,
+                "realized_protected_floor_shortfall_kwh": 0.0,
+                "realized_route_protected_floor_feasible": True,
                 "q50_energy_prediction_error_kwh": -11.0,
                 "actual_used_by_optimizer": False,
                 "actual_opened_post_decision_only": True,
@@ -170,6 +173,8 @@ def test_prediction_actual_storage_evidence_is_arithmetically_verified() -> None
         ],
         "mobility_q50_eta_prediction_error_seconds_started_routes": 50.0,
         "mobility_q50_energy_prediction_error_kwh_started_routes": -11.0,
+        "mobility_realized_protected_floor_shortfall_kwh_started_routes": 0.0,
+        "mobility_realized_protected_floor_violation_route_count": 0,
         "migration_prediction_actual_event_count": 1,
         "migration_prediction_actual_events": [
             {
