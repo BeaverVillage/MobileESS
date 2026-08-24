@@ -84,6 +84,7 @@ class Stage25fSumoExecutionAuthority:
             or payload.get("post_decision_only") is not True
             or payload.get("travel_time_column") != "final_tt_sec"
             or payload.get("issue_zero_timestamp") != "2025-01-01T00:00:00"
+            or payload.get("maximum_supported_route_eta_seconds") != 16200
         ):
             raise MobilityExecutionContractError("SUMO execution authority is invalid")
 
@@ -244,4 +245,10 @@ class Stage25fSumoExecutionAuthority:
             source_day_sha256=day_sha,
         )
         realized.validate()
+        if realized.eta_seconds > 16200.0:
+            raise MobilityExecutionContractError(
+                "SUMO realization exceeds frozen H54 execution support: "
+                f"issue={issue} od_index={key[0]} rank={key[1]} "
+                f"eta_seconds={realized.eta_seconds:.12g}"
+            )
         return realized

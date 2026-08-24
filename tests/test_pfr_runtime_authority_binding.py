@@ -218,6 +218,59 @@ def test_planning_blocks_route_that_cannot_finish_before_episode_boundary() -> N
     assert state.last_slow_miqp_certificate[
         "episode_boundary_eta_authority"
     ] == "SAFE_ETA"
+    assert state.last_slow_miqp_certificate[
+        "episode_boundary_execution_support_authority"
+    ] == "PREDECLARED_H54_SUMO_EXECUTION_SUPPORT"
+    assert state.last_slow_miqp_certificate[
+        "episode_boundary_execution_support_steps"
+    ] == 54
+
+
+def test_planning_blocks_short_prediction_inside_h54_boundary_embargo() -> None:
+    locations = {
+        "MESS01": "STA09",
+        "MESS02": "IDC12",
+        "MESS03": "IDC01",
+        "MESS04": "STA11",
+    }
+    state = MutableMethodState(
+        issue=235,
+        pre_state_sha256="a" * 64,
+        mess_energy_kwh={mid: 760.0 for mid in MESS_IDS},
+        mess_location=locations,
+    )
+    route = MobilityRouteForecast(
+        source_service_id="IDC01",
+        destination_service_id="STA07",
+        od_index=10,
+        rank=1,
+        q50_eta_seconds=60.0,
+        safe_eta_seconds=120.0,
+        q50_energy_kwh=2.0,
+        safe_energy_kwh=3.0,
+    )
+    frame = CausalExperimentFrame(
+        issue=235,
+        current_price_aud_per_mwh=0.0,
+        horizon_price_median_aud_per_mwh=0.0,
+        q50_background_p_kw=0.0,
+        q50_background_q_kvar=0.0,
+        arrivals=(),
+        exogenous_sha256="b" * 64,
+        mobility_routes=(route,),
+    )
+
+    destinations, _ = _optimize_mess_routes(
+        state,
+        SimpleNamespace(energy_flexibility="MESS", joint_uncertainty=False),
+        frame,
+        53,
+    )
+
+    assert destinations["MESS03"] == "IDC01"
+    assert state.last_slow_miqp_certificate[
+        "episode_boundary_blocked_route_count"
+    ] == 1
 
 
 def test_execution_fails_closed_when_sumo_actual_crosses_episode_boundary() -> None:

@@ -66,6 +66,8 @@ MESS_CHARGE_LIMIT_KW = 550.0
 MESS_NOMINAL_DISCHARGE_KW = 20.0
 MESS_CHARGE_EFFICIENCY = 0.95
 MAXIMUM_REFRESH_STEPS = 6
+MAX_MESS_TRANSIT_STEPS = 54
+MAX_MESS_TRANSIT_SECONDS = MAX_MESS_TRANSIT_STEPS * 300
 PRICE_DEADBAND_FRACTION = 0.05
 MODELED_GPU_CAPACITY_PER_IDC = 256
 EXACT_AC_PROJECTION_MARGIN_PU = 2e-5
@@ -2510,7 +2512,11 @@ def _mobility_energy_profile(
     route.validate()
     eta = route.safe_eta_seconds if safe else route.q50_eta_seconds
     total = route.safe_energy_kwh if safe else route.q50_energy_kwh
-    steps = min(54, max(1, math.ceil(eta / 300.0)))
+    steps = max(1, math.ceil(eta / 300.0))
+    if steps > MAX_MESS_TRANSIT_STEPS:
+        raise RuntimeContractError(
+            "causal planning ETA exceeds the predeclared H54 mobility support"
+        )
     durations = tuple(
         min(300.0, max(0.0, eta - 300.0 * index)) for index in range(steps)
     )
@@ -2610,9 +2616,13 @@ def _optimize_mess_routes(
                 eta = route.safe_eta_seconds if safe else route.q50_eta_seconds
                 energy = route.safe_energy_kwh if safe else route.q50_energy_kwh
                 planned_transit_steps = max(1, math.ceil(eta / 300.0))
-                if planned_transit_steps > 54:
+                if planned_transit_steps > MAX_MESS_TRANSIT_STEPS:
                     continue
-                if planned_transit_steps > evaluation_steps_remaining:
+                # Actual SUMO time is execution-only and therefore cannot be
+                # consulted here.  Reserve the full predeclared H54 execution
+                # support near an independent episode boundary; using only the
+                # predicted ETA caused post-decision boundary crossings.
+                if evaluation_steps_remaining < MAX_MESS_TRANSIT_STEPS:
                     episode_boundary_blocked_route_count += 1
                     continue
                 if state.mess_energy_kwh[mid] - energy < MESS_FLOOR_KWH - 1e-9:
@@ -2717,6 +2727,11 @@ def _optimize_mess_routes(
         "episode_boundary_eta_authority": (
             "SAFE_ETA" if safe else "Q50_ETA"
         ),
+        "episode_boundary_execution_support_authority": (
+            "PREDECLARED_H54_SUMO_EXECUTION_SUPPORT"
+        ),
+        "episode_boundary_execution_support_steps": MAX_MESS_TRANSIT_STEPS,
+        "episode_boundary_execution_support_seconds": MAX_MESS_TRANSIT_SECONDS,
     }
     model.dispose()
     return destinations, ranks
@@ -3422,10 +3437,27 @@ def _start_planned_routes(
         # SUMO travel time be opened for state transition and SOC deduction.
         realization = execution_authority.realize(issue=frame.issue, route=route)
         profile = _realized_mobility_energy_profile(realization)
+        if len(profile) > MAX_MESS_TRANSIT_STEPS:
+            raise RuntimeContractError(
+                "post-decision SUMO mobility realization exceeds the predeclared "
+                "H54 execution support: "
+                f"issue={frame.issue} mess_id={mid} source={source} "
+                f"destination={destination} rank={rank} "
+                f"realized_eta_seconds={realization.eta_seconds:.12g} "
+                f"execution_steps={len(profile)} "
+                f"support_steps={MAX_MESS_TRANSIT_STEPS}"
+            )
         if len(profile) > evaluation_steps_remaining:
             raise RuntimeContractError(
                 "post-decision SUMO mobility realization crosses the independent "
-                "episode boundary"
+                "episode boundary: "
+                f"issue={frame.issue} mess_id={mid} source={source} "
+                f"destination={destination} rank={rank} "
+                f"planning_eta_seconds="
+                f"{(route.safe_eta_seconds if config.joint_uncertainty else route.q50_eta_seconds):.12g} "
+                f"realized_eta_seconds={realization.eta_seconds:.12g} "
+                f"execution_steps={len(profile)} "
+                f"evaluation_steps_remaining={evaluation_steps_remaining}"
             )
         realized_terminal_energy_kwh = state.mess_energy_kwh[mid] - sum(profile)
         if realized_terminal_energy_kwh < MESS_PHYSICAL_MIN_KWH - 1e-9:
@@ -3550,6 +3582,12 @@ def _start_planned_routes(
                 "execution_transit_duration_seconds_discrete": len(profile) * 300,
                 "evaluation_steps_remaining_at_start": (
                     evaluation_steps_remaining
+                ),
+                "episode_boundary_execution_support_authority": (
+                    "PREDECLARED_H54_SUMO_EXECUTION_SUPPORT"
+                ),
+                "episode_boundary_execution_support_steps": (
+                    MAX_MESS_TRANSIT_STEPS
                 ),
                 "episode_boundary_completion_guaranteed": True,
                 "realized_source_authority": realization.source_authority,
