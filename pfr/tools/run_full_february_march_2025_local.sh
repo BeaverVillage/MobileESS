@@ -62,10 +62,12 @@ if ((prepare_only)); then
         read -r period_id start_date days <<<"$row"
         shared="$base/PFR_${period_id}_SHARED_EXOGENOUS_V13_13"
         input_root="$base/PFR_${period_id}_V13_13_DAILY_INPUTS"
+        gate_root="$run_root/preflight/$period_id"
+        mkdir -p "$gate_root"
         "$python_bin" -m pfr.tools.preflight_full_month_2025 \
             --repo "$repo_dir" --period-id "$period_id" \
             --shared-root "$shared" --input-root "$input_root" \
-            --report "$input_root/PREFLIGHT_REPORT.json" \
+            --report "$gate_root/PREFLIGHT_REPORT.json" \
             --allow-unmaterialized || overall=1
     done
     if ((overall == 0)); then
