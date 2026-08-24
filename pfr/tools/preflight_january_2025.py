@@ -543,7 +543,7 @@ def validate_uncertainty(
 def validate_jobs(independent_path: Path, canonical_path: Path) -> Mapping[str, Any]:
     independent = pd.read_parquet(
         independent_path,
-        columns=("job_uid", "arrival_step", "requested_gpu"),
+        columns=("job_uid", "origin_IDC_id", "arrival_step", "requested_gpu"),
     )
     canonical = pd.read_parquet(
         canonical_path,
@@ -564,6 +564,45 @@ def validate_jobs(independent_path: Path, canonical_path: Path) -> Mapping[str, 
         "canonical_job_count": len(canonical),
         "arrival_min": int(arrivals.min()) if len(arrivals) else None,
         "arrival_max": int(arrivals.max()) if len(arrivals) else None,
+    }
+
+
+def validate_workload_scheduler_contract(
+    repo: Path,
+    independent_path: Path,
+) -> Mapping[str, Any]:
+    jobs = pd.read_parquet(
+        independent_path,
+        columns=("origin_IDC_id", "arrival_step", "requested_gpu"),
+    )
+    contract_path = repo / "pfr/contracts/PFR_RUNTIME_CONTRACT.json"
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    burst_gpu = (
+        jobs.groupby(["arrival_step", "origin_IDC_id"])["requested_gpu"].sum()
+        if not jobs.empty
+        else pd.Series(dtype=float)
+    )
+    maximum_job_gpu = (
+        int(jobs["requested_gpu"].max()) if not jobs.empty else 0
+    )
+    maximum_burst_gpu = int(burst_gpu.max()) if len(burst_gpu) else 0
+    queue_required_groups = int((burst_gpu > 256).sum())
+    scheduler = str(contract.get("common_gpu_gang_scheduler", ""))
+    fairness = str(contract.get("workload_service_fairness_invariant", ""))
+    passed = bool(
+        contract.get("schema_version") == "K9H7_RESULT_V2.runtime_contract.v1"
+        and "work-conserving" in scheduler
+        and "complete gang" in scheduler
+        and "QUEUED" in fairness
+        and maximum_job_gpu <= 256
+    )
+    return {
+        "pass": passed,
+        "policy": "COMMON_WORK_CONSERVING_LEAST_START_SLACK_EDF_WHOLE_GANG",
+        "maximum_single_job_gpu": maximum_job_gpu,
+        "maximum_same_issue_idc_arrival_gpu": maximum_burst_gpu,
+        "arrival_groups_requiring_capacity_queue": queue_required_groups,
+        "capacity_queue_required_by_cohort": queue_required_groups > 0,
     }
 
 
@@ -697,6 +736,9 @@ def main() -> None:
                     args.factorized_uncertainty, args.workload_uncertainty
                 ),
                 "jobs": validate_jobs(args.independent_jobs, args.canonical_jobs),
+                "workload_scheduler": validate_workload_scheduler_contract(
+                    args.repo, args.independent_jobs
+                ),
             }
         )
         route = json.loads(args.route_catalog.read_text(encoding="utf-8"))

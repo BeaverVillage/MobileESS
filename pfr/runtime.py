@@ -3657,7 +3657,7 @@ class PfrRuntimeRunner:
             safety_replan = False
 
             def escalate_for_safety() -> EscalatedCandidate:
-                nonlocal accepted_fast_state, accepted_limits, active_optimization, fast, safety_replan, migration_started_events, prestart_placement_events
+                nonlocal accepted_fast_state, accepted_limits, active_optimization, fast, safety_replan, migration_started_events, prestart_placement_events, workload_schedule
                 state.active_plan = _build_slow_plan(
                     state,
                     config,
@@ -3676,6 +3676,23 @@ class PfrRuntimeRunner:
                 migration_started_events += _start_planned_job_migrations(
                     state, config, self.migration_authority
                 )
+                escalated_schedule = _schedule_capacity_feasible_queued_jobs(
+                    state, config, frame
+                )
+                workload_schedule = {
+                    **escalated_schedule,
+                    "started_jobs": (
+                        workload_schedule["started_jobs"]
+                        + escalated_schedule["started_jobs"]
+                    ),
+                    "started_gpu_by_site": {
+                        site: (
+                            workload_schedule["started_gpu_by_site"][site]
+                            + escalated_schedule["started_gpu_by_site"][site]
+                        )
+                        for site in IDCS
+                    },
+                }
                 safety_replan = True
                 accepted_fast_state = FastLayerState(
                     issue=frame.issue,

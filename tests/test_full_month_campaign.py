@@ -1,8 +1,13 @@
 import json
 from pathlib import Path
 
+import pandas as pd
+
 from pfr.tools.run_frozen_rep_week_daily_campaign import payload
-from pfr.tools.preflight_january_2025 import validate_method_contracts
+from pfr.tools.preflight_january_2025 import (
+    validate_method_contracts,
+    validate_workload_scheduler_contract,
+)
 
 
 CONTRACT = (
@@ -107,3 +112,26 @@ def test_common_b0_b8_contract_is_valid_for_all_month_preflights() -> None:
         ]
         is True
     )
+
+
+def test_preflight_accepts_burst_that_requires_capacity_queue(
+    tmp_path: Path,
+) -> None:
+    jobs_path = tmp_path / "jobs.parquet"
+    pd.DataFrame(
+        {
+            "origin_IDC_id": ["IDC04"] * 300,
+            "arrival_step": [1852] * 300,
+            "requested_gpu": [1] * 300,
+        }
+    ).to_parquet(jobs_path, index=False)
+
+    result = validate_workload_scheduler_contract(
+        Path(__file__).parents[1], jobs_path
+    )
+
+    assert result["pass"] is True
+    assert result["maximum_single_job_gpu"] == 1
+    assert result["maximum_same_issue_idc_arrival_gpu"] == 300
+    assert result["arrival_groups_requiring_capacity_queue"] == 1
+    assert result["capacity_queue_required_by_cohort"] is True
