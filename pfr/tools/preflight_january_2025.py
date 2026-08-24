@@ -565,17 +565,21 @@ def validate_sumo_mobility_execution(
     physics_path = repo / "pfr/contracts/MESS_MOBILITY_PHYSICS_V1.json"
     try:
         route_catalog = json.loads(route_catalog_path.read_text(encoding="utf-8"))
+        contract = json.loads(contract_path.read_text(encoding="utf-8"))
         authority = Stage25fSumoExecutionAuthority(
             contract_path=contract_path,
             mobility_physics=MobilityPhysics.from_contract(physics_path),
             route_rows=route_catalog.get("routes", ()),
         )
+        stored_evidence = contract.get("stored_prediction_actual_evidence", {})
+        evidence_ok = set(stored_evidence) == {"eta", "energy", "aggregation"}
         return {
-            "pass": True,
+            "pass": evidence_ok,
             "authority_id": authority.AUTHORITY_ID,
             "authority_sha256": authority.fingerprint,
             "optimizer_access": False,
             "post_decision_only": True,
+            "prediction_actual_error_materialized": evidence_ok,
         }
     except Exception as exc:
         return {
@@ -583,6 +587,7 @@ def validate_sumo_mobility_execution(
             "error": f"{type(exc).__name__}: {exc}",
             "optimizer_access": False,
             "post_decision_only": True,
+            "prediction_actual_error_materialized": False,
         }
 
 
@@ -665,7 +670,7 @@ def validate_workload_scheduler_contract(
     scheduler = str(contract.get("common_gpu_gang_scheduler", ""))
     fairness = str(contract.get("workload_service_fairness_invariant", ""))
     passed = bool(
-        contract.get("schema_version") == "K9H7_RESULT_V2.runtime_contract.v1"
+        contract.get("schema_version") == "K9H7_RESULT_V2.runtime_contract.v2"
         and "work-conserving" in scheduler
         and "complete gang" in scheduler
         and "QUEUED" in fairness

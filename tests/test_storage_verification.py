@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 from pfr.tools.verify_daily_campaign_storage import (
+    _prediction_actual_evidence_errors,
     inspect_campaign_registry,
     inspect_method,
 )
@@ -126,3 +127,41 @@ def test_campaign_registry_detects_missing_day(tmp_path: Path) -> None:
     assert "campaign daily date axis is incomplete, duplicated, or reordered" in result[
         "errors"
     ]
+
+
+def test_prediction_actual_storage_evidence_is_arithmetically_verified() -> None:
+    marker = {
+        "schema_version": "K9H7_RESULT_V2.issue_commit.v2",
+        "mobility_started_route_count": 1,
+        "mobility_started_events": [
+            {
+                "planned_q50_eta_seconds": 600.0,
+                "sumo_realized_eta_seconds": 650.0,
+                "q50_eta_prediction_error_seconds": 50.0,
+                "planned_mobility_energy_kwh": 24.0,
+                "realized_mobility_energy_route_total_kwh": 13.0,
+                "q50_energy_prediction_error_kwh": -11.0,
+                "actual_used_by_optimizer": False,
+                "actual_opened_post_decision_only": True,
+            }
+        ],
+        "mobility_q50_eta_prediction_error_seconds_started_routes": 50.0,
+        "mobility_q50_energy_prediction_error_kwh_started_routes": -11.0,
+        "migration_prediction_actual_event_count": 1,
+        "migration_prediction_actual_events": [
+            {
+                "predicted_total_downtime_steps": 2,
+                "realized_total_downtime_steps": 2,
+                "total_downtime_error_steps": 0,
+                "total_downtime_error_seconds": 0,
+                "external_observed_wan_telemetry": False,
+            }
+        ],
+        "migration_duration_prediction_error_seconds": 0,
+    }
+    assert _prediction_actual_evidence_errors(marker) == []
+    marker["mobility_started_events"][0]["q50_eta_prediction_error_seconds"] = 0.0
+    assert (
+        "mobility ETA prediction/actual error arithmetic mismatch"
+        in _prediction_actual_evidence_errors(marker)
+    )

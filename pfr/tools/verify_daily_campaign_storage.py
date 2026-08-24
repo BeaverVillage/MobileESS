@@ -44,6 +44,105 @@ def atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:
     temporary.replace(path)
 
 
+def _prediction_actual_evidence_errors(marker: Mapping[str, Any]) -> list[str]:
+    """Validate the v2 mobility/migration audit payload before accepting storage."""
+    if marker.get("schema_version") != "K9H7_RESULT_V2.issue_commit.v2":
+        return []
+    errors: list[str] = []
+    required = {
+        "mobility_started_events",
+        "mobility_started_route_count",
+        "mobility_q50_eta_prediction_error_seconds_started_routes",
+        "mobility_q50_energy_prediction_error_kwh_started_routes",
+        "migration_prediction_actual_events",
+        "migration_prediction_actual_event_count",
+        "migration_duration_prediction_error_seconds",
+    }
+    missing = sorted(required - set(marker))
+    if missing:
+        return [f"prediction/actual evidence fields missing: {missing}"]
+    mobility = marker.get("mobility_started_events")
+    migrations = marker.get("migration_prediction_actual_events")
+    if not isinstance(mobility, list) or not isinstance(migrations, list):
+        return ["prediction/actual event evidence is not a list"]
+    if int(marker["mobility_started_route_count"]) != len(mobility):
+        errors.append("mobility started-route count mismatch")
+    if int(marker["migration_prediction_actual_event_count"]) != len(migrations):
+        errors.append("migration prediction/actual event count mismatch")
+    tolerance = 1e-8
+    for event in mobility:
+        try:
+            eta_error = float(event["sumo_realized_eta_seconds"]) - float(
+                event["planned_q50_eta_seconds"]
+            )
+            energy_error = float(
+                event["realized_mobility_energy_route_total_kwh"]
+            ) - float(event["planned_mobility_energy_kwh"])
+            if abs(eta_error - float(event["q50_eta_prediction_error_seconds"])) > tolerance:
+                errors.append("mobility ETA prediction/actual error arithmetic mismatch")
+            if abs(
+                energy_error - float(event["q50_energy_prediction_error_kwh"])
+            ) > tolerance:
+                errors.append("mobility energy prediction/actual error arithmetic mismatch")
+            if event.get("actual_used_by_optimizer") is not False:
+                errors.append("mobility realized actual leaked to optimizer")
+            if event.get("actual_opened_post_decision_only") is not True:
+                errors.append("mobility realized actual was not post-decision only")
+        except (KeyError, TypeError, ValueError):
+            errors.append("mobility prediction/actual event is incomplete")
+    for event in migrations:
+        try:
+            step_error = int(event["realized_total_downtime_steps"]) - int(
+                event["predicted_total_downtime_steps"]
+            )
+            if step_error != int(event["total_downtime_error_steps"]):
+                errors.append("migration duration error arithmetic mismatch")
+            if int(event["total_downtime_error_seconds"]) != step_error * 300:
+                errors.append("migration duration seconds/steps mismatch")
+            if event.get("external_observed_wan_telemetry") is not False:
+                errors.append("migration telemetry classification is invalid")
+        except (KeyError, TypeError, ValueError):
+            errors.append("migration prediction/actual event is incomplete")
+    try:
+        mobility_eta_error = sum(
+            float(event["q50_eta_prediction_error_seconds"])
+            for event in mobility
+        )
+        mobility_energy_error = sum(
+            float(event["q50_energy_prediction_error_kwh"])
+            for event in mobility
+        )
+        migration_duration_error = sum(
+            int(event["total_downtime_error_seconds"])
+            for event in migrations
+        )
+        if abs(
+            mobility_eta_error
+            - float(
+                marker[
+                    "mobility_q50_eta_prediction_error_seconds_started_routes"
+                ]
+            )
+        ) > tolerance:
+            errors.append("mobility ETA aggregate error mismatch")
+        if abs(
+            mobility_energy_error
+            - float(
+                marker[
+                    "mobility_q50_energy_prediction_error_kwh_started_routes"
+                ]
+            )
+        ) > tolerance:
+            errors.append("mobility energy aggregate error mismatch")
+        if migration_duration_error != int(
+            marker["migration_duration_prediction_error_seconds"]
+        ):
+            errors.append("migration duration aggregate error mismatch")
+    except (KeyError, TypeError, ValueError):
+        errors.append("prediction/actual aggregate evidence is incomplete")
+    return errors
+
+
 def inspect_method(
     method_root: Path,
     method: str,
@@ -70,6 +169,9 @@ def inspect_method(
                 "post_state_sha256"
             ):
                 raise ValueError("state-chain hash missing")
+            evidence_errors = _prediction_actual_evidence_errors(marker)
+            if evidence_errors:
+                raise ValueError("; ".join(evidence_errors))
             markers.append(marker)
         except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
             errors.append(f"{marker_path}: {type(exc).__name__}: {exc}")
@@ -121,6 +223,23 @@ def inspect_method(
                 reader = csv.DictReader(handle)
                 if reader.fieldnames is None or "issue" not in reader.fieldnames:
                     raise ValueError("issue column missing")
+                if any(
+                    row.get("schema_version")
+                    == "K9H7_RESULT_V2.issue_commit.v2"
+                    for row in markers
+                ):
+                    required_csv_fields = {
+                        "mobility_started_events",
+                        "mobility_q50_eta_prediction_error_seconds_started_routes",
+                        "mobility_q50_energy_prediction_error_kwh_started_routes",
+                        "migration_prediction_actual_events",
+                        "migration_duration_prediction_error_seconds",
+                    }
+                    missing_csv = sorted(required_csv_fields - set(reader.fieldnames))
+                    if missing_csv:
+                        raise ValueError(
+                            f"prediction/actual CSV fields missing: {missing_csv}"
+                        )
                 for row in reader:
                     csv_issues.append(int(row["issue"]))
                     if row.get("comparison_method_id") != method:

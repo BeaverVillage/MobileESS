@@ -153,6 +153,15 @@ def run_idc_migration_canary(
         and completed[0]["remaining_work_gpu_hours_before"]
         == completed[0]["remaining_work_gpu_hours_after"]
     )
+    prediction_actual = restart.get("migration_prediction_actual_events", [])
+    prediction_actual_audit = bool(
+        len(prediction_actual) == 1
+        and prediction_actual[0].get("predicted_total_downtime_steps")
+        == prediction_actual[0].get("realized_total_downtime_steps")
+        and prediction_actual[0].get("total_downtime_error_seconds") == 0
+        and prediction_actual[0].get("payload_error_bytes") == 0
+        and prediction_actual[0].get("external_observed_wan_telemetry") is False
+    )
     passed = bool(
         b5_summary["status"] == "PASS"
         and len(started) == 1
@@ -165,6 +174,7 @@ def run_idc_migration_canary(
         and started[0]["source_idc"] != restart_state.get("destination_idc")
         and len(restart["migration_restarts_completed"]) == 1
         and work_conserved
+        and prediction_actual_audit
         and b8_summary["status"] == "PASS"
         and b8_summary["full_replan_count"] == 7
         and b8_precheckpoint_blocked
@@ -188,6 +198,10 @@ def run_idc_migration_canary(
             and started[0]["source_idc"] != restart_state.get("destination_idc")
         ),
         "remaining_compute_work_conserved": work_conserved,
+        "migration_prediction_actual_audit": prediction_actual_audit,
+        "migration_prediction_actual_event": (
+            prediction_actual[0] if len(prediction_actual) == 1 else None
+        ),
         "b8_every_five_minute_full_replans": b8_summary["full_replan_count"],
         "b8_precheckpoint_migration_blocked": b8_precheckpoint_blocked,
         "b8_episode_boundary_migration_blocked": b8_episode_boundary_blocked,

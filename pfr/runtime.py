@@ -304,6 +304,11 @@ class RuntimeJobState:
     migration_payload_remaining_bytes: int = 0
     restart_remaining_steps: int = 0
     migration_work_gpu_hours_at_start: Optional[float] = None
+    migration_start_issue: Optional[int] = None
+    migration_predicted_transfer_steps: Optional[int] = None
+    migration_predicted_restart_steps: Optional[int] = None
+    migration_transfer_complete_issue: Optional[int] = None
+    migration_actual_transfer_steps: Optional[int] = None
     queue_wait_steps: int = 0
 
 
@@ -3073,6 +3078,14 @@ def _start_planned_job_migrations(
         job.migration_destination_idc = destination
         job.migration_payload_remaining_bytes = job.source.migration_payload_bytes
         job.migration_work_gpu_hours_at_start = job.remaining_work_gpu_hours
+        predicted_transfer_steps = authority.transfer_steps(
+            job.source.migration_payload_bytes, source, destination
+        )
+        job.migration_start_issue = state.issue
+        job.migration_predicted_transfer_steps = predicted_transfer_steps
+        job.migration_predicted_restart_steps = authority.restart_steps
+        job.migration_transfer_complete_issue = None
+        job.migration_actual_transfer_steps = None
         job.migration_state = "WAN_TRANSFER_ACTIVE"
         job.checkpoint_state = "CONSUMED_BY_MIGRATION"
         state.wan_active_transfers += 1
@@ -3086,11 +3099,14 @@ def _start_planned_job_migrations(
                 "remaining_work_gpu_hours": job.remaining_work_gpu_hours,
                 "checkpoint_steps_at_start": job.steps_since_checkpoint,
                 "checkpoint_interval_steps": authority.checkpoint_interval_steps,
+                "predicted_transfer_steps": predicted_transfer_steps,
+                "predicted_restart_steps": authority.restart_steps,
                 "required_transfer_restart_steps": (
-                    authority.transfer_steps(
-                        job.source.migration_payload_bytes, source, destination
-                    )
-                    + authority.restart_steps
+                    predicted_transfer_steps + authority.restart_steps
+                ),
+                "predicted_total_downtime_seconds": (
+                    (predicted_transfer_steps + authority.restart_steps)
+                    * authority.step_seconds
                 ),
             }
         )
@@ -3113,6 +3129,7 @@ def _advance_job_migration_state(
             "bytes_transferred": 0,
             "completed_migrations": [],
             "completed_restarts": [],
+            "completed_realizations": [],
         }
     if authority is None:
         raise RuntimeContractError("active migration state lacks authority")
@@ -3120,6 +3137,7 @@ def _advance_job_migration_state(
         raise RuntimeContractError("active migrations exceed WAN authority")
     transferred = 0
     completed_migrations = []
+    completed_realizations = []
     for job in sorted(active, key=lambda item: item.source.job_uid):
         source = job.migration_source_idc
         destination = job.migration_destination_idc
@@ -3140,14 +3158,25 @@ def _advance_job_migration_state(
         job.migration_payload_remaining_bytes -= sent
         transferred += sent
         if job.migration_payload_remaining_bytes == 0:
+            if (
+                job.migration_start_issue is None
+                or job.migration_predicted_transfer_steps is None
+                or job.migration_predicted_restart_steps is None
+            ):
+                raise RuntimeContractError(
+                    "active migration lacks prediction/realization audit state"
+                )
+            actual_transfer_steps = state.issue - job.migration_start_issue + 1
+            if actual_transfer_steps <= 0:
+                raise RuntimeContractError("migration transfer duration is invalid")
+            job.migration_transfer_complete_issue = state.issue
+            job.migration_actual_transfer_steps = actual_transfer_steps
             job.destination_idc = destination
             job.logical_rack_id = f"{destination}:PFR-H100-LOGICAL-POOL"
             job.gang_membership = tuple(
                 f"{destination}:PFR-GPU:{job.source.job_uid}:{index}"
                 for index in range(job.source.requested_gpu)
             )
-            job.migration_source_idc = None
-            job.migration_destination_idc = None
             job.steps_since_checkpoint = 0
             if authority.restart_steps:
                 job.lifecycle = "RESTARTING"
@@ -3167,8 +3196,72 @@ def _advance_job_migration_state(
                     ),
                     "remaining_work_gpu_hours_after": job.remaining_work_gpu_hours,
                     "work_conserved": True,
+                    "predicted_transfer_steps": (
+                        job.migration_predicted_transfer_steps
+                    ),
+                    "realized_transfer_steps": actual_transfer_steps,
+                    "transfer_duration_error_steps": (
+                        actual_transfer_steps
+                        - job.migration_predicted_transfer_steps
+                    ),
+                    "predicted_transfer_seconds": (
+                        job.migration_predicted_transfer_steps
+                        * authority.step_seconds
+                    ),
+                    "realized_transfer_seconds": (
+                        actual_transfer_steps * authority.step_seconds
+                    ),
+                    "transfer_duration_error_seconds": (
+                        (actual_transfer_steps - job.migration_predicted_transfer_steps)
+                        * authority.step_seconds
+                    ),
                 }
             )
+            if authority.restart_steps == 0:
+                predicted_total_steps = job.migration_predicted_transfer_steps
+                actual_total_steps = actual_transfer_steps
+                completed_realizations.append(
+                    {
+                        "job_uid": job.source.job_uid,
+                        "source_idc": source,
+                        "destination_idc": destination,
+                        "predicted_payload_bytes": job.source.migration_payload_bytes,
+                        "realized_payload_bytes": job.source.migration_payload_bytes,
+                        "payload_error_bytes": 0,
+                        "predicted_transfer_steps": (
+                            job.migration_predicted_transfer_steps
+                        ),
+                        "predicted_restart_steps": 0,
+                        "predicted_total_downtime_steps": predicted_total_steps,
+                        "realized_transfer_steps": actual_transfer_steps,
+                        "realized_restart_steps": 0,
+                        "realized_total_downtime_steps": actual_total_steps,
+                        "total_downtime_error_steps": (
+                            actual_total_steps - predicted_total_steps
+                        ),
+                        "predicted_total_downtime_seconds": (
+                            predicted_total_steps * authority.step_seconds
+                        ),
+                        "realized_total_downtime_seconds": (
+                            actual_total_steps * authority.step_seconds
+                        ),
+                        "total_downtime_error_seconds": (
+                            (actual_total_steps - predicted_total_steps)
+                            * authority.step_seconds
+                        ),
+                        "prediction_authority": authority.authority_id,
+                        "execution_authority": authority.authority_id,
+                        "external_observed_wan_telemetry": False,
+                    }
+                )
+                job.migration_start_issue = None
+                job.migration_predicted_transfer_steps = None
+                job.migration_predicted_restart_steps = None
+                job.migration_transfer_complete_issue = None
+                job.migration_actual_transfer_steps = None
+                job.migration_source_idc = None
+                job.migration_destination_idc = None
+                job.migration_work_gpu_hours_at_start = None
     state.wan_transferred_bytes_cumulative += transferred
     completed_restarts = []
     for uid in sorted(restarting_before):
@@ -3188,8 +3281,67 @@ def _advance_job_migration_state(
             job.lifecycle = "RUNNING"
             job.migration_state = "COMPLETED"
             job.checkpoint_state = "INTERVAL_PENDING"
+            if (
+                job.migration_start_issue is None
+                or job.migration_predicted_transfer_steps is None
+                or job.migration_predicted_restart_steps is None
+                or job.migration_transfer_complete_issue is None
+                or job.migration_actual_transfer_steps is None
+            ):
+                raise RuntimeContractError(
+                    "migration restart lacks prediction/realization audit state"
+                )
+            actual_restart_steps = state.issue - job.migration_transfer_complete_issue
+            predicted_total_steps = (
+                job.migration_predicted_transfer_steps
+                + job.migration_predicted_restart_steps
+            )
+            actual_total_steps = state.issue - job.migration_start_issue + 1
             completed_restarts.append(uid)
+            completed_realizations.append(
+                {
+                    "job_uid": uid,
+                    "source_idc": job.migration_source_idc,
+                    "destination_idc": job.destination_idc,
+                    "predicted_payload_bytes": job.source.migration_payload_bytes,
+                    "realized_payload_bytes": job.source.migration_payload_bytes,
+                    "payload_error_bytes": 0,
+                    "predicted_transfer_steps": (
+                        job.migration_predicted_transfer_steps
+                    ),
+                    "predicted_restart_steps": (
+                        job.migration_predicted_restart_steps
+                    ),
+                    "predicted_total_downtime_steps": predicted_total_steps,
+                    "realized_transfer_steps": job.migration_actual_transfer_steps,
+                    "realized_restart_steps": actual_restart_steps,
+                    "realized_total_downtime_steps": actual_total_steps,
+                    "total_downtime_error_steps": (
+                        actual_total_steps - predicted_total_steps
+                    ),
+                    "predicted_total_downtime_seconds": (
+                        predicted_total_steps * authority.step_seconds
+                    ),
+                    "realized_total_downtime_seconds": (
+                        actual_total_steps * authority.step_seconds
+                    ),
+                    "total_downtime_error_seconds": (
+                        (actual_total_steps - predicted_total_steps)
+                        * authority.step_seconds
+                    ),
+                    "prediction_authority": authority.authority_id,
+                    "execution_authority": authority.authority_id,
+                    "external_observed_wan_telemetry": False,
+                }
+            )
             job.migration_work_gpu_hours_at_start = None
+            job.migration_source_idc = None
+            job.migration_destination_idc = None
+            job.migration_start_issue = None
+            job.migration_predicted_transfer_steps = None
+            job.migration_predicted_restart_steps = None
+            job.migration_transfer_complete_issue = None
+            job.migration_actual_transfer_steps = None
     state.wan_active_transfers = sum(
         job.lifecycle == "MIGRATING" for job in state.jobs.values()
     )
@@ -3197,6 +3349,7 @@ def _advance_job_migration_state(
         "bytes_transferred": transferred,
         "completed_migrations": completed_migrations,
         "completed_restarts": completed_restarts,
+        "completed_realizations": completed_realizations,
     }
 
 
@@ -3264,6 +3417,76 @@ def _start_planned_routes(
                 "realized_mobility_energy_route_total_kwh": (
                     realization.energy_kwh
                 ),
+                "q50_eta_prediction_error_seconds": (
+                    realization.eta_seconds - route.q50_eta_seconds
+                ),
+                "q50_eta_absolute_error_seconds": abs(
+                    realization.eta_seconds - route.q50_eta_seconds
+                ),
+                "q50_eta_absolute_percentage_error": (
+                    abs(realization.eta_seconds - route.q50_eta_seconds)
+                    / route.q50_eta_seconds
+                    if route.q50_eta_seconds > 0.0
+                    else None
+                ),
+                "planning_eta_prediction_error_seconds": (
+                    realization.eta_seconds
+                    - (
+                        route.safe_eta_seconds
+                        if config.joint_uncertainty
+                        else route.q50_eta_seconds
+                    )
+                ),
+                "planning_eta_absolute_error_seconds": abs(
+                    realization.eta_seconds
+                    - (
+                        route.safe_eta_seconds
+                        if config.joint_uncertainty
+                        else route.q50_eta_seconds
+                    )
+                ),
+                "safe_eta_reserve_margin_seconds": (
+                    route.safe_eta_seconds - realization.eta_seconds
+                ),
+                "safe_eta_realization_covered": (
+                    realization.eta_seconds <= route.safe_eta_seconds
+                ),
+                "q50_energy_prediction_error_kwh": (
+                    realization.energy_kwh - route.q50_energy_kwh
+                ),
+                "q50_energy_absolute_error_kwh": abs(
+                    realization.energy_kwh - route.q50_energy_kwh
+                ),
+                "q50_energy_absolute_percentage_error": (
+                    abs(realization.energy_kwh - route.q50_energy_kwh)
+                    / route.q50_energy_kwh
+                    if route.q50_energy_kwh > 0.0
+                    else None
+                ),
+                "planning_energy_prediction_error_kwh": (
+                    realization.energy_kwh
+                    - (
+                        route.safe_energy_kwh
+                        if config.joint_uncertainty
+                        else route.q50_energy_kwh
+                    )
+                ),
+                "planning_energy_absolute_error_kwh": abs(
+                    realization.energy_kwh
+                    - (
+                        route.safe_energy_kwh
+                        if config.joint_uncertainty
+                        else route.q50_energy_kwh
+                    )
+                ),
+                "safe_energy_reserve_margin_kwh": (
+                    route.safe_energy_kwh - realization.energy_kwh
+                ),
+                "safe_energy_realization_covered": (
+                    realization.energy_kwh <= route.safe_energy_kwh
+                ),
+                "execution_transit_steps": len(profile),
+                "execution_transit_duration_seconds_discrete": len(profile) * 300,
                 "realized_source_authority": realization.source_authority,
                 "realized_source_day_sha256": realization.source_day_sha256,
                 "actual_opened_post_decision_only": True,
@@ -3525,6 +3748,19 @@ def _post_payload(state: MutableMethodState, method_id: str) -> Mapping[str, Any
                 "restart_remaining_steps": job.restart_remaining_steps,
                 "migration_work_gpu_hours_at_start": (
                     job.migration_work_gpu_hours_at_start
+                ),
+                "migration_start_issue": job.migration_start_issue,
+                "migration_predicted_transfer_steps": (
+                    job.migration_predicted_transfer_steps
+                ),
+                "migration_predicted_restart_steps": (
+                    job.migration_predicted_restart_steps
+                ),
+                "migration_transfer_complete_issue": (
+                    job.migration_transfer_complete_issue
+                ),
+                "migration_actual_transfer_steps": (
+                    job.migration_actual_transfer_steps
                 ),
                 "queue_wait_steps": job.queue_wait_steps,
             }
@@ -3986,7 +4222,7 @@ class PfrRuntimeRunner:
                 for job in state.jobs.values()
             )
             record = {
-                "schema_version": "K9H7_RESULT_V2.issue_commit.v1",
+                "schema_version": "K9H7_RESULT_V2.issue_commit.v2",
                 "result_uid": identity.result_uid,
                 "scientific_framework_id": identity.scientific_framework_id,
                 "comparison_method_id": config.comparison_method_id.value,
@@ -4063,6 +4299,28 @@ class PfrRuntimeRunner:
                 "prestart_spatial_placements": list(prestart_placement_events),
                 "migration_completed": migration_progress["completed_migrations"],
                 "migration_restarts_completed": migration_progress["completed_restarts"],
+                "migration_prediction_actual_events": migration_progress[
+                    "completed_realizations"
+                ],
+                "migration_prediction_actual_event_count": len(
+                    migration_progress["completed_realizations"]
+                ),
+                "migration_duration_prediction_error_steps": sum(
+                    int(event["total_downtime_error_steps"])
+                    for event in migration_progress["completed_realizations"]
+                ),
+                "migration_duration_absolute_error_steps": sum(
+                    abs(int(event["total_downtime_error_steps"]))
+                    for event in migration_progress["completed_realizations"]
+                ),
+                "migration_duration_prediction_error_seconds": sum(
+                    int(event["total_downtime_error_seconds"])
+                    for event in migration_progress["completed_realizations"]
+                ),
+                "migration_duration_absolute_error_seconds": sum(
+                    abs(int(event["total_downtime_error_seconds"]))
+                    for event in migration_progress["completed_realizations"]
+                ),
                 "migration_job_state_evidence": {
                     uid: {
                         "lifecycle": job.lifecycle,
@@ -4122,6 +4380,51 @@ class PfrRuntimeRunner:
                 ),
                 "realized_mobility_energy_kwh": realized_mobility_energy_kwh,
                 "mobility_energy_kwh": realized_mobility_energy_kwh,
+                "mobility_realized_route_total_energy_kwh_started_routes": sum(
+                    float(event["realized_mobility_energy_route_total_kwh"])
+                    for event in mobility_started_events
+                ),
+                "mobility_q50_eta_prediction_error_seconds_started_routes": sum(
+                    float(event["q50_eta_prediction_error_seconds"])
+                    for event in mobility_started_events
+                ),
+                "mobility_q50_eta_absolute_error_seconds_started_routes": sum(
+                    float(event["q50_eta_absolute_error_seconds"])
+                    for event in mobility_started_events
+                ),
+                "mobility_planning_eta_prediction_error_seconds_started_routes": sum(
+                    float(event["planning_eta_prediction_error_seconds"])
+                    for event in mobility_started_events
+                ),
+                "mobility_planning_eta_absolute_error_seconds_started_routes": sum(
+                    float(event["planning_eta_absolute_error_seconds"])
+                    for event in mobility_started_events
+                ),
+                "mobility_q50_energy_prediction_error_kwh_started_routes": sum(
+                    float(event["q50_energy_prediction_error_kwh"])
+                    for event in mobility_started_events
+                ),
+                "mobility_q50_energy_absolute_error_kwh_started_routes": sum(
+                    float(event["q50_energy_absolute_error_kwh"])
+                    for event in mobility_started_events
+                ),
+                "mobility_planning_energy_prediction_error_kwh_started_routes": sum(
+                    float(event["planning_energy_prediction_error_kwh"])
+                    for event in mobility_started_events
+                ),
+                "mobility_planning_energy_absolute_error_kwh_started_routes": sum(
+                    float(event["planning_energy_absolute_error_kwh"])
+                    for event in mobility_started_events
+                ),
+                "mobility_safe_eta_covered_started_routes": sum(
+                    bool(event["safe_eta_realization_covered"])
+                    for event in mobility_started_events
+                ),
+                "mobility_safe_energy_covered_started_routes": sum(
+                    bool(event["safe_energy_realization_covered"])
+                    for event in mobility_started_events
+                ),
+                "mobility_started_route_count": len(mobility_started_events),
                 "mobility_started_events": list(mobility_started_events),
                 "mobility_execution_actual_used_by_optimizer": False,
                 "mobility_execution_actual_opened_post_decision_only": bool(
@@ -4209,7 +4512,7 @@ class PfrRuntimeRunner:
             atomic_write_json(issue_root / "COMMIT_MARKER.json", record)
             records.append(record)
         summary = {
-            "schema_version": "K9H7_RESULT_V2.method_run.v1",
+            "schema_version": "K9H7_RESULT_V2.method_run.v2",
             "status": "PASS" if failure is None and len(records) == len(frames) else "FAIL_CLOSED",
             "comparison_method_id": config.comparison_method_id.value,
             "representative_week_id": representative_week_id,
@@ -4247,9 +4550,116 @@ class PfrRuntimeRunner:
             ),
             "migration_count": state.migration_count_cumulative,
             "wan_transferred_bytes": state.wan_transferred_bytes_cumulative,
+            "migration_prediction_actual_event_count": sum(
+                int(row["migration_prediction_actual_event_count"])
+                for row in records
+            ),
+            "migration_duration_mean_absolute_error_steps": (
+                sum(
+                    float(row["migration_duration_absolute_error_steps"])
+                    for row in records
+                )
+                / sum(
+                    int(row["migration_prediction_actual_event_count"])
+                    for row in records
+                )
+                if sum(
+                    int(row["migration_prediction_actual_event_count"])
+                    for row in records
+                )
+                else None
+            ),
+            "migration_duration_mean_absolute_error_seconds": (
+                sum(
+                    float(row["migration_duration_absolute_error_seconds"])
+                    for row in records
+                )
+                / sum(
+                    int(row["migration_prediction_actual_event_count"])
+                    for row in records
+                )
+                if sum(
+                    int(row["migration_prediction_actual_event_count"])
+                    for row in records
+                )
+                else None
+            ),
             "migration_authority_sha256": (
                 self.migration_authority.fingerprint
                 if self.migration_authority is not None
+                else None
+            ),
+            "mobility_started_route_count": sum(
+                int(row["mobility_started_route_count"]) for row in records
+            ),
+            "mobility_q50_eta_mean_absolute_error_seconds": (
+                sum(
+                    float(
+                        row[
+                            "mobility_q50_eta_absolute_error_seconds_started_routes"
+                        ]
+                    )
+                    for row in records
+                )
+                / sum(int(row["mobility_started_route_count"]) for row in records)
+                if sum(int(row["mobility_started_route_count"]) for row in records)
+                else None
+            ),
+            "mobility_q50_energy_mean_absolute_error_kwh": (
+                sum(
+                    float(
+                        row[
+                            "mobility_q50_energy_absolute_error_kwh_started_routes"
+                        ]
+                    )
+                    for row in records
+                )
+                / sum(int(row["mobility_started_route_count"]) for row in records)
+                if sum(int(row["mobility_started_route_count"]) for row in records)
+                else None
+            ),
+            "mobility_planning_eta_mean_absolute_error_seconds": (
+                sum(
+                    float(
+                        row[
+                            "mobility_planning_eta_absolute_error_seconds_started_routes"
+                        ]
+                    )
+                    for row in records
+                )
+                / sum(int(row["mobility_started_route_count"]) for row in records)
+                if sum(int(row["mobility_started_route_count"]) for row in records)
+                else None
+            ),
+            "mobility_planning_energy_mean_absolute_error_kwh": (
+                sum(
+                    float(
+                        row[
+                            "mobility_planning_energy_absolute_error_kwh_started_routes"
+                        ]
+                    )
+                    for row in records
+                )
+                / sum(int(row["mobility_started_route_count"]) for row in records)
+                if sum(int(row["mobility_started_route_count"]) for row in records)
+                else None
+            ),
+            "mobility_safe_eta_empirical_coverage": (
+                sum(
+                    int(row["mobility_safe_eta_covered_started_routes"])
+                    for row in records
+                )
+                / sum(int(row["mobility_started_route_count"]) for row in records)
+                if sum(int(row["mobility_started_route_count"]) for row in records)
+                else None
+            ),
+            "mobility_safe_energy_empirical_coverage": (
+                sum(
+                    int(row["mobility_safe_energy_covered_started_routes"])
+                    for row in records
+                )
+                / sum(int(row["mobility_started_route_count"]) for row in records)
+                if sum(int(row["mobility_started_route_count"]) for row in records)
                 else None
             ),
             "deadline_misses": sum(row["deadline_misses"] for row in records[-1:]),
@@ -4343,7 +4753,7 @@ class PfrRuntimeRunner:
                 }
                 atomic_write_json(method_root / "FAILURE.json", failure)
                 summary = {
-                    "schema_version": "K9H7_RESULT_V2.method_run.v1",
+                    "schema_version": "K9H7_RESULT_V2.method_run.v2",
                     "status": "FAIL_CLOSED",
                     "comparison_method_id": config.comparison_method_id.value,
                     "representative_week_id": representative_week_id,

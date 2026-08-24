@@ -14,7 +14,8 @@
     "travel_time": "STAGE25F_2025_SUMO_FINAL_OPERATIONAL_TT_EXECUTION_ONLY_V1",
     "energy": "MESS_MOBILITY_PHYSICS_V1_AT_SUMO_REALIZED_TRAVEL_TIME",
     "optimizer_access": false,
-    "post_decision_only": true
+    "post_decision_only": true,
+    "prediction_actual_error_materialized": true
   },
   "gates": {
     "causal_eta_physics_propagation": "PASS",
@@ -22,7 +23,9 @@
     "distribution_shift_stress": "PASS",
     "workload_uncertainty_binding": "PASS",
     "grid_uncertainty_binding": "PASS",
-    "future_actual_leakage": "ABSENT"
+    "future_actual_leakage": "ABSENT",
+    "mobility_prediction_actual_storage": "PASS",
+    "migration_prediction_actual_storage": "PASS_RUNTIME_AUDIT"
   },
   "historical_joint_mobility_result": "LEGACY_NOT_USED_BY_RUNTIME",
   "current_contract": "V13_2_CAUSAL_ETA_PHYSICS_X_WORKLOAD_X_GRID",

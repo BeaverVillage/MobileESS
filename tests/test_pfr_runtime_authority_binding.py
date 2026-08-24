@@ -135,4 +135,15 @@ def test_route_commit_uses_post_decision_sumo_eta_and_energy() -> None:
     assert events[0]["planning_mobility_energy_kwh_used"] == 36.0
     assert events[0]["sumo_realized_eta_seconds"] == 650.0
     assert events[0]["realized_mobility_energy_route_total_kwh"] == 13.0
+    assert events[0]["q50_eta_prediction_error_seconds"] == 50.0
+    assert events[0]["q50_eta_absolute_error_seconds"] == 50.0
+    assert events[0]["planning_eta_prediction_error_seconds"] == -250.0
+    assert events[0]["safe_eta_reserve_margin_seconds"] == 250.0
+    assert events[0]["safe_eta_realization_covered"] is True
+    assert events[0]["q50_energy_prediction_error_kwh"] == -11.0
+    assert events[0]["q50_energy_absolute_error_kwh"] == 11.0
+    assert events[0]["planning_energy_prediction_error_kwh"] == -23.0
+    assert events[0]["safe_energy_reserve_margin_kwh"] == 23.0
+    assert events[0]["safe_energy_realization_covered"] is True
+    assert events[0]["execution_transit_steps"] == 3
     assert events[0]["actual_used_by_optimizer"] is False

@@ -1494,13 +1494,17 @@ def main() -> None:
         raise RuntimeError("predictive native dwell-guard authority is invalid")
     if (
         runtime_contract.get("schema_version")
-        != "K9H7_RESULT_V2.runtime_contract.v1"
+        != "K9H7_RESULT_V2.runtime_contract.v2"
         or "admitted on its causal arrival issue"
         not in runtime_contract.get("workload_admission_authority", "")
         or "work-conserving"
         not in runtime_contract.get("common_gpu_gang_scheduler", "")
         or "fails closed"
         not in runtime_contract.get("non_temporal_compute_authority", "")
+        or "Every started MESS route"
+        not in runtime_contract.get("mobility_prediction_actual_audit", "")
+        or "Every completed checkpoint migration"
+        not in runtime_contract.get("migration_prediction_actual_audit", "")
     ):
         raise RuntimeError("workload admission runtime authority is invalid")
     frozen_control_authorized = bool(
@@ -1662,6 +1666,11 @@ def main() -> None:
         "mobility_execution_time_authority": mobility_execution.AUTHORITY_ID,
         "mobility_execution_post_decision_only": True,
         "mobility_execution_actual_used_by_optimizer": False,
+        "mobility_prediction_actual_error_materialized": True,
+        "migration_prediction_actual_error_materialized": True,
+        "migration_realization_classification": (
+            "DETERMINISTIC_FROZEN_ABILENE_SCENARIO_NOT_EXTERNAL_WAN_TELEMETRY"
+        ),
         "legacy_mobility_energy_fields_ignored": [
             "energy_quantiles_kWh",
             "safe_energy_kWh",
@@ -1826,6 +1835,11 @@ def main() -> None:
         "mobility_execution_time_authority": mobility_execution.AUTHORITY_ID,
         "mobility_execution_post_decision_only": True,
         "mobility_execution_actual_used_by_optimizer": False,
+        "mobility_prediction_actual_error_materialized": True,
+        "migration_prediction_actual_error_materialized": True,
+        "migration_realization_classification": (
+            "DETERMINISTIC_FROZEN_ABILENE_SCENARIO_NOT_EXTERNAL_WAN_TELEMETRY"
+        ),
         "migration_authority_path": str(migration_authority_path),
         "migration_authority_sha256": migration_authority.fingerprint,
         "migration_contract_sha256": migration_authority.contract_fingerprint,

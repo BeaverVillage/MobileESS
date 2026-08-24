@@ -568,6 +568,20 @@ class PfrRuntimeTests(unittest.TestCase):
         self.assertEqual(initial_marker["wan_bytes_transferred_step"], 0)
         self.assertEqual(len(restart_marker["migration_restarts_completed"]), 1)
         self.assertEqual(
+            restart_marker["migration_prediction_actual_event_count"], 1
+        )
+        migration_audit = restart_marker["migration_prediction_actual_events"][0]
+        self.assertEqual(migration_audit["predicted_total_downtime_steps"], 2)
+        self.assertEqual(migration_audit["realized_total_downtime_steps"], 2)
+        self.assertEqual(migration_audit["total_downtime_error_steps"], 0)
+        self.assertEqual(migration_audit["total_downtime_error_seconds"], 0)
+        self.assertEqual(migration_audit["payload_error_bytes"], 0)
+        self.assertFalse(migration_audit["external_observed_wan_telemetry"])
+        self.assertEqual(summary["migration_prediction_actual_event_count"], 1)
+        self.assertEqual(
+            summary["migration_duration_mean_absolute_error_seconds"], 0.0
+        )
+        self.assertEqual(
             marker["migration_payload_authority"],
             self.migration_authority.fingerprint,
         )

@@ -84,6 +84,13 @@ def evaluate(run_root: Path, contract: Mapping[str, Any]) -> Mapping[str, Any]:
                 and int(row["wan_bytes_transferred_step"]) == 0
                 for row in method_rows
             )
+        prediction_actual_storage_compliant = all(
+            row.get("schema_version") == "K9H7_RESULT_V2.issue_commit.v2"
+            and isinstance(row.get("mobility_started_events"), list)
+            and isinstance(row.get("migration_prediction_actual_events"), list)
+            and row.get("mobility_execution_actual_used_by_optimizer") is False
+            for row in method_rows
+        )
         technical[method_id] = {
             "complete": len(method_rows) == expected and materialized_count(run_root, method_id) == expected,
             "contiguous_issue_axis": axis == list(range(start, start + expected)),
@@ -93,6 +100,9 @@ def evaluate(run_root: Path, contract: Mapping[str, Any]) -> Mapping[str, Any]:
             "final_ac_violation_count": sum(ac_violations(row) for row in method_rows),
             "future_actual_used": any(bool(row["future_actual_used"]) for row in method_rows),
             "checkpoint_migration_policy_compliant": migration_policy_compliant,
+            "prediction_actual_storage_compliant": (
+                prediction_actual_storage_compliant
+            ),
             "migration_count": (
                 int(method_rows[-1]["migration_count_cumulative"])
                 if method_rows else 0
@@ -114,6 +124,7 @@ def evaluate(run_root: Path, contract: Mapping[str, Any]) -> Mapping[str, Any]:
             and technical[method_id]["final_ac_violation_count"] == 0
             and not technical[method_id]["future_actual_used"]
             and technical[method_id]["checkpoint_migration_policy_compliant"]
+            and technical[method_id]["prediction_actual_storage_compliant"]
         ) else "FAIL"
 
     b5, b7 = technical["B5"], technical["B7"]
