@@ -3,12 +3,18 @@
 from __future__ import annotations
 
 import json
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any, Mapping
 
 from .methods import ComparisonMethod, ExperimentAuthority, MethodFactory
 from .migration import MigrationAuthority
 from .power import H100UtilizationPowerCurve
+from .risk_calibration import (
+    AUTHORITY_ID,
+    FrozenRiskCalibration,
+    RISK_FAMILY_SCALES,
+)
 from .runtime import (
     CausalExperimentFrame,
     OperationalTrainingJob,
@@ -103,6 +109,22 @@ def run_idc_migration_canary(
         power_curve=curve,
         physical_backend=_CanaryPhysical(),
         migration_authority=authority,
+        risk_calibration_authority=FrozenRiskCalibration(
+            authority_id=AUTHORITY_ID,
+            alpha=0.05,
+            source_method="B6",
+            source_period="2025-01",
+            calibration_dates=tuple(
+                (date(2025, 1, 1) + timedelta(days=offset)).isoformat()
+                for offset in range(31)
+            ),
+            finite_sample_rank=31,
+            normalized_joint_quantile=0.0,
+            predeclared_scales=dict(RISK_FAMILY_SCALES),
+            calibrated_increments={family: 0.0 for family in RISK_FAMILY_SCALES},
+            source_audit_sha256="d" * 64,
+            artifact_sha256="e" * 64,
+        ),
     )
     b5 = factory.create(ComparisonMethod.B5)
     b5_root = output / "b5"

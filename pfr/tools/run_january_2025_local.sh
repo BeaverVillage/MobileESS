@@ -11,6 +11,8 @@ gurobi_threads=4
 watch_seconds=10
 mode="run"
 skip_preflight=0
+diagnostic_method=""
+risk_calibration=""
 
 usage() {
     cat <<'EOF'
@@ -26,6 +28,8 @@ Run options:
   --day-workers N        Concurrent daily processes (default: 4).
   --gurobi-threads N     Gurobi threads per daily process (default: 4).
   --output-root PATH     Campaign output root.
+  --diagnostic-method B6 Run one method only; B6 is the January calibration source.
+  --risk-calibration P   Frozen calibration required for B7/B8, never for B6 fitting.
   --skip-preflight       Skip the automatic preflight (not recommended).
   --watch-seconds N      Monitor refresh interval; 0 prints once (default: 10).
   -h, --help             Show this help.
@@ -53,7 +57,7 @@ while (($#)); do
             skip_preflight=1
             shift
             ;;
-        --start-day|--end-day|--day-workers|--gurobi-threads|--output-root|--watch-seconds)
+        --start-day|--end-day|--day-workers|--gurobi-threads|--output-root|--watch-seconds|--diagnostic-method|--risk-calibration)
             require_value "$@"
             option="$1"
             value="$2"
@@ -65,6 +69,8 @@ while (($#)); do
                 --gurobi-threads) gurobi_threads="$value" ;;
                 --output-root) output_root="$value" ;;
                 --watch-seconds) watch_seconds="$value" ;;
+                --diagnostic-method) diagnostic_method="$value" ;;
+                --risk-calibration) risk_calibration="$value" ;;
             esac
             ;;
         -h|--help)
@@ -94,6 +100,14 @@ if ((start_day < 1 || end_day > 31 || start_day > end_day)); then
 fi
 if ((day_workers < 1 || gurobi_threads < 1)); then
     echo "day-workers and gurobi-threads must be positive." >&2
+    exit 64
+fi
+if [[ -n "$diagnostic_method" && ! "$diagnostic_method" =~ ^B[0-8]$ ]]; then
+    echo "--diagnostic-method must be B0 through B8." >&2
+    exit 64
+fi
+if [[ "$diagnostic_method" == "B6" && -n "$risk_calibration" ]]; then
+    echo "January B6 calibration fitting must not load --risk-calibration." >&2
     exit 64
 fi
 
@@ -143,7 +157,10 @@ export NUMEXPR_NUM_THREADS=1
 export PYTHONHASHSEED=0
 
 cd "$repo_dir"
-echo "Classification: JANUARY-2025 POST-HOC FINAL VALIDATION (not an independent holdout)."
+echo "Classification: JANUARY-2025 CALIBRATION/DEVELOPMENT (not an independent holdout)."
+if [[ "$diagnostic_method" == "B6" ]]; then
+    echo "Calibration role: JANUARY-2025 B6 RAW-RISK FITTING ONLY."
+fi
 expected_full_commit_sha="${PFR_EXPECTED_FULL_COMMIT_SHA:-}"
 expected_branch="${PFR_EXPECTED_BRANCH:-codex/pr6-b8-periodic5}"
 if [[ ! "$expected_full_commit_sha" =~ ^[0-9a-f]{40}$ ]]; then
@@ -176,11 +193,20 @@ echo "Monitor in another shell:"
 printf 'bash %q --monitor-only --output-root %q\n' \
     "$repo_dir/pfr/tools/run_january_2025_local.sh" "$output_root"
 
+campaign_arguments=()
+if [[ -n "$diagnostic_method" ]]; then
+    campaign_arguments+=(--diagnostic-method "$diagnostic_method")
+fi
+if [[ -n "$risk_calibration" ]]; then
+    campaign_arguments+=(--risk-calibration "$risk_calibration")
+fi
+
 exec "$python_bin" -m pfr.tools.run_pfr_daily_campaign \
     --repo "$repo_dir" \
     --start-day "$start_day" \
     --end-day "$end_day" \
     --day-workers "$day_workers" \
     --capture-day-logs \
+    "${campaign_arguments[@]}" \
     "${common_arguments[@]}" \
     --output "$output_root"

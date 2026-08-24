@@ -386,7 +386,11 @@ def campaign_payload(
             else "PFR_JAN2025_POST_HOC_DAILY_VALIDATION_V13_13_FREEZE_20260823"
         ),
         "status": status,
-        "evaluation_classification": "POST_HOC_DESIGN_VALIDATION_NOT_INDEPENDENT_HOLDOUT",
+        "evaluation_classification": (
+            "JANUARY_2025_B6_RISK_CALIBRATION_FIT"
+            if diagnostic_method == "B6"
+            else "POST_HOC_DESIGN_VALIDATION_NOT_INDEPENDENT_HOLDOUT"
+        ),
         "independent_holdout_claim": False,
         "calendar_timezone": "FIXED_AEST_UTC_PLUS_10_NO_DST",
         "start_day": start_day,
@@ -467,6 +471,11 @@ def main() -> None:
     parser.add_argument("--workload-uncertainty", type=Path, required=True)
     parser.add_argument("--factorized-uncertainty", type=Path, required=True)
     parser.add_argument(
+        "--risk-calibration",
+        type=Path,
+        help="Frozen January B6 event-risk calibration for B7/B8 validation.",
+    )
+    parser.add_argument(
         "--migration-authority",
         type=Path,
         help="Frozen IDC migration authority; defaults to the repository contract.",
@@ -483,6 +492,15 @@ def main() -> None:
         parser.error(
             "--diagnostic-method and --supplementary-b8-periodic-5min are mutually exclusive"
         )
+    calibrated_method_selected = bool(
+        args.supplementary_b8_periodic_5min
+        or args.diagnostic_method in {"B7", "B8"}
+        or args.diagnostic_method is None
+    )
+    if calibrated_method_selected and args.risk_calibration is None:
+        parser.error("--risk-calibration is required before calibrated B7/B8 execution")
+    if args.diagnostic_method == "B6" and args.risk_calibration is not None:
+        parser.error("B6 calibration fitting must not load a calibrated-risk artifact")
     if not 1 <= args.day_workers <= 31:
         parser.error("--day-workers must be in [1, 31]")
 
@@ -535,6 +553,8 @@ def main() -> None:
             else args.repo / "pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json"
         ),
     ]
+    if args.risk_calibration is not None:
+        common.extend(("--risk-calibration", str(args.risk_calibration)))
     for mobility_root in args.mobility_root:
         common.extend(("--mobility-root", str(mobility_root)))
     if args.checkpoint_payload_occupancy_factor is not None:

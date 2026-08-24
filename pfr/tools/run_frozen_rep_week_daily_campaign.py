@@ -52,6 +52,7 @@ def payload(
     final: bool,
     continue_after_failure: bool,
     supplementary_b8_periodic_5min: bool = False,
+    diagnostic_method: str | None = None,
 ) -> Mapping[str, Any]:
     expected = int(period["days"])
     complete = len(rows) == expected
@@ -66,7 +67,10 @@ def payload(
         "status": status,
         "period_id": period["period_id"],
         "evaluation_classification": (
-            period.get(
+            "FEBRUARY_2025_DEVELOPMENT_VALIDATION_NOT_INDEPENDENT_EXECUTION"
+            if period.get("period_id") == "FEB2025_FULL"
+            and diagnostic_method in {"B6", "B7"}
+            else period.get(
                 "evaluation_classification",
                 "FROZEN_OUT_OF_MONTH_GENERALIZATION_VALIDATION_NOT_STRICTLY_UNSEEN",
             )
@@ -81,12 +85,19 @@ def payload(
         "continue_to_next_day_after_failure": continue_after_failure,
         "failure_evidence_preserved_before_continuation": True,
         "issues_per_method_per_day": ISSUES_PER_DAY,
-        "methods_per_day": 1 if supplementary_b8_periodic_5min else 8,
+        "methods_per_day": (
+            1 if supplementary_b8_periodic_5min or diagnostic_method is not None else 8
+        ),
         "method_ids": (
             ["B8"]
             if supplementary_b8_periodic_5min
-            else [f"B{index}" for index in range(8)]
+            else (
+                [diagnostic_method]
+                if diagnostic_method is not None
+                else [f"B{index}" for index in range(8)]
+            )
         ),
+        "diagnostic_method": diagnostic_method,
         "supplementary_b8_periodic_5min": supplementary_b8_periodic_5min,
         "daily_runs": sorted(rows, key=lambda row: str(row["calendar_date"])),
     }
@@ -110,6 +121,11 @@ def main() -> None:
         action="store_true",
         help="Run only B8 for the frozen out-of-month daily period.",
     )
+    parser.add_argument(
+        "--diagnostic-method",
+        choices=tuple(f"B{index}" for index in range(9)),
+        help="Run one method for a development-validation period.",
+    )
     parser.add_argument("--shared-root", type=Path, required=True)
     parser.add_argument("--exact-package-root", type=Path, required=True)
     parser.add_argument("--authority-package-root", type=Path, required=True)
@@ -123,6 +139,7 @@ def main() -> None:
     parser.add_argument("--mobility-template-bank", type=Path, required=True)
     parser.add_argument("--workload-uncertainty", type=Path, required=True)
     parser.add_argument("--factorized-uncertainty", type=Path, required=True)
+    parser.add_argument("--risk-calibration", type=Path)
     parser.add_argument(
         "--migration-authority",
         type=Path,
@@ -130,6 +147,19 @@ def main() -> None:
     )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    if args.diagnostic_method and args.supplementary_b8_periodic_5min:
+        parser.error(
+            "--diagnostic-method and --supplementary-b8-periodic-5min are mutually exclusive"
+        )
+    calibrated_method_selected = bool(
+        args.supplementary_b8_periodic_5min
+        or args.diagnostic_method in {"B7", "B8"}
+        or args.diagnostic_method is None
+    )
+    if calibrated_method_selected and args.risk_calibration is None:
+        parser.error("--risk-calibration is required before calibrated B7/B8 execution")
+    if args.diagnostic_method == "B6" and args.risk_calibration is not None:
+        parser.error("B6 calibration/validation must retain its raw-risk interface")
     if not 1 <= args.day_workers <= 31:
         parser.error("--day-workers must be in [1, 31]")
 
@@ -190,6 +220,8 @@ def main() -> None:
     ]
     for mobility_root in args.mobility_root:
         common.extend(("--mobility-root", str(mobility_root)))
+    if args.risk_calibration is not None:
+        common.extend(("--risk-calibration", str(args.risk_calibration)))
     args.output.mkdir(parents=True, exist_ok=True)
     specs = period_specs(period)
     rows: list[Mapping[str, Any]] = []
@@ -206,6 +238,7 @@ def main() -> None:
             supplementary_b8_periodic_5min=(
                 args.supplementary_b8_periodic_5min
             ),
+            diagnostic_method=args.diagnostic_method,
         ): spec
         for spec in specs
     }
@@ -250,6 +283,7 @@ def main() -> None:
                     supplementary_b8_periodic_5min=(
                         args.supplementary_b8_periodic_5min
                     ),
+                    diagnostic_method=args.diagnostic_method,
                 ),
             )
             print(
@@ -285,6 +319,7 @@ def main() -> None:
         supplementary_b8_periodic_5min=(
             args.supplementary_b8_periodic_5min
         ),
+        diagnostic_method=args.diagnostic_method,
     )
     write_campaign(args.output, campaign)
     print(json.dumps({"status": campaign["status"], "output": str(args.output)}))

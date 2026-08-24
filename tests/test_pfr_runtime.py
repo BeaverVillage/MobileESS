@@ -1,10 +1,16 @@
 import tempfile
+from datetime import date, timedelta
 from pathlib import Path
 import unittest
 
 from pfr.migration import load_migration_authority
 from pfr.methods import ComparisonMethod, ExperimentAuthority, MethodFactory
 from pfr.power import H100UtilizationPowerCurve
+from pfr.risk_calibration import (
+    AUTHORITY_ID,
+    FrozenRiskCalibration,
+    RISK_FAMILY_SCALES,
+)
 from pfr.optimization import FastOptimizationCertificate, OptimizedFastControl
 from pfr.runtime import (
     CausalExperimentFrame,
@@ -155,6 +161,26 @@ class PfrRuntimeTests(unittest.TestCase):
             Path(__file__).parents[1]
             / "pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json"
         )
+        normalized_quantile = 0.2
+        self.risk_calibration = FrozenRiskCalibration(
+            authority_id=AUTHORITY_ID,
+            alpha=0.05,
+            source_method="B6",
+            source_period="2025-01",
+            calibration_dates=tuple(
+                (date(2025, 1, 1) + timedelta(days=offset)).isoformat()
+                for offset in range(31)
+            ),
+            finite_sample_rank=31,
+            normalized_joint_quantile=normalized_quantile,
+            predeclared_scales=dict(RISK_FAMILY_SCALES),
+            calibrated_increments={
+                family: normalized_quantile * scale
+                for family, scale in RISK_FAMILY_SCALES.items()
+            },
+            source_audit_sha256="f" * 64,
+            artifact_sha256="e" * 64,
+        )
         job = OperationalTrainingJob(
             "j1", "IDC01", 100, 102, 110, 1, 3600, 0.01, None, "source-j1",
             self.migration_authority.checkpoint_payload_bytes(1),
@@ -172,6 +198,7 @@ class PfrRuntimeTests(unittest.TestCase):
                 power_curve=self.curve,
                 physical_backend=physical,
                 migration_authority=self.migration_authority,
+                risk_calibration_authority=self.risk_calibration,
             ).run_matrix(
                 configs=self.configs, frames=self.frames, initial=self.initial,
                 representative_week_id="TEST", output=Path(temporary),
@@ -190,6 +217,7 @@ class PfrRuntimeTests(unittest.TestCase):
                 power_curve=self.curve,
                 physical_backend=FakePhysical(),
                 migration_authority=self.migration_authority,
+                risk_calibration_authority=self.risk_calibration,
             ).run_method(
                 config=b8,
                 frames=self.frames,
@@ -209,6 +237,52 @@ class PfrRuntimeTests(unittest.TestCase):
         self.assertEqual(
             rows[1]["replan_causes"], ["PERIODIC_5_MINUTE_REFRESH"]
         )
+
+    def test_b6_materializes_raw_one_step_risk_calibration_audit(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            summary = PfrRuntimeRunner(
+                power_curve=self.curve,
+                physical_backend=FakePhysical(),
+                migration_authority=self.migration_authority,
+            ).run_method(
+                config=self.configs[6],
+                frames=self.frames[:1],
+                initial=self.initial,
+                representative_week_id="TEST_JAN_B6_CALIBRATION",
+                output=root,
+            )
+            marker = __import__("json").loads(
+                (root / "B6/issue_000100/COMMIT_MARKER.json").read_text()
+            )
+        audit = marker["risk_calibration_audit"]
+        self.assertEqual(marker["risk_interface"], "RAW_UNCALIBRATED")
+        self.assertIsNone(marker["risk_calibration_authority_id"])
+        self.assertFalse(audit["future_actual_used_by_optimizer"])
+        self.assertTrue(audit["actual_opened_post_decision_only"])
+        self.assertEqual(set(audit["predeclared_scale"]), set(RISK_FAMILY_SCALES))
+        self.assertEqual(summary["risk_calibration_audit_count"], 1)
+        self.assertEqual(
+            summary["risk_calibration_day_joint_score"],
+            audit["joint_normalized_score"],
+        )
+
+    def test_b7_fails_closed_without_frozen_risk_calibration(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            with self.assertRaisesRegex(
+                RuntimeContractError, "lacks a frozen January-2025 authority"
+            ):
+                PfrRuntimeRunner(
+                    power_curve=self.curve,
+                    physical_backend=FakePhysical(),
+                    migration_authority=self.migration_authority,
+                ).run_method(
+                    config=self.configs[7],
+                    frames=self.frames[:1],
+                    initial=self.initial,
+                    representative_week_id="TEST_B7_MISSING_CALIBRATION",
+                    output=Path(temporary),
+                )
 
     def test_b0_late_arrival_is_admitted_without_full_replan(self):
         late_job = OperationalTrainingJob(
@@ -273,6 +347,7 @@ class PfrRuntimeTests(unittest.TestCase):
                         power_curve=self.curve,
                         physical_backend=FakePhysical(),
                         migration_authority=self.migration_authority,
+                        risk_calibration_authority=self.risk_calibration,
                     ).run_method(
                         config=config,
                         frames=frames,
@@ -602,6 +677,7 @@ class PfrRuntimeTests(unittest.TestCase):
                 power_curve=self.curve,
                 physical_backend=physical,
                 migration_authority=self.migration_authority,
+                risk_calibration_authority=self.risk_calibration,
             ).run_method(
                 config=self.configs[0], frames=self.frames[:1], initial=self.initial,
                 representative_week_id="TEST", output=Path(temporary),
@@ -620,6 +696,7 @@ class PfrRuntimeTests(unittest.TestCase):
                 power_curve=self.curve,
                 physical_backend=physical,
                 migration_authority=self.migration_authority,
+                risk_calibration_authority=self.risk_calibration,
             ).run_matrix(
                 configs=self.configs, frames=self.frames[:1], initial=self.initial,
                 representative_week_id="TEST", output=Path(temporary),
@@ -643,6 +720,7 @@ class PfrRuntimeTests(unittest.TestCase):
                 power_curve=self.curve,
                 physical_backend=physical,
                 migration_authority=self.migration_authority,
+                risk_calibration_authority=self.risk_calibration,
             ).run_matrix(
                 configs=self.configs,
                 frames=self.frames,

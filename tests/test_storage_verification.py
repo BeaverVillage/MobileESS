@@ -4,9 +4,11 @@ from pathlib import Path
 
 from pfr.tools.verify_daily_campaign_storage import (
     _prediction_actual_evidence_errors,
+    _risk_calibration_evidence_errors,
     inspect_campaign_registry,
     inspect_method,
 )
+from pfr.risk_calibration import RISK_FAMILY_SCALES
 
 
 def write_complete_method(root: Path, first_issue: int = 8928) -> None:
@@ -185,4 +187,37 @@ def test_prediction_actual_storage_evidence_is_arithmetically_verified() -> None
     assert (
         "mobility ETA prediction/actual error arithmetic mismatch"
         in _prediction_actual_evidence_errors(marker)
+    )
+
+
+def test_b6_risk_calibration_storage_arithmetic_is_verified() -> None:
+    predicted = {family: -1.0 for family in RISK_FAMILY_SCALES}
+    actual = {
+        family: predicted[family] + 0.2 * scale
+        for family, scale in RISK_FAMILY_SCALES.items()
+    }
+    marker = {
+        "schema_version": "K9H7_RESULT_V2.issue_commit.v2",
+        "comparison_method_id": "B6",
+        "risk_calibration_audit": {
+            "schema_version": "PFR5_EVENT_RISK_CALIBRATION_AUDIT_V1",
+            "future_actual_used_by_optimizer": False,
+            "actual_opened_post_decision_only": True,
+            "predicted_violation_margin": predicted,
+            "actual_violation_margin": actual,
+            "predeclared_scale": dict(RISK_FAMILY_SCALES),
+            "positive_underprediction_margin": {
+                family: 0.2 * scale
+                for family, scale in RISK_FAMILY_SCALES.items()
+            },
+            "normalized_positive_underprediction": {
+                family: 0.2 for family in RISK_FAMILY_SCALES
+            },
+            "joint_normalized_score": 0.2,
+        },
+    }
+    assert _risk_calibration_evidence_errors(marker) == []
+    marker["risk_calibration_audit"]["joint_normalized_score"] = 0.0
+    assert "B6 risk joint score arithmetic mismatch" in (
+        _risk_calibration_evidence_errors(marker)
     )

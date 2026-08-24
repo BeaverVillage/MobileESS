@@ -33,6 +33,7 @@ from pfr.native_predictive import (
 from pfr.optimization import GurobiFastControlOptimizer, gurobi_thread_limit
 from pfr.power import H100UtilizationPowerCurve
 from pfr.provenance import scientific_implementation_fingerprint
+from pfr.risk_calibration import load_frozen_risk_calibration
 from pfr.runtime import (
     CausalExperimentFrame,
     MobilityRouteForecast,
@@ -1412,6 +1413,14 @@ def main() -> None:
     parser.add_argument("--workload-uncertainty", type=Path, required=True)
     parser.add_argument("--factorized-uncertainty", type=Path, required=True)
     parser.add_argument(
+        "--risk-calibration",
+        type=Path,
+        help=(
+            "Frozen January-2025 B6 event-risk calibration. Required before "
+            "any calibrated B7/B8 execution and prohibited from B6 fitting."
+        ),
+    )
+    parser.add_argument(
         "--migration-authority",
         type=Path,
         help=(
@@ -1434,6 +1443,24 @@ def main() -> None:
         parser.error(
             "--diagnostic-method and --supplementary-b8-periodic-5min are mutually exclusive"
         )
+    calibrated_method_selected = bool(
+        args.supplementary_b8_periodic_5min
+        or args.diagnostic_method in {"B7", "B8"}
+        or args.diagnostic_method is None
+    )
+    if calibrated_method_selected and args.risk_calibration is None:
+        parser.error(
+            "--risk-calibration is required before any B7/B8 or B0-B7 matrix execution"
+        )
+    if args.diagnostic_method == "B6" and args.risk_calibration is not None:
+        parser.error(
+            "January B6 calibration fitting must not load a calibrated-risk artifact"
+        )
+    risk_calibration = (
+        load_frozen_risk_calibration(args.risk_calibration)
+        if args.risk_calibration is not None
+        else None
+    )
     if args.count <= 0:
         parser.error("--count must be positive")
     repo = args.repo.resolve()
@@ -1668,6 +1695,22 @@ def main() -> None:
         "mobility_execution_actual_used_by_optimizer": False,
         "mobility_prediction_actual_error_materialized": True,
         "migration_prediction_actual_error_materialized": True,
+        "risk_calibration_authority_id": (
+            risk_calibration.authority_id
+            if risk_calibration is not None
+            else None
+        ),
+        "risk_calibration_artifact_sha256": (
+            risk_calibration.artifact_sha256
+            if risk_calibration is not None
+            else None
+        ),
+        "risk_calibration_fit_period": (
+            risk_calibration.source_period
+            if risk_calibration is not None
+            else None
+        ),
+        "march_outcomes_used_for_risk_calibration": False,
         "migration_realization_classification": (
             "DETERMINISTIC_FROZEN_ABILENE_SCENARIO_NOT_EXTERNAL_WAN_TELEMETRY"
         ),
@@ -1749,6 +1792,7 @@ def main() -> None:
         ),
         migration_authority=migration_authority,
         mobility_execution_authority=mobility_execution,
+        risk_calibration_authority=risk_calibration,
     )
     factory = MethodFactory(authority)
     configs = factory.all()
@@ -1837,6 +1881,22 @@ def main() -> None:
         "mobility_execution_actual_used_by_optimizer": False,
         "mobility_prediction_actual_error_materialized": True,
         "migration_prediction_actual_error_materialized": True,
+        "risk_calibration_authority_path": (
+            str(args.risk_calibration.resolve())
+            if args.risk_calibration is not None
+            else None
+        ),
+        "risk_calibration_authority_id": (
+            risk_calibration.authority_id
+            if risk_calibration is not None
+            else None
+        ),
+        "risk_calibration_artifact_sha256": (
+            risk_calibration.artifact_sha256
+            if risk_calibration is not None
+            else None
+        ),
+        "risk_calibration_march_outcomes_read": False,
         "migration_realization_classification": (
             "DETERMINISTIC_FROZEN_ABILENE_SCENARIO_NOT_EXTERNAL_WAN_TELEMETRY"
         ),

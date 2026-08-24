@@ -7,11 +7,13 @@ import csv
 from datetime import date, timedelta
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 from typing import Any, Mapping
 
 from pfr.provenance import scientific_implementation_fingerprint
+from pfr.risk_calibration import RISK_FAMILY_SCALES
 
 
 METHODS = tuple(f"B{index}" for index in range(8))
@@ -143,6 +145,61 @@ def _prediction_actual_evidence_errors(marker: Mapping[str, Any]) -> list[str]:
     return errors
 
 
+def _risk_calibration_evidence_errors(marker: Mapping[str, Any]) -> list[str]:
+    if (
+        marker.get("schema_version") != "K9H7_RESULT_V2.issue_commit.v2"
+        or marker.get("comparison_method_id") != "B6"
+    ):
+        return []
+    audit = marker.get("risk_calibration_audit")
+    if not isinstance(audit, dict):
+        return ["B6 risk calibration audit missing"]
+    if (
+        audit.get("schema_version")
+        != "PFR5_EVENT_RISK_CALIBRATION_AUDIT_V1"
+        or audit.get("future_actual_used_by_optimizer") is not False
+        or audit.get("actual_opened_post_decision_only") is not True
+    ):
+        return ["B6 risk calibration audit authority invalid"]
+    predicted = audit.get("predicted_violation_margin")
+    actual = audit.get("actual_violation_margin")
+    scales = audit.get("predeclared_scale")
+    positive = audit.get("positive_underprediction_margin")
+    normalized = audit.get("normalized_positive_underprediction")
+    mappings = (predicted, actual, scales, positive, normalized)
+    if any(not isinstance(value, dict) for value in mappings) or any(
+        set(value) != set(RISK_FAMILY_SCALES) for value in mappings
+    ):
+        return ["B6 risk calibration family evidence incomplete"]
+    errors: list[str] = []
+    expected_scores = []
+    for family, frozen_scale in RISK_FAMILY_SCALES.items():
+        try:
+            expected_positive = max(
+                0.0, float(actual[family]) - float(predicted[family])
+            )
+            expected_normalized = expected_positive / frozen_scale
+            if abs(float(scales[family]) - frozen_scale) > 1e-12:
+                errors.append(f"B6 risk scale mismatch family={family}")
+            if abs(float(positive[family]) - expected_positive) > 1e-10:
+                errors.append(
+                    f"B6 risk positive residual arithmetic mismatch family={family}"
+                )
+            if abs(float(normalized[family]) - expected_normalized) > 1e-10:
+                errors.append(
+                    f"B6 risk normalized residual arithmetic mismatch family={family}"
+                )
+            expected_scores.append(expected_normalized)
+        except (TypeError, ValueError, KeyError):
+            errors.append(f"B6 risk calibration numeric evidence invalid family={family}")
+    try:
+        if abs(float(audit["joint_normalized_score"]) - max(expected_scores)) > 1e-10:
+            errors.append("B6 risk joint score arithmetic mismatch")
+    except (TypeError, ValueError, KeyError):
+        errors.append("B6 risk joint score missing")
+    return errors
+
+
 def inspect_method(
     method_root: Path,
     method: str,
@@ -170,6 +227,7 @@ def inspect_method(
             ):
                 raise ValueError("state-chain hash missing")
             evidence_errors = _prediction_actual_evidence_errors(marker)
+            evidence_errors.extend(_risk_calibration_evidence_errors(marker))
             if evidence_errors:
                 raise ValueError("; ".join(evidence_errors))
             markers.append(marker)
@@ -209,6 +267,22 @@ def inspect_method(
             errors.append("METHOD_SUMMARY commit count mismatch")
         if summary.get("status") == "PASS" and len(markers) != ISSUES_PER_DAY:
             errors.append("PASS method does not contain 288 markers")
+        if summary.get("status") == "PASS" and method == "B6":
+            if int(summary.get("risk_calibration_audit_count", -1)) != len(markers):
+                errors.append("PASS B6 risk calibration audit count mismatch")
+            marker_scores = [
+                float(row["risk_calibration_audit"]["joint_normalized_score"])
+                for row in markers
+                if isinstance(row.get("risk_calibration_audit"), dict)
+            ]
+            if marker_scores:
+                summary_score = float(
+                    summary.get("risk_calibration_day_joint_score", float("nan"))
+                )
+                if not math.isfinite(summary_score) or abs(
+                    summary_score - max(marker_scores)
+                ) > 1e-10:
+                    errors.append("PASS B6 daily risk calibration score mismatch")
         if (
             summary.get("status") == "PASS"
             and summary.get("schema_version") == "K9H7_RESULT_V2.method_run.v2"
@@ -457,7 +531,16 @@ def main() -> None:
         action="store_true",
         help="Verify a B8-only supplementary daily campaign.",
     )
+    parser.add_argument(
+        "--diagnostic-method",
+        choices=tuple(f"B{index}" for index in range(9)),
+        help="Verify a one-method calibration or development-validation campaign.",
+    )
     args = parser.parse_args()
+    if args.diagnostic_method and args.supplementary_b8_periodic_5min:
+        parser.error(
+            "--diagnostic-method and --supplementary-b8-periodic-5min are mutually exclusive"
+        )
     if not 1 <= args.days <= 31:
         parser.error("--days must be in [1, 31]")
     expected_dates = [
@@ -465,7 +548,11 @@ def main() -> None:
         for offset in range(args.days)
     ]
     fingerprint = scientific_implementation_fingerprint(args.repo)
-    methods = B8_METHODS if args.supplementary_b8_periodic_5min else METHODS
+    methods = (
+        B8_METHODS
+        if args.supplementary_b8_periodic_5min
+        else ((args.diagnostic_method,) if args.diagnostic_method else METHODS)
+    )
     rows = [
         inspect_day(
             args.root / calendar_date,

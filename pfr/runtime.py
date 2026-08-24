@@ -28,6 +28,7 @@ from .optimization import (
 )
 from .power import H100UtilizationPowerCurve
 from .risk import PlanValidityRiskMonitor, ReplanCost, RiskConstraint, RiskFamily
+from .risk_calibration import FrozenRiskCalibration, RISK_FAMILY_SCALES
 from .safety import (
     AcSafetyFilter,
     EscalatedCandidate,
@@ -3532,35 +3533,47 @@ def _start_planned_routes(
     return tuple(events)
 
 
-def _risk_decision(state: MutableMethodState, frame: CausalExperimentFrame, config: MethodConfig):
+def _risk_constraints(
+    state: MutableMethodState,
+    frame: CausalExperimentFrame,
+    config: MethodConfig,
+    *,
+    exact_override: Optional[Mapping[str, Any]] = None,
+    include_uncertainty: bool = True,
+    risk_issue: Optional[int] = None,
+) -> Tuple[RiskConstraint, ...]:
     active_jobs = [job for job in state.jobs.values() if job.lifecycle != "COMPLETED"]
     gpu_by_site = {site: sum(job.source.requested_gpu for job in active_jobs if job.destination_idc == site) for site in IDCS}
-    if config.joint_uncertainty:
+    if config.joint_uncertainty and include_uncertainty:
         gpu_by_site = {
             site: gpu_by_site[site] + frame.workload_reserve_gpu.get(site, 0.0)
             for site in IDCS
         }
+    evaluation_issue = frame.issue if risk_issue is None else int(risk_issue)
     deadline_margin = max(
         (
             job.remaining_work_gpu_hours
-            - max(0, job.source.deadline_step - frame.issue) * job.source.requested_gpu * STEP_HOURS
+            - max(0, job.source.deadline_step - evaluation_issue)
+            * job.source.requested_gpu
+            * STEP_HOURS
             for job in active_jobs
         ),
         default=-1.0,
     )
     min_energy = min(state.mess_energy_kwh.values())
-    if state.last_exact is None:
+    exact = exact_override if exact_override is not None else state.last_exact
+    if exact is None:
         voltage_margin, thermal_margin = -0.01, -0.10
     else:
         voltage_margin = max(
-            0.95 - float(state.last_exact["voltage_min_pu"]),
-            float(state.last_exact["voltage_max_pu"]) - 1.05,
+            0.95 - float(exact["voltage_min_pu"]),
+            float(exact["voltage_max_pu"]) - 1.05,
         )
         thermal_margin = max(
-            float(state.last_exact["line_max_loading_pu"]) - 1.0,
-            float(state.last_exact["transformer_max_current_loading_pu"]) - 1.0,
+            float(exact["line_max_loading_pu"]) - 1.0,
+            float(exact["transformer_max_current_loading_pu"]) - 1.0,
         )
-        if config.joint_uncertainty:
+        if exact_override is None and config.joint_uncertainty and include_uncertainty:
             # This is the previous issue's causal robust envelope, not a current-h0
             # realization.  It may request a new plan but never substitutes for the
             # current Fresh-OpenDSS commit gate.
@@ -3568,15 +3581,15 @@ def _risk_decision(state: MutableMethodState, frame: CausalExperimentFrame, conf
                 voltage_margin,
                 0.95
                 - float(
-                    state.last_exact.get(
+                    exact.get(
                         "robust_grid_voltage_min_pu",
-                        state.last_exact["voltage_min_pu"],
+                        exact["voltage_min_pu"],
                     )
                 ),
                 float(
-                    state.last_exact.get(
+                    exact.get(
                         "robust_grid_voltage_max_pu",
-                        state.last_exact["voltage_max_pu"],
+                        exact["voltage_max_pu"],
                     )
                 )
                 - 1.05,
@@ -3584,35 +3597,108 @@ def _risk_decision(state: MutableMethodState, frame: CausalExperimentFrame, conf
             thermal_margin = max(
                 thermal_margin,
                 float(
-                    state.last_exact.get(
+                    exact.get(
                         "robust_grid_line_max_loading_pu",
-                        state.last_exact["line_max_loading_pu"],
+                        exact["line_max_loading_pu"],
                     )
                 )
                 - 1.0,
                 float(
-                    state.last_exact.get(
+                    exact.get(
                         "robust_grid_transformer_max_loading_pu",
-                        state.last_exact["transformer_max_current_loading_pu"],
+                        exact["transformer_max_current_loading_pu"],
                     )
                 )
                 - 1.0,
             )
-    calibrated = config.risk_interface == "CALIBRATED"
-    constraints = (
-        RiskConstraint("soc", RiskFamily.SOC, MESS_FLOOR_KWH - min_energy, 100.0),
-        RiskConstraint("deadline", RiskFamily.DEADLINE, deadline_margin, 1.0),
-        RiskConstraint("gpu", RiskFamily.GPU, max(gpu_by_site.values(), default=0) - MODELED_GPU_CAPACITY_PER_IDC, 32.0),
-        RiskConstraint("wan", RiskFamily.WAN, -1.0, 1.0),
-        RiskConstraint("voltage", RiskFamily.VOLTAGE, voltage_margin, 0.01),
-        RiskConstraint("thermal", RiskFamily.THERMAL, thermal_margin, 0.10),
+    return (
+        RiskConstraint("soc", RiskFamily.SOC, MESS_FLOOR_KWH - min_energy, RISK_FAMILY_SCALES[RiskFamily.SOC.value]),
+        RiskConstraint("deadline", RiskFamily.DEADLINE, deadline_margin, RISK_FAMILY_SCALES[RiskFamily.DEADLINE.value]),
+        RiskConstraint("gpu", RiskFamily.GPU, max(gpu_by_site.values(), default=0) - MODELED_GPU_CAPACITY_PER_IDC, RISK_FAMILY_SCALES[RiskFamily.GPU.value]),
+        RiskConstraint("wan", RiskFamily.WAN, -1.0, RISK_FAMILY_SCALES[RiskFamily.WAN.value]),
+        RiskConstraint("voltage", RiskFamily.VOLTAGE, voltage_margin, RISK_FAMILY_SCALES[RiskFamily.VOLTAGE.value]),
+        RiskConstraint("thermal", RiskFamily.THERMAL, thermal_margin, RISK_FAMILY_SCALES[RiskFamily.THERMAL.value]),
     )
-    return PlanValidityRiskMonitor(calibrated=calibrated, maximum_refresh_steps=6).evaluate(
+
+
+def _risk_decision(
+    state: MutableMethodState,
+    frame: CausalExperimentFrame,
+    config: MethodConfig,
+    calibration: Optional[FrozenRiskCalibration],
+):
+    calibrated = config.risk_interface == "CALIBRATED"
+    base_constraints = _risk_constraints(state, frame, config)
+    if calibrated and calibration is None:
+        raise RuntimeContractError(
+            "calibrated B7/B8 risk interface lacks a frozen January-2025 authority"
+        )
+    constraints = tuple(
+        RiskConstraint(
+            constraint.name,
+            constraint.family,
+            constraint.violation_margin,
+            constraint.predeclared_scale,
+            (
+                calibration.increment(constraint.family)
+                if calibrated and calibration is not None
+                else 0.0
+            ),
+        )
+        for constraint in base_constraints
+    )
+    decision = PlanValidityRiskMonitor(calibrated=calibrated, maximum_refresh_steps=6).evaluate(
         constraints=constraints,
         expected_replan_benefit=0.0,
         replan_cost=ReplanCost(1.0, 0.0, 0.1, 0.01),
         plan_age_steps=state.active_plan_age_steps,
     )
+    return decision, base_constraints
+
+
+def _risk_calibration_audit(
+    *,
+    issue: int,
+    predicted: Sequence[RiskConstraint],
+    actual: Sequence[RiskConstraint],
+) -> Mapping[str, Any]:
+    predicted_by_family = {row.family.value: row for row in predicted}
+    actual_by_family = {row.family.value: row for row in actual}
+    if set(predicted_by_family) != set(RISK_FAMILY_SCALES) or set(
+        actual_by_family
+    ) != set(RISK_FAMILY_SCALES):
+        raise RuntimeContractError("risk calibration family axis is incomplete")
+    predicted_margins = {
+        family: float(predicted_by_family[family].violation_margin)
+        for family in RISK_FAMILY_SCALES
+    }
+    actual_margins = {
+        family: float(actual_by_family[family].violation_margin)
+        for family in RISK_FAMILY_SCALES
+    }
+    positive_underprediction = {
+        family: max(0.0, actual_margins[family] - predicted_margins[family])
+        for family in RISK_FAMILY_SCALES
+    }
+    normalized = {
+        family: positive_underprediction[family] / RISK_FAMILY_SCALES[family]
+        for family in RISK_FAMILY_SCALES
+    }
+    return {
+        "schema_version": "PFR5_EVENT_RISK_CALIBRATION_AUDIT_V1",
+        "role": "B6_RAW_ONE_STEP_PREDECISION_TO_REALIZED_AUDIT",
+        "prediction_issue": int(issue),
+        "realization_issue": int(issue),
+        "horizon_steps": 1,
+        "future_actual_used_by_optimizer": False,
+        "actual_opened_post_decision_only": True,
+        "predicted_violation_margin": predicted_margins,
+        "actual_violation_margin": actual_margins,
+        "predeclared_scale": dict(RISK_FAMILY_SCALES),
+        "positive_underprediction_margin": positive_underprediction,
+        "normalized_positive_underprediction": normalized,
+        "joint_normalized_score": max(normalized.values()),
+    }
 
 
 def _should_replan(state: MutableMethodState, config: MethodConfig, risk: Any, issue_offset: int) -> Tuple[bool, Tuple[str, ...]]:
@@ -3821,6 +3907,7 @@ class PfrRuntimeRunner:
         native_control_minimum_dwell_steps: int = 0,
         migration_authority: Optional[MigrationAuthority] = None,
         mobility_execution_authority: Optional[MobilityExecutionAuthority] = None,
+        risk_calibration_authority: Optional[FrozenRiskCalibration] = None,
     ) -> None:
         power_curve.validate()
         self.power_curve = power_curve
@@ -3841,6 +3928,9 @@ class PfrRuntimeRunner:
             migration_authority.validate()
         self.migration_authority = migration_authority
         self.mobility_execution_authority = mobility_execution_authority
+        if risk_calibration_authority is not None:
+            risk_calibration_authority.validate()
+        self.risk_calibration_authority = risk_calibration_authority
 
     def run_method(
         self,
@@ -3882,7 +3972,12 @@ class PfrRuntimeRunner:
             if frame.issue != state.issue:
                 raise RuntimeContractError("PRE state issue does not match causal frame")
             blocked_spatial = _admit_arrivals(state, frame, config)
-            risk = _risk_decision(state, frame, config)
+            risk, predicted_risk_constraints = _risk_decision(
+                state,
+                frame,
+                config,
+                self.risk_calibration_authority,
+            )
             risk_used_previous_grid_envelope = state.last_exact is not None
             replan, replan_causes = _should_replan(state, config, risk, offset)
             migration_started_events: tuple[Mapping[str, Any], ...] = ()
@@ -4252,6 +4347,21 @@ class PfrRuntimeRunner:
                 max(0.0, job.remaining_work_gpu_hours - max(0, job.source.deadline_step - frame.issue - 1) * job.source.requested_gpu * STEP_HOURS)
                 for job in state.jobs.values() if job.lifecycle != "COMPLETED"
             )
+            risk_calibration_audit: Mapping[str, Any] | None = None
+            if config.comparison_method_id == ComparisonMethod.B6:
+                actual_risk_constraints = _risk_constraints(
+                    state,
+                    frame,
+                    config,
+                    exact_override=verifier.last_commit.raw_metrics,
+                    include_uncertainty=False,
+                    risk_issue=frame.issue + 1,
+                )
+                risk_calibration_audit = _risk_calibration_audit(
+                    issue=frame.issue,
+                    predicted=predicted_risk_constraints,
+                    actual=actual_risk_constraints,
+                )
             state.last_exact = dict(verifier.last_commit.raw_metrics)
             pre_hash = state.pre_state_sha256
             state.issue = frame.issue + 1
@@ -4386,6 +4496,19 @@ class PfrRuntimeRunner:
                 "risk_interface": risk.active_risk_interface,
                 "risk": risk.active_risk,
                 "risk_components": risk.calibrated_components if config.risk_interface == "CALIBRATED" else risk.raw_components,
+                "risk_raw_components": dict(risk.raw_components),
+                "risk_calibrated_components": dict(risk.calibrated_components),
+                "risk_calibration_authority_id": (
+                    self.risk_calibration_authority.authority_id
+                    if self.risk_calibration_authority is not None
+                    else None
+                ),
+                "risk_calibration_artifact_sha256": (
+                    self.risk_calibration_authority.artifact_sha256
+                    if self.risk_calibration_authority is not None
+                    else None
+                ),
+                "risk_calibration_audit": risk_calibration_audit,
                 "arrivals": len(frame.arrivals),
                 "active_jobs": sum(job.lifecycle == "RUNNING" for job in state.jobs.values()),
                 "completed_jobs": sum(job.lifecycle == "COMPLETED" for job in state.jobs.values()),
@@ -4707,6 +4830,27 @@ class PfrRuntimeRunner:
             "final_compute_debt_gpu_hours": state.compute_debt_gpu_hours,
             "final_energy_debt_kwh": state.energy_debt_kwh,
             "final_minimum_mess_energy_kwh": min(state.mess_energy_kwh.values()),
+            "risk_calibration_audit_count": sum(
+                row.get("risk_calibration_audit") is not None for row in records
+            ),
+            "risk_calibration_day_joint_score": max(
+                (
+                    float(row["risk_calibration_audit"]["joint_normalized_score"])
+                    for row in records
+                    if row.get("risk_calibration_audit") is not None
+                ),
+                default=None,
+            ),
+            "risk_calibration_authority_id": (
+                self.risk_calibration_authority.authority_id
+                if self.risk_calibration_authority is not None
+                else None
+            ),
+            "risk_calibration_artifact_sha256": (
+                self.risk_calibration_authority.artifact_sha256
+                if self.risk_calibration_authority is not None
+                else None
+            ),
             "final_mess_in_transit": dict(state.mess_in_transit),
             "terminal_mobility_complete": not any(state.mess_in_transit.values()),
             "failure": failure,
