@@ -26,6 +26,27 @@ B8_METHOD_COUNT = 1
 _ACTIVE_CHILDREN: set[subprocess.Popen[str]] = set()
 _ACTIVE_CHILDREN_LOCK = threading.Lock()
 _STOP_REQUESTED = threading.Event()
+_RECEIVED_STOP_SIGNAL: int | None = None
+
+
+def install_stop_signal_handlers() -> None:
+    """Make SIGINT/SIGTERM interrupt the campaign even if a parent ignored them."""
+    _STOP_REQUESTED.clear()
+
+    def raise_keyboard_interrupt(signum: int, _frame: Any) -> None:
+        global _RECEIVED_STOP_SIGNAL
+        _RECEIVED_STOP_SIGNAL = signum
+        _STOP_REQUESTED.set()
+        raise KeyboardInterrupt
+
+    signal.signal(signal.SIGINT, raise_keyboard_interrupt)
+    signal.signal(signal.SIGTERM, raise_keyboard_interrupt)
+
+
+def received_stop_signal_name() -> str:
+    if _RECEIVED_STOP_SIGNAL is None:
+        return "SIGINT"
+    return signal.Signals(_RECEIVED_STOP_SIGNAL).name
 
 
 def signal_process_group(process: subprocess.Popen[str], signum: int) -> None:
@@ -414,6 +435,7 @@ def write_campaign(output: Path, payload: Mapping[str, Any]) -> None:
 
 
 def main() -> None:
+    install_stop_signal_handlers()
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--start-day", type=int, required=True)
@@ -602,6 +624,7 @@ def main() -> None:
             }), flush=True)
     except KeyboardInterrupt:
         signal.signal(signal.SIGINT, signal.SIG_IGN)
+        signal.signal(signal.SIGTERM, signal.SIG_IGN)
         for future in futures:
             future.cancel()
         stop_active_children(args.output)
@@ -623,7 +646,7 @@ def main() -> None:
             )
         )
         interrupted["status"] = "INTERRUPTED"
-        interrupted["signal"] = "SIGINT"
+        interrupted["signal"] = received_stop_signal_name()
         write_campaign(args.output, interrupted)
         print(json.dumps({
             "status": "INTERRUPTED",

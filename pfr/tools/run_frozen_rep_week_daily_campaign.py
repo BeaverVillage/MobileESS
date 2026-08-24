@@ -14,6 +14,7 @@ from typing import Any, Mapping
 from pfr.tools.run_pfr_daily_campaign import (
     DaySpec,
     ISSUES_PER_DAY,
+    install_stop_signal_handlers,
     run_day,
     stop_active_children,
     write_campaign,
@@ -92,6 +93,7 @@ def payload(
 
 
 def main() -> None:
+    install_stop_signal_handlers()
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--period-id", required=True)

@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import signal
 import subprocess
 import sys
 import tempfile
@@ -139,3 +140,26 @@ def test_ctrl_c_cleanup_discovers_and_stops_orphan_matrix_group(
             process.kill()
             process.wait(timeout=5)
         _STOP_REQUESTED.clear()
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX signal semantics required")
+def test_signal_handlers_restore_sigint_ignored_by_parent() -> None:
+    script = """
+import os
+import signal
+signal.signal(signal.SIGINT, signal.SIG_IGN)
+from pfr.tools.run_pfr_daily_campaign import install_stop_signal_handlers
+install_stop_signal_handlers()
+os.kill(os.getpid(), signal.SIGINT)
+raise SystemExit(99)
+"""
+    completed = subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=Path(__file__).resolve().parents[1],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == -signal.SIGINT
+    assert "KeyboardInterrupt" in completed.stderr

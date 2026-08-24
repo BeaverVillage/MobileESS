@@ -9,6 +9,19 @@ end_day=31
 day_workers=1
 gurobi_threads=4
 
+interrupt_run() {
+    trap - INT TERM
+    echo "INTERRUPTED_BY_USER: stopping January B8 execution; partial results are preserved." >&2
+    exit 130
+}
+terminate_run() {
+    trap - INT TERM
+    echo "TERMINATED: stopping January B8 execution; partial results are preserved." >&2
+    exit 143
+}
+trap interrupt_run INT
+trap terminate_run TERM
+
 usage() {
     printf '%s\n' \
         "Usage: bash pfr/tools/run_january_2025_b8_periodic5_local.sh [options]" \

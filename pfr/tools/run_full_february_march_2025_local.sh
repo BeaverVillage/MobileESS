@@ -9,6 +9,28 @@ contract="$repo_dir/pfr/contracts/FROZEN_2025_FULL_MONTH_VALIDATION_PERIODS_V1.j
 canonical="$base/stage_kestrel_f30_resource_aware_job_power_policy_v2_0_32_r6c_20260806T122335/CANONICAL_F30_RACK_POWER_JOB_BASE_PREFROZEN_R6C.parquet"
 prepare_only=0
 run_root=""
+
+interrupt_run() {
+    trap - INT TERM
+    echo "INTERRUPTED_BY_USER: stopping February-March execution; partial results are preserved." >&2
+    exit 130
+}
+terminate_run() {
+    trap - INT TERM
+    echo "TERMINATED: stopping February-March execution; partial results are preserved." >&2
+    exit 143
+}
+trap interrupt_run INT
+trap terminate_run TERM
+
+abort_if_interrupted() {
+    local rc="$1"
+    local phase="$2"
+    if ((rc == 130 || rc == 143)); then
+        echo "EXECUTION_STOPPED phase=$phase rc=$rc" >&2
+        exit "$rc"
+    fi
+}
 while (($#)); do
     case "$1" in
         --prepare-only) prepare_only=1; shift ;;
@@ -132,6 +154,7 @@ run_period() {
         --factorized-uncertainty "$base/PFR3_V13_2_FACTORIZED_UNCERTAINTY_CURRENT/PFR3_FACTORIZED_UNCERTAINTY_V13_2.json" \
         --migration-authority "$repo_dir/pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json" \
         --output "$output" || campaign_rc=$?
+    abort_if_interrupted "$campaign_rc" "${period_id}_b0_b7"
     "$python_bin" -m pfr.tools.run_frozen_rep_week_daily_campaign \
         --repo "$repo_dir" --period-id "$period_id" --period-contract "$contract" \
         --day-workers 4 --capture-day-logs --continue-after-failure \
@@ -151,6 +174,7 @@ run_period() {
         --factorized-uncertainty "$base/PFR3_V13_2_FACTORIZED_UNCERTAINTY_CURRENT/PFR3_FACTORIZED_UNCERTAINTY_V13_2.json" \
         --migration-authority "$repo_dir/pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json" \
         --output "$b8_output" || b8_campaign_rc=$?
+    abort_if_interrupted "$b8_campaign_rc" "${period_id}_b8"
     "$python_bin" -m pfr.tools.verify_daily_campaign_storage \
         --repo "$repo_dir" --root "$output" --start-date "$start_date" --days "$days" \
         --report "$output/STORAGE_VERIFICATION.json" || verify_rc=$?

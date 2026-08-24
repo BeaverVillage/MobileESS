@@ -9,6 +9,28 @@ preflight_only=0
 skip_migration_sensitivity=0
 january_only=0
 
+interrupt_run() {
+    trap - INT TERM
+    echo "INTERRUPTED_BY_USER: stopping January-to-March execution; partial results are preserved." >&2
+    exit 130
+}
+terminate_run() {
+    trap - INT TERM
+    echo "TERMINATED: stopping January-to-March execution; partial results are preserved." >&2
+    exit 143
+}
+trap interrupt_run INT
+trap terminate_run TERM
+
+abort_if_interrupted() {
+    local rc="$1"
+    local phase="$2"
+    if ((rc == 130 || rc == 143)); then
+        echo "EXECUTION_STOPPED phase=$phase rc=$rc" >&2
+        exit "$rc"
+    fi
+}
+
 while (($#)); do
     case "$1" in
         --preflight-only) preflight_only=1; shift ;;
@@ -85,6 +107,7 @@ if ((skip_migration_sensitivity == 0)); then
         bash "$repo_dir/pfr/tools/run_january_2025_migration_sensitivity_local.sh" \
         || sensitivity_rc=$?
     if ((sensitivity_rc != 0)); then
+        abort_if_interrupted "$sensitivity_rc" "january_migration_sensitivity"
         overall=1
         echo "JANUARY_MIGRATION_SENSITIVITY_FAILED_BUT_CONTINUING rc=$sensitivity_rc" >&2
     fi
@@ -94,6 +117,7 @@ jan_campaign_rc=0
 bash "$repo_dir/pfr/tools/run_january_2025_local.sh" \
     --start-day 1 --end-day 31 --day-workers 4 --gurobi-threads 4 \
     --output-root "$jan_root" || jan_campaign_rc=$?
+abort_if_interrupted "$jan_campaign_rc" "january_b0_b7"
 
 jan_verify_rc=0
 "$python_bin" -m pfr.tools.verify_daily_campaign_storage \
@@ -110,6 +134,7 @@ b8_campaign_rc=0
 bash "$repo_dir/pfr/tools/run_january_2025_b8_periodic5_local.sh" \
     --start-day 1 --end-day 31 --day-workers 4 --gurobi-threads 4 \
     --output-root "$b8_root" || b8_campaign_rc=$?
+abort_if_interrupted "$b8_campaign_rc" "january_b8"
 if ((b8_campaign_rc != 0)); then
     overall=1
     echo "JANUARY_B8_COMPLETED_WITH_RECORDED_FAILURE rc=$b8_campaign_rc" >&2
@@ -165,6 +190,7 @@ fi
 rep_rc=0
 bash "$repo_dir/pfr/tools/run_full_february_march_2025_local.sh" \
     --run-root "$run_root" || rep_rc=$?
+abort_if_interrupted "$rep_rc" "february_march"
 if ((rep_rc != 0)); then overall=1; fi
 
 if ((overall == 0)); then
