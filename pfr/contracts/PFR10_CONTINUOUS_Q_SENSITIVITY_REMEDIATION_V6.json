@@ -1,0 +1,31 @@
+{
+  "schema_version": "PFR10_CONTINUOUS_Q_SENSITIVITY_REMEDIATION_V6",
+  "status": "FROZEN_BEFORE_V6_REPLAY",
+  "trigger_artifact": "PFR10_JAN2025_DAY03_ENERGY_RECOVERY_PQ_V5",
+  "observed_failure": {
+    "coarse_grid_limitation": true,
+    "example_issue": 829,
+    "best_robust_voltage_min_pu": 0.9496098641562928,
+    "corresponding_voltage_max_pu": 1.04935401625083,
+    "outcome_exclusion": false
+  },
+  "technical_amendment": {
+    "name": "FRESH_OPENDSS_CONTINUOUS_LOCATION_SENSITIVE_Q_SENSITIVITY_QP",
+    "finite_difference_probe_kvar": 70.0,
+    "metrics": ["minimum_voltage", "maximum_voltage", "line_loading", "transformer_loading"],
+    "internal_voltage_limits_pu": [0.9505, 1.0495],
+    "decision_variables": "CONNECTED_MESS_REACTIVE_POWER_DELTAS",
+    "integer_variables": 0,
+    "objective": "NORMALIZED_MINIMUM_SQUARED_Q_DISTANCE",
+    "exact_candidate_scales": [0.25, 0.5, 0.75, 1.0, 1.05],
+    "acceptance": "FRESH_EXACT_OPENDSS_PASS_OR_STRICTLY_IMPROVING_WITH_NO_NEW_HARD_CONSTRAINT_VIOLATION",
+    "pcs_limits_unchanged": "P550_S700",
+    "slow_binary_state_fixed": true,
+    "future_actual_used": false
+  },
+  "required_replay_order": [
+    "PFR9_JAN01_FULL_DAY_B0_B7",
+    "PFR10_JAN03_DIAGNOSTIC",
+    "PFR10_JAN01_07_INDEPENDENT_B0_B7"
+  ]
+}

@@ -313,6 +313,7 @@ def main() -> int:
     parser.add_argument("--phase", choices=("traffic", "full"), default="traffic")
     parser.add_argument("--cpu-workers", type=int, default=14)
     parser.add_argument("--audit-quarantine-only", action="store_true")
+    parser.add_argument("--stage2a-runtime-override")
     args = parser.parse_args()
     if args.batch_size != 576:
         raise RuntimeError("R12 freezes the accepted R10 origin-context batch at exactly 576")
@@ -364,6 +365,14 @@ def main() -> int:
     r10 = load_module(r10_path, "r12_r10_streaming_authority")
     package = r10_path.parent
     r10.CURRENT_PKG = package
+    stage2a_override_sha256 = None
+    if args.stage2a_runtime_override:
+        stage2a_override = Path(args.stage2a_runtime_override).resolve()
+        q2_override = stage2a_override / "scats_forecast/q2_global_volume_forecast_offsets1_19.float32.npy"
+        if not q2_override.is_file():
+            raise RuntimeError("stage2a runtime override is missing the causal Q2 forecast")
+        r10.STAGE2A_RUNTIME = stage2a_override
+        stage2a_override_sha256 = sha256(q2_override)
 
     rows = read_resume(index_partial, output, artifact_issues)
     quarantine_audit = quarantine_uncommitted(output, rows)
@@ -507,6 +516,8 @@ def main() -> int:
                 "future_actual_target_read": False,
                 "gurobi_executed": False,
                 "opendss_executed": False,
+                "stage2a_runtime_root": str(r10.STAGE2A_RUNTIME),
+                "stage2a_q2_sha256": stage2a_override_sha256,
             })
             return 0
 

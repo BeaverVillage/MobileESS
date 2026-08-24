@@ -1,0 +1,30 @@
+{
+  "stage": "PFR6",
+  "pipeline": [
+    "upper_controller_u_nom",
+    "continuous_convex_AC_safety_projection",
+    "Fresh_Exact_three_phase_OpenDSS",
+    "h0_commit"
+  ],
+  "projection_constraints": [
+    "phase-aware_voltage",
+    "line_thermal",
+    "transformer_current_kVA",
+    "MESS_PCS_circle",
+    "SOC",
+    "plug_D2",
+    "bounded_training_throttle",
+    "fixed_slow_discrete_state"
+  ],
+  "sequential_feasibility_restoration": {
+    "primary_subproblem": "elastic_joint_P_Q_convex_trust_region_QCP",
+    "elastic_variables": "linearized_constraint_residuals_only",
+    "intermediate_acceptance": "strict_Fresh_Exact_normalized_violation_reduction",
+    "relinearization": "after_every_accepted_Fresh_Exact_intermediate_step",
+    "final_acceptance": "unchanged_0.95_1.05_voltage_and_1.0_thermal_Fresh_Exact_limits",
+    "hard_limits_relaxed": false
+  },
+  "prohibited": "heuristic P/Q correction after OpenDSS failure",
+  "unresolved_policy": "method-scoped continuous projection <-> common fixed-state grid coordination -> Fresh OpenDSS -> full slow replan and repeat -> fail closed",
+  "accepted_final_ac_violation_count": 0
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Materialize one representative week's P/Q/PV and price source blocks."""
+"""Materialize one frozen P/Q/PV and price source chunk."""
 from __future__ import annotations
 import argparse,hashlib,importlib.util,json,shutil,sys,tempfile
 from pathlib import Path
@@ -33,9 +33,12 @@ def jw(p:Path,o):
 def main():
  ap=argparse.ArgumentParser();ap.add_argument("--repo",required=True);ap.add_argument("--output-root",required=True)
  ap.add_argument("--candidate-id",default="W02_2025-01-13");ap.add_argument("--start-index",type=int,default=START)
+ ap.add_argument("--scored-count",type=int,default=2016)
  ap.add_argument("--base-work",default="/home/jaewon/mobile_ess_work");a=ap.parse_args()
  repo=Path(a.repo).resolve();out=Path(a.output_root).resolve();base=Path(a.base_work).resolve()
- start=int(a.start_index);scored_end=start+2015;padded_end=start+BLOCK*BLOCKS-1
+ start=int(a.start_index)
+ if not 1<=a.scored_count<=BLOCK*BLOCKS:raise RuntimeError("scored-count must be in [1,2304]")
+ scored_end=start+a.scored_count-1;padded_end=start+BLOCK*BLOCKS-1
  out.mkdir(parents=True,exist_ok=True)
  helper=load(repo/"stage7/r12_representative_weeks/materialize_r12_episode_power_price.py","a_b10_pp_helper")
  forecast=base/"execution_packages/Mobile_ESS_stage_p6a4h1b_p7a3f1b_conditional_dag_parallel_v3_0_1/assets/forecast/P6A3_FULL_YEAR_CAUSAL_FORECAST.npz"
@@ -52,7 +55,7 @@ def main():
    auth=bd/"BLOCK_AUTHORITY.json"
    if auth.is_file():
     old=json.loads(auth.read_text())
-    if old.get("status")!="PASS" or old.get("candidate_id",a.candidate_id)!=a.candidate_id or old.get("issue_first")!=lo or old.get("issue_last")!=hi-1:raise RuntimeError("existing source block authority drift")
+    if old.get("status")!="PASS" or old.get("candidate_id",a.candidate_id)!=a.candidate_id or old.get("issue_first")!=lo or old.get("issue_last")!=hi-1 or old.get("scored_overlap_first")!=max(lo,start) or old.get("scored_overlap_last")!=min(hi-1,scored_end):raise RuntimeError("existing source block authority drift")
     records.append(old);continue
    pdir=bd/"power_tmp";pdir.mkdir()
    prec=helper.materialize_power(r7,resolved,kernel,work,issues,pdir)
@@ -75,9 +78,10 @@ def main():
  finally:
   for t in temps:shutil.rmtree(t,ignore_errors=True)
  top={"schema_version":"mobileess.post_stage15.rep_week.power_price_blocks.v2","status":"PASS","candidate_id":a.candidate_id,
-      "scored_issue_first":start,"scored_issue_last":scored_end,"scored_issue_count":2016,
+      "scored_issue_first":start,"scored_issue_last":scored_end,"scored_issue_count":a.scored_count,
       "source_issue_last":padded_end,"source_block_steps":BLOCK,"block_count":BLOCKS,
-      "extra_source_cache_steps":288,"extra_source_cache_role":"UNSCORED_CAUSAL_SOURCE_PADDING",
+      "extra_source_cache_steps":BLOCK*BLOCKS-a.scored_count,
+      "extra_source_cache_role":("NONE_ALL_SOURCE_ISSUES_SCORED" if a.scored_count==BLOCK*BLOCKS else "UNSCORED_CAUSAL_SOURCE_PADDING"),
       "future_actual_used":False,"blocks":records}
  jw(out/"REP_WEEK_POWER_PRICE_SOURCE_AUTHORITY.json",top)
  if a.candidate_id=="W02_2025-01-13":jw(out/"A_B10_W02_POWER_PRICE_SOURCE_AUTHORITY.json",top)

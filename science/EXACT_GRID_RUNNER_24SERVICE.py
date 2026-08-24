@@ -23,6 +23,7 @@ from opendss_metrics_common import (
     TOL, V_MIN_PU, V_MAX_PU, LOADING_LIMIT_PU,
     get_error, cmd, set_named_load, set_named_generator,
     collect_voltage_rows, collect_line_rows, collect_transformer_rows,
+    collect_control_state,
 )
 
 TOTAL_STEPS=105933
@@ -215,7 +216,8 @@ class PowerStore:
         return (np.asarray(self.tp[j],dtype=np.float64),np.asarray(self.tq[j],dtype=np.float64),
                 np.asarray(self.tv[j],dtype=np.float64),int(self.tt[j]))
 
-def apply_background(odd:Any,bp:np.ndarray,bq:np.ndarray,pv:np.ndarray,contract_dir:Path)->dict[str,float]:
+def apply_background(odd:Any,bp:np.ndarray,bq:np.ndarray,pv:np.ndarray,
+                     contract_dir:Path)->dict[str,float]:
     adapter=json.loads((contract_dir/"opendss_runtime_adapter.json").read_text(encoding="utf-8"))
     mask=np.load(contract_dir/"compiled_bus_phase_mask.npy",allow_pickle=False).astype(bool)
     if bp.shape!=(131,3) or bq.shape!=(131,3) or pv.shape!=(131,3) or mask.shape!=(131,3):
@@ -316,6 +318,27 @@ def solve_step(paths:dict[str,str],step:int,state:dict[str,list[Any]])->dict[str
     import opendssdirect as odd
     store=PowerStore(Path(paths["primary"]),Path(paths["tail"]))
     bp,bq,pv,tns=store.step(step)
+    forecast_override="background_p_kw" in state
+    if forecast_override:
+        bp=np.asarray(state["background_p_kw"],dtype=float)
+        bq=np.asarray(state["background_q_kvar"],dtype=float)
+        pv=np.asarray(state["pv_available_kw"],dtype=float)
+        if bp.shape!=(131,3) or bq.shape!=(131,3) or pv.shape!=(131,3):
+            raise RuntimeError("forecast background override must be 131x3")
+        if not np.isfinite(bp).all() or not np.isfinite(bq).all() or not np.isfinite(pv).all():
+            raise RuntimeError("forecast background override contains nonfinite values")
+    scale_contract_value=paths.get("feeder_scale_contract")
+    feeder_scale=1.0
+    if scale_contract_value is not None:
+        scale_contract=json.loads(Path(scale_contract_value).read_text(encoding="utf-8"))
+        feeder_scale=float(scale_contract["alpha_grid"])
+        if (scale_contract.get("status")!="FROZEN_POST_HOC_P100_FEEDER_SCALE"
+                or not 0.0<feeder_scale<=1.0):
+            raise RuntimeError("feeder absolute-scale contract is invalid")
+        if not forecast_override:
+            bp=bp*feeder_scale
+            bq=bq*feeder_scale
+            pv=pv*feeder_scale
     fac_p=np.asarray(state["facility_p_kw"],dtype=float)
     fac_q=np.asarray(state["facility_q_kvar"],dtype=float)
     if "mess_location_service_id" in state:
@@ -335,6 +358,26 @@ def solve_step(paths:dict[str,str],step:int,state:dict[str,list[Any]])->dict[str
     command_audit=[]
     odd.Basic.ClearAll()
     assets=Path(paths["assets"]); contract=Path(paths["contract"])
+    if forecast_override:
+        adapter=json.loads((contract/"opendss_runtime_adapter.json").read_text(encoding="utf-8"))
+        native_p=np.asarray(adapter["native_bus_p_kw"],dtype=float)
+        native_q=np.asarray(adapter["native_bus_q_kvar"],dtype=float)
+        pweights=np.zeros((131,3),dtype=float)
+        qweights=np.zeros((131,3),dtype=float)
+        for row in adapter["loads"]:
+            for phase in row["phases"]:
+                bi=int(row["bus_index"]); pi=int(phase)-1; count=len(row["phases"])
+                if abs(native_p[bi])>1e-12:
+                    pweights[bi,pi]+=float(row["base_p_kw"])/native_p[bi]/count
+                if abs(native_q[bi])>1e-12:
+                    qweights[bi,pi]+=float(row["base_q_kvar"])/native_q[bi]/count
+        def align_load_phases(values:np.ndarray,weights:np.ndarray)->np.ndarray:
+            totals=values.sum(axis=1)
+            if np.any((np.abs(weights).sum(axis=1)<1e-12)&(np.abs(totals)>1e-9)):
+                raise RuntimeError("forecast override has load on a bus without compiled phases")
+            return totals[:,None]*weights
+        bp=align_load_phases(bp,pweights)
+        bq=align_load_phases(bq,qweights)
     cmd(odd,f'Compile "{assets/"IEEE123Master.dss"}"',command_audit)
     cmd(odd,"MakeBusList",command_audit)
     base_bus_count=int(odd.Circuit.NumBuses())
@@ -347,6 +390,73 @@ def solve_step(paths:dict[str,str],step:int,state:dict[str,list[Any]])->dict[str
         raise RuntimeError("augmented bus count !=168")
     cmd(odd,f'Redirect "{assets/"Generated_Planning_Line_Ratings_u080.dss"}"',command_audit)
     cmd(odd,f'Redirect "{contract/"Generated_PhasePV.dss"}"',command_audit)
+    native_control_value=paths.get("native_grid_control")
+    native_control_path=Path(native_control_value) if native_control_value else None
+    if native_control_path is not None:
+        if not native_control_path.is_file():
+            raise RuntimeError("common native grid-control overlay is missing")
+        cmd(odd,f'Redirect "{native_control_path}"',command_audit)
+    native_control_mode=str(
+      state.get("native_grid_control_mode","LEGACY_SOURCE_STATE")
+    ).upper()
+    initial_native_states={
+      str(name).lower():[int(value) for value in values]
+      for name,values in state.get("native_capacitor_initial_states",{}).items()
+    }
+    initial_native_regulator_taps={
+      str(name).lower():int(value)
+      for name,value in state.get("native_regulator_initial_tap_numbers",{}).items()
+    }
+    available_capacitors={str(name).lower() for name in odd.Capacitors.AllNames()}
+    missing_capacitors=sorted(set(initial_native_states)-available_capacitors)
+    if missing_capacitors:
+        raise RuntimeError(
+          f"native capacitor state references missing assets: {missing_capacitors}"
+        )
+    for name,values in sorted(initial_native_states.items()):
+        odd.Capacitors.Name(name)
+        if len(values)!=int(odd.Capacitors.NumSteps()):
+            raise RuntimeError(f"native capacitor state width changed for {name}")
+        odd.Capacitors.States(values)
+    available_regcontrols={str(name).lower() for name in odd.RegControls.AllNames()}
+    missing_regcontrols=sorted(
+      set(initial_native_regulator_taps)-available_regcontrols
+    )
+    if missing_regcontrols:
+        raise RuntimeError(
+          f"native regulator state references missing controls: {missing_regcontrols}"
+        )
+    for name,tap_number in sorted(initial_native_regulator_taps.items()):
+        if not -16<=tap_number<=16:
+            raise RuntimeError(f"native regulator tap escaped physical range for {name}")
+        odd.RegControls.Name(name)
+        odd.RegControls.TapNumber(tap_number)
+    locked_native_capacitors={
+      str(name).lower() for name in state.get("native_capacitor_locked",())
+    }
+    if not locked_native_capacitors.issubset(available_capacitors):
+        raise RuntimeError("native capacitor dwell lock references a missing asset")
+    if native_control_path is not None:
+        control_to_capacitor={
+          "pfr_native_c83":"c83",
+          "pfr_native_c88a":"c88a",
+          "pfr_native_c90b":"c90b",
+          "pfr_native_c92c":"c92c",
+        }
+        if native_control_mode=="FIXED_STATE_VERIFICATION":
+            disabled=set(control_to_capacitor)
+        elif native_control_mode=="EVALUATE_TRANSITION":
+            disabled={
+              control for control,capacitor in control_to_capacitor.items()
+              if capacitor in locked_native_capacitors
+            }
+        else:
+            raise RuntimeError(f"unsupported native grid-control mode {native_control_mode}")
+        for control in sorted(disabled):
+            cmd(odd,f"Edit CapControl.{control} Enabled=No",command_audit)
+        if native_control_mode=="FIXED_STATE_VERIFICATION":
+            for control in sorted(available_regcontrols):
+                cmd(odd,f"Edit RegControl.{control} Enabled=No",command_audit)
     bind=apply_background(odd,bp,bq,pv,contract)
 
     for i,idc in enumerate(IDCS):
@@ -393,11 +503,25 @@ def solve_step(paths:dict[str,str],step:int,state:dict[str,list[Any]])->dict[str
     lviol=sum(1 for r in lines if r["hard_violation"])
     tviol=sum(1 for r in tx if r["hard_violation"])
     tcviol=sum(1 for r in txi if r["hard_violation"])
-    vmin=min((float(r["voltage_pu"]) for r in voltage),default=float("nan"))
-    vmax=max((float(r["voltage_pu"]) for r in voltage),default=float("nan"))
-    lmax=max((float(r["loading_pu"]) for r in lines),default=float("nan"))
-    tkmax=max((float(r["loading_pu"]) for r in tx),default=float("nan"))
-    tcmax=max((float(r["current_loading_pu"]) for r in txi),default=float("nan"))
+    vmin_row=min(voltage,key=lambda r:float(r["voltage_pu"]),default=None)
+    vmax_row=max(voltage,key=lambda r:float(r["voltage_pu"]),default=None)
+    lmax_row=max(lines,key=lambda r:float(r["loading_pu"]),default=None)
+    tkmax_row=max(tx,key=lambda r:float(r["loading_pu"]),default=None)
+    tcmax_row=max(txi,key=lambda r:float(r["current_loading_pu"]),default=None)
+    vmin=float(vmin_row["voltage_pu"]) if vmin_row else float("nan")
+    vmax=float(vmax_row["voltage_pu"]) if vmax_row else float("nan")
+    lmax=float(lmax_row["loading_pu"]) if lmax_row else float("nan")
+    tkmax=float(tkmax_row["loading_pu"]) if tkmax_row else float("nan")
+    tcmax=float(tcmax_row["current_loading_pu"]) if tcmax_row else float("nan")
+    native_control=collect_control_state(odd)
+    native_capacitor_states={
+      str(row["name"]):list(row.get("states",()))
+      for row in native_control.get("capacitors",())
+    }
+    native_regulator_taps={
+      str(row["name"]):row.get("tap_number")
+      for row in native_control.get("regcontrols",())
+    }
     hard=bool(converged and cerr==0 and vviol==0 and lviol==0 and tviol==0 and tcviol==0 and root_sign)
     return {
       "step_index":int(step),"timestamp_utc_ns":int(tns),
@@ -406,11 +530,45 @@ def solve_step(paths:dict[str,str],step:int,state:dict[str,list[Any]])->dict[str
       "line_max_loading_pu":lmax,"line_violation_count":lviol,
       "transformer_max_kva_loading_pu":tkmax,"transformer_kva_violation_count":tviol,
       "transformer_max_current_loading_pu":tcmax,"transformer_current_violation_count":tcviol,
+      "voltage_min_bus_node":(
+        f'{vmin_row["bus"]}.{vmin_row["node"]}' if vmin_row else None
+      ),
+      "voltage_max_bus_node":(
+        f'{vmax_row["bus"]}.{vmax_row["node"]}' if vmax_row else None
+      ),
+      "line_max_loading_name":(str(lmax_row["line"]) if lmax_row else None),
+      "transformer_max_kva_loading_name":(
+        str(tkmax_row["transformer"]) if tkmax_row else None
+      ),
+      "transformer_max_current_loading_name":(
+        str(tcmax_row["transformer"]) if tcmax_row else None
+      ),
+      "transformer_max_current_loading_winding":(
+        int(tcmax_row["winding"]) if tcmax_row else None
+      ),
       "root_import_p_kw":root_import_p,"root_import_q_kvar":root_import_q,
       "root_sign_pass":root_sign,"hard_constraint_pass":hard,
       "background_binding_p_residual_kw":bind["p_residual_kw"],
       "background_binding_q_residual_kvar":bind["q_residual_kvar"],
       "background_binding_pv_residual_kw":bind["pv_residual_kw"],
+      "feeder_absolute_scale_alpha":feeder_scale,
+      "feeder_absolute_scale_applied":scale_contract_value is not None,
+      "native_grid_control_authority":(
+        "COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1"
+        if native_control_path is not None
+        else "LEGACY_FIXED_CAPACITOR_NO_CAPCONTROL"
+      ),
+      "native_capcontrol_count":int(odd.CapControls.Count()),
+      "native_grid_control_mode":native_control_mode,
+      "native_capacitor_binary_state_frozen":bool(
+        native_control_mode=="FIXED_STATE_VERIFICATION"
+      ),
+      "native_regulator_tap_state_frozen":bool(
+        native_control_mode=="FIXED_STATE_VERIFICATION"
+      ),
+      "native_capacitor_locked":sorted(locked_native_capacitors),
+      "native_capacitor_states":native_capacitor_states,
+      "native_regulator_tap_numbers":native_regulator_taps,
     }
 
 def read_h6b2_state(package_root:Path)->dict[str,list[Any]]:

@@ -1,0 +1,82 @@
+{
+  "schema_version": "BACKGROUND_LOAD_SCALE_CONSISTENCY_AUDIT_V1",
+  "audit_date": "2026-08-22",
+  "status": "SUPERSEDED_P95_IS_INTENTIONAL_BUT_INCOMPATIBLE_WITH_B0_HARD_FEASIBILITY",
+  "question": "Is the native-transformer violation caused by an accidental AEMO-Jemena-IEEE123 absolute-scale mismatch?",
+  "answer": "The p95 mapping was implemented as intended, so it is not a preprocessing bug. It is nevertheless incompatible with the experiment requirement that resource-free B0 must hard-pass every committed timestamp. FEEDER_ABSOLUTE_SCALE_CONTRACT_V2 therefore supersedes the p95 operating scale with a p100-to-native mapping.",
+  "superseded_by": "FEEDER_ABSOLUTE_SCALE_CONTRACT_V2",
+  "scaling_contract": {
+    "configured_reference": "p95",
+    "aemo_2025_total_demand_p95_mw": 7100.2615,
+    "ieee123_native_active_load_kw": 3490.0,
+    "ieee123_native_reactive_load_kvar": 1920.0,
+    "load_scale_formula": "load_scale(t) = AEMO_VIC1_TOTALDEMAND_MW(t) / 7100.2615",
+    "active_power_formula": "P_bg_net_total_kW(t) = 3490.0 * load_scale(t)",
+    "reactive_power_formula_before_jemena_variation": "Q_bg_total_kvar(t) = 1920.0 * load_scale(t)",
+    "equivalent_active_mapping_kw_per_regional_mw": 0.49153119232605724,
+    "aemo_2025_total_demand_max_mw": 9490.53,
+    "annual_max_load_scale": 1.3366451263427734,
+    "annual_max_load_scale_timestamp_utc": "2025-02-03T08:35:00",
+    "annual_max_operational_net_target_kw": 4664.89208984375,
+    "p95_operational_net_target_kw": 3490.000244140625,
+    "pv_semantics": "Explicit feeder PV is added back to gross background and subtracted independently in OpenDSS; it is not multiplied by a post-hoc alpha_grid."
+  },
+  "feeder_evidence": {
+    "canonical_native_max_transformer_current_loading_pu": 0.9440711414330595,
+    "canonical_native_max_transformer": "reg1a",
+    "official_48h_window_utc": "2025-04-28T14:00:00Z/2025-04-30T14:00:00Z",
+    "official_48h_max_transformer_current_loading_pu": 0.8162840869203749,
+    "annual_background_peak_timestamp_utc": "2025-02-03T07:25:00Z",
+    "annual_background_peak_max_transformer_current_loading_pu": 1.3519762438823422,
+    "annual_background_peak_max_transformer": "reg1a",
+    "annual_background_peak_status": "VIOLATED",
+    "annual_audit_interpretation": "Annual background peak already violates native transformer limits. Do not uprate the transformer implicitly; retain it as an exact OpenDSS operating constraint."
+  },
+  "comparison_interpretation": {
+    "official_48h_vs_annual_peak": "Different operating windows; 0.816 p.u. does not certify the annual maximum.",
+    "annual_peak_is_preexisting_known_stress": true,
+    "january_failure_used_to_choose_scale": false,
+    "scale_correction_authorized": false,
+    "alpha_grid_applied": true,
+    "alpha_grid": 0.7481417265421424
+  },
+  "decision": {
+    "classification": "CASE_B_INTENTIONAL_STRESS_SUPERSEDED_BY_EXPERIMENT_FEASIBILITY_CONTRACT",
+    "background_load_scaling_change": "AUTHORIZED_ONLY_BY_FEEDER_ABSOLUTE_SCALE_CONTRACT_V2",
+    "transformer_uprating": "PROHIBITED_BY_THIS_AUDIT",
+    "voltage_limit_relaxation": "PROHIBITED_BY_THIS_AUDIT",
+    "next_design_scope": "Apply one p100-derived scale to background P/Q/PV in causal planning and exact execution; preserve IDC/MESS specifications, topology, ratings, and hard limits."
+  },
+  "source_authorities": [
+    {
+      "path": "/home/jaewon/mobile_ess_tools/mobile_ess_power_v61_pipeline_v1/config/power_v61.yaml",
+      "sha256": "a175b271ce9b401b290904437f46f8246d9c0e7a29147042da022386a6cc8f6f",
+      "evidence": "load_scaling.main_reference = p95"
+    },
+    {
+      "path": "/home/jaewon/mobile_ess_tools/mobile_ess_power_v61_pipeline_v1/src/power_v61/profiles.py",
+      "sha256": "c3ebd010b02a962dd146f6645824761615e0033598a9d0582cb7d54c14e70abd",
+      "evidence": "scale = demand / refs[load_reference]; IEEE123 P and Q are multiplied by the same scale"
+    },
+    {
+      "path": "/mnt/c/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed/power_v61/power_data_quality_report.json",
+      "sha256": "f999c2a09baadcf63fb2cedf05c93466f2727c5f2235417559bd24bb9e466eb9",
+      "evidence": "AEMO mean/p95/max demand reference values"
+    },
+    {
+      "path": "/home/jaewon/mobile_ess_work/processed/power_v70_3ph/runtime_arrays/operational_net_target_total_kw.npy",
+      "sha256": "703f29d2605c28ce6de68205b3bc012ca37cbbf41a68f0cc89b86fa71c43cd36",
+      "evidence": "Frozen 2025 feeder operational-net target"
+    },
+    {
+      "path": "/home/jaewon/mobile_ess_work/integrated_rebuild/current/06_opendss_3ph/power_side_p4f_hardening_v1/official48_u080_all_transformers/gate.json",
+      "sha256": "dd24a409611d0055b63903b8e952090fd0fed754a518843def69f45da75c03f4",
+      "evidence": "Canonical native and official 48-hour exact OpenDSS metrics"
+    },
+    {
+      "path": "/home/jaewon/mobile_ess_work/integrated_rebuild/current/06_opendss_3ph/power_side_p4f_hardening_v1/exact_full_pq_u080_all_transformers/annual_peak_transformer_violation_audit.json",
+      "sha256": "0fb8f6e940523487cdaff9dae15ffb91acdc6f798df4aa6708c6916a5fc6443a",
+      "evidence": "Pre-January frozen annual background-peak reg1a violation"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "schema_version": "K9H7_RESULT_V2.runtime_contract.v1",
+  "stage": "PFR9_PLUS",
+  "issue_pipeline": [
+    "causal source frame",
+    "slow B0-B7 treatment plan",
+    "five-minute continuous recourse",
+    "normalized plan-validity risk",
+    "convex AC safety projection certificate",
+    "Fresh Exact 168-bus three-phase OpenDSS",
+    "atomic h0 POST commit marker",
+    "materializer"
+  ],
+  "source_job_power": "source-matched canonical Kestrel work plus measured H100 utilization-power p95 envelope",
+  "work_unit": "normalized full-utilization H100-equivalent GPU-hour, not FLOPs/tokens",
+  "fast_optimization_authority": "actual deterministic Gurobi continuous convex QP with per-IDC GPU and MESS SOC constraints; nominal Q is fixed at zero and only each method's preregistered MESS P/Q capability may be used by its AC-safety projection; no common emergency MESS dispatch exists",
+  "gurobi_numerical_acceptance": "finite primal with OPTIMAL or SUBOPTIMAL status; a raw MaxVio above 1e-6 triggers one deterministic NumericFocus/ScaleFlag retry, followed by exact bound and per-site capacity projection with independently verified residual <=1e-9; every commit still requires Fresh Exact AC",
+  "common_hard_safety_actuator": "B0-B7 share the same hard limits, native feeder-device controller, and capability-bounded reactive support from the existing phase-resolved PV generators. Scheduled MESS and workload optimization remain restricted to each arm's preregistered capability",
+  "overvoltage_control_direction": "for capability-enabled arms, absorb inverter Q, charge MESS when thermal headroom permits, and increase temporal compute within remaining-work, robust GPU-reserve, and unchanged 750-kVA limits; workload throttling is reserved for undervoltage or thermal relief",
+  "physical_execution_authority_version": "V13_13_POST_HOC_P100_FEEDER_SCALE_NATIVE_ELASTIC_AC_FREEZE_20260823",
+  "common_native_grid_control": "COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1 carries capacitor and regulator tap states chronologically. It first applies local CapControl/RegControl and a bounded feeder-wide discrete guard, after which each method receives only its preregistered continuous projection. If all remain Fresh-exact infeasible, finite-difference integer tap restoration searches the existing native assets. PV reactive power is disabled because the frozen PV authority defines peak-available kW rather than inverter kVA. FEEDER_ABSOLUTE_SCALE_CONTRACT_V2 applies one common p100-based factor to background P/Q/PV in both causal planning and exact execution. No emergency MESS, load shedding, rating increase, or hard-limit relaxation is introduced. The design is frozen for January-2025 post-hoc development and unseen-period validation.",
+  "continuous_ac_projection_landing_margin_pu": 0.00002,
+  "continuous_ac_projection_acceptance": "the primary finite-difference joint P/Q subproblem is an elastic convex feasibility-restoration trust-region QCP, so an initially infeasible point may take strictly improving intermediate steps across more than one trust radius; every step is relinearized from Fresh exact results and final acceptance remains exclusively the unchanged 0.95/1.05/1.0 Fresh OpenDSS hard limits",
+  "mess_initial_energy_kwh": 760,
+  "mess_safety_reserve_kwh": 440,
+  "mess_operational_policy": "only energy-enabled methods may use nominal MESS P; dispatch and mobility must preserve the 440-kWh protected floor while each independent daily episode cold-starts at 760 kWh",
+  "missing_input_bytes_policy": "raw input_bytes remains NULL and is never zero-filled; the frozen primary migration case study separately declares datasets pre-staged at all 12 IDCs, so destination dataset transfer is zero by scenario authority rather than by imputation",
+  "checkpoint_policy": "checkpoint size and interval are not measured in Kestrel; IDC_MIGRATION_AUTHORITY_V1 explicitly models a 30-minute interval, rho_ckpt times requested-GPU count times an 80-GB H100-framebuffer engineering reference, and one five-minute simulation interval of restart overhead. The primary rho_ckpt is 1.0 and January development sensitivity values are 0.25, 0.5, and 1.0; none is a measured checkpoint size",
+  "migration_authority": "PFR_IDC_MIGRATION_ABILENE12_H10080_V1; Abilene is a 12-node capacity benchmark and must not be described as a measured Melbourne inter-IDC WAN",
+  "facility_reactive_power_assumption": "unity power factor, explicitly modeled",
+  "modeled_gpu_capacity_per_idc": 256,
+  "mess_physical_ratings": {
+    "active_power_limit_kw": 550,
+    "apparent_power_limit_kva": 700,
+    "energy_floor_kwh": 440,
+    "energy_capacity_kwh": 1080
+  },
+  "future_actual": "prohibited; current h0 realized physical state is allowed only inside Fresh OpenDSS",
+  "local_repair": "prohibited",
+  "heuristic_post_opendss_pq_correction": "prohibited"
+}

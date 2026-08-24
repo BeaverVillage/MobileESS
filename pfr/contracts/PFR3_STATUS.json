@@ -1,0 +1,24 @@
+{
+  "stage": "PFR3",
+  "status": "PASS",
+  "authority": "V13_2_FACTORIZED_UNCERTAINTY",
+  "uncertainty_universe": "U_t = U_mob x U_work x U_grid",
+  "composition": "CARTESIAN_PRODUCT_OF_SEPARATELY_CALIBRATED_AUTHORITIES",
+  "joint_cross_factor_recalibration": false,
+  "components": {
+    "U_mob": "PFR3_JOINT_MOBILITY_CALIBRATION.json",
+    "U_work": "PFR3_WORKLOAD_UNCERTAINTY_V13_2.json",
+    "U_grid": "PFR3_GRID_UNCERTAINTY_V13_2.json"
+  },
+  "gates": {
+    "joint_eta_energy_coverage": "PASS",
+    "no_2025_retuning": "PASS",
+    "distribution_shift_stress": "PASS",
+    "workload_uncertainty_binding": "PASS",
+    "grid_uncertainty_binding": "PASS",
+    "future_actual_leakage": "ABSENT"
+  },
+  "historical_joint_mobility_result": "PASS_SUPPORTING_AUTHORITY",
+  "current_contract": "V13_2_JOINT_ETA_ENERGY_X_WORKLOAD_X_GRID",
+  "next_authorized_stage": "PFR4"
+}
