@@ -65,6 +65,8 @@ class SlowDiscretePlan:
     job_idc_placement: Mapping[str, str]
     checkpoint_migration: Mapping[str, Optional[str]]
     gpu_gang_allocation: Mapping[str, Tuple[str, ...]]
+    # Earliest start-eligibility issue.  Actual RUNNING admission is performed
+    # by the common capacity-feasible whole-gang dispatcher.
     job_start_issue: Mapping[str, int]
     coarse_charging_kw: Mapping[str, Tuple[float, ...]]
 

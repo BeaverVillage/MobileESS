@@ -1488,6 +1488,8 @@ def main() -> None:
         != "K9H7_RESULT_V2.runtime_contract.v1"
         or "admitted on its causal arrival issue"
         not in runtime_contract.get("workload_admission_authority", "")
+        or "work-conserving"
+        not in runtime_contract.get("common_gpu_gang_scheduler", "")
         or "fails closed"
         not in runtime_contract.get("non_temporal_compute_authority", "")
     ):
@@ -1649,6 +1651,9 @@ def main() -> None:
         "runtime_contract_sha256": sha256(runtime_contract_path),
         "workload_admission_authority": (
             "CAUSAL_ARRIVAL_ORIGIN_PLACEMENT_ADMISSION_ONLY_PLAN_REVISION"
+        ),
+        "common_gpu_gang_scheduler": (
+            "WORK_CONSERVING_LEAST_START_SLACK_EDF_CAPACITY_QUEUE_WHOLE_GANG"
         ),
         "non_temporal_compute_modulation_allowed": False,
         "native_grid_control_release_status": native_control_contract["status"],

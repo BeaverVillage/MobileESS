@@ -299,6 +299,7 @@ class RuntimeJobState:
     migration_payload_remaining_bytes: int = 0
     restart_remaining_steps: int = 0
     migration_work_gpu_hours_at_start: Optional[float] = None
+    queue_wait_steps: int = 0
 
 
 @dataclass
@@ -314,6 +315,8 @@ class MutableMethodState:
     communication_bytes: int = 0
     admission_plan_revision_count: int = 0
     admission_communication_bytes: int = 0
+    scheduler_started_jobs_cumulative: int = 0
+    capacity_queue_wait_job_steps_cumulative: int = 0
     wan_transferred_bytes_cumulative: int = 0
     wan_active_transfers: int = 0
     migration_count_cumulative: int = 0
@@ -2438,7 +2441,7 @@ def _register_arrivals_in_active_plan(
 
 
 def _compute_fraction(job: RuntimeJobState, frame: CausalExperimentFrame, config: MethodConfig) -> float:
-    if job.lifecycle in {"COMPLETED", "MIGRATING", "RESTARTING"}:
+    if job.lifecycle != "RUNNING":
         return 0.0
     remaining_full_steps = math.ceil(job.remaining_work_gpu_hours / (job.source.requested_gpu * STEP_HOURS))
     steps_to_deadline = job.source.deadline_step - frame.issue
@@ -2705,6 +2708,101 @@ def _effective_job_site(job: RuntimeJobState) -> str:
     return job.destination_idc
 
 
+def _schedule_capacity_feasible_queued_jobs(
+    state: MutableMethodState,
+    config: MethodConfig,
+    frame: CausalExperimentFrame,
+) -> Mapping[str, Any]:
+    """Start whole GPU gangs without hiding capacity-blocked workload.
+
+    The dispatcher is common and work-conserving: it never delays a job when
+    the complete gang fits at its already-decided placement.  Priority is
+    deterministic earliest-latest-start, then deadline, arrival, and UID.
+    QUEUED jobs retain all work and remain visible in debt/deadline metrics.
+    """
+
+    reserve = {
+        site: (
+            float(frame.workload_reserve_gpu.get(site, 0.0))
+            if config.joint_uncertainty
+            else 0.0
+        )
+        for site in IDCS
+    }
+    capacity = {
+        site: MODELED_GPU_CAPACITY_PER_IDC - reserve[site]
+        for site in IDCS
+    }
+    if any(value < 0.0 for value in capacity.values()):
+        raise RuntimeContractError("workload reserve exceeds IDC GPU capacity")
+    occupied = {site: 0.0 for site in IDCS}
+    for job in state.jobs.values():
+        if job.lifecycle not in {"RUNNING", "MIGRATING", "RESTARTING"}:
+            continue
+        site = _effective_job_site(job)
+        occupied[site] += job.source.requested_gpu
+    if any(
+        occupied[site] > MODELED_GPU_CAPACITY_PER_IDC + 1e-9
+        for site in IDCS
+    ):
+        raise RuntimeContractError(
+            "existing GPU gang occupancy exceeds physical IDC capacity"
+        )
+
+    started_jobs = 0
+    started_gpu = {site: 0 for site in IDCS}
+    for uid, job in sorted(
+        (
+            (uid, job)
+            for uid, job in state.jobs.items()
+            if job.lifecycle == "QUEUED"
+        ),
+        key=lambda row: (
+            row[1].source.latest_start_step,
+            row[1].source.deadline_step,
+            row[1].source.arrival_step,
+            row[0],
+        ),
+    ):
+        site = job.destination_idc
+        gpu = job.source.requested_gpu
+        if gpu > MODELED_GPU_CAPACITY_PER_IDC:
+            raise RuntimeContractError(
+                "a GPU gang cannot fit at its fixed planned IDC"
+            )
+        if occupied[site] + gpu > capacity[site] + 1e-9:
+            continue
+        job.lifecycle = "RUNNING"
+        job.compute_rate_fraction = 0.0
+        job.start_issue = frame.issue
+        occupied[site] += gpu
+        started_jobs += 1
+        started_gpu[site] += gpu
+
+    queued = [job for job in state.jobs.values() if job.lifecycle == "QUEUED"]
+    queued_gpu = {
+        site: sum(
+            job.source.requested_gpu
+            for job in queued
+            if job.destination_idc == site
+        )
+        for site in IDCS
+    }
+    state.scheduler_started_jobs_cumulative += started_jobs
+    return {
+        "policy": "COMMON_WORK_CONSERVING_LEAST_START_SLACK_EDF_WHOLE_GANG",
+        "started_jobs": started_jobs,
+        "started_gpu_by_site": started_gpu,
+        "running_reserved_gpu_by_site": {
+            site: int(occupied[site]) for site in IDCS
+        },
+        "queued_jobs": len(queued),
+        "queued_gpu_by_site": queued_gpu,
+        "capacity_blocked": bool(queued),
+        "capacity_gpu_by_site": capacity,
+    }
+
+
 def _optimize_job_migrations(
     state: MutableMethodState,
     config: MethodConfig,
@@ -2746,44 +2844,57 @@ def _optimize_job_migrations(
         else 0.0
         for site in IDCS
     }
-    loads = dict(reserved)
+    physical_loads = {site: 0.0 for site in IDCS}
     for uid, job in jobs.items():
         if job.lifecycle != "QUEUED":
-            loads[placements[uid]] += job.source.requested_gpu
-    if any(value > MODELED_GPU_CAPACITY_PER_IDC + 1e-9 for value in loads.values()):
+            physical_loads[placements[uid]] += job.source.requested_gpu
+    if any(
+        value > MODELED_GPU_CAPACITY_PER_IDC + 1e-9
+        for value in physical_loads.values()
+    ):
         raise RuntimeContractError("running GPU gang placement exceeds IDC capacity")
+    loads = {
+        site: reserved[site] + physical_loads[site]
+        for site in IDCS
+    }
     prestart_placements = []
+    projected_queue_loads = dict(loads)
     for uid, job in sorted(
         (
             (uid, job)
             for uid, job in jobs.items()
             if job.lifecycle == "QUEUED"
         ),
-        key=lambda row: (-row[1].source.requested_gpu, row[0]),
+        key=lambda row: (
+            row[1].source.latest_start_step,
+            row[1].source.deadline_step,
+            row[1].source.arrival_step,
+            row[0],
+        ),
     ):
         gpu = job.source.requested_gpu
         feasible = [
             destination
             for destination in IDCS
-            if loads[destination] + gpu <= MODELED_GPU_CAPACITY_PER_IDC + 1e-9
+            if gpu <= MODELED_GPU_CAPACITY_PER_IDC
         ]
         if not feasible:
             raise RuntimeContractError(
-                "no IDC has capacity for the queued pre-start GPU gang"
+                "queued GPU gang exceeds every individual IDC capacity"
             )
         destination = min(
             feasible,
             key=lambda site: (
                 sum(
                     (value + (gpu if candidate == site else 0.0)) ** 2
-                    for candidate, value in loads.items()
+                    for candidate, value in projected_queue_loads.items()
                 ),
-                loads[site],
+                projected_queue_loads[site],
                 site,
             ),
         )
         placements[uid] = destination
-        loads[destination] += gpu
+        projected_queue_loads[destination] += gpu
         if destination != job.destination_idc:
             prestart_placements.append(
                 {
@@ -2863,6 +2974,7 @@ def _optimize_job_migrations(
         "authority_sha256": authority.fingerprint,
         "eligible_candidate_count": len(candidates),
         "baseline_sum_squared_reserved_gpu": baseline,
+        "projected_queue_gpu_by_site": projected_queue_loads,
         "selected_migration": selected_payload,
         "maximum_migrations_per_replan": 1,
         "evaluation_steps_remaining": evaluation_steps_remaining,
@@ -3249,7 +3361,7 @@ def _nominal_control(state: MutableMethodState, config: MethodConfig, frame: Cau
     compute = {
         uid: _compute_fraction(job, frame, config)
         for uid, job in state.jobs.items()
-        if job.lifecycle not in {"COMPLETED", "MIGRATING", "RESTARTING"}
+        if job.lifecycle == "RUNNING"
     }
     energy_enabled = config.energy_flexibility in {"MESS", "STATIONARY_BESS"}
     charge, discharge = _nominal_mess_dispatch(
@@ -3315,6 +3427,10 @@ def _post_payload(state: MutableMethodState, method_id: str) -> Mapping[str, Any
         "migration_count_cumulative": state.migration_count_cumulative,
         "admission_plan_revision_count": state.admission_plan_revision_count,
         "admission_communication_bytes": state.admission_communication_bytes,
+        "scheduler_started_jobs_cumulative": state.scheduler_started_jobs_cumulative,
+        "capacity_queue_wait_job_steps_cumulative": (
+            state.capacity_queue_wait_job_steps_cumulative
+        ),
         "native_capacitor_states": state.native_capacitor_states,
         "native_capacitor_dwell_remaining_steps": (
             state.native_capacitor_dwell_remaining_steps
@@ -3342,6 +3458,7 @@ def _post_payload(state: MutableMethodState, method_id: str) -> Mapping[str, Any
                 "migration_work_gpu_hours_at_start": (
                     job.migration_work_gpu_hours_at_start
                 ),
+                "queue_wait_steps": job.queue_wait_steps,
             }
             for uid, job in sorted(state.jobs.items())
         },
@@ -3455,6 +3572,9 @@ class PfrRuntimeRunner:
                 admission_plan_events = _register_arrivals_in_active_plan(
                     state, frame
                 )
+            workload_schedule = _schedule_capacity_feasible_queued_jobs(
+                state, config, frame
+            )
             nominal = _nominal_control(state, config, frame)
             fast_state = FastLayerState(
                 issue=frame.issue,
@@ -3462,7 +3582,7 @@ class PfrRuntimeRunner:
                 remaining_work_gpu_hours={
                     uid: job.remaining_work_gpu_hours
                     for uid, job in state.jobs.items()
-                    if job.lifecycle not in {"COMPLETED", "MIGRATING", "RESTARTING"}
+                    if job.lifecycle == "RUNNING"
                     and uid in state.active_plan.job_idc_placement
                 },
             )
@@ -3563,7 +3683,7 @@ class PfrRuntimeRunner:
                     remaining_work_gpu_hours={
                         uid: job.remaining_work_gpu_hours
                         for uid, job in state.jobs.items()
-                        if job.lifecycle not in {"COMPLETED", "MIGRATING", "RESTARTING"}
+                        if job.lifecycle == "RUNNING"
                         and uid in state.active_plan.job_idc_placement
                     },
                 )
@@ -3669,10 +3789,11 @@ class PfrRuntimeRunner:
             )
             for uid, fraction in fast.control.job_compute_rate_fraction.items():
                 job = state.jobs[uid]
+                if job.lifecycle != "RUNNING":
+                    raise RuntimeContractError(
+                        "fast compute control references a non-running job"
+                    )
                 job.compute_rate_fraction = fraction
-                if fraction > 0.0 and job.lifecycle == "QUEUED":
-                    job.lifecycle = "RUNNING"
-                    job.start_issue = frame.issue
             facility_p, _ = _facility_power(state.jobs.values(), self.power_curve)
             previous_native_states = dict(state.native_capacitor_states)
             state.native_capacitor_states = {
@@ -3749,6 +3870,14 @@ class PfrRuntimeRunner:
             migration_progress = _advance_job_migration_state(
                 state, self.migration_authority
             )
+            queued_after_step = [
+                job for job in state.jobs.values() if job.lifecycle == "QUEUED"
+            ]
+            for job in queued_after_step:
+                job.queue_wait_steps += 1
+            state.capacity_queue_wait_job_steps_cumulative += len(
+                queued_after_step
+            )
             state.compute_debt_gpu_hours = sum(
                 max(0.0, job.remaining_work_gpu_hours - max(0, job.source.deadline_step - frame.issue - 1) * job.source.requested_gpu * STEP_HOURS)
                 for job in state.jobs.values() if job.lifecycle != "COMPLETED"
@@ -3792,6 +3921,45 @@ class PfrRuntimeRunner:
                 ),
                 "admission_communication_bytes_cumulative": (
                     state.admission_communication_bytes
+                ),
+                "workload_scheduler_policy": workload_schedule["policy"],
+                "workload_started_jobs": workload_schedule["started_jobs"],
+                "workload_started_gpu_by_site": workload_schedule[
+                    "started_gpu_by_site"
+                ],
+                "scheduler_started_jobs_cumulative": (
+                    state.scheduler_started_jobs_cumulative
+                ),
+                "capacity_blocked_queue": bool(queued_after_step),
+                "queued_jobs": len(queued_after_step),
+                "queued_gpu_by_site": {
+                    site: sum(
+                        job.source.requested_gpu
+                        for job in queued_after_step
+                        if job.destination_idc == site
+                    )
+                    for site in IDCS
+                },
+                "running_gpu_by_site": {
+                    site: sum(
+                        job.source.requested_gpu
+                        for job in state.jobs.values()
+                        if job.lifecycle == "RUNNING"
+                        and job.destination_idc == site
+                    )
+                    for site in IDCS
+                },
+                "capacity_queue_wait_job_steps_cumulative": (
+                    state.capacity_queue_wait_job_steps_cumulative
+                ),
+                "maximum_queue_wait_steps": max(
+                    (job.queue_wait_steps for job in state.jobs.values()),
+                    default=0,
+                ),
+                "late_started_jobs": sum(
+                    job.start_issue is not None
+                    and job.start_issue > job.source.latest_start_step
+                    for job in state.jobs.values()
                 ),
                 "wan_transferred_bytes_cumulative": state.wan_transferred_bytes_cumulative,
                 "wan_active_transfers": state.wan_active_transfers,
@@ -3943,6 +4111,13 @@ class PfrRuntimeRunner:
             "communication_bytes": state.communication_bytes,
             "admission_plan_revision_count": state.admission_plan_revision_count,
             "admission_communication_bytes": state.admission_communication_bytes,
+            "scheduler_started_jobs": state.scheduler_started_jobs_cumulative,
+            "capacity_queue_wait_job_steps": (
+                state.capacity_queue_wait_job_steps_cumulative
+            ),
+            "final_queued_jobs": sum(
+                job.lifecycle == "QUEUED" for job in state.jobs.values()
+            ),
             "migration_count": state.migration_count_cumulative,
             "wan_transferred_bytes": state.wan_transferred_bytes_cumulative,
             "migration_authority_sha256": (
