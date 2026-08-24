@@ -89,3 +89,8 @@ def test_all_month_runners_bind_same_frozen_calibration() -> None:
     assert orchestrator.index("run_january_to_march_2025_local.sh") < orchestrator.index(
         "prepare_april_2025_local.sh"
     ) < orchestrator.index("run_april_2025_local.sh")
+    monitor = (
+        REPO / "pfr/tools/show_january_to_april_progress.py"
+    ).read_text(encoding="utf-8")
+    assert "ETA: NOT_REPORTED" in monitor
+    assert "APRIL B0-B7" in monitor
