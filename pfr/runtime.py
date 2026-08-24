@@ -312,6 +312,8 @@ class MutableMethodState:
     active_plan_age_steps: int = 10**9
     full_replan_count: int = 0
     communication_bytes: int = 0
+    admission_plan_revision_count: int = 0
+    admission_communication_bytes: int = 0
     wan_transferred_bytes_cumulative: int = 0
     wan_active_transfers: int = 0
     migration_count_cumulative: int = 0
@@ -2343,6 +2345,98 @@ def _admit_arrivals(state: MutableMethodState, frame: CausalExperimentFrame, con
     return spatial_blocked
 
 
+def _register_arrivals_in_active_plan(
+    state: MutableMethodState,
+    frame: CausalExperimentFrame,
+) -> tuple[Mapping[str, Any], ...]:
+    """Publish an immutable admission-only plan revision for new arrivals.
+
+    A full slow replan optimizes optional placement, migration, and MESS routing.
+    Workload admission is a separate common obligation: a job must become
+    executable at its current (initially origin) IDC on its causal arrival issue,
+    even when the method's slow-plan policy is FIXED or is between refreshes.
+    This revision adds only the frozen default placement and gang identity; it
+    cannot alter any pre-existing slow decision.
+    """
+
+    if state.active_plan is None:
+        raise RuntimeContractError("workload admission lacks an active slow plan")
+    plan = state.active_plan
+    arrived_uids = tuple(source.job_uid for source in frame.arrivals)
+    missing = tuple(uid for uid in arrived_uids if uid not in plan.job_idc_placement)
+    stale_missing = sorted(
+        uid
+        for uid, job in state.jobs.items()
+        if job.lifecycle != "COMPLETED"
+        and uid not in plan.job_idc_placement
+        and uid not in missing
+    )
+    if stale_missing:
+        raise RuntimeContractError(
+            "active slow plan lost previously admitted jobs: "
+            + ",".join(stale_missing)
+        )
+    if not missing:
+        return ()
+
+    placement = dict(plan.job_idc_placement)
+    checkpoint = dict(plan.checkpoint_migration)
+    gangs = dict(plan.gpu_gang_allocation)
+    starts = dict(plan.job_start_issue)
+    events = []
+    for uid in missing:
+        job = state.jobs[uid]
+        if job.source.arrival_step != frame.issue:
+            raise RuntimeContractError("admission revision is not causal to this issue")
+        destination = job.destination_idc
+        placement[uid] = destination
+        checkpoint[uid] = None
+        gangs[uid] = tuple(job.gang_membership)
+        starts[uid] = frame.issue
+        events.append(
+            {
+                "job_uid": uid,
+                "arrival_issue": frame.issue,
+                "destination_idc": destination,
+                "requested_gpu": job.source.requested_gpu,
+                "decision_authority": "DETERMINISTIC_ORIGIN_ADMISSION_NO_OPTIMIZATION",
+            }
+        )
+
+    revision = state.admission_plan_revision_count + 1
+    base_plan_id = plan.plan_id.split("+A", 1)[0]
+    revised = SlowDiscretePlan(
+        plan_id=f"{base_plan_id}+A{revision}",
+        valid_from_issue=plan.valid_from_issue,
+        mess_destination=dict(plan.mess_destination),
+        mess_native_route_rank=dict(plan.mess_native_route_rank),
+        job_idc_placement=placement,
+        checkpoint_migration=checkpoint,
+        gpu_gang_allocation=gangs,
+        job_start_issue=starts,
+        coarse_charging_kw=dict(plan.coarse_charging_kw),
+    )
+    revised.validate()
+    for uid in plan.job_idc_placement:
+        if (
+            revised.job_idc_placement[uid] != plan.job_idc_placement[uid]
+            or revised.checkpoint_migration[uid] != plan.checkpoint_migration[uid]
+            or revised.gpu_gang_allocation[uid] != plan.gpu_gang_allocation[uid]
+            or revised.job_start_issue[uid] != plan.job_start_issue[uid]
+        ):
+            raise RuntimeContractError(
+                "admission-only revision mutated a pre-existing slow decision"
+            )
+    state.active_plan = revised
+    state.admission_plan_revision_count = revision
+    encoded_bytes = len(
+        json.dumps(events, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    )
+    state.admission_communication_bytes += encoded_bytes
+    state.communication_bytes += encoded_bytes
+    return tuple(events)
+
+
 def _compute_fraction(job: RuntimeJobState, frame: CausalExperimentFrame, config: MethodConfig) -> float:
     if job.lifecycle in {"COMPLETED", "MIGRATING", "RESTARTING"}:
         return 0.0
@@ -3174,6 +3268,38 @@ def _nominal_control(state: MutableMethodState, config: MethodConfig, frame: Cau
     )
 
 
+def _enforce_compute_modulation_authority(
+    config: MethodConfig,
+    nominal: FastControl,
+    optimized: FastControl,
+    state: FastLayerState,
+    limits: FastLayerLimits,
+) -> None:
+    """Prevent an optimizer from granting temporal flexibility to B0/B1."""
+
+    if config.temporal_workload_shift:
+        return
+    expected = {
+        uid: min(
+            max(float(nominal.job_compute_rate_fraction[uid]), 0.0),
+            float(state.remaining_work_gpu_hours[uid])
+            / (int(limits.job_gpu_count[uid]) * STEP_HOURS),
+        )
+        for uid in nominal.job_compute_rate_fraction
+    }
+    if set(optimized.job_compute_rate_fraction) != set(expected) or any(
+        abs(
+            float(optimized.job_compute_rate_fraction[uid])
+            - expected[uid]
+        )
+        > 1e-9
+        for uid in expected
+    ):
+        raise RuntimeContractError(
+            "fast optimizer modulated compute for a method without temporal flexibility"
+        )
+
+
 def _post_payload(state: MutableMethodState, method_id: str) -> Mapping[str, Any]:
     return {
         "comparison_method_id": method_id,
@@ -3187,6 +3313,8 @@ def _post_payload(state: MutableMethodState, method_id: str) -> Mapping[str, Any
         "wan_transferred_bytes_cumulative": state.wan_transferred_bytes_cumulative,
         "wan_active_transfers": state.wan_active_transfers,
         "migration_count_cumulative": state.migration_count_cumulative,
+        "admission_plan_revision_count": state.admission_plan_revision_count,
+        "admission_communication_bytes": state.admission_communication_bytes,
         "native_capacitor_states": state.native_capacitor_states,
         "native_capacitor_dwell_remaining_steps": (
             state.native_capacitor_dwell_remaining_steps
@@ -3300,6 +3428,7 @@ class PfrRuntimeRunner:
             replan, replan_causes = _should_replan(state, config, risk, offset)
             migration_started_events: tuple[Mapping[str, Any], ...] = ()
             prestart_placement_events: tuple[Mapping[str, Any], ...] = ()
+            admission_plan_events: tuple[Mapping[str, Any], ...] = ()
             if replan:
                 state.active_plan = _build_slow_plan(
                     state,
@@ -3322,7 +3451,10 @@ class PfrRuntimeRunner:
                 )
             if state.active_plan is None:
                 raise RuntimeContractError("no active slow plan")
-            slow_fingerprint = state.active_plan.fingerprint
+            if not replan:
+                admission_plan_events = _register_arrivals_in_active_plan(
+                    state, frame
+                )
             nominal = _nominal_control(state, config, frame)
             fast_state = FastLayerState(
                 issue=frame.issue,
@@ -3361,7 +3493,11 @@ class PfrRuntimeRunner:
                         for site in IDCS
                     },
                     mess_operational_enabled=config.energy_flexibility in {"MESS", "STATIONARY_BESS"},
+                    compute_modulation_enabled=config.temporal_workload_shift,
                 ),
+            )
+            _enforce_compute_modulation_authority(
+                config, nominal, optimized.control, fast_state, limits
             )
             fast = execute_fast_recourse(
                 architecture=self.architecture,
@@ -3459,7 +3595,15 @@ class PfrRuntimeRunner:
                             for site in IDCS
                         },
                         mess_operational_enabled=config.energy_flexibility in {"MESS", "STATIONARY_BESS"},
+                        compute_modulation_enabled=config.temporal_workload_shift,
                     ),
+                )
+                _enforce_compute_modulation_authority(
+                    config,
+                    escalated_nominal,
+                    active_optimization.control,
+                    accepted_fast_state,
+                    accepted_limits,
                 )
                 fast = execute_fast_recourse(
                     architecture=self.architecture,
@@ -3641,6 +3785,14 @@ class PfrRuntimeRunner:
                 "replan_causes": replan_causes + (("AC_SAFETY_ESCALATION",) if safety_replan else ()),
                 "full_replan_count_cumulative": state.full_replan_count,
                 "communication_bytes_cumulative": state.communication_bytes,
+                "admission_plan_revision_executed": bool(admission_plan_events),
+                "admission_plan_events": list(admission_plan_events),
+                "admission_plan_revision_count_cumulative": (
+                    state.admission_plan_revision_count
+                ),
+                "admission_communication_bytes_cumulative": (
+                    state.admission_communication_bytes
+                ),
                 "wan_transferred_bytes_cumulative": state.wan_transferred_bytes_cumulative,
                 "wan_active_transfers": state.wan_active_transfers,
                 "wan_bytes_transferred_step": migration_progress["bytes_transferred"],
@@ -3789,6 +3941,8 @@ class PfrRuntimeRunner:
             "future_actual_used": False,
             "full_replan_count": state.full_replan_count,
             "communication_bytes": state.communication_bytes,
+            "admission_plan_revision_count": state.admission_plan_revision_count,
+            "admission_communication_bytes": state.admission_communication_bytes,
             "migration_count": state.migration_count_cumulative,
             "wan_transferred_bytes": state.wan_transferred_bytes_cumulative,
             "migration_authority_sha256": (

@@ -4,6 +4,9 @@ The slow layer owns every binary or categorical choice.  The five-minute
 layer may only project continuous set-points while preserving the exact slow
 plan fingerprint.  Fresh Exact OpenDSS remains a later mandatory commit gate;
 the linear screen here can reject a candidate but can never certify a commit.
+New causal workload arrivals are published as immutable admission-only slow-plan
+revisions before this fast contract is entered; the fast layer never invents or
+hides workload membership.
 """
 
 from __future__ import annotations

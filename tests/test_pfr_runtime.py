@@ -5,6 +5,7 @@ import unittest
 from pfr.migration import load_migration_authority
 from pfr.methods import ComparisonMethod, ExperimentAuthority, MethodFactory
 from pfr.power import H100UtilizationPowerCurve
+from pfr.optimization import FastOptimizationCertificate, OptimizedFastControl
 from pfr.runtime import (
     CausalExperimentFrame,
     OperationalTrainingJob,
@@ -15,6 +16,7 @@ from pfr.runtime import (
     NativeGridControlDecision,
 )
 from pfr.safety import ExactAcResult
+from pfr.slow_fast import FastControl
 
 
 class FakePhysical:
@@ -117,6 +119,28 @@ class RaiseAfterOneCommittedIssuePhysical(FakePhysical):
         return super().verify_fresh(**kwargs)
 
 
+class UnauthorizedComputeModulatingOptimizer:
+    def optimize(self, *, nominal, state, limits, context):
+        return OptimizedFastControl(
+            FastControl(
+                dict(nominal.mess_charge_kw),
+                dict(nominal.mess_discharge_kw),
+                dict(nominal.mess_q_kvar),
+                {uid: 0.0 for uid in nominal.job_compute_rate_fraction},
+                dict(nominal.site_throughput_fraction),
+            ),
+            FastOptimizationCertificate(
+                solver="SYNTHETIC_UNAUTHORIZED",
+                status="SYNTHETIC",
+                actual_gurobi_used=False,
+                solution_count=1,
+                objective_value=0.0,
+                maximum_constraint_violation=0.0,
+                runtime_seconds=0.0,
+            ),
+        )
+
+
 class PfrRuntimeTests(unittest.TestCase):
     def setUp(self):
         hashes = [format(index, "064x") for index in range(1, 8)]
@@ -185,6 +209,136 @@ class PfrRuntimeTests(unittest.TestCase):
         self.assertEqual(
             rows[1]["replan_causes"], ["PERIODIC_5_MINUTE_REFRESH"]
         )
+
+    def test_b0_late_arrival_is_admitted_without_full_replan(self):
+        late_job = OperationalTrainingJob(
+            "late-j1", "IDC01", 101, 103, 120, 1, 3600, 0.01, None,
+            "source-late-j1", self.migration_authority.checkpoint_payload_bytes(1),
+            self.migration_authority.fingerprint,
+        )
+        frames = (
+            CausalExperimentFrame(100, 100, 50, 1000, 100, (), "d" * 64),
+            CausalExperimentFrame(101, 100, 50, 1000, 100, (late_job,), "e" * 64),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            summary = PfrRuntimeRunner(
+                power_curve=self.curve,
+                physical_backend=FakePhysical(),
+                migration_authority=self.migration_authority,
+            ).run_method(
+                config=self.configs[0],
+                frames=frames,
+                initial=self.initial,
+                representative_week_id="TEST_B0_LATE_ARRIVAL",
+                output=root,
+            )
+            first = __import__("json").loads(
+                (root / "B0/issue_000100/COMMIT_MARKER.json").read_text()
+            )
+            second = __import__("json").loads(
+                (root / "B0/issue_000101/COMMIT_MARKER.json").read_text()
+            )
+        self.assertEqual(summary["status"], "PASS")
+        self.assertEqual(summary["full_replan_count"], 1)
+        self.assertEqual(summary["admission_plan_revision_count"], 1)
+        self.assertEqual(first["facility_p_kw_total"], 0.0)
+        self.assertGreater(second["facility_p_kw_total"], 0.0)
+        self.assertEqual(second["active_jobs"], 1)
+        self.assertTrue(second["admission_plan_revision_executed"])
+        self.assertEqual(
+            second["admission_plan_events"][0]["decision_authority"],
+            "DETERMINISTIC_ORIGIN_ADMISSION_NO_OPTIMIZATION",
+        )
+
+    def test_late_arrival_is_executable_across_b0_b8(self):
+        late_job = OperationalTrainingJob(
+            "common-late-j1", "IDC01", 101, 103, 120, 1, 3600, 0.01,
+            None, "source-common-late-j1",
+            self.migration_authority.checkpoint_payload_bytes(1),
+            self.migration_authority.fingerprint,
+        )
+        frames = (
+            CausalExperimentFrame(100, 100, 50, 1000, 100, (), "d" * 64),
+            CausalExperimentFrame(101, 100, 50, 1000, 100, (late_job,), "e" * 64),
+        )
+        b8 = MethodFactory(
+            ExperimentAuthority(*[format(index, "064x") for index in range(1, 8)])
+        ).create(ComparisonMethod.B8)
+        for config in (*self.configs, b8):
+            with self.subTest(method=config.comparison_method_id.value):
+                with tempfile.TemporaryDirectory() as temporary:
+                    root = Path(temporary)
+                    summary = PfrRuntimeRunner(
+                        power_curve=self.curve,
+                        physical_backend=FakePhysical(),
+                        migration_authority=self.migration_authority,
+                    ).run_method(
+                        config=config,
+                        frames=frames,
+                        initial=self.initial,
+                        representative_week_id="TEST_COMMON_LATE_ARRIVAL",
+                        output=root,
+                    )
+                    marker = __import__("json").loads(
+                        (
+                            root
+                            / config.comparison_method_id.value
+                            / "issue_000101/COMMIT_MARKER.json"
+                        ).read_text()
+                    )
+                self.assertEqual(summary["status"], "PASS")
+                self.assertGreater(marker["facility_p_kw_total"], 0.0)
+                self.assertEqual(marker["active_jobs"], 1)
+
+    def test_b0_rejects_unauthorized_fast_compute_modulation(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            with self.assertRaisesRegex(
+                RuntimeContractError,
+                "without temporal flexibility",
+            ):
+                PfrRuntimeRunner(
+                    power_curve=self.curve,
+                    physical_backend=FakePhysical(),
+                    fast_optimizer=UnauthorizedComputeModulatingOptimizer(),
+                    migration_authority=self.migration_authority,
+                ).run_method(
+                    config=self.configs[0],
+                    frames=self.frames[:1],
+                    initial=self.initial,
+                    representative_week_id="TEST_B0_COMPUTE_AUTHORITY",
+                    output=Path(temporary),
+                )
+
+    def test_b0_allows_only_physical_last_step_work_clipping(self):
+        short_job = OperationalTrainingJob(
+            "short-j1", "IDC01", 100, 102, 110, 1, 60, 0.01, None,
+            "source-short-j1",
+            self.migration_authority.checkpoint_payload_bytes(1),
+            self.migration_authority.fingerprint,
+        )
+        frame = CausalExperimentFrame(
+            100, 100, 50, 1000, 100, (short_job,), "f" * 64
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            summary = PfrRuntimeRunner(
+                power_curve=self.curve,
+                physical_backend=FakePhysical(),
+                migration_authority=self.migration_authority,
+            ).run_method(
+                config=self.configs[0],
+                frames=(frame,),
+                initial=self.initial,
+                representative_week_id="TEST_B0_LAST_STEP_CLIP",
+                output=root,
+            )
+            marker = __import__("json").loads(
+                (root / "B0/issue_000100/COMMIT_MARKER.json").read_text()
+            )
+        self.assertEqual(summary["status"], "PASS")
+        self.assertEqual(marker["completed_jobs"], 1)
+        self.assertGreater(marker["facility_p_kw_total"], 0.0)
 
     def test_common_native_binary_transition_precedes_and_is_fixed_during_safety(self):
         physical = NativeControlPhysical()

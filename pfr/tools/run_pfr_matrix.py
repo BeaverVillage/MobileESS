@@ -1452,6 +1452,9 @@ def main() -> None:
     predictive_native_authority = (
         repo / "pfr/contracts/PREDICTIVE_NATIVE_DWELL_GUARD_V1.json"
     ).resolve()
+    runtime_contract_path = (
+        repo / "pfr/contracts/PFR_RUNTIME_CONTRACT.json"
+    ).resolve()
     if not all(
         path.is_file()
         for path in (
@@ -1459,12 +1462,14 @@ def main() -> None:
             native_control_authority,
             native_asset_audit,
             predictive_native_authority,
+            runtime_contract_path,
         )
     ):
         raise RuntimeError("common native grid-control authority is incomplete")
     native_control_contract = json_load(native_control_authority)
     native_asset_contract = json_load(native_asset_audit)
     predictive_native_contract = json_load(predictive_native_authority)
+    runtime_contract = json_load(runtime_contract_path)
     if (
         predictive_native_contract.get("identity")
         != "PREDICTIVE_NATIVE_DWELL_GUARD_V1"
@@ -1478,6 +1483,15 @@ def main() -> None:
         != [f"B{index}" for index in range(9)]
     ):
         raise RuntimeError("predictive native dwell-guard authority is invalid")
+    if (
+        runtime_contract.get("schema_version")
+        != "K9H7_RESULT_V2.runtime_contract.v1"
+        or "admitted on its causal arrival issue"
+        not in runtime_contract.get("workload_admission_authority", "")
+        or "fails closed"
+        not in runtime_contract.get("non_temporal_compute_authority", "")
+    ):
+        raise RuntimeError("workload admission runtime authority is invalid")
     frozen_control_authorized = bool(
         native_control_contract.get("status") == "FROZEN_APPROVED"
         and native_control_contract.get("main_scientific_campaign_authorized")
@@ -1632,6 +1646,11 @@ def main() -> None:
             PREDICTIVE_NATIVE_HORIZON_STEPS
         ),
         "predictive_native_future_actual_used": False,
+        "runtime_contract_sha256": sha256(runtime_contract_path),
+        "workload_admission_authority": (
+            "CAUSAL_ARRIVAL_ORIGIN_PLACEMENT_ADMISSION_ONLY_PLAN_REVISION"
+        ),
+        "non_temporal_compute_modulation_allowed": False,
         "native_grid_control_release_status": native_control_contract["status"],
         "main_scientific_campaign_authorized": frozen_control_authorized,
         "january_2025_post_hoc_validation_authorized": post_hoc_control_authorized,
