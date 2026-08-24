@@ -22,6 +22,12 @@ from pfr.daily import DailyInitializationError, certify_daily_pre_identity
 from pfr.git_identity import run_git
 from pfr.methods import ComparisonMethod, ExperimentAuthority, MethodFactory
 from pfr.migration import MigrationAuthority, load_migration_authority
+from pfr.native_predictive import (
+    PREDICTIVE_NATIVE_HORIZON_STEPS,
+    PredictivePathScore,
+    capacitor_switch_count,
+    intermediate_capacitor_states,
+)
 from pfr.optimization import GurobiFastControlOptimizer, gurobi_thread_limit
 from pfr.power import H100UtilizationPowerCurve
 from pfr.provenance import scientific_implementation_fingerprint
@@ -126,6 +132,15 @@ class ExactOpenDssBackend:
         previous_capacitor_states: Mapping[str, Sequence[int]],
         previous_regulator_taps: Mapping[str, int],
         locked_capacitors: Sequence[str],
+        native_forecast_background_p_kw: Sequence[
+            Sequence[Sequence[float]]
+        ] = (),
+        native_forecast_background_q_kvar: Sequence[
+            Sequence[Sequence[float]]
+        ] = (),
+        native_forecast_pv_available_kw: Sequence[
+            Sequence[Sequence[float]]
+        ] = (),
         deep_search: bool = False,
     ) -> NativeGridControlDecision:
         state = self._state(
@@ -214,6 +229,241 @@ class ExactOpenDssBackend:
             return sum(value * value for value in residuals)
 
         transition_metrics = metrics(raw)
+        predictive_guard_evidence: dict[str, Any] = {
+            "status": "NOT_TRIGGERED_NO_LOCAL_CAPACITOR_TRANSITION",
+            "authority": "PREDICTIVE_NATIVE_DWELL_GUARD_V1",
+            "future_actual_used": False,
+            "horizon_steps": PREDICTIVE_NATIVE_HORIZON_STEPS,
+            "candidate_count": 0,
+        }
+        native_forecasts = (
+            native_forecast_background_p_kw,
+            native_forecast_background_q_kvar,
+            native_forecast_pv_available_kw,
+        )
+        if any(native_forecasts) and not all(native_forecasts):
+            raise RuntimeError(
+                "predictive native forecast requires background P/Q and PV"
+            )
+        if any(native_forecasts) and any(
+            len(values) != PREDICTIVE_NATIVE_HORIZON_STEPS
+            for values in native_forecasts
+        ):
+            raise RuntimeError("predictive native forecast horizon must be 12 steps")
+        if (
+            not deep_search
+            and bool(transition_metrics["hard_constraint_pass"])
+            and transition_states != previous_states
+            and all(native_forecasts)
+        ):
+            candidate_rows = []
+            capacitor_candidates = intermediate_capacitor_states(
+                previous_states,
+                transition_states,
+                tuple(locked),
+            )
+            all_capacitor_names = tuple(sorted(previous_states))
+            for candidate_states in capacitor_candidates:
+                is_local_transition = candidate_states == transition_states
+                if is_local_transition:
+                    current_raw = raw
+                    current_metrics = transition_metrics
+                    current_taps = dict(transition_taps)
+                else:
+                    current_state = dict(state)
+                    current_state.update(
+                        {
+                            "native_grid_control_mode": "EVALUATE_TRANSITION",
+                            "native_capacitor_initial_states": {
+                                name: list(values)
+                                for name, values in candidate_states.items()
+                            },
+                            "native_capacitor_locked": list(all_capacitor_names),
+                            "native_regulator_initial_tap_numbers": previous_taps,
+                        }
+                    )
+                    current_raw = self.exact.solve_step(
+                        self.paths, issue, current_state
+                    )
+                    current_metrics = metrics(current_raw)
+                    current_taps = {
+                        str(name).lower(): int(round(float(value)))
+                        for name, value in current_raw.get(
+                            "native_regulator_tap_numbers", previous_taps
+                        ).items()
+                    }
+                if not bool(current_metrics["hard_constraint_pass"]):
+                    candidate_rows.append(
+                        {
+                            "states": {
+                                name: list(values)
+                                for name, values in sorted(candidate_states.items())
+                            },
+                            "current_h0_hard_pass": False,
+                            "is_local_transition": is_local_transition,
+                        }
+                    )
+                    continue
+
+                forecast_metrics = []
+                forecast_taps = dict(current_taps)
+                for lead, (background_p, background_q, pv_available) in enumerate(
+                    zip(*native_forecasts), start=1
+                ):
+                    forecast_state = dict(state)
+                    forecast_state.update(
+                        {
+                            "background_p_kw": background_p,
+                            "background_q_kvar": background_q,
+                            "pv_available_kw": pv_available,
+                            "native_grid_control_mode": "EVALUATE_TRANSITION",
+                            "native_capacitor_initial_states": {
+                                name: list(values)
+                                for name, values in candidate_states.items()
+                            },
+                            "native_capacitor_locked": list(all_capacitor_names),
+                            "native_regulator_initial_tap_numbers": forecast_taps,
+                        }
+                    )
+                    forecast_raw = self.exact.solve_step(
+                        self.paths, issue, forecast_state
+                    )
+                    observed_states = {
+                        str(name).lower(): tuple(int(value) for value in values)
+                        for name, values in forecast_raw.get(
+                            "native_capacitor_states", {}
+                        ).items()
+                    }
+                    if observed_states and observed_states != candidate_states:
+                        raise RuntimeError(
+                            "predictive forecast changed a locked capacitor state"
+                        )
+                    forecast_taps = {
+                        str(name).lower(): int(round(float(value)))
+                        for name, value in forecast_raw.get(
+                            "native_regulator_tap_numbers", forecast_taps
+                        ).items()
+                    }
+                    row_metrics = metrics(forecast_raw)
+                    forecast_metrics.append(row_metrics)
+                score = PredictivePathScore.from_metrics(forecast_metrics)
+                tap_movement = sum(
+                    abs(int(value) - int(previous_taps.get(name, value)))
+                    for name, value in current_taps.items()
+                )
+                candidate_rows.append(
+                    {
+                        "states": {
+                            name: list(values)
+                            for name, values in sorted(candidate_states.items())
+                        },
+                        "current_h0_hard_pass": True,
+                        "is_local_transition": is_local_transition,
+                        "current_taps": dict(sorted(current_taps.items())),
+                        "forecast_violation_steps": score.violation_steps,
+                        "forecast_maximum_violation_score": score.maximum_violation,
+                        "forecast_cumulative_violation_score": (
+                            score.cumulative_violation
+                        ),
+                        "forecast_minimum_voltage_pu": min(
+                            float(row["voltage_min_pu"])
+                            for row in forecast_metrics
+                        ),
+                        "forecast_maximum_voltage_pu": max(
+                            float(row["voltage_max_pu"])
+                            for row in forecast_metrics
+                        ),
+                        "forecast_maximum_line_loading_pu": max(
+                            float(row["line_max_loading_pu"])
+                            for row in forecast_metrics
+                        ),
+                        "forecast_maximum_transformer_loading_pu": max(
+                            float(row["transformer_max_loading_pu"])
+                            for row in forecast_metrics
+                        ),
+                        "capacitor_switch_count": capacitor_switch_count(
+                            previous_states, candidate_states
+                        ),
+                        "regulator_tap_movement": tap_movement,
+                        "_selection": (
+                            score.rank(),
+                            0 if is_local_transition else 1,
+                            capacitor_switch_count(
+                                previous_states, candidate_states
+                            ),
+                            tap_movement,
+                            tuple(
+                                candidate_states[name]
+                                for name in sorted(candidate_states)
+                            ),
+                            tuple(
+                                current_taps[name] for name in sorted(current_taps)
+                            ),
+                        ),
+                        "_current_raw": current_raw,
+                        "_current_metrics": current_metrics,
+                        "_current_taps": current_taps,
+                        "_states": candidate_states,
+                    }
+                )
+            selectable = [
+                row for row in candidate_rows if row.get("current_h0_hard_pass")
+            ]
+            if not selectable:
+                raise RuntimeError(
+                    "local transition passed but no predictive h0 candidate passed"
+                )
+            selected_predictive = min(
+                selectable, key=lambda row: row["_selection"]
+            )
+            transition_states = dict(selected_predictive["_states"])
+            transition_taps = dict(selected_predictive["_current_taps"])
+            raw = selected_predictive["_current_raw"]
+            transition_metrics = selected_predictive["_current_metrics"]
+            predictive_guard_evidence = {
+                "status": (
+                    "LOCAL_TRANSITION_RETAINED"
+                    if selected_predictive["is_local_transition"]
+                    else "PREDICTIVE_DWELL_GUARD_OVERRIDE"
+                ),
+                "authority": "PREDICTIVE_NATIVE_DWELL_GUARD_V1",
+                "future_actual_used": False,
+                "forecast_quantiles": {
+                    "background_p": "q90_gross",
+                    "background_q": "q90",
+                    "pv_available": "q10",
+                },
+                "horizon_steps": PREDICTIVE_NATIVE_HORIZON_STEPS,
+                "candidate_count": len(candidate_rows),
+                "selected_states": {
+                    name: list(values)
+                    for name, values in sorted(transition_states.items())
+                },
+                "candidates": [
+                    {
+                        key: value
+                        for key, value in row.items()
+                        if not key.startswith("_")
+                    }
+                    for row in candidate_rows
+                ],
+            }
+        elif transition_states == previous_states:
+            predictive_guard_evidence["status"] = (
+                "NOT_TRIGGERED_NO_LOCAL_CAPACITOR_TRANSITION"
+            )
+        elif not all(native_forecasts):
+            predictive_guard_evidence["status"] = (
+                "NOT_TRIGGERED_NO_CAUSAL_HORIZON_FORECAST"
+            )
+        elif deep_search:
+            predictive_guard_evidence["status"] = (
+                "NOT_TRIGGERED_DEEP_CURRENT_STATE_FALLBACK"
+            )
+        else:
+            predictive_guard_evidence["status"] = (
+                "NOT_TRIGGERED_LOCAL_TRANSITION_H0_UNSAFE"
+            )
         beam_width = 4
         maximum_tap_depth = 16
         deep_trust_region_radius = 8
@@ -610,9 +860,14 @@ class ExactOpenDssBackend:
             states=states,
             raw_metrics={
                 "status": (
-                    "COMMON_NATIVE_GRID_GLOBAL_GUARD_SELECTED_FRESH"
-                    if len(candidates) > 1
-                    else "COMMON_NATIVE_GRID_TRANSITION_EVALUATED_FRESH"
+                    "COMMON_NATIVE_GRID_PREDICTIVE_DWELL_GUARD_SELECTED_FRESH"
+                    if predictive_guard_evidence.get("status")
+                    == "PREDICTIVE_DWELL_GUARD_OVERRIDE"
+                    else (
+                        "COMMON_NATIVE_GRID_GLOBAL_GUARD_SELECTED_FRESH"
+                        if len(candidates) > 1
+                        else "COMMON_NATIVE_GRID_TRANSITION_EVALUATED_FRESH"
+                    )
                 ),
                 "issue": issue,
                 "native_grid_control_authority": selected_raw.get(
@@ -690,6 +945,7 @@ class ExactOpenDssBackend:
                     ),
                 },
                 "global_guard_candidate_evidence": candidate_evidence,
+                "predictive_native_dwell_guard": predictive_guard_evidence,
             },
             fresh_instance=True,
             common_to_all_methods=True,
@@ -1036,12 +1292,41 @@ def _frames(
         robust_p = feeder_scale * np.asarray(block["upper_p"][row, 0], dtype=float)
         robust_q = feeder_scale * np.asarray(block["upper_q"][row, 0], dtype=float)
         robust_pv = feeder_scale * np.asarray(block["lower_pv"][row, 0], dtype=float)
+        native_forecast_p = feeder_scale * np.asarray(
+            block["upper_p"][row, 1 : PREDICTIVE_NATIVE_HORIZON_STEPS + 1],
+            dtype=float,
+        )
+        native_forecast_q = feeder_scale * np.asarray(
+            block["upper_q"][row, 1 : PREDICTIVE_NATIVE_HORIZON_STEPS + 1],
+            dtype=float,
+        )
+        native_forecast_pv = feeder_scale * np.asarray(
+            block["lower_pv"][row, 1 : PREDICTIVE_NATIVE_HORIZON_STEPS + 1],
+            dtype=float,
+        )
+        if any(
+            values.shape[0] != PREDICTIVE_NATIVE_HORIZON_STEPS
+            for values in (
+                native_forecast_p,
+                native_forecast_q,
+                native_forecast_pv,
+            )
+        ):
+            raise RuntimeError(
+                f"causal native-control forecast is shorter than "
+                f"{PREDICTIVE_NATIVE_HORIZON_STEPS} steps at issue={issue}"
+            )
         payload = {
             "issue": issue,
             "power_block_authority_sha256": sha256(root / "BLOCK_AUTHORITY.json"),
             "arriving_job_uids": sorted(job.job_uid for job in arrivals.get(issue, ())),
             "mobility_issue_sha256": sha256(mobility_path),
             "factorized_uncertainty_bound": True,
+            "predictive_native_forecast_lead_steps": [
+                1,
+                PREDICTIVE_NATIVE_HORIZON_STEPS,
+            ],
+            "predictive_native_future_actual_used": False,
             "feeder_absolute_scale_alpha": feeder_scale,
             "migration_authority_sha256": migration_authority.fingerprint,
         }
@@ -1058,6 +1343,18 @@ def _frames(
             robust_background_p_kw=tuple(tuple(map(float, values)) for values in robust_p),
             robust_background_q_kvar=tuple(tuple(map(float, values)) for values in robust_q),
             robust_pv_available_kw=tuple(tuple(map(float, values)) for values in robust_pv),
+            native_forecast_background_p_kw=tuple(
+                tuple(tuple(map(float, phase_values)) for phase_values in profile)
+                for profile in native_forecast_p
+            ),
+            native_forecast_background_q_kvar=tuple(
+                tuple(tuple(map(float, phase_values)) for phase_values in profile)
+                for profile in native_forecast_q
+            ),
+            native_forecast_pv_available_kw=tuple(
+                tuple(tuple(map(float, phase_values)) for phase_values in profile)
+                for profile in native_forecast_pv
+            ),
             workload_reserve_gpu=dict(workload_reserve_gpu),
             mobility_routes=tuple(routes),
             mobility_template_bank=mobility_template_bank,
@@ -1152,17 +1449,35 @@ def main() -> None:
     native_asset_audit = (
         repo / "pfr/contracts/IEEE123_NATIVE_CONTROL_ASSET_AUDIT_V1.json"
     ).resolve()
+    predictive_native_authority = (
+        repo / "pfr/contracts/PREDICTIVE_NATIVE_DWELL_GUARD_V1.json"
+    ).resolve()
     if not all(
         path.is_file()
         for path in (
             native_control_dss,
             native_control_authority,
             native_asset_audit,
+            predictive_native_authority,
         )
     ):
         raise RuntimeError("common native grid-control authority is incomplete")
     native_control_contract = json_load(native_control_authority)
     native_asset_contract = json_load(native_asset_audit)
+    predictive_native_contract = json_load(predictive_native_authority)
+    if (
+        predictive_native_contract.get("identity")
+        != "PREDICTIVE_NATIVE_DWELL_GUARD_V1"
+        or int(predictive_native_contract.get("horizon_steps", -1))
+        != PREDICTIVE_NATIVE_HORIZON_STEPS
+        or predictive_native_contract.get("forecast_authority", {}).get(
+            "future_actual_used"
+        )
+        is not False
+        or predictive_native_contract.get("common_to_methods")
+        != [f"B{index}" for index in range(9)]
+    ):
+        raise RuntimeError("predictive native dwell-guard authority is invalid")
     frozen_control_authorized = bool(
         native_control_contract.get("status") == "FROZEN_APPROVED"
         and native_control_contract.get("main_scientific_campaign_authorized")
@@ -1307,6 +1622,16 @@ def main() -> None:
             native_control_authority
         ),
         "native_grid_asset_audit_sha256": sha256(native_asset_audit),
+        "predictive_native_dwell_guard_id": predictive_native_contract[
+            "identity"
+        ],
+        "predictive_native_dwell_guard_authority_sha256": sha256(
+            predictive_native_authority
+        ),
+        "predictive_native_forecast_horizon_steps": (
+            PREDICTIVE_NATIVE_HORIZON_STEPS
+        ),
+        "predictive_native_future_actual_used": False,
         "native_grid_control_release_status": native_control_contract["status"],
         "main_scientific_campaign_authorized": frozen_control_authorized,
         "january_2025_post_hoc_validation_authorized": post_hoc_control_authorized,
@@ -1482,6 +1807,16 @@ def main() -> None:
             "main_scientific_campaign_authorized": frozen_control_authorized,
             "january_2025_post_hoc_validation_authorized": post_hoc_control_authorized,
             "diagnostic_candidate_override": pending_diagnostic_authorized,
+        },
+        "predictive_native_dwell_guard": {
+            "identity": predictive_native_contract["identity"],
+            "authority_sha256": sha256(predictive_native_authority),
+            "horizon_steps": PREDICTIVE_NATIVE_HORIZON_STEPS,
+            "lead_steps": [1, PREDICTIVE_NATIVE_HORIZON_STEPS],
+            "future_actual_used": False,
+            "common_to_methods": predictive_native_contract[
+                "common_to_methods"
+            ],
         },
     }
     temporary_manifest = output / "RUN_MANIFEST.json.tmp"

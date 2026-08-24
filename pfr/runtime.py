@@ -19,6 +19,7 @@ from .methods import (
     MethodConfig,
 )
 from .migration import MigrationAuthority
+from .native_predictive import PREDICTIVE_NATIVE_HORIZON_STEPS
 from .optimization import (
     FastControlOptimizer,
     FastOptimizationContext,
@@ -189,6 +190,15 @@ class CausalExperimentFrame:
     robust_background_p_kw: Tuple[Tuple[float, ...], ...] = ()
     robust_background_q_kvar: Tuple[Tuple[float, ...], ...] = ()
     robust_pv_available_kw: Tuple[Tuple[float, ...], ...] = ()
+    native_forecast_background_p_kw: Tuple[
+        Tuple[Tuple[float, ...], ...], ...
+    ] = ()
+    native_forecast_background_q_kvar: Tuple[
+        Tuple[Tuple[float, ...], ...], ...
+    ] = ()
+    native_forecast_pv_available_kw: Tuple[
+        Tuple[Tuple[float, ...], ...], ...
+    ] = ()
     workload_reserve_gpu: Mapping[str, float] = field(default_factory=dict)
     mobility_routes: Tuple[MobilityRouteForecast, ...] = ()
     mobility_template_bank: Mapping[int, Tuple[float, ...]] = field(default_factory=dict)
@@ -221,6 +231,28 @@ class CausalExperimentFrame:
         )
         if any(robust) and any(len(array) != 131 or any(len(row) != 3 for row in array) for array in robust):
             raise RuntimeContractError("robust grid arrays must be 131x3")
+        native_forecasts = (
+            self.native_forecast_background_p_kw,
+            self.native_forecast_background_q_kvar,
+            self.native_forecast_pv_available_kw,
+        )
+        if any(native_forecasts):
+            if not all(native_forecasts):
+                raise RuntimeContractError(
+                    "predictive native forecast must provide P, Q, and PV"
+                )
+            if any(
+                len(forecast) != PREDICTIVE_NATIVE_HORIZON_STEPS
+                or any(
+                    len(profile) != 131
+                    or any(len(row) != 3 for row in profile)
+                    for profile in forecast
+                )
+                for forecast in native_forecasts
+            ):
+                raise RuntimeContractError(
+                    "predictive native forecast must be 12x131x3"
+                )
         for route in self.mobility_routes:
             route.validate()
 
@@ -367,6 +399,15 @@ class FreshPhysicalBackend(Protocol):
         previous_capacitor_states: Mapping[str, Sequence[int]],
         previous_regulator_taps: Mapping[str, int],
         locked_capacitors: Sequence[str],
+        native_forecast_background_p_kw: Sequence[
+            Sequence[Sequence[float]]
+        ] = (),
+        native_forecast_background_q_kvar: Sequence[
+            Sequence[Sequence[float]]
+        ] = (),
+        native_forecast_pv_available_kw: Sequence[
+            Sequence[Sequence[float]]
+        ] = (),
     ) -> NativeGridControlDecision:
         ...
 
@@ -416,6 +457,15 @@ class _PhysicalVerifierAdapter:
         robust_background_p_kw: Sequence[Sequence[float]],
         robust_background_q_kvar: Sequence[Sequence[float]],
         robust_pv_available_kw: Sequence[Sequence[float]],
+        native_forecast_background_p_kw: Sequence[
+            Sequence[Sequence[float]]
+        ],
+        native_forecast_background_q_kvar: Sequence[
+            Sequence[Sequence[float]]
+        ],
+        native_forecast_pv_available_kw: Sequence[
+            Sequence[Sequence[float]]
+        ],
         previous_capacitor_states: Optional[
             Mapping[str, Sequence[int]]
         ] = None,
@@ -431,6 +481,18 @@ class _PhysicalVerifierAdapter:
         self.robust_background_p_kw = tuple(tuple(row) for row in robust_background_p_kw)
         self.robust_background_q_kvar = tuple(tuple(row) for row in robust_background_q_kvar)
         self.robust_pv_available_kw = tuple(tuple(row) for row in robust_pv_available_kw)
+        self.native_forecast_background_p_kw = tuple(
+            tuple(tuple(row) for row in profile)
+            for profile in native_forecast_background_p_kw
+        )
+        self.native_forecast_background_q_kvar = tuple(
+            tuple(tuple(row) for row in profile)
+            for profile in native_forecast_background_q_kvar
+        )
+        self.native_forecast_pv_available_kw = tuple(
+            tuple(tuple(row) for row in profile)
+            for profile in native_forecast_pv_available_kw
+        )
         self.previous_capacitor_states = {
             str(name).lower(): tuple(int(value) for value in values)
             for name, values in (previous_capacitor_states or {}).items()
@@ -487,6 +549,15 @@ class _PhysicalVerifierAdapter:
                 previous_capacitor_states=self.previous_capacitor_states,
                 previous_regulator_taps=self.previous_regulator_taps,
                 locked_capacitors=self.locked_capacitors,
+                native_forecast_background_p_kw=(
+                    self.native_forecast_background_p_kw
+                ),
+                native_forecast_background_q_kvar=(
+                    self.native_forecast_background_q_kvar
+                ),
+                native_forecast_pv_available_kw=(
+                    self.native_forecast_pv_available_kw
+                ),
             )
         decision.validate()
         self.native_decision = decision
@@ -510,6 +581,15 @@ class _PhysicalVerifierAdapter:
             previous_capacitor_states=self.previous_capacitor_states,
             previous_regulator_taps=self.previous_regulator_taps,
             locked_capacitors=self.locked_capacitors,
+            native_forecast_background_p_kw=(
+                self.native_forecast_background_p_kw
+            ),
+            native_forecast_background_q_kvar=(
+                self.native_forecast_background_q_kvar
+            ),
+            native_forecast_pv_available_kw=(
+                self.native_forecast_pv_available_kw
+            ),
         )
         decision.validate()
         self.native_decision = decision
@@ -3303,6 +3383,9 @@ class PfrRuntimeRunner:
                 frame.robust_background_p_kw,
                 frame.robust_background_q_kvar,
                 frame.robust_pv_available_kw,
+                frame.native_forecast_background_p_kw,
+                frame.native_forecast_background_q_kvar,
+                frame.native_forecast_pv_available_kw,
                 state.native_capacitor_states,
                 state.native_regulator_tap_numbers,
                 tuple(
