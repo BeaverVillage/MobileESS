@@ -14,6 +14,7 @@ from pfr.risk_calibration import RISK_FAMILY_SCALES, load_frozen_risk_calibratio
 
 
 ISSUES_PER_DAY = 288
+CALIBRATION_BLOCK_STEPS = 6
 
 
 def _load(path: Path) -> Mapping[str, Any]:
@@ -40,13 +41,14 @@ def validate_february(
     calibration_path: Path,
 ) -> Mapping[str, Any]:
     calibration = load_frozen_risk_calibration(calibration_path)
-    quantile = calibration.normalized_joint_quantile
+    family_quantiles = calibration.normalized_family_quantiles
     daily_rows = []
+    family_block_rows = []
     b6_replans = b7_replans = trigger_divergence = 0
     calibrated_component_checks = 0
     for day_offset in range(28):
         calendar_date = (date(2025, 2, 1) + timedelta(days=day_offset)).isoformat()
-        day_scores = []
+        day_family_scores = {family: [] for family in RISK_FAMILY_SCALES}
         for method, root in (("B6", b6_root), ("B7", b7_root)):
             summary = _load(root / calendar_date / method / "METHOD_SUMMARY.json")
             if (
@@ -74,7 +76,13 @@ def validate_february(
             audit = b6.get("risk_calibration_audit")
             if not isinstance(audit, dict):
                 raise ValueError(f"February B6 audit missing issue={issue}")
-            day_scores.append(float(audit["joint_normalized_score"]))
+            normalized = audit.get("normalized_positive_underprediction")
+            if not isinstance(normalized, dict) or set(normalized) != set(
+                RISK_FAMILY_SCALES
+            ):
+                raise ValueError(f"February B6 family audit missing issue={issue}")
+            for family in RISK_FAMILY_SCALES:
+                day_family_scores[family].append(float(normalized[family]))
             if b7.get("risk_calibration_authority_id") != calibration.authority_id:
                 raise ValueError(f"February B7 authority ID mismatch issue={issue}")
             if (
@@ -89,7 +97,10 @@ def validate_february(
             for family in RISK_FAMILY_SCALES:
                 difference = float(calibrated[family]) - float(raw[family])
                 if not math.isclose(
-                    difference, quantile, rel_tol=1e-10, abs_tol=1e-10
+                    difference,
+                    float(family_quantiles[family]),
+                    rel_tol=1e-10,
+                    abs_tol=1e-10,
                 ):
                     raise ValueError(
                         f"February B7 calibrated increment mismatch family={family} issue={issue}"
@@ -100,33 +111,82 @@ def validate_february(
             b6_replans += int(b6_triggered)
             b7_replans += int(b7_triggered)
             trigger_divergence += int(b6_triggered != b7_triggered)
-        day_score = max(day_scores)
+        daily_family_maxima = {
+            family: max(values) for family, values in day_family_scores.items()
+        }
         daily_rows.append(
             {
                 "calendar_date": calendar_date,
-                "joint_normalized_score": day_score,
-                "covered_by_january_quantile": day_score <= quantile,
+                "normalized_family_maxima": daily_family_maxima,
             }
         )
-    covered_days = sum(bool(row["covered_by_january_quantile"]) for row in daily_rows)
-    coverage = covered_days / len(daily_rows)
-    status = "PASS" if coverage >= 1.0 - calibration.alpha else "FAIL_VALIDATION"
+        for block_start in range(0, ISSUES_PER_DAY, CALIBRATION_BLOCK_STEPS):
+            maxima = {
+                family: max(
+                    day_family_scores[family][
+                        block_start : block_start + CALIBRATION_BLOCK_STEPS
+                    ]
+                )
+                for family in RISK_FAMILY_SCALES
+            }
+            family_block_rows.append(
+                {
+                    "calendar_date": calendar_date,
+                    "block_index_within_day": (
+                        block_start // CALIBRATION_BLOCK_STEPS
+                    ),
+                    "normalized_family_maxima": maxima,
+                    "family_covered": {
+                        family: maxima[family] <= family_quantiles[family]
+                        for family in RISK_FAMILY_SCALES
+                    },
+                }
+            )
+    covered_blocks_by_family = {
+        family: sum(bool(row["family_covered"][family]) for row in family_block_rows)
+        for family in RISK_FAMILY_SCALES
+    }
+    coverage_by_family = {
+        family: covered / len(family_block_rows)
+        for family, covered in covered_blocks_by_family.items()
+    }
+    all_family_covered_blocks = sum(
+        all(bool(value) for value in row["family_covered"].values())
+        for row in family_block_rows
+    )
+    coverage_pass = all(
+        value >= 1.0 - calibration.alpha for value in coverage_by_family.values()
+    )
+    nondegenerate_trigger = b7_replans < 28 * ISSUES_PER_DAY
+    status = (
+        "PASS"
+        if coverage_pass and nondegenerate_trigger
+        else "FAIL_VALIDATION"
+    )
     return {
-        "schema_version": "PFR5_EVENT_RISK_FEB2025_VALIDATION_V1",
+        "schema_version": "PFR5_EVENT_RISK_FEB2025_VALIDATION_V2",
         "status": status,
         "role": "FEBRUARY_DEVELOPMENT_VALIDATION_ONLY",
         "independent_execution_claim": False,
         "calibration_authority_id": calibration.authority_id,
         "calibration_artifact_sha256": calibration.artifact_sha256,
-        "january_normalized_joint_quantile": quantile,
-        "target_daily_joint_coverage": 1.0 - calibration.alpha,
-        "february_daily_block_count": len(daily_rows),
-        "february_covered_daily_blocks": covered_days,
-        "february_empirical_daily_joint_coverage": coverage,
-        "daily_blocks": daily_rows,
+        "january_normalized_family_quantiles": dict(family_quantiles),
+        "coverage_claim": "FAMILY_WISE_30_MINUTE_BLOCK_COVERAGE_NOT_JOINT_COVERAGE",
+        "target_family_block_coverage": 1.0 - calibration.alpha,
+        "february_calendar_day_count": len(daily_rows),
+        "february_calibration_block_count": len(family_block_rows),
+        "february_covered_blocks_by_family": covered_blocks_by_family,
+        "february_empirical_block_coverage_by_family": coverage_by_family,
+        "february_all_family_covered_block_count": all_family_covered_blocks,
+        "february_empirical_all_family_block_coverage_diagnostic": (
+            all_family_covered_blocks / len(family_block_rows)
+        ),
+        "daily_diagnostics": daily_rows,
+        "family_blocks": family_block_rows,
         "b6_full_replan_issues": b6_replans,
         "b7_full_replan_issues": b7_replans,
         "b6_b7_trigger_divergence_issues": trigger_divergence,
+        "b7_event_trigger_nondegenerate": nondegenerate_trigger,
         "b7_calibrated_component_checks": calibrated_component_checks,
         "february_labels_used_to_refit_calibration": False,
         "march_paths_or_outcomes_read": False,

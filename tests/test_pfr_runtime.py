@@ -171,8 +171,15 @@ class PfrRuntimeTests(unittest.TestCase):
                 (date(2025, 1, 1) + timedelta(days=offset)).isoformat()
                 for offset in range(31)
             ),
-            finite_sample_rank=31,
+            calibration_block_steps=6,
+            calibration_block_minutes=30,
+            calibration_block_count=1488,
+            coverage_claim="FAMILY_WISE_BLOCK_COVERAGE_NOT_JOINT_COVERAGE",
+            finite_sample_rank=1415,
             normalized_joint_quantile=normalized_quantile,
+            normalized_family_quantiles={
+                family: normalized_quantile for family in RISK_FAMILY_SCALES
+            },
             predeclared_scales=dict(RISK_FAMILY_SCALES),
             calibrated_increments={
                 family: normalized_quantile * scale
@@ -180,6 +187,8 @@ class PfrRuntimeTests(unittest.TestCase):
             },
             source_audit_sha256="f" * 64,
             artifact_sha256="e" * 64,
+            source_issue_count=8928,
+            source_calibrated_risk_positive_count=1,
         )
         job = OperationalTrainingJob(
             "j1", "IDC01", 100, 102, 110, 1, 3600, 0.01, None, "source-j1",

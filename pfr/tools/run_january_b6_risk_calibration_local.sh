@@ -48,6 +48,6 @@ fi
     --report "$calibration_root/STORAGE_VERIFICATION.json"
 "$python_bin" -m pfr.tools.build_january_b6_risk_calibration \
     --source-root "$calibration_root" --output "$artifact"
-"$python_bin" -c 'from pathlib import Path; import sys; from pfr.risk_calibration import load_frozen_risk_calibration; x=load_frozen_risk_calibration(Path(sys.argv[1])); print("RISK_CALIBRATION_FROZEN", x.authority_id, x.normalized_joint_quantile, x.artifact_sha256)' "$artifact"
+"$python_bin" -c 'from pathlib import Path; import json,sys; from pfr.risk_calibration import load_frozen_risk_calibration; x=load_frozen_risk_calibration(Path(sys.argv[1])); print("RISK_CALIBRATION_FROZEN", x.authority_id, json.dumps(dict(x.normalized_family_quantiles), sort_keys=True), x.artifact_sha256)' "$artifact"
 echo "JANUARY_B6_CALIBRATION_STATUS=FROZEN"
 echo "RISK_CALIBRATION_ARTIFACT=$artifact"

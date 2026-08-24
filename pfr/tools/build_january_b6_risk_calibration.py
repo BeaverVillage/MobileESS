@@ -1,4 +1,4 @@
-"""Freeze PFR5 event-risk margins from January-2025 B6 daily blocks only."""
+"""Freeze family-wise PFR5 event-risk margins from January-2025 B6 blocks."""
 
 from __future__ import annotations
 
@@ -19,6 +19,7 @@ from pfr.risk_calibration import (
 
 
 ISSUES_PER_DAY = 288
+CALIBRATION_BLOCK_STEPS = 6
 ALPHA = 0.05
 
 
@@ -46,7 +47,7 @@ def _atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:
     temporary.replace(path)
 
 
-def _validate_audit(audit: Mapping[str, Any], issue: int) -> float:
+def _validate_audit(audit: Mapping[str, Any], issue: int) -> Mapping[str, float]:
     if (
         audit.get("schema_version")
         != "PFR5_EVENT_RISK_CALIBRATION_AUDIT_V1"
@@ -103,19 +104,28 @@ def _validate_audit(audit: Mapping[str, Any], issue: int) -> float:
         abs_tol=1e-12,
     ):
         raise ValueError(f"joint normalized score mismatch issue={issue}")
-    return score
+    return {
+        family: float(normalized[family]) for family in RISK_FAMILY_SCALES
+    }
 
 
 def build_calibration(source_root: Path, *, alpha: float = ALPHA) -> Mapping[str, Any]:
     source_root = source_root.resolve()
     if not 0.0 < alpha < 1.0:
         raise ValueError("alpha must lie in (0,1)")
+    if (
+        CALIBRATION_BLOCK_STEPS <= 0
+        or ISSUES_PER_DAY % CALIBRATION_BLOCK_STEPS != 0
+    ):
+        raise ValueError("calibration block must exactly partition every day")
     dates = tuple(
         (date(2025, 1, 1) + timedelta(days=offset)).isoformat()
         for offset in range(31)
     )
     daily_scores: list[Mapping[str, Any]] = []
+    block_scores: list[Mapping[str, Any]] = []
     source_audits: list[Mapping[str, Any]] = []
+    source_raw_components: list[Mapping[str, float]] = []
     source_commits: set[str] = set()
     for offset, calendar_date in enumerate(dates):
         day_root = source_root / calendar_date
@@ -142,7 +152,8 @@ def build_calibration(source_root: Path, *, alpha: float = ALPHA) -> Mapping[str
         ):
             raise ValueError(f"January B6 day is incomplete: {calendar_date}")
         first_issue = offset * ISSUES_PER_DAY
-        scores = []
+        family_scores: list[Mapping[str, float]] = []
+        joint_scores: list[float] = []
         for issue in range(first_issue, first_issue + ISSUES_PER_DAY):
             marker = _load_json(
                 method_root / f"issue_{issue:06d}" / "COMMIT_MARKER.json"
@@ -160,7 +171,25 @@ def build_calibration(source_root: Path, *, alpha: float = ALPHA) -> Mapping[str
             audit = marker.get("risk_calibration_audit")
             if not isinstance(audit, dict):
                 raise ValueError(f"risk calibration audit missing issue={issue}")
-            scores.append(_validate_audit(audit, issue))
+            normalized = _validate_audit(audit, issue)
+            family_scores.append(normalized)
+            joint_scores.append(max(normalized.values()))
+            raw_components = marker.get("risk_raw_components")
+            if (
+                not isinstance(raw_components, dict)
+                or set(raw_components) != set(RISK_FAMILY_SCALES)
+                or any(
+                    not math.isfinite(float(raw_components[family]))
+                    for family in RISK_FAMILY_SCALES
+                )
+            ):
+                raise ValueError(f"raw risk component evidence missing issue={issue}")
+            source_raw_components.append(
+                {
+                    family: float(raw_components[family])
+                    for family in RISK_FAMILY_SCALES
+                }
+            )
             source_audits.append(
                 {
                     "calendar_date": calendar_date,
@@ -170,7 +199,7 @@ def build_calibration(source_root: Path, *, alpha: float = ALPHA) -> Mapping[str
                     "post_state_sha256": marker.get("post_state_sha256"),
                 }
             )
-        day_score = max(scores)
+        day_score = max(joint_scores)
         if not math.isclose(
             float(summary.get("risk_calibration_day_joint_score", float("nan"))),
             day_score,
@@ -185,11 +214,54 @@ def build_calibration(source_root: Path, *, alpha: float = ALPHA) -> Mapping[str
                 "issue_count": ISSUES_PER_DAY,
             }
         )
+        for block_start in range(0, ISSUES_PER_DAY, CALIBRATION_BLOCK_STEPS):
+            block_rows = family_scores[
+                block_start : block_start + CALIBRATION_BLOCK_STEPS
+            ]
+            family_maxima = {
+                family: max(row[family] for row in block_rows)
+                for family in RISK_FAMILY_SCALES
+            }
+            block_scores.append(
+                {
+                    "calendar_date": calendar_date,
+                    "block_index_within_day": (
+                        block_start // CALIBRATION_BLOCK_STEPS
+                    ),
+                    "first_issue": first_issue + block_start,
+                    "issue_count": CALIBRATION_BLOCK_STEPS,
+                    "normalized_family_maxima": family_maxima,
+                }
+            )
     if len(source_commits) != 1:
         raise ValueError("January B6 calibration days use multiple implementation commits")
-    ordered = sorted(float(row["joint_normalized_score"]) for row in daily_scores)
-    rank = min(math.ceil((len(ordered) + 1) * (1.0 - alpha)), len(ordered))
-    quantile = ordered[rank - 1]
+    rank = min(
+        math.ceil((len(block_scores) + 1) * (1.0 - alpha)),
+        len(block_scores),
+    )
+    family_quantiles = {
+        family: sorted(
+            float(row["normalized_family_maxima"][family])
+            for row in block_scores
+        )[rank - 1]
+        for family in RISK_FAMILY_SCALES
+    }
+    calibrated_increments = {
+        family: family_quantiles[family] * scale
+        for family, scale in RISK_FAMILY_SCALES.items()
+    }
+    source_positive_trigger_count = sum(
+        max(
+            float(raw[family]) + family_quantiles[family]
+            for family in RISK_FAMILY_SCALES
+        )
+        > 0.0
+        for raw in source_raw_components
+    )
+    if source_positive_trigger_count >= len(source_raw_components):
+        raise ValueError(
+            "calibration degenerates B7 into an always-positive risk trigger"
+        )
     return {
         "schema_version": SCHEMA_VERSION,
         "status": "FROZEN",
@@ -198,20 +270,29 @@ def build_calibration(source_root: Path, *, alpha: float = ALPHA) -> Mapping[str
         "source_risk_interface": "RAW_UNCALIBRATED",
         "source_period": "2025-01",
         "calibration_dates": list(dates),
-        "calibration_block": "INDEPENDENT_DAILY_MAX_OVER_288_ISSUES_AND_6_RISK_FAMILIES",
+        "calibration_block": "NONOVERLAPPING_30_MINUTE_MAXIMA_WITHIN_CALENDAR_DAY",
+        "calibration_block_steps": CALIBRATION_BLOCK_STEPS,
+        "calibration_block_minutes": CALIBRATION_BLOCK_STEPS * 5,
         "one_step_residual": "MAX_0_ACTUAL_MARGIN_MINUS_PREDECISION_MARGIN",
-        "joint_score": "MAX_OVER_RISK_FAMILIES_OF_POSITIVE_UNDERPREDICTION_DIVIDED_BY_PREDECLARED_SCALE",
+        "coverage_claim": "FAMILY_WISE_BLOCK_COVERAGE_NOT_JOINT_COVERAGE",
+        "family_block_score": "MAX_WITHIN_NONOVERLAPPING_BLOCK_OF_NORMALIZED_POSITIVE_UNDERPREDICTION",
         "alpha": alpha,
-        "target_joint_coverage": 1.0 - alpha,
+        "target_family_block_coverage": 1.0 - alpha,
         "daily_block_count": len(daily_scores),
+        "calibration_block_count": len(block_scores),
         "finite_sample_rank": rank,
-        "normalized_joint_quantile": quantile,
+        "normalized_family_quantiles": family_quantiles,
+        "normalized_joint_quantile": max(family_quantiles.values()),
         "predeclared_scales": dict(RISK_FAMILY_SCALES),
-        "calibrated_increments": {
-            family: quantile * scale
-            for family, scale in RISK_FAMILY_SCALES.items()
-        },
+        "calibrated_increments": calibrated_increments,
         "daily_block_scores": daily_scores,
+        "family_block_scores": block_scores,
+        "source_issue_count": len(source_raw_components),
+        "source_calibrated_risk_positive_count": source_positive_trigger_count,
+        "source_calibrated_risk_positive_fraction": (
+            source_positive_trigger_count / len(source_raw_components)
+        ),
+        "nondegenerate_event_trigger_gate": "PASS_NOT_ALWAYS_POSITIVE_ON_SOURCE_B6_STATES",
         "source_audit_sha256": _canonical_sha256(source_audits),
         "source_git_full_commit_sha": next(iter(source_commits)),
         "source_root": str(source_root),
@@ -236,10 +317,13 @@ def main() -> None:
             {
                 "status": "FROZEN",
                 "output": str(args.output.resolve()),
-                "daily_blocks": payload["daily_block_count"],
+                "calibration_blocks": payload["calibration_block_count"],
                 "finite_sample_rank": payload["finite_sample_rank"],
-                "normalized_joint_quantile": payload[
-                    "normalized_joint_quantile"
+                "normalized_family_quantiles": payload[
+                    "normalized_family_quantiles"
+                ],
+                "source_calibrated_risk_positive_fraction": payload[
+                    "source_calibrated_risk_positive_fraction"
                 ],
                 "march_outcomes_read": False,
             },

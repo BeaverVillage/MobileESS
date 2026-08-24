@@ -13,8 +13,8 @@ from typing import Mapping
 from .risk import RiskFamily
 
 
-SCHEMA_VERSION = "PFR5_EVENT_RISK_CALIBRATION_JAN2025_V1"
-AUTHORITY_ID = "JAN2025_B6_RAW_DAY_BLOCK_JOINT_UNDERPREDICTION_V1"
+SCHEMA_VERSION = "PFR5_EVENT_RISK_CALIBRATION_JAN2025_V2"
+AUTHORITY_ID = "JAN2025_B6_RAW_30MIN_FAMILY_BLOCK_UNDERPREDICTION_V2"
 RISK_FAMILY_SCALES: Mapping[str, float] = {
     RiskFamily.SOC.value: 100.0,
     RiskFamily.DEADLINE.value: 1.0,
@@ -44,12 +44,19 @@ class FrozenRiskCalibration:
     source_method: str
     source_period: str
     calibration_dates: tuple[str, ...]
+    calibration_block_steps: int
+    calibration_block_minutes: int
+    calibration_block_count: int
+    coverage_claim: str
     finite_sample_rank: int
     normalized_joint_quantile: float
+    normalized_family_quantiles: Mapping[str, float]
     predeclared_scales: Mapping[str, float]
     calibrated_increments: Mapping[str, float]
     source_audit_sha256: str
     artifact_sha256: str
+    source_issue_count: int
+    source_calibrated_risk_positive_count: int
     february_labels_used_for_fit: bool = False
     march_outcomes_read: bool = False
 
@@ -72,32 +79,70 @@ class FrozenRiskCalibration:
             raise RiskCalibrationContractError("risk calibration date axis is not January 2025")
         if not 0.0 < self.alpha < 1.0:
             raise RiskCalibrationContractError("risk calibration alpha must lie in (0,1)")
+        if (
+            self.calibration_block_steps != 6
+            or self.calibration_block_minutes != 30
+            or self.calibration_block_count != 1488
+            or self.coverage_claim
+            != "FAMILY_WISE_BLOCK_COVERAGE_NOT_JOINT_COVERAGE"
+        ):
+            raise RiskCalibrationContractError(
+                "risk calibration must use family-wise coverage over 1488 "
+                "non-overlapping 30-minute blocks"
+            )
         expected_rank = min(
-            math.ceil((len(self.calibration_dates) + 1) * (1.0 - self.alpha)),
-            len(self.calibration_dates),
+            math.ceil((self.calibration_block_count + 1) * (1.0 - self.alpha)),
+            self.calibration_block_count,
         )
         if self.finite_sample_rank != expected_rank:
             raise RiskCalibrationContractError("finite-sample calibration rank mismatch")
         if set(self.predeclared_scales) != set(RISK_FAMILY_SCALES):
             raise RiskCalibrationContractError("risk calibration scale family axis mismatch")
+        if set(self.normalized_family_quantiles) != set(RISK_FAMILY_SCALES):
+            raise RiskCalibrationContractError(
+                "risk calibration family quantile axis mismatch"
+            )
         if set(self.calibrated_increments) != set(RISK_FAMILY_SCALES):
             raise RiskCalibrationContractError("risk calibration increment family axis mismatch")
         if not math.isfinite(self.normalized_joint_quantile) or self.normalized_joint_quantile < 0.0:
             raise RiskCalibrationContractError("normalized joint quantile is invalid")
         for family, frozen_scale in RISK_FAMILY_SCALES.items():
             scale = float(self.predeclared_scales[family])
+            quantile = float(self.normalized_family_quantiles[family])
             increment = float(self.calibrated_increments[family])
             if not math.isclose(scale, frozen_scale, rel_tol=0.0, abs_tol=1e-12):
                 raise RiskCalibrationContractError(
                     f"predeclared risk scale changed for {family}"
                 )
-            expected_increment = self.normalized_joint_quantile * scale
-            if not math.isfinite(increment) or not math.isclose(
+            expected_increment = quantile * scale
+            if (
+                not math.isfinite(quantile)
+                or quantile < 0.0
+                or not math.isfinite(increment)
+                or not math.isclose(
                 increment, expected_increment, rel_tol=1e-12, abs_tol=1e-12
+                )
             ):
                 raise RiskCalibrationContractError(
                     f"calibrated risk increment mismatch for {family}"
                 )
+        if not math.isclose(
+            self.normalized_joint_quantile,
+            max(float(value) for value in self.normalized_family_quantiles.values()),
+            rel_tol=1e-12,
+            abs_tol=1e-12,
+        ):
+            raise RiskCalibrationContractError(
+                "diagnostic maximum family quantile mismatch"
+            )
+        if (
+            self.source_issue_count != 8928
+            or self.source_calibrated_risk_positive_count < 0
+            or self.source_calibrated_risk_positive_count >= self.source_issue_count
+        ):
+            raise RiskCalibrationContractError(
+                "calibration degenerates the event trigger or source count is invalid"
+            )
         if len(self.source_audit_sha256) != 64 or len(self.artifact_sha256) != 64:
             raise RiskCalibrationContractError("risk calibration fingerprints are invalid")
 
@@ -117,10 +162,18 @@ def load_frozen_risk_calibration(path: Path) -> FrozenRiskCalibration:
         source_method=str(payload.get("source_method", "")),
         source_period=str(payload.get("source_period", "")),
         calibration_dates=tuple(str(value) for value in payload.get("calibration_dates", ())),
+        calibration_block_steps=int(payload.get("calibration_block_steps", -1)),
+        calibration_block_minutes=int(payload.get("calibration_block_minutes", -1)),
+        calibration_block_count=int(payload.get("calibration_block_count", -1)),
+        coverage_claim=str(payload.get("coverage_claim", "")),
         finite_sample_rank=int(payload.get("finite_sample_rank", -1)),
         normalized_joint_quantile=float(
             payload.get("normalized_joint_quantile", float("nan"))
         ),
+        normalized_family_quantiles={
+            str(key): float(value)
+            for key, value in payload.get("normalized_family_quantiles", {}).items()
+        },
         predeclared_scales={
             str(key): float(value)
             for key, value in payload.get("predeclared_scales", {}).items()
@@ -131,6 +184,10 @@ def load_frozen_risk_calibration(path: Path) -> FrozenRiskCalibration:
         },
         source_audit_sha256=str(payload.get("source_audit_sha256", "")),
         artifact_sha256=file_sha256(path),
+        source_issue_count=int(payload.get("source_issue_count", -1)),
+        source_calibrated_risk_positive_count=int(
+            payload.get("source_calibrated_risk_positive_count", -1)
+        ),
         february_labels_used_for_fit=bool(
             payload.get("february_labels_used_for_fit", True)
         ),
