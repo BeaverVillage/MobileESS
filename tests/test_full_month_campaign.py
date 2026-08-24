@@ -2,8 +2,14 @@ import json
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 from pfr.tools.run_frozen_rep_week_daily_campaign import payload
+from pfr.tools.jfm_isolation import (
+    LAYOUT,
+    initialize_isolated_run_root,
+    load_isolated_run_root,
+)
 from pfr.tools.preflight_january_2025 import (
     validate_method_contracts,
     validate_workload_scheduler_contract,
@@ -135,3 +141,28 @@ def test_preflight_accepts_burst_that_requires_capacity_queue(
     assert result["maximum_same_issue_idc_arrival_gpu"] == 300
     assert result["arrival_groups_requiring_capacity_queue"] == 1
     assert result["capacity_queue_required_by_cohort"] is True
+
+
+def test_jfm_run_root_is_bound_to_commit_branch_and_layout(
+    tmp_path: Path,
+) -> None:
+    run_root = tmp_path / "isolated-run"
+    sha = "a" * 40
+    initialized = initialize_isolated_run_root(run_root, sha, "branch/test")
+
+    assert initialized["layout"] == LAYOUT
+    assert load_isolated_run_root(run_root) == initialized
+    assert initialize_isolated_run_root(run_root, sha, "branch/test") == initialized
+    with pytest.raises(RuntimeError, match="different commit"):
+        initialize_isolated_run_root(run_root, "b" * 40, "branch/test")
+
+
+def test_jfm_run_root_rejects_nonempty_legacy_directory(
+    tmp_path: Path,
+) -> None:
+    run_root = tmp_path / "legacy-results"
+    run_root.mkdir()
+    (run_root / "old-result.json").write_text("{}\n", encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="non-empty run root"):
+        initialize_isolated_run_root(run_root, "a" * 40, "branch/test")

@@ -8,8 +8,22 @@ base="$work/frozen_artifacts"
 contract="$repo_dir/pfr/contracts/FROZEN_2025_FULL_MONTH_VALIDATION_PERIODS_V1.json"
 canonical="$base/stage_kestrel_f30_resource_aware_job_power_policy_v2_0_32_r6c_20260806T122335/CANONICAL_F30_RACK_POWER_JOB_BASE_PREFROZEN_R6C.parquet"
 prepare_only=0
-if [[ "${1:-}" == "--prepare-only" ]]; then prepare_only=1; shift; fi
-if (($#)); then echo "Usage: $0 [--prepare-only]" >&2; exit 64; fi
+run_root=""
+while (($#)); do
+    case "$1" in
+        --prepare-only) prepare_only=1; shift ;;
+        --run-root)
+            if (($# < 2)); then echo "Missing value for --run-root" >&2; exit 64; fi
+            run_root="$2"
+            shift 2
+            ;;
+        *) echo "Usage: $0 --run-root ABSOLUTE_PATH [--prepare-only]" >&2; exit 64 ;;
+    esac
+done
+if [[ -z "$run_root" || "$run_root" != /* ]]; then
+    echo "ABORT_ISOLATION: --run-root must be an authorized absolute path." >&2
+    exit 2
+fi
 
 authority_sha="$($python_bin -c 'import hashlib,sys; print(hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest())' "$contract")"
 
@@ -29,6 +43,16 @@ prepare_inputs() {
 
 cd "$repo_dir"
 overall=0
+expected_full_commit_sha="${PFR_EXPECTED_FULL_COMMIT_SHA:-}"
+expected_branch="${PFR_EXPECTED_BRANCH:-codex/feb03-predictive-native}"
+if [[ ! "$expected_full_commit_sha" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "ABORT_ISOLATION: set PFR_EXPECTED_FULL_COMMIT_SHA to the frozen 40-character commit." >&2
+    exit 2
+fi
+"$python_bin" -m pfr.tools.jfm_isolation \
+    --run-root "$run_root" --initialize \
+    --expected-full-commit-sha "$expected_full_commit_sha" \
+    --expected-branch "$expected_branch" || exit 2
 if ! prepare_inputs FEB2025_FULL 2025-02-01 28; then overall=1; fi
 if ! prepare_inputs MAR2025_FULL 2025-03-01 31; then overall=1; fi
 
@@ -67,25 +91,27 @@ run_period() {
     local period_id="$1" start_date="$2" days="$3"
     local shared="$base/PFR_${period_id}_SHARED_EXOGENOUS_V13_13"
     local input_root="$base/PFR_${period_id}_V13_13_DAILY_INPUTS"
-    local output="$base/CODEX_PR6_V13_13_${period_id}_DAILY_20260823"
-    local b8_output="$base/CODEX_PR6_V13_13_${period_id}_B8_PERIODIC5_20260823"
+    local month_name=""
+    case "$period_id" in
+        FEB2025_FULL) month_name="february" ;;
+        MAR2025_FULL) month_name="march" ;;
+        *) echo "Unsupported isolated period: $period_id" >&2; return 1 ;;
+    esac
+    local output="$run_root/$month_name/B0_B7"
+    local b8_output="$run_root/$month_name/B8"
     local campaign_rc=0 verify_rc=0 b8_campaign_rc=0 b8_verify_rc=0
-    local expected_full_commit_sha="${PFR_EXPECTED_FULL_COMMIT_SHA:-}"
-    local expected_branch="${PFR_EXPECTED_BRANCH:-codex/pr6-b8-periodic5}"
-    if [[ ! "$expected_full_commit_sha" =~ ^[0-9a-f]{40}$ ]]; then
-        echo "ABORT_MAIN_CAMPAIGN: preprocessing is preserved, but PFR_EXPECTED_FULL_COMMIT_SHA is not a frozen 40-character commit." >&2
-        return 1
-    fi
+    local gate_root="$run_root/preflight/$period_id"
+    mkdir -p "$gate_root"
     "$python_bin" -m pfr.tools.assert_experiment_source_freeze \
         --repo "$repo_dir" \
         --expected-full-commit-sha "$expected_full_commit_sha" \
         --expected-branch "$expected_branch" \
         --migration-authority "$repo_dir/pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json" \
-        --report "$input_root/SOURCE_FREEZE_GATE.json" || return 1
+        --report "$gate_root/SOURCE_FREEZE_GATE.json" || return 1
     "$python_bin" -m pfr.tools.preflight_full_month_2025 \
         --repo "$repo_dir" --period-id "$period_id" \
         --shared-root "$shared" --input-root "$input_root" \
-        --report "$input_root/PREFLIGHT_REPORT.json" || return 1
+        --report "$gate_root/PREFLIGHT_REPORT.json" || return 1
     "$python_bin" -m pfr.tools.run_frozen_rep_week_daily_campaign \
         --repo "$repo_dir" --period-id "$period_id" --period-contract "$contract" \
         --day-workers 4 --capture-day-logs --continue-after-failure \

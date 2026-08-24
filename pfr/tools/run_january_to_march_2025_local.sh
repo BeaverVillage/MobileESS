@@ -4,8 +4,7 @@ set -uo pipefail
 repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 python_bin="${PFR_PYTHON:-/home/jaewon/miniconda3/envs/power_v61_gpu/bin/python}"
 base="/home/jaewon/mobile_ess_work/frozen_artifacts"
-jan_root="$base/JAN2025_IDC_REFREEZE_V1_B0_B7"
-b8_root="$base/JAN2025_IDC_REFREEZE_V1_B8"
+run_root=""
 preflight_only=0
 skip_migration_sensitivity=0
 january_only=0
@@ -14,12 +13,17 @@ while (($#)); do
     case "$1" in
         --preflight-only) preflight_only=1; shift ;;
         --skip-migration-sensitivity) skip_migration_sensitivity=1; shift ;;
+        --run-root)
+            if (($# < 2)); then echo "Missing value for --run-root" >&2; exit 64; fi
+            run_root="$2"
+            shift 2
+            ;;
         --january-only)
             january_only=1
             shift
             ;;
         -h|--help)
-            echo "Usage: $0 [--preflight-only] [--skip-migration-sensitivity] [--january-only]"
+            echo "Usage: $0 --run-root ABSOLUTE_PATH [--preflight-only] [--skip-migration-sensitivity] [--january-only]"
             echo "Runs 4 daily processes x 4 Gurobi threads."
             echo "Default: attempt January, February, and March in order; preserve failures and continue."
             exit 0
@@ -30,6 +34,24 @@ done
 
 cd "$repo_dir"
 overall=0
+expected_full_commit_sha="${PFR_EXPECTED_FULL_COMMIT_SHA:-}"
+expected_branch="${PFR_EXPECTED_BRANCH:-codex/feb03-predictive-native}"
+if [[ -z "$run_root" || "$run_root" != /* ]]; then
+    echo "ABORT_ISOLATION: --run-root must be a new or previously authorized absolute path." >&2
+    exit 2
+fi
+if [[ ! "$expected_full_commit_sha" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "ABORT_ISOLATION: set PFR_EXPECTED_FULL_COMMIT_SHA to the frozen 40-character commit." >&2
+    exit 2
+fi
+"$python_bin" -m pfr.tools.jfm_isolation \
+    --run-root "$run_root" --initialize \
+    --expected-full-commit-sha "$expected_full_commit_sha" \
+    --expected-branch "$expected_branch" || exit 2
+jan_root="$run_root/january/B0_B7"
+b8_root="$run_root/january/B8"
+export PFR_JFM_RUN_ROOT="$run_root"
+echo "ISOLATED_JFM_RUN_ROOT=$run_root"
 
 run_january_preflight() {
     bash "$repo_dir/pfr/tools/run_january_2025_local.sh" \
@@ -41,7 +63,7 @@ if ((preflight_only)); then
     if ! run_january_preflight; then overall=1; fi
     if ((january_only == 0)); then
         if ! bash "$repo_dir/pfr/tools/run_full_february_march_2025_local.sh" \
-            --prepare-only; then
+            --prepare-only --run-root "$run_root"; then
             overall=1
         fi
     fi
@@ -59,6 +81,7 @@ echo "February and March continue even if January fails; --january-only explicit
 if ((skip_migration_sensitivity == 0)); then
     sensitivity_rc=0
     PFR_DAY_WORKERS=4 PFR_GUROBI_THREADS=4 \
+        PFR_MIGRATION_SENSITIVITY_OUTPUT="$run_root/january/migration_sensitivity" \
         bash "$repo_dir/pfr/tools/run_january_2025_migration_sensitivity_local.sh" \
         || sensitivity_rc=$?
     if ((sensitivity_rc != 0)); then
@@ -140,7 +163,8 @@ if ((overall != 0)); then
 fi
 
 rep_rc=0
-bash "$repo_dir/pfr/tools/run_full_february_march_2025_local.sh" || rep_rc=$?
+bash "$repo_dir/pfr/tools/run_full_february_march_2025_local.sh" \
+    --run-root "$run_root" || rep_rc=$?
 if ((rep_rc != 0)); then overall=1; fi
 
 if ((overall == 0)); then
