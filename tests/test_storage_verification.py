@@ -84,6 +84,27 @@ def test_missing_materialized_csv_fails(tmp_path: Path) -> None:
     assert "PASS method lacks MATERIALIZED_COMMIT_ROWS.csv" in result["errors"]
 
 
+def test_v2_pass_summary_rejects_terminal_in_transit_mess(tmp_path: Path) -> None:
+    write_complete_method(tmp_path)
+    summary_path = tmp_path / "B8/METHOD_SUMMARY.json"
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    summary.update(
+        {
+            "schema_version": "K9H7_RESULT_V2.method_run.v2",
+            "final_mess_in_transit": {"MESS01": False, "MESS02": True},
+            "terminal_mobility_complete": False,
+        }
+    )
+    summary_path.write_text(json.dumps(summary), encoding="utf-8")
+
+    result = inspect_method(tmp_path / "B8", "B8", 8928)
+    assert "PASS method ends with an in-transit MESS route" in result["errors"]
+    assert (
+        "PASS method terminal mobility completion flag is not true"
+        in result["errors"]
+    )
+
+
 def test_campaign_registry_requires_exact_date_and_b8_axes(tmp_path: Path) -> None:
     dates = ["2025-02-01", "2025-02-02"]
     (tmp_path / "CAMPAIGN_SUMMARY.json").write_text(

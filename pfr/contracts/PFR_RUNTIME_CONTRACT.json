@@ -36,6 +36,7 @@
   "migration_authority": "PFR_IDC_MIGRATION_ABILENE12_H10080_V1; Abilene is a 12-node capacity benchmark and must not be described as a measured Melbourne inter-IDC WAN",
   "migration_prediction_actual_audit": "Every completed checkpoint migration materializes planned transfer/restart steps and bytes, runtime-realized transfer/restart steps and bytes, signed and absolute duration error, and both authorities. The execution is a deterministic realization of the same frozen Abilene capacity scenario, not external observed WAN telemetry; a zero error is therefore expected unless runtime execution diverges from its plan.",
   "mobility_prediction_actual_audit": "Every started MESS route materializes causal ML q50 and safe ETA/physics-energy values, post-decision SUMO realized ETA and physics-energy values, signed/absolute q50 errors, planning-policy errors, and discretized execution steps. Method summaries materialize route counts and q50 ETA/energy MAE.",
+  "daily_episode_mobility_boundary": "A route may start only when its planning ETA fits within the remaining scored five-minute steps. After the post-decision SUMO realization is opened, execution must fail closed before mutating MESS state if the realized transit profile cannot finish within the same independent daily episode. A PASS method must end with every MESS parked and no route energy left undeducted.",
   "facility_reactive_power_assumption": "unity power factor, explicitly modeled",
   "modeled_gpu_capacity_per_idc": 256,
   "mess_physical_ratings": {

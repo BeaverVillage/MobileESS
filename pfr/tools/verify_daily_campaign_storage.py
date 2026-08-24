@@ -209,6 +209,17 @@ def inspect_method(
             errors.append("METHOD_SUMMARY commit count mismatch")
         if summary.get("status") == "PASS" and len(markers) != ISSUES_PER_DAY:
             errors.append("PASS method does not contain 288 markers")
+        if (
+            summary.get("status") == "PASS"
+            and summary.get("schema_version") == "K9H7_RESULT_V2.method_run.v2"
+        ):
+            terminal_state = summary.get("final_mess_in_transit")
+            if not isinstance(terminal_state, dict) or not terminal_state:
+                errors.append("PASS method lacks terminal MESS transit evidence")
+            elif any(bool(value) for value in terminal_state.values()):
+                errors.append("PASS method ends with an in-transit MESS route")
+            if summary.get("terminal_mobility_complete") is not True:
+                errors.append("PASS method terminal mobility completion flag is not true")
         if summary.get("status") != "PASS" and failure is None:
             errors.append("failed method has no FAILURE.json")
     elif method_root.exists() and (markers or failure is not None):

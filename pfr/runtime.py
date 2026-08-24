@@ -2535,7 +2535,12 @@ def _optimize_mess_routes(
     state: MutableMethodState,
     config: MethodConfig,
     frame: CausalExperimentFrame,
+    evaluation_steps_remaining: int,
 ) -> Tuple[dict[str, str], dict[str, int]]:
+    if evaluation_steps_remaining <= 0:
+        raise RuntimeContractError(
+            "mobility optimizer lacks remaining evaluation steps"
+        )
     destinations = dict(state.mess_location)
     ranks = dict(state.mess_route_rank)
     if config.energy_flexibility != "MESS" or not frame.mobility_routes:
@@ -2564,6 +2569,7 @@ def _optimize_mess_routes(
         return destinations, ranks
 
     candidates: dict[str, list[Tuple[str, int, Optional[MobilityRouteForecast], float]]] = {}
+    episode_boundary_blocked_route_count = 0
     safe = config.joint_uncertainty
     for mid in MESS_IDS:
         if state.mess_in_transit[mid]:
@@ -2591,7 +2597,11 @@ def _optimize_mess_routes(
             for route in _pareto_routes(frame.routes_for(current, destination), safe=safe):
                 eta = route.safe_eta_seconds if safe else route.q50_eta_seconds
                 energy = route.safe_energy_kwh if safe else route.q50_energy_kwh
-                if math.ceil(eta / 300.0) > 54:
+                planned_transit_steps = max(1, math.ceil(eta / 300.0))
+                if planned_transit_steps > 54:
+                    continue
+                if planned_transit_steps > evaluation_steps_remaining:
+                    episode_boundary_blocked_route_count += 1
                     continue
                 if state.mess_energy_kwh[mid] - energy < MESS_FLOOR_KWH - 1e-9:
                     continue
@@ -2688,6 +2698,13 @@ def _optimize_mess_routes(
         "maximum_mess_away_from_canonical_staging": 1,
         "mobility_eligible_mess_ids": list(MOBILITY_ELIGIBLE_MESS_IDS),
         "joint_safe_eta_energy_used": safe,
+        "evaluation_steps_remaining": evaluation_steps_remaining,
+        "episode_boundary_blocked_route_count": (
+            episode_boundary_blocked_route_count
+        ),
+        "episode_boundary_eta_authority": (
+            "SAFE_ETA" if safe else "Q50_ETA"
+        ),
     }
     model.dispose()
     return destinations, ranks
@@ -2701,7 +2718,12 @@ def _build_slow_plan(
     evaluation_steps_remaining: int,
 ) -> SlowDiscretePlan:
     jobs = {uid: job for uid, job in state.jobs.items() if job.lifecycle != "COMPLETED"}
-    destinations, route_ranks = _optimize_mess_routes(state, config, frame)
+    destinations, route_ranks = _optimize_mess_routes(
+        state,
+        config,
+        frame,
+        evaluation_steps_remaining,
+    )
     job_placements, checkpoint_migrations = _optimize_job_migrations(
         state,
         config,
@@ -3358,7 +3380,12 @@ def _start_planned_routes(
     config: MethodConfig,
     frame: CausalExperimentFrame,
     execution_authority: Optional[MobilityExecutionAuthority],
+    evaluation_steps_remaining: int,
 ) -> Tuple[Mapping[str, Any], ...]:
+    if evaluation_steps_remaining <= 0:
+        raise RuntimeContractError(
+            "MESS route execution lacks remaining evaluation steps"
+        )
     if state.active_plan is None or config.energy_flexibility != "MESS":
         return ()
     events = []
@@ -3383,6 +3410,11 @@ def _start_planned_routes(
         # SUMO travel time be opened for state transition and SOC deduction.
         realization = execution_authority.realize(issue=frame.issue, route=route)
         profile = _realized_mobility_energy_profile(realization)
+        if len(profile) > evaluation_steps_remaining:
+            raise RuntimeContractError(
+                "post-decision SUMO mobility realization crosses the independent "
+                "episode boundary"
+            )
         if state.mess_energy_kwh[mid] - sum(profile) < MESS_FLOOR_KWH - 1e-9:
             raise RuntimeContractError(
                 "selected route is infeasible under post-decision SUMO realization"
@@ -3487,6 +3519,10 @@ def _start_planned_routes(
                 ),
                 "execution_transit_steps": len(profile),
                 "execution_transit_duration_seconds_discrete": len(profile) * 300,
+                "evaluation_steps_remaining_at_start": (
+                    evaluation_steps_remaining
+                ),
+                "episode_boundary_completion_guaranteed": True,
                 "realized_source_authority": realization.source_authority,
                 "realized_source_day_sha256": realization.source_day_sha256,
                 "actual_opened_post_decision_only": True,
@@ -3871,6 +3907,7 @@ class PfrRuntimeRunner:
                     config,
                     frame,
                     self.mobility_execution_authority,
+                    len(frames) - offset,
                 )
                 prestart_placement_events = _apply_planned_prestart_placements(
                     state, config
@@ -4174,6 +4211,10 @@ class PfrRuntimeRunner:
                     state.mess_route_destination[mid] = None
                     state.mess_route_energy_profile_kwh[mid] = ()
                     state.mess_route_profile_index[mid] = 0
+            if offset == len(frames) - 1 and any(state.mess_in_transit.values()):
+                raise RuntimeContractError(
+                    "independent daily episode ended with unfinished MESS transit"
+                )
             for uid, remaining in fast.next_state.remaining_work_gpu_hours.items():
                 job = state.jobs[uid]
                 job.remaining_work_gpu_hours = remaining
@@ -4666,6 +4707,8 @@ class PfrRuntimeRunner:
             "final_compute_debt_gpu_hours": state.compute_debt_gpu_hours,
             "final_energy_debt_kwh": state.energy_debt_kwh,
             "final_minimum_mess_energy_kwh": min(state.mess_energy_kwh.values()),
+            "final_mess_in_transit": dict(state.mess_in_transit),
+            "terminal_mobility_complete": not any(state.mess_in_transit.values()),
             "failure": failure,
         }
         atomic_write_json(method_root / "METHOD_SUMMARY.json", summary)

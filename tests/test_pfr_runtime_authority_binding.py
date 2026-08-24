@@ -1,12 +1,16 @@
 from types import SimpleNamespace
 
+import pytest
+
 from pfr.mobility_execution import MobilityExecutionRealization
 from pfr.runtime import (
     CausalExperimentFrame,
     MESS_IDS,
     MobilityRouteForecast,
     MutableMethodState,
+    RuntimeContractError,
     _mobility_energy_profile,
+    _optimize_mess_routes,
     _pareto_routes,
     _start_planned_routes,
 )
@@ -126,6 +130,7 @@ def test_route_commit_uses_post_decision_sumo_eta_and_energy() -> None:
         SimpleNamespace(energy_flexibility="MESS", joint_uncertainty=True),
         frame,
         authority,
+        10,
     )
 
     assert authority.calls == [(6, 471, 1)]
@@ -147,3 +152,115 @@ def test_route_commit_uses_post_decision_sumo_eta_and_energy() -> None:
     assert events[0]["safe_energy_realization_covered"] is True
     assert events[0]["execution_transit_steps"] == 3
     assert events[0]["actual_used_by_optimizer"] is False
+
+
+def test_planning_blocks_route_that_cannot_finish_before_episode_boundary() -> None:
+    locations = {
+        "MESS01": "STA09",
+        "MESS02": "IDC12",
+        "MESS03": "IDC01",
+        "MESS04": "STA11",
+    }
+    state = MutableMethodState(
+        issue=286,
+        pre_state_sha256="a" * 64,
+        mess_energy_kwh={mid: 760.0 for mid in MESS_IDS},
+        mess_location=locations,
+    )
+    route = MobilityRouteForecast(
+        source_service_id="IDC01",
+        destination_service_id="STA07",
+        od_index=10,
+        rank=1,
+        q50_eta_seconds=900.0,
+        safe_eta_seconds=920.0,
+        q50_energy_kwh=20.0,
+        safe_energy_kwh=21.0,
+    )
+    frame = CausalExperimentFrame(
+        issue=286,
+        current_price_aud_per_mwh=0.0,
+        horizon_price_median_aud_per_mwh=0.0,
+        q50_background_p_kw=0.0,
+        q50_background_q_kvar=0.0,
+        arrivals=(),
+        exogenous_sha256="b" * 64,
+        mobility_routes=(route,),
+    )
+
+    destinations, _ = _optimize_mess_routes(
+        state,
+        SimpleNamespace(energy_flexibility="MESS", joint_uncertainty=True),
+        frame,
+        2,
+    )
+
+    assert destinations["MESS03"] == "IDC01"
+    assert state.last_slow_miqp_certificate[
+        "episode_boundary_blocked_route_count"
+    ] == 1
+    assert state.last_slow_miqp_certificate[
+        "episode_boundary_eta_authority"
+    ] == "SAFE_ETA"
+
+
+def test_execution_fails_closed_when_sumo_actual_crosses_episode_boundary() -> None:
+    locations = {
+        "MESS01": "STA09",
+        "MESS02": "IDC12",
+        "MESS03": "STA07",
+        "MESS04": "STA11",
+    }
+    destinations = dict(locations)
+    destinations["MESS03"] = "IDC01"
+    state = MutableMethodState(
+        issue=6,
+        pre_state_sha256="a" * 64,
+        mess_energy_kwh={mid: 760.0 for mid in MESS_IDS},
+        mess_location=locations,
+        active_plan=SlowDiscretePlan(
+            plan_id="plan",
+            valid_from_issue=6,
+            mess_destination=destinations,
+            mess_native_route_rank={mid: 1 for mid in MESS_IDS},
+            job_idc_placement={},
+            checkpoint_migration={},
+            gpu_gang_allocation={},
+            job_start_issue={},
+            coarse_charging_kw={mid: (0.0,) for mid in MESS_IDS},
+        ),
+    )
+    route = MobilityRouteForecast(
+        source_service_id="STA07",
+        destination_service_id="IDC01",
+        od_index=471,
+        rank=1,
+        q50_eta_seconds=600.0,
+        safe_eta_seconds=900.0,
+        q50_energy_kwh=24.0,
+        safe_energy_kwh=36.0,
+    )
+    frame = CausalExperimentFrame(
+        issue=6,
+        current_price_aud_per_mwh=0.0,
+        horizon_price_median_aud_per_mwh=0.0,
+        q50_background_p_kw=0.0,
+        q50_background_q_kvar=0.0,
+        arrivals=(),
+        exogenous_sha256="b" * 64,
+        mobility_routes=(route,),
+    )
+    authority = _ExecutionAuthority()
+
+    with pytest.raises(RuntimeContractError, match="crosses the independent"):
+        _start_planned_routes(
+            state,
+            SimpleNamespace(energy_flexibility="MESS", joint_uncertainty=True),
+            frame,
+            authority,
+            2,
+        )
+
+    assert authority.calls == [(6, 471, 1)]
+    assert state.mess_in_transit["MESS03"] is False
+    assert state.mess_location["MESS03"] == "STA07"
