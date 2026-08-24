@@ -1,4 +1,4 @@
-"""Fail-closed preflight for a complete February or March 2025 campaign."""
+"""Fail-closed preflight for a contracted complete 2025 calendar month."""
 
 from __future__ import annotations
 
@@ -39,13 +39,14 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--period-id", required=True)
+    parser.add_argument("--period-contract", type=Path)
     parser.add_argument("--shared-root", type=Path, required=True)
     parser.add_argument("--input-root", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--allow-unmaterialized", action="store_true")
     args = parser.parse_args()
 
-    contract_path = (
+    contract_path = args.period_contract or (
         args.repo / "pfr/contracts/FROZEN_2025_FULL_MONTH_VALIDATION_PERIODS_V1.json"
     )
     contract = json.loads(contract_path.read_text(encoding="utf-8"))
