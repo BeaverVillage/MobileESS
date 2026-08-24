@@ -22,6 +22,7 @@ from pfr.daily import DailyInitializationError, certify_daily_pre_identity
 from pfr.git_identity import run_git
 from pfr.methods import ComparisonMethod, ExperimentAuthority, MethodFactory
 from pfr.migration import MigrationAuthority, load_migration_authority
+from pfr.mobility_physics import MobilityPhysics
 from pfr.native_predictive import (
     PREDICTIVE_NATIVE_HORIZON_STEPS,
     PredictivePathScore,
@@ -1197,7 +1198,8 @@ def _frames(
     canonical_jobs: Path,
     mobility_paths: Mapping[int, Path],
     route_rows: Sequence[Mapping[str, Any]],
-    mobility_template_bank: Mapping[int, tuple[float, ...]],
+    mobility_physics: MobilityPhysics,
+    mobility_physics_sha256: str,
     workload_reserve_gpu: Mapping[str, float],
     feeder_scale: float,
     migration_authority: MigrationAuthority,
@@ -1269,25 +1271,25 @@ def _frames(
             raise RuntimeError(f"missing causal mobility source issue={issue}")
         with np.load(mobility_path, allow_pickle=False) as mobility:
             eta = np.asarray(mobility["path_quantiles_sec"][0], dtype=float)
-            energy = np.asarray(mobility["energy_quantiles_kWh"][0], dtype=float)
-            safe_energy = np.asarray(mobility["safe_energy_kWh"][0], dtype=float)
-            safe_eta = np.asarray(mobility["route_safe_eta_sec"][0], dtype=float)
-            template_ids = np.asarray(mobility["e4b_template_id"][0], dtype=int)
-            profile_steps = np.asarray(mobility["profile_safe_horizon_steps"][0], dtype=int)
+        if eta.shape != (1656, 3):
+            raise RuntimeError(
+                f"causal mobility ETA shape is invalid issue={issue} shape={eta.shape}"
+            )
         routes = []
         for static in route_rows:
             slot = int(static["slot"])
+            q50_energy, safe_energy = mobility_physics.forecast_energy_kwh(
+                static, eta[slot]
+            )
             routes.append(MobilityRouteForecast(
                 source_service_id=str(static["source_service_id"]),
                 destination_service_id=str(static["destination_service_id"]),
                 od_index=int(static["od_index"]),
                 rank=int(static["rank"]),
                 q50_eta_seconds=float(eta[slot, 1]),
-                safe_eta_seconds=float(safe_eta[slot]),
-                q50_energy_kwh=float(energy[slot, 1]),
-                safe_energy_kwh=float(safe_energy[slot]),
-                profile_template_id=int(template_ids[slot]),
-                profile_horizon_steps=int(profile_steps[slot]),
+                safe_eta_seconds=float(eta[slot, 2]),
+                q50_energy_kwh=q50_energy,
+                safe_energy_kwh=safe_energy,
             ))
         robust_p = feeder_scale * np.asarray(block["upper_p"][row, 0], dtype=float)
         robust_q = feeder_scale * np.asarray(block["upper_q"][row, 0], dtype=float)
@@ -1321,6 +1323,9 @@ def _frames(
             "power_block_authority_sha256": sha256(root / "BLOCK_AUTHORITY.json"),
             "arriving_job_uids": sorted(job.job_uid for job in arrivals.get(issue, ())),
             "mobility_issue_sha256": sha256(mobility_path),
+            "mobility_physics_sha256": mobility_physics_sha256,
+            "mobility_energy_source": "DETERMINISTIC_PHYSICS_FROM_GEOMETRY_AND_ETA",
+            "legacy_mobility_energy_arrays_read": False,
             "factorized_uncertainty_bound": True,
             "predictive_native_forecast_lead_steps": [
                 1,
@@ -1357,7 +1362,6 @@ def _frames(
             ),
             workload_reserve_gpu=dict(workload_reserve_gpu),
             mobility_routes=tuple(routes),
-            mobility_template_bank=mobility_template_bank,
         ))
     return frames
 
@@ -1399,7 +1403,11 @@ def main() -> None:
     parser.add_argument("--power-curve", type=Path, required=True)
     parser.add_argument("--mobility-root", type=Path, action="append", required=True)
     parser.add_argument("--route-catalog", type=Path, required=True)
-    parser.add_argument("--mobility-template-bank", type=Path, required=True)
+    parser.add_argument(
+        "--mobility-template-bank",
+        type=Path,
+        help="Legacy compatibility argument; E4 energy profiles are never loaded.",
+    )
     parser.add_argument("--workload-uncertainty", type=Path, required=True)
     parser.add_argument("--factorized-uncertainty", type=Path, required=True)
     parser.add_argument(
@@ -1588,20 +1596,30 @@ def main() -> None:
             mobility_paths[issue] = path
     route_catalog = json_load(args.route_catalog)
     route_rows = route_catalog.get("routes", ())
-    if route_catalog.get("status") != "PASS" or len(route_rows) != 1656:
-        raise RuntimeError("frozen K=3 route catalog is incomplete")
-    template_frame = pd.read_parquet(args.mobility_template_bank)
-    template_columns = [f"u{index:03d}" for index in range(129)]
-    mobility_template_bank = {
-        index: tuple(float(row[column]) for column in template_columns)
-        for index, row in template_frame.iterrows()
+    required_route_physics = {
+        "route_distance_km",
+        "cumulative_ascent_m",
+        "cumulative_descent_m",
     }
+    if (
+        route_catalog.get("status") != "PASS"
+        or route_catalog.get("mobility_energy_ml_loaded") is not False
+        or route_catalog.get("runtime_energy_authority")
+        != "DETERMINISTIC_PHYSICS_E_RECOMPUTED_FROM_GEOMETRY_AND_CAUSAL_ETA"
+        or len(route_rows) != 1656
+        or any(not required_route_physics.issubset(route) for route in route_rows)
+    ):
+        raise RuntimeError("frozen K=3 route catalog is incomplete")
+    mobility_physics_path = args.repo / "pfr/contracts/MESS_MOBILITY_PHYSICS_V1.json"
+    mobility_physics = MobilityPhysics.from_contract(mobility_physics_path)
+    mobility_physics_fingerprint = sha256(mobility_physics_path)
     frames = _frames(
         shared=args.shared_root.resolve(), start_issue=args.start_issue, count=args.count,
         independent_jobs=args.independent_jobs.resolve(), canonical_jobs=args.canonical_jobs.resolve(),
         mobility_paths=mobility_paths,
         route_rows=route_rows,
-        mobility_template_bank=mobility_template_bank,
+        mobility_physics=mobility_physics,
+        mobility_physics_sha256=mobility_physics_fingerprint,
         workload_reserve_gpu={
             key: float(value) for key, value in workload_uncertainty["idc_gpu_reserve"].items()
         },
@@ -1626,7 +1644,17 @@ def main() -> None:
             "ENGINEERING_SCENARIO_NOT_MEASURED_CHECKPOINT_SIZE"
         ),
         "route_catalog_sha256": sha256(args.route_catalog),
-        "mobility_template_bank_sha256": sha256(args.mobility_template_bank),
+        "mobility_physics_sha256": mobility_physics_fingerprint,
+        "mobility_energy_authority": (
+            "DETERMINISTIC_LONGITUDINAL_PHYSICS_FROM_FROZEN_GEOMETRY_AND_CAUSAL_ETA"
+        ),
+        "legacy_mobility_energy_fields_ignored": [
+            "energy_quantiles_kWh",
+            "safe_energy_kWh",
+            "e4b_template_id",
+            "profile_safe_horizon_steps",
+        ],
+        "legacy_mobility_template_bank_loaded": False,
         "physical_execution_authority_version": (
             "V13_13_POST_HOC_P100_FEEDER_SCALE_NATIVE_ELASTIC_AC_FREEZE_20260823"
         ),
@@ -1800,7 +1828,7 @@ def main() -> None:
         "cross_day_endogenous_state_carryover": False,
         "controller_burn_in_steps": 0,
         "factorized_uncertainty_decision_use": {
-            "U_mob": "K3_ROUTE_MIQP_AND_E4_TRANSIT_SOC",
+            "U_mob": "CAUSAL_ETA_Q10_Q50_Q90_TO_DETERMINISTIC_PHYSICS",
             "U_work": "SITE_GPU_CAPACITY_AND_PLAN_VALIDITY_RISK",
             "U_grid": "CAUSAL_ADAPTIVE_ENVELOPE_PLAN_VALIDITY_DIAGNOSTIC",
         },

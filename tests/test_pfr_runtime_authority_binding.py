@@ -11,8 +11,6 @@ def _route(rank: int, eta: float, energy: float) -> MobilityRouteForecast:
         safe_eta_seconds=eta,
         q50_energy_kwh=energy,
         safe_energy_kwh=energy,
-        profile_template_id=0,
-        profile_horizon_steps=2,
     )
 
 
@@ -24,12 +22,19 @@ def test_duration_energy_pareto_prunes_dominated_k3_route() -> None:
     assert [route.rank for route in kept] == [1, 3]
 
 
-def test_e4_profile_conserves_selected_safe_energy() -> None:
-    cumulative = tuple(index / 128.0 for index in range(129))
+def test_physics_profile_conserves_selected_safe_energy() -> None:
     route = _route(1, 600.0, 24.0)
 
-    profile = _mobility_energy_profile(route, {0: cumulative}, safe=True)
+    profile = _mobility_energy_profile(route, safe=True)
 
     assert len(profile) == 2
     assert all(value >= 0.0 for value in profile)
     assert abs(sum(profile) - 24.0) < 1e-9
+
+
+def test_physics_profile_weights_partial_final_step() -> None:
+    route = _route(1, 650.0, 26.0)
+
+    profile = _mobility_energy_profile(route, safe=True)
+
+    assert profile == (12.0, 12.0, 2.0)

@@ -155,8 +155,6 @@ class MobilityRouteForecast:
     safe_eta_seconds: float
     q50_energy_kwh: float
     safe_energy_kwh: float
-    profile_template_id: int
-    profile_horizon_steps: int
 
     def validate(self) -> None:
         if self.source_service_id == self.destination_service_id:
@@ -171,10 +169,6 @@ class MobilityRouteForecast:
         )
         if any(not math.isfinite(value) or value < 0.0 for value in values):
             raise RuntimeContractError("mobility forecast must be finite and non-negative")
-        if self.profile_template_id < 0 or self.profile_horizon_steps <= 0:
-            raise RuntimeContractError("mobility E4 profile authority is invalid")
-
-
 @dataclass(frozen=True)
 class CausalExperimentFrame:
     issue: int
@@ -201,7 +195,6 @@ class CausalExperimentFrame:
     ] = ()
     workload_reserve_gpu: Mapping[str, float] = field(default_factory=dict)
     mobility_routes: Tuple[MobilityRouteForecast, ...] = ()
-    mobility_template_bank: Mapping[int, Tuple[float, ...]] = field(default_factory=dict)
 
     def validate(self) -> None:
         values = (
@@ -2476,30 +2469,28 @@ def _pareto_routes(
 
 def _mobility_energy_profile(
     route: MobilityRouteForecast,
-    template_bank: Mapping[int, Tuple[float, ...]],
     *,
     safe: bool,
 ) -> Tuple[float, ...]:
+    """Allocate deterministic lumped-physics energy over the causal ETA.
+
+    The route-total energy has already been recomputed from frozen geometry and
+    ETA.  Constant physical power is therefore the only profile assumption;
+    learned E4 templates are deliberately outside the runtime authority.
+    """
     route.validate()
-    cumulative = template_bank.get(route.profile_template_id)
-    if cumulative is None or len(cumulative) != 129:
-        raise RuntimeContractError("selected route lacks its frozen E4B profile template")
-    if any(not math.isfinite(value) for value in cumulative) or abs(cumulative[0]) > 1e-9 or abs(cumulative[-1] - 1.0) > 1e-6:
-        raise RuntimeContractError("E4B cumulative profile is invalid")
     eta = route.safe_eta_seconds if safe else route.q50_eta_seconds
     total = route.safe_energy_kwh if safe else route.q50_energy_kwh
-    steps = min(54, max(1, math.ceil(eta / 300.0), route.profile_horizon_steps))
-
-    def interpolate(fraction: float) -> float:
-        position = fraction * 128.0
-        left = min(127, int(math.floor(position)))
-        weight = position - left
-        return cumulative[left] + weight * (cumulative[left + 1] - cumulative[left])
-
-    sampled = tuple(interpolate(index / steps) for index in range(steps + 1))
-    profile = tuple(max(0.0, sampled[index + 1] - sampled[index]) * total for index in range(steps))
+    steps = min(54, max(1, math.ceil(eta / 300.0)))
+    durations = tuple(
+        min(300.0, max(0.0, eta - 300.0 * index)) for index in range(steps)
+    )
+    duration_sum = sum(durations)
+    if duration_sum <= 0.0 or abs(duration_sum - eta) > 1e-7:
+        raise RuntimeContractError("causal ETA cannot be discretized into transit steps")
+    profile = tuple(total * duration / duration_sum for duration in durations)
     if abs(sum(profile) - total) > max(1e-8, total * 1e-8):
-        raise RuntimeContractError("E4B route profile does not conserve safe mobility energy")
+        raise RuntimeContractError("physics transit profile does not conserve mobility energy")
     return profile
 
 
@@ -3193,9 +3184,7 @@ def _start_planned_routes(
         routes = [route for route in frame.routes_for(source, destination) if route.rank == rank]
         if len(routes) != 1:
             raise RuntimeContractError("slow plan selected a route outside frozen K=3")
-        profile = _mobility_energy_profile(
-            routes[0], frame.mobility_template_bank, safe=config.joint_uncertainty
-        )
+        profile = _mobility_energy_profile(routes[0], safe=config.joint_uncertainty)
         if state.mess_energy_kwh[mid] - sum(profile) < MESS_FLOOR_KWH - 1e-9:
             raise RuntimeContractError("selected mobility profile violates protected SOC floor")
         state.mess_in_transit[mid] = True
@@ -3846,7 +3835,7 @@ class PfrRuntimeRunner:
                 index = state.mess_route_profile_index[mid]
                 profile = state.mess_route_energy_profile_kwh[mid]
                 if index >= len(profile):
-                    raise RuntimeContractError("transit profile index escaped E4B authority")
+                    raise RuntimeContractError("transit profile index escaped physics authority")
                 movement = profile[index]
                 mobility_energy_kwh += movement
                 state.mess_energy_kwh[mid] -= movement

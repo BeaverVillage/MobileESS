@@ -11,12 +11,14 @@ from pathlib import Path
 import tempfile
 from typing import Any, Mapping
 
+import numpy as np
 import pandas as pd
 
 from pfr.canary import run_idc_migration_canary
 from pfr.migration import load_migration_authority
 from pfr.tools.preflight_january_2025 import (
     validate_method_contracts,
+    validate_physics_only_mobility_runtime,
     validate_workload_scheduler_contract,
 )
 
@@ -110,6 +112,13 @@ def main() -> None:
             (args.shared_root / "mobility/mobility_runtime").glob("issue_*.npz")
         )
         mobility_issues = {int(path.name.split("_")[1]) for path in mobility_files}
+        eta_source_ok = False
+        if mobility_files:
+            try:
+                with np.load(mobility_files[0], allow_pickle=False) as payload:
+                    eta_source_ok = payload["path_quantiles_sec"].shape == (54, 1656, 3)
+            except (KeyError, OSError, ValueError):
+                eta_source_ok = False
         expected = set(range(first, last + 1))
         power_ranges = []
         for path in sorted((args.shared_root / "power_price").glob("block_*_*_*")):
@@ -145,9 +154,7 @@ def main() -> None:
                 "power_exact_scored_and_padding_coverage": power_issues
                 == set(range(first, source_last + 1))
                 and all(count == 1 for count in power_issue_counts.values()),
-                "template_bank": (
-                    args.shared_root / "mobility/E4B_FULLFIT_TEMPLATE_BANK_129.parquet"
-                ).is_file(),
+                "eta_source_shape": eta_source_ok,
             }
         )
     source_ok = source_ready and all(source_checks.values())
@@ -162,6 +169,18 @@ def main() -> None:
         and scale.get("scientific_authority_version")
         == contract.get("physical_execution_authority_version")
     )
+    physics = json.loads(
+        (args.repo / "pfr/contracts/MESS_MOBILITY_PHYSICS_V1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    physics_ok = bool(
+        physics.get("status") == "FROZEN_PHYSICS_ONLY"
+        and physics.get("mobility_energy_ml_loaded") is False
+        and physics.get("mobility_profile_ml_loaded") is False
+        and physics.get("traffic_ml_role") == "ETA_ONLY"
+    )
+    physics_runtime = validate_physics_only_mobility_runtime(args.repo)
     migration_authority = load_migration_authority(
         args.repo / "pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json"
     )
@@ -190,6 +209,8 @@ def main() -> None:
         and input_ok
         and source_ok
         and scale_ok
+        and physics_ok
+        and physics_runtime.get("pass") is True
         and migration_ok
         and method_contracts_ok
         and workload_scheduler_ok
@@ -198,6 +219,8 @@ def main() -> None:
         plan_ok
         and input_ok
         and scale_ok
+        and physics_ok
+        and physics_runtime.get("pass") is True
         and migration_ok
         and method_contracts_ok
         and workload_scheduler_ok
@@ -225,6 +248,8 @@ def main() -> None:
             "source_ready": source_ok,
             "source": source_checks,
             "feeder_scale_contract": scale_ok,
+            "mobility_physics_contract": physics_ok,
+            "physics_only_mobility_runtime": physics_runtime,
             "migration_authority": migration_ok,
             "migration_runtime_canary": migration_canary,
             "b0_b8_method_contracts": method_contracts,

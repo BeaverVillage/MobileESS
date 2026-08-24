@@ -12,6 +12,8 @@ from typing import Any, Mapping
 import numpy as np
 import pandas as pd
 
+from pfr.tools.preflight_january_2025 import validate_physics_only_mobility_runtime
+
 
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -75,10 +77,25 @@ def main() -> None:
         for path in (args.shared_root / "mobility/mobility_runtime").glob("issue_*.npz")
     }
     missing_mobility = sorted(expected - mobility_issues)
+    eta_source_ok = False
+    mobility_files = sorted(
+        (args.shared_root / "mobility/mobility_runtime").glob("issue_*.npz")
+    )
+    if mobility_files:
+        try:
+            with np.load(mobility_files[0], allow_pickle=False) as payload:
+                eta_source_ok = payload["path_quantiles_sec"].shape == (54, 1656, 3)
+        except (KeyError, OSError, ValueError):
+            eta_source_ok = False
 
-    template_path = args.shared_root / "mobility/E4B_FULLFIT_TEMPLATE_BANK_129.parquet"
-    template = pd.read_parquet(template_path)
-    template_ok = all(f"u{index:03d}" in template.columns for index in range(129))
+    physics_path = args.repo / "pfr/contracts/MESS_MOBILITY_PHYSICS_V1.json"
+    physics = json.loads(physics_path.read_text(encoding="utf-8"))
+    physics_ok = bool(
+        physics.get("status") == "FROZEN_PHYSICS_ONLY"
+        and physics.get("mobility_energy_ml_loaded") is False
+        and physics.get("mobility_profile_ml_loaded") is False
+        and physics.get("traffic_ml_role") == "ETA_ONLY"
+    )
 
     pre_path = args.input_root / "pre/DAILY_CANONICAL_PRE_MANIFEST.json"
     jobs_path = args.input_root / "jobs/INDEPENDENT_JOB_COHORT.parquet"
@@ -134,7 +151,11 @@ def main() -> None:
         "shared_authority": authority_ok,
         "power_issue_exact_coverage": not missing_power and not duplicate_power,
         "mobility_issue_coverage": not missing_mobility,
-        "template_bank": template_ok,
+        "mobility_eta_source_shape": eta_source_ok,
+        "mobility_physics": physics_ok,
+        "physics_only_mobility_runtime": validate_physics_only_mobility_runtime(
+            args.repo
+        )["pass"],
         "daily_pre": daily_pre_ok,
         "job_cohort": jobs_ok,
         "feeder_scale_contract": scale_ok,
@@ -160,7 +181,7 @@ def main() -> None:
             "daily_pre": sha256(pre_path),
             "jobs": sha256(jobs_path),
             "jobs_authority": sha256(jobs_authority_path),
-            "template_bank": sha256(template_path),
+            "mobility_physics": sha256(physics_path),
             "feeder_scale_contract": sha256(scale_path),
         },
     }

@@ -1,0 +1,36 @@
+{
+  "schema_version": "mobileess.mess_mobility_physics.v1",
+  "status": "FROZEN_PHYSICS_ONLY",
+  "energy_authority": "DETERMINISTIC_LONGITUDINAL_PHYSICS_FROM_FROZEN_ROUTE_GEOMETRY_AND_CAUSAL_ETA",
+  "mobility_energy_ml_loaded": false,
+  "mobility_profile_ml_loaded": false,
+  "traffic_ml_role": "ETA_ONLY",
+  "safe_energy_rule": "MAX_OF_PHYSICS_ENERGY_AT_CAUSAL_ETA_Q10_Q50_Q90",
+  "transit_profile_rule": "CONSTANT_LUMPED_PHYSICS_POWER_WITH_PARTIAL_FINAL_STEP",
+  "parameters": {
+    "gross_vehicle_mass_kg": 28000.0,
+    "gravity_mps2": 9.80665,
+    "rolling_resistance_coefficient": 0.007,
+    "air_density_kg_per_m3": 1.225,
+    "air_drag_coefficient": 0.6,
+    "front_surface_area_m2": 9.5,
+    "drivetrain_efficiency": 0.9,
+    "regenerative_braking_efficiency": 0.6,
+    "battery_side_auxiliary_power_kw": 5.0
+  },
+  "component_equations": {
+    "rolling": "m*g*Crr*distance/eta_drive",
+    "aerodynamic": "0.5*rho*Cd*A*v^2*distance/eta_drive",
+    "grade": "m*g*(ascent/eta_drive-eta_regen*descent)",
+    "auxiliary": "P_aux*ETA"
+  },
+  "frozen_vehicle_contract_sha256": "b1fa74794d757ee6b51fb7e3d2fbf35d7769341da2b59cf548dc1786b77f07f1",
+  "frozen_feature_bridge_contract_sha256": "cbd2bcc9861d7a7910ac2779a515285d963b1f134818791a84241b24c80498d4",
+  "frozen_bridge_regression": {
+    "rolling_kwh_per_km": 0.5932417901234568,
+    "uphill_kwh_per_m": 0.08474882716049384,
+    "downhill_regeneration_kwh_per_m": -0.04576436666666667,
+    "aerodynamic_force_coefficient": 3.8791666666666664,
+    "physics_baseline_component_sum_max_error_kwh": 0.0
+  }
+}

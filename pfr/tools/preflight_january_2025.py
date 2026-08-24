@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 from pathlib import Path
@@ -502,12 +503,55 @@ def validate_mobility_sources(roots: Sequence[Path]) -> Mapping[str, Any]:
             observed[issue] = str(path)
     observed_issues = set(observed)
     missing = sorted(EXPECTED_ISSUES - observed_issues)
+    eta_samples = []
+    for issue in sorted(observed)[:3]:
+        path = Path(observed[issue])
+        try:
+            with np.load(path, allow_pickle=False) as payload:
+                shape = tuple(payload["path_quantiles_sec"].shape)
+            eta_samples.append({"issue": issue, "shape": shape, "pass": shape == (54, 1656, 3)})
+        except (KeyError, OSError, ValueError):
+            eta_samples.append({"issue": issue, "shape": None, "pass": False})
     return {
-        "pass": not duplicates and not malformed and not missing,
+        "pass": not duplicates
+        and not malformed
+        and not missing
+        and bool(eta_samples)
+        and all(row["pass"] for row in eta_samples),
         "observed_issue_count": len(observed_issues & EXPECTED_ISSUES),
         "duplicates": sorted(set(duplicates))[:20],
         "malformed": malformed[:20],
         "missing_issue_sample": missing[:20],
+        "eta_samples": eta_samples,
+        "runtime_mobility_input": "path_quantiles_sec_ONLY",
+    }
+
+
+def validate_physics_only_mobility_runtime(repo: Path) -> Mapping[str, Any]:
+    source_path = repo / "pfr/tools/run_pfr_matrix.py"
+    tree = ast.parse(source_path.read_text(encoding="utf-8"))
+    forbidden = {
+        "energy_quantiles_kWh",
+        "safe_energy_kWh",
+        "route_safe_eta_sec",
+        "e4b_template_id",
+        "profile_safe_horizon_steps",
+    }
+    accessed = sorted(
+        {
+            node.slice.value
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Subscript)
+            and isinstance(node.slice, ast.Constant)
+            and isinstance(node.slice.value, str)
+            and node.slice.value in forbidden
+        }
+    )
+    return {
+        "pass": not accessed,
+        "forbidden_legacy_array_accesses": accessed,
+        "required_runtime_input": "path_quantiles_sec",
+        "energy_authority": "MESS_MOBILITY_PHYSICS_V1",
     }
 
 
@@ -628,7 +672,11 @@ def main() -> None:
     parser.add_argument("--power-curve", type=Path, required=True)
     parser.add_argument("--mobility-root", type=Path, action="append", required=True)
     parser.add_argument("--route-catalog", type=Path, required=True)
-    parser.add_argument("--mobility-template-bank", type=Path, required=True)
+    parser.add_argument(
+        "--mobility-template-bank",
+        type=Path,
+        help="Legacy compatibility argument; physics-only runtime ignores it.",
+    )
     parser.add_argument("--workload-uncertainty", type=Path, required=True)
     parser.add_argument("--factorized-uncertainty", type=Path, required=True)
     parser.add_argument(
@@ -655,7 +703,7 @@ def main() -> None:
         args.canonical_jobs,
         args.power_curve,
         args.route_catalog,
-        args.mobility_template_bank,
+        args.repo / "pfr/contracts/MESS_MOBILITY_PHYSICS_V1.json",
         args.workload_uncertainty,
         args.factorized_uncertainty,
         args.repo / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.dss",
@@ -732,6 +780,9 @@ def main() -> None:
                 "daily_pre": validate_daily_pre(args.initial_state),
                 "power_sources": validate_power_sources(args.shared_root),
                 "mobility_sources": validate_mobility_sources(args.mobility_root),
+                "physics_only_mobility_runtime": validate_physics_only_mobility_runtime(
+                    args.repo
+                ),
                 "uncertainty": validate_uncertainty(
                     args.factorized_uncertainty, args.workload_uncertainty
                 ),
@@ -742,13 +793,31 @@ def main() -> None:
             }
         )
         route = json.loads(args.route_catalog.read_text(encoding="utf-8"))
-        template = pd.read_parquet(args.mobility_template_bank)
-        checks["route_and_template"] = {
+        physics = json.loads(
+            (args.repo / "pfr/contracts/MESS_MOBILITY_PHYSICS_V1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        required_geometry = {
+            "route_distance_km",
+            "cumulative_ascent_m",
+            "cumulative_descent_m",
+        }
+        checks["route_and_physics"] = {
             "pass": route.get("status") == "PASS"
             and len(route.get("routes", ())) == 1656
-            and all(f"u{index:03d}" in template for index in range(129)),
+            and route.get("mobility_energy_ml_loaded") is False
+            and route.get("runtime_energy_authority")
+            == "DETERMINISTIC_PHYSICS_E_RECOMPUTED_FROM_GEOMETRY_AND_CAUSAL_ETA"
+            and all(
+                required_geometry.issubset(row) for row in route.get("routes", ())
+            )
+            and physics.get("status") == "FROZEN_PHYSICS_ONLY"
+            and physics.get("mobility_energy_ml_loaded") is False
+            and physics.get("mobility_profile_ml_loaded") is False,
             "route_count": len(route.get("routes", ())),
-            "template_row_count": len(template),
+            "energy_authority": physics.get("energy_authority"),
+            "legacy_template_bank_loaded": False,
         }
     status = "PASS" if checks and all(row.get("pass") is True for row in checks.values()) else "FAIL_CLOSED"
     report = {

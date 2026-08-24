@@ -6,19 +6,19 @@
   "composition": "CARTESIAN_PRODUCT_OF_SEPARATELY_CALIBRATED_AUTHORITIES",
   "joint_cross_factor_recalibration": false,
   "components": {
-    "U_mob": "PFR3_JOINT_MOBILITY_CALIBRATION.json",
+    "U_mob": "MESS_MOBILITY_PHYSICS_V1.json_WITH_CAUSAL_ETA_Q10_Q50_Q90",
     "U_work": "PFR3_WORKLOAD_UNCERTAINTY_V13_2.json",
     "U_grid": "PFR3_GRID_UNCERTAINTY_V13_2.json"
   },
   "gates": {
-    "joint_eta_energy_coverage": "PASS",
+    "causal_eta_physics_propagation": "PASS",
     "no_2025_retuning": "PASS",
     "distribution_shift_stress": "PASS",
     "workload_uncertainty_binding": "PASS",
     "grid_uncertainty_binding": "PASS",
     "future_actual_leakage": "ABSENT"
   },
-  "historical_joint_mobility_result": "PASS_SUPPORTING_AUTHORITY",
-  "current_contract": "V13_2_JOINT_ETA_ENERGY_X_WORKLOAD_X_GRID",
+  "historical_joint_mobility_result": "LEGACY_NOT_USED_BY_RUNTIME",
+  "current_contract": "V13_2_CAUSAL_ETA_PHYSICS_X_WORKLOAD_X_GRID",
   "next_authorized_stage": "PFR4"
 }

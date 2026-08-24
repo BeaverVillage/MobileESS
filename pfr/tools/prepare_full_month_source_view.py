@@ -224,14 +224,6 @@ def main() -> None:
                 "view_path": str(target),
             }
         )
-    template_source = reused_roots[0] / "E4B_FULLFIT_TEMPLATE_BANK_129.parquet"
-    template_target = args.shared_root / "mobility/E4B_FULLFIT_TEMPLATE_BANK_129.parquet"
-    if template_target.exists() or template_target.is_symlink():
-        if not template_target.is_symlink() or template_target.resolve() != template_source.resolve():
-            raise RuntimeError("mobility template view drift")
-    else:
-        template_target.symlink_to(template_source.resolve())
-
     index_path = args.shared_root / "mobility/FULL_MONTH_MOBILITY_VIEW_INDEX.json"
     atomic_write_json(
         index_path,
@@ -242,6 +234,8 @@ def main() -> None:
             "issue_last": last,
             "issue_count": len(selected_rows),
             "future_actual_used": False,
+            "runtime_mobility_fields": ["path_quantiles_sec"],
+            "legacy_energy_and_e4_fields_ignored": True,
             "rows": selected_rows,
         },
     )
