@@ -1,6 +1,7 @@
 import tempfile
 from datetime import date, timedelta
 from pathlib import Path
+import pickle
 import unittest
 
 import pandas as pd
@@ -276,6 +277,49 @@ class PfrRuntimeTests(unittest.TestCase):
         self.assertEqual(
             summary["risk_calibration_day_joint_score"],
             audit["joint_normalized_score"],
+        )
+
+    def test_diagnostic_checkpoint_preserves_exact_runtime_resume_state(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            summary = PfrRuntimeRunner(
+                power_curve=self.curve,
+                physical_backend=FakePhysical(),
+                migration_authority=self.migration_authority,
+            ).run_method(
+                config=self.configs[0],
+                frames=self.frames[:1],
+                initial=self.initial,
+                representative_week_id="TEST_DIAGNOSTIC_RESUME",
+                output=root,
+                diagnostic_checkpoint_after_issue=self.frames[0].issue,
+            )
+            checkpoint_path = (
+                root
+                / "B0"
+                / "DIAGNOSTIC_RESUME_AFTER_ISSUE_000100.pkl"
+            )
+            sidecar_path = checkpoint_path.with_suffix(".json")
+            with checkpoint_path.open("rb") as handle:
+                checkpoint = pickle.load(handle)
+            sidecar = __import__("json").loads(sidecar_path.read_text())
+
+        self.assertEqual(summary["status"], "PASS")
+        self.assertEqual(checkpoint["completed_issue"], 100)
+        self.assertEqual(checkpoint["resume_issue"], 101)
+        self.assertEqual(checkpoint["state"].issue, 101)
+        self.assertEqual(
+            checkpoint["post_state_sha256"],
+            checkpoint["state"].pre_state_sha256,
+        )
+        self.assertEqual(
+            checkpoint["representative_week_id"],
+            "TEST_DIAGNOSTIC_RESUME",
+        )
+        self.assertFalse(sidecar["scientific_result_eligible"])
+        self.assertEqual(
+            sidecar["resume_semantics"],
+            "EXACT_ENDOGENOUS_RUNTIME_STATE_WITH_COLD_PLANNER",
         )
 
     def test_b7_fails_closed_without_frozen_risk_calibration(self):

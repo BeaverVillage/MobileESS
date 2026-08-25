@@ -26,6 +26,7 @@
     "slow_decisions_fixed": true,
     "solver": "persistent exact continuous convex QCP",
     "lexicographic_backend": "Gurobi native multiobjective",
+    "charge_discharge_exclusivity_recovery": "If the relaxed convex-QCP incumbent exceeds the frozen 1e-4 kW simultaneous charge/discharge gate, fix every five-minute dispatch direction from incumbent net power and re-solve all lexicographic priorities inside the original watchdog; never widen the gate or commit the relaxed incumbent.",
     "exact_constraints": [
       "line P-Q circles",
       "service-transformer P-Q circles",

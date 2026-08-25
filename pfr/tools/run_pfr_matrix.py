@@ -11,6 +11,7 @@ import itertools
 import json
 import os
 from pathlib import Path
+import pickle
 import shutil
 import statistics
 import subprocess
@@ -60,6 +61,7 @@ from pfr.runtime import (
     PhysicalCommit,
     PfrRuntimeRunner,
     RuntimeInitialState,
+    MutableMethodState,
     NativeGridControlDecision,
 )
 from pfr.safety import ExactAcResult
@@ -1533,7 +1535,22 @@ def main() -> None:
         ),
     )
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--diagnostic-checkpoint-after-issue",
+        type=int,
+        help="Save a non-scientific cold-planner resume checkpoint after this issue.",
+    )
+    parser.add_argument(
+        "--diagnostic-resume-checkpoint",
+        type=Path,
+        help="Resume a diagnostic method from a locally generated runtime checkpoint.",
+    )
     args = parser.parse_args()
+    if (
+        args.diagnostic_checkpoint_after_issue is not None
+        or args.diagnostic_resume_checkpoint is not None
+    ) and not args.diagnostic_method:
+        parser.error("diagnostic checkpoint/resume requires --diagnostic-method")
     if args.diagnostic_method and args.supplementary_b8_periodic_5min:
         parser.error(
             "--diagnostic-method and --supplementary-b8-periodic-5min are mutually exclusive"
@@ -1728,14 +1745,44 @@ def main() -> None:
     ):
         raise RuntimeError("feeder absolute-scale contract is invalid")
     paths["feeder_scale_contract"] = str(feeder_scale_path)
-    pre = json_load(args.initial_state)
-    if not args.diagnostic_method and "canonical_pre" not in pre:
-        raise RuntimeError("main January B0-B7 execution requires canonical daily PRE")
-    initial = _runtime_initial_state(
-        pre,
-        args.start_issue,
-        require_population_identity=not bool(args.diagnostic_method),
-    )
+    diagnostic_resume_state = None
+    diagnostic_resume_cumulative_grid_cost_aud = 0.0
+    if args.diagnostic_resume_checkpoint is not None:
+        with args.diagnostic_resume_checkpoint.resolve().open("rb") as handle:
+            checkpoint = pickle.load(handle)
+        if (
+            not isinstance(checkpoint, dict)
+            or checkpoint.get("schema_version")
+            != "PFR_DIAGNOSTIC_RUNTIME_CHECKPOINT_V1"
+            or checkpoint.get("comparison_method_id") != args.diagnostic_method
+            or checkpoint.get("representative_week_id") != args.candidate_id
+            or int(checkpoint.get("completed_issue", -2)) + 1
+            != int(checkpoint.get("resume_issue", -1))
+            or int(checkpoint.get("resume_issue", -1)) != args.start_issue
+            or not isinstance(checkpoint.get("state"), MutableMethodState)
+            or checkpoint.get("post_state_sha256")
+            != checkpoint.get("state").pre_state_sha256
+        ):
+            raise RuntimeError("diagnostic resume checkpoint contract mismatch")
+        diagnostic_resume_state = checkpoint["state"]
+        diagnostic_resume_cumulative_grid_cost_aud = float(
+            checkpoint["cumulative_grid_cost_aud"]
+        )
+        initial = RuntimeInitialState(
+            issue=args.start_issue,
+            state_sha256=str(checkpoint["post_state_sha256"]),
+            mess_energy_kwh=dict(diagnostic_resume_state.mess_energy_kwh),
+            mess_location=dict(diagnostic_resume_state.mess_location),
+        )
+    else:
+        pre = json_load(args.initial_state)
+        if not args.diagnostic_method and "canonical_pre" not in pre:
+            raise RuntimeError("main January B0-B7 execution requires canonical daily PRE")
+        initial = _runtime_initial_state(
+            pre,
+            args.start_issue,
+            require_population_identity=not bool(args.diagnostic_method),
+        )
     factorized = json_load(args.factorized_uncertainty)
     workload_uncertainty = json_load(args.workload_uncertainty)
     if factorized.get("status") != "PASS" or workload_uncertainty.get("status") != "PASS":
@@ -1973,6 +2020,13 @@ def main() -> None:
             initial=initial,
             representative_week_id=args.candidate_id,
             output=output,
+            diagnostic_resume_state=diagnostic_resume_state,
+            diagnostic_resume_cumulative_grid_cost_aud=(
+                diagnostic_resume_cumulative_grid_cost_aud
+            ),
+            diagnostic_checkpoint_after_issue=(
+                args.diagnostic_checkpoint_after_issue
+            ),
         )
         matrix = {
             "schema_version": (

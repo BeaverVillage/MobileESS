@@ -1,8 +1,10 @@
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 from pfr.methods import ElectricalStressMethod, ExperimentAuthority, MethodFactory
+from pfr.persistent_bounded_milp import _PersistentMilpModel
 from pfr.retained_h54 import (
     RetainedH54JointPlanner,
     _FORMULATION_DEFAULTS,
@@ -168,12 +170,13 @@ def test_hierarchical_move_blocked_mpc_preserves_science_and_exact_recourse() ->
     assert 'PFR_ONLINE_MILP_WALL_BUDGET_SECONDS", "30.0"' in source
     assert 'self.numeric_focus = 0 if model_role == "slow_master" else 2' in source
     assert "self.model.Params.NumericFocus = self.numeric_focus" in source
-    assert "TERTIARY_SOLVER_OBJECTIVE_SCALE = 1e4" in source
-    assert "TERTIARY_SOLVER_OBJECTIVE_SCALE * tertiary_expr" in source
-    assert "EXACT_QCP_CONVERGENCE_TOLERANCE = 1e-10" in source
-    assert "self.model.Params.BarQCPConvTol" in source
+    assert "EXCLUSIVITY_TOLERANCE_KW = 1e-4" in source
+    assert "charge_discharge_exclusivity_tolerance_pu" in source
+    assert "_fix_dispatch_modes_from_incumbent" in source
+    assert "charge_discharge_mode_projection_used" in source
+    assert "self.mode[(mid, step)].LB = 0.0" in source
     assert '"tertiary_actuation": float(tertiary_expr.getValue())' in source
-    assert "exclusivity_tolerance_kw = 1e-4" in source
+    assert "EXCLUSIVITY_TOLERANCE_KW = 1e-3" not in source
     assert "PFR_GUROBI_NUMERIC_FOCUS" not in source
     assert "PFR_GUROBI_CROSSOVER" not in source
     assert "PFR_GUROBI_MULTIOBJ_PRE" not in source
@@ -192,6 +195,45 @@ def test_hierarchical_move_blocked_mpc_preserves_science_and_exact_recourse() ->
     )
     assert "online_solver_contract_sha256" in runner_source
     assert "HIERARCHICAL_MOVE_BLOCKED_MIXED_INTEGER_MPC_V1.json" in runner_source
+
+
+def test_exact_recourse_projects_relaxed_dispatch_to_physical_modes() -> None:
+    class Model:
+        updated = False
+
+        def update(self):
+            self.updated = True
+
+    recourse = object.__new__(_PersistentMilpModel)
+    recourse.model_role = "exact_recourse"
+    recourse.h = 2
+    recourse.k = 1
+    recourse.model = Model()
+    recourse.mode = {
+        (mid, step): SimpleNamespace(LB=0.0, UB=1.0)
+        for mid in MESS_IDS
+        for step in range(recourse.h)
+    }
+    recourse.pdis = {}
+    recourse.pchg = {}
+    for mid in MESS_IDS:
+        for route in recourse._route_axis(mid):
+            for step in range(recourse.h):
+                # Step 0 is net discharge despite a numerical charge residue;
+                # step 1 is net charge despite a discharge residue.
+                recourse.pdis[(mid, route, step)] = SimpleNamespace(
+                    X=5.0 if step == 0 else 0.001
+                )
+                recourse.pchg[(mid, route, step)] = SimpleNamespace(
+                    X=0.001 if step == 0 else 5.0
+                )
+
+    recourse._fix_dispatch_modes_from_incumbent()
+
+    assert recourse.model.updated
+    for mid in MESS_IDS:
+        assert recourse.mode[(mid, 0)].LB == recourse.mode[(mid, 0)].UB == 1.0
+        assert recourse.mode[(mid, 1)].LB == recourse.mode[(mid, 1)].UB == 0.0
 
 
 def test_new_stress_campaign_fails_closed_without_retained_h54_planner() -> None:

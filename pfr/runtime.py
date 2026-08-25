@@ -9,6 +9,7 @@ import json
 import math
 import os
 from pathlib import Path
+import pickle
 import time
 from typing import Any, Iterable, Mapping, Optional, Protocol, Sequence, Tuple
 
@@ -4386,6 +4387,9 @@ class PfrRuntimeRunner:
         initial: RuntimeInitialState,
         representative_week_id: str,
         output: Path,
+        diagnostic_resume_state: Optional[MutableMethodState] = None,
+        diagnostic_resume_cumulative_grid_cost_aud: float = 0.0,
+        diagnostic_checkpoint_after_issue: Optional[int] = None,
     ) -> Mapping[str, Any]:
         if not frames:
             raise RuntimeContractError("runtime needs at least one frame")
@@ -4397,7 +4401,7 @@ class PfrRuntimeRunner:
         )
         method_root = output / config.comparison_method_id.value
         method_root.mkdir(parents=True, exist_ok=True)
-        state = MutableMethodState(
+        state = diagnostic_resume_state or MutableMethodState(
             issue=initial.issue,
             pre_state_sha256=initial.state_sha256,
             mess_energy_kwh=dict(initial.mess_energy_kwh),
@@ -4410,8 +4414,14 @@ class PfrRuntimeRunner:
                 name: 0 for name in self.native_control_initial_states
             },
         )
+        if state.issue != initial.issue:
+            raise RuntimeContractError(
+                "diagnostic resume state does not match requested first issue"
+            )
         records = []
-        cumulative_grid_cost_aud = 0.0
+        cumulative_grid_cost_aud = float(
+            diagnostic_resume_cumulative_grid_cost_aud
+        )
         failure: Optional[Mapping[str, Any]] = None
         for offset, frame in enumerate(frames):
             started = time.monotonic()
@@ -5423,6 +5433,51 @@ class PfrRuntimeRunner:
             # This avoids estimating storage from unrelated campaign I/O.
             atomic_write_json(issue_root / "COMMIT_MARKER.json", record)
             records.append(record)
+            if diagnostic_checkpoint_after_issue == frame.issue:
+                checkpoint_path = (
+                    method_root
+                    / f"DIAGNOSTIC_RESUME_AFTER_ISSUE_{frame.issue:06d}.pkl"
+                )
+                checkpoint_tmp = checkpoint_path.with_suffix(".pkl.tmp")
+                checkpoint_payload = {
+                    "schema_version": "PFR_DIAGNOSTIC_RUNTIME_CHECKPOINT_V1",
+                    "comparison_method_id": config.comparison_method_id.value,
+                    "representative_week_id": representative_week_id,
+                    "completed_issue": int(frame.issue),
+                    "resume_issue": int(state.issue),
+                    "post_state_sha256": state.pre_state_sha256,
+                    "cumulative_grid_cost_aud": cumulative_grid_cost_aud,
+                    "state": state,
+                }
+                with checkpoint_tmp.open("wb") as handle:
+                    pickle.dump(
+                        checkpoint_payload,
+                        handle,
+                        protocol=pickle.HIGHEST_PROTOCOL,
+                    )
+                    handle.flush()
+                    os.fsync(handle.fileno())
+                os.replace(checkpoint_tmp, checkpoint_path)
+                checkpoint_sha256 = hashlib.sha256(
+                    checkpoint_path.read_bytes()
+                ).hexdigest()
+                atomic_write_json(
+                    checkpoint_path.with_suffix(".json"),
+                    {
+                        key: value
+                        for key, value in checkpoint_payload.items()
+                        if key != "state"
+                    }
+                    | {
+                        "checkpoint_path": str(checkpoint_path.resolve()),
+                        "checkpoint_sha256": checkpoint_sha256,
+                        "planner_persistent_state_restored": False,
+                        "resume_semantics": (
+                            "EXACT_ENDOGENOUS_RUNTIME_STATE_WITH_COLD_PLANNER"
+                        ),
+                        "scientific_result_eligible": False,
+                    },
+                )
         summary = {
             "schema_version": "K9H7_RESULT_V2.method_run.v2",
             "status": "PASS" if failure is None and len(records) == len(frames) else "FAIL_CLOSED",
