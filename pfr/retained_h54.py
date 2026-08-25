@@ -54,6 +54,24 @@ _FORMULATION_DEFAULTS = {
 }
 
 
+class _RuntimeZeroFixedRackEnvironment:
+    """Retain the engine API while removing its pilot-period rack baseline.
+
+    Runtime facility demand is reconstructed from the admitted/running job
+    state.  Reading the retained pilot baseline here would both double count
+    jobs and fail outside that pilot's timestamp index.
+    """
+
+    def __init__(self, retained_environment: Any) -> None:
+        self._retained_environment = retained_environment
+
+    def current_fixed(self, _issue: Any, _rack: str) -> tuple[float, float]:
+        return 0.0, 0.0
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._retained_environment, name)
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -132,6 +150,7 @@ class RetainedH54JointPlanner:
         self.scope = self.b4.prepare_scope(
             self.base, foundation["rack"], self.op1, root
         )
+        self.scope["env"] = _RuntimeZeroFixedRackEnvironment(self.scope["env"])
         if foundation.get("gstatic") is None:
             foundation["gstatic"] = self.b4.build_grid_static(
                 foundation["engine"],
@@ -523,5 +542,6 @@ class RetainedH54JointPlanner:
             "planning_mobility_npz_sha256": frame.planning_mobility_npz_sha256,
             "future_actual_used": False,
             "price_used_by_optimizer": False,
+            "runtime_fixed_rack_baseline_zeroed": True,
         }
         return plan, certificate

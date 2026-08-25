@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from pfr.methods import ElectricalStressMethod, ExperimentAuthority, MethodFactory
+from pfr.retained_h54 import _RuntimeZeroFixedRackEnvironment
 from pfr.runtime import (
     CausalExperimentFrame,
     MESS_CANONICAL_STAGING,
@@ -14,6 +15,18 @@ from pfr.runtime import (
 
 
 REPO = Path(__file__).resolve().parents[1]
+
+
+def test_runtime_reference_grid_cannot_read_pilot_fixed_rack_baseline() -> None:
+    class PilotEnvironment:
+        marker = "retained"
+
+        def current_fixed(self, _issue, _rack):
+            raise AssertionError("pilot timestamp lookup must not occur")
+
+    environment = _RuntimeZeroFixedRackEnvironment(PilotEnvironment())
+    assert environment.current_fixed("2025-01-04", "IDC01_LP01") == (0.0, 0.0)
+    assert environment.marker == "retained"
 
 
 def test_retained_h54_planner_uses_only_frozen_paper_facing_hierarchy() -> None:
