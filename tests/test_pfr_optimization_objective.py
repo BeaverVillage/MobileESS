@@ -1,7 +1,9 @@
 import pytest
+import pandas as pd
 
 from pfr.methods import ElectricalStressMethod, ExperimentAuthority, MethodFactory
 from pfr.optimization import FastOptimizationContext, GurobiFastControlOptimizer
+from pfr.persistent_bounded_milp import PersistentBoundedMilpPlanner
 from pfr.runtime import (
     CausalExperimentFrame,
     MESS_CANONICAL_STAGING,
@@ -9,7 +11,9 @@ from pfr.runtime import (
     MutableMethodState,
     OperationalTrainingJob,
     RuntimeJobState,
+    RuntimeContractError,
     _schedule_capacity_feasible_queued_jobs,
+    _synchronize_planned_rack_assignments,
 )
 from pfr.slow_fast import FastControl, FastLayerLimits, FastLayerState, SlowDiscretePlan
 
@@ -141,3 +145,145 @@ def test_dispatcher_honors_h54_temporal_start_decision() -> None:
     started = _schedule_capacity_feasible_queued_jobs(state, config, frame(102))
     assert runtime_job.lifecycle == "RUNNING"
     assert started["started_jobs"] == 1
+
+
+def test_h54_physical_rack_assignment_is_materialized_for_running_state() -> None:
+    source = OperationalTrainingJob(
+        job_uid="job-rack",
+        origin_idc="IDC01",
+        arrival_step=100,
+        latest_start_step=104,
+        deadline_step=120,
+        requested_gpu=2,
+        runtime_seconds_source=3600.0,
+        cpu_request_share_kw=1.0,
+        input_bytes=0,
+        source_record_id="source-rack",
+    )
+    job = RuntimeJobState(
+        source=source,
+        destination_idc="IDC01",
+        logical_rack_id="IDC01:PFR-H100-LOGICAL-POOL",
+        gang_membership=("IDC01:PFR-GPU:job-rack:0", "IDC01:PFR-GPU:job-rack:1"),
+        remaining_work_gpu_hours=2.0,
+        lifecycle="RUNNING",
+    )
+    physical_gang = (
+        "IDC01_LP02:PFR-GPU:job-rack:0",
+        "IDC01_LP02:PFR-GPU:job-rack:1",
+    )
+    plan = SlowDiscretePlan(
+        plan_id="B07-100-1",
+        valid_from_issue=100,
+        mess_destination=dict(MESS_CANONICAL_STAGING),
+        mess_native_route_rank={mid: 1 for mid in MESS_IDS},
+        job_idc_placement={"job-rack": "IDC01"},
+        checkpoint_migration={"job-rack": None},
+        gpu_gang_allocation={"job-rack": physical_gang},
+        job_start_issue={"job-rack": 100},
+        coarse_charging_kw={mid: (0.0,) * 54 for mid in MESS_IDS},
+        coarse_discharging_kw={mid: (0.0,) * 54 for mid in MESS_IDS},
+        coarse_reactive_kvar={mid: (0.0,) * 54 for mid in MESS_IDS},
+    )
+    state = MutableMethodState(
+        issue=101,
+        pre_state_sha256="a" * 64,
+        mess_energy_kwh={mid: 760.0 for mid in MESS_IDS},
+        mess_location=dict(MESS_CANONICAL_STAGING),
+        jobs={"job-rack": job},
+        active_plan=plan,
+    )
+
+    _synchronize_planned_rack_assignments(state)
+
+    assert job.logical_rack_id == "IDC01_LP02"
+    assert job.gang_membership == physical_gang
+
+    job.logical_rack_id = "IDC01_LP01"
+    with pytest.raises(RuntimeContractError, match="cannot change physical rack"):
+        _synchronize_planned_rack_assignments(state)
+
+
+def test_prestaged_spatial_admission_uses_remote_physical_rack_without_wan() -> None:
+    planner = object.__new__(PersistentBoundedMilpPlanner)
+    planner._initialize = lambda: None
+    planner.scope = {
+        "cap": pd.DataFrame(
+            [
+                {
+                    "rack_pool_id": "IDC01_LP01",
+                    "idc_id": "IDC01",
+                    "deliverable_active_gpu_capacity": 1.0,
+                    "rack_power_cap_kw": 10.0,
+                },
+                {
+                    "rack_pool_id": "IDC02_LP01",
+                    "idc_id": "IDC02",
+                    "deliverable_active_gpu_capacity": 1.0,
+                    "rack_power_cap_kw": 10.0,
+                },
+            ]
+        ),
+        "domains": {},
+        "pmap": {},
+        "wan_map": {},
+    }
+    jobs = {}
+    for index in range(2):
+        uid = f"burst-{index}"
+        source = OperationalTrainingJob(
+            job_uid=uid,
+            origin_idc="IDC01",
+            arrival_step=100,
+            latest_start_step=105,
+            deadline_step=120,
+            requested_gpu=1,
+            runtime_seconds_source=3600.0,
+            cpu_request_share_kw=0.1,
+            input_bytes=None,
+            source_record_id=uid,
+        )
+        jobs[uid] = RuntimeJobState(
+            source=source,
+            destination_idc="IDC01",
+            logical_rack_id="IDC01:PFR-H100-LOGICAL-POOL",
+            gang_membership=(f"IDC01:PFR-GPU:{uid}:0",),
+            remaining_work_gpu_hours=1.0,
+        )
+        planner.scope["domains"][uid] = [
+            {
+                "destination_IDC_id": "IDC01",
+                "rack_pool_id": "IDC01_LP01",
+            },
+            {
+                "destination_IDC_id": "IDC02",
+                "rack_pool_id": "IDC02_LP01",
+            },
+        ]
+        planner.scope["pmap"][uid] = {
+            "arrival_step": 100,
+            "latest_start_step": 105,
+            "latest_completion_step_exclusive": 120,
+            "requested_gpu": 1,
+            "IT_power_kW": 1.0,
+            "duration_steps": 12,
+        }
+    state = MutableMethodState(
+        issue=100,
+        pre_state_sha256="a" * 64,
+        mess_energy_kwh={mid: 760.0 for mid in MESS_IDS},
+        mess_location=dict(MESS_CANONICAL_STAGING),
+        jobs=jobs,
+    )
+    config = MethodFactory(
+        ExperimentAuthority(*(format(index, "064x") for index in range(1, 8)))
+    ).create_electrical_stress(ElectricalStressMethod.B07)
+
+    audit = planner.materialize_runtime_rack_assignments(state, config)
+
+    assert audit["assigned_jobs"] == 2
+    assert {job.destination_idc for job in jobs.values()} == {"IDC01", "IDC02"}
+    remote = next(job for job in jobs.values() if job.destination_idc == "IDC02")
+    assert remote.migration_state == "PRESTART_PLACED_DATASET_PRESTAGED"
+    assert remote.logical_rack_id == "IDC02_LP01"
+    assert remote.prestart_wan_required_bytes == 0

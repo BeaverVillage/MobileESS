@@ -17,6 +17,18 @@
       "checkpoint/migration option when eligible"
     ],
     "solver": "persistent bounded MILP",
+    "resident_job_slots": {
+      "initial": 16,
+      "growth": "Per-method geometric growth to the next power of two when the visible causal queue exceeds the resident frontier",
+      "maximum": 1024,
+      "reuse": "A grown model is reused for every later issue of that method; growth never drops or hides queued work"
+    },
+    "queued_dataset_residency": {
+      "authority": "IDC_MIGRATION_AUTHORITY_V1",
+      "mode": "PRESTAGED_AT_ALL_12_IDCS",
+      "remote_prestart_transfer_bytes": 0,
+      "checkpoint_separation": "The engineering checkpoint payload applies only to migration of an already-running job, never to queued-job placement"
+    },
     "circle_role": "polyhedral lower-bound/screening model; never a physical commit authority",
     "exact_forced_domain_rule": "Skip the MILP only when every retained slow decision has exactly one feasible option"
   },
@@ -80,6 +92,9 @@
     "day_process_workers": 6,
     "cpu_affinity": "DISJOINT_TOPOLOGY_AWARE_BALANCED_SMT_CONTENTION",
     "runtime_topology_evidence": "PFR_RUNTIME_TOPOLOGY_BENCHMARK_20260826",
+    "initial_resident_queued_job_slots": 16,
+    "maximum_dynamic_queued_job_slots": 1024,
+    "dynamic_job_slot_growth": "NEXT_POWER_OF_TWO_PER_METHOD_THEN_PERSISTENT_REUSE",
     "slow_master_numeric_focus": 0,
     "exact_recourse_numeric_focus": 2,
     "exact_qcp_constraint_scaling": "Every line, service-transformer, and PCS P-Q circle is divided by its physical nameplate before squaring, producing a dimensionless O(1) QCP row whose numerical residual is independent of equipment rating.",
@@ -108,7 +123,9 @@
     "norm_relative_tolerance",
     "norm_engineering_margin_fraction",
     "exact_qcp_feasibility_restoration_rounds",
-    "exact_qcp_implied_tangent_cuts_added"
+    "exact_qcp_implied_tangent_cuts_added",
+    "resident_job_slot_capacity",
+    "visible_queued_jobs"
   ],
   "rejected_diagnostics": [
     "54-step exact-cut MILP outer approximation: no primary convergence within 120 seconds",

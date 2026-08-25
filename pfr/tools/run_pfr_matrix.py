@@ -1758,6 +1758,7 @@ def main() -> None:
     paths["feeder_scale_contract"] = str(feeder_scale_path)
     diagnostic_resume_state = None
     diagnostic_resume_cumulative_grid_cost_aud = 0.0
+    pre: Optional[Mapping[str, Any]] = None
     if args.diagnostic_resume_checkpoint is not None:
         with args.diagnostic_resume_checkpoint.resolve().open("rb") as handle:
             checkpoint = pickle.load(handle)
@@ -2346,7 +2347,9 @@ def main() -> None:
                     else "FROZEN_B0_B7_MAIN_OR_TECHNICAL_DIAGNOSTIC"
                 )
             ),
-        "independent_daily_cold_start": "canonical_pre" in pre,
+        "independent_daily_cold_start": (
+            pre is not None and "canonical_pre" in pre
+        ),
         "cross_day_endogenous_state_carryover": False,
         "controller_burn_in_steps": 0,
         "factorized_uncertainty_decision_use": {

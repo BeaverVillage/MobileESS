@@ -592,11 +592,10 @@ class CompactH54JointPlanner(RetainedH54JointPlanner):
                         ):
                             workload_exact_infeasible += 1
                             continue
-                        required_gb = (
-                            float(self.scope["wan_map"][uid])
-                            if site != job.source.origin_idc
-                            else 0.0
-                        )
+                        # Queued datasets are frozen as pre-staged at every
+                        # IDC.  WAN/checkpoint bytes belong only to migration
+                        # of an already-running job.
+                        required_gb = 0.0
                         committed_gb = 0.0
                         if job.prestart_wan_transferred_bytes > 0:
                             if job.prestart_wan_target_idc != site:
@@ -673,6 +672,8 @@ class CompactH54JointPlanner(RetainedH54JointPlanner):
             wan_required,
             {
                 "physical_domain_size": workload_domain_before,
+                "queued_dataset_residency_mode": "PRESTAGED_AT_ALL_12_IDCS",
+                "queued_remote_placement_transfer_bytes": 0,
                 "exact_infeasible_removed": workload_exact_infeasible,
                 "bounded_candidates_evaluated": workload_evaluated,
                 "temporal_offsets_per_job_upper_bound": 6,

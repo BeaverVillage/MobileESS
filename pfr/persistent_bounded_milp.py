@@ -55,6 +55,7 @@ from .slow_fast import SlowDiscretePlan
 ADAPTER_ID = "HIERARCHICAL_MOVE_BLOCKED_MIXED_INTEGER_H54_MPC_V1"
 SOLVER_CONTRACT = "HIERARCHICAL_MOVE_BLOCKED_MIXED_INTEGER_MPC_V1"
 MAX_ONLINE_QUEUED_JOBS = 16
+MAX_DYNAMIC_QUEUED_JOB_SLOTS = 1024
 MAX_SEPARATION_ROUNDS = 12
 SEPARATION_GAP_PARTITIONS = 16
 GLOBAL_ASSET_REFINEMENT_DIRECTIONS = 64
@@ -101,6 +102,7 @@ class _WorkloadOption:
 class _PreparedOnlineDomain:
     route_options: tuple[_MobilityTemplate, ...]
     queued_job_ids: tuple[str, ...]
+    deferred_queued_job_ids: tuple[str, ...]
     job_options: tuple[tuple[_WorkloadOption, ...], ...]
     running_it_kw: np.ndarray
     running_gpu: np.ndarray
@@ -156,6 +158,155 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         self._static_context_by_method: dict[str, Mapping[str, Any]] = {}
         self._master_models: dict[str, _PersistentMilpModel] = {}
         self._recourse_models: dict[str, _PersistentMilpModel] = {}
+        self._job_slot_capacity_by_method: dict[str, int] = {}
+
+    def materialize_runtime_rack_assignments(
+        self, state: MutableMethodState, config: MethodConfig
+    ) -> Mapping[str, Any]:
+        """Assign ready pooled gangs to the retained physical rack domain.
+
+        Admission can occur between slow replans and therefore cannot depend
+        on the bounded queued-job optimization domain.  Use the same retained
+        rack capacities and per-job admissible domains here so a work-
+        conserving IDC-level admission never becomes an unmodelled rack
+        overload at the next replan.
+        """
+
+        self._initialize()
+        cap = self.scope["cap"].copy()
+        rack_rows = {
+            str(row.rack_pool_id): row for row in cap.itertuples(index=False)
+        }
+        occupied_gpu = {rack: 0.0 for rack in rack_rows}
+        occupied_power = {rack: 0.0 for rack in rack_rows}
+        assigned = 0
+        capacity_blocked = 0
+
+        def is_ready(uid: str, job: Any) -> bool:
+            if job.lifecycle != "QUEUED":
+                return True
+            if job.migration_state == "PRESTART_WAN_PENDING":
+                return False
+            if state.active_plan is None:
+                return True
+            return state.issue >= int(
+                state.active_plan.job_start_issue.get(uid, state.issue)
+            )
+
+        ordered = sorted(
+            (
+                (uid, job)
+                for uid, job in state.jobs.items()
+                if job.lifecycle != "COMPLETED" and is_ready(uid, job)
+            ),
+            key=lambda item: (
+                item[1].lifecycle == "QUEUED",
+                (
+                    item[1].lifecycle == "QUEUED"
+                    and str(item[1].logical_rack_id) not in rack_rows
+                ),
+                item[1].source.latest_start_step,
+                item[1].source.deadline_step,
+                item[1].source.arrival_step,
+                item[0],
+            ),
+        )
+        for uid, job in ordered:
+            destination = _effective_job_site(job)
+            row = self._scope_job(uid, job)
+            power_kw = (
+                float(row["IT_power_kW"])
+                if job.lifecycle in {"RUNNING", "QUEUED"}
+                else 0.0
+            )
+            gpu = int(job.source.requested_gpu)
+            admissible_rows = [
+                item
+                for item in self.scope["domains"][uid]
+                if (
+                    config.spatial_workload_migration
+                    or str(item["destination_IDC_id"]) == destination
+                )
+            ]
+            allowed = sorted(
+                {str(item["rack_pool_id"]) for item in admissible_rows}
+            )
+            current = str(job.logical_rack_id)
+            if current in rack_rows:
+                if current not in allowed:
+                    raise RuntimeContractError(
+                        f"job {uid} physical rack is outside its retained domain"
+                    )
+                selected = current
+            else:
+                feasible = [
+                    rack
+                    for rack in allowed
+                    if occupied_gpu[rack] + gpu
+                    <= float(rack_rows[rack].deliverable_active_gpu_capacity)
+                    + 1e-9
+                    and occupied_power[rack] + power_kw
+                    <= float(rack_rows[rack].rack_power_cap_kw) + 1e-9
+                ]
+                if not feasible:
+                    if job.lifecycle != "QUEUED":
+                        raise RuntimeContractError(
+                            f"running job {uid} cannot be placed in its physical rack domain"
+                        )
+                    capacity_blocked += 1
+                    continue
+                selected = min(
+                    feasible,
+                    key=lambda rack: (
+                        (
+                            (occupied_gpu[rack] + gpu)
+                            / float(
+                                rack_rows[rack].deliverable_active_gpu_capacity
+                            )
+                        ),
+                        (
+                            (occupied_power[rack] + power_kw)
+                            / float(rack_rows[rack].rack_power_cap_kw)
+                        ),
+                        rack,
+                    ),
+                )
+                selected_destination = str(
+                    rack_rows[selected].idc_id
+                )
+                if selected_destination != destination:
+                    if not config.spatial_workload_migration:
+                        raise RuntimeContractError(
+                            "non-spatial method selected a remote admission rack"
+                        )
+                    job.destination_idc = selected_destination
+                    job.migration_state = (
+                        "PRESTART_PLACED_DATASET_PRESTAGED"
+                    )
+                job.logical_rack_id = selected
+                job.gang_membership = tuple(
+                    f"{selected}:PFR-GPU:{uid}:{index}"
+                    for index in range(gpu)
+                )
+                assigned += 1
+            occupied_gpu[selected] += gpu
+            occupied_power[selected] += power_kw
+            if (
+                occupied_gpu[selected]
+                > float(rack_rows[selected].deliverable_active_gpu_capacity)
+                + 1e-9
+                or occupied_power[selected]
+                > float(rack_rows[selected].rack_power_cap_kw) + 1e-9
+            ):
+                raise RuntimeContractError(
+                    f"physical rack occupancy exceeds retained capacity: {selected}"
+                )
+        return {
+            "assigned_jobs": assigned,
+            "capacity_blocked_jobs": capacity_blocked,
+            "occupied_gpu_by_rack": occupied_gpu,
+            "occupied_power_kw_by_rack": occupied_power,
+        }
 
     def _issue_kernel(
         self,
@@ -225,7 +376,9 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         state: MutableMethodState,
         config: MethodConfig,
         frame: CausalExperimentFrame,
+        migration_authority: MigrationAuthority,
     ) -> tuple[
+        tuple[str, ...],
         tuple[str, ...],
         tuple[tuple[_WorkloadOption, ...], ...],
         np.ndarray,
@@ -244,12 +397,12 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         }
         rack_gpu = {rack: np.zeros(h) for rack in rack_rows}
         rack_power = {rack: np.zeros(h) for rack in rack_rows}
-        queued: list[tuple[str, Any]] = []
+        all_queued: list[tuple[str, Any]] = []
         for uid, job in sorted(state.jobs.items()):
             if job.lifecycle == "COMPLETED":
                 continue
             if job.lifecycle == "QUEUED":
-                queued.append((uid, job))
+                all_queued.append((uid, job))
                 continue
             site = _effective_job_site(job)
             rack = str(job.logical_rack_id)
@@ -274,11 +427,25 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             running_gpu[:duration, col] += job.source.requested_gpu
             rack_gpu[rack][:duration] += job.source.requested_gpu
             rack_power[rack][:duration] += power
-        if len(queued) > MAX_ONLINE_QUEUED_JOBS:
-            raise RuntimeContractError(
-                f"queued-job count {len(queued)} exceeds persistent authority "
-                f"{MAX_ONLINE_QUEUED_JOBS}"
+        # The resident MILP owns a bounded causal decision frontier, not the
+        # entire visible queue.  Optimize the most urgent jobs and preserve
+        # the remaining backlog in runtime state for later rolling horizons.
+        # Treating the model slot count as a queue-size limit made legitimate
+        # burst arrivals structurally infeasible.
+        all_queued.sort(
+            key=lambda item: (
+                item[1].source.latest_start_step,
+                item[1].source.deadline_step,
+                item[1].source.arrival_step,
+                item[0],
             )
+        )
+        slot_capacity = self._job_slot_capacity_by_method.get(
+            config.comparison_method_id.value,
+            MAX_ONLINE_QUEUED_JOBS,
+        )
+        queued = all_queued[:slot_capacity]
+        deferred_queued = all_queued[slot_capacity:]
         wan_index = self.scope["wan_cap"].set_index("oracle_step")
         wan_capacity = np.asarray(
             [
@@ -358,11 +525,22 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                         ):
                             exact_removed += 1
                             continue
-                        required_gb = (
-                            float(self.scope["wan_map"][uid])
-                            if destination != job.source.origin_idc
-                            else 0.0
-                        )
+                        # The frozen placement authority declares the dataset
+                        # pre-staged at all 12 IDCs.  A queued-job placement
+                        # therefore transfers zero bytes; the separate 80-GB
+                        # checkpoint payload applies only to a running-job
+                        # migration.  Charging the historical input-size
+                        # sensitivity here made burst placement impossible and
+                        # contradicted the declared residency mode.
+                        required_gb = 0.0
+                        if (
+                            destination != job.source.origin_idc
+                            and migration_authority.dataset_residency_mode
+                            != "PRESTAGED_AT_ALL_12_IDCS"
+                        ):
+                            raise RuntimeContractError(
+                                "remote queued placement lacks dataset residency authority"
+                            )
                         committed_gb = 0.0
                         if job.prestart_wan_transferred_bytes:
                             if job.prestart_wan_target_idc != destination:
@@ -419,6 +597,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             option_sets.append(tuple(selected))
         return (
             tuple(uid for uid, _job in queued),
+            tuple(uid for uid, _job in deferred_queued),
             tuple(option_sets),
             running_it,
             running_gpu,
@@ -433,6 +612,14 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 "bounded_domain_size": sum(map(len, option_sets)),
                 "bounded_feasible_choices_removed": bounded_removed,
                 "candidate_limit_k_per_job": self.candidate_limit,
+                "visible_queued_jobs": len(all_queued),
+                "optimized_queued_jobs": len(queued),
+                "deferred_queued_jobs": len(deferred_queued),
+                "queued_domain_limit": slot_capacity,
+                "queued_dataset_residency_mode": (
+                    migration_authority.dataset_residency_mode
+                ),
+                "queued_remote_placement_transfer_bytes": 0,
             },
         )
 
@@ -444,6 +631,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         state: MutableMethodState,
         config: MethodConfig,
         frame: CausalExperimentFrame,
+        migration_authority: MigrationAuthority,
         effective_steps: int,
         output: Path,
     ) -> _PreparedOnlineDomain:
@@ -458,6 +646,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         )
         (
             queued,
+            deferred_queued,
             options,
             running_it,
             running_gpu,
@@ -466,11 +655,16 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             wan_capacity,
             workload_audit,
         ) = self._workload_domain(
-            kernel=kernel, state=state, config=config, frame=frame
+            kernel=kernel,
+            state=state,
+            config=config,
+            frame=frame,
+            migration_authority=migration_authority,
         )
         return _PreparedOnlineDomain(
             route_options=routes,
             queued_job_ids=queued,
+            deferred_queued_job_ids=deferred_queued,
             job_options=options,
             running_it_kw=running_it,
             running_gpu=running_gpu,
@@ -490,9 +684,34 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         migration_authority: Optional[MigrationAuthority],
         evaluation_steps_remaining: int,
     ) -> tuple[SlowDiscretePlan, Mapping[str, Any]]:
-        del migration_authority
+        if migration_authority is None:
+            raise RuntimeContractError(
+                "persistent planner requires migration/dataset residency authority"
+            )
+        migration_authority.validate()
         total_started = time.monotonic()
         method_key = config.comparison_method_id.value
+        visible_queue = sum(
+            job.lifecycle == "QUEUED" for job in state.jobs.values()
+        )
+        current_slots = self._job_slot_capacity_by_method.get(
+            method_key, MAX_ONLINE_QUEUED_JOBS
+        )
+        required_slots = min(
+            MAX_DYNAMIC_QUEUED_JOB_SLOTS,
+            max(MAX_ONLINE_QUEUED_JOBS, visible_queue),
+        )
+        grown_slots = min(
+            MAX_DYNAMIC_QUEUED_JOB_SLOTS,
+            1 << (required_slots - 1).bit_length(),
+        )
+        if grown_slots > current_slots:
+            for models in (self._master_models, self._recourse_models):
+                stale = models.pop(method_key, None)
+                if stale is not None:
+                    stale.model.dispose()
+            current_slots = grown_slots
+        self._job_slot_capacity_by_method[method_key] = current_slots
         issue_root = (
             self.output_root
             / "_PERSISTENT_BOUNDED_MILP"
@@ -515,6 +734,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             state=state,
             config=config,
             frame=frame,
+            migration_authority=migration_authority,
             effective_steps=min(
                 PLANNING_HORIZON_STEPS, int(evaluation_steps_remaining)
             ),
@@ -536,6 +756,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             build_started = time.monotonic()
             common_model_kwargs = {
                 "candidate_limit": self.candidate_limit,
+                "job_slot_capacity": current_slots,
                 "static": self._static_context_by_method[method_key],
                 "kernel": kernel,
                 "rack_rows": {
@@ -629,6 +850,8 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             "full_miqcp_executed_in_online_loop": False,
             "offline_reference_oracle": "science/main.py::build_full",
             "candidate_limit_k": self.candidate_limit,
+            "resident_job_slot_capacity": current_slots,
+            "visible_queued_jobs": visible_queue,
             "candidate_limit_frozen": self.candidate_limit_frozen,
             "mobility_domain_reduction": dict(domain.route_audit),
             "workload_domain_reduction": dict(domain.workload_audit),
@@ -741,6 +964,7 @@ class _PersistentMilpModel:
         self,
         *,
         candidate_limit: int,
+        job_slot_capacity: int,
         static: Mapping[str, Any],
         kernel: _RadialStressKernel,
         rack_rows: Mapping[str, Any],
@@ -756,6 +980,9 @@ class _PersistentMilpModel:
         self.gp = gp
         self.GRB = GRB
         self.k = int(candidate_limit)
+        self.job_slot_capacity = int(job_slot_capacity)
+        if self.job_slot_capacity < MAX_ONLINE_QUEUED_JOBS:
+            raise RuntimeContractError("persistent job-slot capacity is invalid")
         if model_role not in {"slow_master", "exact_recourse"}:
             raise RuntimeContractError(f"unknown hierarchical model role {model_role}")
         self.model_role = model_role
@@ -804,7 +1031,7 @@ class _PersistentMilpModel:
                 vtype=discrete_type,
                 name=f"job[{j},{o}]",
             )
-            for j in range(MAX_ONLINE_QUEUED_JOBS)
+            for j in range(self.job_slot_capacity)
             for o in range(self.k)
         }
         self.mode = {
@@ -955,7 +1182,7 @@ class _PersistentMilpModel:
                 gp.quicksum(self.job[(j, o)] for o in range(self.k)) == 0.0,
                 name=f"job_one[{j}]",
             )
-            for j in range(MAX_ONLINE_QUEUED_JOBS)
+            for j in range(self.job_slot_capacity)
         }
         self.dis_gate = {}
         self.chg_gate = {}
@@ -1579,7 +1806,7 @@ class _PersistentMilpModel:
             if old is not None:
                 self._clear_job_coefficients(key, old)
         self._last_job_mapping.clear()
-        for j in range(MAX_ONLINE_QUEUED_JOBS):
+        for j in range(self.job_slot_capacity):
             active_job = j < len(domain.queued_job_ids)
             self.job_one[j].RHS = 1.0 if active_job else 0.0
             options = domain.job_options[j] if active_job else ()
@@ -1678,7 +1905,10 @@ class _PersistentMilpModel:
                         -float(edge["ratio2_ref"]),
                     )
                     self.du_def[(node, step)].RHS = 0.0
-        self.primary_lock.RHS = 1.0
+        # Reoptimization must preserve the same engineering headroom as model
+        # construction.  Resetting this row to 1.0 silently removed the
+        # physical safety margin after the first persistent update.
+        self.primary_lock.RHS = NORM_SAFE_LIMIT_FACTOR
         self.secondary_lock.RHS = self.h * STEP_HOURS
         self.model.update()
 
@@ -1724,7 +1954,7 @@ class _PersistentMilpModel:
             value = 1.0 if r == int(route_index) else 0.0
             self.route[r].LB = value
             self.route[r].UB = value
-        for j in range(MAX_ONLINE_QUEUED_JOBS):
+        for j in range(self.job_slot_capacity):
             options = self.domain.job_options[j] if j < len(self.domain.job_options) else ()
             chosen = job_option_indices.get(j)
             for o in range(self.k):
@@ -2408,6 +2638,7 @@ class _PersistentMilpModel:
         placements: dict[str, str] = {}
         starts: dict[str, int] = {}
         racks: dict[str, str] = {}
+        gangs: dict[str, tuple[str, ...]] = {}
         wan: dict[str, tuple[float, ...]] = {}
         wan_required: dict[str, int] = {}
         queued_index = {uid: index for index, uid in enumerate(domain.queued_job_ids)}
@@ -2417,6 +2648,27 @@ class _PersistentMilpModel:
         for uid, job in sorted(active_jobs.items()):
             if uid not in queued_index:
                 destination = _effective_job_site(job)
+                if job.lifecycle == "QUEUED":
+                    # Jobs outside the bounded causal decision frontier remain
+                    # visible and ready under their current admission state.
+                    # They are reconsidered by EDF in later rolling horizons.
+                    placements[uid] = destination
+                    prior_start = (
+                        state.active_plan.job_start_issue.get(uid, frame.issue)
+                        if state.active_plan is not None
+                        else frame.issue
+                    )
+                    starts[uid] = max(frame.issue, int(prior_start))
+                    # This is a preserved queue record, not an optimized rack
+                    # decision.  Publish a pooled gang so the runtime rack
+                    # authority repacks it around the selected frontier.
+                    gangs[uid] = tuple(
+                        f"{destination}:PFR-GPU:{uid}:{index}"
+                        for index in range(job.source.requested_gpu)
+                    )
+                    wan[uid] = (0.0,) * self.h
+                    wan_required[uid] = 0
+                    continue
                 rack = str(job.logical_rack_id)
                 if rack not in self.racks:
                     rack = next(
@@ -2427,6 +2679,10 @@ class _PersistentMilpModel:
                 placements[uid] = destination
                 starts[uid] = frame.issue
                 racks[uid] = rack
+                gangs[uid] = tuple(
+                    f"{rack}:PFR-GPU:{uid}:{index}"
+                    for index in range(job.source.requested_gpu)
+                )
                 wan[uid] = (0.0,) * self.h
                 wan_required[uid] = 0
                 continue
@@ -2444,6 +2700,10 @@ class _PersistentMilpModel:
             placements[uid] = option.destination
             starts[uid] = frame.issue + option.start_offset
             racks[uid] = option.rack
+            gangs[uid] = tuple(
+                f"{option.rack}:PFR-GPU:{uid}:{index}"
+                for index in range(job.source.requested_gpu)
+            )
             wan[uid] = option.wan_schedule_gb
             wan_required[uid] = option.wan_required_bytes
         charge: dict[str, tuple[float, ...]] = {}
@@ -2473,13 +2733,7 @@ class _PersistentMilpModel:
             mess_native_route_rank=ranks,
             job_idc_placement=placements,
             checkpoint_migration={uid: None for uid in active_jobs},
-            gpu_gang_allocation={
-                uid: tuple(
-                    f"{racks[uid]}:PFR-GPU:{uid}:{index}"
-                    for index in range(job.source.requested_gpu)
-                )
-                for uid, job in active_jobs.items()
-            },
+            gpu_gang_allocation=gangs,
             job_start_issue=starts,
             coarse_charging_kw=charge,
             coarse_discharging_kw=discharge,

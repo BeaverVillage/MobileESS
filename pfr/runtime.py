@@ -2613,6 +2613,73 @@ def _register_arrivals_in_active_plan(
     return tuple(events)
 
 
+def _planned_physical_rack(
+    plan: SlowDiscretePlan, uid: str
+) -> Optional[str]:
+    """Return the physical rack encoded by a retained H54 gang allocation.
+
+    The retained optimizer publishes rack placement in every GPU member ID.
+    Runtime state used to retain its synthetic ``IDCxx:PFR-H100-LOGICAL-POOL``
+    placeholder instead, so a later replan collapsed every running gang onto
+    the first rack in the domain.  Keep the two representations identical at
+    their common gang-allocation boundary.
+    """
+
+    members = tuple(plan.gpu_gang_allocation.get(uid, ()))
+    marker = ":PFR-GPU:"
+    encoded = tuple(member for member in members if marker in member)
+    prefixes = {member.split(marker, 1)[0] for member in encoded}
+    physical = {prefix for prefix in prefixes if "_LP" in prefix}
+    if not physical:
+        return None
+    if (
+        len(encoded) != len(members)
+        or prefixes != physical
+        or len(physical) != 1
+    ):
+        # Member-count validation belongs to SlowDiscretePlan.validate().
+        # This branch is only about ambiguous rack identity.
+        raise RuntimeContractError(
+            f"job {uid} gang allocation spans multiple physical racks"
+        )
+    return next(iter(physical))
+
+
+def _synchronize_planned_rack_assignments(state: MutableMethodState) -> None:
+    """Materialize H54 physical rack decisions into mutable runtime state."""
+
+    plan = state.active_plan
+    if plan is None:
+        return
+    for uid, job in state.jobs.items():
+        rack = _planned_physical_rack(plan, uid)
+        if rack is None:
+            if job.lifecycle == "QUEUED" and uid in plan.gpu_gang_allocation:
+                destination = plan.job_idc_placement.get(
+                    uid, job.destination_idc
+                )
+                job.logical_rack_id = (
+                    f"{destination}:PFR-H100-LOGICAL-POOL"
+                )
+                job.gang_membership = tuple(
+                    plan.gpu_gang_allocation[uid]
+                )
+            continue
+        destination = plan.job_idc_placement.get(uid)
+        if destination is None or not rack.startswith(f"{destination}_LP"):
+            raise RuntimeContractError(
+                f"job {uid} physical rack is inconsistent with planned IDC"
+            )
+        current = str(job.logical_rack_id)
+        current_is_physical = current.startswith(f"{job.destination_idc}_LP")
+        if job.lifecycle != "QUEUED" and current_is_physical and current != rack:
+            raise RuntimeContractError(
+                f"running job {uid} cannot change physical rack during replan"
+            )
+        job.logical_rack_id = rack
+        job.gang_membership = tuple(plan.gpu_gang_allocation[uid])
+
+
 def _compute_fraction(job: RuntimeJobState, frame: CausalExperimentFrame, config: MethodConfig) -> float:
     if job.lifecycle != "RUNNING":
         return 0.0
@@ -3073,6 +3140,17 @@ def _schedule_capacity_feasible_queued_jobs(
             continue
         site = job.destination_idc
         gpu = job.source.requested_gpu
+        if (
+            isinstance(config.comparison_method_id, ElectricalStressMethod)
+            and str(job.logical_rack_id).endswith(
+                ":PFR-H100-LOGICAL-POOL"
+            )
+        ):
+            # The retained rack authority has not found physical space yet.
+            # Preserve the whole gang in the visible queue rather than start
+            # it against the coarser pooled IDC capacity.
+            capacity_blocked_jobs += 1
+            continue
         if gpu > MODELED_GPU_CAPACITY_PER_IDC:
             raise RuntimeContractError(
                 "a GPU gang cannot fit at its fixed planned IDC"
@@ -3330,20 +3408,24 @@ def _apply_planned_prestart_placements(
                 job.migration_state = "PRESTART_WAN_PENDING"
             else:
                 job.destination_idc = destination
-                job.logical_rack_id = f"{destination}:PFR-H100-LOGICAL-POOL"
+                job.logical_rack_id = (
+                    _planned_physical_rack(state.active_plan, uid)
+                    or f"{destination}:PFR-H100-LOGICAL-POOL"
+                )
                 job.gang_membership = tuple(
-                    f"{destination}:PFR-GPU:{uid}:{index}"
-                    for index in range(job.source.requested_gpu)
+                    state.active_plan.gpu_gang_allocation[uid]
                 )
                 job.migration_state = "PRESTART_DATA_READY"
         else:
             # Historical B0-B8 read-compatible path.  The new B00-B09 adapter
             # always supplies an explicit causal WAN schedule.
             job.destination_idc = destination
-            job.logical_rack_id = f"{destination}:PFR-H100-LOGICAL-POOL"
+            job.logical_rack_id = (
+                _planned_physical_rack(state.active_plan, uid)
+                or f"{destination}:PFR-H100-LOGICAL-POOL"
+            )
             job.gang_membership = tuple(
-                f"{destination}:PFR-GPU:{uid}:{index}"
-                for index in range(job.source.requested_gpu)
+                state.active_plan.gpu_gang_allocation[uid]
             )
             job.migration_state = "PRESTART_PLACED_DATASET_PRESTAGED"
         events.append(
@@ -3413,10 +3495,12 @@ def _advance_prestart_wan(
         ):
             destination = job.prestart_wan_target_idc
             job.destination_idc = destination
-            job.logical_rack_id = f"{destination}:PFR-H100-LOGICAL-POOL"
+            job.logical_rack_id = (
+                _planned_physical_rack(state.active_plan, uid)
+                or f"{destination}:PFR-H100-LOGICAL-POOL"
+            )
             job.gang_membership = tuple(
-                f"{destination}:PFR-GPU:{uid}:{gpu}"
-                for gpu in range(job.source.requested_gpu)
+                state.active_plan.gpu_gang_allocation[uid]
             )
             job.migration_state = "PRESTART_DATA_READY"
             completed.append(
@@ -4433,6 +4517,19 @@ class PfrRuntimeRunner:
             if frame.issue != state.issue:
                 raise RuntimeContractError("PRE state issue does not match causal frame")
             blocked_spatial = _admit_arrivals(state, frame, config)
+            # Materialize the previous plan's rack assignment before it is
+            # consumed as the running-job state of a new H54 optimization.
+            _synchronize_planned_rack_assignments(state)
+            rack_materializer = getattr(
+                self.joint_planner,
+                "materialize_runtime_rack_assignments",
+                None,
+            )
+            if (
+                isinstance(config.comparison_method_id, ElectricalStressMethod)
+                and callable(rack_materializer)
+            ):
+                rack_materializer(state, config)
             risk, predicted_risk_constraints = _risk_decision(
                 state,
                 frame,
@@ -4461,9 +4558,12 @@ class PfrRuntimeRunner:
                 state.communication_bytes += len(
                     json.dumps(asdict(state.active_plan), sort_keys=True, separators=(",", ":"))
                 )
+                _synchronize_planned_rack_assignments(state)
                 prestart_placement_events = _apply_planned_prestart_placements(
                     state, config
                 )
+                if callable(rack_materializer):
+                    rack_materializer(state, config)
                 migration_started_events = _start_planned_job_migrations(
                     state, config, self.migration_authority
                 )
