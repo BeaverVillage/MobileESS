@@ -298,7 +298,7 @@ def test_shared_watchdog_transfers_unused_master_time_to_exact_recourse() -> Non
         master_elapsed_seconds=16.5,
     )
 
-    assert master_budget == pytest.approx(20.0)
+    assert master_budget == pytest.approx(30.0)
     assert recourse_budget == pytest.approx(13.5)
     assert 16.5 + recourse_budget == pytest.approx(total)
 

@@ -168,19 +168,18 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
     ) -> float:
         """Allocate one watchdog across the master and exact-recourse stages.
 
-        January R6 exposed that the former fixed 55/45 split could time out the
-        master even when both stages would complete inside the unchanged
-        30-second planner watchdog. Reserve one third of the total for exact
-        recourse (10 seconds at the frozen development watchdog, above the R6
-        observed 8.25-second maximum), then give recourse every second the
-        master did not actually consume.
+        January R6 and R8 exposed that both the former 55/45 split and a later
+        20/10 reserved split could time out the master even when both stages
+        could still complete inside the unchanged 30-second planner watchdog.
+        The master therefore sees the one total deadline; exact recourse gets
+        precisely the wall time that remains after the master and decision fix.
         """
 
         total = float(total_seconds)
         if not math.isfinite(total) or total <= 0.0:
             raise RuntimeContractError("shared planner watchdog must be positive")
         if master_elapsed_seconds is None:
-            return max(0.05, (2.0 / 3.0) * total)
+            return total
         elapsed = float(master_elapsed_seconds)
         if not math.isfinite(elapsed) or elapsed < 0.0:
             raise RuntimeContractError("master elapsed time must be nonnegative")
@@ -827,6 +826,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         recourse.update(**update_kwargs)
         update_seconds = time.monotonic() - update_started
         master_started = time.monotonic()
+        shared_solve_started = master_started
         active_wall_budget = (
             self.bootstrap_wall_budget_seconds
             if build_seconds > 0.0
@@ -860,7 +860,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         )
         recourse_wall_budget = self._shared_watchdog_budgets(
             active_wall_budget,
-            master_elapsed_seconds=master_seconds,
+            master_elapsed_seconds=time.monotonic() - shared_solve_started,
         )
         result = recourse.solve_lexicographic(
             wall_budget_seconds=recourse_wall_budget
