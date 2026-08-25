@@ -146,6 +146,9 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         self.bootstrap_wall_budget_seconds = float(
             os.environ.get("PFR_ONLINE_BOOTSTRAP_WALL_BUDGET_SECONDS", "60.0")
         )
+        self.max_persistent_solve_reuses = int(
+            os.environ.get("PFR_PERSISTENT_MODEL_MAX_REUSES", "64")
+        )
         if not math.isfinite(self.wall_budget_seconds) or self.wall_budget_seconds <= 0:
             raise RuntimeContractError("online MILP wall budget must be positive")
         if (
@@ -153,12 +156,21 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             or self.bootstrap_wall_budget_seconds <= 0
         ):
             raise RuntimeContractError("bootstrap wall budget must be positive")
+        if self.max_persistent_solve_reuses < 1:
+            raise RuntimeContractError("persistent model max reuses must be positive")
         self._kernels: dict[str, _RadialStressKernel] = {}
         self._kernel_issue: dict[str, int] = {}
         self._static_context_by_method: dict[str, Mapping[str, Any]] = {}
         self._master_models: dict[str, _PersistentMilpModel] = {}
         self._recourse_models: dict[str, _PersistentMilpModel] = {}
         self._job_slot_capacity_by_method: dict[str, int] = {}
+        self._model_solve_generation_by_method: dict[str, int] = {}
+
+    def _dispose_method_models(self, method_key: str) -> None:
+        for models in (self._master_models, self._recourse_models):
+            stale = models.pop(method_key, None)
+            if stale is not None:
+                stale.model.dispose()
 
     @staticmethod
     def _shared_watchdog_budgets(
@@ -735,12 +747,23 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             MAX_DYNAMIC_QUEUED_JOB_SLOTS,
             1 << (required_slots - 1).bit_length(),
         )
+        model_refresh_reason: str | None = None
         if grown_slots > current_slots:
-            for models in (self._master_models, self._recourse_models):
-                stale = models.pop(method_key, None)
-                if stale is not None:
-                    stale.model.dispose()
+            self._dispose_method_models(method_key)
+            self._model_solve_generation_by_method[method_key] = 0
+            model_refresh_reason = "JOB_SLOT_CAPACITY_GROWTH"
             current_slots = grown_slots
+        elif (
+            self._model_solve_generation_by_method.get(method_key, 0)
+            >= self.max_persistent_solve_reuses
+        ):
+            # Gurobi's retained multiobjective reoptimization state can become
+            # substantially slower than a cold model after hundreds of RHS and
+            # coefficient updates.  Bound that numerical state age without
+            # changing the mathematical model or any accepted decision.
+            self._dispose_method_models(method_key)
+            self._model_solve_generation_by_method[method_key] = 0
+            model_refresh_reason = "PERIODIC_NUMERICAL_STATE_REFRESH"
         self._job_slot_capacity_by_method[method_key] = current_slots
         issue_root = (
             self.output_root
@@ -783,6 +806,8 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 and method_key not in self._master_models
             )
         ):
+            if model_refresh_reason is None:
+                model_refresh_reason = "INITIAL_MODEL_BUILD"
             build_started = time.monotonic()
             common_model_kwargs = {
                 "candidate_limit": self.candidate_limit,
@@ -873,6 +898,10 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         )
         recourse_seconds = time.monotonic() - recourse_started
         plan.validate()
+        model_solve_generation = (
+            self._model_solve_generation_by_method.get(method_key, 0) + 1
+        )
+        self._model_solve_generation_by_method[method_key] = model_solve_generation
         total_seconds = time.monotonic() - total_started
         certificate = {
             "adapter_id": ADAPTER_ID,
@@ -899,6 +928,9 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             ),
             "gurobi_numeric_focus": recourse.numeric_focus,
             "persistent_model_reused": build_seconds == 0.0,
+            "persistent_model_refresh_reason": model_refresh_reason,
+            "persistent_model_solve_generation": model_solve_generation,
+            "persistent_model_max_reuses": self.max_persistent_solve_reuses,
             "model_build_once_seconds": build_seconds,
             "cold_start_bootstrap_budget_used": build_seconds > 0.0,
             "active_planner_wall_budget_seconds": active_wall_budget,

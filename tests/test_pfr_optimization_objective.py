@@ -309,3 +309,29 @@ def test_shared_watchdog_fails_before_recourse_when_master_consumes_total() -> N
             30.0,
             master_elapsed_seconds=30.0,
         )
+
+
+def test_persistent_model_refresh_disposes_both_hierarchical_stages() -> None:
+    class FakeGurobiModel:
+        def __init__(self) -> None:
+            self.disposed = False
+
+        def dispose(self) -> None:
+            self.disposed = True
+
+    class FakeStage:
+        def __init__(self) -> None:
+            self.model = FakeGurobiModel()
+
+    planner = object.__new__(PersistentBoundedMilpPlanner)
+    master = FakeStage()
+    recourse = FakeStage()
+    planner._master_models = {"B07": master}
+    planner._recourse_models = {"B07": recourse}
+
+    planner._dispose_method_models("B07")
+
+    assert master.model.disposed
+    assert recourse.model.disposed
+    assert planner._master_models == {}
+    assert planner._recourse_models == {}
