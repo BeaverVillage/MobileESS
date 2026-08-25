@@ -4,7 +4,12 @@ from types import SimpleNamespace
 import pytest
 
 from pfr.methods import ElectricalStressMethod, ExperimentAuthority, MethodFactory
-from pfr.persistent_bounded_milp import _PersistentMilpModel
+from pfr.persistent_bounded_milp import (
+    NORM_ENGINEERING_MARGIN_FRACTION,
+    NORM_RELATIVE_TOLERANCE,
+    NORM_SAFE_LIMIT_FACTOR,
+    _PersistentMilpModel,
+)
 from pfr.retained_h54 import (
     RetainedH54JointPlanner,
     _FORMULATION_DEFAULTS,
@@ -21,6 +26,16 @@ from pfr.runtime import (
 
 
 REPO = Path(__file__).resolve().parents[1]
+
+
+def test_norm_solver_tolerance_cannot_consume_engineering_headroom() -> None:
+    assert NORM_ENGINEERING_MARGIN_FRACTION == pytest.approx(
+        10 * NORM_RELATIVE_TOLERANCE
+    )
+    assert NORM_SAFE_LIMIT_FACTOR == pytest.approx(
+        1.0 - NORM_ENGINEERING_MARGIN_FRACTION
+    )
+    assert NORM_SAFE_LIMIT_FACTOR + NORM_RELATIVE_TOLERANCE < 1.0
 
 
 def test_runtime_reference_grid_cannot_read_pilot_fixed_rack_baseline() -> None:
@@ -171,6 +186,20 @@ def test_hierarchical_move_blocked_mpc_preserves_science_and_exact_recourse() ->
     assert 'self.numeric_focus = 0 if model_role == "slow_master" else 2' in source
     assert "self.model.Params.NumericFocus = self.numeric_focus" in source
     assert "EXCLUSIVITY_TOLERANCE_KW = 1e-4" in source
+    assert "self.flow_p[(node, step)] / limit" in source
+    assert "(pnet / limit) * (pnet / limit)" in source
+    assert "NORM_RELATIVE_TOLERANCE = 1e-6" in source
+    assert "NORM_ENGINEERING_MARGIN_FRACTION = 1e-5" in source
+    assert "NORM_SAFE_LIMIT_FACTOR + NORM_RELATIVE_TOLERANCE" in source
+    assert "self.zmax <= NORM_SAFE_LIMIT_FACTOR" in source
+    assert "maximum_exact_norm_relative_residual" in source
+    assert '"exact_qcp_relative_tolerance": 1e-6' in contract
+    assert '"norm_engineering_margin_fraction": 1e-5' in contract
+    assert "MAX_EXACT_QCP_FEASIBILITY_RESTORATION_ROUNDS = 4" in source
+    assert "exact_qcp_implied_tangent_cuts_added" in source
+    assert "self.model.Params.NumericFocus = 3" in source
+    assert "self.model.Params.Crossover = 0" in source
+    assert "self.model.Params.Crossover = -1" in source
     assert "charge_discharge_exclusivity_tolerance_pu" in source
     assert "_fix_dispatch_modes_from_incumbent" in source
     assert "charge_discharge_mode_projection_used" in source

@@ -58,9 +58,17 @@ MAX_ONLINE_QUEUED_JOBS = 16
 MAX_SEPARATION_ROUNDS = 12
 SEPARATION_GAP_PARTITIONS = 16
 GLOBAL_ASSET_REFINEMENT_DIRECTIONS = 64
-NORM_TOLERANCE = 1e-7
+# Gurobi certifies the scaled QCP rows, not an absolute kVA residual.  Keep the
+# numerical contract dimensionless and reserve a separate physical margin so a
+# solution at the numerical boundary is still strictly inside nameplate.
+NORM_RELATIVE_TOLERANCE = 1e-6
+NORM_ENGINEERING_MARGIN_FRACTION = 1e-5
+NORM_SAFE_LIMIT_FACTOR = 1.0 - NORM_ENGINEERING_MARGIN_FRACTION
+if NORM_SAFE_LIMIT_FACTOR + NORM_RELATIVE_TOLERANCE >= 1.0:
+    raise RuntimeError("norm engineering margin must dominate solver tolerance")
 LEX_TOLERANCE = 1e-7
 EXCLUSIVITY_TOLERANCE_KW = 1e-4
+MAX_EXACT_QCP_FEASIBILITY_RESTORATION_ROUNDS = 4
 P_MAX = 550.0
 ETA_DISCHARGE = 0.95
 
@@ -672,6 +680,19 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             "maximum_exact_norm_residual": result[
                 "maximum_exact_norm_residual"
             ],
+            "maximum_exact_norm_relative_residual": result[
+                "maximum_exact_norm_relative_residual"
+            ],
+            "norm_relative_tolerance": result["norm_relative_tolerance"],
+            "norm_engineering_margin_fraction": result[
+                "norm_engineering_margin_fraction"
+            ],
+            "exact_qcp_feasibility_restoration_rounds": result[
+                "exact_qcp_feasibility_restoration_rounds"
+            ],
+            "exact_qcp_implied_tangent_cuts_added": result[
+                "exact_qcp_implied_tangent_cuts_added"
+            ],
             "maximum_simultaneous_charge_discharge_kw": result[
                 "maximum_simultaneous_charge_discharge_kw"
             ],
@@ -1139,7 +1160,11 @@ class _PersistentMilpModel:
                     PUE * self.it[(site, step)]
                     <= IDC_TRANSFORMER_LIMIT_KW * self.z[step]
                 )
-        self.primary_lock = self.model.addConstr(self.zmax <= 1.0)
+        # Keep stress normalized to the physical limits while reserving explicit
+        # headroom at the hard acceptance boundary.
+        self.primary_lock = self.model.addConstr(
+            self.zmax <= NORM_SAFE_LIMIT_FACTOR
+        )
         self.secondary_lock = self.model.addConstr(
             STEP_HOURS * gp.quicksum(self.z.values()) <= self.h * STEP_HOURS
         )
@@ -1186,7 +1211,7 @@ class _PersistentMilpModel:
                 direction_p * self._pnet(mid, r, step)
                 + direction_q * self.q[(mid, r, step)]
             )
-            self.model.addConstr(lhs <= PCS_KVA)
+            self.model.addConstr(lhs <= NORM_SAFE_LIMIT_FACTOR * PCS_KVA)
         else:
             raise RuntimeContractError(f"unknown norm-cut kind {kind}")
         return True
@@ -1289,7 +1314,15 @@ class _PersistentMilpModel:
                         )
 
     def _add_exact_norm_constraints(self) -> None:
-        """Diagnostic exact-circle realization of the same bounded domain."""
+        """Dimensionless exact-circle realization of the bounded domain.
+
+        Writing these rows in raw kVA squared makes the solver's feasibility
+        test depend on equipment size.  Every axis is therefore divided by an
+        physical nameplate.  The nonlinear rows are O(1), and the independent
+        acceptance audit uses the same dimensionless scale.  A separate zmax
+        hard cap (and direct PCS cap) reserves engineering headroom without
+        changing the paper-facing stress objective's physical normalization.
+        """
 
         for step in range(self.h):
             for node in self.nonroot:
@@ -1298,28 +1331,32 @@ class _PersistentMilpModel:
                     continue
                 limit = float(self.static["lim"][edge_key])
                 self.model.addQConstr(
-                    self.flow_p[(node, step)] * self.flow_p[(node, step)]
-                    + self.flow_q[(node, step)] * self.flow_q[(node, step)]
-                    <= limit * limit * self.z[step] * self.z[step],
+                    (self.flow_p[(node, step)] / limit)
+                    * (self.flow_p[(node, step)] / limit)
+                    + (self.flow_q[(node, step)] / limit)
+                    * (self.flow_q[(node, step)] / limit)
+                    <= self.z[step] * self.z[step],
                     name=f"exact_line_norm[{node},{step}]",
                 )
             for service in self.services:
                 limit = float(self.static["service_kva"][service])
                 self.model.addQConstr(
-                    self.service_p[(service, step)]
-                    * self.service_p[(service, step)]
-                    + self.service_q[(service, step)]
-                    * self.service_q[(service, step)]
-                    <= limit * limit * self.z[step] * self.z[step],
+                    (self.service_p[(service, step)] / limit)
+                    * (self.service_p[(service, step)] / limit)
+                    + (self.service_q[(service, step)] / limit)
+                    * (self.service_q[(service, step)] / limit)
+                    <= self.z[step] * self.z[step],
                     name=f"exact_service_norm[{service},{step}]",
                 )
             for mid in MESS_IDS:
                 for r in self._route_axis(mid):
                     pnet = self._pnet(mid, r, step)
+                    limit = NORM_SAFE_LIMIT_FACTOR * PCS_KVA
                     self.model.addQConstr(
-                        pnet * pnet
-                        + self.q[(mid, r, step)] * self.q[(mid, r, step)]
-                        <= PCS_KVA * PCS_KVA,
+                        (pnet / limit) * (pnet / limit)
+                        + (self.q[(mid, r, step)] / limit)
+                        * (self.q[(mid, r, step)] / limit)
+                        <= 1.0,
                         name=f"exact_pcs_norm[{mid},{r},{step}]",
                     )
 
@@ -1698,9 +1735,16 @@ class _PersistentMilpModel:
                 self.job[(j, o)].UB = value
         self.model.update()
 
-    def _exact_norm_residuals(self) -> tuple[float, list[tuple[str, str, int, float, float]]]:
+    def _exact_norm_residuals(
+        self,
+    ) -> tuple[
+        float,
+        float,
+        list[tuple[str, str, int, float, float]],
+    ]:
         violations: list[tuple[str, str, int, float, float]] = []
-        maximum = 0.0
+        maximum_kva = 0.0
+        maximum_relative = 0.0
         for step in range(self.h):
             z = float(self.z[step].X)
             for node in self.nonroot:
@@ -1709,20 +1753,32 @@ class _PersistentMilpModel:
                     continue
                 p = float(self.flow_p[(node, step)].X)
                 q = float(self.flow_q[(node, step)].X)
-                limit = float(self.static["lim"][edge_key]) * z
-                residual = math.hypot(p, q) - limit
-                maximum = max(maximum, residual)
-                if residual > NORM_TOLERANCE:
-                    norm = math.hypot(p, q)
+                nameplate = float(self.static["lim"][edge_key])
+                norm = math.hypot(p, q)
+                objective_residual_kva = norm - nameplate * z
+                safety_residual_kva = (
+                    norm - nameplate * NORM_SAFE_LIMIT_FACTOR
+                )
+                residual_kva = max(objective_residual_kva, safety_residual_kva)
+                residual_relative = residual_kva / nameplate
+                maximum_kva = max(maximum_kva, residual_kva)
+                maximum_relative = max(maximum_relative, residual_relative)
+                if residual_relative > NORM_RELATIVE_TOLERANCE:
                     violations.append(("LINE", node, step, p / norm, q / norm))
             for service in self.services:
                 p = float(self.service_p[(service, step)].X)
                 q = float(self.service_q[(service, step)].X)
-                limit = float(self.static["service_kva"][service]) * z
-                residual = math.hypot(p, q) - limit
-                maximum = max(maximum, residual)
-                if residual > NORM_TOLERANCE:
-                    norm = math.hypot(p, q)
+                nameplate = float(self.static["service_kva"][service])
+                norm = math.hypot(p, q)
+                objective_residual_kva = norm - nameplate * z
+                safety_residual_kva = (
+                    norm - nameplate * NORM_SAFE_LIMIT_FACTOR
+                )
+                residual_kva = max(objective_residual_kva, safety_residual_kva)
+                residual_relative = residual_kva / nameplate
+                maximum_kva = max(maximum_kva, residual_kva)
+                maximum_relative = max(maximum_relative, residual_relative)
+                if residual_relative > NORM_RELATIVE_TOLERANCE:
                     violations.append(
                         ("SERVICE", service, step, p / norm, q / norm)
                     )
@@ -1730,14 +1786,23 @@ class _PersistentMilpModel:
                 for r in self._route_axis(mid):
                     p = float(self._pnet(mid, r, step).getValue())
                     q = float(self.q[(mid, r, step)].X)
-                    residual = math.hypot(p, q) - PCS_KVA
-                    maximum = max(maximum, residual)
-                    if residual > NORM_TOLERANCE:
+                    residual_kva = (
+                        math.hypot(p, q)
+                        - NORM_SAFE_LIMIT_FACTOR * PCS_KVA
+                    )
+                    residual_relative = residual_kva / PCS_KVA
+                    maximum_kva = max(maximum_kva, residual_kva)
+                    maximum_relative = max(maximum_relative, residual_relative)
+                    if residual_relative > NORM_RELATIVE_TOLERANCE:
                         norm = math.hypot(p, q)
                         violations.append(
                             (f"PCS:{mid}", str(r), step, p / norm, q / norm)
                         )
-        return max(0.0, maximum), violations
+        return (
+            max(0.0, maximum_kva),
+            max(0.0, maximum_relative),
+            violations,
+        )
 
     def _near_active_norm_directions(
         self,
@@ -1766,7 +1831,9 @@ class _PersistentMilpModel:
                 p = float(self.flow_p[(node, step)].X)
                 q = float(self.flow_q[(node, step)].X)
                 norm = math.hypot(p, q)
-                limit = float(self.static["lim"][edge_key]) * z
+                limit = float(self.static["lim"][edge_key]) * min(
+                    z, NORM_SAFE_LIMIT_FACTOR
+                )
                 if norm > 0.0 and (
                     norm >= utilization_floor * limit
                     or ("LINE", node) in active_assets
@@ -1778,7 +1845,9 @@ class _PersistentMilpModel:
                 p = float(self.service_p[(service, step)].X)
                 q = float(self.service_q[(service, step)].X)
                 norm = math.hypot(p, q)
-                limit = float(self.static["service_kva"][service]) * z
+                limit = float(self.static["service_kva"][service]) * min(
+                    z, NORM_SAFE_LIMIT_FACTOR
+                )
                 if norm > 0.0 and (
                     norm >= utilization_floor * limit
                     or ("SERVICE", service) in active_assets
@@ -1794,7 +1863,8 @@ class _PersistentMilpModel:
                     kind = f"PCS:{mid}"
                     element = str(r)
                     if norm > 0.0 and (
-                        norm >= utilization_floor * PCS_KVA
+                        norm
+                        >= utilization_floor * NORM_SAFE_LIMIT_FACTOR * PCS_KVA
                         or (kind, element) in active_assets
                     ):
                         candidates[(kind, element, step)] = (
@@ -1845,7 +1915,6 @@ class _PersistentMilpModel:
         solve_seconds = 0.0
         separation_seconds = 0.0
         cuts_added = 0
-        maximum_residual = math.inf
         last_violations: list[tuple[str, str, int, float, float]] = []
         for separation_round in range(1, MAX_SEPARATION_ROUNDS + 1):
             remaining = deadline - time.monotonic()
@@ -1878,7 +1947,11 @@ class _PersistentMilpModel:
                     f"status={_status_name(self.GRB, self.model.Status)} gap={gap}"
                 )
             separation_started = time.monotonic()
-            maximum_residual, violations = self._exact_norm_residuals()
+            (
+                maximum_residual_kva,
+                maximum_relative_residual,
+                violations,
+            ) = self._exact_norm_residuals()
             last_violations = violations
             separation_seconds += time.monotonic() - separation_started
             if not violations:
@@ -1890,7 +1963,8 @@ class _PersistentMilpModel:
                     "cuts_added": cuts_added,
                     "solve_seconds": solve_seconds,
                     "separation_seconds": separation_seconds,
-                    "maximum_residual": maximum_residual,
+                    "maximum_residual": maximum_residual_kva,
+                    "maximum_relative_residual": maximum_relative_residual,
                 }
             # Refine every near-active circle, not only the circles that happen
             # to violate at this incumbent.  Otherwise the MILP successively
@@ -1914,13 +1988,15 @@ class _PersistentMilpModel:
             if added_this_round == 0:
                 raise RuntimeContractError(
                     "exact norm separation stalled with a positive residual: "
-                    f"max={maximum_residual}"
+                    f"max_kva={maximum_residual_kva} "
+                    f"max_relative={maximum_relative_residual}"
                 )
             self.model.update()
         raise RuntimeContractError(
             "persistent MILP exhausted exact norm-separation rounds: "
             f"rounds={MAX_SEPARATION_ROUNDS} "
-            f"max_residual_kva={maximum_residual:.12g} "
+            f"max_residual_kva={maximum_residual_kva:.12g} "
+            f"max_relative_residual={maximum_relative_residual:.12g} "
             f"remaining={len(last_violations)} "
             f"sample={last_violations[:5]}"
         )
@@ -1992,6 +2068,8 @@ class _PersistentMilpModel:
         tertiary_expr = self._tertiary_objective()
         charge_discharge_mode_projection_used = False
         maximum_simultaneous_before_projection = 0.0
+        exact_qcp_feasibility_restoration_rounds = 0
+        exact_qcp_implied_tangent_cuts_added = 0
         use_native_multiobjective = True
         if use_native_multiobjective:
             # Match the retained Full-H54 oracle's native Gurobi
@@ -2055,6 +2133,97 @@ class _PersistentMilpModel:
                         f"status={_status_name(self.GRB, self.model.Status)} "
                         f"solve_seconds={exact_solve_seconds:.6f}"
                     )
+            if self.model_role == "exact_recourse":
+                # A conic barrier solution can satisfy Gurobi's internal QCP
+                # test yet miss the independent scale-aware residual audit.
+                # Supporting tangents are already implied by the exact circle,
+                # so adding them changes no mathematical feasible point.  They
+                # give the optimizer a linear row in the precise violated
+                # direction and make the returned solution independently
+                # certifiable against the engineering-safe circle.
+                for restoration_round in range(
+                    1, MAX_EXACT_QCP_FEASIBILITY_RESTORATION_ROUNDS + 1
+                ):
+                    (
+                        residual_kva,
+                        relative_residual,
+                        violations,
+                    ) = self._exact_norm_residuals()
+                    if (
+                        not violations
+                        and relative_residual <= NORM_RELATIVE_TOLERANCE
+                    ):
+                        break
+                    added = 0
+                    for kind, element, step, direction_p, direction_q in violations:
+                        added += int(
+                            self._add_cut(
+                                kind=kind,
+                                element=element,
+                                step=step,
+                                direction_p=direction_p,
+                                direction_q=direction_q,
+                            )
+                        )
+                    if added == 0:
+                        raise RuntimeContractError(
+                            "exact QCP feasibility restoration stalled: "
+                            f"max_residual_kva={residual_kva:.12g} "
+                            f"max_relative_residual={relative_residual:.12g} "
+                            f"remaining={violations[:5]}"
+                        )
+                    exact_qcp_implied_tangent_cuts_added += added
+                    exact_qcp_feasibility_restoration_rounds = restoration_round
+                    self.model.update()
+                    remaining_budget = deadline - time.monotonic()
+                    if remaining_budget <= 0.0:
+                        raise RuntimeContractError(
+                            "exact recourse exhausted its wall budget during "
+                            "scale-aware QCP feasibility restoration"
+                        )
+                    self.model.Params.TimeLimit = max(0.001, remaining_budget)
+                    # Re-optimizing a previously crossed-over cone after a
+                    # supporting row is added can terminate SUBOPTIMAL from a
+                    # degenerate crossover basis.  The rare restoration pass
+                    # therefore uses the barrier point directly at maximum
+                    # numerical focus, then restores the normal online policy.
+                    self.model.Params.NumericFocus = 3
+                    self.model.Params.Crossover = 0
+                    restoration_started = time.monotonic()
+                    self.model.optimize()
+                    exact_solve_seconds += (
+                        time.monotonic() - restoration_started
+                    )
+                    self.model.Params.NumericFocus = self.numeric_focus
+                    self.model.Params.Crossover = -1
+                    if (
+                        self.model.SolCount < 1
+                        or self.model.Status != self.GRB.OPTIMAL
+                    ):
+                        raise RuntimeContractError(
+                            "exact QCP feasibility-restoration solve failed "
+                            "to complete all objective priorities: "
+                            f"status={_status_name(self.GRB, self.model.Status)} "
+                            f"round={restoration_round} "
+                            f"solve_seconds={exact_solve_seconds:.6f}"
+                        )
+                else:
+                    (
+                        residual_kva,
+                        relative_residual,
+                        violations,
+                    ) = self._exact_norm_residuals()
+                    if (
+                        violations
+                        or relative_residual > NORM_RELATIVE_TOLERANCE
+                    ):
+                        raise RuntimeContractError(
+                            "exact QCP feasibility restoration exhausted: "
+                            f"rounds={MAX_EXACT_QCP_FEASIBILITY_RESTORATION_ROUNDS} "
+                            f"max_residual_kva={residual_kva:.12g} "
+                            f"max_relative_residual={relative_residual:.12g} "
+                            f"remaining={violations[:5]}"
+                        )
             # Gurobi does not expose a single MIPGap attribute after a native
             # multiobjective solve.  OPTIMAL here means every priority stopped
             # under the model's frozen MIPGap parameter, so record the
@@ -2069,19 +2238,21 @@ class _PersistentMilpModel:
                 "solve_seconds": exact_solve_seconds / 3.0,
                 "separation_seconds": 0.0,
             }
-        residual, remaining = self._exact_norm_residuals()
+        residual_kva, relative_residual, remaining = self._exact_norm_residuals()
         if self.model_role == "exact_recourse":
-            if remaining or residual > NORM_TOLERANCE:
+            if remaining or relative_residual > NORM_RELATIVE_TOLERANCE:
                 raise RuntimeContractError(
                     "exact H54 recourse lost Euclidean-norm feasibility: "
-                    f"max_residual={residual:.12g} "
+                    f"max_residual_kva={residual_kva:.12g} "
+                    f"max_relative_residual={relative_residual:.12g} "
                     f"remaining={remaining[:5]}"
                 )
         else:
             # The slow MILP is a discrete-decision master. Its polyhedral
             # circle relaxation is never committed; exact H54 recourse below
             # is the physical/objective acceptance authority.
-            residual = max(0.0, residual)
+            residual_kva = max(0.0, residual_kva)
+            relative_residual = max(0.0, relative_residual)
         maximum_simultaneous_kw = (
             self._maximum_simultaneous_charge_discharge_kw()
         )
@@ -2178,7 +2349,24 @@ class _PersistentMilpModel:
                 row["separation_seconds"]
                 for row in (primary, secondary, tertiary)
             ),
-            "maximum_exact_norm_residual": residual,
+            "maximum_exact_norm_residual": residual_kva,
+            "maximum_exact_norm_relative_residual": relative_residual,
+            "norm_relative_tolerance": NORM_RELATIVE_TOLERANCE,
+            "norm_engineering_margin_fraction": (
+                NORM_ENGINEERING_MARGIN_FRACTION
+            ),
+            "exact_qcp_feasibility_restoration_rounds": (
+                exact_qcp_feasibility_restoration_rounds
+            ),
+            "exact_qcp_implied_tangent_cuts_added": (
+                exact_qcp_implied_tangent_cuts_added
+            ),
+            "exact_qcp_restoration_numeric_focus": (
+                3 if exact_qcp_feasibility_restoration_rounds else None
+            ),
+            "exact_qcp_restoration_crossover": (
+                0 if exact_qcp_feasibility_restoration_rounds else None
+            ),
             "maximum_simultaneous_charge_discharge_kw": (
                 maximum_simultaneous_kw
             ),

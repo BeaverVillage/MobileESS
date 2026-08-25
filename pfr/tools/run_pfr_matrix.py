@@ -1545,12 +1545,23 @@ def main() -> None:
         type=Path,
         help="Resume a diagnostic method from a locally generated runtime checkpoint.",
     )
+    parser.add_argument(
+        "--diagnostic-stop-after-issue",
+        type=int,
+        help=(
+            "Stop cleanly after committing this issue while retaining the "
+            "original --count episode horizon; diagnostic methods only."
+        ),
+    )
     args = parser.parse_args()
     if (
         args.diagnostic_checkpoint_after_issue is not None
         or args.diagnostic_resume_checkpoint is not None
+        or args.diagnostic_stop_after_issue is not None
     ) and not args.diagnostic_method:
-        parser.error("diagnostic checkpoint/resume requires --diagnostic-method")
+        parser.error(
+            "diagnostic checkpoint/resume/stop requires --diagnostic-method"
+        )
     if args.diagnostic_method and args.supplementary_b8_periodic_5min:
         parser.error(
             "--diagnostic-method and --supplementary-b8-periodic-5min are mutually exclusive"
@@ -2027,6 +2038,7 @@ def main() -> None:
             diagnostic_checkpoint_after_issue=(
                 args.diagnostic_checkpoint_after_issue
             ),
+            diagnostic_stop_after_issue=args.diagnostic_stop_after_issue,
         )
         matrix = {
             "schema_version": (
@@ -2057,7 +2069,9 @@ def main() -> None:
             "all_binary_states_unchanged_in_fast_layer": method["binary_state_unchanged"],
             "future_actual_used": False,
             "failed_methods": (
-                [] if method["status"] == "PASS" else [single_method_id]
+                []
+                if method["status"] in {"PASS", "DIAGNOSTIC_STOP"}
+                else [single_method_id]
             ),
             "method_failures_isolated": True,
             "continue_to_next_method_after_failure": True,
@@ -2385,7 +2399,7 @@ def main() -> None:
     )
     temporary_manifest.replace(output / "RUN_MANIFEST.json")
     print(json.dumps({"status": matrix["status"], "markers": matrix["valid_commit_markers"], "output": str(output)}))
-    if matrix["status"] != "PASS":
+    if matrix["status"] not in {"PASS", "DIAGNOSTIC_STOP"}:
         raise SystemExit(2)
 
 

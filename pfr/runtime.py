@@ -4390,6 +4390,7 @@ class PfrRuntimeRunner:
         diagnostic_resume_state: Optional[MutableMethodState] = None,
         diagnostic_resume_cumulative_grid_cost_aud: float = 0.0,
         diagnostic_checkpoint_after_issue: Optional[int] = None,
+        diagnostic_stop_after_issue: Optional[int] = None,
     ) -> Mapping[str, Any]:
         if not frames:
             raise RuntimeContractError("runtime needs at least one frame")
@@ -4419,6 +4420,7 @@ class PfrRuntimeRunner:
                 "diagnostic resume state does not match requested first issue"
             )
         records = []
+        diagnostic_stop_reached = False
         cumulative_grid_cost_aud = float(
             diagnostic_resume_cumulative_grid_cost_aud
         )
@@ -5377,6 +5379,21 @@ class PfrRuntimeRunner:
                         "maximum_exact_norm_residual"
                     ) if (replan or safety_replan) else None
                 ),
+                "h54_maximum_exact_norm_relative_residual": (
+                    state.last_slow_miqp_certificate.get(
+                        "maximum_exact_norm_relative_residual"
+                    ) if (replan or safety_replan) else None
+                ),
+                "h54_norm_relative_tolerance": (
+                    state.last_slow_miqp_certificate.get(
+                        "norm_relative_tolerance"
+                    ) if (replan or safety_replan) else None
+                ),
+                "h54_norm_engineering_margin_fraction": (
+                    state.last_slow_miqp_certificate.get(
+                        "norm_engineering_margin_fraction"
+                    ) if (replan or safety_replan) else None
+                ),
                 "fast_recourse_runtime_seconds": fast.runtime_seconds,
                 "safety_filter_runtime_seconds": safety.filter_runtime_seconds,
                 "opendss_runtime_seconds": verifier.opendss_runtime_seconds,
@@ -5478,9 +5495,22 @@ class PfrRuntimeRunner:
                         "scientific_result_eligible": False,
                     },
                 )
+            if diagnostic_stop_after_issue == frame.issue:
+                diagnostic_stop_reached = True
+                break
         summary = {
             "schema_version": "K9H7_RESULT_V2.method_run.v2",
-            "status": "PASS" if failure is None and len(records) == len(frames) else "FAIL_CLOSED",
+            "status": (
+                "DIAGNOSTIC_STOP"
+                if failure is None and diagnostic_stop_reached
+                else (
+                    "PASS"
+                    if failure is None and len(records) == len(frames)
+                    else "FAIL_CLOSED"
+                )
+            ),
+            "diagnostic_stop_after_issue": diagnostic_stop_after_issue,
+            "diagnostic_stop_reached": diagnostic_stop_reached,
             "comparison_method_id": config.comparison_method_id.value,
             "method_order": int(config.comparison_method_id.value[1:]),
             "factorial_energy": (

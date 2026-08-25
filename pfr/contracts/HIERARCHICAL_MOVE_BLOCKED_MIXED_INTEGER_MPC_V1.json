@@ -35,7 +35,7 @@
       "SOC, travel energy, support-energy recovery",
       "fixed slow-decision GPU, rack, IDC, WAN, checkpoint, and deadline feasibility"
     ],
-    "acceptance": "Exact QCP residual at frozen numerical tolerance and no simultaneous charge/discharge"
+    "acceptance": "Exact dimensionless QCP residual at the frozen scale-aware numerical tolerance, explicit engineering headroom inside every physical nameplate, and no simultaneous charge/discharge"
   },
   "lexicographic_objectives": [
     "min max_h z_h",
@@ -79,6 +79,12 @@
     "gurobi_threads": 4,
     "slow_master_numeric_focus": 0,
     "exact_recourse_numeric_focus": 2,
+    "exact_qcp_constraint_scaling": "Every line, service-transformer, and PCS P-Q circle is divided by its physical nameplate before squaring, producing a dimensionless O(1) QCP row whose numerical residual is independent of equipment rating.",
+    "exact_qcp_relative_tolerance": 1e-6,
+    "norm_engineering_margin_fraction": 1e-5,
+    "norm_safety_invariant": "The paper-facing stress objective remains normalized to physical nameplate. A separate zmax hard cap and PCS hard circle reserve an engineering margin ten times the scale-aware numerical tolerance; even an accepted solution at the positive residual boundary remains strictly inside nameplate because (1 - 1e-5) + 1e-6 < 1.",
+    "exact_qcp_physical_feasibility_restoration": "If independent scale-aware evaluation of either the stress row or the nameplate-safety row exceeds the frozen relative gate, add only supporting tangent half-spaces implied by the same Euclidean circles and re-solve every lexicographic priority; no gate or safe-limit relaxation is permitted.",
+    "exact_qcp_restoration_solver_policy": "Restoration-only reoptimization uses NumericFocus=3 and Crossover=0 to avoid a degenerate crossover basis after implied tangent insertion, then immediately restores the approved online NumericFocus=2 and AUTO crossover settings.",
     "numeric_focus_evidence": "Paired 19-step B06 validation reduced steady end-to-end median and p95 with identical route decisions, predicted objectives, Fresh-AC values, zero exact residual, and AC PASS. NumericFocus 0 and 1 remain prohibited for exact recourse after clean reruns exceeded the frozen simultaneous charge/discharge residual tolerance",
     "crossover": "AUTO",
     "multi_objective_presolve": "AUTO"
@@ -94,7 +100,12 @@
     "Fresh_OpenDSS_seconds",
     "storage_seconds",
     "total_issue_wall_seconds",
-    "maximum_exact_norm_residual"
+    "maximum_exact_norm_residual",
+    "maximum_exact_norm_relative_residual",
+    "norm_relative_tolerance",
+    "norm_engineering_margin_fraction",
+    "exact_qcp_feasibility_restoration_rounds",
+    "exact_qcp_implied_tangent_cuts_added"
   ],
   "rejected_diagnostics": [
     "54-step exact-cut MILP outer approximation: no primary convergence within 120 seconds",

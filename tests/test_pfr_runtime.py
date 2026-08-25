@@ -322,6 +322,26 @@ class PfrRuntimeTests(unittest.TestCase):
             "EXACT_ENDOGENOUS_RUNTIME_STATE_WITH_COLD_PLANNER",
         )
 
+    def test_diagnostic_stop_retains_full_episode_horizon(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            summary = PfrRuntimeRunner(
+                power_curve=self.curve,
+                physical_backend=FakePhysical(),
+                migration_authority=self.migration_authority,
+            ).run_method(
+                config=self.configs[0],
+                frames=self.frames,
+                initial=self.initial,
+                representative_week_id="TEST_DIAGNOSTIC_STOP",
+                output=Path(temporary),
+                diagnostic_stop_after_issue=self.frames[0].issue,
+            )
+
+        self.assertEqual(summary["status"], "DIAGNOSTIC_STOP")
+        self.assertEqual(summary["requested_issues"], len(self.frames))
+        self.assertEqual(summary["committed_issues"], 1)
+        self.assertTrue(summary["diagnostic_stop_reached"])
+
     def test_b7_fails_closed_without_frozen_risk_calibration(self):
         with tempfile.TemporaryDirectory() as temporary:
             with self.assertRaisesRegex(

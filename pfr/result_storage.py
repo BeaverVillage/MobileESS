@@ -47,6 +47,8 @@ ISSUE_REQUIRED_COLUMNS = (
     "h54_parameter_update_time_s", "h54_slow_master_time_s",
     "h54_exact_recourse_time_s", "h54_planner_total_time_s",
     "h54_master_skipped_forced_domain", "h54_maximum_exact_norm_residual",
+    "h54_maximum_exact_norm_relative_residual", "h54_norm_relative_tolerance",
+    "h54_norm_engineering_margin_fraction",
     "commit_marker_storage_time_s", "total_issue_wall_time_s",
     "total_control_time_s", "communication_bytes",
     "communication_bytes_step", "run_status", "failure_stage",
@@ -288,6 +290,15 @@ def _issue_row(record: Mapping[str, Any]) -> dict[str, Any]:
         ),
         "h54_maximum_exact_norm_residual": record.get(
             "h54_maximum_exact_norm_residual"
+        ),
+        "h54_maximum_exact_norm_relative_residual": record.get(
+            "h54_maximum_exact_norm_relative_residual"
+        ),
+        "h54_norm_relative_tolerance": record.get(
+            "h54_norm_relative_tolerance"
+        ),
+        "h54_norm_engineering_margin_fraction": record.get(
+            "h54_norm_engineering_margin_fraction"
         ),
         "commit_marker_storage_time_s": record.get(
             "commit_marker_storage_time_s"
