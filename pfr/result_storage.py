@@ -66,7 +66,8 @@ MESS_REQUIRED_COLUMNS = (
 )
 JOB_REQUIRED_COLUMNS = (
     "timestamp", "issue", "method_id", "job_id", "arrival_issue",
-    "deadline_issue", "remaining_work_gpu_hours", "required_gpu", "current_idc",
+    "deadline_issue", "actual_start_issue", "completion_issue",
+    "remaining_work_gpu_hours", "required_gpu", "current_idc",
     "assigned_idc", "running", "queued", "completed", "planned_compute_rate",
     "compute_rate", "gpu_allocated", "shifted_temporally",
     "migrated_spatially", "checkpoint_state", "checkpoint_eligible",
@@ -383,6 +384,14 @@ def _job_rows(record: Mapping[str, Any]) -> list[dict[str, Any]]:
     for uid, job in sorted(record.get("job_states", {}).items()):
         lifecycle = job.get("lifecycle")
         checkpoint_state = str(job.get("checkpoint_state") or "")
+        arrival_issue = job.get("arrival_issue")
+        actual_start_issue = job.get("actual_start_issue")
+        planned_start_issue = job.get("planned_start_issue")
+        effective_start_issue = (
+            actual_start_issue
+            if actual_start_issue is not None
+            else planned_start_issue
+        )
         rows.append({
             "result_schema_version": RESULT_SCHEMA_VERSION,
             "timestamp": timestamp,
@@ -390,10 +399,12 @@ def _job_rows(record: Mapping[str, Any]) -> list[dict[str, Any]]:
             "issue": int(record["issue"]),
             "method_id": record["comparison_method_id"],
             "job_id": uid,
-            "arrival_issue": job.get("arrival_issue"),
-            "arrival_time": job.get("arrival_issue"),
+            "arrival_issue": arrival_issue,
+            "arrival_time": arrival_issue,
             "deadline_issue": job.get("deadline_issue"),
             "deadline": job.get("deadline_issue"),
+            "actual_start_issue": actual_start_issue,
+            "completion_issue": job.get("completion_issue"),
             "remaining_work_gpu_hours": job.get("remaining_work_gpu_hours"),
             "required_gpu": job.get("required_gpu"),
             "current_idc": job.get("destination_idc"),
@@ -404,7 +415,11 @@ def _job_rows(record: Mapping[str, Any]) -> list[dict[str, Any]]:
             "planned_compute_rate": planned.get(uid),
             "compute_rate": accepted.get(uid, job.get("compute_rate_fraction")),
             "gpu_allocated": job.get("required_gpu") if lifecycle == "RUNNING" else 0,
-            "shifted_temporally": bool(job.get("planned_start_issue", record["issue"]) > job.get("arrival_issue", record["issue"])),
+            "shifted_temporally": bool(
+                effective_start_issue is not None
+                and arrival_issue is not None
+                and int(effective_start_issue) > int(arrival_issue)
+            ),
             "migrated_spatially": job.get("destination_idc") != job.get("origin_idc"),
             "checkpoint_state": job.get("checkpoint_state"),
             "checkpoint_eligible": "ELIGIBLE" in checkpoint_state,

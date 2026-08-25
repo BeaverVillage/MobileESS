@@ -5414,6 +5414,8 @@ class PfrRuntimeRunner:
                         "destination_idc": job.destination_idc,
                         "planned_idc": state.active_plan.job_idc_placement.get(uid),
                         "planned_start_issue": state.active_plan.job_start_issue.get(uid),
+                        "actual_start_issue": job.start_issue,
+                        "completion_issue": job.completion_issue,
                         "remaining_work_gpu_hours": job.remaining_work_gpu_hours,
                         "lifecycle": job.lifecycle,
                         "compute_rate_fraction": job.compute_rate_fraction,

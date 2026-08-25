@@ -197,6 +197,36 @@ class ElectricalStressResultStorageTests(unittest.TestCase):
             self.assertEqual(jobs["prestart_wan_transfer_gb_step"].tolist(), [1.0])
             self.assertEqual(jobs["prestart_wan_data_ready"].tolist(), [False])
 
+    def test_completed_job_uses_persisted_actual_start_for_temporal_shift(self):
+        record = _record(9)
+        record["job_states"] = {
+            "completed-job": {
+                "lifecycle": "COMPLETED",
+                "arrival_issue": 3,
+                "deadline_issue": 20,
+                "planned_start_issue": None,
+                "actual_start_issue": 5,
+                "completion_issue": 8,
+                "remaining_work_gpu_hours": 0.0,
+                "required_gpu": 2,
+                "origin_idc": "IDC01",
+                "destination_idc": "IDC01",
+                "planned_idc": None,
+                "compute_rate_fraction": 0.0,
+                "checkpoint_state": "NOT_APPLICABLE_COMPLETED",
+                "restart_remaining_steps": 0,
+            }
+        }
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw) / "B07"
+            root.mkdir()
+            materialize_method_results(root, [record], {})
+            jobs = pd.read_parquet(root / "JOB_WAN_TRAJECTORY.parquet")
+
+            self.assertEqual(jobs["actual_start_issue"].tolist(), [5])
+            self.assertEqual(jobs["completion_issue"].tolist(), [8])
+            self.assertEqual(jobs["shifted_temporally"].tolist(), [True])
+
     def test_campaign_summary_is_exactly_ten_ordered_rows(self):
         summaries = []
         for index in range(10):
