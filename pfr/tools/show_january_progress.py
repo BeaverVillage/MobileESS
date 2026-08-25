@@ -58,6 +58,8 @@ def inspect_day(
             status = "FAIL"
     elif (root / "ORCHESTRATION_FAILURE.json").is_file():
         status = "FAIL"
+    elif (root / "FAILURE_EVIDENCE.json").is_file():
+        status = "RUNNING_WITH_FAILURE" if active else "INCOMPLETE_WITH_FAILURE"
     elif any((root / method / "FAILURE.json").is_file() for method in methods):
         status = "RUNNING_WITH_FAILURE" if active else "INCOMPLETE_WITH_FAILURE"
     return {"completed": completed, "status": status, "counts": counts}

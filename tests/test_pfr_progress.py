@@ -36,6 +36,15 @@ def test_progress_does_not_call_abandoned_partial_directory_running(
     assert inspect_day(day, active=True)["status"] == "RUNNING"
 
 
+def test_progress_surfaces_day_root_failure_evidence(tmp_path: Path) -> None:
+    day = tmp_path / "2025-01-01"
+    day.mkdir(parents=True)
+    (day / "FAILURE_EVIDENCE.json").write_text("{}", encoding="utf-8")
+
+    assert inspect_day(day)["status"] == "INCOMPLETE_WITH_FAILURE"
+    assert inspect_day(day, active=True)["status"] == "RUNNING_WITH_FAILURE"
+
+
 def test_snapshot_prints_per_method_counts(tmp_path: Path) -> None:
     day = tmp_path / "2025-01-01"
     (day / "B3" / "issue_000000").mkdir(parents=True)
