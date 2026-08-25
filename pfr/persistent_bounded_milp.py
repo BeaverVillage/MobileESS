@@ -60,6 +60,15 @@ SEPARATION_GAP_PARTITIONS = 16
 GLOBAL_ASSET_REFINEMENT_DIRECTIONS = 64
 NORM_TOLERANCE = 1e-7
 LEX_TOLERANCE = 1e-7
+# The tertiary objective is dimensionless and intentionally normalized for
+# reporting. Its continuous dispatch coefficients are consequently O(1e-5),
+# which is too close to the optimizer's absolute numerical tolerances: a
+# physically dominated charge/discharge pair of O(1e-4 kW) can otherwise be
+# returned as optimal. Multiplying the *entire* tertiary objective by this
+# positive constant leaves its ordering and the frozen lexicographic science
+# unchanged while giving the solver numerically resolvable coefficients.
+TERTIARY_SOLVER_OBJECTIVE_SCALE = 1e4
+EXACT_QCP_CONVERGENCE_TOLERANCE = 1e-10
 P_MAX = 550.0
 ETA_DISCHARGE = 0.95
 
@@ -629,6 +638,9 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 master.numeric_focus if master is not None else None
             ),
             "gurobi_numeric_focus": recourse.numeric_focus,
+            "gurobi_exact_qcp_convergence_tolerance": (
+                recourse.exact_qcp_convergence_tolerance
+            ),
             "persistent_model_reused": build_seconds == 0.0,
             "model_build_once_seconds": build_seconds,
             "cold_start_bootstrap_budget_used": build_seconds > 0.0,
@@ -657,6 +669,9 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 "secondary_exposure"
             ],
             "objective_secondary_actuation": result["tertiary_actuation"],
+            "tertiary_solver_objective_scale": result[
+                "tertiary_solver_objective_scale"
+            ],
             "predicted_voltage_stress_max": result[
                 "predicted_voltage_stress_max"
             ],
@@ -749,6 +764,19 @@ class _PersistentMilpModel:
         # OpenDSS authorities before commitment.
         self.numeric_focus = 0 if model_role == "slow_master" else 2
         self.model.Params.NumericFocus = self.numeric_focus
+        self.exact_qcp_convergence_tolerance = (
+            EXACT_QCP_CONVERGENCE_TOLERANCE
+            if model_role == "exact_recourse"
+            else None
+        )
+        if self.exact_qcp_convergence_tolerance is not None:
+            # Continuous convex-QCP recourse is accepted only after a tighter
+            # KKT convergence test than Gurobi's 1e-6 default. This prevents
+            # solver termination noise from crossing the unchanged 1e-4 kW
+            # charge/discharge exclusivity fail-closed threshold.
+            self.model.Params.BarQCPConvTol = (
+                self.exact_qcp_convergence_tolerance
+            )
         self.model.Params.FeasibilityTol = 1e-8
         self.model.Params.IntFeasTol = 1e-8
         self.model.Params.OptimalityTol = 1e-8
@@ -1932,6 +1960,7 @@ class _PersistentMilpModel:
         deadline = time.monotonic() + float(wall_budget_seconds)
         exposure_expr = STEP_HOURS * self.gp.quicksum(self.z.values())
         tertiary_expr = self._tertiary_objective()
+        tertiary_solver_expr = TERTIARY_SOLVER_OBJECTIVE_SCALE * tertiary_expr
         use_native_multiobjective = True
         if use_native_multiobjective:
             # Match the retained Full-H54 oracle's native Gurobi
@@ -1947,7 +1976,11 @@ class _PersistentMilpModel:
                 name="electrical_stress_exposure",
             )
             self.model.setObjectiveN(
-                tertiary_expr, 2, priority=1, abstol=1e-8, reltol=0.0,
+                tertiary_solver_expr,
+                2,
+                priority=1,
+                abstol=TERTIARY_SOLVER_OBJECTIVE_SCALE * 1e-8,
+                reltol=0.0,
                 name="secondary_actuation",
             )
             self.model.Params.TimeLimit = max(0.001, deadline - time.monotonic())
@@ -2056,6 +2089,9 @@ class _PersistentMilpModel:
             "primary_worst_stress": float(self.zmax.X),
             "secondary_exposure": float(exposure_expr.getValue()),
             "tertiary_actuation": float(tertiary_expr.getValue()),
+            "tertiary_solver_objective_scale": (
+                TERTIARY_SOLVER_OBJECTIVE_SCALE
+            ),
             "priority_status": [
                 primary["status"], secondary["status"], tertiary["status"]
             ],

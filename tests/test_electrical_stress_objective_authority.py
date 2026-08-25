@@ -168,6 +168,12 @@ def test_hierarchical_move_blocked_mpc_preserves_science_and_exact_recourse() ->
     assert 'PFR_ONLINE_MILP_WALL_BUDGET_SECONDS", "30.0"' in source
     assert 'self.numeric_focus = 0 if model_role == "slow_master" else 2' in source
     assert "self.model.Params.NumericFocus = self.numeric_focus" in source
+    assert "TERTIARY_SOLVER_OBJECTIVE_SCALE = 1e4" in source
+    assert "TERTIARY_SOLVER_OBJECTIVE_SCALE * tertiary_expr" in source
+    assert "EXACT_QCP_CONVERGENCE_TOLERANCE = 1e-10" in source
+    assert "self.model.Params.BarQCPConvTol" in source
+    assert '"tertiary_actuation": float(tertiary_expr.getValue())' in source
+    assert "exclusivity_tolerance_kw = 1e-4" in source
     assert "PFR_GUROBI_NUMERIC_FOCUS" not in source
     assert "PFR_GUROBI_CROSSOVER" not in source
     assert "PFR_GUROBI_MULTIOBJ_PRE" not in source
