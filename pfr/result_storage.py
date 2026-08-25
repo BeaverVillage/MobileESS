@@ -42,7 +42,13 @@ ISSUE_REQUIRED_COLUMNS = (
     "rebound_power_kw", "aemo_price_aud_per_mwh",
     "kpi_step_grid_cost_aud", "kpi_cumulative_grid_cost_aud",
     "slow_solver_time_s", "fast_solver_time_s", "ac_safety_filter_time_s",
-    "opendss_time_s", "total_control_time_s", "communication_bytes",
+    "opendss_time_s", "h54_reference_anchor_time_s",
+    "h54_domain_generation_time_s", "h54_model_build_once_time_s",
+    "h54_parameter_update_time_s", "h54_slow_master_time_s",
+    "h54_exact_recourse_time_s", "h54_planner_total_time_s",
+    "h54_master_skipped_forced_domain", "h54_maximum_exact_norm_residual",
+    "commit_marker_storage_time_s", "total_issue_wall_time_s",
+    "total_control_time_s", "communication_bytes",
     "communication_bytes_step", "run_status", "failure_stage",
     "failure_reason", "last_committed_issue", "attempt_id",
     "parent_attempt_id", "retry_count",
@@ -270,6 +276,23 @@ def _issue_row(record: Mapping[str, Any]) -> dict[str, Any]:
         "fast_solver_time_s": record.get("fast_recourse_runtime_seconds"),
         "ac_safety_filter_time_s": record.get("safety_filter_runtime_seconds"),
         "opendss_time_s": record.get("opendss_runtime_seconds"),
+        "h54_reference_anchor_time_s": record.get("h54_reference_anchor_time_s"),
+        "h54_domain_generation_time_s": record.get("h54_domain_generation_time_s"),
+        "h54_model_build_once_time_s": record.get("h54_model_build_once_time_s"),
+        "h54_parameter_update_time_s": record.get("h54_parameter_update_time_s"),
+        "h54_slow_master_time_s": record.get("h54_slow_master_time_s"),
+        "h54_exact_recourse_time_s": record.get("h54_exact_recourse_time_s"),
+        "h54_planner_total_time_s": record.get("h54_planner_total_time_s"),
+        "h54_master_skipped_forced_domain": record.get(
+            "h54_master_skipped_forced_domain"
+        ),
+        "h54_maximum_exact_norm_residual": record.get(
+            "h54_maximum_exact_norm_residual"
+        ),
+        "commit_marker_storage_time_s": record.get(
+            "commit_marker_storage_time_s"
+        ),
+        "total_issue_wall_time_s": record.get("total_issue_wall_time_s"),
         "total_control_time_s": record.get("runtime_seconds"),
         "communication_bytes": record.get("communication_bytes_cumulative"),
         "communication_bytes_step": record.get("communication_bytes_step"),

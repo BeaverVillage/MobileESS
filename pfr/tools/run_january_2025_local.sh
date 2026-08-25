@@ -123,10 +123,20 @@ fi
 
 if [[ "$mode" == "monitor" ]]; then
     cd "$repo_dir"
+    monitor_methods=()
+    if [[ -n "$diagnostic_method" ]]; then
+        monitor_methods+=(--method "$diagnostic_method")
+    else
+        for index in {0..9}; do
+            printf -v method 'B%02d' "$index"
+            monitor_methods+=(--method "$method")
+        done
+    fi
     exec "$python_bin" -m pfr.tools.show_january_progress \
         --root "$output_root" \
         --start-day "$start_day" \
         --end-day "$end_day" \
+        "${monitor_methods[@]}" \
         --watch-seconds "$watch_seconds"
 fi
 
@@ -213,8 +223,13 @@ fi
 echo "Starting days $start_day-$end_day with $day_workers processes x "\
 "$gurobi_threads Gurobi threads (visible CPUs=$available_cpu, system CPUs=$logical_cpu)."
 echo "Monitor in another shell:"
-printf 'bash %q --monitor-only --output-root %q\n' \
-    "$repo_dir/pfr/tools/run_january_2025_local.sh" "$output_root"
+printf 'bash %q --monitor-only --output-root %q --start-day %q --end-day %q' \
+    "$repo_dir/pfr/tools/run_january_2025_local.sh" "$output_root" \
+    "$start_day" "$end_day"
+if [[ -n "$diagnostic_method" ]]; then
+    printf ' --diagnostic-method %q' "$diagnostic_method"
+fi
+printf '\n'
 
 campaign_arguments=()
 if ((fail_fast)); then

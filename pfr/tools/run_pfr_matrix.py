@@ -46,6 +46,11 @@ from pfr.risk_calibration import (
     ELECTRICAL_STRESS_AUTHORITY_ID,
     load_frozen_risk_calibration,
 )
+from pfr.persistent_bounded_milp import (
+    ADAPTER_ID as ONLINE_MILP_ADAPTER_ID,
+    SOLVER_CONTRACT as ONLINE_MILP_SOLVER_CONTRACT,
+    PersistentBoundedMilpPlanner,
+)
 from pfr.retained_h54 import ADAPTER_ID, RetainedH54JointPlanner
 from pfr.runtime import (
     CausalExperimentFrame,
@@ -1479,6 +1484,15 @@ def main() -> None:
         default=Path("/home/jaewon/mobile_ess_work"),
         help="Existing BUILD4/BUILD7 authority base used by the retained H54 solver.",
     )
+    parser.add_argument(
+        "--h54-planner-backend",
+        choices=("online-bounded", "full-miqcp-oracle"),
+        default="online-bounded",
+        help=(
+            "Use the bounded online controller in the live loop (default), or "
+            "the retained Full H54 MIQCP only for offline paired-oracle diagnostics."
+        ),
+    )
     parser.add_argument("--initial-state", type=Path, required=True)
     parser.add_argument("--independent-jobs", type=Path, required=True)
     parser.add_argument("--canonical-jobs", type=Path, required=True)
@@ -1527,6 +1541,11 @@ def main() -> None:
     if args.electrical_stress_campaign and args.supplementary_b8_periodic_5min:
         parser.error(
             "--electrical-stress-campaign already includes B08; legacy B8 supplementary mode is incompatible"
+        )
+    if args.electrical_stress_campaign and args.h54_planner_backend == "full-miqcp-oracle":
+        parser.error(
+            "Full H54 MIQCP is an offline sampled-state oracle and cannot be attached "
+            "to the online B00-B09 campaign loop"
         )
     calibrated_method_selected = bool(
         args.supplementary_b8_periodic_5min
@@ -1886,13 +1905,26 @@ def main() -> None:
         in {method.value for method in ElectricalStressMethod}
     )
     power_curve = _load_curve(args.power_curve)
+    h54_planner_class = (
+        RetainedH54JointPlanner
+        if args.h54_planner_backend == "full-miqcp-oracle"
+        else PersistentBoundedMilpPlanner
+    )
     retained_h54 = (
-        RetainedH54JointPlanner(
+        h54_planner_class(
             repo=repo,
             base=args.retained_h54_base,
             output_root=output,
             power_curve=power_curve,
             gurobi_threads=int(os.environ.get("PFR_GUROBI_THREADS", "4")),
+            legacy_causal_screening=(
+                args.h54_planner_backend == "full-miqcp-oracle"
+                and
+                os.environ.get(
+                    "PFR_EXPERIMENTAL_LEGACY_CAUSAL_SCREENING", "0"
+                )
+                == "1"
+            ),
         )
         if electrical_stress_selected
         else None
@@ -2053,13 +2085,84 @@ def main() -> None:
         ),
         "retained_h54_adapter": {
             "connected": retained_h54 is not None,
-            "adapter_id": ADAPTER_ID if retained_h54 is not None else None,
-            "retained_entrypoint": "science/main.py::build_full",
+            "backend_role": args.h54_planner_backend,
+            "adapter_id": (
+                ADAPTER_ID
+                if retained_h54 is not None
+                and args.h54_planner_backend == "full-miqcp-oracle"
+                else (
+                    ONLINE_MILP_ADAPTER_ID if retained_h54 is not None else None
+                )
+            ),
+            "retained_entrypoint": (
+                "science/main.py::build_full"
+                if args.h54_planner_backend == "full-miqcp-oracle"
+                else "pfr/persistent_bounded_milp.py::PersistentBoundedMilpPlanner"
+            ),
             "adapter_source_sha256": (
-                sha256(repo / "pfr/retained_h54.py")
+                sha256(
+                    repo
+                    / (
+                        "pfr/retained_h54.py"
+                        if args.h54_planner_backend == "full-miqcp-oracle"
+                        else "pfr/persistent_bounded_milp.py"
+                    )
+                )
                 if retained_h54 is not None
                 else None
             ),
+            "online_solver_contract": (
+                ONLINE_MILP_SOLVER_CONTRACT
+                if retained_h54 is not None
+                and args.h54_planner_backend == "online-bounded"
+                else None
+            ),
+            "online_solver_contract_sha256": (
+                sha256(
+                    repo
+                    / "pfr/contracts/HIERARCHICAL_MOVE_BLOCKED_MIXED_INTEGER_MPC_V1.json"
+                )
+                if retained_h54 is not None
+                and args.h54_planner_backend == "online-bounded"
+                else None
+            ),
+            "paper_facing_online_backend": (
+                "Hierarchical Move-Blocked Mixed-Integer MPC with Causal Domain Reduction"
+                if retained_h54 is not None
+                and args.h54_planner_backend == "online-bounded"
+                else None
+            ),
+            "slow_master_grid_minutes": (
+                30
+                if retained_h54 is not None
+                and args.h54_planner_backend == "online-bounded"
+                else None
+            ),
+            "slow_master_stage_count": (
+                9
+                if retained_h54 is not None
+                and args.h54_planner_backend == "online-bounded"
+                else None
+            ),
+            "fixed_slow_decision_exact_h54_qcp_recourse": (
+                args.h54_planner_backend == "online-bounded"
+                if retained_h54 is not None
+                else None
+            ),
+            "gurobi_slow_master_numeric_focus": (
+                0
+                if retained_h54 is not None
+                and args.h54_planner_backend == "online-bounded"
+                else None
+            ),
+            "gurobi_exact_recourse_numeric_focus": (
+                2
+                if retained_h54 is not None
+                and args.h54_planner_backend == "online-bounded"
+                else None
+            ),
+            "gurobi_crossover": "AUTO",
+            "gurobi_multi_objective_presolve": "AUTO",
             "retained_solver_source_sha256": (
                 sha256(repo / "science/main.py")
                 if retained_h54 is not None
@@ -2073,6 +2176,10 @@ def main() -> None:
             "planning_horizon_steps": 54,
             "forecast_semantics": "ISSUE_CAUSAL_RUNTIME_H54_OVERRIDE",
             "price_role": "EX_POST_KPI_ONLY_NOT_OPTIMIZER_OBJECTIVE",
+            "full_miqcp_in_online_loop": False,
+            "restricted_online_decision_domain": (
+                args.h54_planner_backend == "online-bounded"
+            ),
         },
         "config_sha256": hashlib.sha256(
             json.dumps(

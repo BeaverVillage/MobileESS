@@ -24,6 +24,7 @@ from .power import H100UtilizationPowerCurve
 from .runtime import (
     CausalExperimentFrame,
     IDCS,
+    MESS_CANONICAL_STAGING,
     MESS_IDS,
     MutableMethodState,
     PLANNING_HORIZON_STEPS,
@@ -37,6 +38,7 @@ from .slow_fast import SlowDiscretePlan
 ADAPTER_ID = "RETAINED_SCIENCE_BUILD_FULL_H54_ADAPTER_V1"
 
 _FORMULATION_DEFAULTS = {
+    "MOBILEESS_OPT_HORIZON_STEPS": "54",
     "MOBILEESS_R24_PERMANENT_EXACT_REBASE": "1",
     "MOBILEESS_R25A_FORWARD_BACKWARD_PRUNE": "1",
     "MOBILEESS_R25B_ROUTE_DOMINANCE_AUDIT": "1",
@@ -48,9 +50,25 @@ _FORMULATION_DEFAULTS = {
     "MOBILEESS_R25K_B4_ROOT_BRANCH_STRENGTHENING": "1",
     "MOBILEESS_R25N_B6C5R4_COMPLETE_UNIT_NORMALIZATION": "1",
     "MOBILEESS_EXACT_IMPLIED_BOUNDS": "1",
+    # These dense B4 rows are algebraic consequences of the retained SOC/debt
+    # recursions.  Omitting them preserves both the integer and continuous
+    # feasible sets while avoiding millions of repeated route-arc nonzeros.
+    "MOBILEESS_POST15_SKIP_REDUNDANT_DENSE_B4_CUTS": "1",
+    # The retained solver already implements a solver-checked, one-step-shifted
+    # causal MIP start.  Keep it enabled now that the runtime adapter carries
+    # the preceding plan between replans of the same method.
+    "MOBILEESS_R25V_CAUSAL_ROLLING_MIPSTART": "1",
+    # R26 multiresolution MPC: retain all 54 physical five-minute grid/SOC/
+    # workload evaluations, but place far-horizon mobility departures on the
+    # predeclared 15-minute stage grid after the first fine 60 minutes.
+    "MOBILEESS_R26_MULTIRES_MOBILITY": "1",
+    "MOBILEESS_R26_SINGLE_RELOCATION_TRUST_REGION": "1",
     "MOBILEESS_VECTOR_K3_PARETO": "1",
     "MOBILEESS_BULK_MOBILITY_VARS": "1",
     "MOBILEESS_GUROBI_ECON_MIPGAP": "0.03",
+    "MOBILEESS_GUROBI_PRIMARY_STRESS_MIPGAP": "0.03",
+    "MOBILEESS_GUROBI_EXPOSURE_MIPGAP": "0.03",
+    "MOBILEESS_GUROBI_TIMELIMIT": "300",
 }
 
 
@@ -110,18 +128,26 @@ class RetainedH54JointPlanner:
         output_root: Path,
         power_curve: H100UtilizationPowerCurve,
         gurobi_threads: Optional[int] = None,
+        legacy_causal_screening: bool = False,
     ) -> None:
         self.repo = repo.resolve()
         self.base = base.resolve()
         self.output_root = output_root.resolve()
         power_curve.validate()
         self.power_curve = power_curve
+        self.legacy_causal_screening = bool(legacy_causal_screening)
         if not self.base.is_dir():
             raise RuntimeContractError(
                 f"retained H54 base directory is missing: {self.base}"
             )
         for name, value in _FORMULATION_DEFAULTS.items():
-            os.environ.setdefault(name, value)
+            observed = os.environ.get(name)
+            if observed is not None and observed != value:
+                raise RuntimeContractError(
+                    f"retained H54 formulation environment drift {name}: "
+                    f"expected={value} observed={observed}"
+                )
+            os.environ[name] = value
         os.environ["MOBILEESS_R25M_B6_EXACT_DECOMPOSITION"] = "0"
         if gurobi_threads is not None:
             if not 1 <= int(gurobi_threads) <= 16:
@@ -133,6 +159,42 @@ class RetainedH54JointPlanner:
             )
         self.science = _load_science_module(self.repo)
         self._initialized = False
+        self._rolling_warmstarts: dict[str, Mapping[str, Any]] = {}
+
+    def _legacy_fixed_location_screen(
+        self, state: MutableMethodState, config: MethodConfig
+    ) -> tuple[Optional[dict[str, str]], str]:
+        """Reuse the old causal no-demand mobility decision as domain screening.
+
+        The historical route optimizer returned STAY without building its small
+        MIQP when no active workload destination existed and every MESS was at
+        canonical staging.  In that exact state we omit the time-expanded
+        mobility network, but retain the complete H54 P/Q, SOC, recovery,
+        workload, and electrical-stress MIQCP.
+        """
+
+        if not self.legacy_causal_screening:
+            return None, "DISABLED"
+        if not bool(config.h54_capability_mask.get("mess_mobility", False)):
+            return None, "CAPABILITY_OFF_HANDLED_BY_COMMON_FORMULATION"
+        if any(bool(state.mess_in_transit[mid]) for mid in MESS_IDS):
+            return None, "COMMITTED_TRANSIT_PRESENT"
+        active_sites = {
+            _effective_job_site(job)
+            for job in state.jobs.values()
+            if job.lifecycle != "COMPLETED"
+        }
+        away = {
+            mid
+            for mid in MESS_IDS
+            if state.mess_location[mid] != MESS_CANONICAL_STAGING[mid]
+        }
+        if active_sites or away:
+            return None, "ACTIVE_WORKLOAD_OR_AWAY_MESS_REQUIRES_ROUTE_DOMAIN"
+        homes = {mid: str(state.mess_location[mid]) for mid in MESS_IDS}
+        if len(set(homes.values())) != len(homes):
+            return None, "SHARED_PCC_REQUIRES_COMMON_CONNECTION_MODEL"
+        return homes, "LEGACY_CAUSAL_NO_ACTIVE_DESTINATION_ALL_CANONICAL_STAY"
 
     def _initialize(self) -> None:
         if self._initialized:
@@ -380,6 +442,10 @@ class RetainedH54JointPlanner:
         ) + (float(frame.horizon_price_median_aud_per_mwh),) * (
             PLANNING_HORIZON_STEPS - 1
         )
+        method_key = config.comparison_method_id.value
+        screened_homes, screening_reason = self._legacy_fixed_location_screen(
+            state, config
+        )
         solution = self.science.build_full(
             self.scope,
             self.b4,
@@ -410,6 +476,17 @@ class RetainedH54JointPlanner:
             # The retained pilot rack baseline is both out-of-period and would
             # double count load, so bind its fixed-rack term to runtime zero.
             fixed_rack_forecast_override=lambda _rack, _step: (0.0, 0.0, 0.0),
+            rolling_warmstart=self._rolling_warmstarts.get(method_key),
+            fixed_location_projection_override=(
+                True if screened_homes is not None else None
+            ),
+            fixed_location_homes_override=screened_homes,
+        )
+        # Store only the optimizer's causal plan.  This is solver guidance for
+        # the next replan of the same method, never an execution authority and
+        # never a source of future realized information.
+        self._rolling_warmstarts[method_key] = dict(
+            solution["rolling_warmstart_payload"]
         )
         selected_jobs = {
             str(row["job_uid"]): dict(row) for row in solution["plan"]
@@ -543,5 +620,31 @@ class RetainedH54JointPlanner:
             "future_actual_used": False,
             "price_used_by_optimizer": False,
             "runtime_fixed_rack_baseline_zeroed": True,
+            "legacy_causal_mobility_screening": {
+                "enabled": self.legacy_causal_screening,
+                "applied": screened_homes is not None,
+                "reason": screening_reason,
+                "restricted_domain": screened_homes is not None,
+                "fixed_homes": screened_homes or {},
+                "decision_authority": "RESTRICTED_H54_MIQCP",
+                "heuristic_role": "DOMAIN_SCREENING_ONLY",
+                "mobility_domain_before_candidate_arcs": len(moves),
+                "mobility_domain_after_candidate_arcs": int(
+                    metrics.get("candidate_move_continuous_arc_count", 0)
+                ),
+                "heuristic_recommended_routes": [],
+                "restricted_miqcp_objective_z": float(
+                    metrics["objective_worst_predicted_electrical_stress_pu"]
+                ),
+            },
+            "planned_mobility_routes": [
+                {
+                    "mess_id": str(row["mess_id"]),
+                    "horizon_step": int(row["horizon_step"]),
+                    "destination_service_id": str(row["destination_service_id"]),
+                    "route_slot": int(row["slot"]),
+                }
+                for row in solution["route_rows"]
+            ],
         }
         return plan, certificate

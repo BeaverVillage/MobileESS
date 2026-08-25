@@ -1,0 +1,108 @@
+{
+  "schema_version": "HIERARCHICAL_MOVE_BLOCKED_MIXED_INTEGER_MPC_V1",
+  "status": "FROZEN_FOR_JANUARY_DEVELOPMENT_VALIDATION",
+  "paper_facing_name": "Hierarchical Move-Blocked Mixed-Integer MPC with Causal Domain Reduction",
+  "objective_authority": "ELECTRICAL_STRESS_OBJECTIVE_V1",
+  "planning_horizon": {
+    "steps": 54,
+    "step_minutes": 5,
+    "total_minutes": 270
+  },
+  "slow_master": {
+    "grid_minutes": 30,
+    "stages": 9,
+    "decisions": [
+      "MESS route/location",
+      "queued-job start block, rack, and IDC placement",
+      "checkpoint/migration option when eligible"
+    ],
+    "solver": "persistent bounded MILP",
+    "circle_role": "polyhedral lower-bound/screening model; never a physical commit authority",
+    "exact_forced_domain_rule": "Skip the MILP only when every retained slow decision has exactly one feasible option"
+  },
+  "fast_recourse": {
+    "grid_minutes": 5,
+    "steps": 54,
+    "slow_decisions_fixed": true,
+    "solver": "persistent exact continuous convex QCP",
+    "lexicographic_backend": "Gurobi native multiobjective",
+    "exact_constraints": [
+      "line P-Q circles",
+      "service-transformer P-Q circles",
+      "MESS PCS P-Q circles",
+      "voltage and thermal hard limits",
+      "SOC, travel energy, support-energy recovery",
+      "fixed slow-decision GPU, rack, IDC, WAN, checkpoint, and deadline feasibility"
+    ],
+    "acceptance": "Exact QCP residual at frozen numerical tolerance and no simultaneous charge/discharge"
+  },
+  "lexicographic_objectives": [
+    "min max_h z_h",
+    "min sum_h z_h * delta_t subject to priority 1",
+    "min secondary actuation subject to priorities 1 and 2"
+  ],
+  "unchanged_scientific_semantics": [
+    "electrical-stress definitions",
+    "H54 causal forecast horizon",
+    "voltage, line, transformer, SOC, PCS, mobility, GPU, rack, IDC, WAN, checkpoint, deadline, and recovery constraints",
+    "Fresh exact three-phase OpenDSS commit gate",
+    "price excluded from optimization"
+  ],
+  "online_commit_chain": [
+    "event trigger",
+    "exact-safe causal pruning",
+    "bounded 9-stage slow MILP master or exact forced-domain skip",
+    "fixed-slow-decision exact H54 continuous QCP recourse",
+    "five-minute continuous operating adjustment",
+    "Fresh exact three-phase OpenDSS",
+    "commit or fail closed"
+  ],
+  "offline_reference": {
+    "solver": "Full H54 MIQCP",
+    "role": "sampled-state offline oracle only",
+    "prohibited_online_use": true
+  },
+  "watchdog": {
+    "cold_start_bootstrap_seconds": 30.0,
+    "january_development_steady_state_seconds": 30.0,
+    "production_freeze_rule": "After January development, set the production watchdog from the measured steady-state p99 plus a documented margin; do not use the runtime performance target itself as the timeout",
+    "semantics": "Fail closed on timeout; never relax an objective priority or hard constraint"
+  },
+  "runtime_acceptance": {
+    "comparison_scope": "Same issue, state, forecast, candidate K, Gurobi thread count, objective, hard constraints, Fresh OpenDSS gate, and storage path",
+    "measured_quantity": "End-to-end total issue wall time, with component timings retained",
+    "rule": "A computational alternative with no paired speed improvement is removed from the production path",
+    "watchdog_is_not_speed_evidence": true
+  },
+  "approved_solver_runtime_settings": {
+    "gurobi_threads": 4,
+    "slow_master_numeric_focus": 0,
+    "exact_recourse_numeric_focus": 2,
+    "numeric_focus_evidence": "Paired 19-step B06 validation reduced steady end-to-end median and p95 with identical route decisions, predicted objectives, Fresh-AC values, zero exact residual, and AC PASS. NumericFocus 0 and 1 remain prohibited for exact recourse after clean reruns exceeded the frozen simultaneous charge/discharge residual tolerance",
+    "crossover": "AUTO",
+    "multi_objective_presolve": "AUTO"
+  },
+  "required_runtime_fields": [
+    "reference_anchor_seconds",
+    "causal_domain_generation_seconds",
+    "model_build_once_seconds",
+    "parameter_update_seconds",
+    "slow_master_milp_seconds",
+    "slow_master_skipped_exact_forced_domain",
+    "fixed_binary_exact_h54_recourse_seconds",
+    "Fresh_OpenDSS_seconds",
+    "storage_seconds",
+    "total_issue_wall_seconds",
+    "maximum_exact_norm_residual"
+  ],
+  "rejected_diagnostics": [
+    "54-step exact-cut MILP outer approximation: no primary convergence within 120 seconds",
+    "persistent sequential lexicographic QCP: slower than native multiobjective",
+    "condensed QCP diagnostic: objective and Fresh-AC trajectory mismatch",
+    "one-thread Gurobi diagnostic: slower than four threads",
+    "exact-recourse NumericFocus=0 diagnostic: faster but failed a clean default rerun at the frozen charge/discharge residual tolerance",
+    "exact-recourse NumericFocus=1 diagnostic: failed the same frozen charge/discharge residual tolerance",
+    "Crossover=0 diagnostic: identical output but slower median and p95",
+    "MultiObjPre=2 diagnostic: identical output but slower median and p95"
+  ]
+}

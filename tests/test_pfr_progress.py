@@ -47,3 +47,15 @@ def test_snapshot_prints_per_method_counts(tmp_path: Path) -> None:
 
     assert "B3=001" in rendered
     assert "total | 1/2304" in rendered
+
+
+def test_snapshot_counts_new_b07_calibration_axis(tmp_path: Path) -> None:
+    day = tmp_path / "2025-01-01"
+    marker = day / "B07" / "issue_000000" / "COMMIT_MARKER.json"
+    marker.parent.mkdir(parents=True)
+    marker.write_text("{}", encoding="utf-8")
+
+    rendered = snapshot(tmp_path, 1, 1, methods=("B07",))
+
+    assert "B07=001" in rendered
+    assert "total | 1/288" in rendered

@@ -553,9 +553,10 @@ def _r25p_solution_scalar(value):
  if not math.isfinite(result):raise RuntimeError("nonfinite solution scalar")
  return result
 
-def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref,ar2,b6,z,route_df,moves,conn_delay,price,out,static_ctx,rolling_mess_state=None,mess_DE0=None,workload_debt0=None,rolling_warmstart=None,capability_mask=None,planning_forecast_override=None,price_forecast_override=None,fixed_rack_forecast_override=None):
+def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref,ar2,b6,z,route_df,moves,conn_delay,price,out,static_ctx,rolling_mess_state=None,mess_DE0=None,workload_debt0=None,rolling_warmstart=None,capability_mask=None,planning_forecast_override=None,price_forecast_override=None,fixed_rack_forecast_override=None,fixed_location_projection_override=None,fixed_location_homes_override=None):
  import gurobipy as gp
  from gurobipy import GRB
+ _runtime_adapter_mode=rolling_mess_state is not None
  # One retained H54 formulation serves every ablation.  A method may only
  # remove decision capabilities; it may not replace the frozen objective or
  # any grid/service/recovery constraint with a method-specific heuristic.
@@ -586,9 +587,11 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  r25m_b6_exact_decomposition=(os.environ.get("MOBILEESS_R25M_B6_EXACT_DECOMPOSITION","0")=="1")
  r25n_b6c5r4_complete_unit_normalization=(os.environ.get("MOBILEESS_R25N_B6C5R4_COMPLETE_UNIT_NORMALIZATION","0")=="1")
  r25v_causal_rolling_mipstart=(os.environ.get("MOBILEESS_R25V_CAUSAL_ROLLING_MIPSTART","0")=="1")
- fixed_location_projection=(os.environ.get("MOBILEESS_FIXED_LOCATION_MOBILITY_ABLATION","0")=="1")
+ fixed_location_projection=((os.environ.get("MOBILEESS_FIXED_LOCATION_MOBILITY_ABLATION","0")=="1") if fixed_location_projection_override is None else bool(fixed_location_projection_override))
  active_plan_mobility_projection=(os.environ.get("MOBILEESS_ACTIVE_PLAN_MOBILITY_PROJECTION","0")=="1")
  post15_skip_redundant_dense_b4_cuts=(os.environ.get("MOBILEESS_POST15_SKIP_REDUNDANT_DENSE_B4_CUTS","0")=="1")
+ r26_multires_mobility=(os.environ.get("MOBILEESS_R26_MULTIRES_MOBILITY","0")=="1")
+ r26_single_relocation=(os.environ.get("MOBILEESS_R26_SINGLE_RELOCATION_TRUST_REGION","0")=="1")
  mobility_domain_projected=bool(fixed_location_projection or active_plan_mobility_projection)
  if r25a_fb_prune and not r24_exact_rebase:
   raise RuntimeError("R25A forward/backward compiler requires the adopted R24 exact-rebase foundation")
@@ -610,6 +613,13 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   raise RuntimeError("R25M B6 exact path decomposition requires frozen R25K B4 foundation")
  if r25m_b6_exact_decomposition:
   raise RuntimeError("R25M B6 economic path decomposition is not objective-authoritative under ELECTRICAL_STRESS_OBJECTIVE_V1; use the retained monolithic 54-step model")
+ if r26_multires_mobility and (H!=54 or not r25a_fb_prune):
+  raise RuntimeError("R26 multires mobility requires H54 and the exact forward/backward domain compiler")
+ if r26_single_relocation and not r26_multires_mobility:
+  raise RuntimeError("R26 single-relocation trust region requires the common multires mobility grid")
+ def _r26_departure_step(h):
+  # build_multires_horizon(): 12 x 5 min followed by 14 x 15 min.
+  return int(h)<12 or (int(h)-12)%3==0
  # The C5R4 coordinate scaling and causal MIP starts are formulation-neutral
  # assets.  Retain them for the monolithic stress MIQCP; only the old economic
  # branch-and-price decomposition is objective-specific and disabled above.
@@ -723,7 +733,11 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   econ_gap=float(_econ_gap_raw if _econ_gap_raw is not None else "0.015")
   if not (0.015-1e-15 <= econ_gap <= 0.05+1e-15):
    raise RuntimeError(f"MOBILEESS_GUROBI_ECON_MIPGAP must be in [0.015,0.05]; got {econ_gap}")
- m.Params.Threads=threads_req;m.Params.Seed=0;m.Params.MIPGap=0;m.Params.MIPGapAbs=0;m.Params.NumericFocus=3
+ stress_gap=float(os.environ.get("MOBILEESS_GUROBI_PRIMARY_STRESS_MIPGAP","0.03"))
+ exposure_gap=float(os.environ.get("MOBILEESS_GUROBI_EXPOSURE_MIPGAP","0.03"))
+ if not (0.0<stress_gap<=0.05 and 0.0<exposure_gap<=0.05):
+  raise RuntimeError(f"electrical-stress lexicographic MIP gaps must lie in (0,0.05]; primary={stress_gap} exposure={exposure_gap}")
+ m.Params.Threads=threads_req;m.Params.Seed=0;m.Params.MIPGap=stress_gap;m.Params.MIPGapAbs=0;m.Params.NumericFocus=3
  m.Params.FeasibilityTol=1e-9;m.Params.IntFeasTol=1e-9;m.Params.OptimalityTol=1e-9
  m.Params.InheritParams=1
  m.Params.MultiObjPre=2
@@ -747,7 +761,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  m.Params.PreSparsify=2
  m.Params.NodefileStart=0.5
  _r14_policy_name="FROZEN_ISSUE113_BASELINE"
- if int(issue)>113:
+ if _runtime_adapter_mode or int(issue)>113:
   if r25k_b4_root_branch_strengthening:
    _r14_policy_name='R25K_B4_ROOT_CUT_HANDOFF_BRANCH_PRIORITY_EXACT'
   elif r25h_b1_certificate_focus:
@@ -857,11 +871,15 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  if set(mids)!=set(mess_E):raise RuntimeError(f"rolling MESS key mismatch state={sorted(mids)} energy={sorted(mess_E)}")
  fixed_homes={}
  if fixed_location_projection:
-  _fixed_homes_raw=os.environ.get("MOBILEESS_FIXED_LOCATION_HOME_MAP_JSON","")
-  if not _fixed_homes_raw:
-   raise RuntimeError("M4 exact fixed-location projection requires MOBILEESS_FIXED_LOCATION_HOME_MAP_JSON")
-  try:fixed_homes={str(k):str(v) for k,v in json.loads(_fixed_homes_raw).items()}
-  except Exception as exc:raise RuntimeError("invalid M4 fixed-location home-map JSON") from exc
+  if fixed_location_homes_override is not None:
+   try:fixed_homes={str(k):str(v) for k,v in dict(fixed_location_homes_override).items()}
+   except Exception as exc:raise RuntimeError("invalid runtime fixed-location home-map override") from exc
+  else:
+   _fixed_homes_raw=os.environ.get("MOBILEESS_FIXED_LOCATION_HOME_MAP_JSON","")
+   if not _fixed_homes_raw:
+    raise RuntimeError("M4 exact fixed-location projection requires MOBILEESS_FIXED_LOCATION_HOME_MAP_JSON")
+   try:fixed_homes={str(k):str(v) for k,v in json.loads(_fixed_homes_raw).items()}
+   except Exception as exc:raise RuntimeError("invalid M4 fixed-location home-map JSON") from exc
   if set(mids)!=set(fixed_homes):
    raise RuntimeError(f"M4 fixed-location fleet identity drift state={sorted(mids)} authority={sorted(fixed_homes)}")
   if len(set(fixed_homes.values()))!=len(fixed_homes) or any(sid not in sidx for sid in fixed_homes.values()):
@@ -937,7 +955,14 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
     rec=move_arr[h][si0]
     if rec is None:continue
     slots,di,Dv,Ev=rec;arr=h+Dv;terminal=(arr==H);route_prune["terminal_arrival_dominated"]+=int(np.count_nonzero(terminal))
-    inside=(arr<H);req=E_FLOOR+np.maximum(PEAK_RESERVE,Ev);socok=(eub+1e-9>=req)
+    inside=(arr<H)
+    if r26_multires_mobility and not _r26_departure_step(h):inside=np.zeros_like(inside,dtype=bool)
+    # A rolling H54 solve may schedule at most one new relocation per MESS.
+    # After that relocation the state is no longer the solve's initial service,
+    # so no second MOVE arc is admitted. A later causal replan can schedule the
+    # next relocation from the newly committed state.
+    if r26_single_relocation and int(si0)!=int(ini):inside=np.zeros_like(inside,dtype=bool)
+    req=E_FLOOR+np.maximum(PEAK_RESERVE,Ev);socok=(eub+1e-9>=req)
     route_prune["soc_upper_bound_infeasible"]+=int(np.count_nonzero(inside & ~socok));take=inside&socok
     if np.any(take):
      ss=slots[take];aa=arr[take].astype(np.int64);dd=di[take].astype(np.int64);ee=eub-Ev[take]
@@ -1125,6 +1150,23 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   "future_regeneration_precredit":False,
   "feasible_set_relaxed":False})
  jw(out/"BUILD7BR22C_ARRAY_MOBILITY_DOMAIN_AUDIT.json",{"implementation":"24-bit masks + NumPy max-energy envelope","service_nodes":len(SERVICES),"move_keys":len(mv),"stay_keys":len(stay),"baseline_reachable_move_binaries":route_prune["baseline_reachable_move_binaries"],"terminal_arrival_dominated":route_prune["terminal_arrival_dominated"],"soc_upper_bound_infeasible":route_prune["soc_upper_bound_infeasible"],"exact_pruning_contract_unchanged":True,"feasible_set_relaxed":False})
+ if r26_multires_mobility:
+  _r26_departures=[h for h in range(H) if _r26_departure_step(h)]
+  jw(out/"R26_MULTIRES_MOBILITY_DOMAIN_AUDIT.json",{
+   "status":"PASS","horizon_physical_steps":H,"horizon_physical_minutes":H*5,
+   "fine_departure_steps":list(range(12)),"coarse_departure_steps":list(range(12,H,3)),
+   "enabled_departure_step_count":len(_r26_departures),
+   "all_grid_SOC_dispatch_workload_stress_steps_retained":True,
+   "mobility_departure_decision_resolution":"5 min through 60 min; 15 min thereafter",
+   "objective_authority":"ELECTRICAL_STRESS_OBJECTIVE_V1","future_actual_used":False})
+ if r26_single_relocation:
+  jw(out/"R26_SINGLE_RELOCATION_TRUST_REGION_AUDIT.json",{
+   "status":"PASS","scope":"ONE_H54_SOLVE_PER_MESS",
+   "maximum_new_relocations_per_mess":1,
+   "subsequent_relocation_available_at_next_causal_replan":True,
+   "all_destination_departure_and_K3_route_choices_retained_for_first_relocation":True,
+   "all_grid_SOC_dispatch_workload_recovery_stress_steps_retained":True,
+   "future_actual_used":False,"objective_authority":"ELECTRICAL_STRESS_OBJECTIVE_V1"})
  # Exact lookup indices eliminate repeated O(|mv|) Python scans during SOC construction/extraction.
  mv_by_mid_h=defaultdict(list)
  for (m0,hh,slot),v in mv.items():mv_by_mid_h[(m0,hh)].append((slot,v))
@@ -1782,7 +1824,11 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  m.setObjectiveN(stress_worst,0,priority=3,abstol=1e-6,reltol=0.0,name="worst_electrical_stress")
  m.setObjectiveN(obj_exposure,1,priority=2,abstol=1e-6,reltol=0.0,name="electrical_stress_exposure")
  m.setObjectiveN(obj_actuation,2,priority=1,abstol=1e-8,reltol=0.0,name="secondary_actuation")
- m.update();econ_env=m.getMultiobjEnv(2);econ_env.setParam("InheritParams",1);econ_env.setParam("MIPGap",econ_gap);econ_env.setParam("MIPGapAbs",0.0);econ_env.setParam("Threads",threads_req);econ_env.setParam("MIPFocus",3)
+ m.update()
+ primary_env=m.getMultiobjEnv(0);exposure_env=m.getMultiobjEnv(1);econ_env=m.getMultiobjEnv(2)
+ for _env,_gap in ((primary_env,stress_gap),(exposure_env,exposure_gap),(econ_env,econ_gap)):
+  _env.setParam("InheritParams",1);_env.setParam("MIPGap",_gap);_env.setParam("MIPGapAbs",0.0);_env.setParam("Threads",threads_req)
+ econ_env.setParam("MIPFocus",3)
  m.update()
  if r25n_b6c5r4_complete_unit_normalization:
   def _c5r4_attr(name):
@@ -1836,14 +1882,14 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  # R6: issue113 retains historical bound-focused search because its complete
  # causal PASS start is already high-quality.  Rolling issues have no Start,
  # so recover a current-issue incumbent first.
- _rolling_primal_recovery=bool(rolling_mess_state is not None and int(issue)>113 and not r25h_b1_certificate_focus)
+ _rolling_primal_recovery=bool(_runtime_adapter_mode and rolling_warmstart is not None and not r25h_b1_certificate_focus)
  if _rolling_primal_recovery:
   m.Params.MIPFocus=1
   if econ_env is not None:econ_env.setParam("MIPFocus",1)
 
  # R25H/B1 certificate-focused policy: issue>113 already obtains feasible incumbents reliably;
  # keep search focused on improving the best bound until the frozen 3% certificate is reached.
- if r25h_b1_certificate_focus and int(issue)>113:
+ if r25h_b1_certificate_focus and (_runtime_adapter_mode or int(issue)>113):
   m.Params.MIPFocus=3
   m.Params.ImproveStartGap=0.0
   if econ_env is not None:
@@ -1853,7 +1899,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  # ConversationA R12R1 frozen solver-search policy:
  # Heuristics=0.05 is fixed BEFORE full rolling validation for every issue.
  # This changes solver search only; model/feasible set/objective are unchanged.
- _r11_heuristics=(0.10 if int(issue)>113 else float(os.environ.get("MOBILEESS_FINAL_HEURISTICS","0.05")))
+ _r11_heuristics=(0.10 if (_runtime_adapter_mode or int(issue)>113) else float(os.environ.get("MOBILEESS_FINAL_HEURISTICS","0.05")))
  m.Params.Heuristics=_r11_heuristics
  if econ_env is not None:econ_env.setParam("Heuristics",_r11_heuristics)
 
@@ -1872,7 +1918,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
 
  jw(out/"ConversationA_BUILD7C_R23_CLOSURE_POLICY.json",{
    "issue":int(issue),"policy":_r14_policy_name,
-   "applied_to_rolling_issue":bool(int(issue)>113),
+   "applied_to_rolling_issue":bool(_runtime_adapter_mode or int(issue)>113),
    "MIPGap":float(econ_gap),"Threads":int(threads_req),
    "Heuristics":float(m.Params.Heuristics),"MIPFocus":int(m.Params.MIPFocus),
    "ImproveStartGap":float(m.Params.ImproveStartGap),
@@ -1895,7 +1941,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  jw(out/"BUILD7C_R6_ROLLING_SOLVER_POLICY.json",{
    "issue":int(issue),
    "rolling_primal_recovery":bool(_rolling_primal_recovery),
-   "R25H_B1_certificate_focus":bool(r25h_b1_certificate_focus and int(issue)>113),
+   "R25H_B1_certificate_focus":bool(r25h_b1_certificate_focus and (_runtime_adapter_mode or int(issue)>113)),
    "effective_MIPFocus":int(m.Params.MIPFocus),
    "ImproveStartGap":float(m.Params.ImproveStartGap),
    "Heuristics":float(m.Params.Heuristics),
@@ -1909,7 +1955,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
 
  jw(out/"ConversationA_R25H_B1_CERTIFICATE_SEARCH_POLICY.json",{
    "issue":int(issue),
-   "active":bool(r25h_b1_certificate_focus and int(issue)>113),
+   "active":bool(r25h_b1_certificate_focus and (_runtime_adapter_mode or int(issue)>113)),
    "foundation":"R25G hybrid STAY-binary exact formulation",
    "target_MIPGap":float(econ_gap),
    "MIPFocus":int(m.Params.MIPFocus),
@@ -1938,7 +1984,46 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  # No future realized Job/D2/Grid/Price information is introduced by either source.
  warm_audit={"applied":False,"source":None,"future_realized_used":False,"issue":int(issue)}
  try:
-  if int(issue)==113:
+  _cold_stay_start=bool(
+   not jobs and not running
+   and all(abs(float(0.0 if mess_DE0 is None else mess_DE0.get(mid,0.0)))<=1e-12 for mid in mids)
+   and all(abs(float(_wd0[d]))<=1e-12 for d in IDCS)
+   and all(int(avail_h[mid])==0 for mid in mids))
+  if _cold_stay_start:
+   # Deterministic causal cold-start incumbent: every MESS remains at its
+   # current service and all discrete dispatch modes are off.  Gurobi completes
+   # the continuous grid/stress variables and rejects the start harmlessly if
+   # the no-actuation trajectory is not feasible for the current forecast.
+   for v in m.getVars():v.Start=GRB.UNDEFINED
+   for v in mv.values():v.Start=0.0
+   for v in stay.values():v.Start=0.0
+   for v in node_occ.values():v.Start=0.0
+   for v in mode.values():v.Start=0.0
+   for v in Pdis.values():v.Start=0.0
+   for v in Pchg.values():v.Start=0.0
+   for v in Q.values():v.Start=0.0
+   for v in repE.values():v.Start=0.0
+   for mid in mids:
+    sid=str(initial_sid[mid])
+    for h in range(H):
+     if (mid,h,sid) not in stay:
+      raise RuntimeError(f"cold STAY start lacks reachable state mid={mid} h={h} sid={sid}")
+     stay[(mid,h,sid)].Start=1.0
+     if (mid,h,sid) in node_occ:node_occ[(mid,h,sid)].Start=1.0
+     E[(mid,h)].Start=float(mess_E[mid])/_c5r4_energy_scale_kwh_per_model_unit
+     DE[(mid,h)].Start=0.0
+    if (mid,H,sid) in node_occ:node_occ[(mid,H,sid)].Start=1.0
+    E[(mid,H)].Start=float(mess_E[mid])/_c5r4_energy_scale_kwh_per_model_unit
+    DE[(mid,H)].Start=0.0
+   m.update()
+   warm_audit.update({
+    "applied":True,"source":"causal no-job/no-debt all-STAY incumbent",
+    "policy":"solver-checked partial MIP start; continuous grid variables completed natively",
+    "defined_integer_mip_start_count":sum(
+     1 for v in m.getVars()
+     if v.VType in (GRB.BINARY,GRB.INTEGER,GRB.SEMIINT) and abs(float(v.Start))<1e100),
+    "future_realized_used":False})
+  elif int(issue)==113 and not _runtime_adapter_mode:
    wa=HERE/"embedded/BUILD7BR4_PASS_AUTHORITY.tar.gz"
    with tarfile.open(wa,"r:gz") as tf:
     members=tf.getmembers()
@@ -2143,7 +2228,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
          "quadratic_constraints":int(m.NumQConstrs),"linear_nonzeros":float(m.DNumNZs),
          "requested_threads":int(threads_req),"solve_mode":solve_mode,"root_Method":root_method,
          "objective_authority":"ELECTRICAL_STRESS_OBJECTIVE_V1",
-         "MIPGap_primary_stress":0.0,"MIPGap_secondary_actuation":econ_gap,
+         "MIPGap_primary_stress":stress_gap,"MIPGap_stress_exposure":exposure_gap,"MIPGap_secondary_actuation":econ_gap,
          "MIPFocus_secondary_actuation":int(m.Params.MIPFocus),
          "lex_zero_certificate_active":bool(zero_lex_cert),
          "warm_start_applied":bool(warm_audit.get("applied",False)),
@@ -2217,17 +2302,23 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   m.optimize(_cb)
  _stage("GUROBI_OPTIMIZE_DONE",out,gurobi_runtime_s=float(b6_result.get("total_decomposition_seconds",m.Runtime)) if b6_result else float(m.Runtime))
  status=int(m.Status)
+ _current_multiobj_pass=int(cbstate.get("multiobj_pass",0))
+ _current_gap_target=(stress_gap if _current_multiobj_pass<=0 else (exposure_gap if _current_multiobj_pass==1 else econ_gap))
  _model_gap=None
+ _r14_quality={"pass":False,"reason":"NO_INCUMBENT","issue":int(issue)}
  if int(m.SolCount)>0:
   try:_model_gap=float(m.MIPGap)
-  except Exception:_model_gap=(0.0 if status==GRB.OPTIMAL else None)
+  except Exception:
+   _snap=cbstate.get("latest_mip") or {}
+   _model_gap=_snap.get("relative_gap")
+   if _model_gap is None and status==GRB.OPTIMAL:_model_gap=0.0
  if b6_result is not None:
   _r12_certified_gap_accept=bool(b6_result.get("certificate_pass",False))
  else:
   _r12_certified_gap_accept=bool(
     status==GRB.OPTIMAL or
-    (status==GRB.TIME_LIMIT and int(m.SolCount)>0 and
-     float(m.MIPGap)<=float(econ_gap)+1e-12)
+    (status==GRB.TIME_LIMIT and _current_multiobj_pass>=2 and int(m.SolCount)>0 and _model_gap is not None and
+     float(_model_gap)<=float(_current_gap_target)+1e-12)
   )
  _b6_compact_exact=bool(b6_result is not None and (b6_result.get("compact_exact_global_phase") or {}).get("certificate_pass") is True)
  _b6_acceptance_basis=("R25T exact priced-root/complete compact-MIQCP combined global lower bound + feasible incumbent <= frozen target" if _b6_compact_exact else "R25M B6 exact all-column/branch-price lower bound + feasible integer path-master incumbent <= frozen target")
@@ -2237,9 +2328,10 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
    "status_name":"OPTIMAL" if status==GRB.OPTIMAL else ("TIME_LIMIT" if status==GRB.TIME_LIMIT else str(status)),
    "solution_count":int(m.SolCount),
    "certified_mip_gap":(float(b6_result.get("global_certified_gap")) if b6_result is not None and b6_result.get("global_certified_gap") is not None else _model_gap),
-   "target_mip_gap":float(econ_gap),
+   "target_mip_gap":float(_current_gap_target),
+   "current_multiobjective_pass":int(_current_multiobj_pass),
    "accepted":bool(_r12_certified_gap_accept),
-   "acceptance_basis":(_b6_acceptance_basis if b6_result is not None else "OPTIMAL status OR TIME_LIMIT with incumbent and certified MIPGap <= frozen target"),
+   "acceptance_basis":(_b6_acceptance_basis if b6_result is not None else "OPTIMAL status OR tertiary-pass TIME_LIMIT with incumbent and certified pass MIPGap <= frozen target"),
    "scientific_model_changed":False,
    "feasible_set_changed":False,
    "objective_changed":False})
@@ -2301,7 +2393,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  elif solve_mode=="LEXICOGRAPHIC_ELECTRICAL_STRESS_V1":
   # Gurobi does not expose Model.ObjBound for a completed multiobjective
   # solve.  Each priority pass is globally optimal when Status=OPTIMAL.
-  _full_bd=_full_obj if status==GRB.OPTIMAL else float("-inf")
+  _full_bd=(_full_obj if status==GRB.OPTIMAL else float((cbstate.get("latest_mip") or {}).get("objbnd",float("-inf"))))
  else:
   _full_bd=float(m.ObjBound)
  _root_bd=(float(b6_result["full_all_column_relaxation_lower_bound"]) if b6_result is not None else _full_bd)
@@ -2413,7 +2505,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
    if isinstance(_pm,dict):
     _pm["pass"]=1
  term["R12_certified_gap_acceptance"]=bool(_r12_certified_gap_accept)
- term["R12_acceptance_basis"]=(_b6_acceptance_basis if b6_result is not None else "OPTIMAL or TIME_LIMIT with incumbent and certified Gurobi MIPGap <= frozen target")
+ term["R12_acceptance_basis"]=(_b6_acceptance_basis if b6_result is not None else "all lexicographic passes complete, or tertiary-pass TIME_LIMIT with incumbent and certified pass MIPGap <= frozen target")
  term["restricted_master_native_mip_gap_is_scientific_authority"]=False if b6_result is not None else True
  jw(out/"BUILD7BR6_GUROBI_TERMINATION.json",term)
  if int(m.SolCount)>0:
@@ -2426,9 +2518,10 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
    if not math.isfinite(_r14_val) or _r14_val<0.0:
     _r14_invalid.append(_r14_key);_r14_values[_r14_key]=None
    else:_r14_values[_r14_key]=_r14_val
-  _r23_constr_gate=(1e-8 if int(issue)==113 else 1e-6)
-  _r23_bound_gate=(1e-8 if int(issue)==113 else 1e-6)
-  _r23_int_gate=(1e-8 if int(issue)==113 else 1e-5)
+  _legacy_pilot_initial=bool(int(issue)==113 and not _runtime_adapter_mode)
+  _r23_constr_gate=(1e-8 if _legacy_pilot_initial else 1e-6)
+  _r23_bound_gate=(1e-8 if _legacy_pilot_initial else 1e-6)
+  _r23_int_gate=(1e-8 if _legacy_pilot_initial else 1e-5)
   _r14_quality={
    "issue":int(issue),"policy":_r14_policy_name,
    "ConstrVio_gate":_r23_constr_gate,"BoundVio_gate":_r23_bound_gate,
@@ -2570,6 +2663,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
          "mess_support_debt1":{mid:float(_c5r4_energy_scale_kwh_per_model_unit*DE[(mid,1)].X) for mid in mids},"workload_debt1":_wd1,
          "metrics":{"variables":m.NumVars,"binary_variables":int(m.NumBinVars),"integer_variables":int(m.NumIntVars),"constraints":m.NumConstrs,"qconstraints":m.NumQConstrs,"runtime_s":m.Runtime,
                     "node_count":m.NodeCount,"mip_gap":final_pass_gap,"target_mip_gap":econ_gap,
+                    "primary_stress_target_mip_gap":stress_gap,"stress_exposure_target_mip_gap":exposure_gap,
                     "objective_authority":"ELECTRICAL_STRESS_OBJECTIVE_V1",
                     "capability_mask":dict(_cap),
                     "objective_worst_predicted_electrical_stress_pu":float(stress_worst.X),

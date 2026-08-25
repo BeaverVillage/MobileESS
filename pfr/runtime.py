@@ -5322,6 +5322,51 @@ class PfrRuntimeRunner:
                     for uid, job in sorted(state.jobs.items())
                 },
                 "slow_solver_time_s": slow_solver_time_s,
+                "h54_reference_anchor_time_s": (
+                    state.last_slow_miqp_certificate.get(
+                        "reference_anchor_seconds"
+                    ) if (replan or safety_replan) else 0.0
+                ),
+                "h54_domain_generation_time_s": (
+                    state.last_slow_miqp_certificate.get(
+                        "causal_domain_generation_seconds"
+                    ) if (replan or safety_replan) else 0.0
+                ),
+                "h54_model_build_once_time_s": (
+                    state.last_slow_miqp_certificate.get(
+                        "model_build_once_seconds"
+                    ) if (replan or safety_replan) else 0.0
+                ),
+                "h54_parameter_update_time_s": (
+                    state.last_slow_miqp_certificate.get(
+                        "parameter_update_seconds"
+                    ) if (replan or safety_replan) else 0.0
+                ),
+                "h54_slow_master_time_s": (
+                    state.last_slow_miqp_certificate.get(
+                        "slow_master_milp_seconds"
+                    ) if (replan or safety_replan) else 0.0
+                ),
+                "h54_exact_recourse_time_s": (
+                    state.last_slow_miqp_certificate.get(
+                        "fixed_binary_exact_h54_recourse_seconds"
+                    ) if (replan or safety_replan) else 0.0
+                ),
+                "h54_planner_total_time_s": (
+                    state.last_slow_miqp_certificate.get(
+                        "online_planner_total_seconds"
+                    ) if (replan or safety_replan) else 0.0
+                ),
+                "h54_master_skipped_forced_domain": (
+                    state.last_slow_miqp_certificate.get(
+                        "slow_master_skipped_exact_forced_domain"
+                    ) if (replan or safety_replan) else None
+                ),
+                "h54_maximum_exact_norm_residual": (
+                    state.last_slow_miqp_certificate.get(
+                        "maximum_exact_norm_residual"
+                    ) if (replan or safety_replan) else None
+                ),
                 "fast_recourse_runtime_seconds": fast.runtime_seconds,
                 "safety_filter_runtime_seconds": safety.filter_runtime_seconds,
                 "opendss_runtime_seconds": verifier.opendss_runtime_seconds,
@@ -5366,6 +5411,16 @@ class PfrRuntimeRunner:
             }
             issue_root = method_root / f"issue_{frame.issue:06d}"
             issue_root.mkdir(parents=True, exist_ok=True)
+            record["commit_marker_storage_time_s"] = 0.0
+            record["total_issue_wall_time_s"] = record["runtime_seconds"]
+            storage_started = time.monotonic()
+            atomic_write_json(issue_root / "COMMIT_MARKER.json", record)
+            record["commit_marker_storage_time_s"] = (
+                time.monotonic() - storage_started
+            )
+            record["total_issue_wall_time_s"] = time.monotonic() - started
+            # The second atomic write persists the measured first-write cost.
+            # This avoids estimating storage from unrelated campaign I/O.
             atomic_write_json(issue_root / "COMMIT_MARKER.json", record)
             records.append(record)
         summary = {

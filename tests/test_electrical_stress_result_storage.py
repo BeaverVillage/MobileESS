@@ -55,6 +55,17 @@ def _record(issue: int = 0) -> dict:
         "realized_grid_cost_aud": 1.0,
         "cumulative_grid_cost_aud": 1.0 + issue,
         "slow_solver_time_s": 2.0,
+        "h54_reference_anchor_time_s": 0.01,
+        "h54_domain_generation_time_s": 0.02,
+        "h54_model_build_once_time_s": 0.0,
+        "h54_parameter_update_time_s": 0.03,
+        "h54_slow_master_time_s": 0.40,
+        "h54_exact_recourse_time_s": 1.50,
+        "h54_planner_total_time_s": 1.96,
+        "h54_master_skipped_forced_domain": True,
+        "h54_maximum_exact_norm_residual": 0.0,
+        "commit_marker_storage_time_s": 0.01,
+        "total_issue_wall_time_s": 2.41,
         "fast_recourse_runtime_seconds": 0.2,
         "safety_filter_runtime_seconds": 0.1,
         "runtime_seconds": 2.4,
@@ -144,6 +155,9 @@ class ElectricalStressResultStorageTests(unittest.TestCase):
             issue = pd.read_parquet(root / "ISSUE_RESULT.parquet")
             self.assertEqual(issue["predicted_worst_stress_z"].tolist(), [0.82, 0.82])
             self.assertEqual(issue["ac_worst_stress_z"].tolist(), [0.84, 0.84])
+            self.assertEqual(issue["h54_slow_master_time_s"].tolist(), [0.4, 0.4])
+            self.assertEqual(issue["h54_exact_recourse_time_s"].tolist(), [1.5, 1.5])
+            self.assertEqual(issue["h54_maximum_exact_norm_residual"].tolist(), [0.0, 0.0])
             audit = json.loads((root / "RESULT_STORAGE_AUDIT.json").read_text())
             self.assertEqual(audit["status"], "PASS")
 
