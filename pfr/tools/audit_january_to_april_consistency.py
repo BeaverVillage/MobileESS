@@ -89,7 +89,7 @@ def audit(
     rows = []
     for month, start, days in PERIODS:
         source_authorities[month] = set()
-        for registry, method_count in (("B0_B7", 8), ("B8", 1)):
+        for registry, method_count in (("B00_B09", 10),):
             root = run_root / month / registry
             campaign = load_json(root / "CAMPAIGN_SUMMARY.json")
             storage = load_json(root / "STORAGE_VERIFICATION.json")
@@ -99,14 +99,9 @@ def audit(
             if len(daily) != days or any(row.get("status") != "PASS" for row in daily):
                 raise RuntimeError(f"daily campaign is incomplete: {month}/{registry}")
             expected_markers = days * method_count * 288
-            method = "B8" if registry == "B8" else "B*"
             markers = sum(
                 1
-                for _ in root.glob(
-                    "2025-??-??/B8/issue_*/COMMIT_MARKER.json"
-                    if method == "B8"
-                    else "2025-??-??/B[0-7]/issue_*/COMMIT_MARKER.json"
-                )
+                for _ in root.glob("2025-??-??/B0[0-9]/issue_*/COMMIT_MARKER.json")
             )
             if markers != expected_markers:
                 raise RuntimeError(
@@ -161,7 +156,7 @@ def audit(
     if any(len(values) != 1 for values in source_authorities.values()):
         raise RuntimeError("a month used more than one shared exogenous authority")
     return {
-        "schema_version": "PFR_JANUARY_TO_APRIL_CONSISTENCY_AUDIT_V1",
+        "schema_version": "PFR_JANUARY_TO_APRIL_ELECTRICAL_STRESS_CONSISTENCY_AUDIT_V2",
         "status": "PASS",
         "calendar_day_count": 120,
         "run_manifest_count": len(signatures),

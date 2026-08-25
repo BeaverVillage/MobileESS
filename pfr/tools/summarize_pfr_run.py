@@ -11,6 +11,8 @@ from pathlib import Path
 import statistics
 from typing import Any, Mapping, Sequence
 
+from pfr.electrical_stress import OBJECTIVE_AUTHORITY, stress_from_extrema
+
 
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -71,6 +73,22 @@ def summarize(run_root: Path, expected_issues: int) -> Mapping[str, Any]:
             int(row.get("migration_prediction_actual_event_count", 0))
             for row in rows
         )
+        exact_stress = [
+            stress_from_extrema(
+                minimum_voltage_pu=float(row["exact_ac"]["voltage_min_pu"]),
+                maximum_voltage_pu=float(row["exact_ac"]["voltage_max_pu"]),
+                maximum_line_loading_fraction=float(
+                    row["exact_ac"]["line_max_loading_pu"]
+                ),
+                maximum_transformer_loading_fraction=max(
+                    float(row["exact_ac"]["transformer_max_kva_loading_pu"]),
+                    float(
+                        row["exact_ac"]["transformer_max_current_loading_pu"]
+                    ),
+                ),
+            )
+            for row in rows
+        ]
         method = {
             "comparison_method_id": method_id,
             "status": "PASS" if len(rows) == expected_issues and materialized_rows == expected_issues else "FAIL",
@@ -80,6 +98,21 @@ def summarize(run_root: Path, expected_issues: int) -> Mapping[str, Any]:
             "state_chain_complete": chain_complete,
             "fresh_exact_opendss_count": sum(bool(row["actual_fresh_opendss_used"]) for row in rows),
             "actual_gurobi_count": sum(bool(row["actual_gurobi_used"]) for row in rows),
+            "optimization_objective_authority": OBJECTIVE_AUTHORITY,
+            "realized_exact_electrical_stress": {
+                "worst_pu": max((value.worst for value in exact_stress), default=0.0),
+                "exposure_pu_hours": sum(value.worst for value in exact_stress)
+                * (5.0 / 60.0),
+                "voltage_worst_pu": max(
+                    (value.voltage for value in exact_stress), default=0.0
+                ),
+                "line_worst_pu": max(
+                    (value.line for value in exact_stress), default=0.0
+                ),
+                "transformer_worst_pu": max(
+                    (value.transformer for value in exact_stress), default=0.0
+                ),
+            },
             "final_ac_violation_count": sum(exact_violation_count(row) for row in rows),
             "future_actual_used": any(bool(row["future_actual_used"]) for row in rows),
             "full_slow_replan_count": int(rows[-1]["full_replan_count_cumulative"]) if rows else 0,

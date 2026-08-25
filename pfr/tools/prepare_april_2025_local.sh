@@ -26,7 +26,8 @@ authority_sha="$("$python_bin" -c 'import hashlib,sys; print(hashlib.sha256(open
 mkdir -p "$input_root"
 "$python_bin" -m pfr.tools.build_calendar_daily_pre \
     --start-date 2025-04-01 --days 30 --campaign-id "$period_id" \
-    --authority-sha256 "$authority_sha" --output-root "$input_root/pre"
+    --authority-sha256 "$authority_sha" --output-root "$input_root/pre" \
+    --electrical-stress-campaign
 "$python_bin" -m pfr.tools.build_calendar_job_cohort \
     --canonical "$canonical" --start-date 2025-04-01 --days 30 \
     --campaign-id "$period_id" \
@@ -39,6 +40,7 @@ if ((plan_only)); then
         --repo "$repo_dir" --period-id "$period_id" --period-contract "$contract" \
         --shared-root "$shared" --input-root "$input_root" \
         --route-catalog "$base/PFR3_FIXED_K3_PHYSICS_CURRENT/FROZEN_K3_PHYSICS_GEOMETRY.json" \
+        --electrical-stress-campaign \
         --allow-unmaterialized --report "$input_root/PREFLIGHT_REPORT.json"
     exit $?
 fi
@@ -48,5 +50,6 @@ bash "$repo_dir/pfr/tools/prepare_april_2025_sources.sh"
     --repo "$repo_dir" --period-id "$period_id" --period-contract "$contract" \
     --shared-root "$shared" --input-root "$input_root" \
     --route-catalog "$base/PFR3_FIXED_K3_PHYSICS_CURRENT/FROZEN_K3_PHYSICS_GEOMETRY.json" \
+    --electrical-stress-campaign \
     --report "$input_root/PREFLIGHT_REPORT.json"
 echo "APRIL_2025_PREPARATION_STATUS=PASS_READY_TO_RUN"

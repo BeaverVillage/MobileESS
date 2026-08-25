@@ -31,6 +31,24 @@ SERVICES=[f"IDC{i:02d}" for i in range(1,13)]+[f"STA{i:02d}" for i in range(1,13
 IDCS=[f"IDC{i:02d}" for i in range(1,13)]
 B5_SHA=C["parents"]["BUILD5R3_external"]
 
+_STRESS_METHOD_CAPABILITIES={
+ "B00":{"mess_dispatch":False,"mess_mobility":False,"temporal_compute":False,"spatial_compute":False},
+ "B01":{"mess_dispatch":True,"mess_mobility":True,"temporal_compute":False,"spatial_compute":False},
+ "B02":{"mess_dispatch":False,"mess_mobility":False,"temporal_compute":True,"spatial_compute":False},
+ "B03":{"mess_dispatch":False,"mess_mobility":False,"temporal_compute":False,"spatial_compute":True},
+ "B04":{"mess_dispatch":False,"mess_mobility":False,"temporal_compute":True,"spatial_compute":True},
+ "B05":{"mess_dispatch":True,"mess_mobility":False,"temporal_compute":True,"spatial_compute":True},
+ "B06":{"mess_dispatch":True,"mess_mobility":True,"temporal_compute":True,"spatial_compute":True},
+ "B07":{"mess_dispatch":True,"mess_mobility":True,"temporal_compute":True,"spatial_compute":True},
+ "B08":{"mess_dispatch":True,"mess_mobility":True,"temporal_compute":True,"spatial_compute":True},
+ "B09":{"mess_dispatch":True,"mess_mobility":True,"temporal_compute":True,"spatial_compute":True},
+}
+def electrical_stress_capability_mask(method_id=None):
+ method_id=str(method_id or os.environ.get("MOBILEESS_METHOD_ID","")).upper()
+ if not method_id:return None
+ if method_id not in _STRESS_METHOD_CAPABILITIES:raise RuntimeError(f"unknown electrical-stress method id {method_id}")
+ return dict(_STRESS_METHOD_CAPABILITIES[method_id])
+
 _PERSIST={}
 def _persist(key,loader):
  if key not in _PERSIST:_PERSIST[key]=loader()
@@ -535,9 +553,25 @@ def _r25p_solution_scalar(value):
  if not math.isfinite(result):raise RuntimeError("nonfinite solution scalar")
  return result
 
-def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref,ar2,b6,z,route_df,moves,conn_delay,price,out,static_ctx,rolling_mess_state=None,mess_DE0=None,workload_debt0=None,rolling_warmstart=None):
+def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref,ar2,b6,z,route_df,moves,conn_delay,price,out,static_ctx,rolling_mess_state=None,mess_DE0=None,workload_debt0=None,rolling_warmstart=None,capability_mask=None,planning_forecast_override=None,price_forecast_override=None,fixed_rack_forecast_override=None):
  import gurobipy as gp
  from gurobipy import GRB
+ # One retained H54 formulation serves every ablation.  A method may only
+ # remove decision capabilities; it may not replace the frozen objective or
+ # any grid/service/recovery constraint with a method-specific heuristic.
+ _cap_default={
+  "mess_dispatch":True,
+  "mess_mobility":True,
+  "temporal_compute":True,
+  "spatial_compute":True,
+ }
+ _cap=dict(_cap_default)
+ if capability_mask is not None:
+  unknown=set(capability_mask)-set(_cap_default)
+  if unknown:raise RuntimeError(f"unknown H54 capability mask fields {sorted(unknown)}")
+  _cap.update({str(k):bool(v) for k,v in capability_mask.items()})
+ if _cap["mess_mobility"] and not _cap["mess_dispatch"]:
+  raise RuntimeError("MESS mobility cannot be enabled when MESS dispatch is disabled")
  exact_pcc_leaf_elim=(os.environ.get("MOBILEESS_EXACT_PCC_LEAF_ELIM","0")=="1")
  exact_implied_bounds=(os.environ.get("MOBILEESS_EXACT_IMPLIED_BOUNDS","0")=="1")
  r24_exact_rebase=(os.environ.get("MOBILEESS_R24_PERMANENT_EXACT_REBASE","0")=="1")
@@ -574,10 +608,11 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   raise RuntimeError("R25K B4 root/branch strengthening requires frozen R25I B2 numerical-rescaling foundation")
  if r25m_b6_exact_decomposition and not r25k_b4_root_branch_strengthening:
   raise RuntimeError("R25M B6 exact path decomposition requires frozen R25K B4 foundation")
- if r25n_b6c5r4_complete_unit_normalization and not r25m_b6_exact_decomposition:
-  raise RuntimeError("B6-C5R4 complete unit normalization requires exact path decomposition")
- if r25v_causal_rolling_mipstart and not r25m_b6_exact_decomposition:
-  raise RuntimeError("R25V causal rolling MIP start requires exact path decomposition")
+ if r25m_b6_exact_decomposition:
+  raise RuntimeError("R25M B6 economic path decomposition is not objective-authoritative under ELECTRICAL_STRESS_OBJECTIVE_V1; use the retained monolithic 54-step model")
+ # The C5R4 coordinate scaling and causal MIP starts are formulation-neutral
+ # assets.  Retain them for the monolithic stress MIQCP; only the old economic
+ # branch-and-price decomposition is objective-specific and disabled above.
  # C5R4 exact coordinate substitution. Physical inputs, rolling state, reports and
  # Fresh Exact OpenDSS remain kW/kvar/kWh. Only optimization variables use
  # MW/Mvar/MWh, so every affected row is divided by the same positive scale and
@@ -593,9 +628,10 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   raise RuntimeError("R24 permanent exact rebase locks PCC-leaf elimination OFF: prior exact candidate was not performance-authoritative")
  if exact_implied_bounds:
   _route_energy=np.asarray([float(mm["energy_kWh"]) for mm in moves.values()],dtype=np.float64)
-  if _route_energy.size==0 and not fixed_location_projection:raise RuntimeError("BR14 implied-bound proof gate: empty planning move set")
-  _emin=(0.0 if fixed_location_projection else float(np.min(_route_energy)))
-  _emax=(0.0 if fixed_location_projection else float(np.max(_route_energy)))
+  # A bounded independent episode can legitimately remove every MOVE whose
+  # arrival would cross the episode boundary. STAY remains feasible and exact.
+  _emin=(0.0 if _route_energy.size==0 else float(np.min(_route_energy)))
+  _emax=(0.0 if _route_energy.size==0 else float(np.max(_route_energy)))
   _etol=1e-9
   _proof={
    "status":"PASS" if _emin>=-_etol else "FAIL_CLOSED",
@@ -629,15 +665,23 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  _wd0={d:0.0 for d in IDCS}
  if workload_debt0 is not None:
   for d in IDCS:_wd0[d]=float(workload_debt0.get(d,0.0))
- zero_lex_cert=(all(abs(_wd0[d])<=1e-12 for d in IDCS) and len(shadow)==len(jobs) and
+ legacy_sla_zero_lex_cert=(all(abs(_wd0[d])<=1e-12 for d in IDCS) and len(shadow)==len(jobs) and
                 all(int(shadow.get(j,-10**9))==int(issue) for j in jobs) and
                 all((not dest_commit.get(j)) or str(dest_commit.get(j))==str(pmap[j]["origin_IDC_id"]) for j in jobs))
+ # ELECTRICAL_STRESS_OBJECTIVE_V1: the old SLA-objective certificate was valid
+ # only because wait/remote/WAN were higher-priority objectives.  Applying that
+ # pruning under grid-stress minimization would silently remove the workload
+ # flexibility that is one of the paper's two control levers.
+ zero_lex_cert=False
  choices=[];byj={j:[] for j in jobs};byjd={};full_choice_count=0
  for j in jobs:
   if issue>int(pmap[j]["latest_start_step"]):raise RuntimeError("deadline before solve "+j)
   opts_full=scope["domains"][j]
+  if not _cap["spatial_compute"]:
+   opts_full=[o for o in opts_full if str(o["destination_IDC_id"])==str(pmap[j]["origin_IDC_id"])]
   if dest_commit.get(j):opts_full=[o for o in opts_full if o["destination_IDC_id"]==dest_commit[j]]
   maxst_full=min(int(pmap[j]["latest_start_step"]),horizon_end,int(pmap[j]["latest_completion_step_exclusive"])-int(pmap[j]["duration_steps"]))
+  if not _cap["temporal_compute"]:maxst_full=issue
   if j in shadow:maxst_full=min(maxst_full,int(shadow[j])+wait_steps)
   full_choice_count+=len(opts_full)*max(0,maxst_full-issue+1)
   if zero_lex_cert:
@@ -724,13 +768,16 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  m.Params.NodefileDir=str(node_dir)
  m.Params.SoftMemLimit=soft_mem_gb
  x={k:m.addVar(vtype=GRB.BINARY,name=f"x_{i}") for i,k in enumerate(choices)};defer={}
+ stress_h={h:m.addVar(lb=0.0,ub=1.0,name=f"electrical_stress_{h}") for h in range(H)}
+ stress_worst=m.addVar(lb=0.0,ub=1.0,name="worst_electrical_stress")
+ for h in range(H):m.addLConstr(stress_worst>=stress_h[h],name=f"stress_worst_{h}")
  for k,v in x.items():
   j,d,r,st=k;byj[j].append(v);byjd.setdefault((j,d),[]).append(v)
  for j in jobs:
   if zero_lex_cert:
    if not byj[j]:raise RuntimeError("zero-cert has no immediate-local choice "+j)
    m.addLConstr(gp.quicksum(byj[j])==1)
-  elif int(pmap[j]["latest_start_step"])<=horizon_end:
+  elif (not _cap["temporal_compute"]) or int(pmap[j]["latest_start_step"])<=horizon_end:
    if not byj[j]:raise RuntimeError("no urgent choice "+j)
    m.addLConstr(gp.quicksum(byj[j])==1)
   else:
@@ -744,7 +791,13 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  rack_to_idc={r:str(caprow[r]["idc_id"]) for r in racks}
  racks_by_idc={d:[r for r in racks if rack_to_idc[r]==d] for d in IDCS}
  def ff(r,t):
-  if (r,t) not in cache:cache[(r,t)]=b4.conservative_fixed(op1,scope,r,issue,t)
+  if (r,t) not in cache:
+   if fixed_rack_forecast_override is None:
+    cache[(r,t)]=b4.conservative_fixed(op1,scope,r,issue,t)
+   else:
+    value=fixed_rack_forecast_override(r,t) if callable(fixed_rack_forecast_override) else fixed_rack_forecast_override.get((r,t),(0.0,0.0,0.0))
+    if len(value)!=3 or any(not np.isfinite(float(x)) for x in value):raise RuntimeError("invalid runtime fixed-rack forecast override")
+    cache[(r,t)]=tuple(float(x) for x in value)
   return cache[(r,t)]
  bypool=defaultdict(list);byidc=defaultdict(list)
  for jj in running.values():
@@ -760,6 +813,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
    byidc[(d,t)].append((v,float(pmap[j]["IT_power_kW"])))
    hh=t-issue
    if 0<=hh<H:x_active_by_d_h[(d,hh)].append((j,v))
+ idc_transformer_stress_expr={}
  for t in range(issue,maxcomp):
   for r in racks:
    fg,fp,_=ff(r,t);cr=caprow[r];terms=bypool[(r,t)]
@@ -767,7 +821,12 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
    m.addLConstr(fp+sum(p for v,g,p in terms if v is None)+gp.quicksum(p*v for v,g,p in terms if v is not None)<=float(cr["rack_power_cap_kw"])+1e-9)
   for d in [f"IDC{i:02d}" for i in range(1,13)]:
    dr=racks_by_idc[d];fit=sum(ff(r,t)[1] for r in dr);terms=byidc[(d,t)]
-   m.addLConstr(PUE*(fit+sum(p for v,p in terms if v is None)+gp.quicksum(p*v for v,p in terms if v is not None))<=750.0*PF+1e-9)
+   _facility_p=PUE*(fit+sum(p for v,p in terms if v is None)+gp.quicksum(p*v for v,p in terms if v is not None))
+   m.addLConstr(_facility_p<=750.0*PF+1e-9)
+   _hh=t-issue
+   if 0<=_hh<H:
+    idc_transformer_stress_expr[(_hh,d)]=(_facility_p,750.0*PF)
+    m.addLConstr(_facility_p<=750.0*PF*stress_h[_hh]+1e-9,name=f"idc_transformer_stress_{d}_{_hh}")
  # WAN one-step pipeline.
  F={};F_by_t=defaultdict(list);times=range(issue,horizon_end+1);widx=scope["wan_cap"].set_index("oracle_step")
  for j in jobs:
@@ -830,6 +889,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  move_arr=[[None for _ in SERVICES] for _ in range(H)];tmp=defaultdict(list)
  for (hh,slot),mm in moves.items():
   tmp[(int(hh),sidx[str(mm["source"])])].append((int(slot),sidx[str(mm["dest"])],int(mm["D"]),float(mm["energy_kWh"])))
+ service_stress_expr={};static_line_stress_rows={}
  for h in range(H):
   for si in range(len(SERVICES)):
    rec=tmp.get((h,si),[])
@@ -1028,6 +1088,8 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
    stay_td=m.addVars(stay_keys,vtype=GRB.BINARY,name="stay")
   mv_td=m.addVars(mv_keys,vtype=GRB.BINARY,name="move")
  stay={k:stay_td[k] for k in stay_keys};mv={k:mv_td[k] for k in mv_keys}
+ if not _cap["mess_mobility"]:
+  for _move_index,v in enumerate(mv.values()):m.addLConstr(v==0.0,name=f"capability_no_mess_move_{_move_index}")
  for mid in mids:incoming[(mid,avail_h[mid],initial_sid[mid])].append(1.0)
  for (mid,h,sid),v in stay.items():outgoing[(mid,h,sid)].append(v);incoming[(mid,h+1,sid)].append(v)
  for (mid,h,slot),v in mv.items():
@@ -1176,6 +1238,10 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
     _active_stay=gp.quicksum(s for sid,s in stay_by_mid_h.get((mid,h),[]))
     m.addLConstr(mode[(mid,h)]<=_active_stay,name=f"r25k_mode_transit_symmetry_{mid}_{h}")
    m.addQConstr(pn*pn+qt*qt<=_S_MAX_MODEL*_S_MAX_MODEL,name=f"pcs_{mid}_{h}")
+   if not _cap["mess_dispatch"]:
+    m.addLConstr(pdt==0.0,name=f"capability_no_mess_discharge_{mid}_{h}")
+    m.addLConstr(pct==0.0,name=f"capability_no_mess_charge_{mid}_{h}")
+    m.addLConstr(qt==0.0,name=f"capability_no_mess_q_{mid}_{h}")
    depart=gp.quicksum(float(moves[(h,slot)]["energy_kWh"])/_c5r4_energy_scale_kwh_per_model_unit*v for slot,v in mv_by_mid_h.get((mid,h),[]))
    depflag=gp.quicksum(v for slot,v in mv_by_mid_h.get((mid,h),[]))
    if r24_exact_rebase:
@@ -1321,18 +1387,32 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   "fresh_exact_opendss_full_168_bus_retained":True,
   "implied_bound_proof":"E_h<=min(E_MAX,E0+h*eta_ch*DT*P_MAX); DE_h<=min(E_MAX,(H-h)*eta_ch*DT*P_MAX); repE_h<=eta_ch*DT*P_MAX",
   "feasible_set_relaxed":False,"physical_constraint_removed":False,"acceptance_policy":"baseline requires BR9 fingerprint identity; structural candidates require exact proof + output equivalence + Fresh Exact OpenDSS"})
- _price_hits=np.flatnonzero(np.asarray(price["issues"],dtype=np.int64)==int(issue))
- if len(_price_hits)!=1:raise RuntimeError(f"causal price row issue={issue} cardinality={len(_price_hits)}")
- _price_row=int(_price_hits[0]);priceq=np.asarray(price["q50"][_price_row],float)
+ if price_forecast_override is None:
+  _price_hits=np.flatnonzero(np.asarray(price["issues"],dtype=np.int64)==int(issue))
+  if len(_price_hits)!=1:raise RuntimeError(f"causal price row issue={issue} cardinality={len(_price_hits)}")
+  _price_row=int(_price_hits[0]);priceq=np.asarray(price["q50"][_price_row],float)
+ else:
+  priceq=np.asarray(price_forecast_override,dtype=float)
+  if priceq.shape!=(H,) or not np.isfinite(priceq).all():raise RuntimeError("runtime price forecast override must be finite H54")
  price_factor=np.asarray([float(priceq[h])*DT/1000.0 for h in range(H)],dtype=np.float64)
  bgP=np.empty((H,len(bgbus)),dtype=np.float64);bgQ=np.empty((H,len(bgbus)),dtype=np.float64)
  for i in range(len(bgbus)):bgP[0,i]=float(actual_net[i]);bgQ[0,i]=float(actual_q[i])
- _plan_hits=np.flatnonzero(np.asarray(planning["issues"],dtype=np.int64)==int(issue))
- if len(_plan_hits)!=1:raise RuntimeError(f"causal grid planning row issue={issue} cardinality={len(_plan_hits)}")
- _plan_row=int(_plan_hits[0])
- for h in range(1,H):
-  for i in range(len(bgbus)):
-   bgP[h,i]=float(planning["safe_netP_bus_kW"][_plan_row,h,i]);bgQ[h,i]=float(planning["safe_Q_bus_kvar"][_plan_row,h,i])
+ if planning_forecast_override is None:
+  _plan_hits=np.flatnonzero(np.asarray(planning["issues"],dtype=np.int64)==int(issue))
+  if len(_plan_hits)!=1:raise RuntimeError(f"causal grid planning row issue={issue} cardinality={len(_plan_hits)}")
+  _plan_row=int(_plan_hits[0])
+  for h in range(1,H):
+   for i in range(len(bgbus)):
+    bgP[h,i]=float(planning["safe_netP_bus_kW"][_plan_row,h,i]);bgQ[h,i]=float(planning["safe_Q_bus_kvar"][_plan_row,h,i])
+ else:
+  _fp=np.asarray(planning_forecast_override["background_p_kw"],dtype=float)
+  _fq=np.asarray(planning_forecast_override["background_q_kvar"],dtype=float)
+  _pv=np.asarray(planning_forecast_override["pv_available_kw"],dtype=float)
+  _expected=(H,len(bgbus),3)
+  if _fp.shape!=_expected or _fq.shape!=_expected or _pv.shape!=_expected:raise RuntimeError(f"runtime H54 grid forecast override shape drift P={_fp.shape} Q={_fq.shape} PV={_pv.shape} expected={_expected}")
+  if not np.isfinite(_fp).all() or not np.isfinite(_fq).all() or not np.isfinite(_pv).all():raise RuntimeError("runtime H54 grid forecast override contains nonfinite values")
+  _net=np.sum(_fp-_pv,axis=2);_qsum=np.sum(_fq,axis=2)
+  bgP[1:,:]=_net[1:,:];bgQ[1:,:]=_qsum[1:,:]
  voltage_const={}
  for n in nodes:
   kv=float(ref["bkv"][n]);U0=(math.sqrt(3)*kv*float(ref["vpu"][n]))**2
@@ -1381,7 +1461,9 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
    ownP[pcc[sid]]+=_c5r4_power_scale_kw_per_model_unit*psvc
    ownQ[pcc[sid]]+=_c5r4_power_scale_kw_per_model_unit*qsvc
    skva=float(service_kva[sid])/_c5r4_power_scale_kw_per_model_unit
+   service_stress_expr[(h,sid)]=(psvc,qsvc,skva)
    m.addQConstr(psvc*psvc+qsvc*qsvc<=skva*skva,name=f"svcS_{h}_{sid}")
+   m.addQConstr(psvc*psvc+qsvc*qsvc<=skva*skva*stress_h[h]*stress_h[h],name=f"svcStress_{h}_{sid}")
    for mid in active:econ+=float(price_factor[h])*_c5r4_power_scale_kw_per_model_unit*(Pchg[(mid,h,sid)]-Pdis[(mid,h,sid)])
   # R25D/A4 exact radial-grid projection.  The 36 possible IDC/MESS PCC
   # injection nodes define a decision skeleton.  Every subtree outside that
@@ -1401,6 +1483,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
      _ownP_static[b]+=float(bgP[h,i]);_ownQ_static[b]+=float(bgQ[h,i])
    _staticFP,_staticFQ=condense_static_subtree_flows(proj,_ownP_static,_ownQ_static)
    _thermal=static_line_thermal_checks(proj,_staticFP,_staticFQ,lim)
+   static_line_stress_rows[h]=tuple(_thermal)
    r25d_static_thermal_check_count+=len(_thermal)
    if _thermal:r25d_worst_static_line_loading=max(r25d_worst_static_line_loading,max(float(q["loading_ratio"]) for q in _thermal))
    # Exact voltage projection map and bound propagation.  R25D removes the
@@ -1548,6 +1631,21 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
     else:
      u=U0+dU[(h,n)]
     m.addLConstr(u>=lo,name=f"v_lo_{h}_{n}");m.addLConstr(u<=hi,name=f"v_hi_{h}_{n}");bounds[(h,n)]=(u,kv)
+  # Common ELECTRICAL_STRESS_OBJECTIVE_V1 epigraph.  Voltage uses the
+  # squared-voltage LinDistFlow surrogate; executed stress is recomputed from
+  # Fresh exact three-phase OpenDSS and is reported separately.
+  for n in nodes:
+   _u,_kv=bounds[(h,n)];_unom=(math.sqrt(3)*float(_kv))**2
+   _vlo=(0.95*math.sqrt(3)*float(_kv))**2;_vhi=(1.05*math.sqrt(3)*float(_kv))**2
+   m.addLConstr(_unom-_u<=(_unom-_vlo)*stress_h[h],name=f"vStressLo_{h}_{n}")
+   m.addLConstr(_u-_unom<=(_vhi-_unom)*stress_h[h],name=f"vStressHi_{h}_{n}")
+  _flow_scale=_r25i_flow_scale_kw_per_model_unit if r25d_grid_projection else 1.0
+  for (_p,_n),_limit in lim.items():
+   if (h,_n) not in FP:continue
+   _limit_model=float(_limit)/_flow_scale
+   m.addQConstr(FP[(h,_n)]*FP[(h,_n)]+FQ[(h,_n)]*FQ[(h,_n)]<=_limit_model*_limit_model*stress_h[h]*stress_h[h],name=f"lineStress_{h}_{_n}")
+  if r25d_grid_projection and _thermal:
+   m.addLConstr(stress_h[h]>=max(float(q["loading_ratio"]) for q in _thermal),name=f"staticLineStress_{h}")
  if r25d_grid_projection:
   _ta=r25d_proj.audit()
   jw(out/"ConversationA_R25D_RADIAL_GRID_EXACT_PROJECTION_AUDIT.json",{
@@ -1647,43 +1745,44 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
    "scientific_model_semantics_changed":False,"integer_feasible_set_changed":False,"objective_changed":False,
    "future_actual_used":False,"future_regeneration_precredit":False,"fresh_exact_opendss_retained":True})
  _stage("FULL_MODEL_CONSTRAINT_BUILD_DONE",out,vars=int(m.NumVars),lincon=int(m.NumConstrs),qcon=int(m.NumQConstrs))
- # Objectives preserve SLA hierarchy; grid/debt are hard constraints; economics is lowest priority.
+ # ELECTRICAL_STRESS_OBJECTIVE_V1.  Safety, deadline and both recovery debts
+ # remain hard constraints.  Price is retained only for ex-post reporting.
  obj_defer=gp.quicksum(defer.values()) if defer else 0.0
  obj_wait=gp.quicksum((st-int(pmap[j]["arrival_step"]))*v for (j,d,r,st),v in x.items())
  obj_remote=gp.quicksum(v for (j,d,r,st),v in x.items() if d!=str(pmap[j]["origin_IDC_id"]))
  obj_send=gp.quicksum(F.values()) if F else 0.0
- jw(out/"BUILD7C_R7_ECONOMIC_OBJECTIVE_TRANSLATION_AUDIT.json",{
-  "status":"PASS",
-  "issue":int(issue),
-  "economic_constant_dollars":float(econ_constant),
-  "constant_components":"background net-P + fixed workload + committed running workload",
-  "decision_dependent_components":"candidate-job power + MESS charge/discharge + route tie-break",
-  "argmin_changed":False,
-  "feasible_set_changed":False,
-  "objective_ordering_changed":False,
-  "absolute_objective_difference_changed":False,
-  "relative_gap_semantics":"3% of the frozen Stage-1 scalar economic objective = modeled total procurement cost + 1e-5*route-energy tie-break",
-  "route_tiebreak_weight":1e-5,
-  "route_tiebreak_is_decision_dependent":True,
-  "procurement_only_relative_gap_not_separately_certified":True,
-  "relative_gap_is_objective_origin_sensitive":True,
-  "constant_translation_preserves_argmin_and_absolute_gap_but_not_relative_gap":True,
-  "translated_decision_dependent_gap_is_diagnostic_not_stage1_acceptance":True,
-  "target_relative_MIP_gap":float(econ_gap)})
- if zero_lex_cert:
-  # Earlier objective optima are mathematically certified, not approximated.
-  solve_mode="LEX_ZERO_CERT_SINGLE_ECON"
-  m.setObjective(econ+float(econ_constant)+1e-5*route_pen,GRB.MINIMIZE)
-  m.Params.MIPGap=econ_gap;m.Params.MIPGapAbs=0.0;m.Params.MIPFocus=3
-  econ_env=None
- else:
-  solve_mode="HIERARCHICAL_FALLBACK"
-  m.setObjectiveN(obj_defer,0,priority=5,abstol=0,reltol=0)
-  m.setObjectiveN(obj_wait,1,priority=4,abstol=0,reltol=0)
-  m.setObjectiveN(obj_remote,2,priority=3,abstol=0,reltol=0)
-  m.setObjectiveN(obj_send,3,priority=2,abstol=0,reltol=0)
-  m.setObjectiveN(econ+float(econ_constant)+1e-5*route_pen,4,priority=1,abstol=1e-8,reltol=0)
-  m.update();econ_env=m.getMultiobjEnv(4);econ_env.setParam("InheritParams",1);econ_env.setParam("MIPGap",econ_gap);econ_env.setParam("MIPGapAbs",0.0);econ_env.setParam("Threads",threads_req);econ_env.setParam("MIPFocus",3)
+ _route_scale=max(1.0,float(H)*max(1,len(mids))*max([float(mm["energy_kWh"]) for mm in moves.values()] or [1.0]))
+ _wan_scale=max(1.0,sum(float(widx.loc[t,"public_path_safe_capacity_GB_per_5min"]) for t in times))
+ _job_scale=max(1.0,float(len(jobs)))
+ _wait_scale=max(1.0,float(H)*_job_scale)
+ _dispatch_throughput=gp.quicksum(Pchg.values())+gp.quicksum(Pdis.values())
+ _dispatch_scale=max(1.0,float(H)*max(1,len(mids))*float(_P_MAX_MODEL))
+ obj_exposure=DT*gp.quicksum(stress_h.values())
+ obj_actuation=(route_pen/_route_scale+obj_send/_wan_scale+obj_remote/_job_scale+
+                obj_wait/_wait_scale+_dispatch_throughput/_dispatch_scale)
+ jw(out/"ELECTRICAL_STRESS_OBJECTIVE_V1_AUDIT.json",{
+  "status":"PASS","issue":int(issue),"objective_authority":"ELECTRICAL_STRESS_OBJECTIVE_V1",
+  "primary":"min max_h predicted electrical stress",
+  "secondary":"min sum_h predicted electrical stress * delta_t",
+  "tertiary":"min normalized route, WAN, remote-placement, wait and battery-throughput actuation",
+  "voltage_planning_metric":"normalized squared-voltage LinDistFlow surrogate",
+  "line_planning_metric":"apparent branch-flow/rating SOC epigraph",
+  "transformer_planning_metric":"IDC and service-transformer loading/rating epigraph",
+  "fresh_exact_opendss_execution_authority":True,
+  "economic_cost_role":"EX_POST_KPI_ONLY","root_peak_role":"KPI_ONLY",
+  "legacy_sla_zero_certificate_detected":bool(legacy_sla_zero_lex_cert),
+  "legacy_sla_choice_pruning_disabled":True,"hard_deadline_constraints_retained":True,
+  "terminal_workload_debt_zero_retained":True,"terminal_support_energy_debt_zero_retained":True,
+  "price_used_by_optimizer":False,"modality_count_used_by_optimizer":False,
+  "runtime_causal_grid_forecast_override_used":bool(planning_forecast_override is not None),
+  "runtime_fixed_rack_forecast_override_used":bool(fixed_rack_forecast_override is not None),
+  "runtime_price_kpi_forecast_override_used":bool(price_forecast_override is not None),
+  "common_H54_formulation":True,"capability_mask":_cap})
+ solve_mode="LEXICOGRAPHIC_ELECTRICAL_STRESS_V1"
+ m.setObjectiveN(stress_worst,0,priority=3,abstol=1e-6,reltol=0.0,name="worst_electrical_stress")
+ m.setObjectiveN(obj_exposure,1,priority=2,abstol=1e-6,reltol=0.0,name="electrical_stress_exposure")
+ m.setObjectiveN(obj_actuation,2,priority=1,abstol=1e-8,reltol=0.0,name="secondary_actuation")
+ m.update();econ_env=m.getMultiobjEnv(2);econ_env.setParam("InheritParams",1);econ_env.setParam("MIPGap",econ_gap);econ_env.setParam("MIPGapAbs",0.0);econ_env.setParam("Threads",threads_req);econ_env.setParam("MIPFocus",3)
  m.update()
  if r25n_b6c5r4_complete_unit_normalization:
   def _c5r4_attr(name):
@@ -2020,8 +2119,9 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  actual_fp=int(m.Fingerprint)&0xffffffff
  model_equiv={"fingerprint_hex":f"0x{actual_fp:08x}","variables":int(m.NumVars),"constraints":int(m.NumConstrs),"qconstraints":int(m.NumQConstrs),"linear_nonzeros":float(m.DNumNZs),"binary_variables":int(m.NumBinVars),"golden":golden}
  model_equiv["PASS"]=(model_equiv["fingerprint_hex"]==golden["fingerprint_hex"] and model_equiv["variables"]==golden["variables"] and model_equiv["constraints"]==golden["constraints"] and model_equiv["qconstraints"]==golden["qconstraints"] and model_equiv["linear_nonzeros"]==golden["linear_nonzeros"] and model_equiv["binary_variables"]==golden["binary_variables"])
- structural_projection_mode=bool(exact_pcc_leaf_elim or exact_implied_bounds or r25k_b4_root_branch_strengthening or mobility_domain_projected)
- model_equiv["gate_mode"]="STRUCTURAL_PROJECTION_EXPECTED_MODEL_CHANGE" if structural_projection_mode else "STRICT_BR9_IDENTITY"
+ objective_rebase_mode=True
+ structural_projection_mode=bool(exact_pcc_leaf_elim or exact_implied_bounds or r25k_b4_root_branch_strengthening or mobility_domain_projected or objective_rebase_mode)
+ model_equiv["gate_mode"]="ELECTRICAL_STRESS_OBJECTIVE_V1_EXPECTED_MODEL_CHANGE" if objective_rebase_mode else ("STRUCTURAL_PROJECTION_EXPECTED_MODEL_CHANGE" if structural_projection_mode else "STRICT_BR9_IDENTITY")
  model_equiv["strict_BR9_identity_pass"]=bool(model_equiv["PASS"])
  model_equiv["execution_gate_pass"]=bool(model_equiv["PASS"] or structural_projection_mode)
  jw(out/"BUILD7BR9_GOLDEN_MODEL_EQUIVALENCE.json",model_equiv)
@@ -2042,8 +2142,9 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
  preopt={"status":"PREOPT_READY","variables":int(m.NumVars),"binary_variables":int(m.NumBinVars),"integer_variables":int(m.NumIntVars),"linear_constraints":int(m.NumConstrs),
          "quadratic_constraints":int(m.NumQConstrs),"linear_nonzeros":float(m.DNumNZs),
          "requested_threads":int(threads_req),"solve_mode":solve_mode,"root_Method":root_method,
-         "MIPGap_service_objectives":0.0,"MIPGap_economic":econ_gap,
-         "MIPFocus_economic":int(m.Params.MIPFocus),
+         "objective_authority":"ELECTRICAL_STRESS_OBJECTIVE_V1",
+         "MIPGap_primary_stress":0.0,"MIPGap_secondary_actuation":econ_gap,
+         "MIPFocus_secondary_actuation":int(m.Params.MIPFocus),
          "lex_zero_certificate_active":bool(zero_lex_cert),
          "warm_start_applied":bool(warm_audit.get("applied",False)),
          "rolling_var_hints_applied":bool(warm_audit.get("rolling_var_hints_applied",False)),
@@ -2116,6 +2217,10 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   m.optimize(_cb)
  _stage("GUROBI_OPTIMIZE_DONE",out,gurobi_runtime_s=float(b6_result.get("total_decomposition_seconds",m.Runtime)) if b6_result else float(m.Runtime))
  status=int(m.Status)
+ _model_gap=None
+ if int(m.SolCount)>0:
+  try:_model_gap=float(m.MIPGap)
+  except Exception:_model_gap=(0.0 if status==GRB.OPTIMAL else None)
  if b6_result is not None:
   _r12_certified_gap_accept=bool(b6_result.get("certificate_pass",False))
  else:
@@ -2131,7 +2236,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
    "status_code":int(status),
    "status_name":"OPTIMAL" if status==GRB.OPTIMAL else ("TIME_LIMIT" if status==GRB.TIME_LIMIT else str(status)),
    "solution_count":int(m.SolCount),
-   "certified_mip_gap":(float(b6_result.get("global_certified_gap")) if b6_result is not None and b6_result.get("global_certified_gap") is not None else (float(m.MIPGap) if int(m.SolCount)>0 else None)),
+   "certified_mip_gap":(float(b6_result.get("global_certified_gap")) if b6_result is not None and b6_result.get("global_certified_gap") is not None else _model_gap),
    "target_mip_gap":float(econ_gap),
    "accepted":bool(_r12_certified_gap_accept),
    "acceptance_basis":(_b6_acceptance_basis if b6_result is not None else "OPTIMAL status OR TIME_LIMIT with incumbent and certified MIPGap <= frozen target"),
@@ -2182,15 +2287,29 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
    int(m.Params.ConcurrentMIP)==concurrent_req)
  thread_verified=normal_thread_verified if concurrent_req<=1 else concurrent_parameter_verified
 
- _full_obj=float(m.ObjVal) if m.SolCount>0 else float("inf")
+ _full_obj=(
+  float(stress_worst.X)
+  if solve_mode=="LEXICOGRAPHIC_ELECTRICAL_STRESS_V1" and m.SolCount>0
+  else (float(m.ObjVal) if m.SolCount>0 else float("inf"))
+ )
  # B6-C5R1: one and only one scientific lower-bound authority.  If external
  # exact branch-and-price tightened the root all-column bound, every gap audit
  # must use that certificate lower bound rather than silently reverting to the
  # weaker root relaxation.
- _full_bd=(float(b6_result.get("certificate_lower_bound",b6_result["full_all_column_relaxation_lower_bound"])) if b6_result is not None else float(m.ObjBound))
+ if b6_result is not None:
+  _full_bd=float(b6_result.get("certificate_lower_bound",b6_result["full_all_column_relaxation_lower_bound"]))
+ elif solve_mode=="LEXICOGRAPHIC_ELECTRICAL_STRESS_V1":
+  # Gurobi does not expose Model.ObjBound for a completed multiobjective
+  # solve.  Each priority pass is globally optimal when Status=OPTIMAL.
+  _full_bd=_full_obj if status==GRB.OPTIMAL else float("-inf")
+ else:
+  _full_bd=float(m.ObjBound)
  _root_bd=(float(b6_result["full_all_column_relaxation_lower_bound"]) if b6_result is not None else _full_bd)
- _red_obj=_full_obj-float(econ_constant) if math.isfinite(_full_obj) else float("inf")
- _red_bd=_full_bd-float(econ_constant) if math.isfinite(_full_bd) else _full_bd
+ # Under ELECTRICAL_STRESS_OBJECTIVE_V1 there is no economic constant in the
+ # optimized objective.  Keep the legacy gap-audit plumbing numerically neutral
+ # while downstream artifact readers are migrated.
+ _red_obj=_full_obj
+ _red_bd=_full_bd
  def _gap(obj,bd):
   if not (math.isfinite(obj) and math.isfinite(bd)):return float("inf")
   if bd>obj+1e-7*max(1.0,abs(obj),abs(bd)):
@@ -2213,7 +2332,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   else:
    _incumbent_needed=None
  else:_incumbent_needed=None
- _restricted_native_gap=(b6_result.get("restricted_master_native_gap") if b6_result is not None else (float(m.MIPGap) if m.SolCount>0 else None))
+ _restricted_native_gap=(b6_result.get("restricted_master_native_gap") if b6_result is not None else _model_gap)
  # The frozen scalar objective also contains the tiny decision-dependent route-energy
  # tie-breaker.  It cannot be translated out of the lower bound the way a constant
  # can, so report its incumbent contribution explicitly and do NOT manufacture a
@@ -2255,7 +2374,8 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
 
  term={"status_code":status,"sol_count":int(m.SolCount),"runtime_s":float(b6_result.get("total_decomposition_seconds",m.Runtime)) if b6_result is not None else float(m.Runtime),"node_count":float(m.NodeCount) if hasattr(m,"NodeCount") else None,
        "process_memory_MB":_proc_mem(),"SoftMemLimit_GB":float(soft_mem_gb),"solve_mode":solve_mode,"objective_pass_metrics":pass_metrics,
-       "final_economic_target_mip_gap":econ_gap,"final_economic_achieved_mip_gap":final_pass_gap,"final_economic_incumbent":final_pass_obj,"final_economic_bound":final_pass_bound,
+       "objective_authority":"ELECTRICAL_STRESS_OBJECTIVE_V1",
+       "final_secondary_target_mip_gap":econ_gap,"final_secondary_achieved_mip_gap":final_pass_gap,"final_secondary_incumbent":final_pass_obj,"final_secondary_bound":final_pass_bound,
        "requested_threads":int(threads_req),"requested_concurrent_mip":int(concurrent_req),
        "actual_thread_counts_from_message_callback":actual_thread_counts,
        "actual_economic_threads":max(actual_thread_counts) if actual_thread_counts else (threads_req if concurrent_req>1 else None),
@@ -2263,13 +2383,12 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
        "configured_thread_cap_verified":bool(configured_thread_cap_verified),
        "observed_thread_counts_within_requested_cap":bool(observed_thread_counts_within_requested_cap),
        "thread_policy_verified":bool(thread_verified),"thread_verification_mode":"CONCURRENT_PARAMETER_PLUS_EXTERNAL_LOG" if concurrent_req>1 else "THREADS_PARAMETER_PLUS_MESSAGE_CAP",
-       "root_Method":root_method,"MIPFocus_economic":int(m.Params.MIPFocus),
+       "root_Method":root_method,"MIPFocus_secondary_actuation":int(m.Params.MIPFocus),
        "rolling_primal_recovery":bool(_rolling_primal_recovery),
        "rolling_var_hints_applied":bool(warm_audit.get("rolling_var_hints_applied",False)),
-       "economic_constant_dollars":float(econ_constant),
-       "full_cost_gap_semantics":True,
-       "frozen_scalar_objective_includes_route_energy_tiebreak":True,
-       "route_tiebreak_weight":1e-5,
+       "economic_constant_dollars_ex_post_only":float(econ_constant),
+       "full_cost_gap_semantics":False,
+       "frozen_scalar_objective_includes_route_energy_tiebreak":False,
        "translated_reduced_relative_gap_diagnostic":float(_reduced_gap_calc)}
  # Solver quality attributes are diagnostic only; Fresh Exact OpenDSS remains the physical gate.
  for _attr in ["MaxVio","ConstrVio","BoundVio","IntVio","ComplVio"]:
@@ -2411,7 +2530,35 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
   except Exception as _voltage_exc:raise RuntimeError(f"invalid planned voltage expression h={h} node={n}: {_voltage_exc}") from _voltage_exc
   vv=math.sqrt(max(_u_value,0))/(math.sqrt(3)*kv)
   gridplan.append({"horizon_step":h,"node":n,"v_pu":vv})
+ planned_stress=[{"horizon_step":h,"predicted_electrical_stress_pu":float(stress_h[h].X)} for h in range(H)]
+ predicted_voltage_components=[]
+ for row in gridplan:
+  _v=float(row["v_pu"])
+  _under=max(0.0,(1.0-_v*_v)/(1.0-0.95*0.95))
+  _over=max(0.0,(_v*_v-1.0)/(1.05*1.05-1.0))
+  predicted_voltage_components.append((max(_under,_over),int(row["horizon_step"]),str(row["node"]),None))
+ predicted_line_components=[]
+ for h in range(H):
+  for (_p,_n),_limit in lim.items():
+   if (h,_n) not in FP:continue
+   _limit_model=float(_limit)/_r25i_flow_scale_kw_per_model_unit
+   _fp=_r25p_solution_scalar(FP[(h,_n)]);_fq=_r25p_solution_scalar(FQ[(h,_n)])
+   predicted_line_components.append((math.hypot(_fp,_fq)/_limit_model,int(h),f"{_p}->{_n}",None))
+  for _row in static_line_stress_rows.get(h,()):
+   predicted_line_components.append((float(_row["loading_ratio"]),int(h),f'{_row["parent"]}->{_row["child"]}',None))
+ predicted_transformer_components=[]
+ for (h,d),(_facility_p,_facility_limit) in idc_transformer_stress_expr.items():
+  predicted_transformer_components.append((_r25p_solution_scalar(_facility_p)/float(_facility_limit),int(h),str(d),None))
+ for (h,sid),(_psvc,_qsvc,_skva) in service_stress_expr.items():
+  predicted_transformer_components.append((math.hypot(_r25p_solution_scalar(_psvc),_r25p_solution_scalar(_qsvc))/float(_skva),int(h),str(sid),None))
+ def _component_argmax(rows):
+  return max(rows,key=lambda x:x[0]) if rows else (0.0,None,None,None)
+ _pred_v=_component_argmax(predicted_voltage_components)
+ _pred_l=_component_argmax(predicted_line_components)
+ _pred_t=_component_argmax(predicted_transformer_components)
+ _pred_worst_type,_pred_worst=max((("VOLTAGE",_pred_v),("LINE",_pred_l),("TRANSFORMER",_pred_t)),key=lambda x:x[1][0])
  cw(out/"BUILD7B_FULL54_JOB_PLAN.csv",plan);cw(out/"BUILD7B_FULL54_MESS_PLAN.csv",mess_rows);cw(out/"BUILD7B_FULL54_MOVE_ARCS_SELECTED.csv",route_rows);cw(out/"BUILD7B_FULL54_GRID_VOLTAGE_PLAN.csv",gridplan)
+ cw(out/"BUILD7B_FULL54_ELECTRICAL_STRESS_PLAN.csv",planned_stress)
  _wd1={d:(0.0 if workload_debt_identically_zero else float(DW[(d,1)].X)) for d in IDCS}
  return {"model":m,"plan":plan,"send_now":send_now,"wan_all":wan_all,"firstmess":firstmess,"chosen_h0_move":chosen_move,
          "mess_rows":mess_rows,"route_rows":route_rows,"shadow":shadow,
@@ -2423,7 +2570,19 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
          "mess_support_debt1":{mid:float(_c5r4_energy_scale_kwh_per_model_unit*DE[(mid,1)].X) for mid in mids},"workload_debt1":_wd1,
          "metrics":{"variables":m.NumVars,"binary_variables":int(m.NumBinVars),"integer_variables":int(m.NumIntVars),"constraints":m.NumConstrs,"qconstraints":m.NumQConstrs,"runtime_s":m.Runtime,
                     "node_count":m.NodeCount,"mip_gap":final_pass_gap,"target_mip_gap":econ_gap,
-                    "objective_economic_AUD":float(econ.getValue()),
+                    "objective_authority":"ELECTRICAL_STRESS_OBJECTIVE_V1",
+                    "capability_mask":dict(_cap),
+                    "objective_worst_predicted_electrical_stress_pu":float(stress_worst.X),
+                    "objective_predicted_stress_exposure_pu_hours":float(DT*sum(stress_h[h].X for h in range(H))),
+                    "predicted_voltage_stress_max":float(_pred_v[0]),
+                    "predicted_line_stress_max":float(_pred_l[0]),
+                    "predicted_transformer_stress_max":float(_pred_t[0]),
+                    "predicted_worst_stress_type":str(_pred_worst_type),
+                    "predicted_worst_element_id":_pred_worst[2],
+                    "predicted_worst_phase":_pred_worst[3],
+                    "predicted_worst_horizon_step":_pred_worst[1],
+                    "objective_secondary_actuation":float(obj_actuation.getValue()),
+                    "planned_procurement_cost_AUD_ex_post_KPI":float(econ.getValue()+econ_constant),
                     "selected_move_count":len(route_rows),"candidate_move_binary_count":int(0 if r25e_node_arc_exact else len(mv)),
                     "candidate_move_continuous_arc_count":int(len(mv) if r25e_node_arc_exact else 0),"linear_nonzeros":float(m.DNumNZs),
                     "SoftMemLimit_GB":float(soft_mem_gb),"MIQCPMethod":int(m.Params.MIQCPMethod),"MultiObjPre":2,"root_Method":root_method,
@@ -2432,7 +2591,7 @@ def build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref
                     "lex_zero_certificate_active":bool(zero_lex_cert),"warm_start_applied":bool(warm_audit.get("applied",False)),
                     "baseline_move_binary_count":int(route_prune["baseline_reachable_move_binaries"]),
                     "exact_move_binary_reduction":int(route_prune["exact_move_binary_reduction"]),
-                    "MIPFocus_economic":3,"sparse_branch_flow_formulation":True,
+                    "MIPFocus_secondary_actuation":3,"sparse_branch_flow_formulation":True,
                     "max_planned_voltage_pu":max(x["v_pu"] for x in gridplan),"min_planned_voltage_pu":min(x["v_pu"] for x in gridplan),
                     "max_support_debt_kWh":_c5r4_energy_scale_kwh_per_model_unit*max(float(DE[(mid,h)].X) for mid in mids for h in range(H+1)),
                     "max_workload_debt_GPUh":0.0 if workload_debt_identically_zero else max(float(DW[(d,h)].X) for d in [f"IDC{i:02d}" for i in range(1,13)] for h in range(H+1)),
@@ -2569,7 +2728,7 @@ def main(out,base):
   # Initial MESS state.
   s0=scope["d2"][scope["d2"]["slot5"]==issue].sort_values("mess_id");mess_E={str(r.mess_id):float(r.safe_energy_start_kWh) for r in s0.itertuples(index=False)}
   _stage("FULL54_MODEL_BUILD_AND_SOLVE_BEGIN",out)
-  sol=build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref,ar2,b6,z,route_df,moves,conn_delay,price,out,static_ctx)
+  sol=build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref,ar2,b6,z,route_df,moves,conn_delay,price,out,static_ctx,capability_mask=electrical_stress_capability_mask())
   _stage("FULL54_MODEL_BUILD_AND_SOLVE_DONE",out,runtime_s=float(sol["metrics"]["runtime_s"]))
   # Exact current Rack / commitment / WAN certificates from BUILD4R1.
   _stage("RACK_WAN_CERT_BEGIN",out)
@@ -2913,7 +3072,8 @@ def rolling54_main(out,base):
    # The full joint H54 solve receives ONLY committed rolling state.
    sol=build_full(scope,b4,op1,issue,queue,running,inventory,dest_commit,mess_E,ref,ar2,b6,z,route_df,moves,
      conn_delay,static_ctx["price"],issue_out,static_ctx,rolling_mess_state=mess_state,mess_DE0=mess_DE,
-     workload_debt0=workload_debt,rolling_warmstart=rolling_warmstart)
+     workload_debt0=workload_debt,rolling_warmstart=rolling_warmstart,
+     capability_mask=electrical_stress_capability_mask())
 
    if os.environ.get("MOBILEESS_R25M_B6_SCREEN_ONLY","0")=="1" and int(issue)==int(os.environ.get("MOBILEESS_R25M_B6_SCREEN_ISSUE","152")):
     jw(issue_out/"ConversationA_R25M_B6_DIAGNOSTIC_STOP.json",{

@@ -11,8 +11,7 @@ import time
 
 from pfr.tools.jfm_isolation import load_isolated_run_root
 from pfr.tools.show_january_to_march_progress import (
-    B8_METHODS,
-    MAIN_METHODS,
+    ELECTRICAL_STRESS_METHODS,
     Period,
     snapshot,
 )
@@ -111,14 +110,10 @@ def main() -> None:
     run_root = Path(authority["run_root"])
     layout = authority["layout"]
     periods = [
-        Period("JANUARY B0-B7", run_root / layout["january_b0_b7"], date(2025, 1, 1), 31, MAIN_METHODS),
-        Period("JANUARY B08", run_root / layout["january_b8"], date(2025, 1, 1), 31, B8_METHODS),
-        Period("FEBRUARY B0-B7", run_root / layout["february_b0_b7"], date(2025, 2, 1), 28, MAIN_METHODS),
-        Period("FEBRUARY B08", run_root / layout["february_b8"], date(2025, 2, 1), 28, B8_METHODS),
-        Period("MARCH B0-B7", run_root / layout["march_b0_b7"], date(2025, 3, 1), 31, MAIN_METHODS),
-        Period("MARCH B08", run_root / layout["march_b8"], date(2025, 3, 1), 31, B8_METHODS),
-        Period("APRIL B0-B7", run_root / layout["april_b0_b7"], date(2025, 4, 1), 30, MAIN_METHODS),
-        Period("APRIL B08", run_root / layout["april_b8"], date(2025, 4, 1), 30, B8_METHODS),
+        Period("JANUARY B00-B09", run_root / layout["january_b00_b09"], date(2025, 1, 1), 31, ELECTRICAL_STRESS_METHODS),
+        Period("FEBRUARY B00-B09", run_root / layout["february_b00_b09"], date(2025, 2, 1), 28, ELECTRICAL_STRESS_METHODS),
+        Period("MARCH B00-B09", run_root / layout["march_b00_b09"], date(2025, 3, 1), 31, ELECTRICAL_STRESS_METHODS),
+        Period("APRIL B00-B09", run_root / layout["april_b00_b09"], date(2025, 4, 1), 30, ELECTRICAL_STRESS_METHODS),
     ]
     while True:
         print(

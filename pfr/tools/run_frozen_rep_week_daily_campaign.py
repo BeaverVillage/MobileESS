@@ -13,12 +13,14 @@ from typing import Any, Mapping
 
 from pfr.tools.run_pfr_daily_campaign import (
     DaySpec,
+    ELECTRICAL_STRESS_METHODS,
     ISSUES_PER_DAY,
     install_stop_signal_handlers,
     run_day,
     stop_active_children,
     write_campaign,
 )
+from pfr.result_storage import materialize_period_summary
 
 
 def sha256(path: Path) -> str:
@@ -53,6 +55,7 @@ def payload(
     continue_after_failure: bool,
     supplementary_b8_periodic_5min: bool = False,
     diagnostic_method: str | None = None,
+    electrical_stress_campaign: bool = False,
 ) -> Mapping[str, Any]:
     expected = int(period["days"])
     complete = len(rows) == expected
@@ -86,7 +89,9 @@ def payload(
         "failure_evidence_preserved_before_continuation": True,
         "issues_per_method_per_day": ISSUES_PER_DAY,
         "methods_per_day": (
-            1 if supplementary_b8_periodic_5min or diagnostic_method is not None else 8
+            1
+            if supplementary_b8_periodic_5min or diagnostic_method is not None
+            else (len(ELECTRICAL_STRESS_METHODS) if electrical_stress_campaign else 8)
         ),
         "method_ids": (
             ["B8"]
@@ -94,10 +99,15 @@ def payload(
             else (
                 [diagnostic_method]
                 if diagnostic_method is not None
-                else [f"B{index}" for index in range(8)]
+                else (
+                    list(ELECTRICAL_STRESS_METHODS)
+                    if electrical_stress_campaign
+                    else [f"B{index}" for index in range(8)]
+                )
             )
         ),
         "diagnostic_method": diagnostic_method,
+        "electrical_stress_campaign": electrical_stress_campaign,
         "supplementary_b8_periodic_5min": supplementary_b8_periodic_5min,
         "daily_runs": sorted(rows, key=lambda row: str(row["calendar_date"])),
     }
@@ -123,8 +133,16 @@ def main() -> None:
     )
     parser.add_argument(
         "--diagnostic-method",
-        choices=tuple(f"B{index}" for index in range(9)),
+        choices=(
+            tuple(f"B{index}" for index in range(9))
+            + ELECTRICAL_STRESS_METHODS
+        ),
         help="Run one method for a development-validation period.",
+    )
+    parser.add_argument(
+        "--electrical-stress-campaign",
+        action="store_true",
+        help="Run the frozen ordered B00-B09 electrical-stress campaign.",
     )
     parser.add_argument("--shared-root", type=Path, required=True)
     parser.add_argument("--exact-package-root", type=Path, required=True)
@@ -151,15 +169,22 @@ def main() -> None:
         parser.error(
             "--diagnostic-method and --supplementary-b8-periodic-5min are mutually exclusive"
         )
+    if args.electrical_stress_campaign and (
+        args.diagnostic_method or args.supplementary_b8_periodic_5min
+    ):
+        parser.error(
+            "--electrical-stress-campaign is mutually exclusive with single-method modes"
+        )
     calibrated_method_selected = bool(
         args.supplementary_b8_periodic_5min
-        or args.diagnostic_method in {"B7", "B8"}
+        or args.electrical_stress_campaign
+        or args.diagnostic_method in {"B7", "B8", "B08", "B09"}
         or args.diagnostic_method is None
     )
     if calibrated_method_selected and args.risk_calibration is None:
         parser.error("--risk-calibration is required before calibrated B7/B8 execution")
-    if args.diagnostic_method == "B6" and args.risk_calibration is not None:
-        parser.error("B6 calibration/validation must retain its raw-risk interface")
+    if args.diagnostic_method in {"B6", "B07"} and args.risk_calibration is not None:
+        parser.error("raw-risk calibration/validation must retain its raw-risk interface")
     if not 1 <= args.day_workers <= 31:
         parser.error("--day-workers must be in [1, 31]")
 
@@ -239,6 +264,7 @@ def main() -> None:
                 args.supplementary_b8_periodic_5min
             ),
             diagnostic_method=args.diagnostic_method,
+            electrical_stress_campaign=args.electrical_stress_campaign,
         ): spec
         for spec in specs
     }
@@ -284,6 +310,7 @@ def main() -> None:
                         args.supplementary_b8_periodic_5min
                     ),
                     diagnostic_method=args.diagnostic_method,
+                    electrical_stress_campaign=args.electrical_stress_campaign,
                 ),
             )
             print(
@@ -320,8 +347,15 @@ def main() -> None:
             args.supplementary_b8_periodic_5min
         ),
         diagnostic_method=args.diagnostic_method,
+        electrical_stress_campaign=args.electrical_stress_campaign,
     )
     write_campaign(args.output, campaign)
+    if campaign["status"] == "PASS" and args.electrical_stress_campaign:
+        materialize_period_summary(
+            args.output,
+            calendar_dates=tuple(spec.calendar_date for spec in specs),
+            method_ids=ELECTRICAL_STRESS_METHODS,
+        )
     print(json.dumps({"status": campaign["status"], "output": str(args.output)}))
     if campaign["status"] != "PASS":
         raise SystemExit(1)

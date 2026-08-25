@@ -38,8 +38,7 @@ if [[ -z "$risk_calibration" || ! -f "$risk_calibration" ]]; then
     exit 2
 fi
 
-output="$run_root/april/B0_B7"
-b8_output="$run_root/april/B8"
+output="$run_root/april/B00_B09"
 gate_root="$run_root/preflight/APR2025_FULL"
 expected_full_commit_sha="${PFR_EXPECTED_FULL_COMMIT_SHA:-}"
 expected_branch="${PFR_EXPECTED_BRANCH:-codex/feb03-predictive-native}"
@@ -61,6 +60,7 @@ mkdir -p "$gate_root"
     --repo "$repo_dir" --period-id "$period_id" --period-contract "$contract" \
     --shared-root "$shared" --input-root "$input_root" \
     --route-catalog "$base/PFR3_FIXED_K3_PHYSICS_CURRENT/FROZEN_K3_PHYSICS_GEOMETRY.json" \
+    --electrical-stress-campaign \
     --report "$gate_root/PREFLIGHT_REPORT.json"
 if ((preflight_only)); then
     echo "APRIL_2025_EXECUTION_PREFLIGHT=PASS_NO_EPISODES_STARTED"
@@ -72,6 +72,7 @@ export OPENBLAS_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0
 common=(
     --repo "$repo_dir" --period-id "$period_id" --period-contract "$contract"
     --day-workers 4 --capture-day-logs --continue-after-failure
+    --electrical-stress-campaign
     --shared-root "$shared"
     --exact-package-root /mnt/c/Users/kjw39/Downloads/stage_mess_grid_v2038_exact_sweep_power_v70_final_v1_package
     --authority-package-root "$work/run_packages/K9H7_V2044R11R1_20260807T191351"
@@ -94,24 +95,13 @@ campaign_rc=0
     "${common[@]}" --output "$output" || campaign_rc=$?
 if ((campaign_rc == 130 || campaign_rc == 143)); then exit "$campaign_rc"; fi
 
-b8_campaign_rc=0
-"$python_bin" -m pfr.tools.run_frozen_rep_week_daily_campaign \
-    "${common[@]}" --supplementary-b8-periodic-5min \
-    --output "$b8_output" || b8_campaign_rc=$?
-if ((b8_campaign_rc == 130 || b8_campaign_rc == 143)); then exit "$b8_campaign_rc"; fi
-
 verify_rc=0
 "$python_bin" -m pfr.tools.verify_daily_campaign_storage \
     --repo "$repo_dir" --root "$output" --start-date 2025-04-01 --days 30 \
+    --electrical-stress-campaign \
     --report "$output/STORAGE_VERIFICATION.json" || verify_rc=$?
-b8_verify_rc=0
-"$python_bin" -m pfr.tools.verify_daily_campaign_storage \
-    --repo "$repo_dir" --root "$b8_output" --start-date 2025-04-01 --days 30 \
-    --supplementary-b8-periodic-5min \
-    --report "$b8_output/STORAGE_VERIFICATION.json" || b8_verify_rc=$?
-
-if ((campaign_rc != 0 || b8_campaign_rc != 0 || verify_rc != 0 || b8_verify_rc != 0)); then
-    echo "APRIL_2025_EXECUTION_STATUS=COMPLETE_WITH_RECORDED_FAILURES campaign_rc=$campaign_rc b8_campaign_rc=$b8_campaign_rc verify_rc=$verify_rc b8_verify_rc=$b8_verify_rc" >&2
+if ((campaign_rc != 0 || verify_rc != 0)); then
+    echo "APRIL_2025_EXECUTION_STATUS=COMPLETE_WITH_RECORDED_FAILURES campaign_rc=$campaign_rc verify_rc=$verify_rc" >&2
     exit 1
 fi
 echo "APRIL_2025_EXECUTION_STATUS=PASS"

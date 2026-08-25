@@ -64,6 +64,7 @@ class FastOptimizationCertificate:
     post_projection_maximum_constraint_violation: float | None = None
     numerical_recovery_used: bool = False
     numerical_retry_count: int = 0
+    objective_authority: str = "ELECTRICAL_STRESS_OBJECTIVE_V1_SECONDARY_RECOURSE"
 
     def as_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -172,7 +173,25 @@ class GurobiFastControlOptimizer:
             remaining = float(state.remaining_work_gpu_hours[job_id])
             upper = min(1.0, remaining / (gpu * dt_hours))
             target = min(max(float(nominal.job_compute_rate_fraction.get(job_id, 0.0)), 0.0), upper)
-            lower = 0.0 if context.compute_modulation_enabled else target
+            remaining_slots = int(context.job_deadline_step[job_id]) - context.issue
+            if remaining_slots <= 0 and remaining > 1e-12:
+                raise FastOptimizationError(
+                    f"job {job_id} has remaining work at/after its deadline"
+                )
+            future_full_work = max(0, remaining_slots - 1) * gpu * dt_hours
+            required_now = max(
+                0.0,
+                (remaining - future_full_work) / (gpu * dt_hours),
+            )
+            if required_now > upper + 1e-9:
+                raise FastOptimizationError(
+                    f"job {job_id} cannot meet its hard deadline"
+                )
+            lower = (
+                min(upper, required_now)
+                if context.compute_modulation_enabled
+                else target
+            )
             variable_upper = upper if context.compute_modulation_enabled else target
             variable = model.addVar(
                 lb=lower,
@@ -182,9 +201,7 @@ class GurobiFastControlOptimizer:
             compute[job_id] = variable
             compute_lower[job_id] = lower
             compute_upper[job_id] = variable_upper
-            urgency = 1.0 / max(1, int(context.job_deadline_step[job_id]) - context.issue)
             objective += 10.0 * (variable - target) * (variable - target)
-            objective += 0.1 * urgency * (1.0 - variable) * (1.0 - variable)
 
         for site in sorted(context.site_gpu_capacity):
             model.addConstr(
@@ -213,6 +230,14 @@ class GurobiFastControlOptimizer:
             )
             lower = -min(float(limits.mess_charge_limit_kw[mess_id]), max_charge_soc)
             upper = min(float(limits.mess_discharge_limit_kw[mess_id]), max_discharge_soc)
+            target_q = float(nominal.mess_q_kvar.get(mess_id, 0.0))
+            if abs(target_q) > float(limits.mess_pcs_kva[mess_id]) + 1e-9:
+                raise FastOptimizationError("planned MESS Q exceeds the PCS rating")
+            p_cap_at_planned_q = math.sqrt(
+                max(0.0, float(limits.mess_pcs_kva[mess_id]) ** 2 - target_q**2)
+            )
+            lower = max(lower, -p_cap_at_planned_q)
+            upper = min(upper, p_cap_at_planned_q)
             if not context.mess_operational_enabled:
                 lower = upper = 0.0
             p_var = model.addVar(lb=lower, ub=upper, name=f"mess_p[{mess_id}]")
@@ -323,7 +348,10 @@ class GurobiFastControlOptimizer:
         control = FastControl(
             mess_charge_kw=charge,
             mess_discharge_kw=discharge,
-            mess_q_kvar={mess_id: 0.0 for mess_id in mess_p},
+            mess_q_kvar={
+                mess_id: float(nominal.mess_q_kvar.get(mess_id, 0.0))
+                for mess_id in mess_p
+            },
             job_compute_rate_fraction=compute_value,
             site_throughput_fraction=dict(nominal.site_throughput_fraction),
         )

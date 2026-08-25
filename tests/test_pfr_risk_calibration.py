@@ -12,7 +12,7 @@ from pfr.tools import build_january_b6_risk_calibration as builder
 from pfr.tools import validate_february_risk_calibration as february_validator
 
 
-def _audit(issue: int, score: float) -> dict:
+def _audit(issue: int, score: float, source_method: str = "B6") -> dict:
     predicted = {family: -1.0 for family in RISK_FAMILY_SCALES}
     actual = {
         family: predicted[family] + score * scale
@@ -25,7 +25,7 @@ def _audit(issue: int, score: float) -> dict:
     normalized = {family: score for family in RISK_FAMILY_SCALES}
     return {
         "schema_version": "PFR5_EVENT_RISK_CALIBRATION_AUDIT_V1",
-        "role": "B6_RAW_ONE_STEP_PREDECISION_TO_REALIZED_AUDIT",
+        "role": f"{source_method}_RAW_ONE_STEP_PREDECISION_TO_REALIZED_AUDIT",
         "prediction_issue": issue,
         "realization_issue": issue,
         "horizon_steps": 1,
@@ -40,21 +40,22 @@ def _audit(issue: int, score: float) -> dict:
     }
 
 
-def test_january_b6_family_blocks_freeze_and_load_without_march(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+@pytest.mark.parametrize("source_method", ["B6", "B07"])
+def test_january_raw_family_blocks_freeze_and_load_without_march(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, source_method: str
 ) -> None:
     monkeypatch.setattr(builder, "ISSUES_PER_DAY", 2)
     monkeypatch.setattr(builder, "CALIBRATION_BLOCK_STEPS", 1)
     for day_index in range(31):
         calendar_date = f"2025-01-{day_index + 1:02d}"
-        method_root = tmp_path / calendar_date / "B6"
+        method_root = tmp_path / calendar_date / source_method
         method_root.mkdir(parents=True)
         (method_root.parent / "RUN_MANIFEST.json").write_text(
             json.dumps(
                 {
                     "git_full_commit_sha": "c" * 40,
                     "git_worktree_dirty": False,
-                    "diagnostic_single_method": "B6",
+                    "diagnostic_single_method": source_method,
                     "risk_calibration_authority_id": None,
                 }
             ),
@@ -71,7 +72,7 @@ def test_january_b6_family_blocks_freeze_and_load_without_march(
                 json.dumps(
                     {
                         "status": "PASS_COMMITTED",
-                        "comparison_method_id": "B6",
+                        "comparison_method_id": source_method,
                         "issue": issue,
                         "risk_interface": "RAW_UNCALIBRATED",
                         "risk_calibration_authority_id": None,
@@ -80,7 +81,9 @@ def test_january_b6_family_blocks_freeze_and_load_without_march(
                         },
                         "pre_state_sha256": "a" * 64,
                         "post_state_sha256": "b" * 64,
-                        "risk_calibration_audit": _audit(issue, score),
+                        "risk_calibration_audit": _audit(
+                            issue, score, source_method
+                        ),
                     }
                 ),
                 encoding="utf-8",
@@ -89,7 +92,7 @@ def test_january_b6_family_blocks_freeze_and_load_without_march(
             json.dumps(
                 {
                     "status": "PASS",
-                    "comparison_method_id": "B6",
+                    "comparison_method_id": source_method,
                     "commit_marker_count": 2,
                     "risk_calibration_audit_count": 2,
                     "risk_calibration_day_joint_score": max(day_scores),
@@ -98,7 +101,7 @@ def test_january_b6_family_blocks_freeze_and_load_without_march(
             encoding="utf-8",
         )
 
-    payload = builder.build_calibration(tmp_path)
+    payload = builder.build_calibration(tmp_path, source_method=source_method)
     assert payload["daily_block_count"] == 31
     assert payload["calibration_block_count"] == 62
     assert payload["finite_sample_rank"] == 60
@@ -107,6 +110,7 @@ def test_january_b6_family_blocks_freeze_and_load_without_march(
     )
     assert payload["source_calibrated_risk_positive_count"] == 0
     assert payload["march_outcomes_read"] is False
+    assert payload["source_method"] == source_method
 
     payload.update(
         {

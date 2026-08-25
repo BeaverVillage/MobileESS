@@ -13,12 +13,14 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from pfr.provenance import scientific_implementation_fingerprint
+from pfr.result_storage import validate_campaign_summary
 from pfr.risk_calibration import RISK_FAMILY_SCALES
 from pfr.runtime import MESS_FLOOR_KWH
 
 
 METHODS = tuple(f"B{index}" for index in range(8))
 B8_METHODS = ("B8",)
+ELECTRICAL_STRESS_METHODS = tuple(f"B{index:02d}" for index in range(10))
 ISSUES_PER_DAY = 288
 
 
@@ -568,13 +570,24 @@ def main() -> None:
     )
     parser.add_argument(
         "--diagnostic-method",
-        choices=tuple(f"B{index}" for index in range(9)),
+        choices=(tuple(f"B{index}" for index in range(9)) + ELECTRICAL_STRESS_METHODS),
         help="Verify a one-method calibration or development-validation campaign.",
+    )
+    parser.add_argument(
+        "--electrical-stress-campaign",
+        action="store_true",
+        help="Verify the ordered B00-B09 electrical-stress campaign.",
     )
     args = parser.parse_args()
     if args.diagnostic_method and args.supplementary_b8_periodic_5min:
         parser.error(
             "--diagnostic-method and --supplementary-b8-periodic-5min are mutually exclusive"
+        )
+    if args.electrical_stress_campaign and (
+        args.diagnostic_method or args.supplementary_b8_periodic_5min
+    ):
+        parser.error(
+            "--electrical-stress-campaign is mutually exclusive with single-method modes"
         )
     if not 1 <= args.days <= 31:
         parser.error("--days must be in [1, 31]")
@@ -586,7 +599,15 @@ def main() -> None:
     methods = (
         B8_METHODS
         if args.supplementary_b8_periodic_5min
-        else ((args.diagnostic_method,) if args.diagnostic_method else METHODS)
+        else (
+            (args.diagnostic_method,)
+            if args.diagnostic_method
+            else (
+                ELECTRICAL_STRESS_METHODS
+                if args.electrical_stress_campaign
+                else METHODS
+            )
+        )
     )
     rows = [
         inspect_day(
@@ -598,9 +619,35 @@ def main() -> None:
         for calendar_date in expected_dates
     ]
     campaign_registry = inspect_campaign_registry(args.root, expected_dates, methods)
+    period_summary: dict[str, Any] | None = None
+    if args.electrical_stress_campaign:
+        try:
+            period_summary = validate_campaign_summary(
+                args.root / "CAMPAIGN_SUMMARY.parquet",
+                expected_method_ids=ELECTRICAL_STRESS_METHODS,
+            )
+            period_audit = load_json(args.root / "PERIOD_SUMMARY_AUDIT.json")
+            if (
+                period_audit.get("status") != "PASS"
+                or period_audit.get("calendar_dates") != expected_dates
+                or period_audit.get("method_ids_in_order")
+                != list(ELECTRICAL_STRESS_METHODS)
+            ):
+                raise RuntimeError("period summary audit axis/status mismatch")
+            period_summary = {**period_summary, "period_audit": period_audit}
+        except (OSError, RuntimeError, ValueError, json.JSONDecodeError) as exc:
+            period_summary = {
+                "status": "FAIL",
+                "errors": [f"{type(exc).__name__}: {exc}"],
+            }
     storage_ok = (
         all(row["storage_integrity"] == "PASS" for row in rows)
         and not campaign_registry["errors"]
+        and (
+            not args.electrical_stress_campaign
+            or period_summary is not None
+            and period_summary.get("status") == "PASS"
+        )
     )
     complete = all(bool(row["complete"]) for row in rows)
     scientific_pass = complete and all(
@@ -627,12 +674,14 @@ def main() -> None:
         "supplementary_b8_periodic_5min": (
             args.supplementary_b8_periodic_5min
         ),
+        "electrical_stress_campaign": args.electrical_stress_campaign,
         "completed_days": sum(bool(row["complete"]) for row in rows),
         "pass_days": sum(row["scientific_status"] == "PASS" for row in rows),
         "total_commit_markers": sum(int(row["commit_markers"]) for row in rows),
         "scientific_implementation_fingerprint": fingerprint,
         "days": rows,
         "campaign_registry": campaign_registry,
+        "period_campaign_summary": period_summary,
     }
     report_path = args.report or (args.root / "STORAGE_VERIFICATION.json")
     atomic_write_json(report_path, report)

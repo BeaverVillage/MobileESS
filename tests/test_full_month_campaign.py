@@ -106,6 +106,18 @@ def test_full_month_campaign_has_separate_b0_b7_and_b8_registries() -> None:
     assert b8["methods_per_day"] == 1
     assert b8["method_ids"] == ["B8"]
 
+    stress = payload(
+        period,
+        rows,
+        workers=4,
+        final=True,
+        continue_after_failure=True,
+        electrical_stress_campaign=True,
+    )
+    assert stress["methods_per_day"] == 10
+    assert stress["method_ids"] == [f"B{index:02d}" for index in range(10)]
+    assert stress["electrical_stress_campaign"] is True
+
 
 def test_common_b0_b8_contract_is_valid_for_all_month_preflights() -> None:
     result = validate_method_contracts()

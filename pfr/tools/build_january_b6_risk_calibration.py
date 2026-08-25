@@ -13,6 +13,8 @@ from typing import Any, Mapping
 
 from pfr.risk_calibration import (
     AUTHORITY_ID,
+    ELECTRICAL_STRESS_AUTHORITY_ID,
+    ELECTRICAL_STRESS_SCHEMA_VERSION,
     RISK_FAMILY_SCALES,
     SCHEMA_VERSION,
 )
@@ -47,12 +49,14 @@ def _atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:
     temporary.replace(path)
 
 
-def _validate_audit(audit: Mapping[str, Any], issue: int) -> Mapping[str, float]:
+def _validate_audit(
+    audit: Mapping[str, Any], issue: int, *, source_method: str = "B6"
+) -> Mapping[str, float]:
     if (
         audit.get("schema_version")
         != "PFR5_EVENT_RISK_CALIBRATION_AUDIT_V1"
         or audit.get("role")
-        != "B6_RAW_ONE_STEP_PREDECISION_TO_REALIZED_AUDIT"
+        != f"{source_method}_RAW_ONE_STEP_PREDECISION_TO_REALIZED_AUDIT"
         or int(audit.get("prediction_issue", -1)) != issue
         or int(audit.get("realization_issue", -1)) != issue
         or int(audit.get("horizon_steps", -1)) != 1
@@ -109,8 +113,15 @@ def _validate_audit(audit: Mapping[str, Any], issue: int) -> Mapping[str, float]
     }
 
 
-def build_calibration(source_root: Path, *, alpha: float = ALPHA) -> Mapping[str, Any]:
+def build_calibration(
+    source_root: Path,
+    *,
+    alpha: float = ALPHA,
+    source_method: str = "B6",
+) -> Mapping[str, Any]:
     source_root = source_root.resolve()
+    if source_method not in {"B6", "B07"}:
+        raise ValueError("calibration source method must be B6 or B07")
     if not 0.0 < alpha < 1.0:
         raise ValueError("alpha must lie in (0,1)")
     if (
@@ -129,13 +140,13 @@ def build_calibration(source_root: Path, *, alpha: float = ALPHA) -> Mapping[str
     source_commits: set[str] = set()
     for offset, calendar_date in enumerate(dates):
         day_root = source_root / calendar_date
-        method_root = day_root / "B6"
+        method_root = day_root / source_method
         manifest = _load_json(day_root / "RUN_MANIFEST.json")
         source_commit = str(manifest.get("git_full_commit_sha", ""))
         if (
             len(source_commit) != 40
             or manifest.get("git_worktree_dirty") is not False
-            or manifest.get("diagnostic_single_method") != "B6"
+            or manifest.get("diagnostic_single_method") != source_method
             or manifest.get("risk_calibration_authority_id") is not None
         ):
             raise ValueError(
@@ -145,7 +156,7 @@ def build_calibration(source_root: Path, *, alpha: float = ALPHA) -> Mapping[str
         summary = _load_json(method_root / "METHOD_SUMMARY.json")
         if (
             summary.get("status") != "PASS"
-            or summary.get("comparison_method_id") != "B6"
+            or summary.get("comparison_method_id") != source_method
             or int(summary.get("commit_marker_count", -1)) != ISSUES_PER_DAY
             or int(summary.get("risk_calibration_audit_count", -1))
             != ISSUES_PER_DAY
@@ -160,7 +171,7 @@ def build_calibration(source_root: Path, *, alpha: float = ALPHA) -> Mapping[str
             )
             if (
                 marker.get("status") != "PASS_COMMITTED"
-                or marker.get("comparison_method_id") != "B6"
+                or marker.get("comparison_method_id") != source_method
                 or int(marker.get("issue", -1)) != issue
                 or marker.get("risk_interface") != "RAW_UNCALIBRATED"
                 or marker.get("risk_calibration_authority_id") is not None
@@ -171,7 +182,9 @@ def build_calibration(source_root: Path, *, alpha: float = ALPHA) -> Mapping[str
             audit = marker.get("risk_calibration_audit")
             if not isinstance(audit, dict):
                 raise ValueError(f"risk calibration audit missing issue={issue}")
-            normalized = _validate_audit(audit, issue)
+            normalized = _validate_audit(
+                audit, issue, source_method=source_method
+            )
             family_scores.append(normalized)
             joint_scores.append(max(normalized.values()))
             raw_components = marker.get("risk_raw_components")
@@ -234,7 +247,9 @@ def build_calibration(source_root: Path, *, alpha: float = ALPHA) -> Mapping[str
                 }
             )
     if len(source_commits) != 1:
-        raise ValueError("January B6 calibration days use multiple implementation commits")
+        raise ValueError(
+            f"January {source_method} calibration days use multiple implementation commits"
+        )
     rank = min(
         math.ceil((len(block_scores) + 1) * (1.0 - alpha)),
         len(block_scores),
@@ -263,10 +278,18 @@ def build_calibration(source_root: Path, *, alpha: float = ALPHA) -> Mapping[str
             "calibration degenerates B7 into an always-positive risk trigger"
         )
     return {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": (
+            ELECTRICAL_STRESS_SCHEMA_VERSION
+            if source_method == "B07"
+            else SCHEMA_VERSION
+        ),
         "status": "FROZEN",
-        "authority_id": AUTHORITY_ID,
-        "source_method": "B6",
+        "authority_id": (
+            ELECTRICAL_STRESS_AUTHORITY_ID
+            if source_method == "B07"
+            else AUTHORITY_ID
+        ),
+        "source_method": source_method,
         "source_risk_interface": "RAW_UNCALIBRATED",
         "source_period": "2025-01",
         "calibration_dates": list(dates),
@@ -292,7 +315,9 @@ def build_calibration(source_root: Path, *, alpha: float = ALPHA) -> Mapping[str
         "source_calibrated_risk_positive_fraction": (
             source_positive_trigger_count / len(source_raw_components)
         ),
-        "nondegenerate_event_trigger_gate": "PASS_NOT_ALWAYS_POSITIVE_ON_SOURCE_B6_STATES",
+        "nondegenerate_event_trigger_gate": (
+            f"PASS_NOT_ALWAYS_POSITIVE_ON_SOURCE_{source_method}_STATES"
+        ),
         "source_audit_sha256": _canonical_sha256(source_audits),
         "source_git_full_commit_sha": next(iter(source_commits)),
         "source_root": str(source_root),
@@ -309,8 +334,18 @@ def main() -> None:
     parser.add_argument("--source-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--alpha", type=float, default=ALPHA)
+    parser.add_argument(
+        "--source-method",
+        choices=("B6", "B07"),
+        default="B07",
+        help="Raw-risk January method; B07 is authoritative for B00-B09.",
+    )
     args = parser.parse_args()
-    payload = build_calibration(args.source_root, alpha=args.alpha)
+    payload = build_calibration(
+        args.source_root,
+        alpha=args.alpha,
+        source_method=args.source_method,
+    )
     _atomic_write_json(args.output.resolve(), payload)
     print(
         json.dumps(

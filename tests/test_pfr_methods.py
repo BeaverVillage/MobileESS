@@ -2,6 +2,8 @@ import unittest
 
 from pfr.methods import (
     ComparisonMethod,
+    FACTORIAL_ELECTRICAL_STRESS_CELLS,
+    ElectricalStressMethod,
     ExperimentAuthority,
     K9H7ResultIdentityV2,
     MethodContractError,
@@ -100,6 +102,61 @@ class MethodFactoryTests(unittest.TestCase):
         )
         with self.assertRaises(MethodContractError):
             identity.validate()
+
+    def test_electrical_stress_registry_is_b00_through_b09(self):
+        configs = self.factory.electrical_stress_campaign()
+        self.assertEqual(
+            [item.comparison_method_id.value for item in configs],
+            [f"B{index:02d}" for index in range(10)],
+        )
+        self.assertEqual(
+            self.factory.create_electrical_stress(
+                ElectricalStressMethod.B04
+            ).label,
+            "Full compute only",
+        )
+
+    def test_factorial_cells_share_controller_and_only_toggle_capabilities(self):
+        cells = {
+            cell: self.factory.create_electrical_stress(method)
+            for cell, method in FACTORIAL_ELECTRICAL_STRESS_CELLS.items()
+        }
+        common = {
+            (
+                config.control_mode,
+                config.periodic_replan_steps,
+                config.risk_interface,
+                config.joint_uncertainty,
+                config.ac_safety_filter,
+            )
+            for config in cells.values()
+        }
+        self.assertEqual(len(common), 1)
+        self.assertEqual(
+            {
+                cell: (
+                    config.energy_flexibility != "NONE",
+                    config.temporal_workload_shift
+                    and config.spatial_workload_migration,
+                )
+                for cell, config in cells.items()
+            },
+            {
+                "RC0": (False, False),
+                "RCE": (True, False),
+                "RCC": (False, True),
+                "RCEC": (True, True),
+            },
+        )
+        self.assertEqual(
+            cells["RCC"].h54_capability_mask,
+            {
+                "mess_dispatch": False,
+                "mess_mobility": False,
+                "temporal_compute": True,
+                "spatial_compute": True,
+            },
+        )
 
 
 if __name__ == "__main__":

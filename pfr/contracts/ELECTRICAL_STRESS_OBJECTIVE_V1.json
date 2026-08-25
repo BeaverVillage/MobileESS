@@ -1,0 +1,43 @@
+{
+  "schema_version": "ELECTRICAL_STRESS_OBJECTIVE_V1",
+  "status": "FROZEN",
+  "research_objective": "Minimize worst-case predicted distribution-network electrical stress while satisfying hard grid, mobility, storage, AI-service, and recovery constraints.",
+  "planning_authority": "CAUSAL_RADIAL_NETWORK_SURROGATE",
+  "execution_authority": "FRESH_EXACT_THREE_PHASE_OPENDSS",
+  "authoritative_method_registry": "ELECTRICAL_STRESS_METHOD_REGISTRY_V1",
+  "common_formulation_rule": "B00-B09 use one H54 formulation and objective; only capability, replan-policy, and risk-interface masks may differ according to the frozen registry.",
+  "stress_components": {
+    "voltage_planning": "limit-normalized LinDistFlow squared-voltage epigraph; 0 at 1 pu and 1 at 0.95/1.05 pu",
+    "voltage_realized_exact_ac": "max((1-v_min)/0.05, (v_max-1)/0.05, 0)",
+    "line": "max_line_current/loading_rating",
+    "transformer": "max(transformer_current_loading, transformer_kVA_loading)"
+  },
+  "planning_to_evaluation_semantics": "The causal planner minimizes a radial-network surrogate with the same physical limit endpoints; the paper-facing realized KPI is recomputed from Fresh three-phase OpenDSS voltage magnitudes and current/kVA loadings.",
+  "lexicographic_objectives": [
+    "min max_h z_h",
+    "min sum_h z_h * delta_t",
+    "min secondary_actuation"
+  ],
+  "hard_constraints": [
+    "0.95 <= exact/surrogate voltage <= 1.05 pu",
+    "line loading <= 1 pu",
+    "transformer loading <= 1 pu",
+    "MESS route, connection, SOC, PCS P-Q circle",
+    "GPU gang, rack, IDC, WAN, checkpoint, deadline",
+    "terminal workload debt and support-energy debt recovery",
+    "recovery rebound bound where active"
+  ],
+  "excluded_from_optimization_objective": [
+    "electricity price or ex-post grid cost",
+    "root peak",
+    "rebound KPI",
+    "number of modalities used"
+  ],
+  "evaluation_only": [
+    "realized root peak kW",
+    "realized rebound kW and kWh",
+    "realized electricity cost AUD",
+    "Fresh OpenDSS exact electrical stress",
+    "counterfactual z_E, z_C, z_EC"
+  ]
+}

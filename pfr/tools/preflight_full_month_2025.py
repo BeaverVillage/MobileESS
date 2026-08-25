@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 
 from pfr.canary import run_idc_migration_canary
+from pfr.methods import ExperimentAuthority, MethodFactory
 from pfr.migration import load_migration_authority
 from pfr.tools.preflight_january_2025 import (
     validate_method_contracts,
@@ -51,6 +52,11 @@ def main() -> None:
     parser.add_argument("--route-catalog", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--allow-unmaterialized", action="store_true")
+    parser.add_argument(
+        "--electrical-stress-campaign",
+        action="store_true",
+        help="Validate the B00-B09 daily PRE and method registry.",
+    )
     args = parser.parse_args()
 
     contract_path = args.period_contract or (
@@ -64,6 +70,7 @@ def main() -> None:
     first = int(period["global_issue_first"])
     last = int(period["global_issue_last"])
     days = int(period["days"])
+    method_count = 10 if args.electrical_stress_campaign else 8
 
     plan_path = args.shared_root / "SOURCE_MATERIALIZATION_PLAN.json"
     plan = json.loads(plan_path.read_text(encoding="utf-8"))
@@ -83,8 +90,13 @@ def main() -> None:
     input_ok = bool(
         pre.get("status") == "PASS"
         and len(pre.get("calendar_dates", ())) == days
-        and int(pre.get("daily_episode_count", -1)) == days * 8
-        and len(pre.get("episodes", ())) == days * 8
+        and int(pre.get("daily_episode_count", -1)) == days * method_count
+        and len(pre.get("episodes", ())) == days * method_count
+        and pre.get("methods") == (
+            [f"B{index:02d}" for index in range(10)]
+            if args.electrical_stress_campaign
+            else [f"B{index}" for index in range(8)]
+        )
         and all(
             row.get("daily_state_reset") is True
             and row.get("cross_day_state_carryover") is False
@@ -204,7 +216,22 @@ def main() -> None:
             migration_authority, Path(temporary)
         )
     migration_ok = migration_ok and migration_canary.get("pass") is True
-    method_contracts = validate_method_contracts()
+    if args.electrical_stress_campaign:
+        hashes = tuple(format(index, "064x") for index in range(1, 8))
+        stress_configs = MethodFactory(
+            ExperimentAuthority(*hashes)
+        ).electrical_stress_campaign()
+        method_contracts = {
+            "pass": tuple(
+                config.comparison_method_id.value for config in stress_configs
+            ) == tuple(f"B{index:02d}" for index in range(10)),
+            "method_ids": [
+                config.comparison_method_id.value for config in stress_configs
+            ],
+            "objective_semantics": "COMMON_ELECTRICAL_STRESS_LEXICOGRAPHIC",
+        }
+    else:
+        method_contracts = validate_method_contracts()
     method_contracts_ok = method_contracts.get("pass") is True
     workload_scheduler = validate_workload_scheduler_contract(
         args.repo, jobs_path
@@ -249,7 +276,8 @@ def main() -> None:
         "period_id": args.period_id,
         "calendar_start": period["calendar_start"],
         "days": days,
-        "expected_commit_markers": int(period["expected_commit_markers"]),
+        "expected_commit_markers": days * method_count * 288,
+        "electrical_stress_campaign": args.electrical_stress_campaign,
         "checks": {
             "materialization_plan": plan_ok,
             "daily_pre_and_jobs": input_ok,

@@ -31,14 +31,14 @@ cd "$repo_dir"
 common=(--run-root "$run_root" --risk-calibration "$risk_calibration")
 if ((preflight_only)); then
     bash "$repo_dir/pfr/tools/run_january_to_march_2025_local.sh" \
-        "${common[@]}" --skip-migration-sensitivity --preflight-only
+        "${common[@]}" --preflight-only
     bash "$repo_dir/pfr/tools/prepare_april_2025_local.sh" --plan-only
     echo "JANUARY_TO_APRIL_PREFLIGHT_STATUS=PASS_NO_EPISODES_STARTED"
     exit 0
 fi
 
 bash "$repo_dir/pfr/tools/run_january_to_march_2025_local.sh" \
-    "${common[@]}" --skip-migration-sensitivity
+    "${common[@]}"
 echo "JANUARY_TO_MARCH_FROZEN_EXECUTION=PASS; STARTING_APRIL_PREPROCESSING"
 bash "$repo_dir/pfr/tools/prepare_april_2025_local.sh"
 echo "APRIL_PREPROCESSING=PASS; STARTING_APRIL_EXECUTION"

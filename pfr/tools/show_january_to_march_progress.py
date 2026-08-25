@@ -13,6 +13,9 @@ import time
 from pfr.tools.jfm_isolation import load_isolated_run_root
 
 
+ELECTRICAL_STRESS_METHODS = tuple(f"B{index:02d}" for index in range(10))
+# Historical exports remain import-compatible for analysis tools that only read
+# old campaigns.  New progress views use ELECTRICAL_STRESS_METHODS exclusively.
 MAIN_METHODS = tuple(f"B{index}" for index in range(8))
 B8_METHODS = ("B8",)
 
@@ -234,46 +237,25 @@ def main() -> None:
     layout = authority["layout"]
     periods = [
         Period(
-            "JANUARY B0-B7",
-            run_root / layout["january_b0_b7"],
+            "JANUARY B00-B09",
+            run_root / layout["january_b00_b09"],
             date(2025, 1, 1),
             31,
-            MAIN_METHODS,
+            ELECTRICAL_STRESS_METHODS,
         ),
         Period(
-            "JANUARY B08",
-            run_root / layout["january_b8"],
-            date(2025, 1, 1),
-            31,
-            B8_METHODS,
-        ),
-        Period(
-            "FEBRUARY B0-B7",
-            run_root / layout["february_b0_b7"],
+            "FEBRUARY B00-B09",
+            run_root / layout["february_b00_b09"],
             date(2025, 2, 1),
             28,
-            MAIN_METHODS,
+            ELECTRICAL_STRESS_METHODS,
         ),
         Period(
-            "FEBRUARY B08",
-            run_root / layout["february_b8"],
-            date(2025, 2, 1),
-            28,
-            B8_METHODS,
-        ),
-        Period(
-            "MARCH B0-B7",
-            run_root / layout["march_b0_b7"],
+            "MARCH B00-B09",
+            run_root / layout["march_b00_b09"],
             date(2025, 3, 1),
             31,
-            MAIN_METHODS,
-        ),
-        Period(
-            "MARCH B08",
-            run_root / layout["march_b8"],
-            date(2025, 3, 1),
-            31,
-            B8_METHODS,
+            ELECTRICAL_STRESS_METHODS,
         ),
     ]
     print(

@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import asdict
 from functools import lru_cache
 import hashlib
 import importlib
 import itertools
 import json
+import os
 from pathlib import Path
 import shutil
 import statistics
@@ -19,8 +21,15 @@ import numpy as np
 import pandas as pd
 
 from pfr.daily import DailyInitializationError, certify_daily_pre_identity
+from pfr.electrical_stress import OBJECTIVE_AUTHORITY
 from pfr.git_identity import run_git
-from pfr.methods import ComparisonMethod, ExperimentAuthority, MethodFactory
+from pfr.methods import (
+    ComparisonMethod,
+    ElectricalStressMethod,
+    FACTORIAL_ELECTRICAL_STRESS_CELLS,
+    ExperimentAuthority,
+    MethodFactory,
+)
 from pfr.migration import MigrationAuthority, load_migration_authority
 from pfr.mobility_execution import Stage25fSumoExecutionAuthority
 from pfr.mobility_physics import MobilityPhysics
@@ -33,11 +42,16 @@ from pfr.native_predictive import (
 from pfr.optimization import GurobiFastControlOptimizer, gurobi_thread_limit
 from pfr.power import H100UtilizationPowerCurve
 from pfr.provenance import scientific_implementation_fingerprint
-from pfr.risk_calibration import load_frozen_risk_calibration
+from pfr.risk_calibration import (
+    ELECTRICAL_STRESS_AUTHORITY_ID,
+    load_frozen_risk_calibration,
+)
+from pfr.retained_h54 import ADAPTER_ID, RetainedH54JointPlanner
 from pfr.runtime import (
     CausalExperimentFrame,
     MobilityRouteForecast,
     OperationalTrainingJob,
+    PLANNING_HORIZON_STEPS,
     PhysicalCommit,
     PfrRuntimeRunner,
     RuntimeInitialState,
@@ -1272,7 +1286,13 @@ def _frames(
         if mobility_path is None:
             raise RuntimeError(f"missing causal mobility source issue={issue}")
         with np.load(mobility_path, allow_pickle=False) as mobility:
-            eta = np.asarray(mobility["path_quantiles_sec"][0], dtype=float)
+            eta_horizon = np.asarray(mobility["path_quantiles_sec"], dtype=float)
+        if eta_horizon.shape != (PLANNING_HORIZON_STEPS, 1656, 3):
+            raise RuntimeError(
+                f"causal H54 mobility ETA shape is invalid issue={issue} "
+                f"shape={eta_horizon.shape}"
+            )
+        eta = eta_horizon[0]
         if eta.shape != (1656, 3):
             raise RuntimeError(
                 f"causal mobility ETA shape is invalid issue={issue} shape={eta.shape}"
@@ -1308,6 +1328,18 @@ def _frames(
             block["lower_pv"][row, 1 : PREDICTIVE_NATIVE_HORIZON_STEPS + 1],
             dtype=float,
         )
+        planning_forecast_p = feeder_scale * np.asarray(
+            block["upper_p"][row, :PLANNING_HORIZON_STEPS],
+            dtype=float,
+        )
+        planning_forecast_q = feeder_scale * np.asarray(
+            block["upper_q"][row, :PLANNING_HORIZON_STEPS],
+            dtype=float,
+        )
+        planning_forecast_pv = feeder_scale * np.asarray(
+            block["lower_pv"][row, :PLANNING_HORIZON_STEPS],
+            dtype=float,
+        )
         if any(
             values.shape[0] != PREDICTIVE_NATIVE_HORIZON_STEPS
             for values in (
@@ -1319,6 +1351,18 @@ def _frames(
             raise RuntimeError(
                 f"causal native-control forecast is shorter than "
                 f"{PREDICTIVE_NATIVE_HORIZON_STEPS} steps at issue={issue}"
+            )
+        if any(
+            values.shape[0] != PLANNING_HORIZON_STEPS
+            for values in (
+                planning_forecast_p,
+                planning_forecast_q,
+                planning_forecast_pv,
+            )
+        ):
+            raise RuntimeError(
+                f"causal planning forecast is shorter than "
+                f"{PLANNING_HORIZON_STEPS} steps at issue={issue}"
             )
         payload = {
             "issue": issue,
@@ -1334,6 +1378,11 @@ def _frames(
                 PREDICTIVE_NATIVE_HORIZON_STEPS,
             ],
             "predictive_native_future_actual_used": False,
+            "joint_planning_forecast_horizon_indices": [
+                0,
+                PLANNING_HORIZON_STEPS - 1,
+            ],
+            "joint_planning_future_actual_used": False,
             "feeder_absolute_scale_alpha": feeder_scale,
             "migration_authority_sha256": migration_authority.fingerprint,
         }
@@ -1362,8 +1411,22 @@ def _frames(
                 tuple(tuple(map(float, phase_values)) for phase_values in profile)
                 for profile in native_forecast_pv
             ),
+            planning_forecast_background_p_kw=tuple(
+                tuple(tuple(map(float, phase_values)) for phase_values in profile)
+                for profile in planning_forecast_p
+            ),
+            planning_forecast_background_q_kvar=tuple(
+                tuple(tuple(map(float, phase_values)) for phase_values in profile)
+                for profile in planning_forecast_q
+            ),
+            planning_forecast_pv_available_kw=tuple(
+                tuple(tuple(map(float, phase_values)) for phase_values in profile)
+                for profile in planning_forecast_pv
+            ),
             workload_reserve_gpu=dict(workload_reserve_gpu),
             mobility_routes=tuple(routes),
+            planning_mobility_npz_path=str(mobility_path.resolve()),
+            planning_mobility_npz_sha256=sha256(mobility_path),
         ))
     return frames
 
@@ -1374,8 +1437,19 @@ def main() -> None:
     parser.add_argument("--candidate-id", default="JAN2025_DAY01")
     parser.add_argument(
         "--diagnostic-method",
-        choices=tuple(method.value for method in ComparisonMethod),
+        choices=(
+            tuple(method.value for method in ComparisonMethod)
+            + tuple(method.value for method in ElectricalStressMethod)
+        ),
         help="Run one full state-chain method for technical diagnosis only.",
+    )
+    parser.add_argument(
+        "--electrical-stress-campaign",
+        action="store_true",
+        help=(
+            "Run the authoritative B00-B09 electrical-stress registry. "
+            "Historical B0-B8 identifiers remain read-compatible only."
+        ),
     )
     parser.add_argument(
         "--supplementary-b8-periodic-5min",
@@ -1399,6 +1473,12 @@ def main() -> None:
     parser.add_argument("--exact-package-root", type=Path, required=True)
     parser.add_argument("--authority-package-root", type=Path, required=True)
     parser.add_argument("--primary-root", type=Path, required=True)
+    parser.add_argument(
+        "--retained-h54-base",
+        type=Path,
+        default=Path("/home/jaewon/mobile_ess_work"),
+        help="Existing BUILD4/BUILD7 authority base used by the retained H54 solver.",
+    )
     parser.add_argument("--initial-state", type=Path, required=True)
     parser.add_argument("--independent-jobs", type=Path, required=True)
     parser.add_argument("--canonical-jobs", type=Path, required=True)
@@ -1416,8 +1496,9 @@ def main() -> None:
         "--risk-calibration",
         type=Path,
         help=(
-            "Frozen January-2025 B6 event-risk calibration. Required before "
-            "any calibrated B7/B8 execution and prohibited from B6 fitting."
+            "Frozen January-2025 B07 electrical-stress event-risk calibration. "
+            "Required before calibrated B08/B09 execution and prohibited from "
+            "B07 fitting."
         ),
     )
     parser.add_argument(
@@ -1443,16 +1524,20 @@ def main() -> None:
         parser.error(
             "--diagnostic-method and --supplementary-b8-periodic-5min are mutually exclusive"
         )
+    if args.electrical_stress_campaign and args.supplementary_b8_periodic_5min:
+        parser.error(
+            "--electrical-stress-campaign already includes B08; legacy B8 supplementary mode is incompatible"
+        )
     calibrated_method_selected = bool(
         args.supplementary_b8_periodic_5min
-        or args.diagnostic_method in {"B7", "B8"}
+        or args.diagnostic_method in {"B7", "B8", "B08", "B09"}
         or args.diagnostic_method is None
     )
     if calibrated_method_selected and args.risk_calibration is None:
         parser.error(
-            "--risk-calibration is required before any B7/B8 or B0-B7 matrix execution"
+            "--risk-calibration is required before a calibrated method or full campaign execution"
         )
-    if args.diagnostic_method == "B6" and args.risk_calibration is not None:
+    if args.diagnostic_method in {"B6", "B07"} and args.risk_calibration is not None:
         parser.error(
             "January B6 calibration fitting must not load a calibrated-risk artifact"
         )
@@ -1461,6 +1546,23 @@ def main() -> None:
         if args.risk_calibration is not None
         else None
     )
+    stress_method_selected = bool(
+        args.electrical_stress_campaign
+        or args.diagnostic_method
+        in {method.value for method in ElectricalStressMethod}
+    )
+    if (
+        stress_method_selected
+        and risk_calibration is not None
+        and (
+            risk_calibration.source_method != "B07"
+            or risk_calibration.authority_id != ELECTRICAL_STRESS_AUTHORITY_ID
+        )
+    ):
+        parser.error(
+            "B00-B09 requires a frozen January B07 electrical-stress calibration; "
+            "historical B6 calibration is read-compatible only"
+        )
     if args.count <= 0:
         parser.error("--count must be positive")
     repo = args.repo.resolve()
@@ -1756,7 +1858,11 @@ def main() -> None:
         "evaluation_classification": native_control_contract[
             "evaluation_classification"
         ],
-        "common_native_grid_control_applied_to": [f"B{index}" for index in range(8)],
+        "common_native_grid_control_applied_to": (
+            [f"B{index:02d}" for index in range(10)]
+            if args.electrical_stress_campaign
+            else [f"B{index}" for index in range(8)]
+        ),
         "original_ieee123_master_modified": False,
     }
     contract_sha = hashlib.sha256(json.dumps(evaluation_contract, sort_keys=True).encode()).hexdigest()
@@ -1774,8 +1880,25 @@ def main() -> None:
         evaluation_coefficients_sha256=contract_sha,
         physical_ratings_sha256=sha256(Path(paths["assets"]) / "Generated_Planning_Line_Ratings_u080.dss"),
     )
+    electrical_stress_selected = bool(
+        args.electrical_stress_campaign
+        or args.diagnostic_method
+        in {method.value for method in ElectricalStressMethod}
+    )
+    power_curve = _load_curve(args.power_curve)
+    retained_h54 = (
+        RetainedH54JointPlanner(
+            repo=repo,
+            base=args.retained_h54_base,
+            output_root=output,
+            power_curve=power_curve,
+            gurobi_threads=int(os.environ.get("PFR_GUROBI_THREADS", "4")),
+        )
+        if electrical_stress_selected
+        else None
+    )
     runner = PfrRuntimeRunner(
-        power_curve=_load_curve(args.power_curve),
+        power_curve=power_curve,
         physical_backend=ExactOpenDssBackend(exact, paths),
         fast_optimizer=GurobiFastControlOptimizer(),
         native_control_initial_states={
@@ -1793,16 +1916,25 @@ def main() -> None:
         migration_authority=migration_authority,
         mobility_execution_authority=mobility_execution,
         risk_calibration_authority=risk_calibration,
+        joint_planner=retained_h54,
     )
     factory = MethodFactory(authority)
-    configs = factory.all()
+    configs = (
+        factory.electrical_stress_campaign()
+        if args.electrical_stress_campaign
+        else factory.all()
+    )
     single_method_id = (
         ComparisonMethod.B8.value
         if args.supplementary_b8_periodic_5min
         else args.diagnostic_method
     )
     if single_method_id:
-        config = factory.create(ComparisonMethod(single_method_id))
+        config = (
+            factory.create_electrical_stress(ElectricalStressMethod(single_method_id))
+            if single_method_id in {method.value for method in ElectricalStressMethod}
+            else factory.create(ComparisonMethod(single_method_id))
+        )
         method = runner.run_method(
             config=config,
             frames=frames,
@@ -1865,9 +1997,118 @@ def main() -> None:
         "start_issue": args.start_issue,
         "count": args.count,
         "shared_authority_fingerprint": authority.fingerprint,
+        "method_ids": [config.comparison_method_id.value for config in configs]
+        if not single_method_id
+        else [single_method_id],
+        "method_id": single_method_id,
+        "methods": [
+            {
+                **asdict(config),
+                "comparison_method_id": config.comparison_method_id.value,
+                "method_id": config.comparison_method_id.value,
+                "method_name": config.label,
+                "method_order": int(config.comparison_method_id.value[1:]),
+                "h54_capability_mask": dict(config.h54_capability_mask),
+                "controller_type": config.control_mode,
+                "risk_calibration": config.risk_interface == "CALIBRATED",
+                "full_replan_interval": (
+                    f"EVERY_{config.periodic_replan_steps}_STEPS"
+                    if config.periodic_replan_steps is not None
+                    else "EVENT_WITH_MAX_REFRESH"
+                ),
+                "factorial_energy": (
+                    int(config.energy_flexibility == "MESS")
+                    if config.comparison_method_id.value
+                    in {method.value for method in FACTORIAL_ELECTRICAL_STRESS_CELLS.values()}
+                    else None
+                ),
+                "factorial_compute": (
+                    int(config.temporal_workload_shift and config.spatial_workload_migration)
+                    if config.comparison_method_id.value
+                    in {method.value for method in FACTORIAL_ELECTRICAL_STRESS_CELLS.values()}
+                    else None
+                ),
+            }
+            for config in (
+                configs
+                if not single_method_id
+                else (config,)
+            )
+        ],
+        "objective_id": OBJECTIVE_AUTHORITY,
+        "objective_version": "V1",
+        "objective_primary": "MIN_MAX_PREDICTED_AC_STRESS",
+        "objective_secondary": "MIN_STRESS_EXPOSURE",
+        "objective_tertiary": "MIN_ACTUATION",
+        "stress_definition_version": "ELECTRICAL_STRESS_OBJECTIVE_V1",
+        "objective_contract_sha256": sha256(
+            repo / "pfr/contracts/ELECTRICAL_STRESS_OBJECTIVE_V1.json"
+        ),
+        "method_registry_contract_sha256": sha256(
+            repo / "pfr/contracts/ELECTRICAL_STRESS_METHOD_REGISTRY_V1.json"
+        ),
+        "result_schema_version": "ELECTRICAL_STRESS_RESULT_SCHEMA_V1",
+        "result_schema_contract_sha256": sha256(
+            repo / "pfr/contracts/ELECTRICAL_STRESS_RESULT_SCHEMA_V1.json"
+        ),
+        "retained_h54_adapter": {
+            "connected": retained_h54 is not None,
+            "adapter_id": ADAPTER_ID if retained_h54 is not None else None,
+            "retained_entrypoint": "science/main.py::build_full",
+            "adapter_source_sha256": (
+                sha256(repo / "pfr/retained_h54.py")
+                if retained_h54 is not None
+                else None
+            ),
+            "retained_solver_source_sha256": (
+                sha256(repo / "science/main.py")
+                if retained_h54 is not None
+                else None
+            ),
+            "retained_base": (
+                str(args.retained_h54_base.resolve())
+                if retained_h54 is not None
+                else None
+            ),
+            "planning_horizon_steps": 54,
+            "forecast_semantics": "ISSUE_CAUSAL_RUNTIME_H54_OVERRIDE",
+            "price_role": "EX_POST_KPI_ONLY_NOT_OPTIMIZER_OBJECTIVE",
+        },
+        "config_sha256": hashlib.sha256(
+            json.dumps(
+                [
+                    {
+                        **asdict(item),
+                        "comparison_method_id": item.comparison_method_id.value,
+                    }
+                    for item in (
+                        configs if not single_method_id else (config,)
+                    )
+                ],
+                sort_keys=True,
+            ).encode()
+        ).hexdigest(),
         "shared_exogenous_authority_sha256": sha256(
             args.shared_root / "SHARED_EXOGENOUS_AUTHORITY.json"
         ),
+        "exogenous_input_sha256": sha256(
+            args.shared_root / "SHARED_EXOGENOUS_AUTHORITY.json"
+        ),
+        "forecast_model_sha256": hashlib.sha256(
+            json.dumps(
+                {
+                    "shared_exogenous_authority": sha256(
+                        args.shared_root / "SHARED_EXOGENOUS_AUTHORITY.json"
+                    ),
+                    "factorized_uncertainty": sha256(args.factorized_uncertainty),
+                    "workload_uncertainty": sha256(args.workload_uncertainty),
+                },
+                sort_keys=True,
+            ).encode()
+        ).hexdigest(),
+        "network_model_sha256": authority.grid_model_sha256,
+        "rating_contract_sha256": authority.physical_ratings_sha256,
+        "initial_state_sha256": authority.initial_state_sha256,
         "shared_exogenous_authority_path": str(
             (args.shared_root / "SHARED_EXOGENOUS_AUTHORITY.json").resolve()
         ),
@@ -1896,6 +2137,11 @@ def main() -> None:
             if risk_calibration is not None
             else None
         ),
+        "risk_calibration_sha256": (
+            risk_calibration.artifact_sha256
+            if risk_calibration is not None
+            else None
+        ),
         "risk_calibration_march_outcomes_read": False,
         "migration_realization_classification": (
             "DETERMINISTIC_FROZEN_ABILENE_SCENARIO_NOT_EXTERNAL_WAN_TELEMETRY"
@@ -1908,6 +2154,7 @@ def main() -> None:
             migration_authority.checkpoint_payload_occupancy_factor
         ),
         **source_identity,
+        "git_commit_sha": source_identity["git_full_commit_sha"],
         "actual_gurobi_used": matrix["all_actual_gurobi"],
         "actual_fresh_opendss_used": matrix["all_fresh_exact_opendss"],
         "opendss_metrics_common_sha256": sha256(args.exact_package_root / "opendss_metrics_common.py"),
@@ -1918,8 +2165,12 @@ def main() -> None:
         "comparison_scope": (
             "POST_HOC_SUPPLEMENTARY_TIMING_BASELINE"
             if args.supplementary_b8_periodic_5min
-            else "FROZEN_B0_B7_MAIN_OR_TECHNICAL_DIAGNOSTIC"
-        ),
+                else (
+                    "FROZEN_B00_B09_ELECTRICAL_STRESS_CAMPAIGN"
+                    if args.electrical_stress_campaign
+                    else "FROZEN_B0_B7_MAIN_OR_TECHNICAL_DIAGNOSTIC"
+                )
+            ),
         "independent_daily_cold_start": "canonical_pre" in pre,
         "cross_day_endogenous_state_carryover": False,
         "controller_burn_in_steps": 0,

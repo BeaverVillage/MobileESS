@@ -8,7 +8,7 @@ preflight_only=0
 
 stop_run() {
     trap - INT TERM
-    echo "INTERRUPTED: January B6 calibration stopped; partial results are preserved." >&2
+    echo "INTERRUPTED: January B07 electrical-stress calibration stopped; partial results are preserved." >&2
     exit 130
 }
 trap stop_run INT TERM
@@ -27,27 +27,27 @@ if [[ -z "$run_root" || "$run_root" != /* ]]; then
     exit 2
 fi
 
-calibration_root="$run_root/january_b6_raw"
-artifact="$run_root/calibration/PFR5_EVENT_RISK_CALIBRATION_JAN2025.json"
+calibration_root="$run_root/january_b07_electrical_stress_raw"
+artifact="$run_root/calibration/ELECTRICAL_STRESS_EVENT_RISK_CALIBRATION_JAN2025.json"
 common=(
     --start-day 1 --end-day 31 --day-workers 4 --gurobi-threads 4
-    --diagnostic-method B6 --output-root "$calibration_root"
+    --diagnostic-method B07 --output-root "$calibration_root"
 )
 if ((preflight_only)); then common+=(--preflight-only); fi
 
 cd "$repo_dir"
 bash "$repo_dir/pfr/tools/run_january_2025_local.sh" "${common[@]}"
 if ((preflight_only)); then
-    echo "JANUARY_B6_CALIBRATION_PREFLIGHT=PASS_NO_EPISODES_STARTED"
+    echo "JANUARY_B07_CALIBRATION_PREFLIGHT=PASS_NO_EPISODES_STARTED"
     exit 0
 fi
 
 "$python_bin" -m pfr.tools.verify_daily_campaign_storage \
     --repo "$repo_dir" --root "$calibration_root" \
-    --start-date 2025-01-01 --days 31 --diagnostic-method B6 \
+    --start-date 2025-01-01 --days 31 --diagnostic-method B07 \
     --report "$calibration_root/STORAGE_VERIFICATION.json"
 "$python_bin" -m pfr.tools.build_january_b6_risk_calibration \
-    --source-root "$calibration_root" --output "$artifact"
+    --source-root "$calibration_root" --source-method B07 --output "$artifact"
 "$python_bin" -c 'from pathlib import Path; import json,sys; from pfr.risk_calibration import load_frozen_risk_calibration; x=load_frozen_risk_calibration(Path(sys.argv[1])); print("RISK_CALIBRATION_FROZEN", x.authority_id, json.dumps(dict(x.normalized_family_quantiles), sort_keys=True), x.artifact_sha256)' "$artifact"
-echo "JANUARY_B6_CALIBRATION_STATUS=FROZEN"
+echo "JANUARY_B07_ELECTRICAL_STRESS_CALIBRATION_STATUS=FROZEN"
 echo "RISK_CALIBRATION_ARTIFACT=$artifact"

@@ -523,6 +523,11 @@ def solve_step(paths:dict[str,str],step:int,state:dict[str,list[Any]])->dict[str
       for row in native_control.get("regcontrols",())
     }
     hard=bool(converged and cerr==0 and vviol==0 and lviol==0 and tviol==0 and tcviol==0 and root_sign)
+    def first_value(row,*keys):
+      if row is None:return None
+      for key in keys:
+        if row.get(key) is not None:return row.get(key)
+      return None
     return {
       "step_index":int(step),"timestamp_utc_ns":int(tns),
       "converged":converged,"command_error_count":cerr,
@@ -533,20 +538,27 @@ def solve_step(paths:dict[str,str],step:int,state:dict[str,list[Any]])->dict[str
       "voltage_min_bus_node":(
         f'{vmin_row["bus"]}.{vmin_row["node"]}' if vmin_row else None
       ),
+      "voltage_min_phase":(int(vmin_row["node"]) if vmin_row and str(vmin_row.get("node","")).isdigit() else vmin_row.get("node") if vmin_row else None),
       "voltage_max_bus_node":(
         f'{vmax_row["bus"]}.{vmax_row["node"]}' if vmax_row else None
       ),
+      "voltage_max_phase":(int(vmax_row["node"]) if vmax_row and str(vmax_row.get("node","")).isdigit() else vmax_row.get("node") if vmax_row else None),
       "line_max_loading_name":(str(lmax_row["line"]) if lmax_row else None),
+      "line_max_current_a":first_value(lmax_row,"max_current_a","max_phase_current_a","current_a"),
+      "line_max_phase":first_value(lmax_row,"phase","max_phase","conductor"),
       "transformer_max_kva_loading_name":(
         str(tkmax_row["transformer"]) if tkmax_row else None
       ),
+      "transformer_max_kva":first_value(tkmax_row,"max_kva","kva","apparent_power_kva"),
       "transformer_max_current_loading_name":(
         str(tcmax_row["transformer"]) if tcmax_row else None
       ),
+      "transformer_max_current_a":first_value(tcmax_row,"max_phase_current_a","max_current_a"),
+      "transformer_max_phase":first_value(tcmax_row,"phase","max_phase","conductor"),
       "transformer_max_current_loading_winding":(
         int(tcmax_row["winding"]) if tcmax_row else None
       ),
-      "root_import_p_kw":root_import_p,"root_import_q_kvar":root_import_q,
+      "root_import_p_kw":root_import_p,"root_import_q_kvar":root_import_q,"root_export_p_kw":root_export_p,
       "root_sign_pass":root_sign,"hard_constraint_pass":hard,
       "background_binding_p_residual_kw":bind["p_residual_kw"],
       "background_binding_q_residual_kvar":bind["q_residual_kvar"],

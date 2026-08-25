@@ -1,0 +1,37 @@
+{
+  "schema_version": "ELECTRICAL_STRESS_METHOD_REGISTRY_V1",
+  "status": "FROZEN_FOR_REIMPLEMENTATION",
+  "objective_authority": "ELECTRICAL_STRESS_OBJECTIVE_V1",
+  "historical_method_ids_preserved": ["B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8"],
+  "authoritative_new_campaign_ids": ["B00", "B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B09"],
+  "methods": {
+    "B00": "No Flexibility",
+    "B01": "MESS Only",
+    "B02": "Temporal Compute Only",
+    "B03": "Spatial Compute Only",
+    "B04": "Full Compute Only",
+    "B05": "Stationary BESS + Full Compute",
+    "B06": "Mobile MESS + Full Compute, Periodic",
+    "B07": "Joint Event-Triggered, Uncalibrated",
+    "B08": "Joint Every-5-min Full Replan",
+    "B09": "Proposed: Risk-Calibrated Event-Triggered Joint Control"
+  },
+  "factorial_reuse": {
+    "RC0": "B00",
+    "RCE": "B01",
+    "RCC": "B04",
+    "RCEC": "B06"
+  },
+  "factorial_common_contract": {
+    "controller": "PERIODIC_MPC",
+    "periodic_replan_steps": 6,
+    "risk_interface": "NONE",
+    "joint_uncertainty": false,
+    "fresh_ac_safety": true,
+    "only_vary": ["energy_flexibility", "temporal_compute", "spatial_compute"]
+  },
+  "additional_factorial_execution_count_relative_to_historical_B0_B8": 1,
+  "additional_condition": "B04_FULL_COMPUTE_ONLY",
+  "cost_is_optimizer_objective": false,
+  "cost_is_ex_post_kpi": true
+}

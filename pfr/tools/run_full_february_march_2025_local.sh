@@ -67,7 +67,8 @@ prepare_inputs() {
     mkdir -p "$input_root"
     "$python_bin" -m pfr.tools.build_calendar_daily_pre \
         --start-date "$start_date" --days "$days" --campaign-id "$period_id" \
-        --authority-sha256 "$authority_sha" --output-root "$input_root/pre" || return
+        --authority-sha256 "$authority_sha" --output-root "$input_root/pre" \
+        --electrical-stress-campaign || return
     "$python_bin" -m pfr.tools.build_calendar_job_cohort \
         --canonical "$canonical" --start-date "$start_date" --days "$days" \
         --campaign-id "$period_id" \
@@ -101,6 +102,7 @@ if ((prepare_only)); then
             --repo "$repo_dir" --period-id "$period_id" \
             --shared-root "$shared" --input-root "$input_root" \
             --route-catalog "$base/PFR3_FIXED_K3_PHYSICS_CURRENT/FROZEN_K3_PHYSICS_GEOMETRY.json" \
+            --electrical-stress-campaign \
             --report "$gate_root/PREFLIGHT_REPORT.json" \
             --allow-unmaterialized || overall=1
     done
@@ -133,9 +135,8 @@ run_period() {
         MAR2025_FULL) month_name="march" ;;
         *) echo "Unsupported isolated period: $period_id" >&2; return 1 ;;
     esac
-    local output="$run_root/$month_name/B0_B7"
-    local b8_output="$run_root/$month_name/B8"
-    local campaign_rc=0 verify_rc=0 b8_campaign_rc=0 b8_verify_rc=0
+    local output="$run_root/$month_name/B00_B09"
+    local campaign_rc=0 verify_rc=0
     local gate_root="$run_root/preflight/$period_id"
     mkdir -p "$gate_root"
     "$python_bin" -m pfr.tools.assert_experiment_source_freeze \
@@ -148,10 +149,12 @@ run_period() {
         --repo "$repo_dir" --period-id "$period_id" \
         --shared-root "$shared" --input-root "$input_root" \
         --route-catalog "$base/PFR3_FIXED_K3_PHYSICS_CURRENT/FROZEN_K3_PHYSICS_GEOMETRY.json" \
+        --electrical-stress-campaign \
         --report "$gate_root/PREFLIGHT_REPORT.json" || return 1
     "$python_bin" -m pfr.tools.run_frozen_rep_week_daily_campaign \
         --repo "$repo_dir" --period-id "$period_id" --period-contract "$contract" \
         --day-workers 4 --capture-day-logs --continue-after-failure \
+        --electrical-stress-campaign \
         --shared-root "$shared" \
         --exact-package-root /mnt/c/Users/kjw39/Downloads/stage_mess_grid_v2038_exact_sweep_power_v70_final_v1_package \
         --authority-package-root "$work/run_packages/K9H7_V2044R11R1_20260807T191351" \
@@ -168,37 +171,13 @@ run_period() {
         --migration-authority "$repo_dir/pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json" \
         --risk-calibration "$risk_calibration" \
         --output "$output" || campaign_rc=$?
-    abort_if_interrupted "$campaign_rc" "${period_id}_b0_b7"
-    "$python_bin" -m pfr.tools.run_frozen_rep_week_daily_campaign \
-        --repo "$repo_dir" --period-id "$period_id" --period-contract "$contract" \
-        --day-workers 4 --capture-day-logs --continue-after-failure \
-        --supplementary-b8-periodic-5min \
-        --shared-root "$shared" \
-        --exact-package-root /mnt/c/Users/kjw39/Downloads/stage_mess_grid_v2038_exact_sweep_power_v70_final_v1_package \
-        --authority-package-root "$work/run_packages/K9H7_V2044R11R1_20260807T191351" \
-        --primary-root "$work/processed/power_v70_3ph" \
-        --initial-state "$input_root/pre/DAILY_CANONICAL_PRE_MANIFEST.json" \
-        --independent-jobs "$input_root/jobs/INDEPENDENT_JOB_COHORT.parquet" \
-        --canonical-jobs "$canonical" \
-        --power-curve "$repo_dir/pfr/contracts/H100_UTILIZATION_POWER_CURVE.json" \
-        --mobility-root "$shared/mobility" \
-        --route-catalog "$base/PFR3_FIXED_K3_PHYSICS_CURRENT/FROZEN_K3_PHYSICS_GEOMETRY.json" \
-        --mobility-template-bank "$shared/mobility/E4B_FULLFIT_TEMPLATE_BANK_129.parquet" \
-        --workload-uncertainty "$base/PFR3_V13_2_WORKLOAD_UNCERTAINTY_CURRENT/PFR3_WORKLOAD_UNCERTAINTY_V13_2.json" \
-        --factorized-uncertainty "$base/PFR3_V13_2_FACTORIZED_UNCERTAINTY_CURRENT/PFR3_FACTORIZED_UNCERTAINTY_V13_2.json" \
-        --migration-authority "$repo_dir/pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json" \
-        --risk-calibration "$risk_calibration" \
-        --output "$b8_output" || b8_campaign_rc=$?
-    abort_if_interrupted "$b8_campaign_rc" "${period_id}_b8"
+    abort_if_interrupted "$campaign_rc" "${period_id}_b00_b09"
     "$python_bin" -m pfr.tools.verify_daily_campaign_storage \
         --repo "$repo_dir" --root "$output" --start-date "$start_date" --days "$days" \
+        --electrical-stress-campaign \
         --report "$output/STORAGE_VERIFICATION.json" || verify_rc=$?
-    "$python_bin" -m pfr.tools.verify_daily_campaign_storage \
-        --repo "$repo_dir" --root "$b8_output" --start-date "$start_date" --days "$days" \
-        --supplementary-b8-periodic-5min \
-        --report "$b8_output/STORAGE_VERIFICATION.json" || b8_verify_rc=$?
-    if ((campaign_rc != 0 || verify_rc != 0 || b8_campaign_rc != 0 || b8_verify_rc != 0)); then
-        echo "PERIOD_COMPLETED_WITH_RECORDED_FAILURE period=$period_id campaign_rc=$campaign_rc verify_rc=$verify_rc b8_campaign_rc=$b8_campaign_rc b8_verify_rc=$b8_verify_rc" >&2
+    if ((campaign_rc != 0 || verify_rc != 0)); then
+        echo "PERIOD_COMPLETED_WITH_RECORDED_FAILURE period=$period_id campaign_rc=$campaign_rc verify_rc=$verify_rc" >&2
         return 1
     fi
     echo "PERIOD_STATUS=PASS period=$period_id"

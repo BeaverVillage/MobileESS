@@ -15,6 +15,12 @@ from .risk import RiskFamily
 
 SCHEMA_VERSION = "PFR5_EVENT_RISK_CALIBRATION_JAN2025_V2"
 AUTHORITY_ID = "JAN2025_B6_RAW_30MIN_FAMILY_BLOCK_UNDERPREDICTION_V2"
+ELECTRICAL_STRESS_SCHEMA_VERSION = (
+    "ELECTRICAL_STRESS_EVENT_RISK_CALIBRATION_JAN2025_V1"
+)
+ELECTRICAL_STRESS_AUTHORITY_ID = (
+    "JAN2025_B07_ELECTRICAL_STRESS_RAW_30MIN_FAMILY_BLOCK_V1"
+)
 RISK_FAMILY_SCALES: Mapping[str, float] = {
     RiskFamily.SOC.value: 100.0,
     RiskFamily.DEADLINE.value: 1.0,
@@ -61,11 +67,15 @@ class FrozenRiskCalibration:
     march_outcomes_read: bool = False
 
     def validate(self) -> None:
-        if self.authority_id != AUTHORITY_ID:
+        authority_pair = (self.authority_id, self.source_method)
+        if authority_pair not in {
+            (AUTHORITY_ID, "B6"),
+            (ELECTRICAL_STRESS_AUTHORITY_ID, "B07"),
+        }:
             raise RiskCalibrationContractError("risk calibration authority ID mismatch")
-        if self.source_method != "B6" or self.source_period != "2025-01":
+        if self.source_period != "2025-01":
             raise RiskCalibrationContractError(
-                "event-risk calibration must use January-2025 B6 raw risk"
+                "event-risk calibration must use January-2025 B6/B07 raw risk"
             )
         if self.february_labels_used_for_fit or self.march_outcomes_read:
             raise RiskCalibrationContractError(
@@ -154,7 +164,10 @@ class FrozenRiskCalibration:
 def load_frozen_risk_calibration(path: Path) -> FrozenRiskCalibration:
     path = path.resolve()
     payload = json.loads(path.read_text(encoding="utf-8"))
-    if payload.get("schema_version") != SCHEMA_VERSION or payload.get("status") != "FROZEN":
+    if payload.get("schema_version") not in {
+        SCHEMA_VERSION,
+        ELECTRICAL_STRESS_SCHEMA_VERSION,
+    } or payload.get("status") != "FROZEN":
         raise RiskCalibrationContractError("risk calibration artifact is not frozen")
     calibration = FrozenRiskCalibration(
         authority_id=str(payload.get("authority_id", "")),

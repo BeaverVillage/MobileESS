@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 python_bin="${PFR_PYTHON:-/home/jaewon/miniconda3/envs/power_v61_gpu/bin/python}"
-output_root="/home/jaewon/mobile_ess_work/frozen_artifacts/CODEX_PR6_V13_13_JAN2025_DAILY_20260823"
+output_root="/home/jaewon/mobile_ess_work/frozen_artifacts/ELECTRICAL_STRESS_B00_B09_JAN2025"
 start_day=1
 end_day=31
 day_workers=4
@@ -28,8 +28,8 @@ Run options:
   --day-workers N        Concurrent daily processes (default: 4).
   --gurobi-threads N     Gurobi threads per daily process (default: 4).
   --output-root PATH     Campaign output root.
-  --diagnostic-method B6 Run one method only; B6 is the January calibration source.
-  --risk-calibration P   Frozen calibration required for B7/B8, never for B6 fitting.
+  --diagnostic-method B07 Run one method only; B07 is the new calibration source.
+  --risk-calibration P    Frozen B07 calibration required for full B00-B09.
   --skip-preflight       Skip the automatic preflight (not recommended).
   --watch-seconds N      Monitor refresh interval; 0 prints once (default: 10).
   -h, --help             Show this help.
@@ -102,12 +102,16 @@ if ((day_workers < 1 || gurobi_threads < 1)); then
     echo "day-workers and gurobi-threads must be positive." >&2
     exit 64
 fi
-if [[ -n "$diagnostic_method" && ! "$diagnostic_method" =~ ^B[0-8]$ ]]; then
-    echo "--diagnostic-method must be B0 through B8." >&2
+if [[ -n "$diagnostic_method" && ! "$diagnostic_method" =~ ^(B[0-8]|B0[0-9])$ ]]; then
+    echo "--diagnostic-method must be historical B0-B8 or B00-B09." >&2
     exit 64
 fi
-if [[ "$diagnostic_method" == "B6" && -n "$risk_calibration" ]]; then
-    echo "January B6 calibration fitting must not load --risk-calibration." >&2
+if [[ "$diagnostic_method" =~ ^(B6|B07)$ && -n "$risk_calibration" ]]; then
+    echo "January raw-risk calibration fitting must not load --risk-calibration." >&2
+    exit 64
+fi
+if [[ -z "$diagnostic_method" && -z "$risk_calibration" ]]; then
+    echo "Full B00-B09 requires the frozen January B07 --risk-calibration." >&2
     exit 64
 fi
 
@@ -129,12 +133,24 @@ if ((day_workers * gurobi_threads > available_cpu)); then
 "machine becomes unresponsive." >&2
 fi
 
+source_initial_state=/home/jaewon/mobile_ess_work/frozen_artifacts/PFR_JAN2025_DAILY_PRE_CURRENT/JAN2025_DAILY_CANONICAL_PRE_MANIFEST.json
+initial_state_path="$source_initial_state"
+if [[ -z "$diagnostic_method" || "$diagnostic_method" =~ ^B0[0-9]$ ]]; then
+    stress_pre_root="$output_root/_CAMPAIGN_INPUTS/pre"
+    authority_sha="$($python_bin -c 'import json,sys; print(json.load(open(sys.argv[1]))["authority_document_sha256"])' "$source_initial_state")"
+    "$python_bin" -m pfr.tools.build_calendar_daily_pre \
+        --start-date 2025-01-01 --days 31 --campaign-id JAN2025_ELECTRICAL_STRESS \
+        --authority-sha256 "$authority_sha" --output-root "$stress_pre_root" \
+        --electrical-stress-campaign
+    initial_state_path="$stress_pre_root/DAILY_CANONICAL_PRE_MANIFEST.json"
+fi
+
 common_arguments=(
     --shared-root /home/jaewon/mobile_ess_work/frozen_artifacts/PFR_JAN2025_SHARED_EXOGENOUS_CURRENT
     --exact-package-root /mnt/c/Users/kjw39/Downloads/stage_mess_grid_v2038_exact_sweep_power_v70_final_v1_package
     --authority-package-root /home/jaewon/mobile_ess_work/run_packages/K9H7_V2044R11R1_20260807T191351
     --primary-root /home/jaewon/mobile_ess_work/processed/power_v70_3ph
-    --initial-state /home/jaewon/mobile_ess_work/frozen_artifacts/PFR_JAN2025_DAILY_PRE_CURRENT/JAN2025_DAILY_CANONICAL_PRE_MANIFEST.json
+    --initial-state "$initial_state_path"
     --independent-jobs /home/jaewon/mobile_ess_work/frozen_artifacts/PFR_JAN2025_JOB_COHORT_FIXED_AEST_CURRENT/JAN2025_INDEPENDENT_JOB_COHORT.parquet
     --canonical-jobs /home/jaewon/mobile_ess_work/frozen_artifacts/stage_kestrel_f30_resource_aware_job_power_policy_v2_0_32_r6c_20260806T122335/CANONICAL_F30_RACK_POWER_JOB_BASE_PREFROZEN_R6C.parquet
     --power-curve "$repo_dir/pfr/contracts/H100_UTILIZATION_POWER_CURVE.json"
@@ -158,8 +174,8 @@ export PYTHONHASHSEED=0
 
 cd "$repo_dir"
 echo "Classification: JANUARY-2025 CALIBRATION/DEVELOPMENT (not an independent holdout)."
-if [[ "$diagnostic_method" == "B6" ]]; then
-    echo "Calibration role: JANUARY-2025 B6 RAW-RISK FITTING ONLY."
+if [[ "$diagnostic_method" == "B07" ]]; then
+    echo "Calibration role: JANUARY-2025 B07 ELECTRICAL-STRESS RAW-RISK FITTING ONLY."
 fi
 expected_full_commit_sha="${PFR_EXPECTED_FULL_COMMIT_SHA:-}"
 expected_branch="${PFR_EXPECTED_BRANCH:-codex/feb03-predictive-native}"
@@ -178,6 +194,7 @@ if ((skip_preflight == 0)); then
     "$python_bin" -m pfr.tools.preflight_january_2025 \
         --repo "$repo_dir" \
         "${common_arguments[@]}" \
+        --electrical-stress-campaign \
         --report "$output_root/PREFLIGHT_REPORT.json"
 fi
 
@@ -196,6 +213,8 @@ printf 'bash %q --monitor-only --output-root %q\n' \
 campaign_arguments=()
 if [[ -n "$diagnostic_method" ]]; then
     campaign_arguments+=(--diagnostic-method "$diagnostic_method")
+else
+    campaign_arguments+=(--electrical-stress-campaign)
 fi
 if [[ -n "$risk_calibration" ]]; then
     campaign_arguments+=(--risk-calibration "$risk_calibration")

@@ -3,6 +3,8 @@ from datetime import date, timedelta
 from pathlib import Path
 import unittest
 
+import pandas as pd
+
 from pfr.migration import load_migration_authority
 from pfr.methods import ComparisonMethod, ExperimentAuthority, MethodFactory
 from pfr.power import H100UtilizationPowerCurve
@@ -741,6 +743,12 @@ class PfrRuntimeTests(unittest.TestCase):
             failure = __import__("json").loads(
                 (Path(temporary) / "B0/FAILURE.json").read_text()
             )
+            partial_issue = pd.read_parquet(
+                Path(temporary) / "B0/ISSUE_RESULT.parquet"
+            )
+            storage_audit = __import__("json").loads(
+                (Path(temporary) / "B0/RESULT_STORAGE_AUDIT.json").read_text()
+            )
 
         self.assertEqual(b0["status"], "FAIL_CLOSED")
         self.assertEqual(b0["committed_issues"], 1)
@@ -748,6 +756,11 @@ class PfrRuntimeTests(unittest.TestCase):
         self.assertTrue(b0["state_chain_complete"])
         self.assertEqual(failure["issue"], 101)
         self.assertEqual(failure["valid_partial_commit_markers"], 1)
+        self.assertEqual(failure["failure_stage"], "METHOD_RUNTIME")
+        self.assertEqual(failure["last_committed_issue"], 100)
+        self.assertTrue(failure["attempt_id"])
+        self.assertEqual(len(partial_issue), 1)
+        self.assertEqual(storage_audit["status"], "PASS")
 
 
 if __name__ == "__main__":

@@ -9,17 +9,15 @@ import re
 from typing import Any, Mapping
 
 
-SCHEMA_VERSION = "PFR_JAN_TO_APRIL_ISOLATED_RUN_ROOT_V2"
+SCHEMA_VERSION = "PFR_JAN_TO_APRIL_ELECTRICAL_STRESS_ISOLATED_RUN_ROOT_V3"
 MANIFEST_NAME = "JFM_ISOLATION_MANIFEST.json"
 LAYOUT = {
-    "january_b0_b7": "january/B0_B7",
-    "january_b8": "january/B8",
-    "february_b0_b7": "february/B0_B7",
-    "february_b8": "february/B8",
-    "march_b0_b7": "march/B0_B7",
-    "march_b8": "march/B8",
-    "april_b0_b7": "april/B0_B7",
-    "april_b8": "april/B8",
+    "january_b00_b09": "january/B00_B09",
+    "february_b00_b09": "february/B00_B09",
+    "march_b00_b09": "march/B00_B09",
+    "april_b00_b09": "april/B00_B09",
+    "january_b07_calibration_raw": "january_b07_electrical_stress_raw",
+    "risk_calibration": "calibration/ELECTRICAL_STRESS_EVENT_RISK_CALIBRATION_JAN2025.json",
 }
 
 

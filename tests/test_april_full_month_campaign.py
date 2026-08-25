@@ -73,6 +73,15 @@ def test_april_daily_specs_and_registries_are_complete() -> None:
     )
     assert main["method_ids"] == [f"B{index}" for index in range(8)]
     assert b8["method_ids"] == ["B8"]
+    stress = payload(
+        april,
+        rows,
+        workers=4,
+        final=True,
+        continue_after_failure=True,
+        electrical_stress_campaign=True,
+    )
+    assert stress["method_ids"] == [f"B{index:02d}" for index in range(10)]
 
 
 def test_all_month_runners_bind_same_frozen_calibration() -> None:
@@ -93,4 +102,4 @@ def test_all_month_runners_bind_same_frozen_calibration() -> None:
         REPO / "pfr/tools/show_january_to_april_progress.py"
     ).read_text(encoding="utf-8")
     assert "ETA: NOT_REPORTED" in monitor
-    assert "APRIL B0-B7" in monitor
+    assert "APRIL B00-B09" in monitor

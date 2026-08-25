@@ -15,6 +15,7 @@ import pandas as pd
 
 from pfr.canary import run_idc_migration_canary
 from pfr.methods import (
+    ELECTRICAL_STRESS_COMPARISON_METHODS,
     ExperimentAuthority,
     MAIN_COMPARISON_METHODS,
     MethodFactory,
@@ -109,6 +110,45 @@ def validate_method_contracts() -> Mapping[str, Any]:
             ),
             "migration_checkpoint_authority_is_runtime_common": True,
         },
+    }
+
+
+def validate_electrical_stress_method_contracts() -> Mapping[str, Any]:
+    hashes = tuple(format(index, "064x") for index in range(1, 8))
+    configs = MethodFactory(ExperimentAuthority(*hashes)).electrical_stress_campaign()
+    observed = tuple(config.comparison_method_id for config in configs)
+    by_id = {config.comparison_method_id.value: config for config in configs}
+    factorial = tuple(by_id[method] for method in ("B00", "B01", "B04", "B06"))
+    factorial_common = {
+        (
+            config.control_mode,
+            config.periodic_replan_steps,
+            config.risk_interface,
+            config.joint_uncertainty,
+            config.ac_safety_filter,
+        )
+        for config in factorial
+    }
+    event_contract_pass = bool(
+        by_id["B07"].control_mode == "EVENT_TRIGGERED"
+        and by_id["B07"].risk_interface == "RAW_UNCALIBRATED"
+        and by_id["B08"].control_mode == "PERIODIC_MPC"
+        and by_id["B08"].periodic_replan_steps == 1
+        and by_id["B08"].risk_interface == "CALIBRATED"
+        and by_id["B09"].control_mode == "EVENT_TRIGGERED"
+        and by_id["B09"].risk_interface == "CALIBRATED"
+    )
+    return {
+        "pass": observed == ELECTRICAL_STRESS_COMPARISON_METHODS
+        and all(config.ac_safety_filter for config in configs)
+        and len(factorial_common) == 1
+        and event_contract_pass,
+        "method_ids": [config.comparison_method_id.value for config in configs],
+        "objective_semantics": "COMMON_ELECTRICAL_STRESS_LEXICOGRAPHIC",
+        "safety_filter_common": all(config.ac_safety_filter for config in configs),
+        "factorial_cells": ["B00", "B01", "B04", "B06"],
+        "factorial_common_controller_contract": len(factorial_common) == 1,
+        "b07_b08_b09_event_calibration_contract": event_contract_pass,
     }
 
 
@@ -721,6 +761,11 @@ def main() -> None:
         help="Frozen IDC migration authority; defaults to the repository contract.",
     )
     parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument(
+        "--electrical-stress-campaign",
+        action="store_true",
+        help="Validate the ordered B00-B09 campaign and PRE axis.",
+    )
     args = parser.parse_args()
     migration_authority_path = (
         args.migration_authority
@@ -783,7 +828,11 @@ def main() -> None:
     if checks["required_files"]["pass"]:
         checks.update(
             {
-                "method_contracts": validate_method_contracts(),
+                "method_contracts": (
+                    validate_electrical_stress_method_contracts()
+                    if args.electrical_stress_campaign
+                    else validate_method_contracts()
+                ),
                 "migration_authority": validate_migration_authority(
                     migration_authority_path
                 ),
@@ -866,8 +915,9 @@ def main() -> None:
         "independent_holdout_claim": False,
         "status": status,
         "campaign_days": len(day_specs(1, 31)),
-        "expected_episodes": 31 * 8,
-        "expected_scored_issues": TOTAL_ISSUES * 8,
+        "expected_episodes": 31 * (10 if args.electrical_stress_campaign else 8),
+        "expected_scored_issues": TOTAL_ISSUES * (10 if args.electrical_stress_campaign else 8),
+        "electrical_stress_campaign": args.electrical_stress_campaign,
         "checks": checks,
         "critical_code_sha256": {
             str(path.relative_to(args.repo)): sha256(path)

@@ -6,7 +6,7 @@ from dataclasses import asdict, dataclass
 from enum import Enum
 import hashlib
 import json
-from typing import Mapping, Optional, Tuple
+from typing import Mapping, Optional, Tuple, Union
 
 
 class MethodContractError(ValueError):
@@ -30,8 +30,32 @@ class ComparisonMethod(str, Enum):
     B8 = "B8"
 
 
+class ElectricalStressMethod(str, Enum):
+    """Authoritative method IDs for the rebased electrical-stress campaign."""
+
+    B00 = "B00"
+    B01 = "B01"
+    B02 = "B02"
+    B03 = "B03"
+    B04 = "B04"
+    B05 = "B05"
+    B06 = "B06"
+    B07 = "B07"
+    B08 = "B08"
+    B09 = "B09"
+
+
 MAIN_COMPARISON_METHODS = tuple(ComparisonMethod(f"B{index}") for index in range(8))
 SUPPLEMENTARY_COMPARISON_METHODS = (ComparisonMethod.B8,)
+ELECTRICAL_STRESS_COMPARISON_METHODS = tuple(
+    ElectricalStressMethod(f"B{index:02d}") for index in range(10)
+)
+FACTORIAL_ELECTRICAL_STRESS_CELLS = {
+    "RC0": ElectricalStressMethod.B00,
+    "RCE": ElectricalStressMethod.B01,
+    "RCC": ElectricalStressMethod.B04,
+    "RCEC": ElectricalStressMethod.B06,
+}
 
 
 @dataclass(frozen=True)
@@ -68,7 +92,7 @@ class ExperimentAuthority:
 
 @dataclass(frozen=True)
 class MethodConfig:
-    comparison_method_id: ComparisonMethod
+    comparison_method_id: Union[ComparisonMethod, ElectricalStressMethod]
     label: str
     energy_flexibility: str
     temporal_workload_shift: bool
@@ -99,6 +123,16 @@ class MethodConfig:
         if not self.ac_safety_filter:
             raise MethodContractError("all methods require the same Fresh AC hard safety")
 
+    @property
+    def h54_capability_mask(self) -> Mapping[str, bool]:
+        energy = self.energy_flexibility in {"MESS", "STATIONARY_BESS"}
+        return {
+            "mess_dispatch": energy,
+            "mess_mobility": self.energy_flexibility == "MESS",
+            "temporal_compute": self.temporal_workload_shift,
+            "spatial_compute": self.spatial_workload_migration,
+        }
+
 
 _TREATMENTS: Mapping[ComparisonMethod, Tuple[object, ...]] = {
     ComparisonMethod.B0: ("No flexibility", "NONE", False, False, "FIXED", "NONE", False, False, False, None),
@@ -110,6 +144,22 @@ _TREATMENTS: Mapping[ComparisonMethod, Tuple[object, ...]] = {
     ComparisonMethod.B6: ("Joint event-triggered raw risk", "MESS", True, True, "EVENT_TRIGGERED", "RAW_UNCALIBRATED", True, True, True, None),
     ComparisonMethod.B7: ("Full proposed calibrated ICPS", "MESS", True, True, "EVENT_TRIGGERED", "CALIBRATED", True, True, True, None),
     ComparisonMethod.B8: ("Joint calibrated five-minute periodic full-replan baseline", "MESS", True, True, "PERIODIC_MPC", "CALIBRATED", True, True, True, 1),
+}
+
+
+_ELECTRICAL_STRESS_TREATMENTS: Mapping[
+    ElectricalStressMethod, Tuple[object, ...]
+] = {
+    ElectricalStressMethod.B00: ("No flexibility", "NONE", False, False, "PERIODIC_MPC", "NONE", True, False, True, 6),
+    ElectricalStressMethod.B01: ("MESS only", "MESS", False, False, "PERIODIC_MPC", "NONE", True, False, True, 6),
+    ElectricalStressMethod.B02: ("Temporal compute only", "NONE", True, False, "PERIODIC_MPC", "NONE", True, False, True, 6),
+    ElectricalStressMethod.B03: ("Spatial compute only", "NONE", False, True, "PERIODIC_MPC", "NONE", True, False, True, 6),
+    ElectricalStressMethod.B04: ("Full compute only", "NONE", True, True, "PERIODIC_MPC", "NONE", True, False, True, 6),
+    ElectricalStressMethod.B05: ("Stationary BESS plus full compute", "STATIONARY_BESS", True, True, "PERIODIC_MPC", "NONE", True, False, True, 6),
+    ElectricalStressMethod.B06: ("Mobile MESS plus full compute periodic", "MESS", True, True, "PERIODIC_MPC", "NONE", True, False, True, 6),
+    ElectricalStressMethod.B07: ("Joint event-triggered raw risk", "MESS", True, True, "EVENT_TRIGGERED", "RAW_UNCALIBRATED", True, True, True, None),
+    ElectricalStressMethod.B08: ("Joint calibrated every-five-minute full replan", "MESS", True, True, "PERIODIC_MPC", "CALIBRATED", True, True, True, 1),
+    ElectricalStressMethod.B09: ("Proposed calibrated event-triggered joint control", "MESS", True, True, "EVENT_TRIGGERED", "CALIBRATED", True, True, True, None),
 }
 
 
@@ -139,6 +189,61 @@ class MethodFactory:
         )
         config.validate()
         return config
+
+    def create_electrical_stress(
+        self, method: ElectricalStressMethod
+    ) -> MethodConfig:
+        treatment = _ELECTRICAL_STRESS_TREATMENTS[method]
+        config = MethodConfig(
+            comparison_method_id=method,
+            label=str(treatment[0]),
+            energy_flexibility=str(treatment[1]),
+            temporal_workload_shift=bool(treatment[2]),
+            spatial_workload_migration=bool(treatment[3]),
+            control_mode=str(treatment[4]),
+            risk_interface=str(treatment[5]),
+            ai_training_aware=bool(treatment[6]),
+            joint_uncertainty=bool(treatment[7]),
+            slow_fast_control=bool(treatment[8]),
+            periodic_replan_steps=(
+                None if treatment[9] is None else int(treatment[9])
+            ),
+            ac_safety_filter=True,
+            authority_fingerprint=self.authority.fingerprint,
+        )
+        config.validate()
+        return config
+
+    def electrical_stress_campaign(self) -> Tuple[MethodConfig, ...]:
+        """Return B00-B09; old B0-B8 IDs remain historical/read compatible."""
+
+        result = tuple(
+            self.create_electrical_stress(method)
+            for method in ELECTRICAL_STRESS_COMPARISON_METHODS
+        )
+        if len({item.comparison_method_id for item in result}) != 10:
+            raise MethodContractError("electrical-stress B00-B09 registry is incomplete")
+        if len({item.authority_fingerprint for item in result}) != 1:
+            raise MethodContractError("electrical-stress methods lack shared authority")
+        factorial = {
+            cell: self.create_electrical_stress(method)
+            for cell, method in FACTORIAL_ELECTRICAL_STRESS_CELLS.items()
+        }
+        common = {
+            (
+                item.control_mode,
+                item.periodic_replan_steps,
+                item.risk_interface,
+                item.joint_uncertainty,
+                item.ac_safety_filter,
+            )
+            for item in factorial.values()
+        }
+        if len(common) != 1:
+            raise MethodContractError(
+                "RC0/RCE/RCC/RCEC must differ only by capability mask"
+            )
+        return result
 
     def all(self) -> Tuple[MethodConfig, ...]:
         """Return the frozen B0-B7 main registry for backward compatibility."""
@@ -174,8 +279,11 @@ class K9H7ResultIdentityV2:
             raise MethodContractError("K9H7_RESULT_V1 is historical compatibility only")
         if self.scientific_framework_id != "V13_AI_ICPS":
             raise MethodContractError("unknown current scientific framework")
-        if self.comparison_method_id not in {method.value for method in ComparisonMethod}:
-            raise MethodContractError("comparison method must be B0-B8")
+        valid_methods = {method.value for method in ComparisonMethod} | {
+            method.value for method in ElectricalStressMethod
+        }
+        if self.comparison_method_id not in valid_methods:
+            raise MethodContractError("comparison method must be historical B0-B8 or stress B00-B09")
         if not self.controller_id or not self.representative_week_id:
             raise MethodContractError("controller and representative week identities are required")
         if len(self.shared_authority_fingerprint) != 64:
