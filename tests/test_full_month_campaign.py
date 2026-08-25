@@ -30,17 +30,17 @@ def test_full_month_contract_covers_all_90_calendar_days() -> None:
     assert feb["days"] == 28
     assert feb["global_issue_first"] == 31 * 288
     assert feb["global_issue_last"] == (31 + 28) * 288 - 1
-    assert feb["expected_commit_markers"] == 28 * 8 * 288
+    assert feb["expected_commit_markers"] == 28 * 10 * 288
 
     assert mar["calendar_start"] == "2025-03-01"
     assert mar["days"] == 31
     assert mar["global_issue_first"] == (31 + 28) * 288
     assert mar["global_issue_last"] == 90 * 288 - 1
-    assert mar["expected_commit_markers"] == 31 * 8 * 288
+    assert mar["expected_commit_markers"] == 31 * 10 * 288
 
-    assert 31 * 8 * 288 + sum(
+    assert 31 * 10 * 288 + sum(
         period["expected_commit_markers"] for period in contract["periods"]
-    ) == 90 * 8 * 288 == 207360
+    ) == 90 * 10 * 288 == 259200
 
 
 def test_generated_and_reused_mobility_ranges_cover_each_full_month() -> None:

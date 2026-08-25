@@ -7,7 +7,9 @@ from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 import hashlib
 import json
 import os
+import queue
 import signal
+import shutil
 import subprocess
 import sys
 import threading
@@ -23,6 +25,7 @@ try:
 except ImportError:  # pragma: no cover - production campaigns run under WSL/POSIX.
     fcntl = None
 
+from pfr.cpu_topology import discover_disjoint_cpu_groups
 from pfr.provenance import scientific_implementation_fingerprint
 from pfr.result_storage import materialize_period_summary
 
@@ -142,11 +145,25 @@ def run_child(
     *,
     cwd: Path,
     stdout: Any = None,
+    cpu_affinity: Sequence[int] | None = None,
 ) -> int:
     if _STOP_REQUESTED.is_set():
         return 130
+    launch_command = list(command)
+    if cpu_affinity is not None:
+        taskset = shutil.which("taskset")
+        if taskset is None:
+            raise RuntimeError("topology-aware affinity requested but taskset is missing")
+        if not cpu_affinity:
+            raise RuntimeError("topology-aware affinity produced an empty CPU group")
+        launch_command = [
+            taskset,
+            "--cpu-list",
+            ",".join(str(cpu) for cpu in cpu_affinity),
+            *launch_command,
+        ]
     process = subprocess.Popen(
-        command,
+        launch_command,
         cwd=cwd,
         stdout=stdout,
         stderr=subprocess.STDOUT if stdout is not None else None,
@@ -407,6 +424,8 @@ def run_day(
     supplementary_b8_periodic_5min: bool,
     diagnostic_method: str | None = None,
     electrical_stress_campaign: bool = False,
+    cpu_affinity: Sequence[int] | None = None,
+    diagnostic_steps_per_day: int | None = None,
 ) -> Mapping[str, Any]:
     day_root = output / spec.calendar_date
     summary_path = day_root / "MATRIX_SUMMARY.json"
@@ -463,11 +482,23 @@ def run_day(
         command.append("--electrical-stress-campaign")
     if diagnostic_method is not None:
         command.extend(("--diagnostic-method", diagnostic_method))
+    if diagnostic_steps_per_day is not None:
+        command.extend(
+            (
+                "--diagnostic-stop-after-issue",
+                str(spec.start_issue + diagnostic_steps_per_day - 1),
+            )
+        )
     if capture_day_logs:
         with (day_root / "DAY_RUN.log").open("w", encoding="utf-8") as log:
-            returncode = run_child(command, cwd=repo, stdout=log)
+            returncode = run_child(
+                command,
+                cwd=repo,
+                stdout=log,
+                cpu_affinity=cpu_affinity,
+            )
     else:
-        returncode = run_child(command, cwd=repo)
+        returncode = run_child(command, cwd=repo, cpu_affinity=cpu_affinity)
 
     if returncode != 0 or not summary_path.is_file():
         evidence_path = write_day_failure_evidence(
@@ -490,9 +521,16 @@ def run_day(
             result["preserved_previous_attempt"] = str(preserved_attempt)
         return result
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    bounded_diagnostic_pass = bool(
+        diagnostic_steps_per_day is not None
+        and summary.get("status") == "DIAGNOSTIC_STOP"
+        and int(summary.get("valid_commit_markers", -1))
+        == diagnostic_steps_per_day
+    )
     day_status = (
         "PASS"
         if summary_passes(summary, method_count=method_count)
+        or bounded_diagnostic_pass
         else "FAIL_CLOSED"
     )
     result = {
@@ -503,6 +541,7 @@ def run_day(
         "reused_existing_pass": False,
         "scientific_implementation_fingerprint": implementation_fingerprint,
         "shared_exogenous_authority_sha256": shared_authority_sha256,
+        "bounded_diagnostic_pass": bounded_diagnostic_pass,
     }
     if preserved_attempt is not None:
         result["preserved_previous_attempt"] = str(preserved_attempt)
@@ -520,6 +559,26 @@ def run_day(
     return result
 
 
+def run_day_with_affinity_slot(
+    spec: DaySpec,
+    *,
+    affinity_slots: queue.Queue[tuple[int, ...]] | None,
+    **kwargs: Any,
+) -> Mapping[str, Any]:
+    """Hold one disjoint CPU slot for the complete lifetime of a day process."""
+
+    affinity = affinity_slots.get() if affinity_slots is not None else None
+    try:
+        result = run_day(spec, cpu_affinity=affinity, **kwargs)
+        return {
+            **result,
+            "cpu_affinity": list(affinity) if affinity is not None else None,
+        }
+    finally:
+        if affinity_slots is not None and affinity is not None:
+            affinity_slots.put(affinity)
+
+
 def campaign_payload(
     *,
     start_day: int,
@@ -532,6 +591,9 @@ def campaign_payload(
     diagnostic_method: str | None = None,
     electrical_stress_campaign: bool = False,
     fail_fast: bool = False,
+    cpu_affinity_policy: str = "none",
+    cpu_affinity_groups: Sequence[Sequence[int]] = (),
+    diagnostic_steps_per_day: int | None = None,
 ) -> Mapping[str, Any]:
     expected_days = end_day - start_day + 1
     complete = len(summaries) == expected_days
@@ -564,6 +626,10 @@ def campaign_payload(
         "end_day": end_day,
         "day_process_workers": day_workers,
         "gurobi_threads_per_process": int(os.environ.get("PFR_GUROBI_THREADS", "1")),
+        "cpu_affinity_policy": cpu_affinity_policy,
+        "cpu_affinity_groups": [list(group) for group in cpu_affinity_groups],
+        "diagnostic_steps_per_day": diagnostic_steps_per_day,
+        "scientific_result_eligible": diagnostic_steps_per_day is None,
         "independent_daily_cold_start": True,
         "cross_day_endogenous_state_carryover": False,
         "continue_to_next_method_after_failure": True,
@@ -621,6 +687,20 @@ def main() -> None:
     parser.add_argument("--start-day", type=int, required=True)
     parser.add_argument("--end-day", type=int, required=True)
     parser.add_argument("--day-workers", type=int, default=1)
+    parser.add_argument(
+        "--cpu-affinity",
+        choices=("none", "disjoint"),
+        default="none",
+        help="Pin each active day process to a disjoint topology-aware CPU set.",
+    )
+    parser.add_argument(
+        "--diagnostic-steps-per-day",
+        type=int,
+        help=(
+            "Benchmark only: retain the 288-step episode horizon but stop each "
+            "diagnostic day after this many committed issues."
+        ),
+    )
     parser.add_argument("--capture-day-logs", action="store_true")
     parser.add_argument(
         "--fail-fast",
@@ -690,6 +770,11 @@ def main() -> None:
         parser.error(
             "--electrical-stress-campaign is mutually exclusive with single-method modes"
         )
+    if args.diagnostic_steps_per_day is not None:
+        if args.diagnostic_method is None:
+            parser.error("--diagnostic-steps-per-day requires --diagnostic-method")
+        if not 1 <= args.diagnostic_steps_per_day < ISSUES_PER_DAY:
+            parser.error("--diagnostic-steps-per-day must be in [1, 287]")
     calibrated_method_selected = bool(
         args.supplementary_b8_periodic_5min
         or args.electrical_stress_campaign
@@ -730,6 +815,16 @@ def main() -> None:
         raise SystemExit(2)
 
     specs = day_specs(args.start_day, args.end_day)
+    affinity_groups: tuple[tuple[int, ...], ...] = ()
+    affinity_slots: queue.Queue[tuple[int, ...]] | None = None
+    if args.cpu_affinity == "disjoint":
+        affinity_groups = discover_disjoint_cpu_groups(
+            workers=args.day_workers,
+            threads_per_worker=int(os.environ.get("PFR_GUROBI_THREADS", "1")),
+        )
+        affinity_slots = queue.Queue()
+        for group in affinity_groups:
+            affinity_slots.put(group)
     args.output.mkdir(parents=True, exist_ok=True)
     try:
         campaign_lock = acquire_campaign_lock(args.output)
@@ -776,8 +871,9 @@ def main() -> None:
     try:
         futures = {
             pool.submit(
-                run_day,
+                run_day_with_affinity_slot,
                 spec,
+                affinity_slots=affinity_slots,
                 repo=args.repo,
                 output=args.output,
                 common=common,
@@ -791,6 +887,7 @@ def main() -> None:
                 ),
                 diagnostic_method=args.diagnostic_method,
                 electrical_stress_campaign=args.electrical_stress_campaign,
+                diagnostic_steps_per_day=args.diagnostic_steps_per_day,
             ): spec
             for spec in specs
         }
@@ -837,6 +934,9 @@ def main() -> None:
                     diagnostic_method=args.diagnostic_method,
                     electrical_stress_campaign=args.electrical_stress_campaign,
                     fail_fast=args.fail_fast,
+                    cpu_affinity_policy=args.cpu_affinity,
+                    cpu_affinity_groups=affinity_groups,
+                    diagnostic_steps_per_day=args.diagnostic_steps_per_day,
                 ),
             )
             done = len(summaries)
@@ -892,6 +992,9 @@ def main() -> None:
                 diagnostic_method=args.diagnostic_method,
                 electrical_stress_campaign=args.electrical_stress_campaign,
                 fail_fast=args.fail_fast,
+                cpu_affinity_policy=args.cpu_affinity,
+                cpu_affinity_groups=affinity_groups,
+                diagnostic_steps_per_day=args.diagnostic_steps_per_day,
             )
         )
         interrupted["status"] = "INTERRUPTED"
@@ -920,6 +1023,9 @@ def main() -> None:
         diagnostic_method=args.diagnostic_method,
         electrical_stress_campaign=args.electrical_stress_campaign,
         fail_fast=args.fail_fast,
+        cpu_affinity_policy=args.cpu_affinity,
+        cpu_affinity_groups=affinity_groups,
+        diagnostic_steps_per_day=args.diagnostic_steps_per_day,
     )
     if first_failure is not None:
         campaign = dict(campaign)

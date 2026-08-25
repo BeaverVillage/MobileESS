@@ -5,6 +5,9 @@ repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 python_bin="${PFR_PYTHON:-/home/jaewon/miniconda3/envs/power_v61_gpu/bin/python}"
 run_root=""
 preflight_only=0
+day_workers="${PFR_DAY_WORKERS:-6}"
+gurobi_threads="${PFR_GUROBI_THREADS:-2}"
+cpu_affinity="${PFR_CPU_AFFINITY:-disjoint}"
 
 stop_run() {
     trap - INT TERM
@@ -18,13 +21,24 @@ while (($#)); do
         --run-root)
             (($# >= 2)) || { echo "Missing --run-root value" >&2; exit 64; }
             run_root="$2"; shift 2 ;;
+        --day-workers) day_workers="$2"; shift 2 ;;
+        --gurobi-threads) gurobi_threads="$2"; shift 2 ;;
+        --cpu-affinity) cpu_affinity="$2"; shift 2 ;;
         --preflight-only) preflight_only=1; shift ;;
-        *) echo "Usage: $0 --run-root ABSOLUTE_PATH [--preflight-only]" >&2; exit 64 ;;
+        *) echo "Usage: $0 --run-root ABSOLUTE_PATH [--day-workers N] [--gurobi-threads N] [--cpu-affinity none|disjoint] [--preflight-only]" >&2; exit 64 ;;
     esac
 done
 if [[ -z "$run_root" || "$run_root" != /* ]]; then
     echo "--run-root must be an absolute isolated path." >&2
     exit 2
+fi
+if ! [[ "$day_workers" =~ ^[1-9][0-9]*$ && "$gurobi_threads" =~ ^[1-9][0-9]*$ ]]; then
+    echo "worker and Gurobi thread counts must be positive integers." >&2
+    exit 64
+fi
+if [[ "$cpu_affinity" != none && "$cpu_affinity" != disjoint ]]; then
+    echo "--cpu-affinity must be none or disjoint." >&2
+    exit 64
 fi
 
 mkdir -p "$run_root"
@@ -38,7 +52,9 @@ fi
 calibration_root="$run_root/january_b07_electrical_stress_raw"
 artifact="$run_root/calibration/ELECTRICAL_STRESS_EVENT_RISK_CALIBRATION_JAN2025.json"
 common=(
-    --start-day 1 --end-day 31 --day-workers 4 --gurobi-threads 4
+    --start-day 1 --end-day 31
+    --day-workers "$day_workers" --gurobi-threads "$gurobi_threads"
+    --cpu-affinity "$cpu_affinity"
     --diagnostic-method B07 --output-root "$calibration_root" --fail-fast
 )
 if ((preflight_only)); then common+=(--preflight-only); fi

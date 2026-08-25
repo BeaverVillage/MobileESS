@@ -4,17 +4,19 @@ set -uo pipefail
 repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 python_bin="${PFR_PYTHON:-/home/jaewon/miniconda3/envs/power_v61_gpu/bin/python}"
 base="/home/jaewon/mobile_ess_work"
-workers=4
-gurobi_threads=4
+workers=6
+gurobi_threads=2
+cpu_affinity=disjoint
 mode="run"
 
 while (($#)); do
     case "$1" in
         --day-workers) workers="$2"; shift 2 ;;
         --gurobi-threads) gurobi_threads="$2"; shift 2 ;;
+        --cpu-affinity) cpu_affinity="$2"; shift 2 ;;
         --prepare-only) mode="prepare"; shift ;;
         -h|--help)
-            echo "Usage: $0 [--day-workers N] [--gurobi-threads N] [--prepare-only]"
+            echo "Usage: $0 [--day-workers N] [--gurobi-threads N] [--cpu-affinity none|disjoint] [--prepare-only]"
             exit 0
             ;;
         *) echo "Unknown option: $1" >&2; exit 64 ;;
@@ -26,6 +28,10 @@ if ! [[ "$workers" =~ ^[1-7]$ ]]; then
 fi
 if ! [[ "$gurobi_threads" =~ ^[1-9][0-9]*$ ]]; then
     echo "--gurobi-threads must be positive" >&2
+    exit 64
+fi
+if [[ "$cpu_affinity" != none && "$cpu_affinity" != disjoint ]]; then
+    echo "--cpu-affinity must be none or disjoint" >&2
     exit 64
 fi
 
@@ -84,7 +90,8 @@ run_period() {
         --report "$input_root/PREFLIGHT_REPORT.json" || return
     "$python_bin" -m pfr.tools.run_frozen_rep_week_daily_campaign \
         --repo "$repo_dir" --period-id "$period_id" \
-        --day-workers "$workers" --capture-day-logs --continue-after-failure \
+        --day-workers "$workers" --cpu-affinity "$cpu_affinity" \
+        --capture-day-logs --continue-after-failure \
         --shared-root "$shared" \
         --exact-package-root /mnt/c/Users/kjw39/Downloads/stage_mess_grid_v2038_exact_sweep_power_v70_final_v1_package \
         --authority-package-root "$base/run_packages/K9H7_V2044R11R1_20260807T191351" \

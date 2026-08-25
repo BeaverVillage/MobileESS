@@ -70,13 +70,16 @@
     "semantics": "Fail closed on timeout; never relax an objective priority or hard constraint"
   },
   "runtime_acceptance": {
-    "comparison_scope": "Same issue, state, forecast, candidate K, Gurobi thread count, objective, hard constraints, Fresh OpenDSS gate, and storage path",
+    "comparison_scope": "Same issue, state, forecast, candidate K, objective, hard constraints, Fresh OpenDSS gate, and storage path; worker/thread topology may vary because it is the measured factor",
     "measured_quantity": "End-to-end total issue wall time, with component timings retained",
     "rule": "A computational alternative with no paired speed improvement is removed from the production path",
     "watchdog_is_not_speed_evidence": true
   },
   "approved_solver_runtime_settings": {
-    "gurobi_threads": 4,
+    "gurobi_threads": 2,
+    "day_process_workers": 6,
+    "cpu_affinity": "DISJOINT_TOPOLOGY_AWARE_BALANCED_SMT_CONTENTION",
+    "runtime_topology_evidence": "PFR_RUNTIME_TOPOLOGY_BENCHMARK_20260826",
     "slow_master_numeric_focus": 0,
     "exact_recourse_numeric_focus": 2,
     "exact_qcp_constraint_scaling": "Every line, service-transformer, and PCS P-Q circle is divided by its physical nameplate before squaring, producing a dimensionless O(1) QCP row whose numerical residual is independent of equipment rating.",
@@ -111,7 +114,7 @@
     "54-step exact-cut MILP outer approximation: no primary convergence within 120 seconds",
     "persistent sequential lexicographic QCP: slower than native multiobjective",
     "condensed QCP diagnostic: objective and Fresh-AC trajectory mismatch",
-    "one-thread Gurobi diagnostic: slower than four threads",
+    "bounded topology diagnostics selected six day processes with two Gurobi threads each over arbitrary 4x4, 5x3, 7x2, and unpinned alternatives",
     "exact-recourse NumericFocus=0 diagnostic: faster but failed a clean default rerun at the frozen charge/discharge residual tolerance",
     "exact-recourse NumericFocus=1 diagnostic: failed the same frozen charge/discharge residual tolerance",
     "Crossover=0 diagnostic: identical output but slower median and p95",

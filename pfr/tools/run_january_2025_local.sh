@@ -8,12 +8,14 @@ start_day=1
 end_day=31
 day_workers=4
 gurobi_threads=4
+cpu_affinity=none
 watch_seconds=10
 mode="run"
 skip_preflight=0
 fail_fast=0
 diagnostic_method=""
 risk_calibration=""
+diagnostic_steps_per_day=""
 
 usage() {
     cat <<'EOF'
@@ -28,9 +30,11 @@ Run options:
   --end-day N            Last January day (default: 31).
   --day-workers N        Concurrent daily processes (default: 4).
   --gurobi-threads N     Gurobi threads per daily process (default: 4).
+  --cpu-affinity MODE    none or disjoint (default: none).
   --output-root PATH     Campaign output root.
   --diagnostic-method B07 Run one method only; B07 is the new calibration source.
   --risk-calibration P    Frozen B07 calibration required for full B00-B09.
+  --diagnostic-steps-per-day N  Bounded topology benchmark only.
   --skip-preflight       Skip the automatic preflight (not recommended).
   --fail-fast            Stop all day workers after the first saved failure.
   --watch-seconds N      Monitor refresh interval; 0 prints once (default: 10).
@@ -63,7 +67,7 @@ while (($#)); do
             fail_fast=1
             shift
             ;;
-        --start-day|--end-day|--day-workers|--gurobi-threads|--output-root|--watch-seconds|--diagnostic-method|--risk-calibration)
+        --start-day|--end-day|--day-workers|--gurobi-threads|--cpu-affinity|--output-root|--watch-seconds|--diagnostic-method|--risk-calibration|--diagnostic-steps-per-day)
             require_value "$@"
             option="$1"
             value="$2"
@@ -73,10 +77,12 @@ while (($#)); do
                 --end-day) end_day="$value" ;;
                 --day-workers) day_workers="$value" ;;
                 --gurobi-threads) gurobi_threads="$value" ;;
+                --cpu-affinity) cpu_affinity="$value" ;;
                 --output-root) output_root="$value" ;;
                 --watch-seconds) watch_seconds="$value" ;;
                 --diagnostic-method) diagnostic_method="$value" ;;
                 --risk-calibration) risk_calibration="$value" ;;
+                --diagnostic-steps-per-day) diagnostic_steps_per_day="$value" ;;
             esac
             ;;
         -h|--help)
@@ -108,6 +114,10 @@ if ((day_workers < 1 || gurobi_threads < 1)); then
     echo "day-workers and gurobi-threads must be positive." >&2
     exit 64
 fi
+if [[ "$cpu_affinity" != none && "$cpu_affinity" != disjoint ]]; then
+    echo "--cpu-affinity must be none or disjoint." >&2
+    exit 64
+fi
 if [[ -n "$diagnostic_method" && ! "$diagnostic_method" =~ ^(B[0-8]|B0[0-9])$ ]]; then
     echo "--diagnostic-method must be historical B0-B8 or B00-B09." >&2
     exit 64
@@ -119,6 +129,13 @@ fi
 if [[ -z "$diagnostic_method" && -z "$risk_calibration" ]]; then
     echo "Full B00-B09 requires the frozen January B07 --risk-calibration." >&2
     exit 64
+fi
+if [[ -n "$diagnostic_steps_per_day" ]]; then
+    if [[ -z "$diagnostic_method" || ! "$diagnostic_steps_per_day" =~ ^[0-9]+$ ]] \
+        || ((diagnostic_steps_per_day < 1 || diagnostic_steps_per_day >= 288)); then
+        echo "--diagnostic-steps-per-day requires a diagnostic method and N in [1,287]." >&2
+        exit 64
+    fi
 fi
 
 if [[ "$mode" == "monitor" ]]; then
@@ -221,7 +238,8 @@ if [[ "$mode" == "preflight" ]]; then
 fi
 
 echo "Starting days $start_day-$end_day with $day_workers processes x "\
-"$gurobi_threads Gurobi threads (visible CPUs=$available_cpu, system CPUs=$logical_cpu)."
+"$gurobi_threads Gurobi threads, affinity=$cpu_affinity "\
+"(visible CPUs=$available_cpu, system CPUs=$logical_cpu)."
 echo "Monitor in another shell:"
 printf 'bash %q --monitor-only --output-root %q --start-day %q --end-day %q' \
     "$repo_dir/pfr/tools/run_january_2025_local.sh" "$output_root" \
@@ -243,12 +261,16 @@ fi
 if [[ -n "$risk_calibration" ]]; then
     campaign_arguments+=(--risk-calibration "$risk_calibration")
 fi
+if [[ -n "$diagnostic_steps_per_day" ]]; then
+    campaign_arguments+=(--diagnostic-steps-per-day "$diagnostic_steps_per_day")
+fi
 
 exec "$python_bin" -m pfr.tools.run_pfr_daily_campaign \
     --repo "$repo_dir" \
     --start-day "$start_day" \
     --end-day "$end_day" \
     --day-workers "$day_workers" \
+    --cpu-affinity "$cpu_affinity" \
     --capture-day-logs \
     "${campaign_arguments[@]}" \
     "${common_arguments[@]}" \

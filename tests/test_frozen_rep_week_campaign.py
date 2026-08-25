@@ -21,6 +21,24 @@ def test_frozen_rep_week_specs_keep_global_issue_axis() -> None:
     assert specs[-1].candidate_id == "W07_2025-02-17_DAY07"
 
 
+def test_period_specs_support_a_fail_closed_calendar_slice() -> None:
+    period = {
+        "period_id": "FEB2025_FULL",
+        "calendar_start": "2025-02-01",
+        "days": 28,
+        "global_issue_first": 8928,
+    }
+
+    specs = period_specs(period, start_day_index=1, end_day_index=6)
+
+    assert len(specs) == 6
+    assert specs[0].calendar_date == "2025-02-01"
+    assert specs[-1].calendar_date == "2025-02-06"
+    assert specs[-1].start_issue == 8928 + 5 * 288
+    with pytest.raises(ValueError, match="period day slice"):
+        period_specs(period, start_day_index=0, end_day_index=6)
+
+
 def test_rep_week_power_block_uses_frozen_global_issue_range(tmp_path) -> None:
     block = tmp_path / "power_price" / "block_00_13536_14111"
     block.mkdir(parents=True)

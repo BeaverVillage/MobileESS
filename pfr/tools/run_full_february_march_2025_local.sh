@@ -10,6 +10,9 @@ canonical="$base/stage_kestrel_f30_resource_aware_job_power_policy_v2_0_32_r6c_2
 prepare_only=0
 run_root=""
 risk_calibration=""
+day_workers="${PFR_DAY_WORKERS:-6}"
+gurobi_threads="${PFR_GUROBI_THREADS:-2}"
+cpu_affinity="${PFR_CPU_AFFINITY:-disjoint}"
 
 interrupt_run() {
     trap - INT TERM
@@ -45,12 +48,23 @@ while (($#)); do
             risk_calibration="$2"
             shift 2
             ;;
-        *) echo "Usage: $0 --run-root ABSOLUTE_PATH --risk-calibration FILE [--prepare-only]" >&2; exit 64 ;;
+        --day-workers) day_workers="$2"; shift 2 ;;
+        --gurobi-threads) gurobi_threads="$2"; shift 2 ;;
+        --cpu-affinity) cpu_affinity="$2"; shift 2 ;;
+        *) echo "Usage: $0 --run-root ABSOLUTE_PATH --risk-calibration FILE [--day-workers N] [--gurobi-threads N] [--cpu-affinity none|disjoint] [--prepare-only]" >&2; exit 64 ;;
     esac
 done
 if [[ -z "$run_root" || "$run_root" != /* ]]; then
     echo "ABORT_ISOLATION: --run-root must be an authorized absolute path." >&2
     exit 2
+fi
+if ! [[ "$day_workers" =~ ^[1-9][0-9]*$ && "$gurobi_threads" =~ ^[1-9][0-9]*$ ]]; then
+    echo "worker and Gurobi thread counts must be positive integers." >&2
+    exit 64
+fi
+if [[ "$cpu_affinity" != none && "$cpu_affinity" != disjoint ]]; then
+    echo "--cpu-affinity must be none or disjoint." >&2
+    exit 64
 fi
 cd "$repo_dir"
 if [[ -z "$risk_calibration" || ! -f "$risk_calibration" ]]; then
@@ -118,7 +132,7 @@ source_rc=0
 bash "$repo_dir/pfr/tools/prepare_full_february_march_2025_sources.sh" || source_rc=$?
 if ((source_rc != 0)); then overall=1; fi
 
-export PFR_GUROBI_THREADS=4
+export PFR_GUROBI_THREADS="$gurobi_threads"
 export OMP_NUM_THREADS=1
 export MKL_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
@@ -153,7 +167,8 @@ run_period() {
         --report "$gate_root/PREFLIGHT_REPORT.json" || return 1
     "$python_bin" -m pfr.tools.run_frozen_rep_week_daily_campaign \
         --repo "$repo_dir" --period-id "$period_id" --period-contract "$contract" \
-        --day-workers 4 --capture-day-logs --continue-after-failure \
+        --day-workers "$day_workers" --cpu-affinity "$cpu_affinity" \
+        --capture-day-logs --continue-after-failure \
         --electrical-stress-campaign \
         --shared-root "$shared" \
         --exact-package-root /mnt/c/Users/kjw39/Downloads/stage_mess_grid_v2038_exact_sweep_power_v70_final_v1_package \

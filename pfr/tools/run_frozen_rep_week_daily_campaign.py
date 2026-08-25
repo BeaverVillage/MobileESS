@@ -8,15 +8,17 @@ from datetime import date, timedelta
 import hashlib
 import json
 import os
+import queue
 from pathlib import Path
 from typing import Any, Mapping
 
+from pfr.cpu_topology import discover_disjoint_cpu_groups
 from pfr.tools.run_pfr_daily_campaign import (
     DaySpec,
     ELECTRICAL_STRESS_METHODS,
     ISSUES_PER_DAY,
     install_stop_signal_handlers,
-    run_day,
+    run_day_with_affinity_slot,
     stop_active_children,
     write_campaign,
 )
@@ -31,10 +33,20 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def period_specs(period: Mapping[str, Any]) -> tuple[DaySpec, ...]:
+def period_specs(
+    period: Mapping[str, Any],
+    *,
+    start_day_index: int = 1,
+    end_day_index: int | None = None,
+) -> tuple[DaySpec, ...]:
     start = date.fromisoformat(str(period["calendar_start"]))
     issue_first = int(period["global_issue_first"])
     days = int(period["days"])
+    selected_end = days if end_day_index is None else int(end_day_index)
+    if not 1 <= start_day_index <= selected_end <= days:
+        raise ValueError(
+            "period day slice must satisfy 1 <= start <= end <= period days"
+        )
     return tuple(
         DaySpec(
             day_index=offset + 1,
@@ -42,7 +54,7 @@ def period_specs(period: Mapping[str, Any]) -> tuple[DaySpec, ...]:
             start_issue=issue_first + offset * ISSUES_PER_DAY,
             candidate_id=f"{period['period_id']}_DAY{offset + 1:02d}",
         )
-        for offset in range(days)
+        for offset in range(start_day_index - 1, selected_end)
     )
 
 
@@ -56,8 +68,13 @@ def payload(
     supplementary_b8_periodic_5min: bool = False,
     diagnostic_method: str | None = None,
     electrical_stress_campaign: bool = False,
+    cpu_affinity_policy: str = "none",
+    cpu_affinity_groups: tuple[tuple[int, ...], ...] = (),
+    expected_days: int | None = None,
+    start_day_index: int = 1,
+    end_day_index: int | None = None,
 ) -> Mapping[str, Any]:
-    expected = int(period["days"])
+    expected = int(period["days"]) if expected_days is None else expected_days
     complete = len(rows) == expected
     any_fail = any(row["status"] == "FAIL_CLOSED" for row in rows)
     status = (
@@ -69,6 +86,11 @@ def payload(
         "schema_version": "PFR_FROZEN_REP_WEEK_DAILY_VALIDATION_V13_13",
         "status": status,
         "period_id": period["period_id"],
+        "period_day_index_first": start_day_index,
+        "period_day_index_last": (
+            int(period["days"]) if end_day_index is None else end_day_index
+        ),
+        "full_period_execution": expected == int(period["days"]),
         "evaluation_classification": (
             "FEBRUARY_2025_DEVELOPMENT_VALIDATION_NOT_INDEPENDENT_EXECUTION"
             if period.get("period_id") == "FEB2025_FULL"
@@ -82,6 +104,8 @@ def payload(
         "calendar_timezone": "FIXED_AEST_UTC_PLUS_10_NO_DST",
         "day_process_workers": workers,
         "gurobi_threads_per_process": int(os.environ.get("PFR_GUROBI_THREADS", "1")),
+        "cpu_affinity_policy": cpu_affinity_policy,
+        "cpu_affinity_groups": [list(group) for group in cpu_affinity_groups],
         "independent_daily_cold_start": True,
         "cross_day_endogenous_state_carryover": False,
         "continue_to_next_method_after_failure": True,
@@ -120,6 +144,13 @@ def main() -> None:
     parser.add_argument("--period-id", required=True)
     parser.add_argument("--period-contract", type=Path)
     parser.add_argument("--day-workers", type=int, default=4)
+    parser.add_argument("--start-day-index", type=int, default=1)
+    parser.add_argument("--end-day-index", type=int)
+    parser.add_argument(
+        "--cpu-affinity",
+        choices=("none", "disjoint"),
+        default="none",
+    )
     parser.add_argument("--capture-day-logs", action="store_true")
     parser.add_argument(
         "--continue-after-failure",
@@ -248,13 +279,33 @@ def main() -> None:
     if args.risk_calibration is not None:
         common.extend(("--risk-calibration", str(args.risk_calibration)))
     args.output.mkdir(parents=True, exist_ok=True)
-    specs = period_specs(period)
+    specs = period_specs(
+        period,
+        start_day_index=args.start_day_index,
+        end_day_index=args.end_day_index,
+    )
+    selected_end_day_index = (
+        int(period["days"])
+        if args.end_day_index is None
+        else args.end_day_index
+    )
+    affinity_groups: tuple[tuple[int, ...], ...] = ()
+    affinity_slots: queue.Queue[tuple[int, ...]] | None = None
+    if args.cpu_affinity == "disjoint":
+        affinity_groups = discover_disjoint_cpu_groups(
+            workers=args.day_workers,
+            threads_per_worker=int(os.environ.get("PFR_GUROBI_THREADS", "1")),
+        )
+        affinity_slots = queue.Queue()
+        for group in affinity_groups:
+            affinity_slots.put(group)
     rows: list[Mapping[str, Any]] = []
     pool = ThreadPoolExecutor(max_workers=args.day_workers)
     futures: dict[Future[Mapping[str, Any]], DaySpec] = {
         pool.submit(
-            run_day,
+            run_day_with_affinity_slot,
             spec,
+            affinity_slots=affinity_slots,
             repo=args.repo,
             output=args.output,
             common=common,
@@ -311,6 +362,11 @@ def main() -> None:
                     ),
                     diagnostic_method=args.diagnostic_method,
                     electrical_stress_campaign=args.electrical_stress_campaign,
+                    cpu_affinity_policy=args.cpu_affinity,
+                    cpu_affinity_groups=affinity_groups,
+                    expected_days=len(specs),
+                    start_day_index=args.start_day_index,
+                    end_day_index=selected_end_day_index,
                 ),
             )
             print(
@@ -348,6 +404,11 @@ def main() -> None:
         ),
         diagnostic_method=args.diagnostic_method,
         electrical_stress_campaign=args.electrical_stress_campaign,
+        cpu_affinity_policy=args.cpu_affinity,
+        cpu_affinity_groups=affinity_groups,
+        expected_days=len(specs),
+        start_day_index=args.start_day_index,
+        end_day_index=selected_end_day_index,
     )
     write_campaign(args.output, campaign)
     if campaign["status"] == "PASS" and args.electrical_stress_campaign:

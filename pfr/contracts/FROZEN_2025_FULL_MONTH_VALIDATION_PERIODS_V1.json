@@ -7,9 +7,11 @@
   "calendar_timezone": "FIXED_AEST_UTC_PLUS_10_NO_DST",
   "daily_cold_start": true,
   "cross_day_endogenous_state_carryover": false,
-  "day_workers": 4,
-  "gurobi_threads_per_worker": 4,
-  "methods_per_day": 8,
+  "day_workers": 6,
+  "gurobi_threads_per_worker": 2,
+  "cpu_affinity_policy": "DISJOINT_TOPOLOGY_AWARE_BALANCED_SMT_CONTENTION",
+  "runtime_topology_evidence": "PFR_RUNTIME_TOPOLOGY_BENCHMARK_20260826",
+  "methods_per_day": 10,
   "issues_per_method_per_day": 288,
   "source_generator_sha256": {
     "performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_W02_POWER_PRICE_SOURCE.py": "f8733de5d51dd2aca0ec91d24e75d8c0d5e721d0bcd0ca5fd782001979fe426f",
@@ -26,7 +28,7 @@
       "days": 28,
       "global_issue_first": 8928,
       "global_issue_last": 16991,
-      "expected_commit_markers": 64512,
+      "expected_commit_markers": 80640,
       "source_padding_issue_last": 18143,
       "power_generation_starts": [8928, 11232, 13536, 15840],
       "mobility_generation_chunks": [
@@ -47,7 +49,7 @@
       "days": 31,
       "global_issue_first": 16992,
       "global_issue_last": 25919,
-      "expected_commit_markers": 71424,
+      "expected_commit_markers": 89280,
       "source_padding_issue_last": 26207,
       "power_generation_starts": [16992, 19296, 21600, 23904],
       "mobility_generation_chunks": [
