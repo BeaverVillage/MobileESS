@@ -149,7 +149,7 @@ def certify_daily_pre_identity(manifest: dict[str, Any]) -> dict[str, Any]:
         raise DailyInitializationError("daily population contains duplicate dates")
     for calendar_date in dates:
         daily = tuple(row for row in rows if row["calendar_date"] == calendar_date)
-        if tuple(row["comparison_method_id"] for row in daily) != METHODS:
+        if tuple(row["comparison_method_id"] for row in daily) != methods:
             raise DailyInitializationError(f"method axis mismatch on {calendar_date}")
         if len({row["method_independent_pre_sha256"] for row in daily}) != 1:
             raise DailyInitializationError(f"same-date PRE identity mismatch on {calendar_date}")
