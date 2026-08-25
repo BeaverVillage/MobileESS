@@ -287,3 +287,25 @@ def test_prestaged_spatial_admission_uses_remote_physical_rack_without_wan() -> 
     assert remote.migration_state == "PRESTART_PLACED_DATASET_PRESTAGED"
     assert remote.logical_rack_id == "IDC02_LP01"
     assert remote.prestart_wan_required_bytes == 0
+
+
+def test_shared_watchdog_transfers_unused_master_time_to_exact_recourse() -> None:
+    total = 30.0
+
+    master_budget = PersistentBoundedMilpPlanner._shared_watchdog_budgets(total)
+    recourse_budget = PersistentBoundedMilpPlanner._shared_watchdog_budgets(
+        total,
+        master_elapsed_seconds=16.5,
+    )
+
+    assert master_budget == pytest.approx(20.0)
+    assert recourse_budget == pytest.approx(13.5)
+    assert 16.5 + recourse_budget == pytest.approx(total)
+
+
+def test_shared_watchdog_fails_before_recourse_when_master_consumes_total() -> None:
+    with pytest.raises(RuntimeContractError, match="exhausted the shared"):
+        PersistentBoundedMilpPlanner._shared_watchdog_budgets(
+            30.0,
+            master_elapsed_seconds=30.0,
+        )

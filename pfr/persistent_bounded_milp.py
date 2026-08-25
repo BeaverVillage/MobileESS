@@ -160,6 +160,37 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         self._recourse_models: dict[str, _PersistentMilpModel] = {}
         self._job_slot_capacity_by_method: dict[str, int] = {}
 
+    @staticmethod
+    def _shared_watchdog_budgets(
+        total_seconds: float,
+        *,
+        master_elapsed_seconds: float | None = None,
+    ) -> float:
+        """Allocate one watchdog across the master and exact-recourse stages.
+
+        January R6 exposed that the former fixed 55/45 split could time out the
+        master even when both stages would complete inside the unchanged
+        30-second planner watchdog. Reserve one third of the total for exact
+        recourse (10 seconds at the frozen development watchdog, above the R6
+        observed 8.25-second maximum), then give recourse every second the
+        master did not actually consume.
+        """
+
+        total = float(total_seconds)
+        if not math.isfinite(total) or total <= 0.0:
+            raise RuntimeContractError("shared planner watchdog must be positive")
+        if master_elapsed_seconds is None:
+            return max(0.05, (2.0 / 3.0) * total)
+        elapsed = float(master_elapsed_seconds)
+        if not math.isfinite(elapsed) or elapsed < 0.0:
+            raise RuntimeContractError("master elapsed time must be nonnegative")
+        remaining = total - elapsed
+        if remaining <= 0.0:
+            raise RuntimeContractError(
+                "slow master exhausted the shared planner watchdog before exact recourse"
+            )
+        return remaining
+
     def materialize_runtime_rack_assignments(
         self, state: MutableMethodState, config: MethodConfig
     ) -> Mapping[str, Any]:
@@ -816,7 +847,9 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             if master is None:
                 raise RuntimeContractError("slow master model missing")
             master_result = master.solve_lexicographic(
-                wall_budget_seconds=max(0.05, 0.55 * active_wall_budget)
+                wall_budget_seconds=self._shared_watchdog_budgets(
+                    active_wall_budget
+                )
             )
             route_index, job_option_indices = master.selected_domain_decisions()
         master_seconds = time.monotonic() - master_started
@@ -825,8 +858,12 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             route_index=route_index,
             job_option_indices=job_option_indices,
         )
+        recourse_wall_budget = self._shared_watchdog_budgets(
+            active_wall_budget,
+            master_elapsed_seconds=master_seconds,
+        )
         result = recourse.solve_lexicographic(
-            wall_budget_seconds=max(0.05, 0.45 * active_wall_budget)
+            wall_budget_seconds=recourse_wall_budget
         )
         plan = recourse.extract_plan(
             state=state,
@@ -865,6 +902,15 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             "model_build_once_seconds": build_seconds,
             "cold_start_bootstrap_budget_used": build_seconds > 0.0,
             "active_planner_wall_budget_seconds": active_wall_budget,
+            "shared_master_wall_budget_seconds": (
+                self._shared_watchdog_budgets(active_wall_budget)
+            ),
+            "shared_recourse_wall_budget_seconds": recourse_wall_budget,
+            "shared_watchdog_unused_master_seconds_transferred": max(
+                0.0,
+                self._shared_watchdog_budgets(active_wall_budget)
+                - master_seconds,
+            ),
             "reference_anchor_seconds": reference_seconds,
             "causal_domain_generation_seconds": domain_seconds,
             "parameter_update_seconds": update_seconds,

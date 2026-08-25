@@ -78,6 +78,9 @@
   "watchdog": {
     "cold_start_bootstrap_seconds": 30.0,
     "january_development_steady_state_seconds": 30.0,
+    "stage_allocation": "One shared 30-second planner watchdog. The slow master may use at most two thirds; exact recourse receives every second not actually consumed by the master. This removes the observed R6 fixed-partition rejection while retaining an evidence-sized exact-recourse reserve.",
+    "exact_recourse_reserve_evidence": "R6 first-failure audit over 818 completed replans measured exact-recourse p99 7.25335 s and maximum 8.24690 s. Reserving one third (10 s) exceeds the observed maximum by 21.3%; unused master time increases that reserve dynamically.",
+    "r6_root_cause": "The former fixed 55/45 split stopped issue 1424 at the master's 16.5-second sub-deadline even though issue 1423 completed master plus exact recourse in 20.99 seconds and the unchanged total watchdog was 30 seconds.",
     "production_freeze_rule": "After January development, set the production watchdog from the measured steady-state p99 plus a documented margin; do not use the runtime performance target itself as the timeout",
     "semantics": "Fail closed on timeout; never relax an objective priority or hard constraint"
   },
@@ -112,6 +115,9 @@
     "causal_domain_generation_seconds",
     "model_build_once_seconds",
     "parameter_update_seconds",
+    "shared_master_wall_budget_seconds",
+    "shared_recourse_wall_budget_seconds",
+    "shared_watchdog_unused_master_seconds_transferred",
     "slow_master_milp_seconds",
     "slow_master_skipped_exact_forced_domain",
     "fixed_binary_exact_h54_recourse_seconds",
