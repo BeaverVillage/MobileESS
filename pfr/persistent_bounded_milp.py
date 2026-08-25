@@ -141,10 +141,10 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             os.environ.get("PFR_ONLINE_CANDIDATE_K_FROZEN", "0") == "1"
         )
         self.wall_budget_seconds = float(
-            os.environ.get("PFR_ONLINE_MILP_WALL_BUDGET_SECONDS", "30.0")
+            os.environ.get("PFR_ONLINE_MILP_WALL_BUDGET_SECONDS", "60.0")
         )
         self.bootstrap_wall_budget_seconds = float(
-            os.environ.get("PFR_ONLINE_BOOTSTRAP_WALL_BUDGET_SECONDS", "30.0")
+            os.environ.get("PFR_ONLINE_BOOTSTRAP_WALL_BUDGET_SECONDS", "60.0")
         )
         if not math.isfinite(self.wall_budget_seconds) or self.wall_budget_seconds <= 0:
             raise RuntimeContractError("online MILP wall budget must be positive")
@@ -170,7 +170,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
 
         January R6 and R8 exposed that both the former 55/45 split and a later
         20/10 reserved split could time out the master even when both stages
-        could still complete inside the unchanged 30-second planner watchdog.
+        could still complete inside the planner-wide watchdog.
         The master therefore sees the one total deadline; exact recourse gets
         precisely the wall time that remains after the master and decision fix.
         """

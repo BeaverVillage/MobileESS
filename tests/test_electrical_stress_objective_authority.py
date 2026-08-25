@@ -182,7 +182,7 @@ def test_hierarchical_move_blocked_mpc_preserves_science_and_exact_recourse() ->
     assert "maximum_exact_norm_residual" in source
     assert "future_actual_used" in source
     assert "price_used_by_optimizer" in source
-    assert 'PFR_ONLINE_MILP_WALL_BUDGET_SECONDS", "30.0"' in source
+    assert 'PFR_ONLINE_MILP_WALL_BUDGET_SECONDS", "60.0"' in source
     assert 'self.numeric_focus = 0 if model_role == "slow_master" else 2' in source
     assert "self.model.Params.NumericFocus = self.numeric_focus" in source
     assert "EXCLUSIVITY_TOLERANCE_KW = 1e-4" in source

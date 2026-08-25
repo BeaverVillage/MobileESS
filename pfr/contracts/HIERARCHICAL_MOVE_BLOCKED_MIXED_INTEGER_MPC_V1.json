@@ -76,10 +76,12 @@
     "prohibited_online_use": true
   },
   "watchdog": {
-    "cold_start_bootstrap_seconds": 30.0,
-    "january_development_steady_state_seconds": 30.0,
-    "stage_allocation": "One shared 30-second planner deadline with no stage sub-deadlines. The slow master sees the total remaining deadline; exact recourse receives exactly the wall time left after the master and fixed-decision transfer. Fail closed only when the combined stages exhaust the unchanged total watchdog.",
-    "shared_deadline_evidence": "R6 issue 1424 failed at the former master partition; R8 issue 1705 then failed at a nominal 20-second master reserve while issue 1704 measured master 16.03 s plus exact recourse 5.16 s, only 22.01 s total. These two independent failures show that any static stage reserve can reject a combined solve that may fit the one authorized watchdog.",
+    "cold_start_bootstrap_seconds": 60.0,
+    "january_development_steady_state_seconds": 60.0,
+    "physical_control_interval_seconds": 300.0,
+    "stage_allocation": "One shared 60-second planner deadline with no stage sub-deadlines. The slow master sees the total remaining deadline; exact recourse receives exactly the wall time left after the master and fixed-decision transfer. Fail closed only when the combined stages exhaust the watchdog.",
+    "shared_deadline_evidence": "R6 issue 1424 failed at the former master partition; R8 issue 1705 then failed at a nominal 20-second master reserve while issue 1704 measured master 16.03 s plus exact recourse 5.16 s, only 22.01 s total. R9 removed stage partitions and proved the combined master-plus-recourse solve itself exceeded 30 seconds. Therefore 30 seconds was a performance target masquerading as a fail-close watchdog, not a defensible physical deadline.",
+    "watchdog_margin": "The 60-second watchdog is one fifth of the physical five-minute control interval, retaining 240 seconds for downstream exact AC, storage, and actuation while allowing January to measure the hard-instance tail. Normal solves terminate at optimality and do not consume the unused allowance.",
     "r6_root_cause": "The former fixed 55/45 split stopped issue 1424 at the master's 16.5-second sub-deadline even though issue 1423 completed master plus exact recourse in 20.99 seconds and the unchanged total watchdog was 30 seconds.",
     "production_freeze_rule": "After January development, set the production watchdog from the measured steady-state p99 plus a documented margin; do not use the runtime performance target itself as the timeout",
     "semantics": "Fail closed on timeout; never relax an objective priority or hard constraint"
@@ -93,6 +95,7 @@
   "approved_solver_runtime_settings": {
     "gurobi_threads": 2,
     "day_process_workers": 6,
+    "planner_watchdog_seconds": 60.0,
     "cpu_affinity": "DISJOINT_TOPOLOGY_AWARE_BALANCED_SMT_CONTENTION",
     "runtime_topology_evidence": "PFR_RUNTIME_TOPOLOGY_BENCHMARK_20260826",
     "initial_resident_queued_job_slots": 16,
