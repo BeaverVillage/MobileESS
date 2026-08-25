@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import os
 import signal
 import subprocess
@@ -9,11 +10,17 @@ import pytest
 
 from pfr.tools.run_pfr_daily_campaign import (
     _STOP_REQUESTED,
+    CampaignAlreadyRunningError,
+    DaySpec,
+    acquire_campaign_lock,
+    campaign_payload,
     day_specs,
     discover_campaign_process_groups,
     preserve_existing_day,
+    release_campaign_lock,
     reusable_pass,
     stop_active_children,
+    write_day_failure_evidence,
 )
 
 
@@ -50,6 +57,57 @@ def test_failed_day_attempt_is_moved_to_preserved_namespace() -> None:
         assert (preserved / "FAILURE.json").read_text(encoding="utf-8") == (
             "failure evidence"
         )
+
+
+def test_failed_day_evidence_contains_command_log_tail_and_artifact_inventory(
+    tmp_path: Path,
+) -> None:
+    day = tmp_path / "2025-01-04"
+    day.mkdir()
+    (day / "DAY_RUN.log").write_text("line one\nroot exception\n", encoding="utf-8")
+    (day / "partial.json").write_text("{}\n", encoding="utf-8")
+
+    path = write_day_failure_evidence(
+        day_root=day,
+        spec=DaySpec(4, "2025-01-04", 864, "JAN2025_DAY04"),
+        returncode=1,
+        command=("python", "-m", "pfr.tools.run_pfr_matrix"),
+        implementation_fingerprint="frozen-fingerprint",
+        preserved_attempt=None,
+    )
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["status"] == "FAIL_CLOSED"
+    assert payload["returncode"] == 1
+    assert payload["day_log_tail"][-1] == "root exception"
+    assert "partial.json" in payload["artifact_files"]
+
+
+def test_fail_fast_campaign_payload_declares_abort_policy() -> None:
+    payload = campaign_payload(
+        start_day=1,
+        end_day=31,
+        day_workers=4,
+        summaries=(),
+        final=False,
+        supplementary_b8_periodic_5min=False,
+        diagnostic_method="B07",
+        fail_fast=True,
+    )
+
+    assert payload["continue_to_next_day_after_failure"] is False
+    assert payload["fail_fast_on_first_day_failure"] is True
+    assert payload["failure_evidence_preserved_before_abort"] is True
+
+
+@pytest.mark.skipif(os.name != "posix", reason="flock requires POSIX")
+def test_campaign_output_lock_rejects_second_owner(tmp_path: Path) -> None:
+    first = acquire_campaign_lock(tmp_path)
+    try:
+        with pytest.raises(CampaignAlreadyRunningError):
+            acquire_campaign_lock(tmp_path)
+    finally:
+        release_campaign_lock(first)
 
 
 def test_preserve_refuses_target_outside_campaign_root() -> None:

@@ -11,6 +11,7 @@ gurobi_threads=4
 watch_seconds=10
 mode="run"
 skip_preflight=0
+fail_fast=0
 diagnostic_method=""
 risk_calibration=""
 
@@ -31,6 +32,7 @@ Run options:
   --diagnostic-method B07 Run one method only; B07 is the new calibration source.
   --risk-calibration P    Frozen B07 calibration required for full B00-B09.
   --skip-preflight       Skip the automatic preflight (not recommended).
+  --fail-fast            Stop all day workers after the first saved failure.
   --watch-seconds N      Monitor refresh interval; 0 prints once (default: 10).
   -h, --help             Show this help.
 EOF
@@ -55,6 +57,10 @@ while (($#)); do
             ;;
         --skip-preflight)
             skip_preflight=1
+            shift
+            ;;
+        --fail-fast)
+            fail_fast=1
             shift
             ;;
         --start-day|--end-day|--day-workers|--gurobi-threads|--output-root|--watch-seconds|--diagnostic-method|--risk-calibration)
@@ -211,6 +217,9 @@ printf 'bash %q --monitor-only --output-root %q\n' \
     "$repo_dir/pfr/tools/run_january_2025_local.sh" "$output_root"
 
 campaign_arguments=()
+if ((fail_fast)); then
+    campaign_arguments+=(--fail-fast)
+fi
 if [[ -n "$diagnostic_method" ]]; then
     campaign_arguments+=(--diagnostic-method "$diagnostic_method")
 else

@@ -12,10 +12,16 @@ import subprocess
 import sys
 import threading
 import time
+import traceback
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, IO, Mapping, Sequence
+
+try:
+    import fcntl
+except ImportError:  # pragma: no cover - production campaigns run under WSL/POSIX.
+    fcntl = None
 
 from pfr.provenance import scientific_implementation_fingerprint
 from pfr.result_storage import materialize_period_summary
@@ -30,6 +36,73 @@ _ACTIVE_CHILDREN: set[subprocess.Popen[str]] = set()
 _ACTIVE_CHILDREN_LOCK = threading.Lock()
 _STOP_REQUESTED = threading.Event()
 _RECEIVED_STOP_SIGNAL: int | None = None
+
+
+class CampaignAlreadyRunningError(RuntimeError):
+    """Raised before artifacts are touched when an output root is already active."""
+
+
+def utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f"{path.name}.tmp.{os.getpid()}")
+    temporary.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    temporary.replace(path)
+
+
+def acquire_campaign_lock(output: Path) -> IO[str]:
+    """Hold a non-blocking lifetime lock for one campaign output root."""
+    output.mkdir(parents=True, exist_ok=True)
+    lock_path = output / ".CAMPAIGN_RUN.lock"
+    handle = lock_path.open("a+", encoding="utf-8")
+    if fcntl is not None:
+        try:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            handle.seek(0)
+            owner = handle.read().strip() or "owner metadata unavailable"
+            handle.close()
+            raise CampaignAlreadyRunningError(
+                f"campaign output root is already active: {output}; owner={owner}"
+            ) from exc
+    owner = {
+        "status": "ACTIVE",
+        "pid": os.getpid(),
+        "started_at_utc": utc_now(),
+        "output_root": str(output.resolve()),
+        "argv": sys.argv,
+    }
+    handle.seek(0)
+    handle.truncate()
+    handle.write(json.dumps(owner, sort_keys=True) + "\n")
+    handle.flush()
+    os.fsync(handle.fileno())
+    return handle
+
+
+def release_campaign_lock(handle: IO[str]) -> None:
+    try:
+        handle.seek(0)
+        handle.truncate()
+        handle.write(
+            json.dumps(
+                {"status": "RELEASED", "pid": os.getpid(), "released_at_utc": utc_now()},
+                sort_keys=True,
+            )
+            + "\n"
+        )
+        handle.flush()
+        os.fsync(handle.fileno())
+        if fcntl is not None:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    finally:
+        handle.close()
 
 
 def install_stop_signal_handlers() -> None:
@@ -270,6 +343,59 @@ def preserve_existing_day(day_root: Path, output: Path) -> Path:
     return target
 
 
+def _log_tail(path: Path, *, max_lines: int = 240) -> list[str]:
+    if not path.is_file():
+        return []
+    try:
+        return path.read_text(encoding="utf-8", errors="replace").splitlines()[
+            -max_lines:
+        ]
+    except OSError as exc:
+        return [f"<unable to read log: {type(exc).__name__}: {exc}>"]
+
+
+def write_day_failure_evidence(
+    *,
+    day_root: Path,
+    spec: DaySpec,
+    returncode: int,
+    command: Sequence[str],
+    implementation_fingerprint: str,
+    preserved_attempt: Path | None,
+) -> Path:
+    """Persist enough immutable evidence to diagnose a failed run without replay."""
+    log_path = day_root / "DAY_RUN.log"
+    evidence_path = day_root / "FAILURE_EVIDENCE.json"
+    atomic_write_json(
+        evidence_path,
+        {
+            "schema_version": "PFR_DAILY_FAILURE_EVIDENCE_V1",
+            "status": "FAIL_CLOSED",
+            "captured_at_utc": utc_now(),
+            "calendar_date": spec.calendar_date,
+            "start_issue": spec.start_issue,
+            "returncode": returncode,
+            "command": list(command),
+            "cwd": str(day_root.parent),
+            "scientific_implementation_fingerprint": implementation_fingerprint,
+            "day_artifact": str(day_root),
+            "preserved_previous_attempt": (
+                str(preserved_attempt) if preserved_attempt is not None else None
+            ),
+            "matrix_summary_present": (day_root / "MATRIX_SUMMARY.json").is_file(),
+            "run_manifest_present": (day_root / "RUN_MANIFEST.json").is_file(),
+            "day_log": str(log_path),
+            "day_log_tail": _log_tail(log_path),
+            "artifact_files": sorted(
+                str(path.relative_to(day_root))
+                for path in day_root.rglob("*")
+                if path.is_file()
+            ),
+        },
+    )
+    return evidence_path
+
+
 def run_day(
     spec: DaySpec,
     *,
@@ -344,25 +470,35 @@ def run_day(
         returncode = run_child(command, cwd=repo)
 
     if returncode != 0 or not summary_path.is_file():
+        evidence_path = write_day_failure_evidence(
+            day_root=day_root,
+            spec=spec,
+            returncode=returncode,
+            command=command,
+            implementation_fingerprint=implementation_fingerprint,
+            preserved_attempt=preserved_attempt,
+        )
         result = {
             "calendar_date": spec.calendar_date,
             "start_issue": spec.start_issue,
             "status": "FAIL_CLOSED",
             "returncode": returncode,
             "artifact": str(day_root),
+            "failure_evidence": str(evidence_path),
         }
         if preserved_attempt is not None:
             result["preserved_previous_attempt"] = str(preserved_attempt)
         return result
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    day_status = (
+        "PASS"
+        if summary_passes(summary, method_count=method_count)
+        else "FAIL_CLOSED"
+    )
     result = {
         "calendar_date": spec.calendar_date,
         "start_issue": spec.start_issue,
-        "status": (
-            "PASS"
-            if summary_passes(summary, method_count=method_count)
-            else "FAIL_CLOSED"
-        ),
+        "status": day_status,
         "artifact": str(day_root),
         "reused_existing_pass": False,
         "scientific_implementation_fingerprint": implementation_fingerprint,
@@ -370,6 +506,17 @@ def run_day(
     }
     if preserved_attempt is not None:
         result["preserved_previous_attempt"] = str(preserved_attempt)
+    if day_status == "FAIL_CLOSED":
+        result["failure_evidence"] = str(
+            write_day_failure_evidence(
+                day_root=day_root,
+                spec=spec,
+                returncode=returncode,
+                command=command,
+                implementation_fingerprint=implementation_fingerprint,
+                preserved_attempt=preserved_attempt,
+            )
+        )
     return result
 
 
@@ -384,6 +531,7 @@ def campaign_payload(
     checkpoint_payload_occupancy_factor: float | None = None,
     diagnostic_method: str | None = None,
     electrical_stress_campaign: bool = False,
+    fail_fast: bool = False,
 ) -> Mapping[str, Any]:
     expected_days = end_day - start_day + 1
     complete = len(summaries) == expected_days
@@ -419,8 +567,10 @@ def campaign_payload(
         "independent_daily_cold_start": True,
         "cross_day_endogenous_state_carryover": False,
         "continue_to_next_method_after_failure": True,
-        "continue_to_next_day_after_failure": True,
+        "continue_to_next_day_after_failure": not fail_fast,
+        "fail_fast_on_first_day_failure": fail_fast,
         "failure_evidence_preserved_before_continuation": True,
+        "failure_evidence_preserved_before_abort": True,
         "controller_burn_in_steps": 0,
         "issues_per_method_per_day": ISSUES_PER_DAY,
         "methods_per_day": (
@@ -461,9 +611,7 @@ def campaign_payload(
 
 
 def write_campaign(output: Path, payload: Mapping[str, Any]) -> None:
-    temporary = output / "CAMPAIGN_SUMMARY.json.tmp"
-    temporary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    temporary.replace(output / "CAMPAIGN_SUMMARY.json")
+    atomic_write_json(output / "CAMPAIGN_SUMMARY.json", payload)
 
 
 def main() -> None:
@@ -474,6 +622,11 @@ def main() -> None:
     parser.add_argument("--end-day", type=int, required=True)
     parser.add_argument("--day-workers", type=int, default=1)
     parser.add_argument("--capture-day-logs", action="store_true")
+    parser.add_argument(
+        "--fail-fast",
+        action="store_true",
+        help="Stop all day workers after the first failure, preserving evidence.",
+    )
     parser.add_argument("--no-reuse-passed-days", action="store_true")
     parser.add_argument(
         "--supplementary-b8-periodic-5min",
@@ -578,6 +731,11 @@ def main() -> None:
 
     specs = day_specs(args.start_day, args.end_day)
     args.output.mkdir(parents=True, exist_ok=True)
+    try:
+        campaign_lock = acquire_campaign_lock(args.output)
+    except CampaignAlreadyRunningError as exc:
+        print(f"FAIL_CLOSED_DUPLICATE_CAMPAIGN: {exc}", file=sys.stderr, flush=True)
+        raise SystemExit(73) from exc
     common: list[str] = [
         "--repo", str(args.repo),
         "--count", str(ISSUES_PER_DAY),
@@ -612,6 +770,7 @@ def main() -> None:
         )
 
     summaries: list[Mapping[str, Any]] = []
+    first_failure: Mapping[str, Any] | None = None
     pool = ThreadPoolExecutor(max_workers=args.day_workers)
     futures: dict[Future[Mapping[str, Any]], DaySpec] = {}
     try:
@@ -644,18 +803,15 @@ def main() -> None:
                 day_root.mkdir(parents=True, exist_ok=True)
                 failure = {
                     "status": "FAIL_CLOSED_ORCHESTRATION_EXCEPTION",
+                    "captured_at_utc": utc_now(),
                     "calendar_date": spec.calendar_date,
                     "start_issue": spec.start_issue,
                     "exception_type": type(exc).__name__,
                     "message": str(exc),
+                    "traceback": traceback.format_exc(),
                     "partial_results_preserved": True,
                 }
-                temporary_failure = day_root / "ORCHESTRATION_FAILURE.json.tmp"
-                temporary_failure.write_text(
-                    json.dumps(failure, indent=2, sort_keys=True) + "\n",
-                    encoding="utf-8",
-                )
-                temporary_failure.replace(day_root / "ORCHESTRATION_FAILURE.json")
+                atomic_write_json(day_root / "ORCHESTRATION_FAILURE.json", failure)
                 row = {
                     "calendar_date": spec.calendar_date,
                     "start_issue": spec.start_issue,
@@ -680,6 +836,7 @@ def main() -> None:
                     ),
                     diagnostic_method=args.diagnostic_method,
                     electrical_stress_campaign=args.electrical_stress_campaign,
+                    fail_fast=args.fail_fast,
                 ),
             )
             done = len(summaries)
@@ -690,6 +847,28 @@ def main() -> None:
                 "percent": round(100.0 * done / len(specs), 1),
                 "status": row["status"],
             }), flush=True)
+            if args.fail_fast and row["status"] == "FAIL_CLOSED":
+                first_failure = row
+                for pending in futures:
+                    if pending is not future:
+                        pending.cancel()
+                stop_active_children(args.output)
+                atomic_write_json(
+                    args.output / "CAMPAIGN_FAILURE_EVIDENCE.json",
+                    {
+                        "schema_version": "PFR_CAMPAIGN_FAILURE_EVIDENCE_V1",
+                        "status": "FAIL_CLOSED_FIRST_FAILURE_ABORT",
+                        "captured_at_utc": utc_now(),
+                        "first_failure": row,
+                        "completed_results": sorted(
+                            summaries, key=lambda item: str(item["calendar_date"])
+                        ),
+                        "scheduled_dates": [item.calendar_date for item in specs],
+                        "active_children_stopped": True,
+                        "partial_results_preserved": True,
+                    },
+                )
+                break
     except KeyboardInterrupt:
         signal.signal(signal.SIGINT, signal.SIG_IGN)
         signal.signal(signal.SIGTERM, signal.SIG_IGN)
@@ -712,6 +891,7 @@ def main() -> None:
                 ),
                 diagnostic_method=args.diagnostic_method,
                 electrical_stress_campaign=args.electrical_stress_campaign,
+                fail_fast=args.fail_fast,
             )
         )
         interrupted["status"] = "INTERRUPTED"
@@ -722,6 +902,7 @@ def main() -> None:
             "days": len(summaries),
             "output": str(args.output),
         }), flush=True)
+        release_campaign_lock(campaign_lock)
         raise SystemExit(130)
     else:
         pool.shutdown(wait=True)
@@ -738,7 +919,13 @@ def main() -> None:
         ),
         diagnostic_method=args.diagnostic_method,
         electrical_stress_campaign=args.electrical_stress_campaign,
+        fail_fast=args.fail_fast,
     )
+    if first_failure is not None:
+        campaign = dict(campaign)
+        campaign["status"] = "FAIL_CLOSED"
+        campaign["aborted_after_first_failure"] = True
+        campaign["first_failure"] = first_failure
     write_campaign(args.output, campaign)
     if campaign["status"] == "PASS" and args.electrical_stress_campaign:
         materialize_period_summary(
@@ -748,7 +935,9 @@ def main() -> None:
         )
     print(json.dumps({"status": campaign["status"], "days": len(summaries), "output": str(args.output)}))
     if campaign["status"] != "PASS":
+        release_campaign_lock(campaign_lock)
         raise SystemExit(1)
+    release_campaign_lock(campaign_lock)
 
 
 if __name__ == "__main__":

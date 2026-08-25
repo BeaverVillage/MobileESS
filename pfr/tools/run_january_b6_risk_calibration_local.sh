@@ -27,11 +27,19 @@ if [[ -z "$run_root" || "$run_root" != /* ]]; then
     exit 2
 fi
 
+mkdir -p "$run_root"
+calibration_lock="$run_root/.january_b07_calibration.lock"
+exec 9>"$calibration_lock"
+if ! flock -n 9; then
+    echo "FAIL_CLOSED_DUPLICATE_CALIBRATION: another January B07 calibration already owns $run_root" >&2
+    exit 73
+fi
+
 calibration_root="$run_root/january_b07_electrical_stress_raw"
 artifact="$run_root/calibration/ELECTRICAL_STRESS_EVENT_RISK_CALIBRATION_JAN2025.json"
 common=(
     --start-day 1 --end-day 31 --day-workers 4 --gurobi-threads 4
-    --diagnostic-method B07 --output-root "$calibration_root"
+    --diagnostic-method B07 --output-root "$calibration_root" --fail-fast
 )
 if ((preflight_only)); then common+=(--preflight-only); fi
 

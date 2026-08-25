@@ -183,21 +183,22 @@ def _prediction_actual_evidence_errors(marker: Mapping[str, Any]) -> list[str]:
 
 
 def _risk_calibration_evidence_errors(marker: Mapping[str, Any]) -> list[str]:
+    method = str(marker.get("comparison_method_id", ""))
     if (
         marker.get("schema_version") != "K9H7_RESULT_V2.issue_commit.v2"
-        or marker.get("comparison_method_id") != "B6"
+        or method not in {"B6", "B07"}
     ):
         return []
     audit = marker.get("risk_calibration_audit")
     if not isinstance(audit, dict):
-        return ["B6 risk calibration audit missing"]
+        return [f"{method} risk calibration audit missing"]
     if (
         audit.get("schema_version")
         != "PFR5_EVENT_RISK_CALIBRATION_AUDIT_V1"
         or audit.get("future_actual_used_by_optimizer") is not False
         or audit.get("actual_opened_post_decision_only") is not True
     ):
-        return ["B6 risk calibration audit authority invalid"]
+        return [f"{method} risk calibration audit authority invalid"]
     predicted = audit.get("predicted_violation_margin")
     actual = audit.get("actual_violation_margin")
     scales = audit.get("predeclared_scale")
@@ -207,7 +208,7 @@ def _risk_calibration_evidence_errors(marker: Mapping[str, Any]) -> list[str]:
     if any(not isinstance(value, dict) for value in mappings) or any(
         set(value) != set(RISK_FAMILY_SCALES) for value in mappings
     ):
-        return ["B6 risk calibration family evidence incomplete"]
+        return [f"{method} risk calibration family evidence incomplete"]
     errors: list[str] = []
     expected_scores = []
     for family, frozen_scale in RISK_FAMILY_SCALES.items():
@@ -217,23 +218,23 @@ def _risk_calibration_evidence_errors(marker: Mapping[str, Any]) -> list[str]:
             )
             expected_normalized = expected_positive / frozen_scale
             if abs(float(scales[family]) - frozen_scale) > 1e-12:
-                errors.append(f"B6 risk scale mismatch family={family}")
+                errors.append(f"{method} risk scale mismatch family={family}")
             if abs(float(positive[family]) - expected_positive) > 1e-10:
                 errors.append(
-                    f"B6 risk positive residual arithmetic mismatch family={family}"
+                    f"{method} risk positive residual arithmetic mismatch family={family}"
                 )
             if abs(float(normalized[family]) - expected_normalized) > 1e-10:
                 errors.append(
-                    f"B6 risk normalized residual arithmetic mismatch family={family}"
+                    f"{method} risk normalized residual arithmetic mismatch family={family}"
                 )
             expected_scores.append(expected_normalized)
         except (TypeError, ValueError, KeyError):
-            errors.append(f"B6 risk calibration numeric evidence invalid family={family}")
+            errors.append(f"{method} risk calibration numeric evidence invalid family={family}")
     try:
         if abs(float(audit["joint_normalized_score"]) - max(expected_scores)) > 1e-10:
-            errors.append("B6 risk joint score arithmetic mismatch")
+            errors.append(f"{method} risk joint score arithmetic mismatch")
     except (TypeError, ValueError, KeyError):
-        errors.append("B6 risk joint score missing")
+        errors.append(f"{method} risk joint score missing")
     return errors
 
 
@@ -304,9 +305,9 @@ def inspect_method(
             errors.append("METHOD_SUMMARY commit count mismatch")
         if summary.get("status") == "PASS" and len(markers) != ISSUES_PER_DAY:
             errors.append("PASS method does not contain 288 markers")
-        if summary.get("status") == "PASS" and method == "B6":
+        if summary.get("status") == "PASS" and method in {"B6", "B07"}:
             if int(summary.get("risk_calibration_audit_count", -1)) != len(markers):
-                errors.append("PASS B6 risk calibration audit count mismatch")
+                errors.append(f"PASS {method} risk calibration audit count mismatch")
             marker_scores = [
                 float(row["risk_calibration_audit"]["joint_normalized_score"])
                 for row in markers
@@ -319,7 +320,7 @@ def inspect_method(
                 if not math.isfinite(summary_score) or abs(
                     summary_score - max(marker_scores)
                 ) > 1e-10:
-                    errors.append("PASS B6 daily risk calibration score mismatch")
+                    errors.append(f"PASS {method} daily risk calibration score mismatch")
         if (
             summary.get("status") == "PASS"
             and summary.get("schema_version") == "K9H7_RESULT_V2.method_run.v2"
@@ -537,7 +538,13 @@ def inspect_campaign_registry(
         errors.append("campaign issue-axis size mismatch")
     if summary.get("continue_to_next_method_after_failure") is not True:
         errors.append("campaign method-failure continuation policy missing")
-    if summary.get("continue_to_next_day_after_failure") is not True:
+    fail_fast = summary.get("fail_fast_on_first_day_failure") is True
+    if fail_fast:
+        if summary.get("continue_to_next_day_after_failure") is not False:
+            errors.append("fail-fast campaign continuation policy mismatch")
+        if summary.get("failure_evidence_preserved_before_abort") is not True:
+            errors.append("fail-fast failure-evidence policy missing")
+    elif summary.get("continue_to_next_day_after_failure") is not True:
         errors.append("campaign day-failure continuation policy missing")
     expected_b8 = methods == B8_METHODS
     if summary.get("supplementary_b8_periodic_5min") is not expected_b8:

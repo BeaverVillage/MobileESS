@@ -195,16 +195,13 @@ def test_prediction_actual_storage_evidence_is_arithmetically_verified() -> None
     )
 
 
-def test_b6_risk_calibration_storage_arithmetic_is_verified() -> None:
+def test_b6_and_b07_risk_calibration_storage_arithmetic_is_verified() -> None:
     predicted = {family: -1.0 for family in RISK_FAMILY_SCALES}
     actual = {
         family: predicted[family] + 0.2 * scale
         for family, scale in RISK_FAMILY_SCALES.items()
     }
-    marker = {
-        "schema_version": "K9H7_RESULT_V2.issue_commit.v2",
-        "comparison_method_id": "B6",
-        "risk_calibration_audit": {
+    audit = {
             "schema_version": "PFR5_EVENT_RISK_CALIBRATION_AUDIT_V1",
             "future_actual_used_by_optimizer": False,
             "actual_opened_post_decision_only": True,
@@ -219,10 +216,15 @@ def test_b6_risk_calibration_storage_arithmetic_is_verified() -> None:
                 family: 0.2 for family in RISK_FAMILY_SCALES
             },
             "joint_normalized_score": 0.2,
-        },
     }
-    assert _risk_calibration_evidence_errors(marker) == []
-    marker["risk_calibration_audit"]["joint_normalized_score"] = 0.0
-    assert "B6 risk joint score arithmetic mismatch" in (
-        _risk_calibration_evidence_errors(marker)
-    )
+    for method in ("B6", "B07"):
+        marker = {
+            "schema_version": "K9H7_RESULT_V2.issue_commit.v2",
+            "comparison_method_id": method,
+            "risk_calibration_audit": dict(audit),
+        }
+        assert _risk_calibration_evidence_errors(marker) == []
+        marker["risk_calibration_audit"]["joint_normalized_score"] = 0.0
+        assert f"{method} risk joint score arithmetic mismatch" in (
+            _risk_calibration_evidence_errors(marker)
+        )
