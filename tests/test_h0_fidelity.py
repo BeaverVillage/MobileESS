@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from pfr.h0_fidelity import (
@@ -62,3 +64,18 @@ def test_exactly_one_reference_is_required():
             minimum_sign_agreement=0.0,
             minimum_pairwise_concordance=0.0,
         )
+
+
+def test_full_period_runner_propagates_fixed_h0_sampling_interval():
+    repo = Path(__file__).resolve().parents[1]
+    runner = (
+        repo / "pfr" / "tools" / "run_frozen_rep_week_daily_campaign.py"
+    ).read_text(encoding="utf-8")
+    wrapper = (
+        repo / "pfr" / "tools" / "run_full_february_march_2025_local.sh"
+    ).read_text(encoding="utf-8")
+
+    assert '"--h0-fidelity-audit-every-steps"' in runner
+    assert "str(args.h0_fidelity_audit_every_steps)" in runner
+    assert "--h0-fidelity-audit-every-steps 12" in wrapper
+    assert "--phase february" in wrapper

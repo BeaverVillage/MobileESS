@@ -13,6 +13,8 @@ def scientific_implementation_files(repo: Path) -> tuple[Path, ...]:
         (
             repo / "pfr" / "tools" / "run_pfr_matrix.py",
             repo / "pfr" / "tools" / "run_pfr_daily_campaign.py",
+            repo / "pfr" / "tools" / "run_frozen_rep_week_daily_campaign.py",
+            repo / "pfr" / "tools" / "run_full_february_march_2025_local.sh",
             repo / "pfr" / "tools" / "verify_daily_campaign_storage.py",
             repo / "pfr" / "tools" / "audit_h0_surrogate_fidelity.py",
         )

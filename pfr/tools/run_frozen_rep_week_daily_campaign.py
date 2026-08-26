@@ -195,6 +195,15 @@ def main() -> None:
     parser.add_argument("--factorized-uncertainty", type=Path, required=True)
     parser.add_argument("--risk-calibration", type=Path)
     parser.add_argument(
+        "--h0-fidelity-audit-every-steps",
+        type=int,
+        default=0,
+        help=(
+            "Run the fixed same-state H0 surrogate/Fresh-AC candidate audit "
+            "at this interval for eligible methods (0 disables it)."
+        ),
+    )
+    parser.add_argument(
         "--migration-authority",
         type=Path,
         help="Frozen IDC migration authority; defaults to the repository contract.",
@@ -223,6 +232,8 @@ def main() -> None:
         parser.error("raw-risk calibration/validation must retain its raw-risk interface")
     if not 1 <= args.day_workers <= 31:
         parser.error("--day-workers must be in [1, 31]")
+    if args.h0_fidelity_audit_every_steps < 0:
+        parser.error("--h0-fidelity-audit-every-steps cannot be negative")
 
     contract_path = args.period_contract or (
         args.repo / "pfr/contracts/FROZEN_2025_REP_WEEK_VALIDATION_PERIODS_V1.json"
@@ -283,6 +294,13 @@ def main() -> None:
         common.extend(("--mobility-root", str(mobility_root)))
     if args.risk_calibration is not None:
         common.extend(("--risk-calibration", str(args.risk_calibration)))
+    if args.h0_fidelity_audit_every_steps:
+        common.extend(
+            (
+                "--h0-fidelity-audit-every-steps",
+                str(args.h0_fidelity_audit_every_steps),
+            )
+        )
     args.output.mkdir(parents=True, exist_ok=True)
     specs = period_specs(
         period,
