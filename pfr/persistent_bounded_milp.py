@@ -60,7 +60,15 @@ MAX_DYNAMIC_QUEUED_JOB_SLOTS = 1024
 JOB_SLOT_GROWTH_BLOCK = 32
 MAX_RESIDENT_JOB_OPTION_AXIS = 8192
 BURST_VISIBLE_QUEUE_THRESHOLD = 128
-BURST_PLANNER_WALL_BUDGET_SECONDS = 90.0
+# The production topology is six independent day workers with two Gurobi
+# threads each on eight physical cores.  The final two affinity groups must
+# therefore share physical cores with earlier workers even though their
+# logical CPUs are disjoint.  January issue 2517 completed in about 64 seconds
+# in isolation but reached the former 90-second watchdog before completing all
+# lexicographic priorities under that required 6x2 topology.  This larger
+# budget is restricted to the already-defined burst queue and remains one half
+# of the physical five-minute control interval; normal issues stay at 60 s.
+BURST_PLANNER_WALL_BUDGET_SECONDS = 150.0
 MAX_SEPARATION_ROUNDS = 12
 SEPARATION_GAP_PARTITIONS = 16
 GLOBAL_ASSET_REFINEMENT_DIRECTIONS = 64

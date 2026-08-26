@@ -5,6 +5,8 @@ from types import SimpleNamespace
 from pfr.methods import ElectricalStressMethod, ExperimentAuthority, MethodFactory
 from pfr.optimization import FastOptimizationContext, GurobiFastControlOptimizer
 from pfr.persistent_bounded_milp import (
+    BURST_PLANNER_WALL_BUDGET_SECONDS,
+    BURST_VISIBLE_QUEUE_THRESHOLD,
     PersistentBoundedMilpPlanner,
     _PersistentMilpModel,
     _WorkloadOption,
@@ -30,6 +32,11 @@ from pfr.runtime import (
     _synchronize_planned_rack_assignments,
 )
 from pfr.slow_fast import FastControl, FastLayerLimits, FastLayerState, SlowDiscretePlan
+
+
+def test_burst_watchdog_retains_half_control_interval_topology_margin() -> None:
+    assert BURST_VISIBLE_QUEUE_THRESHOLD == 128
+    assert BURST_PLANNER_WALL_BUDGET_SECONDS == 150.0
 
 
 @pytest.mark.parametrize(
