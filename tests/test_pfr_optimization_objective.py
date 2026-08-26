@@ -478,6 +478,55 @@ def test_capacity_deferral_expands_k_before_accepting_visible_queue() -> None:
     assert certificate["candidate_limit_expansion_reason"] == (
         "BASE_DOMAIN_CAPACITY_DEFERRAL"
     )
+    assert certificate["candidate_limit_admission_screen_attempts"] == [8]
+
+
+def test_intermediate_candidate_uses_admission_screen_before_full_solve() -> None:
+    planner = object.__new__(PersistentBoundedMilpPlanner)
+    planner.base_candidate_limit = 4
+    planner.candidate_limit = 4
+    planner.adaptive_candidate_max = 16
+    planner.candidate_limit_frozen = False
+    planner._master_models = {}
+    planner._recourse_models = {}
+    planner._model_solve_generation_by_method = {}
+    sentinel_plan = object()
+    calls = []
+
+    def solve_current(**kwargs):
+        screen = bool(kwargs.get("admission_screen_only", False))
+        calls.append((planner.candidate_limit, screen))
+        deferred = int(planner.candidate_limit < 8)
+        return (None if screen else sentinel_plan), {
+            "candidate_limit_k": planner.candidate_limit,
+            "optimized_deferred_job_count": deferred,
+            "workload_domain_reduction": {"no_bounded_option_jobs": 0},
+            "admission_gate_solve_seconds": 0.25 if screen else 0.0,
+            "admission_screen_total_seconds": 0.5 if screen else 0.0,
+            "admission_screen_model_build_seconds": 0.1 if screen else 0.0,
+        }
+
+    planner._solve_current_candidate_limit = solve_current
+    config = SimpleNamespace(comparison_method_id=SimpleNamespace(value="B07"))
+
+    plan, certificate = planner.solve(
+        state=None,
+        config=config,
+        frame=None,
+        migration_authority=None,
+        evaluation_steps_remaining=54,
+    )
+
+    assert plan is sentinel_plan
+    assert calls == [(4, False), (8, True), (8, False)]
+    assert certificate["candidate_limit_attempts"] == [4, 8]
+    assert certificate["candidate_limit_admission_screen_attempts"] == [8]
+    assert certificate["candidate_limit_admission_screen_solve_seconds"] == 0.25
+    assert certificate["candidate_limit_admission_screen_total_seconds"] == 0.5
+    assert (
+        certificate["candidate_limit_admission_screen_model_build_seconds"]
+        == 0.1
+    )
 
 
 def test_unavoidable_capacity_deferral_does_not_expand_candidate_domain() -> None:

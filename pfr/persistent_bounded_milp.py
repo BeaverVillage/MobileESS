@@ -991,7 +991,11 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
     def _is_candidate_truncation_infeasibility(error: BaseException) -> bool:
         message = str(error)
         return (
-            "hierarchical slow_master multiobjective solve failed" in message
+            (
+                "hierarchical slow_master multiobjective solve failed" in message
+                or "hierarchical slow_master admission gate solve failed"
+                in message
+            )
             and "status=INFEASIBLE" in message
         )
 
@@ -1036,12 +1040,21 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         attempted: list[int] = []
         infeasible_messages: list[str] = []
         deferred_expansion_attempts = 0
+        admission_screen_attempts: list[int] = []
+        admission_screen_solve_seconds = 0.0
+        admission_screen_total_seconds = 0.0
+        admission_screen_model_build_seconds = 0.0
         expansion_grid = self._candidate_expansion_grid()
         for candidate_limit in expansion_grid:
             if self.candidate_limit != candidate_limit:
                 self._dispose_method_models(method_key)
                 self._model_solve_generation_by_method[method_key] = 0
                 self.candidate_limit = candidate_limit
+            admission_screen_only = (
+                bool(attempted)
+                and not self.candidate_limit_frozen
+                and candidate_limit != expansion_grid[-1]
+            )
             attempted.append(candidate_limit)
             try:
                 plan, certificate = self._solve_current_candidate_limit(
@@ -1050,7 +1063,41 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     frame=frame,
                     migration_authority=migration_authority,
                     evaluation_steps_remaining=evaluation_steps_remaining,
+                    admission_screen_only=admission_screen_only,
                 )
+                if admission_screen_only:
+                    admission_screen_attempts.append(candidate_limit)
+                    admission_screen_solve_seconds += float(
+                        certificate.get("admission_gate_solve_seconds", 0.0)
+                    )
+                    admission_screen_total_seconds += float(
+                        certificate.get("admission_screen_total_seconds", 0.0)
+                    )
+                    admission_screen_model_build_seconds += float(
+                        certificate.get(
+                            "admission_screen_model_build_seconds", 0.0
+                        )
+                    )
+                    screen_workload = certificate.get(
+                        "workload_domain_reduction", {}
+                    )
+                    screen_unavoidable = int(
+                        screen_workload.get("no_bounded_option_jobs", 0)
+                        if isinstance(screen_workload, Mapping)
+                        else 0
+                    )
+                    if int(
+                        certificate.get("optimized_deferred_job_count", 0)
+                    ) > screen_unavoidable:
+                        deferred_expansion_attempts += 1
+                        continue
+                    plan, certificate = self._solve_current_candidate_limit(
+                        state=state,
+                        config=config,
+                        frame=frame,
+                        migration_authority=migration_authority,
+                        evaluation_steps_remaining=evaluation_steps_remaining,
+                    )
             except RuntimeContractError as error:
                 if not self._is_candidate_truncation_infeasibility(error):
                     raise
@@ -1102,6 +1149,18 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     "candidate_limit_deferred_attempt_count": (
                         deferred_expansion_attempts
                     ),
+                    "candidate_limit_admission_screen_attempts": list(
+                        admission_screen_attempts
+                    ),
+                    "candidate_limit_admission_screen_solve_seconds": (
+                        admission_screen_solve_seconds
+                    ),
+                    "candidate_limit_admission_screen_total_seconds": (
+                        admission_screen_total_seconds
+                    ),
+                    "candidate_limit_admission_screen_model_build_seconds": (
+                        admission_screen_model_build_seconds
+                    ),
                     "candidate_limit_unavoidable_deferred_job_count": (
                         unavoidable_deferred
                     ),
@@ -1123,6 +1182,10 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     ),
                 }
             )
+            if plan is None:
+                raise RuntimeContractError(
+                    "candidate admission screen returned without a full plan"
+                )
             return plan, evidence
         raise RuntimeContractError("adaptive candidate expansion grid is empty")
 
@@ -1134,7 +1197,8 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         frame: CausalExperimentFrame,
         migration_authority: Optional[MigrationAuthority],
         evaluation_steps_remaining: int,
-    ) -> tuple[SlowDiscretePlan, Mapping[str, Any]]:
+        admission_screen_only: bool = False,
+    ) -> tuple[Optional[SlowDiscretePlan], Mapping[str, Any]]:
         if migration_authority is None:
             raise RuntimeContractError(
                 "persistent planner requires migration/dataset residency authority"
@@ -1210,13 +1274,15 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             len(domain.route_options) == 1 and not domain.job_options
         )
         build_seconds = 0.0
-        if (
-            method_key not in self._recourse_models
-            or (
-                not slow_domain_forced
-                and method_key not in self._master_models
-            )
-        ):
+        needs_master = (
+            not slow_domain_forced
+            and method_key not in self._master_models
+        )
+        needs_recourse = (
+            not admission_screen_only
+            and method_key not in self._recourse_models
+        )
+        if needs_master or needs_recourse:
             if model_refresh_reason is None:
                 model_refresh_reason = "INITIAL_MODEL_BUILD"
             build_started = time.monotonic()
@@ -1230,22 +1296,19 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     for row in self.scope["cap"].itertuples(index=False)
                 },
             }
-            if (
-                not slow_domain_forced
-                and method_key not in self._master_models
-            ):
+            if needs_master:
                 self._master_models[method_key] = _PersistentMilpModel(
                     **common_model_kwargs,
                     model_role="slow_master",
                 )
-            if method_key not in self._recourse_models:
+            if needs_recourse:
                 self._recourse_models[method_key] = _PersistentMilpModel(
                     **common_model_kwargs,
                     model_role="exact_recourse",
                 )
             build_seconds = time.monotonic() - build_started
         master = self._master_models.get(method_key)
-        recourse = self._recourse_models[method_key]
+        recourse = self._recourse_models.get(method_key)
         update_started = time.monotonic()
         update_kwargs = {
             "kernel": kernel,
@@ -1259,7 +1322,10 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             if master is None:
                 raise RuntimeContractError("slow master model missing")
             master.update(**update_kwargs)
-        recourse.update(**update_kwargs)
+        if not admission_screen_only:
+            if recourse is None:
+                raise RuntimeContractError("exact recourse model missing")
+            recourse.update(**update_kwargs)
         update_seconds = time.monotonic() - update_started
         master_started = time.monotonic()
         shared_solve_started = master_started
@@ -1268,6 +1334,40 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             if build_seconds > 0.0
             else self.wall_budget_seconds
         )
+        if admission_screen_only:
+            if slow_domain_forced:
+                screen_result = {
+                    "capacity_admission_gate": 0.0,
+                    "optimized_deferred_job_count": 0,
+                    "admission_gate_solve_seconds": 0.0,
+                }
+            else:
+                if master is None:
+                    raise RuntimeContractError("slow master model missing")
+                screen_result = master.solve_admission_gate(
+                    wall_budget_seconds=self._shared_watchdog_budgets(
+                        active_wall_budget
+                    )
+                )
+            return None, {
+                "candidate_limit_k": self.candidate_limit,
+                "visible_queued_jobs": visible_queue,
+                "mobility_domain_reduction": dict(domain.route_audit),
+                "workload_domain_reduction": dict(domain.workload_audit),
+                "capacity_admission_gate": screen_result[
+                    "capacity_admission_gate"
+                ],
+                "optimized_deferred_job_count": screen_result[
+                    "optimized_deferred_job_count"
+                ],
+                "admission_gate_solve_seconds": screen_result[
+                    "admission_gate_solve_seconds"
+                ],
+                "admission_screen_model_build_seconds": build_seconds,
+                "admission_screen_parameter_update_seconds": update_seconds,
+                "admission_screen_total_seconds": time.monotonic()
+                - total_started,
+            }
         if slow_domain_forced:
             route_index = 0
             job_option_indices = {
@@ -1290,6 +1390,8 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             route_index, job_option_indices = master.selected_domain_decisions()
         master_seconds = time.monotonic() - master_started
         recourse_started = time.monotonic()
+        if recourse is None:
+            raise RuntimeContractError("exact recourse model missing")
         recourse.fix_slow_decisions(
             route_index=route_index,
             job_option_indices=job_option_indices,
@@ -2922,19 +3024,60 @@ class _PersistentMilpModel:
                 self.mode[(mid, step)].UB = direction
         self.model.update()
 
+    def _admission_objective(self) -> Any:
+        """Return the frozen whole-gang admission objective."""
+
+        nslots = self.job_slot_capacity
+        expression = self.gp.LinExpr()
+        for j, variable in self.defer_job.items():
+            expression += variable
+            expression += (
+                float(nslots - j) / float((nslots + 1) ** 2)
+            ) * variable
+        return expression
+
+    def solve_admission_gate(
+        self, *, wall_budget_seconds: float
+    ) -> Mapping[str, Any]:
+        """Screen an expanded domain without solving discarded priorities."""
+
+        if self.model_role != "slow_master":
+            raise RuntimeContractError(
+                "admission-only screening is restricted to the slow master"
+            )
+        admission_expr = self._admission_objective()
+        self.model.NumObj = 1
+        self.model.setObjective(admission_expr, self.GRB.MINIMIZE)
+        self.model.Params.TimeLimit = max(0.001, float(wall_budget_seconds))
+        solve_started = time.monotonic()
+        self.model.optimize()
+        solve_seconds = time.monotonic() - solve_started
+        if self.model.SolCount < 1 or self.model.Status != self.GRB.OPTIMAL:
+            try:
+                gap = float(self.model.MIPGap)
+            except Exception:
+                gap = math.inf
+            raise RuntimeContractError(
+                "hierarchical slow_master admission gate solve failed: "
+                f"status={_status_name(self.GRB, self.model.Status)} "
+                f"final_gap={gap} solve_seconds={solve_seconds:.6f}"
+            )
+        return {
+            "capacity_admission_gate": float(admission_expr.getValue()),
+            "optimized_deferred_job_count": sum(
+                float(self.defer_job[j].X) > 0.5
+                for j in range(len(self.domain.job_options))
+            ),
+            "admission_gate_solve_seconds": solve_seconds,
+        }
+
     def solve_lexicographic(self, *, wall_budget_seconds: float) -> Mapping[str, Any]:
         deadline = time.monotonic() + float(wall_budget_seconds)
         # This is a feasibility/admission gate, not a replacement research
         # objective.  Minimize deferred gangs before applying the frozen three
         # electrical-stress priorities.  A sub-unit EDF term breaks equal-count
         # ties without ever outweighing one additional admitted job.
-        nslots = self.job_slot_capacity
-        admission_expr = self.gp.LinExpr()
-        for j, variable in self.defer_job.items():
-            admission_expr += variable
-            admission_expr += (
-                float(nslots - j) / float((nslots + 1) ** 2)
-            ) * variable
+        admission_expr = self._admission_objective()
         exposure_expr = STEP_HOURS * self.gp.quicksum(self.z.values())
         tertiary_expr = self._tertiary_objective()
         charge_discharge_mode_projection_used = False
@@ -2946,6 +3089,7 @@ class _PersistentMilpModel:
             # Match the retained Full-H54 oracle's native Gurobi
             # lexicographic execution instead of rebuilding the branch tree
             # in three independent Python-side solves.
+            self.model.NumObj = 4
             self.model.setObjective(self.gp.LinExpr(), self.GRB.MINIMIZE)
             self.model.setObjectiveN(
                 admission_expr, 0, priority=4, abstol=1e-8, reltol=0.0,
