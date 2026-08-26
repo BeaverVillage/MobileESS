@@ -16,16 +16,16 @@
     "line": "max_line_current/loading_rating",
     "transformer": "max(transformer_current_loading, transformer_kVA_loading)"
   },
-  "planning_to_evaluation_semantics": "The causal planner minimizes a radial-network surrogate with the same physical limit endpoints; the paper-facing realized KPI is recomputed from Fresh three-phase OpenDSS voltage magnitudes and current/kVA loadings.",
+  "planning_to_evaluation_semantics": "The causal planner minimizes a radial-network surrogate normalized to the physical limit endpoints, may report predicted stress above one, and never treats the surrogate epigraph cap as execution authority; the paper-facing realized KPI and hard H0 commit decision are recomputed from Fresh three-phase OpenDSS voltage magnitudes and current/kVA loadings.",
   "lexicographic_objectives": [
     "min max_h z_h",
     "min sum_h z_h * delta_t",
     "min secondary_actuation"
   ],
   "hard_constraints": [
-    "0.95 <= exact/surrogate voltage <= 1.05 pu",
-    "line loading <= 1 pu",
-    "transformer loading <= 1 pu",
+    "Fresh exact H0 voltage remains within 0.95 and 1.05 pu",
+    "Fresh exact H0 line loading <= 1 pu",
+    "Fresh exact H0 transformer loading <= 1 pu",
     "MESS route, connection, SOC, PCS P-Q circle",
     "GPU gang, rack, IDC, WAN, checkpoint, deadline",
     "terminal workload debt and support-energy debt recovery",

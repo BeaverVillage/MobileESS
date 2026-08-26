@@ -67,6 +67,11 @@ NORM_ENGINEERING_MARGIN_FRACTION = 1e-5
 NORM_SAFE_LIMIT_FACTOR = 1.0 - NORM_ENGINEERING_MARGIN_FRACTION
 if NORM_SAFE_LIMIT_FACTOR + NORM_RELATIVE_TOLERANCE >= 1.0:
     raise RuntimeError("norm engineering margin must dominate solver tolerance")
+# The causal radial surrogate is an optimization/ranking model, while Fresh
+# three-phase OpenDSS is the H0 execution authority.  Its normalized stress
+# epigraph must therefore be able to report values above one; clipping it at
+# one turned conservative forecast error into a false solver infeasibility.
+PLANNING_STRESS_EPIGRAPH_MAX = 10.0
 LEX_TOLERANCE = 1e-7
 EXCLUSIVITY_TOLERANCE_KW = 1e-4
 MAX_EXACT_QCP_FEASIBILITY_RESTORATION_ROUNDS = 4
@@ -1415,7 +1420,9 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             "fast_continuous_grid_minutes": 5,
             "slow_master_status": master_result["solution_status"],
             "slow_master_skipped_exact_forced_domain": slow_domain_forced,
-            "hard_grid_candidate_pass": True,
+            "planning_surrogate_grid_is_advisory": True,
+            "planning_surrogate_stress_above_one_reportable": True,
+            "hard_grid_candidate_pass": False,
             "hard_mess_soc_pcs_route_candidate_pass": True,
             "hard_gpu_rack_idc_candidate_pass": True,
             "hard_wan_checkpoint_candidate_pass": True,
@@ -1640,10 +1647,14 @@ class _PersistentMilpModel:
             for step in range(self.h)
         }
         self.z = {
-            step: self.model.addVar(lb=0.0, ub=1.0, name=f"z[{step}]")
+            step: self.model.addVar(
+                lb=0.0, ub=PLANNING_STRESS_EPIGRAPH_MAX, name=f"z[{step}]"
+            )
             for step in range(self.h)
         }
-        self.zmax = self.model.addVar(lb=0.0, ub=1.0, name="zmax")
+        self.zmax = self.model.addVar(
+            lb=0.0, ub=PLANNING_STRESS_EPIGRAPH_MAX, name="zmax"
+        )
         self._build_constraints(kernel)
         self.model.update()
         self._last_job_mapping: dict[tuple[int, int], Optional[_WorkloadOption]] = {}
@@ -1872,8 +1883,18 @@ class _PersistentMilpModel:
                 )
             for node in self.nodes:
                 i = kernel.index[node]
-                low = float(kernel.low_u[i] - kernel.reference_u[i])
-                high = float(kernel.high_u[i] - kernel.reference_u[i])
+                low = float(
+                    kernel.nominal_u[i]
+                    - kernel.reference_u[i]
+                    - PLANNING_STRESS_EPIGRAPH_MAX
+                    * (kernel.nominal_u[i] - kernel.low_u[i])
+                )
+                high = float(
+                    kernel.nominal_u[i]
+                    - kernel.reference_u[i]
+                    + PLANNING_STRESS_EPIGRAPH_MAX
+                    * (kernel.high_u[i] - kernel.nominal_u[i])
+                )
                 self.voltage_low[(node, step)] = self.model.addConstr(
                     self.du[(node, step)] >= low
                 )
@@ -1903,13 +1924,15 @@ class _PersistentMilpModel:
                     <= IDC_TRANSFORMER_LIMIT_KW * self.z[step],
                     name=f"idc_transformer_stress[{site},{step}]",
                 )
-        # Keep stress normalized to the physical limits while reserving explicit
-        # headroom at the hard acceptance boundary.
+        # These retained rows lock priorities only for the non-native fallback
+        # path.  They bound the reporting epigraph, not physical feasibility;
+        # Fresh OpenDSS remains the H0 hard commit authority.
         self.primary_lock = self.model.addConstr(
-            self.zmax <= NORM_SAFE_LIMIT_FACTOR
+            self.zmax <= PLANNING_STRESS_EPIGRAPH_MAX
         )
         self.secondary_lock = self.model.addConstr(
-            STEP_HOURS * gp.quicksum(self.z.values()) <= self.h * STEP_HOURS
+            STEP_HOURS * gp.quicksum(self.z.values())
+            <= PLANNING_STRESS_EPIGRAPH_MAX * self.h * STEP_HOURS
         )
 
     def _add_cut(
@@ -2455,10 +2478,16 @@ class _PersistentMilpModel:
                 self.flow_p_def[(node, step)].RHS = float(background_p[step, i])
                 self.flow_q_def[(node, step)].RHS = float(background_q[step, i])
                 self.voltage_low[(node, step)].RHS = float(
-                    kernel.low_u[i] - kernel.reference_u[i]
+                    kernel.nominal_u[i]
+                    - kernel.reference_u[i]
+                    - PLANNING_STRESS_EPIGRAPH_MAX
+                    * (kernel.nominal_u[i] - kernel.low_u[i])
                 )
                 self.voltage_high[(node, step)].RHS = float(
-                    kernel.high_u[i] - kernel.reference_u[i]
+                    kernel.nominal_u[i]
+                    - kernel.reference_u[i]
+                    + PLANNING_STRESS_EPIGRAPH_MAX
+                    * (kernel.high_u[i] - kernel.nominal_u[i])
                 )
                 self.voltage_below[(node, step)].RHS = float(
                     kernel.nominal_u[i] - kernel.reference_u[i]
@@ -2493,8 +2522,10 @@ class _PersistentMilpModel:
         # Reoptimization must preserve the same engineering headroom as model
         # construction.  Resetting this row to 1.0 silently removed the
         # physical safety margin after the first persistent update.
-        self.primary_lock.RHS = NORM_SAFE_LIMIT_FACTOR
-        self.secondary_lock.RHS = self.h * STEP_HOURS
+        self.primary_lock.RHS = PLANNING_STRESS_EPIGRAPH_MAX
+        self.secondary_lock.RHS = (
+            PLANNING_STRESS_EPIGRAPH_MAX * self.h * STEP_HOURS
+        )
         self.model.update()
 
     def selected_domain_decisions(self) -> tuple[int, dict[int, Optional[int]]]:
@@ -2575,11 +2606,7 @@ class _PersistentMilpModel:
                 q = float(self.flow_q[(node, step)].X)
                 nameplate = float(self.static["lim"][edge_key])
                 norm = math.hypot(p, q)
-                objective_residual_kva = norm - nameplate * z
-                safety_residual_kva = (
-                    norm - nameplate * NORM_SAFE_LIMIT_FACTOR
-                )
-                residual_kva = max(objective_residual_kva, safety_residual_kva)
+                residual_kva = norm - nameplate * z
                 residual_relative = residual_kva / nameplate
                 maximum_kva = max(maximum_kva, residual_kva)
                 maximum_relative = max(maximum_relative, residual_relative)
@@ -2590,11 +2617,7 @@ class _PersistentMilpModel:
                 q = float(self.service_q[(service, step)].X)
                 nameplate = float(self.static["service_kva"][service])
                 norm = math.hypot(p, q)
-                objective_residual_kva = norm - nameplate * z
-                safety_residual_kva = (
-                    norm - nameplate * NORM_SAFE_LIMIT_FACTOR
-                )
-                residual_kva = max(objective_residual_kva, safety_residual_kva)
+                residual_kva = norm - nameplate * z
                 residual_relative = residual_kva / nameplate
                 maximum_kva = max(maximum_kva, residual_kva)
                 maximum_relative = max(maximum_relative, residual_relative)
@@ -2651,9 +2674,7 @@ class _PersistentMilpModel:
                 p = float(self.flow_p[(node, step)].X)
                 q = float(self.flow_q[(node, step)].X)
                 norm = math.hypot(p, q)
-                limit = float(self.static["lim"][edge_key]) * min(
-                    z, NORM_SAFE_LIMIT_FACTOR
-                )
+                limit = float(self.static["lim"][edge_key]) * z
                 if norm > 0.0 and (
                     norm >= utilization_floor * limit
                     or ("LINE", node) in active_assets
@@ -2665,9 +2686,7 @@ class _PersistentMilpModel:
                 p = float(self.service_p[(service, step)].X)
                 q = float(self.service_q[(service, step)].X)
                 norm = math.hypot(p, q)
-                limit = float(self.static["service_kva"][service]) * min(
-                    z, NORM_SAFE_LIMIT_FACTOR
-                )
+                limit = float(self.static["service_kva"][service]) * z
                 if norm > 0.0 and (
                     norm >= utilization_floor * limit
                     or ("SERVICE", service) in active_assets

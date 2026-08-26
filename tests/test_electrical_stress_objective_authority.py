@@ -195,8 +195,10 @@ def test_hierarchical_move_blocked_mpc_preserves_science_and_exact_recourse() ->
     assert "NORM_RELATIVE_TOLERANCE = 1e-6" in source
     assert "NORM_ENGINEERING_MARGIN_FRACTION = 1e-5" in source
     assert "NORM_SAFE_LIMIT_FACTOR + NORM_RELATIVE_TOLERANCE" in source
-    assert "self.zmax <= NORM_SAFE_LIMIT_FACTOR" in source
-    assert "self.primary_lock.RHS = NORM_SAFE_LIMIT_FACTOR" in source
+    assert "PLANNING_STRESS_EPIGRAPH_MAX = 10.0" in source
+    assert "self.zmax <= PLANNING_STRESS_EPIGRAPH_MAX" in source
+    assert "self.primary_lock.RHS = PLANNING_STRESS_EPIGRAPH_MAX" in source
+    assert '"planning_surrogate_grid_is_advisory": True' in source
     assert "MAX_DYNAMIC_QUEUED_JOB_SLOTS = 1024" in source
     assert '"queued_remote_placement_transfer_bytes": 0' in source
     assert "maximum_exact_norm_relative_residual" in source
