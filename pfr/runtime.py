@@ -36,7 +36,11 @@ from .optimization import (
 from .power import H100UtilizationPowerCurve
 from .risk import PlanValidityRiskMonitor, ReplanCost, RiskConstraint, RiskFamily
 from .risk_calibration import FrozenRiskCalibration, RISK_FAMILY_SCALES
-from .result_storage import materialize_campaign_summary, materialize_method_results
+from .result_storage import (
+    materialize_campaign_summary,
+    materialize_method_results,
+    validate_method_results,
+)
 from .safety import (
     AcSafetyFilter,
     EscalatedCandidate,
@@ -6036,6 +6040,7 @@ class PfrRuntimeRunner:
         initial: RuntimeInitialState,
         representative_week_id: str,
         output: Path,
+        reuse_passed_methods: bool = False,
     ) -> Mapping[str, Any]:
         method_axis = tuple(config.comparison_method_id for config in configs)
         allowed_axes = (
@@ -6047,7 +6052,71 @@ class PfrRuntimeRunner:
                 "runtime matrix must execute historical B0-B7 or stress B00-B09 in frozen order"
             )
         summaries = []
+        reused_methods = []
+        executed_methods = []
         for config in configs:
+            method_id = config.comparison_method_id.value
+            method_root = output / method_id
+            summary_path = method_root / "METHOD_SUMMARY.json"
+            if reuse_passed_methods and summary_path.is_file():
+                try:
+                    reusable = json.loads(summary_path.read_text(encoding="utf-8"))
+                    marker_paths = sorted(
+                        method_root.glob("issue_*/COMMIT_MARKER.json")
+                    )
+                    markers = [
+                        json.loads(path.read_text(encoding="utf-8"))
+                        for path in marker_paths
+                    ]
+                    expected_issues = [int(frame.issue) for frame in frames]
+                    if (
+                        reusable.get("status") != "PASS"
+                        or reusable.get("comparison_method_id") != method_id
+                        or int(reusable.get("committed_issues", -1)) != len(frames)
+                        or int(reusable.get("fresh_exact_opendss_count", -1))
+                        != len(frames)
+                        or int(reusable.get("actual_gurobi_count", -1))
+                        != len(frames)
+                        or (method_root / "FAILURE.json").exists()
+                        or [int(row.get("issue", -1)) for row in markers]
+                        != expected_issues
+                        or any(
+                            row.get("status") != "PASS_COMMITTED"
+                            or row.get("commit_marker") is not True
+                            or row.get("comparison_method_id") != method_id
+                            for row in markers
+                        )
+                        or any(
+                            markers[index]["post_state_sha256"]
+                            != markers[index + 1]["pre_state_sha256"]
+                            for index in range(max(0, len(markers) - 1))
+                        )
+                    ):
+                        raise RuntimeContractError(
+                            f"existing {method_id} is not a reusable PASS"
+                        )
+                    validate_method_results(
+                        method_root, expected_issue_count=len(frames)
+                    )
+                except (
+                    OSError,
+                    RuntimeError,
+                    ValueError,
+                    TypeError,
+                    KeyError,
+                    json.JSONDecodeError,
+                ):
+                    reusable = None
+                if reusable is not None:
+                    summaries.append({**reusable, "reused_existing_pass": True})
+                    reused_methods.append(method_id)
+                    continue
+            if reuse_passed_methods and method_root.exists():
+                archive_root = output / "_preserved_method_attempts"
+                archive_root.mkdir(parents=True, exist_ok=True)
+                archived = archive_root / f"{method_id}__attempt_{time.time_ns()}"
+                method_root.replace(archived)
+            executed_methods.append(method_id)
             try:
                 summary = self.run_method(
                     config=config,
@@ -6193,6 +6262,8 @@ class PfrRuntimeRunner:
             "method_execution_order": [
                 config.comparison_method_id.value for config in configs
             ],
+            "reused_passed_methods": reused_methods,
+            "executed_methods": executed_methods,
             "method_summaries": summaries,
         }
         output.mkdir(parents=True, exist_ok=True)

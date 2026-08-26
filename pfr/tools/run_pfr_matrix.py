@@ -1575,7 +1575,17 @@ def main() -> None:
             "issues so an interrupted day can resume from a verified prefix."
         ),
     )
+    parser.add_argument(
+        "--reuse-passed-methods",
+        action="store_true",
+        help=(
+            "Reuse only fully validated PASS method directories and execute "
+            "the remaining methods in the frozen matrix order."
+        ),
+    )
     args = parser.parse_args()
+    if args.reuse_passed_methods and args.diagnostic_method:
+        parser.error("--reuse-passed-methods is only valid for a full matrix")
     if (
         args.diagnostic_checkpoint_after_issue is not None
         or args.diagnostic_resume_checkpoint is not None
@@ -2147,6 +2157,7 @@ def main() -> None:
             initial=initial,
             representative_week_id=args.candidate_id,
             output=output,
+            reuse_passed_methods=args.reuse_passed_methods,
         )
     manifest = {
         "status": matrix["status"],
@@ -2193,6 +2204,13 @@ def main() -> None:
         if not single_method_id
         else [single_method_id],
         "method_id": single_method_id,
+        "method_reuse": {
+            "enabled": bool(args.reuse_passed_methods),
+            "reused_passed_methods": list(
+                matrix.get("reused_passed_methods", [])
+            ),
+            "executed_methods": list(matrix.get("executed_methods", [])),
+        },
         "methods": [
             {
                 **asdict(config),

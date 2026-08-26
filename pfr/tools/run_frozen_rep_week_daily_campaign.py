@@ -175,6 +175,11 @@ def main() -> None:
         action="store_true",
         help="Run the frozen ordered B00-B09 electrical-stress campaign.",
     )
+    parser.add_argument(
+        "--reuse-passed-methods",
+        action="store_true",
+        help="Validate and reuse completed PASS methods within partial days.",
+    )
     parser.add_argument("--shared-root", type=Path, required=True)
     parser.add_argument("--exact-package-root", type=Path, required=True)
     parser.add_argument("--authority-package-root", type=Path, required=True)
@@ -316,6 +321,7 @@ def main() -> None:
             ),
             diagnostic_method=args.diagnostic_method,
             electrical_stress_campaign=args.electrical_stress_campaign,
+            reuse_passed_methods=args.reuse_passed_methods,
         ): spec
         for spec in specs
     }

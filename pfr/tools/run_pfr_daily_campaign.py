@@ -431,6 +431,7 @@ def run_day(
     cpu_affinity: Sequence[int] | None = None,
     diagnostic_steps_per_day: int | None = None,
     authorized_pass_fingerprints: Sequence[str] = (),
+    reuse_passed_methods: bool = False,
 ) -> Mapping[str, Any]:
     day_root = output / spec.calendar_date
     summary_path = day_root / "MATRIX_SUMMARY.json"
@@ -480,7 +481,7 @@ def run_day(
         }
 
     preserved_attempt = None
-    if day_root.exists():
+    if day_root.exists() and not reuse_passed_methods:
         preserved_attempt = preserve_existing_day(day_root, output)
     day_root.mkdir(parents=True, exist_ok=True)
     command = [
@@ -496,6 +497,8 @@ def run_day(
         command.append("--supplementary-b8-periodic-5min")
     if electrical_stress_campaign:
         command.append("--electrical-stress-campaign")
+    if reuse_passed_methods:
+        command.append("--reuse-passed-methods")
     if diagnostic_method is not None:
         command.extend(
             (

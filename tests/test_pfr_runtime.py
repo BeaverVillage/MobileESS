@@ -150,6 +150,23 @@ class UnauthorizedComputeModulatingOptimizer:
         )
 
 
+class ActualGurobiIdentityOptimizer:
+    def optimize(self, *, nominal, state, limits, context):
+        del state, limits, context
+        return OptimizedFastControl(
+            nominal,
+            FastOptimizationCertificate(
+                solver="SYNTHETIC_GUROBI",
+                status="OPTIMAL",
+                actual_gurobi_used=True,
+                solution_count=1,
+                objective_value=0.0,
+                maximum_constraint_violation=0.0,
+                runtime_seconds=0.0,
+            ),
+        )
+
+
 class PfrRuntimeTests(unittest.TestCase):
     def setUp(self):
         hashes = [format(index, "064x") for index in range(1, 8)]
@@ -851,6 +868,44 @@ class PfrRuntimeTests(unittest.TestCase):
         self.assertTrue(all(
             row["status"] == "PASS" for row in summary["method_summaries"][1:]
         ))
+
+    def test_matrix_reuses_only_validated_passed_methods(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary)
+            runner = PfrRuntimeRunner(
+                power_curve=self.curve,
+                physical_backend=FakePhysical(),
+                fast_optimizer=ActualGurobiIdentityOptimizer(),
+                migration_authority=self.migration_authority,
+                risk_calibration_authority=self.risk_calibration,
+            )
+            first = runner.run_matrix(
+                configs=self.configs,
+                frames=self.frames[:1],
+                initial=self.initial,
+                representative_week_id="TEST",
+                output=output,
+            )
+            second = PfrRuntimeRunner(
+                power_curve=self.curve,
+                physical_backend=RaiseOncePhysical(),
+                fast_optimizer=ActualGurobiIdentityOptimizer(),
+                migration_authority=self.migration_authority,
+                risk_calibration_authority=self.risk_calibration,
+            ).run_matrix(
+                configs=self.configs,
+                frames=self.frames[:1],
+                initial=self.initial,
+                representative_week_id="TEST",
+                output=output,
+                reuse_passed_methods=True,
+            )
+
+        self.assertEqual(first["status"], "PASS")
+        self.assertEqual(second["status"], "PASS")
+        self.assertEqual(second["reused_passed_methods"], [f"B{i}" for i in range(8)])
+        self.assertEqual(second["executed_methods"], [])
+        self.assertTrue(all(row["reused_existing_pass"] for row in second["method_summaries"]))
 
     def test_exception_summary_preserves_and_counts_prior_commit_markers(self):
         physical = RaiseAfterOneCommittedIssuePhysical()
