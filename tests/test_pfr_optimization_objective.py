@@ -1274,6 +1274,51 @@ def test_no_visible_queue_skips_duplicate_admission_screen() -> None:
     )
 
 
+def test_compute_disabled_method_skips_duplicate_admission_screen() -> None:
+    planner = object.__new__(PersistentBoundedMilpPlanner)
+    planner.base_candidate_limit = 4
+    planner.candidate_limit = 4
+    planner.adaptive_candidate_max = 16
+    planner.candidate_limit_frozen = False
+    sentinel_plan = object()
+    calls = []
+
+    def solve_current(**kwargs):
+        calls.append(bool(kwargs.get("admission_screen_only", False)))
+        return sentinel_plan, {
+            "candidate_limit_k": planner.candidate_limit,
+            "optimized_deferred_job_count": 0,
+            "workload_domain_reduction": {"no_bounded_option_jobs": 0},
+        }
+
+    planner._solve_current_candidate_limit = solve_current
+    config = SimpleNamespace(
+        comparison_method_id=SimpleNamespace(value="B01"),
+        h54_capability_mask={
+            "spatial_compute": False,
+            "temporal_compute": False,
+        },
+    )
+
+    plan, certificate = planner.solve(
+        state=SimpleNamespace(
+            jobs={"queued": SimpleNamespace(lifecycle="QUEUED")}
+        ),
+        config=config,
+        frame=None,
+        migration_authority=None,
+        evaluation_steps_remaining=54,
+    )
+
+    assert plan is sentinel_plan
+    assert calls == [False]
+    assert certificate["candidate_limit_admission_screen_attempts"] == []
+    assert certificate["candidate_limit_admission_screen_total_seconds"] == 0.0
+    assert certificate["candidate_limit_admission_screen_skipped_reason"] == (
+        "COMPUTE_CONTROL_CAPABILITY_DISABLED"
+    )
+
+
 def test_unavoidable_capacity_deferral_does_not_expand_candidate_domain() -> None:
     planner = object.__new__(PersistentBoundedMilpPlanner)
     planner.base_candidate_limit = 4

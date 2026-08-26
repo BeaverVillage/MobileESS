@@ -1526,8 +1526,15 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         visible_queue = any(
             job.lifecycle == "QUEUED" for job in state.jobs.values()
         )
+        capability_mask = getattr(config, "h54_capability_mask", {})
+        compute_admission_enabled = bool(
+            capability_mask.get("spatial_compute", True)
+            or capability_mask.get("temporal_compute", True)
+        )
         admission_screen_required = (
-            not self.candidate_limit_frozen and visible_queue
+            not self.candidate_limit_frozen
+            and visible_queue
+            and compute_admission_enabled
         )
         for candidate_limit in expansion_grid:
             if self.candidate_limit != candidate_limit:
@@ -1682,7 +1689,11 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                         else (
                             "NO_VISIBLE_QUEUED_JOBS"
                             if not visible_queue
-                            else None
+                            else (
+                                "COMPUTE_CONTROL_CAPABILITY_DISABLED"
+                                if not compute_admission_enabled
+                                else None
+                            )
                         )
                     ),
                     "candidate_limit_attempt_timings": list(
