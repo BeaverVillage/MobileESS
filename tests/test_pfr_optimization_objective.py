@@ -6,6 +6,7 @@ from pfr.methods import ElectricalStressMethod, ExperimentAuthority, MethodFacto
 from pfr.optimization import FastOptimizationContext, GurobiFastControlOptimizer
 from pfr.persistent_bounded_milp import (
     PersistentBoundedMilpPlanner,
+    _PersistentMilpModel,
     _WorkloadOption,
 )
 from pfr.runtime import (
@@ -380,6 +381,57 @@ def test_candidate_truncation_infeasibility_expands_k_until_feasible() -> None:
     assert certificate["candidate_limit_expansion_reason"] == (
         "BASE_DOMAIN_SLOW_MASTER_INFEASIBLE"
     )
+
+
+def test_capacity_deferral_expands_k_before_accepting_visible_queue() -> None:
+    planner = object.__new__(PersistentBoundedMilpPlanner)
+    planner.base_candidate_limit = 4
+    planner.candidate_limit = 4
+    planner.adaptive_candidate_max = 16
+    planner.candidate_limit_frozen = False
+    planner._master_models = {}
+    planner._recourse_models = {}
+    planner._model_solve_generation_by_method = {}
+    sentinel_plan = object()
+
+    def solve_current(**_kwargs):
+        return sentinel_plan, {
+            "candidate_limit_k": planner.candidate_limit,
+            "optimized_deferred_job_count": int(planner.candidate_limit < 16),
+        }
+
+    planner._solve_current_candidate_limit = solve_current
+    config = SimpleNamespace(comparison_method_id=SimpleNamespace(value="B07"))
+
+    plan, certificate = planner.solve(
+        state=None,
+        config=config,
+        frame=None,
+        migration_authority=None,
+        evaluation_steps_remaining=54,
+    )
+
+    assert plan is sentinel_plan
+    assert certificate["candidate_limit_attempts"] == [4, 8, 16]
+    assert certificate["candidate_limit_deferred_attempt_count"] == 2
+    assert certificate["candidate_limit_expansion_reason"] == (
+        "BASE_DOMAIN_CAPACITY_DEFERRAL"
+    )
+
+
+def test_slow_master_accepts_explicit_deferred_queue_decision() -> None:
+    stage = object.__new__(_PersistentMilpModel)
+    stage.model_role = "slow_master"
+    stage.model = SimpleNamespace(SolCount=1)
+    stage.domain = SimpleNamespace(route_options=(object(),), job_options=((),))
+    stage.route = {0: SimpleNamespace(X=1.0)}
+    stage.job = {}
+    stage.defer_job = {0: SimpleNamespace(X=1.0)}
+
+    route, jobs = stage.selected_domain_decisions()
+
+    assert route == 0
+    assert jobs == {0: None}
 
 
 def test_workload_truncation_preserves_destination_and_time_diversity() -> None:

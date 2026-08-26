@@ -533,6 +533,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         electrical_score_evaluations = 0
         electrical_score_cache_hits = 0
         option_sets: list[tuple[_WorkloadOption, ...]] = []
+        no_bounded_option_job_ids: list[str] = []
         candidate_selection_mode = (
             "GLOBAL_ELECTRICAL_SCORE_TOP_K"
             if self.candidate_limit <= 16
@@ -550,8 +551,8 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 int(job.source.deadline_step) - frame.issue - duration,
             )
             if latest_offset < 0:
-                raise RuntimeContractError(f"job {uid} cannot meet its deadline")
-            if config.temporal_workload_shift:
+                offsets = []
+            elif config.temporal_workload_shift:
                 offsets = list(range(latest_offset + 1))
             else:
                 offsets = [0]
@@ -668,9 +669,12 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                             )
                         )
             if not feasible:
-                raise RuntimeContractError(
-                    f"job {uid} has no exact-hard-feasible bounded option"
-                )
+                # A capacity burst can legitimately leave an urgent whole gang
+                # without a placement in this rolling H54 window.  Keep an
+                # empty option set: the resident model's explicit deferral
+                # decision preserves the job in the visible runtime queue.
+                # Physical capacity and deadlines remain unchanged.
+                no_bounded_option_job_ids.append(uid)
             selected = self._select_resilient_workload_options(
                 feasible,
                 self.candidate_limit,
@@ -705,6 +709,8 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 "visible_queued_jobs": len(all_queued),
                 "optimized_queued_jobs": len(queued),
                 "deferred_queued_jobs": len(deferred_queued),
+                "no_bounded_option_jobs": len(no_bounded_option_job_ids),
+                "no_bounded_option_job_ids": no_bounded_option_job_ids,
                 "queued_domain_limit": slot_capacity,
                 "queued_dataset_residency_mode": (
                     migration_authority.dataset_residency_mode
@@ -1024,6 +1030,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
 
         attempted: list[int] = []
         infeasible_messages: list[str] = []
+        deferred_expansion_attempts = 0
         expansion_grid = self._candidate_expansion_grid()
         for candidate_limit in expansion_grid:
             if self.candidate_limit != candidate_limit:
@@ -1050,6 +1057,16 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                         f"attempted_k={attempted} final_error={error}"
                     ) from error
                 continue
+            if (
+                int(certificate.get("optimized_deferred_job_count", 0)) > 0
+                and not self.candidate_limit_frozen
+                and candidate_limit != expansion_grid[-1]
+            ):
+                # A K-truncated option set can make a job appear deferrable even
+                # though a later exact-safe candidate admits it.  Expand before
+                # accepting deferral, just as the former infeasibility path did.
+                deferred_expansion_attempts += 1
+                continue
             evidence = dict(certificate)
             evidence.update(
                 {
@@ -1066,8 +1083,15 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     "candidate_limit_infeasible_attempt_count": len(
                         infeasible_messages
                     ),
+                    "candidate_limit_deferred_attempt_count": (
+                        deferred_expansion_attempts
+                    ),
                     "candidate_limit_expansion_reason": (
-                        "BASE_DOMAIN_SLOW_MASTER_INFEASIBLE"
+                        (
+                            "BASE_DOMAIN_CAPACITY_DEFERRAL"
+                            if deferred_expansion_attempts
+                            else "BASE_DOMAIN_SLOW_MASTER_INFEASIBLE"
+                        )
                         if len(attempted) > 1
                         else None
                     ),
@@ -1153,9 +1177,11 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             output=issue_root,
         )
         domain_seconds = time.monotonic() - domain_started
+        # A queued workload is never a mathematically forced domain: even a
+        # single placement option can conflict jointly with other gangs or the
+        # grid.  The slow master must retain the explicit queue-deferral choice.
         slow_domain_forced = (
-            len(domain.route_options) == 1
-            and all(len(options) == 1 for options in domain.job_options)
+            len(domain.route_options) == 1 and not domain.job_options
         )
         build_seconds = 0.0
         if (
@@ -1280,6 +1306,10 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             "candidate_limit_frozen": self.candidate_limit_frozen,
             "mobility_domain_reduction": dict(domain.route_audit),
             "workload_domain_reduction": dict(domain.workload_audit),
+            "capacity_admission_gate": result["capacity_admission_gate"],
+            "optimized_deferred_job_count": result[
+                "optimized_deferred_job_count"
+            ],
             "solution_status": result["solution_status"],
             "actual_gurobi_used": True,
             "gurobi_slow_master_numeric_focus": (
@@ -1493,6 +1523,15 @@ class _PersistentMilpModel:
             for j in range(self.job_slot_capacity)
             for o in range(self.k)
         }
+        self.defer_job = {
+            j: self.model.addVar(
+                lb=0.0,
+                ub=1.0,
+                vtype=discrete_type,
+                name=f"defer_job[{j}]",
+            )
+            for j in range(self.job_slot_capacity)
+        }
         self.mode = {
             (mid, step): self.model.addVar(
                 lb=0.0,
@@ -1640,7 +1679,9 @@ class _PersistentMilpModel:
         )
         self.job_one = {
             j: self.model.addConstr(
-                gp.quicksum(self.job[(j, o)] for o in range(self.k)) == 0.0,
+                gp.quicksum(self.job[(j, o)] for o in range(self.k))
+                + self.defer_job[j]
+                == 0.0,
                 name=f"job_one[{j}]",
             )
             for j in range(self.job_slot_capacity)
@@ -2325,6 +2366,8 @@ class _PersistentMilpModel:
         for j in range(self.job_slot_capacity):
             active_job = j < len(domain.queued_job_ids)
             self.job_one[j].RHS = 1.0 if active_job else 0.0
+            self.defer_job[j].LB = 0.0
+            self.defer_job[j].UB = 1.0 if active_job else 0.0
             options = domain.job_options[j] if active_job else ()
             for o in range(self.k):
                 key = (j, o)
@@ -2428,7 +2471,7 @@ class _PersistentMilpModel:
         self.secondary_lock.RHS = self.h * STEP_HOURS
         self.model.update()
 
-    def selected_domain_decisions(self) -> tuple[int, dict[int, int]]:
+    def selected_domain_decisions(self) -> tuple[int, dict[int, Optional[int]]]:
         """Extract the slow master's integral route and workload decisions."""
 
         if self.model_role != "slow_master" or self.model.SolCount < 1:
@@ -2444,23 +2487,25 @@ class _PersistentMilpModel:
             raise RuntimeContractError(
                 f"slow master route decision is not integral: {route_hits}"
             )
-        jobs: dict[int, int] = {}
+        jobs: dict[int, Optional[int]] = {}
         for j, options in enumerate(self.domain.job_options):
             hits = [
                 o for o in range(len(options)) if float(self.job[(j, o)].X) > 0.5
             ]
-            if len(hits) != 1:
+            deferred = float(self.defer_job[j].X) > 0.5
+            if len(hits) + int(deferred) != 1:
                 raise RuntimeContractError(
-                    f"slow master job decision is not integral j={j}: {hits}"
+                    "slow master job admission decision is not integral "
+                    f"j={j}: options={hits} deferred={deferred}"
                 )
-            jobs[j] = hits[0]
+            jobs[j] = None if deferred else hits[0]
         return route_hits[0], jobs
 
     def fix_slow_decisions(
         self,
         *,
         route_index: int,
-        job_option_indices: Mapping[int, int],
+        job_option_indices: Mapping[int, Optional[int]],
     ) -> None:
         """Fix slow binaries so the second level is an exact continuous QCP."""
 
@@ -2473,6 +2518,9 @@ class _PersistentMilpModel:
         for j in range(self.job_slot_capacity):
             options = self.domain.job_options[j] if j < len(self.domain.job_options) else ()
             chosen = job_option_indices.get(j)
+            deferred = j < len(self.domain.job_options) and chosen is None
+            self.defer_job[j].LB = 1.0 if deferred else 0.0
+            self.defer_job[j].UB = 1.0 if deferred else 0.0
             for o in range(self.k):
                 value = 1.0 if chosen is not None and o == int(chosen) else 0.0
                 if o >= len(options):
@@ -2810,6 +2858,17 @@ class _PersistentMilpModel:
 
     def solve_lexicographic(self, *, wall_budget_seconds: float) -> Mapping[str, Any]:
         deadline = time.monotonic() + float(wall_budget_seconds)
+        # This is a feasibility/admission gate, not a replacement research
+        # objective.  Minimize deferred gangs before applying the frozen three
+        # electrical-stress priorities.  A sub-unit EDF term breaks equal-count
+        # ties without ever outweighing one additional admitted job.
+        nslots = self.job_slot_capacity
+        admission_expr = self.gp.LinExpr()
+        for j, variable in self.defer_job.items():
+            admission_expr += variable
+            admission_expr += (
+                float(nslots - j) / float((nslots + 1) ** 2)
+            ) * variable
         exposure_expr = STEP_HOURS * self.gp.quicksum(self.z.values())
         tertiary_expr = self._tertiary_objective()
         charge_discharge_mode_projection_used = False
@@ -2823,15 +2882,19 @@ class _PersistentMilpModel:
             # in three independent Python-side solves.
             self.model.setObjective(self.gp.LinExpr(), self.GRB.MINIMIZE)
             self.model.setObjectiveN(
-                self.zmax, 0, priority=3, abstol=1e-6, reltol=0.0,
+                admission_expr, 0, priority=4, abstol=1e-8, reltol=0.0,
+                name="capacity_admission_gate",
+            )
+            self.model.setObjectiveN(
+                self.zmax, 1, priority=3, abstol=1e-6, reltol=0.0,
                 name="worst_electrical_stress",
             )
             self.model.setObjectiveN(
-                exposure_expr, 1, priority=2, abstol=1e-6, reltol=0.0,
+                exposure_expr, 2, priority=2, abstol=1e-6, reltol=0.0,
                 name="electrical_stress_exposure",
             )
             self.model.setObjectiveN(
-                tertiary_expr, 2, priority=1, abstol=1e-8, reltol=0.0,
+                tertiary_expr, 3, priority=1, abstol=1e-8, reltol=0.0,
                 name="secondary_actuation",
             )
             self.model.Params.TimeLimit = max(0.001, deadline - time.monotonic())
@@ -3078,6 +3141,11 @@ class _PersistentMilpModel:
             "primary_worst_stress": float(self.zmax.X),
             "secondary_exposure": float(exposure_expr.getValue()),
             "tertiary_actuation": float(tertiary_expr.getValue()),
+            "capacity_admission_gate": float(admission_expr.getValue()),
+            "optimized_deferred_job_count": sum(
+                float(self.defer_job[j].X) > 0.5
+                for j in range(len(self.domain.job_options))
+            ),
             "priority_status": [
                 primary["status"], secondary["status"], tertiary["status"]
             ],
@@ -3223,10 +3291,28 @@ class _PersistentMilpModel:
                 for o in range(len(domain.job_options[j]))
                 if self.job[(j, o)].X > 0.5
             ]
-            if len(hits) != 1:
+            deferred = float(self.defer_job[j].X) > 0.5
+            if len(hits) + int(deferred) != 1:
                 raise RuntimeContractError(
-                    f"persistent MILP job option is not integral uid={uid}"
+                    "persistent MILP job admission is not integral "
+                    f"uid={uid} options={hits} deferred={deferred}"
                 )
+            if deferred:
+                destination = _effective_job_site(job)
+                placements[uid] = destination
+                prior_start = (
+                    state.active_plan.job_start_issue.get(uid, frame.issue)
+                    if state.active_plan is not None
+                    else frame.issue
+                )
+                starts[uid] = max(frame.issue, int(prior_start))
+                gangs[uid] = tuple(
+                    f"{destination}:PFR-GPU:{uid}:{index}"
+                    for index in range(job.source.requested_gpu)
+                )
+                wan[uid] = (0.0,) * self.h
+                wan_required[uid] = 0
+                continue
             option = domain.job_options[j][hits[0]]
             placements[uid] = option.destination
             starts[uid] = frame.issue + option.start_offset

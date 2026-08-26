@@ -54,6 +54,11 @@
     "min sum_h z_h * delta_t subject to priority 1",
     "min secondary actuation subject to priorities 1 and 2"
   ],
+  "capacity_admission_gate": {
+    "order": "Before the frozen electrical-stress objective priorities, maximize the number of exact-hard-feasible queued whole gangs in the bounded H54 domain; break equal-count ties by least-start-slack EDF order.",
+    "deferred_semantics": "A gang that cannot be jointly admitted remains visible and work-conserving in the runtime capacity-blocked queue for the next rolling horizon; it is never dropped and no GPU, rack, IDC, WAN, grid, or deadline constraint is relaxed.",
+    "candidate_truncation_guard": "Any selected deferral expands the exact-safe workload candidate set through the approved K grid before deferral is accepted at maximum K."
+  },
   "unchanged_scientific_semantics": [
     "electrical-stress definitions",
     "H54 causal forecast horizon",
@@ -112,7 +117,7 @@
     "online_candidate_base_k": 4,
     "online_candidate_adaptive_grid": [4, 8, 16],
     "online_candidate_adaptive_max_k": 16,
-    "online_candidate_expansion_trigger": "SLOW_MASTER_STATUS_INFEASIBLE_ONLY",
+    "online_candidate_expansion_trigger": "SLOW_MASTER_STATUS_INFEASIBLE_OR_CAPACITY_DEFERRAL",
     "online_candidate_expansion_evidence": "January issue 2069 was INFEASIBLE under both inner-polygon and exact-QCP models at K=4, while the identical checkpoint passed under both models at K=16. Candidate truncation is a latency approximation, not a physical hard limit.",
     "persistent_model_max_reuses": 16,
     "persistent_model_refresh_policy": "Rebuild both slow-master and recourse Gurobi models after 16 successful solves or any resident job-slot growth. R10 issue 1722 established that retained Gurobi multiobjective numerical state can time out while an identical cold checkpoint passes. R11 then failed issue 1721 after only 25 post-refresh solves under the approved 6-process by 2-thread topology; issue 1720 had already risen to 18.36 s before the next retained solve exceeded 60 s. The 16-solve bound refreshes before the observed 25-solve failure age while amortizing the measured cold build sufficiently to keep steady worker throughput in the 2-second range.",
