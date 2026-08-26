@@ -2906,11 +2906,41 @@ class _PersistentMilpModel:
                     gap = float(self.model.MIPGap)
                 except Exception:
                     gap = math.inf
+                iis_sample: list[str] = []
+                if self.model.Status in {
+                    self.GRB.INFEASIBLE,
+                    self.GRB.INF_OR_UNBD,
+                }:
+                    try:
+                        self.model.computeIIS()
+                        iis_sample.extend(
+                            f"constr:{row.ConstrName}"
+                            for row in self.model.getConstrs()
+                            if row.IISConstr
+                        )
+                        iis_sample.extend(
+                            f"qconstr:{row.QCName}"
+                            for row in self.model.getQConstrs()
+                            if row.IISQConstr
+                        )
+                        iis_sample.extend(
+                            f"lb:{row.VarName}"
+                            for row in self.model.getVars()
+                            if row.IISLB
+                        )
+                        iis_sample.extend(
+                            f"ub:{row.VarName}"
+                            for row in self.model.getVars()
+                            if row.IISUB
+                        )
+                    except Exception as iis_error:
+                        iis_sample = [f"IIS_UNAVAILABLE:{type(iis_error).__name__}"]
                 raise RuntimeContractError(
                     f"hierarchical {self.model_role} multiobjective solve failed "
                     "to complete all priorities: "
                     f"status={_status_name(self.GRB, self.model.Status)} "
-                    f"final_gap={gap} solve_seconds={exact_solve_seconds:.6f}"
+                    f"final_gap={gap} solve_seconds={exact_solve_seconds:.6f} "
+                    f"iis_sample={iis_sample[:24]}"
                 )
             maximum_simultaneous_before_projection = (
                 self._maximum_simultaneous_charge_discharge_kw()
