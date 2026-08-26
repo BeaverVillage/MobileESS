@@ -22,6 +22,17 @@ METHODS = tuple(f"B{index}" for index in range(8))
 B8_METHODS = ("B8",)
 ELECTRICAL_STRESS_METHODS = tuple(f"B{index:02d}" for index in range(10))
 ISSUES_PER_DAY = 288
+ENERGY_FLEX_METHODS = frozenset({"B01", "B05", "B06", "B07", "B08", "B09", "B6"})
+
+
+def requires_rebound_authority(diagnostic_method: str | None) -> bool:
+    """Return whether matched-shadow rebound evidence must be present.
+
+    A one-method energy-flex diagnostic deliberately has no co-located shadow
+    method result. Ordered multi-method campaigns still require the frozen
+    B00/B04 shadow authority without exemption.
+    """
+    return diagnostic_method not in ENERGY_FLEX_METHODS
 
 
 def load_json(path: Path) -> Mapping[str, Any]:
@@ -731,10 +742,10 @@ def main() -> None:
             )
         )
     )
-    # Raw one-method risk calibration intentionally has no matched B04 shadow.
-    # It must still pass terminal energy recovery. Rebound materialization is
-    # required without exemption for the final ordered B00-B09 campaign.
-    require_rebound_authority = args.diagnostic_method not in {"B6", "B07"}
+    # Any one-method energy-flex diagnostic intentionally has no co-located
+    # matched shadow. It must still pass terminal energy recovery. Rebound
+    # materialization remains mandatory for the final ordered B00-B09 campaign.
+    require_rebound_authority = requires_rebound_authority(args.diagnostic_method)
     rows = [
         inspect_day(
             args.root / calendar_date,
@@ -807,7 +818,7 @@ def main() -> None:
         "rebound_authority_exemption": (
             None
             if require_rebound_authority
-            else "RAW_SINGLE_METHOD_CALIBRATION_HAS_NO_MATCHED_B04_SHADOW"
+            else "SINGLE_METHOD_ENERGY_FLEX_DIAGNOSTIC_HAS_NO_MATCHED_SHADOW"
         ),
         "completed_days": sum(bool(row["complete"]) for row in rows),
         "pass_days": sum(row["scientific_status"] == "PASS" for row in rows),
