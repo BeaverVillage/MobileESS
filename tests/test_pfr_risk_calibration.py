@@ -1,9 +1,16 @@
 import json
+import math
 from pathlib import Path
 
 import pytest
 
 from pfr.risk_calibration import (
+    AUTHORITY_ID,
+    CALIBRATION_BLOCK_COUNT,
+    CALIBRATION_DAY_COUNT,
+    CALIBRATION_ISSUE_COUNT,
+    CALIBRATION_SOURCE_PERIOD,
+    SCHEMA_VERSION,
     RISK_FAMILY_SCALES,
     RiskCalibrationContractError,
     load_frozen_risk_calibration,
@@ -40,13 +47,28 @@ def _audit(issue: int, score: float, source_method: str = "B6") -> dict:
     }
 
 
+def test_fourteen_day_protocol_has_exact_finite_sample_geometry() -> None:
+    protocol_path = (
+        Path(__file__).parents[1]
+        / "pfr/contracts/PFR5_EVENT_RISK_CALIBRATION_PROTOCOL_V3.json"
+    )
+    protocol = json.loads(protocol_path.read_text(encoding="utf-8"))
+
+    assert protocol["calibration_period"] == "2025-01-01_TO_2025-01-14"
+    assert protocol["calibration_day_count"] == CALIBRATION_DAY_COUNT == 14
+    assert protocol["complete_weekly_cycles"] == 2
+    assert protocol["calibration_issue_count"] == CALIBRATION_ISSUE_COUNT
+    assert protocol["calibration_block_count"] == CALIBRATION_BLOCK_COUNT == 672
+    assert protocol["finite_sample_rank"] == math.ceil((672 + 1) * 0.95) == 640
+
+
 @pytest.mark.parametrize("source_method", ["B6", "B07"])
 def test_january_raw_family_blocks_freeze_and_load_without_march(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, source_method: str
 ) -> None:
     monkeypatch.setattr(builder, "ISSUES_PER_DAY", 2)
     monkeypatch.setattr(builder, "CALIBRATION_BLOCK_STEPS", 1)
-    for day_index in range(31):
+    for day_index in range(CALIBRATION_DAY_COUNT):
         calendar_date = f"2025-01-{day_index + 1:02d}"
         method_root = tmp_path / calendar_date / source_method
         method_root.mkdir(parents=True)
@@ -102,11 +124,11 @@ def test_january_raw_family_blocks_freeze_and_load_without_march(
         )
 
     payload = builder.build_calibration(tmp_path, source_method=source_method)
-    assert payload["daily_block_count"] == 31
-    assert payload["calibration_block_count"] == 62
-    assert payload["finite_sample_rank"] == 60
+    assert payload["daily_block_count"] == 14
+    assert payload["calibration_block_count"] == 28
+    assert payload["finite_sample_rank"] == 28
     assert payload["normalized_family_quantiles"]["R_SOC"] == pytest.approx(
-        0.301
+        0.141
     )
     assert payload["source_calibrated_risk_positive_count"] == 0
     assert payload["march_outcomes_read"] is False
@@ -116,19 +138,19 @@ def test_january_raw_family_blocks_freeze_and_load_without_march(
         {
             "calibration_block_steps": 6,
             "calibration_block_minutes": 30,
-            "calibration_block_count": 1488,
-            "finite_sample_rank": 1415,
-            "source_issue_count": 8928,
+            "calibration_block_count": CALIBRATION_BLOCK_COUNT,
+            "finite_sample_rank": 640,
+            "source_issue_count": CALIBRATION_ISSUE_COUNT,
         }
     )
     artifact = tmp_path / "FROZEN_RISK_CALIBRATION.json"
     artifact.write_text(json.dumps(payload), encoding="utf-8")
     calibration = load_frozen_risk_calibration(artifact)
-    assert calibration.source_period == "2025-01"
+    assert calibration.source_period == CALIBRATION_SOURCE_PERIOD
     assert calibration.normalized_family_quantiles["R_SOC"] == pytest.approx(
-        0.301
+        0.141
     )
-    assert calibration.calibrated_increments["R_SOC"] == pytest.approx(30.1)
+    assert calibration.calibrated_increments["R_SOC"] == pytest.approx(14.1)
 
 
 def test_loader_rejects_february_or_march_as_fit_period(tmp_path: Path) -> None:
@@ -136,18 +158,18 @@ def test_loader_rejects_february_or_march_as_fit_period(tmp_path: Path) -> None:
     artifact.write_text(
         json.dumps(
             {
-                "schema_version": "PFR5_EVENT_RISK_CALIBRATION_JAN2025_V2",
+                "schema_version": SCHEMA_VERSION,
                 "status": "FROZEN",
-                "authority_id": "JAN2025_B6_RAW_30MIN_FAMILY_BLOCK_UNDERPREDICTION_V2",
+                "authority_id": AUTHORITY_ID,
                 "alpha": 0.05,
                 "source_method": "B6",
                 "source_period": "2025-01_TO_2025-03",
-                "calibration_dates": [f"2025-01-{day:02d}" for day in range(1, 32)],
+                "calibration_dates": [f"2025-01-{day:02d}" for day in range(1, 15)],
                 "calibration_block_steps": 6,
                 "calibration_block_minutes": 30,
-                "calibration_block_count": 1488,
+                "calibration_block_count": CALIBRATION_BLOCK_COUNT,
                 "coverage_claim": "FAMILY_WISE_BLOCK_COVERAGE_NOT_JOINT_COVERAGE",
-                "finite_sample_rank": 1415,
+                "finite_sample_rank": 640,
                 "normalized_joint_quantile": 0.1,
                 "normalized_family_quantiles": {
                     family: 0.1 for family in RISK_FAMILY_SCALES
@@ -158,7 +180,7 @@ def test_loader_rejects_february_or_march_as_fit_period(tmp_path: Path) -> None:
                     for family, scale in RISK_FAMILY_SCALES.items()
                 },
                 "source_audit_sha256": "a" * 64,
-                "source_issue_count": 8928,
+                "source_issue_count": CALIBRATION_ISSUE_COUNT,
                 "source_calibrated_risk_positive_count": 1,
                 "february_labels_used_for_fit": False,
                 "march_outcomes_read": False,
@@ -166,7 +188,7 @@ def test_loader_rejects_february_or_march_as_fit_period(tmp_path: Path) -> None:
         ),
         encoding="utf-8",
     )
-    with pytest.raises(RiskCalibrationContractError, match="January-2025 B6"):
+    with pytest.raises(RiskCalibrationContractError, match="2025-01-01"):
         load_frozen_risk_calibration(artifact)
 
 
@@ -178,20 +200,20 @@ def test_loader_rejects_always_positive_event_trigger_artifact(
     artifact.write_text(
         json.dumps(
             {
-                "schema_version": "PFR5_EVENT_RISK_CALIBRATION_JAN2025_V2",
+                "schema_version": SCHEMA_VERSION,
                 "status": "FROZEN",
-                "authority_id": "JAN2025_B6_RAW_30MIN_FAMILY_BLOCK_UNDERPREDICTION_V2",
+                "authority_id": AUTHORITY_ID,
                 "alpha": 0.05,
                 "source_method": "B6",
-                "source_period": "2025-01",
+                "source_period": CALIBRATION_SOURCE_PERIOD,
                 "calibration_dates": [
-                    f"2025-01-{day:02d}" for day in range(1, 32)
+                    f"2025-01-{day:02d}" for day in range(1, 15)
                 ],
                 "calibration_block_steps": 6,
                 "calibration_block_minutes": 30,
-                "calibration_block_count": 1488,
+                "calibration_block_count": CALIBRATION_BLOCK_COUNT,
                 "coverage_claim": "FAMILY_WISE_BLOCK_COVERAGE_NOT_JOINT_COVERAGE",
-                "finite_sample_rank": 1415,
+                "finite_sample_rank": 640,
                 "normalized_joint_quantile": quantile,
                 "normalized_family_quantiles": {
                     family: quantile for family in RISK_FAMILY_SCALES
@@ -202,8 +224,8 @@ def test_loader_rejects_always_positive_event_trigger_artifact(
                     for family, scale in RISK_FAMILY_SCALES.items()
                 },
                 "source_audit_sha256": "a" * 64,
-                "source_issue_count": 8928,
-                "source_calibrated_risk_positive_count": 8928,
+                "source_issue_count": CALIBRATION_ISSUE_COUNT,
+                "source_calibrated_risk_positive_count": CALIBRATION_ISSUE_COUNT,
                 "february_labels_used_for_fit": False,
                 "march_outcomes_read": False,
             }
@@ -220,18 +242,18 @@ def test_february_validation_checks_frozen_b7_binding_without_march(
 ) -> None:
     quantile = 0.2
     calibration_payload = {
-        "schema_version": "PFR5_EVENT_RISK_CALIBRATION_JAN2025_V2",
+        "schema_version": SCHEMA_VERSION,
         "status": "FROZEN",
-        "authority_id": "JAN2025_B6_RAW_30MIN_FAMILY_BLOCK_UNDERPREDICTION_V2",
+        "authority_id": AUTHORITY_ID,
         "alpha": 0.05,
         "source_method": "B6",
-        "source_period": "2025-01",
-        "calibration_dates": [f"2025-01-{day:02d}" for day in range(1, 32)],
+        "source_period": CALIBRATION_SOURCE_PERIOD,
+        "calibration_dates": [f"2025-01-{day:02d}" for day in range(1, 15)],
         "calibration_block_steps": 6,
         "calibration_block_minutes": 30,
-        "calibration_block_count": 1488,
+        "calibration_block_count": CALIBRATION_BLOCK_COUNT,
         "coverage_claim": "FAMILY_WISE_BLOCK_COVERAGE_NOT_JOINT_COVERAGE",
-        "finite_sample_rank": 1415,
+        "finite_sample_rank": 640,
         "normalized_joint_quantile": quantile,
         "normalized_family_quantiles": {
             family: quantile for family in RISK_FAMILY_SCALES
@@ -242,7 +264,7 @@ def test_february_validation_checks_frozen_b7_binding_without_march(
             for family, scale in RISK_FAMILY_SCALES.items()
         },
         "source_audit_sha256": "a" * 64,
-        "source_issue_count": 8928,
+        "source_issue_count": CALIBRATION_ISSUE_COUNT,
         "source_calibrated_risk_positive_count": 1,
         "february_labels_used_for_fit": False,
         "march_outcomes_read": False,

@@ -13,14 +13,32 @@ from typing import Mapping
 from .risk import RiskFamily
 
 
-SCHEMA_VERSION = "PFR5_EVENT_RISK_CALIBRATION_JAN2025_V2"
-AUTHORITY_ID = "JAN2025_B6_RAW_30MIN_FAMILY_BLOCK_UNDERPREDICTION_V2"
+SCHEMA_VERSION = "PFR5_EVENT_RISK_CALIBRATION_JAN2025_V3"
+AUTHORITY_ID = "JAN2025_DAY01_14_B6_RAW_30MIN_FAMILY_BLOCK_UNDERPREDICTION_V3"
 ELECTRICAL_STRESS_SCHEMA_VERSION = (
-    "ELECTRICAL_STRESS_EVENT_RISK_CALIBRATION_JAN2025_V1"
+    "ELECTRICAL_STRESS_EVENT_RISK_CALIBRATION_JAN2025_V2"
 )
 ELECTRICAL_STRESS_AUTHORITY_ID = (
-    "JAN2025_B07_ELECTRICAL_STRESS_RAW_30MIN_FAMILY_BLOCK_V1"
+    "JAN2025_DAY01_14_B07_ELECTRICAL_STRESS_RAW_30MIN_FAMILY_BLOCK_V2"
 )
+CALIBRATION_START_DATE = date(2025, 1, 1)
+CALIBRATION_END_DATE = date(2025, 1, 14)
+CALIBRATION_DAY_COUNT = 14
+CALIBRATION_SOURCE_PERIOD = "2025-01-01_TO_2025-01-14"
+CALIBRATION_BLOCK_STEPS = 6
+CALIBRATION_BLOCK_MINUTES = 30
+CALIBRATION_BLOCK_COUNT = 672
+CALIBRATION_ISSUE_COUNT = 4032
+CALIBRATION_ISSUES_PER_DAY = 288
+if (
+    (CALIBRATION_END_DATE - CALIBRATION_START_DATE).days + 1
+    != CALIBRATION_DAY_COUNT
+    or CALIBRATION_DAY_COUNT * CALIBRATION_ISSUES_PER_DAY
+    != CALIBRATION_ISSUE_COUNT
+    or CALIBRATION_ISSUE_COUNT // CALIBRATION_BLOCK_STEPS
+    != CALIBRATION_BLOCK_COUNT
+):
+    raise RuntimeError("14-day calibration geometry is internally inconsistent")
 RISK_FAMILY_SCALES: Mapping[str, float] = {
     RiskFamily.SOC.value: 100.0,
     RiskFamily.DEADLINE.value: 1.0,
@@ -73,31 +91,32 @@ class FrozenRiskCalibration:
             (ELECTRICAL_STRESS_AUTHORITY_ID, "B07"),
         }:
             raise RiskCalibrationContractError("risk calibration authority ID mismatch")
-        if self.source_period != "2025-01":
+        if self.source_period != CALIBRATION_SOURCE_PERIOD:
             raise RiskCalibrationContractError(
-                "event-risk calibration must use January-2025 B6/B07 raw risk"
+                "event-risk calibration must use 2025-01-01 through "
+                "2025-01-14 B6/B07 raw risk"
             )
         if self.february_labels_used_for_fit or self.march_outcomes_read:
             raise RiskCalibrationContractError(
                 "February/March labels are prohibited from January calibration fit"
             )
         expected_dates = tuple(
-            (date(2025, 1, 1) + timedelta(days=offset)).isoformat()
-            for offset in range(31)
+            (CALIBRATION_START_DATE + timedelta(days=offset)).isoformat()
+            for offset in range(CALIBRATION_DAY_COUNT)
         )
         if self.calibration_dates != expected_dates:
             raise RiskCalibrationContractError("risk calibration date axis is not January 2025")
         if not 0.0 < self.alpha < 1.0:
             raise RiskCalibrationContractError("risk calibration alpha must lie in (0,1)")
         if (
-            self.calibration_block_steps != 6
-            or self.calibration_block_minutes != 30
-            or self.calibration_block_count != 1488
+            self.calibration_block_steps != CALIBRATION_BLOCK_STEPS
+            or self.calibration_block_minutes != CALIBRATION_BLOCK_MINUTES
+            or self.calibration_block_count != CALIBRATION_BLOCK_COUNT
             or self.coverage_claim
             != "FAMILY_WISE_BLOCK_COVERAGE_NOT_JOINT_COVERAGE"
         ):
             raise RiskCalibrationContractError(
-                "risk calibration must use family-wise coverage over 1488 "
+                "risk calibration must use family-wise coverage over 672 "
                 "non-overlapping 30-minute blocks"
             )
         expected_rank = min(
@@ -146,7 +165,7 @@ class FrozenRiskCalibration:
                 "diagnostic maximum family quantile mismatch"
             )
         if (
-            self.source_issue_count != 8928
+            self.source_issue_count != CALIBRATION_ISSUE_COUNT
             or self.source_calibrated_risk_positive_count < 0
             or self.source_calibrated_risk_positive_count >= self.source_issue_count
         ):

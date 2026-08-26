@@ -1,5 +1,6 @@
 import pytest
 import pandas as pd
+from types import SimpleNamespace
 
 from pfr.methods import ElectricalStressMethod, ExperimentAuthority, MethodFactory
 from pfr.optimization import FastOptimizationContext, GurobiFastControlOptimizer
@@ -335,3 +336,76 @@ def test_persistent_model_refresh_disposes_both_hierarchical_stages() -> None:
     assert recourse.model.disposed
     assert planner._master_models == {}
     assert planner._recourse_models == {}
+
+
+def test_candidate_truncation_infeasibility_expands_k_until_feasible() -> None:
+    planner = object.__new__(PersistentBoundedMilpPlanner)
+    planner.base_candidate_limit = 4
+    planner.candidate_limit = 4
+    planner.adaptive_candidate_max = 16
+    planner.candidate_limit_frozen = False
+    planner._master_models = {}
+    planner._recourse_models = {}
+    planner._model_solve_generation_by_method = {}
+    sentinel_plan = object()
+
+    def solve_current(**_kwargs):
+        if planner.candidate_limit < 16:
+            raise RuntimeContractError(
+                "hierarchical slow_master multiobjective solve failed to "
+                "complete all priorities: status=INFEASIBLE"
+            )
+        return sentinel_plan, {"candidate_limit_k": planner.candidate_limit}
+
+    planner._solve_current_candidate_limit = solve_current
+    config = SimpleNamespace(
+        comparison_method_id=SimpleNamespace(value="B07")
+    )
+
+    plan, certificate = planner.solve(
+        state=None,
+        config=config,
+        frame=None,
+        migration_authority=None,
+        evaluation_steps_remaining=54,
+    )
+
+    assert plan is sentinel_plan
+    assert certificate["candidate_limit_attempts"] == [4, 8, 16]
+    assert certificate["candidate_limit_adaptive_expansion_used"] is True
+    assert certificate["candidate_limit_infeasible_attempt_count"] == 2
+    assert certificate["candidate_limit_expansion_reason"] == (
+        "BASE_DOMAIN_SLOW_MASTER_INFEASIBLE"
+    )
+
+
+def test_candidate_expansion_does_not_mask_non_infeasibility_failures() -> None:
+    planner = object.__new__(PersistentBoundedMilpPlanner)
+    planner.base_candidate_limit = 4
+    planner.candidate_limit = 4
+    planner.adaptive_candidate_max = 16
+    planner.candidate_limit_frozen = False
+    planner._master_models = {}
+    planner._recourse_models = {}
+    planner._model_solve_generation_by_method = {}
+
+    def solve_current(**_kwargs):
+        raise RuntimeContractError(
+            "hierarchical slow_master multiobjective solve failed to complete "
+            "all priorities: status=TIME_LIMIT"
+        )
+
+    planner._solve_current_candidate_limit = solve_current
+    config = SimpleNamespace(
+        comparison_method_id=SimpleNamespace(value="B07")
+    )
+
+    with pytest.raises(RuntimeContractError, match="status=TIME_LIMIT"):
+        planner.solve(
+            state=None,
+            config=config,
+            frame=None,
+            migration_authority=None,
+            evaluation_steps_remaining=54,
+        )
+    assert planner.candidate_limit == 4

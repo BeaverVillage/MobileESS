@@ -13,6 +13,10 @@ from typing import Any, Mapping
 
 from pfr.risk_calibration import (
     AUTHORITY_ID,
+    CALIBRATION_BLOCK_STEPS,
+    CALIBRATION_DAY_COUNT,
+    CALIBRATION_SOURCE_PERIOD,
+    CALIBRATION_START_DATE,
     ELECTRICAL_STRESS_AUTHORITY_ID,
     ELECTRICAL_STRESS_SCHEMA_VERSION,
     RISK_FAMILY_SCALES,
@@ -21,7 +25,6 @@ from pfr.risk_calibration import (
 
 
 ISSUES_PER_DAY = 288
-CALIBRATION_BLOCK_STEPS = 6
 ALPHA = 0.05
 
 
@@ -130,8 +133,8 @@ def build_calibration(
     ):
         raise ValueError("calibration block must exactly partition every day")
     dates = tuple(
-        (date(2025, 1, 1) + timedelta(days=offset)).isoformat()
-        for offset in range(31)
+        (CALIBRATION_START_DATE + timedelta(days=offset)).isoformat()
+        for offset in range(CALIBRATION_DAY_COUNT)
     )
     daily_scores: list[Mapping[str, Any]] = []
     block_scores: list[Mapping[str, Any]] = []
@@ -150,7 +153,7 @@ def build_calibration(
             or manifest.get("risk_calibration_authority_id") is not None
         ):
             raise ValueError(
-                f"January B6 source manifest is not a clean raw calibration run: {calendar_date}"
+                f"January {source_method} source manifest is not a clean raw calibration run: {calendar_date}"
             )
         source_commits.add(source_commit)
         summary = _load_json(method_root / "METHOD_SUMMARY.json")
@@ -161,7 +164,9 @@ def build_calibration(
             or int(summary.get("risk_calibration_audit_count", -1))
             != ISSUES_PER_DAY
         ):
-            raise ValueError(f"January B6 day is incomplete: {calendar_date}")
+            raise ValueError(
+                f"January {source_method} day is incomplete: {calendar_date}"
+            )
         first_issue = offset * ISSUES_PER_DAY
         family_scores: list[Mapping[str, float]] = []
         joint_scores: list[float] = []
@@ -177,7 +182,7 @@ def build_calibration(
                 or marker.get("risk_calibration_authority_id") is not None
             ):
                 raise ValueError(
-                    f"January calibration source is not raw B6 issue={issue}"
+                    f"January calibration source is not raw {source_method} issue={issue}"
                 )
             audit = marker.get("risk_calibration_audit")
             if not isinstance(audit, dict):
@@ -291,7 +296,7 @@ def build_calibration(
         ),
         "source_method": source_method,
         "source_risk_interface": "RAW_UNCALIBRATED",
-        "source_period": "2025-01",
+        "source_period": CALIBRATION_SOURCE_PERIOD,
         "calibration_dates": list(dates),
         "calibration_block": "NONOVERLAPPING_30_MINUTE_MAXIMA_WITHIN_CALENDAR_DAY",
         "calibration_block_steps": CALIBRATION_BLOCK_STEPS,

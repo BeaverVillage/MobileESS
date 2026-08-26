@@ -169,16 +169,16 @@ class PfrRuntimeTests(unittest.TestCase):
             authority_id=AUTHORITY_ID,
             alpha=0.05,
             source_method="B6",
-            source_period="2025-01",
+            source_period="2025-01-01_TO_2025-01-14",
             calibration_dates=tuple(
                 (date(2025, 1, 1) + timedelta(days=offset)).isoformat()
-                for offset in range(31)
+                for offset in range(14)
             ),
             calibration_block_steps=6,
             calibration_block_minutes=30,
-            calibration_block_count=1488,
+            calibration_block_count=672,
             coverage_claim="FAMILY_WISE_BLOCK_COVERAGE_NOT_JOINT_COVERAGE",
-            finite_sample_rank=1415,
+            finite_sample_rank=640,
             normalized_joint_quantile=normalized_quantile,
             normalized_family_quantiles={
                 family: normalized_quantile for family in RISK_FAMILY_SCALES
@@ -190,7 +190,7 @@ class PfrRuntimeTests(unittest.TestCase):
             },
             source_audit_sha256="f" * 64,
             artifact_sha256="e" * 64,
-            source_issue_count=8928,
+            source_issue_count=4032,
             source_calibrated_risk_positive_count=1,
         )
         job = OperationalTrainingJob(

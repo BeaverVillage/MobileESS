@@ -1,4 +1,4 @@
-"""Fail-closed, read-only release gate for the 31-day January campaign."""
+"""Fail-closed, read-only release gate for a bounded January campaign."""
 
 from __future__ import annotations
 
@@ -766,7 +766,18 @@ def main() -> None:
         action="store_true",
         help="Validate the ordered B00-B09 campaign and PRE axis.",
     )
+    parser.add_argument("--campaign-start-day", type=int, default=1)
+    parser.add_argument("--campaign-end-day", type=int, default=31)
+    parser.add_argument("--campaign-method-count", type=int)
     args = parser.parse_args()
+    if not (
+        1 <= args.campaign_start_day <= args.campaign_end_day <= 31
+    ):
+        parser.error("campaign day range must lie within January 1-31")
+    if args.campaign_method_count is not None and not (
+        1 <= args.campaign_method_count <= 10
+    ):
+        parser.error("campaign method count must lie in 1-10")
     migration_authority_path = (
         args.migration_authority
         if args.migration_authority is not None
@@ -909,14 +920,26 @@ def main() -> None:
             "legacy_template_bank_loaded": False,
         }
     status = "PASS" if checks and all(row.get("pass") is True for row in checks.values()) else "FAIL_CLOSED"
+    campaign_day_count = len(
+        day_specs(args.campaign_start_day, args.campaign_end_day)
+    )
+    methods_per_day = (
+        args.campaign_method_count
+        if args.campaign_method_count is not None
+        else (10 if args.electrical_stress_campaign else 8)
+    )
     report = {
-        "schema_version": "JAN2025_31DAY_POST_HOC_PREFLIGHT_V13_13_FREEZE_20260823",
+        "schema_version": "JAN2025_BOUNDED_POST_HOC_PREFLIGHT_V13_14",
         "evaluation_classification": "POST_HOC_DESIGN_VALIDATION_NOT_INDEPENDENT_HOLDOUT",
         "independent_holdout_claim": False,
         "status": status,
-        "campaign_days": len(day_specs(1, 31)),
-        "expected_episodes": 31 * (10 if args.electrical_stress_campaign else 8),
-        "expected_scored_issues": TOTAL_ISSUES * (10 if args.electrical_stress_campaign else 8),
+        "campaign_start_day": args.campaign_start_day,
+        "campaign_end_day": args.campaign_end_day,
+        "campaign_days": campaign_day_count,
+        "expected_episodes": campaign_day_count * methods_per_day,
+        "expected_scored_issues": (
+            campaign_day_count * ISSUES_PER_DAY * methods_per_day
+        ),
         "electrical_stress_campaign": args.electrical_stress_campaign,
         "checks": checks,
         "critical_code_sha256": {

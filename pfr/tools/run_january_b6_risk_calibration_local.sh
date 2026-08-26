@@ -62,7 +62,7 @@ fi
 calibration_root="$run_root/january_b07_electrical_stress_raw"
 artifact="$run_root/calibration/ELECTRICAL_STRESS_EVENT_RISK_CALIBRATION_JAN2025.json"
 common=(
-    --start-day 1 --end-day 31
+    --start-day 1 --end-day 14
     --day-workers "$day_workers" --gurobi-threads "$gurobi_threads"
     --cpu-affinity "$cpu_affinity"
     --diagnostic-method B07 --output-root "$calibration_root" --fail-fast
@@ -81,7 +81,7 @@ fi
 
 "$python_bin" -m pfr.tools.verify_daily_campaign_storage \
     --repo "$repo_dir" --root "$calibration_root" \
-    --start-date 2025-01-01 --days 31 --diagnostic-method B07 \
+    --start-date 2025-01-01 --days 14 --diagnostic-method B07 \
     --report "$calibration_root/STORAGE_VERIFICATION.json"
 "$python_bin" -m pfr.tools.build_january_b6_risk_calibration \
     --source-root "$calibration_root" --source-method B07 --output "$artifact"

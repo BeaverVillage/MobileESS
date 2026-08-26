@@ -140,6 +140,18 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         self.candidate_limit_frozen = (
             os.environ.get("PFR_ONLINE_CANDIDATE_K_FROZEN", "0") == "1"
         )
+        self.base_candidate_limit = self.candidate_limit
+        self.adaptive_candidate_max = int(
+            os.environ.get("PFR_ONLINE_ADAPTIVE_CANDIDATE_MAX_K", "16")
+        )
+        if (
+            self.adaptive_candidate_max not in ALLOWED_DEVELOPMENT_K
+            or self.adaptive_candidate_max < self.base_candidate_limit
+        ):
+            raise RuntimeContractError(
+                "adaptive candidate maximum must be an allowed K no smaller "
+                "than the base candidate K"
+            )
         self.wall_budget_seconds = float(
             os.environ.get("PFR_ONLINE_MILP_WALL_BUDGET_SECONDS", "60.0")
         )
@@ -165,6 +177,9 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         self._recourse_models: dict[str, _PersistentMilpModel] = {}
         self._job_slot_capacity_by_method: dict[str, int] = {}
         self._model_solve_generation_by_method: dict[str, int] = {}
+        self._adaptive_domain_cache_by_method: dict[
+            str, tuple[int, str, int, int, _PreparedOnlineDomain]
+        ] = {}
 
     def _dispose_method_models(self, method_key: str) -> None:
         for models in (self._master_models, self._recourse_models):
@@ -506,9 +521,17 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         locations = []
         for mid in MESS_IDS:
             locations.append([state.mess_location[mid]] * h)
-        baseline = kernel.evaluate(
-            frame, running_it, zero_mess, zero_mess, locations
-        )
+        # Rack identity changes GPU/rack feasibility but not the radial-grid
+        # injection produced by an otherwise identical job placement.  The
+        # old nested loop recomputed the same H54 electrical score once per
+        # admissible rack, which became the dominant runtime for burst queues
+        # (issue 2069 evaluated 11,808 choices).  Cache only the electrical
+        # score; every rack-specific hard-cap and WAN check still runs.
+        electrical_score_cache: dict[
+            tuple[str, int, int, float], tuple[float, float]
+        ] = {}
+        electrical_score_evaluations = 0
+        electrical_score_cache_hits = 0
         option_sets: list[tuple[_WorkloadOption, ...]] = []
         before = 0
         exact_removed = 0
@@ -600,16 +623,26 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                         if remaining > 1e-9:
                             exact_removed += 1
                             continue
-                        trial = running_it.copy()
-                        trial[offset:end, IDCS.index(destination)] += float(
-                            row["IT_power_kW"]
-                        )
-                        result = kernel.evaluate(
-                            frame, trial, zero_mess, zero_mess, locations
-                        )
+                        power_kw = float(row["IT_power_kW"])
+                        score_key = (destination, offset, end, power_kw)
+                        electrical_score = electrical_score_cache.get(score_key)
+                        if electrical_score is None:
+                            trial = running_it.copy()
+                            trial[offset:end, IDCS.index(destination)] += power_kw
+                            result = kernel.evaluate(
+                                frame, trial, zero_mess, zero_mess, locations
+                            )
+                            electrical_score = (
+                                float(result.objective[0]),
+                                float(result.objective[1]),
+                            )
+                            electrical_score_cache[score_key] = electrical_score
+                            electrical_score_evaluations += 1
+                        else:
+                            electrical_score_cache_hits += 1
                         score = (
-                            float(result.objective[0]),
-                            float(result.objective[1]),
+                            electrical_score[0],
+                            electrical_score[1],
                             float(offset) / h
                             + float(destination != job.source.origin_idc),
                             destination,
@@ -654,6 +687,8 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 "bounded_domain_size": sum(map(len, option_sets)),
                 "bounded_feasible_choices_removed": bounded_removed,
                 "candidate_limit_k_per_job": self.candidate_limit,
+                "electrical_score_evaluations": electrical_score_evaluations,
+                "electrical_score_cache_hits": electrical_score_cache_hits,
                 "visible_queued_jobs": len(all_queued),
                 "optimized_queued_jobs": len(queued),
                 "deferred_queued_jobs": len(deferred_queued),
@@ -677,47 +712,230 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         effective_steps: int,
         output: Path,
     ) -> _PreparedOnlineDomain:
-        routes, route_audit = self._route_domain(
-            kernel=kernel,
-            static=static,
-            state=state,
-            config=config,
-            frame=frame,
-            effective_steps=effective_steps,
-            output=output,
+        method_key = config.comparison_method_id.value
+        target_limit = self.candidate_limit
+        superset_limit = (
+            self.base_candidate_limit
+            if self.candidate_limit_frozen
+            else self.adaptive_candidate_max
         )
-        (
-            queued,
-            deferred_queued,
-            options,
-            running_it,
-            running_gpu,
-            rack_gpu,
-            rack_power,
-            wan_capacity,
-            workload_audit,
-        ) = self._workload_domain(
-            kernel=kernel,
-            state=state,
-            config=config,
-            frame=frame,
-            migration_authority=migration_authority,
+        cache_key = (
+            int(frame.issue),
+            str(state.pre_state_sha256),
+            int(effective_steps),
+            int(superset_limit),
+        )
+        cached = self._adaptive_domain_cache_by_method.get(method_key)
+        cache_reused = cached is not None and cached[:4] == cache_key
+        if cache_reused:
+            superset = cached[4]
+        else:
+            # Ranking every exact-hard-feasible choice already dominates the
+            # cost; retaining the first 16 instead of the first 4 is nearly
+            # free.  Generate one preregistered superset so a K expansion can
+            # slice it without repeating thousands of causal grid scores.
+            self.candidate_limit = superset_limit
+            try:
+                routes, route_audit = self._route_domain(
+                    kernel=kernel,
+                    static=static,
+                    state=state,
+                    config=config,
+                    frame=frame,
+                    effective_steps=effective_steps,
+                    output=output,
+                )
+                (
+                    queued,
+                    deferred_queued,
+                    options,
+                    running_it,
+                    running_gpu,
+                    rack_gpu,
+                    rack_power,
+                    wan_capacity,
+                    workload_audit,
+                ) = self._workload_domain(
+                    kernel=kernel,
+                    state=state,
+                    config=config,
+                    frame=frame,
+                    migration_authority=migration_authority,
+                )
+            finally:
+                self.candidate_limit = target_limit
+            superset = _PreparedOnlineDomain(
+                route_options=routes,
+                queued_job_ids=queued,
+                deferred_queued_job_ids=deferred_queued,
+                job_options=options,
+                running_it_kw=running_it,
+                running_gpu=running_gpu,
+                running_rack_gpu=rack_gpu,
+                running_rack_power_kw=rack_power,
+                wan_capacity_gb=wan_capacity,
+                route_audit=route_audit,
+                workload_audit=workload_audit,
+            )
+            self._adaptive_domain_cache_by_method[method_key] = (*cache_key, superset)
+
+        routes = tuple(superset.route_options[:target_limit])
+        options = tuple(
+            tuple(job_options[:target_limit])
+            for job_options in superset.job_options
+        )
+        route_audit = dict(superset.route_audit)
+        route_audit.update(
+            {
+                "candidate_limit_k": target_limit,
+                "bounded_domain_size": len(routes),
+                "bounded_truncation_removed": max(
+                    0,
+                    int(
+                        route_audit.get(
+                            "feasibility_preserving_domain_size", len(routes)
+                        )
+                    )
+                    - len(routes),
+                ),
+                "adaptive_superset_candidate_limit_k": superset_limit,
+                "adaptive_superset_reused": cache_reused,
+            }
+        )
+        workload_audit = dict(superset.workload_audit)
+        bounded_workload_size = sum(map(len, options))
+        workload_audit.update(
+            {
+                "candidate_limit_k_per_job": target_limit,
+                "bounded_domain_size": bounded_workload_size,
+                "bounded_feasible_choices_removed": max(
+                    0,
+                    int(
+                        workload_audit.get(
+                            "domain_after_exact_safe", bounded_workload_size
+                        )
+                    )
+                    - bounded_workload_size,
+                ),
+                "adaptive_superset_candidate_limit_k": superset_limit,
+                "adaptive_superset_reused": cache_reused,
+            }
         )
         return _PreparedOnlineDomain(
             route_options=routes,
-            queued_job_ids=queued,
-            deferred_queued_job_ids=deferred_queued,
+            queued_job_ids=superset.queued_job_ids,
+            deferred_queued_job_ids=superset.deferred_queued_job_ids,
             job_options=options,
-            running_it_kw=running_it,
-            running_gpu=running_gpu,
-            running_rack_gpu=rack_gpu,
-            running_rack_power_kw=rack_power,
-            wan_capacity_gb=wan_capacity,
+            running_it_kw=superset.running_it_kw,
+            running_gpu=superset.running_gpu,
+            running_rack_gpu=superset.running_rack_gpu,
+            running_rack_power_kw=superset.running_rack_power_kw,
+            wan_capacity_gb=superset.wan_capacity_gb,
             route_audit=route_audit,
             workload_audit=workload_audit,
         )
 
+    @staticmethod
+    def _is_candidate_truncation_infeasibility(error: BaseException) -> bool:
+        message = str(error)
+        return (
+            "hierarchical slow_master multiobjective solve failed" in message
+            and "status=INFEASIBLE" in message
+        )
+
+    def _candidate_expansion_grid(self) -> tuple[int, ...]:
+        maximum = (
+            self.base_candidate_limit
+            if self.candidate_limit_frozen
+            else self.adaptive_candidate_max
+        )
+        return tuple(
+            candidate
+            for candidate in ALLOWED_DEVELOPMENT_K
+            if self.base_candidate_limit <= candidate <= maximum
+        )
+
     def solve(
+        self,
+        *,
+        state: MutableMethodState,
+        config: MethodConfig,
+        frame: CausalExperimentFrame,
+        migration_authority: Optional[MigrationAuthority],
+        evaluation_steps_remaining: int,
+    ) -> tuple[SlowDiscretePlan, Mapping[str, Any]]:
+        """Solve at the fast base K, expanding only on proven truncation.
+
+        Candidate K is a latency control, not a physical feasibility limit.
+        A base-K master can therefore be infeasible solely because the useful
+        route or placement was ranked outside the truncated domain.  Preserve
+        the common-case K=4 latency, but rebuild at the next preregistered K
+        after an actual slow-master INFEASIBLE status.  Every successful
+        attempt still passes the same recourse, exact norm audit, and Fresh
+        OpenDSS commit authority.
+        """
+
+        method_key = config.comparison_method_id.value
+        if self.candidate_limit != self.base_candidate_limit:
+            self._dispose_method_models(method_key)
+            self._model_solve_generation_by_method[method_key] = 0
+            self.candidate_limit = self.base_candidate_limit
+
+        attempted: list[int] = []
+        infeasible_messages: list[str] = []
+        expansion_grid = self._candidate_expansion_grid()
+        for candidate_limit in expansion_grid:
+            if self.candidate_limit != candidate_limit:
+                self._dispose_method_models(method_key)
+                self._model_solve_generation_by_method[method_key] = 0
+                self.candidate_limit = candidate_limit
+            attempted.append(candidate_limit)
+            try:
+                plan, certificate = self._solve_current_candidate_limit(
+                    state=state,
+                    config=config,
+                    frame=frame,
+                    migration_authority=migration_authority,
+                    evaluation_steps_remaining=evaluation_steps_remaining,
+                )
+            except RuntimeContractError as error:
+                if not self._is_candidate_truncation_infeasibility(error):
+                    raise
+                infeasible_messages.append(str(error))
+                if candidate_limit == expansion_grid[-1]:
+                    raise RuntimeContractError(
+                        "adaptive candidate expansion exhausted after genuine "
+                        "slow-master infeasibility: "
+                        f"attempted_k={attempted} final_error={error}"
+                    ) from error
+                continue
+            evidence = dict(certificate)
+            evidence.update(
+                {
+                    "candidate_limit_base_k": self.base_candidate_limit,
+                    "candidate_limit_attempts": list(attempted),
+                    "candidate_limit_adaptive_max_k": (
+                        self.base_candidate_limit
+                        if self.candidate_limit_frozen
+                        else self.adaptive_candidate_max
+                    ),
+                    "candidate_limit_adaptive_expansion_used": (
+                        len(attempted) > 1
+                    ),
+                    "candidate_limit_infeasible_attempt_count": len(
+                        infeasible_messages
+                    ),
+                    "candidate_limit_expansion_reason": (
+                        "BASE_DOMAIN_SLOW_MASTER_INFEASIBLE"
+                        if len(attempted) > 1
+                        else None
+                    ),
+                }
+            )
+            return plan, evidence
+        raise RuntimeContractError("adaptive candidate expansion grid is empty")
+
+    def _solve_current_candidate_limit(
         self,
         *,
         state: MutableMethodState,

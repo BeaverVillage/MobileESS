@@ -12,6 +12,13 @@ from .migration import MigrationAuthority
 from .power import H100UtilizationPowerCurve
 from .risk_calibration import (
     AUTHORITY_ID,
+    CALIBRATION_BLOCK_COUNT,
+    CALIBRATION_BLOCK_MINUTES,
+    CALIBRATION_BLOCK_STEPS,
+    CALIBRATION_DAY_COUNT,
+    CALIBRATION_ISSUE_COUNT,
+    CALIBRATION_SOURCE_PERIOD,
+    CALIBRATION_START_DATE,
     FrozenRiskCalibration,
     RISK_FAMILY_SCALES,
 )
@@ -113,16 +120,16 @@ def run_idc_migration_canary(
             authority_id=AUTHORITY_ID,
             alpha=0.05,
             source_method="B6",
-            source_period="2025-01",
+            source_period=CALIBRATION_SOURCE_PERIOD,
             calibration_dates=tuple(
-                (date(2025, 1, 1) + timedelta(days=offset)).isoformat()
-                for offset in range(31)
+                (CALIBRATION_START_DATE + timedelta(days=offset)).isoformat()
+                for offset in range(CALIBRATION_DAY_COUNT)
             ),
-            calibration_block_steps=6,
-            calibration_block_minutes=30,
-            calibration_block_count=1488,
+            calibration_block_steps=CALIBRATION_BLOCK_STEPS,
+            calibration_block_minutes=CALIBRATION_BLOCK_MINUTES,
+            calibration_block_count=CALIBRATION_BLOCK_COUNT,
             coverage_claim="FAMILY_WISE_BLOCK_COVERAGE_NOT_JOINT_COVERAGE",
-            finite_sample_rank=1415,
+            finite_sample_rank=640,
             normalized_joint_quantile=0.0,
             normalized_family_quantiles={
                 family: 0.0 for family in RISK_FAMILY_SCALES
@@ -131,7 +138,7 @@ def run_idc_migration_canary(
             calibrated_increments={family: 0.0 for family in RISK_FAMILY_SCALES},
             source_audit_sha256="d" * 64,
             artifact_sha256="e" * 64,
-            source_issue_count=8928,
+            source_issue_count=CALIBRATION_ISSUE_COUNT,
             source_calibrated_risk_positive_count=0,
         ),
     )

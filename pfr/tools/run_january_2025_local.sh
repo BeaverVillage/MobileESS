@@ -238,9 +238,14 @@ fi
     --report "$output_root/SOURCE_FREEZE_GATE.json"
 if ((skip_preflight == 0)); then
     echo "Running fail-closed January authority/source/design preflight."
+    preflight_method_count=10
+    if [[ -n "$diagnostic_method" ]]; then preflight_method_count=1; fi
     "$python_bin" -m pfr.tools.preflight_january_2025 \
         --repo "$repo_dir" \
         "${common_arguments[@]}" \
+        --campaign-start-day "$start_day" \
+        --campaign-end-day "$end_day" \
+        --campaign-method-count "$preflight_method_count" \
         --electrical-stress-campaign \
         --report "$output_root/PREFLIGHT_REPORT.json"
 fi
