@@ -95,10 +95,41 @@ ETA_DISCHARGE = 0.95
 # for the continuous recourse certificate, but solve route/workload binaries
 # to a sub-percent gap so an enabled flexibility is actually compared.
 SLOW_MASTER_MIP_GAP = 0.001
+# The frozen objective authority permits a certified 3% gap at every
+# lexicographic priority. Keep the stricter sub-percent requirement for the
+# admission/primary/exposure passes so marginal mobility remains visible, but
+# do not spend the watchdog proving the tertiary tie-breaker below 3%.
+TERTIARY_ACTUATION_MIP_GAP = 0.03
 # K is per MESS after the V14 independent-fleet redesign.  Four candidates
 # for each of four vehicles retain 16 route binaries in the base model (the
 # same order as the former global K=16 domain) while exposing every vehicle.
 MOBILITY_ROUTE_CANDIDATE_MIN_K = 4
+
+
+def _certified_relative_gap(best: float, bound: float) -> float:
+    if not math.isfinite(best) or not math.isfinite(bound):
+        return math.inf
+    denominator = abs(best)
+    if denominator <= 1e-12:
+        return 0.0 if abs(best - bound) <= 1e-12 else math.inf
+    return abs(best - bound) / denominator
+
+
+def _tertiary_gap_stop_eligible(
+    *,
+    completed_objectives: int,
+    objective_count: int,
+    solution_count: int,
+    best: float,
+    bound: float,
+) -> tuple[bool, float]:
+    gap = _certified_relative_gap(best, bound)
+    return (
+        completed_objectives == objective_count - 1
+        and solution_count >= 1
+        and gap <= TERTIARY_ACTUATION_MIP_GAP,
+        gap,
+    )
 
 
 def _recovery_zero_boundary(
@@ -3971,7 +4002,8 @@ class _PersistentMilpModel:
                 self.model_role == "slow_master"
                 and self._admission_priority_prelocked
             )
-            self.model.NumObj = 3 if admission_prelocked else 4
+            objective_count = 3 if admission_prelocked else 4
+            self.model.NumObj = objective_count
             self.model.setObjective(self.gp.LinExpr(), self.GRB.MINIMIZE)
             objective_offset = 0
             if not admission_prelocked:
@@ -3996,10 +4028,93 @@ class _PersistentMilpModel:
                 name="secondary_actuation",
             )
             self.model.Params.TimeLimit = max(0.001, deadline - time.monotonic())
+            multiobjective_tracker: dict[str, Any] = {
+                "strictly_completed_objectives": 0,
+                "tertiary_gap": math.inf,
+                "tertiary_gap_stop_requested": False,
+                "events": [],
+            }
+
+            def _multiobjective_callback(model: Any, where: int) -> None:
+                if where == self.GRB.Callback.MULTIOBJ:
+                    objective_number = int(
+                        model.cbGet(self.GRB.Callback.MULTIOBJ_OBJCNT)
+                    )
+                    status = int(model.cbGet(self.GRB.Callback.MULTIOBJ_STATUS))
+                    callback_gap = float(
+                        model.cbGet(self.GRB.Callback.MULTIOBJ_MIPGAP)
+                    )
+                    multiobjective_tracker["events"].append(
+                        {
+                            "objective_count": objective_number,
+                            "status": status,
+                            "mip_gap": callback_gap,
+                        }
+                    )
+                    if status == self.GRB.OPTIMAL:
+                        multiobjective_tracker[
+                            "strictly_completed_objectives"
+                        ] = max(
+                            int(
+                                multiobjective_tracker[
+                                    "strictly_completed_objectives"
+                                ]
+                            ),
+                            objective_number,
+                        )
+                    return
+                if where != self.GRB.Callback.MIP:
+                    return
+                solution_count = int(
+                    model.cbGet(self.GRB.Callback.MIP_SOLCNT)
+                )
+                best = float(model.cbGet(self.GRB.Callback.MIP_OBJBST))
+                bound = float(model.cbGet(self.GRB.Callback.MIP_OBJBND))
+                eligible, gap = _tertiary_gap_stop_eligible(
+                    completed_objectives=int(
+                        multiobjective_tracker[
+                            "strictly_completed_objectives"
+                        ]
+                    ),
+                    objective_count=objective_count,
+                    solution_count=solution_count,
+                    best=best,
+                    bound=bound,
+                )
+                if int(
+                    multiobjective_tracker["strictly_completed_objectives"]
+                ) == objective_count - 1:
+                    multiobjective_tracker["tertiary_gap"] = gap
+                if eligible:
+                    multiobjective_tracker[
+                        "tertiary_gap_stop_requested"
+                    ] = True
+                    model.terminate()
+
             solve_started = time.monotonic()
-            self.model.optimize()
+            if self.model_role == "slow_master":
+                self.model.optimize(_multiobjective_callback)
+            else:
+                self.model.optimize()
             exact_solve_seconds = time.monotonic() - solve_started
-            if self.model.SolCount < 1 or self.model.Status != self.GRB.OPTIMAL:
+            tertiary_gap_accepted = bool(
+                self.model_role == "slow_master"
+                and multiobjective_tracker["tertiary_gap_stop_requested"]
+                and self.model.Status
+                in {self.GRB.INTERRUPTED, self.GRB.TIME_LIMIT}
+                and self.model.SolCount >= 1
+                and int(
+                    multiobjective_tracker["strictly_completed_objectives"]
+                )
+                == objective_count - 1
+                and float(multiobjective_tracker["tertiary_gap"])
+                <= TERTIARY_ACTUATION_MIP_GAP
+            )
+            if (
+                self.model.SolCount < 1
+                or self.model.Status != self.GRB.OPTIMAL
+                and not tertiary_gap_accepted
+            ):
                 try:
                     gap = float(self.model.MIPGap)
                 except Exception:
@@ -4166,9 +4281,30 @@ class _PersistentMilpModel:
             # under the model's frozen MIPGap parameter, so record the
             # conservative certified upper bound rather than inventing a
             # per-pass measured value.
-            final_gap = float(self.model.Params.MIPGap)
-            primary = secondary = tertiary = {
-                "status": _status_name(self.GRB, self.model.Status),
+            final_gap = (
+                float(multiobjective_tracker["tertiary_gap"])
+                if tertiary_gap_accepted
+                else float(self.model.Params.MIPGap)
+            )
+            strict_status = (
+                "OPTIMAL_STRICT_GAP_BEFORE_TERTIARY"
+                if tertiary_gap_accepted
+                else _status_name(self.GRB, self.model.Status)
+            )
+            primary = secondary = {
+                "status": strict_status,
+                "gap": float(self.model.Params.MIPGap),
+                "rounds": 1,
+                "cuts_added": 0,
+                "solve_seconds": exact_solve_seconds / 3.0,
+                "separation_seconds": 0.0,
+            }
+            tertiary = {
+                "status": (
+                    "CERTIFIED_TERTIARY_GAP_EARLY_STOP"
+                    if tertiary_gap_accepted
+                    else _status_name(self.GRB, self.model.Status)
+                ),
                 "gap": final_gap,
                 "rounds": 1,
                 "cuts_added": 0,
@@ -4289,6 +4425,16 @@ class _PersistentMilpModel:
                 "AGGREGATE_ONLY_GUROBI_NATIVE_MULTIOBJECTIVE"
                 if use_native_multiobjective
                 else "MEASURED_P1_P2_P3_PERSISTENT_REOPTIMIZATION"
+            ),
+            "tertiary_gap_early_stop_used": bool(
+                use_native_multiobjective
+                and self.model_role == "slow_master"
+                and tertiary["status"] == "CERTIFIED_TERTIARY_GAP_EARLY_STOP"
+            ),
+            "tertiary_certified_mip_gap": (
+                float(tertiary["gap"])
+                if self.model_role == "slow_master"
+                else None
             ),
             "lexicographic_backend": (
                 "native-multiobjective"

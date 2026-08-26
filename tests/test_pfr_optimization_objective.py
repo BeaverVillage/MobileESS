@@ -10,6 +10,7 @@ from pfr.persistent_bounded_milp import (
     PersistentBoundedMilpPlanner,
     _PersistentMilpModel,
     _WorkloadOption,
+    _tertiary_gap_stop_eligible,
     _effective_workload_groups,
     _resident_candidate_axis_capacity,
     _resident_job_slot_capacity,
@@ -38,6 +39,40 @@ from pfr.slow_fast import FastControl, FastLayerLimits, FastLayerState, SlowDisc
 def test_burst_watchdog_retains_half_control_interval_topology_margin() -> None:
     assert BURST_VISIBLE_QUEUE_THRESHOLD == 128
     assert BURST_PLANNER_WALL_BUDGET_SECONDS == 150.0
+
+
+def test_tertiary_gap_stop_requires_all_strict_priorities_and_three_percent() -> None:
+    eligible, gap = _tertiary_gap_stop_eligible(
+        completed_objectives=2,
+        objective_count=3,
+        solution_count=3,
+        best=51.00673141070,
+        bound=50.20749903839,
+    )
+    assert eligible is True
+    assert gap == pytest.approx(0.0156691519)
+
+    assert _tertiary_gap_stop_eligible(
+        completed_objectives=1,
+        objective_count=3,
+        solution_count=3,
+        best=51.00673141070,
+        bound=50.20749903839,
+    )[0] is False
+    assert _tertiary_gap_stop_eligible(
+        completed_objectives=2,
+        objective_count=3,
+        solution_count=1,
+        best=51.0,
+        bound=49.0,
+    )[0] is False
+    assert _tertiary_gap_stop_eligible(
+        completed_objectives=2,
+        objective_count=3,
+        solution_count=0,
+        best=float("inf"),
+        bound=50.0,
+    )[0] is False
 
 
 @pytest.mark.parametrize(
