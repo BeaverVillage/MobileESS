@@ -28,6 +28,7 @@ from pfr.runtime import (
     RuntimeJobState,
     RuntimeContractError,
     _PhysicalVerifierAdapter,
+    _facility_power,
     _schedule_capacity_feasible_queued_jobs,
     _synchronize_planned_rack_assignments,
 )
@@ -210,6 +211,62 @@ def test_native_selector_receives_h54_facility_pq_not_unity_pf() -> None:
     )
     assert facility_p[1:] == pytest.approx((0.0,) * (len(facility_p) - 1))
     assert facility_q[1:] == pytest.approx((0.0,) * (len(facility_q) - 1))
+
+
+def test_planner_and_fresh_facility_pq_use_canonical_job_sum_order() -> None:
+    power_by_gpu = {1: 500.0, 2: 4e-14, 3: 4e-14}
+    curve = SimpleNamespace(
+        gang_power_kw=lambda gpu_count, fraction: power_by_gpu[gpu_count]
+    )
+
+    def runtime_job(uid: str, gpu: int) -> RuntimeJobState:
+        source = OperationalTrainingJob(
+            job_uid=uid,
+            origin_idc="IDC01",
+            arrival_step=0,
+            latest_start_step=0,
+            deadline_step=10,
+            requested_gpu=gpu,
+            runtime_seconds_source=3600.0,
+            cpu_request_share_kw=0.0,
+            input_bytes=0,
+            source_record_id=uid,
+        )
+        return RuntimeJobState(
+            source=source,
+            destination_idc="IDC01",
+            logical_rack_id=f"IDC01:RACK:{uid}",
+            gang_membership=(f"IDC01:GPU:{gpu}",),
+            remaining_work_gpu_hours=1.0,
+            lifecycle="RUNNING",
+            compute_rate_fraction=1.0,
+        )
+
+    # Deliberately reverse the state insertion order relative to the control.
+    jobs = {
+        uid: runtime_job(uid, gpu)
+        for uid, gpu in (("job-c", 3), ("job-b", 2), ("job-a", 1))
+    }
+    verifier = SimpleNamespace(jobs=jobs, power_curve=curve)
+    control = FastControl(
+        mess_charge_kw={},
+        mess_discharge_kw={},
+        mess_q_kvar={},
+        job_compute_rate_fraction={
+            "job-a": 1.0,
+            "job-b": 1.0,
+            "job-c": 1.0,
+        },
+        site_throughput_fraction={},
+    )
+
+    facility_it_p, _, _ = _PhysicalVerifierAdapter._physical_inputs(
+        verifier, control
+    )
+    fresh_pq = _PhysicalVerifierAdapter._facility_ac_inputs(facility_it_p)
+    planner_pq = _facility_power(jobs.values(), curve)
+
+    assert fresh_pq == planner_pq
 
 
 def _case(*, deadline: int, remaining: float, nominal_rate: float = 0.0):

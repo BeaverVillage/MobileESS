@@ -687,7 +687,12 @@ class _PhysicalVerifierAdapter:
 
     def _physical_inputs(self, control: FastControl) -> tuple[tuple[float, ...], tuple[float, ...], tuple[float, ...]]:
         facility_it_p = {site: 0.0 for site in IDCS}
-        for job_id, fraction in control.job_compute_rate_fraction.items():
+        # The planner-side post-commit identity audit also accumulates by job
+        # UID.  Keep one canonical order in both paths: floating-point sums are
+        # not associative, and insertion-order differences at large job counts
+        # otherwise produce sub-ULP P/Q differences and false SHA mismatches.
+        for job_id in sorted(control.job_compute_rate_fraction):
+            fraction = control.job_compute_rate_fraction[job_id]
             job = self.jobs[job_id]
             if job.lifecycle == "COMPLETED" or fraction <= 0.0:
                 continue
@@ -4668,7 +4673,14 @@ def _should_replan(state: MutableMethodState, config: MethodConfig, risk: Any, i
 def _facility_power(
     jobs: Iterable[RuntimeJobState], curve: H100UtilizationPowerCurve
 ) -> Tuple[Tuple[float, ...], Tuple[float, ...]]:
-    active = [job for job in jobs if job.lifecycle == "RUNNING" and job.compute_rate_fraction > 0.0]
+    active = sorted(
+        (
+            job
+            for job in jobs
+            if job.lifecycle == "RUNNING" and job.compute_rate_fraction > 0.0
+        ),
+        key=lambda job: job.source.job_uid,
+    )
     p = {site: 0.0 for site in IDCS}
     for job in active:
         p[job.destination_idc] += (
