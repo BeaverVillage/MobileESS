@@ -134,6 +134,35 @@ def test_january_raw_family_blocks_freeze_and_load_without_march(
     assert payload["march_outcomes_read"] is False
     assert payload["source_method"] == source_method
 
+    reused_fingerprint = "a" * 64
+    primary_fingerprint = "b" * 64
+    for day_index in range(CALIBRATION_DAY_COUNT):
+        manifest_path = (
+            tmp_path
+            / f"2025-01-{day_index + 1:02d}"
+            / "RUN_MANIFEST.json"
+        )
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["scientific_implementation_fingerprint"] = (
+            reused_fingerprint if day_index == 0 else primary_fingerprint
+        )
+        if day_index == 0:
+            manifest["git_full_commit_sha"] = "d" * 40
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="unapproved implementation lineages"):
+        builder.build_calibration(tmp_path, source_method=source_method)
+    mixed_payload = builder.build_calibration(
+        tmp_path,
+        source_method=source_method,
+        authorized_reuse_fingerprints=(reused_fingerprint,),
+    )
+    assert mixed_payload["source_git_full_commit_sha"] == "c" * 40
+    assert mixed_payload["source_git_full_commit_shas"] == ["c" * 40, "d" * 40]
+    assert mixed_payload[
+        "authorized_verified_pass_reuse_fingerprints"
+    ] == [reused_fingerprint]
+
     payload.update(
         {
             "calibration_block_steps": 6,

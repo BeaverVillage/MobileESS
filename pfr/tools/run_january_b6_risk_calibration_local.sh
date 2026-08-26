@@ -88,8 +88,14 @@ for fingerprint in "${reuse_verified_pass_fingerprints[@]}"; do
     verification+=(--reuse-verified-pass-fingerprint "$fingerprint")
 done
 "$python_bin" -m pfr.tools.verify_daily_campaign_storage "${verification[@]}"
-"$python_bin" -m pfr.tools.build_january_b6_risk_calibration \
+calibration_build=(
     --source-root "$calibration_root" --source-method B07 --output "$artifact"
+)
+for fingerprint in "${reuse_verified_pass_fingerprints[@]}"; do
+    calibration_build+=(--reuse-verified-pass-fingerprint "$fingerprint")
+done
+"$python_bin" -m pfr.tools.build_january_b6_risk_calibration \
+    "${calibration_build[@]}"
 "$python_bin" -c 'from pathlib import Path; import json,sys; from pfr.risk_calibration import load_frozen_risk_calibration; x=load_frozen_risk_calibration(Path(sys.argv[1])); print("RISK_CALIBRATION_FROZEN", x.authority_id, json.dumps(dict(x.normalized_family_quantiles), sort_keys=True), x.artifact_sha256)' "$artifact"
 echo "JANUARY_B07_ELECTRICAL_STRESS_CALIBRATION_STATUS=FROZEN"
 echo "RISK_CALIBRATION_ARTIFACT=$artifact"

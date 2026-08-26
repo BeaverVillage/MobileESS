@@ -121,6 +121,7 @@ def build_calibration(
     *,
     alpha: float = ALPHA,
     source_method: str = "B6",
+    authorized_reuse_fingerprints: tuple[str, ...] = (),
 ) -> Mapping[str, Any]:
     source_root = source_root.resolve()
     if source_method not in {"B6", "B07"}:
@@ -141,11 +142,15 @@ def build_calibration(
     source_audits: list[Mapping[str, Any]] = []
     source_raw_components: list[Mapping[str, float]] = []
     source_commits: set[str] = set()
+    source_lineages: set[tuple[str, str]] = set()
     for offset, calendar_date in enumerate(dates):
         day_root = source_root / calendar_date
         method_root = day_root / source_method
         manifest = _load_json(day_root / "RUN_MANIFEST.json")
         source_commit = str(manifest.get("git_full_commit_sha", ""))
+        source_fingerprint = str(
+            manifest.get("scientific_implementation_fingerprint", "")
+        )
         if (
             len(source_commit) != 40
             or manifest.get("git_worktree_dirty") is not False
@@ -156,6 +161,7 @@ def build_calibration(
                 f"January {source_method} source manifest is not a clean raw calibration run: {calendar_date}"
             )
         source_commits.add(source_commit)
+        source_lineages.add((source_commit, source_fingerprint))
         summary = _load_json(method_root / "METHOD_SUMMARY.json")
         if (
             summary.get("status") != "PASS"
@@ -251,10 +257,31 @@ def build_calibration(
                     "normalized_family_maxima": family_maxima,
                 }
             )
+    primary_commits = set(source_commits)
     if len(source_commits) != 1:
-        raise ValueError(
-            f"January {source_method} calibration days use multiple implementation commits"
-        )
+        if any(
+            len(fingerprint) != 64
+            or any(char not in "0123456789abcdef" for char in fingerprint)
+            for _commit, fingerprint in source_lineages
+        ):
+            raise ValueError(
+                f"January {source_method} mixed-commit calibration lacks "
+                "implementation fingerprints"
+            )
+        primary_lineages = {
+            (commit, fingerprint)
+            for commit, fingerprint in source_lineages
+            if fingerprint not in authorized_reuse_fingerprints
+        }
+        primary_fingerprints = {
+            fingerprint for _commit, fingerprint in primary_lineages
+        }
+        primary_commits = {commit for commit, _fingerprint in primary_lineages}
+        if len(primary_fingerprints) != 1 or len(primary_commits) != 1:
+            raise ValueError(
+                f"January {source_method} calibration days use multiple "
+                "unapproved implementation lineages"
+            )
     rank = min(
         math.ceil((len(block_scores) + 1) * (1.0 - alpha)),
         len(block_scores),
@@ -324,7 +351,16 @@ def build_calibration(
             f"PASS_NOT_ALWAYS_POSITIVE_ON_SOURCE_{source_method}_STATES"
         ),
         "source_audit_sha256": _canonical_sha256(source_audits),
-        "source_git_full_commit_sha": next(iter(source_commits)),
+        "source_git_full_commit_sha": next(iter(primary_commits)),
+        "source_git_full_commit_shas": sorted(source_commits),
+        "source_scientific_implementation_fingerprints": sorted(
+            fingerprint
+            for _commit, fingerprint in source_lineages
+            if fingerprint
+        ),
+        "authorized_verified_pass_reuse_fingerprints": sorted(
+            set(authorized_reuse_fingerprints)
+        ),
         "source_root": str(source_root),
         "february_role": "DEVELOPMENT_VALIDATION_ONLY_NO_REFIT_FROM_VALIDATION_LABELS",
         "february_labels_used_for_fit": False,
@@ -340,16 +376,37 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--alpha", type=float, default=ALPHA)
     parser.add_argument(
+        "--reuse-verified-pass-fingerprint",
+        action="append",
+        default=[],
+        help=(
+            "Explicitly authorize a clean PASS source lineage already "
+            "authorized by the daily campaign and storage verifier."
+        ),
+    )
+    parser.add_argument(
         "--source-method",
         choices=("B6", "B07"),
         default="B07",
         help="Raw-risk January method; B07 is authoritative for B00-B09.",
     )
     args = parser.parse_args()
+    if any(
+        len(value) != 64
+        or value.lower() != value
+        or any(char not in "0123456789abcdef" for char in value)
+        for value in args.reuse_verified_pass_fingerprint
+    ):
+        parser.error(
+            "--reuse-verified-pass-fingerprint must be a lowercase SHA-256"
+        )
     payload = build_calibration(
         args.source_root,
         alpha=args.alpha,
         source_method=args.source_method,
+        authorized_reuse_fingerprints=tuple(
+            args.reuse_verified_pass_fingerprint
+        ),
     )
     _atomic_write_json(args.output.resolve(), payload)
     print(
