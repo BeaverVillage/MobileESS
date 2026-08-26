@@ -57,6 +57,10 @@ ADAPTER_ID = "HIERARCHICAL_MOVE_BLOCKED_MIXED_INTEGER_H54_MPC_V1"
 SOLVER_CONTRACT = "HIERARCHICAL_MOVE_BLOCKED_MIXED_INTEGER_MPC_V1"
 MAX_ONLINE_QUEUED_JOBS = 16
 MAX_DYNAMIC_QUEUED_JOB_SLOTS = 1024
+JOB_SLOT_GROWTH_BLOCK = 32
+MAX_RESIDENT_JOB_OPTION_AXIS = 8192
+BURST_VISIBLE_QUEUE_THRESHOLD = 128
+BURST_PLANNER_WALL_BUDGET_SECONDS = 90.0
 MAX_SEPARATION_ROUNDS = 12
 SEPARATION_GAP_PARTITIONS = 16
 GLOBAL_ASSET_REFINEMENT_DIRECTIONS = 64
@@ -90,6 +94,38 @@ SLOW_MASTER_MIP_GAP = 0.001
 MOBILITY_ROUTE_CANDIDATE_MIN_K = 4
 
 
+def _resident_job_slot_capacity(visible_queue: int) -> int:
+    """Round the live queue to a small reusable block without dummy bloat."""
+
+    required = min(
+        MAX_DYNAMIC_QUEUED_JOB_SLOTS,
+        max(MAX_ONLINE_QUEUED_JOBS, int(visible_queue)),
+    )
+    if required <= MAX_ONLINE_QUEUED_JOBS:
+        return MAX_ONLINE_QUEUED_JOBS
+    return min(
+        MAX_DYNAMIC_QUEUED_JOB_SLOTS,
+        (
+            (required + JOB_SLOT_GROWTH_BLOCK - 1)
+            // JOB_SLOT_GROWTH_BLOCK
+        )
+        * JOB_SLOT_GROWTH_BLOCK,
+    )
+
+
+def _resident_candidate_axis_capacity(
+    *,
+    job_slots: int,
+    active_candidate_k: int,
+    adaptive_candidate_max_k: int,
+) -> int:
+    """Keep the reusable K superset only when its inactive axis is bounded."""
+
+    if job_slots * adaptive_candidate_max_k <= MAX_RESIDENT_JOB_OPTION_AXIS:
+        return adaptive_candidate_max_k
+    return active_candidate_k
+
+
 @dataclass(frozen=True)
 class _WorkloadOption:
     destination: str
@@ -112,6 +148,42 @@ class _WorkloadOption:
                 self.start_offset + self.duration_steps,
             ),
         )
+
+
+def _workload_option_effective_signature(
+    options: Sequence[_WorkloadOption],
+) -> tuple[tuple[Any, ...], ...]:
+    """Identify job options that have identical coefficients inside H54."""
+
+    return tuple(
+        (
+            option.destination,
+            option.rack,
+            option.start_offset,
+            min(
+                PLANNING_HORIZON_STEPS,
+                option.start_offset + option.duration_steps,
+            ),
+            option.it_power_kw,
+            option.requested_gpu,
+            option.wan_schedule_gb,
+            option.wan_required_bytes,
+            option.remote,
+        )
+        for option in options
+    )
+
+
+def _effective_workload_groups(
+    option_sets: Sequence[Sequence[_WorkloadOption]],
+) -> tuple[tuple[int, ...], ...]:
+    """Group jobs whose complete H54 option columns are interchangeable."""
+
+    groups: dict[tuple[tuple[Any, ...], ...], list[int]] = {}
+    for job_index, options in enumerate(option_sets):
+        signature = _workload_option_effective_signature(options)
+        groups.setdefault(signature, []).append(job_index)
+    return tuple(tuple(indices) for indices in groups.values())
 
 
 @dataclass(frozen=True)
@@ -989,6 +1061,10 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             )
             bounded_removed += len(feasible) - len(selected)
             option_sets.append(tuple(selected))
+        effective_signatures = [
+            _workload_option_effective_signature(options)
+            for options in option_sets
+        ]
         return (
             tuple(uid for uid, _job in queued),
             tuple(uid for uid, _job in deferred_queued),
@@ -1019,6 +1095,14 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     migration_authority.dataset_residency_mode
                 ),
                 "queued_remote_placement_transfer_bytes": 0,
+                "effective_workload_symmetry_classes": len(
+                    set(effective_signatures)
+                ),
+                "effective_workload_symmetry_pairs": sum(
+                    effective_signatures[index - 1]
+                    == effective_signatures[index]
+                    for index in range(1, len(effective_signatures))
+                ),
             },
         )
 
@@ -1309,6 +1393,10 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         )
         workload_audit = dict(superset.workload_audit)
         bounded_workload_size = sum(map(len, options))
+        effective_groups = _effective_workload_groups(options)
+        aggregate_option_columns = sum(
+            len(options[group[0]]) for group in effective_groups
+        )
         workload_audit.update(
             {
                 "candidate_limit_k_per_job": target_limit,
@@ -1324,6 +1412,12 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 ),
                 "adaptive_superset_candidate_limit_k": superset_limit,
                 "adaptive_superset_reused": cache_reused,
+                "effective_workload_symmetry_classes": len(effective_groups),
+                "slow_master_unaggregated_option_columns": bounded_workload_size,
+                "slow_master_aggregate_option_columns": aggregate_option_columns,
+                "slow_master_option_columns_removed_by_exact_aggregation": (
+                    bounded_workload_size - aggregate_option_columns
+                ),
             }
         )
         return _PreparedOnlineDomain(
@@ -1396,6 +1490,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         admission_screen_solve_seconds = 0.0
         admission_screen_total_seconds = 0.0
         admission_screen_model_build_seconds = 0.0
+        admission_screen_optimum: float | None = None
         candidate_attempt_timings: list[Mapping[str, Any]] = []
         candidate_search_started = time.monotonic()
         expansion_grid = self._candidate_expansion_grid()
@@ -1461,6 +1556,9 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     screen_deferred = int(
                         certificate.get("optimized_deferred_job_count", 0)
                     )
+                    admission_screen_optimum = float(
+                        certificate["capacity_admission_gate"]
+                    )
                     if (
                         screen_deferred > screen_unavoidable
                         and candidate_limit != expansion_grid[-1]
@@ -1475,6 +1573,9 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                         migration_authority=migration_authority,
                         evaluation_steps_remaining=evaluation_steps_remaining,
                         admission_ceiling_deferred_count=screen_deferred,
+                        admission_ceiling_objective_value=(
+                            admission_screen_optimum
+                        ),
                     )
                     candidate_attempt_timings.append(
                         {
@@ -1599,6 +1700,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         evaluation_steps_remaining: int,
         admission_screen_only: bool = False,
         admission_ceiling_deferred_count: Optional[int] = None,
+        admission_ceiling_objective_value: Optional[float] = None,
     ) -> tuple[Optional[SlowDiscretePlan], Mapping[str, Any]]:
         if migration_authority is None:
             raise RuntimeContractError(
@@ -1613,14 +1715,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         current_slots = self._job_slot_capacity_by_method.get(
             method_key, MAX_ONLINE_QUEUED_JOBS
         )
-        required_slots = min(
-            MAX_DYNAMIC_QUEUED_JOB_SLOTS,
-            max(MAX_ONLINE_QUEUED_JOBS, visible_queue),
-        )
-        grown_slots = min(
-            MAX_DYNAMIC_QUEUED_JOB_SLOTS,
-            1 << (required_slots - 1).bit_length(),
-        )
+        grown_slots = _resident_job_slot_capacity(visible_queue)
         model_refresh_reason: str | None = None
         if grown_slots > current_slots:
             self._dispose_method_models(method_key)
@@ -1645,6 +1740,20 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             self._model_solve_generation_by_method[method_key] = 0
             model_refresh_reason = "PERIODIC_NUMERICAL_STATE_RESET"
         self._job_slot_capacity_by_method[method_key] = current_slots
+        existing_models = tuple(
+            model
+            for model in (
+                self._master_models.get(method_key),
+                self._recourse_models.get(method_key),
+            )
+            if model is not None
+        )
+        if existing_models and any(
+            model.k < self.candidate_limit for model in existing_models
+        ):
+            self._dispose_method_models(method_key)
+            self._model_solve_generation_by_method[method_key] = 0
+            model_refresh_reason = "CANDIDATE_AXIS_GROWTH"
         issue_root = (
             self.output_root
             / "_PERSISTENT_BOUNDED_MILP"
@@ -1699,10 +1808,14 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 # the active K through bounds in update().  Rebuilding and
                 # disposing two large Gurobi models at every 4/8/16/32/64
                 # expansion dominated the solve itself.
-                "candidate_limit": (
-                    self.base_candidate_limit
-                    if self.candidate_limit_frozen
-                    else self.adaptive_candidate_max
+                "candidate_limit": _resident_candidate_axis_capacity(
+                    job_slots=current_slots,
+                    active_candidate_k=self.candidate_limit,
+                    adaptive_candidate_max_k=(
+                        self.base_candidate_limit
+                        if self.candidate_limit_frozen
+                        else self.adaptive_candidate_max
+                    ),
                 ),
                 "job_slot_capacity": current_slots,
                 "static": self._static_context_by_method[method_key],
@@ -1740,7 +1853,8 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             master.update(**update_kwargs)
             if admission_ceiling_deferred_count is not None:
                 master.set_admission_ceiling(
-                    admission_ceiling_deferred_count
+                    admission_ceiling_deferred_count,
+                    objective_value=admission_ceiling_objective_value,
                 )
         if not admission_screen_only:
             if recourse is None:
@@ -1754,6 +1868,11 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             if build_seconds > 0.0
             else self.wall_budget_seconds
         )
+        if visible_queue >= BURST_VISIBLE_QUEUE_THRESHOLD:
+            active_wall_budget = max(
+                active_wall_budget,
+                BURST_PLANNER_WALL_BUDGET_SECONDS,
+            )
         if admission_screen_only:
             if slow_domain_forced:
                 screen_result = {
@@ -2063,7 +2182,9 @@ class _PersistentMilpModel:
         for service, bus in kernel.service_bus.items():
             self.service_by_bus.setdefault(bus, []).append(service)
         self.model = gp.Model(f"pfr_hierarchical_h54_{model_role}")
-        self.model.Params.OutputFlag = 0
+        self.model.Params.OutputFlag = int(
+            os.environ.get("PFR_DIAGNOSTIC_GUROBI_OUTPUT", "0")
+        )
         self.model.Params.Threads = int(os.environ.get("PFR_GUROBI_THREADS", "4"))
         self.model.Params.Seed = 0
         self.mip_gap = (
@@ -2077,6 +2198,8 @@ class _PersistentMilpModel:
         # OpenDSS authorities before commitment.
         self.numeric_focus = 0 if model_role == "slow_master" else 2
         self.model.Params.NumericFocus = self.numeric_focus
+        if model_role == "slow_master":
+            self.model.Params.MIPFocus = 0
         self.model.Params.FeasibilityTol = 1e-8
         self.model.Params.IntFeasTol = 1e-8
         self.model.Params.OptimalityTol = 1e-8
@@ -2251,6 +2374,7 @@ class _PersistentMilpModel:
         self._build_constraints(kernel)
         self.model.update()
         self._last_job_mapping: dict[tuple[int, int], Optional[_WorkloadOption]] = {}
+        self._job_groups: tuple[tuple[int, ...], ...] = ()
         self._last_dispatch_service: dict[tuple[str, int, int], Optional[str]] = {}
         self._last_route_energy: dict[tuple[str, int, int], float] = {}
         self._last_dep_reserve: dict[tuple[str, int, int], float] = {}
@@ -2299,6 +2423,12 @@ class _PersistentMilpModel:
             <= float(self.job_slot_capacity),
             name="admission_ceiling",
         )
+        self.admission_objective_ceiling = self.model.addConstr(
+            self._admission_objective()
+            <= float(self.job_slot_capacity) + 1.0,
+            name="admission_objective_ceiling",
+        )
+        self._admission_priority_prelocked = False
         self.dis_gate = {}
         self.chg_gate = {}
         self.route_dispatch_gate = {}
@@ -2932,6 +3062,10 @@ class _PersistentMilpModel:
         self.config = config
         self.frame = frame
         self.admission_ceiling.RHS = float(self.job_slot_capacity)
+        self.admission_objective_ceiling.RHS = (
+            float(self.job_slot_capacity) + 1.0
+        )
+        self._admission_priority_prelocked = False
         dispatch_enabled = bool(config.h54_capability_mask["mess_dispatch"])
         fleet_recovery_pending = any(
             float(value) > 1e-9
@@ -3073,25 +3207,64 @@ class _PersistentMilpModel:
                     )
 
         # Clear and remap bounded workload-option coefficients.
+        for group in self._job_groups:
+            row = self.job_one[group[0]]
+            for member in group:
+                self.model.chgCoeff(row, self.defer_job[member], 0.0)
         for key, old in tuple(self._last_job_mapping.items()):
             if old is not None:
                 self._clear_job_coefficients(key, old)
         self._last_job_mapping.clear()
+        # The slow master needs only the number of interchangeable jobs placed
+        # on each option.  Keeping one binary option vector per job creates a
+        # factorial identity symmetry during bursts (251 of the 265 jobs at
+        # January issue 2517 have identical H54 columns).  Replace that block
+        # exactly by integer option counts on one representative.  Individual
+        # defer variables remain, so EDF admission weights are unchanged.  The
+        # continuous exact-recourse model stays unaggregated and receives the
+        # deterministically expanded one-hot decisions below.
+        if self.model_role == "slow_master":
+            self._job_groups = _effective_workload_groups(domain.job_options)
+        else:
+            self._job_groups = tuple(
+                (job_index,) for job_index in range(len(domain.job_options))
+            )
+
+        # Rebuild every assignment row because representatives can change as
+        # the rolling queue changes.  Start with an inert bounded skeleton.
         for j in range(self.job_slot_capacity):
-            active_job = j < len(domain.queued_job_ids)
-            self.job_one[j].RHS = 1.0 if active_job else 0.0
+            row = self.job_one[j]
+            self.model.chgCoeff(row, self.defer_job[j], 0.0)
+            row.RHS = 0.0
             self.defer_job[j].LB = 0.0
-            self.defer_job[j].UB = 1.0 if active_job else 0.0
-            options = domain.job_options[j] if active_job else ()
+            self.defer_job[j].UB = 1.0 if j < len(domain.job_options) else 0.0
             for o in range(self.k):
-                key = (j, o)
-                active_option = o < len(options)
-                self.job[key].LB = 0.0
-                self.job[key].UB = 1.0 if active_option else 0.0
-                option = options[o] if active_option else None
+                variable = self.job[(j, o)]
+                self.model.chgCoeff(row, variable, 0.0)
+                variable.LB = 0.0
+                variable.UB = 0.0
+                variable.VType = (
+                    self.GRB.BINARY
+                    if self.model_role == "slow_master"
+                    else self.GRB.CONTINUOUS
+                )
+
+        for group in self._job_groups:
+            representative = group[0]
+            options = domain.job_options[representative]
+            row = self.job_one[representative]
+            row.RHS = float(len(group))
+            for member in group:
+                self.model.chgCoeff(row, self.defer_job[member], 1.0)
+            for o, option in enumerate(options):
+                key = (representative, o)
+                variable = self.job[key]
+                if self.model_role == "slow_master" and len(group) > 1:
+                    variable.VType = self.GRB.INTEGER
+                variable.UB = float(len(group))
+                self.model.chgCoeff(row, variable, 1.0)
                 self._last_job_mapping[key] = option
-                if option is not None:
-                    self._set_job_coefficients(key, option)
+                self._set_job_coefficients(key, option)
 
         for site in IDCS:
             col = IDCS.index(site)
@@ -3193,13 +3366,22 @@ class _PersistentMilpModel:
         )
         self.model.update()
 
-    def set_admission_ceiling(self, deferred_job_count: int) -> None:
+    def set_admission_ceiling(
+        self,
+        deferred_job_count: int,
+        *,
+        objective_value: Optional[float] = None,
+    ) -> None:
         """Keep lower-priority objectives from degrading screened admission."""
 
         ceiling = int(deferred_job_count)
         if not 0 <= ceiling <= self.job_slot_capacity:
             raise RuntimeContractError("admission ceiling is outside model slots")
         self.admission_ceiling.RHS = float(ceiling)
+        if objective_value is None or not math.isfinite(objective_value):
+            raise RuntimeContractError("screened admission optimum is invalid")
+        self.admission_objective_ceiling.RHS = float(objective_value) + 1e-8
+        self._admission_priority_prelocked = True
         self.model.update()
 
     def selected_domain_decisions(
@@ -3225,17 +3407,48 @@ class _PersistentMilpModel:
                 )
             routes[mid] = route_hits[0]
         jobs: dict[int, Optional[int]] = {}
-        for j, options in enumerate(self.domain.job_options):
-            hits = [
-                o for o in range(len(options)) if float(self.job[(j, o)].X) > 0.5
+        groups = getattr(self, "_job_groups", ()) or tuple(
+            (job_index,) for job_index in range(len(self.domain.job_options))
+        )
+        for group in groups:
+            representative = group[0]
+            options = self.domain.job_options[representative]
+            counts: list[int] = []
+            for option_index in range(len(options)):
+                value = float(self.job[(representative, option_index)].X)
+                count = int(round(value))
+                if abs(value - count) > 1e-6 or not 0 <= count <= len(group):
+                    raise RuntimeContractError(
+                        "slow master aggregate job decision is not integral "
+                        f"group={group[:5]} option={option_index} value={value}"
+                    )
+                counts.append(count)
+            deferred_members = [
+                member
+                for member in group
+                if float(self.defer_job[member].X) > 0.5
             ]
-            deferred = float(self.defer_job[j].X) > 0.5
-            if len(hits) + int(deferred) != 1:
+            if sum(counts) + len(deferred_members) != len(group):
                 raise RuntimeContractError(
                     "slow master job admission decision is not integral "
-                    f"j={j}: options={hits} deferred={deferred}"
+                    f"group={group[:5]} counts={counts} "
+                    f"deferred={len(deferred_members)}"
                 )
-            jobs[j] = None if deferred else hits[0]
+            deferred_set = set(deferred_members)
+            admitted_members = [member for member in group if member not in deferred_set]
+            cursor = 0
+            for option_index, count in enumerate(counts):
+                for member in admitted_members[cursor : cursor + count]:
+                    jobs[member] = option_index
+                cursor += count
+            for member in deferred_members:
+                jobs[member] = None
+            if cursor != len(admitted_members):
+                raise RuntimeContractError(
+                    "slow master aggregate decision expansion is incomplete "
+                    f"group={group[:5]} assigned={cursor} "
+                    f"admitted={len(admitted_members)}"
+                )
         return routes, jobs
 
     def fix_slow_decisions(
@@ -3657,22 +3870,32 @@ class _PersistentMilpModel:
             # Match the retained Full-H54 oracle's native Gurobi
             # lexicographic execution instead of rebuilding the branch tree
             # in three independent Python-side solves.
-            self.model.NumObj = 4
-            self.model.setObjective(self.gp.LinExpr(), self.GRB.MINIMIZE)
-            self.model.setObjectiveN(
-                admission_expr, 0, priority=4, abstol=1e-8, reltol=0.0,
-                name="capacity_admission_gate",
+            admission_prelocked = bool(
+                self.model_role == "slow_master"
+                and self._admission_priority_prelocked
             )
+            self.model.NumObj = 3 if admission_prelocked else 4
+            self.model.setObjective(self.gp.LinExpr(), self.GRB.MINIMIZE)
+            objective_offset = 0
+            if not admission_prelocked:
+                self.model.setObjectiveN(
+                    admission_expr, 0, priority=4, abstol=1e-8, reltol=0.0,
+                    name="capacity_admission_gate",
+                )
+                objective_offset = 1
             self.model.setObjectiveN(
-                self.zmax, 1, priority=3, abstol=1e-6, reltol=0.0,
+                self.zmax, objective_offset, priority=3,
+                abstol=1e-6, reltol=0.0,
                 name="worst_electrical_stress",
             )
             self.model.setObjectiveN(
-                exposure_expr, 2, priority=2, abstol=1e-6, reltol=0.0,
+                exposure_expr, objective_offset + 1, priority=2,
+                abstol=1e-6, reltol=0.0,
                 name="electrical_stress_exposure",
             )
             self.model.setObjectiveN(
-                tertiary_expr, 3, priority=1, abstol=1e-8, reltol=0.0,
+                tertiary_expr, objective_offset + 2, priority=1,
+                abstol=1e-8, reltol=0.0,
                 name="secondary_actuation",
             )
             self.model.Params.TimeLimit = max(0.001, deadline - time.monotonic())

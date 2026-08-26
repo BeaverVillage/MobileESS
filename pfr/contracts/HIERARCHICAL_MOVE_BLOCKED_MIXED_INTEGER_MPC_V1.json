@@ -19,7 +19,7 @@
     "solver": "persistent bounded MILP",
     "resident_job_slots": {
       "initial": 16,
-      "growth": "Per-method geometric growth to the next power of two when the visible causal queue exceeds the resident frontier",
+      "growth": "Per-method growth to the next 32-slot block when the visible causal queue exceeds the resident frontier; all visible jobs remain represented and only inactive dummy slots are removed",
       "maximum": 1024,
       "reuse": "A grown model is reused for every later issue of that method; growth never drops or hides queued work"
     },
@@ -57,7 +57,8 @@
   "capacity_admission_gate": {
     "order": "Before the frozen electrical-stress objective priorities, maximize the number of exact-hard-feasible queued whole gangs in the bounded H54 domain; break equal-count ties by least-start-slack EDF order.",
     "deferred_semantics": "A gang that cannot be jointly admitted remains visible and work-conserving in the runtime capacity-blocked queue for the next rolling horizon; it is never dropped and no GPU, rack, IDC, WAN, grid, or deadline constraint is relaxed.",
-    "candidate_truncation_guard": "Any selected deferral expands the exact-safe workload candidate set through the approved K grid before deferral is accepted at maximum K."
+    "candidate_truncation_guard": "Any selected deferral expands the exact-safe workload candidate set through the approved K grid before deferral is accepted at maximum K.",
+    "screened_optimum_reuse": "After an admission-only solve proves the optimal count plus EDF tie-break value, the full electrical solve constrains that exact objective value within the same 1e-8 absolute tolerance and optimizes only the three lower priorities. This is a lexicographically equivalent reformulation and leaves every tied admission optimum available to the electrical objectives."
   },
   "runtime_rack_materialization": {
     "ordering": "Materialize gangs with an existing physical rack assignment before migration or restart reservations, then place all remaining unassigned gangs.",
@@ -124,6 +125,10 @@
     "gurobi_threads": 2,
     "day_process_workers": 6,
     "planner_watchdog_seconds": 60.0,
+    "burst_visible_queue_threshold": 128,
+    "burst_planner_watchdog_seconds": 90.0,
+    "burst_watchdog_policy": "Keep the frozen 60-second planner budget for ordinary issues. When at least 128 queued jobs are simultaneously visible, allow 90 seconds for the same exact lexicographic model; the physical 300-second process watchdog remains unchanged.",
+    "burst_watchdog_evidence": "January issue 2517 has 265 simultaneous arrivals. Exact H54 coefficient aggregation reduced the K32 admission solve from 4.57 to 0.32 seconds and the worst-stress priority from 41.39 to 12.76 seconds. The exposure priority completed at 53.46 seconds, leaving the tertiary priority at a 0.2888% gap under the old 60-second boundary; a 90-second burst budget completed all priorities, exact recourse, and Fresh OpenDSS with PASS_COMMITTED.",
     "online_candidate_base_k": 4,
     "online_candidate_adaptive_grid": [4, 8, 16, 32, 64],
     "online_candidate_adaptive_max_k": 64,
@@ -141,7 +146,12 @@
     "runtime_topology_evidence": "PFR_RUNTIME_TOPOLOGY_BENCHMARK_20260826",
     "initial_resident_queued_job_slots": 16,
     "maximum_dynamic_queued_job_slots": 1024,
-    "dynamic_job_slot_growth": "NEXT_POWER_OF_TWO_PER_METHOD_THEN_PERSISTENT_REUSE",
+    "dynamic_job_slot_growth": "NEXT_32_SLOT_BLOCK_PER_METHOD_THEN_PERSISTENT_REUSE",
+    "dynamic_job_slot_growth_evidence": "January issue 2517 exposed 265 simultaneous visible jobs. Power-of-two growth allocated a 512-slot by K64 skeleton and timed out twice, including a cold-planner replay; 32-slot growth allocates 288 slots for the same 265 job decisions and removes only 224 inactive dummy slots relative to the former skeleton.",
+    "persistent_candidate_axis_policy": "Retain the adaptive K64 superset while resident_job_slots times K64 is at most 8192. Above that bound, build only the active K axis and rebuild on a proven adaptive-K expansion; inactive candidate variables are omitted, while every active candidate and every expansion gate remains identical.",
+    "persistent_candidate_axis_evidence": "At January issue 2517 the active K4 domain needs 1152 job-option variables for 288 slots, whereas an unconditional K64 superset creates 18432 variables of which 17280 are fixed inactive. The bounded-axis policy removes only those inactive variables.",
+    "workload_symmetry_breaking": "In the slow master only, jobs whose complete option vectors have identical H54 coefficients share one integer option-count vector. Per-job binary defer variables remain, preserving the exact EDF admission objective. After optimization, integral counts are deterministically expanded to per-job one-hot choices and fixed in the unaggregated continuous exact-recourse QCP. Aggregate GPU, rack, WAN, P-Q, deadline feasibility, admission value, and all three electrical objectives are unchanged.",
+    "workload_symmetry_evidence": "Of the 265 jobs arriving at January issue 2517, 251 share the same one-GPU 0.70625-kW option coefficients after durations beyond H54 are clipped at the model horizon; only eight effective H54 classes remain.",
     "slow_master_numeric_focus": 0,
     "exact_recourse_numeric_focus": 2,
     "norm_constraint_mode": "INNER_POLYGON",

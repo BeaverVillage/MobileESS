@@ -8,6 +8,10 @@ from pfr.persistent_bounded_milp import (
     PersistentBoundedMilpPlanner,
     _PersistentMilpModel,
     _WorkloadOption,
+    _effective_workload_groups,
+    _resident_candidate_axis_capacity,
+    _resident_job_slot_capacity,
+    _workload_option_effective_signature,
 )
 from pfr.runtime import (
     CausalExperimentFrame,
@@ -26,6 +30,92 @@ from pfr.runtime import (
     _synchronize_planned_rack_assignments,
 )
 from pfr.slow_fast import FastControl, FastLayerLimits, FastLayerState, SlowDiscretePlan
+
+
+@pytest.mark.parametrize(
+    ("visible_queue", "expected_capacity"),
+    [
+        (0, 16),
+        (16, 16),
+        (17, 32),
+        (32, 32),
+        (33, 64),
+        (265, 288),
+        (1024, 1024),
+        (2048, 1024),
+    ],
+)
+def test_resident_job_slots_grow_in_bounded_blocks(
+    visible_queue: int,
+    expected_capacity: int,
+) -> None:
+    assert _resident_job_slot_capacity(visible_queue) == expected_capacity
+
+
+@pytest.mark.parametrize(
+    ("job_slots", "active_k", "expected_k"),
+    [
+        (16, 4, 64),
+        (128, 4, 64),
+        (129, 4, 4),
+        (288, 4, 4),
+        (288, 8, 8),
+        (288, 16, 16),
+    ],
+)
+def test_candidate_superset_axis_is_bounded_for_burst_queues(
+    job_slots: int,
+    active_k: int,
+    expected_k: int,
+) -> None:
+    assert _resident_candidate_axis_capacity(
+        job_slots=job_slots,
+        active_candidate_k=active_k,
+        adaptive_candidate_max_k=64,
+    ) == expected_k
+
+
+def test_workload_symmetry_signature_clips_only_beyond_h54() -> None:
+    def option(duration: int) -> _WorkloadOption:
+        return _WorkloadOption(
+            destination="IDC04",
+            rack="IDC04_LP01",
+            start_offset=2,
+            duration_steps=duration,
+            it_power_kw=0.70625,
+            requested_gpu=1,
+            wan_schedule_gb=(0.0,) * 54,
+            wan_required_bytes=0,
+            remote=False,
+            generation_score=(0.1, 0.2, 0.0, "IDC04", "IDC04_LP01"),
+        )
+
+    assert _workload_option_effective_signature((option(54),)) == (
+        _workload_option_effective_signature((option(200),))
+    )
+    assert _workload_option_effective_signature((option(51),)) != (
+        _workload_option_effective_signature((option(54),))
+    )
+
+
+def test_effective_workload_groups_preserve_first_seen_class_order() -> None:
+    def option(duration: int, *, destination: str = "IDC01") -> _WorkloadOption:
+        return _WorkloadOption(
+            destination=destination,
+            rack=f"{destination}-R01",
+            start_offset=0,
+            duration_steps=duration,
+            it_power_kw=0.70625,
+            requested_gpu=1,
+            wan_schedule_gb=(),
+            wan_required_bytes=0,
+            remote=False,
+            generation_score=(0.0, 0.0, 0.0, destination, f"{destination}-R01"),
+        )
+
+    assert _effective_workload_groups(
+        ((option(54),), (option(3),), (option(200),), (option(3),))
+    ) == ((0, 2), (1, 3))
 
 
 def test_fresh_ac_facility_inputs_match_h54_pue_and_power_factor() -> None:
@@ -964,6 +1054,7 @@ def test_capacity_deferral_expands_k_before_accepting_visible_queue() -> None:
         return sentinel_plan, {
             "candidate_limit_k": planner.candidate_limit,
             "optimized_deferred_job_count": int(planner.candidate_limit < 16),
+            "capacity_admission_gate": float(planner.candidate_limit < 16),
         }
 
     planner._solve_current_candidate_limit = solve_current
@@ -1000,6 +1091,7 @@ def test_intermediate_candidate_uses_admission_screen_before_full_solve() -> Non
     sentinel_plan = object()
     calls = []
     ceilings = []
+    admission_optima = []
     disposed = []
     planner._dispose_method_models = lambda method: disposed.append(method)
 
@@ -1007,10 +1099,14 @@ def test_intermediate_candidate_uses_admission_screen_before_full_solve() -> Non
         screen = bool(kwargs.get("admission_screen_only", False))
         calls.append((planner.candidate_limit, screen))
         ceilings.append(kwargs.get("admission_ceiling_deferred_count"))
+        admission_optima.append(
+            kwargs.get("admission_ceiling_objective_value")
+        )
         deferred = int(planner.candidate_limit < 8)
         return (None if screen else sentinel_plan), {
             "candidate_limit_k": planner.candidate_limit,
             "optimized_deferred_job_count": deferred,
+            "capacity_admission_gate": float(deferred),
             "workload_domain_reduction": {"no_bounded_option_jobs": 0},
             "admission_gate_solve_seconds": 0.25 if screen else 0.0,
             "admission_screen_total_seconds": 0.5 if screen else 0.0,
@@ -1033,6 +1129,7 @@ def test_intermediate_candidate_uses_admission_screen_before_full_solve() -> Non
     assert plan is sentinel_plan
     assert calls == [(4, True), (8, True), (8, False)]
     assert ceilings == [None, None, 0]
+    assert admission_optima == [None, None, 0.0]
     assert disposed == []
     assert certificate["candidate_limit_attempts"] == [4, 8]
     assert certificate["candidate_limit_admission_screen_attempts"] == [4, 8]
@@ -1099,6 +1196,7 @@ def test_unavoidable_capacity_deferral_does_not_expand_candidate_domain() -> Non
         return sentinel_plan, {
             "candidate_limit_k": planner.candidate_limit,
             "optimized_deferred_job_count": 75,
+            "capacity_admission_gate": 75.0,
             "workload_domain_reduction": {
                 "no_bounded_option_jobs": 75,
             },
@@ -1146,6 +1244,32 @@ def test_slow_master_accepts_explicit_deferred_queue_decision() -> None:
 
     assert route == {"MESS01": 0, "MESS02": 0}
     assert jobs == {0: None}
+
+
+def test_slow_master_expands_aggregate_option_counts_to_individual_jobs() -> None:
+    stage = object.__new__(_PersistentMilpModel)
+    stage.model_role = "slow_master"
+    stage.model = SimpleNamespace(SolCount=1)
+    stage.domain = SimpleNamespace(
+        route_options={"MESS01": (object(),)},
+        job_options=((object(), object()),) * 3,
+    )
+    stage.route = {("MESS01", 0): SimpleNamespace(X=1.0)}
+    stage.job = {
+        (0, 0): SimpleNamespace(X=1.0),
+        (0, 1): SimpleNamespace(X=1.0),
+    }
+    stage.defer_job = {
+        0: SimpleNamespace(X=0.0),
+        1: SimpleNamespace(X=1.0),
+        2: SimpleNamespace(X=0.0),
+    }
+    stage._job_groups = ((0, 1, 2),)
+
+    route, jobs = stage.selected_domain_decisions()
+
+    assert route == {"MESS01": 0}
+    assert jobs == {0: 0, 1: None, 2: 1}
 
 
 def test_workload_truncation_preserves_destination_and_time_diversity() -> None:
