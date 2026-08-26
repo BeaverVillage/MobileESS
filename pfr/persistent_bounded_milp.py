@@ -1062,8 +1062,19 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                         f"attempted_k={attempted} final_error={error}"
                     ) from error
                 continue
+            optimized_deferred = int(
+                certificate.get("optimized_deferred_job_count", 0)
+            )
+            workload_reduction = certificate.get(
+                "workload_domain_reduction", {}
+            )
+            unavoidable_deferred = int(
+                workload_reduction.get("no_bounded_option_jobs", 0)
+                if isinstance(workload_reduction, Mapping)
+                else 0
+            )
             if (
-                int(certificate.get("optimized_deferred_job_count", 0)) > 0
+                optimized_deferred > unavoidable_deferred
                 and not self.candidate_limit_frozen
                 and candidate_limit != expansion_grid[-1]
             ):
@@ -1090,6 +1101,16 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     ),
                     "candidate_limit_deferred_attempt_count": (
                         deferred_expansion_attempts
+                    ),
+                    "candidate_limit_unavoidable_deferred_job_count": (
+                        unavoidable_deferred
+                    ),
+                    "candidate_limit_expansion_avoided_reason": (
+                        "ONLY_EXACT_INFEASIBLE_WORKLOADS_DEFERRED"
+                        if optimized_deferred > 0
+                        and optimized_deferred == unavoidable_deferred
+                        and len(attempted) == 1
+                        else None
                     ),
                     "candidate_limit_expansion_reason": (
                         (

@@ -480,6 +480,47 @@ def test_capacity_deferral_expands_k_before_accepting_visible_queue() -> None:
     )
 
 
+def test_unavoidable_capacity_deferral_does_not_expand_candidate_domain() -> None:
+    planner = object.__new__(PersistentBoundedMilpPlanner)
+    planner.base_candidate_limit = 4
+    planner.candidate_limit = 4
+    planner.adaptive_candidate_max = 64
+    planner.candidate_limit_frozen = False
+    planner._master_models = {}
+    planner._recourse_models = {}
+    planner._model_solve_generation_by_method = {}
+    sentinel_plan = object()
+
+    def solve_current(**_kwargs):
+        return sentinel_plan, {
+            "candidate_limit_k": planner.candidate_limit,
+            "optimized_deferred_job_count": 75,
+            "workload_domain_reduction": {
+                "no_bounded_option_jobs": 75,
+            },
+        }
+
+    planner._solve_current_candidate_limit = solve_current
+    config = SimpleNamespace(comparison_method_id=SimpleNamespace(value="B01"))
+
+    plan, certificate = planner.solve(
+        state=None,
+        config=config,
+        frame=None,
+        migration_authority=None,
+        evaluation_steps_remaining=54,
+    )
+
+    assert plan is sentinel_plan
+    assert certificate["candidate_limit_attempts"] == [4]
+    assert certificate["candidate_limit_adaptive_expansion_used"] is False
+    assert certificate["candidate_limit_deferred_attempt_count"] == 0
+    assert certificate["candidate_limit_unavoidable_deferred_job_count"] == 75
+    assert certificate["candidate_limit_expansion_avoided_reason"] == (
+        "ONLY_EXACT_INFEASIBLE_WORKLOADS_DEFERRED"
+    )
+
+
 def test_slow_master_accepts_explicit_deferred_queue_decision() -> None:
     stage = object.__new__(_PersistentMilpModel)
     stage.model_role = "slow_master"
