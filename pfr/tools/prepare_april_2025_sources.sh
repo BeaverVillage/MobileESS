@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -uo pipefail
+set -Eeuo pipefail
 
 repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 python_bin="${PFR_PYTHON:-/home/jaewon/miniconda3/envs/power_v61_gpu/bin/python}"
@@ -10,11 +10,19 @@ shared="$base/PFR_${period_id}_SHARED_EXOGENOUS_V13_13"
 power_generator="$repo_dir/performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_W02_POWER_PRICE_SOURCE.py"
 mobility_generator="$repo_dir/performance/post_stage15_runtime_acceleration/package/scripts/PREPARE_W02_MOBILITY_SOURCE.py"
 plan_only=0
+
+stop_run() {
+    trap - INT TERM
+    echo "INTERRUPTED: April source preparation stopped; partial deterministic sources are preserved." >&2
+    exit 130
+}
+trap stop_run INT TERM
+
 if [[ "${1:-}" == "--plan-only" ]]; then plan_only=1; shift; fi
 if (($#)); then echo "Usage: $0 [--plan-only]" >&2; exit 64; fi
 
 generated_roots() {
-    "$python_bin" -c 'import json,sys; c=json.load(open(sys.argv[1])); p=c["periods"][0]; [print("/home/jaewon/mobile_ess_work/frozen_artifacts/PFR_V13_13_FULL_MONTH_SOURCE_CHUNKS/{}/{}/mobility".format(p["period_id"],x["start"])) for x in p["mobility_generation_chunks"]]' "$contract"
+    "$python_bin" -c 'import json,sys; p=json.load(open(sys.argv[1]))["periods"][0]; [print("/home/jaewon/mobile_ess_work/frozen_artifacts/PFR_V13_13_FULL_MONTH_SOURCE_CHUNKS/{}/{}/mobility".format(p["period_id"],x["start"])) for x in p["mobility_generation_chunks"]]' "$contract"
 }
 
 source_view() {
@@ -23,18 +31,13 @@ source_view() {
         --repo "$repo_dir" --period-id "$period_id"
         --period-contract "$contract" --shared-root "$shared"
     )
-    while IFS= read -r root; do
-        args+=(--generated-mobility-root "$root")
-    done < <(generated_roots)
+    while IFS= read -r root; do args+=(--generated-mobility-root "$root"); done < <(generated_roots)
     if ((plan_only)); then args+=(--plan-only); fi
     "${args[@]}"
 }
 
 cd "$repo_dir"
-if ((plan_only)); then
-    source_view
-    exit $?
-fi
+if ((plan_only)); then source_view; exit $?; fi
 
 gpu_python="${PFR_MOBILITY_PYTHON:-}"
 if [[ -z "$gpu_python" ]]; then

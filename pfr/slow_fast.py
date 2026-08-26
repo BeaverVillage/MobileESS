@@ -4,11 +4,14 @@ The slow layer owns every binary or categorical choice.  The five-minute
 layer may only project continuous set-points while preserving the exact slow
 plan fingerprint.  Fresh Exact OpenDSS remains a later mandatory commit gate;
 the linear screen here can reject a candidate but can never certify a commit.
+New causal workload arrivals are published as immutable admission-only slow-plan
+revisions before this fast contract is entered; the fast layer never invents or
+hides workload membership.
 """
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 import hashlib
 import json
 import math
@@ -62,8 +65,19 @@ class SlowDiscretePlan:
     job_idc_placement: Mapping[str, str]
     checkpoint_migration: Mapping[str, Optional[str]]
     gpu_gang_allocation: Mapping[str, Tuple[str, ...]]
+    # Earliest start-eligibility issue.  Actual RUNNING admission is performed
+    # by the common capacity-feasible whole-gang dispatcher.
     job_start_issue: Mapping[str, int]
     coarse_charging_kw: Mapping[str, Tuple[float, ...]]
+    coarse_discharging_kw: Mapping[str, Tuple[float, ...]] = field(
+        default_factory=dict
+    )
+    coarse_reactive_kvar: Mapping[str, Tuple[float, ...]] = field(
+        default_factory=dict
+    )
+    mess_departure_issue: Mapping[str, Optional[int]] = field(default_factory=dict)
+    job_wan_send_gb: Mapping[str, Tuple[float, ...]] = field(default_factory=dict)
+    job_wan_required_bytes: Mapping[str, int] = field(default_factory=dict)
 
     def validate(self) -> None:
         if not self.plan_id or self.valid_from_issue < 0:
@@ -87,6 +101,41 @@ class SlowDiscretePlan:
         for schedule in self.coarse_charging_kw.values():
             if not schedule or any(not math.isfinite(float(value)) for value in schedule):
                 raise SlowFastContractError("coarse charging schedule is invalid")
+        for schedules, name in (
+            (self.coarse_discharging_kw, "coarse discharging"),
+            (self.coarse_reactive_kvar, "coarse reactive"),
+        ):
+            if schedules and set(schedules) != mess_ids:
+                raise SlowFastContractError(f"{name} schedule must cover every MESS")
+            for schedule in schedules.values():
+                if not schedule or any(
+                    not math.isfinite(float(value)) for value in schedule
+                ):
+                    raise SlowFastContractError(f"{name} schedule is invalid")
+        if self.mess_departure_issue:
+            if set(self.mess_departure_issue) != mess_ids:
+                raise SlowFastContractError(
+                    "MESS departure schedule must cover every MESS"
+                )
+            if any(
+                value is not None and int(value) < self.valid_from_issue
+                for value in self.mess_departure_issue.values()
+            ):
+                raise SlowFastContractError("MESS departure precedes plan validity")
+        for mapping, name in (
+            (self.job_wan_send_gb, "job WAN schedule"),
+            (self.job_wan_required_bytes, "job WAN requirement"),
+        ):
+            if mapping and set(mapping) != jobs:
+                raise SlowFastContractError(f"{name} must cover every job")
+        for schedule in self.job_wan_send_gb.values():
+            if not schedule or any(
+                not math.isfinite(float(value)) or float(value) < 0.0
+                for value in schedule
+            ):
+                raise SlowFastContractError("job WAN schedule is invalid")
+        if any(int(value) < 0 for value in self.job_wan_required_bytes.values()):
+            raise SlowFastContractError("job WAN requirement cannot be negative")
 
     @property
     def fingerprint(self) -> str:

@@ -10,6 +10,7 @@ from typing import Any, Iterable
 
 
 METHODS = tuple(f"B{index}" for index in range(8))
+ELECTRICAL_STRESS_METHODS = tuple(f"B{index:02d}" for index in range(10))
 START_DATE = date(2025, 1, 1)
 END_DATE = date(2025, 1, 31)
 MESS_IDS = ("MESS01", "MESS02", "MESS03", "MESS04")
@@ -83,6 +84,7 @@ def build_calendar_daily_pre_artifacts(
     calendar_dates: Iterable[str],
     campaign_id: str,
     schema_prefix: str = "CALENDAR_PERIOD",
+    methods: Iterable[str] = METHODS,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     if len(authority_document_sha256) != 64:
         raise DailyInitializationError("authority SHA-256 is required")
@@ -91,6 +93,11 @@ def build_calendar_daily_pre_artifacts(
         raise DailyInitializationError("calendar dates must be nonempty and unique")
     if not campaign_id or not schema_prefix:
         raise DailyInitializationError("campaign identity is required")
+    method_axis = tuple(str(value) for value in methods)
+    if method_axis not in {METHODS, ELECTRICAL_STRESS_METHODS}:
+        raise DailyInitializationError(
+            "method axis must be historical B0-B7 or electrical-stress B00-B09"
+        )
     canonical = CanonicalDailyPre()
     canonical_hash = canonical.sha256()
     rows = [
@@ -105,7 +112,7 @@ def build_calendar_daily_pre_artifacts(
             "method_independent_pre_sha256": canonical_hash,
         }
         for day_index, calendar_date in enumerate(dates, 1)
-        for method in METHODS
+        for method in method_axis
     ]
     manifest = {
         "schema_version": f"{schema_prefix}_DAILY_CANONICAL_PRE_MANIFEST_V13_13",
@@ -113,7 +120,7 @@ def build_calendar_daily_pre_artifacts(
         "authority_document_sha256": authority_document_sha256,
         "campaign_id": campaign_id,
         "calendar_dates": list(dates),
-        "methods": list(METHODS),
+        "methods": list(method_axis),
         "daily_episode_count": len(rows),
         "scored_issues_per_episode": 288,
         "committed_scored_issue_target": len(rows) * 288,
@@ -130,15 +137,19 @@ def certify_daily_pre_identity(manifest: dict[str, Any]) -> dict[str, Any]:
     rows = tuple(rows)
     dates = tuple(manifest.get("calendar_dates", ()))
     methods = tuple(manifest.get("methods", ()))
-    if not dates or methods != METHODS or len(rows) != len(dates) * len(METHODS):
+    if (
+        not dates
+        or methods not in {METHODS, ELECTRICAL_STRESS_METHODS}
+        or len(rows) != len(dates) * len(methods)
+    ):
         raise DailyInitializationError(
-            "daily population must be one or more unique dates x B0-B7"
+            "daily population must use the complete B0-B7 or B00-B09 axis"
         )
     if len(set(dates)) != len(dates):
         raise DailyInitializationError("daily population contains duplicate dates")
     for calendar_date in dates:
         daily = tuple(row for row in rows if row["calendar_date"] == calendar_date)
-        if tuple(row["comparison_method_id"] for row in daily) != METHODS:
+        if tuple(row["comparison_method_id"] for row in daily) != methods:
             raise DailyInitializationError(f"method axis mismatch on {calendar_date}")
         if len({row["method_independent_pre_sha256"] for row in daily}) != 1:
             raise DailyInitializationError(f"same-date PRE identity mismatch on {calendar_date}")
@@ -151,6 +162,8 @@ def certify_daily_pre_identity(manifest: dict[str, Any]) -> dict[str, Any]:
         "methods_per_date": len(methods),
         "daily_episode_count": len(rows),
         "same_date_b0_b7_pre_identity": True,
+        "same_date_all_methods_pre_identity": True,
+        "method_ids": list(methods),
         "controller_burn_in_steps": 0,
         "daily_state_reset": True,
         "cross_day_state_carryover": False,

@@ -5,6 +5,7 @@ import unittest
 
 from pfr.daily import (
     DailyInitializationError,
+    ELECTRICAL_STRESS_METHODS,
     build_calendar_daily_pre_artifacts,
     build_daily_pre_artifacts,
 )
@@ -36,6 +37,19 @@ class JanuaryDailyInitializationTests(unittest.TestCase):
         self.assertTrue(certificate["same_date_b0_b7_pre_identity"])
         self.assertTrue(certificate["daily_state_reset"])
         self.assertFalse(certificate["cross_day_state_carryover"])
+
+    def test_electrical_stress_daily_population_has_ordered_b00_b09_axis(self):
+        manifest, certificate = build_calendar_daily_pre_artifacts(
+            AUTHORITY_SHA,
+            calendar_dates=("2025-01-01", "2025-01-02"),
+            campaign_id="JAN2025_ELECTRICAL_STRESS",
+            methods=ELECTRICAL_STRESS_METHODS,
+        )
+        self.assertEqual(manifest["methods"], list(ELECTRICAL_STRESS_METHODS))
+        self.assertEqual(manifest["daily_episode_count"], 20)
+        self.assertEqual(certificate["methods_per_date"], 10)
+        self.assertEqual(certificate["method_ids"], list(ELECTRICAL_STRESS_METHODS))
+        self.assertTrue(certificate["same_date_all_methods_pre_identity"])
 
     def test_canonical_pre_matches_v13_2(self):
         manifest, _ = build_daily_pre_artifacts(AUTHORITY_SHA)

@@ -9,16 +9,25 @@ import json
 import math
 import os
 from pathlib import Path
+import pickle
 import time
 from typing import Any, Iterable, Mapping, Optional, Protocol, Sequence, Tuple
 
+from .electrical_stress import (
+    OBJECTIVE_AUTHORITY,
+    stress_from_extrema,
+    trajectory_summary,
+)
 from .methods import (
     ComparisonMethod,
+    ElectricalStressMethod,
     K9H7ResultIdentityV2,
     MAIN_COMPARISON_METHODS,
     MethodConfig,
 )
 from .migration import MigrationAuthority
+from .mobility_execution import MobilityExecutionRealization
+from .native_predictive import PREDICTIVE_NATIVE_HORIZON_STEPS
 from .optimization import (
     FastControlOptimizer,
     FastOptimizationContext,
@@ -26,6 +35,12 @@ from .optimization import (
 )
 from .power import H100UtilizationPowerCurve
 from .risk import PlanValidityRiskMonitor, ReplanCost, RiskConstraint, RiskFamily
+from .risk_calibration import FrozenRiskCalibration, RISK_FAMILY_SCALES
+from .result_storage import (
+    materialize_campaign_summary,
+    materialize_method_results,
+    validate_method_results,
+)
 from .safety import (
     AcSafetyFilter,
     EscalatedCandidate,
@@ -56,13 +71,16 @@ MESS_CANONICAL_STAGING = {
 STEP_HOURS = 5.0 / 60.0
 MESS_CAPACITY_KWH = 1080.0
 MESS_FLOOR_KWH = 440.0
+MESS_PHYSICAL_MIN_KWH = 0.0
 MESS_SAFETY_RESERVE_KWH = 440.0
 MESS_CANONICAL_DAILY_PRE_KWH = 760.0
 MESS_CHARGE_LIMIT_KW = 550.0
 MESS_NOMINAL_DISCHARGE_KW = 20.0
 MESS_CHARGE_EFFICIENCY = 0.95
 MAXIMUM_REFRESH_STEPS = 6
-PRICE_DEADBAND_FRACTION = 0.05
+MAX_MESS_TRANSIT_STEPS = 54
+MAX_MESS_TRANSIT_SECONDS = MAX_MESS_TRANSIT_STEPS * 300
+PLANNING_HORIZON_STEPS = 54
 MODELED_GPU_CAPACITY_PER_IDC = 256
 EXACT_AC_PROJECTION_MARGIN_PU = 2e-5
 EXACT_AC_PROJECTION_VOLTAGE_MIN_PU = 0.95 + EXACT_AC_PROJECTION_MARGIN_PU
@@ -75,6 +93,27 @@ class RuntimeContractError(RuntimeError):
     pass
 
 
+def _fast_recourse_soc_min(energy_kwh: float) -> float:
+    """Prevent control-induced worsening while preserving realized SOC violations."""
+    if not math.isfinite(energy_kwh) or energy_kwh < MESS_PHYSICAL_MIN_KWH - 1e-9:
+        raise RuntimeContractError("MESS energy violates physical battery bounds")
+    return min(
+        MESS_FLOOR_KWH / MESS_CAPACITY_KWH,
+        max(MESS_PHYSICAL_MIN_KWH, energy_kwh) / MESS_CAPACITY_KWH,
+    )
+
+
+class MobilityExecutionAuthority(Protocol):
+    """Execution environment hidden from the planning optimizer."""
+
+    fingerprint: str
+
+    def realize(
+        self, *, issue: int, route: "MobilityRouteForecast"
+    ) -> MobilityExecutionRealization:
+        ...
+
+
 def atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:
     """Durably publish JSON so a killed process cannot expose a partial artifact."""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -84,6 +123,54 @@ def atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:
         handle.flush()
         os.fsync(handle.fileno())
     temporary.replace(path)
+
+
+def _write_runtime_resume_checkpoint(
+    *,
+    checkpoint_path: Path,
+    comparison_method_id: str,
+    representative_week_id: str,
+    completed_issue: int,
+    state: "MutableMethodState",
+    cumulative_grid_cost_aud: float,
+    rolling_restart_checkpoint: bool,
+) -> None:
+    """Atomically persist exact endogenous state for cold-planner continuation."""
+
+    checkpoint_payload = {
+        "schema_version": "PFR_DIAGNOSTIC_RUNTIME_CHECKPOINT_V1",
+        "comparison_method_id": comparison_method_id,
+        "representative_week_id": representative_week_id,
+        "completed_issue": int(completed_issue),
+        "resume_issue": int(state.issue),
+        "post_state_sha256": state.pre_state_sha256,
+        "cumulative_grid_cost_aud": cumulative_grid_cost_aud,
+        "state": state,
+    }
+    checkpoint_tmp = checkpoint_path.with_suffix(".pkl.tmp")
+    with checkpoint_tmp.open("wb") as handle:
+        pickle.dump(checkpoint_payload, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(checkpoint_tmp, checkpoint_path)
+    checkpoint_sha256 = hashlib.sha256(checkpoint_path.read_bytes()).hexdigest()
+    atomic_write_json(
+        checkpoint_path.with_suffix(".json"),
+        {
+            key: value
+            for key, value in checkpoint_payload.items()
+            if key != "state"
+        }
+        | {
+            "checkpoint_path": str(checkpoint_path.resolve()),
+            "checkpoint_sha256": checkpoint_sha256,
+            "planner_persistent_state_restored": False,
+            "resume_semantics": "EXACT_ENDOGENOUS_RUNTIME_STATE_WITH_COLD_PLANNER",
+            "rolling_restart_checkpoint": rolling_restart_checkpoint,
+            "prefix_state_chain_verification_required": True,
+            "scientific_result_eligible": False,
+        },
+    )
 
 
 def gurobi_thread_limit() -> int:
@@ -154,8 +241,6 @@ class MobilityRouteForecast:
     safe_eta_seconds: float
     q50_energy_kwh: float
     safe_energy_kwh: float
-    profile_template_id: int
-    profile_horizon_steps: int
 
     def validate(self) -> None:
         if self.source_service_id == self.destination_service_id:
@@ -170,10 +255,6 @@ class MobilityRouteForecast:
         )
         if any(not math.isfinite(value) or value < 0.0 for value in values):
             raise RuntimeContractError("mobility forecast must be finite and non-negative")
-        if self.profile_template_id < 0 or self.profile_horizon_steps <= 0:
-            raise RuntimeContractError("mobility E4 profile authority is invalid")
-
-
 @dataclass(frozen=True)
 class CausalExperimentFrame:
     issue: int
@@ -189,9 +270,28 @@ class CausalExperimentFrame:
     robust_background_p_kw: Tuple[Tuple[float, ...], ...] = ()
     robust_background_q_kvar: Tuple[Tuple[float, ...], ...] = ()
     robust_pv_available_kw: Tuple[Tuple[float, ...], ...] = ()
+    native_forecast_background_p_kw: Tuple[
+        Tuple[Tuple[float, ...], ...], ...
+    ] = ()
+    native_forecast_background_q_kvar: Tuple[
+        Tuple[Tuple[float, ...], ...], ...
+    ] = ()
+    native_forecast_pv_available_kw: Tuple[
+        Tuple[Tuple[float, ...], ...], ...
+    ] = ()
+    planning_forecast_background_p_kw: Tuple[
+        Tuple[Tuple[float, ...], ...], ...
+    ] = ()
+    planning_forecast_background_q_kvar: Tuple[
+        Tuple[Tuple[float, ...], ...], ...
+    ] = ()
+    planning_forecast_pv_available_kw: Tuple[
+        Tuple[Tuple[float, ...], ...], ...
+    ] = ()
     workload_reserve_gpu: Mapping[str, float] = field(default_factory=dict)
     mobility_routes: Tuple[MobilityRouteForecast, ...] = ()
-    mobility_template_bank: Mapping[int, Tuple[float, ...]] = field(default_factory=dict)
+    planning_mobility_npz_path: str = ""
+    planning_mobility_npz_sha256: str = ""
 
     def validate(self) -> None:
         values = (
@@ -221,8 +321,66 @@ class CausalExperimentFrame:
         )
         if any(robust) and any(len(array) != 131 or any(len(row) != 3 for row in array) for array in robust):
             raise RuntimeContractError("robust grid arrays must be 131x3")
+        native_forecasts = (
+            self.native_forecast_background_p_kw,
+            self.native_forecast_background_q_kvar,
+            self.native_forecast_pv_available_kw,
+        )
+        if any(native_forecasts):
+            if not all(native_forecasts):
+                raise RuntimeContractError(
+                    "predictive native forecast must provide P, Q, and PV"
+                )
+            if any(
+                len(forecast) != PREDICTIVE_NATIVE_HORIZON_STEPS
+                or any(
+                    len(profile) != 131
+                    or any(len(row) != 3 for row in profile)
+                    for profile in forecast
+                )
+                for forecast in native_forecasts
+            ):
+                raise RuntimeContractError(
+                    "predictive native forecast must be 12x131x3"
+                )
+        planning_forecasts = (
+            self.planning_forecast_background_p_kw,
+            self.planning_forecast_background_q_kvar,
+            self.planning_forecast_pv_available_kw,
+        )
+        if any(planning_forecasts):
+            if not all(planning_forecasts):
+                raise RuntimeContractError(
+                    "H54 planning forecast must provide P, Q, and PV"
+                )
+            if any(
+                len(forecast) != PLANNING_HORIZON_STEPS
+                or any(
+                    len(profile) != 131
+                    or any(len(row) != 3 for row in profile)
+                    for profile in forecast
+                )
+                for forecast in planning_forecasts
+            ):
+                raise RuntimeContractError(
+                    "H54 planning forecast must be 54x131x3"
+                )
         for route in self.mobility_routes:
             route.validate()
+        if bool(self.planning_mobility_npz_path) != bool(
+            self.planning_mobility_npz_sha256
+        ):
+            raise RuntimeContractError(
+                "H54 mobility source path and SHA-256 must be provided together"
+            )
+        if self.planning_mobility_npz_sha256 and (
+            len(self.planning_mobility_npz_sha256) != 64
+            or any(
+                char not in "0123456789abcdef"
+                for char in self.planning_mobility_npz_sha256
+            )
+        ):
+            raise RuntimeContractError("H54 mobility source identity must be SHA-256")
 
     def routes_for(self, source: str, destination: str) -> Tuple[MobilityRouteForecast, ...]:
         return tuple(
@@ -230,6 +388,21 @@ class CausalExperimentFrame:
             for route in self.mobility_routes
             if route.source_service_id == source and route.destination_service_id == destination
         )
+
+
+class H54JointPlanner(Protocol):
+    """Adapter boundary to the retained 54-step joint MIQCP formulation."""
+
+    def solve(
+        self,
+        *,
+        state: "MutableMethodState",
+        config: MethodConfig,
+        frame: CausalExperimentFrame,
+        migration_authority: Optional[MigrationAuthority],
+        evaluation_steps_remaining: int,
+    ) -> tuple[SlowDiscretePlan, Mapping[str, Any]]:
+        ...
 
 
 @dataclass(frozen=True)
@@ -267,6 +440,15 @@ class RuntimeJobState:
     migration_payload_remaining_bytes: int = 0
     restart_remaining_steps: int = 0
     migration_work_gpu_hours_at_start: Optional[float] = None
+    migration_start_issue: Optional[int] = None
+    migration_predicted_transfer_steps: Optional[int] = None
+    migration_predicted_restart_steps: Optional[int] = None
+    migration_transfer_complete_issue: Optional[int] = None
+    migration_actual_transfer_steps: Optional[int] = None
+    queue_wait_steps: int = 0
+    prestart_wan_target_idc: Optional[str] = None
+    prestart_wan_required_bytes: int = 0
+    prestart_wan_transferred_bytes: int = 0
 
 
 @dataclass
@@ -280,11 +462,19 @@ class MutableMethodState:
     active_plan_age_steps: int = 10**9
     full_replan_count: int = 0
     communication_bytes: int = 0
+    admission_plan_revision_count: int = 0
+    admission_communication_bytes: int = 0
+    scheduler_started_jobs_cumulative: int = 0
+    capacity_queue_wait_job_steps_cumulative: int = 0
+    planned_temporal_wait_job_steps_cumulative: int = 0
     wan_transferred_bytes_cumulative: int = 0
     wan_active_transfers: int = 0
     migration_count_cumulative: int = 0
     compute_debt_gpu_hours: float = 0.0
     energy_debt_kwh: float = 0.0
+    mess_energy_debt_kwh: dict[str, float] = field(
+        default_factory=lambda: {mid: 0.0 for mid in MESS_IDS}
+    )
     last_exact: Optional[Mapping[str, Any]] = None
     mess_in_transit: dict[str, bool] = field(
         default_factory=lambda: {mid: False for mid in MESS_IDS}
@@ -367,6 +557,15 @@ class FreshPhysicalBackend(Protocol):
         previous_capacitor_states: Mapping[str, Sequence[int]],
         previous_regulator_taps: Mapping[str, int],
         locked_capacitors: Sequence[str],
+        native_forecast_background_p_kw: Sequence[
+            Sequence[Sequence[float]]
+        ] = (),
+        native_forecast_background_q_kvar: Sequence[
+            Sequence[Sequence[float]]
+        ] = (),
+        native_forecast_pv_available_kw: Sequence[
+            Sequence[Sequence[float]]
+        ] = (),
     ) -> NativeGridControlDecision:
         ...
 
@@ -416,6 +615,15 @@ class _PhysicalVerifierAdapter:
         robust_background_p_kw: Sequence[Sequence[float]],
         robust_background_q_kvar: Sequence[Sequence[float]],
         robust_pv_available_kw: Sequence[Sequence[float]],
+        native_forecast_background_p_kw: Sequence[
+            Sequence[Sequence[float]]
+        ],
+        native_forecast_background_q_kvar: Sequence[
+            Sequence[Sequence[float]]
+        ],
+        native_forecast_pv_available_kw: Sequence[
+            Sequence[Sequence[float]]
+        ],
         previous_capacitor_states: Optional[
             Mapping[str, Sequence[int]]
         ] = None,
@@ -431,6 +639,18 @@ class _PhysicalVerifierAdapter:
         self.robust_background_p_kw = tuple(tuple(row) for row in robust_background_p_kw)
         self.robust_background_q_kvar = tuple(tuple(row) for row in robust_background_q_kvar)
         self.robust_pv_available_kw = tuple(tuple(row) for row in robust_pv_available_kw)
+        self.native_forecast_background_p_kw = tuple(
+            tuple(tuple(row) for row in profile)
+            for profile in native_forecast_background_p_kw
+        )
+        self.native_forecast_background_q_kvar = tuple(
+            tuple(tuple(row) for row in profile)
+            for profile in native_forecast_background_q_kvar
+        )
+        self.native_forecast_pv_available_kw = tuple(
+            tuple(tuple(row) for row in profile)
+            for profile in native_forecast_pv_available_kw
+        )
         self.previous_capacitor_states = {
             str(name).lower(): tuple(int(value) for value in values)
             for name, values in (previous_capacitor_states or {}).items()
@@ -442,6 +662,7 @@ class _PhysicalVerifierAdapter:
         }
         self.native_decision: Optional[NativeGridControlDecision] = None
         self.last_commit: Optional[PhysicalCommit] = None
+        self.opendss_runtime_seconds = 0.0
 
     def _physical_inputs(self, control: FastControl) -> tuple[tuple[float, ...], tuple[float, ...], tuple[float, ...]]:
         facility_p = {site: 0.0 for site in IDCS}
@@ -487,6 +708,15 @@ class _PhysicalVerifierAdapter:
                 previous_capacitor_states=self.previous_capacitor_states,
                 previous_regulator_taps=self.previous_regulator_taps,
                 locked_capacitors=self.locked_capacitors,
+                native_forecast_background_p_kw=(
+                    self.native_forecast_background_p_kw
+                ),
+                native_forecast_background_q_kvar=(
+                    self.native_forecast_background_q_kvar
+                ),
+                native_forecast_pv_available_kw=(
+                    self.native_forecast_pv_available_kw
+                ),
             )
         decision.validate()
         self.native_decision = decision
@@ -510,6 +740,15 @@ class _PhysicalVerifierAdapter:
             previous_capacitor_states=self.previous_capacitor_states,
             previous_regulator_taps=self.previous_regulator_taps,
             locked_capacitors=self.locked_capacitors,
+            native_forecast_background_p_kw=(
+                self.native_forecast_background_p_kw
+            ),
+            native_forecast_background_q_kvar=(
+                self.native_forecast_background_q_kvar
+            ),
+            native_forecast_pv_available_kw=(
+                self.native_forecast_pv_available_kw
+            ),
         )
         decision.validate()
         self.native_decision = decision
@@ -519,21 +758,25 @@ class _PhysicalVerifierAdapter:
         facility_p, mess_p, mess_q = self._physical_inputs(control)
         if self.native_decision is None:
             self.select_native_control(control=control)
-        self.last_commit = self.backend.verify_fresh(
-            issue=self.issue,
-            facility_p_kw=facility_p,
-            facility_q_kvar=(0.0,) * len(IDCS),
-            mess_location=self.mess_location,
-            mess_p_kw=mess_p,
-            mess_q_kvar=mess_q,
-            mess_in_transit=self.mess_in_transit,
-            robust_background_p_kw=self.robust_background_p_kw,
-            robust_background_q_kvar=self.robust_background_q_kvar,
-            robust_pv_available_kw=self.robust_pv_available_kw,
-            native_capacitor_states=self.native_decision.states,
-            native_regulator_taps=self.native_decision.regulator_taps,
-            pv_q_fraction_by_phase=self.native_decision.pv_q_fraction_by_phase,
-        )
+        started = time.monotonic()
+        try:
+            self.last_commit = self.backend.verify_fresh(
+                issue=self.issue,
+                facility_p_kw=facility_p,
+                facility_q_kvar=(0.0,) * len(IDCS),
+                mess_location=self.mess_location,
+                mess_p_kw=mess_p,
+                mess_q_kvar=mess_q,
+                mess_in_transit=self.mess_in_transit,
+                robust_background_p_kw=self.robust_background_p_kw,
+                robust_background_q_kvar=self.robust_background_q_kvar,
+                robust_pv_available_kw=self.robust_pv_available_kw,
+                native_capacitor_states=self.native_decision.states,
+                native_regulator_taps=self.native_decision.regulator_taps,
+                pv_q_fraction_by_phase=self.native_decision.pv_q_fraction_by_phase,
+            )
+        finally:
+            self.opendss_runtime_seconds += time.monotonic() - started
         if not self.last_commit.actual_fresh_opendss_used:
             raise RuntimeContractError("physical backend did not execute Fresh OpenDSS")
         return self.last_commit.exact
@@ -614,6 +857,17 @@ class _GurobiSensitivityProjector:
         )
         root_sign_penalty = 10.0 if "ROOT_SIGN" in exact.status else 0.0
         return root_sign_penalty + sum(value * value for value in violations)
+
+    @staticmethod
+    def _electrical_stress_score(exact: ExactAcResult) -> float:
+        return stress_from_extrema(
+            minimum_voltage_pu=exact.minimum_voltage_pu,
+            maximum_voltage_pu=exact.maximum_voltage_pu,
+            maximum_line_loading_fraction=exact.maximum_line_loading_fraction,
+            maximum_transformer_loading_fraction=(
+                exact.maximum_transformer_loading_fraction
+            ),
+        ).worst
 
     def _maximum_compute_rates(
         self, control: FastControl, state: FastLayerState
@@ -1433,16 +1687,54 @@ class _GurobiSensitivityProjector:
             + (delta_q[mess_id] / 700.0) * (delta_q[mess_id] / 700.0)
             for mess_id in bounds
         )
-        model.setObjective(
-            1.0e6 * normalized_residual + normalized_movement,
-            GRB.MINIMIZE,
+        predicted_stress = model.addVar(
+            lb=0.0, name="predicted_worst_electrical_stress"
         )
-        model.optimize()
-        if (
-            model.Status not in {GRB.OPTIMAL, GRB.SUBOPTIMAL}
-            or model.SolCount < 1
-            or float(model.MaxVio) > 1e-6
-        ):
+        model.addConstr(
+            1.0 - expressions["vmin"] <= 0.05 * predicted_stress,
+            name="predicted_voltage_low_stress",
+        )
+        model.addConstr(
+            expressions["vmax"] - 1.0 <= 0.05 * predicted_stress,
+            name="predicted_voltage_high_stress",
+        )
+        model.addConstr(
+            expressions["line"] <= predicted_stress,
+            name="predicted_line_stress",
+        )
+        model.addConstr(
+            expressions["transformer"] <= predicted_stress,
+            name="predicted_transformer_stress",
+        )
+        # Gurobi multi-objective objectives must be linear, while restoration
+        # and movement are quadratic.  Implement the exact hierarchy as three
+        # sequential convex solves with optimum-locking constraints.
+        def _solve_stage(objective: object) -> bool:
+            model.setObjective(objective, GRB.MINIMIZE)
+            model.optimize()
+            return bool(
+                model.Status in {GRB.OPTIMAL, GRB.SUBOPTIMAL}
+                and model.SolCount >= 1
+                and float(model.MaxVio) <= 1e-6
+            )
+
+        if not _solve_stage(normalized_residual):
+            model.dispose()
+            return None
+        optimum_residual = float(normalized_residual.getValue())
+        model.addQConstr(
+            normalized_residual <= optimum_residual + 1e-10,
+            name="lock_feasibility_restoration_optimum",
+        )
+        if not _solve_stage(predicted_stress):
+            model.dispose()
+            return None
+        optimum_predicted_stress = float(predicted_stress.X)
+        model.addConstr(
+            predicted_stress <= optimum_predicted_stress + 1e-6,
+            name="lock_electrical_stress_optimum",
+        )
+        if not _solve_stage(normalized_movement):
             model.dispose()
             return None
         solution = {
@@ -1496,7 +1788,10 @@ class _GurobiSensitivityProjector:
         selected = min(
             admissible,
             key=(
-                (lambda item: self._objective_distance(control, item[0]))
+                (lambda item: (
+                    self._electrical_stress_score(item[1]),
+                    self._objective_distance(control, item[0]),
+                ))
                 if passing
                 else (lambda item: self._violation_score(item[1]))
             ),
@@ -1507,8 +1802,11 @@ class _GurobiSensitivityProjector:
             "scale": scale,
             "passed": candidate_exact.passed,
             "predicted_elastic_residual": predicted_residual,
+            "predicted_electrical_stress_optimum": optimum_predicted_stress,
             "fresh_exact_violation_score_before": base_score,
             "fresh_exact_violation_score_after": self._violation_score(candidate_exact),
+            "fresh_exact_electrical_stress_before": self._electrical_stress_score(exact),
+            "fresh_exact_electrical_stress_after": self._electrical_stress_score(candidate_exact),
             "continuous_variables": 2 * len(solution),
             "elastic_variables": len(predicted_residual),
             "integer_variables": 0,
@@ -1968,6 +2266,7 @@ class _GurobiSensitivityProjector:
         current = nominal
         exact = self.verifier.verify_fresh(control=current, state=state, slow_plan=slow_plan)
         exact.validate()
+        initial_exact = exact
         for _ in range(24):
             if exact.passed:
                 break
@@ -2225,8 +2524,8 @@ class _GurobiSensitivityProjector:
                 "CONVEX_CONTINUOUS_QP", True, True, True, True, True, True, True, True
             ),
             slow_plan_fingerprint=slow_plan.fingerprint,
-            objective_nominal=0.0,
-            objective_projected=self._objective_distance(nominal, current),
+            objective_nominal=self._electrical_stress_score(initial_exact),
+            objective_projected=self._electrical_stress_score(exact),
             runtime_seconds=time.monotonic() - started,
         )
 
@@ -2263,15 +2562,182 @@ def _admit_arrivals(state: MutableMethodState, frame: CausalExperimentFrame, con
     return spatial_blocked
 
 
+def _register_arrivals_in_active_plan(
+    state: MutableMethodState,
+    frame: CausalExperimentFrame,
+) -> tuple[Mapping[str, Any], ...]:
+    """Publish an immutable admission-only plan revision for new arrivals.
+
+    A full slow replan optimizes optional placement, migration, and MESS routing.
+    Workload admission is a separate common obligation: a job must become
+    executable at its current (initially origin) IDC on its causal arrival issue,
+    even when the method's slow-plan policy is FIXED or is between refreshes.
+    This revision adds only the frozen default placement and gang identity; it
+    cannot alter any pre-existing slow decision.
+    """
+
+    if state.active_plan is None:
+        raise RuntimeContractError("workload admission lacks an active slow plan")
+    plan = state.active_plan
+    arrived_uids = tuple(source.job_uid for source in frame.arrivals)
+    missing = tuple(uid for uid in arrived_uids if uid not in plan.job_idc_placement)
+    stale_missing = sorted(
+        uid
+        for uid, job in state.jobs.items()
+        if job.lifecycle != "COMPLETED"
+        and uid not in plan.job_idc_placement
+        and uid not in missing
+    )
+    if stale_missing:
+        raise RuntimeContractError(
+            "active slow plan lost previously admitted jobs: "
+            + ",".join(stale_missing)
+        )
+    if not missing:
+        return ()
+
+    placement = dict(plan.job_idc_placement)
+    checkpoint = dict(plan.checkpoint_migration)
+    gangs = dict(plan.gpu_gang_allocation)
+    starts = dict(plan.job_start_issue)
+    wan_schedules = dict(plan.job_wan_send_gb)
+    wan_requirements = dict(plan.job_wan_required_bytes)
+    events = []
+    for uid in missing:
+        job = state.jobs[uid]
+        if job.source.arrival_step != frame.issue:
+            raise RuntimeContractError("admission revision is not causal to this issue")
+        destination = job.destination_idc
+        placement[uid] = destination
+        checkpoint[uid] = None
+        gangs[uid] = tuple(job.gang_membership)
+        starts[uid] = frame.issue
+        if wan_schedules:
+            wan_schedules[uid] = (0.0,) * PLANNING_HORIZON_STEPS
+        if wan_requirements:
+            wan_requirements[uid] = 0
+        events.append(
+            {
+                "job_uid": uid,
+                "arrival_issue": frame.issue,
+                "destination_idc": destination,
+                "requested_gpu": job.source.requested_gpu,
+                "decision_authority": "DETERMINISTIC_ORIGIN_ADMISSION_NO_OPTIMIZATION",
+            }
+        )
+
+    revision = state.admission_plan_revision_count + 1
+    base_plan_id = plan.plan_id.split("+A", 1)[0]
+    revised = SlowDiscretePlan(
+        plan_id=f"{base_plan_id}+A{revision}",
+        valid_from_issue=plan.valid_from_issue,
+        mess_destination=dict(plan.mess_destination),
+        mess_native_route_rank=dict(plan.mess_native_route_rank),
+        job_idc_placement=placement,
+        checkpoint_migration=checkpoint,
+        gpu_gang_allocation=gangs,
+        job_start_issue=starts,
+        coarse_charging_kw=dict(plan.coarse_charging_kw),
+        coarse_discharging_kw=dict(plan.coarse_discharging_kw),
+        coarse_reactive_kvar=dict(plan.coarse_reactive_kvar),
+        mess_departure_issue=dict(plan.mess_departure_issue),
+        job_wan_send_gb=wan_schedules,
+        job_wan_required_bytes=wan_requirements,
+    )
+    revised.validate()
+    for uid in plan.job_idc_placement:
+        if (
+            revised.job_idc_placement[uid] != plan.job_idc_placement[uid]
+            or revised.checkpoint_migration[uid] != plan.checkpoint_migration[uid]
+            or revised.gpu_gang_allocation[uid] != plan.gpu_gang_allocation[uid]
+            or revised.job_start_issue[uid] != plan.job_start_issue[uid]
+        ):
+            raise RuntimeContractError(
+                "admission-only revision mutated a pre-existing slow decision"
+            )
+    state.active_plan = revised
+    state.admission_plan_revision_count = revision
+    encoded_bytes = len(
+        json.dumps(events, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    )
+    state.admission_communication_bytes += encoded_bytes
+    state.communication_bytes += encoded_bytes
+    return tuple(events)
+
+
+def _planned_physical_rack(
+    plan: SlowDiscretePlan, uid: str
+) -> Optional[str]:
+    """Return the physical rack encoded by a retained H54 gang allocation.
+
+    The retained optimizer publishes rack placement in every GPU member ID.
+    Runtime state used to retain its synthetic ``IDCxx:PFR-H100-LOGICAL-POOL``
+    placeholder instead, so a later replan collapsed every running gang onto
+    the first rack in the domain.  Keep the two representations identical at
+    their common gang-allocation boundary.
+    """
+
+    members = tuple(plan.gpu_gang_allocation.get(uid, ()))
+    marker = ":PFR-GPU:"
+    encoded = tuple(member for member in members if marker in member)
+    prefixes = {member.split(marker, 1)[0] for member in encoded}
+    physical = {prefix for prefix in prefixes if "_LP" in prefix}
+    if not physical:
+        return None
+    if (
+        len(encoded) != len(members)
+        or prefixes != physical
+        or len(physical) != 1
+    ):
+        # Member-count validation belongs to SlowDiscretePlan.validate().
+        # This branch is only about ambiguous rack identity.
+        raise RuntimeContractError(
+            f"job {uid} gang allocation spans multiple physical racks"
+        )
+    return next(iter(physical))
+
+
+def _synchronize_planned_rack_assignments(state: MutableMethodState) -> None:
+    """Materialize H54 physical rack decisions into mutable runtime state."""
+
+    plan = state.active_plan
+    if plan is None:
+        return
+    for uid, job in state.jobs.items():
+        rack = _planned_physical_rack(plan, uid)
+        if rack is None:
+            if job.lifecycle == "QUEUED" and uid in plan.gpu_gang_allocation:
+                destination = plan.job_idc_placement.get(
+                    uid, job.destination_idc
+                )
+                job.logical_rack_id = (
+                    f"{destination}:PFR-H100-LOGICAL-POOL"
+                )
+                job.gang_membership = tuple(
+                    plan.gpu_gang_allocation[uid]
+                )
+            continue
+        destination = plan.job_idc_placement.get(uid)
+        if destination is None or not rack.startswith(f"{destination}_LP"):
+            raise RuntimeContractError(
+                f"job {uid} physical rack is inconsistent with planned IDC"
+            )
+        current = str(job.logical_rack_id)
+        current_is_physical = current.startswith(f"{job.destination_idc}_LP")
+        if job.lifecycle != "QUEUED" and current_is_physical and current != rack:
+            raise RuntimeContractError(
+                f"running job {uid} cannot change physical rack during replan"
+            )
+        job.logical_rack_id = rack
+        job.gang_membership = tuple(plan.gpu_gang_allocation[uid])
+
+
 def _compute_fraction(job: RuntimeJobState, frame: CausalExperimentFrame, config: MethodConfig) -> float:
-    if job.lifecycle in {"COMPLETED", "MIGRATING", "RESTARTING"}:
+    if job.lifecycle != "RUNNING":
         return 0.0
-    remaining_full_steps = math.ceil(job.remaining_work_gpu_hours / (job.source.requested_gpu * STEP_HOURS))
-    steps_to_deadline = job.source.deadline_step - frame.issue
-    urgent = frame.issue >= job.source.latest_start_step or remaining_full_steps >= steps_to_deadline
-    if not _method_uses_temporal(config) or urgent:
-        return 1.0
-    return 1.0 if frame.current_price_aud_per_mwh <= frame.horizon_price_median_aud_per_mwh else 0.5
+    # Time shifting belongs to the 54-step start schedule.  Once a whole GPU
+    # gang is running, nominal execution is work-conserving and price-neutral.
+    return 1.0
 
 
 def _pareto_routes(
@@ -2299,30 +2765,52 @@ def _pareto_routes(
 
 def _mobility_energy_profile(
     route: MobilityRouteForecast,
-    template_bank: Mapping[int, Tuple[float, ...]],
     *,
     safe: bool,
 ) -> Tuple[float, ...]:
+    """Allocate deterministic lumped-physics energy over the causal ETA.
+
+    The route-total energy has already been recomputed from frozen geometry and
+    ETA.  Constant physical power is therefore the only profile assumption;
+    learned E4 templates are deliberately outside the runtime authority.
+    """
     route.validate()
-    cumulative = template_bank.get(route.profile_template_id)
-    if cumulative is None or len(cumulative) != 129:
-        raise RuntimeContractError("selected route lacks its frozen E4B profile template")
-    if any(not math.isfinite(value) for value in cumulative) or abs(cumulative[0]) > 1e-9 or abs(cumulative[-1] - 1.0) > 1e-6:
-        raise RuntimeContractError("E4B cumulative profile is invalid")
     eta = route.safe_eta_seconds if safe else route.q50_eta_seconds
     total = route.safe_energy_kwh if safe else route.q50_energy_kwh
-    steps = min(54, max(1, math.ceil(eta / 300.0), route.profile_horizon_steps))
-
-    def interpolate(fraction: float) -> float:
-        position = fraction * 128.0
-        left = min(127, int(math.floor(position)))
-        weight = position - left
-        return cumulative[left] + weight * (cumulative[left + 1] - cumulative[left])
-
-    sampled = tuple(interpolate(index / steps) for index in range(steps + 1))
-    profile = tuple(max(0.0, sampled[index + 1] - sampled[index]) * total for index in range(steps))
+    steps = max(1, math.ceil(eta / 300.0))
+    if steps > MAX_MESS_TRANSIT_STEPS:
+        raise RuntimeContractError(
+            "causal planning ETA exceeds the predeclared H54 mobility support"
+        )
+    durations = tuple(
+        min(300.0, max(0.0, eta - 300.0 * index)) for index in range(steps)
+    )
+    duration_sum = sum(durations)
+    if duration_sum <= 0.0 or abs(duration_sum - eta) > 1e-7:
+        raise RuntimeContractError("causal ETA cannot be discretized into transit steps")
+    profile = tuple(total * duration / duration_sum for duration in durations)
     if abs(sum(profile) - total) > max(1e-8, total * 1e-8):
-        raise RuntimeContractError("E4B route profile does not conserve safe mobility energy")
+        raise RuntimeContractError("physics transit profile does not conserve mobility energy")
+    return profile
+
+
+def _realized_mobility_energy_profile(
+    realization: MobilityExecutionRealization,
+) -> Tuple[float, ...]:
+    """Discretize only the post-decision SUMO realization for execution."""
+    realization.validate()
+    eta = realization.eta_seconds
+    total = realization.energy_kwh
+    steps = max(1, math.ceil(eta / 300.0))
+    durations = tuple(
+        min(300.0, max(0.0, eta - 300.0 * index)) for index in range(steps)
+    )
+    duration_sum = sum(durations)
+    if duration_sum <= 0.0 or abs(duration_sum - eta) > 1e-7:
+        raise RuntimeContractError("SUMO realized ETA cannot be discretized")
+    profile = tuple(total * duration / duration_sum for duration in durations)
+    if abs(sum(profile) - total) > max(1e-8, total * 1e-8):
+        raise RuntimeContractError("SUMO realized energy profile is not conserved")
     return profile
 
 
@@ -2330,7 +2818,20 @@ def _optimize_mess_routes(
     state: MutableMethodState,
     config: MethodConfig,
     frame: CausalExperimentFrame,
+    evaluation_steps_remaining: int,
 ) -> Tuple[dict[str, str], dict[str, int]]:
+    """Legacy bounded candidate generator pending H54 joint-plan handoff.
+
+    ETA/energy/workload scores in this function are not electrical stress and
+    therefore cannot be a scientific decision authority under the frozen
+    objective.  They remain temporarily to preserve the existing executable
+    asset and regression path while the retained H54 planner is wired into
+    ``SlowDiscretePlan``.
+    """
+    if evaluation_steps_remaining <= 0:
+        raise RuntimeContractError(
+            "mobility optimizer lacks remaining evaluation steps"
+        )
     destinations = dict(state.mess_location)
     ranks = dict(state.mess_route_rank)
     if config.energy_flexibility != "MESS" or not frame.mobility_routes:
@@ -2359,6 +2860,7 @@ def _optimize_mess_routes(
         return destinations, ranks
 
     candidates: dict[str, list[Tuple[str, int, Optional[MobilityRouteForecast], float]]] = {}
+    episode_boundary_blocked_route_count = 0
     safe = config.joint_uncertainty
     for mid in MESS_IDS:
         if state.mess_in_transit[mid]:
@@ -2386,7 +2888,15 @@ def _optimize_mess_routes(
             for route in _pareto_routes(frame.routes_for(current, destination), safe=safe):
                 eta = route.safe_eta_seconds if safe else route.q50_eta_seconds
                 energy = route.safe_energy_kwh if safe else route.q50_energy_kwh
-                if math.ceil(eta / 300.0) > 54:
+                planned_transit_steps = max(1, math.ceil(eta / 300.0))
+                if planned_transit_steps > MAX_MESS_TRANSIT_STEPS:
+                    continue
+                # Actual SUMO time is execution-only and therefore cannot be
+                # consulted here.  Reserve the full predeclared H54 execution
+                # support near an independent episode boundary; using only the
+                # predicted ETA caused post-decision boundary crossings.
+                if evaluation_steps_remaining < MAX_MESS_TRANSIT_STEPS:
+                    episode_boundary_blocked_route_count += 1
                     continue
                 if state.mess_energy_kwh[mid] - energy < MESS_FLOOR_KWH - 1e-9:
                     continue
@@ -2476,6 +2986,9 @@ def _optimize_mess_routes(
         destinations[mid], ranks[mid] = rows[selected][0], rows[selected][1]
     state.last_slow_miqp_certificate = {
         "status": "OPTIMAL",
+        "objective_authority": "LEGACY_ROUTE_CANDIDATE_GENERATOR",
+        "scientific_decision_authority": False,
+        "replacement_required": "ELECTRICAL_STRESS_OBJECTIVE_V1_H54_JOINT_PLANNER",
         "actual_gurobi_used": True,
         "num_integer_variables": len(variables),
         "num_quadratic_objective_terms": len(candidate_sites),
@@ -2483,6 +2996,18 @@ def _optimize_mess_routes(
         "maximum_mess_away_from_canonical_staging": 1,
         "mobility_eligible_mess_ids": list(MOBILITY_ELIGIBLE_MESS_IDS),
         "joint_safe_eta_energy_used": safe,
+        "evaluation_steps_remaining": evaluation_steps_remaining,
+        "episode_boundary_blocked_route_count": (
+            episode_boundary_blocked_route_count
+        ),
+        "episode_boundary_eta_authority": (
+            "SAFE_ETA" if safe else "Q50_ETA"
+        ),
+        "episode_boundary_execution_support_authority": (
+            "PREDECLARED_H54_SUMO_EXECUTION_SUPPORT"
+        ),
+        "episode_boundary_execution_support_steps": MAX_MESS_TRANSIT_STEPS,
+        "episode_boundary_execution_support_seconds": MAX_MESS_TRANSIT_SECONDS,
     }
     model.dispose()
     return destinations, ranks
@@ -2494,9 +3019,76 @@ def _build_slow_plan(
     frame: CausalExperimentFrame,
     migration_authority: Optional[MigrationAuthority],
     evaluation_steps_remaining: int,
+    joint_planner: Optional[H54JointPlanner] = None,
 ) -> SlowDiscretePlan:
+    if isinstance(config.comparison_method_id, ElectricalStressMethod):
+        if joint_planner is None:
+            raise RuntimeContractError(
+                "B00-B09 electrical-stress campaign requires the retained H54 joint planner; legacy route/workload heuristics are prohibited"
+            )
+        if not all(
+            (
+                frame.planning_forecast_background_p_kw,
+                frame.planning_forecast_background_q_kvar,
+                frame.planning_forecast_pv_available_kw,
+            )
+        ):
+            raise RuntimeContractError(
+                "B00-B09 H54 joint planner lacks the complete causal 54-step grid forecast"
+            )
+        if not frame.planning_mobility_npz_path:
+            raise RuntimeContractError(
+                "B00-B09 H54 joint planner lacks the causal 54-step mobility source"
+            )
+        plan, certificate = joint_planner.solve(
+            state=state,
+            config=config,
+            frame=frame,
+            migration_authority=migration_authority,
+            evaluation_steps_remaining=evaluation_steps_remaining,
+        )
+        plan.validate()
+        mask = config.h54_capability_mask
+        if not mask["mess_dispatch"] and any(
+            abs(float(value)) > 1e-9
+            for schedules in (
+                plan.coarse_charging_kw,
+                plan.coarse_discharging_kw,
+                plan.coarse_reactive_kvar,
+            )
+            for schedule in schedules.values()
+            for value in schedule
+        ):
+            raise RuntimeContractError("H54 plan used MESS dispatch while disabled")
+        if not mask["mess_mobility"] and any(
+            plan.mess_destination[mid] != state.mess_location[mid]
+            for mid in MESS_IDS
+            if not state.mess_in_transit[mid]
+        ):
+            raise RuntimeContractError("H54 plan used MESS mobility while disabled")
+        if not mask["spatial_compute"] and any(
+            plan.job_idc_placement[uid] != _effective_job_site(job)
+            for uid, job in state.jobs.items()
+            if job.lifecycle != "COMPLETED"
+        ):
+            raise RuntimeContractError("H54 plan used spatial compute while disabled")
+        if not mask["temporal_compute"] and any(
+            int(start) != frame.issue for start in plan.job_start_issue.values()
+        ):
+            raise RuntimeContractError("H54 plan used temporal compute while disabled")
+        if certificate.get("objective_authority") != OBJECTIVE_AUTHORITY:
+            raise RuntimeContractError("H54 plan lacks frozen objective authority")
+        if dict(certificate.get("capability_mask", {})) != dict(mask):
+            raise RuntimeContractError("H54 planner certificate capability mask drift")
+        state.last_slow_miqp_certificate = dict(certificate)
+        return plan
     jobs = {uid: job for uid, job in state.jobs.items() if job.lifecycle != "COMPLETED"}
-    destinations, route_ranks = _optimize_mess_routes(state, config, frame)
+    destinations, route_ranks = _optimize_mess_routes(
+        state,
+        config,
+        frame,
+        evaluation_steps_remaining,
+    )
     job_placements, checkpoint_migrations = _optimize_job_migrations(
         state,
         config,
@@ -2520,6 +3112,8 @@ def _build_slow_plan(
         },
         job_start_issue={uid: max(frame.issue, job.source.arrival_step) for uid, job in jobs.items()},
         coarse_charging_kw={mid: (0.0,) * 54 for mid in MESS_IDS},
+        coarse_discharging_kw={mid: (0.0,) * 54 for mid in MESS_IDS},
+        coarse_reactive_kvar={mid: (0.0,) * 54 for mid in MESS_IDS},
     )
     plan.validate()
     return plan
@@ -2529,6 +3123,133 @@ def _effective_job_site(job: RuntimeJobState) -> str:
     if job.lifecycle == "MIGRATING" and job.migration_destination_idc is not None:
         return job.migration_destination_idc
     return job.destination_idc
+
+
+def _schedule_capacity_feasible_queued_jobs(
+    state: MutableMethodState,
+    config: MethodConfig,
+    frame: CausalExperimentFrame,
+) -> Mapping[str, Any]:
+    """Start whole GPU gangs without hiding capacity-blocked workload.
+
+    The dispatcher is common and work-conserving: it never delays a job when
+    the complete gang fits at its already-decided placement.  Priority is
+    deterministic earliest-latest-start, then deadline, arrival, and UID.
+    QUEUED jobs retain all work and remain visible in debt/deadline metrics.
+    """
+
+    reserve = {
+        site: (
+            float(frame.workload_reserve_gpu.get(site, 0.0))
+            if config.joint_uncertainty
+            else 0.0
+        )
+        for site in IDCS
+    }
+    capacity = {
+        site: MODELED_GPU_CAPACITY_PER_IDC - reserve[site]
+        for site in IDCS
+    }
+    if any(value < 0.0 for value in capacity.values()):
+        raise RuntimeContractError("workload reserve exceeds IDC GPU capacity")
+    occupied = {site: 0.0 for site in IDCS}
+    for job in state.jobs.values():
+        if job.lifecycle not in {"RUNNING", "MIGRATING", "RESTARTING"}:
+            continue
+        site = _effective_job_site(job)
+        occupied[site] += job.source.requested_gpu
+    if any(
+        occupied[site] > MODELED_GPU_CAPACITY_PER_IDC + 1e-9
+        for site in IDCS
+    ):
+        raise RuntimeContractError(
+            "existing GPU gang occupancy exceeds physical IDC capacity"
+        )
+
+    started_jobs = 0
+    started_gpu = {site: 0 for site in IDCS}
+    plan_scheduled_wait_jobs = 0
+    capacity_blocked_jobs = 0
+    deadline_blocked_jobs = 0
+    for uid, job in sorted(
+        (
+            (uid, job)
+            for uid, job in state.jobs.items()
+            if job.lifecycle == "QUEUED"
+            and job.migration_state != "PRESTART_WAN_PENDING"
+        ),
+        key=lambda row: (
+            row[1].source.latest_start_step,
+            row[1].source.deadline_step,
+            row[1].source.arrival_step,
+            row[0],
+        ),
+    ):
+        if state.active_plan is None or uid not in state.active_plan.job_start_issue:
+            raise RuntimeContractError("queued job lacks an active H54 start decision")
+        planned_start = int(state.active_plan.job_start_issue[uid])
+        if frame.issue < planned_start:
+            plan_scheduled_wait_jobs += 1
+            continue
+        site = job.destination_idc
+        gpu = job.source.requested_gpu
+        if frame.issue > job.source.latest_start_step:
+            # Starting an already-late gang would immediately make the fast
+            # hard-deadline recourse infeasible.  Preserve it in the visible
+            # queue so the miss is measured by the runtime KPI instead of
+            # aborting the experiment.
+            deadline_blocked_jobs += 1
+            continue
+        if (
+            isinstance(config.comparison_method_id, ElectricalStressMethod)
+            and str(job.logical_rack_id).endswith(
+                ":PFR-H100-LOGICAL-POOL"
+            )
+        ):
+            # The retained rack authority has not found physical space yet.
+            # Preserve the whole gang in the visible queue rather than start
+            # it against the coarser pooled IDC capacity.
+            capacity_blocked_jobs += 1
+            continue
+        if gpu > MODELED_GPU_CAPACITY_PER_IDC:
+            raise RuntimeContractError(
+                "a GPU gang cannot fit at its fixed planned IDC"
+            )
+        if occupied[site] + gpu > capacity[site] + 1e-9:
+            capacity_blocked_jobs += 1
+            continue
+        job.lifecycle = "RUNNING"
+        job.compute_rate_fraction = 0.0
+        job.start_issue = frame.issue
+        occupied[site] += gpu
+        started_jobs += 1
+        started_gpu[site] += gpu
+
+    queued = [job for job in state.jobs.values() if job.lifecycle == "QUEUED"]
+    queued_gpu = {
+        site: sum(
+            job.source.requested_gpu
+            for job in queued
+            if job.destination_idc == site
+        )
+        for site in IDCS
+    }
+    state.scheduler_started_jobs_cumulative += started_jobs
+    return {
+        "policy": "COMMON_WORK_CONSERVING_LEAST_START_SLACK_EDF_WHOLE_GANG",
+        "started_jobs": started_jobs,
+        "started_gpu_by_site": started_gpu,
+        "running_reserved_gpu_by_site": {
+            site: int(occupied[site]) for site in IDCS
+        },
+        "queued_jobs": len(queued),
+        "queued_gpu_by_site": queued_gpu,
+        "plan_scheduled_wait_jobs": plan_scheduled_wait_jobs,
+        "capacity_blocked_jobs": capacity_blocked_jobs,
+        "deadline_blocked_jobs": deadline_blocked_jobs,
+        "capacity_blocked": capacity_blocked_jobs > 0,
+        "capacity_gpu_by_site": capacity,
+    }
 
 
 def _optimize_job_migrations(
@@ -2572,44 +3293,57 @@ def _optimize_job_migrations(
         else 0.0
         for site in IDCS
     }
-    loads = dict(reserved)
+    physical_loads = {site: 0.0 for site in IDCS}
     for uid, job in jobs.items():
         if job.lifecycle != "QUEUED":
-            loads[placements[uid]] += job.source.requested_gpu
-    if any(value > MODELED_GPU_CAPACITY_PER_IDC + 1e-9 for value in loads.values()):
+            physical_loads[placements[uid]] += job.source.requested_gpu
+    if any(
+        value > MODELED_GPU_CAPACITY_PER_IDC + 1e-9
+        for value in physical_loads.values()
+    ):
         raise RuntimeContractError("running GPU gang placement exceeds IDC capacity")
+    loads = {
+        site: reserved[site] + physical_loads[site]
+        for site in IDCS
+    }
     prestart_placements = []
+    projected_queue_loads = dict(loads)
     for uid, job in sorted(
         (
             (uid, job)
             for uid, job in jobs.items()
             if job.lifecycle == "QUEUED"
         ),
-        key=lambda row: (-row[1].source.requested_gpu, row[0]),
+        key=lambda row: (
+            row[1].source.latest_start_step,
+            row[1].source.deadline_step,
+            row[1].source.arrival_step,
+            row[0],
+        ),
     ):
         gpu = job.source.requested_gpu
         feasible = [
             destination
             for destination in IDCS
-            if loads[destination] + gpu <= MODELED_GPU_CAPACITY_PER_IDC + 1e-9
+            if gpu <= MODELED_GPU_CAPACITY_PER_IDC
         ]
         if not feasible:
             raise RuntimeContractError(
-                "no IDC has capacity for the queued pre-start GPU gang"
+                "queued GPU gang exceeds every individual IDC capacity"
             )
         destination = min(
             feasible,
             key=lambda site: (
                 sum(
                     (value + (gpu if candidate == site else 0.0)) ** 2
-                    for candidate, value in loads.items()
+                    for candidate, value in projected_queue_loads.items()
                 ),
-                loads[site],
+                projected_queue_loads[site],
                 site,
             ),
         )
         placements[uid] = destination
-        loads[destination] += gpu
+        projected_queue_loads[destination] += gpu
         if destination != job.destination_idc:
             prestart_placements.append(
                 {
@@ -2689,6 +3423,7 @@ def _optimize_job_migrations(
         "authority_sha256": authority.fingerprint,
         "eligible_candidate_count": len(candidates),
         "baseline_sum_squared_reserved_gpu": baseline,
+        "projected_queue_gpu_by_site": projected_queue_loads,
         "selected_migration": selected_payload,
         "maximum_migrations_per_replan": 1,
         "evaluation_steps_remaining": evaluation_steps_remaining,
@@ -2714,23 +3449,135 @@ def _apply_planned_prestart_placements(
         if job.lifecycle != "QUEUED" or destination == job.destination_idc:
             continue
         source = job.destination_idc
-        job.destination_idc = destination
-        job.logical_rack_id = f"{destination}:PFR-H100-LOGICAL-POOL"
-        job.gang_membership = tuple(
-            f"{destination}:PFR-GPU:{uid}:{index}"
-            for index in range(job.source.requested_gpu)
-        )
-        job.migration_state = "PRESTART_PLACED_DATASET_PRESTAGED"
+        if state.active_plan.job_wan_required_bytes:
+            required = int(state.active_plan.job_wan_required_bytes[uid])
+            if required < 0:
+                raise RuntimeContractError("prestart WAN requirement is negative")
+            if (
+                job.prestart_wan_target_idc not in {None, destination}
+                and job.prestart_wan_transferred_bytes > 0
+            ):
+                raise RuntimeContractError(
+                    "replan changed a partially transferred prestart destination"
+                )
+            job.prestart_wan_target_idc = destination
+            job.prestart_wan_required_bytes = required
+            job.prestart_wan_transferred_bytes = min(
+                job.prestart_wan_transferred_bytes, required
+            )
+            if required > job.prestart_wan_transferred_bytes:
+                job.migration_state = "PRESTART_WAN_PENDING"
+            else:
+                job.destination_idc = destination
+                job.logical_rack_id = (
+                    _planned_physical_rack(state.active_plan, uid)
+                    or f"{destination}:PFR-H100-LOGICAL-POOL"
+                )
+                job.gang_membership = tuple(
+                    state.active_plan.gpu_gang_allocation[uid]
+                )
+                job.migration_state = "PRESTART_DATA_READY"
+        else:
+            # Historical B0-B8 read-compatible path.  The new B00-B09 adapter
+            # always supplies an explicit causal WAN schedule.
+            job.destination_idc = destination
+            job.logical_rack_id = (
+                _planned_physical_rack(state.active_plan, uid)
+                or f"{destination}:PFR-H100-LOGICAL-POOL"
+            )
+            job.gang_membership = tuple(
+                state.active_plan.gpu_gang_allocation[uid]
+            )
+            job.migration_state = "PRESTART_PLACED_DATASET_PRESTAGED"
         events.append(
             {
                 "job_uid": uid,
                 "source_idc": source,
                 "destination_idc": destination,
                 "requested_gpu": job.source.requested_gpu,
-                "wan_bytes": 0,
+                "wan_bytes": (
+                    job.prestart_wan_required_bytes
+                    if state.active_plan.job_wan_required_bytes
+                    else 0
+                ),
+                "transfer_pending": job.migration_state == "PRESTART_WAN_PENDING",
             }
         )
     return tuple(events)
+
+
+def _advance_prestart_wan(
+    state: MutableMethodState,
+    authority: Optional[MigrationAuthority],
+) -> Mapping[str, Any]:
+    if state.active_plan is None or not state.active_plan.job_wan_send_gb:
+        return {
+            "bytes_transferred": 0,
+            "bytes_transferred_by_job": {},
+            "completed_prefetches": [],
+        }
+    transferred = 0
+    transferred_by_job: dict[str, int] = {}
+    completed = []
+    index = min(
+        max(0, state.active_plan_age_steps), PLANNING_HORIZON_STEPS - 1
+    )
+    for uid, schedule in sorted(state.active_plan.job_wan_send_gb.items()):
+        job = state.jobs[uid]
+        if job.lifecycle != "QUEUED" or job.prestart_wan_target_idc is None:
+            continue
+        scheduled = int(round(float(schedule[min(index, len(schedule) - 1)]) * 1e9))
+        if scheduled < 0:
+            raise RuntimeContractError("prestart WAN schedule is negative")
+        if scheduled:
+            if authority is None:
+                raise RuntimeContractError("prestart WAN schedule lacks authority")
+            source = job.source.origin_idc
+            destination = job.prestart_wan_target_idc
+            capacity = authority.transfer_capacity_bytes_per_step(
+                source, destination
+            )
+            if scheduled > capacity:
+                raise RuntimeContractError(
+                    "prestart WAN schedule exceeds frozen path capacity"
+                )
+            remaining = max(
+                0,
+                job.prestart_wan_required_bytes
+                - job.prestart_wan_transferred_bytes,
+            )
+            sent = min(scheduled, remaining)
+            job.prestart_wan_transferred_bytes += sent
+            transferred += sent
+            transferred_by_job[uid] = sent
+        if (
+            job.prestart_wan_transferred_bytes
+            >= job.prestart_wan_required_bytes
+        ):
+            destination = job.prestart_wan_target_idc
+            job.destination_idc = destination
+            job.logical_rack_id = (
+                _planned_physical_rack(state.active_plan, uid)
+                or f"{destination}:PFR-H100-LOGICAL-POOL"
+            )
+            job.gang_membership = tuple(
+                state.active_plan.gpu_gang_allocation[uid]
+            )
+            job.migration_state = "PRESTART_DATA_READY"
+            completed.append(
+                {
+                    "job_uid": uid,
+                    "destination_idc": destination,
+                    "transferred_bytes": job.prestart_wan_transferred_bytes,
+                }
+            )
+            job.prestart_wan_target_idc = None
+    state.wan_transferred_bytes_cumulative += transferred
+    return {
+        "bytes_transferred": transferred,
+        "bytes_transferred_by_job": transferred_by_job,
+        "completed_prefetches": completed,
+    }
 
 
 def _start_planned_job_migrations(
@@ -2764,6 +3611,14 @@ def _start_planned_job_migrations(
         job.migration_destination_idc = destination
         job.migration_payload_remaining_bytes = job.source.migration_payload_bytes
         job.migration_work_gpu_hours_at_start = job.remaining_work_gpu_hours
+        predicted_transfer_steps = authority.transfer_steps(
+            job.source.migration_payload_bytes, source, destination
+        )
+        job.migration_start_issue = state.issue
+        job.migration_predicted_transfer_steps = predicted_transfer_steps
+        job.migration_predicted_restart_steps = authority.restart_steps
+        job.migration_transfer_complete_issue = None
+        job.migration_actual_transfer_steps = None
         job.migration_state = "WAN_TRANSFER_ACTIVE"
         job.checkpoint_state = "CONSUMED_BY_MIGRATION"
         state.wan_active_transfers += 1
@@ -2777,11 +3632,14 @@ def _start_planned_job_migrations(
                 "remaining_work_gpu_hours": job.remaining_work_gpu_hours,
                 "checkpoint_steps_at_start": job.steps_since_checkpoint,
                 "checkpoint_interval_steps": authority.checkpoint_interval_steps,
+                "predicted_transfer_steps": predicted_transfer_steps,
+                "predicted_restart_steps": authority.restart_steps,
                 "required_transfer_restart_steps": (
-                    authority.transfer_steps(
-                        job.source.migration_payload_bytes, source, destination
-                    )
-                    + authority.restart_steps
+                    predicted_transfer_steps + authority.restart_steps
+                ),
+                "predicted_total_downtime_seconds": (
+                    (predicted_transfer_steps + authority.restart_steps)
+                    * authority.step_seconds
                 ),
             }
         )
@@ -2804,6 +3662,7 @@ def _advance_job_migration_state(
             "bytes_transferred": 0,
             "completed_migrations": [],
             "completed_restarts": [],
+            "completed_realizations": [],
         }
     if authority is None:
         raise RuntimeContractError("active migration state lacks authority")
@@ -2811,6 +3670,7 @@ def _advance_job_migration_state(
         raise RuntimeContractError("active migrations exceed WAN authority")
     transferred = 0
     completed_migrations = []
+    completed_realizations = []
     for job in sorted(active, key=lambda item: item.source.job_uid):
         source = job.migration_source_idc
         destination = job.migration_destination_idc
@@ -2831,14 +3691,25 @@ def _advance_job_migration_state(
         job.migration_payload_remaining_bytes -= sent
         transferred += sent
         if job.migration_payload_remaining_bytes == 0:
+            if (
+                job.migration_start_issue is None
+                or job.migration_predicted_transfer_steps is None
+                or job.migration_predicted_restart_steps is None
+            ):
+                raise RuntimeContractError(
+                    "active migration lacks prediction/realization audit state"
+                )
+            actual_transfer_steps = state.issue - job.migration_start_issue + 1
+            if actual_transfer_steps <= 0:
+                raise RuntimeContractError("migration transfer duration is invalid")
+            job.migration_transfer_complete_issue = state.issue
+            job.migration_actual_transfer_steps = actual_transfer_steps
             job.destination_idc = destination
             job.logical_rack_id = f"{destination}:PFR-H100-LOGICAL-POOL"
             job.gang_membership = tuple(
                 f"{destination}:PFR-GPU:{job.source.job_uid}:{index}"
                 for index in range(job.source.requested_gpu)
             )
-            job.migration_source_idc = None
-            job.migration_destination_idc = None
             job.steps_since_checkpoint = 0
             if authority.restart_steps:
                 job.lifecycle = "RESTARTING"
@@ -2858,8 +3729,72 @@ def _advance_job_migration_state(
                     ),
                     "remaining_work_gpu_hours_after": job.remaining_work_gpu_hours,
                     "work_conserved": True,
+                    "predicted_transfer_steps": (
+                        job.migration_predicted_transfer_steps
+                    ),
+                    "realized_transfer_steps": actual_transfer_steps,
+                    "transfer_duration_error_steps": (
+                        actual_transfer_steps
+                        - job.migration_predicted_transfer_steps
+                    ),
+                    "predicted_transfer_seconds": (
+                        job.migration_predicted_transfer_steps
+                        * authority.step_seconds
+                    ),
+                    "realized_transfer_seconds": (
+                        actual_transfer_steps * authority.step_seconds
+                    ),
+                    "transfer_duration_error_seconds": (
+                        (actual_transfer_steps - job.migration_predicted_transfer_steps)
+                        * authority.step_seconds
+                    ),
                 }
             )
+            if authority.restart_steps == 0:
+                predicted_total_steps = job.migration_predicted_transfer_steps
+                actual_total_steps = actual_transfer_steps
+                completed_realizations.append(
+                    {
+                        "job_uid": job.source.job_uid,
+                        "source_idc": source,
+                        "destination_idc": destination,
+                        "predicted_payload_bytes": job.source.migration_payload_bytes,
+                        "realized_payload_bytes": job.source.migration_payload_bytes,
+                        "payload_error_bytes": 0,
+                        "predicted_transfer_steps": (
+                            job.migration_predicted_transfer_steps
+                        ),
+                        "predicted_restart_steps": 0,
+                        "predicted_total_downtime_steps": predicted_total_steps,
+                        "realized_transfer_steps": actual_transfer_steps,
+                        "realized_restart_steps": 0,
+                        "realized_total_downtime_steps": actual_total_steps,
+                        "total_downtime_error_steps": (
+                            actual_total_steps - predicted_total_steps
+                        ),
+                        "predicted_total_downtime_seconds": (
+                            predicted_total_steps * authority.step_seconds
+                        ),
+                        "realized_total_downtime_seconds": (
+                            actual_total_steps * authority.step_seconds
+                        ),
+                        "total_downtime_error_seconds": (
+                            (actual_total_steps - predicted_total_steps)
+                            * authority.step_seconds
+                        ),
+                        "prediction_authority": authority.authority_id,
+                        "execution_authority": authority.authority_id,
+                        "external_observed_wan_telemetry": False,
+                    }
+                )
+                job.migration_start_issue = None
+                job.migration_predicted_transfer_steps = None
+                job.migration_predicted_restart_steps = None
+                job.migration_transfer_complete_issue = None
+                job.migration_actual_transfer_steps = None
+                job.migration_source_idc = None
+                job.migration_destination_idc = None
+                job.migration_work_gpu_hours_at_start = None
     state.wan_transferred_bytes_cumulative += transferred
     completed_restarts = []
     for uid in sorted(restarting_before):
@@ -2879,8 +3814,67 @@ def _advance_job_migration_state(
             job.lifecycle = "RUNNING"
             job.migration_state = "COMPLETED"
             job.checkpoint_state = "INTERVAL_PENDING"
+            if (
+                job.migration_start_issue is None
+                or job.migration_predicted_transfer_steps is None
+                or job.migration_predicted_restart_steps is None
+                or job.migration_transfer_complete_issue is None
+                or job.migration_actual_transfer_steps is None
+            ):
+                raise RuntimeContractError(
+                    "migration restart lacks prediction/realization audit state"
+                )
+            actual_restart_steps = state.issue - job.migration_transfer_complete_issue
+            predicted_total_steps = (
+                job.migration_predicted_transfer_steps
+                + job.migration_predicted_restart_steps
+            )
+            actual_total_steps = state.issue - job.migration_start_issue + 1
             completed_restarts.append(uid)
+            completed_realizations.append(
+                {
+                    "job_uid": uid,
+                    "source_idc": job.migration_source_idc,
+                    "destination_idc": job.destination_idc,
+                    "predicted_payload_bytes": job.source.migration_payload_bytes,
+                    "realized_payload_bytes": job.source.migration_payload_bytes,
+                    "payload_error_bytes": 0,
+                    "predicted_transfer_steps": (
+                        job.migration_predicted_transfer_steps
+                    ),
+                    "predicted_restart_steps": (
+                        job.migration_predicted_restart_steps
+                    ),
+                    "predicted_total_downtime_steps": predicted_total_steps,
+                    "realized_transfer_steps": job.migration_actual_transfer_steps,
+                    "realized_restart_steps": actual_restart_steps,
+                    "realized_total_downtime_steps": actual_total_steps,
+                    "total_downtime_error_steps": (
+                        actual_total_steps - predicted_total_steps
+                    ),
+                    "predicted_total_downtime_seconds": (
+                        predicted_total_steps * authority.step_seconds
+                    ),
+                    "realized_total_downtime_seconds": (
+                        actual_total_steps * authority.step_seconds
+                    ),
+                    "total_downtime_error_seconds": (
+                        (actual_total_steps - predicted_total_steps)
+                        * authority.step_seconds
+                    ),
+                    "prediction_authority": authority.authority_id,
+                    "execution_authority": authority.authority_id,
+                    "external_observed_wan_telemetry": False,
+                }
+            )
             job.migration_work_gpu_hours_at_start = None
+            job.migration_source_idc = None
+            job.migration_destination_idc = None
+            job.migration_start_issue = None
+            job.migration_predicted_transfer_steps = None
+            job.migration_predicted_restart_steps = None
+            job.migration_transfer_complete_issue = None
+            job.migration_actual_transfer_steps = None
     state.wan_active_transfers = sum(
         job.lifecycle == "MIGRATING" for job in state.jobs.values()
     )
@@ -2888,16 +3882,29 @@ def _advance_job_migration_state(
         "bytes_transferred": transferred,
         "completed_migrations": completed_migrations,
         "completed_restarts": completed_restarts,
+        "completed_realizations": completed_realizations,
     }
 
 
 def _start_planned_routes(
-    state: MutableMethodState, config: MethodConfig, frame: CausalExperimentFrame
-) -> None:
+    state: MutableMethodState,
+    config: MethodConfig,
+    frame: CausalExperimentFrame,
+    execution_authority: Optional[MobilityExecutionAuthority],
+    evaluation_steps_remaining: int,
+) -> Tuple[Mapping[str, Any], ...]:
+    if evaluation_steps_remaining <= 0:
+        raise RuntimeContractError(
+            "MESS route execution lacks remaining evaluation steps"
+        )
     if state.active_plan is None or config.energy_flexibility != "MESS":
-        return
+        return ()
+    events = []
     for mid in MESS_IDS:
         if state.mess_in_transit[mid]:
+            continue
+        departure_issue = state.active_plan.mess_departure_issue.get(mid)
+        if departure_issue is not None and frame.issue < int(departure_issue):
             continue
         source = state.mess_location[mid]
         destination = state.active_plan.mess_destination[mid]
@@ -2907,47 +3914,219 @@ def _start_planned_routes(
         routes = [route for route in frame.routes_for(source, destination) if route.rank == rank]
         if len(routes) != 1:
             raise RuntimeContractError("slow plan selected a route outside frozen K=3")
-        profile = _mobility_energy_profile(
-            routes[0], frame.mobility_template_bank, safe=config.joint_uncertainty
-        )
-        if state.mess_energy_kwh[mid] - sum(profile) < MESS_FLOOR_KWH - 1e-9:
-            raise RuntimeContractError("selected mobility profile violates protected SOC floor")
+        route = routes[0]
+        if execution_authority is None:
+            raise RuntimeContractError(
+                "MESS route execution requires post-decision SUMO authority"
+            )
+        # Ordering is scientifically material: the slow optimizer has already
+        # committed source/destination/rank above.  Only now may actual 2025
+        # SUMO travel time be opened for state transition and SOC deduction.
+        realization = execution_authority.realize(issue=frame.issue, route=route)
+        profile = _realized_mobility_energy_profile(realization)
+        if len(profile) > MAX_MESS_TRANSIT_STEPS:
+            raise RuntimeContractError(
+                "post-decision SUMO mobility realization exceeds the predeclared "
+                "H54 execution support: "
+                f"issue={frame.issue} mess_id={mid} source={source} "
+                f"destination={destination} rank={rank} "
+                f"realized_eta_seconds={realization.eta_seconds:.12g} "
+                f"execution_steps={len(profile)} "
+                f"support_steps={MAX_MESS_TRANSIT_STEPS}"
+            )
+        if len(profile) > evaluation_steps_remaining:
+            raise RuntimeContractError(
+                "post-decision SUMO mobility realization crosses the independent "
+                "episode boundary: "
+                f"issue={frame.issue} mess_id={mid} source={source} "
+                f"destination={destination} rank={rank} "
+                f"planning_eta_seconds="
+                f"{(route.safe_eta_seconds if config.joint_uncertainty else route.q50_eta_seconds):.12g} "
+                f"realized_eta_seconds={realization.eta_seconds:.12g} "
+                f"execution_steps={len(profile)} "
+                f"evaluation_steps_remaining={evaluation_steps_remaining}"
+            )
+        realized_terminal_energy_kwh = state.mess_energy_kwh[mid] - sum(profile)
+        if realized_terminal_energy_kwh < MESS_PHYSICAL_MIN_KWH - 1e-9:
+            raise RuntimeContractError(
+                "selected route exhausts physical battery energy under post-decision "
+                "SUMO realization: "
+                f"issue={frame.issue} mess_id={mid} source={source} "
+                f"destination={destination} rank={rank} "
+                f"energy_before_kwh={state.mess_energy_kwh[mid]:.12g} "
+                f"planned_energy_kwh="
+                f"{(route.safe_energy_kwh if config.joint_uncertainty else route.q50_energy_kwh):.12g} "
+                f"realized_energy_kwh={sum(profile):.12g} "
+                f"realized_terminal_energy_kwh="
+                f"{realized_terminal_energy_kwh:.12g}"
+            )
         state.mess_in_transit[mid] = True
         state.mess_route_destination[mid] = destination
         state.mess_route_rank[mid] = rank
         state.mess_route_energy_profile_kwh[mid] = profile
         state.mess_route_profile_index[mid] = 0
+        events.append(
+            {
+                "mess_id": mid,
+                "source_service_id": source,
+                "destination_service_id": destination,
+                "od_index": route.od_index,
+                "rank": rank,
+                "planned_q50_eta_seconds": route.q50_eta_seconds,
+                "reserved_safe_eta_seconds": route.safe_eta_seconds,
+                "planning_eta_seconds_used": (
+                    route.safe_eta_seconds
+                    if config.joint_uncertainty
+                    else route.q50_eta_seconds
+                ),
+                "planned_mobility_energy_kwh": route.q50_energy_kwh,
+                "reserved_safe_mobility_energy_kwh": route.safe_energy_kwh,
+                "planning_mobility_energy_kwh_used": (
+                    route.safe_energy_kwh
+                    if config.joint_uncertainty
+                    else route.q50_energy_kwh
+                ),
+                "sumo_realized_eta_seconds": realization.eta_seconds,
+                "realized_mobility_energy_route_total_kwh": (
+                    realization.energy_kwh
+                ),
+                "realized_terminal_energy_kwh": realized_terminal_energy_kwh,
+                "realized_protected_floor_shortfall_kwh": max(
+                    0.0, MESS_FLOOR_KWH - realized_terminal_energy_kwh
+                ),
+                "realized_route_protected_floor_feasible": (
+                    realized_terminal_energy_kwh >= MESS_FLOOR_KWH - 1e-9
+                ),
+                "q50_eta_prediction_error_seconds": (
+                    realization.eta_seconds - route.q50_eta_seconds
+                ),
+                "q50_eta_absolute_error_seconds": abs(
+                    realization.eta_seconds - route.q50_eta_seconds
+                ),
+                "q50_eta_absolute_percentage_error": (
+                    abs(realization.eta_seconds - route.q50_eta_seconds)
+                    / route.q50_eta_seconds
+                    if route.q50_eta_seconds > 0.0
+                    else None
+                ),
+                "planning_eta_prediction_error_seconds": (
+                    realization.eta_seconds
+                    - (
+                        route.safe_eta_seconds
+                        if config.joint_uncertainty
+                        else route.q50_eta_seconds
+                    )
+                ),
+                "planning_eta_absolute_error_seconds": abs(
+                    realization.eta_seconds
+                    - (
+                        route.safe_eta_seconds
+                        if config.joint_uncertainty
+                        else route.q50_eta_seconds
+                    )
+                ),
+                "safe_eta_reserve_margin_seconds": (
+                    route.safe_eta_seconds - realization.eta_seconds
+                ),
+                "safe_eta_realization_covered": (
+                    realization.eta_seconds <= route.safe_eta_seconds
+                ),
+                "q50_energy_prediction_error_kwh": (
+                    realization.energy_kwh - route.q50_energy_kwh
+                ),
+                "q50_energy_absolute_error_kwh": abs(
+                    realization.energy_kwh - route.q50_energy_kwh
+                ),
+                "q50_energy_absolute_percentage_error": (
+                    abs(realization.energy_kwh - route.q50_energy_kwh)
+                    / route.q50_energy_kwh
+                    if route.q50_energy_kwh > 0.0
+                    else None
+                ),
+                "planning_energy_prediction_error_kwh": (
+                    realization.energy_kwh
+                    - (
+                        route.safe_energy_kwh
+                        if config.joint_uncertainty
+                        else route.q50_energy_kwh
+                    )
+                ),
+                "planning_energy_absolute_error_kwh": abs(
+                    realization.energy_kwh
+                    - (
+                        route.safe_energy_kwh
+                        if config.joint_uncertainty
+                        else route.q50_energy_kwh
+                    )
+                ),
+                "safe_energy_reserve_margin_kwh": (
+                    route.safe_energy_kwh - realization.energy_kwh
+                ),
+                "safe_energy_realization_covered": (
+                    realization.energy_kwh <= route.safe_energy_kwh
+                ),
+                "execution_transit_steps": len(profile),
+                "execution_transit_duration_seconds_discrete": len(profile) * 300,
+                "evaluation_steps_remaining_at_start": (
+                    evaluation_steps_remaining
+                ),
+                "episode_boundary_execution_support_authority": (
+                    "PREDECLARED_H54_SUMO_EXECUTION_SUPPORT"
+                ),
+                "episode_boundary_execution_support_steps": (
+                    MAX_MESS_TRANSIT_STEPS
+                ),
+                "episode_boundary_completion_guaranteed": True,
+                "realized_source_authority": realization.source_authority,
+                "realized_source_day_sha256": realization.source_day_sha256,
+                "actual_opened_post_decision_only": True,
+                "actual_used_by_optimizer": False,
+            }
+        )
+    return tuple(events)
 
 
-def _risk_decision(state: MutableMethodState, frame: CausalExperimentFrame, config: MethodConfig):
+def _risk_constraints(
+    state: MutableMethodState,
+    frame: CausalExperimentFrame,
+    config: MethodConfig,
+    *,
+    exact_override: Optional[Mapping[str, Any]] = None,
+    include_uncertainty: bool = True,
+    risk_issue: Optional[int] = None,
+) -> Tuple[RiskConstraint, ...]:
     active_jobs = [job for job in state.jobs.values() if job.lifecycle != "COMPLETED"]
     gpu_by_site = {site: sum(job.source.requested_gpu for job in active_jobs if job.destination_idc == site) for site in IDCS}
-    if config.joint_uncertainty:
+    if config.joint_uncertainty and include_uncertainty:
         gpu_by_site = {
             site: gpu_by_site[site] + frame.workload_reserve_gpu.get(site, 0.0)
             for site in IDCS
         }
+    evaluation_issue = frame.issue if risk_issue is None else int(risk_issue)
     deadline_margin = max(
         (
             job.remaining_work_gpu_hours
-            - max(0, job.source.deadline_step - frame.issue) * job.source.requested_gpu * STEP_HOURS
+            - max(0, job.source.deadline_step - evaluation_issue)
+            * job.source.requested_gpu
+            * STEP_HOURS
             for job in active_jobs
         ),
         default=-1.0,
     )
     min_energy = min(state.mess_energy_kwh.values())
-    if state.last_exact is None:
+    exact = exact_override if exact_override is not None else state.last_exact
+    if exact is None:
         voltage_margin, thermal_margin = -0.01, -0.10
     else:
         voltage_margin = max(
-            0.95 - float(state.last_exact["voltage_min_pu"]),
-            float(state.last_exact["voltage_max_pu"]) - 1.05,
+            0.95 - float(exact["voltage_min_pu"]),
+            float(exact["voltage_max_pu"]) - 1.05,
         )
         thermal_margin = max(
-            float(state.last_exact["line_max_loading_pu"]) - 1.0,
-            float(state.last_exact["transformer_max_current_loading_pu"]) - 1.0,
+            float(exact["line_max_loading_pu"]) - 1.0,
+            float(exact["transformer_max_current_loading_pu"]) - 1.0,
         )
-        if config.joint_uncertainty:
+        if exact_override is None and config.joint_uncertainty and include_uncertainty:
             # This is the previous issue's causal robust envelope, not a current-h0
             # realization.  It may request a new plan but never substitutes for the
             # current Fresh-OpenDSS commit gate.
@@ -2955,15 +4134,15 @@ def _risk_decision(state: MutableMethodState, frame: CausalExperimentFrame, conf
                 voltage_margin,
                 0.95
                 - float(
-                    state.last_exact.get(
+                    exact.get(
                         "robust_grid_voltage_min_pu",
-                        state.last_exact["voltage_min_pu"],
+                        exact["voltage_min_pu"],
                     )
                 ),
                 float(
-                    state.last_exact.get(
+                    exact.get(
                         "robust_grid_voltage_max_pu",
-                        state.last_exact["voltage_max_pu"],
+                        exact["voltage_max_pu"],
                     )
                 )
                 - 1.05,
@@ -2971,35 +4150,111 @@ def _risk_decision(state: MutableMethodState, frame: CausalExperimentFrame, conf
             thermal_margin = max(
                 thermal_margin,
                 float(
-                    state.last_exact.get(
+                    exact.get(
                         "robust_grid_line_max_loading_pu",
-                        state.last_exact["line_max_loading_pu"],
+                        exact["line_max_loading_pu"],
                     )
                 )
                 - 1.0,
                 float(
-                    state.last_exact.get(
+                    exact.get(
                         "robust_grid_transformer_max_loading_pu",
-                        state.last_exact["transformer_max_current_loading_pu"],
+                        exact["transformer_max_current_loading_pu"],
                     )
                 )
                 - 1.0,
             )
-    calibrated = config.risk_interface == "CALIBRATED"
-    constraints = (
-        RiskConstraint("soc", RiskFamily.SOC, MESS_FLOOR_KWH - min_energy, 100.0),
-        RiskConstraint("deadline", RiskFamily.DEADLINE, deadline_margin, 1.0),
-        RiskConstraint("gpu", RiskFamily.GPU, max(gpu_by_site.values(), default=0) - MODELED_GPU_CAPACITY_PER_IDC, 32.0),
-        RiskConstraint("wan", RiskFamily.WAN, -1.0, 1.0),
-        RiskConstraint("voltage", RiskFamily.VOLTAGE, voltage_margin, 0.01),
-        RiskConstraint("thermal", RiskFamily.THERMAL, thermal_margin, 0.10),
+    return (
+        RiskConstraint("soc", RiskFamily.SOC, MESS_FLOOR_KWH - min_energy, RISK_FAMILY_SCALES[RiskFamily.SOC.value]),
+        RiskConstraint("deadline", RiskFamily.DEADLINE, deadline_margin, RISK_FAMILY_SCALES[RiskFamily.DEADLINE.value]),
+        RiskConstraint("gpu", RiskFamily.GPU, max(gpu_by_site.values(), default=0) - MODELED_GPU_CAPACITY_PER_IDC, RISK_FAMILY_SCALES[RiskFamily.GPU.value]),
+        RiskConstraint("wan", RiskFamily.WAN, -1.0, RISK_FAMILY_SCALES[RiskFamily.WAN.value]),
+        RiskConstraint("voltage", RiskFamily.VOLTAGE, voltage_margin, RISK_FAMILY_SCALES[RiskFamily.VOLTAGE.value]),
+        RiskConstraint("thermal", RiskFamily.THERMAL, thermal_margin, RISK_FAMILY_SCALES[RiskFamily.THERMAL.value]),
     )
-    return PlanValidityRiskMonitor(calibrated=calibrated, maximum_refresh_steps=6).evaluate(
+
+
+def _risk_decision(
+    state: MutableMethodState,
+    frame: CausalExperimentFrame,
+    config: MethodConfig,
+    calibration: Optional[FrozenRiskCalibration],
+):
+    calibrated = config.risk_interface == "CALIBRATED"
+    base_constraints = _risk_constraints(state, frame, config)
+    if calibrated and calibration is None:
+        raise RuntimeContractError(
+            "calibrated B7/B8 risk interface lacks a frozen January-2025 authority"
+        )
+    constraints = tuple(
+        RiskConstraint(
+            constraint.name,
+            constraint.family,
+            constraint.violation_margin,
+            constraint.predeclared_scale,
+            (
+                calibration.increment(constraint.family)
+                if calibrated and calibration is not None
+                else 0.0
+            ),
+        )
+        for constraint in base_constraints
+    )
+    decision = PlanValidityRiskMonitor(calibrated=calibrated, maximum_refresh_steps=6).evaluate(
         constraints=constraints,
         expected_replan_benefit=0.0,
         replan_cost=ReplanCost(1.0, 0.0, 0.1, 0.01),
         plan_age_steps=state.active_plan_age_steps,
     )
+    return decision, base_constraints
+
+
+def _risk_calibration_audit(
+    *,
+    issue: int,
+    predicted: Sequence[RiskConstraint],
+    actual: Sequence[RiskConstraint],
+    source_method: str = "B6",
+) -> Mapping[str, Any]:
+    if source_method not in {"B6", "B07"}:
+        raise RuntimeContractError("risk calibration audit source must be B6 or B07")
+    predicted_by_family = {row.family.value: row for row in predicted}
+    actual_by_family = {row.family.value: row for row in actual}
+    if set(predicted_by_family) != set(RISK_FAMILY_SCALES) or set(
+        actual_by_family
+    ) != set(RISK_FAMILY_SCALES):
+        raise RuntimeContractError("risk calibration family axis is incomplete")
+    predicted_margins = {
+        family: float(predicted_by_family[family].violation_margin)
+        for family in RISK_FAMILY_SCALES
+    }
+    actual_margins = {
+        family: float(actual_by_family[family].violation_margin)
+        for family in RISK_FAMILY_SCALES
+    }
+    positive_underprediction = {
+        family: max(0.0, actual_margins[family] - predicted_margins[family])
+        for family in RISK_FAMILY_SCALES
+    }
+    normalized = {
+        family: positive_underprediction[family] / RISK_FAMILY_SCALES[family]
+        for family in RISK_FAMILY_SCALES
+    }
+    return {
+        "schema_version": "PFR5_EVENT_RISK_CALIBRATION_AUDIT_V1",
+        "role": f"{source_method}_RAW_ONE_STEP_PREDECISION_TO_REALIZED_AUDIT",
+        "prediction_issue": int(issue),
+        "realization_issue": int(issue),
+        "horizon_steps": 1,
+        "future_actual_used_by_optimizer": False,
+        "actual_opened_post_decision_only": True,
+        "predicted_violation_margin": predicted_margins,
+        "actual_violation_margin": actual_margins,
+        "predeclared_scale": dict(RISK_FAMILY_SCALES),
+        "positive_underprediction_margin": positive_underprediction,
+        "normalized_positive_underprediction": normalized,
+        "joint_normalized_score": max(normalized.values()),
+    }
 
 
 def _should_replan(state: MutableMethodState, config: MethodConfig, risk: Any, issue_offset: int) -> Tuple[bool, Tuple[str, ...]]:
@@ -3037,37 +4292,47 @@ def _nominal_mess_dispatch(
     energy_kwh: Mapping[str, float],
     in_transit: Mapping[str, bool],
     energy_enabled: bool,
-    current_price_aud_per_mwh: float,
-    horizon_price_median_aud_per_mwh: float,
+    plan: SlowDiscretePlan,
+    plan_age_steps: int,
 ) -> Tuple[Mapping[str, float], Mapping[str, float]]:
     charge = {mid: 0.0 for mid in MESS_IDS}
     discharge = {mid: 0.0 for mid in MESS_IDS}
     if not energy_enabled:
         return charge, discharge
 
-    price_margin = PRICE_DEADBAND_FRACTION * max(abs(horizon_price_median_aud_per_mwh), 1.0)
-    low_price = current_price_aud_per_mwh < horizon_price_median_aud_per_mwh - price_margin
-    high_price = current_price_aud_per_mwh > horizon_price_median_aud_per_mwh + price_margin
-    recovery_hours = MAXIMUM_REFRESH_STEPS * STEP_HOURS
     for mid in MESS_IDS:
         if in_transit[mid]:
             continue
+        index = min(
+            max(0, int(plan_age_steps)),
+            len(plan.coarse_charging_kw[mid]) - 1,
+        )
+        planned_charge = float(plan.coarse_charging_kw[mid][index])
+        discharging = plan.coarse_discharging_kw.get(mid, ())
+        planned_discharge = (
+            float(discharging[min(index, len(discharging) - 1)])
+            if discharging
+            else 0.0
+        )
+        net = planned_discharge - planned_charge
         energy = float(energy_kwh[mid])
-        if low_price and energy < MESS_CAPACITY_KWH:
-            charge[mid] = min(
-                MESS_CHARGE_LIMIT_KW,
-                (MESS_CAPACITY_KWH - energy) / (MESS_CHARGE_EFFICIENCY * recovery_hours),
-            )
-        elif not high_price and energy < MESS_CANONICAL_DAILY_PRE_KWH:
-            charge[mid] = min(
-                MESS_CHARGE_LIMIT_KW,
-                (MESS_CANONICAL_DAILY_PRE_KWH - energy) / (MESS_CHARGE_EFFICIENCY * recovery_hours),
-            )
-        elif high_price and energy > MESS_SAFETY_RESERVE_KWH:
+        max_charge_by_soc = max(
+            0.0,
+            (MESS_CAPACITY_KWH - energy)
+            / (MESS_CHARGE_EFFICIENCY * STEP_HOURS),
+        )
+        max_discharge_by_soc = max(
+            0.0,
+            (energy - MESS_SAFETY_RESERVE_KWH)
+            * MESS_CHARGE_EFFICIENCY
+            / STEP_HOURS,
+        )
+        if net >= 0.0:
             discharge[mid] = min(
-                MESS_NOMINAL_DISCHARGE_KW,
-                (energy - MESS_SAFETY_RESERVE_KWH) * MESS_CHARGE_EFFICIENCY / STEP_HOURS,
+                MESS_CHARGE_LIMIT_KW, max_discharge_by_soc, net
             )
+        else:
+            charge[mid] = min(MESS_CHARGE_LIMIT_KW, max_charge_by_soc, -net)
     return charge, discharge
 
 
@@ -3075,23 +4340,70 @@ def _nominal_control(state: MutableMethodState, config: MethodConfig, frame: Cau
     compute = {
         uid: _compute_fraction(job, frame, config)
         for uid, job in state.jobs.items()
-        if job.lifecycle not in {"COMPLETED", "MIGRATING", "RESTARTING"}
+        if job.lifecycle == "RUNNING"
     }
     energy_enabled = config.energy_flexibility in {"MESS", "STATIONARY_BESS"}
     charge, discharge = _nominal_mess_dispatch(
         energy_kwh=state.mess_energy_kwh,
         in_transit=state.mess_in_transit,
         energy_enabled=energy_enabled,
-        current_price_aud_per_mwh=frame.current_price_aud_per_mwh,
-        horizon_price_median_aud_per_mwh=frame.horizon_price_median_aud_per_mwh,
+        plan=state.active_plan,
+        plan_age_steps=state.active_plan_age_steps,
     )
     return FastControl(
         mess_charge_kw=charge,
         mess_discharge_kw=discharge,
-        mess_q_kvar={mid: 0.0 for mid in MESS_IDS},
+        mess_q_kvar={
+            mid: (
+                float(
+                    state.active_plan.coarse_reactive_kvar[mid][
+                        min(
+                            max(0, state.active_plan_age_steps),
+                            len(state.active_plan.coarse_reactive_kvar[mid]) - 1,
+                        )
+                    ]
+                )
+                if state.active_plan.coarse_reactive_kvar.get(mid)
+                and not state.mess_in_transit[mid]
+                else 0.0
+            )
+            for mid in MESS_IDS
+        },
         job_compute_rate_fraction=compute,
         site_throughput_fraction={site: 1.0 for site in IDCS},
     )
+
+
+def _enforce_compute_modulation_authority(
+    config: MethodConfig,
+    nominal: FastControl,
+    optimized: FastControl,
+    state: FastLayerState,
+    limits: FastLayerLimits,
+) -> None:
+    """Prevent an optimizer from granting temporal flexibility to B0/B1."""
+
+    if config.temporal_workload_shift:
+        return
+    expected = {
+        uid: min(
+            max(float(nominal.job_compute_rate_fraction[uid]), 0.0),
+            float(state.remaining_work_gpu_hours[uid])
+            / (int(limits.job_gpu_count[uid]) * STEP_HOURS),
+        )
+        for uid in nominal.job_compute_rate_fraction
+    }
+    if set(optimized.job_compute_rate_fraction) != set(expected) or any(
+        abs(
+            float(optimized.job_compute_rate_fraction[uid])
+            - expected[uid]
+        )
+        > 1e-9
+        for uid in expected
+    ):
+        raise RuntimeContractError(
+            "fast optimizer modulated compute for a method without temporal flexibility"
+        )
 
 
 def _post_payload(state: MutableMethodState, method_id: str) -> Mapping[str, Any]:
@@ -3104,9 +4416,19 @@ def _post_payload(state: MutableMethodState, method_id: str) -> Mapping[str, Any
         "mess_route_destination": state.mess_route_destination,
         "mess_route_rank": state.mess_route_rank,
         "mess_route_profile_index": state.mess_route_profile_index,
+        "mess_energy_debt_kwh": state.mess_energy_debt_kwh,
         "wan_transferred_bytes_cumulative": state.wan_transferred_bytes_cumulative,
         "wan_active_transfers": state.wan_active_transfers,
         "migration_count_cumulative": state.migration_count_cumulative,
+        "admission_plan_revision_count": state.admission_plan_revision_count,
+        "admission_communication_bytes": state.admission_communication_bytes,
+        "scheduler_started_jobs_cumulative": state.scheduler_started_jobs_cumulative,
+        "capacity_queue_wait_job_steps_cumulative": (
+            state.capacity_queue_wait_job_steps_cumulative
+        ),
+        "planned_temporal_wait_job_steps_cumulative": (
+            state.planned_temporal_wait_job_steps_cumulative
+        ),
         "native_capacitor_states": state.native_capacitor_states,
         "native_capacitor_dwell_remaining_steps": (
             state.native_capacitor_dwell_remaining_steps
@@ -3134,6 +4456,25 @@ def _post_payload(state: MutableMethodState, method_id: str) -> Mapping[str, Any
                 "migration_work_gpu_hours_at_start": (
                     job.migration_work_gpu_hours_at_start
                 ),
+                "migration_start_issue": job.migration_start_issue,
+                "migration_predicted_transfer_steps": (
+                    job.migration_predicted_transfer_steps
+                ),
+                "migration_predicted_restart_steps": (
+                    job.migration_predicted_restart_steps
+                ),
+                "migration_transfer_complete_issue": (
+                    job.migration_transfer_complete_issue
+                ),
+                "migration_actual_transfer_steps": (
+                    job.migration_actual_transfer_steps
+                ),
+                "queue_wait_steps": job.queue_wait_steps,
+                "prestart_wan_target_idc": job.prestart_wan_target_idc,
+                "prestart_wan_required_bytes": job.prestart_wan_required_bytes,
+                "prestart_wan_transferred_bytes": (
+                    job.prestart_wan_transferred_bytes
+                ),
             }
             for uid, job in sorted(state.jobs.items())
         },
@@ -3155,6 +4496,9 @@ class PfrRuntimeRunner:
         ] = None,
         native_control_minimum_dwell_steps: int = 0,
         migration_authority: Optional[MigrationAuthority] = None,
+        mobility_execution_authority: Optional[MobilityExecutionAuthority] = None,
+        risk_calibration_authority: Optional[FrozenRiskCalibration] = None,
+        joint_planner: Optional[H54JointPlanner] = None,
     ) -> None:
         power_curve.validate()
         self.power_curve = power_curve
@@ -3174,6 +4518,11 @@ class PfrRuntimeRunner:
         if migration_authority is not None:
             migration_authority.validate()
         self.migration_authority = migration_authority
+        self.mobility_execution_authority = mobility_execution_authority
+        if risk_calibration_authority is not None:
+            risk_calibration_authority.validate()
+        self.risk_calibration_authority = risk_calibration_authority
+        self.joint_planner = joint_planner
 
     def run_method(
         self,
@@ -3183,9 +4532,17 @@ class PfrRuntimeRunner:
         initial: RuntimeInitialState,
         representative_week_id: str,
         output: Path,
+        diagnostic_resume_state: Optional[MutableMethodState] = None,
+        diagnostic_resume_cumulative_grid_cost_aud: float = 0.0,
+        diagnostic_prefix_records: Sequence[Mapping[str, Any]] = (),
+        diagnostic_checkpoint_after_issue: Optional[int] = None,
+        diagnostic_stop_after_issue: Optional[int] = None,
+        restart_checkpoint_interval: Optional[int] = None,
     ) -> Mapping[str, Any]:
         if not frames:
             raise RuntimeContractError("runtime needs at least one frame")
+        if restart_checkpoint_interval is not None and restart_checkpoint_interval < 1:
+            raise RuntimeContractError("restart checkpoint interval must be positive")
         initial.validate()
         if frames[0].issue != initial.issue or [frame.issue for frame in frames] != list(range(initial.issue, initial.issue + len(frames))):
             raise RuntimeContractError("runtime frame axis is not contiguous from canonical PRE")
@@ -3194,7 +4551,7 @@ class PfrRuntimeRunner:
         )
         method_root = output / config.comparison_method_id.value
         method_root.mkdir(parents=True, exist_ok=True)
-        state = MutableMethodState(
+        state = diagnostic_resume_state or MutableMethodState(
             issue=initial.issue,
             pre_state_sha256=initial.state_sha256,
             mess_energy_kwh=dict(initial.mess_energy_kwh),
@@ -3207,42 +4564,120 @@ class PfrRuntimeRunner:
                 name: 0 for name in self.native_control_initial_states
             },
         )
-        records = []
+        if state.issue != initial.issue:
+            raise RuntimeContractError(
+                "diagnostic resume state does not match requested first issue"
+            )
+        records = [dict(record) for record in diagnostic_prefix_records]
+        prefix_record_count = len(records)
+        if records:
+            expected_prefix_issues = list(
+                range(records[0]["issue"], frames[0].issue)
+            )
+            if [int(record["issue"]) for record in records] != expected_prefix_issues:
+                raise RuntimeContractError(
+                    "diagnostic resume prefix is not contiguous to the first frame"
+                )
+            if any(
+                record.get("comparison_method_id")
+                != config.comparison_method_id.value
+                for record in records
+            ):
+                raise RuntimeContractError("diagnostic resume prefix method mismatch")
+            if records[-1].get("post_state_sha256") != state.pre_state_sha256:
+                raise RuntimeContractError(
+                    "diagnostic resume prefix does not bind to checkpoint state"
+                )
+            if any(
+                records[index].get("post_state_sha256")
+                != records[index + 1].get("pre_state_sha256")
+                for index in range(len(records) - 1)
+            ):
+                raise RuntimeContractError(
+                    "diagnostic resume prefix state chain is discontinuous"
+                )
+        diagnostic_stop_reached = False
+        cumulative_grid_cost_aud = float(
+            diagnostic_resume_cumulative_grid_cost_aud
+        )
         failure: Optional[Mapping[str, Any]] = None
         for offset, frame in enumerate(frames):
             started = time.monotonic()
+            slow_solver_time_s = 0.0
+            communication_bytes_before = state.communication_bytes
             frame.validate()
             if frame.issue != state.issue:
                 raise RuntimeContractError("PRE state issue does not match causal frame")
             blocked_spatial = _admit_arrivals(state, frame, config)
-            risk = _risk_decision(state, frame, config)
+            # Materialize the previous plan's rack assignment before it is
+            # consumed as the running-job state of a new H54 optimization.
+            _synchronize_planned_rack_assignments(state)
+            rack_materializer = getattr(
+                self.joint_planner,
+                "materialize_runtime_rack_assignments",
+                None,
+            )
+            if (
+                isinstance(config.comparison_method_id, ElectricalStressMethod)
+                and callable(rack_materializer)
+            ):
+                rack_materializer(state, config)
+            risk, predicted_risk_constraints = _risk_decision(
+                state,
+                frame,
+                config,
+                self.risk_calibration_authority,
+            )
             risk_used_previous_grid_envelope = state.last_exact is not None
             replan, replan_causes = _should_replan(state, config, risk, offset)
             migration_started_events: tuple[Mapping[str, Any], ...] = ()
             prestart_placement_events: tuple[Mapping[str, Any], ...] = ()
+            admission_plan_events: tuple[Mapping[str, Any], ...] = ()
+            mobility_started_events: tuple[Mapping[str, Any], ...] = ()
             if replan:
+                slow_started = time.monotonic()
                 state.active_plan = _build_slow_plan(
                     state,
                     config,
                     frame,
                     self.migration_authority,
                     len(frames) - offset,
+                    self.joint_planner,
                 )
+                slow_solver_time_s += time.monotonic() - slow_started
                 state.active_plan_age_steps = 0
                 state.full_replan_count += 1
                 state.communication_bytes += len(
                     json.dumps(asdict(state.active_plan), sort_keys=True, separators=(",", ":"))
                 )
-                _start_planned_routes(state, config, frame)
+                _synchronize_planned_rack_assignments(state)
                 prestart_placement_events = _apply_planned_prestart_placements(
                     state, config
                 )
+                if callable(rack_materializer):
+                    rack_materializer(state, config)
                 migration_started_events = _start_planned_job_migrations(
                     state, config, self.migration_authority
                 )
             if state.active_plan is None:
                 raise RuntimeContractError("no active slow plan")
-            slow_fingerprint = state.active_plan.fingerprint
+            mobility_started_events = _start_planned_routes(
+                state,
+                config,
+                frame,
+                self.mobility_execution_authority,
+                len(frames) - offset,
+            )
+            plan_id_for_action = state.active_plan.plan_id
+            plan_origin_issue_for_action = state.active_plan.valid_from_issue
+            plan_age_for_action = state.active_plan_age_steps
+            if not replan:
+                admission_plan_events = _register_arrivals_in_active_plan(
+                    state, frame
+                )
+            workload_schedule = _schedule_capacity_feasible_queued_jobs(
+                state, config, frame
+            )
             nominal = _nominal_control(state, config, frame)
             fast_state = FastLayerState(
                 issue=frame.issue,
@@ -3250,7 +4685,7 @@ class PfrRuntimeRunner:
                 remaining_work_gpu_hours={
                     uid: job.remaining_work_gpu_hours
                     for uid, job in state.jobs.items()
-                    if job.lifecycle not in {"COMPLETED", "MIGRATING", "RESTARTING"}
+                    if job.lifecycle == "RUNNING"
                     and uid in state.active_plan.job_idc_placement
                 },
             )
@@ -3260,7 +4695,10 @@ class PfrRuntimeRunner:
                 mess_charge_limit_kw={mid: 0.0 if state.mess_in_transit[mid] else 550.0 for mid in MESS_IDS},
                 mess_discharge_limit_kw={mid: 0.0 if state.mess_in_transit[mid] else 550.0 for mid in MESS_IDS},
                 mess_pcs_kva={mid: 700.0 for mid in MESS_IDS},
-                mess_soc_min={mid: MESS_FLOOR_KWH / MESS_CAPACITY_KWH for mid in MESS_IDS},
+                mess_soc_min={
+                    mid: _fast_recourse_soc_min(state.mess_energy_kwh[mid])
+                    for mid in MESS_IDS
+                },
                 mess_soc_max={mid: 1.0 for mid in MESS_IDS},
                 job_gpu_count={uid: state.jobs[uid].source.requested_gpu for uid in fast_state.remaining_work_gpu_hours},
                 site_throughput_limit={site: 1.0 for site in IDCS},
@@ -3281,7 +4719,11 @@ class PfrRuntimeRunner:
                         for site in IDCS
                     },
                     mess_operational_enabled=config.energy_flexibility in {"MESS", "STATIONARY_BESS"},
+                    compute_modulation_enabled=config.temporal_workload_shift,
                 ),
+            )
+            _enforce_compute_modulation_authority(
+                config, nominal, optimized.control, fast_state, limits
             )
             fast = execute_fast_recourse(
                 architecture=self.architecture,
@@ -3303,6 +4745,9 @@ class PfrRuntimeRunner:
                 frame.robust_background_p_kw,
                 frame.robust_background_q_kvar,
                 frame.robust_pv_available_kw,
+                frame.native_forecast_background_p_kw,
+                frame.native_forecast_background_q_kvar,
+                frame.native_forecast_pv_available_kw,
                 state.native_capacitor_states,
                 state.native_regulator_tap_numbers,
                 tuple(
@@ -3312,20 +4757,27 @@ class PfrRuntimeRunner:
                 ),
             )
             native_decision = verifier.select_native_control(control=fast.control)
+            pre_safety_control = fast.control
             accepted_fast_state = fast_state
             accepted_limits = limits
             active_optimization = optimized
             safety_replan = False
 
             def escalate_for_safety() -> EscalatedCandidate:
-                nonlocal accepted_fast_state, accepted_limits, active_optimization, fast, safety_replan, migration_started_events, prestart_placement_events
+                nonlocal accepted_fast_state, accepted_limits, active_optimization, fast, safety_replan, migration_started_events, prestart_placement_events, workload_schedule, slow_solver_time_s, plan_id_for_action, plan_origin_issue_for_action, plan_age_for_action
+                slow_started = time.monotonic()
                 state.active_plan = _build_slow_plan(
                     state,
                     config,
                     frame,
                     self.migration_authority,
                     len(frames) - offset,
+                    self.joint_planner,
                 )
+                slow_solver_time_s += time.monotonic() - slow_started
+                plan_id_for_action = state.active_plan.plan_id
+                plan_origin_issue_for_action = state.active_plan.valid_from_issue
+                plan_age_for_action = 0
                 state.active_plan_age_steps = 0
                 state.full_replan_count += 1
                 state.communication_bytes += len(
@@ -3337,6 +4789,23 @@ class PfrRuntimeRunner:
                 migration_started_events += _start_planned_job_migrations(
                     state, config, self.migration_authority
                 )
+                escalated_schedule = _schedule_capacity_feasible_queued_jobs(
+                    state, config, frame
+                )
+                workload_schedule = {
+                    **escalated_schedule,
+                    "started_jobs": (
+                        workload_schedule["started_jobs"]
+                        + escalated_schedule["started_jobs"]
+                    ),
+                    "started_gpu_by_site": {
+                        site: (
+                            workload_schedule["started_gpu_by_site"][site]
+                            + escalated_schedule["started_gpu_by_site"][site]
+                        )
+                        for site in IDCS
+                    },
+                }
                 safety_replan = True
                 accepted_fast_state = FastLayerState(
                     issue=frame.issue,
@@ -3344,7 +4813,7 @@ class PfrRuntimeRunner:
                     remaining_work_gpu_hours={
                         uid: job.remaining_work_gpu_hours
                         for uid, job in state.jobs.items()
-                        if job.lifecycle not in {"COMPLETED", "MIGRATING", "RESTARTING"}
+                        if job.lifecycle == "RUNNING"
                         and uid in state.active_plan.job_idc_placement
                     },
                 )
@@ -3354,7 +4823,10 @@ class PfrRuntimeRunner:
                     mess_charge_limit_kw={mid: 0.0 if state.mess_in_transit[mid] else 550.0 for mid in MESS_IDS},
                     mess_discharge_limit_kw={mid: 0.0 if state.mess_in_transit[mid] else 550.0 for mid in MESS_IDS},
                     mess_pcs_kva={mid: 700.0 for mid in MESS_IDS},
-                    mess_soc_min={mid: MESS_FLOOR_KWH / MESS_CAPACITY_KWH for mid in MESS_IDS},
+                    mess_soc_min={
+                        mid: _fast_recourse_soc_min(state.mess_energy_kwh[mid])
+                        for mid in MESS_IDS
+                    },
                     mess_soc_max={mid: 1.0 for mid in MESS_IDS},
                     job_gpu_count={uid: state.jobs[uid].source.requested_gpu for uid in accepted_fast_state.remaining_work_gpu_hours},
                     site_throughput_limit={site: 1.0 for site in IDCS},
@@ -3376,7 +4848,15 @@ class PfrRuntimeRunner:
                             for site in IDCS
                         },
                         mess_operational_enabled=config.energy_flexibility in {"MESS", "STATIONARY_BESS"},
+                        compute_modulation_enabled=config.temporal_workload_shift,
                     ),
+                )
+                _enforce_compute_modulation_authority(
+                    config,
+                    escalated_nominal,
+                    active_optimization.control,
+                    accepted_fast_state,
+                    accepted_limits,
                 )
                 fast = execute_fast_recourse(
                     architecture=self.architecture,
@@ -3442,10 +4922,11 @@ class PfrRuntimeRunner:
             )
             for uid, fraction in fast.control.job_compute_rate_fraction.items():
                 job = state.jobs[uid]
+                if job.lifecycle != "RUNNING":
+                    raise RuntimeContractError(
+                        "fast compute control references a non-running job"
+                    )
                 job.compute_rate_fraction = fraction
-                if fraction > 0.0 and job.lifecycle == "QUEUED":
-                    job.lifecycle = "RUNNING"
-                    job.start_issue = frame.issue
             facility_p, _ = _facility_power(state.jobs.values(), self.power_curve)
             previous_native_states = dict(state.native_capacitor_states)
             state.native_capacitor_states = {
@@ -3472,21 +4953,41 @@ class PfrRuntimeRunner:
                 str(name).lower(): int(value)
                 for name, value in native_decision.regulator_taps.items()
             }
+            mess_in_transit_before_execution = dict(state.mess_in_transit)
             for mid in MESS_IDS:
                 state.mess_energy_kwh[mid] = fast.next_state.mess_soc[mid] * MESS_CAPACITY_KWH
-            mobility_energy_kwh = 0.0
+                support = (
+                    STEP_HOURS
+                    * float(fast.control.mess_discharge_kw[mid])
+                    / MESS_CHARGE_EFFICIENCY
+                )
+                repayment = (
+                    STEP_HOURS
+                    * float(fast.control.mess_charge_kw[mid])
+                    * MESS_CHARGE_EFFICIENCY
+                )
+                state.mess_energy_debt_kwh[mid] = max(
+                    0.0,
+                    float(state.mess_energy_debt_kwh[mid])
+                    + support
+                    - repayment,
+                )
+            state.energy_debt_kwh = sum(state.mess_energy_debt_kwh.values())
+            realized_mobility_energy_kwh = 0.0
             for mid in MESS_IDS:
                 if not state.mess_in_transit[mid]:
                     continue
                 index = state.mess_route_profile_index[mid]
                 profile = state.mess_route_energy_profile_kwh[mid]
                 if index >= len(profile):
-                    raise RuntimeContractError("transit profile index escaped E4B authority")
+                    raise RuntimeContractError("transit profile index escaped physics authority")
                 movement = profile[index]
-                mobility_energy_kwh += movement
+                realized_mobility_energy_kwh += movement
                 state.mess_energy_kwh[mid] -= movement
-                if state.mess_energy_kwh[mid] < MESS_FLOOR_KWH - 1e-9:
-                    raise RuntimeContractError("realized mobility profile violated protected SOC floor")
+                if state.mess_energy_kwh[mid] < MESS_PHYSICAL_MIN_KWH - 1e-9:
+                    raise RuntimeContractError(
+                        "realized mobility profile exhausted physical battery energy"
+                    )
                 state.mess_route_profile_index[mid] += 1
                 if state.mess_route_profile_index[mid] == len(profile):
                     destination = state.mess_route_destination[mid]
@@ -3497,6 +4998,10 @@ class PfrRuntimeRunner:
                     state.mess_route_destination[mid] = None
                     state.mess_route_energy_profile_kwh[mid] = ()
                     state.mess_route_profile_index[mid] = 0
+            if offset == len(frames) - 1 and any(state.mess_in_transit.values()):
+                raise RuntimeContractError(
+                    "independent daily episode ended with unfinished MESS transit"
+                )
             for uid, remaining in fast.next_state.remaining_work_gpu_hours.items():
                 job = state.jobs[uid]
                 job.remaining_work_gpu_hours = remaining
@@ -3519,13 +5024,59 @@ class PfrRuntimeRunner:
                         job.checkpoint_state = "READY"
                     elif config.spatial_workload_migration:
                         job.checkpoint_state = "INTERVAL_PENDING"
+            prestart_wan_progress = _advance_prestart_wan(
+                state, self.migration_authority
+            )
             migration_progress = _advance_job_migration_state(
                 state, self.migration_authority
+            )
+            queued_after_step = [
+                job for job in state.jobs.values() if job.lifecycle == "QUEUED"
+            ]
+            for job in queued_after_step:
+                job.queue_wait_steps += 1
+            planned_wait_uids = {
+                uid
+                for uid, job in state.jobs.items()
+                if job.lifecycle == "QUEUED"
+                and state.active_plan is not None
+                and uid in state.active_plan.job_start_issue
+                and frame.issue < int(state.active_plan.job_start_issue[uid])
+            }
+            planned_wait_after_step = [
+                state.jobs[uid] for uid in sorted(planned_wait_uids)
+            ]
+            capacity_wait_after_step = [
+                job
+                for uid, job in state.jobs.items()
+                if job.lifecycle == "QUEUED" and uid not in planned_wait_uids
+            ]
+            state.planned_temporal_wait_job_steps_cumulative += len(
+                planned_wait_after_step
+            )
+            state.capacity_queue_wait_job_steps_cumulative += len(
+                capacity_wait_after_step
             )
             state.compute_debt_gpu_hours = sum(
                 max(0.0, job.remaining_work_gpu_hours - max(0, job.source.deadline_step - frame.issue - 1) * job.source.requested_gpu * STEP_HOURS)
                 for job in state.jobs.values() if job.lifecycle != "COMPLETED"
             )
+            risk_calibration_audit: Mapping[str, Any] | None = None
+            if config.risk_interface == "RAW_UNCALIBRATED":
+                actual_risk_constraints = _risk_constraints(
+                    state,
+                    frame,
+                    config,
+                    exact_override=verifier.last_commit.raw_metrics,
+                    include_uncertainty=False,
+                    risk_issue=frame.issue + 1,
+                )
+                risk_calibration_audit = _risk_calibration_audit(
+                    issue=frame.issue,
+                    predicted=predicted_risk_constraints,
+                    actual=actual_risk_constraints,
+                    source_method=config.comparison_method_id.value,
+                )
             state.last_exact = dict(verifier.last_commit.raw_metrics)
             pre_hash = state.pre_state_sha256
             state.issue = frame.issue + 1
@@ -3536,11 +5087,88 @@ class PfrRuntimeRunner:
                 job.lifecycle != "COMPLETED" and state.issue > job.source.deadline_step
                 for job in state.jobs.values()
             )
+            deadline_missed_job_ids = tuple(
+                sorted(
+                    uid
+                    for uid, job in state.jobs.items()
+                    if job.lifecycle != "COMPLETED"
+                    and state.issue > job.source.deadline_step
+                )
+            )
+            exact_electrical_stress = stress_from_extrema(
+                minimum_voltage_pu=verifier.last_commit.exact.minimum_voltage_pu,
+                maximum_voltage_pu=verifier.last_commit.exact.maximum_voltage_pu,
+                maximum_line_loading_fraction=(
+                    verifier.last_commit.exact.maximum_line_loading_fraction
+                ),
+                maximum_transformer_loading_fraction=(
+                    verifier.last_commit.exact.maximum_transformer_loading_fraction
+                ),
+            )
+            step_grid_cost_aud = (
+                float(verifier.last_commit.raw_metrics["root_import_p_kw"])
+                * frame.current_price_aud_per_mwh
+                * STEP_HOURS
+                / 1000.0
+            )
+            cumulative_grid_cost_aud += step_grid_cost_aud
             record = {
-                "schema_version": "K9H7_RESULT_V2.issue_commit.v1",
+                "schema_version": "K9H7_RESULT_V2.issue_commit.v2",
                 "result_uid": identity.result_uid,
                 "scientific_framework_id": identity.scientific_framework_id,
                 "comparison_method_id": config.comparison_method_id.value,
+                "method_order": int(config.comparison_method_id.value[1:]),
+                "energy_flex": config.energy_flexibility,
+                "temporal_compute": config.temporal_workload_shift,
+                "spatial_compute": config.spatial_workload_migration,
+                "replan_policy": config.control_mode,
+                "risk_calibration": config.risk_interface == "CALIBRATED",
+                "objective_id": OBJECTIVE_AUTHORITY,
+                "objective_primary": "WORST_PREDICTED_ELECTRICAL_STRESS",
+                "h54_capability_mask": dict(config.h54_capability_mask),
+                "factorial_energy": (
+                    int(config.energy_flexibility == "MESS")
+                    if config.comparison_method_id.value
+                    in {"B00", "B01", "B04", "B06"}
+                    else None
+                ),
+                "factorial_compute": (
+                    int(
+                        config.temporal_workload_shift
+                        and config.spatial_workload_migration
+                    )
+                    if config.comparison_method_id.value
+                    in {"B00", "B01", "B04", "B06"}
+                    else None
+                ),
+                "predicted_worst_electrical_stress_pu": (
+                    state.last_slow_miqp_certificate.get(
+                        "objective_worst_predicted_electrical_stress_pu"
+                    )
+                ),
+                "predicted_electrical_stress_exposure_pu_hours": (
+                    state.last_slow_miqp_certificate.get(
+                        "objective_predicted_stress_exposure_pu_hours"
+                    )
+                ),
+                "predicted_voltage_stress_max": state.last_slow_miqp_certificate.get(
+                    "predicted_voltage_stress_max"
+                ),
+                "predicted_line_stress_max": state.last_slow_miqp_certificate.get(
+                    "predicted_line_stress_max"
+                ),
+                "predicted_transformer_stress_max": state.last_slow_miqp_certificate.get(
+                    "predicted_transformer_stress_max"
+                ),
+                "predicted_worst_stress_type": state.last_slow_miqp_certificate.get(
+                    "predicted_worst_stress_type"
+                ),
+                "predicted_worst_element_id": state.last_slow_miqp_certificate.get(
+                    "predicted_worst_element_id"
+                ),
+                "predicted_worst_phase": state.last_slow_miqp_certificate.get(
+                    "predicted_worst_phase"
+                ),
                 "controller_id": identity.controller_id,
                 "ablation_id": identity.ablation_id,
                 "representative_week_id": representative_week_id,
@@ -3551,21 +5179,112 @@ class PfrRuntimeRunner:
                 "post_state_sha256": post_hash,
                 "causal_exogenous_sha256": frame.exogenous_sha256,
                 "future_actual_used": False,
+                "future_actual_used_by_optimizer": False,
                 "h0_only_committed": True,
                 "slow_plan_fingerprint": state.active_plan.fingerprint,
+                "plan_id": plan_id_for_action,
+                "replan_id": state.full_replan_count,
+                "plan_origin_issue": plan_origin_issue_for_action,
+                "plan_age_steps": plan_age_for_action,
                 "binary_state_unchanged": fast.binary_state_unchanged,
                 "full_replan_executed": replan or safety_replan,
                 "replan_causes": replan_causes + (("AC_SAFETY_ESCALATION",) if safety_replan else ()),
                 "full_replan_count_cumulative": state.full_replan_count,
                 "communication_bytes_cumulative": state.communication_bytes,
+                "communication_bytes_step": (
+                    state.communication_bytes - communication_bytes_before
+                ),
+                "admission_plan_revision_executed": bool(admission_plan_events),
+                "admission_plan_events": list(admission_plan_events),
+                "admission_plan_revision_count_cumulative": (
+                    state.admission_plan_revision_count
+                ),
+                "admission_communication_bytes_cumulative": (
+                    state.admission_communication_bytes
+                ),
+                "workload_scheduler_policy": workload_schedule["policy"],
+                "workload_started_jobs": workload_schedule["started_jobs"],
+                "workload_started_gpu_by_site": workload_schedule[
+                    "started_gpu_by_site"
+                ],
+                "scheduler_started_jobs_cumulative": (
+                    state.scheduler_started_jobs_cumulative
+                ),
+                "capacity_blocked_queue": bool(capacity_wait_after_step),
+                "planned_temporal_wait_jobs": len(planned_wait_after_step),
+                "capacity_blocked_jobs": len(capacity_wait_after_step),
+                "queued_jobs": len(queued_after_step),
+                "queued_gpu_by_site": {
+                    site: sum(
+                        job.source.requested_gpu
+                        for job in queued_after_step
+                        if job.destination_idc == site
+                    )
+                    for site in IDCS
+                },
+                "running_gpu_by_site": {
+                    site: sum(
+                        job.source.requested_gpu
+                        for job in state.jobs.values()
+                        if job.lifecycle == "RUNNING"
+                        and job.destination_idc == site
+                    )
+                    for site in IDCS
+                },
+                "capacity_queue_wait_job_steps_cumulative": (
+                    state.capacity_queue_wait_job_steps_cumulative
+                ),
+                "planned_temporal_wait_job_steps_cumulative": (
+                    state.planned_temporal_wait_job_steps_cumulative
+                ),
+                "maximum_queue_wait_steps": max(
+                    (job.queue_wait_steps for job in state.jobs.values()),
+                    default=0,
+                ),
+                "late_started_jobs": sum(
+                    job.start_issue is not None
+                    and job.start_issue > job.source.latest_start_step
+                    for job in state.jobs.values()
+                ),
                 "wan_transferred_bytes_cumulative": state.wan_transferred_bytes_cumulative,
                 "wan_active_transfers": state.wan_active_transfers,
-                "wan_bytes_transferred_step": migration_progress["bytes_transferred"],
+                "wan_bytes_transferred_step": (
+                    migration_progress["bytes_transferred"]
+                    + prestart_wan_progress["bytes_transferred"]
+                ),
+                "prestart_wan_completed": prestart_wan_progress[
+                    "completed_prefetches"
+                ],
+                "prestart_wan_bytes_transferred_step_by_job": (
+                    prestart_wan_progress["bytes_transferred_by_job"]
+                ),
                 "migration_count_cumulative": state.migration_count_cumulative,
                 "migration_started": list(migration_started_events),
                 "prestart_spatial_placements": list(prestart_placement_events),
                 "migration_completed": migration_progress["completed_migrations"],
                 "migration_restarts_completed": migration_progress["completed_restarts"],
+                "migration_prediction_actual_events": migration_progress[
+                    "completed_realizations"
+                ],
+                "migration_prediction_actual_event_count": len(
+                    migration_progress["completed_realizations"]
+                ),
+                "migration_duration_prediction_error_steps": sum(
+                    int(event["total_downtime_error_steps"])
+                    for event in migration_progress["completed_realizations"]
+                ),
+                "migration_duration_absolute_error_steps": sum(
+                    abs(int(event["total_downtime_error_steps"]))
+                    for event in migration_progress["completed_realizations"]
+                ),
+                "migration_duration_prediction_error_seconds": sum(
+                    int(event["total_downtime_error_seconds"])
+                    for event in migration_progress["completed_realizations"]
+                ),
+                "migration_duration_absolute_error_seconds": sum(
+                    abs(int(event["total_downtime_error_seconds"]))
+                    for event in migration_progress["completed_realizations"]
+                ),
                 "migration_job_state_evidence": {
                     uid: {
                         "lifecycle": job.lifecycle,
@@ -3590,10 +5309,24 @@ class PfrRuntimeRunner:
                 "risk_interface": risk.active_risk_interface,
                 "risk": risk.active_risk,
                 "risk_components": risk.calibrated_components if config.risk_interface == "CALIBRATED" else risk.raw_components,
+                "risk_raw_components": dict(risk.raw_components),
+                "risk_calibrated_components": dict(risk.calibrated_components),
+                "risk_calibration_authority_id": (
+                    self.risk_calibration_authority.authority_id
+                    if self.risk_calibration_authority is not None
+                    else None
+                ),
+                "risk_calibration_artifact_sha256": (
+                    self.risk_calibration_authority.artifact_sha256
+                    if self.risk_calibration_authority is not None
+                    else None
+                ),
+                "risk_calibration_audit": risk_calibration_audit,
                 "arrivals": len(frame.arrivals),
                 "active_jobs": sum(job.lifecycle == "RUNNING" for job in state.jobs.values()),
                 "completed_jobs": sum(job.lifecycle == "COMPLETED" for job in state.jobs.values()),
                 "deadline_misses": deadline_misses,
+                "deadline_missed_job_ids": deadline_missed_job_ids,
                 "remaining_work_gpu_hours": sum(job.remaining_work_gpu_hours for job in state.jobs.values()),
                 "spatial_actions_blocked_missing_payload": blocked_spatial,
                 "checkpoint_authority": (
@@ -3612,13 +5345,103 @@ class PfrRuntimeRunner:
                     state.last_spatial_optimizer_certificate
                 ),
                 "facility_p_kw_total": sum(facility_p),
+                "background_root_kw": frame.q50_background_p_kw,
+                # No frozen auxiliary-power coefficient exists for WAN equipment.
+                # Transfer energy therefore remains explicitly unavailable rather
+                # than being assigned an invented electrical load.
+                "wan_power_kw": None,
                 "mess_p_kw_total": sum(fast.control.mess_discharge_kw.values()) - sum(fast.control.mess_charge_kw.values()),
                 "mess_q_kvar_total": sum(fast.control.mess_q_kvar.values()),
                 "minimum_mess_energy_kwh": min(state.mess_energy_kwh.values()),
-                "mobility_energy_kwh": mobility_energy_kwh,
+                "planned_mobility_energy_kwh": sum(
+                    float(event["planned_mobility_energy_kwh"])
+                    for event in mobility_started_events
+                ),
+                "reserved_safe_mobility_energy_kwh": sum(
+                    float(event["reserved_safe_mobility_energy_kwh"])
+                    for event in mobility_started_events
+                ),
+                "realized_mobility_energy_kwh": realized_mobility_energy_kwh,
+                "mobility_energy_kwh": realized_mobility_energy_kwh,
+                "mobility_realized_route_total_energy_kwh_started_routes": sum(
+                    float(event["realized_mobility_energy_route_total_kwh"])
+                    for event in mobility_started_events
+                ),
+                "mobility_realized_protected_floor_shortfall_kwh_started_routes": sum(
+                    float(event["realized_protected_floor_shortfall_kwh"])
+                    for event in mobility_started_events
+                ),
+                "mobility_realized_protected_floor_violation_route_count": sum(
+                    not bool(event["realized_route_protected_floor_feasible"])
+                    for event in mobility_started_events
+                ),
+                "mobility_q50_eta_prediction_error_seconds_started_routes": sum(
+                    float(event["q50_eta_prediction_error_seconds"])
+                    for event in mobility_started_events
+                ),
+                "mobility_q50_eta_absolute_error_seconds_started_routes": sum(
+                    float(event["q50_eta_absolute_error_seconds"])
+                    for event in mobility_started_events
+                ),
+                "mobility_planning_eta_prediction_error_seconds_started_routes": sum(
+                    float(event["planning_eta_prediction_error_seconds"])
+                    for event in mobility_started_events
+                ),
+                "mobility_planning_eta_absolute_error_seconds_started_routes": sum(
+                    float(event["planning_eta_absolute_error_seconds"])
+                    for event in mobility_started_events
+                ),
+                "mobility_q50_energy_prediction_error_kwh_started_routes": sum(
+                    float(event["q50_energy_prediction_error_kwh"])
+                    for event in mobility_started_events
+                ),
+                "mobility_q50_energy_absolute_error_kwh_started_routes": sum(
+                    float(event["q50_energy_absolute_error_kwh"])
+                    for event in mobility_started_events
+                ),
+                "mobility_planning_energy_prediction_error_kwh_started_routes": sum(
+                    float(event["planning_energy_prediction_error_kwh"])
+                    for event in mobility_started_events
+                ),
+                "mobility_planning_energy_absolute_error_kwh_started_routes": sum(
+                    float(event["planning_energy_absolute_error_kwh"])
+                    for event in mobility_started_events
+                ),
+                "mobility_safe_eta_covered_started_routes": sum(
+                    bool(event["safe_eta_realization_covered"])
+                    for event in mobility_started_events
+                ),
+                "mobility_safe_energy_covered_started_routes": sum(
+                    bool(event["safe_energy_realization_covered"])
+                    for event in mobility_started_events
+                ),
+                "mobility_started_route_count": len(mobility_started_events),
+                "mobility_started_events": list(mobility_started_events),
+                "mobility_execution_actual_used_by_optimizer": False,
+                "mobility_execution_actual_opened_post_decision_only": bool(
+                    mobility_started_events
+                ),
+                "mobility_realized_actual_used_by_execution": bool(
+                    mobility_started_events
+                    or realized_mobility_energy_kwh > 0.0
+                ),
+                "mobility_execution_authority_sha256": (
+                    self.mobility_execution_authority.fingerprint
+                    if self.mobility_execution_authority is not None
+                    else None
+                ),
                 "mess_in_transit": dict(state.mess_in_transit),
                 "mess_location": dict(state.mess_location),
+                "mess_energy_kwh": dict(state.mess_energy_kwh),
+                "mess_route_destination": dict(state.mess_route_destination),
                 "mess_route_rank": dict(state.mess_route_rank),
+                "mobility_completed": {
+                    mid: bool(
+                        mess_in_transit_before_execution[mid]
+                        and not state.mess_in_transit[mid]
+                    )
+                    for mid in MESS_IDS
+                },
                 "slow_miqp_certificate": dict(state.last_slow_miqp_certificate),
                 "joint_uncertainty_decision_use": config.joint_uncertainty,
                 "risk_grid_envelope_source": (
@@ -3661,13 +5484,131 @@ class PfrRuntimeRunner:
                 ),
                 "compute_debt_gpu_hours": state.compute_debt_gpu_hours,
                 "energy_debt_kwh": state.energy_debt_kwh,
+                "recovery_horizon_remaining": max(
+                    0, PLANNING_HORIZON_STEPS - int(plan_age_for_action)
+                ),
+                "compute_debt_target": 0.0,
+                "energy_debt_target": 0.0,
+                "terminal_recovery_feasible": bool(
+                    state.compute_debt_gpu_hours <= 1e-9
+                    and state.energy_debt_kwh <= 1e-9
+                ) if offset == len(frames) - 1 else None,
+                "joint_plan_control": asdict(nominal),
+                "planned_control": asdict(pre_safety_control),
+                "accepted_control": asdict(fast.control),
+                "job_states": {
+                    uid: {
+                        "origin_idc": job.source.origin_idc,
+                        "arrival_issue": job.source.arrival_step,
+                        "latest_start_issue": job.source.latest_start_step,
+                        "deadline_issue": job.source.deadline_step,
+                        "required_gpu": job.source.requested_gpu,
+                        "destination_idc": job.destination_idc,
+                        "planned_idc": state.active_plan.job_idc_placement.get(uid),
+                        "planned_start_issue": state.active_plan.job_start_issue.get(uid),
+                        "actual_start_issue": job.start_issue,
+                        "completion_issue": job.completion_issue,
+                        "remaining_work_gpu_hours": job.remaining_work_gpu_hours,
+                        "lifecycle": job.lifecycle,
+                        "compute_rate_fraction": job.compute_rate_fraction,
+                        "checkpoint_state": job.checkpoint_state,
+                        "migration_state": job.migration_state,
+                        "migration_source_idc": job.migration_source_idc,
+                        "migration_destination_idc": job.migration_destination_idc,
+                        "migration_payload_remaining_bytes": job.migration_payload_remaining_bytes,
+                        "restart_remaining_steps": job.restart_remaining_steps,
+                        "prestart_wan_target_idc": job.prestart_wan_target_idc,
+                        "prestart_wan_required_bytes": (
+                            job.prestart_wan_required_bytes
+                        ),
+                        "prestart_wan_transferred_bytes": (
+                            job.prestart_wan_transferred_bytes
+                        ),
+                    }
+                    for uid, job in sorted(state.jobs.items())
+                },
+                "slow_solver_time_s": slow_solver_time_s,
+                "h54_reference_anchor_time_s": (
+                    state.last_slow_miqp_certificate.get(
+                        "reference_anchor_seconds"
+                    ) if (replan or safety_replan) else 0.0
+                ),
+                "h54_domain_generation_time_s": (
+                    state.last_slow_miqp_certificate.get(
+                        "causal_domain_generation_seconds"
+                    ) if (replan or safety_replan) else 0.0
+                ),
+                "h54_model_build_once_time_s": (
+                    state.last_slow_miqp_certificate.get(
+                        "model_build_once_seconds"
+                    ) if (replan or safety_replan) else 0.0
+                ),
+                "h54_parameter_update_time_s": (
+                    state.last_slow_miqp_certificate.get(
+                        "parameter_update_seconds"
+                    ) if (replan or safety_replan) else 0.0
+                ),
+                "h54_slow_master_time_s": (
+                    state.last_slow_miqp_certificate.get(
+                        "slow_master_milp_seconds"
+                    ) if (replan or safety_replan) else 0.0
+                ),
+                "h54_exact_recourse_time_s": (
+                    state.last_slow_miqp_certificate.get(
+                        "fixed_binary_exact_h54_recourse_seconds"
+                    ) if (replan or safety_replan) else 0.0
+                ),
+                "h54_planner_total_time_s": (
+                    state.last_slow_miqp_certificate.get(
+                        "online_planner_total_seconds"
+                    ) if (replan or safety_replan) else 0.0
+                ),
+                "h54_master_skipped_forced_domain": (
+                    state.last_slow_miqp_certificate.get(
+                        "slow_master_skipped_exact_forced_domain"
+                    ) if (replan or safety_replan) else None
+                ),
+                "h54_maximum_exact_norm_residual": (
+                    state.last_slow_miqp_certificate.get(
+                        "maximum_exact_norm_residual"
+                    ) if (replan or safety_replan) else None
+                ),
+                "h54_maximum_exact_norm_relative_residual": (
+                    state.last_slow_miqp_certificate.get(
+                        "maximum_exact_norm_relative_residual"
+                    ) if (replan or safety_replan) else None
+                ),
+                "h54_norm_relative_tolerance": (
+                    state.last_slow_miqp_certificate.get(
+                        "norm_relative_tolerance"
+                    ) if (replan or safety_replan) else None
+                ),
+                "h54_norm_engineering_margin_fraction": (
+                    state.last_slow_miqp_certificate.get(
+                        "norm_engineering_margin_fraction"
+                    ) if (replan or safety_replan) else None
+                ),
                 "fast_recourse_runtime_seconds": fast.runtime_seconds,
                 "safety_filter_runtime_seconds": safety.filter_runtime_seconds,
+                "opendss_runtime_seconds": verifier.opendss_runtime_seconds,
                 "safety_filter_intervention": safety.intervention,
                 "safety_filter_delta_p_kw": safety.delta_p_kw,
                 "safety_filter_delta_q_kvar": safety.delta_q_kvar,
                 "safety_filter_compute_throttling_fraction": safety.compute_throttling_fraction,
                 "safety_filter_compute_load_increase_fraction": safety.compute_load_increase_fraction,
+                "safety_filter_stage": (
+                    "ESCALATED_FULL_REPLAN"
+                    if safety.escalation_count
+                    else ("CONTINUOUS_PROJECTION" if safety.intervention else "NONE")
+                ),
+                "safety_action_delta_norm": math.sqrt(
+                    safety.delta_p_kw * safety.delta_p_kw
+                    + safety.delta_q_kvar * safety.delta_q_kvar
+                    + safety.compute_throttling_fraction
+                    * safety.compute_throttling_fraction
+                    + safety.compute_load_increase_fraction
+                    * safety.compute_load_increase_fraction
+                ),
                 "safety_filter_escalation_count": safety.escalation_count,
                 "safety_capability_mess_enabled": config.energy_flexibility
                 in {"MESS", "STATIONARY_BESS"},
@@ -3677,49 +5618,410 @@ class PfrRuntimeRunner:
                 "optimization_certificate": active_optimization.certificate.as_dict(),
                 "actual_fresh_opendss_used": verifier.last_commit.actual_fresh_opendss_used,
                 "exact_ac": dict(verifier.last_commit.raw_metrics),
-                "price_aud_per_mwh": frame.current_price_aud_per_mwh,
-                "realized_grid_cost_aud": (
-                    float(verifier.last_commit.raw_metrics["root_import_p_kw"])
-                    * frame.current_price_aud_per_mwh * STEP_HOURS / 1000.0
+                "optimization_objective_authority": OBJECTIVE_AUTHORITY,
+                "realized_exact_electrical_stress": (
+                    exact_electrical_stress.as_dict()
                 ),
+                "price_aud_per_mwh": frame.current_price_aud_per_mwh,
+                "realized_grid_cost_aud": step_grid_cost_aud,
+                "cumulative_grid_cost_aud": cumulative_grid_cost_aud,
+                "attempt_id": identity.result_uid,
+                "parent_attempt_id": None,
+                "retry_count": 0,
                 "runtime_seconds": time.monotonic() - started,
             }
             issue_root = method_root / f"issue_{frame.issue:06d}"
             issue_root.mkdir(parents=True, exist_ok=True)
+            record["commit_marker_storage_time_s"] = 0.0
+            record["total_issue_wall_time_s"] = record["runtime_seconds"]
+            storage_started = time.monotonic()
+            atomic_write_json(issue_root / "COMMIT_MARKER.json", record)
+            record["commit_marker_storage_time_s"] = (
+                time.monotonic() - storage_started
+            )
+            record["total_issue_wall_time_s"] = time.monotonic() - started
+            # The second atomic write persists the measured first-write cost.
+            # This avoids estimating storage from unrelated campaign I/O.
             atomic_write_json(issue_root / "COMMIT_MARKER.json", record)
             records.append(record)
+            if diagnostic_checkpoint_after_issue == frame.issue:
+                _write_runtime_resume_checkpoint(
+                    checkpoint_path=(
+                        method_root
+                        / f"DIAGNOSTIC_RESUME_AFTER_ISSUE_{frame.issue:06d}.pkl"
+                    ),
+                    comparison_method_id=config.comparison_method_id.value,
+                    representative_week_id=representative_week_id,
+                    completed_issue=frame.issue,
+                    state=state,
+                    cumulative_grid_cost_aud=cumulative_grid_cost_aud,
+                    rolling_restart_checkpoint=False,
+                )
+            if restart_checkpoint_interval is not None and (
+                (offset + 1) % restart_checkpoint_interval == 0
+                or offset == len(frames) - 1
+            ):
+                _write_runtime_resume_checkpoint(
+                    checkpoint_path=method_root / "LATEST_RUNTIME_CHECKPOINT.pkl",
+                    comparison_method_id=config.comparison_method_id.value,
+                    representative_week_id=representative_week_id,
+                    completed_issue=frame.issue,
+                    state=state,
+                    cumulative_grid_cost_aud=cumulative_grid_cost_aud,
+                    rolling_restart_checkpoint=True,
+                )
+            if diagnostic_stop_after_issue == frame.issue:
+                diagnostic_stop_reached = True
+                break
         summary = {
-            "schema_version": "K9H7_RESULT_V2.method_run.v1",
-            "status": "PASS" if failure is None and len(records) == len(frames) else "FAIL_CLOSED",
+            "schema_version": "K9H7_RESULT_V2.method_run.v2",
+            "status": (
+                "DIAGNOSTIC_STOP"
+                if failure is None and diagnostic_stop_reached
+                else (
+                    "PASS"
+                    if failure is None
+                    and len(records) - prefix_record_count == len(frames)
+                    else "FAIL_CLOSED"
+                )
+            ),
+            "diagnostic_stop_after_issue": diagnostic_stop_after_issue,
+            "diagnostic_stop_reached": diagnostic_stop_reached,
             "comparison_method_id": config.comparison_method_id.value,
+            "method_order": int(config.comparison_method_id.value[1:]),
+            "factorial_energy": (
+                int(config.energy_flexibility == "MESS")
+                if config.comparison_method_id.value in {"B00", "B01", "B04", "B06"}
+                else None
+            ),
+            "factorial_compute": (
+                int(
+                    config.temporal_workload_shift
+                    and config.spatial_workload_migration
+                )
+                if config.comparison_method_id.value in {"B00", "B01", "B04", "B06"}
+                else None
+            ),
             "representative_week_id": representative_week_id,
-            "requested_issues": len(frames),
+            "requested_issues": prefix_record_count + len(frames),
+            "resumed_prefix_issues": prefix_record_count,
             "committed_issues": len(records),
             "commit_marker_count": len(records),
             "fresh_exact_opendss_count": sum(row["actual_fresh_opendss_used"] for row in records),
             "actual_gurobi_count": sum(row["actual_gurobi_used"] for row in records),
+            "optimization_objective_authority": OBJECTIVE_AUTHORITY,
+            "realized_exact_electrical_stress": trajectory_summary(
+                (
+                    stress_from_extrema(
+                        minimum_voltage_pu=float(row["exact_ac"]["voltage_min_pu"]),
+                        maximum_voltage_pu=float(row["exact_ac"]["voltage_max_pu"]),
+                        maximum_line_loading_fraction=float(
+                            row["exact_ac"]["line_max_loading_pu"]
+                        ),
+                        maximum_transformer_loading_fraction=max(
+                            float(
+                                row["exact_ac"][
+                                    "transformer_max_kva_loading_pu"
+                                ]
+                            ),
+                            float(
+                                row["exact_ac"][
+                                    "transformer_max_current_loading_pu"
+                                ]
+                            ),
+                        ),
+                    )
+                    for row in records
+                ),
+                step_hours=STEP_HOURS,
+            ),
             "state_chain_complete": all(
                 records[index]["post_state_sha256"] == records[index + 1]["pre_state_sha256"]
                 for index in range(max(0, len(records) - 1))
             ),
             "binary_state_unchanged": all(row["binary_state_unchanged"] for row in records),
             "future_actual_used": False,
+            "future_actual_used_by_optimizer": False,
+            "mobility_execution_authority_sha256": (
+                self.mobility_execution_authority.fingerprint
+                if self.mobility_execution_authority is not None
+                else None
+            ),
+            "mobility_realized_actual_used_by_execution": any(
+                row["mobility_realized_actual_used_by_execution"]
+                for row in records
+            ),
             "full_replan_count": state.full_replan_count,
             "communication_bytes": state.communication_bytes,
+            "admission_plan_revision_count": state.admission_plan_revision_count,
+            "admission_communication_bytes": state.admission_communication_bytes,
+            "scheduler_started_jobs": state.scheduler_started_jobs_cumulative,
+            "capacity_queue_wait_job_steps": (
+                state.capacity_queue_wait_job_steps_cumulative
+            ),
+            "planned_temporal_wait_job_steps": (
+                state.planned_temporal_wait_job_steps_cumulative
+            ),
+            "final_queued_jobs": sum(
+                job.lifecycle == "QUEUED" for job in state.jobs.values()
+            ),
             "migration_count": state.migration_count_cumulative,
             "wan_transferred_bytes": state.wan_transferred_bytes_cumulative,
+            "migration_prediction_actual_event_count": sum(
+                int(row["migration_prediction_actual_event_count"])
+                for row in records
+            ),
+            "migration_duration_mean_absolute_error_steps": (
+                sum(
+                    float(row["migration_duration_absolute_error_steps"])
+                    for row in records
+                )
+                / sum(
+                    int(row["migration_prediction_actual_event_count"])
+                    for row in records
+                )
+                if sum(
+                    int(row["migration_prediction_actual_event_count"])
+                    for row in records
+                )
+                else None
+            ),
+            "migration_duration_mean_absolute_error_seconds": (
+                sum(
+                    float(row["migration_duration_absolute_error_seconds"])
+                    for row in records
+                )
+                / sum(
+                    int(row["migration_prediction_actual_event_count"])
+                    for row in records
+                )
+                if sum(
+                    int(row["migration_prediction_actual_event_count"])
+                    for row in records
+                )
+                else None
+            ),
             "migration_authority_sha256": (
                 self.migration_authority.fingerprint
                 if self.migration_authority is not None
+                else None
+            ),
+            "mobility_started_route_count": sum(
+                int(row["mobility_started_route_count"]) for row in records
+            ),
+            "mobility_realized_protected_floor_shortfall_kwh_started_routes": sum(
+                float(
+                    row[
+                        "mobility_realized_protected_floor_shortfall_kwh_started_routes"
+                    ]
+                )
+                for row in records
+            ),
+            "mobility_realized_protected_floor_violation_route_count": sum(
+                int(row["mobility_realized_protected_floor_violation_route_count"])
+                for row in records
+            ),
+            "mobility_q50_eta_mean_absolute_error_seconds": (
+                sum(
+                    float(
+                        row[
+                            "mobility_q50_eta_absolute_error_seconds_started_routes"
+                        ]
+                    )
+                    for row in records
+                )
+                / sum(int(row["mobility_started_route_count"]) for row in records)
+                if sum(int(row["mobility_started_route_count"]) for row in records)
+                else None
+            ),
+            "mobility_q50_energy_mean_absolute_error_kwh": (
+                sum(
+                    float(
+                        row[
+                            "mobility_q50_energy_absolute_error_kwh_started_routes"
+                        ]
+                    )
+                    for row in records
+                )
+                / sum(int(row["mobility_started_route_count"]) for row in records)
+                if sum(int(row["mobility_started_route_count"]) for row in records)
+                else None
+            ),
+            "mobility_planning_eta_mean_absolute_error_seconds": (
+                sum(
+                    float(
+                        row[
+                            "mobility_planning_eta_absolute_error_seconds_started_routes"
+                        ]
+                    )
+                    for row in records
+                )
+                / sum(int(row["mobility_started_route_count"]) for row in records)
+                if sum(int(row["mobility_started_route_count"]) for row in records)
+                else None
+            ),
+            "mobility_planning_energy_mean_absolute_error_kwh": (
+                sum(
+                    float(
+                        row[
+                            "mobility_planning_energy_absolute_error_kwh_started_routes"
+                        ]
+                    )
+                    for row in records
+                )
+                / sum(int(row["mobility_started_route_count"]) for row in records)
+                if sum(int(row["mobility_started_route_count"]) for row in records)
+                else None
+            ),
+            "mobility_safe_eta_empirical_coverage": (
+                sum(
+                    int(row["mobility_safe_eta_covered_started_routes"])
+                    for row in records
+                )
+                / sum(int(row["mobility_started_route_count"]) for row in records)
+                if sum(int(row["mobility_started_route_count"]) for row in records)
+                else None
+            ),
+            "mobility_safe_energy_empirical_coverage": (
+                sum(
+                    int(row["mobility_safe_energy_covered_started_routes"])
+                    for row in records
+                )
+                / sum(int(row["mobility_started_route_count"]) for row in records)
+                if sum(int(row["mobility_started_route_count"]) for row in records)
                 else None
             ),
             "deadline_misses": sum(row["deadline_misses"] for row in records[-1:]),
             "final_compute_debt_gpu_hours": state.compute_debt_gpu_hours,
             "final_energy_debt_kwh": state.energy_debt_kwh,
             "final_minimum_mess_energy_kwh": min(state.mess_energy_kwh.values()),
+            "risk_calibration_audit_count": sum(
+                row.get("risk_calibration_audit") is not None for row in records
+            ),
+            "risk_calibration_day_joint_score": max(
+                (
+                    float(row["risk_calibration_audit"]["joint_normalized_score"])
+                    for row in records
+                    if row.get("risk_calibration_audit") is not None
+                ),
+                default=None,
+            ),
+            "risk_calibration_authority_id": (
+                self.risk_calibration_authority.authority_id
+                if self.risk_calibration_authority is not None
+                else None
+            ),
+            "risk_calibration_artifact_sha256": (
+                self.risk_calibration_authority.artifact_sha256
+                if self.risk_calibration_authority is not None
+                else None
+            ),
+            "final_mess_in_transit": dict(state.mess_in_transit),
+            "terminal_mobility_complete": not any(state.mess_in_transit.values()),
             "failure": failure,
         }
+        if records:
+            component_maxima = {
+                name: max(
+                    float(row["realized_exact_electrical_stress"][key])
+                    for row in records
+                )
+                for name, key in (
+                    ("daily_max_voltage_stress", "voltage_stress_pu"),
+                    ("daily_max_line_stress", "line_stress_pu"),
+                    ("daily_max_transformer_stress", "transformer_stress_pu"),
+                )
+            }
+            runtimes = sorted(float(row["runtime_seconds"]) for row in records)
+            solver_runtimes = sorted(
+                float(row["slow_solver_time_s"]) for row in records
+            )
+            p95_index = max(0, math.ceil(0.95 * len(runtimes)) - 1)
+            summary.update(
+                {
+                    **component_maxima,
+                    "daily_max_ac_stress": summary[
+                        "realized_exact_electrical_stress"
+                    ]["worst_electrical_stress_pu"],
+                    "daily_ac_stress_exposure": summary[
+                        "realized_exact_electrical_stress"
+                    ]["electrical_stress_exposure_pu_hours"],
+                    "daily_peak_root_import_kw": max(
+                        float(row["exact_ac"]["root_import_p_kw"])
+                        for row in records
+                    ),
+                    "daily_rebound_peak_kw": None,
+                    "daily_rebound_energy_kwh": None,
+                    "grid_cost_aud": sum(
+                        float(row["realized_grid_cost_aud"]) for row in records
+                    ),
+                    "deadline_miss_count": len(
+                        {
+                            uid
+                            for row in records
+                            for uid in row["deadline_missed_job_ids"]
+                        }
+                    ),
+                    "total_deadline_misses": len(
+                        {
+                            uid
+                            for row in records
+                            for uid in row["deadline_missed_job_ids"]
+                        }
+                    ),
+                    "terminal_compute_debt": float(
+                        records[-1]["compute_debt_gpu_hours"]
+                    ),
+                    "terminal_energy_debt_kwh": float(
+                        records[-1]["energy_debt_kwh"]
+                    ),
+                    "mess_move_count": sum(
+                        int(row["mobility_started_route_count"]) for row in records
+                    ),
+                    "workload_temporal_shift_count": len(
+                        {
+                            uid
+                            for row in records
+                            for uid, job in row["job_states"].items()
+                            if job.get("planned_start_issue") is not None
+                            and job.get("arrival_issue") is not None
+                            and int(job["planned_start_issue"])
+                            > int(job["arrival_issue"])
+                        }
+                    ),
+                    "planned_temporal_wait_job_steps": int(
+                        state.planned_temporal_wait_job_steps_cumulative
+                    ),
+                    "workload_migration_count": int(
+                        state.migration_count_cumulative
+                    ),
+                    "checkpoint_count": len(
+                        {
+                            uid
+                            for row in records
+                            for uid, job in row["job_states"].items()
+                            if str(job.get("checkpoint_state"))
+                            in {"READY", "CONSUMED_BY_MIGRATION"}
+                        }
+                    ),
+                    "wan_transfer_gb": float(
+                        state.wan_transferred_bytes_cumulative
+                    ) / 1e9,
+                    "fast_recourse_count": len(records),
+                    "solver_time_p95_s": solver_runtimes[p95_index],
+                    "total_control_time_p95_s": runtimes[p95_index],
+                    "safety_filter_intervention_count": sum(
+                        bool(row["safety_filter_intervention"])
+                        for row in records
+                    ),
+                    "mobility_completed_count": sum(
+                        sum(bool(value) for value in row["mobility_completed"].values())
+                        for row in records
+                    ),
+                }
+            )
         atomic_write_json(method_root / "METHOD_SUMMARY.json", summary)
+        atomic_write_json(method_root / "DAILY_SUMMARY.json", summary)
         if records:
             fields = tuple(records[0])
             with (method_root / "MATERIALIZED_COMMIT_ROWS.csv").open("w", encoding="utf-8", newline="") as stream:
@@ -3727,6 +6029,7 @@ class PfrRuntimeRunner:
                 writer.writeheader()
                 for row in records:
                     writer.writerow({key: json.dumps(value, sort_keys=True) if isinstance(value, (dict, list, tuple)) else value for key, value in row.items()})
+            materialize_method_results(method_root, records, summary)
         return summary
 
     def run_matrix(
@@ -3737,11 +6040,83 @@ class PfrRuntimeRunner:
         initial: RuntimeInitialState,
         representative_week_id: str,
         output: Path,
+        reuse_passed_methods: bool = False,
     ) -> Mapping[str, Any]:
-        if tuple(config.comparison_method_id for config in configs) != MAIN_COMPARISON_METHODS:
-            raise RuntimeContractError("runtime matrix must execute B0-B7 in order")
+        method_axis = tuple(config.comparison_method_id for config in configs)
+        allowed_axes = (
+            MAIN_COMPARISON_METHODS,
+            tuple(ElectricalStressMethod(f"B{index:02d}") for index in range(10)),
+        )
+        if method_axis not in allowed_axes:
+            raise RuntimeContractError(
+                "runtime matrix must execute historical B0-B7 or stress B00-B09 in frozen order"
+            )
         summaries = []
+        reused_methods = []
+        executed_methods = []
         for config in configs:
+            method_id = config.comparison_method_id.value
+            method_root = output / method_id
+            summary_path = method_root / "METHOD_SUMMARY.json"
+            if reuse_passed_methods and summary_path.is_file():
+                try:
+                    reusable = json.loads(summary_path.read_text(encoding="utf-8"))
+                    marker_paths = sorted(
+                        method_root.glob("issue_*/COMMIT_MARKER.json")
+                    )
+                    markers = [
+                        json.loads(path.read_text(encoding="utf-8"))
+                        for path in marker_paths
+                    ]
+                    expected_issues = [int(frame.issue) for frame in frames]
+                    if (
+                        reusable.get("status") != "PASS"
+                        or reusable.get("comparison_method_id") != method_id
+                        or int(reusable.get("committed_issues", -1)) != len(frames)
+                        or int(reusable.get("fresh_exact_opendss_count", -1))
+                        != len(frames)
+                        or int(reusable.get("actual_gurobi_count", -1))
+                        != len(frames)
+                        or (method_root / "FAILURE.json").exists()
+                        or [int(row.get("issue", -1)) for row in markers]
+                        != expected_issues
+                        or any(
+                            row.get("status") != "PASS_COMMITTED"
+                            or row.get("commit_marker") is not True
+                            or row.get("comparison_method_id") != method_id
+                            for row in markers
+                        )
+                        or any(
+                            markers[index]["post_state_sha256"]
+                            != markers[index + 1]["pre_state_sha256"]
+                            for index in range(max(0, len(markers) - 1))
+                        )
+                    ):
+                        raise RuntimeContractError(
+                            f"existing {method_id} is not a reusable PASS"
+                        )
+                    validate_method_results(
+                        method_root, expected_issue_count=len(frames)
+                    )
+                except (
+                    OSError,
+                    RuntimeError,
+                    ValueError,
+                    TypeError,
+                    KeyError,
+                    json.JSONDecodeError,
+                ):
+                    reusable = None
+                if reusable is not None:
+                    summaries.append({**reusable, "reused_existing_pass": True})
+                    reused_methods.append(method_id)
+                    continue
+            if reuse_passed_methods and method_root.exists():
+                archive_root = output / "_preserved_method_attempts"
+                archive_root.mkdir(parents=True, exist_ok=True)
+                archived = archive_root / f"{method_id}__attempt_{time.time_ns()}"
+                method_root.replace(archived)
+            executed_methods.append(method_id)
             try:
                 summary = self.run_method(
                     config=config,
@@ -3792,19 +6167,37 @@ class PfrRuntimeRunner:
                     if partial_records
                     else int(initial.issue)
                 )
+                failed_attempt_id = canonical_hash(
+                    {
+                        "output": str(method_root.resolve()),
+                        "comparison_method_id": config.comparison_method_id.value,
+                        "representative_week_id": representative_week_id,
+                        "next_issue": next_issue,
+                    }
+                )
                 failure = {
                     "status": "FAIL_CLOSED_EXCEPTION",
                     "comparison_method_id": config.comparison_method_id.value,
                     "issue": next_issue,
                     "exception_type": type(exc).__name__,
                     "message": str(exc),
+                    "failure_stage": "METHOD_RUNTIME",
+                    "failure_reason": f"{type(exc).__name__}: {exc}",
+                    "last_committed_issue": (
+                        int(partial_records[-1]["issue"])
+                        if partial_records
+                        else None
+                    ),
+                    "attempt_id": failed_attempt_id,
+                    "parent_attempt_id": None,
+                    "retry_count": 0,
                     "partial_results_preserved": True,
                     "valid_partial_commit_markers": len(partial_records),
                     "invalid_partial_commit_markers": invalid_partial_markers,
                 }
                 atomic_write_json(method_root / "FAILURE.json", failure)
                 summary = {
-                    "schema_version": "K9H7_RESULT_V2.method_run.v1",
+                    "schema_version": "K9H7_RESULT_V2.method_run.v2",
                     "status": "FAIL_CLOSED",
                     "comparison_method_id": config.comparison_method_id.value,
                     "representative_week_id": representative_week_id,
@@ -3832,8 +6225,16 @@ class PfrRuntimeRunner:
                     ),
                     "future_actual_used": False,
                     "failure": failure,
+                    "failure_stage": failure["failure_stage"],
+                    "failure_reason": failure["failure_reason"],
+                    "last_committed_issue": failure["last_committed_issue"],
+                    "attempt_id": failed_attempt_id,
+                    "parent_attempt_id": None,
+                    "retry_count": 0,
                 }
                 atomic_write_json(method_root / "METHOD_SUMMARY.json", summary)
+                atomic_write_json(method_root / "DAILY_SUMMARY.json", summary)
+                materialize_method_results(method_root, partial_records, summary)
             summaries.append(summary)
         expected = len(frames) * len(configs)
         committed = sum(item["committed_issues"] for item in summaries)
@@ -3861,8 +6262,11 @@ class PfrRuntimeRunner:
             "method_execution_order": [
                 config.comparison_method_id.value for config in configs
             ],
+            "reused_passed_methods": reused_methods,
+            "executed_methods": executed_methods,
             "method_summaries": summaries,
         }
         output.mkdir(parents=True, exist_ok=True)
         atomic_write_json(output / "MATRIX_SUMMARY.json", matrix)
+        materialize_campaign_summary(output, summaries)
         return matrix

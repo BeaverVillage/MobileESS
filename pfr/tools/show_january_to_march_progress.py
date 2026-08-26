@@ -10,7 +10,12 @@ import os
 from pathlib import Path
 import time
 
+from pfr.tools.jfm_isolation import load_isolated_run_root
 
+
+ELECTRICAL_STRESS_METHODS = tuple(f"B{index:02d}" for index in range(10))
+# Historical exports remain import-compatible for analysis tools that only read
+# old campaigns.  New progress views use ELECTRICAL_STRESS_METHODS exclusively.
 MAIN_METHODS = tuple(f"B{index}" for index in range(8))
 B8_METHODS = ("B8",)
 
@@ -223,84 +228,42 @@ def source_progress() -> str:
 
 
 def main() -> None:
-    base = Path("/home/jaewon/mobile_ess_work/frozen_artifacts")
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--january-root",
-        type=Path,
-        default=base / "JAN2025_IDC_REFREEZE_V1_B0_B7",
-    )
-    parser.add_argument(
-        "--january-b8-root",
-        type=Path,
-        default=base / "JAN2025_IDC_REFREEZE_V1_B8",
-    )
-    parser.add_argument(
-        "--february-root",
-        type=Path,
-        default=base / "CODEX_PR6_V13_13_FEB2025_FULL_DAILY_20260823",
-    )
-    parser.add_argument(
-        "--march-root",
-        type=Path,
-        default=base / "CODEX_PR6_V13_13_MAR2025_FULL_DAILY_20260823",
-    )
-    parser.add_argument(
-        "--february-b8-root",
-        type=Path,
-        default=base / "CODEX_PR6_V13_13_FEB2025_FULL_B8_PERIODIC5_20260823",
-    )
-    parser.add_argument(
-        "--march-b8-root",
-        type=Path,
-        default=base / "CODEX_PR6_V13_13_MAR2025_FULL_B8_PERIODIC5_20260823",
-    )
+    parser.add_argument("--run-root", type=Path, required=True)
     parser.add_argument("--watch-seconds", type=float, default=10.0)
     args = parser.parse_args()
+    authority = load_isolated_run_root(args.run_root)
+    run_root = Path(authority["run_root"])
+    layout = authority["layout"]
     periods = [
         Period(
-            "JANUARY B0-B7",
-            args.january_root,
+            "JANUARY B00-B09",
+            run_root / layout["january_b00_b09"],
             date(2025, 1, 1),
             31,
-            MAIN_METHODS,
+            ELECTRICAL_STRESS_METHODS,
         ),
         Period(
-            "JANUARY B08",
-            args.january_b8_root,
-            date(2025, 1, 1),
-            31,
-            B8_METHODS,
-        ),
-        Period(
-            "FEBRUARY B0-B7",
-            args.february_root,
+            "FEBRUARY B00-B09",
+            run_root / layout["february_b00_b09"],
             date(2025, 2, 1),
             28,
-            MAIN_METHODS,
+            ELECTRICAL_STRESS_METHODS,
         ),
         Period(
-            "FEBRUARY B08",
-            args.february_b8_root,
-            date(2025, 2, 1),
-            28,
-            B8_METHODS,
-        ),
-        Period(
-            "MARCH B0-B7",
-            args.march_root,
+            "MARCH B00-B09",
+            run_root / layout["march_b00_b09"],
             date(2025, 3, 1),
             31,
-            MAIN_METHODS,
-        ),
-        Period(
-            "MARCH B08",
-            args.march_b8_root,
-            date(2025, 3, 1),
-            31,
-            B8_METHODS,
+            ELECTRICAL_STRESS_METHODS,
         ),
     ]
+    print(
+        f"ISOLATED RUN: {run_root} "
+        f"commit={authority['expected_full_commit_sha']} "
+        f"branch={authority['expected_branch']}",
+        flush=True,
+    )
     while True:
         print(source_progress(), flush=True)
         print(snapshot(periods), flush=True)

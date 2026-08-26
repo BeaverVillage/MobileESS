@@ -1,8 +1,9 @@
-"""Fail-closed, read-only release gate for the 31-day January campaign."""
+"""Fail-closed, read-only release gate for a bounded January campaign."""
 
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 from pathlib import Path
@@ -14,11 +15,14 @@ import pandas as pd
 
 from pfr.canary import run_idc_migration_canary
 from pfr.methods import (
+    ELECTRICAL_STRESS_COMPARISON_METHODS,
     ExperimentAuthority,
     MAIN_COMPARISON_METHODS,
     MethodFactory,
 )
 from pfr.migration import load_migration_authority
+from pfr.mobility_execution import Stage25fSumoExecutionAuthority
+from pfr.mobility_physics import MobilityPhysics
 from pfr.provenance import scientific_implementation_fingerprint
 from pfr.tools.run_pfr_daily_campaign import ISSUES_PER_DAY, day_specs
 from pfr.tools.run_pfr_matrix import _runtime_initial_state
@@ -109,6 +113,45 @@ def validate_method_contracts() -> Mapping[str, Any]:
     }
 
 
+def validate_electrical_stress_method_contracts() -> Mapping[str, Any]:
+    hashes = tuple(format(index, "064x") for index in range(1, 8))
+    configs = MethodFactory(ExperimentAuthority(*hashes)).electrical_stress_campaign()
+    observed = tuple(config.comparison_method_id for config in configs)
+    by_id = {config.comparison_method_id.value: config for config in configs}
+    factorial = tuple(by_id[method] for method in ("B00", "B01", "B04", "B06"))
+    factorial_common = {
+        (
+            config.control_mode,
+            config.periodic_replan_steps,
+            config.risk_interface,
+            config.joint_uncertainty,
+            config.ac_safety_filter,
+        )
+        for config in factorial
+    }
+    event_contract_pass = bool(
+        by_id["B07"].control_mode == "EVENT_TRIGGERED"
+        and by_id["B07"].risk_interface == "RAW_UNCALIBRATED"
+        and by_id["B08"].control_mode == "PERIODIC_MPC"
+        and by_id["B08"].periodic_replan_steps == 1
+        and by_id["B08"].risk_interface == "CALIBRATED"
+        and by_id["B09"].control_mode == "EVENT_TRIGGERED"
+        and by_id["B09"].risk_interface == "CALIBRATED"
+    )
+    return {
+        "pass": observed == ELECTRICAL_STRESS_COMPARISON_METHODS
+        and all(config.ac_safety_filter for config in configs)
+        and len(factorial_common) == 1
+        and event_contract_pass,
+        "method_ids": [config.comparison_method_id.value for config in configs],
+        "objective_semantics": "COMMON_ELECTRICAL_STRESS_LEXICOGRAPHIC",
+        "safety_filter_common": all(config.ac_safety_filter for config in configs),
+        "factorial_cells": ["B00", "B01", "B04", "B06"],
+        "factorial_common_controller_contract": len(factorial_common) == 1,
+        "b07_b08_b09_event_calibration_contract": event_contract_pass,
+    }
+
+
 def validate_migration_authority(path: Path) -> Mapping[str, Any]:
     authority = load_migration_authority(path)
     passed = bool(
@@ -193,11 +236,11 @@ def validate_common_native_grid_control(
         and authority.get("feeder_wide_global_guard", {}).get(
             "maximum_total_candidate_evaluations"
         )
-        == 928
+        == 88
         and authority.get("feeder_wide_global_guard", {}).get(
             "regulator_search_beam_width"
         )
-        == 4
+        == 2
         and authority.get("feeder_wide_global_guard", {}).get(
             "regulator_search_tap_anchor_count"
         )
@@ -205,7 +248,7 @@ def validate_common_native_grid_control(
         and authority.get("feeder_wide_global_guard", {}).get(
             "maximum_regulator_search_iterations"
         )
-        == 16
+        == 2
         and authority.get("feeder_wide_global_guard", {}).get(
             "fixed_candidate_state_includes_capacitors_and_regulator_taps"
         )
@@ -502,13 +545,90 @@ def validate_mobility_sources(roots: Sequence[Path]) -> Mapping[str, Any]:
             observed[issue] = str(path)
     observed_issues = set(observed)
     missing = sorted(EXPECTED_ISSUES - observed_issues)
+    eta_samples = []
+    for issue in sorted(observed)[:3]:
+        path = Path(observed[issue])
+        try:
+            with np.load(path, allow_pickle=False) as payload:
+                shape = tuple(payload["path_quantiles_sec"].shape)
+            eta_samples.append({"issue": issue, "shape": shape, "pass": shape == (54, 1656, 3)})
+        except (KeyError, OSError, ValueError):
+            eta_samples.append({"issue": issue, "shape": None, "pass": False})
     return {
-        "pass": not duplicates and not malformed and not missing,
+        "pass": not duplicates
+        and not malformed
+        and not missing
+        and bool(eta_samples)
+        and all(row["pass"] for row in eta_samples),
         "observed_issue_count": len(observed_issues & EXPECTED_ISSUES),
         "duplicates": sorted(set(duplicates))[:20],
         "malformed": malformed[:20],
         "missing_issue_sample": missing[:20],
+        "eta_samples": eta_samples,
+        "runtime_mobility_input": "path_quantiles_sec_ONLY",
     }
+
+
+def validate_physics_only_mobility_runtime(repo: Path) -> Mapping[str, Any]:
+    source_path = repo / "pfr/tools/run_pfr_matrix.py"
+    tree = ast.parse(source_path.read_text(encoding="utf-8"))
+    forbidden = {
+        "energy_quantiles_kWh",
+        "safe_energy_kWh",
+        "route_safe_eta_sec",
+        "e4b_template_id",
+        "profile_safe_horizon_steps",
+    }
+    accessed = sorted(
+        {
+            node.slice.value
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Subscript)
+            and isinstance(node.slice, ast.Constant)
+            and isinstance(node.slice.value, str)
+            and node.slice.value in forbidden
+        }
+    )
+    return {
+        "pass": not accessed,
+        "forbidden_legacy_array_accesses": accessed,
+        "required_runtime_input": "path_quantiles_sec",
+        "energy_authority": "MESS_MOBILITY_PHYSICS_V1",
+    }
+
+
+def validate_sumo_mobility_execution(
+    repo: Path, route_catalog_path: Path
+) -> Mapping[str, Any]:
+    """Open the execution-only authority without exposing it to causal frames."""
+    contract_path = repo / "pfr/contracts/MESS_MOBILITY_EXECUTION_SUMO_V1.json"
+    physics_path = repo / "pfr/contracts/MESS_MOBILITY_PHYSICS_V1.json"
+    try:
+        route_catalog = json.loads(route_catalog_path.read_text(encoding="utf-8"))
+        contract = json.loads(contract_path.read_text(encoding="utf-8"))
+        authority = Stage25fSumoExecutionAuthority(
+            contract_path=contract_path,
+            mobility_physics=MobilityPhysics.from_contract(physics_path),
+            route_rows=route_catalog.get("routes", ()),
+        )
+        stored_evidence = contract.get("stored_prediction_actual_evidence", {})
+        evidence_ok = set(stored_evidence) == {"eta", "energy", "aggregation"}
+        return {
+            "pass": evidence_ok,
+            "authority_id": authority.AUTHORITY_ID,
+            "authority_sha256": authority.fingerprint,
+            "optimizer_access": False,
+            "post_decision_only": True,
+            "prediction_actual_error_materialized": evidence_ok,
+        }
+    except Exception as exc:
+        return {
+            "pass": False,
+            "error": f"{type(exc).__name__}: {exc}",
+            "optimizer_access": False,
+            "post_decision_only": True,
+            "prediction_actual_error_materialized": False,
+        }
 
 
 def validate_uncertainty(
@@ -543,7 +663,7 @@ def validate_uncertainty(
 def validate_jobs(independent_path: Path, canonical_path: Path) -> Mapping[str, Any]:
     independent = pd.read_parquet(
         independent_path,
-        columns=("job_uid", "arrival_step", "requested_gpu"),
+        columns=("job_uid", "origin_IDC_id", "arrival_step", "requested_gpu"),
     )
     canonical = pd.read_parquet(
         canonical_path,
@@ -564,6 +684,45 @@ def validate_jobs(independent_path: Path, canonical_path: Path) -> Mapping[str, 
         "canonical_job_count": len(canonical),
         "arrival_min": int(arrivals.min()) if len(arrivals) else None,
         "arrival_max": int(arrivals.max()) if len(arrivals) else None,
+    }
+
+
+def validate_workload_scheduler_contract(
+    repo: Path,
+    independent_path: Path,
+) -> Mapping[str, Any]:
+    jobs = pd.read_parquet(
+        independent_path,
+        columns=("origin_IDC_id", "arrival_step", "requested_gpu"),
+    )
+    contract_path = repo / "pfr/contracts/PFR_RUNTIME_CONTRACT.json"
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    burst_gpu = (
+        jobs.groupby(["arrival_step", "origin_IDC_id"])["requested_gpu"].sum()
+        if not jobs.empty
+        else pd.Series(dtype=float)
+    )
+    maximum_job_gpu = (
+        int(jobs["requested_gpu"].max()) if not jobs.empty else 0
+    )
+    maximum_burst_gpu = int(burst_gpu.max()) if len(burst_gpu) else 0
+    queue_required_groups = int((burst_gpu > 256).sum())
+    scheduler = str(contract.get("common_gpu_gang_scheduler", ""))
+    fairness = str(contract.get("workload_service_fairness_invariant", ""))
+    passed = bool(
+        contract.get("schema_version") == "K9H7_RESULT_V2.runtime_contract.v2"
+        and "work-conserving" in scheduler
+        and "complete gang" in scheduler
+        and "QUEUED" in fairness
+        and maximum_job_gpu <= 256
+    )
+    return {
+        "pass": passed,
+        "policy": "COMMON_WORK_CONSERVING_LEAST_START_SLACK_EDF_WHOLE_GANG",
+        "maximum_single_job_gpu": maximum_job_gpu,
+        "maximum_same_issue_idc_arrival_gpu": maximum_burst_gpu,
+        "arrival_groups_requiring_capacity_queue": queue_required_groups,
+        "capacity_queue_required_by_cohort": queue_required_groups > 0,
     }
 
 
@@ -589,7 +748,11 @@ def main() -> None:
     parser.add_argument("--power-curve", type=Path, required=True)
     parser.add_argument("--mobility-root", type=Path, action="append", required=True)
     parser.add_argument("--route-catalog", type=Path, required=True)
-    parser.add_argument("--mobility-template-bank", type=Path, required=True)
+    parser.add_argument(
+        "--mobility-template-bank",
+        type=Path,
+        help="Legacy compatibility argument; physics-only runtime ignores it.",
+    )
     parser.add_argument("--workload-uncertainty", type=Path, required=True)
     parser.add_argument("--factorized-uncertainty", type=Path, required=True)
     parser.add_argument(
@@ -598,7 +761,23 @@ def main() -> None:
         help="Frozen IDC migration authority; defaults to the repository contract.",
     )
     parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument(
+        "--electrical-stress-campaign",
+        action="store_true",
+        help="Validate the ordered B00-B09 campaign and PRE axis.",
+    )
+    parser.add_argument("--campaign-start-day", type=int, default=1)
+    parser.add_argument("--campaign-end-day", type=int, default=31)
+    parser.add_argument("--campaign-method-count", type=int)
     args = parser.parse_args()
+    if not (
+        1 <= args.campaign_start_day <= args.campaign_end_day <= 31
+    ):
+        parser.error("campaign day range must lie within January 1-31")
+    if args.campaign_method_count is not None and not (
+        1 <= args.campaign_method_count <= 10
+    ):
+        parser.error("campaign method count must lie in 1-10")
     migration_authority_path = (
         args.migration_authority
         if args.migration_authority is not None
@@ -616,7 +795,8 @@ def main() -> None:
         args.canonical_jobs,
         args.power_curve,
         args.route_catalog,
-        args.mobility_template_bank,
+        args.repo / "pfr/contracts/MESS_MOBILITY_PHYSICS_V1.json",
+        args.repo / "pfr/contracts/MESS_MOBILITY_EXECUTION_SUMO_V1.json",
         args.workload_uncertainty,
         args.factorized_uncertainty,
         args.repo / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.dss",
@@ -659,7 +839,11 @@ def main() -> None:
     if checks["required_files"]["pass"]:
         checks.update(
             {
-                "method_contracts": validate_method_contracts(),
+                "method_contracts": (
+                    validate_electrical_stress_method_contracts()
+                    if args.electrical_stress_campaign
+                    else validate_method_contracts()
+                ),
                 "migration_authority": validate_migration_authority(
                     migration_authority_path
                 ),
@@ -693,30 +877,70 @@ def main() -> None:
                 "daily_pre": validate_daily_pre(args.initial_state),
                 "power_sources": validate_power_sources(args.shared_root),
                 "mobility_sources": validate_mobility_sources(args.mobility_root),
+                "physics_only_mobility_runtime": validate_physics_only_mobility_runtime(
+                    args.repo
+                ),
+                "sumo_mobility_execution": validate_sumo_mobility_execution(
+                    args.repo, args.route_catalog
+                ),
                 "uncertainty": validate_uncertainty(
                     args.factorized_uncertainty, args.workload_uncertainty
                 ),
                 "jobs": validate_jobs(args.independent_jobs, args.canonical_jobs),
+                "workload_scheduler": validate_workload_scheduler_contract(
+                    args.repo, args.independent_jobs
+                ),
             }
         )
         route = json.loads(args.route_catalog.read_text(encoding="utf-8"))
-        template = pd.read_parquet(args.mobility_template_bank)
-        checks["route_and_template"] = {
+        physics = json.loads(
+            (args.repo / "pfr/contracts/MESS_MOBILITY_PHYSICS_V1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        required_geometry = {
+            "route_distance_km",
+            "cumulative_ascent_m",
+            "cumulative_descent_m",
+        }
+        checks["route_and_physics"] = {
             "pass": route.get("status") == "PASS"
             and len(route.get("routes", ())) == 1656
-            and all(f"u{index:03d}" in template for index in range(129)),
+            and route.get("mobility_energy_ml_loaded") is False
+            and route.get("runtime_energy_authority")
+            == "DETERMINISTIC_PHYSICS_E_RECOMPUTED_FROM_GEOMETRY_AND_CAUSAL_ETA"
+            and all(
+                required_geometry.issubset(row) for row in route.get("routes", ())
+            )
+            and physics.get("status") == "FROZEN_PHYSICS_ONLY"
+            and physics.get("mobility_energy_ml_loaded") is False
+            and physics.get("mobility_profile_ml_loaded") is False,
             "route_count": len(route.get("routes", ())),
-            "template_row_count": len(template),
+            "energy_authority": physics.get("energy_authority"),
+            "legacy_template_bank_loaded": False,
         }
     status = "PASS" if checks and all(row.get("pass") is True for row in checks.values()) else "FAIL_CLOSED"
+    campaign_day_count = len(
+        day_specs(args.campaign_start_day, args.campaign_end_day)
+    )
+    methods_per_day = (
+        args.campaign_method_count
+        if args.campaign_method_count is not None
+        else (10 if args.electrical_stress_campaign else 8)
+    )
     report = {
-        "schema_version": "JAN2025_31DAY_POST_HOC_PREFLIGHT_V13_13_FREEZE_20260823",
+        "schema_version": "JAN2025_BOUNDED_POST_HOC_PREFLIGHT_V13_14",
         "evaluation_classification": "POST_HOC_DESIGN_VALIDATION_NOT_INDEPENDENT_HOLDOUT",
         "independent_holdout_claim": False,
         "status": status,
-        "campaign_days": len(day_specs(1, 31)),
-        "expected_episodes": 31 * 8,
-        "expected_scored_issues": TOTAL_ISSUES * 8,
+        "campaign_start_day": args.campaign_start_day,
+        "campaign_end_day": args.campaign_end_day,
+        "campaign_days": campaign_day_count,
+        "expected_episodes": campaign_day_count * methods_per_day,
+        "expected_scored_issues": (
+            campaign_day_count * ISSUES_PER_DAY * methods_per_day
+        ),
+        "electrical_stress_campaign": args.electrical_stress_campaign,
         "checks": checks,
         "critical_code_sha256": {
             str(path.relative_to(args.repo)): sha256(path)

@@ -7,15 +7,20 @@ import csv
 from datetime import date, timedelta
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 from typing import Any, Mapping
 
 from pfr.provenance import scientific_implementation_fingerprint
+from pfr.result_storage import validate_campaign_summary
+from pfr.risk_calibration import RISK_FAMILY_SCALES
+from pfr.runtime import MESS_FLOOR_KWH
 
 
 METHODS = tuple(f"B{index}" for index in range(8))
 B8_METHODS = ("B8",)
+ELECTRICAL_STRESS_METHODS = tuple(f"B{index:02d}" for index in range(10))
 ISSUES_PER_DAY = 288
 
 
@@ -44,6 +49,195 @@ def atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:
     temporary.replace(path)
 
 
+def _prediction_actual_evidence_errors(marker: Mapping[str, Any]) -> list[str]:
+    """Validate the v2 mobility/migration audit payload before accepting storage."""
+    if marker.get("schema_version") != "K9H7_RESULT_V2.issue_commit.v2":
+        return []
+    errors: list[str] = []
+    required = {
+        "mobility_started_events",
+        "mobility_started_route_count",
+        "mobility_q50_eta_prediction_error_seconds_started_routes",
+        "mobility_q50_energy_prediction_error_kwh_started_routes",
+        "mobility_realized_protected_floor_shortfall_kwh_started_routes",
+        "mobility_realized_protected_floor_violation_route_count",
+        "migration_prediction_actual_events",
+        "migration_prediction_actual_event_count",
+        "migration_duration_prediction_error_seconds",
+    }
+    missing = sorted(required - set(marker))
+    if missing:
+        return [f"prediction/actual evidence fields missing: {missing}"]
+    mobility = marker.get("mobility_started_events")
+    migrations = marker.get("migration_prediction_actual_events")
+    if not isinstance(mobility, list) or not isinstance(migrations, list):
+        return ["prediction/actual event evidence is not a list"]
+    if int(marker["mobility_started_route_count"]) != len(mobility):
+        errors.append("mobility started-route count mismatch")
+    if int(marker["migration_prediction_actual_event_count"]) != len(migrations):
+        errors.append("migration prediction/actual event count mismatch")
+    tolerance = 1e-8
+    for event in mobility:
+        try:
+            eta_error = float(event["sumo_realized_eta_seconds"]) - float(
+                event["planned_q50_eta_seconds"]
+            )
+            energy_error = float(
+                event["realized_mobility_energy_route_total_kwh"]
+            ) - float(event["planned_mobility_energy_kwh"])
+            terminal_energy = float(event["realized_terminal_energy_kwh"])
+            floor_shortfall = max(0.0, MESS_FLOOR_KWH - terminal_energy)
+            if abs(eta_error - float(event["q50_eta_prediction_error_seconds"])) > tolerance:
+                errors.append("mobility ETA prediction/actual error arithmetic mismatch")
+            if abs(
+                energy_error - float(event["q50_energy_prediction_error_kwh"])
+            ) > tolerance:
+                errors.append("mobility energy prediction/actual error arithmetic mismatch")
+            if event.get("actual_used_by_optimizer") is not False:
+                errors.append("mobility realized actual leaked to optimizer")
+            if event.get("actual_opened_post_decision_only") is not True:
+                errors.append("mobility realized actual was not post-decision only")
+            if abs(
+                floor_shortfall
+                - float(event["realized_protected_floor_shortfall_kwh"])
+            ) > tolerance:
+                errors.append("mobility realized SOC-floor shortfall arithmetic mismatch")
+            if bool(event["realized_route_protected_floor_feasible"]) != (
+                terminal_energy >= MESS_FLOOR_KWH - 1e-9
+            ):
+                errors.append("mobility realized SOC-floor feasibility mismatch")
+        except (KeyError, TypeError, ValueError):
+            errors.append("mobility prediction/actual event is incomplete")
+    for event in migrations:
+        try:
+            step_error = int(event["realized_total_downtime_steps"]) - int(
+                event["predicted_total_downtime_steps"]
+            )
+            if step_error != int(event["total_downtime_error_steps"]):
+                errors.append("migration duration error arithmetic mismatch")
+            if int(event["total_downtime_error_seconds"]) != step_error * 300:
+                errors.append("migration duration seconds/steps mismatch")
+            if event.get("external_observed_wan_telemetry") is not False:
+                errors.append("migration telemetry classification is invalid")
+        except (KeyError, TypeError, ValueError):
+            errors.append("migration prediction/actual event is incomplete")
+    try:
+        mobility_eta_error = sum(
+            float(event["q50_eta_prediction_error_seconds"])
+            for event in mobility
+        )
+        mobility_energy_error = sum(
+            float(event["q50_energy_prediction_error_kwh"])
+            for event in mobility
+        )
+        mobility_floor_shortfall = sum(
+            float(event["realized_protected_floor_shortfall_kwh"])
+            for event in mobility
+        )
+        mobility_floor_violations = sum(
+            not bool(event["realized_route_protected_floor_feasible"])
+            for event in mobility
+        )
+        migration_duration_error = sum(
+            int(event["total_downtime_error_seconds"])
+            for event in migrations
+        )
+        if abs(
+            mobility_eta_error
+            - float(
+                marker[
+                    "mobility_q50_eta_prediction_error_seconds_started_routes"
+                ]
+            )
+        ) > tolerance:
+            errors.append("mobility ETA aggregate error mismatch")
+        if abs(
+            mobility_energy_error
+            - float(
+                marker[
+                    "mobility_q50_energy_prediction_error_kwh_started_routes"
+                ]
+            )
+        ) > tolerance:
+            errors.append("mobility energy aggregate error mismatch")
+        if migration_duration_error != int(
+            marker["migration_duration_prediction_error_seconds"]
+        ):
+            errors.append("migration duration aggregate error mismatch")
+        if abs(
+            mobility_floor_shortfall
+            - float(
+                marker[
+                    "mobility_realized_protected_floor_shortfall_kwh_started_routes"
+                ]
+            )
+        ) > tolerance:
+            errors.append("mobility SOC-floor shortfall aggregate mismatch")
+        if mobility_floor_violations != int(
+            marker["mobility_realized_protected_floor_violation_route_count"]
+        ):
+            errors.append("mobility SOC-floor violation aggregate mismatch")
+    except (KeyError, TypeError, ValueError):
+        errors.append("prediction/actual aggregate evidence is incomplete")
+    return errors
+
+
+def _risk_calibration_evidence_errors(marker: Mapping[str, Any]) -> list[str]:
+    method = str(marker.get("comparison_method_id", ""))
+    if (
+        marker.get("schema_version") != "K9H7_RESULT_V2.issue_commit.v2"
+        or method not in {"B6", "B07"}
+    ):
+        return []
+    audit = marker.get("risk_calibration_audit")
+    if not isinstance(audit, dict):
+        return [f"{method} risk calibration audit missing"]
+    if (
+        audit.get("schema_version")
+        != "PFR5_EVENT_RISK_CALIBRATION_AUDIT_V1"
+        or audit.get("future_actual_used_by_optimizer") is not False
+        or audit.get("actual_opened_post_decision_only") is not True
+    ):
+        return [f"{method} risk calibration audit authority invalid"]
+    predicted = audit.get("predicted_violation_margin")
+    actual = audit.get("actual_violation_margin")
+    scales = audit.get("predeclared_scale")
+    positive = audit.get("positive_underprediction_margin")
+    normalized = audit.get("normalized_positive_underprediction")
+    mappings = (predicted, actual, scales, positive, normalized)
+    if any(not isinstance(value, dict) for value in mappings) or any(
+        set(value) != set(RISK_FAMILY_SCALES) for value in mappings
+    ):
+        return [f"{method} risk calibration family evidence incomplete"]
+    errors: list[str] = []
+    expected_scores = []
+    for family, frozen_scale in RISK_FAMILY_SCALES.items():
+        try:
+            expected_positive = max(
+                0.0, float(actual[family]) - float(predicted[family])
+            )
+            expected_normalized = expected_positive / frozen_scale
+            if abs(float(scales[family]) - frozen_scale) > 1e-12:
+                errors.append(f"{method} risk scale mismatch family={family}")
+            if abs(float(positive[family]) - expected_positive) > 1e-10:
+                errors.append(
+                    f"{method} risk positive residual arithmetic mismatch family={family}"
+                )
+            if abs(float(normalized[family]) - expected_normalized) > 1e-10:
+                errors.append(
+                    f"{method} risk normalized residual arithmetic mismatch family={family}"
+                )
+            expected_scores.append(expected_normalized)
+        except (TypeError, ValueError, KeyError):
+            errors.append(f"{method} risk calibration numeric evidence invalid family={family}")
+    try:
+        if abs(float(audit["joint_normalized_score"]) - max(expected_scores)) > 1e-10:
+            errors.append(f"{method} risk joint score arithmetic mismatch")
+    except (TypeError, ValueError, KeyError):
+        errors.append(f"{method} risk joint score missing")
+    return errors
+
+
 def inspect_method(
     method_root: Path,
     method: str,
@@ -70,6 +264,10 @@ def inspect_method(
                 "post_state_sha256"
             ):
                 raise ValueError("state-chain hash missing")
+            evidence_errors = _prediction_actual_evidence_errors(marker)
+            evidence_errors.extend(_risk_calibration_evidence_errors(marker))
+            if evidence_errors:
+                raise ValueError("; ".join(evidence_errors))
             markers.append(marker)
         except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
             errors.append(f"{marker_path}: {type(exc).__name__}: {exc}")
@@ -107,6 +305,33 @@ def inspect_method(
             errors.append("METHOD_SUMMARY commit count mismatch")
         if summary.get("status") == "PASS" and len(markers) != ISSUES_PER_DAY:
             errors.append("PASS method does not contain 288 markers")
+        if summary.get("status") == "PASS" and method in {"B6", "B07"}:
+            if int(summary.get("risk_calibration_audit_count", -1)) != len(markers):
+                errors.append(f"PASS {method} risk calibration audit count mismatch")
+            marker_scores = [
+                float(row["risk_calibration_audit"]["joint_normalized_score"])
+                for row in markers
+                if isinstance(row.get("risk_calibration_audit"), dict)
+            ]
+            if marker_scores:
+                summary_score = float(
+                    summary.get("risk_calibration_day_joint_score", float("nan"))
+                )
+                if not math.isfinite(summary_score) or abs(
+                    summary_score - max(marker_scores)
+                ) > 1e-10:
+                    errors.append(f"PASS {method} daily risk calibration score mismatch")
+        if (
+            summary.get("status") == "PASS"
+            and summary.get("schema_version") == "K9H7_RESULT_V2.method_run.v2"
+        ):
+            terminal_state = summary.get("final_mess_in_transit")
+            if not isinstance(terminal_state, dict) or not terminal_state:
+                errors.append("PASS method lacks terminal MESS transit evidence")
+            elif any(bool(value) for value in terminal_state.values()):
+                errors.append("PASS method ends with an in-transit MESS route")
+            if summary.get("terminal_mobility_complete") is not True:
+                errors.append("PASS method terminal mobility completion flag is not true")
         if summary.get("status") != "PASS" and failure is None:
             errors.append("failed method has no FAILURE.json")
     elif method_root.exists() and (markers or failure is not None):
@@ -121,6 +346,23 @@ def inspect_method(
                 reader = csv.DictReader(handle)
                 if reader.fieldnames is None or "issue" not in reader.fieldnames:
                     raise ValueError("issue column missing")
+                if any(
+                    row.get("schema_version")
+                    == "K9H7_RESULT_V2.issue_commit.v2"
+                    for row in markers
+                ):
+                    required_csv_fields = {
+                        "mobility_started_events",
+                        "mobility_q50_eta_prediction_error_seconds_started_routes",
+                        "mobility_q50_energy_prediction_error_kwh_started_routes",
+                        "migration_prediction_actual_events",
+                        "migration_duration_prediction_error_seconds",
+                    }
+                    missing_csv = sorted(required_csv_fields - set(reader.fieldnames))
+                    if missing_csv:
+                        raise ValueError(
+                            f"prediction/actual CSV fields missing: {missing_csv}"
+                        )
                 for row in reader:
                     csv_issues.append(int(row["issue"]))
                     if row.get("comparison_method_id") != method:
@@ -156,6 +398,7 @@ def inspect_day(
     calendar_date: str,
     implementation_fingerprint: str,
     methods: tuple[str, ...] = METHODS,
+    authorized_implementation_fingerprints: tuple[str, ...] = (),
 ) -> dict[str, Any]:
     errors: list[str] = []
     expected_first_issue = (
@@ -225,7 +468,14 @@ def inspect_day(
         complete = True
 
     if manifest is not None:
-        if manifest.get("scientific_implementation_fingerprint") != implementation_fingerprint:
+        artifact_fingerprint = manifest.get(
+            "scientific_implementation_fingerprint"
+        )
+        if (
+            artifact_fingerprint != implementation_fingerprint
+            and artifact_fingerprint
+            not in authorized_implementation_fingerprints
+        ):
             errors.append("scientific implementation fingerprint drift")
         if manifest.get("status") != scientific_status and summary is not None:
             errors.append("RUN_MANIFEST/MATRIX_SUMMARY status mismatch")
@@ -258,6 +508,18 @@ def inspect_day(
         "methods": method_rows,
         "orchestration_failure_evidence": orchestration_failure is not None,
         "temporary_files": temp_files,
+        "artifact_scientific_implementation_fingerprint": (
+            manifest.get("scientific_implementation_fingerprint")
+            if manifest is not None
+            else None
+        ),
+        "cross_implementation_reuse_authorized": bool(
+            manifest is not None
+            and manifest.get("scientific_implementation_fingerprint")
+            != implementation_fingerprint
+            and manifest.get("scientific_implementation_fingerprint")
+            in authorized_implementation_fingerprints
+        ),
         "errors": errors,
     }
 
@@ -296,7 +558,13 @@ def inspect_campaign_registry(
         errors.append("campaign issue-axis size mismatch")
     if summary.get("continue_to_next_method_after_failure") is not True:
         errors.append("campaign method-failure continuation policy missing")
-    if summary.get("continue_to_next_day_after_failure") is not True:
+    fail_fast = summary.get("fail_fast_on_first_day_failure") is True
+    if fail_fast:
+        if summary.get("continue_to_next_day_after_failure") is not False:
+            errors.append("fail-fast campaign continuation policy mismatch")
+        if summary.get("failure_evidence_preserved_before_abort") is not True:
+            errors.append("fail-fast failure-evidence policy missing")
+    elif summary.get("continue_to_next_day_after_failure") is not True:
         errors.append("campaign day-failure continuation policy missing")
     expected_b8 = methods == B8_METHODS
     if summary.get("supplementary_b8_periodic_5min") is not expected_b8:
@@ -323,32 +591,109 @@ def main() -> None:
     parser.add_argument("--days", type=int, required=True)
     parser.add_argument("--report", type=Path)
     parser.add_argument(
+        "--reuse-verified-pass-fingerprint",
+        action="append",
+        default=[],
+        help=(
+            "Explicitly authorize storage verification of a PASS day reused "
+            "by the campaign runner from this scientific fingerprint."
+        ),
+    )
+    parser.add_argument(
         "--supplementary-b8-periodic-5min",
         action="store_true",
         help="Verify a B8-only supplementary daily campaign.",
     )
+    parser.add_argument(
+        "--diagnostic-method",
+        choices=(tuple(f"B{index}" for index in range(9)) + ELECTRICAL_STRESS_METHODS),
+        help="Verify a one-method calibration or development-validation campaign.",
+    )
+    parser.add_argument(
+        "--electrical-stress-campaign",
+        action="store_true",
+        help="Verify the ordered B00-B09 electrical-stress campaign.",
+    )
     args = parser.parse_args()
+    if args.diagnostic_method and args.supplementary_b8_periodic_5min:
+        parser.error(
+            "--diagnostic-method and --supplementary-b8-periodic-5min are mutually exclusive"
+        )
+    if args.electrical_stress_campaign and (
+        args.diagnostic_method or args.supplementary_b8_periodic_5min
+    ):
+        parser.error(
+            "--electrical-stress-campaign is mutually exclusive with single-method modes"
+        )
     if not 1 <= args.days <= 31:
         parser.error("--days must be in [1, 31]")
+    if any(
+        len(value) != 64
+        or value.lower() != value
+        or any(char not in "0123456789abcdef" for char in value)
+        for value in args.reuse_verified_pass_fingerprint
+    ):
+        parser.error(
+            "--reuse-verified-pass-fingerprint must be a lowercase SHA-256"
+        )
     expected_dates = [
         (args.start_date + timedelta(days=offset)).isoformat()
         for offset in range(args.days)
     ]
     fingerprint = scientific_implementation_fingerprint(args.repo)
-    methods = B8_METHODS if args.supplementary_b8_periodic_5min else METHODS
+    methods = (
+        B8_METHODS
+        if args.supplementary_b8_periodic_5min
+        else (
+            (args.diagnostic_method,)
+            if args.diagnostic_method
+            else (
+                ELECTRICAL_STRESS_METHODS
+                if args.electrical_stress_campaign
+                else METHODS
+            )
+        )
+    )
     rows = [
         inspect_day(
             args.root / calendar_date,
             calendar_date,
             fingerprint,
             methods,
+            tuple(args.reuse_verified_pass_fingerprint),
         )
         for calendar_date in expected_dates
     ]
     campaign_registry = inspect_campaign_registry(args.root, expected_dates, methods)
+    period_summary: dict[str, Any] | None = None
+    if args.electrical_stress_campaign:
+        try:
+            period_summary = validate_campaign_summary(
+                args.root / "CAMPAIGN_SUMMARY.parquet",
+                expected_method_ids=ELECTRICAL_STRESS_METHODS,
+            )
+            period_audit = load_json(args.root / "PERIOD_SUMMARY_AUDIT.json")
+            if (
+                period_audit.get("status") != "PASS"
+                or period_audit.get("calendar_dates") != expected_dates
+                or period_audit.get("method_ids_in_order")
+                != list(ELECTRICAL_STRESS_METHODS)
+            ):
+                raise RuntimeError("period summary audit axis/status mismatch")
+            period_summary = {**period_summary, "period_audit": period_audit}
+        except (OSError, RuntimeError, ValueError, json.JSONDecodeError) as exc:
+            period_summary = {
+                "status": "FAIL",
+                "errors": [f"{type(exc).__name__}: {exc}"],
+            }
     storage_ok = (
         all(row["storage_integrity"] == "PASS" for row in rows)
         and not campaign_registry["errors"]
+        and (
+            not args.electrical_stress_campaign
+            or period_summary is not None
+            and period_summary.get("status") == "PASS"
+        )
     )
     complete = all(bool(row["complete"]) for row in rows)
     scientific_pass = complete and all(
@@ -375,12 +720,17 @@ def main() -> None:
         "supplementary_b8_periodic_5min": (
             args.supplementary_b8_periodic_5min
         ),
+        "electrical_stress_campaign": args.electrical_stress_campaign,
         "completed_days": sum(bool(row["complete"]) for row in rows),
         "pass_days": sum(row["scientific_status"] == "PASS" for row in rows),
         "total_commit_markers": sum(int(row["commit_markers"]) for row in rows),
         "scientific_implementation_fingerprint": fingerprint,
+        "authorized_verified_pass_reuse_fingerprints": sorted(
+            set(args.reuse_verified_pass_fingerprint)
+        ),
         "days": rows,
         "campaign_registry": campaign_registry,
+        "period_campaign_summary": period_summary,
     }
     report_path = args.report or (args.root / "STORAGE_VERIFICATION.json")
     atomic_write_json(report_path, report)

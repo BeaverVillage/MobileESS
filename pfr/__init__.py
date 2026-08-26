@@ -87,6 +87,9 @@ from .debt import (
 )
 from .methods import (
     ComparisonMethod,
+    ELECTRICAL_STRESS_COMPARISON_METHODS,
+    FACTORIAL_ELECTRICAL_STRESS_CELLS,
+    ElectricalStressMethod,
     ExperimentAuthority,
     K9H7ResultIdentityV2,
     MethodConfig,
@@ -98,6 +101,13 @@ from .runtime import (
     OperationalTrainingJob,
     PfrRuntimeRunner,
     RuntimeInitialState,
+)
+from .electrical_stress import (
+    OBJECTIVE_AUTHORITY,
+    ElectricalStress,
+    stress_from_extrema,
+    trajectory_summary,
+    voltage_stress_from_extrema,
 )
 
 __all__ = [
@@ -122,6 +132,8 @@ __all__ = [
     "TrainingParameterization",
     "UncertaintyUniverse",
     "WorkUnit",
+    "OBJECTIVE_AUTHORITY",
+    "ElectricalStress",
     "advance_restart",
     "arrive",
     "baseline_compute_work_gpu_hours",
@@ -138,5 +150,8 @@ __all__ = [
     "run_compute_fraction_step",
     "start_prefetch",
     "start_running",
+    "stress_from_extrema",
+    "trajectory_summary",
     "validate_assignment_transition",
+    "voltage_stress_from_extrema",
 ]

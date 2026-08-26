@@ -3,9 +3,13 @@ import json
 from pathlib import Path
 
 from pfr.tools.verify_daily_campaign_storage import (
+    _prediction_actual_evidence_errors,
+    _risk_calibration_evidence_errors,
     inspect_campaign_registry,
+    inspect_day,
     inspect_method,
 )
+from pfr.risk_calibration import RISK_FAMILY_SCALES
 
 
 def write_complete_method(root: Path, first_issue: int = 8928) -> None:
@@ -83,6 +87,27 @@ def test_missing_materialized_csv_fails(tmp_path: Path) -> None:
     assert "PASS method lacks MATERIALIZED_COMMIT_ROWS.csv" in result["errors"]
 
 
+def test_v2_pass_summary_rejects_terminal_in_transit_mess(tmp_path: Path) -> None:
+    write_complete_method(tmp_path)
+    summary_path = tmp_path / "B8/METHOD_SUMMARY.json"
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    summary.update(
+        {
+            "schema_version": "K9H7_RESULT_V2.method_run.v2",
+            "final_mess_in_transit": {"MESS01": False, "MESS02": True},
+            "terminal_mobility_complete": False,
+        }
+    )
+    summary_path.write_text(json.dumps(summary), encoding="utf-8")
+
+    result = inspect_method(tmp_path / "B8", "B8", 8928)
+    assert "PASS method ends with an in-transit MESS route" in result["errors"]
+    assert (
+        "PASS method terminal mobility completion flag is not true"
+        in result["errors"]
+    )
+
+
 def test_campaign_registry_requires_exact_date_and_b8_axes(tmp_path: Path) -> None:
     dates = ["2025-02-01", "2025-02-02"]
     (tmp_path / "CAMPAIGN_SUMMARY.json").write_text(
@@ -126,3 +151,119 @@ def test_campaign_registry_detects_missing_day(tmp_path: Path) -> None:
     assert "campaign daily date axis is incomplete, duplicated, or reordered" in result[
         "errors"
     ]
+
+
+def test_storage_verifier_honors_explicit_pass_fingerprint_authority(
+    tmp_path: Path,
+) -> None:
+    old_fingerprint = "a" * 64
+    current_fingerprint = "b" * 64
+    (tmp_path / "RUN_MANIFEST.json").write_text(
+        json.dumps(
+            {
+                "scientific_implementation_fingerprint": old_fingerprint,
+                "status": "PASS",
+                "count": 288,
+                "start_issue": 0,
+                "git_full_commit_sha": "c" * 40,
+                "git_worktree_dirty": False,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    rejected = inspect_day(
+        tmp_path,
+        "2025-01-01",
+        current_fingerprint,
+        ("B07",),
+    )
+    authorized = inspect_day(
+        tmp_path,
+        "2025-01-01",
+        current_fingerprint,
+        ("B07",),
+        (old_fingerprint,),
+    )
+
+    assert "scientific implementation fingerprint drift" in rejected["errors"]
+    assert "scientific implementation fingerprint drift" not in authorized["errors"]
+    assert authorized["cross_implementation_reuse_authorized"] is True
+
+
+def test_prediction_actual_storage_evidence_is_arithmetically_verified() -> None:
+    marker = {
+        "schema_version": "K9H7_RESULT_V2.issue_commit.v2",
+        "mobility_started_route_count": 1,
+        "mobility_started_events": [
+            {
+                "planned_q50_eta_seconds": 600.0,
+                "sumo_realized_eta_seconds": 650.0,
+                "q50_eta_prediction_error_seconds": 50.0,
+                "planned_mobility_energy_kwh": 24.0,
+                "realized_mobility_energy_route_total_kwh": 13.0,
+                "realized_terminal_energy_kwh": 747.0,
+                "realized_protected_floor_shortfall_kwh": 0.0,
+                "realized_route_protected_floor_feasible": True,
+                "q50_energy_prediction_error_kwh": -11.0,
+                "actual_used_by_optimizer": False,
+                "actual_opened_post_decision_only": True,
+            }
+        ],
+        "mobility_q50_eta_prediction_error_seconds_started_routes": 50.0,
+        "mobility_q50_energy_prediction_error_kwh_started_routes": -11.0,
+        "mobility_realized_protected_floor_shortfall_kwh_started_routes": 0.0,
+        "mobility_realized_protected_floor_violation_route_count": 0,
+        "migration_prediction_actual_event_count": 1,
+        "migration_prediction_actual_events": [
+            {
+                "predicted_total_downtime_steps": 2,
+                "realized_total_downtime_steps": 2,
+                "total_downtime_error_steps": 0,
+                "total_downtime_error_seconds": 0,
+                "external_observed_wan_telemetry": False,
+            }
+        ],
+        "migration_duration_prediction_error_seconds": 0,
+    }
+    assert _prediction_actual_evidence_errors(marker) == []
+    marker["mobility_started_events"][0]["q50_eta_prediction_error_seconds"] = 0.0
+    assert (
+        "mobility ETA prediction/actual error arithmetic mismatch"
+        in _prediction_actual_evidence_errors(marker)
+    )
+
+
+def test_b6_and_b07_risk_calibration_storage_arithmetic_is_verified() -> None:
+    predicted = {family: -1.0 for family in RISK_FAMILY_SCALES}
+    actual = {
+        family: predicted[family] + 0.2 * scale
+        for family, scale in RISK_FAMILY_SCALES.items()
+    }
+    audit = {
+            "schema_version": "PFR5_EVENT_RISK_CALIBRATION_AUDIT_V1",
+            "future_actual_used_by_optimizer": False,
+            "actual_opened_post_decision_only": True,
+            "predicted_violation_margin": predicted,
+            "actual_violation_margin": actual,
+            "predeclared_scale": dict(RISK_FAMILY_SCALES),
+            "positive_underprediction_margin": {
+                family: 0.2 * scale
+                for family, scale in RISK_FAMILY_SCALES.items()
+            },
+            "normalized_positive_underprediction": {
+                family: 0.2 for family in RISK_FAMILY_SCALES
+            },
+            "joint_normalized_score": 0.2,
+    }
+    for method in ("B6", "B07"):
+        marker = {
+            "schema_version": "K9H7_RESULT_V2.issue_commit.v2",
+            "comparison_method_id": method,
+            "risk_calibration_audit": dict(audit),
+        }
+        assert _risk_calibration_evidence_errors(marker) == []
+        marker["risk_calibration_audit"]["joint_normalized_score"] = 0.0
+        assert f"{method} risk joint score arithmetic mismatch" in (
+            _risk_calibration_evidence_errors(marker)
+        )

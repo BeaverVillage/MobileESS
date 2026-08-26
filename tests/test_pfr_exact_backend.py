@@ -296,12 +296,12 @@ def test_native_global_guard_searches_capacitor_and_regulator_jointly() -> None:
             "LOCAL_TRANSITION",
             "CHRONOLOGICAL_PRE_TRANSITION",
         ],
-        "beam_width": 4,
+        "beam_width": 2,
         "beam_width_per_capacitor_state": None,
         "frontier_policy": "SCALAR_FEASIBILITY_BEAM",
         "frontier_width_per_capacitor_state": None,
         "voltage_tradeoff_bin_pu": None,
-        "maximum_tap_depth": 16,
+        "maximum_tap_depth": 2,
         "single_tap_change_per_search_edge": True,
         "integer_trust_region_radius": None,
         "maximum_relinearizations": None,
@@ -429,3 +429,92 @@ def test_native_global_guard_includes_chronological_previous_tap_anchor() -> Non
     assert decision.states == {"c83": (1,)}
     assert decision.regulator_taps == {"creg1a": 0}
     assert decision.raw_metrics["selection_hard_constraint_pass"] is True
+
+
+class TemporalMyopiaExact:
+    """Local C83 OFF passes H0 but overloads during its dwell interval."""
+
+    def solve_step(self, paths, issue, state):
+        del paths, issue
+        forecast = "background_p_kw" in state
+        locked = bool(state.get("native_capacitor_locked"))
+        if locked:
+            capacitor = int(
+                state.get("native_capacitor_initial_states", {}).get(
+                    "c83", [1]
+                )[0]
+            )
+        else:
+            capacitor = 0
+        overloaded = forecast and capacitor == 0
+        transformer = 1.01 if overloaded else 0.98
+        return {
+            "voltage_violation_count": 0,
+            "line_violation_count": 0,
+            "transformer_kva_violation_count": 0,
+            "transformer_current_violation_count": 1 if overloaded else 0,
+            "root_sign_pass": True,
+            "hard_constraint_pass": not overloaded,
+            "voltage_min_pu": 0.98,
+            "voltage_max_pu": 1.02,
+            "line_max_loading_pu": 0.6,
+            "transformer_max_kva_loading_pu": transformer,
+            "transformer_max_current_loading_pu": transformer,
+            "root_import_p_kw": 100.0,
+            "native_grid_control_authority": "TEST_COMMON_CONTROL",
+            "native_capacitor_states": {"c83": [capacitor]},
+            "native_regulator_tap_numbers": {"creg1a": 0},
+        }
+
+
+def test_predictive_dwell_guard_blocks_temporally_myopic_capacitor_transition() -> None:
+    backend = ExactOpenDssBackend(TemporalMyopiaExact(), {})
+    profile = ((2.0, 2.0, 2.0),)
+    forecast = (profile,) * 12
+
+    decision = backend.select_native_control(
+        issue=9708,
+        facility_p_kw=(0.0,),
+        facility_q_kvar=(0.0,),
+        mess_location=("STA09",),
+        mess_p_kw=(0.0,),
+        mess_q_kvar=(0.0,),
+        mess_in_transit=(False,),
+        previous_capacitor_states={"c83": (1,)},
+        previous_regulator_taps={"creg1a": 0},
+        locked_capacitors=(),
+        native_forecast_background_p_kw=forecast,
+        native_forecast_background_q_kvar=forecast,
+        native_forecast_pv_available_kw=forecast,
+    )
+
+    evidence = decision.raw_metrics["predictive_native_dwell_guard"]
+    assert decision.states == {"c83": (1,)}
+    assert decision.raw_metrics["status"] == (
+        "COMMON_NATIVE_GRID_PREDICTIVE_DWELL_GUARD_SELECTED_FRESH"
+    )
+    assert evidence["status"] == "PREDICTIVE_DWELL_GUARD_OVERRIDE"
+    assert evidence["future_actual_used"] is False
+    assert evidence["horizon_steps"] == 12
+
+
+def test_native_control_without_forecast_preserves_pre_guard_behavior() -> None:
+    backend = ExactOpenDssBackend(TemporalMyopiaExact(), {})
+
+    decision = backend.select_native_control(
+        issue=9708,
+        facility_p_kw=(0.0,),
+        facility_q_kvar=(0.0,),
+        mess_location=("STA09",),
+        mess_p_kw=(0.0,),
+        mess_q_kvar=(0.0,),
+        mess_in_transit=(False,),
+        previous_capacitor_states={"c83": (1,)},
+        previous_regulator_taps={"creg1a": 0},
+        locked_capacitors=(),
+    )
+
+    assert decision.states == {"c83": (0,)}
+    assert decision.raw_metrics["predictive_native_dwell_guard"]["status"] == (
+        "NOT_TRIGGERED_NO_CAUSAL_HORIZON_FORECAST"
+    )

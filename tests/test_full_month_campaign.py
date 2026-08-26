@@ -1,8 +1,19 @@
 import json
 from pathlib import Path
 
+import pandas as pd
+import pytest
+
 from pfr.tools.run_frozen_rep_week_daily_campaign import payload
-from pfr.tools.preflight_january_2025 import validate_method_contracts
+from pfr.tools.jfm_isolation import (
+    LAYOUT,
+    initialize_isolated_run_root,
+    load_isolated_run_root,
+)
+from pfr.tools.preflight_january_2025 import (
+    validate_method_contracts,
+    validate_workload_scheduler_contract,
+)
 
 
 CONTRACT = (
@@ -19,17 +30,17 @@ def test_full_month_contract_covers_all_90_calendar_days() -> None:
     assert feb["days"] == 28
     assert feb["global_issue_first"] == 31 * 288
     assert feb["global_issue_last"] == (31 + 28) * 288 - 1
-    assert feb["expected_commit_markers"] == 28 * 8 * 288
+    assert feb["expected_commit_markers"] == 28 * 10 * 288
 
     assert mar["calendar_start"] == "2025-03-01"
     assert mar["days"] == 31
     assert mar["global_issue_first"] == (31 + 28) * 288
     assert mar["global_issue_last"] == 90 * 288 - 1
-    assert mar["expected_commit_markers"] == 31 * 8 * 288
+    assert mar["expected_commit_markers"] == 31 * 10 * 288
 
-    assert 31 * 8 * 288 + sum(
+    assert 31 * 10 * 288 + sum(
         period["expected_commit_markers"] for period in contract["periods"]
-    ) == 90 * 8 * 288 == 207360
+    ) == 90 * 10 * 288 == 259200
 
 
 def test_generated_and_reused_mobility_ranges_cover_each_full_month() -> None:
@@ -95,6 +106,18 @@ def test_full_month_campaign_has_separate_b0_b7_and_b8_registries() -> None:
     assert b8["methods_per_day"] == 1
     assert b8["method_ids"] == ["B8"]
 
+    stress = payload(
+        period,
+        rows,
+        workers=4,
+        final=True,
+        continue_after_failure=True,
+        electrical_stress_campaign=True,
+    )
+    assert stress["methods_per_day"] == 10
+    assert stress["method_ids"] == [f"B{index:02d}" for index in range(10)]
+    assert stress["electrical_stress_campaign"] is True
+
 
 def test_common_b0_b8_contract_is_valid_for_all_month_preflights() -> None:
     result = validate_method_contracts()
@@ -107,3 +130,51 @@ def test_common_b0_b8_contract_is_valid_for_all_month_preflights() -> None:
         ]
         is True
     )
+
+
+def test_preflight_accepts_burst_that_requires_capacity_queue(
+    tmp_path: Path,
+) -> None:
+    jobs_path = tmp_path / "jobs.parquet"
+    pd.DataFrame(
+        {
+            "origin_IDC_id": ["IDC04"] * 300,
+            "arrival_step": [1852] * 300,
+            "requested_gpu": [1] * 300,
+        }
+    ).to_parquet(jobs_path, index=False)
+
+    result = validate_workload_scheduler_contract(
+        Path(__file__).parents[1], jobs_path
+    )
+
+    assert result["pass"] is True
+    assert result["maximum_single_job_gpu"] == 1
+    assert result["maximum_same_issue_idc_arrival_gpu"] == 300
+    assert result["arrival_groups_requiring_capacity_queue"] == 1
+    assert result["capacity_queue_required_by_cohort"] is True
+
+
+def test_jfm_run_root_is_bound_to_commit_branch_and_layout(
+    tmp_path: Path,
+) -> None:
+    run_root = tmp_path / "isolated-run"
+    sha = "a" * 40
+    initialized = initialize_isolated_run_root(run_root, sha, "branch/test")
+
+    assert initialized["layout"] == LAYOUT
+    assert load_isolated_run_root(run_root) == initialized
+    assert initialize_isolated_run_root(run_root, sha, "branch/test") == initialized
+    with pytest.raises(RuntimeError, match="different commit"):
+        initialize_isolated_run_root(run_root, "b" * 40, "branch/test")
+
+
+def test_jfm_run_root_rejects_nonempty_legacy_directory(
+    tmp_path: Path,
+) -> None:
+    run_root = tmp_path / "legacy-results"
+    run_root.mkdir()
+    (run_root / "old-result.json").write_text("{}\n", encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="non-empty run root"):
+        initialize_isolated_run_root(run_root, "a" * 40, "branch/test")

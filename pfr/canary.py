@@ -3,12 +3,25 @@
 from __future__ import annotations
 
 import json
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any, Mapping
 
 from .methods import ComparisonMethod, ExperimentAuthority, MethodFactory
 from .migration import MigrationAuthority
 from .power import H100UtilizationPowerCurve
+from .risk_calibration import (
+    AUTHORITY_ID,
+    CALIBRATION_BLOCK_COUNT,
+    CALIBRATION_BLOCK_MINUTES,
+    CALIBRATION_BLOCK_STEPS,
+    CALIBRATION_DAY_COUNT,
+    CALIBRATION_ISSUE_COUNT,
+    CALIBRATION_SOURCE_PERIOD,
+    CALIBRATION_START_DATE,
+    FrozenRiskCalibration,
+    RISK_FAMILY_SCALES,
+)
 from .runtime import (
     CausalExperimentFrame,
     OperationalTrainingJob,
@@ -103,6 +116,31 @@ def run_idc_migration_canary(
         power_curve=curve,
         physical_backend=_CanaryPhysical(),
         migration_authority=authority,
+        risk_calibration_authority=FrozenRiskCalibration(
+            authority_id=AUTHORITY_ID,
+            alpha=0.05,
+            source_method="B6",
+            source_period=CALIBRATION_SOURCE_PERIOD,
+            calibration_dates=tuple(
+                (CALIBRATION_START_DATE + timedelta(days=offset)).isoformat()
+                for offset in range(CALIBRATION_DAY_COUNT)
+            ),
+            calibration_block_steps=CALIBRATION_BLOCK_STEPS,
+            calibration_block_minutes=CALIBRATION_BLOCK_MINUTES,
+            calibration_block_count=CALIBRATION_BLOCK_COUNT,
+            coverage_claim="FAMILY_WISE_BLOCK_COVERAGE_NOT_JOINT_COVERAGE",
+            finite_sample_rank=640,
+            normalized_joint_quantile=0.0,
+            normalized_family_quantiles={
+                family: 0.0 for family in RISK_FAMILY_SCALES
+            },
+            predeclared_scales=dict(RISK_FAMILY_SCALES),
+            calibrated_increments={family: 0.0 for family in RISK_FAMILY_SCALES},
+            source_audit_sha256="d" * 64,
+            artifact_sha256="e" * 64,
+            source_issue_count=CALIBRATION_ISSUE_COUNT,
+            source_calibrated_risk_positive_count=0,
+        ),
     )
     b5 = factory.create(ComparisonMethod.B5)
     b5_root = output / "b5"
@@ -153,6 +191,15 @@ def run_idc_migration_canary(
         and completed[0]["remaining_work_gpu_hours_before"]
         == completed[0]["remaining_work_gpu_hours_after"]
     )
+    prediction_actual = restart.get("migration_prediction_actual_events", [])
+    prediction_actual_audit = bool(
+        len(prediction_actual) == 1
+        and prediction_actual[0].get("predicted_total_downtime_steps")
+        == prediction_actual[0].get("realized_total_downtime_steps")
+        and prediction_actual[0].get("total_downtime_error_seconds") == 0
+        and prediction_actual[0].get("payload_error_bytes") == 0
+        and prediction_actual[0].get("external_observed_wan_telemetry") is False
+    )
     passed = bool(
         b5_summary["status"] == "PASS"
         and len(started) == 1
@@ -165,6 +212,7 @@ def run_idc_migration_canary(
         and started[0]["source_idc"] != restart_state.get("destination_idc")
         and len(restart["migration_restarts_completed"]) == 1
         and work_conserved
+        and prediction_actual_audit
         and b8_summary["status"] == "PASS"
         and b8_summary["full_replan_count"] == 7
         and b8_precheckpoint_blocked
@@ -188,6 +236,10 @@ def run_idc_migration_canary(
             and started[0]["source_idc"] != restart_state.get("destination_idc")
         ),
         "remaining_compute_work_conserved": work_conserved,
+        "migration_prediction_actual_audit": prediction_actual_audit,
+        "migration_prediction_actual_event": (
+            prediction_actual[0] if len(prediction_actual) == 1 else None
+        ),
         "b8_every_five_minute_full_replans": b8_summary["full_replan_count"],
         "b8_precheckpoint_migration_blocked": b8_precheckpoint_blocked,
         "b8_episode_boundary_migration_blocked": b8_episode_boundary_blocked,

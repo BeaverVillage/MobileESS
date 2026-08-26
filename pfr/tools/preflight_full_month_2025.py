@@ -11,11 +11,18 @@ from pathlib import Path
 import tempfile
 from typing import Any, Mapping
 
+import numpy as np
 import pandas as pd
 
 from pfr.canary import run_idc_migration_canary
+from pfr.methods import ExperimentAuthority, MethodFactory
 from pfr.migration import load_migration_authority
-from pfr.tools.preflight_january_2025 import validate_method_contracts
+from pfr.tools.preflight_january_2025 import (
+    validate_method_contracts,
+    validate_physics_only_mobility_runtime,
+    validate_sumo_mobility_execution,
+    validate_workload_scheduler_contract,
+)
 
 
 def sha256(path: Path) -> str:
@@ -42,8 +49,14 @@ def main() -> None:
     parser.add_argument("--period-contract", type=Path)
     parser.add_argument("--shared-root", type=Path, required=True)
     parser.add_argument("--input-root", type=Path, required=True)
+    parser.add_argument("--route-catalog", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--allow-unmaterialized", action="store_true")
+    parser.add_argument(
+        "--electrical-stress-campaign",
+        action="store_true",
+        help="Validate the B00-B09 daily PRE and method registry.",
+    )
     args = parser.parse_args()
 
     contract_path = args.period_contract or (
@@ -57,6 +70,7 @@ def main() -> None:
     first = int(period["global_issue_first"])
     last = int(period["global_issue_last"])
     days = int(period["days"])
+    method_count = 10 if args.electrical_stress_campaign else 8
 
     plan_path = args.shared_root / "SOURCE_MATERIALIZATION_PLAN.json"
     plan = json.loads(plan_path.read_text(encoding="utf-8"))
@@ -76,8 +90,13 @@ def main() -> None:
     input_ok = bool(
         pre.get("status") == "PASS"
         and len(pre.get("calendar_dates", ())) == days
-        and int(pre.get("daily_episode_count", -1)) == days * 8
-        and len(pre.get("episodes", ())) == days * 8
+        and int(pre.get("daily_episode_count", -1)) == days * method_count
+        and len(pre.get("episodes", ())) == days * method_count
+        and pre.get("methods") == (
+            [f"B{index:02d}" for index in range(10)]
+            if args.electrical_stress_campaign
+            else [f"B{index}" for index in range(8)]
+        )
         and all(
             row.get("daily_state_reset") is True
             and row.get("cross_day_state_carryover") is False
@@ -108,6 +127,13 @@ def main() -> None:
             (args.shared_root / "mobility/mobility_runtime").glob("issue_*.npz")
         )
         mobility_issues = {int(path.name.split("_")[1]) for path in mobility_files}
+        eta_source_ok = False
+        if mobility_files:
+            try:
+                with np.load(mobility_files[0], allow_pickle=False) as payload:
+                    eta_source_ok = payload["path_quantiles_sec"].shape == (54, 1656, 3)
+            except (KeyError, OSError, ValueError):
+                eta_source_ok = False
         expected = set(range(first, last + 1))
         power_ranges = []
         for path in sorted((args.shared_root / "power_price").glob("block_*_*_*")):
@@ -143,9 +169,7 @@ def main() -> None:
                 "power_exact_scored_and_padding_coverage": power_issues
                 == set(range(first, source_last + 1))
                 and all(count == 1 for count in power_issue_counts.values()),
-                "template_bank": (
-                    args.shared_root / "mobility/E4B_FULLFIT_TEMPLATE_BANK_129.parquet"
-                ).is_file(),
+                "eta_source_shape": eta_source_ok,
             }
         )
     source_ok = source_ready and all(source_checks.values())
@@ -159,6 +183,21 @@ def main() -> None:
         scale.get("status") == "FROZEN_POST_HOC_P100_FEEDER_SCALE"
         and scale.get("scientific_authority_version")
         == contract.get("physical_execution_authority_version")
+    )
+    physics = json.loads(
+        (args.repo / "pfr/contracts/MESS_MOBILITY_PHYSICS_V1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    physics_ok = bool(
+        physics.get("status") == "FROZEN_PHYSICS_ONLY"
+        and physics.get("mobility_energy_ml_loaded") is False
+        and physics.get("mobility_profile_ml_loaded") is False
+        and physics.get("traffic_ml_role") == "ETA_ONLY"
+    )
+    physics_runtime = validate_physics_only_mobility_runtime(args.repo)
+    sumo_execution = validate_sumo_mobility_execution(
+        args.repo, args.route_catalog
     )
     migration_authority = load_migration_authority(
         args.repo / "pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json"
@@ -177,22 +216,49 @@ def main() -> None:
             migration_authority, Path(temporary)
         )
     migration_ok = migration_ok and migration_canary.get("pass") is True
-    method_contracts = validate_method_contracts()
+    if args.electrical_stress_campaign:
+        hashes = tuple(format(index, "064x") for index in range(1, 8))
+        stress_configs = MethodFactory(
+            ExperimentAuthority(*hashes)
+        ).electrical_stress_campaign()
+        method_contracts = {
+            "pass": tuple(
+                config.comparison_method_id.value for config in stress_configs
+            ) == tuple(f"B{index:02d}" for index in range(10)),
+            "method_ids": [
+                config.comparison_method_id.value for config in stress_configs
+            ],
+            "objective_semantics": "COMMON_ELECTRICAL_STRESS_LEXICOGRAPHIC",
+        }
+    else:
+        method_contracts = validate_method_contracts()
     method_contracts_ok = method_contracts.get("pass") is True
+    workload_scheduler = validate_workload_scheduler_contract(
+        args.repo, jobs_path
+    )
+    workload_scheduler_ok = workload_scheduler.get("pass") is True
     ready_to_run = (
         plan_ok
         and input_ok
         and source_ok
         and scale_ok
+        and physics_ok
+        and physics_runtime.get("pass") is True
+        and sumo_execution.get("pass") is True
         and migration_ok
         and method_contracts_ok
+        and workload_scheduler_ok
     )
     ready_to_materialize = (
         plan_ok
         and input_ok
         and scale_ok
+        and physics_ok
+        and physics_runtime.get("pass") is True
+        and sumo_execution.get("pass") is True
         and migration_ok
         and method_contracts_ok
+        and workload_scheduler_ok
         and not source_ready
     )
     status = (
@@ -210,16 +276,21 @@ def main() -> None:
         "period_id": args.period_id,
         "calendar_start": period["calendar_start"],
         "days": days,
-        "expected_commit_markers": int(period["expected_commit_markers"]),
+        "expected_commit_markers": days * method_count * 288,
+        "electrical_stress_campaign": args.electrical_stress_campaign,
         "checks": {
             "materialization_plan": plan_ok,
             "daily_pre_and_jobs": input_ok,
             "source_ready": source_ok,
             "source": source_checks,
             "feeder_scale_contract": scale_ok,
+            "mobility_physics_contract": physics_ok,
+            "physics_only_mobility_runtime": physics_runtime,
+            "sumo_mobility_execution": sumo_execution,
             "migration_authority": migration_ok,
             "migration_runtime_canary": migration_canary,
             "b0_b8_method_contracts": method_contracts,
+            "workload_scheduler": workload_scheduler,
         },
         "job_count": len(jobs),
         "shared_authority_sha256": authority_sha,

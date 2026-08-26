@@ -7,7 +7,11 @@ from datetime import date, timedelta
 import json
 from pathlib import Path
 
-from pfr.daily import build_calendar_daily_pre_artifacts
+from pfr.daily import (
+    ELECTRICAL_STRESS_METHODS,
+    METHODS,
+    build_calendar_daily_pre_artifacts,
+)
 
 
 def atomic_write_json(path: Path, payload: object) -> None:
@@ -25,6 +29,11 @@ def main() -> None:
     parser.add_argument("--campaign-id", required=True)
     parser.add_argument("--authority-sha256", required=True)
     parser.add_argument("--output-root", type=Path, required=True)
+    parser.add_argument(
+        "--electrical-stress-campaign",
+        action="store_true",
+        help="Build the canonical PRE population on the B00-B09 method axis.",
+    )
     args = parser.parse_args()
     if not 1 <= args.days <= 31:
         parser.error("--days must be in [1, 31]")
@@ -37,6 +46,11 @@ def main() -> None:
         calendar_dates=dates,
         campaign_id=args.campaign_id,
         schema_prefix=args.campaign_id.replace("-", "_").upper(),
+        methods=(
+            ELECTRICAL_STRESS_METHODS
+            if args.electrical_stress_campaign
+            else METHODS
+        ),
     )
     args.output_root.mkdir(parents=True, exist_ok=True)
     manifest_path = args.output_root / "DAILY_CANONICAL_PRE_MANIFEST.json"
