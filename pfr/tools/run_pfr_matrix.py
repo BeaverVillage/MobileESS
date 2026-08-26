@@ -16,7 +16,13 @@ import shutil
 import statistics
 import subprocess
 import sys
+import time
 from typing import Any, Mapping, Optional, Sequence
+
+try:
+    import fcntl
+except ImportError:  # pragma: no cover - production campaigns run under WSL.
+    fcntl = None
 
 import numpy as np
 import pandas as pd
@@ -114,6 +120,96 @@ def _load_exact_module(repo: Path, exact_package_root: Path):
     sys.path.insert(0, str(support))
     sys.path.insert(0, str(science))
     return importlib.import_module("EXACT_GRID_RUNNER_24SERVICE")
+
+
+def _prepare_shared_exact_sources(
+    *,
+    exact: Any,
+    campaign_root: Path,
+    authority_package_root: Path,
+    exact_package_root: Path,
+    primary_root: Path,
+    source_commit_sha: str,
+) -> Mapping[str, str]:
+    """Prepare immutable Fresh-OpenDSS sources once per daily campaign.
+
+    ``prepare_sources`` verifies and extracts the same large authority archives
+    for every independent day.  Six concurrent cold starts previously scanned
+    and unpacked that Windows-mounted tree six times, causing ENOMEM before the
+    solver started.  The extracted arrays and DSS assets are read-only during
+    every solve, so serialize the one preparation and let all day workers reuse
+    the verified paths.  A campaign-specific root and source/input identity
+    marker prevent reuse across experiments.
+    """
+
+    if fcntl is None:
+        raise RuntimeError("shared exact-source preparation requires POSIX locking")
+    campaign_root = campaign_root.resolve()
+    source_work = campaign_root / "_SHARED_EXACT_SOURCE_WORK"
+    marker_path = source_work / "PREPARED_PATHS.json"
+    lock_path = campaign_root / ".EXACT_SOURCE_PREPARE.lock"
+    expected = {
+        "source_commit_sha": str(source_commit_sha),
+        "authority_package_root": str(authority_package_root.resolve()),
+        "exact_package_root": str(exact_package_root.resolve()),
+        "primary_root": str(primary_root.resolve()),
+    }
+
+    campaign_root.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("a+", encoding="utf-8") as lock_handle:
+        fcntl.flock(lock_handle.fileno(), fcntl.LOCK_EX)
+        if marker_path.is_file():
+            try:
+                marker = json_load(marker_path)
+                cached_paths = {
+                    str(key): str(value)
+                    for key, value in marker.get("paths", {}).items()
+                }
+                if (
+                    marker.get("status") == "PASS"
+                    and all(marker.get(key) == value for key, value in expected.items())
+                    and cached_paths
+                    and all(Path(value).exists() for value in cached_paths.values())
+                ):
+                    return cached_paths
+            except (OSError, ValueError, TypeError):
+                pass
+
+        if source_work.exists():
+            shutil.rmtree(source_work)
+        source_work.mkdir(parents=True)
+        started = time.monotonic()
+        prepared_paths = {
+            str(key): str(value)
+            for key, value in exact.prepare_sources(
+                authority_package_root.resolve(),
+                source_work,
+                v2038_root=str(exact_package_root.resolve()),
+                primary_root=str(primary_root.resolve()),
+            ).items()
+        }
+        missing = [
+            value for value in prepared_paths.values() if not Path(value).exists()
+        ]
+        if missing:
+            raise RuntimeError(
+                f"shared exact-source preparation returned missing paths: {missing}"
+            )
+        marker = {
+            "schema_version": "PFR_SHARED_EXACT_SOURCE_PREPARATION_V1",
+            "status": "PASS",
+            **expected,
+            "paths": prepared_paths,
+            "preparation_seconds": time.monotonic() - started,
+            "prepared_by_pid": os.getpid(),
+        }
+        temporary = marker_path.with_name(f"{marker_path.name}.tmp.{os.getpid()}")
+        temporary.write_text(
+            json.dumps(marker, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        temporary.replace(marker_path)
+        return prepared_paths
 
 
 class ExactOpenDssBackend:
@@ -1835,14 +1931,15 @@ def main() -> None:
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
     exact = _load_exact_module(repo, args.exact_package_root)
-    source_work = output / "_exact_source_work"
-    if source_work.exists():
-        shutil.rmtree(source_work)
-    source_work.mkdir(parents=True)
-    paths = exact.prepare_sources(
-        args.authority_package_root.resolve(), source_work,
-        v2038_root=str(args.exact_package_root.resolve()),
-        primary_root=str(args.primary_root.resolve()),
+    paths = dict(
+        _prepare_shared_exact_sources(
+            exact=exact,
+            campaign_root=output.parent,
+            authority_package_root=args.authority_package_root,
+            exact_package_root=args.exact_package_root,
+            primary_root=args.primary_root,
+            source_commit_sha=str(source_identity["git_full_commit_sha"]),
+        )
     )
     if (
         native_control_contract.get("common_to_B0_B7") is not True
