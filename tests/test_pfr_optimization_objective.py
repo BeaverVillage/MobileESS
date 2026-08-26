@@ -428,7 +428,7 @@ def test_candidate_truncation_infeasibility_expands_k_until_feasible() -> None:
     )
 
     plan, certificate = planner.solve(
-        state=None,
+        state=SimpleNamespace(jobs={}),
         config=config,
         frame=None,
         migration_authority=None,
@@ -465,7 +465,9 @@ def test_capacity_deferral_expands_k_before_accepting_visible_queue() -> None:
     config = SimpleNamespace(comparison_method_id=SimpleNamespace(value="B07"))
 
     plan, certificate = planner.solve(
-        state=None,
+        state=SimpleNamespace(
+            jobs={"queued": SimpleNamespace(lifecycle="QUEUED")}
+        ),
         config=config,
         frame=None,
         migration_authority=None,
@@ -514,7 +516,9 @@ def test_intermediate_candidate_uses_admission_screen_before_full_solve() -> Non
     config = SimpleNamespace(comparison_method_id=SimpleNamespace(value="B07"))
 
     plan, certificate = planner.solve(
-        state=None,
+        state=SimpleNamespace(
+            jobs={"queued": SimpleNamespace(lifecycle="QUEUED")}
+        ),
         config=config,
         frame=None,
         migration_authority=None,
@@ -532,6 +536,46 @@ def test_intermediate_candidate_uses_admission_screen_before_full_solve() -> Non
     assert (
         certificate["candidate_limit_admission_screen_model_build_seconds"]
         == 0.2
+    )
+
+
+def test_no_visible_queue_skips_duplicate_admission_screen() -> None:
+    planner = object.__new__(PersistentBoundedMilpPlanner)
+    planner.base_candidate_limit = 4
+    planner.candidate_limit = 4
+    planner.adaptive_candidate_max = 16
+    planner.candidate_limit_frozen = False
+    sentinel_plan = object()
+    calls = []
+
+    def solve_current(**kwargs):
+        calls.append(bool(kwargs.get("admission_screen_only", False)))
+        return sentinel_plan, {
+            "candidate_limit_k": planner.candidate_limit,
+            "optimized_deferred_job_count": 0,
+            "workload_domain_reduction": {"no_bounded_option_jobs": 0},
+        }
+
+    planner._solve_current_candidate_limit = solve_current
+    config = SimpleNamespace(comparison_method_id=SimpleNamespace(value="B07"))
+
+    plan, certificate = planner.solve(
+        state=SimpleNamespace(
+            jobs={"running": SimpleNamespace(lifecycle="RUNNING")}
+        ),
+        config=config,
+        frame=None,
+        migration_authority=None,
+        evaluation_steps_remaining=54,
+    )
+
+    assert plan is sentinel_plan
+    assert calls == [False]
+    assert certificate["candidate_limit_attempts"] == [4]
+    assert certificate["candidate_limit_admission_screen_attempts"] == []
+    assert certificate["candidate_limit_admission_screen_total_seconds"] == 0.0
+    assert certificate["candidate_limit_admission_screen_skipped_reason"] == (
+        "NO_VISIBLE_QUEUED_JOBS"
     )
 
 
@@ -559,7 +603,9 @@ def test_unavoidable_capacity_deferral_does_not_expand_candidate_domain() -> Non
     config = SimpleNamespace(comparison_method_id=SimpleNamespace(value="B01"))
 
     plan, certificate = planner.solve(
-        state=None,
+        state=SimpleNamespace(
+            jobs={"queued": SimpleNamespace(lifecycle="QUEUED")}
+        ),
         config=config,
         frame=None,
         migration_authority=None,
@@ -722,7 +768,7 @@ def test_candidate_expansion_does_not_mask_non_infeasibility_failures() -> None:
 
     with pytest.raises(RuntimeContractError, match="status=TIME_LIMIT"):
         planner.solve(
-            state=None,
+            state=SimpleNamespace(jobs={}),
             config=config,
             frame=None,
             migration_authority=None,

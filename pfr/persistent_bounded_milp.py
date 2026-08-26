@@ -1045,12 +1045,22 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         candidate_attempt_timings: list[Mapping[str, Any]] = []
         candidate_search_started = time.monotonic()
         expansion_grid = self._candidate_expansion_grid()
+        visible_queue = any(
+            job.lifecycle == "QUEUED" for job in state.jobs.values()
+        )
+        admission_screen_required = (
+            not self.candidate_limit_frozen and visible_queue
+        )
         for candidate_limit in expansion_grid:
             if self.candidate_limit != candidate_limit:
                 self.candidate_limit = candidate_limit
-            admission_screen_only = (
-                not self.candidate_limit_frozen
-            )
+            # The admission screen exists only to detect candidate-truncated
+            # queue deferral before the full lexicographic solve.  With no
+            # visible queued jobs the deferred count is identically zero, so
+            # solving the master once as a screen and then again for the full
+            # plan is pure duplicate work.  Route-domain infeasibility remains
+            # protected by the full solve's existing adaptive-K exception path.
+            admission_screen_only = admission_screen_required
             attempted.append(candidate_limit)
             try:
                 attempt_started = time.monotonic()
@@ -1181,6 +1191,15 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     ),
                     "candidate_limit_admission_screen_model_build_seconds": (
                         admission_screen_model_build_seconds
+                    ),
+                    "candidate_limit_admission_screen_skipped_reason": (
+                        "CANDIDATE_K_FROZEN"
+                        if self.candidate_limit_frozen
+                        else (
+                            "NO_VISIBLE_QUEUED_JOBS"
+                            if not visible_queue
+                            else None
+                        )
                     ),
                     "candidate_limit_attempt_timings": list(
                         candidate_attempt_timings
