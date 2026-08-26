@@ -1033,8 +1033,6 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
 
         method_key = config.comparison_method_id.value
         if self.candidate_limit != self.base_candidate_limit:
-            self._dispose_method_models(method_key)
-            self._model_solve_generation_by_method[method_key] = 0
             self.candidate_limit = self.base_candidate_limit
 
         attempted: list[int] = []
@@ -1047,8 +1045,6 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         expansion_grid = self._candidate_expansion_grid()
         for candidate_limit in expansion_grid:
             if self.candidate_limit != candidate_limit:
-                self._dispose_method_models(method_key)
-                self._model_solve_generation_by_method[method_key] = 0
                 self.candidate_limit = candidate_limit
             admission_screen_only = (
                 not self.candidate_limit_frozen
@@ -1286,7 +1282,15 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 model_refresh_reason = "INITIAL_MODEL_BUILD"
             build_started = time.monotonic()
             common_model_kwargs = {
-                "candidate_limit": self.candidate_limit,
+                # Keep one resident superset skeleton and mask options above
+                # the active K through bounds in update().  Rebuilding and
+                # disposing two large Gurobi models at every 4/8/16/32/64
+                # expansion dominated the solve itself.
+                "candidate_limit": (
+                    self.base_candidate_limit
+                    if self.candidate_limit_frozen
+                    else self.adaptive_candidate_max
+                ),
                 "job_slot_capacity": current_slots,
                 "static": self._static_context_by_method[method_key],
                 "kernel": kernel,
@@ -1428,6 +1432,9 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             "full_miqcp_executed_in_online_loop": False,
             "offline_reference_oracle": "science/main.py::build_full",
             "candidate_limit_k": self.candidate_limit,
+            "persistent_model_candidate_capacity_k": (
+                master.k if master is not None else recourse.k
+            ),
             "resident_job_slot_capacity": current_slots,
             "visible_queued_jobs": visible_queue,
             "candidate_limit_frozen": self.candidate_limit_frozen,

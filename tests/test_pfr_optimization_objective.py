@@ -492,6 +492,8 @@ def test_intermediate_candidate_uses_admission_screen_before_full_solve() -> Non
     planner._model_solve_generation_by_method = {}
     sentinel_plan = object()
     calls = []
+    disposed = []
+    planner._dispose_method_models = lambda method: disposed.append(method)
 
     def solve_current(**kwargs):
         screen = bool(kwargs.get("admission_screen_only", False))
@@ -519,6 +521,7 @@ def test_intermediate_candidate_uses_admission_screen_before_full_solve() -> Non
 
     assert plan is sentinel_plan
     assert calls == [(4, True), (8, True), (8, False)]
+    assert disposed == []
     assert certificate["candidate_limit_attempts"] == [4, 8]
     assert certificate["candidate_limit_admission_screen_attempts"] == [4, 8]
     assert certificate["candidate_limit_admission_screen_solve_seconds"] == 0.5
