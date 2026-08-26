@@ -244,7 +244,13 @@ class AcSafetyFilter:
                 and refreshed_decision.regulator_taps
                 == previous_decision.regulator_taps
             ):
-                return candidate, refreshed_exact
+                # The online selector has converged to the same unresolved
+                # discrete state.  Leave the alternating loop, but do not
+                # return before the deep native-restoration fallback below.
+                # Returning here made that fallback unreachable precisely
+                # when the bounded online search had exhausted its basin.
+                exact = refreshed_exact
+                break
             exact = refreshed_exact
             active_nominal = candidate.control
         # Only after the online common native search and every authorized

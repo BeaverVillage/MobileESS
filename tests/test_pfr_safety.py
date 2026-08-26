@@ -78,6 +78,43 @@ class AlternatingNativeVerifier:
         )
 
 
+class StalledOnlineNativeVerifier:
+    def __init__(self):
+        self.native_decision = SimpleNamespace(
+            states={"c83": (1,)}, regulator_taps={"creg4a": 5}
+        )
+        self.online_selections = 0
+        self.deep_selections = 0
+
+    def select_native_control(self, *, control):
+        del control
+        self.online_selections += 1
+        return self.native_decision
+
+    def select_native_control_deep(self, *, control):
+        del control
+        self.deep_selections += 1
+        self.native_decision = SimpleNamespace(
+            states={"c83": (0,)}, regulator_taps={"creg4a": 3}
+        )
+        return self.native_decision
+
+    def verify_fresh(self, **kwargs):
+        del kwargs
+        passed = self.deep_selections > 0
+        return ExactAcResult(
+            passed,
+            "PASS" if passed else "TRANSFORMER_FAIL",
+            True,
+            True,
+            0.97,
+            1.03,
+            0.8,
+            0.99 if passed else 1.01,
+            0 if passed else 1,
+        )
+
+
 class SafetyFilterTests(unittest.TestCase):
     def setUp(self):
         self.state = FastLayerState(0, {"m1": 0.5}, {"j1": 1.0})
@@ -135,6 +172,17 @@ class SafetyFilterTests(unittest.TestCase):
         self.assertTrue(result.accepted)
         self.assertEqual(verifier.selections, 1)
         self.assertEqual(verifier.native_decision.regulator_taps, {"creg4a": 4})
+
+    def test_stalled_online_native_search_reaches_deep_restoration(self):
+        verifier = StalledOnlineNativeVerifier()
+        result = AcSafetyFilter(
+            projector=Projector(control(5)), verifier=verifier
+        ).filter(nominal=control(10), state=self.state, slow_plan=plan())
+
+        self.assertTrue(result.accepted)
+        self.assertEqual(verifier.online_selections, 1)
+        self.assertEqual(verifier.deep_selections, 1)
+        self.assertEqual(verifier.native_decision.regulator_taps, {"creg4a": 3})
 
     def test_escalation_requires_full_replan_and_fast_recourse(self):
         filt = AcSafetyFilter(projector=Projector(), verifier=Verifier(passed=False))
