@@ -398,6 +398,7 @@ def inspect_day(
     calendar_date: str,
     implementation_fingerprint: str,
     methods: tuple[str, ...] = METHODS,
+    authorized_implementation_fingerprints: tuple[str, ...] = (),
 ) -> dict[str, Any]:
     errors: list[str] = []
     expected_first_issue = (
@@ -467,7 +468,14 @@ def inspect_day(
         complete = True
 
     if manifest is not None:
-        if manifest.get("scientific_implementation_fingerprint") != implementation_fingerprint:
+        artifact_fingerprint = manifest.get(
+            "scientific_implementation_fingerprint"
+        )
+        if (
+            artifact_fingerprint != implementation_fingerprint
+            and artifact_fingerprint
+            not in authorized_implementation_fingerprints
+        ):
             errors.append("scientific implementation fingerprint drift")
         if manifest.get("status") != scientific_status and summary is not None:
             errors.append("RUN_MANIFEST/MATRIX_SUMMARY status mismatch")
@@ -500,6 +508,18 @@ def inspect_day(
         "methods": method_rows,
         "orchestration_failure_evidence": orchestration_failure is not None,
         "temporary_files": temp_files,
+        "artifact_scientific_implementation_fingerprint": (
+            manifest.get("scientific_implementation_fingerprint")
+            if manifest is not None
+            else None
+        ),
+        "cross_implementation_reuse_authorized": bool(
+            manifest is not None
+            and manifest.get("scientific_implementation_fingerprint")
+            != implementation_fingerprint
+            and manifest.get("scientific_implementation_fingerprint")
+            in authorized_implementation_fingerprints
+        ),
         "errors": errors,
     }
 
@@ -571,6 +591,15 @@ def main() -> None:
     parser.add_argument("--days", type=int, required=True)
     parser.add_argument("--report", type=Path)
     parser.add_argument(
+        "--reuse-verified-pass-fingerprint",
+        action="append",
+        default=[],
+        help=(
+            "Explicitly authorize storage verification of a PASS day reused "
+            "by the campaign runner from this scientific fingerprint."
+        ),
+    )
+    parser.add_argument(
         "--supplementary-b8-periodic-5min",
         action="store_true",
         help="Verify a B8-only supplementary daily campaign.",
@@ -598,6 +627,15 @@ def main() -> None:
         )
     if not 1 <= args.days <= 31:
         parser.error("--days must be in [1, 31]")
+    if any(
+        len(value) != 64
+        or value.lower() != value
+        or any(char not in "0123456789abcdef" for char in value)
+        for value in args.reuse_verified_pass_fingerprint
+    ):
+        parser.error(
+            "--reuse-verified-pass-fingerprint must be a lowercase SHA-256"
+        )
     expected_dates = [
         (args.start_date + timedelta(days=offset)).isoformat()
         for offset in range(args.days)
@@ -622,6 +660,7 @@ def main() -> None:
             calendar_date,
             fingerprint,
             methods,
+            tuple(args.reuse_verified_pass_fingerprint),
         )
         for calendar_date in expected_dates
     ]
@@ -686,6 +725,9 @@ def main() -> None:
         "pass_days": sum(row["scientific_status"] == "PASS" for row in rows),
         "total_commit_markers": sum(int(row["commit_markers"]) for row in rows),
         "scientific_implementation_fingerprint": fingerprint,
+        "authorized_verified_pass_reuse_fingerprints": sorted(
+            set(args.reuse_verified_pass_fingerprint)
+        ),
         "days": rows,
         "campaign_registry": campaign_registry,
         "period_campaign_summary": period_summary,

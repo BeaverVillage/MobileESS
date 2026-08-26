@@ -79,10 +79,15 @@ if ((preflight_only)); then
     exit 0
 fi
 
-"$python_bin" -m pfr.tools.verify_daily_campaign_storage \
-    --repo "$repo_dir" --root "$calibration_root" \
-    --start-date 2025-01-01 --days 14 --diagnostic-method B07 \
+verification=(
+    --repo "$repo_dir" --root "$calibration_root"
+    --start-date 2025-01-01 --days 14 --diagnostic-method B07
     --report "$calibration_root/STORAGE_VERIFICATION.json"
+)
+for fingerprint in "${reuse_verified_pass_fingerprints[@]}"; do
+    verification+=(--reuse-verified-pass-fingerprint "$fingerprint")
+done
+"$python_bin" -m pfr.tools.verify_daily_campaign_storage "${verification[@]}"
 "$python_bin" -m pfr.tools.build_january_b6_risk_calibration \
     --source-root "$calibration_root" --source-method B07 --output "$artifact"
 "$python_bin" -c 'from pathlib import Path; import json,sys; from pfr.risk_calibration import load_frozen_risk_calibration; x=load_frozen_risk_calibration(Path(sys.argv[1])); print("RISK_CALIBRATION_FROZEN", x.authority_id, json.dumps(dict(x.normalized_family_quantiles), sort_keys=True), x.artifact_sha256)' "$artifact"

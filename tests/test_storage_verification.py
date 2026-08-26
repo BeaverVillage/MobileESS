@@ -6,6 +6,7 @@ from pfr.tools.verify_daily_campaign_storage import (
     _prediction_actual_evidence_errors,
     _risk_calibration_evidence_errors,
     inspect_campaign_registry,
+    inspect_day,
     inspect_method,
 )
 from pfr.risk_calibration import RISK_FAMILY_SCALES
@@ -150,6 +151,44 @@ def test_campaign_registry_detects_missing_day(tmp_path: Path) -> None:
     assert "campaign daily date axis is incomplete, duplicated, or reordered" in result[
         "errors"
     ]
+
+
+def test_storage_verifier_honors_explicit_pass_fingerprint_authority(
+    tmp_path: Path,
+) -> None:
+    old_fingerprint = "a" * 64
+    current_fingerprint = "b" * 64
+    (tmp_path / "RUN_MANIFEST.json").write_text(
+        json.dumps(
+            {
+                "scientific_implementation_fingerprint": old_fingerprint,
+                "status": "PASS",
+                "count": 288,
+                "start_issue": 0,
+                "git_full_commit_sha": "c" * 40,
+                "git_worktree_dirty": False,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    rejected = inspect_day(
+        tmp_path,
+        "2025-01-01",
+        current_fingerprint,
+        ("B07",),
+    )
+    authorized = inspect_day(
+        tmp_path,
+        "2025-01-01",
+        current_fingerprint,
+        ("B07",),
+        (old_fingerprint,),
+    )
+
+    assert "scientific implementation fingerprint drift" in rejected["errors"]
+    assert "scientific implementation fingerprint drift" not in authorized["errors"]
+    assert authorized["cross_implementation_reuse_authorized"] is True
 
 
 def test_prediction_actual_storage_evidence_is_arithmetically_verified() -> None:
