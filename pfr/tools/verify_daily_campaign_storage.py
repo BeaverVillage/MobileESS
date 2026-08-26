@@ -243,6 +243,7 @@ def inspect_method(
     method: str,
     expected_first_issue: int,
     expected_calendar_date: str | None = None,
+    require_rebound_authority: bool = True,
 ) -> dict[str, Any]:
     errors: list[str] = []
     markers: list[Mapping[str, Any]] = []
@@ -332,14 +333,15 @@ def inspect_method(
             if method in {"B01", "B05", "B06", "B07", "B08", "B09"}:
                 if float(summary.get("terminal_energy_debt_kwh", math.inf)) > 1e-9:
                     errors.append("energy-flex method violates day-end recovery")
-                if summary.get("rebound_authority_complete") is not True:
-                    errors.append("energy-flex method lacks rebound authority")
-                for field in ("daily_rebound_peak_kw", "daily_rebound_energy_kwh"):
-                    try:
-                        if not math.isfinite(float(summary[field])):
-                            raise ValueError
-                    except (KeyError, TypeError, ValueError):
-                        errors.append(f"energy-flex method lacks finite {field}")
+                if require_rebound_authority:
+                    if summary.get("rebound_authority_complete") is not True:
+                        errors.append("energy-flex method lacks rebound authority")
+                    for field in ("daily_rebound_peak_kw", "daily_rebound_energy_kwh"):
+                        try:
+                            if not math.isfinite(float(summary[field])):
+                                raise ValueError
+                        except (KeyError, TypeError, ValueError):
+                            errors.append(f"energy-flex method lacks finite {field}")
         if summary.get("status") == "PASS" and method in {"B6", "B07"}:
             if int(summary.get("risk_calibration_audit_count", -1)) != len(markers):
                 errors.append(f"PASS {method} risk calibration audit count mismatch")
@@ -430,9 +432,13 @@ def inspect_method(
                 ) != {expected_calendar_date}
             ):
                 errors.append("ISSUE_RESULT splits or mislabels simulation date")
-            if method in {"B01", "B05", "B06", "B07", "B08", "B09"} and (
-                issue_frame["shadow_root_import_kw"].isna().any()
-                or issue_frame["rebound_power_kw"].isna().any()
+            if (
+                require_rebound_authority
+                and method in {"B01", "B05", "B06", "B07", "B08", "B09"}
+                and (
+                    issue_frame["shadow_root_import_kw"].isna().any()
+                    or issue_frame["rebound_power_kw"].isna().any()
+                )
             ):
                 errors.append("ISSUE_RESULT rebound/shadow columns contain nulls")
         except (OSError, ValueError, TypeError, KeyError) as exc:
@@ -463,6 +469,7 @@ def inspect_day(
     implementation_fingerprint: str,
     methods: tuple[str, ...] = METHODS,
     authorized_implementation_fingerprints: tuple[str, ...] = (),
+    require_rebound_authority: bool = True,
 ) -> dict[str, Any]:
     errors: list[str] = []
     expected_first_issue = (
@@ -474,6 +481,7 @@ def inspect_day(
             method,
             expected_first_issue,
             expected_calendar_date=calendar_date,
+            require_rebound_authority=require_rebound_authority,
         )
         for method in methods
     ]
@@ -723,6 +731,10 @@ def main() -> None:
             )
         )
     )
+    # Raw one-method risk calibration intentionally has no matched B04 shadow.
+    # It must still pass terminal energy recovery. Rebound materialization is
+    # required without exemption for the final ordered B00-B09 campaign.
+    require_rebound_authority = args.diagnostic_method not in {"B6", "B07"}
     rows = [
         inspect_day(
             args.root / calendar_date,
@@ -730,6 +742,7 @@ def main() -> None:
             fingerprint,
             methods,
             tuple(args.reuse_verified_pass_fingerprint),
+            require_rebound_authority,
         )
         for calendar_date in expected_dates
     ]
@@ -790,6 +803,12 @@ def main() -> None:
             args.supplementary_b8_periodic_5min
         ),
         "electrical_stress_campaign": args.electrical_stress_campaign,
+        "rebound_authority_required": require_rebound_authority,
+        "rebound_authority_exemption": (
+            None
+            if require_rebound_authority
+            else "RAW_SINGLE_METHOD_CALIBRATION_HAS_NO_MATCHED_B04_SHADOW"
+        ),
         "completed_days": sum(bool(row["complete"]) for row in rows),
         "pass_days": sum(row["scientific_status"] == "PASS" for row in rows),
         "total_commit_markers": sum(int(row["commit_markers"]) for row in rows),
