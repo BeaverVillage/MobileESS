@@ -12,7 +12,7 @@ import os
 from pathlib import Path
 import pickle
 import time
-from typing import Any, Iterable, Mapping, Optional, Protocol, Sequence, Tuple
+from typing import Any, Callable, Iterable, Mapping, Optional, Protocol, Sequence, Tuple
 
 from .electrical_stress import (
     OBJECTIVE_AUTHORITY,
@@ -3609,6 +3609,7 @@ def _optimize_job_migrations(
     frame: CausalExperimentFrame,
     authority: Optional[MigrationAuthority],
     evaluation_steps_remaining: int,
+    migration_candidate_feasible: Optional[Callable[[str, str], bool]] = None,
 ) -> tuple[dict[str, str], dict[str, Optional[str]]]:
     if evaluation_steps_remaining <= 0:
         raise RuntimeContractError("migration optimizer lacks remaining evaluation steps")
@@ -3709,6 +3710,8 @@ def _optimize_job_migrations(
     baseline = sum(value * value for value in loads.values())
     candidates = []
     episode_boundary_blocked_candidate_count = 0
+    rack_domain_blocked_candidate_count = 0
+    deadline_blocked_candidate_count = 0
     if state.wan_active_transfers < authority.maximum_active_transfers:
         for uid, job in sorted(jobs.items()):
             if (
@@ -3724,6 +3727,12 @@ def _optimize_job_migrations(
                     continue
                 if loads[destination] + gpu > MODELED_GPU_CAPACITY_PER_IDC + 1e-9:
                     continue
+                if (
+                    migration_candidate_feasible is not None
+                    and not migration_candidate_feasible(uid, destination)
+                ):
+                    rack_domain_blocked_candidate_count += 1
+                    continue
                 after = dict(loads)
                 after[source] -= gpu
                 after[destination] += gpu
@@ -3732,6 +3741,22 @@ def _optimize_job_migrations(
                     job.source.migration_payload_bytes, source, destination
                 )
                 downtime_steps = transfer_steps + authority.restart_steps
+                remaining_compute_steps = int(
+                    math.ceil(
+                        max(0.0, float(job.remaining_work_gpu_hours))
+                        / (float(gpu) * STEP_HOURS)
+                        - 1e-12
+                    )
+                )
+                deadline_steps_remaining = int(
+                    job.source.deadline_step - frame.issue
+                )
+                if (
+                    downtime_steps + remaining_compute_steps
+                    > deadline_steps_remaining
+                ):
+                    deadline_blocked_candidate_count += 1
+                    continue
                 net_improvement = improvement - (
                     authority.downtime_penalty_per_gpu_step * gpu * downtime_steps
                 )
@@ -3781,6 +3806,10 @@ def _optimize_job_migrations(
         "episode_boundary_blocked_candidate_count": (
             episode_boundary_blocked_candidate_count
         ),
+        "rack_domain_blocked_candidate_count": (
+            rack_domain_blocked_candidate_count
+        ),
+        "deadline_blocked_candidate_count": deadline_blocked_candidate_count,
         "prestart_placements": prestart_placements,
     }
     return placements, migrations

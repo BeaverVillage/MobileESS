@@ -14,7 +14,7 @@ import math
 import os
 from pathlib import Path
 import time
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Callable, Mapping, Optional, Sequence
 
 import numpy as np
 
@@ -228,6 +228,23 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             if stale is not None:
                 stale.model.dispose()
 
+    def _reset_method_model_solutions(self, method_key: str) -> int:
+        """Cold-start retained models without rebuilding their skeletons.
+
+        Gurobi ``Model.reset()`` discards solution and reoptimization state so
+        the next optimize starts from scratch.  Variables, constraints, and
+        the exact recourse topology remain unchanged, avoiding the measured
+        17-second construction cost of two large replacement models.
+        """
+
+        reset_count = 0
+        for models in (self._master_models, self._recourse_models):
+            retained = models.get(method_key)
+            if retained is not None:
+                retained.model.reset()
+                reset_count += 1
+        return reset_count
+
     @staticmethod
     def _shared_watchdog_budgets(
         total_seconds: float,
@@ -279,6 +296,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         occupied_power = {rack: 0.0 for rack in rack_rows}
         assigned = 0
         capacity_blocked = 0
+        migrating_reservations = 0
 
         def is_ready(uid: str, job: Any) -> bool:
             if job.lifecycle != "QUEUED":
@@ -310,6 +328,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             ),
         )
         for uid, job in ordered:
+            reserving_migration = job.lifecycle == "MIGRATING"
             destination = _effective_job_site(job)
             row = self._scope_job(uid, job)
             power_kw = (
@@ -333,12 +352,17 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 {str(item["rack_pool_id"]) for item in admissible_rows}
             )
             current = str(job.logical_rack_id)
-            if current in rack_rows:
+            if current in rack_rows and current in allowed:
+                if reserving_migration:
+                    raise RuntimeContractError(
+                        f"migrating job {uid} was teleported before transfer completion"
+                    )
+                selected = current
+            elif current in rack_rows and not reserving_migration:
                 if current not in allowed:
                     raise RuntimeContractError(
                         f"job {uid} physical rack is outside its retained domain"
                     )
-                selected = current
             else:
                 feasible = [
                     rack
@@ -350,6 +374,10 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     <= float(rack_rows[rack].rack_power_cap_kw) + 1e-9
                 ]
                 if not feasible:
+                    if reserving_migration:
+                        raise RuntimeContractError(
+                            f"migrating job {uid} cannot reserve a destination physical rack"
+                        )
                     if job.lifecycle != "QUEUED":
                         raise RuntimeContractError(
                             f"running job {uid} cannot be placed in its physical rack domain"
@@ -372,6 +400,16 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                         rack,
                     ),
                 )
+                if reserving_migration:
+                    # Checkpoint transfer releases the source rack, while the
+                    # common scheduler already reserves aggregate GPU at the
+                    # destination IDC.  Mirror that reservation at rack level
+                    # without teleporting runtime state: transfer completion
+                    # changes the logical rack to the destination pool, and
+                    # RESTARTING materializes the physical rack next issue.
+                    migrating_reservations += 1
+                    occupied_gpu[selected] += gpu
+                    continue
                 selected_destination = str(
                     rack_rows[selected].idc_id
                 )
@@ -407,10 +445,67 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 )
         return {
             "assigned_jobs": assigned,
+            "migrating_destination_rack_reservations": migrating_reservations,
             "capacity_blocked_jobs": capacity_blocked,
             "occupied_gpu_by_rack": occupied_gpu,
             "occupied_power_kw_by_rack": occupied_power,
         }
+
+    def _migration_candidate_rack_feasible(
+        self,
+        *,
+        state: MutableMethodState,
+        candidate_uid: str,
+        destination: str,
+        planned_racks: Mapping[str, str],
+    ) -> bool:
+        """Screen checkpoint migration against indivisible rack capacity.
+
+        The common migration authority balances aggregate IDC GPU.  A whole
+        gang additionally needs one admissible physical rack.  Reserve around
+        every rack already selected by the H54 plan, including queued gangs,
+        so a migration cannot be accepted and then fail at transfer/restart.
+        """
+
+        self._initialize()
+        rack_rows = {
+            str(row.rack_pool_id): row
+            for row in self.scope["cap"].itertuples(index=False)
+        }
+        occupied_gpu = {rack: 0.0 for rack in rack_rows}
+        occupied_power = {rack: 0.0 for rack in rack_rows}
+        for uid, rack in planned_racks.items():
+            if uid == candidate_uid or rack not in rack_rows:
+                continue
+            job = state.jobs[uid]
+            if job.lifecycle in {"COMPLETED", "MIGRATING"}:
+                continue
+            row = self._scope_job(uid, job)
+            occupied_gpu[rack] += int(job.source.requested_gpu)
+            occupied_power[rack] += (
+                float(row["IT_power_kW"])
+                if job.lifecycle in {"RUNNING", "QUEUED"}
+                else 0.0
+            )
+
+        candidate = state.jobs[candidate_uid]
+        candidate_row = self._scope_job(candidate_uid, candidate)
+        candidate_gpu = int(candidate.source.requested_gpu)
+        candidate_power = float(candidate_row["IT_power_kW"])
+        allowed = sorted(
+            {
+                str(item["rack_pool_id"])
+                for item in self.scope["domains"][candidate_uid]
+                if str(item["destination_IDC_id"]) == destination
+            }
+        )
+        return any(
+            occupied_gpu[rack] + candidate_gpu
+            <= float(rack_rows[rack].deliverable_active_gpu_capacity) + 1e-9
+            and occupied_power[rack] + candidate_power
+            <= float(rack_rows[rack].rack_power_cap_kw) + 1e-9
+            for rack in allowed
+        )
 
     def _issue_kernel(
         self,
@@ -1523,12 +1618,18 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             >= self.max_persistent_solve_reuses
         ):
             # Gurobi's retained multiobjective reoptimization state can become
-            # substantially slower than a cold model after repeated RHS and
-            # coefficient updates.  Bound that numerical state age without
-            # changing the mathematical model or any accepted decision.
-            self._dispose_method_models(method_key)
+            # substantially slower after repeated RHS and coefficient updates.
+            # Reset solution/reoptimization state at the frozen 16-solve age,
+            # but retain the immutable model skeleton.  Model.reset() makes
+            # the next optimize a cold start without paying to reconstruct the
+            # same variables and constraints.
+            reset_count = self._reset_method_model_solutions(method_key)
+            if reset_count != 2:
+                raise RuntimeContractError(
+                    "periodic numerical reset requires both persistent models"
+                )
             self._model_solve_generation_by_method[method_key] = 0
-            model_refresh_reason = "PERIODIC_NUMERICAL_STATE_REFRESH"
+            model_refresh_reason = "PERIODIC_NUMERICAL_STATE_RESET"
         self._job_slot_capacity_by_method[method_key] = current_slots
         issue_root = (
             self.output_root
@@ -1717,6 +1818,14 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             domain=domain,
             migration_authority=migration_authority,
             evaluation_steps_remaining=evaluation_steps_remaining,
+            migration_candidate_feasible=lambda uid, destination, planned_racks: (
+                self._migration_candidate_rack_feasible(
+                    state=state,
+                    candidate_uid=uid,
+                    destination=destination,
+                    planned_racks=planned_racks,
+                )
+            ),
         )
         recourse_seconds = time.monotonic() - recourse_started
         plan.validate()
@@ -1780,6 +1889,9 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             },
             "persistent_model_reused": build_seconds == 0.0,
             "persistent_model_refresh_reason": model_refresh_reason,
+            "persistent_model_solution_state_reset": (
+                model_refresh_reason == "PERIODIC_NUMERICAL_STATE_RESET"
+            ),
             "persistent_model_solve_generation": model_solve_generation,
             "persistent_model_max_reuses": self.max_persistent_solve_reuses,
             "model_build_once_seconds": build_seconds,
@@ -3902,6 +4014,9 @@ class _PersistentMilpModel:
         domain: _PreparedOnlineDomain,
         migration_authority: MigrationAuthority,
         evaluation_steps_remaining: int,
+        migration_candidate_feasible: Optional[
+            Callable[[str, str, Mapping[str, str]], bool]
+        ] = None,
     ) -> SlowDiscretePlan:
         selected_routes: dict[str, _MobilityTemplate] = {}
         selected_route_indices: dict[str, int] = {}
@@ -4058,6 +4173,13 @@ class _PersistentMilpModel:
             frame,
             migration_authority,
             evaluation_steps_remaining,
+            (
+                None
+                if migration_candidate_feasible is None
+                else lambda uid, destination: migration_candidate_feasible(
+                    uid, destination, racks
+                )
+            ),
         )
         for uid, destination in checkpoint_migrations.items():
             if destination is None:

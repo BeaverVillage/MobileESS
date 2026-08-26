@@ -817,6 +817,62 @@ class PfrRuntimeTests(unittest.TestCase):
             self.migration_authority.fingerprint,
         )
 
+    def test_spatial_arm_rejects_migration_that_would_miss_hard_deadline(self):
+        config = next(
+            item
+            for item in self.configs
+            if item.comparison_method_id is ComparisonMethod.B5
+        )
+        jobs = tuple(
+            OperationalTrainingJob(
+                f"deadline-j{index}", "IDC01", 100, 102, 124, 1, 7200, 0.01,
+                None, f"source-deadline-j{index}",
+                self.migration_authority.checkpoint_payload_bytes(1),
+                self.migration_authority.fingerprint,
+            )
+            for index in (1, 2)
+        )
+        frames = tuple(
+            CausalExperimentFrame(
+                issue,
+                100.0,
+                100.0,
+                1000.0,
+                100.0,
+                jobs if issue == 100 else (),
+                format(issue, "064x"),
+                workload_reserve_gpu={
+                    site: (20.0 if issue >= 106 and site == "IDC01" else 0.0)
+                    for site in self.migration_authority.idc_to_wan_node
+                },
+            )
+            for issue in range(100, 109)
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            summary = PfrRuntimeRunner(
+                power_curve=self.curve,
+                physical_backend=FakePhysical(),
+                migration_authority=self.migration_authority,
+            ).run_method(
+                config=config,
+                frames=frames,
+                initial=self.initial,
+                representative_week_id="TEST_B5_DEADLINE_BLOCK",
+                output=root,
+            )
+            marker = __import__("json").loads(
+                (root / "B5/issue_000106/COMMIT_MARKER.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+
+        self.assertEqual(summary["status"], "PASS")
+        self.assertEqual(summary["migration_count"], 0)
+        certificate = marker["spatial_optimizer_certificate"]
+        self.assertIsNone(certificate["selected_migration"])
+        self.assertGreater(certificate["deadline_blocked_candidate_count"], 0)
+
     def test_empty_job_slow_plan_is_valid(self):
         frame = CausalExperimentFrame(100, 10, 10, 1000, 100, (), "f" * 64)
         with tempfile.TemporaryDirectory() as temporary:

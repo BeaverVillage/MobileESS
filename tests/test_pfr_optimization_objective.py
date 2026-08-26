@@ -530,6 +530,225 @@ def test_restart_rack_materialization_preserves_migration_destination() -> None:
     assert job.logical_rack_id == "IDC02_LP01"
 
 
+def test_active_migration_keeps_source_rack_until_transfer_completes() -> None:
+    planner = object.__new__(PersistentBoundedMilpPlanner)
+    planner._initialize = lambda: None
+    uid = "migrating-job"
+    planner.scope = {
+        "cap": pd.DataFrame(
+            [
+                {
+                    "rack_pool_id": "IDC01_LP01",
+                    "idc_id": "IDC01",
+                    "deliverable_active_gpu_capacity": 1.0,
+                    "rack_power_cap_kw": 10.0,
+                },
+                {
+                    "rack_pool_id": "IDC02_LP01",
+                    "idc_id": "IDC02",
+                    "deliverable_active_gpu_capacity": 1.0,
+                    "rack_power_cap_kw": 10.0,
+                },
+            ]
+        ),
+        "domains": {
+            uid: [
+                {
+                    "destination_IDC_id": "IDC01",
+                    "rack_pool_id": "IDC01_LP01",
+                },
+                {
+                    "destination_IDC_id": "IDC02",
+                    "rack_pool_id": "IDC02_LP01",
+                },
+            ]
+        },
+        "pmap": {
+            uid: {
+                "arrival_step": 100,
+                "latest_start_step": 105,
+                "latest_completion_step_exclusive": 120,
+                "requested_gpu": 1,
+                "IT_power_kW": 1.0,
+                "duration_steps": 12,
+            }
+        },
+        "wan_map": {},
+    }
+    source = OperationalTrainingJob(
+        job_uid=uid,
+        origin_idc="IDC01",
+        arrival_step=100,
+        latest_start_step=105,
+        deadline_step=120,
+        requested_gpu=1,
+        runtime_seconds_source=3600.0,
+        cpu_request_share_kw=0.1,
+        input_bytes=None,
+        source_record_id=uid,
+    )
+    job = RuntimeJobState(
+        source=source,
+        destination_idc="IDC01",
+        logical_rack_id="IDC01_LP01",
+        gang_membership=(f"IDC01_LP01:PFR-GPU:{uid}:0",),
+        remaining_work_gpu_hours=1.0,
+        lifecycle="MIGRATING",
+        compute_rate_fraction=0.0,
+        migration_source_idc="IDC01",
+        migration_destination_idc="IDC02",
+        migration_payload_remaining_bytes=1_000_000,
+    )
+    state = MutableMethodState(
+        issue=106,
+        pre_state_sha256="a" * 64,
+        mess_energy_kwh={mid: 760.0 for mid in MESS_IDS},
+        mess_location=dict(MESS_CANONICAL_STAGING),
+        jobs={uid: job},
+    )
+    config = MethodFactory(
+        ExperimentAuthority(*(format(index, "064x") for index in range(1, 8)))
+    ).create_electrical_stress(ElectricalStressMethod.B07)
+
+    audit = planner.materialize_runtime_rack_assignments(state, config)
+
+    assert audit["assigned_jobs"] == 0
+    assert audit["migrating_destination_rack_reservations"] == 1
+    assert audit["occupied_gpu_by_rack"] == {
+        "IDC01_LP01": 0.0,
+        "IDC02_LP01": 1.0,
+    }
+    assert job.destination_idc == "IDC01"
+    assert job.logical_rack_id == "IDC01_LP01"
+    assert job.migration_destination_idc == "IDC02"
+
+
+def test_migration_candidate_requires_one_feasible_destination_rack() -> None:
+    planner = object.__new__(PersistentBoundedMilpPlanner)
+    planner._initialize = lambda: None
+    candidate_uid = "candidate"
+    occupant_uid = "occupant"
+    planner.scope = {
+        "cap": pd.DataFrame(
+            [
+                {
+                    "rack_pool_id": "IDC01_LP01",
+                    "idc_id": "IDC01",
+                    "deliverable_active_gpu_capacity": 2.0,
+                    "rack_power_cap_kw": 20.0,
+                },
+                {
+                    "rack_pool_id": "IDC02_LP01",
+                    "idc_id": "IDC02",
+                    "deliverable_active_gpu_capacity": 2.0,
+                    "rack_power_cap_kw": 20.0,
+                },
+            ]
+        ),
+        "domains": {
+            candidate_uid: [
+                {
+                    "destination_IDC_id": "IDC01",
+                    "rack_pool_id": "IDC01_LP01",
+                },
+                {
+                    "destination_IDC_id": "IDC02",
+                    "rack_pool_id": "IDC02_LP01",
+                },
+            ],
+            occupant_uid: [
+                {
+                    "destination_IDC_id": "IDC02",
+                    "rack_pool_id": "IDC02_LP01",
+                }
+            ],
+        },
+        "pmap": {
+            candidate_uid: {
+                "arrival_step": 100,
+                "latest_start_step": 105,
+                "latest_completion_step_exclusive": 140,
+                "requested_gpu": 2,
+                "IT_power_kW": 10.0,
+            },
+            occupant_uid: {
+                "arrival_step": 100,
+                "latest_start_step": 105,
+                "latest_completion_step_exclusive": 140,
+                "requested_gpu": 1,
+                "IT_power_kW": 10.0,
+            },
+        },
+        "wan_map": {},
+    }
+
+    def runtime_job(uid: str, origin: str, gpu: int) -> RuntimeJobState:
+        source = OperationalTrainingJob(
+            job_uid=uid,
+            origin_idc=origin,
+            arrival_step=100,
+            latest_start_step=105,
+            deadline_step=140,
+            requested_gpu=gpu,
+            runtime_seconds_source=3600.0,
+            cpu_request_share_kw=0.1,
+            input_bytes=None,
+            source_record_id=uid,
+        )
+        return RuntimeJobState(
+            source=source,
+            destination_idc=origin,
+            logical_rack_id=f"{origin}_LP01",
+            gang_membership=tuple(f"{origin}:GPU:{index}" for index in range(gpu)),
+            remaining_work_gpu_hours=float(gpu),
+            lifecycle="RUNNING",
+        )
+
+    state = MutableMethodState(
+        issue=106,
+        pre_state_sha256="a" * 64,
+        mess_energy_kwh={mid: 760.0 for mid in MESS_IDS},
+        mess_location=dict(MESS_CANONICAL_STAGING),
+        jobs={
+            candidate_uid: runtime_job(candidate_uid, "IDC01", 2),
+            occupant_uid: runtime_job(occupant_uid, "IDC02", 1),
+        },
+    )
+    planned_racks = {
+        candidate_uid: "IDC01_LP01",
+        occupant_uid: "IDC02_LP01",
+    }
+
+    assert not planner._migration_candidate_rack_feasible(
+        state=state,
+        candidate_uid=candidate_uid,
+        destination="IDC02",
+        planned_racks=planned_racks,
+    )
+
+
+def test_periodic_persistent_refresh_resets_without_rebuilding() -> None:
+    planner = object.__new__(PersistentBoundedMilpPlanner)
+    calls = []
+    planner._master_models = {
+        "B07": SimpleNamespace(
+            model=SimpleNamespace(reset=lambda: calls.append("master"))
+        )
+    }
+    planner._recourse_models = {
+        "B07": SimpleNamespace(
+            model=SimpleNamespace(reset=lambda: calls.append("recourse"))
+        )
+    }
+
+    reset_count = planner._reset_method_model_solutions("B07")
+
+    assert reset_count == 2
+    assert calls == ["master", "recourse"]
+    assert set(planner._master_models) == {"B07"}
+    assert set(planner._recourse_models) == {"B07"}
+
+
 def test_shared_watchdog_transfers_unused_master_time_to_exact_recourse() -> None:
     total = 30.0
 
