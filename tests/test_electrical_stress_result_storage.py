@@ -136,6 +136,16 @@ def _record(issue: int = 0) -> dict:
 
 
 class ElectricalStressResultStorageTests(unittest.TestCase):
+    def test_simulation_calendar_date_does_not_split_on_utc_midnight(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "B09"
+            row = _record()
+            row["simulation_calendar_date"] = "2025-02-03"
+            materialize_method_results(root, (row,), {"status": "PASS"})
+            stored = pd.read_parquet(root / "ISSUE_RESULT.parquet")
+            self.assertEqual(stored.loc[0, "date"], "2025-02-03")
+            self.assertTrue(str(stored.loc[0, "timestamp"]).endswith("+00:00"))
+
     def test_method_tables_are_written_and_read_back_with_empty_job_schema(self):
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw) / "B09"

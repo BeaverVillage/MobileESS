@@ -1,0 +1,20 @@
+{
+  "identity": "REBOUND_SHADOW_AUTHORITY_V1",
+  "status": "FROZEN_PRE_MARCH",
+  "step_hours": 0.08333333333333333,
+  "matched_shadow_method": {
+    "B01": "B00",
+    "B05": "B04",
+    "B06": "B04",
+    "B07": "B04",
+    "B08": "B04",
+    "B09": "B04"
+  },
+  "recovery_window": "steps entered with positive support-energy debt",
+  "step_rebound_kw": "max(0, method_root_import_kw - matched_shadow_root_import_kw) during the recovery window; zero otherwise",
+  "daily_rebound_peak_kw": "max(step_rebound_kw)",
+  "daily_rebound_energy_kwh": "sum(step_rebound_kw * step_hours)",
+  "matching_keys": ["simulation_calendar_date", "issue"],
+  "service_matching": "B01 uses B00; full-compute energy methods use service-feasible B04.",
+  "positive_result_required": false
+}

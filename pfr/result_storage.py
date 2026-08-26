@@ -138,7 +138,15 @@ def _timestamp_fields(record: Mapping[str, Any]) -> tuple[int | None, str | None
 
     timestamp_ns = int(raw)
     timestamp = pd.Timestamp(timestamp_ns, unit="ns", tz="UTC")
-    return timestamp_ns, timestamp.isoformat(), timestamp.date().isoformat()
+    simulation_date = record.get("simulation_calendar_date")
+    if simulation_date is None:
+        date = timestamp.date().isoformat()
+    else:
+        try:
+            date = pd.Timestamp(str(simulation_date)).date().isoformat()
+        except ValueError as exc:
+            raise ValueError("invalid simulation_calendar_date") from exc
+    return timestamp_ns, timestamp.isoformat(), date
 
 
 def _issue_row(record: Mapping[str, Any]) -> dict[str, Any]:
@@ -842,7 +850,7 @@ def validate_method_results(
         },
         "nullable_measurements": {
             "predicted_component_element_phase": "required columns; populated only when the planner certificate exposes component argmax metadata",
-            "shadow_and_rebound": "nullable until a frozen shadow-baseline authority is supplied",
+            "shadow_and_rebound": "nullable only for isolated single-method diagnostics where the matched shadow is unavailable; official B00-B09 campaigns require materialization",
             "opendss_time_s": "nullable until the exact runner reports isolated wall time",
         },
     }

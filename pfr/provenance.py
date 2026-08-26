@@ -9,7 +9,14 @@ from pathlib import Path
 def scientific_implementation_files(repo: Path) -> tuple[Path, ...]:
     repo = repo.resolve()
     files = sorted((repo / "pfr").glob("*.py"))
-    files.append(repo / "pfr" / "tools" / "run_pfr_matrix.py")
+    files.extend(
+        (
+            repo / "pfr" / "tools" / "run_pfr_matrix.py",
+            repo / "pfr" / "tools" / "run_pfr_daily_campaign.py",
+            repo / "pfr" / "tools" / "verify_daily_campaign_storage.py",
+            repo / "pfr" / "tools" / "audit_h0_surrogate_fidelity.py",
+        )
+    )
     files.extend(
         (
             repo / "science" / "EXACT_GRID_RUNNER_24SERVICE.py",
@@ -47,6 +54,42 @@ def scientific_implementation_files(repo: Path) -> tuple[Path, ...]:
             / "pfr"
             / "contracts"
             / "MESS_MOBILITY_EXECUTION_SUMO_V1.json",
+            repo
+            / "pfr"
+            / "contracts"
+            / "H0_SURROGATE_FIDELITY_GATE_V1.json",
+            repo
+            / "pfr"
+            / "contracts"
+            / "EPISODE_BOUNDARY_RECOVERY_V1.json",
+            repo
+            / "pfr"
+            / "contracts"
+            / "RETAINED_PLAN_EVENT_TRIGGER_V1.json",
+            repo
+            / "pfr"
+            / "contracts"
+            / "SERVICE_FEASIBILITY_CLASSIFICATION_V1.json",
+            repo
+            / "pfr"
+            / "contracts"
+            / "SIMULATION_CALENDAR_DATE_V1.json",
+            repo
+            / "pfr"
+            / "contracts"
+            / "REBOUND_SHADOW_AUTHORITY_V1.json",
+            repo
+            / "pfr"
+            / "contracts"
+            / "ELECTRICAL_STRESS_RESULT_SCHEMA_V1.json",
+            repo
+            / "pfr"
+            / "contracts"
+            / "CAUSAL_PHASE_ENVELOPE_SURROGATE_V1.json",
+            repo
+            / "pfr"
+            / "contracts"
+            / "MESS_REACTIVE_DISPATCH_AUTHORITY_V1.json",
         )
     )
     missing = [path for path in files if not path.is_file()]

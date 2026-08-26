@@ -171,7 +171,8 @@ def test_hierarchical_move_blocked_mpc_preserves_science_and_exact_recourse() ->
         / "HIERARCHICAL_MOVE_BLOCKED_MIXED_INTEGER_MPC_V1.json"
     ).read_text(encoding="utf-8")
     assert "OBJECTIVE_AUTHORITY" in source
-    assert "self.debt[(mid, self.h)] == 0.0" in source
+    assert "episode_terminal_debt" in source
+    assert "_episode_terminal_debt_rhs" in source
     assert "route departure reserve" not in source  # encoded as dep_reserve rows
     assert "self.dep_reserve" in source
     assert 'model_role="slow_master"' in source

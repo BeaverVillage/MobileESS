@@ -1449,6 +1449,16 @@ def main() -> None:
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--candidate-id", default="JAN2025_DAY01")
     parser.add_argument(
+        "--calendar-date",
+        help="Simulation-local AEST calendar date (YYYY-MM-DD) for daily output grouping.",
+    )
+    parser.add_argument(
+        "--h0-fidelity-audit-every-steps",
+        type=int,
+        default=0,
+        help="Sample aligned same-action surrogate/Fresh-AC candidates; 0 disables.",
+    )
+    parser.add_argument(
         "--diagnostic-method",
         choices=(
             tuple(method.value for method in ComparisonMethod)
@@ -2066,6 +2076,7 @@ def main() -> None:
         mobility_execution_authority=mobility_execution,
         risk_calibration_authority=risk_calibration,
         joint_planner=retained_h54,
+        h0_fidelity_audit_every_steps=args.h0_fidelity_audit_every_steps,
     )
     factory = MethodFactory(authority)
     configs = (
@@ -2090,6 +2101,7 @@ def main() -> None:
             initial=initial,
             representative_week_id=args.candidate_id,
             output=output,
+            simulation_calendar_date=args.calendar_date,
             diagnostic_resume_state=diagnostic_resume_state,
             diagnostic_resume_cumulative_grid_cost_aud=(
                 diagnostic_resume_cumulative_grid_cost_aud
@@ -2157,6 +2169,7 @@ def main() -> None:
             initial=initial,
             representative_week_id=args.candidate_id,
             output=output,
+            simulation_calendar_date=args.calendar_date,
             reuse_passed_methods=args.reuse_passed_methods,
         )
     manifest = {

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
+from datetime import date
 import csv
 import hashlib
 import json
@@ -499,6 +500,16 @@ class MutableMethodState:
     )
     native_capacitor_switch_count: dict[str, int] = field(default_factory=dict)
     native_regulator_tap_numbers: dict[str, int] = field(default_factory=dict)
+    retained_plan_risk_components: dict[str, float] = field(default_factory=dict)
+    risk_trigger_armed: dict[str, bool] = field(
+        default_factory=lambda: {family.value: True for family in RiskFamily}
+    )
+    last_committed_mess_p_kw: dict[str, float] = field(
+        default_factory=lambda: {mid: 0.0 for mid in MESS_IDS}
+    )
+    last_committed_mess_q_kvar: dict[str, float] = field(
+        default_factory=lambda: {mid: 0.0 for mid in MESS_IDS}
+    )
 
 
 @dataclass(frozen=True)
@@ -4205,7 +4216,20 @@ def _risk_decision(
         expected_replan_benefit=0.0,
         replan_cost=ReplanCost(1.0, 0.0, 0.1, 0.01),
         plan_age_steps=state.active_plan_age_steps,
+        retained_plan_components=(
+            state.retained_plan_risk_components or None
+        ),
+        trigger_armed=state.risk_trigger_armed,
+        material_deterioration=0.25,
     )
+    active_components = (
+        decision.calibrated_components
+        if calibrated
+        else decision.raw_components
+    )
+    for family, value in active_components.items():
+        if float(value) <= -0.10:
+            state.risk_trigger_armed[family] = True
     return decision, base_constraints
 
 
@@ -4435,6 +4459,10 @@ def _post_payload(state: MutableMethodState, method_id: str) -> Mapping[str, Any
         ),
         "native_capacitor_switch_count": state.native_capacitor_switch_count,
         "native_regulator_tap_numbers": state.native_regulator_tap_numbers,
+        "retained_plan_risk_components": state.retained_plan_risk_components,
+        "risk_trigger_armed": state.risk_trigger_armed,
+        "last_committed_mess_p_kw": state.last_committed_mess_p_kw,
+        "last_committed_mess_q_kvar": state.last_committed_mess_q_kvar,
         "jobs": {
             uid: {
                 "destination_idc": job.destination_idc,
@@ -4499,6 +4527,7 @@ class PfrRuntimeRunner:
         mobility_execution_authority: Optional[MobilityExecutionAuthority] = None,
         risk_calibration_authority: Optional[FrozenRiskCalibration] = None,
         joint_planner: Optional[H54JointPlanner] = None,
+        h0_fidelity_audit_every_steps: int = 0,
     ) -> None:
         power_curve.validate()
         self.power_curve = power_curve
@@ -4523,6 +4552,128 @@ class PfrRuntimeRunner:
             risk_calibration_authority.validate()
         self.risk_calibration_authority = risk_calibration_authority
         self.joint_planner = joint_planner
+        if h0_fidelity_audit_every_steps < 0:
+            raise RuntimeContractError("H0 fidelity audit interval cannot be negative")
+        self.h0_fidelity_audit_every_steps = int(
+            h0_fidelity_audit_every_steps
+        )
+
+    @staticmethod
+    def _scaled_mess_control(control: FastControl, scale: float) -> FastControl:
+        factor = float(scale)
+        return FastControl(
+            mess_charge_kw={
+                key: factor * float(value)
+                for key, value in control.mess_charge_kw.items()
+            },
+            mess_discharge_kw={
+                key: factor * float(value)
+                for key, value in control.mess_discharge_kw.items()
+            },
+            mess_q_kvar={
+                key: factor * float(value)
+                for key, value in control.mess_q_kvar.items()
+            },
+            job_compute_rate_fraction=dict(control.job_compute_rate_fraction),
+            site_throughput_fraction=dict(control.site_throughput_fraction),
+        )
+
+    def _h0_fidelity_audit(
+        self,
+        *,
+        config: MethodConfig,
+        state: MutableMethodState,
+        frame: CausalExperimentFrame,
+        verifier: _PhysicalVerifierAdapter,
+        accepted_control: FastControl,
+    ) -> Mapping[str, Any]:
+        evaluator = getattr(self.joint_planner, "evaluate_h0_surrogate", None)
+        if not callable(evaluator):
+            raise RuntimeContractError("H0 fidelity audit requires the live surrogate")
+        accepted_commit = verifier.last_commit
+        accepted_native = verifier.native_decision
+        accepted_runtime = verifier.opendss_runtime_seconds
+        if accepted_commit is None or accepted_native is None:
+            raise RuntimeContractError("H0 audit lacks accepted Fresh-AC evidence")
+        candidates = (
+            ("REFERENCE_ZERO_MESS", self._scaled_mess_control(accepted_control, 0.0), True),
+            ("HALF_ACCEPTED_MESS", self._scaled_mess_control(accepted_control, 0.5), False),
+            ("ACCEPTED_MESS", accepted_control, False),
+        )
+        started = time.monotonic()
+        rows = []
+        try:
+            for candidate_id, control, is_reference in candidates:
+                facility, mess_p, mess_q = verifier._physical_inputs(control)
+                surrogate = evaluator(
+                    method_key=config.comparison_method_id.value,
+                    state=state,
+                    frame=frame,
+                    facility_it_kw=facility,
+                    mess_p_kw=mess_p,
+                    mess_q_kvar=mess_q,
+                    mess_location=verifier.mess_location,
+                )
+                exact = (
+                    accepted_commit.exact
+                    if candidate_id == "ACCEPTED_MESS"
+                    else verifier.verify_fresh(control=control)
+                )
+                exact_stress = stress_from_extrema(
+                    minimum_voltage_pu=exact.minimum_voltage_pu,
+                    maximum_voltage_pu=exact.maximum_voltage_pu,
+                    maximum_line_loading_fraction=(
+                        exact.maximum_line_loading_fraction
+                    ),
+                    maximum_transformer_loading_fraction=(
+                        exact.maximum_transformer_loading_fraction
+                    ),
+                )
+                rows.append(
+                    {
+                        "state_id": (
+                            f"{config.comparison_method_id.value}:{frame.issue}"
+                        ),
+                        "candidate_id": candidate_id,
+                        "is_reference": is_reference,
+                        "surrogate_h0_stress": float(surrogate["worst"]),
+                        "fresh_ac_h0_stress": float(exact_stress.worst),
+                        "surrogate_components": dict(surrogate),
+                        "fresh_ac_components": exact_stress.as_dict(),
+                        "fresh_ac_extrema": {
+                            "minimum_voltage_pu": float(exact.minimum_voltage_pu),
+                            "maximum_voltage_pu": float(exact.maximum_voltage_pu),
+                            "maximum_line_loading_fraction": float(
+                                exact.maximum_line_loading_fraction
+                            ),
+                            "maximum_transformer_loading_fraction": float(
+                                exact.maximum_transformer_loading_fraction
+                            ),
+                        },
+                        "mess_p_kw": {
+                            mid: float(mess_p[index])
+                            for index, mid in enumerate(MESS_IDS)
+                        },
+                        "mess_q_kvar": {
+                            mid: float(mess_q[index])
+                            for index, mid in enumerate(MESS_IDS)
+                        },
+                        "same_compute_action": True,
+                        "same_native_grid_state": True,
+                    }
+                )
+        finally:
+            verifier.last_commit = accepted_commit
+            verifier.native_decision = accepted_native
+            verifier.opendss_runtime_seconds = accepted_runtime
+        return {
+            "schema_version": "H0_SURROGATE_FIDELITY_CANDIDATES_V1",
+            "comparison": "SAME_STATE_SAME_H0_FIXED_COMPUTE_AND_NATIVE_STATE",
+            "candidate_rows": rows,
+            "diagnostic_wall_time_s": time.monotonic() - started,
+            "diagnostic_time_excluded_from_control_kpi": True,
+            "future_actual_used_by_optimizer": False,
+        }
 
     def run_method(
         self,
@@ -4532,6 +4683,7 @@ class PfrRuntimeRunner:
         initial: RuntimeInitialState,
         representative_week_id: str,
         output: Path,
+        simulation_calendar_date: Optional[str] = None,
         diagnostic_resume_state: Optional[MutableMethodState] = None,
         diagnostic_resume_cumulative_grid_cost_aud: float = 0.0,
         diagnostic_prefix_records: Sequence[Mapping[str, Any]] = (),
@@ -4541,6 +4693,13 @@ class PfrRuntimeRunner:
     ) -> Mapping[str, Any]:
         if not frames:
             raise RuntimeContractError("runtime needs at least one frame")
+        if simulation_calendar_date is not None:
+            try:
+                date.fromisoformat(simulation_calendar_date)
+            except ValueError as exc:
+                raise RuntimeContractError(
+                    "simulation calendar date must be ISO YYYY-MM-DD"
+                ) from exc
         if restart_checkpoint_interval is not None and restart_checkpoint_interval < 1:
             raise RuntimeContractError("restart checkpoint interval must be positive")
         initial.validate()
@@ -4604,6 +4763,8 @@ class PfrRuntimeRunner:
         for offset, frame in enumerate(frames):
             started = time.monotonic()
             slow_solver_time_s = 0.0
+            h0_fidelity_audit: Mapping[str, Any] | None = None
+            energy_debt_before_kwh = float(state.energy_debt_kwh)
             communication_bytes_before = state.communication_bytes
             frame.validate()
             if frame.issue != state.issue:
@@ -4646,6 +4807,18 @@ class PfrRuntimeRunner:
                 )
                 slow_solver_time_s += time.monotonic() - slow_started
                 state.active_plan_age_steps = 0
+                retained_components = (
+                    risk.calibrated_components
+                    if config.risk_interface == "CALIBRATED"
+                    else risk.raw_components
+                )
+                state.retained_plan_risk_components = {
+                    str(name): float(value)
+                    for name, value in retained_components.items()
+                }
+                for name, value in retained_components.items():
+                    if float(value) > 0.0:
+                        state.risk_trigger_armed[str(name)] = False
                 state.full_replan_count += 1
                 state.communication_bytes += len(
                     json.dumps(asdict(state.active_plan), sort_keys=True, separators=(",", ":"))
@@ -4910,6 +5083,18 @@ class PfrRuntimeRunner:
                 }
                 atomic_write_json(method_root / "FAILURE.json", failure)
                 break
+            if (
+                self.h0_fidelity_audit_every_steps > 0
+                and offset % self.h0_fidelity_audit_every_steps == 0
+                and config.comparison_method_id.value in {"B05", "B06"}
+            ):
+                h0_fidelity_audit = self._h0_fidelity_audit(
+                    config=config,
+                    state=state,
+                    frame=frame,
+                    verifier=verifier,
+                    accepted_control=safety.safe_control,
+                )
             fast = execute_fast_recourse(
                 architecture=self.architecture,
                 slow_plan=state.active_plan,
@@ -4973,6 +5158,14 @@ class PfrRuntimeRunner:
                     - repayment,
                 )
             state.energy_debt_kwh = sum(state.mess_energy_debt_kwh.values())
+            state.last_committed_mess_p_kw = {
+                mid: float(fast.control.mess_discharge_kw[mid])
+                - float(fast.control.mess_charge_kw[mid])
+                for mid in MESS_IDS
+            }
+            state.last_committed_mess_q_kvar = {
+                mid: float(fast.control.mess_q_kvar[mid]) for mid in MESS_IDS
+            }
             realized_mobility_energy_kwh = 0.0
             for mid in MESS_IDS:
                 if not state.mess_in_transit[mid]:
@@ -5172,6 +5365,7 @@ class PfrRuntimeRunner:
                 "controller_id": identity.controller_id,
                 "ablation_id": identity.ablation_id,
                 "representative_week_id": representative_week_id,
+                "simulation_calendar_date": simulation_calendar_date,
                 "issue": frame.issue,
                 "status": "PASS_COMMITTED",
                 "commit_marker": True,
@@ -5311,6 +5505,13 @@ class PfrRuntimeRunner:
                 "risk_components": risk.calibrated_components if config.risk_interface == "CALIBRATED" else risk.raw_components,
                 "risk_raw_components": dict(risk.raw_components),
                 "risk_calibrated_components": dict(risk.calibrated_components),
+                "retained_plan_risk_components": dict(
+                    state.retained_plan_risk_components
+                ),
+                "risk_trigger_armed": dict(state.risk_trigger_armed),
+                "triggered_risk_families": list(
+                    risk.triggered_risk_families
+                ),
                 "risk_calibration_authority_id": (
                     self.risk_calibration_authority.authority_id
                     if self.risk_calibration_authority is not None
@@ -5322,6 +5523,7 @@ class PfrRuntimeRunner:
                     else None
                 ),
                 "risk_calibration_audit": risk_calibration_audit,
+                "h0_surrogate_fidelity_audit": h0_fidelity_audit,
                 "arrivals": len(frame.arrivals),
                 "active_jobs": sum(job.lifecycle == "RUNNING" for job in state.jobs.values()),
                 "completed_jobs": sum(job.lifecycle == "COMPLETED" for job in state.jobs.values()),
@@ -5484,6 +5686,7 @@ class PfrRuntimeRunner:
                 ),
                 "compute_debt_gpu_hours": state.compute_debt_gpu_hours,
                 "energy_debt_kwh": state.energy_debt_kwh,
+                "energy_debt_before_kwh": energy_debt_before_kwh,
                 "recovery_horizon_remaining": max(
                     0, PLANNING_HORIZON_STEPS - int(plan_age_for_action)
                 ),
@@ -5673,6 +5876,61 @@ class PfrRuntimeRunner:
             if diagnostic_stop_after_issue == frame.issue:
                 diagnostic_stop_reached = True
                 break
+        method_id = config.comparison_method_id.value
+        shadow_method = {
+            "B01": "B00",
+            "B05": "B04",
+            "B06": "B04",
+            "B07": "B04",
+            "B08": "B04",
+            "B09": "B04",
+        }.get(method_id)
+        if shadow_method is None:
+            for row in records:
+                root_import = float(row["exact_ac"]["root_import_p_kw"])
+                row["shadow_root_import_kw"] = root_import
+                row["rebound_power_kw"] = 0.0
+                row["rebound_shadow_method_id"] = method_id
+                row["rebound_authority_status"] = "NOT_ENERGY_FLEX_METHOD"
+        else:
+            shadow_path = method_root.parent / shadow_method / "ISSUE_RESULT.parquet"
+            if shadow_path.is_file():
+                import pandas as pd
+
+                shadow_frame = pd.read_parquet(
+                    shadow_path, columns=("issue", "root_import_kw")
+                )
+                shadow_by_issue = {
+                    int(row.issue): float(row.root_import_kw)
+                    for row in shadow_frame.itertuples(index=False)
+                }
+                if any(int(row["issue"]) not in shadow_by_issue for row in records):
+                    raise RuntimeContractError(
+                        f"rebound shadow {shadow_method} issue axis is incomplete"
+                    )
+                for row in records:
+                    shadow_root = shadow_by_issue[int(row["issue"])]
+                    root_import = float(row["exact_ac"]["root_import_p_kw"])
+                    row["shadow_root_import_kw"] = shadow_root
+                    recovery_active = (
+                        float(row.get("energy_debt_before_kwh", 0.0)) > 1e-9
+                    )
+                    row["rebound_power_kw"] = (
+                        max(0.0, root_import - shadow_root)
+                        if recovery_active
+                        else 0.0
+                    )
+                    row["rebound_recovery_active"] = recovery_active
+                    row["rebound_shadow_method_id"] = shadow_method
+                    row["rebound_authority_status"] = "MATCHED_SHADOW_MATERIALIZED"
+            else:
+                for row in records:
+                    row["shadow_root_import_kw"] = None
+                    row["rebound_power_kw"] = None
+                    row["rebound_shadow_method_id"] = shadow_method
+                    row["rebound_authority_status"] = (
+                        "SHADOW_NOT_AVAILABLE_SINGLE_METHOD_DIAGNOSTIC"
+                    )
         summary = {
             "schema_version": "K9H7_RESULT_V2.method_run.v2",
             "status": (
@@ -5703,6 +5961,7 @@ class PfrRuntimeRunner:
                 else None
             ),
             "representative_week_id": representative_week_id,
+            "simulation_calendar_date": simulation_calendar_date,
             "requested_issues": prefix_record_count + len(frames),
             "resumed_prefix_issues": prefix_record_count,
             "committed_issues": len(records),
@@ -5898,6 +6157,15 @@ class PfrRuntimeRunner:
             "risk_calibration_audit_count": sum(
                 row.get("risk_calibration_audit") is not None for row in records
             ),
+            "h0_surrogate_fidelity_audit_count": sum(
+                row.get("h0_surrogate_fidelity_audit") is not None
+                for row in records
+            ),
+            "h0_surrogate_fidelity_diagnostic_wall_time_s": sum(
+                float(row["h0_surrogate_fidelity_audit"]["diagnostic_wall_time_s"])
+                for row in records
+                if row.get("h0_surrogate_fidelity_audit") is not None
+            ),
             "risk_calibration_day_joint_score": max(
                 (
                     float(row["risk_calibration_audit"]["joint_normalized_score"])
@@ -5950,8 +6218,21 @@ class PfrRuntimeRunner:
                         float(row["exact_ac"]["root_import_p_kw"])
                         for row in records
                     ),
-                    "daily_rebound_peak_kw": None,
-                    "daily_rebound_energy_kwh": None,
+                    "daily_rebound_peak_kw": (
+                        max(float(row["rebound_power_kw"]) for row in records)
+                        if all(row.get("rebound_power_kw") is not None for row in records)
+                        else None
+                    ),
+                    "daily_rebound_energy_kwh": (
+                        sum(float(row["rebound_power_kw"]) for row in records)
+                        * STEP_HOURS
+                        if all(row.get("rebound_power_kw") is not None for row in records)
+                        else None
+                    ),
+                    "rebound_shadow_method_id": shadow_method or method_id,
+                    "rebound_authority_complete": all(
+                        row.get("rebound_power_kw") is not None for row in records
+                    ),
                     "grid_cost_aud": sum(
                         float(row["realized_grid_cost_aud"]) for row in records
                     ),
@@ -6020,6 +6301,28 @@ class PfrRuntimeRunner:
                     ),
                 }
             )
+            service_feasible = bool(
+                int(summary["total_deadline_misses"]) == 0
+                and float(summary["terminal_compute_debt"]) <= 1e-9
+            )
+            summary.update(
+                {
+                    "execution_status": summary["status"],
+                    "service_feasible": service_feasible,
+                    "scientific_status": (
+                        "PASS_SERVICE_FEASIBLE"
+                        if summary["status"] == "PASS" and service_feasible
+                        else (
+                            "PASS_SERVICE_INFEASIBLE"
+                            if summary["status"] == "PASS"
+                            else summary["status"]
+                        )
+                    ),
+                    "stress_only_ranking_eligible": (
+                        summary["status"] == "PASS" and service_feasible
+                    ),
+                }
+            )
         atomic_write_json(method_root / "METHOD_SUMMARY.json", summary)
         atomic_write_json(method_root / "DAILY_SUMMARY.json", summary)
         if records:
@@ -6040,6 +6343,7 @@ class PfrRuntimeRunner:
         initial: RuntimeInitialState,
         representative_week_id: str,
         output: Path,
+        simulation_calendar_date: Optional[str] = None,
         reuse_passed_methods: bool = False,
     ) -> Mapping[str, Any]:
         method_axis = tuple(config.comparison_method_id for config in configs)
@@ -6124,6 +6428,7 @@ class PfrRuntimeRunner:
                     initial=initial,
                     representative_week_id=representative_week_id,
                     output=output,
+                    simulation_calendar_date=simulation_calendar_date,
                 )
             except Exception as exc:
                 method_root = output / config.comparison_method_id.value

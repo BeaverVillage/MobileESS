@@ -105,6 +105,7 @@ class _WorkloadOption:
 
 @dataclass(frozen=True)
 class _PreparedOnlineDomain:
+    effective_steps: int
     route_options: tuple[_MobilityTemplate, ...]
     queued_job_ids: tuple[str, ...]
     deferred_queued_job_ids: tuple[str, ...]
@@ -116,6 +117,21 @@ class _PreparedOnlineDomain:
     wan_capacity_gb: np.ndarray
     route_audit: Mapping[str, Any]
     workload_audit: Mapping[str, Any]
+
+
+def _episode_terminal_debt_rhs(
+    effective_steps: int, horizon_steps: int = PLANNING_HORIZON_STEPS
+) -> tuple[float, ...]:
+    """Return RHS values for boundaries 1..H; zero only at real episode end."""
+
+    effective = int(effective_steps)
+    horizon = int(horizon_steps)
+    if not 1 <= effective <= horizon:
+        raise RuntimeContractError("effective episode horizon is invalid")
+    return tuple(
+        0.0 if boundary == effective else MESS_CAPACITY_KWH
+        for boundary in range(1, horizon + 1)
+    )
 
 
 def _status_name(grb: Any, status: int) -> str:
@@ -394,10 +410,113 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             self.ar2, self.b6, reference, self.b4
         )
         kernel = _RadialStressKernel(static, reference)
+        phase_envelope_evidence: dict[str, Any] = {
+            "authority": "BALANCED_REFERENCE_FIRST_ISSUE",
+            "causal_lag_steps": None,
+        }
+        if state.last_exact is not None:
+            previous_vmin = float(state.last_exact["voltage_min_pu"])
+            previous_vmax = float(state.last_exact["voltage_max_pu"])
+            lower_stress = max(0.0, (1.0 - previous_vmin) / 0.05)
+            upper_stress = max(0.0, (previous_vmax - 1.0) / 0.05)
+            balanced_vpu = np.sqrt(kernel.reference_u / kernel.nominal_u)
+            delta_p = np.zeros(len(kernel.nodes), dtype=float)
+            delta_q = np.zeros(len(kernel.nodes), dtype=float)
+            for mid in MESS_IDS:
+                service = state.mess_location[mid]
+                bus = kernel.index[kernel.service_bus[service]]
+                delta_p[bus] -= float(state.last_committed_mess_p_kw[mid])
+                delta_q[bus] -= float(state.last_committed_mess_q_kvar[mid])
+            action_du = (
+                delta_p @ kernel.voltage_p.T
+                + delta_q @ kernel.voltage_q.T
+            )
+            balanced_action_vpu = np.sqrt(
+                np.maximum(kernel.reference_u + action_du, 1e-12)
+                / kernel.nominal_u
+            )
+            if upper_stress >= lower_stress:
+                dominant = "UPPER"
+                shift = previous_vmax - float(np.max(balanced_action_vpu))
+            else:
+                dominant = "LOWER"
+                shift = previous_vmin - float(np.min(balanced_action_vpu))
+            corrected_vpu = balanced_vpu + shift
+            if np.any(corrected_vpu <= 0.0):
+                raise RuntimeContractError("causal phase-envelope correction is invalid")
+            kernel.reference_u = kernel.nominal_u * corrected_vpu**2
+            phase_envelope_evidence = {
+                "authority": "PREVIOUS_COMMITTED_FRESH_AC_PHASE_ENVELOPE",
+                "causal_lag_steps": 1,
+                "dominant_boundary": dominant,
+                "previous_minimum_voltage_pu": previous_vmin,
+                "previous_maximum_voltage_pu": previous_vmax,
+                "balanced_vpu_shift": float(shift),
+                "future_actual_used": False,
+            }
+        kernel.phase_envelope_evidence = phase_envelope_evidence
         self._kernels[method_key] = kernel
         self._kernel_issue[method_key] = int(frame.issue)
         self._static_context_by_method[method_key] = static
         return kernel
+
+    def evaluate_h0_surrogate(
+        self,
+        *,
+        method_key: str,
+        state: MutableMethodState,
+        frame: CausalExperimentFrame,
+        facility_it_kw: Sequence[float],
+        mess_p_kw: Sequence[float],
+        mess_q_kvar: Sequence[float],
+        mess_location: Sequence[str],
+    ) -> Mapping[str, float | str]:
+        """Score one fixed H0 action with the live issue's causal surrogate."""
+
+        if self._kernel_issue.get(method_key) != int(frame.issue):
+            audit_root = (
+                self.output_root
+                / "_H0_FIDELITY"
+                / method_key
+                / f"issue_{frame.issue:06d}"
+            )
+            audit_root.mkdir(parents=True, exist_ok=True)
+            self._issue_kernel(
+                method_key=method_key,
+                state=state,
+                frame=frame,
+                output=audit_root,
+            )
+        kernel = self._kernels[method_key]
+        idc = np.repeat(
+            np.asarray(tuple(facility_it_kw), dtype=float)[None, :],
+            PLANNING_HORIZON_STEPS,
+            axis=0,
+        )
+        mess_p = np.repeat(
+            np.asarray(tuple(mess_p_kw), dtype=float)[None, :],
+            PLANNING_HORIZON_STEPS,
+            axis=0,
+        )
+        mess_q = np.repeat(
+            np.asarray(tuple(mess_q_kvar), dtype=float)[None, :],
+            PLANNING_HORIZON_STEPS,
+            axis=0,
+        )
+        locations = [
+            [str(service)] * PLANNING_HORIZON_STEPS
+            for service in mess_location
+        ]
+        result = kernel.evaluate(frame, idc, mess_p, mess_q, locations)
+        return {
+            "worst": float(result.per_step[0]),
+            "voltage": float(result.voltage[0]),
+            "line": float(result.line[0]),
+            "transformer": float(result.transformer[0]),
+            "phase_envelope_authority": str(
+                kernel.phase_envelope_evidence["authority"]
+            ),
+        }
 
     def _route_domain(
         self,
@@ -917,6 +1036,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             finally:
                 self.candidate_limit = target_limit
             superset = _PreparedOnlineDomain(
+                effective_steps=int(effective_steps),
                 route_options=routes,
                 queued_job_ids=queued,
                 deferred_queued_job_ids=deferred_queued,
@@ -974,6 +1094,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             }
         )
         return _PreparedOnlineDomain(
+            effective_steps=int(effective_steps),
             route_options=routes,
             queued_job_ids=superset.queued_job_ids,
             deferred_queued_job_ids=superset.deferred_queued_job_ids,
@@ -1926,6 +2047,7 @@ class _PersistentMilpModel:
         self.debt0 = {}
         self.energy_dyn = {}
         self.debt_dyn = {}
+        self.episode_terminal_debt = {}
         self.dep_reserve = {}
         for mid in MESS_IDS:
             self.energy0[mid] = self.model.addConstr(self.energy[(mid, 0)] == 0.0)
@@ -1960,7 +2082,11 @@ class _PersistentMilpModel:
                     + self.repay[(mid, step)]
                     == 0.0
                 )
-            self.model.addConstr(self.debt[(mid, self.h)] == 0.0)
+            for boundary in range(1, self.h + 1):
+                self.episode_terminal_debt[(mid, boundary)] = self.model.addConstr(
+                    self.debt[(mid, boundary)] <= MESS_CAPACITY_KWH,
+                    name=f"episode_terminal_debt[{mid},{boundary}]",
+                )
         for r in range(self.k):
             for step in range(self.h):
                 self.dep_reserve[(r, step)] = self.model.addConstr(
@@ -2518,6 +2644,10 @@ class _PersistentMilpModel:
         self.admission_ceiling.RHS = float(self.job_slot_capacity)
         mobile = MOBILITY_ELIGIBLE_MESS_IDS[0]
         dispatch_enabled = bool(config.h54_capability_mask["mess_dispatch"])
+        effective_steps = int(domain.effective_steps)
+        if not 1 <= effective_steps <= self.h:
+            raise RuntimeContractError("effective episode horizon is invalid")
+        terminal_rhs = _episode_terminal_debt_rhs(effective_steps, self.h)
 
         for r in range(self.k):
             active = r < len(domain.route_options)
@@ -2528,13 +2658,23 @@ class _PersistentMilpModel:
                 self._locations_for_route(state, route) if route is not None else [None] * self.h
             )
             for step in range(self.h):
-                available = active and locations[step] is not None and dispatch_enabled
+                available = (
+                    active
+                    and step < effective_steps
+                    and locations[step] is not None
+                    and dispatch_enabled
+                )
                 key = (mobile, r, step)
                 self.pdis[key].UB = P_MAX if available else 0.0
                 self.pchg[key].UB = P_MAX if available else 0.0
-                self.q[key].LB = -PCS_KVA if available else 0.0
-                self.q[key].UB = PCS_KVA if available else 0.0
-                self.qabs[key].UB = PCS_KVA if available else 0.0
+                # The retained balanced model reverses the ranking of several
+                # phase-specific PCC Q actions.  Until a three-phase reactive
+                # sensitivity authority is frozen, Q is removed from the
+                # admissible controller domain instead of being optimized on
+                # a known-wrong direction.  Active-power flexibility remains.
+                self.q[key].LB = 0.0
+                self.q[key].UB = 0.0
+                self.qabs[key].UB = 0.0
                 self._move_dispatch_service(
                     key, str(locations[step]) if available else None
                 )
@@ -2568,6 +2708,10 @@ class _PersistentMilpModel:
         for mid in MESS_IDS:
             self.energy0[mid].RHS = float(state.mess_energy_kwh[mid])
             self.debt0[mid].RHS = float(state.mess_energy_debt_kwh[mid])
+            for boundary in range(1, self.h + 1):
+                self.episode_terminal_debt[(mid, boundary)].RHS = (
+                    terminal_rhs[boundary - 1]
+                )
             for step in range(self.h):
                 committed = 0.0
                 if state.mess_in_transit[mid]:
@@ -2578,13 +2722,17 @@ class _PersistentMilpModel:
                 self.energy_dyn[(mid, step)].RHS = -committed
                 if mid == mobile:
                     continue
-                available = not state.mess_in_transit[mid] and dispatch_enabled
+                available = (
+                    step < effective_steps
+                    and not state.mess_in_transit[mid]
+                    and dispatch_enabled
+                )
                 key = (mid, 0, step)
                 self.pdis[key].UB = P_MAX if available else 0.0
                 self.pchg[key].UB = P_MAX if available else 0.0
-                self.q[key].LB = -PCS_KVA if available else 0.0
-                self.q[key].UB = PCS_KVA if available else 0.0
-                self.qabs[key].UB = PCS_KVA if available else 0.0
+                self.q[key].LB = 0.0
+                self.q[key].UB = 0.0
+                self.qabs[key].UB = 0.0
                 self._move_dispatch_service(
                     key, state.mess_location[mid] if available else None
                 )
@@ -2599,7 +2747,9 @@ class _PersistentMilpModel:
                     # incumbent.  Every new issue starts from the original
                     # continuous recourse domain.
                     self.mode[(mid, step)].LB = 0.0
-                    self.mode[(mid, step)].UB = 1.0
+                    self.mode[(mid, step)].UB = (
+                        1.0 if step < effective_steps else 0.0
+                    )
 
         # Clear and remap bounded workload-option coefficients.
         for key, old in tuple(self._last_job_mapping.items()):
