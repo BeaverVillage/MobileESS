@@ -7,6 +7,9 @@ output_root=${OUTPUT_ROOT:?set OUTPUT_ROOT to a new artifact directory}
 count=${COUNT:-288}
 h0_every=${H0_AUDIT_EVERY:-12}
 methods=${METHODS:-"B00 B01 B02 B03 B04 B05 B06"}
+calendar_date=${CALENDAR_DATE:-2025-02-01}
+start_issue=${START_ISSUE:-8928}
+candidate_id=${CANDIDATE_ID:-FEB2025_FULL_DAY01}
 
 cd "$repo_dir"
 export PFR_GUROBI_THREADS=${PFR_GUROBI_THREADS:-4}
@@ -36,9 +39,9 @@ for method in $methods; do
         --mobility-root /home/jaewon/mobile_ess_work/frozen_artifacts/PFR_FEB2025_FULL_SHARED_EXOGENOUS_V13_13/mobility \
         --risk-calibration /home/jaewon/mobile_ess_work/frozen_artifacts/HIERARCHICAL_ELECTRICAL_STRESS_JAN2025_CALIBRATION_7147D56_20260826_R14/calibration/ELECTRICAL_STRESS_EVENT_RISK_CALIBRATION_JAN2025.json \
         --h0-fidelity-audit-every-steps "$h0_every" \
-        --candidate-id FEB2025_FULL_DAY01 \
-        --calendar-date 2025-02-01 \
-        --start-issue 8928 \
+        --candidate-id "$candidate_id" \
+        --calendar-date "$calendar_date" \
+        --start-issue "$start_issue" \
         --output "$output_root" \
         --diagnostic-method "$method" \
         --electrical-stress-campaign
