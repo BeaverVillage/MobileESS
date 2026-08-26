@@ -2780,8 +2780,49 @@ class _GurobiSensitivityProjector:
             and self.improve_safe_operating_point
             and not self._recovery_compliant(current)
         ):
-            raise RuntimeContractError(
-                "AC projection violated fixed energy recovery admission"
+            recovery_fallback = self._null_or_minimum_recovery_control(current)
+            recovery_exact = self.verifier.verify_fresh(
+                control=recovery_fallback, state=state, slow_plan=slow_plan
+            )
+            recovery_exact.validate()
+            recovery_repairs: list[
+                tuple[FastControl, ExactAcResult, str]
+            ] = []
+            if recovery_exact.passed and self._recovery_compliant(
+                recovery_fallback
+            ):
+                recovery_repairs.append(
+                    (recovery_fallback, recovery_exact, "NULL_OR_MIN_RECOVERY")
+                )
+            local_recovery = self._joint_pq_sensitivity_step(
+                recovery_fallback, state, slow_plan, recovery_exact
+            )
+            if (
+                local_recovery is not None
+                and local_recovery[1].passed
+                and self._recovery_compliant(local_recovery[0])
+            ):
+                recovery_repairs.append(
+                    (local_recovery[0], local_recovery[1], "LOCAL_PQ_RECOVERY")
+                )
+            if not recovery_repairs:
+                raise RuntimeContractError(
+                    "AC projection violated fixed energy recovery admission"
+                )
+            current, exact, recovery_repair = min(
+                recovery_repairs,
+                key=lambda item: (
+                    self._electrical_stress_score(item[1]),
+                    self._objective_distance(nominal, item[0]),
+                    item[2],
+                ),
+            )
+            self.trace.append(
+                {
+                    "status": "POST_PROJECTION_RECOVERY_READMISSION",
+                    "selected": recovery_repair,
+                    "candidate_count": len(recovery_repairs),
+                }
             )
         if not self.allow_mess and any(
             candidate != nominal_map
