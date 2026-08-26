@@ -1014,6 +1014,35 @@ def test_periodic_persistent_refresh_resets_without_rebuilding() -> None:
     assert set(planner._recourse_models) == {"B07"}
 
 
+def test_periodic_persistent_refresh_accepts_recourse_only_forced_domain() -> None:
+    planner = object.__new__(PersistentBoundedMilpPlanner)
+    calls = []
+    planner._master_models = {}
+    planner._recourse_models = {
+        "B00": SimpleNamespace(
+            model=SimpleNamespace(reset=lambda: calls.append("recourse"))
+        )
+    }
+
+    reset_count = planner._periodic_reset_method_models("B00")
+
+    assert reset_count == 1
+    assert calls == ["recourse"]
+    assert planner._master_models == {}
+    assert set(planner._recourse_models) == {"B00"}
+
+
+def test_periodic_persistent_refresh_rejects_master_only_state() -> None:
+    planner = object.__new__(PersistentBoundedMilpPlanner)
+    planner._master_models = {
+        "B00": SimpleNamespace(model=SimpleNamespace(reset=lambda: None))
+    }
+    planner._recourse_models = {}
+
+    with pytest.raises(RuntimeContractError, match="exact recourse"):
+        planner._periodic_reset_method_models("B00")
+
+
 def test_shared_watchdog_transfers_unused_master_time_to_exact_recourse() -> None:
     total = 30.0
 

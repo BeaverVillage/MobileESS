@@ -325,6 +325,27 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 reset_count += 1
         return reset_count
 
+    def _periodic_reset_method_models(self, method_key: str) -> int:
+        """Reset every retained model for a completed full-solve generation.
+
+        Exact recourse is created by every full solve, whereas the slow master
+        is intentionally absent while the discrete domain is forced.  A
+        recourse-only retained state is therefore valid and must not fail the
+        periodic numerical reset.  A master-only state is not reachable after
+        a completed full solve and remains fail-closed.
+        """
+
+        if method_key not in self._recourse_models:
+            raise RuntimeContractError(
+                "periodic numerical reset requires the retained exact recourse model"
+            )
+        reset_count = self._reset_method_model_solutions(method_key)
+        if reset_count not in (1, 2):
+            raise RuntimeContractError(
+                "periodic numerical reset found an invalid retained-model count"
+            )
+        return reset_count
+
     @staticmethod
     def _shared_watchdog_budgets(
         total_seconds: float,
@@ -1740,11 +1761,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             # but retain the immutable model skeleton.  Model.reset() makes
             # the next optimize a cold start without paying to reconstruct the
             # same variables and constraints.
-            reset_count = self._reset_method_model_solutions(method_key)
-            if reset_count != 2:
-                raise RuntimeContractError(
-                    "periodic numerical reset requires both persistent models"
-                )
+            self._periodic_reset_method_models(method_key)
             self._model_solve_generation_by_method[method_key] = 0
             model_refresh_reason = "PERIODIC_NUMERICAL_STATE_RESET"
         self._job_slot_capacity_by_method[method_key] = current_slots
