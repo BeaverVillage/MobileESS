@@ -478,7 +478,7 @@ def test_capacity_deferral_expands_k_before_accepting_visible_queue() -> None:
     assert certificate["candidate_limit_expansion_reason"] == (
         "BASE_DOMAIN_CAPACITY_DEFERRAL"
     )
-    assert certificate["candidate_limit_admission_screen_attempts"] == [4, 8]
+    assert certificate["candidate_limit_admission_screen_attempts"] == [4, 8, 16]
 
 
 def test_intermediate_candidate_uses_admission_screen_before_full_solve() -> None:
@@ -492,12 +492,14 @@ def test_intermediate_candidate_uses_admission_screen_before_full_solve() -> Non
     planner._model_solve_generation_by_method = {}
     sentinel_plan = object()
     calls = []
+    ceilings = []
     disposed = []
     planner._dispose_method_models = lambda method: disposed.append(method)
 
     def solve_current(**kwargs):
         screen = bool(kwargs.get("admission_screen_only", False))
         calls.append((planner.candidate_limit, screen))
+        ceilings.append(kwargs.get("admission_ceiling_deferred_count"))
         deferred = int(planner.candidate_limit < 8)
         return (None if screen else sentinel_plan), {
             "candidate_limit_k": planner.candidate_limit,
@@ -521,6 +523,7 @@ def test_intermediate_candidate_uses_admission_screen_before_full_solve() -> Non
 
     assert plan is sentinel_plan
     assert calls == [(4, True), (8, True), (8, False)]
+    assert ceilings == [None, None, 0]
     assert disposed == []
     assert certificate["candidate_limit_attempts"] == [4, 8]
     assert certificate["candidate_limit_admission_screen_attempts"] == [4, 8]

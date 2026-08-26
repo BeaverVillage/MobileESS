@@ -1050,7 +1050,6 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 self.candidate_limit = candidate_limit
             admission_screen_only = (
                 not self.candidate_limit_frozen
-                and candidate_limit != expansion_grid[-1]
             )
             attempted.append(candidate_limit)
             try:
@@ -1095,9 +1094,13 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                         if isinstance(screen_workload, Mapping)
                         else 0
                     )
-                    if int(
+                    screen_deferred = int(
                         certificate.get("optimized_deferred_job_count", 0)
-                    ) > screen_unavoidable:
+                    )
+                    if (
+                        screen_deferred > screen_unavoidable
+                        and candidate_limit != expansion_grid[-1]
+                    ):
                         deferred_expansion_attempts += 1
                         continue
                     attempt_started = time.monotonic()
@@ -1107,6 +1110,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                         frame=frame,
                         migration_authority=migration_authority,
                         evaluation_steps_remaining=evaluation_steps_remaining,
+                        admission_ceiling_deferred_count=screen_deferred,
                     )
                     candidate_attempt_timings.append(
                         {
@@ -1221,6 +1225,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         migration_authority: Optional[MigrationAuthority],
         evaluation_steps_remaining: int,
         admission_screen_only: bool = False,
+        admission_ceiling_deferred_count: Optional[int] = None,
     ) -> tuple[Optional[SlowDiscretePlan], Mapping[str, Any]]:
         if migration_authority is None:
             raise RuntimeContractError(
@@ -1353,6 +1358,10 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             if master is None:
                 raise RuntimeContractError("slow master model missing")
             master.update(**update_kwargs)
+            if admission_ceiling_deferred_count is not None:
+                master.set_admission_ceiling(
+                    admission_ceiling_deferred_count
+                )
         if not admission_screen_only:
             if recourse is None:
                 raise RuntimeContractError("exact recourse model missing")
@@ -1469,6 +1478,9 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             "mobility_domain_reduction": dict(domain.route_audit),
             "workload_domain_reduction": dict(domain.workload_audit),
             "capacity_admission_gate": result["capacity_admission_gate"],
+            "capacity_admission_screen_ceiling_count": (
+                admission_ceiling_deferred_count
+            ),
             "optimized_deferred_job_count": result[
                 "optimized_deferred_job_count"
             ],
@@ -1854,6 +1866,11 @@ class _PersistentMilpModel:
             )
             for j in range(self.job_slot_capacity)
         }
+        self.admission_ceiling = self.model.addConstr(
+            gp.quicksum(self.defer_job.values())
+            <= float(self.job_slot_capacity),
+            name="admission_ceiling",
+        )
         self.dis_gate = {}
         self.chg_gate = {}
         self.route_dispatch_gate = {}
@@ -2479,6 +2496,7 @@ class _PersistentMilpModel:
         self.state = state
         self.config = config
         self.frame = frame
+        self.admission_ceiling.RHS = float(self.job_slot_capacity)
         mobile = MOBILITY_ELIGIBLE_MESS_IDS[0]
         dispatch_enabled = bool(config.h54_capability_mask["mess_dispatch"])
 
@@ -2683,6 +2701,15 @@ class _PersistentMilpModel:
         self.secondary_lock.RHS = (
             PLANNING_STRESS_EPIGRAPH_MAX * self.h * STEP_HOURS
         )
+        self.model.update()
+
+    def set_admission_ceiling(self, deferred_job_count: int) -> None:
+        """Keep lower-priority objectives from degrading screened admission."""
+
+        ceiling = int(deferred_job_count)
+        if not 0 <= ceiling <= self.job_slot_capacity:
+            raise RuntimeContractError("admission ceiling is outside model slots")
+        self.admission_ceiling.RHS = float(ceiling)
         self.model.update()
 
     def selected_domain_decisions(self) -> tuple[int, dict[int, Optional[int]]]:
