@@ -1552,6 +1552,14 @@ def main() -> None:
         help="Resume a diagnostic method from a locally generated runtime checkpoint.",
     )
     parser.add_argument(
+        "--diagnostic-resume-prefix-output",
+        type=Path,
+        help=(
+            "Reuse the contiguous committed issue prefix in this output while "
+            "resuming from --diagnostic-resume-checkpoint."
+        ),
+    )
+    parser.add_argument(
         "--diagnostic-stop-after-issue",
         type=int,
         help=(
@@ -1559,14 +1567,31 @@ def main() -> None:
             "original --count episode horizon; diagnostic methods only."
         ),
     )
+    parser.add_argument(
+        "--restart-checkpoint-interval",
+        type=int,
+        help=(
+            "Atomically refresh LATEST_RUNTIME_CHECKPOINT every N committed "
+            "issues so an interrupted day can resume from a verified prefix."
+        ),
+    )
     args = parser.parse_args()
     if (
         args.diagnostic_checkpoint_after_issue is not None
         or args.diagnostic_resume_checkpoint is not None
+        or args.diagnostic_resume_prefix_output is not None
         or args.diagnostic_stop_after_issue is not None
     ) and not args.diagnostic_method:
         parser.error(
             "diagnostic checkpoint/resume/stop requires --diagnostic-method"
+        )
+    if (
+        args.diagnostic_resume_prefix_output is not None
+        and args.diagnostic_resume_checkpoint is None
+    ):
+        parser.error(
+            "--diagnostic-resume-prefix-output requires "
+            "--diagnostic-resume-checkpoint"
         )
     if args.diagnostic_method and args.supplementary_b8_periodic_5min:
         parser.error(
@@ -1764,6 +1789,7 @@ def main() -> None:
     paths["feeder_scale_contract"] = str(feeder_scale_path)
     diagnostic_resume_state = None
     diagnostic_resume_cumulative_grid_cost_aud = 0.0
+    diagnostic_prefix_records: list[Mapping[str, Any]] = []
     pre: Optional[Mapping[str, Any]] = None
     if args.diagnostic_resume_checkpoint is not None:
         with args.diagnostic_resume_checkpoint.resolve().open("rb") as handle:
@@ -1792,6 +1818,22 @@ def main() -> None:
             mess_energy_kwh=dict(diagnostic_resume_state.mess_energy_kwh),
             mess_location=dict(diagnostic_resume_state.mess_location),
         )
+        if args.diagnostic_resume_prefix_output is not None:
+            prefix_method_root = (
+                args.diagnostic_resume_prefix_output.resolve()
+                / str(args.diagnostic_method)
+            )
+            prefix_paths = sorted(
+                prefix_method_root.glob("issue_*/COMMIT_MARKER.json")
+            )
+            diagnostic_prefix_records = [
+                json_load(path)
+                for path in prefix_paths
+                if int(path.parent.name.removeprefix("issue_"))
+                < args.start_issue
+            ]
+            if not diagnostic_prefix_records:
+                raise RuntimeError("diagnostic resume prefix contains no markers")
     else:
         pre = json_load(args.initial_state)
         if not args.diagnostic_method and "canonical_pre" not in pre:
@@ -2042,10 +2084,12 @@ def main() -> None:
             diagnostic_resume_cumulative_grid_cost_aud=(
                 diagnostic_resume_cumulative_grid_cost_aud
             ),
+            diagnostic_prefix_records=diagnostic_prefix_records,
             diagnostic_checkpoint_after_issue=(
                 args.diagnostic_checkpoint_after_issue
             ),
             diagnostic_stop_after_issue=args.diagnostic_stop_after_issue,
+            restart_checkpoint_interval=args.restart_checkpoint_interval,
         )
         matrix = {
             "schema_version": (
@@ -2067,11 +2111,17 @@ def main() -> None:
                 if args.supplementary_b8_periodic_5min
                 else "TECHNICAL_DIAGNOSTIC_ONLY"
             ),
-            "issues_per_method": len(frames),
-            "expected_commit_markers": len(frames),
+            "issues_per_method": int(method["requested_issues"]),
+            "expected_commit_markers": int(method["requested_issues"]),
             "valid_commit_markers": method["committed_issues"],
-            "all_fresh_exact_opendss": method["fresh_exact_opendss_count"] == len(frames),
-            "all_actual_gurobi": method["actual_gurobi_count"] == len(frames),
+            "all_fresh_exact_opendss": (
+                method["fresh_exact_opendss_count"]
+                == int(method["requested_issues"])
+            ),
+            "all_actual_gurobi": (
+                method["actual_gurobi_count"]
+                == int(method["requested_issues"])
+            ),
             "all_state_chains_complete": method["state_chain_complete"],
             "all_binary_states_unchanged_in_fast_layer": method["binary_state_unchanged"],
             "future_actual_used": False,
@@ -2103,6 +2153,41 @@ def main() -> None:
         "candidate_id": args.candidate_id,
         "start_issue": args.start_issue,
         "count": args.count,
+        "exact_prefix_resume": {
+            "used": bool(diagnostic_prefix_records),
+            "checkpoint_path": (
+                str(args.diagnostic_resume_checkpoint.resolve())
+                if args.diagnostic_resume_checkpoint is not None
+                else None
+            ),
+            "checkpoint_sha256": (
+                sha256(args.diagnostic_resume_checkpoint.resolve())
+                if args.diagnostic_resume_checkpoint is not None
+                else None
+            ),
+            "prefix_output": (
+                str(args.diagnostic_resume_prefix_output.resolve())
+                if args.diagnostic_resume_prefix_output is not None
+                else None
+            ),
+            "prefix_issue_count": len(diagnostic_prefix_records),
+            "prefix_first_issue": (
+                int(diagnostic_prefix_records[0]["issue"])
+                if diagnostic_prefix_records
+                else None
+            ),
+            "prefix_last_issue": (
+                int(diagnostic_prefix_records[-1]["issue"])
+                if diagnostic_prefix_records
+                else None
+            ),
+            "prefix_checkpoint_state_chain_match": bool(
+                diagnostic_prefix_records
+                and diagnostic_resume_state is not None
+                and diagnostic_prefix_records[-1]["post_state_sha256"]
+                == diagnostic_resume_state.pre_state_sha256
+            ),
+        },
         "shared_authority_fingerprint": authority.fingerprint,
         "method_ids": [config.comparison_method_id.value for config in configs]
         if not single_method_id

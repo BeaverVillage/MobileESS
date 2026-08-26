@@ -497,7 +497,14 @@ def run_day(
     if electrical_stress_campaign:
         command.append("--electrical-stress-campaign")
     if diagnostic_method is not None:
-        command.extend(("--diagnostic-method", diagnostic_method))
+        command.extend(
+            (
+                "--diagnostic-method",
+                diagnostic_method,
+                "--restart-checkpoint-interval",
+                "8",
+            )
+        )
     if diagnostic_steps_per_day is not None:
         command.extend(
             (

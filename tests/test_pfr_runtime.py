@@ -293,6 +293,7 @@ class PfrRuntimeTests(unittest.TestCase):
                 representative_week_id="TEST_DIAGNOSTIC_RESUME",
                 output=root,
                 diagnostic_checkpoint_after_issue=self.frames[0].issue,
+                restart_checkpoint_interval=1,
             )
             checkpoint_path = (
                 root
@@ -303,6 +304,9 @@ class PfrRuntimeTests(unittest.TestCase):
             with checkpoint_path.open("rb") as handle:
                 checkpoint = pickle.load(handle)
             sidecar = __import__("json").loads(sidecar_path.read_text())
+            latest_sidecar = __import__("json").loads(
+                (root / "B0/LATEST_RUNTIME_CHECKPOINT.json").read_text()
+            )
 
         self.assertEqual(summary["status"], "PASS")
         self.assertEqual(checkpoint["completed_issue"], 100)
@@ -321,6 +325,66 @@ class PfrRuntimeTests(unittest.TestCase):
             sidecar["resume_semantics"],
             "EXACT_ENDOGENOUS_RUNTIME_STATE_WITH_COLD_PLANNER",
         )
+        self.assertTrue(latest_sidecar["rolling_restart_checkpoint"])
+        self.assertEqual(latest_sidecar["completed_issue"], 100)
+
+    def test_diagnostic_resume_prefix_materializes_one_contiguous_result(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            first_runner = PfrRuntimeRunner(
+                power_curve=self.curve,
+                physical_backend=FakePhysical(),
+                migration_authority=self.migration_authority,
+            )
+            first_runner.run_method(
+                config=self.configs[0],
+                frames=self.frames[:1],
+                initial=self.initial,
+                representative_week_id="TEST_PREFIX_RESUME",
+                output=root,
+                diagnostic_checkpoint_after_issue=self.frames[0].issue,
+            )
+            with (
+                root / "B0/DIAGNOSTIC_RESUME_AFTER_ISSUE_000100.pkl"
+            ).open("rb") as handle:
+                checkpoint = pickle.load(handle)
+            prefix = [
+                __import__("json").loads(
+                    (root / "B0/issue_000100/COMMIT_MARKER.json").read_text()
+                )
+            ]
+            resume_initial = RuntimeInitialState(
+                issue=101,
+                state_sha256=checkpoint["post_state_sha256"],
+                mess_energy_kwh=dict(checkpoint["state"].mess_energy_kwh),
+                mess_location=dict(checkpoint["state"].mess_location),
+            )
+            summary = PfrRuntimeRunner(
+                power_curve=self.curve,
+                physical_backend=FakePhysical(),
+                migration_authority=self.migration_authority,
+            ).run_method(
+                config=self.configs[0],
+                frames=self.frames[1:],
+                initial=resume_initial,
+                representative_week_id="TEST_PREFIX_RESUME",
+                output=root,
+                diagnostic_resume_state=checkpoint["state"],
+                diagnostic_resume_cumulative_grid_cost_aud=checkpoint[
+                    "cumulative_grid_cost_aud"
+                ],
+                diagnostic_prefix_records=prefix,
+            )
+
+            materialized = pd.read_csv(
+                root / "B0/MATERIALIZED_COMMIT_ROWS.csv"
+            )
+
+        self.assertEqual(summary["status"], "PASS")
+        self.assertEqual(summary["resumed_prefix_issues"], 1)
+        self.assertEqual(summary["requested_issues"], len(self.frames))
+        self.assertEqual(summary["committed_issues"], len(self.frames))
+        self.assertEqual(materialized["issue"].tolist(), [100, 101])
 
     def test_diagnostic_stop_retains_full_episode_horizon(self):
         with tempfile.TemporaryDirectory() as temporary:

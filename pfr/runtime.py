@@ -121,6 +121,54 @@ def atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:
     temporary.replace(path)
 
 
+def _write_runtime_resume_checkpoint(
+    *,
+    checkpoint_path: Path,
+    comparison_method_id: str,
+    representative_week_id: str,
+    completed_issue: int,
+    state: "MutableMethodState",
+    cumulative_grid_cost_aud: float,
+    rolling_restart_checkpoint: bool,
+) -> None:
+    """Atomically persist exact endogenous state for cold-planner continuation."""
+
+    checkpoint_payload = {
+        "schema_version": "PFR_DIAGNOSTIC_RUNTIME_CHECKPOINT_V1",
+        "comparison_method_id": comparison_method_id,
+        "representative_week_id": representative_week_id,
+        "completed_issue": int(completed_issue),
+        "resume_issue": int(state.issue),
+        "post_state_sha256": state.pre_state_sha256,
+        "cumulative_grid_cost_aud": cumulative_grid_cost_aud,
+        "state": state,
+    }
+    checkpoint_tmp = checkpoint_path.with_suffix(".pkl.tmp")
+    with checkpoint_tmp.open("wb") as handle:
+        pickle.dump(checkpoint_payload, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(checkpoint_tmp, checkpoint_path)
+    checkpoint_sha256 = hashlib.sha256(checkpoint_path.read_bytes()).hexdigest()
+    atomic_write_json(
+        checkpoint_path.with_suffix(".json"),
+        {
+            key: value
+            for key, value in checkpoint_payload.items()
+            if key != "state"
+        }
+        | {
+            "checkpoint_path": str(checkpoint_path.resolve()),
+            "checkpoint_sha256": checkpoint_sha256,
+            "planner_persistent_state_restored": False,
+            "resume_semantics": "EXACT_ENDOGENOUS_RUNTIME_STATE_WITH_COLD_PLANNER",
+            "rolling_restart_checkpoint": rolling_restart_checkpoint,
+            "prefix_state_chain_verification_required": True,
+            "scientific_result_eligible": False,
+        },
+    )
+
+
 def gurobi_thread_limit() -> int:
     try:
         value = int(os.environ.get("PFR_GUROBI_THREADS", "1"))
@@ -4473,11 +4521,15 @@ class PfrRuntimeRunner:
         output: Path,
         diagnostic_resume_state: Optional[MutableMethodState] = None,
         diagnostic_resume_cumulative_grid_cost_aud: float = 0.0,
+        diagnostic_prefix_records: Sequence[Mapping[str, Any]] = (),
         diagnostic_checkpoint_after_issue: Optional[int] = None,
         diagnostic_stop_after_issue: Optional[int] = None,
+        restart_checkpoint_interval: Optional[int] = None,
     ) -> Mapping[str, Any]:
         if not frames:
             raise RuntimeContractError("runtime needs at least one frame")
+        if restart_checkpoint_interval is not None and restart_checkpoint_interval < 1:
+            raise RuntimeContractError("restart checkpoint interval must be positive")
         initial.validate()
         if frames[0].issue != initial.issue or [frame.issue for frame in frames] != list(range(initial.issue, initial.issue + len(frames))):
             raise RuntimeContractError("runtime frame axis is not contiguous from canonical PRE")
@@ -4503,7 +4555,34 @@ class PfrRuntimeRunner:
             raise RuntimeContractError(
                 "diagnostic resume state does not match requested first issue"
             )
-        records = []
+        records = [dict(record) for record in diagnostic_prefix_records]
+        prefix_record_count = len(records)
+        if records:
+            expected_prefix_issues = list(
+                range(records[0]["issue"], frames[0].issue)
+            )
+            if [int(record["issue"]) for record in records] != expected_prefix_issues:
+                raise RuntimeContractError(
+                    "diagnostic resume prefix is not contiguous to the first frame"
+                )
+            if any(
+                record.get("comparison_method_id")
+                != config.comparison_method_id.value
+                for record in records
+            ):
+                raise RuntimeContractError("diagnostic resume prefix method mismatch")
+            if records[-1].get("post_state_sha256") != state.pre_state_sha256:
+                raise RuntimeContractError(
+                    "diagnostic resume prefix does not bind to checkpoint state"
+                )
+            if any(
+                records[index].get("post_state_sha256")
+                != records[index + 1].get("pre_state_sha256")
+                for index in range(len(records) - 1)
+            ):
+                raise RuntimeContractError(
+                    "diagnostic resume prefix state chain is discontinuous"
+                )
         diagnostic_stop_reached = False
         cumulative_grid_cost_aud = float(
             diagnostic_resume_cumulative_grid_cost_aud
@@ -5553,49 +5632,30 @@ class PfrRuntimeRunner:
             atomic_write_json(issue_root / "COMMIT_MARKER.json", record)
             records.append(record)
             if diagnostic_checkpoint_after_issue == frame.issue:
-                checkpoint_path = (
-                    method_root
-                    / f"DIAGNOSTIC_RESUME_AFTER_ISSUE_{frame.issue:06d}.pkl"
+                _write_runtime_resume_checkpoint(
+                    checkpoint_path=(
+                        method_root
+                        / f"DIAGNOSTIC_RESUME_AFTER_ISSUE_{frame.issue:06d}.pkl"
+                    ),
+                    comparison_method_id=config.comparison_method_id.value,
+                    representative_week_id=representative_week_id,
+                    completed_issue=frame.issue,
+                    state=state,
+                    cumulative_grid_cost_aud=cumulative_grid_cost_aud,
+                    rolling_restart_checkpoint=False,
                 )
-                checkpoint_tmp = checkpoint_path.with_suffix(".pkl.tmp")
-                checkpoint_payload = {
-                    "schema_version": "PFR_DIAGNOSTIC_RUNTIME_CHECKPOINT_V1",
-                    "comparison_method_id": config.comparison_method_id.value,
-                    "representative_week_id": representative_week_id,
-                    "completed_issue": int(frame.issue),
-                    "resume_issue": int(state.issue),
-                    "post_state_sha256": state.pre_state_sha256,
-                    "cumulative_grid_cost_aud": cumulative_grid_cost_aud,
-                    "state": state,
-                }
-                with checkpoint_tmp.open("wb") as handle:
-                    pickle.dump(
-                        checkpoint_payload,
-                        handle,
-                        protocol=pickle.HIGHEST_PROTOCOL,
-                    )
-                    handle.flush()
-                    os.fsync(handle.fileno())
-                os.replace(checkpoint_tmp, checkpoint_path)
-                checkpoint_sha256 = hashlib.sha256(
-                    checkpoint_path.read_bytes()
-                ).hexdigest()
-                atomic_write_json(
-                    checkpoint_path.with_suffix(".json"),
-                    {
-                        key: value
-                        for key, value in checkpoint_payload.items()
-                        if key != "state"
-                    }
-                    | {
-                        "checkpoint_path": str(checkpoint_path.resolve()),
-                        "checkpoint_sha256": checkpoint_sha256,
-                        "planner_persistent_state_restored": False,
-                        "resume_semantics": (
-                            "EXACT_ENDOGENOUS_RUNTIME_STATE_WITH_COLD_PLANNER"
-                        ),
-                        "scientific_result_eligible": False,
-                    },
+            if restart_checkpoint_interval is not None and (
+                (offset + 1) % restart_checkpoint_interval == 0
+                or offset == len(frames) - 1
+            ):
+                _write_runtime_resume_checkpoint(
+                    checkpoint_path=method_root / "LATEST_RUNTIME_CHECKPOINT.pkl",
+                    comparison_method_id=config.comparison_method_id.value,
+                    representative_week_id=representative_week_id,
+                    completed_issue=frame.issue,
+                    state=state,
+                    cumulative_grid_cost_aud=cumulative_grid_cost_aud,
+                    rolling_restart_checkpoint=True,
                 )
             if diagnostic_stop_after_issue == frame.issue:
                 diagnostic_stop_reached = True
@@ -5607,7 +5667,8 @@ class PfrRuntimeRunner:
                 if failure is None and diagnostic_stop_reached
                 else (
                     "PASS"
-                    if failure is None and len(records) == len(frames)
+                    if failure is None
+                    and len(records) - prefix_record_count == len(frames)
                     else "FAIL_CLOSED"
                 )
             ),
@@ -5629,7 +5690,8 @@ class PfrRuntimeRunner:
                 else None
             ),
             "representative_week_id": representative_week_id,
-            "requested_issues": len(frames),
+            "requested_issues": prefix_record_count + len(frames),
+            "resumed_prefix_issues": prefix_record_count,
             "committed_issues": len(records),
             "commit_marker_count": len(records),
             "fresh_exact_opendss_count": sum(row["actual_fresh_opendss_used"] for row in records),

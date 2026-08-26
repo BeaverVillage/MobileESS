@@ -142,7 +142,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         )
         self.base_candidate_limit = self.candidate_limit
         self.adaptive_candidate_max = int(
-            os.environ.get("PFR_ONLINE_ADAPTIVE_CANDIDATE_MAX_K", "16")
+            os.environ.get("PFR_ONLINE_ADAPTIVE_CANDIDATE_MAX_K", "64")
         )
         if (
             self.adaptive_candidate_max not in ALLOWED_DEVELOPMENT_K
@@ -533,6 +533,11 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         electrical_score_evaluations = 0
         electrical_score_cache_hits = 0
         option_sets: list[tuple[_WorkloadOption, ...]] = []
+        candidate_selection_mode = (
+            "GLOBAL_ELECTRICAL_SCORE_TOP_K"
+            if self.candidate_limit <= 16
+            else "DESTINATION_OFFSET_BALANCED_THEN_RACK_ROUND_ROBIN"
+        )
         before = 0
         exact_removed = 0
         bounded_removed = 0
@@ -666,8 +671,15 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 raise RuntimeContractError(
                     f"job {uid} has no exact-hard-feasible bounded option"
                 )
-            feasible.sort(key=lambda option: option.generation_score)
-            selected = feasible[: self.candidate_limit]
+            selected = self._select_resilient_workload_options(
+                feasible,
+                self.candidate_limit,
+            )
+            candidate_selection_mode = (
+                "GLOBAL_ELECTRICAL_SCORE_TOP_K"
+                if self.candidate_limit <= 16
+                else "GLOBAL_TOP16_THEN_DESTINATION_OFFSET_RACK_DIVERSITY"
+            )
             bounded_removed += len(feasible) - len(selected)
             option_sets.append(tuple(selected))
         return (
@@ -687,6 +699,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 "bounded_domain_size": sum(map(len, option_sets)),
                 "bounded_feasible_choices_removed": bounded_removed,
                 "candidate_limit_k_per_job": self.candidate_limit,
+                "candidate_selection_mode": candidate_selection_mode,
                 "electrical_score_evaluations": electrical_score_evaluations,
                 "electrical_score_cache_hits": electrical_score_cache_hits,
                 "visible_queued_jobs": len(all_queued),
@@ -699,6 +712,134 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 "queued_remote_placement_transfer_bytes": 0,
             },
         )
+
+    @staticmethod
+    def _select_resilient_workload_options(
+        feasible: Sequence[_WorkloadOption],
+        limit: int,
+    ) -> list[_WorkloadOption]:
+        """Preserve legacy K<=16 and add diversity only beyond that prefix."""
+
+        ranked = sorted(feasible, key=lambda option: option.generation_score)
+        if limit <= 16 or len(ranked) <= 16:
+            return ranked[:limit]
+
+        # _prepare_domain builds one maximum-K superset and slices it for every
+        # retry.  Its first 16 entries must therefore remain the former global
+        # order so K=4/8/16 decisions and state hashes stay unchanged.
+        diverse = PersistentBoundedMilpPlanner._select_diverse_workload_options(
+            feasible,
+            len(feasible),
+        )
+        selected = ranked[:16]
+        selected_set = set(selected)
+        selected.extend(option for option in diverse if option not in selected_set)
+        return selected[:limit]
+
+    @staticmethod
+    def _select_diverse_workload_options(
+        feasible: Sequence[_WorkloadOption],
+        limit: int,
+    ) -> list[_WorkloadOption]:
+        """Truncate without destroying aggregate placement feasibility.
+
+        Electrical score ties are common: rack identity does not change the
+        radial injection, and a burst can give many jobs the same best IDC and
+        start offset.  A plain global top-K consequently filled every bounded
+        domain with near-duplicates.  Increasing K then added more racks at
+        that same IDC before exposing another IDC/time bin, so a physically
+        feasible burst could remain master-infeasible solely because of the
+        truncation order.
+
+        Preserve the best electrical ordering *between* choices while first
+        covering distinct (destination, start-offset) bins.  Within each bin,
+        round-robin racks before taking a second option from a rack.  This
+        makes K a latency/quality knob rather than an accidental site-capacity
+        restriction.  The exact rack/IDC/GPU/WAN checks above and the master,
+        exact QCP recourse, and Fresh OpenDSS gates remain unchanged.
+        """
+
+        if limit <= 0 or not feasible:
+            return []
+
+        ranked = sorted(feasible, key=lambda option: option.generation_score)
+
+        bin_options: dict[
+            tuple[str, int], dict[str, list[_WorkloadOption]]
+        ] = {}
+        for option in ranked:
+            group = bin_options.setdefault(
+                (option.destination, option.start_offset),
+                {},
+            )
+            group.setdefault(option.rack, []).append(option)
+
+        # Each bin's sequence covers all admissible racks before repeating a
+        # rack.  Keys are ordered by their best original electrical score.
+        bin_sequences: dict[tuple[str, int], list[_WorkloadOption]] = {}
+        for key, racks in bin_options.items():
+            rack_order = sorted(
+                racks,
+                key=lambda rack: racks[rack][0].generation_score,
+            )
+            sequence: list[_WorkloadOption] = []
+            depth = 0
+            while True:
+                added = False
+                for rack in rack_order:
+                    if depth < len(racks[rack]):
+                        sequence.append(racks[rack][depth])
+                        added = True
+                if not added:
+                    break
+                depth += 1
+            bin_sequences[key] = sequence
+
+        destination_bins: dict[str, list[tuple[str, int]]] = {}
+        for key in bin_sequences:
+            destination_bins.setdefault(key[0], []).append(key)
+        for destination, keys in destination_bins.items():
+            keys.sort(key=lambda key: bin_sequences[key][0].generation_score)
+
+        destination_order = sorted(
+            destination_bins,
+            key=lambda destination: min(
+                bin_sequences[key][0].generation_score
+                for key in destination_bins[destination]
+            ),
+        )
+
+        # First cover the best time bin at every IDC, then the second-best bin
+        # at every IDC, and so on.  Only after all site/time bins are exposed
+        # do we consume second-rack/deeper choices from those bins.
+        ordered_bins: list[tuple[str, int]] = []
+        bin_depth = 0
+        while True:
+            added = False
+            for destination in destination_order:
+                keys = destination_bins[destination]
+                if bin_depth < len(keys):
+                    ordered_bins.append(keys[bin_depth])
+                    added = True
+            if not added:
+                break
+            bin_depth += 1
+
+        selected: list[_WorkloadOption] = []
+        option_depth = 0
+        while len(selected) < limit:
+            added = False
+            for key in ordered_bins:
+                sequence = bin_sequences[key]
+                if option_depth < len(sequence):
+                    selected.append(sequence[option_depth])
+                    added = True
+                    if len(selected) == limit:
+                        break
+            if not added:
+                break
+            option_depth += 1
+        return selected
 
     def _prepare_domain(
         self,

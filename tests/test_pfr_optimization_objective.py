@@ -4,7 +4,10 @@ from types import SimpleNamespace
 
 from pfr.methods import ElectricalStressMethod, ExperimentAuthority, MethodFactory
 from pfr.optimization import FastOptimizationContext, GurobiFastControlOptimizer
-from pfr.persistent_bounded_milp import PersistentBoundedMilpPlanner
+from pfr.persistent_bounded_milp import (
+    PersistentBoundedMilpPlanner,
+    _WorkloadOption,
+)
 from pfr.runtime import (
     CausalExperimentFrame,
     MESS_CANONICAL_STAGING,
@@ -376,6 +379,114 @@ def test_candidate_truncation_infeasibility_expands_k_until_feasible() -> None:
     assert certificate["candidate_limit_infeasible_attempt_count"] == 2
     assert certificate["candidate_limit_expansion_reason"] == (
         "BASE_DOMAIN_SLOW_MASTER_INFEASIBLE"
+    )
+
+
+def test_workload_truncation_preserves_destination_and_time_diversity() -> None:
+    options = []
+    for destination_number in range(1, 13):
+        destination = f"IDC{destination_number:02d}"
+        for offset in range(6):
+            for rack_number in range(2):
+                options.append(
+                    _WorkloadOption(
+                        destination=destination,
+                        rack=f"{destination}-R{rack_number}",
+                        start_offset=offset,
+                        duration_steps=1,
+                        it_power_kw=1.0,
+                        requested_gpu=1,
+                        wan_schedule_gb=(),
+                        wan_required_bytes=0,
+                        remote=False,
+                        generation_score=(
+                            float(destination_number),
+                            float(offset),
+                            float(offset),
+                            destination,
+                            f"R{rack_number}",
+                        ),
+                    )
+                )
+
+    selected_16 = PersistentBoundedMilpPlanner._select_diverse_workload_options(
+        options,
+        16,
+    )
+    selected_64 = PersistentBoundedMilpPlanner._select_diverse_workload_options(
+        options,
+        64,
+    )
+
+    assert len({option.destination for option in selected_16}) == 12
+    assert len(
+        {(option.destination, option.start_offset) for option in selected_16}
+    ) == 16
+    assert len({option.destination for option in selected_64}) == 12
+    assert len(
+        {(option.destination, option.start_offset) for option in selected_64}
+    ) == 64
+
+
+def test_workload_truncation_round_robins_racks_after_site_time_coverage() -> None:
+    options = [
+        _WorkloadOption(
+            destination="IDC01",
+            rack=f"R{rack_number}",
+            start_offset=0,
+            duration_steps=1,
+            it_power_kw=1.0,
+            requested_gpu=1,
+            wan_schedule_gb=(),
+            wan_required_bytes=0,
+            remote=False,
+            generation_score=(0.0, 0.0, 0.0, "IDC01", f"R{rack_number}"),
+        )
+        for rack_number in range(8)
+    ]
+
+    selected = PersistentBoundedMilpPlanner._select_diverse_workload_options(
+        options,
+        4,
+    )
+
+    assert [option.rack for option in selected] == ["R0", "R1", "R2", "R3"]
+
+
+def test_resilient_superset_keeps_legacy_top16_as_exact_prefix() -> None:
+    options = [
+        _WorkloadOption(
+            destination=f"IDC{destination:02d}",
+            rack=f"R{rack}",
+            start_offset=offset,
+            duration_steps=1,
+            it_power_kw=1.0,
+            requested_gpu=1,
+            wan_schedule_gb=(),
+            wan_required_bytes=0,
+            remote=False,
+            generation_score=(
+                float(destination),
+                float(offset),
+                float(offset),
+                f"IDC{destination:02d}",
+                f"R{rack}",
+            ),
+        )
+        for destination in range(1, 13)
+        for offset in range(6)
+        for rack in range(2)
+    ]
+    legacy = sorted(options, key=lambda option: option.generation_score)
+    superset = PersistentBoundedMilpPlanner._select_resilient_workload_options(
+        options,
+        64,
+    )
+
+    assert superset[:16] == legacy[:16]
+    assert len(superset) == 64
+    assert len({option.destination for option in superset}) > len(
+        {option.destination for option in legacy[:64]}
     )
 
 
