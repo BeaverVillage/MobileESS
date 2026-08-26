@@ -120,16 +120,25 @@ class _PreparedOnlineDomain:
 
 
 def _episode_terminal_debt_rhs(
-    effective_steps: int, horizon_steps: int = PLANNING_HORIZON_STEPS
+    effective_steps: int,
+    horizon_steps: int = PLANNING_HORIZON_STEPS,
+    *,
+    additional_zero_boundaries: Sequence[int] = (),
 ) -> tuple[float, ...]:
-    """Return RHS values for boundaries 1..H; zero only at real episode end."""
+    """Return debt bounds at the episode end and fixed recovery deadlines."""
 
     effective = int(effective_steps)
     horizon = int(horizon_steps)
     if not 1 <= effective <= horizon:
         raise RuntimeContractError("effective episode horizon is invalid")
+    zero_boundaries = {effective}
+    zero_boundaries.update(
+        int(boundary)
+        for boundary in additional_zero_boundaries
+        if 1 <= int(boundary) <= effective
+    )
     return tuple(
-        0.0 if boundary == effective else MESS_CAPACITY_KWH
+        0.0 if boundary in zero_boundaries else MESS_CAPACITY_KWH
         for boundary in range(1, horizon + 1)
     )
 
@@ -2644,11 +2653,13 @@ class _PersistentMilpModel:
         self.admission_ceiling.RHS = float(self.job_slot_capacity)
         mobile = MOBILITY_ELIGIBLE_MESS_IDS[0]
         dispatch_enabled = bool(config.h54_capability_mask["mess_dispatch"])
+        fleet_recovery_pending = any(
+            float(value) > 1e-9
+            for value in state.mess_energy_debt_kwh.values()
+        )
         effective_steps = int(domain.effective_steps)
         if not 1 <= effective_steps <= self.h:
             raise RuntimeContractError("effective episode horizon is invalid")
-        terminal_rhs = _episode_terminal_debt_rhs(effective_steps, self.h)
-
         for r in range(self.k):
             active = r < len(domain.route_options)
             self.route[r].LB = 0.0
@@ -2665,7 +2676,12 @@ class _PersistentMilpModel:
                     and dispatch_enabled
                 )
                 key = (mobile, r, step)
-                self.pdis[key].UB = P_MAX if available else 0.0
+                self.pdis[key].UB = (
+                    P_MAX
+                    if available
+                    and not fleet_recovery_pending
+                    else 0.0
+                )
                 self.pchg[key].UB = P_MAX if available else 0.0
                 # The retained balanced model reverses the ranking of several
                 # phase-specific PCC Q actions.  Until a three-phase reactive
@@ -2708,6 +2724,17 @@ class _PersistentMilpModel:
         for mid in MESS_IDS:
             self.energy0[mid].RHS = float(state.mess_energy_kwh[mid])
             self.debt0[mid].RHS = float(state.mess_energy_debt_kwh[mid])
+            due = state.mess_energy_recovery_due_issue.get(mid)
+            recovery_boundary = (
+                max(1, min(effective_steps, int(due) - int(frame.issue) + 1))
+                if due is not None
+                else effective_steps
+            )
+            terminal_rhs = _episode_terminal_debt_rhs(
+                effective_steps,
+                self.h,
+                additional_zero_boundaries=(recovery_boundary,),
+            )
             for boundary in range(1, self.h + 1):
                 self.episode_terminal_debt[(mid, boundary)].RHS = (
                     terminal_rhs[boundary - 1]
@@ -2728,7 +2755,12 @@ class _PersistentMilpModel:
                     and dispatch_enabled
                 )
                 key = (mid, 0, step)
-                self.pdis[key].UB = P_MAX if available else 0.0
+                self.pdis[key].UB = (
+                    P_MAX
+                    if available
+                    and not fleet_recovery_pending
+                    else 0.0
+                )
                 self.pchg[key].UB = P_MAX if available else 0.0
                 self.q[key].LB = 0.0
                 self.q[key].UB = 0.0

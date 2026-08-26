@@ -476,6 +476,9 @@ class MutableMethodState:
     mess_energy_debt_kwh: dict[str, float] = field(
         default_factory=lambda: {mid: 0.0 for mid in MESS_IDS}
     )
+    mess_energy_recovery_due_issue: dict[str, Optional[int]] = field(
+        default_factory=lambda: {mid: None for mid in MESS_IDS}
+    )
     last_exact: Optional[Mapping[str, Any]] = None
     mess_in_transit: dict[str, bool] = field(
         default_factory=lambda: {mid: False for mid in MESS_IDS}
@@ -827,10 +830,31 @@ class _GurobiSensitivityProjector:
         allow_mess: bool,
         allow_compute: bool = True,
         compute_site_capacity: Optional[Mapping[str, float]] = None,
+        improve_safe_operating_point: bool = False,
+        refresh_local_pq_model: bool = False,
+        carried_energy_debt_kwh: Optional[Mapping[str, float]] = None,
+        minimum_recovery_charge_kw: Optional[Mapping[str, float]] = None,
+        remaining_episode_steps_after_commit: int = PLANNING_HORIZON_STEPS,
     ) -> None:
         self.verifier = verifier
         self.allow_mess = allow_mess
         self.allow_compute = allow_compute
+        self.improve_safe_operating_point = bool(improve_safe_operating_point)
+        self.refresh_local_pq_model = bool(refresh_local_pq_model)
+        self.carried_energy_debt_kwh = {
+            mid: max(0.0, float((carried_energy_debt_kwh or {}).get(mid, 0.0)))
+            for mid in MESS_IDS
+        }
+        self.minimum_recovery_charge_kw = {
+            mid: max(
+                0.0,
+                float((minimum_recovery_charge_kw or {}).get(mid, 0.0)),
+            )
+            for mid in MESS_IDS
+        }
+        self.remaining_episode_steps_after_commit = max(
+            0, int(remaining_episode_steps_after_commit)
+        )
         self.compute_site_capacity = {
             site: float(
                 (compute_site_capacity or {}).get(
@@ -842,6 +866,114 @@ class _GurobiSensitivityProjector:
         if any(value < 0.0 for value in self.compute_site_capacity.values()):
             raise RuntimeContractError("compute site capacity cannot be negative")
         self.trace: list[Mapping[str, Any]] = []
+        self.local_pq_surrogate: Optional[Mapping[str, Any]] = None
+
+    @staticmethod
+    def _stress_components_from_metrics(
+        metrics: Mapping[str, float],
+    ) -> Mapping[str, float | str]:
+        voltage = max(
+            0.0,
+            (1.0 - float(metrics["vmin"])) / 0.05,
+            (float(metrics["vmax"]) - 1.0) / 0.05,
+        )
+        line = max(0.0, float(metrics["line"]))
+        transformer = max(0.0, float(metrics["transformer"]))
+        components = {
+            "voltage": voltage,
+            "line": line,
+            "transformer": transformer,
+        }
+        worst_type = max(components, key=components.get)
+        return {
+            "worst": float(components[worst_type]),
+            **components,
+            "worst_type": worst_type.upper(),
+            "phase_envelope_authority": (
+                "CAUSAL_FRESH_AC_LOCAL_PQ_FINITE_DIFFERENCE"
+            ),
+        }
+
+    def evaluate_local_pq_surrogate(
+        self, control: FastControl
+    ) -> Mapping[str, float | str]:
+        model = self.local_pq_surrogate
+        if model is None:
+            raise RuntimeContractError("local H0 P/Q surrogate is unavailable")
+        metrics = dict(model["base_metrics"])
+        for mess_id in model["bounds"]:
+            current_p = float(model["base_p_kw"][mess_id])
+            current_q = float(model["base_q_kvar"][mess_id])
+            candidate_p = (
+                float(control.mess_discharge_kw[mess_id])
+                - float(control.mess_charge_kw[mess_id])
+            )
+            candidate_q = float(control.mess_q_kvar[mess_id])
+            delta_p = candidate_p - current_p
+            delta_q = candidate_q - current_q
+            for name in metrics:
+                metrics[name] += (
+                    float(model["derivatives_p"][name].get(mess_id, 0.0))
+                    * delta_p
+                    + float(model["derivatives_q"][name].get(mess_id, 0.0))
+                    * delta_q
+                )
+        result = dict(self._stress_components_from_metrics(metrics))
+        result["trust_region_pass"] = all(
+            float(bounds[0]) - 1e-9
+            <= (
+                float(control.mess_discharge_kw[mid])
+                - float(control.mess_charge_kw[mid])
+                - float(model["base_p_kw"][mid])
+            )
+            <= float(bounds[1]) + 1e-9
+            and float(bounds[2]) - 1e-9
+            <= (
+                float(control.mess_q_kvar[mid])
+                - float(model["base_q_kvar"][mid])
+            )
+            <= float(bounds[3]) + 1e-9
+            for mid, bounds in model["bounds"].items()
+        )
+        return result
+
+    def _null_or_minimum_recovery_control(
+        self, control: FastControl
+    ) -> FastControl:
+        return FastControl(
+            mess_charge_kw={
+                mid: self.minimum_recovery_charge_kw[mid] for mid in MESS_IDS
+            },
+            mess_discharge_kw={mid: 0.0 for mid in MESS_IDS},
+            mess_q_kvar={mid: 0.0 for mid in MESS_IDS},
+            job_compute_rate_fraction=dict(control.job_compute_rate_fraction),
+            site_throughput_fraction=dict(control.site_throughput_fraction),
+        )
+
+    def _recovery_compliant(self, control: FastControl) -> bool:
+        fleet_recovery_pending = any(
+            value > 1e-9 for value in self.carried_energy_debt_kwh.values()
+        )
+        for mid in MESS_IDS:
+            net_p = (
+                float(control.mess_discharge_kw[mid])
+                - float(control.mess_charge_kw[mid])
+            )
+            if fleet_recovery_pending and net_p > 1e-9:
+                return False
+            maximum_new_support_kw = (
+                MESS_CHARGE_EFFICIENCY**2
+                * MESS_CHARGE_LIMIT_KW
+                * self.remaining_episode_steps_after_commit
+            )
+            if not fleet_recovery_pending and net_p > maximum_new_support_kw + 1e-9:
+                return False
+            if (
+                self.minimum_recovery_charge_kw[mid] > 1e-9
+                and net_p > -self.minimum_recovery_charge_kw[mid] + 1e-9
+            ):
+                return False
+        return True
 
     @staticmethod
     def _objective_distance(nominal: FastControl, candidate: FastControl) -> float:
@@ -1555,8 +1687,31 @@ class _GurobiSensitivityProjector:
                     / STEP_HOURS,
                 ),
             )
+            # A carried discharge debt has a fixed physical recovery deadline.
+            # Do not create fresh support debt while the earlier excursion is
+            # still outstanding; otherwise receding H54 can perpetually roll
+            # repayment forward while remaining terminal-feasible on paper.
+            if any(
+                value > 1e-9 for value in self.carried_energy_debt_kwh.values()
+            ):
+                max_discharge = 0.0
+            else:
+                max_discharge = min(
+                    max_discharge,
+                    MESS_CHARGE_EFFICIENCY**2
+                    * MESS_CHARGE_LIMIT_KW
+                    * self.remaining_episode_steps_after_commit,
+                )
             q_cap = math.sqrt(max(0.0, 700.0**2 - current_p**2))
-            lower_p, upper_p = -max_charge, max_discharge
+            lower_p = -max_charge
+            upper_p = min(
+                max_discharge,
+                -self.minimum_recovery_charge_kw[mess_id]
+                if self.minimum_recovery_charge_kw[mess_id] > 1e-9
+                else max_discharge,
+            )
+            if lower_p > upper_p + 1e-9:
+                return None
             lower_q, upper_q = -q_cap, q_cap
             bounds[mess_id] = (
                 max(lower_p - current_p, -EXACT_AC_P_TRUST_REGION_KW),
@@ -1622,6 +1777,32 @@ class _GurobiSensitivityProjector:
                     ) / denominator
         if not bounds:
             return None
+
+        self.local_pq_surrogate = {
+            "schema_version": "CAUSAL_H0_LOCAL_PQ_SURROGATE_V1",
+            "issue": int(getattr(self.verifier, "issue", state.issue)),
+            "mess_location": tuple(
+                getattr(self.verifier, "mess_location", ("UNKNOWN",) * len(MESS_IDS))
+            ),
+            "base_metrics": dict(base_metrics),
+            "base_p_kw": {
+                mid: float(values[4]) for mid, values in bounds.items()
+            },
+            "base_q_kvar": {
+                mid: float(values[5]) for mid, values in bounds.items()
+            },
+            "bounds": {mid: tuple(values[:4]) for mid, values in bounds.items()},
+            "derivatives_p": {
+                name: dict(values) for name, values in derivatives_p.items()
+            },
+            "derivatives_q": {
+                name: dict(values) for name, values in derivatives_q.items()
+            },
+            "future_actual_used": False,
+            "operating_point_authority": (
+                "CURRENT_CAUSAL_STATE_FRESH_OPENDSS_FINITE_DIFFERENCE"
+            ),
+        }
 
         model = gp.Model("pfr_exact_ac_joint_pq_sensitivity")
         model.Params.OutputFlag = 0
@@ -1758,7 +1939,11 @@ class _GurobiSensitivityProjector:
         model.dispose()
 
         base_score = self._violation_score(exact)
-        candidates = []
+        candidates = (
+            [(control, exact, "BASE_RETAINED_SAFE")]
+            if self._recovery_compliant(control)
+            else []
+        )
         for scale in (0.25, 0.5, 0.75, 1.0, 1.05, 1.25):
             charge = dict(control.mess_charge_kw)
             discharge = dict(control.mess_discharge_kw)
@@ -1786,7 +1971,19 @@ class _GurobiSensitivityProjector:
                 control=candidate, state=state, slow_plan=slow_plan
             )
             candidate_exact.validate()
-            candidates.append((candidate, candidate_exact, scale))
+            if self._recovery_compliant(candidate):
+                candidates.append((candidate, candidate_exact, scale))
+
+        fallback = self._null_or_minimum_recovery_control(control)
+        if fallback != control:
+            fallback_exact = self.verifier.verify_fresh(
+                control=fallback, state=state, slow_plan=slow_plan
+            )
+            fallback_exact.validate()
+            if self._recovery_compliant(fallback):
+                candidates.append(
+                    (fallback, fallback_exact, "NULL_OR_MIN_RECOVERY")
+                )
 
         passing = [item for item in candidates if item[1].passed]
         admissible = passing or [
@@ -2278,6 +2475,66 @@ class _GurobiSensitivityProjector:
         exact = self.verifier.verify_fresh(control=current, state=state, slow_plan=slow_plan)
         exact.validate()
         initial_exact = exact
+        if exact.passed and self.allow_mess and self.improve_safe_operating_point:
+            admitted: list[tuple[FastControl, ExactAcResult, str]] = []
+            if self._recovery_compliant(current):
+                admitted.append((current, exact, "BASE_RETAINED_SAFE"))
+            fallback = self._null_or_minimum_recovery_control(current)
+            fallback_exact = exact
+            if fallback != current:
+                fallback_exact = self.verifier.verify_fresh(
+                    control=fallback, state=state, slow_plan=slow_plan
+                )
+                fallback_exact.validate()
+                if fallback_exact.passed and self._recovery_compliant(fallback):
+                    admitted.append(
+                        (fallback, fallback_exact, "NULL_OR_MIN_RECOVERY")
+                    )
+            if self.refresh_local_pq_model:
+                local_base = (
+                    current if self._recovery_compliant(current) else fallback
+                )
+                local_base_exact = (
+                    exact if local_base == current else fallback_exact
+                )
+                local = self._joint_pq_sensitivity_step(
+                    local_base, state, slow_plan, local_base_exact
+                )
+                if (
+                    local is not None
+                    and local[1].passed
+                    and self._recovery_compliant(local[0])
+                ):
+                    admitted.append((local[0], local[1], "LOCAL_PQ_TRUST_REGION"))
+            if not admitted:
+                raise RuntimeContractError(
+                    "no Fresh-AC-safe action satisfies fixed energy recovery"
+                )
+            current, exact, admission = min(
+                admitted,
+                key=lambda item: (
+                    self._electrical_stress_score(item[1]),
+                    self._objective_distance(nominal, item[0]),
+                    item[2],
+                ),
+            )
+            self.trace.append(
+                {
+                    "status": "H0_EXACT_BENEFIT_ADMISSION",
+                    "selected": admission,
+                    "candidate_count": len(admitted),
+                    "fresh_exact_electrical_stress_before": (
+                        self._electrical_stress_score(initial_exact)
+                    ),
+                    "fresh_exact_electrical_stress_after": (
+                        self._electrical_stress_score(exact)
+                    ),
+                    "local_pq_model_refreshed": bool(
+                        self.local_pq_surrogate is not None
+                    ),
+                    "positive_result_required": False,
+                }
+            )
         for _ in range(24):
             if exact.passed:
                 break
@@ -2518,6 +2775,14 @@ class _GurobiSensitivityProjector:
                 "transformer": exact.maximum_transformer_loading_fraction,
             }
             self.trace.append(trace_row)
+        if (
+            self.allow_mess
+            and self.improve_safe_operating_point
+            and not self._recovery_compliant(current)
+        ):
+            raise RuntimeContractError(
+                "AC projection violated fixed energy recovery admission"
+            )
         if not self.allow_mess and any(
             candidate != nominal_map
             for candidate, nominal_map in (
@@ -4360,6 +4625,40 @@ def _nominal_mess_dispatch(
     return charge, discharge
 
 
+def _energy_recovery_status(
+    state: MutableMethodState, issue: int
+) -> tuple[dict[str, float], dict[str, int], dict[str, bool]]:
+    """Return causal minimum charge, slack, and active recovery state.
+
+    A debt deadline is fixed when discharge first creates debt.  Recovery is
+    active only when the remaining full-rate charge opportunities are nearly
+    exhausted; merely carrying debt does not label every intervening step as a
+    rebound/recovery step.
+    """
+
+    minimum_charge = {mid: 0.0 for mid in MESS_IDS}
+    slack_steps = {mid: PLANNING_HORIZON_STEPS for mid in MESS_IDS}
+    active = {mid: False for mid in MESS_IDS}
+    for mid in MESS_IDS:
+        debt = max(0.0, float(state.mess_energy_debt_kwh[mid]))
+        due = state.mess_energy_recovery_due_issue.get(mid)
+        if debt <= 1e-9 or due is None:
+            continue
+        remaining = max(1, int(due) - int(issue) + 1)
+        full_step_repayment = (
+            MESS_CHARGE_EFFICIENCY * STEP_HOURS * MESS_CHARGE_LIMIT_KW
+        )
+        required = int(math.ceil(max(0.0, debt - 1e-9) / full_step_repayment))
+        slack_steps[mid] = remaining - required
+        active[mid] = slack_steps[mid] <= 1
+        if active[mid]:
+            minimum_charge[mid] = min(
+                MESS_CHARGE_LIMIT_KW,
+                debt / (MESS_CHARGE_EFFICIENCY * STEP_HOURS * remaining),
+            )
+    return minimum_charge, slack_steps, active
+
+
 def _nominal_control(state: MutableMethodState, config: MethodConfig, frame: CausalExperimentFrame) -> FastControl:
     compute = {
         uid: _compute_fraction(job, frame, config)
@@ -4441,6 +4740,9 @@ def _post_payload(state: MutableMethodState, method_id: str) -> Mapping[str, Any
         "mess_route_rank": state.mess_route_rank,
         "mess_route_profile_index": state.mess_route_profile_index,
         "mess_energy_debt_kwh": state.mess_energy_debt_kwh,
+        "mess_energy_recovery_due_issue": (
+            state.mess_energy_recovery_due_issue
+        ),
         "wan_transferred_bytes_cumulative": state.wan_transferred_bytes_cumulative,
         "wan_active_transfers": state.wan_active_transfers,
         "migration_count_cumulative": state.migration_count_cumulative,
@@ -4586,18 +4888,30 @@ class PfrRuntimeRunner:
         frame: CausalExperimentFrame,
         verifier: _PhysicalVerifierAdapter,
         accepted_control: FastControl,
+        local_surrogate_evaluator: Optional[Any] = None,
+        reference_control: Optional[FastControl] = None,
     ) -> Mapping[str, Any]:
-        evaluator = getattr(self.joint_planner, "evaluate_h0_surrogate", None)
+        evaluator = local_surrogate_evaluator or getattr(
+            self.joint_planner, "evaluate_h0_surrogate", None
+        )
         if not callable(evaluator):
             raise RuntimeContractError("H0 fidelity audit requires the live surrogate")
+        local_model = local_surrogate_evaluator is not None
         accepted_commit = verifier.last_commit
         accepted_native = verifier.native_decision
         accepted_runtime = verifier.opendss_runtime_seconds
         if accepted_commit is None or accepted_native is None:
             raise RuntimeContractError("H0 audit lacks accepted Fresh-AC evidence")
+        reference = reference_control or self._scaled_mess_control(
+            accepted_control, 0.0
+        )
         candidates = (
-            ("REFERENCE_ZERO_MESS", self._scaled_mess_control(accepted_control, 0.0), True),
-            ("HALF_ACCEPTED_MESS", self._scaled_mess_control(accepted_control, 0.5), False),
+            ("REFERENCE_NULL_OR_MIN_RECOVERY", reference, True),
+            (
+                "HALF_ACCEPTED_FROM_REFERENCE",
+                _blend_control(reference, accepted_control, 0.5),
+                False,
+            ),
             ("ACCEPTED_MESS", accepted_control, False),
         )
         started = time.monotonic()
@@ -4605,14 +4919,18 @@ class PfrRuntimeRunner:
         try:
             for candidate_id, control, is_reference in candidates:
                 facility, mess_p, mess_q = verifier._physical_inputs(control)
-                surrogate = evaluator(
-                    method_key=config.comparison_method_id.value,
-                    state=state,
-                    frame=frame,
-                    facility_it_kw=facility,
-                    mess_p_kw=mess_p,
-                    mess_q_kvar=mess_q,
-                    mess_location=verifier.mess_location,
+                surrogate = (
+                    evaluator(control)
+                    if local_model
+                    else evaluator(
+                        method_key=config.comparison_method_id.value,
+                        state=state,
+                        frame=frame,
+                        facility_it_kw=facility,
+                        mess_p_kw=mess_p,
+                        mess_q_kvar=mess_q,
+                        mess_location=verifier.mess_location,
+                    )
                 )
                 exact = (
                     accepted_commit.exact
@@ -4660,6 +4978,11 @@ class PfrRuntimeRunner:
                         },
                         "same_compute_action": True,
                         "same_native_grid_state": True,
+                        "surrogate_authority": (
+                            "CAUSAL_FRESH_AC_LOCAL_PQ_FINITE_DIFFERENCE"
+                            if local_model
+                            else "RETAINED_H54_RADIAL_SURROGATE"
+                        ),
                     }
                 )
         finally:
@@ -5043,6 +5366,11 @@ class PfrRuntimeRunner:
                 )
                 return EscalatedCandidate(state.active_plan, accepted_fast_state, fast.control, True, True)
 
+            (
+                minimum_recovery_charge_kw,
+                recovery_slack_steps,
+                recovery_active_by_mess,
+            ) = _energy_recovery_status(state, frame.issue)
             safety_projector = _GurobiSensitivityProjector(
                 verifier,
                 allow_mess=config.energy_flexibility in {"MESS", "STATIONARY_BESS"},
@@ -5056,6 +5384,25 @@ class PfrRuntimeRunner:
                     )
                     for site in IDCS
                 },
+                improve_safe_operating_point=(
+                    isinstance(
+                        config.comparison_method_id, ElectricalStressMethod
+                    )
+                    and config.energy_flexibility
+                    in {"MESS", "STATIONARY_BESS"}
+                ),
+                refresh_local_pq_model=(
+                    isinstance(
+                        config.comparison_method_id, ElectricalStressMethod
+                    )
+                    and self.h0_fidelity_audit_every_steps > 0
+                    and offset % self.h0_fidelity_audit_every_steps == 0
+                ),
+                carried_energy_debt_kwh=state.mess_energy_debt_kwh,
+                minimum_recovery_charge_kw=minimum_recovery_charge_kw,
+                remaining_episode_steps_after_commit=max(
+                    0, len(frames) - offset - 1
+                ),
             )
             safety = AcSafetyFilter(
                 projector=safety_projector,
@@ -5094,6 +5441,16 @@ class PfrRuntimeRunner:
                     frame=frame,
                     verifier=verifier,
                     accepted_control=safety.safe_control,
+                    local_surrogate_evaluator=(
+                        safety_projector.evaluate_local_pq_surrogate
+                        if safety_projector.local_pq_surrogate is not None
+                        else None
+                    ),
+                    reference_control=(
+                        safety_projector._null_or_minimum_recovery_control(
+                            safety.safe_control
+                        )
+                    ),
                 )
             fast = execute_fast_recourse(
                 architecture=self.architecture,
@@ -5157,6 +5514,15 @@ class PfrRuntimeRunner:
                     + support
                     - repayment,
                 )
+                if state.mess_energy_debt_kwh[mid] <= 1e-9:
+                    state.mess_energy_debt_kwh[mid] = 0.0
+                    state.mess_energy_recovery_due_issue[mid] = None
+                elif state.mess_energy_recovery_due_issue[mid] is None:
+                    remaining_after_commit = max(0, len(frames) - offset - 1)
+                    state.mess_energy_recovery_due_issue[mid] = (
+                        int(frame.issue)
+                        + min(PLANNING_HORIZON_STEPS, remaining_after_commit)
+                    )
             state.energy_debt_kwh = sum(state.mess_energy_debt_kwh.values())
             state.last_committed_mess_p_kw = {
                 mid: float(fast.control.mess_discharge_kw[mid])
@@ -5687,8 +6053,22 @@ class PfrRuntimeRunner:
                 "compute_debt_gpu_hours": state.compute_debt_gpu_hours,
                 "energy_debt_kwh": state.energy_debt_kwh,
                 "energy_debt_before_kwh": energy_debt_before_kwh,
-                "recovery_horizon_remaining": max(
-                    0, PLANNING_HORIZON_STEPS - int(plan_age_for_action)
+                "recovery_active": any(recovery_active_by_mess.values()),
+                "recovery_active_by_mess": dict(recovery_active_by_mess),
+                "recovery_slack_steps_by_mess": dict(recovery_slack_steps),
+                "minimum_recovery_charge_kw_by_mess": dict(
+                    minimum_recovery_charge_kw
+                ),
+                "energy_recovery_due_issue_by_mess": dict(
+                    state.mess_energy_recovery_due_issue
+                ),
+                "recovery_horizon_remaining": min(
+                    (
+                        max(0, int(due) - int(frame.issue) + 1)
+                        for due in state.mess_energy_recovery_due_issue.values()
+                        if due is not None
+                    ),
+                    default=PLANNING_HORIZON_STEPS,
                 ),
                 "compute_debt_target": 0.0,
                 "energy_debt_target": 0.0,
@@ -5912,9 +6292,7 @@ class PfrRuntimeRunner:
                     shadow_root = shadow_by_issue[int(row["issue"])]
                     root_import = float(row["exact_ac"]["root_import_p_kw"])
                     row["shadow_root_import_kw"] = shadow_root
-                    recovery_active = (
-                        float(row.get("energy_debt_before_kwh", 0.0)) > 1e-9
-                    )
+                    recovery_active = bool(row.get("recovery_active", False))
                     row["rebound_power_kw"] = (
                         max(0.0, root_import - shadow_root)
                         if recovery_active

@@ -267,7 +267,7 @@ def _issue_row(record: Mapping[str, Any]) -> dict[str, Any]:
         "remaining_compute_work": record.get("remaining_work_gpu_hours"),
         "compute_debt": record.get("compute_debt_gpu_hours"),
         "energy_debt_kwh": record.get("energy_debt_kwh"),
-        "recovery_active": bool(record.get("compute_debt_gpu_hours", 0.0) or record.get("energy_debt_kwh", 0.0)),
+        "recovery_active": bool(record.get("recovery_active", False)),
         "recovery_horizon_remaining": record.get("recovery_horizon_remaining"),
         "compute_debt_target": record.get("compute_debt_target"),
         "energy_debt_target": record.get("energy_debt_target"),
