@@ -53,11 +53,17 @@ main() {
     export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
     export NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0
 
-    echo "=== JANUARY B07 CALIBRATION START $(date -Is) ==="
-    run_child bash "$repo/pfr/tools/run_january_b07_risk_calibration_local.sh" \
-        --run-root "$jan_root" --day-workers 6 --gurobi-threads 2 \
-        --cpu-affinity disjoint
-    test -f "$calibration"
+    if [[ -f "$calibration" ]]; then
+        "$python_bin" -c 'import json,sys; from pathlib import Path; p=Path(sys.argv[1]); r=json.loads(p.read_text()); assert r.get("status") == "PASS" and r.get("storage_integrity") == "PASS", r; print("JANUARY_STORAGE_VERIFIED", p)' \
+            "$jan_root/january_b07_electrical_stress_raw/STORAGE_VERIFICATION.json"
+        echo "=== JANUARY B07 CALIBRATION ALREADY FROZEN; SKIP $(date -Is) ==="
+    else
+        echo "=== JANUARY B07 CALIBRATION START $(date -Is) ==="
+        run_child bash "$repo/pfr/tools/run_january_b07_risk_calibration_local.sh" \
+            --run-root "$jan_root" --day-workers 6 --gurobi-threads 2 \
+            --cpu-affinity disjoint
+        test -f "$calibration"
+    fi
     "$python_bin" -c 'from pathlib import Path; import sys; from pfr.risk_calibration import load_frozen_risk_calibration; x=load_frozen_risk_calibration(Path(sys.argv[1])); print("JANUARY_CALIBRATION_VERIFIED", x.artifact_sha256)' "$calibration"
     echo "=== JANUARY B07 CALIBRATION PASS $(date -Is) ==="
 
