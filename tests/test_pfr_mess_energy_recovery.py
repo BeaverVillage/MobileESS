@@ -205,6 +205,42 @@ class SafeStressVerifier:
         )
 
 
+def test_recovery_fallback_keeps_transit_mess_disconnected() -> None:
+    verifier = SimpleNamespace(mess_in_transit=(False, False, False, True))
+    projector = _GurobiSensitivityProjector(
+        verifier,
+        allow_mess=True,
+        carried_energy_debt_kwh={mid: 1.0 for mid in MESS_IDS},
+        minimum_recovery_charge_kw={mid: 125.0 for mid in MESS_IDS},
+    )
+    nominal = FastControl(
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {},
+        {},
+    )
+
+    fallback = projector._null_or_minimum_recovery_control(nominal)
+
+    assert fallback.mess_charge_kw["MESS04"] == 0.0
+    assert fallback.mess_discharge_kw["MESS04"] == 0.0
+    assert fallback.mess_q_kvar["MESS04"] == 0.0
+    assert all(
+        fallback.mess_charge_kw[mid] == 125.0 for mid in MESS_IDS[:3]
+    )
+    assert projector._recovery_compliant(fallback)
+
+    invalid_transit_dispatch = FastControl(
+        {**fallback.mess_charge_kw, "MESS04": 1.0},
+        dict(fallback.mess_discharge_kw),
+        dict(fallback.mess_q_kvar),
+        {},
+        {},
+    )
+    assert not projector._recovery_compliant(invalid_transit_dispatch)
+
+
 def test_projector_combines_active_relief_with_location_sensitive_q():
     nominal = FastControl(
         {mid: 50.0 for mid in MESS_IDS},

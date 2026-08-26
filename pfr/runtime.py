@@ -981,7 +981,12 @@ class _GurobiSensitivityProjector:
     ) -> FastControl:
         return FastControl(
             mess_charge_kw={
-                mid: self.minimum_recovery_charge_kw[mid] for mid in MESS_IDS
+                mid: (
+                    0.0
+                    if self.verifier.mess_in_transit[index]
+                    else self.minimum_recovery_charge_kw[mid]
+                )
+                for index, mid in enumerate(MESS_IDS)
             },
             mess_discharge_kw={mid: 0.0 for mid in MESS_IDS},
             mess_q_kvar={mid: 0.0 for mid in MESS_IDS},
@@ -993,11 +998,21 @@ class _GurobiSensitivityProjector:
         fleet_recovery_pending = any(
             value > 1e-9 for value in self.carried_energy_debt_kwh.values()
         )
-        for mid in MESS_IDS:
+        for index, mid in enumerate(MESS_IDS):
             net_p = (
                 float(control.mess_discharge_kw[mid])
                 - float(control.mess_charge_kw[mid])
             )
+            if self.verifier.mess_in_transit[index]:
+                if (
+                    abs(net_p) > 1e-9
+                    or abs(float(control.mess_q_kvar[mid])) > 1e-9
+                ):
+                    return False
+                # A disconnected MESS cannot service its recovery obligation
+                # until it arrives.  Do not make the physically mandatory
+                # zero-dispatch control fail the per-step recovery gate.
+                continue
             if fleet_recovery_pending and net_p > 1e-9:
                 return False
             maximum_new_support_kw = (
