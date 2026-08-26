@@ -16,6 +16,7 @@ fail_fast=0
 diagnostic_method=""
 risk_calibration=""
 diagnostic_steps_per_day=""
+reuse_verified_pass_fingerprints=()
 
 usage() {
     cat <<'EOF'
@@ -35,6 +36,8 @@ Run options:
   --diagnostic-method B07 Run one method only; B07 is the new calibration source.
   --risk-calibration P    Frozen B07 calibration required for full B00-B09.
   --diagnostic-steps-per-day N  Bounded topology benchmark only.
+  --reuse-verified-pass-fingerprint SHA256  Reuse a fully gated PASS day from
+                                this explicitly authorized prior implementation.
   --skip-preflight       Skip the automatic preflight (not recommended).
   --fail-fast            Stop all day workers after the first saved failure.
   --watch-seconds N      Monitor refresh interval; 0 prints once (default: 10).
@@ -66,6 +69,11 @@ while (($#)); do
         --fail-fast)
             fail_fast=1
             shift
+            ;;
+        --reuse-verified-pass-fingerprint)
+            require_value "$@"
+            reuse_verified_pass_fingerprints+=("$2")
+            shift 2
             ;;
         --start-day|--end-day|--day-workers|--gurobi-threads|--cpu-affinity|--output-root|--watch-seconds|--diagnostic-method|--risk-calibration|--diagnostic-steps-per-day)
             require_value "$@"
@@ -137,6 +145,12 @@ if [[ -n "$diagnostic_steps_per_day" ]]; then
         exit 64
     fi
 fi
+for fingerprint in "${reuse_verified_pass_fingerprints[@]}"; do
+    if [[ ! "$fingerprint" =~ ^[0-9a-f]{64}$ ]]; then
+        echo "--reuse-verified-pass-fingerprint must be a lowercase SHA-256." >&2
+        exit 64
+    fi
+done
 
 if [[ "$mode" == "monitor" ]]; then
     cd "$repo_dir"
@@ -264,6 +278,9 @@ fi
 if [[ -n "$diagnostic_steps_per_day" ]]; then
     campaign_arguments+=(--diagnostic-steps-per-day "$diagnostic_steps_per_day")
 fi
+for fingerprint in "${reuse_verified_pass_fingerprints[@]}"; do
+    campaign_arguments+=(--reuse-verified-pass-fingerprint "$fingerprint")
+done
 
 exec "$python_bin" -m pfr.tools.run_pfr_daily_campaign \
     --repo "$repo_dir" \

@@ -322,6 +322,7 @@ def reusable_pass(
     implementation_fingerprint: str,
     shared_authority_sha256: str | None = None,
     method_count: int = METHOD_COUNT,
+    authorized_implementation_fingerprints: Sequence[str] = (),
 ) -> bool:
     summary_path = day_root / "MATRIX_SUMMARY.json"
     manifest_path = day_root / "RUN_MANIFEST.json"
@@ -332,10 +333,13 @@ def reusable_pass(
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return False
+    artifact_fingerprint = manifest.get("scientific_implementation_fingerprint")
     return bool(
         summary_passes(summary, method_count=method_count)
-        and manifest.get("scientific_implementation_fingerprint")
-        == implementation_fingerprint
+        and (
+            artifact_fingerprint == implementation_fingerprint
+            or artifact_fingerprint in authorized_implementation_fingerprints
+        )
         and (
             shared_authority_sha256 is None
             or manifest.get("shared_exogenous_authority_sha256")
@@ -426,6 +430,7 @@ def run_day(
     electrical_stress_campaign: bool = False,
     cpu_affinity: Sequence[int] | None = None,
     diagnostic_steps_per_day: int | None = None,
+    authorized_pass_fingerprints: Sequence[str] = (),
 ) -> Mapping[str, Any]:
     day_root = output / spec.calendar_date
     summary_path = day_root / "MATRIX_SUMMARY.json"
@@ -452,7 +457,14 @@ def run_day(
         implementation_fingerprint,
         shared_authority_sha256,
         method_count,
+        authorized_pass_fingerprints,
     ):
+        artifact_manifest = json.loads(
+            (day_root / "RUN_MANIFEST.json").read_text(encoding="utf-8")
+        )
+        artifact_fingerprint = str(
+            artifact_manifest["scientific_implementation_fingerprint"]
+        )
         return {
             "calendar_date": spec.calendar_date,
             "start_issue": spec.start_issue,
@@ -460,6 +472,10 @@ def run_day(
             "artifact": str(day_root),
             "reused_existing_pass": True,
             "scientific_implementation_fingerprint": implementation_fingerprint,
+            "artifact_scientific_implementation_fingerprint": artifact_fingerprint,
+            "cross_implementation_reuse_authorized": (
+                artifact_fingerprint != implementation_fingerprint
+            ),
             "shared_exogenous_authority_sha256": shared_authority_sha256,
         }
 
@@ -594,6 +610,7 @@ def campaign_payload(
     cpu_affinity_policy: str = "none",
     cpu_affinity_groups: Sequence[Sequence[int]] = (),
     diagnostic_steps_per_day: int | None = None,
+    authorized_pass_fingerprints: Sequence[str] = (),
 ) -> Mapping[str, Any]:
     expected_days = end_day - start_day + 1
     complete = len(summaries) == expected_days
@@ -630,6 +647,10 @@ def campaign_payload(
         "cpu_affinity_groups": [list(group) for group in cpu_affinity_groups],
         "diagnostic_steps_per_day": diagnostic_steps_per_day,
         "scientific_result_eligible": diagnostic_steps_per_day is None,
+        "authorized_verified_pass_reuse_fingerprints": sorted(
+            set(authorized_pass_fingerprints)
+        ),
+        "cross_implementation_pass_reuse_is_explicit": True,
         "independent_daily_cold_start": True,
         "cross_day_endogenous_state_carryover": False,
         "continue_to_next_method_after_failure": True,
@@ -709,6 +730,16 @@ def main() -> None:
     )
     parser.add_argument("--no-reuse-passed-days", action="store_true")
     parser.add_argument(
+        "--reuse-verified-pass-fingerprint",
+        action="append",
+        default=[],
+        help=(
+            "Explicitly authorize reuse of a fully gated PASS day produced by "
+            "this prior scientific implementation fingerprint. The artifact's "
+            "original fingerprint remains recorded in campaign provenance."
+        ),
+    )
+    parser.add_argument(
         "--supplementary-b8-periodic-5min",
         action="store_true",
         help="Run only the post-hoc B8 five-minute periodic timing baseline.",
@@ -787,6 +818,13 @@ def main() -> None:
         parser.error("raw-risk calibration fitting must not load a calibrated-risk artifact")
     if not 1 <= args.day_workers <= 31:
         parser.error("--day-workers must be in [1, 31]")
+    for fingerprint in args.reuse_verified_pass_fingerprint:
+        if len(fingerprint) != 64 or any(
+            character not in "0123456789abcdef" for character in fingerprint
+        ):
+            parser.error(
+                "--reuse-verified-pass-fingerprint must be a lowercase SHA-256"
+            )
 
     native_authority_path = (
         args.repo / "pfr/contracts/COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1.json"
@@ -888,6 +926,9 @@ def main() -> None:
                 diagnostic_method=args.diagnostic_method,
                 electrical_stress_campaign=args.electrical_stress_campaign,
                 diagnostic_steps_per_day=args.diagnostic_steps_per_day,
+                authorized_pass_fingerprints=(
+                    args.reuse_verified_pass_fingerprint
+                ),
             ): spec
             for spec in specs
         }
@@ -937,6 +978,9 @@ def main() -> None:
                     cpu_affinity_policy=args.cpu_affinity,
                     cpu_affinity_groups=affinity_groups,
                     diagnostic_steps_per_day=args.diagnostic_steps_per_day,
+                    authorized_pass_fingerprints=(
+                        args.reuse_verified_pass_fingerprint
+                    ),
                 ),
             )
             done = len(summaries)
@@ -995,6 +1039,9 @@ def main() -> None:
                 cpu_affinity_policy=args.cpu_affinity,
                 cpu_affinity_groups=affinity_groups,
                 diagnostic_steps_per_day=args.diagnostic_steps_per_day,
+                authorized_pass_fingerprints=(
+                    args.reuse_verified_pass_fingerprint
+                ),
             )
         )
         interrupted["status"] = "INTERRUPTED"
@@ -1026,6 +1073,7 @@ def main() -> None:
         cpu_affinity_policy=args.cpu_affinity,
         cpu_affinity_groups=affinity_groups,
         diagnostic_steps_per_day=args.diagnostic_steps_per_day,
+        authorized_pass_fingerprints=args.reuse_verified_pass_fingerprint,
     )
     if first_failure is not None:
         campaign = dict(campaign)

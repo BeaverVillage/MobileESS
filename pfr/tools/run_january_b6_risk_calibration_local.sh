@@ -8,6 +8,7 @@ preflight_only=0
 day_workers="${PFR_DAY_WORKERS:-6}"
 gurobi_threads="${PFR_GUROBI_THREADS:-2}"
 cpu_affinity="${PFR_CPU_AFFINITY:-disjoint}"
+reuse_verified_pass_fingerprints=()
 
 stop_run() {
     trap - INT TERM
@@ -24,8 +25,11 @@ while (($#)); do
         --day-workers) day_workers="$2"; shift 2 ;;
         --gurobi-threads) gurobi_threads="$2"; shift 2 ;;
         --cpu-affinity) cpu_affinity="$2"; shift 2 ;;
+        --reuse-verified-pass-fingerprint)
+            (($# >= 2)) || { echo "Missing --reuse-verified-pass-fingerprint value" >&2; exit 64; }
+            reuse_verified_pass_fingerprints+=("$2"); shift 2 ;;
         --preflight-only) preflight_only=1; shift ;;
-        *) echo "Usage: $0 --run-root ABSOLUTE_PATH [--day-workers N] [--gurobi-threads N] [--cpu-affinity none|disjoint] [--preflight-only]" >&2; exit 64 ;;
+        *) echo "Usage: $0 --run-root ABSOLUTE_PATH [--day-workers N] [--gurobi-threads N] [--cpu-affinity none|disjoint] [--reuse-verified-pass-fingerprint SHA256] [--preflight-only]" >&2; exit 64 ;;
     esac
 done
 if [[ -z "$run_root" || "$run_root" != /* ]]; then
@@ -40,6 +44,12 @@ if [[ "$cpu_affinity" != none && "$cpu_affinity" != disjoint ]]; then
     echo "--cpu-affinity must be none or disjoint." >&2
     exit 64
 fi
+for fingerprint in "${reuse_verified_pass_fingerprints[@]}"; do
+    if [[ ! "$fingerprint" =~ ^[0-9a-f]{64}$ ]]; then
+        echo "--reuse-verified-pass-fingerprint must be a lowercase SHA-256." >&2
+        exit 64
+    fi
+done
 
 mkdir -p "$run_root"
 calibration_lock="$run_root/.january_b07_calibration.lock"
@@ -58,6 +68,9 @@ common=(
     --diagnostic-method B07 --output-root "$calibration_root" --fail-fast
 )
 if ((preflight_only)); then common+=(--preflight-only); fi
+for fingerprint in "${reuse_verified_pass_fingerprints[@]}"; do
+    common+=(--reuse-verified-pass-fingerprint "$fingerprint")
+done
 
 cd "$repo_dir"
 bash "$repo_dir/pfr/tools/run_january_2025_local.sh" "${common[@]}"

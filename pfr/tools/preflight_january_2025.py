@@ -236,11 +236,11 @@ def validate_common_native_grid_control(
         and authority.get("feeder_wide_global_guard", {}).get(
             "maximum_total_candidate_evaluations"
         )
-        == 928
+        == 88
         and authority.get("feeder_wide_global_guard", {}).get(
             "regulator_search_beam_width"
         )
-        == 4
+        == 2
         and authority.get("feeder_wide_global_guard", {}).get(
             "regulator_search_tap_anchor_count"
         )
@@ -248,7 +248,7 @@ def validate_common_native_grid_control(
         and authority.get("feeder_wide_global_guard", {}).get(
             "maximum_regulator_search_iterations"
         )
-        == 16
+        == 2
         and authority.get("feeder_wide_global_guard", {}).get(
             "fixed_candidate_state_includes_capacitors_and_regulator_taps"
         )

@@ -132,7 +132,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         # Soft legacy location fixing is never authoritative in this backend.
         kwargs["legacy_causal_screening"] = False
         super().__init__(**kwargs)
-        self.candidate_limit = int(os.environ.get("PFR_ONLINE_CANDIDATE_K", "16"))
+        self.candidate_limit = int(os.environ.get("PFR_ONLINE_CANDIDATE_K", "4"))
         if self.candidate_limit not in ALLOWED_DEVELOPMENT_K:
             raise RuntimeContractError(
                 f"candidate K must lie on {ALLOWED_DEVELOPMENT_K}"
@@ -147,7 +147,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             os.environ.get("PFR_ONLINE_BOOTSTRAP_WALL_BUDGET_SECONDS", "60.0")
         )
         self.max_persistent_solve_reuses = int(
-            os.environ.get("PFR_PERSISTENT_MODEL_MAX_REUSES", "64")
+            os.environ.get("PFR_PERSISTENT_MODEL_MAX_REUSES", "16")
         )
         if not math.isfinite(self.wall_budget_seconds) or self.wall_budget_seconds <= 0:
             raise RuntimeContractError("online MILP wall budget must be positive")
@@ -758,7 +758,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             >= self.max_persistent_solve_reuses
         ):
             # Gurobi's retained multiobjective reoptimization state can become
-            # substantially slower than a cold model after hundreds of RHS and
+            # substantially slower than a cold model after repeated RHS and
             # coefficient updates.  Bound that numerical state age without
             # changing the mathematical model or any accepted decision.
             self._dispose_method_models(method_key)
@@ -988,6 +988,11 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             "norm_engineering_margin_fraction": result[
                 "norm_engineering_margin_fraction"
             ],
+            "norm_constraint_mode": result["norm_constraint_mode"],
+            "norm_inner_polygon_sides": result["norm_inner_polygon_sides"],
+            "norm_inner_polygon_max_radial_conservatism_fraction": result[
+                "norm_inner_polygon_max_radial_conservatism_fraction"
+            ],
             "exact_qcp_feasibility_restoration_rounds": result[
                 "exact_qcp_feasibility_restoration_rounds"
             ],
@@ -1093,7 +1098,24 @@ class _PersistentMilpModel:
         self.model.Params.FeasibilityTol = 1e-8
         self.model.Params.IntFeasTol = 1e-8
         self.model.Params.OptimalityTol = 1e-8
-        self.exact_qcp_diagnostic = model_role == "exact_recourse"
+        self.norm_constraint_mode = os.environ.get(
+            "PFR_NORM_CONSTRAINT_MODE", "INNER_POLYGON"
+        ).upper()
+        if self.norm_constraint_mode not in {"EXACT_QCP", "INNER_POLYGON"}:
+            raise RuntimeContractError(
+                "PFR_NORM_CONSTRAINT_MODE must be EXACT_QCP or INNER_POLYGON"
+            )
+        self.norm_inner_polygon_sides = int(
+            os.environ.get("PFR_NORM_INNER_POLYGON_SIDES", "16")
+        )
+        if self.norm_inner_polygon_sides not in {8, 16, 32}:
+            raise RuntimeContractError(
+                "PFR_NORM_INNER_POLYGON_SIDES must be one of 8, 16, or 32"
+            )
+        self.exact_qcp_diagnostic = (
+            model_role == "exact_recourse"
+            and self.norm_constraint_mode == "EXACT_QCP"
+        )
         self.relaxed_dispatch_mode_diagnostic = True
         discrete_type = GRB.BINARY if model_role == "slow_master" else GRB.CONTINUOUS
         self.route = {
@@ -1233,7 +1255,9 @@ class _PersistentMilpModel:
         self._cut_directions: set[tuple[str, str, int, int, int]] = set()
         self._cut_angles: dict[tuple[str, str, int], list[float]] = {}
         self._globally_refined_assets: set[tuple[str, str]] = set()
-        if self.model_role == "slow_master":
+        if self.norm_constraint_mode == "INNER_POLYGON":
+            self._add_inner_norm_constraints(self.norm_inner_polygon_sides)
+        elif self.model_role == "slow_master":
             self._add_initial_norm_cuts()
         else:
             self._add_exact_norm_constraints()
@@ -1616,6 +1640,61 @@ class _PersistentMilpModel:
                         self._add_cut(
                             kind=f"PCS:{mid}", element=str(r), step=step,
                             direction_p=dp, direction_q=dq,
+                        )
+
+    def _add_inner_norm_constraints(self, sides: int) -> None:
+        """Conservative polyhedral circle model for latency-sensitive runs.
+
+        The intersection of regularly spaced halfspaces with apothem
+        ``R*cos(pi/sides)`` is an inscribed polygon.  Every point admitted by
+        these linear rows is therefore inside the physical Euclidean circle.
+        This trades at most ``1-cos(pi/sides)`` radial capability for removal
+        of the online QCP barrier while retaining the independent exact-norm
+        audit and downstream Fresh OpenDSS hard gate.
+        """
+
+        apothem_factor = math.cos(math.pi / sides)
+        directions = tuple(
+            (
+                math.cos(2.0 * math.pi * index / sides),
+                math.sin(2.0 * math.pi * index / sides),
+            )
+            for index in range(sides)
+        )
+        for step in range(self.h):
+            for node in self.nonroot:
+                edge_key = (self.static["parent"][node], node)
+                if edge_key not in self.static["lim"]:
+                    continue
+                limit = float(self.static["lim"][edge_key]) * apothem_factor
+                for direction_p, direction_q in directions:
+                    self.model.addConstr(
+                        direction_p * self.flow_p[(node, step)]
+                        + direction_q * self.flow_q[(node, step)]
+                        <= limit * self.z[step]
+                    )
+            for service in self.services:
+                limit = (
+                    float(self.static["service_kva"][service])
+                    * apothem_factor
+                )
+                for direction_p, direction_q in directions:
+                    self.model.addConstr(
+                        direction_p * self.service_p[(service, step)]
+                        + direction_q * self.service_q[(service, step)]
+                        <= limit * self.z[step]
+                    )
+            for mid in MESS_IDS:
+                for route_index in self._route_axis(mid):
+                    pnet = self._pnet(mid, route_index, step)
+                    limit = (
+                        NORM_SAFE_LIMIT_FACTOR * PCS_KVA * apothem_factor
+                    )
+                    for direction_p, direction_q in directions:
+                        self.model.addConstr(
+                            direction_p * pnet
+                            + direction_q * self.q[(mid, route_index, step)]
+                            <= limit
                         )
 
     def _add_exact_norm_constraints(self) -> None:
@@ -2441,7 +2520,7 @@ class _PersistentMilpModel:
                         f"status={_status_name(self.GRB, self.model.Status)} "
                         f"solve_seconds={exact_solve_seconds:.6f}"
                     )
-            if self.model_role == "exact_recourse":
+            if self.exact_qcp_diagnostic:
                 # A conic barrier solution can satisfy Gurobi's internal QCP
                 # test yet miss the independent scale-aware residual audit.
                 # Supporting tangents are already implied by the exact circle,
@@ -2620,7 +2699,22 @@ class _PersistentMilpModel:
             "solution_status": (
                 "HIERARCHICAL_SLOW_MASTER_COMPLETE"
                 if self.model_role == "slow_master"
-                else "FIXED_SLOW_DECISIONS_H54_EXACT_QCP_COMPLETE"
+                else (
+                    "FIXED_SLOW_DECISIONS_H54_EXACT_QCP_COMPLETE"
+                    if self.norm_constraint_mode == "EXACT_QCP"
+                    else "FIXED_SLOW_DECISIONS_H54_INNER_POLYGON_COMPLETE"
+                )
+            ),
+            "norm_constraint_mode": self.norm_constraint_mode,
+            "norm_inner_polygon_sides": (
+                self.norm_inner_polygon_sides
+                if self.norm_constraint_mode == "INNER_POLYGON"
+                else None
+            ),
+            "norm_inner_polygon_max_radial_conservatism_fraction": (
+                1.0 - math.cos(math.pi / self.norm_inner_polygon_sides)
+                if self.norm_constraint_mode == "INNER_POLYGON"
+                else 0.0
             ),
             "primary_worst_stress": float(self.zmax.X),
             "secondary_exposure": float(exposure_expr.getValue()),

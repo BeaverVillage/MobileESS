@@ -488,8 +488,14 @@ class ExactOpenDssBackend:
             predictive_guard_evidence["status"] = (
                 "NOT_TRIGGERED_LOCAL_TRANSITION_H0_UNSAFE"
             )
-        beam_width = 4
-        maximum_tap_depth = 16
+        beam_width = int(os.environ.get("PFR_NATIVE_GUARD_BEAM_WIDTH", "2"))
+        maximum_tap_depth = int(
+            os.environ.get("PFR_NATIVE_GUARD_MAX_TAP_DEPTH", "2")
+        )
+        if beam_width < 1 or maximum_tap_depth < 1:
+            raise RuntimeError(
+                "native guard beam width and tap depth must both be positive"
+            )
         deep_trust_region_radius = 8
         deep_maximum_relinearizations = 4
         candidates: list[
@@ -948,7 +954,7 @@ class ExactOpenDssBackend:
                         "LOCAL_TRANSITION",
                         "CHRONOLOGICAL_PRE_TRANSITION",
                     ],
-                    "beam_width": 4,
+                    "beam_width": beam_width,
                     "beam_width_per_capacitor_state": None,
                     "frontier_policy": (
                         "FINITE_DIFFERENCE_INTEGER_TRUST_REGION"
@@ -2215,7 +2221,19 @@ def main() -> None:
             ),
             "fixed_slow_decision_exact_h54_qcp_recourse": (
                 args.h54_planner_backend == "online-bounded"
+                and os.environ.get(
+                    "PFR_NORM_CONSTRAINT_MODE", "INNER_POLYGON"
+                ).upper()
+                == "EXACT_QCP"
                 if retained_h54 is not None
+                else None
+            ),
+            "fixed_slow_decision_h54_recourse_norm_model": (
+                os.environ.get(
+                    "PFR_NORM_CONSTRAINT_MODE", "INNER_POLYGON"
+                ).upper()
+                if retained_h54 is not None
+                and args.h54_planner_backend == "online-bounded"
                 else None
             ),
             "gurobi_slow_master_numeric_focus": (

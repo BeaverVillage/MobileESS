@@ -29,25 +29,25 @@
       "remote_prestart_transfer_bytes": 0,
       "checkpoint_separation": "The engineering checkpoint payload applies only to migration of an already-running job, never to queued-job placement"
     },
-    "circle_role": "polyhedral lower-bound/screening model; never a physical commit authority",
+    "circle_role": "16-face inscribed polyhedral safety model; every admitted point is inside the physical Euclidean circle",
     "exact_forced_domain_rule": "Skip the MILP only when every retained slow decision has exactly one feasible option"
   },
   "fast_recourse": {
     "grid_minutes": 5,
     "steps": 54,
     "slow_decisions_fixed": true,
-    "solver": "persistent exact continuous convex QCP",
+    "solver": "persistent continuous LP with a conservative 16-face inscribed circle model",
     "lexicographic_backend": "Gurobi native multiobjective",
-    "charge_discharge_exclusivity_recovery": "If the relaxed convex-QCP incumbent exceeds the frozen 1e-4 kW simultaneous charge/discharge gate, fix every five-minute dispatch direction from incumbent net power and re-solve all lexicographic priorities inside the original watchdog; never widen the gate or commit the relaxed incumbent.",
+    "charge_discharge_exclusivity_recovery": "If the relaxed continuous incumbent exceeds the frozen 1e-4 kW simultaneous charge/discharge gate, fix every five-minute dispatch direction from incumbent net power and re-solve all lexicographic priorities inside the original watchdog; never widen the gate or commit the relaxed incumbent.",
     "exact_constraints": [
-      "line P-Q circles",
-      "service-transformer P-Q circles",
-      "MESS PCS P-Q circles",
+      "line P-Q inner polygons with independent Euclidean-norm audit",
+      "service-transformer P-Q inner polygons with independent Euclidean-norm audit",
+      "MESS PCS P-Q inner polygons with independent Euclidean-norm audit",
       "voltage and thermal hard limits",
       "SOC, travel energy, support-energy recovery",
       "fixed slow-decision GPU, rack, IDC, WAN, checkpoint, and deadline feasibility"
     ],
-    "acceptance": "Exact dimensionless QCP residual at the frozen scale-aware numerical tolerance, explicit engineering headroom inside every physical nameplate, and no simultaneous charge/discharge"
+    "acceptance": "Independent dimensionless Euclidean-norm residual at the frozen scale-aware numerical tolerance, explicit engineering headroom inside every physical nameplate, and no simultaneous charge/discharge"
   },
   "lexicographic_objectives": [
     "min max_h z_h",
@@ -65,7 +65,7 @@
     "event trigger",
     "exact-safe causal pruning",
     "bounded 9-stage slow MILP master or exact forced-domain skip",
-    "fixed-slow-decision exact H54 continuous QCP recourse",
+    "fixed-slow-decision conservative H54 continuous LP recourse",
     "five-minute continuous operating adjustment",
     "Fresh exact three-phase OpenDSS",
     "commit or fail closed"
@@ -92,12 +92,26 @@
     "rule": "A computational alternative with no paired speed improvement is removed from the production path",
     "watchdog_is_not_speed_evidence": true
   },
+  "latency_accuracy_tradeoff": {
+    "explicitly_changes_scientific_results": true,
+    "online_candidate_k_reduction": "16 to 4; fewer mobility and workload alternatives reach the optimizer",
+    "circle_approximation": "A 16-face inscribed polygon replaces online QCP circles and sacrifices at most 1.921471959676957 percent radial capability while remaining physically conservative",
+    "native_guard_search_reduction": "Online regulator beam width 4 to 2 and maximum depth 16 to 2; unresolved cases still enter continuous safety projection and must pass Fresh OpenDSS or fail closed",
+    "hard_safety_tradeoff": false,
+    "retained_fail_closed_gates": [
+      "independent exact Euclidean-norm audit",
+      "charge/discharge exclusivity",
+      "Fresh exact three-phase OpenDSS realized-H0 verification",
+      "state-chain and storage verification"
+    ]
+  },
   "approved_solver_runtime_settings": {
     "gurobi_threads": 2,
     "day_process_workers": 6,
     "planner_watchdog_seconds": 60.0,
-    "persistent_model_max_reuses": 64,
-    "persistent_model_refresh_policy": "Rebuild both slow-master and exact-recourse Gurobi models after 64 successful solves or any resident job-slot growth. R10 issue 1722 timed out after 60.01 s with a 282-update persistent model, while the identical checkpoint with a cold planner completed master in 28.36 s and the full planner in 34.76 s with identical hard gates. A measured 1.99-s cold build amortizes to about 0.031 s per issue at 64 reuses.",
+    "online_candidate_k": 4,
+    "persistent_model_max_reuses": 16,
+    "persistent_model_refresh_policy": "Rebuild both slow-master and recourse Gurobi models after 16 successful solves or any resident job-slot growth. R10 issue 1722 established that retained Gurobi multiobjective numerical state can time out while an identical cold checkpoint passes. R11 then failed issue 1721 after only 25 post-refresh solves under the approved 6-process by 2-thread topology; issue 1720 had already risen to 18.36 s before the next retained solve exceeded 60 s. The 16-solve bound refreshes before the observed 25-solve failure age while amortizing the measured cold build sufficiently to keep steady worker throughput in the 2-second range.",
     "cpu_affinity": "DISJOINT_TOPOLOGY_AWARE_BALANCED_SMT_CONTENTION",
     "runtime_topology_evidence": "PFR_RUNTIME_TOPOLOGY_BENCHMARK_20260826",
     "initial_resident_queued_job_slots": 16,
@@ -105,12 +119,14 @@
     "dynamic_job_slot_growth": "NEXT_POWER_OF_TWO_PER_METHOD_THEN_PERSISTENT_REUSE",
     "slow_master_numeric_focus": 0,
     "exact_recourse_numeric_focus": 2,
-    "exact_qcp_constraint_scaling": "Every line, service-transformer, and PCS P-Q circle is divided by its physical nameplate before squaring, producing a dimensionless O(1) QCP row whose numerical residual is independent of equipment rating.",
+    "norm_constraint_mode": "INNER_POLYGON",
+    "norm_inner_polygon_sides": 16,
+    "norm_inner_polygon_max_radial_conservatism_fraction": 0.01921471959676957,
+    "norm_constraint_scaling": "Every line, service-transformer, and PCS P-Q pair is normalized by its physical nameplate. Sixteen regularly spaced halfspaces use apothem R*cos(pi/16), so the complete feasible polygon lies inside the exact physical circle.",
     "exact_qcp_relative_tolerance": 1e-6,
     "norm_engineering_margin_fraction": 1e-5,
     "norm_safety_invariant": "The paper-facing stress objective remains normalized to physical nameplate. A separate zmax hard cap and PCS hard circle reserve an engineering margin ten times the scale-aware numerical tolerance; even an accepted solution at the positive residual boundary remains strictly inside nameplate because (1 - 1e-5) + 1e-6 < 1.",
-    "exact_qcp_physical_feasibility_restoration": "If independent scale-aware evaluation of either the stress row or the nameplate-safety row exceeds the frozen relative gate, add only supporting tangent half-spaces implied by the same Euclidean circles and re-solve every lexicographic priority; no gate or safe-limit relaxation is permitted.",
-    "exact_qcp_restoration_solver_policy": "Restoration-only reoptimization uses NumericFocus=3 and Crossover=0 to avoid a degenerate crossover basis after implied tangent insertion, then immediately restores the approved online NumericFocus=2 and AUTO crossover settings.",
+    "exact_norm_fail_closed_audit": "Independently evaluate every accepted line, service-transformer, and PCS point against the exact Euclidean circle; any scale-aware residual above the frozen gate fails closed. The inner polygon is conservative and therefore needs no numerical feasibility restoration in normal operation.",
     "numeric_focus_evidence": "Paired 19-step B06 validation reduced steady end-to-end median and p95 with identical route decisions, predicted objectives, Fresh-AC values, zero exact residual, and AC PASS. NumericFocus 0 and 1 remain prohibited for exact recourse after clean reruns exceeded the frozen simultaneous charge/discharge residual tolerance",
     "crossover": "AUTO",
     "multi_objective_presolve": "AUTO"

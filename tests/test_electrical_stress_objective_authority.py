@@ -183,7 +183,10 @@ def test_hierarchical_move_blocked_mpc_preserves_science_and_exact_recourse() ->
     assert "future_actual_used" in source
     assert "price_used_by_optimizer" in source
     assert 'PFR_ONLINE_MILP_WALL_BUDGET_SECONDS", "60.0"' in source
-    assert 'PFR_PERSISTENT_MODEL_MAX_REUSES", "64"' in source
+    assert 'PFR_PERSISTENT_MODEL_MAX_REUSES", "16"' in source
+    assert 'PFR_ONLINE_CANDIDATE_K", "4"' in source
+    assert 'PFR_NORM_CONSTRAINT_MODE", "INNER_POLYGON"' in source
+    assert "self._add_inner_norm_constraints" in source
     assert 'self.numeric_focus = 0 if model_role == "slow_master" else 2' in source
     assert "self.model.Params.NumericFocus = self.numeric_focus" in source
     assert "EXCLUSIVITY_TOLERANCE_KW = 1e-4" in source
@@ -216,7 +219,7 @@ def test_hierarchical_move_blocked_mpc_preserves_science_and_exact_recourse() ->
     assert "PFR_SEQUENTIAL" not in source
     assert "condensed" not in source.lower()
     assert "persistent bounded MILP" in contract
-    assert "persistent exact continuous convex QCP" in contract
+    assert "persistent continuous LP with a conservative 16-face" in contract
     assert "Full H54 MIQCP" in contract
     assert "sampled-state offline oracle only" in contract
     assert "condensed QCP diagnostic" in contract

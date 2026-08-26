@@ -146,6 +146,17 @@ def test_pass_reuse_requires_matching_implementation_fingerprint(
     assert reusable_pass(day, "current", "source-a")
     assert not reusable_pass(day, "current", "source-b")
     assert not reusable_pass(day, "changed")
+    assert reusable_pass(
+        day,
+        "changed",
+        authorized_implementation_fingerprints=("current",),
+    )
+    assert not reusable_pass(
+        day,
+        "changed",
+        shared_authority_sha256="source-b",
+        authorized_implementation_fingerprints=("current",),
+    )
 
 
 def test_b8_pass_reuse_requires_288_markers(tmp_path: Path) -> None:
