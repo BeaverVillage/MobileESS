@@ -309,23 +309,35 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 state.active_plan.job_start_issue.get(uid, state.issue)
             )
 
+        def materialization_priority(item: tuple[str, Any]) -> tuple[Any, ...]:
+            uid, job = item
+            current_is_physical = str(job.logical_rack_id) in rack_rows
+            if job.lifecycle != "MIGRATING" and current_is_physical:
+                placement_class = 0
+            elif job.lifecycle in {"MIGRATING", "RESTARTING"}:
+                placement_class = 1
+            else:
+                placement_class = 2
+            return (
+                placement_class,
+                job.lifecycle == "QUEUED",
+                (
+                    job.lifecycle == "QUEUED"
+                    and not current_is_physical
+                ),
+                job.source.latest_start_step,
+                job.source.deadline_step,
+                job.source.arrival_step,
+                uid,
+            )
+
         ordered = sorted(
             (
                 (uid, job)
                 for uid, job in state.jobs.items()
                 if job.lifecycle != "COMPLETED" and is_ready(uid, job)
             ),
-            key=lambda item: (
-                item[1].lifecycle == "QUEUED",
-                (
-                    item[1].lifecycle == "QUEUED"
-                    and str(item[1].logical_rack_id) not in rack_rows
-                ),
-                item[1].source.latest_start_step,
-                item[1].source.deadline_step,
-                item[1].source.arrival_step,
-                item[0],
-            ),
+            key=materialization_priority,
         )
         for uid, job in ordered:
             reserving_migration = job.lifecycle == "MIGRATING"
@@ -333,7 +345,8 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             row = self._scope_job(uid, job)
             power_kw = (
                 float(row["IT_power_kW"])
-                if job.lifecycle in {"RUNNING", "QUEUED"}
+                if job.lifecycle
+                in {"RUNNING", "QUEUED", "MIGRATING", "RESTARTING"}
                 else 0.0
             )
             gpu = int(job.source.requested_gpu)
@@ -409,6 +422,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     # RESTARTING materializes the physical rack next issue.
                     migrating_reservations += 1
                     occupied_gpu[selected] += gpu
+                    occupied_power[selected] += power_kw
                     continue
                 selected_destination = str(
                     rack_rows[selected].idc_id

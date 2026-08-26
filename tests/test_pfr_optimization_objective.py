@@ -618,9 +618,120 @@ def test_active_migration_keeps_source_rack_until_transfer_completes() -> None:
         "IDC01_LP01": 0.0,
         "IDC02_LP01": 1.0,
     }
+    assert audit["occupied_power_kw_by_rack"] == {
+        "IDC01_LP01": 0.0,
+        "IDC02_LP01": 1.0,
+    }
     assert job.destination_idc == "IDC01"
     assert job.logical_rack_id == "IDC01_LP01"
     assert job.migration_destination_idc == "IDC02"
+
+
+def test_restarting_job_reserves_full_power_after_fixed_racks() -> None:
+    planner = object.__new__(PersistentBoundedMilpPlanner)
+    planner._initialize = lambda: None
+    fixed_uid = "fixed-running"
+    restarting_uid = "restarting"
+    planner.scope = {
+        "cap": pd.DataFrame(
+            [
+                {
+                    "rack_pool_id": "IDC11_LP01",
+                    "idc_id": "IDC11",
+                    "deliverable_active_gpu_capacity": 2.0,
+                    "rack_power_cap_kw": 15.0,
+                },
+                {
+                    "rack_pool_id": "IDC11_LP04",
+                    "idc_id": "IDC11",
+                    "deliverable_active_gpu_capacity": 2.0,
+                    "rack_power_cap_kw": 15.0,
+                },
+            ]
+        ),
+        "domains": {
+            uid: [
+                {
+                    "destination_IDC_id": "IDC11",
+                    "rack_pool_id": rack,
+                }
+                for rack in ("IDC11_LP01", "IDC11_LP04")
+            ]
+            for uid in (fixed_uid, restarting_uid)
+        },
+        "pmap": {
+            fixed_uid: {
+                "arrival_step": 100,
+                "latest_start_step": 105,
+                "latest_completion_step_exclusive": 140,
+                "requested_gpu": 1,
+                "IT_power_kW": 10.0,
+            },
+            restarting_uid: {
+                "arrival_step": 100,
+                "latest_start_step": 101,
+                "latest_completion_step_exclusive": 120,
+                "requested_gpu": 1,
+                "IT_power_kW": 10.0,
+            },
+        },
+        "wan_map": {},
+    }
+
+    def source(uid: str, *, latest_start: int, deadline: int) -> OperationalTrainingJob:
+        return OperationalTrainingJob(
+            job_uid=uid,
+            origin_idc="IDC11",
+            arrival_step=100,
+            latest_start_step=latest_start,
+            deadline_step=deadline,
+            requested_gpu=1,
+            runtime_seconds_source=3600.0,
+            cpu_request_share_kw=0.1,
+            input_bytes=None,
+            source_record_id=uid,
+        )
+
+    fixed = RuntimeJobState(
+        source=source(fixed_uid, latest_start=105, deadline=140),
+        destination_idc="IDC11",
+        logical_rack_id="IDC11_LP01",
+        gang_membership=(f"IDC11_LP01:PFR-GPU:{fixed_uid}:0",),
+        remaining_work_gpu_hours=1.0,
+        lifecycle="RUNNING",
+    )
+    restarting = RuntimeJobState(
+        source=source(restarting_uid, latest_start=101, deadline=120),
+        destination_idc="IDC11",
+        logical_rack_id="IDC11:PFR-H100-LOGICAL-POOL",
+        gang_membership=(f"IDC11:PFR-GPU:{restarting_uid}:0",),
+        remaining_work_gpu_hours=1.0,
+        lifecycle="RESTARTING",
+        restart_remaining_steps=1,
+    )
+    state = MutableMethodState(
+        issue=106,
+        pre_state_sha256="a" * 64,
+        mess_energy_kwh={mid: 760.0 for mid in MESS_IDS},
+        mess_location=dict(MESS_CANONICAL_STAGING),
+        jobs={fixed_uid: fixed, restarting_uid: restarting},
+    )
+    config = MethodFactory(
+        ExperimentAuthority(*(format(index, "064x") for index in range(1, 8)))
+    ).create_electrical_stress(ElectricalStressMethod.B07)
+
+    audit = planner.materialize_runtime_rack_assignments(state, config)
+
+    assert fixed.logical_rack_id == "IDC11_LP01"
+    assert restarting.logical_rack_id == "IDC11_LP04"
+    assert audit["occupied_gpu_by_rack"] == {
+        "IDC11_LP01": 1.0,
+        "IDC11_LP04": 1.0,
+    }
+    assert audit["occupied_power_kw_by_rack"] == {
+        "IDC11_LP01": 10.0,
+        "IDC11_LP04": 10.0,
+    }
 
 
 def test_migration_candidate_requires_one_feasible_destination_rack() -> None:

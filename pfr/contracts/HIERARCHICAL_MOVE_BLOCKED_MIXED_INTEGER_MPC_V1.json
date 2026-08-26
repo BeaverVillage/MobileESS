@@ -59,6 +59,11 @@
     "deferred_semantics": "A gang that cannot be jointly admitted remains visible and work-conserving in the runtime capacity-blocked queue for the next rolling horizon; it is never dropped and no GPU, rack, IDC, WAN, grid, or deadline constraint is relaxed.",
     "candidate_truncation_guard": "Any selected deferral expands the exact-safe workload candidate set through the approved K grid before deferral is accepted at maximum K."
   },
+  "runtime_rack_materialization": {
+    "ordering": "Materialize gangs with an existing physical rack assignment before migration or restart reservations, then place all remaining unassigned gangs.",
+    "migration_restart_reservation": "Every MIGRATING or RESTARTING gang reserves both its full GPU count and its full post-restart IT power at the destination rack before any later gang is placed.",
+    "safety_reason": "A zero-power migration or restart placeholder can otherwise overbook destination-rack power and fail only after the job returns to RUNNING."
+  },
   "planning_surrogate_feasibility_semantics": {
     "stress_range": "The normalized causal radial-surrogate epigraph is reportable above 1.0 and is not clipped at the physical endpoint.",
     "reason": "Clipping a conservative surrogate at 1.0 converts forecast-model error or a future-horizon warning into solver INFEASIBLE before the exact execution authority can evaluate H0.",
