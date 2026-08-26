@@ -1801,14 +1801,16 @@ class _PersistentMilpModel:
         }
         self.service_p_def = {
             (service, step): self.model.addConstr(
-                self.service_p[(service, step)] == 0.0
+                self.service_p[(service, step)] == 0.0,
+                name=f"service_p_def[{service},{step}]",
             )
             for service in self.services
             for step in range(self.h)
         }
         self.service_q_def = {
             (service, step): self.model.addConstr(
-                self.service_q[(service, step)] == 0.0
+                self.service_q[(service, step)] == 0.0,
+                name=f"service_q_def[{service},{step}]",
             )
             for service in self.services
             for step in range(self.h)
@@ -1831,8 +1833,12 @@ class _PersistentMilpModel:
                 for service in self.service_by_bus.get(node, ()):
                     pexpr += self.service_p[(service, step)]
                     qexpr += self.service_q[(service, step)]
-                self.flow_p_def[(node, step)] = self.model.addConstr(pexpr == 0.0)
-                self.flow_q_def[(node, step)] = self.model.addConstr(qexpr == 0.0)
+                self.flow_p_def[(node, step)] = self.model.addConstr(
+                    pexpr == 0.0, name=f"flow_p_def[{node},{step}]"
+                )
+                self.flow_q_def[(node, step)] = self.model.addConstr(
+                    qexpr == 0.0, name=f"flow_q_def[{node},{step}]"
+                )
         self.du_def = {}
         self.voltage_low = {}
         self.voltage_high = {}
@@ -1840,7 +1846,8 @@ class _PersistentMilpModel:
         self.voltage_above = {}
         for step in range(self.h):
             self.du_def[(self.root, step)] = self.model.addConstr(
-                self.du[(self.root, step)] == 0.0
+                self.du[(self.root, step)] == 0.0,
+                name=f"du_def[{self.root},{step}]",
             )
             for node in self.nonroot:
                 parent = kernel.parent[node]
@@ -1860,7 +1867,9 @@ class _PersistentMilpModel:
                     expr = self.du[(node, step)] - float(
                         edge["ratio2_ref"]
                     ) * self.du[(parent, step)]
-                self.du_def[(node, step)] = self.model.addConstr(expr == 0.0)
+                self.du_def[(node, step)] = self.model.addConstr(
+                    expr == 0.0, name=f"du_def[{node},{step}]"
+                )
             for node in self.nodes:
                 i = kernel.index[node]
                 low = float(kernel.low_u[i] - kernel.reference_u[i])
@@ -1876,18 +1885,23 @@ class _PersistentMilpModel:
                 self.voltage_below[(node, step)] = self.model.addConstr(
                     (kernel.nominal_u[i] - kernel.low_u[i]) * self.z[step]
                     + self.du[(node, step)]
-                    >= below
+                    >= below,
+                    name=f"voltage_below[{node},{step}]",
                 )
                 self.voltage_above[(node, step)] = self.model.addConstr(
                     (kernel.high_u[i] - kernel.nominal_u[i]) * self.z[step]
                     - self.du[(node, step)]
-                    >= above
+                    >= above,
+                    name=f"voltage_above[{node},{step}]",
                 )
-            self.model.addConstr(self.zmax >= self.z[step])
+            self.model.addConstr(
+                self.zmax >= self.z[step], name=f"zmax_epigraph[{step}]"
+            )
             for site in IDCS:
                 self.model.addConstr(
                     PUE * self.it[(site, step)]
-                    <= IDC_TRANSFORMER_LIMIT_KW * self.z[step]
+                    <= IDC_TRANSFORMER_LIMIT_KW * self.z[step],
+                    name=f"idc_transformer_stress[{site},{step}]",
                 )
         # Keep stress normalized to the physical limits while reserving explicit
         # headroom at the hard acceptance boundary.
@@ -2071,7 +2085,11 @@ class _PersistentMilpModel:
                     self.model.addConstr(
                         direction_p * self.flow_p[(node, step)]
                         + direction_q * self.flow_q[(node, step)]
-                        <= limit * self.z[step]
+                        <= limit * self.z[step],
+                        name=(
+                            f"inner_line_stress[{node},{step},"
+                            f"{direction_p:.9f},{direction_q:.9f}]"
+                        ),
                     )
             for service in self.services:
                 limit = (
@@ -2082,7 +2100,11 @@ class _PersistentMilpModel:
                     self.model.addConstr(
                         direction_p * self.service_p[(service, step)]
                         + direction_q * self.service_q[(service, step)]
-                        <= limit * self.z[step]
+                        <= limit * self.z[step],
+                        name=(
+                            f"inner_service_stress[{service},{step},"
+                            f"{direction_p:.9f},{direction_q:.9f}]"
+                        ),
                     )
             for mid in MESS_IDS:
                 for route_index in self._route_axis(mid):
@@ -2094,7 +2116,11 @@ class _PersistentMilpModel:
                         self.model.addConstr(
                             direction_p * pnet
                             + direction_q * self.q[(mid, route_index, step)]
-                            <= limit
+                            <= limit,
+                            name=(
+                                f"inner_pcs_limit[{mid},{route_index},{step},"
+                                f"{direction_p:.9f},{direction_q:.9f}]"
+                            ),
                         )
 
     def _add_exact_norm_constraints(self) -> None:
