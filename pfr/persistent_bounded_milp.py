@@ -58,7 +58,6 @@ SOLVER_CONTRACT = "HIERARCHICAL_MOVE_BLOCKED_MIXED_INTEGER_MPC_V1"
 MAX_ONLINE_QUEUED_JOBS = 16
 MAX_DYNAMIC_QUEUED_JOB_SLOTS = 1024
 JOB_SLOT_GROWTH_BLOCK = 32
-MAX_RESIDENT_JOB_OPTION_AXIS = 8192
 BURST_VISIBLE_QUEUE_THRESHOLD = 128
 # The production topology is six independent day workers with two Gurobi
 # threads each on eight physical cores.  The final two affinity groups must
@@ -102,6 +101,42 @@ SLOW_MASTER_MIP_GAP = 0.001
 MOBILITY_ROUTE_CANDIDATE_MIN_K = 4
 
 
+def _recovery_zero_boundary(
+    *,
+    effective_steps: int,
+    due_issue: int | None,
+    current_issue: int,
+    debt_kwh: float,
+    transit_remaining_steps: int = 0,
+) -> int:
+    """Return the earliest physically reachable debt-zero boundary.
+
+    A vehicle already in transit is disconnected for every remaining transit
+    step.  Its recovery deadline must therefore be deferred until enough
+    connected steps exist after arrival to repay the carried debt at the
+    physical charge limit.  Without this adjustment an expired deadline at
+    boundary one conflicts with the mandatory zero-dispatch transit domain.
+    """
+
+    effective = int(effective_steps)
+    if not 1 <= effective <= PLANNING_HORIZON_STEPS:
+        raise RuntimeContractError("effective episode horizon is invalid")
+    requested = (
+        max(1, min(effective, int(due_issue) - int(current_issue) + 1))
+        if due_issue is not None
+        else effective
+    )
+    if float(debt_kwh) <= 1e-9 or int(transit_remaining_steps) <= 0:
+        return requested
+    recovery_per_step_kwh = MESS_CHARGE_EFFICIENCY * STEP_HOURS * P_MAX
+    charge_steps = max(
+        1,
+        int(math.ceil((float(debt_kwh) - 1e-12) / recovery_per_step_kwh)),
+    )
+    earliest_physical = int(transit_remaining_steps) + charge_steps
+    return max(requested, min(effective, earliest_physical))
+
+
 def _resident_job_slot_capacity(visible_queue: int) -> int:
     """Round the live queue to a small reusable block without dummy bloat."""
 
@@ -127,11 +162,18 @@ def _resident_candidate_axis_capacity(
     active_candidate_k: int,
     adaptive_candidate_max_k: int,
 ) -> int:
-    """Keep the reusable K superset only when its inactive axis is bounded."""
+    """Build only the live K axis; genuine expansion rebuilds on demand.
 
-    if job_slots * adaptive_candidate_max_k <= MAX_RESIDENT_JOB_OPTION_AXIS:
-        return adaptive_candidate_max_k
-    return active_candidate_k
+    Even with just 16 job slots, preallocating K=64 creates roughly 508k rows
+    and 88k columns because the route dispatch/network skeleton also scales
+    with K.  Inactive bound-fixed columns survive enough of multiobjective
+    presolve to dominate hard root relaxations.  The planner already detects
+    candidate-axis growth and rebuilds both models, so eager preallocation is
+    pure overhead and has no scientific effect.
+    """
+
+    del job_slots, adaptive_candidate_max_k
+    return int(active_candidate_k)
 
 
 @dataclass(frozen=True)
@@ -1644,6 +1686,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             )
             if (
                 optimized_deferred > unavoidable_deferred
+                and compute_admission_enabled
                 and not self.candidate_limit_frozen
                 and candidate_limit != expansion_grid[-1]
             ):
@@ -1706,11 +1749,19 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                         unavoidable_deferred
                     ),
                     "candidate_limit_expansion_avoided_reason": (
-                        "ONLY_EXACT_INFEASIBLE_WORKLOADS_DEFERRED"
-                        if optimized_deferred > 0
-                        and optimized_deferred == unavoidable_deferred
-                        and len(attempted) == 1
-                        else None
+                        (
+                            "COMPUTE_CONTROL_CAPABILITY_DISABLED"
+                            if optimized_deferred > unavoidable_deferred
+                            and not compute_admission_enabled
+                            and len(attempted) == 1
+                            else (
+                                "ONLY_EXACT_INFEASIBLE_WORKLOADS_DEFERRED"
+                                if optimized_deferred > 0
+                                and optimized_deferred == unavoidable_deferred
+                                and len(attempted) == 1
+                                else None
+                            )
+                        )
                     ),
                     "candidate_limit_expansion_reason": (
                         (
@@ -1840,10 +1891,9 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 model_refresh_reason = "INITIAL_MODEL_BUILD"
             build_started = time.monotonic()
             common_model_kwargs = {
-                # Keep one resident superset skeleton and mask options above
-                # the active K through bounds in update().  Rebuilding and
-                # disposing two large Gurobi models at every 4/8/16/32/64
-                # expansion dominated the solve itself.
+                # Build only the live K axis.  Genuine candidate expansion is
+                # rare and the CANDIDATE_AXIS_GROWTH path above rebuilds both
+                # models exactly when a larger domain is scientifically needed.
                 "candidate_limit": _resident_candidate_axis_capacity(
                     job_slots=current_slots,
                     active_candidate_k=self.candidate_limit,
@@ -3184,10 +3234,21 @@ class _PersistentMilpModel:
             self.energy0[mid].RHS = float(state.mess_energy_kwh[mid])
             self.debt0[mid].RHS = float(state.mess_energy_debt_kwh[mid])
             due = state.mess_energy_recovery_due_issue.get(mid)
-            recovery_boundary = (
-                max(1, min(effective_steps, int(due) - int(frame.issue) + 1))
-                if due is not None
-                else effective_steps
+            transit_remaining_steps = (
+                max(
+                    0,
+                    len(state.mess_route_energy_profile_kwh[mid])
+                    - int(state.mess_route_profile_index[mid]),
+                )
+                if state.mess_in_transit[mid]
+                else 0
+            )
+            recovery_boundary = _recovery_zero_boundary(
+                effective_steps=effective_steps,
+                due_issue=(int(due) if due is not None else None),
+                current_issue=int(frame.issue),
+                debt_kwh=float(state.mess_energy_debt_kwh[mid]),
+                transit_remaining_steps=transit_remaining_steps,
             )
             terminal_rhs = _episode_terminal_debt_rhs(
                 effective_steps,

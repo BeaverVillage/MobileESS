@@ -1,6 +1,9 @@
 import unittest
 
-from pfr.persistent_bounded_milp import _episode_terminal_debt_rhs
+from pfr.persistent_bounded_milp import (
+    _episode_terminal_debt_rhs,
+    _recovery_zero_boundary,
+)
 
 
 class EpisodeBoundaryRecoveryTests(unittest.TestCase):
@@ -21,6 +24,36 @@ class EpisodeBoundaryRecoveryTests(unittest.TestCase):
         self.assertEqual(rhs[6], 0.0)
         self.assertEqual(rhs[53], 0.0)
         self.assertEqual(sum(value == 0.0 for value in rhs), 2)
+
+    def test_transit_defers_expired_recovery_until_charge_is_possible(self):
+        boundary = _recovery_zero_boundary(
+            effective_steps=54,
+            due_issue=9738,
+            current_issue=9738,
+            debt_kwh=10.0,
+            transit_remaining_steps=1,
+        )
+        self.assertEqual(boundary, 2)
+
+    def test_transit_deferral_includes_all_required_charge_steps(self):
+        boundary = _recovery_zero_boundary(
+            effective_steps=54,
+            due_issue=9738,
+            current_issue=9738,
+            debt_kwh=100.0,
+            transit_remaining_steps=2,
+        )
+        self.assertEqual(boundary, 5)
+
+    def test_transit_does_not_shorten_a_later_recovery_deadline(self):
+        boundary = _recovery_zero_boundary(
+            effective_steps=54,
+            due_issue=9744,
+            current_issue=9738,
+            debt_kwh=10.0,
+            transit_remaining_steps=1,
+        )
+        self.assertEqual(boundary, 7)
 
 
 if __name__ == "__main__":

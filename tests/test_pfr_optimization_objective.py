@@ -63,15 +63,15 @@ def test_resident_job_slots_grow_in_bounded_blocks(
 @pytest.mark.parametrize(
     ("job_slots", "active_k", "expected_k"),
     [
-        (16, 4, 64),
-        (128, 4, 64),
+        (16, 4, 4),
+        (128, 4, 4),
         (129, 4, 4),
         (288, 4, 4),
         (288, 8, 8),
         (288, 16, 16),
     ],
 )
-def test_candidate_superset_axis_is_bounded_for_burst_queues(
+def test_resident_candidate_axis_matches_live_domain(
     job_slots: int,
     active_k: int,
     expected_k: int,
@@ -1287,7 +1287,7 @@ def test_compute_disabled_method_skips_duplicate_admission_screen() -> None:
         calls.append(bool(kwargs.get("admission_screen_only", False)))
         return sentinel_plan, {
             "candidate_limit_k": planner.candidate_limit,
-            "optimized_deferred_job_count": 0,
+            "optimized_deferred_job_count": 1,
             "workload_domain_reduction": {"no_bounded_option_jobs": 0},
         }
 
@@ -1312,9 +1312,13 @@ def test_compute_disabled_method_skips_duplicate_admission_screen() -> None:
 
     assert plan is sentinel_plan
     assert calls == [False]
+    assert certificate["candidate_limit_attempts"] == [4]
     assert certificate["candidate_limit_admission_screen_attempts"] == []
     assert certificate["candidate_limit_admission_screen_total_seconds"] == 0.0
     assert certificate["candidate_limit_admission_screen_skipped_reason"] == (
+        "COMPUTE_CONTROL_CAPABILITY_DISABLED"
+    )
+    assert certificate["candidate_limit_expansion_avoided_reason"] == (
         "COMPUTE_CONTROL_CAPABILITY_DISABLED"
     )
 
