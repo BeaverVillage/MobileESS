@@ -478,7 +478,7 @@ def test_capacity_deferral_expands_k_before_accepting_visible_queue() -> None:
     assert certificate["candidate_limit_expansion_reason"] == (
         "BASE_DOMAIN_CAPACITY_DEFERRAL"
     )
-    assert certificate["candidate_limit_admission_screen_attempts"] == [8]
+    assert certificate["candidate_limit_admission_screen_attempts"] == [4, 8]
 
 
 def test_intermediate_candidate_uses_admission_screen_before_full_solve() -> None:
@@ -518,14 +518,14 @@ def test_intermediate_candidate_uses_admission_screen_before_full_solve() -> Non
     )
 
     assert plan is sentinel_plan
-    assert calls == [(4, False), (8, True), (8, False)]
+    assert calls == [(4, True), (8, True), (8, False)]
     assert certificate["candidate_limit_attempts"] == [4, 8]
-    assert certificate["candidate_limit_admission_screen_attempts"] == [8]
-    assert certificate["candidate_limit_admission_screen_solve_seconds"] == 0.25
-    assert certificate["candidate_limit_admission_screen_total_seconds"] == 0.5
+    assert certificate["candidate_limit_admission_screen_attempts"] == [4, 8]
+    assert certificate["candidate_limit_admission_screen_solve_seconds"] == 0.5
+    assert certificate["candidate_limit_admission_screen_total_seconds"] == 1.0
     assert (
         certificate["candidate_limit_admission_screen_model_build_seconds"]
-        == 0.1
+        == 0.2
     )
 
 

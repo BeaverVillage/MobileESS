@@ -1051,8 +1051,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 self._model_solve_generation_by_method[method_key] = 0
                 self.candidate_limit = candidate_limit
             admission_screen_only = (
-                bool(attempted)
-                and not self.candidate_limit_frozen
+                not self.candidate_limit_frozen
                 and candidate_limit != expansion_grid[-1]
             )
             attempted.append(candidate_limit)
