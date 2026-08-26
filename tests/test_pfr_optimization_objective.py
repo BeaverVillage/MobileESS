@@ -152,6 +152,67 @@ def test_dispatcher_honors_h54_temporal_start_decision() -> None:
     assert started["started_jobs"] == 1
 
 
+def test_dispatcher_keeps_late_capacity_queue_out_of_fast_recourse() -> None:
+    source = OperationalTrainingJob(
+        job_uid="late-job",
+        origin_idc="IDC01",
+        arrival_step=100,
+        latest_start_step=101,
+        deadline_step=105,
+        requested_gpu=1,
+        runtime_seconds_source=1800.0,
+        cpu_request_share_kw=0.1,
+        input_bytes=0,
+        source_record_id="late-source",
+    )
+    job = RuntimeJobState(
+        source=source,
+        destination_idc="IDC01",
+        logical_rack_id="IDC01_LP01",
+        gang_membership=("IDC01_LP01:PFR-GPU:late-job:0",),
+        remaining_work_gpu_hours=0.5,
+    )
+    plan = SlowDiscretePlan(
+        plan_id="B02-103-1",
+        valid_from_issue=103,
+        mess_destination=dict(MESS_CANONICAL_STAGING),
+        mess_native_route_rank={mid: 1 for mid in MESS_IDS},
+        job_idc_placement={"late-job": "IDC01"},
+        checkpoint_migration={"late-job": None},
+        gpu_gang_allocation={"late-job": job.gang_membership},
+        job_start_issue={"late-job": 103},
+        coarse_charging_kw={mid: (0.0,) * 54 for mid in MESS_IDS},
+        coarse_discharging_kw={mid: (0.0,) * 54 for mid in MESS_IDS},
+        coarse_reactive_kvar={mid: (0.0,) * 54 for mid in MESS_IDS},
+    )
+    state = MutableMethodState(
+        issue=103,
+        pre_state_sha256="a" * 64,
+        mess_energy_kwh={mid: 760.0 for mid in MESS_IDS},
+        mess_location=dict(MESS_CANONICAL_STAGING),
+        jobs={"late-job": job},
+        active_plan=plan,
+    )
+    config = MethodFactory(
+        ExperimentAuthority(*(format(index, "064x") for index in range(1, 8)))
+    ).create_electrical_stress(ElectricalStressMethod.B02)
+    frame = CausalExperimentFrame(
+        issue=103,
+        current_price_aud_per_mwh=0.0,
+        horizon_price_median_aud_per_mwh=0.0,
+        q50_background_p_kw=0.0,
+        q50_background_q_kvar=0.0,
+        arrivals=(),
+        exogenous_sha256="b" * 64,
+    )
+
+    audit = _schedule_capacity_feasible_queued_jobs(state, config, frame)
+
+    assert job.lifecycle == "QUEUED"
+    assert audit["started_jobs"] == 0
+    assert audit["deadline_blocked_jobs"] == 1
+
+
 def test_h54_physical_rack_assignment_is_materialized_for_running_state() -> None:
     source = OperationalTrainingJob(
         job_uid="job-rack",

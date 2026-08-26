@@ -3166,6 +3166,7 @@ def _schedule_capacity_feasible_queued_jobs(
     started_gpu = {site: 0 for site in IDCS}
     plan_scheduled_wait_jobs = 0
     capacity_blocked_jobs = 0
+    deadline_blocked_jobs = 0
     for uid, job in sorted(
         (
             (uid, job)
@@ -3188,6 +3189,13 @@ def _schedule_capacity_feasible_queued_jobs(
             continue
         site = job.destination_idc
         gpu = job.source.requested_gpu
+        if frame.issue > job.source.latest_start_step:
+            # Starting an already-late gang would immediately make the fast
+            # hard-deadline recourse infeasible.  Preserve it in the visible
+            # queue so the miss is measured by the runtime KPI instead of
+            # aborting the experiment.
+            deadline_blocked_jobs += 1
+            continue
         if (
             isinstance(config.comparison_method_id, ElectricalStressMethod)
             and str(job.logical_rack_id).endswith(
@@ -3234,6 +3242,7 @@ def _schedule_capacity_feasible_queued_jobs(
         "queued_gpu_by_site": queued_gpu,
         "plan_scheduled_wait_jobs": plan_scheduled_wait_jobs,
         "capacity_blocked_jobs": capacity_blocked_jobs,
+        "deadline_blocked_jobs": deadline_blocked_jobs,
         "capacity_blocked": capacity_blocked_jobs > 0,
         "capacity_gpu_by_site": capacity,
     }
