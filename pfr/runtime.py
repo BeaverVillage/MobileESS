@@ -2490,7 +2490,7 @@ class _GurobiSensitivityProjector:
                     admitted.append(
                         (fallback, fallback_exact, "NULL_OR_MIN_RECOVERY")
                     )
-            if self.refresh_local_pq_model:
+            if self.refresh_local_pq_model or not admitted:
                 local_base = (
                     current if self._recovery_compliant(current) else fallback
                 )
