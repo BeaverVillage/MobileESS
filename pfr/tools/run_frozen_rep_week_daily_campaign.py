@@ -143,6 +143,11 @@ def main() -> None:
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--period-id", required=True)
     parser.add_argument("--period-contract", type=Path)
+    parser.add_argument(
+        "--final-evaluation-authority",
+        type=Path,
+        help="V14 final-evaluation authority propagated to every daily run.",
+    )
     parser.add_argument("--day-workers", type=int, default=4)
     parser.add_argument("--start-day-index", type=int, default=1)
     parser.add_argument("--end-day-index", type=int)
@@ -234,6 +239,19 @@ def main() -> None:
         parser.error("--day-workers must be in [1, 31]")
     if args.h0_fidelity_audit_every_steps < 0:
         parser.error("--h0-fidelity-audit-every-steps cannot be negative")
+    final_evaluation_authority = None
+    if args.final_evaluation_authority is not None:
+        final_evaluation_authority = json.loads(
+            args.final_evaluation_authority.read_text(encoding="utf-8")
+        )
+        if final_evaluation_authority.get("status") != (
+            "FROZEN_FINAL_EVALUATION_AUTHORIZED"
+        ):
+            raise RuntimeError("final-evaluation authority is not frozen")
+    if args.period_id == "MAR2025_FULL" and final_evaluation_authority is None:
+        raise RuntimeError(
+            "MAR2025_FULL requires --final-evaluation-authority"
+        )
 
     contract_path = args.period_contract or (
         args.repo / "pfr/contracts/FROZEN_2025_REP_WEEK_VALIDATION_PERIODS_V1.json"
@@ -290,6 +308,15 @@ def main() -> None:
             else args.repo / "pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json"
         ),
     ]
+    if final_evaluation_authority is not None:
+        common.extend(
+            (
+                "--final-evaluation-authority",
+                str(args.final_evaluation_authority),
+                "--evaluation-period-id",
+                str(final_evaluation_authority["evaluation_period_id"]),
+            )
+        )
     for mobility_root in args.mobility_root:
         common.extend(("--mobility-root", str(mobility_root)))
     if args.risk_calibration is not None:

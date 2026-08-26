@@ -50,6 +50,10 @@ def test_robust_grid_forecast_is_diagnostic_not_realized_h0_commit_gate() -> Non
     assert commit.raw_metrics["robust_grid_role"] == (
         "CAUSAL_PLAN_VALIDITY_DIAGNOSTIC_NOT_H0_COMMIT_GATE"
     )
+    assert commit.raw_metrics["facility_p_kw"] == [0.0]
+    assert commit.raw_metrics["facility_q_kvar"] == [0.0]
+    assert commit.raw_metrics["facility_power_factor_assumption"] == 0.95
+    assert commit.raw_metrics["facility_pue_assumption"] == 1.30
 
 
 def test_native_transition_is_selected_once_then_fixed_for_verification() -> None:

@@ -313,3 +313,127 @@ class K9H7ResultIdentityV2:
         )
         identity.validate()
         return identity
+
+
+@dataclass(frozen=True)
+class K9H7ResultIdentityV3:
+    """V14 episode identity with source, authority, and calendar binding."""
+
+    scientific_framework_id: str
+    evaluation_period_id: str
+    comparison_method_id: str
+    controller_id: str
+    ablation_id: Optional[str]
+    representative_week_id: str
+    shared_authority_fingerprint: str
+    source_commit_sha: str
+    objective_contract_sha256: str
+    method_config_sha256: str
+    calibration_fingerprint: Optional[str]
+    calendar_date: str
+    daily_episode_id: str
+    schema_version: str = "K9H7_RESULT_V3"
+
+    def validate(self) -> None:
+        if self.schema_version != "K9H7_RESULT_V3":
+            raise MethodContractError("V14 results require K9H7_RESULT_V3")
+        if self.scientific_framework_id != "V14_AI_ICPS":
+            raise MethodContractError("V14 result identity framework mismatch")
+        valid_methods = {method.value for method in ComparisonMethod} | {
+            method.value for method in ElectricalStressMethod
+        }
+        if self.comparison_method_id not in valid_methods:
+            raise MethodContractError("unknown comparison method")
+        if not all(
+            (
+                self.evaluation_period_id,
+                self.controller_id,
+                self.representative_week_id,
+                self.calendar_date,
+                self.daily_episode_id,
+            )
+        ):
+            raise MethodContractError("V14 episode identity fields are incomplete")
+        for name, value, lengths in (
+            ("shared authority", self.shared_authority_fingerprint, {64}),
+            ("source commit", self.source_commit_sha, {40, 64}),
+            ("objective contract", self.objective_contract_sha256, {64}),
+            ("method config", self.method_config_sha256, {64}),
+        ):
+            if len(value) not in lengths or any(
+                character not in "0123456789abcdef" for character in value.lower()
+            ):
+                raise MethodContractError(f"invalid {name} fingerprint")
+        if self.calibration_fingerprint is not None and (
+            len(self.calibration_fingerprint) != 64
+            or any(
+                character not in "0123456789abcdef"
+                for character in self.calibration_fingerprint.lower()
+            )
+        ):
+            raise MethodContractError("invalid calibration fingerprint")
+
+    @property
+    def result_uid(self) -> str:
+        """Hash-addressed daily method episode identity."""
+
+        self.validate()
+        return _hash(asdict(self))
+
+    def for_day_issue(self, day_issue_index: int) -> Mapping[str, object]:
+        """Return a per-issue identity bound to the episode and issue offset."""
+
+        self.validate()
+        index = int(day_issue_index)
+        if index < 0:
+            raise MethodContractError("day issue index cannot be negative")
+        payload: dict[str, object] = {
+            **asdict(self),
+            "episode_result_uid": self.result_uid,
+            "day_issue_index": index,
+        }
+        payload["result_uid"] = _hash(payload)
+        return payload
+
+    @classmethod
+    def for_method(
+        cls,
+        config: MethodConfig,
+        *,
+        controller_id: str,
+        representative_week_id: str,
+        evaluation_period_id: str,
+        source_commit_sha: str,
+        objective_contract_sha256: str,
+        calibration_fingerprint: Optional[str],
+        calendar_date: str,
+        ablation_id: Optional[str] = None,
+    ) -> "K9H7ResultIdentityV3":
+        method_payload = {
+            **asdict(config),
+            "comparison_method_id": config.comparison_method_id.value,
+        }
+        identity = cls(
+            scientific_framework_id="V14_AI_ICPS",
+            evaluation_period_id=evaluation_period_id,
+            comparison_method_id=config.comparison_method_id.value,
+            controller_id=controller_id,
+            ablation_id=ablation_id,
+            representative_week_id=representative_week_id,
+            shared_authority_fingerprint=config.authority_fingerprint,
+            source_commit_sha=source_commit_sha.lower(),
+            objective_contract_sha256=objective_contract_sha256.lower(),
+            method_config_sha256=_hash(method_payload),
+            calibration_fingerprint=(
+                calibration_fingerprint.lower()
+                if calibration_fingerprint is not None
+                else None
+            ),
+            calendar_date=calendar_date,
+            daily_episode_id=(
+                f"{evaluation_period_id}:{calendar_date}:"
+                f"{config.comparison_method_id.value}"
+            ),
+        )
+        identity.validate()
+        return identity

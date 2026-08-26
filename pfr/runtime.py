@@ -22,7 +22,7 @@ from .electrical_stress import (
 from .methods import (
     ComparisonMethod,
     ElectricalStressMethod,
-    K9H7ResultIdentityV2,
+    K9H7ResultIdentityV3,
     MAIN_COMPARISON_METHODS,
     MethodConfig,
 )
@@ -62,7 +62,14 @@ from .slow_fast import (
 
 IDCS = tuple(f"IDC{i:02d}" for i in range(1, 13))
 MESS_IDS = tuple(f"MESS{i:02d}" for i in range(1, 5))
-MOBILITY_ELIGIBLE_MESS_IDS = ("MESS03",)
+IDC_FACILITY_PUE = 1.30
+IDC_FACILITY_POWER_FACTOR = 0.95
+IDC_FACILITY_TANPHI = math.tan(math.acos(IDC_FACILITY_POWER_FACTOR))
+# Every physical MESS in the four-unit fleet is a mobility decision asset.
+# Restricting this tuple to MESS03 made the B06 mobility treatment a
+# single-unit treatment even though dispatch and result accounting covered the
+# full fleet.
+MOBILITY_ELIGIBLE_MESS_IDS = MESS_IDS
 MESS_CANONICAL_STAGING = {
     "MESS01": "STA09",
     "MESS02": "IDC12",
@@ -679,26 +686,51 @@ class _PhysicalVerifierAdapter:
         self.opendss_runtime_seconds = 0.0
 
     def _physical_inputs(self, control: FastControl) -> tuple[tuple[float, ...], tuple[float, ...], tuple[float, ...]]:
-        facility_p = {site: 0.0 for site in IDCS}
+        facility_it_p = {site: 0.0 for site in IDCS}
         for job_id, fraction in control.job_compute_rate_fraction.items():
             job = self.jobs[job_id]
             if job.lifecycle == "COMPLETED" or fraction <= 0.0:
                 continue
-            facility_p[job.destination_idc] += (
+            facility_it_p[job.destination_idc] += (
                 self.power_curve.gang_power_kw(job.source.requested_gpu, fraction)
                 + job.source.cpu_request_share_kw
             )
-        if any(value > 750.0 + 1e-9 for value in facility_p.values()):
-            raise RuntimeContractError("projected AI load exceeds unchanged 750-kVA transformer rating")
         mess_p = tuple(
             control.mess_discharge_kw.get(mid, 0.0) - control.mess_charge_kw.get(mid, 0.0)
             for mid in MESS_IDS
         )
         mess_q = tuple(control.mess_q_kvar.get(mid, 0.0) for mid in MESS_IDS)
-        return tuple(facility_p[site] for site in IDCS), mess_p, mess_q
+        return tuple(facility_it_p[site] for site in IDCS), mess_p, mess_q
+
+    @staticmethod
+    def _facility_ac_inputs(
+        facility_it_p_kw: Sequence[float],
+    ) -> tuple[tuple[float, ...], tuple[float, ...]]:
+        """Map IT demand to the exact facility-side P/Q used by H54.
+
+        The planning surrogate applies PUE=1.30 and PF=0.95.  Fresh OpenDSS
+        must receive that same facility load rather than an IT-only,
+        unity-power-factor load.
+        """
+
+        facility_p = tuple(
+            IDC_FACILITY_PUE * float(value) for value in facility_it_p_kw
+        )
+        facility_q = tuple(
+            IDC_FACILITY_TANPHI * value for value in facility_p
+        )
+        if any(
+            math.hypot(p_kw, q_kvar) > 750.0 + 1e-9
+            for p_kw, q_kvar in zip(facility_p, facility_q)
+        ):
+            raise RuntimeContractError(
+                "projected AI facility load exceeds unchanged 750-kVA transformer rating"
+            )
+        return facility_p, facility_q
 
     def select_native_control(self, *, control: FastControl) -> NativeGridControlDecision:
-        facility_p, mess_p, mess_q = self._physical_inputs(control)
+        facility_it_p, mess_p, mess_q = self._physical_inputs(control)
+        facility_p, facility_q = self._facility_ac_inputs(facility_it_p)
         selector = getattr(self.backend, "select_native_control", None)
         if selector is None:
             decision = NativeGridControlDecision(
@@ -714,7 +746,7 @@ class _PhysicalVerifierAdapter:
             decision = selector(
                 issue=self.issue,
                 facility_p_kw=facility_p,
-                facility_q_kvar=(0.0,) * len(IDCS),
+                facility_q_kvar=facility_q,
                 mess_location=self.mess_location,
                 mess_p_kw=mess_p,
                 mess_q_kvar=mess_q,
@@ -739,14 +771,15 @@ class _PhysicalVerifierAdapter:
     def select_native_control_deep(
         self, *, control: FastControl
     ) -> NativeGridControlDecision:
-        facility_p, mess_p, mess_q = self._physical_inputs(control)
+        facility_it_p, mess_p, mess_q = self._physical_inputs(control)
+        facility_p, facility_q = self._facility_ac_inputs(facility_it_p)
         selector = getattr(self.backend, "select_native_control_deep", None)
         if selector is None:
             return self.select_native_control(control=control)
         decision = selector(
             issue=self.issue,
             facility_p_kw=facility_p,
-            facility_q_kvar=(0.0,) * len(IDCS),
+            facility_q_kvar=facility_q,
             mess_location=self.mess_location,
             mess_p_kw=mess_p,
             mess_q_kvar=mess_q,
@@ -769,7 +802,8 @@ class _PhysicalVerifierAdapter:
         return decision
 
     def verify_fresh(self, *, control: FastControl, **_: Any) -> ExactAcResult:
-        facility_p, mess_p, mess_q = self._physical_inputs(control)
+        facility_it_p, mess_p, mess_q = self._physical_inputs(control)
+        facility_p, facility_q = self._facility_ac_inputs(facility_it_p)
         if self.native_decision is None:
             self.select_native_control(control=control)
         started = time.monotonic()
@@ -777,7 +811,7 @@ class _PhysicalVerifierAdapter:
             self.last_commit = self.backend.verify_fresh(
                 issue=self.issue,
                 facility_p_kw=facility_p,
-                facility_q_kvar=(0.0,) * len(IDCS),
+                facility_q_kvar=facility_q,
                 mess_location=self.mess_location,
                 mess_p_kw=mess_p,
                 mess_q_kvar=mess_q,
@@ -4612,9 +4646,16 @@ def _facility_power(
             curve.gang_power_kw(job.source.requested_gpu, job.compute_rate_fraction)
             + job.source.cpu_request_share_kw
         )
-    if any(value > 750.0 + 1e-9 for value in p.values()):
-        raise RuntimeContractError("AI facility load exceeds unchanged 750-kVA transformer rating")
-    return tuple(p[site] for site in IDCS), (0.0,) * len(IDCS)
+    facility_p = tuple(IDC_FACILITY_PUE * p[site] for site in IDCS)
+    facility_q = tuple(IDC_FACILITY_TANPHI * value for value in facility_p)
+    if any(
+        math.hypot(p_kw, q_kvar) > 750.0 + 1e-9
+        for p_kw, q_kvar in zip(facility_p, facility_q)
+    ):
+        raise RuntimeContractError(
+            "AI facility load exceeds unchanged 750-kVA transformer rating"
+        )
+    return facility_p, facility_q
 
 
 def _nominal_mess_dispatch(
@@ -4861,7 +4902,10 @@ class PfrRuntimeRunner:
         power_curve: H100UtilizationPowerCurve,
         physical_backend: FreshPhysicalBackend,
         fast_optimizer: Optional[FastControlOptimizer] = None,
-        controller_id: str = "PFR_V13_SLOW_FAST_AC_SAFE_V1",
+        controller_id: str = "PFR_V14_SLOW_FAST_AC_SAFE_V1",
+        evaluation_period_id: str = "TECHNICAL_DIAGNOSTIC",
+        source_commit_sha: str = "0000000000000000000000000000000000000000",
+        objective_contract_sha256: str = "0" * 64,
         native_control_initial_states: Optional[
             Mapping[str, Sequence[int]]
         ] = None,
@@ -4877,6 +4921,9 @@ class PfrRuntimeRunner:
         self.physical_backend = physical_backend
         self.fast_optimizer = fast_optimizer or IdentityFastControlOptimizer()
         self.controller_id = controller_id
+        self.evaluation_period_id = str(evaluation_period_id)
+        self.source_commit_sha = str(source_commit_sha)
+        self.objective_contract_sha256 = str(objective_contract_sha256)
         self.architecture = SlowFastArchitecture()
         self.native_control_initial_states = {
             str(name).lower(): tuple(int(value) for value in values)
@@ -5069,8 +5116,19 @@ class PfrRuntimeRunner:
         initial.validate()
         if frames[0].issue != initial.issue or [frame.issue for frame in frames] != list(range(initial.issue, initial.issue + len(frames))):
             raise RuntimeContractError("runtime frame axis is not contiguous from canonical PRE")
-        identity = K9H7ResultIdentityV2.for_method(
-            config, controller_id=self.controller_id, representative_week_id=representative_week_id
+        identity = K9H7ResultIdentityV3.for_method(
+            config,
+            controller_id=self.controller_id,
+            representative_week_id=representative_week_id,
+            evaluation_period_id=self.evaluation_period_id,
+            source_commit_sha=self.source_commit_sha,
+            objective_contract_sha256=self.objective_contract_sha256,
+            calibration_fingerprint=(
+                self.risk_calibration_authority.artifact_sha256
+                if self.risk_calibration_authority is not None
+                else None
+            ),
+            calendar_date=simulation_calendar_date or "UNSPECIFIED_DATE",
         )
         method_root = output / config.comparison_method_id.value
         method_root.mkdir(parents=True, exist_ok=True)
@@ -5510,7 +5568,58 @@ class PfrRuntimeRunner:
                         "fast compute control references a non-running job"
                     )
                 job.compute_rate_fraction = fraction
-            facility_p, _ = _facility_power(state.jobs.values(), self.power_curve)
+            facility_p, facility_q = _facility_power(
+                state.jobs.values(), self.power_curve
+            )
+            planner_facility_pq = {
+                "facility_p_kw": list(map(float, facility_p)),
+                "facility_q_kvar": list(map(float, facility_q)),
+                "facility_pue_assumption": IDC_FACILITY_PUE,
+                "facility_power_factor_assumption": (
+                    IDC_FACILITY_POWER_FACTOR
+                ),
+            }
+            exact_raw = verifier.last_commit.raw_metrics
+            exact_facility_pq_available = all(
+                key in exact_raw
+                for key in (
+                    "facility_p_kw",
+                    "facility_q_kvar",
+                    "facility_pue_assumption",
+                    "facility_power_factor_assumption",
+                )
+            )
+            exact_facility_pq = (
+                {
+                    "facility_p_kw": list(
+                        map(float, exact_raw["facility_p_kw"])
+                    ),
+                    "facility_q_kvar": list(
+                        map(float, exact_raw["facility_q_kvar"])
+                    ),
+                    "facility_pue_assumption": float(
+                        exact_raw["facility_pue_assumption"]
+                    ),
+                    "facility_power_factor_assumption": float(
+                        exact_raw["facility_power_factor_assumption"]
+                    ),
+                }
+                if exact_facility_pq_available
+                else None
+            )
+            planner_facility_pq_sha256 = canonical_hash(planner_facility_pq)
+            exact_facility_pq_sha256 = (
+                canonical_hash(exact_facility_pq)
+                if exact_facility_pq is not None
+                else None
+            )
+            if (
+                exact_facility_pq_sha256 is not None
+                and exact_facility_pq_sha256 != planner_facility_pq_sha256
+            ):
+                raise RuntimeContractError(
+                    "planner and Fresh OpenDSS facility P/Q inputs differ"
+                )
             previous_native_states = dict(state.native_capacitor_states)
             state.native_capacitor_states = {
                 str(name).lower(): tuple(int(value) for value in values)
@@ -5712,10 +5821,23 @@ class PfrRuntimeRunner:
                 / 1000.0
             )
             cumulative_grid_cost_aud += step_grid_cost_aud
+            day_issue_index = (
+                prefix_record_count + int(frame.issue) - int(initial.issue)
+            )
+            issue_identity = identity.for_day_issue(day_issue_index)
             record = {
-                "schema_version": "K9H7_RESULT_V2.issue_commit.v2",
-                "result_uid": identity.result_uid,
+                "schema_version": "K9H7_RESULT_V3.issue_commit.v1",
+                "result_uid": issue_identity["result_uid"],
+                "episode_result_uid": identity.result_uid,
+                "result_identity": issue_identity,
                 "scientific_framework_id": identity.scientific_framework_id,
+                "evaluation_period_id": identity.evaluation_period_id,
+                "source_commit_sha": identity.source_commit_sha,
+                "objective_contract_sha256": identity.objective_contract_sha256,
+                "method_config_sha256": identity.method_config_sha256,
+                "calibration_fingerprint": identity.calibration_fingerprint,
+                "daily_episode_id": identity.daily_episode_id,
+                "day_issue_index": day_issue_index,
                 "comparison_method_id": config.comparison_method_id.value,
                 "method_order": int(config.comparison_method_id.value[1:]),
                 "energy_flex": config.energy_flexibility,
@@ -5813,7 +5935,11 @@ class PfrRuntimeRunner:
                 ),
                 "capacity_blocked_queue": bool(capacity_wait_after_step),
                 "planned_temporal_wait_jobs": len(planned_wait_after_step),
+                "planned_temporal_wait_job_ids": sorted(planned_wait_uids),
                 "capacity_blocked_jobs": len(capacity_wait_after_step),
+                "capacity_blocked_job_ids": sorted(
+                    job.source.job_uid for job in capacity_wait_after_step
+                ),
                 "queued_jobs": len(queued_after_step),
                 "queued_gpu_by_site": {
                     site: sum(
@@ -5954,6 +6080,16 @@ class PfrRuntimeRunner:
                     state.last_spatial_optimizer_certificate
                 ),
                 "facility_p_kw_total": sum(facility_p),
+                "facility_q_kvar_total": sum(facility_q),
+                "facility_power_factor_assumption": IDC_FACILITY_POWER_FACTOR,
+                "facility_pue_assumption": IDC_FACILITY_PUE,
+                "planner_facility_pq_sha256": planner_facility_pq_sha256,
+                "fresh_ac_facility_pq_sha256": exact_facility_pq_sha256,
+                "planner_fresh_ac_facility_pq_identity_pass": (
+                    exact_facility_pq_sha256 == planner_facility_pq_sha256
+                    if exact_facility_pq_sha256 is not None
+                    else None
+                ),
                 "background_root_kw": frame.q50_background_p_kw,
                 # No frozen auxiliary-power coefficient exists for WAN equipment.
                 # Transfer energy therefore remains explicitly unavailable rather
@@ -6249,7 +6385,7 @@ class PfrRuntimeRunner:
                 "price_aud_per_mwh": frame.current_price_aud_per_mwh,
                 "realized_grid_cost_aud": step_grid_cost_aud,
                 "cumulative_grid_cost_aud": cumulative_grid_cost_aud,
-                "attempt_id": identity.result_uid,
+                "attempt_id": issue_identity["result_uid"],
                 "parent_attempt_id": None,
                 "retry_count": 0,
                 "runtime_seconds": time.monotonic() - started,
@@ -6351,7 +6487,12 @@ class PfrRuntimeRunner:
                         "SHADOW_NOT_AVAILABLE_SINGLE_METHOD_DIAGNOSTIC"
                     )
         summary = {
-            "schema_version": "K9H7_RESULT_V2.method_run.v2",
+            "schema_version": "K9H7_RESULT_V3.method_run.v1",
+            "result_identity": {
+                **asdict(identity),
+                "episode_result_uid": identity.result_uid,
+                "day_issue_index_authority": "PER_ISSUE_COMMIT_MARKER",
+            },
             "status": (
                 "DIAGNOSTIC_STOP"
                 if failure is None and diagnostic_stop_reached
@@ -6678,14 +6819,30 @@ class PfrRuntimeRunner:
                     "mess_move_count": sum(
                         int(row["mobility_started_route_count"]) for row in records
                     ),
-                    "workload_temporal_shift_count": len(
+                    "planned_temporal_delay_job_count": len(
+                        {
+                            uid
+                            for row in records
+                            for uid in row.get(
+                                "planned_temporal_wait_job_ids", ()
+                            )
+                        }
+                    ),
+                    "capacity_blocked_wait_job_count": len(
+                        {
+                            uid
+                            for row in records
+                            for uid in row.get("capacity_blocked_job_ids", ())
+                        }
+                    ),
+                    "actual_start_delay_job_count": len(
                         {
                             uid
                             for row in records
                             for uid, job in row["job_states"].items()
-                            if job.get("planned_start_issue") is not None
+                            if job.get("actual_start_issue") is not None
                             and job.get("arrival_issue") is not None
-                            and int(job["planned_start_issue"])
+                            and int(job["actual_start_issue"])
                             > int(job["arrival_issue"])
                         }
                     ),
@@ -6720,6 +6877,12 @@ class PfrRuntimeRunner:
                     ),
                 }
             )
+            # Compatibility alias: unlike the historical broad
+            # planned_start>arrival scan, this now counts only jobs that were
+            # actually kept queued by a temporal plan for at least one step.
+            summary["workload_temporal_shift_count"] = summary[
+                "planned_temporal_delay_job_count"
+            ]
             service_feasible = bool(
                 int(summary["total_deadline_misses"]) == 0
                 and float(summary["terminal_compute_debt"]) <= 1e-9
@@ -6921,7 +7084,7 @@ class PfrRuntimeRunner:
                 }
                 atomic_write_json(method_root / "FAILURE.json", failure)
                 summary = {
-                    "schema_version": "K9H7_RESULT_V2.method_run.v2",
+                    "schema_version": "K9H7_RESULT_V3.method_run.v1",
                     "status": "FAIL_CLOSED",
                     "comparison_method_id": config.comparison_method_id.value,
                     "representative_week_id": representative_week_id,
@@ -6968,7 +7131,7 @@ class PfrRuntimeRunner:
             if item["status"] != "PASS"
         ]
         matrix = {
-            "schema_version": "K9H7_RESULT_V2.matrix_run.v1",
+            "schema_version": "K9H7_RESULT_V3.matrix_run.v1",
             "status": "PASS" if committed == expected and all(item["status"] == "PASS" for item in summaries) else "FAIL_CLOSED",
             "representative_week_id": representative_week_id,
             "method_count": len(configs),
@@ -6992,5 +7155,46 @@ class PfrRuntimeRunner:
         }
         output.mkdir(parents=True, exist_ok=True)
         atomic_write_json(output / "MATRIX_SUMMARY.json", matrix)
+        exogenous_rows = []
+        exogenous_identity_pass = matrix["status"] == "PASS"
+        if exogenous_identity_pass:
+            for frame in frames:
+                observed = {}
+                for config in configs:
+                    method_id = config.comparison_method_id.value
+                    marker_path = (
+                        output
+                        / method_id
+                        / f"issue_{frame.issue:06d}"
+                        / "COMMIT_MARKER.json"
+                    )
+                    marker = json.loads(marker_path.read_text(encoding="utf-8"))
+                    observed[method_id] = marker.get("causal_exogenous_sha256")
+                hashes = set(observed.values())
+                row_pass = hashes == {frame.exogenous_sha256}
+                exogenous_identity_pass = exogenous_identity_pass and row_pass
+                exogenous_rows.append(
+                    {
+                        "issue": frame.issue,
+                        "expected_sha256": frame.exogenous_sha256,
+                        "observed_by_method": observed,
+                        "pass": row_pass,
+                    }
+                )
+        atomic_write_json(
+            output / "B00_B09_EXOGENOUS_IDENTITY_CERTIFICATE.json",
+            {
+                "status": "PASS" if exogenous_identity_pass else "FAIL_OR_INCOMPLETE",
+                "method_ids": [
+                    config.comparison_method_id.value for config in configs
+                ],
+                "same_issue_same_exogenous_identity": exogenous_identity_pass,
+                "issues": exogenous_rows,
+            },
+        )
+        if matrix["status"] == "PASS" and not exogenous_identity_pass:
+            raise RuntimeContractError(
+                "same-issue method exogenous identity certificate failed"
+            )
         materialize_campaign_summary(output, summaries)
         return matrix

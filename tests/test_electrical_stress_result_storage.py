@@ -170,6 +170,19 @@ class ElectricalStressResultStorageTests(unittest.TestCase):
             self.assertEqual(issue["h54_maximum_exact_norm_residual"].tolist(), [0.0, 0.0])
             audit = json.loads((root / "RESULT_STORAGE_AUDIT.json").read_text())
             self.assertEqual(audit["status"], "PASS")
+            for filename in (
+                "RESULT_IDENTITY.json",
+                "ai_job_training_step.parquet",
+                "ai_checkpoint_migration_event.parquet",
+                "risk_monitor_step.parquet",
+                "exact_recourse_step.parquet",
+                "ac_safety_filter_step.parquet",
+                "communication_step.parquet",
+                "POLICY_RUNTIME_INVARIANT_CERTIFICATE.json",
+                "PAPER_METRIC_COMPLETENESS_CERTIFICATE.json",
+                "INDEPENDENT_RECALCULATION_CERTIFICATE.json",
+            ):
+                self.assertTrue((root / filename).is_file(), filename)
 
     def test_job_table_persists_prestart_wan_progress_by_job(self):
         record = _record(0)

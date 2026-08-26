@@ -13,14 +13,106 @@ from pfr.runtime import (
     CausalExperimentFrame,
     MESS_CANONICAL_STAGING,
     MESS_IDS,
+    IDC_FACILITY_POWER_FACTOR,
+    IDC_FACILITY_PUE,
+    IDC_FACILITY_TANPHI,
     MutableMethodState,
+    NativeGridControlDecision,
     OperationalTrainingJob,
     RuntimeJobState,
     RuntimeContractError,
+    _PhysicalVerifierAdapter,
     _schedule_capacity_feasible_queued_jobs,
     _synchronize_planned_rack_assignments,
 )
 from pfr.slow_fast import FastControl, FastLayerLimits, FastLayerState, SlowDiscretePlan
+
+
+def test_fresh_ac_facility_inputs_match_h54_pue_and_power_factor() -> None:
+    facility_p, facility_q = _PhysicalVerifierAdapter._facility_ac_inputs(
+        (100.0, 0.0)
+    )
+
+    assert IDC_FACILITY_PUE == pytest.approx(1.30)
+    assert IDC_FACILITY_POWER_FACTOR == pytest.approx(0.95)
+    assert facility_p == pytest.approx((130.0, 0.0))
+    assert facility_q == pytest.approx(
+        (130.0 * IDC_FACILITY_TANPHI, 0.0)
+    )
+    assert facility_p[0] / (facility_p[0] ** 2 + facility_q[0] ** 2) ** 0.5 == pytest.approx(
+        IDC_FACILITY_POWER_FACTOR
+    )
+
+
+def test_native_selector_receives_h54_facility_pq_not_unity_pf() -> None:
+    class Backend:
+        selected = None
+
+        def select_native_control(self, **kwargs):
+            self.selected = kwargs
+            return NativeGridControlDecision(
+                states={},
+                raw_metrics={"status": "TEST"},
+                fresh_instance=True,
+                common_to_all_methods=True,
+            )
+
+    source = OperationalTrainingJob(
+        job_uid="facility-pq",
+        origin_idc="IDC01",
+        arrival_step=0,
+        latest_start_step=0,
+        deadline_step=10,
+        requested_gpu=1,
+        runtime_seconds_source=3600.0,
+        cpu_request_share_kw=0.0,
+        input_bytes=0,
+        source_record_id="facility-pq",
+    )
+    job = RuntimeJobState(
+        source=source,
+        destination_idc="IDC01",
+        logical_rack_id="IDC01:RACK:facility-pq",
+        gang_membership=("IDC01:GPU:0",),
+        remaining_work_gpu_hours=1.0,
+        lifecycle="RUNNING",
+    )
+    backend = Backend()
+    verifier = _PhysicalVerifierAdapter(
+        backend=backend,
+        issue=0,
+        jobs={source.job_uid: job},
+        power_curve=SimpleNamespace(
+            gang_power_kw=lambda gpu_count, fraction: 100.0
+        ),
+        mess_location=tuple(MESS_CANONICAL_STAGING.values()),
+        mess_in_transit=(False,) * len(MESS_IDS),
+        robust_background_p_kw=(),
+        robust_background_q_kvar=(),
+        robust_pv_available_kw=(),
+        native_forecast_background_p_kw=(),
+        native_forecast_background_q_kvar=(),
+        native_forecast_pv_available_kw=(),
+    )
+    verifier.select_native_control(
+        control=FastControl(
+            mess_charge_kw={mid: 0.0 for mid in MESS_IDS},
+            mess_discharge_kw={mid: 0.0 for mid in MESS_IDS},
+            mess_q_kvar={mid: 0.0 for mid in MESS_IDS},
+            job_compute_rate_fraction={source.job_uid: 1.0},
+            site_throughput_fraction={"IDC01": 1.0},
+        )
+    )
+
+    assert backend.selected is not None
+    facility_p = backend.selected["facility_p_kw"]
+    facility_q = backend.selected["facility_q_kvar"]
+    assert facility_p[0] == pytest.approx(100.0 * IDC_FACILITY_PUE)
+    assert facility_q[0] == pytest.approx(
+        facility_p[0] * IDC_FACILITY_TANPHI
+    )
+    assert facility_p[1:] == pytest.approx((0.0,) * (len(facility_p) - 1))
+    assert facility_q[1:] == pytest.approx((0.0,) * (len(facility_q) - 1))
 
 
 def _case(*, deadline: int, remaining: float, nominal_rate: float = 0.0):
@@ -355,6 +447,89 @@ def test_prestaged_spatial_admission_uses_remote_physical_rack_without_wan() -> 
     assert remote.prestart_wan_required_bytes == 0
 
 
+def test_restart_rack_materialization_preserves_migration_destination() -> None:
+    planner = object.__new__(PersistentBoundedMilpPlanner)
+    planner._initialize = lambda: None
+    uid = "restarting-job"
+    planner.scope = {
+        "cap": pd.DataFrame(
+            [
+                {
+                    "rack_pool_id": "IDC01_LP01",
+                    "idc_id": "IDC01",
+                    "deliverable_active_gpu_capacity": 1.0,
+                    "rack_power_cap_kw": 10.0,
+                },
+                {
+                    "rack_pool_id": "IDC02_LP01",
+                    "idc_id": "IDC02",
+                    "deliverable_active_gpu_capacity": 1.0,
+                    "rack_power_cap_kw": 10.0,
+                },
+            ]
+        ),
+        "domains": {
+            uid: [
+                {
+                    "destination_IDC_id": "IDC01",
+                    "rack_pool_id": "IDC01_LP01",
+                },
+                {
+                    "destination_IDC_id": "IDC02",
+                    "rack_pool_id": "IDC02_LP01",
+                },
+            ]
+        },
+        "pmap": {
+            uid: {
+                "arrival_step": 100,
+                "latest_start_step": 105,
+                "latest_completion_step_exclusive": 120,
+                "requested_gpu": 1,
+                "IT_power_kW": 1.0,
+                "duration_steps": 12,
+            }
+        },
+        "wan_map": {},
+    }
+    source = OperationalTrainingJob(
+        job_uid=uid,
+        origin_idc="IDC01",
+        arrival_step=100,
+        latest_start_step=105,
+        deadline_step=120,
+        requested_gpu=1,
+        runtime_seconds_source=3600.0,
+        cpu_request_share_kw=0.1,
+        input_bytes=None,
+        source_record_id=uid,
+    )
+    job = RuntimeJobState(
+        source=source,
+        destination_idc="IDC02",
+        logical_rack_id="IDC02:PFR-H100-LOGICAL-POOL",
+        gang_membership=(f"IDC02:PFR-GPU:{uid}:0",),
+        remaining_work_gpu_hours=1.0,
+        lifecycle="RESTARTING",
+        restart_remaining_steps=1,
+    )
+    state = MutableMethodState(
+        issue=106,
+        pre_state_sha256="a" * 64,
+        mess_energy_kwh={mid: 760.0 for mid in MESS_IDS},
+        mess_location=dict(MESS_CANONICAL_STAGING),
+        jobs={uid: job},
+    )
+    config = MethodFactory(
+        ExperimentAuthority(*(format(index, "064x") for index in range(1, 8)))
+    ).create_electrical_stress(ElectricalStressMethod.B08)
+
+    planner.materialize_runtime_rack_assignments(state, config)
+
+    assert job.destination_idc == "IDC02"
+    assert job.logical_rack_id == "IDC02_LP01"
+
+
 def test_shared_watchdog_transfers_unused_master_time_to_exact_recourse() -> None:
     total = 30.0
 
@@ -626,14 +801,20 @@ def test_slow_master_accepts_explicit_deferred_queue_decision() -> None:
     stage = object.__new__(_PersistentMilpModel)
     stage.model_role = "slow_master"
     stage.model = SimpleNamespace(SolCount=1)
-    stage.domain = SimpleNamespace(route_options=(object(),), job_options=((),))
-    stage.route = {0: SimpleNamespace(X=1.0)}
+    stage.domain = SimpleNamespace(
+        route_options={"MESS01": (object(),), "MESS02": (object(),)},
+        job_options=((),),
+    )
+    stage.route = {
+        ("MESS01", 0): SimpleNamespace(X=1.0),
+        ("MESS02", 0): SimpleNamespace(X=1.0),
+    }
     stage.job = {}
     stage.defer_job = {0: SimpleNamespace(X=1.0)}
 
     route, jobs = stage.selected_domain_decisions()
 
-    assert route == 0
+    assert route == {"MESS01": 0, "MESS02": 0}
     assert jobs == {0: None}
 
 

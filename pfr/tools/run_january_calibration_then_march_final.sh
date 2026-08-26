@@ -13,6 +13,7 @@ march_root=${MARCH_RUN_ROOT:?set MARCH_RUN_ROOT}
 log_file=${RUN_LOG_FILE:-$work/logs/january_calibration_then_march_final.log}
 calibration=$jan_root/calibration/ELECTRICAL_STRESS_EVENT_RISK_CALIBRATION_JAN2025.json
 contract=$repo/pfr/contracts/FROZEN_2025_FULL_MONTH_VALIDATION_PERIODS_V1.json
+final_authority=$repo/pfr/contracts/MARCH_2025_FINAL_EVALUATION_AUTHORITY_V2.json
 shared=$base/PFR_MAR2025_FULL_SHARED_EXOGENOUS_V13_13
 input_root=$base/PFR_MAR2025_FULL_V13_13_DAILY_INPUTS
 output=$march_root/march/B00_B09
@@ -108,6 +109,7 @@ main() {
 
     run_child "$python_bin" -m pfr.tools.run_frozen_rep_week_daily_campaign \
         --repo "$repo" --period-id MAR2025_FULL --period-contract "$contract" \
+        --final-evaluation-authority "$final_authority" \
         --day-workers 6 --cpu-affinity disjoint --capture-day-logs \
         --continue-after-failure --electrical-stress-campaign \
         --h0-fidelity-audit-every-steps 12 \

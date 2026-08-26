@@ -1075,6 +1075,10 @@ class ExactOpenDssBackend:
         )
         combined = dict(raw)
         combined.update({
+            "facility_p_kw": [float(value) for value in facility_p_kw],
+            "facility_q_kvar": [float(value) for value in facility_q_kvar],
+            "facility_power_factor_assumption": 0.95,
+            "facility_pue_assumption": 1.30,
             "robust_grid_fresh_opendss": bool(robust_background_p_kw),
             "robust_grid_role": "CAUSAL_PLAN_VALIDITY_DIAGNOSTIC_NOT_H0_COMMIT_GATE",
             "robust_grid_hard_constraint_pass": bool(robust["hard_constraint_pass"]),
@@ -1449,6 +1453,15 @@ def main() -> None:
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--candidate-id", default="JAN2025_DAY01")
     parser.add_argument(
+        "--evaluation-period-id",
+        help="Frozen V14 evaluation period identity bound into every result.",
+    )
+    parser.add_argument(
+        "--final-evaluation-authority",
+        type=Path,
+        help="Frozen final-evaluation authority; required by the March launcher.",
+    )
+    parser.add_argument(
         "--calendar-date",
         help="Simulation-local AEST calendar date (YYYY-MM-DD) for daily output grouping.",
     )
@@ -1664,6 +1677,42 @@ def main() -> None:
     if args.count <= 0:
         parser.error("--count must be positive")
     repo = args.repo.resolve()
+    final_evaluation_authority = None
+    final_evaluation_authority_path = None
+    if args.final_evaluation_authority is not None:
+        final_evaluation_authority_path = args.final_evaluation_authority.resolve()
+        final_evaluation_authority = json_load(final_evaluation_authority_path)
+        if (
+            final_evaluation_authority.get("identity")
+            != "MARCH_2025_FINAL_EVALUATION_AUTHORITY_V2"
+            or final_evaluation_authority.get("scientific_framework_id")
+            != "V14_AI_ICPS"
+            or final_evaluation_authority.get("status")
+            != "FROZEN_FINAL_EVALUATION_AUTHORIZED"
+            or final_evaluation_authority.get(
+                "main_scientific_campaign_authorized"
+            )
+            is not True
+            or final_evaluation_authority.get("independent_holdout_claim")
+            is not False
+            or args.evaluation_period_id
+            != final_evaluation_authority.get("evaluation_period_id")
+        ):
+            raise RuntimeError("March final-evaluation authority is invalid")
+        if args.calendar_date is None or not (
+            str(final_evaluation_authority["calendar_date_first"])
+            <= args.calendar_date
+            <= str(final_evaluation_authority["calendar_date_last"])
+        ):
+            raise RuntimeError("calendar date is outside final-evaluation authority")
+        if not args.electrical_stress_campaign:
+            raise RuntimeError(
+                "final-evaluation authority requires the full B00-B09 campaign"
+            )
+    elif args.evaluation_period_id is not None:
+        raise RuntimeError(
+            "--evaluation-period-id requires --final-evaluation-authority"
+        )
     migration_authority_path = (
         args.migration_authority.resolve()
         if args.migration_authority is not None
@@ -1769,6 +1818,20 @@ def main() -> None:
             "authority. The pending-control flag is restricted to an explicit "
             "single-method engineering diagnostic."
         )
+    final_evaluation_authorized = final_evaluation_authority is not None
+    campaign_authorized = bool(
+        frozen_control_authorized or final_evaluation_authorized
+    )
+    evaluation_classification = (
+        str(final_evaluation_authority["evaluation_classification"])
+        if final_evaluation_authority is not None
+        else str(native_control_contract["evaluation_classification"])
+    )
+    evaluation_period_id = (
+        str(args.evaluation_period_id)
+        if args.evaluation_period_id is not None
+        else str(args.candidate_id)
+    )
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
     exact = _load_exact_module(repo, args.exact_package_root)
@@ -1915,8 +1978,16 @@ def main() -> None:
         migration_authority=migration_authority,
     )
     evaluation_contract = {
+        "scientific_framework_id": "V14_AI_ICPS",
+        "evaluation_period_id": evaluation_period_id,
+        "final_evaluation_authority_sha256": (
+            sha256(final_evaluation_authority_path)
+            if final_evaluation_authority_path is not None
+            else None
+        ),
         "gpu_capacity_per_idc_modeled": 256,
-        "facility_power_factor_assumption": 1.0,
+        "facility_power_factor_assumption": 0.95,
+        "facility_pue_assumption": 1.30,
         "mess_discharge_kw_when_enabled": 20.0,
         "maximum_refresh_steps": 6,
         "future_actual_used": False,
@@ -1999,11 +2070,9 @@ def main() -> None:
         ),
         "non_temporal_compute_modulation_allowed": False,
         "native_grid_control_release_status": native_control_contract["status"],
-        "main_scientific_campaign_authorized": frozen_control_authorized,
+        "main_scientific_campaign_authorized": campaign_authorized,
         "january_2025_post_hoc_validation_authorized": post_hoc_control_authorized,
-        "evaluation_classification": native_control_contract[
-            "evaluation_classification"
-        ],
+        "evaluation_classification": evaluation_classification,
         "common_native_grid_control_applied_to": (
             [f"B{index:02d}" for index in range(10)]
             if args.electrical_stress_campaign
@@ -2077,6 +2146,9 @@ def main() -> None:
         risk_calibration_authority=risk_calibration,
         joint_planner=retained_h54,
         h0_fidelity_audit_every_steps=args.h0_fidelity_audit_every_steps,
+        evaluation_period_id=evaluation_period_id,
+        source_commit_sha=source_identity["git_full_commit_sha"],
+        objective_contract_sha256=contract_sha,
     )
     factory = MethodFactory(authority)
     configs = (
@@ -2500,9 +2572,20 @@ def main() -> None:
         "physical_execution_authority_version": (
             "V13_13_POST_HOC_P100_FEEDER_SCALE_NATIVE_ELASTIC_AC_FREEZE_20260823"
         ),
-        "evaluation_classification": native_control_contract[
-            "evaluation_classification"
-        ],
+        "scientific_framework_id": "V14_AI_ICPS",
+        "evaluation_period_id": evaluation_period_id,
+        "final_evaluation_authority_path": (
+            str(final_evaluation_authority_path)
+            if final_evaluation_authority_path is not None
+            else None
+        ),
+        "final_evaluation_authority_sha256": (
+            sha256(final_evaluation_authority_path)
+            if final_evaluation_authority_path is not None
+            else None
+        ),
+        "main_scientific_campaign_authorized": campaign_authorized,
+        "evaluation_classification": evaluation_classification,
         "independent_holdout_claim": False,
         "common_native_grid_control": {
             "identity": native_control_contract["identity"],
@@ -2516,6 +2599,9 @@ def main() -> None:
             "asset_audit_sha256": sha256(native_asset_audit),
             "release_status": native_control_contract["status"],
             "main_scientific_campaign_authorized": frozen_control_authorized,
+            "authorized_via_final_evaluation_authority": (
+                final_evaluation_authorized
+            ),
             "january_2025_post_hoc_validation_authorized": post_hoc_control_authorized,
             "diagnostic_candidate_override": pending_diagnostic_authorized,
         },

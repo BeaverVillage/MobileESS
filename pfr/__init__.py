@@ -92,6 +92,7 @@ from .methods import (
     ElectricalStressMethod,
     ExperimentAuthority,
     K9H7ResultIdentityV2,
+    K9H7ResultIdentityV3,
     MethodConfig,
     MethodFactory,
 )

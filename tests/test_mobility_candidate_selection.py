@@ -1,7 +1,17 @@
-from pfr.compact_h54 import _MobilityTemplate, _ordered_mobility_candidates
+from pfr.compact_h54 import (
+    CompactH54JointPlanner,
+    _MobilityTemplate,
+    _ordered_mobility_candidates,
+)
+from pfr.runtime import MESS_CANONICAL_STAGING, MESS_IDS, MutableMethodState
 
 
-def _route(offset: int | None, destination: str, rank: int = 1) -> _MobilityTemplate:
+def _route(
+    offset: int | None,
+    destination: str,
+    rank: int = 1,
+    mess_id: str = "MESS03",
+) -> _MobilityTemplate:
     return _MobilityTemplate(
         departure_offset=offset,
         destination_service_id=destination,
@@ -11,6 +21,7 @@ def _route(offset: int | None, destination: str, rank: int = 1) -> _MobilityTemp
         energy_kwh=0.0 if offset is None else 10.0,
         source="STA07",
         generation_reason="TEST",
+        mess_id=None if offset is None else mess_id,
     )
 
 
@@ -77,3 +88,51 @@ def test_actionable_prefix_round_robins_destinations_before_route_depth() -> Non
 
     assert ordered.index(sta05) < ordered.index(idc01_second)
     assert ordered.index(sta05) < ordered.index(idc01_third)
+
+
+def test_actionable_prefix_exposes_every_mess_before_route_depth() -> None:
+    stay = _route(None, "STA07")
+    first_by_mess = [
+        _route(1, f"IDC0{index}", mess_id=f"MESS0{index}")
+        for index in range(1, 5)
+    ]
+    duplicate = _route(2, "IDC01", rank=2, mess_id="MESS01")
+
+    ordered = _ordered_mobility_candidates(
+        mandatory=[stay],
+        ranked=[
+            (first_by_mess[0], 0.50),
+            (duplicate, 0.51),
+            (first_by_mess[1], 0.60),
+            (first_by_mess[2], 0.70),
+            (first_by_mess[3], 0.80),
+        ],
+        commitment_window_steps=6,
+    )
+
+    assert {route.mess_id for route in ordered[1:5]} == set(MESS_IDS)
+    assert ordered.index(first_by_mess[3]) < ordered.index(duplicate)
+
+
+def test_route_template_moves_only_its_selected_mess() -> None:
+    state = MutableMethodState(
+        issue=10,
+        pre_state_sha256="a" * 64,
+        mess_energy_kwh={mid: 760.0 for mid in MESS_IDS},
+        mess_location=dict(MESS_CANONICAL_STAGING),
+    )
+    route = _route(1, "IDC01", mess_id="MESS01")
+    planner = object.__new__(CompactH54JointPlanner)
+
+    locations = planner._locations_for_template(state, route)
+
+    assert locations[MESS_IDS.index("MESS01")] == [
+        "STA09",
+        None,
+        None,
+        None,
+    ] + ["IDC01"] * 50
+    for mid in MESS_IDS[1:]:
+        assert locations[MESS_IDS.index(mid)] == [
+            MESS_CANONICAL_STAGING[mid]
+        ] * 54

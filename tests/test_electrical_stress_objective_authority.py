@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -26,6 +27,26 @@ from pfr.runtime import (
 
 
 REPO = Path(__file__).resolve().parents[1]
+
+
+def test_march_final_authority_is_v14_and_preserves_post_hoc_history() -> None:
+    authority = json.loads(
+        (
+            REPO
+            / "pfr/contracts/MARCH_2025_FINAL_EVALUATION_AUTHORITY_V2.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    assert authority["scientific_framework_id"] == "V14_AI_ICPS"
+    assert authority["evaluation_period_id"] == "MAR2025_FINAL"
+    assert authority["main_scientific_campaign_authorized"] is True
+    assert authority["independent_holdout_claim"] is False
+    assert authority["historical_provenance"][
+        "development_outcome_informed_parameter_tuning"
+    ] is True
+    assert authority["historical_provenance"][
+        "prior_march_2025_partial_run_status"
+    ] == "QUARANTINED_DIAGNOSTIC"
 
 
 def test_norm_solver_tolerance_cannot_consume_engineering_headroom() -> None:
@@ -153,6 +174,17 @@ def test_online_runtime_uses_persistent_bounded_milp_and_keeps_full_oracle_offli
     assert 'choices=("online-bounded", "full-miqcp-oracle")' in source
     assert "Full H54 MIQCP is an offline sampled-state oracle" in source
     assert '"PFR_EXPERIMENTAL_LEGACY_CAUSAL_SCREENING", "0"' in source
+
+    planner_source = (
+        REPO / "pfr" / "persistent_bounded_milp.py"
+    ).read_text(encoding="utf-8")
+    assert "_optimize_job_migrations(" in planner_source
+    assert "checkpoint_migration={uid: None for uid in active_jobs}" not in planner_source
+    runtime_source = (REPO / "pfr" / "runtime.py").read_text(encoding="utf-8")
+    assert "MOBILITY_ELIGIBLE_MESS_IDS = MESS_IDS" in runtime_source
+    assert 'facility_q_kvar=(0.0,) * len(IDCS)' not in runtime_source
+    assert "IDC_FACILITY_PUE * float(value)" in runtime_source
+    assert "IDC_FACILITY_TANPHI * value" in runtime_source
     contract = (REPO / "pfr" / "contracts" / "ELECTRICAL_STRESS_OBJECTIVE_V1.json").read_text(
         encoding="utf-8"
     )
