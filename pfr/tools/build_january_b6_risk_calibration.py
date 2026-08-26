@@ -258,6 +258,9 @@ def build_calibration(
                 }
             )
     primary_commits = set(source_commits)
+    primary_fingerprints = {
+        fingerprint for _commit, fingerprint in source_lineages if fingerprint
+    }
     if len(source_commits) != 1:
         if any(
             len(fingerprint) != 64
@@ -277,7 +280,7 @@ def build_calibration(
             fingerprint for _commit, fingerprint in primary_lineages
         }
         primary_commits = {commit for commit, _fingerprint in primary_lineages}
-        if len(primary_fingerprints) != 1 or len(primary_commits) != 1:
+        if len(primary_fingerprints) != 1:
             raise ValueError(
                 f"January {source_method} calibration days use multiple "
                 "unapproved implementation lineages"
@@ -351,12 +354,26 @@ def build_calibration(
             f"PASS_NOT_ALWAYS_POSITIVE_ON_SOURCE_{source_method}_STATES"
         ),
         "source_audit_sha256": _canonical_sha256(source_audits),
-        "source_git_full_commit_sha": next(iter(primary_commits)),
+        # A Git commit identifies the whole repository, including provenance
+        # tooling that does not affect the scientific calculation.  Do not
+        # pretend that one commit represents every day when multiple clean
+        # commits share the same scientific implementation fingerprint.
+        "source_git_full_commit_sha": (
+            next(iter(primary_commits)) if len(primary_commits) == 1 else None
+        ),
         "source_git_full_commit_shas": sorted(source_commits),
+        "source_git_full_commit_sha_is_unique": len(source_commits) == 1,
+        "source_primary_scientific_implementation_fingerprint": (
+            next(iter(primary_fingerprints))
+            if len(primary_fingerprints) == 1
+            else None
+        ),
         "source_scientific_implementation_fingerprints": sorted(
-            fingerprint
-            for _commit, fingerprint in source_lineages
-            if fingerprint
+            {
+                fingerprint
+                for _commit, fingerprint in source_lineages
+                if fingerprint
+            }
         ),
         "authorized_verified_pass_reuse_fingerprints": sorted(
             set(authorized_reuse_fingerprints)

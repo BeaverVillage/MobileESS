@@ -163,6 +163,38 @@ def test_january_raw_family_blocks_freeze_and_load_without_march(
         "authorized_verified_pass_reuse_fingerprints"
     ] == [reused_fingerprint]
 
+    # Repository-only provenance tooling may change between days without
+    # changing the scientific implementation.  Preserve every Git commit and
+    # use the scientific fingerprint as the implementation identity.
+    for day_index in range(CALIBRATION_DAY_COUNT):
+        manifest_path = (
+            tmp_path
+            / f"2025-01-{day_index + 1:02d}"
+            / "RUN_MANIFEST.json"
+        )
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["scientific_implementation_fingerprint"] = primary_fingerprint
+        manifest["git_full_commit_sha"] = (
+            "c" * 40 if day_index < 7 else "e" * 40
+        )
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    same_science_payload = builder.build_calibration(
+        tmp_path, source_method=source_method
+    )
+    assert same_science_payload["source_git_full_commit_sha"] is None
+    assert same_science_payload["source_git_full_commit_shas"] == [
+        "c" * 40,
+        "e" * 40,
+    ]
+    assert same_science_payload["source_git_full_commit_sha_is_unique"] is False
+    assert same_science_payload[
+        "source_primary_scientific_implementation_fingerprint"
+    ] == primary_fingerprint
+    assert same_science_payload[
+        "source_scientific_implementation_fingerprints"
+    ] == [primary_fingerprint]
+
     payload.update(
         {
             "calibration_block_steps": 6,
