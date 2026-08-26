@@ -86,6 +86,86 @@ class _MobilityTemplate:
         )
 
 
+def _ordered_mobility_candidates(
+    *,
+    mandatory: Sequence[_MobilityTemplate],
+    ranked: Sequence[tuple[_MobilityTemplate, float]],
+    commitment_window_steps: int,
+) -> list[_MobilityTemplate]:
+    """Return a stable prefix that exposes executable mobility decisions.
+
+    A global electrical-score ordering can fill a small K domain with routes
+    whose departures all lie beyond the next scheduled replan.  Rolling the
+    horizon then recreates those future departures indefinitely, so mobility
+    is enabled on paper but no route can ever start.  Keep the frozen score
+    ordering, while putting two destination-diverse candidates that can
+    depart before the next replan at the front of the optional prefix.  The
+    best unrestricted future-preposition candidate follows them.  STAY and a
+    previously retained plan remain mandatory and movement is never forced.
+    """
+
+    ordered: list[_MobilityTemplate] = []
+    seen: set[tuple[Any, ...]] = set()
+
+    def add(candidate: _MobilityTemplate) -> None:
+        if candidate.identity not in seen:
+            ordered.append(candidate)
+            seen.add(candidate.identity)
+
+    for candidate in mandatory:
+        add(candidate)
+
+    actionable = [
+        candidate
+        for candidate, _score in ranked
+        if candidate.departure_offset is not None
+        and int(candidate.departure_offset) < int(commitment_window_steps)
+    ]
+    if actionable:
+        add(actionable[0])
+        first_destination = actionable[0].destination_service_id
+        second_destination = next(
+            (
+                candidate
+                for candidate in actionable[1:]
+                if candidate.destination_service_id != first_destination
+            ),
+            None,
+        )
+        if second_destination is not None:
+            add(second_destination)
+
+    if ranked:
+        add(ranked[0][0])
+
+    # Fill the remaining actionable prefix destination-by-destination.  The
+    # single-step screen often gives many departure/rank variants at one PCC
+    # identical scores; a flat ordering can consume K before a location whose
+    # full H54 recourse is better is ever exposed to the master.
+    by_destination: dict[str, list[_MobilityTemplate]] = {}
+    destination_order: list[str] = []
+    for candidate in actionable:
+        destination = candidate.destination_service_id
+        if destination not in by_destination:
+            by_destination[destination] = []
+            destination_order.append(destination)
+        by_destination[destination].append(candidate)
+    depth = 0
+    while True:
+        added_at_depth = False
+        for destination in destination_order:
+            candidates = by_destination[destination]
+            if depth < len(candidates):
+                add(candidates[depth])
+                added_at_depth = True
+        if not added_at_depth:
+            break
+        depth += 1
+    for candidate, _score in ranked:
+        add(candidate)
+    return ordered
+
+
 @dataclass(frozen=True)
 class _CandidateEvaluation:
     template: _MobilityTemplate
@@ -324,7 +404,13 @@ class _RadialStressKernel:
         candidates: Sequence[tuple[int, str]],
         support_kw: float = 100.0,
     ) -> np.ndarray:
-        """Batch-score one support action for every route arrival candidate."""
+        """Batch-score the best active-P direction at each route destination.
+
+        Storage can charge or discharge.  Screening only positive injection
+        reverses location rankings during upper-voltage stress and can remove
+        the destination that the full H54 recourse would select.  Evaluate the
+        same bounded probe in both directions and retain the lower stress.
+        """
         if not candidates:
             return np.empty(0, dtype=float)
         own_p, own_q = self.injections(
@@ -333,11 +419,17 @@ class _RadialStressKernel:
         if self.anchor_p is None:
             self.anchor_p = own_p[0].copy()
             self.anchor_q = own_q[0].copy()
-        steps = np.asarray([int(step) for step, _service in candidates], dtype=int)
+        steps_one = np.asarray(
+            [int(step) for step, _service in candidates], dtype=int
+        )
+        steps = np.repeat(steps_one, 2)
         batch_p = own_p[steps].copy()
         batch_q = own_q[steps].copy()
-        for row, (_step, service) in enumerate(candidates):
-            batch_p[row, self.index[self.service_bus[str(service)]]] -= support_kw
+        for candidate_index, (_step, service) in enumerate(candidates):
+            bus = self.index[self.service_bus[str(service)]]
+            # Even row: discharge/injection.  Odd row: charge/withdrawal.
+            batch_p[2 * candidate_index, bus] -= support_kw
+            batch_p[2 * candidate_index + 1, bus] += support_kw
         flow_p = batch_p @ self.descendant.T
         flow_q = batch_q @ self.descendant.T
         du = (
@@ -361,10 +453,19 @@ class _RadialStressKernel:
             axis=1,
         )
         idc = np.max(PUE * idc_it_kw[steps] / IDC_TRANSFORMER_LIMIT_KW, axis=1)
-        service = np.asarray(
-            [support_kw / self.service_kva[str(name)] for _step, name in candidates]
+        service = np.repeat(
+            np.asarray(
+                [
+                    support_kw / self.service_kva[str(name)]
+                    for _step, name in candidates
+                ]
+            ),
+            2,
         )
-        return np.maximum.reduce((np.max(voltage, axis=1), line, idc, service))
+        directional = np.maximum.reduce(
+            (np.max(voltage, axis=1), line, idc, service)
+        )
+        return np.min(directional.reshape(len(candidates), 2), axis=1)
 
 
 class CompactH54JointPlanner(RetainedH54JointPlanner):
@@ -933,15 +1034,16 @@ class CompactH54JointPlanner(RetainedH54JointPlanner):
                             }
                         )
                     )
-        selected: list[_MobilityTemplate] = []
-        seen: set[tuple[Any, ...]] = set()
-        for candidate in mandatory + [row[0] for row in ranked]:
-            if candidate.identity in seen:
-                continue
-            selected.append(candidate)
-            seen.add(candidate.identity)
-            if len(selected) >= self.candidate_limit:
-                break
+        screen_score_by_identity = {
+            candidate.identity: float(score) for candidate, score in ranked
+        }
+        commitment_window_steps = int(config.periodic_replan_steps or 6)
+        ordered = _ordered_mobility_candidates(
+            mandatory=mandatory,
+            ranked=ranked,
+            commitment_window_steps=commitment_window_steps,
+        )
+        selected = ordered[: self.candidate_limit]
         return selected, {
             "physical_domain_size": 1 + len(physical),
             "exact_infeasible_removed": exact_removed,
@@ -960,6 +1062,38 @@ class CompactH54JointPlanner(RetainedH54JointPlanner):
             "future_preposition_candidates_enabled": True,
             "departure_grid": list(departure_grid),
             "heuristic_role": "BOUNDED_DOMAIN_GENERATION_ONLY",
+            "candidate_selection_mode": (
+                "COMMITMENT_WINDOW_DESTINATION_ROUND_ROBIN_THEN_GLOBAL_SCORE"
+            ),
+            "candidate_screen_dispatch_domain": (
+                "BIDIRECTIONAL_ACTIVE_P_100KW"
+            ),
+            "commitment_window_steps": commitment_window_steps,
+            "actionable_candidate_count": sum(
+                candidate.departure_offset is not None
+                and int(candidate.departure_offset) < commitment_window_steps
+                for candidate, _score in ranked
+            ),
+            "selected_actionable_candidate_count": sum(
+                candidate.departure_offset is not None
+                and int(candidate.departure_offset) < commitment_window_steps
+                for candidate in selected
+            ),
+            "bounded_candidates": [
+                {
+                    "is_stay": bool(candidate.is_stay),
+                    "departure_offset": candidate.departure_offset,
+                    "destination_service_id": candidate.destination_service_id,
+                    "route_rank": int(candidate.route_rank),
+                    "transit_steps": int(candidate.transit_steps),
+                    "energy_kwh": float(candidate.energy_kwh),
+                    "screen_stress": screen_score_by_identity.get(
+                        candidate.identity
+                    ),
+                    "generation_reason": candidate.generation_reason,
+                }
+                for candidate in selected
+            ],
         }
 
     def _dispatch(

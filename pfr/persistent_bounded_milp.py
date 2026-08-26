@@ -77,6 +77,13 @@ EXCLUSIVITY_TOLERANCE_KW = 1e-4
 MAX_EXACT_QCP_FEASIBILITY_RESTORATION_ROUNDS = 4
 P_MAX = 550.0
 ETA_DISCHARGE = 0.95
+# A 3% discrete master gap can hide the entire marginal value of mobility:
+# the February counterfactual exposed a 2.97% stress improvement that Gurobi
+# was allowed to treat as equivalent to STAY.  Keep the published 3% ceiling
+# for the continuous recourse certificate, but solve route/workload binaries
+# to a sub-percent gap so an enabled flexibility is actually compared.
+SLOW_MASTER_MIP_GAP = 0.001
+MOBILITY_ROUTE_CANDIDATE_MIN_K = 16
 
 
 @dataclass(frozen=True)
@@ -1060,7 +1067,22 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             )
             self._adaptive_domain_cache_by_method[method_key] = (*cache_key, superset)
 
-        routes = tuple(superset.route_options[:target_limit])
+        route_target_limit = target_limit
+        if (
+            bool(config.h54_capability_mask["mess_mobility"])
+            and not self.candidate_limit_frozen
+        ):
+            # Route ranking is only a causal screen.  Unlike workload options,
+            # retaining K=4 can erase the mobility treatment by admitting
+            # several near-duplicate departures but omitting the destination
+            # that wins the full H54 recourse.  The persistent model already
+            # reserves the adaptive K=64 route axis, so exposing a compact,
+            # destination-balanced K=16 route set adds no model-build memory.
+            route_target_limit = min(
+                superset_limit,
+                max(target_limit, MOBILITY_ROUTE_CANDIDATE_MIN_K),
+            )
+        routes = tuple(superset.route_options[:route_target_limit])
         options = tuple(
             tuple(job_options[:target_limit])
             for job_options in superset.job_options
@@ -1068,7 +1090,14 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         route_audit = dict(superset.route_audit)
         route_audit.update(
             {
-                "candidate_limit_k": target_limit,
+                "candidate_limit_k": route_target_limit,
+                "base_candidate_limit_k": target_limit,
+                "mobility_route_candidate_floor_k": (
+                    MOBILITY_ROUTE_CANDIDATE_MIN_K
+                    if bool(config.h54_capability_mask["mess_mobility"])
+                    and not self.candidate_limit_frozen
+                    else None
+                ),
                 "bounded_domain_size": len(routes),
                 "bounded_truncation_removed": max(
                     0,
@@ -1081,6 +1110,19 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 ),
                 "adaptive_superset_candidate_limit_k": superset_limit,
                 "adaptive_superset_reused": cache_reused,
+                "bounded_candidates": list(
+                    route_audit.get("bounded_candidates", [])[
+                        :route_target_limit
+                    ]
+                ),
+                "selected_actionable_candidate_count": sum(
+                    row.get("departure_offset") is not None
+                    and int(row["departure_offset"])
+                    < int(route_audit.get("commitment_window_steps", 1))
+                    for row in route_audit.get("bounded_candidates", [])[
+                        :route_target_limit
+                    ]
+                ),
             }
         )
         workload_audit = dict(superset.workload_audit)
@@ -1600,6 +1642,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         )
         recourse_seconds = time.monotonic() - recourse_started
         plan.validate()
+        selected_route = domain.route_options[route_index]
         model_solve_generation = (
             self._model_solve_generation_by_method.get(method_key, 0) + 1
         )
@@ -1638,7 +1681,21 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             "gurobi_slow_master_numeric_focus": (
                 master.numeric_focus if master is not None else None
             ),
+            "slow_master_mip_gap_tolerance": (
+                master.mip_gap if master is not None else 0.0
+            ),
             "gurobi_numeric_focus": recourse.numeric_focus,
+            "selected_mobility_candidate": {
+                "domain_index": int(route_index),
+                "is_stay": bool(selected_route.is_stay),
+                "departure_offset": selected_route.departure_offset,
+                "destination_service_id": (
+                    selected_route.destination_service_id
+                ),
+                "route_rank": int(selected_route.route_rank),
+                "transit_steps": int(selected_route.transit_steps),
+                "energy_kwh": float(selected_route.energy_kwh),
+            },
             "persistent_model_reused": build_seconds == 0.0,
             "persistent_model_refresh_reason": model_refresh_reason,
             "persistent_model_solve_generation": model_solve_generation,
@@ -1801,7 +1858,10 @@ class _PersistentMilpModel:
         self.model.Params.OutputFlag = 0
         self.model.Params.Threads = int(os.environ.get("PFR_GUROBI_THREADS", "4"))
         self.model.Params.Seed = 0
-        self.model.Params.MIPGap = 0.03
+        self.mip_gap = (
+            SLOW_MASTER_MIP_GAP if model_role == "slow_master" else 0.03
+        )
+        self.model.Params.MIPGap = self.mip_gap
         # NumericFocus 0/1 are prohibited for the exact recourse: clean
         # default reruns exceeded the frozen charge/discharge residual.  The
         # non-committing polyhedral slow master may use 0; its selected slow
@@ -3165,9 +3225,13 @@ class _PersistentMilpModel:
                 if int(self.model.IsMIP) != 0
                 else 0.0
             )
-            if not status_ok or not math.isfinite(gap) or gap > 0.03 + 1e-12:
+            if (
+                not status_ok
+                or not math.isfinite(gap)
+                or gap > self.mip_gap + 1e-12
+            ):
                 raise RuntimeContractError(
-                    "persistent MILP lacks the frozen 3% certificate: "
+                    "persistent MILP lacks its configured gap certificate: "
                     f"status={_status_name(self.GRB, self.model.Status)} gap={gap}"
                 )
             separation_started = time.monotonic()
