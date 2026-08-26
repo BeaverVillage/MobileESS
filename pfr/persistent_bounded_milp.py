@@ -1042,6 +1042,8 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         admission_screen_solve_seconds = 0.0
         admission_screen_total_seconds = 0.0
         admission_screen_model_build_seconds = 0.0
+        candidate_attempt_timings: list[Mapping[str, Any]] = []
+        candidate_search_started = time.monotonic()
         expansion_grid = self._candidate_expansion_grid()
         for candidate_limit in expansion_grid:
             if self.candidate_limit != candidate_limit:
@@ -1052,6 +1054,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             )
             attempted.append(candidate_limit)
             try:
+                attempt_started = time.monotonic()
                 plan, certificate = self._solve_current_candidate_limit(
                     state=state,
                     config=config,
@@ -1059,6 +1062,17 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     migration_authority=migration_authority,
                     evaluation_steps_remaining=evaluation_steps_remaining,
                     admission_screen_only=admission_screen_only,
+                )
+                candidate_attempt_timings.append(
+                    {
+                        "candidate_limit_k": candidate_limit,
+                        "mode": (
+                            "ADMISSION_SCREEN"
+                            if admission_screen_only
+                            else "FULL_LEXICOGRAPHIC_RECOURSE"
+                        ),
+                        "wall_seconds": time.monotonic() - attempt_started,
+                    }
                 )
                 if admission_screen_only:
                     admission_screen_attempts.append(candidate_limit)
@@ -1086,12 +1100,20 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     ) > screen_unavoidable:
                         deferred_expansion_attempts += 1
                         continue
+                    attempt_started = time.monotonic()
                     plan, certificate = self._solve_current_candidate_limit(
                         state=state,
                         config=config,
                         frame=frame,
                         migration_authority=migration_authority,
                         evaluation_steps_remaining=evaluation_steps_remaining,
+                    )
+                    candidate_attempt_timings.append(
+                        {
+                            "candidate_limit_k": candidate_limit,
+                            "mode": "FULL_LEXICOGRAPHIC_RECOURSE",
+                            "wall_seconds": time.monotonic() - attempt_started,
+                        }
                     )
             except RuntimeContractError as error:
                 if not self._is_candidate_truncation_infeasibility(error):
@@ -1155,6 +1177,12 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     ),
                     "candidate_limit_admission_screen_model_build_seconds": (
                         admission_screen_model_build_seconds
+                    ),
+                    "candidate_limit_attempt_timings": list(
+                        candidate_attempt_timings
+                    ),
+                    "candidate_limit_search_total_seconds": (
+                        time.monotonic() - candidate_search_started
                     ),
                     "candidate_limit_unavoidable_deferred_job_count": (
                         unavoidable_deferred
