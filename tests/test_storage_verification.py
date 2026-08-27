@@ -8,6 +8,7 @@ from pfr.tools.verify_daily_campaign_storage import (
     inspect_campaign_registry,
     inspect_day,
     inspect_method,
+    requires_rebound_authority,
 )
 from pfr.risk_calibration import RISK_FAMILY_SCALES
 
@@ -267,3 +268,11 @@ def test_b6_and_b07_risk_calibration_storage_arithmetic_is_verified() -> None:
         assert f"{method} risk joint score arithmetic mismatch" in (
             _risk_calibration_evidence_errors(marker)
         )
+
+
+def test_single_method_energy_flex_diagnostics_exempt_missing_shadow_only() -> None:
+    for method in ("B01", "B05", "B06", "B07", "B08", "B09", "B6"):
+        assert requires_rebound_authority(method) is False
+    assert requires_rebound_authority("B00") is True
+    assert requires_rebound_authority("B04") is True
+    assert requires_rebound_authority(None) is True

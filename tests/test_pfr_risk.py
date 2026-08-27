@@ -77,6 +77,47 @@ class RiskMonitorTests(unittest.TestCase):
         )
         self.assertEqual(decision.trigger_causes, ("MAXIMUM_REFRESH",))
 
+    def test_retained_plan_does_not_retrigger_unchanged_positive_family(self):
+        monitor = PlanValidityRiskMonitor(
+            calibrated=False, maximum_refresh_steps=12
+        )
+        positive = constraints(raw_margin=0.01)
+        first = monitor.evaluate(
+            constraints=positive,
+            expected_replan_benefit=0,
+            replan_cost=ReplanCost(1, 1, 1, 0),
+            plan_age_steps=0,
+        )
+        retained = dict(first.raw_components)
+        repeated = monitor.evaluate(
+            constraints=positive,
+            expected_replan_benefit=0,
+            replan_cost=ReplanCost(1, 1, 1, 0),
+            plan_age_steps=1,
+            retained_plan_components=retained,
+            trigger_armed={name: False for name in retained},
+        )
+        self.assertFalse(repeated.request_full_replan)
+
+    def test_retained_plan_retriggers_material_deterioration(self):
+        monitor = PlanValidityRiskMonitor(
+            calibrated=False, maximum_refresh_steps=12
+        )
+        retained = {family.value: 0.1 for family in RiskFamily}
+        decision = monitor.evaluate(
+            constraints=constraints(raw_margin=0.04),
+            expected_replan_benefit=0,
+            replan_cost=ReplanCost(1, 1, 1, 0),
+            plan_age_steps=1,
+            retained_plan_components=retained,
+            trigger_armed={name: False for name in retained},
+            material_deterioration=0.25,
+        )
+        self.assertTrue(decision.request_full_replan)
+        self.assertIn(
+            "RETAINED_PLAN_RISK_INVALIDATED", decision.trigger_causes
+        )
+
     def test_all_six_families_are_mandatory(self):
         with self.assertRaises(RiskContractError):
             PlanValidityRiskMonitor(calibrated=True, maximum_refresh_steps=12).evaluate(

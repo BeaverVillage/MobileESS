@@ -16,7 +16,13 @@ import shutil
 import statistics
 import subprocess
 import sys
+import time
 from typing import Any, Mapping, Optional, Sequence
+
+try:
+    import fcntl
+except ImportError:  # pragma: no cover - production campaigns run under WSL.
+    fcntl = None
 
 import numpy as np
 import pandas as pd
@@ -114,6 +120,96 @@ def _load_exact_module(repo: Path, exact_package_root: Path):
     sys.path.insert(0, str(support))
     sys.path.insert(0, str(science))
     return importlib.import_module("EXACT_GRID_RUNNER_24SERVICE")
+
+
+def _prepare_shared_exact_sources(
+    *,
+    exact: Any,
+    campaign_root: Path,
+    authority_package_root: Path,
+    exact_package_root: Path,
+    primary_root: Path,
+    source_commit_sha: str,
+) -> Mapping[str, str]:
+    """Prepare immutable Fresh-OpenDSS sources once per daily campaign.
+
+    ``prepare_sources`` verifies and extracts the same large authority archives
+    for every independent day.  Six concurrent cold starts previously scanned
+    and unpacked that Windows-mounted tree six times, causing ENOMEM before the
+    solver started.  The extracted arrays and DSS assets are read-only during
+    every solve, so serialize the one preparation and let all day workers reuse
+    the verified paths.  A campaign-specific root and source/input identity
+    marker prevent reuse across experiments.
+    """
+
+    if fcntl is None:
+        raise RuntimeError("shared exact-source preparation requires POSIX locking")
+    campaign_root = campaign_root.resolve()
+    source_work = campaign_root / "_SHARED_EXACT_SOURCE_WORK"
+    marker_path = source_work / "PREPARED_PATHS.json"
+    lock_path = campaign_root / ".EXACT_SOURCE_PREPARE.lock"
+    expected = {
+        "source_commit_sha": str(source_commit_sha),
+        "authority_package_root": str(authority_package_root.resolve()),
+        "exact_package_root": str(exact_package_root.resolve()),
+        "primary_root": str(primary_root.resolve()),
+    }
+
+    campaign_root.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("a+", encoding="utf-8") as lock_handle:
+        fcntl.flock(lock_handle.fileno(), fcntl.LOCK_EX)
+        if marker_path.is_file():
+            try:
+                marker = json_load(marker_path)
+                cached_paths = {
+                    str(key): str(value)
+                    for key, value in marker.get("paths", {}).items()
+                }
+                if (
+                    marker.get("status") == "PASS"
+                    and all(marker.get(key) == value for key, value in expected.items())
+                    and cached_paths
+                    and all(Path(value).exists() for value in cached_paths.values())
+                ):
+                    return cached_paths
+            except (OSError, ValueError, TypeError):
+                pass
+
+        if source_work.exists():
+            shutil.rmtree(source_work)
+        source_work.mkdir(parents=True)
+        started = time.monotonic()
+        prepared_paths = {
+            str(key): str(value)
+            for key, value in exact.prepare_sources(
+                authority_package_root.resolve(),
+                source_work,
+                v2038_root=str(exact_package_root.resolve()),
+                primary_root=str(primary_root.resolve()),
+            ).items()
+        }
+        missing = [
+            value for value in prepared_paths.values() if not Path(value).exists()
+        ]
+        if missing:
+            raise RuntimeError(
+                f"shared exact-source preparation returned missing paths: {missing}"
+            )
+        marker = {
+            "schema_version": "PFR_SHARED_EXACT_SOURCE_PREPARATION_V1",
+            "status": "PASS",
+            **expected,
+            "paths": prepared_paths,
+            "preparation_seconds": time.monotonic() - started,
+            "prepared_by_pid": os.getpid(),
+        }
+        temporary = marker_path.with_name(f"{marker_path.name}.tmp.{os.getpid()}")
+        temporary.write_text(
+            json.dumps(marker, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        temporary.replace(marker_path)
+        return prepared_paths
 
 
 class ExactOpenDssBackend:
@@ -1075,6 +1171,10 @@ class ExactOpenDssBackend:
         )
         combined = dict(raw)
         combined.update({
+            "facility_p_kw": [float(value) for value in facility_p_kw],
+            "facility_q_kvar": [float(value) for value in facility_q_kvar],
+            "facility_power_factor_assumption": 0.95,
+            "facility_pue_assumption": 1.30,
             "robust_grid_fresh_opendss": bool(robust_background_p_kw),
             "robust_grid_role": "CAUSAL_PLAN_VALIDITY_DIAGNOSTIC_NOT_H0_COMMIT_GATE",
             "robust_grid_hard_constraint_pass": bool(robust["hard_constraint_pass"]),
@@ -1449,6 +1549,25 @@ def main() -> None:
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--candidate-id", default="JAN2025_DAY01")
     parser.add_argument(
+        "--evaluation-period-id",
+        help="Frozen V14 evaluation period identity bound into every result.",
+    )
+    parser.add_argument(
+        "--final-evaluation-authority",
+        type=Path,
+        help="Frozen final-evaluation authority; required by the March launcher.",
+    )
+    parser.add_argument(
+        "--calendar-date",
+        help="Simulation-local AEST calendar date (YYYY-MM-DD) for daily output grouping.",
+    )
+    parser.add_argument(
+        "--h0-fidelity-audit-every-steps",
+        type=int,
+        default=0,
+        help="Sample aligned same-action surrogate/Fresh-AC candidates; 0 disables.",
+    )
+    parser.add_argument(
         "--diagnostic-method",
         choices=(
             tuple(method.value for method in ComparisonMethod)
@@ -1654,6 +1773,42 @@ def main() -> None:
     if args.count <= 0:
         parser.error("--count must be positive")
     repo = args.repo.resolve()
+    final_evaluation_authority = None
+    final_evaluation_authority_path = None
+    if args.final_evaluation_authority is not None:
+        final_evaluation_authority_path = args.final_evaluation_authority.resolve()
+        final_evaluation_authority = json_load(final_evaluation_authority_path)
+        if (
+            final_evaluation_authority.get("identity")
+            != "MARCH_2025_FINAL_EVALUATION_AUTHORITY_V2"
+            or final_evaluation_authority.get("scientific_framework_id")
+            != "V14_AI_ICPS"
+            or final_evaluation_authority.get("status")
+            != "FROZEN_FINAL_EVALUATION_AUTHORIZED"
+            or final_evaluation_authority.get(
+                "main_scientific_campaign_authorized"
+            )
+            is not True
+            or final_evaluation_authority.get("independent_holdout_claim")
+            is not False
+            or args.evaluation_period_id
+            != final_evaluation_authority.get("evaluation_period_id")
+        ):
+            raise RuntimeError("March final-evaluation authority is invalid")
+        if args.calendar_date is None or not (
+            str(final_evaluation_authority["calendar_date_first"])
+            <= args.calendar_date
+            <= str(final_evaluation_authority["calendar_date_last"])
+        ):
+            raise RuntimeError("calendar date is outside final-evaluation authority")
+        if not args.electrical_stress_campaign:
+            raise RuntimeError(
+                "final-evaluation authority requires the full B00-B09 campaign"
+            )
+    elif args.evaluation_period_id is not None:
+        raise RuntimeError(
+            "--evaluation-period-id requires --final-evaluation-authority"
+        )
     migration_authority_path = (
         args.migration_authority.resolve()
         if args.migration_authority is not None
@@ -1759,17 +1914,32 @@ def main() -> None:
             "authority. The pending-control flag is restricted to an explicit "
             "single-method engineering diagnostic."
         )
+    final_evaluation_authorized = final_evaluation_authority is not None
+    campaign_authorized = bool(
+        frozen_control_authorized or final_evaluation_authorized
+    )
+    evaluation_classification = (
+        str(final_evaluation_authority["evaluation_classification"])
+        if final_evaluation_authority is not None
+        else str(native_control_contract["evaluation_classification"])
+    )
+    evaluation_period_id = (
+        str(args.evaluation_period_id)
+        if args.evaluation_period_id is not None
+        else str(args.candidate_id)
+    )
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
     exact = _load_exact_module(repo, args.exact_package_root)
-    source_work = output / "_exact_source_work"
-    if source_work.exists():
-        shutil.rmtree(source_work)
-    source_work.mkdir(parents=True)
-    paths = exact.prepare_sources(
-        args.authority_package_root.resolve(), source_work,
-        v2038_root=str(args.exact_package_root.resolve()),
-        primary_root=str(args.primary_root.resolve()),
+    paths = dict(
+        _prepare_shared_exact_sources(
+            exact=exact,
+            campaign_root=output.parent,
+            authority_package_root=args.authority_package_root,
+            exact_package_root=args.exact_package_root,
+            primary_root=args.primary_root,
+            source_commit_sha=str(source_identity["git_full_commit_sha"]),
+        )
     )
     if (
         native_control_contract.get("common_to_B0_B7") is not True
@@ -1905,8 +2075,16 @@ def main() -> None:
         migration_authority=migration_authority,
     )
     evaluation_contract = {
+        "scientific_framework_id": "V14_AI_ICPS",
+        "evaluation_period_id": evaluation_period_id,
+        "final_evaluation_authority_sha256": (
+            sha256(final_evaluation_authority_path)
+            if final_evaluation_authority_path is not None
+            else None
+        ),
         "gpu_capacity_per_idc_modeled": 256,
-        "facility_power_factor_assumption": 1.0,
+        "facility_power_factor_assumption": 0.95,
+        "facility_pue_assumption": 1.30,
         "mess_discharge_kw_when_enabled": 20.0,
         "maximum_refresh_steps": 6,
         "future_actual_used": False,
@@ -1989,11 +2167,9 @@ def main() -> None:
         ),
         "non_temporal_compute_modulation_allowed": False,
         "native_grid_control_release_status": native_control_contract["status"],
-        "main_scientific_campaign_authorized": frozen_control_authorized,
+        "main_scientific_campaign_authorized": campaign_authorized,
         "january_2025_post_hoc_validation_authorized": post_hoc_control_authorized,
-        "evaluation_classification": native_control_contract[
-            "evaluation_classification"
-        ],
+        "evaluation_classification": evaluation_classification,
         "common_native_grid_control_applied_to": (
             [f"B{index:02d}" for index in range(10)]
             if args.electrical_stress_campaign
@@ -2066,6 +2242,10 @@ def main() -> None:
         mobility_execution_authority=mobility_execution,
         risk_calibration_authority=risk_calibration,
         joint_planner=retained_h54,
+        h0_fidelity_audit_every_steps=args.h0_fidelity_audit_every_steps,
+        evaluation_period_id=evaluation_period_id,
+        source_commit_sha=source_identity["git_full_commit_sha"],
+        objective_contract_sha256=contract_sha,
     )
     factory = MethodFactory(authority)
     configs = (
@@ -2090,6 +2270,7 @@ def main() -> None:
             initial=initial,
             representative_week_id=args.candidate_id,
             output=output,
+            simulation_calendar_date=args.calendar_date,
             diagnostic_resume_state=diagnostic_resume_state,
             diagnostic_resume_cumulative_grid_cost_aud=(
                 diagnostic_resume_cumulative_grid_cost_aud
@@ -2157,6 +2338,7 @@ def main() -> None:
             initial=initial,
             representative_week_id=args.candidate_id,
             output=output,
+            simulation_calendar_date=args.calendar_date,
             reuse_passed_methods=args.reuse_passed_methods,
         )
     manifest = {
@@ -2487,9 +2669,20 @@ def main() -> None:
         "physical_execution_authority_version": (
             "V13_13_POST_HOC_P100_FEEDER_SCALE_NATIVE_ELASTIC_AC_FREEZE_20260823"
         ),
-        "evaluation_classification": native_control_contract[
-            "evaluation_classification"
-        ],
+        "scientific_framework_id": "V14_AI_ICPS",
+        "evaluation_period_id": evaluation_period_id,
+        "final_evaluation_authority_path": (
+            str(final_evaluation_authority_path)
+            if final_evaluation_authority_path is not None
+            else None
+        ),
+        "final_evaluation_authority_sha256": (
+            sha256(final_evaluation_authority_path)
+            if final_evaluation_authority_path is not None
+            else None
+        ),
+        "main_scientific_campaign_authorized": campaign_authorized,
+        "evaluation_classification": evaluation_classification,
         "independent_holdout_claim": False,
         "common_native_grid_control": {
             "identity": native_control_contract["identity"],
@@ -2503,6 +2696,9 @@ def main() -> None:
             "asset_audit_sha256": sha256(native_asset_audit),
             "release_status": native_control_contract["status"],
             "main_scientific_campaign_authorized": frozen_control_authorized,
+            "authorized_via_final_evaluation_authority": (
+                final_evaluation_authorized
+            ),
             "january_2025_post_hoc_validation_authorized": post_hoc_control_authorized,
             "diagnostic_candidate_override": pending_diagnostic_authorized,
         },

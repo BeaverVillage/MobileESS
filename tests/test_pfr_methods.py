@@ -6,6 +6,7 @@ from pfr.methods import (
     ElectricalStressMethod,
     ExperimentAuthority,
     K9H7ResultIdentityV2,
+    K9H7ResultIdentityV3,
     MethodContractError,
     MethodFactory,
 )
@@ -102,6 +103,29 @@ class MethodFactoryTests(unittest.TestCase):
         )
         with self.assertRaises(MethodContractError):
             identity.validate()
+
+    def test_v14_identity_binds_episode_and_day_issue(self):
+        config = self.factory.create(ComparisonMethod.B7)
+        identity = K9H7ResultIdentityV3.for_method(
+            config,
+            controller_id="pfr-v14",
+            representative_week_id="MAR2025_DAY01",
+            evaluation_period_id="MAR2025_FINAL",
+            source_commit_sha="a" * 40,
+            objective_contract_sha256="b" * 64,
+            calibration_fingerprint="c" * 64,
+            calendar_date="2025-03-01",
+        )
+
+        first = identity.for_day_issue(0)
+        second = identity.for_day_issue(1)
+
+        self.assertEqual(identity.scientific_framework_id, "V14_AI_ICPS")
+        self.assertEqual(identity.schema_version, "K9H7_RESULT_V3")
+        self.assertEqual(first["evaluation_period_id"], "MAR2025_FINAL")
+        self.assertEqual(first["day_issue_index"], 0)
+        self.assertNotEqual(first["result_uid"], second["result_uid"])
+        self.assertEqual(first["episode_result_uid"], second["episode_result_uid"])
 
     def test_electrical_stress_registry_is_b00_through_b09(self):
         configs = self.factory.electrical_stress_campaign()

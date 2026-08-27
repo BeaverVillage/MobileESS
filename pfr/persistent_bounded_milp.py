@@ -14,7 +14,7 @@ import math
 import os
 from pathlib import Path
 import time
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Callable, Mapping, Optional, Sequence
 
 import numpy as np
 
@@ -48,6 +48,7 @@ from .runtime import (
     RuntimeContractError,
     STEP_HOURS,
     _effective_job_site,
+    _optimize_job_migrations,
 )
 from .slow_fast import SlowDiscretePlan
 
@@ -56,6 +57,17 @@ ADAPTER_ID = "HIERARCHICAL_MOVE_BLOCKED_MIXED_INTEGER_H54_MPC_V1"
 SOLVER_CONTRACT = "HIERARCHICAL_MOVE_BLOCKED_MIXED_INTEGER_MPC_V1"
 MAX_ONLINE_QUEUED_JOBS = 16
 MAX_DYNAMIC_QUEUED_JOB_SLOTS = 1024
+JOB_SLOT_GROWTH_BLOCK = 32
+BURST_VISIBLE_QUEUE_THRESHOLD = 128
+# The production topology is six independent day workers with two Gurobi
+# threads each on eight physical cores.  The final two affinity groups must
+# therefore share physical cores with earlier workers even though their
+# logical CPUs are disjoint.  January issue 2517 completed in about 64 seconds
+# in isolation but reached the former 90-second watchdog before completing all
+# lexicographic priorities under that required 6x2 topology.  This larger
+# budget is restricted to the already-defined burst queue and remains one half
+# of the physical five-minute control interval; normal issues stay at 60 s.
+BURST_PLANNER_WALL_BUDGET_SECONDS = 150.0
 MAX_SEPARATION_ROUNDS = 12
 SEPARATION_GAP_PARTITIONS = 16
 GLOBAL_ASSET_REFINEMENT_DIRECTIONS = 64
@@ -77,6 +89,122 @@ EXCLUSIVITY_TOLERANCE_KW = 1e-4
 MAX_EXACT_QCP_FEASIBILITY_RESTORATION_ROUNDS = 4
 P_MAX = 550.0
 ETA_DISCHARGE = 0.95
+# A 3% discrete master gap can hide the entire marginal value of mobility:
+# the February counterfactual exposed a 2.97% stress improvement that Gurobi
+# was allowed to treat as equivalent to STAY.  Keep the published 3% ceiling
+# for the continuous recourse certificate, but solve route/workload binaries
+# to a sub-percent gap so an enabled flexibility is actually compared.
+SLOW_MASTER_MIP_GAP = 0.001
+# The frozen objective authority permits a certified 3% gap at every
+# lexicographic priority. Keep the stricter sub-percent requirement for the
+# admission/primary/exposure passes so marginal mobility remains visible, but
+# do not spend the watchdog proving the tertiary tie-breaker below 3%.
+TERTIARY_ACTUATION_MIP_GAP = 0.03
+# K is per MESS after the V14 independent-fleet redesign.  Four candidates
+# for each of four vehicles retain 16 route binaries in the base model (the
+# same order as the former global K=16 domain) while exposing every vehicle.
+MOBILITY_ROUTE_CANDIDATE_MIN_K = 4
+
+
+def _certified_relative_gap(best: float, bound: float) -> float:
+    if not math.isfinite(best) or not math.isfinite(bound):
+        return math.inf
+    denominator = abs(best)
+    if denominator <= 1e-12:
+        return 0.0 if abs(best - bound) <= 1e-12 else math.inf
+    return abs(best - bound) / denominator
+
+
+def _tertiary_gap_stop_eligible(
+    *,
+    completed_objectives: int,
+    objective_count: int,
+    solution_count: int,
+    best: float,
+    bound: float,
+) -> tuple[bool, float]:
+    gap = _certified_relative_gap(best, bound)
+    return (
+        completed_objectives == objective_count - 1
+        and solution_count >= 1
+        and gap <= TERTIARY_ACTUATION_MIP_GAP,
+        gap,
+    )
+
+
+def _recovery_zero_boundary(
+    *,
+    effective_steps: int,
+    due_issue: int | None,
+    current_issue: int,
+    debt_kwh: float,
+    transit_remaining_steps: int = 0,
+) -> int:
+    """Return the earliest physically reachable debt-zero boundary.
+
+    A vehicle already in transit is disconnected for every remaining transit
+    step.  Its recovery deadline must therefore be deferred until enough
+    connected steps exist after arrival to repay the carried debt at the
+    physical charge limit.  Without this adjustment an expired deadline at
+    boundary one conflicts with the mandatory zero-dispatch transit domain.
+    """
+
+    effective = int(effective_steps)
+    if not 1 <= effective <= PLANNING_HORIZON_STEPS:
+        raise RuntimeContractError("effective episode horizon is invalid")
+    requested = (
+        max(1, min(effective, int(due_issue) - int(current_issue) + 1))
+        if due_issue is not None
+        else effective
+    )
+    if float(debt_kwh) <= 1e-9 or int(transit_remaining_steps) <= 0:
+        return requested
+    recovery_per_step_kwh = MESS_CHARGE_EFFICIENCY * STEP_HOURS * P_MAX
+    charge_steps = max(
+        1,
+        int(math.ceil((float(debt_kwh) - 1e-12) / recovery_per_step_kwh)),
+    )
+    earliest_physical = int(transit_remaining_steps) + charge_steps
+    return max(requested, min(effective, earliest_physical))
+
+
+def _resident_job_slot_capacity(visible_queue: int) -> int:
+    """Round the live queue to a small reusable block without dummy bloat."""
+
+    required = min(
+        MAX_DYNAMIC_QUEUED_JOB_SLOTS,
+        max(MAX_ONLINE_QUEUED_JOBS, int(visible_queue)),
+    )
+    if required <= MAX_ONLINE_QUEUED_JOBS:
+        return MAX_ONLINE_QUEUED_JOBS
+    return min(
+        MAX_DYNAMIC_QUEUED_JOB_SLOTS,
+        (
+            (required + JOB_SLOT_GROWTH_BLOCK - 1)
+            // JOB_SLOT_GROWTH_BLOCK
+        )
+        * JOB_SLOT_GROWTH_BLOCK,
+    )
+
+
+def _resident_candidate_axis_capacity(
+    *,
+    job_slots: int,
+    active_candidate_k: int,
+    adaptive_candidate_max_k: int,
+) -> int:
+    """Build only the live K axis; genuine expansion rebuilds on demand.
+
+    Even with just 16 job slots, preallocating K=64 creates roughly 508k rows
+    and 88k columns because the route dispatch/network skeleton also scales
+    with K.  Inactive bound-fixed columns survive enough of multiobjective
+    presolve to dominate hard root relaxations.  The planner already detects
+    candidate-axis growth and rebuilds both models, so eager preallocation is
+    pure overhead and has no scientific effect.
+    """
+
+    del job_slots, adaptive_candidate_max_k
+    return int(active_candidate_k)
 
 
 @dataclass(frozen=True)
@@ -103,9 +231,46 @@ class _WorkloadOption:
         )
 
 
+def _workload_option_effective_signature(
+    options: Sequence[_WorkloadOption],
+) -> tuple[tuple[Any, ...], ...]:
+    """Identify job options that have identical coefficients inside H54."""
+
+    return tuple(
+        (
+            option.destination,
+            option.rack,
+            option.start_offset,
+            min(
+                PLANNING_HORIZON_STEPS,
+                option.start_offset + option.duration_steps,
+            ),
+            option.it_power_kw,
+            option.requested_gpu,
+            option.wan_schedule_gb,
+            option.wan_required_bytes,
+            option.remote,
+        )
+        for option in options
+    )
+
+
+def _effective_workload_groups(
+    option_sets: Sequence[Sequence[_WorkloadOption]],
+) -> tuple[tuple[int, ...], ...]:
+    """Group jobs whose complete H54 option columns are interchangeable."""
+
+    groups: dict[tuple[tuple[Any, ...], ...], list[int]] = {}
+    for job_index, options in enumerate(option_sets):
+        signature = _workload_option_effective_signature(options)
+        groups.setdefault(signature, []).append(job_index)
+    return tuple(tuple(indices) for indices in groups.values())
+
+
 @dataclass(frozen=True)
 class _PreparedOnlineDomain:
-    route_options: tuple[_MobilityTemplate, ...]
+    effective_steps: int
+    route_options: Mapping[str, tuple[_MobilityTemplate, ...]]
     queued_job_ids: tuple[str, ...]
     deferred_queued_job_ids: tuple[str, ...]
     job_options: tuple[tuple[_WorkloadOption, ...], ...]
@@ -116,6 +281,30 @@ class _PreparedOnlineDomain:
     wan_capacity_gb: np.ndarray
     route_audit: Mapping[str, Any]
     workload_audit: Mapping[str, Any]
+
+
+def _episode_terminal_debt_rhs(
+    effective_steps: int,
+    horizon_steps: int = PLANNING_HORIZON_STEPS,
+    *,
+    additional_zero_boundaries: Sequence[int] = (),
+) -> tuple[float, ...]:
+    """Return debt bounds at the episode end and fixed recovery deadlines."""
+
+    effective = int(effective_steps)
+    horizon = int(horizon_steps)
+    if not 1 <= effective <= horizon:
+        raise RuntimeContractError("effective episode horizon is invalid")
+    zero_boundaries = {effective}
+    zero_boundaries.update(
+        int(boundary)
+        for boundary in additional_zero_boundaries
+        if 1 <= int(boundary) <= effective
+    )
+    return tuple(
+        0.0 if boundary in zero_boundaries else MESS_CAPACITY_KWH
+        for boundary in range(1, horizon + 1)
+    )
 
 
 def _status_name(grb: Any, status: int) -> str:
@@ -192,6 +381,44 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             if stale is not None:
                 stale.model.dispose()
 
+    def _reset_method_model_solutions(self, method_key: str) -> int:
+        """Cold-start retained models without rebuilding their skeletons.
+
+        Gurobi ``Model.reset()`` discards solution and reoptimization state so
+        the next optimize starts from scratch.  Variables, constraints, and
+        the exact recourse topology remain unchanged, avoiding the measured
+        17-second construction cost of two large replacement models.
+        """
+
+        reset_count = 0
+        for models in (self._master_models, self._recourse_models):
+            retained = models.get(method_key)
+            if retained is not None:
+                retained.model.reset()
+                reset_count += 1
+        return reset_count
+
+    def _periodic_reset_method_models(self, method_key: str) -> int:
+        """Reset every retained model for a completed full-solve generation.
+
+        Exact recourse is created by every full solve, whereas the slow master
+        is intentionally absent while the discrete domain is forced.  A
+        recourse-only retained state is therefore valid and must not fail the
+        periodic numerical reset.  A master-only state is not reachable after
+        a completed full solve and remains fail-closed.
+        """
+
+        if method_key not in self._recourse_models:
+            raise RuntimeContractError(
+                "periodic numerical reset requires the retained exact recourse model"
+            )
+        reset_count = self._reset_method_model_solutions(method_key)
+        if reset_count not in (1, 2):
+            raise RuntimeContractError(
+                "periodic numerical reset found an invalid retained-model count"
+            )
+        return reset_count
+
     @staticmethod
     def _shared_watchdog_budgets(
         total_seconds: float,
@@ -243,6 +470,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         occupied_power = {rack: 0.0 for rack in rack_rows}
         assigned = 0
         capacity_blocked = 0
+        migrating_reservations = 0
 
         def is_ready(uid: str, job: Any) -> bool:
             if job.lifecycle != "QUEUED":
@@ -255,30 +483,44 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 state.active_plan.job_start_issue.get(uid, state.issue)
             )
 
+        def materialization_priority(item: tuple[str, Any]) -> tuple[Any, ...]:
+            uid, job = item
+            current_is_physical = str(job.logical_rack_id) in rack_rows
+            if job.lifecycle != "MIGRATING" and current_is_physical:
+                placement_class = 0
+            elif job.lifecycle in {"MIGRATING", "RESTARTING"}:
+                placement_class = 1
+            else:
+                placement_class = 2
+            return (
+                placement_class,
+                job.lifecycle == "QUEUED",
+                (
+                    job.lifecycle == "QUEUED"
+                    and not current_is_physical
+                ),
+                job.source.latest_start_step,
+                job.source.deadline_step,
+                job.source.arrival_step,
+                uid,
+            )
+
         ordered = sorted(
             (
                 (uid, job)
                 for uid, job in state.jobs.items()
                 if job.lifecycle != "COMPLETED" and is_ready(uid, job)
             ),
-            key=lambda item: (
-                item[1].lifecycle == "QUEUED",
-                (
-                    item[1].lifecycle == "QUEUED"
-                    and str(item[1].logical_rack_id) not in rack_rows
-                ),
-                item[1].source.latest_start_step,
-                item[1].source.deadline_step,
-                item[1].source.arrival_step,
-                item[0],
-            ),
+            key=materialization_priority,
         )
         for uid, job in ordered:
+            reserving_migration = job.lifecycle == "MIGRATING"
             destination = _effective_job_site(job)
             row = self._scope_job(uid, job)
             power_kw = (
                 float(row["IT_power_kW"])
-                if job.lifecycle in {"RUNNING", "QUEUED"}
+                if job.lifecycle
+                in {"RUNNING", "QUEUED", "MIGRATING", "RESTARTING"}
                 else 0.0
             )
             gpu = int(job.source.requested_gpu)
@@ -286,7 +528,10 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 item
                 for item in self.scope["domains"][uid]
                 if (
-                    config.spatial_workload_migration
+                    (
+                        job.lifecycle == "QUEUED"
+                        and config.spatial_workload_migration
+                    )
                     or str(item["destination_IDC_id"]) == destination
                 )
             ]
@@ -294,12 +539,17 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 {str(item["rack_pool_id"]) for item in admissible_rows}
             )
             current = str(job.logical_rack_id)
-            if current in rack_rows:
+            if current in rack_rows and current in allowed:
+                if reserving_migration:
+                    raise RuntimeContractError(
+                        f"migrating job {uid} was teleported before transfer completion"
+                    )
+                selected = current
+            elif current in rack_rows and not reserving_migration:
                 if current not in allowed:
                     raise RuntimeContractError(
                         f"job {uid} physical rack is outside its retained domain"
                     )
-                selected = current
             else:
                 feasible = [
                     rack
@@ -311,6 +561,10 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     <= float(rack_rows[rack].rack_power_cap_kw) + 1e-9
                 ]
                 if not feasible:
+                    if reserving_migration:
+                        raise RuntimeContractError(
+                            f"migrating job {uid} cannot reserve a destination physical rack"
+                        )
                     if job.lifecycle != "QUEUED":
                         raise RuntimeContractError(
                             f"running job {uid} cannot be placed in its physical rack domain"
@@ -333,13 +587,27 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                         rack,
                     ),
                 )
+                if reserving_migration:
+                    # Checkpoint transfer releases the source rack, while the
+                    # common scheduler already reserves aggregate GPU at the
+                    # destination IDC.  Mirror that reservation at rack level
+                    # without teleporting runtime state: transfer completion
+                    # changes the logical rack to the destination pool, and
+                    # RESTARTING materializes the physical rack next issue.
+                    migrating_reservations += 1
+                    occupied_gpu[selected] += gpu
+                    occupied_power[selected] += power_kw
+                    continue
                 selected_destination = str(
                     rack_rows[selected].idc_id
                 )
                 if selected_destination != destination:
-                    if not config.spatial_workload_migration:
+                    if (
+                        job.lifecycle != "QUEUED"
+                        or not config.spatial_workload_migration
+                    ):
                         raise RuntimeContractError(
-                            "non-spatial method selected a remote admission rack"
+                            "non-queued job changed IDC during rack materialization"
                         )
                     job.destination_idc = selected_destination
                     job.migration_state = (
@@ -365,10 +633,67 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 )
         return {
             "assigned_jobs": assigned,
+            "migrating_destination_rack_reservations": migrating_reservations,
             "capacity_blocked_jobs": capacity_blocked,
             "occupied_gpu_by_rack": occupied_gpu,
             "occupied_power_kw_by_rack": occupied_power,
         }
+
+    def _migration_candidate_rack_feasible(
+        self,
+        *,
+        state: MutableMethodState,
+        candidate_uid: str,
+        destination: str,
+        planned_racks: Mapping[str, str],
+    ) -> bool:
+        """Screen checkpoint migration against indivisible rack capacity.
+
+        The common migration authority balances aggregate IDC GPU.  A whole
+        gang additionally needs one admissible physical rack.  Reserve around
+        every rack already selected by the H54 plan, including queued gangs,
+        so a migration cannot be accepted and then fail at transfer/restart.
+        """
+
+        self._initialize()
+        rack_rows = {
+            str(row.rack_pool_id): row
+            for row in self.scope["cap"].itertuples(index=False)
+        }
+        occupied_gpu = {rack: 0.0 for rack in rack_rows}
+        occupied_power = {rack: 0.0 for rack in rack_rows}
+        for uid, rack in planned_racks.items():
+            if uid == candidate_uid or rack not in rack_rows:
+                continue
+            job = state.jobs[uid]
+            if job.lifecycle in {"COMPLETED", "MIGRATING"}:
+                continue
+            row = self._scope_job(uid, job)
+            occupied_gpu[rack] += int(job.source.requested_gpu)
+            occupied_power[rack] += (
+                float(row["IT_power_kW"])
+                if job.lifecycle in {"RUNNING", "QUEUED", "RESTARTING"}
+                else 0.0
+            )
+
+        candidate = state.jobs[candidate_uid]
+        candidate_row = self._scope_job(candidate_uid, candidate)
+        candidate_gpu = int(candidate.source.requested_gpu)
+        candidate_power = float(candidate_row["IT_power_kW"])
+        allowed = sorted(
+            {
+                str(item["rack_pool_id"])
+                for item in self.scope["domains"][candidate_uid]
+                if str(item["destination_IDC_id"]) == destination
+            }
+        )
+        return any(
+            occupied_gpu[rack] + candidate_gpu
+            <= float(rack_rows[rack].deliverable_active_gpu_capacity) + 1e-9
+            and occupied_power[rack] + candidate_power
+            <= float(rack_rows[rack].rack_power_cap_kw) + 1e-9
+            for rack in allowed
+        )
 
     def _issue_kernel(
         self,
@@ -394,10 +719,113 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             self.ar2, self.b6, reference, self.b4
         )
         kernel = _RadialStressKernel(static, reference)
+        phase_envelope_evidence: dict[str, Any] = {
+            "authority": "BALANCED_REFERENCE_FIRST_ISSUE",
+            "causal_lag_steps": None,
+        }
+        if state.last_exact is not None:
+            previous_vmin = float(state.last_exact["voltage_min_pu"])
+            previous_vmax = float(state.last_exact["voltage_max_pu"])
+            lower_stress = max(0.0, (1.0 - previous_vmin) / 0.05)
+            upper_stress = max(0.0, (previous_vmax - 1.0) / 0.05)
+            balanced_vpu = np.sqrt(kernel.reference_u / kernel.nominal_u)
+            delta_p = np.zeros(len(kernel.nodes), dtype=float)
+            delta_q = np.zeros(len(kernel.nodes), dtype=float)
+            for mid in MESS_IDS:
+                service = state.mess_location[mid]
+                bus = kernel.index[kernel.service_bus[service]]
+                delta_p[bus] -= float(state.last_committed_mess_p_kw[mid])
+                delta_q[bus] -= float(state.last_committed_mess_q_kvar[mid])
+            action_du = (
+                delta_p @ kernel.voltage_p.T
+                + delta_q @ kernel.voltage_q.T
+            )
+            balanced_action_vpu = np.sqrt(
+                np.maximum(kernel.reference_u + action_du, 1e-12)
+                / kernel.nominal_u
+            )
+            if upper_stress >= lower_stress:
+                dominant = "UPPER"
+                shift = previous_vmax - float(np.max(balanced_action_vpu))
+            else:
+                dominant = "LOWER"
+                shift = previous_vmin - float(np.min(balanced_action_vpu))
+            corrected_vpu = balanced_vpu + shift
+            if np.any(corrected_vpu <= 0.0):
+                raise RuntimeContractError("causal phase-envelope correction is invalid")
+            kernel.reference_u = kernel.nominal_u * corrected_vpu**2
+            phase_envelope_evidence = {
+                "authority": "PREVIOUS_COMMITTED_FRESH_AC_PHASE_ENVELOPE",
+                "causal_lag_steps": 1,
+                "dominant_boundary": dominant,
+                "previous_minimum_voltage_pu": previous_vmin,
+                "previous_maximum_voltage_pu": previous_vmax,
+                "balanced_vpu_shift": float(shift),
+                "future_actual_used": False,
+            }
+        kernel.phase_envelope_evidence = phase_envelope_evidence
         self._kernels[method_key] = kernel
         self._kernel_issue[method_key] = int(frame.issue)
         self._static_context_by_method[method_key] = static
         return kernel
+
+    def evaluate_h0_surrogate(
+        self,
+        *,
+        method_key: str,
+        state: MutableMethodState,
+        frame: CausalExperimentFrame,
+        facility_it_kw: Sequence[float],
+        mess_p_kw: Sequence[float],
+        mess_q_kvar: Sequence[float],
+        mess_location: Sequence[str],
+    ) -> Mapping[str, float | str]:
+        """Score one fixed H0 action with the live issue's causal surrogate."""
+
+        if self._kernel_issue.get(method_key) != int(frame.issue):
+            audit_root = (
+                self.output_root
+                / "_H0_FIDELITY"
+                / method_key
+                / f"issue_{frame.issue:06d}"
+            )
+            audit_root.mkdir(parents=True, exist_ok=True)
+            self._issue_kernel(
+                method_key=method_key,
+                state=state,
+                frame=frame,
+                output=audit_root,
+            )
+        kernel = self._kernels[method_key]
+        idc = np.repeat(
+            np.asarray(tuple(facility_it_kw), dtype=float)[None, :],
+            PLANNING_HORIZON_STEPS,
+            axis=0,
+        )
+        mess_p = np.repeat(
+            np.asarray(tuple(mess_p_kw), dtype=float)[None, :],
+            PLANNING_HORIZON_STEPS,
+            axis=0,
+        )
+        mess_q = np.repeat(
+            np.asarray(tuple(mess_q_kvar), dtype=float)[None, :],
+            PLANNING_HORIZON_STEPS,
+            axis=0,
+        )
+        locations = [
+            [str(service)] * PLANNING_HORIZON_STEPS
+            for service in mess_location
+        ]
+        result = kernel.evaluate(frame, idc, mess_p, mess_q, locations)
+        return {
+            "worst": float(result.per_step[0]),
+            "voltage": float(result.voltage[0]),
+            "line": float(result.line[0]),
+            "transformer": float(result.transformer[0]),
+            "phase_envelope_authority": str(
+                kernel.phase_envelope_evidence["authority"]
+            ),
+        }
 
     def _route_domain(
         self,
@@ -409,14 +837,19 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         frame: CausalExperimentFrame,
         effective_steps: int,
         output: Path,
-    ) -> tuple[tuple[_MobilityTemplate, ...], Mapping[str, Any]]:
+    ) -> tuple[
+        Mapping[str, tuple[_MobilityTemplate, ...]],
+        Mapping[str, Any],
+    ]:
         # Reuse the audited causal H54 future-prepositioning generator.  It
         # returns choices, not completed plans; the MILP jointly selects one
         # route with workload placement and continuous dispatch.
         from .compact_h54 import CompactH54JointPlanner
 
         helper = object.__new__(CompactH54JointPlanner)
-        helper.candidate_limit = self.candidate_limit
+        helper.candidate_limit = 1 + len(MOBILITY_ELIGIBLE_MESS_IDS) * max(
+            0, self.candidate_limit - 1
+        )
         helper.science = self.science
         helper.scope = self.scope
         helper._static_context = static
@@ -429,7 +862,46 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             effective_steps=effective_steps,
             output=output,
         )
-        return tuple(routes), dict(audit)
+        per_mess: dict[str, tuple[_MobilityTemplate, ...]] = {}
+        for mid in MOBILITY_ELIGIBLE_MESS_IDS:
+            stay = _MobilityTemplate(
+                departure_offset=None,
+                destination_service_id=(
+                    str(state.mess_route_destination[mid])
+                    if state.mess_in_transit[mid]
+                    else state.mess_location[mid]
+                ),
+                route_rank=int(state.mess_route_rank[mid]),
+                route_slot=None,
+                transit_steps=0,
+                energy_kwh=0.0,
+                source=state.mess_location[mid],
+                generation_reason="MANDATORY_PER_MESS_STAY_OR_COMMITTED_TRANSIT",
+                mess_id=mid,
+            )
+            per_mess[mid] = tuple(
+                [stay]
+                + [
+                    route
+                    for route in routes
+                    if not route.is_stay and route.mess_id == mid
+                ][: max(0, self.candidate_limit - 1)]
+            )
+        route_audit = dict(audit)
+        route_audit.update(
+            {
+                "independent_route_choice_per_mess": True,
+                "new_departure_limit_per_plan": len(MOBILITY_ELIGIBLE_MESS_IDS),
+                "per_mess_domain_size": {
+                    mid: len(options) for mid, options in per_mess.items()
+                },
+                "per_mess_move_candidate_count": {
+                    mid: sum(not option.is_stay for option in options)
+                    for mid, options in per_mess.items()
+                },
+            }
+        )
+        return per_mess, route_audit
 
     def _workload_domain(
         self,
@@ -691,6 +1163,10 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             )
             bounded_removed += len(feasible) - len(selected)
             option_sets.append(tuple(selected))
+        effective_signatures = [
+            _workload_option_effective_signature(options)
+            for options in option_sets
+        ]
         return (
             tuple(uid for uid, _job in queued),
             tuple(uid for uid, _job in deferred_queued),
@@ -721,6 +1197,14 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     migration_authority.dataset_residency_mode
                 ),
                 "queued_remote_placement_transfer_bytes": 0,
+                "effective_workload_symmetry_classes": len(
+                    set(effective_signatures)
+                ),
+                "effective_workload_symmetry_pairs": sum(
+                    effective_signatures[index - 1]
+                    == effective_signatures[index]
+                    for index in range(1, len(effective_signatures))
+                ),
             },
         )
 
@@ -917,6 +1401,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             finally:
                 self.candidate_limit = target_limit
             superset = _PreparedOnlineDomain(
+                effective_steps=int(effective_steps),
                 route_options=routes,
                 queued_job_ids=queued,
                 deferred_queued_job_ids=deferred_queued,
@@ -931,7 +1416,23 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             )
             self._adaptive_domain_cache_by_method[method_key] = (*cache_key, superset)
 
-        routes = tuple(superset.route_options[:target_limit])
+        route_target_limit = target_limit
+        if (
+            bool(config.h54_capability_mask["mess_mobility"])
+            and not self.candidate_limit_frozen
+        ):
+            # Route ranking is only a causal screen.  Unlike workload options,
+            # retaining fewer than K=4 per MESS can erase one vehicle's
+            # destination diversity.  The per-MESS domain is independently
+            # balanced, so K=4 exposes 16 total fleet route binaries.
+            route_target_limit = min(
+                superset_limit,
+                max(target_limit, MOBILITY_ROUTE_CANDIDATE_MIN_K),
+            )
+        routes = {
+            mid: tuple(options[:route_target_limit])
+            for mid, options in superset.route_options.items()
+        }
         options = tuple(
             tuple(job_options[:target_limit])
             for job_options in superset.job_options
@@ -939,23 +1440,65 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         route_audit = dict(superset.route_audit)
         route_audit.update(
             {
-                "candidate_limit_k": target_limit,
-                "bounded_domain_size": len(routes),
+                "candidate_limit_k": route_target_limit,
+                "base_candidate_limit_k": target_limit,
+                "mobility_route_candidate_floor_k": (
+                    MOBILITY_ROUTE_CANDIDATE_MIN_K
+                    if bool(config.h54_capability_mask["mess_mobility"])
+                    and not self.candidate_limit_frozen
+                    else None
+                ),
+                "bounded_domain_size": sum(map(len, routes.values())),
+                "per_mess_domain_size": {
+                    mid: len(options) for mid, options in routes.items()
+                },
+                "per_mess_move_candidate_count": {
+                    mid: sum(not option.is_stay for option in options)
+                    for mid, options in routes.items()
+                },
                 "bounded_truncation_removed": max(
                     0,
                     int(
                         route_audit.get(
-                            "feasibility_preserving_domain_size", len(routes)
+                            "feasibility_preserving_domain_size",
+                            sum(map(len, routes.values())),
                         )
                     )
-                    - len(routes),
+                    - sum(map(len, routes.values())),
                 ),
                 "adaptive_superset_candidate_limit_k": superset_limit,
                 "adaptive_superset_reused": cache_reused,
+                "bounded_candidates": [
+                    {
+                        "mess_id": mid,
+                        "domain_index": index,
+                        "is_stay": option.is_stay,
+                        "departure_offset": option.departure_offset,
+                        "destination_service_id": option.destination_service_id,
+                        "route_rank": option.route_rank,
+                        "transit_steps": option.transit_steps,
+                        "energy_kwh": option.energy_kwh,
+                        "generation_reason": option.generation_reason,
+                    }
+                    for mid, options in routes.items()
+                    for index, option in enumerate(options)
+                ],
+                "selected_actionable_candidate_count": sum(
+                    1
+                    for options in routes.values()
+                    for row in options
+                    if row.departure_offset is not None
+                    and int(row.departure_offset)
+                    < int(route_audit.get("commitment_window_steps", 1))
+                ),
             }
         )
         workload_audit = dict(superset.workload_audit)
         bounded_workload_size = sum(map(len, options))
+        effective_groups = _effective_workload_groups(options)
+        aggregate_option_columns = sum(
+            len(options[group[0]]) for group in effective_groups
+        )
         workload_audit.update(
             {
                 "candidate_limit_k_per_job": target_limit,
@@ -971,9 +1514,16 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 ),
                 "adaptive_superset_candidate_limit_k": superset_limit,
                 "adaptive_superset_reused": cache_reused,
+                "effective_workload_symmetry_classes": len(effective_groups),
+                "slow_master_unaggregated_option_columns": bounded_workload_size,
+                "slow_master_aggregate_option_columns": aggregate_option_columns,
+                "slow_master_option_columns_removed_by_exact_aggregation": (
+                    bounded_workload_size - aggregate_option_columns
+                ),
             }
         )
         return _PreparedOnlineDomain(
+            effective_steps=int(effective_steps),
             route_options=routes,
             queued_job_ids=superset.queued_job_ids,
             deferred_queued_job_ids=superset.deferred_queued_job_ids,
@@ -1033,8 +1583,6 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
 
         method_key = config.comparison_method_id.value
         if self.candidate_limit != self.base_candidate_limit:
-            self._dispose_method_models(method_key)
-            self._model_solve_generation_by_method[method_key] = 0
             self.candidate_limit = self.base_candidate_limit
 
         attempted: list[int] = []
@@ -1044,19 +1592,36 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         admission_screen_solve_seconds = 0.0
         admission_screen_total_seconds = 0.0
         admission_screen_model_build_seconds = 0.0
+        admission_screen_optimum: float | None = None
+        candidate_attempt_timings: list[Mapping[str, Any]] = []
+        candidate_search_started = time.monotonic()
         expansion_grid = self._candidate_expansion_grid()
+        visible_queue = any(
+            job.lifecycle == "QUEUED" for job in state.jobs.values()
+        )
+        capability_mask = getattr(config, "h54_capability_mask", {})
+        compute_admission_enabled = bool(
+            capability_mask.get("spatial_compute", True)
+            or capability_mask.get("temporal_compute", True)
+        )
+        admission_screen_required = (
+            not self.candidate_limit_frozen
+            and visible_queue
+            and compute_admission_enabled
+        )
         for candidate_limit in expansion_grid:
             if self.candidate_limit != candidate_limit:
-                self._dispose_method_models(method_key)
-                self._model_solve_generation_by_method[method_key] = 0
                 self.candidate_limit = candidate_limit
-            admission_screen_only = (
-                bool(attempted)
-                and not self.candidate_limit_frozen
-                and candidate_limit != expansion_grid[-1]
-            )
+            # The admission screen exists only to detect candidate-truncated
+            # queue deferral before the full lexicographic solve.  With no
+            # visible queued jobs the deferred count is identically zero, so
+            # solving the master once as a screen and then again for the full
+            # plan is pure duplicate work.  Route-domain infeasibility remains
+            # protected by the full solve's existing adaptive-K exception path.
+            admission_screen_only = admission_screen_required
             attempted.append(candidate_limit)
             try:
+                attempt_started = time.monotonic()
                 plan, certificate = self._solve_current_candidate_limit(
                     state=state,
                     config=config,
@@ -1064,6 +1629,17 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     migration_authority=migration_authority,
                     evaluation_steps_remaining=evaluation_steps_remaining,
                     admission_screen_only=admission_screen_only,
+                )
+                candidate_attempt_timings.append(
+                    {
+                        "candidate_limit_k": candidate_limit,
+                        "mode": (
+                            "ADMISSION_SCREEN"
+                            if admission_screen_only
+                            else "FULL_LEXICOGRAPHIC_RECOURSE"
+                        ),
+                        "wall_seconds": time.monotonic() - attempt_started,
+                    }
                 )
                 if admission_screen_only:
                     admission_screen_attempts.append(candidate_limit)
@@ -1086,17 +1662,36 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                         if isinstance(screen_workload, Mapping)
                         else 0
                     )
-                    if int(
+                    screen_deferred = int(
                         certificate.get("optimized_deferred_job_count", 0)
-                    ) > screen_unavoidable:
+                    )
+                    admission_screen_optimum = float(
+                        certificate["capacity_admission_gate"]
+                    )
+                    if (
+                        screen_deferred > screen_unavoidable
+                        and candidate_limit != expansion_grid[-1]
+                    ):
                         deferred_expansion_attempts += 1
                         continue
+                    attempt_started = time.monotonic()
                     plan, certificate = self._solve_current_candidate_limit(
                         state=state,
                         config=config,
                         frame=frame,
                         migration_authority=migration_authority,
                         evaluation_steps_remaining=evaluation_steps_remaining,
+                        admission_ceiling_deferred_count=screen_deferred,
+                        admission_ceiling_objective_value=(
+                            admission_screen_optimum
+                        ),
+                    )
+                    candidate_attempt_timings.append(
+                        {
+                            "candidate_limit_k": candidate_limit,
+                            "mode": "FULL_LEXICOGRAPHIC_RECOURSE",
+                            "wall_seconds": time.monotonic() - attempt_started,
+                        }
                     )
             except RuntimeContractError as error:
                 if not self._is_candidate_truncation_infeasibility(error):
@@ -1122,6 +1717,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             )
             if (
                 optimized_deferred > unavoidable_deferred
+                and compute_admission_enabled
                 and not self.candidate_limit_frozen
                 and candidate_limit != expansion_grid[-1]
             ):
@@ -1161,15 +1757,42 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     "candidate_limit_admission_screen_model_build_seconds": (
                         admission_screen_model_build_seconds
                     ),
+                    "candidate_limit_admission_screen_skipped_reason": (
+                        "CANDIDATE_K_FROZEN"
+                        if self.candidate_limit_frozen
+                        else (
+                            "NO_VISIBLE_QUEUED_JOBS"
+                            if not visible_queue
+                            else (
+                                "COMPUTE_CONTROL_CAPABILITY_DISABLED"
+                                if not compute_admission_enabled
+                                else None
+                            )
+                        )
+                    ),
+                    "candidate_limit_attempt_timings": list(
+                        candidate_attempt_timings
+                    ),
+                    "candidate_limit_search_total_seconds": (
+                        time.monotonic() - candidate_search_started
+                    ),
                     "candidate_limit_unavoidable_deferred_job_count": (
                         unavoidable_deferred
                     ),
                     "candidate_limit_expansion_avoided_reason": (
-                        "ONLY_EXACT_INFEASIBLE_WORKLOADS_DEFERRED"
-                        if optimized_deferred > 0
-                        and optimized_deferred == unavoidable_deferred
-                        and len(attempted) == 1
-                        else None
+                        (
+                            "COMPUTE_CONTROL_CAPABILITY_DISABLED"
+                            if optimized_deferred > unavoidable_deferred
+                            and not compute_admission_enabled
+                            and len(attempted) == 1
+                            else (
+                                "ONLY_EXACT_INFEASIBLE_WORKLOADS_DEFERRED"
+                                if optimized_deferred > 0
+                                and optimized_deferred == unavoidable_deferred
+                                and len(attempted) == 1
+                                else None
+                            )
+                        )
                     ),
                     "candidate_limit_expansion_reason": (
                         (
@@ -1198,6 +1821,8 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         migration_authority: Optional[MigrationAuthority],
         evaluation_steps_remaining: int,
         admission_screen_only: bool = False,
+        admission_ceiling_deferred_count: Optional[int] = None,
+        admission_ceiling_objective_value: Optional[float] = None,
     ) -> tuple[Optional[SlowDiscretePlan], Mapping[str, Any]]:
         if migration_authority is None:
             raise RuntimeContractError(
@@ -1212,14 +1837,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         current_slots = self._job_slot_capacity_by_method.get(
             method_key, MAX_ONLINE_QUEUED_JOBS
         )
-        required_slots = min(
-            MAX_DYNAMIC_QUEUED_JOB_SLOTS,
-            max(MAX_ONLINE_QUEUED_JOBS, visible_queue),
-        )
-        grown_slots = min(
-            MAX_DYNAMIC_QUEUED_JOB_SLOTS,
-            1 << (required_slots - 1).bit_length(),
-        )
+        grown_slots = _resident_job_slot_capacity(visible_queue)
         model_refresh_reason: str | None = None
         if grown_slots > current_slots:
             self._dispose_method_models(method_key)
@@ -1231,13 +1849,29 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             >= self.max_persistent_solve_reuses
         ):
             # Gurobi's retained multiobjective reoptimization state can become
-            # substantially slower than a cold model after repeated RHS and
-            # coefficient updates.  Bound that numerical state age without
-            # changing the mathematical model or any accepted decision.
+            # substantially slower after repeated RHS and coefficient updates.
+            # Reset solution/reoptimization state at the frozen 16-solve age,
+            # but retain the immutable model skeleton.  Model.reset() makes
+            # the next optimize a cold start without paying to reconstruct the
+            # same variables and constraints.
+            self._periodic_reset_method_models(method_key)
+            self._model_solve_generation_by_method[method_key] = 0
+            model_refresh_reason = "PERIODIC_NUMERICAL_STATE_RESET"
+        self._job_slot_capacity_by_method[method_key] = current_slots
+        existing_models = tuple(
+            model
+            for model in (
+                self._master_models.get(method_key),
+                self._recourse_models.get(method_key),
+            )
+            if model is not None
+        )
+        if existing_models and any(
+            model.k < self.candidate_limit for model in existing_models
+        ):
             self._dispose_method_models(method_key)
             self._model_solve_generation_by_method[method_key] = 0
-            model_refresh_reason = "PERIODIC_NUMERICAL_STATE_REFRESH"
-        self._job_slot_capacity_by_method[method_key] = current_slots
+            model_refresh_reason = "CANDIDATE_AXIS_GROWTH"
         issue_root = (
             self.output_root
             / "_PERSISTENT_BOUNDED_MILP"
@@ -1271,7 +1905,8 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
         # single placement option can conflict jointly with other gangs or the
         # grid.  The slow master must retain the explicit queue-deferral choice.
         slow_domain_forced = (
-            len(domain.route_options) == 1 and not domain.job_options
+            all(len(options) == 1 for options in domain.route_options.values())
+            and not domain.job_options
         )
         build_seconds = 0.0
         needs_master = (
@@ -1287,7 +1922,18 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 model_refresh_reason = "INITIAL_MODEL_BUILD"
             build_started = time.monotonic()
             common_model_kwargs = {
-                "candidate_limit": self.candidate_limit,
+                # Build only the live K axis.  Genuine candidate expansion is
+                # rare and the CANDIDATE_AXIS_GROWTH path above rebuilds both
+                # models exactly when a larger domain is scientifically needed.
+                "candidate_limit": _resident_candidate_axis_capacity(
+                    job_slots=current_slots,
+                    active_candidate_k=self.candidate_limit,
+                    adaptive_candidate_max_k=(
+                        self.base_candidate_limit
+                        if self.candidate_limit_frozen
+                        else self.adaptive_candidate_max
+                    ),
+                ),
                 "job_slot_capacity": current_slots,
                 "static": self._static_context_by_method[method_key],
                 "kernel": kernel,
@@ -1322,6 +1968,11 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             if master is None:
                 raise RuntimeContractError("slow master model missing")
             master.update(**update_kwargs)
+            if admission_ceiling_deferred_count is not None:
+                master.set_admission_ceiling(
+                    admission_ceiling_deferred_count,
+                    objective_value=admission_ceiling_objective_value,
+                )
         if not admission_screen_only:
             if recourse is None:
                 raise RuntimeContractError("exact recourse model missing")
@@ -1334,6 +1985,11 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             if build_seconds > 0.0
             else self.wall_budget_seconds
         )
+        if visible_queue >= BURST_VISIBLE_QUEUE_THRESHOLD:
+            active_wall_budget = max(
+                active_wall_budget,
+                BURST_PLANNER_WALL_BUDGET_SECONDS,
+            )
         if admission_screen_only:
             if slow_domain_forced:
                 screen_result = {
@@ -1369,7 +2025,9 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                 - total_started,
             }
         if slow_domain_forced:
-            route_index = 0
+            route_indices = {
+                mid: 0 for mid in MOBILITY_ELIGIBLE_MESS_IDS
+            }
             job_option_indices = {
                 j: 0 for j in range(len(domain.job_options))
             }
@@ -1387,13 +2045,13 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
                     active_wall_budget
                 )
             )
-            route_index, job_option_indices = master.selected_domain_decisions()
+            route_indices, job_option_indices = master.selected_domain_decisions()
         master_seconds = time.monotonic() - master_started
         recourse_started = time.monotonic()
         if recourse is None:
             raise RuntimeContractError("exact recourse model missing")
         recourse.fix_slow_decisions(
-            route_index=route_index,
+            route_indices=route_indices,
             job_option_indices=job_option_indices,
         )
         recourse_wall_budget = self._shared_watchdog_budgets(
@@ -1408,9 +2066,23 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             config=config,
             frame=frame,
             domain=domain,
+            migration_authority=migration_authority,
+            evaluation_steps_remaining=evaluation_steps_remaining,
+            migration_candidate_feasible=lambda uid, destination, planned_racks: (
+                self._migration_candidate_rack_feasible(
+                    state=state,
+                    candidate_uid=uid,
+                    destination=destination,
+                    planned_racks=planned_racks,
+                )
+            ),
         )
         recourse_seconds = time.monotonic() - recourse_started
         plan.validate()
+        selected_routes = {
+            mid: domain.route_options[mid][route_indices[mid]]
+            for mid in MOBILITY_ELIGIBLE_MESS_IDS
+        }
         model_solve_generation = (
             self._model_solve_generation_by_method.get(method_key, 0) + 1
         )
@@ -1429,12 +2101,18 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             "full_miqcp_executed_in_online_loop": False,
             "offline_reference_oracle": "science/main.py::build_full",
             "candidate_limit_k": self.candidate_limit,
+            "persistent_model_candidate_capacity_k": (
+                master.k if master is not None else recourse.k
+            ),
             "resident_job_slot_capacity": current_slots,
             "visible_queued_jobs": visible_queue,
             "candidate_limit_frozen": self.candidate_limit_frozen,
             "mobility_domain_reduction": dict(domain.route_audit),
             "workload_domain_reduction": dict(domain.workload_audit),
             "capacity_admission_gate": result["capacity_admission_gate"],
+            "capacity_admission_screen_ceiling_count": (
+                admission_ceiling_deferred_count
+            ),
             "optimized_deferred_job_count": result[
                 "optimized_deferred_job_count"
             ],
@@ -1443,9 +2121,27 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             "gurobi_slow_master_numeric_focus": (
                 master.numeric_focus if master is not None else None
             ),
+            "slow_master_mip_gap_tolerance": (
+                master.mip_gap if master is not None else 0.0
+            ),
             "gurobi_numeric_focus": recourse.numeric_focus,
+            "selected_mobility_candidates": {
+                mid: {
+                    "domain_index": int(route_indices[mid]),
+                    "is_stay": bool(route.is_stay),
+                    "departure_offset": route.departure_offset,
+                    "destination_service_id": route.destination_service_id,
+                    "route_rank": int(route.route_rank),
+                    "transit_steps": int(route.transit_steps),
+                    "energy_kwh": float(route.energy_kwh),
+                }
+                for mid, route in selected_routes.items()
+            },
             "persistent_model_reused": build_seconds == 0.0,
             "persistent_model_refresh_reason": model_refresh_reason,
+            "persistent_model_solution_state_reset": (
+                model_refresh_reason == "PERIODIC_NUMERICAL_STATE_RESET"
+            ),
             "persistent_model_solve_generation": model_solve_generation,
             "persistent_model_max_reuses": self.max_persistent_solve_reuses,
             "model_build_once_seconds": build_seconds,
@@ -1603,10 +2299,15 @@ class _PersistentMilpModel:
         for service, bus in kernel.service_bus.items():
             self.service_by_bus.setdefault(bus, []).append(service)
         self.model = gp.Model(f"pfr_hierarchical_h54_{model_role}")
-        self.model.Params.OutputFlag = 0
+        self.model.Params.OutputFlag = int(
+            os.environ.get("PFR_DIAGNOSTIC_GUROBI_OUTPUT", "0")
+        )
         self.model.Params.Threads = int(os.environ.get("PFR_GUROBI_THREADS", "4"))
         self.model.Params.Seed = 0
-        self.model.Params.MIPGap = 0.03
+        self.mip_gap = (
+            SLOW_MASTER_MIP_GAP if model_role == "slow_master" else 0.03
+        )
+        self.model.Params.MIPGap = self.mip_gap
         # NumericFocus 0/1 are prohibited for the exact recourse: clean
         # default reruns exceeded the frozen charge/discharge residual.  The
         # non-committing polyhedral slow master may use 0; its selected slow
@@ -1614,6 +2315,8 @@ class _PersistentMilpModel:
         # OpenDSS authorities before commitment.
         self.numeric_focus = 0 if model_role == "slow_master" else 2
         self.model.Params.NumericFocus = self.numeric_focus
+        if model_role == "slow_master":
+            self.model.Params.MIPFocus = 0
         self.model.Params.FeasibilityTol = 1e-8
         self.model.Params.IntFeasTol = 1e-8
         self.model.Params.OptimalityTol = 1e-8
@@ -1638,9 +2341,13 @@ class _PersistentMilpModel:
         self.relaxed_dispatch_mode_diagnostic = True
         discrete_type = GRB.BINARY if model_role == "slow_master" else GRB.CONTINUOUS
         self.route = {
-            r: self.model.addVar(
-                lb=0.0, ub=1.0, vtype=discrete_type, name=f"route[{r}]"
+            (mid, r): self.model.addVar(
+                lb=0.0,
+                ub=1.0,
+                vtype=discrete_type,
+                name=f"route[{mid},{r}]",
             )
+            for mid in MOBILITY_ELIGIBLE_MESS_IDS
             for r in range(self.k)
         }
         self.job = {
@@ -1680,9 +2387,12 @@ class _PersistentMilpModel:
         self.pchg: dict[tuple[str, int, int], Any] = {}
         self.q: dict[tuple[str, int, int], Any] = {}
         self.qabs: dict[tuple[str, int, int], Any] = {}
-        mobile = MOBILITY_ELIGIBLE_MESS_IDS[0]
         for mid in MESS_IDS:
-            route_axis = range(self.k) if mid == mobile else range(1)
+            route_axis = (
+                range(self.k)
+                if mid in MOBILITY_ELIGIBLE_MESS_IDS
+                else range(1)
+            )
             for r in route_axis:
                 for step in range(self.h):
                     key = (mid, r, step)
@@ -1781,9 +2491,10 @@ class _PersistentMilpModel:
         self._build_constraints(kernel)
         self.model.update()
         self._last_job_mapping: dict[tuple[int, int], Optional[_WorkloadOption]] = {}
+        self._job_groups: tuple[tuple[int, ...], ...] = ()
         self._last_dispatch_service: dict[tuple[str, int, int], Optional[str]] = {}
-        self._last_route_energy: dict[tuple[int, int], float] = {}
-        self._last_dep_reserve: dict[tuple[int, int], float] = {}
+        self._last_route_energy: dict[tuple[str, int, int], float] = {}
+        self._last_dep_reserve: dict[tuple[str, int, int], float] = {}
         self._cut_directions: set[tuple[str, str, int, int, int]] = set()
         self._cut_angles: dict[tuple[str, str, int], list[float]] = {}
         self._globally_refined_assets: set[tuple[str, str]] = set()
@@ -1801,16 +2512,20 @@ class _PersistentMilpModel:
         self.kernel = kernel
 
     def _route_axis(self, mid: str) -> range:
-        return range(self.k) if mid == MOBILITY_ELIGIBLE_MESS_IDS[0] else range(1)
+        return range(self.k) if mid in MOBILITY_ELIGIBLE_MESS_IDS else range(1)
 
     def _pnet(self, mid: str, r: int, step: int) -> Any:
         return self.pdis[(mid, r, step)] - self.pchg[(mid, r, step)]
 
     def _build_constraints(self, kernel: _RadialStressKernel) -> None:
         gp = self.gp
-        self.route_one = self.model.addConstr(
-            gp.quicksum(self.route.values()) == 1.0, name="route_one"
-        )
+        self.route_one = {
+            mid: self.model.addConstr(
+                gp.quicksum(self.route[(mid, r)] for r in range(self.k)) == 1.0,
+                name=f"route_one[{mid}]",
+            )
+            for mid in MOBILITY_ELIGIBLE_MESS_IDS
+        }
         self.job_one = {
             j: self.model.addConstr(
                 gp.quicksum(self.job[(j, o)] for o in range(self.k))
@@ -1820,10 +2535,20 @@ class _PersistentMilpModel:
             )
             for j in range(self.job_slot_capacity)
         }
+        self.admission_ceiling = self.model.addConstr(
+            gp.quicksum(self.defer_job.values())
+            <= float(self.job_slot_capacity),
+            name="admission_ceiling",
+        )
+        self.admission_objective_ceiling = self.model.addConstr(
+            self._admission_objective()
+            <= float(self.job_slot_capacity) + 1.0,
+            name="admission_objective_ceiling",
+        )
+        self._admission_priority_prelocked = False
         self.dis_gate = {}
         self.chg_gate = {}
         self.route_dispatch_gate = {}
-        mobile = MOBILITY_ELIGIBLE_MESS_IDS[0]
         for mid in MESS_IDS:
             for step in range(self.h):
                 pdis = gp.quicksum(
@@ -1838,24 +2563,27 @@ class _PersistentMilpModel:
                 self.chg_gate[(mid, step)] = self.model.addConstr(
                     pchg <= P_MAX * (1.0 - self.mode[(mid, step)])
                 )
-            if mid == mobile:
+            if mid in MOBILITY_ELIGIBLE_MESS_IDS:
                 for r in range(self.k):
                     for step in range(self.h):
-                        self.route_dispatch_gate[(r, step)] = self.model.addConstr(
+                        self.route_dispatch_gate[(mid, r, step)] = self.model.addConstr(
                             self.pdis[(mid, r, step)]
                             + self.pchg[(mid, r, step)]
-                            <= P_MAX * self.route[r]
+                            <= P_MAX * self.route[(mid, r)]
                         )
                         self.model.addConstr(
-                            self.q[(mid, r, step)] <= PCS_KVA * self.route[r]
+                            self.q[(mid, r, step)]
+                            <= PCS_KVA * self.route[(mid, r)]
                         )
                         self.model.addConstr(
-                            self.q[(mid, r, step)] >= -PCS_KVA * self.route[r]
+                            self.q[(mid, r, step)]
+                            >= -PCS_KVA * self.route[(mid, r)]
                         )
         self.energy0 = {}
         self.debt0 = {}
         self.energy_dyn = {}
         self.debt_dyn = {}
+        self.episode_terminal_debt = {}
         self.dep_reserve = {}
         for mid in MESS_IDS:
             self.energy0[mid] = self.model.addConstr(self.energy[(mid, 0)] == 0.0)
@@ -1890,12 +2618,17 @@ class _PersistentMilpModel:
                     + self.repay[(mid, step)]
                     == 0.0
                 )
-            self.model.addConstr(self.debt[(mid, self.h)] == 0.0)
-        for r in range(self.k):
-            for step in range(self.h):
-                self.dep_reserve[(r, step)] = self.model.addConstr(
-                    self.energy[(mobile, step)] >= MESS_FLOOR_KWH
+            for boundary in range(1, self.h + 1):
+                self.episode_terminal_debt[(mid, boundary)] = self.model.addConstr(
+                    self.debt[(mid, boundary)] <= MESS_CAPACITY_KWH,
+                    name=f"episode_terminal_debt[{mid},{boundary}]",
                 )
+        for mid in MOBILITY_ELIGIBLE_MESS_IDS:
+            for r in range(self.k):
+                for step in range(self.h):
+                    self.dep_reserve[(mid, r, step)] = self.model.addConstr(
+                        self.energy[(mid, step)] >= MESS_FLOOR_KWH
+                    )
         self.it_def = {
             (site, step): self.model.addConstr(
                 self.it[(site, step)] == 0.0,
@@ -2320,8 +3053,8 @@ class _PersistentMilpModel:
     def _locations_for_route(
         state: MutableMethodState,
         route: _MobilityTemplate,
+        mid: str,
     ) -> list[Optional[str]]:
-        mid = MOBILITY_ELIGIBLE_MESS_IDS[0]
         if state.mess_in_transit[mid]:
             destination = state.mess_route_destination[mid]
             if destination is None:
@@ -2335,7 +3068,7 @@ class _PersistentMilpModel:
                 str(destination)
             ] * max(0, PLANNING_HORIZON_STEPS - remaining)
         current = state.mess_location[mid]
-        if route.is_stay:
+        if route.is_stay or route.mess_id != mid:
             return [current] * PLANNING_HORIZON_STEPS
         departure = int(route.departure_offset)
         arrival = departure + int(route.transit_steps)
@@ -2445,58 +3178,118 @@ class _PersistentMilpModel:
         self.state = state
         self.config = config
         self.frame = frame
-        mobile = MOBILITY_ELIGIBLE_MESS_IDS[0]
+        self.admission_ceiling.RHS = float(self.job_slot_capacity)
+        self.admission_objective_ceiling.RHS = (
+            float(self.job_slot_capacity) + 1.0
+        )
+        self._admission_priority_prelocked = False
         dispatch_enabled = bool(config.h54_capability_mask["mess_dispatch"])
-
-        for r in range(self.k):
-            active = r < len(domain.route_options)
-            self.route[r].LB = 0.0
-            self.route[r].UB = 1.0 if active else 0.0
-            route = domain.route_options[r] if active else None
-            locations = (
-                self._locations_for_route(state, route) if route is not None else [None] * self.h
-            )
-            for step in range(self.h):
-                available = active and locations[step] is not None and dispatch_enabled
-                key = (mobile, r, step)
-                self.pdis[key].UB = P_MAX if available else 0.0
-                self.pchg[key].UB = P_MAX if available else 0.0
-                self.q[key].LB = -PCS_KVA if available else 0.0
-                self.q[key].UB = PCS_KVA if available else 0.0
-                self.qabs[key].UB = PCS_KVA if available else 0.0
-                self._move_dispatch_service(
-                    key, str(locations[step]) if available else None
-                )
-                old_energy = self._last_route_energy.get((r, step), 0.0)
-                new_energy = (
-                    float(route.energy_kwh)
+        fleet_recovery_pending = any(
+            float(value) > 1e-9
+            for value in state.mess_energy_debt_kwh.values()
+        )
+        effective_steps = int(domain.effective_steps)
+        if not 1 <= effective_steps <= self.h:
+            raise RuntimeContractError("effective episode horizon is invalid")
+        for mid in MOBILITY_ELIGIBLE_MESS_IDS:
+            options = domain.route_options[mid]
+            for r in range(self.k):
+                active = r < len(options)
+                self.route[(mid, r)].LB = 0.0
+                self.route[(mid, r)].UB = 1.0 if active else 0.0
+                route = options[r] if active else None
+                locations = (
+                    self._locations_for_route(state, route, mid)
                     if route is not None
-                    and not route.is_stay
-                    and int(route.departure_offset) == step
-                    else 0.0
+                    else [None] * self.h
                 )
-                if old_energy != new_energy:
-                    self.model.chgCoeff(
-                        self.energy_dyn[(mobile, step)], self.route[r], new_energy
+                for step in range(self.h):
+                    available = (
+                        active
+                        and step < effective_steps
+                        and locations[step] is not None
+                        and dispatch_enabled
                     )
-                    self._last_route_energy[(r, step)] = new_energy
-                old_reserve = self._last_dep_reserve.get((r, step), 0.0)
-                new_reserve = (
-                    max(peak_reserve_kwh, float(route.energy_kwh))
-                    if route is not None
-                    and not route.is_stay
-                    and int(route.departure_offset) == step
-                    else 0.0
-                )
-                if old_reserve != new_reserve:
-                    self.model.chgCoeff(
-                        self.dep_reserve[(r, step)], self.route[r], -new_reserve
+                    key = (mid, r, step)
+                    self.pdis[key].UB = (
+                        P_MAX
+                        if available
+                        and not fleet_recovery_pending
+                        else 0.0
                     )
-                    self._last_dep_reserve[(r, step)] = new_reserve
+                    self.pchg[key].UB = P_MAX if available else 0.0
+                    # The retained balanced model reverses the ranking of several
+                    # phase-specific PCC Q actions.  Until a three-phase reactive
+                    # sensitivity authority is frozen, Q is removed from the
+                    # admissible controller domain instead of being optimized on
+                    # a known-wrong direction.  Active-power flexibility remains.
+                    self.q[key].LB = 0.0
+                    self.q[key].UB = 0.0
+                    self.qabs[key].UB = 0.0
+                    self._move_dispatch_service(
+                        key, str(locations[step]) if available else None
+                    )
+                    coefficient_key = (mid, r, step)
+                    old_energy = self._last_route_energy.get(coefficient_key, 0.0)
+                    new_energy = (
+                        float(route.energy_kwh)
+                        if route is not None
+                        and not route.is_stay
+                        and int(route.departure_offset) == step
+                        else 0.0
+                    )
+                    if old_energy != new_energy:
+                        self.model.chgCoeff(
+                            self.energy_dyn[(mid, step)],
+                            self.route[(mid, r)],
+                            new_energy,
+                        )
+                        self._last_route_energy[coefficient_key] = new_energy
+                    old_reserve = self._last_dep_reserve.get(coefficient_key, 0.0)
+                    new_reserve = (
+                        max(peak_reserve_kwh, float(route.energy_kwh))
+                        if route is not None
+                        and not route.is_stay
+                        and int(route.departure_offset) == step
+                        else 0.0
+                    )
+                    if old_reserve != new_reserve:
+                        self.model.chgCoeff(
+                            self.dep_reserve[(mid, r, step)],
+                            self.route[(mid, r)],
+                            -new_reserve,
+                        )
+                        self._last_dep_reserve[coefficient_key] = new_reserve
 
         for mid in MESS_IDS:
             self.energy0[mid].RHS = float(state.mess_energy_kwh[mid])
             self.debt0[mid].RHS = float(state.mess_energy_debt_kwh[mid])
+            due = state.mess_energy_recovery_due_issue.get(mid)
+            transit_remaining_steps = (
+                max(
+                    0,
+                    len(state.mess_route_energy_profile_kwh[mid])
+                    - int(state.mess_route_profile_index[mid]),
+                )
+                if state.mess_in_transit[mid]
+                else 0
+            )
+            recovery_boundary = _recovery_zero_boundary(
+                effective_steps=effective_steps,
+                due_issue=(int(due) if due is not None else None),
+                current_issue=int(frame.issue),
+                debt_kwh=float(state.mess_energy_debt_kwh[mid]),
+                transit_remaining_steps=transit_remaining_steps,
+            )
+            terminal_rhs = _episode_terminal_debt_rhs(
+                effective_steps,
+                self.h,
+                additional_zero_boundaries=(recovery_boundary,),
+            )
+            for boundary in range(1, self.h + 1):
+                self.episode_terminal_debt[(mid, boundary)].RHS = (
+                    terminal_rhs[boundary - 1]
+                )
             for step in range(self.h):
                 committed = 0.0
                 if state.mess_in_transit[mid]:
@@ -2505,15 +3298,24 @@ class _PersistentMilpModel:
                     if index < len(profile):
                         committed = float(profile[index])
                 self.energy_dyn[(mid, step)].RHS = -committed
-                if mid == mobile:
+                if mid in MOBILITY_ELIGIBLE_MESS_IDS:
                     continue
-                available = not state.mess_in_transit[mid] and dispatch_enabled
+                available = (
+                    step < effective_steps
+                    and not state.mess_in_transit[mid]
+                    and dispatch_enabled
+                )
                 key = (mid, 0, step)
-                self.pdis[key].UB = P_MAX if available else 0.0
+                self.pdis[key].UB = (
+                    P_MAX
+                    if available
+                    and not fleet_recovery_pending
+                    else 0.0
+                )
                 self.pchg[key].UB = P_MAX if available else 0.0
-                self.q[key].LB = -PCS_KVA if available else 0.0
-                self.q[key].UB = PCS_KVA if available else 0.0
-                self.qabs[key].UB = PCS_KVA if available else 0.0
+                self.q[key].LB = 0.0
+                self.q[key].UB = 0.0
+                self.qabs[key].UB = 0.0
                 self._move_dispatch_service(
                     key, state.mess_location[mid] if available else None
                 )
@@ -2528,28 +3330,69 @@ class _PersistentMilpModel:
                     # incumbent.  Every new issue starts from the original
                     # continuous recourse domain.
                     self.mode[(mid, step)].LB = 0.0
-                    self.mode[(mid, step)].UB = 1.0
+                    self.mode[(mid, step)].UB = (
+                        1.0 if step < effective_steps else 0.0
+                    )
 
         # Clear and remap bounded workload-option coefficients.
+        for group in self._job_groups:
+            row = self.job_one[group[0]]
+            for member in group:
+                self.model.chgCoeff(row, self.defer_job[member], 0.0)
         for key, old in tuple(self._last_job_mapping.items()):
             if old is not None:
                 self._clear_job_coefficients(key, old)
         self._last_job_mapping.clear()
+        # The slow master needs only the number of interchangeable jobs placed
+        # on each option.  Keeping one binary option vector per job creates a
+        # factorial identity symmetry during bursts (251 of the 265 jobs at
+        # January issue 2517 have identical H54 columns).  Replace that block
+        # exactly by integer option counts on one representative.  Individual
+        # defer variables remain, so EDF admission weights are unchanged.  The
+        # continuous exact-recourse model stays unaggregated and receives the
+        # deterministically expanded one-hot decisions below.
+        if self.model_role == "slow_master":
+            self._job_groups = _effective_workload_groups(domain.job_options)
+        else:
+            self._job_groups = tuple(
+                (job_index,) for job_index in range(len(domain.job_options))
+            )
+
+        # Rebuild every assignment row because representatives can change as
+        # the rolling queue changes.  Start with an inert bounded skeleton.
         for j in range(self.job_slot_capacity):
-            active_job = j < len(domain.queued_job_ids)
-            self.job_one[j].RHS = 1.0 if active_job else 0.0
+            row = self.job_one[j]
+            self.model.chgCoeff(row, self.defer_job[j], 0.0)
+            row.RHS = 0.0
             self.defer_job[j].LB = 0.0
-            self.defer_job[j].UB = 1.0 if active_job else 0.0
-            options = domain.job_options[j] if active_job else ()
+            self.defer_job[j].UB = 1.0 if j < len(domain.job_options) else 0.0
             for o in range(self.k):
-                key = (j, o)
-                active_option = o < len(options)
-                self.job[key].LB = 0.0
-                self.job[key].UB = 1.0 if active_option else 0.0
-                option = options[o] if active_option else None
+                variable = self.job[(j, o)]
+                self.model.chgCoeff(row, variable, 0.0)
+                variable.LB = 0.0
+                variable.UB = 0.0
+                variable.VType = (
+                    self.GRB.BINARY
+                    if self.model_role == "slow_master"
+                    else self.GRB.CONTINUOUS
+                )
+
+        for group in self._job_groups:
+            representative = group[0]
+            options = domain.job_options[representative]
+            row = self.job_one[representative]
+            row.RHS = float(len(group))
+            for member in group:
+                self.model.chgCoeff(row, self.defer_job[member], 1.0)
+            for o, option in enumerate(options):
+                key = (representative, o)
+                variable = self.job[key]
+                if self.model_role == "slow_master" and len(group) > 1:
+                    variable.VType = self.GRB.INTEGER
+                variable.UB = float(len(group))
+                self.model.chgCoeff(row, variable, 1.0)
                 self._last_job_mapping[key] = option
-                if option is not None:
-                    self._set_job_coefficients(key, option)
+                self._set_job_coefficients(key, option)
 
         for site in IDCS:
             col = IDCS.index(site)
@@ -2651,50 +3494,111 @@ class _PersistentMilpModel:
         )
         self.model.update()
 
-    def selected_domain_decisions(self) -> tuple[int, dict[int, Optional[int]]]:
+    def set_admission_ceiling(
+        self,
+        deferred_job_count: int,
+        *,
+        objective_value: Optional[float] = None,
+    ) -> None:
+        """Keep lower-priority objectives from degrading screened admission."""
+
+        ceiling = int(deferred_job_count)
+        if not 0 <= ceiling <= self.job_slot_capacity:
+            raise RuntimeContractError("admission ceiling is outside model slots")
+        self.admission_ceiling.RHS = float(ceiling)
+        if objective_value is None or not math.isfinite(objective_value):
+            raise RuntimeContractError("screened admission optimum is invalid")
+        self.admission_objective_ceiling.RHS = float(objective_value) + 1e-8
+        self._admission_priority_prelocked = True
+        self.model.update()
+
+    def selected_domain_decisions(
+        self,
+    ) -> tuple[dict[str, int], dict[int, Optional[int]]]:
         """Extract the slow master's integral route and workload decisions."""
 
         if self.model_role != "slow_master" or self.model.SolCount < 1:
             raise RuntimeContractError("slow-master decisions requested without a solution")
         if self.domain is None:
             raise RuntimeContractError("slow-master domain is unavailable")
-        route_hits = [
-            r
-            for r in range(len(self.domain.route_options))
-            if float(self.route[r].X) > 0.5
-        ]
-        if len(route_hits) != 1:
-            raise RuntimeContractError(
-                f"slow master route decision is not integral: {route_hits}"
-            )
-        jobs: dict[int, Optional[int]] = {}
-        for j, options in enumerate(self.domain.job_options):
-            hits = [
-                o for o in range(len(options)) if float(self.job[(j, o)].X) > 0.5
+        routes: dict[str, int] = {}
+        for mid, options in self.domain.route_options.items():
+            route_hits = [
+                r
+                for r in range(len(options))
+                if float(self.route[(mid, r)].X) > 0.5
             ]
-            deferred = float(self.defer_job[j].X) > 0.5
-            if len(hits) + int(deferred) != 1:
+            if len(route_hits) != 1:
+                raise RuntimeContractError(
+                    "slow master route decision is not integral "
+                    f"for {mid}: {route_hits}"
+                )
+            routes[mid] = route_hits[0]
+        jobs: dict[int, Optional[int]] = {}
+        groups = getattr(self, "_job_groups", ()) or tuple(
+            (job_index,) for job_index in range(len(self.domain.job_options))
+        )
+        for group in groups:
+            representative = group[0]
+            options = self.domain.job_options[representative]
+            counts: list[int] = []
+            for option_index in range(len(options)):
+                value = float(self.job[(representative, option_index)].X)
+                count = int(round(value))
+                if abs(value - count) > 1e-6 or not 0 <= count <= len(group):
+                    raise RuntimeContractError(
+                        "slow master aggregate job decision is not integral "
+                        f"group={group[:5]} option={option_index} value={value}"
+                    )
+                counts.append(count)
+            deferred_members = [
+                member
+                for member in group
+                if float(self.defer_job[member].X) > 0.5
+            ]
+            if sum(counts) + len(deferred_members) != len(group):
                 raise RuntimeContractError(
                     "slow master job admission decision is not integral "
-                    f"j={j}: options={hits} deferred={deferred}"
+                    f"group={group[:5]} counts={counts} "
+                    f"deferred={len(deferred_members)}"
                 )
-            jobs[j] = None if deferred else hits[0]
-        return route_hits[0], jobs
+            deferred_set = set(deferred_members)
+            admitted_members = [member for member in group if member not in deferred_set]
+            cursor = 0
+            for option_index, count in enumerate(counts):
+                for member in admitted_members[cursor : cursor + count]:
+                    jobs[member] = option_index
+                cursor += count
+            for member in deferred_members:
+                jobs[member] = None
+            if cursor != len(admitted_members):
+                raise RuntimeContractError(
+                    "slow master aggregate decision expansion is incomplete "
+                    f"group={group[:5]} assigned={cursor} "
+                    f"admitted={len(admitted_members)}"
+                )
+        return routes, jobs
 
     def fix_slow_decisions(
         self,
         *,
-        route_index: int,
+        route_indices: Mapping[str, int],
         job_option_indices: Mapping[int, Optional[int]],
     ) -> None:
         """Fix slow binaries so the second level is an exact continuous QCP."""
 
         if self.model_role != "exact_recourse" or self.domain is None:
             raise RuntimeContractError("slow decisions can only fix exact recourse")
-        for r in range(self.k):
-            value = 1.0 if r == int(route_index) else 0.0
-            self.route[r].LB = value
-            self.route[r].UB = value
+        for mid, options in self.domain.route_options.items():
+            chosen_route = int(route_indices[mid])
+            if not 0 <= chosen_route < len(options):
+                raise RuntimeContractError(
+                    f"slow route choice is outside {mid} domain: {chosen_route}"
+                )
+            for r in range(self.k):
+                value = 1.0 if r == chosen_route else 0.0
+                self.route[(mid, r)].LB = value
+                self.route[(mid, r)].UB = value
         for j in range(self.job_slot_capacity):
             options = self.domain.job_options[j] if j < len(self.domain.job_options) else ()
             chosen = job_option_indices.get(j)
@@ -2903,9 +3807,13 @@ class _PersistentMilpModel:
                 if int(self.model.IsMIP) != 0
                 else 0.0
             )
-            if not status_ok or not math.isfinite(gap) or gap > 0.03 + 1e-12:
+            if (
+                not status_ok
+                or not math.isfinite(gap)
+                or gap > self.mip_gap + 1e-12
+            ):
                 raise RuntimeContractError(
-                    "persistent MILP lacks the frozen 3% certificate: "
+                    "persistent MILP lacks its configured gap certificate: "
                     f"status={_status_name(self.GRB, self.model.Status)} gap={gap}"
                 )
             separation_started = time.monotonic()
@@ -2972,10 +3880,11 @@ class _PersistentMilpModel:
             expression += self.pdis[key] / (P_MAX * self.h * len(MESS_IDS))
             expression += self.pchg[key] / (P_MAX * self.h * len(MESS_IDS))
             expression += self.qabs[key] / (PCS_KVA * self.h * len(MESS_IDS))
-        for r, route in enumerate(self.domain.route_options):
-            expression += (
-                float(route.energy_kwh) / MESS_CAPACITY_KWH
-            ) * self.route[r]
+        for mid, options in self.domain.route_options.items():
+            for r, route in enumerate(options):
+                expression += (
+                    float(route.energy_kwh) / MESS_CAPACITY_KWH
+                ) * self.route[(mid, r)]
         for (j, o), option in self._last_job_mapping.items():
             if option is None:
                 continue
@@ -3089,29 +3998,123 @@ class _PersistentMilpModel:
             # Match the retained Full-H54 oracle's native Gurobi
             # lexicographic execution instead of rebuilding the branch tree
             # in three independent Python-side solves.
-            self.model.NumObj = 4
-            self.model.setObjective(self.gp.LinExpr(), self.GRB.MINIMIZE)
-            self.model.setObjectiveN(
-                admission_expr, 0, priority=4, abstol=1e-8, reltol=0.0,
-                name="capacity_admission_gate",
+            admission_prelocked = bool(
+                self.model_role == "slow_master"
+                and self._admission_priority_prelocked
             )
+            objective_count = 3 if admission_prelocked else 4
+            self.model.NumObj = objective_count
+            self.model.setObjective(self.gp.LinExpr(), self.GRB.MINIMIZE)
+            objective_offset = 0
+            if not admission_prelocked:
+                self.model.setObjectiveN(
+                    admission_expr, 0, priority=4, abstol=1e-8, reltol=0.0,
+                    name="capacity_admission_gate",
+                )
+                objective_offset = 1
             self.model.setObjectiveN(
-                self.zmax, 1, priority=3, abstol=1e-6, reltol=0.0,
+                self.zmax, objective_offset, priority=3,
+                abstol=1e-6, reltol=0.0,
                 name="worst_electrical_stress",
             )
             self.model.setObjectiveN(
-                exposure_expr, 2, priority=2, abstol=1e-6, reltol=0.0,
+                exposure_expr, objective_offset + 1, priority=2,
+                abstol=1e-6, reltol=0.0,
                 name="electrical_stress_exposure",
             )
             self.model.setObjectiveN(
-                tertiary_expr, 3, priority=1, abstol=1e-8, reltol=0.0,
+                tertiary_expr, objective_offset + 2, priority=1,
+                abstol=1e-8, reltol=0.0,
                 name="secondary_actuation",
             )
             self.model.Params.TimeLimit = max(0.001, deadline - time.monotonic())
+            multiobjective_tracker: dict[str, Any] = {
+                "strictly_completed_objectives": 0,
+                "tertiary_gap": math.inf,
+                "tertiary_gap_stop_requested": False,
+                "events": [],
+            }
+
+            def _multiobjective_callback(model: Any, where: int) -> None:
+                if where == self.GRB.Callback.MULTIOBJ:
+                    objective_number = int(
+                        model.cbGet(self.GRB.Callback.MULTIOBJ_OBJCNT)
+                    )
+                    status = int(model.cbGet(self.GRB.Callback.MULTIOBJ_STATUS))
+                    callback_gap = float(
+                        model.cbGet(self.GRB.Callback.MULTIOBJ_MIPGAP)
+                    )
+                    multiobjective_tracker["events"].append(
+                        {
+                            "objective_count": objective_number,
+                            "status": status,
+                            "mip_gap": callback_gap,
+                        }
+                    )
+                    if status == self.GRB.OPTIMAL:
+                        multiobjective_tracker[
+                            "strictly_completed_objectives"
+                        ] = max(
+                            int(
+                                multiobjective_tracker[
+                                    "strictly_completed_objectives"
+                                ]
+                            ),
+                            objective_number,
+                        )
+                    return
+                if where != self.GRB.Callback.MIP:
+                    return
+                solution_count = int(
+                    model.cbGet(self.GRB.Callback.MIP_SOLCNT)
+                )
+                best = float(model.cbGet(self.GRB.Callback.MIP_OBJBST))
+                bound = float(model.cbGet(self.GRB.Callback.MIP_OBJBND))
+                eligible, gap = _tertiary_gap_stop_eligible(
+                    completed_objectives=int(
+                        multiobjective_tracker[
+                            "strictly_completed_objectives"
+                        ]
+                    ),
+                    objective_count=objective_count,
+                    solution_count=solution_count,
+                    best=best,
+                    bound=bound,
+                )
+                if int(
+                    multiobjective_tracker["strictly_completed_objectives"]
+                ) == objective_count - 1:
+                    multiobjective_tracker["tertiary_gap"] = gap
+                if eligible:
+                    multiobjective_tracker[
+                        "tertiary_gap_stop_requested"
+                    ] = True
+                    model.terminate()
+
             solve_started = time.monotonic()
-            self.model.optimize()
+            if self.model_role == "slow_master":
+                self.model.optimize(_multiobjective_callback)
+            else:
+                self.model.optimize()
             exact_solve_seconds = time.monotonic() - solve_started
-            if self.model.SolCount < 1 or self.model.Status != self.GRB.OPTIMAL:
+            tertiary_gap_accepted = bool(
+                self.model_role == "slow_master"
+                and multiobjective_tracker["tertiary_gap_stop_requested"]
+                and self.model.Status
+                in {self.GRB.INTERRUPTED, self.GRB.TIME_LIMIT}
+                and self.model.SolCount >= 1
+                and int(
+                    multiobjective_tracker["strictly_completed_objectives"]
+                )
+                == objective_count - 1
+                and float(multiobjective_tracker["tertiary_gap"])
+                <= TERTIARY_ACTUATION_MIP_GAP
+            )
+            if (
+                self.model.SolCount < 1
+                or self.model.Status != self.GRB.OPTIMAL
+                and not tertiary_gap_accepted
+            ):
                 try:
                     gap = float(self.model.MIPGap)
                 except Exception:
@@ -3278,9 +4281,30 @@ class _PersistentMilpModel:
             # under the model's frozen MIPGap parameter, so record the
             # conservative certified upper bound rather than inventing a
             # per-pass measured value.
-            final_gap = float(self.model.Params.MIPGap)
-            primary = secondary = tertiary = {
-                "status": _status_name(self.GRB, self.model.Status),
+            final_gap = (
+                float(multiobjective_tracker["tertiary_gap"])
+                if tertiary_gap_accepted
+                else float(self.model.Params.MIPGap)
+            )
+            strict_status = (
+                "OPTIMAL_STRICT_GAP_BEFORE_TERTIARY"
+                if tertiary_gap_accepted
+                else _status_name(self.GRB, self.model.Status)
+            )
+            primary = secondary = {
+                "status": strict_status,
+                "gap": float(self.model.Params.MIPGap),
+                "rounds": 1,
+                "cuts_added": 0,
+                "solve_seconds": exact_solve_seconds / 3.0,
+                "separation_seconds": 0.0,
+            }
+            tertiary = {
+                "status": (
+                    "CERTIFIED_TERTIARY_GAP_EARLY_STOP"
+                    if tertiary_gap_accepted
+                    else _status_name(self.GRB, self.model.Status)
+                ),
                 "gap": final_gap,
                 "rounds": 1,
                 "cuts_added": 0,
@@ -3402,6 +4426,16 @@ class _PersistentMilpModel:
                 if use_native_multiobjective
                 else "MEASURED_P1_P2_P3_PERSISTENT_REOPTIMIZATION"
             ),
+            "tertiary_gap_early_stop_used": bool(
+                use_native_multiobjective
+                and self.model_role == "slow_master"
+                and tertiary["status"] == "CERTIFIED_TERTIARY_GAP_EARLY_STOP"
+            ),
+            "tertiary_certified_mip_gap": (
+                float(tertiary["gap"])
+                if self.model_role == "slow_master"
+                else None
+            ),
             "lexicographic_backend": (
                 "native-multiobjective"
             ),
@@ -3458,22 +4492,39 @@ class _PersistentMilpModel:
         config: MethodConfig,
         frame: CausalExperimentFrame,
         domain: _PreparedOnlineDomain,
+        migration_authority: MigrationAuthority,
+        evaluation_steps_remaining: int,
+        migration_candidate_feasible: Optional[
+            Callable[[str, str, Mapping[str, str]], bool]
+        ] = None,
     ) -> SlowDiscretePlan:
-        route_hits = [r for r in range(len(domain.route_options)) if self.route[r].X > 0.5]
-        if len(route_hits) != 1:
-            raise RuntimeContractError("persistent MILP route selection is not integral")
-        route = domain.route_options[route_hits[0]]
-        mobile = MOBILITY_ELIGIBLE_MESS_IDS[0]
+        selected_routes: dict[str, _MobilityTemplate] = {}
+        selected_route_indices: dict[str, int] = {}
+        for mid, options in domain.route_options.items():
+            route_hits = [
+                r
+                for r in range(len(options))
+                if self.route[(mid, r)].X > 0.5
+            ]
+            if len(route_hits) != 1:
+                raise RuntimeContractError(
+                    "persistent MILP route selection is not integral "
+                    f"for {mid}: {route_hits}"
+                )
+            selected_route_indices[mid] = route_hits[0]
+            selected_routes[mid] = options[route_hits[0]]
         destinations = {mid: state.mess_location[mid] for mid in MESS_IDS}
         ranks = {mid: int(state.mess_route_rank[mid]) for mid in MESS_IDS}
         departures: dict[str, Optional[int]] = {mid: None for mid in MESS_IDS}
-        if state.mess_in_transit[mobile]:
-            destinations[mobile] = str(state.mess_route_destination[mobile])
-            ranks[mobile] = int(state.mess_route_rank[mobile])
-        elif not route.is_stay:
-            destinations[mobile] = route.destination_service_id
-            ranks[mobile] = route.route_rank
-            departures[mobile] = frame.issue + int(route.departure_offset)
+        for mid in MOBILITY_ELIGIBLE_MESS_IDS:
+            route = selected_routes[mid]
+            if state.mess_in_transit[mid]:
+                destinations[mid] = str(state.mess_route_destination[mid])
+                ranks[mid] = int(state.mess_route_rank[mid])
+            elif not route.is_stay:
+                destinations[mid] = route.destination_service_id
+                ranks[mid] = route.route_rank
+                departures[mid] = frame.issue + int(route.departure_offset)
         placements: dict[str, str] = {}
         starts: dict[str, int] = {}
         racks: dict[str, str] = {}
@@ -3567,7 +4618,11 @@ class _PersistentMilpModel:
         discharge: dict[str, tuple[float, ...]] = {}
         reactive: dict[str, tuple[float, ...]] = {}
         for mid in MESS_IDS:
-            selected_r = route_hits[0] if mid == mobile else 0
+            selected_r = (
+                selected_route_indices[mid]
+                if mid in MOBILITY_ELIGIBLE_MESS_IDS
+                else 0
+            )
             charge[mid] = tuple(
                 float(self.pchg[(mid, selected_r, step)].X)
                 for step in range(self.h)
@@ -3580,6 +4635,40 @@ class _PersistentMilpModel:
                 float(self.q[(mid, selected_r, step)].X)
                 for step in range(self.h)
             )
+        # The bounded H54 rewrite retained queued-job spatial placement but
+        # accidentally published ``None`` for every running-job checkpoint
+        # migration.  That made migration_count structurally zero for the
+        # online B00-B09 campaign even when a checkpoint-ready, capacity-safe
+        # migration was selected by the frozen IDC migration authority.
+        #
+        # Reuse that authority's exact single-action enumeration here.  The
+        # H54 MILP still owns queued placement and electrical dispatch; only
+        # the separately frozen checkpoint action is merged into the plan.
+        # A logical destination gang is intentional: runtime materializes the
+        # physical destination rack only after WAN transfer and restart, so a
+        # running gang is never teleported during plan synchronization.
+        _migration_placements, checkpoint_migrations = _optimize_job_migrations(
+            state,
+            config,
+            frame,
+            migration_authority,
+            evaluation_steps_remaining,
+            (
+                None
+                if migration_candidate_feasible is None
+                else lambda uid, destination: migration_candidate_feasible(
+                    uid, destination, racks
+                )
+            ),
+        )
+        for uid, destination in checkpoint_migrations.items():
+            if destination is None:
+                continue
+            placements[uid] = destination
+            gangs[uid] = tuple(
+                f"{destination}:PFR-GPU:{uid}:{index}"
+                for index in range(state.jobs[uid].source.requested_gpu)
+            )
         return SlowDiscretePlan(
             plan_id=(
                 f"{config.comparison_method_id.value}-{frame.issue}-"
@@ -3589,7 +4678,7 @@ class _PersistentMilpModel:
             mess_destination=destinations,
             mess_native_route_rank=ranks,
             job_idc_placement=placements,
-            checkpoint_migration={uid: None for uid in active_jobs},
+            checkpoint_migration=checkpoint_migrations,
             gpu_gang_allocation=gangs,
             job_start_issue=starts,
             coarse_charging_kw=charge,

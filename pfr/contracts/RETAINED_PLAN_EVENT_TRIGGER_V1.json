@@ -1,0 +1,17 @@
+{
+  "identity": "RETAINED_PLAN_EVENT_TRIGGER_V1",
+  "status": "FROZEN_PRE_MARCH",
+  "maximum_refresh_steps": 6,
+  "risk_on_threshold": 0.0,
+  "risk_off_rearm_threshold": -0.1,
+  "material_normalized_deterioration": 0.25,
+  "trigger_rule": [
+    "an armed risk family becomes positive",
+    "risk materially deteriorates relative to the last accepted plan",
+    "maximum refresh age is reached",
+    "a separate exact AC safety escalation is required"
+  ],
+  "same_family_rearm_rule": "risk must recover to or below the off threshold",
+  "positive_result_required": false,
+  "calibration_rule": "Regenerate January B07 raw audit and then build the B09 calibrated authority."
+}

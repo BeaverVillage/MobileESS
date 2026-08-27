@@ -73,6 +73,7 @@ def payload(
     expected_days: int | None = None,
     start_day_index: int = 1,
     end_day_index: int | None = None,
+    authorized_pass_fingerprints: tuple[str, ...] = (),
 ) -> Mapping[str, Any]:
     expected = int(period["days"]) if expected_days is None else expected_days
     complete = len(rows) == expected
@@ -106,6 +107,10 @@ def payload(
         "gurobi_threads_per_process": int(os.environ.get("PFR_GUROBI_THREADS", "1")),
         "cpu_affinity_policy": cpu_affinity_policy,
         "cpu_affinity_groups": [list(group) for group in cpu_affinity_groups],
+        "authorized_verified_pass_reuse_fingerprints": sorted(
+            set(authorized_pass_fingerprints)
+        ),
+        "cross_implementation_pass_reuse_is_explicit": True,
         "independent_daily_cold_start": True,
         "cross_day_endogenous_state_carryover": False,
         "continue_to_next_method_after_failure": True,
@@ -143,6 +148,11 @@ def main() -> None:
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--period-id", required=True)
     parser.add_argument("--period-contract", type=Path)
+    parser.add_argument(
+        "--final-evaluation-authority",
+        type=Path,
+        help="V14 final-evaluation authority propagated to every daily run.",
+    )
     parser.add_argument("--day-workers", type=int, default=4)
     parser.add_argument("--start-day-index", type=int, default=1)
     parser.add_argument("--end-day-index", type=int)
@@ -180,6 +190,15 @@ def main() -> None:
         action="store_true",
         help="Validate and reuse completed PASS methods within partial days.",
     )
+    parser.add_argument(
+        "--reuse-verified-pass-fingerprint",
+        action="append",
+        default=[],
+        help=(
+            "Explicitly authorize reuse of a fully gated PASS day produced by "
+            "this scientific implementation fingerprint. May be repeated."
+        ),
+    )
     parser.add_argument("--shared-root", type=Path, required=True)
     parser.add_argument("--exact-package-root", type=Path, required=True)
     parser.add_argument("--authority-package-root", type=Path, required=True)
@@ -194,6 +213,15 @@ def main() -> None:
     parser.add_argument("--workload-uncertainty", type=Path, required=True)
     parser.add_argument("--factorized-uncertainty", type=Path, required=True)
     parser.add_argument("--risk-calibration", type=Path)
+    parser.add_argument(
+        "--h0-fidelity-audit-every-steps",
+        type=int,
+        default=0,
+        help=(
+            "Run the fixed same-state H0 surrogate/Fresh-AC candidate audit "
+            "at this interval for eligible methods (0 disables it)."
+        ),
+    )
     parser.add_argument(
         "--migration-authority",
         type=Path,
@@ -223,6 +251,28 @@ def main() -> None:
         parser.error("raw-risk calibration/validation must retain its raw-risk interface")
     if not 1 <= args.day_workers <= 31:
         parser.error("--day-workers must be in [1, 31]")
+    if args.h0_fidelity_audit_every_steps < 0:
+        parser.error("--h0-fidelity-audit-every-steps cannot be negative")
+    for fingerprint in args.reuse_verified_pass_fingerprint:
+        if len(fingerprint) != 64 or any(
+            character not in "0123456789abcdef" for character in fingerprint
+        ):
+            parser.error(
+                "--reuse-verified-pass-fingerprint must be a lowercase SHA-256"
+            )
+    final_evaluation_authority = None
+    if args.final_evaluation_authority is not None:
+        final_evaluation_authority = json.loads(
+            args.final_evaluation_authority.read_text(encoding="utf-8")
+        )
+        if final_evaluation_authority.get("status") != (
+            "FROZEN_FINAL_EVALUATION_AUTHORIZED"
+        ):
+            raise RuntimeError("final-evaluation authority is not frozen")
+    if args.period_id == "MAR2025_FULL" and final_evaluation_authority is None:
+        raise RuntimeError(
+            "MAR2025_FULL requires --final-evaluation-authority"
+        )
 
     contract_path = args.period_contract or (
         args.repo / "pfr/contracts/FROZEN_2025_REP_WEEK_VALIDATION_PERIODS_V1.json"
@@ -279,10 +329,26 @@ def main() -> None:
             else args.repo / "pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json"
         ),
     ]
+    if final_evaluation_authority is not None:
+        common.extend(
+            (
+                "--final-evaluation-authority",
+                str(args.final_evaluation_authority),
+                "--evaluation-period-id",
+                str(final_evaluation_authority["evaluation_period_id"]),
+            )
+        )
     for mobility_root in args.mobility_root:
         common.extend(("--mobility-root", str(mobility_root)))
     if args.risk_calibration is not None:
         common.extend(("--risk-calibration", str(args.risk_calibration)))
+    if args.h0_fidelity_audit_every_steps:
+        common.extend(
+            (
+                "--h0-fidelity-audit-every-steps",
+                str(args.h0_fidelity_audit_every_steps),
+            )
+        )
     args.output.mkdir(parents=True, exist_ok=True)
     specs = period_specs(
         period,
@@ -322,6 +388,9 @@ def main() -> None:
             diagnostic_method=args.diagnostic_method,
             electrical_stress_campaign=args.electrical_stress_campaign,
             reuse_passed_methods=args.reuse_passed_methods,
+            authorized_pass_fingerprints=(
+                args.reuse_verified_pass_fingerprint
+            ),
         ): spec
         for spec in specs
     }
@@ -373,6 +442,9 @@ def main() -> None:
                     expected_days=len(specs),
                     start_day_index=args.start_day_index,
                     end_day_index=selected_end_day_index,
+                    authorized_pass_fingerprints=tuple(
+                        args.reuse_verified_pass_fingerprint
+                    ),
                 ),
             )
             print(
@@ -415,6 +487,9 @@ def main() -> None:
         expected_days=len(specs),
         start_day_index=args.start_day_index,
         end_day_index=selected_end_day_index,
+        authorized_pass_fingerprints=tuple(
+            args.reuse_verified_pass_fingerprint
+        ),
     )
     write_campaign(args.output, campaign)
     if campaign["status"] == "PASS" and args.electrical_stress_campaign:

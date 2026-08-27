@@ -10,7 +10,7 @@
     "ISSUE_RESULT.parquet": {
       "grain": "one committed method-issue action",
       "mandatory_non_null": [
-        "timestamp", "issue", "method_id", "predicted_worst_stress_z",
+        "date", "timestamp", "issue", "method_id", "predicted_worst_stress_z",
         "ac_worst_stress_z", "ac_voltage_stress_max", "ac_line_stress_max",
         "ac_transformer_stress_max", "ac_hard_constraint_pass",
         "commit_accepted", "root_import_kw", "run_status", "attempt_id"
@@ -90,7 +90,6 @@
   },
   "nullable_with_authority_reason": {
     "predicted_worst_phase": "balanced planning surrogate has no phase identity",
-    "shadow_root_import_kw_and_rebound": "null until a frozen shadow-baseline authority is supplied",
     "wan_power_kw": "null because no frozen WAN auxiliary-power coefficient exists; GB transfer remains measured",
     "raw_current_or_phase_extrema": "null only when the Fresh OpenDSS metrics provider does not expose the underlying physical field"
   },
@@ -101,6 +100,9 @@
     "no duplicate issue within a method",
     "every materialized action is commit accepted",
     "predicted and realized worst stress are non-null for B00-B09",
+    "simulation-local date is identical across all 288 rows of a method-day",
+    "energy-flex methods have non-null matched-shadow rebound fields",
+    "execution PASS is classified separately from service feasibility",
     "CAMPAIGN_SUMMARY contains exactly B00-B09 in frozen order",
     "period CAMPAIGN_SUMMARY is rebuilt from every passing date and read back",
     "period p95 runtimes are recomputed from issue-level samples"

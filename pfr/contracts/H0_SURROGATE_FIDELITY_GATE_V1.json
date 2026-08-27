@@ -1,0 +1,26 @@
+{
+  "schema_version": "H0_SURROGATE_FIDELITY_GATE_V1",
+  "status": "FROZEN_BEFORE_MARCH",
+  "estimand": "same-state same-H0 candidate delta and ranking fidelity",
+  "prohibited_comparison": "H54 horizon maximum minus realized H0 stress",
+  "reference_action": "same compute action with zero MESS P/Q",
+  "candidate_actions": ["REFERENCE_ZERO_MESS", "HALF_ACCEPTED_MESS", "ACCEPTED_MESS"],
+  "sampled_methods": ["B05", "B06"],
+  "sampling_interval_steps": 12,
+  "sampling_rationale": "B05 covers stationary storage and B06 covers mobile storage. B07-B09 reuse the same physical surrogate; excluding duplicate methods avoids unnecessary Fresh-AC probes.",
+  "tie_tolerance": 0.0001,
+  "phases": {
+    "january": {
+      "minimum_states": 168,
+      "minimum_sign_agreement": 0.9,
+      "minimum_pairwise_concordance": 0.85
+    },
+    "february": {
+      "minimum_states": 72,
+      "minimum_sign_agreement": 0.9,
+      "minimum_pairwise_concordance": 0.85
+    }
+  },
+  "selection_rule": "fixed engineering fidelity gate, not fitted to February or March outcomes",
+  "march_outcomes_may_be_read": false
+}

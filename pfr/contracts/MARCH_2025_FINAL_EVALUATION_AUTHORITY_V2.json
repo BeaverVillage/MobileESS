@@ -1,0 +1,57 @@
+{
+  "schema_version": "MARCH_2025_FINAL_EVALUATION_AUTHORITY_V2.authority.v1",
+  "identity": "MARCH_2025_FINAL_EVALUATION_AUTHORITY_V2",
+  "scientific_framework_id": "V14_AI_ICPS",
+  "status": "FROZEN_FINAL_EVALUATION_AUTHORIZED",
+  "evaluation_period_id": "MAR2025_FINAL",
+  "calendar_date_first": "2025-03-01",
+  "calendar_date_last": "2025-03-31",
+  "main_scientific_campaign_authorized": true,
+  "evaluation_classification": "FROZEN_FINAL_EVALUATION_NOT_INDEPENDENT_HOLDOUT",
+  "independent_holdout_claim": false,
+  "outcome_informed_parameter_tuning_historical": true,
+  "march_outcomes_permitted_for_parameter_tuning": false,
+  "source_freeze": {
+    "required": true,
+    "binding_time": "RUN_LAUNCH_AFTER_CLEAN_COMMIT",
+    "required_manifest_field": "git_full_commit_sha",
+    "expected_sha_must_be_supplied_by_launcher": true
+  },
+  "required_result_identity_fields": [
+    "scientific_framework_id",
+    "evaluation_period_id",
+    "source_commit_sha",
+    "objective_contract_sha256",
+    "method_config_sha256",
+    "calibration_fingerprint",
+    "calendar_date",
+    "daily_episode_id",
+    "day_issue_index"
+  ],
+  "frozen_physical_assumptions": {
+    "idc_facility_pue": 1.3,
+    "idc_facility_power_factor": 0.95,
+    "planner_and_fresh_ac_pq_identity_required": true,
+    "mobility_eligible_mess_ids": [
+      "MESS01",
+      "MESS02",
+      "MESS03",
+      "MESS04"
+    ],
+    "independent_route_choice_per_mess_required": true
+  },
+  "historical_provenance": {
+    "development_authority_identity": "COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1",
+    "development_evaluation_classification": "POST_HOC_DESIGN_VALIDATION_NOT_INDEPENDENT_HOLDOUT",
+    "development_outcome_informed_parameter_tuning": true,
+    "historical_results_must_not_be_overwritten": true,
+    "prior_march_2025_partial_run_status": "QUARANTINED_DIAGNOSTIC",
+    "technical_invalidation_reasons": [
+      "RUNNING_WORKLOAD_MIGRATION_WAS_STRUCTURALLY_DISABLED",
+      "MOBILITY_WAS_RESTRICTED_TO_A_SINGLE_MESS",
+      "PLANNER_AND_FRESH_AC_USED_DIFFERENT_IDC_REACTIVE_POWER"
+    ],
+    "rerun_reason": "TECHNICAL_INVALIDATION_NOT_OBSERVED_PERFORMANCE"
+  },
+  "created_utc_date": "2026-08-27"
+}

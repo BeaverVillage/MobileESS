@@ -80,6 +80,7 @@ class RiskDecision:
     expected_replan_benefit: float
     replan_cost: float
     plan_age_steps: int
+    triggered_risk_families: Tuple[str, ...] = ()
 
 
 class PlanValidityRiskMonitor:
@@ -109,6 +110,9 @@ class PlanValidityRiskMonitor:
         expected_replan_benefit: float,
         replan_cost: ReplanCost,
         plan_age_steps: int,
+        retained_plan_components: Mapping[str, float] | None = None,
+        trigger_armed: Mapping[str, bool] | None = None,
+        material_deterioration: float = 0.25,
     ) -> RiskDecision:
         frozen = tuple(constraints)
         if not frozen:
@@ -123,8 +127,22 @@ class PlanValidityRiskMonitor:
         calibrated_risk = max(calibrated.values())
         active = calibrated_risk if self.calibrated else raw_risk
         causes = []
-        if active > 0.0:
-            causes.append("SAFETY_RISK_POSITIVE")
+        active_components = calibrated if self.calibrated else raw
+        triggered_families = []
+        for family, value in active_components.items():
+            if value <= 0.0:
+                continue
+            if retained_plan_components is None:
+                triggered_families.append(family)
+                continue
+            armed = True if trigger_armed is None else bool(
+                trigger_armed.get(family, True)
+            )
+            reference = float(retained_plan_components.get(family, value))
+            if armed or value - reference >= material_deterioration:
+                triggered_families.append(family)
+        if triggered_families:
+            causes.append("RETAINED_PLAN_RISK_INVALIDATED")
         if expected_replan_benefit > replan_cost.total:
             causes.append("OPPORTUNITY_NET_BENEFIT_POSITIVE")
         if plan_age_steps >= self.maximum_refresh_steps:
@@ -141,6 +159,7 @@ class PlanValidityRiskMonitor:
             expected_replan_benefit=expected_replan_benefit,
             replan_cost=replan_cost.total,
             plan_age_steps=plan_age_steps,
+            triggered_risk_families=tuple(sorted(triggered_families)),
         )
 
 

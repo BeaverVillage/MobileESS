@@ -9,13 +9,20 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+import json
 import math
 import os
 from pathlib import Path
 import sys
+import time
 from typing import Any, Mapping, Optional
 
 import numpy as np
+
+try:
+    import fcntl
+except ImportError:  # pragma: no cover - production campaigns run under WSL/POSIX.
+    fcntl = None
 
 from .electrical_stress import OBJECTIVE_AUTHORITY
 from .methods import MethodConfig
@@ -201,28 +208,65 @@ class RetainedH54JointPlanner:
             return
         root = self.output_root / "_RETAINED_H54_FOUNDATION"
         root.mkdir(parents=True, exist_ok=True)
-        foundation, _ = self.science._worker_foundation(self.base, root)
-        self.foundation = foundation
-        self.b4 = foundation["b4"]
-        self.ar2 = foundation["ar2"]
-        self.b6 = foundation["b6"]
-        self.op1 = foundation["op1"]
-        self.grid = foundation["grid"]
-        self.metrics = foundation["metrics"]
-        self.scope = self.b4.prepare_scope(
-            self.base, foundation["rack"], self.op1, root
-        )
-        self.scope["env"] = _RuntimeZeroFixedRackEnvironment(self.scope["env"])
-        if foundation.get("gstatic") is None:
-            foundation["gstatic"] = self.b4.build_grid_static(
-                foundation["engine"],
-                self.grid,
-                self.metrics,
-                self.scope,
-                foundation["b2"],
+        # Six independent day processes are intentionally kept for campaign
+        # throughput.  Their retained-foundation construction, however, has a
+        # short high-memory extraction/import/static-grid phase.  Serializing
+        # only that one-time phase prevents concurrent RSS spikes without
+        # reducing steady-state day or solver parallelism.
+        lock_path = Path(
+            os.environ.get(
+                "PFR_FOUNDATION_STARTUP_LOCK",
+                str(self.output_root.parent / ".PFR_FOUNDATION_STARTUP.lock"),
             )
-        self.gstatic = foundation["gstatic"]
-        self._initialized = True
+        )
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+        lock_handle = lock_path.open("a+", encoding="utf-8")
+        wait_started = time.monotonic()
+        try:
+            if fcntl is not None:
+                fcntl.flock(lock_handle.fileno(), fcntl.LOCK_EX)
+            wait_seconds = time.monotonic() - wait_started
+            foundation, _ = self.science._worker_foundation(self.base, root)
+            self.foundation = foundation
+            self.b4 = foundation["b4"]
+            self.ar2 = foundation["ar2"]
+            self.b6 = foundation["b6"]
+            self.op1 = foundation["op1"]
+            self.grid = foundation["grid"]
+            self.metrics = foundation["metrics"]
+            self.scope = self.b4.prepare_scope(
+                self.base, foundation["rack"], self.op1, root
+            )
+            self.scope["env"] = _RuntimeZeroFixedRackEnvironment(self.scope["env"])
+            if foundation.get("gstatic") is None:
+                foundation["gstatic"] = self.b4.build_grid_static(
+                    foundation["engine"],
+                    self.grid,
+                    self.metrics,
+                    self.scope,
+                    foundation["b2"],
+                )
+            self.gstatic = foundation["gstatic"]
+            self._initialized = True
+            (root / "FOUNDATION_STARTUP_MEMORY_GATE.json").write_text(
+                json.dumps(
+                    {
+                        "status": "PASS",
+                        "lock_path": str(lock_path.resolve()),
+                        "wait_seconds": wait_seconds,
+                        "serialized_scope": "FOUNDATION_ONLY",
+                        "steady_state_day_parallelism_reduced": False,
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+        finally:
+            if fcntl is not None:
+                fcntl.flock(lock_handle.fileno(), fcntl.LOCK_UN)
+            lock_handle.close()
 
     def _scope_job(self, uid: str, state_job: Any) -> dict[str, Any]:
         if uid not in self.scope["pmap"]:

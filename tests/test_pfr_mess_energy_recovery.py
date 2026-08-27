@@ -177,6 +177,70 @@ class ActiveSensitivityVerifier:
         )
 
 
+class SafeStressVerifier:
+    mess_in_transit = (False, False, False, False)
+
+    def verify_fresh(self, *, control, state, slow_plan):
+        del state, slow_plan
+        p = sum(
+            control.mess_discharge_kw[mid] - control.mess_charge_kw[mid]
+            for mid in MESS_IDS
+        )
+        q = sum(control.mess_q_kvar.values())
+        vmax = (
+            1.03
+            + abs(p - 200.0) / 100000.0
+            + abs(q + 120.0) / 100000.0
+        )
+        return ExactAcResult(
+            True,
+            "PASS",
+            True,
+            True,
+            0.98,
+            vmax,
+            0.5,
+            0.5,
+            0,
+        )
+
+
+def test_recovery_fallback_keeps_transit_mess_disconnected() -> None:
+    verifier = SimpleNamespace(mess_in_transit=(False, False, False, True))
+    projector = _GurobiSensitivityProjector(
+        verifier,
+        allow_mess=True,
+        carried_energy_debt_kwh={mid: 1.0 for mid in MESS_IDS},
+        minimum_recovery_charge_kw={mid: 125.0 for mid in MESS_IDS},
+    )
+    nominal = FastControl(
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {},
+        {},
+    )
+
+    fallback = projector._null_or_minimum_recovery_control(nominal)
+
+    assert fallback.mess_charge_kw["MESS04"] == 0.0
+    assert fallback.mess_discharge_kw["MESS04"] == 0.0
+    assert fallback.mess_q_kvar["MESS04"] == 0.0
+    assert all(
+        fallback.mess_charge_kw[mid] == 125.0 for mid in MESS_IDS[:3]
+    )
+    assert projector._recovery_compliant(fallback)
+
+    invalid_transit_dispatch = FastControl(
+        {**fallback.mess_charge_kw, "MESS04": 1.0},
+        dict(fallback.mess_discharge_kw),
+        dict(fallback.mess_q_kvar),
+        {},
+        {},
+    )
+    assert not projector._recovery_compliant(invalid_transit_dispatch)
+
+
 def test_projector_combines_active_relief_with_location_sensitive_q():
     nominal = FastControl(
         {mid: 50.0 for mid in MESS_IDS},
@@ -205,6 +269,36 @@ def test_projector_combines_active_relief_with_location_sensitive_q():
     assert not any(
         row.get("solver", {}).get("status")
         == "FRESH_OPENDSS_PASSING_ACTIVE_COORDINATE_Q_SEARCH"
+        for row in projector.trace
+    )
+
+
+def test_safe_h0_action_uses_local_pq_model_and_exact_admission():
+    nominal = FastControl(
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {mid: 0.0 for mid in MESS_IDS},
+        {},
+        {},
+    )
+    state = FastLayerState(0, {mid: 760.0 / 1080.0 for mid in MESS_IDS}, {})
+    projector = _GurobiSensitivityProjector(
+        SafeStressVerifier(),
+        allow_mess=True,
+        improve_safe_operating_point=True,
+        refresh_local_pq_model=True,
+    )
+
+    candidate = projector.project(
+        nominal=nominal,
+        state=state,
+        slow_plan=SimpleNamespace(fingerprint="fixed-plan"),
+    )
+
+    assert projector.local_pq_surrogate is not None
+    assert candidate.objective_projected <= candidate.objective_nominal
+    assert any(
+        row.get("status") == "H0_EXACT_BENEFIT_ADMISSION"
         for row in projector.trace
     )
 

@@ -27,6 +27,9 @@ from .retained_h54 import RetainedH54JointPlanner
 from .runtime import (
     CausalExperimentFrame,
     IDCS,
+    IDC_FACILITY_POWER_FACTOR,
+    IDC_FACILITY_PUE,
+    IDC_FACILITY_TANPHI,
     MESS_CAPACITY_KWH,
     MESS_CHARGE_EFFICIENCY,
     MESS_CHARGE_LIMIT_KW,
@@ -47,9 +50,9 @@ COMPACT_ADAPTER_ID = "OFFLINE_ORACLE_VALIDATED_BOUNDED_CANDIDATE_H54_V1"
 ONLINE_DOMAIN_AUTHORITY = "BOUNDED_CANDIDATE_ONLINE_DOMAIN_V1"
 ALLOWED_DEVELOPMENT_K = (4, 8, 16, 32, 64)
 DEFAULT_CANDIDATE_LIMIT = 16
-PUE = 1.30
-PF = 0.95
-TANPHI = math.tan(math.acos(PF))
+PUE = IDC_FACILITY_PUE
+PF = IDC_FACILITY_POWER_FACTOR
+TANPHI = IDC_FACILITY_TANPHI
 IDC_TRANSFORMER_LIMIT_KW = 750.0 * PF
 PCS_KVA = 700.0
 
@@ -71,6 +74,7 @@ class _MobilityTemplate:
     energy_kwh: float
     source: str
     generation_reason: str
+    mess_id: Optional[str]
 
     @property
     def is_stay(self) -> bool:
@@ -79,11 +83,103 @@ class _MobilityTemplate:
     @property
     def identity(self) -> tuple[Any, ...]:
         return (
+            self.mess_id,
             self.departure_offset,
             self.destination_service_id,
             self.route_rank,
             self.route_slot,
         )
+
+
+def _ordered_mobility_candidates(
+    *,
+    mandatory: Sequence[_MobilityTemplate],
+    ranked: Sequence[tuple[_MobilityTemplate, float]],
+    commitment_window_steps: int,
+) -> list[_MobilityTemplate]:
+    """Return a stable prefix that exposes executable mobility decisions.
+
+    A global electrical-score ordering can fill a small K domain with routes
+    whose departures all lie beyond the next scheduled replan.  Rolling the
+    horizon then recreates those future departures indefinitely, so mobility
+    is enabled on paper but no route can ever start.  Keep the frozen score
+    ordering, while putting an actionable candidate for every eligible MESS
+    and destination-diverse candidates at the front of the optional prefix.
+    The best unrestricted future-preposition candidate follows them.  STAY
+    and a previously retained plan remain mandatory and movement is never
+    forced.
+    """
+
+    ordered: list[_MobilityTemplate] = []
+    seen: set[tuple[Any, ...]] = set()
+
+    def add(candidate: _MobilityTemplate) -> None:
+        if candidate.identity not in seen:
+            ordered.append(candidate)
+            seen.add(candidate.identity)
+
+    for candidate in mandatory:
+        add(candidate)
+
+    actionable = [
+        candidate
+        for candidate, _score in ranked
+        if candidate.departure_offset is not None
+        and int(candidate.departure_offset) < int(commitment_window_steps)
+    ]
+    if actionable:
+        # Fleet diversity is part of the treatment definition: a bounded
+        # prefix must not silently reduce four mobile assets to whichever one
+        # happens to win the causal screen tie-break.
+        for mid in MOBILITY_ELIGIBLE_MESS_IDS:
+            candidate = next(
+                (row for row in actionable if row.mess_id == mid),
+                None,
+            )
+            if candidate is not None:
+                add(candidate)
+        add(actionable[0])
+        first_destination = actionable[0].destination_service_id
+        second_destination = next(
+            (
+                candidate
+                for candidate in actionable[1:]
+                if candidate.destination_service_id != first_destination
+            ),
+            None,
+        )
+        if second_destination is not None:
+            add(second_destination)
+
+    if ranked:
+        add(ranked[0][0])
+
+    # Fill the remaining actionable prefix destination-by-destination.  The
+    # single-step screen often gives many departure/rank variants at one PCC
+    # identical scores; a flat ordering can consume K before a location whose
+    # full H54 recourse is better is ever exposed to the master.
+    by_asset_destination: dict[tuple[Optional[str], str], list[_MobilityTemplate]] = {}
+    asset_destination_order: list[tuple[Optional[str], str]] = []
+    for candidate in actionable:
+        key = (candidate.mess_id, candidate.destination_service_id)
+        if key not in by_asset_destination:
+            by_asset_destination[key] = []
+            asset_destination_order.append(key)
+        by_asset_destination[key].append(candidate)
+    depth = 0
+    while True:
+        added_at_depth = False
+        for key in asset_destination_order:
+            candidates = by_asset_destination[key]
+            if depth < len(candidates):
+                add(candidates[depth])
+                added_at_depth = True
+        if not added_at_depth:
+            break
+        depth += 1
+    for candidate, _score in ranked:
+        add(candidate)
+    return ordered
 
 
 @dataclass(frozen=True)
@@ -324,7 +420,13 @@ class _RadialStressKernel:
         candidates: Sequence[tuple[int, str]],
         support_kw: float = 100.0,
     ) -> np.ndarray:
-        """Batch-score one support action for every route arrival candidate."""
+        """Batch-score the best active-P direction at each route destination.
+
+        Storage can charge or discharge.  Screening only positive injection
+        reverses location rankings during upper-voltage stress and can remove
+        the destination that the full H54 recourse would select.  Evaluate the
+        same bounded probe in both directions and retain the lower stress.
+        """
         if not candidates:
             return np.empty(0, dtype=float)
         own_p, own_q = self.injections(
@@ -333,11 +435,17 @@ class _RadialStressKernel:
         if self.anchor_p is None:
             self.anchor_p = own_p[0].copy()
             self.anchor_q = own_q[0].copy()
-        steps = np.asarray([int(step) for step, _service in candidates], dtype=int)
+        steps_one = np.asarray(
+            [int(step) for step, _service in candidates], dtype=int
+        )
+        steps = np.repeat(steps_one, 2)
         batch_p = own_p[steps].copy()
         batch_q = own_q[steps].copy()
-        for row, (_step, service) in enumerate(candidates):
-            batch_p[row, self.index[self.service_bus[str(service)]]] -= support_kw
+        for candidate_index, (_step, service) in enumerate(candidates):
+            bus = self.index[self.service_bus[str(service)]]
+            # Even row: discharge/injection.  Odd row: charge/withdrawal.
+            batch_p[2 * candidate_index, bus] -= support_kw
+            batch_p[2 * candidate_index + 1, bus] += support_kw
         flow_p = batch_p @ self.descendant.T
         flow_q = batch_q @ self.descendant.T
         du = (
@@ -361,10 +469,19 @@ class _RadialStressKernel:
             axis=1,
         )
         idc = np.max(PUE * idc_it_kw[steps] / IDC_TRANSFORMER_LIMIT_KW, axis=1)
-        service = np.asarray(
-            [support_kw / self.service_kva[str(name)] for _step, name in candidates]
+        service = np.repeat(
+            np.asarray(
+                [
+                    support_kw / self.service_kva[str(name)]
+                    for _step, name in candidates
+                ]
+            ),
+            2,
         )
-        return np.maximum.reduce((np.max(voltage, axis=1), line, idc, service))
+        directional = np.maximum.reduce(
+            (np.max(voltage, axis=1), line, idc, service)
+        )
+        return np.min(directional.reshape(len(candidates), 2), axis=1)
 
 
 class CompactH54JointPlanner(RetainedH54JointPlanner):
@@ -712,7 +829,9 @@ class CompactH54JointPlanner(RetainedH54JointPlanner):
         locations = self._stationary_locations(state)
         if template.is_stay:
             return locations
-        mid = MOBILITY_ELIGIBLE_MESS_IDS[0]
+        mid = template.mess_id
+        if mid not in MOBILITY_ELIGIBLE_MESS_IDS:
+            raise _CandidateInfeasible("mobility template lacks an eligible MESS")
         if state.mess_in_transit[mid]:
             raise _CandidateInfeasible("cannot schedule a new route during committed transit")
         departure = int(template.departure_offset)
@@ -741,26 +860,18 @@ class CompactH54JointPlanner(RetainedH54JointPlanner):
     ) -> tuple[list[_MobilityTemplate], Mapping[str, Any]]:
         """Build physical candidates, then apply the explicit bounded approximation."""
 
-        mid = MOBILITY_ELIGIBLE_MESS_IDS[0]
-        current = state.mess_location[mid]
         stay = _MobilityTemplate(
             departure_offset=None,
-            destination_service_id=(
-                str(state.mess_route_destination[mid])
-                if state.mess_in_transit[mid]
-                else current
-            ),
-            route_rank=int(state.mess_route_rank[mid]),
+            destination_service_id="FLEET_STAY",
+            route_rank=0,
             route_slot=None,
             transit_steps=0,
             energy_kwh=0.0,
-            source=current,
+            source="FLEET_STATE",
             generation_reason="MANDATORY_STAY_OR_COMMITTED_TRANSIT",
+            mess_id=None,
         )
-        if (
-            not config.h54_capability_mask["mess_mobility"]
-            or state.mess_in_transit[mid]
-        ):
+        if not config.h54_capability_mask["mess_mobility"]:
             return [stay], {
                 "physical_domain_size": 1,
                 "exact_infeasible_removed": 0,
@@ -800,56 +911,65 @@ class CompactH54JointPlanner(RetainedH54JointPlanner):
         peak_reserve = float(self.science.PEAK_RESERVE)
         physical: list[_MobilityTemplate] = []
         exact_removed = 0
-        source_slots = np.flatnonzero(sources == current)
-        for departure in departure_grid:
-            optimistic_energy = min(
-                MESS_CAPACITY_KWH,
-                float(state.mess_energy_kwh[mid])
-                + departure
-                * MESS_CHARGE_EFFICIENCY
-                * STEP_HOURS
-                * MESS_CHARGE_LIMIT_KW,
-            )
-            for slot in source_slots.tolist():
-                travel = int(profile_steps[departure, slot])
-                transit = travel + connection_delay
-                energy = float(safe_energy[departure, slot])
-                if (
-                    transit <= 0
-                    # Arrival at the terminal boundary leaves no in-horizon
-                    # connected dispatch step.  Such a move consumes energy
-                    # but cannot improve any retained H54 stress component and
-                    # is exactly dominated by staying at the source.
-                    or departure + transit >= effective_steps
-                    or not math.isfinite(energy)
-                    or energy < 0.0
-                    or optimistic_energy
-                    < MESS_FLOOR_KWH + max(peak_reserve, energy) - 1e-9
-                ):
-                    exact_removed += 1
-                    continue
-                physical.append(
-                    _MobilityTemplate(
-                        departure_offset=int(departure),
-                        destination_service_id=str(destinations[slot]),
-                        route_rank=int(ranks[slot]),
-                        route_slot=int(slot),
-                        transit_steps=transit,
-                        energy_kwh=energy,
-                        source=current,
-                        generation_reason="CAUSAL_H54_PREPOSITION_CANDIDATE",
-                    )
+        for mid in MOBILITY_ELIGIBLE_MESS_IDS:
+            if state.mess_in_transit[mid]:
+                continue
+            current = state.mess_location[mid]
+            source_slots = np.flatnonzero(sources == current)
+            for departure in departure_grid:
+                optimistic_energy = min(
+                    MESS_CAPACITY_KWH,
+                    float(state.mess_energy_kwh[mid])
+                    + departure
+                    * MESS_CHARGE_EFFICIENCY
+                    * STEP_HOURS
+                    * MESS_CHARGE_LIMIT_KW,
                 )
+                for slot in source_slots.tolist():
+                    travel = int(profile_steps[departure, slot])
+                    transit = travel + connection_delay
+                    energy = float(safe_energy[departure, slot])
+                    if (
+                        transit <= 0
+                        # Arrival at the terminal boundary leaves no in-horizon
+                        # connected dispatch step.  Such a move consumes energy
+                        # but cannot improve any retained H54 stress component and
+                        # is exactly dominated by staying at the source.
+                        or departure + transit >= effective_steps
+                        or not math.isfinite(energy)
+                        or energy < 0.0
+                        or optimistic_energy
+                        < MESS_FLOOR_KWH + max(peak_reserve, energy) - 1e-9
+                    ):
+                        exact_removed += 1
+                        continue
+                    physical.append(
+                        _MobilityTemplate(
+                            departure_offset=int(departure),
+                            destination_service_id=str(destinations[slot]),
+                            route_rank=int(ranks[slot]),
+                            route_slot=int(slot),
+                            transit_steps=transit,
+                            energy_kwh=energy,
+                            source=current,
+                            generation_reason="CAUSAL_H54_PREPOSITION_CANDIDATE",
+                            mess_id=mid,
+                        )
+                    )
 
         # K=3 route dominance is exact within a fixed departure/source/destination:
         # a route with no shorter duration and no lower energy cannot improve any
         # retained hard resource constraint or stress trajectory.
         nondominated: list[_MobilityTemplate] = []
         dominated_removed = 0
-        groups: dict[tuple[int, str], list[_MobilityTemplate]] = {}
+        groups: dict[tuple[str, int, str], list[_MobilityTemplate]] = {}
         for candidate in physical:
             groups.setdefault(
-                (int(candidate.departure_offset), candidate.destination_service_id),
+                (
+                    str(candidate.mess_id),
+                    int(candidate.departure_offset),
+                    candidate.destination_service_id,
+                ),
                 [],
             ).append(candidate)
         for group in groups.values():
@@ -909,39 +1029,42 @@ class CompactH54JointPlanner(RetainedH54JointPlanner):
 
         mandatory: list[_MobilityTemplate] = [stay]
         if state.active_plan is not None:
-            planned_departure = state.active_plan.mess_departure_issue.get(mid)
-            planned_destination = state.active_plan.mess_destination.get(mid)
-            planned_rank = state.active_plan.mess_native_route_rank.get(mid)
-            if planned_departure is not None and int(planned_departure) >= frame.issue:
-                offset = int(planned_departure) - frame.issue
-                previous = next(
-                    (
-                        candidate
-                        for candidate in nondominated
-                        if candidate.departure_offset == offset
-                        and candidate.destination_service_id == planned_destination
-                        and candidate.route_rank == int(planned_rank)
-                    ),
-                    None,
-                )
-                if previous is not None:
-                    mandatory.append(
-                        _MobilityTemplate(
-                            **{
-                                **previous.__dict__,
-                                "generation_reason": "MANDATORY_PREVIOUS_CAUSAL_PLAN",
-                            }
-                        )
+            for mid in MOBILITY_ELIGIBLE_MESS_IDS:
+                planned_departure = state.active_plan.mess_departure_issue.get(mid)
+                planned_destination = state.active_plan.mess_destination.get(mid)
+                planned_rank = state.active_plan.mess_native_route_rank.get(mid)
+                if planned_departure is not None and int(planned_departure) >= frame.issue:
+                    offset = int(planned_departure) - frame.issue
+                    previous = next(
+                        (
+                            candidate
+                            for candidate in nondominated
+                            if candidate.mess_id == mid
+                            and candidate.departure_offset == offset
+                            and candidate.destination_service_id == planned_destination
+                            and candidate.route_rank == int(planned_rank)
+                        ),
+                        None,
                     )
-        selected: list[_MobilityTemplate] = []
-        seen: set[tuple[Any, ...]] = set()
-        for candidate in mandatory + [row[0] for row in ranked]:
-            if candidate.identity in seen:
-                continue
-            selected.append(candidate)
-            seen.add(candidate.identity)
-            if len(selected) >= self.candidate_limit:
-                break
+                    if previous is not None:
+                        mandatory.append(
+                            _MobilityTemplate(
+                                **{
+                                    **previous.__dict__,
+                                    "generation_reason": "MANDATORY_PREVIOUS_CAUSAL_PLAN",
+                                }
+                            )
+                        )
+        screen_score_by_identity = {
+            candidate.identity: float(score) for candidate, score in ranked
+        }
+        commitment_window_steps = int(config.periodic_replan_steps or 6)
+        ordered = _ordered_mobility_candidates(
+            mandatory=mandatory,
+            ranked=ranked,
+            commitment_window_steps=commitment_window_steps,
+        )
+        selected = ordered[: self.candidate_limit]
         return selected, {
             "physical_domain_size": 1 + len(physical),
             "exact_infeasible_removed": exact_removed,
@@ -960,6 +1083,39 @@ class CompactH54JointPlanner(RetainedH54JointPlanner):
             "future_preposition_candidates_enabled": True,
             "departure_grid": list(departure_grid),
             "heuristic_role": "BOUNDED_DOMAIN_GENERATION_ONLY",
+            "candidate_selection_mode": (
+                "COMMITMENT_WINDOW_DESTINATION_ROUND_ROBIN_THEN_GLOBAL_SCORE"
+            ),
+            "candidate_screen_dispatch_domain": (
+                "BIDIRECTIONAL_ACTIVE_P_100KW"
+            ),
+            "commitment_window_steps": commitment_window_steps,
+            "actionable_candidate_count": sum(
+                candidate.departure_offset is not None
+                and int(candidate.departure_offset) < commitment_window_steps
+                for candidate, _score in ranked
+            ),
+            "selected_actionable_candidate_count": sum(
+                candidate.departure_offset is not None
+                and int(candidate.departure_offset) < commitment_window_steps
+                for candidate in selected
+            ),
+            "bounded_candidates": [
+                {
+                    "is_stay": bool(candidate.is_stay),
+                    "mess_id": candidate.mess_id,
+                    "departure_offset": candidate.departure_offset,
+                    "destination_service_id": candidate.destination_service_id,
+                    "route_rank": int(candidate.route_rank),
+                    "transit_steps": int(candidate.transit_steps),
+                    "energy_kwh": float(candidate.energy_kwh),
+                    "screen_stress": screen_score_by_identity.get(
+                        candidate.identity
+                    ),
+                    "generation_reason": candidate.generation_reason,
+                }
+                for candidate in selected
+            ],
         }
 
     def _dispatch(
@@ -1032,7 +1188,7 @@ class CompactH54JointPlanner(RetainedH54JointPlanner):
                     if index < len(profile):
                         level -= float(profile[index])
                 if (
-                    mid in MOBILITY_ELIGIBLE_MESS_IDS
+                    mid == mobility_template.mess_id
                     and not mobility_template.is_stay
                     and step == int(mobility_template.departure_offset)
                 ):
@@ -1105,7 +1261,7 @@ class CompactH54JointPlanner(RetainedH54JointPlanner):
                     if index < len(profile):
                         level -= float(profile[index])
                 if (
-                    mid in MOBILITY_ELIGIBLE_MESS_IDS
+                    mid == mobility_template.mess_id
                     and not mobility_template.is_stay
                     and step == int(mobility_template.departure_offset)
                 ):
@@ -1240,6 +1396,7 @@ class CompactH54JointPlanner(RetainedH54JointPlanner):
             evaluations,
             key=lambda row: (
                 row[0],
+                "" if row[1].template.mess_id is None else row[1].template.mess_id,
                 row[1].template.destination_service_id,
                 row[1].template.route_rank,
                 -1
@@ -1265,7 +1422,7 @@ class CompactH54JointPlanner(RetainedH54JointPlanner):
             if state.mess_in_transit[mid]:
                 destinations[mid] = str(state.mess_route_destination[mid])
                 ranks[mid] = int(state.mess_route_rank[mid])
-            elif not selected_template.is_stay:
+            elif not selected_template.is_stay and selected_template.mess_id == mid:
                 destinations[mid] = selected_template.destination_service_id
                 ranks[mid] = selected_template.route_rank
                 departures[mid] = frame.issue + int(selected_template.departure_offset)

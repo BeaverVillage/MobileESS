@@ -136,6 +136,16 @@ def _record(issue: int = 0) -> dict:
 
 
 class ElectricalStressResultStorageTests(unittest.TestCase):
+    def test_simulation_calendar_date_does_not_split_on_utc_midnight(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "B09"
+            row = _record()
+            row["simulation_calendar_date"] = "2025-02-03"
+            materialize_method_results(root, (row,), {"status": "PASS"})
+            stored = pd.read_parquet(root / "ISSUE_RESULT.parquet")
+            self.assertEqual(stored.loc[0, "date"], "2025-02-03")
+            self.assertTrue(str(stored.loc[0, "timestamp"]).endswith("+00:00"))
+
     def test_method_tables_are_written_and_read_back_with_empty_job_schema(self):
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw) / "B09"
@@ -160,6 +170,19 @@ class ElectricalStressResultStorageTests(unittest.TestCase):
             self.assertEqual(issue["h54_maximum_exact_norm_residual"].tolist(), [0.0, 0.0])
             audit = json.loads((root / "RESULT_STORAGE_AUDIT.json").read_text())
             self.assertEqual(audit["status"], "PASS")
+            for filename in (
+                "RESULT_IDENTITY.json",
+                "ai_job_training_step.parquet",
+                "ai_checkpoint_migration_event.parquet",
+                "risk_monitor_step.parquet",
+                "exact_recourse_step.parquet",
+                "ac_safety_filter_step.parquet",
+                "communication_step.parquet",
+                "POLICY_RUNTIME_INVARIANT_CERTIFICATE.json",
+                "PAPER_METRIC_COMPLETENESS_CERTIFICATE.json",
+                "INDEPENDENT_RECALCULATION_CERTIFICATE.json",
+            ):
+                self.assertTrue((root / filename).is_file(), filename)
 
     def test_job_table_persists_prestart_wan_progress_by_job(self):
         record = _record(0)

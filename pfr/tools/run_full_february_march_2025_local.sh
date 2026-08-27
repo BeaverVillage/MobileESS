@@ -170,6 +170,7 @@ run_period() {
         --day-workers "$day_workers" --cpu-affinity "$cpu_affinity" \
         --capture-day-logs --continue-after-failure \
         --electrical-stress-campaign \
+        --h0-fidelity-audit-every-steps 12 \
         --shared-root "$shared" \
         --exact-package-root /mnt/c/Users/kjw39/Downloads/stage_mess_grid_v2038_exact_sweep_power_v70_final_v1_package \
         --authority-package-root "$work/run_packages/K9H7_V2044R11R1_20260807T191351" \
@@ -191,6 +192,13 @@ run_period() {
         --repo "$repo_dir" --root "$output" --start-date "$start_date" --days "$days" \
         --electrical-stress-campaign \
         --report "$output/STORAGE_VERIFICATION.json" || verify_rc=$?
+    if [[ "$period_id" == "FEB2025_FULL" ]]; then
+        "$python_bin" -m pfr.tools.audit_h0_surrogate_fidelity \
+            --campaign-root "$output" \
+            --contract "$repo_dir/pfr/contracts/H0_SURROGATE_FIDELITY_GATE_V1.json" \
+            --phase february \
+            --output "$output/H0_SURROGATE_FIDELITY_AUDIT.json" || verify_rc=$?
+    fi
     if ((campaign_rc != 0 || verify_rc != 0)); then
         echo "PERIOD_COMPLETED_WITH_RECORDED_FAILURE period=$period_id campaign_rc=$campaign_rc verify_rc=$verify_rc" >&2
         return 1

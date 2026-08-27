@@ -490,6 +490,7 @@ def run_day(
         "pfr.tools.run_pfr_matrix",
         *common,
         "--candidate-id", spec.candidate_id,
+        "--calendar-date", spec.calendar_date,
         "--start-issue", str(spec.start_issue),
         "--output", str(day_root),
     ]
@@ -734,6 +735,12 @@ def main() -> None:
     )
     parser.add_argument("--capture-day-logs", action="store_true")
     parser.add_argument(
+        "--h0-fidelity-audit-every-steps",
+        type=int,
+        default=0,
+        help="January/February gate sampling interval; 0 disables.",
+    )
+    parser.add_argument(
         "--fail-fast",
         action="store_true",
         help="Stop all day workers after the first failure, preserving evidence.",
@@ -828,6 +835,8 @@ def main() -> None:
         parser.error("raw-risk calibration fitting must not load a calibrated-risk artifact")
     if not 1 <= args.day_workers <= 31:
         parser.error("--day-workers must be in [1, 31]")
+    if args.h0_fidelity_audit_every_steps < 0:
+        parser.error("--h0-fidelity-audit-every-steps cannot be negative")
     for fingerprint in args.reuse_verified_pass_fingerprint:
         if len(fingerprint) != 64 or any(
             character not in "0123456789abcdef" for character in fingerprint
@@ -902,6 +911,13 @@ def main() -> None:
     ]
     if args.risk_calibration is not None:
         common.extend(("--risk-calibration", str(args.risk_calibration)))
+    if args.h0_fidelity_audit_every_steps:
+        common.extend(
+            (
+                "--h0-fidelity-audit-every-steps",
+                str(args.h0_fidelity_audit_every_steps),
+            )
+        )
     for mobility_root in args.mobility_root:
         common.extend(("--mobility-root", str(mobility_root)))
     if args.checkpoint_payload_occupancy_factor is not None:
