@@ -73,6 +73,7 @@ def payload(
     expected_days: int | None = None,
     start_day_index: int = 1,
     end_day_index: int | None = None,
+    authorized_pass_fingerprints: tuple[str, ...] = (),
 ) -> Mapping[str, Any]:
     expected = int(period["days"]) if expected_days is None else expected_days
     complete = len(rows) == expected
@@ -106,6 +107,10 @@ def payload(
         "gurobi_threads_per_process": int(os.environ.get("PFR_GUROBI_THREADS", "1")),
         "cpu_affinity_policy": cpu_affinity_policy,
         "cpu_affinity_groups": [list(group) for group in cpu_affinity_groups],
+        "authorized_verified_pass_reuse_fingerprints": sorted(
+            set(authorized_pass_fingerprints)
+        ),
+        "cross_implementation_pass_reuse_is_explicit": True,
         "independent_daily_cold_start": True,
         "cross_day_endogenous_state_carryover": False,
         "continue_to_next_method_after_failure": True,
@@ -185,6 +190,15 @@ def main() -> None:
         action="store_true",
         help="Validate and reuse completed PASS methods within partial days.",
     )
+    parser.add_argument(
+        "--reuse-verified-pass-fingerprint",
+        action="append",
+        default=[],
+        help=(
+            "Explicitly authorize reuse of a fully gated PASS day produced by "
+            "this scientific implementation fingerprint. May be repeated."
+        ),
+    )
     parser.add_argument("--shared-root", type=Path, required=True)
     parser.add_argument("--exact-package-root", type=Path, required=True)
     parser.add_argument("--authority-package-root", type=Path, required=True)
@@ -239,6 +253,13 @@ def main() -> None:
         parser.error("--day-workers must be in [1, 31]")
     if args.h0_fidelity_audit_every_steps < 0:
         parser.error("--h0-fidelity-audit-every-steps cannot be negative")
+    for fingerprint in args.reuse_verified_pass_fingerprint:
+        if len(fingerprint) != 64 or any(
+            character not in "0123456789abcdef" for character in fingerprint
+        ):
+            parser.error(
+                "--reuse-verified-pass-fingerprint must be a lowercase SHA-256"
+            )
     final_evaluation_authority = None
     if args.final_evaluation_authority is not None:
         final_evaluation_authority = json.loads(
@@ -367,6 +388,9 @@ def main() -> None:
             diagnostic_method=args.diagnostic_method,
             electrical_stress_campaign=args.electrical_stress_campaign,
             reuse_passed_methods=args.reuse_passed_methods,
+            authorized_pass_fingerprints=(
+                args.reuse_verified_pass_fingerprint
+            ),
         ): spec
         for spec in specs
     }
@@ -418,6 +442,9 @@ def main() -> None:
                     expected_days=len(specs),
                     start_day_index=args.start_day_index,
                     end_day_index=selected_end_day_index,
+                    authorized_pass_fingerprints=tuple(
+                        args.reuse_verified_pass_fingerprint
+                    ),
                 ),
             )
             print(
@@ -460,6 +487,9 @@ def main() -> None:
         expected_days=len(specs),
         start_day_index=args.start_day_index,
         end_day_index=selected_end_day_index,
+        authorized_pass_fingerprints=tuple(
+            args.reuse_verified_pass_fingerprint
+        ),
     )
     write_campaign(args.output, campaign)
     if campaign["status"] == "PASS" and args.electrical_stress_campaign:

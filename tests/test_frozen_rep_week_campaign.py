@@ -1,6 +1,6 @@
 import pytest
 
-from pfr.tools.run_frozen_rep_week_daily_campaign import period_specs
+from pfr.tools.run_frozen_rep_week_daily_campaign import payload, period_specs
 from pfr.tools.run_pfr_matrix import _block, _indexed_power_blocks
 
 
@@ -37,6 +37,31 @@ def test_period_specs_support_a_fail_closed_calendar_slice() -> None:
     assert specs[-1].start_issue == 8928 + 5 * 288
     with pytest.raises(ValueError, match="period day slice"):
         period_specs(period, start_day_index=0, end_day_index=6)
+
+
+def test_campaign_payload_records_cross_implementation_pass_authority() -> None:
+    first = "a" * 64
+    second = "b" * 64
+
+    result = payload(
+        {
+            "period_id": "MAR2025_FULL",
+            "calendar_start": "2025-03-01",
+            "days": 31,
+            "global_issue_first": 16992,
+        },
+        [],
+        workers=6,
+        final=False,
+        continue_after_failure=True,
+        authorized_pass_fingerprints=(second, first, second),
+    )
+
+    assert result["authorized_verified_pass_reuse_fingerprints"] == [
+        first,
+        second,
+    ]
+    assert result["cross_implementation_pass_reuse_is_explicit"] is True
 
 
 def test_rep_week_power_block_uses_frozen_global_issue_range(tmp_path) -> None:
