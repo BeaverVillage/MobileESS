@@ -923,7 +923,7 @@ def test_restarting_job_reserves_full_power_after_fixed_racks() -> None:
     }
 
 
-def test_migration_candidate_requires_one_feasible_destination_rack() -> None:
+def test_migration_candidate_reserves_restarting_job_rack_power() -> None:
     planner = object.__new__(PersistentBoundedMilpPlanner)
     planner._initialize = lambda: None
     candidate_uid = "candidate"
@@ -940,8 +940,8 @@ def test_migration_candidate_requires_one_feasible_destination_rack() -> None:
                 {
                     "rack_pool_id": "IDC02_LP01",
                     "idc_id": "IDC02",
-                    "deliverable_active_gpu_capacity": 2.0,
-                    "rack_power_cap_kw": 20.0,
+                    "deliverable_active_gpu_capacity": 3.0,
+                    "rack_power_cap_kw": 19.0,
                 },
             ]
         ),
@@ -1004,6 +1004,10 @@ def test_migration_candidate_requires_one_feasible_destination_rack() -> None:
             lifecycle="RUNNING",
         )
 
+    occupant = runtime_job(occupant_uid, "IDC02", 1)
+    occupant.lifecycle = "RESTARTING"
+    occupant.compute_rate_fraction = 0.0
+    occupant.restart_remaining_steps = 1
     state = MutableMethodState(
         issue=106,
         pre_state_sha256="a" * 64,
@@ -1011,7 +1015,7 @@ def test_migration_candidate_requires_one_feasible_destination_rack() -> None:
         mess_location=dict(MESS_CANONICAL_STAGING),
         jobs={
             candidate_uid: runtime_job(candidate_uid, "IDC01", 2),
-            occupant_uid: runtime_job(occupant_uid, "IDC02", 1),
+            occupant_uid: occupant,
         },
     )
     planned_racks = {

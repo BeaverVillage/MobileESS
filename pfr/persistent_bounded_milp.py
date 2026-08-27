@@ -672,7 +672,7 @@ class PersistentBoundedMilpPlanner(RetainedH54JointPlanner):
             occupied_gpu[rack] += int(job.source.requested_gpu)
             occupied_power[rack] += (
                 float(row["IT_power_kW"])
-                if job.lifecycle in {"RUNNING", "QUEUED"}
+                if job.lifecycle in {"RUNNING", "QUEUED", "RESTARTING"}
                 else 0.0
             )
 
