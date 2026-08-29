@@ -12,9 +12,12 @@ import math
 from collections import defaultdict, deque
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Mapping, Sequence
+from typing import TYPE_CHECKING, Mapping, Sequence
 
 from .grid_lp import LINE_POLYGON_FACES, BranchPhase, FeederLPData, PhaseAwareGridLPFactory
+
+if TYPE_CHECKING:
+    from .grid_background_v16_2 import AuthorityBackgroundBinding
 
 
 PHASE_NAME = {1: "A", 2: "B", 3: "C"}
@@ -240,6 +243,7 @@ def build_full_grid_binding(
     rooftop_pv_mw_96: Sequence[float],
     aidc_plan_kw_96x12: Sequence[Sequence[float]],
     pcc_asset: Path | None = None,
+    background_binding: AuthorityBackgroundBinding | None = None,
 ) -> FullGridBinding:
     if not (len(demand_mw_96) == len(rooftop_pv_mw_96) == len(aidc_plan_kw_96x12) == 96):
         raise ValueError("FULL_IEEE123_G11_TIME_AXIS_MUST_BE_96")
@@ -268,20 +272,32 @@ def build_full_grid_binding(
     masters: list[dict[str, float]] = []
     pv_net_cancellation_error = 0.0
     for time_index in range(96):
-        demand_scale = float(demand_mw_96[time_index]) / AEMO_ANNUAL_MAX_MW
-        # The frozen adapter's explicit PV add-back and generator projection
-        # use the same residential phase weights.  Their net-background
-        # contribution therefore cancels exactly; retain the two quantities
-        # in evidence while the LP receives the operational-net background.
-        pv_projected_kw = float(rooftop_pv_mw_96[time_index]) * IEEE123_NATIVE_P_KW / AEMO_ANNUAL_MAX_MW
-        pv_addback = {key: pv_projected_kw * value / pv_total for key, value in pv_capacity.items()}
-        pv_generation = dict(pv_addback)
-        pv_net_cancellation_error = max(
-            pv_net_cancellation_error,
-            max((abs(pv_addback[key] - pv_generation[key]) for key in pv_addback), default=0.0),
-        )
-        base_p = {key: value * demand_scale for key, value in native_p.items()}
-        base_q = {key: value * demand_scale for key, value in native_q.items()}
+        if background_binding is None:
+            demand_scale = float(demand_mw_96[time_index]) / AEMO_ANNUAL_MAX_MW
+            # Historical V16.1 behavior retained for callers that have not
+            # opted into the prospective V16.2 binding.
+            pv_projected_kw = float(rooftop_pv_mw_96[time_index]) * IEEE123_NATIVE_P_KW / AEMO_ANNUAL_MAX_MW
+            pv_addback = {key: pv_projected_kw * value / pv_total for key, value in pv_capacity.items()}
+            pv_generation = dict(pv_addback)
+            pv_net_cancellation_error = max(
+                pv_net_cancellation_error,
+                max((abs(pv_addback[key] - pv_generation[key]) for key in pv_addback), default=0.0),
+            )
+            base_p = {key: value * demand_scale for key, value in native_p.items()}
+            base_q = {key: value * demand_scale for key, value in native_q.items()}
+        else:
+            base_p = dict(background_binding.net_p_kw_96[time_index])
+            base_q = dict(background_binding.gross_q_kvar_96[time_index])
+            gross = background_binding.gross_p_kw_96[time_index]
+            generation = background_binding.pv_generation_kw_96[time_index]
+            pv_net_cancellation_error = max(
+                pv_net_cancellation_error,
+                abs(
+                    sum(gross.values())
+                    - sum(generation.values())
+                    - sum(base_p.values())
+                ),
+            )
         for key, value in capacitor_q.items():
             base_q[key] = base_q.get(key, 0.0) - value
         master_p: dict[tuple[str, str], dict[str, float]] = defaultdict(dict)
@@ -299,10 +315,13 @@ def build_full_grid_binding(
             if not service_id.startswith(("IDC", "STA")):
                 continue
             key = f"mess_p_kw[{service_id}]"
+            q_key = f"mess_q_kvar[{service_id}]"
             master[key] = 0.0
+            master[q_key] = 0.0
             bus = f"mess_{service_id.lower()}_pcc"
             for phase in ("A", "B", "C"):
                 master_p[(bus, phase)][key] = 1.0 / 3.0
+                master_q[(bus, phase)][q_key] = 1.0 / 3.0
         data = FeederLPData(
             root_bus="150",
             branches=branches,
@@ -333,7 +352,12 @@ def build_full_grid_binding(
         baseline_master=tuple(masters),
         topology_evidence=topology,
         input_evidence={
-            "background_mapping": "FROZEN_AEMO_VIC1_P100_TO_IEEE123_NATIVE_OPERATIONAL_NET",
+            "background_mapping": (
+                "GRID_BACKGROUND_MAPPING_CONTRACT_V16_2_BINDING"
+                if background_binding is not None
+                else "FROZEN_AEMO_VIC1_P100_TO_IEEE123_NATIVE_OPERATIONAL_NET"
+            ),
+            "background_binding": dict(background_binding.evidence) if background_binding is not None else None,
             "background_kw_per_regional_mw": IEEE123_NATIVE_P_KW / AEMO_ANNUAL_MAX_MW,
             "native_active_load_kw": p_total,
             "native_reactive_load_kvar": q_total,
@@ -444,7 +468,12 @@ def deterministic_hard_constraint_audit(binding: FullGridBinding) -> dict[str, o
     }
 
 
-def run_g11(binding: FullGridBinding, *, pass_status: str = "PASS_FULL_IEEE123_V16_1") -> dict[str, object]:
+def run_g11(
+    binding: FullGridBinding,
+    *,
+    pass_status: str = "PASS_FULL_IEEE123_V16_1",
+    require_initial_all_feasible: bool = True,
+) -> dict[str, object]:
     solutions = [
         factory.solve(time_index, binding.baseline_master[time_index], collect_iis=time_index == 0)
         for time_index, factory in enumerate(binding.factories)
@@ -508,7 +537,7 @@ def run_g11(binding: FullGridBinding, *, pass_status: str = "PASS_FULL_IEEE123_V
         and feasible_reference.feasible
         and infeasible.feasibility_cut.satisfied(feasible_reference_master)
     )
-    if feasible_count != 96:
+    if require_initial_all_feasible and feasible_count != 96:
         status = "FAIL_FULL_IEEE123_BASELINE_INFEASIBLE"
     else:
         status = pass_status if cut_valid and pi_sign_valid and farkas_valid else "FAIL_G11_DUAL_FARKAS_VALIDATION"
@@ -535,6 +564,14 @@ def run_g11(binding: FullGridBinding, *, pass_status: str = "PASS_FULL_IEEE123_V
         "status": status,
         "grid_lp_count": 96,
         "feasible_grid_lp_count": feasible_count,
+        "initial_infeasible_grid_lp_count": 96 - feasible_count,
+        "initial_reference_grid_status": (
+            "FEASIBLE_ALL_96"
+            if feasible_count == 96
+            else "INFEASIBLE_EXPECTED_FARKAS_PATH"
+        ),
+        "initial_reference_all_96_feasible_required_by_g11": require_initial_all_feasible,
+        "g11_gate_semantics": "DUAL_OPTIMALITY_AND_FARKAS_CUT_VALIDITY",
         "baseline_feasible_incumbent_admitted": feasible_count == 96,
         "baseline_time_0_iis": {
             "constraint_names": list(solutions[0].iis_constraint_names),
