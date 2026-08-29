@@ -1,0 +1,167 @@
+{
+  "authority_id": "V16_1_DA_AIDC_ICPS_BOUNDARYSEP",
+  "artifact_id": "V16_1_AIDC_POWER_BOUNDARY_REFREEZE_AUTHORITY",
+  "status": "PROSPECTIVE_REFREEZE_MINTED_IMPLEMENTATION_PENDING",
+  "effective_scope": "APRIL_FULL_IEEE123_PREPRODUCTION_AND_FUTURE_UNOPENED_PRIMARY_CAMPAIGNS",
+  "prospective": true,
+  "minted_before_may_june_access": true,
+  "justification": {
+    "artifact": "dayahead/artifacts/v16/RACK_POWER_CAPACITY_PROVENANCE_AUDIT_V1.json",
+    "artifact_sha256": "77ca85b017bde76c837af5075b435a151264e9b2c98b12ddd5c69de2c4156f9b",
+    "classification": "CAPACITY_CLASS_D_LEGACY_SYNTHETIC",
+    "prior_fail_closed_status_preserved": true
+  },
+  "scientific_boundaries": {
+    "P_IT_REF": "ESIF_WHOLE_FACILITY_IT",
+    "G_REF": "KESTREL_H100_SUBSYSTEM",
+    "W_F": "KESTREL_SOURCE_QUALIFIED_FLEXIBLE_SUBSYSTEM",
+    "DATASET312_KAPPA": "KESTREL_INCREMENTAL_IT_POWER_RESPONSE",
+    "LOGICAL_POOL_48": "VIRTUAL_CASE_STUDY_COMPUTE_POOLS",
+    "G_CAP_48": "VIRTUAL_LOGICAL_POOL_DELIVERABLE_ACTIVE_GPU_PLANNING_CAPACITY",
+    "LEGACY_RACK_POWER_CAP_KW": "HISTORICAL_LEGACY_SYNTHETIC_VIRTUAL_SCENARIO_CAPACITY_NOT_ESIF_RATING"
+  },
+  "legacy_power_capacity_retirement": {
+    "source_path": "C:/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed데이터/데이터센터/NLR Kestrel Jobs Data/stage_k5c3_20260723_062008/outputs/optimization_main_rack_parameters.csv",
+    "source_sha256": "4546c0672a4d25aa5c7c92ea90fb90ec8d3c009dda426939179b293abdeb83c0",
+    "source_bytes_preserved": true,
+    "field": "rack_power_cap_kw",
+    "absolute_kw_capacity_semantics": "RETIRED_FROM_V16_1_ACTIVE_SCIENTIFIC_CONSTRAINT_SET",
+    "is_esif_whole_facility_physical_rating": false,
+    "is_physical_rack_nameplate": false,
+    "is_flexible_only_power_capacity": false,
+    "required_active_hard_constraint_call_count": 0,
+    "new_facility_or_rack_nameplate_invented": false,
+    "capacity_scaling_performed": false,
+    "capacity_fitting_performed": false
+  },
+  "retained_virtual_power_spatialization": {
+    "definition": "w_r_P_SP = legacy_P_CAP_r / sum_r legacy_P_CAP_r",
+    "aidc_definition": "w_d_P_SP = sum_{r in R_d} w_r_P_SP",
+    "frozen_rack_weight_source": "dayahead/artifacts/v16/AIDC_RACK_MAPPING_CONTRACT.json",
+    "frozen_rack_weight_source_sha256": "d33444a19cfc6c4761f2e1b9a8adb88203b05cffc1d4a798e7b61c5add265d5b",
+    "rack_weight_sum": 1.0000000000000002,
+    "aidc_weights": {
+      "AIDC01": 0.06741573033707865,
+      "AIDC02": 0.1198501872659176,
+      "AIDC03": 0.12359550561797754,
+      "AIDC04": 0.054307116104868915,
+      "AIDC05": 0.08426966292134833,
+      "AIDC06": 0.10861423220973783,
+      "AIDC07": 0.033707865168539325,
+      "AIDC08": 0.09925093632958804,
+      "AIDC09": 0.22284644194756553,
+      "AIDC10": 0.028089887640449437,
+      "AIDC11": 0.018726591760299626,
+      "AIDC12": 0.03932584269662921
+    },
+    "aidc_weight_sum": 0.9999999999999999,
+    "fitting_call_count": 0,
+    "reestimation_call_count": 0,
+    "authority_statement": "Normalized legacy ratios are retained solely as frozen virtual case-study spatialization weights. Their absolute kW capacity semantics are retired."
+  },
+  "active_power_reference_delta": {
+    "P_F_REF_SYS": "sum_r P_F_REF(r,t)",
+    "P_RES_SYS": "P_IT_REF_Q90(t) - P_F_REF_SYS(t)",
+    "required_system_residual": "P_RES_SYS(t) >= 0 for all 96 slots",
+    "P_RES_AIDC": "w_d_P_SP * P_RES_SYS(t)",
+    "P_F_DA_RACK": "sum_b kappa_n(b)^P * x(b,r,t) / 0.25",
+    "P_IT_DA_AIDC": "P_RES_AIDC(d,t) + sum_{r in R_d} P_F_DA(r,t)",
+    "reconstruction": "sum_d P_IT_DA(d,t) = P_IT_REF_Q90(t) + [P_F_DA_SYS(t) - P_F_REF_SYS(t)]",
+    "PUE_PLAN": 1.3,
+    "PUE_application": "P_AIDC_PLAN(d,t) = PUE_PLAN * P_IT_DA(d,t), exactly once",
+    "rack_total_it_kw_hard_cap_active": false
+  },
+  "active_gpu_reference_delta": {
+    "G_F_REF_SYS": "sum_r G_F_REF(r,t)",
+    "G_RES_SYS": "G_REF_Q90(t) - G_F_REF_SYS(t)",
+    "required_system_residual": "G_RES_SYS(t) >= 0 for all 96 slots",
+    "G_RES_RACK": "w_r_G * G_RES_SYS(t)",
+    "active_constraint": "G_RES(r,t) + G_F_DA(r,t) <= G_CAP(r)",
+    "G_CAP_values_changed": false
+  },
+  "reference_compute_schedule_v3": {
+    "authority_id": "REFERENCE_COMPUTE_SCHEDULE_V3",
+    "v2_preserved_as_historical_evidence": true,
+    "v2_active_delta_origin": false,
+    "forecast_input": "COHORT_Q50",
+    "initial_backlog": 0,
+    "policy": "AS_ARRIVED_EARLIEST_FEASIBLE_DETERMINISTIC_FLUID",
+    "grid_blind": true,
+    "mess_blind": true,
+    "individual_queued_job_injection": false,
+    "deadline_or_sla_fabrication": false,
+    "feasibility_inputs": [
+      "ARRIVAL_CAUSALITY",
+      "FROZEN_H100_NODE_HOUR_UNITS",
+      "SYSTEM_RESIDUAL_NONNEGATIVITY",
+      "FROZEN_48_LOGICAL_POOL_GPU_CAPACITY",
+      "DETERMINISTIC_RACK_ALLOCATION"
+    ],
+    "reads_legacy_absolute_rack_kw_cap": false,
+    "required_b0_b2_byte_identity": true,
+    "active_service_parity": "B_97_DA = B_97_REF_V3"
+  },
+  "paper_facing_result_schema": {
+    "required": {
+      "AIDC_BASE_IT_POWER_KW": [96, 12],
+      "AIDC_TOTAL_IT_POWER_KW": [96, 12],
+      "AIDC_RACK_FLEX_POWER_KW": [96, 48],
+      "AIDC_RACK_GPU": [96, 48],
+      "AIDC_RACK_FLEX_GPU": [96, 48]
+    },
+    "legacy_AIDC_RACK_POWER_KW": "COMPATIBILITY_ONLY_EXCLUDED_FROM_V16_1_PAPER_FACING_AUTHORITY",
+    "prohibits_measured_48_rack_background_implication": true
+  },
+  "g10_v16_1": {
+    "required": [
+      "P_RES_SYS_NONNEGATIVE",
+      "G_RES_SYS_NONNEGATIVE",
+      "EXACT_SYSTEM_POWER_RECONSTRUCTION",
+      "RACK_GPU_CAPACITY_PASS",
+      "REFERENCE_V3_SERVICE_PARITY_PASS",
+      "MESS_ROUTE_SOC_CONNECTION_TERMINAL_INVARIANTS_PASS"
+    ],
+    "retired_requirement": "LEGACY_RACK_TOTAL_KW_CAP"
+  },
+  "electrical_hard_feasibility": [
+    "FEEDER_LINE_CURRENT",
+    "TRANSFORMER_CURRENT_AND_KVA",
+    "VOLTAGE",
+    "MESS_PCS_AND_SOC",
+    "FRESH_OPENDSS"
+  ],
+  "traceability_classification": {
+    "retained": [
+      "P_IT_REF",
+      "G_REF",
+      "W_F",
+      "DATASET312_KAPPA",
+      "ML_WEIGHTS",
+      "TRAFFIC",
+      "MESS",
+      "IEEE123",
+      "CL_MC_BD",
+      "GPU_PLANNING_CAPACITY",
+      "VIRTUAL_SPATIAL_MAPPING_RATIOS"
+    ],
+    "superseded": [
+      "V16_RACK_LEVEL_WHOLE_POWER_RESIDUAL",
+      "ACTIVE_LEGACY_RACK_TOTAL_KW_HARD_CAP",
+      "REFERENCE_COMPUTE_SCHEDULE_V2_AS_PRODUCTION_REFERENCE"
+    ],
+    "new": [
+      "ESIF_KESTREL_POWER_BOUNDARY_SEPARATION",
+      "AIDC_LEVEL_WHOLE_FACILITY_RESIDUAL_SPATIALIZATION",
+      "REFERENCE_COMPUTE_SCHEDULE_V3"
+    ]
+  },
+  "execution_firewall_at_mint": {
+    "production_code_change_count_before_authority_mint": 0,
+    "may_loader_access_count": 0,
+    "june_loader_access_count": 0,
+    "g12_call_count": 0,
+    "g13_call_count": 0,
+    "g14_call_count": 0,
+    "c12_call_count": 0
+  }
+}
