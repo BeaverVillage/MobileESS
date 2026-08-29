@@ -39,6 +39,10 @@ All feeder/PV/AIDC-PCC/Mobile-ESS-PCC sources were located and independently re-
 - CL-MC-BD: objective `0.5253623480754914`, 2 iterations, 6 cuts, gap 0
 - G11: PASS; G12: PASS_NON_SCIENTIFIC_PREPRODUCTION
 
-## Stop point
+## Corrected final-April gate order and current stop point
 
-Stopped after C7/C8/C9 pre-production integration. No May forecast, May reference schedule, May B0-B3 campaign, integrated scientific solve, G13 QSTS, G14 result campaign, or June replication was run. G13/G14 remain blocked until C12 and full scientific IEEE123 inputs are released.
+The earlier reduced-star result remains engineering-only evidence. The authoritative order is now `April full IEEE123 integration -> final G12 -> G13 -> G14 -> C12`; G13 is a prerequisite for C12, not a post-C12 activity.
+
+The exact full IEEE123 source release passed, including native controls and the frozen nonuniform 48-Rack capacity weights. C7 then failed closed at `FAIL_REFERENCE_DELTA_DECOMPOSITION`: the fixed Rack-ID-priority reference schedule makes the frozen GPU residual negative in 96 Rack/slot cells (minimum `-14.359713515786275`). No clipping, refitting, or replacement spatialization was applied. Consequently final G12, G13, G14, and C12 were not run, and no production freeze token was minted.
+
+No May forecast, May reference schedule, May B0-B3 campaign, or June replication was created. May and June loader access counts remain zero.

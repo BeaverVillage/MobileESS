@@ -27,9 +27,9 @@ def planning_residual(
         if len(mapped) != len(flexible):
             raise ValueError("REFERENCE_DELTA_RACK_AXIS_MISMATCH")
         row = tuple(float(a) - float(b) for a, b in zip(mapped, flexible))
-        if any(value < -1e-9 for value in row):
+        if any(value < 0.0 for value in row):
             raise ValueError("FAIL_REFERENCE_DELTA_DECOMPOSITION")
-        result.append(tuple(max(0.0, value) for value in row))
+        result.append(row)
     return tuple(result)
 
 
