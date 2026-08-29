@@ -1,0 +1,112 @@
+{
+  "authority_id": "DAYAHEAD_G0_G15_TEST_REPORT_V16",
+  "commands": [
+    {
+      "command": "python -m pytest -q tests/dayahead",
+      "result": "72 passed"
+    },
+    {
+      "command": "python -m pytest -q tests/dayahead tests/test_pfr_ai_training.py tests/test_pfr_power.py tests/test_pfr_methods.py tests/test_git_identity.py",
+      "result": "112 passed, 71 subtests passed"
+    },
+    {
+      "command": "python -m pytest -q tests",
+      "failures": [
+        {
+          "classification": "PRE_EXISTING_GUROBI_13_0_3_WINDOWS_BEHAVIOR",
+          "test": "test_joint_projection_restores_feasibility_across_multiple_trust_regions"
+        },
+        {
+          "classification": "WINDOWS_MISSING_POSIX_FCNTL",
+          "test": "test_exact_sources_are_prepared_once_and_reused_by_day_workers"
+        },
+        {
+          "classification": "WINDOWS_MISSING_POSIX_FCNTL",
+          "test": "test_exact_source_cache_is_invalidated_by_source_identity"
+        }
+      ],
+      "result": "424 passed, 4 skipped, 84 subtests passed, 3 failed"
+    },
+    {
+      "command": "python -m dayahead.aidc_preflight --full-inventory-hashes ...",
+      "result": "PASS"
+    },
+    {
+      "command": "python -m dayahead.reproduce_nlr_authority ...",
+      "result": "PASS"
+    },
+    {
+      "command": "python -m dayahead.reproduce_dataset312 ...",
+      "result": "PASS"
+    }
+  ],
+  "gates": {
+    "G0": {
+      "evidence": "historical artifacts preserved; V16 output isolated",
+      "status": "PASS"
+    },
+    "G1": {
+      "evidence": "new code/schema uses AIDC",
+      "status": "PASS"
+    },
+    "G10": {
+      "evidence": "reference delta/service/MESS invariants",
+      "status": "PASS_UNIT_INTEGRATION_PENDING"
+    },
+    "G11": {
+      "evidence": "real Gurobi Pi/Farkas and cut tests",
+      "status": "PASS_ENGINEERING"
+    },
+    "G12": {
+      "evidence": "PASS",
+      "status": "CONTROLLED_FIXTURE_PASS_SCIENTIFIC_NOT_RUN"
+    },
+    "G13": {
+      "evidence": "no scientific IEEE123 96-slot schedule yet",
+      "status": "NOT_RUN"
+    },
+    "G14": {
+      "evidence": "independent recalculator unit pass; result matrices absent",
+      "status": "NOT_RUN_CONTRACT_PASS"
+    },
+    "G15": {
+      "evidence": "raw sharing/volumes/kappa exact reproduction",
+      "status": "PASS"
+    },
+    "G2": {
+      "evidence": "AIDC_RAW_PREFLIGHT full 389-file SHA inventory",
+      "status": "PASS"
+    },
+    "G3": {
+      "evidence": "D-1 cutoff tests",
+      "status": "PASS"
+    },
+    "G4": {
+      "evidence": "lineage + historical/D1 separation + raw reproduction",
+      "status": "PASS"
+    },
+    "G5": {
+      "evidence": "locked loader implemented; HPO/final refit not run",
+      "status": "NOT_COMPLETE"
+    },
+    "G6": {
+      "evidence": "model forecast weights absent",
+      "status": "NOT_RUN"
+    },
+    "G7": {
+      "evidence": "supporting 96-slot traffic interface tests",
+      "status": "PASS"
+    },
+    "G8": {
+      "evidence": "time/vintage/DST/aggregation tests",
+      "status": "PASS"
+    },
+    "G9": {
+      "evidence": "single objective/squared-voltage contracts",
+      "status": "PASS_ENGINEERING"
+    }
+  },
+  "generated_at_utc": "2026-08-29T05:09:19.785544+00:00",
+  "may_june_access_status": "LOCKED",
+  "overall_status": "IMPLEMENTATION_PROGRESS_PASS_WITH_3_PREEXISTING_ENVIRONMENT_FAILURES_SCIENTIFIC_CAMPAIGN_LOCKED"
+}

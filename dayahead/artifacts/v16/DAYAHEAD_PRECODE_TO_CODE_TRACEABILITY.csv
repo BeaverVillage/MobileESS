@@ -1,0 +1,14 @@
+authority_id,section/equation,source module,function/class,test,status,inherited_from_previous_work,modified_for_v16
+V16-AUTH,Sections 0-1,dayahead/authority.py,AUTHORITY_IDS,test_frozen_authority_ids_are_exact,PASS,True,True
+V16-LABEL,Sections 5.1-5.6,dayahead/aidc_labels.py,dependency_firewall/historical_label_eligible,test_label_gate.py; test_v16_contracts.py,PASS,False,True
+V16-RAW,C1/G2/G15,dayahead/aidc_preflight.py,audit,AIDC_RAW_PREFLIGHT.json,PASS,True,True
+V16-D312,Section 5.6/G15,dayahead/reproduce_dataset312.py,reproduce,AIDC_DATASET312_RAW_REPRODUCTION.json,PASS,False,True
+V16-ADMIT,Section 9.2/G4,dayahead/aidc_admission_contract.py,validate_admission_record,test_d1_admission_is_forecast_cohort_only_and_denies_expost_fields,PASS,False,True
+V16-REF,Sections 7.6/12.1A,dayahead/reference_compute.py; dayahead/aidc_reference_delta.py,build_reference_schedule/planning_residual,test_reference_schedule_v2_is_deterministic_and_starts_empty,PASS_UNIT,True,True
+V16-SVC,Section 9.2,dayahead/aidc_service_contract.py,backlog_trajectory/require_terminal_reference_parity,test_reference_matched_terminal_service_has_no_deadline_slack,PASS_UNIT,False,True
+V16-REPLAY,Section 12.4,dayahead/aidc_realized_decomposition.py; dayahead/realized_compute_replay.py,realized_replay/replay_compute,test_realized_remove_then_add_prevents_double_count_and_fails_negative,PASS_UNIT,False,True
+V16-GRID,Sections 10-11/G11,dayahead/grid_lp.py; dayahead/benders.py,PhaseAwareGridLPFactory/cuts_for_iteration,test_today_work_package.py,PASS_REUSED,True,False
+V16-MESS,Section 9.4,dayahead/mess_physics.py,validate_trajectory,test_today_work_package.py,PASS_REUSED,True,False
+V16-G12,G12,dayahead/solver_equivalence.py,run_equivalence,test_controlled_monolithic_standard_and_cl_mc_bd_are_equivalent,CONTROLLED_PASS,False,True
+V16-G13,G13,dayahead/opendss_qsts.py,run_qsts/classify_g13,test_g13_distinguishes_release_fail_from_benchmark_infeasible,NOT_RUN,True,True
+V16-G14,G14,dayahead/result_schema.py,independent_recalculate,test_g14_independent_recalculator_has_zero_external_calls,CONTRACT_PASS_RESULT_PENDING,True,True

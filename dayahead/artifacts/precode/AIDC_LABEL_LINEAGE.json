@@ -1,0 +1,81 @@
+{
+  "authority_id": "AIDC_LABEL_ORIGIN_PROVENANCE_V1",
+  "generated_at_utc": "2026-08-28T10:26:34.556226+00:00",
+  "joint_alignment": {
+    "failures": [
+      "FAIL_AIDC_JOINT_LABEL_ALIGNMENT",
+      "FAIL_AIDC_P_LABEL"
+    ],
+    "resource_coupling_claim_eligible": false,
+    "row_wise_cross_dataset_merge_performed": false,
+    "status": "FAIL",
+    "synthetic_temporal_alignment_performed": false
+  },
+  "status": "FAIL",
+  "targets": {
+    "G_NF": {
+      "depends_on": [
+        "start_time",
+        "end_time",
+        "gpus_requested",
+        "partition",
+        "state_simple"
+      ],
+      "derivation_rule": "sum source-backed active GPU allocations on the timezone-aware Kestrel operational axis",
+      "failures": [],
+      "first_timestamp": "2023-08-10 04:13:58+00:00",
+      "label_origin": "SOURCE_DERIVED",
+      "last_timestamp": "2026-02-24 10:04:21+00:00",
+      "required_coverage_end": "2025-12-31T23:45:00+10:00",
+      "source_file_sha256": [
+        "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f"
+      ],
+      "source_system_id": "NLR_KESTREL_SLURM",
+      "status": "PASS",
+      "target": "G_NF",
+      "timestamp_axis_id": "KESTREL_TZ_AWARE_MOUNTAIN_TO_FIXED_AEST_15MIN_V1"
+    },
+    "P_NF": {
+      "depends_on": [
+        "it_power_kw"
+      ],
+      "derivation_rule": "source timestamp interpretation pending; observed IT active power then 15-minute aggregation only",
+      "failures": [
+        "SOURCE_TIMESTAMP_AXIS_UNRESOLVED",
+        "REQUIRED_NOV_DEC_COVERAGE_MISSING"
+      ],
+      "first_timestamp": "2015-11-10 03:00:01",
+      "label_origin": "OBSERVED_RAW",
+      "last_timestamp": "2025-08-29 04:35:08.461000",
+      "required_coverage_end": "2025-12-31T23:45:00+10:00",
+      "source_file_sha256": [
+        "19cd12405dde9144b1a360e8c8418666c399a3d0d15a7f846880d71ab22f9dd4"
+      ],
+      "source_system_id": "NLR_ESIF_DATA_CENTER_PUE",
+      "status": "FAIL",
+      "target": "P_NF",
+      "timestamp_axis_id": "ESIF_PUE_TIMESTAMP_TIMEZONE_UNRESOLVED"
+    },
+    "W_F": {
+      "depends_on": [
+        "submit_time",
+        "start_time",
+        "end_time",
+        "gpus_requested"
+      ],
+      "derivation_rule": "development-frozen cohorts from source-backed future job arrivals; no future job ID fabrication",
+      "failures": [],
+      "first_timestamp": "2023-08-10 04:13:58+00:00",
+      "label_origin": "SOURCE_DERIVED",
+      "last_timestamp": "2026-01-01 06:48:47+00:00",
+      "required_coverage_end": "2025-12-31T23:45:00+10:00",
+      "source_file_sha256": [
+        "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f"
+      ],
+      "source_system_id": "NLR_KESTREL_SLURM",
+      "status": "PASS",
+      "target": "W_F",
+      "timestamp_axis_id": "KESTREL_TZ_AWARE_MOUNTAIN_TO_FIXED_AEST_15MIN_V1"
+    }
+  }
+}
