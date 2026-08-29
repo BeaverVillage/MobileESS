@@ -1,23 +1,43 @@
 {
+  "access_audit": {
+    "d1_expost_eligibility_field_access_count": 0,
+    "esif_causal_history_imputation_count": 572,
+    "esif_imputation_rule": "PAST_SAME_SLOT_MEDIAN_UP_TO_7_DAYS; TARGET_DAYS_WITH_MISSING_P_EXCLUDED",
+    "esif_raw_15min_missing_count": 572,
+    "esif_returned_max_timestamp": "2025-04-30T23:59:07.527000+10:00",
+    "kestrel_archive_member_open_count": 9,
+    "max_kestrel_month_opened": 202504,
+    "may_june_loader_access_count": 0,
+    "split_access_counts": {
+      "PRIMARY_2025MAY": 0,
+      "REPLICATION_2025JUN01_25": 0,
+      "TRAIN_2024AUG19_2025MAR31": 1,
+      "VALIDATION_2025APR": 1
+    }
+  },
   "authority_id": "AIDC_TEMPORAL_SPLIT_V16",
-  "best_seed_selection_prohibited": true,
-  "independent_replication_end": "2025-06-25",
-  "independent_replication_start": "2025-06-01",
+  "best_seed_selection": false,
+  "ensemble": false,
+  "hpo_seed": 20260828,
   "locked": true,
-  "may_june_access_status": "LOCKED",
-  "phase_a_train_end": "2025-03-31",
-  "phase_a_training_start": "2024-08-19",
-  "phase_a_validation_end": "2025-04-30",
-  "phase_a_validation_start": "2025-04-01",
-  "posthoc_quantile_calibration": "NONE_V1",
-  "primary_locked_test_end": "2025-05-31",
-  "primary_locked_test_start": "2025-05-01",
+  "production_refit": [
+    "2024-08-19",
+    "2025-04-30"
+  ],
   "production_refit_count": 1,
-  "production_refit_end": "2025-04-30",
-  "production_refit_start": "2024-08-19",
   "production_seed": 20260828,
+  "robustness_seed_runs_this_phase": 0,
   "robustness_seeds": [
     20260829,
     20260830
+  ],
+  "status": "PASS",
+  "training": [
+    "2024-08-19",
+    "2025-03-31"
+  ],
+  "validation_hpo": [
+    "2025-04-01",
+    "2025-04-30"
   ]
 }

@@ -1,19 +1,39 @@
 {
-  "completed": [
-    "source lineage",
+  "canonical_state_sha256": "dcd6fd8c2216e7d26abb41554dd820bb2358affb3e9570103374d3c89e808939",
+  "config_sha256": "b58dae8a0899ea8ec31a122168be91b04fc20f583c08ec35fcd91efe7bff49cb",
+  "final_weight_config_fingerprint": "309d9019c8ff97cce92953755b96100717d00f7fa6cfb5311caf8797c14d43e3",
+  "freeze_scope": [
+    "cohort_runtime_bins",
+    "feature_schema",
+    "lookback",
+    "architecture",
+    "hyperparameters",
     "eligibility",
-    "kappa",
-    "split",
-    "architecture contract",
-    "seed policy",
-    "locked loader"
+    "kappa_n_P",
+    "target_scalers",
+    "production_weights",
+    "production_config"
   ],
-  "may_june_access_status": "LOCKED",
-  "pending": [
-    "April-only HPO",
-    "one Aug19-Apr30 production refit",
-    "model weights/hash",
-    "96-slot forecasts"
-  ],
-  "status": "NOT_COMPLETE"
+  "gates": {
+    "G5": "PASS",
+    "G6": "PASS"
+  },
+  "may_june_forecast_rows": 0,
+  "may_june_loader_access_count": 0,
+  "production_refit_count": 1,
+  "production_seed": 20260828,
+  "robustness_seeds_used_for_selection_or_ensemble": [],
+  "selected_hyperparameters": {
+    "attention_heads": 4,
+    "candidate_id": "C02",
+    "d_model": 64,
+    "dropout": 0.2,
+    "encoder_layers": 2,
+    "learning_rate": 0.0003,
+    "lookback": 1344
+  },
+  "status": "PASS_PRODUCTION_MODEL_FROZEN",
+  "validation_forecast_namespace": "APRIL_VALIDATION_ONLY",
+  "weights_file": "AIDC_RC_MQT_PRODUCTION_SEED20260828.pt",
+  "weights_file_sha256": "30603de0f1cf19e84d2280970aa8a74e6aff2b63cfa11d00200e161860bfc4bc"
 }

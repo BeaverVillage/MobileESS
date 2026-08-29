@@ -12,3 +12,6 @@ V16-MESS,Section 9.4,dayahead/mess_physics.py,validate_trajectory,test_today_wor
 V16-G12,G12,dayahead/solver_equivalence.py,run_equivalence,test_controlled_monolithic_standard_and_cl_mc_bd_are_equivalent,CONTROLLED_PASS,False,True
 V16-G13,G13,dayahead/opendss_qsts.py,run_qsts/classify_g13,test_g13_distinguishes_release_fail_from_benchmark_infeasible,NOT_RUN,True,True
 V16-G14,G14,dayahead/result_schema.py,independent_recalculate,test_g14_independent_recalculator_has_zero_external_calls,CONTRACT_PASS_RESULT_PENDING,True,True
+V16-MAP,R002-R005/C7 readiness,dayahead/frozen_mapping_authority.py,verify_frozen_mapping_sources,test_frozen_mapping_authority.py; FROZEN_MAPPING_AUTHORITY.json,PASS_EXACT_SHA_SOURCE_FOUND,True,True
+V16-G5,G5 April-only model selection,dayahead/aidc_ml_data.py; dayahead/aidc_ml_backend.py; dayahead/run_aidc_ml_freeze.py,load_april_locked_labels; train_transformer; execute,test_g56_freeze_artifacts.py; AIDC_G5_G6_TEST_EVIDENCE.json,PASS,False,True
+V16-G6,G6 production freeze,dayahead/aidc_ml_backend.py; dayahead/run_aidc_ml_freeze.py,save_production_weights; verify_saved_weight_fingerprint,test_g56_freeze_artifacts.py; AIDC_ML_FREEZE_REPORT.json,PASS_PRODUCTION_REFIT_COUNT_1,False,True
