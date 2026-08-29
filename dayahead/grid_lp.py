@@ -283,9 +283,10 @@ class PhaseAwareGridLPFactory:
         model.optimize()
         if model.Status == GRB.OPTIMAL:
             pi = {row.row_name: float(constr.Pi) for constr, row in registry}
+            active_master_keys = sorted({key for _constr, row in registry for key in row.master_coefficients})
             gradient = {
                 key: sum(float(constr.Pi) * row.master_coefficients.get(key, 0.0) for constr, row in registry)
-                for key in master
+                for key in active_master_keys
             }
             objective = float(model.ObjVal)
             cut = OptimalityCut(time_index, objective - sum(gradient[key] * float(master[key]) for key in gradient), gradient, source_iteration)
@@ -296,12 +297,22 @@ class PhaseAwareGridLPFactory:
             return GridLPSolution(time_index, True, objective, pi, {}, cut, None, loading)
         if model.Status == GRB.INFEASIBLE:
             rays = {row.row_name: float(constr.FarkasDual) for constr, row in registry}
+            active_master_keys = sorted({key for _constr, row in registry for key in row.master_coefficients})
             gradient = {
                 key: sum(float(constr.FarkasDual) * row.master_coefficients.get(key, 0.0) for constr, row in registry)
-                for key in master
+                for key in active_master_keys
             }
             proof = float(model.FarkasProof)
-            rhs = sum(gradient[key] * float(master[key]) for key in gradient) - proof
-            cut = FeasibilityCut(time_index, gradient, rhs, source_iteration)
+            # Gurobi's positive FarkasProof is the required movement away from
+            # the infeasible RHS point along the certificate direction:
+            #   g·(m - m_hat) >= FarkasProof.
+            # FeasibilityCut stores only <= rows, hence multiply by -1.
+            threshold = sum(gradient[key] * float(master[key]) for key in gradient) + proof
+            cut = FeasibilityCut(
+                time_index,
+                {key: -value for key, value in gradient.items()},
+                -threshold,
+                source_iteration,
+            )
             return GridLPSolution(time_index, False, None, {}, rays, None, cut, {})
         raise RuntimeError(f"unexpected Gurobi status {model.Status}")

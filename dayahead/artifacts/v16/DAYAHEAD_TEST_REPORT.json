@@ -3,11 +3,11 @@
   "commands": [
     {
       "command": "python -m pytest -q tests/dayahead",
-      "result": "77 passed"
+      "result": "82 passed"
     },
     {
       "command": "python -m pytest -q tests/dayahead tests/test_pfr_ai_training.py tests/test_pfr_power.py tests/test_pfr_methods.py tests/test_git_identity.py",
-      "result": "117 passed, 71 subtests passed"
+      "result": "122 passed, 71 subtests passed"
     },
     {
       "command": "python -m pytest -q tests",
@@ -25,7 +25,7 @@
           "test": "test_exact_source_cache_is_invalidated_by_source_identity"
         }
       ],
-      "result": "429 passed, 4 skipped, 84 subtests passed, 3 failed"
+      "result": "434 passed, 4 skipped, 84 subtests passed, 3 failed"
     },
     {
       "command": "python -m dayahead.aidc_preflight --full-inventory-hashes ...",
@@ -46,6 +46,10 @@
     {
       "command": "python -m dayahead.run_aidc_ml_freeze --raw-root ... --output dayahead/artifacts/v16",
       "result": "PASS; April-only HPO; production refit count 1; May/June access 0"
+    },
+    {
+      "command": "python -m dayahead.run_c7_c9_preproduction",
+      "result": "PASS; monolithic first; 96 Grid LP Pi/Farkas; Standard and CL-MC-BD certified; May/June access 0"
     }
   ],
   "gates": {
@@ -58,20 +62,20 @@
       "status": "PASS"
     },
     "G10": {
-      "evidence": "reference delta/service/MESS invariants",
-      "status": "PASS_UNIT_INTEGRATION_PENDING"
+      "evidence": "April-only reference delta/service/MESS route-SOC-P-Q integrated invariants",
+      "status": "PASS_PREPRODUCTION_INTEGRATED"
     },
     "G11": {
-      "evidence": "real Gurobi Pi/Farkas and cut tests",
-      "status": "PASS_ENGINEERING"
+      "evidence": "integrated 96 time-local LP registry, real Gurobi Pi/Farkas, sampled cut validity and exact exclusion",
+      "status": "PASS_PREPRODUCTION"
     },
     "G12": {
-      "evidence": "PASS",
-      "status": "CONTROLLED_FIXTURE_PASS_SCIENTIFIC_NOT_RUN"
+      "evidence": "monolithic/Standard/CL-MC-BD objective and hard-feasibility identity; CL gap 0",
+      "status": "PASS_NON_SCIENTIFIC_PREPRODUCTION"
     },
     "G13": {
-      "evidence": "no scientific IEEE123 96-slot schedule yet",
-      "status": "NOT_RUN"
+      "evidence": "C12 and full scientific IEEE123 input release required; May/June still locked",
+      "status": "BLOCKED_UNTIL_C12"
     },
     "G14": {
       "evidence": "independent recalculator unit pass; result matrices absent",
@@ -120,5 +124,5 @@
     "status": "PASS"
   },
   "may_june_access_status": "LOCKED_ACCESS_COUNT_0",
-  "overall_status": "G5_G6_PASS_PRODUCTION_MODEL_FROZEN_C7_AUTHORITY_READY"
+  "overall_status": "C7_C8_C9_PREPRODUCTION_PASS_MAY_JUNE_LOCKED"
 }

@@ -60,11 +60,20 @@ def validate_occupancy(occupancy: Mapping[tuple[str, int], Sequence[str]]) -> No
             raise ValueError("MESS_CANNOT_EXIST_AT_TWO_PLACES")
 
 
-def validate_trajectory(slots: Sequence[MessSlot], *, initial_energy_kwh: float = E_INITIAL_KWH) -> tuple[float, ...]:
+def validate_trajectory(
+    slots: Sequence[MessSlot],
+    *,
+    initial_energy_kwh: float = E_INITIAL_KWH,
+    mobility_energy_kwh: Sequence[float] | None = None,
+) -> tuple[float, ...]:
     if len(slots) != 96:
         raise ValueError("MESS trajectory must contain exactly 96 slots")
+    if mobility_energy_kwh is None:
+        mobility_energy_kwh = (0.0,) * 96
+    if len(mobility_energy_kwh) != 96 or any(float(value) < 0 for value in mobility_energy_kwh):
+        raise ValueError("MESS_SAFE_MOBILITY_ENERGY_REQUIRES_96_NONNEGATIVE_SLOTS")
     energy = [float(initial_energy_kwh)]
-    for index, slot in enumerate(slots):
+    for index, (slot, mobility_kwh) in enumerate(zip(slots, mobility_energy_kwh)):
         if slot.p_dis_kw < -1e-9 or slot.p_ch_kw < -1e-9:
             raise ValueError("P_dis/P_ch must be non-negative")
         if slot.p_dis_kw > 1e-9 and slot.p_ch_kw > 1e-9:
@@ -78,7 +87,7 @@ def validate_trajectory(slots: Sequence[MessSlot], *, initial_energy_kwh: float 
         if not pcs_inner_polygon_satisfied(slot.p_kw, slot.q_kvar):
             raise ValueError("MESS_16_FACE_PCS_INNER_POLYGON_EXCEEDED")
         audit_pcs_exact_norm(slot.p_kw, slot.q_kvar)
-        next_energy = energy[-1] + DT_HOURS * (slot.p_ch_kw - slot.p_dis_kw)
+        next_energy = energy[-1] + DT_HOURS * (slot.p_ch_kw - slot.p_dis_kw) - float(mobility_kwh)
         if not E_MIN_KWH - 1e-9 <= next_energy <= E_MAX_KWH + 1e-9:
             raise ValueError("MESS_SOC_BOUND_EXCEEDED")
         energy.append(next_energy)

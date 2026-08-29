@@ -15,6 +15,7 @@ class ReferenceComputeSchedule:
     workload_by_rack_slot: Mapping[tuple[str, int], float]
     scientific_eligible: bool
     backlog_terminal_by_cohort: Mapping[str, float] | None = None
+    workload_by_cohort_rack_slot: Mapping[tuple[str, str, int], float] | None = None
 
 
 def build_reference_schedule(
@@ -38,6 +39,12 @@ def build_reference_schedule(
         if set(rack_capacity_nodeh_per_slot) != set(ordered_racks):
             raise ValueError("REFERENCE_SCHEDULE_RACK_CAPACITY_AXIS_MISMATCH")
         allocation = {(rack, slot): 0.0 for rack in ordered_racks for slot in range(96)}
+        cohort_allocation = {
+            (cohort, rack, slot): 0.0
+            for cohort in sorted(cohort_arrivals)
+            for rack in ordered_racks
+            for slot in range(96)
+        }
         backlog = {cohort: 0.0 for cohort in sorted(cohort_arrivals)}
         for cohort, values in cohort_arrivals.items():
             if len(values) != 96 or any(float(value) < 0 for value in values):
@@ -49,11 +56,18 @@ def build_reference_schedule(
                 for rack in ordered_racks:
                     served = min(backlog[cohort], remaining_capacity[rack])
                     allocation[(rack, slot)] += served
+                    cohort_allocation[(cohort, rack, slot)] += served
                     remaining_capacity[rack] -= served
                     backlog[cohort] -= served
                     if backlog[cohort] <= 1e-12:
                         break
-        return ReferenceComputeSchedule("REFERENCE_COMPUTE_SCHEDULE_V2", allocation, True, backlog)
+        return ReferenceComputeSchedule(
+            "REFERENCE_COMPUTE_SCHEDULE_V2",
+            allocation,
+            True,
+            backlog,
+            cohort_allocation,
+        )
     if workload_by_rack_slot is None:
         raise ValueError("REFERENCE_SCHEDULE_REQUIRES_FORECAST_COHORT_ARRIVALS")
     expected = {(rack, slot) for rack in dimensions.rack_ids for slot in range(96)}
