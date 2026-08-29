@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping, Sequence
 
-from .grid_lp import BranchPhase, FeederLPData, PhaseAwareGridLPFactory
+from .grid_lp import LINE_POLYGON_FACES, BranchPhase, FeederLPData, PhaseAwareGridLPFactory
 
 
 PHASE_NAME = {1: "A", 2: "B", 3: "C"}
@@ -31,14 +31,15 @@ class FullGridBinding:
     input_evidence: dict[str, object]
 
 
-def _compile(assets: Path, contract: Path) -> object:
+def _compile(assets: Path, contract: Path, pcc_asset: Path | None = None) -> object:
     import opendssdirect as odd
 
+    selected_pcc_asset = pcc_asset or (assets / "Generated_ThreePhase_PCC_v3.dss")
     odd.Basic.ClearAll()
     for command in (
         f'Compile "{assets / "IEEE123Master.dss"}"',
         "MakeBusList",
-        f'Redirect "{assets / "Generated_ThreePhase_PCC_v3.dss"}"',
+        f'Redirect "{selected_pcc_asset}"',
         "MakeBusList",
         "CalcVoltageBases",
         f'Redirect "{assets / "Generated_Planning_Line_Ratings_u080.dss"}"',
@@ -238,12 +239,13 @@ def build_full_grid_binding(
     demand_mw_96: Sequence[float],
     rooftop_pv_mw_96: Sequence[float],
     aidc_plan_kw_96x12: Sequence[Sequence[float]],
+    pcc_asset: Path | None = None,
 ) -> FullGridBinding:
     if not (len(demand_mw_96) == len(rooftop_pv_mw_96) == len(aidc_plan_kw_96x12) == 96):
         raise ValueError("FULL_IEEE123_G11_TIME_AXIS_MUST_BE_96")
     if any(len(row) != 12 for row in aidc_plan_kw_96x12):
         raise ValueError("FULL_IEEE123_G11_AIDC_AXIS_MUST_BE_12")
-    odd = _compile(assets, contract)
+    odd = _compile(assets, contract, pcc_asset)
     branches, topology = _oriented_branches(odd)
     node_present = {(branch.parent_bus, branch.phase): True for branch in branches}
     node_present.update({(branch.child_bus, branch.phase): True for branch in branches})
@@ -343,13 +345,108 @@ def build_full_grid_binding(
             "aidc_derivative_p_per_phase": 1.0 / 3.0,
             "aidc_derivative_q_per_phase": tan_phi / 3.0,
             "legacy_rack_kw_row_active_count": 0,
+            "pcc_transformer_asset": str((pcc_asset or (assets / "Generated_ThreePhase_PCC_v3.dss")).resolve()),
         },
     )
 
 
-def run_g11(binding: FullGridBinding) -> dict[str, object]:
+def deterministic_hard_constraint_audit(binding: FullGridBinding) -> dict[str, object]:
+    """Recalculate lossless branch flows and hard-limit ratios without a solver."""
+
+    transformer_rows: list[dict[str, object]] = []
+    line_rows: list[dict[str, object]] = []
+    voltage_rows: list[dict[str, object]] = []
+    for time_index, (factory, master) in enumerate(zip(binding.factories, binding.baseline_master)):
+        data = factory.data
+        outgoing: dict[tuple[str, str], list[BranchPhase]] = defaultdict(list)
+        for branch in data.branches:
+            outgoing[(branch.parent_bus, branch.phase)].append(branch)
+        p_flow: dict[tuple[str, str], float] = {}
+        q_flow: dict[tuple[str, str], float] = {}
+        for branch in reversed(data.branches):
+            child = (branch.child_bus, branch.phase)
+            p_local = float(data.base_load_p_kw.get(child, 0.0)) - sum(
+                float(value) * float(master[key])
+                for key, value in data.master_p_injection.get(child, {}).items()
+            )
+            q_local = float(data.base_load_q_kvar.get(child, 0.0)) - sum(
+                float(value) * float(master[key])
+                for key, value in data.master_q_injection.get(child, {}).items()
+            )
+            p_value = p_local + sum(p_flow[(row.branch_id, row.phase)] for row in outgoing.get(child, ()))
+            q_value = q_local + sum(q_flow[(row.branch_id, row.phase)] for row in outgoing.get(child, ()))
+            key = (branch.branch_id, branch.phase)
+            p_flow[key] = p_value
+            q_flow[key] = q_value
+            limit = float(data.line_limit_kva_u080[key])
+            apothem = limit * math.cos(math.pi / LINE_POLYGON_FACES)
+            polygon_ratio = max(
+                (
+                    p_value * math.cos(2 * math.pi * face / LINE_POLYGON_FACES)
+                    + q_value * math.sin(2 * math.pi * face / LINE_POLYGON_FACES)
+                ) / apothem
+                for face in range(LINE_POLYGON_FACES)
+            )
+            row = {
+                "time_index": time_index,
+                "branch_id": branch.branch_id,
+                "phase": branch.phase,
+                "p_kw": p_value,
+                "q_kvar": q_value,
+                "apparent_power_kva": math.hypot(p_value, q_value),
+                "limit_kva": limit,
+                "circular_loading_pu": math.hypot(p_value, q_value) / limit,
+                "hard_polygon_loading_pu": polygon_ratio,
+            }
+            line_rows.append(row)
+            if key in data.transformer_limit_kva:
+                transformer_rows.append(row)
+        voltage = {(data.root_bus, phase): 1.0 for phase in ("A", "B", "C")}
+        for branch in data.branches:
+            parent = (branch.parent_bus, branch.phase)
+            child = (branch.child_bus, branch.phase)
+            voltage[child] = voltage[parent] - 2.0 * (
+                branch.r_pu_per_kw * p_flow[(branch.branch_id, branch.phase)]
+                + branch.x_pu_per_kvar * q_flow[(branch.branch_id, branch.phase)]
+            )
+            voltage_rows.append({
+                "time_index": time_index,
+                "bus": branch.child_bus,
+                "phase": branch.phase,
+                "v_squared_pu": voltage[child],
+                "voltage_pu": math.sqrt(max(0.0, voltage[child])),
+            })
+    tx_violations = [row for row in transformer_rows if float(row["hard_polygon_loading_pu"]) > 1.0 + 1e-9]
+    line_violations = [
+        row for row in line_rows
+        if not str(row["branch_id"]).startswith("transformer.")
+        and float(row["hard_polygon_loading_pu"]) > 1.0 + 1e-9
+    ]
+    voltage_violations = [
+        row for row in voltage_rows
+        if not 0.95**2 - 1e-9 <= float(row["v_squared_pu"]) <= 1.05**2 + 1e-9
+    ]
+
+    def worst(rows: Sequence[dict[str, object]], field: str) -> dict[str, object] | None:
+        return max(rows, key=lambda row: float(row[field])) if rows else None
+
+    return {
+        "solver_call_count": 0,
+        "transformer_hard_violation_count": len(tx_violations),
+        "line_hard_violation_count": len(line_violations),
+        "voltage_hard_violation_count": len(voltage_violations),
+        "transformer_violation_time_count": len({int(row["time_index"]) for row in tx_violations}),
+        "violating_transformer_branches": sorted({str(row["branch_id"]) for row in tx_violations}),
+        "worst_transformer": worst(tx_violations or transformer_rows, "hard_polygon_loading_pu"),
+        "worst_line": worst(line_violations or [row for row in line_rows if not str(row["branch_id"]).startswith("transformer.")], "hard_polygon_loading_pu"),
+        "minimum_voltage": min(voltage_rows, key=lambda row: float(row["v_squared_pu"])),
+        "maximum_voltage": max(voltage_rows, key=lambda row: float(row["v_squared_pu"])),
+    }
+
+
+def run_g11(binding: FullGridBinding, *, pass_status: str = "PASS_FULL_IEEE123_V16_1") -> dict[str, object]:
     solutions = [
-        factory.solve(time_index, binding.baseline_master[time_index])
+        factory.solve(time_index, binding.baseline_master[time_index], collect_iis=time_index == 0)
         for time_index, factory in enumerate(binding.factories)
     ]
     feasible_count = sum(solution.feasible for solution in solutions)
@@ -414,12 +511,35 @@ def run_g11(binding: FullGridBinding) -> dict[str, object]:
     if feasible_count != 96:
         status = "FAIL_FULL_IEEE123_BASELINE_INFEASIBLE"
     else:
-        status = "PASS_FULL_IEEE123_V16_1" if cut_valid and pi_sign_valid and farkas_valid else "FAIL_G11_DUAL_FARKAS_VALIDATION"
+        status = pass_status if cut_valid and pi_sign_valid and farkas_valid else "FAIL_G11_DUAL_FARKAS_VALIDATION"
+    transformer_loading = [
+        (solution.time_index, branch_phase[0], branch_phase[1], float(value))
+        for solution in solutions if solution.feasible
+        for branch_phase, value in solution.loading.items()
+        if branch_phase[0].startswith("transformer.")
+    ]
+    aidc_transformer_loading = [
+        row for row in transformer_loading if row[1].startswith("transformer.idc_idc")
+    ]
+    mess_transformer_loading = [
+        row for row in transformer_loading if row[1].startswith("transformer.mess_")
+    ]
+
+    def worst_loading(rows: Sequence[tuple[int, str, str, float]]) -> dict[str, object] | None:
+        if not rows:
+            return None
+        time_index, branch_id, phase, loading = max(rows, key=lambda row: row[3])
+        return {"time_index": time_index, "branch_id": branch_id, "phase": phase, "loading_pu": loading}
+
     return {
         "status": status,
         "grid_lp_count": 96,
         "feasible_grid_lp_count": feasible_count,
         "baseline_feasible_incumbent_admitted": feasible_count == 96,
+        "baseline_time_0_iis": {
+            "constraint_names": list(solutions[0].iis_constraint_names),
+            "variable_bounds": [list(row) for row in solutions[0].iis_variable_bounds],
+        } if not solutions[0].feasible else None,
         "master_dependent_row_registry_complete": binding.topology_evidence["registry_complete_all_96"],
         "pi_sign_convention": "PASS" if pi_sign_valid else "FAIL",
         "farkasdual_sign_convention": "PASS" if farkas_valid else "FAIL",
@@ -445,6 +565,17 @@ def run_g11(binding: FullGridBinding) -> dict[str, object]:
         "objective_min": min((float(solution.objective) for solution in solutions if solution.feasible), default=None),
         "objective_max": max((float(solution.objective) for solution in solutions if solution.feasible), default=None),
         "aidc_electrical_injection_derivatives": "PASS",
+        "transformer_hard_constraint_semantics": {
+            "kva_limit_hard": True,
+            "current_loading_limit_hard_equivalent_at_fixed_voltage": True,
+            "transformer_rating_optimization_variable_count": 0,
+            "transformer_constraint_slack_variable_count": 0,
+            "polygon_faces": 16,
+            "present_phase_rows_per_time": binding.topology_evidence["transformer_phase_count"] * 16,
+        },
+        "worst_transformer_loading": worst_loading(transformer_loading),
+        "worst_aidc_transformer_loading": worst_loading(aidc_transformer_loading),
+        "worst_mess_transformer_loading": worst_loading(mess_transformer_loading),
         "legacy_rack_kw_row_active_count": 0,
         "reduced_star_used_as_final_evidence": False,
         "topology": binding.topology_evidence,

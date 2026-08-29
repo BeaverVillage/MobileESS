@@ -112,6 +112,8 @@ class GridLPSolution:
     optimality_cut: OptimalityCut | None
     feasibility_cut: FeasibilityCut | None
     loading: Mapping[tuple[str, str], float]
+    iis_constraint_names: tuple[str, ...] = ()
+    iis_variable_bounds: tuple[tuple[str, str, float], ...] = ()
 
 
 class CapacityGridLPFactory:
@@ -129,7 +131,10 @@ class CapacityGridLPFactory:
             MasterDependentRow("master_demand", {"y": 1.0}, 0.0, ">="),
         )
 
-    def solve(self, time_index: int, master: Mapping[str, float], source_iteration: int = 0) -> GridLPSolution:
+    def solve(
+        self, time_index: int, master: Mapping[str, float], source_iteration: int = 0,
+        *, collect_iis: bool = False,
+    ) -> GridLPSolution:
         try:
             import gurobipy as gp
             from gurobipy import GRB
@@ -217,7 +222,10 @@ class PhaseAwareGridLPFactory:
             ))
         self.master_dependent_row_registry = tuple(rows)
 
-    def solve(self, time_index: int, master: Mapping[str, float], source_iteration: int = 0) -> GridLPSolution:
+    def solve(
+        self, time_index: int, master: Mapping[str, float], source_iteration: int = 0,
+        *, collect_iis: bool = False,
+    ) -> GridLPSolution:
         try:
             import gurobipy as gp
             from gurobipy import GRB
@@ -314,5 +322,20 @@ class PhaseAwareGridLPFactory:
                 -threshold,
                 source_iteration,
             )
-            return GridLPSolution(time_index, False, None, {}, rays, None, cut, {})
+            iis_constraints: tuple[str, ...] = ()
+            iis_bounds: tuple[tuple[str, str, float], ...] = ()
+            if collect_iis:
+                model.computeIIS()
+                iis_constraints = tuple(
+                    constr.ConstrName for constr in model.getConstrs() if bool(constr.IISConstr)
+                )
+                iis_bounds = tuple(
+                    (var.VarName, side, float(var.LB if side == "LB" else var.UB))
+                    for var in model.getVars()
+                    for side, active in (("LB", bool(var.IISLB)), ("UB", bool(var.IISUB)))
+                    if active
+                )
+            return GridLPSolution(
+                time_index, False, None, {}, rays, None, cut, {}, iis_constraints, iis_bounds
+            )
         raise RuntimeError(f"unexpected Gurobi status {model.Status}")
