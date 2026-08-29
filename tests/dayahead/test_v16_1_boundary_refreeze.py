@@ -119,3 +119,18 @@ def test_april_v16_1_artifacts_are_v3_byte_identical_and_campaign_locked() -> No
     assert g10["status"] == "PASS"
     assert g10["g12_call_count"] == g10["g13_call_count"] == g10["g14_call_count"] == g10["c12_call_count"] == 0
     assert g10["may_loader_access_count"] == g10["june_loader_access_count"] == 0
+
+
+def test_g11_fails_closed_without_a_complete_april_aemo_vintage() -> None:
+    report = json.loads((V16_1 / "G11_V16_1_FULL_IEEE123_REPORT.json").read_text(encoding="utf-8"))
+    assert report["status"] == "FAIL_AEMO_COMPLETE_VINTAGE_NOT_FOUND"
+    assert report["stop_rule_applied"] is True
+    assert report["input_authority_gate"]["demand_complete_vintage_count_for_operating_day"] == 0
+    assert report["input_authority_gate"]["pv_complete_vintage_count_for_operating_day"] == 0
+    assert report["prohibited_substitutions_rejected"]["per_slot_vintage_mixing_used"] is False
+    assert report["prohibited_substitutions_rejected"]["actual_used_as_forecast"] is False
+    assert report["g11_execution"]["reduced_star_used_as_final_evidence"] is False
+    assert report["g11_execution"]["final_full_ieee123_grid_lp_count"] == 0
+    assert all(value == 0 for value in report["downstream_call_counts"].values())
+    assert report["firewall"]["may_loader_access_count"] == 0
+    assert report["firewall"]["june_loader_access_count"] == 0
