@@ -52,9 +52,8 @@ AUTHORITY_ARCHIVE_MEMBERS = {
 def _write_json(path: Path, payload: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True, allow_nan=False) + "\n",
-        encoding="utf-8",
+    temporary.write_bytes(
+        (json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
     )
     temporary.replace(path)
 
@@ -67,7 +66,7 @@ def _write_sha_manifest(artifacts: Path) -> None:
     ]
     target = artifacts / "DAYAHEAD_SHA256SUMS.txt"
     temporary = target.with_suffix(".txt.tmp")
-    temporary.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    temporary.write_bytes(("\n".join(lines) + "\n").encode("utf-8"))
     temporary.replace(target)
 
 
@@ -298,7 +297,7 @@ def _write_traceability(output: Path) -> None:
     path = output / "DAYAHEAD_PRECODE_TO_CODE_TRACEABILITY.csv"
     temporary = path.with_suffix(".csv.tmp")
     with temporary.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.writer(stream)
+        writer = csv.writer(stream, lineterminator="\n")
         writer.writerow(("classification", "authority_item", "implementation_or_evidence", "v16_1_status"))
         writer.writerows(rows)
     temporary.replace(path)
