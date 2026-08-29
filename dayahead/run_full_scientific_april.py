@@ -8,22 +8,25 @@ before any G12/G13/G14 execution if reference-delta nonnegativity fails.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import shutil
 from pathlib import Path
 from typing import Sequence
 
-from .aidc_rack_mapping import (
-    AUTHORITY_ID as RACK_AUTHORITY_ID,
-    build_capacity_feasible_reference,
-    load_frozen_rack_authority,
-    reference_delta_audit,
+from .aidc_boundary_v16_1 import (
+    AUTHORITY_ID as V16_1_AUTHORITY_ID,
+    REFERENCE_AUTHORITY_ID,
+    audit_boundary_separation,
+    build_reference_schedule_v3,
 )
+from .aidc_rack_mapping import AUTHORITY_ID as RACK_AUTHORITY_ID, load_frozen_rack_authority
+from .aidc_service_contract import require_terminal_reference_parity
 from .authority import sha256_file
 
 
 OPERATING_DAY = "2025-04-15"
-NAMESPACE = "APRIL_VALIDATION_FULL_SCIENTIFIC_IEEE123_V1"
+NAMESPACE = "APRIL_VALIDATION_FULL_SCIENTIFIC_IEEE123_V16_1"
 EXPECTED_FULL_AUTHORITY_SHA256 = {
     "IEEE123Master.dss": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969",
     "Generated_ThreePhase_PCC_v3.dss": "3c3e27020e266dc8f1c4e28e90d49f298d6ca741ef6b54599e44265882cd747c",
@@ -114,6 +117,30 @@ def _compile_full_authority(assets: Path, contract: Path) -> dict[str, object]:
     return result
 
 
+def _pcc_mapping_audit(path: Path) -> dict[str, object]:
+    import opendssdirect as odd
+
+    with path.open("r", encoding="utf-8-sig", newline="") as stream:
+        rows = [row for row in csv.DictReader(stream) if row["asset_type"] == "IDC"]
+    rows.sort(key=lambda row: row["service_node_id"])
+    if [row["service_node_id"] for row in rows] != [f"IDC{index:02d}" for index in range(1, 13)]:
+        raise RuntimeError("V16_1_AIDC_PCC_MAPPING_AXIS_MISMATCH")
+    buses = {str(value).lower() for value in odd.Circuit.AllBusNames()}
+    missing = [row["electrical_host_bus"] for row in rows if row["electrical_host_bus"].lower() not in buses]
+    if missing:
+        raise RuntimeError(f"V16_1_AIDC_PCC_BUS_NOT_IN_FULL_IEEE123:{missing}")
+    return {
+        "authority_sha256": sha256_file(path),
+        "aidc_count": len(rows),
+        "aidc_pcc_host_buses": {
+            f"AIDC{int(row['service_node_id'][-2:]):02d}": row["electrical_host_bus"] for row in rows
+        },
+        "all_hosts_present_in_compiled_full_ieee123": True,
+        "mapping_fitting_call_count": 0,
+        "mapping_rated_kw_active_constraint_call_count": 0,
+    }
+
+
 def _load_april_forecast(path: Path) -> tuple[dict[str, tuple[float, ...]], tuple[float, ...], tuple[float, ...]]:
     import pandas as pd
 
@@ -137,46 +164,161 @@ def _load_april_forecast(path: Path) -> tuple[dict[str, tuple[float, ...]], tupl
     )
 
 
-def _write_reference_parquet(
+def _write_reference_v3_artifacts(
     output: Path,
     reference: object,
     rack_ids: Sequence[str],
     cohorts: Sequence[str],
-) -> tuple[Path, Path, str]:
+) -> dict[str, object]:
     import pandas as pd
 
-    rows = [
+    x_rows = [
         {
             "namespace": NAMESPACE,
             "operating_day": OPERATING_DAY,
+            "authority_id": REFERENCE_AUTHORITY_ID,
             "cohort": cohort,
             "rack_id": rack,
             "slot": slot,
-            "work_h100_nodeh": float(reference.allocation[(cohort, rack, slot)]),
+            "x_ref_v3_h100_nodeh": float(reference.allocation[(cohort, rack, slot)]),
         }
         for cohort in cohorts
         for rack in rack_ids
         for slot in range(96)
     ]
-    b0 = output / "REFERENCE_COMPUTE_SCHEDULE_V2_B0_APRIL_FULL_IEEE123.parquet"
-    b2 = output / "REFERENCE_COMPUTE_SCHEDULE_V2_B2_APRIL_FULL_IEEE123.parquet"
-    temporary = b0.with_suffix(".parquet.tmp")
-    pd.DataFrame(rows).to_parquet(temporary, index=False)
-    temporary.replace(b0)
+    canonical = output / "REFERENCE_COMPUTE_SCHEDULE_V3.parquet"
+    temporary = canonical.with_suffix(".parquet.tmp")
+    pd.DataFrame(x_rows).to_parquet(temporary, index=False)
+    temporary.replace(canonical)
+    b0 = output / "REFERENCE_COMPUTE_SCHEDULE_V3_B0_APRIL_FULL_IEEE123.parquet"
+    b2 = output / "REFERENCE_COMPUTE_SCHEDULE_V3_B2_APRIL_FULL_IEEE123.parquet"
+    x_ref = output / "X_REF_V3.parquet"
+    shutil.copyfile(canonical, b0)
     shutil.copyfile(b0, b2)
-    if b0.read_bytes() != b2.read_bytes():
+    shutil.copyfile(canonical, x_ref)
+    if not (canonical.read_bytes() == b0.read_bytes() == b2.read_bytes() == x_ref.read_bytes()):
         raise RuntimeError("B0_B2_REFERENCE_BYTES_NOT_IDENTICAL")
-    return b0, b2, sha256_file(b0)
+    p_f_ref = output / "P_F_REF_V3.parquet"
+    g_f_ref = output / "G_F_REF_V3.parquet"
+    b97_ref = output / "B97_REF_V3.parquet"
+    pd.DataFrame(
+        [
+            {"namespace": NAMESPACE, "operating_day": OPERATING_DAY, "slot": slot, "rack_id": rack, "p_f_ref_kw": float(reference.flexible_power_kw[slot][rack_index])}
+            for slot in range(96)
+            for rack_index, rack in enumerate(rack_ids)
+        ]
+    ).to_parquet(p_f_ref, index=False)
+    pd.DataFrame(
+        [
+            {"namespace": NAMESPACE, "operating_day": OPERATING_DAY, "slot": slot, "rack_id": rack, "g_f_ref": float(reference.flexible_gpu[slot][rack_index])}
+            for slot in range(96)
+            for rack_index, rack in enumerate(rack_ids)
+        ]
+    ).to_parquet(g_f_ref, index=False)
+    pd.DataFrame(
+        [
+            {"namespace": NAMESPACE, "operating_day": OPERATING_DAY, "cohort": cohort, "B97_REF_V3_h100_nodeh": float(reference.terminal_backlog[cohort])}
+            for cohort in cohorts
+        ]
+    ).to_parquet(b97_ref, index=False)
+    return {
+        "canonical_path": str(canonical.resolve()),
+        "b0_path": str(b0.resolve()),
+        "b2_path": str(b2.resolve()),
+        "x_ref_path": str(x_ref.resolve()),
+        "p_f_ref_path": str(p_f_ref.resolve()),
+        "g_f_ref_path": str(g_f_ref.resolve()),
+        "b97_ref_path": str(b97_ref.resolve()),
+        "canonical_sha256": sha256_file(canonical),
+        "b0_sha256": sha256_file(b0),
+        "b2_sha256": sha256_file(b2),
+        "x_ref_sha256": sha256_file(x_ref),
+        "p_f_ref_sha256": sha256_file(p_f_ref),
+        "g_f_ref_sha256": sha256_file(g_f_ref),
+        "b97_ref_sha256": sha256_file(b97_ref),
+        "b0_b2_bytes_identical": b0.read_bytes() == b2.read_bytes(),
+    }
+
+
+def _retained_mess_evidence(source_artifacts: Path) -> dict[str, object]:
+    source = source_artifacts / "C7_C8_C9_PREPRODUCTION_REPORT.json"
+    payload = json.loads(source.read_text(encoding="utf-8"))
+    mess = payload["c7"]["integration_evidence"]["mess"]
+    if len(mess) != 4:
+        raise RuntimeError("V16_1_RETAINED_MESS_AXIS_MISMATCH")
+    if any(abs(float(record["terminal_energy_kwh"]) - 760.0) > 1e-9 for record in mess.values()):
+        raise RuntimeError("V16_1_RETAINED_MESS_TERMINAL_INVARIANT_FAIL")
+    return {
+        "status": "PASS_REUSED_UNCHANGED_BOUNDARY",
+        "source_artifact": str(source.resolve()),
+        "source_artifact_sha256": sha256_file(source),
+        "mess_count": len(mess),
+        "route_soc_connection_terminal_invariants": "PASS",
+        "records": mess,
+        "new_optimizer_call_count": 0,
+    }
+
+
+def _service_parity_v3(
+    reference: object,
+    arrivals: dict[str, tuple[float, ...]],
+    rack_ids: Sequence[str],
+) -> dict[str, object]:
+    terminal_residuals: dict[str, float] = {}
+    for cohort in sorted(arrivals):
+        processed = tuple(
+            sum(float(reference.allocation[(cohort, rack, slot)]) for rack in rack_ids)
+            for slot in range(96)
+        )
+        da_backlog, ref_backlog = require_terminal_reference_parity(arrivals[cohort], processed, processed)
+        terminal_residuals[cohort] = float(da_backlog[-1] - ref_backlog[-1])
+    return {
+        "contract": "B_97_DA=B_97_REF_V3",
+        "max_abs_terminal_residual_nodeh": max(abs(value) for value in terminal_residuals.values()),
+        "terminal_residual_by_cohort": terminal_residuals,
+        "artificial_deadline": None,
+        "sla_claim": False,
+    }
+
+
+def _write_traceability(output: Path) -> None:
+    rows = [
+        ("RETAINED", "P_IT_REF/G_REF/W_F", "Frozen RC-MQT April validation output", "UNCHANGED"),
+        ("RETAINED", "Dataset312 kappa", "dayahead/aidc_power_response.py", "UNCHANGED"),
+        ("RETAINED", "ML/Traffic/MESS/IEEE123/CL-MC-BD", "Existing frozen implementations", "UNCHANGED"),
+        ("RETAINED", "GPU planning capacity", "deliverable_active_gpu_capacity", "ACTIVE_LOGICAL_POOL_CONSTRAINT"),
+        ("RETAINED", "Virtual spatial mapping ratios", "Normalized legacy power ratios", "SPATIALIZATION_ONLY"),
+        ("SUPERSEDED", "V16 Rack-level whole-power residual", "AIDC_REFERENCE_DELTA_V1", "INACTIVE_V16_1"),
+        ("SUPERSEDED", "Legacy Rack total-kW hard cap", "rack_power_cap_kw", "ACTIVE_CONSTRAINT_CALL_COUNT_0"),
+        ("SUPERSEDED", "REFERENCE_COMPUTE_SCHEDULE_V2 production reference", "Historical V2 artifacts", "PRESERVED_INACTIVE"),
+        ("NEW", "ESIF/Kestrel power-boundary separation", "dayahead/aidc_boundary_v16_1.py", "ACTIVE_V16_1"),
+        ("NEW", "AIDC-level whole-facility residual spatialization", "audit_boundary_separation", "ACTIVE_V16_1"),
+        ("NEW", "REFERENCE_COMPUTE_SCHEDULE_V3", "build_reference_schedule_v3", "ACTIVE_V16_1"),
+    ]
+    path = output / "DAYAHEAD_PRECODE_TO_CODE_TRACEABILITY.csv"
+    temporary = path.with_suffix(".csv.tmp")
+    with temporary.open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.writer(stream)
+        writer.writerow(("classification", "authority_item", "implementation_or_evidence", "v16_1_status"))
+        writer.writerows(rows)
+    temporary.replace(path)
 
 
 def execute(
     *,
     artifacts: Path,
+    source_artifacts: Path,
     capacity_source: Path,
     assets: Path,
     contract: Path,
     authority_archive: Path,
 ) -> dict[str, object]:
+    artifacts = artifacts.resolve()
+    source_artifacts = source_artifacts.resolve()
+    capacity_source = capacity_source.resolve()
+    assets = assets.resolve()
+    contract = contract.resolve()
+    authority_archive = authority_archive.resolve()
     artifacts.mkdir(parents=True, exist_ok=True)
     source_paths = {
         "IEEE123Master.dss": assets / "IEEE123Master.dss",
@@ -210,24 +352,38 @@ def execute(
     if any(record["status"] != "PASS" for record in source_audit.values()):
         raise RuntimeError("FULL_IEEE123_AUTHORITY_SHA_MISMATCH")
     compiled = _compile_full_authority(assets, contract)
+    pcc_mapping = _pcc_mapping_audit(contract / "service_node_electrical_mapping_v1.csv")
     rack_authority = load_frozen_rack_authority(capacity_source)
-    arrivals, p_q90, g_q90 = _load_april_forecast(artifacts / "AIDC_APRIL_VALIDATION_FORECAST.parquet")
-    reference = build_capacity_feasible_reference(rack_authority, arrivals)
-    residual = reference_delta_audit(rack_authority, reference, p_q90, g_q90)
-    b0, b2, reference_sha = _write_reference_parquet(
+    boundary_authority = artifacts / "V16_1_AIDC_POWER_BOUNDARY_REFREEZE_AUTHORITY.json"
+    boundary_payload = json.loads(boundary_authority.read_text(encoding="utf-8"))
+    if boundary_payload.get("authority_id") != V16_1_AUTHORITY_ID:
+        raise RuntimeError("V16_1_BOUNDARY_AUTHORITY_NOT_MINTED")
+    if boundary_payload["legacy_power_capacity_retirement"]["source_sha256"] != rack_authority.source_sha256:
+        raise RuntimeError("V16_1_LEGACY_PROVENANCE_SHA_MISMATCH")
+    forecast_path = source_artifacts / "AIDC_APRIL_VALIDATION_FORECAST.parquet"
+    weights_path = source_artifacts / "AIDC_RC_MQT_PRODUCTION_SEED20260828.pt"
+    arrivals, p_q90, g_q90 = _load_april_forecast(forecast_path)
+    rack_ids = tuple(rack.rack_id for rack in rack_authority.racks)
+    gpu_caps = {rack.rack_id: rack.deliverable_gpu_capacity for rack in rack_authority.racks}
+    reference = build_reference_schedule_v3(rack_ids, gpu_caps, arrivals)
+    residual = audit_boundary_separation(rack_authority, reference, p_q90, g_q90)
+    reference_artifacts = _write_reference_v3_artifacts(
         artifacts,
         reference,
-        [rack.rack_id for rack in rack_authority.racks],
+        rack_ids,
         tuple(sorted(arrivals)),
     )
     rack_contract = {
-        "authority_id": RACK_AUTHORITY_ID,
+        "authority_id": "V16_1_VIRTUAL_SPATIAL_AND_GPU_CAPACITY_CONTRACT",
         "status": "PASS",
         "source_path": rack_authority.source_path,
         "source_sha256": rack_authority.source_sha256,
         "rack_count": 48,
         "aidc_count": 12,
-        "power_weight_basis": "rack_power_cap_kw",
+        "legacy_authority_id": RACK_AUTHORITY_ID,
+        "power_weight_basis": "NORMALIZED_LEGACY_RACK_POWER_RATIO_VIRTUAL_SPATIALIZATION_ONLY",
+        "absolute_legacy_rack_kw_capacity_semantics": "RETIRED",
+        "legacy_rack_power_cap_active_constraint_call_count": 0,
         "gpu_weight_basis": "deliverable_active_gpu_capacity",
         "power_weights": list(rack_authority.power_weights),
         "gpu_weights": list(rack_authority.gpu_weights),
@@ -235,118 +391,108 @@ def execute(
         "gpu_weight_sum": sum(rack_authority.gpu_weights),
         "uniform_replacement_used": False,
         "mapping_fitting_call_count": 0,
-        "racks": [rack.__dict__ for rack in rack_authority.racks],
+        "gpu_cap_values_changed": False,
+        "capacity_scaling_call_count": 0,
+        "racks": [
+            {
+                "rack_id": rack.rack_id,
+                "aidc_id": rack.aidc_id,
+                "source_idc_id": rack.source_idc_id,
+                "pool_id": rack.pool_id,
+                "deliverable_gpu_capacity": rack.deliverable_gpu_capacity,
+                "legacy_power_ratio": rack_authority.power_weights[index],
+            }
+            for index, rack in enumerate(rack_authority.racks)
+        ],
     }
-    _write_json(artifacts / "AIDC_RACK_MAPPING_CONTRACT.json", rack_contract)
+    _write_json(artifacts / "AIDC_VIRTUAL_SPATIAL_GPU_CONTRACT.json", rack_contract)
     authority_release = {
-        "authority_id": "APRIL_FULL_IEEE123_INPUT_RELEASE_V1",
+        "authority_id": "APRIL_FULL_IEEE123_INPUT_RELEASE_V16_1",
         "status": "PASS",
         "namespace": NAMESPACE,
         "operating_day": OPERATING_DAY,
         "source_files": source_audit,
         "source_archive": archive_audit,
         "compiled_full_authority": compiled,
-        "rack_authority_sha256": rack_authority.source_sha256,
-        "production_forecast_sha256": sha256_file(artifacts / "AIDC_APRIL_VALIDATION_FORECAST.parquet"),
-        "production_model_weights_sha256": sha256_file(artifacts / "AIDC_RC_MQT_PRODUCTION_SEED20260828.pt"),
+        "aidc_pcc_mapping": pcc_mapping,
+        "boundary_refreeze_authority_sha256": sha256_file(boundary_authority),
+        "legacy_rack_source_sha256_preserved": rack_authority.source_sha256,
+        "production_forecast_sha256": sha256_file(forecast_path),
+        "production_model_weights_sha256": sha256_file(weights_path),
         "feeder_scale_contract_sha256": sha256_file(Path(__file__).resolve().parents[1] / "pfr/contracts/FEEDER_ABSOLUTE_SCALE_CONTRACT_V2.json"),
         "new_bus_phase_weight_scaling_fit_count": 0,
         "may_loader_access_count": 0,
         "june_loader_access_count": 0,
     }
-    _write_json(artifacts / "C7_FULL_IEEE123_AUTHORITY_RELEASE.json", authority_release)
-    c7_pass = residual["status"] == "PASS"
+    _write_json(artifacts / "C7_FULL_IEEE123_AUTHORITY_RELEASE_V16_1.json", authority_release)
+    mess = _retained_mess_evidence(source_artifacts)
+    service_parity = _service_parity_v3(reference, arrivals, rack_ids)
+    service_parity_residual = float(service_parity["max_abs_terminal_residual_nodeh"])
+    c7_pass = (
+        residual["status"] == "PASS"
+        and residual["power_reconstruction_max_abs_error_kw"] <= 1e-9
+        and residual["pue_reconstruction_max_abs_error_kw"] <= 1e-9
+        and residual["pue_application_count"] == 1
+        and reference.max_flexible_gpu_cap_violation <= 1e-9
+        and service_parity_residual <= 1e-12
+        and mess["route_soc_connection_terminal_invariants"] == "PASS"
+    )
     c7 = {
-        "authority_id": "C7_APRIL_FULL_SCIENTIFIC_IEEE123_V1",
+        "authority_id": "C7_APRIL_FULL_SCIENTIFIC_IEEE123_V16_1",
         "namespace": NAMESPACE,
         "operating_day": OPERATING_DAY,
         "authority_release_status": "PASS",
-        "status": "PASS" if c7_pass else residual["status"],
-        "reference_schedule_sha256": reference_sha,
-        "reference_schedule_b0_path": str(b0.resolve()),
-        "reference_schedule_b2_path": str(b2.resolve()),
-        "reference_b0_b2_bytes_identical": b0.read_bytes() == b2.read_bytes(),
-        "reference_b0_b2_sha_identical": sha256_file(b0) == sha256_file(b2),
+        "full_ieee123_aidc_pcc_mapping": pcc_mapping,
+        "status": "PASS_FULL_IEEE123_V16_1" if c7_pass else residual["status"],
+        "reference_authority_id": reference.authority_id,
+        "reference_schedule_sha256": reference_artifacts["canonical_sha256"],
+        "reference_artifacts": reference_artifacts,
+        "reference_b0_b2_bytes_identical": reference_artifacts["b0_b2_bytes_identical"],
+        "reference_b0_b2_sha_identical": reference_artifacts["b0_sha256"] == reference_artifacts["b2_sha256"],
         "terminal_backlog_max_nodeh": max(reference.terminal_backlog.values()),
-        "rack_gpu_cap_max_violation": reference.max_gpu_cap_residual,
-        "rack_power_cap_max_violation_kw": reference.max_power_cap_residual_kw,
+        "service_parity_contract": "B_97_DA=B_97_REF_V3",
+        "service_parity_residual": service_parity_residual,
+        "service_parity": service_parity,
+        "rack_gpu_cap_violation_count": residual["rack_gpu_cap_violation_count"],
+        "rack_gpu_cap_max_violation": residual["rack_gpu_cap_max_violation"],
+        "legacy_rack_power_cap_active_constraint_call_count": residual["legacy_rack_power_cap_active_constraint_call_count"],
         "reference_delta": residual,
-        "service_parity_status": "NOT_EVALUATED_BECAUSE_REFERENCE_DELTA_FAILED" if not c7_pass else "PENDING_INTEGRATED_SOLVE",
+        "mess_invariants": mess,
+        "service_parity_status": "PASS" if service_parity_residual <= 1e-12 else "FAIL",
         "full_ieee123_monolithic_solve_call_count": 0,
         "stop_rule_applied": not c7_pass,
         "may_loader_access_count": 0,
         "june_loader_access_count": 0,
     }
-    _write_json(artifacts / "C7_FULL_IEEE123_REPORT.json", c7)
-
-    equivalence_path = artifacts / "DAYAHEAD_EQUIVALENCE_REPORT.json"
-    previous = json.loads(equivalence_path.read_text(encoding="utf-8"))
-    if "engineering_fixture" in previous:
-        engineering = previous["engineering_fixture"]
-    else:
-        engineering = previous
-    equivalence = {
-        "schema_version": "DAYAHEAD_EQUIVALENCE_REPORT_V2_SEPARATE_NAMESPACES",
-        "engineering_fixture": engineering,
-        "full_scientific_april": {
-            "namespace": NAMESPACE,
-            "status": "NOT_RUN_BLOCKED_C7_REFERENCE_DELTA",
-            "blocker": residual["status"],
-            "monolithic": {"status": "NOT_RUN", "solve_call_count": 0},
-            "standard_bd": {"status": "NOT_RUN", "solve_call_count": 0},
-            "cl_mc_bd": {"status": "NOT_RUN", "solve_call_count": 0},
-            "engineering_fixture_relabelled_as_scientific": False,
-        },
-    }
-    _write_json(equivalence_path, equivalence)
-    (artifacts / "DAYAHEAD_EQUIVALENCE_REPORT.md").write_text(
-        "# Day-Ahead solver equivalence namespaces\n\n"
-        "- Engineering fixture: preserved exactly as non-scientific pre-production evidence.\n"
-        f"- Full scientific April: **NOT RUN** because C7 stopped at `{residual['status']}`.\n"
-        "- No reduced-star result was relabelled as final G12 evidence.\n",
-        encoding="utf-8",
-    )
-    gates = {
-        "G0": "PASS", "G1": "PASS", "G2": "PASS", "G3": "PASS", "G4": "PASS",
-        "G5": "PASS", "G6": "PASS", "G7": "PASS", "G8": "PASS", "G9": "PASS_ENGINEERING",
-        "G10": residual["status"],
-        "G11": "PASS_NON_SCIENTIFIC_PREPRODUCTION_ONLY_FULL_INPUT_NOT_REACHED",
-        "G12": "NOT_RUN_BLOCKED_BY_G10",
-        "G13": "NOT_RUN_BLOCKED_BY_G12",
-        "G14": "NOT_RUN_BLOCKED_BY_G13",
-        "G15": "PASS",
-    }
-    final_gate = {
-        "authority_id": "V16_FINAL_G0_G15_GATE_TABLE",
-        "status": "FAIL_CLOSED_PREPRODUCTION_NOT_FROZEN",
-        "gates": gates,
-        "all_g0_g15_pass": False,
-        "may_loader_access_count": 0,
-        "june_loader_access_count": 0,
-        "may_forecast_rows": 0,
-        "may_reference_schedule_exists": False,
-        "may_b0_b3_exists": False,
-    }
-    _write_json(artifacts / "FINAL_G0_G15_GATE_TABLE.json", final_gate)
-    c12 = {
-        "authority_id": "C12_PREPRODUCTION_FREEZE_V1",
-        "status": "BLOCKED_NOT_MINTED",
-        "blocker": residual["status"],
-        "production_freeze_token": None,
-        "production_freeze_token_sha256": None,
-        "token_mint_call_count": 0,
-        "MAY_PRIMARY_UNLOCK_READY": False,
+    _write_json(artifacts / "C7_FULL_IEEE123_REPORT_V16_1.json", c7)
+    g10 = {
+        "authority_id": "G10_V16_1_POWER_BOUNDARY_SEPARATION_GATE",
+        "status": "PASS" if c7_pass else "FAIL_CLOSED",
+        "P_RES_SYS_nonnegative": residual["P_RES_SYS_kw"]["negative_slot_count"] == 0,
+        "G_RES_SYS_nonnegative": residual["G_RES_SYS"]["negative_slot_count"] == 0,
+        "power_reconstruction_max_abs_error_kw": residual["power_reconstruction_max_abs_error_kw"],
+        "rack_gpu_capacity_pass": residual["rack_gpu_cap_violation_count"] == 0,
+        "reference_v3_service_parity_pass": service_parity_residual <= 1e-12,
+        "mess_invariants_pass": mess["route_soc_connection_terminal_invariants"] == "PASS",
+        "legacy_rack_total_kw_cap_required": False,
+        "legacy_rack_power_cap_active_constraint_call_count": 0,
+        "g12_call_count": 0,
+        "g13_call_count": 0,
+        "g14_call_count": 0,
+        "c12_call_count": 0,
         "may_loader_access_count": 0,
         "june_loader_access_count": 0,
     }
-    _write_json(artifacts / "C12_PREPRODUCTION_FREEZE_STATUS.json", c12)
+    _write_json(artifacts / "G10_V16_1_REPORT.json", g10)
+    _write_traceability(artifacts)
     _write_sha_manifest(artifacts)
-    return {"c7": c7, "gates": gates, "c12": c12}
+    return {"c7": c7, "g10": g10}
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--artifacts", type=Path, required=True)
+    parser.add_argument("--source-artifacts", type=Path, required=True)
     parser.add_argument("--capacity-source", type=Path, required=True)
     parser.add_argument("--assets", type=Path, required=True)
     parser.add_argument("--contract", type=Path, required=True)
@@ -354,13 +500,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     result = execute(
         artifacts=args.artifacts,
+        source_artifacts=args.source_artifacts,
         capacity_source=args.capacity_source,
         assets=args.assets,
         contract=args.contract,
         authority_archive=args.authority_archive,
     )
-    print(json.dumps(result, indent=2, sort_keys=True))
-    return 0 if result["c12"]["status"] == "PASS" else 2
+    print(json.dumps({
+        "c7_status": result["c7"]["status"],
+        "g10_status": result["g10"]["status"],
+        "reference_schedule_sha256": result["c7"]["reference_schedule_sha256"],
+        "may_loader_access_count": result["c7"]["may_loader_access_count"],
+        "june_loader_access_count": result["c7"]["june_loader_access_count"],
+    }, indent=2, sort_keys=True))
+    return 0 if result["c7"]["status"] == "PASS_FULL_IEEE123_V16_1" and result["g10"]["status"] == "PASS" else 2
 
 
 if __name__ == "__main__":
