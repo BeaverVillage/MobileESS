@@ -1,0 +1,193 @@
+{
+  "authority_id": "RACK_POWER_CAPACITY_PROVENANCE_AUDIT_V1",
+  "status": "PASS_PROVENANCE_AUDIT_FAIL_CLOSED_PRESERVED",
+  "classification": "CAPACITY_CLASS_D_LEGACY_SYNTHETIC",
+  "classification_reason": "The exact frozen file labels the case as a synthetic active-fraction sensitivity, and its K5-C3 report defines the 12 IDCs and 48 Rack-equivalent pools as deterministic virtual partitions and the capacities as planning sensitivities rather than installed physical capacity. The 48 power caps therefore are not a rated ESIF whole-facility IT capacity authority.",
+  "scope": {
+    "audit_only": true,
+    "scientific_authority_changed": false,
+    "production_code_changed": false,
+    "rack_capacities_changed": false,
+    "x_ref_changed": false,
+    "reference_compute_schedule_v2_changed": false,
+    "mapping_weights_changed": false,
+    "ml_changed": false,
+    "fail_closed_status_preserved": true
+  },
+  "exact_capacity_authority": {
+    "authority_file": "C:/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed데이터/데이터센터/NLR Kestrel Jobs Data/stage_k5c3_20260723_062008/outputs/optimization_main_rack_parameters.csv",
+    "authority_file_sha256": "4546c0672a4d25aa5c7c92ea90fb90ec8d3c009dda426939179b293abdeb83c0",
+    "recomputed_sha256_match": true,
+    "file_size_bytes": 12945,
+    "filesystem_creation_time": "2026-07-23T15:20:41.1185989+09:00",
+    "filesystem_last_write_time": "2026-07-23T15:20:41.1398865+09:00",
+    "git_tracked_in_current_repository": false,
+    "git_blob_sha1_computed_from_exact_external_bytes": "9745596d4cb75f5c8a0f63fe0bd3ef0de243ead6",
+    "git_blob_note": "The SHA-1 is the Git blob identity of the exact bytes, computed read-only; the external authority file is not tracked in the current repository.",
+    "source_stage": "K5-C3 v1.0.4",
+    "source_scenario_id": "q995_u85_rbase",
+    "source_scenario_parameters": {
+      "capacity_quantile": 0.995,
+      "target_utilization": 0.85,
+      "rack_case": "base",
+      "rack_active_fraction": 0.85,
+      "capacity_calibration_end": "2024-12-31T23:59:59Z",
+      "capacity_calibration_uses_2025": false
+    },
+    "current_v16_mapping_authority_id_that_consumes_the_file": "CAPACITY_PROPORTIONAL_UTILIZATION_INVARIANT_V1",
+    "rack_count": 48,
+    "aidc_count": 12,
+    "logical_pools_per_aidc": 4
+  },
+  "generation_lineage": {
+    "published_stage_manifest": {
+      "path": "C:/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed데이터/데이터센터/NLR Kestrel Jobs Data/stage_k5c3_20260723_062008/manifest.json",
+      "sha256": "8628405dd302a9c1d99f12b76bf45ebef6efd163a0d582b959546d3321cf2f1c"
+    },
+    "published_pipeline_configuration": {
+      "path": "C:/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed데이터/데이터센터/NLR Kestrel Jobs Data/stage_k5c3_20260723_062008/pipeline_used.yaml",
+      "sha256": "49a1d7b79a83f316e81fb110e12aadc183273952fa9f52258a5038066302b46b"
+    },
+    "published_stage_report": {
+      "path": "C:/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed데이터/데이터센터/NLR Kestrel Jobs Data/stage_k5c3_20260723_062008/reports/REPORT.md",
+      "sha256": "22801f034ffb358d5043c0f923f0406e9dea897138037988c8efa72e7edba67e"
+    },
+    "published_capacity_audit": {
+      "path": "C:/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed데이터/데이터센터/NLR Kestrel Jobs Data/stage_k5c3_20260723_062008/reports/capacity_rack_audit.json",
+      "sha256": "dedfa68e6f95ad2e8273b438be0623199d1c3fa8b8ba4bd6c585b4eed4078425"
+    },
+    "execution_log": {
+      "path": "C:/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed데이터/데이터센터/NLR Kestrel Jobs Data/stage_k5c3_20260723_062008/logs/execution.log",
+      "sha256": "629af554fd549d2505c173394cce383738589225eb78bd0cfcff7d8f7096143e"
+    },
+    "published_loader_not_generator": {
+      "path": "C:/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed데이터/데이터센터/NLR Kestrel Jobs Data/stage_k5c3_20260723_062008/load_optimization_window.py",
+      "sha256": "0aa27808e4181a3bc2b56ccca1cab2cc5809bdae67df76b9a0dd996542909f72",
+      "role": "Consumer of the frozen CSV, not the capacity generator"
+    },
+    "generator_source_status": "The exact stage driver/function that wrote the CSV is not retained in the published stage directory or review inventory. The execution log, manifest, pipeline, report, source fields, parent outputs, and exact row-wise formula remain available; no generator name is inferred.",
+    "parent_k5_c2_rack_parameters": {
+      "path": "C:/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed데이터/데이터센터/NLR Kestrel Jobs Data/stage_k5c2_20260722_232023/outputs/rack_equivalent_4pool_parameters.csv",
+      "sha256": "273d95956103f06a8943082d9f4cbfb05116f3b481ff4f099ac0416b78e3df9d",
+      "role": "Supplies the 12-by-4 virtual Rack-equivalent topology and Eagle-derived relative heterogeneity"
+    },
+    "parent_k5_c2_power_scenario": {
+      "path": "C:/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed데이터/데이터센터/NLR Kestrel Jobs Data/stage_k5c2_20260722_232023/outputs/paired_h100_power_scenarios_corrected.csv",
+      "sha256": "2bb4755ea258fc6bbbce5e52cb65b224c4fb447b738ef5dbc4495ecacdd8274f",
+      "selected_incremental_it_kw_per_gpu": 0.4525064517115263
+    },
+    "earliest_available_absolute_power_source": {
+      "stage": "K4-B NLR GenAI Power Profiles",
+      "report_path": "C:/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed데이터/데이터센터/NLR GenAI Power Profiles/stage_k4b_20260721_111642/reports/REPORT.md",
+      "report_sha256": "292066bf902d812612d8774db96b5e66938cb920fca2a91268a4dbcab6c39815",
+      "mapping_parameters_path": "C:/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed데이터/데이터센터/NLR GenAI Power Profiles/stage_k4b_20260721_111642/outputs/training_kestrel_mapping_parameters.csv",
+      "mapping_parameters_sha256": "103efa02aeb12d4749344d5a2de794e33c6fba9f6ea20337d41dba27bd16c187",
+      "semantics": "Measured NLR run-level gross and incremental IT-power parameters mapped by requested GPU count; PUE is not applied"
+    },
+    "earliest_available_relative_rack_source": {
+      "stage": "K4-D Eagle Rack/PUE",
+      "summary_path": "C:/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed데이터/데이터센터/Eagle_Rack_PUE/stage_k4d_20260721_112108/stage_k4d_summary.json",
+      "summary_sha256": "ddc8fc5b891a128266c36dc272f77a8dfdb8e29601798fe62c2ed44013b8ff3f",
+      "semantics": "Relative Rack heterogeneity and power-headroom calibration only; not absolute H100 power or Melbourne/ESIF installed capacity"
+    },
+    "lineage_summary": [
+      "Pre-2025 Kestrel workload concurrency sets the q99.5/u85 installed H100-equivalent planning scale.",
+      "Eagle data supplies relative virtual-pool heterogeneity, not physical 48-Rack identities or absolute ESIF capacity.",
+      "NLR GenAI supplies the absolute per-GPU IT idle/incremental power parameters.",
+      "K5-C3 applies the base 0.85 active-fraction sensitivity and publishes the 48 virtual capacity rows."
+    ]
+  },
+  "capacity_formula_audit": {
+    "P_CAP_field": "rack_power_cap_kw",
+    "G_CAP_field": "deliverable_active_gpu_capacity",
+    "idle_power_field": "idle_it_kw",
+    "per_rack_power_formula": "P_CAP[r] = idle_it_kw[r] + incremental_it_kw_per_gpu * G_CAP[r]",
+    "incremental_it_kw_per_gpu": 0.4525064517115263,
+    "P_CAP_units": "kW IT-side",
+    "G_CAP_units": "H100-equivalent active GPUs",
+    "idle_power_units": "kW IT-side",
+    "pue_included_in_P_CAP": false,
+    "pue_application_boundary": "PUE is applied later, after aggregation of IT-side Rack power, to form facility/PCC power.",
+    "historical_main_pue_separate_from_cap": 1.3,
+    "row_count_checked": 48,
+    "formula_max_absolute_error_kw": 0.0,
+    "installed_gpu_capacity_sum": 2136.0,
+    "G_CAP_sum": 1815.6000000000001,
+    "idle_it_kw_sum": 405.61144856682785,
+    "incremental_envelope_kw_sum": 821.5707137274472,
+    "P_CAP_sum_kw": 1227.182162294275,
+    "P_CAP_min_kw": 5.389455904830481,
+    "P_CAP_max_kw": 76.00505546134421,
+    "G_CAP_min": 7.070415796367968,
+    "G_CAP_max": 131.92684685551956,
+    "designed_quantity": "Total IT-side power capacity of each logical Rack-equivalent pool, including its allocated idle IT term plus the incremental power envelope at deliverable active-GPU capacity; it is not a flexible-increment-only service limit.",
+    "source_characterization": "Engineered/synthesized planning sensitivity using measured per-GPU power inputs and measured relative heterogeneity; not physical 48-Rack telemetry, not an ESIF rating, and not calibrated to the V16 ESIF P_IT_REF target."
+  },
+  "boundary_identity_audit": {
+    "P_IT_REF": "ESIF_WHOLE_FACILITY_IT",
+    "G_REF": "KESTREL_H100_SUBSYSTEM",
+    "W_F": "KESTREL_SOURCE_QUALIFIED_FLEXIBLE_SUBSYSTEM",
+    "KAPPA": "KESTREL_INCREMENTAL_WORKLOAD_POWER",
+    "P_CAP_48": "LEGACY_SYNTHETIC_OR_VIRTUAL_SCENARIO_CAPACITY",
+    "G_CAP_48": "LEGACY_SYNTHETIC_OR_VIRTUAL_SCENARIO_CAPACITY",
+    "same_boundary_as_P_IT_REF": false,
+    "boundary_mismatch_proven": true,
+    "physical_same_boundary_capacity_proven": false
+  },
+  "old_v14_v15_usage": {
+    "generation_depended_directly_on_old_P_NF": false,
+    "generation_depended_directly_on_old_G_NF": false,
+    "generation_basis": "Pre-2025 Kestrel capacity sizing, Eagle virtual-pool shares, and NLR per-GPU IT power, independent of the later V16 ESIF target.",
+    "old_mapping": "12 deterministic virtual IDCs by 4 logical Rack-equivalent pools; capacity-proportional virtual spatialization, not physical Rack telemetry or geography.",
+    "old_power_constraint_semantics": "Old optimization paths constrained each Rack's fixed/background IT plus scheduled job IT against rack_power_cap_kw and constrained fixed plus scheduled active GPUs against deliverable_active_gpu_capacity; PUE was applied separately at the IDC facility boundary.",
+    "old_flexible_workload_semantics": "Flexible jobs consumed incremental Rack IT power and GPU headroom within the same total logical Rack cap; P_CAP was not a flexible-only limit.",
+    "old_expected_power_scale_kw": {
+      "aggregate_logical_rack_it_envelope": 1227.182162294275,
+      "interpretation": "The old logical model was internally bounded by a roughly 1.227 MW aggregate Rack IT envelope. Evidence does not establish a physical ESIF P_NF rating at this scale; consistency came from the virtual Kestrel case-study boundary and its capacity/slack policy."
+    },
+    "authority_documents": [
+      {
+        "path": "C:/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/정리 자료/Mobile_ESS_AI_ICPS_정식화_구현명세_v14_2_Current_Authority_20260827.docx",
+        "sha256": "1d4dadae504c9ecf95c3623b2d91036e8c5ee564ee1395be6b4f5d47d85d0394",
+        "role": "Legacy implementation semantics: logical pools, pre-PUE IT caps, and separate facility PUE"
+      },
+      {
+        "path": "C:/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/정리 자료/MobileESS_AIDC_DayAhead_ML_Optimization_FINAL_SCIENTIFIC_REFREEZE_Codex_Handoff_20260829_CODEX_IMPLEMENTATION_AUTHORITY_FINAL_REVISED.docx",
+        "sha256": "c1f46f2066ccbba9936b9bfe0667da9ae37e7c418fbf0ff186a93ebd6d80baf5",
+        "role": "Current authority: ESIF whole-facility P_IT_REF and Kestrel subsystem targets replace the old P_NF/G_NF active path"
+      }
+    ]
+  },
+  "new_esif_scale_comparison": {
+    "operating_day": "2025-04-15",
+    "P_IT_REF_Q90_min_kw": 2919.766907425101,
+    "P_IT_REF_Q90_max_kw": 3398.464792363265,
+    "P_CAP_48_total_kw": 1227.182162294275,
+    "ESIF_to_legacy_cap_ratio_at_min": 2.37924490522781,
+    "ESIF_to_legacy_cap_ratio_at_max": 2.7693238190568827,
+    "legacy_cap_fraction_of_ESIF_at_min": 0.4203014148744184,
+    "legacy_cap_fraction_of_ESIF_at_max": 0.36109897770660804,
+    "aggregate_power_capacity_deficit_slot_count": 96,
+    "comparison_result": "The V16 ESIF whole-facility Q90 target exceeds the aggregate legacy virtual Rack cap in all 96 April slots; this is a boundary/authority mismatch, not evidence that the ESIF facility physically lacks capacity."
+  },
+  "immutability_and_execution_firewall": {
+    "scientific_code_change_count": 0,
+    "production_code_change_count": 0,
+    "scientific_authority_change_count": 0,
+    "artifact_files_created_count": 1,
+    "fitting_call_count": 0,
+    "scaling_call_count": 0,
+    "clipping_call_count": 0,
+    "optimizer_call_count": 0,
+    "g12_call_count": 0,
+    "g13_call_count": 0,
+    "g14_call_count": 0,
+    "c12_call_count": 0,
+    "may_loader_access_count": 0,
+    "june_loader_access_count": 0,
+    "may_forecast_rows_generated": 0,
+    "may_reference_schedule_generated": false,
+    "may_b0_b3_generated": false
+  },
+  "stop_point": "PROVENANCE_AUDIT_COMPLETE_NO_FIX_APPLIED"
+}
