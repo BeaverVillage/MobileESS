@@ -234,6 +234,7 @@ def _aidc_only_upper_bound(
     *, arrivals: np.ndarray, reference_cube: np.ndarray, p_res_aidc: np.ndarray,
     g_res_rack: np.ndarray, gpu_capacities: np.ndarray, rack_aidc: tuple[str, ...],
     current: Any, voltage: Any, base_controls: np.ndarray,
+    skip_current_row: Any | None = None,
 ) -> dict[str, Any]:
     import gurobipy as gp
     from gurobipy import GRB
@@ -293,6 +294,8 @@ def _aidc_only_upper_bound(
     for t in range(96):
         fixed = np.asarray(base_controls[t, 12:], dtype=float) - anchor[t, 12:]
         for b, branch in enumerate(branches):
+            if skip_current_row is not None and bool(skip_current_row(branch)):
+                continue
             expression = float(i0[t, b]) + gp.quicksum(float(ji[t, a, b]) * (aidc_load[a, t] - float(anchor[t, a])) for a in range(12))
             expression += float(np.dot(ji[t, 12:, b], fixed))
             model.addConstr(expression <= 1.0)

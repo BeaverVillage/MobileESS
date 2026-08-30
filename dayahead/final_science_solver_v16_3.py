@@ -26,6 +26,7 @@ from .mess_physics import (
 )
 from .run_v16_3_nonzero_validity import _aidc_limits, _planning_flow_base_and_sensitivity
 from .v16_3_authority import add_phase_current_epigraph
+from .v17_v5_current_repair import is_dominated_mess_current_row
 
 
 def _cohort_node_class(cohort: str) -> int:
@@ -215,6 +216,14 @@ def solve_shadow(
         ji = np.asarray(current_data["current_sensitivity_pu_per_control"][slot], dtype=float)
         i0 = np.asarray(current_data["anchor_current_loading_pu"][slot], dtype=float)
         for branch, name in enumerate(branch_names):
+            # V17 V5 repair: these exact generated MESS-transformer phase rows
+            # are rigorously dominated by the frozen 700-kVA PCS, 0.95-pu
+            # voltage floor and 750-kVA balanced transformer contract.  Their
+            # zero-current scalar-magnitude derivative is undefined and must
+            # not be installed as an affine hard row.  Fresh AC still checks
+            # their actual current and transformer-kVA metrics.
+            if is_dominated_mess_current_row(name):
+                continue
             expression = float(i0[branch]) + gp.quicksum(float(ji[c, branch]) * delta[c] for c in range(60))
             add_phase_current_epigraph(
                 model,

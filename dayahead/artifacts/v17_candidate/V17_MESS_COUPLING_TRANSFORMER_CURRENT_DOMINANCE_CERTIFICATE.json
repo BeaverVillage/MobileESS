@@ -1,0 +1,63 @@
+{
+  "AIDC_site_changes": 0,
+  "Fresh_OpenDSS_actual_current_reporting_retained": true,
+  "June_result_content_reads": 0,
+  "June_scientific_input_reads": 0,
+  "May_result_content_reads": 0,
+  "May_scientific_input_reads": 0,
+  "OpenDSS_calls_inside_Benders": 0,
+  "PF_changes": 0,
+  "PUE_changes": 0,
+  "RCMQT_retraining_calls": 0,
+  "V5_spatial_rule_changes": 0,
+  "arbitrary_current_clipping_calls": 0,
+  "artifact_id": "V17_MESS_COUPLING_TRANSFORMER_CURRENT_DOMINANCE_CERTIFICATE_V1",
+  "asset": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_2\\Generated_ThreePhase_PCC_v4.dss",
+    "record_count": 24,
+    "sha256": "ba13e3081df606c18d61f1e02300b23f7be00dc2d22bc4c8064d04f40beec719"
+  },
+  "authoritative_values": {
+    "MESS_PCS_apparent_power_limit_kva": 700.0,
+    "XHL_percent": 5.75,
+    "connections": "wye-wye",
+    "generated_MESS_transformer_rating_kva": 750.0,
+    "hard_current_metric_winding": 1,
+    "magnetizing_current_percent": 0.0,
+    "minimum_PCC_voltage_pu": 0.95,
+    "no_load_loss_percent": 0.0,
+    "phases": 3,
+    "primary_kv": 4.16,
+    "secondary_kv": 0.48,
+    "total_load_loss_percent": 1.0,
+    "winding_1_R_percent": 0.8,
+    "winding_2_R_percent": 0.2
+  },
+  "beta_changes": 0,
+  "classification": "ANALYTICALLY_DOMINATED_BY_PCS_VOLTAGE_TRANSFORMER_CONTRACT",
+  "effect_selected_rho_values": 0,
+  "kappa_changes": 0,
+  "proof": {
+    "OpenDSS_rating_convention": "I_rated=S_3ph/(sqrt(3)*kV_LL) on each winding; the ideal turns ratio preserves normalized series current.",
+    "balanced_three_phase_semantics": true,
+    "independent_downstream_load": false,
+    "loss_treatment": "Series R/X changes voltage and power loss but not the same through-current; %NoLoadLoss=%Imag=0 proves no additional primary shunt current.",
+    "no_shunt_excitation_branch": true,
+    "normalized_current_bound_equation": "I_pu <= S_PCS_kVA / (S_TX_kVA * V_PCC_pu)",
+    "normalized_current_upper_bound_pu": 0.9824561403508771,
+    "series_winding_current_per_unit_identity": true,
+    "strict_margin_to_one_pu": 0.01754385964912286
+  },
+  "remaining_April_day_runs": 0,
+  "repair_id": "V17_V5_MESS_COUPLING_TRANSFORMER_CURRENT_DOMINANCE_V1",
+  "row_scope": {
+    "AIDC_coupling_transformers_excluded": true,
+    "native_feeder_transformers_excluded": true,
+    "ordinary_lines_excluded": true,
+    "phase_row_count": 72,
+    "predicate": "^transformer\\.mess_(?:idc|sta)\\d{2}_tx::[abc]$",
+    "transformer_count": 24
+  },
+  "status": "PASS",
+  "transformer_kva_reporting_retained": true
+}
