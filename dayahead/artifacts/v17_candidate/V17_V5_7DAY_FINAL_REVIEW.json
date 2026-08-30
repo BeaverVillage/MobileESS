@@ -1,0 +1,96 @@
+{
+  "AIDC_only_upper_bound": "NOT_EXECUTED",
+  "AIDC_site_changes": 0,
+  "B0_B1_B2_B3": "NOT_EXECUTED",
+  "D1_anchor_H_J": {
+    "day_count": 7,
+    "status": "PASS_REGENERATED_7_DAYS"
+  },
+  "June_result_content_reads": 0,
+  "June_scientific_input_reads": 0,
+  "May_result_content_reads": 0,
+  "May_scientific_input_reads": 0,
+  "OpenDSS_calls_inside_Benders": 0,
+  "PF_changes": 0,
+  "PUE_changes": 0,
+  "V4_V5_reference_comparison": {
+    "critical_slot_active_AIDC_count_v5": {
+      "2025-04-02": 12,
+      "2025-04-03": 12,
+      "2025-04-12": 12,
+      "2025-04-13": 12,
+      "2025-04-15": 12,
+      "2025-04-22": 12,
+      "2025-04-23": 12
+    },
+    "maximum_AIDC_concentration_share_v5": 0.22284644194756564,
+    "status": "PASS",
+    "temporal_max_abs_error_nodeh": 2.0816681711721685e-17
+  },
+  "V5_implementation": "PASS",
+  "artifact_id": "V17_V5_7DAY_FINAL_REVIEW_V1",
+  "beta_changes": 0,
+  "classification": "V17_V5_E_SURROGATE_OR_AC_VALIDATION_FAILURE",
+  "dual_Fresh_AC": "NOT_EXECUTED",
+  "grid_benefit_selected_parameters": 0,
+  "kappa_changes": 0,
+  "permutation_invariance": {
+    "max_abs_error_nodeh": 0.0,
+    "status": "PASS"
+  },
+  "reason": "The predeclared rho=0.10 current-surrogate error bound failed before the required pre-evaluation freeze; downstream scientific evaluation is unauthorized.",
+  "resume_decision": "V17_V5_FURTHER_CORRECTION_REQUIRED",
+  "status": "FAIL_CLOSED_BEFORE_B0_B3",
+  "surrogate_validation": {
+    "accepted_rho": null,
+    "current_status": "FAIL_CLOSED_ON_PREDECLARED_RHO_PROBE",
+    "first_gate_failure": {
+      "current_metrics": {
+        "false_current_feasible_count": 0,
+        "false_current_infeasible_count": 0,
+        "max_abs_normalized_current_error_pu": 0.07193634600933063,
+        "mean_abs_normalized_current_error_pu": 0.0005651778925253363,
+        "p95_abs_normalized_current_error_pu": 1.0355103320264226e-05,
+        "sample_count": 383,
+        "worst_actual_loading_pu": 0.0719327457857421,
+        "worst_element_phase": "transformer.mess_idc01_tx::A",
+        "worst_predicted_loading_pu": -3.600223588527662e-06
+      },
+      "current_probe_pass": false,
+      "family": "C_SINGLE_MESS_P",
+      "operating_day": "2025-04-02",
+      "probe_id": "C_01_DISCHARGE",
+      "rho": 0.1,
+      "slot": 23,
+      "voltage_metrics": {
+        "actual_Vmax_pu": 1.0385805067296048,
+        "actual_Vmin_pu": 0.9776850339365113,
+        "false_feasible_count": 0,
+        "false_infeasible_count": 0,
+        "lower_limit_disagreement_count": 0,
+        "max_abs_error_pu": 8.658579137010847e-06,
+        "mean_abs_error_pu": 9.480274319433428e-07,
+        "p95_abs_error_pu": 1.718531785266375e-06,
+        "predicted_Vmax_pu": 1.038579799923292,
+        "predicted_Vmin_pu": 0.9776861745626242,
+        "upper_limit_disagreement_count": 0,
+        "worst_node_phase": "mess_idc01_pcc.1"
+      },
+      "voltage_probe_pass": true
+    },
+    "voltage_status": "FAIL_CLOSED_INCOMPLETE_AFTER_FIRST_GATE_FAILURE"
+  },
+  "verification": {
+    "focused_command": "py -3.11 -m pytest tests/test_v17_reference_scheduler_v5.py tests/test_v17_v5_fail_closed_review.py tests/test_v17_deferrability_semantics.py tests/test_v17_ac_restoration_regression.py -q",
+    "focused_result": "12 passed in 0.15s",
+    "py_compile": "PASS",
+    "repo_root_pytest_collection": "ABORTED_BY_EXISTING science/r25l_b5_monolithic_gate_proof_test.py IMPORT_TIME_SYSTEMEXIT",
+    "tests_tree_command": "py -3.11 -m pytest tests -q",
+    "tests_tree_failures": [
+      "test_g56_freeze_artifacts torch DLL runtime unavailable (3 sibling tests passed)",
+      "test_pfr_mess_energy_recovery existing PFR projection failure; no PFR path changed",
+      "two shared_exact_source_preparation tests require POSIX fcntl and fail on Windows"
+    ],
+    "tests_tree_result": "559 passed, 4 failed, 4 skipped, 84 subtests passed in 68.53s"
+  }
+}

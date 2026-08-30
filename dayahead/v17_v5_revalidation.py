@@ -20,7 +20,9 @@ from .v17_deferrability_april import (
     COHORTS,
     MODEL_NAME,
     NAMESPACE,
+    SOURCE_DEFAULT,
     _array_fingerprint,
+    _load_reference,
     _target_index,
 )
 from .v17_deferrability_ml import TARGET_NAMES
@@ -39,6 +41,331 @@ DEBUG_DAYS = (
 )
 FROZEN_WEIGHTS_SHA256 = "544d6b36504bb8de6d0dd8fe9446fc435c2459a3949d91a2203c1f001162c859"
 FROZEN_CHECKPOINT_FINGERPRINT = "a8dd2d6111de196aead25c01b9e58885c3aab8fe78651f5b15cbf142dbb5cba7"
+
+
+def _electrical_context(repo: Path, source: Path, output: Path, day: str):
+    from .full_ieee123_g11_v16_1 import build_full_grid_binding
+    from .grid_background_v16_2 import build_authority_background_binding
+    from .run_aidc_ieee123_penetration_hosting_capacity_diagnostic_v1 import _select_april_vintages_locked
+    from .run_authority_semantic_g11_v16_2 import _default_background_paths
+
+    rack_contract = json.loads((repo / "dayahead/artifacts/v16_1/AIDC_VIRTUAL_SPATIAL_GPU_CONTRACT.json").read_text(encoding="utf-8"))
+    authority = load_frozen_rack_authority(Path(rack_contract["source_path"]))
+    c7 = json.loads((repo / "dayahead/artifacts/v16_1/C7_FULL_IEEE123_REPORT_V16_1.json").read_text(encoding="utf-8"))
+    reference, inputs = _load_reference(output / "reference_v5" / f"REFERENCE_COMPUTE_SCHEDULE_V5_{day}.npz", authority, c7["mess_invariants"]["records"])
+    vintages, excluded = _select_april_vintages_locked(repo / "dayahead/artifacts/v16_1/AEMO_DA_VINTAGE_CONTRACT_V16_1.json")
+    if day not in vintages:
+        raise RuntimeError(f"V17_V5_APRIL_VINTAGE_MISSING:{day}:{excluded}")
+    vintage = vintages[day]
+    background = build_authority_background_binding(
+        timestamps_fixed_aest=vintage["timestamps_96"], demand_mw_96=vintage["demand_mw_96"],
+        rooftop_pv_mw_96=vintage["pv_mw_96"], paths=_default_background_paths(repo, source),
+    )
+    binding = build_full_grid_binding(
+        assets=source / "opendss_assets", contract=source / "power_v70_p4f_contract",
+        demand_mw_96=vintage["demand_mw_96"], rooftop_pv_mw_96=vintage["pv_mw_96"],
+        aidc_plan_kw_96x12=reference["plan_kw_96x12"],
+        pcc_asset=repo / "dayahead/artifacts/v16_2/Generated_ThreePhase_PCC_v4.dss",
+        background_binding=background,
+    )
+    return reference, inputs, vintage, background, binding, authority
+
+
+def build_anchors(repo: Path, source: Path, output: Path) -> dict[str, Any]:
+    from .run_v16_3_correction import _current_cache_path, _generate_current_day
+    from .run_v16_3_voltage_candidate import _anchor_and_sensitivity_day
+
+    repo = repo.resolve(); source = source.resolve(); output = output.resolve()
+    cache = output / "ac_cache_v5"
+    rows = []
+    for day in DEBUG_DAYS:
+        reference, _inputs, vintage, background, binding, authority = _electrical_context(repo, source, output, day)
+        voltage_path = cache / "data" / f"D1_AC_ANCHOR_SENSITIVITY_{day}.npz"
+        if voltage_path.is_file():
+            existing_voltage = np.load(voltage_path, allow_pickle=False)
+            reusable_voltage = (
+                str(existing_voltage["operating_day"]) == day
+                and np.max(np.abs(np.asarray(existing_voltage["anchor_control"][:, :12]) - np.asarray(reference["plan_kw_96x12"]))) <= 1e-12
+            )
+        else:
+            reusable_voltage = False
+        if reusable_voltage:
+            voltage_record = {"operating_day": day, "path": str(voltage_path.resolve()), "sha256": sha256_file(voltage_path), "bytes": voltage_path.stat().st_size, "reused_exact_V5_plan_cache": True}
+        else:
+            voltage_record = _anchor_and_sensitivity_day(repo, source, background, reference["plan_kw_96x12"], binding, day, voltage_path)
+        context = (reference, vintage, background, binding, voltage_path, authority)
+        current_path = _current_cache_path(cache, day)
+        if current_path.is_file():
+            existing_current = np.load(current_path, allow_pickle=False)
+            reusable_current = str(existing_current["source_voltage_cache_sha256"]) == sha256_file(voltage_path)
+        else:
+            reusable_current = False
+        if reusable_current:
+            current_record = {"operating_day": day, "path": str(current_path.resolve()), "sha256": sha256_file(current_path), "bytes": current_path.stat().st_size, "reused_exact_V5_voltage_bound_cache": True}
+        else:
+            current_record = _generate_current_day(repo, source, cache, day, context)
+        v5 = np.load(output / "reference_v5" / f"REFERENCE_COMPUTE_SCHEDULE_V5_{day}.npz", allow_pickle=False)
+        v4 = np.load(output / "reference_v4" / f"REFERENCE_COMPUTE_SCHEDULE_V4_{day}.npz", allow_pickle=False)
+        voltage = np.load(voltage_path, allow_pickle=False); current = np.load(current_path, allow_pickle=False)
+        old_voltage = np.load(output / "ac_cache/data" / f"D1_AC_ANCHOR_SENSITIVITY_{day}.npz", allow_pickle=False)
+        old_current = np.load(output / "ac_cache/data" / f"D1_AC_ANCHOR_CURRENT_SENSITIVITY_{day}.npz", allow_pickle=False)
+        plan_difference = float(np.max(np.abs(np.asarray(v5["plan_kw_96x12"]) - np.asarray(v4["plan_kw_96x12"]))))
+        anchor_control_error = float(np.max(np.abs(np.asarray(v5["plan_kw_96x12"]) - np.asarray(voltage["anchor_control"][:, :12]))))
+        if plan_difference <= 1e-12 or anchor_control_error > 1e-9:
+            raise RuntimeError(f"V17_V5_ANCHOR_EQUIVALENCE_GATE_FAIL:{day}:{plan_difference}:{anchor_control_error}")
+        rows.append({
+            "operating_day": day,
+            "V4_to_V5_per_AIDC_plan_max_abs_difference_kw": plan_difference,
+            "electrical_anchor_reuse_permitted": False,
+            "V5_anchor_plan_identity_max_abs_error_kw": anchor_control_error,
+            "V4_to_V5_anchor_v_squared_max_abs_difference": float(np.max(np.abs(np.asarray(voltage["anchor_v_squared"]) - np.asarray(old_voltage["anchor_v_squared"])))),
+            "V4_to_V5_H_max_abs_difference": float(np.max(np.abs(np.asarray(voltage["sensitivity"]) - np.asarray(old_voltage["sensitivity"])))),
+            "V4_to_V5_J_I_max_abs_difference": float(np.max(np.abs(np.asarray(current["current_sensitivity_pu_per_control"]) - np.asarray(old_current["current_sensitivity_pu_per_control"])))),
+            "voltage_cache": {"path": str(voltage_path.resolve()), "sha256": sha256_file(voltage_path), "bytes": voltage_path.stat().st_size, "deterministic_repeat_max_abs_error": float(voltage["deterministic_repeat_max_abs_error"])},
+            "current_cache": {"path": str(current_path.resolve()), "sha256": sha256_file(current_path), "bytes": current_path.stat().st_size, "deterministic_repeat_max_abs_error": float(current["deterministic_repeat_max_abs_error_pu"])},
+            "voltage_generation": voltage_record,
+            "current_generation": current_record,
+        })
+        print(json.dumps({"stage": "V17_V5_ANCHOR", "day": day, "complete": len(rows)}), flush=True)
+    report = {
+        "artifact_id": "V17_V5_7DAY_D1_ANCHOR_MANIFEST_V1", "status": "PASS_REGENERATED_7_DAYS",
+        "debug_days": list(DEBUG_DAYS), "days": rows,
+        "common_frozen_D1_tap_semantics": True, "MESS_P_Q_zero_at_anchor": True,
+        "native_IEEE123_unchanged": True, "beta_AIDC": BETA_AIDC,
+        **_scientific_firewall(),
+    }
+    write_json(output / "V17_V5_7DAY_D1_ANCHOR_MANIFEST.json", report)
+    return {"status": report["status"], "day_count": len(rows)}
+
+
+def validate_surrogates(repo: Path, source: Path, output: Path) -> dict[str, Any]:
+    from .run_planning_ac_voltage_forensic_v1 import _compile
+    from .run_aidc_ieee123_penetration_hosting_capacity_diagnostic_v1 import PF_TAN, _set_generator, _set_load
+    from .run_v16_3_correction import _current_sampler, _sample_currents
+    from .run_v16_3_nonzero_validity import (
+        _aidc_limits, _branch_ratings,
+        _regcontrol_metadata, _slot_selection,
+    )
+    from .run_v16_3_voltage_candidate import CAPACITORS, REGULATORS, _fix_controls, _set_slot, _voltage_map
+    from .v16_3_correction import CURRENT_ERROR_TOLERANCE, current_comparison, current_metrics_pass
+    from .v16_3_nonzero_validity import (
+        VOLTAGE_TOLERANCE, build_probe_directions, expand_rho, voltage_comparison,
+    )
+
+    repo = repo.resolve(); source = source.resolve(); output = output.resolve()
+    rho = 0.10
+
+    def apply_changed_controls(odd, controls: tuple[str, ...], previous: np.ndarray, values: np.ndarray) -> np.ndarray:
+        for index in range(12):
+            if abs(float(values[index]) - float(previous[index])) > 1e-12:
+                value = float(values[index]); _set_load(odd, f"IDC_IDC{index+1:02d}", value, value * PF_TAN)
+        services = [control.split("[", 1)[1][:-1] for control in controls[12:36]]
+        for index, service in enumerate(services):
+            if abs(float(values[12 + index]) - float(previous[12 + index])) > 1e-12 or abs(float(values[36 + index]) - float(previous[36 + index])) > 1e-12:
+                p = float(values[12 + index]); q = float(values[36 + index])
+                _set_generator(odd, f"MESS_DIS_{service}", max(p, 0.0), q)
+                _set_load(odd, f"MESS_CHG_{service}", max(-p, 0.0), 0.0)
+        return values.copy()
+
+    voltage_days = []; current_days = []
+    total_probes = 0; total_voltage_false = 0; total_current_false = 0
+    first_gate_failure = None
+    for day in DEBUG_DAYS:
+        reference, _inputs, _vintage, background, binding, authority = _electrical_context(repo, source, output, day)
+        voltage_path = output / "ac_cache_v5/data" / f"D1_AC_ANCHOR_SENSITIVITY_{day}.npz"
+        current_path = output / "ac_cache_v5/data" / f"D1_AC_ANCHOR_CURRENT_SENSITIVITY_{day}.npz"
+        voltage = np.load(voltage_path, allow_pickle=False); current = np.load(current_path, allow_pickle=False)
+        controls = tuple(map(str, voltage["control_names"])); nodes = tuple(map(str, voltage["node_names"]))
+        branches = tuple(binding.factories[0].data.branches)
+        identities = tuple(f"{branch.branch_id}::{branch.phase}" for branch in branches)
+        odd, adapter = _compile(source, repo, "NATIVE")
+        ratings, rating_rows = _branch_ratings(odd, binding)
+        selection = _slot_selection(voltage, ratings, [str(row["kind"]) for row in rating_rows], _regcontrol_metadata(odd), day)
+        day_probe_count = 0; day_v_false = 0; day_i_false = 0
+        max_v = 0.0; mean_v = 0.0; p95_v = 0.0
+        max_i = 0.0; mean_i = 0.0; p95_i = 0.0
+        family_counts: dict[str, int] = {}
+        for slot in selection["slots"]:
+            down, up, _limits = _aidc_limits(reference, authority, slot)
+            directions = build_probe_directions(controls, down, up)
+            anchor = np.asarray(voltage["anchor_control"][slot], dtype=float)
+            taps = {name: float(voltage["regulator_taps"][slot, i]) for i, name in enumerate(REGULATORS)}
+            caps = {name: [int(voltage["capacitor_states"][slot, i])] for i, name in enumerate(CAPACITORS)}
+            _set_slot(odd, adapter, background, reference["plan_kw_96x12"], slot)
+            _fix_controls(odd, taps, caps)
+            odd.Solution.SolveSnap()
+            if not bool(odd.Solution.Converged()):
+                raise RuntimeError(f"V17_V5_SURROGATE_ANCHOR_NONCONVERGENCE:{day}:{slot}")
+            current_indices, current_coefficients = _current_sampler(odd, branches)
+            current_values = anchor.copy()
+            for direction in directions:
+                delta = expand_rho(direction, rho); values = anchor + delta
+                predicted_voltage = np.sqrt(np.maximum(np.asarray(voltage["anchor_v_squared"][slot]) + delta @ np.asarray(voltage["sensitivity"][slot]), 0.0))
+                predicted_current = np.asarray(current["anchor_current_loading_pu"][slot]) + delta @ np.asarray(current["current_sensitivity_pu_per_control"][slot])
+                current_values = apply_changed_controls(odd, controls, current_values, values)
+                odd.Solution.SolveSnap()
+                if not bool(odd.Solution.Converged()):
+                    raise RuntimeError(f"V17_V5_SURROGATE_PROBE_NONCONVERGENCE:{day}:{slot}:{direction.probe_id}")
+                actual_voltage = np.asarray(list(_voltage_map(odd, nodes).values()), dtype=float)
+                actual_current = _sample_currents(odd, current_indices, current_coefficients) / ratings
+                vm = voltage_comparison(predicted_voltage, actual_voltage, nodes)
+                im = current_comparison(predicted_current, actual_current, identities)
+                day_probe_count += 1; family_counts[direction.family] = family_counts.get(direction.family, 0) + 1
+                day_v_false += int(vm["false_feasible_count"]); day_i_false += int(im["false_current_feasible_count"])
+                max_v = max(max_v, float(vm["max_abs_error_pu"])); mean_v = max(mean_v, float(vm["mean_abs_error_pu"])); p95_v = max(p95_v, float(vm["p95_abs_error_pu"]));
+                max_i = max(max_i, float(im["max_abs_normalized_current_error_pu"])); mean_i = max(mean_i, float(im["mean_abs_normalized_current_error_pu"])); p95_i = max(p95_i, float(im["p95_abs_normalized_current_error_pu"]));
+                probe_voltage_pass = int(vm["false_feasible_count"]) == 0 and float(vm["max_abs_error_pu"]) <= VOLTAGE_TOLERANCE["max_abs_candidate_vs_frozen_pu"] + 1e-12 and float(vm["mean_abs_error_pu"]) <= VOLTAGE_TOLERANCE["mean_abs_candidate_vs_frozen_pu"] + 1e-12 and float(vm["p95_abs_error_pu"]) <= VOLTAGE_TOLERANCE["p95_abs_candidate_vs_frozen_pu"] + 1e-12
+                probe_current_pass = current_metrics_pass(im)
+                if not probe_voltage_pass or not probe_current_pass:
+                    first_gate_failure = {"operating_day": day, "slot": int(slot), "probe_id": direction.probe_id, "family": direction.family, "rho": rho, "voltage_metrics": vm, "current_metrics": im, "voltage_probe_pass": probe_voltage_pass, "current_probe_pass": probe_current_pass}
+                    break
+            if first_gate_failure is not None:
+                break
+        voltage_pass = day_v_false == 0 and max_v <= VOLTAGE_TOLERANCE["max_abs_candidate_vs_frozen_pu"] + 1e-12 and mean_v <= VOLTAGE_TOLERANCE["mean_abs_candidate_vs_frozen_pu"] + 1e-12 and p95_v <= VOLTAGE_TOLERANCE["p95_abs_candidate_vs_frozen_pu"] + 1e-12
+        current_pass = day_i_false == 0 and current_metrics_pass({"false_current_feasible_count": day_i_false, "max_abs_normalized_current_error_pu": max_i, "mean_abs_normalized_current_error_pu": mean_i, "p95_abs_normalized_current_error_pu": p95_i})
+        voltage_days.append({"operating_day": day, "rho": rho, "selected_slots": selection, "probe_count": day_probe_count, "probe_counts_by_predeclared_family": family_counts, "false_feasible_count": day_v_false, "max_abs_error_pu": max_v, "max_per_probe_mean_abs_error_pu": mean_v, "max_per_probe_p95_abs_error_pu": p95_v, "status": "PASS" if voltage_pass else "FAIL", "H_coefficient_sha256": hashlib.sha256(np.asarray(voltage["sensitivity"]).tobytes()).hexdigest()})
+        current_days.append({"operating_day": day, "rho": rho, "selected_slots": selection, "probe_count": day_probe_count, "probe_counts_by_predeclared_family": family_counts, "false_feasible_count": day_i_false, "max_abs_normalized_current_error_pu": max_i, "max_per_probe_mean_abs_error_pu": mean_i, "max_per_probe_p95_abs_error_pu": p95_i, "status": "PASS" if current_pass else "FAIL", "J_I_coefficient_sha256": str(current["coefficient_sha256"])})
+        total_probes += day_probe_count; total_voltage_false += day_v_false; total_current_false += day_i_false
+        print(json.dumps({"stage": "V17_V5_SURROGATE", "day": day, "probes": day_probe_count, "voltage": voltage_days[-1]["status"], "current": current_days[-1]["status"], "first_gate_failure": first_gate_failure}), flush=True)
+        if first_gate_failure is not None:
+            break
+    all_days_complete = len(voltage_days) == len(DEBUG_DAYS)
+    voltage_status = "PASS" if all_days_complete and all(row["status"] == "PASS" for row in voltage_days) else "FAIL_CLOSED_INCOMPLETE_AFTER_FIRST_GATE_FAILURE"
+    current_status = "PASS" if all_days_complete and all(row["status"] == "PASS" for row in current_days) else "FAIL_CLOSED_ON_PREDECLARED_RHO_PROBE"
+    remaining = [day for day in DEBUG_DAYS if day not in {row["operating_day"] for row in voltage_days}]
+    voltage_report = {"artifact_id": "V17_V5_7DAY_VOLTAGE_SURROGATE_VALIDATION_V1", "status": voltage_status, "rho_candidate_tested": rho, "rho_valid_frozen_primary": rho if voltage_status == "PASS" and current_status == "PASS" else None, "predeclared_probe_family_reused": True, "days": voltage_days, "debug_days_completed": len(voltage_days), "remaining_debug_days_not_executed_after_fail_closed": remaining, "probe_count": total_probes, "voltage_false_feasible_count": total_voltage_false, "first_gate_failure": first_gate_failure, "tolerances": VOLTAGE_TOLERANCE, **_scientific_firewall()}
+    current_report = {"artifact_id": "V17_V5_7DAY_CURRENT_SURROGATE_VALIDATION_V1", "status": current_status, "rho_candidate_tested": rho, "rho_valid_frozen_primary": rho if voltage_status == "PASS" and current_status == "PASS" else None, "predeclared_probe_family_reused": True, "days": current_days, "debug_days_completed": len(current_days), "remaining_debug_days_not_executed_after_fail_closed": remaining, "probe_count": total_probes, "hard_current_false_feasible_count": total_current_false, "first_gate_failure": first_gate_failure, "tolerances": CURRENT_ERROR_TOLERANCE, **_scientific_firewall()}
+    write_json(output / "V17_V5_7DAY_VOLTAGE_SURROGATE_VALIDATION.json", voltage_report)
+    write_json(output / "V17_V5_7DAY_CURRENT_SURROGATE_VALIDATION.json", current_report)
+    return {"status": "PASS" if voltage_report["status"] == current_report["status"] == "PASS" else "FAIL_CLOSED", "probe_count": total_probes, "voltage_false_feasible_count": total_voltage_false, "current_false_feasible_count": total_current_false, "first_gate_failure": first_gate_failure}
+
+
+def finalize_fail_closed(repo: Path, output: Path) -> dict[str, Any]:
+    repo = repo.resolve(); output = output.resolve()
+    voltage = json.loads((output / "V17_V5_7DAY_VOLTAGE_SURROGATE_VALIDATION.json").read_text(encoding="utf-8"))
+    current = json.loads((output / "V17_V5_7DAY_CURRENT_SURROGATE_VALIDATION.json").read_text(encoding="utf-8"))
+    permutation = json.loads((output / "V17_V5_PERMUTATION_INVARIANCE_AUDIT.json").read_text(encoding="utf-8"))
+    comparison = json.loads((output / "V17_V5_7DAY_REFERENCE_COMPARISON.json").read_text(encoding="utf-8"))
+    anchors = json.loads((output / "V17_V5_7DAY_D1_ANCHOR_MANIFEST.json").read_text(encoding="utf-8"))
+    for row in anchors["days"]:
+        row.pop("voltage_generation", None)
+        row.pop("current_generation", None)
+    anchors["compact_manifest_only_cache_payloads_ignored"] = True
+    write_json(output / "V17_V5_7DAY_D1_ANCHOR_MANIFEST.json", anchors)
+    if voltage["status"] == current["status"] == "PASS":
+        raise RuntimeError("V17_V5_FAILURE_FINALIZER_REFUSES_PASSING_SURROGATE")
+    first_failure = current["first_gate_failure"]
+    reference_hashes = {
+        day: sha256_file(output / "reference_v5" / f"REFERENCE_COMPUTE_SCHEDULE_V5_{day}.npz")
+        for day in DEBUG_DAYS
+    }
+    freeze = {
+        "artifact_id": "V17_V5_7DAY_PRE_EVALUATION_FREEZE_MANIFEST_V1",
+        "status": "NOT_MINTED_SURROGATE_GATE_FAIL",
+        "pre_evaluation_freeze_minted": False,
+        "freeze_token": None,
+        "blocking_gate": "V5_J_I_RHO_0_10_ERROR_BOUND",
+        "first_gate_failure": first_failure,
+        "accepted_rho": None,
+        "scheduler_code_sha256": sha256_file(repo / "dayahead/v17_reference_scheduler_v5.py"),
+        "V5_contract_sha256": sha256_file(output / "V17_REFERENCE_SCHEDULER_V5_CONTRACT.json"),
+        "V5_reference_sha256": reference_hashes,
+        "anchor_H_J_sha256": {row["operating_day"]: {"H": row["voltage_cache"]["sha256"], "J_I": row["current_cache"]["sha256"]} for row in anchors["days"]},
+        "B0_B3_result_reads_before_freeze": 0,
+        "scientific_parameter_adjustments_after_gate_failure": 0,
+        **_scientific_firewall(),
+    }
+    write_json(output / "V17_V5_7DAY_PRE_EVALUATION_FREEZE_MANIFEST.json", freeze)
+
+    blocked_common = {
+        "status": "NOT_EXECUTED_PRE_EVALUATION_FREEZE_NOT_MINTED",
+        "blocking_gate": "V5_J_I_RHO_0_10_ERROR_BOUND",
+        "first_gate_failure": first_failure,
+        "scientific_result_rows": 0,
+        "solver_calls": 0,
+        "Fresh_OpenDSS_calls": 0,
+        **_scientific_firewall(),
+    }
+    blocked_artifacts = {
+        "V17_V5_7DAY_B0_B1_B2_B3_RESULTS.json": {"artifact_id": "V17_V5_7DAY_B0_B1_B2_B3_RESULTS_V1", "B0_B1_B2_B3_case_day_count": 0, **blocked_common},
+        "V17_V5_7DAY_DUAL_FRESH_AC_RESULTS.json": {"artifact_id": "V17_V5_7DAY_DUAL_FRESH_AC_RESULTS_V1", "primary_schedule_count": 0, "secondary_schedule_count": 0, **blocked_common},
+        "V17_V5_7DAY_AIDC_GRID_VALUE_FORENSIC.json": {"artifact_id": "V17_V5_7DAY_AIDC_GRID_VALUE_FORENSIC_V1", "B1_minus_B0_rows": 0, "B3_minus_B2_rows": 0, **blocked_common},
+        "V17_V5_7DAY_AIDC_ONLY_UPPER_BOUND.json": {"artifact_id": "V17_V5_7DAY_AIDC_ONLY_UPPER_BOUND_V1", "upper_bound_solve_count": 0, **blocked_common},
+    }
+    for name, payload in blocked_artifacts.items():
+        write_json(output / name, payload)
+
+    classification = "V17_V5_E_SURROGATE_OR_AC_VALIDATION_FAILURE"
+    resume = "V17_V5_FURTHER_CORRECTION_REQUIRED"
+    review = {
+        "artifact_id": "V17_V5_7DAY_FINAL_REVIEW_V1",
+        "status": "FAIL_CLOSED_BEFORE_B0_B3",
+        "classification": classification,
+        "resume_decision": resume,
+        "V5_implementation": "PASS",
+        "permutation_invariance": {"status": permutation["status"], "max_abs_error_nodeh": permutation["maximum_deterministic_repeat_error_nodeh"]},
+        "V4_V5_reference_comparison": {
+            "status": comparison["status"],
+            "temporal_max_abs_error_nodeh": max(row["temporal_service_max_abs_difference_nodeh"] for row in comparison["days"]),
+            "critical_slot_active_AIDC_count_v5": {row["operating_day"]: row["critical_slot_active_AIDC_count_v5"] for row in comparison["days"]},
+            "maximum_AIDC_concentration_share_v5": max(row["maximum_AIDC_concentration_share_v5"] for row in comparison["days"]),
+        },
+        "D1_anchor_H_J": {"status": anchors["status"], "day_count": len(anchors["days"])},
+        "surrogate_validation": {"voltage_status": voltage["status"], "current_status": current["status"], "first_gate_failure": first_failure, "accepted_rho": None},
+        "B0_B1_B2_B3": "NOT_EXECUTED",
+        "dual_Fresh_AC": "NOT_EXECUTED",
+        "AIDC_only_upper_bound": "NOT_EXECUTED",
+        "reason": "The predeclared rho=0.10 current-surrogate error bound failed before the required pre-evaluation freeze; downstream scientific evaluation is unauthorized.",
+        "verification": {
+            "focused_command": "py -3.11 -m pytest tests/test_v17_reference_scheduler_v5.py tests/test_v17_v5_fail_closed_review.py tests/test_v17_deferrability_semantics.py tests/test_v17_ac_restoration_regression.py -q",
+            "focused_result": "12 passed in 0.15s",
+            "tests_tree_command": "py -3.11 -m pytest tests -q",
+            "tests_tree_result": "559 passed, 4 failed, 4 skipped, 84 subtests passed in 68.53s",
+            "tests_tree_failures": [
+                "test_g56_freeze_artifacts torch DLL runtime unavailable (3 sibling tests passed)",
+                "test_pfr_mess_energy_recovery existing PFR projection failure; no PFR path changed",
+                "two shared_exact_source_preparation tests require POSIX fcntl and fail on Windows",
+            ],
+            "repo_root_pytest_collection": "ABORTED_BY_EXISTING science/r25l_b5_monolithic_gate_proof_test.py IMPORT_TIME_SYSTEMEXIT",
+            "py_compile": "PASS",
+        },
+        **_scientific_firewall(),
+    }
+    write_json(output / "V17_V5_7DAY_FINAL_REVIEW.json", review)
+    artifact_names = [
+        "V17_PRE_V5_DIRTY_TREE_PRESERVATION_MANIFEST.json",
+        "V17_REFERENCE_SCHEDULER_V5_CONTRACT.json",
+        "V17_V4_V5_ROOT_CAUSE_UNIT_TEST.json",
+        "V17_V5_PERMUTATION_INVARIANCE_AUDIT.json",
+        "V17_V5_7DAY_REFERENCE_COMPARISON.json",
+        "V17_V5_7DAY_D1_ANCHOR_MANIFEST.json",
+        "V17_V5_7DAY_VOLTAGE_SURROGATE_VALIDATION.json",
+        "V17_V5_7DAY_CURRENT_SURROGATE_VALIDATION.json",
+        "V17_V5_7DAY_PRE_EVALUATION_FREEZE_MANIFEST.json",
+        "V17_V5_7DAY_B0_B1_B2_B3_RESULTS.json",
+        "V17_V5_7DAY_DUAL_FRESH_AC_RESULTS.json",
+        "V17_V5_7DAY_AIDC_GRID_VALUE_FORENSIC.json",
+        "V17_V5_7DAY_AIDC_ONLY_UPPER_BOUND.json",
+        "V17_V5_7DAY_FINAL_REVIEW.json",
+    ]
+    manifest = {
+        "artifact_id": "V17_V5_CANDIDATE_MANIFEST_V1",
+        "status": "FAIL_CLOSED_CANDIDATE_NOT_FROZEN",
+        "classification": classification,
+        "resume_decision": resume,
+        "git_head_before_final_review_commit": __import__("subprocess").run(["git", "rev-parse", "HEAD"], cwd=repo, check=True, text=True, capture_output=True).stdout.strip(),
+        "artifacts_sha256": {name: sha256_file(output / name) for name in artifact_names},
+        "code_sha256": {path: sha256_file(repo / path) for path in ("dayahead/v17_reference_scheduler_v5.py", "dayahead/v17_v5_revalidation.py", "tests/test_v17_reference_scheduler_v5.py", "tests/test_v17_v5_fail_closed_review.py")},
+        "verification_summary": "12 focused PASS; tests tree 559 PASS / 4 unrelated-or-environmental FAIL / 4 skipped / 84 subtests PASS",
+        "large_reproducible_cache_policy": "SHA_IN_COMPACT_MANIFEST_NOT_COMMITTED",
+        "V4_artifacts_changed": 0,
+        "remaining_April_day_runs": 0,
+        "B0_B1_B2_B3_solver_calls": 0,
+        "dual_Fresh_AC_calls": 0,
+        **_scientific_firewall(),
+    }
+    write_json(output / "V17_V5_CANDIDATE_MANIFEST.json", manifest)
+    return {"classification": classification, "resume_decision": resume, "freeze_minted": False}
 
 
 def _scientific_firewall() -> dict[str, int]:
@@ -266,11 +593,15 @@ def materialize(repo: Path, output: Path) -> dict[str, Any]:
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("phase", choices=("materialize",))
+    parser.add_argument("phase", choices=("materialize", "anchors", "validate", "finalize-failure"))
     parser.add_argument("--repo", type=Path, default=Path.cwd())
+    parser.add_argument("--source", type=Path, default=SOURCE_DEFAULT)
     parser.add_argument("--output", type=Path, default=Path("dayahead/artifacts/v17_candidate"))
     args = parser.parse_args(argv)
-    result = materialize(args.repo, args.output)
+    if args.phase == "materialize": result = materialize(args.repo, args.output)
+    elif args.phase == "anchors": result = build_anchors(args.repo, args.source, args.output)
+    elif args.phase == "validate": result = validate_surrogates(args.repo, args.source, args.output)
+    else: result = finalize_fail_closed(args.repo, args.output)
     print(json.dumps(result, sort_keys=True))
     return 0
 

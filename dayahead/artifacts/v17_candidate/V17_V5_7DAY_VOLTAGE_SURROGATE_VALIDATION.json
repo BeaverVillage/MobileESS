@@ -1,0 +1,145 @@
+{
+  "AIDC_site_changes": 0,
+  "June_result_content_reads": 0,
+  "June_scientific_input_reads": 0,
+  "May_result_content_reads": 0,
+  "May_scientific_input_reads": 0,
+  "OpenDSS_calls_inside_Benders": 0,
+  "PF_changes": 0,
+  "PUE_changes": 0,
+  "artifact_id": "V17_V5_7DAY_VOLTAGE_SURROGATE_VALIDATION_V1",
+  "beta_changes": 0,
+  "days": [
+    {
+      "H_coefficient_sha256": "985ed6c0fd5076a2b1bdb35be0daefaff8024b6cff0324999338ae7b33576e24",
+      "false_feasible_count": 0,
+      "max_abs_error_pu": 8.658579137010847e-06,
+      "max_per_probe_mean_abs_error_pu": 9.480274319433428e-07,
+      "max_per_probe_p95_abs_error_pu": 1.718531785266375e-06,
+      "operating_day": "2025-04-02",
+      "probe_count": 37,
+      "probe_counts_by_predeclared_family": {
+        "A_SINGLE_AIDC_P": 24,
+        "B_ZERO_SUM_AIDC_REDISTRIBUTION": 12,
+        "C_SINGLE_MESS_P": 1
+      },
+      "rho": 0.1,
+      "selected_slots": {
+        "anchor_max_current_loading_pu": 0.7835009977704782,
+        "near_current_slots": [],
+        "near_voltage_slots": [
+          36,
+          40,
+          41,
+          82,
+          83,
+          86
+        ],
+        "reasons": {
+          "23": [
+            "VOLTAGE_LOW_CRITICAL"
+          ],
+          "36": [
+            "WITHIN_DECLARED_VOLTAGE_PROXIMITY"
+          ],
+          "40": [
+            "WITHIN_DECLARED_VOLTAGE_PROXIMITY"
+          ],
+          "41": [
+            "WITHIN_DECLARED_VOLTAGE_PROXIMITY"
+          ],
+          "60": [
+            "REGULATOR_DEADBAND_NEAR"
+          ],
+          "74": [
+            "MAX_LINE_CURRENT_ANCHOR",
+            "MAX_TRANSFORMER_CURRENT_ANCHOR"
+          ],
+          "82": [
+            "WITHIN_DECLARED_VOLTAGE_PROXIMITY"
+          ],
+          "83": [
+            "WITHIN_DECLARED_VOLTAGE_PROXIMITY"
+          ],
+          "85": [
+            "DETERMINISTIC_ORDINARY"
+          ],
+          "86": [
+            "VOLTAGE_HIGH_CRITICAL",
+            "WITHIN_DECLARED_VOLTAGE_PROXIMITY"
+          ]
+        },
+        "slots": [
+          23,
+          36,
+          40,
+          41,
+          60,
+          74,
+          82,
+          83,
+          85,
+          86
+        ]
+      },
+      "status": "PASS"
+    }
+  ],
+  "debug_days_completed": 1,
+  "first_gate_failure": {
+    "current_metrics": {
+      "false_current_feasible_count": 0,
+      "false_current_infeasible_count": 0,
+      "max_abs_normalized_current_error_pu": 0.07193634600933063,
+      "mean_abs_normalized_current_error_pu": 0.0005651778925253363,
+      "p95_abs_normalized_current_error_pu": 1.0355103320264226e-05,
+      "sample_count": 383,
+      "worst_actual_loading_pu": 0.0719327457857421,
+      "worst_element_phase": "transformer.mess_idc01_tx::A",
+      "worst_predicted_loading_pu": -3.600223588527662e-06
+    },
+    "current_probe_pass": false,
+    "family": "C_SINGLE_MESS_P",
+    "operating_day": "2025-04-02",
+    "probe_id": "C_01_DISCHARGE",
+    "rho": 0.1,
+    "slot": 23,
+    "voltage_metrics": {
+      "actual_Vmax_pu": 1.0385805067296048,
+      "actual_Vmin_pu": 0.9776850339365113,
+      "false_feasible_count": 0,
+      "false_infeasible_count": 0,
+      "lower_limit_disagreement_count": 0,
+      "max_abs_error_pu": 8.658579137010847e-06,
+      "mean_abs_error_pu": 9.480274319433428e-07,
+      "p95_abs_error_pu": 1.718531785266375e-06,
+      "predicted_Vmax_pu": 1.038579799923292,
+      "predicted_Vmin_pu": 0.9776861745626242,
+      "upper_limit_disagreement_count": 0,
+      "worst_node_phase": "mess_idc01_pcc.1"
+    },
+    "voltage_probe_pass": true
+  },
+  "grid_benefit_selected_parameters": 0,
+  "kappa_changes": 0,
+  "predeclared_probe_family_reused": true,
+  "probe_count": 37,
+  "remaining_debug_days_not_executed_after_fail_closed": [
+    "2025-04-03",
+    "2025-04-12",
+    "2025-04-13",
+    "2025-04-15",
+    "2025-04-22",
+    "2025-04-23"
+  ],
+  "rho_candidate_tested": 0.1,
+  "rho_valid_frozen_primary": null,
+  "status": "FAIL_CLOSED_INCOMPLETE_AFTER_FIRST_GATE_FAILURE",
+  "tolerances": {
+    "max_abs_candidate_vs_frozen_pu": 0.01,
+    "max_abs_candidate_vs_native_pu": 0.015,
+    "mean_abs_candidate_vs_frozen_pu": 0.003,
+    "p95_abs_candidate_vs_frozen_pu": 0.005
+  },
+  "voltage_false_feasible_count": 0
+}
