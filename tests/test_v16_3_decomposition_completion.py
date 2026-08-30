@@ -65,3 +65,29 @@ def test_full_lp_farkas_logs_record_bound_aware_violation():
     assert certificates
     assert all(row["Gurobi_FarkasProof"]>0 and row["bound_aware_cut_violation"]>0 for row in certificates)
     assert all(row["cut_origin"]=="ACTUAL_GUROBI_FARKASDUAL_FULL_LP" for row in certificates)
+
+
+def test_supplementary_all41_is_exhaustive_and_equivalent():
+    value=load("V16_3_SUPPLEMENTARY_ALL41_DECOMPOSITION_RESULTS.json")
+    assert value["day_count"]==41
+    assert value["feasible_day_count"]+value["infeasible_day_count"]==41
+    assert value["feasible_summary"]["all_standard_objective_equivalent"]
+    assert value["feasible_summary"]["all_cl_mc_bd_objective_equivalent"]
+    assert value["infeasible_summary"]["all_standard_status_identical"]
+    assert value["infeasible_summary"]["all_cl_mc_bd_status_identical"]
+    assert max(value["timeout_count"].values())==0
+    assert all(row["no_day_selection"] for row in value["days"])
+    for row in value["days"]:
+        if row["preserved_monolithic"]["hard_feasible"]:
+            assert max(row["relative_objective_difference"].values())<=1e-3
+        else:
+            assert row["STANDARD_BD"]["status"]==row["CL_MC_BD"]["status"]=="INFEASIBLE_CERTIFIED"
+
+
+def test_completion_manifest_preserves_original_science_and_returns_one_classification():
+    value=load("V16_3_DECOMPOSITION_COMPLETION_MANIFEST.json")
+    assert value["original_final_science_classification_preserved"]=="FINAL_SCIENCE_DECOMPOSITION_INCOMPLETE"
+    assert value["historical_final_artifacts_all_exact"]
+    assert value["final_classification"]=="DECOMP_COMPLETION_A_MAY02_EQUIVALENT_SUPPLEMENTARY_COMPLETE"
+    assert value["next_decision"]=="READY_FOR_FINAL_RESULTS_INTERPRETATION_AND_PAPER"
+    assert all(counter==0 for counter in value["firewall_counters"].values())

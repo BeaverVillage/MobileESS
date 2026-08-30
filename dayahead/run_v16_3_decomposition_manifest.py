@@ -99,6 +99,24 @@ def execute(repo: Path, output: Path) -> dict[str, object]:
         "reference_coherence_classification": coherence["classification"],
         "reference_provenance_defect_found": reference_defect,
         "critical_cut_attribution_hypothesis_supported": attribution["hypothesis_supported"],
+        "verification": {
+            "targeted": {
+                "command": "pytest tests/test_v16_3_decomposition_completion.py -q",
+                "result": "9 passed",
+                "status": "PASS",
+            },
+            "full_regression": {
+                "command": "pytest tests -q",
+                "result": "521 passed, 4 skipped, 84 subtests passed, 3 failed",
+                "status": "KNOWN_UNRELATED_FAILURES",
+                "failures": [
+                    "tests/test_pfr_mess_energy_recovery.py::test_joint_projection_restores_feasibility_across_multiple_trust_regions",
+                    "tests/test_shared_exact_source_preparation.py::test_exact_sources_are_prepared_once_and_reused_by_day_workers (Windows lacks POSIX fcntl)",
+                    "tests/test_shared_exact_source_preparation.py::test_exact_source_cache_is_invalidated_by_source_identity (Windows lacks POSIX fcntl)",
+                ],
+                "changed_by_this_task": False,
+            },
+        },
         "firewall_counters": COUNTERS,
         "final_classification": classification,
         "next_decision": "READY_FOR_FINAL_RESULTS_INTERPRETATION_AND_PAPER" if may02_pass and not reference_defect else "DECOMPOSITION_OR_REFERENCE_REVIEW_REQUIRED",
