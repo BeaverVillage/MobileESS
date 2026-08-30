@@ -62,7 +62,7 @@ def test_shadow_lp_has_no_opendss_and_keeps_current_and_kva_separate() -> None:
     source = inspect.getsource(v16_3_shadow.solve_shadow)
     assert "opendssdirect" not in source.lower()
     assert "_compile" not in source and "SolveSnap" not in source
-    assert "grid_phase_current_hard" in source
+    assert "add_phase_current_epigraph" in source
     assert "transformer_total_kva_hard" in source
     assert "max_normalized_phase_line_current" in source
     assert "tap" not in " ".join(line for line in source.splitlines() if "tap_decision_variable_count" not in line).lower()

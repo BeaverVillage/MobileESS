@@ -25,6 +25,7 @@ from .mess_physics import (
     P_LIMIT_KW,
 )
 from .run_v16_3_nonzero_validity import _aidc_limits, _planning_flow_base_and_sensitivity
+from .v16_3_authority import add_phase_current_epigraph
 
 
 def solve_shadow(
@@ -162,9 +163,13 @@ def solve_shadow(
         i0 = np.asarray(current_data["anchor_current_loading_pu"][slot], dtype=float)
         for branch, name in enumerate(branch_names):
             expression = float(i0[branch]) + gp.quicksum(float(ji[c, branch]) * delta[c] for c in range(60))
-            model.addConstr(expression <= 1.0, name=f"grid_phase_current_hard[{slot},{name}]")
-            if not name.startswith("transformer."):
-                model.addConstr(eta >= expression, name=f"line_current_objective[{slot},{name}]")
+            add_phase_current_epigraph(
+                model,
+                affine_current_pu=expression,
+                slot=slot,
+                branch_name=name,
+                line_objective=None if name.startswith("transformer.") else eta,
+            )
 
         p0, q0, sp, sq = _planning_flow_base_and_sensitivity(binding, slot, anchor)
         branches = tuple(binding.factories[slot].data.branches)
@@ -220,4 +225,3 @@ def solve_shadow(
         "tap_decision_variable_count": 0,
         "OpenDSS_call_count_inside_model": 0,
     }
-

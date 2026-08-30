@@ -1,0 +1,3101 @@
+{
+  "J_I_hash_of_daily_hashes": "9c2402f16f7252fb3219a231842523ac85fedbbafb8f28bc6083ebca8ff7883e",
+  "LP_Pi_Farkas_preserved": true,
+  "May_June_firewall": {
+    "G12_G13_G14_C12": "NOT_RUN",
+    "May_forecast_rows": 0,
+    "final_B0_B1_B2_B3_run": "NOT_RUN",
+    "june_scientific_loader_access_count": 0,
+    "may_scientific_loader_access_count": 0
+  },
+  "affine_equation": "I_aff_pu = I_anchor_pu + J_I_pu*Delta_u",
+  "artifact_id": "V16_3_AC_ANCHORED_PHASE_CURRENT_AUTHORITY",
+  "authority_id": "V16_3_DA_AIDC_ICPS_AC_ANCHORED_FROZEN_D1_CONTROL",
+  "branch_phase_dimension": 383,
+  "cache_manifest": {
+    "file_count": 29,
+    "large_cache_committed_to_normal_git": false,
+    "path": "dayahead/artifacts/v16_3_candidate/V16_3_CURRENT_CANDIDATE_NPZ_SHA256_MANIFEST.json",
+    "sha256": "b796e7fbd6e0531c008b757add6872c0cd45e096f7c0ae197bfc7f450b118ed2",
+    "total_bytes": 423851342,
+    "verification": "PASS_ALL_FILE_BYTES_AND_SHA256"
+  },
+  "control_dimension": 60,
+  "evidence_checkpoint_sha": "ea8dac048bf756a65a22fb4e906e6ef2812570c8",
+  "generation": "CENTRAL_FINITE_DIFFERENCE_WITH_ALREADY_DECLARED_PERTURBATIONS",
+  "hard_constraint": "I_hat_pu <= 1",
+  "integer_or_binary_variables_added": 0,
+  "line_objective_row": "lambda >= I_hat_pu",
+  "physical_epigraph": [
+    "I_hat_pu >= I_aff_pu",
+    "I_hat_pu >= 0"
+  ],
+  "prospective": true,
+  "rating_side_provenance": [
+    {
+      "branch": "transformer.reg1a",
+      "kind": "transformer",
+      "parent_bus": "150",
+      "phase": "A",
+      "rated_current_a": 693.9306120067617,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.reg1a",
+      "kind": "transformer",
+      "parent_bus": "150",
+      "phase": "B",
+      "rated_current_a": 693.9306120067617,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.reg1a",
+      "kind": "transformer",
+      "parent_bus": "150",
+      "phase": "C",
+      "rated_current_a": 693.9306120067617,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw1",
+      "kind": "line",
+      "parent_bus": "150r",
+      "phase": "A",
+      "rated_current_a": 790.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw1",
+      "kind": "line",
+      "parent_bus": "150r",
+      "phase": "B",
+      "rated_current_a": 790.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw1",
+      "kind": "line",
+      "parent_bus": "150r",
+      "phase": "C",
+      "rated_current_a": 790.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l115",
+      "kind": "line",
+      "parent_bus": "149",
+      "phase": "A",
+      "rated_current_a": 790.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc01_tx",
+      "kind": "transformer",
+      "parent_bus": "149",
+      "phase": "A",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc01_tx",
+      "kind": "transformer",
+      "parent_bus": "149",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l115",
+      "kind": "line",
+      "parent_bus": "149",
+      "phase": "B",
+      "rated_current_a": 790.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc01_tx",
+      "kind": "transformer",
+      "parent_bus": "149",
+      "phase": "B",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc01_tx",
+      "kind": "transformer",
+      "parent_bus": "149",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l115",
+      "kind": "line",
+      "parent_bus": "149",
+      "phase": "C",
+      "rated_current_a": 790.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc01_tx",
+      "kind": "transformer",
+      "parent_bus": "149",
+      "phase": "C",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc01_tx",
+      "kind": "transformer",
+      "parent_bus": "149",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l3",
+      "kind": "line",
+      "parent_bus": "1",
+      "phase": "A",
+      "rated_current_a": 767.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l1",
+      "kind": "line",
+      "parent_bus": "1",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l3",
+      "kind": "line",
+      "parent_bus": "1",
+      "phase": "B",
+      "rated_current_a": 767.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l2",
+      "kind": "line",
+      "parent_bus": "1",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l3",
+      "kind": "line",
+      "parent_bus": "1",
+      "phase": "C",
+      "rated_current_a": 767.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l7",
+      "kind": "line",
+      "parent_bus": "7",
+      "phase": "A",
+      "rated_current_a": 756.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l7",
+      "kind": "line",
+      "parent_bus": "7",
+      "phase": "B",
+      "rated_current_a": 756.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l4",
+      "kind": "line",
+      "parent_bus": "3",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l5",
+      "kind": "line",
+      "parent_bus": "3",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l7",
+      "kind": "line",
+      "parent_bus": "7",
+      "phase": "C",
+      "rated_current_a": 756.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l9",
+      "kind": "line",
+      "parent_bus": "8",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l10",
+      "kind": "line",
+      "parent_bus": "8",
+      "phase": "A",
+      "rated_current_a": 698.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l8",
+      "kind": "line",
+      "parent_bus": "8",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l10",
+      "kind": "line",
+      "parent_bus": "8",
+      "phase": "B",
+      "rated_current_a": 698.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l6",
+      "kind": "line",
+      "parent_bus": "5",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l10",
+      "kind": "line",
+      "parent_bus": "8",
+      "phase": "C",
+      "rated_current_a": 698.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.reg2a",
+      "kind": "transformer",
+      "parent_bus": "9",
+      "phase": "A",
+      "rated_current_a": 832.639467110741,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l13",
+      "kind": "line",
+      "parent_bus": "13",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw2",
+      "kind": "line",
+      "parent_bus": "13",
+      "phase": "A",
+      "rated_current_a": 418.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l13",
+      "kind": "line",
+      "parent_bus": "13",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw2",
+      "kind": "line",
+      "parent_bus": "13",
+      "phase": "B",
+      "rated_current_a": 418.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l12",
+      "kind": "line",
+      "parent_bus": "13",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l13",
+      "kind": "line",
+      "parent_bus": "13",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw2",
+      "kind": "line",
+      "parent_bus": "13",
+      "phase": "C",
+      "rated_current_a": 418.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l11",
+      "kind": "line",
+      "parent_bus": "9r",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l18",
+      "kind": "line",
+      "parent_bus": "18",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l19",
+      "kind": "line",
+      "parent_bus": "18",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw3",
+      "kind": "line",
+      "parent_bus": "18",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l116",
+      "kind": "line",
+      "parent_bus": "152",
+      "phase": "A",
+      "rated_current_a": 418.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc09_tx",
+      "kind": "transformer",
+      "parent_bus": "152",
+      "phase": "A",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc09_tx",
+      "kind": "transformer",
+      "parent_bus": "152",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l19",
+      "kind": "line",
+      "parent_bus": "18",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw3",
+      "kind": "line",
+      "parent_bus": "18",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l116",
+      "kind": "line",
+      "parent_bus": "152",
+      "phase": "B",
+      "rated_current_a": 418.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc09_tx",
+      "kind": "transformer",
+      "parent_bus": "152",
+      "phase": "B",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc09_tx",
+      "kind": "transformer",
+      "parent_bus": "152",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l34",
+      "kind": "line",
+      "parent_bus": "34",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l19",
+      "kind": "line",
+      "parent_bus": "18",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw3",
+      "kind": "line",
+      "parent_bus": "18",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l116",
+      "kind": "line",
+      "parent_bus": "152",
+      "phase": "C",
+      "rated_current_a": 418.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc09_tx",
+      "kind": "transformer",
+      "parent_bus": "152",
+      "phase": "C",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc09_tx",
+      "kind": "transformer",
+      "parent_bus": "152",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l14",
+      "kind": "line",
+      "parent_bus": "14",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l15",
+      "kind": "line",
+      "parent_bus": "14",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l20",
+      "kind": "line",
+      "parent_bus": "19",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l22",
+      "kind": "line",
+      "parent_bus": "21",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc08_tx",
+      "kind": "transformer",
+      "parent_bus": "21",
+      "phase": "A",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc08_tx",
+      "kind": "transformer",
+      "parent_bus": "21",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l114",
+      "kind": "line",
+      "parent_bus": "135",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l52",
+      "kind": "line",
+      "parent_bus": "52",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l21",
+      "kind": "line",
+      "parent_bus": "21",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l22",
+      "kind": "line",
+      "parent_bus": "21",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc08_tx",
+      "kind": "transformer",
+      "parent_bus": "21",
+      "phase": "B",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc08_tx",
+      "kind": "transformer",
+      "parent_bus": "21",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l114",
+      "kind": "line",
+      "parent_bus": "135",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l52",
+      "kind": "line",
+      "parent_bus": "52",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l16",
+      "kind": "line",
+      "parent_bus": "15",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l17",
+      "kind": "line",
+      "parent_bus": "15",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l22",
+      "kind": "line",
+      "parent_bus": "21",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc08_tx",
+      "kind": "transformer",
+      "parent_bus": "21",
+      "phase": "C",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc08_tx",
+      "kind": "transformer",
+      "parent_bus": "21",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l114",
+      "kind": "line",
+      "parent_bus": "135",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l52",
+      "kind": "line",
+      "parent_bus": "52",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l24",
+      "kind": "line",
+      "parent_bus": "23",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l35",
+      "kind": "line",
+      "parent_bus": "35",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l36",
+      "kind": "line",
+      "parent_bus": "35",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc03_tx",
+      "kind": "transformer",
+      "parent_bus": "35",
+      "phase": "A",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc03_tx",
+      "kind": "transformer",
+      "parent_bus": "35",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l53",
+      "kind": "line",
+      "parent_bus": "53",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l24",
+      "kind": "line",
+      "parent_bus": "23",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l35",
+      "kind": "line",
+      "parent_bus": "35",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l36",
+      "kind": "line",
+      "parent_bus": "35",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc03_tx",
+      "kind": "transformer",
+      "parent_bus": "35",
+      "phase": "B",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc03_tx",
+      "kind": "transformer",
+      "parent_bus": "35",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l53",
+      "kind": "line",
+      "parent_bus": "53",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l23",
+      "kind": "line",
+      "parent_bus": "23",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l24",
+      "kind": "line",
+      "parent_bus": "23",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l36",
+      "kind": "line",
+      "parent_bus": "35",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc03_tx",
+      "kind": "transformer",
+      "parent_bus": "35",
+      "phase": "C",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc03_tx",
+      "kind": "transformer",
+      "parent_bus": "35",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l53",
+      "kind": "line",
+      "parent_bus": "53",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l26",
+      "kind": "line",
+      "parent_bus": "25",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.reg3a",
+      "kind": "transformer",
+      "parent_bus": "25",
+      "phase": "A",
+      "rated_current_a": 832.639467110741,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l37",
+      "kind": "line",
+      "parent_bus": "36",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l41",
+      "kind": "line",
+      "parent_bus": "40",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l54",
+      "kind": "line",
+      "parent_bus": "54",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l55",
+      "kind": "line",
+      "parent_bus": "54",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw8",
+      "kind": "line",
+      "parent_bus": "54",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta02_tx",
+      "kind": "transformer",
+      "parent_bus": "54",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l26",
+      "kind": "line",
+      "parent_bus": "25",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l38",
+      "kind": "line",
+      "parent_bus": "36",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l41",
+      "kind": "line",
+      "parent_bus": "40",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l54",
+      "kind": "line",
+      "parent_bus": "54",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l55",
+      "kind": "line",
+      "parent_bus": "54",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta02_tx",
+      "kind": "transformer",
+      "parent_bus": "54",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l26",
+      "kind": "line",
+      "parent_bus": "25",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.reg3c",
+      "kind": "transformer",
+      "parent_bus": "25",
+      "phase": "C",
+      "rated_current_a": 832.639467110741,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l40",
+      "kind": "line",
+      "parent_bus": "40",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l41",
+      "kind": "line",
+      "parent_bus": "40",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l54",
+      "kind": "line",
+      "parent_bus": "54",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l55",
+      "kind": "line",
+      "parent_bus": "54",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta02_tx",
+      "kind": "transformer",
+      "parent_bus": "54",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l30",
+      "kind": "line",
+      "parent_bus": "28",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta01_tx",
+      "kind": "transformer",
+      "parent_bus": "28",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l25",
+      "kind": "line",
+      "parent_bus": "25r",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l43",
+      "kind": "line",
+      "parent_bus": "42",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l56",
+      "kind": "line",
+      "parent_bus": "55",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l58",
+      "kind": "line",
+      "parent_bus": "57",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l30",
+      "kind": "line",
+      "parent_bus": "28",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta01_tx",
+      "kind": "transformer",
+      "parent_bus": "28",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l39",
+      "kind": "line",
+      "parent_bus": "38",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l42",
+      "kind": "line",
+      "parent_bus": "42",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l43",
+      "kind": "line",
+      "parent_bus": "42",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l56",
+      "kind": "line",
+      "parent_bus": "55",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l57",
+      "kind": "line",
+      "parent_bus": "57",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l58",
+      "kind": "line",
+      "parent_bus": "57",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l30",
+      "kind": "line",
+      "parent_bus": "28",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta01_tx",
+      "kind": "transformer",
+      "parent_bus": "28",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l25",
+      "kind": "line",
+      "parent_bus": "25r",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l43",
+      "kind": "line",
+      "parent_bus": "42",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l56",
+      "kind": "line",
+      "parent_bus": "55",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l58",
+      "kind": "line",
+      "parent_bus": "57",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l31",
+      "kind": "line",
+      "parent_bus": "29",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l27",
+      "kind": "line",
+      "parent_bus": "26",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l44",
+      "kind": "line",
+      "parent_bus": "44",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l45",
+      "kind": "line",
+      "parent_bus": "44",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l60",
+      "kind": "line",
+      "parent_bus": "60",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l61",
+      "kind": "line",
+      "parent_bus": "60",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw4",
+      "kind": "line",
+      "parent_bus": "60",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l31",
+      "kind": "line",
+      "parent_bus": "29",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l45",
+      "kind": "line",
+      "parent_bus": "44",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l59",
+      "kind": "line",
+      "parent_bus": "58",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l60",
+      "kind": "line",
+      "parent_bus": "60",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l61",
+      "kind": "line",
+      "parent_bus": "60",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw4",
+      "kind": "line",
+      "parent_bus": "60",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l31",
+      "kind": "line",
+      "parent_bus": "29",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l27",
+      "kind": "line",
+      "parent_bus": "26",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l28",
+      "kind": "line",
+      "parent_bus": "26",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l45",
+      "kind": "line",
+      "parent_bus": "44",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l60",
+      "kind": "line",
+      "parent_bus": "60",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l61",
+      "kind": "line",
+      "parent_bus": "60",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw4",
+      "kind": "line",
+      "parent_bus": "60",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l32",
+      "kind": "line",
+      "parent_bus": "30",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l29",
+      "kind": "line",
+      "parent_bus": "27",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l46",
+      "kind": "line",
+      "parent_bus": "45",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l47",
+      "kind": "line",
+      "parent_bus": "47",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l48",
+      "kind": "line",
+      "parent_bus": "47",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw6",
+      "kind": "line",
+      "parent_bus": "61",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l62",
+      "kind": "line",
+      "parent_bus": "62",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta05_tx",
+      "kind": "transformer",
+      "parent_bus": "62",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.reg4a",
+      "kind": "transformer",
+      "parent_bus": "160",
+      "phase": "A",
+      "rated_current_a": 832.639467110741,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l32",
+      "kind": "line",
+      "parent_bus": "30",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l47",
+      "kind": "line",
+      "parent_bus": "47",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l48",
+      "kind": "line",
+      "parent_bus": "47",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw6",
+      "kind": "line",
+      "parent_bus": "61",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l62",
+      "kind": "line",
+      "parent_bus": "62",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta05_tx",
+      "kind": "transformer",
+      "parent_bus": "62",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.reg4b",
+      "kind": "transformer",
+      "parent_bus": "160",
+      "phase": "B",
+      "rated_current_a": 832.639467110741,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l32",
+      "kind": "line",
+      "parent_bus": "30",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l33",
+      "kind": "line",
+      "parent_bus": "31",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l47",
+      "kind": "line",
+      "parent_bus": "47",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l48",
+      "kind": "line",
+      "parent_bus": "47",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw6",
+      "kind": "line",
+      "parent_bus": "61",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l62",
+      "kind": "line",
+      "parent_bus": "62",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta05_tx",
+      "kind": "transformer",
+      "parent_bus": "62",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.reg4c",
+      "kind": "transformer",
+      "parent_bus": "160",
+      "phase": "C",
+      "rated_current_a": 832.639467110741,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc07_tx",
+      "kind": "transformer",
+      "parent_bus": "250",
+      "phase": "A",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc07_tx",
+      "kind": "transformer",
+      "parent_bus": "250",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc06_tx",
+      "kind": "transformer",
+      "parent_bus": "48",
+      "phase": "A",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc06_tx",
+      "kind": "transformer",
+      "parent_bus": "48",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l49",
+      "kind": "line",
+      "parent_bus": "49",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.xfm1",
+      "kind": "transformer",
+      "parent_bus": "61s",
+      "phase": "A",
+      "rated_current_a": 20.817918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc05_tx",
+      "kind": "transformer",
+      "parent_bus": "61s",
+      "phase": "A",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc05_tx",
+      "kind": "transformer",
+      "parent_bus": "61s",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l63",
+      "kind": "line",
+      "parent_bus": "63",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l117",
+      "kind": "line",
+      "parent_bus": "160r",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc07_tx",
+      "kind": "transformer",
+      "parent_bus": "250",
+      "phase": "B",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc07_tx",
+      "kind": "transformer",
+      "parent_bus": "250",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc06_tx",
+      "kind": "transformer",
+      "parent_bus": "48",
+      "phase": "B",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc06_tx",
+      "kind": "transformer",
+      "parent_bus": "48",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l49",
+      "kind": "line",
+      "parent_bus": "49",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.xfm1",
+      "kind": "transformer",
+      "parent_bus": "61s",
+      "phase": "B",
+      "rated_current_a": 20.817918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc05_tx",
+      "kind": "transformer",
+      "parent_bus": "61s",
+      "phase": "B",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc05_tx",
+      "kind": "transformer",
+      "parent_bus": "61s",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l63",
+      "kind": "line",
+      "parent_bus": "63",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l117",
+      "kind": "line",
+      "parent_bus": "160r",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc07_tx",
+      "kind": "transformer",
+      "parent_bus": "250",
+      "phase": "C",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc07_tx",
+      "kind": "transformer",
+      "parent_bus": "250",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc06_tx",
+      "kind": "transformer",
+      "parent_bus": "48",
+      "phase": "C",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc06_tx",
+      "kind": "transformer",
+      "parent_bus": "48",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l49",
+      "kind": "line",
+      "parent_bus": "49",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.xfm1",
+      "kind": "transformer",
+      "parent_bus": "61s",
+      "phase": "C",
+      "rated_current_a": 20.817918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc05_tx",
+      "kind": "transformer",
+      "parent_bus": "61s",
+      "phase": "C",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc05_tx",
+      "kind": "transformer",
+      "parent_bus": "61s",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l63",
+      "kind": "line",
+      "parent_bus": "63",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l117",
+      "kind": "line",
+      "parent_bus": "160r",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l50",
+      "kind": "line",
+      "parent_bus": "50",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc04_tx",
+      "kind": "transformer",
+      "parent_bus": "50",
+      "phase": "A",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc04_tx",
+      "kind": "transformer",
+      "parent_bus": "50",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l64",
+      "kind": "line",
+      "parent_bus": "64",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta04_tx",
+      "kind": "transformer",
+      "parent_bus": "64",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l66",
+      "kind": "line",
+      "parent_bus": "67",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l67",
+      "kind": "line",
+      "parent_bus": "67",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l68",
+      "kind": "line",
+      "parent_bus": "67",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta08_tx",
+      "kind": "transformer",
+      "parent_bus": "67",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l50",
+      "kind": "line",
+      "parent_bus": "50",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc04_tx",
+      "kind": "transformer",
+      "parent_bus": "50",
+      "phase": "B",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc04_tx",
+      "kind": "transformer",
+      "parent_bus": "50",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l64",
+      "kind": "line",
+      "parent_bus": "64",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta04_tx",
+      "kind": "transformer",
+      "parent_bus": "64",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l67",
+      "kind": "line",
+      "parent_bus": "67",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l68",
+      "kind": "line",
+      "parent_bus": "67",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta08_tx",
+      "kind": "transformer",
+      "parent_bus": "67",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l50",
+      "kind": "line",
+      "parent_bus": "50",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc04_tx",
+      "kind": "transformer",
+      "parent_bus": "50",
+      "phase": "C",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc04_tx",
+      "kind": "transformer",
+      "parent_bus": "50",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l64",
+      "kind": "line",
+      "parent_bus": "64",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta04_tx",
+      "kind": "transformer",
+      "parent_bus": "64",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l67",
+      "kind": "line",
+      "parent_bus": "67",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l68",
+      "kind": "line",
+      "parent_bus": "67",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta08_tx",
+      "kind": "transformer",
+      "parent_bus": "67",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l51",
+      "kind": "line",
+      "parent_bus": "51",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l65",
+      "kind": "line",
+      "parent_bus": "65",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l69",
+      "kind": "line",
+      "parent_bus": "68",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l73",
+      "kind": "line",
+      "parent_bus": "72",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l96",
+      "kind": "line",
+      "parent_bus": "97",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw5",
+      "kind": "line",
+      "parent_bus": "97",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l51",
+      "kind": "line",
+      "parent_bus": "51",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l65",
+      "kind": "line",
+      "parent_bus": "65",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l73",
+      "kind": "line",
+      "parent_bus": "72",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l96",
+      "kind": "line",
+      "parent_bus": "97",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw5",
+      "kind": "line",
+      "parent_bus": "97",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l51",
+      "kind": "line",
+      "parent_bus": "51",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l65",
+      "kind": "line",
+      "parent_bus": "65",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l72",
+      "kind": "line",
+      "parent_bus": "72",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l73",
+      "kind": "line",
+      "parent_bus": "72",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l96",
+      "kind": "line",
+      "parent_bus": "97",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw5",
+      "kind": "line",
+      "parent_bus": "97",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw7",
+      "kind": "line",
+      "parent_bus": "151",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l70",
+      "kind": "line",
+      "parent_bus": "69",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l76",
+      "kind": "line",
+      "parent_bus": "76",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l77",
+      "kind": "line",
+      "parent_bus": "76",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l97",
+      "kind": "line",
+      "parent_bus": "98",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta06_tx",
+      "kind": "transformer",
+      "parent_bus": "98",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l118",
+      "kind": "line",
+      "parent_bus": "197",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw7",
+      "kind": "line",
+      "parent_bus": "151",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l76",
+      "kind": "line",
+      "parent_bus": "76",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l77",
+      "kind": "line",
+      "parent_bus": "76",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l97",
+      "kind": "line",
+      "parent_bus": "98",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta06_tx",
+      "kind": "transformer",
+      "parent_bus": "98",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l118",
+      "kind": "line",
+      "parent_bus": "197",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.sw7",
+      "kind": "line",
+      "parent_bus": "151",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l74",
+      "kind": "line",
+      "parent_bus": "73",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l76",
+      "kind": "line",
+      "parent_bus": "76",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l77",
+      "kind": "line",
+      "parent_bus": "76",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l97",
+      "kind": "line",
+      "parent_bus": "98",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta06_tx",
+      "kind": "transformer",
+      "parent_bus": "98",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l118",
+      "kind": "line",
+      "parent_bus": "197",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc02_tx",
+      "kind": "transformer",
+      "parent_bus": "300_open",
+      "phase": "A",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc02_tx",
+      "kind": "transformer",
+      "parent_bus": "300_open",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l71",
+      "kind": "line",
+      "parent_bus": "70",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l78",
+      "kind": "line",
+      "parent_bus": "77",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l86",
+      "kind": "line",
+      "parent_bus": "86",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l98",
+      "kind": "line",
+      "parent_bus": "99",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l101",
+      "kind": "line",
+      "parent_bus": "101",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc02_tx",
+      "kind": "transformer",
+      "parent_bus": "300_open",
+      "phase": "B",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc02_tx",
+      "kind": "transformer",
+      "parent_bus": "300_open",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l78",
+      "kind": "line",
+      "parent_bus": "77",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l86",
+      "kind": "line",
+      "parent_bus": "86",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l98",
+      "kind": "line",
+      "parent_bus": "99",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l101",
+      "kind": "line",
+      "parent_bus": "101",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc02_tx",
+      "kind": "transformer",
+      "parent_bus": "300_open",
+      "phase": "C",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc02_tx",
+      "kind": "transformer",
+      "parent_bus": "300_open",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l75",
+      "kind": "line",
+      "parent_bus": "74",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l78",
+      "kind": "line",
+      "parent_bus": "77",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l86",
+      "kind": "line",
+      "parent_bus": "86",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l98",
+      "kind": "line",
+      "parent_bus": "99",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l100",
+      "kind": "line",
+      "parent_bus": "101",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l101",
+      "kind": "line",
+      "parent_bus": "101",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l79",
+      "kind": "line",
+      "parent_bus": "78",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l80",
+      "kind": "line",
+      "parent_bus": "78",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l87",
+      "kind": "line",
+      "parent_bus": "87",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l88",
+      "kind": "line",
+      "parent_bus": "87",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta11_tx",
+      "kind": "transformer",
+      "parent_bus": "87",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l99",
+      "kind": "line",
+      "parent_bus": "100",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta07_tx",
+      "kind": "transformer",
+      "parent_bus": "100",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l105",
+      "kind": "line",
+      "parent_bus": "105",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l79",
+      "kind": "line",
+      "parent_bus": "78",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l80",
+      "kind": "line",
+      "parent_bus": "78",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l88",
+      "kind": "line",
+      "parent_bus": "87",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta11_tx",
+      "kind": "transformer",
+      "parent_bus": "87",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l99",
+      "kind": "line",
+      "parent_bus": "100",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta07_tx",
+      "kind": "transformer",
+      "parent_bus": "100",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l104",
+      "kind": "line",
+      "parent_bus": "105",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l105",
+      "kind": "line",
+      "parent_bus": "105",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l79",
+      "kind": "line",
+      "parent_bus": "78",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l80",
+      "kind": "line",
+      "parent_bus": "78",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l88",
+      "kind": "line",
+      "parent_bus": "87",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta11_tx",
+      "kind": "transformer",
+      "parent_bus": "87",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l99",
+      "kind": "line",
+      "parent_bus": "100",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta07_tx",
+      "kind": "transformer",
+      "parent_bus": "100",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l102",
+      "kind": "line",
+      "parent_bus": "102",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l105",
+      "kind": "line",
+      "parent_bus": "105",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc11_tx",
+      "kind": "transformer",
+      "parent_bus": "79",
+      "phase": "A",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc11_tx",
+      "kind": "transformer",
+      "parent_bus": "79",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l81",
+      "kind": "line",
+      "parent_bus": "80",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta09_tx",
+      "kind": "transformer",
+      "parent_bus": "80",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l90",
+      "kind": "line",
+      "parent_bus": "89",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l107",
+      "kind": "line",
+      "parent_bus": "108",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l108",
+      "kind": "line",
+      "parent_bus": "108",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc12_tx",
+      "kind": "transformer",
+      "parent_bus": "108",
+      "phase": "A",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc12_tx",
+      "kind": "transformer",
+      "parent_bus": "108",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc11_tx",
+      "kind": "transformer",
+      "parent_bus": "79",
+      "phase": "B",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc11_tx",
+      "kind": "transformer",
+      "parent_bus": "79",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l81",
+      "kind": "line",
+      "parent_bus": "80",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta09_tx",
+      "kind": "transformer",
+      "parent_bus": "80",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l89",
+      "kind": "line",
+      "parent_bus": "89",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l90",
+      "kind": "line",
+      "parent_bus": "89",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l106",
+      "kind": "line",
+      "parent_bus": "106",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l108",
+      "kind": "line",
+      "parent_bus": "108",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc12_tx",
+      "kind": "transformer",
+      "parent_bus": "108",
+      "phase": "B",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc12_tx",
+      "kind": "transformer",
+      "parent_bus": "108",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc11_tx",
+      "kind": "transformer",
+      "parent_bus": "79",
+      "phase": "C",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc11_tx",
+      "kind": "transformer",
+      "parent_bus": "79",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l81",
+      "kind": "line",
+      "parent_bus": "80",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta09_tx",
+      "kind": "transformer",
+      "parent_bus": "80",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l90",
+      "kind": "line",
+      "parent_bus": "89",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l103",
+      "kind": "line",
+      "parent_bus": "103",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l108",
+      "kind": "line",
+      "parent_bus": "108",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc12_tx",
+      "kind": "transformer",
+      "parent_bus": "108",
+      "phase": "C",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc12_tx",
+      "kind": "transformer",
+      "parent_bus": "108",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l82",
+      "kind": "line",
+      "parent_bus": "81",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc10_tx",
+      "kind": "transformer",
+      "parent_bus": "81",
+      "phase": "A",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc10_tx",
+      "kind": "transformer",
+      "parent_bus": "81",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l92",
+      "kind": "line",
+      "parent_bus": "91",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta10_tx",
+      "kind": "transformer",
+      "parent_bus": "91",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l109",
+      "kind": "line",
+      "parent_bus": "109",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l82",
+      "kind": "line",
+      "parent_bus": "81",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc10_tx",
+      "kind": "transformer",
+      "parent_bus": "81",
+      "phase": "B",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc10_tx",
+      "kind": "transformer",
+      "parent_bus": "81",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l92",
+      "kind": "line",
+      "parent_bus": "91",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta10_tx",
+      "kind": "transformer",
+      "parent_bus": "91",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l82",
+      "kind": "line",
+      "parent_bus": "81",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l83",
+      "kind": "line",
+      "parent_bus": "81",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.idc_idc10_tx",
+      "kind": "transformer",
+      "parent_bus": "81",
+      "phase": "C",
+      "rated_current_a": 208.17918360202853,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_idc10_tx",
+      "kind": "transformer",
+      "parent_bus": "81",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l91",
+      "kind": "line",
+      "parent_bus": "91",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l92",
+      "kind": "line",
+      "parent_bus": "91",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta10_tx",
+      "kind": "transformer",
+      "parent_bus": "91",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l84",
+      "kind": "line",
+      "parent_bus": "82",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l93",
+      "kind": "line",
+      "parent_bus": "93",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l94",
+      "kind": "line",
+      "parent_bus": "93",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l110",
+      "kind": "line",
+      "parent_bus": "110",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l111",
+      "kind": "line",
+      "parent_bus": "110",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l84",
+      "kind": "line",
+      "parent_bus": "82",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l94",
+      "kind": "line",
+      "parent_bus": "93",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l84",
+      "kind": "line",
+      "parent_bus": "82",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l85",
+      "kind": "line",
+      "parent_bus": "84",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l94",
+      "kind": "line",
+      "parent_bus": "93",
+      "phase": "C",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta12_tx",
+      "kind": "transformer",
+      "parent_bus": "83",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta03_tx",
+      "kind": "transformer",
+      "parent_bus": "95",
+      "phase": "A",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l112",
+      "kind": "line",
+      "parent_bus": "112",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta12_tx",
+      "kind": "transformer",
+      "parent_bus": "83",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l95",
+      "kind": "line",
+      "parent_bus": "95",
+      "phase": "B",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta03_tx",
+      "kind": "transformer",
+      "parent_bus": "95",
+      "phase": "B",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta12_tx",
+      "kind": "transformer",
+      "parent_bus": "83",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "transformer.mess_sta03_tx",
+      "kind": "transformer",
+      "parent_bus": "95",
+      "phase": "C",
+      "rated_current_a": 104.08959180101427,
+      "terminal_or_winding_side": 1
+    },
+    {
+      "branch": "line.l113",
+      "kind": "line",
+      "parent_bus": "113",
+      "phase": "A",
+      "rated_current_a": 400.0,
+      "terminal_or_winding_side": 1
+    }
+  ],
+  "status": "ACTIVE_PROSPECTIVE_PRODUCTION_PLANNING_AUTHORITY"
+}
