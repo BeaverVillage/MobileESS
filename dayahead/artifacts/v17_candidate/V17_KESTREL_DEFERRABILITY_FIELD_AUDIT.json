@@ -1,0 +1,287 @@
+{
+  "June_scientific_input_reads": 0,
+  "May_scientific_input_reads": 0,
+  "artifact_id": "V17_KESTREL_DEFERRABILITY_FIELD_AUDIT_V1",
+  "authority_hierarchy": {
+    "claim_boundary": "TRAINING_LABEL_PROXY_NOT_MEASURED_SLA",
+    "explicit_user_SLA_deadline_metadata_semantically_valid": false,
+    "qos_present_but_no_documented_service_tolerance_mapping": true,
+    "selected_authority": "REVEALED_LATENCY_DEFERRABILITY_PROXY"
+  },
+  "field_evidence": [
+    {
+      "D_minus_1_inference_permitted": true,
+      "candidate": "submit/request time",
+      "classification": "CAUSAL_AT_SUBMISSION",
+      "evidence": "Slurm Submit timestamp.",
+      "present_fields": [
+        "submit_time"
+      ],
+      "source_fields": [
+        "submit_time"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": false,
+      "candidate": "eligible time",
+      "classification": "NOT_AVAILABLE",
+      "evidence": "No Eligible field in the 50-column export.",
+      "present_fields": [],
+      "source_fields": [
+        "eligible_time"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": false,
+      "candidate": "queue wait",
+      "classification": "HISTORICAL_LABEL_ONLY",
+      "evidence": "Derived as start_time minus submit_time.",
+      "present_fields": [
+        "queue_wait"
+      ],
+      "source_fields": [
+        "queue_wait"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": false,
+      "candidate": "start time",
+      "classification": "EX_POST_ONLY",
+      "evidence": "Realized scheduler start.",
+      "present_fields": [
+        "start_time"
+      ],
+      "source_fields": [
+        "start_time"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": false,
+      "candidate": "end time",
+      "classification": "EX_POST_ONLY",
+      "evidence": "Realized terminal timestamp.",
+      "present_fields": [
+        "end_time"
+      ],
+      "source_fields": [
+        "end_time"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": false,
+      "candidate": "runtime",
+      "classification": "EX_POST_ONLY",
+      "evidence": "Realized elapsed wallclock.",
+      "present_fields": [
+        "wallclock_used"
+      ],
+      "source_fields": [
+        "wallclock_used"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": false,
+      "candidate": "terminal state",
+      "classification": "HISTORICAL_LABEL_ONLY",
+      "evidence": "Observed terminal/operational state; future terminal state is forbidden.",
+      "present_fields": [
+        "state",
+        "state_simple"
+      ],
+      "source_fields": [
+        "state",
+        "state_simple"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": true,
+      "candidate": "partition",
+      "classification": "CAUSAL_AT_SUBMISSION",
+      "evidence": "Requested Slurm partition.",
+      "present_fields": [
+        "partition"
+      ],
+      "source_fields": [
+        "partition"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": true,
+      "candidate": "QOS",
+      "classification": "CAUSAL_AT_SUBMISSION",
+      "evidence": "Observed QOS values {'high': 2263, 'normal': 199564, 'standby': 128041}; datacard supplies no QOS-to-SLA/deadline guarantee.",
+      "present_fields": [
+        "qos"
+      ],
+      "source_fields": [
+        "qos"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": false,
+      "candidate": "priority",
+      "classification": "NOT_AVAILABLE",
+      "evidence": "No Priority field.",
+      "present_fields": [],
+      "source_fields": [
+        "priority"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": false,
+      "candidate": "reservation",
+      "classification": "NOT_AVAILABLE",
+      "evidence": "No Reservation field.",
+      "present_fields": [],
+      "source_fields": [
+        "reservation",
+        "reservation_name"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": false,
+      "candidate": "deadline",
+      "classification": "NOT_AVAILABLE",
+      "evidence": "No Deadline field.",
+      "present_fields": [],
+      "source_fields": [
+        "deadline"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": true,
+      "candidate": "requested time limit",
+      "classification": "CAUSAL_AT_SUBMISSION",
+      "evidence": "Slurm Timelimit is a requested execution-duration cap, not a service-start deadline.",
+      "present_fields": [
+        "wallclock_req"
+      ],
+      "source_fields": [
+        "wallclock_req"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": false,
+      "candidate": "preemption indicator",
+      "classification": "NOT_AVAILABLE",
+      "evidence": "No dedicated preemption field.",
+      "present_fields": [],
+      "source_fields": [
+        "preempted",
+        "preempt_time"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": false,
+      "candidate": "requeue indicator",
+      "classification": "NOT_AVAILABLE",
+      "evidence": "No dedicated requeue field.",
+      "present_fields": [],
+      "source_fields": [
+        "requeue",
+        "requeued"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": true,
+      "candidate": "requested GPUs/nodes",
+      "classification": "CAUSAL_AT_SUBMISSION",
+      "evidence": "Requested resources are known at submission.",
+      "present_fields": [
+        "gpus_requested",
+        "nodes_req"
+      ],
+      "source_fields": [
+        "gpus_requested",
+        "nodes_req"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": false,
+      "candidate": "realized node occupancy",
+      "classification": "EX_POST_ONLY",
+      "evidence": "Realized allocation/occupancy; label construction only.",
+      "present_fields": [
+        "gpu_nodes_occupied",
+        "nodes_used"
+      ],
+      "source_fields": [
+        "gpu_nodes_occupied",
+        "nodes_used"
+      ]
+    },
+    {
+      "D_minus_1_inference_permitted": false,
+      "candidate": "sharing/full-node status",
+      "classification": "EX_POST_ONLY",
+      "evidence": "Observed co-residency; used only to establish historical power-model compatibility.",
+      "present_fields": [
+        "shared_job_count",
+        "nodes_shared",
+        "jobs_shared"
+      ],
+      "source_fields": [
+        "shared_job_count",
+        "nodes_shared",
+        "jobs_shared"
+      ]
+    }
+  ],
+  "source": {
+    "April_member_reads": 0,
+    "June_member_reads": 0,
+    "May_member_reads": 0,
+    "datacard_declared_variable_count": 50,
+    "datacard_documents_queue_wait_as_start_minus_submit": false,
+    "datacard_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR HPC Kestrel Jobs Data\\datacard.md",
+    "datacard_sha256": "0139b75b80cd3029e0af54e22fc0dbad3080e92a8a7a602f1bd62cd7a36f62e9",
+    "kestrel_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+    "kestrel_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+    "members_opened": [
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+        "month": 202408,
+        "rows": 428165
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+        "month": 202409,
+        "rows": 405655
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+        "month": 202410,
+        "rows": 273571
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+        "month": 202411,
+        "rows": 248055
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+        "month": 202412,
+        "rows": 290267
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+        "month": 202501,
+        "rows": 400896
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+        "month": 202502,
+        "rows": 453728
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+        "month": 202503,
+        "rows": 406258
+      }
+    ],
+    "schema_field_count": 48
+  },
+  "source_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+  "starting_checkpoint": "4ae0aa98bb995001d657f8a4de2f9cea868ae92d",
+  "status": "PASS_REVEALED_LATENCY_PROXY_SELECTED"
+}

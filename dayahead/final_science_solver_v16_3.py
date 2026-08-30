@@ -28,6 +28,14 @@ from .run_v16_3_nonzero_validity import _aidc_limits, _planning_flow_base_and_se
 from .v16_3_authority import add_phase_current_epigraph
 
 
+def _cohort_node_class(cohort: str) -> int:
+    """Parse both historical Nxx_Ryy and V17 Nxx_Cy cohort identifiers."""
+
+    if not cohort.startswith("N") or len(cohort) < 3:
+        raise ValueError(f"UNRECOGNIZED_COHORT_NODE_CLASS:{cohort}")
+    return int(cohort[1:3])
+
+
 def solve_shadow(
     *,
     inputs: B3Inputs,
@@ -95,6 +103,27 @@ def solve_shadow(
                 name=f"service_balance[{cohort},{slot}]",
             )
         model.addConstr(backlog[(cohort, 96)] == 0.0, name=f"service_terminal_parity[{cohort}]")
+    deadline_slots = {
+        str(key): int(value)
+        for key, value in inputs.evidence.get("deadline_slots_by_cohort", {}).items()
+    }
+    if deadline_slots:
+        if set(deadline_slots) != set(cohorts):
+            raise RuntimeError("V17_DEADLINE_COHORT_AXIS_MISMATCH")
+        for cohort in cohorts:
+            delay = deadline_slots[cohort]
+            if delay < 0:
+                raise RuntimeError("V17_NEGATIVE_DEADLINE_SLOT")
+            for arrival_slot in range(96):
+                due_slot = min(95, arrival_slot + delay)
+                model.addConstr(
+                    backlog[(cohort, due_slot + 1)]
+                    <= sum(
+                        float(inputs.arrivals[cohort][slot])
+                        for slot in range(arrival_slot + 1, due_slot + 1)
+                    ),
+                    name=f"service_deadline[{cohort},{arrival_slot}]",
+                )
     for slot in range(96):
         for rack in racks:
             r = rack_index[rack]
@@ -110,7 +139,7 @@ def solve_shadow(
         for index in range(1, 13):
             aidc = f"AIDC{index:02d}"
             flexible = gp.quicksum(
-                KAPPA_KW_PER_ACTIVE_H100_NODE[int(cohort[1:3])] / DT_HOURS * x[(cohort, rack, slot)]
+                KAPPA_KW_PER_ACTIVE_H100_NODE[_cohort_node_class(cohort)] / DT_HOURS * x[(cohort, rack, slot)]
                 for cohort in cohorts for rack in aidc_racks[aidc]
             )
             aidc_load[(aidc, slot)] = PUE_PLAN * (inputs.p_res_aidc_kw[slot][index - 1] + flexible)

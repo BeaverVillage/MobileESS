@@ -29,6 +29,11 @@ MAX_ITERATIONS=200
 TIME_LIMIT_SECONDS=1800.0
 
 
+def _cohort_node_class(cohort:str)->int:
+    if not cohort.startswith("N") or len(cohort)<3:raise ValueError(f"UNRECOGNIZED_COHORT_NODE_CLASS:{cohort}")
+    return int(cohort[1:3])
+
+
 def _sha(value)->str:
     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(",",":"),default=float).encode()).hexdigest()
 
@@ -104,13 +109,22 @@ def build_resource_master(*,inputs:B3Inputs,context,voltage,rho:float=.1)->Resou
         model.addConstr(backlog[(c,0)]==0,name=f"service_initial[{c}]")
         for t in range(96):model.addConstr(backlog[(c,t+1)]==backlog[(c,t)]+inputs.arrivals[c][t]-gp.quicksum(x[(c,r,t)] for r in racks),name=f"service_balance[{c},{t}]")
         model.addConstr(backlog[(c,96)]==0,name=f"service_terminal_parity[{c}]")
+    deadline_slots={str(k):int(v) for k,v in inputs.evidence.get("deadline_slots_by_cohort",{}).items()}
+    if deadline_slots:
+        if set(deadline_slots)!=set(cohorts):raise RuntimeError("V17_DEADLINE_COHORT_AXIS_MISMATCH")
+        for c in cohorts:
+            delay=deadline_slots[c]
+            if delay<0:raise RuntimeError("V17_NEGATIVE_DEADLINE_SLOT")
+            for arrival_slot in range(96):
+                due=min(95,arrival_slot+delay)
+                model.addConstr(backlog[(c,due+1)]<=sum(float(inputs.arrivals[c][t]) for t in range(arrival_slot+1,due+1)),name=f"service_deadline[{c},{arrival_slot}]")
     for t in range(96):
         for rack in racks:
             r=rack_index[rack];model.addConstr(inputs.g_res_rack[t][r]+GPU_PER_NODE/DT_HOURS*gp.quicksum(x[(c,rack,t)] for c in cohorts)<=inputs.gpu_capacity[r],name=f"rack_gpu_hard[{rack},{t}]")
     aidc_load={}
     for t in range(96):
         for index in range(1,13):
-            aidc=f"AIDC{index:02d}";flex=gp.quicksum(KAPPA_KW_PER_ACTIVE_H100_NODE[int(c[1:3])]/DT_HOURS*x[(c,r,t)] for c in cohorts for r in aidc_racks[aidc])
+            aidc=f"AIDC{index:02d}";flex=gp.quicksum(KAPPA_KW_PER_ACTIVE_H100_NODE[_cohort_node_class(c)]/DT_HOURS*x[(c,r,t)] for c in cohorts for r in aidc_racks[aidc])
             aidc_load[(aidc,t)]=PUE_PLAN*(inputs.p_res_aidc_kw[t][index-1]+flex)
     mess_p={};mess_q={};mess_e={};service_to_mess={str(v["service_site"]):k for k,v in inputs.mess_records.items()}
     for mid,record in sorted(inputs.mess_records.items()):
