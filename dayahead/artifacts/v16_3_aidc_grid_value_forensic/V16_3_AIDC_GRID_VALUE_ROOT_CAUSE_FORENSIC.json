@@ -1,0 +1,1884 @@
+{
+  "artifact_id": "V16_3_AIDC_GRID_VALUE_ROOT_CAUSE_FORENSIC",
+  "checkpoint": {
+    "authority_commit": "2246063175977f152f3ac8df8f65a861cc7bbd22",
+    "branch": "codex/dayahead-aidc-joint-v1",
+    "decomposition_completion_commit": "1c46d6510be6be6e00f3305821cbe3bbbd79bdd9",
+    "head": "1c46d6510be6be6e00f3305821cbe3bbbd79bdd9",
+    "working_tree_clean_before": true
+  },
+  "classification_basis": {
+    "all_AIDCs_downstream_line_l10": false,
+    "implementation_identity_max_abs_error": 5.684341886080802e-14,
+    "maximum_best_possible_AIDC_only_relief": 7.626881753930448e-07,
+    "median_AIDC_projection_pu": 2.4168738038100494e-08,
+    "median_MESS_projection_pu": 0.028805091323717114,
+    "median_line_l10_sensitivity_range_pu_per_kw": 0.00021473331823643194,
+    "median_net_peak_Delta_P_F_to_total_ratio": 0.0008792089559357775
+  },
+  "evidence_artifact_sha256": {
+    "best_possible_relief": "45e2a19b6af2a3a52a409a1b3434a289bdb2439221613e18dcf637d1f87aebb1",
+    "coherence_design": "dd331215a4cca313aa55a7a3f90af2496b3dc08bd385ea40f0c0db04369a0d15",
+    "electrical_diversity_design": "d224e7394eedf951c50dd665de55ed3b4ae36d7761fcf2f5db4fd2f338b7623e",
+    "flexible_power": "fa8f0c862cde0230edae2e97702bc441a96d942de95038503c5ab5568700a3eb",
+    "sensitivity": "f5e390eb2328acc86901f7ee65f4ca406e0b8c22ba940b2bca11b9e2bfaba8a5",
+    "topology": "3230a0f2a434679bb1852340ddee31be98544681c49b3e73179e402ee8dffbde"
+  },
+  "firewall": {
+    "AIDC_site_changes": 0,
+    "H_changes": 0,
+    "J_I_changes": 0,
+    "May_June_result_dependent_tuning": 0,
+    "beta_changes": 0,
+    "historical_result_changes": 0,
+    "retraining_calls": 0,
+    "rho_changes": 0,
+    "scientific_authority_changes": 0
+  },
+  "historical_artifact_sha256_before": {
+    "V16_3_CL_MC_BD_RESULTS.json": "0f3b9790e7585e4a98a949097cf0b5541ab5504425845e92d87cde98c703a1c9",
+    "V16_3_DECOMPOSITION_COMPARISON.json": "ad0c659c33dfb885079fc65c93dba39f693e723808b1f92876506a5cbfadd9f7",
+    "V16_3_FINAL_DUAL_AC_VALIDATION_RESULTS.json": "0287cb24c4c6d6a11c5a72b5b2d6ab57ba2b4385abb6b4dcf3f0004d1e62d020",
+    "V16_3_FINAL_SCIENCE_RESULT_MANIFEST.json": "abe8dae43ed31c96b20a530421fa88a76d0a1e3a03dd7e4a9a7a9d4b1e980798",
+    "V16_3_JUNE_REPLICATION_B0_B1_B2_B3_RESULTS.json": "e63de078a14992ef765ccb8e1531830f3ba93cde86694d0dc9b833af7884b78a",
+    "V16_3_MAY_B0_B1_B2_B3_RESULTS.json": "7456e25b147658aa151f0c232365136d749c27ce2670d53dcff2694fc12ebc18",
+    "V16_3_MONOLITHIC_RESULTS.json": "33277a91dd4e4d47a704d7bae908f207ef04f6863d5efb992586f212c0a1f044",
+    "V16_3_STANDARD_BD_RESULTS.json": "a752e0b006f693d5d9f6504be4b5d544a95f6bdfe434115823b1910fc211b132"
+  },
+  "historical_artifacts_modified": 0,
+  "next_decision": "CURRENT_V16_3_AIDC_RESULT_IS_PHYSICALLY_EXPLAINED",
+  "primary_classification": "AIDC_CAUSE_B_FLEXIBLE_POWER_SCALE_LIMITED",
+  "root_cause_tests": {
+    "best_possible_relief_near_zero": true,
+    "critical_cut_topology_cancellation": false,
+    "flexible_power_scale_limited": true,
+    "implementation_defect": false,
+    "line_l10_cut_has_one_upstream_and_eleven_downstream_AIDCs": true,
+    "objective_misalignment_audit": {
+      "aggregate": {
+        "interpretation": "Some local top-10 and feeder-transformer reductions exist, but their magnitude is much smaller than MESS relief and does not move the line.l10-dominated maximum materially; objective hiding is secondary, not the primary cause.",
+        "largest_local_top10_reduction": -3.7747953611555474e-05,
+        "maximum_absolute_objective_change": 7.626881756150894e-07,
+        "median_AIDC_PCC_transformer_change": 4.3620264505994655e-07,
+        "median_feeder_transformer_change": -3.8704419685564595e-05,
+        "median_objective_change_B1_minus_B0": 1.2002603577698778e-08
+      },
+      "per_day": [
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.2122780320231914,
+            "B1_max": 0.2122780318530934,
+            "change": -1.7009799124778624e-10
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.9332538641659244,
+            "B1_max": 0.933221061374601,
+            "change": -3.280279132333863e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.8234547638136664,
+            "B1": 0.8234547594176733,
+            "change_B1_minus_B0": -4.39599312507255e-09
+          },
+          "operating_day": "2025-05-02",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.8234547638136664,
+              "B1_max": 0.8234547594176733,
+              "change": -4.39599312507255e-09,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.7949225008847312,
+              "B1_max": 0.7948945603265508,
+              "change": -2.794055818033936e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.7931450483258521,
+              "B1_max": 0.7931450765871602,
+              "change": 2.8261308071542146e-08,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.7885050483712348,
+              "B1_max": 0.7885050763531191,
+              "change": 2.7981884254124623e-08,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.7788844479923216,
+              "B1_max": 0.7788844561047692,
+              "change": 8.112447602570683e-09,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.7727443766794047,
+              "B1_max": 0.7727444102551191,
+              "change": 3.357571443096674e-08,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.7276653838777014,
+              "B1_max": 0.7276653722330241,
+              "change": -1.1644677333499942e-08,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.6905012574555909,
+              "B1_max": 0.690473321577692,
+              "change": -2.7935877898843664e-05,
+              "line_phase": "line.sw1::C"
+            },
+            {
+              "B0_max": 0.682946986890225,
+              "B1_max": 0.6829469757117542,
+              "change": -1.117847081566481e-08,
+              "line_phase": "line.sw2::C"
+            },
+            {
+              "B0_max": 0.6806801228931664,
+              "B1_max": 0.6806801182513267,
+              "change": -4.641839690400218e-09,
+              "line_phase": "line.l52::A"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0489127190753127,
+            "B0_Vmin": 0.9734845518106111,
+            "B1_Vmax": 1.0489126188160869,
+            "B1_Vmin": 0.9734845505360775
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.20987468059964626,
+            "B1_max": 0.20987511623796748,
+            "change": 4.3563832122228696e-07
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.8114057096732984,
+            "B1_max": 0.8113662628304833,
+            "change": -3.944684281509403e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.71995142868472,
+            "B1": 0.7199514266713267,
+            "change_B1_minus_B0": -2.013393229916005e-09
+          },
+          "operating_day": "2025-05-03",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.71995142868472,
+              "B1_max": 0.7199514266713267,
+              "change": -2.013393229916005e-09,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.6996154528410871,
+              "B1_max": 0.6995814407883817,
+              "change": -3.401205270536778e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.6966050386860215,
+              "B1_max": 0.6966050369328963,
+              "change": -1.7531252005653641e-09,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.6961876706976478,
+              "B1_max": 0.696187668812174,
+              "change": -1.8854737771079044e-09,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.6924312763358929,
+              "B1_max": 0.6924312744653423,
+              "change": -1.870550603300103e-09,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.684306387974167,
+              "B1_max": 0.6843063861418557,
+              "change": -1.8323113026852411e-09,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.6366750216009087,
+              "B1_max": 0.6366750298165887,
+              "change": 8.215680025180916e-09,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.6105837048144727,
+              "B1_max": 0.6105837033422721,
+              "change": -1.4722005836631524e-09,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.6079694223798476,
+              "B1_max": 0.6079356207073383,
+              "change": -3.3801672509325975e-05,
+              "line_phase": "line.sw1::C"
+            },
+            {
+              "B0_max": 0.6059828556784826,
+              "B1_max": 0.6059828541834215,
+              "change": -1.495061185963209e-09,
+              "line_phase": "line.l116::A"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0485339920603731,
+            "B0_Vmin": 0.975863208520595,
+            "B1_Vmax": 1.0485339928831874,
+            "B1_Vmin": 0.9758632096865547
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.20892808131812063,
+            "B1_max": 0.20893058063591022,
+            "change": 2.4993177895893393e-06
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.8107845751618674,
+            "B1_max": 0.8107456314476731,
+            "change": -3.8943714194328294e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.7191386460977177,
+            "B1": 0.7191386581003213,
+            "change_B1_minus_B0": 1.2002603577698778e-08
+          },
+          "operating_day": "2025-05-04",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.7191386460977177,
+              "B1_max": 0.7191386581003213,
+              "change": 1.2002603577698778e-08,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.6990798933087793,
+              "B1_max": 0.6990463149750474,
+              "change": -3.357833373185404e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.6965640052893821,
+              "B1_max": 0.6965640190802527,
+              "change": 1.37908705566403e-08,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.6957199304768902,
+              "B1_max": 0.6957199417567592,
+              "change": 1.127986903881606e-08,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.6919869721247075,
+              "B1_max": 0.6919869832948657,
+              "change": 1.1170158242812533e-08,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.6839076035877959,
+              "B1_max": 0.6839076144932223,
+              "change": 1.0905426450769085e-08,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.6356683613834678,
+              "B1_max": 0.635668409973025,
+              "change": 4.8589557155587215e-08,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.6113083786558487,
+              "B1_max": 0.6113083908018062,
+              "change": 1.214595746201752e-08,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.6070243309679995,
+              "B1_max": 0.6069909854022554,
+              "change": -3.334556574408065e-05,
+              "line_phase": "line.sw1::C"
+            },
+            {
+              "B0_max": 0.606739668041789,
+              "B1_max": 0.6067396800540189,
+              "change": 1.2012229877456093e-08,
+              "line_phase": "line.l116::A"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0487557885101233,
+            "B0_Vmin": 0.9757312577503026,
+            "B1_Vmax": 1.0487541179513553,
+            "B1_Vmin": 0.9757312584832472
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.20806490477667142,
+            "B1_max": 0.20806762598087525,
+            "change": 2.7212042038315953e-06
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.885937743132688,
+            "B1_max": 0.8858963528365055,
+            "change": -4.1390296182552966e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.7777358237740648,
+            "B1": 0.7777358324154087,
+            "change_B1_minus_B0": 8.641343862691997e-09
+          },
+          "operating_day": "2025-05-05",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.7777358237740648,
+              "B1_max": 0.7777358324154087,
+              "change": 8.641343862691997e-09,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.7546198033357369,
+              "B1_max": 0.7545845481342751,
+              "change": -3.525520146174799e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.7524028288606501,
+              "B1_max": 0.7524028369769712,
+              "change": 8.116321059681297e-09,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.7483404140159992,
+              "B1_max": 0.7483404220520807,
+              "change": 8.036081577955656e-09,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.7481317616516012,
+              "B1_max": 0.7481317714954282,
+              "change": 9.843826975775016e-09,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.7395403935351231,
+              "B1_max": 0.7395404013774358,
+              "change": 7.84231268813329e-09,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.686054394786694,
+              "B1_max": 0.6860544200776317,
+              "change": 2.5290937677446834e-08,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.6609898685103528,
+              "B1_max": 0.6609898774571147,
+              "change": 8.946761886896581e-09,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.6563965552148461,
+              "B1_max": 0.6563965640582528,
+              "change": 8.843406673619825e-09,
+              "line_phase": "line.l116::A"
+            },
+            {
+              "B0_max": 0.6541874838941696,
+              "B1_max": 0.6541523589944203,
+              "change": -3.512489974932809e-05,
+              "line_phase": "line.sw1::C"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0489801225233064,
+            "B0_Vmin": 0.9740459811288283,
+            "B1_Vmax": 1.048973315627013,
+            "B1_Vmin": 0.9740459817178535
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.21005264696152065,
+            "B1_max": 0.21005265190501143,
+            "change": 4.9434907833934005e-09
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.895475184374572,
+            "B1_max": 0.8954312824462,
+            "change": -4.390192837200324e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.7860856337788221,
+            "B1": 0.786085642749821,
+            "change_B1_minus_B0": 8.970998832680266e-09
+          },
+          "operating_day": "2025-05-06",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.7860856337788221,
+              "B1_max": 0.786085642749821,
+              "change": 8.970998832680266e-09,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.7627435581696959,
+              "B1_max": 0.7627061636850394,
+              "change": -3.739448465645001e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.7605175644608475,
+              "B1_max": 0.7605175728874253,
+              "change": 8.426577768894106e-09,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.7564196930313504,
+              "B1_max": 0.7564197013745223,
+              "change": 8.343171931102233e-09,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.7563074732195009,
+              "B1_max": 0.7563074835463746,
+              "change": 1.032687368951457e-08,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.7475390532776827,
+              "B1_max": 0.7475390614195326,
+              "change": 8.141849971998738e-09,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.6932628008008236,
+              "B1_max": 0.6932628285904222,
+              "change": 2.7789598622263156e-08,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.6683668594431411,
+              "B1_max": 0.6683668687974866,
+              "change": 9.354345520407037e-09,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.6637841032866705,
+              "B1_max": 0.6637841125293336,
+              "change": 9.242663079334079e-09,
+              "line_phase": "line.l116::A"
+            },
+            {
+              "B0_max": 0.6610746678065132,
+              "B1_max": 0.6610374089436872,
+              "change": -3.7258862826017314e-05,
+              "line_phase": "line.sw1::C"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0485770514765287,
+            "B0_Vmin": 0.9744591775250823,
+            "B1_Vmax": 1.0485770518148396,
+            "B1_Vmin": 0.9744591770703893
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.21171510164974455,
+            "B1_max": 0.21171510447175854,
+            "change": 2.822013983605487e-09
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.9088399042127977,
+            "B1_max": 0.9087955873282503,
+            "change": -4.4316884547423996e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.7978036190257982,
+            "B1": 0.7978036445865999,
+            "change_B1_minus_B0": 2.5560801697466218e-08
+          },
+          "operating_day": "2025-05-07",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.7978036190257982,
+              "B1_max": 0.7978036445865999,
+              "change": 2.5560801697466218e-08,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.7741272960041083,
+              "B1_max": 0.7740895480504968,
+              "change": -3.7747953611555474e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.7719177433777121,
+              "B1_max": 0.7719177673767893,
+              "change": 2.399907716998939e-08,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.7678193355344549,
+              "B1_max": 0.767819364559633,
+              "change": 2.9025178038821764e-08,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.7677724923789745,
+              "B1_max": 0.7677725161466598,
+              "change": 2.3767685264353133e-08,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.7587831239023397,
+              "B1_max": 0.7587831471078778,
+              "change": 2.32055380466889e-08,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.7038521560211273,
+              "B1_max": 0.703852216108366,
+              "change": 6.008723874018074e-08,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.6788129520627187,
+              "B1_max": 0.6788129782152822,
+              "change": 2.6152563448178512e-08,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.6742504912780959,
+              "B1_max": 0.6742505171688765,
+              "change": 2.5890780630533072e-08,
+              "line_phase": "line.l116::A"
+            },
+            {
+              "B0_max": 0.6711181365498871,
+              "B1_max": 0.6710805432254058,
+              "change": -3.759332448127761e-05,
+              "line_phase": "line.sw1::C"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0491747816043098,
+            "B0_Vmin": 0.9753189792953115,
+            "B1_Vmax": 1.0491713452486873,
+            "B1_Vmin": 0.9753181611953208
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.21277992663859585,
+            "B1_max": 0.2127816382252448,
+            "change": 1.7115866489392229e-06
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.9627090705093309,
+            "B1_max": 0.9626658895672744,
+            "change": -4.318094205646439e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.839936304815321,
+            "B1": 0.839936322561597,
+            "change_B1_minus_B0": 1.7746276004260153e-08
+          },
+          "operating_day": "2025-05-08",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.839936304815321,
+              "B1_max": 0.839936322561597,
+              "change": 1.7746276004260153e-08,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.8150718853213065,
+              "B1_max": 0.8150353265122255,
+              "change": -3.655880908093323e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.8132690900395241,
+              "B1_max": 0.8132691067067914,
+              "change": 1.6667267344061543e-08,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.8115170868208698,
+              "B1_max": 0.8115171074966525,
+              "change": 2.0675782752554994e-08,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.8090207961745386,
+              "B1_max": 0.8090208126814732,
+              "change": 1.6506934596982603e-08,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.7997673559224034,
+              "B1_max": 0.799767372037924,
+              "change": 1.6115520584669696e-08,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.739404229415282,
+              "B1_max": 0.7394042733443555,
+              "change": 4.392907348993447e-08,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.721814878256137,
+              "B1_max": 0.7218148968966064,
+              "change": 1.8640469390263092e-08,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.7173868897793614,
+              "B1_max": 0.7173869082236974,
+              "change": 1.8444336058465183e-08,
+              "line_phase": "line.l116::A"
+            },
+            {
+              "B0_max": 0.7050855248350252,
+              "B1_max": 0.705049097756172,
+              "change": -3.6427078853207284e-05,
+              "line_phase": "line.sw1::C"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.04896808260303,
+            "B0_Vmin": 0.9737823153855647,
+            "B1_Vmax": 1.04896677661649,
+            "B1_Vmin": 0.9737823115347931
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.2124372823780977,
+            "B1_max": 0.21243771858074276,
+            "change": 4.3620264505994655e-07
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.9497664776592526,
+            "B1_max": 0.949731929828781,
+            "change": -3.454783047163179e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.8363926360448511,
+            "B1": 0.8363926536245939,
+            "change_B1_minus_B0": 1.7579742772610985e-08
+          },
+          "operating_day": "2025-05-09",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.8363926360448511,
+              "B1_max": 0.8363926536245939,
+              "change": 1.7579742772610985e-08,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.8041141168026207,
+              "B1_max": 0.8040848671008182,
+              "change": -2.924970180251396e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.8035180261267734,
+              "B1_max": 0.8035180425703121,
+              "change": 1.644353875285276e-08,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.7986463667113662,
+              "B1_max": 0.7986463609028965,
+              "change": -5.808469705215202e-09,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.7885620527546475,
+              "B1_max": 0.7885620470790522,
+              "change": -5.6755953270481996e-09,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.7844034620045722,
+              "B1_max": 0.784403454741735,
+              "change": -7.262837220523011e-09,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.738552613950164,
+              "B1_max": 0.7385526103616026,
+              "change": -3.5885614479980177e-09,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.6978632401475653,
+              "B1_max": 0.6978346595173128,
+              "change": -2.8580630252461603e-05,
+              "line_phase": "line.sw1::C"
+            },
+            {
+              "B0_max": 0.6942345440842597,
+              "B1_max": 0.6942345405267133,
+              "change": -3.5575463686043918e-09,
+              "line_phase": "line.sw2::C"
+            },
+            {
+              "B0_max": 0.6940035227106818,
+              "B1_max": 0.6940035401267154,
+              "change": 1.7416033615269555e-08,
+              "line_phase": "line.l52::A"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.048758754829538,
+            "B0_Vmin": 0.9734053098207568,
+            "B1_Vmax": 1.0487586369281856,
+            "B1_Vmin": 0.9734053058213683
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.21032578732095852,
+            "B1_max": 0.21032623716776455,
+            "change": 4.49846806027665e-07
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.8521635999419096,
+            "B1_max": 0.8521244118529595,
+            "change": -3.918808895009285e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.7509894960127383,
+            "B1": 0.7509894938884086,
+            "change_B1_minus_B0": -2.1243297121387172e-09
+          },
+          "operating_day": "2025-05-10",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.7509894960127383,
+              "B1_max": 0.7509894938884086,
+              "change": -2.1243297121387172e-09,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.7302777503930273,
+              "B1_max": 0.7302441674018406,
+              "change": -3.358299118672026e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.729562882748473,
+              "B1_max": 0.7295628809673979,
+              "change": -1.781075176232605e-09,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.7271469364500709,
+              "B1_max": 0.7271469344607092,
+              "change": -1.9893616753918764e-09,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.723324889998774,
+              "B1_max": 0.723324888024964,
+              "change": -1.9738100043298346e-09,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.7150263730358853,
+              "B1_max": 0.7150263711022891,
+              "change": -1.9335962830879794e-09,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.661998340865462,
+              "B1_max": 0.6619983501493074,
+              "change": 9.283845359142617e-09,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.6430576832873982,
+              "B1_max": 0.6430576816893101,
+              "change": -1.5980881062915842e-09,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.6385749510060862,
+              "B1_max": 0.638574949383642,
+              "change": -1.6224441790058108e-09,
+              "line_phase": "line.l116::A"
+            },
+            {
+              "B0_max": 0.6323081777959988,
+              "B1_max": 0.6322747945764091,
+              "change": -3.3383219589677715e-05,
+              "line_phase": "line.sw1::C"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0489413317095495,
+            "B0_Vmin": 0.9763990703155802,
+            "B1_Vmax": 1.0489381242808613,
+            "B1_Vmin": 0.9763990677880862
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.20799813202773298,
+            "B1_max": 0.20799813188370664,
+            "change": -1.4402634640475753e-10
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.8349996699991087,
+            "B1_max": 0.8349609009892743,
+            "change": -3.876900983434961e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.7359366094712977,
+            "B1": 0.7359365972054416,
+            "change_B1_minus_B0": -1.2265856108584217e-08
+          },
+          "operating_day": "2025-05-11",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.7359366094712977,
+              "B1_max": 0.7359365972054416,
+              "change": -1.2265856108584217e-08,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.7155687956226653,
+              "B1_max": 0.715535571797781,
+              "change": -3.3223824884243136e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.714474044448288,
+              "B1_max": 0.7144740310644997,
+              "change": -1.3383788299847765e-08,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.7124216045346952,
+              "B1_max": 0.7124215930187384,
+              "change": -1.1515956743757272e-08,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.7086463482372641,
+              "B1_max": 0.7086463368271809,
+              "change": -1.1410083211593758e-08,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.7004603879090486,
+              "B1_max": 0.7004603767588652,
+              "change": -1.1150183443220385e-08,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.649314071956365,
+              "B1_max": 0.6493140500200415,
+              "change": -2.1936323535420854e-08,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.6292133149642254,
+              "B1_max": 0.6292133031474693,
+              "change": -1.1816756129157113e-08,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.6246614811896574,
+              "B1_max": 0.6246614694414683,
+              "change": -1.1748189088223171e-08,
+              "line_phase": "line.l116::A"
+            },
+            {
+              "B0_max": 0.6201608716816669,
+              "B1_max": 0.6201278335936283,
+              "change": -3.3038088038561675e-05,
+              "line_phase": "line.sw1::C"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0491492794075863,
+            "B0_Vmin": 0.9752537692901946,
+            "B1_Vmax": 1.0491488357126764,
+            "B1_Vmin": 0.9752176844455
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.2085890899817044,
+            "B1_max": 0.20859184343847806,
+            "change": 2.753456773668672e-06
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.9184366150691993,
+            "B1_max": 0.9183954997104457,
+            "change": -4.111535875361838e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.8060908063801288,
+            "B1": 0.8060908297199801,
+            "change_B1_minus_B0": 2.333985138491812e-08
+          },
+          "operating_day": "2025-05-12",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.8060908063801288,
+              "B1_max": 0.8060908297199801,
+              "change": 2.333985138491812e-08,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.7823015366963655,
+              "B1_max": 0.7822665156982207,
+              "change": -3.5020998144785764e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.7802871856812763,
+              "B1_max": 0.7802872075979008,
+              "change": 2.1916624515228023e-08,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.7779138445068549,
+              "B1_max": 0.7779138714725408,
+              "change": 2.6965685906432668e-08,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.7761644030641617,
+              "B1_max": 0.7761644247706125,
+              "change": 2.1706450858971493e-08,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.7672038273834085,
+              "B1_max": 0.7672038485773984,
+              "change": 2.119398989641752e-08,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.7102123065169473,
+              "B1_max": 0.7102123580803552,
+              "change": 5.156340787682012e-08,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.690011320473131,
+              "B1_max": 0.6900113445155479,
+              "change": 2.4042416946201683e-08,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.6855355558963684,
+              "B1_max": 0.6855355797035114,
+              "change": 2.380714303473752e-08,
+              "line_phase": "line.l116::A"
+            },
+            {
+              "B0_max": 0.6771850895361511,
+              "B1_max": 0.6771502054084592,
+              "change": -3.488412769192539e-05,
+              "line_phase": "line.sw1::C"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.049395692978734,
+            "B0_Vmin": 0.9753098819071442,
+            "B1_Vmax": 1.04939149841801,
+            "B1_Vmin": 0.9753081243073408
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.21049505005845937,
+            "B1_max": 0.21049505347451888,
+            "change": 3.4160595185905862e-09
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.9325205136882433,
+            "B1_max": 0.9324862620617559,
+            "change": -3.425162648740265e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.8233460254967511,
+            "B1": 0.8233460211843775,
+            "change_B1_minus_B0": -4.312373569348438e-09
+          },
+          "operating_day": "2025-05-13",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.8233460254967511,
+              "B1_max": 0.8233460211843775,
+              "change": -4.312373569348438e-09,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.7940500955923904,
+              "B1_max": 0.7940199868341338,
+              "change": -3.0108758256597312e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.793121823739654,
+              "B1_max": 0.7931218699522473,
+              "change": 4.621259330761518e-08,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.7885290259480648,
+              "B1_max": 0.7885290717090827,
+              "change": 4.576101786391007e-08,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.7853978212757365,
+              "B1_max": 0.7856245524541338,
+              "change": 0.00022673117839722146,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.7786445498179565,
+              "B1_max": 0.7786445944882168,
+              "change": 4.4670260268553363e-08,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.7269817950322952,
+              "B1_max": 0.7269817832897665,
+              "change": -1.1742528727154422e-08,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.6967914039564704,
+              "B1_max": 0.6970241760862157,
+              "change": 0.0002327721297452623,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.692323370045948,
+              "B1_max": 0.6925472542552682,
+              "change": 0.00022388420932017983,
+              "line_phase": "line.l116::A"
+            },
+            {
+              "B0_max": 0.689044551300204,
+              "B1_max": 0.6890143693720763,
+              "change": -3.0181928127759328e-05,
+              "line_phase": "line.sw1::C"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0488891483677687,
+            "B0_Vmin": 0.9736717449518826,
+            "B1_Vmax": 1.048889025301189,
+            "B1_Vmin": 0.9736717405391
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.21220295907578648,
+            "B1_max": 0.2122029588706568,
+            "change": -2.0512969101105227e-10
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.9283450067772337,
+            "B1_max": 0.9284314943963413,
+            "change": 8.648761910756697e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.8172376345065746,
+            "B1": 0.817236871818399,
+            "change_B1_minus_B0": -7.626881756150894e-07
+          },
+          "operating_day": "2025-05-14",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.8172376345065746,
+              "B1_max": 0.817236871818399,
+              "change": -7.626881756150894e-07,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.7907412588370012,
+              "B1_max": 0.7908149267576654,
+              "change": 7.366792066421102e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.7886640939151525,
+              "B1_max": 0.7887799600258515,
+              "change": 0.00011586611069902553,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.7858184778296073,
+              "B1_max": 0.7860214637699745,
+              "change": 0.0002029859403671619,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.7844838870529438,
+              "B1_max": 0.7845981318375217,
+              "change": 0.00011424478457788823,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.7754004760754803,
+              "B1_max": 0.7755114568055766,
+              "change": 0.0001109807300962995,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.7229076312354279,
+              "B1_max": 0.7229079457475667,
+              "change": 3.1451213877708994e-07,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.6964387852843017,
+              "B1_max": 0.6966472558938454,
+              "change": 0.00020847060954365393,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.691942398822274,
+              "B1_max": 0.6921428776218167,
+              "change": 0.00020047879954265824,
+              "line_phase": "line.l116::A"
+            },
+            {
+              "B0_max": 0.684647586106296,
+              "B1_max": 0.6847193072795943,
+              "change": 7.172117329834471e-05,
+              "line_phase": "line.sw1::C"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0491740201204305,
+            "B0_Vmin": 0.9731527289040718,
+            "B1_Vmax": 1.049172000122452,
+            "B1_Vmin": 0.9731527870551818
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.21288383784881346,
+            "B1_max": 0.21288424879146087,
+            "change": 4.109426474108169e-07
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.9675117691940479,
+            "B1_max": 0.9674767976477837,
+            "change": -3.49715462641953e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.8518574818663747,
+            "B1": 0.8518575014797141,
+            "change_B1_minus_B0": 1.961333939703991e-08
+          },
+          "operating_day": "2025-05-15",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.8518574818663747,
+              "B1_max": 0.8518575014797141,
+              "change": 1.961333939703991e-08,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.8191380616668769,
+              "B1_max": 0.8191084532088101,
+              "change": -2.9608458066765486e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.818848718586944,
+              "B1_max": 0.8188487369352864,
+              "change": 1.8348342400997808e-08,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.8138109147342062,
+              "B1_max": 0.8138109080240663,
+              "change": -6.71013988817748e-09,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.8094351744649615,
+              "B1_max": 0.8094833622830783,
+              "change": 4.818781811677386e-05,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.803635127554018,
+              "B1_max": 0.8036351209978205,
+              "change": -6.55619747380598e-09,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.7513707879072382,
+              "B1_max": 0.7513707840180975,
+              "change": -3.889140676172076e-09,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.7198159732355276,
+              "B1_max": 0.7198655288318965,
+              "change": 4.955559636887763e-05,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.7153764437927163,
+              "B1_max": 0.7154240887464947,
+              "change": 4.764495377840294e-05,
+              "line_phase": "line.l116::A"
+            },
+            {
+              "B0_max": 0.7099555427443367,
+              "B1_max": 0.709926744691139,
+              "change": -2.879805319766504e-05,
+              "line_phase": "line.sw1::C"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0492456823826406,
+            "B0_Vmin": 0.9729049913228677,
+            "B1_Vmax": 1.0492430714200183,
+            "B1_Vmin": 0.9729048671800786
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.21241812350099518,
+            "B1_max": 0.2124185748971683,
+            "change": 4.5139617313449953e-07
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.9775042224302053,
+            "B1_max": 0.9774701598661908,
+            "change": -3.406256401450314e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.8609849034583721,
+            "B1": 0.8609849238090902,
+            "change_B1_minus_B0": 2.035071811068434e-08
+          },
+          "operating_day": "2025-05-16",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.8609849034583721,
+              "B1_max": 0.8609849238090902,
+              "change": 2.035071811068434e-08,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.8275981127925915,
+              "B1_max": 0.8275692738649882,
+              "change": -2.8838927603302977e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.8274540926034653,
+              "B1_max": 0.8274541116403398,
+              "change": 1.9036874521205505e-08,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.8223043872092839,
+              "B1_max": 0.8223043976168256,
+              "change": 1.0407541717327717e-08,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.8120466847098537,
+              "B1_max": 0.8120466948649562,
+              "change": 1.015510242563522e-08,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.8099546336679398,
+              "B1_max": 0.809954646802738,
+              "change": 1.3134798138025872e-08,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.7591919186834554,
+              "B1_max": 0.7591919146488169,
+              "change": -4.034638512173672e-09,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.7196784150228677,
+              "B1_max": 0.7196784354780276,
+              "change": 2.0455159899235298e-08,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.7172823156867212,
+              "B1_max": 0.7172540636080418,
+              "change": -2.8252078679402715e-05,
+              "line_phase": "line.sw1::C"
+            },
+            {
+              "B0_max": 0.7158478470884718,
+              "B1_max": 0.7158478431058505,
+              "change": -3.982621343823212e-09,
+              "line_phase": "line.sw2::C"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0491148707659703,
+            "B0_Vmin": 0.9728494878734718,
+            "B1_Vmax": 1.0491099019448444,
+            "B1_Vmin": 0.9728494888569407
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.21026844816717957,
+            "B1_max": 0.21026891576642395,
+            "change": 4.675992443803345e-07
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.9362254791768491,
+            "B1_max": 0.9361866961220223,
+            "change": -3.878305482674094e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.8245402266353296,
+            "B1": 0.8245402222676247,
+            "change_B1_minus_B0": -4.367704864449706e-09
+          },
+          "operating_day": "2025-05-17",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.8245402266353296,
+              "B1_max": 0.8245402222676247,
+              "change": -4.367704864449706e-09,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.8080469706001003,
+              "B1_max": 0.8080469652830825,
+              "change": -5.317017826023118e-09,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.8023161715368282,
+              "B1_max": 0.802282935641371,
+              "change": -3.3235895457228715e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.7995991517911548,
+              "B1_max": 0.7995991476864519,
+              "change": -4.104702910900926e-09,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.7956410067067664,
+              "B1_max": 0.7956410026373971,
+              "change": -4.069369285986113e-09,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.786966499452773,
+              "B1_max": 0.7869664954707295,
+              "change": -3.982043472738894e-09,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.7225095485922183,
+              "B1_max": 0.7225095289895453,
+              "change": -1.9602672929330822e-08,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.7192328725519171,
+              "B1_max": 0.7192698917429908,
+              "change": 3.70191910736839e-05,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.7150508163751378,
+              "B1_max": 0.7150508116989546,
+              "change": -4.67618321842167e-09,
+              "line_phase": "line.l116::A"
+            },
+            {
+              "B0_max": 0.6915043871041711,
+              "B1_max": 0.6915411578552356,
+              "change": 3.677075106456318e-05,
+              "line_phase": "line.l53::A"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.049189144425613,
+            "B0_Vmin": 0.9751812236882764,
+            "B1_Vmax": 1.049179325847251,
+            "B1_Vmin": 0.9751715180787384
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.20820312711178734,
+            "B1_max": 0.20820312744261263,
+            "change": 3.308252838341019e-10
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.9346184823602048,
+            "B1_max": 0.9345797779405193,
+            "change": -3.8704419685564595e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.823024879666706,
+            "B1": 0.8230248924189244,
+            "change_B1_minus_B0": 1.2752218392364512e-08
+          },
+          "operating_day": "2025-05-18",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.823024879666706,
+              "B1_max": 0.8230248924189244,
+              "change": 1.2752218392364512e-08,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.8076033124080072,
+              "B1_max": 0.8076033274015152,
+              "change": 1.4993507990723742e-08,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.8009390250797498,
+              "B1_max": 0.8009058565942004,
+              "change": -3.316848554935081e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.7982983686320503,
+              "B1_max": 0.7982983806240916,
+              "change": 1.1992041359931704e-08,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.7943778709704502,
+              "B1_max": 0.7943778828488282,
+              "change": 1.1878377947915908e-08,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.7857772458370551,
+              "B1_max": 0.7857772574359261,
+              "change": 1.159887097479384e-08,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.7207813766890726,
+              "B1_max": 0.7207814191523851,
+              "change": 4.246331253288105e-08,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.7198952010136318,
+              "B1_max": 0.7198952145756646,
+              "change": 1.3562032830094495e-08,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.7157722911419595,
+              "B1_max": 0.7157723045555139,
+              "change": 1.3413554378338688e-08,
+              "line_phase": "line.l116::A"
+            },
+            {
+              "B0_max": 0.6919098794594953,
+              "B1_max": 0.6919098925338948,
+              "change": 1.3074399451973306e-08,
+              "line_phase": "line.l53::A"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0483929255040103,
+            "B0_Vmin": 0.9758898404862546,
+            "B1_Vmax": 1.0483915339736725,
+            "B1_Vmin": 0.9758898422120408
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.20864343557005655,
+            "B1_max": 0.20864567501199272,
+            "change": 2.2394419361693174e-06
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.9716566303745967,
+            "B1_max": 0.9716190771703049,
+            "change": -3.755320429177367e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.8481128201029006,
+            "B1": 0.8481128205705996,
+            "change_B1_minus_B0": 4.676989906471363e-10
+          },
+          "operating_day": "2025-06-07",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.8481128201029006,
+              "B1_max": 0.8481128205705996,
+              "change": 4.676989906471363e-10,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.836776498468022,
+              "B1_max": 0.836776499390436,
+              "change": 9.224139230212813e-10,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.827633025429863,
+              "B1_max": 0.8276010384779544,
+              "change": -3.198695190853584e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.8245580526256358,
+              "B1_max": 0.8245580530736781,
+              "change": 4.480423809738454e-10,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.8208247798844567,
+              "B1_max": 0.8208247803252033,
+              "change": 4.4074666138982366e-10,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.8125363846926638,
+              "B1_max": 0.8125363851172973,
+              "change": 4.246335505442289e-10,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.7478775859817377,
+              "B1_max": 0.7478775868024543,
+              "change": 8.207166057871973e-10,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.7447077678862792,
+              "B1_max": 0.7447077686665674,
+              "change": 7.802881674123796e-10,
+              "line_phase": "line.l116::A"
+            },
+            {
+              "B0_max": 0.7398454613918243,
+              "B1_max": 0.7398454748435221,
+              "change": 1.3451697866706525e-08,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.7176319157150313,
+              "B1_max": 0.7176319165419778,
+              "change": 8.269465112675789e-10,
+              "line_phase": "line.l53::A"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0496523287329218,
+            "B0_Vmin": 0.9753402723470407,
+            "B1_Vmax": 1.049648846894891,
+            "B1_Vmin": 0.9753402733828641
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.20822103883478693,
+            "B1_max": 0.2082215443474632,
+            "change": 5.055126762743001e-07
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.990201472904128,
+            "B1_max": 0.9901645458473146,
+            "change": -3.692705681335173e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.8641335891365254,
+            "B1": 0.8641336102644579,
+            "change_B1_minus_B0": 2.1127932514630743e-08
+          },
+          "operating_day": "2025-06-14",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.8641335891365254,
+              "B1_max": 0.8641336102644579,
+              "change": 2.1127932514630743e-08,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.8544792397993008,
+              "B1_max": 0.8544792649728598,
+              "change": 2.517355890407913e-08,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.8434290619098836,
+              "B1_max": 0.8433976083307891,
+              "change": -3.145357909450919e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.8404689532949595,
+              "B1_max": 0.8404689731736253,
+              "change": 1.9878665824535346e-08,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.8367291911574287,
+              "B1_max": 0.8367292108543604,
+              "change": 1.9696931641277615e-08,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.8284018182095522,
+              "B1_max": 0.828401837451431,
+              "change": 1.9241878868037077e-08,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.7656012563935759,
+              "B1_max": 0.7656012793132342,
+              "change": 2.2919658282383182e-08,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.7625516883260958,
+              "B1_max": 0.7625517110337744,
+              "change": 2.2707678626332495e-08,
+              "line_phase": "line.l116::A"
+            },
+            {
+              "B0_max": 0.7528618357804421,
+              "B1_max": 0.7528618943252728,
+              "change": 5.854483076106476e-08,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.7344244945383407,
+              "B1_max": 0.7344245165874191,
+              "change": 2.20490784519356e-08,
+              "line_phase": "line.l53::A"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0492788203538383,
+            "B0_Vmin": 0.9756452764908331,
+            "B1_Vmax": 1.049274371779822,
+            "B1_Vmin": 0.9756451666179287
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.20519067851035938,
+            "B1_max": 0.20519085200134787,
+            "change": 1.7349098849206435e-07
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.9712830884763127,
+            "B1_max": 0.9712466006253426,
+            "change": -3.6487850970101654e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.8478846159717325,
+            "B1": 0.8478846372595834,
+            "change_B1_minus_B0": 2.1287850926476892e-08
+          },
+          "operating_day": "2025-06-22",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.8478846159717325,
+              "B1_max": 0.8478846372595834,
+              "change": 2.1287850926476892e-08,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.8381490532743214,
+              "B1_max": 0.8381490785997263,
+              "change": 2.532540488431323e-08,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.8273148514539214,
+              "B1_max": 0.8272837720597059,
+              "change": -3.107939421542749e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.8243478028210031,
+              "B1_max": 0.8243478228479627,
+              "change": 2.0026959646202158e-08,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.8206683272807949,
+              "B1_max": 0.8206683471244262,
+              "change": 1.9843631293703368e-08,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.8124828492121549,
+              "B1_max": 0.8124828685973419,
+              "change": 1.9385187011167204e-08,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.7507511702052146,
+              "B1_max": 0.7507511932935691,
+              "change": 2.3088354450528925e-08,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.7476535645184529,
+              "B1_max": 0.7476535873920201,
+              "change": 2.2873567262493566e-08,
+              "line_phase": "line.l116::A"
+            },
+            {
+              "B0_max": 0.7391108527563005,
+              "B1_max": 0.7391109127390377,
+              "change": 5.998273722163106e-08,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.720300131084254,
+              "B1_max": 0.7203001532970079,
+              "change": 2.2212753969519383e-08,
+              "line_phase": "line.l53::A"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0493227590189862,
+            "B0_Vmin": 0.974947018700762,
+            "B1_Vmax": 1.0493158439537766,
+            "B1_Vmin": 0.974947019520847
+          }
+        },
+        {
+          "AIDC_PCC_transformer_current": {
+            "B0_max": 0.20494205809092672,
+            "B1_max": 0.20494473968196786,
+            "change": 2.681591041137077e-06
+          },
+          "feeder_transformer_current": {
+            "B0_max": 0.9865665309225448,
+            "B1_max": 0.9865372333495643,
+            "change": -2.929757298042457e-05
+          },
+          "maximum_normalized_phase_line_current": {
+            "B0": 0.8697091911820762,
+            "B1": 0.8697092049549918,
+            "change_B1_minus_B0": 1.3772915585796852e-08
+          },
+          "operating_day": "2025-06-23",
+          "top10_B0_line_phase_currents": [
+            {
+              "B0_max": 0.8697091911820762,
+              "B1_max": 0.8697092049549918,
+              "change": 1.3772915585796852e-08,
+              "line_phase": "line.l10::A"
+            },
+            {
+              "B0_max": 0.8364525113041013,
+              "B1_max": 0.8364525171711245,
+              "change": 5.8670232006008405e-09,
+              "line_phase": "line.l7::A"
+            },
+            {
+              "B0_max": 0.8352706617817278,
+              "B1_max": 0.8352458571514121,
+              "change": -2.4804630315733434e-05,
+              "line_phase": "line.sw1::A"
+            },
+            {
+              "B0_max": 0.8315222451899342,
+              "B1_max": 0.8315222509967849,
+              "change": 5.8068506669783915e-09,
+              "line_phase": "line.l3::A"
+            },
+            {
+              "B0_max": 0.829258890457492,
+              "B1_max": 0.8292588979452896,
+              "change": 7.487797604177615e-09,
+              "line_phase": "line.sw2::A"
+            },
+            {
+              "B0_max": 0.8209248968906955,
+              "B1_max": 0.8209249025545617,
+              "change": 5.663866264882245e-09,
+              "line_phase": "line.l115::A"
+            },
+            {
+              "B0_max": 0.7638577656976335,
+              "B1_max": 0.7638577578936048,
+              "change": -7.804028756552839e-09,
+              "line_phase": "line.l10::C"
+            },
+            {
+              "B0_max": 0.7456668178772138,
+              "B1_max": 0.7456668320456052,
+              "change": 1.4168391460067653e-08,
+              "line_phase": "line.l52::A"
+            },
+            {
+              "B0_max": 0.737955159130669,
+              "B1_max": 0.7379551659758703,
+              "change": 6.845201294680692e-09,
+              "line_phase": "line.l116::A"
+            },
+            {
+              "B0_max": 0.7316711892176404,
+              "B1_max": 0.7316719786578287,
+              "change": 7.894401883312696e-07,
+              "line_phase": "line.sw2::C"
+            }
+          ],
+          "voltage": {
+            "B0_Vmax": 1.0491224796199083,
+            "B0_Vmin": 0.9743401735891581,
+            "B1_Vmax": 1.0491211542754346,
+            "B1_Vmin": 0.9743381839738178
+          }
+        }
+      ]
+    },
+    "objective_misalignment_primary_cause": false,
+    "trust_region_limited_primary_cause": false,
+    "trust_region_outside_radius_solve_count": 0
+  },
+  "science_separation": {
+    "GRID_VALUE": "21-day topology/sensitivity/power/optimization forensic; no inference from reference-coherence failures.",
+    "REFERENCE_COHERENCE": "13-day A_EXPECTED_CROSS_HEAD_FORECAST_INCOHERENCE; analyzed independently."
+  },
+  "status": "PASS_READ_ONLY_FAIL_CLOSED"
+}
