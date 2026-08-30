@@ -153,6 +153,7 @@ class SubproblemResult:
     gradient:tuple[float,...]
     intercept:float|None
     proof:float|None
+    farkas_cut_violation:float|None
     dual_sha256:str
     dual_nonzero_count:int
     critical_branch:str|None
@@ -202,13 +203,33 @@ class ExactGridSubproblem:
         if self.model.Status==GRB.OPTIMAL:
             dual={con.ConstrName:float(con.Pi) for con,_ in self.registry};grad=sum((float(con.Pi)*np.asarray(a,dtype=float) for con,a in self.registry),start=np.zeros(60));obj=float(self.model.ObjVal)
             line=[(float(self.i_hat[b].X),c.branch_names[b]) for b in range(len(self.i_hat)) if not c.branch_names[b].startswith("transformer.")];loading,branch=max(line,key=lambda z:(z[0],z[1]))
-            result=SubproblemResult(c.slot,True,obj,tuple(map(float,grad)),obj-float(grad@x),None,_sha(dual),sum(abs(v)>1e-12 for v in dual.values()),branch,loading,"OPTIMAL",runtime,dual)
+            result=SubproblemResult(c.slot,True,obj,tuple(map(float,grad)),obj-float(grad@x),None,None,_sha(dual),sum(abs(v)>1e-12 for v in dual.values()),branch,loading,"OPTIMAL",runtime,dual)
         elif self.model.Status==GRB.INFEASIBLE:
-            dual={con.ConstrName:float(con.FarkasDual) for con,_ in self.registry};grad=sum((float(con.FarkasDual)*np.asarray(a,dtype=float) for con,a in self.registry),start=np.zeros(60));proof=float(self.model.FarkasProof)
-            result=SubproblemResult(c.slot,False,None,tuple(map(float,grad)),None,proof,_sha(dual),sum(abs(v)>1e-12 for v in dual.values()),None,None,"INFEASIBLE_FARKAS",runtime,dual)
+            constraints=self.model.getConstrs();multipliers=np.asarray(self.model.getAttr("FarkasDual",constraints),dtype=float)
+            dual={con.ConstrName:float(value) for con,value in zip(constraints,multipliers)}
+            grad=sum((float(con.FarkasDual)*np.asarray(a,dtype=float) for con,a in self.registry),start=np.zeros(60));proof=float(self.model.FarkasProof)
+            # Gurobi's Farkas ray combines the full LP as a_bar*y <= b_bar.
+            # Feasibility therefore requires b_bar(x) >= min_y a_bar*y over
+            # the frozen variable bounds.  FarkasProof alone is not that
+            # bound-aware violation (e.g. an i_hat upper bound contributes).
+            variables=self.model.getVars();a_bar=np.zeros(len(variables),dtype=float)
+            for con,multiplier in zip(constraints,multipliers):
+                if abs(float(multiplier))<=1e-15:continue
+                row=self.model.getRow(con)
+                for term in range(row.size()):a_bar[row.getVar(term).index]+=float(multiplier)*float(row.getCoeff(term))
+            b_bar=float(sum(float(multiplier)*float(con.RHS) for con,multiplier in zip(constraints,multipliers)))
+            minimum_lhs=0.0
+            for variable,coefficient in zip(variables,a_bar):
+                if abs(float(coefficient))<=1e-15:continue
+                bound=float(variable.LB if coefficient>0 else variable.UB)
+                if not math.isfinite(bound):raise RuntimeError(f"FARKAS_RAY_UNBOUNDED_MINIMUM_T{c.slot}:{variable.VarName}")
+                minimum_lhs+=float(coefficient)*bound
+            violation=float(minimum_lhs-b_bar)
+            if violation<=1e-10:raise RuntimeError(f"INVALID_FARKAS_CERTIFICATE_T{c.slot}:{violation}")
+            result=SubproblemResult(c.slot,False,None,tuple(map(float,grad)),None,proof,violation,_sha(dual),sum(abs(v)>1e-12 for v in dual.values()),None,None,"INFEASIBLE_FARKAS",runtime,dual)
         else:raise RuntimeError(f"GRID_SP_STATUS_{self.model.Status}_T{c.slot}")
         if raw_dir is not None:
-            raw_dir.mkdir(parents=True,exist_ok=True);path=raw_dir/f"iter_{iteration:03d}_slot_{c.slot:02d}.json";path.write_text(json.dumps({"slot":c.slot,"iteration":iteration,"status":result.status,"dual":dual,"gradient":result.gradient,"objective":result.objective,"proof":result.proof},sort_keys=True)+"\n",encoding="utf-8")
+            raw_dir.mkdir(parents=True,exist_ok=True);path=raw_dir/f"iter_{iteration:03d}_slot_{c.slot:02d}.json";path.write_text(json.dumps({"slot":c.slot,"iteration":iteration,"status":result.status,"dual":dual,"gradient":result.gradient,"objective":result.objective,"Gurobi_FarkasProof":result.proof,"bound_aware_cut_violation":result.farkas_cut_violation},sort_keys=True)+"\n",encoding="utf-8")
         return result
 
 
@@ -218,7 +239,7 @@ def add_cut(master:ResourceMaster,result:SubproblemResult,index:int)->str:
     if result.feasible:
         master.model.addConstr(master.eta>=float(result.intercept)+expr,name=f"optimality_cut[{index},{result.slot}]");return "OPTIMALITY"
     controls=np.asarray([float(e.getValue()) if hasattr(e,"getValue") else (float(e.X) if hasattr(e,"X") else float(e)) for e in master.control_expressions[result.slot]])
-    threshold=float(np.asarray(result.gradient)@controls)+float(result.proof)
+    threshold=float(np.asarray(result.gradient)@controls)+float(result.farkas_cut_violation)
     master.model.addConstr(-expr<=-threshold,name=f"farkas_cut[{index},{result.slot}]");return "FARKAS"
 
 
@@ -250,7 +271,7 @@ def solve_benders(*,inputs:B3Inputs,context,voltage,current,method:str,raw_dir:P
             cut_index+=1;kind=add_cut(master,r,cut_index);added_opt+=kind=="OPTIMALITY";added_farkas+=kind=="FARKAS"
         optcuts+=added_opt;farkas+=added_farkas
         gap=max(0.0,(ub-lb)/max(abs(ub),1e-6)) if math.isfinite(ub) and math.isfinite(lb) else math.inf
-        logs.append({"iteration":iteration,"master_incumbent":float(master.eta.X),"master_ObjBound":float(master.model.ObjBound),"LB":lb,"UB":ub if math.isfinite(ub) else None,"gap":gap if math.isfinite(gap) else None,"subproblem_statuses":[r.status for r in results],"worst_time":None if worst is None else {"slot":worst.slot,"branch_phase":worst.critical_branch,"loading":worst.critical_loading,"objective":worst.objective},"critical_time_set":[{"slot":r.slot,"line_phase":r.critical_branch,"loading":r.critical_loading,"cut_origin":"ACTUAL_GUROBI_PI_FULL_LP"} for r in critical],"optimality_cuts_added":added_opt,"Farkas_cuts_added":added_farkas,"optimality_cut_count":optcuts,"Farkas_cut_count":farkas,"master_runtime_seconds":master_runtime,"subproblem_runtime_seconds":sp_runtime,"cumulative_runtime_seconds":time.perf_counter()-started,"all_96_feasible":all_feasible,"UB_update_permitted":all_feasible,"dual_sha256_by_slot":[r.dual_sha256 for r in results]})
+        logs.append({"iteration":iteration,"master_incumbent":float(master.eta.X),"master_ObjBound":float(master.model.ObjBound),"LB":lb,"UB":ub if math.isfinite(ub) else None,"gap":gap if math.isfinite(gap) else None,"subproblem_statuses":[r.status for r in results],"worst_time":None if worst is None else {"slot":worst.slot,"branch_phase":worst.critical_branch,"loading":worst.critical_loading,"objective":worst.objective},"critical_time_set":[{"slot":r.slot,"line_phase":r.critical_branch,"loading":r.critical_loading,"cut_origin":"ACTUAL_GUROBI_PI_FULL_LP"} for r in critical],"Farkas_certificates":[{"slot":r.slot,"Gurobi_FarkasProof":r.proof,"bound_aware_cut_violation":r.farkas_cut_violation,"dual_sha256":r.dual_sha256,"cut_origin":"ACTUAL_GUROBI_FARKASDUAL_FULL_LP"} for r in infeasible],"optimality_cuts_added":added_opt,"Farkas_cuts_added":added_farkas,"optimality_cut_count":optcuts,"Farkas_cut_count":farkas,"master_runtime_seconds":master_runtime,"subproblem_runtime_seconds":sp_runtime,"cumulative_runtime_seconds":time.perf_counter()-started,"all_96_feasible":all_feasible,"UB_update_permitted":all_feasible,"dual_sha256_by_slot":[r.dual_sha256 for r in results]})
         if gap<=TOLERANCE:break
     runtime=time.perf_counter()-started;gap=max(0.0,(ub-lb)/max(abs(ub),1e-6)) if math.isfinite(ub) and math.isfinite(lb) else math.inf
     return {"method":method,"status":"OPTIMAL_CERTIFIED" if gap<=TOLERANCE else "TIME_OR_ITERATION_LIMIT_NOT_CERTIFIED","hard_feasible":bool(math.isfinite(ub)),"objective":ub if math.isfinite(ub) else None,"runtime_seconds":runtime,"iterations":len(logs),"optimality_cut_count":optcuts,"farkas_cut_count":farkas,"LB":lb if math.isfinite(lb) else None,"UB":ub if math.isfinite(ub) else None,"gap":gap if math.isfinite(gap) else None,"LB_monotone":all(logs[i]["LB"]>=logs[i-1]["LB"]-1e-9 for i in range(1,len(logs))),"UB_nonincreasing":all(logs[i]["UB"] is None or logs[i-1]["UB"] is None or logs[i]["UB"]<=logs[i-1]["UB"]+1e-9 for i in range(1,len(logs))),"UB_only_from_all_96_feasible":all((not r["UB_update_permitted"]) or r["all_96_feasible"] for r in logs),"iteration_log":logs,"OpenDSS_calls_inside_Benders":0,"coefficient_hash_of_hashes":_sha([c.coefficient_sha256 for c in coeffs])}
