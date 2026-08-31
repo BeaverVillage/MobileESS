@@ -95,3 +95,21 @@ def test_kestrel_u2_interval_manifest_is_ex_post_only() -> None:
     assert manifest["fully_reconstructable_ex_post_jobs"] == 62_498
     assert manifest["future_physical_node_assignment_available_D1"] is False
     assert "GPU device assignment" in manifest["forbidden_inferences"]
+
+
+def test_eagle_shared_state_is_absent_and_not_forced() -> None:
+    states = load("V17_EAGLE_SHARED_NODE_STATE_DATASET.json")
+    validation = load("V17_EAGLE_SHARED_MARGINAL_POWER_VALIDATION.json")
+    assert states["EAGLE_U2_ANALOG_samples"] == 0
+    assert states["counts"]["max_exact_concurrent_jobs"] == 1
+    assert validation["EAGLE_SHARED_MARGINAL_CLASSIFICATION"] == "EAGLE_SHARED_MARGINAL_D_NOT_IDENTIFIABLE"
+    assert validation["candidate_point_model_authorized"] is False
+    assert validation["same_total_gpu_changed_concurrent_job_count_transition_count"] == 0
+
+
+def test_eagle_split_is_blocked_not_random_row() -> None:
+    split = load("V17_EAGLE_SHARED_POWER_SPLIT_CONTRACT.json")
+    assert split["split_unit"] == "physical-node UTC calendar day"
+    assert split["random_telemetry_row_split"] is False
+    assert split["adjacent_day_embargo"] is True
+    assert split["final_metrics_read_before_contract"] is False
