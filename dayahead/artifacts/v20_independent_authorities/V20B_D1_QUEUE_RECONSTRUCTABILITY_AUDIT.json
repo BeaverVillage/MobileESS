@@ -1,0 +1,17 @@
+{
+  "artifact_id": "V20B_D1_QUEUE_RECONSTRUCTABILITY_AUDIT_V1",
+  "candidate_rule": "submit_time <= cutoff < start_time",
+  "rule_semantics": "retrospectively identifies jobs that eventually started after cutoff",
+  "strength": "RESTRICTED_RETROSPECTIVE_SUBSET_ONLY",
+  "complete_queue_membership_supported": false,
+  "blocking_gaps": [
+    "no cutoff snapshot",
+    "no cancellation time",
+    "no hold/release history",
+    "no requeue history",
+    "final state is not a cutoff-state transition log"
+  ],
+  "eventually_started_subset_is_full_queue_claim": false,
+  "future_actual_feature_injection_count": 0,
+  "main_authority_eligible": false
+}
