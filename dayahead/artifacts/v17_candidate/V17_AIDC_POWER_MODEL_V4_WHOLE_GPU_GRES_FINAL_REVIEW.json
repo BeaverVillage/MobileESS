@@ -1,0 +1,78 @@
+{
+  "ACTIVE_FINAL_AIDC_POWER_BOUNDARY": "V17_AIDC_POWER_MODEL_V1_FROZEN_KAPPA_BOUNDARY",
+  "April_scientific_input_reads_before_freeze": 0,
+  "June_result_content_reads": 0,
+  "June_scientific_input_reads": 0,
+  "May_result_content_reads": 0,
+  "May_scientific_input_reads": 0,
+  "READY_FOR_APRIL_RESUME_V1": true,
+  "READY_FOR_APRIL_RESUME_V4": false,
+  "RC_MQT_V4_training_runs": 0,
+  "Reference_V5_V4_rebuilds": 0,
+  "V17_AIDC_POWER_MODEL_V4_WHOLE_GPU_GRES": "NOT_AUTHORIZED",
+  "V1_V2_V3_V3R1_V3R2_byte_identity": "PASS_250_PRECHANGE_RECORDS_REVERIFIED",
+  "ac_anchor_rebuilds": 0,
+  "artifact_id": "V17_AIDC_POWER_MODEL_V4_WHOLE_GPU_GRES_FINAL_REVIEW_V1",
+  "artifact_sha256": {
+    "V17_AIDC_POWER_MODEL_V4_WHOLE_GPU_GRES_CONTRACT.json": "f60a29fcd54f31216c0249cabd50cf22e713ee07395de868f8c4f411023d2304",
+    "V17_AIDC_POWER_V1_V4_GPU_HOUR_COVERAGE_COMPARISON.json": "3b47e84136080d2e16ecaba14ca5ef8ba452b9e254b4f8a2ec00c27830616214",
+    "V17_AIDC_POWER_V4_WHOLE_GPU_GRES_PRECHANGE_MANIFEST.json": "8e305bb390d5ec0b4233c6a218c390a386e0a76d95e9ab78343e93bbc0cc3292",
+    "V17_DATASET312_PER_GPU_BOARD_POWER_AUTHORITY.json": "684fde27323ed91c9d6de0f45b880185801651cb665ead4797b47648875e1f45",
+    "V17_KESTREL_WHOLE_GPU_GRES_SEMANTICS_AUDIT.json": "f17dbb1ae5ef439f108b6c9d887d9fc66f0afea992f1363877ce5ff31c9bfeb4",
+    "V17_SCIENTIFIC_DATA_H100_PER_GPU_CROSS_VALIDATION.json": "77053deb69f7467d026a045fc0f6061979cf5e3c2a34e2ef6ec2842b8e533766"
+  },
+  "candidate_coverage": {
+    "V1_GPU_hour_fraction": 0.12039563303594322,
+    "V1_plus_U2_GPU_hour_fraction": 0.9209556717477224,
+    "expected_92_0956_percent_check": "PASS_WITH_ABSOLUTE_DIFFERENCE_3.282522775815977e-07",
+    "reaches_90_percent_if_U2_were_authorized": true,
+    "used_as_active_coverage": false
+  },
+  "classification": "V17_V4_WHOLE_GPU_GRES_FAIL_NODE_TIME_CAPACITY_GATE",
+  "coefficient_tuning_calls": 0,
+  "common_Fresh_OpenDSS_restoration_calls": 0,
+  "dataset312_GPU_board_kappa_kW": {
+    "Q10": 0.3941881609951147,
+    "Q50": 0.48563611660901085,
+    "Q90": 0.5391969931144363,
+    "idle_subtraction_W_per_GPU": 72.5,
+    "measurement_boundary": "NVML_GPU_BOARD_ONLY",
+    "run_count": 46
+  },
+  "downstream_stop": {
+    "H_J_rebuilds": 0,
+    "rho_0_10_validation_calls": 0,
+    "same_7_day_runs": 0,
+    "reason": "The exact training trace contains one same-node interval with 5 concurrently requested GPUs, so the required <=4 whole-device capacity gate does not pass."
+  },
+  "focused_tests": "16 passed in 0.92s",
+  "full_tests": {
+    "command": "python -m pytest -q tests",
+    "result": "622 passed, 4 skipped, 84 subtests passed, 4 unrelated/environment failures",
+    "unrelated_failures": [
+      "torch is not installed for the historical G5/G6 weight fingerprint test",
+      "pre-existing PFR multi-trust-region projection assertion",
+      "two POSIX-fcntl shared-source locking tests on Windows"
+    ]
+  },
+  "grid_outcome_used_for_model_selection": 0,
+  "remaining_April_day_runs": 0,
+  "scientific_data_H100_role": "PASS_PHYSICAL_CROSS_VALIDATION_ONLY_NO_COEFFICIENT_FIT",
+  "status": "FAIL_CLOSED_V4_NOT_MINTED",
+  "u2_gate": {
+    "classification": "U2_WHOLE_GPU_GRES_RECLASSIFICATION_NOT_AUTHORIZED",
+    "gpus_requested_integer_1_to_4": true,
+    "multi_node_uniform_distribution_identifiable": true,
+    "no_MPS_MIG_shard_evidence_in_available_fields": true,
+    "node_time_concurrent_sum_le_4": false,
+    "offending_active_jobs": {
+      "7539787": 2,
+      "7543918": 2,
+      "7545385": 1
+    },
+    "offending_node": "x3107c0s17b0n0",
+    "offending_overlap_seconds": 7,
+    "observed_max_concurrent_requested_GPUs": 5,
+    "violation_count": 1
+  }
+}
