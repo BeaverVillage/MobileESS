@@ -1,0 +1,92 @@
+{
+  "artifact_id": "V18R2_FLEXIBLE_ARRIVAL_TARGET_CONTRACT_V1",
+  "training_period": [
+    "2024-08-19",
+    "2025-03-31"
+  ],
+  "source": {
+    "source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+    "source_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+    "members_opened": [
+      {
+        "month": 202410,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+        "H100_rows": 21679
+      },
+      {
+        "month": 202411,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+        "H100_rows": 26933
+      },
+      {
+        "month": 202412,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+        "H100_rows": 41814
+      },
+      {
+        "month": 202408,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+        "H100_rows": 20192
+      },
+      {
+        "month": 202409,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+        "H100_rows": 26532
+      },
+      {
+        "month": 202501,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+        "H100_rows": 96880
+      },
+      {
+        "month": 202502,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+        "H100_rows": 22295
+      },
+      {
+        "month": 202503,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+        "H100_rows": 86148
+      }
+    ],
+    "min_member_month_opened": 202408,
+    "max_member_month_opened": 202503,
+    "H100_rows": 342473
+  },
+  "semantic_label": "COMPLETED H100 job with retrospective queue wait >600 seconds; TRAINING_TARGET_ONLY",
+  "repair": {
+    "V18R1_global_conflict_job_ids_excluded": 76,
+    "source_artifact_sha256": "ed0f7647ba91293b0abb560a74bdc077e7613627ccfbd8a7e9485d5491ec4534"
+  },
+  "H_FLEX_DAY": "sum(gpus_requested * realized runtime hours) assigned to AEST submit day",
+  "A_FLEX": "same service mass assigned to 15-minute AEST submit slot [GPU-h/slot]",
+  "S_FLEX": "A_FLEX/H_FLEX_DAY for positive days; sums to one",
+  "tiers": [
+    "FULL_1",
+    "FULL_2",
+    "FULL_4",
+    "FULL_8",
+    "FULL_16",
+    "PARTIAL"
+  ],
+  "tier_rule": "exact isolated 4-GPU/node supported node class -> FULL_n; every other repaired semantic-flexible job -> PARTIAL lower-bound power boundary",
+  "latency_classes": [
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5"
+  ],
+  "daily_slot_mass_identity_max_abs_GPU_h": 0.0,
+  "daily_tier_mass_identity_max_abs_GPU_h": 3.637978807091713e-11,
+  "daily_latency_mass_identity_max_abs_GPU_h": 3.637978807091713e-11,
+  "target_job_count_before_conflict_exclusion": 85870,
+  "target_job_count_after_conflict_exclusion": 85866,
+  "native_execution_vs_arrival_target_boundary": {
+    "V18R1_repaired_execution_integral_GPU_h": 610707.3561111112,
+    "V18R2_submitted_service_target_GPU_h": 614322.9725,
+    "difference_reason": "full service mass is assigned to submit day rather than clipped by execution overlap"
+  },
+  "D1_feature_use_of_revealed_label": 0,
+  "April_member_reads_before_model_freeze": 0
+}

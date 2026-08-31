@@ -1,0 +1,95 @@
+{
+  "artifact_id": "V18R2_FORECAST_MAGNITUDE_ROOT_CAUSE_V1",
+  "overall": "G_MULTIFACTOR_FORECAST_MAGNITUDE_ATTRITION",
+  "hypotheses": [
+    {
+      "hypothesis": "H1 legacy absolute rather than capacity-normalized target",
+      "evidence": "V17 target used per-target positive P95 only; no C_REF denominator",
+      "verdict": "CONTRIBUTOR"
+    },
+    {
+      "hypothesis": "H2 beta_AIDC/equivalent-footprint applied to workload",
+      "evidence": {
+        "before_GPU_h": 4976.275420508247,
+        "beta": 0.25,
+        "after_GPU_h": 1244.0688551270619,
+        "mechanical_loss_GPU_h": 3732.2065653811856
+      },
+      "verdict": "PRIMARY_CONTRIBUTOR_DOUBLE_SCALING_BOUNDARY"
+    },
+    {
+      "hypothesis": "H3 factor-4 GPU/node loss",
+      "evidence": "target and scheduler remain GPU-hour; factor 4 appears only in full-node power conversion",
+      "verdict": "PASS_NOT_CONTRIBUTOR"
+    },
+    {
+      "hypothesis": "H4 slot_hours 0.25 double application",
+      "evidence": "0.25 is not multiplied into workload; it is used once for capacity and GPU-h-to-kW conversion",
+      "verdict": "PASS_NOT_CONTRIBUTOR"
+    },
+    {
+      "hypothesis": "H5 12-site total accidentally reduced to one site",
+      "evidence": "rack/site weights sum one and scheduler arrival identity matches system total",
+      "verdict": "PASS_NOT_CONTRIBUTOR"
+    },
+    {
+      "hypothesis": "H6 slotwise Q50 aggregation bias",
+      "evidence": {
+        "slotwise_CV_mass_ratio": 7.538146306159275e-05,
+        "daily_CV_mass_ratio": 0.2649951323365423,
+        "WAPE_A": 0.9999246185369384,
+        "WAPE_B": 0.914408046245931
+      },
+      "verdict": "CONTRIBUTOR"
+    },
+    {
+      "hypothesis": "H7 service-demand target interpreted as occupancy/rate",
+      "evidence": "old reference scheduler preserved GPU-hour mass and divided by 0.25 only when forming kW",
+      "verdict": "PASS_NOT_CONTRIBUTOR"
+    },
+    {
+      "hypothesis": "H8 cumulative horizon converted as a slot",
+      "evidence": "old target is direct per-arrival-slot GPU-hour, not cumulative",
+      "verdict": "NOT_APPLICABLE"
+    },
+    {
+      "hypothesis": "H9 excessive modelable filtering",
+      "evidence": {
+        "all_repaired_semantic_GPU_h": 614322.9725,
+        "old_modelable_GPU_h": 566045.7675,
+        "retained_fraction": 0.9214139676341013,
+        "old_modelable_jobs": 83072
+      },
+      "verdict": "CONTRIBUTOR"
+    },
+    {
+      "hypothesis": "H10 genuine April low regime",
+      "evidence": "new prediction uses calendar-only D-1 features and is located against the training daily-intensity distribution; April actual is diagnostic-only",
+      "verdict": "NOT_PRIMARY_NO_CAUSAL_COVARIATE_EVIDENCE"
+    }
+  ],
+  "top_3": [
+    {
+      "rank_candidate": "beta_AIDC_0.25",
+      "quantitative_effect": 0.75,
+      "type": "MECHANICAL_SCALING_LOSS",
+      "rank": 1
+    },
+    {
+      "rank_candidate": "slotwise_Q50/statistical underforecast",
+      "quantitative_effect": 0.7174226553245838,
+      "type": "STATISTICAL_FORECAST_DIFFERENCE",
+      "rank": 2
+    },
+    {
+      "rank_candidate": "modelable filtering",
+      "quantitative_effect": 0.07858603236589867,
+      "type": "SEMANTIC_FILTERING_LOSS",
+      "rank": 3
+    }
+  ],
+  "training_7day_equivalent_GPU_h": 19112.270255555555,
+  "old_7day_GPU_h": 1244.0688551270619,
+  "new_7day_GPU_h": 8760.796666666665,
+  "period_warning": "training-average and April prediction are different periods; statistical difference is not called mechanical attrition"
+}

@@ -1,0 +1,17 @@
+{
+  "artifact_id": "V18R2_CAPACITY_NORMALIZED_FORECAST_CONTRACT_V1",
+  "daily_intensity": "h_FLEX = H_FLEX_DAY / (C_REF * 24 h)",
+  "slot_intensity": "a_FLEX = A_FLEX / (C_REF * 0.25 h)",
+  "C_K_SOURCE": "partial time-varying Kestrel installed-capacity authority from V18R1",
+  "C_REF_GPU": 528.0,
+  "C_REF_pre_expansion_authority": "132 H100 nodes x 4 GPU",
+  "C_REF_post_expansion_role": "ENGINEERING_NORMALIZATION_REFERENCE; not an installed-capacity claim",
+  "C_MODEL_GPU": 528.0,
+  "C_MODEL_label": "EQUIVALENT_CASE_STUDY_H100_CAPACITY_NOT_REAL_MELBOURNE_INSTALLED_CAPACITY",
+  "restoration": "H_hat_GPU_h = h_hat * C_MODEL * 24 h",
+  "C_MODEL_over_C_REF": 1.0,
+  "arrival_intensity_upper_bound": null,
+  "sigmoid_calls": 0,
+  "posthoc_multiplier_calls": 0,
+  "C_MODEL_mutations": 0
+}
