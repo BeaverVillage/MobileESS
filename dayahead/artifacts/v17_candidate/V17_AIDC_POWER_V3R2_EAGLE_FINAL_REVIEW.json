@@ -1,0 +1,925 @@
+{
+  "D1_causal_state_decision": {
+    "DAY_AHEAD_ACTUATOR_STATE_IDENTIFIABLE": false,
+    "Eagle_absolute_kW_to_H100_transfer_calls": 0,
+    "June_result_content_reads": 0,
+    "June_scientific_input_reads": 0,
+    "May_result_content_reads": 0,
+    "May_scientific_input_reads": 0,
+    "OpenDSS_calls_inside_Benders": 0,
+    "POWER_RESPONSE_MODEL_IDENTIFIABLE": false,
+    "SHARED_OCCUPANCY_CLASS_defined": false,
+    "arbitrary_flexible_scaling_calls": 0,
+    "effect_selected_power_parameters": 0,
+    "existing_logical_pool_axes": "latency/resource arrival aggregates; no future physical placement or source-defined co-residency state",
+    "future_measured_utilization_available": false,
+    "future_physical_node_ID_available": false,
+    "grid_benefit_selected_power_parameters": 0,
+    "historical_ex_post_U2_state": {
+      "jobs": 62498,
+      "node_equivalent_hours": 111441.48388888942
+    },
+    "reason": "Kestrel shared_job_count is an ex-post consequence of physical scheduler placement, not a causal D-1 observable under the current logical pools.",
+    "remaining_April_day_runs": 0,
+    "rowwise_Eagle_to_Kestrel_merges": 0,
+    "schema": "V17_AIDC_POWER_V3R2_D1_CAUSALITY_AUDIT_V1",
+    "status": "FAIL_CLOSED_D1_SHARED_STATE_NOT_IDENTIFIABLE"
+  },
+  "EAGLE_SHARED_MARGINAL_CLASSIFICATION": "EAGLE_SHARED_MARGINAL_D_NOT_IDENTIFIABLE",
+  "Eagle_absolute_kW_to_H100_transfer_calls": 0,
+  "Eagle_common_observables": [
+    "concurrent_job_count",
+    "sum_requested_gpus",
+    "sum_requested_cpus"
+  ],
+  "Eagle_hardware": {
+    "cpu_cores_per_socket": 18,
+    "cpu_model": "Intel Xeon Gold 6154",
+    "cpu_sockets_per_node": 2,
+    "gpu_model": "NVIDIA Tesla V100 PCIe",
+    "gpus_per_node": 2,
+    "machine": "NREL/NLR Eagle",
+    "node_ids": [
+      "r103u17",
+      "r103u21",
+      "r104u29",
+      "r104u33",
+      "r105u09",
+      "r105u15"
+    ]
+  },
+  "Eagle_job_telemetry_overlap": {
+    "jobs_overlapping_Ganglia": 79321,
+    "jobs_overlapping_iLO": 105146,
+    "physical_node_time_join_available": true
+  },
+  "Eagle_marginal_power_heldout_metrics": {
+    "gpu_board_sum": {
+      "marginal_bias_w": 4.06048013314112,
+      "marginal_mae_w": 45.4775725748408,
+      "marginal_rmse_w": 61.44580533927837,
+      "n": 7447,
+      "p95_marginal_abs_error_w": 117.68551636893022,
+      "sign_accuracy": 0.1922921982006177,
+      "worst_marginal_abs_error_w": 531.6855163689302
+    },
+    "whole_node_ilo": {
+      "marginal_bias_w": -0.8740506141914763,
+      "marginal_mae_w": 96.14114702205326,
+      "marginal_rmse_w": 107.9468997751179,
+      "n": 7447,
+      "p95_marginal_abs_error_w": 178.0144517458075,
+      "sign_accuracy": 0.3716932993151605,
+      "worst_marginal_abs_error_w": 576.4108439172952
+    }
+  },
+  "Eagle_measurement": {
+    "ganglia_observed_median_sampling_seconds": 60.0,
+    "gpu_board_power": "Ganglia gpu[0|1]_power_usage_report, direct watts",
+    "gpu_memory_utilization": "Ganglia gpu[0|1]_mem_util, direct telemetry",
+    "gpu_temperature": "Ganglia gpu[0|1]_temp, Celsius",
+    "ilo_observed_median_sampling_seconds": 60.0,
+    "timestamp_authority": "UTC ISO-8601 Z in raw telemetry",
+    "whole_node_power": "HPE iLO instantaneous watts"
+  },
+  "Eagle_sources": {
+    "ganglia": {
+      "absolute_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\Eagle GPU Node Metrics\\esif.hpc.eagle.ganglia.gpu.sixnodes.csv.zip",
+      "bytes": 1149353389,
+      "content_index_sha256": "8b867343af8156400446f613f10d5dd39238865dd94a64c508b0155195175e78",
+      "immutable_before_after": true,
+      "md5_official_registry": "bf2c397ce74dfcc82ac1be425647f2fc",
+      "member_count": 1,
+      "members": [
+        {
+          "compressed_bytes": 1149353009,
+          "crc32": "c3a7b2a8",
+          "path": "esif.hpc.eagle.ganglia.gpu.sixnodes_2021-01-01_2024-06-18.csv",
+          "uncompressed_bytes": 16123437948
+        }
+      ],
+      "sha256": "f8e14651bf3cad97e83fe22a704734bffdc1307afa935430da2b37833db34e1f",
+      "uncompressed_bytes": 16123437948
+    },
+    "ilo": {
+      "absolute_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\Eagle GPU Node Metrics\\esif.hpc.eagle.ilo-power.gpu.sixnodes.csv.zip",
+      "bytes": 53704398,
+      "content_index_sha256": "79b4dbaa317aa3cb0eedadbe0d934546ee249ff58e0dd91d70c2fc41e890a5fa",
+      "immutable_before_after": true,
+      "md5_official_registry": "2c4320667daca7d55a31181bc47b56d9",
+      "member_count": 1,
+      "members": [
+        {
+          "compressed_bytes": 53704122,
+          "crc32": "0a89f0dd",
+          "path": "esif.hpc.eagle.ilo-power.gpu.sixnodes_2019-04-15_2024-08-29.csv",
+          "uncompressed_bytes": 593625464
+        }
+      ],
+      "sha256": "ee73ff938dd1ede6c3e1064e0fb042bcdb35f7e1a9bc582e2fa420fe7e50cda3",
+      "uncompressed_bytes": 593625464
+    },
+    "jobs_energy": {
+      "absolute_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\Eagle Jobs + Additional Energy Metrics\\esif.hpc.eagle.job-anon-energy-metrics.zip",
+      "bytes": 1441620944,
+      "content_index_sha256": "e723f9e5c3a50b8f7f4b8f3efedba956d145c4ea9bca296541b9a43c26e5b840",
+      "immutable_before_after": true,
+      "md5_official_registry": "cc60eac4d10b38a1bbfe3ef7dede5590",
+      "member_count": 68,
+      "members": [
+        {
+          "compressed_bytes": 1970366,
+          "crc32": "a538accf",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2018/month=11/eagle_jobs_energy_metrics_201811_0.parquet",
+          "uncompressed_bytes": 2788706
+        },
+        {
+          "compressed_bytes": 1217028,
+          "crc32": "ebc2ac8e",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2018/month=12/eagle_jobs_energy_metrics_201812_0.parquet",
+          "uncompressed_bytes": 1723097
+        },
+        {
+          "compressed_bytes": 2304290,
+          "crc32": "812bd70c",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2019/month=1/eagle_jobs_energy_metrics_201901_0.parquet",
+          "uncompressed_bytes": 3030070
+        },
+        {
+          "compressed_bytes": 12187694,
+          "crc32": "231f236c",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2019/month=10/eagle_jobs_energy_metrics_201910_0.parquet",
+          "uncompressed_bytes": 15347886
+        },
+        {
+          "compressed_bytes": 19669308,
+          "crc32": "ac7a51b3",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2019/month=11/eagle_jobs_energy_metrics_201911_0.parquet",
+          "uncompressed_bytes": 24454429
+        },
+        {
+          "compressed_bytes": 25345278,
+          "crc32": "060ee850",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2019/month=12/eagle_jobs_energy_metrics_201912_0.parquet",
+          "uncompressed_bytes": 31492565
+        },
+        {
+          "compressed_bytes": 2479294,
+          "crc32": "0351c154",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2019/month=2/eagle_jobs_energy_metrics_201902_0.parquet",
+          "uncompressed_bytes": 3168915
+        },
+        {
+          "compressed_bytes": 3506150,
+          "crc32": "41fc509f",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2019/month=3/eagle_jobs_energy_metrics_201903_0.parquet",
+          "uncompressed_bytes": 4436987
+        },
+        {
+          "compressed_bytes": 3599705,
+          "crc32": "1ae43f2c",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2019/month=4/eagle_jobs_energy_metrics_201904_0.parquet",
+          "uncompressed_bytes": 4555809
+        },
+        {
+          "compressed_bytes": 10992244,
+          "crc32": "19ac09ea",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2019/month=5/eagle_jobs_energy_metrics_201905_0.parquet",
+          "uncompressed_bytes": 13759100
+        },
+        {
+          "compressed_bytes": 11901108,
+          "crc32": "7fcc7407",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2019/month=6/eagle_jobs_energy_metrics_201906_0.parquet",
+          "uncompressed_bytes": 14905591
+        },
+        {
+          "compressed_bytes": 16894262,
+          "crc32": "c13faf6e",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2019/month=7/eagle_jobs_energy_metrics_201907_0.parquet",
+          "uncompressed_bytes": 21102204
+        },
+        {
+          "compressed_bytes": 15930621,
+          "crc32": "7ae38da3",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2019/month=8/eagle_jobs_energy_metrics_201908_0.parquet",
+          "uncompressed_bytes": 19810818
+        },
+        {
+          "compressed_bytes": 18204156,
+          "crc32": "bcce1c72",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2019/month=9/eagle_jobs_energy_metrics_201909_0.parquet",
+          "uncompressed_bytes": 22893098
+        },
+        {
+          "compressed_bytes": 22433211,
+          "crc32": "927316c6",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2020/month=1/eagle_jobs_energy_metrics_202001_0.parquet",
+          "uncompressed_bytes": 28105497
+        },
+        {
+          "compressed_bytes": 25625947,
+          "crc32": "43ac2d10",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2020/month=10/eagle_jobs_energy_metrics_202010_0.parquet",
+          "uncompressed_bytes": 32249568
+        },
+        {
+          "compressed_bytes": 28837020,
+          "crc32": "12ddbd54",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2020/month=11/eagle_jobs_energy_metrics_202011_0.parquet",
+          "uncompressed_bytes": 35511180
+        },
+        {
+          "compressed_bytes": 27259611,
+          "crc32": "3520f6fd",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2020/month=12/eagle_jobs_energy_metrics_202012_0.parquet",
+          "uncompressed_bytes": 33969779
+        },
+        {
+          "compressed_bytes": 15386690,
+          "crc32": "6aabd6f8",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2020/month=2/eagle_jobs_energy_metrics_202002_0.parquet",
+          "uncompressed_bytes": 19391538
+        },
+        {
+          "compressed_bytes": 28640647,
+          "crc32": "5ce4cf32",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2020/month=3/eagle_jobs_energy_metrics_202003_0.parquet",
+          "uncompressed_bytes": 35856723
+        },
+        {
+          "compressed_bytes": 23160174,
+          "crc32": "783039fd",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2020/month=4/eagle_jobs_energy_metrics_202004_0.parquet",
+          "uncompressed_bytes": 29168424
+        },
+        {
+          "compressed_bytes": 24973867,
+          "crc32": "e34e85bb",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2020/month=5/eagle_jobs_energy_metrics_202005_0.parquet",
+          "uncompressed_bytes": 31240347
+        },
+        {
+          "compressed_bytes": 25755837,
+          "crc32": "407474d5",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2020/month=6/eagle_jobs_energy_metrics_202006_0.parquet",
+          "uncompressed_bytes": 32396462
+        },
+        {
+          "compressed_bytes": 18158511,
+          "crc32": "c55f5662",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2020/month=7/eagle_jobs_energy_metrics_202007_0.parquet",
+          "uncompressed_bytes": 22723768
+        },
+        {
+          "compressed_bytes": 20233535,
+          "crc32": "91de1188",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2020/month=8/eagle_jobs_energy_metrics_202008_0.parquet",
+          "uncompressed_bytes": 24952627
+        },
+        {
+          "compressed_bytes": 36514437,
+          "crc32": "9dc633c0",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2020/month=9/eagle_jobs_energy_metrics_202009_0.parquet",
+          "uncompressed_bytes": 45355819
+        },
+        {
+          "compressed_bytes": 27273058,
+          "crc32": "5afcef12",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2021/month=1/eagle_jobs_energy_metrics_202101_0.parquet",
+          "uncompressed_bytes": 34298655
+        },
+        {
+          "compressed_bytes": 11266729,
+          "crc32": "b3fe8620",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2021/month=10/eagle_jobs_energy_metrics_202110_0.parquet",
+          "uncompressed_bytes": 13993452
+        },
+        {
+          "compressed_bytes": 15626285,
+          "crc32": "da9d77dd",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2021/month=11/eagle_jobs_energy_metrics_202111_0.parquet",
+          "uncompressed_bytes": 19579277
+        },
+        {
+          "compressed_bytes": 19233758,
+          "crc32": "f2e32ccf",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2021/month=12/eagle_jobs_energy_metrics_202112_0.parquet",
+          "uncompressed_bytes": 24285595
+        },
+        {
+          "compressed_bytes": 26160788,
+          "crc32": "b0842cbe",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2021/month=2/eagle_jobs_energy_metrics_202102_0.parquet",
+          "uncompressed_bytes": 33300611
+        },
+        {
+          "compressed_bytes": 39017773,
+          "crc32": "04d4856c",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2021/month=3/eagle_jobs_energy_metrics_202103_0.parquet",
+          "uncompressed_bytes": 49183054
+        },
+        {
+          "compressed_bytes": 29932506,
+          "crc32": "8beef63d",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2021/month=4/eagle_jobs_energy_metrics_202104_0.parquet",
+          "uncompressed_bytes": 37879483
+        },
+        {
+          "compressed_bytes": 13918590,
+          "crc32": "407120c0",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2021/month=5/eagle_jobs_energy_metrics_202105_0.parquet",
+          "uncompressed_bytes": 17316959
+        },
+        {
+          "compressed_bytes": 12919349,
+          "crc32": "ea74ca2f",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2021/month=6/eagle_jobs_energy_metrics_202106_0.parquet",
+          "uncompressed_bytes": 16241087
+        },
+        {
+          "compressed_bytes": 12410949,
+          "crc32": "14dfc4ba",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2021/month=7/eagle_jobs_energy_metrics_202107_0.parquet",
+          "uncompressed_bytes": 15392798
+        },
+        {
+          "compressed_bytes": 16884158,
+          "crc32": "7bc2339c",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2021/month=8/eagle_jobs_energy_metrics_202108_0.parquet",
+          "uncompressed_bytes": 20856322
+        },
+        {
+          "compressed_bytes": 21627223,
+          "crc32": "63162217",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2021/month=9/eagle_jobs_energy_metrics_202109_0.parquet",
+          "uncompressed_bytes": 27089897
+        },
+        {
+          "compressed_bytes": 13428015,
+          "crc32": "39e8385c",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2022/month=1/eagle_jobs_energy_metrics_202201_0.parquet",
+          "uncompressed_bytes": 16995359
+        },
+        {
+          "compressed_bytes": 25619428,
+          "crc32": "6a589a06",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2022/month=10/eagle_jobs_energy_metrics_202210_0.parquet",
+          "uncompressed_bytes": 34214010
+        },
+        {
+          "compressed_bytes": 36384549,
+          "crc32": "43a0683f",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2022/month=11/eagle_jobs_energy_metrics_202211_0.parquet",
+          "uncompressed_bytes": 47176360
+        },
+        {
+          "compressed_bytes": 31183141,
+          "crc32": "600ab2d4",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2022/month=12/eagle_jobs_energy_metrics_202212_0.parquet",
+          "uncompressed_bytes": 39867407
+        },
+        {
+          "compressed_bytes": 26802756,
+          "crc32": "fa67520e",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2022/month=2/eagle_jobs_energy_metrics_202202_0.parquet",
+          "uncompressed_bytes": 34543401
+        },
+        {
+          "compressed_bytes": 51810355,
+          "crc32": "86af5181",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2022/month=3/eagle_jobs_energy_metrics_202203_0.parquet",
+          "uncompressed_bytes": 66819238
+        },
+        {
+          "compressed_bytes": 19248854,
+          "crc32": "cbecd57b",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2022/month=4/eagle_jobs_energy_metrics_202204_0.parquet",
+          "uncompressed_bytes": 24405720
+        },
+        {
+          "compressed_bytes": 17786822,
+          "crc32": "94c558c4",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2022/month=5/eagle_jobs_energy_metrics_202205_0.parquet",
+          "uncompressed_bytes": 22274802
+        },
+        {
+          "compressed_bytes": 17983127,
+          "crc32": "0e5fef20",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2022/month=6/eagle_jobs_energy_metrics_202206_0.parquet",
+          "uncompressed_bytes": 22699768
+        },
+        {
+          "compressed_bytes": 21664616,
+          "crc32": "11a67e24",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2022/month=7/eagle_jobs_energy_metrics_202207_0.parquet",
+          "uncompressed_bytes": 27622891
+        },
+        {
+          "compressed_bytes": 26895109,
+          "crc32": "38b41631",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2022/month=8/eagle_jobs_energy_metrics_202208_0.parquet",
+          "uncompressed_bytes": 33947516
+        },
+        {
+          "compressed_bytes": 33191843,
+          "crc32": "8693ba23",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2022/month=9/eagle_jobs_energy_metrics_202209_0.parquet",
+          "uncompressed_bytes": 42686753
+        },
+        {
+          "compressed_bytes": 30482088,
+          "crc32": "b92f6937",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2023/month=1/eagle_jobs_energy_metrics_202301_0.parquet",
+          "uncompressed_bytes": 38252625
+        },
+        {
+          "compressed_bytes": 20649903,
+          "crc32": "dbe78193",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2023/month=10/eagle_jobs_energy_metrics_202310_0.parquet",
+          "uncompressed_bytes": 25944084
+        },
+        {
+          "compressed_bytes": 22507697,
+          "crc32": "a51dd15c",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2023/month=11/eagle_jobs_energy_metrics_202311_0.parquet",
+          "uncompressed_bytes": 27727900
+        },
+        {
+          "compressed_bytes": 23792486,
+          "crc32": "0e452dff",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2023/month=12/eagle_jobs_energy_metrics_202312_0.parquet",
+          "uncompressed_bytes": 30485948
+        },
+        {
+          "compressed_bytes": 25407154,
+          "crc32": "90e6a478",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2023/month=2/eagle_jobs_energy_metrics_202302_0.parquet",
+          "uncompressed_bytes": 33426725
+        },
+        {
+          "compressed_bytes": 39266826,
+          "crc32": "1ba1dcbb",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2023/month=3/eagle_jobs_energy_metrics_202303_0.parquet",
+          "uncompressed_bytes": 51223795
+        },
+        {
+          "compressed_bytes": 31329270,
+          "crc32": "3d53b42b",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2023/month=4/eagle_jobs_energy_metrics_202304_0.parquet",
+          "uncompressed_bytes": 38696360
+        },
+        {
+          "compressed_bytes": 25903355,
+          "crc32": "d31ce653",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2023/month=5/eagle_jobs_energy_metrics_202305_0.parquet",
+          "uncompressed_bytes": 32585529
+        },
+        {
+          "compressed_bytes": 23291169,
+          "crc32": "e348f412",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2023/month=6/eagle_jobs_energy_metrics_202306_0.parquet",
+          "uncompressed_bytes": 30471355
+        },
+        {
+          "compressed_bytes": 23392508,
+          "crc32": "0d559d40",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2023/month=7/eagle_jobs_energy_metrics_202307_0.parquet",
+          "uncompressed_bytes": 29287628
+        },
+        {
+          "compressed_bytes": 35035199,
+          "crc32": "225047cb",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2023/month=8/eagle_jobs_energy_metrics_202308_0.parquet",
+          "uncompressed_bytes": 43324693
+        },
+        {
+          "compressed_bytes": 29552409,
+          "crc32": "1e58d9c9",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2023/month=9/eagle_jobs_energy_metrics_202309_0.parquet",
+          "uncompressed_bytes": 36858755
+        },
+        {
+          "compressed_bytes": 31771404,
+          "crc32": "371bbe80",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2024/month=1/eagle_jobs_energy_metrics_202401_0.parquet",
+          "uncompressed_bytes": 39603605
+        },
+        {
+          "compressed_bytes": 18571536,
+          "crc32": "7ce1318f",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2024/month=2/eagle_jobs_energy_metrics_202402_0.parquet",
+          "uncompressed_bytes": 23060898
+        },
+        {
+          "compressed_bytes": 19080922,
+          "crc32": "931216ce",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2024/month=3/eagle_jobs_energy_metrics_202403_0.parquet",
+          "uncompressed_bytes": 24621692
+        },
+        {
+          "compressed_bytes": 9717202,
+          "crc32": "924e4c8b",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2024/month=4/eagle_jobs_energy_metrics_202404_0.parquet",
+          "uncompressed_bytes": 12156377
+        },
+        {
+          "compressed_bytes": 15446534,
+          "crc32": "520e32bf",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2024/month=5/eagle_jobs_energy_metrics_202405_0.parquet",
+          "uncompressed_bytes": 21405084
+        },
+        {
+          "compressed_bytes": 4932008,
+          "crc32": "5e34667d",
+          "path": "esif.hpc.eagle.job-anon-energy-metrics/year=2024/month=6/eagle_jobs_energy_metrics_202406_0.parquet",
+          "uncompressed_bytes": 6184171
+        }
+      ],
+      "sha256": "966ca575cc50b3273719b39781e32728ae066ece4af699fb5d73d9db4362ecce",
+      "uncompressed_bytes": 1822378646
+    }
+  },
+  "Eagle_state_evidence": {
+    "co_resident_samples": 0,
+    "exact_samples": 5546367,
+    "max_exact_concurrent_jobs": 1
+  },
+  "Eagle_time_alignment": {
+    "gpu_pair_rule": "exact same physical-node timestamp",
+    "heldout_offset_selection": false,
+    "ilo_max_staleness_seconds": 300,
+    "ilo_rule": "most recent same-node iLO sample at or before Ganglia timestamp",
+    "job_timestamp_fields": [
+      "start_time_tz",
+      "end_time_tz"
+    ],
+    "outside_staleness": "MISSING_FAIL_CLOSED",
+    "random_row_split_allowed": false,
+    "telemetry_duplicate_resolution": "exact node/metric/timestamp collapse only; no value fitting",
+    "timezone": "UTC"
+  },
+  "Eagle_total_power_heldout_metrics": {
+    "gpu_board_sum": {
+      "B_E0": {
+        "bias_w": 2.1330028687421736,
+        "mae_w": 53.25910712038344,
+        "mean_measured_w": 94.29344359734498,
+        "n": 1086846,
+        "nrmse_by_mean": 0.8198202074400619,
+        "p95_abs_error_w": 168.57355353391472,
+        "rmse_w": 77.30367049021314,
+        "worst_abs_error_w": 498.5735535339147
+      },
+      "B_E1": {
+        "bias_w": -0.3118835897391523,
+        "mae_w": 34.04110677325321,
+        "mean_measured_w": 94.29344359734498,
+        "n": 1086846,
+        "nrmse_by_mean": 0.6424907547941838,
+        "p95_abs_error_w": 126.4395086948496,
+        "rmse_w": 60.582665749000974,
+        "worst_abs_error_w": 436.23278420349027
+      },
+      "B_E2": {
+        "bias_w": -0.640012251061341,
+        "mae_w": 32.97146864225671,
+        "mean_measured_w": 94.29344359734498,
+        "n": 1086846,
+        "nrmse_by_mean": 0.6384710802365425,
+        "p95_abs_error_w": 123.32710824981409,
+        "rmse_w": 60.20363679282034,
+        "worst_abs_error_w": 441.4220130048539
+      },
+      "B_E3": {
+        "bias_w": -0.6400122510602756,
+        "mae_w": 32.97146864225701,
+        "mean_measured_w": 94.29344359734498,
+        "n": 1086846,
+        "nrmse_by_mean": 0.6384710802365429,
+        "p95_abs_error_w": 123.32710824981405,
+        "rmse_w": 60.203636792820376,
+        "worst_abs_error_w": 441.4220130048539
+      }
+    },
+    "whole_node_ilo": {
+      "B_E0": {
+        "bias_w": 2.7262974596990732,
+        "mae_w": 118.29849898070773,
+        "mean_measured_w": 500.7643180358579,
+        "n": 1086846,
+        "nrmse_by_mean": 0.28314410437119325,
+        "p95_abs_error_w": 260.50938450443687,
+        "rmse_w": 141.78846433131437,
+        "worst_abs_error_w": 830.5093845044369
+      },
+      "B_E1": {
+        "bias_w": -0.2961817100930462,
+        "mae_w": 105.94801415111398,
+        "mean_measured_w": 500.7643180358579,
+        "n": 1086846,
+        "nrmse_by_mean": 0.2543374306061044,
+        "p95_abs_error_w": 246.3566923525093,
+        "rmse_w": 127.3631099884582,
+        "worst_abs_error_w": 731.5936197009123
+      },
+      "B_E2": {
+        "bias_w": -1.4944598220038974,
+        "mae_w": 103.23289031870246,
+        "mean_measured_w": 500.7643180358579,
+        "n": 1086846,
+        "nrmse_by_mean": 0.24953308526926163,
+        "p95_abs_error_w": 240.48419047349216,
+        "rmse_w": 124.95726527224538,
+        "worst_abs_error_w": 739.5400744505856
+      },
+      "B_E3": {
+        "bias_w": -1.7945813544890832,
+        "mae_w": 101.66923264235085,
+        "mean_measured_w": 500.7643180358579,
+        "n": 1086846,
+        "nrmse_by_mean": 0.24792280740478562,
+        "p95_abs_error_w": 244.30700064108424,
+        "rmse_w": 124.15089557559281,
+        "worst_abs_error_w": 760.5638193688575
+      }
+    }
+  },
+  "June_result_content_reads": 0,
+  "June_scientific_input_reads": 0,
+  "KESTREL_NATIVE_ENERGY_CLASSIFICATION": "KESTREL_NODE_ENERGY_NOT_IDENTIFIABLE",
+  "Kestrel_native_energy": {
+    "U2_statistics": {
+      "U2_jobs": 67874,
+      "energy_negative": 0,
+      "energy_null": 67871,
+      "energy_positive": 0,
+      "energy_zero": 3,
+      "joule_to_wh_max_abs_error": 0.0,
+      "multi_gpu_node": 4,
+      "multi_nodelist": 4,
+      "multi_shared_node": 102,
+      "null_fraction": 0.999955800453782,
+      "positive_fraction": 0.0,
+      "zero_fraction": 4.4199546217992164e-05
+    },
+    "classification": "KESTREL_NODE_ENERGY_NOT_IDENTIFIABLE",
+    "source_semantics": "Slurm-reported energy from node-level power monitoring; public datacard does not document shared-job attribution or expose per-node time series"
+  },
+  "May_result_content_reads": 0,
+  "May_scientific_input_reads": 0,
+  "OpenDSS_calls_inside_Benders": 0,
+  "RCMQT_V3R2": {
+    "performed": false,
+    "required": false
+  },
+  "READY_FOR_APRIL_RESUME": true,
+  "U1_CLASSIFICATION": "V17_V3_U1_NOT_IDENTIFIABLE",
+  "U2_CLASSIFICATION": "V17_V3_U2_NOT_IDENTIFIABLE",
+  "U3_CLASSIFICATION": "V17_V3_U3_NOT_IDENTIFIABLE",
+  "V100_TO_H100_TRANSFER_CLASSIFICATION": "V100_TO_H100_TRANSFER_NOT_AUTHORIZED_UPSTREAM_MARGINAL_FAILURE",
+  "V3R2_authority_minted": false,
+  "active_final_AIDC_power_boundary": "V17_AIDC_POWER_MODEL_V1_FROZEN_KAPPA_BOUNDARY",
+  "arbitrary_flexible_scaling_calls": 0,
+  "artifact_sha256": {
+    "V17_AIDC_POWER_MODEL_V3R2_CONTRACT.json": {
+      "bytes": 1058,
+      "sha256": "5e37454739a8a9f3c107e0831a671519e166c7002a7cb3a319eb517849de342e"
+    },
+    "V17_AIDC_POWER_MODEL_V3R2_VALIDATION.json": {
+      "bytes": 4678,
+      "sha256": "1374d00446ab27f0d841eb2ff2b83d0a513fb70833d5108686b7d7b57c0ce004"
+    },
+    "V17_AIDC_POWER_V1_V3R2_COVERAGE_COMPARISON.json": {
+      "bytes": 1666,
+      "sha256": "b653e15960e88e29941d6771010c5c9395fcd7b34a7f87820d4041529fcbc62f"
+    },
+    "V17_AIDC_POWER_V3R2_ACTIVATION_DECISION.json": {
+      "bytes": 1046,
+      "sha256": "fc63b938eb1816deac7e112b856f1cdc99934f1580586408d42a8f490c77b695"
+    },
+    "V17_AIDC_POWER_V3R2_COHORT_IDENTIFIABILITY.json": {
+      "bytes": 1553,
+      "sha256": "a46f6fd296b76a7c072ebfd2ad065ba09f9c15b81d8cdecd1cf42e4361a03717"
+    },
+    "V17_AIDC_POWER_V3R2_D1_CAUSALITY_AUDIT.json": {
+      "bytes": 1212,
+      "sha256": "fe1592c9c96b3f6286a1c1dc05b8f7343929d69e5fab5ac43097c5c78a3c0edb"
+    },
+    "V17_AIDC_POWER_V3R2_EAGLE_PRECHANGE_MANIFEST.json": {
+      "bytes": 63618,
+      "sha256": "9fecfe408a1485a290cdb99914018b2bd423739d1488ba5ee098e79699557584"
+    },
+    "V17_AIDC_POWER_V3R2_TRANSFER_ACCEPTANCE_CONTRACT.json": {
+      "bytes": 1170,
+      "sha256": "783c48026a088d75c1adcc565bbac741b5009d26ee693a2dbedd1e6e2d7331e7"
+    },
+    "V17_EAGLE_DATASET_DISCOVERY.json": {
+      "bytes": 21885,
+      "sha256": "e4a89cf91174b96e1f715a17e135959bbff2f33ab80afb6d6b13a07c0e16b775"
+    },
+    "V17_EAGLE_GPU_NODE_TELEMETRY_SCHEMA_AUDIT.json": {
+      "bytes": 1444,
+      "sha256": "404f359ddf7cd7a7ee35270e7a8353d69de06882d0ee701d5562b43d8698c261"
+    },
+    "V17_EAGLE_HARDWARE_MEASUREMENT_AUTHORITY.json": {
+      "bytes": 1692,
+      "sha256": "9abbd2dbbf0b917ef4a0a06372a042e0a0d2daddcc1b95c05e240afe3a1eb56c"
+    },
+    "V17_EAGLE_JOB_ENERGY_SCHEMA_AUDIT.json": {
+      "bytes": 2925,
+      "sha256": "8eb20a44ce8486ac435ffc19a2dff7583bac425c1693e5f4bc5160eeac73f94b"
+    },
+    "V17_EAGLE_KESTREL_COMMON_OBSERVABLE_CONTRACT.json": {
+      "bytes": 1309,
+      "sha256": "45e107ba3a8681ab64a2f355b720e19cb1594f90f2448c9e18aba40fd64910ac"
+    },
+    "V17_EAGLE_SHARED_MARGINAL_POWER_VALIDATION.json": {
+      "bytes": 11120,
+      "sha256": "1e8300f16f6e5ae5ed3b44e1db164f695ff5a9e69d3d34d17883f91b3efdd2c4"
+    },
+    "V17_EAGLE_SHARED_NODE_STATE_DATASET.json": {
+      "bytes": 1998,
+      "sha256": "266d4f451e282b5f914f1737166e15c5cce679faa1d3653bfec9a56aafdcb4ea"
+    },
+    "V17_EAGLE_SHARED_POWER_SPLIT_CONTRACT.json": {
+      "bytes": 1123,
+      "sha256": "6793529a46e0030dcf090b025c57af28e3079cd561982d1b33f48845898af459"
+    },
+    "V17_EAGLE_SOURCE_AUTHORITY_MANIFEST.json": {
+      "bytes": 20735,
+      "sha256": "2d7c57e49d94872891053badd240244aea6a17e593f3e76400f014928737b383"
+    },
+    "V17_EAGLE_TEMPORAL_ALIGNMENT_CONTRACT.json": {
+      "bytes": 1914,
+      "sha256": "c828db8b635ece2d72838727b3d254266ef8f05508bd7ef92ad00da288cc42c0"
+    },
+    "V17_KESTREL_NATIVE_ENERGY_FIELD_AUDIT.json": {
+      "bytes": 3864,
+      "sha256": "78d01d5e3260b5bedc830f11bdf44f33c8a8fa270dcb117df4db30fbeb2702f0"
+    },
+    "V17_V3R2_KESTREL_U2_ENERGY_IDENTIFIABILITY.json": {
+      "bytes": 1334,
+      "sha256": "4899abb1cf6da06b9442a5527a874e90bf982554f888c22c05da4182124f2f76"
+    },
+    "V17_V3R2_KESTREL_U2_NODE_INTERVALS_MANIFEST.json": {
+      "bytes": 1923,
+      "sha256": "d621fdadce25a5b202dee3ab3ecaf27fc9b02011e0fe2c28ff07b1b8f48b5e39"
+    },
+    "V17_V3R2_KESTREL_U2_REPRODUCTION.json": {
+      "bytes": 4877,
+      "sha256": "cb2ea78f9f92cd5e8b57bf175eba11f66101bc091e49a3d3880f0f21616cdcd9"
+    },
+    "V17_V3R2_V100_TO_H100_RESPONSE_TRANSFER_AUDIT.json": {
+      "bytes": 1161,
+      "sha256": "03a589473990e64c999d1d7900eebf4d40004514d43bb25dc6ee5fd61d913ee6"
+    }
+  },
+  "cohort_support": {
+    "U2A_new_active_jobs": 0,
+    "U2A_new_active_node_equivalent_hours": 0.0,
+    "U2B_historical_only_node_equivalent_hours": 111441.48388888942
+  },
+  "concurrent_job_count_incremental_information": {
+    "gpu_board_sum": {
+      "E1_to_E2_rmse_reduction_w": 0.37902895618063326,
+      "interpretation": "active-job indicator improvement only; not co-residency information because job_count never exceeds one"
+    },
+    "whole_node_ilo": {
+      "E1_to_E2_rmse_reduction_w": 2.405844716212826,
+      "interpretation": "active-job indicator improvement only; not co-residency information because job_count never exceeds one"
+    }
+  },
+  "coverage": {
+    "Eagle_absolute_kW_to_H100_transfer_calls": 0,
+    "June_result_content_reads": 0,
+    "June_scientific_input_reads": 0,
+    "May_result_content_reads": 0,
+    "May_scientific_input_reads": 0,
+    "OpenDSS_calls_inside_Benders": 0,
+    "V1_job_fraction": 0.17512343733585461,
+    "V1_modelable": {
+      "GPU_hours": 73532.97555555556,
+      "jobs": 15003,
+      "node_equivalent_hours": 18383.24388888889,
+      "occupied_node_hours": 18383.24388888889
+    },
+    "V1_node_equivalent_hour_fraction": 0.12039563303594165,
+    "V3R2_job_fraction": 0.17512343733585461,
+    "V3R2_modelable": {
+      "GPU_hours": 73532.97555555556,
+      "jobs": 15003,
+      "node_equivalent_hours": 18383.24388888889,
+      "occupied_node_hours": 18383.24388888889
+    },
+    "V3R2_node_equivalent_hour_fraction": 0.12039563303594165,
+    "arbitrary_flexible_scaling_calls": 0,
+    "effect_selected_power_parameters": 0,
+    "grid_benefit_selected_power_parameters": 0,
+    "incremental_coverage": 0.0,
+    "newly_recovered": {
+      "U1": {
+        "jobs": 0,
+        "node_equivalent_hours": 0.0
+      },
+      "U2A": {
+        "jobs": 0,
+        "node_equivalent_hours": 0.0
+      },
+      "U3": {
+        "jobs": 0,
+        "node_equivalent_hours": 0.0
+      }
+    },
+    "remaining_April_day_runs": 0,
+    "remaining_unmodeled_node_equivalent_hours": 134307.04416666666,
+    "rowwise_Eagle_to_Kestrel_merges": 0,
+    "schema": "V17_AIDC_POWER_V1_V3R2_COVERAGE_COMPARISON_V1",
+    "semantic_flexible": {
+      "GPU_hours": 610761.1522222222,
+      "jobs": 85671,
+      "node_equivalent_hours": 152690.28805555555,
+      "occupied_node_hours": 517949.1363888889
+    },
+    "status": "PASS_NO_INCREMENTAL_ACTIVE_COVERAGE"
+  },
+  "effect_selected_power_parameters": 0,
+  "generation_git_head": "7ff7493d41d586cb20646fdd997813b8b139e3b3",
+  "generation_worktree_status": "M tests/test_v17_v3r2_eagle_forensic.py\n?? dayahead/artifacts/v17_candidate/V17_AIDC_POWER_V3R2_EAGLE_FINAL_REVIEW.json\n?? dayahead/v17_v3r2_final_review.py\n?? tests/test_v17_v3r2_final_review.py",
+  "git_commits": {
+    "Eagle_discovery_provenance_schema_time_alignment": "845acf17217a0e682b4e441d97f13ab7bda136f4",
+    "Eagle_shared_node_marginal_validation": "ae91e8b3541d47767c53df9b19dc046c4ee1b16b",
+    "Kestrel_native_energy_U2_forensic": "befd82083f80c247bc38a6dd4b8512d834d784a8",
+    "V100_H100_transfer_D1_causality": "7ff7493d41d586cb20646fdd997813b8b139e3b3",
+    "V3R2_model_RCMQT": "NOT_CREATED_NOT_AUTHORIZED",
+    "final_review": "THIS_ARTIFACT_COMMIT_REPORTED_AFTER_CREATION",
+    "same_7day_electrical_validation": "NOT_CREATED_NOT_REQUIRED"
+  },
+  "grid_benefit_selected_power_parameters": 0,
+  "normalized_Eagle_sharing_response": {
+    "equation": "g_shared(X)=P_dynamic(X)/P_dynamic(full-GPU reference)",
+    "reason": "no source-identifiable co-resident Eagle state and unreliable marginal transitions",
+    "valid": false
+  },
+  "prechange_authority_preservation": {
+    "mismatch_count": 0,
+    "mismatches": [],
+    "pass": true,
+    "record_count": 260
+  },
+  "preserved_AC_restoration_evidence": {
+    "first_pass_PASS": 27,
+    "note": "Preserved evidence only; no AC or schedule rerun in V3R1.",
+    "restoration_failure": 0,
+    "restoration_required": 1,
+    "restoration_success": 1,
+    "schedules": 28
+  },
+  "primary_classification": "V17_AIDC_POWER_V3R2_G_MARGINAL_POWER_NOT_IDENTIFIABLE",
+  "remaining_April_day_runs": 0,
+  "rowwise_Eagle_to_Kestrel_merges": 0,
+  "same_7day_V3R2": {
+    "performed": false,
+    "required": false
+  },
+  "schema": "V17_AIDC_POWER_V3R2_EAGLE_FINAL_REVIEW_V1",
+  "status": "V17_AIDC_POWER_V3R2_EAGLE_NOT_AUTHORIZED",
+  "tests": {
+    "focused_command": "python -m pytest tests/test_v17_v3r2_eagle_forensic.py tests/test_v17_v3r2_final_review.py -q",
+    "focused_result": "15 passed in 0.11s",
+    "full_command": "python -m pytest tests -q",
+    "full_result": "615 passed, 4 skipped, 84 subtests passed, 4 failed in 58.52s",
+    "unrelated_or_environment_failures": [
+      "torch absent: production-weight fingerprint test",
+      "existing PFR multi-trust-region MESS projection regression",
+      "two POSIX fcntl source-cache tests unsupported on Windows"
+    ]
+  },
+  "transfer_decision": {
+    "Dataset312_kappa_changes": 0,
+    "Eagle_absolute_kW_to_H100_authorized": false,
+    "Eagle_absolute_kW_to_H100_transfer_calls": 0,
+    "Eagle_hardware": "2 x NVIDIA Tesla V100 PCIe",
+    "H100_sources": [
+      "Dataset312 frozen absolute kappa",
+      "Scientific Data H100",
+      "EuroSys Zenodo H100"
+    ],
+    "June_result_content_reads": 0,
+    "June_scientific_input_reads": 0,
+    "May_result_content_reads": 0,
+    "May_scientific_input_reads": 0,
+    "OpenDSS_calls_inside_Benders": 0,
+    "V100_TO_H100_TRANSFER_CLASSIFICATION": "V100_TO_H100_TRANSFER_NOT_AUTHORIZED_UPSTREAM_MARGINAL_FAILURE",
+    "arbitrary_flexible_scaling_calls": 0,
+    "candidate_dimensionless_equation": "g_shared(X)=P_dynamic(X)/P_dynamic(full-GPU reference)",
+    "candidate_dimensionless_response_identified": false,
+    "cross_hardware_heldout_transfer_evaluation_performed": false,
+    "effect_selected_power_parameters": 0,
+    "grid_benefit_selected_power_parameters": 0,
+    "remaining_April_day_runs": 0,
+    "rowwise_Eagle_to_Kestrel_merges": 0,
+    "schema": "V17_V3R2_V100_TO_H100_RESPONSE_TRANSFER_AUDIT_V1",
+    "status": "FAIL_CLOSED_UPSTREAM_EAGLE_SHARED_RESPONSE_ABSENT"
+  }
+}
