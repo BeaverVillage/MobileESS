@@ -74,3 +74,24 @@ def test_all_v3r2_discovery_counters_are_zero() -> None:
         payload = load(name)
         for key, value in zero_counters().items():
             assert payload[key] == value
+
+
+def test_kestrel_native_energy_is_not_reinterpreted_as_u2_power() -> None:
+    audit = load("V17_KESTREL_NATIVE_ENERGY_FIELD_AUDIT.json")
+    reproduction = load("V17_V3R2_KESTREL_U2_REPRODUCTION.json")
+    identity = load("V17_V3R2_KESTREL_U2_ENERGY_IDENTIFIABILITY.json")
+    assert reproduction["U2"]["jobs"] == 67_874
+    assert abs(reproduction["U2"]["node_equivalent_hours"] - 122_237.74291666666) < 1e-9
+    assert audit["U2_statistics"]["energy_positive"] == 0
+    assert audit["U2_statistics"]["energy_null"] == 67_871
+    assert audit["U2_statistics"]["energy_zero"] == 3
+    assert audit["direct_job_power_authorized"] is False
+    assert identity["classification"] == "KESTREL_NODE_ENERGY_NOT_IDENTIFIABLE"
+    assert identity["P_job_equals_energy_over_runtime_authorized"] is False
+
+
+def test_kestrel_u2_interval_manifest_is_ex_post_only() -> None:
+    manifest = load("V17_V3R2_KESTREL_U2_NODE_INTERVALS_MANIFEST.json")
+    assert manifest["fully_reconstructable_ex_post_jobs"] == 62_498
+    assert manifest["future_physical_node_assignment_available_D1"] is False
+    assert "GPU device assignment" in manifest["forbidden_inferences"]
