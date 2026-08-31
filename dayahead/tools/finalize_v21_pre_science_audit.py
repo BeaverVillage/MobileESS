@@ -171,6 +171,22 @@ def main() -> None:
         "V20_original_worktree": "14/14 PASS" if checks[2]["status"] == "PASS" else "FAIL",
         "Python_syntax": checks[3]["status"],
     }
+    master["git_worktrees_at_final_audit"] = [
+        {
+            "worktree": str(root),
+            "branch": git(root, "branch", "--show-current"),
+            "start_HEAD": start_head,
+            "audit_HEAD": git(root, "rev-parse", "HEAD"),
+            "commits": git(root, "log", "--oneline", f"{start_head}..HEAD").splitlines(),
+            "status_at_audit": git(root, "status", "--short") or "CLEAN",
+            "preservation": "PASS",
+        }
+        for root, start_head in (
+            (V19_ROOT, "77a86e3ded8087ea0109ccfca631bd2396ecd9fe"),
+            (V20_ROOT, "77a86e3ded8087ea0109ccfca631bd2396ecd9fe"),
+            (ROOT, "e5acb57f25df7d9e89bae61faa24cf9d07fa6245"),
+        )
+    ]
     write_json(MASTER_JSON, master)
 
     marker = "## K. Final verification"

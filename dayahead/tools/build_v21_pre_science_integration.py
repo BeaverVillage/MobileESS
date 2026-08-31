@@ -530,6 +530,41 @@ def main() -> None:
     }
     write_json("V21_READY_FLAGS.json", ready_flags)
 
+    all_sites = [
+        "Equinix ME4",
+        "Micron21",
+        "Fujitsu Noble Park",
+        "AAPT / TPG Richmond",
+        "NEXTDC M2",
+        "NEXTDC M3",
+        "Vocus Mitcham",
+        "NEXTDC M1",
+        "Equinix ME5",
+        "CDC Brooklyn BK1",
+        "IBM MEL01",
+        "STACK MEL01A",
+    ]
+    scale_summary = {
+        "sites_reviewed": 12,
+        "April_2025_applicability_confirmed_sites": 7,
+        "April_2025_applicability_uncertain_sites": 5,
+        "direct_common_IT_MW_sites": 0,
+        "common_operating_capacity_boundary_sites": 4,
+        "common_operating_capacity_boundary_MW": 106.5,
+        "site_specific_electrical_weights_available": False,
+        "site_specific_GPU_weights_available": False,
+        "unresolved_direct_IT_MW_sites": all_sites,
+        "unknown_reported_capacity_sites": [
+            "Equinix ME4",
+            "CDC Brooklyn BK1",
+            "IBM MEL01",
+        ],
+        "low_primary_high_role": "PARTIAL_COVERAGE_DIAGNOSTIC_NOT_FINAL_SCALE",
+    }
+    baseline_metrics = comparison["SCALE_INDEPENDENT_ML_AUTHORITY"][
+        "B3_LIGHTGBM_QUANTILE"
+    ]
+
     master = {
         "artifact_id": "V21_OVERNIGHT_MASTER_STATUS_V1",
         "OVERNIGHT_RESULT": "SAFE_PRE_SCIENCE_WORK_COMPLETE_AUTHORITY_BLOCKERS_REMAIN",
@@ -538,13 +573,33 @@ def main() -> None:
             "C_MASS_daily_WAPE": comparison["SCALE_INDEPENDENT_ML_AUTHORITY"]["V19-A"]["daily_WAPE_mean"],
             "C_MASS_burst_WAPE": comparison["SCALE_INDEPENDENT_ML_AUTHORITY"]["V19-A"]["burst_WAPE_mean"],
             "best_baseline": selection["selected_model_id"],
+            "best_baseline_daily_WAPE": baseline_metrics["daily_WAPE_mean"],
+            "best_baseline_burst_WAPE": baseline_metrics["burst_WAPE_mean"],
+            "C_MASS_daily_WAPE_relative_improvement_vs_best_baseline": acceptance[
+                "daily_WAPE_relative_improvement"
+            ],
+            "C_MASS_burst_WAPE_relative_improvement_vs_best_baseline": acceptance[
+                "burst_WAPE_relative_improvement"
+            ],
             "PROPOSED_MODEL_ACCEPTED": ready["PROPOSED_MODEL_ACCEPTED"],
             "selected_production_forecast_model": selection["selected_model_id"],
             "device": ready["execution_summary"]["device_name"],
         },
         "AIDC_scale": scale,
+        "AIDC_scale_summary": scale_summary,
         "D1_state": d1,
+        "D1_state_summary": {
+            "queue_snapshot_authority": "UNAVAILABLE",
+            "running_state_authority": "UNAVAILABLE",
+            "best_available_class": d1["classification"],
+            "main_controllable_scope": "FORECAST_NEW_ONLY",
+        },
         "job_to_power": partial,
+        "job_to_power_summary": {
+            "full_node_authority": "DATASET312_GPU_BOARD_PLUS_CPU_PACKAGE_INCREMENTAL_POWER",
+            "partial_node_authority": partial["classification"],
+            "remaining_power_gap": "PARTIAL_NODE_WORKLOAD_DEPENDENT_HOST_CPU_INCREMENT",
+        },
         "integration": {
             "forecast_bundle_ready": bundle_validation["status"] == "PASS",
             "scheduler_adapter_ready": True,
@@ -588,6 +643,8 @@ def main() -> None:
         "",
         f"- C-MASS novelty gate: {master['ML']['C_MASS_novelty_gate']}",
         f"- C-MASS Daily/Burst WAPE: {master['ML']['C_MASS_daily_WAPE']:.6f} / {master['ML']['C_MASS_burst_WAPE']:.6f}",
+        f"- best baseline Daily/Burst WAPE: {master['ML']['best_baseline_daily_WAPE']:.6f} / {master['ML']['best_baseline_burst_WAPE']:.6f}",
+        f"- C-MASS relative improvement (Daily/Burst): {master['ML']['C_MASS_daily_WAPE_relative_improvement_vs_best_baseline']:.6f} / {master['ML']['C_MASS_burst_WAPE_relative_improvement_vs_best_baseline']:.6f}",
         f"- proposed accepted: {master['ML']['PROPOSED_MODEL_ACCEPTED']}",
         f"- selected production model: `{selection['selected_model_id']}`",
         "- selection inputs: training-only blocked-CV metrics; facility/grid/April target reads = 0",
@@ -595,8 +652,11 @@ def main() -> None:
         "## B–F. Independent authorities and integration",
         "",
         f"- site scale: `{scale['classification']}`",
+        "- site evidence: 12/12 reviewed; April applicability 7 confirmed + 5 uncertain; direct common IT MW 0/12",
+        "- common operating-capacity boundary: 4/12 sites, 106.5 MW; low/primary/high are partial diagnostics only",
         f"- D-1 state: `{d1['classification']}`; main scope remains FORECAST_NEW_ONLY",
-        f"- partial-node: `{partial['classification']}`",
+        "- full-node power: Dataset312 GPU-board + CPU-package incremental authority",
+        f"- partial-node: `{partial['classification']}`; host/CPU increment remains unidentified",
         f"- forecast bundle: {bundle_validation['status']} ({len(bundles)} days)",
         f"- G1–G17 passed: {preflight['passed']}; failed: {', '.join(preflight['failed_gates'])}",
         f"- locked test: `{locked['classification']}`",

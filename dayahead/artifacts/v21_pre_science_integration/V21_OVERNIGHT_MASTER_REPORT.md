@@ -6,6 +6,8 @@ OVERNIGHT RESULT: `SAFE_PRE_SCIENCE_WORK_COMPLETE_AUTHORITY_BLOCKERS_REMAIN`
 
 - C-MASS novelty gate: True
 - C-MASS Daily/Burst WAPE: 1.007606 / 0.847147
+- best baseline Daily/Burst WAPE: 0.890250 / 0.920623
+- C-MASS relative improvement (Daily/Burst): -0.131823 / 0.079811
 - proposed accepted: False
 - selected production model: `B3_LIGHTGBM_QUANTILE`
 - selection inputs: training-only blocked-CV metrics; facility/grid/April target reads = 0
@@ -13,8 +15,11 @@ OVERNIGHT RESULT: `SAFE_PRE_SCIENCE_WORK_COMPLETE_AUTHORITY_BLOCKERS_REMAIN`
 ## B–F. Independent authorities and integration
 
 - site scale: `A4_BOUNDARY_HETEROGENEITY_BLOCKS_FINAL_SCALE`
+- site evidence: 12/12 reviewed; April applicability 7 confirmed + 5 uncertain; direct common IT MW 0/12
+- common operating-capacity boundary: 4/12 sites, 106.5 MW; low/primary/high are partial diagnostics only
 - D-1 state: `B3_ONLY_NONCAUSAL_ORACLE_SUPPORTED`; main scope remains FORECAST_NEW_ONLY
-- partial-node: `C3_GPU_BOARD_LOWER_BOUND_REMAINS_ONLY`
+- full-node power: Dataset312 GPU-board + CPU-package incremental authority
+- partial-node: `C3_GPU_BOARD_LOWER_BOUND_REMAINS_ONLY`; host/CPU increment remains unidentified
 - forecast bundle: PASS (7 days)
 - G1–G17 passed: False; failed: G13_PCC_transformer_interface, G15_site_scale_authority, G16_locked_test_authority
 - locked test: `E3_NO_UNTOUCHED_PERIOD_AVAILABLE`

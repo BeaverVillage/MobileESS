@@ -6,6 +6,10 @@
     "C_MASS_daily_WAPE": 1.0076055679711258,
     "C_MASS_burst_WAPE": 0.8471469668307847,
     "best_baseline": "B3_LIGHTGBM_QUANTILE",
+    "best_baseline_daily_WAPE": 0.8902500584818535,
+    "best_baseline_burst_WAPE": 0.9206230064013147,
+    "C_MASS_daily_WAPE_relative_improvement_vs_best_baseline": -0.13182308540299237,
+    "C_MASS_burst_WAPE_relative_improvement_vs_best_baseline": 0.07981121377549036,
     "PROPOSED_MODEL_ACCEPTED": false,
     "selected_production_forecast_model": "B3_LIGHTGBM_QUANTILE",
     "device": "NVIDIA GeForce RTX 4060 Laptop GPU"
@@ -87,6 +91,36 @@
       "grid_benefit_based_scale_selection_count": 0
     }
   },
+  "AIDC_scale_summary": {
+    "sites_reviewed": 12,
+    "April_2025_applicability_confirmed_sites": 7,
+    "April_2025_applicability_uncertain_sites": 5,
+    "direct_common_IT_MW_sites": 0,
+    "common_operating_capacity_boundary_sites": 4,
+    "common_operating_capacity_boundary_MW": 106.5,
+    "site_specific_electrical_weights_available": false,
+    "site_specific_GPU_weights_available": false,
+    "unresolved_direct_IT_MW_sites": [
+      "Equinix ME4",
+      "Micron21",
+      "Fujitsu Noble Park",
+      "AAPT / TPG Richmond",
+      "NEXTDC M2",
+      "NEXTDC M3",
+      "Vocus Mitcham",
+      "NEXTDC M1",
+      "Equinix ME5",
+      "CDC Brooklyn BK1",
+      "IBM MEL01",
+      "STACK MEL01A"
+    ],
+    "unknown_reported_capacity_sites": [
+      "Equinix ME4",
+      "CDC Brooklyn BK1",
+      "IBM MEL01"
+    ],
+    "low_primary_high_role": "PARTIAL_COVERAGE_DIAGNOSTIC_NOT_FINAL_SCALE"
+  },
   "D1_state": {
     "artifact_id": "V20B_D1_STATE_FINAL_REVIEW_V1",
     "classification": "B3_ONLY_NONCAUSAL_ORACLE_SUPPORTED",
@@ -105,6 +139,12 @@
     "FORECAST_NEW_ONLY_main_policy": "VALID",
     "future_actual_feature_injection_count": 0
   },
+  "D1_state_summary": {
+    "queue_snapshot_authority": "UNAVAILABLE",
+    "running_state_authority": "UNAVAILABLE",
+    "best_available_class": "B3_ONLY_NONCAUSAL_ORACLE_SUPPORTED",
+    "main_controllable_scope": "FORECAST_NEW_ONLY"
+  },
   "job_to_power": {
     "artifact_id": "V20C_PARTIAL_NODE_POWER_FINAL_REVIEW_V1",
     "classification": "C3_GPU_BOARD_LOWER_BOUND_REMAINS_ONLY",
@@ -121,6 +161,11 @@
       "partial_CPU_double_count": 0,
       "PUE_application_count_per_bridge": 1
     }
+  },
+  "job_to_power_summary": {
+    "full_node_authority": "DATASET312_GPU_BOARD_PLUS_CPU_PACKAGE_INCREMENTAL_POWER",
+    "partial_node_authority": "C3_GPU_BOARD_LOWER_BOUND_REMAINS_ONLY",
+    "remaining_power_gap": "PARTIAL_NODE_WORKLOAD_DEPENDENT_HOST_CPU_INCREMENT"
   },
   "integration": {
     "forecast_bundle_ready": true,
@@ -173,7 +218,7 @@
     "worktree": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v21_pre_science",
     "branch": "codex/v21-pre-science-integration",
     "start_HEAD": "586431f2d014adf2750441be30eb95481908ac03",
-    "current_HEAD_before_final_commit": "9a5caa67421ac7b04c6aefbf70fa6b118717d274"
+    "current_HEAD_before_final_commit": "382a860d5736793f4ecbdd36df40a01bf31d7032"
   },
   "firewall": {
     "science_call_namespace": "FINAL_GRID_SCIENCE_CASES",
@@ -195,5 +240,59 @@
     "V19_original_worktree": "15/15 PASS",
     "V20_original_worktree": "14/14 PASS",
     "Python_syntax": "PASS"
-  }
+  },
+  "git_worktrees_at_final_audit": [
+    {
+      "worktree": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix",
+      "branch": "codex/v19-c-mass-tpp",
+      "start_HEAD": "77a86e3ded8087ea0109ccfca631bd2396ecd9fe",
+      "audit_HEAD": "e5acb57f25df7d9e89bae61faa24cf9d07fa6245",
+      "commits": [
+        "e5acb57 Complete V19 C-MASS-TPP model evaluation",
+        "4eed31e Fix V19 CUDA ablation routing",
+        "581d8e5 Correct V19 CUDA execution and mass precision",
+        "902d438 Implement V19 C-MASS-TPP forecasting architecture",
+        "62eaf1b Audit C-MASS-TPP prior architecture novelty",
+        "ebd4eb8 Freeze V19 C-MASS-TPP development baseline"
+      ],
+      "status_at_audit": "CLEAN",
+      "preservation": "PASS"
+    },
+    {
+      "worktree": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v20_independent",
+      "branch": "codex/v20-independent-authorities",
+      "start_HEAD": "77a86e3ded8087ea0109ccfca631bd2396ecd9fe",
+      "audit_HEAD": "d8a1b25ad9add4d148a1b49c4c335b9e11e690f7",
+      "commits": [
+        "d8a1b25 Complete V20 independent authority review",
+        "f2a6192 Audit untouched locked-test authority",
+        "7656109 Add model-agnostic integration preflight",
+        "067f248 Audit D1 workload state and partial-node power",
+        "057b535 Audit Melbourne site-specific AIDC scaling",
+        "8783508 Freeze V20 independent authority baseline"
+      ],
+      "status_at_audit": "CLEAN",
+      "preservation": "PASS"
+    },
+    {
+      "worktree": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v21_pre_science",
+      "branch": "codex/v21-pre-science-integration",
+      "start_HEAD": "e5acb57f25df7d9e89bae61faa24cf9d07fa6245",
+      "audit_HEAD": "382a860d5736793f4ecbdd36df40a01bf31d7032",
+      "commits": [
+        "382a860 Complete V21 cross-worktree pre-science audit",
+        "109d90c Add selected B3 forecast authority and pre-science gates",
+        "9a5caa6 Freeze V21 pre-science integration baseline",
+        "586431f Integrate V20 independent authority contracts",
+        "d8a1b25 Complete V20 independent authority review",
+        "f2a6192 Audit untouched locked-test authority",
+        "7656109 Add model-agnostic integration preflight",
+        "067f248 Audit D1 workload state and partial-node power",
+        "057b535 Audit Melbourne site-specific AIDC scaling",
+        "8783508 Freeze V20 independent authority baseline"
+      ],
+      "status_at_audit": "M dayahead/artifacts/v21_pre_science_integration/V21_ARTIFACT_SHA256_MANIFEST.json\n M dayahead/artifacts/v21_pre_science_integration/V21_OVERNIGHT_MASTER_REPORT.md\n M dayahead/artifacts/v21_pre_science_integration/V21_OVERNIGHT_MASTER_STATUS.json\n M dayahead/artifacts/v21_pre_science_integration/V21_TEST_REPORT.json\n M dayahead/tools/build_v21_pre_science_integration.py\n M dayahead/tools/finalize_v21_pre_science_audit.py",
+      "preservation": "PASS"
+    }
+  ]
 }
