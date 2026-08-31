@@ -1,0 +1,42 @@
+{
+  "AIDC_site_changes": 0,
+  "Dataset312_Kestrel_row_merge_count": 0,
+  "H_regeneration_calls": 0,
+  "J_I_regeneration_calls": 0,
+  "June_result_content_reads": 0,
+  "June_scientific_input_reads": 0,
+  "May_result_content_reads": 0,
+  "May_scientific_input_reads": 0,
+  "PF_changes": 0,
+  "PUE_changes": 0,
+  "RCMQT_retraining_calls": 0,
+  "artifact_id": "V17_AIDC_PARTIAL_NODE_POWER_IDENTIFIABILITY_V1",
+  "beta_changes": 0,
+  "candidate_model_fit_calls": 0,
+  "classification": "V17_AIDC_POWER_V2_C_PARTIAL_NODE_POWER_NOT_IDENTIFIABLE",
+  "cohort_decomposition_sha256": "390fbfe101f1d5d2753081194275c6fd2e4528b3c4eb02e56f230528616326ff",
+  "current_kappa_applied_to_unmodeled_node_hours": 0,
+  "effect_selected_parameters": 0,
+  "evidence": {
+    "CPU_RAPL_available": true,
+    "active_or_requested_GPU_count_per_node_state_available": false,
+    "direct_partial_GPU_ground_truth_available": false,
+    "explicit_node_host_idle_or_increment_label_available": false,
+    "full_node_only_training_node_counts": [
+      2,
+      4,
+      8,
+      16
+    ],
+    "idle_GPU_contribution_identifiable": false,
+    "per_GPU_power_available": true
+  },
+  "grid_benefit_selected_parameters": 0,
+  "partial_node_validation_claimed": false,
+  "reason": "Per-socket power is observed only without an authoritative active/requested-GPU state or measured host/idle-GPU counterfactual. Full-node fits cannot validate partial-node allocation.",
+  "remaining_April_day_runs": 0,
+  "required_decomposition": "P_inc_node = P_host_increment + sum_g P_GPU_increment,g (or measured equivalent)",
+  "scientific_boundary_expansion_authorized": false,
+  "source_audit_sha256": "5d70ad0a447495a9a6209cb3e38996a1eb4089b3f8246757d509a9ec6748b495",
+  "status": "NOT_IDENTIFIABLE_FAIL_CLOSED"
+}
