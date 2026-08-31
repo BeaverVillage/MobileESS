@@ -1,0 +1,920 @@
+{
+  "artifact_id": "V17_AIDC_FLEXIBILITY_FUNNEL_FORENSIC_V1",
+  "status": "PASS_READ_ONLY_REPRODUCIBLE_FORENSIC",
+  "classification": "D. MULTI_FACTOR_ATTRITION",
+  "temporal_contract": {
+    "training_cutoff_statement": "2025-03-31 IS ML TRAINING CUTOFF ONLY.",
+    "scaling_reference_statement": "APRIL 2025 IS THE REAL-WORLD SCALING REFERENCE PERIOD.",
+    "evaluation_dates": [
+      "2025-04-02",
+      "2025-04-03",
+      "2025-04-12",
+      "2025-04-13",
+      "2025-04-15",
+      "2025-04-22",
+      "2025-04-23"
+    ]
+  },
+  "frozen_parameters": {
+    "PUE": 1.3,
+    "beta_AIDC": 0.25,
+    "kappa_kW_per_GPU": {
+      "Q10": 0.3941881609951147,
+      "Q50": 0.48563611660901085,
+      "Q90": 0.5391969931144363
+    },
+    "slot_hours": 0.25
+  },
+  "funnel": {
+    "S0": {
+      "jobs": 85671,
+      "GPU_hours": 610761.1522222199,
+      "scope": "2024-08-19 through 2025-03-31 semantic-flexible training authority"
+    },
+    "S1": {
+      "jobs": 82875,
+      "GPU_hours": 562477.1488888941,
+      "retained_job_fraction": 0.9673635185768813,
+      "retained_GPU_hour_fraction": 0.9209445408280355,
+      "attrition_GPU_hours": 48284.00333332573
+    },
+    "S2": {
+      "jobs": null,
+      "jobs_status": "NOT_IDENTIFIABLE_FROM_AGGREGATE_FORECAST_AUTHORITY",
+      "GPU_hours": 1244.068855127062,
+      "ratio_to_S1": 0.0022117678159629603,
+      "ratio_semantics": "MAGNITUDE_RATIO_NOT_SET_RETENTION; different periods and forecast aggregate versus training support"
+    },
+    "S3": {
+      "jobs": null,
+      "admitted_GPU_hours": 1244.068855127062,
+      "rejected_GPU_hours_within_forecast_cohort": 0.0,
+      "retained_fraction_within_forecast_cohort": 1.0,
+      "already_running_GPU_hours": null,
+      "queued_or_backlog_GPU_hours": null,
+      "policy": "FORECAST_COHORT_ONLY; initial backlog=0; individual queued-job injection=0"
+    },
+    "S4": {
+      "flexible_IT_kWh": 604.1647675981244,
+      "flexible_PCC_kWh": 785.4141978775618,
+      "average_flexible_IT_kW": 3.5962188547507403,
+      "peak_flexible_IT_kW": 5.0395569242877025,
+      "average_flexible_PCC_kW": 4.675084511175963,
+      "peak_flexible_PCC_kW": 6.551424001574014,
+      "boundary": "NVML GPU-board incremental above 72.5 W/GPU idle; Q50; whole GPU; PUE once at IT-to-PCC"
+    },
+    "S5": {
+      "total_IT_kWh": 131984.0764351028,
+      "total_PCC_kWh": 171579.29936563363,
+      "mean_total_IT_kW": 785.6195025898976,
+      "peak_total_IT_kW": 929.5416000732273,
+      "mean_total_PCC_kW": 1021.3053533668668,
+      "peak_total_PCC_kW": 1208.404080095196,
+      "eta_flex_energy_IT": 0.004577558020002474,
+      "eta_flex_energy_PCC": 0.004577558020002475,
+      "eta_flex_peak_IT": 0.00542155071262082,
+      "eta_flex_peak_PCC": 0.005421550712620818
+    },
+    "S6": {
+      "B1-B0": {
+        "shifted_IT_kWh_L1_half": 58.39822804533119,
+        "positive_shifted_IT_kWh": 58.398228045330924,
+        "negative_shifted_IT_kWh_magnitude": 58.39822804533142,
+        "absolute_shifted_IT_kWh": 116.79645609066237,
+        "net_shifted_IT_kWh": -4.850820599900684e-13,
+        "shifted_pcc_kwh": 75.91769645893055,
+        "positive_shifted_pcc_kwh": 75.91769645893021,
+        "negative_shifted_pcc_kwh_magnitude": 75.91769645893085,
+        "absolute_shifted_pcc_kwh": 151.8353929178611,
+        "net_shifted_pcc_kwh": -6.306066779870889e-13,
+        "peak_individual_AIDC_abs_delta_PCC_kW": 2.2485644576844237,
+        "peak_individual_AIDC_abs_delta_IT_kW": 1.7296649674495566,
+        "peak_system_aggregate_abs_delta_PCC_kW": 2.777373631267256,
+        "peak_system_aggregate_abs_delta_IT_kW": 2.136441254820966
+      },
+      "B3-B2": {
+        "shifted_IT_kWh_L1_half": 58.79910875284026,
+        "positive_shifted_IT_kWh": 58.79910875283998,
+        "negative_shifted_IT_kWh_magnitude": 58.7991087528405,
+        "absolute_shifted_IT_kWh": 117.59821750568052,
+        "net_shifted_IT_kWh": -5.547699052280782e-13,
+        "shifted_pcc_kwh": 76.43884137869235,
+        "positive_shifted_pcc_kwh": 76.43884137869198,
+        "negative_shifted_pcc_kwh_magnitude": 76.43884137869266,
+        "absolute_shifted_pcc_kwh": 152.8776827573847,
+        "net_shifted_pcc_kwh": -7.212008767965017e-13,
+        "peak_individual_AIDC_abs_delta_PCC_kW": 4.111208181373968,
+        "peak_individual_AIDC_abs_delta_IT_kW": 3.162467831826129,
+        "peak_system_aggregate_abs_delta_PCC_kW": 14.094644382884194,
+        "peak_system_aggregate_abs_delta_IT_kW": 10.842034140680148
+      }
+    },
+    "S7": {
+      "B1-B0": {
+        "shift_utilization_energy": 0.09665943990328191,
+        "shift_utilization_peak": 0.34321766644079127
+      },
+      "B3-B2": {
+        "shift_utilization_energy": 0.0973229686772334,
+        "shift_utilization_peak": 0.6275289433848624
+      }
+    }
+  },
+  "daily": {
+    "2025-04-02": {
+      "forecast_arrival_GPU_hours": 179.9469523284729,
+      "admitted_GPU_hours": 179.94695232847286,
+      "rejected_GPU_hours_within_forecast_cohort": 2.842170943040401e-14,
+      "flexible_IT_kWh": 87.38873912442637,
+      "flexible_PCC_kWh": 113.60536086175428,
+      "total_IT_kWh": 18868.519242912065,
+      "total_PCC_kWh": 24529.075015785686,
+      "mean_total_IT_kW": 786.1883017880027,
+      "peak_total_IT_kW": 915.4396172564547,
+      "mean_total_PCC_kW": 1022.0447923244037,
+      "peak_total_PCC_kW": 1190.071502433391,
+      "mean_flexible_IT_kW": 3.641197463517765,
+      "peak_flexible_IT_kW": 4.541220944877009,
+      "mean_flexible_PCC_kW": 4.733556702573094,
+      "peak_flexible_PCC_kW": 5.903587228340109,
+      "eta_flex_energy_IT": 0.004631457190645939,
+      "eta_flex_energy_PCC": 0.004631457190645939,
+      "eta_flex_peak_IT": 0.004960699601888449,
+      "eta_flex_peak_PCC": 0.004960699601888447,
+      "pairs": {
+        "B1-B0": {
+          "positive_shifted_IT_kWh": 8.445435496570266,
+          "negative_shifted_IT_kWh_magnitude": 8.44543549656995,
+          "absolute_shifted_IT_kWh": 16.890870993140215,
+          "shifted_IT_kWh_L1_half": 8.445435496570108,
+          "net_shifted_IT_kWh": 3.149617319090444e-13,
+          "positive_shifted_PCC_kWh": 10.979066145541346,
+          "negative_shifted_PCC_kWh_magnitude": 10.979066145540935,
+          "absolute_shifted_PCC_kWh": 21.95813229108228,
+          "shifted_PCC_kWh_L1_half": 10.97906614554114,
+          "net_shifted_PCC_kWh": 4.0945025148175773e-13,
+          "peak_individual_AIDC_abs_delta_PCC_kW": 2.243939188654622,
+          "peak_system_aggregate_abs_delta_PCC_kW": 2.0544606542090484
+        },
+        "B3-B2": {
+          "positive_shifted_IT_kWh": 8.529479615142835,
+          "negative_shifted_IT_kWh_magnitude": 8.52947961514256,
+          "absolute_shifted_IT_kWh": 17.058959230285392,
+          "shifted_IT_kWh_L1_half": 8.529479615142696,
+          "net_shifted_IT_kWh": 2.760185242760389e-13,
+          "positive_shifted_PCC_kWh": 11.088323499685686,
+          "negative_shifted_PCC_kWh_magnitude": 11.088323499685327,
+          "absolute_shifted_PCC_kWh": 22.176646999371012,
+          "shifted_PCC_kWh_L1_half": 11.088323499685506,
+          "net_shifted_PCC_kWh": 3.588240815588506e-13,
+          "peak_individual_AIDC_abs_delta_PCC_kW": 3.9846940679698974,
+          "peak_system_aggregate_abs_delta_PCC_kW": 3.7097216151210333
+        }
+      }
+    },
+    "2025-04-03": {
+      "forecast_arrival_GPU_hours": 183.7688059026413,
+      "admitted_GPU_hours": 183.7688059026413,
+      "rejected_GPU_hours_within_forecast_cohort": 0.0,
+      "flexible_IT_kWh": 89.24476925243377,
+      "flexible_PCC_kWh": 116.0182000281639,
+      "total_IT_kWh": 18880.381928828334,
+      "total_PCC_kWh": 24544.496507476833,
+      "mean_total_IT_kW": 786.6825803678472,
+      "peak_total_IT_kW": 919.1581071264271,
+      "mean_total_PCC_kW": 1022.6873544782014,
+      "peak_total_PCC_kW": 1194.9055392643552,
+      "mean_flexible_IT_kW": 3.7185320521847403,
+      "peak_flexible_IT_kW": 4.629513436784083,
+      "mean_flexible_PCC_kW": 4.834091667840163,
+      "peak_flexible_PCC_kW": 6.018367467819307,
+      "eta_flex_energy_IT": 0.004726851903147494,
+      "eta_flex_energy_PCC": 0.004726851903147495,
+      "eta_flex_peak_IT": 0.005036688901387571,
+      "eta_flex_peak_PCC": 0.005036688901387571,
+      "pairs": {
+        "B1-B0": {
+          "positive_shifted_IT_kWh": 8.578531073380418,
+          "negative_shifted_IT_kWh_magnitude": 8.57853107338023,
+          "absolute_shifted_IT_kWh": 17.15706214676065,
+          "shifted_IT_kWh_L1_half": 8.578531073380326,
+          "net_shifted_IT_kWh": 1.8788389647502647e-13,
+          "positive_shifted_PCC_kWh": 11.152090395394545,
+          "negative_shifted_PCC_kWh_magnitude": 11.1520903953943,
+          "absolute_shifted_PCC_kWh": 22.30418079078885,
+          "shifted_PCC_kWh_L1_half": 11.152090395394424,
+          "net_shifted_PCC_kWh": 2.4424906541753444e-13,
+          "peak_individual_AIDC_abs_delta_PCC_kW": 2.244018194879004,
+          "peak_system_aggregate_abs_delta_PCC_kW": 1.867431623787347
+        },
+        "B3-B2": {
+          "positive_shifted_IT_kWh": 8.658653123912828,
+          "negative_shifted_IT_kWh_magnitude": 8.658653123912627,
+          "absolute_shifted_IT_kWh": 17.317306247825456,
+          "shifted_IT_kWh_L1_half": 8.658653123912728,
+          "net_shifted_IT_kWh": 2.029146081930286e-13,
+          "positive_shifted_PCC_kWh": 11.256249061086677,
+          "negative_shifted_PCC_kWh_magnitude": 11.256249061086415,
+          "absolute_shifted_PCC_kWh": 22.512498122173092,
+          "shifted_PCC_kWh_L1_half": 11.256249061086546,
+          "net_shifted_PCC_kWh": 2.637889906509372e-13,
+          "peak_individual_AIDC_abs_delta_PCC_kW": 4.107411355529294,
+          "peak_system_aggregate_abs_delta_PCC_kW": 7.698007813647493
+        }
+      }
+    },
+    "2025-04-12": {
+      "forecast_arrival_GPU_hours": 166.75116970843956,
+      "admitted_GPU_hours": 166.75116970843953,
+      "rejected_GPU_hours_within_forecast_cohort": 2.842170943040401e-14,
+      "flexible_IT_kWh": 80.9803904972167,
+      "flexible_PCC_kWh": 105.27450764638172,
+      "total_IT_kWh": 18607.434834148382,
+      "total_PCC_kWh": 24189.665284392897,
+      "mean_total_IT_kW": 775.3097847561825,
+      "peak_total_IT_kW": 907.5218333805551,
+      "mean_total_PCC_kW": 1007.9027201830372,
+      "peak_total_PCC_kW": 1179.7783833947217,
+      "mean_flexible_IT_kW": 3.3741829373840293,
+      "peak_flexible_IT_kW": 4.152217757634108,
+      "mean_flexible_PCC_kW": 4.386437818599238,
+      "peak_flexible_PCC_kW": 5.397883084924341,
+      "eta_flex_energy_IT": 0.00435204482611442,
+      "eta_flex_energy_PCC": 0.004352044826114421,
+      "eta_flex_peak_IT": 0.004575336487681989,
+      "eta_flex_peak_PCC": 0.004575336487681989,
+      "pairs": {
+        "B1-B0": {
+          "positive_shifted_IT_kWh": 7.815954259909653,
+          "negative_shifted_IT_kWh_magnitude": 7.8159542599100496,
+          "absolute_shifted_IT_kWh": 15.631908519819707,
+          "shifted_IT_kWh_L1_half": 7.815954259909853,
+          "net_shifted_IT_kWh": -3.9694743218905595e-13,
+          "positive_shifted_PCC_kWh": 10.16074053788255,
+          "negative_shifted_PCC_kWh_magnitude": 10.160740537883065,
+          "absolute_shifted_PCC_kWh": 20.321481075765618,
+          "shifted_PCC_kWh_L1_half": 10.160740537882809,
+          "net_shifted_PCC_kWh": -5.160316618457728e-13,
+          "peak_individual_AIDC_abs_delta_PCC_kW": 2.245735010875947,
+          "peak_system_aggregate_abs_delta_PCC_kW": 1.8801903984864587
+        },
+        "B3-B2": {
+          "positive_shifted_IT_kWh": 7.872307013282511,
+          "negative_shifted_IT_kWh_magnitude": 7.872307013283028,
+          "absolute_shifted_IT_kWh": 15.74461402656554,
+          "shifted_IT_kWh_L1_half": 7.87230701328277,
+          "net_shifted_IT_kWh": -5.165099117640728e-13,
+          "positive_shifted_PCC_kWh": 10.233999117267265,
+          "negative_shifted_PCC_kWh_magnitude": 10.233999117267937,
+          "absolute_shifted_PCC_kWh": 20.4679982345352,
+          "shifted_PCC_kWh_L1_half": 10.2339991172676,
+          "net_shifted_PCC_kWh": -6.714628852932947e-13,
+          "peak_individual_AIDC_abs_delta_PCC_kW": 4.104122928212973,
+          "peak_system_aggregate_abs_delta_PCC_kW": 6.1323508226961145
+        }
+      }
+    },
+    "2025-04-13": {
+      "forecast_arrival_GPU_hours": 155.31486615839415,
+      "admitted_GPU_hours": 155.31486615839412,
+      "rejected_GPU_hours_within_forecast_cohort": 2.842170943040401e-14,
+      "flexible_IT_kWh": 75.42650845281081,
+      "flexible_PCC_kWh": 98.05446098865406,
+      "total_IT_kWh": 18511.657732827785,
+      "total_PCC_kWh": 24065.15505267612,
+      "mean_total_IT_kW": 771.3190722011577,
+      "peak_total_IT_kW": 900.0446690089747,
+      "mean_total_PCC_kW": 1002.714793861505,
+      "peak_total_PCC_kW": 1170.0580697116673,
+      "mean_flexible_IT_kW": 3.1427711855337837,
+      "peak_flexible_IT_kW": 3.865644177444964,
+      "mean_flexible_PCC_kW": 4.085602541193919,
+      "peak_flexible_PCC_kW": 5.025337430678453,
+      "eta_flex_energy_IT": 0.004074541002292445,
+      "eta_flex_energy_PCC": 0.004074541002292445,
+      "eta_flex_peak_IT": 0.0042949470293528495,
+      "eta_flex_peak_PCC": 0.004294947029352849,
+      "pairs": {
+        "B1-B0": {
+          "positive_shifted_IT_kWh": 7.319281350688848,
+          "negative_shifted_IT_kWh_magnitude": 7.319281350689064,
+          "absolute_shifted_IT_kWh": 14.63856270137791,
+          "shifted_IT_kWh_L1_half": 7.319281350688955,
+          "net_shifted_IT_kWh": -2.1726210574203063e-13,
+          "positive_shifted_PCC_kWh": 9.515065755895503,
+          "negative_shifted_PCC_kWh_magnitude": 9.515065755895783,
+          "absolute_shifted_PCC_kWh": 19.030131511791286,
+          "shifted_PCC_kWh_L1_half": 9.515065755895643,
+          "net_shifted_PCC_kWh": -2.824407374646398e-13,
+          "peak_individual_AIDC_abs_delta_PCC_kW": 2.2485644576844237,
+          "peak_system_aggregate_abs_delta_PCC_kW": 1.91622948257573
+        },
+        "B3-B2": {
+          "positive_shifted_IT_kWh": 7.392720495356888,
+          "negative_shifted_IT_kWh_magnitude": 7.392720495357135,
+          "absolute_shifted_IT_kWh": 14.78544099071402,
+          "shifted_IT_kWh_L1_half": 7.39272049535701,
+          "net_shifted_IT_kWh": -2.4800674334703496e-13,
+          "positive_shifted_PCC_kWh": 9.610536643963954,
+          "negative_shifted_PCC_kWh_magnitude": 9.610536643964275,
+          "absolute_shifted_PCC_kWh": 19.221073287928228,
+          "shifted_PCC_kWh_L1_half": 9.610536643964114,
+          "net_shifted_PCC_kWh": -3.2240876635114546e-13,
+          "peak_individual_AIDC_abs_delta_PCC_kW": 4.111208181373968,
+          "peak_system_aggregate_abs_delta_PCC_kW": 5.388064610438594
+        }
+      }
+    },
+    "2025-04-15": {
+      "forecast_arrival_GPU_hours": 177.37826419231982,
+      "admitted_GPU_hours": 177.3782641923198,
+      "rejected_GPU_hours_within_forecast_cohort": 2.842170943040401e-14,
+      "flexible_IT_kWh": 86.14129139320534,
+      "flexible_PCC_kWh": 111.98367881116695,
+      "total_IT_kWh": 18924.87696414614,
+      "total_PCC_kWh": 24602.34005338998,
+      "mean_total_IT_kW": 788.5365401727557,
+      "peak_total_IT_kW": 916.7495200112397,
+      "mean_total_PCC_kW": 1025.0975022245823,
+      "peak_total_PCC_kW": 1191.7743760146118,
+      "mean_flexible_IT_kW": 3.589220474716889,
+      "peak_flexible_IT_kW": 4.476006251771994,
+      "mean_flexible_PCC_kW": 4.665986617131956,
+      "peak_flexible_PCC_kW": 5.818808127303593,
+      "eta_flex_energy_IT": 0.004551749084361453,
+      "eta_flex_energy_PCC": 0.0045517490843614535,
+      "eta_flex_peak_IT": 0.004882474606277532,
+      "eta_flex_peak_PCC": 0.004882474606277532,
+      "pairs": {
+        "B1-B0": {
+          "positive_shifted_IT_kWh": 8.324509153272723,
+          "negative_shifted_IT_kWh_magnitude": 8.324509153272766,
+          "absolute_shifted_IT_kWh": 16.64901830654549,
+          "shifted_IT_kWh_L1_half": 8.324509153272745,
+          "net_shifted_IT_kWh": -4.304249264700607e-14,
+          "positive_shifted_PCC_kWh": 10.821861899254541,
+          "negative_shifted_PCC_kWh_magnitude": 10.821861899254596,
+          "absolute_shifted_PCC_kWh": 21.643723798509136,
+          "shifted_PCC_kWh_L1_half": 10.821861899254568,
+          "net_shifted_PCC_kWh": -5.595524044110789e-14,
+          "peak_individual_AIDC_abs_delta_PCC_kW": 2.2460980799905386,
+          "peak_system_aggregate_abs_delta_PCC_kW": 2.777373631267256
+        },
+        "B3-B2": {
+          "positive_shifted_IT_kWh": 8.282554550347417,
+          "negative_shifted_IT_kWh_magnitude": 8.282554550347427,
+          "absolute_shifted_IT_kWh": 16.565109100694844,
+          "shifted_IT_kWh_L1_half": 8.282554550347422,
+          "net_shifted_IT_kWh": -1.1614640873001637e-14,
+          "positive_shifted_PCC_kWh": 10.767320915451641,
+          "negative_shifted_PCC_kWh_magnitude": 10.767320915451656,
+          "absolute_shifted_PCC_kWh": 21.534641830903297,
+          "shifted_PCC_kWh_L1_half": 10.767320915451648,
+          "net_shifted_PCC_kWh": -1.509903313490213e-14,
+          "peak_individual_AIDC_abs_delta_PCC_kW": 3.6123860971491126,
+          "peak_system_aggregate_abs_delta_PCC_kW": 6.548679356844136
+        }
+      }
+    },
+    "2025-04-22": {
+      "forecast_arrival_GPU_hours": 183.05808744251127,
+      "admitted_GPU_hours": 183.05808744251127,
+      "rejected_GPU_hours_within_forecast_cohort": 0.0,
+      "flexible_IT_kWh": 88.8996186994539,
+      "flexible_PCC_kWh": 115.56950430929007,
+      "total_IT_kWh": 19009.280901426755,
+      "total_PCC_kWh": 24712.06517185478,
+      "mean_total_IT_kW": 792.0533708927815,
+      "peak_total_IT_kW": 920.5787666965051,
+      "mean_total_PCC_kW": 1029.669382160616,
+      "peak_total_PCC_kW": 1196.7523967054567,
+      "mean_flexible_IT_kW": 3.7041507791439123,
+      "peak_flexible_IT_kW": 4.634864668074878,
+      "mean_flexible_PCC_kW": 4.815396012887086,
+      "peak_flexible_PCC_kW": 6.025324068497342,
+      "eta_flex_energy_IT": 0.004676642907243349,
+      "eta_flex_energy_PCC": 0.00467664290724335,
+      "eta_flex_peak_IT": 0.005034729059314588,
+      "eta_flex_peak_PCC": 0.005034729059314588,
+      "pairs": {
+        "B1-B0": {
+          "positive_shifted_IT_kWh": 8.611562636867546,
+          "negative_shifted_IT_kWh_magnitude": 8.611562636867932,
+          "absolute_shifted_IT_kWh": 17.223125273735477,
+          "shifted_IT_kWh_L1_half": 8.611562636867738,
+          "net_shifted_IT_kWh": -3.853327913160543e-13,
+          "positive_shifted_PCC_kWh": 11.19503142792781,
+          "negative_shifted_PCC_kWh_magnitude": 11.195031427928312,
+          "absolute_shifted_PCC_kWh": 22.390062855856122,
+          "shifted_PCC_kWh_L1_half": 11.195031427928061,
+          "net_shifted_PCC_kWh": -5.009326287108706e-13,
+          "peak_individual_AIDC_abs_delta_PCC_kW": 2.2446288322927472,
+          "peak_system_aggregate_abs_delta_PCC_kW": 1.8718893995289214
+        },
+        "B3-B2": {
+          "positive_shifted_IT_kWh": 8.70065912119918,
+          "negative_shifted_IT_kWh_magnitude": 8.700659121199521,
+          "absolute_shifted_IT_kWh": 17.401318242398702,
+          "shifted_IT_kWh_L1_half": 8.700659121199351,
+          "net_shifted_IT_kWh": -3.4024065616204794e-13,
+          "positive_shifted_PCC_kWh": 11.310856857558935,
+          "negative_shifted_PCC_kWh_magnitude": 11.31085685755938,
+          "absolute_shifted_PCC_kWh": 22.621713715118315,
+          "shifted_PCC_kWh_L1_half": 11.310856857559157,
+          "net_shifted_PCC_kWh": -4.4231285301066237e-13,
+          "peak_individual_AIDC_abs_delta_PCC_kW": 4.1049288499586964,
+          "peak_system_aggregate_abs_delta_PCC_kW": 14.094644382884194
+        }
+      }
+    },
+    "2025-04-23": {
+      "forecast_arrival_GPU_hours": 197.85070939428303,
+      "admitted_GPU_hours": 197.85070939428303,
+      "rejected_GPU_hours_within_forecast_cohort": 0.0,
+      "flexible_IT_kWh": 96.08345017857755,
+      "flexible_PCC_kWh": 124.90848523215082,
+      "total_IT_kWh": 19181.92483081333,
+      "total_PCC_kWh": 24936.502280057324,
+      "mean_total_IT_kW": 799.2468679505552,
+      "peak_total_IT_kW": 929.5416000732273,
+      "mean_total_PCC_kW": 1039.020928335722,
+      "peak_total_PCC_kW": 1208.404080095196,
+      "mean_flexible_IT_kW": 4.003477090774065,
+      "peak_flexible_IT_kW": 5.0395569242877025,
+      "mean_flexible_PCC_kW": 5.204520218006284,
+      "peak_flexible_PCC_kW": 6.551424001574014,
+      "eta_flex_energy_IT": 0.005009061969851518,
+      "eta_flex_energy_PCC": 0.005009061969851519,
+      "eta_flex_peak_IT": 0.00542155071262082,
+      "eta_flex_peak_PCC": 0.005421550712620818,
+      "pairs": {
+        "B1-B0": {
+          "positive_shifted_IT_kWh": 9.302954074641473,
+          "negative_shifted_IT_kWh_magnitude": 9.302954074641422,
+          "absolute_shifted_IT_kWh": 18.605908149282897,
+          "shifted_IT_kWh_L1_half": 9.302954074641448,
+          "net_shifted_IT_kWh": 5.192427684400732e-14,
+          "positive_shifted_PCC_kWh": 12.093840297033916,
+          "negative_shifted_PCC_kWh_magnitude": 12.093840297033848,
+          "absolute_shifted_PCC_kWh": 24.187680594067764,
+          "shifted_PCC_kWh_L1_half": 12.093840297033882,
+          "net_shifted_PCC_kWh": 6.750155989720952e-14,
+          "peak_individual_AIDC_abs_delta_PCC_kW": 2.241965223258646,
+          "peak_system_aggregate_abs_delta_PCC_kW": 2.059949248367918
+        },
+        "B3-B2": {
+          "positive_shifted_IT_kWh": 9.362734833598317,
+          "negative_shifted_IT_kWh_magnitude": 9.362734833598234,
+          "absolute_shifted_IT_kWh": 18.72546966719655,
+          "shifted_IT_kWh_L1_half": 9.362734833598275,
+          "net_shifted_IT_kWh": 8.266891444901166e-14,
+          "positive_shifted_PCC_kWh": 12.171555283677812,
+          "negative_shifted_PCC_kWh_magnitude": 12.171555283677705,
+          "absolute_shifted_PCC_kWh": 24.343110567355517,
+          "shifted_PCC_kWh_L1_half": 12.171555283677758,
+          "net_shifted_PCC_kWh": 1.0746958878371515e-13,
+          "peak_individual_AIDC_abs_delta_PCC_kW": 4.093348795080004,
+          "peak_system_aggregate_abs_delta_PCC_kW": 6.444179076085707
+        }
+      }
+    }
+  },
+  "objective_comparison": [
+    {
+      "date": "2025-04-02",
+      "B1_minus_B0_relief_pu": 9.918750912230045e-05,
+      "B3_minus_B2_relief_pu": 9.409532866277992e-05,
+      "AIDC_only_best_possible_relief_pu": 9.92919042930307e-05,
+      "B1_fraction_of_AIDC_only_upper_bound": 0.9989486033984991
+    },
+    {
+      "date": "2025-04-03",
+      "B1_minus_B0_relief_pu": 0.00010167757561196922,
+      "B3_minus_B2_relief_pu": 9.656469501195808e-05,
+      "AIDC_only_best_possible_relief_pu": 0.00010171431309180523,
+      "B1_fraction_of_AIDC_only_upper_bound": 0.999638817008941
+    },
+    {
+      "date": "2025-04-12",
+      "B1_minus_B0_relief_pu": 8.543497459001514e-05,
+      "B3_minus_B2_relief_pu": 8.15383602255082e-05,
+      "AIDC_only_best_possible_relief_pu": 8.561800895223737e-05,
+      "B1_fraction_of_AIDC_only_upper_bound": 0.9978621978662885
+    },
+    {
+      "date": "2025-04-13",
+      "B1_minus_B0_relief_pu": 8.121011912098908e-05,
+      "B3_minus_B2_relief_pu": 8.131441510106363e-05,
+      "AIDC_only_best_possible_relief_pu": 8.136664207980537e-05,
+      "B1_fraction_of_AIDC_only_upper_bound": 0.9980763252013918
+    },
+    {
+      "date": "2025-04-15",
+      "B1_minus_B0_relief_pu": 9.561225801169027e-05,
+      "B3_minus_B2_relief_pu": 9.561225801180129e-05,
+      "AIDC_only_best_possible_relief_pu": 9.561225801191231e-05,
+      "B1_fraction_of_AIDC_only_upper_bound": 0.9999999999976776
+    },
+    {
+      "date": "2025-04-22",
+      "B1_minus_B0_relief_pu": 9.867730006496434e-05,
+      "B3_minus_B2_relief_pu": 9.140782071248577e-05,
+      "AIDC_only_best_possible_relief_pu": 9.882083296397504e-05,
+      "B1_fraction_of_AIDC_only_upper_bound": 0.9985475441290499
+    },
+    {
+      "date": "2025-04-23",
+      "B1_minus_B0_relief_pu": 0.00010536286971463138,
+      "B3_minus_B2_relief_pu": 0.00010536286971496445,
+      "AIDC_only_best_possible_relief_pu": 0.00010536286971485342,
+      "B1_fraction_of_AIDC_only_upper_bound": 0.9999999999978926
+    }
+  ],
+  "objective_summary": {
+    "B1_relief_pu_min": 8.121011912098908e-05,
+    "B1_relief_pu_max": 0.00010536286971463138,
+    "B3_relief_pu_min": 8.131441510106363e-05,
+    "B3_relief_pu_max": 0.00010536286971496445,
+    "AIDC_only_upper_bound_pu_min": 8.136664207980537e-05,
+    "AIDC_only_upper_bound_pu_max": 0.00010536286971485342,
+    "B1_fraction_of_upper_bound_min": 0.9978621978662885,
+    "B1_fraction_of_upper_bound_mean": 0.9990104982285343,
+    "B1_fraction_of_upper_bound_max": 0.9999999999978926
+  },
+  "facility_residual_decomposition": {
+    "P_flexible_GPU_kWh": 604.1647675981244,
+    "P_nonflex_GPU_kWh": null,
+    "P_CPU_host_kWh": null,
+    "P_idle_base_kWh": null,
+    "P_memory_storage_network_kWh": null,
+    "P_unidentified_residual_kWh": 131379.91166750467,
+    "status": "ONLY_FLEXIBLE_GPU_AND_COMBINED_RESIDUAL_IDENTIFIABLE"
+  },
+  "measurement_boundaries": {
+    "Dataset312": "NVML per-GPU board power; Q50 incremental after 72.5 W/GPU idle subtraction; CPU/host absent",
+    "Kestrel": "Slurm job/resource/timestamp telemetry; native U2 energy is null/zero and has no usable positive observations",
+    "Eagle": "node iLO total-power plus V100-era scheduler/Ganglia telemetry exists, but V100-to-H100 absolute transfer and shared marginal response are not authorized",
+    "ESIF": "whole-facility IT magnitude/PUE telemetry; no direct schedulability attribution to workload",
+    "workload_dependent_host_power_authorized": false
+  },
+  "hypotheses": {
+    "H1": {
+      "verdict": "PASS",
+      "evidence": {
+        "semantic_modelable_GPU_hour_coverage": 0.9209445408280355,
+        "facility_flexible_energy_share": 0.004577558020002474
+      },
+      "reason": "the two ratios have different denominators"
+    },
+    "H2": {
+      "verdict": "PARTIAL",
+      "evidence": {
+        "identified_flexible_IT_kWh": 604.1647675981244,
+        "unidentified_or_residual_IT_kWh": 131379.91166750467,
+        "identified_share": 0.004577558020002474
+      },
+      "reason": "GPU-board-only authority leaves host/CPU/memory/network and other load in residual, but their workload-dependent flexible part is not identifiable"
+    },
+    "H3": {
+      "verdict": "PARTIAL",
+      "evidence": {
+        "forecast_cohort_admission_fraction": 1.0,
+        "excluded_already_running_GPU_hours": null,
+        "excluded_queue_backlog_GPU_hours": null
+      },
+      "reason": "policy excludes non-forecast cohorts, but all forecast arrivals are served and excluded amounts are unavailable"
+    },
+    "H4": {
+      "verdict": "PASS",
+      "evidence": {
+        "B1_shift_utilization_energy": 0.09665943990328191,
+        "B1_upper_bound_realization_mean": 0.9990104982285343
+      },
+      "reason": "available flexible energy exceeds the moved energy, while objective relief closely approaches the independent AIDC-only bound"
+    }
+  },
+  "MESS_comparison": {
+    "actual_B3_peak_abs_aggregate_active_power_kW": 220.0,
+    "actual_B3_peak_abs_per_unit_active_power_kW": 55.0,
+    "AIDC_peak_individual_PCC_shift_kW": 4.111208181373968,
+    "same_active_power_boundary_ratio": 53.512249999092944,
+    "nameplate_context": "4 x 700 kVA is apparent power and is not divided by kW without a supported power factor"
+  },
+  "inputs": [
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_AIDC_POWER_V4R1_FINAL_REVIEW.json",
+      "sha256": "0414f4152656d0aef9dba03920a322921aba407d1b0172c48a2f7c169c018d07",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_AIDC_POWER_V4R1_7DAY_B0_B1_B2_B3_RESULTS.json",
+      "sha256": "20ffbc467f62b41b14e2dd17160c762340b7ab524331063fcb472f1203006a0d",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_AIDC_POWER_V1_V4R1_7DAY_SCIENCE_COMPARISON.json",
+      "sha256": "f81e6c82eaff16848d5298a52ec4b5c20f7c805b034623b278f44218e9807b33",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_AIDC_FLEXIBLE_SCALE_ATTRITION_FORENSIC.json",
+      "sha256": "f4fc1bf56d2b767c1df157746971876979023aadd0a999617e4b6d53ca590904",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_AIDC_FLEXIBLE_SCALE_ATTRITION_TABLE.csv",
+      "sha256": "1ef12e35d985583100acd2fa00e70a7bfd0c96bfbf7ff13d5e71ae506106e99d",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_AIDC_FLEXIBLE_SHARE_AUTHORITY_PRECHECK.json",
+      "sha256": "2e3797d20b38ed9a97280b6a51446bf28a4b879b49290f25a003e85063af3232",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_FLEXIBLE_SHARE_AUTHORITY_GAP.json",
+      "sha256": "7301e2c6cffee85d82444a0be0fc3e91be0ff32eabff6bf33063ccc0ce4d43a9",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_FLEXIBLE_SHARE_AUTHORITY_GAP_RESOLUTION.json",
+      "sha256": "a318f99fd9ee889e483dbef033dfed23dc388842a7b18f780e3d7480371d526c",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_TRAINING_SEMANTIC_FLEXIBILITY_MAGNITUDE.json",
+      "sha256": "2dc8655e31d2c53cf5765a560be7a67111ff2f1cfd3226f99ba222bc8eed8f3d",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_FIXED_PLUS_FLEX_RESOURCE_LABEL_AUDIT.json",
+      "sha256": "6ce555424796f1074f758e749255c970eab2dfb75375b16cdc967717fe26bf67",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_FLEXIBLE_COHORT_SEMANTICS_V2.json",
+      "sha256": "2020ff452b829f7c81cf3c07ac04a9461c5c0c105221ab2784520dd0744eb6d8",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_GPU_SUBSYSTEM_BOUNDARY_TRAINING_AUDIT.json",
+      "sha256": "e175b82d38079bdde39f8deb34472a029c1991c8130d6b7395ac330d9182b5da",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_KESTREL_DEFERRABILITY_FIELD_AUDIT.json",
+      "sha256": "c9aa974497c636b47a91801bfbbc2947c0bbb00b9d895b9042f6d54be40c65b4",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_KESTREL_NATIVE_ENERGY_FIELD_AUDIT.json",
+      "sha256": "78d01d5e3260b5bedc830f11bdf44f33c8a8fa270dcb117df4db30fbeb2702f0",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_KESTREL_WHOLE_GPU_GRES_SEMANTICS_AUDIT.json",
+      "sha256": "f17dbb1ae5ef439f108b6c9d887d9fc66f0afea992f1363877ce5ff31c9bfeb4",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_Kestrel_U2_SHARING_SEMANTICS_AUDIT.json",
+      "sha256": "9ea9a6cef3e38e78bf43a87bdc070c43dbcd056b70a636f1953fe0b3b5e94068",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_AIDC_POWER_MODEL_V4R1_CONTRACT.json",
+      "sha256": "40e9ced75123bfd591462c4487b3b358e94b9f8d0ad404d23aea89d5a3a312c7",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_AIDC_POWER_MODEL_V4R1_CAPACITY_CONSISTENT_SUPPORT_CONTRACT.json",
+      "sha256": "9ac3980abb8f2b4d982312f9822ec57d489d2df8b43a041df39d14210066e18f",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_AIDC_POWER_MODEL_V4_WHOLE_GPU_GRES_CONTRACT.json",
+      "sha256": "f60a29fcd54f31216c0249cabd50cf22e713ee07395de868f8c4f411023d2304",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_DATASET312_PER_GPU_BOARD_POWER_AUTHORITY.json",
+      "sha256": "684fde27323ed91c9d6de0f45b880185801651cb665ead4797b47648875e1f45",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_REFERENCE_SCHEDULER_V6_GPU_HOUR_CONTRACT.json",
+      "sha256": "d81d55d74d4d2d456ddb5f6d27052e54e47f1dbdd3a203f412b5f4c3734f41f0",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_REFERENCE_SCHEDULER_V6_GPU_HOUR_7DAY_VALIDATION.json",
+      "sha256": "c6f6e0683ebb3a17af80e579eef104ebcce94c5ea7afe4724a6d5ef01c723cd1",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_RCMQT_V4R1_TARGET_SEMANTICS_CONTRACT.json",
+      "sha256": "9b7ac639b771facca688721965278f5838d31559f53a706d91e9f4f5b4dfcdd1",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_RCMQT_V4R1_APRIL_7DAY_VALIDATION.json",
+      "sha256": "8e681371ab643a489140e1eef9b7c8a976bea41aae22d194bf117f889ccdd1a8",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_APRIL_7DAY_AIDC_ACTUATION_FORENSIC.json",
+      "sha256": "38dd8fa9c31cd630826ce3d563cf537758b3c8beb2dc773c7f8ca03e5d4b90bd",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_V4R1_7DAY_SURROGATE_VALIDATION.json",
+      "sha256": "bc7f52c67e66045e86ad5926968d2ee61fdc26f5c939c6968c7c5db6a5a53181",
+      "role": "authority_or_lineage"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/reference_v6_v4r1/REFERENCE_COMPUTE_SCHEDULE_V6_GPU_HOUR_2025-04-02.npz",
+      "sha256": "e2928b952ca79cab944c483b8e98a9e49c55056c96d29ccc6fce99a543d44371",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/reference_v6_v4r1/REFERENCE_COMPUTE_SCHEDULE_V6_GPU_HOUR_2025-04-03.npz",
+      "sha256": "a54ce6bb6e21d742ad2ecfa43ecef1f3680d9eb24c06c738e3aa29b82c52a5aa",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/reference_v6_v4r1/REFERENCE_COMPUTE_SCHEDULE_V6_GPU_HOUR_2025-04-12.npz",
+      "sha256": "2f604a21db5cc2f2c85ec21f66c8613be2bfd74cc0a006a7e7b7dd9ae1aae7a5",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/reference_v6_v4r1/REFERENCE_COMPUTE_SCHEDULE_V6_GPU_HOUR_2025-04-13.npz",
+      "sha256": "21dc92113af93969ba8ee4a5457846997a8062c10839c72318b64fdd9351232d",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/reference_v6_v4r1/REFERENCE_COMPUTE_SCHEDULE_V6_GPU_HOUR_2025-04-15.npz",
+      "sha256": "b47ec9b553048fc8e36917706c77b1cfc45e64b441d75443ec19039aaba203d5",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/reference_v6_v4r1/REFERENCE_COMPUTE_SCHEDULE_V6_GPU_HOUR_2025-04-22.npz",
+      "sha256": "4d51ceee429131236e47645f3f59c6e6fabb1b345423d9cf6482c3339c603a8f",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/reference_v6_v4r1/REFERENCE_COMPUTE_SCHEDULE_V6_GPU_HOUR_2025-04-23.npz",
+      "sha256": "e4b6d78db4c093c85dd6dfa10d996e83847de95234f1d723c521ed9d3c87dcb5",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-02_B0_ITER0.npz",
+      "sha256": "96aefd8e7108ef9f8c364851ec914e4a88272d97280a02f7046d38921a26ca22",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-02_B1_ITER0.npz",
+      "sha256": "f416a8d4e7c5e65773cc7a18545bedce4c372eb69cf20f34045b813afab42497",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-02_B2_ITER0.npz",
+      "sha256": "7a577625fb5abf38dc82165c4fdaa502fa9796d36c1874bab3e44286ffee7f96",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-02_B3_ITER0.npz",
+      "sha256": "091bbac76dde62541de2575a5d19eec6a891e6e8c2481dd11415dfca75671339",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-03_B0_ITER0.npz",
+      "sha256": "b5ffd85611e256bc674248278ee25ca76d73e344311ff83f5d9f4fc0fe218193",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-03_B1_ITER0.npz",
+      "sha256": "0597622ffac7fdebddb1eba66db802fd652d32f435e01716377b689c14f05ff0",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-03_B2_ITER0.npz",
+      "sha256": "b9a8c8c7e86aee7426d56b69ea49f22c49d26d6023743ba480c5cb59c842a885",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-03_B3_ITER0.npz",
+      "sha256": "1a94f0c8b6f11430480140907f7b3f5ec5e2ac91d58d88e9f5256a38687d37af",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-12_B0_ITER0.npz",
+      "sha256": "7a38608263a0cca0f418dfe68e9241b657ab4a774341b668c97ea87f33a0f36f",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-12_B1_ITER0.npz",
+      "sha256": "ad2f7036418371f4e54eaad34aaed5a286ebf3b0e1b2ebb6d3f431e6da3c4c64",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-12_B2_ITER0.npz",
+      "sha256": "003aa23adfaffbb4c4f7aa90fe53940450d77ff4b2c4b7870ade8f793489df88",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-12_B3_ITER1.npz",
+      "sha256": "91917c7f7e4d8febd941270dbaa9bb89194c4f0c7d1f76d48790f42b64aca3fe",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-13_B0_ITER0.npz",
+      "sha256": "c5e33e2fe50ae3ae5e319d800b77001513ad9cccdca465e6414c139dafc6b610",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-13_B1_ITER0.npz",
+      "sha256": "6a6d861843f8148e23d7e60acf8d9f7d8b18a1a02442187175d392fc37a436f5",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-13_B2_ITER0.npz",
+      "sha256": "71b4e78de9db404d374f9cc7314a454ad22ebdb886cd918d4bc02a253635b28b",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-13_B3_ITER0.npz",
+      "sha256": "82e9446e4e7c594d2d7446d0657b419f901366fc114aac9824255c16071604fd",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-15_B0_ITER0.npz",
+      "sha256": "7f6aa5f8b5a54166c1ad56e48c718f4cce2dfead2a879eb9a1fdef23dff545c7",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-15_B1_ITER0.npz",
+      "sha256": "5d8a3bf7c9831855a0f9c05b2b55894d54c2d7c015be7ad34f923b49a283e964",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-15_B2_ITER0.npz",
+      "sha256": "7e05cefe4d2ae372ea6c7bc977c1b33c88e9bc129efaeb0b32d0fcbe67766745",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-15_B3_ITER0.npz",
+      "sha256": "662e00482bce330993efba6ce8030a1a31f4a5e1f7c7edad191569c9206f8d12",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-22_B0_ITER0.npz",
+      "sha256": "c0a1eaafd193371134140b7863e0e5e1a33c0c9265f36d91d48e7fb4b33d3aa5",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-22_B1_ITER0.npz",
+      "sha256": "2292d5439095f165cdf434de46141059554715854e910f480b19740115492f65",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-22_B2_ITER0.npz",
+      "sha256": "9f1f0f3ab47c719f18de2b858f355f2d322ac238a211be67079d19a4d43bead5",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-22_B3_ITER0.npz",
+      "sha256": "07a3dfe1267248731a19000219746d618e75010cde01775e4a2ff7a294af8e32",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-23_B0_ITER0.npz",
+      "sha256": "2e387cc922686483c688f72f0b3702fbfb8ea42ad634027c614ba8edcba0d265",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-23_B1_ITER0.npz",
+      "sha256": "06855c53b2730007f60fa7b79dc32e864c05cbfc97ddd46fd24963589956c60e",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-23_B2_ITER0.npz",
+      "sha256": "b7893704d4bbbdc39b05c4699c0c4efb57bde917c2523d88b2ecd5002090d37b",
+      "role": "frozen_numeric_input"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/schedules_v4r1/V17_V4R1_2025-04-23_B3_ITER1.npz",
+      "sha256": "3df4a4ddf8fd2abfd7e7f6acdcaa3bbdffe8d74b944e9932e0ea21e2927a2cba",
+      "role": "frozen_numeric_input"
+    }
+  ],
+  "firewall_counters": {
+    "scientific_solver_calls": 0,
+    "OpenDSS_calls": 0,
+    "ML_retraining_calls": 0,
+    "beta_mutations": 0,
+    "PUE_mutations": 0,
+    "PF_mutations": 0,
+    "final_scale_selection_calls": 0,
+    "existing_V17_files_modified": 0
+  }
+}
