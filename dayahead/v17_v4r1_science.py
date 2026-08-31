@@ -117,10 +117,30 @@ def _case_metrics(result: Mapping[str, Any], primary: Mapping[str, Any]) -> dict
         "MESS_terminal_SOC_max_abs_error_kwh": float(result["mess_terminal_soc_max_abs_error_kwh"]),
         "Vmin_pu": float(primary["Vmin_pu"]),
         "Vmax_pu": float(primary["Vmax_pu"]),
-        "worst_line_loading_pu": float(primary["worst_line_loading_pu"]),
-        "worst_transformer_current_loading_pu": float(primary["worst_transformer_current_loading_pu"]),
-        "worst_transformer_kva_loading_pu": float(primary["worst_transformer_kva_loading_pu"]),
+        "worst_line_loading_pu": float(primary["worst_line_phase_current"]["normalized_current_loading_pu"]),
+        "worst_transformer_current_loading_pu": float(primary["worst_transformer_phase_current"]["normalized_current_loading_pu"]),
+        "worst_transformer_kva_loading_pu": float(primary["worst_transformer_total_kva"]["transformer_total_kva_loading_pu"]),
     }
+
+
+def _cuts_by_slot(repo, source, context, voltage_data, controls, violations, *, case, iteration_index, margins):
+    """Invoke the frozen local-cut builder once per violated slot.
+
+    The historical common loop was exercised with a single violated slot. Its
+    local variable named ``voltage`` becomes a boolean after processing that
+    slot, so a multi-slot call cannot advance. Slot partitioning preserves the
+    exact cut equations while leaving the historical implementation unchanged.
+    """
+
+    cuts = []; calls = 0
+    for slot in sorted({int(row.slot) for row in violations}):
+        slot_rows = [row for row in violations if int(row.slot) == slot]
+        new_cuts, new_calls = local_fresh_ac_cuts(
+            repo, source, context, voltage_data, controls, slot_rows,
+            case=case, iteration_index=iteration_index, margins=margins,
+        )
+        cuts.extend(new_cuts); calls += new_calls
+    return cuts, calls
 
 
 def execute_day(repo: Path, source: Path, output: Path, day: str) -> dict[str, Any]:
@@ -139,31 +159,31 @@ def execute_day(repo: Path, source: Path, output: Path, day: str) -> dict[str, A
     reference, inputs, vintage, background, binding, authority = electrical_context(repo, source, output, day)
     voltage_path = output / "ac_cache_v4r1/data" / f"D1_AC_ANCHOR_SENSITIVITY_{day}.npz"
     current_path = output / "ac_cache_v4r1/data" / f"D1_AC_ANCHOR_CURRENT_SENSITIVITY_{day}.npz"
-    voltage = np.load(voltage_path, allow_pickle=False); current = np.load(current_path, allow_pickle=False)
+    voltage_data = np.load(voltage_path, allow_pickle=False); current_data = np.load(current_path, allow_pickle=False)
     context = (reference, vintage, background, binding, voltage_path, authority)
-    solved = solve_shadow(inputs=inputs, context=context, voltage_data=voltage, current_data=current, rho=RHO, case="ALL")
+    solved = solve_shadow(inputs=inputs, context=context, voltage_data=voltage_data, current_data=current_data, rho=RHO, case="ALL")
     schedule_dir = output / "schedules_v4r1"; schedule_dir.mkdir(parents=True, exist_ok=True)
     cases: dict[str, Any] = {}; fresh_calls = 0
     for case in CASES:
         result = dict(solved[case]); initial_path = schedule_dir / f"V17_V4R1_{day}_{case}_ITER0.npz"
         controls = _save_solver_schedule(initial_path, result)
         initial_result = dict(result); initial_sha = sha256_file(initial_path)
-        primary, violations, calls = primary_fresh_ac(repo, source, context, voltage, controls, day=day, case=case, schedule_sha256=str(result["schedule_sha256"]))
+        primary, violations, calls = primary_fresh_ac(repo, source, context, voltage_data, controls, day=day, case=case, schedule_sha256=str(result["schedule_sha256"]))
         fresh_calls += calls; first_primary = dict(primary); first_count = len(violations)
         accumulated = []; iterations = 0; final_path = initial_path
         while violations and iterations < K_MAX:
             iterations += 1
-            cuts, calls = local_fresh_ac_cuts(repo, source, context, voltage, controls, violations, case=case, iteration_index=iterations, margins=margins_record["margins"])
+            cuts, calls = _cuts_by_slot(repo, source, context, voltage_data, controls, violations, case=case, iteration_index=iterations, margins=margins_record["margins"])
             fresh_calls += calls
             if not cuts:
                 break
             accumulated.extend(cuts)
-            result = dict(solve_shadow(inputs=inputs, context=context, voltage_data=voltage, current_data=current, rho=RHO, case=case, restoration_cuts=tuple(accumulated)))
+            result = dict(solve_shadow(inputs=inputs, context=context, voltage_data=voltage_data, current_data=current_data, rho=RHO, case=case, restoration_cuts=tuple(accumulated)))
             if not bool(result.get("hard_feasible")):
                 break
             final_path = schedule_dir / f"V17_V4R1_{day}_{case}_ITER{iterations}.npz"
             controls = _save_solver_schedule(final_path, result)
-            primary, violations, calls = primary_fresh_ac(repo, source, context, voltage, controls, day=day, case=case, schedule_sha256=str(result["schedule_sha256"]))
+            primary, violations, calls = primary_fresh_ac(repo, source, context, voltage_data, controls, day=day, case=case, schedule_sha256=str(result["schedule_sha256"]))
             fresh_calls += calls
         secondary = primary["secondary_native_RegControl"]
         final_pass = bool(result.get("hard_feasible")) and not violations and bool(primary["all_frozen_hard_constraints_pass"]) and bool(secondary["all_frozen_hard_constraints_pass"])
