@@ -113,3 +113,29 @@ def test_eagle_split_is_blocked_not_random_row() -> None:
     assert split["random_telemetry_row_split"] is False
     assert split["adjacent_day_embargo"] is True
     assert split["final_metrics_read_before_contract"] is False
+
+
+def test_v100_absolute_transfer_and_v3r2_activation_are_rejected() -> None:
+    transfer = load("V17_V3R2_V100_TO_H100_RESPONSE_TRANSFER_AUDIT.json")
+    contract = load("V17_AIDC_POWER_MODEL_V3R2_CONTRACT.json")
+    validation = load("V17_AIDC_POWER_MODEL_V3R2_VALIDATION.json")
+    assert transfer["Eagle_absolute_kW_to_H100_authorized"] is False
+    assert transfer["candidate_dimensionless_response_identified"] is False
+    assert contract["minted"] is False
+    assert contract["V1_kappa_modified"] is False
+    assert validation["primary_classification"] == "V17_AIDC_POWER_V3R2_G_MARGINAL_POWER_NOT_IDENTIFIABLE"
+
+
+def test_d1_future_state_and_incremental_coverage_fail_closed() -> None:
+    d1 = load("V17_AIDC_POWER_V3R2_D1_CAUSALITY_AUDIT.json")
+    cohort = load("V17_AIDC_POWER_V3R2_COHORT_IDENTIFIABILITY.json")
+    coverage = load("V17_AIDC_POWER_V1_V3R2_COVERAGE_COMPARISON.json")
+    decision = load("V17_AIDC_POWER_V3R2_ACTIVATION_DECISION.json")
+    assert d1["future_physical_node_ID_available"] is False
+    assert d1["SHARED_OCCUPANCY_CLASS_defined"] is False
+    assert cohort["U2A"]["jobs"] == 0
+    assert cohort["U2A_U2B_U2C_disjoint"] is True
+    assert coverage["incremental_coverage"] == 0.0
+    assert decision["ACTIVE_BOUNDARY"] == "V17_AIDC_POWER_MODEL_V1_FROZEN_KAPPA_BOUNDARY"
+    assert decision["READY_FOR_APRIL_RESUME"] is True
+    assert decision["same_7day_regression_performed"] is False
