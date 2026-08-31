@@ -1,0 +1,95 @@
+{
+  "gates": {
+    "G1_forecast_daily_event_tier_mass": {
+      "status": "PASS",
+      "evidence": "FORECAST_BUNDLE_V1 exact mean/Q50/Q90 identities"
+    },
+    "G2_causality_certificate": {
+      "status": "PASS",
+      "evidence": "D-1 request/submission features only"
+    },
+    "G3_scheduler_workload_conservation": {
+      "status": "PASS",
+      "evidence": "arrival = served + terminal backlog; no hidden shedding"
+    },
+    "G4_deadline_SLA": {
+      "status": "PASS",
+      "evidence": "training-only empirical latency adapter with frozen EDF"
+    },
+    "G5_compute_capacity": {
+      "status": "PASS",
+      "evidence": "C_MODEL is equivalent-case-study capacity only"
+    },
+    "G6_tier_to_power_conversion": {
+      "status": "PASS",
+      "evidence": "frozen hybrid tier coefficients after scheduling"
+    },
+    "G7_partial_node_boundary": {
+      "status": "PASS",
+      "evidence": "accepted lower bound retained; no invented host increment"
+    },
+    "G8_site_allocation": {
+      "status": "PASS",
+      "evidence": "explicit engineering allocation, not final Melbourne GPU authority"
+    },
+    "G9_facility_power_conservation": {
+      "status": "PASS",
+      "evidence": "P_IT = P_locked + P_flex without clipping"
+    },
+    "G10_flex_le_total": {
+      "status": "PASS",
+      "evidence": "P_flex <= P_total every site/slot"
+    },
+    "G11_negative_residual": {
+      "status": "PASS",
+      "evidence": "negative residual is a failure; clipping calls = 0"
+    },
+    "G12_PUE_exactly_once": {
+      "status": "PASS",
+      "evidence": "PUE applied once after IT composition"
+    },
+    "G13_PCC_transformer_interface": {
+      "status": "FAIL",
+      "evidence": "requires source-backed DNSP rating/PF rather than synthetic 1.5 MVA"
+    },
+    "G14_site_sum_system_total": {
+      "status": "PASS",
+      "evidence": "site sums equal system total"
+    },
+    "G15_site_scale_authority": {
+      "status": "FAIL",
+      "evidence": "requires 12/12 common-boundary site authority"
+    },
+    "G16_locked_test_authority": {
+      "status": "FAIL",
+      "evidence": "requires truly untouched sealed target period"
+    },
+    "G17_preservation_hashes": {
+      "status": "PASS",
+      "evidence": "V17/V18/V18R1/V18R2/V19/V20 byte preservation"
+    }
+  },
+  "passed": false,
+  "failed_gates": [
+    "G13_PCC_transformer_interface",
+    "G15_site_scale_authority",
+    "G16_locked_test_authority"
+  ],
+  "science_call_namespace": "FINAL_GRID_SCIENCE_CASES",
+  "grid_solver_calls": 0,
+  "B0_calls": 0,
+  "B1_calls": 0,
+  "B2_calls": 0,
+  "B3_calls": 0,
+  "OpenDSS_calls": 0,
+  "AC_science_calls": 0,
+  "B3_ML_production_fit_calls": 1,
+  "artifact_id": "V21_G1_G17_PRE_SCIENCE_PREFLIGHT_V1",
+  "current_authority_state": true,
+  "synthetic_all_pass_fixture_used_for_readiness": false,
+  "preservation": {
+    "status": "PASS",
+    "files_checked": 500,
+    "failures": []
+  }
+}

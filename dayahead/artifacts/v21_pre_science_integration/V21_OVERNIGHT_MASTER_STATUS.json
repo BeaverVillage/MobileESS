@@ -1,0 +1,192 @@
+{
+  "artifact_id": "V21_OVERNIGHT_MASTER_STATUS_V1",
+  "OVERNIGHT_RESULT": "SAFE_PRE_SCIENCE_WORK_COMPLETE_AUTHORITY_BLOCKERS_REMAIN",
+  "ML": {
+    "C_MASS_novelty_gate": true,
+    "C_MASS_daily_WAPE": 1.0076055679711258,
+    "C_MASS_burst_WAPE": 0.8471469668307847,
+    "best_baseline": "B3_LIGHTGBM_QUANTILE",
+    "PROPOSED_MODEL_ACCEPTED": false,
+    "selected_production_forecast_model": "B3_LIGHTGBM_QUANTILE",
+    "device": "NVIDIA GeForce RTX 4060 Laptop GPU"
+  },
+  "AIDC_scale": {
+    "artifact_id": "V20A_FINAL_SCALE_REVIEW_V1",
+    "classification": "A4_BOUNDARY_HETEROGENEITY_BLOCKS_FINAL_SCALE",
+    "SITE_SCALE_AUTHORITY_READY": false,
+    "final_realworld_numerator_MW": null,
+    "final_model_AIDC_peak_MW": null,
+    "final_site_weights": null,
+    "partial_common_boundary": {
+      "boundary": "OPERATING_CAPACITY",
+      "sites": 4,
+      "MW": 106.5
+    },
+    "diagnostic_candidates": {
+      "LOW": {
+        "denominator": "D_APRIL_NORMAL_MW",
+        "denominator_MW": 804.2664,
+        "partial_operating_capacity_numerator_MW": 106.5,
+        "rho": 0.13241881048369047,
+        "IEEE123_background_peak_MW": 2.3154691360756456,
+        "IEEE123_equivalent_AIDC_MW": 0.30661166871083545,
+        "authority": "PARTIAL_COVERAGE_DIAGNOSTIC_NOT_FINAL_SCALE"
+      },
+      "PRIMARY": {
+        "denominator": "D_APRIL_2025_FORECAST_PEAK_MW",
+        "denominator_MW": 567.9513,
+        "partial_operating_capacity_numerator_MW": 106.5,
+        "rho": 0.18751607752284397,
+        "IEEE123_background_peak_MW": 2.3154691360756456,
+        "IEEE123_equivalent_AIDC_MW": 0.4341876900221133,
+        "authority": "PARTIAL_COVERAGE_DIAGNOSTIC_NOT_FINAL_SCALE"
+      },
+      "HIGH": {
+        "denominator": "D_APRIL_FIRM_MW",
+        "denominator_MW": 531.9662,
+        "partial_operating_capacity_numerator_MW": 106.5,
+        "rho": 0.20020068944229916,
+        "IEEE123_background_peak_MW": 2.3154691360756456,
+        "IEEE123_equivalent_AIDC_MW": 0.46355851742470905,
+        "authority": "PARTIAL_COVERAGE_DIAGNOSTIC_NOT_FINAL_SCALE"
+      }
+    },
+    "unresolved": [
+      "No direct/common IT MW for 12/12 sites",
+      "No actual DNSP interconnection rating per site",
+      "No site-specific GPU capacity authority",
+      "IBM April-2025 operation unresolved"
+    ],
+    "firewall": {
+      "artifact_id": "V20A_CAPACITY_BOUNDARY_HARMONIZATION_V1",
+      "sets": {
+        "DIRECT_IT_MW_SET": [],
+        "OPERATING_CAPACITY_MW_SET": [
+          "NEXTDC M2",
+          "NEXTDC M3",
+          "NEXTDC M1",
+          "STACK MEL01A"
+        ],
+        "FACILITY_INCOMING_POWER_SET": [],
+        "MVA_ONLY_SET": [
+          "Fujitsu Noble Park",
+          "AAPT / TPG Richmond"
+        ]
+      },
+      "set_totals": {
+        "DIRECT_IT_MW_SET": null,
+        "OPERATING_CAPACITY_MW_SET": 106.5,
+        "FACILITY_INCOMING_POWER_SET": null,
+        "MVA_ONLY_SET": "NOT_SUMMED_AS_MW"
+      },
+      "mixed_boundary_silent_aggregation_count": 0,
+      "MVA_to_MW_unsupported_conversion_count": 0,
+      "unknown_to_zero_count": 0,
+      "facility_power_divided_by_PUE_count": 0,
+      "PUE_1_30_role": "CASE_STUDY_PCC_CONVERSION_ONLY_NOT_REAL_CAPACITY_HARMONIZER",
+      "grid_benefit_based_scale_selection_count": 0
+    }
+  },
+  "D1_state": {
+    "artifact_id": "V20B_D1_STATE_FINAL_REVIEW_V1",
+    "classification": "B3_ONLY_NONCAUSAL_ORACLE_SUPPORTED",
+    "exact_snapshot_available": false,
+    "retrospective_complete_causal_state_supported": false,
+    "queued_GPU_h": null,
+    "running_GPU_h": null,
+    "level_C_preserved_oracle": {
+      "path": "dayahead/artifacts/v18r1_aidc_physical_coherence_repair/V18R1_D1_RETROSPECTIVE_QUEUE_ORACLE.json",
+      "sha256": "f815fe0aaf1c07dc689b8928d41126c46742cf8c654563c611ae0881b498abb2",
+      "seven_day_queued_GPU_h": 6621.642222222222,
+      "seven_day_running_GPU_h": 5303.617222222221,
+      "authority_role": "NONE"
+    },
+    "D1_STATE_EXTENSION_READY": false,
+    "FORECAST_NEW_ONLY_main_policy": "VALID",
+    "future_actual_feature_injection_count": 0
+  },
+  "job_to_power": {
+    "artifact_id": "V20C_PARTIAL_NODE_POWER_FINAL_REVIEW_V1",
+    "classification": "C3_GPU_BOARD_LOWER_BOUND_REMAINS_ONLY",
+    "new_main_authority_found": false,
+    "current_lower_bound_remains": true,
+    "partial_node_kW_per_GPU": 0.48563611660901085,
+    "CPU_increment": null,
+    "finite_interval_supported": false,
+    "PARTIAL_NODE_POWER_UPGRADE_READY": false,
+    "prior_identifiability_sha256": "97f35f8283f1b995f031f44691f14a0ba662026ddf39363df821a4304b332b8d",
+    "firewall": {
+      "power_coefficient_tuning_calls": 0,
+      "arbitrary_host_multiplier": 0,
+      "partial_CPU_double_count": 0,
+      "PUE_application_count_per_bridge": 1
+    }
+  },
+  "integration": {
+    "forecast_bundle_ready": true,
+    "scheduler_adapter_ready": true,
+    "power_bridge_ready": true,
+    "facility_conservation_ready": true,
+    "preflight_passed": false,
+    "failed_gates": [
+      "G13_PCC_transformer_interface",
+      "G15_site_scale_authority",
+      "G16_locked_test_authority"
+    ]
+  },
+  "locked_test": {
+    "artifact_id": "V20E_LOCKED_TEST_FINAL_REVIEW_V1",
+    "classification": "E3_NO_UNTOUCHED_PERIOD_AVAILABLE",
+    "untouched_period_exists": false,
+    "sealed": false,
+    "dates": null,
+    "contamination_status": "POST_APRIL_PERIODS_HAVE_PRIOR_HUMAN_VISIBLE_OUTCOME_OR_RESULT_LINEAGE",
+    "LOCKED_TEST_AUTHORITY_READY": false,
+    "NO_HUMAN_OUTCOME_ACCESS_certificate": null,
+    "new_target_reads_by_V20": 0,
+    "new_ML_evaluations": 0,
+    "new_grid_runs": 0,
+    "already_observed_period_falsely_labeled_unseen_count": 0
+  },
+  "ready_flags": {
+    "artifact_id": "V21_READY_FLAGS_V1",
+    "ML_AUTHORITY_READY": true,
+    "SITE_SCALE_AUTHORITY_READY": false,
+    "D1_STATE_AUTHORITY_READY": false,
+    "POWER_AUTHORITY_READY": false,
+    "MODEL_AGNOSTIC_INTEGRATION_READY": true,
+    "LOCKED_TEST_AUTHORITY_READY": false,
+    "PRE_SCIENCE_PREFLIGHT_READY": false,
+    "FINAL_GRID_SCIENCE_READY": false,
+    "FINAL_GRID_SCIENCE_AUTHORIZED": false,
+    "selected_production_forecast_model": "B3_LIGHTGBM_QUANTILE",
+    "FINAL_FACILITY_FLEXIBILITY_SHARE": null
+  },
+  "remaining_blockers_ranked": [
+    "1. No untouched locked-test period (G16)",
+    "2. No 12/12 common-boundary Melbourne site scale/GPU weights (G15)",
+    "3. No source-backed real DNSP/PF interface rating (G13)",
+    "4. No D-1 queue/running snapshot authority",
+    "5. Partial-node host/CPU increment remains unidentified"
+  ],
+  "git": {
+    "worktree": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v21_pre_science",
+    "branch": "codex/v21-pre-science-integration",
+    "start_HEAD": "586431f2d014adf2750441be30eb95481908ac03",
+    "current_HEAD_before_final_commit": "9a5caa67421ac7b04c6aefbf70fa6b118717d274"
+  },
+  "firewall": {
+    "science_call_namespace": "FINAL_GRID_SCIENCE_CASES",
+    "result_based_retuning": 0,
+    "April_target_reads": 0,
+    "beta_AIDC_scaling_calls": 0,
+    "facility_scale_calls_on_GPU_h": 0,
+    "B0_calls": 0,
+    "B1_calls": 0,
+    "B2_calls": 0,
+    "B3_calls": 0,
+    "OpenDSS_calls": 0,
+    "AC_science_calls": 0,
+    "B3_ML_production_fit_calls": 1
+  }
+}
