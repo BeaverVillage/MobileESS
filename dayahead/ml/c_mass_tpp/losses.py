@@ -107,10 +107,10 @@ def total_loss(
         target_mass, output["q90"], 0.9
     )
     count = negative_binomial_nll(target_count, output["count_mean"], output["count_dispersion"])
-    burst = torch.zeros((), dtype=mass.dtype)
+    burst = torch.zeros((), dtype=mass.dtype, device=mass.device)
     if use_burst:
         burst = F.cross_entropy(output["burst_logits"], burst_labels(target_mass, p50, p90))
-    event = torch.zeros((), dtype=mass.dtype)
+    event = torch.zeros((), dtype=mass.dtype, device=mass.device)
     event_meta: dict[str, float | str] = {"matching": "DISABLED", "ot_cost": 0.0}
     if use_event_loss:
         event, event_meta = event_set_loss(

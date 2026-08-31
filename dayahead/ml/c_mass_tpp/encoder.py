@@ -93,11 +93,24 @@ class StandardTransformerWindowEncoder(nn.Module):
         slot = torch.clamp(
             ((7.0 * 24.0 - event_ages_h) * 4.0).long(), min=0, max=self.slots - 1
         )
-        token = torch.zeros(self.slots, self.position.shape[-1], dtype=event_features.dtype)
-        count = torch.zeros(self.slots, 1, dtype=event_features.dtype)
+        token = torch.zeros(
+            self.slots,
+            self.position.shape[-1],
+            dtype=event_features.dtype,
+            device=event_features.device,
+        )
+        count = torch.zeros(
+            self.slots, 1, dtype=event_features.dtype, device=event_features.device
+        )
         embedded = self.embedding(event_features)
         token.index_add_(0, slot, embedded)
-        count.index_add_(0, slot, torch.ones(len(slot), 1, dtype=event_features.dtype))
+        count.index_add_(
+            0,
+            slot,
+            torch.ones(
+                len(slot), 1, dtype=event_features.dtype, device=event_features.device
+            ),
+        )
         token = token / count.clamp_min(1.0)
         encoded = self.encoder((token.unsqueeze(0) + self.position))
         return self.norm(encoded.mean(dim=1))

@@ -10,6 +10,7 @@ import numpy as np
 import torch
 
 from dayahead.ml.c_mass_tpp.data import ROOT, causality_audit
+from dayahead.ml.c_mass_tpp.encoder import StandardTransformerWindowEncoder
 from dayahead.ml.c_mass_tpp.facility_bridge import reference_it_power
 from dayahead.ml.c_mass_tpp.model import CMASSTPP, CMASSTPPConfig
 from dayahead.ml.c_mass_tpp.power_bridge import PUE, packets_to_power
@@ -82,6 +83,12 @@ class V19StructuralUnitTests(unittest.TestCase):
         residual = total - np.zeros_like(total)
         self.assertGreaterEqual(float(residual.min()), 0.0)
         self.assertLessEqual(float(np.max(np.abs(total - residual))), 1e-12)
+
+    @unittest.skipUnless(torch.cuda.is_available(), "CUDA device-routing check")
+    def test_transformer_ablation_cuda_routing(self) -> None:
+        encoder = StandardTransformerWindowEncoder(9, 16).to("cuda:0")
+        output = encoder(torch.randn(32, 9, device="cuda:0"), torch.linspace(0, 167, 32, device="cuda:0"))
+        self.assertEqual(output.device.type, "cuda")
 
 
 class V19ArtifactTests(unittest.TestCase):
