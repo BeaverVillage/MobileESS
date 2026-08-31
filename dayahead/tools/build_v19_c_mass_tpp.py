@@ -1578,11 +1578,69 @@ def full(epochs: int) -> None:
         freeze_sha,
         april,
     )
+    cuda_full_run_seconds = float(time.perf_counter() - started)
+    record_execution_summary(cuda_full_run_seconds)
     print(json.dumps({
         "classification": final["result_classification"],
-        "elapsed_seconds": time.perf_counter() - started,
+        "elapsed_seconds": cuda_full_run_seconds,
         "artifact_count": len([path for path in OUT.iterdir() if path.is_file()]),
     }, indent=2))
+
+
+def record_execution_summary(cuda_full_run_seconds: float) -> dict[str, object]:
+    report_path = OUT / "V19_EVENT_ENCODER_PRETRAINING_REPORT.json"
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    runs = report["runs"]
+    elapsed = np.asarray([float(run["elapsed_seconds"]) for run in runs], dtype=float)
+    epoch_seconds = np.asarray(
+        [float(value) for run in runs for value in run["epoch_runtime_seconds"]], dtype=float
+    )
+    utilization = np.asarray(
+        [
+            float(value)
+            for run in runs
+            for value in run["gpu_utilization_samples_percent"]
+        ],
+        dtype=float,
+    )
+    fold_runtime = {
+        str(fold): float(
+            sum(float(run["elapsed_seconds"]) for run in runs if int(run["fold"]) == fold)
+        )
+        for fold in range(1, 6)
+    }
+    cpu_full = float(report["execution_correction"]["cpu_reference_full_run_seconds"])
+    cpu_median = float(
+        report["execution_correction"][
+            "cpu_reference_median_fold_variant_seed_training_seconds"
+        ]
+    )
+    summary = {
+        "EXECUTION_DEVICE_CHANGE_ONLY": "CPU_TO_CUDA",
+        "RESULT_BASED_RETUNING": 0,
+        "device_name": runs[0]["device_name"],
+        "cuda_full_run_seconds": float(cuda_full_run_seconds),
+        "cpu_reference_full_run_seconds": cpu_full,
+        "measured_full_run_speedup_CPU_over_CUDA": cpu_full / cuda_full_run_seconds,
+        "median_fold_variant_seed_training_seconds": float(np.median(elapsed)),
+        "measured_median_training_speedup_CPU_over_CUDA": cpu_median / float(np.median(elapsed)),
+        "epoch_runtime_seconds_median": float(np.median(epoch_seconds)),
+        "epoch_runtime_seconds_min": float(epoch_seconds.min()),
+        "epoch_runtime_seconds_max": float(epoch_seconds.max()),
+        "fold_training_runtime_seconds_sum_over_variants_and_seeds": fold_runtime,
+        "peak_VRAM_bytes": int(max(int(run["peak_VRAM_bytes"]) for run in runs)),
+        "gpu_utilization_sample_percent_min": float(utilization.min()),
+        "gpu_utilization_sample_percent_mean": float(utilization.mean()),
+        "gpu_utilization_sample_percent_max": float(utilization.max()),
+        "final_table_mixes_CPU_and_CUDA_deep_folds": False,
+    }
+    report["execution_summary"] = summary
+    write_json("V19_EVENT_ENCODER_PRETRAINING_REPORT.json", report)
+    for name in ("V19_READY_FLAGS.json", "V19_FINAL_REVIEW.json"):
+        payload = json.loads((OUT / name).read_text(encoding="utf-8"))
+        payload["execution_summary"] = summary
+        write_json(name, payload)
+    return summary
 
 
 def main() -> None:

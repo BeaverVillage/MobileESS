@@ -1,0 +1,37 @@
+{
+  "artifact_id": "V19_C_MASS_TPP_ARCHITECTURE_CONTRACT_V1",
+  "name": "Causal Mass-Conserving Aggregate-conditioned Service-Set Temporal Point Process",
+  "modules": {
+    "A_encoder": "causal diagonal exponential-decay jump state-space over every irregular event plus 28-day macro MLP",
+    "B_mass_head": "nonnegative conditional mean and structurally monotone Q50/Q90",
+    "C_burst_head": "fold-training P50/P90 three-class auxiliary head",
+    "D_service_set_decoder": "10,012 anonymous all-at-once queries evaluated in chunks of 512",
+    "E_hard_reconciliation": "float64 alpha-normalized allocation with final round-off residual correction"
+  },
+  "encoder_note": "The user-provided GRUCell recurrence was a recommended reference. The implemented vectorized diagonal decay/jump SSM preserves all events and is CPU-feasible; encoder novelty is not claimed.",
+  "mass_identity": [
+    "sum event_mass_mean == daily_mean",
+    "sum event_mass_Q50 == Q50",
+    "sum event_mass_Q90 == Q90"
+  ],
+  "set_matching": {
+    "small_sets": "deterministic entropic Sinkhorn",
+    "large_sets": "memory-bounded monotone 1-D OT with mark/mass costs",
+    "event_truncation": false
+  },
+  "variants": {
+    "V19-A": "without SSL",
+    "V19-B": "SSL, no burst auxiliary",
+    "V19-C": "SSL plus burst auxiliary"
+  },
+  "loss_weights": {
+    "Tweedie": 1.0,
+    "quantile": 0.0002,
+    "burst": 0.05,
+    "event_set": 0.05,
+    "count": 0.01,
+    "count_consistency": 0.001,
+    "mass_conservation_loss": null
+  },
+  "facility_scale_firewall": "SCALE_INDEPENDENT_GPU_H_ONLY_FOR_ACCEPTANCE"
+}

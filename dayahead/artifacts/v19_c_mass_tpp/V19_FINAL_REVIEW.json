@@ -1,0 +1,3542 @@
+{
+  "artifact_id": "V19_FINAL_REVIEW_V1",
+  "result_classification": "C. V19_C_MASS_TPP_NOVELTY_PASS_PERFORMANCE_FAIL",
+  "ready_flags": {
+    "artifact_id": "V19_READY_FLAGS_V1",
+    "RESULT_CLASSIFICATION": "C. V19_C_MASS_TPP_NOVELTY_PASS_PERFORMANCE_FAIL",
+    "NOVELTY_GATE_PASS": true,
+    "MODEL_DEVELOPMENT_READY": true,
+    "PROPOSED_MODEL_ACCEPTED": false,
+    "FACILITY_FORECAST_INTEGRATION_READY": false,
+    "FACILITY_FORECAST_INTEGRATION_AUTHORITY": "PROVISIONAL_LEGACY_SCALE_DIAGNOSTIC_ONLY",
+    "NEW_LOCKED_TEST_READY": false,
+    "NEW_GRID_SCIENCE_RUN_READY": false,
+    "FINAL_FACILITY_FLEXIBILITY_SHARE": null,
+    "preservation": {
+      "status": "PASS",
+      "failures": []
+    },
+    "firewall_counters": {
+      "D_day_actual_feature_reads": 0,
+      "future_start_feature_reads": 0,
+      "future_end_feature_reads": 0,
+      "future_queue_wait_feature_reads": 0,
+      "future_completion_feature_reads": 0,
+      "April_target_reads_before_freeze": 0,
+      "April_reads_for_model_selection_or_tuning": 0,
+      "literature_target_reads": 0,
+      "grid_objective_reads_for_model_selection": 0,
+      "result_based_workload_multiplier_calls": 0,
+      "beta_AIDC_scaling_calls": 0,
+      "facility_scale_calls_on_GPU_h": 0,
+      "B0_B1_B2_B3_science_calls": 0,
+      "OpenDSS_calls": 0,
+      "AC_science_calls": 0,
+      "RESULT_BASED_RETUNING": 0
+    },
+    "execution_device_correction": {
+      "EXECUTION_DEVICE_CHANGE_ONLY": "CPU_TO_CUDA",
+      "CPU_deep_fold_results_in_final_table": 0
+    }
+  },
+  "novelty": {
+    "artifact_id": "V19_C_MASS_TPP_SYSTEMATIC_NOVELTY_AUDIT_V1",
+    "access_date": "2026-09-01",
+    "search_queries": [
+      "temporal point process data center workload",
+      "marked temporal point process GPU workload",
+      "GPU job arrival prediction point process",
+      "aggregate conditioned temporal point process",
+      "mass conserving temporal point process",
+      "mass-conserving event forecasting",
+      "service-set forecasting temporal point process",
+      "future event set workload forecasting",
+      "long horizon marked event set prediction",
+      "aggregate constrained event forecasting",
+      "data center job arrival event forecasting",
+      "AI data center workload forecasting point process",
+      "energy-aware marked temporal point process"
+    ],
+    "sources_queried": {
+      "IEEE_Xplore": "SEARCH_RESULTS_ACCESSIBLE; no near-identical full paper found",
+      "ACM_Digital_Library": "METADATA_AND_PRIMARY_PAPERS_ACCESSIBLE",
+      "ScienceDirect": "ABSTRACTS_ACCESSIBLE; selected full text access variable",
+      "SpringerLink": "SEARCH_AND_ABSTRACTS_ACCESSIBLE",
+      "arXiv": "ACCESSIBLE",
+      "OpenReview": "SEARCH/METADATA_ACCESSIBLE; some PDF challenges encountered",
+      "NeurIPS": "PRIMARY_PROCEEDINGS_ACCESSIBLE",
+      "ICML": "PMLR_PRIMARY_PROCEEDINGS_ACCESSIBLE",
+      "ICLR": "OPENREVIEW_ACCESSIBLE",
+      "KDD": "PRIMARY_KDD_PDF_ACCESSIBLE",
+      "AAAI": "PRIMARY_PROCEEDINGS_ACCESSIBLE",
+      "AISTATS": "OPENREVIEW/PMLR_METADATA_ACCESSIBLE",
+      "Web_of_Science": "NOT_ACCESSED_NO_AUTHENTICATED_CONNECTOR",
+      "Scopus": "NOT_ACCESSED_NO_AUTHENTICATED_CONNECTOR"
+    },
+    "nearest_prior_works": [
+      {
+        "paper_model": "DualTPP / Long Horizon Forecasting With Temporal Point Processes",
+        "year": 2021,
+        "venue": "ACM WSDM",
+        "event_time_prediction": "YES",
+        "marked_events": "YES",
+        "long_horizon_all_at_once": "NO; binwise constrained sequential inference",
+        "continuous_service_mass": "NO",
+        "daily_aggregate_mass_head": "NO; aggregate count model",
+        "hard_aggregate_event_reconciliation": "PARTIAL; count/timing constrained quadratic inference",
+        "gpu_resource_power_tier": "NO",
+        "electrical_power_mapping": "NO",
+        "d_minus_1_datacenter_scheduling": "NO",
+        "nearest_component": "micro event model plus macro aggregate constraint",
+        "near_duplicate": "NO",
+        "url": "https://doi.org/10.1145/3437963.3441740"
+      },
+      {
+        "paper_model": "DEF / Detecting the Future",
+        "year": 2026,
+        "venue": "AAAI",
+        "event_time_prediction": "YES",
+        "marked_events": "YES",
+        "long_horizon_all_at_once": "YES",
+        "continuous_service_mass": "NO",
+        "daily_aggregate_mass_head": "NO",
+        "hard_aggregate_event_reconciliation": "NO",
+        "gpu_resource_power_tier": "NO",
+        "electrical_power_mapping": "NO",
+        "d_minus_1_datacenter_scheduling": "NO",
+        "nearest_component": "parallel query event detection plus horizon matching",
+        "near_duplicate": "NO",
+        "url": "https://doi.org/10.1609/aaai.v40i27.39413"
+      },
+      {
+        "paper_model": "EventFlow",
+        "year": 2026,
+        "venue": "AISTATS",
+        "event_time_prediction": "YES",
+        "marked_events": "LIMITED/benchmark dependent",
+        "long_horizon_all_at_once": "YES",
+        "continuous_service_mass": "NO",
+        "daily_aggregate_mass_head": "NO; event-count distribution",
+        "hard_aggregate_event_reconciliation": "NO",
+        "gpu_resource_power_tier": "NO",
+        "electrical_power_mapping": "NO",
+        "d_minus_1_datacenter_scheduling": "NO",
+        "nearest_component": "non-autoregressive joint future event-time generation",
+        "near_duplicate": "NO",
+        "url": "https://openreview.net/forum?id=QXqKGOE2JW"
+      },
+      {
+        "paper_model": "Add and Thin",
+        "year": 2023,
+        "venue": "NeurIPS",
+        "event_time_prediction": "YES",
+        "marked_events": "YES",
+        "long_horizon_all_at_once": "YES; diffusion conditional sampling",
+        "continuous_service_mass": "NO",
+        "daily_aggregate_mass_head": "NO",
+        "hard_aggregate_event_reconciliation": "NO",
+        "gpu_resource_power_tier": "NO",
+        "electrical_power_mapping": "NO",
+        "d_minus_1_datacenter_scheduling": "NO",
+        "nearest_component": "whole-window point-process generation",
+        "near_duplicate": "NO",
+        "url": "https://proceedings.neurips.cc/paper_files/paper/2023/file/b1d9c7e7bd265d81aae8d74a7a6bd7f1-Paper-Conference.pdf"
+      },
+      {
+        "paper_model": "S2P2 / Deep Continuous-Time State-Space Models",
+        "year": 2025,
+        "venue": "NeurIPS/medical open manuscript record",
+        "event_time_prediction": "YES",
+        "marked_events": "YES",
+        "long_horizon_all_at_once": "NO",
+        "continuous_service_mass": "NO",
+        "daily_aggregate_mass_head": "NO",
+        "hard_aggregate_event_reconciliation": "NO",
+        "gpu_resource_power_tier": "NO",
+        "electrical_power_mapping": "NO",
+        "d_minus_1_datacenter_scheduling": "NO",
+        "nearest_component": "continuous-time state-space event encoder",
+        "near_duplicate": "NO",
+        "url": "https://openreview.net/forum?id=91cd21773ccd043766294dd5cebc557ae7de3dce"
+      },
+      {
+        "paper_model": "RMTPP",
+        "year": 2016,
+        "venue": "ACM KDD",
+        "event_time_prediction": "YES",
+        "marked_events": "YES",
+        "long_horizon_all_at_once": "NO",
+        "continuous_service_mass": "NO",
+        "daily_aggregate_mass_head": "NO",
+        "hard_aggregate_event_reconciliation": "NO",
+        "gpu_resource_power_tier": "NO",
+        "electrical_power_mapping": "NO",
+        "d_minus_1_datacenter_scheduling": "NO",
+        "nearest_component": "recurrent marked continuous-time history encoder",
+        "near_duplicate": "NO",
+        "url": "https://doi.org/10.1145/2939672.2939875"
+      },
+      {
+        "paper_model": "SAHP",
+        "year": 2020,
+        "venue": "ICML/PMLR",
+        "event_time_prediction": "YES",
+        "marked_events": "YES",
+        "long_horizon_all_at_once": "NO",
+        "continuous_service_mass": "NO",
+        "daily_aggregate_mass_head": "NO",
+        "hard_aggregate_event_reconciliation": "NO",
+        "gpu_resource_power_tier": "NO",
+        "electrical_power_mapping": "NO",
+        "d_minus_1_datacenter_scheduling": "NO",
+        "nearest_component": "self-attentive history representation",
+        "near_duplicate": "NO",
+        "url": "https://proceedings.mlr.press/v119/zhang20q.html"
+      },
+      {
+        "paper_model": "Transformer Hawkes Process",
+        "year": 2020,
+        "venue": "ICML",
+        "event_time_prediction": "YES",
+        "marked_events": "YES",
+        "long_horizon_all_at_once": "NO",
+        "continuous_service_mass": "NO",
+        "daily_aggregate_mass_head": "NO",
+        "hard_aggregate_event_reconciliation": "NO",
+        "gpu_resource_power_tier": "NO",
+        "electrical_power_mapping": "NO",
+        "d_minus_1_datacenter_scheduling": "NO",
+        "nearest_component": "Transformer TPP baseline",
+        "near_duplicate": "NO",
+        "url": "https://arxiv.org/abs/2002.09291"
+      },
+      {
+        "paper_model": "Deep Renewal Processes",
+        "year": 2019,
+        "venue": "NeurIPS TPP workshop / PLOS ONE extension",
+        "event_time_prediction": "YES",
+        "marked_events": "demand size",
+        "long_horizon_all_at_once": "NO",
+        "continuous_service_mass": "YES; intermittent demand size",
+        "daily_aggregate_mass_head": "NO",
+        "hard_aggregate_event_reconciliation": "NO",
+        "gpu_resource_power_tier": "NO",
+        "electrical_power_mapping": "NO",
+        "d_minus_1_datacenter_scheduling": "NO",
+        "nearest_component": "intermittent occurrence and continuous size forecasting",
+        "near_duplicate": "NO",
+        "url": "https://arxiv.org/abs/1911.10416"
+      },
+      {
+        "paper_model": "MC-LSTM",
+        "year": 2021,
+        "venue": "ICML/PMLR",
+        "event_time_prediction": "NO",
+        "marked_events": "NO",
+        "long_horizon_all_at_once": "NO",
+        "continuous_service_mass": "YES",
+        "daily_aggregate_mass_head": "NO",
+        "hard_aggregate_event_reconciliation": "YES; recurrent physical mass flow",
+        "gpu_resource_power_tier": "NO",
+        "electrical_power_mapping": "NO",
+        "d_minus_1_datacenter_scheduling": "NO",
+        "nearest_component": "hard architectural mass conservation",
+        "near_duplicate": "NO",
+        "url": "https://proceedings.mlr.press/v139/hoedt21a.html"
+      },
+      {
+        "paper_model": "Characterization and Prediction of DL Workloads in Large-Scale GPU Datacenters",
+        "year": 2021,
+        "venue": "SC21",
+        "event_time_prediction": "NO",
+        "marked_events": "job/resource workload records",
+        "long_horizon_all_at_once": "NO",
+        "continuous_service_mass": "resource/runtime characterization",
+        "daily_aggregate_mass_head": "NO",
+        "hard_aggregate_event_reconciliation": "NO",
+        "gpu_resource_power_tier": "GPU resource but not V19 tiers",
+        "electrical_power_mapping": "energy-saving application, not tier bridge",
+        "d_minus_1_datacenter_scheduling": "scheduling case studies, not this forecast contract",
+        "nearest_component": "GPU datacenter workload prediction domain",
+        "near_duplicate": "NO",
+        "url": "https://www.sc21.supercomputing.org/proceedings/tech_paper/tech_paper_pages/pap594.html"
+      }
+    ],
+    "substantive_comparison": {
+      "closest_single_work": "DualTPP",
+      "closest_component_combination": [
+        "DualTPP",
+        "DEF",
+        "EventFlow",
+        "MC-LSTM"
+      ],
+      "already_known_components": [
+        "marked continuous-time event encoders",
+        "macro count plus micro TPP coupling",
+        "all-at-once horizon event decoding and matching",
+        "hard conservation architectures",
+        "hierarchical forecast reconciliation",
+        "GPU workload characterization and scheduling"
+      ],
+      "distinct_system_level_combination": [
+        "D-1 submission-only H100 history",
+        "conditional next-day continuous service-mass mean and quantiles",
+        "anonymous all-at-once time/tier/latency service-event set",
+        "hard normalized allocation of the predicted aggregate service mass for mean/Q50/Q90",
+        "direct frozen H100 tier-to-IT-to-PCC electrical bridge"
+      ],
+      "novelty_scope_warning": "The continuous-time encoder, set decoder, Sinkhorn matching, quantile heads, and normalization are not individually novel. Any claim must be limited to the aggregate-conditioned exact service-mass reconciliation system and its datacenter electrical application."
+    },
+    "novelty_gate": "PASS_NO_NEAR_IDENTICAL_ARCHITECTURE",
+    "near_duplicate_found": false,
+    "world_first_claim_allowed": "NOT_YET",
+    "gate_rationale": "No accessed single architecture jointly predicts continuous daily GPU service mass and an anonymous marked next-day service-event set with hard exact scenario-wise reconciliation and frozen electrical tier mapping. DualTPP is the strongest conceptual predecessor and prevents broad novelty claims."
+  },
+  "dataset": {
+    "artifact_id": "V19_EVENT_DATASET_REPRODUCTION_V1",
+    "source": {
+      "source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+      "source_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+      "members_opened": [
+        {
+          "month": 202410,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+          "H100_rows": 21679
+        },
+        {
+          "month": 202411,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+          "H100_rows": 26933
+        },
+        {
+          "month": 202412,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+          "H100_rows": 41814
+        },
+        {
+          "month": 202407,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=7/kestrel_jobs_202407_0.parquet",
+          "H100_rows": 42284
+        },
+        {
+          "month": 202408,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+          "H100_rows": 20192
+        },
+        {
+          "month": 202409,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+          "H100_rows": 26532
+        },
+        {
+          "month": 202501,
+          "member": "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+          "H100_rows": 96880
+        },
+        {
+          "month": 202502,
+          "member": "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+          "H100_rows": 22295
+        },
+        {
+          "month": 202503,
+          "member": "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+          "H100_rows": 86148
+        }
+      ],
+      "H100_rows": 384757,
+      "requested_columns": [
+        "account_hash",
+        "end_time",
+        "gpu_nodes_occupied",
+        "gpus_requested",
+        "id",
+        "jobs_shared",
+        "nodelist",
+        "nodes_req",
+        "nodes_shared",
+        "partition",
+        "qos",
+        "shared_job_count",
+        "start_time",
+        "state_simple",
+        "submit_time",
+        "wallclock_req"
+      ]
+    },
+    "all_H100_source_rows_loaded_July2024_to_March2025": 384757,
+    "source_valid_submission_request_input_events": 323354,
+    "semantic_flexible_target_events_after_76_conflict_exclusion": 85866,
+    "training_days": 225,
+    "training_total_master_mass_GPU_h": 614322.9724999999,
+    "positive_target_days": 205,
+    "K_max_training_observed": 10012,
+    "event_count_quantiles": {
+      "0.5": 90.0,
+      "0.9": 998.1999999999999,
+      "0.95": 1567.9999999999993,
+      "0.99": 3155.1199999999935,
+      "1.0": 10012.0
+    },
+    "daily_master_event_sum_max_abs_error_GPU_h": 0.0,
+    "causality": {
+      "main_input_boundary": "REQUEST_AND_SUBMISSION_SIDE_ONLY_BEFORE_D_MINUS_1_18_00_AEST",
+      "D_day_actual_feature_reads": 0,
+      "future_start_feature_reads": 0,
+      "future_end_feature_reads": 0,
+      "future_queue_wait_feature_reads": 0,
+      "future_completion_feature_reads": 0,
+      "historical_realized_runtime_feature_reads": 0,
+      "target_label_queue_wait_reads": 1,
+      "target_label_realized_runtime_reads": 1
+    },
+    "daily_master_mass_identity_max_abs_error_GPU_h": 0.0,
+    "daily_slot_mass_identity_max_abs_error_GPU_h": 6.548361852765083e-11,
+    "daily_tier_mass_identity_max_abs_error_GPU_h": 8.731149137020111e-11,
+    "zero_target_days": 20,
+    "target_event_mass_min_GPU_h": 0.0002777777777777778,
+    "target_event_mass_max_GPU_h": 1199.1144444444446,
+    "KMAX_RESOURCE_BLOCKER": true,
+    "KMAX_resolution": "10,012 queries retained through chunked decoder; no target-event truncation"
+  },
+  "architecture": {
+    "artifact_id": "V19_C_MASS_TPP_ARCHITECTURE_CONTRACT_V1",
+    "name": "Causal Mass-Conserving Aggregate-conditioned Service-Set Temporal Point Process",
+    "modules": {
+      "A_encoder": "causal diagonal exponential-decay jump state-space over every irregular event plus 28-day macro MLP",
+      "B_mass_head": "nonnegative conditional mean and structurally monotone Q50/Q90",
+      "C_burst_head": "fold-training P50/P90 three-class auxiliary head",
+      "D_service_set_decoder": "10,012 anonymous all-at-once queries evaluated in chunks of 512",
+      "E_hard_reconciliation": "float64 alpha-normalized allocation with final round-off residual correction"
+    },
+    "encoder_note": "The user-provided GRUCell recurrence was a recommended reference. The implemented vectorized diagonal decay/jump SSM preserves all events and is CPU-feasible; encoder novelty is not claimed.",
+    "mass_identity": [
+      "sum event_mass_mean == daily_mean",
+      "sum event_mass_Q50 == Q50",
+      "sum event_mass_Q90 == Q90"
+    ],
+    "set_matching": {
+      "small_sets": "deterministic entropic Sinkhorn",
+      "large_sets": "memory-bounded monotone 1-D OT with mark/mass costs",
+      "event_truncation": false
+    },
+    "variants": {
+      "V19-A": "without SSL",
+      "V19-B": "SSL, no burst auxiliary",
+      "V19-C": "SSL plus burst auxiliary"
+    },
+    "loss_weights": {
+      "Tweedie": 1.0,
+      "quantile": 0.0002,
+      "burst": 0.05,
+      "event_set": 0.05,
+      "count": 0.01,
+      "count_consistency": 0.001,
+      "mass_conservation_loss": null
+    },
+    "facility_scale_firewall": "SCALE_INDEPENDENT_GPU_H_ONLY_FOR_ACCEPTANCE"
+  },
+  "baselines": {
+    "artifact_id": "V19_BASELINE_IMPLEMENTATION_AUDIT_V1",
+    "executed": {
+      "B0": "V18R2 Candidate-B empirical DOW Q50/Q90 rule",
+      "B1": "D-7 requested-service proxy with training-only scale",
+      "B2": "LightGBM 4.6.0 Tweedie mean plus quantile heads",
+      "B3": "LightGBM 4.6.0 quantile Q50/Q90",
+      "B4": "lightweight faithful patch-token Transformer over 28-day request proxy",
+      "B5": "RMTPP-style continuous-time recurrent/decay event adaptation with daily horizon head; not canonical next-event likelihood reproduction",
+      "B6": "THP-style causal attention-pooling long-horizon adaptation; O(N^2) canonical THP was infeasible at 10k-event windows"
+    },
+    "not_reproduced": {
+      "B7_SAHP": "NOT_REPRODUCED_WITH_REASON: canonical self-attention implementation is quadratic in the observed 7-day event windows and no resource-safe faithful path was available",
+      "B8_DEF_EventFlow": "NOT_REPRODUCED_WITH_REASON: primary code/papers were found, but adapting their generative training and dependencies to 10,012 marked service-mass events was not computationally feasible within the frozen evaluation resource budget"
+    },
+    "fairness": "same dates, target, cutoff, conflict exclusion and April firewall",
+    "input_information_table": {
+      "B0": "known target-day calendar only",
+      "B1": "past request-side proxy",
+      "B2_B3": "18 macro request/calendar features",
+      "B4": "28-day request-side proxy sequence",
+      "B5_B6": "7-day request/submission event history",
+      "C_MASS_TPP": "same 7-day event history plus 28-day macro request/calendar context"
+    },
+    "parameter_and_compute_records": [
+      {
+        "fold": 1,
+        "variant": "V19-A",
+        "seed": 20260901,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.3260796,
+        "epoch_runtime_seconds": [
+          0.8136778000000007,
+          0.40523009999999715
+        ],
+        "final_training_loss": 25.968941307067873,
+        "pretraining": {
+          "enabled": false,
+          "status": "NOT_REQUESTED_FOR_VARIANT",
+          "nested_inner_tweedie_scores": {
+            "1.3": 374.5240478515625,
+            "1.5": 87.74972534179688,
+            "1.7": 21.80687713623047
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 112816640,
+        "gpu_utilization_samples_percent": [
+          30.0,
+          25.0
+        ]
+      },
+      {
+        "fold": 1,
+        "variant": "V19-B",
+        "seed": 20260901,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.9033748000000017,
+        "epoch_runtime_seconds": [
+          0.39934219999999954,
+          0.40051549999999736
+        ],
+        "final_training_loss": 25.688459968566896,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 1.2281375175172633,
+          "interarrival_loss": 0.008113616781139915,
+          "next_request_loss": 1.3355852175842633,
+          "events_seen": 89950,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 374.5240478515625,
+            "1.5": 87.74972534179688,
+            "1.7": 21.80687713623047
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 114913792,
+        "gpu_utilization_samples_percent": [
+          34.0,
+          34.0
+        ]
+      },
+      {
+        "fold": 1,
+        "variant": "V19-C",
+        "seed": 20260901,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.9414631,
+        "epoch_runtime_seconds": [
+          0.4051532000000009,
+          0.4177052999999944
+        ],
+        "final_training_loss": 25.737047958374024,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 1.2281375175172633,
+          "interarrival_loss": 0.008113616781139915,
+          "next_request_loss": 1.3355852175842633,
+          "events_seen": 89950,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 374.5240478515625,
+            "1.5": 87.74972534179688,
+            "1.7": 21.80687713623047
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 117020160,
+        "gpu_utilization_samples_percent": [
+          34.0,
+          34.0
+        ]
+      },
+      {
+        "fold": 1,
+        "variant": "V19-A",
+        "seed": 20260902,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.8953385000000011,
+        "epoch_runtime_seconds": [
+          0.39278360000000134,
+          0.39678419999999903
+        ],
+        "final_training_loss": 28.962421417236328,
+        "pretraining": {
+          "enabled": false,
+          "status": "NOT_REQUESTED_FOR_VARIANT",
+          "nested_inner_tweedie_scores": {
+            "1.3": 374.5240478515625,
+            "1.5": 87.74972534179688,
+            "1.7": 21.80687713623047
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 119108096,
+        "gpu_utilization_samples_percent": [
+          37.0,
+          40.0
+        ]
+      },
+      {
+        "fold": 1,
+        "variant": "V19-B",
+        "seed": 20260902,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.8985708000000017,
+        "epoch_runtime_seconds": [
+          0.3986064000000056,
+          0.39996660000000617
+        ],
+        "final_training_loss": 28.58955535888672,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 1.0273598378354853,
+          "interarrival_loss": 0.047875689681280746,
+          "next_request_loss": 1.4459026726809414,
+          "events_seen": 89950,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 374.5240478515625,
+            "1.5": 87.74972534179688,
+            "1.7": 21.80687713623047
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 121205248,
+        "gpu_utilization_samples_percent": [
+          40.0,
+          26.0
+        ]
+      },
+      {
+        "fold": 1,
+        "variant": "V19-C",
+        "seed": 20260902,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.9092630999999969,
+        "epoch_runtime_seconds": [
+          0.40795419999999893,
+          0.4073421999999951
+        ],
+        "final_training_loss": 28.63915100097656,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 1.0273598378354853,
+          "interarrival_loss": 0.047875689681280746,
+          "next_request_loss": 1.4459026726809414,
+          "events_seen": 89950,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 374.5240478515625,
+            "1.5": 87.74972534179688,
+            "1.7": 21.80687713623047
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 123311616,
+        "gpu_utilization_samples_percent": [
+          33.0,
+          33.0
+        ]
+      },
+      {
+        "fold": 1,
+        "variant": "V19-A",
+        "seed": 20260903,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.9183081999999985,
+        "epoch_runtime_seconds": [
+          0.41720209999999724,
+          0.39174500000000023
+        ],
+        "final_training_loss": 28.659207916259767,
+        "pretraining": {
+          "enabled": false,
+          "status": "NOT_REQUESTED_FOR_VARIANT",
+          "nested_inner_tweedie_scores": {
+            "1.3": 374.5240478515625,
+            "1.5": 87.74972534179688,
+            "1.7": 21.80687713623047
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 125399552,
+        "gpu_utilization_samples_percent": [
+          40.0,
+          41.0
+        ]
+      },
+      {
+        "fold": 1,
+        "variant": "V19-B",
+        "seed": 20260903,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.9075424999999981,
+        "epoch_runtime_seconds": [
+          0.39398570000000177,
+          0.40733000000000175
+        ],
+        "final_training_loss": 28.052043151855468,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 1.3821250633759932,
+          "interarrival_loss": 0.04729268896732141,
+          "next_request_loss": 1.502322018146515,
+          "events_seen": 89950,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 374.5240478515625,
+            "1.5": 87.74972534179688,
+            "1.7": 21.80687713623047
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 127496704,
+        "gpu_utilization_samples_percent": [
+          41.0,
+          37.0
+        ]
+      },
+      {
+        "fold": 1,
+        "variant": "V19-C",
+        "seed": 20260903,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.9206713999999963,
+        "epoch_runtime_seconds": [
+          0.40103999999999473,
+          0.3944249000000042
+        ],
+        "final_training_loss": 28.10266532897949,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 1.3821250633759932,
+          "interarrival_loss": 0.04729268896732141,
+          "next_request_loss": 1.502322018146515,
+          "events_seen": 89950,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 374.5240478515625,
+            "1.5": 87.74972534179688,
+            "1.7": 21.80687713623047
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 129603072,
+        "gpu_utilization_samples_percent": [
+          37.0,
+          25.0
+        ]
+      },
+      {
+        "fold": 2,
+        "variant": "V19-A",
+        "seed": 20260901,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.9800307000000004,
+        "epoch_runtime_seconds": [
+          0.42626940000000246,
+          0.4404074999999992
+        ],
+        "final_training_loss": 33.41484274183001,
+        "pretraining": {
+          "enabled": false,
+          "status": "NOT_REQUESTED_FOR_VARIANT",
+          "nested_inner_tweedie_scores": {
+            "1.3": 317.5898132324219,
+            "1.5": 71.90879821777344,
+            "1.7": 17.048446655273438
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 150369792,
+        "gpu_utilization_samples_percent": [
+          39.0,
+          39.0
+        ]
+      },
+      {
+        "fold": 2,
+        "variant": "V19-B",
+        "seed": 20260901,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.9422286,
+        "epoch_runtime_seconds": [
+          0.42102430000000624,
+          0.4129226000000017
+        ],
+        "final_training_loss": 33.36076327732631,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 1.0898486546107702,
+          "interarrival_loss": 0.008109680867554354,
+          "next_request_loss": 1.249261343053409,
+          "events_seen": 112145,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 317.5898132324219,
+            "1.5": 71.90879821777344,
+            "1.7": 17.048446655273438
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 152466944,
+        "gpu_utilization_samples_percent": [
+          43.0,
+          43.0
+        ]
+      },
+      {
+        "fold": 2,
+        "variant": "V19-C",
+        "seed": 20260901,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.949676199999999,
+        "epoch_runtime_seconds": [
+          0.4240561000000014,
+          0.4170221999999981
+        ],
+        "final_training_loss": 33.41008377075195,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 1.0898486546107702,
+          "interarrival_loss": 0.008109680867554354,
+          "next_request_loss": 1.249261343053409,
+          "events_seen": 112145,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 317.5898132324219,
+            "1.5": 71.90879821777344,
+            "1.7": 17.048446655273438
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 154573312,
+        "gpu_utilization_samples_percent": [
+          45.0,
+          45.0
+        ]
+      },
+      {
+        "fold": 2,
+        "variant": "V19-A",
+        "seed": 20260902,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.9785697999999954,
+        "epoch_runtime_seconds": [
+          0.4269317999999984,
+          0.43846600000000535
+        ],
+        "final_training_loss": 31.20045825413295,
+        "pretraining": {
+          "enabled": false,
+          "status": "NOT_REQUESTED_FOR_VARIANT",
+          "nested_inner_tweedie_scores": {
+            "1.3": 317.5898132324219,
+            "1.5": 71.90879821777344,
+            "1.7": 17.048446655273438
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 156661248,
+        "gpu_utilization_samples_percent": [
+          48.0,
+          48.0
+        ]
+      },
+      {
+        "fold": 2,
+        "variant": "V19-B",
+        "seed": 20260902,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.9269563000000005,
+        "epoch_runtime_seconds": [
+          0.41802880000000187,
+          0.4054250999999951
+        ],
+        "final_training_loss": 31.634337288992747,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.9097790781940732,
+          "interarrival_loss": 0.03942710985263277,
+          "next_request_loss": 1.330489810023989,
+          "events_seen": 112145,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 317.5898132324219,
+            "1.5": 71.90879821777344,
+            "1.7": 17.048446655273438
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 158758400,
+        "gpu_utilization_samples_percent": [
+          23.0,
+          35.0
+        ]
+      },
+      {
+        "fold": 2,
+        "variant": "V19-C",
+        "seed": 20260902,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.9454854000000026,
+        "epoch_runtime_seconds": [
+          0.42516269999999423,
+          0.41812710000000664
+        ],
+        "final_training_loss": 31.68761716570173,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.9097790781940732,
+          "interarrival_loss": 0.03942710985263277,
+          "next_request_loss": 1.330489810023989,
+          "events_seen": 112145,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 317.5898132324219,
+            "1.5": 71.90879821777344,
+            "1.7": 17.048446655273438
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 160864768,
+        "gpu_utilization_samples_percent": [
+          35.0,
+          35.0
+        ]
+      },
+      {
+        "fold": 2,
+        "variant": "V19-A",
+        "seed": 20260903,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.9377420000000001,
+        "epoch_runtime_seconds": [
+          0.41700289999999995,
+          0.4122917000000115
+        ],
+        "final_training_loss": 34.77958624703543,
+        "pretraining": {
+          "enabled": false,
+          "status": "NOT_REQUESTED_FOR_VARIANT",
+          "nested_inner_tweedie_scores": {
+            "1.3": 317.5898132324219,
+            "1.5": 71.90879821777344,
+            "1.7": 17.048446655273438
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 162952704,
+        "gpu_utilization_samples_percent": [
+          35.0,
+          39.0
+        ]
+      },
+      {
+        "fold": 2,
+        "variant": "V19-B",
+        "seed": 20260903,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.9357910000000089,
+        "epoch_runtime_seconds": [
+          0.4103362999999973,
+          0.4085369999999955
+        ],
+        "final_training_loss": 34.84966932024275,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 1.2083416378923826,
+          "interarrival_loss": 0.038395530868521224,
+          "next_request_loss": 1.39454328588077,
+          "events_seen": 112145,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 317.5898132324219,
+            "1.5": 71.90879821777344,
+            "1.7": 17.048446655273438
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 165049856,
+        "gpu_utilization_samples_percent": [
+          39.0,
+          38.0
+        ]
+      },
+      {
+        "fold": 2,
+        "variant": "V19-C",
+        "seed": 20260903,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 0.939269799999991,
+        "epoch_runtime_seconds": [
+          0.41260059999999044,
+          0.42429039999998963
+        ],
+        "final_training_loss": 34.89862823486328,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 1.2083416378923826,
+          "interarrival_loss": 0.038395530868521224,
+          "next_request_loss": 1.39454328588077,
+          "events_seen": 112145,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 317.5898132324219,
+            "1.5": 71.90879821777344,
+            "1.7": 17.048446655273438
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 167156224,
+        "gpu_utilization_samples_percent": [
+          38.0,
+          24.0
+        ]
+      },
+      {
+        "fold": 3,
+        "variant": "V19-A",
+        "seed": 20260901,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.1333573999999942,
+        "epoch_runtime_seconds": [
+          0.5416137999999933,
+          0.48147199999999657
+        ],
+        "final_training_loss": 36.149846182929146,
+        "pretraining": {
+          "enabled": false,
+          "status": "NOT_REQUESTED_FOR_VARIANT",
+          "nested_inner_tweedie_scores": {
+            "1.3": 888.63525390625,
+            "1.5": 208.51101684570312,
+            "1.7": 53.99651336669922
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 276503552,
+        "gpu_utilization_samples_percent": [
+          39.0,
+          39.0
+        ]
+      },
+      {
+        "fold": 3,
+        "variant": "V19-B",
+        "seed": 20260901,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.056878900000001,
+        "epoch_runtime_seconds": [
+          0.49244170000000054,
+          0.4707835999999901
+        ],
+        "final_training_loss": 36.000777350531685,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.9237501705820496,
+          "interarrival_loss": 0.007096425082685577,
+          "next_request_loss": 1.1185250048701827,
+          "events_seen": 149897,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 888.63525390625,
+            "1.5": 208.51101684570312,
+            "1.7": 53.99651336669922
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 278600704,
+        "gpu_utilization_samples_percent": [
+          43.0,
+          37.0
+        ]
+      },
+      {
+        "fold": 3,
+        "variant": "V19-C",
+        "seed": 20260901,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.058280400000001,
+        "epoch_runtime_seconds": [
+          0.48295590000000743,
+          0.4726904999999988
+        ],
+        "final_training_loss": 36.04645601908366,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.9237501705820496,
+          "interarrival_loss": 0.007096425082685577,
+          "next_request_loss": 1.1185250048701827,
+          "events_seen": 149897,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 888.63525390625,
+            "1.5": 208.51101684570312,
+            "1.7": 53.99651336669922
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 280707072,
+        "gpu_utilization_samples_percent": [
+          37.0,
+          31.0
+        ]
+      },
+      {
+        "fold": 3,
+        "variant": "V19-A",
+        "seed": 20260902,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.059131700000009,
+        "epoch_runtime_seconds": [
+          0.4806298999999967,
+          0.4772803000000039
+        ],
+        "final_training_loss": 35.21575525071886,
+        "pretraining": {
+          "enabled": false,
+          "status": "NOT_REQUESTED_FOR_VARIANT",
+          "nested_inner_tweedie_scores": {
+            "1.3": 888.63525390625,
+            "1.5": 208.51101684570312,
+            "1.7": 53.99651336669922
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 282795008,
+        "gpu_utilization_samples_percent": [
+          35.0,
+          35.0
+        ]
+      },
+      {
+        "fold": 3,
+        "variant": "V19-B",
+        "seed": 20260902,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.0579294000000061,
+        "epoch_runtime_seconds": [
+          0.4737848000000042,
+          0.47952889999999115
+        ],
+        "final_training_loss": 34.887638092041016,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.7654029598107209,
+          "interarrival_loss": 0.030403670769914782,
+          "next_request_loss": 1.1626116794508856,
+          "events_seen": 149897,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 888.63525390625,
+            "1.5": 208.51101684570312,
+            "1.7": 53.99651336669922
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 284892160,
+        "gpu_utilization_samples_percent": [
+          54.0,
+          54.0
+        ]
+      },
+      {
+        "fold": 3,
+        "variant": "V19-C",
+        "seed": 20260902,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.0583507000000054,
+        "epoch_runtime_seconds": [
+          0.48434910000000286,
+          0.47264079999999353
+        ],
+        "final_training_loss": 34.93831984202067,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.7654029598107209,
+          "interarrival_loss": 0.030403670769914782,
+          "next_request_loss": 1.1626116794508856,
+          "events_seen": 149897,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 888.63525390625,
+            "1.5": 208.51101684570312,
+            "1.7": 53.99651336669922
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 286998528,
+        "gpu_utilization_samples_percent": [
+          19.0,
+          46.0
+        ]
+      },
+      {
+        "fold": 3,
+        "variant": "V19-A",
+        "seed": 20260903,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.0522323,
+        "epoch_runtime_seconds": [
+          0.47416389999999353,
+          0.47718620000000556
+        ],
+        "final_training_loss": 37.15291998121474,
+        "pretraining": {
+          "enabled": false,
+          "status": "NOT_REQUESTED_FOR_VARIANT",
+          "nested_inner_tweedie_scores": {
+            "1.3": 888.63525390625,
+            "1.5": 208.51101684570312,
+            "1.7": 53.99651336669922
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 289086464,
+        "gpu_utilization_samples_percent": [
+          36.0,
+          34.0
+        ]
+      },
+      {
+        "fold": 3,
+        "variant": "V19-B",
+        "seed": 20260903,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.0563086000000084,
+        "epoch_runtime_seconds": [
+          0.47048420000000135,
+          0.46993030000000147
+        ],
+        "final_training_loss": 36.86443583170573,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 1.017349717182082,
+          "interarrival_loss": 0.029661164637906728,
+          "next_request_loss": 1.2480606348127932,
+          "events_seen": 149897,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 888.63525390625,
+            "1.5": 208.51101684570312,
+            "1.7": 53.99651336669922
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 291183616,
+        "gpu_utilization_samples_percent": [
+          34.0,
+          30.0
+        ]
+      },
+      {
+        "fold": 3,
+        "variant": "V19-C",
+        "seed": 20260903,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.0570673,
+        "epoch_runtime_seconds": [
+          0.46844439999999565,
+          0.4746634000000114
+        ],
+        "final_training_loss": 36.91509797837999,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 1.017349717182082,
+          "interarrival_loss": 0.029661164637906728,
+          "next_request_loss": 1.2480606348127932,
+          "events_seen": 149897,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 888.63525390625,
+            "1.5": 208.51101684570312,
+            "1.7": 53.99651336669922
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 293289984,
+        "gpu_utilization_samples_percent": [
+          54.0,
+          54.0
+        ]
+      },
+      {
+        "fold": 4,
+        "variant": "V19-A",
+        "seed": 20260901,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.3209351999999939,
+        "epoch_runtime_seconds": [
+          0.6263312999999897,
+          0.6006986000000012
+        ],
+        "final_training_loss": 30.49888359416615,
+        "pretraining": {
+          "enabled": false,
+          "status": "NOT_REQUESTED_FOR_VARIANT",
+          "nested_inner_tweedie_scores": {
+            "1.3": 1031.2059326171875,
+            "1.5": 215.32667541503906,
+            "1.7": 46.661956787109375
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 684493824,
+        "gpu_utilization_samples_percent": [
+          62.0,
+          29.0
+        ]
+      },
+      {
+        "fold": 4,
+        "variant": "V19-B",
+        "seed": 20260901,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.2894179999999977,
+        "epoch_runtime_seconds": [
+          0.5848988999999989,
+          0.5918594999999982
+        ],
+        "final_training_loss": 30.48353203860196,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.684401470782428,
+          "interarrival_loss": 0.005770775961191875,
+          "next_request_loss": 0.899622291840356,
+          "events_seen": 235511,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 1031.2059326171875,
+            "1.5": 215.32667541503906,
+            "1.7": 46.661956787109375
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 686590976,
+        "gpu_utilization_samples_percent": [
+          38.0,
+          38.0
+        ]
+      },
+      {
+        "fold": 4,
+        "variant": "V19-C",
+        "seed": 20260901,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.3122231999999912,
+        "epoch_runtime_seconds": [
+          0.6019292000000007,
+          0.605896400000006
+        ],
+        "final_training_loss": 30.53044778650457,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.684401470782428,
+          "interarrival_loss": 0.005770775961191875,
+          "next_request_loss": 0.899622291840356,
+          "events_seen": 235511,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 1031.2059326171875,
+            "1.5": 215.32667541503906,
+            "1.7": 46.661956787109375
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 688697344,
+        "gpu_utilization_samples_percent": [
+          20.0,
+          30.0
+        ]
+      },
+      {
+        "fold": 4,
+        "variant": "V19-A",
+        "seed": 20260902,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.3096165000000042,
+        "epoch_runtime_seconds": [
+          0.6054912999999971,
+          0.5779721000000109
+        ],
+        "final_training_loss": 33.16048587452281,
+        "pretraining": {
+          "enabled": false,
+          "status": "NOT_REQUESTED_FOR_VARIANT",
+          "nested_inner_tweedie_scores": {
+            "1.3": 1031.2059326171875,
+            "1.5": 215.32667541503906,
+            "1.7": 46.661956787109375
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 690785280,
+        "gpu_utilization_samples_percent": [
+          36.0,
+          20.0
+        ]
+      },
+      {
+        "fold": 4,
+        "variant": "V19-B",
+        "seed": 20260902,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.2808717000000058,
+        "epoch_runtime_seconds": [
+          0.5965867999999972,
+          0.5785395000000051
+        ],
+        "final_training_loss": 32.836777600375086,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.5563125556399082,
+          "interarrival_loss": 0.020743514991220856,
+          "next_request_loss": 0.8920735547254826,
+          "events_seen": 235511,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 1031.2059326171875,
+            "1.5": 215.32667541503906,
+            "1.7": 46.661956787109375
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 692882432,
+        "gpu_utilization_samples_percent": [
+          32.0,
+          53.0
+        ]
+      },
+      {
+        "fold": 4,
+        "variant": "V19-C",
+        "seed": 20260902,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.3026301999999959,
+        "epoch_runtime_seconds": [
+          0.5992149000000069,
+          0.5857161999999931
+        ],
+        "final_training_loss": 32.88986084677956,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.5563125556399082,
+          "interarrival_loss": 0.020743514991220856,
+          "next_request_loss": 0.8920735547254826,
+          "events_seen": 235511,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 1031.2059326171875,
+            "1.5": 215.32667541503906,
+            "1.7": 46.661956787109375
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 694988800,
+        "gpu_utilization_samples_percent": [
+          81.0,
+          27.0
+        ]
+      },
+      {
+        "fold": 4,
+        "variant": "V19-A",
+        "seed": 20260903,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.3563583999999906,
+        "epoch_runtime_seconds": [
+          0.6589461000000085,
+          0.5842437000000018
+        ],
+        "final_training_loss": 33.346589521928266,
+        "pretraining": {
+          "enabled": false,
+          "status": "NOT_REQUESTED_FOR_VARIANT",
+          "nested_inner_tweedie_scores": {
+            "1.3": 1031.2059326171875,
+            "1.5": 215.32667541503906,
+            "1.7": 46.661956787109375
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 697076736,
+        "gpu_utilization_samples_percent": [
+          31.0,
+          31.0
+        ]
+      },
+      {
+        "fold": 4,
+        "variant": "V19-B",
+        "seed": 20260903,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.3069688999999869,
+        "epoch_runtime_seconds": [
+          0.6123508000000015,
+          0.5936023000000148
+        ],
+        "final_training_loss": 33.469013387506656,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.7492406065094059,
+          "interarrival_loss": 0.020111995068748063,
+          "next_request_loss": 1.002850677432685,
+          "events_seen": 235511,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 1031.2059326171875,
+            "1.5": 215.32667541503906,
+            "1.7": 46.661956787109375
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 699173888,
+        "gpu_utilization_samples_percent": [
+          33.0,
+          66.0
+        ]
+      },
+      {
+        "fold": 4,
+        "variant": "V19-C",
+        "seed": 20260903,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.2911471999999833,
+        "epoch_runtime_seconds": [
+          0.6007185999999933,
+          0.588126399999993
+        ],
+        "final_training_loss": 33.522038373080164,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.7492406065094059,
+          "interarrival_loss": 0.020111995068748063,
+          "next_request_loss": 1.002850677432685,
+          "events_seen": 235511,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 1031.2059326171875,
+            "1.5": 215.32667541503906,
+            "1.7": 46.661956787109375
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 701280256,
+        "gpu_utilization_samples_percent": [
+          42.0,
+          30.0
+        ]
+      },
+      {
+        "fold": 5,
+        "variant": "V19-A",
+        "seed": 20260901,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.3900256999999954,
+        "epoch_runtime_seconds": [
+          0.6635492000000056,
+          0.6148177999999973
+        ],
+        "final_training_loss": 31.819328748262844,
+        "pretraining": {
+          "enabled": false,
+          "status": "NOT_REQUESTED_FOR_VARIANT",
+          "nested_inner_tweedie_scores": {
+            "1.3": 671.8220825195312,
+            "1.5": 152.63485717773438,
+            "1.7": 37.46229553222656
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 701316096,
+        "gpu_utilization_samples_percent": [
+          37.0,
+          69.0
+        ]
+      },
+      {
+        "fold": 5,
+        "variant": "V19-B",
+        "seed": 20260901,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.399662300000017,
+        "epoch_runtime_seconds": [
+          0.6854065999999932,
+          0.618090699999982
+        ],
+        "final_training_loss": 31.73640361199012,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.6600484507424491,
+          "interarrival_loss": 0.005701707631704353,
+          "next_request_loss": 0.892111945719946,
+          "events_seen": 254749,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 671.8220825195312,
+            "1.5": 152.63485717773438,
+            "1.7": 37.46229553222656
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 703413248,
+        "gpu_utilization_samples_percent": [
+          34.0,
+          72.0
+        ]
+      },
+      {
+        "fold": 5,
+        "variant": "V19-C",
+        "seed": 20260901,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.4498047000000156,
+        "epoch_runtime_seconds": [
+          0.6948421000000167,
+          0.6500255999999922
+        ],
+        "final_training_loss": 31.77837562561035,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.6600484507424491,
+          "interarrival_loss": 0.005701707631704353,
+          "next_request_loss": 0.892111945719946,
+          "events_seen": 254749,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 671.8220825195312,
+            "1.5": 152.63485717773438,
+            "1.7": 37.46229553222656
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 705511424,
+        "gpu_utilization_samples_percent": [
+          52.0,
+          54.0
+        ]
+      },
+      {
+        "fold": 5,
+        "variant": "V19-A",
+        "seed": 20260902,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.4040513000000203,
+        "epoch_runtime_seconds": [
+          0.6330416000000127,
+          0.6469433000000038
+        ],
+        "final_training_loss": 34.13332374279316,
+        "pretraining": {
+          "enabled": false,
+          "status": "NOT_REQUESTED_FOR_VARIANT",
+          "nested_inner_tweedie_scores": {
+            "1.3": 671.8220825195312,
+            "1.5": 152.63485717773438,
+            "1.7": 37.46229553222656
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 709659648,
+        "gpu_utilization_samples_percent": [
+          29.0,
+          29.0
+        ]
+      },
+      {
+        "fold": 5,
+        "variant": "V19-B",
+        "seed": 20260902,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.3636450999999852,
+        "epoch_runtime_seconds": [
+          0.6111061000000007,
+          0.6401500000000055
+        ],
+        "final_training_loss": 33.576690453749436,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.5378216076937933,
+          "interarrival_loss": 0.01952500494625715,
+          "next_request_loss": 0.8798436425508015,
+          "events_seen": 254749,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 671.8220825195312,
+            "1.5": 152.63485717773438,
+            "1.7": 37.46229553222656
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 711756800,
+        "gpu_utilization_samples_percent": [
+          31.0,
+          31.0
+        ]
+      },
+      {
+        "fold": 5,
+        "variant": "V19-C",
+        "seed": 20260902,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.389615699999979,
+        "epoch_runtime_seconds": [
+          0.6180835000000116,
+          0.6595530999999824
+        ],
+        "final_training_loss": 33.63022958315336,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.5378216076937933,
+          "interarrival_loss": 0.01952500494625715,
+          "next_request_loss": 0.8798436425508015,
+          "events_seen": 254749,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 671.8220825195312,
+            "1.5": 152.63485717773438,
+            "1.7": 37.46229553222656
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 713863168,
+        "gpu_utilization_samples_percent": [
+          35.0,
+          50.0
+        ]
+      },
+      {
+        "fold": 5,
+        "variant": "V19-A",
+        "seed": 20260903,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.408417700000001,
+        "epoch_runtime_seconds": [
+          0.6591925000000174,
+          0.6576580999999919
+        ],
+        "final_training_loss": 32.39132829812857,
+        "pretraining": {
+          "enabled": false,
+          "status": "NOT_REQUESTED_FOR_VARIANT",
+          "nested_inner_tweedie_scores": {
+            "1.3": 671.8220825195312,
+            "1.5": 152.63485717773438,
+            "1.7": 37.46229553222656
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 715951104,
+        "gpu_utilization_samples_percent": [
+          31.0,
+          31.0
+        ]
+      },
+      {
+        "fold": 5,
+        "variant": "V19-B",
+        "seed": 20260903,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.428255799999988,
+        "epoch_runtime_seconds": [
+          0.6631990999999857,
+          0.6639747000000114
+        ],
+        "final_training_loss": 32.80267130411588,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.7191366108637007,
+          "interarrival_loss": 0.018840207485482097,
+          "next_request_loss": 0.9836623441605341,
+          "events_seen": 254749,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 671.8220825195312,
+            "1.5": 152.63485717773438,
+            "1.7": 37.46229553222656
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 718048256,
+        "gpu_utilization_samples_percent": [
+          27.0,
+          27.0
+        ]
+      },
+      {
+        "fold": 5,
+        "variant": "V19-C",
+        "seed": 20260903,
+        "variance_power": 1.7,
+        "epochs": 2,
+        "elapsed_seconds": 1.4302997000000062,
+        "epoch_runtime_seconds": [
+          0.6637386000000163,
+          0.6705577999999832
+        ],
+        "final_training_loss": 32.85194050348722,
+        "pretraining": {
+          "enabled": true,
+          "status": "PASS",
+          "masked_mark_loss": 0.7191366108637007,
+          "interarrival_loss": 0.018840207485482097,
+          "next_request_loss": 0.9836623441605341,
+          "events_seen": 254749,
+          "epochs": 2,
+          "nested_inner_tweedie_scores": {
+            "1.3": 671.8220825195312,
+            "1.5": 152.63485717773438,
+            "1.7": 37.46229553222656
+          }
+        },
+        "parameters": 268390,
+        "execution_device": "cuda:0",
+        "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_VRAM_bytes": 720154624,
+        "gpu_utilization_samples_percent": [
+          31.0,
+          31.0
+        ]
+      }
+    ]
+  },
+  "SCALE_INDEPENDENT_ML_AUTHORITY": {
+    "B0_V18R2_CANDIDATE_B": {
+      "seed_metrics": {
+        "deterministic": {
+          "daily_WAPE": 0.9180979299674747,
+          "daily_MAE_GPU_h": 3043.8988373804264,
+          "daily_RMSE_GPU_h": 7188.330847007709,
+          "mean_bias_GPU_h": -2442.702496320824,
+          "aggregate_mass_ratio": 0.26323435001915396,
+          "median_absolute_percentage_safe": 0.8915515230230793,
+          "Q50_pinball": 1521.9494186902132,
+          "Q90_pinball": 1734.4773999264169,
+          "Q50_coverage": 0.41721854304635764,
+          "Q90_coverage": 0.8079470198675497,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.9395434131303984,
+          "burst_MAE_GPU_h": 14589.625423280426,
+          "burst_underforecast_ratio": 0.06045658686960169,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.217155234383463,
+          "IT_energy_bias_kWh": -181670.17795841052,
+          "peak_flexible_IT_power_error_kW": -102234.92135503427,
+          "peak_timing_error_slots": 3058.0
+        }
+      },
+      "IT_energy_bias_kWh_mean": -181670.17795841052,
+      "IT_energy_bias_kWh_median": -181670.17795841052,
+      "IT_energy_bias_kWh_std": 0.0,
+      "Q50_coverage_mean": 0.41721854304635764,
+      "Q50_coverage_median": 0.41721854304635764,
+      "Q50_coverage_std": 0.0,
+      "Q50_pinball_mean": 1521.9494186902132,
+      "Q50_pinball_median": 1521.9494186902132,
+      "Q50_pinball_std": 0.0,
+      "Q90_coverage_mean": 0.8079470198675497,
+      "Q90_coverage_median": 0.8079470198675497,
+      "Q90_coverage_std": 0.0,
+      "Q90_pinball_mean": 1734.4773999264169,
+      "Q90_pinball_median": 1734.4773999264169,
+      "Q90_pinball_std": 0.0,
+      "aggregate_mass_ratio_mean": 0.26323435001915396,
+      "aggregate_mass_ratio_median": 0.26323435001915396,
+      "aggregate_mass_ratio_std": 0.0,
+      "burst_MAE_GPU_h_mean": 14589.625423280426,
+      "burst_MAE_GPU_h_median": 14589.625423280426,
+      "burst_MAE_GPU_h_std": 0.0,
+      "burst_WAPE_mean": 0.9395434131303984,
+      "burst_WAPE_median": 0.9395434131303984,
+      "burst_WAPE_std": 0.0,
+      "burst_day_count_mean": 21.0,
+      "burst_day_count_median": 21.0,
+      "burst_day_count_std": 0.0,
+      "burst_underforecast_ratio_mean": 0.06045658686960169,
+      "burst_underforecast_ratio_median": 0.06045658686960169,
+      "burst_underforecast_ratio_std": 0.0,
+      "daily_MAE_GPU_h_mean": 3043.8988373804264,
+      "daily_MAE_GPU_h_median": 3043.8988373804264,
+      "daily_MAE_GPU_h_std": 0.0,
+      "daily_RMSE_GPU_h_mean": 7188.330847007709,
+      "daily_RMSE_GPU_h_median": 7188.330847007709,
+      "daily_RMSE_GPU_h_std": 0.0,
+      "daily_WAPE_mean": 0.9180979299674747,
+      "daily_WAPE_median": 0.9180979299674747,
+      "daily_WAPE_std": 0.0,
+      "flexible_IT_power_WAPE_mean": 1.217155234383463,
+      "flexible_IT_power_WAPE_median": 1.217155234383463,
+      "flexible_IT_power_WAPE_std": 0.0,
+      "mean_bias_GPU_h_mean": -2442.702496320824,
+      "mean_bias_GPU_h_median": -2442.702496320824,
+      "mean_bias_GPU_h_std": 0.0,
+      "median_absolute_percentage_safe_mean": 0.8915515230230793,
+      "median_absolute_percentage_safe_median": 0.8915515230230793,
+      "median_absolute_percentage_safe_std": 0.0,
+      "negative_prediction_count_mean": 0.0,
+      "negative_prediction_count_median": 0.0,
+      "negative_prediction_count_std": 0.0,
+      "peak_flexible_IT_power_error_kW_mean": -102234.92135503427,
+      "peak_flexible_IT_power_error_kW_median": -102234.92135503427,
+      "peak_flexible_IT_power_error_kW_std": 0.0,
+      "peak_timing_error_slots_mean": 3058.0,
+      "peak_timing_error_slots_median": 3058.0,
+      "peak_timing_error_slots_std": 0.0,
+      "quantile_crossing_count_mean": 0.0,
+      "quantile_crossing_count_median": 0.0,
+      "quantile_crossing_count_std": 0.0
+    },
+    "B1_PERSISTENCE_PROXY": {
+      "seed_metrics": {
+        "deterministic": {
+          "daily_WAPE": 1.411533258849319,
+          "daily_MAE_GPU_h": 4679.854191248924,
+          "daily_RMSE_GPU_h": 8967.067849368645,
+          "mean_bias_GPU_h": 668.6924221253834,
+          "aggregate_mass_ratio": 1.2016903850413747,
+          "median_absolute_percentage_safe": 1.1460204963139318,
+          "Q50_pinball": 2189.414102722572,
+          "Q90_pinball": 1734.5010230330017,
+          "Q50_coverage": 0.5496688741721855,
+          "Q90_coverage": 0.8609271523178808,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.8631208922671132,
+          "burst_MAE_GPU_h": 13402.904365247296,
+          "burst_underforecast_ratio": 0.2881443781862763,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 2.0939103656160185,
+          "IT_energy_bias_kWh": 50487.61268075771,
+          "peak_flexible_IT_power_error_kW": -70036.85476213563,
+          "peak_timing_error_slots": 8628.0
+        }
+      },
+      "IT_energy_bias_kWh_mean": 50487.61268075771,
+      "IT_energy_bias_kWh_median": 50487.61268075771,
+      "IT_energy_bias_kWh_std": 0.0,
+      "Q50_coverage_mean": 0.5496688741721855,
+      "Q50_coverage_median": 0.5496688741721855,
+      "Q50_coverage_std": 0.0,
+      "Q50_pinball_mean": 2189.414102722572,
+      "Q50_pinball_median": 2189.414102722572,
+      "Q50_pinball_std": 0.0,
+      "Q90_coverage_mean": 0.8609271523178808,
+      "Q90_coverage_median": 0.8609271523178808,
+      "Q90_coverage_std": 0.0,
+      "Q90_pinball_mean": 1734.5010230330017,
+      "Q90_pinball_median": 1734.5010230330017,
+      "Q90_pinball_std": 0.0,
+      "aggregate_mass_ratio_mean": 1.2016903850413747,
+      "aggregate_mass_ratio_median": 1.2016903850413747,
+      "aggregate_mass_ratio_std": 0.0,
+      "burst_MAE_GPU_h_mean": 13402.904365247296,
+      "burst_MAE_GPU_h_median": 13402.904365247296,
+      "burst_MAE_GPU_h_std": 0.0,
+      "burst_WAPE_mean": 0.8631208922671132,
+      "burst_WAPE_median": 0.8631208922671132,
+      "burst_WAPE_std": 0.0,
+      "burst_day_count_mean": 21.0,
+      "burst_day_count_median": 21.0,
+      "burst_day_count_std": 0.0,
+      "burst_underforecast_ratio_mean": 0.2881443781862763,
+      "burst_underforecast_ratio_median": 0.2881443781862763,
+      "burst_underforecast_ratio_std": 0.0,
+      "daily_MAE_GPU_h_mean": 4679.854191248924,
+      "daily_MAE_GPU_h_median": 4679.854191248924,
+      "daily_MAE_GPU_h_std": 0.0,
+      "daily_RMSE_GPU_h_mean": 8967.067849368645,
+      "daily_RMSE_GPU_h_median": 8967.067849368645,
+      "daily_RMSE_GPU_h_std": 0.0,
+      "daily_WAPE_mean": 1.411533258849319,
+      "daily_WAPE_median": 1.411533258849319,
+      "daily_WAPE_std": 0.0,
+      "flexible_IT_power_WAPE_mean": 2.0939103656160185,
+      "flexible_IT_power_WAPE_median": 2.0939103656160185,
+      "flexible_IT_power_WAPE_std": 0.0,
+      "mean_bias_GPU_h_mean": 668.6924221253834,
+      "mean_bias_GPU_h_median": 668.6924221253834,
+      "mean_bias_GPU_h_std": 0.0,
+      "median_absolute_percentage_safe_mean": 1.1460204963139318,
+      "median_absolute_percentage_safe_median": 1.1460204963139318,
+      "median_absolute_percentage_safe_std": 0.0,
+      "negative_prediction_count_mean": 0.0,
+      "negative_prediction_count_median": 0.0,
+      "negative_prediction_count_std": 0.0,
+      "peak_flexible_IT_power_error_kW_mean": -70036.85476213563,
+      "peak_flexible_IT_power_error_kW_median": -70036.85476213563,
+      "peak_flexible_IT_power_error_kW_std": 0.0,
+      "peak_timing_error_slots_mean": 8628.0,
+      "peak_timing_error_slots_median": 8628.0,
+      "peak_timing_error_slots_std": 0.0,
+      "quantile_crossing_count_mean": 0.0,
+      "quantile_crossing_count_median": 0.0,
+      "quantile_crossing_count_std": 0.0
+    },
+    "B2_LIGHTGBM_TWEEDIE": {
+      "seed_metrics": {
+        "deterministic": {
+          "daily_WAPE": 0.976108062962391,
+          "daily_MAE_GPU_h": 3236.2279676571557,
+          "daily_RMSE_GPU_h": 7051.552507484855,
+          "mean_bias_GPU_h": -1158.7189235485148,
+          "aggregate_mass_ratio": 0.6505082783764421,
+          "median_absolute_percentage_safe": 0.8765278230598303,
+          "Q50_pinball": 1475.7854415850668,
+          "Q90_pinball": 1690.4083353315098,
+          "Q50_coverage": 0.5165562913907285,
+          "Q90_coverage": 0.8940397350993378,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.8682298695981397,
+          "burst_MAE_GPU_h": 13482.238714798385,
+          "burst_underforecast_ratio": 0.1317701304018602,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.5703531589156716,
+          "IT_energy_bias_kWh": -85936.05137359956,
+          "peak_flexible_IT_power_error_kW": -92547.4331930805,
+          "peak_timing_error_slots": 5940.0
+        }
+      },
+      "IT_energy_bias_kWh_mean": -85936.05137359956,
+      "IT_energy_bias_kWh_median": -85936.05137359956,
+      "IT_energy_bias_kWh_std": 0.0,
+      "Q50_coverage_mean": 0.5165562913907285,
+      "Q50_coverage_median": 0.5165562913907285,
+      "Q50_coverage_std": 0.0,
+      "Q50_pinball_mean": 1475.7854415850668,
+      "Q50_pinball_median": 1475.7854415850668,
+      "Q50_pinball_std": 0.0,
+      "Q90_coverage_mean": 0.8940397350993378,
+      "Q90_coverage_median": 0.8940397350993378,
+      "Q90_coverage_std": 0.0,
+      "Q90_pinball_mean": 1690.4083353315098,
+      "Q90_pinball_median": 1690.4083353315098,
+      "Q90_pinball_std": 0.0,
+      "aggregate_mass_ratio_mean": 0.6505082783764421,
+      "aggregate_mass_ratio_median": 0.6505082783764421,
+      "aggregate_mass_ratio_std": 0.0,
+      "burst_MAE_GPU_h_mean": 13482.238714798385,
+      "burst_MAE_GPU_h_median": 13482.238714798385,
+      "burst_MAE_GPU_h_std": 0.0,
+      "burst_WAPE_mean": 0.8682298695981397,
+      "burst_WAPE_median": 0.8682298695981397,
+      "burst_WAPE_std": 0.0,
+      "burst_day_count_mean": 21.0,
+      "burst_day_count_median": 21.0,
+      "burst_day_count_std": 0.0,
+      "burst_underforecast_ratio_mean": 0.1317701304018602,
+      "burst_underforecast_ratio_median": 0.1317701304018602,
+      "burst_underforecast_ratio_std": 0.0,
+      "daily_MAE_GPU_h_mean": 3236.2279676571557,
+      "daily_MAE_GPU_h_median": 3236.2279676571557,
+      "daily_MAE_GPU_h_std": 0.0,
+      "daily_RMSE_GPU_h_mean": 7051.552507484855,
+      "daily_RMSE_GPU_h_median": 7051.552507484855,
+      "daily_RMSE_GPU_h_std": 0.0,
+      "daily_WAPE_mean": 0.976108062962391,
+      "daily_WAPE_median": 0.976108062962391,
+      "daily_WAPE_std": 0.0,
+      "flexible_IT_power_WAPE_mean": 1.5703531589156716,
+      "flexible_IT_power_WAPE_median": 1.5703531589156716,
+      "flexible_IT_power_WAPE_std": 0.0,
+      "mean_bias_GPU_h_mean": -1158.7189235485148,
+      "mean_bias_GPU_h_median": -1158.7189235485148,
+      "mean_bias_GPU_h_std": 0.0,
+      "median_absolute_percentage_safe_mean": 0.8765278230598303,
+      "median_absolute_percentage_safe_median": 0.8765278230598303,
+      "median_absolute_percentage_safe_std": 0.0,
+      "negative_prediction_count_mean": 0.0,
+      "negative_prediction_count_median": 0.0,
+      "negative_prediction_count_std": 0.0,
+      "peak_flexible_IT_power_error_kW_mean": -92547.4331930805,
+      "peak_flexible_IT_power_error_kW_median": -92547.4331930805,
+      "peak_flexible_IT_power_error_kW_std": 0.0,
+      "peak_timing_error_slots_mean": 5940.0,
+      "peak_timing_error_slots_median": 5940.0,
+      "peak_timing_error_slots_std": 0.0,
+      "quantile_crossing_count_mean": 0.0,
+      "quantile_crossing_count_median": 0.0,
+      "quantile_crossing_count_std": 0.0
+    },
+    "B3_LIGHTGBM_QUANTILE": {
+      "seed_metrics": {
+        "deterministic": {
+          "daily_WAPE": 0.8902500584818535,
+          "daily_MAE_GPU_h": 2951.5708831701336,
+          "daily_RMSE_GPU_h": 7099.139767685258,
+          "mean_bias_GPU_h": -2109.6048121832796,
+          "aggregate_mass_ratio": 0.36370296301248994,
+          "median_absolute_percentage_safe": 0.8291463296196824,
+          "Q50_pinball": 1475.7854415850668,
+          "Q90_pinball": 1690.4083353315098,
+          "Q50_coverage": 0.5165562913907285,
+          "Q90_coverage": 0.8940397350993378,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.9206230064013147,
+          "burst_MAE_GPU_h": 14295.821387005271,
+          "burst_underforecast_ratio": 0.07937699359868532,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.3056066673863056,
+          "IT_energy_bias_kWh": -156870.5663389173,
+          "peak_flexible_IT_power_error_kW": -101104.91534220555,
+          "peak_timing_error_slots": 8736.0
+        }
+      },
+      "IT_energy_bias_kWh_mean": -156870.5663389173,
+      "IT_energy_bias_kWh_median": -156870.5663389173,
+      "IT_energy_bias_kWh_std": 0.0,
+      "Q50_coverage_mean": 0.5165562913907285,
+      "Q50_coverage_median": 0.5165562913907285,
+      "Q50_coverage_std": 0.0,
+      "Q50_pinball_mean": 1475.7854415850668,
+      "Q50_pinball_median": 1475.7854415850668,
+      "Q50_pinball_std": 0.0,
+      "Q90_coverage_mean": 0.8940397350993378,
+      "Q90_coverage_median": 0.8940397350993378,
+      "Q90_coverage_std": 0.0,
+      "Q90_pinball_mean": 1690.4083353315098,
+      "Q90_pinball_median": 1690.4083353315098,
+      "Q90_pinball_std": 0.0,
+      "aggregate_mass_ratio_mean": 0.36370296301248994,
+      "aggregate_mass_ratio_median": 0.36370296301248994,
+      "aggregate_mass_ratio_std": 0.0,
+      "burst_MAE_GPU_h_mean": 14295.821387005271,
+      "burst_MAE_GPU_h_median": 14295.821387005271,
+      "burst_MAE_GPU_h_std": 0.0,
+      "burst_WAPE_mean": 0.9206230064013147,
+      "burst_WAPE_median": 0.9206230064013147,
+      "burst_WAPE_std": 0.0,
+      "burst_day_count_mean": 21.0,
+      "burst_day_count_median": 21.0,
+      "burst_day_count_std": 0.0,
+      "burst_underforecast_ratio_mean": 0.07937699359868532,
+      "burst_underforecast_ratio_median": 0.07937699359868532,
+      "burst_underforecast_ratio_std": 0.0,
+      "daily_MAE_GPU_h_mean": 2951.5708831701336,
+      "daily_MAE_GPU_h_median": 2951.5708831701336,
+      "daily_MAE_GPU_h_std": 0.0,
+      "daily_RMSE_GPU_h_mean": 7099.139767685258,
+      "daily_RMSE_GPU_h_median": 7099.139767685258,
+      "daily_RMSE_GPU_h_std": 0.0,
+      "daily_WAPE_mean": 0.8902500584818535,
+      "daily_WAPE_median": 0.8902500584818535,
+      "daily_WAPE_std": 0.0,
+      "flexible_IT_power_WAPE_mean": 1.3056066673863056,
+      "flexible_IT_power_WAPE_median": 1.3056066673863056,
+      "flexible_IT_power_WAPE_std": 0.0,
+      "mean_bias_GPU_h_mean": -2109.6048121832796,
+      "mean_bias_GPU_h_median": -2109.6048121832796,
+      "mean_bias_GPU_h_std": 0.0,
+      "median_absolute_percentage_safe_mean": 0.8291463296196824,
+      "median_absolute_percentage_safe_median": 0.8291463296196824,
+      "median_absolute_percentage_safe_std": 0.0,
+      "negative_prediction_count_mean": 0.0,
+      "negative_prediction_count_median": 0.0,
+      "negative_prediction_count_std": 0.0,
+      "peak_flexible_IT_power_error_kW_mean": -101104.91534220555,
+      "peak_flexible_IT_power_error_kW_median": -101104.91534220555,
+      "peak_flexible_IT_power_error_kW_std": 0.0,
+      "peak_timing_error_slots_mean": 8736.0,
+      "peak_timing_error_slots_median": 8736.0,
+      "peak_timing_error_slots_std": 0.0,
+      "quantile_crossing_count_mean": 0.0,
+      "quantile_crossing_count_median": 0.0,
+      "quantile_crossing_count_std": 0.0
+    },
+    "B4_PATCHTST_LITE": {
+      "seed_metrics": {
+        "20260901": {
+          "daily_WAPE": 1.1085167071170126,
+          "daily_MAE_GPU_h": 3675.220916933982,
+          "daily_RMSE_GPU_h": 7876.397130346888,
+          "mean_bias_GPU_h": -1417.0199718816111,
+          "aggregate_mass_ratio": 0.5725997569529339,
+          "median_absolute_percentage_safe": 0.8436925803713105,
+          "Q50_pinball": 1791.6993445237406,
+          "Q90_pinball": 1601.594793647098,
+          "Q50_coverage": 0.44370860927152317,
+          "Q90_coverage": 0.8807947019867549,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.9033701644488655,
+          "burst_MAE_GPU_h": 14027.911998194139,
+          "burst_underforecast_ratio": 0.1812414149662022,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.5201423408828856,
+          "IT_energy_bias_kWh": -105364.99911929476,
+          "peak_flexible_IT_power_error_kW": -87449.64865125828,
+          "peak_timing_error_slots": 5188.0
+        },
+        "20260902": {
+          "daily_WAPE": 0.9509524332795252,
+          "daily_MAE_GPU_h": 3152.825980302756,
+          "daily_RMSE_GPU_h": 7155.496547072136,
+          "mean_bias_GPU_h": -2264.1277494581836,
+          "aggregate_mass_ratio": 0.31709589870982924,
+          "median_absolute_percentage_safe": 0.8447435309793896,
+          "Q50_pinball": 1554.0483986683466,
+          "Q90_pinball": 1549.9884757835491,
+          "Q50_coverage": 0.4304635761589404,
+          "Q90_coverage": 0.9139072847682119,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.9347086912134631,
+          "burst_MAE_GPU_h": 14514.549827189776,
+          "burst_underforecast_ratio": 0.06529130878653686,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.2729552748253852,
+          "IT_energy_bias_kWh": -168319.92496724497,
+          "peak_flexible_IT_power_error_kW": -100160.74343724159,
+          "peak_timing_error_slots": 5376.0
+        },
+        "20260903": {
+          "daily_WAPE": 0.9332366655257999,
+          "daily_MAE_GPU_h": 3094.090410698785,
+          "daily_RMSE_GPU_h": 7162.229554250185,
+          "mean_bias_GPU_h": -2286.7575772986224,
+          "aggregate_mass_ratio": 0.3102703111309374,
+          "median_absolute_percentage_safe": 0.8383821751771714,
+          "Q50_pinball": 1545.8684759252012,
+          "Q90_pinball": 1530.5801070094046,
+          "Q50_coverage": 0.423841059602649,
+          "Q90_coverage": 0.8874172185430463,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.9406448641561297,
+          "burst_MAE_GPU_h": 14606.729218233302,
+          "burst_underforecast_ratio": 0.05935513584387034,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.2649304045394971,
+          "IT_energy_bias_kWh": -170001.30100334005,
+          "peak_flexible_IT_power_error_kW": -100215.97908111615,
+          "peak_timing_error_slots": 4704.0
+        }
+      },
+      "IT_energy_bias_kWh_mean": -147895.40836329325,
+      "IT_energy_bias_kWh_median": -168319.92496724497,
+      "IT_energy_bias_kWh_std": 30081.373408253632,
+      "Q50_coverage_mean": 0.4326710816777042,
+      "Q50_coverage_median": 0.4304635761589404,
+      "Q50_coverage_std": 0.0082597293306268,
+      "Q50_pinball_mean": 1630.5387397057627,
+      "Q50_pinball_median": 1554.0483986683466,
+      "Q50_pinball_std": 114.00667580743757,
+      "Q90_coverage_mean": 0.8940397350993378,
+      "Q90_coverage_median": 0.8874172185430463,
+      "Q90_coverage_std": 0.014306270857412517,
+      "Q90_pinball_mean": 1560.7211254800175,
+      "Q90_pinball_median": 1549.9884757835491,
+      "Q90_pinball_std": 29.96846961605667,
+      "aggregate_mass_ratio_mean": 0.39998865559790014,
+      "aggregate_mass_ratio_median": 0.31709589870982924,
+      "aggregate_mass_ratio_std": 0.12208628477350918,
+      "burst_MAE_GPU_h_mean": 14383.06368120574,
+      "burst_MAE_GPU_h_median": 14514.549827189776,
+      "burst_MAE_GPU_h_std": 253.9341102107238,
+      "burst_WAPE_mean": 0.9262412399394861,
+      "burst_WAPE_median": 0.9347086912134631,
+      "burst_WAPE_std": 0.016352861276130667,
+      "burst_day_count_mean": 21.0,
+      "burst_day_count_median": 21.0,
+      "burst_day_count_std": 0.0,
+      "burst_underforecast_ratio_mean": 0.10196261986553645,
+      "burst_underforecast_ratio_median": 0.06529130878653686,
+      "burst_underforecast_ratio_std": 0.05611093210038674,
+      "daily_MAE_GPU_h_mean": 3307.3791026451745,
+      "daily_MAE_GPU_h_median": 3152.825980302756,
+      "daily_MAE_GPU_h_std": 261.2063897108148,
+      "daily_RMSE_GPU_h_mean": 7398.041077223071,
+      "daily_RMSE_GPU_h_median": 7162.229554250185,
+      "daily_RMSE_GPU_h_std": 338.2599774498532,
+      "daily_WAPE_mean": 0.9975686019741126,
+      "daily_WAPE_median": 0.9509524332795252,
+      "daily_WAPE_std": 0.07878482778164834,
+      "flexible_IT_power_WAPE_mean": 1.352676006749256,
+      "flexible_IT_power_WAPE_median": 1.2729552748253852,
+      "flexible_IT_power_WAPE_std": 0.1184618910223697,
+      "mean_bias_GPU_h_mean": -1989.301766212806,
+      "mean_bias_GPU_h_median": -2264.1277494581836,
+      "mean_bias_GPU_h_std": 404.769783431867,
+      "median_absolute_percentage_safe_mean": 0.842272762175957,
+      "median_absolute_percentage_safe_median": 0.8436925803713105,
+      "median_absolute_percentage_safe_std": 0.0027843161567963756,
+      "negative_prediction_count_mean": 0.0,
+      "negative_prediction_count_median": 0.0,
+      "negative_prediction_count_std": 0.0,
+      "peak_flexible_IT_power_error_kW_mean": -95942.12372320534,
+      "peak_flexible_IT_power_error_kW_median": -100160.74343724159,
+      "peak_flexible_IT_power_error_kW_std": 6005.129051059615,
+      "peak_timing_error_slots_mean": 5089.333333333333,
+      "peak_timing_error_slots_median": 5188.0,
+      "peak_timing_error_slots_std": 283.07517650891884,
+      "quantile_crossing_count_mean": 0.0,
+      "quantile_crossing_count_median": 0.0,
+      "quantile_crossing_count_std": 0.0
+    },
+    "B5_RMTPP_LONG_HORIZON_ADAPTATION": {
+      "seed_metrics": {
+        "20260901": {
+          "daily_WAPE": 0.9337236392566769,
+          "daily_MAE_GPU_h": 3095.7049430105003,
+          "daily_RMSE_GPU_h": 7133.8905927790565,
+          "mean_bias_GPU_h": -2224.5992137037083,
+          "aggregate_mass_ratio": 0.32901845881766156,
+          "median_absolute_percentage_safe": 0.8453041805803383,
+          "Q50_pinball": 1541.0607714313792,
+          "Q90_pinball": 1640.076717094371,
+          "Q50_coverage": 0.4503311258278146,
+          "Q90_coverage": 0.8410596026490066,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.9340498165781796,
+          "burst_MAE_GPU_h": 14504.318544637692,
+          "burst_underforecast_ratio": 0.0659501834218203,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.2814100631420025,
+          "IT_energy_bias_kWh": -165341.11489239382,
+          "peak_flexible_IT_power_error_kW": -101293.90544778062,
+          "peak_timing_error_slots": 2688.0
+        },
+        "20260902": {
+          "daily_WAPE": 0.926181656041272,
+          "daily_MAE_GPU_h": 3070.6999482364386,
+          "daily_RMSE_GPU_h": 7115.462830956329,
+          "mean_bias_GPU_h": -2205.89489589082,
+          "aggregate_mass_ratio": 0.3346600377211986,
+          "median_absolute_percentage_safe": 0.8416750199842675,
+          "Q50_pinball": 1536.3073862051385,
+          "Q90_pinball": 1569.1544611200218,
+          "Q50_coverage": 0.4304635761589404,
+          "Q90_coverage": 0.8609271523178808,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.9315992290284618,
+          "burst_MAE_GPU_h": 14466.26479010365,
+          "burst_underforecast_ratio": 0.06840077097153818,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.2858169283979726,
+          "IT_energy_bias_kWh": -163927.2251716628,
+          "peak_flexible_IT_power_error_kW": -101428.15983644837,
+          "peak_timing_error_slots": 4032.0
+        },
+        "20260903": {
+          "daily_WAPE": 0.9314895806524989,
+          "daily_MAE_GPU_h": 3088.2980551765,
+          "daily_RMSE_GPU_h": 7143.100115524933,
+          "mean_bias_GPU_h": -2263.4879712704505,
+          "aggregate_mass_ratio": 0.3172888680104455,
+          "median_absolute_percentage_safe": 0.8472578554245958,
+          "Q50_pinball": 1526.6095893335519,
+          "Q90_pinball": 1583.7904199118145,
+          "Q50_coverage": 0.45695364238410596,
+          "Q90_coverage": 0.8675496688741722,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.9364077576264203,
+          "burst_MAE_GPU_h": 14540.933645316636,
+          "burst_underforecast_ratio": 0.06359224237357969,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.2706376852691814,
+          "IT_energy_bias_kWh": -168245.348700143,
+          "peak_flexible_IT_power_error_kW": -101454.93140089598,
+          "peak_timing_error_slots": 4032.0
+        }
+      },
+      "IT_energy_bias_kWh_mean": -165837.8962547332,
+      "IT_energy_bias_kWh_median": -165341.11489239382,
+      "IT_energy_bias_kWh_std": 1797.5245002093602,
+      "Q50_coverage_mean": 0.44591611479028703,
+      "Q50_coverage_median": 0.4503311258278146,
+      "Q50_coverage_std": 0.011256113716540377,
+      "Q50_pinball_mean": 1534.6592489900231,
+      "Q50_pinball_median": 1536.3073862051385,
+      "Q50_pinball_std": 6.013675150079595,
+      "Q90_coverage_mean": 0.8565121412803531,
+      "Q90_coverage_median": 0.8609271523178808,
+      "Q90_coverage_std": 0.01125611371654037,
+      "Q90_pinball_mean": 1597.673866042069,
+      "Q90_pinball_median": 1583.7904199118145,
+      "Q90_pinball_std": 30.572909091345725,
+      "aggregate_mass_ratio_mean": 0.3269891215164353,
+      "aggregate_mass_ratio_median": 0.32901845881766156,
+      "aggregate_mass_ratio_std": 0.007235470115643642,
+      "burst_MAE_GPU_h_mean": 14503.838993352658,
+      "burst_MAE_GPU_h_median": 14504.318544637692,
+      "burst_MAE_GPU_h_std": 30.485318453103236,
+      "burst_WAPE_mean": 0.9340189344110206,
+      "burst_WAPE_median": 0.9340498165781796,
+      "burst_WAPE_std": 0.001963195032004779,
+      "burst_day_count_mean": 21.0,
+      "burst_day_count_median": 21.0,
+      "burst_day_count_std": 0.0,
+      "burst_underforecast_ratio_mean": 0.06598106558897938,
+      "burst_underforecast_ratio_median": 0.0659501834218203,
+      "burst_underforecast_ratio_std": 0.001963195032004802,
+      "daily_MAE_GPU_h_mean": 3084.900982141146,
+      "daily_MAE_GPU_h_median": 3088.2980551765,
+      "daily_MAE_GPU_h_std": 10.48705614295893,
+      "daily_RMSE_GPU_h_mean": 7130.8178464201055,
+      "daily_RMSE_GPU_h_median": 7133.8905927790565,
+      "daily_RMSE_GPU_h_std": 11.490175578041736,
+      "daily_WAPE_mean": 0.9304649586501492,
+      "daily_WAPE_median": 0.9314895806524989,
+      "daily_WAPE_std": 0.003163096098354319,
+      "flexible_IT_power_WAPE_mean": 1.2792882256030522,
+      "flexible_IT_power_WAPE_median": 1.2814100631420025,
+      "flexible_IT_power_WAPE_std": 0.0063759444475315384,
+      "mean_bias_GPU_h_mean": -2231.3273602883264,
+      "mean_bias_GPU_h_median": -2224.5992137037083,
+      "mean_bias_GPU_h_std": 23.988768903649234,
+      "median_absolute_percentage_safe_mean": 0.8447456853297339,
+      "median_absolute_percentage_safe_median": 0.8453041805803383,
+      "median_absolute_percentage_safe_std": 0.0023131436901839887,
+      "negative_prediction_count_mean": 0.0,
+      "negative_prediction_count_median": 0.0,
+      "negative_prediction_count_std": 0.0,
+      "peak_flexible_IT_power_error_kW_mean": -101392.332228375,
+      "peak_flexible_IT_power_error_kW_median": -101428.15983644837,
+      "peak_flexible_IT_power_error_kW_std": 70.45117703947868,
+      "peak_timing_error_slots_mean": 3584.0,
+      "peak_timing_error_slots_median": 4032.0,
+      "peak_timing_error_slots_std": 633.5676759431466,
+      "quantile_crossing_count_mean": 0.0,
+      "quantile_crossing_count_median": 0.0,
+      "quantile_crossing_count_std": 0.0
+    },
+    "B6_THP_LONG_HORIZON_ADAPTATION": {
+      "seed_metrics": {
+        "20260901": {
+          "daily_WAPE": 0.9484383659344646,
+          "daily_MAE_GPU_h": 3144.4907402167696,
+          "daily_RMSE_GPU_h": 7159.897386674147,
+          "mean_bias_GPU_h": -2288.742579222645,
+          "aggregate_mass_ratio": 0.30967159670092875,
+          "median_absolute_percentage_safe": 0.8533598531581632,
+          "Q50_pinball": 1552.5940498896607,
+          "Q90_pinball": 1551.8907948140863,
+          "Q50_coverage": 0.4370860927152318,
+          "Q90_coverage": 0.8741721854304636,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.9390489347756273,
+          "burst_MAE_GPU_h": 14581.946955340352,
+          "burst_underforecast_ratio": 0.060951065224372686,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.2661765836603853,
+          "IT_energy_bias_kWh": -170104.91846538655,
+          "peak_flexible_IT_power_error_kW": -101010.13625486109,
+          "peak_timing_error_slots": 4032.0
+        },
+        "20260902": {
+          "daily_WAPE": 0.9734628972788555,
+          "daily_MAE_GPU_h": 3227.4580788620924,
+          "daily_RMSE_GPU_h": 7090.7762366586185,
+          "mean_bias_GPU_h": -2134.7778009540707,
+          "aggregate_mass_ratio": 0.3561103096043867,
+          "median_absolute_percentage_safe": 0.9103020071862347,
+          "Q50_pinball": 1616.4076580574763,
+          "Q90_pinball": 2054.562997131392,
+          "Q50_coverage": 0.4304635761589404,
+          "Q90_coverage": 0.9735099337748344,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.9214005890247592,
+          "burst_MAE_GPU_h": 14307.896017142808,
+          "burst_underforecast_ratio": 0.07859941097524083,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.3122395094040216,
+          "IT_energy_bias_kWh": -158427.29178858115,
+          "peak_flexible_IT_power_error_kW": -100297.36536486057,
+          "peak_timing_error_slots": 4032.0
+        },
+        "20260903": {
+          "daily_WAPE": 0.9876267551238356,
+          "daily_MAE_GPU_h": 3274.417503363446,
+          "daily_RMSE_GPU_h": 7259.159996230556,
+          "mean_bias_GPU_h": -2371.806079330164,
+          "aggregate_mass_ratio": 0.284618061225947,
+          "median_absolute_percentage_safe": 0.8930458754527216,
+          "Q50_pinball": 1642.349815535275,
+          "Q90_pinball": 1587.2217236191595,
+          "Q50_coverage": 0.3973509933774834,
+          "Q90_coverage": 0.8609271523178808,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.9526380696672888,
+          "burst_MAE_GPU_h": 14792.964759440752,
+          "burst_underforecast_ratio": 0.0473619303327112,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.2447015167179203,
+          "IT_energy_bias_kWh": -176403.40245302237,
+          "peak_flexible_IT_power_error_kW": -100424.87942390864,
+          "peak_timing_error_slots": 4704.0
+        }
+      },
+      "IT_energy_bias_kWh_mean": -168311.87090233,
+      "IT_energy_bias_kWh_median": -170104.91846538655,
+      "IT_energy_bias_kWh_std": 7447.433711357516,
+      "Q50_coverage_mean": 0.4216335540838852,
+      "Q50_coverage_median": 0.4304635761589404,
+      "Q50_coverage_std": 0.017381915836670675,
+      "Q50_pinball_mean": 1603.7838411608038,
+      "Q50_pinball_median": 1616.4076580574763,
+      "Q50_pinball_std": 37.71423189759306,
+      "Q90_coverage_mean": 0.9028697571743929,
+      "Q90_coverage_median": 0.8741721854304636,
+      "Q90_coverage_std": 0.050241972082741906,
+      "Q90_pinball_mean": 1731.2251718548794,
+      "Q90_pinball_median": 1587.2217236191595,
+      "Q90_pinball_std": 229.08889187891785,
+      "aggregate_mass_ratio_mean": 0.31679998917708746,
+      "aggregate_mass_ratio_median": 0.30967159670092875,
+      "aggregate_mass_ratio_std": 0.029618641416307916,
+      "burst_MAE_GPU_h_mean": 14560.935910641303,
+      "burst_MAE_GPU_h_median": 14581.946955340352,
+      "burst_MAE_GPU_h_std": 198.58502660596287,
+      "burst_WAPE_mean": 0.9376958644892252,
+      "burst_WAPE_median": 0.9390489347756273,
+      "burst_WAPE_std": 0.012788488277172345,
+      "burst_day_count_mean": 21.0,
+      "burst_day_count_median": 21.0,
+      "burst_day_count_std": 0.0,
+      "burst_underforecast_ratio_mean": 0.062304135510774905,
+      "burst_underforecast_ratio_median": 0.060951065224372686,
+      "burst_underforecast_ratio_std": 0.012788488277172343,
+      "daily_MAE_GPU_h_mean": 3215.4554408141025,
+      "daily_MAE_GPU_h_median": 3227.4580788620924,
+      "daily_MAE_GPU_h_std": 53.717088749152104,
+      "daily_RMSE_GPU_h_mean": 7169.94453985444,
+      "daily_RMSE_GPU_h_median": 7159.897386674147,
+      "daily_RMSE_GPU_h_std": 69.10852136153329,
+      "daily_WAPE_mean": 0.9698426727790519,
+      "daily_WAPE_median": 0.9734628972788555,
+      "daily_WAPE_std": 0.016202098236260124,
+      "flexible_IT_power_WAPE_mean": 1.274372536594109,
+      "flexible_IT_power_WAPE_median": 1.2661765836603853,
+      "flexible_IT_power_WAPE_std": 0.028174756401027127,
+      "mean_bias_GPU_h_mean": -2265.1088198356265,
+      "mean_bias_GPU_h_median": -2288.742579222645,
+      "mean_bias_GPU_h_std": 98.19883612533734,
+      "median_absolute_percentage_safe_mean": 0.8855692452657066,
+      "median_absolute_percentage_safe_median": 0.8930458754527216,
+      "median_absolute_percentage_safe_std": 0.02384012339948758,
+      "negative_prediction_count_mean": 0.0,
+      "negative_prediction_count_median": 0.0,
+      "negative_prediction_count_std": 0.0,
+      "peak_flexible_IT_power_error_kW_mean": -100577.46034787677,
+      "peak_flexible_IT_power_error_kW_median": -100424.87942390864,
+      "peak_flexible_IT_power_error_kW_std": 310.34527994612694,
+      "peak_timing_error_slots_mean": 4256.0,
+      "peak_timing_error_slots_median": 4032.0,
+      "peak_timing_error_slots_std": 316.7838379715733,
+      "quantile_crossing_count_mean": 0.0,
+      "quantile_crossing_count_median": 0.0,
+      "quantile_crossing_count_std": 0.0
+    },
+    "V19-A": {
+      "seed_metrics": {
+        "20260901": {
+          "daily_WAPE": 1.0313903507919209,
+          "daily_MAE_GPU_h": 3419.51309025622,
+          "daily_RMSE_GPU_h": 6827.756681120116,
+          "mean_bias_GPU_h": -694.390265303072,
+          "aggregate_mass_ratio": 0.7905586554535554,
+          "median_absolute_percentage_safe": 0.9755432924437291,
+          "Q50_pinball": 1536.067229127863,
+          "Q90_pinball": 1635.13659247666,
+          "Q50_coverage": 0.46357615894039733,
+          "Q90_coverage": 0.8543046357615894,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.8375241591851668,
+          "burst_MAE_GPU_h": 13005.427524362394,
+          "burst_underforecast_ratio": 0.16247584081483327,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.6957227614477535,
+          "IT_energy_bias_kWh": -51196.72239399624,
+          "peak_flexible_IT_power_error_kW": -99388.19076719192,
+          "peak_timing_error_slots": 4032.0
+        },
+        "20260902": {
+          "daily_WAPE": 0.9884941930475987,
+          "daily_MAE_GPU_h": 3277.293441976809,
+          "daily_RMSE_GPU_h": 6935.595154711831,
+          "mean_bias_GPU_h": -973.6219531393717,
+          "aggregate_mass_ratio": 0.706337054053538,
+          "median_absolute_percentage_safe": 0.9083150265733819,
+          "Q50_pinball": 1549.2603264046982,
+          "Q90_pinball": 1638.7543769696526,
+          "Q50_coverage": 0.3973509933774834,
+          "Q90_coverage": 0.847682119205298,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.8597744491431988,
+          "burst_MAE_GPU_h": 13350.939388434195,
+          "burst_underforecast_ratio": 0.14022555085680122,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.6204458971833167,
+          "IT_energy_bias_kWh": -72031.58789460611,
+          "peak_flexible_IT_power_error_kW": -99883.03511786558,
+          "peak_timing_error_slots": 11424.0
+        },
+        "20260903": {
+          "daily_WAPE": 1.002932160073858,
+          "daily_MAE_GPU_h": 3325.161659092738,
+          "daily_RMSE_GPU_h": 6887.426569595429,
+          "mean_bias_GPU_h": -756.1545402539205,
+          "aggregate_mass_ratio": 0.7719293724163054,
+          "median_absolute_percentage_safe": 0.9266012961254153,
+          "Q50_pinball": 1567.257443316799,
+          "Q90_pinball": 1617.4958064121138,
+          "Q50_coverage": 0.3443708609271523,
+          "Q90_coverage": 0.8609271523178808,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.8441422921639886,
+          "burst_MAE_GPU_h": 13108.196677775713,
+          "burst_underforecast_ratio": 0.15585770783601136,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.6794822808572865,
+          "IT_energy_bias_kWh": -55770.878197030135,
+          "peak_flexible_IT_power_error_kW": -99682.38864616845,
+          "peak_timing_error_slots": 11424.0
+        }
+      },
+      "IT_energy_bias_kWh_mean": -59666.39616187749,
+      "IT_energy_bias_kWh_median": -55770.878197030135,
+      "IT_energy_bias_kWh_std": 8940.700951937428,
+      "Q50_coverage_mean": 0.40176600441501104,
+      "Q50_coverage_median": 0.3973509933774834,
+      "Q50_coverage_std": 0.048765390804358766,
+      "Q50_pinball_mean": 1550.86166628312,
+      "Q50_pinball_median": 1549.2603264046982,
+      "Q50_pinball_std": 12.783598406880492,
+      "Q90_coverage_mean": 0.8543046357615894,
+      "Q90_coverage_median": 0.8543046357615894,
+      "Q90_coverage_std": 0.005407262125349162,
+      "Q90_pinball_mean": 1630.4622586194755,
+      "Q90_pinball_median": 1635.13659247666,
+      "Q90_pinball_std": 9.286863600225182,
+      "aggregate_mass_ratio_mean": 0.7562750273077996,
+      "aggregate_mass_ratio_median": 0.7719293724163054,
+      "aggregate_mass_ratio_std": 0.03612121653708067,
+      "burst_MAE_GPU_h_mean": 13154.854530190767,
+      "burst_MAE_GPU_h_median": 13108.196677775713,
+      "burst_MAE_GPU_h_std": 144.86160855009496,
+      "burst_WAPE_mean": 0.8471469668307847,
+      "burst_WAPE_median": 0.8441422921639886,
+      "burst_WAPE_std": 0.009328804967914875,
+      "burst_day_count_mean": 21.0,
+      "burst_day_count_median": 21.0,
+      "burst_day_count_std": 0.0,
+      "burst_underforecast_ratio_mean": 0.15285303316921528,
+      "burst_underforecast_ratio_median": 0.15585770783601136,
+      "burst_underforecast_ratio_std": 0.009328804967914881,
+      "daily_MAE_GPU_h_mean": 3340.6560637752555,
+      "daily_MAE_GPU_h_median": 3325.161659092738,
+      "daily_MAE_GPU_h_std": 59.0856131475284,
+      "daily_RMSE_GPU_h_mean": 6883.592801809125,
+      "daily_RMSE_GPU_h_median": 6887.426569595429,
+      "daily_RMSE_GPU_h_std": 44.108256432155954,
+      "daily_WAPE_mean": 1.0076055679711258,
+      "daily_WAPE_median": 1.002932160073858,
+      "daily_WAPE_std": 0.01782134756104089,
+      "flexible_IT_power_WAPE_mean": 1.6652169798294523,
+      "flexible_IT_power_WAPE_median": 1.6794822808572865,
+      "flexible_IT_power_WAPE_std": 0.032344764475183696,
+      "mean_bias_GPU_h_mean": -808.0555862321213,
+      "mean_bias_GPU_h_median": -756.1545402539205,
+      "mean_bias_GPU_h_std": 119.75773545844035,
+      "median_absolute_percentage_safe_mean": 0.9368198717141754,
+      "median_absolute_percentage_safe_median": 0.9266012961254153,
+      "median_absolute_percentage_safe_std": 0.028381031203733285,
+      "negative_prediction_count_mean": 0.0,
+      "negative_prediction_count_median": 0.0,
+      "negative_prediction_count_std": 0.0,
+      "peak_flexible_IT_power_error_kW_mean": -99651.20484374197,
+      "peak_flexible_IT_power_error_kW_median": -99682.38864616845,
+      "peak_flexible_IT_power_error_kW_std": 203.21918380366222,
+      "peak_timing_error_slots_mean": 8960.0,
+      "peak_timing_error_slots_median": 11424.0,
+      "peak_timing_error_slots_std": 3484.622217687306,
+      "quantile_crossing_count_mean": 0.0,
+      "quantile_crossing_count_median": 0.0,
+      "quantile_crossing_count_std": 0.0
+    },
+    "V19-B": {
+      "seed_metrics": {
+        "20260901": {
+          "daily_WAPE": 1.0565172964065928,
+          "daily_MAE_GPU_h": 3502.8199772961793,
+          "daily_RMSE_GPU_h": 6799.07622812951,
+          "mean_bias_GPU_h": -509.70556321930763,
+          "aggregate_mass_ratio": 0.8462630831426456,
+          "median_absolute_percentage_safe": 1.179688141943039,
+          "Q50_pinball": 1539.1091566423497,
+          "Q90_pinball": 1652.6534668047796,
+          "Q50_coverage": 0.46357615894039733,
+          "Q90_coverage": 0.847682119205298,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.8243100495224281,
+          "burst_MAE_GPU_h": 12800.233269805103,
+          "burst_underforecast_ratio": 0.1756899504775718,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.746186134895225,
+          "IT_energy_bias_kWh": -37360.53838337394,
+          "peak_flexible_IT_power_error_kW": -99269.48244156358,
+          "peak_timing_error_slots": 8736.0
+        },
+        "20260902": {
+          "daily_WAPE": 1.0060043254764202,
+          "daily_MAE_GPU_h": 3335.347239946221,
+          "daily_RMSE_GPU_h": 6945.163142889552,
+          "mean_bias_GPU_h": -866.6379734531652,
+          "aggregate_mass_ratio": 0.7386054622816242,
+          "median_absolute_percentage_safe": 0.9388095872958971,
+          "Q50_pinball": 1553.6274188546806,
+          "Q90_pinball": 1663.9773700870069,
+          "Q50_coverage": 0.39072847682119205,
+          "Q90_coverage": 0.8410596026490066,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.8534924829493686,
+          "burst_MAE_GPU_h": 13253.39037429729,
+          "burst_underforecast_ratio": 0.1465075170506314,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.6504581339349969,
+          "IT_energy_bias_kWh": -64029.67725606411,
+          "peak_flexible_IT_power_error_kW": -99410.98001390047,
+          "peak_timing_error_slots": 11424.0
+        },
+        "20260903": {
+          "daily_WAPE": 1.0121342769062804,
+          "daily_MAE_GPU_h": 3355.670727693559,
+          "daily_RMSE_GPU_h": 6858.707221222797,
+          "mean_bias_GPU_h": -647.8660921475464,
+          "aggregate_mass_ratio": 0.8045912331933254,
+          "median_absolute_percentage_safe": 0.9659748160852353,
+          "Q50_pinball": 1568.1678947889993,
+          "Q90_pinball": 1604.8180681567328,
+          "Q50_coverage": 0.3443708609271523,
+          "Q90_coverage": 0.8609271523178808,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.8365082615445318,
+          "burst_MAE_GPU_h": 12989.65223836909,
+          "burst_underforecast_ratio": 0.1634917384554681,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.7083851880876955,
+          "IT_energy_bias_kWh": -47654.014209286084,
+          "peak_flexible_IT_power_error_kW": -99681.8931791881,
+          "peak_timing_error_slots": 11424.0
+        }
+      },
+      "IT_energy_bias_kWh_mean": -49681.40994957471,
+      "IT_energy_bias_kWh_median": -47654.014209286084,
+      "IT_energy_bias_kWh_std": 10981.605595070145,
+      "Q50_coverage_mean": 0.3995584988962472,
+      "Q50_coverage_median": 0.39072847682119205,
+      "Q50_coverage_std": 0.04906426218740148,
+      "Q50_pinball_mean": 1553.6348234286768,
+      "Q50_pinball_median": 1553.6274188546806,
+      "Q50_pinball_std": 11.863181326824444,
+      "Q90_coverage_mean": 0.8498896247240618,
+      "Q90_coverage_median": 0.847682119205298,
+      "Q90_coverage_std": 0.008259729330626795,
+      "Q90_pinball_mean": 1640.4829683495063,
+      "Q90_pinball_median": 1652.6534668047796,
+      "Q90_pinball_std": 25.639117583706437,
+      "aggregate_mass_ratio_mean": 0.7964865928725318,
+      "aggregate_mass_ratio_median": 0.8045912331933254,
+      "aggregate_mass_ratio_std": 0.04432309201316275,
+      "burst_MAE_GPU_h_mean": 13014.425294157161,
+      "burst_MAE_GPU_h_median": 12989.65223836909,
+      "burst_MAE_GPU_h_std": 185.82809001466026,
+      "burst_WAPE_mean": 0.8381035980054428,
+      "burst_WAPE_median": 0.8365082615445318,
+      "burst_WAPE_std": 0.011966966449274367,
+      "burst_day_count_mean": 21.0,
+      "burst_day_count_median": 21.0,
+      "burst_day_count_std": 0.0,
+      "burst_underforecast_ratio_mean": 0.1618964019945571,
+      "burst_underforecast_ratio_median": 0.1634917384554681,
+      "burst_underforecast_ratio_std": 0.011966966449274332,
+      "daily_MAE_GPU_h_mean": 3397.94598164532,
+      "daily_MAE_GPU_h_median": 3355.670727693559,
+      "daily_MAE_GPU_h_std": 74.61982427115205,
+      "daily_RMSE_GPU_h_mean": 6867.64886408062,
+      "daily_RMSE_GPU_h_median": 6858.707221222797,
+      "daily_RMSE_GPU_h_std": 59.97394655889921,
+      "daily_WAPE_mean": 1.0248852995964313,
+      "daily_WAPE_median": 1.0121342769062804,
+      "daily_WAPE_std": 0.02250676183996961,
+      "flexible_IT_power_WAPE_mean": 1.7016764856393056,
+      "flexible_IT_power_WAPE_median": 1.7083851880876955,
+      "flexible_IT_power_WAPE_std": 0.03936764795587135,
+      "mean_bias_GPU_h_mean": -674.7365429400064,
+      "mean_bias_GPU_h_median": -647.8660921475464,
+      "mean_bias_GPU_h_std": 146.95056359919187,
+      "median_absolute_percentage_safe_mean": 1.028157515108057,
+      "median_absolute_percentage_safe_median": 0.9659748160852353,
+      "median_absolute_percentage_safe_std": 0.10772073636815448,
+      "negative_prediction_count_mean": 0.0,
+      "negative_prediction_count_median": 0.0,
+      "negative_prediction_count_std": 0.0,
+      "peak_flexible_IT_power_error_kW_mean": -99454.11854488407,
+      "peak_flexible_IT_power_error_kW_median": -99410.98001390047,
+      "peak_flexible_IT_power_error_kW_std": 171.1068940137851,
+      "peak_timing_error_slots_mean": 10528.0,
+      "peak_timing_error_slots_median": 11424.0,
+      "peak_timing_error_slots_std": 1267.1353518862932,
+      "quantile_crossing_count_mean": 0.0,
+      "quantile_crossing_count_median": 0.0,
+      "quantile_crossing_count_std": 0.0
+    },
+    "V19-C": {
+      "seed_metrics": {
+        "20260901": {
+          "daily_WAPE": 1.0563648485609256,
+          "daily_MAE_GPU_h": 3502.3145455714794,
+          "daily_RMSE_GPU_h": 6799.10290669458,
+          "mean_bias_GPU_h": -510.7133571258163,
+          "aggregate_mass_ratio": 0.8459591132839772,
+          "median_absolute_percentage_safe": 1.178601139504019,
+          "Q50_pinball": 1539.1275108435086,
+          "Q90_pinball": 1652.559654233639,
+          "Q50_coverage": 0.46357615894039733,
+          "Q90_coverage": 0.847682119205298,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.8243839894373144,
+          "burst_MAE_GPU_h": 12801.38143991299,
+          "burst_underforecast_ratio": 0.17561601056268564,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.7458980335541734,
+          "IT_energy_bias_kWh": -37435.784199782676,
+          "peak_flexible_IT_power_error_kW": -99270.04740203459,
+          "peak_timing_error_slots": 8736.0
+        },
+        "20260902": {
+          "daily_WAPE": 1.0059390370832948,
+          "daily_MAE_GPU_h": 3335.1307801793027,
+          "daily_RMSE_GPU_h": 6945.366526616595,
+          "mean_bias_GPU_h": -867.4984082821696,
+          "aggregate_mass_ratio": 0.7383459387305521,
+          "median_absolute_percentage_safe": 0.9388353818569619,
+          "Q50_pinball": 1553.5466396337963,
+          "Q90_pinball": 1663.7233698994553,
+          "Q50_coverage": 0.39072847682119205,
+          "Q90_coverage": 0.8410596026490066,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.8535576296736195,
+          "burst_MAE_GPU_h": 13254.402000041338,
+          "burst_underforecast_ratio": 0.14644237032638058,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.6502239494265618,
+          "IT_energy_bias_kWh": -64094.07374089422,
+          "peak_flexible_IT_power_error_kW": -99413.51389059109,
+          "peak_timing_error_slots": 11424.0
+        },
+        "20260903": {
+          "daily_WAPE": 1.012146976687306,
+          "daily_MAE_GPU_h": 3355.712833058832,
+          "daily_RMSE_GPU_h": 6858.683871779605,
+          "mean_bias_GPU_h": -647.9051837504024,
+          "aggregate_mass_ratio": 0.8045794424205112,
+          "median_absolute_percentage_safe": 0.9650758244033055,
+          "Q50_pinball": 1568.1658228273375,
+          "Q90_pinball": 1604.8069059180118,
+          "Q50_coverage": 0.3443708609271523,
+          "Q90_coverage": 0.8609271523178808,
+          "burst_day_count": 21,
+          "burst_WAPE": 0.8365035130718538,
+          "burst_MAE_GPU_h": 12989.578502087468,
+          "burst_underforecast_ratio": 0.16349648692814625,
+          "negative_prediction_count": 0,
+          "quantile_crossing_count": 0,
+          "flexible_IT_power_WAPE": 1.708386126144002,
+          "IT_energy_bias_kWh": -47656.64322323799,
+          "peak_flexible_IT_power_error_kW": -99683.22872753025,
+          "peak_timing_error_slots": 11424.0
+        }
+      },
+      "IT_energy_bias_kWh_mean": -49728.83372130496,
+      "IT_energy_bias_kWh_median": -47656.64322323799,
+      "IT_energy_bias_kWh_std": 10981.395794999335,
+      "Q50_coverage_mean": 0.3995584988962472,
+      "Q50_coverage_median": 0.39072847682119205,
+      "Q50_coverage_std": 0.04906426218740148,
+      "Q50_pinball_mean": 1553.613324434881,
+      "Q50_pinball_median": 1553.5466396337963,
+      "Q50_pinball_std": 11.854935002340206,
+      "Q90_coverage_mean": 0.8498896247240618,
+      "Q90_coverage_median": 0.847682119205298,
+      "Q90_coverage_std": 0.008259729330626795,
+      "Q90_pinball_mean": 1640.3633100170355,
+      "Q90_pinball_median": 1652.559654233639,
+      "Q90_pinball_std": 25.55191501246816,
+      "aggregate_mass_ratio_mean": 0.7962948314783468,
+      "aggregate_mass_ratio_median": 0.8045794424205112,
+      "aggregate_mass_ratio_std": 0.04432173972378008,
+      "burst_MAE_GPU_h_mean": 13015.120647347265,
+      "burst_MAE_GPU_h_median": 12989.578502087468,
+      "burst_MAE_GPU_h_std": 185.82466263139048,
+      "burst_WAPE_mean": 0.8381483773942625,
+      "burst_WAPE_median": 0.8365035130718538,
+      "burst_WAPE_std": 0.011966745732478532,
+      "burst_day_count_mean": 21.0,
+      "burst_day_count_median": 21.0,
+      "burst_day_count_std": 0.0,
+      "burst_underforecast_ratio_mean": 0.1618516226057375,
+      "burst_underforecast_ratio_median": 0.16349648692814625,
+      "burst_underforecast_ratio_std": 0.011966745732478521,
+      "daily_MAE_GPU_h_mean": 3397.7193862698714,
+      "daily_MAE_GPU_h_median": 3355.712833058832,
+      "daily_MAE_GPU_h_std": 74.43572501239127,
+      "daily_RMSE_GPU_h_mean": 6867.717768363594,
+      "daily_RMSE_GPU_h_median": 6858.683871779605,
+      "daily_RMSE_GPU_h_std": 60.05258858584182,
+      "daily_WAPE_mean": 1.0248169541105085,
+      "daily_WAPE_median": 1.012146976687306,
+      "daily_WAPE_std": 0.02245123399314974,
+      "flexible_IT_power_WAPE_mean": 1.701502703041579,
+      "flexible_IT_power_WAPE_median": 1.708386126144002,
+      "flexible_IT_power_WAPE_std": 0.03936088353191573,
+      "mean_bias_GPU_h_mean": -675.3723163861295,
+      "mean_bias_GPU_h_median": -647.9051837504024,
+      "mean_bias_GPU_h_std": 146.94608016453265,
+      "median_absolute_percentage_safe_mean": 1.027504115254762,
+      "median_absolute_percentage_safe_median": 0.9650758244033055,
+      "median_absolute_percentage_safe_std": 0.10737744412116969,
+      "negative_prediction_count_mean": 0.0,
+      "negative_prediction_count_median": 0.0,
+      "negative_prediction_count_std": 0.0,
+      "peak_flexible_IT_power_error_kW_mean": -99455.59667338531,
+      "peak_flexible_IT_power_error_kW_median": -99413.51389059109,
+      "peak_flexible_IT_power_error_kW_std": 171.28518595287787,
+      "peak_timing_error_slots_mean": 10528.0,
+      "peak_timing_error_slots_median": 11424.0,
+      "peak_timing_error_slots_std": 1267.1353518862932,
+      "quantile_crossing_count_mean": 0.0,
+      "quantile_crossing_count_median": 0.0,
+      "quantile_crossing_count_std": 0.0
+    }
+  },
+  "proposed_model_acceptance": {
+    "best_non_proposed_baseline": "B3_LIGHTGBM_QUANTILE",
+    "selected_C_MASS_TPP_variant": "V19-A",
+    "daily_WAPE_relative_improvement": -0.13182308540299237,
+    "burst_WAPE_relative_improvement": 0.07981121377549036,
+    "bootstrap": {
+      "paired_difference_definition": "abs_error_proposed_minus_abs_error_baseline",
+      "mean_difference_GPU_h": 370.36604454555834,
+      "CI95_lower_GPU_h": 75.90622772119038,
+      "CI95_upper_GPU_h": 730.5019943016631,
+      "supports_proposed_improvement": false,
+      "block_length_days": 7,
+      "replicates": 2000,
+      "seed": 20260901
+    },
+    "proposed_mass_ratio": 0.7562750273077996,
+    "baseline_mass_ratio": 0.36370296301248994,
+    "proposed_closer_to_one": true,
+    "hard_structural_tests_pass": true,
+    "PROPOSED_MODEL_ACCEPTED": false,
+    "PROPOSED_MODEL_STATUS": "PERFORMANCE_FAIL"
+  },
+  "ablation": [
+    {
+      "ablation": "A1_WO_SSL_PRETRAINING",
+      "daily_WAPE": 1.0076055679711258,
+      "burst_WAPE": 0.8471469668307847,
+      "mass_ratio": 0.7562750273077996,
+      "event_set_metric": null,
+      "power_WAPE": 1.6652169798294523,
+      "mass_identity_max_error_GPU_h": null,
+      "execution": "REUSED_THREE_SEED_FIVE_FOLD_VARIANT",
+      "note": "predefined V19-A"
+    },
+    {
+      "ablation": "A2_WO_BURST_HEAD",
+      "daily_WAPE": 1.0248852995964313,
+      "burst_WAPE": 0.8381035980054428,
+      "mass_ratio": 0.7964865928725318,
+      "event_set_metric": null,
+      "power_WAPE": 1.7016764856393056,
+      "mass_identity_max_error_GPU_h": null,
+      "execution": "REUSED_THREE_SEED_FIVE_FOLD_VARIANT",
+      "note": "predefined V19-B"
+    },
+    {
+      "ablation": "A3_WO_EVENT_ENCODER",
+      "daily_WAPE": 1.015415449512359,
+      "burst_WAPE": 0.8326086201906724,
+      "mass_ratio": 0.7533844001344594,
+      "event_set_metric": 2.791542201036366,
+      "power_WAPE": 1.7491543326899426,
+      "mass_identity_max_error_GPU_h": 0.0,
+      "execution": "ONE_PREREGISTERED_SEED_FIVE_FOLD",
+      "note": "A4 intentionally removes the structural identity; A6 pools all events into 672 causal tokens; A7 keeps aggregate mass but uses 96 anonymous slot queries."
+    },
+    {
+      "ablation": "A4_WO_HARD_MASS_RECONCILIATION",
+      "daily_WAPE": 1.024209080229439,
+      "burst_WAPE": 0.8367855891941279,
+      "mass_ratio": 0.7899924218522175,
+      "event_set_metric": 2.774951377686994,
+      "power_WAPE": 2.888536047568054,
+      "mass_identity_max_error_GPU_h": 4733.5869140625,
+      "execution": "ONE_PREREGISTERED_SEED_FIVE_FOLD",
+      "note": "A4 intentionally removes the structural identity; A6 pools all events into 672 causal tokens; A7 keeps aggregate mass but uses 96 anonymous slot queries."
+    },
+    {
+      "ablation": "A5_WO_POWER_TIER_MARK",
+      "daily_WAPE": 1.0315044064514698,
+      "burst_WAPE": 0.8375569687543288,
+      "mass_ratio": 0.7904896790912261,
+      "event_set_metric": 2.7684357509724724,
+      "power_WAPE": 1.7876028347868538,
+      "mass_identity_max_error_GPU_h": 2.2737367544323206e-13,
+      "execution": "ONE_PREREGISTERED_SEED_FIVE_FOLD",
+      "note": "A4 intentionally removes the structural identity; A6 pools all events into 672 causal tokens; A7 keeps aggregate mass but uses 96 anonymous slot queries."
+    },
+    {
+      "ablation": "A6_STANDARD_TRANSFORMER_ENCODER",
+      "daily_WAPE": 1.014699960716114,
+      "burst_WAPE": 0.8492483560919805,
+      "mass_ratio": 0.7494408096777772,
+      "event_set_metric": 2.7189490803047995,
+      "power_WAPE": 1.7524754186206377,
+      "mass_identity_max_error_GPU_h": 0.0,
+      "execution": "ONE_PREREGISTERED_SEED_FIVE_FOLD",
+      "note": "A4 intentionally removes the structural identity; A6 pools all events into 672 causal tokens; A7 keeps aggregate mass but uses 96 anonymous slot queries."
+    },
+    {
+      "ablation": "A7_96_SLOT_HIERARCHICAL_DECODER",
+      "daily_WAPE": 1.0824474843396452,
+      "burst_WAPE": 0.8188306976196041,
+      "mass_ratio": 0.8593020293225131,
+      "event_set_metric": 3.690523099942456,
+      "power_WAPE": 1.8712011520960665,
+      "mass_identity_max_error_GPU_h": 0.0,
+      "execution": "ONE_PREREGISTERED_SEED_FIVE_FOLD",
+      "note": "A4 intentionally removes the structural identity; A6 pools all events into 672 causal tokens; A7 keeps aggregate mass but uses 96 anonymous slot queries."
+    }
+  ],
+  "April_postfreeze": {
+    "artifact_id": "V19_APRIL_POSTFREEZE_DIAGNOSTIC_V1",
+    "label": "OBSERVED_DIAGNOSTIC_NOT_LOCKED_TEST",
+    "freeze_artifact_sha256": "948f5a09c63b78057721d2c6b4af786dc65d62d1f4d9c7d010215b3b1ff03dce",
+    "days": [
+      {
+        "date": "2025-04-02",
+        "V18R2_Q50_GPU_h": 2259.3956944444444,
+        "C_MASS_mean_GPU_h": 2327.580322265625,
+        "C_MASS_Q50_GPU_h": 995.62890625,
+        "C_MASS_Q90_GPU_h": 6495.60986328125,
+        "observed_diagnostic_GPU_h": 5235.122777777778,
+        "predicted_event_count": 382.4695231119792,
+        "burst_probability": 0.32806339859962463,
+        "predicted_tier_mass_GPU_h": {
+          "FULL_1": 483.339337775625,
+          "FULL_2": 351.40997946304765,
+          "FULL_4": 451.41648989831543,
+          "FULL_8": 347.0809338523813,
+          "FULL_16": 322.2262749193701,
+          "PARTIAL": 372.10730612182715
+        },
+        "label": "OBSERVED_DIAGNOSTIC_NOT_LOCKED_TEST"
+      },
+      {
+        "date": "2025-04-03",
+        "V18R2_Q50_GPU_h": 1554.5718055555553,
+        "C_MASS_mean_GPU_h": 2444.581095377604,
+        "C_MASS_Q50_GPU_h": 978.7038167317709,
+        "C_MASS_Q90_GPU_h": 6480.721516927083,
+        "observed_diagnostic_GPU_h": 7104.636111111111,
+        "predicted_event_count": 382.47365315755206,
+        "burst_probability": 0.3266993463039398,
+        "predicted_tier_mass_GPU_h": {
+          "FULL_1": 511.8878449200159,
+          "FULL_2": 369.40510044405045,
+          "FULL_4": 472.98585617405405,
+          "FULL_8": 361.8285956007255,
+          "FULL_16": 337.54325884083914,
+          "PARTIAL": 390.9304392319451
+        },
+        "label": "OBSERVED_DIAGNOSTIC_NOT_LOCKED_TEST"
+      },
+      {
+        "date": "2025-04-12",
+        "V18R2_Q50_GPU_h": 1113.4151388888886,
+        "C_MASS_mean_GPU_h": 2524.5234375,
+        "C_MASS_Q50_GPU_h": 979.6704915364584,
+        "C_MASS_Q90_GPU_h": 6424.954264322917,
+        "observed_diagnostic_GPU_h": 3511.347777777778,
+        "predicted_event_count": 382.45961507161456,
+        "burst_probability": 0.32733723521232605,
+        "predicted_tier_mass_GPU_h": {
+          "FULL_1": 531.1253157789575,
+          "FULL_2": 379.20616714730244,
+          "FULL_4": 489.64247346925083,
+          "FULL_8": 371.92542252535674,
+          "FULL_16": 347.8390824167435,
+          "PARTIAL": 404.78497752113765
+        },
+        "label": "OBSERVED_DIAGNOSTIC_NOT_LOCKED_TEST"
+      },
+      {
+        "date": "2025-04-13",
+        "V18R2_Q50_GPU_h": 349.94555555555553,
+        "C_MASS_mean_GPU_h": 2443.555216471354,
+        "C_MASS_Q50_GPU_h": 990.1339518229166,
+        "C_MASS_Q90_GPU_h": 6457.613444010417,
+        "observed_diagnostic_GPU_h": 5609.301111111112,
+        "predicted_event_count": 382.4661865234375,
+        "burst_probability": 0.32743969559669495,
+        "predicted_tier_mass_GPU_h": {
+          "FULL_1": 513.8934850103218,
+          "FULL_2": 367.9429994139566,
+          "FULL_4": 473.76198850202087,
+          "FULL_8": 360.8178230757527,
+          "FULL_16": 336.44587034130274,
+          "PARTIAL": 390.69304912020164
+        },
+        "label": "OBSERVED_DIAGNOSTIC_NOT_LOCKED_TEST"
+      },
+      {
+        "date": "2025-04-15",
+        "V18R2_Q50_GPU_h": 612.036388888889,
+        "C_MASS_mean_GPU_h": 2259.3404947916665,
+        "C_MASS_Q50_GPU_h": 1005.8502807617188,
+        "C_MASS_Q90_GPU_h": 6472.809407552083,
+        "observed_diagnostic_GPU_h": 3435.956666666667,
+        "predicted_event_count": 382.4823303222656,
+        "burst_probability": 0.3282321095466614,
+        "predicted_tier_mass_GPU_h": {
+          "FULL_1": 467.6980317719701,
+          "FULL_2": 342.31439085079415,
+          "FULL_4": 438.21692453359873,
+          "FULL_8": 337.6276966556759,
+          "FULL_16": 314.09067588683445,
+          "PARTIAL": 359.3927749916562
+        },
+        "label": "OBSERVED_DIAGNOSTIC_NOT_LOCKED_TEST"
+      },
+      {
+        "date": "2025-04-22",
+        "V18R2_Q50_GPU_h": 612.036388888889,
+        "C_MASS_mean_GPU_h": 1846.5774536132812,
+        "C_MASS_Q50_GPU_h": 1050.211446126302,
+        "C_MASS_Q90_GPU_h": 6771.285481770833,
+        "observed_diagnostic_GPU_h": 4036.016111111111,
+        "predicted_event_count": 382.46034749348956,
+        "burst_probability": 0.3333466947078705,
+        "predicted_tier_mass_GPU_h": {
+          "FULL_1": 371.30206879191064,
+          "FULL_2": 281.6928333655738,
+          "FULL_4": 361.29743784218795,
+          "FULL_8": 279.74062303598,
+          "FULL_16": 259.86936325035794,
+          "PARTIAL": 292.67512691281644
+        },
+        "label": "OBSERVED_DIAGNOSTIC_NOT_LOCKED_TEST"
+      },
+      {
+        "date": "2025-04-23",
+        "V18R2_Q50_GPU_h": 2259.3956944444444,
+        "C_MASS_mean_GPU_h": 2389.2045084635415,
+        "C_MASS_Q50_GPU_h": 967.1054890950521,
+        "C_MASS_Q90_GPU_h": 6468.451497395833,
+        "observed_diagnostic_GPU_h": 5115.490833333334,
+        "predicted_event_count": 382.47157796223956,
+        "burst_probability": 0.3349027633666992,
+        "predicted_tier_mass_GPU_h": {
+          "FULL_1": 498.82429312528114,
+          "FULL_2": 362.4280487733472,
+          "FULL_4": 462.7477937148859,
+          "FULL_8": 353.07147084329614,
+          "FULL_16": 330.2811008257611,
+          "PARTIAL": 381.851801664864
+        },
+        "label": "OBSERVED_DIAGNOSTIC_NOT_LOCKED_TEST"
+      }
+    ],
+    "seven_day_mean_GPU_h": 16235.36252848307,
+    "seven_day_Q50_GPU_h": 6967.304382324219,
+    "seven_day_Q90_GPU_h": 45571.44547526042,
+    "seven_day_observed_GPU_h_diagnostic": 34047.87138888889,
+    "April_target_reads_before_freeze": 0,
+    "April_target_reads_after_freeze": 1,
+    "April_reads_for_model_selection_or_tuning": 0,
+    "source": {
+      "source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+      "source_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+      "members_opened": [
+        {
+          "month": 202504,
+          "member": "esif.hpc.kestrel.job-anon/year=2025/month=4/kestrel_jobs_202504_0.parquet",
+          "H100_rows": 65762
+        }
+      ],
+      "H100_rows": 65762,
+      "requested_columns": [
+        "account_hash",
+        "end_time",
+        "gpu_nodes_occupied",
+        "gpus_requested",
+        "id",
+        "jobs_shared",
+        "nodelist",
+        "nodes_req",
+        "nodes_shared",
+        "partition",
+        "qos",
+        "shared_job_count",
+        "start_time",
+        "state_simple",
+        "submit_time",
+        "wallclock_req"
+      ]
+    }
+  },
+  "electrical_forecast": {
+    "label": "PROVISIONAL_LEGACY_SCALE_DIAGNOSTIC",
+    "flexible_IT_power_WAPE": 1.4821052869253486,
+    "IT_energy_bias_kWh": -8518.279019612371,
+    "peak_flexible_IT_power_error_kW": -4444.1401065211485,
+    "peak_timing_error_slots": 121.0
+  },
+  "facility": {
+    "artifact_id": "V19_FACILITY_FLEXIBILITY_DIAGNOSTIC_V1",
+    "scale_authority_label": "LEGACY_FACILITY_SCALE_DIAGNOSTIC_ONLY",
+    "FINAL_FACILITY_FLEXIBILITY_SHARE": null,
+    "provisional_legacy_energy_share": 0.06464113489967144,
+    "provisional_legacy_at_total_peak_share": 0.0,
+    "provisional_legacy_max_instantaneous_share": 0.40655054520138784,
+    "provisional_mean_flexible_IT_kW": 50.783336246726336,
+    "provisional_peak_flexible_IT_kW": 290.00449196485744,
+    "provisional_mean_flexible_PCC_kW": 66.01833712074423,
+    "provisional_peak_flexible_PCC_kW": 377.00583955431466,
+    "literature_target_calibration": false,
+    "model_acceptance_uses_facility_share": false,
+    "future_authority": "SITE_SPECIFIC_AIDC_SCALE_AUTHORITY_NOT_YET_AVAILABLE"
+  },
+  "scheduler": {
+    "artifact_id": "V19_REFERENCE_SCHEDULER_PREFLIGHT_V1",
+    "policy": "GRID_BLIND_EDF_FLUID_GPU_HOUR_WITH_FROZEN_ENGINEERING_RACK_WEIGHTS",
+    "C_MODEL_GPU": 528,
+    "C_MODEL_role": "EQUIVALENT_CASE_STUDY_H100_CAPACITY",
+    "days": [
+      {
+        "day": "2025-04-02",
+        "arrival_GPU_h": 2327.580321760734,
+        "served_GPU_h": 2327.5803217607336,
+        "work_conservation_abs_error_GPU_h": 4.547473508864641e-13,
+        "max_backlog_GPU_h": 1762.014619312168,
+        "terminal_backlog_GPU_h": 0,
+        "max_deadline_shortfall_GPU_h": 152.6751700415574,
+        "max_system_capacity_violation_GPU_h_per_slot": 0.0,
+        "max_rack_capacity_violation_GPU_h_per_slot": 3.552713678800501e-15,
+        "hidden_shedding_GPU_h": 0.0,
+        "feasible": false
+      },
+      {
+        "day": "2025-04-03",
+        "arrival_GPU_h": 2444.581095574985,
+        "served_GPU_h": 2444.581095574985,
+        "work_conservation_abs_error_GPU_h": 0.0,
+        "max_backlog_GPU_h": 1874.937304249153,
+        "terminal_backlog_GPU_h": 0,
+        "max_deadline_shortfall_GPU_h": 196.44217365271538,
+        "max_system_capacity_violation_GPU_h_per_slot": 2.842170943040401e-14,
+        "max_rack_capacity_violation_GPU_h_per_slot": 3.552713678800501e-15,
+        "hidden_shedding_GPU_h": 0.0,
+        "feasible": false
+      },
+      {
+        "day": "2025-04-12",
+        "arrival_GPU_h": 2524.523438340804,
+        "served_GPU_h": 2524.5234383408038,
+        "work_conservation_abs_error_GPU_h": 4.547473508864641e-13,
+        "max_backlog_GPU_h": 1954.2505352025207,
+        "terminal_backlog_GPU_h": 0,
+        "max_deadline_shortfall_GPU_h": 233.01052916817002,
+        "max_system_capacity_violation_GPU_h_per_slot": 2.842170943040401e-14,
+        "max_rack_capacity_violation_GPU_h_per_slot": 3.552713678800501e-15,
+        "hidden_shedding_GPU_h": 0.0,
+        "feasible": false
+      },
+      {
+        "day": "2025-04-13",
+        "arrival_GPU_h": 2443.555216324665,
+        "served_GPU_h": 2443.5552163246653,
+        "work_conservation_abs_error_GPU_h": 4.547473508864641e-13,
+        "max_backlog_GPU_h": 1875.4816972080177,
+        "terminal_backlog_GPU_h": 0,
+        "max_deadline_shortfall_GPU_h": 198.04307499763905,
+        "max_system_capacity_violation_GPU_h_per_slot": 2.842170943040401e-14,
+        "max_rack_capacity_violation_GPU_h_per_slot": 1.7763568394002505e-15,
+        "hidden_shedding_GPU_h": 0.0,
+        "feasible": false
+      },
+      {
+        "day": "2025-04-15",
+        "arrival_GPU_h": 2259.340494456005,
+        "served_GPU_h": 2259.3404944560057,
+        "work_conservation_abs_error_GPU_h": 4.547473508864641e-13,
+        "max_backlog_GPU_h": 1693.4791150794576,
+        "terminal_backlog_GPU_h": 0,
+        "max_deadline_shortfall_GPU_h": 128.34242663304565,
+        "max_system_capacity_violation_GPU_h_per_slot": 0.0,
+        "max_rack_capacity_violation_GPU_h_per_slot": 8.881784197001252e-16,
+        "hidden_shedding_GPU_h": 0.0,
+        "feasible": false
+      },
+      {
+        "day": "2025-04-22",
+        "arrival_GPU_h": 1846.5774525443844,
+        "served_GPU_h": 1846.5774525443844,
+        "work_conservation_abs_error_GPU_h": 0.0,
+        "max_backlog_GPU_h": 1297.8142442511387,
+        "terminal_backlog_GPU_h": 0,
+        "max_deadline_shortfall_GPU_h": 0.0,
+        "max_system_capacity_violation_GPU_h_per_slot": 2.842170943040401e-14,
+        "max_rack_capacity_violation_GPU_h_per_slot": 1.7763568394002505e-15,
+        "hidden_shedding_GPU_h": 0.0,
+        "feasible": true
+      },
+      {
+        "day": "2025-04-23",
+        "arrival_GPU_h": 2389.204509023357,
+        "served_GPU_h": 2389.204509023357,
+        "work_conservation_abs_error_GPU_h": 0.0,
+        "max_backlog_GPU_h": 1819.203015684429,
+        "terminal_backlog_GPU_h": 0,
+        "max_deadline_shortfall_GPU_h": 173.30860527844206,
+        "max_system_capacity_violation_GPU_h_per_slot": 0.0,
+        "max_rack_capacity_violation_GPU_h_per_slot": 1.7763568394002505e-15,
+        "hidden_shedding_GPU_h": 0.0,
+        "feasible": false
+      }
+    ],
+    "total_arrival_GPU_h": 16235.362528024934,
+    "total_served_GPU_h": 16235.362528024934,
+    "terminal_backlog_GPU_h": 0.0,
+    "maximum_deadline_shortfall_GPU_h": 233.01052916817002,
+    "maximum_capacity_violation_GPU_h_per_slot": 2.842170943040401e-14,
+    "hidden_shedding_GPU_h": 0.0,
+    "feasible": false,
+    "B0_B1_B2_B3_science_calls": 0,
+    "OpenDSS_calls": 0
+  },
+  "limitations": [
+    "225-day supervised horizon",
+    "semantic-flexible label is a retrospective proxy",
+    "exact D-1 queue snapshot absent",
+    "capacity timeline partial and C_MODEL is only an equivalent case-study normalization",
+    "no untouched locked future test",
+    "B5/B6 are resource-feasible long-horizon adaptations rather than canonical likelihood reproductions",
+    "B7/B8 not reproduced for documented compute/dependency reasons",
+    "facility/site electrical magnitudes are provisional legacy-scale diagnostics, not final Melbourne authority"
+  ],
+  "git": {
+    "starting_branch": "codex/dayahead-aidc-joint-v1",
+    "starting_HEAD": "77a86e3ded8087ea0109ccfca631bd2396ecd9fe",
+    "new_branch": "codex/v19-c-mass-tpp",
+    "freeze_commit": "ebd4eb8e631137cf9710fecee768d11ef344c512",
+    "novelty_commit": "62eaf1b12a3a298fcd968a8cbfa4a2247fd90212"
+  },
+  "execution_summary": {
+    "EXECUTION_DEVICE_CHANGE_ONLY": "CPU_TO_CUDA",
+    "RESULT_BASED_RETUNING": 0,
+    "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "cuda_full_run_seconds": 228.67827929999999,
+    "cpu_reference_full_run_seconds": 252.86667400000002,
+    "measured_full_run_speedup_CPU_over_CUDA": 1.1057747800711217,
+    "median_fold_variant_seed_training_seconds": 1.058280400000001,
+    "measured_median_training_speedup_CPU_over_CUDA": 1.2485417853340188,
+    "epoch_runtime_seconds_median": 0.4772332500000047,
+    "epoch_runtime_seconds_min": 0.39174500000000023,
+    "epoch_runtime_seconds_max": 0.8136778000000007,
+    "fold_training_runtime_seconds_sum_over_variants_and_seeds": {
+      "1": 8.620611999999994,
+      "2": 8.535749799999998,
+      "3": 9.589536700000025,
+      "4": 11.77016929999995,
+      "5": 12.663778000000008
+    },
+    "peak_VRAM_bytes": 720154624,
+    "gpu_utilization_sample_percent_min": 19.0,
+    "gpu_utilization_sample_percent_mean": 38.03333333333333,
+    "gpu_utilization_sample_percent_max": 81.0,
+    "final_table_mixes_CPU_and_CUDA_deep_folds": false
+  }
+}
