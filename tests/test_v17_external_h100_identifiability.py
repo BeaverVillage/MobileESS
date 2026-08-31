@@ -109,3 +109,16 @@ def test_may_june_and_opendss_benders_firewalls_hold_everywhere() -> None:
             assert payload["May_result_content_reads"] == 0
             assert payload["June_result_content_reads"] == 0
             assert payload["OpenDSS_calls_inside_Benders"] == 0
+
+
+def test_final_review_is_fail_closed_v1_active_and_hash_complete() -> None:
+    review = load("V17_AIDC_POWER_V3_EXTERNAL_FINAL_REVIEW.json")
+    assert review["status"] == "V17_AIDC_POWER_V3_EXTERNAL_NOT_AUTHORIZED"
+    assert review["primary_classification"] == "V17_AIDC_POWER_V3_E_EXTERNAL_POWER_NOT_IDENTIFIABLE"
+    assert review["active_final_AIDC_power_boundary"] == "V17_AIDC_POWER_MODEL_V1_FROZEN_KAPPA_BOUNDARY"
+    assert review["READY_FOR_APRIL_RESUME"] is True
+    assert review["V3_authority_minted"] is False
+    assert review["RCMQT_V3"]["performed"] is False
+    assert review["same_7day_V3_science"]["performed"] is False
+    for name, record in review["artifact_sha256"].items():
+        assert file_sha(ARTIFACTS / name) == record["sha256"]
