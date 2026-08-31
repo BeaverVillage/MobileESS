@@ -409,9 +409,13 @@ def build_daily_samples(
                 target_event_time_h=jobs["arrival_h"].to_numpy(np.float32),
                 target_event_tier=jobs["tier_index"].to_numpy(np.int64),
                 target_event_latency=jobs["latency_index"].to_numpy(np.int64),
-                target_event_mass_GPU_h=event_mass.astype(np.float32),
-                target_slot_mass_GPU_h=slots.astype(np.float32),
-                target_tier_mass_GPU_h=tier_mass.astype(np.float32),
+                # Preserve the scientific target authority in float64.  Casting
+                # these three independently aggregated views to float32 caused
+                # milliscale GPU-h drift when they were compared with the
+                # float64 daily master, even though the source sums agreed.
+                target_event_mass_GPU_h=event_mass,
+                target_slot_mass_GPU_h=slots,
+                target_tier_mass_GPU_h=tier_mass,
             )
         )
     return samples

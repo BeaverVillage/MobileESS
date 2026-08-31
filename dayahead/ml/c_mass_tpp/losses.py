@@ -68,8 +68,8 @@ def event_set_loss(
         p_index, a_index = monotone_chunked_match(
             ptime.detach().cpu().numpy(), actual_time.detach().cpu().numpy()
         )
-        pi = torch.from_numpy(p_index).long()
-        ai = torch.from_numpy(a_index).long()
+        pi = torch.from_numpy(p_index).long().to(ptime.device)
+        ai = torch.from_numpy(a_index).long().to(ptime.device)
         matching_loss = (
             torch.abs(ptime[pi] - actual_time[ai]).mean() / 24.0
             + torch.abs(torch.log1p(pmass[pi]) - torch.log1p(actual_mass[ai])).mean()
@@ -131,4 +131,3 @@ def total_loss(
         **event_meta,
     }
     return total, components
-

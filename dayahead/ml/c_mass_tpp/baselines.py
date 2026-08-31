@@ -11,6 +11,7 @@ from torch.nn import functional as F
 
 from .data import DailySample
 from .encoder import CausalContinuousTimeEncoder
+from .device import DEVICE
 
 
 @dataclass
@@ -182,20 +183,21 @@ def _train_deep_baseline(
     epochs: int = 30,
 ) -> BaselinePrediction:
     torch.manual_seed(seed)
+    model = model.to(DEVICE)
     optimizer = torch.optim.Adam(model.parameters(), lr=3e-3)
     scale = 528.0 * 24.0
     for _ in range(epochs):
         for index in train_index:
             sample = samples[int(index)]
             if mode == "patch":
-                x = torch.from_numpy(np.log1p(sample.proxy_history_28d_GPU_h)[None, :])
+                x = torch.from_numpy(np.log1p(sample.proxy_history_28d_GPU_h)[None, :]).to(DEVICE)
                 prediction = model(x) * scale
             else:
                 prediction = model(
-                    torch.from_numpy(sample.micro_event_features),
-                    torch.from_numpy(sample.micro_event_ages_h),
+                    torch.from_numpy(sample.micro_event_features).to(DEVICE),
+                    torch.from_numpy(sample.micro_event_ages_h).to(DEVICE),
                 ) * scale
-            target = torch.tensor([sample.daily_mass_GPU_h])
+            target = torch.tensor([sample.daily_mass_GPU_h], device=DEVICE)
             loss = F.smooth_l1_loss(prediction[:, 0], target, beta=1000.0)
             loss = loss + 0.2 * F.l1_loss(prediction[:, 1], target)
             optimizer.zero_grad()
@@ -207,20 +209,20 @@ def _train_deep_baseline(
             sample = samples[int(index)]
             if mode == "patch":
                 prediction = model(
-                    torch.from_numpy(np.log1p(sample.proxy_history_28d_GPU_h)[None, :])
+                    torch.from_numpy(np.log1p(sample.proxy_history_28d_GPU_h)[None, :]).to(DEVICE)
                 ) * scale
             else:
                 prediction = model(
-                    torch.from_numpy(sample.micro_event_features),
-                    torch.from_numpy(sample.micro_event_ages_h),
+                    torch.from_numpy(sample.micro_event_features).to(DEVICE),
+                    torch.from_numpy(sample.micro_event_ages_h).to(DEVICE),
                 ) * scale
-            values.append(prediction[0].numpy())
+            values.append(prediction[0].detach().cpu().numpy())
     array = np.asarray(values)
     return BaselinePrediction(
         mean=array[:, 0],
         q50=array[:, 1],
         q90=array[:, 2],
-        metadata={"parameters": sum(parameter.numel() for parameter in model.parameters()), "epochs": epochs},
+        metadata={"parameters": sum(parameter.numel() for parameter in model.parameters()), "epochs": epochs, "execution_device": str(DEVICE)},
     )
 
 

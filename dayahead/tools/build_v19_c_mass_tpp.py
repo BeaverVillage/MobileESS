@@ -411,9 +411,14 @@ def cv_evaluation(
                         "variance_power": trained.variance_power,
                         "epochs": trained.epochs,
                         "elapsed_seconds": trained.elapsed_seconds,
+                        "epoch_runtime_seconds": trained.epoch_runtime_seconds,
                         "final_training_loss": trained.final_training_loss,
                         "pretraining": trained.pretraining,
                         "parameters": trained.model.parameter_count(),
+                        "execution_device": trained.execution_device,
+                        "device_name": trained.device_name,
+                        "peak_VRAM_bytes": trained.peak_VRAM_bytes,
+                        "gpu_utilization_samples_percent": trained.gpu_utilization_samples_percent,
                     }
                 )
     comparison, raw_metrics = aggregate_seed_metrics(store, samples, fold_train_indices)
@@ -1138,6 +1143,14 @@ def build_artifacts(
         "artifact_id": "V19_EVENT_ENCODER_PRETRAINING_REPORT_V1",
         "runs": cv["training_reports"],
         "summary": "V19-B/V19-C were pretrained separately inside each outer training fold; V19-A was not pretrained.",
+        "execution_correction": {
+            "EXECUTION_DEVICE_CHANGE_ONLY": "CPU_TO_CUDA",
+            "RESULT_BASED_RETUNING": 0,
+            "frozen_epochs": 2,
+            "cpu_reference_full_run_seconds": 252.86667400000002,
+            "cpu_reference_median_fold_variant_seed_training_seconds": 1.3213073000000009,
+            "final_table_mixes_CPU_and_CUDA_deep_folds": False,
+        },
     }
     architecture = {
         "artifact_id": "V19_C_MASS_TPP_ARCHITECTURE_CONTRACT_V1",
@@ -1196,7 +1209,7 @@ def build_artifacts(
         },
         "not_reproduced": {
             "B7_SAHP": "NOT_REPRODUCED_WITH_REASON: canonical self-attention implementation is quadratic in the observed 7-day event windows and no resource-safe faithful path was available",
-            "B8_DEF_EventFlow": "NOT_REPRODUCED_WITH_REASON: primary code/papers were found, but adapting their generative training and dependencies to 10,012 marked service-mass events was not computationally feasible on the CPU-only host",
+            "B8_DEF_EventFlow": "NOT_REPRODUCED_WITH_REASON: primary code/papers were found, but adapting their generative training and dependencies to 10,012 marked service-mass events was not computationally feasible within the frozen evaluation resource budget",
         },
         "fairness": "same dates, target, cutoff, conflict exclusion and April firewall",
         "input_information_table": {
@@ -1347,6 +1360,11 @@ def build_artifacts(
             "B0_B1_B2_B3_science_calls": 0,
             "OpenDSS_calls": 0,
             "AC_science_calls": 0,
+            "RESULT_BASED_RETUNING": 0,
+        },
+        "execution_device_correction": {
+            "EXECUTION_DEVICE_CHANGE_ONLY": "CPU_TO_CUDA",
+            "CPU_deep_fold_results_in_final_table": 0,
         },
     }
     final_review = {

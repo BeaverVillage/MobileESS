@@ -10,6 +10,7 @@ import torch
 from torch.nn import functional as F
 
 from .data import DailySample, event_feature_matrix
+from .device import DEVICE, execution_device_metadata, sample_gpu_utilization_percent
 from .losses import burst_labels, negative_binomial_nll
 from .mass_head import pinball_loss, tweedie_deviance
 from .model import CMASSTPP, CMASSTPPConfig
@@ -30,6 +31,11 @@ class TrainingResult:
     final_training_loss: float
     variant: str
     seed: int
+    execution_device: str
+    device_name: str
+    peak_VRAM_bytes: int
+    epoch_runtime_seconds: list[float]
+    gpu_utilization_samples_percent: list[float]
 
 
 def inverse_softplus(value: float) -> float:
@@ -125,6 +131,9 @@ def train_cmass(
     if variant not in {"V19-A", "V19-B", "V19-C"}:
         raise ValueError(variant)
     torch.manual_seed(seed)
+    if DEVICE.type == "cuda":
+        torch.cuda.manual_seed_all(seed)
+        torch.cuda.reset_peak_memory_stats()
     np.random.seed(seed)
     config_values: dict[str, object] = {
         "k_max": k_max,
@@ -134,6 +143,7 @@ def train_cmass(
     config = CMASSTPPConfig(**config_values)
     model = CMASSTPP(config)
     _initialize_output_biases(model, samples, train_index)
+    model = model.to(DEVICE)
     pretraining_report: dict[str, object] = {
         "enabled": variant in {"V19-B", "V19-C"},
         "status": "NOT_REQUESTED_FOR_VARIANT",
@@ -162,7 +172,10 @@ def train_cmass(
     ]
     started = time.perf_counter()
     last_loss = float("nan")
+    epoch_runtimes: list[float] = []
+    utilization_samples: list[float] = []
     for epoch in range(epochs):
+        epoch_started = time.perf_counter()
         model.train()
         losses = []
         order = rng.permutation(train_index)
@@ -171,6 +184,10 @@ def train_cmass(
             batch_features, batch_ages, batch_macro, batch_mask = _batch(
                 samples, batch_index, macro_mean, macro_std
             )
+            batch_features = batch_features.to(DEVICE)
+            batch_ages = batch_ages.to(DEVICE)
+            batch_macro = batch_macro.to(DEVICE)
+            batch_mask = batch_mask.to(DEVICE)
             output = model.forward_batch(
                 batch_features,
                 batch_ages,
@@ -181,10 +198,12 @@ def train_cmass(
             target = torch.tensor(
                 [samples[int(index)].daily_mass_GPU_h for index in batch_index],
                 dtype=torch.float32,
+                device=DEVICE,
             )
             target_count = torch.tensor(
                 [len(samples[int(index)].target_event_mass_GPU_h) for index in batch_index],
                 dtype=torch.float32,
+                device=DEVICE,
             )
             mass_loss = tweedie_deviance(target, output["mean"], variance_power)
             quantile_loss = pinball_loss(target, output["q50"], 0.5) + pinball_loss(
@@ -193,7 +212,7 @@ def train_cmass(
             count_loss = negative_binomial_nll(
                 target_count, output["count_mean"], output["count_dispersion"]
             )
-            burst_loss = torch.zeros(())
+            burst_loss = torch.zeros((), device=DEVICE)
             if variant == "V19-C":
                 burst_loss = F.cross_entropy(
                     output["burst_logits"], burst_labels(target, p50, p90)
@@ -203,15 +222,15 @@ def train_cmass(
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
             optimizer.step()
-            losses.append(float(loss.detach()))
+            losses.append(float(loss.detach().cpu()))
         # Deterministic sparse event-set supervision: all events on selected days,
         # all K_max queries, and no target mass truncation.
         for index in event_subset:
             sample = samples[int(index)]
             output = model.forward_one(
-                torch.from_numpy(sample.micro_event_features),
-                torch.from_numpy(sample.micro_event_ages_h),
-                _macro(sample, macro_mean, macro_std),
+                torch.from_numpy(sample.micro_event_features).to(DEVICE),
+                torch.from_numpy(sample.micro_event_ages_h).to(DEVICE),
+                _macro(sample, macro_mean, macro_std).to(DEVICE),
                 decode_events=True,
             )
             n = len(sample.target_event_mass_GPU_h)
@@ -224,15 +243,15 @@ def train_cmass(
                 actual_order = np.argsort(sample.target_event_time_h, kind="mergesort")
                 predicted_order = selected[torch.argsort(output["arrival_h"][0, selected])]
                 length = min(len(actual_order), len(predicted_order))
-                ai = torch.from_numpy(actual_order[:length]).long()
+                ai = torch.from_numpy(actual_order[:length]).long().to(DEVICE)
                 pi = predicted_order[:length]
                 event_loss = (
-                    torch.abs(output["arrival_h"][0, pi] - torch.from_numpy(sample.target_event_time_h)[ai]).mean() / 24.0
-                    + F.cross_entropy(output["tier_logits"][0, pi], torch.from_numpy(sample.target_event_tier)[ai])
-                    + F.cross_entropy(output["latency_logits"][0, pi], torch.from_numpy(sample.target_event_latency)[ai])
+                    torch.abs(output["arrival_h"][0, pi] - torch.from_numpy(sample.target_event_time_h).to(DEVICE)[ai]).mean() / 24.0
+                    + F.cross_entropy(output["tier_logits"][0, pi], torch.from_numpy(sample.target_event_tier).to(DEVICE)[ai])
+                    + F.cross_entropy(output["latency_logits"][0, pi], torch.from_numpy(sample.target_event_latency).to(DEVICE)[ai])
                     + torch.abs(
                         torch.log1p(output["event_mass_mean"][0, pi])
-                        - torch.log1p(torch.from_numpy(sample.target_event_mass_GPU_h)[ai])
+                        - torch.log1p(torch.from_numpy(sample.target_event_mass_GPU_h).to(DEVICE)[ai])
                     ).mean()
                 )
             else:
@@ -243,6 +262,13 @@ def train_cmass(
             torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
             optimizer.step()
         last_loss = float(np.mean(losses))
+        if DEVICE.type == "cuda":
+            torch.cuda.synchronize()
+        epoch_runtimes.append(float(time.perf_counter() - epoch_started))
+        utilization = sample_gpu_utilization_percent()
+        if utilization is not None:
+            utilization_samples.append(utilization)
+    device_meta = execution_device_metadata()
     return TrainingResult(
         model=model,
         macro_mean=macro_mean,
@@ -256,6 +282,11 @@ def train_cmass(
         final_training_loss=last_loss,
         variant=variant,
         seed=seed,
+        execution_device=str(device_meta["execution_device"]),
+        device_name=str(device_meta["device_name"]),
+        peak_VRAM_bytes=int(torch.cuda.max_memory_allocated()) if DEVICE.type == "cuda" else 0,
+        epoch_runtime_seconds=epoch_runtimes,
+        gpu_utilization_samples_percent=utilization_samples,
     )
 
 
@@ -271,34 +302,34 @@ def predict_cmass(
         for index in indices:
             sample = samples[int(index)]
             output = result.model.forward_one(
-                torch.from_numpy(sample.micro_event_features),
-                torch.from_numpy(sample.micro_event_ages_h),
-                _macro(sample, result.macro_mean, result.macro_std),
+                torch.from_numpy(sample.micro_event_features).to(DEVICE),
+                torch.from_numpy(sample.micro_event_ages_h).to(DEVICE),
+                _macro(sample, result.macro_mean, result.macro_std).to(DEVICE),
                 decode_events=decode_events,
             )
             record: dict[str, object] = {
                 "index": int(index),
                 "date": sample.date,
-                "mean": float(output["mean"][0]),
-                "q50": float(output["q50"][0]),
-                "q90": float(output["q90"][0]),
-                "count_mean": float(output["count_mean"][0]),
-                "burst_probability": torch.softmax(output["burst_logits"], -1)[0].numpy(),
+                "mean": float(output["mean"][0].detach().cpu()),
+                "q50": float(output["q50"][0].detach().cpu()),
+                "q90": float(output["q90"][0].detach().cpu()),
+                "count_mean": float(output["count_mean"][0].detach().cpu()),
+                "burst_probability": torch.softmax(output["burst_logits"], -1)[0].detach().cpu().numpy(),
             }
             if decode_events:
                 query_count = output["activity_logit"].shape[-1]
                 count = min(query_count, max(0, int(round(record["count_mean"]))))
                 activity = output["activity_logit"][0]
-                selected = torch.topk(activity, k=count, sorted=False).indices if count else torch.zeros(0, dtype=torch.long)
+                selected = torch.topk(activity, k=count, sorted=False).indices if count else torch.zeros(0, dtype=torch.long, device=DEVICE)
                 record.update(
                     {
-                        "arrival_h_all": output["arrival_h"][0].numpy(),
-                        "tier_probability_all": torch.softmax(output["tier_logits"][0], -1).numpy(),
-                        "latency_probability_all": torch.softmax(output["latency_logits"][0], -1).numpy(),
-                        "event_mass_mean_all": output["event_mass_mean"][0].numpy(),
-                        "event_mass_q50_all": output["event_mass_q50"][0].numpy(),
-                        "event_mass_q90_all": output["event_mass_q90"][0].numpy(),
-                        "selected_index": selected.numpy(),
+                        "arrival_h_all": output["arrival_h"][0].detach().cpu().numpy(),
+                        "tier_probability_all": torch.softmax(output["tier_logits"][0], -1).detach().cpu().numpy(),
+                        "latency_probability_all": torch.softmax(output["latency_logits"][0], -1).detach().cpu().numpy(),
+                        "event_mass_mean_all": output["event_mass_mean"][0].detach().cpu().numpy(),
+                        "event_mass_q50_all": output["event_mass_q50"][0].detach().cpu().numpy(),
+                        "event_mass_q90_all": output["event_mass_q90"][0].detach().cpu().numpy(),
+                        "selected_index": selected.detach().cpu().numpy(),
                         "mass_identity_mean_error": float(abs(output["event_mass_mean"].sum() - output["mean"][0])),
                         "mass_identity_q50_error": float(abs(output["event_mass_q50"].sum() - output["q50"][0])),
                         "mass_identity_q90_error": float(abs(output["event_mass_q90"].sum() - output["q90"][0])),

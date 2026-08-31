@@ -135,6 +135,26 @@ class V19ArtifactTests(unittest.TestCase):
         self.assertEqual(self.reproduction["K_max_training_observed"], 10012)
         self.assertIn("no target-event truncation", self.reproduction["KMAX_resolution"])
 
+    def test_target_mass_views_preserve_daily_master(self) -> None:
+        for key in (
+            "daily_master_mass_identity_max_abs_error_GPU_h",
+            "daily_slot_mass_identity_max_abs_error_GPU_h",
+            "daily_tier_mass_identity_max_abs_error_GPU_h",
+        ):
+            self.assertLessEqual(self.reproduction[key], 1e-8, key)
+
+    def test_cuda_execution_device_only(self) -> None:
+        report = json.loads(
+            (OUT / "V19_EVENT_ENCODER_PRETRAINING_REPORT.json").read_text(encoding="utf-8")
+        )
+        correction = report["execution_correction"]
+        self.assertEqual(correction["EXECUTION_DEVICE_CHANGE_ONLY"], "CPU_TO_CUDA")
+        self.assertEqual(correction["RESULT_BASED_RETUNING"], 0)
+        self.assertFalse(correction["final_table_mixes_CPU_and_CUDA_deep_folds"])
+        self.assertTrue(report["runs"])
+        self.assertTrue(all(run["execution_device"] == "cuda:0" for run in report["runs"]))
+        self.assertTrue(all(run["peak_VRAM_bytes"] > 0 for run in report["runs"]))
+
     def test_april_firewall(self) -> None:
         self.assertEqual(self.april["April_target_reads_before_freeze"], 0)
         self.assertEqual(self.april["April_reads_for_model_selection_or_tuning"], 0)
