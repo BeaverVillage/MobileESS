@@ -1,0 +1,390 @@
+{
+  "June_result_content_reads": 0,
+  "June_scientific_input_reads": 0,
+  "May_result_content_reads": 0,
+  "May_scientific_input_reads": 0,
+  "OpenDSS_calls_inside_Benders": 0,
+  "arbitrary_flexible_scaling_calls": 0,
+  "artifact_id": "V17_EXTERNAL_H100_SCHEMA_AUDIT_V1",
+  "concept_firewall": {
+    "GPU_utilization_percentage_is_GPU_allocation_fraction": false,
+    "MIG_2g20gb_is_Kestrel_2_of_4_GPU_request": false,
+    "time_slicing_is_Kestrel_co_residency": false
+  },
+  "datasets": {
+    "EUROSYS_UNTANGLING_GPU_POWER": {
+      "fields": {
+        "CPU_package_power": {
+          "classification": "NOT_AVAILABLE",
+          "note": "Instrumentation or configuration is declared by code, but the downloaded data and bench-res directories contain no measurements."
+        },
+        "GPU_index_device_identity": {
+          "classification": "NOT_AVAILABLE",
+          "note": "Instrumentation or configuration is declared by code, but the downloaded data and bench-res directories contain no measurements."
+        },
+        "GPU_utilization": {
+          "classification": "NOT_AVAILABLE",
+          "note": "Instrumentation or configuration is declared by code, but the downloaded data and bench-res directories contain no measurements."
+        },
+        "MIG_instance_ID": {
+          "classification": "CONFIGURATION_METADATA",
+          "note": "Runtime GI/CI/MIG UUID plumbing in experiment scripts; no recorded result values."
+        },
+        "MIG_slice_configuration": {
+          "classification": "CONFIGURATION_METADATA",
+          "note": "GI/CI profile enumeration and creation logic in experiment scripts; no result rows."
+        },
+        "active_GPU_count": {
+          "classification": "NOT_AVAILABLE",
+          "note": "Instrumentation or configuration is declared by code, but the downloaded data and bench-res directories contain no measurements."
+        },
+        "batch_concurrency": {
+          "classification": "CONFIGURATION_METADATA",
+          "note": "Container/pod and MIG complement loops define concurrency settings."
+        },
+        "concurrent_process_container_count": {
+          "classification": "NOT_AVAILABLE",
+          "note": "Instrumentation or configuration is declared by code, but the downloaded data and bench-res directories contain no measurements."
+        },
+        "experiment_session_ID": {
+          "classification": "CONFIGURATION_METADATA",
+          "note": "Expected filenames and labels in figure scripts; source CSVs absent."
+        },
+        "host_system_power": {
+          "classification": "NOT_AVAILABLE",
+          "note": "Instrumentation or configuration is declared by code, but the downloaded data and bench-res directories contain no measurements."
+        },
+        "idle_baseline": {
+          "classification": "NOT_AVAILABLE",
+          "note": "Instrumentation or configuration is declared by code, but the downloaded data and bench-res directories contain no measurements."
+        },
+        "idle_state": {
+          "classification": "NOT_AVAILABLE",
+          "note": "Instrumentation or configuration is declared by code, but the downloaded data and bench-res directories contain no measurements."
+        },
+        "memory_utilization": {
+          "classification": "NOT_AVAILABLE",
+          "note": "Instrumentation or configuration is declared by code, but the downloaded data and bench-res directories contain no measurements."
+        },
+        "node_count": {
+          "classification": "NOT_AVAILABLE",
+          "note": "Instrumentation or configuration is declared by code, but the downloaded data and bench-res directories contain no measurements."
+        },
+        "per_GPU_instantaneous_power": {
+          "classification": "NOT_AVAILABLE",
+          "note": "Instrumentation or configuration is declared by code, but the downloaded data and bench-res directories contain no measurements."
+        },
+        "power_cap": {
+          "classification": "CONFIGURATION_METADATA",
+          "note": "350W H100 PCIe and 400W H100 NVL labels in figure code."
+        },
+        "powered_GPU_count": {
+          "classification": "NOT_AVAILABLE",
+          "note": "Instrumentation or configuration is declared by code, but the downloaded data and bench-res directories contain no measurements."
+        },
+        "requested_GPU_count": {
+          "classification": "NOT_AVAILABLE",
+          "note": "Instrumentation or configuration is declared by code, but the downloaded data and bench-res directories contain no measurements."
+        },
+        "time_slicing_mode": {
+          "classification": "CONFIGURATION_METADATA",
+          "note": "Docker and Kubernetes time-slicing experiment definitions."
+        },
+        "timestamp": {
+          "classification": "NOT_AVAILABLE",
+          "note": "Instrumentation or configuration is declared by code, but the downloaded data and bench-res directories contain no measurements."
+        },
+        "workload_ID": {
+          "classification": "CONFIGURATION_METADATA",
+          "note": "Blender/HPCG/LLaMA/YOLO/GPU-burn experiment definitions."
+        }
+      },
+      "raw_telemetry_file_count": 0,
+      "schema_is_fit_capable": false
+    },
+    "SCIENTIFIC_DATA_H100_B200_HIGH_RESOLUTION": {
+      "fields": {
+        "CPU_package_power": {
+          "classification": "NOT_AVAILABLE",
+          "note": "cpu_power_W column exists but is empty in all audited H100 node CSVs."
+        },
+        "GPU_index_device_identity": {
+          "classification": "DIRECT_MEASUREMENT",
+          "fields": [
+            "gpu0..gpu7 column identity"
+          ]
+        },
+        "GPU_utilization": {
+          "classification": "DIRECT_MEASUREMENT",
+          "fields": [
+            "gpu0_utilization_percent..gpu7_utilization_percent"
+          ]
+        },
+        "MIG_instance_ID": {
+          "classification": "NOT_AVAILABLE"
+        },
+        "MIG_slice_configuration": {
+          "classification": "NOT_AVAILABLE"
+        },
+        "active_GPU_count": {
+          "classification": "NOT_AVAILABLE",
+          "note": "Eight device channels exist; no causal active/allocation count field."
+        },
+        "batch_concurrency": {
+          "classification": "CONFIGURATION_METADATA",
+          "fields": [
+            "BatchSize in filename"
+          ]
+        },
+        "concurrent_process_container_count": {
+          "classification": "NOT_AVAILABLE"
+        },
+        "experiment_session_ID": {
+          "classification": "CONFIGURATION_METADATA",
+          "fields": [
+            "one CSV file per recorded session/configuration"
+          ]
+        },
+        "host_system_power": {
+          "classification": "NOT_AVAILABLE"
+        },
+        "idle_baseline": {
+          "classification": "NOT_AVAILABLE"
+        },
+        "idle_state": {
+          "classification": "NOT_AVAILABLE",
+          "note": "No source-labeled idle state."
+        },
+        "memory_utilization": {
+          "classification": "DIRECT_MEASUREMENT",
+          "fields": [
+            "gpu0_mem_utilization..gpu7_mem_utilization"
+          ]
+        },
+        "node_count": {
+          "classification": "CONFIGURATION_METADATA",
+          "value": 1
+        },
+        "per_GPU_instantaneous_power": {
+          "classification": "DIRECT_MEASUREMENT",
+          "fields": [
+            "gpu0_power_W..gpu7_power_W"
+          ]
+        },
+        "power_cap": {
+          "classification": "DERIVED",
+          "derived_H100_W": 700.0,
+          "fields": [
+            "gpu*_power_W / gpu*_Power_TDP"
+          ]
+        },
+        "powered_GPU_count": {
+          "classification": "NOT_AVAILABLE"
+        },
+        "requested_GPU_count": {
+          "classification": "NOT_AVAILABLE"
+        },
+        "time_slicing_mode": {
+          "classification": "NOT_AVAILABLE"
+        },
+        "timestamp": {
+          "classification": "DIRECT_MEASUREMENT",
+          "fields": [
+            "timestamp"
+          ]
+        },
+        "workload_ID": {
+          "classification": "CONFIGURATION_METADATA",
+          "fields": [
+            "CSV path and filename"
+          ]
+        }
+      },
+      "schema": {
+        "archive_prefix": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/",
+        "csv_member_count": 95,
+        "h100_csv_member_count": 21,
+        "h100_members": [
+          {
+            "bytes": 19583758,
+            "crc32": "5fbcb1e6",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Image Generation Diffusion Models/H100/Batch_size_impact/Image_generation_H100_8GPU_Node_ModelSize128_ImageSize32_BatchSize128.csv"
+          },
+          {
+            "bytes": 20951259,
+            "crc32": "49dc8b2e",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Image Generation Diffusion Models/H100/Batch_size_impact/Image_generation_H100_8GPU_Node_ModelSize128_ImageSize32_BatchSize256.csv"
+          },
+          {
+            "bytes": 20123790,
+            "crc32": "765c4405",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Image Generation Diffusion Models/H100/Batch_size_impact/Image_generation_H100_8GPU_Node_ModelSize128_ImageSize32_BatchSize512.csv"
+          },
+          {
+            "bytes": 19182364,
+            "crc32": "e2febad2",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Image Generation Diffusion Models/H100/Image_size_impact/Image_generation_H100_8GPU_Node_ModelSize128_ImageSize16_BatchSize128.csv"
+          },
+          {
+            "bytes": 19583758,
+            "crc32": "5fbcb1e6",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Image Generation Diffusion Models/H100/Image_size_impact/Image_generation_H100_8GPU_Node_ModelSize128_ImageSize32_BatchSize128.csv"
+          },
+          {
+            "bytes": 19765730,
+            "crc32": "cac18688",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Image Generation Diffusion Models/H100/Image_size_impact/Image_generation_H100_8GPU_Node_ModelSize128_ImageSize64_BatchSize128.csv"
+          },
+          {
+            "bytes": 19583758,
+            "crc32": "5fbcb1e6",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Image Generation Diffusion Models/H100/Model_size_impact/Image_generation_H100_8GPU_Node_ModelSize128_ImageSize32_BatchSize128.csv"
+          },
+          {
+            "bytes": 19681341,
+            "crc32": "7ec55572",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Image Generation Diffusion Models/H100/Model_size_impact/Image_generation_H100_8GPU_Node_ModelSize256_ImageSize32_BatchSize128.csv"
+          },
+          {
+            "bytes": 19796532,
+            "crc32": "853a8310",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Image Generation Diffusion Models/H100/Model_size_impact/Image_generation_H100_8GPU_Node_ModelSize512_ImageSize32_BatchSize128.csv"
+          },
+          {
+            "bytes": 19902218,
+            "crc32": "e5a64e85",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Text Generation LLMs/H100/Batch_size/LLM_H100_8GPU_Node_Lamma8B_SeqLength2048_Deepspeedds_z3_BatchSize16.csv"
+          },
+          {
+            "bytes": 19795087,
+            "crc32": "31b559da",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Text Generation LLMs/H100/Batch_size/LLM_H100_8GPU_Node_Lamma8B_SeqLength2048_Deepspeedds_z3_BatchSize2.csv"
+          },
+          {
+            "bytes": 19918461,
+            "crc32": "8e544765",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Text Generation LLMs/H100/Batch_size/LLM_H100_8GPU_Node_Lamma8B_SeqLength2048_Deepspeedds_z3_BatchSize32.csv"
+          },
+          {
+            "bytes": 19886360,
+            "crc32": "36ff16e7",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Text Generation LLMs/H100/DeepSpeed_parallel_sitting/LLM_H100_8GPU_Node_Lamma8B_SeqLength2048_Deepspeedds_z1_BatchSize16.csv"
+          },
+          {
+            "bytes": 19897852,
+            "crc32": "51d2680a",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Text Generation LLMs/H100/DeepSpeed_parallel_sitting/LLM_H100_8GPU_Node_Lamma8B_SeqLength2048_Deepspeedds_z2_BatchSize16.csv"
+          },
+          {
+            "bytes": 19902218,
+            "crc32": "e5a64e85",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Text Generation LLMs/H100/DeepSpeed_parallel_sitting/LLM_H100_8GPU_Node_Lamma8B_SeqLength2048_Deepspeedds_z3_BatchSize16.csv"
+          },
+          {
+            "bytes": 19638855,
+            "crc32": "5fe71ab5",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Text Generation LLMs/H100/Model_Size/LLM_H100_8GPU_Node_Lamma1B_SeqLength2048_Deepspeedds_z3_BatchSize16.csv"
+          },
+          {
+            "bytes": 19831413,
+            "crc32": "c2ffd79d",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Text Generation LLMs/H100/Model_Size/LLM_H100_8GPU_Node_Lamma3B_SeqLength2048_Deepspeedds_z3_BatchSize16.csv"
+          },
+          {
+            "bytes": 19902218,
+            "crc32": "e5a64e85",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Text Generation LLMs/H100/Model_Size/LLM_H100_8GPU_Node_Lamma8B_SeqLength2048_Deepspeedds_z3_BatchSize16.csv"
+          },
+          {
+            "bytes": 19901075,
+            "crc32": "46a1ce5f",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Text Generation LLMs/H100/Sequance_length_cut/LLM_H100_8GPU_Node_Lamma8B_SeqLength1024_Deepspeedds_z3_BatchSize16.csv"
+          },
+          {
+            "bytes": 19902218,
+            "crc32": "e5a64e85",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Text Generation LLMs/H100/Sequance_length_cut/LLM_H100_8GPU_Node_Lamma8B_SeqLength2048_Deepspeedds_z3_BatchSize16.csv"
+          },
+          {
+            "bytes": 19893317,
+            "crc32": "db11a440",
+            "path": "High-resolution-AI-Data-Center-Training-Workloads-Dataset_FigShare/Node_Dataset/Text Generation LLMs/H100/Sequance_length_cut/LLM_H100_8GPU_Node_Lamma8B_SeqLength4096_Deepspeedds_z3_BatchSize16.csv"
+          }
+        ],
+        "h100_schema_columns": [
+          "timestamp",
+          "cpu_utilization_percent",
+          "cpu_freq_MHz",
+          "cpu_power_W",
+          "cpu_temp_C",
+          "gpu0_utilization_percent",
+          "gpu0_mem_utilization",
+          "gpu0_Power_TDP",
+          "gpu0_mem_used_MB",
+          "gpu0_mem_total_MB",
+          "gpu0_power_W",
+          "gpu0_temp_C",
+          "gpu1_utilization_percent",
+          "gpu1_mem_utilization",
+          "gpu1_Power_TDP",
+          "gpu1_mem_used_MB",
+          "gpu1_mem_total_MB",
+          "gpu1_power_W",
+          "gpu1_temp_C",
+          "gpu2_utilization_percent",
+          "gpu2_mem_utilization",
+          "gpu2_Power_TDP",
+          "gpu2_mem_used_MB",
+          "gpu2_mem_total_MB",
+          "gpu2_power_W",
+          "gpu2_temp_C",
+          "gpu3_utilization_percent",
+          "gpu3_mem_utilization",
+          "gpu3_Power_TDP",
+          "gpu3_mem_used_MB",
+          "gpu3_mem_total_MB",
+          "gpu3_power_W",
+          "gpu3_temp_C",
+          "gpu4_utilization_percent",
+          "gpu4_mem_utilization",
+          "gpu4_Power_TDP",
+          "gpu4_mem_used_MB",
+          "gpu4_mem_total_MB",
+          "gpu4_power_W",
+          "gpu4_temp_C",
+          "gpu5_utilization_percent",
+          "gpu5_mem_utilization",
+          "gpu5_Power_TDP",
+          "gpu5_mem_used_MB",
+          "gpu5_mem_total_MB",
+          "gpu5_power_W",
+          "gpu5_temp_C",
+          "gpu6_utilization_percent",
+          "gpu6_mem_utilization",
+          "gpu6_Power_TDP",
+          "gpu6_mem_used_MB",
+          "gpu6_mem_total_MB",
+          "gpu6_power_W",
+          "gpu6_temp_C",
+          "gpu7_utilization_percent",
+          "gpu7_mem_utilization",
+          "gpu7_Power_TDP",
+          "gpu7_mem_used_MB",
+          "gpu7_mem_total_MB",
+          "gpu7_power_W",
+          "gpu7_temp_C"
+        ],
+        "h100_unique_content_count_by_crc32": 16,
+        "node_csv_member_count": 42,
+        "unique_header_count": 3
+      },
+      "schema_is_fit_capable_for_allocation_or_sharing_power": false,
+      "schema_is_fit_capable_for_utilization_power_response": true
+    }
+  },
+  "effect_selected_power_parameters": 0,
+  "grid_benefit_selected_power_parameters": 0,
+  "remaining_April_day_runs": 0,
+  "rowwise_external_to_Kestrel_merges": 0,
+  "status": "PASS_SCHEMA_AUDIT_WITH_EUROSYS_RAW_TELEMETRY_ABSENT"
+}

@@ -1,0 +1,77 @@
+{
+  "Dataset312_kappa_changes": 0,
+  "June_result_content_reads": 0,
+  "June_scientific_input_reads": 0,
+  "May_result_content_reads": 0,
+  "May_scientific_input_reads": 0,
+  "OpenDSS_calls_inside_Benders": 0,
+  "absolute_external_kW_may_replace_Dataset312_kappa": false,
+  "arbitrary_flexible_scaling_calls": 0,
+  "artifact_id": "V17_EXTERNAL_H100_HARDWARE_COMPATIBILITY_V1",
+  "effect_selected_power_parameters": 0,
+  "grid_benefit_selected_power_parameters": 0,
+  "matrix": [
+    {
+      "CPU_platform": "two CPU sockets; exact CPU model not encoded locally",
+      "GPU_SKU": "NVIDIA H100; exact SKU/form factor not encoded locally",
+      "GPU_interconnect": "NOT_ENCODED_LOCALLY",
+      "GPUs_per_node": 4,
+      "idle_subtraction": "4*72.5 W GPU plus 2*64.1 W CPU-socket constants per node",
+      "measured_power_boundary": "sum per-GPU NVML board power + CPU RAPL package power",
+      "memory_SKU": "NOT_ENCODED_LOCALLY",
+      "power_cap": "NOT_ENCODED_LOCALLY",
+      "source": "Dataset312",
+      "system_architecture": "NLR Kestrel node",
+      "workload": "full-node Llama2-70B LoRA and Stable Diffusion training; Llama3 inference"
+    },
+    {
+      "CPU_platform": "NOT_ENCODED_LOCALLY",
+      "GPU_SKU": "H100 PCIe 80GB and H100 NVL 94GB",
+      "GPU_interconnect": "NVL only for H100-NVL experiments; otherwise not encoded",
+      "GPUs_per_node": "1 and 2 in local figure-source labels",
+      "idle_subtraction": "figure logic exists but raw measurements absent",
+      "measured_power_boundary": "scripts declare DCGM device power and IPMI platform power",
+      "memory_SKU": "80GB/94GB",
+      "power_cap": "350W/400W",
+      "source": "EuroSys artifact",
+      "system_architecture": "multiple experimental platforms",
+      "workload": "MIG/time-slicing/concurrent benchmark experiments"
+    },
+    {
+      "CPU_platform": "Intel Xeon 208 vCPU",
+      "GPU_SKU": "H100 SXM 80GB",
+      "GPU_interconnect": "NOT_ENCODED_LOCALLY",
+      "GPUs_per_node": 8,
+      "idle_subtraction": "no explicit idle state or idle baseline",
+      "measured_power_boundary": "per-GPU pynvml board power; CPU power columns empty in H100 CSVs",
+      "memory_SKU": "80GB",
+      "power_cap": "700W derived reproducibly from reported W and percent-TDP fields",
+      "source": "Scientific Data H100",
+      "system_architecture": "8-GPU data-center node",
+      "workload": "single full-node diffusion or LLM training session"
+    }
+  ],
+  "relationships": [
+    {
+      "classification": "QUALITATIVE_ONLY",
+      "from": "EuroSys artifact",
+      "reason": "H100 PCIe/NVL hardware and power caps differ or are unverified, and the downloaded artifact omits all raw sharing telemetry.",
+      "to": "Dataset312"
+    },
+    {
+      "classification": "DIMENSIONLESS_RESPONSE_TRANSFER_ONLY",
+      "from": "Scientific Data H100",
+      "reason": "H100 identity overlaps, but 8x SXM/700W, CPU and power boundary differ from Dataset312's 4-GPU NVML+RAPL incremental node boundary.",
+      "to": "Dataset312"
+    },
+    {
+      "classification": "INCOMPATIBLE",
+      "from": "EuroSys artifact",
+      "reason": "Sharing data are absent locally and the encoded H100 variants (PCIe/NVL 350/400W) differ from the Scientific Data SXM 700W platform.",
+      "to": "Scientific Data H100"
+    }
+  ],
+  "remaining_April_day_runs": 0,
+  "rowwise_external_to_Kestrel_merges": 0,
+  "status": "PASS_FAIL_CLOSED_NO_DIRECT_EXTERNAL_ABSOLUTE_KW_TRANSFER"
+}
