@@ -1,0 +1,140 @@
+{
+  "actions_not_run": [
+    "Apr12 B2 replay",
+    "AC cut construction",
+    "7-day regression",
+    "remaining April",
+    "May",
+    "June"
+  ],
+  "artifact_id": "V17_APR12_B2_AC_RESTORATION_CONTROL_FLOW_TRACE_V1",
+  "authority_audit": {
+    "available_test_scope": "scalar deterministic non-scientific fixture only",
+    "explicit_prior_design_requirement": "all B0-B3 use same AC restoration protocol",
+    "frozen_K_MAX_found": false,
+    "frozen_cut_guard_rule_found": false,
+    "frozen_local_trust_region_found": false,
+    "policy_conclusion": "AMBIGUOUS/INCOMPLETE: common protocol was requested, but the frozen scientific operator contract and parameters are absent",
+    "required_cut_validation_exists": false,
+    "required_cut_validation_path": "dayahead/artifacts/v17_candidate/V17_AC_RESTORATION_CUT_VALIDATION.json",
+    "required_formal_contract_exists": false,
+    "required_formal_contract_path": "dayahead/artifacts/v17_candidate/V17_AC_RESTORATION_OUTER_LOOP_CONTRACT.json",
+    "scientific_all_case_restoration_test_exists": false
+  },
+  "call_graph": [
+    {
+      "executed": true,
+      "result": "OPTIMAL",
+      "source": "dayahead/v17_v5_current_repair.py:658",
+      "step": "B2 optimization"
+    },
+    {
+      "executed": true,
+      "result": "3180d93525fa48cfb4b88d43f15fd3e981619cdfa0a54d8c8252009479a8ff94",
+      "source": "dayahead/v17_v5_current_repair.py:668",
+      "step": "schedule serialization"
+    },
+    {
+      "executed": true,
+      "result": "FAIL",
+      "source": "dayahead/v17_v5_current_repair.py:670",
+      "step": "Primary Fresh OpenDSS"
+    },
+    {
+      "executed": "SUMMARY_ONLY",
+      "result": "two voltage violations counted, but no dispatchable bus/phase/slot violation object serialized",
+      "source": "dayahead/v17_deferrability_april.py:292",
+      "step": "violation parser"
+    },
+    {
+      "executed": false,
+      "result": "no dispatcher or case-eligibility policy in scientific runner",
+      "source": null,
+      "step": "restoration eligibility check"
+    },
+    {
+      "executed": false,
+      "result": "only non-scientific scalar fixture exists",
+      "source": null,
+      "step": "restoration cut builder"
+    },
+    {
+      "executed": false,
+      "result": "not registered",
+      "source": null,
+      "step": "re-optimization callback"
+    },
+    {
+      "executed": false,
+      "result": "not reached",
+      "source": null,
+      "step": "second Primary Fresh OpenDSS"
+    }
+  ],
+  "case": "B2",
+  "classification": "V17_AC_RESTORATION_AUTHORITY_AMBIGUOUS",
+  "counters": {
+    "AIDC_site_changes": 0,
+    "Fresh_OpenDSS_calls": 0,
+    "June_result_content_reads": 0,
+    "June_scientific_input_reads": 0,
+    "May_result_content_reads": 0,
+    "May_scientific_input_reads": 0,
+    "OpenDSS_calls_inside_Benders": 0,
+    "PF_changes": 0,
+    "PUE_changes": 0,
+    "RCMQT_retraining_calls": 0,
+    "beta_changes": 0,
+    "eta_FLEX_created": 0,
+    "flexible_power_scale_tuning_calls": 0,
+    "kappa_changes": 0,
+    "optimizer_calls": 0,
+    "remaining_April_day_runs": 0,
+    "whole_facility_flexible_share_assumptions": 0
+  },
+  "implementation_evidence": {
+    "Fresh_AC_summary_runner": {
+      "bytes": 28754,
+      "path": "dayahead/v17_deferrability_april.py",
+      "sha256": "7d4866fa5735b4bf19f6ca0f0508ff1b9dd1fc8fd48dc4b821afac74dd2d980a"
+    },
+    "non_scientific_fixture": {
+      "bytes": 2424,
+      "path": "dayahead/v17_ac_restoration_regression_fixture.py",
+      "sha256": "652bb7a30516d39e4fab454d64c4e66f4211d7477a3aac53a58c27457736ca12"
+    },
+    "scientific_runner": {
+      "bytes": 39661,
+      "path": "dayahead/v17_v5_current_repair.py",
+      "sha256": "febcfffefdc2f28e0a174d78a609f3bab7c8d8fb878fc0775250fe884bbe6cd6"
+    }
+  },
+  "known_state": {
+    "AC_restoration_iterations": 0,
+    "AC_restoration_status": "PRIMARY_FAIL_STOP_NO_SILENT_REPAIR",
+    "Vmax_pu": 1.0500161160111587,
+    "Vmin_pu": 0.9686931294976168,
+    "phase_current_violation_count": 0,
+    "planning_hard_feasible": true,
+    "primary_Fresh_AC_FAIL": true,
+    "transformer_kVA_violation_count": 0,
+    "voltage_violation_count": 2
+  },
+  "operating_day": "2025-04-12",
+  "preserved_daily_artifact_sha256": "2aab87ebf81936a6237bf51a60902364a79386e2a66e5ea725910e5637e05824",
+  "preserved_schedule_sha256": "3180d93525fa48cfb4b88d43f15fd3e981619cdfa0a54d8c8252009479a8ff94",
+  "requested_trace_fields": {
+    "B2_eligible": null,
+    "Fresh_AC_returned_FAIL": true,
+    "callback_registered": false,
+    "cut_builder_invoked": false,
+    "max_iteration_value": null,
+    "resolve_invoked": false,
+    "restoration_enabled_flag": null,
+    "stop_condition": "PRIMARY_FAIL_STOP_NO_SILENT_REPAIR",
+    "violation_passed_to_restoration_dispatcher": false,
+    "voltage_violation_object_created": false,
+    "voltage_violation_summary_created": true
+  },
+  "status": "V17_AC_RESTORATION_AUTHORITY_AMBIGUOUS"
+}
