@@ -1,0 +1,544 @@
+{
+  "artifact_id": "V18R1_KESTREL_GPU_ACCOUNTING_SCHEMA_AUDIT_V1",
+  "source": {
+    "source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+    "source_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+    "members": [
+      {
+        "month": 202408,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+        "rows": 428165,
+        "H100_rows": 20192
+      },
+      {
+        "month": 202409,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+        "rows": 405655,
+        "H100_rows": 26532
+      },
+      {
+        "month": 202410,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+        "rows": 273571,
+        "H100_rows": 21679
+      },
+      {
+        "month": 202411,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+        "rows": 248055,
+        "H100_rows": 26933
+      },
+      {
+        "month": 202412,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+        "rows": 290267,
+        "H100_rows": 41814
+      },
+      {
+        "month": 202501,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+        "rows": 400896,
+        "H100_rows": 96880
+      },
+      {
+        "month": 202502,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+        "rows": 453728,
+        "H100_rows": 22295
+      },
+      {
+        "month": 202503,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+        "rows": 406258,
+        "H100_rows": 86148
+      },
+      {
+        "month": 202504,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=4/kestrel_jobs_202504_0.parquet",
+        "rows": 987663,
+        "H100_rows": 65762
+      }
+    ],
+    "all_rows_Aug2024_Apr2025": 3894258,
+    "H100_rows_Aug2024_Apr2025": 408235,
+    "schema_union": [
+      "account_hash",
+      "array_pos",
+      "array_range",
+      "avg_mem_eff",
+      "consumed_energy_joules",
+      "consumed_energy_raw_joules",
+      "consumed_energy_raw_watt_hours",
+      "cpu_eff",
+      "cpu_energy_tdp_estimated_max_watt_hours",
+      "cpu_energy_tdp_estimated_used_watt_hours",
+      "cpu_used",
+      "day",
+      "day_of_week",
+      "end_time",
+      "gpu_nodes_occupied",
+      "gpus_requested",
+      "hour",
+      "id",
+      "job_id",
+      "job_type_hash",
+      "jobs_shared",
+      "max_mem_eff",
+      "memory_req",
+      "min_mem_eff",
+      "minute",
+      "name_hash",
+      "nodelist",
+      "nodes_req",
+      "nodes_shared",
+      "nodes_used",
+      "partition",
+      "processors_req",
+      "processors_used",
+      "python_job",
+      "qos",
+      "queue_wait",
+      "reframe_job",
+      "shared_job_count",
+      "start_time",
+      "state",
+      "state_simple",
+      "submit_line_hash",
+      "submit_script_hash",
+      "submit_time",
+      "user_hash",
+      "wallclock_req",
+      "wallclock_used",
+      "work_dir_hash"
+    ],
+    "schema_intersection": [
+      "account_hash",
+      "array_pos",
+      "array_range",
+      "avg_mem_eff",
+      "consumed_energy_joules",
+      "consumed_energy_raw_joules",
+      "consumed_energy_raw_watt_hours",
+      "cpu_eff",
+      "cpu_energy_tdp_estimated_max_watt_hours",
+      "cpu_energy_tdp_estimated_used_watt_hours",
+      "cpu_used",
+      "day",
+      "day_of_week",
+      "end_time",
+      "gpu_nodes_occupied",
+      "gpus_requested",
+      "hour",
+      "id",
+      "job_id",
+      "job_type_hash",
+      "jobs_shared",
+      "max_mem_eff",
+      "memory_req",
+      "min_mem_eff",
+      "minute",
+      "name_hash",
+      "nodelist",
+      "nodes_req",
+      "nodes_shared",
+      "nodes_used",
+      "partition",
+      "processors_req",
+      "processors_used",
+      "python_job",
+      "qos",
+      "queue_wait",
+      "reframe_job",
+      "shared_job_count",
+      "start_time",
+      "state",
+      "state_simple",
+      "submit_line_hash",
+      "submit_script_hash",
+      "submit_time",
+      "user_hash",
+      "wallclock_req",
+      "wallclock_used",
+      "work_dir_hash"
+    ],
+    "field_types": {
+      "account_hash": [
+        "string"
+      ],
+      "array_pos": [
+        "double"
+      ],
+      "array_range": [
+        "string"
+      ],
+      "avg_mem_eff": [
+        "double"
+      ],
+      "consumed_energy_joules": [
+        "string"
+      ],
+      "consumed_energy_raw_joules": [
+        "double"
+      ],
+      "consumed_energy_raw_watt_hours": [
+        "double"
+      ],
+      "cpu_eff": [
+        "double"
+      ],
+      "cpu_energy_tdp_estimated_max_watt_hours": [
+        "double"
+      ],
+      "cpu_energy_tdp_estimated_used_watt_hours": [
+        "double"
+      ],
+      "cpu_used": [
+        "duration[ns]",
+        "duration[us]"
+      ],
+      "day": [
+        "double"
+      ],
+      "day_of_week": [
+        "double"
+      ],
+      "end_time": [
+        "timestamp[us, tz=-06:00]",
+        "timestamp[us, tz=-07:00]",
+        "timestamp[us, tz=UTC]"
+      ],
+      "gpu_nodes_occupied": [
+        "double"
+      ],
+      "gpus_requested": [
+        "double"
+      ],
+      "hour": [
+        "double"
+      ],
+      "id": [
+        "string"
+      ],
+      "job_id": [
+        "int64"
+      ],
+      "job_type_hash": [
+        "string"
+      ],
+      "jobs_shared": [
+        "list<item: string>"
+      ],
+      "max_mem_eff": [
+        "double"
+      ],
+      "memory_req": [
+        "string"
+      ],
+      "min_mem_eff": [
+        "double"
+      ],
+      "minute": [
+        "double"
+      ],
+      "name_hash": [
+        "string"
+      ],
+      "nodelist": [
+        "list<item: string>"
+      ],
+      "nodes_req": [
+        "int64"
+      ],
+      "nodes_shared": [
+        "list<item: string>"
+      ],
+      "nodes_used": [
+        "int64"
+      ],
+      "partition": [
+        "string"
+      ],
+      "processors_req": [
+        "int64"
+      ],
+      "processors_used": [
+        "int64"
+      ],
+      "python_job": [
+        "bool"
+      ],
+      "qos": [
+        "string"
+      ],
+      "queue_wait": [
+        "duration[ns]"
+      ],
+      "reframe_job": [
+        "bool"
+      ],
+      "shared_job_count": [
+        "double"
+      ],
+      "start_time": [
+        "timestamp[us, tz=-06:00]",
+        "timestamp[us, tz=-07:00]",
+        "timestamp[us, tz=UTC]"
+      ],
+      "state": [
+        "string"
+      ],
+      "state_simple": [
+        "string"
+      ],
+      "submit_line_hash": [
+        "string"
+      ],
+      "submit_script_hash": [
+        "string"
+      ],
+      "submit_time": [
+        "timestamp[us, tz=-06:00]",
+        "timestamp[us, tz=-07:00]",
+        "timestamp[us, tz=UTC]"
+      ],
+      "user_hash": [
+        "string"
+      ],
+      "wallclock_req": [
+        "duration[ns]"
+      ],
+      "wallclock_used": [
+        "duration[ns]"
+      ],
+      "work_dir_hash": [
+        "string"
+      ]
+    }
+  },
+  "requested_fields": {
+    "gpus_requested": "PRESENT_REQUEST_QUANTITY",
+    "gpu_nodes_occupied": "PRESENT_NODE_COUNT_OCCUPIED",
+    "nodelist": "PRESENT_EXECUTION_NODELIST"
+  },
+  "allocation_fields": {
+    "AllocTRES": "ABSENT",
+    "tres_alloc": "ABSENT",
+    "gres_alloc": "ABSENT",
+    "allocated_GPU_identity": "ABSENT"
+  },
+  "series_semantics": {
+    "G_REQUESTED": "gpus_requested projected over retrospective execution interval",
+    "G_ALLOCATED_OBS": null,
+    "G_PHYSICAL_FEASIBLE": "nodelist-constrained source-request feasibility, after explicitly listed global conflict quarantine"
+  },
+  "risk_audit": {
+    "A1_duplicate_rows": {
+      "verdict": "PASS",
+      "duplicate_id_rows": 0,
+      "duplicate_exact_rows": 0
+    },
+    "A2_job_step_double_count": {
+      "verdict": "PASS",
+      "step_field_present": false,
+      "step_like_id_count": 0
+    },
+    "A3_requeue_duplicate_execution": {
+      "verdict": "NOT_APPLICABLE",
+      "explicit_requeue_field": false,
+      "duplicate_id_rows": 0
+    },
+    "A4_array_parent_child_double_count": {
+      "verdict": "PASS",
+      "array_execution_groups": 544,
+      "nonexecuting_parent_summary_groups": 31,
+      "executing_parent_plus_child_collision_groups": 0,
+      "interpretation": "null-array_pos parent summaries without executable start/end/GPU/node data are excluded by the valid execution filter; non-null array_pos rows are executed tasks"
+    },
+    "A5_non_H100_contamination": {
+      "verdict": "PASS",
+      "filter": "partition comma-token starts with gpu-h100"
+    },
+    "A6_other_subsystem_contamination": {
+      "verdict": "PASS",
+      "included_H100_partition_counts": {
+        "gpu-h100": 131522,
+        "gpu-h100-stdby": 105881,
+        "gpu-h100l": 1821,
+        "gpu-h100s": 36909,
+        "gpu-h100s-stdby": 85
+      }
+    },
+    "A7_nodelist_parsing_duplicate": {
+      "verdict": "PASS",
+      "rows_with_duplicate_node_identity": 0
+    },
+    "A8_timezone_DST_conversion": {
+      "verdict": "PASS",
+      "source_timezone_types": {
+        "account_hash": [
+          "string"
+        ],
+        "array_pos": [
+          "double"
+        ],
+        "array_range": [
+          "string"
+        ],
+        "avg_mem_eff": [
+          "double"
+        ],
+        "consumed_energy_joules": [
+          "string"
+        ],
+        "consumed_energy_raw_joules": [
+          "double"
+        ],
+        "consumed_energy_raw_watt_hours": [
+          "double"
+        ],
+        "cpu_eff": [
+          "double"
+        ],
+        "cpu_energy_tdp_estimated_max_watt_hours": [
+          "double"
+        ],
+        "cpu_energy_tdp_estimated_used_watt_hours": [
+          "double"
+        ],
+        "cpu_used": [
+          "duration[ns]",
+          "duration[us]"
+        ],
+        "day": [
+          "double"
+        ],
+        "day_of_week": [
+          "double"
+        ],
+        "end_time": [
+          "timestamp[us, tz=-06:00]",
+          "timestamp[us, tz=-07:00]",
+          "timestamp[us, tz=UTC]"
+        ],
+        "gpu_nodes_occupied": [
+          "double"
+        ],
+        "gpus_requested": [
+          "double"
+        ],
+        "hour": [
+          "double"
+        ],
+        "id": [
+          "string"
+        ],
+        "job_id": [
+          "int64"
+        ],
+        "job_type_hash": [
+          "string"
+        ],
+        "jobs_shared": [
+          "list<item: string>"
+        ],
+        "max_mem_eff": [
+          "double"
+        ],
+        "memory_req": [
+          "string"
+        ],
+        "min_mem_eff": [
+          "double"
+        ],
+        "minute": [
+          "double"
+        ],
+        "name_hash": [
+          "string"
+        ],
+        "nodelist": [
+          "list<item: string>"
+        ],
+        "nodes_req": [
+          "int64"
+        ],
+        "nodes_shared": [
+          "list<item: string>"
+        ],
+        "nodes_used": [
+          "int64"
+        ],
+        "partition": [
+          "string"
+        ],
+        "processors_req": [
+          "int64"
+        ],
+        "processors_used": [
+          "int64"
+        ],
+        "python_job": [
+          "bool"
+        ],
+        "qos": [
+          "string"
+        ],
+        "queue_wait": [
+          "duration[ns]"
+        ],
+        "reframe_job": [
+          "bool"
+        ],
+        "shared_job_count": [
+          "double"
+        ],
+        "start_time": [
+          "timestamp[us, tz=-06:00]",
+          "timestamp[us, tz=-07:00]",
+          "timestamp[us, tz=UTC]"
+        ],
+        "state": [
+          "string"
+        ],
+        "state_simple": [
+          "string"
+        ],
+        "submit_line_hash": [
+          "string"
+        ],
+        "submit_script_hash": [
+          "string"
+        ],
+        "submit_time": [
+          "timestamp[us, tz=-06:00]",
+          "timestamp[us, tz=-07:00]",
+          "timestamp[us, tz=UTC]"
+        ],
+        "user_hash": [
+          "string"
+        ],
+        "wallclock_req": [
+          "duration[ns]"
+        ],
+        "wallclock_used": [
+          "duration[ns]"
+        ],
+        "work_dir_hash": [
+          "string"
+        ]
+      },
+      "normalization": "all timestamps converted to UTC before AEST boundary clipping",
+      "negative_queue_intervals": 0
+    },
+    "A9_overlap_integration": {
+      "verdict": "PASS",
+      "GPU_hour_identity_abs_error": 4.656612873077393e-10,
+      "interval": "half-open [start,end)",
+      "same_timestamp_order": "release before start"
+    },
+    "A10_requested_vs_allocated_confusion": {
+      "verdict": "CONTRIBUTOR",
+      "reason": "V18 named a requested-over-execution integral as physical active occupancy despite no AllocTRES/GRES allocation field"
+    }
+  }
+}

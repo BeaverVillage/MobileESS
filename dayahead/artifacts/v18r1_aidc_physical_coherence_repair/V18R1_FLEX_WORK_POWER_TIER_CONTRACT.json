@@ -1,0 +1,34 @@
+{
+  "artifact_id": "V18R1_FLEX_WORK_POWER_TIER_CONTRACT_V1",
+  "model": "TRAINING_ONLY_CONSTANT_CONDITIONAL_MIXTURE_BASELINE",
+  "total_work": "W_F_TOTAL(t,b) from frozen causal forecast",
+  "tiers": [
+    "FULL_1",
+    "FULL_2",
+    "FULL_4",
+    "FULL_8",
+    "FULL_16",
+    "PARTIAL"
+  ],
+  "common_unit": "GPU_HOUR",
+  "full_tier_conversion": "node_hour = GPU_hour / 4; energy = node_hour * kappa_total_kW_per_active_node",
+  "partial_conversion": "energy = GPU_hour * 0.48563611660901085 kW/GPU",
+  "mixture": {
+    "FULL_1": 0.08272259217123983,
+    "FULL_2": 0.008632124976832764,
+    "FULL_4": 0.018137095725047313,
+    "FULL_8": 0.00964790154479891,
+    "FULL_16": 0.0012665240525035217,
+    "PARTIAL": 0.8795937615295777
+  },
+  "constraints": [
+    "pi_c >= 0",
+    "sum pi_c = 1",
+    "sum W_F_c = W_F_TOTAL"
+  ],
+  "fit_period": [
+    "2024-08-19",
+    "2025-03-31"
+  ],
+  "literature_target_reads": 0
+}

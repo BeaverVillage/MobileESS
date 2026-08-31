@@ -1,0 +1,1180 @@
+{
+  "artifact_id": "V18R1_STRUCTURAL_REFREEZE_FINAL_REVIEW_V1",
+  "result_classification": "B. V18R1_PASS_CAPACITY_TIMELINE_PARTIAL",
+  "ready": {
+    "artifact_id": "V18R1_READY_FLAGS_V1",
+    "RESULT_CLASSIFICATION": "B. V18R1_PASS_CAPACITY_TIMELINE_PARTIAL",
+    "STRUCTURAL_REFREEZE_READY": true,
+    "NEW_LOCKED_SCIENCE_RUN_READY": false,
+    "NEW_LOCKED_TEST_STATUS": "NEW_LOCKED_TEST_NOT_YET_AVAILABLE",
+    "KNOWN_QUEUE_EXTENSION_STATUS": "UNAVAILABLE",
+    "gates": {
+      "A1_accounting_semantics": "PASS_REQUESTED_ALLOCATED_PHYSICAL_SERIES_SEPARATED",
+      "A2_physical_execution_coherence": "PASS_REPAIRED_EXECUTION_PHYSICS_WITH_GLOBAL_CONFLICT_QUARANTINE",
+      "A3_capacity_timeline": "PARTIAL_OFFICIAL_EXPANSION_WITHOUT_PUBLIC_NODE_COUNT",
+      "B1_main_D1_causality": "PASS_CAUSAL_FORECAST_ONLY_SCOPE",
+      "B2_known_queue_extension": "NOT_AVAILABLE",
+      "C_node_power": "PASS_HYBRID_AUTHORITY",
+      "C2_forecast_power_tier": "PASS_POWER_TIER_MASS_COHERENCE",
+      "D_two_component_facility": "PASS_EXACT_TWO_COMPONENT_DECOMPOSITION",
+      "E_prospective_scheduler": "PASS_CONTRACT_PREFLIGHT_ONLY_NOT_EXECUTED"
+    },
+    "preservation_verification": {
+      "status": "PASS",
+      "failures": []
+    },
+    "firewall_counters": {
+      "B0_B1_B2_B3_calls": 0,
+      "OpenDSS_calls": 0,
+      "new_grid_science_result_calls": 0,
+      "future_realized_main_feature_reads": 0,
+      "literature_target_builder_reads": 0,
+      "grid_result_parameter_selection_calls": 0,
+      "workload_multiplier_fitting_to_benefit": 0,
+      "q99_5_u85_capacity_promotion": 0
+    }
+  },
+  "root_cause_hypotheses": [
+    {
+      "hypothesis": "static capacity wrong",
+      "evidence": "official 132-node October authority plus confirmed Dec/Jan VTO GPU buy-in of unpublished size; raw nodelist expands beyond 132 observed identities",
+      "verdict": "CONTRIBUTOR_CAPACITY_TIMELINE_PARTIAL"
+    },
+    {
+      "hypothesis": "requested vs allocated mismatch",
+      "evidence": "archive has gpus_requested and nodelist but no AllocTRES/GRES allocation field; 589.411 is requested quantity projected over execution",
+      "verdict": "PRIMARY_SEMANTIC_CORRECTION"
+    },
+    {
+      "hypothesis": "duplicate rows",
+      "evidence": {
+        "verdict": "PASS",
+        "duplicate_id_rows": 0,
+        "duplicate_exact_rows": 0
+      },
+      "verdict": "PASS"
+    },
+    {
+      "hypothesis": "job-step double count",
+      "evidence": {
+        "verdict": "PASS",
+        "step_field_present": false,
+        "step_like_id_count": 0
+      },
+      "verdict": "PASS_NOT_CONTRIBUTOR"
+    },
+    {
+      "hypothesis": "time overlap error",
+      "evidence": {
+        "identity_error": 4.656612873077393e-10
+      },
+      "verdict": "PASS_NOT_CONTRIBUTOR"
+    },
+    {
+      "hypothesis": "H100 node expansion",
+      "evidence": [
+        {
+          "date_or_period": "2024-08-19",
+          "claim": "NREL reported full Kestrel buildout completed in summer 2024",
+          "source": "https://www.nrel.gov/news/program/2024/kestrel-supercomputer-ready-to-energize-renewable-energy-research.html"
+        },
+        {
+          "date_or_period": "FY25 allocation / October 2024",
+          "installed_H100_nodes": 132,
+          "GPUs_per_node": 4,
+          "installed_GPU": 528,
+          "source": "https://www.nrel.gov/docs/gen/fy24/90033.pdf"
+        },
+        {
+          "date_or_period": "October 2024",
+          "installed_H100_nodes": 132,
+          "source": "https://www.nrel.gov/docs/fy25osti/91696.pdf"
+        },
+        {
+          "date_or_period": "December 2024 installation; January 2025 procurement completion",
+          "claim": "VTO Kestrel GPU buy-in/expanded capacity exists",
+          "additional_node_count": null,
+          "sources": [
+            "https://www.nrel.gov/docs/libraries/transportation/fy25-q3-vto-accomplishments-report.pdf",
+            "https://www.nrel.gov/docs/libraries/transportation/fy25-q1-vto-accomplishments-report.pdf"
+          ]
+        }
+      ],
+      "verdict": "CONFIRMED_EXPANSION_QUANTITY_UNRESOLVED"
+    },
+    {
+      "hypothesis": "other subsystem contamination",
+      "evidence": {
+        "verdict": "PASS",
+        "included_H100_partition_counts": {
+          "gpu-h100": 131522,
+          "gpu-h100-stdby": 105881,
+          "gpu-h100l": 1821,
+          "gpu-h100s": 36909,
+          "gpu-h100s-stdby": 85
+        }
+      },
+      "verdict": "PASS_NOT_CONTRIBUTOR"
+    }
+  ],
+  "physical_node_population": {
+    "distinct_nodes_entire_training": 156,
+    "monthly": {
+      "2024-08": {
+        "distinct_H100_nodelist_nodes": 130,
+        "new_first_seen_nodes": 130,
+        "last_seen_nodes": 0,
+        "max_concurrently_active_distinct_nodes": 128
+      },
+      "2024-09": {
+        "distinct_H100_nodelist_nodes": 130,
+        "new_first_seen_nodes": 0,
+        "last_seen_nodes": 0,
+        "max_concurrently_active_distinct_nodes": 129
+      },
+      "2024-10": {
+        "distinct_H100_nodelist_nodes": 132,
+        "new_first_seen_nodes": 2,
+        "last_seen_nodes": 0,
+        "max_concurrently_active_distinct_nodes": 130
+      },
+      "2024-11": {
+        "distinct_H100_nodelist_nodes": 130,
+        "new_first_seen_nodes": 0,
+        "last_seen_nodes": 0,
+        "max_concurrently_active_distinct_nodes": 130
+      },
+      "2024-12": {
+        "distinct_H100_nodelist_nodes": 154,
+        "new_first_seen_nodes": 22,
+        "last_seen_nodes": 0,
+        "max_concurrently_active_distinct_nodes": 127
+      },
+      "2025-01": {
+        "distinct_H100_nodelist_nodes": 154,
+        "new_first_seen_nodes": 2,
+        "last_seen_nodes": 0,
+        "max_concurrently_active_distinct_nodes": 150
+      },
+      "2025-02": {
+        "distinct_H100_nodelist_nodes": 154,
+        "new_first_seen_nodes": 0,
+        "last_seen_nodes": 1,
+        "max_concurrently_active_distinct_nodes": 153
+      },
+      "2025-03": {
+        "distinct_H100_nodelist_nodes": 155,
+        "new_first_seen_nodes": 0,
+        "last_seen_nodes": 28,
+        "max_concurrently_active_distinct_nodes": 153
+      }
+    },
+    "interpretation": "distinct/first-seen nodes are OBSERVED_USE_LOWER_BOUND only and are not promoted to installed capacity"
+  },
+  "physical_feasibility": {
+    "artifact_id": "V18R1_KESTREL_PHYSICAL_ALLOCATION_FEASIBILITY_V1",
+    "raw_series_semantics": "G_REQUESTED projected over retrospective execution; not direct AllocTRES observation",
+    "G_ALLOCATED_OBS_available": false,
+    "all_training_execution_rows": 276218,
+    "exact_uniform_nodelist_rows": 276183,
+    "ambiguous_or_not_identifiable_rows": 35,
+    "raw_ambiguous_feasibility": {
+      "ambiguous_row_count": 35,
+      "ambiguous_event_interval_count": 793,
+      "ambiguous_but_feasible_event_interval_count": 785,
+      "ambiguous_infeasible_event_interval_count": 8,
+      "ambiguous_15min_slot_count": 92,
+      "ambiguous_infeasible_15min_slot_count": 2,
+      "infeasible_details": [
+        {
+          "start_UTC": "2025-01-08T15:43:10+00:00",
+          "end_UTC": "2025-01-08T15:43:33+00:00",
+          "ambiguous_job_ids": [
+            "6527291",
+            "6527292",
+            "6527293"
+          ],
+          "involved_exact_job_ids": [
+            "6509653",
+            "6509654",
+            "6509793",
+            "6510176",
+            "6518752",
+            "6518778",
+            "6518780",
+            "6518801",
+            "6518806",
+            "6519710",
+            "6519722",
+            "6519791",
+            "6519796",
+            "6519808",
+            "6519810",
+            "6519815",
+            "6519828",
+            "6519834",
+            "6519835",
+            "6519846",
+            "6519856",
+            "6519858",
+            "6519867"
+          ],
+          "remaining_node_capacities": {
+            "x3103c0s21b0n0": 2,
+            "x3103c0s29b0n0": 2,
+            "x3104c0s29b0n0": 2,
+            "x3105c0s17b0n0": 0,
+            "x3106c0s5b0n0": 0,
+            "x3106c0s9b0n0": 3,
+            "x3110c0s9b0n0": 0,
+            "x3112c0s21b0n0": 0,
+            "x3112c0s41b0n0": 0,
+            "x3115c0s17b0n0": 1,
+            "x3115c0s37b0n0": -1
+          }
+        },
+        {
+          "start_UTC": "2025-01-08T15:43:33+00:00",
+          "end_UTC": "2025-01-08T15:44:38+00:00",
+          "ambiguous_job_ids": [
+            "6527291",
+            "6527292",
+            "6527293"
+          ],
+          "involved_exact_job_ids": [
+            "6509653",
+            "6509654",
+            "6509793",
+            "6510176",
+            "6518752",
+            "6518778",
+            "6518780",
+            "6518801",
+            "6518806",
+            "6519710",
+            "6519722",
+            "6519791",
+            "6519796",
+            "6519808",
+            "6519810",
+            "6519815",
+            "6519828",
+            "6519834",
+            "6519835",
+            "6519846",
+            "6519856",
+            "6519858",
+            "6519867"
+          ],
+          "remaining_node_capacities": {
+            "x3103c0s21b0n0": 2,
+            "x3103c0s29b0n0": 2,
+            "x3104c0s29b0n0": 2,
+            "x3105c0s17b0n0": 0,
+            "x3106c0s5b0n0": 0,
+            "x3106c0s9b0n0": 3,
+            "x3110c0s9b0n0": 0,
+            "x3112c0s21b0n0": 0,
+            "x3112c0s41b0n0": 0,
+            "x3115c0s17b0n0": 1,
+            "x3115c0s37b0n0": -1
+          }
+        },
+        {
+          "start_UTC": "2025-01-08T15:44:49+00:00",
+          "end_UTC": "2025-01-08T15:44:54+00:00",
+          "ambiguous_job_ids": [
+            "6527297",
+            "6527298",
+            "6527300"
+          ],
+          "involved_exact_job_ids": [
+            "6509653",
+            "6509654",
+            "6509793",
+            "6510176",
+            "6518752",
+            "6518778",
+            "6518801",
+            "6519710",
+            "6519722",
+            "6519791",
+            "6519796",
+            "6519810",
+            "6519815",
+            "6519828",
+            "6519834",
+            "6519835",
+            "6519846",
+            "6519856",
+            "6519858",
+            "6519867"
+          ],
+          "remaining_node_capacities": {
+            "x3103c0s21b0n0": 2,
+            "x3103c0s29b0n0": 2,
+            "x3104c0s29b0n0": 2,
+            "x3105c0s17b0n0": 0,
+            "x3106c0s5b0n0": 0,
+            "x3106c0s9b0n0": 3,
+            "x3110c0s29b0n0": 3,
+            "x3110c0s9b0n0": 0,
+            "x3112c0s41b0n0": 0,
+            "x3115c0s17b0n0": 1,
+            "x3115c0s37b0n0": -1
+          }
+        },
+        {
+          "start_UTC": "2025-01-08T15:44:57+00:00",
+          "end_UTC": "2025-01-08T15:46:23+00:00",
+          "ambiguous_job_ids": [
+            "6527301",
+            "6527302",
+            "6527303"
+          ],
+          "involved_exact_job_ids": [
+            "6509653",
+            "6509654",
+            "6509793",
+            "6510176",
+            "6518722",
+            "6518778",
+            "6518780",
+            "6518797",
+            "6518801",
+            "6518806",
+            "6519712",
+            "6519779",
+            "6519791",
+            "6519796",
+            "6519808",
+            "6519810",
+            "6519815",
+            "6519856",
+            "6519858",
+            "6519867"
+          ],
+          "remaining_node_capacities": {
+            "x3103c0s29b0n0": 2,
+            "x3104c0s29b0n0": 2,
+            "x3106c0s5b0n0": 0,
+            "x3106c0s9b0n0": 3,
+            "x3110c0s29b0n0": 3,
+            "x3110c0s9b0n0": -1,
+            "x3112c0s21b0n0": 0,
+            "x3113c0s25b0n0": 0,
+            "x3115c0s17b0n0": 1,
+            "x3115c0s37b0n0": 0,
+            "x3115c0s41b0n0": 1
+          }
+        },
+        {
+          "start_UTC": "2025-01-08T15:46:29+00:00",
+          "end_UTC": "2025-01-08T15:46:31+00:00",
+          "ambiguous_job_ids": [
+            "6527304",
+            "6527305"
+          ],
+          "involved_exact_job_ids": [
+            "6509653",
+            "6509654",
+            "6509793",
+            "6518752",
+            "6518801",
+            "6519710",
+            "6519722",
+            "6519810",
+            "6519828",
+            "6519834",
+            "6519835",
+            "6519846",
+            "6519856",
+            "6519867"
+          ],
+          "remaining_node_capacities": {
+            "x3103c0s21b0n0": 2,
+            "x3103c0s29b0n0": 2,
+            "x3104c0s29b0n0": 2,
+            "x3105c0s17b0n0": 0,
+            "x3112c0s41b0n0": -1,
+            "x3115c0s17b0n0": 1,
+            "x3115c0s37b0n0": 0
+          }
+        },
+        {
+          "start_UTC": "2025-01-08T15:46:31+00:00",
+          "end_UTC": "2025-01-08T15:46:36+00:00",
+          "ambiguous_job_ids": [
+            "6527304",
+            "6527305",
+            "6527306"
+          ],
+          "involved_exact_job_ids": [
+            "6509653",
+            "6509654",
+            "6509793",
+            "6510176",
+            "6518722",
+            "6518752",
+            "6518780",
+            "6518801",
+            "6518806",
+            "6519710",
+            "6519712",
+            "6519722",
+            "6519779",
+            "6519791",
+            "6519808",
+            "6519810",
+            "6519828",
+            "6519834",
+            "6519835",
+            "6519846",
+            "6519856",
+            "6519858",
+            "6519867"
+          ],
+          "remaining_node_capacities": {
+            "x3103c0s21b0n0": 2,
+            "x3103c0s29b0n0": 2,
+            "x3104c0s29b0n0": 2,
+            "x3105c0s17b0n0": 0,
+            "x3106c0s5b0n0": 0,
+            "x3106c0s9b0n0": 3,
+            "x3112c0s21b0n0": 0,
+            "x3112c0s41b0n0": -1,
+            "x3113c0s25b0n0": 0,
+            "x3115c0s17b0n0": 1,
+            "x3115c0s37b0n0": -1
+          }
+        },
+        {
+          "start_UTC": "2025-01-08T15:46:37+00:00",
+          "end_UTC": "2025-01-08T15:46:44+00:00",
+          "ambiguous_job_ids": [
+            "6527306",
+            "6527307",
+            "6527309"
+          ],
+          "involved_exact_job_ids": [
+            "6509653",
+            "6509654",
+            "6509793",
+            "6510176",
+            "6518722",
+            "6518778",
+            "6518780",
+            "6518797",
+            "6518806",
+            "6519710",
+            "6519712",
+            "6519779",
+            "6519791",
+            "6519796",
+            "6519808",
+            "6519810",
+            "6519815",
+            "6519834",
+            "6519835",
+            "6519856",
+            "6519858",
+            "6519867"
+          ],
+          "remaining_node_capacities": {
+            "x3103c0s29b0n0": 2,
+            "x3105c0s17b0n0": 0,
+            "x3106c0s5b0n0": 0,
+            "x3106c0s9b0n0": 3,
+            "x3110c0s29b0n0": 2,
+            "x3110c0s9b0n0": 0,
+            "x3112c0s21b0n0": 0,
+            "x3113c0s25b0n0": 0,
+            "x3115c0s17b0n0": 1,
+            "x3115c0s37b0n0": -1,
+            "x3115c0s41b0n0": 2
+          }
+        },
+        {
+          "start_UTC": "2025-01-08T15:46:48+00:00",
+          "end_UTC": "2025-01-08T15:46:55+00:00",
+          "ambiguous_job_ids": [
+            "6527306",
+            "6527310",
+            "6527311"
+          ],
+          "involved_exact_job_ids": [
+            "6509793",
+            "6510176",
+            "6518722",
+            "6518752",
+            "6518778",
+            "6518780",
+            "6518801",
+            "6518806",
+            "6519710",
+            "6519712",
+            "6519722",
+            "6519779",
+            "6519791",
+            "6519796",
+            "6519808",
+            "6519810",
+            "6519815",
+            "6519828",
+            "6519834",
+            "6519835",
+            "6519846",
+            "6519856",
+            "6519858",
+            "6519867"
+          ],
+          "remaining_node_capacities": {
+            "x3103c0s21b0n0": 2,
+            "x3103c0s29b0n0": 2,
+            "x3104c0s29b0n0": 2,
+            "x3105c0s17b0n0": -1,
+            "x3106c0s5b0n0": 0,
+            "x3106c0s9b0n0": 3,
+            "x3110c0s29b0n0": 3,
+            "x3110c0s9b0n0": 0,
+            "x3112c0s21b0n0": 0,
+            "x3112c0s41b0n0": 0,
+            "x3113c0s25b0n0": 0,
+            "x3115c0s37b0n0": -1
+          }
+        }
+      ],
+      "allocation_interpretation": "each listed occupied node receives at least one GPU; remaining total request is assigned by integer bipartite max-flow under four GPUs/node"
+    },
+    "repaired_ambiguous_feasibility": {
+      "ambiguous_row_count": 35,
+      "ambiguous_event_interval_count": 781,
+      "ambiguous_but_feasible_event_interval_count": 781,
+      "ambiguous_infeasible_event_interval_count": 0,
+      "ambiguous_15min_slot_count": 91,
+      "ambiguous_infeasible_15min_slot_count": 0,
+      "infeasible_details": [],
+      "allocation_interpretation": "each listed occupied node receives at least one GPU; remaining total request is assigned by integer bipartite max-flow under four GPUs/node"
+    },
+    "raw_requested_execution_GPU_hours": 1660799.8058333336,
+    "raw_max_15min_average_requested_execution_GPU": 589.4111111111112,
+    "raw_static_528_exceed_slot_count": 902,
+    "raw_max_instant_requested_execution_GPU": 590.0,
+    "raw_max_concurrent_distinct_nodes": 153,
+    "raw_max_exact_requested_GPU_on_any_node": 10.0,
+    "raw_exact_infeasible_event_interval_count": 29,
+    "raw_ambiguous_infeasible_event_interval_count": 8,
+    "raw_infeasible_event_interval_count": 37,
+    "raw_exact_active_15min_slot_count": 20012,
+    "raw_exact_feasible_15min_slot_count": 19881,
+    "raw_exact_infeasible_15min_slot_count": 131,
+    "raw_ambiguous_infeasible_15min_slot_count": 2,
+    "raw_infeasible_15min_slot_count": 133,
+    "raw_exact_conflict_job_ids": [
+      "5615916",
+      "5615917",
+      "5615918",
+      "5940834",
+      "5947395",
+      "5947402",
+      "5947403",
+      "5967937",
+      "5968169",
+      "5968170",
+      "5970315",
+      "5970316",
+      "5980553",
+      "5981741",
+      "6340517",
+      "6340536",
+      "6341960",
+      "6342527",
+      "6342529",
+      "6342530",
+      "6342531",
+      "6342532",
+      "6342533",
+      "6342534",
+      "6342535",
+      "6342536",
+      "6342537",
+      "6342538",
+      "6342539",
+      "6342540",
+      "6342541",
+      "6342542",
+      "6342543",
+      "6342544",
+      "6342545",
+      "6342546",
+      "6342547",
+      "6342548",
+      "6342549",
+      "6342550",
+      "6342551",
+      "6342552",
+      "6342553",
+      "6342554",
+      "6342556",
+      "6342557",
+      "6342558",
+      "6342559",
+      "6342560",
+      "6342561",
+      "6342562",
+      "6342563",
+      "6342564",
+      "6342565",
+      "6342566",
+      "6342567",
+      "6342568",
+      "7539787",
+      "7543918",
+      "7545385"
+    ],
+    "raw_ambiguous_conflict_job_ids": [
+      "6527291",
+      "6527292",
+      "6527293",
+      "6527297",
+      "6527298",
+      "6527300",
+      "6527301",
+      "6527302",
+      "6527303",
+      "6527304",
+      "6527305",
+      "6527306",
+      "6527307",
+      "6527309",
+      "6527310",
+      "6527311"
+    ],
+    "raw_conflict_job_ids": [
+      "5615916",
+      "5615917",
+      "5615918",
+      "5940834",
+      "5947395",
+      "5947402",
+      "5947403",
+      "5967937",
+      "5968169",
+      "5968170",
+      "5970315",
+      "5970316",
+      "5980553",
+      "5981741",
+      "6340517",
+      "6340536",
+      "6341960",
+      "6342527",
+      "6342529",
+      "6342530",
+      "6342531",
+      "6342532",
+      "6342533",
+      "6342534",
+      "6342535",
+      "6342536",
+      "6342537",
+      "6342538",
+      "6342539",
+      "6342540",
+      "6342541",
+      "6342542",
+      "6342543",
+      "6342544",
+      "6342545",
+      "6342546",
+      "6342547",
+      "6342548",
+      "6342549",
+      "6342550",
+      "6342551",
+      "6342552",
+      "6342553",
+      "6342554",
+      "6342556",
+      "6342557",
+      "6342558",
+      "6342559",
+      "6342560",
+      "6342561",
+      "6342562",
+      "6342563",
+      "6342564",
+      "6342565",
+      "6342566",
+      "6342567",
+      "6342568",
+      "6527291",
+      "6527292",
+      "6527293",
+      "6527297",
+      "6527298",
+      "6527300",
+      "6527301",
+      "6527302",
+      "6527303",
+      "6527304",
+      "6527305",
+      "6527306",
+      "6527307",
+      "6527309",
+      "6527310",
+      "6527311",
+      "7539787",
+      "7543918",
+      "7545385"
+    ],
+    "repair_policy": "global conflict-set quarantine: every job active in every source-infeasible node interval is excluded from prospective flexible authority; no row chosen, clipped, or timestamp-modified",
+    "repaired_execution_rows": 276142,
+    "repaired_max_15min_average_requested_execution_GPU": 589.4111111111112,
+    "repaired_requested_execution_GPU_hours": 1660440.5469444445,
+    "repaired_static_528_exceed_slot_count": 902,
+    "repaired_exact_active_and_feasible_15min_slot_count": 20012,
+    "repaired_max_exact_requested_GPU_on_any_node": 4.0,
+    "repaired_true_infeasible_slot_count": 0,
+    "ambiguous_15min_slot_count": 92,
+    "interval_to_slot_GPU_hour_identity_abs_error": 4.656612873077393e-10,
+    "posthoc_clipping_calls": 0,
+    "capacity_promotion_q99_5_u85_calls": 0,
+    "gate_A2": "PASS_REPAIRED_EXECUTION_PHYSICS_WITH_GLOBAL_CONFLICT_QUARANTINE"
+  },
+  "native_flexibility": {
+    "artifact_id": "V18R1_KESTREL_NATIVE_FLEXIBILITY_RECOMPUTED_V1",
+    "raw_before_conflict_repair": {
+      "all_H100_GPU_h": 1660799.8058333336,
+      "semantic_flexible_GPU_h": 610761.1522222222,
+      "eta_F_GPU_energy": 0.3677512184653482
+    },
+    "repaired_authority": {
+      "all_H100_GPU_h": 1660440.5469444445,
+      "semantic_flexible_GPU_h": 610707.3561111112,
+      "eta_F_GPU_energy": 0.3677983877441078
+    },
+    "previous_V18_eta_F_GPU_energy": 0.3677512184653483,
+    "change_due_to_global_conflict_quarantine_percentage_points": 0.004716927875947352,
+    "conflict_job_ids_removed": [
+      "5615916",
+      "5615917",
+      "5615918",
+      "5940834",
+      "5947395",
+      "5947402",
+      "5947403",
+      "5967937",
+      "5968169",
+      "5968170",
+      "5970315",
+      "5970316",
+      "5980553",
+      "5981741",
+      "6340517",
+      "6340536",
+      "6341960",
+      "6342527",
+      "6342529",
+      "6342530",
+      "6342531",
+      "6342532",
+      "6342533",
+      "6342534",
+      "6342535",
+      "6342536",
+      "6342537",
+      "6342538",
+      "6342539",
+      "6342540",
+      "6342541",
+      "6342542",
+      "6342543",
+      "6342544",
+      "6342545",
+      "6342546",
+      "6342547",
+      "6342548",
+      "6342549",
+      "6342550",
+      "6342551",
+      "6342552",
+      "6342553",
+      "6342554",
+      "6342556",
+      "6342557",
+      "6342558",
+      "6342559",
+      "6342560",
+      "6342561",
+      "6342562",
+      "6342563",
+      "6342564",
+      "6342565",
+      "6342566",
+      "6342567",
+      "6342568",
+      "6527291",
+      "6527292",
+      "6527293",
+      "6527297",
+      "6527298",
+      "6527300",
+      "6527301",
+      "6527302",
+      "6527303",
+      "6527304",
+      "6527305",
+      "6527306",
+      "6527307",
+      "6527309",
+      "6527310",
+      "6527311",
+      "7539787",
+      "7543918",
+      "7545385"
+    ],
+    "facility_power_share_claim": false,
+    "utilization_status": "FULL_PERIOD_INSTALLED_CAPACITY_NORMALIZED_UTILIZATION_NOT_REPORTED_BECAUSE_POST_BUYIN_C_K_T_NOT_FULLY_IDENTIFIED",
+    "requested_execution_GPU_hour_semantics": "resource request integrated only while retrospectively executing"
+  },
+  "D1_main_scope": {
+    "artifact_id": "V18R1_D1_MAIN_CAUSAL_SCOPE_CONTRACT_V1",
+    "MAIN_D1_CONTROL_SCOPE": "FORECAST_NEW_FLEXIBLE_WORKLOAD_ONLY",
+    "known_running": "LOCKED_REFERENCE_RESIDUAL",
+    "known_queue": "LOCKED_REFERENCE_RESIDUAL",
+    "other_H100_and_facility_IT": "LOCKED_REFERENCE_RESIDUAL",
+    "KNOWN_QUEUE_EXTENSION_STATUS": "UNAVAILABLE",
+    "snapshot_source_research": {
+      "searched_on": "2026-08-31",
+      "repository_root": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix",
+      "raw_data_root": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터",
+      "filename_patterns": [
+        "squeue",
+        "scheduler snapshot",
+        "queue snapshot",
+        "pending snapshot",
+        "scheduler state",
+        "slurm state",
+        "state dump",
+        "queue event"
+      ],
+      "repository_matches": 0,
+      "raw_data_matches": 0,
+      "archive_allocation_snapshot_fields": 0
+    },
+    "main_gate_B1": "PASS_CAUSAL_FORECAST_ONLY_SCOPE",
+    "publication_statement": "The main day-ahead control authority is restricted to newly forecast delay-tolerant workload; pre-existing running/queued work is retained inside the locked reference residual because exact cutoff-state snapshots are unavailable.",
+    "causality_counters": {
+      "future_realized_start_feature_reads": 0,
+      "future_realized_end_feature_reads": 0,
+      "D_day_actual_feature_reads": 0,
+      "future_job_id_injections": 0
+    },
+    "oracle_import_firewall": "RETROSPECTIVE ORACLE MODULE OUTPUT IS NON_AUTHORITY AND IS NOT IMPORTABLE BY MODEL OR SCHEDULER"
+  },
+  "D1_oracle": {
+    "artifact_id": "V18R1_D1_RETROSPECTIVE_QUEUE_ORACLE_V1",
+    "label": "NON_CAUSAL_RETROSPECTIVE_DIAGNOSTIC",
+    "authority_role": "NONE",
+    "days": [
+      {
+        "day": "2025-04-02",
+        "cutoff_AEST": "2025-04-02 D-1 18:00",
+        "queued_oracle_GPU_h_in_D_day": 462.2283333333333,
+        "running_oracle_GPU_h_in_D_day": 257.9947222222222,
+        "forecast_new_GPU_h": 179.9469523284729,
+        "potential_extra_over_forecast_ratio": 4.002418747503261
+      },
+      {
+        "day": "2025-04-03",
+        "cutoff_AEST": "2025-04-03 D-1 18:00",
+        "queued_oracle_GPU_h_in_D_day": 1278.918888888889,
+        "running_oracle_GPU_h_in_D_day": 349.2308333333333,
+        "forecast_new_GPU_h": 183.7688059026413,
+        "potential_extra_over_forecast_ratio": 8.859772006598323
+      },
+      {
+        "day": "2025-04-12",
+        "cutoff_AEST": "2025-04-12 D-1 18:00",
+        "queued_oracle_GPU_h_in_D_day": 1216.4688888888888,
+        "running_oracle_GPU_h_in_D_day": 1386.5333333333333,
+        "forecast_new_GPU_h": 166.75116970843956,
+        "potential_extra_over_forecast_ratio": 15.610098728383793
+      },
+      {
+        "day": "2025-04-13",
+        "cutoff_AEST": "2025-04-13 D-1 18:00",
+        "queued_oracle_GPU_h_in_D_day": 264.0363888888889,
+        "running_oracle_GPU_h_in_D_day": 1893.3919444444443,
+        "forecast_new_GPU_h": 155.31486615839415,
+        "potential_extra_over_forecast_ratio": 13.890675031282141
+      },
+      {
+        "day": "2025-04-15",
+        "cutoff_AEST": "2025-04-15 D-1 18:00",
+        "queued_oracle_GPU_h_in_D_day": 2047.3105555555553,
+        "running_oracle_GPU_h_in_D_day": 1301.467222222222,
+        "forecast_new_GPU_h": 177.37826419231982,
+        "potential_extra_over_forecast_ratio": 18.87930177367681
+      },
+      {
+        "day": "2025-04-22",
+        "cutoff_AEST": "2025-04-22 D-1 18:00",
+        "queued_oracle_GPU_h_in_D_day": 453.8127777777778,
+        "running_oracle_GPU_h_in_D_day": 51.837500000000006,
+        "forecast_new_GPU_h": 183.05808744251127,
+        "potential_extra_over_forecast_ratio": 2.7622394882530137
+      },
+      {
+        "day": "2025-04-23",
+        "cutoff_AEST": "2025-04-23 D-1 18:00",
+        "queued_oracle_GPU_h_in_D_day": 898.8663888888889,
+        "running_oracle_GPU_h_in_D_day": 63.16166666666667,
+        "forecast_new_GPU_h": 197.85070939428303,
+        "potential_extra_over_forecast_ratio": 4.862393763968751
+      }
+    ],
+    "totals": {
+      "queued_oracle_GPU_h": 6621.642222222222,
+      "running_oracle_GPU_h": 5303.617222222221,
+      "forecast_new_GPU_h": 1244.068855127062,
+      "potential_extra_flexibility_ratio": 9.58569085247815
+    },
+    "prohibited_uses": [
+      "main ML feature",
+      "optimizer input",
+      "model calibration",
+      "workload scaling",
+      "publication main authority"
+    ]
+  },
+  "power_tier": {
+    "artifact_id": "V18R1_FLEX_WORK_POWER_TIER_VALIDATION_V1",
+    "training_tier_GPU_h": {
+      "FULL_1": 50519.29555555556,
+      "FULL_2": 5271.702222222222,
+      "FULL_4": 11076.457777777778,
+      "FULL_8": 5892.044444444446,
+      "FULL_16": 773.4755555555556,
+      "PARTIAL": 537174.3805555555
+    },
+    "training_tier_pi": {
+      "FULL_1": 0.08272259217123983,
+      "FULL_2": 0.008632124976832764,
+      "FULL_4": 0.018137095725047313,
+      "FULL_8": 0.00964790154479891,
+      "FULL_16": 0.0012665240525035217,
+      "PARTIAL": 0.8795937615295777
+    },
+    "authorized_tier_GPU_h_identity_error": 2.3283064365386963e-10,
+    "blocked_monthly_mixture_validation": [
+      {
+        "validation_month": "2024-09",
+        "L1_mixture_error": 0.21721431537835817
+      },
+      {
+        "validation_month": "2024-10",
+        "L1_mixture_error": 0.21068069295862119
+      },
+      {
+        "validation_month": "2024-11",
+        "L1_mixture_error": 0.28780153596310437
+      },
+      {
+        "validation_month": "2024-12",
+        "L1_mixture_error": 0.11712860986716173
+      },
+      {
+        "validation_month": "2025-01",
+        "L1_mixture_error": 0.11680370535599463
+      },
+      {
+        "validation_month": "2025-02",
+        "L1_mixture_error": 0.3729417156739445
+      },
+      {
+        "validation_month": "2025-03",
+        "L1_mixture_error": 0.07699171226792866
+      }
+    ],
+    "blocked_validation_mean_L1_error": 0.19993746963787334,
+    "April_observed_diagnostic": {
+      "label": "OBSERVED_VALIDATION_DIAGNOSTIC",
+      "tier_GPU_h": {
+        "FULL_1": 20832.59333333333,
+        "FULL_2": 5270.371111111111,
+        "FULL_4": 701.6755555555554,
+        "FULL_8": 10344.38222222222,
+        "FULL_16": 147.62666666666667,
+        "PARTIAL": 79098.2113888889
+      },
+      "tier_pi": {
+        "FULL_1": 0.17898207260712448,
+        "FULL_2": 0.045280101703230755,
+        "FULL_4": 0.006028406700098252,
+        "FULL_8": 0.08887318733434814,
+        "FULL_16": 0.001268326336011348,
+        "PARTIAL": 0.6795679053191871
+      },
+      "L1_vs_training_mixture": 0.42426909047067934
+    },
+    "forecast_7day_tier_GPU_h": {
+      "FULL_1": 102.91260053561719,
+      "FULL_2": 10.73895783724205,
+      "FULL_4": 22.563795913989537,
+      "FULL_8": 12.002653829216591,
+      "FULL_16": 1.5756431279889431,
+      "PARTIAL": 1094.2752038830074
+    },
+    "forecast_7day_total_GPU_h": 1244.0688551270616,
+    "forecast_7day_tier_energy_kWh": {
+      "FULL_1": 58.903862542651524,
+      "FULL_2": 5.965558701730389,
+      "FULL_4": 11.811338355193389,
+      "FULL_8": 6.080738875207222,
+      "FULL_16": 0.7742157678310759,
+      "PARTIAL": 531.4195605152775
+    },
+    "sum_tier_work_minus_total_max_abs_GPU_h": 5.684341886080802e-14,
+    "negative_tier_mass_count": 0,
+    "partial_node_CPU_double_count": 0,
+    "gate_C2": "PASS_POWER_TIER_MASS_COHERENCE"
+  },
+  "hybrid_power": {
+    "artifact_id": "V18R1_HYBRID_NODE_POWER_AUTHORITY_REVALIDATION_V1",
+    "gate_C": "PASS_HYBRID_AUTHORITY",
+    "revalidation_method": "frozen V18 reproduction artifact SHA preserved plus raw source SHA authority unchanged",
+    "V18_contract_sha256": "9b578977dde85a567e9cbb2024663a33b8fe3ff6cfdadf18dc60f42dad7dc3a7",
+    "source_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+    "fullnode": {
+      "authority": "Dataset312 paired NVML GPU-board + two-socket RAPL CPU-package incremental above frozen idle",
+      "supported_node_classes": [
+        1,
+        2,
+        4,
+        8,
+        16
+      ],
+      "kappa_total_kW_per_active_node": {
+        "1": 2.289471346990805,
+        "2": 2.2220251879720374,
+        "4": 2.0938566188449466,
+        "8": 2.026464800777849,
+        "16": 1.9654597010662909
+      },
+      "source_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137"
+    },
+    "partialnode": {
+      "authority": "V17 per-GPU board Q50 lower bound",
+      "kappa_kW_per_GPU": 0.48563611660901085,
+      "CPU_package_increment": null,
+      "reason": "node packing/partial occupancy counterfactual absent"
+    },
+    "raw_authority_reproduction_failures": [],
+    "PUE_application": "after IT decomposition exactly once",
+    "arbitrary_multiplier_calls": 0
+  },
+  "facility_decomposition": {
+    "artifact_id": "V18R1_TWO_COMPONENT_FACILITY_DECOMPOSITION_VALIDATION_V1",
+    "scope": "seven previously observed April diagnostic days; no B0-B3/OpenDSS",
+    "total_IT_kWh": 131984.0764351028,
+    "flexible_reference_IT_kWh": 614.955274757891,
+    "locked_residual_IT_kWh": 131369.1211603449,
+    "days": [
+      {
+        "day": "2025-04-02",
+        "total_IT_kWh": 18868.519242912065,
+        "flexible_reference_IT_kWh": 88.94952000040146,
+        "locked_residual_IT_kWh": 18779.569722911663
+      },
+      {
+        "day": "2025-04-03",
+        "total_IT_kWh": 18880.381928828334,
+        "flexible_reference_IT_kWh": 90.83869920869144,
+        "locked_residual_IT_kWh": 18789.54322961964
+      },
+      {
+        "day": "2025-04-12",
+        "total_IT_kWh": 18607.434834148382,
+        "flexible_reference_IT_kWh": 82.42671694709361,
+        "locked_residual_IT_kWh": 18525.008117201287
+      },
+      {
+        "day": "2025-04-13",
+        "total_IT_kWh": 18511.657732827785,
+        "flexible_reference_IT_kWh": 76.77364142571139,
+        "locked_residual_IT_kWh": 18434.884091402073
+      },
+      {
+        "day": "2025-04-15",
+        "total_IT_kWh": 18924.87696414614,
+        "flexible_reference_IT_kWh": 87.67979259582464,
+        "locked_residual_IT_kWh": 18837.197171550317
+      },
+      {
+        "day": "2025-04-22",
+        "total_IT_kWh": 19009.280901426755,
+        "flexible_reference_IT_kWh": 90.48738419576145,
+        "locked_residual_IT_kWh": 18918.793517230995
+      },
+      {
+        "day": "2025-04-23",
+        "total_IT_kWh": 19181.92483081333,
+        "flexible_reference_IT_kWh": 97.799520384407,
+        "locked_residual_IT_kWh": 19084.12531042892
+      }
+    ],
+    "aggregate_total_minus_day_sum_kWh": 0.0,
+    "aggregate_flexible_minus_day_sum_kWh": 0.0,
+    "minimum_locked_residual_IT_kW": 13.001189536715861,
+    "maximum_conservation_error_kW": 2.842170943040401e-14,
+    "maximum_P_FLEX_minus_P_IT_kW": -13.001189536715861,
+    "negative_locked_residual_count": 0,
+    "site_sum_max_abs_error_kW": 3.552713678800501e-15,
+    "PUE": 1.3,
+    "PUE_application_count": 1,
+    "PCC_reference_identity": "P_PCC_REF = P_IT_REF * 1.30",
+    "C_MODEL": {
+      "value_GPU": 528.0,
+      "label": "EQUIVALENT_CASE_STUDY_H100_CAPACITY_NOT_REAL_MELBOURNE_INSTALLED_CAPACITY",
+      "rack_weight_sum": 1.0,
+      "rack_capacity_sum_GPU": 528.0,
+      "max_reference_scheduled_GPU": 10.377228447251355
+    },
+    "negative_residual_clipping_calls": 0,
+    "gate_D": "PASS_EXACT_TWO_COMPONENT_DECOMPOSITION"
+  },
+  "facility_flexibility": {
+    "artifact_id": "V18R1_FACILITY_FLEXIBILITY_SHARE_V1",
+    "eta_F_GPU_NATIVE": 0.3677983877441078,
+    "eta_F_FORECAST_WORK": null,
+    "eta_F_FACILITY_ENERGY": 0.004659314148856945,
+    "eta_F_FACILITY_AT_TOTAL_PEAK": 0.004431222450653829,
+    "eta_F_FACILITY_MAX_INSTANT": 0.0067177104359360225,
+    "full_node_contribution_kWh": 83.5357142426136,
+    "partial_node_contribution_kWh": 531.4195605152775,
+    "GPU_board_contribution_kWh": 610.6999011721117,
+    "CPU_package_incremental_contribution_kWh": 4.19537700045155,
+    "component_median_nonadditivity_gap_kWh": 0.05999658532768937,
+    "authority": "SOURCE_BACKED_HYBRID_POWER_PLUS_TRAINING_ONLY_ENGINEERING_TIER_OVERLAY_ON_FROZEN_REFERENCE",
+    "literature_calibration": false
+  },
+  "literature_context": {
+    "range": "approximately 20-25% under non-identical literature boundaries",
+    "label": "LITERATURE_CONTEXT_ONLY",
+    "calibration_target": false,
+    "builder_reads": 0
+  },
+  "remaining_limitations": [
+    "post-buy-in exact installed H100 node count/date is not publicly identified",
+    "37 raw source-infeasible event intervals implicate 76 jobs; the complete global conflict set remains quarantined",
+    "no exact D-1 squeue/running snapshot",
+    "constant conditional tier-mixture baseline does not identify per-job future tier",
+    "April is observed diagnostic, not a locked unseen test"
+  ],
+  "preservation": {
+    "status": "PASS",
+    "failures": []
+  }
+}

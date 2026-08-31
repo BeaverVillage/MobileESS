@@ -1,0 +1,16 @@
+{
+  "artifact_id": "V18R1_TWO_COMPONENT_FACILITY_DECOMPOSITION_CONTRACT_V1",
+  "equations": {
+    "P_IT_REF": "REFERENCE_LOCKED_IT_RESIDUAL + P_FLEX_REF",
+    "P_IT_DA": "REFERENCE_LOCKED_IT_RESIDUAL + P_FLEX_DA",
+    "Delta_P_IT": "P_FLEX_DA - P_FLEX_REF",
+    "P_PCC_REF": "P_IT_REF * 1.30",
+    "P_PCC_DA": "P_IT_DA * 1.30"
+  },
+  "residual_name": "REFERENCE_LOCKED_IT_RESIDUAL",
+  "residual_definition": "whole-facility reference IT remaining after subtraction of the source-backed forecast-flexible reference component",
+  "claim_limit": "planning/reference decomposition residual; not measured inference/base/background power",
+  "negative_residual_policy": "FAIL_CLOSED_NO_CLIPPING",
+  "PUE": 1.3,
+  "PUE_application_count": 1
+}
