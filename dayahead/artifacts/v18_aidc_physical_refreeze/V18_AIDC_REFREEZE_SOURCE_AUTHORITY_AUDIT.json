@@ -1,0 +1,55 @@
+{
+  "artifact_id": "V18_AIDC_REFREEZE_SOURCE_AUTHORITY_AUDIT_V1",
+  "sources": [
+    {
+      "source_id": "KESTREL_JOB_ARCHIVE",
+      "classification": "SUPPORTED",
+      "scope": "retrospective training occupancy, resource requests and revealed-latency semantic labels",
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+      "sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f"
+    },
+    {
+      "source_id": "KESTREL_D1_STATE",
+      "classification": "UNSUPPORTED",
+      "scope": "exact cutoff queue/running snapshot",
+      "reason": "archive contains final sacct record, not a D-1 state snapshot; future start/end would be required"
+    },
+    {
+      "source_id": "KESTREL_INSTALLED_CAPACITY",
+      "classification": "SUPPORTED",
+      "scope": "132 H100 nodes x 4 H100 GPUs = 528 GPUs",
+      "official_sources": [
+        "https://www.nrel.gov/docs/fy25osti/91696.pdf",
+        "https://www.nrel.gov/docs/gen/fy24/90033.pdf"
+      ]
+    },
+    {
+      "source_id": "DATASET312_FULLNODE_POWER",
+      "classification": "SUPPORTED",
+      "scope": "full-node H100 training classes with NVML GPU-board plus RAPL CPU-package incremental power",
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\dataset.zip",
+      "sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137"
+    },
+    {
+      "source_id": "DATASET312_PARTIALNODE_CPU",
+      "classification": "UNSUPPORTED",
+      "scope": "partial-node CPU-package attribution",
+      "reason": "no measured active GPU-count/packing counterfactual"
+    },
+    {
+      "source_id": "V17_PER_GPU_BOARD",
+      "classification": "SUPPORTED",
+      "scope": "partial-node whole-GPU lower bound",
+      "kappa_Q50_kW_per_GPU": 0.48563611660901085
+    },
+    {
+      "source_id": "ESIF_WHOLE_FACILITY_IT",
+      "classification": "PARTIALLY_SUPPORTED",
+      "scope": "whole-facility total IT and PUE boundary supported; workload attribution absent",
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR ESIF PUE  IT Power\\esif.influx.buildingData.PUE.combined.parquet",
+      "sha256": "19cd12405dde9144b1a360e8c8418666c399a3d0d15a7f846880d71ab22f9dd4"
+    }
+  ],
+  "test_split_status": "NEW_LOCKED_TEST_NOT_YET_AVAILABLE",
+  "result_or_literature_based_parameter_selection_calls": 0
+}

@@ -1,0 +1,25 @@
+{
+  "artifact_id": "V18_D1_CAUSAL_WORKLOAD_STATE_CONTRACT_V1",
+  "cutoff": "D-1 18:00 AEST",
+  "RUNNING_KNOWN": {
+    "main_policy": "LOCKED",
+    "required_source": "cutoff allocation/state snapshot",
+    "current_authority": "MISSING"
+  },
+  "QUEUED_KNOWN": {
+    "balance_initialization": "B_b(1)=B_b^KNOWN",
+    "required_source": "cutoff pending queue snapshot with request-side fields",
+    "current_authority": "MISSING"
+  },
+  "FORECAST_NEW": {
+    "authority": "aggregate forecast W_hat_F_b_t",
+    "individual_future_job_ids": false
+  },
+  "balance": "B_b,t+1=B_b,t+W_hat_F,b,t-sum_r x_b,r,t",
+  "forbidden": [
+    "future realized start",
+    "future realized end",
+    "future completion/state",
+    "D-day actual arrivals as feature"
+  ]
+}
