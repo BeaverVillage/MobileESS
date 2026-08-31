@@ -1,0 +1,153 @@
+{
+  "artifact_id": "V20C_PARTIAL_NODE_POWER_SOURCE_AUDIT_V1",
+  "Dataset312_source": {
+    "bytes": 1070866623,
+    "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\NLR_Dataset_312_GenAI_Power\\dataset.zip",
+    "sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+    "zip_member_count": 3191
+  },
+  "raw_member_counts": {
+    "NVML": 302,
+    "RAPL": 302
+  },
+  "available": {
+    "CPU_RAPL_package_power": {
+      "available": true,
+      "fields": [
+        "cpu-0[uJ]",
+        "cpu-0-core[uJ]",
+        "cpu-1[uJ]",
+        "cpu-1-core[uJ]",
+        "cpu-0[W]",
+        "cpu-0-core[W]",
+        "cpu-1[W]",
+        "cpu-1-core[W]"
+      ]
+    },
+    "direct_partial_node_or_partial_GPU_ground_truth": {
+      "available": false,
+      "reason": "No experiment varies active/requested GPU count within a powered node while observing host, idle-GPU and active-GPU components separately."
+    },
+    "node_count": {
+      "available": true,
+      "full_node_only_experimental_design": true,
+      "training_values": [
+        2,
+        4,
+        8,
+        16
+      ]
+    },
+    "node_level_idle_or_base_power_label": {
+      "available": false,
+      "reason": "No measured experiment/state label identifies a node-idle baseline; post-processing constants are not measured partial-node ground truth."
+    },
+    "number_of_powered_or_active_GPUs": {
+      "available": false,
+      "reason": "Four telemetry channels exist per measured node, but no per-timestamp powered/active/requested GPU-count field exists."
+    },
+    "per_GPU_NVML_power": {
+      "available": true,
+      "fields": [
+        "gpu-0[mW]",
+        "gpu-1[mW]",
+        "gpu-2[mW]",
+        "gpu-3[mW]"
+      ],
+      "meaning": "per-socket instantaneous board power telemetry"
+    },
+    "per_device_GPU_utilization": {
+      "available": false,
+      "reason": "NVML logs contain power and temperature only, not per-device utilization or allocation occupancy."
+    },
+    "scenario_or_utilization_metadata": {
+      "available": true,
+      "meaning": "training model/node-count/repeat and inference workload/request-rate/batch metadata; not GPU allocation occupancy"
+    },
+    "temporal_power_telemetry": {
+      "aggregated_schemas": [
+        {
+          "fields": [
+            {
+              "name": "power[W]",
+              "type": "double"
+            },
+            {
+              "name": "timestep[s]",
+              "type": "double"
+            }
+          ],
+          "member": "01_aggregated_datasets/training/results/000000.parquet",
+          "rows": 26601
+        },
+        {
+          "fields": [
+            {
+              "name": "power[W]",
+              "type": "double"
+            },
+            {
+              "name": "timestep[s]",
+              "type": "double"
+            }
+          ],
+          "member": "01_aggregated_datasets/training/results/000021.parquet",
+          "rows": 63771
+        },
+        {
+          "fields": [
+            {
+              "name": "power[W]",
+              "type": "double"
+            },
+            {
+              "name": "timestep[s]",
+              "type": "double"
+            }
+          ],
+          "member": "01_aggregated_datasets/inference_offline_llama3_70b/results/000000.parquet",
+          "rows": 511
+        }
+      ],
+      "available": true,
+      "raw_NVML_header": [
+        "timestamp",
+        "reading-time[ns]",
+        "gpu-0[mW]",
+        "gpu-1[mW]",
+        "gpu-2[mW]",
+        "gpu-3[mW]",
+        "gpu-0[C]",
+        "gpu-1[C]",
+        "gpu-2[C]",
+        "gpu-3[C]"
+      ],
+      "raw_RAPL_header": [
+        "timestamp",
+        "reading-time[ns]",
+        "cpu-0[uJ]",
+        "cpu-0-core[uJ]",
+        "cpu-1[uJ]",
+        "cpu-1-core[uJ]",
+        "cpu-0[W]",
+        "cpu-0-core[W]",
+        "cpu-1[W]",
+        "cpu-1-core[W]"
+      ]
+    }
+  },
+  "additional_sources_reviewed": [
+    "Kestrel job accounting",
+    "Eagle V100 energy telemetry",
+    "external H100/B200 parameter-support audit",
+    "EuroSys GPU-sharing archive"
+  ],
+  "main_gate": {
+    "H100_compatible": true,
+    "workload_dependent": true,
+    "partial_occupancy_directly_measured": false,
+    "idle_subtraction_clear": false,
+    "packing_semantics_clear": false
+  },
+  "source_audit_sha256": "5d70ad0a447495a9a6209cb3e38996a1eb4089b3f8246757d509a9ec6748b495"
+}

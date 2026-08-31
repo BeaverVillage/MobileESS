@@ -1,0 +1,55 @@
+{
+  "artifact_id": "V20A_HOST_GRID_DENOMINATOR_REVIEW_V1",
+  "unique_host_rule": true,
+  "host_count": 12,
+  "candidates": [
+    {
+      "id": "D_APRIL_FIRM_MW",
+      "value": 531.9662000000001,
+      "unit": "MW",
+      "definition": "Unique-host summer firm/N-1 ratings; published MVA converted with documented PF",
+      "host_coverage_fraction": 0.75
+    },
+    {
+      "id": "D_APRIL_NORMAL_MW",
+      "value": 804.2664,
+      "unit": "MW",
+      "definition": "Unique-host summer normal ratings; published MVA converted with documented PF",
+      "host_coverage_fraction": 0.75
+    },
+    {
+      "id": "D_APRIL_2025_FORECAST_PEAK_MW",
+      "value": 567.9513000000001,
+      "unit": "MW",
+      "definition": "Unique-host 2025/2024-25 forecast maximum demand applicable to April 2025",
+      "host_coverage_fraction": 1
+    },
+    {
+      "id": "D_APRIL_2024_HISTORICAL_PEAK_MW",
+      "value": 539.0114999999998,
+      "unit": "MW",
+      "definition": "Unique-host 2024/FY2023-24 historical maximum demand; context kept distinct from ratings",
+      "host_coverage_fraction": 1
+    },
+    {
+      "id": "D_APRIL_FIRM_MVA",
+      "value": 535.85,
+      "unit": "MVA",
+      "definition": "Unique-host published summer firm/N-1 ratings without MW conversion",
+      "host_coverage_fraction": 0.75
+    },
+    {
+      "id": "D_APRIL_NORMAL_MVA",
+      "value": 809.76,
+      "unit": "MVA",
+      "definition": "Unique-host published summer normal ratings without MW conversion",
+      "host_coverage_fraction": 0.75
+    }
+  ],
+  "primary_candidate_id": "D_APRIL_2025_FORECAST_PEAK_MW",
+  "primary_candidate_reason": "100% unique-host coverage, MW demand boundary, April-2025-applicable forecast vintage",
+  "primary_candidate_value_MW": 567.9513000000001,
+  "firm_normal_caveat": "75% host coverage; sensitivity only",
+  "MVA_to_MW_rule": "Only prior rows with explicitly documented source PF are retained; no new conversion.",
+  "grid_benefit_based_selection_calls": 0
+}

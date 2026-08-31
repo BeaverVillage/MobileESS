@@ -1,0 +1,28 @@
+{
+  "artifact_id": "V20_TEST_REPORT_V1",
+  "focused_v20_command": "python -m unittest dayahead.tests.test_v20_independent_authorities -v",
+  "focused_v20_result": "PASS",
+  "focused_v20_tests": 14,
+  "focused_v20_failures": 0,
+  "compileall_result": "PASS",
+  "git_diff_check_result": "PASS",
+  "extended_regression_command": "python -m unittest dayahead.tests.test_v20_independent_authorities dayahead.tests.test_v18_aidc_physical_refreeze dayahead.tests.test_v18r1_aidc_physical_coherence_repair dayahead.tests.test_v18r2_aidc_forecast_magnitude_refreeze dayahead.tests.test_v17_flexibility_funnel_forensic -v",
+  "extended_regression_total": 53,
+  "extended_regression_passed": 48,
+  "extended_regression_failures": 4,
+  "extended_regression_errors": 1,
+  "preexisting_base_failures": [
+    "stale embedded SHA for V17_AIDC_FLEXIBLE_SCALE_ATTRITION_FORENSIC.json",
+    "stale embedded SHA for V17_AIDC_FLEXIBILITY_FUNNEL_FORENSIC_V1.json",
+    "same stale SHA propagated into V18/V18R1 preservation tests",
+    "V18R2 manifest references an untracked/missing ac_cache NPZ"
+  ],
+  "v20_change_caused_legacy_failure": false,
+  "evidence": "V20 baseline manifest re-hashed 396 current protected files and final verification has zero mismatch; V20 did not edit any failed legacy path.",
+  "science_firewall": {
+    "B0_B1_B2_B3_calls": 0,
+    "OpenDSS_calls": 0,
+    "grid_science_calls": 0,
+    "ML_training_calls": 0
+  }
+}
