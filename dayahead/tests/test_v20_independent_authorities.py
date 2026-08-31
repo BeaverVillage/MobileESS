@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -91,6 +92,29 @@ class TestV20Artifacts(unittest.TestCase):
         for record in manifest["preserved_files"]:
             path = ROOT / record["path"]
             self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), record["sha256"])
+
+    def test_locked_test_not_falsely_sealed(self):
+        p = self.load("V20E_LOCKED_TEST_FINAL_REVIEW.json")
+        self.assertEqual(p["classification"], "E3_NO_UNTOUCHED_PERIOD_AVAILABLE")
+        self.assertFalse(p["sealed"])
+        self.assertEqual(p["already_observed_period_falsely_labeled_unseen_count"], 0)
+        self.assertFalse((OUT / "V20E_NEW_LOCKED_TEST_PERIOD_FREEZE.json").exists())
+
+    def test_master_firewall_and_ready_logic(self):
+        p = self.load("V20_MASTER_AUTHORITY_STATUS.json")
+        counters = p["firewall_counters"]
+        self.assertEqual(counters["B0_B1_B2_B3_calls"], 0)
+        self.assertEqual(counters["OpenDSS_calls"], 0)
+        self.assertEqual(counters["grid_science_calls"], 0)
+        self.assertTrue(p["ready_flags"]["MODEL_AGNOSTIC_INTEGRATION_READY"])
+        self.assertFalse(p["ready_flags"]["PRE_ML_INTEGRATION_READY"])
+        self.assertEqual(p["ready_flags"]["FINAL_SCIENCE_READY"], "PENDING_V19_MODEL_AUTHORITY")
+
+    def test_protected_v19_path_not_changed(self):
+        changed = subprocess.check_output(
+            ["git", "diff", "--name-only", "77a86e3ded8087ea0109ccfca631bd2396ecd9fe", "--"],
+            cwd=ROOT, text=True).splitlines()
+        self.assertFalse(any(name.replace("\\", "/").startswith("dayahead/ml/c_mass_tpp/") for name in changed))
 
 
 if __name__ == "__main__":
