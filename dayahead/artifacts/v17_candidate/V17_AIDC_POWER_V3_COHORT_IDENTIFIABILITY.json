@@ -1,0 +1,143 @@
+{
+  "June_result_content_reads": 0,
+  "June_scientific_input_reads": 0,
+  "May_result_content_reads": 0,
+  "May_scientific_input_reads": 0,
+  "OpenDSS_calls_inside_Benders": 0,
+  "V1_modelable": {
+    "GPU_hours": 73532.97555555556,
+    "jobs": 15003,
+    "node_equivalent_hours": 18383.24388888889,
+    "occupied_node_hours": 18383.24388888889
+  },
+  "arbitrary_flexible_scaling_calls": 0,
+  "artifact_id": "V17_AIDC_POWER_V3_COHORT_IDENTIFIABILITY_V1",
+  "classifications": {
+    "U1": "V17_V3_U1_NOT_IDENTIFIABLE",
+    "U2": "V17_V3_U2_NOT_IDENTIFIABLE",
+    "U3": "V17_V3_U3_NOT_IDENTIFIABLE"
+  },
+  "disjoint_set_validation": {
+    "jobs_sum_exact": true,
+    "mutually_exclusive": true,
+    "node_equivalent_hours_sum_abs_error": 0.0
+  },
+  "effect_selected_power_parameters": 0,
+  "grid_benefit_selected_power_parameters": 0,
+  "groups": [
+    {
+      "GPU_hours": 24231.83166666667,
+      "group": "U1_EXCLUSIVE_PARTIAL_NODE",
+      "jobs": 2416,
+      "node_equivalent_hours": 6057.957916666667,
+      "occupied_node_hours": 20906.93222222222
+    },
+    {
+      "GPU_hours": 488950.9716666666,
+      "group": "U2_SHARED_PARTIAL_OR_SHARED_NODE",
+      "jobs": 67874,
+      "node_equivalent_hours": 122237.74291666666,
+      "occupied_node_hours": 472647.6169444444
+    },
+    {
+      "GPU_hours": 24045.373333333337,
+      "group": "U3_FULL_NODE_BUT_UNSUPPORTED_NODE_COUNT",
+      "jobs": 378,
+      "node_equivalent_hours": 6011.343333333334,
+      "occupied_node_hours": 6011.343333333334
+    },
+    {
+      "GPU_hours": 0.0,
+      "group": "U4_OTHER_POWER_UNMODELED",
+      "jobs": 0,
+      "node_equivalent_hours": 0.0,
+      "occupied_node_hours": 0.0
+    }
+  ],
+  "reasons": {
+    "U1": "Kestrel requested-GPU fraction is observable, but neither external source supplies held-out measurements for the corresponding exclusive partial allocation state on a compatible 4-GPU Kestrel node.",
+    "U2": "Kestrel exposes node/job co-residency but not per-device assignment, same-GPU sharing mechanism, utilization, MIG state, or time-slice fraction; EuroSys raw power rows are absent.",
+    "U3": "V1 only freezes measured node classes 1/2/4/8/16; external sources do not validate extrapolation to unsupported Kestrel full-node counts under the V1 power boundary."
+  },
+  "recoverable_node_equivalent_hours": {
+    "U1": 0.0,
+    "U2": 0.0,
+    "U3": 0.0
+  },
+  "remaining_April_day_runs": 0,
+  "reproduction_identity": {
+    "errors": {
+      "U1_EXCLUSIVE_PARTIAL_NODE": {
+        "jobs": 0,
+        "node_equivalent_hours": 9.094947017729282e-13
+      },
+      "U2_SHARED_PARTIAL_OR_SHARED_NODE": {
+        "jobs": 0,
+        "node_equivalent_hours": 0.0
+      },
+      "U3_FULL_NODE_BUT_UNSUPPORTED_NODE_COUNT": {
+        "jobs": 0,
+        "node_equivalent_hours": 0.0
+      },
+      "U4_OTHER_POWER_UNMODELED": {
+        "jobs": 0,
+        "node_equivalent_hours": 0.0
+      }
+    },
+    "pass": true
+  },
+  "rowwise_external_to_Kestrel_merges": 0,
+  "semantic_flexible": {
+    "GPU_hours": 610761.1522222222,
+    "jobs": 85671,
+    "node_equivalent_hours": 152690.28805555555,
+    "occupied_node_hours": 517949.1363888889
+  },
+  "source": {
+    "members_opened": [
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+        "month": 202408,
+        "rows": 428165
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+        "month": 202409,
+        "rows": 405655
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+        "month": 202410,
+        "rows": 273571
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+        "month": 202411,
+        "rows": 248055
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+        "month": 202412,
+        "rows": 290267
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+        "month": 202501,
+        "rows": 400896
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+        "month": 202502,
+        "rows": 453728
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+        "month": 202503,
+        "rows": 406258
+      }
+    ],
+    "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+    "sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f"
+  },
+  "status": "PASS_REPRODUCTION_FAIL_CLOSED_NO_NEW_SOURCE_BACKED_COHORT"
+}
