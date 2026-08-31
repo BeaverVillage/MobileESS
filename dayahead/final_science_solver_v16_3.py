@@ -7,7 +7,7 @@ import json
 import math
 import time
 from collections import defaultdict
-from typing import Mapping
+from typing import Mapping, Sequence
 
 import numpy as np
 
@@ -27,6 +27,7 @@ from .mess_physics import (
 from .run_v16_3_nonzero_validity import _aidc_limits, _planning_flow_base_and_sensitivity
 from .v16_3_authority import add_phase_current_epigraph
 from .v17_v5_current_repair import is_dominated_mess_current_row
+from .v17_ac_restoration_contract import RHO as RESTORATION_RHO, RestorationCut
 
 
 def _cohort_node_class(cohort: str) -> int:
@@ -45,6 +46,7 @@ def solve_shadow(
     current_data,
     rho: float,
     case: str = "B3",
+    restoration_cuts: Sequence[RestorationCut] = (),
 ) -> dict[str, object]:
     """Solve exactly one candidate LP using only frozen affine grid rows."""
 
@@ -185,6 +187,7 @@ def solve_shadow(
 
     eta = model.addVar(lb=0.0, name="max_normalized_phase_line_current")
     delta_by_slot = {}
+    expressions_by_slot = {}
     for slot in range(96):
         expressions = []
         for name in controls:
@@ -201,6 +204,7 @@ def solve_shadow(
         anchor = np.asarray(voltage_data["anchor_control"][slot], dtype=float)
         delta = [expression - float(anchor[i]) for i, expression in enumerate(expressions)]
         delta_by_slot[slot] = delta
+        expressions_by_slot[slot] = expressions
         down, up, _limits = _aidc_limits(reference, authority, slot)
         for i in range(12):
             model.addConstr(delta[i] >= -rho * float(down[i]), name=f"trust_aidc_low[{slot},{i}]")
@@ -248,6 +252,46 @@ def solve_shadow(
                 model.addConstr(math.cos(angle) * p + math.sin(angle) * q <= apothem,
                                 name=f"transformer_total_kva_hard[{slot},{branch},{face}]")
 
+    control_axis = tuple(map(str, controls))
+    for cut_index, cut in enumerate(restoration_cuts):
+        if cut.trust_region_rho != RESTORATION_RHO or abs(float(rho) - RESTORATION_RHO) > 1e-12:
+            raise RuntimeError("V17_AC_RESTORATION_CUT_RHO_MISMATCH")
+        if cut.control_names != control_axis:
+            raise RuntimeError("V17_AC_RESTORATION_CUT_CONTROL_AXIS_MISMATCH")
+        if not 0 <= int(cut.slot) < 96:
+            raise RuntimeError("V17_AC_RESTORATION_CUT_SLOT_OUT_OF_RANGE")
+        expressions = expressions_by_slot[int(cut.slot)]
+        affine = float(cut.actual_value) + gp.quicksum(
+            float(coefficient) * (expressions[index] - float(cut.anchor_controls[index]))
+            for index, coefficient in enumerate(cut.coefficients)
+        )
+        if cut.relation == "<=":
+            model.addConstr(
+                affine <= float(cut.hard_limit) - float(cut.margin),
+                name=f"fresh_ac_restoration_upper[{cut_index},{cut.slot}]",
+            )
+        elif cut.relation == ">=":
+            model.addConstr(
+                affine >= float(cut.hard_limit) + float(cut.margin),
+                name=f"fresh_ac_restoration_lower[{cut_index},{cut.slot}]",
+            )
+        else:
+            raise RuntimeError("V17_AC_RESTORATION_CUT_RELATION_INVALID")
+        # This is the executable stale-cut guard: every model that carries a
+        # local cut is constrained to the exact stored Fresh-AC neighborhood.
+        for control_index, radius in enumerate(cut.local_radius):
+            if float(radius) <= 0.0:
+                continue
+            center = float(cut.anchor_controls[control_index])
+            model.addConstr(
+                expressions[control_index] >= center - float(radius),
+                name=f"fresh_ac_cut_trust_low[{cut_index},{cut.slot},{control_index}]",
+            )
+            model.addConstr(
+                expressions[control_index] <= center + float(radius),
+                name=f"fresh_ac_cut_trust_high[{cut_index},{cut.slot},{control_index}]",
+            )
+
     model.setObjective(eta, GRB.MINIMIZE)
     model.update()
 
@@ -276,7 +320,7 @@ def solve_shadow(
         mess_q_payload=np.asarray([[mess_q[(m,t)].X for m in sorted(inputs.mess_records)] for t in range(96)])
         mess_e_payload=np.asarray([[mess_e[(m,t)].X for m in sorted(inputs.mess_records)] for t in range(97)])
         schedule_hash=hashlib.sha256(json.dumps({"controls":controls_96x60.tolist(),"workload":workload_payload},sort_keys=True,separators=(",",":")).encode()).hexdigest()
-        return {"case":target,"status":"OPTIMAL","hard_feasible":True,"objective_max_normalized_phase_line_current":float(eta.X),"runtime_seconds":float(model.Runtime),"wall_runtime_seconds":time.perf_counter()-case_started,"model_build_wall_seconds":case_started-started,"variable_count":int(model.NumVars),"constraint_count":int(model.NumConstrs),"terminal_service_parity_max_abs_error":terminal_error,"mess_terminal_soc_max_abs_error_kwh":mess_terminal_error,"controls_96x60":controls_96x60,"workload_payload":np.asarray(workload_payload),"mess_p_96x4":mess_p_payload,"mess_q_96x4":mess_q_payload,"mess_e_97x4":mess_e_payload,"obj_bound":float(model.ObjBound),"mip_gap":float(model.MIPGap) if bool(model.IsMIP) else 0.0,"node_count":float(model.NodeCount),"schedule_sha256":schedule_hash,"tap_decision_variable_count":0,"OpenDSS_call_count_inside_model":0}
+        return {"case":target,"status":"OPTIMAL","hard_feasible":True,"objective_max_normalized_phase_line_current":float(eta.X),"runtime_seconds":float(model.Runtime),"wall_runtime_seconds":time.perf_counter()-case_started,"model_build_wall_seconds":case_started-started,"variable_count":int(model.NumVars),"constraint_count":int(model.NumConstrs),"terminal_service_parity_max_abs_error":terminal_error,"mess_terminal_soc_max_abs_error_kwh":mess_terminal_error,"controls_96x60":controls_96x60,"workload_payload":np.asarray(workload_payload),"mess_p_96x4":mess_p_payload,"mess_q_96x4":mess_q_payload,"mess_e_97x4":mess_e_payload,"obj_bound":float(model.ObjBound),"mip_gap":float(model.MIPGap) if bool(model.IsMIP) else 0.0,"node_count":float(model.NodeCount),"schedule_sha256":schedule_hash,"tap_decision_variable_count":0,"restoration_cut_count":len(restoration_cuts),"OpenDSS_call_count_inside_model":0}
 
     if case == "ALL":
         return {target: solve_one(target) for target in ("B0","B1","B2","B3")}
