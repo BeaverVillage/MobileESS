@@ -1,0 +1,147 @@
+{
+  "Day_Ahead_prohibited_field_use_count": 0,
+  "artifact_id": "V29_CUTOFF_FIELD_OBSERVABILITY_AUDIT_V1",
+  "fields": [
+    {
+      "basis": "request-time queue/partition field",
+      "classification": "CUTOFF_OBSERVABLE",
+      "field": "partition",
+      "use": "strict full-node admission",
+      "used_by_V29_DA": true
+    },
+    {
+      "basis": "request-time requested nodes",
+      "classification": "CUTOFF_OBSERVABLE",
+      "field": "nodes_req",
+      "use": "strict full-node admission and service mass",
+      "used_by_V29_DA": true
+    },
+    {
+      "basis": "request-time requested GPUs",
+      "classification": "CUTOFF_OBSERVABLE",
+      "field": "gpus_requested",
+      "use": "strict full-node admission",
+      "used_by_V29_DA": true
+    },
+    {
+      "basis": "request-time requested walltime",
+      "classification": "CUTOFF_OBSERVABLE",
+      "field": "wallclock_req",
+      "use": "service mass",
+      "used_by_V29_DA": true
+    },
+    {
+      "basis": "request-time resource request",
+      "classification": "CUTOFF_OBSERVABLE",
+      "field": "processors_req",
+      "use": "audit only",
+      "used_by_V29_DA": false
+    },
+    {
+      "basis": "request-time resource request",
+      "classification": "CUTOFF_OBSERVABLE",
+      "field": "memory_req",
+      "use": "audit only",
+      "used_by_V29_DA": false
+    },
+    {
+      "basis": "request-time scheduling field",
+      "classification": "CUTOFF_OBSERVABLE",
+      "field": "qos",
+      "use": "audit only",
+      "used_by_V29_DA": false
+    },
+    {
+      "basis": "submission event timestamp",
+      "classification": "CUTOFF_OBSERVABLE",
+      "field": "submit_time",
+      "use": "submitted_at <= cutoff",
+      "used_by_V29_DA": true
+    },
+    {
+      "basis": "future event timestamp used only to reconstruct not-started-at-cutoff",
+      "classification": "RECONSTRUCTED_PAST_STATE",
+      "field": "start_time",
+      "use": "queue membership reconstruction only",
+      "used_by_V29_DA": true
+    },
+    {
+      "basis": "used only to exclude a never-started job already terminated before cutoff",
+      "classification": "RECONSTRUCTED_PAST_STATE",
+      "field": "end_time",
+      "use": "queue membership reconstruction only",
+      "used_by_V29_DA": true
+    },
+    {
+      "basis": "final/eventual state",
+      "classification": "POST_CUTOFF_EX_POST_ONLY",
+      "field": "state",
+      "use": "prohibited",
+      "used_by_V29_DA": false
+    },
+    {
+      "basis": "eventual COMPLETED status",
+      "classification": "POST_CUTOFF_EX_POST_ONLY",
+      "field": "state_simple",
+      "use": "prohibited",
+      "used_by_V29_DA": false
+    },
+    {
+      "basis": "actual runtime",
+      "classification": "POST_CUTOFF_EX_POST_ONLY",
+      "field": "wallclock_used",
+      "use": "prohibited",
+      "used_by_V29_DA": false
+    },
+    {
+      "basis": "allocated/used nodes",
+      "classification": "POST_CUTOFF_EX_POST_ONLY",
+      "field": "nodes_used",
+      "use": "prohibited",
+      "used_by_V29_DA": false
+    },
+    {
+      "basis": "allocated GPU nodes",
+      "classification": "POST_CUTOFF_EX_POST_ONLY",
+      "field": "gpu_nodes_occupied",
+      "use": "prohibited",
+      "used_by_V29_DA": false
+    },
+    {
+      "basis": "future allocated-node evidence",
+      "classification": "POST_CUTOFF_EX_POST_ONLY",
+      "field": "nodelist",
+      "use": "prohibited",
+      "used_by_V29_DA": false
+    },
+    {
+      "basis": "realized sharing indicator",
+      "classification": "POST_CUTOFF_EX_POST_ONLY",
+      "field": "shared_job_count",
+      "use": "prohibited",
+      "used_by_V29_DA": false
+    },
+    {
+      "basis": "realized sharing indicator",
+      "classification": "POST_CUTOFF_EX_POST_ONLY",
+      "field": "nodes_shared",
+      "use": "prohibited",
+      "used_by_V29_DA": false
+    },
+    {
+      "basis": "realized sharing indicator",
+      "classification": "POST_CUTOFF_EX_POST_ONLY",
+      "field": "jobs_shared",
+      "use": "prohibited",
+      "used_by_V29_DA": false
+    },
+    {
+      "basis": "realized wait duration",
+      "classification": "POST_CUTOFF_EX_POST_ONLY",
+      "field": "queue_wait",
+      "use": "prohibited",
+      "used_by_V29_DA": false
+    }
+  ],
+  "status": "PASS"
+}
