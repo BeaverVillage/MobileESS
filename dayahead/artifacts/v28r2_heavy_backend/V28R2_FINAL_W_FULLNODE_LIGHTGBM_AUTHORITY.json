@@ -1,0 +1,153 @@
+{
+  "April_01_training_end": "2025-03-30",
+  "April_training_rows": 0,
+  "GPU_hour_to_node_hour_divisor": 4,
+  "May_training_rows": 0,
+  "W_FULLNODE_LIGHTGBM_READY": true,
+  "access_audit": {
+    "April_archive_member_role": "boundary_completion_for_pre_April_submit_targets_only",
+    "April_training_rows": 0,
+    "G_unit": "H100_GPU_equivalent_15min_average",
+    "May_training_rows": 0,
+    "W_unit": "H100_node_hour_arrival",
+    "axis_end_exclusive": "2025-04-01",
+    "axis_start": "2024-08-01",
+    "kestrel_archive_members_opened": [
+      "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2025/month=4/kestrel_jobs_202504_0.parquet"
+    ],
+    "maximum_kestrel_month_opened": 202504,
+    "maximum_target_timestamp_exclusive": "2025-04-01",
+    "p_missing_slots": 572,
+    "partial_and_shared_controllable_W": false,
+    "partial_and_shared_retained_in_total_G": true,
+    "resolution_minutes": 15,
+    "slots_per_day": 96,
+    "strict_fullnode_eligible_jobs": 37434,
+    "strict_fullnode_node_hours": 47131.946388888886,
+    "strict_fullnode_training_jobs": 31971,
+    "strict_fullnode_training_jobs_equivalent_check": "submit-time slot mass on 2024-08-19 through 2025-03-31",
+    "strict_fullnode_training_node_hours": 44174.44472222223,
+    "timezone": "FIXED_AEST_UTC_PLUS_10",
+    "valid_total_reference_h100_jobs": 227993
+  },
+  "artifact_id": "V28R2_FINAL_W_FULLNODE_LIGHTGBM_AUTHORITY_V1",
+  "cohort_ids": [
+    "N01_R00",
+    "N01_R01",
+    "N01_R02",
+    "N02_R00",
+    "N02_R01",
+    "N02_R02",
+    "N04_R00",
+    "N04_R01",
+    "N04_R02",
+    "N08_R00",
+    "N08_R01",
+    "N08_R02",
+    "N16_R00",
+    "N16_R01",
+    "N16_R02"
+  ],
+  "configuration": {
+    "deterministic": true,
+    "learning_rate": 0.035,
+    "max_depth": 3,
+    "min_child_samples": 12,
+    "n_estimators": 120,
+    "n_jobs": 1,
+    "num_leaves": 7,
+    "random_state": 20260901,
+    "reg_lambda": 1.0,
+    "verbosity": -1
+  },
+  "conversion_count": 0,
+  "facility_MW_multiplication_count": 0,
+  "features": [
+    "dow_sin",
+    "dow_cos",
+    "weekend",
+    "month_sin",
+    "month_cos",
+    "lag_2d",
+    "lag_7d",
+    "mean_2_8d",
+    "std_2_8d"
+  ],
+  "fits": [
+    {
+      "channel": "W_FULLNODE_DAILY",
+      "model_sha256": {
+        "q10": "b1dcba77f01893c1227a2ba0f881156bcb8d70f455ae07fa20d51311c25cce7e",
+        "q50": "6fffb9701bb79a9cbf58b5d1508a378cb81ffebca912369b2bfadf1fc617e8b7",
+        "q90": "593f3eb0184453a6b00d7a619e12a576f772c0398b99f02adc932ddf9e855bd5"
+      },
+      "noncrossing_projection_cells": 2,
+      "noncrossing_violations": 0,
+      "prediction_min": {
+        "q10": 0.025923901736978002,
+        "q50": 6.181468536681849,
+        "q90": 106.10508556319361
+      },
+      "raw_noncrossing_violations": 1,
+      "training_end": "2025-03-30",
+      "training_rows": 224,
+      "variant": "APRIL_01_CAUSAL_FIT"
+    },
+    {
+      "channel": "W_FULLNODE_DAILY",
+      "model_sha256": {
+        "q10": "39206ddb860c6fd9154eb5fcec2194b622a32b7fde44f6cb82a3f0d057bc3997",
+        "q50": "054eaedce384ca23e8db7b0723eee172f0c7da524c7a9719160d7af31251edac",
+        "q90": "fd682595ab5d09505efca117e2a79f744c4ece1df4b8c66bf8c1df83fdbeb77f"
+      },
+      "noncrossing_projection_cells": 0,
+      "noncrossing_violations": 0,
+      "prediction_min": {
+        "q10": 0.025204416706974868,
+        "q50": 6.759336756464524,
+        "q90": 125.79441079476204
+      },
+      "raw_noncrossing_violations": 0,
+      "training_end": "2025-03-31",
+      "training_rows": 225,
+      "variant": "GENERAL_THROUGH_MARCH_31_FIT"
+    }
+  ],
+  "general_training_end": "2025-03-31",
+  "mean_is_Q50_copy": false,
+  "model_family": "LIGHTGBM_QUANTILE",
+  "model_output_shape": [
+    1
+  ],
+  "no_post_April_calibration": true,
+  "optimizer_shape_after_training_only_adapter": [
+    96,
+    15
+  ],
+  "optimizer_statistic": "Q50",
+  "partial_controllable": false,
+  "public_quantile_integrity": "FIXED_PER_CELL_ASCENDING_REARRANGEMENT_THEN_EXPM1; NOT_FITTED; RAW_CROSSINGS_AUDITED",
+  "quantiles": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "raw_unit": "H100_node_hour",
+  "seed": 20260901,
+  "source_sha256": {
+    "esif": "19cd12405dde9144b1a360e8c8418666c399a3d0d15a7f846880d71ab22f9dd4",
+    "kestrel": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f"
+  },
+  "status": "PASS",
+  "target": "strict full-node eligible H100 node-hour daily arrival mass",
+  "target_transform": "log1p_nonnegative_target",
+  "training_start": "2024-08-19"
+}

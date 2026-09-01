@@ -1,0 +1,54 @@
+{
+  "OPTIMIZER_CHANNEL_AUTHORITY_READY": true,
+  "artifact_id": "V28R2_OPTIMIZER_CHANNEL_SCHEMA_V1",
+  "channels": {
+    "G_REF": {
+      "shape": [
+        96
+      ],
+      "statistic": "Q90",
+      "unit": "equivalent_case_H100_GPU"
+    },
+    "P_IT_REF": {
+      "shape": [
+        96
+      ],
+      "statistic": "Q90",
+      "unit": "equivalent_case_kW"
+    },
+    "W_F": {
+      "shape": [
+        96,
+        15
+      ],
+      "statistic": "Q50",
+      "unit": "H100_node_hour_arrival"
+    }
+  },
+  "forbidden": [
+    "mean_equals_Q50_copy",
+    "facility_MW_times_GPU_hour",
+    "PARTIAL_actuator",
+    "future_actual_feature"
+  ],
+  "quantile_output_contract": {
+    "integrity": "0 <= Q10 <= Q50 <= Q90",
+    "inverse_transform": "expm1",
+    "noncrossing": "fixed per-cell ascending rearrangement of the three raw log-quantile predictions",
+    "order": [
+      "Q10",
+      "Q50",
+      "Q90"
+    ],
+    "post_April_fitted_calibration": false,
+    "raw_crossings_retained_in_authority_audit": true,
+    "target_transform": "log1p"
+  },
+  "status": "PASS",
+  "time_contract": {
+    "forecast_cutoff": "D-1 18:00 AEST",
+    "resolution_minutes": 15,
+    "slots_per_day": 96,
+    "timezone": "FIXED_AEST_UTC_PLUS_10"
+  }
+}
