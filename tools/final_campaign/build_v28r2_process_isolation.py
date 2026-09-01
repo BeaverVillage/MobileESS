@@ -6,10 +6,16 @@ from __future__ import annotations
 import ast
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 
 REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO))
+
+from dayahead.v28r2.backend_contract import DAY_WORKERS, GUROBI_THREADS  # noqa: E402
+
+
 OUT = REPO / "dayahead/artifacts/v28r2_heavy_backend"
 RUNNER = REPO / "tools/final_campaign/run_v28r2_april.py"
 MONITOR = REPO / "tools/final_campaign/monitor_v28r2_april.py"
@@ -79,7 +85,8 @@ def main() -> None:
     process_ready = (
         not thread_occurrences
         and popen_calls >= 1
-        and "DAY_WORKERS = 2" in runner_source
+        and "DAY_WORKERS" in runner_source
+        and "GUROBI_THREADS" in runner_source
         and "shell=False" in runner_source
         and "dayahead.v28r2.heavy_backend" in runner_source
         and all(record["lf_only"] and record["set_euo_pipefail"] for record in scripts.values())
@@ -98,8 +105,8 @@ def main() -> None:
         "status": "PASS" if process_ready else "FAIL",
         "PROCESS_ISOLATION_READY": process_ready,
         "production_model": "parent supervisor -> independent day CLI subprocess",
-        "day_workers": 2,
-        "gurobi_threads_per_child": 4,
+        "day_workers": DAY_WORKERS,
+        "gurobi_threads_per_child": GUROBI_THREADS,
         "within_child_heavy_solves": "SEQUENTIAL",
         "Popen_call_count": popen_calls,
         "thread_executor_occurrences": thread_occurrences,

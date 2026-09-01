@@ -21,11 +21,11 @@ The only permitted smoke completed all 30 steps on 2025-04-01: 7 solver calls (D
 
 ## 20–23. Tests, artifacts, Git, and remaining state
 
-All 66 V28R2 tests pass. Artifact hashes are in `V28R2_ARTIFACT_SHA256.json`; historical/raw preservation passes. The fixed commit sequence is retained with no merge. April full-month PASS, May runner, May final science, and final grid-science authorization remain false until their separate work is completed.
+All 68 V28R2 tests pass. Artifact hashes are in `V28R2_ARTIFACT_SHA256.json`; historical/raw preservation passes. The fixed commit sequence is retained with no merge. April full-month PASS, May runner, May final science, and final grid-science authorization remain false until their separate work is completed.
 
 ## 24–25. Local execution and monitoring
 
-See `V28R2_LOCAL_APRIL_EXECUTION_COMMANDS.md` for two exact copy-paste WSL commands: one starts setup, source verification, execution, and audit; the other opens the compact 10-second monitor. The runner uses two isolated day processes, four Gurobi threads per child, and 15-minute/96-slot days. The monitor is read-only.
+See `V28R2_LOCAL_APRIL_EXECUTION_COMMANDS.md` for two exact copy-paste WSL commands: one starts setup, source verification, execution, and audit; the other opens the compact 10-second monitor. The runner uses four isolated day processes, four Gurobi threads per child, and 15-minute/96-slot days. The monitor is read-only.
 
 ## 26. Q1–Q25
 

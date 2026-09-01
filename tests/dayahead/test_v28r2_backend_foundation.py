@@ -29,7 +29,7 @@ def test_day_run_spec_is_fixed_96_slot_aest_and_four_threads():
     value.validate()
     assert len(value.timestamps_fixed_aest) == 96
     assert value.settings.gurobi_threads == 4
-    assert value.settings.day_workers == 2
+    assert value.settings.day_workers == 4
 
 
 def test_git_head_retries_windows_linked_worktree_path_under_wsl(tmp_path: Path, monkeypatch):

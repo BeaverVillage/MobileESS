@@ -22,7 +22,7 @@ def test_april_plan_uses_exact_day_cli_and_frozen_resources():
     assert len(april_days()) == 30
     assert april_days()[0] == "2025-04-01"
     assert april_days()[-1] == "2025-04-30"
-    assert DAY_WORKERS == 2
+    assert DAY_WORKERS == 4
     command = child_command("2025-04-01", python="python-test")
     assert command == (
         "python-test", "-m", "dayahead.v28r2.heavy_backend",
@@ -31,7 +31,7 @@ def test_april_plan_uses_exact_day_cli_and_frozen_resources():
     )
 
 
-def test_supervisor_never_has_more_than_two_day_processes(tmp_path: Path):
+def test_supervisor_never_has_more_than_four_day_processes(tmp_path: Path):
     roots = {
         "frozen_artifacts": tmp_path / "results",
         "logs": tmp_path / "logs",
@@ -65,7 +65,7 @@ def test_supervisor_never_has_more_than_two_day_processes(tmp_path: Path):
 
     commands = [(day, child_command(day, python="python-test")) for day in april_days()[:7]]
     result = supervise_commands(commands, roots, popen_factory=factory, poll_seconds=0.01)
-    assert peak == 2
+    assert peak == 4
     assert len(result) == 7
     assert all(row["status"] == "PASS" for row in result)
 

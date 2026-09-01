@@ -20,13 +20,12 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 
 from dayahead.v28r2.certificate import verify_certificate  # noqa: E402
+from dayahead.v28r2.backend_contract import DAY_WORKERS, GUROBI_THREADS  # noqa: E402
 from dayahead.v28r2.day_state import atomic_json  # noqa: E402
 
 
 APRIL_START = date(2025, 4, 1)
 APRIL_END = date(2025, 4, 30)
-DAY_WORKERS = 2
-GUROBI_THREADS = 4
 ROOT_SUFFIX = "v28r2_april_full_month_preflight"
 READY_FLAGS = REPO / "dayahead/artifacts/v28r2_heavy_backend/V28R2_IMPLEMENTATION_READY_FLAGS.json"
 REQUIRED_LAUNCH_GATES = (

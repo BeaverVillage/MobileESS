@@ -10,6 +10,8 @@ import time
 from pathlib import Path
 from typing import Mapping
 
+from dayahead.v28r2.backend_contract import DAY_WORKERS, GUROBI_THREADS
+
 
 REPO = Path(__file__).resolve().parents[2]
 ROOT_SUFFIX = "v28r2_april_full_month_preflight"
@@ -194,7 +196,7 @@ def snapshot(
     completed = counts["PASS"] + counts["FAIL"]
     eta = None
     if elapsed is not None and completed > 0 and completed < len(APRIL_DAYS):
-        eta = elapsed / completed * (len(APRIL_DAYS) - completed) / 2.0
+        eta = elapsed / completed * (len(APRIL_DAYS) - completed) / DAY_WORKERS
     visible_running = [row for row in rows if row["status"] == "RUNNING"]
     visible_failed = [row for row in rows if row["status"] in {"FAIL", "INCOMPLETE"}]
     campaign_status = (
@@ -207,8 +209,8 @@ def snapshot(
         "campaign": "APRIL_PREFLIGHT",
         "status": campaign_status,
         "resolution": "15 min / 96 slots",
-        "day_workers": 2,
-        "gurobi_threads": 4,
+        "day_workers": DAY_WORKERS,
+        "gurobi_threads": GUROBI_THREADS,
         "totals": {
             "total": 30,
             **counts,

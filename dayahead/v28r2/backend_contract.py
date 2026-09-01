@@ -15,7 +15,7 @@ from typing import Mapping
 
 AEST = timezone(timedelta(hours=10), name="AEST_FIXED_UTC_PLUS_10")
 NATIVE_WINDOWS = os.name == "nt"
-DAY_WORKERS = 2
+DAY_WORKERS = 4
 GUROBI_THREADS = 4
 SLOTS = 96
 RESOLUTION_MINUTES = 15

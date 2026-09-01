@@ -105,7 +105,7 @@ def test_production_factory_binds_all_steps_without_running_them(tmp_path: Path)
     state = tmp_path / "state.json"
     handlers = ProductionHandlers(REPO, spec, tmp_path / "day", state, "non-authority-smoke")
     assert tuple(handlers.handlers) == EXECUTION_STEPS
-    assert spec.settings.day_workers == 2
+    assert spec.settings.day_workers == 4
     assert spec.settings.gurobi_threads == 4
     assert spec.source_day_sha256 == "ba0b73096bc32174e60c81af02e4aa9ef7ceae06370c249c05dd6ddc827c65cf"
 

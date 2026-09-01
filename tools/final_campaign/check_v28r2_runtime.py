@@ -13,6 +13,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 
 from dayahead.v28r2.source_manifest import verify_day_manifest  # noqa: E402
+from dayahead.v28r2.backend_contract import DAY_WORKERS, GUROBI_THREADS  # noqa: E402
 from dayahead.v28r2.source_preflight import APRIL_DAYS, day_root  # noqa: E402
 from tools.final_campaign.run_v28r2_april import verify_launch_gates  # noqa: E402
 
@@ -40,7 +41,7 @@ def check_runtime(repo: Path = REPO) -> dict[str, object]:
 
     model = gp.Model("V28R2_WSL_PREFLIGHT")
     model.Params.OutputFlag = 0
-    model.Params.Threads = 4
+    model.Params.Threads = GUROBI_THREADS
     model.dispose()
     verified_days = 0
     for day in APRIL_DAYS:
@@ -71,8 +72,8 @@ def check_runtime(repo: Path = REPO) -> dict[str, object]:
         "source_days_verified": verified_days,
         "production_contract_sha256": spec.sha256,
         "production_handlers_verified": 30,
-        "day_workers": 2,
-        "gurobi_threads": 4,
+        "day_workers": DAY_WORKERS,
+        "gurobi_threads": GUROBI_THREADS,
     }
 
 
@@ -85,7 +86,8 @@ def main() -> int:
     print(
         "[실행 준비 PASS] "
         f"Python {result['python']} | Gurobi {result['gurobi']} | "
-        f"sources {result['source_days_verified']}/30 | workers 2 | threads 4"
+        f"sources {result['source_days_verified']}/30 | "
+        f"workers {result['day_workers']} | threads {result['gurobi_threads']}"
     )
     return 0
 
