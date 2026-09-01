@@ -1,0 +1,22 @@
+{
+  "artifact_id": "V23M_RACQ_FLEX_ARCHITECTURE_CONTRACT_V1",
+  "proposed_model_name": "ACQ-Flex",
+  "RACQ_RECURRENCE_GATE_PASS": false,
+  "recurrence_branch_status": "DISABLED_BY_PREREGISTERED_GATE",
+  "modules": {
+    "A": "hourly DeepSets plus causal decay-GRU",
+    "B": "all-motif chunked attention memory; experimental only when recurrence gate fails",
+    "C": "recurring/innovation decomposition; disabled in ACQ fallback",
+    "D": "hurdle Bernoulli plus zero-truncated negative binomial count",
+    "E": "two-component LogNormal body plus bounded-shape GPD tail",
+    "F": "low-rank 24x6x5 cohort decoder",
+    "G": "exactly coherent 96x6x5 allocation",
+    "H": "differentiable fluid EDF and frozen exact scheduler adapter",
+    "I": "frozen tier-to-power IT projection; PUE excluded from ML loss"
+  },
+  "mass_identity_tolerance_GPU_h": 1e-09,
+  "motif_top_K": null,
+  "all_active_motifs_required": true,
+  "C_MODEL_GPU_equivalent": 528,
+  "C_MODEL_interpretation": "CASE_STUDY_ONLY_NOT_MELBOURNE_INSTALLED_CAPACITY"
+}

@@ -1,0 +1,80 @@
+{
+  "artifact_id": "V23M_TRAINING_POLICY_FREEZE_V1",
+  "frozen_before_outer_CV": true,
+  "model_family_evaluated": "ACQ-Flex",
+  "configs": [
+    {
+      "config_id": "A",
+      "hidden_size": 64,
+      "motif_hidden_size": 48,
+      "rank": 8,
+      "learning_rate": 0.001,
+      "dropout": 0.0,
+      "tail_threshold_quantile": 0.95
+    },
+    {
+      "config_id": "B",
+      "hidden_size": 64,
+      "motif_hidden_size": 48,
+      "rank": 8,
+      "learning_rate": 0.0003,
+      "dropout": 0.1,
+      "tail_threshold_quantile": 0.95
+    },
+    {
+      "config_id": "C",
+      "hidden_size": 96,
+      "motif_hidden_size": 64,
+      "rank": 12,
+      "learning_rate": 0.0003,
+      "dropout": 0.1,
+      "tail_threshold_quantile": 0.95
+    },
+    {
+      "config_id": "D",
+      "hidden_size": 96,
+      "motif_hidden_size": 64,
+      "rank": 12,
+      "learning_rate": 0.001,
+      "dropout": 0.0,
+      "tail_threshold_quantile": 0.9
+    }
+  ],
+  "optimizer": "AdamW",
+  "max_epochs": 100,
+  "min_epochs": 15,
+  "early_stopping_patience": 10,
+  "gradient_clip_norm": 1.0,
+  "weight_decay_inner_candidates": [
+    0.0001,
+    0.001
+  ],
+  "seeds": [
+    20260901,
+    20260902,
+    20260903
+  ],
+  "seed_cherry_pick": false,
+  "queue_power_loss_configs": {
+    "QP0": [
+      0.0,
+      0.0
+    ],
+    "QP1": [
+      0.05,
+      0.0
+    ],
+    "QP2": [
+      0.05,
+      0.05
+    ],
+    "QP3": [
+      0.1,
+      0.05
+    ]
+  },
+  "selection_metrics": "TRAINING_ONLY_SCALE_INDEPENDENT_ML_METRICS",
+  "April_reads_before_freeze": 0,
+  "grid_objective_reads_for_selection": 0,
+  "result_based_retuning": 0
+}
