@@ -26,6 +26,7 @@ class ModelConfig:
     rank: int = 8
     dropout: float = 0.0
     recurrence_enabled: bool = False
+    mass_scale_GPU_h: float = 10000.0
 
 
 class RACQFlex(nn.Module):
@@ -60,7 +61,7 @@ class RACQFlex(nn.Module):
             motif = self.motif_memory(motifs, motif_mask, queries).mean(dim=1)
             state = torch.cat([state, motif], dim=-1)
         state = self.context(state)
-        total = F.softplus(self.total_mass(state)).squeeze(-1)
+        total = F.softplus(self.total_mass(state)).squeeze(-1) * self.config.mass_scale_GPU_h
         hourly = self.cohorts(state, total)
         slots = self.allocation(state, hourly)
         return {

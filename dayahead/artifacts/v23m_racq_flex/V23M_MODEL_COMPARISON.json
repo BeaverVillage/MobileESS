@@ -1,0 +1,78 @@
+{
+  "artifact_id": "V23M_MODEL_COMPARISON_V1",
+  "evaluated_model": "B11_ACQ_FLEX",
+  "RACQ_run": false,
+  "selected_configs_by_fold": [
+    "A",
+    "A",
+    "D",
+    "A",
+    "D"
+  ],
+  "config_selection": "INNER_CHRONOLOGICAL_TRAINING_ONLY",
+  "ACQ_aggregate_metrics": {
+    "daily_WAPE": 1.091156165344103,
+    "Q50_WAPE": 1.0609612917929359,
+    "daily_MAE_GPU_h": 3617.663083380158,
+    "daily_RMSE_GPU_h": 7155.284560546616,
+    "aggregate_mass_ratio": 0.5967570632350877,
+    "burst_WAPE": 0.8897447088530759,
+    "Q50_coverage": 0.3708609271523179,
+    "Q90_coverage": 0.8543046357615894,
+    "negative_prediction_count": 0,
+    "quantile_crossing_count": 0,
+    "flexible_IT_power_WAPE": 1.5623611757575064,
+    "peak_flexible_IT_power_error_kW": -160.32491961541575,
+    "peak_timing_error_slots": 2561.0
+  },
+  "baseline_rows": [
+    {
+      "model": "B0_V18R2_CANDIDATE_B",
+      "status": "PRESERVED_SERIALIZED",
+      "daily_WAPE": 0.9180979299674747,
+      "burst_WAPE": 0.9395434131303984,
+      "aggregate_mass_ratio": 0.26323435001915396
+    },
+    {
+      "model": "B1_PERSISTENCE_PROXY",
+      "status": "PRESERVED_SERIALIZED",
+      "daily_WAPE": 1.411533258849319,
+      "burst_WAPE": 0.8631208922671132,
+      "aggregate_mass_ratio": 1.2016903850413747
+    },
+    {
+      "model": "B2_LIGHTGBM_TWEEDIE",
+      "status": "PRESERVED_SERIALIZED",
+      "daily_WAPE": 0.976108062962391,
+      "burst_WAPE": 0.8682298695981397,
+      "aggregate_mass_ratio": 0.6505082783764421
+    },
+    {
+      "model": "B3_LIGHTGBM_QUANTILE",
+      "status": "PRESERVED_SERIALIZED",
+      "daily_WAPE": 0.8902500584818535,
+      "burst_WAPE": 0.9206230064013147,
+      "aggregate_mass_ratio": 0.36370296301248994
+    },
+    {
+      "model": "V19-A",
+      "status": "PRESERVED_SERIALIZED",
+      "daily_WAPE": 1.0076055679711258,
+      "burst_WAPE": 0.8471469668307847,
+      "aggregate_mass_ratio": 0.7562750273077996
+    },
+    {
+      "model": "B1_V23M_CAUSAL_LAG1",
+      "status": "REPRODUCED_CAUSALLY",
+      "daily_WAPE": 1.3224544175109205,
+      "burst_WAPE": 0.8845957714978162,
+      "aggregate_mass_ratio": 0.9887431317409769
+    }
+  ],
+  "execution": {
+    "device": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "CUDA": true,
+    "fold_seed_device_mixing": 0,
+    "total_runtime_seconds": 59.988702800000006
+  }
+}

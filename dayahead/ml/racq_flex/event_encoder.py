@@ -31,7 +31,7 @@ class DecayGRU(nn.Module):
         self.decay_unconstrained = nn.Parameter(torch.zeros(hidden_size))
         self.cell = nn.GRUCell(input_size, hidden_size)
 
-    def forward(self, hourly: Tensor, elapsed_hours: Tensor) -> tuple[Tensor, Tensor]:
+    def forward(self, hourly: Tensor, elapsed_hours: Tensor, observed_hours: Tensor | None = None) -> tuple[Tensor, Tensor]:
         """Return every causal state and the final state."""
 
         batch, steps, _ = hourly.shape
@@ -40,7 +40,8 @@ class DecayGRU(nn.Module):
         rate = F.softplus(self.decay_unconstrained).unsqueeze(0)
         for step in range(steps):
             state = state * torch.exp(-rate * elapsed_hours[:, step : step + 1])
-            state = self.cell(hourly[:, step], state)
+            candidate = self.cell(hourly[:, step], state)
+            state = candidate if observed_hours is None else torch.where(observed_hours[:, step : step + 1], candidate, state)
             states.append(state)
         stacked = torch.stack(states, dim=1)
         return stacked, state
@@ -56,5 +57,5 @@ class GlobalEventStateEncoder(nn.Module):
 
     def forward(self, events: Tensor, event_mask: Tensor, elapsed_hours: Tensor) -> Tensor:
         hourly = self.set_encoder(events, event_mask)
-        _, final = self.temporal(hourly, elapsed_hours)
+        _, final = self.temporal(hourly, elapsed_hours, event_mask.any(dim=2))
         return final
