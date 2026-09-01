@@ -1,0 +1,30 @@
+{
+  "artifact_id": "V22S_CAPACITY_BOUNDARY_TAXONOMY_V1",
+  "allowed_values": [
+    "ACTUAL_OPERATING_IT_LOAD",
+    "METERED_PEAK_DEMAND",
+    "CONTRACTED_IT_LOAD",
+    "BILLED_IT_CAPACITY",
+    "IT_LOAD",
+    "IT_CAPACITY",
+    "CRITICAL_IT_POWER",
+    "OPERATING_CAPACITY",
+    "BUILT_CAPACITY",
+    "FULLY_BUILT_OUT_POWER",
+    "FACILITY_POWER",
+    "INCOMING_POWER",
+    "DESIGN_CAPACITY",
+    "FUTURE_ULTIMATE_CAPACITY",
+    "MVA_INPUT",
+    "UPS_CAPACITY",
+    "GENERATOR_NAMEPLATE",
+    "SERVER_COUNT",
+    "UNKNOWN"
+  ],
+  "silent_boundary_relabel_count": 0,
+  "rules": [
+    "Capacity is not actual load",
+    "MVA is not MW without an explicit or engineering-sensitivity PF",
+    "UPS/generator/server proxies are not IT MW"
+  ]
+}
