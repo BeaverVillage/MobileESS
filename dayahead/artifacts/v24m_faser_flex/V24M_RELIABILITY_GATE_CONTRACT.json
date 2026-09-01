@@ -1,0 +1,11 @@
+{
+  "artifact_id": "V24M_RELIABILITY_GATE_CONTRACT_V1",
+  "alpha_semantics": "weight on historical analog distribution",
+  "formula": "sigmoid(b0-softplus(b1)dmin+softplus(b2)log1p(neff)-softplus(b3)dispersion-softplus(b4)GPvariance-softplus(b5)drift)",
+  "parameter_count": 6,
+  "fit_data": "inner-validation only",
+  "objective": "CRPS component preference",
+  "fallback": "best single component when gate proxy does not improve both",
+  "April_reads": 0,
+  "outer_validation_tuning_reads": 0
+}

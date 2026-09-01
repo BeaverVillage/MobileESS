@@ -1,0 +1,84 @@
+{
+  "artifact_id": "V24M_TRAINING_POLICY_FREEZE_V1",
+  "frozen_before_outer_FASER_evaluation": true,
+  "seeds": [
+    20260901,
+    20260902,
+    20260903
+  ],
+  "predictive_samples": 4096,
+  "fit_inner_calibration_split_days": [
+    14,
+    14
+  ],
+  "early_fold_fallback_days": [
+    10,
+    10
+  ],
+  "signature_candidates": [
+    "SIG-A",
+    "SIG-B",
+    "SIG-C"
+  ],
+  "kernel_candidates": [
+    "K1",
+    "K2"
+  ],
+  "joint_candidates": [
+    "J1",
+    "J2"
+  ],
+  "retrieval_configs": {
+    "RET-A": {
+      "K": 10,
+      "temperature": 0.5
+    },
+    "RET-B": {
+      "K": 20,
+      "temperature": 0.5
+    },
+    "RET-C": {
+      "K": 20,
+      "temperature": 1.0
+    },
+    "RET-D": {
+      "K": 30,
+      "temperature": 1.0
+    }
+  },
+  "full_configs": {
+    "F1": [
+      "SIG-A",
+      "K1",
+      "J2",
+      "RET-A",
+      10
+    ],
+    "F2": [
+      "SIG-B",
+      "K1",
+      "J2",
+      "RET-B",
+      10
+    ],
+    "F3": [
+      "SIG-A",
+      "K2",
+      "J1",
+      "RET-C",
+      20
+    ],
+    "F4": [
+      "SIG-C",
+      "K2",
+      "J2",
+      "RET-D",
+      20
+    ]
+  },
+  "if_both_probe_signals_false": "RUN_F1_ONLY",
+  "otherwise": "SELECT_F1_TO_F4_ON_INNER_VALIDATION_ONLY",
+  "result_based_config_additions": 0,
+  "lucky_seed_selection": 0,
+  "April_reads": 0
+}
