@@ -23,6 +23,10 @@ def test_adapter_mass_and_reference_schedule_determinism():
     assert np.all(first.backlog_nodeh >= 0)
     assert np.all(first.p_f_ref_kw >= 0)
     assert np.all(first.g_f_ref_gpu >= 0)
+    # Both racks must have the same utilization under the frozen
+    # capacity-proportional invariant.
+    utilization = first.x_ref_nodeh.sum(axis=0) / capacities[:, None]
+    assert np.allclose(utilization[0], utilization[1], atol=1e-12, rtol=0)
 
 
 def test_reference_authority_b0_b2_bytes_are_identical():

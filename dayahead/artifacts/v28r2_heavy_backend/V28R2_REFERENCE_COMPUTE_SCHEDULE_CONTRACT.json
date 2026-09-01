@@ -11,7 +11,7 @@
     "frozen_rack_GPU_weights",
     "528_GPU_capacity_authority"
   ],
-  "policy": "as-arrived earliest-feasible fluid service",
+  "policy": "as-arrived earliest-feasible fluid service with frozen capacity-proportional rack utilization invariant",
   "prohibited_inputs": [
     "actual",
     "grid_loading",
@@ -30,5 +30,6 @@
     "AIDC_id",
     "rack_id",
     "slot_order_with_time_progressing_earliest_first"
-  ]
+  ],
+  "tie_break_scope": "cohort service priority and floating arithmetic residual only; rack fluid mass follows frozen GPU capacity weights"
 }

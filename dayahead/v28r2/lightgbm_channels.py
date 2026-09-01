@@ -65,6 +65,20 @@ def enforce_quantile_integrity(raw_log_predictions: np.ndarray) -> np.ndarray:
     return np.maximum(np.expm1(np.sort(raw, axis=0)), 0.0)
 
 
+def predict_serialized_quantiles(model_dir: Path, channel: str, variant: str, features: pd.DataFrame) -> np.ndarray:
+    """Load the three hashed model texts without passing a Unicode path to C."""
+
+    import lightgbm as lgb
+
+    raw = []
+    for quantile in QUANTILES:
+        label = f"q{int(quantile * 100):02d}"
+        path = model_dir / f"{channel}_{variant}_{label}.txt"
+        booster = lgb.Booster(model_str=path.read_text(encoding="utf-8"))
+        raw.append(np.asarray(booster.predict(features), dtype=float))
+    return enforce_quantile_integrity(np.stack(raw))
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:

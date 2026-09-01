@@ -133,14 +133,24 @@ def build_reference_schedule(
         backlog[slot + 1] = backlog[slot] + arrivals[slot]
         remaining = capacities.copy()
         for cohort_index in range(len(cohorts)):
-            for rack_index in range(len(racks)):
-                served = min(backlog[slot + 1, cohort_index], remaining[rack_index])
-                allocation[cohort_index, rack_index, slot] = served
-                backlog[slot + 1, cohort_index] -= served
-                remaining[rack_index] -= served
-                if backlog[slot + 1, cohort_index] <= 1e-12:
-                    backlog[slot + 1, cohort_index] = 0.0
-                    break
+            total_remaining = float(remaining.sum())
+            total_served = min(float(backlog[slot + 1, cohort_index]), total_remaining)
+            if total_served <= 0 or total_remaining <= 0:
+                continue
+            # The frozen rack authority is explicitly a capacity-proportional
+            # utilization invariant.  Cohorts retain lexical priority while
+            # fluid service is spread in proportion to remaining rack capacity.
+            served = total_served * remaining / total_remaining
+            # Close floating arithmetic in deterministic AIDC/rack order only.
+            arithmetic_residual = total_served - float(served.sum())
+            if arithmetic_residual:
+                served[0] += arithmetic_residual
+            allocation[cohort_index, :, slot] = served
+            backlog[slot + 1, cohort_index] -= total_served
+            remaining -= served
+            remaining[np.abs(remaining) <= 1e-14] = 0.0
+            if backlog[slot + 1, cohort_index] <= 1e-12:
+                backlog[slot + 1, cohort_index] = 0.0
 
     p_f_ref = np.zeros((len(racks), 96), dtype=float)
     for cohort_index, cohort in enumerate(cohorts):
