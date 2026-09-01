@@ -130,8 +130,10 @@ class DayRunSpec:
         if self.campaign != "april" or self.timestamps_fixed_aest != fixed_aest_axis(self.day):
             raise ValueError("V28R2_DAY_RUN_SPEC_TIME_OR_CAMPAIGN")
         self.settings.validate()
+        if len(self.git_head) not in {40, 64} or any(character not in "0123456789abcdef" for character in self.git_head):
+            raise ValueError("V28R2_DAY_RUN_SPEC_GIT_OBJECT_ID_REQUIRED")
         hashes = (
-            self.git_head, self.code_tree_sha256, self.config_sha256,
+            self.code_tree_sha256, self.config_sha256,
             self.source_day_sha256, self.ml_model_sha256, self.thermal_sha256,
             self.scale_sha256, self.formulation_fingerprint,
         )
@@ -153,4 +155,3 @@ class DayRunSpec:
 
 def combined_file_sha256(files: Mapping[str, Path]) -> str:
     return canonical_sha256({name: sha256_file(path) for name, path in sorted(files.items())})
-

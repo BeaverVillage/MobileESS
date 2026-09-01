@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Iterable
 
 
@@ -39,7 +39,15 @@ def canonical_sha256(payload: dict[str, object]) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
-def verify_day_manifest(payload: dict[str, object]) -> None:
+def _portable_evidence_path(path_text: str, base_dir: Path | None) -> Path:
+    path = Path(path_text)
+    if path.is_file() or base_dir is None:
+        return path
+    portable = base_dir / PureWindowsPath(path_text).name
+    return portable if portable.is_file() else path
+
+
+def verify_day_manifest(payload: dict[str, object], base_dir: Path | None = None) -> None:
     categories = payload.get("categories")
     if not isinstance(categories, dict) or set(categories) != set(CATEGORIES) or len(categories) != len(CATEGORIES):
         raise ValueError("V28R2_SOURCE_CATEGORY_AXIS")
@@ -52,7 +60,7 @@ def verify_day_manifest(payload: dict[str, object]) -> None:
         if evidence["status"] != "NOT_APPLICABLE_BY_AUTHORITY":
             if not path_text or not evidence.get("sha256"):
                 raise ValueError(f"V28R2_SOURCE_EVIDENCE_MISSING:{category}")
-            path = Path(str(path_text))
+            path = _portable_evidence_path(str(path_text), base_dir)
             if not path.is_file() or sha256_file(path) != evidence["sha256"]:
                 raise ValueError(f"V28R2_SOURCE_SHA_MISMATCH:{category}")
 

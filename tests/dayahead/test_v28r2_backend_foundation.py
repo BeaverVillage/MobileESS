@@ -50,8 +50,10 @@ def test_runtime_ledger_never_prefills_success_counts():
     assert ledger.opendss_solved_slots == {}
     assert ledger.pue_calls == {}
     assert ledger.optimizer_calls_by_namespace["ACTUAL"] == 0
+    ledger.begin_opendss("DA/B0")
     ledger.record_opendss_slot("DA/B0", 0, True)
     assert ledger.opendss_solved_slots["DA/B0"] == 1
+    assert ledger.opendss_engine_count["DA/B0"] == 1
     with pytest.raises(RuntimeError):
         ledger.record_opendss_slot("DA/B0", 2, True)
 
