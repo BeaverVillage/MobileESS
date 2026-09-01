@@ -1,0 +1,119 @@
+{
+  "D1_allowed_fields": [
+    "cohort_id",
+    "forecast_issue_cutoff",
+    "forecast_q50_nodeh",
+    "forecast_vintage_id",
+    "node_class",
+    "runtime_class",
+    "target_slot"
+  ],
+  "D1_expost_field_denylist": [
+    "completed",
+    "end_time",
+    "gpu_nodes_occupied",
+    "job_id",
+    "jobs_shared",
+    "nodes_shared",
+    "queued_job_id",
+    "realized_end_time",
+    "realized_runtime",
+    "runtime_hours",
+    "shared_job_count",
+    "start_time",
+    "state_simple"
+  ],
+  "D1_mode": "FORECAST_COHORT_ONLY",
+  "PARTIAL_CPU_package_increment_invented": false,
+  "PARTIAL_to_FULL_remapping": false,
+  "WORKLOAD_ELIGIBILITY_READY": true,
+  "artifact_id": "V28R2_WORKLOAD_ELIGIBILITY_BINDING_V1",
+  "authority_id": "NLR_KESTREL_H100_ELIGIBILITY_V1",
+  "cohort_definition": "node count x frozen runtime class R00/R01/R02",
+  "cohort_ids": [
+    "N01_R00",
+    "N01_R01",
+    "N01_R02",
+    "N02_R00",
+    "N02_R01",
+    "N02_R02",
+    "N04_R00",
+    "N04_R01",
+    "N04_R02",
+    "N08_R00",
+    "N08_R01",
+    "N08_R02",
+    "N16_R00",
+    "N16_R01",
+    "N16_R02"
+  ],
+  "controllable_node_classes": [
+    1,
+    2,
+    4,
+    8,
+    16
+  ],
+  "historical_label_expost_fields_role": "HISTORICAL_LABEL_AND_AUDIT_ONLY",
+  "historical_label_rule": "H100 + COMPLETED + valid runtime + gpus_requested=4*gpu_nodes_occupied + node class in {1,2,4,8,16} + (share count NULL/zero) + nodes_shared/jobs_shared empty",
+  "individual_queue_injection": false,
+  "initial_backlog_nodeh": 0.0,
+  "partial_controllable": false,
+  "partial_reference_embedded": true,
+  "runtime_bins_hours_by_node_class": {
+    "1": {
+      "bin_closure": [
+        "(-inf,q33]",
+        "(q33,q67]",
+        "(q67,+inf)"
+      ],
+      "q33_hours": 0.015555555555555555,
+      "q67_hours": 0.05722222222222222
+    },
+    "16": {
+      "bin_closure": [
+        "(-inf,q33]",
+        "(q33,q67]",
+        "(q67,+inf)"
+      ],
+      "q33_hours": 0.04064814814814814,
+      "q67_hours": 0.16231481481481477
+    },
+    "2": {
+      "bin_closure": [
+        "(-inf,q33]",
+        "(q33,q67]",
+        "(q67,+inf)"
+      ],
+      "q33_hours": 0.020370370370370348,
+      "q67_hours": 0.2535185185185185
+    },
+    "4": {
+      "bin_closure": [
+        "(-inf,q33]",
+        "(q33,q67]",
+        "(q67,+inf)"
+      ],
+      "q33_hours": 0.16916666666666666,
+      "q67_hours": 1.3958333333333328
+    },
+    "8": {
+      "bin_closure": [
+        "(-inf,q33]",
+        "(q33,q67]",
+        "(q67,+inf)"
+      ],
+      "q33_hours": 0.0325,
+      "q67_hours": 0.20555555555555555
+    }
+  },
+  "sharing_controllable": false,
+  "source_sha256": {
+    "admission": "f05918c27a381665f6e264d37c80e234a7ef99c49157e3b349799e9894971b74",
+    "cohorts": "f1d11e9d83f97ce63ee5a8106ee3b6e9cde0d91b80a51b15af993efcf4323e46",
+    "eligibility": "f62f05c82a1094358c5c0dcbaffc8a191d9a00aa34aa6b6ff567afe0570fa9d6"
+  },
+  "status": "PASS",
+  "uncontrolled_reference_rule": "PARTIAL/shared/unsupported work remains embedded in total P_IT_REF and G_REF and enters the non-controllable reference residual.",
+  "unsupported_fullnode_controllable": false
+}
