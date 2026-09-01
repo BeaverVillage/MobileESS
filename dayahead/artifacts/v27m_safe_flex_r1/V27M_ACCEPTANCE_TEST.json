@@ -1,0 +1,19 @@
+{
+  "artifact_id": "V27M_ACCEPTANCE_TEST_V1",
+  "RESULT_CLASSIFICATION": "V27M_SAFE_R1_RESIDUAL_SIGNAL_FAIL",
+  "residual_signal_gates": {
+    "A_pooled_improvement_at_least_1pct": false,
+    "B_at_least_4_of_5_outer_folds_improve": false,
+    "C_bootstrap_point_estimate_negative": false,
+    "D_R4_beats_base_only_R2": false
+  },
+  "RESIDUAL_STATE_SIGNAL_READY": false,
+  "SAFE_R1_PROPOSED_MODEL_ACCEPTED": false,
+  "SAFE_R1_PRODUCTION_READY": false,
+  "production_fallback": {
+    "daily_mean": "B2_LIGHTGBM_TWEEDIE",
+    "daily_Q50_Q90": "B3_LIGHTGBM_QUANTILE",
+    "flexibility_envelope": "BEST_ACCEPTED_CONVENTIONAL_AGGREGATE_ENVELOPE_BL2"
+  },
+  "reason": "The preregistered state+running LightGBM residual is worse than BL2, improves only 1/5 folds, has a strictly positive bootstrap CI, and does not beat base-only residual LightGBM."
+}

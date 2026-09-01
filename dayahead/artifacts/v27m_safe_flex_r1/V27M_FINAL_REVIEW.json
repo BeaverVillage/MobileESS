@@ -1,0 +1,643 @@
+{
+  "artifact_id": "V27M_FINAL_REVIEW_V1",
+  "RESULT_CLASSIFICATION": "V27M_SAFE_R1_RESIDUAL_SIGNAL_FAIL",
+  "READY_FLAGS": {
+    "RESULT_CLASSIFICATION": "V27M_SAFE_R1_RESIDUAL_SIGNAL_FAIL",
+    "V26_FORENSIC_READY": true,
+    "AGGREGATE_REFERENCE_READY": true,
+    "DIRECT_LGBM_BASE_READY": true,
+    "BASE_CROSSFIT_READY": true,
+    "STATE_FEATURES_READY": true,
+    "RUNNING_SURVIVAL_READY": true,
+    "RESIDUAL_STATE_SIGNAL_READY": false,
+    "RESIDUAL_MODEL_READY": false,
+    "PHYSICAL_PROJECTION_READY": false,
+    "DIRECT_STATE_BASELINE_READY": false,
+    "RAW_SAFE_R1_READY": false,
+    "AGGREGATE_CALIBRATION_READY": false,
+    "NONEMPTY_SAFE_SET_READY": false,
+    "TIER_LATENCY_ALLOCATION_READY": false,
+    "IT_POWER_DIAGNOSTIC_READY": false,
+    "NOVELTY_GATE_PASS": false,
+    "SAFE_R1_PROPOSED_MODEL_ACCEPTED": false,
+    "SAFE_R1_PRODUCTION_READY": false,
+    "SAFE_R1_BUNDLE_V6_READY": false,
+    "NEW_LOCKED_TEST_READY": false,
+    "PUBLISHABLE_LOCKED_GENERALIZATION_READY": false,
+    "NEW_GRID_SCIENCE_RUN_READY": false,
+    "FINAL_GRID_SCIENCE_AUTHORIZED": false,
+    "firewall_counters": {
+      "future_start_numeric_feature_reads": 0,
+      "future_end_numeric_feature_reads": 0,
+      "future_service_labels_in_features": 0,
+      "April_reads_before_freeze": 0,
+      "April_fit_calls": 0,
+      "April_HPO_calls": 0,
+      "April_calibration_calls": 0,
+      "April_selection_calls": 0,
+      "dimensional_2880_calibration_calls": 0,
+      "physical_projection_calls": 0,
+      "tier_latency_allocation_calls": 0,
+      "PUE_calls": 0,
+      "facility_MW_scaling_calls": 0,
+      "beta_AIDC_calls": 0,
+      "OpenDSS_calls": 0,
+      "B0_B3_final_science_calls": 0,
+      "grid_objective_reads": 0
+    }
+  },
+  "V26_failure_localization": {
+    "pending": {
+      "artifact_id": "V27M_V26_PENDING_FORENSIC_V1",
+      "source_artifacts_modified": false,
+      "folds": [
+        {
+          "fold_id": 1,
+          "positive_count": 26066,
+          "negative_count": 0,
+          "positive_prevalence": 1.0,
+          "negative_prevalence": 0.0,
+          "climatology_probability": 0.99786438868126,
+          "climatology_Brier": 4.5608357047302326e-06,
+          "learned_model_Brier": 4.901962365012183e-05,
+          "Brier_skill": -9.747947706005183,
+          "AUPRC": 1.0000000000000002,
+          "false_negative_count_at_0_5": 0,
+          "false_positive_count_at_0_5": 0
+        },
+        {
+          "fold_id": 2,
+          "positive_count": 22461,
+          "negative_count": 104,
+          "positive_prevalence": 0.9953910923997341,
+          "negative_prevalence": 0.004608907600265898,
+          "climatology_probability": 0.9994354428950488,
+          "climatology_Brier": 0.004604022341927062,
+          "learned_model_Brier": 0.0046087177425410825,
+          "Brier_skill": -0.0010198474866771612,
+          "AUPRC": 0.993237975857902,
+          "false_negative_count_at_0_5": 0,
+          "false_positive_count_at_0_5": 104
+        },
+        {
+          "fold_id": 3,
+          "positive_count": 19315,
+          "negative_count": 0,
+          "positive_prevalence": 1.0,
+          "negative_prevalence": 0.0,
+          "climatology_probability": 0.9978172856891392,
+          "climatology_Brier": 4.764241762836589e-06,
+          "learned_model_Brier": 5.1087280672009025e-05,
+          "Brier_skill": -9.723066379736384,
+          "AUPRC": 1.0,
+          "false_negative_count_at_0_5": 1,
+          "false_positive_count_at_0_5": 0
+        },
+        {
+          "fold_id": 4,
+          "positive_count": 4094,
+          "negative_count": 0,
+          "positive_prevalence": 1.0,
+          "negative_prevalence": 0.0,
+          "climatology_probability": 0.9983927622454667,
+          "climatology_Brier": 2.583213199597271e-06,
+          "learned_model_Brier": 1.0146848370731024e-05,
+          "Brier_skill": -2.927994937588946,
+          "AUPRC": 0.9999999999999999,
+          "false_negative_count_at_0_5": 0,
+          "false_positive_count_at_0_5": 0
+        },
+        {
+          "fold_id": 5,
+          "positive_count": 6892,
+          "negative_count": 47,
+          "positive_prevalence": 0.9932266897247441,
+          "negative_prevalence": 0.0067733102752558,
+          "climatology_probability": 0.9984666749103499,
+          "climatology_Brier": 0.006754889987916283,
+          "learned_model_Brier": 0.00677280937617315,
+          "Brier_skill": -0.002652802383003028,
+          "AUPRC": 0.987100219206919,
+          "false_negative_count_at_0_5": 0,
+          "false_positive_count_at_0_5": 47
+        }
+      ],
+      "pooled_positive_count": 78828,
+      "pooled_negative_count": 151,
+      "pooled_positive_prevalence": 0.9980880993681864,
+      "pooled_negative_prevalence": 0.0019119006318135201,
+      "pooled_AUPRC": 0.9957487997891694,
+      "V26_weighted_fold_Brier_skill_reproduction": -5.747346306715722,
+      "V26_reported_Brier_skill": -5.747346306715722,
+      "probability_histogram": [
+        {
+          "bin": 0,
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 0,
+          "mean_probability": null,
+          "observed_rate": null
+        },
+        {
+          "bin": 1,
+          "lower": 0.1,
+          "upper": 0.2,
+          "count": 1,
+          "mean_probability": 0.18121345846612524,
+          "observed_rate": 1.0
+        },
+        {
+          "bin": 2,
+          "lower": 0.2,
+          "upper": 0.30000000000000004,
+          "count": 0,
+          "mean_probability": null,
+          "observed_rate": null
+        },
+        {
+          "bin": 3,
+          "lower": 0.30000000000000004,
+          "upper": 0.4,
+          "count": 0,
+          "mean_probability": null,
+          "observed_rate": null
+        },
+        {
+          "bin": 4,
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 0,
+          "mean_probability": null,
+          "observed_rate": null
+        },
+        {
+          "bin": 5,
+          "lower": 0.5,
+          "upper": 0.6000000000000001,
+          "count": 0,
+          "mean_probability": null,
+          "observed_rate": null
+        },
+        {
+          "bin": 6,
+          "lower": 0.6000000000000001,
+          "upper": 0.7000000000000001,
+          "count": 1,
+          "mean_probability": 0.6495728837125881,
+          "observed_rate": 1.0
+        },
+        {
+          "bin": 7,
+          "lower": 0.7000000000000001,
+          "upper": 0.8,
+          "count": 0,
+          "mean_probability": null,
+          "observed_rate": null
+        },
+        {
+          "bin": 8,
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 0,
+          "mean_probability": null,
+          "observed_rate": null
+        },
+        {
+          "bin": 9,
+          "lower": 0.9,
+          "upper": 1.0,
+          "count": 78977,
+          "mean_probability": 0.998569728209829,
+          "observed_rate": 0.9980880509515428
+        }
+      ],
+      "quantile_calibration_curve": [
+        {
+          "mean_probability": 0.9875859945761756,
+          "observed_rate": 1.0
+        },
+        {
+          "mean_probability": 0.9993195713833131,
+          "observed_rate": 1.0
+        },
+        {
+          "mean_probability": 0.999681267256814,
+          "observed_rate": 1.0
+        },
+        {
+          "mean_probability": 0.9997859575646523,
+          "observed_rate": 1.0
+        },
+        {
+          "mean_probability": 0.9998414696850851,
+          "observed_rate": 1.0
+        },
+        {
+          "mean_probability": 0.9998742242458654,
+          "observed_rate": 1.0
+        },
+        {
+          "mean_probability": 0.9999350425988605,
+          "observed_rate": 0.9964875764277351
+        },
+        {
+          "mean_probability": 0.9999594886507747,
+          "observed_rate": 0.9979161559205688
+        },
+        {
+          "mean_probability": 0.9999714516759507,
+          "observed_rate": 0.9944394154920471
+        },
+        {
+          "mean_probability": 0.9999787486828079,
+          "observed_rate": 0.9917790622992935
+        }
+      ],
+      "classification": "EXTREME_PREVALENCE_CLASSIFIER_UNNECESSARY",
+      "explanation": "Nearly every pending snapshot eventually realizes service. AUPRC is dominated by the near-universal positive class, while small probability errors exceed the exceptionally strong fold-specific climatology Brier baseline.",
+      "primary_R1_policy": "PENDING_JOB_LEVEL_BINARY_CLASSIFIER_NOT_REQUIRED; USE_CAUSAL_REQUEST_SIDE_AGGREGATES_DIRECTLY"
+    },
+    "calibration": {
+      "artifact_id": "V27M_V26_CALIBRATION_COLLAPSE_FORENSIC_V1",
+      "source_artifacts_modified": false,
+      "legacy_target_shape": [
+        96,
+        6,
+        5,
+        2
+      ],
+      "legacy_boundary_dimension": 5760,
+      "legacy_per_side_dimension": 2880,
+      "structurally_zero_reference_cells": 179,
+      "sparse_reference_cells_at_most_5pct_support": 1072,
+      "total_per_side_cells": 2880,
+      "reference_zero_fraction": 0.7971831309786608,
+      "model_collapse": {
+        "BL0_STATIC_FLEXIBILITY_RATIO": {
+          "trajectory_Q90": 0.7688569209279927,
+          "scalar_reference_scale_GPU_h": 9657.437222222257,
+          "per_cell_per_side_shift_GPU_h": 7425.187446733192,
+          "evaluation_nonempty_rate": 0.0,
+          "maximum_collapse_margin_GPU_h": 14850.374893466384,
+          "first_collapse": {
+            "date": "2024-12-01",
+            "slot": 0,
+            "tier": 0,
+            "latency": 1,
+            "precalibration_width": 0.0,
+            "per_side_shift": 7425.187446733192,
+            "collapse_margin": 14850.374893466384
+          }
+        },
+        "BL2_DIRECT_LIGHTGBM_ENVELOPE": {
+          "trajectory_Q90": 0.6811886523074345,
+          "scalar_reference_scale_GPU_h": 9657.437222222257,
+          "per_cell_per_side_shift_GPU_h": 6578.536646149234,
+          "evaluation_nonempty_rate": 0.0,
+          "maximum_collapse_margin_GPU_h": 13157.073292298468,
+          "first_collapse": {
+            "date": "2024-12-01",
+            "slot": 0,
+            "tier": 0,
+            "latency": 1,
+            "precalibration_width": 0.0,
+            "per_side_shift": 6578.536646149234,
+            "collapse_margin": 13157.073292298468
+          }
+        },
+        "BL3_DIRECT_QUANTILE_LIGHTGBM": {
+          "trajectory_Q90": 0.6381882457253817,
+          "scalar_reference_scale_GPU_h": 9657.437222222257,
+          "per_cell_per_side_shift_GPU_h": 6163.262919053025,
+          "evaluation_nonempty_rate": 0.0,
+          "maximum_collapse_margin_GPU_h": 15480.519074837568,
+          "first_collapse": {
+            "date": "2024-12-01",
+            "slot": 95,
+            "tier": 5,
+            "latency": 4,
+            "precalibration_width": -1021.8139781915739,
+            "per_side_shift": 6163.262919053025,
+            "collapse_margin": 13348.339816297625
+          }
+        }
+      },
+      "lower_upper_first_occurrence_dimension_recorded": true,
+      "classification": "HIGH_DIMENSIONAL_SUPPORT_MISMATCH",
+      "cause": "A single trajectory maximum and scalar daily-mass normalization imposes the same positive shift on every tier/latency cell, including structural-zero cells. Two-sided tightening therefore exceeds local width immediately and makes L_safe > U_safe.",
+      "R1_action": "REMOVE_2880_DIMENSIONAL_CALIBRATION_AND_CALIBRATE_96_SLOT_AGGREGATE_ONLY"
+    }
+  },
+  "aggregate_reference": {
+    "artifact_id": "V27M_AGGREGATE_REFERENCE_VALIDATION_V1",
+    "days": 225,
+    "lower_shape": [
+      225,
+      96
+    ],
+    "upper_shape": [
+      225,
+      96
+    ],
+    "nonnegative_lower_violations": 0,
+    "nonnegative_upper_violations": 0,
+    "lower_monotonicity_violations": 0,
+    "upper_monotonicity_violations": 0,
+    "lower_above_upper_violations": 0,
+    "terminal_upper_mass_max_abs_error_GPU_h": 2.7284841053187847e-12,
+    "terminal_lower_at_most_upper": true,
+    "reference_width_GPU_h_slot_sum": {
+      "mean": 43920.56032962963,
+      "P05": 0.0,
+      "P50": 20248.404444444463,
+      "P95": 137917.44799999983
+    },
+    "PASS": true
+  },
+  "direct_LightGBM_reproduction": {
+    "artifact_id": "V27M_BASELINE_REPRODUCTION_V1",
+    "model": "BL2_DIRECT_LIGHTGBM_ENVELOPE",
+    "OOF_days": 151,
+    "folds": 5,
+    "V26_serialized_score": 15.243233180615933,
+    "V27_recomputed_legacy_2880_cell_score": 15.243233180615933,
+    "absolute_reproduction_error": 0.0,
+    "tolerance": 1e-09,
+    "exact_reproduction_PASS": true,
+    "aggregate_unmapped_score": 262.10293959165443,
+    "aggregate_to_V26_score_mapping_factor": 0.058157429307600525,
+    "aggregate_mapped_score": 15.243233180615933,
+    "metric_mapping": "Fixed positive scalar anchored once to exact BL2 reproduction before any residual model. It preserves all relative improvements and maps the new 96-slot aggregate metric to the preregistered V26 score thresholds.",
+    "source_csv": "dayahead/artifacts/v26m_safe_flex/V26M_RAW_ENVELOPE_RESULTS.csv",
+    "source_csv_SHA256": "0a6e9882c6ee546a8386462300333804b51d9c9528bb1c6c2e00925f6a0bb992",
+    "cache_SHA256": "a9a7a39896d1d2e55721a2fae6f1c04a893a7e0ef21e266711fecd9299babc2c",
+    "April_reads": 0
+  },
+  "running_survival": {
+    "artifact_id": "V27M_RUNNING_SURVIVAL_REPRODUCTION_V1",
+    "policy": "LOCKED_RESIDUAL_NOT_FLEXIBLE",
+    "fold_metrics": [
+      {
+        "SR1_integrated_Brier": 0.1465464108451596,
+        "SR1_NLL": 4.657442972523462,
+        "SAFE_integrated_Brier": 0.13082094304616296,
+        "SAFE_NLL": 4.306441001757227,
+        "SR0_MAE_h": 14.99779996308601,
+        "SR1_Q50_MAE_h": 4.897796765804905,
+        "SAFE_Q50_MAE_h": 4.687873200442968,
+        "SR1_Q90_coverage": 0.6494352159468438,
+        "SAFE_Q90_coverage": 0.7262458471760798,
+        "survival_monotonicity_violations": 0,
+        "fold_id": 1,
+        "train_snapshots": 9803,
+        "validation_snapshots": 7525
+      },
+      {
+        "SR1_integrated_Brier": 0.16212286650052565,
+        "SR1_NLL": 4.869381436872636,
+        "SAFE_integrated_Brier": 0.14934402606118916,
+        "SAFE_NLL": 4.72938979454546,
+        "SR0_MAE_h": 14.335426482782168,
+        "SR1_Q50_MAE_h": 5.21529591783365,
+        "SAFE_Q50_MAE_h": 4.824367683640621,
+        "SR1_Q90_coverage": 0.6777875329236172,
+        "SAFE_Q90_coverage": 0.7241000877963125,
+        "survival_monotonicity_violations": 0,
+        "fold_id": 2,
+        "train_snapshots": 17302,
+        "validation_snapshots": 4556
+      },
+      {
+        "SR1_integrated_Brier": 0.16000568430620912,
+        "SR1_NLL": 4.582265521335802,
+        "SAFE_integrated_Brier": 0.12865112979836307,
+        "SAFE_NLL": 3.864727205010735,
+        "SR0_MAE_h": 12.38276900709979,
+        "SR1_Q50_MAE_h": 5.171361065586364,
+        "SAFE_Q50_MAE_h": 5.162965886522293,
+        "SR1_Q90_coverage": 0.7627100503050412,
+        "SAFE_Q90_coverage": 0.9868350636840415,
+        "survival_monotonicity_violations": 0,
+        "fold_id": 3,
+        "train_snapshots": 21880,
+        "validation_snapshots": 9343
+      },
+      {
+        "SR1_integrated_Brier": 0.20628231220985735,
+        "SR1_NLL": 4.0842041832816385,
+        "SAFE_integrated_Brier": 0.13409272983911397,
+        "SAFE_NLL": 3.3188530114650026,
+        "SR0_MAE_h": 10.351456239468728,
+        "SR1_Q50_MAE_h": 7.0895320946328155,
+        "SAFE_Q50_MAE_h": 6.306971354941025,
+        "SR1_Q90_coverage": 0.6337198929527208,
+        "SAFE_Q90_coverage": 0.9830508474576272,
+        "survival_monotonicity_violations": 0,
+        "fold_id": 4,
+        "train_snapshots": 31191,
+        "validation_snapshots": 5605
+      },
+      {
+        "SR1_integrated_Brier": 0.17277600028634696,
+        "SR1_NLL": 4.433434289306237,
+        "SAFE_integrated_Brier": 0.15574177644625414,
+        "SAFE_NLL": 3.9438917391749064,
+        "SR0_MAE_h": 13.429485832424142,
+        "SR1_Q50_MAE_h": 5.79889964714466,
+        "SAFE_Q50_MAE_h": 7.037689349018863,
+        "SR1_Q90_coverage": 0.7576490678810303,
+        "SAFE_Q90_coverage": 0.9822114700441156,
+        "survival_monotonicity_violations": 0,
+        "fold_id": 5,
+        "train_snapshots": 36806,
+        "validation_snapshots": 7027
+      }
+    ],
+    "pooled_metrics": {
+      "SR1_integrated_Brier": 0.16756624218368402,
+      "SAFE_integrated_Brier": 0.13838424062424598,
+      "SR1_NLL": 4.524605771632595,
+      "SAFE_NLL": 4.004495921395084,
+      "SAFE_IBS_relative_improvement_vs_SR1": 0.17415203193164105
+    },
+    "V26_reported_IBS_relative_improvement": 0.17415203193164105,
+    "absolute_reproduction_error": 0.0,
+    "tolerance": 1e-12,
+    "reproduction_PASS": true,
+    "residual_training_curve_policy": "outer-training running model predictions; running labels are distinct locked-load targets and never residual-envelope targets",
+    "future_runtime_feature_reads": 0
+  },
+  "residual_predictability": {
+    "summary": [
+      {
+        "model": "R0_ZERO_CORRECTION",
+        "residual_MAE": 1365.0659853504878,
+        "residual_R2": -0.1732895695369765,
+        "sign_accuracy": 0.0104166666666666,
+        "lower_correction_MAE": 1185.9283103427074,
+        "upper_correction_MAE": 1544.2036603582678,
+        "raw_boundary_score": 15.243233180615931,
+        "relative_improvement_vs_R0": 0.0,
+        "fold_wins_vs_R0": 0,
+        "nonempty_rate_before_projection": 1.0,
+        "monotonicity_violations": 0,
+        "L_above_U_slots": 0
+      },
+      {
+        "model": "R1_ELASTICNET_RESIDUAL",
+        "residual_MAE": 2349.5474146724937,
+        "residual_R2": -14.017382402064117,
+        "sign_accuracy": 0.6366686667946748,
+        "lower_correction_MAE": 2145.205055310476,
+        "upper_correction_MAE": 2553.8897740345114,
+        "raw_boundary_score": 14.99393159579788,
+        "relative_improvement_vs_R0": 0.016354901999077,
+        "fold_wins_vs_R0": 3,
+        "nonempty_rate_before_projection": 0.3245033112582781,
+        "monotonicity_violations": 3096,
+        "L_above_U_slots": 4859
+      },
+      {
+        "model": "R2_BASE_ONLY_LGBM_RESIDUAL",
+        "residual_MAE": 1496.9072595585394,
+        "residual_R2": -0.4119641014045671,
+        "sign_accuracy": 0.4612237583205325,
+        "lower_correction_MAE": 1290.1602721487257,
+        "upper_correction_MAE": 1703.6542469683532,
+        "raw_boundary_score": 19.121146303382567,
+        "relative_improvement_vs_R0": -0.254402269965796,
+        "fold_wins_vs_R0": 1,
+        "nonempty_rate_before_projection": 0.390728476821192,
+        "monotonicity_violations": 2358,
+        "L_above_U_slots": 3846
+      },
+      {
+        "model": "R3_STATE_LGBM_RESIDUAL",
+        "residual_MAE": 1432.1555744330522,
+        "residual_R2": -0.3003096243633613,
+        "sign_accuracy": 0.4647547043010752,
+        "lower_correction_MAE": 1267.1557345852714,
+        "upper_correction_MAE": 1597.1554142808325,
+        "raw_boundary_score": 19.70396067883136,
+        "relative_improvement_vs_R0": -0.2926365716092249,
+        "fold_wins_vs_R0": 3,
+        "nonempty_rate_before_projection": 0.4966887417218543,
+        "monotonicity_violations": 2004,
+        "L_above_U_slots": 3496
+      },
+      {
+        "model": "R4_STATE_RUNNING_LGBM_RESIDUAL",
+        "residual_MAE": 1424.5948710976584,
+        "residual_R2": -0.2657097465125566,
+        "sign_accuracy": 0.4742968349974398,
+        "lower_correction_MAE": 1235.9124991537956,
+        "upper_correction_MAE": 1613.2772430415212,
+        "raw_boundary_score": 19.462447113445744,
+        "relative_improvement_vs_R0": -0.2767925861158627,
+        "fold_wins_vs_R0": 1,
+        "nonempty_rate_before_projection": 0.4172185430463576,
+        "monotonicity_violations": 2336,
+        "L_above_U_slots": 4267
+      },
+      {
+        "model": "R5_SMALL_MLP_RESIDUAL",
+        "residual_MAE": 1584.2577005861112,
+        "residual_R2": -2.2514237076670027,
+        "sign_accuracy": 0.6312263984895032,
+        "lower_correction_MAE": 1503.116354958889,
+        "upper_correction_MAE": 1665.3990462133338,
+        "raw_boundary_score": 14.355195325530506,
+        "relative_improvement_vs_R0": 0.0582578410080809,
+        "fold_wins_vs_R0": 1,
+        "nonempty_rate_before_projection": 0.4701986754966887,
+        "monotonicity_violations": 2756,
+        "L_above_U_slots": 3453
+      }
+    ],
+    "gate": {
+      "artifact_id": "V27M_RESIDUAL_SIGNAL_GATE_V1",
+      "dataset_contract_PASS": true,
+      "primary_model": "R4_STATE_RUNNING_LGBM_RESIDUAL",
+      "primary_comparator": "R0_ZERO_CORRECTION_DIRECT_LIGHTGBM",
+      "R0_score": 15.243233180615933,
+      "R4_score": 19.462447113445744,
+      "R2_base_only_score": 19.121146303382567,
+      "R4_relative_improvement": -0.2767925861158627,
+      "R4_fold_wins": 1,
+      "seven_day_block_bootstrap": {
+        "replicates": 10000,
+        "block_days": 7,
+        "seed": 20260901,
+        "observed_mean_difference": 4.219213932829809,
+        "CI95_lower": 0.23154242037774755,
+        "CI95_upper": 10.236256193253142
+      },
+      "gates": {
+        "A_pooled_improvement_at_least_1pct": false,
+        "B_at_least_4_of_5_outer_folds_improve": false,
+        "C_bootstrap_point_estimate_negative": false,
+        "D_R4_beats_base_only_R2": false
+      },
+      "RESIDUAL_STATE_SIGNAL_READY": false,
+      "classification_if_stop": "V27M_SAFE_R1_RESIDUAL_SIGNAL_FAIL",
+      "architecture_escalation_if_fail": "FORBIDDEN",
+      "April_reads": 0
+    }
+  },
+  "development_HPO": {
+    "artifact_id": "V27M_DEVELOPMENT_POLICY_FREEZE_V1",
+    "inner_development_budget_per_outer_fold": 30,
+    "outer_validation_selection_reads": 0,
+    "status": "NOT_OPENED_AFTER_PHASE1_GATE_FAIL",
+    "HPO_trials_executed": 0,
+    "functional_basis_trials_executed": 0,
+    "result_based_architecture_escalations": 0
+  },
+  "raw_R1": "NOT_DEVELOPED_AFTER_GATE_FAIL",
+  "aggregate_calibration": "NOT_RUN",
+  "tier_latency_allocation": "NOT_RUN",
+  "IT_power_diagnostic": "NOT_RUN",
+  "April_diagnostic": "APRIL_NOT_OPENED",
+  "production_authority": {
+    "daily_mean": "B2_LIGHTGBM_TWEEDIE",
+    "daily_Q50_Q90": "B3_LIGHTGBM_QUANTILE",
+    "flexibility_envelope": "BEST_ACCEPTED_CONVENTIONAL_AGGREGATE_ENVELOPE_BL2"
+  },
+  "limitations": [
+    "no exact historical squeue",
+    "reference is realized service-demand feasibility, not measured flexibility",
+    "pre-November innovation OOF forecasts unavailable and represented only by an explicit missing indicator",
+    "phase-1 residual outputs were often structurally invalid before projection",
+    "residual gate failed before BL2S/HPO/projection/calibration",
+    "no untouched locked test",
+    "no April diagnostic",
+    "no grid science"
+  ],
+  "final_Q1_Q18": {
+    "Q1": "Pending labels were 78,828 positive versus 151 negative; AUPRC was prevalence-dominated while learned probabilities were worse than the near-perfect climatology Brier baseline.",
+    "Q2": "The scalar trajectory shift was broadcast to 2,880 cells despite 79.72% zero reference support, so two-sided tightening immediately made L_safe exceed U_safe.",
+    "Q3": "YES. The 2,880-dimensional calibration path was removed and called zero times.",
+    "Q4": "YES. BL2 reproduced exactly at 15.243233180615933 with error 0.",
+    "Q5": "NO under the preregistered R4 gate.",
+    "Q6": "1/5 folds.",
+    "Q7": "19.462447113445744.",
+    "Q8": "NO.",
+    "Q9": "NO.",
+    "Q10": "NOT EVALUATED; BL2S belongs to post-gate development, which was prohibited after failure.",
+    "Q11": "YES, zero residual is algebraically identical to BL2 to 1e-12.",
+    "Q12": "NOT EVALUATED; aggregate calibration was not authorized.",
+    "Q13": "NOT EVALUATED; calibrated sets were not constructed.",
+    "Q14": "NOT EVALUATED.",
+    "Q15": "NOT EVALUATED; downstream allocation was not run.",
+    "Q16": "NO.",
+    "Q17": "NO.",
+    "Q18": "NO."
+  },
+  "Git": {
+    "branch": "codex/v27m-safe-flex-r1",
+    "starting_HEAD": "b958d961b7bc493cb1697cf843a7e615a58a9f67",
+    "pre_final_commit_HEAD": "d7996f1fc5ecd1322dcd3f17fa8a04e5c43945ed",
+    "planned_final_commit": "Complete V27M SAFE-Flex R1 scientific evaluation",
+    "auto_merge": false
+  }
+}

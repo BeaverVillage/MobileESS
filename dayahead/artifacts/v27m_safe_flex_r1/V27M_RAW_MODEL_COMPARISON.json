@@ -1,0 +1,135 @@
+{
+  "artifact_id": "V27M_RAW_MODEL_COMPARISON_V1",
+  "stage": "PHASE1_RESIDUAL_PREDICTABILITY_ONLY",
+  "full_R1_status": "NOT_DEVELOPED_AFTER_MANDATORY_GATE_FAIL",
+  "models": [
+    {
+      "model": "R0_ZERO_CORRECTION",
+      "residual_MAE": 1365.0659853504878,
+      "residual_R2": -0.1732895695369765,
+      "sign_accuracy": 0.0104166666666666,
+      "lower_correction_MAE": 1185.9283103427074,
+      "upper_correction_MAE": 1544.2036603582678,
+      "raw_boundary_score": 15.243233180615931,
+      "relative_improvement_vs_R0": 0.0,
+      "fold_wins_vs_R0": 0,
+      "nonempty_rate_before_projection": 1.0,
+      "monotonicity_violations": 0,
+      "L_above_U_slots": 0
+    },
+    {
+      "model": "R1_ELASTICNET_RESIDUAL",
+      "residual_MAE": 2349.5474146724937,
+      "residual_R2": -14.017382402064117,
+      "sign_accuracy": 0.6366686667946748,
+      "lower_correction_MAE": 2145.205055310476,
+      "upper_correction_MAE": 2553.8897740345114,
+      "raw_boundary_score": 14.99393159579788,
+      "relative_improvement_vs_R0": 0.016354901999077,
+      "fold_wins_vs_R0": 3,
+      "nonempty_rate_before_projection": 0.3245033112582781,
+      "monotonicity_violations": 3096,
+      "L_above_U_slots": 4859
+    },
+    {
+      "model": "R2_BASE_ONLY_LGBM_RESIDUAL",
+      "residual_MAE": 1496.9072595585394,
+      "residual_R2": -0.4119641014045671,
+      "sign_accuracy": 0.4612237583205325,
+      "lower_correction_MAE": 1290.1602721487257,
+      "upper_correction_MAE": 1703.6542469683532,
+      "raw_boundary_score": 19.121146303382567,
+      "relative_improvement_vs_R0": -0.254402269965796,
+      "fold_wins_vs_R0": 1,
+      "nonempty_rate_before_projection": 0.390728476821192,
+      "monotonicity_violations": 2358,
+      "L_above_U_slots": 3846
+    },
+    {
+      "model": "R3_STATE_LGBM_RESIDUAL",
+      "residual_MAE": 1432.1555744330522,
+      "residual_R2": -0.3003096243633613,
+      "sign_accuracy": 0.4647547043010752,
+      "lower_correction_MAE": 1267.1557345852714,
+      "upper_correction_MAE": 1597.1554142808325,
+      "raw_boundary_score": 19.70396067883136,
+      "relative_improvement_vs_R0": -0.2926365716092249,
+      "fold_wins_vs_R0": 3,
+      "nonempty_rate_before_projection": 0.4966887417218543,
+      "monotonicity_violations": 2004,
+      "L_above_U_slots": 3496
+    },
+    {
+      "model": "R4_STATE_RUNNING_LGBM_RESIDUAL",
+      "residual_MAE": 1424.5948710976584,
+      "residual_R2": -0.2657097465125566,
+      "sign_accuracy": 0.4742968349974398,
+      "lower_correction_MAE": 1235.9124991537956,
+      "upper_correction_MAE": 1613.2772430415212,
+      "raw_boundary_score": 19.462447113445744,
+      "relative_improvement_vs_R0": -0.2767925861158627,
+      "fold_wins_vs_R0": 1,
+      "nonempty_rate_before_projection": 0.4172185430463576,
+      "monotonicity_violations": 2336,
+      "L_above_U_slots": 4267
+    },
+    {
+      "model": "R5_SMALL_MLP_RESIDUAL",
+      "residual_MAE": 1584.2577005861112,
+      "residual_R2": -2.2514237076670027,
+      "sign_accuracy": 0.6312263984895032,
+      "lower_correction_MAE": 1503.116354958889,
+      "upper_correction_MAE": 1665.3990462133338,
+      "raw_boundary_score": 14.355195325530506,
+      "relative_improvement_vs_R0": 0.0582578410080809,
+      "fold_wins_vs_R0": 1,
+      "nonempty_rate_before_projection": 0.4701986754966887,
+      "monotonicity_violations": 2756,
+      "L_above_U_slots": 3453
+    }
+  ],
+  "primary_gate": {
+    "artifact_id": "V27M_RESIDUAL_SIGNAL_GATE_V1",
+    "dataset_contract_PASS": true,
+    "primary_model": "R4_STATE_RUNNING_LGBM_RESIDUAL",
+    "primary_comparator": "R0_ZERO_CORRECTION_DIRECT_LIGHTGBM",
+    "R0_score": 15.243233180615933,
+    "R4_score": 19.462447113445744,
+    "R2_base_only_score": 19.121146303382567,
+    "R4_relative_improvement": -0.2767925861158627,
+    "R4_fold_wins": 1,
+    "seven_day_block_bootstrap": {
+      "replicates": 10000,
+      "block_days": 7,
+      "seed": 20260901,
+      "observed_mean_difference": 4.219213932829809,
+      "CI95_lower": 0.23154242037774755,
+      "CI95_upper": 10.236256193253142
+    },
+    "gates": {
+      "A_pooled_improvement_at_least_1pct": false,
+      "B_at_least_4_of_5_outer_folds_improve": false,
+      "C_bootstrap_point_estimate_negative": false,
+      "D_R4_beats_base_only_R2": false
+    },
+    "RESIDUAL_STATE_SIGNAL_READY": false,
+    "classification_if_stop": "V27M_SAFE_R1_RESIDUAL_SIGNAL_FAIL",
+    "architecture_escalation_if_fail": "FORBIDDEN",
+    "April_reads": 0
+  },
+  "strong_target": 14.481071521585136,
+  "strong_target_reached_by_primary_R4": false,
+  "secondary_diagnostics": {
+    "ElasticNet": {
+      "score": 14.99393159579788,
+      "fold_wins": 3,
+      "gate_authority": false
+    },
+    "small_MLP": {
+      "score": 14.355195325530506,
+      "fold_wins": 1,
+      "nonempty_rate_before_projection": 0.4701986754966887,
+      "gate_authority": false
+    }
+  }
+}
