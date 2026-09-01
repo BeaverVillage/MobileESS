@@ -1,0 +1,25 @@
+{
+  "PROCESS_ISOLATION_READY": true,
+  "Popen_call_count": 1,
+  "artifact_id": "V28R2_PROCESS_ISOLATION_CONTRACT_V1",
+  "child_module": "dayahead.v28r2.heavy_backend",
+  "day_workers": 2,
+  "gurobi_threads_per_child": 4,
+  "production_model": "parent supervisor -> independent day CLI subprocess",
+  "scripts": {
+    "monitor_2025_april_preflight.sh": {
+      "executable": true,
+      "lf_only": true,
+      "set_euo_pipefail": true
+    },
+    "run_2025_april_preflight.sh": {
+      "executable": true,
+      "lf_only": true,
+      "set_euo_pipefail": true
+    }
+  },
+  "shared_native_objects": [],
+  "status": "PASS",
+  "thread_executor_occurrences": [],
+  "within_child_heavy_solves": "SEQUENTIAL"
+}
