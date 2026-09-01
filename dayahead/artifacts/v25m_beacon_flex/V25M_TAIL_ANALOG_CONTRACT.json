@@ -1,0 +1,26 @@
+{
+  "artifact_id": "V25M_TAIL_ANALOG_CONTRACT_V1",
+  "scope": "TAIL_SEVERITY_ONLY_H_GT_U80",
+  "representation": "DEPTH2_LOGSIGNATURE_PLUS_EXPLICIT_PRESSURE",
+  "candidates": {
+    "TA-A": {
+      "K": 5,
+      "temperature": 0.5
+    },
+    "TA-B": {
+      "K": 10,
+      "temperature": 0.5
+    },
+    "TA-C": {
+      "K": 20,
+      "temperature": 1.0
+    }
+  },
+  "tau_A_candidates": [
+    5,
+    10
+  ],
+  "lambda": "n_eff/(n_eff+tau_A)*exp(-d_min/d0)",
+  "learned_reliability_gate": false,
+  "selection": "INNER_VALIDATION_ONLY"
+}
