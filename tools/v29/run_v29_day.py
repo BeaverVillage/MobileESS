@@ -110,7 +110,8 @@ def run_day(repo: Path, campaign_repo: Path, day: str, output: Path) -> dict[str
         act_context = actual_context(repo, context, day, replay.trajectory)
         result = run_fresh_opendss(repo=repo, context=act_context, voltage=act_context.voltage, trajectory=replay.trajectory, output=output / "actual/opendss" / case)
         opendss[f"ACT/{case}"] = result_metrics(result)
-        act_context.voltage.close(); act_context.current.close()
+        # with_realized_background deliberately shares the immutable DA
+        # sensitivity handles; they are closed once after all trajectories.
 
     pi = execute_pi_v29(repo, day, actual, output / "pi/electrical_cache", output / "pi")
     trajectories["PI/B3"] = pi.trajectory
