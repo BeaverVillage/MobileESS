@@ -10,6 +10,7 @@ import numpy as np
 from dayahead.mess_physics import (
     E_MAX_KWH, E_MIN_KWH, PCS_KVA, P_LIMIT_KW, pcs_inner_polygon_satisfied,
 )
+from dayahead.v29.mess_availability import normalize_mess_record
 
 
 DT_HOURS = 0.25
@@ -56,7 +57,7 @@ def replay_mess(
     actual_records: Sequence[Mapping[str, object]],
 ) -> MessReplay:
     p_da = np.asarray(p_da_kw, dtype=float); q_da = np.asarray(q_da_kvar, dtype=float)
-    records = tuple(sorted(actual_records, key=lambda row: str(row["mess_id"])))
+    records = tuple(normalize_mess_record(row) for row in sorted(actual_records, key=lambda row: str(row["mess_id"])))
     if p_da.shape != (96, 4) or q_da.shape != (96, 4) or len(records) != 4:
         raise ValueError("V28R2_MESS_REPLAY_INPUT_AXIS")
     p_exec = np.zeros((96, 4)); q_exec = np.zeros((96, 4))
@@ -77,8 +78,8 @@ def replay_mess(
         for slot in range(96):
             locations[slot, mess] = location[slot]
             travel[slot, mess] = actual_travel[slot]
-            connection_delay = slot > 0 and mode[slot - 1] == "TRANSIT" and mode[slot] == "CONNECTED"
-            connected = available[slot] and mode[slot] == "CONNECTED" and not connection_delay
+            connection_delay = mode[slot] == "CONNECTION_DELAY"
+            connected = available[slot] and mode[slot] == "CONNECTED"
             p = float(p_da[slot, mess]); q = float(q_da[slot, mess])
             reason = "EXECUTED"
             if not connected:

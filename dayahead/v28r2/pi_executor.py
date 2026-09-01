@@ -25,6 +25,7 @@ from dayahead.v28r2.reference_delta import build_reference_delta
 from dayahead.v28r2.solver_payload import SolverPayload
 from dayahead.v28r2.source_cache import day_root
 from dayahead.v28r2.workload_replay import ActualWorkload
+from dayahead.v29.mess_availability import normalize_mess_record
 
 
 def _axes(repo: Path) -> tuple[tuple[str, ...], tuple[str, ...], tuple[str, ...], np.ndarray, np.ndarray]:
@@ -82,11 +83,7 @@ def materialize_pi_formulation_data(
     }
     mobility = json.loads((day_root(repo, day) / "traffic_mobility.json").read_text(encoding="utf-8"))
     pi_mobility = copy.deepcopy(mobility)
-    for record in pi_mobility["mess"]:
-        for slot in range(1, 96):
-            if record["mode"][slot - 1] == "TRANSIT" and record["mode"][slot] == "CONNECTED":
-                record["mode"][slot] = "CONNECTION_DELAY"
-                record["available"][slot] = False
+    pi_mobility["mess"] = [normalize_mess_record(record) for record in pi_mobility["mess"]]
     fingerprint = formulation_fingerprint(repo)
     input_sha = canonical_sha256({
         "namespace": "PERFECT_INFORMATION", "day": day,

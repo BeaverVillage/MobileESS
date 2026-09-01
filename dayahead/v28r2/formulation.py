@@ -22,6 +22,7 @@ from dayahead.v28r2.reference_compute import (
 from dayahead.v28r2.reference_delta import ReferenceDelta, build_reference_delta
 from dayahead.v28r2.source_cache import day_root
 from dayahead.v28r2.source_labels import load_optimizer_labels
+from dayahead.v29.mess_availability import normalize_mess_record
 
 
 CASES = ("B0", "B1", "B2", "B3")
@@ -104,12 +105,13 @@ class V28R2FormulationData:
 
 def _mess_authority(payload: Mapping[str, object]) -> dict[str, dict[str, object]]:
     result = {}
-    for record in payload["mess"]:
+    for source_record in payload["mess"]:
+        record = normalize_mess_record(source_record)
         mess_id = str(record["mess_id"])
-        transit = tuple(
-            index for index, (mode, available) in enumerate(zip(
-                record["mode"], record["available"], strict=True,
-            ))
+        transit = tuple(index for index, mode in enumerate(record["mode"]) if mode == "TRANSIT")
+        connection_delay = tuple(index for index, mode in enumerate(record["mode"]) if mode == "CONNECTION_DELAY")
+        unavailable = tuple(
+            index for index, (mode, available) in enumerate(zip(record["mode"], record["available"], strict=True))
             if mode != "CONNECTED" or not bool(available)
         )
         connected_locations = tuple(dict.fromkeys(
@@ -123,6 +125,8 @@ def _mess_authority(payload: Mapping[str, object]) -> dict[str, dict[str, object
         result[mess_id] = {
             "service_site": connected_locations[0],
             "transit_slots": list(transit),
+            "connection_delay_slots": list(connection_delay),
+            "unavailable_slots": list(unavailable),
             "safe_mobility_energy_kwh": float(sum(record["safe_travel_energy_kwh"])),
             "mode_96": list(record["mode"]),
             "location_96": list(record["location"]),

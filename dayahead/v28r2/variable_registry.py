@@ -190,13 +190,14 @@ def build_resource_model(
     mess_p, mess_q, mess_e = {}, {}, {}
     for mess_id, record in sorted(data.mess_records.items()):
         transit = set(map(int, record["transit_slots"]))
+        unavailable = set(map(int, record.get("unavailable_slots", record["transit_slots"])))
         start = min(transit)
         for boundary in range(97):
             mess_e[(mess_id, boundary)] = model.addVar(lb=E_MIN_KWH, ub=E_MAX_KWH, name=f"mess_soc_kwh[{mess_id},{boundary}]")
         model.addConstr(mess_e[(mess_id, 0)] == E_INITIAL_KWH, name=f"mess_initial_soc[{mess_id}]")
         for slot in range(96):
-            connected = slot not in transit
-            fixed = -5.0 if slot in range(start - 8, start) else 0.0
+            connected = slot not in unavailable
+            fixed = -5.0 if connected and slot in range(start - 8, start) else 0.0
             mess_p[(mess_id, slot)] = model.addVar(
                 lb=(-rho * P_LIMIT_KW if connected else 0.0) if mess_flexible else fixed,
                 ub=(rho * P_LIMIT_KW if connected else 0.0) if mess_flexible else fixed,
