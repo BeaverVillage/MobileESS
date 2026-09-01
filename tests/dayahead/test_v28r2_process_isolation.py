@@ -150,6 +150,13 @@ def test_single_start_script_owns_setup_source_run_and_audit():
     assert "audit_v28r2_april" in source
 
 
+def test_runtime_preflight_constructs_production_child_contract():
+    source = (Path(__file__).resolve().parents[2] / "tools/final_campaign/check_v28r2_runtime.py").read_text(encoding="utf-8")
+    assert "from dayahead.v28r2.production_handlers import ProductionHandlers, build_day_run_spec" in source
+    assert "build_day_run_spec(repo, APRIL_DAYS[0], \"authority-preflight\")" in source
+    assert "spec.validate()" in source
+
+
 def test_runner_source_has_no_thread_executor():
     source = (Path(__file__).resolve().parents[2] / "tools/final_campaign/run_v28r2_april.py").read_text(encoding="utf-8")
     assert "ThreadPoolExecutor" not in source

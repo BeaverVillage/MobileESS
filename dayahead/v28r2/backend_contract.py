@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import re
 import subprocess
 from dataclasses import asdict, dataclass
 from datetime import date, datetime, time, timedelta, timezone
@@ -12,6 +14,7 @@ from typing import Mapping
 
 
 AEST = timezone(timedelta(hours=10), name="AEST_FIXED_UTC_PLUS_10")
+NATIVE_WINDOWS = os.name == "nt"
 DAY_WORKERS = 2
 GUROBI_THREADS = 4
 SLOTS = 96
@@ -76,10 +79,58 @@ def fixed_aest_axis(day: str) -> tuple[str, ...]:
     return tuple((start + timedelta(minutes=RESOLUTION_MINUTES * slot)).isoformat() for slot in range(SLOTS))
 
 
+def _run_git_head(repo: Path, git_dir: Path | None = None) -> tuple[str | None, str]:
+    command = ["git"]
+    if git_dir is not None:
+        command.extend((f"--git-dir={git_dir}", f"--work-tree={repo}"))
+    command.extend(("rev-parse", "HEAD"))
+    completed = subprocess.run(
+        command, cwd=repo, text=True, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, check=False,
+    )
+    value = completed.stdout.strip()
+    if completed.returncode == 0 and re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", value):
+        return value, ""
+    return None, completed.stderr.strip()
+
+
+def _worktree_git_dir(repo: Path) -> Path | None:
+    """Resolve a linked-worktree gitdir, including Windows paths under WSL."""
+    dot_git = repo / ".git"
+    if not dot_git.is_file():
+        return None
+    marker = dot_git.read_text(encoding="utf-8").strip()
+    if not marker.lower().startswith("gitdir:"):
+        return None
+    raw = marker.split(":", 1)[1].strip()
+    if not NATIVE_WINDOWS and re.match(r"^[A-Za-z]:[\\/]", raw):
+        converted = subprocess.run(
+            ["wslpath", "-u", raw], text=True, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, check=False,
+        )
+        if converted.returncode != 0 or not converted.stdout.strip():
+            raise RuntimeError(f"V28R2_GIT_WORKTREE_PATH_TRANSLATION_FAILED: {converted.stderr.strip()}")
+        return Path(converted.stdout.strip())
+    path = Path(raw)
+    return path if path.is_absolute() else (repo / path).resolve()
+
+
 def git_head(repo: Path) -> str:
-    return subprocess.check_output(
-        ["git", "rev-parse", "HEAD"], cwd=repo, text=True,
-    ).strip()
+    value, first_error = _run_git_head(repo)
+    if value is not None:
+        return value
+    git_dir = _worktree_git_dir(repo)
+    if git_dir is not None:
+        value, fallback_error = _run_git_head(repo, git_dir)
+        if value is not None:
+            return value
+    else:
+        fallback_error = "linked worktree gitdir unavailable"
+    raise RuntimeError(
+        "V28R2_GIT_HEAD_UNAVAILABLE: "
+        f"default={first_error or 'invalid object id'}; "
+        f"worktree={fallback_error or 'invalid object id'}"
+    )
 
 
 def code_tree_manifest(repo: Path) -> dict[str, str]:

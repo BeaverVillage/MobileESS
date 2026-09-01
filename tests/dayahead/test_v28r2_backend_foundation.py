@@ -1,8 +1,10 @@
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
 
+from dayahead.v28r2 import backend_contract
 from dayahead.v28r2.backend_contract import DayRunSpec, NativeSettings, fixed_aest_axis
 from dayahead.v28r2.certificate import verify_certificate, write_certificate
 from dayahead.v28r2.day_state import DayState
@@ -28,6 +30,27 @@ def test_day_run_spec_is_fixed_96_slot_aest_and_four_threads():
     assert len(value.timestamps_fixed_aest) == 96
     assert value.settings.gurobi_threads == 4
     assert value.settings.day_workers == 2
+
+
+def test_git_head_retries_windows_linked_worktree_path_under_wsl(tmp_path: Path, monkeypatch):
+    (tmp_path / ".git").write_text("gitdir: C:/repo/.git/worktrees/child\n", encoding="utf-8")
+    commands = []
+
+    def fake_run(command, **_kwargs):
+        commands.append(command)
+        if command[:2] == ["wslpath", "-u"]:
+            return subprocess.CompletedProcess(command, 0, "/mnt/c/repo/.git/worktrees/child\n", "")
+        if any(str(arg).startswith("--git-dir=") for arg in command):
+            return subprocess.CompletedProcess(command, 0, "b" * 40 + "\n", "")
+        return subprocess.CompletedProcess(command, 128, "", "not a git repository")
+
+    monkeypatch.setattr(backend_contract, "NATIVE_WINDOWS", False)
+    monkeypatch.setattr(backend_contract.subprocess, "run", fake_run)
+    assert backend_contract.git_head(tmp_path) == "b" * 40
+    assert any(
+        "--git-dir=/mnt/c/repo/.git/worktrees/child" in str(argument).replace("\\", "/")
+        for command in commands for argument in command
+    )
 
 
 def test_state_reuse_recomputes_artifact_and_predecessor_hashes(tmp_path: Path):
