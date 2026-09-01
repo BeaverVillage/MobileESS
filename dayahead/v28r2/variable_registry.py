@@ -136,9 +136,14 @@ def build_resource_model(
         (cohort, boundary): model.addVar(lb=0.0, name=f"backlog[{cohort},{boundary}]")
         for cohort in data.cohort_ids for boundary in range(97)
     }
+    initial_backlog = np.asarray(
+        getattr(data, "initial_backlog_nodeh", np.zeros(len(data.cohort_ids))), dtype=float,
+    )
+    if initial_backlog.shape != (len(data.cohort_ids),) or np.any(initial_backlog < 0):
+        raise ValueError("V29_INITIAL_BACKLOG_AXIS_OR_SIGN")
     for cohort in data.cohort_ids:
         c = cohort_index[cohort]
-        model.addConstr(backlog[(cohort, 0)] == 0.0, name=f"service_initial[{cohort}]")
+        model.addConstr(backlog[(cohort, 0)] == float(initial_backlog[c]), name=f"service_initial[{cohort}]")
         for slot in range(96):
             model.addConstr(
                 backlog[(cohort, slot + 1)] == backlog[(cohort, slot)]
