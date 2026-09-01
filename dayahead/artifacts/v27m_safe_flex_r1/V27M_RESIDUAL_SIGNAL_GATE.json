@@ -1,0 +1,29 @@
+{
+  "artifact_id": "V27M_RESIDUAL_SIGNAL_GATE_V1",
+  "dataset_contract_PASS": true,
+  "primary_model": "R4_STATE_RUNNING_LGBM_RESIDUAL",
+  "primary_comparator": "R0_ZERO_CORRECTION_DIRECT_LIGHTGBM",
+  "R0_score": 15.243233180615933,
+  "R4_score": 19.462447113445744,
+  "R2_base_only_score": 19.121146303382567,
+  "R4_relative_improvement": -0.2767925861158627,
+  "R4_fold_wins": 1,
+  "seven_day_block_bootstrap": {
+    "replicates": 10000,
+    "block_days": 7,
+    "seed": 20260901,
+    "observed_mean_difference": 4.219213932829809,
+    "CI95_lower": 0.23154242037774755,
+    "CI95_upper": 10.236256193253142
+  },
+  "gates": {
+    "A_pooled_improvement_at_least_1pct": false,
+    "B_at_least_4_of_5_outer_folds_improve": false,
+    "C_bootstrap_point_estimate_negative": false,
+    "D_R4_beats_base_only_R2": false
+  },
+  "RESIDUAL_STATE_SIGNAL_READY": false,
+  "classification_if_stop": "V27M_SAFE_R1_RESIDUAL_SIGNAL_FAIL",
+  "architecture_escalation_if_fail": "FORBIDDEN",
+  "April_reads": 0
+}
