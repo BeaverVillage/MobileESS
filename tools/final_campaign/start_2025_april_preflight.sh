@@ -27,11 +27,10 @@ else
   echo "[2/4] Python 패키지 확인 완료"
 fi
 
-echo "[3/4] 실행 환경과 April source 30/30 검증"
+echo "[3/4] April source 30/30 검증"
 "$VENV/bin/python" -m tools.final_campaign.prepare_v28r2_april_sources
-"$VENV/bin/python" -m tools.final_campaign.check_v28r2_runtime
 
-echo "[4/4] April 30일 실행 시작"
+echo "[4/4] 실행 환경·월말 모델 rollout 검증 후 April 30일 실행 시작"
 if "$VENV/bin/python" -m tools.final_campaign.run_v28r2_april; then
   echo "[완료] 30일 실행 PASS. 최종 인증서를 검사합니다."
   exec "$VENV/bin/python" -m tools.final_campaign.audit_v28r2_april

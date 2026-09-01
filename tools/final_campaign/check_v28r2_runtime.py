@@ -54,6 +54,9 @@ def check_runtime(repo: Path = REPO) -> dict[str, object]:
     # This catches worktree/Git metadata and deferred-import failures once in the
     # parent instead of allowing thirty identical child failures.
     from dayahead.v28r2.production_handlers import ProductionHandlers, build_day_run_spec
+    from dayahead.v28r2.lightgbm_channels import causal_optimizer_predictions
+    from dayahead.v28r2.source_labels import load_optimizer_labels
+    import numpy as np
 
     spec = build_day_run_spec(repo, APRIL_DAYS[0], "authority-preflight")
     spec.validate()
@@ -63,6 +66,17 @@ def check_runtime(repo: Path = REPO) -> dict[str, object]:
     )
     if len(production.handlers) != 30:
         raise RuntimeError("V28R2_PRODUCTION_HANDLER_COUNT")
+    model_dir = repo / "dayahead/artifacts/v28r2_heavy_backend/V28R2_OPTIMIZER_CHANNEL_MODELS"
+    p_quantiles, g_quantiles, w_quantiles = causal_optimizer_predictions(
+        load_optimizer_labels(repo), APRIL_DAYS[-1], model_dir,
+    )
+    if (
+        p_quantiles.shape != (3, 96)
+        or g_quantiles.shape != (3, 96)
+        or w_quantiles.shape != (3,)
+        or not all(np.isfinite(values).all() for values in (p_quantiles, g_quantiles, w_quantiles))
+    ):
+        raise RuntimeError("V28R2_APRIL_OPTIMIZER_ROLLOUT_INVALID")
     return {
         "status": "PASS",
         "python": sys.version.split()[0],
@@ -72,6 +86,7 @@ def check_runtime(repo: Path = REPO) -> dict[str, object]:
         "source_days_verified": verified_days,
         "production_contract_sha256": spec.sha256,
         "production_handlers_verified": 30,
+        "optimizer_rollout_verified_through": APRIL_DAYS[-1],
         "day_workers": DAY_WORKERS,
         "gurobi_threads": GUROBI_THREADS,
     }

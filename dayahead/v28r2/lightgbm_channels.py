@@ -65,17 +65,29 @@ def enforce_quantile_integrity(raw_log_predictions: np.ndarray) -> np.ndarray:
     return np.maximum(np.expm1(np.sort(raw, axis=0)), 0.0)
 
 
-def predict_serialized_quantiles(model_dir: Path, channel: str, variant: str, features: pd.DataFrame) -> np.ndarray:
+def predict_serialized_quantiles(
+    model_dir: Path,
+    channel: str,
+    variant: str,
+    features: pd.DataFrame,
+    booster_cache: dict[tuple[str, str], tuple[object, ...]] | None = None,
+) -> np.ndarray:
     """Load the three hashed model texts without passing a Unicode path to C."""
 
     import lightgbm as lgb
 
-    raw = []
-    for quantile in QUANTILES:
-        label = f"q{int(quantile * 100):02d}"
-        path = model_dir / f"{channel}_{variant}_{label}.txt"
-        booster = lgb.Booster(model_str=path.read_text(encoding="utf-8"))
-        raw.append(np.asarray(booster.predict(features), dtype=float))
+    key = (channel, variant)
+    boosters = booster_cache.get(key) if booster_cache is not None else None
+    if boosters is None:
+        loaded = []
+        for quantile in QUANTILES:
+            label = f"q{int(quantile * 100):02d}"
+            path = model_dir / f"{channel}_{variant}_{label}.txt"
+            loaded.append(lgb.Booster(model_str=path.read_text(encoding="utf-8")))
+        boosters = tuple(loaded)
+        if booster_cache is not None:
+            booster_cache[key] = boosters
+    raw = [np.asarray(booster.predict(features), dtype=float) for booster in boosters]
     return enforce_quantile_integrity(np.stack(raw))
 
 
@@ -123,6 +135,68 @@ def daily_features(values: pd.Series) -> pd.DataFrame:
     return frame.loc[:, DAILY_FEATURES]
 
 
+def _variant_for_day(day: pd.Timestamp) -> str:
+    return "APRIL_01_CAUSAL_FIT" if day.day == 1 else "GENERAL_THROUGH_MARCH_31_FIT"
+
+
+def _recursive_slot_predictions(
+    values: np.ndarray,
+    timestamps: pd.DatetimeIndex,
+    target: pd.Timestamp,
+    model_dir: Path,
+    channel: str,
+    booster_cache: dict[tuple[str, str], tuple[object, ...]],
+) -> np.ndarray:
+    """Roll P/G forward with q50 as causal lag state, never April actuals."""
+    future_index = pd.date_range(
+        timestamps[-1] + pd.Timedelta(minutes=15),
+        target + pd.Timedelta(days=1), freq="15min", inclusive="left",
+    )
+    extended_index = timestamps.append(future_index)
+    extended_values = np.concatenate([values, np.full(len(future_index), np.nan)])
+    result: np.ndarray | None = None
+    first_day = future_index[0].normalize()
+    for forecast_day in pd.date_range(first_day, target.normalize(), freq="D"):
+        target_index = pd.date_range(forecast_day, periods=96, freq="15min")
+        features = slot_features(extended_values, extended_index).loc[target_index]
+        if not np.isfinite(features).all().all():
+            raise RuntimeError(f"V28R2_CAUSAL_SLOT_FEATURE_MISSING:{channel}:{forecast_day.date()}")
+        result = predict_serialized_quantiles(
+            model_dir, channel, _variant_for_day(forecast_day), features, booster_cache,
+        )
+        positions = extended_index.get_indexer(target_index)
+        if np.any(positions < 0):
+            raise RuntimeError("V28R2_CAUSAL_SLOT_ROLLOUT_AXIS")
+        extended_values[positions] = result[1]
+    if result is None:
+        raise RuntimeError("V28R2_CAUSAL_SLOT_ROLLOUT_EMPTY")
+    return result
+
+
+def _recursive_daily_predictions(
+    values: pd.Series,
+    target: pd.Timestamp,
+    model_dir: Path,
+    booster_cache: dict[tuple[str, str], tuple[object, ...]],
+) -> np.ndarray:
+    """Roll daily W forward with q50 as causal lag state, never April actuals."""
+    future_days = pd.date_range(values.index[-1] + pd.Timedelta(days=1), target, freq="D")
+    extended = pd.concat([values, pd.Series(np.nan, index=future_days)])
+    result: np.ndarray | None = None
+    for forecast_day in future_days:
+        features = daily_features(extended).loc[[forecast_day]]
+        if not np.isfinite(features).all().all():
+            raise RuntimeError(f"V28R2_CAUSAL_W_FEATURE_MISSING:{forecast_day.date()}")
+        result = predict_serialized_quantiles(
+            model_dir, "W_FULLNODE_DAILY", _variant_for_day(forecast_day),
+            features, booster_cache,
+        )
+        extended.loc[forecast_day] = result[1, 0]
+    if result is None:
+        raise RuntimeError("V28R2_CAUSAL_W_ROLLOUT_EMPTY")
+    return result[:, 0]
+
+
 def causal_optimizer_predictions(
     labels: OptimizerLabels, target_date: str, model_dir: Path,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -131,21 +205,13 @@ def causal_optimizer_predictions(
     target = pd.Timestamp(target_date, tz=labels.timestamps.tz)
     if not pd.Timestamp("2025-04-01", tz=labels.timestamps.tz) <= target <= pd.Timestamp("2025-04-30", tz=labels.timestamps.tz):
         raise ValueError("V28R2_OPTIMIZER_MATERIALIZATION_APRIL_ONLY")
-    future_index = pd.date_range(
-        labels.timestamps[-1] + pd.Timedelta(minutes=15),
-        target + pd.Timedelta(days=1), freq="15min", inclusive="left",
+    booster_cache: dict[tuple[str, str], tuple[object, ...]] = {}
+    p_quantiles = _recursive_slot_predictions(
+        labels.p_it_kw, labels.timestamps, target, model_dir, "P_REF", booster_cache,
     )
-    extended_index = labels.timestamps.append(future_index)
-    variant = "APRIL_01_CAUSAL_FIT" if target_date == "2025-04-01" else "GENERAL_THROUGH_MARCH_31_FIT"
-    target_index = pd.date_range(target, periods=96, freq="15min")
-    p_values = np.concatenate([labels.p_it_kw, np.full(len(future_index), np.nan)])
-    g_values = np.concatenate([labels.g_h100_gpu, np.full(len(future_index), np.nan)])
-    p_x = slot_features(p_values, extended_index).loc[target_index]
-    g_x = slot_features(g_values, extended_index).loc[target_index]
-    if not np.isfinite(p_x).all().all() or not np.isfinite(g_x).all().all():
-        raise RuntimeError("V28R2_CAUSAL_SLOT_FEATURE_MISSING")
-    p_quantiles = predict_serialized_quantiles(model_dir, "P_REF", variant, p_x)
-    g_quantiles = predict_serialized_quantiles(model_dir, "G_REF", variant, g_x)
+    g_quantiles = _recursive_slot_predictions(
+        labels.g_h100_gpu, labels.timestamps, target, model_dir, "G_REF", booster_cache,
+    )
 
     daily_index = pd.date_range(
         labels.timestamps[0].normalize(), labels.timestamps[-1].normalize(),
@@ -155,12 +221,7 @@ def causal_optimizer_predictions(
         labels.w_nodeh.reshape(-1, 96, len(labels.cohort_ids)).sum(axis=(1, 2)),
         index=daily_index,
     )
-    future_days = pd.date_range(daily_index[-1] + pd.Timedelta(days=1), target, freq="D")
-    extended_daily = pd.concat([daily_w, pd.Series(np.nan, index=future_days)])
-    w_x = daily_features(extended_daily).loc[[target]]
-    if not np.isfinite(w_x).all().all():
-        raise RuntimeError("V28R2_CAUSAL_W_FEATURE_MISSING")
-    w_quantiles = predict_serialized_quantiles(model_dir, "W_FULLNODE_DAILY", variant, w_x)[:, 0]
+    w_quantiles = _recursive_daily_predictions(daily_w, target, model_dir, booster_cache)
     return p_quantiles, g_quantiles, w_quantiles
 
 

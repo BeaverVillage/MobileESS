@@ -3,9 +3,11 @@ import pandas as pd
 from pathlib import Path
 
 from dayahead.v28r2.lightgbm_channels import (
-    DAILY_FEATURES, SLOT_FEATURES, daily_features, enforce_quantile_integrity, slot_features,
+    DAILY_FEATURES, SLOT_FEATURES, causal_optimizer_predictions, daily_features,
+    enforce_quantile_integrity, slot_features,
 )
-from dayahead.v28r2.source_labels import AEST
+from dayahead.v28r2 import lightgbm_channels
+from dayahead.v28r2.source_labels import AEST, OptimizerLabels
 
 
 def test_slot_features_are_d1_cutoff_safe_and_96_slot():
@@ -34,6 +36,43 @@ def test_public_quantile_rearrangement_is_nonnegative_and_ordered():
     assert np.all(output >= 0)
     assert np.all(output[0] <= output[1])
     assert np.all(output[1] <= output[2])
+
+
+def test_april_month_rollout_recursively_supplies_causal_lag_features(tmp_path, monkeypatch):
+    timestamps = pd.date_range("2025-03-01", periods=31 * 96, freq="15min", tz=AEST)
+    labels = OptimizerLabels(
+        timestamps=timestamps,
+        p_it_kw=np.linspace(100.0, 200.0, len(timestamps)),
+        p_observed=np.ones(len(timestamps), dtype=bool),
+        g_h100_gpu=np.linspace(10.0, 20.0, len(timestamps)),
+        w_nodeh=np.ones((len(timestamps), 15), dtype=float),
+        cohort_ids=tuple(f"cohort-{index}" for index in range(15)),
+        source_paths={}, source_sha256={}, audit={},
+    )
+    calls = []
+
+    def fake_predict(_model_dir, channel, variant, features, _cache=None):
+        calls.append((channel, variant, str(features.index[0].date())))
+        return np.vstack([
+            np.full(len(features), 1.0),
+            np.full(len(features), 2.0),
+            np.full(len(features), 3.0),
+        ])
+
+    monkeypatch.setattr(lightgbm_channels, "predict_serialized_quantiles", fake_predict)
+    p_quantiles, g_quantiles, w_quantiles = causal_optimizer_predictions(
+        labels, "2025-04-30", tmp_path,
+    )
+    assert p_quantiles.shape == g_quantiles.shape == (3, 96)
+    assert w_quantiles.shape == (3,)
+    assert np.isfinite(p_quantiles).all() and np.isfinite(g_quantiles).all() and np.isfinite(w_quantiles).all()
+    assert len(calls) == 90
+    assert all(sum(channel == expected for channel, _variant, _day in calls) == 30 for expected in (
+        "P_REF", "G_REF", "W_FULLNODE_DAILY",
+    ))
+    assert all((channel, "GENERAL_THROUGH_MARCH_31_FIT", "2025-04-03") in calls for channel in (
+        "P_REF", "G_REF", "W_FULLNODE_DAILY",
+    ))
 
 
 def test_frozen_lightgbm_artifacts_have_no_april_or_may_training():

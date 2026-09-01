@@ -145,7 +145,6 @@ def test_single_start_script_owns_setup_source_run_and_audit():
     assert "mobileess-v28r2" in source
     assert "requirements-v28.txt" in source
     assert "prepare_v28r2_april_sources" in source
-    assert "check_v28r2_runtime" in source
     assert "run_v28r2_april" in source
     assert "audit_v28r2_april" in source
 
@@ -155,6 +154,8 @@ def test_runtime_preflight_constructs_production_child_contract():
     assert "from dayahead.v28r2.production_handlers import ProductionHandlers, build_day_run_spec" in source
     assert "build_day_run_spec(repo, APRIL_DAYS[0], \"authority-preflight\")" in source
     assert "spec.validate()" in source
+    assert "causal_optimizer_predictions" in source
+    assert "APRIL_DAYS[-1]" in source
 
 
 def test_runner_source_has_no_thread_executor():
