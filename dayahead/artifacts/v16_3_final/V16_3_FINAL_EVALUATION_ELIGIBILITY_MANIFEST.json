@@ -1,0 +1,908 @@
+{
+  "AC_result_reads_for_eligibility": 0,
+  "H_changes": 0,
+  "J_I_changes": 0,
+  "access_audit": {
+    "PRIMARY_2025MAY": 1,
+    "REPLICATION_2025JUN01_25": 1,
+    "d1_expost_eligibility_field_access_count": 0,
+    "esif_returned_max_timestamp": "2025-06-25T23:59:07.823000+10:00",
+    "kestrel_members_opened": [
+      "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2025/month=4/kestrel_jobs_202504_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2025/month=5/kestrel_jobs_202505_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2025/month=6/kestrel_jobs_202506_0.parquet"
+    ],
+    "max_kestrel_month_opened": 202506
+  },
+  "aemo_sources": {
+    "JUNE_REPLICATION": {
+      "demand": {
+        "exact_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\AEMO\\Day-Ahead demand forecast\\PUBLIC_ARCHIVE#PREDISPATCHREGIONSUM#ALL#FILE01#202506010000.zip",
+        "sha256": "f3ba6cbf7dd065e30912872fb6b082260d14a8d557ab97994e2630dcebeeddf0"
+      },
+      "pv": {
+        "exact_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\AEMO\\AEMO Rooftop PV — forecast + actual\\Forecast\\PUBLIC_ARCHIVE#ROOFTOP_PV_FORECAST#FILE01#202506010000.zip",
+        "sha256": "1983977f940041bd5e8427cfdda320f71687163c4ad1af8366b6e2cf3118761d"
+      }
+    },
+    "MAY_PRIMARY": {
+      "demand": {
+        "exact_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\AEMO\\Day-Ahead demand forecast\\PUBLIC_ARCHIVE#PREDISPATCHREGIONSUM#ALL#FILE01#202505010000.zip",
+        "sha256": "699f0befb7f1b834165d7c179348f6daf9b8c1eb85fae3b82bcfa5c6a552d2ab"
+      },
+      "pv": {
+        "exact_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\AEMO\\AEMO Rooftop PV — forecast + actual\\Forecast\\PUBLIC_ARCHIVE#ROOFTOP_PV_FORECAST#FILE01#202505010000.zip",
+        "sha256": "bab44d378c5cda62d1423c9a63586da245d264b611c35c16c9f88acbd8c0d7b2"
+      }
+    }
+  },
+  "artifact_id": "V16_3_FINAL_EVALUATION_ELIGIBILITY_MANIFEST",
+  "benchmark_days": {
+    "JUNE_REPLICATION": "2025-06-02",
+    "MAY_PRIMARY": "2025-05-02"
+  },
+  "beta_changes": 0,
+  "candidate_periods": {
+    "JUNE_REPLICATION": [
+      "2025-06-01",
+      "2025-06-02",
+      "2025-06-03",
+      "2025-06-04",
+      "2025-06-05",
+      "2025-06-06",
+      "2025-06-07",
+      "2025-06-08",
+      "2025-06-09",
+      "2025-06-10",
+      "2025-06-11",
+      "2025-06-12",
+      "2025-06-13",
+      "2025-06-14",
+      "2025-06-15",
+      "2025-06-16",
+      "2025-06-17",
+      "2025-06-18",
+      "2025-06-19",
+      "2025-06-20",
+      "2025-06-21",
+      "2025-06-22",
+      "2025-06-23",
+      "2025-06-24",
+      "2025-06-25"
+    ],
+    "MAY_PRIMARY": [
+      "2025-05-01",
+      "2025-05-02",
+      "2025-05-03",
+      "2025-05-04",
+      "2025-05-05",
+      "2025-05-06",
+      "2025-05-07",
+      "2025-05-08",
+      "2025-05-09",
+      "2025-05-10",
+      "2025-05-11",
+      "2025-05-12",
+      "2025-05-13",
+      "2025-05-14",
+      "2025-05-15",
+      "2025-05-16",
+      "2025-05-17",
+      "2025-05-18",
+      "2025-05-19",
+      "2025-05-20",
+      "2025-05-21",
+      "2025-05-22",
+      "2025-05-23",
+      "2025-05-24",
+      "2025-05-25",
+      "2025-05-26",
+      "2025-05-27",
+      "2025-05-28",
+      "2025-05-29",
+      "2025-05-30",
+      "2025-05-31"
+    ]
+  },
+  "excluded": [
+    {
+      "operating_day": "2025-05-01",
+      "period": "MAY_PRIMARY",
+      "reasons": [
+        "NO_COMPLETE_CAUSAL_AEMO_DEMAND_VINTAGE",
+        "NO_COMPLETE_CAUSAL_AEMO_PV_VINTAGE"
+      ]
+    },
+    {
+      "operating_day": "2025-06-01",
+      "period": "JUNE_REPLICATION",
+      "reasons": [
+        "NO_COMPLETE_CAUSAL_AEMO_DEMAND_VINTAGE",
+        "NO_COMPLETE_CAUSAL_AEMO_PV_VINTAGE"
+      ]
+    }
+  ],
+  "excluded_day_count": 2,
+  "forecast_cache": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\V16_3_FINAL_AIDC_DA_FORECAST.parquet",
+    "rows": 274176,
+    "sha256": "5711b30570a7c495bfafb748194c824ff02e985a9b55a641d1ee9c1bb9257b3d"
+  },
+  "forecast_weights_sha256": "30603de0f1cf19e84d2280970aa8a74e6aff2b63cfa11d00200e161860bfc4bc",
+  "included": [
+    {
+      "cutoff_fixed_aest": "2025-05-01T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025050128",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-01T17:32:30+10:00",
+      "operating_day": "2025-05-02",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/01 18:00:00"
+      },
+      "pv_issue": "2025-05-01T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-02T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025050228",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-02T17:32:58+10:00",
+      "operating_day": "2025-05-03",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/02 18:00:00"
+      },
+      "pv_issue": "2025-05-02T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-03T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025050328",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-03T17:33:05+10:00",
+      "operating_day": "2025-05-04",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/03 18:00:00"
+      },
+      "pv_issue": "2025-05-03T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-04T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025050428",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-04T17:33:05+10:00",
+      "operating_day": "2025-05-05",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/04 18:00:00"
+      },
+      "pv_issue": "2025-05-04T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-05T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025050528",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-05T17:32:40+10:00",
+      "operating_day": "2025-05-06",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/05 18:00:00"
+      },
+      "pv_issue": "2025-05-05T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-06T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025050628",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-06T17:32:57+10:00",
+      "operating_day": "2025-05-07",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/06 18:00:00"
+      },
+      "pv_issue": "2025-05-06T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-07T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025050728",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-07T17:32:32+10:00",
+      "operating_day": "2025-05-08",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/07 18:00:00"
+      },
+      "pv_issue": "2025-05-07T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-08T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025050828",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-08T17:32:34+10:00",
+      "operating_day": "2025-05-09",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/08 18:00:00"
+      },
+      "pv_issue": "2025-05-08T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-09T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025050928",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-09T17:32:21+10:00",
+      "operating_day": "2025-05-10",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/09 18:00:00"
+      },
+      "pv_issue": "2025-05-09T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-10T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025051028",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-10T17:32:31+10:00",
+      "operating_day": "2025-05-11",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/10 18:00:00"
+      },
+      "pv_issue": "2025-05-10T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-11T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025051128",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-11T17:32:25+10:00",
+      "operating_day": "2025-05-12",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/11 18:00:00"
+      },
+      "pv_issue": "2025-05-11T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-12T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025051228",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-12T17:32:17+10:00",
+      "operating_day": "2025-05-13",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/12 18:00:00"
+      },
+      "pv_issue": "2025-05-12T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-13T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025051328",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-13T17:32:25+10:00",
+      "operating_day": "2025-05-14",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/13 18:00:00"
+      },
+      "pv_issue": "2025-05-13T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-14T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025051428",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-14T17:32:24+10:00",
+      "operating_day": "2025-05-15",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/14 18:00:00"
+      },
+      "pv_issue": "2025-05-14T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-15T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025051528",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-15T17:32:34+10:00",
+      "operating_day": "2025-05-16",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/15 18:00:00"
+      },
+      "pv_issue": "2025-05-15T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-16T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025051628",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-16T17:32:33+10:00",
+      "operating_day": "2025-05-17",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/16 18:00:00"
+      },
+      "pv_issue": "2025-05-16T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-17T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025051728",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-17T17:32:39+10:00",
+      "operating_day": "2025-05-18",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/17 18:00:00"
+      },
+      "pv_issue": "2025-05-17T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-18T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025051828",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-18T17:32:31+10:00",
+      "operating_day": "2025-05-19",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/18 18:00:00"
+      },
+      "pv_issue": "2025-05-18T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-19T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025051928",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-19T17:32:15+10:00",
+      "operating_day": "2025-05-20",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/19 18:00:00"
+      },
+      "pv_issue": "2025-05-19T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-20T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025052028",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-20T17:32:29+10:00",
+      "operating_day": "2025-05-21",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/20 18:00:00"
+      },
+      "pv_issue": "2025-05-20T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-21T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025052128",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-21T17:32:28+10:00",
+      "operating_day": "2025-05-22",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/21 18:00:00"
+      },
+      "pv_issue": "2025-05-21T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-22T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025052228",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-22T17:32:31+10:00",
+      "operating_day": "2025-05-23",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/22 18:00:00"
+      },
+      "pv_issue": "2025-05-22T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-23T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025052328",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-23T17:32:47+10:00",
+      "operating_day": "2025-05-24",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/23 18:00:00"
+      },
+      "pv_issue": "2025-05-23T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-24T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025052428",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-24T17:32:47+10:00",
+      "operating_day": "2025-05-25",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/24 18:00:00"
+      },
+      "pv_issue": "2025-05-24T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-25T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025052528",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-25T17:32:43+10:00",
+      "operating_day": "2025-05-26",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/25 18:00:00"
+      },
+      "pv_issue": "2025-05-25T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-26T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025052628",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-26T17:33:04+10:00",
+      "operating_day": "2025-05-27",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/26 18:00:00"
+      },
+      "pv_issue": "2025-05-26T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-27T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025052728",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-27T17:32:24+10:00",
+      "operating_day": "2025-05-28",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/27 18:00:00"
+      },
+      "pv_issue": "2025-05-27T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-28T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025052828",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-28T17:32:21+10:00",
+      "operating_day": "2025-05-29",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/28 18:00:00"
+      },
+      "pv_issue": "2025-05-28T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-29T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025052928",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-29T17:32:33+10:00",
+      "operating_day": "2025-05-30",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/29 18:00:00"
+      },
+      "pv_issue": "2025-05-29T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-05-30T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025053028",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-05-30T17:32:21+10:00",
+      "operating_day": "2025-05-31",
+      "period": "MAY_PRIMARY",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/05/30 18:00:00"
+      },
+      "pv_issue": "2025-05-30T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-01T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025060128",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-01T17:32:30+10:00",
+      "operating_day": "2025-06-02",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/01 18:00:00"
+      },
+      "pv_issue": "2025-06-01T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-02T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025060228",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-02T17:32:27+10:00",
+      "operating_day": "2025-06-03",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/02 18:00:00"
+      },
+      "pv_issue": "2025-06-02T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-03T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025060328",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-03T17:32:23+10:00",
+      "operating_day": "2025-06-04",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/03 18:00:00"
+      },
+      "pv_issue": "2025-06-03T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-04T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025060428",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-04T17:32:43+10:00",
+      "operating_day": "2025-06-05",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/04 18:00:00"
+      },
+      "pv_issue": "2025-06-04T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-05T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025060528",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-05T17:32:50+10:00",
+      "operating_day": "2025-06-06",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/05 18:00:00"
+      },
+      "pv_issue": "2025-06-05T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-06T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025060628",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-06T17:32:53+10:00",
+      "operating_day": "2025-06-07",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/06 18:00:00"
+      },
+      "pv_issue": "2025-06-06T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-07T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025060728",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-07T17:32:23+10:00",
+      "operating_day": "2025-06-08",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/07 18:00:00"
+      },
+      "pv_issue": "2025-06-07T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-08T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025060828",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-08T17:32:18+10:00",
+      "operating_day": "2025-06-09",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/08 18:00:00"
+      },
+      "pv_issue": "2025-06-08T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-09T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025060928",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-09T17:32:20+10:00",
+      "operating_day": "2025-06-10",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/09 18:00:00"
+      },
+      "pv_issue": "2025-06-09T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-10T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025061028",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-10T17:32:34+10:00",
+      "operating_day": "2025-06-11",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/10 18:00:00"
+      },
+      "pv_issue": "2025-06-10T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-11T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025061128",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-11T17:32:31+10:00",
+      "operating_day": "2025-06-12",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/11 18:00:00"
+      },
+      "pv_issue": "2025-06-11T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-12T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025061228",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-12T17:32:35+10:00",
+      "operating_day": "2025-06-13",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/12 18:00:00"
+      },
+      "pv_issue": "2025-06-12T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-13T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025061328",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-13T17:32:37+10:00",
+      "operating_day": "2025-06-14",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/13 18:00:00"
+      },
+      "pv_issue": "2025-06-13T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-14T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025061428",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-14T17:32:19+10:00",
+      "operating_day": "2025-06-15",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/14 18:00:00"
+      },
+      "pv_issue": "2025-06-14T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-15T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025061528",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-15T17:32:45+10:00",
+      "operating_day": "2025-06-16",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/15 18:00:00"
+      },
+      "pv_issue": "2025-06-15T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-16T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025061628",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-16T17:32:26+10:00",
+      "operating_day": "2025-06-17",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/16 18:00:00"
+      },
+      "pv_issue": "2025-06-16T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-17T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025061728",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-17T17:32:35+10:00",
+      "operating_day": "2025-06-18",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/17 18:00:00"
+      },
+      "pv_issue": "2025-06-17T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-18T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025061828",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-18T17:32:23+10:00",
+      "operating_day": "2025-06-19",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/18 18:00:00"
+      },
+      "pv_issue": "2025-06-18T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-19T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025061928",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-19T17:32:21+10:00",
+      "operating_day": "2025-06-20",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/19 18:00:00"
+      },
+      "pv_issue": "2025-06-19T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-20T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025062028",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-20T17:32:08+10:00",
+      "operating_day": "2025-06-21",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/20 18:00:00"
+      },
+      "pv_issue": "2025-06-20T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-21T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025062128",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-21T17:32:16+10:00",
+      "operating_day": "2025-06-22",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/21 18:00:00"
+      },
+      "pv_issue": "2025-06-21T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-22T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025062228",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-22T17:32:23+10:00",
+      "operating_day": "2025-06-23",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/22 18:00:00"
+      },
+      "pv_issue": "2025-06-22T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-23T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025062328",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-23T17:32:12+10:00",
+      "operating_day": "2025-06-24",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/23 18:00:00"
+      },
+      "pv_issue": "2025-06-23T18:00:00+10:00"
+    },
+    {
+      "cutoff_fixed_aest": "2025-06-24T18:00:00+10:00",
+      "demand_identity": {
+        "PREDISPATCHSEQNO": "2025062428",
+        "RUNNO": "1"
+      },
+      "demand_issue": "2025-06-24T17:32:16+10:00",
+      "operating_day": "2025-06-25",
+      "period": "JUNE_REPLICATION",
+      "pv_identity": {
+        "VERSION_DATETIME": "2025/06/24 18:00:00"
+      },
+      "pv_issue": "2025-06-24T18:00:00+10:00"
+    }
+  ],
+  "included_day_count": 54,
+  "optimization_result_reads_for_eligibility": 0,
+  "rho_changes": 0,
+  "scientific_authority_changes": 0,
+  "selection_rule": "PRECOMMITTED_DATA_COMPLETENESS_AND_D1_VINTAGE_ONLY",
+  "source_sha256": {
+    "esif": "19cd12405dde9144b1a360e8c8418666c399a3d0d15a7f846880d71ab22f9dd4",
+    "kestrel": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f"
+  },
+  "status": "FROZEN_ELIGIBILITY_APPLIED_NO_RESULT_READS"
+}

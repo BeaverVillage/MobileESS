@@ -1,0 +1,37 @@
+{
+  "artifact_id": "V16_3_FINAL_TEST_REPORT",
+  "commands": [
+    {
+      "command": "python -m pytest -q tests/test_v16_3_execution_contract.py tests/test_v16_3_final_science.py tests/test_v16_3_final_artifacts.py",
+      "result": "13 passed in 1.82s",
+      "status": "PASS"
+    },
+    {
+      "command": "python -m pytest -q tests",
+      "result": "507 passed, 4 skipped, 84 subtests passed, 3 failed",
+      "status": "PARTIAL_EXISTING_UNRELATED_FAILURES",
+      "failures": [
+        "tests/test_pfr_mess_energy_recovery.py::test_joint_projection_restores_feasibility_across_multiple_trust_regions",
+        "tests/test_shared_exact_source_preparation.py::test_exact_sources_are_prepared_once_and_reused_by_day_workers (Windows lacks POSIX fcntl)",
+        "tests/test_shared_exact_source_preparation.py::test_exact_source_cache_is_invalidated_by_source_identity (Windows lacks POSIX fcntl)"
+      ]
+    },
+    {
+      "command": "python -m pytest -q",
+      "result": "collection INTERNALERROR caused by pre-existing science/r25l_b5_monolithic_gate_proof_test.py raising SystemExit(0) at import",
+      "status": "NOT_A_TEST_FAILURE_COLLECTION_BLOCKER"
+    },
+    {
+      "command": "python -m py_compile final V16.3 execution modules",
+      "result": "PASS",
+      "status": "PASS"
+    },
+    {
+      "command": "python -m dayahead.audit_v16_3_final_results --workers 4",
+      "result": "54 days audited; solver calls 0; OpenDSS calls 0",
+      "status": "PASS"
+    }
+  ],
+  "authority_specific_status": "PASS",
+  "known_regression_limitations_preserved_not_patched": true
+}

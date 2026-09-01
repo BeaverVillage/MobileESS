@@ -1,0 +1,1035 @@
+{
+  "aggregate": {
+    "AIDC_redistribution_nonzero_day_count": 21,
+    "component_sum_identity_max_abs_error_pu": 6.938893903907228e-18,
+    "max_abs_Delta_I_crit_from_AIDC_pu": 0.0002395379652449545,
+    "max_abs_Delta_I_crit_from_MESS_total_pu": 0.05146929769221631,
+    "max_abs_objective_B1_minus_B0": 7.626881755040671e-07,
+    "max_abs_objective_B3_minus_B2": 4.0425723213388665e-08,
+    "median_abs_Delta_I_crit_from_AIDC_pu": 2.4168738038100494e-08,
+    "median_abs_Delta_I_crit_from_MESS_total_pu": 0.028805091323717114,
+    "median_abs_objective_B1_minus_B0": 1.2752218281342209e-08,
+    "median_abs_objective_B3_minus_B2": 1.2265856219606519e-08
+  },
+  "artifact_id": "V16_3_CRITICAL_CUT_ATTRIBUTION_DIAGNOSTIC",
+  "common_feasible_day_count": 21,
+  "common_feasible_days": [
+    "2025-05-02",
+    "2025-05-03",
+    "2025-05-04",
+    "2025-05-05",
+    "2025-05-06",
+    "2025-05-07",
+    "2025-05-08",
+    "2025-05-09",
+    "2025-05-10",
+    "2025-05-11",
+    "2025-05-12",
+    "2025-05-13",
+    "2025-05-14",
+    "2025-05-15",
+    "2025-05-16",
+    "2025-05-17",
+    "2025-05-18",
+    "2025-06-07",
+    "2025-06-14",
+    "2025-06-22",
+    "2025-06-23"
+  ],
+  "counters": {
+    "H_changes": 0,
+    "J_I_changes": 0,
+    "OpenDSS_calls": 0,
+    "OpenDSS_calls_inside_Benders": 0,
+    "PF_changes": 0,
+    "PUE_changes": 0,
+    "alpha_grid_changes": 0,
+    "beta_changes": 0,
+    "clipping_calls": 0,
+    "gamma_crit_changes": 0,
+    "historical_final_science_artifacts_modified": 0,
+    "kappa_changes": 0,
+    "objective_changes": 0,
+    "post_hoc_AC_tuning_count": 0,
+    "rating_changes": 0,
+    "redistribution_calls": 0,
+    "retraining_calls": 0,
+    "rho_changes": 0,
+    "scientific_authority_changes": 0,
+    "solver_calls": 0,
+    "tap_semantics_changes": 0,
+    "voltage_limit_changes": 0
+  },
+  "hypothesis": "AIDC redistribution exists but has near-zero projection on the realized critical current sensitivity, while MESS P/Q dominates the reduction.",
+  "hypothesis_supported": true,
+  "method": "Frozen J_I dot frozen final schedule-control delta at each realized critical branch/phase/time; component axes are AIDC[0:12], MESS_P[12:36], MESS_Q[36:60].",
+  "per_day": [
+    {
+      "AIDC_location_time_redistribution_nodeh": 12.433818463751507,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -4.395993110329268e-09,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": -4.395993110329268e-09,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 31
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 8.601976589730371e-09,
+        "Delta_I_crit_from_MESS_P_pu": -0.024366391155666148,
+        "Delta_I_crit_from_MESS_Q_pu": 0.01428490745917399,
+        "Delta_I_crit_from_MESS_total_pu": -0.010081483696492158,
+        "Delta_I_crit_total_affine_pu": -0.010081475094515568,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 26
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 8.601976589730371e-09,
+        "Delta_I_crit_from_MESS_P_pu": -4.288107605208928e-09,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": -4.288107605208928e-09,
+        "Delta_I_crit_total_affine_pu": 4.313868984521443e-09,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 26
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 1171996.1791721361,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-02.npz",
+      "critical_current_sensitivity_sha256": "f8c7fe45e8dea2dbdf87d3c67f901e0e356747526024af8bcc349c1c76cd4feb",
+      "objective": {
+        "B0": 0.8234547638136663,
+        "B1": 0.8234547594176732,
+        "B2": 0.7683165948313827,
+        "B3": 0.7683165991452516
+      },
+      "operating_day": "2025-05-02"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 10.585211106252018,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -2.0133932208149173e-09,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": -2.0133932208149173e-09,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.9713056736788883e-05,
+        "Delta_I_crit_from_MESS_P_pu": 0.009768919031241996,
+        "Delta_I_crit_from_MESS_Q_pu": 0.005906198547400265,
+        "Delta_I_crit_from_MESS_total_pu": 0.01567511757864226,
+        "Delta_I_crit_total_affine_pu": 0.01570483063537905,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 69
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.9713056736788883e-05,
+        "Delta_I_crit_from_MESS_P_pu": -2.9711877554627802e-05,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": -2.9711877554627802e-05,
+        "Delta_I_crit_total_affine_pu": 1.1791821610812733e-09,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 1.4277137372665258e-21,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 69
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 527.5498148002488,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-03.npz",
+      "critical_current_sensitivity_sha256": "192de792ebd0c7524f03192a20837e690f7bbf34c634ca69af66dbd0b3008fac",
+      "objective": {
+        "B0": 0.71995142868472,
+        "B1": 0.7199514266713267,
+        "B2": 0.668379856518277,
+        "B3": 0.6683798576974591
+      },
+      "operating_day": "2025-05-03"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 10.980211732457231,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 1.2002603565071062e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": 1.2002603565071062e-08,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 7.600167088163711e-09,
+        "Delta_I_crit_from_MESS_P_pu": -0.043607415310288,
+        "Delta_I_crit_from_MESS_Q_pu": 0.006795732841852309,
+        "Delta_I_crit_from_MESS_total_pu": -0.03681168246843569,
+        "Delta_I_crit_total_affine_pu": -0.036811674868268605,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 6.938893903907228e-18,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 70
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 7.600167088163711e-09,
+        "Delta_I_crit_from_MESS_P_pu": 4.402436857687673e-09,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 4.402436857687673e-09,
+        "Delta_I_crit_total_affine_pu": 1.2002603945851385e-08,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 70
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 4843535.94354066,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-04.npz",
+      "critical_current_sensitivity_sha256": "415e3cb49b2cbeae1f5dce1416a48288a602dc86d23ee20d000ae27d46fa0dbc",
+      "objective": {
+        "B0": 0.7191386460977177,
+        "B1": 0.7191386581003213,
+        "B2": 0.6675847929050375,
+        "B3": 0.667584804907641
+      },
+      "operating_day": "2025-05-04"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 11.572855429733913,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 8.64134381398482e-09,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": 8.64134381398482e-09,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.6443569690000107e-09,
+        "Delta_I_crit_from_MESS_P_pu": -0.02166432655025502,
+        "Delta_I_crit_from_MESS_Q_pu": 0.016056216870380946,
+        "Delta_I_crit_from_MESS_total_pu": -0.005608109679874074,
+        "Delta_I_crit_total_affine_pu": -0.005608107035517104,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 30
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.6443569690000107e-09,
+        "Delta_I_crit_from_MESS_P_pu": 5.996987128050093e-09,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 5.996987128050093e-09,
+        "Delta_I_crit_total_affine_pu": 8.641344097050103e-09,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 30
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 2120783.897793812,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-05.npz",
+      "critical_current_sensitivity_sha256": "86ee266b14dece697cf70d8d5a7a20cf63084ec228973f8ee5e1f0e525fa2f49",
+      "objective": {
+        "B0": 0.7777358237740648,
+        "B1": 0.7777358324154088,
+        "B2": 0.723213779866019,
+        "B3": 0.7232137885073628
+      },
+      "operating_day": "2025-05-05"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 11.39107471307443,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 8.970998861395895e-09,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": 8.970998861395895e-09,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 0.0002395379652449545,
+        "Delta_I_crit_from_MESS_P_pu": -0.0408659033260258,
+        "Delta_I_crit_from_MESS_Q_pu": 0.009880108195568504,
+        "Delta_I_crit_from_MESS_total_pu": -0.030985795130457294,
+        "Delta_I_crit_total_affine_pu": -0.030746257165212343,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 3.469446951953614e-18,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 74
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 0.0002395379652449545,
+        "Delta_I_crit_from_MESS_P_pu": -0.00023952899424630763,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": -0.00023952899424630763,
+        "Delta_I_crit_total_affine_pu": 8.970998646875119e-09,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 74
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 129.35650972392136,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-06.npz",
+      "critical_current_sensitivity_sha256": "4659ca94b27dcd30f32f1f74419bf7dffd506078143ea15e5c87b43119512834",
+      "objective": {
+        "B0": 0.7860856337788225,
+        "B1": 0.7860856427498211,
+        "B2": 0.7314166460863026,
+        "B3": 0.7314166550573011
+      },
+      "operating_day": "2025-05-06"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 11.78462846090153,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.556080168970529e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": 2.556080168970529e-08,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.4168738038100494e-08,
+        "Delta_I_crit_from_MESS_P_pu": -0.005256971765412212,
+        "Delta_I_crit_from_MESS_Q_pu": 0.015758209698376935,
+        "Delta_I_crit_from_MESS_total_pu": 0.010501237932964723,
+        "Delta_I_crit_total_affine_pu": 0.010501262101702762,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 29
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.4168738038100494e-08,
+        "Delta_I_crit_from_MESS_P_pu": 9.820832175902148e-09,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 9.820832175902148e-09,
+        "Delta_I_crit_total_affine_pu": 3.398957021400264e-08,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 29
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 434496.74188243435,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-07.npz",
+      "critical_current_sensitivity_sha256": "5f4fe56783c8c44b21615a04e269d42a7f7907d8b063bb4b01b6f320ab77c6d3",
+      "objective": {
+        "B0": 0.7978036190257984,
+        "B1": 0.7978036445865999,
+        "B2": 0.7478910623631341,
+        "B3": 0.747891096352704
+      },
+      "operating_day": "2025-05-07"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 12.611177508055357,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 1.774627605794641e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": 1.774627605794641e-08,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.8489646880353646e-09,
+        "Delta_I_crit_from_MESS_P_pu": -0.04366896211462412,
+        "Delta_I_crit_from_MESS_Q_pu": -0.0018520498146000763,
+        "Delta_I_crit_from_MESS_total_pu": -0.0455210119292242,
+        "Delta_I_crit_total_affine_pu": -0.04552100908025951,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 70
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.8489646880353646e-09,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 2.179098312899051e-08,
+        "Delta_I_crit_from_MESS_total_pu": 2.179098312899051e-08,
+        "Delta_I_crit_total_affine_pu": 2.4639947817025873e-08,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 70
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 15978089.20566696,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-08.npz",
+      "critical_current_sensitivity_sha256": "57d10a752e709dca6e1d0b94ca81cdaa56a2bb80f1becbda11e7eb6726220da6",
+      "objective": {
+        "B0": 0.8399363048153211,
+        "B1": 0.8399363225615971,
+        "B2": 0.7862903294599837,
+        "B3": 0.7862903540999315
+      },
+      "operating_day": "2025-05-08"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 11.889202647625922,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 1.75797427624948e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": 1.75797427624948e-08,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 31
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 1.3289738590403161e-08,
+        "Delta_I_crit_from_MESS_P_pu": -0.029953528424773446,
+        "Delta_I_crit_from_MESS_Q_pu": 0.016429952089146993,
+        "Delta_I_crit_from_MESS_total_pu": -0.013523576335626453,
+        "Delta_I_crit_total_affine_pu": -0.013523563045887862,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 27
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 1.3289738590403161e-08,
+        "Delta_I_crit_from_MESS_P_pu": -8.687584004104964e-10,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": -8.687584004104964e-10,
+        "Delta_I_crit_total_affine_pu": 1.2420980189992664e-08,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 27
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 1017595.3607840076,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-09.npz",
+      "critical_current_sensitivity_sha256": "a1fee16a3842d6f8f4fa6d81f0a52e117a3bf4c9283be043a9e32e40f6d262ca",
+      "objective": {
+        "B0": 0.8363926360448511,
+        "B1": 0.8363926536245939,
+        "B2": 0.7781408863007476,
+        "B3": 0.7781408987217276
+      },
+      "operating_day": "2025-05-09"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 10.911876994133962,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -2.124329691794088e-09,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": -2.124329691794088e-09,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -2.1243296917942494e-09,
+        "Delta_I_crit_from_MESS_P_pu": -0.04444226697955406,
+        "Delta_I_crit_from_MESS_Q_pu": -0.004384192321907558,
+        "Delta_I_crit_from_MESS_total_pu": -0.048826459301461615,
+        "Delta_I_crit_total_affine_pu": -0.04882646142579131,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -2.1243296917942494e-09,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 5.881042379950052e-10,
+        "Delta_I_crit_from_MESS_total_pu": 5.881042379950052e-10,
+        "Delta_I_crit_total_affine_pu": -1.5362254537992443e-09,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 22984407.50042987,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-10.npz",
+      "critical_current_sensitivity_sha256": "169790519120805cd653471a789e415249890f248dcc7396c38e34838289d803",
+      "objective": {
+        "B0": 0.7509894960127385,
+        "B1": 0.7509894938884086,
+        "B2": 0.7021630361231727,
+        "B3": 0.702163034586947
+      },
+      "operating_day": "2025-05-10"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 10.629217480421023,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -1.2265856129459484e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": -1.2265856129459484e-08,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -1.2265856129459484e-08,
+        "Delta_I_crit_from_MESS_P_pu": -0.044410953712490375,
+        "Delta_I_crit_from_MESS_Q_pu": -0.007058343979725934,
+        "Delta_I_crit_from_MESS_total_pu": -0.05146929769221631,
+        "Delta_I_crit_total_affine_pu": -0.05146930995807244,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -1.2265856129459484e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": -1.2265856129459484e-08,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 4196143.925787624,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-11.npz",
+      "critical_current_sensitivity_sha256": "8e8eb054feeb5d361819c52ce0cb816a7e3de76f8442b800b74ddb9f963ac782",
+      "objective": {
+        "B0": 0.7359366094712977,
+        "B1": 0.7359365972054415,
+        "B2": 0.6844673117790814,
+        "B3": 0.6844672995132252
+      },
+      "operating_day": "2025-05-11"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 11.723337464625324,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.333985137510865e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": 2.333985137510865e-08,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.83968771746763e-06,
+        "Delta_I_crit_from_MESS_P_pu": -0.024680660384255412,
+        "Delta_I_crit_from_MESS_Q_pu": 0.013574331022507269,
+        "Delta_I_crit_from_MESS_total_pu": -0.011106329361748143,
+        "Delta_I_crit_total_affine_pu": -0.011103489674030676,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 1.734723475976807e-18,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 32
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.83968771746763e-06,
+        "Delta_I_crit_from_MESS_P_pu": -2.808742956810659e-06,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": -2.808742956810659e-06,
+        "Delta_I_crit_total_affine_pu": 3.0944760656970764e-08,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 7.940933880509066e-23,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 32
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 3911.109412992961,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-12.npz",
+      "critical_current_sensitivity_sha256": "35fa9597eb4a43211cbca220ce92bc4c3cf8710001fc9a06e1923f871c179dd8",
+      "objective": {
+        "B0": 0.8060908063801288,
+        "B1": 0.8060908297199801,
+        "B2": 0.7554732885788076,
+        "B3": 0.7554733195235681
+      },
+      "operating_day": "2025-05-12"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 10.728086183311483,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -4.312373592656132e-09,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": -4.312373592656132e-09,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 31
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.042429955278281e-08,
+        "Delta_I_crit_from_MESS_P_pu": -0.04401797930611834,
+        "Delta_I_crit_from_MESS_Q_pu": -0.0004653496484766672,
+        "Delta_I_crit_from_MESS_total_pu": -0.044483328954595,
+        "Delta_I_crit_total_affine_pu": -0.04448330853029545,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.042429955278281e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": -2.293903389705898e-08,
+        "Delta_I_crit_from_MESS_total_pu": -2.293903389705898e-08,
+        "Delta_I_crit_total_affine_pu": -2.5147343442761684e-09,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 2177961.052697846,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-13.npz",
+      "critical_current_sensitivity_sha256": "3d697fef29f1a42dd650201a46b28a579e54c80aef3183ed827915daedef7005",
+      "objective": {
+        "B0": 0.8233460254967511,
+        "B1": 0.8233460211843775,
+        "B2": 0.7692309434072708,
+        "B3": 0.7692309408925363
+      },
+      "operating_day": "2025-05-13"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 11.796090987281193,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -7.626881756092026e-07,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": -7.626881756092026e-07,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 31
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 3.759874123981164e-08,
+        "Delta_I_crit_from_MESS_P_pu": -0.04407572038226182,
+        "Delta_I_crit_from_MESS_Q_pu": 0.004651512802754925,
+        "Delta_I_crit_from_MESS_total_pu": -0.03942420757950689,
+        "Delta_I_crit_total_affine_pu": -0.03942416998076566,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 29
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 3.759874123981164e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 2.8269820194874797e-09,
+        "Delta_I_crit_from_MESS_total_pu": 2.8269820194874797e-09,
+        "Delta_I_crit_total_affine_pu": 4.042572325929912e-08,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 29
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 1048551.2620768895,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-14.npz",
+      "critical_current_sensitivity_sha256": "e3df3ce2db494934856d51aa4fed1ed840e4193671b4f53ac4d9dba672bc1fba",
+      "objective": {
+        "B0": 0.8172376345065744,
+        "B1": 0.8172368718183989,
+        "B2": 0.7635476981358937,
+        "B3": 0.763547738561617
+      },
+      "operating_day": "2025-05-14"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 13.421163926940341,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 1.9613339410640402e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": 1.9613339410640402e-08,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 31
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 7.483720224943759e-05,
+        "Delta_I_crit_from_MESS_P_pu": -0.03141404495675553,
+        "Delta_I_crit_from_MESS_Q_pu": 0.014582442585165167,
+        "Delta_I_crit_from_MESS_total_pu": -0.016831602371590364,
+        "Delta_I_crit_total_affine_pu": -0.016756765169340923,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 6.938893903907228e-18,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 34
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 7.483720224943759e-05,
+        "Delta_I_crit_from_MESS_P_pu": -7.487583870801557e-05,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": -7.487583870801557e-05,
+        "Delta_I_crit_total_affine_pu": -3.863645857798124e-08,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 6.776263578034403e-21,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 34
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 224.90956189796438,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-15.npz",
+      "critical_current_sensitivity_sha256": "cf9f435b14badf76cecac19e0e3fd56cd6db89af57e706b5c2672cda3b4947cf",
+      "objective": {
+        "B0": 0.8518574818663749,
+        "B1": 0.8518575014797141,
+        "B2": 0.7948304698180026,
+        "B3": 0.7948304311815438
+      },
+      "operating_day": "2025-05-15"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 12.055026749394964,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.035071801935708e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": 2.035071801935708e-08,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 31
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -7.643715974351994e-08,
+        "Delta_I_crit_from_MESS_P_pu": -0.04014079567431128,
+        "Delta_I_crit_from_MESS_Q_pu": 0.011335704350594167,
+        "Delta_I_crit_from_MESS_total_pu": -0.028805091323717114,
+        "Delta_I_crit_total_affine_pu": -0.028805167760876854,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 3.469446951953614e-18,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 71
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -7.643715974351994e-08,
+        "Delta_I_crit_from_MESS_P_pu": 7.243482080706299e-08,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 7.243482080706299e-08,
+        "Delta_I_crit_total_affine_pu": -4.002338936456949e-09,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 71
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 376846.6989141247,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-16.npz",
+      "critical_current_sensitivity_sha256": "3d23ff8172e13c903c21af9fd3012372067b4cf470dd1e8e95c4d72c9d8282dd",
+      "objective": {
+        "B0": 0.8609849034583719,
+        "B1": 0.8609849238090902,
+        "B2": 0.7986767600755132,
+        "B3": 0.7986767560731739
+      },
+      "operating_day": "2025-05-16"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 11.672365560981756,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -4.36770486902271e-09,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": -4.36770486902271e-09,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 71
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -5.661189207634582e-08,
+        "Delta_I_crit_from_MESS_P_pu": -0.0017287334628413396,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0076831257921416984,
+        "Delta_I_crit_from_MESS_total_pu": 0.005954392329300359,
+        "Delta_I_crit_total_affine_pu": 0.005954335717408283,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 8.673617379884035e-19,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 67
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -5.661189207634582e-08,
+        "Delta_I_crit_from_MESS_P_pu": 5.1233607247523354e-08,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 5.1233607247523354e-08,
+        "Delta_I_crit_total_affine_pu": -5.378284828822468e-09,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 67
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 105179.17898363771,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-17.npz",
+      "critical_current_sensitivity_sha256": "d7c731de366c905b7527230d93656efce7d32c59b7d7860c30cf473f501e78b3",
+      "objective": {
+        "B0": 0.8245402266353294,
+        "B1": 0.8245402222676246,
+        "B2": 0.7718322189775003,
+        "B3": 0.7718322135992154
+      },
+      "operating_day": "2025-05-17"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 11.072212374475033,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 1.2752218421565708e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": 1.2752218421565708e-08,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -1.6802234590325533e-08,
+        "Delta_I_crit_from_MESS_P_pu": -0.038547134914119915,
+        "Delta_I_crit_from_MESS_Q_pu": -0.004369926032928739,
+        "Delta_I_crit_from_MESS_total_pu": -0.042917060947048655,
+        "Delta_I_crit_total_affine_pu": -0.042917077749283244,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 70
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -1.6802234590325533e-08,
+        "Delta_I_crit_from_MESS_P_pu": 3.335838339812182e-08,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 3.335838339812182e-08,
+        "Delta_I_crit_total_affine_pu": 1.6556148807796284e-08,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 70
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 2554247.217317132,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-18.npz",
+      "critical_current_sensitivity_sha256": "ed298820d4efa9efd127dff8aecf9a7de4db908288a6a94607243a881a9d84a4",
+      "objective": {
+        "B0": 0.8230248796667062,
+        "B1": 0.8230248924189245,
+        "B2": 0.7703986235665716,
+        "B3": 0.7703986401227203
+      },
+      "operating_day": "2025-05-18"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 11.485097976352034,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 4.676989950010823e-10,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": 4.676989950010823e-10,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -1.9164513648772085e-08,
+        "Delta_I_crit_from_MESS_P_pu": -0.019443350446170623,
+        "Delta_I_crit_from_MESS_Q_pu": 0.009425587712724393,
+        "Delta_I_crit_from_MESS_total_pu": -0.01001776273344623,
+        "Delta_I_crit_total_affine_pu": -0.01001778189795988,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 68
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -1.9164513648772085e-08,
+        "Delta_I_crit_from_MESS_P_pu": 2.1616472670083038e-08,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 2.1616472670083038e-08,
+        "Delta_I_crit_total_affine_pu": 2.451959021310953e-09,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 68
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 522724.6001146547,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-06-07.npz",
+      "critical_current_sensitivity_sha256": "89c2ac81a72018d84c4e5989eda6b46bcb0e9240f1ba2fed236be3611c2df03e",
+      "objective": {
+        "B0": 0.8481128201029006,
+        "B1": 0.8481128205705994,
+        "B2": 0.8026845719750023,
+        "B3": 0.8026845744269616
+      },
+      "operating_day": "2025-06-07"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 11.648020786316694,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.1127932459244804e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": 2.1127932459244804e-08,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 4.9876524449705636e-05,
+        "Delta_I_crit_from_MESS_P_pu": -0.00876143536509464,
+        "Delta_I_crit_from_MESS_Q_pu": 0.00929247157377211,
+        "Delta_I_crit_from_MESS_total_pu": 0.0005310362086774698,
+        "Delta_I_crit_total_affine_pu": 0.0005809127331271747,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 1.734723475976807e-18,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 69
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 4.9876524449705636e-05,
+        "Delta_I_crit_from_MESS_P_pu": -4.9847385992210456e-05,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": -4.9847385992210456e-05,
+        "Delta_I_crit_total_affine_pu": 2.9138457495180036e-08,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 4.863822001811803e-22,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 69
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 10.647017099456372,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-06-14.npz",
+      "critical_current_sensitivity_sha256": "e957d5b2df8eb271d2f24d3edec332e1b44bed7811ee0de46669ea0756bf2b88",
+      "objective": {
+        "B0": 0.8641335891365254,
+        "B1": 0.8641336102644578,
+        "B2": 0.8176566400576709,
+        "B3": 0.8176566691961283
+      },
+      "operating_day": "2025-06-14"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 10.451315001012482,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 2.1287850917739562e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": 2.1287850917739562e-08,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 72
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -2.6397248275248985e-08,
+        "Delta_I_crit_from_MESS_P_pu": -0.04429987358006032,
+        "Delta_I_crit_from_MESS_Q_pu": 0.004767935597393331,
+        "Delta_I_crit_from_MESS_total_pu": -0.03953193798266699,
+        "Delta_I_crit_total_affine_pu": -0.03953196437991527,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 74
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -2.6397248275248985e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 4.5193097071186264e-08,
+        "Delta_I_crit_from_MESS_total_pu": 4.5193097071186264e-08,
+        "Delta_I_crit_total_affine_pu": 1.879584879593728e-08,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 74
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 1497577.9888289934,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-06-22.npz",
+      "critical_current_sensitivity_sha256": "5b5a08248e0216e12663f18a71f07815dea1b40581e7a8d869148b75e5933eac",
+      "objective": {
+        "B0": 0.8478846159717323,
+        "B1": 0.8478846372595834,
+        "B2": 0.7953452200698606,
+        "B3": 0.7953452388657093
+      },
+      "operating_day": "2025-06-22"
+    },
+    {
+      "AIDC_location_time_redistribution_nodeh": 10.298490010549537,
+      "B1_minus_B0_at_B1_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": 1.3772915574899952e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 0.0,
+        "Delta_I_crit_from_MESS_total_pu": 0.0,
+        "Delta_I_crit_total_affine_pu": 1.3772915574899952e-08,
+        "comparison": "B1-minus-B0",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 33
+      },
+      "B3_minus_B0_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -7.193838410849028e-08,
+        "Delta_I_crit_from_MESS_P_pu": -0.04398504780542539,
+        "Delta_I_crit_from_MESS_Q_pu": 0.010739049543681815,
+        "Delta_I_crit_from_MESS_total_pu": -0.03324599826174358,
+        "Delta_I_crit_total_affine_pu": -0.03324607020012769,
+        "comparison": "B3-minus-B0",
+        "component_sum_identity_error_pu": 6.938893903907228e-18,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 30
+      },
+      "B3_minus_B2_at_B3_realized_critical": {
+        "Delta_I_crit_from_AIDC_pu": -7.193838410849028e-08,
+        "Delta_I_crit_from_MESS_P_pu": 0.0,
+        "Delta_I_crit_from_MESS_Q_pu": 8.571130021755331e-08,
+        "Delta_I_crit_from_MESS_total_pu": 8.571130021755331e-08,
+        "Delta_I_crit_total_affine_pu": 1.3772916109063036e-08,
+        "comparison": "B3-minus-B2",
+        "component_sum_identity_error_pu": 0.0,
+        "critical_branch_phase": "line.l10::A",
+        "critical_slot": 30
+      },
+      "MESS_to_AIDC_absolute_projection_ratio_at_B3_critical": 462145.4689836414,
+      "critical_current_sensitivity_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_3_final\\cache\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-06-23.npz",
+      "critical_current_sensitivity_sha256": "1ff760a94349c340771f9c8739f8d8a8a32dc18b3f61a50d68381ffd00826c91",
+      "objective": {
+        "B0": 0.8697091911820762,
+        "B1": 0.8697092049549918,
+        "B2": 0.8227557225702095,
+        "B3": 0.822755736343125
+      },
+      "operating_day": "2025-06-23"
+    }
+  ],
+  "role": "READ_ONLY_DIAGNOSTIC_ONLY"
+}

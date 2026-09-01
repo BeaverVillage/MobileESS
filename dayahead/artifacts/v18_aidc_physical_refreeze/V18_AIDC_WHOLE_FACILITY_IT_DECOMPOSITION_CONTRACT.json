@@ -1,0 +1,13 @@
+{
+  "artifact_id": "V18_AIDC_WHOLE_FACILITY_IT_DECOMPOSITION_CONTRACT_V1",
+  "equations": {
+    "P_IT_REF": "P_OTHER_LOCKED+P_RUN_LOCKED+P_FLEX_REF",
+    "P_IT_DA": "P_OTHER_LOCKED+P_RUN_LOCKED+P_FLEX_DA",
+    "Delta_P_IT": "P_FLEX_DA-P_FLEX_REF",
+    "P_PCC": "P_IT*PUE"
+  },
+  "residual_name": "OTHER_LOCKED_IT / NON_CONTROLLABLE_IT_RESIDUAL",
+  "negative_residual_policy": "FAIL_FACILITY_COMPOSITION_INCONSISTENT; no clipping",
+  "PUE": 1.3,
+  "PUE_application_count": 1
+}

@@ -1,0 +1,122 @@
+{
+  "AIDC_site_changes": 0,
+  "June_result_content_reads": 0,
+  "June_scientific_input_reads": 0,
+  "May_result_content_reads": 0,
+  "May_scientific_input_reads": 0,
+  "OpenDSS_calls_inside_Benders": 0,
+  "PF_changes": 0,
+  "PUE_changes": 0,
+  "artifact_id": "V17_AC_RESTORATION_OUTER_LOOP_CONTRACT_V1",
+  "beta_changes": 0,
+  "case_authorized_controls": {
+    "B0": [],
+    "B1": [
+      "AIDC_COMPUTE_FLEX"
+    ],
+    "B2": [
+      "MESS_P",
+      "MESS_Q"
+    ],
+    "B3": [
+      "AIDC_COMPUTE_FLEX",
+      "MESS_P",
+      "MESS_Q"
+    ]
+  },
+  "cut": {
+    "current": "I_AC(u_k)+J_I_k(u-u_k)<=1-m_I",
+    "guard_fields": [
+      "violation_sha256",
+      "local_ac_operating_point_sha256",
+      "derivative_sha256",
+      "violation_type",
+      "slot",
+      "relation",
+      "actual_value",
+      "hard_limit",
+      "margin",
+      "trust_region_rho",
+      "iteration_index",
+      "control_names",
+      "anchor_controls",
+      "coefficients",
+      "local_radius"
+    ],
+    "lower_voltage": "V_AC(u_k)+J_V_k(u-u_k)>=V_MIN+m_V",
+    "method": "Fresh-OpenDSS frozen-tap central finite difference at the failed schedule",
+    "stale_cut_policy": "REJECT/CONSTRAIN outside the exact stored local anchor and rho neighborhood",
+    "transformer_kva": "S_AC(u_k)+J_S_k(u-u_k)<=1-m_transformer_kva",
+    "upper_voltage": "V_AC(u_k)+J_V_k(u-u_k)<=V_MAX-m_V",
+    "validation_artifact_sha256": "e6c5b20c409d79e958f19fb65b285577ceeb7fa689354b026a4735fd96c452d1"
+  },
+  "effect_selected_parameters": 0,
+  "grid_benefit_selected_parameters": 0,
+  "local_trust_region": {
+    "authority": "existing validated V16.3/V17 V5 local control radius",
+    "cut_valid_only_inside_anchor_neighborhood": true,
+    "rho": 0.1,
+    "second_effect_selected_radius": false
+  },
+  "objective": {
+    "preserve_original_primary_objective": true,
+    "report_original_restored_and_degradation": true,
+    "weighted_restoration_objective_added": false
+  },
+  "remaining_April_day_runs": 0,
+  "scientific_replay_calls_before_contract": 0,
+  "scientific_role": "COMMON_FEASIBILITY_CLOSURE_NOT_PROPOSED_METHOD_ADVANTAGE",
+  "scope": [
+    "B0",
+    "B1",
+    "B2",
+    "B3"
+  ],
+  "source": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\v17_ac_restoration_contract.py",
+    "sha256": "76830d6914cad83ea8e225c07b8d41ae696c224510dfa9dfe2cfe0c4f1fe5cc8"
+  },
+  "state_machine": [
+    "optimization",
+    "frozen_schedule_serialization",
+    "Primary_Fresh_OpenDSS",
+    "exact_immutable_violation_extraction",
+    "PASS_OR_LOCAL_CUT_REOPTIMIZE"
+  ],
+  "status": "FROZEN_BEFORE_APR12_REPLAY",
+  "termination": {
+    "K_MAX": 5,
+    "fail": "if FAIL at k==K_MAX, fail closed without repair or parameter change",
+    "iteration_zero_is_original_optimization": true,
+    "pass": "terminate after Primary Fresh OpenDSS hard-feasibility PASS",
+    "rationale": [
+      "bounded sequential-feasibility restoration",
+      "fixed computational guard",
+      "independent of Apr-12 violation magnitude",
+      "not selected from B0-B3 outcomes"
+    ]
+  },
+  "violation_object": {
+    "immutable": true,
+    "required_fields": [
+      "violation_type",
+      "operating_day",
+      "case",
+      "slot",
+      "asset",
+      "phase",
+      "actual_value",
+      "hard_limit",
+      "signed_violation",
+      "fresh_opendss_state_sha256",
+      "schedule_sha256"
+    ],
+    "types": [
+      "VOLTAGE_UPPER",
+      "VOLTAGE_LOWER",
+      "LINE_CURRENT",
+      "TRANSFORMER_CURRENT",
+      "TRANSFORMER_KVA"
+    ]
+  }
+}

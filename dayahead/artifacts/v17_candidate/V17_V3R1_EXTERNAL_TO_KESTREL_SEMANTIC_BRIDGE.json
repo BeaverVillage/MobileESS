@@ -1,0 +1,93 @@
+{
+  "June_result_content_reads": 0,
+  "June_scientific_input_reads": 0,
+  "May_result_content_reads": 0,
+  "May_scientific_input_reads": 0,
+  "OpenDSS_calls_inside_Benders": 0,
+  "U2_classification": "SEMANTICALLY_INCOMPATIBLE",
+  "U2_known": [
+    "physical node ID",
+    "co-resident job IDs",
+    "job start/end intervals",
+    "aggregate job GPU request",
+    "occupied-node count"
+  ],
+  "U2_meaning": "physical same-node co-residency derived by NLR from Slurm allocation overlap",
+  "U2_unknown": [
+    "per-device GPU placement",
+    "same-GPU vs separate-GPU sharing",
+    "MIG state",
+    "time-slicing state/fraction",
+    "GPU utilization",
+    "D-1 future physical node assignment"
+  ],
+  "aggregate_shared_node_power": {
+    "reason": "The artifact has GPU board power but no node/wall power; Kestrel future placement is unavailable at D-1.",
+    "source_backed": false
+  },
+  "arbitrary_flexible_scaling_calls": 0,
+  "artifact_id": "V17_V3R1_EXTERNAL_TO_KESTREL_SEMANTIC_BRIDGE_V1",
+  "effect_selected_power_parameters": 0,
+  "experiment_bridges": [
+    {
+      "Kestrel_bridge": "REQUIRES_UNOBSERVED_STATE",
+      "external_experiment": "H100 MIG GI/CI single or concurrent partitions",
+      "external_state": [
+        "MIG profile",
+        "GI/CI count",
+        "MIG UUID",
+        "workload",
+        "device power"
+      ],
+      "reason": "Kestrel U2 has no MIG state, slice profile, MIG instance, or per-device placement."
+    },
+    {
+      "Kestrel_bridge": "REQUIRES_UNOBSERVED_STATE",
+      "external_experiment": "P100 time-slicing concurrent containers",
+      "external_state": [
+        "oversubscription policy",
+        "instances per GPU",
+        "per-device power"
+      ],
+      "reason": "Kestrel U2 has no time-slicing mechanism/fraction and the source GPU is P100, not H100."
+    },
+    {
+      "Kestrel_bridge": "DERIVABLE_FROM_KESTREL",
+      "external_experiment": "H100 full-GPU one/two-GPU benchmark",
+      "external_state": [
+        "physical active GPU count",
+        "workload",
+        "device power"
+      ],
+      "reason": "Requested aggregate GPU count is observable, but the runs do not identify a 4-GPU Kestrel co-resident marginal or per-job attribution."
+    },
+    {
+      "Kestrel_bridge": "REQUIRES_UNOBSERVED_STATE",
+      "external_experiment": "A100 multi-GPU pass-through active vector",
+      "external_state": [
+        "per-GPU active vector",
+        "device power",
+        "IPMI temperature"
+      ],
+      "reason": "Per-device placement is absent in Kestrel and the hardware is A100."
+    },
+    {
+      "Kestrel_bridge": "REQUIRES_UNOBSERVED_STATE",
+      "external_experiment": "node-level shared aggregate power",
+      "external_state": [],
+      "reason": "No Zenodo node/wall-power measurement exists; IPMI collection is temperature-only."
+    }
+  ],
+  "grid_benefit_selected_power_parameters": 0,
+  "job_attributed_power": {
+    "reason": "Device traces are not labeled by Kestrel job and Kestrel lacks the external sharing intervention state.",
+    "source_backed": false
+  },
+  "marginal_power_of_schedulable_work": {
+    "identifiable": false,
+    "reason": "Removing a Kestrel U2 job does not map causally to an observed Zenodo MIG/time-slice/device state transition."
+  },
+  "remaining_April_day_runs": 0,
+  "rowwise_external_to_Kestrel_merges": 0,
+  "status": "FAIL_CLOSED_U2_EXTERNAL_SHARING_STATE_NOT_OBSERVABLE_IN_KESTREL"
+}

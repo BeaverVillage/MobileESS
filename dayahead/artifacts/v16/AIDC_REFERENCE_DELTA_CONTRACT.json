@@ -1,0 +1,17 @@
+{
+  "authority_id": "AIDC_REFERENCE_DELTA_V1",
+  "equations": {
+    "gpu": "G_RES_PLAN=wG*G_REF_Q90-G_F_REF; G_DA=G_RES_PLAN+G_F_DA",
+    "power": "P_RES_PLAN=wP*P_IT_REF_Q90-P_F_REF; P_IT_DA=P_RES_PLAN+P_F_DA"
+  },
+  "interpretation": "Q90-based conservative reference-decomposition planning residual; not physical-background quantile",
+  "nonnegative_fail": "FAIL_REFERENCE_DELTA_DECOMPOSITION",
+  "planning_inputs": {
+    "G_REF": "Q90",
+    "P_IT_REF": "Q90",
+    "W_F": "Q50"
+  },
+  "planning_pf": 0.95,
+  "planning_pue": 1.3,
+  "status": "IMPLEMENTED_UNIT_TEST_PASS_INTEGRATION_PENDING"
+}

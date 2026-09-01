@@ -1,0 +1,53 @@
+{
+  "alternatives": [
+    {
+      "D_minus_1_causality_preserved": true,
+      "G_RES_negative_removed_by_construction": true,
+      "definition": "Predict W_F quantiles and nonnegative G_RES directly; define G_REF := 4*served(W_F)/Delta_t + softplus(G_RES_raw).",
+      "historical_raw_labels_support": true,
+      "id": "A_COHERENT_MULTIHEAD_PARAMETERIZATION",
+      "retraining_required": true,
+      "training_inference_change": "Joint loss with differentiable/reference-service layer or teacher-forced workload-to-G_F mapping."
+    },
+    {
+      "D_minus_1_causality_preserved": true,
+      "G_RES_negative_removed_by_construction": "YES_IF_SERVICE_PARITY_REMAINS_FEASIBLE; otherwise fail closed",
+      "definition": "Add sum_r 4*x_r,t/Delta_t <= G_REF_Q90(t) to the deterministic V3 scheduler while retaining service parity.",
+      "historical_raw_labels_support": true,
+      "id": "B_COHERENCE_CONSTRAINED_REFERENCE_SCHEDULER",
+      "limitation": "Can expose cross-head infeasibility rather than resolve it.",
+      "retraining_required": false,
+      "training_inference_change": "No forecast retraining; scheduler feasibility contract changes prospectively."
+    },
+    {
+      "D_minus_1_causality_preserved": true,
+      "G_RES_negative_removed_by_construction": true,
+      "definition": "Predict nonnegative G_FIXED and workload W_F; compute G_FLEX from W_F/reference service and set G_REF=G_FIXED+G_FLEX.",
+      "historical_raw_labels_support": true,
+      "id": "C_JOINT_G_FIXED_PLUS_G_FLEX_PARAMETERIZATION",
+      "retraining_required": true,
+      "training_inference_change": "Replace independent G_REF head with structurally joint fixed-plus-flex heads."
+    }
+  ],
+  "artifact_id": "V17_AIDC_COHERENCE_CORRECTION_DESIGN_CANDIDATE",
+  "clipping_main_fix": false,
+  "failure_evidence": "13 frozen days have G_F_REF_SYS(Q50 workload-derived) > G_REF_Q90 from a separately predicted head; beta/unit/time identities pass.",
+  "firewall": {
+    "AIDC_site_changes": 0,
+    "H_changes": 0,
+    "J_I_changes": 0,
+    "May_June_result_dependent_tuning": 0,
+    "beta_changes": 0,
+    "historical_result_changes": 0,
+    "retraining_calls": 0,
+    "rho_changes": 0,
+    "scientific_authority_changes": 0
+  },
+  "independence_statement": "Reference coherence and V16.3 grid-value limitation are separate questions; no causal link is inferred.",
+  "recommended_review_order": [
+    "C_JOINT_G_FIXED_PLUS_G_FLEX_PARAMETERIZATION",
+    "A_COHERENT_MULTIHEAD_PARAMETERIZATION",
+    "B_COHERENCE_CONSTRAINED_REFERENCE_SCHEDULER"
+  ],
+  "status": "DESIGN_ONLY_NOT_IMPLEMENTED"
+}

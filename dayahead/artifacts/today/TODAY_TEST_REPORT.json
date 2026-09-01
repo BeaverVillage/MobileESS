@@ -1,0 +1,69 @@
+{
+  "authority_id": "TODAY_TEST_REPORT_V1",
+  "commands": [
+    {
+      "classification": "NON_SCIENTIFIC_ENGINEERING_TEST",
+      "command": "python -m pytest -q tests/dayahead",
+      "result": "PASS",
+      "summary": "54 passed"
+    },
+    {
+      "classification": "MIXED_EXISTING_REGRESSION_AND_NON_SCIENTIFIC_ENGINEERING",
+      "command": "python -m pytest -q tests/dayahead tests/test_pfr_ai_training.py tests/test_pfr_power.py tests/test_pfr_methods.py tests/test_git_identity.py",
+      "result": "PASS",
+      "summary": "94 passed, 71 subtests passed"
+    },
+    {
+      "classification": "FULL_REPOSITORY_REGRESSION",
+      "command": "python -m pytest -q tests",
+      "failures": [
+        {
+          "blocks_tomorrow_aidc_integration": false,
+          "classification": "PRE_EXISTING_GUROBI_13_0_3_WINDOWS_BEHAVIOR",
+          "introduced_today": false,
+          "test": "tests/test_pfr_mess_energy_recovery.py::test_joint_projection_restores_feasibility_across_multiple_trust_regions"
+        },
+        {
+          "blocks_tomorrow_aidc_integration": false,
+          "classification": "WINDOWS_MISSING_POSIX_FCNTL",
+          "introduced_today": false,
+          "test": "tests/test_shared_exact_source_preparation.py::test_exact_sources_are_prepared_once_and_reused_by_day_workers"
+        },
+        {
+          "blocks_tomorrow_aidc_integration": false,
+          "classification": "WINDOWS_MISSING_POSIX_FCNTL",
+          "introduced_today": false,
+          "test": "tests/test_shared_exact_source_preparation.py::test_exact_source_cache_is_invalidated_by_source_identity"
+        }
+      ],
+      "result": "FAIL",
+      "summary": "406 passed, 4 skipped, 84 subtests passed, 3 failed"
+    },
+    {
+      "classification": "STATIC_ENGINEERING_CHECK",
+      "command": "python -m compileall -q dayahead",
+      "result": "PASS"
+    },
+    {
+      "classification": "STATIC_ENGINEERING_CHECK",
+      "command": "git diff --check",
+      "result": "PASS"
+    },
+    {
+      "classification": "SCIENTIFIC_FAIL_CLOSED_GATE",
+      "command": "python -m dayahead.cli aidc-status",
+      "result": "EXPECTED_EXIT_2",
+      "summary": "WAITING_AIDC_AUTHORITY; four unresolved dependencies; no fallback"
+    }
+  ],
+  "generated_at_utc": "2026-08-28T14:08:07.156210+00:00",
+  "overall_status": "ENGINEERING_PASS_WITH_3_PREEXISTING_ENVIRONMENTAL_FULL_SUITE_FAILURES",
+  "runtime": {
+    "PYTHONPATH": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\python_deps;C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix",
+    "cwd": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix",
+    "python": "C:\\Users\\kjw39\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe"
+  },
+  "scientific_B0_B3_runs": 0,
+  "scientific_opendss_runs": 0,
+  "scientific_solver_equivalence_claimed": false
+}

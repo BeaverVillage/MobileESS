@@ -1,0 +1,26 @@
+{
+  "April_scientific_input_reads_before_freeze": 0,
+  "June_scientific_input_reads": 0,
+  "May_scientific_input_reads": 0,
+  "artifact_id": "V17_RCMQT_V4R1_TARGET_SEMANTICS_CONTRACT_V1",
+  "axes": {
+    "requested_whole_GPU_count_per_node": [1, 2, 3, 4],
+    "revealed_latency_class": ["C1", "C2", "C3", "C4", "C5"],
+    "time_slots": 96
+  },
+  "fixed_target": "G_FIXED_GPU: aggregate whole-GPU occupancy trajectory for source-valid FIXED jobs",
+  "flexible_target_equation": "W[c,g,t] = sum(total source-requested GPU count * runtime hours) for authorized V1 or U2_CLEAN jobs submitted in slot t with frozen latency class c and uniform per-node GPU count g",
+  "forecast_cutoff": "D-1 18:00 fixed AEST",
+  "quarantine_rule": "Q has no flexible target; FIXED Q members may remain in G_FIXED_GPU; all Q power remains in P_IT_REF residual",
+  "quantiles": [0.1, 0.5, 0.9],
+  "remaining_April_day_runs": 0,
+  "status": "FROZEN_BEFORE_TRAINING_AND_APRIL_ACCESS",
+  "target_names": [
+    "W_F_C1::G1", "W_F_C1::G2", "W_F_C1::G3", "W_F_C1::G4",
+    "W_F_C2::G1", "W_F_C2::G2", "W_F_C2::G3", "W_F_C2::G4",
+    "W_F_C3::G1", "W_F_C3::G2", "W_F_C3::G3", "W_F_C3::G4",
+    "W_F_C4::G1", "W_F_C4::G2", "W_F_C4::G3", "W_F_C4::G4",
+    "W_F_C5::G1", "W_F_C5::G2", "W_F_C5::G3", "W_F_C5::G4"
+  ],
+  "unit": "GPU-hour per 15-minute arrival slot"
+}

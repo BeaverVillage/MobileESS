@@ -1,0 +1,128 @@
+{
+  "authority_id": "REFERENCE_SPATIAL_FEASIBILITY_DIAGNOSTIC_V2",
+  "status": "STOPPED_AT_AGGREGATE_CAPACITY_NECESSITY_TEST",
+  "classification": "CASE_B2_AGGREGATE_CAPACITY_AUTHORITY_MISMATCH",
+  "classification_subtype": "CASE_B2_AGGREGATE_RACK_POWER_CAPACITY_MISMATCH",
+  "classification_reason": "P_IT_REF_Q90 exceeds the sum of all 48 frozen Rack power caps in every April 2025-04-15 slot. A spatial allocator cannot repair an aggregate capacity deficit.",
+  "scope": {
+    "operating_day": "2025-04-15",
+    "forecast_model": "Proposed AIDC RC-MQT",
+    "forecast_quantile": 0.9,
+    "diagnostic_only": true,
+    "scientific_authority_changed": false,
+    "production_scheduler_changed": false,
+    "production_authority_code_change_count": 0,
+    "x_ref_changed": false,
+    "fitting_performed": false,
+    "scaling_performed": false,
+    "clipping_performed": false
+  },
+  "preserved_prior_evidence": {
+    "artifact": "REFERENCE_DELTA_FAILURE_DIAGNOSTIC_V1.json",
+    "artifact_sha256": "e9b6f32576888e234c1a7825f74a7fd0ee8d377e1758996cf672180e88c61397",
+    "prior_classification": "CASE_B_REFERENCE_SPATIAL_ALLOCATOR_REQUIRED",
+    "prior_fail_closed_status_preserved": true
+  },
+  "frozen_capacity_authority": {
+    "source_sha256": "4546c0672a4d25aa5c7c92ea90fb90ec8d3c009dda426939179b293abdeb83c0",
+    "rack_count": 48,
+    "P_CAP_TOTAL_kw": 1227.182162294275,
+    "G_CAP_TOTAL": 1815.6000000000001
+  },
+  "aggregate_capacity_necessity_test": {
+    "equations": {
+      "power_margin": "P_MARGIN_TOTAL(t)=P_CAP_TOTAL-P_IT_REF_Q90(t)",
+      "gpu_margin": "G_MARGIN_TOTAL(t)=G_CAP_TOTAL-G_REF_Q90(t)"
+    },
+    "P_IT_REF_Q90_kw": {
+      "min": 2919.766907425101,
+      "max": 3398.464792363265
+    },
+    "G_REF_Q90": {
+      "min": 73.11211833804846,
+      "max": 109.98814879977704
+    },
+    "P_MARGIN_TOTAL_kw": {
+      "min": -2171.2826300689903,
+      "max": -1692.5847451308261,
+      "negative_slot_count": 96,
+      "first_negative": {
+        "slot": 0,
+        "value": -1722.4646343569786
+      },
+      "worst_negative": {
+        "slot": 21,
+        "value": -2171.2826300689903
+      },
+      "status": "FAIL_AGGREGATE_RACK_POWER_CAPACITY"
+    },
+    "G_MARGIN_TOTAL": {
+      "min": 1705.611851200223,
+      "max": 1742.4878816619516,
+      "negative_slot_count": 0,
+      "first_negative": null,
+      "worst_negative": null,
+      "status": "PASS"
+    },
+    "aggregate_power_capacity_pass": false,
+    "aggregate_gpu_capacity_pass": true,
+    "overall_status": "FAIL_AGGREGATE_CAPACITY_NECESSITY_TEST"
+  },
+  "existing_temporal_reference_service": {
+    "status": "NOT_EVALUATED_DUE_MANDATORY_AGGREGATE_STOP",
+    "Y_REF_sha256": null,
+    "Y_REF_materialized": false,
+    "total_work_by_cohort_computed": false,
+    "per_slot_work_by_cohort_computed": false,
+    "B_97_REF_recomputed": false,
+    "arrival_causality_recomputed": false,
+    "reason": "Section B is conditional on aggregate P/G capacity PASS."
+  },
+  "system_first_residual_headroom": {
+    "status": "NOT_RUN_BY_AGGREGATE_STOP",
+    "power_headroom_statistics": null,
+    "gpu_headroom_statistics": null,
+    "negative_power_headroom_count": null,
+    "negative_gpu_headroom_count": null,
+    "reason": "Aggregate power capacity already fails; no spatial workaround is permitted."
+  },
+  "spatial_feasibility_lp": {
+    "status": "NOT_RUN_BY_AGGREGATE_STOP",
+    "slot_count": 96,
+    "evaluated_slot_count": 0,
+    "feasible_slot_count": null,
+    "infeasible_slot_count": null,
+    "solver_call_count": 0,
+    "optimization_objective_used": false,
+    "iis_or_lp_feasibility_evidence": [],
+    "aggregate_infeasibility_evidence": {
+      "power_deficit_slot_count": 96,
+      "first_deficit_slot": 0,
+      "worst_deficit_slot": 21,
+      "worst_deficit_kw": 2171.2826300689903
+    },
+    "reason": "A spatial feasibility LP cannot repair total forecast power above total frozen Rack power capacity."
+  },
+  "immutability_checks": {
+    "x_ref_old_bytes_changed": false,
+    "b0_reference_sha256_before": "c5f969cb0e55b0a9803da2abd48b78220c720b33e0cc56794f7d1d88debe2621",
+    "b0_reference_sha256_after": "c5f969cb0e55b0a9803da2abd48b78220c720b33e0cc56794f7d1d88debe2621",
+    "b2_reference_sha256_before": "c5f969cb0e55b0a9803da2abd48b78220c720b33e0cc56794f7d1d88debe2621",
+    "b2_reference_sha256_after": "c5f969cb0e55b0a9803da2abd48b78220c720b33e0cc56794f7d1d88debe2621",
+    "b0_b2_bytes_identical": true,
+    "fitting_call_count": 0,
+    "scaling_call_count": 0,
+    "clipping_call_count": 0
+  },
+  "execution_firewall": {
+    "g12_call_count": 0,
+    "g13_call_count": 0,
+    "g14_call_count": 0,
+    "c12_call_count": 0,
+    "may_loader_access_count": 0,
+    "june_loader_access_count": 0,
+    "may_forecast_rows_generated": 0,
+    "may_reference_schedule_generated": false,
+    "may_b0_b3_generated": false
+  }
+}

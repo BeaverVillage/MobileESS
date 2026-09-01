@@ -1,0 +1,38 @@
+{
+  "V5_spatialization_changes_aggregate_scale": false,
+  "approximately_0_2_percent_quantity": "modeled flexible incremental IT energy divided by beta-scaled whole-AIDC IT energy; not a job-count fraction",
+  "artifact_id": "V17_AIDC_SCALE_ROOT_CAUSE_REVIEW_V1",
+  "classification": "V17_AIDC_SCALE_B_POWER_MODEL_COMPATIBILITY_BOUNDARY_DOMINANT",
+  "counters": {
+    "AIDC_site_changes": 0,
+    "Fresh_OpenDSS_calls": 0,
+    "June_result_content_reads": 0,
+    "June_scientific_input_reads": 0,
+    "May_result_content_reads": 0,
+    "May_scientific_input_reads": 0,
+    "OpenDSS_calls_inside_Benders": 0,
+    "PF_changes": 0,
+    "PUE_changes": 0,
+    "RCMQT_retraining_calls": 0,
+    "beta_changes": 0,
+    "eta_FLEX_created": 0,
+    "flexible_power_scale_tuning_calls": 0,
+    "kappa_changes": 0,
+    "optimizer_calls": 0,
+    "remaining_April_day_runs": 0,
+    "whole_facility_flexible_share_assumptions": 0
+  },
+  "dominant_attrition_stage": "F3_TO_F7_POWER_MODEL_COMPATIBILITY_BOUNDARY",
+  "forecast_or_adapter_attenuation_defect": false,
+  "secondary_quantitative_attribution": {
+    "effective_grid_relief_per_kW_median": 3.3016789872173856e-05,
+    "flexible_GPUh_fraction": 0.044275640746874484,
+    "flexible_IT_energy_fraction_median_7day": 0.0017793798025828272,
+    "flexible_nodeh_fraction": 0.044275640746874484,
+    "modelable_flexibility_fraction_jobs": 0.0543157940467312,
+    "semantic_flexibility_fraction_jobs": 0.3101571946795647
+  },
+  "status": "PASS_FULLY_EXPLAINED_NO_UNIT_DEFECT",
+  "unit_or_scaling_implementation_defect": false,
+  "why_ratio_is_small": "The dominant identifiable loss is the frozen power-model boundary: only the completed, full-node, authorized-node-class, no-sharing latency-flexible subset has kappa authority. Its roughly 30-37 kWh/day is then compared with roughly 16.9-18.1 MWh/day of beta-scaled whole-AIDC IT. Beta occurs once on both sides and cancels; PUE and PF are absent from the IT-energy ratio."
+}

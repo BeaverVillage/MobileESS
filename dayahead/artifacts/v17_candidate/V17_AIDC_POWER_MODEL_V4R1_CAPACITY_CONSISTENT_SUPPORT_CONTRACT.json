@@ -1,0 +1,46 @@
+{
+  "April_scientific_input_reads_before_contract": 0,
+  "June_result_content_reads": 0,
+  "June_scientific_input_reads": 0,
+  "May_result_content_reads": 0,
+  "May_scientific_input_reads": 0,
+  "acceptance": {
+    "cleaned_global_capacity_violation_count": 0,
+    "cleaned_maximum_concurrent_allocated_GPUs_per_node": 4,
+    "coverage_threshold_used": false
+  },
+  "artifact_id": "V17_AIDC_POWER_MODEL_V4R1_CAPACITY_CONSISTENT_SUPPORT_CONTRACT_V1",
+  "boundary_semantics": {
+    "interval": "half-open [start,end)",
+    "same_timestamp_event_order": "release before start"
+  },
+  "candidate_trace_universe": "all source rows in the frozen training interval that have an exact physical nodelist and an integer 1..4 source-derived GPU allocation per occupied node; only U2 membership is eligible for active flexible support",
+  "capacity_conflict": "G_n(t) > 4",
+  "capacity_equation": "G_n(t) = sum(source-derived per-node gpus_requested for all active candidate jobs on physical node n)",
+  "clean_support": "U2_CLEAN = U2 \\ Q",
+  "conflict_job_set": "Q = union of every job active in every capacity-conflict interval",
+  "determinism_firewall": {
+    "April_result_independent": true,
+    "May_June_independent": true,
+    "coverage_independent": true,
+    "global_rule": true,
+    "grid_outcome_independent": true,
+    "training_only": true
+  },
+  "forbidden_operations": [
+    "GPU clipping",
+    "timestamp repair",
+    "fractional GPU imputation",
+    "choosing an erroneous conflict record",
+    "coverage-selected quarantine",
+    "grid-selected quarantine"
+  ],
+  "quarantine": "every member of Q is excluded from active flexible power; Q members outside frozen U2 are recorded separately and already have no active flexible target",
+  "quarantined_power_role": "whole-IT load and total-IT denominator retained; flexible delta not authorized; power remains in P_IT_REF residual",
+  "remaining_April_day_runs": 0,
+  "status": "FROZEN_PROSPECTIVE_BEFORE_SUPPORT_AUDIT",
+  "training_window_AEST": [
+    "2024-08-19",
+    "2025-03-31"
+  ]
+}

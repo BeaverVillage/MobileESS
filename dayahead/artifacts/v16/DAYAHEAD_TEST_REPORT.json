@@ -1,0 +1,128 @@
+{
+  "authority_id": "DAYAHEAD_G0_G15_TEST_REPORT_V16",
+  "commands": [
+    {
+      "command": "python -m pytest -q tests/dayahead",
+      "result": "82 passed"
+    },
+    {
+      "command": "python -m pytest -q tests/dayahead tests/test_pfr_ai_training.py tests/test_pfr_power.py tests/test_pfr_methods.py tests/test_git_identity.py",
+      "result": "122 passed, 71 subtests passed"
+    },
+    {
+      "command": "python -m pytest -q tests",
+      "failures": [
+        {
+          "classification": "PRE_EXISTING_GUROBI_13_0_3_WINDOWS_BEHAVIOR",
+          "test": "test_joint_projection_restores_feasibility_across_multiple_trust_regions"
+        },
+        {
+          "classification": "WINDOWS_MISSING_POSIX_FCNTL",
+          "test": "test_exact_sources_are_prepared_once_and_reused_by_day_workers"
+        },
+        {
+          "classification": "WINDOWS_MISSING_POSIX_FCNTL",
+          "test": "test_exact_source_cache_is_invalidated_by_source_identity"
+        }
+      ],
+      "result": "434 passed, 4 skipped, 84 subtests passed, 3 failed"
+    },
+    {
+      "command": "python -m dayahead.aidc_preflight --full-inventory-hashes ...",
+      "result": "PASS"
+    },
+    {
+      "command": "python -m dayahead.reproduce_nlr_authority ...",
+      "result": "PASS"
+    },
+    {
+      "command": "python -m dayahead.reproduce_dataset312 ...",
+      "result": "PASS"
+    },
+    {
+      "command": "python -m dayahead.frozen_mapping_authority ...",
+      "result": "PASS; six frozen digests independently re-hashed"
+    },
+    {
+      "command": "python -m dayahead.run_aidc_ml_freeze --raw-root ... --output dayahead/artifacts/v16",
+      "result": "PASS; April-only HPO; production refit count 1; May/June access 0"
+    },
+    {
+      "command": "python -m dayahead.run_c7_c9_preproduction",
+      "result": "PASS; monolithic first; 96 Grid LP Pi/Farkas; Standard and CL-MC-BD certified; May/June access 0"
+    }
+  ],
+  "gates": {
+    "G0": {
+      "evidence": "historical artifacts preserved; V16 output isolated",
+      "status": "PASS"
+    },
+    "G1": {
+      "evidence": "new code/schema uses AIDC",
+      "status": "PASS"
+    },
+    "G10": {
+      "evidence": "April-only reference delta/service/MESS route-SOC-P-Q integrated invariants",
+      "status": "PASS_PREPRODUCTION_INTEGRATED"
+    },
+    "G11": {
+      "evidence": "integrated 96 time-local LP registry, real Gurobi Pi/Farkas, sampled cut validity and exact exclusion",
+      "status": "PASS_PREPRODUCTION"
+    },
+    "G12": {
+      "evidence": "monolithic/Standard/CL-MC-BD objective and hard-feasibility identity; CL gap 0",
+      "status": "PASS_NON_SCIENTIFIC_PREPRODUCTION"
+    },
+    "G13": {
+      "evidence": "C12 and full scientific IEEE123 input release required; May/June still locked",
+      "status": "BLOCKED_UNTIL_C12"
+    },
+    "G14": {
+      "evidence": "independent recalculator unit pass; result matrices absent",
+      "status": "NOT_RUN_CONTRACT_PASS"
+    },
+    "G15": {
+      "evidence": "raw sharing/volumes/kappa exact reproduction",
+      "status": "PASS"
+    },
+    "G2": {
+      "evidence": "AIDC_RAW_PREFLIGHT full 389-file SHA inventory",
+      "status": "PASS"
+    },
+    "G3": {
+      "evidence": "D-1 cutoff tests",
+      "status": "PASS"
+    },
+    "G4": {
+      "evidence": "lineage + historical/D1 separation + raw reproduction",
+      "status": "PASS"
+    },
+    "G5": {
+      "evidence": "April-only paired HPO; seed 20260828; May/June access 0",
+      "status": "PASS"
+    },
+    "G6": {
+      "evidence": "one Aug19-Apr30 production refit; weights/config fingerprint frozen",
+      "status": "PASS"
+    },
+    "G7": {
+      "evidence": "supporting 96-slot traffic interface tests",
+      "status": "PASS"
+    },
+    "G8": {
+      "evidence": "time/vintage/DST/aggregation tests",
+      "status": "PASS"
+    },
+    "G9": {
+      "evidence": "single objective/squared-voltage contracts",
+      "status": "PASS_ENGINEERING"
+    }
+  },
+  "generated_at_utc": "2026-08-29T05:52:56.827208+00:00",
+  "mapping_authority": {
+    "artifact": "FROZEN_MAPPING_AUTHORITY.json",
+    "status": "PASS"
+  },
+  "may_june_access_status": "LOCKED_ACCESS_COUNT_0",
+  "overall_status": "C7_C8_C9_PREPRODUCTION_PASS_MAY_JUNE_LOCKED"
+}

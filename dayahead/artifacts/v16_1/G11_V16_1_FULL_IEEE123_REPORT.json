@@ -1,0 +1,118 @@
+{
+  "authority_id": "G11_V16_1_FULL_IEEE123_DUAL_FARKAS_GATE",
+  "status": "FAIL_AEMO_COMPLETE_VINTAGE_NOT_FOUND",
+  "required_pass_status": "PASS_FULL_IEEE123_V16_1",
+  "operating_day": "2025-04-15",
+  "cutoff_fixed_aest": "2025-04-14T18:00:00+10:00",
+  "stop_rule": "G11_FAIL_STOP_BEFORE_G12",
+  "stop_rule_applied": true,
+  "upstream_state": {
+    "c7_status": "PASS_FULL_IEEE123_V16_1",
+    "c7_report_sha256": "834ab50f90e331ae308cac31b748886a10236045a431a33f6ce8e4d741c36bae",
+    "g10_status": "PASS",
+    "g10_report_sha256": "4b9774204d499ef7006a32b7972978b0f71da24bfaf13cb6cd2539bc5fdfe407",
+    "reference_v3_sha256": "c6de7c19f485d8faa0960fe6aae7e19d75cfbba801886ae99d451f1685fa633d",
+    "production_model_sha256": "30603de0f1cf19e84d2280970aa8a74e6aff2b63cfa11d00200e161860bfc4bc"
+  },
+  "input_authority_gate": {
+    "rule": "For each AEMO demand and rooftop-PV product, select one latest complete next-day trajectory with issue_time at or before the D-1 18:00 fixed-AEST cutoff; per-slot vintage mixing and rolling substitution are prohibited.",
+    "failure_code": "FAIL_AEMO_COMPLETE_VINTAGE_NOT_FOUND",
+    "required_demand_product": "PREDISPATCHREGIONSUM_COMPLETE_NEXT_DAY_30MIN",
+    "required_pv_product": "ROOFTOP_PV_FORECAST_COMPLETE_NEXT_DAY",
+    "demand_complete_vintage_count_for_operating_day": 0,
+    "pv_complete_vintage_count_for_operating_day": 0,
+    "aemo_da_vintage_contract_materialized": false,
+    "source_root_read_only": true,
+    "source_root": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터"
+  },
+  "read_only_source_inventory": {
+    "demand_forecast_months_present": [
+      "2025-08",
+      "2025-09",
+      "2025-10",
+      "2025-11",
+      "2025-12"
+    ],
+    "rooftop_pv_forecast_months_present": [
+      "2025-08",
+      "2025-09",
+      "2025-10",
+      "2025-11",
+      "2025-12"
+    ],
+    "april_demand_forecast_archive_present": false,
+    "april_rooftop_pv_forecast_archive_present": false,
+    "demand_archive_sha256_by_month": {
+      "2025-08": "26f02a51b82e46152c880c4687339b416fd667d049902e968d0346fb67d552a7",
+      "2025-09": "dd6c54a6ac4017e23466adeca5ed4b4803d4f9c7d2557057dfddf22912f26b54",
+      "2025-10": "dcb7cc2844f8f44a6df7b98c0c1f24e2932f9a6d6e937d0cb717beb211020556",
+      "2025-11": "adda6b3f3f1507e2f0b2eae9c475e807d7b1b03eb62189092ec2549a48c90feb",
+      "2025-12": "20271f0cc4acc193bfb40e96bd01f91276c11cf7208a186ba1a78eecf6fa3d65"
+    },
+    "pv_archive_sha256_by_month": {
+      "2025-08": "3a54c6e95971448d5e6e20e8b0a4ed6d4a9f358b1913f0c7409e27127917c047",
+      "2025-09": "15c9ef8304c444df70c3c8a4c1179986e778fdf555384d6e7206134fcebb65a3",
+      "2025-10": "b3b3f5218cbb195e51b11c2bf7ff4c7c138399231f77d829fd24480e1e84c55e",
+      "2025-11": "5134094569e4adfb7b1d6e0d9ebaf0536645b586feefb8ffb875b3b16d891566",
+      "2025-12": "16f11af3f83e290a1167c3296f950f2889176121a04d62509802f1c9ab5cb782"
+    },
+    "inventory_evidence": "dayahead/artifacts/v16/AIDC_RAW_PREFLIGHT.json"
+  },
+  "prohibited_substitutions_rejected": {
+    "pfr_rolling_forecast_available": true,
+    "pfr_rolling_forecast_shape": [
+      576,
+      54,
+      131,
+      3
+    ],
+    "pfr_rolling_forecast_resolution_minutes": 5,
+    "reason_not_authoritative_for_day_ahead": "A 54-step rolling horizon is not one complete 48-slot 30-minute next-day AEMO vintage and cannot cover the 96-slot day without prohibited per-slot vintage mixing.",
+    "actual_used_as_forecast": false,
+    "new_forecast_source_fitted_or_created": false,
+    "per_slot_vintage_mixing_used": false,
+    "rolling_vintage_substitution_used": false
+  },
+  "full_ieee123_authority_readiness": {
+    "authority_archive_sha256": "de89f122f2c56c25c268cef114f24188e9fdce452f24d07f8117a4b97d06c72e",
+    "full_feeder_master_sha256": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969",
+    "compiled_bus_phase_mask_sha256": "4f3b5dea7237d4cb5461b4b8735b7825be8249ba035d35224308ba446ff7d59b",
+    "u080_ampacity_sha256": "46d492b5b62400d33646089b80105d713250d0790ed7baab85b002d48121f302",
+    "pcc_mapping_sha256": "c3763567f6785f182ab151ca0390918017d4e24c2733f6d72d2304bba416322e",
+    "full_feeder_compiles_to_168_buses": true,
+    "aidc_pcc_hosts_present": "12/12",
+    "legacy_rack_kw_row_active_count": 0
+  },
+  "g11_execution": {
+    "final_full_ieee123_grid_lp_count": 0,
+    "master_dependent_row_registry_completeness_checked": false,
+    "pi_sign_convention_checked_on_final_problem": false,
+    "farkas_sign_convention_checked_on_final_problem": false,
+    "sampled_feasible_perturbation_checked_on_final_problem": false,
+    "infeasible_incumbent_exclusion_checked_on_final_problem": false,
+    "baseline_admission_checked_on_final_problem": false,
+    "aidc_injection_derivatives_checked_on_final_problem": false,
+    "reduced_star_used_as_final_evidence": false,
+    "existing_reduced_star_evidence_preserved_as_non_scientific": true
+  },
+  "downstream_call_counts": {
+    "g12": 0,
+    "g13": 0,
+    "realized_replay": 0,
+    "g14": 0,
+    "c12": 0
+  },
+  "firewall": {
+    "may_loader_access_count": 0,
+    "june_loader_access_count": 0,
+    "may_forecast_rows": 0,
+    "may_reference_schedule_created": false,
+    "may_b0_b3_results_created": false,
+    "june_results_created": false
+  },
+  "verification": {
+    "command": "python -m pytest tests/dayahead -q",
+    "result": "90 passed",
+    "current_head_before_g11_failure_artifact": "64d27d7ddaa1f0b798eb412c76b03c67293fe499"
+  }
+}

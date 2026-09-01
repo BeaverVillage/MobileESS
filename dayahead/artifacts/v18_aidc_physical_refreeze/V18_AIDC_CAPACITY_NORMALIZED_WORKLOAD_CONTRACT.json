@@ -1,0 +1,19 @@
+{
+  "artifact_id": "V18_AIDC_CAPACITY_NORMALIZED_WORKLOAD_CONTRACT_V1",
+  "status": "CONTRACT_FROZEN_MODEL_REFIT_NOT_RUN",
+  "C_MODEL_GPU_equivalent": 528.0,
+  "equations": {
+    "G_REF_MODEL": "C_MODEL*u_TOTAL_hat",
+    "G_F_REF_MODEL": "G_REF_MODEL*sigmoid(z_flex)",
+    "W_F_MODEL_b": "C_MODEL*0.25h*a_FLEX_hat_b"
+  },
+  "architecture": "hierarchical total utilization and conditional flexible fraction; same C_MODEL for G and W",
+  "48_rack_distribution": "normalize frozen nonnegative rack weights to sum C_MODEL; no hidden second scale",
+  "training_period": [
+    "2024-08-19",
+    "2025-03-31"
+  ],
+  "validation_period": "must be newly designated; April has already been observed",
+  "locked_test_period": "NEW_LOCKED_TEST_NOT_YET_AVAILABLE",
+  "ML_novelty_claim": false
+}

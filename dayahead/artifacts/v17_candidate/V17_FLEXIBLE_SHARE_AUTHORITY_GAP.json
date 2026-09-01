@@ -1,0 +1,77 @@
+{
+  "artifact_id": "V17_FLEXIBLE_SHARE_AUTHORITY_GAP_V1",
+  "counters": {
+    "AIDC_site_changes": 0,
+    "April_B0_B1_B2_B3_calls": 0,
+    "Fresh_OpenDSS_calls": 0,
+    "June_result_content_reads": 0,
+    "June_scientific_input_reads": 0,
+    "May_June_result_dependent_tuning": 0,
+    "May_result_content_reads": 0,
+    "May_scientific_input_reads": 0,
+    "OpenDSS_calls_inside_Benders": 0,
+    "PF_changes": 0,
+    "PUE_changes": 0,
+    "RC_MQT_retraining_calls": 0,
+    "V16_3_historical_result_changes": 0,
+    "V16_3_scientific_authority_changes": 0,
+    "alpha_grid_changes": 0,
+    "arbitrary_clipping_calls": 0,
+    "beta_changes": 0,
+    "current_limit_changes": 0,
+    "decomposition_regression_calls": 0,
+    "eta_FLEX_calibration_calls": 0,
+    "gamma_crit_changes": 0,
+    "kappa_changes": 0,
+    "native_ieee123_changes": 0,
+    "native_rating_changes": 0,
+    "post_hoc_effect_tuning_calls": 0,
+    "tap_semantics_changes": 0,
+    "voltage_limit_changes": 0
+  },
+  "downstream_actions_not_run": [
+    "eta_FLEX calibration",
+    "reference scheduler V4",
+    "fixed-plus-flex label construction",
+    "RC-MQT retraining",
+    "April affine-region validation",
+    "AC restoration",
+    "April B0/B1/B2/B3",
+    "April-15 decomposition regression"
+  ],
+  "final_classification": "V17_APRIL_D_FLEXIBLE_SHARE_AUTHORITY_MISSING",
+  "minimum_evidence_to_unblock": [
+    "A measured facility-level IT label separating schedulable/deferrable and fixed energy, with source hash and time scope; or",
+    "an archived source giving a numeric schedulable IT share for a scope defensibly matching this case study, together with a prospectively frozen main-value selection rule."
+  ],
+  "missing_authority": {
+    "must_be_independent_of": [
+      "beta_AIDC",
+      "feeder penetration",
+      "PUE",
+      "PF",
+      "kappa_n",
+      "May/June outcomes",
+      "B1-B0 or B3-B2 improvement"
+    ],
+    "quantity": "facility-level schedulable/deferrable IT workload energy share",
+    "required_scope": "IT-only whole-facility envelope",
+    "required_temporal_semantics": "share represented by D-1 schedulable workload",
+    "symbol": "f_FLEX_AUTH"
+  },
+  "next_decision": "V17_FURTHER_REDESIGN_REQUIRED",
+  "prohibited_gap_fills": [
+    "selecting a Dataset312 utilization scenario after observing grid benefit",
+    "equating utilization with flexible share",
+    "scaling from the existing Kestrel-to-ESIF ratio to obtain a desired effect",
+    "clipping or broadening Kestrel eligibility",
+    "using May/June inputs or outcomes"
+  ],
+  "status": "V17_BLOCKED_FLEXIBLE_SHARE_AUTHORITY_MISSING",
+  "why_existing_sources_are_insufficient": [
+    "ESIF measures whole-facility IT magnitude but not schedulability.",
+    "Kestrel describes a subsystem workload but supplies no facility-level share denominator.",
+    "Dataset312 utilization scenarios do not define a schedulable fraction and provide no authorized main-case choice.",
+    "Archived literature entries contain no numeric, scope-matched main flexible-share authority."
+  ]
+}

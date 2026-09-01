@@ -1,0 +1,47 @@
+{
+  "Track_A": {
+    "actual_flexible_job_fraction": 0.3101571946795647,
+    "approximately_0_2_percent_is_job_count_fraction": false,
+    "classification": "V17_AIDC_SCALE_B_POWER_MODEL_COMPATIBILITY_BOUNDARY_DOMINANT",
+    "flexible_GPU_hour_fraction": 0.044275640746874484,
+    "largest_funnel_loss": "F3_TO_F7_POWER_MODEL_COMPATIBILITY_BOUNDARY",
+    "low_grid_relief_attribution": "both a small source-backed flexible-power scale and weak/current-row-dependent J_I projection contribute; the independent upper bound nearly equals B1",
+    "modelable_flexible_job_fraction": 0.0543157940467312,
+    "modelable_flexible_node_hour_fraction": 0.044275640746874484,
+    "status": "PASS_FULLY_EXPLAINED_NO_UNIT_DEFECT",
+    "unit_or_scaling_defect": false,
+    "why_approximately_0_2_percent": "The dominant identifiable loss is the frozen power-model boundary: only the completed, full-node, authorized-node-class, no-sharing latency-flexible subset has kappa authority. Its roughly 30-37 kWh/day is then compared with roughly 16.9-18.1 MWh/day of beta-scaled whole-AIDC IT. Beta occurs once on both sides and cancels; PUE and PF are absent from the IT-energy ratio."
+  },
+  "Track_B": {
+    "authority_blocker": "AMBIGUOUS/INCOMPLETE: common protocol was requested, but the frozen scientific operator contract and parameters are absent",
+    "classification": "V17_AC_RESTORATION_AUTHORITY_AMBIGUOUS",
+    "closed_loop_operational_in_real_scientific_case": false,
+    "same_7day_regression_calls": 0,
+    "scientific_replay_calls": 0,
+    "status": "V17_AC_RESTORATION_AUTHORITY_AMBIGUOUS",
+    "why_Apr12_B2_restoration_did_not_execute": "The runner performed one Fresh-AC summary and stopped; no dispatchable violation object, eligibility dispatcher, cut builder, callback, or re-solve path is connected."
+  },
+  "artifact_id": "V17_AIDC_SCALE_AND_AC_LOOP_COMBINED_REVIEW_V1",
+  "counters": {
+    "AIDC_site_changes": 0,
+    "Fresh_OpenDSS_calls": 0,
+    "June_result_content_reads": 0,
+    "June_scientific_input_reads": 0,
+    "May_result_content_reads": 0,
+    "May_scientific_input_reads": 0,
+    "OpenDSS_calls_inside_Benders": 0,
+    "PF_changes": 0,
+    "PUE_changes": 0,
+    "RCMQT_retraining_calls": 0,
+    "beta_changes": 0,
+    "eta_FLEX_created": 0,
+    "flexible_power_scale_tuning_calls": 0,
+    "kappa_changes": 0,
+    "optimizer_calls": 0,
+    "remaining_April_day_runs": 0,
+    "whole_facility_flexible_share_assumptions": 0
+  },
+  "required_next_authority": "Mint/recover the frozen V17 AC restoration outer-loop contract with common B0-B3 eligibility, K_MAX, local trust region, and cut guard before any scientific replay.",
+  "resume_decision": "APRIL_RESUME_BLOCKED",
+  "status": "APRIL_RESUME_BLOCKED"
+}

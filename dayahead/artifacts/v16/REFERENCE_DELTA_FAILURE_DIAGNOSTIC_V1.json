@@ -1,0 +1,165 @@
+{
+  "authority_id": "REFERENCE_DELTA_FAILURE_DIAGNOSTIC_V1",
+  "status": "PASS_DIAGNOSTIC_COMPLETE_FAIL_CLOSED_REMAINS",
+  "classification": "CASE_B_REFERENCE_SPATIAL_ALLOCATOR_REQUIRED",
+  "classification_basis": {
+    "systemwide_power_residual_nonnegative_all_slots": true,
+    "systemwide_gpu_residual_nonnegative_all_slots": true,
+    "system_first_mapped_power_residual_nonnegative": true,
+    "system_first_mapped_gpu_residual_nonnegative": true,
+    "existing_x_ref_plus_system_first_residual_satisfies_power_caps": false,
+    "existing_x_ref_plus_system_first_residual_satisfies_gpu_caps": true,
+    "systemwide_reconstruction_identities_pass": true
+  },
+  "scope": {
+    "operating_day": "2025-04-15",
+    "namespace": "APRIL_VALIDATION_FULL_SCIENTIFIC_IEEE123_V1",
+    "diagnostic_only": true,
+    "scientific_authority_changed": false,
+    "production_code_changed": false,
+    "scientific_authority_code_change_count": 0,
+    "new_fitting_performed": false,
+    "redistribution_performed": false,
+    "optimization_result_tuning_performed": false
+  },
+  "inputs": {
+    "forecast_model": "Proposed AIDC RC-MQT",
+    "forecast_quantile_for_power_and_gpu_reference": 0.9,
+    "reference_schedule": "REFERENCE_COMPUTE_SCHEDULE_V2",
+    "rack_count": 48,
+    "slot_count": 96,
+    "rack_capacity_source_sha256": "4546c0672a4d25aa5c7c92ea90fb90ec8d3c009dda426939179b293abdeb83c0",
+    "reference_schedule_sha256": "c5f969cb0e55b0a9803da2abd48b78220c720b33e0cc56794f7d1d88debe2621"
+  },
+  "old_v16_map_first_then_subtract_failure": {
+    "equation": {
+      "gpu": "G_RES(r,t)=w_r^G*G_REF_Q90(t)-G_F_REF(r,t)",
+      "power": "P_RES(r,t)=w_r^P*P_IT_REF_Q90(t)-P_F_REF(r,t)"
+    },
+    "status": "FAIL_REFERENCE_DELTA_DECOMPOSITION",
+    "gpu_residual_min": -14.359713515786275,
+    "gpu_residual_max": 7.992063043969091,
+    "negative_gpu_residual_count": 96,
+    "first_negative_gpu_residual": {
+      "slot": 0,
+      "rack_index": 0,
+      "rack_id": "AIDC01_LP01",
+      "value": -11.33444113864005
+    },
+    "power_residual_min_kw": 12.822835503517856,
+    "power_residual_max_kw": 210.48261045783994,
+    "negative_power_residual_count": 0
+  },
+  "systemwide_reference_delta": {
+    "equation": {
+      "gpu": "G_RES_SYS(t)=G_REF_Q90(t)-sum_r G_F_REF(r,t)",
+      "power": "P_RES_SYS(t)=P_IT_REF_Q90(t)-sum_r P_F_REF(r,t)"
+    },
+    "status": "PASS_NONNEGATIVE_ALL_96_SLOTS",
+    "gpu": {
+      "min": 61.353069307496604,
+      "max": 99.82846435050295,
+      "negative_slot_count": 0,
+      "first_negative_slot_value": null
+    },
+    "power_kw": {
+      "min": 2912.3435537911796,
+      "max": 3393.7455492108206,
+      "negative_slot_count": 0,
+      "first_negative_slot_value": null
+    },
+    "flexible_reference_system_totals": {
+      "gpu_min": 9.113035694912687,
+      "gpu_max": 15.787915648672975,
+      "power_kw_min": 4.719243152444458,
+      "power_kw_max": 8.125235267192176
+    }
+  },
+  "system_first_map_second_counterfactual": {
+    "diagnostic_only": true,
+    "equation": {
+      "gpu_residual": "G_RES_SYSFIRST(r,t)=w_r^G*G_RES_SYS(t)",
+      "power_residual": "P_RES_SYSFIRST(r,t)=w_r^P*P_RES_SYS(t)",
+      "gpu_b0": "G_B0_SYSFIRST(r,t)=G_RES_SYSFIRST(r,t)+G_F_REF(r,t)",
+      "power_b0": "P_B0_SYSFIRST(r,t)=P_RES_SYSFIRST(r,t)+P_F_REF(r,t)"
+    },
+    "mapped_residual_statistics": {
+      "gpu_min": 0.238924713806666,
+      "gpu_max": 7.253830429714969,
+      "power_kw_min": 12.790234119383339,
+      "power_kw_max": 210.1903259473916,
+      "negative_gpu_count": 0,
+      "negative_power_count": 0
+    },
+    "weight_checks": {
+      "sum_w_g": 1.0,
+      "sum_w_p": 1.0,
+      "tolerance": 1e-12,
+      "status": "PASS"
+    },
+    "rack_cap_tests": {
+      "gpu": {
+        "violation_count": 0,
+        "max_violation": 0.0,
+        "worst_rack_slot": {
+          "rack_id": "AIDC11_LP01",
+          "slot": 25,
+          "cap_excess": -6.681657947022874
+        },
+        "status": "PASS"
+      },
+      "power_kw": {
+        "violation_count": 4608,
+        "evaluated_rack_slot_count": 4608,
+        "max_violation": 134.1852704860474,
+        "worst_rack_slot": {
+          "rack_id": "AIDC09_LP04",
+          "slot": 21,
+          "cap_excess_kw": 134.1852704860474
+        },
+        "status": "FAIL_RACK_POWER_CAP"
+      }
+    },
+    "systemwide_reconstruction_identities": {
+      "gpu_identity": "sum_r G_B0_SYSFIRST(r,t)=G_REF_Q90(t)",
+      "power_identity": "sum_r P_B0_SYSFIRST(r,t)=P_IT_REF_Q90(t)",
+      "gpu_max_abs_error": 1.4210854715202004e-14,
+      "power_max_abs_error_kw": 4.547473508864641e-13,
+      "deterministic_tolerance": 1e-9,
+      "status": "PASS"
+    }
+  },
+  "immutability_checks": {
+    "existing_x_ref_modified": false,
+    "b0_reference_sha256_before": "c5f969cb0e55b0a9803da2abd48b78220c720b33e0cc56794f7d1d88debe2621",
+    "b0_reference_sha256_after": "c5f969cb0e55b0a9803da2abd48b78220c720b33e0cc56794f7d1d88debe2621",
+    "b2_reference_sha256_before": "c5f969cb0e55b0a9803da2abd48b78220c720b33e0cc56794f7d1d88debe2621",
+    "b2_reference_sha256_after": "c5f969cb0e55b0a9803da2abd48b78220c720b33e0cc56794f7d1d88debe2621",
+    "b0_b2_bytes_identical": true,
+    "b0_b2_sha_identity": true,
+    "reference_scheduler_call_count": 0,
+    "reference_scheduler_code_change_count": 0,
+    "mapping_fitting_call_count": 0,
+    "clipping_call_count": 0
+  },
+  "service_parity_identity": {
+    "status": "UNCHANGED_NOT_REEVALUATED",
+    "identity_change_count": 0,
+    "existing_x_ref_terminal_backlog_max_nodeh": 0.0,
+    "prior_c7_service_parity_status": "NOT_EVALUATED_BECAUSE_REFERENCE_DELTA_FAILED",
+    "post_diagnostic_service_parity_status": "NOT_EVALUATED_BECAUSE_REFERENCE_DELTA_FAILED",
+    "numeric_da_service_parity_recomputed": false,
+    "reason": "The diagnostic reads the existing x_REF bytes and does not create or modify a DA schedule."
+  },
+  "execution_firewall": {
+    "g12_call_count": 0,
+    "g13_call_count": 0,
+    "g14_call_count": 0,
+    "c12_call_count": 0,
+    "may_loader_access_count": 0,
+    "june_loader_access_count": 0,
+    "may_forecast_rows_generated": 0,
+    "may_reference_schedule_generated": false,
+    "may_b0_b3_generated": false
+  }
+}

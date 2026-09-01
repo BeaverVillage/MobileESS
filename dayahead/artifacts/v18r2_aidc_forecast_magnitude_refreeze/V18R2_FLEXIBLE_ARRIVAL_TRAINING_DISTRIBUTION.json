@@ -1,0 +1,63 @@
+{
+  "artifact_id": "V18R2_FLEXIBLE_ARRIVAL_TRAINING_DISTRIBUTION_V1",
+  "period": [
+    "2024-08-19",
+    "2025-03-31"
+  ],
+  "day_count": 225,
+  "total_flexible_GPU_h": 614322.9725,
+  "mean_GPU_h_per_day": 2730.3243222222222,
+  "median_GPU_h_per_day": 891.2858333333334,
+  "day_total_quantiles_GPU_h": {
+    "P10": 0.6635555555555557,
+    "P50": 891.2858333333334,
+    "P75": 2867.2266666666656,
+    "P90": 6616.340444444441,
+    "P95": 11582.908166666677,
+    "P99": 25035.647088888876
+  },
+  "zero_arrival_slot_fraction": 0.8920370370370371,
+  "slot_arrival_quantiles_GPU_h_all": {
+    "P50": 0.0,
+    "P75": 0.0,
+    "P90": 0.08941666666667213,
+    "P95": 23.653888888888865,
+    "P99": 385.8837333333306
+  },
+  "slot_arrival_quantiles_GPU_h_positive": {
+    "P50": 18.605694444444445,
+    "P75": 93.38416666666667,
+    "P90": 360.73116666666675,
+    "P95": 856.3457361111087,
+    "P99": 4059.4273972222263
+  },
+  "burstiness_coefficient_of_variation": 18.96330727999363,
+  "variance_to_mean": 10227.539597150295,
+  "skewness": 59.02050602841008,
+  "max_to_positive_median": 2857.909092944961,
+  "weekday_mean_GPU_h_per_day": 2875.5776742581093,
+  "weekend_mean_GPU_h_per_day": 2364.9213585069447,
+  "holiday_mean_GPU_h_per_day": 10976.23781746031,
+  "nonholiday_mean_GPU_h_per_day": 2465.547283384302,
+  "capacity_normalization": {
+    "definition": "H_FLEX_DAY / (C_REF * 24 h)",
+    "C_REF_GPU": 528.0,
+    "pre_expansion_role": "SOURCE_BACKED_132_H100_NODES_X4_GPU",
+    "post_expansion_role": "ENGINEERING_NORMALIZATION_REFERENCE_BECAUSE_EXPANSION_QUANTITY_UNPUBLISHED",
+    "mean_daily_intensity": 0.2154611996703143,
+    "quantiles": {
+      "P10": 5.236391694725029e-05,
+      "P50": 0.07033505629208754,
+      "P75": 0.22626473063973054,
+      "P90": 0.522122825476992,
+      "P95": 0.9140552530513476,
+      "P99": 1.9756665947671148
+    },
+    "upper_bound_enforced": false
+  },
+  "daily_slot_mass_identity_max_abs_GPU_h": 0.0,
+  "daily_tier_mass_identity_max_abs_GPU_h": 3.637978807091713e-11,
+  "V18R1_repaired_execution_integral_GPU_h": 610707.3561111112,
+  "arrival_target_minus_execution_integral_GPU_h": 3615.616388888797,
+  "boundary_explanation": "arrival target assigns full realized service mass to in-period submit day; V18R1 native value clips execution overlap to the training window"
+}

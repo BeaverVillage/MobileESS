@@ -1,0 +1,37 @@
+{
+  "authority_id": "AIDC_LABEL_ORIGIN_PROVENANCE_V2",
+  "dataset312_role": "PARAMETER_ONLY_NO_TARGET_ROW_MERGE",
+  "facility_hierarchy": "NLR_ESIF_FACILITY_WITH_KESTREL_SUBSYSTEM",
+  "status": "PASS",
+  "targets": {
+    "G_REF": {
+      "depends_on": [],
+      "derivation_rule": "H100 allocation interval occupancy from scheduler fields",
+      "label_origin": "SOURCE_DERIVED",
+      "source_file_sha256": [
+        "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f"
+      ],
+      "source_system_id": "NLR_KESTREL_SCHEDULER"
+    },
+    "P_IT_REF": {
+      "depends_on": [],
+      "derivation_rule": "it_power_kw source-offset parse -> fixed AEST -> 15-min mean",
+      "label_origin": "OBSERVED_RAW",
+      "source_file_sha256": [
+        "19cd12405dde9144b1a360e8c8418666c399a3d0d15a7f846880d71ab22f9dd4",
+        "59e6c0537956b77fb071c6f8211efc3fa4522ca10e5e3d95679aa937627262b1"
+      ],
+      "source_system_id": "NLR_ESIF_FACILITY_POWER"
+    },
+    "W_F": {
+      "depends_on": [],
+      "derivation_rule": "eligible H100-node-hour arrival cohort mass",
+      "label_origin": "SOURCE_DERIVED",
+      "source_file_sha256": [
+        "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f"
+      ],
+      "source_system_id": "NLR_KESTREL_SCHEDULER"
+    }
+  },
+  "timestamp_axis_id": "NLR_MOUNTAIN_OFFSET_TO_FIXED_AEST_15MIN_V1"
+}

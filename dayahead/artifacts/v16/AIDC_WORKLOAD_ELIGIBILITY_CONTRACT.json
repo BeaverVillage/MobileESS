@@ -1,0 +1,41 @@
+{
+  "authority_id": "NLR_KESTREL_H100_ELIGIBILITY_V1",
+  "expost_fields_role": "HISTORICAL_LABEL_AND_AUDIT_ONLY",
+  "period_reproduction": {
+    "PRIMARY_2025MAY": {
+      "eligible_jobs": 3123,
+      "incremental_total_energy_MWh": 31.859787525160876,
+      "node_hours": 15090.556111111462,
+      "peak_15min_total_MW": 0.17600187342556192
+    },
+    "REPLICATION_2025JUN01_25": {
+      "eligible_jobs": 3742,
+      "incremental_total_energy_MWh": 17.8815071201498,
+      "node_hours": 8163.093333333267,
+      "peak_15min_total_MW": 0.18458121626311927
+    },
+    "TRAIN_2024AUG19_2025MAR31": {
+      "eligible_jobs": 31993,
+      "incremental_total_energy_MWh": 98.35393621883169,
+      "node_hours": 44225.56749999632,
+      "peak_15min_total_MW": 0.19231559314722785
+    },
+    "VALIDATION_2025APR": {
+      "eligible_jobs": 3541,
+      "incremental_total_energy_MWh": 22.82939363233247,
+      "node_hours": 10365.958611111122,
+      "peak_15min_total_MW": 0.14918647550897673
+    }
+  },
+  "rule": "H100 + COMPLETED + valid runtime + gpus_requested=4*gpu_nodes_occupied + node class in {1,2,4,8,16} + (share count NULL/zero) + nodes_shared/jobs_shared empty",
+  "sharing_reproduction": {
+    "positive_share_evidence": 221227,
+    "share_count_NULL": 58229,
+    "share_count_POSITIVE": 221227,
+    "share_count_ZERO": 0,
+    "sharing_conflicts": 0,
+    "total_valid_H100_jobs": 279456,
+    "triple_no_share_evidence": 58229
+  },
+  "status": "PASS"
+}

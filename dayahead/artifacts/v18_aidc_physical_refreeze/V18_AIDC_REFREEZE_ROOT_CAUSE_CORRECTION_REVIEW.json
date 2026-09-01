@@ -1,0 +1,213 @@
+{
+  "artifact_id": "V18_AIDC_REFREEZE_ROOT_CAUSE_CORRECTION_REVIEW_V1",
+  "result_classification": "E. REFREEZE_FAILED_PHYSICAL_COHERENCE",
+  "corrections": {
+    "capacity_normalization": {
+      "before": 1815.6,
+      "after": 528.0,
+      "unit": "GPU",
+      "status": "FAIL_NATIVE_PHYSICAL_COHERENCE"
+    },
+    "D1_known_state": {
+      "before": "forecast cohort only",
+      "after": "contract defined; queue/running quantities null",
+      "status": "GATE_B_QUEUE_AUTHORITY_MISSING"
+    },
+    "node_power": {
+      "before": "GPU-board Q50 only",
+      "after": "full-node Dataset312 GPU+CPU package; partial-node board lower bound",
+      "status": "PASS_HYBRID_AUTHORITY"
+    },
+    "facility_decomposition": {
+      "before": "combined residual + flex",
+      "after": "three-component contract only",
+      "status": "BLOCKED_NOT_VALIDATED"
+    }
+  },
+  "Kestrel_native": {
+    "artifact_id": "V18_KESTREL_NATIVE_FLEXIBILITY_SHARE_V1",
+    "status": "PASS_RETROSPECTIVE_TRAINING_SOURCE_REPRODUCTION",
+    "training_period_AEST": [
+      "2024-08-19",
+      "2025-03-31"
+    ],
+    "C_K_GPU_equivalent": 528.0,
+    "counts": {
+      "all_executed_H100_jobs": 276218,
+      "semantic_flexible_jobs": 85671,
+      "fullnode_nodelevel_jobs": 15003
+    },
+    "energies": {
+      "all_executed_H100_GPU_hours": 1660799.8058333332,
+      "semantic_flexible_GPU_hours": 610761.1522222222
+    },
+    "fullnode_by_node_class": {
+      "1": {
+        "jobs": 14334,
+        "node_hours": 12629.823888888888,
+        "GPU_hours": 50519.29555555555
+      },
+      "2": {
+        "jobs": 227,
+        "node_hours": 1317.9255555555555,
+        "GPU_hours": 5271.702222222222
+      },
+      "4": {
+        "jobs": 255,
+        "node_hours": 2769.1144444444444,
+        "GPU_hours": 11076.457777777778
+      },
+      "8": {
+        "jobs": 135,
+        "node_hours": 1473.0111111111114,
+        "GPU_hours": 5892.044444444446
+      },
+      "16": {
+        "jobs": 52,
+        "node_hours": 193.36888888888888,
+        "GPU_hours": 773.4755555555555
+      }
+    },
+    "eta_F_GPU_energy": 0.3677512184653483,
+    "eta_F_GPU_peak_coincident": 1.0,
+    "mean_total_GPU_utilization": 0.5824915143916011,
+    "peak_total_GPU_utilization": 1.1163089225589227,
+    "mean_flexible_GPU_utilization": 0.21421196416323732,
+    "peak_flexible_GPU_utilization": 0.9696969696969697,
+    "peak_total_active_GPU": 589.4111111111112,
+    "peak_flexible_active_GPU": 512.0,
+    "q99_5_total_active_GPU": 567.8920944444446,
+    "KESTREL_VIRTUAL_PLANNING_CAPACITY_diagnostic_GPU": 668.108346405229,
+    "virtual_planning_capacity_selected": false,
+    "capacity_violation_slot_count": 902,
+    "capacity_violation_slot_fraction": 0.04175925925925926,
+    "maximum_capacity_excess_GPU": 61.411111111111154,
+    "flex_exceeds_total_slot_count": 0,
+    "flexible_arrival_GPU_hours_submitted_in_training": 612089.1177777778,
+    "mean_flexible_arrival_intensity": 0.21467772088165604,
+    "peak_flexible_arrival_intensity": 403.1847053872052,
+    "arrival_GPU_hours_by_latency_class": {
+      "C1": 40862.13694444444,
+      "C2": 31287.16,
+      "C3": 41073.95166666666,
+      "C4": 27853.565555555557,
+      "C5": 471012.3036111111
+    },
+    "member_access": [
+      {
+        "month": 202408,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+        "rows": 428165
+      },
+      {
+        "month": 202409,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+        "rows": 405655
+      },
+      {
+        "month": 202410,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+        "rows": 273571
+      },
+      {
+        "month": 202411,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+        "rows": 248055
+      },
+      {
+        "month": 202412,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+        "rows": 290267
+      },
+      {
+        "month": 202501,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+        "rows": 400896
+      },
+      {
+        "month": 202502,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+        "rows": 453728
+      },
+      {
+        "month": 202503,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+        "rows": 406258
+      }
+    ],
+    "native_series_fingerprint": "dc6641267679bbc5133f6bfec14a9c930d65de0b3a5c945a0056ae7397a1d057",
+    "posthoc_clipping_calls": 0,
+    "semantic_definition": "completed H100 jobs with valid execution and revealed queue wait >600s; retrospective training label only",
+    "D1_feature_role": "NONE"
+  },
+  "training_power_split": {
+    "artifact_id": "V18_AIDC_FULLNODE_PARTIALNODE_POWER_SPLIT_V1",
+    "period": "retrospective training only; not a D-1 forecast result",
+    "fullnode_jobs": 15003,
+    "fullnode_GPU_hours": 73532.97555555556,
+    "fullnode_node_hours_by_class": {
+      "1": 12629.823888888888,
+      "2": 1317.9255555555555,
+      "4": 2769.1144444444444,
+      "8": 1473.0111111111114,
+      "16": 193.36888888888888
+    },
+    "E_FLEX_GPU_BOARD_component_kWh": 38918.33400907576,
+    "E_FLEX_CPU_PACKAGE_component_kWh": 2059.490184386496,
+    "E_FLEX_NODE_TOTAL_IDENTIFIED_kWh": 41007.27622567913,
+    "V4R1_fullnode_GPU_board_Q50_kWh": 35710.26869150533,
+    "nodelevel_minus_V4R1_fullnode_kWh": 5297.007534173805,
+    "GPU_board_component_increase_vs_V4R1_Q50_kWh": 3208.0653175704356,
+    "CPU_package_component_kWh": 2059.490184386496,
+    "component_median_attribution_gap_kWh": 29.45203221687325,
+    "component_note": "paired total median is authoritative; separate component medians are diagnostic and need not add exactly to paired median",
+    "partialnode_U2_CLEAN_jobs": 67872,
+    "partialnode_GPU_hours": 488944.17333333794,
+    "E_FLEX_PARTIAL_LOWER_BOUND_kWh": 237448.9495762053,
+    "E_FLEX_ALL_IDENTIFIED_training_kWh": 278456.22580188443,
+    "eta_F_H100_power": null,
+    "eta_F_H100_power_status": "TOTAL_IDENTIFIABLE_H100_DENOMINATOR_NOT_COMMON_ACROSS_FULL_AND_PARTIAL_BOUNDARIES",
+    "partial_node_CPU_double_count": 0
+  },
+  "new_whole_facility_share": null,
+  "literature_context": {
+    "label": "LITERATURE_CONTEXT_ONLY",
+    "representative_range": "approximately 20-25% under non-identical boundaries",
+    "builder_parameter_reads": 0,
+    "calibration_calls": 0
+  },
+  "remaining_authority_gaps": [
+    "D-1 cutoff scheduler queue snapshot",
+    "D-1 running allocation/state snapshot",
+    "causal deadline/SLA for known queued work",
+    "V18 forecast output tier preserving fullnode versus partial-node authority",
+    "new untouched locked test period"
+  ],
+  "ready": {
+    "artifact_id": "V18_AIDC_REFREEZE_READY_FOR_SCIENCE_RUN_V1",
+    "READY_FOR_NEW_SCIENCE_RUN": false,
+    "classification": "E. REFREEZE_FAILED_PHYSICAL_COHERENCE",
+    "gates": {
+      "A_workload_normalization": "FAIL_NATIVE_PHYSICAL_COHERENCE",
+      "B_D1_causal_state": "FAIL_QUEUE_AND_RUNNING_SNAPSHOT_AUTHORITY_MISSING",
+      "C_node_power": "PASS_HYBRID_AUTHORITY",
+      "D_facility_composition": "BLOCKED_NOT_EVALUATED",
+      "E_prospective_scheduler": "BLOCKED_NOT_IMPLEMENTED"
+    },
+    "locked_test_status": "NEW_LOCKED_TEST_NOT_YET_AVAILABLE",
+    "scientific_solver_calls": 0,
+    "OpenDSS_calls": 0
+  },
+  "firewall_counters": {
+    "D_day_actual_feature_reads": 0,
+    "future_realized_start_end_feature_reads": 0,
+    "future_completion_feature_reads": 0,
+    "future_job_id_injections": 0,
+    "literature_target_model_builder_reads": 0,
+    "result_based_workload_multiplier_selection": 0,
+    "grid_benefit_coefficient_selection": 0,
+    "negative_residual_clipping": 0,
+    "scientific_solver_calls": 0,
+    "OpenDSS_calls": 0
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "artifact_id": "V17_AIDC_ELECTRICAL_DIVERSITY_CASE_DESIGN_CANDIDATE",
+  "candidate_universe": "Predeclared feasible three-phase service buses satisfying voltage, PCC-transformer, land/use, and interconnection screening before evaluation.",
+  "deterministic_rule": {
+    "constraints": [
+      "select exactly 12",
+      "minimum number of distinct first-level feeder subtrees",
+      "phase-connectivity diversity quota",
+      "no two sites with identical cut-incidence vector unless candidate scarcity is certified"
+    ],
+    "feature_vector": "For each candidate bus: April-only normalized J_I columns over predeclared top-K native line-phase cuts and H voltage sensitivities, phase incidence, root-path branch incidence, and source electrical distance.",
+    "objective": "Lexicographically maximize: (1) minimum pairwise standardized sensitivity distance, (2) logdet of sensitivity Gram matrix plus epsilon I, (3) subtree entropy, (4) electrical-distance range.",
+    "precommit": "Freeze candidate set, April feature hashes, normalization, K, epsilon, constraints, solver seed, and selected sites before May/June access.",
+    "tie_break": "ascending canonical bus ID then phase mask"
+  },
+  "executed": false,
+  "firewall": {
+    "AIDC_site_changes": 0,
+    "H_changes": 0,
+    "J_I_changes": 0,
+    "May_June_result_dependent_tuning": 0,
+    "beta_changes": 0,
+    "historical_result_changes": 0,
+    "retraining_calls": 0,
+    "rho_changes": 0,
+    "scientific_authority_changes": 0
+  },
+  "selected_sites": null,
+  "selection_data_firewall": {
+    "allowed": "training period plus April validation D-1 feeder anchors/sensitivities",
+    "forbidden": "May/June outcomes, B0-B3 results, or post-evaluation critical cuts"
+  },
+  "status": "DESIGN_ONLY_NOT_EXECUTED"
+}

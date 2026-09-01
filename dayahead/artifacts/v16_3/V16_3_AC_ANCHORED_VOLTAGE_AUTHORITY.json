@@ -1,0 +1,40 @@
+{
+  "D1_generated_only": true,
+  "H_hash_of_daily_fingerprints": "ecc6018c9850b7744a508aa88ef25f07062691012fba696b21c2ad6c464ddf8a",
+  "H_recompute_during_optimization": 0,
+  "May_June_firewall": {
+    "G12_G13_G14_C12": "NOT_RUN",
+    "May_forecast_rows": 0,
+    "final_B0_B1_B2_B3_run": "NOT_RUN",
+    "june_scientific_loader_access_count": 0,
+    "may_scientific_loader_access_count": 0
+  },
+  "Pi_Farkas_compatible": true,
+  "affine_LP": true,
+  "artifact_id": "V16_3_AC_ANCHORED_VOLTAGE_AUTHORITY",
+  "authority_id": "V16_3_DA_AIDC_ICPS_AC_ANCHORED_FROZEN_D1_CONTROL",
+  "cache_manifest": {
+    "file_count": 30,
+    "large_cache_committed_to_normal_git": false,
+    "path": "dayahead/artifacts/v16_3_candidate/V16_3_CANDIDATE_NPZ_SHA256_MANIFEST.json",
+    "sha256": "129915aaa9c65b2a5d64f515633c41180b179e2a521716becdccb37a5aca1c53",
+    "total_bytes": 424325232,
+    "verification": "PASS_ALL_FILE_BYTES_AND_SHA256"
+  },
+  "control_dimension": 60,
+  "equation": "v_plan = v_anchor + H_P*Delta_P + H_Q*Delta_Q",
+  "evidence_checkpoint_sha": "ea8dac048bf756a65a22fb4e906e6ef2812570c8",
+  "frozen_tap_state": true,
+  "optimized_result_leakage": 0,
+  "perturbation_rule": {
+    "AIDC_P_delta_kw": "max(1.0, 0.005*max(abs(anchor_kw),200.0))",
+    "MESS_P_delta_kw": 5.0,
+    "MESS_Q_delta_kvar": 5.0,
+    "declared_before_validation": true,
+    "method": "symmetric central finite difference"
+  },
+  "prospective": true,
+  "status": "ACTIVE_PROSPECTIVE_PRODUCTION_PLANNING_AUTHORITY",
+  "stored_equation": "v_squared_plan = v_squared_anchor + H * (control - control_anchor)",
+  "time_local_slices": 96
+}

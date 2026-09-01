@@ -1,0 +1,11 @@
+﻿stage,quantity,jobs,GPU_hours,energy_kWh,retained_fraction,attrition_fraction,reason
+S0,semantic-flexible training workload,85671,610761.1522222199,,1.0,0.0,training semantic universe
+S1,power-modelable training support,82875,562477.1488888941,,0.9209445408280355,0.07905545917196455,unsupported or quarantined power semantics
+S2,seven evaluation-day forecast magnitude,,1244.068855127062,,0.0022117678159629603,0.997788232184037,MAGNITUDE_RATIO_NOT_SET_RETENTION; 7 days versus training window
+S3,D-1 admitted forecast cohort,,1244.068855127062,,1.0,0.0,all forecast arrivals served; other backlog/running workload excluded by policy but unquantified
+S4_IT,source-backed flexible IT energy,,1244.068855127062,604.1647675981244,,,Q50 GPU-board incremental conversion
+S4_PCC,source-backed flexible PCC energy,,1244.068855127062,785.4141978775618,,,PUE=1.30 applied once
+S5,facility-wide total IT denominator,,,131984.0764351028,0.004577558020002474,0.9954224419799975,"denominator comparison, not workload loss"
+S6_B1,actually shifted PCC energy L1/2,,,75.91769645893055,0.09665943990328191,0.9033405600967181,deadline/capacity/reference and grid-objective scheduling envelope
+S6_B3,actually shifted PCC energy L1/2,,,76.43884137869235,0.0973229686772334,0.9026770313227666,joint MESS/workload optimization envelope
+S7,peak individual-AIDC PCC actuation,,,,0.6275289433848624,0.3724710566151376,peak shift divided by peak available flexible PCC power

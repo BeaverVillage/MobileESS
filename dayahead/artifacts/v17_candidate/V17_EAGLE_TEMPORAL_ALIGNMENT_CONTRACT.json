@@ -1,0 +1,61 @@
+{
+  "Eagle_absolute_kW_to_H100_transfer_calls": 0,
+  "June_result_content_reads": 0,
+  "June_scientific_input_reads": 0,
+  "May_result_content_reads": 0,
+  "May_scientific_input_reads": 0,
+  "OpenDSS_calls_inside_Benders": 0,
+  "alignment_rule": {
+    "gpu_pair_rule": "exact same physical-node timestamp",
+    "heldout_offset_selection": false,
+    "ilo_max_staleness_seconds": 300,
+    "ilo_rule": "most recent same-node iLO sample at or before Ganglia timestamp",
+    "job_timestamp_fields": [
+      "start_time_tz",
+      "end_time_tz"
+    ],
+    "outside_staleness": "MISSING_FAIL_CLOSED",
+    "random_row_split_allowed": false,
+    "telemetry_duplicate_resolution": "exact node/metric/timestamp collapse only; no value fitting",
+    "timezone": "UTC"
+  },
+  "arbitrary_flexible_scaling_calls": 0,
+  "coverage": {
+    "ganglia_utc": [
+      "2021-01-01T07:00:03Z",
+      "2024-06-17T13:22:13Z"
+    ],
+    "ilo_utc": [
+      "2019-04-16T16:03:30Z",
+      "2024-08-28T01:09:01Z"
+    ],
+    "jobs_energy": [
+      "2018-11",
+      "2024-06"
+    ]
+  },
+  "effect_selected_power_parameters": 0,
+  "grid_benefit_selected_power_parameters": 0,
+  "quality": {
+    "ganglia_duplicate_rows": {
+      "gpu0_power_usage_report": 22249,
+      "gpu1_power_usage_report": 22342
+    },
+    "ganglia_median_interval_seconds": 60.0,
+    "ganglia_p95_interval_seconds_range": [
+      70.0,
+      72.0
+    ],
+    "gap_rows_are_not_imputed": true,
+    "ilo_duplicate_rows": 0,
+    "ilo_median_interval_seconds": 60.0,
+    "ilo_p95_interval_seconds": 60.0,
+    "known_long_gaps_exist": true,
+    "prior_ilo_lag_median_seconds": 29.0,
+    "prior_ilo_lag_p95_seconds": 58.0
+  },
+  "remaining_April_day_runs": 0,
+  "rowwise_Eagle_to_Kestrel_merges": 0,
+  "schema": "V17_EAGLE_TEMPORAL_ALIGNMENT_CONTRACT_V1",
+  "status": "PASS_DETERMINISTIC_SOURCE_TIME_ALIGNMENT_FROZEN"
+}

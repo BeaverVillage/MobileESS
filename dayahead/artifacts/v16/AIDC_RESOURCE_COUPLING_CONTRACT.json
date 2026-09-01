@@ -1,0 +1,32 @@
+{
+  "allowed_delta": "GPU_TO_POWER_GATED_RESIDUAL_ONLY",
+  "authority_id": "AIDC_RESOURCE_COUPLING_BLOCK_V1",
+  "causal_decoder_mask": false,
+  "common_architecture_fields_equal": true,
+  "decoder_latent_shape": [
+    96,
+    64
+  ],
+  "decoder_mode": "ONE_PASS_NON_AUTOREGRESSIVE_CROSS_ATTENTION",
+  "fixed_sinusoidal_positional_encoding": true,
+  "flex_to_gpu_or_power_direct_injection": false,
+  "gpu_to_power_gated_residual": true,
+  "memory_shape": [
+    1344,
+    64
+  ],
+  "past_shape": [
+    1344,
+    24
+  ],
+  "proposed_added_parameter_names": [
+    "gpu_to_power_gate.bias",
+    "gpu_to_power_gate.weight",
+    "gpu_to_power_value.bias",
+    "gpu_to_power_value.weight"
+  ],
+  "quantile_parameterization": "q10=softplus(a);q50=q10+softplus(b);q90=q50+softplus(c)",
+  "status": "PASS",
+  "vanilla_delta": "equations_9e_9f_only",
+  "vanilla_removed_parameter_names": []
+}

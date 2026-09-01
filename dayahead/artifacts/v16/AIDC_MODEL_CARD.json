@@ -1,0 +1,123 @@
+{
+  "architecture": {
+    "authority_id": "AIDC_RESOURCE_COUPLING_BLOCK_V1",
+    "causal_decoder_mask": false,
+    "decoder_latent_shape": [
+      96,
+      64
+    ],
+    "decoder_mode": "ONE_PASS_NON_AUTOREGRESSIVE_CROSS_ATTENTION",
+    "fixed_sinusoidal_positional_encoding": true,
+    "flex_to_gpu_or_power_direct_injection": false,
+    "gpu_to_power_gated_residual": true,
+    "memory_shape": [
+      1344,
+      64
+    ],
+    "past_shape": [
+      1344,
+      24
+    ],
+    "quantile_parameterization": "q10=softplus(a);q50=q10+softplus(b);q90=q50+softplus(c)",
+    "vanilla_delta": "equations_9e_9f_only"
+  },
+  "authority_id": "AIDC_RC_MQT_V2_REFDELTA",
+  "canonical_state_sha256": "dcd6fd8c2216e7d26abb41554dd820bb2358affb3e9570103374d3c89e808939",
+  "config_sha256": "b58dae8a0899ea8ec31a122168be91b04fc20f583c08ec35fcd91efe7bff49cb",
+  "deterministic_backend": {
+    "flash_sdp": false,
+    "math_sdp": true,
+    "memory_efficient_sdp": false,
+    "torch_deterministic_algorithms": true
+  },
+  "direct_output_slots": 96,
+  "expanded_target_schema": [
+    "P_IT_REF",
+    "G_REF",
+    "W_F::N01_R00",
+    "W_F::N01_R01",
+    "W_F::N01_R02",
+    "W_F::N02_R00",
+    "W_F::N02_R01",
+    "W_F::N02_R02",
+    "W_F::N04_R00",
+    "W_F::N04_R01",
+    "W_F::N04_R02",
+    "W_F::N08_R00",
+    "W_F::N08_R01",
+    "W_F::N08_R02",
+    "W_F::N16_R00",
+    "W_F::N16_R01",
+    "W_F::N16_R02"
+  ],
+  "final_weight_config_fingerprint": "309d9019c8ff97cce92953755b96100717d00f7fa6cfb5311caf8797c14d43e3",
+  "hpo_seed": 20260828,
+  "hpo_selection_criterion": "PAIRED_APRIL_NORMALIZED_MEAN_PINBALL_ONLY",
+  "models_evaluated": [
+    "Seasonal/Persistence",
+    "K5-B2-DA LightGBM",
+    "Vanilla Transformer",
+    "Proposed AIDC RC-MQT"
+  ],
+  "posthoc_quantile_calibration": "NONE_V1",
+  "production_model": "Proposed AIDC RC-MQT",
+  "production_refit_count": 1,
+  "production_seed": 20260828,
+  "production_training": {
+    "batch_size": 2,
+    "cuda_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "cuda_version": "12.8",
+    "device": "cuda",
+    "epoch_training_loss": [
+      0.0957428024486318,
+      0.015642065134998717,
+      0.01306192369246092
+    ],
+    "epochs": 3,
+    "fit_sample_count": 244,
+    "include_april_in_fit": true,
+    "torch_version": "2.8.0+cu128"
+  },
+  "quantiles": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "selected_hyperparameters": {
+    "attention_heads": 4,
+    "candidate_id": "C02",
+    "d_model": 64,
+    "dropout": 0.2,
+    "encoder_layers": 2,
+    "learning_rate": 0.0003,
+    "lookback": 1344
+  },
+  "status": "PASS_PRODUCTION_MODEL_FROZEN",
+  "target_scalers": {
+    "G_REF": 101.861,
+    "P_IT_REF": 2782.688623942433,
+    "W_F::N01_R00": 1.35286111111111,
+    "W_F::N01_R01": 1.4099444444444442,
+    "W_F::N01_R02": 54.95905555555554,
+    "W_F::N02_R00": 0.2918333333333331,
+    "W_F::N02_R01": 1.4351388888888872,
+    "W_F::N02_R02": 56.25561111111067,
+    "W_F::N04_R00": 0.7451111111111108,
+    "W_F::N04_R01": 10.702222222222215,
+    "W_F::N04_R02": 90.56066666666662,
+    "W_F::N08_R00": 1.2272222222222193,
+    "W_F::N08_R01": 1.6442222222222223,
+    "W_F::N08_R02": 83.28977777777774,
+    "W_F::N16_R00": 1.0855555555555554,
+    "W_F::N16_R01": 4.546666666666664,
+    "W_F::N16_R02": 158.67999999999995
+  },
+  "target_scaling": "POSITIVE_ONLY_NO_MEAN_SUBTRACTION",
+  "targets": [
+    "P_IT_REF",
+    "G_REF",
+    "W_F"
+  ],
+  "weights_file": "AIDC_RC_MQT_PRODUCTION_SEED20260828.pt",
+  "weights_file_sha256": "30603de0f1cf19e84d2280970aa8a74e6aff2b63cfa11d00200e161860bfc4bc"
+}

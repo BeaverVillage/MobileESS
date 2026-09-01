@@ -1,0 +1,382 @@
+{
+  "AIDC_raw_data_changes": 0,
+  "C12_calls": 0,
+  "G12_final_calls": 0,
+  "G13_calls": 0,
+  "G14_calls": 0,
+  "OpenDSS_calls_inside_Benders": 0,
+  "PF_changes": 0,
+  "PUE_changes": 0,
+  "acceptance_criteria": {
+    "LP_Pi_Farkas_required": true,
+    "candidate_B_must_improve_max_error_over_old_and_A": true,
+    "candidate_B_must_improve_mean_error_over_old_and_A": true,
+    "case_A_114A_false_undervoltage_allowed": false,
+    "common_B0_B1_B2_B3_anchor_required": true,
+    "frozen_before_april29_read": true,
+    "may_june_access_allowed": false,
+    "opendss_inside_benders_allowed": false
+  },
+  "acceptance_fingerprint": "cbc828df3dd6acce4778b1d934a20d388a901f6d4c9c3849f6a39695ba94302e",
+  "alpha_grid_changes": 0,
+  "artifact_id": "V16_3_VOLTAGE_MODEL_CANONICAL_VALIDATION",
+  "beta_production_changes": 0,
+  "candidate_only": true,
+  "canonical_cases": [
+    {
+      "absolute_errors_pu": {
+        "CANDIDATE_A_TAP_AWARE_INCREMENTAL_LD": 0.003945458415441694,
+        "CANDIDATE_B_AC_ANCHORED_AFFINE": 0.0,
+        "OLD_PLANNING": 0.08686666561480705
+      },
+      "beta_AIDC": 0.25,
+      "case_id": "CASE_A",
+      "network_metrics": {
+        "CANDIDATE_A_TAP_AWARE_INCREMENTAL_LD": {
+          "Vmax_location": {
+            "bus": "83",
+            "node": "83.1",
+            "phase": "A",
+            "slot": 0
+          },
+          "Vmax_pu": 1.0390287573869819,
+          "Vmin_location": {
+            "bus": "idc_idc02_pcc",
+            "node": "idc_idc02_pcc.1",
+            "phase": "A",
+            "slot": 0
+          },
+          "Vmin_pu": 0.9665943137389917,
+          "classification_disagreement": 0,
+          "false_feasible": 0,
+          "false_overvoltage": 0,
+          "false_undervoltage": 0,
+          "max_abs_voltage_error_pu": 0.025059568493075224,
+          "mean_abs_voltage_error_pu": 0.008831445240719282,
+          "mean_signed_error_pu": -0.008828432288954685,
+          "p95_abs_voltage_error_pu": 0.02103875907417138,
+          "worst_error_location": {
+            "bus": "300_open",
+            "node": "300_open.2",
+            "phase": "B",
+            "slot": 0
+          }
+        },
+        "CANDIDATE_B_AC_ANCHORED_AFFINE": {
+          "Vmax_location": {
+            "bus": "83",
+            "node": "83.2",
+            "phase": "B",
+            "slot": 0
+          },
+          "Vmax_pu": 1.0468697516800771,
+          "Vmin_location": {
+            "bus": "idc_idc02_pcc",
+            "node": "idc_idc02_pcc.1",
+            "phase": "A",
+            "slot": 0
+          },
+          "Vmin_pu": 0.9787611862548514,
+          "classification_disagreement": 0,
+          "false_feasible": 0,
+          "false_overvoltage": 0,
+          "false_undervoltage": 0,
+          "max_abs_voltage_error_pu": 0.0,
+          "mean_abs_voltage_error_pu": 0.0,
+          "mean_signed_error_pu": 0.0,
+          "p95_abs_voltage_error_pu": 0.0,
+          "worst_error_location": {
+            "bus": "1",
+            "node": "1.1",
+            "phase": "A",
+            "slot": 0
+          }
+        },
+        "OLD_PLANNING": {
+          "Vmax_location": {
+            "bus": "150",
+            "node": "150.1",
+            "phase": "A",
+            "slot": 0
+          },
+          "Vmax_pu": 1.0,
+          "Vmin_location": {
+            "bus": "idc_idc02_pcc",
+            "node": "idc_idc02_pcc.1",
+            "phase": "A",
+            "slot": 0
+          },
+          "Vmin_pu": 0.9331816569417509,
+          "classification_disagreement": 120,
+          "false_feasible": 0,
+          "false_overvoltage": 0,
+          "false_undervoltage": 120,
+          "max_abs_voltage_error_pu": 0.08686666561480705,
+          "mean_abs_voltage_error_pu": 0.055670520663036786,
+          "mean_signed_error_pu": -0.055670417117308545,
+          "p95_abs_voltage_error_pu": 0.08598832611941426,
+          "worst_error_location": {
+            "bus": "114",
+            "node": "114.1",
+            "phase": "A",
+            "slot": 0
+          }
+        }
+      },
+      "node": "114.1",
+      "operating_day": "2025-04-17",
+      "slot": 66,
+      "voltages_pu": {
+        "CANDIDATE_A_TAP_AWARE_INCREMENTAL_LD": 1.019172769285182,
+        "CANDIDATE_B_AC_ANCHORED_AFFINE": 1.0231182277006237,
+        "FRESH_OPENDSS_NATIVE": 1.0231182277006237,
+        "OLD_PLANNING": 0.9362515620858166
+      }
+    },
+    {
+      "absolute_errors_pu": {
+        "CANDIDATE_A_TAP_AWARE_INCREMENTAL_LD": 0.0009559928666240669,
+        "CANDIDATE_B_AC_ANCHORED_AFFINE": 0.0,
+        "OLD_PLANNING": 0.0702547112779216
+      },
+      "beta_AIDC": 1e-06,
+      "case_id": "CASE_B",
+      "network_metrics": {
+        "CANDIDATE_A_TAP_AWARE_INCREMENTAL_LD": {
+          "Vmax_location": {
+            "bus": "83",
+            "node": "83.1",
+            "phase": "A",
+            "slot": 0
+          },
+          "Vmax_pu": 1.040322594585804,
+          "Vmin_location": {
+            "bus": "idc_idc02_pcc",
+            "node": "idc_idc02_pcc.1",
+            "phase": "A",
+            "slot": 0
+          },
+          "Vmin_pu": 0.9763140915709904,
+          "classification_disagreement": 0,
+          "false_feasible": 0,
+          "false_overvoltage": 0,
+          "false_undervoltage": 0,
+          "max_abs_voltage_error_pu": 0.01659496692559237,
+          "mean_abs_voltage_error_pu": 0.004848588940734758,
+          "mean_signed_error_pu": -0.004449199640586618,
+          "p95_abs_voltage_error_pu": 0.014379383406868423,
+          "worst_error_location": {
+            "bus": "300_open",
+            "node": "300_open.2",
+            "phase": "B",
+            "slot": 0
+          }
+        },
+        "CANDIDATE_B_AC_ANCHORED_AFFINE": {
+          "Vmax_location": {
+            "bus": "83",
+            "node": "83.2",
+            "phase": "B",
+            "slot": 0
+          },
+          "Vmax_pu": 1.0418503390432767,
+          "Vmin_location": {
+            "bus": "65",
+            "node": "65.1",
+            "phase": "A",
+            "slot": 0
+          },
+          "Vmin_pu": 0.9789483378833409,
+          "classification_disagreement": 0,
+          "false_feasible": 0,
+          "false_overvoltage": 0,
+          "false_undervoltage": 0,
+          "max_abs_voltage_error_pu": 0.0,
+          "mean_abs_voltage_error_pu": 0.0,
+          "mean_signed_error_pu": 0.0,
+          "p95_abs_voltage_error_pu": 0.0,
+          "worst_error_location": {
+            "bus": "1",
+            "node": "1.1",
+            "phase": "A",
+            "slot": 0
+          }
+        },
+        "OLD_PLANNING": {
+          "Vmax_location": {
+            "bus": "150",
+            "node": "150.1",
+            "phase": "A",
+            "slot": 0
+          },
+          "Vmax_pu": 1.0,
+          "Vmin_location": {
+            "bus": "114",
+            "node": "114.1",
+            "phase": "A",
+            "slot": 0
+          },
+          "Vmin_pu": 0.9510056318209584,
+          "classification_disagreement": 0,
+          "false_feasible": 0,
+          "false_overvoltage": 0,
+          "false_undervoltage": 0,
+          "max_abs_voltage_error_pu": 0.0702547112779216,
+          "mean_abs_voltage_error_pu": 0.038968800311184895,
+          "mean_signed_error_pu": -0.03896873469599059,
+          "p95_abs_voltage_error_pu": 0.06965952508458623,
+          "worst_error_location": {
+            "bus": "114",
+            "node": "114.1",
+            "phase": "A",
+            "slot": 0
+          }
+        }
+      },
+      "node": "114.1",
+      "operating_day": "2025-04-17",
+      "slot": 66,
+      "voltages_pu": {
+        "CANDIDATE_A_TAP_AWARE_INCREMENTAL_LD": 1.020304350232256,
+        "CANDIDATE_B_AC_ANCHORED_AFFINE": 1.02126034309888,
+        "FRESH_OPENDSS_NATIVE": 1.02126034309888,
+        "OLD_PLANNING": 0.9510056318209584
+      }
+    },
+    {
+      "absolute_errors_pu": {
+        "CANDIDATE_A_TAP_AWARE_INCREMENTAL_LD": 0.0016638919953286813,
+        "CANDIDATE_B_AC_ANCHORED_AFFINE": 0.0,
+        "OLD_PLANNING": 0.06521664916802339
+      },
+      "beta_AIDC": 0.25,
+      "case_id": "CASE_C",
+      "network_metrics": {
+        "CANDIDATE_A_TAP_AWARE_INCREMENTAL_LD": {
+          "Vmax_location": {
+            "bus": "83",
+            "node": "83.1",
+            "phase": "A",
+            "slot": 0
+          },
+          "Vmax_pu": 1.0364673383336047,
+          "Vmin_location": {
+            "bus": "idc_idc02_pcc",
+            "node": "idc_idc02_pcc.1",
+            "phase": "A",
+            "slot": 0
+          },
+          "Vmin_pu": 0.971785044435316,
+          "classification_disagreement": 0,
+          "false_feasible": 0,
+          "false_overvoltage": 0,
+          "false_undervoltage": 0,
+          "max_abs_voltage_error_pu": 0.020434478922595756,
+          "mean_abs_voltage_error_pu": 0.006443237645826038,
+          "mean_signed_error_pu": -0.0062807434278030014,
+          "p95_abs_voltage_error_pu": 0.016925709345236295,
+          "worst_error_location": {
+            "bus": "300_open",
+            "node": "300_open.2",
+            "phase": "B",
+            "slot": 0
+          }
+        },
+        "CANDIDATE_B_AC_ANCHORED_AFFINE": {
+          "Vmax_location": {
+            "bus": "83",
+            "node": "83.2",
+            "phase": "B",
+            "slot": 0
+          },
+          "Vmax_pu": 1.0416093082903477,
+          "Vmin_location": {
+            "bus": "idc_idc02_pcc",
+            "node": "idc_idc02_pcc.1",
+            "phase": "A",
+            "slot": 0
+          },
+          "Vmin_pu": 0.9819004077002298,
+          "classification_disagreement": 0,
+          "false_feasible": 0,
+          "false_overvoltage": 0,
+          "false_undervoltage": 0,
+          "max_abs_voltage_error_pu": 0.0,
+          "mean_abs_voltage_error_pu": 0.0,
+          "mean_signed_error_pu": 0.0,
+          "p95_abs_voltage_error_pu": 0.0,
+          "worst_error_location": {
+            "bus": "1",
+            "node": "1.1",
+            "phase": "A",
+            "slot": 0
+          }
+        },
+        "OLD_PLANNING": {
+          "Vmax_location": {
+            "bus": "150",
+            "node": "150.1",
+            "phase": "A",
+            "slot": 0
+          },
+          "Vmax_pu": 1.0,
+          "Vmin_location": {
+            "bus": "idc_idc02_pcc",
+            "node": "idc_idc02_pcc.1",
+            "phase": "A",
+            "slot": 0
+          },
+          "Vmin_pu": 0.9453788513543916,
+          "classification_disagreement": 13,
+          "false_feasible": 0,
+          "false_overvoltage": 0,
+          "false_undervoltage": 13,
+          "max_abs_voltage_error_pu": 0.06521664916802339,
+          "mean_abs_voltage_error_pu": 0.0430845767714121,
+          "mean_signed_error_pu": -0.043084504203602984,
+          "p95_abs_voltage_error_pu": 0.06461691551813803,
+          "worst_error_location": {
+            "bus": "114",
+            "node": "114.1",
+            "phase": "A",
+            "slot": 0
+          }
+        }
+      },
+      "node": "114.1",
+      "operating_day": "2025-04-02",
+      "slot": 66,
+      "voltages_pu": {
+        "CANDIDATE_A_TAP_AWARE_INCREMENTAL_LD": 1.0176327911644503,
+        "CANDIDATE_B_AC_ANCHORED_AFFINE": 1.019296683159779,
+        "FRESH_OPENDSS_NATIVE": 1.019296683159779,
+        "OLD_PLANNING": 0.9540800339917556
+      }
+    }
+  ],
+  "checkpoint": {
+    "branch": "codex/dayahead-aidc-joint-v1",
+    "clean_before_candidate_work": true,
+    "head": "b181aacbce09b11a75f2a4644ccfec9b745fcc98",
+    "native_ieee123_master_sha": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969"
+  },
+  "june_scientific_loader_access_count": 0,
+  "kappa_changes": 0,
+  "legacy_provenance": {
+    "anchor_regenerated_only_from_D1_forecast_reference": true,
+    "hard_coded_historical_taps": false,
+    "historical_post_hoc_tap_result_read": false,
+    "old_v13_sidecar_loaded": false
+  },
+  "legacy_v13_control_sidecar_loads": 0,
+  "may_scientific_loader_access_count": 0,
+  "native_feeder_rating_changes": 0,
+  "native_ieee123_changes": 0,
+  "native_ieee123_master_sha": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969",
+  "native_regulator_setting_changes": 0,
+  "production_V16_3_activations": 0,
+  "scientific_authority_changes": 0,
+  "tap_cooptimization_variables_added": 0,
+  "u080_changes": 0,
+  "voltage_limit_changes": 0
+}
