@@ -1,0 +1,336 @@
+{
+  "artifact_id": "V24M_V23M_RECURRENCE_GATE_INTEGRITY_AUDIT_V1",
+  "classification": "V23M_GATE_METRIC_OR_CALIBRATION_DEFECT_FOUND",
+  "historical_authority_preserved": true,
+  "historical_artifact_sha256": "62f5902b138acc7efecd2450f3101651e1d8a840bc6bbd8e8d055120e6fdeff4",
+  "defect": {
+    "location": "dayahead/tools/build_v23m_audits.py:fitted_probabilities",
+    "positive_class_direction": "CORRECT",
+    "target_label_construction": "CORRECT_FOR_HOURLY_RECURRING_OCCURRENCE",
+    "hourly_recurrence_event_definition": "CORRECT",
+    "class_weight": "NONE",
+    "oversampling": false,
+    "sample_weight": "max(target_GPU_h,1.0)",
+    "sample_weight_normalization": "SCIKIT_LEARN_INTERNAL_OBJECTIVE_SCALING_ONLY",
+    "probability_prior_correction": "ABSENT",
+    "probability_calibration": "ABSENT",
+    "feature_scaling": "TRAIN_ONLY_STANDARD_SCALER_VALID",
+    "same_target_recurrence_feature_leakage": false,
+    "finding": "GPU-h magnitude weights change the fitted class prior and make the output an importance-weighted score, not a calibrated hourly occurrence probability. The same target_GPU_h weighting is then reused in the gate Brier metric."
+  },
+  "historical_R1_fold_probabilities": [
+    {
+      "fold_id": 1,
+      "model": "R1_CALENDAR_AGGREGATE",
+      "log_loss": 5.1167113983896675,
+      "brier_score": 0.7104735369598252,
+      "AUROC": 0.6098744968032205,
+      "average_precision": 0.3577585737521062,
+      "GPU_h_weighted_brier": 0.004038288718483087,
+      "mean_predicted_probability": 0.9969407700728643,
+      "observed_frequency": 0.2847222222222222
+    },
+    {
+      "fold_id": 2,
+      "model": "R1_CALENDAR_AGGREGATE",
+      "log_loss": 4.196646662896263,
+      "brier_score": 0.7942546622223773,
+      "AUROC": 0.6111742110032032,
+      "average_precision": 0.2566726326999,
+      "GPU_h_weighted_brier": 0.007480624506666491,
+      "mean_predicted_probability": 0.9792596067598643,
+      "observed_frequency": 0.17069892473118278
+    },
+    {
+      "fold_id": 3,
+      "model": "R1_CALENDAR_AGGREGATE",
+      "log_loss": 2.8092604512219834,
+      "brier_score": 0.6051776649324033,
+      "AUROC": 0.6155336771370526,
+      "average_precision": 0.46472091283331207,
+      "GPU_h_weighted_brier": 0.004277128583522764,
+      "mean_predicted_probability": 0.9772941825877698,
+      "observed_frequency": 0.3629032258064516
+    },
+    {
+      "fold_id": 4,
+      "model": "R1_CALENDAR_AGGREGATE",
+      "log_loss": 3.3572302265897314,
+      "brier_score": 0.7532452921715997,
+      "AUROC": 0.6706807366025245,
+      "average_precision": 0.45426070243468575,
+      "GPU_h_weighted_brier": 0.010744758835450174,
+      "mean_predicted_probability": 0.9720228320878945,
+      "observed_frequency": 0.20089285714285715
+    },
+    {
+      "fold_id": 5,
+      "model": "R1_CALENDAR_AGGREGATE",
+      "log_loss": 3.028593021160693,
+      "brier_score": 0.6951401624772869,
+      "AUROC": 0.6397832889636169,
+      "average_precision": 0.40461213293304815,
+      "GPU_h_weighted_brier": 0.007490563932262039,
+      "mean_predicted_probability": 0.9721188559319224,
+      "observed_frequency": 0.2620967741935484
+    }
+  ],
+  "corrected_unweighted_diagnostic_R1": [
+    {
+      "fold_id": 1,
+      "model": "R1_CALENDAR_AGGREGATE",
+      "observed_frequency": 0.2847222222222222,
+      "mean_predicted_probability": 0.437641748472223,
+      "brier_score": 0.2413015800319399,
+      "log_loss": 0.7104843484380882,
+      "GPU_h_weighted_brier_diagnostic": 0.4004679714798545
+    },
+    {
+      "fold_id": 2,
+      "model": "R1_CALENDAR_AGGREGATE",
+      "observed_frequency": 0.17069892473118278,
+      "mean_predicted_probability": 0.22055942187357527,
+      "brier_score": 0.14160551367344282,
+      "log_loss": 0.45066899386042636,
+      "GPU_h_weighted_brier_diagnostic": 0.5204340366904217
+    },
+    {
+      "fold_id": 3,
+      "model": "R1_CALENDAR_AGGREGATE",
+      "observed_frequency": 0.3629032258064516,
+      "mean_predicted_probability": 0.24431100121428512,
+      "brier_score": 0.23348958832724812,
+      "log_loss": 0.6670329265093052,
+      "GPU_h_weighted_brier_diagnostic": 0.5898561925399027
+    },
+    {
+      "fold_id": 4,
+      "model": "R1_CALENDAR_AGGREGATE",
+      "observed_frequency": 0.20089285714285715,
+      "mean_predicted_probability": 0.22099923152766654,
+      "brier_score": 0.1431971669257498,
+      "log_loss": 0.45571887908090664,
+      "GPU_h_weighted_brier_diagnostic": 0.5617947927838769
+    },
+    {
+      "fold_id": 5,
+      "model": "R1_CALENDAR_AGGREGATE",
+      "observed_frequency": 0.2620967741935484,
+      "mean_predicted_probability": 0.18817481287475152,
+      "brier_score": 0.18727155954402805,
+      "log_loss": 0.56422225449521,
+      "GPU_h_weighted_brier_diagnostic": 0.5013799599324699
+    }
+  ],
+  "corrected_all_models": [
+    {
+      "fold_id": 1,
+      "model": "R0_CALENDAR",
+      "observed_frequency": 0.2847222222222222,
+      "mean_predicted_probability": 0.14508578805148917,
+      "brier_score": 0.21388880754048334,
+      "log_loss": 0.6354978964888792,
+      "GPU_h_weighted_brier_diagnostic": 0.6830649488414999
+    },
+    {
+      "fold_id": 1,
+      "model": "R1_CALENDAR_AGGREGATE",
+      "observed_frequency": 0.2847222222222222,
+      "mean_predicted_probability": 0.437641748472223,
+      "brier_score": 0.2413015800319399,
+      "log_loss": 0.7104843484380882,
+      "GPU_h_weighted_brier_diagnostic": 0.4004679714798545
+    },
+    {
+      "fold_id": 1,
+      "model": "R2_CALENDAR_AGGREGATE_MOTIF",
+      "observed_frequency": 0.2847222222222222,
+      "mean_predicted_probability": 0.2903657471262944,
+      "brier_score": 0.23347106373655702,
+      "log_loss": 0.7645414585449329,
+      "GPU_h_weighted_brier_diagnostic": 0.6382960148816316
+    },
+    {
+      "fold_id": 2,
+      "model": "R0_CALENDAR",
+      "observed_frequency": 0.17069892473118278,
+      "mean_predicted_probability": 0.17964892885727324,
+      "brier_score": 0.13750134224647742,
+      "log_loss": 0.442809937159964,
+      "GPU_h_weighted_brier_diagnostic": 0.5994157958367511
+    },
+    {
+      "fold_id": 2,
+      "model": "R1_CALENDAR_AGGREGATE",
+      "observed_frequency": 0.17069892473118278,
+      "mean_predicted_probability": 0.22055942187357527,
+      "brier_score": 0.14160551367344282,
+      "log_loss": 0.45066899386042636,
+      "GPU_h_weighted_brier_diagnostic": 0.5204340366904217
+    },
+    {
+      "fold_id": 2,
+      "model": "R2_CALENDAR_AGGREGATE_MOTIF",
+      "observed_frequency": 0.17069892473118278,
+      "mean_predicted_probability": 0.23027014515693076,
+      "brier_score": 0.1578800780261922,
+      "log_loss": 0.5071533142263193,
+      "GPU_h_weighted_brier_diagnostic": 0.6208124142526587
+    },
+    {
+      "fold_id": 3,
+      "model": "R0_CALENDAR",
+      "observed_frequency": 0.3629032258064516,
+      "mean_predicted_probability": 0.18407680729680787,
+      "brier_score": 0.25640899748356927,
+      "log_loss": 0.7345977929864086,
+      "GPU_h_weighted_brier_diagnostic": 0.6709610907091971
+    },
+    {
+      "fold_id": 3,
+      "model": "R1_CALENDAR_AGGREGATE",
+      "observed_frequency": 0.3629032258064516,
+      "mean_predicted_probability": 0.24431100121428512,
+      "brier_score": 0.23348958832724812,
+      "log_loss": 0.6670329265093052,
+      "GPU_h_weighted_brier_diagnostic": 0.5898561925399027
+    },
+    {
+      "fold_id": 3,
+      "model": "R2_CALENDAR_AGGREGATE_MOTIF",
+      "observed_frequency": 0.3629032258064516,
+      "mean_predicted_probability": 0.3315826213400515,
+      "brier_score": 0.22819109866008674,
+      "log_loss": 0.6593239727069675,
+      "GPU_h_weighted_brier_diagnostic": 0.3503968564988345
+    },
+    {
+      "fold_id": 4,
+      "model": "R0_CALENDAR",
+      "observed_frequency": 0.20089285714285715,
+      "mean_predicted_probability": 0.21426264202921508,
+      "brier_score": 0.15346112109364815,
+      "log_loss": 0.48105424603743974,
+      "GPU_h_weighted_brier_diagnostic": 0.5644292558236282
+    },
+    {
+      "fold_id": 4,
+      "model": "R1_CALENDAR_AGGREGATE",
+      "observed_frequency": 0.20089285714285715,
+      "mean_predicted_probability": 0.22099923152766654,
+      "brier_score": 0.1431971669257498,
+      "log_loss": 0.45571887908090664,
+      "GPU_h_weighted_brier_diagnostic": 0.5617947927838769
+    },
+    {
+      "fold_id": 4,
+      "model": "R2_CALENDAR_AGGREGATE_MOTIF",
+      "observed_frequency": 0.20089285714285715,
+      "mean_predicted_probability": 0.27514541406021176,
+      "brier_score": 0.1486018648430989,
+      "log_loss": 0.4657719185435738,
+      "GPU_h_weighted_brier_diagnostic": 0.4629377153208893
+    },
+    {
+      "fold_id": 5,
+      "model": "R0_CALENDAR",
+      "observed_frequency": 0.2620967741935484,
+      "mean_predicted_probability": 0.20827810163224592,
+      "brier_score": 0.1930617757554236,
+      "log_loss": 0.5775419706543322,
+      "GPU_h_weighted_brier_diagnostic": 0.5488616597061895
+    },
+    {
+      "fold_id": 5,
+      "model": "R1_CALENDAR_AGGREGATE",
+      "observed_frequency": 0.2620967741935484,
+      "mean_predicted_probability": 0.18817481287475152,
+      "brier_score": 0.18727155954402805,
+      "log_loss": 0.56422225449521,
+      "GPU_h_weighted_brier_diagnostic": 0.5013799599324699
+    },
+    {
+      "fold_id": 5,
+      "model": "R2_CALENDAR_AGGREGATE_MOTIF",
+      "observed_frequency": 0.2620967741935484,
+      "mean_predicted_probability": 0.17496333750818147,
+      "brier_score": 0.18828094877344348,
+      "log_loss": 0.5673097265394649,
+      "GPU_h_weighted_brier_diagnostic": 0.5251142092808169
+    }
+  ],
+  "authority_label": "NON_AUTHORITY_INTEGRITY_CORRECTION_DIAGNOSTIC",
+  "RACQ_selection_reopened": false,
+  "FASER_architecture_modified_from_this_result": false,
+  "April_data_read": false,
+  "source": {
+    "source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+    "source_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+    "members_opened": [
+      {
+        "month": 202410,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+        "H100_rows": 21679
+      },
+      {
+        "month": 202411,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+        "H100_rows": 26933
+      },
+      {
+        "month": 202412,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+        "H100_rows": 41814
+      },
+      {
+        "month": 202407,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=7/kestrel_jobs_202407_0.parquet",
+        "H100_rows": 42284
+      },
+      {
+        "month": 202408,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+        "H100_rows": 20192
+      },
+      {
+        "month": 202409,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+        "H100_rows": 26532
+      },
+      {
+        "month": 202501,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+        "H100_rows": 96880
+      },
+      {
+        "month": 202502,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+        "H100_rows": 22295
+      },
+      {
+        "month": 202503,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+        "H100_rows": 86148
+      }
+    ],
+    "H100_rows": 384757,
+    "requested_columns": [
+      "account_hash",
+      "end_time",
+      "gpu_nodes_occupied",
+      "gpus_requested",
+      "id",
+      "jobs_shared",
+      "nodelist",
+      "nodes_req",
+      "nodes_shared",
+      "partition",
+      "qos",
+      "shared_job_count",
+      "start_time",
+      "state_simple",
+      "submit_time",
+      "wallclock_req"
+    ]
+  }
+}
