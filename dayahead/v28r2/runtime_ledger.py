@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import os
 import time
@@ -162,19 +163,19 @@ class RuntimeLedger:
             "day": self.day,
             "started_epoch": self.started_epoch,
             "pid": self.pid,
-            "solver_calls": self.solver_calls,
-            "pue_calls": self.pue_calls,
-            "pue_evaluations": self.pue_evaluations,
-            "opendss_solved_slots": self.opendss_solved_slots,
-            "opendss_engine_count": self.opendss_engine_count,
-            "opendss_versions": self.opendss_versions,
-            "opendss_failures": self.opendss_failures,
-            "optimizer_calls_by_namespace": self.optimizer_calls_by_namespace,
+            "solver_calls": copy.deepcopy(self.solver_calls),
+            "pue_calls": dict(self.pue_calls),
+            "pue_evaluations": dict(self.pue_evaluations),
+            "opendss_solved_slots": dict(self.opendss_solved_slots),
+            "opendss_engine_count": dict(self.opendss_engine_count),
+            "opendss_versions": dict(self.opendss_versions),
+            "opendss_failures": copy.deepcopy(self.opendss_failures),
+            "optimizer_calls_by_namespace": dict(self.optimizer_calls_by_namespace),
             "peak_rss_bytes": self.peak_rss_bytes,
             "peak_active_heavy_solves": self.peak_active_heavy_solves,
-            "active_solver": self.active_solver,
+            "active_solver": copy.deepcopy(self.active_solver),
             "active_opendss_trajectory": self.active_opendss_trajectory,
-            "counters": self.counters,
+            "counters": dict(self.counters),
             "elapsed_seconds": time.time() - self.started_epoch,
         }
 

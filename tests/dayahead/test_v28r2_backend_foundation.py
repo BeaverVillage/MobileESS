@@ -44,6 +44,20 @@ def test_state_reuse_recomputes_artifact_and_predecessor_hashes(tmp_path: Path):
     assert loaded.reusable_prefix_length() == 0
 
 
+def test_completed_step_deep_freezes_nested_runtime_counters(tmp_path: Path):
+    artifact = tmp_path / "one.json"
+    artifact.write_text('{"ok":true}\n', encoding="utf-8")
+    nested = {"ledger": {"solver_calls": []}}
+    state = DayState("2025-04-01", "april", spec().sha256)
+    state.begin_step("01_INPUT_AUTHORITY_CHECK")
+    state.complete_step("01_INPUT_AUTHORITY_CHECK", {"one": artifact}, nested)
+    sealed = state.step_sha256["01_INPUT_AUTHORITY_CHECK"]
+    nested["ledger"]["solver_calls"].append({"case": "B0"})
+    assert state.step_counters["01_INPUT_AUTHORITY_CHECK"]["ledger"]["solver_calls"] == []
+    assert state.step_sha256["01_INPUT_AUTHORITY_CHECK"] == sealed
+    assert state.reusable_prefix_length() == 1
+
+
 def test_runtime_ledger_never_prefills_success_counts():
     ledger = RuntimeLedger("2025-04-01")
     assert ledger.solver_calls == []

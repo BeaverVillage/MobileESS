@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import os
 import time
@@ -99,12 +100,13 @@ class DayState:
             raise RuntimeError("V28R2_COMPLETE_NONCURRENT_STEP")
         evidence = {name: {"path": str(path.resolve()), "sha256": sha256_file(path)} for name, path in sorted(artifacts.items())}
         predecessor = self.predecessor_sha256
+        frozen_counters = copy.deepcopy(dict(counters))
         digest = canonical_sha256({
             "step": step, "predecessor_sha256": predecessor,
-            "artifacts": evidence, "counters": dict(counters),
+            "artifacts": evidence, "counters": frozen_counters,
         })
         self.artifacts[step] = evidence
-        self.step_counters[step] = dict(counters)
+        self.step_counters[step] = frozen_counters
         self.step_sha256[step] = digest
         self.completed_steps.append(step)
         self.predecessor_sha256 = digest
