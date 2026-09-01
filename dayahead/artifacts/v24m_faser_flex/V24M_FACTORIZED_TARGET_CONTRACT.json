@@ -1,0 +1,104 @@
+{
+  "artifact_id": "V24M_FACTORIZED_TARGET_CONTRACT_V1",
+  "forecast_cutoff": "D-1 18:00 AEST",
+  "target_horizon": "D-day 00:00 through D-day 24:00 AEST",
+  "scope": "FORECAST_NEW_FLEXIBLE_WORKLOAD_ONLY",
+  "R_ALL": "sum all source-valid H100 gpus_requested * wallclock_req_hours",
+  "PI_F": "R_F_requested / R_ALL_requested",
+  "KAPPA_F": "H_F_actual / R_F_requested; null when R_F=0",
+  "H_F": "sum semantic-flexible gpus_requested * realized_runtime_hours",
+  "master_identity": "H_F = R_ALL * PI_F * KAPPA_F",
+  "units": {
+    "R_ALL": "GPU-h-requested",
+    "R_F": "GPU-h-requested",
+    "H_F": "GPU-h-actual",
+    "PI_F": "dimensionless",
+    "KAPPA_F": "dimensionless"
+  },
+  "days": 225,
+  "max_identity_error_GPU_h": 7.275957614183426e-12,
+  "identity_tolerance_GPU_h": 1e-09,
+  "identity_status": "PASS",
+  "zero_all_days": 11,
+  "zero_flex_days": 20,
+  "zero_day_convention": "PI_F=0,H_F=0,KAPPA_DEFINED=false,KAPPA_F=null",
+  "KAPPA_support": "KAPPA_BOUNDED_0_1",
+  "source": {
+    "source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+    "source_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+    "members_opened": [
+      {
+        "month": 202410,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+        "H100_rows": 21679
+      },
+      {
+        "month": 202411,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+        "H100_rows": 26933
+      },
+      {
+        "month": 202412,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+        "H100_rows": 41814
+      },
+      {
+        "month": 202407,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=7/kestrel_jobs_202407_0.parquet",
+        "H100_rows": 42284
+      },
+      {
+        "month": 202408,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+        "H100_rows": 20192
+      },
+      {
+        "month": 202409,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+        "H100_rows": 26532
+      },
+      {
+        "month": 202501,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+        "H100_rows": 96880
+      },
+      {
+        "month": 202502,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+        "H100_rows": 22295
+      },
+      {
+        "month": 202503,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+        "H100_rows": 86148
+      }
+    ],
+    "H100_rows": 384757,
+    "requested_columns": [
+      "account_hash",
+      "end_time",
+      "gpu_nodes_occupied",
+      "gpus_requested",
+      "id",
+      "jobs_shared",
+      "nodelist",
+      "nodes_req",
+      "nodes_shared",
+      "partition",
+      "qos",
+      "shared_job_count",
+      "start_time",
+      "state_simple",
+      "submit_time",
+      "wallclock_req"
+    ],
+    "April_members_opened": 0,
+    "target_month_max": 202503,
+    "wallclock_arrow_type": "duration[ns]",
+    "wallclock_pandas_dtype": "timedelta64[ns]",
+    "wallclock_conversion_contract": "ARROW_DURATION_NS_TO_PANDAS_TIMEDELTA_TO_SECONDS_TO_HOURS",
+    "wallclock_conversion_bug_inherited_from_prior_loader": false
+  },
+  "conflict_ids_excluded": 76,
+  "target_clipping_calls": 0
+}
