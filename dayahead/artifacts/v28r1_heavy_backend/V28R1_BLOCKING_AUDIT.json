@@ -1,0 +1,47 @@
+{
+  "artifact_id": "V28R1_BLOCKING_AUDIT_V1",
+  "audit_head": "ea5cad3679819d457f227dd8b6922c36d15212b5",
+  "base_head": "ffb4bda9eb5f07ef1a0e83e62bcbe0bc03dc335d",
+  "blocking_defects": [
+    "V28R1-BLOCK-002_OPTIMIZER_CHANNEL_AUTHORITY_INCOMPLETE",
+    "V28R1-BLOCK-005_APRIL_SOURCE_COVERAGE_INCOMPLETE",
+    "V28R1-BLOCK-006_C1_SURROGATE_NOT_LP_COMPATIBLE"
+  ],
+  "created_utc": "2026-09-01T11:09:11.872475+00:00",
+  "forbidden_fallback_created": false,
+  "full_April_campaign_executed": false,
+  "gate_results": [
+    {
+      "defect_id": "V28R1-BLOCK-002_OPTIMIZER_CHANNEL_AUTHORITY_INCOMPLETE",
+      "gate": "A_OPTIMIZER_CHANNEL_AUTHORITY",
+      "status": "FAIL_CLOSED"
+    },
+    {
+      "defect_id": "V28R1-BLOCK-005_APRIL_SOURCE_COVERAGE_INCOMPLETE",
+      "gate": "B_APRIL_30_DAY_SOURCE_COVERAGE",
+      "status": "FAIL_CLOSED"
+    },
+    {
+      "defect_id": null,
+      "gate": "C_SOLVER_PRIMAL_PAYLOAD",
+      "status": "PASS_AUTHORITY_ACCESS_PRESENT_PRODUCTION_PAYLOAD_NOT_EXPOSED"
+    },
+    {
+      "defect_id": null,
+      "gate": "D_FRESH_OPENDSS_PRODUCTION_ENGINE",
+      "status": "PASS_REUSABLE_ENGINE_AND_MAPPING_AUTHORITY_PRESENT"
+    },
+    {
+      "defect_id": "V28R1-BLOCK-006_C1_SURROGATE_NOT_LP_COMPATIBLE",
+      "gate": "E_C1_SURROGATE_LP_COMPATIBILITY",
+      "status": "FAIL_CLOSED"
+    }
+  ],
+  "non_authority_heavy_smoke_executed": false,
+  "primary_blocking_defect": "V28R1-BLOCK-002_OPTIMIZER_CHANNEL_AUTHORITY_INCOMPLETE",
+  "production_implementation_permitted": false,
+  "production_implementation_started": false,
+  "result_classification": "V28R1_BLOCK_OPTIMIZER_CHANNEL_AUTHORITY_INCOMPLETE",
+  "selection_rule": "Gate A is the first mandatory gate and independently forbids new production code; concurrent Gate B and Gate E failures are retained.",
+  "status": "FAIL_CLOSED_PHASE_A"
+}

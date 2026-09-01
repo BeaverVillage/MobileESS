@@ -1,0 +1,278 @@
+{
+  "OPTIMIZER_CHANNEL_AUTHORITY_READY": false,
+  "artifact_id": "V28R1_OPTIMIZER_CHANNEL_AUTHORITY_AUDIT_V1",
+  "checks": {
+    "cohort_definition_and_binding": {
+      "V27_allocation_reason": "MANDATORY_RESIDUAL_SIGNAL_GATE_FAILED",
+      "V27_allocation_status": "NOT_RUN",
+      "V27_contract": {
+        "exists": true,
+        "path": "dayahead/artifacts/v27m_safe_flex_r1/V27M_TIER_LATENCY_ALLOCATION_CONTRACT.json",
+        "sha256": "e60a96e532e8b3b2db0bb5ca0984007895988f189f23282c4cb05492458d0c1d",
+        "size_bytes": 228
+      },
+      "accepted_binding_found": false,
+      "required_axes": [
+        "5 full-node classes",
+        "5 latency classes",
+        "48 racks",
+        "96 slots"
+      ],
+      "required_solver_cohorts": 15,
+      "serialized_authority_axes": [
+        "6 power tiers including PARTIAL",
+        "5 latency classes",
+        "96 slots"
+      ]
+    },
+    "daily_mean_q50_q90_model_files": {
+      "files": [
+        {
+          "exists": true,
+          "path": "dayahead/artifacts/v28_final_dayahead_actual/V28_FINAL_LIGHTGBM_FORECAST_MODELS/APRIL_01_CAUSAL_FIT_mean.txt",
+          "sha256": "ad233a83630198c48ad4cd2545d85a45e21ed549aece084dccad8b3659fc5fc2",
+          "size_bytes": 100050
+        },
+        {
+          "exists": true,
+          "path": "dayahead/artifacts/v28_final_dayahead_actual/V28_FINAL_LIGHTGBM_FORECAST_MODELS/APRIL_01_CAUSAL_FIT_q50.txt",
+          "sha256": "0d2a31a968bc881bf9f3a224e4629505d98c613ebc9bdb63dcdf62eae8b27d74",
+          "size_bytes": 76612
+        },
+        {
+          "exists": true,
+          "path": "dayahead/artifacts/v28_final_dayahead_actual/V28_FINAL_LIGHTGBM_FORECAST_MODELS/APRIL_01_CAUSAL_FIT_q90.txt",
+          "sha256": "d321315ae1c88df648fd4b7a0c43204684e76ba059a42c3e252d5c1d5f2dc939",
+          "size_bytes": 71612
+        },
+        {
+          "exists": true,
+          "path": "dayahead/artifacts/v28_final_dayahead_actual/V28_FINAL_LIGHTGBM_FORECAST_MODELS/GENERAL_THROUGH_MARCH_31_FIT_mean.txt",
+          "sha256": "869c21a961b790fbbc19866ace84e312dc855baca07bb50bd9d9d7bf1b8ac480",
+          "size_bytes": 100108
+        },
+        {
+          "exists": true,
+          "path": "dayahead/artifacts/v28_final_dayahead_actual/V28_FINAL_LIGHTGBM_FORECAST_MODELS/GENERAL_THROUGH_MARCH_31_FIT_q50.txt",
+          "sha256": "25a9eb864f6f2a5331e54f290d23f333afbe06109a9972a883e12325a1036ec0",
+          "size_bytes": 84090
+        },
+        {
+          "exists": true,
+          "path": "dayahead/artifacts/v28_final_dayahead_actual/V28_FINAL_LIGHTGBM_FORECAST_MODELS/GENERAL_THROUGH_MARCH_31_FIT_q90.txt",
+          "sha256": "6398bd07a590fb8a8bb0dfdfedd4674c89f0bfc526d15613dcf054307b018313",
+          "size_bytes": 70079
+        }
+      ],
+      "pass": true
+    },
+    "fixed_IT_shape_source": {
+      "dates": [
+        "2025-04-02",
+        "2025-04-03",
+        "2025-04-12",
+        "2025-04-13",
+        "2025-04-15",
+        "2025-04-22",
+        "2025-04-23"
+      ],
+      "file": {
+        "exists": true,
+        "path": "dayahead/artifacts/v22s_r1_final_operating_scale/V22SR1_PRIMARY_OPERATING_IT_PROFILE.csv",
+        "sha256": "b91099a46ab46d2ca7f27c90e22992b0d6d98204ac406fcc3b0caa0f5ef0ae40",
+        "size_bytes": 198868
+      },
+      "pass_as_dimensionless_shape_only": true,
+      "production_30_day_reference_ready": false,
+      "shape": [
+        672,
+        12
+      ]
+    },
+    "flexible_GPU_h_to_IT_kW": {
+      "full_node_tiers_ready": true,
+      "partial_authority_file": {
+        "exists": true,
+        "path": "dayahead/artifacts/v18r1_aidc_physical_coherence_repair/V18R1_HYBRID_NODE_POWER_AUTHORITY_REVALIDATION.json",
+        "sha256": "e386bd6e749c41471b1a4053d222c41e0853fab08903e63d37cbed35722c3f4a",
+        "size_bytes": 1278
+      },
+      "partial_tier_ready": false,
+      "power_mapping_file": {
+        "exists": true,
+        "path": "dayahead/ml/safe_flex/power_mapping.py",
+        "sha256": "2d3611bd321e3c021cff869abbb684f125a1ca9a0ab814d12a73cc3b86535264",
+        "size_bytes": 1604
+      }
+    },
+    "rack_allocation": {
+      "aidc_count": 12,
+      "file": {
+        "exists": true,
+        "path": "dayahead/artifacts/v16/AIDC_RACK_MAPPING_CONTRACT.json",
+        "sha256": "d33444a19cfc6c4761f2e1b9a8adb88203b05cffc1d4a798e7b61c5add265d5b",
+        "size_bytes": 13752
+      },
+      "gpu_weight_sum": 0.9999999999999997,
+      "pass": true,
+      "power_weight_sum": 1.0000000000000002,
+      "rack_count": 48,
+      "uniform_fallback": false
+    },
+    "reactive_power_PF_contract": {
+      "AIDC_PF": 0.95,
+      "MESS_Q_variable_present": true,
+      "pass": true,
+      "units": "kvar for MESS Q; AIDC injection uses frozen PF=0.95"
+    },
+    "selected_bundle": {
+      "days": [
+        "2025-04-02",
+        "2025-04-03",
+        "2025-04-12",
+        "2025-04-13",
+        "2025-04-15",
+        "2025-04-22",
+        "2025-04-23"
+      ],
+      "file": {
+        "exists": true,
+        "path": "dayahead/artifacts/v21_pre_science_integration/V21_SELECTED_FORECAST_BUNDLE.json",
+        "sha256": "73ce5d2fcb1c7120991a3766afb5ebb31511fc2c04b4965005dbaec98b825bd6",
+        "size_bytes": 294392
+      },
+      "latency_classes_from_adapter": 5,
+      "mean_shape": [
+        96,
+        6
+      ],
+      "pass_for_serialized_seven_days": true,
+      "q50_shape": [
+        96,
+        6
+      ],
+      "q90_shape": [
+        96,
+        6
+      ],
+      "tiers": [
+        "FULL_1",
+        "FULL_2",
+        "FULL_4",
+        "FULL_8",
+        "FULL_16",
+        "PARTIAL"
+      ],
+      "units": "GPU_h per 15-minute slot/power tier; latency disaggregation is conditional"
+    },
+    "serialized_training_only_slot_tier_profile": {
+      "April_target_reads": 0,
+      "file": {
+        "exists": true,
+        "path": "dayahead/artifacts/v21_pre_science_integration/V21_TRAINING_ONLY_DISTRIBUTION_ADAPTER.json",
+        "sha256": "f0d8fb75ea5395e6a7b384247b736fddcef387e339dbf0dff116297c58624099",
+        "size_bytes": 92680
+      },
+      "pass": true,
+      "shape": [
+        7,
+        96,
+        6
+      ],
+      "source_period": [
+        "2024-08-19",
+        "2025-03-31"
+      ],
+      "units": "normalized daily GPU-h mass share by day-of-week/15-minute slot/power tier"
+    },
+    "serialized_training_only_tier_latency_profile": {
+      "file": {
+        "exists": true,
+        "path": "dayahead/artifacts/v21_pre_science_integration/V21_TRAINING_ONLY_DISTRIBUTION_ADAPTER.json",
+        "sha256": "f0d8fb75ea5395e6a7b384247b736fddcef387e339dbf0dff116297c58624099",
+        "size_bytes": 92680
+      },
+      "pass": true,
+      "shape": [
+        7,
+        6,
+        5
+      ],
+      "units": "conditional service-mass share by day-of-week/power tier/latency class"
+    },
+    "site_allocation": {
+      "file": {
+        "exists": true,
+        "path": "dayahead/artifacts/v22s_r1_final_operating_scale/V22SR1_PRIMARY_SITE_WEIGHTS.csv",
+        "sha256": "1fb7931dcc86b190af7e9cc0e18b3466897ea66a35a79e53e452b36524a6e63b",
+        "size_bytes": 2842
+      },
+      "pass": true,
+      "shape": [
+        12
+      ],
+      "units": "fraction of final aggregate operating IT/PCC scale",
+      "weight_sum": 0.9999999999999999
+    }
+  },
+  "defect_id": "V28R1-BLOCK-002_OPTIMIZER_CHANNEL_AUTHORITY_INCOMPLETE",
+  "gate": "A_OPTIMIZER_CHANNEL_AUTHORITY",
+  "invented_empirical_fallback": false,
+  "invented_uniform_fallback": false,
+  "missing_mandatory_authorities": [
+    {
+      "asset": "PARTIAL tier to an authoritative V16.3 cohort and IT-power coefficient",
+      "evidence": {
+        "partial_semantics": {
+          "CPU_package_increment": null,
+          "authority": "V17 per-GPU board Q50 lower bound",
+          "kappa_kW_per_GPU": 0.48563611660901085,
+          "reason": "node packing/partial occupancy counterfactual absent"
+        },
+        "serialized_tier": "PARTIAL",
+        "solver_cohort_requirement": "Nxx_Cy where xx is one of 01,02,04,08,16",
+        "solver_uses_node_class_kappa": "KAPPA_KW_PER_ACTIVE_H100_NODE[_cohort_node_class(cohort)]"
+      },
+      "reason": "The accepted 6-tier authority contains PARTIAL, but V16.3 exposes only five full-node cohort classes. The frozen partial authority explicitly lacks a CPU-package increment; dropping, imputing, or remapping PARTIAL would be a forbidden fallback."
+    },
+    {
+      "asset": "V28R1 fixed/flexible residual schedule covering every April day at the final V22SR1 scale",
+      "evidence": {
+        "V21_bridge_PUE": 1.3,
+        "V21_bridge_dates": [
+          "2025-04-02",
+          "2025-04-03",
+          "2025-04-12",
+          "2025-04-13",
+          "2025-04-15",
+          "2025-04-22",
+          "2025-04-23"
+        ],
+        "V22SR1_profile_dates": [
+          "2025-04-02",
+          "2025-04-03",
+          "2025-04-12",
+          "2025-04-13",
+          "2025-04-15",
+          "2025-04-22",
+          "2025-04-23"
+        ],
+        "V22SR1_profile_rows": 672,
+        "V22SR1_shape_authority_absolute_magnitude_status": "DISCARDED_NOT_SCALE_AUTHORITY",
+        "required_final_aggregate_IT_peak_MW": 0.40677599381381907,
+        "rows_per_date": {
+          "2025-04-02": 96,
+          "2025-04-03": 96,
+          "2025-04-12": 96,
+          "2025-04-13": 96,
+          "2025-04-15": 96,
+          "2025-04-22": 96,
+          "2025-04-23": 96
+        }
+      },
+      "reason": "The seven-date V22SR1 shape can remain a dimensionless authority, but there is no serialized V28R1 rule that binds the daily LightGBM/tier tensor, fixed residual, and final V22SR1 scale for all 30 dates without reusing the prohibited legacy PUE/beta path."
+    }
+  ],
+  "production_code_permitted_after_gate": false,
+  "status": "FAIL_CLOSED"
+}

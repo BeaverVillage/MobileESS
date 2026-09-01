@@ -1,0 +1,70 @@
+{
+  "FRESH_OPENDSS_BACKEND_READY": false,
+  "REUSABLE_FRESH_OPENDSS_AUTHORITY_PRESENT": true,
+  "artifact_id": "V28R1_OPENDSS_ENGINE_AUDIT_V1",
+  "assets": {
+    "IEEE123_master": {
+      "exists": true,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Master.dss",
+      "sha256": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969",
+      "size_bytes": 17008
+    },
+    "line_ratings": {
+      "exists": true,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\Generated_Planning_Line_Ratings_u080.dss",
+      "sha256": "46d492b5b62400d33646089b80105d713250d0790ed7baab85b002d48121f302",
+      "size_bytes": 6038
+    },
+    "phase_PV": {
+      "exists": true,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\Generated_PhasePV.dss",
+      "sha256": "fb4149c6c79de49cd059a7d5b7dc5142ab405948a1876a24e94252019b392562",
+      "size_bytes": 9992
+    },
+    "runtime_adapter": {
+      "exists": true,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\opendss_runtime_adapter.json",
+      "sha256": "5637dc95ab3ea62611b278e0b5f1aefe49befd4bf90bafb7a478fe83e0c43036",
+      "size_bytes": 38747
+    }
+  },
+  "defect_id": null,
+  "engine": {
+    "capture_function": "dayahead.run_v16_3_nonzero_validity._fresh_capture",
+    "capture_function_evidence": {
+      "line": 363,
+      "return_count": 1
+    },
+    "clean_engine_per_case_call_available": true,
+    "compile_function": "dayahead.run_planning_ac_voltage_forensic_v1._compile",
+    "compile_function_evidence": {
+      "line": 94,
+      "return_count": 1
+    },
+    "compile_markers": {
+      "CalcVoltageBases": true,
+      "Compile \"": true,
+      "Generated_PhasePV.dss": true,
+      "Generated_Planning_Line_Ratings_u080.dss": true,
+      "MakeBusList": true,
+      "controlmode=static": true
+    },
+    "native_regulator_capacitor_semantics_available": true,
+    "phase_aware_voltage_current_extraction_available": true,
+    "sequential_96_slot_markers": {
+      "Solution.Converged()": true,
+      "Solution.SolveSnap()": true,
+      "for slot in range(96)": true
+    }
+  },
+  "finding": "The real engine and mapping authority are reusable. A V28R1 production adapter and its execution evidence do not exist because implementation stopped after Gate A.",
+  "gate": "D_FRESH_OPENDSS_PRODUCTION_ENGINE",
+  "mapping": {
+    "AIDC_PF": 0.95,
+    "AIDC_count": 12,
+    "MESS_P_Q_controls": true,
+    "background_load_and_PV_binding": true,
+    "sign_convention_bound_by_existing_full_grid_binding": true
+  },
+  "status": "PASS_REUSABLE_ENGINE_AND_MAPPING_AUTHORITY_PRESENT"
+}
