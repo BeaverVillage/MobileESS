@@ -124,10 +124,12 @@ def test_first_four_handlers_materialize_real_authorities_without_native_solves(
     assert ledger.opendss_solved_slots == {}
 
 
-def test_smoke_is_authorized_but_authoritative_april_remains_fail_closed():
+def test_verified_smoke_releases_authoritative_april_without_claiming_month_pass():
     assert verify_smoke_launch(REPO)["HEAVY_SMOKE_LAUNCH_AUTHORIZED"] is True
-    with pytest.raises(RuntimeError, match="AUTHORITY_PRODUCTION_LAUNCH"):
-        verify_authority_launch(REPO)
+    flags = verify_authority_launch(REPO)
+    assert flags["APRIL_RUNNER_READY"] is True
+    assert flags["END_TO_END_HEAVY_SMOKE_PASS"] is True
+    assert flags["APRIL_FULL_MONTH_PREFLIGHT_PASS"] is False
 
 
 def test_missing_electrical_cache_invokes_real_preparation_adapter(tmp_path: Path, monkeypatch):
