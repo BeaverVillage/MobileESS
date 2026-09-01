@@ -1,0 +1,56 @@
+{
+  "artifact_id": "V29_TEST_REPORT_V1",
+  "known_unexplained_failures": 0,
+  "required_checks": {
+    "01_v28r2_maintained_regressions": "PASS",
+    "02_source_namespace_firewall": "PASS",
+    "03_no_actual_open_before_freeze": "PASS",
+    "04_connection_delay_DA_PI_Actual": "PASS",
+    "05_carryin_field_observability": "PASS",
+    "06_no_postcutoff_actual_input": "PASS",
+    "07_no_April_training_rows": "PASS",
+    "08_carryin_mass_conservation": "PASS",
+    "09_queue_bridge_conservation": "PASS",
+    "10_B0_B2_reference_V3_byte_identity": "PASS",
+    "11_reference_delta_nonnegative": "PASS",
+    "12_no_P_G_double_counting": "PASS",
+    "13_case_dominance": "PASS",
+    "14_rho_0p10_main": "PASS",
+    "15_no_partial_shared_actuator": "PASS",
+    "16_no_running_job_preemption": "PASS",
+    "17_no_synthetic_deadline": "PASS",
+    "18_three_solver_equivalence_1e_4": "PASS",
+    "19_increment_resolution_classification": "PASS",
+    "20_actual_optimizer_calls_zero": "PASS",
+    "21_PI_firewall": "PASS",
+    "22_fresh_opendss_clean_engine": "PASS",
+    "23_smoke_10x96": "PASS",
+    "24_four_day_reproducibility": "PASS",
+    "25_v28r2_protected_scope_preservation": "PASS",
+    "26_artifact_sha_self_consistency": "PASS_AFTER_MANIFEST_GENERATION"
+  },
+  "status": "PASS",
+  "suites": [
+    {
+      "command": "$files=(Get-ChildItem tests/dayahead/test_v28r2_*.py).FullName; python -m pytest -q $files",
+      "elapsed_seconds": 122.78,
+      "failed": 0,
+      "passed": 69
+    },
+    {
+      "command": "$files=(Get-ChildItem tests/dayahead/test_v29_*.py).FullName; python -m pytest -q $files",
+      "elapsed_seconds": 149.27,
+      "failed": 0,
+      "passed": 21
+    },
+    {
+      "command": "python -m pytest -q tests/dayahead/test_v29_final_review.py",
+      "elapsed_seconds": 0.1,
+      "failed": 0,
+      "passed": 2
+    }
+  ],
+  "superseded_invocation_note": "A direct literal test_v28r2_*.py invocation collected zero tests because PowerShell did not expand the wildcard; the explicit file-list command above superseded it and passed 69/69.",
+  "total_failed": 0,
+  "total_passed": 92
+}
