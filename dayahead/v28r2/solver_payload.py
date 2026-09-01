@@ -150,6 +150,7 @@ def payload_from_registry(
     }
     route = {
         mess_id: {
+            "service_site": str(record["service_site"]),
             "mode_96": list(record["mode_96"]),
             "location_96": list(record["location_96"]),
             "available_96": list(record["available_96"]),
