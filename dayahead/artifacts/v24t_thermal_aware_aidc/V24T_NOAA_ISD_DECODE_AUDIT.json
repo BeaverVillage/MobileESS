@@ -1,0 +1,70 @@
+{
+  "artifact_id": "V24T_NOAA_ISD_DECODE_AUDIT",
+  "encoding": {
+    "DEW": {
+      "missing": "+9999/-9999",
+      "scale": 10,
+      "unit": "degC"
+    },
+    "MA1": {
+      "fields": "altimeter,qc,station_pressure,qc",
+      "missing": "99999",
+      "scale": 10,
+      "unit": "hPa"
+    },
+    "SLP": {
+      "missing": "99999",
+      "scale": 10,
+      "unit": "hPa"
+    },
+    "TMP": {
+      "missing": "+9999/-9999",
+      "scale": 10,
+      "unit": "degC"
+    },
+    "WND": {
+      "fields": "direction,qc,type,speed,qc",
+      "missing": [
+        "999",
+        "9999"
+      ],
+      "speed_scale": 10,
+      "speed_unit": "m/s"
+    }
+  },
+  "missing_fraction": {
+    "pressure_hpa": 0.012310538675016011,
+    "rh_pct": 0.0002134775492777343,
+    "slp_hpa": 0.012310538675016011,
+    "station_pressure_hpa": 0.012310538675016011,
+    "t_db_c": 0.0,
+    "t_dew_c": 0.0002134775492777343,
+    "t_wb_c": 0.012524016224293746,
+    "wind_speed_mps": 0.0001423183661851562
+  },
+  "pressure_priority": "MA1 station pressure > SLP sea-level pressure",
+  "pressure_source_counts": {
+    "MA1_STATION_PRESSURE": 13880,
+    "MISSING": 173
+  },
+  "psychrometric_validation": {
+    "dewpoint_le_drybulb": true,
+    "finite_count": 13877,
+    "max_dewpoint_above_drybulb_c": -0.1999999999999993,
+    "max_wetbulb_above_drybulb_c": -0.12548530208718311,
+    "pressure_physical": true,
+    "rh_in_range": true,
+    "wetbulb_ge_dewpoint": true,
+    "wetbulb_le_drybulb": true
+  },
+  "quality_codes_accepted": [
+    "0",
+    "1",
+    "4",
+    "5",
+    "9",
+    "M"
+  ],
+  "quality_fields_preserved": true,
+  "specification": "NOAA ISD format document, mandatory TMP/DEW/SLP/WND and additional MA1"
+}

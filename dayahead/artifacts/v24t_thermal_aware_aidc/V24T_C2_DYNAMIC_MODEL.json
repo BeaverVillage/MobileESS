@@ -1,0 +1,87 @@
+{
+  "artifact_id": "V24T_C2_DYNAMIC_MODEL",
+  "cadence_minutes": 1.0,
+  "coefficient_uncertainty": {
+    "block_count": 3157,
+    "method": "whole-UTC-day blocked bootstrap",
+    "p025": [
+      -30.21995773771206,
+      0.0,
+      0.0,
+      0.0,
+      -0.004745003617957452,
+      1.0245877763229685,
+      35.89299814871026,
+      0.0
+    ],
+    "p50": [
+      -24.76902743850657,
+      0.0,
+      0.0,
+      0.0,
+      0.05788635438907353,
+      1.162397120142499,
+      50.64806598825595,
+      0.0
+    ],
+    "p975": [
+      -21.27477995966313,
+      14.04632509504639,
+      0.0,
+      0.0,
+      0.13864513394738018,
+      1.3327909427564562,
+      55.01688900492666,
+      0.0
+    ],
+    "repetitions": 30,
+    "seed": 2401
+  },
+  "coefficients": {
+    "intercept": -25.344193251084906,
+    "it_mw": 0.5347712547259342,
+    "it_mw_squared": 0.0,
+    "it_mw_x_wetbulb_c": 1.1588150381380529,
+    "rh_pct": 0.06299341654665713,
+    "theta_it_mw": 51.45855766551841,
+    "theta_wetbulb_c": 0.0,
+    "wetbulb_c": 0.0
+  },
+  "fit_rows": 3778759,
+  "form": "stable ARX-equivalent with shared rho and separate IT/wet-bulb state channels",
+  "melbourne_weather_fit_reads": 0,
+  "model": "C2_THERMAL_INERTIA_DYNAMIC_PUE",
+  "other_model_coefficients": {
+    "intercept": 2.85515655000271,
+    "it_mw": 0.0
+  },
+  "rho": 0.9979188352992993,
+  "rho_selection": {
+    "candidate_mean_wape": {
+      "10.0": 0.38106910031514507,
+      "120.0": 0.3806459465312112,
+      "15.0": 0.38107813480968034,
+      "240.0": 0.3798314737480354,
+      "30.0": 0.3810566022371985,
+      "480.0": 0.3794882006587671,
+      "5.0": 0.3810405892098438,
+      "60.0": 0.3809409540536185
+    },
+    "criterion": "minimum mean five-fold expanding cooling WAPE",
+    "pre_registered_tau_candidates_minutes": [
+      5.0,
+      10.0,
+      15.0,
+      30.0,
+      60.0,
+      120.0,
+      240.0,
+      480.0
+    ]
+  },
+  "state_update": "theta_x(t+1)=rho*theta_x(t)+(1-rho)*x(t)",
+  "tau_hours": 8.00000000000002,
+  "tau_minutes": 480.0000000000012,
+  "thermal_fit_data": "NLR only",
+  "validation_state_inputs": "IT and weather only; measured cooling read count after fold start = 0"
+}

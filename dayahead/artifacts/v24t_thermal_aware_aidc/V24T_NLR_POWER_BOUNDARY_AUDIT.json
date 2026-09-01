@@ -1,0 +1,21 @@
+{
+  "artifact_id": "V24T_NLR_POWER_BOUNDARY_AUDIT",
+  "classification": "BOUNDARY_B_NONOVERLAPPING_COMPONENT_SUM",
+  "double_count_count": 0,
+  "facility_target": "facility_kw = it_power_kw + exact non-overlapping component sum; reported pue*IT is an independently audited rounded check",
+  "meter_hierarchy": {
+    "cooling_kw": "outdoor cooling fans, pipe trace heaters, dedicated tower filter pump",
+    "hvac_kw": "fan walls, electrical-room fan coils, make-up air unit",
+    "plug_and_light_kw": "lights, utility plugs, generator crank-case heater",
+    "pump_kw": "energy-recovery/tower-water/boost pumps; excludes documented 2.67 kW tower filter attribution already in cooling_kw"
+  },
+  "non_overlapping_components": [
+    "cooling_kw",
+    "hvac_kw",
+    "pump_kw",
+    "plug_and_light_kw"
+  ],
+  "other_target": "other_kw = plug_and_light_kw",
+  "pass": true,
+  "primary_target": "cooling_system_kw = cooling_kw + hvac_kw + pump_kw"
+}
