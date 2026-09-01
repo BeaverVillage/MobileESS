@@ -95,4 +95,3 @@ def grid_blind_edf(
         "service": service,
         "rack_service": rack_service,
     }
-

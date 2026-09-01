@@ -45,4 +45,3 @@ def monotone_chunked_match(
     p_index = np.floor(np.linspace(0, len(p_order), length, endpoint=False)).astype(int)
     a_index = np.floor(np.linspace(0, len(a_order), length, endpoint=False)).astype(int)
     return p_order[np.minimum(p_index, len(p_order) - 1)], a_order[np.minimum(a_index, len(a_order) - 1)]
-

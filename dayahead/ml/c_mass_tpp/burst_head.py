@@ -12,4 +12,3 @@ class BurstRegimeHead(nn.Module):
 
     def forward(self, context):
         return self.network(context)
-

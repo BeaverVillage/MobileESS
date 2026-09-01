@@ -42,4 +42,3 @@ def tweedie_deviance(
 def pinball_loss(target: torch.Tensor, prediction: torch.Tensor, quantile: float) -> torch.Tensor:
     error = target - prediction
     return torch.maximum(quantile * error, (quantile - 1.0) * error).mean()
-

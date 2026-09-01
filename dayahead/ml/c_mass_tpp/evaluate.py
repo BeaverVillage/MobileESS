@@ -129,4 +129,3 @@ def block_bootstrap_error_difference(
         "replicates": replicates,
         "seed": seed,
     }
-

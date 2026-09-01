@@ -3,4 +3,3 @@
 from .model import CMASSTPP, CMASSTPPConfig
 
 __all__ = ["CMASSTPP", "CMASSTPPConfig"]
-

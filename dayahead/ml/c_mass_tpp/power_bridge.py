@@ -74,4 +74,3 @@ def power_metrics(actual_kw: np.ndarray, predicted_kw: np.ndarray) -> dict[str, 
         "peak_flexible_IT_power_error_kW": float(predicted.max() - actual.max()),
         "peak_timing_error_slots": float(abs(int(np.argmax(predicted)) - int(np.argmax(actual)))),
     }
-

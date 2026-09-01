@@ -37,4 +37,3 @@ def decompose_facility(day: str, flexible_it_total_kw: np.ndarray) -> dict[str, 
         "negative_clipping_calls": 0,
         "PUE_application_count": 1,
     }
-
