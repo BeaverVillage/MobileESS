@@ -1,0 +1,43 @@
+{
+  "artifact_id": "V28_AUTHORITY_CONFLICT_AUDIT_V1",
+  "conflicts": [
+    {
+      "id": "C01_LEGACY_RC_MQT_INPUT_BINDING",
+      "resolution": "retain formulation; replace forecast binding with frozen LightGBM mean/Q50/Q90 authority",
+      "source": "dayahead/artifacts/v16_3_final/V16_3_FINAL_SCIENCE_EXECUTION_CONTRACT.json"
+    },
+    {
+      "id": "C02_LEGACY_BETA_AIDC_SCALE",
+      "resolution": "retain equations; remove beta scale calls and bind V22SR1 absolute operating-load scale",
+      "source": "dayahead/artifacts/v16_3_final/V16_3_FINAL_SCIENCE_EXECUTION_CONTRACT.json"
+    },
+    {
+      "id": "C03_CONSTANT_PUE_AS_OLD_MAIN",
+      "resolution": "C0 remains sensitivity only; C1 is V28 primary planning and evaluation thermal authority",
+      "source": "dayahead/artifacts/v16_3_final/V16_3_FINAL_SCIENCE_EXECUTION_CONTRACT.json"
+    },
+    {
+      "id": "C04_V24T_C2_PRESENT_BUT_REJECTED",
+      "resolution": "import for historical preservation only; production import graph rejects dynamic_state/C2",
+      "source": "V24T branch"
+    },
+    {
+      "id": "C05_V16_3_THREADS_1",
+      "resolution": "historical module remains immutable; V28 runtime adapter enforces Threads=4",
+      "source": "dayahead/v16_3_decomposition_executor.py configure_model"
+    }
+  ],
+  "legacy_final_binding_rules": {
+    "5_minute_control": false,
+    "M1_M2_M3_M4": false,
+    "RC_MQT": false,
+    "constant_PUE_only_main": false,
+    "event_trigger": false,
+    "legacy_1_208_MW_stress_scale": false,
+    "local_repair": false,
+    "representative_weeks": false,
+    "rolling_MPC": false
+  },
+  "status": "PASS_FAIL_CLOSED_CONFLICTS_RESOLVED",
+  "unresolved": []
+}
