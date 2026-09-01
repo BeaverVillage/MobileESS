@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-from dayahead.ml.c_mass_tpp.data import build_daily_samples
+from dayahead.ml.c_mass_tpp.data import AEST, build_daily_samples
 from dayahead.ml.faser_flex.data import load_training_authority
 
 
@@ -38,5 +38,4 @@ def load_beacon_training_data() -> BeaconTrainingData:
 def production_cutoff(date: str) -> pd.Timestamp:
     """Return D-1 18:00 in the repository's Australia/Melbourne wall-clock authority."""
 
-    return pd.Timestamp(date, tz="Australia/Melbourne") - pd.Timedelta(hours=6)
-
+    return pd.Timestamp(date, tz=AEST) - pd.Timedelta(hours=6)

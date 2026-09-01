@@ -1,0 +1,39 @@
+{
+  "artifact_id": "V25M_WORKLOAD_PRESSURE_FEATURE_CONTRACT_V1",
+  "lookback_hours": 168,
+  "macro_lookback_days": 28,
+  "hourly_channels": [
+    "submitted_H100_job_count",
+    "requested_GPU_sum",
+    "requested_GPU_h_sum",
+    "requested_node_sum",
+    "FULL_node_requested_GPU_h",
+    "PARTIAL_node_requested_GPU_h",
+    "long_walltime_requested_GPU_h",
+    "large_job_requested_GPU_h",
+    "unique_account_count",
+    "account_HHI",
+    "median_interarrival_minutes",
+    "P10_interarrival_minutes"
+  ],
+  "explicit_features": [
+    "A6",
+    "A24",
+    "ArrivalCompression",
+    "TailPressure6h",
+    "TailPressure24h",
+    "LongWalltimeShare6h",
+    "MultiNodeShare6h",
+    "FullNodeShare6h",
+    "UniqueAccountAcceleration",
+    "DeltaHHI",
+    "GPU_P90_shift",
+    "walltime_P90_shift",
+    "one_sided_EWMA_workload_z",
+    "one_sided_CUSUM_pressure"
+  ],
+  "large_and_long_threshold_fit": "OUTER_TRAIN_ONLY_P90",
+  "normalization": "LOG1P_POSITIVE_CHANNELS_THEN_ROBUST_MEDIAN_IQR_OUTER_TRAIN_ONLY",
+  "account_hash_use": "AGGREGATE_UNIQUE_COUNT_AND_HHI_ONLY",
+  "April_statistic_reads": 0
+}

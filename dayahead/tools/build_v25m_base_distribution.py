@@ -108,9 +108,10 @@ def main() -> None:
         "target_only_runtime_uses": len(data.authority.flexible_targets), "validation_pretraining_rows": 0, "status": "PASS",
     })
     write("V25M_TIMEZONE_CUTOFF_AUDIT.json", {
-        "artifact_id": "V25M_TIMEZONE_CUTOFF_AUDIT_V1", "repository_timezone": "Australia/Melbourne",
-        "DST_aware": True, "cutoff_semantics": "D-1 18:00 LOCAL_WALL_CLOCK_AEST_OR_AEDT",
-        "V24M_wording_preserved": "D-1 18:00 AEST/AEDT", "fixed_UTC_offset_assumption": False, "status": "PASS",
+        "artifact_id": "V25M_TIMEZONE_CUTOFF_AUDIT_V1", "repository_timezone": "AEST_FIXED_UTC_PLUS_10",
+        "DST_aware": False, "cutoff_semantics": "D-1 18:00 FIXED_AEST_UTC_PLUS_10",
+        "V24M_wording_preserved": "D-1 18:00 AEST", "fixed_UTC_offset_assumption": True,
+        "Australia_Melbourne_DST_semantics_claimed": False, "status": "PASS",
     })
     write("V25M_BLOCKED_CV_SPLIT_CONTRACT.json", {
         "artifact_id": "V25M_BLOCKED_CV_SPLIT_CONTRACT_V1", "folds": [fold.__dict__ for fold in FOLDS],
