@@ -141,3 +141,34 @@ def build_electrical_context(
     voltage = np.load(voltage_path, allow_pickle=False)
     current = np.load(current_path, allow_pickle=False)
     return ElectricalContext(legacy, voltage, current, source, voltage_path, current_path)
+
+
+def with_realized_background(
+    repo: Path, base: ElectricalContext, *, timestamps_96: object,
+    demand_mw_96: object, pv_mw_96: object, aidc_plan_kw_96x12: object,
+) -> ElectricalContext:
+    """Rebind only physical background inputs after the Actual namespace opens."""
+
+    source = base.source_root
+    background = build_authority_background_binding(
+        timestamps_fixed_aest=timestamps_96,
+        demand_mw_96=demand_mw_96,
+        rooftop_pv_mw_96=pv_mw_96,
+        paths=portable_background_paths(repo, source),
+    )
+    binding = build_full_grid_binding(
+        assets=source / "opendss_assets",
+        contract=source / "power_v70_p4f_contract",
+        demand_mw_96=demand_mw_96,
+        rooftop_pv_mw_96=pv_mw_96,
+        aidc_plan_kw_96x12=aidc_plan_kw_96x12,
+        pcc_asset=repo / "dayahead/artifacts/v16_2/Generated_ThreePhase_PCC_v4.dss",
+        background_binding=background,
+    )
+    reference, vintage, _old_background, _old_binding, cache, authority = base.legacy_context
+    rebound = dict(reference)
+    rebound["plan_kw_96x12"] = tuple(tuple(map(float, row)) for row in aidc_plan_kw_96x12)
+    legacy = (rebound, vintage, background, binding, cache, authority)
+    return ElectricalContext(
+        legacy, base.voltage, base.current, source, base.voltage_path, base.current_path,
+    )

@@ -9,8 +9,9 @@ from typing import Mapping
 
 import numpy as np
 
-from .backend_contract import canonical_sha256, sha256_file
+from .backend_contract import sha256_file
 from .electrical_context import ElectricalContext, source_root
+from .trajectory import FrozenTrajectory
 
 
 NATIVE_MASTER_SHA256 = "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969"
@@ -50,72 +51,6 @@ class FeederAssets:
     def sha256(self) -> dict[str, str]:
         self.validate()
         return {name: sha256_file(path) for name, path in self.__dict__.items()}
-
-
-@dataclass(frozen=True)
-class FrozenTrajectory:
-    day: str
-    namespace: str
-    case: str
-    pcc_p_kw: np.ndarray
-    pcc_q_kvar: np.ndarray
-    mess_p_kw: np.ndarray
-    mess_q_kvar: np.ndarray
-    mess_ids: tuple[str, ...]
-    mess_service_sites: tuple[str, ...]
-    source_schedule_sha256: str
-
-    def validate(self) -> None:
-        if self.namespace not in {"DAYAHEAD", "ACTUAL", "PERFECT_INFORMATION"}:
-            raise ValueError("V28R2_OPENDSS_NAMESPACE")
-        expected = {
-            "pcc_p": (self.pcc_p_kw, (96, 12)),
-            "pcc_q": (self.pcc_q_kvar, (96, 12)),
-            "mess_p": (self.mess_p_kw, (96, 4)),
-            "mess_q": (self.mess_q_kvar, (96, 4)),
-        }
-        if any(np.asarray(array).shape != shape or not np.isfinite(array).all() for array, shape in expected.values()):
-            raise ValueError("V28R2_OPENDSS_TRAJECTORY_SHAPE_OR_FINITE")
-        if len(self.mess_ids) != 4 or len(self.mess_service_sites) != 4:
-            raise ValueError("V28R2_OPENDSS_MESS_AXIS")
-        if len(self.source_schedule_sha256) != 64:
-            raise ValueError("V28R2_OPENDSS_SCHEDULE_SHA")
-
-    @property
-    def immutable_sha256(self) -> str:
-        self.validate()
-        return canonical_sha256({
-            "day": self.day, "namespace": self.namespace, "case": self.case,
-            "pcc_p_kw": self.pcc_p_kw.tolist(), "pcc_q_kvar": self.pcc_q_kvar.tolist(),
-            "mess_p_kw": self.mess_p_kw.tolist(), "mess_q_kvar": self.mess_q_kvar.tolist(),
-            "mess_ids": self.mess_ids, "mess_service_sites": self.mess_service_sites,
-            "source_schedule_sha256": self.source_schedule_sha256,
-        })
-
-    @classmethod
-    def from_schedule_payload(
-        cls, payload: Mapping[str, object], *, day: str, namespace: str,
-    ) -> "FrozenTrajectory":
-        source = dict(payload)
-        stored = source.pop("schedule_sha256", None)
-        if stored is not None and stored != canonical_sha256(source):
-            raise RuntimeError("V28R2_OPENDSS_SCHEDULE_PAYLOAD_SHA")
-        route = source.get("mess_route_location")
-        if not isinstance(route, Mapping):
-            raise ValueError("V28R2_OPENDSS_MESS_ROUTE")
-        mess_ids = tuple(sorted(map(str, route)))
-        services = tuple(str(route[mess]["service_site"]) for mess in mess_ids)
-        result = cls(
-            day=day, namespace=namespace, case=str(source["case"]),
-            pcc_p_kw=np.asarray(source["planning_pcc_power_kw"], dtype=float),
-            pcc_q_kvar=np.asarray(source["planning_pcc_reactive_kvar"], dtype=float),
-            mess_p_kw=np.asarray(source["mess_p_kw"], dtype=float),
-            mess_q_kvar=np.asarray(source["mess_q_kvar"], dtype=float),
-            mess_ids=mess_ids, mess_service_sites=services,
-            source_schedule_sha256=str(stored or canonical_sha256(source)),
-        )
-        result.validate()
-        return result
 
 
 def aidc_injection_mapping(p_kw: float, q_kvar: float) -> dict[str, float]:
@@ -216,10 +151,17 @@ def apply_trajectory_slot(
         if str(name).lower().startswith("mess_chg_"):
             _set_load(odd, str(name), 0.0, 0.0)
     by_service: dict[str, list[float]] = {}
-    for index, service in enumerate(trajectory.mess_service_sites):
-        totals = by_service.setdefault(service.upper(), [0.0, 0.0])
-        totals[0] += float(trajectory.mess_p_kw[slot, index])
-        totals[1] += float(trajectory.mess_q_kvar[slot, index])
+    for index, raw_location in enumerate(trajectory.mess_locations_96x4[slot]):
+        service = str(raw_location).upper()
+        p_kw = float(trajectory.mess_p_kw[slot, index])
+        q_kvar = float(trajectory.mess_q_kvar[slot, index])
+        if service.startswith("TRANSIT_"):
+            if abs(p_kw) > 1e-9 or abs(q_kvar) > 1e-9:
+                raise RuntimeError("V28R2_OPENDSS_NONZERO_MESS_IN_TRANSIT")
+            continue
+        totals = by_service.setdefault(service, [0.0, 0.0])
+        totals[0] += p_kw
+        totals[1] += q_kvar
     for service, (p_kw, q_kvar) in sorted(by_service.items()):
         mapped = mess_injection_mapping(p_kw, q_kvar)
         _set_generator(odd, f"MESS_DIS_{service}", mapped["generator_p_kw"], mapped["generator_q_kvar"])

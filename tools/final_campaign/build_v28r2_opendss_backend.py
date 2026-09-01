@@ -52,7 +52,9 @@ def main() -> None:
     odd.Basic.ClearAll()
     source_sha = {
         name: sha256_file(REPO / "dayahead/v28r2" / name)
-        for name in ("opendss_mapping.py", "opendss_backend.py", "opendss_results.py")
+        for name in (
+            "trajectory.py", "opendss_mapping.py", "opendss_backend.py", "opendss_results.py",
+        )
     }
     mapping = {
         "artifact_id": "V28R2_OPENDSS_MAPPING_VALIDATION_V1",

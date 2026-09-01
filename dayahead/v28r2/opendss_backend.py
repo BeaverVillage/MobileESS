@@ -11,10 +11,11 @@ import numpy as np
 
 from .electrical_context import ElectricalContext
 from .opendss_mapping import (
-    CAPACITORS, REGULATORS, FeederAssets, FrozenTrajectory,
+    CAPACITORS, REGULATORS, FeederAssets,
     apply_frozen_native_state, apply_trajectory_slot, compile_clean_engine,
 )
 from .opendss_results import OpenDSSResult
+from .trajectory import FrozenTrajectory
 
 
 ProgressCallback = Callable[[dict[str, object]], None]

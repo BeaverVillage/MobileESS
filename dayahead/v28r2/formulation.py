@@ -106,10 +106,17 @@ def _mess_authority(payload: Mapping[str, object]) -> dict[str, dict[str, object
     result = {}
     for record in payload["mess"]:
         mess_id = str(record["mess_id"])
-        transit = tuple(index for index, mode in enumerate(record["mode"]) if mode == "TRANSIT")
+        transit = tuple(
+            index for index, (mode, available) in enumerate(zip(
+                record["mode"], record["available"], strict=True,
+            ))
+            if mode != "CONNECTED" or not bool(available)
+        )
         connected_locations = tuple(dict.fromkeys(
-            location for location, mode in zip(record["location"], record["mode"], strict=True)
-            if mode == "CONNECTED"
+            location for location, mode, available in zip(
+                record["location"], record["mode"], record["available"], strict=True,
+            )
+            if mode == "CONNECTED" and bool(available)
         ))
         if len(connected_locations) != 1 or not transit:
             raise RuntimeError(f"V28R2_MESS_ROUTE_AUTHORITY:{mess_id}")

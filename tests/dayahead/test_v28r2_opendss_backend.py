@@ -5,10 +5,9 @@ import numpy as np
 import pytest
 
 from dayahead.v28r2.backend_contract import canonical_sha256
-from dayahead.v28r2.opendss_mapping import (
-    FrozenTrajectory, aidc_injection_mapping, mess_injection_mapping,
-)
+from dayahead.v28r2.opendss_mapping import aidc_injection_mapping, mess_injection_mapping
 from dayahead.v28r2.opendss_results import OpenDSSResult
+from dayahead.v28r2.trajectory import FrozenTrajectory
 
 
 def _payload():
@@ -57,7 +56,7 @@ def test_frozen_trajectory_verifies_payload_sha_and_axes():
         payload, day="2025-04-01", namespace="DAYAHEAD",
     )
     trajectory.validate()
-    assert trajectory.mess_service_sites == ("IDC01", "IDC02", "IDC03", "IDC04")
+    assert tuple(trajectory.mess_locations_96x4[0]) == ("IDC01", "IDC02", "IDC03", "IDC04")
     assert len(trajectory.immutable_sha256) == 64
     payload["mess_p_kw"][0][0] = 1.0
     with pytest.raises(RuntimeError, match="SCHEDULE_PAYLOAD_SHA"):
