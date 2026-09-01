@@ -1,0 +1,18 @@
+{
+  "artifact_id": "V26M_ORACLE_CEILING_CONTRACT_V1",
+  "authority": "NON_CAUSAL_ORACLE_DIAGNOSTIC_ONLY",
+  "evaluation_days": "V25 canonical pooled OOF 151 days, 2024-11-01 through 2025-03-31",
+  "O0_input": "raw B2 OOF mean plus raw B3 OOF Q50/Q90; no BR-A reconciliation",
+  "O1_change_only": "add realized D-day overlap from jobs pending at cutoff to each O0 statistic",
+  "projector": "FROZEN_96_SLOT_AGGREGATE_CUMULATIVE_SERVICE_DESCRIPTOR",
+  "projector_scope": "PRE_DEVELOPMENT_INFORMATION_VALUE_PROXY_NOT_FINAL_CLASS_RESOLVED_SAFE_SET",
+  "release_shape": "uniform over 96 slots",
+  "deadline_shift_slots": 8,
+  "capacity": "monthly source-observed lower-bound C_src_GPU times 0.25 h per slot",
+  "primary_envelope_score": "sum(abs(Q50-reference))/sum(reference)",
+  "reserve_nomination": "Q50 aggregate flexible-service GPU-hours",
+  "hidden_shedding_allowed": false,
+  "future_values_online_feature_reads": 0,
+  "April_target_reads": 0,
+  "grid_objective_reads": 0
+}
