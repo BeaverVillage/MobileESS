@@ -148,8 +148,20 @@ def evaluate_fold(
     ratio_mask = part["it_power_kw"].to_numpy() >= p05
     pue_actual = facility_actual[ratio_mask] / part["it_power_kw"].to_numpy()[ratio_mask]
     pue_pred = facility_pred[ratio_mask] / part["it_power_kw"].to_numpy()[ratio_mask]
-    actual_peak = int(np.argmax(facility_actual))
-    predicted_peak = int(np.argmax(facility_pred))
+    peak_frame = pd.DataFrame(
+        {
+            "day": part["ts"].dt.floor("D").to_numpy(),
+            "actual": facility_actual,
+            "predicted": facility_pred,
+        }
+    )
+    daily_peak_errors: list[float] = []
+    daily_timing_errors: list[float] = []
+    for _, day_values in peak_frame.groupby("day", sort=False):
+        actual_peak = int(np.argmax(day_values["actual"].to_numpy()))
+        predicted_peak = int(np.argmax(day_values["predicted"].to_numpy()))
+        daily_peak_errors.append(float(day_values["predicted"].max() - day_values["actual"].max()))
+        daily_timing_errors.append(float(abs(predicted_peak - actual_peak)))
     return {
         **{f"cooling_{key}": value for key, value in regression_metrics(cool_actual, cool_pred).items()},
         **{f"facility_{key}": value for key, value in regression_metrics(facility_actual, facility_pred).items()},
@@ -159,8 +171,9 @@ def evaluate_fold(
         "pue_p05_error": float(np.quantile(pue_pred - pue_actual, 0.05)),
         "pue_p50_error": float(np.quantile(pue_pred - pue_actual, 0.50)),
         "pue_p95_error": float(np.quantile(pue_pred - pue_actual, 0.95)),
-        "facility_peak_error_kw": float(facility_pred[predicted_peak] - facility_actual[actual_peak]),
-        "facility_peak_timing_error_minutes": float(predicted_peak - actual_peak),
+        "facility_peak_error_kw": float(np.mean(daily_peak_errors)),
+        "facility_peak_timing_error_minutes": float(np.mean(daily_timing_errors)),
+        "facility_peak_metric_boundary": "mean signed daily peak magnitude error; mean absolute daily peak timing error",
         "pue_positive_load_threshold_kw": p05,
     }
 
