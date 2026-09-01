@@ -84,7 +84,7 @@ def decode_global_hourly(path: Path) -> tuple[pd.DataFrame, dict[str, Any], dict
                 "station_pressure_hpa": station,
                 "station_pressure_qc": station_qc,
                 "pressure_hpa": pressure_hpa,
-                "pressure_source": "MA1_STATION_PRESSURE" if np.isfinite(station) else "SLP_SEA_LEVEL",
+                "pressure_source": "MA1_STATION_PRESSURE" if np.isfinite(station) else ("SLP_SEA_LEVEL" if np.isfinite(slp) else "MISSING"),
                 "wind_direction_deg": direction,
                 "wind_direction_qc": direction_qc,
                 "wind_type": wind_type,
@@ -97,10 +97,14 @@ def decode_global_hourly(path: Path) -> tuple[pd.DataFrame, dict[str, Any], dict
         )
     decoded = pd.DataFrame.from_records(records)
     decoded["complete"] = decoded[["t_db_c", "t_dew_c", "pressure_hpa", "wind_speed_mps"]].notna().sum(axis=1)
+    decoded["hour"] = decoded["ts"].dt.floor("h")
+    decoded["minute_distance"] = (decoded["ts"] - decoded["hour"]).abs().dt.total_seconds()
+    decoded["station_available"] = decoded["station_pressure_hpa"].notna().astype(int)
     decoded = (
-        decoded.sort_values(["ts", "complete"], ascending=[True, False], kind="stable")
-        .drop_duplicates("ts", keep="first")
-        .drop(columns="complete")
+        decoded.sort_values(["hour", "minute_distance", "complete", "station_available"], ascending=[True, True, False, False], kind="stable")
+        .drop_duplicates("hour", keep="first")
+        .assign(ts=lambda x: x["hour"])
+        .drop(columns=["complete", "hour", "minute_distance", "station_available"])
         .sort_values("ts")
         .reset_index(drop=True)
     )
