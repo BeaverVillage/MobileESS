@@ -72,8 +72,11 @@ def main() -> None:
         kq = predict_quantiles(k_models, valid); dq = predict_quantiles(direct_models, valid)
         training_tensors = np.stack([tensors[date] for date in train.target_day])
         shape_by_fold[fold.fold_id] = empirical_shape(training_tensors)
+        static_total = train.H_K_pending_GPU_h + train.H_G_GPU_h + train.H_N_GPU_h
+        static_q10, static_q50, static_q90 = [float(static_total.quantile(q)) for q in (0.1, 0.5, 0.9)]
+        static_n_q10, static_n_q90 = [float(train.H_N_GPU_h.quantile(q)) for q in (0.1, 0.9)]
         for i, row in valid.reset_index(drop=True).iterrows():
-            predictions.append({"fold_id": fold.fold_id, "date": row.target_day, "K_Q10": kq[i,0], "K_Q50": kq[i,1], "K_Q90": kq[i,2], "DIRECT_Q10": dq[i,0], "DIRECT_Q50": dq[i,1], "DIRECT_Q90": dq[i,2]})
+            predictions.append({"fold_id": fold.fold_id, "date": row.target_day, "K_Q10": kq[i,0], "K_Q50": kq[i,1], "K_Q90": kq[i,2], "DIRECT_Q10": dq[i,0], "DIRECT_Q50": dq[i,1], "DIRECT_Q90": dq[i,2], "STATIC_Q10": static_q10, "STATIC_Q50": static_q50, "STATIC_Q90": static_q90, "STATIC_N_Q10": static_n_q10, "STATIC_N_Q90": static_n_q90})
     pred = pd.DataFrame(predictions).merge(b3, on="date").merge(gap[["date","G_Q50_GPU_h","G_Q90_GPU_h"]], on="date")
     pred["N_Q10"] = np.maximum(0, 2 * pred.Q50_GPU_h - pred.Q90_GPU_h); pred["G_Q10"] = np.maximum(0, 2 * pred.G_Q50_GPU_h - pred.G_Q90_GPU_h)
     records = []
@@ -81,8 +84,12 @@ def main() -> None:
     for row in pred.itertuples(index=False):
         reference = tensors[row.date]; ref_l, ref_u = cumulative_bounds(reference); shape = shape_by_fold[row.fold_id]
         cases = {
+            "BL0_STATIC_FLEXIBILITY_RATIO": (row.STATIC_Q50, row.STATIC_Q50),
             "BL1_LEGACY_B2_B3": (row.N_Q10, row.Q90_GPU_h),
+            "BL2_DIRECT_LIGHTGBM_ENVELOPE": (row.DIRECT_Q50, row.DIRECT_Q50),
             "BL3_DIRECT_QUANTILE_LIGHTGBM": (row.DIRECT_Q10, row.DIRECT_Q90),
+            "BL4_OBSERVABLE_STATE_POINT_RUNTIME": (row.K_Q50 + row.Q50_GPU_h, row.K_Q50 + row.Q50_GPU_h),
+            "BL5_SURVIVAL_ONLY_NO_INNOVATION_UPDATE": (row.K_Q10 + row.STATIC_N_Q10, row.K_Q90 + row.STATIC_N_Q90),
             "FULL_SAFE_FLEX_RAW": (row.K_Q10 + row.G_Q10 + row.N_Q10, row.K_Q90 + row.G_Q90_GPU_h + row.Q90_GPU_h),
         }
         for model, (q10, q90) in cases.items():
