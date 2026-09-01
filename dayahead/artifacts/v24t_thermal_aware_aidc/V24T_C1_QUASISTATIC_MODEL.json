@@ -1,0 +1,61 @@
+{
+  "artifact_id": "V24T_C1_QUASISTATIC_MODEL",
+  "coefficient_uncertainty": {
+    "block_count": 3157,
+    "method": "whole-UTC-day blocked bootstrap",
+    "p025": [
+      -22.070972125459047,
+      45.04602150505701,
+      0.0,
+      -1.042198674513317,
+      0.0,
+      2.6874765356061574,
+      -0.07259925830843375
+    ],
+    "p50": [
+      -16.805906111295414,
+      48.313553923901935,
+      0.0,
+      -0.8235554470740932,
+      0.0,
+      3.051150333904122,
+      -0.02453295466562551
+    ],
+    "p975": [
+      -11.936262440786546,
+      52.018698293760835,
+      0.0,
+      -0.6725410191177601,
+      0.0,
+      3.3732142476755596,
+      0.04898228941384738
+    ],
+    "repetitions": 30,
+    "seed": 2401
+  },
+  "coefficients": {
+    "intercept": -17.372999784868288,
+    "it_mw": 48.77693066779093,
+    "it_mw_squared": 0.0,
+    "it_mw_x_wetbulb_excess_c": 3.001325401872635,
+    "rh_pct": -0.012839873522151745,
+    "wetbulb_c": -0.8400812888810053,
+    "wetbulb_excess_c": 0.0
+  },
+  "constraints": {
+    "it_mw": ">=0",
+    "it_mw_squared": ">=0",
+    "it_mw_x_wetbulb_excess_c": ">=0",
+    "wetbulb_excess_c": ">=0"
+  },
+  "fit_rows": 3778759,
+  "melbourne_weather_fit_reads": 0,
+  "model": "C1_WEATHER_DEPENDENT_QUASISTATIC_PUE",
+  "other_model_coefficients": {
+    "intercept": 2.85515655000271,
+    "it_mw": 0.0
+  },
+  "output": "softplus(latent) kW",
+  "t_ref_c": 5.761505417457923,
+  "thermal_fit_data": "NLR only"
+}
