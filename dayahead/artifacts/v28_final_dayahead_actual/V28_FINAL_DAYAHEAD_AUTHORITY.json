@@ -1,0 +1,75 @@
+{
+  "artifact_id": "V28_FINAL_DAYAHEAD_AUTHORITY",
+  "implementation_authority": {
+    "artifact_id": "FINAL_DAYAHEAD_MODEL_V1",
+    "formulation": {
+      "B0_B2_identical_reference_schedule_required": true,
+      "artifact_id": "V28_DAYAHEAD_FORMULATION_BINDING_V1",
+      "authority_file": "dayahead/artifacts/v16_3_final/V16_3_FINAL_SCIENCE_EXECUTION_CONTRACT.json",
+      "authority_id": "V16_3_DA_AIDC_ICPS_AC_ANCHORED_FROZEN_D1_CONTROL",
+      "authority_sha256": "7147bb9a72fee9e0f2502537e0884d1b183f447c3c72639f3016811344fe06d6",
+      "cases": {
+        "B0": {
+          "MESS_flexibility": false,
+          "compute_flexibility": false
+        },
+        "B1": {
+          "MESS_flexibility": false,
+          "compute_flexibility": true
+        },
+        "B2": {
+          "MESS_flexibility": true,
+          "compute_flexibility": false
+        },
+        "B3": {
+          "MESS_flexibility": true,
+          "compute_flexibility": true
+        }
+      },
+      "event_trigger": false,
+      "input_binding_overrides": {
+        "forecast": "V28_LIGHTGBM",
+        "scale": "V22SR1_ABSOLUTE",
+        "thermal": "V24T_C1"
+      },
+      "local_repair": false,
+      "objective": "MINIMUM_MAXIMUM_NORMALIZED_PHASE_LINE_CURRENT_LOADING",
+      "resolution_minutes": 15,
+      "rolling_MPC": false,
+      "slots_per_day": 96
+    },
+    "opendss": {
+      "artifact_id": "V28_DAYAHEAD_OPENDSS_BINDING_V1",
+      "engine": "FRESH_OPENDSS_QSTS",
+      "feeder": "IEEE_123_NODE_THREE_PHASE",
+      "local_AC_repair": false,
+      "native_regulator_capacitor_semantics_common": true,
+      "nonconvergence_is_pipeline_failure": true,
+      "physical_violation_is_pipeline_failure": false,
+      "required_slots": 96
+    },
+    "solver": {
+      "CL_MC_BD_expansion_not_spelled_in_repository": true,
+      "CL_MC_BD_semantics": "ALL_CRITICAL_TIME_FULL_LP_MULTI_CUT",
+      "FeasibilityTol": 1e-06,
+      "MIPGap": 0.001,
+      "OptimalityTol": 1e-06,
+      "TimeLimit_seconds": 1800,
+      "artifact_id": "V28_DAYAHEAD_SOLVER_BINDING_V1",
+      "comparison_order": [
+        "CL_MC_BD",
+        "MONOLITHIC",
+        "STANDARD_SINGLE_CUT_BD"
+      ],
+      "equivalence_tolerance": 0.001,
+      "historical_executor_sha256": "b0ff5ab4faab683b1f78060a57399a979399f123fa833c689bd304682dadaa7a",
+      "primary_B3_solver": "CL_MC_BD",
+      "seed": 20260828,
+      "threads": 4,
+      "v28_monolithic_copy_sha256": "273380d4ec63084a4ead42dd109a68d4f3dc917f10a02d7f71ccf89bdaebaf8a",
+      "within_day_parallel": false
+    },
+    "status": "IMPLEMENTATION_READY"
+  },
+  "science_complete": false
+}

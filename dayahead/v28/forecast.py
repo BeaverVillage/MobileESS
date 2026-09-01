@@ -29,10 +29,10 @@ def validate_training_cutoff(target_day: str | date, latest_training_day: str | 
     target = target_day.isoformat() if isinstance(target_day, date) else str(target_day)
     latest = latest_training_day.isoformat() if isinstance(latest_training_day, date) else str(latest_training_day)
     allowed = APRIL_01_TRAINING_CUTOFF if target == "2025-04-01" else GENERAL_TRAINING_CUTOFF
-    if latest > allowed:
-        raise ValueError(f"V28_TRAINING_CUTOFF_VIOLATION:{target}:{latest}>{allowed}")
     if target.startswith(("2025-04", "2025-05")) and latest.startswith(("2025-04", "2025-05")):
         raise ValueError("V28_APRIL_MAY_TRAINING_ROW_FORBIDDEN")
+    if latest > allowed:
+        raise ValueError(f"V28_TRAINING_CUTOFF_VIOLATION:{target}:{latest}>{allowed}")
 
 
 def disaggregate_daily_mass(daily_mass_gpu_h: float, normalized_shape: Iterable[float]) -> np.ndarray:

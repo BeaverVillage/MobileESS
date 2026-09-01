@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "OpenDSS_settings": {
+      "type": "object"
+    },
+    "certificate_sha256": {
+      "type": "string"
+    },
+    "code_sha": {
+      "type": "string"
+    },
+    "config_sha": {
+      "type": "string"
+    },
+    "date": {
+      "format": "date",
+      "type": "string"
+    },
+    "defect_ids": {
+      "type": "array"
+    },
+    "git_head": {
+      "type": "string"
+    },
+    "logs": {
+      "type": "array"
+    },
+    "model_sha": {
+      "type": "string"
+    },
+    "previous_attempts": {
+      "type": "integer"
+    },
+    "result_sha": {
+      "type": "string"
+    },
+    "solver_settings": {
+      "type": "object"
+    },
+    "source_sha": {
+      "type": "string"
+    },
+    "status": {
+      "const": "PASS"
+    }
+  },
+  "required": [
+    "date",
+    "status",
+    "git_head",
+    "code_sha",
+    "config_sha",
+    "source_sha",
+    "model_sha",
+    "solver_settings",
+    "OpenDSS_settings",
+    "previous_attempts",
+    "defect_ids",
+    "logs",
+    "result_sha",
+    "certificate_sha256"
+  ],
+  "title": "V28 MAY day certificate",
+  "type": "object"
+}

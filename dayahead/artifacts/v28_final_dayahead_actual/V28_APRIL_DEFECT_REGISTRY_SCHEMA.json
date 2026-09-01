@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "defects": {
+      "items": {
+        "required": [
+          "defect_ID",
+          "first_failing_date",
+          "symptom",
+          "root_cause",
+          "affected_component",
+          "code_fix_commit",
+          "impacted_future_days",
+          "rerun_days",
+          "pass_days_retained",
+          "regression_tests",
+          "status"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "defects"
+  ],
+  "type": "object"
+}
