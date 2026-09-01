@@ -1,0 +1,36 @@
+{
+  "B0_B2_identical_reference_schedule_required": true,
+  "artifact_id": "V28_DAYAHEAD_FORMULATION_BINDING_V1",
+  "authority_file": "dayahead/artifacts/v16_3_final/V16_3_FINAL_SCIENCE_EXECUTION_CONTRACT.json",
+  "authority_id": "V16_3_DA_AIDC_ICPS_AC_ANCHORED_FROZEN_D1_CONTROL",
+  "authority_sha256": "7147bb9a72fee9e0f2502537e0884d1b183f447c3c72639f3016811344fe06d6",
+  "cases": {
+    "B0": {
+      "MESS_flexibility": false,
+      "compute_flexibility": false
+    },
+    "B1": {
+      "MESS_flexibility": false,
+      "compute_flexibility": true
+    },
+    "B2": {
+      "MESS_flexibility": true,
+      "compute_flexibility": false
+    },
+    "B3": {
+      "MESS_flexibility": true,
+      "compute_flexibility": true
+    }
+  },
+  "event_trigger": false,
+  "input_binding_overrides": {
+    "forecast": "V28_LIGHTGBM",
+    "scale": "V22SR1_ABSOLUTE",
+    "thermal": "V24T_C1"
+  },
+  "local_repair": false,
+  "objective": "MINIMUM_MAXIMUM_NORMALIZED_PHASE_LINE_CURRENT_LOADING",
+  "resolution_minutes": 15,
+  "rolling_MPC": false,
+  "slots_per_day": 96
+}
