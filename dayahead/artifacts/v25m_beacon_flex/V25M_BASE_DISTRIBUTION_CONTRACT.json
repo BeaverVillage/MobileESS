@@ -1,0 +1,69 @@
+{
+  "artifact_id": "V25M_BASE_DISTRIBUTION_CONTRACT_V1",
+  "quantile_grid": [
+    0.05,
+    0.1,
+    0.25,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    0.95
+  ],
+  "candidates": {
+    "BR-A": "MEAN_ANCHORED_SLSQP_MONOTONE_QUANTILE_PROJECTION",
+    "BR-B": "QUANTILE_PRESERVING_SLSQP_MONOTONE_PROJECTION"
+  },
+  "constraints": [
+    "Q>=0",
+    "Q_tau_non_decreasing",
+    "BR-A_integral_Q_equals_B2_mean"
+  ],
+  "simple_sorting_calls": 0,
+  "sampling": "DETERMINISTIC_UNIFORM_INVERSE_CDF",
+  "samples": 4096,
+  "selection": [
+    {
+      "fold_id": 1,
+      "candidate_inner_Q50_WAPE": {
+        "BR-A": 0.892982382594795,
+        "BR-B": 0.8567576873204493
+      },
+      "selected": "BR-B"
+    },
+    {
+      "fold_id": 2,
+      "candidate_inner_Q50_WAPE": {
+        "BR-A": 0.893963912280969,
+        "BR-B": 0.8440446285069797
+      },
+      "selected": "BR-B"
+    },
+    {
+      "fold_id": 3,
+      "candidate_inner_Q50_WAPE": {
+        "BR-A": 0.912648665154392,
+        "BR-B": 0.8497081018847422
+      },
+      "selected": "BR-B"
+    },
+    {
+      "fold_id": 4,
+      "candidate_inner_Q50_WAPE": {
+        "BR-A": 0.9665942733791444,
+        "BR-B": 0.972632014727871
+      },
+      "selected": "BR-A"
+    },
+    {
+      "fold_id": 5,
+      "candidate_inner_Q50_WAPE": {
+        "BR-A": 1.04065598060681,
+        "BR-B": 1.138705990436907
+      },
+      "selected": "BR-A"
+    }
+  ],
+  "April_reads": 0
+}
