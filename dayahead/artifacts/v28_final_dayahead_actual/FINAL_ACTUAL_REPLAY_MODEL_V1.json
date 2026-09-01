@@ -1,0 +1,52 @@
+{
+  "AIDC_decomposition": {
+    "artifact_id": "V28_AIDC_ACTUAL_DECOMPOSITION_CONTRACT_V1",
+    "extra_realized_workload": "EXPLICIT_BACKLOG_OR_FROZEN_NATURAL_RESIDUAL",
+    "hidden_shedding_GPU_h": 0,
+    "negative_residual_clipping": false,
+    "negative_residual_failure": "FAIL_AIDC_ACTUAL_DECOMPOSITION",
+    "replay_formula": "P_IT_REPLAY=P_IT_RES_ACT+P_FLEX_EXEC",
+    "residual_formula": "P_IT_RES_ACT=P_IT_ACT_NATURAL-P_FLEX_ACT_NATURAL",
+    "x_EXEC_lower": 0,
+    "x_EXEC_upper": "x_DA_and_actual_available"
+  },
+  "MESS_execution": {
+    "artifact_id": "V28_MESS_ACTUAL_EXECUTION_CONTRACT_V1",
+    "execute_later": false,
+    "optimizer_calls": 0,
+    "physically_unavailable": "P_EXEC=Q_EXEC=0_WITH_EXPLICIT_REASON",
+    "substitute_vehicle": false,
+    "travel_energy_or_SOC_infeasible": "COMMAND_NOT_EXECUTED"
+  },
+  "artifact_id": "FINAL_ACTUAL_REPLAY_MODEL_V1",
+  "execution_gate": {
+    "actual_reoptimization_calls": 0,
+    "artifact_id": "V28_ACTUAL_EXECUTION_GATE_CONTRACT_V1",
+    "command_time_shift_allowed": false,
+    "event_trigger_calls": 0,
+    "input": [
+      "FROZEN_DAY_AHEAD_SCHEDULE",
+      "REALIZED_D_DAY_INPUTS",
+      "PREDEFINED_EXECUTION_GATES"
+    ],
+    "local_repair_calls": 0,
+    "optimizer_imports": [],
+    "replacement_optimization_allowed": false,
+    "rolling_update_calls": 0,
+    "schedule_hash_verified_before_actual_namespace": true
+  },
+  "natural_reference": "R0_NATURAL_REALIZED_REFERENCE_NOT_AN_OPTIMIZATION_POLICY",
+  "opendss": {
+    "artifact_id": "V28_ACTUAL_OPENDSS_BINDING_V1",
+    "inputs": [
+      "realized_grid",
+      "realized_PV",
+      "C1_replayed_AIDC_PCC",
+      "executed_MESS_commands"
+    ],
+    "local_repair": false,
+    "native_controls_same_as_dayahead": true,
+    "slots": 96
+  },
+  "status": "IMPLEMENTATION_READY"
+}
