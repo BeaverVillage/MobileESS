@@ -1,0 +1,130 @@
+{
+  "answers": {
+    "1_how_often_source_backed_carryin_exists": {
+      "nonzero_day_fraction": 0.09210526315789469,
+      "threshold_fractions": {
+        "100": 0.08552631578947369,
+        "1000": 0.046052631578947366,
+        "250": 0.07894736842105263,
+        "500": 0.06359649122807018
+      },
+      "zero_day_fraction": 0.9078947368421053
+    },
+    "2_Apr3_Apr4_typical_or_unusual": {
+      "2025-04-03": {
+        "development_carryin_nodeh": 216.0,
+        "empirical_midrank_percent": 92.10526315789474,
+        "empirical_percentile_rank_inclusive_percent": 92.10526315789474,
+        "historical_day_count": 456,
+        "historical_days_strictly_greater": 36
+      },
+      "2025-04-04": {
+        "development_carryin_nodeh": 1020.0,
+        "empirical_midrank_percent": 95.39473684210526,
+        "empirical_percentile_rank_inclusive_percent": 95.39473684210526,
+        "historical_day_count": 456,
+        "historical_days_strictly_greater": 21
+      }
+    },
+    "3_wallclock_req_interpretation": "conservative upper-bound-like proxy at population level, not a calibrated point estimate",
+    "4_typical_requested_service_realized": {
+      "median_job_ratio": 0.04000000000000001,
+      "requested_weighted_realization_fraction": 0.19798460364284093
+    },
+    "5_ratio_dependence": {
+      "QoS": {
+        "eligible_group_count": 3,
+        "maximum_group": "high",
+        "maximum_median_R": 0.4414351851851852,
+        "median_R_range": 0.4014351851851852,
+        "minimum_group": "normal",
+        "minimum_median_R": 0.04000000000000001
+      },
+      "cutoff_observable_queue_age": {
+        "eligible_group_count": 4,
+        "maximum_group": "Q03_6_TO_24H",
+        "maximum_median_R": 0.08455439814814815,
+        "median_R_range": 0.04677662037037037,
+        "minimum_group": "Q00_NOT_IN_D1_QUEUE",
+        "minimum_median_R": 0.03777777777777778
+      },
+      "direct_answer": "Requested wallclock and QoS show strong descriptive separation; node class and cutoff-observable queue age show smaller separation. These are associations, not causal effects.",
+      "node_class": {
+        "eligible_group_count": 5,
+        "maximum_group": "8",
+        "maximum_median_R": 0.06333333333333334,
+        "median_R_range": 0.03703703703703705,
+        "minimum_group": "2",
+        "minimum_median_R": 0.026296296296296293
+      },
+      "note": "Ranges are descriptive among groups with at least 20 rows; no causal effect is claimed.",
+      "requested_wallclock": {
+        "eligible_group_count": 5,
+        "maximum_group": "W03_12_TO_24H",
+        "maximum_median_R": 0.14538194444444444,
+        "median_R_range": 0.13538194444444443,
+        "minimum_group": "W01_1_TO_4H",
+        "minimum_median_R": 0.01
+      }
+    },
+    "6_lower_bound_calibrated_mass_justified": {
+      "P25_median_fold_prediction_over_realized": 0.10108096547733028,
+      "P25_rolling_row_weighted_lower_bound_coverage": 0.7635571941645742,
+      "answer": "Yes as a separately validated uncertainty/lower-bound estimator; no as an immediately selectable production replacement. The fixed P25 candidate attains empirical lower-bound coverage but materially underpredicts aggregate realized mass.",
+      "boundary": "No production quantile, multiplier, clipping, or eligibility change is selected.",
+      "rolling_origin_candidates": {
+        "FIXED_SIMPLE_LIGHTGBM_Q50_RATIO": {
+          "fold_count": 13,
+          "median_fold_overstatement_ratio": 0.3158700313872505,
+          "row_weighted_mean_MAE_nodeh": 0.7291844372695926,
+          "row_weighted_mean_fraction_realized_ge_prediction": 0.4475129517210692
+        },
+        "HISTORICAL_MEDIAN_REALIZATION_FRACTION": {
+          "fold_count": 13,
+          "median_fold_overstatement_ratio": 0.17275865085708564,
+          "row_weighted_mean_MAE_nodeh": 0.7165805833733567,
+          "row_weighted_mean_fraction_realized_ge_prediction": 0.6596446619839176
+        },
+        "HISTORICAL_P25_REALIZATION_FRACTION": {
+          "fold_count": 13,
+          "median_fold_overstatement_ratio": 0.10108096547733028,
+          "row_weighted_mean_MAE_nodeh": 0.7216628807105706,
+          "row_weighted_mean_fraction_realized_ge_prediction": 0.7635571941645742
+        },
+        "RAW_WALLCLOCK_REQ": {
+          "fold_count": 13,
+          "median_fold_overstatement_ratio": 5.265884907159936,
+          "row_weighted_mean_MAE_nodeh": 3.24965127204088,
+          "row_weighted_mean_fraction_realized_ge_prediction": 0.020903918888853575
+        }
+      }
+    },
+    "7_material_grid_value_under_rho_0_10": {
+      "answer": "NOT_IDENTIFIABLE",
+      "material_day_fraction": null,
+      "reason": "Frozen D1 feeder critical-line/phase/time authority begins in April 2025; extrapolating it to 2024-01-01 through 2025-03-31 would manufacture topology evidence."
+    },
+    "8_population_level_low_AIDC_contribution_cause": {
+      "answer": "Rare workload is the demonstrable population-level gate because carry-in is zero on most days. Conditional on nonzero carry-in, topology and trust attribution are not identifiable here, so the residual mechanism may be mixed but cannot be apportioned.",
+      "measured_nonzero_carryin_fraction": 0.09210526315789469
+    },
+    "9_must_remain_unchanged": [
+      "rho",
+      "nodes_req * wallclock_req production service-mass authority",
+      "strict full-node request-time eligibility and PARTIAL/shared exclusion",
+      "PRE_DAY_QUEUE_BRIDGE_V1",
+      "queue clipping policy",
+      "objective and site mapping",
+      "all production quantiles, multipliers, and campaign formulation parameters"
+    ]
+  },
+  "artifact_id": "V29_PREAPRIL_CENSUS_FINAL_REVIEW_V1",
+  "full_OpenDSS_10x96_runs": 0,
+  "limitations": [
+    "Daily realized queued service is explicitly ex-post and is never a day-ahead feature.",
+    "Calibration excludes every label unavailable by its fit or rolling-fold cutoff.",
+    "No frozen historical D1 electrical critical-row authority exists inside the study window."
+  ],
+  "production_mutations": 0,
+  "status": "PASS_READ_ONLY_CENSUS_WITH_GRID_VALUE_NOT_IDENTIFIABLE"
+}
