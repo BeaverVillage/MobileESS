@@ -1,0 +1,34 @@
+{
+  "C1_AFFINE_CONSERVATISM_READY": true,
+  "C1_AFFINE_ERROR_READY": true,
+  "C1_SURROGATE_LP_COMPATIBLE": true,
+  "C1_refit_calls": 0,
+  "C1_retune_calls": 0,
+  "C2_import_count": 0,
+  "PUE_PLAN_import_count": 0,
+  "SOS2_count": 0,
+  "artifact_id": "V28R2_C1_AFFINE_CONTRACT_V1",
+  "beta_AIDC_count": 0,
+  "binary_variable_count": 0,
+  "coefficient_count": 1152,
+  "coefficient_sha256": "0c26ea8a25faf2c6293cdc0431001c11b53732edd9593cd2d44238652523b831",
+  "epigraph_inequality_count": 0,
+  "exact_model": "V24T_C1_QUASISTATIC_MODEL",
+  "exact_model_sha256": "02a19e6c2d8cb44ec6b90ff1a4c98f21d5e848cda2dc34f2aaf2f959f9e6579e",
+  "exact_physical_evaluation": {
+    "actual": "C1+NOAA",
+    "dayahead": "C1+GFS",
+    "perfect_information": "C1+NOAA"
+  },
+  "nlr_equivalent_scale": 3.4987194698200215,
+  "normalization_factor": 5.987971384940258,
+  "planning_relation": "P_PCC_PLAN[i,t] = a[i,t] * P_IT[i,t] + b[i,t]",
+  "reactive_power": {
+    "Q_zero": false,
+    "formula": "Q=P*tan(acos(0.95))",
+    "power_factor": 0.95
+  },
+  "representation": "single continuous affine equality per site and slot",
+  "status": "PASS",
+  "surrogate": "endpoint secant over source/capacity-derived feasible IT interval"
+}

@@ -113,6 +113,8 @@ def build_reference_schedule(
     cohort_ids: Sequence[str],
     rack_ids: Sequence[str],
     rack_capacity_nodeh_per_slot: Sequence[float],
+    rack_power_envelope_kw: np.ndarray | None = None,
+    rack_gpu_envelope_gpu: np.ndarray | None = None,
 ) -> ReferenceSchedule:
     cohorts = tuple(cohort_ids)
     racks = tuple(rack_ids)
@@ -126,21 +128,33 @@ def build_reference_schedule(
         raise ValueError("V28R2_REFERENCE_REQUIRES_96_NONNEGATIVE_COHORT_ARRIVALS")
     if capacities.shape != (len(racks),) or np.any(capacities <= 0):
         raise ValueError("V28R2_REFERENCE_RACK_CAPACITY")
+    p_envelope = np.full((len(racks), 96), np.inf) if rack_power_envelope_kw is None else np.asarray(rack_power_envelope_kw, dtype=float)
+    g_envelope = np.full((len(racks), 96), np.inf) if rack_gpu_envelope_gpu is None else np.asarray(rack_gpu_envelope_gpu, dtype=float)
+    if p_envelope.shape != (len(racks), 96) or g_envelope.shape != (len(racks), 96):
+        raise ValueError("V28R2_REFERENCE_ENVELOPE_SHAPE")
+    if np.any(p_envelope < 0) or np.any(g_envelope < 0) or np.any(np.isnan(p_envelope)) or np.any(np.isnan(g_envelope)):
+        raise ValueError("V28R2_REFERENCE_ENVELOPE_INVALID")
 
     allocation = np.zeros((len(cohorts), len(racks), 96), dtype=float)
     backlog = np.zeros((97, len(cohorts)), dtype=float)
     for slot in range(96):
         backlog[slot + 1] = backlog[slot] + arrivals[slot]
         remaining = capacities.copy()
+        remaining_p = p_envelope[:, slot].copy()
+        remaining_g = g_envelope[:, slot].copy()
         for cohort_index in range(len(cohorts)):
-            total_remaining = float(remaining.sum())
+            nodes = cohort_node_class(cohorts[cohort_index])
+            kappa = KAPPA_KW_PER_ACTIVE_H100_NODE[nodes]
+            feasible = np.minimum(remaining, remaining_g * DT_HOURS / 4.0)
+            feasible = np.minimum(feasible, remaining_p * DT_HOURS / kappa)
+            total_remaining = float(feasible.sum())
             total_served = min(float(backlog[slot + 1, cohort_index]), total_remaining)
             if total_served <= 0 or total_remaining <= 0:
                 continue
             # The frozen rack authority is explicitly a capacity-proportional
             # utilization invariant.  Cohorts retain lexical priority while
             # fluid service is spread in proportion to remaining rack capacity.
-            served = total_served * remaining / total_remaining
+            served = total_served * feasible / total_remaining
             # Close floating arithmetic in deterministic AIDC/rack order only.
             arithmetic_residual = total_served - float(served.sum())
             if arithmetic_residual:
@@ -148,7 +162,11 @@ def build_reference_schedule(
             allocation[cohort_index, :, slot] = served
             backlog[slot + 1, cohort_index] -= total_served
             remaining -= served
+            remaining_g -= served / DT_HOURS * 4.0
+            remaining_p -= served / DT_HOURS * kappa
             remaining[np.abs(remaining) <= 1e-14] = 0.0
+            remaining_g[np.abs(remaining_g) <= 1e-12] = 0.0
+            remaining_p[np.abs(remaining_p) <= 1e-12] = 0.0
             if backlog[slot + 1, cohort_index] <= 1e-12:
                 backlog[slot + 1, cohort_index] = 0.0
 

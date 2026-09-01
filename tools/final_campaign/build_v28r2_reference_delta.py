@@ -33,14 +33,16 @@ def write_json(name: str, payload: object) -> None:
     os.replace(temporary, path)
 
 
-def april_first_predictions(labels):
-    future_index = pd.date_range("2025-04-01", periods=96, freq="15min", tz=labels.timestamps.tz)
+def causal_predictions(labels, target_date: str):
+    target = pd.Timestamp(target_date, tz=labels.timestamps.tz)
+    future_index = pd.date_range(labels.timestamps[-1] + pd.Timedelta(minutes=15), target + pd.Timedelta(days=1), freq="15min", inclusive="left")
     extended_index = labels.timestamps.append(future_index)
-    variant = "APRIL_01_CAUSAL_FIT"
-    p_values = np.concatenate([labels.p_it_kw, np.full(96, np.nan)])
-    g_values = np.concatenate([labels.g_h100_gpu, np.full(96, np.nan)])
-    p_x = slot_features(p_values, extended_index).loc[future_index]
-    g_x = slot_features(g_values, extended_index).loc[future_index]
+    variant = "APRIL_01_CAUSAL_FIT" if target_date == "2025-04-01" else "GENERAL_THROUGH_MARCH_31_FIT"
+    p_values = np.concatenate([labels.p_it_kw, np.full(len(future_index), np.nan)])
+    g_values = np.concatenate([labels.g_h100_gpu, np.full(len(future_index), np.nan)])
+    target_index = pd.date_range(target, periods=96, freq="15min")
+    p_x = slot_features(p_values, extended_index).loc[target_index]
+    g_x = slot_features(g_values, extended_index).loc[target_index]
     if not np.isfinite(p_x).all().all() or not np.isfinite(g_x).all().all():
         raise RuntimeError("V28R2_APRIL1_CAUSAL_FEATURE_MISSING")
     p_quantiles = predict_serialized_quantiles(MODELS, "P_REF", variant, p_x)
@@ -48,7 +50,8 @@ def april_first_predictions(labels):
 
     daily_index = pd.date_range(labels.timestamps[0].normalize(), labels.timestamps[-1].normalize(), freq="D", tz=labels.timestamps.tz)
     daily_w = pd.Series(labels.w_nodeh.reshape(-1, 96, len(labels.cohort_ids)).sum(axis=(1, 2)), index=daily_index)
-    extended_daily = pd.concat([daily_w, pd.Series([np.nan], index=pd.DatetimeIndex([future_index[0].normalize()]))])
+    future_days = pd.date_range(daily_index[-1] + pd.Timedelta(days=1), target, freq="D")
+    extended_daily = pd.concat([daily_w, pd.Series(np.nan, index=future_days)])
     w_x = daily_features(extended_daily).iloc[[-1]]
     if not np.isfinite(w_x).all().all():
         raise RuntimeError("V28R2_APRIL1_W_CAUSAL_FEATURE_MISSING")
@@ -58,7 +61,7 @@ def april_first_predictions(labels):
 
 def main() -> None:
     labels = load_optimizer_labels(REPO)
-    p_quantiles, g_quantiles, w_quantiles = april_first_predictions(labels)
+    p_quantiles, g_quantiles, w_quantiles = causal_predictions(labels, "2025-04-01")
     p_authority = json.loads((OUT / "V28R2_FINAL_P_REF_LIGHTGBM_AUTHORITY.json").read_text(encoding="utf-8"))
     alpha_it = float(p_authority["scale_binding"]["alpha_IT"])
     p_q90 = p_quantiles[2] * alpha_it
@@ -73,9 +76,13 @@ def main() -> None:
     power_weights = dict(zip(rack_ids, map(float, rack_payload["power_weights"]), strict=True))
     gpu_weights = dict(zip(rack_ids, map(float, rack_payload["gpu_weights"]), strict=True))
     capacities = case_rack_capacity_nodeh_per_slot(rack_ids, gpu_weights)
+    mapped_p_envelope = np.asarray(rack_payload["power_weights"], dtype=float)[:, None] * p_q90
+    mapped_g_envelope = np.asarray(rack_payload["gpu_weights"], dtype=float)[:, None] * g_q90
     schedule = build_reference_schedule(
         arrivals, cohort_ids=labels.cohort_ids, rack_ids=rack_ids,
         rack_capacity_nodeh_per_slot=capacities,
+        rack_power_envelope_kw=mapped_p_envelope,
+        rack_gpu_envelope_gpu=mapped_g_envelope,
     )
 
     failure = None
@@ -105,8 +112,8 @@ def main() -> None:
         "rack_mapping_sha256": sha256_file(rack_source),
         "REFERENCE_DELTA_CLOSURE_READY": ready,
     })
-    mapped_p = np.asarray(rack_payload["power_weights"], dtype=float)[:, None] * p_q90
-    mapped_g = np.asarray(rack_payload["gpu_weights"], dtype=float)[:, None] * g_q90
+    mapped_p = mapped_p_envelope
+    mapped_g = mapped_g_envelope
     raw_p = mapped_p - schedule.p_f_ref_kw
     raw_g = mapped_g - schedule.g_f_ref_gpu
     write_json("V28R2_REFERENCE_DELTA_CLOSURE_AUDIT.json", {

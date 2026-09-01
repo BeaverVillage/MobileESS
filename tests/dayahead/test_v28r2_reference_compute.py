@@ -41,4 +41,21 @@ def test_reference_builder_has_no_actual_grid_or_mess_inputs():
     import inspect
 
     parameters = set(inspect.signature(build_reference_schedule).parameters)
-    assert parameters == {"arrivals_nodeh", "cohort_ids", "rack_ids", "rack_capacity_nodeh_per_slot"}
+    assert parameters == {
+        "arrivals_nodeh", "cohort_ids", "rack_ids", "rack_capacity_nodeh_per_slot",
+        "rack_power_envelope_kw", "rack_gpu_envelope_gpu",
+    }
+    assert parameters.isdisjoint({"actual", "grid", "mess", "voltage"})
+
+
+def test_reference_envelopes_defer_mass_to_backlog_without_deletion():
+    arrivals = np.zeros((96, len(COHORT_IDS)))
+    arrivals[0, 0] = 10.0
+    result = build_reference_schedule(
+        arrivals, cohort_ids=COHORT_IDS, rack_ids=("R",),
+        rack_capacity_nodeh_per_slot=np.asarray([100.0]),
+        rack_power_envelope_kw=np.zeros((1, 96)),
+        rack_gpu_envelope_gpu=np.zeros((1, 96)),
+    )
+    assert result.x_ref_nodeh.sum() == 0
+    assert result.backlog_nodeh[-1].sum() == 10.0

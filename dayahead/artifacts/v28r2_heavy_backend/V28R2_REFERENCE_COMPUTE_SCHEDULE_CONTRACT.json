@@ -4,9 +4,12 @@
   "authority_id": "REFERENCE_COMPUTE_SCHEDULE_V2",
   "capacity_authority_sha256": "7ff19aa8c9c12febf081b04e15e30956cf5a2ead770b6dda77fe71e877d7ad77",
   "case_capacity_GPU": 528.0,
+  "feasibility_rule": "per rack/cohort/slot service <= min(physical nodeh capacity, mapped G_REF envelope, mapped P_REF envelope at frozen kappa); unserved W remains in B_REF",
   "initial_backlog_nodeh": 0,
   "inputs": [
     "forecast_cohort_Q50_arrivals",
+    "P_REF_Q90_reference_envelope",
+    "G_REF_Q90_reference_envelope",
     "frozen_rack_axis",
     "frozen_rack_GPU_weights",
     "528_GPU_capacity_authority"
