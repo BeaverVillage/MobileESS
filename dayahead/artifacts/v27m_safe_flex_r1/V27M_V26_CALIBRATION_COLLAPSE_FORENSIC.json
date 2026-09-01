@@ -1,0 +1,70 @@
+{
+  "artifact_id": "V27M_V26_CALIBRATION_COLLAPSE_FORENSIC_V1",
+  "source_artifacts_modified": false,
+  "legacy_target_shape": [
+    96,
+    6,
+    5,
+    2
+  ],
+  "legacy_boundary_dimension": 5760,
+  "legacy_per_side_dimension": 2880,
+  "structurally_zero_reference_cells": 179,
+  "sparse_reference_cells_at_most_5pct_support": 1072,
+  "total_per_side_cells": 2880,
+  "reference_zero_fraction": 0.7971831309786608,
+  "model_collapse": {
+    "BL0_STATIC_FLEXIBILITY_RATIO": {
+      "trajectory_Q90": 0.7688569209279927,
+      "scalar_reference_scale_GPU_h": 9657.437222222257,
+      "per_cell_per_side_shift_GPU_h": 7425.187446733192,
+      "evaluation_nonempty_rate": 0.0,
+      "maximum_collapse_margin_GPU_h": 14850.374893466384,
+      "first_collapse": {
+        "date": "2024-12-01",
+        "slot": 0,
+        "tier": 0,
+        "latency": 1,
+        "precalibration_width": 0.0,
+        "per_side_shift": 7425.187446733192,
+        "collapse_margin": 14850.374893466384
+      }
+    },
+    "BL2_DIRECT_LIGHTGBM_ENVELOPE": {
+      "trajectory_Q90": 0.6811886523074345,
+      "scalar_reference_scale_GPU_h": 9657.437222222257,
+      "per_cell_per_side_shift_GPU_h": 6578.536646149234,
+      "evaluation_nonempty_rate": 0.0,
+      "maximum_collapse_margin_GPU_h": 13157.073292298468,
+      "first_collapse": {
+        "date": "2024-12-01",
+        "slot": 0,
+        "tier": 0,
+        "latency": 1,
+        "precalibration_width": 0.0,
+        "per_side_shift": 6578.536646149234,
+        "collapse_margin": 13157.073292298468
+      }
+    },
+    "BL3_DIRECT_QUANTILE_LIGHTGBM": {
+      "trajectory_Q90": 0.6381882457253817,
+      "scalar_reference_scale_GPU_h": 9657.437222222257,
+      "per_cell_per_side_shift_GPU_h": 6163.262919053025,
+      "evaluation_nonempty_rate": 0.0,
+      "maximum_collapse_margin_GPU_h": 15480.519074837568,
+      "first_collapse": {
+        "date": "2024-12-01",
+        "slot": 95,
+        "tier": 5,
+        "latency": 4,
+        "precalibration_width": -1021.8139781915739,
+        "per_side_shift": 6163.262919053025,
+        "collapse_margin": 13348.339816297625
+      }
+    }
+  },
+  "lower_upper_first_occurrence_dimension_recorded": true,
+  "classification": "HIGH_DIMENSIONAL_SUPPORT_MISMATCH",
+  "cause": "A single trajectory maximum and scalar daily-mass normalization imposes the same positive shift on every tier/latency cell, including structural-zero cells. Two-sided tightening therefore exceeds local width immediately and makes L_safe > U_safe.",
+  "R1_action": "REMOVE_2880_DIMENSIONAL_CALIBRATION_AND_CALIBRATE_96_SLOT_AGGREGATE_ONLY"
+}
