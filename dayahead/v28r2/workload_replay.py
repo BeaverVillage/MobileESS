@@ -193,6 +193,7 @@ class WorkloadReplay:
 def replay_workload(
     da_service_nodeh: np.ndarray, actual_arrivals_nodeh: np.ndarray,
     authorized_capacity_nodeh: np.ndarray,
+    initial_backlog_nodeh: np.ndarray | None = None,
 ) -> WorkloadReplay:
     da = np.asarray(da_service_nodeh, dtype=float)
     arrivals = np.asarray(actual_arrivals_nodeh, dtype=float)
@@ -202,6 +203,10 @@ def replay_workload(
     if np.any(da < 0) or np.any(arrivals < 0) or np.any(capacity < 0):
         raise ValueError("V28R2_WORKLOAD_REPLAY_NEGATIVE_INPUT")
     executed = np.zeros_like(da); backlog = np.zeros((97, 15), dtype=float)
+    initial = np.zeros(15, dtype=float) if initial_backlog_nodeh is None else np.asarray(initial_backlog_nodeh, dtype=float)
+    if initial.shape != (15,) or np.any(initial < 0) or not np.isfinite(initial).all():
+        raise ValueError("V29_ACTUAL_INITIAL_BACKLOG_AXIS_OR_VALUE")
+    backlog[0] = initial
     for slot in range(96):
         backlog[slot + 1] = backlog[slot] + arrivals[slot]
         remaining = capacity[slot].copy()
@@ -212,7 +217,7 @@ def replay_workload(
                 backlog[slot + 1, cohort] -= amount
                 remaining[rack] -= amount
     unexecuted = da - executed
-    mass_error = float(arrivals.sum() - executed.sum() - backlog[-1].sum())
+    mass_error = float(initial.sum() + arrivals.sum() - executed.sum() - backlog[-1].sum())
     result = WorkloadReplay(
         executed, backlog, unexecuted,
         float(max(0.0, np.max(executed - da))), mass_error,

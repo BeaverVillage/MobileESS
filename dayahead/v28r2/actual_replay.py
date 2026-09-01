@@ -171,6 +171,7 @@ def _residuals(
 def replay_actual_case(
     repo: Path, day: str, schedule_payload: Mapping[str, object],
     actual: ActualWorkload, mobility_records: Sequence[Mapping[str, object]],
+    initial_backlog_nodeh: np.ndarray | None = None,
 ) -> ActualReplay:
     """Execute one B0-B3 schedule at its original slots without optimization."""
 
@@ -182,7 +183,7 @@ def replay_actual_case(
     da = np.asarray(schedule_payload["workload_service_tensor"], dtype=float)
     rack_gpu_capacity = CASE_CAPACITY_GPU * gpu_weights
     capacity_nodeh = np.maximum(0.0, (rack_gpu_capacity[None, :] - g_res) * .25 / 4.0)
-    workload = replay_workload(da, actual.arrivals_nodeh, capacity_nodeh)
+    workload = replay_workload(da, actual.arrivals_nodeh, capacity_nodeh, initial_backlog_nodeh)
     kappa = np.asarray([
         KAPPA_KW_PER_ACTIVE_H100_NODE[int(cohort[1:3])]
         for cohort in COHORT_IDS

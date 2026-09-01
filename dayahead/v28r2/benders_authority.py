@@ -26,7 +26,7 @@ class V28R2GridSubproblem(ExactGridSubproblem):
 def solve_benders(
     *, data, context: object, voltage: object, current: object, method: str,
     raw_dir: Path | None = None, max_iterations: int = 200,
-    time_limit: float = 1800.0,
+    time_limit: float = 1800.0, tolerance: float = TOLERANCE,
 ) -> SolverPayload:
     from gurobipy import GRB
 
@@ -80,14 +80,14 @@ def solve_benders(
             max(0.0, (upper - lower) / max(abs(upper), 1e-6))
             if math.isfinite(upper) and math.isfinite(lower) else math.inf
         )
-        if gap <= TOLERANCE:
+        if gap <= tolerance:
             break
     runtime = time.perf_counter() - started
     gap = (
         max(0.0, (upper - lower) / max(abs(upper), 1e-6))
         if math.isfinite(upper) and math.isfinite(lower) else math.inf
     )
-    if gap > TOLERANCE or not math.isfinite(upper):
+    if gap > tolerance or not math.isfinite(upper):
         raise RuntimeError(f"V28R2_{method}_NOT_CERTIFIED:{gap}")
     return payload_from_registry(
         registry, solver=method, status="OPTIMAL_CERTIFIED", hard_feasible=True,
