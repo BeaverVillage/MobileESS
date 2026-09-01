@@ -1,0 +1,108 @@
+{
+  "artifact_id": "V24M_MODEL_SELECTION_PRE_APRIL_FREEZE_V1",
+  "created_utc": "2026-09-01T04:19:05.197544+00:00",
+  "git_head_before_freeze": "32211d0f3c86dfaf351b2036ddb25ea185a8435d",
+  "April_target_reads_before_freeze": 0,
+  "no_April_read_certificate": true,
+  "novelty_result": "PARTIAL_OVERLAP_DISTINCT_COMBINATION",
+  "factor_identity_result": "PASS_MAX_ERROR_LE_1E-9_GPU_h",
+  "predictability_result": "FACTOR_SIGNAL_PRESENT_PRIMARY_BOTTLENECK_BURST_OCCURRENCE",
+  "selected_input_path": "7_DAY_168_HOUR_8_CAUSAL_CHANNEL_TIME_AUGMENTED",
+  "experimental_FASER_config": {
+    "artifact_id": "V24M_SELECTED_FASER_CONFIG_V1",
+    "status": "EXPERIMENTAL_REJECTED_NOT_PRODUCTION",
+    "selection_rule": "MODAL_OUTER_FOLD_INNER_VALIDATION_SELECTION",
+    "config": "F2",
+    "signature": "SIG-B",
+    "signature_depth": 3,
+    "kernel": "K1_FIXED_MATERN_PLUS_SIGNATURE_FEATURE_MAP",
+    "joint_dependence": "J2_OOF_GAUSSIAN_RESIDUAL_COPULA",
+    "retrieval": "RET-B_K20_TEMP0.5",
+    "tau_shape": 10,
+    "gate": "MONOTONIC_INNER_CRPS_WITH_BEST_COMPONENT_FALLBACK",
+    "calibration": "TRAINING_ONLY_ADDITIVE_QUANTILE_RESIDUAL",
+    "seeds": [
+      20260901,
+      20260902,
+      20260903
+    ],
+    "predictive_samples": 4096
+  },
+  "experimental_FASER_config_sha256": "7323de64a30d603620d9656d728a9edf744167225d68d205562b72f480150014",
+  "acceptance_result": {
+    "artifact_id": "V24M_FASER_ACCEPTANCE_TEST_V1",
+    "classification": "V24M_FASER_NOVELTY_PASS_PERFORMANCE_FAIL",
+    "FASER_PROPOSED_MODEL_ACCEPTED": false,
+    "aggregate_metrics_mean_of_folds_and_seeds": {
+      "model": "ML-B11_FASER_FLEX",
+      "Mean_WAPE": 1.1877478294617465,
+      "Q50_WAPE": 0.9414334518461079,
+      "Q90_pinball": 1841.7091218161709,
+      "CRPS": 2454.95935288857,
+      "Burst_WAPE": 0.763990358554532,
+      "aggregate_mass_ratio": 1.1200518371982742,
+      "Q50_coverage": 0.4992012288786482,
+      "Q90_coverage": 0.8088428059395801,
+      "15min_GPU_h_WAPE": 2.0775536216208503,
+      "IT_power_WAPE": 1.8881341588356073,
+      "status": "REPRODUCED_V24M_5FOLD_3SEED",
+      "evidence_source": "V24M_FASER_BLOCKED_CV_RESULTS.csv"
+    },
+    "acceptance_gates": {
+      "novelty": true,
+      "mean_absolute": false,
+      "mean_vs_current_P0_5pct": false,
+      "Q50_absolute": false,
+      "Q50_vs_current_P0_5pct": false,
+      "CRPS_vs_best_probe_5pct": false,
+      "burst_noninferiority": true,
+      "mass_ratio": true,
+      "Q50_coverage": true,
+      "Q90_coverage": false,
+      "bootstrap_absolute_error": false,
+      "bootstrap_CRPS": false,
+      "structural": true
+    },
+    "bootstrap": {
+      "label": "SEVEN_DAY_BLOCK_BOOTSTRAP_VS_CURRENT_P0_DIRECT_LIGHTGBM",
+      "replicates": 10000,
+      "seed": 20260901,
+      "paired_days": 151,
+      "absolute_error_difference_FASER_minus_baseline": {
+        "point": 382.83947445205763,
+        "CI95": [
+          -54.971146512689586,
+          886.5573699049606
+        ]
+      },
+      "CRPS_difference_FASER_minus_baseline": {
+        "point": -108.88989298951772,
+        "CI95": [
+          -281.5581498440789,
+          38.78520376497773
+        ]
+      },
+      "strong_pass_requires_upper_bounds_below_zero": false
+    },
+    "best_accepted_production_mean": "B2_LIGHTGBM_TWEEDIE",
+    "best_accepted_production_Q50": "B3_LIGHTGBM_QUANTILE",
+    "best_accepted_production_Q90": "B3_LIGHTGBM_QUANTILE",
+    "reason": "FASER failed the preregistered mean, Q50, distributional, Q90-calibration, and bootstrap gates; no post-result retuning was performed.",
+    "April_reads": 0
+  },
+  "selected_production_authorities": {
+    "conditional_mean": "B2_LIGHTGBM_TWEEDIE_FROZEN_TRAINING_ONLY",
+    "Q50": "B3_LIGHTGBM_QUANTILE_FROZEN_TRAINING_ONLY",
+    "Q90": "B3_LIGHTGBM_QUANTILE_FROZEN_TRAINING_ONLY",
+    "reason": "FASER failed preregistered performance gates"
+  },
+  "model_hashes": {
+    "production_model_lineage": "b5933ff2a7719fa41033a62589d2dd0422bd262c75568ffb697a6cec37432d38",
+    "experimental_config": "7323de64a30d603620d9656d728a9edf744167225d68d205562b72f480150014"
+  },
+  "data_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+  "code_tree_sha256": "2e3a4f7e8035b164c7791257d57ee47d401236bd97726799989fe0d87e73ef47",
+  "result_based_retuning": 0,
+  "locked_test_created": false,
+  "grid_science_authorized": false
+}

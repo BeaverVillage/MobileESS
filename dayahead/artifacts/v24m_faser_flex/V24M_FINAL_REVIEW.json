@@ -1,0 +1,1156 @@
+{
+  "artifact_id": "V24M_FINAL_REVIEW_V1",
+  "RESULT_CLASSIFICATION": "V24M_FASER_NOVELTY_PASS_PERFORMANCE_FAIL",
+  "ready_flags": {
+    "NOVELTY_GATE_PASS": true,
+    "FACTOR_IDENTITY_READY": true,
+    "FACTOR_PREDICTABILITY_READY": true,
+    "SIGNATURE_SIGNAL_READY": true,
+    "RETRIEVAL_SIGNAL_READY": true,
+    "FASER_MODEL_DEVELOPMENT_READY": true,
+    "FASER_PROPOSED_MODEL_ACCEPTED": false,
+    "CONDITIONAL_MEAN_AUTHORITY_READY": true,
+    "QUANTILE_AUTHORITY_READY": true,
+    "FORECAST_BUNDLE_V3_READY": true,
+    "QUEUE_DIAGNOSTIC_READY": true,
+    "POWER_DIAGNOSTIC_READY": true,
+    "SCALE_DEPENDENT_DIAGNOSTIC_READY": true,
+    "NEW_LOCKED_TEST_READY": false,
+    "PUBLISHABLE_LOCKED_GENERALIZATION_READY": false,
+    "NEW_GRID_SCIENCE_RUN_READY": false,
+    "FINAL_GRID_SCIENCE_AUTHORIZED": false
+  },
+  "prior_result_integrity": {
+    "V23M_gate_audit": "METRIC_OR_CALIBRATION_DEFECT_FOUND",
+    "historical_V23M_preserved": true
+  },
+  "novelty": {
+    "classification": "PARTIAL_OVERLAP_DISTINCT_COMBINATION",
+    "WORLD_FIRST": "NOT_YET",
+    "near_duplicate": false
+  },
+  "factorization": {
+    "artifact_id": "V24M_FACTORIZED_TARGET_CONTRACT_V1",
+    "forecast_cutoff": "D-1 18:00 AEST",
+    "target_horizon": "D-day 00:00 through D-day 24:00 AEST",
+    "scope": "FORECAST_NEW_FLEXIBLE_WORKLOAD_ONLY",
+    "R_ALL": "sum all source-valid H100 gpus_requested * wallclock_req_hours",
+    "PI_F": "R_F_requested / R_ALL_requested",
+    "KAPPA_F": "H_F_actual / R_F_requested; null when R_F=0",
+    "H_F": "sum semantic-flexible gpus_requested * realized_runtime_hours",
+    "master_identity": "H_F = R_ALL * PI_F * KAPPA_F",
+    "units": {
+      "R_ALL": "GPU-h-requested",
+      "R_F": "GPU-h-requested",
+      "H_F": "GPU-h-actual",
+      "PI_F": "dimensionless",
+      "KAPPA_F": "dimensionless"
+    },
+    "days": 225,
+    "max_identity_error_GPU_h": 7.275957614183426e-12,
+    "identity_tolerance_GPU_h": 1e-09,
+    "identity_status": "PASS",
+    "zero_all_days": 11,
+    "zero_flex_days": 20,
+    "zero_day_convention": "PI_F=0,H_F=0,KAPPA_DEFINED=false,KAPPA_F=null",
+    "KAPPA_support": "KAPPA_BOUNDED_0_1",
+    "source": {
+      "source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+      "source_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+      "members_opened": [
+        {
+          "month": 202410,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+          "H100_rows": 21679
+        },
+        {
+          "month": 202411,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+          "H100_rows": 26933
+        },
+        {
+          "month": 202412,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+          "H100_rows": 41814
+        },
+        {
+          "month": 202407,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=7/kestrel_jobs_202407_0.parquet",
+          "H100_rows": 42284
+        },
+        {
+          "month": 202408,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+          "H100_rows": 20192
+        },
+        {
+          "month": 202409,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+          "H100_rows": 26532
+        },
+        {
+          "month": 202501,
+          "member": "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+          "H100_rows": 96880
+        },
+        {
+          "month": 202502,
+          "member": "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+          "H100_rows": 22295
+        },
+        {
+          "month": 202503,
+          "member": "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+          "H100_rows": 86148
+        }
+      ],
+      "H100_rows": 384757,
+      "requested_columns": [
+        "account_hash",
+        "end_time",
+        "gpu_nodes_occupied",
+        "gpus_requested",
+        "id",
+        "jobs_shared",
+        "nodelist",
+        "nodes_req",
+        "nodes_shared",
+        "partition",
+        "qos",
+        "shared_job_count",
+        "start_time",
+        "state_simple",
+        "submit_time",
+        "wallclock_req"
+      ],
+      "April_members_opened": 0,
+      "target_month_max": 202503,
+      "wallclock_arrow_type": "duration[ns]",
+      "wallclock_pandas_dtype": "timedelta64[ns]",
+      "wallclock_conversion_contract": "ARROW_DURATION_NS_TO_PANDAS_TIMEDELTA_TO_SECONDS_TO_HOURS",
+      "wallclock_conversion_bug_inherited_from_prior_loader": false
+    },
+    "conflict_ids_excluded": 76,
+    "target_clipping_calls": 0
+  },
+  "predictability": {
+    "audit": {
+      "artifact_id": "V24M_FACTOR_PREDICTABILITY_AUDIT_V1",
+      "folds": 5,
+      "same_cutoff": "D-1 18:00 AEST",
+      "causal_feature_columns": [
+        "jobs_1d",
+        "requested_GPU_1d",
+        "requested_GPU_h_1d",
+        "requested_nodes_1d",
+        "unique_accounts_1d",
+        "full_requested_GPU_h_1d",
+        "jobs_7d",
+        "requested_GPU_7d",
+        "requested_GPU_h_7d",
+        "requested_nodes_7d",
+        "unique_accounts_7d",
+        "full_requested_GPU_h_7d",
+        "jobs_28d",
+        "requested_GPU_28d",
+        "requested_GPU_h_28d",
+        "requested_nodes_28d",
+        "unique_accounts_28d",
+        "full_requested_GPU_h_28d",
+        "account_entropy_28d",
+        "full_share_7d",
+        "full_share_28d",
+        "dow_sin",
+        "dow_cos",
+        "month_sin",
+        "month_cos",
+        "holiday"
+      ],
+      "model_metrics": {
+        "F0_DIRECT_LIGHTGBM_H_F": {
+          "Mean_WAPE": 0.9920990832117159,
+          "MAE_GPU_h": 3289.245239950941,
+          "aggregate_mass_ratio": 0.6062698451019047,
+          "Burst_WAPE": 0.8661729267076339
+        },
+        "F1_FACTORIZED_LIGHTGBM": {
+          "Mean_WAPE": 0.9753386533787183,
+          "MAE_GPU_h": 3233.6770361489075,
+          "aggregate_mass_ratio": 0.47560802721542755,
+          "Burst_WAPE": 0.8848187291012068
+        },
+        "F2_SIMPLE_WEEKDAY_FACTORIZED": {
+          "Mean_WAPE": 0.9467355624694639,
+          "MAE_GPU_h": 3138.845197058223,
+          "aggregate_mass_ratio": 0.5193870226321022,
+          "Burst_WAPE": 0.8896570386657561
+        },
+        "F3_DIRECT_ORDINARY_RBF_GP": {
+          "Mean_WAPE": 0.9657144190226852,
+          "MAE_GPU_h": 3201.7684621168937,
+          "aggregate_mass_ratio": 0.07154347568719223,
+          "Burst_WAPE": 0.9860236659045407
+        }
+      },
+      "factorized_minus_direct_Mean_WAPE": -0.016760429832997636,
+      "factorized_better_than_direct": true,
+      "burst_threshold_by_fold_GPU_h": {
+        "1": 4206.22475,
+        "2": 5502.999555555557,
+        "3": 5834.143722222226,
+        "4": 6565.606944444444,
+        "5": 6214.02619444445
+      },
+      "PRIMARY_BOTTLENECK": "BURST_OCCURRENCE"
+    },
+    "oracles": {
+      "artifact_id": "V24M_FACTOR_ORACLE_DIAGNOSTICS_V1",
+      "label": "NON_CAUSAL_ORACLE_DIAGNOSTIC_ONLY",
+      "production_feature_use": false,
+      "oracle_metrics": {
+        "ORACLE_R": {
+          "Mean_WAPE": 0.913235762786695,
+          "MAE_GPU_h": 3027.7786125703683,
+          "aggregate_mass_ratio": 0.5924546022002044,
+          "Burst_WAPE": 0.7874317119640818
+        },
+        "ORACLE_PI": {
+          "Mean_WAPE": 0.8882903364164466,
+          "MAE_GPU_h": 2945.073541740889,
+          "aggregate_mass_ratio": 0.6861639012622479,
+          "Burst_WAPE": 0.8038193562298397
+        },
+        "ORACLE_KAPPA": {
+          "Mean_WAPE": 0.8944913088800345,
+          "MAE_GPU_h": 2965.63249548258,
+          "aggregate_mass_ratio": 0.4720163506278654,
+          "Burst_WAPE": 0.8547063557900136
+        },
+        "ORACLE_DAY_REQUEST": {
+          "Mean_WAPE": 0.913235762786695,
+          "MAE_GPU_h": 3027.7786125703683,
+          "aggregate_mass_ratio": 0.5924546022002044,
+          "Burst_WAPE": 0.7874317119640818
+        },
+        "ORACLE_BURST": {
+          "Mean_WAPE": 0.7007927242615367,
+          "MAE_GPU_h": 2323.4364102094464,
+          "aggregate_mass_ratio": 0.9581394243771684,
+          "Burst_WAPE": 0.4633294058984905
+        }
+      },
+      "Mean_WAPE_improvement_vs_factorized": {
+        "ORACLE_R": 0.06210289059202323,
+        "ORACLE_PI": 0.08704831696227167,
+        "ORACLE_KAPPA": 0.0808473444986838,
+        "ORACLE_DAY_REQUEST": 0.06210289059202323,
+        "ORACLE_BURST": 0.27454592911718156
+      },
+      "primary_bottleneck": "BURST_OCCURRENCE",
+      "April_reads": 0
+    }
+  },
+  "probe": {
+    "artifact_id": "V24M_PROBE_SIGNAL_AUDIT_V1",
+    "SIGNATURE_SIGNAL_READY": true,
+    "RETRIEVAL_SIGNAL_READY": true,
+    "signature_improved_fold_count": 4,
+    "retrieval_improved_fold_count": 4,
+    "fold_comparisons": [
+      {
+        "fold_id": 1,
+        "signature_CRPS_improved": true,
+        "signature_WAPE_improved": false,
+        "retrieval_CRPS_improved": true
+      },
+      {
+        "fold_id": 2,
+        "signature_CRPS_improved": true,
+        "signature_WAPE_improved": true,
+        "retrieval_CRPS_improved": true
+      },
+      {
+        "fold_id": 3,
+        "signature_CRPS_improved": false,
+        "signature_WAPE_improved": true,
+        "retrieval_CRPS_improved": true
+      },
+      {
+        "fold_id": 4,
+        "signature_CRPS_improved": true,
+        "signature_WAPE_improved": true,
+        "retrieval_CRPS_improved": false
+      },
+      {
+        "fold_id": 5,
+        "signature_CRPS_improved": false,
+        "signature_WAPE_improved": false,
+        "retrieval_CRPS_improved": true
+      }
+    ],
+    "aggregate_metrics_mean_of_folds": [
+      {
+        "model": "P0_DIRECT_LIGHTGBM",
+        "Mean_WAPE": 1.0561929282458133,
+        "Q50_WAPE": 0.9190721219002596,
+        "CRPS": 2561.6934087160694,
+        "Burst_WAPE": 0.8262019789643913,
+        "mass_ratio": 0.7496413660615506,
+        "Q50_coverage": 0.4473732718894009,
+        "Q90_coverage": 0.7306605222734255
+      },
+      {
+        "model": "P1_FACTORIZED_LIGHTGBM",
+        "Mean_WAPE": 1.020753835290654,
+        "Q50_WAPE": 0.9209486926788649,
+        "CRPS": 2671.6061645583004,
+        "Burst_WAPE": 0.8339936543775455,
+        "mass_ratio": 0.6260371636139006,
+        "Q50_coverage": 0.36766513056835637,
+        "Q90_coverage": 0.6845929339477727
+      },
+      {
+        "model": "P2_ORDINARY_GP",
+        "Mean_WAPE": 13.151666019105397,
+        "Q50_WAPE": 0.9522269454365535,
+        "CRPS": 2973.75183969954,
+        "Burst_WAPE": 2.129704634262771,
+        "mass_ratio": 14.046225250389488,
+        "Q50_coverage": 0.2880030721966206,
+        "Q90_coverage": 0.9070967741935483
+      },
+      {
+        "model": "P3_SIGNATURE_GP_DIRECT",
+        "Mean_WAPE": 12.56927479500819,
+        "Q50_WAPE": 0.9461926340635287,
+        "CRPS": 2927.554512050504,
+        "Burst_WAPE": 2.212181390587293,
+        "mass_ratio": 13.52295135521641,
+        "Q50_coverage": 0.3201689708141321,
+        "Q90_coverage": 0.9408141321044546
+      },
+      {
+        "model": "P4_FACTORIZED_SIGNATURE_GP",
+        "Mean_WAPE": 1.895576061227899,
+        "Q50_WAPE": 0.9618867166861985,
+        "CRPS": 2657.081817842425,
+        "Burst_WAPE": 0.6536257854351092,
+        "mass_ratio": 1.9915197231236443,
+        "Q50_coverage": 0.28124423963133643,
+        "Q90_coverage": 0.8237788018433181
+      },
+      {
+        "model": "P5_HANDCRAFTED_ANALOG",
+        "Mean_WAPE": 1.316602652344709,
+        "Q50_WAPE": 1.0234033204478254,
+        "CRPS": 2716.3559871780462,
+        "Burst_WAPE": 0.7629680307424526,
+        "mass_ratio": 1.2548206721974497,
+        "Q50_coverage": 0.5136098310291859,
+        "Q90_coverage": 0.8885560675883257
+      },
+      {
+        "model": "P6_SIGNATURE_ANALOG",
+        "Mean_WAPE": 1.306865994659304,
+        "Q50_WAPE": 0.9973944423973033,
+        "CRPS": 2646.539269424766,
+        "Burst_WAPE": 0.7946824271075317,
+        "mass_ratio": 1.178029728914718,
+        "Q50_coverage": 0.561705069124424,
+        "Q90_coverage": 0.8433947772657451
+      },
+      {
+        "model": "P7_FASER_MIXTURE",
+        "Mean_WAPE": 1.333304441130921,
+        "Q50_WAPE": 1.020876726911072,
+        "CRPS": 2788.804090288197,
+        "Burst_WAPE": 0.7933643149810858,
+        "mass_ratio": 1.1807808744126194,
+        "Q50_coverage": 0.529447004608295,
+        "Q90_coverage": 0.7982334869431644
+      }
+    ],
+    "gate_validation": [
+      {
+        "fold_id": 1,
+        "selection": "ANALOG_ONLY",
+        "raw_parameters": [
+          0.4729061571634695,
+          -0.5196525766510725,
+          0.7257353435345967,
+          -0.9494312062515682,
+          -7.067841823408703,
+          -0.5196484813510288
+        ],
+        "inner_CRPS_gp": 2669.661323400946,
+        "inner_CRPS_analog": 2169.08464225173,
+        "inner_CRPS_gate_proxy": 2237.735800848909,
+        "outer_alpha_mean": 1.0,
+        "fit_on_inner_validation_only": true
+      },
+      {
+        "fold_id": 2,
+        "selection": "ANALOG_ONLY",
+        "raw_parameters": [
+          0.7656262146915882,
+          0.2168890096322111,
+          0.873100155403753,
+          -2.222337997083584,
+          -4.548501487882365,
+          0.21689271888516387
+        ],
+        "inner_CRPS_gp": 1920.4208602111773,
+        "inner_CRPS_analog": 1539.2435456155786,
+        "inner_CRPS_gate_proxy": 1567.5339728466504,
+        "outer_alpha_mean": 1.0,
+        "fit_on_inner_validation_only": true
+      },
+      {
+        "fold_id": 3,
+        "selection": "GP_ONLY",
+        "raw_parameters": [
+          -0.012049937157696906,
+          -0.5361651447982619,
+          3.070715778666369,
+          2.6571391233263717,
+          -4.297138565336257,
+          -0.536166490717631
+        ],
+        "inner_CRPS_gp": 2417.000614675689,
+        "inner_CRPS_analog": 2648.061968872812,
+        "inner_CRPS_gate_proxy": 2449.9242340119804,
+        "outer_alpha_mean": 0.0,
+        "fit_on_inner_validation_only": true
+      },
+      {
+        "fold_id": 4,
+        "selection": "ANALOG_ONLY",
+        "raw_parameters": [
+          0.41282307339260066,
+          -0.9096173268622273,
+          -0.39206090141441113,
+          -1.0267759668998622,
+          -6.740423975204687,
+          -0.9096199738802813
+        ],
+        "inner_CRPS_gp": 3701.141874574368,
+        "inner_CRPS_analog": 3357.3059989651806,
+        "inner_CRPS_gate_proxy": 3496.725808142812,
+        "outer_alpha_mean": 1.0,
+        "fit_on_inner_validation_only": true
+      },
+      {
+        "fold_id": 5,
+        "selection": "ANALOG_ONLY",
+        "raw_parameters": [
+          0.46637916636169935,
+          0.7227127152905842,
+          0.706441656567926,
+          1.4344949150824042,
+          -5.085980073148234,
+          0.7227170384862265
+        ],
+        "inner_CRPS_gp": 1673.3903138046426,
+        "inner_CRPS_analog": 1528.7222482544844,
+        "inner_CRPS_gate_proxy": 1617.2799838856317,
+        "outer_alpha_mean": 1.0,
+        "fit_on_inner_validation_only": true
+      }
+    ],
+    "full_execution_policy": "F1_TO_F4",
+    "runtime_seconds": 11.1414969,
+    "predictive_samples": 4096,
+    "April_reads": 0
+  },
+  "full_blocked_CV": {
+    "artifact_id": "V24M_FULL_EVALUATION_SUMMARY_V1",
+    "config_policy": "F1_TO_F4",
+    "selected_configs_by_fold": [
+      "F2",
+      "F4",
+      "F2",
+      "F2",
+      "F4"
+    ],
+    "aggregate_mean": {
+      "burst_threshold_GPU_h": 5664.6002333333345,
+      "Mean_WAPE": 1.1877478294617467,
+      "Mean_MAE_GPU_h": 3662.838864439151,
+      "Mean_RMSE_GPU_h": 6168.1931906629015,
+      "mean_bias_GPU_h": -106.64371182642952,
+      "aggregate_mass_ratio": 1.1200518371982742,
+      "Q50_WAPE": 0.9414334518461079,
+      "Q50_pinball": 1512.160480848207,
+      "Q90_pinball": 1841.7091218161709,
+      "CRPS": 2454.9593528885694,
+      "Burst_WAPE": 0.763990358554532,
+      "Q50_coverage": 0.4992012288786482,
+      "Q90_coverage": 0.8088428059395799,
+      "negative_sample_count": 0.0,
+      "NaN_inf_count": 0.0,
+      "quantile_crossing_count": 0.0,
+      "15min_GPU_h_WAPE": 2.0775536216208503,
+      "IT_power_WAPE": 1.8881341588356075,
+      "peak_power_error_kW": 2.2737367544323207e-14,
+      "peak_timing_error_slots": -109.0,
+      "max_work_conservation_error_GPU_h": 2.461320036672987e-12,
+      "mean_terminal_backlog_GPU_h": 0.0,
+      "mean_deadline_shortfall_GPU_h": 0.8804084664521,
+      "hidden_shedding_GPU_h": 0.0
+    },
+    "aggregate_median": {
+      "burst_threshold_GPU_h": 5834.143722222226,
+      "Mean_WAPE": 0.9744613858289981,
+      "Mean_MAE_GPU_h": 4091.0673614023876,
+      "Mean_RMSE_GPU_h": 5784.266010631559,
+      "mean_bias_GPU_h": 93.19538239509842,
+      "aggregate_mass_ratio": 1.0332904464492267,
+      "Q50_WAPE": 0.8967162682764889,
+      "Q50_pinball": 1389.2260680589768,
+      "Q90_pinball": 1605.4643831195917,
+      "CRPS": 2093.514757540185,
+      "Burst_WAPE": 0.7482276262232495,
+      "Q50_coverage": 0.5666666666666667,
+      "Q90_coverage": 0.8064516129032258,
+      "negative_sample_count": 0.0,
+      "NaN_inf_count": 0.0,
+      "quantile_crossing_count": 0.0,
+      "15min_GPU_h_WAPE": 1.9921250559912727,
+      "IT_power_WAPE": 1.8508353245384375,
+      "peak_power_error_kW": 0.0,
+      "peak_timing_error_slots": -438.0,
+      "max_work_conservation_error_GPU_h": 1.8189894035458565e-12,
+      "mean_terminal_backlog_GPU_h": 0.0,
+      "mean_deadline_shortfall_GPU_h": 0.0,
+      "hidden_shedding_GPU_h": 0.0
+    },
+    "aggregate_std": {
+      "burst_threshold_GPU_h": 840.3316697608224,
+      "Mean_WAPE": 0.3265704964360906,
+      "Mean_MAE_GPU_h": 787.1939068474303,
+      "Mean_RMSE_GPU_h": 3255.875606940906,
+      "mean_bias_GPU_h": 1974.1645172600493,
+      "aggregate_mass_ratio": 0.5385835842508182,
+      "Q50_WAPE": 0.09590531889609301,
+      "Q50_pinball": 418.47493210137316,
+      "Q90_pinball": 556.9864611020307,
+      "CRPS": 951.073697630969,
+      "Burst_WAPE": 0.10265211369640123,
+      "Q50_coverage": 0.19189710128468904,
+      "Q90_coverage": 0.1359089708382814,
+      "negative_sample_count": 0.0,
+      "NaN_inf_count": 0.0,
+      "quantile_crossing_count": 0.0,
+      "15min_GPU_h_WAPE": 0.5203216903036735,
+      "IT_power_WAPE": 0.4780958282710451,
+      "peak_power_error_kW": 2.882487438211627e-14,
+      "peak_timing_error_slots": 1027.8544227105872,
+      "max_work_conservation_error_GPU_h": 9.332169010647646e-13,
+      "mean_terminal_backlog_GPU_h": 0.0,
+      "mean_deadline_shortfall_GPU_h": 1.9486888147391728,
+      "hidden_shedding_GPU_h": 0.0
+    },
+    "runtime_seconds": 66.15992840000001,
+    "seeds": [
+      20260901,
+      20260902,
+      20260903
+    ],
+    "predictive_samples": 4096,
+    "April_reads": 0
+  },
+  "acceptance": {
+    "artifact_id": "V24M_FASER_ACCEPTANCE_TEST_V1",
+    "classification": "V24M_FASER_NOVELTY_PASS_PERFORMANCE_FAIL",
+    "FASER_PROPOSED_MODEL_ACCEPTED": false,
+    "aggregate_metrics_mean_of_folds_and_seeds": {
+      "model": "ML-B11_FASER_FLEX",
+      "Mean_WAPE": 1.1877478294617465,
+      "Q50_WAPE": 0.9414334518461079,
+      "Q90_pinball": 1841.7091218161709,
+      "CRPS": 2454.95935288857,
+      "Burst_WAPE": 0.763990358554532,
+      "aggregate_mass_ratio": 1.1200518371982742,
+      "Q50_coverage": 0.4992012288786482,
+      "Q90_coverage": 0.8088428059395801,
+      "15min_GPU_h_WAPE": 2.0775536216208503,
+      "IT_power_WAPE": 1.8881341588356073,
+      "status": "REPRODUCED_V24M_5FOLD_3SEED",
+      "evidence_source": "V24M_FASER_BLOCKED_CV_RESULTS.csv"
+    },
+    "acceptance_gates": {
+      "novelty": true,
+      "mean_absolute": false,
+      "mean_vs_current_P0_5pct": false,
+      "Q50_absolute": false,
+      "Q50_vs_current_P0_5pct": false,
+      "CRPS_vs_best_probe_5pct": false,
+      "burst_noninferiority": true,
+      "mass_ratio": true,
+      "Q50_coverage": true,
+      "Q90_coverage": false,
+      "bootstrap_absolute_error": false,
+      "bootstrap_CRPS": false,
+      "structural": true
+    },
+    "bootstrap": {
+      "label": "SEVEN_DAY_BLOCK_BOOTSTRAP_VS_CURRENT_P0_DIRECT_LIGHTGBM",
+      "replicates": 10000,
+      "seed": 20260901,
+      "paired_days": 151,
+      "absolute_error_difference_FASER_minus_baseline": {
+        "point": 382.83947445205763,
+        "CI95": [
+          -54.971146512689586,
+          886.5573699049606
+        ]
+      },
+      "CRPS_difference_FASER_minus_baseline": {
+        "point": -108.88989298951772,
+        "CI95": [
+          -281.5581498440789,
+          38.78520376497773
+        ]
+      },
+      "strong_pass_requires_upper_bounds_below_zero": false
+    },
+    "best_accepted_production_mean": "B2_LIGHTGBM_TWEEDIE",
+    "best_accepted_production_Q50": "B3_LIGHTGBM_QUANTILE",
+    "best_accepted_production_Q90": "B3_LIGHTGBM_QUANTILE",
+    "reason": "FASER failed the preregistered mean, Q50, distributional, Q90-calibration, and bootstrap gates; no post-result retuning was performed.",
+    "April_reads": 0
+  },
+  "April_postfreeze": {
+    "artifact_id": "V24M_APRIL_POSTFREEZE_DIAGNOSTIC_V1",
+    "label": "APRIL_OBSERVED_POSTFREEZE_DIAGNOSTIC_NOT_LOCKED_TEST",
+    "freeze_sha256": "471c8f16c9632775fe150dc9bef6b990bfb573c1de523aea1e36bb1a5f03eb51",
+    "freeze_verified_before_April_read": true,
+    "days": [
+      {
+        "date": "2025-04-02",
+        "FASER_diagnostic_predicted_R_ALL_GPU_h": 41607.39099121094,
+        "FASER_diagnostic_predicted_PI_F": 0.19551651684654783,
+        "FASER_diagnostic_predicted_KAPPA_F": 0.23519269051594746,
+        "FASER_diagnostic_predicted_mean_H_F_GPU_h": 1883.4357150607639,
+        "FASER_diagnostic_Q50_H_F_GPU_h": 4778.5704166666665,
+        "FASER_diagnostic_Q90_H_F_GPU_h": 9828.287111111113,
+        "production_mean_H_F_GPU_h": 1436.6522877736825,
+        "production_Q50_H_F_GPU_h": 2883.7449919956034,
+        "production_Q90_H_F_GPU_h": 5235.909627946268,
+        "observed_R_ALL_GPU_h": 76058.5,
+        "observed_PI_F": 0.46467959969409517,
+        "observed_KAPPA_F": 0.14812402640170644,
+        "observed_H_F_GPU_h": 5235.122777777778,
+        "analog_reliability_alpha": 1.0,
+        "nearest_analog_dates": [
+          "2025-03-12",
+          "2025-03-13",
+          "2025-03-07",
+          "2025-03-05",
+          "2025-03-06",
+          "2025-03-09",
+          "2025-03-04",
+          "2025-02-04",
+          "2025-03-08",
+          "2025-03-11",
+          "2025-01-18",
+          "2025-01-17",
+          "2024-08-29",
+          "2025-02-05",
+          "2025-03-14",
+          "2025-01-19",
+          "2024-08-30",
+          "2025-03-15",
+          "2024-08-28",
+          "2025-02-06"
+        ],
+        "nearest_distance": 1.6261228431590526,
+        "effective_neighbors": 19.777382476432823
+      },
+      {
+        "date": "2025-04-03",
+        "FASER_diagnostic_predicted_R_ALL_GPU_h": 36287.99227701823,
+        "FASER_diagnostic_predicted_PI_F": 0.22379005896795456,
+        "FASER_diagnostic_predicted_KAPPA_F": 0.30430497655625277,
+        "FASER_diagnostic_predicted_mean_H_F_GPU_h": 2971.4829410129123,
+        "FASER_diagnostic_Q50_H_F_GPU_h": 4778.5704166666665,
+        "FASER_diagnostic_Q90_H_F_GPU_h": 10279.308500000003,
+        "production_mean_H_F_GPU_h": 2535.039765149632,
+        "production_Q50_H_F_GPU_h": 1981.1435359257098,
+        "production_Q90_H_F_GPU_h": 5379.646390682174,
+        "observed_R_ALL_GPU_h": 79846.06666666667,
+        "observed_PI_F": 0.42852872735956105,
+        "observed_KAPPA_F": 0.2076387332885204,
+        "observed_H_F_GPU_h": 7104.636111111111,
+        "analog_reliability_alpha": 1.0,
+        "nearest_analog_dates": [
+          "2024-12-28",
+          "2024-12-29",
+          "2025-03-07",
+          "2025-01-18",
+          "2025-03-13",
+          "2025-03-08",
+          "2025-01-19",
+          "2025-03-09",
+          "2025-03-06",
+          "2025-03-12",
+          "2024-10-04",
+          "2025-01-17",
+          "2024-10-13",
+          "2024-10-10",
+          "2024-10-05",
+          "2025-03-14",
+          "2024-12-30",
+          "2025-02-04",
+          "2025-03-05",
+          "2024-08-30"
+        ],
+        "nearest_distance": 1.9593909993934817,
+        "effective_neighbors": 19.41440283671345
+      },
+      {
+        "date": "2025-04-12",
+        "FASER_diagnostic_predicted_R_ALL_GPU_h": 48353.7419921875,
+        "FASER_diagnostic_predicted_PI_F": 0.14795539895399598,
+        "FASER_diagnostic_predicted_KAPPA_F": 0.20986457386814564,
+        "FASER_diagnostic_predicted_mean_H_F_GPU_h": 1217.1760702175566,
+        "FASER_diagnostic_Q50_H_F_GPU_h": 4993.77986111111,
+        "FASER_diagnostic_Q90_H_F_GPU_h": 9775.398500000003,
+        "production_mean_H_F_GPU_h": 2981.36707776361,
+        "production_Q50_H_F_GPU_h": 2148.8970637289244,
+        "production_Q90_H_F_GPU_h": 8800.146858490365,
+        "observed_R_ALL_GPU_h": 48370.53333333333,
+        "observed_PI_F": 0.32495506906408583,
+        "observed_KAPPA_F": 0.22339304806691446,
+        "observed_H_F_GPU_h": 3511.347777777778,
+        "analog_reliability_alpha": 1.0,
+        "nearest_analog_dates": [
+          "2025-03-15",
+          "2025-03-16",
+          "2025-03-14",
+          "2025-03-13",
+          "2025-03-01",
+          "2025-02-22",
+          "2025-02-28",
+          "2025-02-21",
+          "2025-03-07",
+          "2025-03-06",
+          "2025-03-08",
+          "2025-02-07",
+          "2025-02-06",
+          "2025-03-17",
+          "2025-01-23",
+          "2025-03-09",
+          "2025-01-25",
+          "2025-03-05",
+          "2025-03-12",
+          "2025-02-20"
+        ],
+        "nearest_distance": 0.9868837928973172,
+        "effective_neighbors": 19.355641627407593
+      },
+      {
+        "date": "2025-04-13",
+        "FASER_diagnostic_predicted_R_ALL_GPU_h": 59212.62216796876,
+        "FASER_diagnostic_predicted_PI_F": 0.1211521295014289,
+        "FASER_diagnostic_predicted_KAPPA_F": 0.2226576127286024,
+        "FASER_diagnostic_predicted_mean_H_F_GPU_h": 1218.9903522406682,
+        "FASER_diagnostic_Q50_H_F_GPU_h": 4799.6745833333325,
+        "FASER_diagnostic_Q90_H_F_GPU_h": 9625.136833333336,
+        "production_mean_H_F_GPU_h": 3183.254356340016,
+        "production_Q50_H_F_GPU_h": 2185.746168590209,
+        "production_Q90_H_F_GPU_h": 10602.538735312715,
+        "observed_R_ALL_GPU_h": 36701.0,
+        "observed_PI_F": 0.4662316194835745,
+        "observed_KAPPA_F": 0.32781523436612214,
+        "observed_H_F_GPU_h": 5609.301111111111,
+        "analog_reliability_alpha": 1.0,
+        "nearest_analog_dates": [
+          "2025-03-16",
+          "2025-03-15",
+          "2025-03-08",
+          "2025-03-09",
+          "2025-03-17",
+          "2025-03-07",
+          "2025-03-14",
+          "2025-02-23",
+          "2025-02-22",
+          "2025-03-13",
+          "2025-03-01",
+          "2025-03-06",
+          "2025-02-21",
+          "2025-01-26",
+          "2025-03-12",
+          "2025-03-02",
+          "2025-02-24",
+          "2025-01-25",
+          "2025-02-07",
+          "2025-02-08"
+        ],
+        "nearest_distance": 0.8699289997952268,
+        "effective_neighbors": 19.180505637832333
+      },
+      {
+        "date": "2025-04-15",
+        "FASER_diagnostic_predicted_R_ALL_GPU_h": 36917.4518758138,
+        "FASER_diagnostic_predicted_PI_F": 0.21348569769043724,
+        "FASER_diagnostic_predicted_KAPPA_F": 0.21706007586333192,
+        "FASER_diagnostic_predicted_mean_H_F_GPU_h": 2174.7673233371315,
+        "FASER_diagnostic_Q50_H_F_GPU_h": 4778.5704166666665,
+        "FASER_diagnostic_Q90_H_F_GPU_h": 10103.832388888892,
+        "production_mean_H_F_GPU_h": 1648.071398657387,
+        "production_Q50_H_F_GPU_h": 2113.992508788966,
+        "production_Q90_H_F_GPU_h": 9249.576045083882,
+        "observed_R_ALL_GPU_h": 37225.0,
+        "observed_PI_F": 0.2969285874188493,
+        "observed_KAPPA_F": 0.310857220404409,
+        "observed_H_F_GPU_h": 3435.9566666666665,
+        "analog_reliability_alpha": 1.0,
+        "nearest_analog_dates": [
+          "2025-03-17",
+          "2025-03-11",
+          "2025-03-16",
+          "2025-01-19",
+          "2025-03-12",
+          "2025-03-09",
+          "2025-02-04",
+          "2025-03-13",
+          "2025-03-15",
+          "2025-01-20",
+          "2025-02-24",
+          "2025-03-08",
+          "2025-02-25",
+          "2025-02-05",
+          "2025-01-18",
+          "2025-01-21",
+          "2025-03-14",
+          "2025-02-23",
+          "2025-03-07",
+          "2025-02-11"
+        ],
+        "nearest_distance": 1.427127344126563,
+        "effective_neighbors": 19.82036663003199
+      },
+      {
+        "date": "2025-04-22",
+        "FASER_diagnostic_predicted_R_ALL_GPU_h": 24115.782263183595,
+        "FASER_diagnostic_predicted_PI_F": 0.10177042240765108,
+        "FASER_diagnostic_predicted_KAPPA_F": 0.19910223946425826,
+        "FASER_diagnostic_predicted_mean_H_F_GPU_h": 627.1563872612847,
+        "FASER_diagnostic_Q50_H_F_GPU_h": 4020.7670833333327,
+        "FASER_diagnostic_Q90_H_F_GPU_h": 8832.480166666668,
+        "production_mean_H_F_GPU_h": 656.0013800612224,
+        "production_Q50_H_F_GPU_h": 1049.0182146731115,
+        "production_Q90_H_F_GPU_h": 3693.323509255634,
+        "observed_R_ALL_GPU_h": 49493.333333333336,
+        "observed_PI_F": 0.34339304956896555,
+        "observed_KAPPA_F": 0.23747324481403753,
+        "observed_H_F_GPU_h": 4036.016111111111,
+        "analog_reliability_alpha": 1.0,
+        "nearest_analog_dates": [
+          "2025-03-11",
+          "2024-09-24",
+          "2025-02-11",
+          "2025-02-26",
+          "2025-02-25",
+          "2025-03-17",
+          "2024-09-25",
+          "2025-02-05",
+          "2025-03-12",
+          "2024-08-20",
+          "2025-03-13",
+          "2024-08-21",
+          "2024-09-03",
+          "2025-03-05",
+          "2024-09-18",
+          "2025-02-12",
+          "2025-02-24",
+          "2024-09-04",
+          "2025-02-19",
+          "2025-02-10"
+        ],
+        "nearest_distance": 0.8265488045033845,
+        "effective_neighbors": 19.8906698304166
+      },
+      {
+        "date": "2025-04-23",
+        "FASER_diagnostic_predicted_R_ALL_GPU_h": 33445.33581136068,
+        "FASER_diagnostic_predicted_PI_F": 0.20130751941302416,
+        "FASER_diagnostic_predicted_KAPPA_F": 0.2271471816537787,
+        "FASER_diagnostic_predicted_mean_H_F_GPU_h": 2026.401637234158,
+        "FASER_diagnostic_Q50_H_F_GPU_h": 4903.215972222221,
+        "FASER_diagnostic_Q90_H_F_GPU_h": 9828.287111111113,
+        "production_mean_H_F_GPU_h": 2162.0911977309825,
+        "production_Q50_H_F_GPU_h": 1967.2946474841572,
+        "production_Q90_H_F_GPU_h": 3392.7524040966346,
+        "observed_R_ALL_GPU_h": 43584.0,
+        "observed_PI_F": 0.45606185756240825,
+        "observed_KAPPA_F": 0.25735728899397964,
+        "observed_H_F_GPU_h": 5115.490833333333,
+        "analog_reliability_alpha": 1.0,
+        "nearest_analog_dates": [
+          "2025-03-13",
+          "2025-03-05",
+          "2025-03-14",
+          "2025-03-06",
+          "2025-02-06",
+          "2025-02-27",
+          "2025-03-12",
+          "2024-08-22",
+          "2025-02-05",
+          "2025-02-12",
+          "2025-02-26",
+          "2025-02-20",
+          "2025-03-15",
+          "2024-09-25",
+          "2024-09-18",
+          "2025-01-23",
+          "2025-02-13",
+          "2024-09-26",
+          "2025-02-28",
+          "2024-09-20"
+        ],
+        "nearest_distance": 0.7174807340170516,
+        "effective_neighbors": 19.778442599025652
+      }
+    ],
+    "production_mean_WAPE": 0.5711192251436348,
+    "production_Q50_WAPE": 0.5791267839474086,
+    "experimental_FASER_mean_WAPE": 0.6440479262877064,
+    "April_target_reads_before_freeze": 0,
+    "April_target_reads_after_freeze": 2,
+    "April_read_attempts_note": "The first post-freeze invocation opened the April member and stopped before fitting/selection because of a factor-builder argument error; the corrected second invocation completed with the frozen configuration.",
+    "April_reads_for_model_selection_or_tuning": 0,
+    "March_only_estimator_fit_or_calibration_calls_after_April_open": 2,
+    "procedural_firewall_note": "The final diagnostic invocation instantiated an experimental March-only FASER and reproduced the already-authoritative B2/B3 family after opening the April container. No April row entered fit, calibration, selection, or configuration, but this ordering is disclosed as a procedural limitation rather than reported as zero retraining.",
+    "source": {
+      "source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+      "source_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+      "members_opened": [
+        {
+          "month": 202410,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+          "H100_rows": 21679
+        },
+        {
+          "month": 202411,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+          "H100_rows": 26933
+        },
+        {
+          "month": 202412,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+          "H100_rows": 41814
+        },
+        {
+          "month": 202407,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=7/kestrel_jobs_202407_0.parquet",
+          "H100_rows": 42284
+        },
+        {
+          "month": 202408,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+          "H100_rows": 20192
+        },
+        {
+          "month": 202409,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+          "H100_rows": 26532
+        },
+        {
+          "month": 202501,
+          "member": "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+          "H100_rows": 96880
+        },
+        {
+          "month": 202502,
+          "member": "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+          "H100_rows": 22295
+        },
+        {
+          "month": 202503,
+          "member": "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+          "H100_rows": 86148
+        },
+        {
+          "month": 202504,
+          "member": "esif.hpc.kestrel.job-anon/year=2025/month=4/kestrel_jobs_202504_0.parquet",
+          "H100_rows": 65762
+        }
+      ],
+      "H100_rows": 450519,
+      "requested_columns": [
+        "account_hash",
+        "end_time",
+        "gpu_nodes_occupied",
+        "gpus_requested",
+        "id",
+        "jobs_shared",
+        "nodelist",
+        "nodes_req",
+        "nodes_shared",
+        "partition",
+        "qos",
+        "shared_job_count",
+        "start_time",
+        "state_simple",
+        "submit_time",
+        "wallclock_req"
+      ]
+    }
+  },
+  "production_authority": {
+    "mean": "B2_LIGHTGBM_TWEEDIE",
+    "Q50": "B3_LIGHTGBM_QUANTILE",
+    "Q90": "B3_LIGHTGBM_QUANTILE",
+    "FASER_or_fallback": "FALLBACK_EXISTING_ACCEPTED_BASELINES"
+  },
+  "queue": {
+    "artifact_id": "V24M_QUEUE_SCHEDULER_DIAGNOSTIC_V1",
+    "records": [
+      {
+        "date": "2025-04-02",
+        "predicted_arrival_GPU_h": 1436.6522877736825,
+        "predicted_terminal_backlog_GPU_h": 0.0,
+        "predicted_deadline_shortfall_GPU_h": 0.0,
+        "predicted_work_conservation_error_GPU_h": 0.0,
+        "hidden_shedding_GPU_h": 0.0
+      },
+      {
+        "date": "2025-04-03",
+        "predicted_arrival_GPU_h": 2535.0397651496323,
+        "predicted_terminal_backlog_GPU_h": 0.0,
+        "predicted_deadline_shortfall_GPU_h": 0.0,
+        "predicted_work_conservation_error_GPU_h": 0.0,
+        "hidden_shedding_GPU_h": 0.0
+      },
+      {
+        "date": "2025-04-12",
+        "predicted_arrival_GPU_h": 2981.36707776361,
+        "predicted_terminal_backlog_GPU_h": 0.0,
+        "predicted_deadline_shortfall_GPU_h": 0.0,
+        "predicted_work_conservation_error_GPU_h": 0.0,
+        "hidden_shedding_GPU_h": 0.0
+      },
+      {
+        "date": "2025-04-13",
+        "predicted_arrival_GPU_h": 3183.254356340016,
+        "predicted_terminal_backlog_GPU_h": 0.0,
+        "predicted_deadline_shortfall_GPU_h": 0.0,
+        "predicted_work_conservation_error_GPU_h": 0.0,
+        "hidden_shedding_GPU_h": 0.0
+      },
+      {
+        "date": "2025-04-15",
+        "predicted_arrival_GPU_h": 1648.0713986573871,
+        "predicted_terminal_backlog_GPU_h": 0.0,
+        "predicted_deadline_shortfall_GPU_h": 0.0,
+        "predicted_work_conservation_error_GPU_h": 2.2737367544323206e-13,
+        "hidden_shedding_GPU_h": 0.0
+      },
+      {
+        "date": "2025-04-22",
+        "predicted_arrival_GPU_h": 656.0013800612224,
+        "predicted_terminal_backlog_GPU_h": 0.0,
+        "predicted_deadline_shortfall_GPU_h": 0.0,
+        "predicted_work_conservation_error_GPU_h": 0.0,
+        "hidden_shedding_GPU_h": 0.0
+      },
+      {
+        "date": "2025-04-23",
+        "predicted_arrival_GPU_h": 2162.0911977309825,
+        "predicted_terminal_backlog_GPU_h": 0.0,
+        "predicted_deadline_shortfall_GPU_h": 0.0,
+        "predicted_work_conservation_error_GPU_h": 0.0,
+        "hidden_shedding_GPU_h": 0.0
+      }
+    ],
+    "max_work_conservation_error_GPU_h": 2.2737367544323206e-13,
+    "hidden_shedding_GPU_h": 0.0,
+    "training_loss_use": false
+  },
+  "power": {
+    "artifact_id": "V24M_POWER_FORECAST_DIAGNOSTIC_V1",
+    "boundary": "IT_SIDE",
+    "IT_power_WAPE": 1.0912310148772568,
+    "predicted_peak_kW": 301.6194023373821,
+    "target_peak_kW": 302.21021780278625,
+    "peak_error_kW": -0.5908154654041482,
+    "peak_timing_error_slots": 311,
+    "PUE_calls": 0,
+    "facility_scale_calls_on_GPU_h": 0
+  },
+  "frozen_scale_diagnostic": {
+    "artifact_id": "V24M_SCALE_DEPENDENT_DIAGNOSTIC_V1",
+    "label": "SCALE_DEPENDENT_DIAGNOSTIC_ONLY",
+    "V22SR1_aggregate_PCC_peak_MW": 0.5288087919579648,
+    "V22SR1_aggregate_IT_peak_MW": 0.40677599381381907,
+    "predicted_flexible_IT_peak_kW": 301.6194023373821,
+    "P_flex_IT_le_P_total_IT": true,
+    "violation_kW": 0.0,
+    "clipping_calls": 0,
+    "GPU_h_scale_calls": 0,
+    "site_distribution_label": "ENGINEERING_GPU_ALLOCATION_ASSUMPTION_NOT_EXECUTED",
+    "FINAL_FACILITY_FLEXIBILITY_SHARE": null
+  },
+  "limitations": [
+    "NO_UNTOUCHED_LOCKED_TEST",
+    "FORECAST_NEW_ONLY_SCOPE",
+    "RETROSPECTIVE_FLEXIBLE_TARGET",
+    "SITE_GPU_ALLOCATION_UNAVAILABLE",
+    "PARTIAL_NODE_LOWER_BOUND_GAP",
+    "J1_INTRINSIC_COREGIONALIZATION_NOT_COMPLETED",
+    "POSTFREEZE_DIAGNOSTIC_ESTIMATORS_INSTANTIATED_AFTER_APRIL_CONTAINER_OPEN_BUT_FIT_MARCH_ONLY"
+  ],
+  "preservation": {
+    "checked_files": 622,
+    "mismatch_count": 0,
+    "failures": [],
+    "deletion_count": 0,
+    "status": "PASS"
+  },
+  "git": {
+    "starting_head": "1322b563c78bb0522e5633ed0524f3865bc154fd",
+    "branch": "codex/v24m-faser-flex",
+    "worktree": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v24m_faser_flex",
+    "commits_before_final": [
+      "32211d0f3c86dfaf351b2036ddb25ea185a8435d\tEvaluate FASER-Flex against strong baselines",
+      "9633caa4bcadbc985622604451c3e595a945ea45\tImplement FASER-Flex probabilistic mixture",
+      "e76e51be0438df57d8fd2e65ff70bb3fd31768bb\tImplement signature path and analog retrieval models",
+      "f8c8b51deb83d6e538fb489266b625848888f52e\tAudit factor predictability and oracle ceilings",
+      "e676cad19616a765f391b1effc69139f2f153aa7\tAdd factorized flexible-workload target contract",
+      "9021d8e7791222c4f69ddde5681fe4f33285b77d\tAudit prior recurrence gate and FASER novelty",
+      "f1ad559faaba1d101121237057020074b29aadd0\tFreeze V24M FASER-Flex development baseline"
+    ],
+    "final_commit_sha": "REPORTED_EXTERNALLY_AFTER_NON_SELF_REFERENTIAL_COMMIT"
+  },
+  "Q1_Q16": {
+    "Q1": "아니다. 부분 중복은 있으나 조사 범위에서 사실상 동일한 전체 architecture는 없었다.",
+    "Q2": "그렇다. 최대 identity 오차는 7.276e-12 GPU-h였다.",
+    "Q3": "BURST_OCCURRENCE",
+    "Q4": "그렇다. factorized/direct LightGBM WAPE는 0.975339/0.992099였다.",
+    "Q5": "probe 기준 5개 fold 중 4개에서 개선 신호가 있었다.",
+    "Q6": "그렇다. signature retrieval은 5개 fold 중 4개에서 CRPS 개선 신호를 보였다.",
+    "Q7": "아니다. gate는 많은 fold에서 단일 analog 또는 GP로 fallback했고 full FASER가 retrieval-only보다 우월하지 않았다.",
+    "Q8": "B2_LIGHTGBM_TWEEDIE",
+    "Q9": "B3_LIGHTGBM_QUANTILE",
+    "Q10": "1.187747829462",
+    "Q11": "Q50 WAPE 0.941433451846, CRPS 2454.959352888569",
+    "Q12": "그렇다. burst WAPE 0.763990358555는 비열등 한계 0.864089906167401 이하였지만 이것만으로 acceptance를 통과하지는 못했다.",
+    "Q13": "아니다. preregistered performance gates를 통과하지 못했다.",
+    "Q14": "Mean=B2 LightGBM Tweedie, Q50/Q90=B3 LightGBM Quantile이다.",
+    "Q15": "NO. GPU-h facility-scale multiplication 호출은 0이다.",
+    "Q16": "NO. 이번 task는 새 grid science run을 승인하지 않는다."
+  },
+  "firewall": {
+    "April_reads_before_freeze": 0,
+    "April_read_attempts_after_freeze": 2,
+    "March_only_estimator_fit_or_calibration_calls_after_April_open": 2,
+    "April_rows_used_in_fit_calibration_selection": 0,
+    "result_based_retuning": 0,
+    "GPU_h_scale_calls": 0,
+    "B0_B1_B2_B3_final_science_calls": 0,
+    "OpenDSS_calls": 0,
+    "grid_science_calls": 0
+  }
+}
