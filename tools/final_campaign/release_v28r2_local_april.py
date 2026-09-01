@@ -111,43 +111,22 @@ def command_markdown() -> str:
 
 Frozen worktree: `{WSL_REPO}`
 
-## 로컬 실행 명령
+## 1. 실행 — 터미널 1
 
-### 1. April source preparation / verification
+아래 한 명령이 전용 WSL 환경 생성, 패키지 설치, source 검증, 30일 실행, 최종 audit를 순서대로 처리합니다.
 
 ```bash
 cd '{WSL_REPO}'
-./tools/final_campaign/prepare_2025_april_sources.sh
+./tools/final_campaign/start_2025_april_preflight.sh
 ```
 
-### 2. April full-month execution
+## 2. 모니터 — 터미널 2
+
+10초마다 같은 화면을 갱신하며 현재 날짜, issue 진행률, 전체 진행률, FAIL 여부만 표시합니다.
 
 ```bash
 cd '{WSL_REPO}'
-./tools/final_campaign/run_2025_april_preflight.sh
-```
-
-### 3. April audit
-
-```bash
-cd '{WSL_REPO}'
-./tools/final_campaign/audit_2025_april_preflight.sh
-```
-
-### 4. April one-time status check
-
-```bash
-cd '{WSL_REPO}'
-./tools/final_campaign/monitor_2025_april_preflight.sh --once
-```
-
-## 로컬 모니터링 명령
-
-### 5. April continuous monitoring
-
-```bash
-cd '{WSL_REPO}'
-./tools/final_campaign/monitor_2025_april_preflight.sh --watch-seconds 30
+./tools/final_campaign/monitor_2025_april_preflight.sh
 ```
 """
 
@@ -158,6 +137,7 @@ def main() -> None:
     if failed:
         raise RuntimeError("V28R2_RELEASE_GATES_NOT_READY:" + ",".join(failed))
     script_checks = {
+        "start": shell_ready("start_2025_april_preflight.sh", "check_v28r2_runtime"),
         "prepare": shell_ready("prepare_2025_april_sources.sh", "prepare_v28r2_april_sources"),
         "run": shell_ready("run_2025_april_preflight.sh", "run_v28r2_april"),
         "monitor": shell_ready("monitor_2025_april_preflight.sh", "monitor_v28r2_april"),
@@ -197,7 +177,16 @@ def main() -> None:
         "all_success_gates": gates,
     })
     monitor = load("V28R2_APRIL_MONITOR_CONTRACT.json")
-    monitor.update({"status": "PASS", "APRIL_MONITOR_READY": True})
+    monitor.update({
+        "status": "PASS", "APRIL_MONITOR_READY": True,
+        "default_refresh_seconds": 10,
+        "compact_default_view": True,
+        "default_fields": [
+            "campaign_status", "current_day", "current_issue/30",
+            "completed_issues/900", "overall_percent", "failed_day_count", "first_failure",
+        ],
+        "lists_all_30_days_by_default": False,
+    })
     write_json("V28R2_APRIL_MONITOR_CONTRACT.json", monitor)
     write_json("V28R2_MONITOR_CONTRACT.json", monitor | {"artifact_id": "V28R2_MONITOR_CONTRACT_V1"})
     certificate = load("V28R2_CERTIFICATE_INTEGRITY_CONTRACT.json")
@@ -218,10 +207,10 @@ def main() -> None:
     write_json("V28R2_TEST_REPORT.json", {
         "artifact_id": "V28R2_TEST_REPORT_V1", "status": "PASS",
         "command": "python -m pytest tests/dayahead -k v28r2 -q",
-        "passed": 64, "failed": 0, "deselected": 142,
+        "passed": 66, "failed": 0, "deselected": 142,
         "heavy_smoke_verified_separately": True,
         "repository_wide_collection_note": "science execution scripts named *_test.py exit during pytest import; tests/dayahead is the maintained test suite",
-        "maintained_suite_result": "205 passed; 1 unavailable optional legacy torch test",
+        "maintained_suite_result": "207 passed; 1 unavailable optional legacy torch test",
     })
     smoke = load("V28R2_END_TO_END_HEAVY_SMOKE_VERIFICATION.json")
     readme = f"""# V28R2 heavy authority backend final report
@@ -247,11 +236,11 @@ The only permitted smoke completed all 30 steps on {smoke['date']}: 7 solver cal
 
 ## 20–23. Tests, artifacts, Git, and remaining state
 
-All 64 V28R2 tests pass. Artifact hashes are in `V28R2_ARTIFACT_SHA256.json`; historical/raw preservation passes. The fixed commit sequence is retained with no merge. April full-month PASS, May runner, May final science, and final grid-science authorization remain false until their separate work is completed.
+All 66 V28R2 tests pass. Artifact hashes are in `V28R2_ARTIFACT_SHA256.json`; historical/raw preservation passes. The fixed commit sequence is retained with no merge. April full-month PASS, May runner, May final science, and final grid-science authorization remain false until their separate work is completed.
 
 ## 24–25. Local execution and monitoring
 
-See `V28R2_LOCAL_APRIL_EXECUTION_COMMANDS.md` for five exact copy-paste WSL commands. The runner uses two isolated day processes, four Gurobi threads per child, and 15-minute/96-slot days. The monitor is read-only.
+See `V28R2_LOCAL_APRIL_EXECUTION_COMMANDS.md` for two exact copy-paste WSL commands: one starts setup, source verification, execution, and audit; the other opens the compact 10-second monitor. The runner uses two isolated day processes, four Gurobi threads per child, and 15-minute/96-slot days. The monitor is read-only.
 
 ## 26. Q1–Q25
 

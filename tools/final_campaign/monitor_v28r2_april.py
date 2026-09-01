@@ -14,6 +14,8 @@ from typing import Mapping
 REPO = Path(__file__).resolve().parents[2]
 ROOT_SUFFIX = "v28r2_april_full_month_preflight"
 APRIL_DAYS = tuple(f"2025-04-{day:02d}" for day in range(1, 31))
+ISSUES_PER_DAY = 30
+TOTAL_ISSUES = len(APRIL_DAYS) * ISSUES_PER_DAY
 
 
 def roots(repo: Path = REPO) -> dict[str, Path]:
@@ -51,6 +53,19 @@ def latest_line(path: Path) -> str | None:
             return bytes(reversed(buffer)).decode("utf-8", errors="replace") or None
     except OSError:
         return None
+
+
+def failure_summary(path: Path) -> str | None:
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return None
+    prefixes = ("ModuleNotFoundError:", "ImportError:", "RuntimeError:", "ValueError:", "FileNotFoundError:")
+    for line in reversed(lines[-300:]):
+        concise = line.strip()
+        if concise.startswith(prefixes):
+            return concise
+    return next((line.strip() for line in reversed(lines) if line.strip()), None)
 
 
 def process_stats(pid: int | None) -> dict[str, float | int | None]:
@@ -110,17 +125,28 @@ def snapshot(
     paths = roots(repo)
     supervisor = read_json(paths["progress"] / "supervisor.json")
     skipped_days = set(map(str, supervisor.get("skipped_immutable_pass", [])))
+    supervisor_results = {
+        str(row.get("day")): str(row.get("status"))
+        for row in supervisor.get("results", []) if isinstance(row, dict) and row.get("day")
+    }
     rows: list[dict[str, object]] = []
     statuses: list[str] = []
+    completed_issues_total = 0
     for day in APRIL_DAYS:
         state_path = paths["progress"] / day / "DAY_STATE.json"
         state = read_json(state_path)
         cert_path = paths["frozen_artifacts"] / day / f"APRIL_DAY_CERTIFICATE_{day.replace('-', '_')}.json"
         cert_status, cert_error = certificate_status(cert_path, day)
-        status = cert_status or str(state.get("status", "PENDING"))
+        state_status = state.get("status")
+        status = cert_status or (str(state_status) if state_status else supervisor_results.get(day, "PENDING"))
         if status not in {"PENDING", "RUNNING", "PASS", "FAIL", "INCOMPLETE"}:
             status = "INCOMPLETE"
         statuses.append(status)
+        completed_steps = state.get("completed_steps", [])
+        completed_issue_count = len(completed_steps) if isinstance(completed_steps, list) else 0
+        if status == "PASS":
+            completed_issue_count = ISSUES_PER_DAY
+        completed_issues_total += min(ISSUES_PER_DAY, completed_issue_count)
         if selected_day is not None and day != selected_day:
             continue
         if active_only and status != "RUNNING":
@@ -138,6 +164,9 @@ def snapshot(
             "status": status,
             "skipped_immutable_pass": day in skipped_days,
             "current_step": state.get("current_step"),
+            "completed_issues": completed_issue_count,
+            "current_issue": min(ISSUES_PER_DAY, completed_issue_count + (1 if status == "RUNNING" else 0)),
+            "total_issues": ISSUES_PER_DAY,
             "predecessor_sha_status": predecessor_status(state) if state else "NOT_STARTED",
             "pid": pid,
             "heartbeat_age_seconds": None if not isinstance(heartbeat, (int, float)) else max(0.0, current - float(heartbeat)),
@@ -155,7 +184,7 @@ def snapshot(
             "active_opendss_trajectory": counters.get("active_opendss_trajectory"),
             "opendss_slot": counters.get("opendss_slot", 0),
             "latest_log_line": latest_line(log_path),
-            "last_error": cert_error or failure.get("message") or state.get("_read_error"),
+            "last_error": cert_error or failure.get("message") or state.get("_read_error") or (failure_summary(log_path) if status in {"FAIL", "INCOMPLETE"} else None),
             "output_path": str((paths["frozen_artifacts"] / day).resolve()),
         }
         rows.append(row)
@@ -166,8 +195,17 @@ def snapshot(
     eta = None
     if elapsed is not None and completed > 0 and completed < len(APRIL_DAYS):
         eta = elapsed / completed * (len(APRIL_DAYS) - completed) / 2.0
+    visible_running = [row for row in rows if row["status"] == "RUNNING"]
+    visible_failed = [row for row in rows if row["status"] in {"FAIL", "INCOMPLETE"}]
+    campaign_status = (
+        "PASS" if counts["PASS"] == len(APRIL_DAYS)
+        else "RUNNING" if counts["RUNNING"]
+        else "FAIL" if counts["FAIL"] or counts["INCOMPLETE"]
+        else "WAITING"
+    )
     return {
         "campaign": "APRIL_PREFLIGHT",
+        "status": campaign_status,
         "resolution": "15 min / 96 slots",
         "day_workers": 2,
         "gurobi_threads": 4,
@@ -177,7 +215,13 @@ def snapshot(
             "skipped_immutable_pass": len(skipped_days),
             "elapsed_seconds": elapsed,
             "estimated_completion_seconds": eta,
+            "completed_issues": completed_issues_total,
+            "total_issues": TOTAL_ISSUES,
+            "overall_progress_percent": round(100.0 * completed_issues_total / TOTAL_ISSUES, 2),
+            "completed_days_percent": round(100.0 * counts["PASS"] / len(APRIL_DAYS), 2),
         },
+        "current": visible_running,
+        "failures": visible_failed,
         "days": rows,
         "read_only": True,
     }
@@ -185,31 +229,31 @@ def snapshot(
 
 def render(value: Mapping[str, object]) -> str:
     totals = value["totals"]
+    current = value["current"]
+    current_text = ", ".join(
+        f"{row['day']} issue {row['current_issue']}/{row['total_issues']}"
+        for row in current
+    ) or "없음"
+    failures = value["failures"]
+    if failures:
+        first = failures[0]
+        fail_text = f"{len(failures)}일 | {first['day']}: {first['last_error'] or '원인 확인 필요'}"
+    else:
+        fail_text = "없음"
     lines = [
-        f"Campaign: {value['campaign']}",
-        f"Resolution: {value['resolution']}",
-        f"Day workers: {value['day_workers']}",
-        f"Gurobi threads: {value['gurobi_threads']}",
-        "Totals: " + " ".join(f"{key}={totals[key]}" for key in (
-            "total", "PASS", "FAIL", "RUNNING", "INCOMPLETE", "PENDING", "skipped_immutable_pass",
-        )),
+        f"V28R2 APRIL  상태: {value['status']}",
+        f"현재 작업: {current_text}",
+        f"전체 작업: {totals['completed_issues']}/{totals['total_issues']} issue ({totals['overall_progress_percent']:.2f}%)",
+        f"완료 날짜: {totals['PASS']}/30 ({totals['completed_days_percent']:.2f}%)",
+        f"FAIL: {fail_text}",
     ]
-    for row in value["days"]:
-        lines.append(
-            f"{row['day']} {row['status']} step={row['current_step']} predecessor={row['predecessor_sha_status']} "
-            f"pid={row['pid']} heartbeat_age={row['heartbeat_age_seconds']} cpu={row['cpu_percent']} "
-            f"rss={row['current_rss_bytes']} peak_rss={row['peak_rss_bytes']} solver={row['active_solver']} "
-            f"obj={row['objective']} LB={row['lb']} UB={row['ub']} gap={row['gap']} "
-            f"OpenDSS={row['active_opendss_trajectory']}:{row['opendss_slot']}/96 error={row['last_error']} "
-            f"output={row['output_path']} log={row['latest_log_line']}"
-        )
     return "\n".join(lines)
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--once", action="store_true")
-    parser.add_argument("--watch-seconds", type=float)
+    parser.add_argument("--watch-seconds", type=float, default=10.0)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--active-only", action="store_true")
     parser.add_argument("--failed-only", action="store_true")
@@ -219,8 +263,10 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--active-only and --failed-only are mutually exclusive")
     while True:
         value = snapshot(active_only=args.active_only, failed_only=args.failed_only, selected_day=args.day)
+        if not args.json:
+            print("\033[2J\033[H", end="")
         print(json.dumps(value, indent=2) if args.json else render(value), flush=True)
-        if args.once or args.watch_seconds is None:
+        if args.once:
             return 0
         time.sleep(max(1.0, args.watch_seconds))
 

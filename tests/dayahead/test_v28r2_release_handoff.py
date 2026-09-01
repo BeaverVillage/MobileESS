@@ -28,12 +28,10 @@ def test_final_release_flags_authorize_only_april_local_preflight():
 def test_handoff_commands_are_exact_and_have_no_placeholders():
     text = (OUT / "V28R2_LOCAL_APRIL_EXECUTION_COMMANDS.md").read_text(encoding="utf-8")
     root = "/mnt/c/Users/kjw39/OneDrive/문서/ChatGPT/Mobile ESS 2/MobileESS_v28r2_heavy_backend"
-    assert text.count(f"cd '{root}'") == 5
-    for script in (
-        "prepare_2025_april_sources.sh", "run_2025_april_preflight.sh",
-        "audit_2025_april_preflight.sh", "monitor_2025_april_preflight.sh",
-    ):
+    assert text.count(f"cd '{root}'") == 2
+    for script in ("start_2025_april_preflight.sh", "monitor_2025_april_preflight.sh"):
         assert script in text
+    assert "--watch-seconds 30" not in text
     assert "<" not in text and "PLACEHOLDER" not in text
 
 

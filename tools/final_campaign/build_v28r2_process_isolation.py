@@ -15,6 +15,9 @@ RUNNER = REPO / "tools/final_campaign/run_v28r2_april.py"
 MONITOR = REPO / "tools/final_campaign/monitor_v28r2_april.py"
 RUN_SCRIPT = REPO / "tools/final_campaign/run_2025_april_preflight.sh"
 MONITOR_SCRIPT = REPO / "tools/final_campaign/monitor_2025_april_preflight.sh"
+START_SCRIPT = REPO / "tools/final_campaign/start_2025_april_preflight.sh"
+PREPARE_SCRIPT = REPO / "tools/final_campaign/prepare_2025_april_sources.sh"
+AUDIT_SCRIPT = REPO / "tools/final_campaign/audit_2025_april_preflight.sh"
 
 
 def write(name: str, payload: object) -> None:
@@ -66,7 +69,7 @@ def main() -> None:
         "gurobipy", "opendssdirect", "solver_runner", "heavy_backend", "subprocess"
     ) if token in monitor_source)
     scripts = {}
-    for path in (RUN_SCRIPT, MONITOR_SCRIPT):
+    for path in (START_SCRIPT, PREPARE_SCRIPT, RUN_SCRIPT, MONITOR_SCRIPT, AUDIT_SCRIPT):
         raw = path.read_bytes()
         scripts[path.name] = {
             "lf_only": b"\r\n" not in raw,
@@ -87,6 +90,8 @@ def main() -> None:
         and all(flag in monitor_source for flag in (
             "--once", "--watch-seconds", "--json", "--active-only", "--failed-only", "--day",
         ))
+        and "default=10.0" in monitor_source
+        and "TOTAL_ISSUES" in monitor_source
     )
     write("V28R2_PROCESS_ISOLATION_CONTRACT.json", {
         "artifact_id": "V28R2_PROCESS_ISOLATION_CONTRACT_V1",
@@ -107,6 +112,9 @@ def main() -> None:
         "status": "PASS_IMPLEMENTATION_READY" if monitor_ready else "FAIL",
         "APRIL_MONITOR_IMPLEMENTATION_READY": monitor_ready,
         "APRIL_MONITOR_READY": False,
+        "default_refresh_seconds": 10,
+        "compact_default_view": True,
+        "lists_all_30_days_by_default": False,
         "read_only": True,
         "write_calls": monitor_write_calls,
         "solver_or_subprocess_tokens": monitor_solver_tokens,

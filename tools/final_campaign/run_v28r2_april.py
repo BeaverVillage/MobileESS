@@ -263,6 +263,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.dry_run:
         print(json.dumps(plan, indent=2))
         return 0
+    # A missing native/runtime dependency must fail once in the parent, never
+    # as thirty identical day failures.
+    from tools.final_campaign.check_v28r2_runtime import check_runtime
+
+    check_runtime()
     verify_launch_gates()
     for root in roots.values():
         root.mkdir(parents=True, exist_ok=True)

@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from dayahead.v28r2.certificate import write_certificate
-from tools.final_campaign.monitor_v28r2_april import snapshot
+from tools.final_campaign.monitor_v28r2_april import render, snapshot
 from tools.final_campaign.run_v28r2_april import (
     DAY_WORKERS,
     april_days,
@@ -115,6 +115,39 @@ def test_monitor_snapshot_is_read_only_and_supports_day_filter(tmp_path: Path):
     assert len(value["days"]) == 1
     assert value["days"][0]["predecessor_sha_status"] == "VERIFIED"
     assert value["days"][0]["heartbeat_age_seconds"] == 10.0
+    assert value["days"][0]["current_issue"] == 2
+    assert value["totals"]["total_issues"] == 900
+
+
+def test_monitor_default_view_is_compact_and_does_not_list_thirty_dates(tmp_path: Path):
+    paths = campaign_roots(tmp_path)
+    paths["progress"].mkdir(parents=True)
+    (paths["progress"] / "supervisor.json").write_text(json.dumps({
+        "status": "INCOMPLETE",
+        "results": [{"day": day, "status": "FAIL"} for day in april_days()],
+    }), encoding="utf-8")
+    paths["logs"].mkdir(parents=True)
+    (paths["logs"] / "2025-04-01.log").write_text(
+        "ModuleNotFoundError: No module named 'lightgbm'\n", encoding="utf-8",
+    )
+    value = snapshot(tmp_path)
+    text = render(value)
+    assert "0/900 issue (0.00%)" in text
+    assert "FAIL: 30일" in text
+    assert "lightgbm" in text
+    assert "2025-04-30" not in text
+
+
+def test_single_start_script_owns_setup_source_run_and_audit():
+    script = Path(__file__).resolve().parents[2] / "tools/final_campaign/start_2025_april_preflight.sh"
+    source = script.read_text(encoding="utf-8")
+    assert "XDG_CACHE_HOME" in source
+    assert "mobileess-v28r2" in source
+    assert "requirements-v28.txt" in source
+    assert "prepare_v28r2_april_sources" in source
+    assert "check_v28r2_runtime" in source
+    assert "run_v28r2_april" in source
+    assert "audit_v28r2_april" in source
 
 
 def test_runner_source_has_no_thread_executor():
