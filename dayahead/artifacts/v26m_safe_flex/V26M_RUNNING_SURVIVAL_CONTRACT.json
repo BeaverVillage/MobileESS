@@ -1,0 +1,28 @@
+{
+  "artifact_id": "V26M_RUNNING_SURVIVAL_CONTRACT_V1",
+  "state": "RUNNING at D-1 18:00 EVENT_CENSORED_RECONSTRUCTED_STATE",
+  "policy": "LOCKED_RESIDUAL",
+  "target": "remaining runtime censored at 24 h",
+  "slot_h": 0.25,
+  "SR0": "requested-walltime residual heuristic",
+  "SR1": "LightGBM log-duration Q50/Q90 with empirical lognormal survival",
+  "SAFE_candidate": "LightGBM discrete hazard fitted by proper person-period Bernoulli likelihood",
+  "features": "request, observed age, category codes, calendar only",
+  "raw_account_identity_used": false,
+  "future_runtime_feature_reads": 0,
+  "right_censoring": "explicit 24-hour horizon",
+  "validation": "five expanding blocked folds; any validation job ID removed from fold training",
+  "pooled_metrics": {
+    "SR1_integrated_Brier": 0.16756624218368402,
+    "SAFE_integrated_Brier": 0.13838424062424598,
+    "SR1_NLL": 4.524605771632595,
+    "SAFE_NLL": 4.004495921395084,
+    "SR0_MAE_h": 13.103469807898103,
+    "SR1_Q50_MAE_h": 5.561972354680758,
+    "SAFE_Q50_MAE_h": 5.587798707357816,
+    "SR1_Q90_coverage": 0.7040462767206953,
+    "SAFE_Q90_coverage": 0.8925299506694856,
+    "SAFE_IBS_relative_improvement_vs_SR1": 0.17415203193164105
+  },
+  "state_quality_gate_5pct_IBS": true
+}
