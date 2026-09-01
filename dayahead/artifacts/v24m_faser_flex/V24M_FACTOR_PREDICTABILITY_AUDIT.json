@@ -1,0 +1,69 @@
+{
+  "artifact_id": "V24M_FACTOR_PREDICTABILITY_AUDIT_V1",
+  "folds": 5,
+  "same_cutoff": "D-1 18:00 AEST",
+  "causal_feature_columns": [
+    "jobs_1d",
+    "requested_GPU_1d",
+    "requested_GPU_h_1d",
+    "requested_nodes_1d",
+    "unique_accounts_1d",
+    "full_requested_GPU_h_1d",
+    "jobs_7d",
+    "requested_GPU_7d",
+    "requested_GPU_h_7d",
+    "requested_nodes_7d",
+    "unique_accounts_7d",
+    "full_requested_GPU_h_7d",
+    "jobs_28d",
+    "requested_GPU_28d",
+    "requested_GPU_h_28d",
+    "requested_nodes_28d",
+    "unique_accounts_28d",
+    "full_requested_GPU_h_28d",
+    "account_entropy_28d",
+    "full_share_7d",
+    "full_share_28d",
+    "dow_sin",
+    "dow_cos",
+    "month_sin",
+    "month_cos",
+    "holiday"
+  ],
+  "model_metrics": {
+    "F0_DIRECT_LIGHTGBM_H_F": {
+      "Mean_WAPE": 0.9920990832117159,
+      "MAE_GPU_h": 3289.245239950941,
+      "aggregate_mass_ratio": 0.6062698451019047,
+      "Burst_WAPE": 0.8661729267076339
+    },
+    "F1_FACTORIZED_LIGHTGBM": {
+      "Mean_WAPE": 0.9753386533787183,
+      "MAE_GPU_h": 3233.6770361489075,
+      "aggregate_mass_ratio": 0.47560802721542755,
+      "Burst_WAPE": 0.8848187291012068
+    },
+    "F2_SIMPLE_WEEKDAY_FACTORIZED": {
+      "Mean_WAPE": 0.9467355624694639,
+      "MAE_GPU_h": 3138.845197058223,
+      "aggregate_mass_ratio": 0.5193870226321022,
+      "Burst_WAPE": 0.8896570386657561
+    },
+    "F3_DIRECT_ORDINARY_RBF_GP": {
+      "Mean_WAPE": 0.9657144190226852,
+      "MAE_GPU_h": 3201.7684621168937,
+      "aggregate_mass_ratio": 0.07154347568719223,
+      "Burst_WAPE": 0.9860236659045407
+    }
+  },
+  "factorized_minus_direct_Mean_WAPE": -0.016760429832997636,
+  "factorized_better_than_direct": true,
+  "burst_threshold_by_fold_GPU_h": {
+    "1": 4206.22475,
+    "2": 5502.999555555557,
+    "3": 5834.143722222226,
+    "4": 6565.606944444444,
+    "5": 6214.02619444445
+  },
+  "PRIMARY_BOTTLENECK": "BURST_OCCURRENCE"
+}
