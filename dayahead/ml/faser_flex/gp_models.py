@@ -268,14 +268,17 @@ def estimate_oof_copula(
         r_mean, r_std = r_model.predict(valid_x)
         pi_mean, pi_std = pi_model.predict(valid_x)
         k_mean, k_std = k_model.predict(valid_x)
+        valid_r = valid.R_ALL_GPU_h_requested.to_numpy(float)
+        valid_pi = valid.PI_F.to_numpy(float)
+        valid_kappa = valid.KAPPA_F.to_numpy(float)
         block = np.column_stack(
             [
-                (np.log(valid.R_ALL_GPU_h_requested.to_numpy(float)) - r_mean) / r_std,
-                (logit(valid.PI_F.to_numpy(float)) - pi_mean) / pi_std,
-                (logit(valid.KAPPA_F.to_numpy(float)) - k_mean) / k_std,
+                (np.log(valid_r[keep]) - r_mean[keep]) / r_std[keep],
+                (logit(valid_pi[keep]) - pi_mean[keep]) / pi_std[keep],
+                (logit(valid_kappa[keep]) - k_mean[keep]) / k_std[keep],
             ]
         )
-        residuals.append(block[keep])
+        residuals.append(block)
     if sum(len(block) for block in residuals) < 5:
         return np.eye(3), 0.0
     correlation = np.corrcoef(np.vstack(residuals), rowvar=False)

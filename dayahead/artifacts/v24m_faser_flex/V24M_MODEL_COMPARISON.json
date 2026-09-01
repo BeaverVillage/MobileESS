@@ -1,0 +1,327 @@
+{
+  "artifact_id": "V24M_MODEL_COMPARISON_V1",
+  "classification": "V24M_FASER_NOVELTY_PASS_PERFORMANCE_FAIL",
+  "prior_benchmarks_reproduced_within_1e-9": true,
+  "prior_authority": {
+    "B2_mean_WAPE": 0.976108062962391,
+    "B3_Q50_WAPE": 0.890250058481854,
+    "C_MASS_WAPE": 1.007605567971126
+  },
+  "factor_probe_metrics": {
+    "F0_DIRECT_LIGHTGBM_H_F": {
+      "Mean_WAPE": 0.9920990832117159,
+      "MAE_GPU_h": 3289.245239950941,
+      "aggregate_mass_ratio": 0.6062698451019047,
+      "Burst_WAPE": 0.8661729267076339
+    },
+    "F1_FACTORIZED_LIGHTGBM": {
+      "Mean_WAPE": 0.9753386533787183,
+      "MAE_GPU_h": 3233.6770361489075,
+      "aggregate_mass_ratio": 0.47560802721542755,
+      "Burst_WAPE": 0.8848187291012068
+    },
+    "F2_SIMPLE_WEEKDAY_FACTORIZED": {
+      "Mean_WAPE": 0.9467355624694639,
+      "MAE_GPU_h": 3138.845197058223,
+      "aggregate_mass_ratio": 0.5193870226321022,
+      "Burst_WAPE": 0.8896570386657561
+    },
+    "F3_DIRECT_ORDINARY_RBF_GP": {
+      "Mean_WAPE": 0.9657144190226852,
+      "MAE_GPU_h": 3201.7684621168937,
+      "aggregate_mass_ratio": 0.07154347568719223,
+      "Burst_WAPE": 0.9860236659045407
+    }
+  },
+  "probe_summary": [
+    {
+      "model": "P0_DIRECT_LIGHTGBM",
+      "Mean_WAPE": 1.0561929282458133,
+      "Q50_WAPE": 0.9190721219002596,
+      "Q90_pinball": 1825.332447359496,
+      "CRPS": 2561.6934087160694,
+      "Burst_WAPE": 0.8262019789643913,
+      "aggregate_mass_ratio": 0.7496413660615506,
+      "Q50_coverage": 0.4473732718894009,
+      "Q90_coverage": 0.7306605222734255,
+      "status": "REPRODUCED_V24M_SAME_FOLDS",
+      "evidence_source": "V24M_PROBE_RESULTS.csv"
+    },
+    {
+      "model": "P1_FACTORIZED_LIGHTGBM",
+      "Mean_WAPE": 1.020753835290654,
+      "Q50_WAPE": 0.9209486926788649,
+      "Q90_pinball": 2035.059552151314,
+      "CRPS": 2671.6061645583004,
+      "Burst_WAPE": 0.8339936543775455,
+      "aggregate_mass_ratio": 0.6260371636139006,
+      "Q50_coverage": 0.36766513056835637,
+      "Q90_coverage": 0.6845929339477725,
+      "status": "REPRODUCED_V24M_SAME_FOLDS",
+      "evidence_source": "V24M_PROBE_RESULTS.csv"
+    },
+    {
+      "model": "P2_ORDINARY_GP",
+      "Mean_WAPE": 13.151666019105397,
+      "Q50_WAPE": 0.9522269454365535,
+      "Q90_pinball": 2251.2087308969417,
+      "CRPS": 2973.75183969954,
+      "Burst_WAPE": 2.129704634262771,
+      "aggregate_mass_ratio": 14.046225250389488,
+      "Q50_coverage": 0.2880030721966206,
+      "Q90_coverage": 0.9070967741935483,
+      "status": "REPRODUCED_V24M_SAME_FOLDS",
+      "evidence_source": "V24M_PROBE_RESULTS.csv"
+    },
+    {
+      "model": "P3_SIGNATURE_GP_DIRECT",
+      "Mean_WAPE": 12.56927479500819,
+      "Q50_WAPE": 0.9461926340635287,
+      "Q90_pinball": 2107.14940009486,
+      "CRPS": 2927.554512050504,
+      "Burst_WAPE": 2.212181390587293,
+      "aggregate_mass_ratio": 13.52295135521641,
+      "Q50_coverage": 0.3201689708141321,
+      "Q90_coverage": 0.9408141321044546,
+      "status": "REPRODUCED_V24M_SAME_FOLDS",
+      "evidence_source": "V24M_PROBE_RESULTS.csv"
+    },
+    {
+      "model": "P4_FACTORIZED_SIGNATURE_GP",
+      "Mean_WAPE": 1.895576061227899,
+      "Q50_WAPE": 0.9618867166861985,
+      "Q90_pinball": 1893.4216599132974,
+      "CRPS": 2657.081817842425,
+      "Burst_WAPE": 0.6536257854351092,
+      "aggregate_mass_ratio": 1.9915197231236443,
+      "Q50_coverage": 0.2812442396313364,
+      "Q90_coverage": 0.8237788018433181,
+      "status": "REPRODUCED_V24M_SAME_FOLDS",
+      "evidence_source": "V24M_PROBE_RESULTS.csv"
+    },
+    {
+      "model": "P5_HANDCRAFTED_ANALOG",
+      "Mean_WAPE": 1.316602652344709,
+      "Q50_WAPE": 1.0234033204478254,
+      "Q90_pinball": 1991.8689740834611,
+      "CRPS": 2716.3559871780462,
+      "Burst_WAPE": 0.7629680307424526,
+      "aggregate_mass_ratio": 1.2548206721974497,
+      "Q50_coverage": 0.5136098310291859,
+      "Q90_coverage": 0.8885560675883257,
+      "status": "REPRODUCED_V24M_SAME_FOLDS",
+      "evidence_source": "V24M_PROBE_RESULTS.csv"
+    },
+    {
+      "model": "P6_SIGNATURE_ANALOG",
+      "Mean_WAPE": 1.306865994659304,
+      "Q50_WAPE": 0.9973944423973033,
+      "Q90_pinball": 1884.4084105871304,
+      "CRPS": 2646.539269424766,
+      "Burst_WAPE": 0.7946824271075317,
+      "aggregate_mass_ratio": 1.178029728914718,
+      "Q50_coverage": 0.561705069124424,
+      "Q90_coverage": 0.8433947772657451,
+      "status": "REPRODUCED_V24M_SAME_FOLDS",
+      "evidence_source": "V24M_PROBE_RESULTS.csv"
+    },
+    {
+      "model": "P7_FASER_MIXTURE",
+      "Mean_WAPE": 1.333304441130921,
+      "Q50_WAPE": 1.020876726911072,
+      "Q90_pinball": 1966.5620778763446,
+      "CRPS": 2788.804090288197,
+      "Burst_WAPE": 0.7933643149810858,
+      "aggregate_mass_ratio": 1.1807808744126194,
+      "Q50_coverage": 0.529447004608295,
+      "Q90_coverage": 0.7982334869431644,
+      "status": "REPRODUCED_V24M_SAME_FOLDS",
+      "evidence_source": "V24M_PROBE_RESULTS.csv"
+    }
+  ],
+  "FASER_summary": {
+    "model": "ML-B11_FASER_FLEX",
+    "Mean_WAPE": 1.1877478294617465,
+    "Q50_WAPE": 0.9414334518461079,
+    "Q90_pinball": 1841.7091218161709,
+    "CRPS": 2454.95935288857,
+    "Burst_WAPE": 0.763990358554532,
+    "aggregate_mass_ratio": 1.1200518371982742,
+    "Q50_coverage": 0.4992012288786482,
+    "Q90_coverage": 0.8088428059395801,
+    "15min_GPU_h_WAPE": 2.0775536216208503,
+    "IT_power_WAPE": 1.8881341588356073,
+    "status": "REPRODUCED_V24M_5FOLD_3SEED",
+    "evidence_source": "V24M_FASER_BLOCKED_CV_RESULTS.csv"
+  },
+  "ablation_summary": [
+    {
+      "component": "A10_FASER_WITHOUT_GP",
+      "Mean_WAPE": 1.0891488459227645,
+      "Q50_WAPE": 0.9345985271806239,
+      "Q90_pinball": 1663.400161033453,
+      "CRPS": 2474.993857702889,
+      "Burst_WAPE": 0.811692262245583,
+      "aggregate_mass_ratio": 0.9127486338930322,
+      "Q50_coverage": 0.4342549923195085,
+      "Q90_coverage": 0.8618433179723501
+    },
+    {
+      "component": "A11_FASER_FIXED_50_50",
+      "Mean_WAPE": 1.3639837318912456,
+      "Q50_WAPE": 0.935202730732405,
+      "Q90_pinball": 1598.822087929699,
+      "CRPS": 2432.574357336497,
+      "Burst_WAPE": 0.7135991552726362,
+      "aggregate_mass_ratio": 1.4005682962183368,
+      "Q50_coverage": 0.36766513056835637,
+      "Q90_coverage": 0.8618433179723501
+    },
+    {
+      "component": "A12_FASER_WITHOUT_RELIABILITY_GATE",
+      "Mean_WAPE": 1.350688905172746,
+      "Q50_WAPE": 0.9429081383214541,
+      "Q90_pinball": 1609.3817196823925,
+      "CRPS": 2476.0419005474223,
+      "Burst_WAPE": 0.7051751526700775,
+      "aggregate_mass_ratio": 1.3754598039294088,
+      "Q50_coverage": 0.3890937019969278,
+      "Q90_coverage": 0.8424884792626728
+    },
+    {
+      "component": "A13_FASER_WITHOUT_JOINT_DEPENDENCE",
+      "Mean_WAPE": 1.1069866487845075,
+      "Q50_WAPE": 0.9531444009637736,
+      "Q90_pinball": 1610.573785093977,
+      "CRPS": 2482.7347225733765,
+      "Burst_WAPE": 0.7812211376262843,
+      "aggregate_mass_ratio": 1.0041806491571854,
+      "Q50_coverage": 0.26743471582181255,
+      "Q90_coverage": 0.8102304147465438
+    },
+    {
+      "component": "A14_FASER_WITHOUT_SHAPE_RETRIEVAL",
+      "Mean_WAPE": 1.1852984551004624,
+      "Q50_WAPE": 0.9348339078027401,
+      "Q90_pinball": 1622.529470282887,
+      "CRPS": 2452.4833903177214,
+      "Burst_WAPE": 0.7637450435465468,
+      "aggregate_mass_ratio": 1.1182581940830851,
+      "Q50_coverage": 0.3955453149001536,
+      "Q90_coverage": 0.8424884792626728
+    },
+    {
+      "component": "A15_FULL_FASER_FLEX",
+      "Mean_WAPE": 1.1852984551004624,
+      "Q50_WAPE": 0.9348339078027401,
+      "Q90_pinball": 1622.529470282887,
+      "CRPS": 2452.4833903177214,
+      "Burst_WAPE": 0.7637450435465468,
+      "aggregate_mass_ratio": 1.1182581940830851,
+      "Q50_coverage": 0.3955453149001536,
+      "Q90_coverage": 0.8424884792626728
+    },
+    {
+      "component": "A1_DIRECT_LIGHTGBM_H_F",
+      "Mean_WAPE": 1.0561929282458133,
+      "Q50_WAPE": 0.9190721219002596,
+      "Q90_pinball": NaN,
+      "CRPS": 2561.6934087160694,
+      "Burst_WAPE": 0.8262019789643913,
+      "aggregate_mass_ratio": 0.7496413660615506,
+      "Q50_coverage": 0.4473732718894009,
+      "Q90_coverage": 0.7306605222734255
+    },
+    {
+      "component": "A2_FACTORIZED_LIGHTGBM",
+      "Mean_WAPE": 1.020753835290654,
+      "Q50_WAPE": 0.9209486926788649,
+      "Q90_pinball": NaN,
+      "CRPS": 2671.6061645583004,
+      "Burst_WAPE": 0.8339936543775455,
+      "aggregate_mass_ratio": 0.6260371636139006,
+      "Q50_coverage": 0.36766513056835637,
+      "Q90_coverage": 0.6845929339477725
+    },
+    {
+      "component": "A3_ORDINARY_FEATURE_GP",
+      "Mean_WAPE": 13.151666019105397,
+      "Q50_WAPE": 0.9522269454365535,
+      "Q90_pinball": NaN,
+      "CRPS": 2973.75183969954,
+      "Burst_WAPE": 2.129704634262771,
+      "aggregate_mass_ratio": 14.046225250389488,
+      "Q50_coverage": 0.2880030721966206,
+      "Q90_coverage": 0.9070967741935483
+    },
+    {
+      "component": "A4_SIGNATURE_GP_DIRECT",
+      "Mean_WAPE": 12.56927479500819,
+      "Q50_WAPE": 0.9461926340635287,
+      "Q90_pinball": NaN,
+      "CRPS": 2927.554512050504,
+      "Burst_WAPE": 2.212181390587293,
+      "aggregate_mass_ratio": 13.52295135521641,
+      "Q50_coverage": 0.3201689708141321,
+      "Q90_coverage": 0.9408141321044546
+    },
+    {
+      "component": "A5_FACTORIZED_SIGNATURE_GP",
+      "Mean_WAPE": 1.895576061227899,
+      "Q50_WAPE": 0.9618867166861985,
+      "Q90_pinball": NaN,
+      "CRPS": 2657.081817842425,
+      "Burst_WAPE": 0.6536257854351092,
+      "aggregate_mass_ratio": 1.9915197231236443,
+      "Q50_coverage": 0.2812442396313364,
+      "Q90_coverage": 0.8237788018433181
+    },
+    {
+      "component": "A6_HANDCRAFTED_ANALOG",
+      "Mean_WAPE": 1.316602652344709,
+      "Q50_WAPE": 1.0234033204478254,
+      "Q90_pinball": NaN,
+      "CRPS": 2716.3559871780462,
+      "Burst_WAPE": 0.7629680307424526,
+      "aggregate_mass_ratio": 1.2548206721974497,
+      "Q50_coverage": 0.5136098310291859,
+      "Q90_coverage": 0.8885560675883257
+    },
+    {
+      "component": "A7_SIGNATURE_ANALOG",
+      "Mean_WAPE": 1.306865994659304,
+      "Q50_WAPE": 0.9973944423973033,
+      "Q90_pinball": NaN,
+      "CRPS": 2646.539269424766,
+      "Burst_WAPE": 0.7946824271075317,
+      "aggregate_mass_ratio": 1.178029728914718,
+      "Q50_coverage": 0.561705069124424,
+      "Q90_coverage": 0.8433947772657451
+    },
+    {
+      "component": "A8_FASER_WITHOUT_FACTORIZATION",
+      "Mean_WAPE": 5.592721202078819,
+      "Q50_WAPE": 0.9303136316247678,
+      "Q90_pinball": 1623.2504891219537,
+      "CRPS": 2550.429776290396,
+      "Burst_WAPE": 0.6248292783960753,
+      "aggregate_mass_ratio": 6.424965531838124,
+      "Q50_coverage": 0.47382488479262674,
+      "Q90_coverage": 0.9274807987711213
+    },
+    {
+      "component": "A9_FASER_WITHOUT_RETRIEVAL",
+      "Mean_WAPE": 1.6965825456615728,
+      "Q50_WAPE": 0.948520060997887,
+      "Q90_pinball": 1558.4365549847093,
+      "CRPS": 2496.273435587739,
+      "Burst_WAPE": 0.6150703045208428,
+      "aggregate_mass_ratio": 1.878793055026851,
+      "Q50_coverage": 0.2738863287250384,
+      "Q90_coverage": 0.8692012288786483
+    }
+  ],
+  "gate_contribution_claim_allowed": false,
+  "production_authority_changed": false,
+  "April_reads": 0
+}

@@ -59,7 +59,11 @@ def coherent_tensor(daily_mass: float, shape: np.ndarray) -> np.ndarray:
 
     tensor = float(daily_mass) * np.asarray(shape, float)
     error = float(daily_mass) - float(tensor.sum())
-    tensor.reshape(-1)[-1] += error
+    # Put the final floating-point correction on the largest cell.  Correcting
+    # an arbitrary trailing zero can make that cell negative when an extreme
+    # heavy-tail draw magnifies an otherwise harmless summation round-off.
+    flat = tensor.reshape(-1)
+    flat[int(np.argmax(flat))] += error
     if np.min(tensor) < -1e-12:
         raise RuntimeError("V24M_NEGATIVE_COHERENT_TENSOR")
     return tensor
