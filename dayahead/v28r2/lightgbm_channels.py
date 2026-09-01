@@ -123,6 +123,47 @@ def daily_features(values: pd.Series) -> pd.DataFrame:
     return frame.loc[:, DAILY_FEATURES]
 
 
+def causal_optimizer_predictions(
+    labels: OptimizerLabels, target_date: str, model_dir: Path,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Materialize P/G slot quantiles and strict-fullnode daily W quantiles."""
+
+    target = pd.Timestamp(target_date, tz=labels.timestamps.tz)
+    if not pd.Timestamp("2025-04-01", tz=labels.timestamps.tz) <= target <= pd.Timestamp("2025-04-30", tz=labels.timestamps.tz):
+        raise ValueError("V28R2_OPTIMIZER_MATERIALIZATION_APRIL_ONLY")
+    future_index = pd.date_range(
+        labels.timestamps[-1] + pd.Timedelta(minutes=15),
+        target + pd.Timedelta(days=1), freq="15min", inclusive="left",
+    )
+    extended_index = labels.timestamps.append(future_index)
+    variant = "APRIL_01_CAUSAL_FIT" if target_date == "2025-04-01" else "GENERAL_THROUGH_MARCH_31_FIT"
+    target_index = pd.date_range(target, periods=96, freq="15min")
+    p_values = np.concatenate([labels.p_it_kw, np.full(len(future_index), np.nan)])
+    g_values = np.concatenate([labels.g_h100_gpu, np.full(len(future_index), np.nan)])
+    p_x = slot_features(p_values, extended_index).loc[target_index]
+    g_x = slot_features(g_values, extended_index).loc[target_index]
+    if not np.isfinite(p_x).all().all() or not np.isfinite(g_x).all().all():
+        raise RuntimeError("V28R2_CAUSAL_SLOT_FEATURE_MISSING")
+    p_quantiles = predict_serialized_quantiles(model_dir, "P_REF", variant, p_x)
+    g_quantiles = predict_serialized_quantiles(model_dir, "G_REF", variant, g_x)
+
+    daily_index = pd.date_range(
+        labels.timestamps[0].normalize(), labels.timestamps[-1].normalize(),
+        freq="D", tz=labels.timestamps.tz,
+    )
+    daily_w = pd.Series(
+        labels.w_nodeh.reshape(-1, 96, len(labels.cohort_ids)).sum(axis=(1, 2)),
+        index=daily_index,
+    )
+    future_days = pd.date_range(daily_index[-1] + pd.Timedelta(days=1), target, freq="D")
+    extended_daily = pd.concat([daily_w, pd.Series(np.nan, index=future_days)])
+    w_x = daily_features(extended_daily).loc[[target]]
+    if not np.isfinite(w_x).all().all():
+        raise RuntimeError("V28R2_CAUSAL_W_FEATURE_MISSING")
+    w_quantiles = predict_serialized_quantiles(model_dir, "W_FULLNODE_DAILY", variant, w_x)[:, 0]
+    return p_quantiles, g_quantiles, w_quantiles
+
+
 def _fit_quantiles(
     channel: str,
     variant: str,
