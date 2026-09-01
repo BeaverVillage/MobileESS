@@ -1,0 +1,27 @@
+{
+  "artifact_id": "V24M_EVENT_PATH_CONTRACT_V1",
+  "lookback_days": 7,
+  "temporal_resolution": "1 hour",
+  "increments": 168,
+  "channels": [
+    "submitted_H100_job_count",
+    "requested_GPU_sum",
+    "requested_GPU_h_sum",
+    "requested_node_sum",
+    "FULL_requested_GPU_h",
+    "PARTIAL_requested_GPU_h",
+    "long_walltime_requested_GPU_h",
+    "unique_account_count"
+  ],
+  "raw_path_shape": [
+    225,
+    168,
+    8
+  ],
+  "raw_nonnegative": true,
+  "cutoff": "D-1 18:00 AEST",
+  "normalization": "log1p then outer-training median/IQR then cumulative path",
+  "time_channel": "[0,1]",
+  "April_members_opened": 0,
+  "path_array_sha256": "3d55071bc025ee62c827aa32f63927dea52651879ee94b20ecb77634dd4511a3"
+}

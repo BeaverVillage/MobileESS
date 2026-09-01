@@ -1,0 +1,32 @@
+{
+  "artifact_id": "V24M_ANALOG_RETRIEVAL_CONTRACT_V1",
+  "distance": "0.50*signature + 0.35*macro + 0.15*calendar RMS standardized distance",
+  "configs": {
+    "RET-A": {
+      "K": 10,
+      "temperature": 0.5
+    },
+    "RET-B": {
+      "K": 20,
+      "temperature": 0.5
+    },
+    "RET-C": {
+      "K": 20,
+      "temperature": 1.0
+    },
+    "RET-D": {
+      "K": 30,
+      "temperature": 1.0
+    }
+  },
+  "weight": "softmax(-distance/temperature)",
+  "joint_tuple_preserved": [
+    "R_ALL",
+    "PI_F",
+    "KAPPA_F",
+    "H_F",
+    "normalized_shape"
+  ],
+  "past_only": true,
+  "same_or_future_date_allowed": false
+}
