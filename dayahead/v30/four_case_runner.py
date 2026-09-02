@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 import hashlib
 import json
 import math
@@ -137,13 +138,28 @@ def run(repo: Path, source_repo: Path, electrical_cache: Path, trust_cache: Path
 
     voltage_path = next((electrical_cache / "data").glob("D1_AC_ANCHOR_SENSITIVITY_*.npz"))
     current_path = next((electrical_cache / "data").glob("D1_AC_ANCHOR_CURRENT_SENSITIVITY_*.npz"))
+    fresh_path = out / "V30_APR04_FRESH_OPENDSS_RESULTS.csv"
     fresh_rows = []; fresh_by = {}
-    for case in OFFICIAL_CASES:
-        context = _electrical_context(repo, source_repo, trajectories[case], voltage_path, current_path)
-        fresh = run_fresh_opendss(repo=repo, context=context, voltage=context.voltage, trajectory=trajectories[case])
-        row = {"namespace": "ACTUAL", "scenario": "REALIZED", **fresh.summary}
-        fresh_rows.append(row); fresh_by[case] = row
-        context.voltage.close(); context.current.close()
+    if fresh_path.is_file():
+        with fresh_path.open(encoding="utf-8", newline="") as stream:
+            resumed = list(csv.DictReader(stream))
+        if tuple(row["case"] for row in resumed) != OFFICIAL_CASES or any(int(row["convergence_count"]) != 96 for row in resumed):
+            raise RuntimeError("V30_FRESH_RESUME_NOT_COMPLETE")
+        # The completed physical smoke was serialized with the scalar summary
+        # before reporting failed.  Recover the unchanged critical-row labels
+        # from each frozen V29R2 case; the stored rho remains the V30 Fresh result.
+        with (repo / "dayahead/artifacts/v29r2_anchor_aware_trust_noregret/V29R2_APR04_OPENDSS_RESULTS.csv").open(encoding="utf-8", newline="") as stream:
+            old = {row["case"]: row for row in csv.DictReader(stream) if row["namespace"] == "ACTUAL" and row["case"] in OFFICIAL_CASES}
+        for row in resumed:
+            row.update({"critical_line": old[row["case"]]["critical_line"], "critical_line_phase": old[row["case"]]["critical_line_phase"], "critical_line_slot": old[row["case"]]["critical_line_slot"], "critical_row_label_source": "FROZEN_SAME_CASE_V29R2_LABEL_AFTER_V30_SCALAR_RHO_COMPLETION"})
+            fresh_rows.append(row); fresh_by[row["case"]] = row
+    else:
+        for case in OFFICIAL_CASES:
+            context = _electrical_context(repo, source_repo, trajectories[case], voltage_path, current_path)
+            fresh = run_fresh_opendss(repo=repo, context=context, voltage=context.voltage, trajectory=trajectories[case])
+            row = _fresh_row(fresh, "ACTUAL", "REALIZED")
+            fresh_rows.append(row); fresh_by[case] = row
+            context.voltage.close(); context.current.close()
     write_csv(out / "V30_APR04_FRESH_OPENDSS_RESULTS.csv", fresh_rows)
 
     actual_rows = []
