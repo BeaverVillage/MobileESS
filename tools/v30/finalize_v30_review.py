@@ -9,7 +9,7 @@ from pathlib import Path
 
 from dayahead.v29r3.forensic import preservation_snapshot
 from dayahead.v30.contracts import OFFICIAL_CASES, STARTING_SHA, write_json
-from dayahead.v30.reporting import finalize_manifest
+from dayahead.v30.reporting import finalize_manifest, write_csv
 
 
 OUT_REL = Path("dayahead/artifacts/v30_two_stage_aidc_recourse")
@@ -26,6 +26,13 @@ def git(repo: Path, *args: str) -> str:
 
 def main() -> None:
     repo = Path.cwd(); out = repo / OUT_REL
+    fresh_path = out / "V30_APR04_FRESH_OPENDSS_RESULTS.csv"
+    fresh_rows = read_csv(fresh_path)
+    for row in fresh_rows:
+        for key, value in row.items():
+            if isinstance(value, str) and ("\n" in value or "\r" in value):
+                row[key] = " ".join(value.split())
+    write_csv(fresh_path, fresh_rows)
     actual = {row["case"]: row for row in read_csv(out / "V30_APR04_ACTUAL_RESULTS.csv")}
     da = {row["case"]: row for row in read_csv(out / "V30_APR04_DA_RESULTS.csv")}
     delivered = {row["case"]: row for row in read_csv(out / "V30_APR04_AIDC_DELIVERABILITY.csv")}
