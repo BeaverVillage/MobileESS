@@ -187,6 +187,11 @@ def main() -> None:
             "resolution": "read-only NTFS junctions to the existing authoritative roots; no evidence copied or modified",
             "superseding_result": "66 passed, 0 failed",
         },
+        "invalidated_freeze_attempt": {
+            "V29R2_DEV_FREEZE_HEAD": _load(out / "V29R2_DEV_FREEZE.json")["V29R2_DEV_FREEZE_HEAD"],
+            "reason": "Apr-04 fail-closed runner exposed an unsupported trajectory namespace before any Apr-04 result artifact was written.",
+            "affected_pre_April_evidence": "none; full regression and preservation audit rerun before replacement freeze",
+        },
         "required_checks": _required_checks(),
         "known_unexplained_failures": 0,
         "Apr04_results_opened_before_freeze": False,
