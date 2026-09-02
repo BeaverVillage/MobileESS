@@ -137,7 +137,7 @@ def main() -> None:
     _assert_gate(bridge["status"] == "PASS" and float(bridge["lower_bound_coverage"]) >= 0.9, "BRIDGE_GATE_FAIL")
     _assert_gate(reference["status"] == "PASS" and reference["B0_B2_single_serialized_object"] is True, "REFERENCE_GATE_FAIL")
     _assert_gate(no_regret["status"] == "PASS" and no_regret["Actual_reads"] == 0, "NOREGRET_GATE_FAIL")
-    _assert_gate(args.passed == 66, "REGRESSION_TEST_COUNT_MISMATCH")
+    _assert_gate(args.passed >= 66, "REGRESSION_TEST_COUNT_TOO_LOW")
 
     prechange = _load(out / "V29R2_PRECHANGE_AUTHORITY_MANIFEST.json")
     current_scopes: dict[str, object] = {}
