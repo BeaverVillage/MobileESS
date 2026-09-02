@@ -15,7 +15,8 @@ from tools.v29.run_stage3_carryin_authority import cohort, cohort_bins, read_can
 from .anchor_forensic import OUT_REL
 from .service_model import (
     CLASSIFIER_PARAMS, EVALUATION_START, FEATURE_NAMES, MODEL_SEED, REGRESSOR_PARAMS,
-    build_job_day_instances, cutoff, fit_hurdle, predict_hurdle_components, rolling_origin,
+    build_job_day_instances, conformal_quantile, cutoff, fit_hurdle,
+    predict_hurdle, predict_hurdle_components, rolling_origin,
 )
 
 
@@ -133,6 +134,65 @@ def _calibration(rows: list[dict[str, object]]) -> dict[str, object]:
         "actual_no_double_count_min_margin": min(float(row["actual_no_double_count_margin"]) for row in rows),
         "April_fit_rows": 0,
     }
+
+
+def predict_bridge_day(repo: Path, day: str) -> list[dict[str, object]]:
+    """Predict a cutoff state without constructing or reading the target-day label."""
+
+    out = repo / OUT_REL
+    service_authority = json.loads((out / "V29R2_EXEC_SERVICE_MODEL_AUTHORITY.json").read_text(encoding="utf-8"))
+    events, _members, _schemas = read_candidate_events(source_zip())
+    train = build_job_day_instances(events, CERTIFICATION_DAYS)
+    target = build_job_day_instances(events, (day,), include_labels=False)
+    bins = cohort_bins(repo)
+    for frame in (train, target):
+        frame["cohort_id"] = [
+            cohort(int(nodes), float(hours), bins)
+            for nodes, hours in zip(frame["nodes"], frame["request_hours"], strict=True)
+        ]
+    mark = cutoff(day)
+    eligible = train.loc[train["label_available_utc"].le(mark)]
+    if eligible.empty or target.empty:
+        return []
+    service_model = fit_hurdle(eligible)
+    target["H_NOM"] = predict_hurdle(service_model, target)
+    q_fraction = float(service_authority["final_conformal_overprediction_fraction_quantile"])
+    target["H_LOW"] = 0.0
+    for _cohort_id, selected in target.groupby("cohort_id", sort=True):
+        h_req = float(selected["H_REQ"].sum())
+        h_nom = float(selected["H_NOM"].sum())
+        h_low = max(0.0, h_nom - q_fraction * h_req)
+        if h_nom > 0:
+            target.loc[selected.index, "H_LOW"] = selected["H_NOM"] * h_low / h_nom
+    bridge_train = _bridge_view(eligible, prediction=False)
+    bridge_target = _bridge_view(target, prediction=True)
+    bridge_model = fit_hurdle(bridge_train)
+    probability, fraction = predict_hurdle_components(bridge_model, bridge_target)
+    target["pre_D0_service_probability"] = 0.0
+    target["H_PRE_D0_NOM"] = 0.0
+    target.loc[bridge_target.index, "pre_D0_service_probability"] = probability
+    target.loc[bridge_target.index, "H_PRE_D0_NOM"] = bridge_target["H_REQ"].to_numpy(dtype=float) * probability * fraction
+    target["H0_REQ"] = target["H_REQ"] - target["H_PRE_D0_NOM"]
+    target["H0_NOM"] = target["H_NOM"]
+    target["H0_LOW"] = target["H_LOW"]
+    rows: list[dict[str, object]] = []
+    for cohort_id, selected in target.groupby("cohort_id", sort=True):
+        rows.append({
+            "day": day, "cohort_id": cohort_id, "job_count": len(selected),
+            "cutoff_H_REQ": float(selected["H_REQ"].sum()),
+            "pre_D0_service_probability_request_weighted": float(np.average(
+                selected["pre_D0_service_probability"], weights=selected["H_REQ"],
+            )),
+            "pre_D0_service_NOM": float(selected["H_PRE_D0_NOM"].sum()),
+            "H0_REQ": float(selected["H0_REQ"].sum()),
+            "H0_NOM": float(selected["H0_NOM"].sum()),
+            "H0_LOW": float(selected["H0_LOW"].sum()),
+            "April_fit_rows": 0, "April_actual_label_reads": 0,
+            "future_actual_feature_count": 0,
+        })
+    if any(not (0 <= row["H0_LOW"] <= row["H0_NOM"] + 1e-9 <= row["H0_REQ"] + 1e-9) for row in rows):
+        raise RuntimeError(f"V29R2_BRIDGE_V2_FORECAST_BOUND_FAILURE:{day}")
+    return rows
 
 
 def build_bridge_v2(repo: Path) -> dict[str, object]:

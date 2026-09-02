@@ -111,7 +111,9 @@ def _feature_frame(rows: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
-def build_job_day_instances(events: pd.DataFrame, days: Sequence[str]) -> pd.DataFrame:
+def build_job_day_instances(
+    events: pd.DataFrame, days: Sequence[str], *, include_labels: bool = True,
+) -> pd.DataFrame:
     prepared = prepare_events(events)
     instances: list[pd.DataFrame] = []
     for day in days:
@@ -128,6 +130,10 @@ def build_job_day_instances(events: pd.DataFrame, days: Sequence[str]) -> pd.Dat
         selected["label_available_utc"] = end_day
         selected["queue_age_hours"] = (mark - selected["submit_utc"]).dt.total_seconds() / 3600.0
         selected["H_REQ"] = selected["nodes"] * selected["request_hours"]
+        if not include_labels:
+            selected["April_actual_label_read"] = False
+            instances.append(selected)
+            continue
         pre_start = selected["start_utc"].where(selected["start_utc"].gt(mark), mark)
         pre_end = selected["end_utc"].where(selected["end_utc"].lt(start_day), start_day)
         pre_overlap_hours = (pre_end - pre_start).dt.total_seconds().div(3600.0)
