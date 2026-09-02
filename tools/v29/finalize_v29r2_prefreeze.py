@@ -169,6 +169,8 @@ def main() -> None:
     _assert_gate(preservation["status"] == "PASS", "V29R2_PROTECTED_SCOPE_MISMATCH")
     write_json(out / "V29R2_POSTCHANGE_PRESERVATION_AUDIT.json", preservation)
 
+    failed_attempts = sorted(out.glob("V29R2_APR04_FAILED_ATTEMPT_*.json"))
+    latest_failure = _load(failed_attempts[-1]) if failed_attempts else None
     report = {
         "artifact_id": "V29R2_TEST_REPORT_V1",
         "status": "PASS",
@@ -189,11 +191,7 @@ def main() -> None:
         },
         "invalidated_freeze_attempt": {
             "V29R2_DEV_FREEZE_HEAD": _load(out / "V29R2_DEV_FREEZE.json")["V29R2_DEV_FREEZE_HEAD"],
-            "reason": (
-                _load(out / "V29R2_APR04_FAILED_ATTEMPT_2.json")["failure"]
-                if (out / "V29R2_APR04_FAILED_ATTEMPT_2.json").is_file()
-                else "unsupported trajectory namespace before any Apr-04 result artifact was written"
-            ),
+            "reason": latest_failure["failure"] if latest_failure else "unsupported trajectory namespace before any Apr-04 result artifact was written",
             "affected_pre_April_evidence": "none; full regression and preservation audit rerun before replacement freeze",
         },
         "required_checks": _required_checks(),

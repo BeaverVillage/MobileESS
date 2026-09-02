@@ -1,7 +1,8 @@
-"""Archive the incomplete Apr-04 schema-failure attempt without hiding it."""
+"""Archive an invalidated Apr-04 attempt without hiding it."""
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import shutil
@@ -20,11 +21,21 @@ def _sha256(path: Path) -> str:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--attempt", type=int, required=True)
+    parser.add_argument("--marker-head", required=True)
+    parser.add_argument("--freeze-head", required=True)
+    parser.add_argument("--failure", required=True)
+    parser.add_argument("--failure-stage", required=True)
+    args = parser.parse_args()
     repo = Path(__file__).resolve().parents[2]
     out = repo / OUT_REL
-    archive = repo / "cache/v29r2_failed_attempts/apr04_schema_failure_e7c3943"
+    archive = repo / f"cache/v29r2_failed_attempts/apr04_attempt_{args.attempt}_{args.marker_head[:7]}"
     archive.mkdir(parents=True, exist_ok=False)
-    candidates = sorted(out.glob("V29R2_APR04_*"))
+    candidates = sorted(
+        path for path in out.glob("V29R2_APR04_*")
+        if not path.name.startswith("V29R2_APR04_FAILED_ATTEMPT_")
+    )
     if not candidates:
         raise RuntimeError("V29R2_NO_INCOMPLETE_APR04_ARTIFACTS_TO_ARCHIVE")
     records = []
@@ -38,12 +49,12 @@ def main() -> None:
         })
         shutil.move(str(source), str(archive / source.name))
     payload = {
-        "artifact_id": "V29R2_APR04_FAILED_ATTEMPT_2_V1",
+        "artifact_id": f"V29R2_APR04_FAILED_ATTEMPT_{args.attempt}_V1",
         "status": "INVALIDATED_IMPLEMENTATION_BUG",
-        "marker_head": "e7c3943",
-        "freeze_head": "2c1b6c8112a0a1b0afd38db9f3ad677f9400c225",
-        "failure": "V29R2_APR04_COMPARISON_HETEROGENEOUS_CSV_SCHEMA",
-        "failure_stage": "final V29 read-only comparison CSV serialization",
+        "marker_head": args.marker_head,
+        "freeze_head": args.freeze_head,
+        "failure": args.failure,
+        "failure_stage": args.failure_stage,
         "Actual_optimizer_calls": 0,
         "scientific_results_authorized": False,
         "archived_file_count": len(records),
@@ -51,7 +62,7 @@ def main() -> None:
         "archive_location": str(archive),
         "next_action": "fix schema only, rerun full regression and preservation, create a replacement freeze, rerun Apr-04 from the beginning",
     }
-    write_json(out / "V29R2_APR04_FAILED_ATTEMPT_2.json", payload)
+    write_json(out / f"V29R2_APR04_FAILED_ATTEMPT_{args.attempt}.json", payload)
     print(json.dumps({"status": payload["status"], "archived": len(records)}))
 
 

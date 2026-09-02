@@ -253,6 +253,13 @@ def run_apr04(repo: Path) -> dict[str, object]:
             }
             evaluations[rung][scenario] = evaluation
             gate_rows.append({"rung": rung, "scenario": scenario, **evaluation, "B2_rho_AC": b2_rho, "B3_rho_AC": result.summary["rho_max_AC"], "epsilon_NR": EPSILON_NR, "epsilon_AC_NR": EPSILON_AC_NR})
+        gate_rows.append({
+            "rung": "B2_FALLBACK", "scenario": scenario,
+            "planning_delta_vs_B2": 0.0, "rho_AC_delta_vs_B2": 0.0,
+            "all_converged": int(b2_result.summary["convergence_count"]) == 96,
+            "B2_rho_AC": b2_rho, "B3_rho_AC": b2_rho,
+            "epsilon_NR": EPSILON_NR, "epsilon_AC_NR": EPSILON_AC_NR,
+        })
     selected, selection_audit = select_first_safe_rung(evaluations)
     nominal = scenario_data["S_NOM"]; context = scenario_context["S_NOM"]
     b2 = b2_payloads["S_NOM"]
