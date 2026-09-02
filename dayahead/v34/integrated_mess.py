@@ -21,6 +21,11 @@ from dayahead.v33m.route_table import MobilityRouteTable
 from .correction import StaticCorrection, bind_squared_voltage_bounds
 
 
+WORK_LIMIT_TIERS = (60.0, 180.0, 300.0)
+RESTRICTED_MIP_GAP = 1e-7
+RESOLVED_OBJECTIVE_TOLERANCE = 1e-6
+
+
 @dataclass(frozen=True)
 class IntegratedMessResult:
     trajectory: MessTrajectory
@@ -47,6 +52,18 @@ class IntegratedMessResult:
     prior_fixed_Q_l1_kvar_slots: float
     current_vehicle_free_variable_count: int
     future_vehicle_variable_count: int
+    zero_actuation_objective: float = math.inf
+    restricted_stationary_objective: float = math.inf
+    restricted_stationary_best_bound: float = math.inf
+    restricted_stationary_mip_gap: float = math.inf
+    restricted_stationary_status: str = "NOT_RUN"
+    restricted_stationary_sum_abs_p_kw_slots: float = 0.0
+    restricted_stationary_sum_abs_q_kvar_slots: float = 0.0
+    restricted_incumbent_improves_zero: bool = False
+    mip_start_accepted: bool = False
+    work_limit_tiers_attempted: tuple[float, ...] = ()
+    escalation_reason: str | None = None
+    bounded_compute_classification: str = "NOT_APPLICABLE"
 
 
 def _configured_model(name: str) -> gp.Model:
@@ -65,6 +82,119 @@ def _configured_model(name: str) -> gp.Model:
     model.Params.SoftMemLimit = 8.0
     model.Params.NodefileStart = 1.0
     return model
+
+
+def _set_zero_stay_start(
+    block: object,
+    mess_id: str,
+    initial_service: str,
+    initial_energy: float,
+) -> None:
+    for (key_mess, _slot, service), variable in block.occupancy.items():
+        variable.Start = float(key_mess == mess_id and service == initial_service)
+    for (key_mess, _slot, service), variable in block.stay.items():
+        variable.Start = float(key_mess == mess_id and service == initial_service)
+    for variable in block.move.values():
+        variable.Start = 0.0
+    for variable in block.discharge_mode.values():
+        variable.Start = 0.0
+    for variable in block.p_discharge.values():
+        variable.Start = 0.0
+    for variable in block.p_charge.values():
+        variable.Start = 0.0
+    for variable in block.q.values():
+        variable.Start = 0.0
+    for variable in block.energy.values():
+        variable.Start = float(initial_energy)
+
+
+def _stationary_restricted_incumbent(
+    model: gp.Model,
+    block: object,
+    mess_id: str,
+    initial_service: str,
+) -> dict[str, object]:
+    """Solve the exact full model with mobility temporarily fixed to STAY.
+
+    The temporary rows are removed before the production solve.  Capturing the
+    solution as a MIP start ensures that the complete mobility model can never
+    return an incumbent worse than this cheap, production-feasible policy.
+    """
+
+    fixed_rows: list[gp.Constr] = []
+    for (key_mess, _slot, service), variable in block.occupancy.items():
+        fixed_rows.append(model.addConstr(
+            variable == float(key_mess == mess_id and service == initial_service),
+            name=f"v35_restricted_occupancy[{variable.index}]",
+        ))
+    for (key_mess, _slot, service), variable in block.stay.items():
+        fixed_rows.append(model.addConstr(
+            variable == float(key_mess == mess_id and service == initial_service),
+            name=f"v35_restricted_stay[{variable.index}]",
+        ))
+    for variable in block.move.values():
+        fixed_rows.append(model.addConstr(variable == 0.0, name=f"v35_restricted_move[{variable.index}]"))
+    model.update()
+    production_gap = float(model.Params.MIPGap)
+    production_work_limit = float(model.Params.WorkLimit)
+    model.Params.MIPGap = RESTRICTED_MIP_GAP
+    model.Params.WorkLimit = WORK_LIMIT_TIERS[0]
+    model.optimize()
+    if model.SolCount < 1:
+        status = int(model.Status)
+        model.remove(fixed_rows)
+        model.update()
+        model.Params.MIPGap = production_gap
+        model.Params.WorkLimit = production_work_limit
+        model.reset()
+        return {
+            "available": False,
+            "status": f"STATUS_{status}",
+            "objective": math.inf,
+            "best_bound": math.inf,
+            "mip_gap": math.inf,
+            "start": (),
+            "sum_abs_p": 0.0,
+            "sum_abs_q": 0.0,
+        }
+
+    raw_status = {
+        GRB.OPTIMAL: "OPTIMAL",
+        GRB.WORK_LIMIT: "WORK_LIMIT",
+        GRB.TIME_LIMIT: "TIME_LIMIT",
+        GRB.SUBOPTIMAL: "SUBOPTIMAL",
+    }.get(model.Status, f"STATUS_{model.Status}")
+    start = tuple(float(variable.X) for variable in model.getVars())
+    sum_abs_p = sum(
+        abs(float(block.p_discharge[key].X) - float(block.p_charge[key].X))
+        for key in block.p_discharge
+    )
+    sum_abs_q = sum(abs(float(variable.X)) for variable in block.q.values())
+    result = {
+        "available": True,
+        "status": raw_status,
+        "objective": float(model.ObjVal),
+        "best_bound": float(model.ObjBound),
+        "mip_gap": float(model.MIPGap),
+        "start": start,
+        "sum_abs_p": float(sum_abs_p),
+        "sum_abs_q": float(sum_abs_q),
+    }
+    model.remove(fixed_rows)
+    model.update()
+    model.Params.MIPGap = production_gap
+    model.Params.WorkLimit = production_work_limit
+    model.reset()
+    for variable, value in zip(model.getVars(), start, strict=True):
+        variable.Start = value
+    return result
+
+
+def _bounded_compute_classification(raw_status: str, objective: float, best_bound: float) -> str:
+    absolute_gap = abs(float(objective) - float(best_bound))
+    if raw_status == "OPTIMAL" and absolute_gap <= RESOLVED_OBJECTIVE_TOLERANCE:
+        return "OPTIMAL_CERTIFIED"
+    return "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT"
 
 
 def solve_integrated_mess(
@@ -110,22 +240,7 @@ def solve_integrated_mess(
     mess_id = inputs.mess_ids[0]
     initial_service = inputs.initial_service_by_mess[mess_id]
     initial_energy = inputs.initial_energy_by_mess[mess_id]
-    for (key_mess, slot, service), variable in block.occupancy.items():
-        variable.Start = float(service == initial_service)
-    for (key_mess, slot, service), variable in block.stay.items():
-        variable.Start = float(service == initial_service)
-    for variable in block.move.values():
-        variable.Start = 0.0
-    for variable in block.discharge_mode.values():
-        variable.Start = 0.0
-    for variable in block.p_discharge.values():
-        variable.Start = 0.0
-    for variable in block.p_charge.values():
-        variable.Start = 0.0
-    for variable in block.q.values():
-        variable.Start = 0.0
-    for variable in block.energy.values():
-        variable.Start = float(initial_energy)
+    _set_zero_stay_start(block, mess_id, initial_service, initial_energy)
     fixed_p = {} if fixed_mess_p_by_service is None else dict(fixed_mess_p_by_service)
     fixed_q = {} if fixed_mess_q_by_service is None else dict(fixed_mess_q_by_service)
     controls = tuple(map(str, voltage_authority["control_names"]))
@@ -269,10 +384,40 @@ def solve_integrated_mess(
         GRB.MINIMIZE,
     )
     model_build_seconds = time.perf_counter() - build_started
-    solve_started = time.perf_counter(); model.optimize(); solve_seconds = time.perf_counter() - solve_started
+    zero_rho = 0.0
+    for slot, coefficient in enumerate(coefficients):
+        numeric = np.asarray(
+            list(aidc[slot])
+            + [float(fixed_p.get((service, slot), 0.0)) for service in p_services]
+            + [float(fixed_q.get((service, slot), 0.0)) for service in p_services],
+            dtype=float,
+        )
+        current = coefficient.current_constant + coefficient.current_matrix.T @ numeric
+        for index, branch in enumerate(coefficient.branch_names):
+            if not branch.startswith("transformer.") and not is_dominated_mess_current_row(branch):
+                zero_rho = max(zero_rho, float(current[index]))
+
+    restricted = _stationary_restricted_incumbent(model, block, mess_id, initial_service)
+    attempted: list[float] = []
+    escalation_reason: str | None = None
+    solve_started = time.perf_counter()
+    for work_limit in WORK_LIMIT_TIERS:
+        attempted.append(work_limit)
+        model.Params.WorkLimit = work_limit
+        model.optimize()
+        if model.SolCount < 1:
+            escalation_reason = "NO_FULL_MODEL_FEASIBLE_INCUMBENT"
+            continue
+        if bool(restricted["available"]) and float(model.ObjVal) > float(restricted["objective"]) + RESOLVED_OBJECTIVE_TOLERANCE:
+            escalation_reason = "FULL_MODEL_INCUMBENT_WORSE_THAN_RESTRICTED_FEASIBLE_INCUMBENT"
+            continue
+        break
+    solve_seconds = time.perf_counter() - solve_started
     accepted_statuses = {GRB.OPTIMAL, GRB.WORK_LIMIT, GRB.TIME_LIMIT, GRB.SUBOPTIMAL}
     if model.Status not in accepted_statuses or model.SolCount < 1:
         raise RuntimeError(f"V34_INTEGRATED_MESS_SOLVER_STATUS:{model.Status}")
+    if bool(restricted["available"]) and float(model.ObjVal) > float(restricted["objective"]) + RESOLVED_OBJECTIVE_TOLERANCE:
+        raise RuntimeError("V35_MESS_FULL_MODEL_WORSE_THAN_RESTRICTED_INCUMBENT")
     # Evaluate the frozen solution numerically.  Keeping tens of thousands of
     # Python LinExpr wrappers alive through optimize materially increases RSS.
     trajectory = extract_mess_trajectory(block)
@@ -300,6 +445,9 @@ def solve_integrated_mess(
         GRB.WORK_LIMIT: "WORK_LIMIT",
         GRB.SUBOPTIMAL: "SUBOPTIMAL",
     }.get(model.Status, f"STATUS_{model.Status}")
+    classification = _bounded_compute_classification(
+        termination, float(model.ObjVal), float(model.ObjBound),
+    )
     return IntegratedMessResult(
         trajectory, np.asarray(planning_v), np.asarray(planning_i), float(model.ObjVal), controls,
         termination,
@@ -310,6 +458,24 @@ def solve_integrated_mess(
         sum(abs(value) for value in fixed_p.values()),
         sum(abs(value) for value in fixed_q.values()),
         sum(variable.LB < variable.UB for variable in model.getVars()), 0,
+        zero_actuation_objective=float(zero_rho),
+        restricted_stationary_objective=float(restricted["objective"]),
+        restricted_stationary_best_bound=float(restricted["best_bound"]),
+        restricted_stationary_mip_gap=float(restricted["mip_gap"]),
+        restricted_stationary_status=str(restricted["status"]),
+        restricted_stationary_sum_abs_p_kw_slots=float(restricted["sum_abs_p"]),
+        restricted_stationary_sum_abs_q_kvar_slots=float(restricted["sum_abs_q"]),
+        restricted_incumbent_improves_zero=bool(
+            bool(restricted["available"])
+            and float(restricted["objective"]) < float(zero_rho) - RESOLVED_OBJECTIVE_TOLERANCE
+        ),
+        mip_start_accepted=bool(
+            bool(restricted["available"])
+            and float(model.ObjVal) <= float(restricted["objective"]) + RESOLVED_OBJECTIVE_TOLERANCE
+        ),
+        work_limit_tiers_attempted=tuple(attempted),
+        escalation_reason=escalation_reason if len(attempted) > 1 else None,
+        bounded_compute_classification=classification,
     )
 
 

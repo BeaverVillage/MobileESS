@@ -351,6 +351,18 @@ def main() -> int:
                             "cumulative_prior_Q_l1_kvar_slots": item.prior_fixed_Q_l1_kvar_slots,
                             "current_vehicle_free_variable_count": item.current_vehicle_free_variable_count,
                             "future_vehicle_variable_count": item.future_vehicle_variable_count,
+                            "zero_actuation_objective": item.zero_actuation_objective,
+                            "restricted_stationary_objective": item.restricted_stationary_objective,
+                            "restricted_stationary_best_bound": item.restricted_stationary_best_bound,
+                            "restricted_stationary_MIP_gap": item.restricted_stationary_mip_gap,
+                            "restricted_stationary_status": item.restricted_stationary_status,
+                            "restricted_stationary_sum_abs_P_kW_slots": item.restricted_stationary_sum_abs_p_kw_slots,
+                            "restricted_stationary_sum_abs_Q_kvar_slots": item.restricted_stationary_sum_abs_q_kvar_slots,
+                            "restricted_incumbent_improves_zero": item.restricted_incumbent_improves_zero,
+                            "MIPStart_accepted": item.mip_start_accepted,
+                            "work_limit_tiers_attempted": list(item.work_limit_tiers_attempted),
+                            "escalation_reason": item.escalation_reason,
+                            "bounded_compute_classification": item.bounded_compute_classification,
                         }
                         for mess_id, item in zip(mess_ids, integrated_runs, strict=True)
                     ],

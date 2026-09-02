@@ -332,7 +332,11 @@ def stationary_mess_probe(coefficients: tuple[object, ...], aidc_p: np.ndarray, 
     model.Params.OutputFlag = 0
     model.Params.Threads = 4
     model.Params.Seed = 20260828
-    model.Params.MIPGap = 1e-3
+    # A 0.1% relative gap previously allowed the zero-P/Q incumbent to be
+    # reported as OPTIMAL even though a simple feasible reactive-power point
+    # improved rho.  The restricted problem is cheap, so resolve its absolute
+    # improvement rather than accepting that loose relative-gap certificate.
+    model.Params.MIPGap = 1e-7
     model.Params.FeasibilityTol = 1e-6
     model.Params.OptimalityTol = 1e-6
     model.Params.WorkLimit = 60.0
@@ -404,6 +408,42 @@ def stationary_mess_probe(coefficients: tuple[object, ...], aidc_p: np.ndarray, 
     perturb_arrays = grid_arrays(coefficients, aidc_p, service=service, mess_p=perturb_p, mess_q=perturb_q)
     baseline_arrays = grid_arrays(coefficients, aidc_p)
     perturb_audit = electrical_audit(coefficients, perturb_arrays)
+    branch_names = coefficients[0].branch_names
+    non_dominated = [
+        index for index, branch in enumerate(branch_names)
+        if not is_dominated_mess_current_row(branch)
+    ]
+    transformer_rows = [
+        (index, float(rating))
+        for index, rating in enumerate(coefficients[0].transformer_ratings)
+        if rating is not None
+    ]
+    pcs_apothem = authority.pcs_kva * math.cos(math.pi / authority.pcs_polygon_faces)
+    pcs_face_max = max(
+        math.cos(2.0 * math.pi * face / authority.pcs_polygon_faces) * perturb_p[perturb_slot]
+        + math.sin(2.0 * math.pi * face / authority.pcs_polygon_faces) * perturb_q[perturb_slot]
+        for face in range(authority.pcs_polygon_faces)
+    )
+    voltage_feasible = bool(
+        perturb_arrays["voltage"].min() >= math.sqrt(V_MIN_SQUARED) - 1e-9
+        and perturb_arrays["voltage"].max() <= math.sqrt(V_MAX_SQUARED) + 1e-9
+    )
+    current_feasible = bool(
+        perturb_arrays["current"][:, non_dominated].max() <= 1.0 + 1e-9
+    )
+    transformer_kva_ratios = [
+        float(np.hypot(
+            perturb_arrays["flow_p"][:, index], perturb_arrays["flow_q"][:, index],
+        ).max() / rating)
+        for index, rating in transformer_rows
+    ]
+    transformer_kva_feasible = bool(max(transformer_kva_ratios) <= 1.0 + 1e-9)
+    perturb_fully_feasible = bool(
+        pcs_face_max <= pcs_apothem + 1e-9
+        and voltage_feasible
+        and current_feasible
+        and transformer_kva_feasible
+    )
     status = {GRB.OPTIMAL: "OPTIMAL", GRB.WORK_LIMIT: "WORK_LIMIT", GRB.TIME_LIMIT: "TIME_LIMIT", GRB.SUBOPTIMAL: "SUBOPTIMAL"}.get(model.Status, f"STATUS_{model.Status}")
     result = {
         "MOVE_fixed_OFF": True,
@@ -428,6 +468,7 @@ def stationary_mess_probe(coefficients: tuple[object, ...], aidc_p: np.ndarray, 
         "best_bound": float(model.ObjBound),
         "MIP_gap": float(model.MIPGap),
         "work_limit": 60.0,
+        "resolved_absolute_gap": float(abs(model.ObjVal - model.ObjBound)),
         "runtime_seconds": runtime,
         "variable_count": int(model.NumVars),
         "constraint_count": int(model.NumConstrs),
@@ -441,8 +482,20 @@ def stationary_mess_probe(coefficients: tuple[object, ...], aidc_p: np.ndarray, 
             "service": service,
             "P_kW": 0.0,
             "Q_kvar": 50.0,
-            "PCS_feasible": True,
+            "PCS_feasible": bool(pcs_face_max <= pcs_apothem + 1e-9),
+            "PCS_polygon_max_lhs_kVA": float(pcs_face_max),
+            "PCS_polygon_apothem_kVA": float(pcs_apothem),
             "SoC_unchanged": True,
+            "initial_energy_feasible": True,
+            "terminal_energy_feasible": True,
+            "voltage_lower_upper_feasible": voltage_feasible,
+            "voltage_min_pu": float(perturb_arrays["voltage"].min()),
+            "voltage_max_pu": float(perturb_arrays["voltage"].max()),
+            "line_and_transformer_current_feasible": current_feasible,
+            "max_non_dominated_current_pu": float(perturb_arrays["current"][:, non_dominated].max()),
+            "transformer_kva_feasible": transformer_kva_feasible,
+            "max_transformer_kva_ratio": float(max(transformer_kva_ratios)),
+            "all_production_planning_constraints_feasible": perturb_fully_feasible,
             "delta_rho": float(perturb_audit["rho"] - baseline["rho"]),
             "max_abs_current_change_pu": float(np.max(np.abs(perturb_arrays["current"] - baseline_arrays["current"]))),
             "max_abs_voltage_change_pu": float(np.max(np.abs(perturb_arrays["voltage"] - baseline_arrays["voltage"]))),
@@ -657,10 +710,38 @@ def main() -> int:
             and stationary["deterministic_feasible_Q_perturbation"]["grid_expressions_change"]
         )
         stationary_improves = float(stationary["rho_improvement"]) > 1e-6
+        production_rows = [
+            row
+            for case in ("B2", "B3")
+            for row in smoke_cases[case]["mess"]["per_MESS_runtime"]
+        ]
+        explicit_restricted_evidence = any(
+            "restricted_stationary_objective" in row for row in production_rows
+        )
+        if explicit_restricted_evidence:
+            solver_starvation_confirmed = any(
+                bool(row.get("restricted_incumbent_improves_zero", False))
+                and (
+                    not bool(row.get("MIPStart_accepted", False))
+                    or float(row["objective_value"]) > float(row["restricted_stationary_objective"]) + 1e-6
+                )
+                for row in production_rows
+            )
+        else:
+            # Backward-compatible interpretation of the just-completed V34
+            # smoke: only MESS01 has the same zero-prior context as this
+            # restricted probe.  A full-model incumbent that matches or beats
+            # it is not solver starvation merely because the solve hit its
+            # bounded-compute WORK_LIMIT.
+            first_full = smoke_cases["B2"]["mess"]["per_MESS_runtime"][0]
+            solver_starvation_confirmed = bool(
+                stationary_improves
+                and float(first_full["objective_value"]) > float(stationary["incumbent"]) + 1e-6
+            )
         findings = []
         if not bool(b1b3["equivalence_pass"]):
             findings.append("V34_B3_ZERO_MESS_CASE_EQUIVALENCE_DEFECT")
-        if stationary_improves and all(row["termination"] == "WORK_LIMIT" for row in smoke_cases["B2"]["mess"]["per_MESS_runtime"]):
+        if solver_starvation_confirmed:
             findings.append("V34_MESS_SOLVER_STARVATION_CONFIRMED")
         primary = (
             "V34_OBJECTIVE_COUPLING_AUDIT_PASS_NO_DEFECT"
@@ -719,7 +800,7 @@ def main() -> int:
                 "post_fix_B1_B3_Q_max_abs_difference_kvar": float(np.max(np.abs(q3 - q1))),
                 "Apr01_four_case_rerun_status": str(smoke["status"]),
             },
-            "MESS_PQ_coupling_probe": {"stationary_PQ_only": stationary, "deterministic_nonzero_PQ_perturbation_reused_without_rerun": perturb, "MESS_grid_coupling_alive": mess_coupling_alive, "MESS_solver_starvation_confirmed": stationary_improves},
+            "MESS_PQ_coupling_probe": {"stationary_PQ_only": stationary, "deterministic_nonzero_PQ_perturbation_reused_without_rerun": perturb, "MESS_grid_coupling_alive": mess_coupling_alive, "MESS_solver_starvation_confirmed": solver_starvation_confirmed},
             "specific_findings": findings,
             "primary_classification": primary,
             "GO_NO_GO": {
