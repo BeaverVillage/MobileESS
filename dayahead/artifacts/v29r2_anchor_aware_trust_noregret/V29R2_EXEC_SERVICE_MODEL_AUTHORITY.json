@@ -1,0 +1,89 @@
+{
+  "artifact_id": "V29R2_EXEC_SERVICE_MODEL_AUTHORITY_V1",
+  "authority": "CARRYIN_EXECUTABLE_SERVICE_V1",
+  "bounds": "0 <= H_LOW <= H_NOM <= H_REQ",
+  "candidate_model_count": 1,
+  "classifier_parameters": {
+    "colsample_bytree": 1.0,
+    "deterministic": true,
+    "force_col_wise": true,
+    "learning_rate": 0.05,
+    "max_depth": 4,
+    "min_child_samples": 10,
+    "n_estimators": 80,
+    "n_jobs": 1,
+    "num_leaves": 15,
+    "objective": "binary",
+    "random_state": 29,
+    "reg_lambda": 1.0,
+    "subsample": 1.0,
+    "verbosity": -1
+  },
+  "downstream_bridge_authorized": true,
+  "feature_names": [
+    "partition_hash",
+    "nodes_req",
+    "gpus_requested",
+    "wallclock_req_hours",
+    "qos_hash",
+    "submit_epoch_days",
+    "queue_age_hours",
+    "submit_hour",
+    "submit_day_of_week",
+    "submit_month"
+  ],
+  "final_conformal_overprediction_fraction_quantile": 0.07491679699211014,
+  "final_fit_April_row_count": 0,
+  "final_fit_row_count": 1909,
+  "metrics": {
+    "April_fit_rows": 0,
+    "aggregate_lower_bound_coverage": 0.90625,
+    "artifact_id": "V29R2_EXEC_SERVICE_MODEL_METRICS_V1",
+    "coverage_target": 0.9,
+    "evaluation_cohort_day_count": 32,
+    "evaluation_day_count": 20,
+    "lower_bound_degenerate": false,
+    "lower_bound_nonzero_cohort_day_count": 7,
+    "nominal_MAE_nodeh": 75.51658110691102,
+    "nominal_WAPE": 0.9518971770081511,
+    "nominal_bias_nodeh": -32.084262856174476,
+    "overforecast_cohort_day_count": 15,
+    "positive_nominal_cohort_day_count": 32,
+    "sharpness_H_LOW_over_H_NOM": 0.1820807886762979,
+    "status": "PASS",
+    "underforecast_cohort_day_count": 17,
+    "zero_output_rate": 0.25,
+    "zero_state_accuracy": 0.75
+  },
+  "model_files": {
+    "V29R2_EXEC_SERVICE_FINAL_CLASSIFIER.txt": {
+      "constant": null,
+      "sha256": "75a60dc688ad5255c2fe6e82950c3f8a0577c4fde6b9705103884f41dc173a47"
+    },
+    "V29R2_EXEC_SERVICE_FINAL_REGRESSOR.txt": {
+      "constant": null,
+      "sha256": "81a5f8b075179d323b2c7a4958cf30bb429213041f310e5f7d2152b0cec770bc"
+    }
+  },
+  "model_seed": 29,
+  "regressor_parameters": {
+    "colsample_bytree": 1.0,
+    "deterministic": true,
+    "force_col_wise": true,
+    "learning_rate": 0.05,
+    "max_depth": 4,
+    "min_child_samples": 10,
+    "n_estimators": 80,
+    "n_jobs": 1,
+    "num_leaves": 15,
+    "objective": "regression_l1",
+    "random_state": 29,
+    "reg_lambda": 1.0,
+    "subsample": 1.0,
+    "verbosity": -1
+  },
+  "rho_CERT": 1.0,
+  "selection_rule": "coverage >= 90%, then highest sharpness, then simpler model if tied",
+  "status": "PASS",
+  "wide_hyperparameter_search_performed": false
+}
