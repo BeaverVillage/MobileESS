@@ -113,7 +113,9 @@ def _service_mapping(path: Path = DEFAULT_SERVICE_MAPPING) -> dict[str, str]:
 
 
 def _route_cache_paths(cache_root: Path, phase: str, day: str) -> tuple[Path, Path]:
-    root = cache_root / phase / day / "shared"
+    # The forecast and 55,296-row route authority are independent of AC
+    # correction phase, so prospective/corrected passes reuse the same bytes.
+    root = cache_root / "shared/traffic" / day
     return root / "TRAFFIC_FORECAST.npz", root / "ROUTE_TABLE.json.gz"
 
 
@@ -215,7 +217,7 @@ def daily_traffic_authority(
 
 def _electrical_context(repo: Path, source_repo: Path, cache_root: Path, phase: str, day: str, data: object):
     source_cache = source_repo / "frozen_artifacts/v28r2_april_full_month_preflight" / day / "dayahead/electrical_cache"
-    local_cache = cache_root / phase / day / "shared/electrical_cache"
+    local_cache = cache_root / "shared/electrical" / day
     candidate = source_cache if source_cache.is_dir() else local_cache
     try:
         return build_electrical_context(source_repo, data, candidate)
@@ -720,13 +722,25 @@ def execute_day(
                 require_finite=("P_kw", "Q_kvar", "energy_kwh"),
             )
             planning_record = atomic_npz(
-                case_root / "PLANNING_GRID.npz", planning_arrays,
+                case_root / "PLANNING_GRID.npz", {
+                    **planning_arrays,
+                    "node_names": np.asarray(fresh.node_names),
+                    "node_phases": np.asarray(fresh.node_phases),
+                    "branch_names": np.asarray(fresh.branch_names),
+                    "branch_phases": np.asarray(fresh.branch_phases),
+                    "branch_kinds": np.asarray(fresh.branch_kinds),
+                },
                 {
                     "voltage_pu": (96, len(fresh.node_names)),
                     "phase_current_loading_pu": (96, len(fresh.branch_names)),
                     "flow_p_kw": (96, len(fresh.branch_names)),
                     "flow_q_kvar": (96, len(fresh.branch_names)),
                     "transformer_kva_loading_pu": (96, len(fresh.branch_names)),
+                    "node_names": (len(fresh.node_names),),
+                    "node_phases": (len(fresh.node_names),),
+                    "branch_names": (len(fresh.branch_names),),
+                    "branch_phases": (len(fresh.branch_names),),
+                    "branch_kinds": (len(fresh.branch_names),),
                 },
                 require_finite=tuple(planning_arrays),
             )

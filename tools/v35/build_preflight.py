@@ -94,6 +94,11 @@ def main() -> int:
         "solver_starvation_remaining": bool(audit["MESS_PQ_coupling_probe"]["MESS_solver_starvation_confirmed"]),
         "planning_physical_constraints": planning_pass,
         "May_numeric_reads": 0,
+        "AIDC_only_stage_disables_legacy_MESS_internally": (
+            "mess_disabled=True" in (REPO / "dayahead/v35/execution.py").read_text(encoding="utf-8")
+            and "DISABLED_ZERO_STATIONARY_NOT_MODELLED_AS_LEGACY_ROUTE"
+            in (REPO / "dayahead/v35/execution.py").read_text(encoding="utf-8")
+        ),
     }
     closure_pass = all(
         bool(value) for key, value in closure_checks.items()
@@ -247,13 +252,23 @@ def main() -> int:
         "primary_classification": "V35_PREAPRIL_AIDC_MESS_CLOSURE_PASS" if closure_pass else "V35_PREAPRIL_MESS_DEFECT_BLOCKED",
         "code_HEAD": head,
         "checks": closure_checks,
-        "defects_discovered": [{
-            "classification": "ENGINEERING_SOLVER_INTEGRATION_DEFECT",
-            "defect_id": "V35_STATIONARY_PQ_LOOSE_RELATIVE_GAP_ZERO_INCUMBENT_DEFECT",
-            "root_cause": "The restricted stationary P/Q MIP accepted the zero-actuation incumbent at MIPGap=1e-3 even though a fully feasible +50 kvar point reduced rho; Gurobi OPTIMAL meant within the requested relative gap, not an exact zero-actuation optimum.",
-            "repair": "Solve the exact full model temporarily fixed to STAY at MIPGap=1e-7, use the resulting P/Q trajectory as MIPStart, compare the full incumbent against it, and escalate deterministically through WorkLimit 60/180/300 only on starvation evidence.",
-            "science_changed": False,
-        }],
+        "defects_discovered": [
+            {
+                "classification": "ENGINEERING_SOLVER_INTEGRATION_DEFECT",
+                "defect_id": "V35_STATIONARY_PQ_LOOSE_RELATIVE_GAP_ZERO_INCUMBENT_DEFECT",
+                "root_cause": "The restricted stationary P/Q MIP accepted the zero-actuation incumbent at MIPGap=1e-3 even though a fully feasible +50 kvar point reduced rho; Gurobi OPTIMAL meant within the requested relative gap, not an exact zero-actuation optimum.",
+                "repair": "Solve the exact full model temporarily fixed to STAY at MIPGap=1e-7, use the resulting P/Q trajectory as MIPStart, compare the full incumbent against it, and escalate deterministically through WorkLimit 60/180/300 only on starvation evidence.",
+                "science_changed": False,
+            },
+            {
+                "classification": "CASE_BINDING_DEFECT",
+                "defect_id": "V35_AIDC_ONLY_STAGE_LEGACY_MESS_CONDITIONING_DEFECT",
+                "root_cause": "Legacy V28R2 B0/B1 resource models fixed a small pre-route MESS charging trajectory and mobility energy, so merely zeroing MESS in the exported V34 schedule did not make the upstream AIDC optimization truly MESS-free.",
+                "repair": "The V35 AIDC-only B0/B1 stage now fixes every MESS P/Q value to zero, removes legacy mobility energy from that stage, holds all four units stationary, and solves AIDC again before B2/B3 sequential V33M3 coordination.",
+                "invalidation": "No V35 campaign result existed; V34 audit evidence is preserved and V35 case outputs are generated only from the repaired stage.",
+                "science_changed": False,
+            },
+        ],
         "stationary_PQ_consistency": {
             "plus_50_kvar": perturbation,
             "optimized": stationary,

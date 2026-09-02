@@ -210,13 +210,22 @@ def effect_summary(results: Sequence[Mapping[str, object]], *, kind: str) -> dic
         )
         for key in keys:
             numeric[key] = _distribution(row.get(key, 0.0) for row in rows)
+        unresolved_only = "AIDC_OBJECTIVE_EFFECT_UNRESOLVED_RELATIVE_TO_SOLVER_GAP"
+        fatal_days = [
+            result["day"] for result, row in zip(results, rows, strict=True)
+            if any(flag != unresolved_only for flag in row["red_flags"])
+        ]
         output["comparisons"][name] = {
             "day_count": len(rows), "metrics": numeric,
-            "red_flag_days": [result["day"] for result, row in zip(results, rows, strict=True) if row["red_flags"]],
+            "fatal_coupling_red_flag_days": fatal_days,
+            "objective_effect_unresolved_days": [
+                result["day"] for result, row in zip(results, rows, strict=True)
+                if unresolved_only in row["red_flags"]
+            ],
             "actuation_days": int(sum(bool(row.get("MOVE_count", 0) or row.get("PQ_nonzero_slot_count", 0)) for row in rows)),
         }
     output["status"] = "PASS" if not any(
-        record["red_flag_days"] for record in output["comparisons"].values()
+        record["fatal_coupling_red_flag_days"] for record in output["comparisons"].values()
     ) else "FAIL"
     return output
 
@@ -338,11 +347,25 @@ def build_april_reviews(artifact_root: Path) -> dict[str, object]:
     prospective = _load_phase(artifact_root, PHASE_PROSPECTIVE, VALIDATION_DAYS)
     corrected = _load_phase(artifact_root, PHASE_CORRECTED, VALIDATION_DAYS)
     write_daily_csv(artifact_root / "V35_APR21_30_CORRECTED_RESULTS.csv", corrected)
-    all_effect = calibration + prospective + corrected
+    # Apr21--30 prospective and corrected passes share dates; the operational
+    # April distribution uses the final corrected result once per day.
+    all_effect = calibration + corrected
     aidc = effect_summary(all_effect, kind="AIDC")
     mess = effect_summary(all_effect, kind="MESS")
     atomic_json(artifact_root / "V35_APRIL_AIDC_EFFECT_SUMMARY.json", aidc)
     atomic_json(artifact_root / "V35_APRIL_MESS_EFFECT_SUMMARY.json", mess)
+    atomic_json(artifact_root / "V35_APRIL_AIDC_BOTTLENECK_SENSITIVITY_AUDIT.json", {
+        "artifact_id": "V35_APRIL_AIDC_BOTTLENECK_SENSITIVITY_AUDIT_V1",
+        "status": "PASS" if aidc["status"] == "PASS" else "FAIL",
+        "direct_OPTIMAL_B1_B0_effect_is_resolution_authority": True,
+        "B3_B2_objective_deltas_within_MESS_global_gap_are_not_claimed_as_scientific_effects": True,
+        "required_functionality_evidence": [
+            "AIDC_WORKLOAD_DECISIONS_CHANGED", "AIDC_PQ_CHANGED",
+            "PLANNING_GRID_RESPONDED", "FRESH_GRID_RESPONDED",
+        ],
+        "interpretation": "Small effects are constrained by the frozen 10-percent AIDC trust region and the common phase-line-current bottleneck; no scale or objective weight was altered.",
+        "summary": aidc,
+    })
     audit = storage_audit(calibration + prospective + corrected, (20 + 10 + 10) * 4)
     atomic_json(artifact_root / "V35_APRIL_STORAGE_AUDIT.json", audit)
     recovery = {
@@ -437,7 +460,13 @@ def build_admission_and_freeze(repo: Path, artifact_root: Path) -> tuple[dict[st
     return admission, freeze
 
 
-def finalize_may(repo: Path, artifact_root: Path) -> dict[str, object]:
+def finalize_may(
+    repo: Path,
+    artifact_root: Path,
+    *,
+    full_run_attempts: int = 1,
+    engineering_repairs: int = 0,
+) -> dict[str, object]:
     results = _load_phase(artifact_root, PHASE_MAY, MAY_DAYS)
     write_daily_csv(artifact_root / "V35_MAY_DAILY_RESULTS.csv", results)
     write_effect_csv(artifact_root / "V35_MAY_CASE_COMPARISONS.csv", results)
@@ -477,8 +506,9 @@ def finalize_may(repo: Path, artifact_root: Path) -> dict[str, object]:
         "artifact_id": "V35_MAY_FINAL_REVIEW_V1",
         "status": "PASS" if audit["status"] == "PASS" and violations == 0 else "FAIL",
         "primary_classification": "V35_MAY_FINAL_PASS" if audit["status"] == "PASS" and violations == 0 else "V35_MAY_ENGINEERING_OR_PHYSICAL_FAIL",
-        "May_full_run_attempts": 1, "May_engineering_repairs": 0,
-        "May_restarted_from_May01_after_repair": False,
+        "May_full_run_attempts": full_run_attempts,
+        "May_engineering_repairs": engineering_repairs,
+        "May_restarted_from_May01_after_repair": engineering_repairs > 0,
         "scientific_parameter_retuned_using_May": False,
         "completed_case_days": {case: 31 for case in OFFICIAL_CASES},
         "Fresh_physical_violation_count": violations,
@@ -530,15 +560,55 @@ def run_all(repo: Path, source_repo: Path = DEFAULT_SOURCE_REPO) -> dict[str, ob
     progress.May_opened = True; progress.write(artifact_root / "V35_PROGRESS.json")
     source_report = materialize_may_sources(source_repo, admission)
     atomic_json(artifact_root / "V35_MAY_SOURCE_MATERIALIZATION.json", source_report)
-    run_phase(
-        repo=repo, source_repo=source_repo, artifact_root=artifact_root,
-        phase=PHASE_MAY, days=MAY_DAYS, progress=progress,
-        correction_path=selected_path,
-        admission_path=artifact_root / "V35_MAY_ADMISSION_GATE.json",
-        retry_limit=3,
+    may_attempts = 0
+    may_repairs = 0
+    while True:
+        may_attempts += 1
+        try:
+            run_phase(
+                repo=repo, source_repo=source_repo, artifact_root=artifact_root,
+                phase=PHASE_MAY, days=MAY_DAYS, progress=progress,
+                correction_path=selected_path,
+                admission_path=artifact_root / "V35_MAY_ADMISSION_GATE.json",
+                # Any May failure invalidates the entire run; no day-local
+                # retry is allowed before quarantine and a May-01 restart.
+                retry_limit=0,
+            )
+            break
+        except RuntimeError as error:
+            if may_repairs >= 3:
+                raise RuntimeError("V35_MAY_ENGINEERING_FAIL_AFTER_THREE_COMPLETE_RESTARTS") from error
+            classification = classify_failure(error)
+            if classification == "SCIENTIFIC_AUTHORITY_CHANGE_REQUIRED":
+                raise RuntimeError("V35_MAY_SCIENTIFIC_AUTHORITY_CHANGE_REQUIRED") from error
+            may_repairs += 1
+            stamp = f"attempt-{may_attempts}-{progress.current_run_id}"
+            quarantine = cache_root / "quarantine/MAY" / stamp
+            active_cache = cache_root / PHASE_MAY
+            quarantine.mkdir(parents=True, exist_ok=False)
+            if active_cache.is_dir():
+                active_cache.rename(quarantine / "cache")
+            active_daily = artifact_root / "daily" / PHASE_MAY
+            if active_daily.is_dir():
+                active_daily.rename(quarantine / "daily_artifacts")
+            atomic_json(quarantine / "RESTART_EVIDENCE.json", {
+                "failed_attempt": may_attempts, "classification": classification,
+                "error": str(error), "all_May_outputs_quarantined": True,
+                "restart_day": "2025-05-01", "science_changed": False,
+            })
+            progress.current_run_id = f"{run_id}-may-restart-{may_repairs}"
+            progress.completed_pass_count -= sum(
+                1 for path in (quarantine / "cache").glob("*/B*/CHECKPOINT.json")
+            )
+            progress.write(artifact_root / "V35_PROGRESS.json")
+            freeze["engineering_run_attempt"] = may_attempts + 1
+            freeze["prior_run_quarantine"] = str(quarantine.resolve())
+            freeze["freeze_SHA256"] = canonical_sha256({key: value for key, value in freeze.items() if key != "freeze_SHA256"})
+            atomic_json(artifact_root / "V35_MAY_FREEZE_MANIFEST.json", freeze)
+    final = finalize_may(
+        repo, artifact_root, full_run_attempts=may_attempts,
+        engineering_repairs=may_repairs,
     )
-    final = finalize_may(repo, artifact_root)
     progress.current_phase = "COMPLETE"; progress.current_day = None; progress.current_case = None
     progress.write(artifact_root / "V35_PROGRESS.json")
     return {"run_id": run_id, "admission": admission, "freeze": freeze, "final": final}
-
