@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import Counter
 from datetime import datetime, timezone
+import importlib.util
 import json
 import math
 from pathlib import Path
@@ -47,6 +48,52 @@ from .storage import atomic_csv, atomic_json, canonical_sha256, sha256_file
 ARTIFACT_RELATIVE = Path("dayahead/artifacts/v35_april_may_final")
 CACHE_RELATIVE = Path("dayahead/cache/v35")
 LOG_RELATIVE = Path("logs/v35_april_may_final")
+WSL_DISTRIBUTION = "Ubuntu-MobileESS-D"
+WSL_PYTHON = "/home/jaewon/.cache/mobileess-v28r2/venv/bin/python"
+
+
+def windows_path_to_wsl(path: Path) -> str:
+    """Translate an absolute Windows path without accessing its contents."""
+
+    resolved = str(path.resolve())
+    if len(resolved) >= 3 and resolved[1] == ":" and resolved[2] in "\\/":
+        return f"/mnt/{resolved[0].lower()}/{resolved[3:].replace(chr(92), '/')}"
+    prefix = "\\\\wsl.localhost\\" + WSL_DISTRIBUTION + "\\"
+    if resolved.casefold().startswith(prefix.casefold()):
+        return "/" + resolved[len(prefix):].replace("\\", "/")
+    raise RuntimeError(f"V35_WSL_PATH_TRANSLATION_UNSUPPORTED:{resolved}")
+
+
+def materialize_may_sources_post_admission(
+    repo: Path,
+    source_repo: Path,
+    admission: dict[str, object],
+    output_path: Path,
+) -> dict[str, object]:
+    """Use a dependency-complete runtime, but only after admission has passed."""
+
+    if admission.get("status") != "PASS":
+        raise RuntimeError("V35_MAY_SOURCE_MATERIALIZATION_BEFORE_ADMISSION")
+    required = ("requests", "eccodes", "pyarrow")
+    if sys.platform != "win32" or all(importlib.util.find_spec(name) is not None for name in required):
+        report = materialize_may_sources(source_repo, admission)
+        atomic_json(output_path, report)
+        return report
+    command = [
+        "wsl.exe", "-d", WSL_DISTRIBUTION, "--", WSL_PYTHON,
+        windows_path_to_wsl(repo / "tools/v35/prepare_may_sources.py"),
+        "--source-repo", windows_path_to_wsl(source_repo),
+        "--admission", windows_path_to_wsl(output_path.parent / "V35_MAY_ADMISSION_GATE.json"),
+        "--output", windows_path_to_wsl(output_path),
+    ]
+    completed = subprocess.run(command, cwd=repo, check=False, capture_output=True, text=True)
+    if completed.returncode != 0:
+        tail = (completed.stdout + "\n" + completed.stderr)[-4000:]
+        raise RuntimeError(f"V35_MAY_SOURCE_WSL_EXECUTOR_FAIL:{tail}")
+    report = json.loads(output_path.read_text(encoding="utf-8"))
+    if report.get("status") != "PASS":
+        raise RuntimeError("V35_MAY_SOURCE_MATERIALIZATION_NOT_PASS")
+    return report
 
 
 def _load_day_result(artifact_root: Path, phase: str, day: str) -> dict[str, object]:
@@ -558,8 +605,9 @@ def run_all(repo: Path, source_repo: Path = DEFAULT_SOURCE_REPO) -> dict[str, ob
     build_april_reviews(artifact_root)
     admission, freeze = build_admission_and_freeze(repo, artifact_root)
     progress.May_opened = True; progress.write(artifact_root / "V35_PROGRESS.json")
-    source_report = materialize_may_sources(source_repo, admission)
-    atomic_json(artifact_root / "V35_MAY_SOURCE_MATERIALIZATION.json", source_report)
+    source_report = materialize_may_sources_post_admission(
+        repo, source_repo, admission, artifact_root / "V35_MAY_SOURCE_MATERIALIZATION.json",
+    )
     may_attempts = 0
     may_repairs = 0
     while True:

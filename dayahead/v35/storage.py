@@ -198,6 +198,46 @@ def checkpoint_is_reusable(path: Path, expected: CheckpointDependencies) -> bool
     return True
 
 
+def rebind_serialization_only_checkpoint(
+    path: Path,
+    *,
+    old_code_head: str,
+    new_code_head: str,
+    history_path: Path,
+) -> dict[str, object]:
+    """Create a successor checkpoint without touching scientific bytes.
+
+    This is limited to a reviewed serialization-only code change.  The old
+    immutable checkpoint is copied to history, every referenced file is
+    re-hashed, and only code_HEAD plus an explicit recovery ledger are changed.
+    """
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if payload.get("status") != "PASS" or payload.get("code_HEAD") != old_code_head:
+        raise RuntimeError("V35_SERIALIZATION_REBIND_SOURCE_CHECKPOINT")
+    for record in payload.get("storage_files", []):
+        artifact = Path(str(record["path"]))
+        if not artifact.is_file() or sha256_file(artifact) != record["sha256"]:
+            raise RuntimeError("V35_SERIALIZATION_REBIND_STORAGE_SHA")
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    if history_path.exists():
+        raise FileExistsError("V35_SERIALIZATION_REBIND_HISTORY_EXISTS")
+    history_path.write_bytes(path.read_bytes())
+    if sha256_file(history_path) != sha256_file(path):
+        raise RuntimeError("V35_SERIALIZATION_REBIND_HISTORY_SHA")
+    payload["code_HEAD"] = new_code_head
+    payload["recovery_rebind"] = {
+        "classification": "ENGINEERING_SERIALIZATION_DEFECT",
+        "old_code_HEAD": old_code_head,
+        "new_code_HEAD": new_code_head,
+        "scientific_files_changed": 0,
+        "all_storage_file_SHAs_reverified": True,
+        "immutable_pre_rebind_checkpoint": str(history_path.resolve()),
+    }
+    atomic_json(path, payload)
+    return payload["recovery_rebind"]
+
+
 def invalidation_scope(change_class: str) -> tuple[str, ...]:
     mapping = {
         "SERIALIZATION_REPORT_ONLY": ("ARTIFACT_REGENERATION",),

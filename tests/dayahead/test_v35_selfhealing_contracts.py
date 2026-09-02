@@ -31,10 +31,12 @@ from dayahead.v35.storage import (
     checkpoint_is_reusable,
     checkpoint_payload,
     invalidation_scope,
+    rebind_serialization_only_checkpoint,
     storage_schema_sha256,
 )
 from dayahead.v35.calibration import calibrate_vectorized, prospective_coverage, select_family
 from dayahead.v35.may_sources import materialize_may_sources
+from dayahead.v35.campaign import windows_path_to_wsl
 from dayahead.v28r2.source_cache import day_root
 
 
@@ -283,3 +285,27 @@ def test_20_checkpoint_accepts_native_40_hex_git_head_but_other_shas_remain_64()
     native.validate()
     with pytest.raises(ValueError, match="science_authority_SHA"):
         CheckpointDependencies(**{**native.__dict__, "science_authority_SHA": "b" * 40}).validate()
+
+
+def test_21_serialization_only_rebind_preserves_old_checkpoint_and_scientific_files(tmp_path: Path):
+    artifact = tmp_path / "data.json"
+    artifact.write_text("{}", encoding="utf-8")
+    checkpoint = checkpoint_payload(
+        phase="P", day="2025-04-01", case="B0", run_id="r", timestamp="t",
+        dependencies=CheckpointDependencies(**{**dependencies().__dict__, "code_HEAD": "a" * 40}),
+        storage_files=({"path": str(artifact), "sha256": __import__("hashlib").sha256(b"{}").hexdigest()},),
+    )
+    path = tmp_path / "CHECKPOINT.json"; atomic_json(path, checkpoint)
+    old_sha = __import__("hashlib").sha256(path.read_bytes()).hexdigest()
+    history = tmp_path / "history/CHECKPOINT.json"
+    record = rebind_serialization_only_checkpoint(
+        path, old_code_head="a" * 40, new_code_head="b" * 40, history_path=history,
+    )
+    assert __import__("hashlib").sha256(history.read_bytes()).hexdigest() == old_sha
+    assert json.loads(path.read_text())["code_HEAD"] == "b" * 40
+    assert record["scientific_files_changed"] == 0
+
+
+def test_22_windows_path_translation_does_not_read_may_data(monkeypatch):
+    monkeypatch.setattr(Path, "resolve", lambda self: Path(r"C:\work space\MobileESS"))
+    assert windows_path_to_wsl(Path("unused")) == "/mnt/c/work space/MobileESS"

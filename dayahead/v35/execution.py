@@ -390,14 +390,20 @@ def _planning_grid(
 
 
 def _solver_record(mess_id: str, item: object) -> dict[str, object]:
+    def finite_or_none(value: object) -> float | None:
+        if value is None:
+            return None
+        number = float(value)
+        return number if math.isfinite(number) else None
+
     return {
         "mess_id": mess_id,
         "solver_status": item.solver_status,
         "termination": item.termination,
         "bounded_compute_classification": item.bounded_compute_classification,
-        "objective_value": item.objective,
-        "best_bound": item.best_bound,
-        "MIP_gap": item.mip_gap,
+        "objective_value": finite_or_none(item.objective),
+        "best_bound": finite_or_none(item.best_bound),
+        "MIP_gap": finite_or_none(item.mip_gap),
         "work_limit_tiers_attempted": list(item.work_limit_tiers_attempted),
         "runtime_seconds": item.solve_seconds,
         "model_build_seconds": item.model_build_seconds,
@@ -406,9 +412,9 @@ def _solver_record(mess_id: str, item: object) -> dict[str, object]:
         "binary_count": item.binary_count,
         "MOVE_binary_count": item.move_binary_count,
         "STAY_variable_count": item.stay_variable_count,
-        "restricted_stationary_objective": item.restricted_stationary_objective,
-        "restricted_stationary_best_bound": item.restricted_stationary_best_bound,
-        "restricted_stationary_MIP_gap": item.restricted_stationary_mip_gap,
+        "restricted_stationary_objective": finite_or_none(item.restricted_stationary_objective),
+        "restricted_stationary_best_bound": finite_or_none(item.restricted_stationary_best_bound),
+        "restricted_stationary_MIP_gap": finite_or_none(item.restricted_stationary_mip_gap),
         "restricted_stationary_status": item.restricted_stationary_status,
         "restricted_stationary_sum_abs_P_kW_slots": item.restricted_stationary_sum_abs_p_kw_slots,
         "restricted_stationary_sum_abs_Q_kvar_slots": item.restricted_stationary_sum_abs_q_kvar_slots,
@@ -822,7 +828,12 @@ def execute_day(
                 "correction_sha256": correction_sha,
                 "objective": objective,
                 "objective_best_bound": objective if not solver_records else solver_records[-1]["best_bound"],
-                "objective_unresolved_absolute_gap": 0.0 if not solver_records else abs(objective - float(solver_records[-1]["best_bound"])),
+                "objective_unresolved_absolute_gap": (
+                    0.0 if not solver_records else (
+                        None if solver_records[-1]["best_bound"] is None
+                        else abs(objective - float(solver_records[-1]["best_bound"]))
+                    )
+                ),
                 "planning": planning_summary,
                 "fresh": fresh.summary,
                 "MESS": {
@@ -878,8 +889,14 @@ def execute_day(
             off_planning=off["arrays"]["planning_voltage"], on_planning=on["arrays"]["planning_voltage"],
             off_fresh=off["arrays"]["fresh_voltage"], on_fresh=on["arrays"]["fresh_voltage"],
             objective_off=float(off["objective"]), objective_on=float(on["objective"]),
-            unresolved_gap_off=float(off["objective_unresolved_absolute_gap"]),
-            unresolved_gap_on=float(on["objective_unresolved_absolute_gap"]),
+            unresolved_gap_off=(
+                1e30 if off["objective_unresolved_absolute_gap"] is None
+                else float(off["objective_unresolved_absolute_gap"])
+            ),
+            unresolved_gap_on=(
+                1e30 if on["objective_unresolved_absolute_gap"] is None
+                else float(on["objective_unresolved_absolute_gap"])
+            ),
             free_workload_count=int(np.asarray(on["arrays"]["workload"]).size),
             solver_status_off="OPTIMAL" if not off["MESS"]["solver_evidence"] else str(off["MESS"]["solver_evidence"][-1]["termination"]),
             solver_status_on="OPTIMAL" if not on["MESS"]["solver_evidence"] else str(on["MESS"]["solver_evidence"][-1]["termination"]),
