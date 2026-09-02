@@ -1,0 +1,20 @@
+{
+  "artifact_id": "V32R1_B0_B2_REFERENCE_IDENTITY_V1",
+  "code_evidence": {
+    "V30_loader": "dayahead/v30/dayahead_formulation.py::load_frozen_schedules",
+    "V30_runner_day_constant": "dayahead/v30/four_case_runner.py::DAY='2025-04-04'",
+    "V30_stage1_behavior": "reports headroom and carries the frozen V29R2 objective; it does not solve a general-day V30 Stage-1 model",
+    "loader_scope": "Apr-04 only: V29R2_APR04_DAYAHEAD_{B0,B1,B2,B3}_SCHEDULE.json",
+    "lower_level_conflict": "V29R2 apr04_runner is also day-fixed and selects B3 MESS rung using same-day scenario Fresh AC; binding that into a general-day V30 Stage-1 would be new integration/scientific authority",
+    "prohibited_substitutions": [
+      "reuse Apr-04 schedule for Jan-Mar",
+      "silently generalize V29R2 Apr-04 runner",
+      "invent V30 robust Stage-1 implementation",
+      "choose a new MESS rung rule"
+    ]
+  },
+  "day_coverage": 0,
+  "reason": "MISSING_REALIZED_TRAFFIC_AUTHORITY_2025-02-28",
+  "required_day_coverage": 90,
+  "status": "NOT_EVALUATED_PHASE_I_BLOCKED"
+}
