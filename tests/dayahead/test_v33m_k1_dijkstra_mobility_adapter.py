@@ -48,9 +48,14 @@ def graph() -> RoadGraphAuthority:
     )
 
 
-def forecast(q50=(10.0, 3.0, 4.0, 9.0), q90=(10.0, 5.0, 6.0, 10.0)):
+def forecast(
+    q10=(8.0, 2.0, 3.0, 7.0),
+    q50=(10.0, 3.0, 4.0, 9.0),
+    q90=(10.0, 5.0, 6.0, 10.0),
+):
     return LinkTravelTimeForecast.from_arrays(
         ("L_DIRECT", "L_AC", "L_CB", "L_BA"),
+        [q10] * 288,
         [q50] * 288,
         [q90] * 288,
         "traffic-sha",
@@ -96,7 +101,7 @@ def test_unreachable_destination_fails_explicitly():
         "sha",
     )
     forecast_disconnected = LinkTravelTimeForecast.from_arrays(
-        ("AB", "CD"), [[1.0, 1.0]], [[1.0, 1.0]]
+        ("AB", "CD"), [[1.0, 1.0]], [[1.0, 1.0]], [[1.0, 1.0]]
     )
     adapter = Mobility15MinAdapter(disconnected, forecast_disconnected)
     with pytest.raises(UnreachableDestinationError, match="unreachable"):
@@ -105,6 +110,7 @@ def test_unreachable_destination_fails_explicitly():
 
 def test_q50_and_q90_sum_same_selected_path():
     route = Mobility15MinAdapter(graph(), forecast()).route(7, "IDC01", "IDC02")
+    assert route.route_q10_eta_sec == 2.0 + 3.0
     assert route.route_q50_eta_sec == 3.0 + 4.0
     assert route.route_q90_eta_sec == 5.0 + 6.0
     assert SAFE_ETA_AUTHORITY == "DEVELOPMENT_Q90_ONLY_PENDING_CALIBRATION_AUDIT"
@@ -114,12 +120,14 @@ def test_q50_and_q90_sum_same_selected_path():
 def test_15_minute_slot_maps_to_corresponding_5_minute_snapshot():
     rows50 = [(100.0, 100.0, 100.0, 100.0)] * 288
     rows90 = [(110.0, 110.0, 110.0, 110.0)] * 288
+    rows10 = [(90.0, 90.0, 90.0, 90.0)] * 288
+    rows10[15] = (18.0, 1.0, 2.0, 8.0)
     rows50[15] = (20.0, 2.0, 3.0, 10.0)
     rows90[15] = (30.0, 4.0, 5.0, 12.0)
     route = Mobility15MinAdapter(
         graph(),
         LinkTravelTimeForecast.from_arrays(
-            ("L_DIRECT", "L_AC", "L_CB", "L_BA"), rows50, rows90
+            ("L_DIRECT", "L_AC", "L_CB", "L_BA"), rows10, rows50, rows90
         ),
     ).route(5, "IDC01", "IDC02")
     assert forecast_step_for_departure_slot(5) == 15
@@ -150,7 +158,7 @@ def test_stay_is_canonical_zero_option():
     assert stay.origin_service_id == stay.destination_service_id == "IDC01"
     assert stay.road_origin_node == stay.road_destination_node == "A"
     assert stay.route_link_ids == ()
-    assert stay.route_q50_eta_sec == stay.route_q90_eta_sec == 0.0
+    assert stay.route_q10_eta_sec == stay.route_q50_eta_sec == stay.route_q90_eta_sec == 0.0
     assert stay.travel_slots_15min == stay.connection_ready_slots_15min == 0
     assert stay.energy_nominal_kwh == stay.energy_safe_kwh == 0.0
 
@@ -173,7 +181,7 @@ def test_travel_and_combined_connection_slot_ceils(eta, travel, ready):
 
 def test_formula_energy_is_positive_and_safe_is_max_of_q50_q90():
     nominal, safe = PhysicsMobilityEnergyAdapter().route_energy_kwh(
-        RouteGeometry(10.0, 20.0, 10.0), 900.0, 1200.0
+        RouteGeometry(10.0, 20.0, 10.0), 600.0, 900.0, 1200.0
     )
     assert nominal > 0.0
     assert safe >= nominal

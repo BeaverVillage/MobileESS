@@ -67,6 +67,7 @@ class Mobility15MinAdapter:
             route_distance_km=0.0,
             cumulative_ascent_m=0.0,
             cumulative_descent_m=0.0,
+            route_q10_eta_sec=0.0,
             route_q50_eta_sec=0.0,
             route_q90_eta_sec=0.0,
             travel_slots_15min=0,
@@ -84,13 +85,17 @@ class Mobility15MinAdapter:
         origin_service_id: str,
         destination_service_id: str,
         path: DijkstraPath,
+        q10: Mapping[str, float],
         q50: Mapping[str, float],
         q90: Mapping[str, float],
     ) -> RouteParameters15Min:
+        route_q10 = sum(q10[link_id] for link_id in path.link_ids)
         route_q50 = sum(q50[link_id] for link_id in path.link_ids)
         route_q90 = sum(q90[link_id] for link_id in path.link_ids)
         geometry = self.physics.geometry_for_path(path.link_ids, self.graph.links_by_id)
-        nominal, safe = self.physics.route_energy_kwh(geometry, route_q50, route_q90)
+        nominal, safe = self.physics.route_energy_kwh(
+            geometry, route_q10, route_q50, route_q90
+        )
         return RouteParameters15Min(
             departure_slot_15=departure_slot_15,
             origin_service_id=origin_service_id,
@@ -101,6 +106,7 @@ class Mobility15MinAdapter:
             route_distance_km=geometry.route_distance_km,
             cumulative_ascent_m=geometry.cumulative_ascent_m,
             cumulative_descent_m=geometry.cumulative_descent_m,
+            route_q10_eta_sec=route_q10,
             route_q50_eta_sec=route_q50,
             route_q90_eta_sec=route_q90,
             travel_slots_15min=travel_slots_15min(route_q90),
@@ -120,7 +126,7 @@ class Mobility15MinAdapter:
             origin_node = self.graph.service_to_road_node[origin_service_id]
         except KeyError as exc:
             raise MobilityContractError(f"unknown service node: {origin_service_id}") from exc
-        q50, q90 = self.forecast.snapshot(
+        q10, q50, q90 = self.forecast.snapshot(
             forecast_step_for_departure_slot(departure_slot_15)
         )
         paths = self.router.single_source(origin_node, q50)
@@ -136,6 +142,7 @@ class Mobility15MinAdapter:
                     origin_service_id,
                     destination_service_id,
                     path,
+                    q10,
                     q50,
                     q90,
                 )
@@ -155,7 +162,7 @@ class Mobility15MinAdapter:
             destination_node = self.graph.service_to_road_node[destination_service_id]
         except KeyError as exc:
             raise MobilityContractError(f"unknown service node: {exc.args[0]}") from exc
-        q50, q90 = self.forecast.snapshot(
+        q10, q50, q90 = self.forecast.snapshot(
             forecast_step_for_departure_slot(departure_slot_15)
         )
         paths = self.router.single_source(origin_node, q50)
@@ -165,6 +172,7 @@ class Mobility15MinAdapter:
             origin_service_id,
             destination_service_id,
             path,
+            q10,
             q50,
             q90,
         )

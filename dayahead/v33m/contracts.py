@@ -90,38 +90,44 @@ class RoadGraphAuthority:
 
 @dataclass(frozen=True)
 class LinkTravelTimeForecast:
-    """Already-materialized native 5-minute link Q50/Q90 predictions."""
+    """Already-materialized native 5-minute link Q10/Q50/Q90 predictions."""
 
     link_ids: tuple[str, ...]
+    link_q10_sec: tuple[tuple[float, ...], ...]
     link_q50_sec: tuple[tuple[float, ...], ...]
     link_q90_sec: tuple[tuple[float, ...], ...]
     traffic_forecast_sha: str = ""
 
     def __post_init__(self) -> None:
         link_ids = tuple(str(value) for value in self.link_ids)
+        q10 = tuple(tuple(float(value) for value in row) for row in self.link_q10_sec)
         q50 = tuple(tuple(float(value) for value in row) for row in self.link_q50_sec)
         q90 = tuple(tuple(float(value) for value in row) for row in self.link_q90_sec)
         if not link_ids or len(link_ids) != len(set(link_ids)):
             raise MobilityContractError("forecast link IDs must be non-empty and unique")
-        if not q50 or len(q50) != len(q90):
-            raise MobilityContractError("Q50 and Q90 forecast steps must align")
+        if not q50 or len(q10) != len(q50) or len(q50) != len(q90):
+            raise MobilityContractError("Q10, Q50, and Q90 forecast steps must align")
         width = len(link_ids)
-        for step, (median_row, safe_row) in enumerate(zip(q50, q90)):
-            if len(median_row) != width or len(safe_row) != width:
+        for step, (fast_row, median_row, safe_row) in enumerate(zip(q10, q50, q90)):
+            if len(fast_row) != width or len(median_row) != width or len(safe_row) != width:
                 raise MobilityContractError(f"forecast width mismatch at step {step}")
-            for median, safe in zip(median_row, safe_row):
+            for fast, median, safe in zip(fast_row, median_row, safe_row):
+                if not math.isfinite(fast) or fast <= 0.0:
+                    raise MobilityContractError("all Q10 link costs must be finite and positive")
                 if not math.isfinite(median) or median <= 0.0:
                     raise MobilityContractError("all Q50 link costs must be finite and positive")
                 if not math.isfinite(safe) or safe <= 0.0:
                     raise MobilityContractError("all Q90 link costs must be finite and positive")
-                if safe < median:
-                    raise MobilityContractError("Q90 link time cannot be below Q50")
+                if not fast <= median <= safe:
+                    raise MobilityContractError("link travel times must satisfy Q10 <= Q50 <= Q90")
         object.__setattr__(self, "link_ids", link_ids)
+        object.__setattr__(self, "link_q10_sec", q10)
         object.__setattr__(self, "link_q50_sec", q50)
         object.__setattr__(self, "link_q90_sec", q90)
         if not self.traffic_forecast_sha:
             payload = {
                 "link_ids": link_ids,
+                "link_q10_sec": q10,
                 "link_q50_sec": q50,
                 "link_q90_sec": q90,
                 "resolution_seconds": TRAFFIC_RESOLUTION_SECONDS,
@@ -135,12 +141,14 @@ class LinkTravelTimeForecast:
     def from_arrays(
         cls,
         link_ids: Sequence[str],
+        link_q10_sec: Sequence[Sequence[float]],
         link_q50_sec: Sequence[Sequence[float]],
         link_q90_sec: Sequence[Sequence[float]],
         traffic_forecast_sha: str = "",
     ) -> "LinkTravelTimeForecast":
         return cls(
             tuple(link_ids),
+            tuple(tuple(row) for row in link_q10_sec),
             tuple(tuple(row) for row in link_q50_sec),
             tuple(tuple(row) for row in link_q90_sec),
             traffic_forecast_sha,
@@ -150,14 +158,17 @@ class LinkTravelTimeForecast:
     def step_count(self) -> int:
         return len(self.link_q50_sec)
 
-    def snapshot(self, forecast_step_5min: int) -> tuple[Mapping[str, float], Mapping[str, float]]:
+    def snapshot(
+        self, forecast_step_5min: int
+    ) -> tuple[Mapping[str, float], Mapping[str, float], Mapping[str, float]]:
         if not 0 <= forecast_step_5min < self.step_count:
             raise MobilityContractError(
                 f"5-minute forecast step {forecast_step_5min} is unavailable"
             )
+        q10 = MappingProxyType(dict(zip(self.link_ids, self.link_q10_sec[forecast_step_5min])))
         q50 = MappingProxyType(dict(zip(self.link_ids, self.link_q50_sec[forecast_step_5min])))
         q90 = MappingProxyType(dict(zip(self.link_ids, self.link_q90_sec[forecast_step_5min])))
-        return q50, q90
+        return q10, q50, q90
 
 
 @dataclass(frozen=True)
@@ -171,6 +182,7 @@ class RouteParameters15Min:
     route_distance_km: float
     cumulative_ascent_m: float
     cumulative_descent_m: float
+    route_q10_eta_sec: float
     route_q50_eta_sec: float
     route_q90_eta_sec: float
     travel_slots_15min: int
@@ -192,6 +204,7 @@ class RouteParameters15Min:
             "route_distance_km": self.route_distance_km,
             "cumulative_ascent_m": self.cumulative_ascent_m,
             "cumulative_descent_m": self.cumulative_descent_m,
+            "route_q10_eta_sec": self.route_q10_eta_sec,
             "route_q50_eta_sec": self.route_q50_eta_sec,
             "route_q90_eta_sec": self.route_q90_eta_sec,
             "travel_slots_15min": self.travel_slots_15min,

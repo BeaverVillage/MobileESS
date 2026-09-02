@@ -51,8 +51,13 @@ class PhysicsMobilityEnergyAdapter:
         )
 
     def route_energy_kwh(
-        self, geometry: RouteGeometry, q50_eta_sec: float, q90_eta_sec: float
+        self,
+        geometry: RouteGeometry,
+        q10_eta_sec: float,
+        q50_eta_sec: float,
+        q90_eta_sec: float,
     ) -> tuple[float, float]:
+        q10_energy = self.physics.energy_kwh(geometry.physics_mapping(), q10_eta_sec)
         nominal = self.physics.energy_kwh(geometry.physics_mapping(), q50_eta_sec)
         q90_energy = self.physics.energy_kwh(geometry.physics_mapping(), q90_eta_sec)
-        return nominal, max(nominal, q90_energy)
+        return nominal, max(q10_energy, nominal, q90_energy)
