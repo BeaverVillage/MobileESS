@@ -251,9 +251,17 @@ def effect_summary(results: Sequence[Mapping[str, object]], *, kind: str) -> dic
         rows = [result["effects"][name] for result in results]
         numeric = {}
         keys = (
-            ("objective_improvement_off_minus_on", "fresh_rho_AC_delta", "shifted_workload_node_hours", "sum_abs_Delta_P_AIDC")
+            (
+                "objective_improvement_off_minus_on", "fresh_rho_AC_delta", "Fresh_losses_delta_kWh",
+                "shifted_workload_node_hours", "changed_site_count", "sum_abs_Delta_P_AIDC",
+                "sum_abs_Delta_Q_AIDC", "actual_service_ratio_delta",
+            )
             if kind == "AIDC" else
-            ("objective_delta_on_minus_off", "fresh_rho_AC_delta", "MOVE_count", "throughput_kWh", "sum_abs_P_kW_slots", "sum_abs_Q_kvar_slots")
+            (
+                "objective_delta_on_minus_off", "fresh_rho_AC_delta", "Fresh_losses_delta_kWh",
+                "MOVE_count", "throughput_kWh", "sum_abs_P_kW_slots", "sum_abs_Q_kvar_slots",
+                "actual_service_ratio_delta",
+            )
         )
         for key in keys:
             numeric[key] = _distribution(row.get(key, 0.0) for row in rows)
@@ -271,6 +279,17 @@ def effect_summary(results: Sequence[Mapping[str, object]], *, kind: str) -> dic
             ],
             "actuation_days": int(sum(bool(row.get("MOVE_count", 0) or row.get("PQ_nonzero_slot_count", 0)) for row in rows)),
         }
+        if kind == "MESS":
+            evidence = [record for row in rows for record in row.get("vehicle_solver_evidence", [])]
+            status_counts = Counter(str(record.get("termination", "UNKNOWN")) for record in evidence)
+            gaps = [float(record["MIP_gap"]) for record in evidence if record.get("MIP_gap") is not None]
+            output["comparisons"][name].update({
+                "days_with_MOVE": int(sum(int(row.get("MOVE_count", 0)) > 0 for row in rows)),
+                "days_with_PQ_actuation": int(sum(int(row.get("PQ_nonzero_slot_count", 0)) > 0 for row in rows)),
+                "solver_status_distribution": dict(sorted(status_counts.items())),
+                "MIP_gap_distribution": None if not gaps else _distribution(gaps),
+                "null_MIP_gap_count": len(evidence) - len(gaps),
+            })
     output["status"] = "PASS" if not any(
         record["fatal_coupling_red_flag_days"] for record in output["comparisons"].values()
     ) else "FAIL"

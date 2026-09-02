@@ -334,3 +334,35 @@ def test_23_v35_fresh_storage_is_finite_with_explicit_transformer_mask(tmp_path:
         assert np.isfinite(payload["transformer_total_kva_loading_pu"]).all()
         assert payload["transformer_total_kva_loading_pu"][0].tolist() == [0.0, .7]
         assert payload["transformer_total_kva_applicable"].tolist() == [False, True]
+
+
+def test_24_small_exact_aidc_effect_is_not_mislabeled_as_solver_gap():
+    off = np.zeros((1, 2, 96)); on = off.copy(); on[0, 0, 0] = 1; on[0, 1, 0] = -1
+    p0 = np.zeros((96, 1)); p1 = p0.copy(); p1[0, 0] = 1
+    grid0 = np.zeros((96, 1)); grid1 = grid0.copy(); grid1[0, 0] = 1e-5
+    result = aidc_effect_watchdog(
+        comparison="B1-B0", off_workload=off, on_workload=on,
+        off_p=p0, on_p=p1, off_q=p0, on_q=p1,
+        off_planning=grid0, on_planning=grid1, off_fresh=grid0, on_fresh=grid1,
+        objective_off=1.0, objective_on=1.0 - 1e-8,
+        unresolved_gap_off=0.0, unresolved_gap_on=0.0, free_workload_count=1,
+        rack_site_ids=("AIDC01", "AIDC02"),
+    )
+    assert result["objective_effect_classification"] == "BELOW_REPORTING_RESOLUTION_ZERO_SOLVER_GAP"
+    assert result["red_flags"] == [] and result["status"] == "PASS"
+    assert result["changed_site_count"] == 2
+
+
+def test_25_small_aidc_effect_inside_nonzero_solver_gap_remains_diagnostic():
+    off = np.zeros((1, 1, 96)); on = off.copy(); on[0, 0, 0] = 1
+    p0 = np.zeros((96, 1)); p1 = p0.copy(); p1[0, 0] = 1
+    grid0 = np.zeros((96, 1)); grid1 = grid0.copy(); grid1[0, 0] = 1e-5
+    result = aidc_effect_watchdog(
+        comparison="B3-B2", off_workload=off, on_workload=on,
+        off_p=p0, on_p=p1, off_q=p0, on_q=p1,
+        off_planning=grid0, on_planning=grid1, off_fresh=grid0, on_fresh=grid1,
+        objective_off=1.0, objective_on=.9999,
+        unresolved_gap_off=.01, unresolved_gap_on=.02, free_workload_count=1,
+    )
+    assert result["objective_effect_classification"] == "UNRESOLVED_WITHIN_SOLVER_GAP"
+    assert "AIDC_OBJECTIVE_EFFECT_UNRESOLVED_RELATIVE_TO_SOLVER_GAP" in result["red_flags"]

@@ -60,11 +60,15 @@ def aidc_effect_watchdog(
     changed_planning = _different(planning_off, planning_on, 1e-12)
     changed_fresh = _different(fresh_off, fresh_on, 1e-12)
     delta_objective = float(objective_on) - float(objective_off)
-    resolution_floor = max(
-        float(solver_objective_tolerance),
-        abs(float(unresolved_gap_off)) + abs(float(unresolved_gap_on)),
-    )
+    unresolved_solver_gap_floor = abs(float(unresolved_gap_off)) + abs(float(unresolved_gap_on))
+    resolution_floor = max(float(solver_objective_tolerance), unresolved_solver_gap_floor)
     resolved = abs(delta_objective) > resolution_floor
+    if resolved:
+        objective_effect_classification = "RESOLVED_ABOVE_SOLVER_AND_REPORTING_FLOOR"
+    elif unresolved_solver_gap_floor > 0.0 and abs(delta_objective) <= unresolved_solver_gap_floor:
+        objective_effect_classification = "UNRESOLVED_WITHIN_SOLVER_GAP"
+    else:
+        objective_effect_classification = "BELOW_REPORTING_RESOLUTION_ZERO_SOLVER_GAP"
     red_flags: list[str] = []
     if free_workload_count > 0 and not changed_workload.any():
         red_flags.append("AIDC_ON_CONTROLLABLE_DECISIONS_IDENTICAL_DESPITE_FREE_WORKLOAD")
@@ -74,7 +78,7 @@ def aidc_effect_watchdog(
         red_flags.append("AIDC_PQ_DIFFERS_BUT_PLANNING_GRID_UNRESPONSIVE")
     if (changed_p.any() or changed_q.any()) and not changed_fresh.any():
         red_flags.append("AIDC_PQ_DIFFERS_BUT_FRESH_GRID_UNRESPONSIVE")
-    if abs(delta_objective) > 0.0 and not resolved:
+    if abs(delta_objective) > 0.0 and objective_effect_classification == "UNRESOLVED_WITHIN_SOLVER_GAP":
         red_flags.append("AIDC_OBJECTIVE_EFFECT_UNRESOLVED_RELATIVE_TO_SOLVER_GAP")
 
     changed_slots = 0
@@ -98,6 +102,8 @@ def aidc_effect_watchdog(
         "objective_improvement_off_minus_on": -delta_objective,
         "relative_objective_delta": delta_objective / max(abs(float(objective_off)), 1e-12),
         "effect_resolution_floor": resolution_floor,
+        "unresolved_solver_gap_floor": unresolved_solver_gap_floor,
+        "objective_effect_classification": objective_effect_classification,
         "resolved_effect": resolved,
         "planning_rho_delta": float(
             np.max(planning_on) - np.max(planning_off)

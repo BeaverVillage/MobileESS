@@ -642,6 +642,23 @@ def _case_array_payload(root: Path) -> dict[str, np.ndarray]:
         }
 
 
+def _cross_case_effect_metrics(off: Mapping[str, object], on: Mapping[str, object]) -> dict[str, float]:
+    off_actual = off["actual"]["actual_AIDC"]
+    on_actual = on["actual"]["actual_AIDC"]
+
+    def service_ratio(value: Mapping[str, object]) -> float:
+        executed = float(value["executed_nodeh"])
+        backlog = float(value["blocked_or_backlog_nodeh"])
+        return executed / max(executed + backlog, 1e-12)
+
+    return {
+        "Fresh_losses_delta_kWh": float(on["fresh"]["losses_kwh"]) - float(off["fresh"]["losses_kwh"]),
+        "actual_executed_nodeh_delta": float(on_actual["executed_nodeh"]) - float(off_actual["executed_nodeh"]),
+        "actual_backlog_nodeh_delta": float(on_actual["blocked_or_backlog_nodeh"]) - float(off_actual["blocked_or_backlog_nodeh"]),
+        "actual_service_ratio_delta": service_ratio(on_actual) - service_ratio(off_actual),
+    }
+
+
 def execute_day(
     *,
     repo: Path,
@@ -931,6 +948,8 @@ def execute_day(
     finally:
         electrical.voltage.close(); electrical.current.close()
 
+    rack_contract = json.loads((repo / "dayahead/artifacts/v16/AIDC_RACK_MAPPING_CONTRACT.json").read_text(encoding="utf-8"))
+    rack_site_ids = tuple(str(row["aidc_id"]) for row in rack_contract["racks"])
     comparisons: dict[str, dict[str, object]] = {}
     for name, off_case, on_case in (
         ("B1-B0", "B0", "B1"), ("B3-B2", "B2", "B3"),
@@ -953,6 +972,7 @@ def execute_day(
                 else float(on["objective_unresolved_absolute_gap"])
             ),
             free_workload_count=int(np.asarray(on["arrays"]["workload"]).size),
+            rack_site_ids=rack_site_ids,
             solver_status_off="OPTIMAL" if not off["MESS"]["solver_evidence"] else str(off["MESS"]["solver_evidence"][-1]["termination"]),
             solver_status_on="OPTIMAL" if not on["MESS"]["solver_evidence"] else str(on["MESS"]["solver_evidence"][-1]["termination"]),
             planning_rho_off=float(off["planning"]["rho"]),
@@ -960,6 +980,7 @@ def execute_day(
             fresh_rho_off=float(off["fresh"]["rho_max_AC"]),
             fresh_rho_on=float(on["fresh"]["rho_max_AC"]),
         )
+        comparisons[name].update(_cross_case_effect_metrics(off, on))
     for name, off_case, on_case in (
         ("B2-B0", "B0", "B2"), ("B3-B1", "B1", "B3"),
     ):
@@ -975,6 +996,7 @@ def execute_day(
             terminal_soc=on["MESS"]["terminal_SoC"],
             solver_records=on["MESS"]["solver_evidence"],
         )
+        comparisons[name].update(_cross_case_effect_metrics(off, on))
     effect_path = artifact_root / "daily" / phase / day / "EFFECT_WATCHDOG.json"
     atomic_json(effect_path, {
         "day": day, "phase": phase, "status": "PASS" if all(row["status"] == "PASS" for row in comparisons.values()) else "DIAGNOSE",
