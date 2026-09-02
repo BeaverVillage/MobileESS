@@ -1,0 +1,76 @@
+{
+  "RESULT_CLASSIFICATION": "V31_MIXED_AIDC_DELIVERABILITY_LIMITATION_DIAGNOSED",
+  "V30_production_change_authorized": false,
+  "artifact_id": "V31_FINAL_BOTTLENECK_REVIEW_V1",
+  "authority": "NON_AUTHORITY_DIAGNOSTIC_ONLY",
+  "cases": {
+    "B1": {
+      "Fresh_demonstrated_physically_unsafe_nodeh": 0.0,
+      "fraction_headroom_high_leverage": 0.22230519307758365,
+      "interpretation": "The zero-margin nominal current envelope remains the largest measured loss. This is a planning-physical deliverability diagnosis; unexecuted work is not falsely labeled Fresh-unsafe.",
+      "nominally_blocked_but_Fresh_unresolved_nodeh": 68.09916284533836,
+      "numerical_evidence_nodeh": {
+        "current_margin": 2.4051944867996324,
+        "nominal_planning_current": 68.0994737690146,
+        "source_availability": 36.1089969581708,
+        "true_rack_capacity": 14.002243376318667
+      },
+      "primary_bottleneck": "PHYSICAL_GRID_DELIVERABILITY_LIMITED",
+      "secondary_contributors": [
+        "SOURCE_AVAILABILITY_LIMITED",
+        "TRUE_RACK_CAPACITY_LIMITED",
+        "GRID_EFFECTIVE_HEADROOM_MISPLACED",
+        "ELECTRICAL_SENSITIVITY_LIMITED"
+      ]
+    },
+    "B3": {
+      "Fresh_demonstrated_physically_unsafe_nodeh": 0.0,
+      "fraction_headroom_high_leverage": 0.22544336630489603,
+      "interpretation": "The zero-margin nominal current envelope remains the largest measured loss. This is a planning-physical deliverability diagnosis; unexecuted work is not falsely labeled Fresh-unsafe.",
+      "nominally_blocked_but_Fresh_unresolved_nodeh": 56.216951154176414,
+      "numerical_evidence_nodeh": {
+        "current_margin": 1.732675015454172,
+        "nominal_planning_current": 56.19459231872735,
+        "source_availability": 35.957686121924034,
+        "true_rack_capacity": 23.530679550524944
+      },
+      "primary_bottleneck": "PHYSICAL_GRID_DELIVERABILITY_LIMITED",
+      "secondary_contributors": [
+        "SOURCE_AVAILABILITY_LIMITED",
+        "TRUE_RACK_CAPACITY_LIMITED",
+        "GRID_EFFECTIVE_HEADROOM_MISPLACED",
+        "ELECTRICAL_SENSITIVITY_LIMITED"
+      ]
+    }
+  },
+  "diagnostic_trajectories": {
+    "D_CUR": "NON_AUTHORITY_DIAGNOSTIC_ONLY",
+    "D_PAIR": "NON_AUTHORITY_DIAGNOSTIC_ONLY",
+    "D_ZERO": "NON_AUTHORITY_DIAGNOSTIC_ONLY"
+  },
+  "margin_comparison": {
+    "M_CURRENT_pu": 0.0009917274479849247,
+    "M_PAIRED_MAX_pu": 0.0004958637239924624,
+    "artifact_id": "V31_MARGIN_COMPARISON_V1",
+    "authority": "NON_AUTHORITY_DIAGNOSTIC_ONLY",
+    "descriptive_classification": "50_PERCENT_LOWER_DIAGNOSTIC_BOUND_SIGNED_PAIR_CORRELATION_UNRESOLVED",
+    "margin_reduction_percent": 50.0,
+    "margin_reduction_pu": 0.0004958637239924624,
+    "materiality_rule": null,
+    "materiality_rule_met": null,
+    "materiality_statement": "No after-the-fact materiality threshold is defined; the exact 50 percent arithmetic reduction is the primary result.",
+    "production_margin_replaced": false,
+    "status": "PASS",
+    "why_margins_differ": "The V30 triangle bound assigned the candidate maximum absolute error to both candidate and anchor. The certification anchor predictor is the Fresh anchor itself, so its exact individual error is zero. Signed candidate residual cancellation could not be measured because those arrays were not frozen."
+  },
+  "official_case_count": 4,
+  "official_cases": [
+    "B0",
+    "B1",
+    "B2",
+    "B3"
+  ],
+  "one_next_scientific_change": "PRE-APRIL ZERO-MARGIN NOMINAL-CURRENT FRONTIER FRESH-AC CERTIFICATION",
+  "recommendation_reason": "Paired-margin recertification would recover little service; the much larger zero-margin nominal-current remainder is still Fresh-unresolved and should be certified before changing formulation or safety policy.",
+  "status": "PASS"
+}
