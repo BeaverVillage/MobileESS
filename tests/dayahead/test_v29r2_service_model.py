@@ -50,6 +50,8 @@ def test_frozen_service_authority_passes_causal_coverage_and_nondegeneracy() -> 
     assert metrics["lower_bound_degenerate"] is False
     assert metrics["lower_bound_nonzero_cohort_day_count"] > 0
     assert authority["downstream_bridge_authorized"] is True
+    data = json.loads((OUT / "V29R2_EXEC_SERVICE_DATA_CONTRACT.json").read_text(encoding="utf-8"))
+    assert "no cross-boundary double count" in data["bridge_mass_order"]
 
 
 def test_rolling_origin_bounds_hold_at_optimizer_cohort_level() -> None:

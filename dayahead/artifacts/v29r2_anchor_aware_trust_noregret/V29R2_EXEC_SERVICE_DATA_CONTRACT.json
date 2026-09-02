@@ -1,6 +1,6 @@
 {
   "April_fit_rows": 0,
-  "H_REALIZED_definition": "nodes_req * min(actual D-day overlap hours, wallclock_req_hours)",
+  "H_REALIZED_definition": "nodes_req * min(actual D-day overlap hours, wallclock_req_hours minus pre-D0 executed requested hours)",
   "H_REQ_definition": "nodes_req * wallclock_req_hours",
   "allowed_cutoff_observable_features": [
     "partition_hash",
@@ -48,6 +48,7 @@
   ],
   "artifact_id": "V29R2_EXEC_SERVICE_DATA_CONTRACT_V1",
   "authority": "CARRYIN_EXECUTABLE_SERVICE_V1",
+  "bridge_mass_order": "pre-D0 executed requested service is subtracted before D-day requested service; no cross-boundary double count",
   "conformal_aggregation_level": "D-day x frozen optimizer cohort",
   "coverage_target": 0.9,
   "forbidden_features": [

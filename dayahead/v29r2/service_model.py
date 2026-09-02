@@ -128,13 +128,21 @@ def build_job_day_instances(events: pd.DataFrame, days: Sequence[str]) -> pd.Dat
         selected["label_available_utc"] = end_day
         selected["queue_age_hours"] = (mark - selected["submit_utc"]).dt.total_seconds() / 3600.0
         selected["H_REQ"] = selected["nodes"] * selected["request_hours"]
+        pre_start = selected["start_utc"].where(selected["start_utc"].gt(mark), mark)
+        pre_end = selected["end_utc"].where(selected["end_utc"].lt(start_day), start_day)
+        pre_overlap_hours = (pre_end - pre_start).dt.total_seconds().div(3600.0)
         overlap_start = selected["start_utc"].where(selected["start_utc"].gt(start_day), start_day)
         overlap_end = selected["end_utc"].where(selected["end_utc"].lt(end_day), end_day)
         overlap_hours = (overlap_end - overlap_start).dt.total_seconds().div(3600.0)
         valid_execution = selected["start_utc"].notna() & selected["end_utc"].notna()
+        pre_overlap_hours = pre_overlap_hours.where(valid_execution, 0.0).clip(lower=0.0)
         overlap_hours = overlap_hours.where(valid_execution, 0.0).clip(lower=0.0)
-        # Executed requested service is definitionally bounded by the request.
-        selected["realized_requested_hours"] = np.minimum(overlap_hours, selected["request_hours"])
+        # Requested service is conserved in chronological order across the bridge.
+        selected["pre_D0_realized_requested_hours"] = np.minimum(pre_overlap_hours, selected["request_hours"])
+        selected["H_PRE_D0_REALIZED"] = selected["nodes"] * selected["pre_D0_realized_requested_hours"]
+        selected["H0_REQ_REALIZED"] = selected["H_REQ"] - selected["H_PRE_D0_REALIZED"]
+        remaining_hours = selected["request_hours"] - selected["pre_D0_realized_requested_hours"]
+        selected["realized_requested_hours"] = np.minimum(overlap_hours, remaining_hours)
         selected["H_REALIZED"] = selected["nodes"] * selected["realized_requested_hours"]
         selected["positive_service"] = selected["H_REALIZED"].gt(0).astype(int)
         selected["realization_fraction"] = selected["H_REALIZED"] / selected["H_REQ"]
@@ -142,6 +150,7 @@ def build_job_day_instances(events: pd.DataFrame, days: Sequence[str]) -> pd.Dat
             (selected["H_REQ"] > 0).all()
             and (selected["H_REALIZED"] >= 0).all()
             and (selected["H_REALIZED"] <= selected["H_REQ"] + 1e-9).all()
+            and (selected["H_PRE_D0_REALIZED"] + selected["H_REALIZED"] <= selected["H_REQ"] + 1e-9).all()
         ):
             raise RuntimeError(f"V29R2_EXEC_SERVICE_MASS_INVALID:{day}")
         instances.append(selected)
@@ -391,7 +400,8 @@ def build_service_authority(repo: Path) -> dict[str, object]:
         "preApril_job_day_instance_count": len(instances),
         "target": "requested full-node service actually executed within D-day by a job queued at D-1 18:00 fixed AEST",
         "H_REQ_definition": "nodes_req * wallclock_req_hours",
-        "H_REALIZED_definition": "nodes_req * min(actual D-day overlap hours, wallclock_req_hours)",
+        "H_REALIZED_definition": "nodes_req * min(actual D-day overlap hours, wallclock_req_hours minus pre-D0 executed requested hours)",
+        "bridge_mass_order": "pre-D0 executed requested service is subtracted before D-day requested service; no cross-boundary double count",
         "allowed_cutoff_observable_features": allowed, "forbidden_features": forbidden,
         "label_only_fields": ["start_time", "end_time"],
         "model_family": "deterministic LightGBM hurdle: positive-service classifier plus conditional realization-fraction regressor",

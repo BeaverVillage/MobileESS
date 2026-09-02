@@ -10,9 +10,9 @@ H_REQ is the request envelope. H_NOM is the nominal executable-service estimate.
 - Rolling evaluation days: 20
 - Rolling evaluation cohort-days: 32
 - Aggregate H_LOW coverage: 0.906250 (target 0.90)
-- Sharpness H_LOW/H_NOM: 0.182081
-- Nominal MAE: 75.516581 node-h
-- Nominal WAPE: 0.951897
+- Sharpness H_LOW/H_NOM: 0.176128
+- Nominal MAE: 75.348392 node-h
+- Nominal WAPE: 0.949819
 - Nonzero lower-bound cohort-days: 7
 
 The model is not tuned on April performance and does not use final state, nodes used, wallclock used, nodelist, future sharing, or post-cutoff Actual as a feature.
