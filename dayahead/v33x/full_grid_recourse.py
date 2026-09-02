@@ -66,6 +66,7 @@ def _slot_problem(
     residual_site_it: np.ndarray,
     frozen_controls: np.ndarray,
     electrical: SlotCoefficients,
+    planning_vmax_pu: float | None = None,
 ) -> tuple[np.ndarray, float, float, dict[str, object], int]:
     cohorts, racks = da_slot.shape
     n_y = cohorts * racks
@@ -96,12 +97,16 @@ def _slot_problem(
 
     grid_rows: list[np.ndarray] = list(resource_rows)
     grid_rhs: list[float] = list(resource_rhs)
+    planning_vmax_squared = V_MAX_SQUARED if planning_vmax_pu is None else float(planning_vmax_pu) ** 2
+    if not math.isfinite(planning_vmax_squared) or planning_vmax_squared <= V_MIN_SQUARED:
+        raise ValueError("V33X_PLANNING_VMAX_RANGE")
 
     v_constant = np.asarray(electrical.voltage_constant) + np.asarray(electrical.voltage_matrix).T @ control_constant
     v_matrix = np.asarray(electrical.voltage_matrix).T @ control_matrix
     for constant, row0 in zip(v_constant, v_matrix, strict=True):
         grid_rows.append(row0.copy())
-        grid_rhs.append(float(V_MAX_SQUARED - constant))
+        upper_rhs = V_MAX_SQUARED - constant if planning_vmax_pu is None else planning_vmax_squared - constant
+        grid_rhs.append(float(upper_rhs))
         grid_rows.append(-row0.copy())
         grid_rhs.append(float(constant - V_MIN_SQUARED))
 
@@ -187,7 +192,8 @@ def _slot_problem(
         "planning_Vmax_pu": float(math.sqrt(max(0.0, float(voltage.max())))),
         "planning_rho_max": max(supported_current, default=0.0),
         "planning_transformer_kva_loading_max": max(tx_loading, default=0.0),
-        "planning_voltage_violation": bool(voltage.min() < V_MIN_SQUARED - 1e-7 or voltage.max() > V_MAX_SQUARED + 1e-7),
+        "planning_voltage_violation": bool(voltage.min() < V_MIN_SQUARED - 1e-7 or voltage.max() > planning_vmax_squared + 1e-7),
+        "planning_vmax_pu": math.sqrt(planning_vmax_squared),
         "planning_current_violation": bool(max(supported_current, default=0.0) > 1.0 + 1e-7),
         "planning_transformer_violation": bool(max(tx_loading, default=0.0) > 1.0 + 1e-7),
     }
@@ -204,6 +210,8 @@ def solve_causal_day_full_grid(
     frozen_controls_96x60: np.ndarray,
     electrical_coefficients: Sequence[SlotCoefficients],
     initial_backlog_nodeh: np.ndarray | None = None,
+    *,
+    planning_vmax_pu: float | None = None,
 ) -> FullGridRecourseResult:
     da = np.asarray(da_service_nodeh, dtype=float)
     arrivals = np.asarray(actual_arrivals_nodeh, dtype=float)
@@ -241,7 +249,7 @@ def solve_causal_day_full_grid(
         site_residual = np.asarray([residual_slot[rack_site == site].sum() for site in range(12)])
         y, physical_service, rho, slot_grid, calls = _slot_problem(
             da_slot, available, rack_capacity, rack_site, kappa, c1, site_residual,
-            controls_slot, coefficient,
+            controls_slot, coefficient, planning_vmax_pu,
         )
         subcalls += calls
         service = float(y.sum())

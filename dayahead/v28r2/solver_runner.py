@@ -13,9 +13,19 @@ from dayahead.v28r2.solver_payload import SolverPayload, payload_from_registry
 from dayahead.v28r2.variable_registry import VariableRegistry, build_resource_model
 
 
-def add_grid_rows(registry: VariableRegistry, context: object, voltage: object, current: object) -> None:
+def add_grid_rows(
+    registry: VariableRegistry,
+    context: object,
+    voltage: object,
+    current: object,
+    *,
+    planning_vmax_pu: float | None = None,
+) -> None:
     import gurobipy as gp
 
+    planning_vmax_squared = V_MAX_SQUARED if planning_vmax_pu is None else float(planning_vmax_pu) ** 2
+    if not math.isfinite(planning_vmax_squared) or planning_vmax_squared <= V_MIN_SQUARED:
+        raise ValueError("V28R2_PLANNING_VMAX_RANGE")
     model = registry.model
     for slot in range(96):
         coefficient = slot_coefficients(context, voltage, current, slot)
@@ -26,7 +36,7 @@ def add_grid_rows(registry: VariableRegistry, context: object, voltage: object, 
                 for index in range(len(controls))
             )
             model.addConstr(expression >= V_MIN_SQUARED, name=f"grid_voltage_low[{slot},{node}]")
-            model.addConstr(expression <= V_MAX_SQUARED, name=f"grid_voltage_high[{slot},{node}]")
+            model.addConstr(expression <= planning_vmax_squared, name=f"grid_voltage_high[{slot},{node}]")
         for branch, branch_name in enumerate(coefficient.branch_names):
             if is_dominated_mess_current_row(branch_name):
                 continue
