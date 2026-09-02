@@ -141,7 +141,12 @@ class CheckpointDependencies:
 
     def validate(self) -> None:
         for name, value in asdict(self).items():
-            if value is not None and (not isinstance(value, str) or len(value) != 64):
+            allowed_lengths = {40, 64} if name == "code_HEAD" else {64}
+            if value is not None and (
+                not isinstance(value, str)
+                or len(value) not in allowed_lengths
+                or any(character not in "0123456789abcdef" for character in value.lower())
+            ):
                 raise ValueError(f"V35_CHECKPOINT_DEPENDENCY_SHA:{name}")
 
 

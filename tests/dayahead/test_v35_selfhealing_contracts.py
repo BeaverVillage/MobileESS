@@ -275,3 +275,11 @@ def test_19_vectorized_correction_selection_preserves_25_percent_rule():
     assert selected is not None and selected.family == "M2"
     assert reports["M1"]["covering"] is True
     assert reason == "MORE_COMPLEX_COVERING_FAMILY_AT_LEAST_25_PERCENT_LESS_MEAN_CORRECTION"
+
+
+def test_20_checkpoint_accepts_native_40_hex_git_head_but_other_shas_remain_64():
+    source = dependencies()
+    native = CheckpointDependencies(**{**source.__dict__, "code_HEAD": "a" * 40})
+    native.validate()
+    with pytest.raises(ValueError, match="science_authority_SHA"):
+        CheckpointDependencies(**{**native.__dict__, "science_authority_SHA": "b" * 40}).validate()
