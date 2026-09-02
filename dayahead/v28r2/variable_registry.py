@@ -103,6 +103,7 @@ def configure_model(model: object) -> None:
 
 def build_resource_model(
     data: V28R2FormulationData, voltage: object, case: str, *, rho: float = 0.1,
+    rho_aidc: float | None = None, rho_mess: float | None = None,
 ) -> VariableRegistry:
     import gurobipy as gp
     from gurobipy import GRB
@@ -110,6 +111,10 @@ def build_resource_model(
     if case not in {"B0", "B1", "B2", "B3"}:
         raise ValueError("V28R2_UNKNOWN_CASE")
     data.validate()
+    aidc_trust = float(rho if rho_aidc is None else rho_aidc)
+    mess_trust = float(rho if rho_mess is None else rho_mess)
+    if not (0 <= aidc_trust <= 1 and 0 <= mess_trust <= 1):
+        raise ValueError("V28R2_TRUST_REGION_RANGE")
     compute_flexible = case in {"B1", "B3"}
     mess_flexible = case in {"B2", "B3"}
     model = gp.Model(f"v28r2_{case}_resource")
@@ -189,8 +194,8 @@ def build_resource_model(
             add_planning_equality(model, p_it[(aidc, slot)], p_pcc[(aidc, slot)], coefficient)
             reference_it = float(data.delta.p_res_plan_kw[indices, slot].sum() + data.reference.p_f_ref_kw[indices, slot].sum())
             reference_pcc = coefficient.slope * reference_it + coefficient.intercept_kw
-            model.addConstr(p_pcc[(aidc, slot)] >= reference_pcc - rho * (reference_pcc - pcc_min), name=f"trust_aidc_low[{aidc},{slot}]")
-            model.addConstr(p_pcc[(aidc, slot)] <= reference_pcc + rho * (pcc_max - reference_pcc), name=f"trust_aidc_high[{aidc},{slot}]")
+            model.addConstr(p_pcc[(aidc, slot)] >= reference_pcc - aidc_trust * (reference_pcc - pcc_min), name=f"trust_aidc_low[{aidc},{slot}]")
+            model.addConstr(p_pcc[(aidc, slot)] <= reference_pcc + aidc_trust * (pcc_max - reference_pcc), name=f"trust_aidc_high[{aidc},{slot}]")
 
     mess_p, mess_q, mess_e = {}, {}, {}
     for mess_id, record in sorted(data.mess_records.items()):
@@ -204,13 +209,13 @@ def build_resource_model(
             connected = slot not in unavailable
             fixed = -5.0 if connected and slot in range(start - 8, start) else 0.0
             mess_p[(mess_id, slot)] = model.addVar(
-                lb=(-rho * P_LIMIT_KW if connected else 0.0) if mess_flexible else fixed,
-                ub=(rho * P_LIMIT_KW if connected else 0.0) if mess_flexible else fixed,
+                lb=(-mess_trust * P_LIMIT_KW if connected else 0.0) if mess_flexible else fixed,
+                ub=(mess_trust * P_LIMIT_KW if connected else 0.0) if mess_flexible else fixed,
                 name=f"mess_p_kw[{mess_id},{slot}]",
             )
             mess_q[(mess_id, slot)] = model.addVar(
-                lb=(-rho * PCS_KVA if connected else 0.0) if mess_flexible else 0.0,
-                ub=(rho * PCS_KVA if connected else 0.0) if mess_flexible else 0.0,
+                lb=(-mess_trust * PCS_KVA if connected else 0.0) if mess_flexible else 0.0,
+                ub=(mess_trust * PCS_KVA if connected else 0.0) if mess_flexible else 0.0,
                 name=f"mess_q_kvar[{mess_id},{slot}]",
             )
             mobility = float(record["safe_mobility_energy_kwh"]) / len(transit) if slot in transit else 0.0

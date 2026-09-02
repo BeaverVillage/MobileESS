@@ -31,6 +31,38 @@ class ReferenceScheduleV4:
     h0_low_nodeh: np.ndarray
     uncertain_initial_nodeh: np.ndarray
 
+    @property
+    def cohort_ids(self) -> tuple[str, ...]:
+        return self.schedule.cohort_ids
+
+    @property
+    def rack_ids(self) -> tuple[str, ...]:
+        return self.schedule.rack_ids
+
+    @property
+    def initial_backlog_nodeh(self) -> np.ndarray:
+        return self.schedule.initial_backlog_nodeh
+
+    @property
+    def arrivals_nodeh(self) -> np.ndarray:
+        return self.schedule.arrivals_nodeh
+
+    @property
+    def x_ref_nodeh(self) -> np.ndarray:
+        return self.schedule.x_ref_nodeh
+
+    @property
+    def backlog_nodeh(self) -> np.ndarray:
+        return self.schedule.backlog_nodeh
+
+    @property
+    def p_f_ref_kw(self) -> np.ndarray:
+        return self.schedule.p_f_ref_kw
+
+    @property
+    def g_f_ref_gpu(self) -> np.ndarray:
+        return self.schedule.g_f_ref_gpu
+
     def validate(self) -> None:
         self.schedule.validate()
         shape = (len(self.schedule.cohort_ids),)
