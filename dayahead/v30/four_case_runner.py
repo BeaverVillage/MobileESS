@@ -107,7 +107,9 @@ def run(repo: Path, source_repo: Path, electrical_cache: Path, trust_cache: Path
     write_json(out / "V30_B1_B3_AIDC_POLICY_IDENTITY.json", {"artifact_id": "V30_B1_B3_AIDC_POLICY_IDENTITY_V1", "status": "PASS", "B1_policy_sha256": policy_hash, "B3_policy_sha256": policy_hash, "byte_config_identical": True, "policy": policy})
     da_rows, headroom_rows = stage1_rows(repo, schedules, scenarios)
     write_csv(out / "V30_APR04_DA_RESULTS.csv", da_rows)
-    write_csv(out / "V30_PREAPRIL_RECOURSE_DELIVERABILITY.csv", [{"scenario_id": i, **item.payload()} for i, item in enumerate(scenarios)])
+    frozen_deliverability = out / "V30_PREAPRIL_RECOURSE_DELIVERABILITY.csv"
+    if not frozen_deliverability.is_file():
+        raise RuntimeError("V30_PREAPRIL_DELIVERABILITY_NOT_FROZEN")
 
     actual = materialize_actual_workload(source_repo, DAY)
     initial = _initial_actual(repo, COHORT_IDS)

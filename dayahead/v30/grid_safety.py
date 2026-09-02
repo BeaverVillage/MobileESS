@@ -73,7 +73,7 @@ def load_phase_current_safety(cache_root: Path, margin_pu: float) -> PhaseCurren
         raise RuntimeError("V30_CURRENT_CACHE_AUTHORITY")
     cache = np.load(paths[0], allow_pickle=False)
     controls = tuple(map(str, cache["control_names"]))
-    if len(controls) < 12 or not all(name.startswith("AIDC") for name in controls[:12]):
+    if len(controls) < 12 or tuple(controls[:12]) != tuple(f"aidc_load_kw[AIDC{i:02d}]" for i in range(1, 13)):
         raise RuntimeError("V30_AIDC_CONTROL_AXIS")
     result = PhaseCurrentSafety(
         tuple(map(str, cache["branch_names"])),
