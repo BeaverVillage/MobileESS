@@ -1,0 +1,54 @@
+{
+  "April_fit_rows": 0,
+  "H_LOW_zero_root_cause": "LEGITIMATE_LOW_SUPPORT_ZERO",
+  "arbitrary_positive_floor_present": false,
+  "artifact_id": "V29R3_SERVICE_HURDLE_FORENSIC_V1",
+  "calibration_implementation_defect": false,
+  "cohort_lower_bound_calculation": [
+    {
+      "H_LOW": 0.0,
+      "H_NOM": 40.54642828241903,
+      "H_REALIZED": 77.99888888888889,
+      "H_REQ": 852.0,
+      "calibration_deduction_nodeh": 64.96629667945624,
+      "cohort_id": "N01_R02",
+      "nominal_fraction": 0.04758970455682985,
+      "raw_lower_before_nonnegative_bound_nodeh": -24.419868397037206,
+      "zero_reason": "NOMINAL_FRACTION_BELOW_ONE_SIDED_CALIBRATION_QUANTILE"
+    },
+    {
+      "H_LOW": 0.0,
+      "H_NOM": 12.982422575850425,
+      "H_REALIZED": 0.0,
+      "H_REQ": 960.0,
+      "calibration_deduction_nodeh": 73.20146104727463,
+      "cohort_id": "N08_R02",
+      "nominal_fraction": 0.013523356849844192,
+      "raw_lower_before_nonnegative_bound_nodeh": -60.21903847142421,
+      "zero_reason": "NOMINAL_FRACTION_BELOW_ONE_SIDED_CALIBRATION_QUANTILE"
+    }
+  ],
+  "conformal_overprediction_fraction_quantile": 0.0762515219242444,
+  "mechanism": "Both Apr-04 cohort nominal service fractions are below the pre-April one-sided OOF overprediction-fraction quantile, so max(0, H_NOM-q*H_REQ) is exactly zero.",
+  "model_family": "causal LightGBM hurdle",
+  "occurrence_and_magnitude_components": [
+    {
+      "H_NOM_reconstructed": 40.54642828241903,
+      "cohort_id": "N01_R02",
+      "job_count": 16,
+      "request_weighted_conditional_service_fraction": 0.3157664121763581,
+      "request_weighted_occurrence_probability": 0.15024502054983135
+    },
+    {
+      "H_NOM_reconstructed": 12.982422575850425,
+      "cohort_id": "N08_R02",
+      "job_count": 1,
+      "request_weighted_conditional_service_fraction": 0.17924242523921263,
+      "request_weighted_occurrence_probability": 0.07544729899629647
+    }
+  ],
+  "occurrence_probability_collapse": false,
+  "positive_magnitude_collapse": false,
+  "status": "PASS",
+  "subgroup_data_sparsity_material": true
+}

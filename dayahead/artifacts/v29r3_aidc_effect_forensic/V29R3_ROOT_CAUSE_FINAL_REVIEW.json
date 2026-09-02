@@ -1,0 +1,39 @@
+{
+  "RESULT_CLASSIFICATION": "V29R3_AIDC_EFFECT_PHYSICALLY_EXPLAINED_NO_FIX_REQUIRED",
+  "answers": {
+    "Q1": "NO: daily AIDC actuation is material, but critical-slot actuation and its Actual retention are limited.",
+    "Q2": "PARTLY: leverage is heterogeneous; the actuation-weighted aggregate is moderate, with weak and strong sites both present.",
+    "Q3": "ALLOCATION STRANDING DOMINATES: 79.814647957 node-h is recoverable by authority-compatible pooling and 7.760034899 node-h remains true capacity-limited. The stranding arises in fixed-command Actual replay after source realization, not from a forbidden rack mapping in the DA solver, so it does not prove a production defect.",
+    "Q4": "Both cohort H_NOM/H_REQ ratios are below the frozen pre-April one-sided calibration quantile, making max(0,H_NOM-q*H_REQ)=0.",
+    "Q5": "NO production defect is proven.",
+    "Q6": "YES; no fix/rerun was needed and the frozen Apr-04 B2-relative no-regret result remains PASS.",
+    "Q7": "NO; without a production science change, a full Apr-1-4 V29R3 rerun would add cost without testing an affected mechanism.",
+    "Q8": "NO. No AIDC scale, trust, MESS rating, feeder rating, PF, C1, or objective parameter may be changed from these development results."
+  },
+  "artifact_id": "V29R3_ROOT_CAUSE_FINAL_REVIEW_V1",
+  "evidence": {
+    "Actual_critical_slot_delta_kw": -8.422307129487608,
+    "DA_critical_slot_delta_kw": -10.669236785058775,
+    "DA_max_aggregate_AIDC_shift_kw": 150.24863971700833,
+    "DA_shifted_energy_L1_over_2_kwh": 175.4610573941965,
+    "H_LOW_zero_root_cause": "LEGITIMATE_LOW_SUPPORT_ZERO",
+    "all_day_execution_ratio": 0.22449757353387353,
+    "background_preflex_fraction": 1.0029409596593442,
+    "benefit_retention": 0.7585751019372755,
+    "critical_sensitivity_classification": "GRID_SENSITIVITY_MODERATE",
+    "critical_slot_execution_ratio": 0.2694656741608049,
+    "fresh_observed_delta_rho": -0.0016299652654621077,
+    "predicted_delta_rho": -0.0015574584774625557,
+    "rack_miss_nodeh": 87.57468285591214,
+    "stranded_capacity_nodeh": 79.81464795672338,
+    "true_capacity_shortage_nodeh": 7.760034899188767
+  },
+  "primary_classification": "MIXED_LIMITATION",
+  "production_science_code_changed": false,
+  "secondary_contributors": [
+    "RACK_ALLOCATION_STRANDING",
+    "ACTUAL_EXECUTION_RETENTION_LIMITED",
+    "BACKGROUND_STRESS_DOMINATED"
+  ],
+  "status": "PASS"
+}
