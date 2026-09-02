@@ -214,7 +214,12 @@ def _read_v29_baseline(repo: Path) -> list[dict[str, object]]:
             for row in csv.DictReader(stream):
                 if row.get("day") == DAY:
                     rows.append({"source": label, **row})
-    return rows
+    # ``write_csv`` deliberately freezes its schema from the first record.
+    # The objective and OpenDSS baseline ledgers have different columns, so
+    # materialize their union before serialization.
+    leading = ("source", "day", "case")
+    fields = (*leading, *sorted(set().union(*(row.keys() for row in rows)) - set(leading)))
+    return [{field: row.get(field, "") for field in fields} for row in rows]
 
 
 def run_apr04(repo: Path) -> dict[str, object]:

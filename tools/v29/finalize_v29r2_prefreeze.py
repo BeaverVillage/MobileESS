@@ -189,7 +189,11 @@ def main() -> None:
         },
         "invalidated_freeze_attempt": {
             "V29R2_DEV_FREEZE_HEAD": _load(out / "V29R2_DEV_FREEZE.json")["V29R2_DEV_FREEZE_HEAD"],
-            "reason": "Apr-04 fail-closed runner exposed an unsupported trajectory namespace before any Apr-04 result artifact was written.",
+            "reason": (
+                _load(out / "V29R2_APR04_FAILED_ATTEMPT_2.json")["failure"]
+                if (out / "V29R2_APR04_FAILED_ATTEMPT_2.json").is_file()
+                else "unsupported trajectory namespace before any Apr-04 result artifact was written"
+            ),
             "affected_pre_April_evidence": "none; full regression and preservation audit rerun before replacement freeze",
         },
         "required_checks": _required_checks(),

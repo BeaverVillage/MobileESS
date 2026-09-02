@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import subprocess
 from pathlib import Path
@@ -21,6 +22,12 @@ def _load(path: Path) -> dict[str, object]:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--invalidation-reason",
+        default="Apr-04 fail-closed runner exposed an unsupported trajectory namespace before any Apr-04 result artifact was written.",
+    )
+    args = parser.parse_args()
     repo = Path(__file__).resolve().parents[2]
     out = repo / OUT_REL
     prior_freeze_path = out / "V29R2_DEV_FREEZE.json"
@@ -62,7 +69,7 @@ def main() -> None:
     }
     if prior_freeze is not None:
         payload["supersedes_invalidated_freeze_head"] = prior_freeze["V29R2_DEV_FREEZE_HEAD"]
-        payload["invalidation_reason"] = "Apr-04 fail-closed runner exposed an unsupported trajectory namespace before any Apr-04 result artifact was written."
+        payload["invalidation_reason"] = args.invalidation_reason
     write_json(out / "V29R2_DEV_FREEZE.json", payload)
     print(json.dumps(payload, indent=2))
 
