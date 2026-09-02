@@ -1,0 +1,141 @@
+{
+  "May_numeric_reads": 0,
+  "May_opened": false,
+  "artifact_id": "V35_PREAPRIL_AIDC_MESS_CLOSURE_AUDIT_V1",
+  "checks": {
+    "AIDC_decision_to_PQ_to_grid_to_objective": true,
+    "B3_lineage_invariant": true,
+    "MESS_PQ_to_planning_grid": true,
+    "May_numeric_reads": 0,
+    "full_model_not_worse_than_restricted": true,
+    "planning_physical_constraints": true,
+    "plus_50_kvar_all_production_constraints_feasible": true,
+    "solver_starvation_remaining": false,
+    "stationary_PQ_improvement_resolved": true,
+    "stationary_PQ_optimized_nonzero": true
+  },
+  "code_HEAD": "f7899e01e9fc46c5be70cfc0601105e2007fb776",
+  "created_at": "2026-09-02T17:30:52.389764+00:00",
+  "defects_discovered": [
+    {
+      "classification": "ENGINEERING_SOLVER_INTEGRATION_DEFECT",
+      "defect_id": "V35_STATIONARY_PQ_LOOSE_RELATIVE_GAP_ZERO_INCUMBENT_DEFECT",
+      "repair": "Solve the exact full model temporarily fixed to STAY at MIPGap=1e-7, use the resulting P/Q trajectory as MIPStart, compare the full incumbent against it, and escalate deterministically through WorkLimit 60/180/300 only on starvation evidence.",
+      "root_cause": "The restricted stationary P/Q MIP accepted the zero-actuation incumbent at MIPGap=1e-3 even though a fully feasible +50 kvar point reduced rho; Gurobi OPTIMAL meant within the requested relative gap, not an exact zero-actuation optimum.",
+      "science_changed": false
+    }
+  ],
+  "previous_PASS_artifacts_invalidated": [
+    "V34 Apr01 B2/B3 zero-PQ solver conclusion",
+    "V34 objective coupling audit generated before tight restricted solve"
+  ],
+  "previous_PASS_artifacts_preserved": [
+    "V34 B3 AIDC lineage correction",
+    "V28R2 immutable B0/B1 AIDC source schedules",
+    "V33M3 traffic and mobility authority",
+    "all unrelated April source manifests and raw arrays"
+  ],
+  "primary_classification": "V35_PREAPRIL_AIDC_MESS_CLOSURE_PASS",
+  "stationary_PQ_consistency": {
+    "conclusion": "FULLY_FEASIBLE_NONZERO_PQ_IMPROVES_RHO_AND_IS_NOW_FOUND",
+    "optimized": {
+      "Fresh_OpenDSS_run": false,
+      "MIP_gap": 0.0,
+      "MOVE_fixed_OFF": true,
+      "P_Q_SoC_free": true,
+      "P_Q_nonzero": true,
+      "baseline_rho": 0.5670071217020519,
+      "best_bound": 0.5666022075877166,
+      "constraint_count": 315362,
+      "current_location_fixed": "STA01",
+      "deterministic_feasible_Q_perturbation": {
+        "PCS_feasible": true,
+        "PCS_polygon_apothem_kVA": 686.5496962822613,
+        "PCS_polygon_max_lhs_kVA": 50.0,
+        "P_kW": 0.0,
+        "Q_kvar": 50.0,
+        "SoC_unchanged": true,
+        "all_production_planning_constraints_feasible": true,
+        "delta_rho": -2.8034779055996495e-05,
+        "grid_expressions_change": true,
+        "initial_energy_feasible": true,
+        "line_and_transformer_current_feasible": true,
+        "max_abs_current_change_pu": 0.007355959677890489,
+        "max_abs_voltage_change_pu": 0.004903141074407147,
+        "max_non_dominated_current_pu": 0.6165483958450978,
+        "max_transformer_kva_ratio": 0.5528157486603082,
+        "service": "STA01",
+        "slot": 74,
+        "terminal_energy_feasible": true,
+        "transformer_kva_feasible": true,
+        "voltage_lower_upper_feasible": true,
+        "voltage_max_pu": 1.048229911390419,
+        "voltage_min_pu": 0.9828858316903925
+      },
+      "direct_solver_objective_terms": [
+        {
+          "coefficient": 1.0,
+          "variable": "rho"
+        }
+      ],
+      "energy_sha256": "2d0b06c04d3cae47d765a0b6ceb9e49777fb1e82f6afd1676aed61a1abc03e39",
+      "incumbent": 0.5666022075877166,
+      "max_abs_P_kW": 550.0,
+      "max_abs_Q_kvar": 427.56815506090595,
+      "objective_improvement": 0.00040491411433529745,
+      "optimized_rho": 0.5666022075877166,
+      "p_sha256": "6e1af148219282e30c7792bcf5ff577ec9385f234f6d2780f1d95e93fac4125c",
+      "production_schedule_modified": false,
+      "q_sha256": "14a678dfc951d5537ecdfe47807c5fa3eec35483c380d0e94569a0771a669145",
+      "resolved_absolute_gap": 0.0,
+      "rho_improvement": 0.00040491411433529745,
+      "runtime_seconds": 0.20488259987905622,
+      "same_grid_constraints": true,
+      "same_objective": "rho; all MOVE/travel/tie terms identically zero under fixed STAY",
+      "solver_status": "OPTIMAL",
+      "sum_abs_P_kW_slots": 1159.4182825484763,
+      "sum_abs_Q_kvar_slots": 12975.610593655128,
+      "terminal_SoC": 0.6333333333333333,
+      "terminal_energy_kWh": 760.0,
+      "variable_count": 482,
+      "work_limit": 60.0
+    },
+    "plus_50_kvar": {
+      "PCS_feasible": true,
+      "PCS_polygon_apothem_kVA": 686.5496962822613,
+      "PCS_polygon_max_lhs_kVA": 50.0,
+      "P_kW": 0.0,
+      "Q_kvar": 50.0,
+      "SoC_unchanged": true,
+      "all_production_planning_constraints_feasible": true,
+      "delta_rho": -2.8034779055996495e-05,
+      "grid_expressions_change": true,
+      "initial_energy_feasible": true,
+      "line_and_transformer_current_feasible": true,
+      "max_abs_current_change_pu": 0.007355959677890489,
+      "max_abs_voltage_change_pu": 0.004903141074407147,
+      "max_non_dominated_current_pu": 0.6165483958450978,
+      "max_transformer_kva_ratio": 0.5528157486603082,
+      "service": "STA01",
+      "slot": 74,
+      "terminal_energy_feasible": true,
+      "transformer_kva_feasible": true,
+      "voltage_lower_upper_feasible": true,
+      "voltage_max_pu": 1.048229911390419,
+      "voltage_min_pu": 0.9828858316903925
+    }
+  },
+  "status": "PASS",
+  "uncorrected_Apr01_Fresh": {
+    "B2": {
+      "Vmin_pu": 0.9471218570195168,
+      "classification": "APR01_20_AC_FIDELITY_CALIBRATION_RESIDUAL_NOT_PREFLIGHT_SOLVER_DEFECT",
+      "voltage_violation_count": 82
+    },
+    "B3": {
+      "Vmin_pu": 0.9471216543980823,
+      "classification": "APR01_20_AC_FIDELITY_CALIBRATION_RESIDUAL_NOT_PREFLIGHT_SOLVER_DEFECT",
+      "voltage_violation_count": 84
+    }
+  }
+}
