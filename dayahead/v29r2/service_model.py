@@ -194,9 +194,9 @@ def fit_hurdle(train: pd.DataFrame) -> HurdleFit:
     return HurdleFit(classifier, regressor, constant_probability, constant_logit)
 
 
-def predict_hurdle(model: HurdleFit, rows: pd.DataFrame) -> np.ndarray:
+def predict_hurdle_components(model: HurdleFit, rows: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
     if rows.empty:
-        return np.zeros(0, dtype=float)
+        return np.zeros(0, dtype=float), np.zeros(0, dtype=float)
     x = _feature_frame(rows)
     probability = (
         np.full(len(rows), model.constant_probability, dtype=float)
@@ -207,6 +207,11 @@ def predict_hurdle(model: HurdleFit, rows: pd.DataFrame) -> np.ndarray:
         if model.regressor is None else np.asarray(model.regressor.predict(x), dtype=float)
     )
     fraction = _sigmoid(logit)
+    return probability, fraction
+
+
+def predict_hurdle(model: HurdleFit, rows: pd.DataFrame) -> np.ndarray:
+    probability, fraction = predict_hurdle_components(model, rows)
     nominal = rows["H_REQ"].to_numpy(dtype=float) * probability * fraction
     if not (np.isfinite(nominal).all() and np.all(nominal >= 0) and np.all(nominal <= rows["H_REQ"].to_numpy(dtype=float) + 1e-9)):
         raise RuntimeError("V29R2_EXEC_SERVICE_NOMINAL_BOUND_FAILURE")
