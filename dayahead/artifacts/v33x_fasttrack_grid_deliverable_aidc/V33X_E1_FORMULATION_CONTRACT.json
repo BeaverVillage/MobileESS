@@ -1,0 +1,30 @@
+{
+  "Fresh_import_or_call_in_decision_module": false,
+  "HiGHS_threads": 4,
+  "MESS_identity": "P/Q/route/location/availability E1 == E0",
+  "artifact_id": "V33X_E1_FORMULATION_CONTRACT_V1",
+  "electrical_constraints": [
+    "V_MIN_SQUARED <= affine_voltage <= V_MAX_SQUARED",
+    "all_supported_line_phase_current <= 1.0",
+    "all_supported_transformer_phase_current <= 1.0",
+    "frozen_transformer_kVA_polygon"
+  ],
+  "full_object_consumer": "dayahead.v28r2.electrical_subproblem.slot_coefficients",
+  "future_Actual_reads": 0,
+  "new_safety_margin": false,
+  "objective_hierarchy": [
+    "MAX_SERVICE",
+    "MIN_MAX_PLANNING_LINE_CURRENT",
+    "MIN_DA_PLACEMENT_DEVIATION"
+  ],
+  "official_case": false,
+  "preemption": false,
+  "removed_hard_constraint": "scalar_anchor_relative_s_dot_deltaP_plus_margin_L1_le_0",
+  "running_job_migration": false,
+  "same_slot_only": true,
+  "status": "FROZEN_BEFORE_E1_FRESH",
+  "strict_FULL_only": true,
+  "temporal_recourse": false,
+  "variant": "E1_FULL_GRID_ENVELOPE",
+  "x_DA_identity": "x_DA_E1 == x_DA_E0"
+}
