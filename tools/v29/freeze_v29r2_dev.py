@@ -23,6 +23,8 @@ def _load(path: Path) -> dict[str, object]:
 def main() -> None:
     repo = Path(__file__).resolve().parents[2]
     out = repo / OUT_REL
+    prior_freeze_path = out / "V29R2_DEV_FREEZE.json"
+    prior_freeze = _load(prior_freeze_path) if prior_freeze_path.is_file() else None
     if _git(repo, "branch", "--show-current") != V29R2_BRANCH:
         raise RuntimeError("V29R2_FREEZE_BRANCH_MISMATCH")
     if _git(repo, "status", "--short"):
@@ -58,6 +60,9 @@ def main() -> None:
         "scientific_paths_frozen": ["dayahead/v29r2", "dayahead/v28r2/variable_registry.py"],
         "postfreeze_rule": "No scientific changes; an implementation bug invalidates this freeze and requires affected evidence rerun plus a new freeze.",
     }
+    if prior_freeze is not None:
+        payload["supersedes_invalidated_freeze_head"] = prior_freeze["V29R2_DEV_FREEZE_HEAD"]
+        payload["invalidation_reason"] = "Apr-04 fail-closed runner exposed an unsupported trajectory namespace before any Apr-04 result artifact was written."
     write_json(out / "V29R2_DEV_FREEZE.json", payload)
     print(json.dumps(payload, indent=2))
 

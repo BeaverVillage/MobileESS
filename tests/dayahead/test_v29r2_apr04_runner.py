@@ -19,4 +19,5 @@ def test_apr04_runner_has_hard_freeze_and_actual_firewalls() -> None:
     assert "require_dev_freeze(repo)" in source
     assert source.index("_freeze_schedules") < source.index("materialize_actual_workload")
     assert "actual_optimizer_calls\": 0" in source
+    assert "DAYAHEAD_NOREGRET" not in source
     assert apr04_runner.DAY == "2025-04-04"

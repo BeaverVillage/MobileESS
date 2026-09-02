@@ -235,12 +235,12 @@ def run_apr04(repo: Path) -> dict[str, object]:
         scenario_data[scenario] = data; scenario_context[scenario] = context
         b2 = solve_case(data, context.legacy_context, context.voltage, context.current, "B2")
         b2_payloads[scenario] = b2
-        b2_result = run_fresh_opendss(repo=repo, context=context, voltage=context.voltage, trajectory=_trajectory(data, b2, "DAYAHEAD_NOREGRET", "B2"))
+        b2_result = run_fresh_opendss(repo=repo, context=context, voltage=context.voltage, trajectory=_trajectory(data, b2, "DAYAHEAD", "B2"))
         b2_rho = float(b2_result.summary["rho_max_AC"])
         for rung in RUNG_ORDER[:-1]:
             candidate = solve_b3_rung(data=data, context=context.legacy_context, voltage=context.voltage, current=context.current, b2_payload=b2, rung=rung, rho=1.0)
             rung_payloads[rung][scenario] = candidate
-            result = run_fresh_opendss(repo=repo, context=context, voltage=context.voltage, trajectory=_trajectory(data, candidate, "DAYAHEAD_NOREGRET", "B3"))
+            result = run_fresh_opendss(repo=repo, context=context, voltage=context.voltage, trajectory=_trajectory(data, candidate, "DAYAHEAD", "B3"))
             evaluation = {
                 "planning_delta_vs_B2": float(candidate.objective) - float(b2.objective),
                 "rho_AC_delta_vs_B2": float(result.summary["rho_max_AC"]) - b2_rho,
