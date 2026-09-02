@@ -50,7 +50,8 @@ def main() -> int:
         history_root.mkdir(parents=True, exist_ok=False)
         preserved = []
         for source in (arrays_path, manifest_path, result_path, checkpoint_path):
-            target = history_root / source.name
+            target_name = "PRESERVED_CHECKPOINT.json" if source == checkpoint_path else source.name
+            target = history_root / target_name
             shutil.copy2(source, target)
             preserved.append({
                 "original_path": str(source.resolve()), "preserved_path": str(target.resolve()),
