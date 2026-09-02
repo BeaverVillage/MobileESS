@@ -1,0 +1,33 @@
+{
+  "checkpoint": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_sumo\\research_pipeline\\21_ml_stage9_v11_fixed_station_full_traffic_freeze_v1\\freeze_assets\\model\\selected_qra_seed_20260728.pt",
+  "checkpoint_sha256": "2e339c49a4be0f9aa95c89efd8abd9fbf7cde36f78206792b2cbf7227a388741",
+  "classification": "CAUSAL_BUT_HORIZON_TOO_SHORT",
+  "dayahead_service_reason": "Cannot cover issue-to-target leads of 6h through 29h55; direct output ends at 270 minutes.",
+  "future_feature_leakage": false,
+  "future_realized_travel_time_feature": false,
+  "graph": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_sumo\\research_pipeline\\21_ml_stage9_v11_fixed_station_full_traffic_freeze_v1\\freeze_assets\\stage1\\graph\\link_order_509.csv",
+  "implementation": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_sumo\\research_pipeline\\21_ml_stage9_v11_fixed_station_full_traffic_freeze_v1\\freeze_assets\\source\\stage_ml5.py",
+  "inputs": [
+    "24-step raw TTI",
+    "24-step seasonal residual TTI",
+    "24-step causal link SCATS",
+    "causal Q2 SCATS forecast offsets 1..19",
+    "train-only target-time seasonal median",
+    "previous-day residual",
+    "previous-week residual",
+    "calendar"
+  ],
+  "model": "MR-DRA-MHSTGNN-QRA",
+  "native_horizon_minutes": 270,
+  "native_horizon_steps": 54,
+  "normalization": "2019-2023 train-only; selection 2019-2022",
+  "quantiles": "ordered Q10=center-softplus, Q50=center, Q90=center+softplus",
+  "route_calibration": "2024 day-assigned 5-fold one-sided conformal; 54-step route scope",
+  "splits": {
+    "locked_test": "2025",
+    "train": "2019-2023",
+    "validation": "2024"
+  },
+  "target": "509-link final_tti (travel-time index)",
+  "target_time_actual_scats_feature": false
+}

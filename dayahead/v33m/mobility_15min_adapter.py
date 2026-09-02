@@ -43,12 +43,20 @@ class Mobility15MinAdapter:
         graph: RoadGraphAuthority,
         forecast: LinkTravelTimeForecast,
         physics: PhysicsMobilityEnergyAdapter | None = None,
+        safe_eta_margin_sec_by_slot: Mapping[int, float] | None = None,
     ) -> None:
         if set(forecast.link_ids) != {link.link_id for link in graph.links}:
             raise MobilityContractError("traffic forecast link axis must exactly match graph")
         self.graph = graph
         self.forecast = forecast
         self.physics = physics or PhysicsMobilityEnergyAdapter()
+        self.safe_eta_margin_sec_by_slot = {
+            int(slot): float(margin)
+            for slot, margin in (safe_eta_margin_sec_by_slot or {}).items()
+        }
+        if any(slot < 0 or slot >= 96 or not math.isfinite(margin) or margin < 0.0
+               for slot, margin in self.safe_eta_margin_sec_by_slot.items()):
+            raise MobilityContractError("Safe ETA margins must be finite non-negative values for slots 0..95")
         self.router = DeterministicDijkstraRouter(graph)
 
     def stay(self, departure_slot_15: int, service_id: str) -> RouteParameters15Min:
@@ -70,6 +78,7 @@ class Mobility15MinAdapter:
             route_q10_eta_sec=0.0,
             route_q50_eta_sec=0.0,
             route_q90_eta_sec=0.0,
+            route_safe_eta_sec=0.0,
             travel_slots_15min=0,
             connection_ready_slots_15min=0,
             energy_nominal_kwh=0.0,
@@ -92,6 +101,11 @@ class Mobility15MinAdapter:
         route_q10 = sum(q10[link_id] for link_id in path.link_ids)
         route_q50 = sum(q50[link_id] for link_id in path.link_ids)
         route_q90 = sum(q90[link_id] for link_id in path.link_ids)
+        route_safe = (
+            route_q50 + self.safe_eta_margin_sec_by_slot[departure_slot_15]
+            if departure_slot_15 in self.safe_eta_margin_sec_by_slot
+            else route_q90
+        )
         geometry = self.physics.geometry_for_path(path.link_ids, self.graph.links_by_id)
         nominal, safe = self.physics.route_energy_kwh(
             geometry, route_q10, route_q50, route_q90
@@ -109,8 +123,9 @@ class Mobility15MinAdapter:
             route_q10_eta_sec=route_q10,
             route_q50_eta_sec=route_q50,
             route_q90_eta_sec=route_q90,
-            travel_slots_15min=travel_slots_15min(route_q90),
-            connection_ready_slots_15min=connection_ready_slots_15min(route_q90),
+            route_safe_eta_sec=route_safe,
+            travel_slots_15min=travel_slots_15min(route_safe),
+            connection_ready_slots_15min=connection_ready_slots_15min(route_safe),
             energy_nominal_kwh=nominal,
             energy_safe_kwh=safe,
             route_graph_sha=self.graph.route_graph_sha,

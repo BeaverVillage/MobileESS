@@ -10,7 +10,7 @@ from types import MappingProxyType
 from typing import Mapping, Sequence
 
 
-SAFE_ETA_AUTHORITY = "DEVELOPMENT_Q90_ONLY_PENDING_CALIBRATION_AUDIT"
+SAFE_ETA_AUTHORITY = "BLOCKED_OOF_ROUTE_RESIDUAL_Q90_ONE_SIDED"
 ROUTING_TIME_MODEL = "DEPARTURE_EPOCH_STATIC_FORECAST_SNAPSHOT"
 TRAFFIC_RESOLUTION_SECONDS = 300
 OPTIMIZATION_RESOLUTION_SECONDS = 900
@@ -185,6 +185,7 @@ class RouteParameters15Min:
     route_q10_eta_sec: float
     route_q50_eta_sec: float
     route_q90_eta_sec: float
+    route_safe_eta_sec: float
     travel_slots_15min: int
     connection_ready_slots_15min: int
     energy_nominal_kwh: float
@@ -207,6 +208,7 @@ class RouteParameters15Min:
             "route_q10_eta_sec": self.route_q10_eta_sec,
             "route_q50_eta_sec": self.route_q50_eta_sec,
             "route_q90_eta_sec": self.route_q90_eta_sec,
+            "route_safe_eta_sec": self.route_safe_eta_sec,
             "travel_slots_15min": self.travel_slots_15min,
             "connection_ready_slots_15min": self.connection_ready_slots_15min,
             "energy_nominal_kwh": self.energy_nominal_kwh,
