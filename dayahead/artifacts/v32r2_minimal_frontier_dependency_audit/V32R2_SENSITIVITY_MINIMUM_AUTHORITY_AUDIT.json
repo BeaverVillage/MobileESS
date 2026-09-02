@@ -1,0 +1,37 @@
+{
+  "V32_operations_supported": [
+    "frontier-eligible slot identification",
+    "AIDC leverage ranking",
+    "leverage quartiles",
+    "audit-set freeze",
+    "candidate direction",
+    "S_PLAN",
+    "S_AC_POLICY"
+  ],
+  "artifact_id": "V32R2_SENSITIVITY_MINIMUM_AUTHORITY_AUDIT_V1",
+  "classification": "FULL_SENSITIVITY_CACHE_NOT_REQUIRED",
+  "exact_consumers": [
+    "solve_causal_day",
+    "_lp"
+  ],
+  "frozen_scalar_s_sufficient": true,
+  "full_line_phase_cache_required": false,
+  "minimum_object": {
+    "companions": [
+      "M_CURRENT",
+      "matched anchor_site_flexible_kw[96,12]",
+      "peak_control_kw=max(1,max_t sum_i anchor[t,i])"
+    ],
+    "definition": "s[t,i]=max_j S[t,i,j] over j whose anchor_loading[t,j] is at or above the slotwise 95th percentile; all j only if mask empty",
+    "name": "V30_SCALAR_PHASE_CURRENT_SITE_SCORE",
+    "shape_per_day": [
+      96,
+      12
+    ],
+    "units": "normalized-current pu per site-kW control"
+  },
+  "operation_requiring_full_S_tensor": null,
+  "reconstruction": "SCIENCE_NEUTRAL_ENGINEERING using the frozen exact sensitivity method, then exact phase_aware_site_scores reduction",
+  "scalar_currently_materialized_for_JanMar": false,
+  "status": "PASS"
+}

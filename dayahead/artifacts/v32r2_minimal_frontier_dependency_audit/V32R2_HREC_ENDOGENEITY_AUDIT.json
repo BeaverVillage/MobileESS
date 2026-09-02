@@ -1,0 +1,14 @@
+{
+  "artifact_id": "V32R2_HREC_ENDOGENEITY_AUDIT_V1",
+  "classification": "DERIVED_POST_SOLVE",
+  "constraint_participation": false,
+  "declared_as_variable_in_contract": true,
+  "evidence": "np.maximum is evaluated after loading the frozen workload_service_tensor; the value is only serialized to DA/headroom reports.",
+  "exact_code": "dayahead/v30/dayahead_formulation.py::stage1_rows",
+  "exact_relationship": "h_REC[r,t] = max(0, CASE_CAPACITY_GPU*gpu_weight[r]*0.25/4 - sum_b x_DA[b,r,t])",
+  "objective_participation": false,
+  "scenario_coupling": false,
+  "solver_output_extraction": false,
+  "solver_variable_declaration": null,
+  "status": "PASS"
+}

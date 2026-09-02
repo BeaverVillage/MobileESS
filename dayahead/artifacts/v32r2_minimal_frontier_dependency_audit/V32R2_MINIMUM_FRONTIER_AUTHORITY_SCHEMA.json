@@ -1,0 +1,77 @@
+{
+  "B1_B0": {
+    "derived_not_materialized": [
+      "h_REC=max(0,rack_capacity-sum_b(x_DA))",
+      "source_available",
+      "y_ACT",
+      "backlog_post",
+      "candidate_direction"
+    ],
+    "required_fields": [
+      "shared_B0_B2_x_DA[15,48,96]",
+      "candidate_x_DA[15,48,96]",
+      "actual_arrivals_through_t[15]",
+      "initial_and_current_backlog[15]",
+      "actual_residual_rack_capacity[48]",
+      "rack_to_AIDC_and_strict_FULL_compatibility",
+      "anchor_actual_flexible_AIDC_P[12]",
+      "V30_scalar_s[t,12]",
+      "M_CURRENT",
+      "candidate_and_anchor_AIDC_P_Q[96,12]",
+      "realized_demand_PV[96]",
+      "realized_weather_C1[96]",
+      "frozen_feeder_ratings_and_native_states[96]",
+      "one_common_fixed_MESS_P_Q[96,4]",
+      "engineering_MESS_location_state_travel_energy[96,4]"
+    ]
+  },
+  "B3_B2": {
+    "derived_not_materialized": [
+      "h_REC=max(0,rack_capacity-sum_b(x_DA))",
+      "source_available",
+      "y_ACT",
+      "backlog_post",
+      "candidate_direction"
+    ],
+    "required_fields": [
+      "shared_B0_B2_x_DA[15,48,96]",
+      "candidate_x_DA[15,48,96]",
+      "actual_arrivals_through_t[15]",
+      "initial_and_current_backlog[15]",
+      "actual_residual_rack_capacity[48]",
+      "rack_to_AIDC_and_strict_FULL_compatibility",
+      "anchor_actual_flexible_AIDC_P[12]",
+      "V30_scalar_s[t,12]",
+      "M_CURRENT",
+      "candidate_and_anchor_AIDC_P_Q[96,12]",
+      "realized_demand_PV[96]",
+      "realized_weather_C1[96]",
+      "frozen_feeder_ratings_and_native_states[96]",
+      "B2_MESS_P_Q[96,4]",
+      "B3_MESS_P_Q[96,4]",
+      "engineering_MESS_location_state_travel_energy[96,4]"
+    ]
+  },
+  "artifact_id": "V32R2_MINIMUM_FRONTIER_AUTHORITY_SCHEMA_V1",
+  "explicitly_excluded": {
+    "SCATS_actual": "DIAGNOSTIC_ONLY",
+    "SCATS_forecast": "NOT_REQUIRED",
+    "full_Stage2_resource_tensor": "reconstructed causally from x_DA plus actual inputs",
+    "full_line_phase_sensitivity_cache": "scalar s is sufficient after exact frozen reduction",
+    "materialized_h_REC": "exactly derived",
+    "raw_traffic_volume": "NOT_REQUIRED"
+  },
+  "reconstruction_source_inputs": [
+    "frozen DA workload model/raw queue authority",
+    "aemo_forecast demand/PV",
+    "GFS D-1 weather and C1",
+    "actual strict-FULL workload",
+    "realized AEMO demand/PV",
+    "realized NOAA weather",
+    "engineering MESS route authority",
+    "IEEE123/native-state authority",
+    "frozen exact sensitivity-generation method"
+  ],
+  "shared_reduction": "B0 and B2 workload_service_tensor is one byte-identical reference x_DA; three workload tensors, not four independent full schedules.",
+  "status": "PASS_MINIMIZED"
+}
