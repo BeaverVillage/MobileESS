@@ -1,0 +1,162 @@
+{
+  "artifact_id": "V33XR3R2_MODEL_SPEC_FREEZE_V1",
+  "channels": {
+    "G": {
+      "adapter": "direct 96-slot prediction",
+      "categorical_handling": "none",
+      "estimator_class": "lightgbm.LGBMRegressor",
+      "features_in_order": [
+        "slot",
+        "slot_sin",
+        "slot_cos",
+        "dow_sin",
+        "dow_cos",
+        "weekend",
+        "month_sin",
+        "month_cos",
+        "lag_2d",
+        "lag_7d",
+        "same_slot_mean_2_8d",
+        "same_slot_std_2_8d"
+      ],
+      "fixed_hyperparameters": {
+        "deterministic": true,
+        "learning_rate": 0.035,
+        "max_depth": 3,
+        "min_child_samples": 12,
+        "n_estimators": 120,
+        "n_jobs": 1,
+        "num_leaves": 7,
+        "random_state": 20260901,
+        "reg_lambda": 1.0,
+        "verbosity": -1
+      },
+      "methodology": "V28R2_FROZEN_LIGHTGBM_QUANTILE",
+      "missing_value_behavior": "training rows require finite target and all finite features",
+      "normalizer_scaler": "none",
+      "objective": "quantile",
+      "only_varying_fit_input": "causal expanding-window training cutoff and causally available empirical values",
+      "optimizer_shape": [
+        96
+      ],
+      "optimizer_statistic": "Q90",
+      "public_integrity": "per-cell ascending rearrangement then expm1 and zero roundoff floor",
+      "quantiles": [
+        0.1,
+        0.5,
+        0.9
+      ],
+      "source_method_sha256": "20d5d8aad4744d31730936904453225e9952ff19e474682a5429dc8e71550c79",
+      "spec_sha256": "32d9411388d641cb9ac23c0b2ce3e5d5df492234499606c18060723b1526f411",
+      "target": "G^REF H100 occupancy",
+      "target_transform": "log1p_nonnegative_target",
+      "training_start": "2024-08-19"
+    },
+    "P": {
+      "adapter": "direct 96-slot prediction",
+      "categorical_handling": "none",
+      "estimator_class": "lightgbm.LGBMRegressor",
+      "features_in_order": [
+        "slot",
+        "slot_sin",
+        "slot_cos",
+        "dow_sin",
+        "dow_cos",
+        "weekend",
+        "month_sin",
+        "month_cos",
+        "lag_2d",
+        "lag_7d",
+        "same_slot_mean_2_8d",
+        "same_slot_std_2_8d"
+      ],
+      "fixed_hyperparameters": {
+        "deterministic": true,
+        "learning_rate": 0.035,
+        "max_depth": 3,
+        "min_child_samples": 12,
+        "n_estimators": 120,
+        "n_jobs": 1,
+        "num_leaves": 7,
+        "random_state": 20260901,
+        "reg_lambda": 1.0,
+        "verbosity": -1
+      },
+      "methodology": "V28R2_FROZEN_LIGHTGBM_QUANTILE",
+      "missing_value_behavior": "training rows require finite target and all finite features",
+      "normalizer_scaler": "none",
+      "objective": "quantile",
+      "only_varying_fit_input": "causal expanding-window training cutoff and causally available empirical values",
+      "optimizer_shape": [
+        96
+      ],
+      "optimizer_statistic": "Q90",
+      "public_integrity": "per-cell ascending rearrangement then expm1 and zero roundoff floor",
+      "quantiles": [
+        0.1,
+        0.5,
+        0.9
+      ],
+      "source_method_sha256": "20d5d8aad4744d31730936904453225e9952ff19e474682a5429dc8e71550c79",
+      "spec_sha256": "44d8a5a65ee44ef21d5471852efb96069d17367112bff474a4f227b9276ceb7b",
+      "target": "P^IT,REF total IT active power",
+      "target_transform": "log1p_nonnegative_target",
+      "training_start": "2024-08-19"
+    },
+    "W": {
+      "adapter": "causal day-of-week x slot x cohort empirical node-hour mass normalized within day-of-week; no smoothing",
+      "categorical_handling": "none",
+      "eligibility": "H100, completed label, nodes in frozen classes, gpus=4*nodes, positive runtime, no PARTIAL/shared",
+      "estimator_class": "lightgbm.LGBMRegressor",
+      "features_in_order": [
+        "dow_sin",
+        "dow_cos",
+        "weekend",
+        "month_sin",
+        "month_cos",
+        "lag_2d",
+        "lag_7d",
+        "mean_2_8d",
+        "std_2_8d"
+      ],
+      "fixed_hyperparameters": {
+        "deterministic": true,
+        "learning_rate": 0.035,
+        "max_depth": 3,
+        "min_child_samples": 12,
+        "n_estimators": 120,
+        "n_jobs": 1,
+        "num_leaves": 7,
+        "random_state": 20260901,
+        "reg_lambda": 1.0,
+        "verbosity": -1
+      },
+      "methodology": "V28R2_FROZEN_LIGHTGBM_QUANTILE",
+      "missing_value_behavior": "training rows require finite target and all finite features",
+      "normalizer_scaler": "none",
+      "objective": "quantile",
+      "only_varying_fit_input": "causal expanding-window training cutoff and causally available empirical values",
+      "optimizer_shape": [
+        96,
+        15
+      ],
+      "optimizer_statistic": "Q50",
+      "public_integrity": "per-cell ascending rearrangement then expm1 and zero roundoff floor",
+      "quantiles": [
+        0.1,
+        0.5,
+        0.9
+      ],
+      "source_method_sha256": "20d5d8aad4744d31730936904453225e9952ff19e474682a5429dc8e71550c79",
+      "spec_sha256": "2b9e86a80905d32e501577c7afb154f90a21428c355306f19e8d254b2337552a",
+      "target": "W^F strict FULL-node eligible daily H100-node-hour arrivals",
+      "target_transform": "log1p_nonnegative_target",
+      "training_start": "2024-08-19"
+    }
+  },
+  "combined_model_spec_sha256": "3251c53bb8e0cfb6234e00286187d3fb643983a5cd192730f7992f2c6f0b281d",
+  "identical_for_all_90_target_days": true,
+  "model_selection_or_HPO": false,
+  "only_allowed_daily_change": "causal expanding-window training cutoff/statistics",
+  "status": "PASS"
+}

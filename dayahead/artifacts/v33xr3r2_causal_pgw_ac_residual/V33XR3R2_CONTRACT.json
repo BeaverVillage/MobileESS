@@ -1,0 +1,50 @@
+{
+  "ACTUAL_AIDC_INTERNAL_RESOURCE_RECOURSE_ALLOWED": true,
+  "ACTUAL_GRID_FEEDBACK_AIDC_CONTROL_ALLOWED": false,
+  "FRESH_USED_AS_CONTROL_ORACLE": false,
+  "Fresh_limits_pu": [
+    0.95,
+    1.05
+  ],
+  "artifact_id": "V33XR3R2_CONTRACT_V1",
+  "branch": "codex/v33xr3r2-causal-pgw-ac-residual",
+  "case": "B1",
+  "classifications": [
+    "V33XR3R2_CAUSAL_PGW_AC_RESIDUAL_AUDIT_PASS",
+    "V33XR3R2_CAUSAL_PGW_MATERIALIZATION_BLOCKED",
+    "V33XR3R2_CAUSAL_PGW_PARTIAL_BLOCK",
+    "V33XR3R2_B1_STAGE1_MATERIALIZATION_BLOCKED",
+    "V33XR3R2_FRESH_MATERIALIZATION_BLOCKED",
+    "V33XR3R2_MATCHING_AUTHORITY_BLOCKED",
+    "V33XR3R2_RESIDUAL_AUDIT_BLOCKED",
+    "V33XR3R2_STATIC_CORRECTION_FAMILY_INSUFFICIENT",
+    "V33XR3R2_IMPLEMENTATION_FAIL"
+  ],
+  "correction_families": [
+    "M0_NO_CORRECTION",
+    "M1_GLOBAL_CONSTANT",
+    "M2_NODE_PHASE",
+    "M3_NODE_PHASE_4BLOCK"
+  ],
+  "expected_days": 90,
+  "family_selection_rule": "zero March upper and lower exceedances; simplest M1>M2>M3 unless complexity reduces mean correction >=25% with zero exceedances",
+  "issue_cutoff": "D-1 18:00 fixed AEST UTC+10",
+  "parallelism_if_phase_B_C_reached": {
+    "Fresh_process_isolated": true,
+    "day_processes": 4,
+    "solver_threads_per_process": 4
+  },
+  "planning_limits_pu": [
+    0.95,
+    1.05
+  ],
+  "production_correction_application": false,
+  "resolution_minutes": 15,
+  "slots_per_day": 96,
+  "starting_HEAD": "2a88c99bf02aed2e170caaf0e389ab1faeb48a6d",
+  "target_days": [
+    "2025-01-01",
+    "2025-03-31"
+  ],
+  "training_start": "2024-08-19"
+}
