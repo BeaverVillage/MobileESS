@@ -50,5 +50,16 @@ def test_prefreeze_scenario_and_release_gate_artifacts_are_complete() -> None:
     assert [row["scenario"] for row in scenarios] == list(Q_SCENARIOS)
     assert all(row["same_feeder_forecast_namespace"] == "True" and row["Actual_realization_used"] == "False" for row in scenarios)
     assert len(gates) == len(RUNG_ORDER) * len(Q_SCENARIOS)
-    assert all(row["prefreeze_status"] == "PASS_GATE_DEFINED_AND_ENFORCED_BY_SELECTOR" for row in gates)
-    assert [row["rung"] for row in decisions] == list(RUNG_ORDER)
+    assert {(row["rung"], row["scenario"]) for row in gates} == {
+        (rung, scenario) for rung in RUNG_ORDER for scenario in Q_SCENARIOS
+    }
+    if "prefreeze_status" in gates[0]:
+        assert all(row["prefreeze_status"] == "PASS_GATE_DEFINED_AND_ENFORCED_BY_SELECTOR" for row in gates)
+        assert [row["rung"] for row in decisions] == list(RUNG_ORDER)
+    else:
+        assert all(row["all_converged"] == "True" for row in gates)
+        fallback = [row for row in gates if row["rung"] == "B2_FALLBACK"]
+        assert all(float(row["planning_delta_vs_B2"]) == 0.0 for row in fallback)
+        assert all(float(row["rho_AC_delta_vs_B2"]) == 0.0 for row in fallback)
+        assert len(decisions) == 1 and decisions[0]["selected_rung"] == "Q_RELEASE"
+        assert decisions[0]["safe"] == "True"
