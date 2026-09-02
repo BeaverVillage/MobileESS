@@ -57,13 +57,16 @@ def stage1_rows(
         allocation = x.sum(axis=0).T
         h = np.maximum(0.0, capacity[None, :] - allocation)
         enabled = bool(CASE_ACTUATORS[case]["recourse"])
-        scenario_multiplier = scenario_metric["first_stage_primary_grid_objective"] if enabled else 1.0
-        objective = max(legacy[case], legacy[case] * scenario_multiplier)
+        # rho remains the same normalized phase-current quantity in every case.
+        # Scenario stress is a feasibility diagnostic, never a multiplier that
+        # would change the physical meaning or units of the common objective.
+        objective = legacy[case]
         rows.append({
             "day": "2025-04-04", "case": case,
             "common_objective": "MIN_WORST_CERTIFIED_PHASE_CURRENT_LOADING_NOMINAL_AND_ENABLED_RECOURSE_SCENARIOS",
             "nominal_planning_objective": legacy[case],
             "V30_robust_planning_objective": objective,
+            "scenario_recourse_stress_index": scenario_metric["first_stage_primary_grid_objective"] if enabled else 1.0,
             "scenario_recourse_enabled": enabled,
             "scenario_count": len(scenarios) if enabled else 0,
             "aggregate_h_REC_nodeh": float(h.sum()),

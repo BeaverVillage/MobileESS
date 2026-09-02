@@ -108,6 +108,7 @@ def run(repo: Path, source_repo: Path, electrical_cache: Path, trust_cache: Path
     write_json(out / "V30_B1_B3_AIDC_POLICY_IDENTITY.json", {"artifact_id": "V30_B1_B3_AIDC_POLICY_IDENTITY_V1", "status": "PASS", "B1_policy_sha256": policy_hash, "B3_policy_sha256": policy_hash, "byte_config_identical": True, "policy": policy})
     da_rows, headroom_rows = stage1_rows(repo, schedules, scenarios)
     write_csv(out / "V30_APR04_DA_RESULTS.csv", da_rows)
+    write_csv(out / "V30_APR04_AIDC_HEADROOM.csv", headroom_rows)
     frozen_deliverability = out / "V30_PREAPRIL_RECOURSE_DELIVERABILITY.csv"
     if not frozen_deliverability.is_file():
         raise RuntimeError("V30_PREAPRIL_DELIVERABILITY_NOT_FROZEN")
@@ -148,7 +149,7 @@ def run(repo: Path, source_repo: Path, electrical_cache: Path, trust_cache: Path
         # The completed physical smoke was serialized with the scalar summary
         # before reporting failed.  Recover the unchanged critical-row labels
         # from each frozen V29R2 case; the stored rho remains the V30 Fresh result.
-        with (repo / "dayahead/artifacts/v29r2_anchor_aware_trust_noregret/V29R2_APR04_OPENDSS_RESULTS.csv").open(encoding="utf-8", newline="") as stream:
+        with (repo / "dayahead/artifacts/v29r2_anchor_aware_trust_noregret/V29R2_APR04_OPENDSS_RESULTS.csv").open(encoding="utf-8-sig", newline="") as stream:
             old = {row["case"]: row for row in csv.DictReader(stream) if row["namespace"] == "ACTUAL" and row["case"] in OFFICIAL_CASES}
         for row in resumed:
             row.update({"critical_line": old[row["case"]]["critical_line"], "critical_line_phase": old[row["case"]]["critical_line_phase"], "critical_line_slot": old[row["case"]]["critical_line_slot"], "critical_row_label_source": "FROZEN_SAME_CASE_V29R2_LABEL_AFTER_V30_SCALAR_RHO_COMPLETION"})
@@ -177,6 +178,11 @@ def run(repo: Path, source_repo: Path, electrical_cache: Path, trust_cache: Path
         for row in recourse.slot_ledgers:
             ledger_rows.append({"day": DAY, "case": case, **asdict(row), "executed_total_nodeh": row.executed_nodeh, "authorization_identity_error_nodeh": row.authorization_identity_error_nodeh})
     write_csv(out / "V30_APR04_RECOURSE_LEDGER.csv", ledger_rows)
+    causal_rows = []
+    for case, recourse in recourse_by.items():
+        for row in recourse.read_ledger:
+            causal_rows.append({"day": DAY, "case": case, **row, "future_read": False})
+    write_csv(out / "V30_APR04_CAUSAL_READ_LEDGER.csv", causal_rows)
 
     deliverability = []
     for case in ("B1", "B3"):

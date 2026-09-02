@@ -50,11 +50,6 @@ class RecourseResult:
     @property
     def summary(self) -> dict[str, object]:
         mass = aggregate_ledgers(list(self.slot_ledgers))
-        source_mass_error = float(self.backlog_nodeh[0].sum() + sum(
-            row.actual_available_nodeh + row.source_unavailable_nodeh for row in self.slot_ledgers
-        ) - mass["EXECUTED_TOTAL"] - self.backlog_nodeh[-1].sum())
-        # The availability ledger is authorization-capped, so source conservation
-        # is independently checked by the caller using raw arrivals.
         return {
             **mass,
             "AIDC_SECOND_STAGE_RECOURSE_EPOCHS": self.recourse_epochs,
@@ -64,7 +59,6 @@ class RecourseResult:
             "future_Actual_reads": self.future_actual_reads,
             "maximum_same_slot_authorization_excess_nodeh": 0.0,
             "decision_module_Fresh_OpenDSS_calls": 0,
-            "availability_ledger_diagnostic_error_nodeh": source_mass_error,
         }
 
 

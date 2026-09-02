@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import csv
 import hashlib
 import json
 from pathlib import Path
@@ -198,8 +199,10 @@ def test_33_actual_module_has_no_opendss_import():
 
 
 def test_34_fresh_expost_runner_exact_cases():
-    source = (REPO / "dayahead/v30/four_case_runner.py").read_text(encoding="utf-8")
-    assert "for case in OFFICIAL_CASES" in source and "run_fresh_opendss" in source
+    with (OUT / "V30_APR04_FRESH_OPENDSS_RESULTS.csv").open(encoding="utf-8", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    assert tuple(row["case"] for row in rows) == OFFICIAL_CASES
+    assert all(int(row["convergence_count"]) == 96 for row in rows)
 
 
 def test_35_mass_ledger_identity(synthetic_result):
@@ -235,7 +238,7 @@ def test_40_manifest_self_consistency(tmp_path):
 
 
 def test_41_required_not_run_zero_contract():
-    assert "required_NOT_RUN" not in two_stage_contract()
+    assert artifact("V30_TEST_REPORT.json")["required_test_not_run_count"] == 0
 
 
 def test_42_causal_read_count_zero(synthetic_result):
@@ -256,3 +259,35 @@ def test_44_scenario_candidates_nested():
 def test_45_policy_same_slot_and_causal():
     policy = aidc_policy_config(0.1, 8, "a" * 64)
     assert policy["same_slot_only"] and policy["causal"] and policy["future_actual_reads"] == 0
+
+
+def _actual_rows():
+    with (OUT / "V30_APR04_ACTUAL_RESULTS.csv").open(encoding="utf-8", newline="") as stream:
+        return {row["case"]: row for row in csv.DictReader(stream)}
+
+
+@pytest.mark.parametrize("case", ["B1", "B3"])
+def test_46_apr04_recourse_complete_and_causal(case):
+    row = _actual_rows()[case]
+    assert int(row["AIDC_SECOND_STAGE_RECOURSE_EPOCHS"]) == 96
+    assert int(row["AIDC_SECOND_STAGE_SOLVER_SUBCALLS"]) == 384
+    assert int(row["future_Actual_reads"]) == 0
+
+
+@pytest.mark.parametrize("case", ["B0", "B2"])
+def test_47_reference_cases_have_no_recourse(case):
+    row = _actual_rows()[case]
+    assert int(row["AIDC_SECOND_STAGE_RECOURSE_EPOCHS"]) == 0
+
+
+def test_48_apr04_fresh_no_regret():
+    review = artifact("V30_APR04_DEVELOPMENT_REVIEW.json")
+    assert review["B1_B0_Fresh_no_regret"] and review["B3_B2_Fresh_no_regret"]
+
+
+def test_49_apr04_classification_pass():
+    assert artifact("V30_APR04_DEVELOPMENT_REVIEW.json")["RESULT_CLASSIFICATION"] == "V30_APR04_TWO_STAGE_AIDC_DEVELOPMENT_CHECKPOINT_PASS"
+
+
+def test_50_no_april_tuning_after_smoke():
+    assert artifact("V30_APR04_DEVELOPMENT_REVIEW.json")["April_rows_used_for_tuning_or_certification"] == 0
