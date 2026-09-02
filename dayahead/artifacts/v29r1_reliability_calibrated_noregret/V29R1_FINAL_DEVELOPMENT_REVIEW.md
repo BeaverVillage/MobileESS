@@ -1,170 +1,152 @@
 # V29R1 final development review
 
-RESULT CLASSIFICATION: `V29R1_BLOCKED_TRUST_CERT_SOURCE_AUTHORITY_INSUFFICIENT`
+RESULT CLASSIFICATION: `V29R1_BLOCKED_TRUST_CERT_PHYSICS_GATES`
 
-## Axes
+Axes: source `READY_90_OF_90`; contract `PASS`; trust `FAIL_NO_PHYSICS_CERTIFIED_RHO`; service/Bridge/V4/Q `BLOCKED`; Apr-04 `NOT_AUTHORIZED`; preservation `PASS`.
 
-- TECHNICAL_STATUS: STOPPED_FAIL_CLOSED_AT_STAGE_2
-- SOURCE_AUTHORITY: INSUFFICIENT_JAN_MAR_CAUSAL_ELECTRICAL_INPUTS
-- TRUST_CERT_STATUS: NOT_CERTIFIED
-- SERVICE_CALIBRATION_STATUS: NOT_RUN
-- BRIDGE_V2_STATUS: NOT_RUN
-- Q_NOREGRET_STATUS: NOT_RUN
-- DAYAHEAD_GRID_EFFECT_STATUS: NOT_EVALUATED
-- ACTUAL_NOREGRET_STATUS: NOT_EVALUATED
-- AC_PHYSICAL_STATUS: NOT_EVALUATED
-- PRESERVATION_STATUS: PASS
+## 1. Starting Git lineage
 
-## 1. Starting Git authority
+Verified `2bcfe7d48046c5c3f9f1bc43b6d35805e3ed589f -> d1997bfbd59701c0183eb0252909267eb49facf2 -> 7897a9204074d498aeecacc637b4d0804b7da904` on `codex/v29r1-reliability-calibrated-noregret`.
 
-V29R1 was branched exactly from `2bcfe7d48046c5c3f9f1bc43b6d35805e3ed589f` on `codex/v29r1-reliability-calibrated-noregret`.
+## 2. Downloaded raw-source validation
 
-## 2. Protected-state verification
+PASS: 90 AEMO demand days, 90 AEMO PV days, 2,250 GFS lead tasks, and 13,500 exact GFS messages. No automatic redownload or full-GRIB substitution occurred.
 
-All protected content-tree hashes were reproduced after the audit; mismatch count is
-0.
+## 3. Jan–Mar 90/90 causal coverage
 
-## 3. Physics-certified trust-region methodology
+PASS for 2025-01-01 through 2025-03-31 using D-1 authority. No future Actual, realized demand/PV, or NOAA-observed substitution was used.
 
-The candidate set `[0.1, 0.25, 0.5, 1.0]` and largest-all-gates-pass selection rule were
-frozen prospectively. Certification required 90 causal Jan--Mar electrical-input days.
+## 4. Jan–Mar materialization
 
-## 4. Selected rho_AIDC and why
+PASS: 90/90 days, 96 fixed-AEST slots per day, deterministic two-pass content manifest `eb920bc1561fd18bbeae71390a3093f2a65af6441f0db9ee55c9673d8a00c875`.
 
-No rho was selected because the required source authority was insufficient.
+## 5. Jan–Mar/April contract equivalence
 
-## 5. Why this is not performance tuning
+`PASS` for schema, shape, timestamps, timezone, units, sign, aggregation, interpolation, AEMO vintage selection, and GFS initialization/lead contract.
 
-No April Day-Ahead or Actual result was used, and no candidate AC/C1 sweep ran.
+## 6. Physics-certified rho candidates
 
-## 6. Executable-service model
+- rho=0.1: FAIL; AC all-days=False; C1 all-days=True; anchor-fail days=26; new candidate violations=0
+- rho=0.25: FAIL; AC all-days=False; C1 all-days=True; anchor-fail days=26; new candidate violations=0
+- rho=0.5: FAIL; AC all-days=False; C1 all-days=True; anchor-fail days=26; new candidate violations=0
+- rho=1.0: FAIL; AC all-days=False; C1 all-days=True; anchor-fail days=26; new candidate violations=0
 
-Not run because Stage 2 issued the mandatory fail-closed stop.
+The run used 90 anchors, 180 directional probes, and 360 candidate trajectories: 630 Fresh OpenDSS trajectories and 60,480 sequential slot solves. Planning-model error and C1 gates passed for every candidate, but absolute AC physical gates did not.
 
-## 7. Pre-April rolling-origin coverage
+## 7. Selected rho_AIDC
 
-Not run; no calibrated coverage claim is made.
+No rho was selected. The frozen largest-all-gates-pass rule therefore returned `null`.
 
-## 8. Nominal vs lower executable-service sharpness
+## 8. Why selection was not April performance tuning
 
-Not run; no nominal/lower channel was promoted to production.
+April rows used = 0; April performance used = false; objective improvement was not a selection input. No alternate rho, threshold, interval, or model was chosen after seeing results.
 
-## 9. Bridge V2 calibration
+## 9. Executable-service model
 
-Not run.
+Blocked by Stage D; not implemented or claimed.
 
-## 10. Reference Schedule V4
+## 10. 90% lower-bound coverage
 
-Not run.
+Blocked; no coverage claim was made and the 90% target was not changed.
 
-## 11. P/G residual and double-count audit
+## 11. Bridge V2 performance
 
-Not run; no V4 residual was constructed.
+Blocked; no Bridge V2 calibration result exists.
 
-## 12. B2-anchored Q no-regret formulation
+## 12. Reference V4 / B0-B2 identity
 
-The scenario family `['S_NOM', 'S_LOW', 'S_ZERO_CARRY']` was frozen prospectively, but formulation and
-solve stages were not authorized.
+Blocked; no V4 authority was created.
 
-## 13. Q-anchor ablation
+## 13. P/G residual and no-double-count proof
 
-Not run.
+Blocked with V4; no residual or no-double-count claim was made.
 
-## 14. Was Q release allowed on each day?
+## 14. B2-anchored Q no-regret formulation
 
-No day was evaluated and Q release was never authorized.
+Blocked before formulation/solve; no Q release authority was created.
 
-## 15. Scenario no-regret margins
+## 15. Was Q release used on Apr-4?
+
+Not evaluated because Apr-04 was not authorized.
+
+## 16. Apr-4 Q no-regret scenario margins
 
 Not evaluated.
 
-## 16. Apr-1--4 Day-Ahead B0/B1/B2/B3
+## 17. Apr-4 DA B0/B1/B2/B3
 
-Not run.
+Not executed.
 
-## 17. Did B0->B1 effect increase relative to V29?
+## 18. V29 vs V29R1 Day-Ahead comparison
 
-Not evaluated.
+Not evaluated; the read-only V29 baseline was not mutated.
 
-## 18. Did B2->B3 remain resolved?
-
-Not evaluated.
-
-## 19. Actual B2 vs B3
-
-Not run.
-
-## 20. Did Actual no-regret pass on every day?
-
-Not evaluated; no pass is claimed.
-
-## 21. Fresh OpenDSS physical results
-
-Not run for V29R1 candidates.
-
-## 22. Carry-in nominal/lower/realized comparison
-
-Not run.
-
-## 23. Missed workload after service calibration
+## 19. Apr-4 H_REQ/H_NOM/H_LOW/H_REALIZED
 
 Not evaluated.
 
-## 24. Did rack-capacity miss remain dominant?
+## 20. Apr-4 missed workload decomposition
 
-Not evaluated after calibration.
+Not evaluated.
 
-## 25. Ablation attribution
+## 21. Did rack-capacity miss fall without changing rack capacity?
 
-Trust, service/bridge, Q-anchor, and no-regret-release ablations were not run and were not
-used for parameter selection.
+Not evaluated; rack capacity was unchanged.
 
-## 26. Remaining primary bottleneck
+## 22. Apr-4 Actual B0/B1/B2/B3
 
-Missing Jan--Mar causal feeder-state source authority in the current production pipeline.
+Not executed.
 
-## 27. Remaining secondary bottleneck
+## 23. Did Actual B3 preserve B2-relative no-regret?
 
-Not evaluated beyond the primary source-authority stop.
+Not evaluated; no pass or fail is claimed.
 
-## 28. What cannot be claimed because carry-in is rare
+## 24. Apr-4 Fresh OpenDSS result
 
-No general persistent AIDC benefit can be claimed; frozen evidence characterizes carry-in
-as opportunistic and absent on most historical days.
+Not executed. The only new Fresh OpenDSS evidence is the pre-April trust certification.
 
-## 29. Tests
+## 25. Apr-4 PI result/regret
 
-10 pre-block gates passed and 21 downstream gates
-were not run. The required 31/31 pre-smoke gate was not achieved, so smoke was prohibited.
-The dedicated V29R1 suite passed 6/6. The portable exact-base checkout passed 27 tests;
-its two legacy checkout-local assumptions (CRLF byte inventory and an untracked frozen-output
-directory) were rerun read-only at the exact V29 authority and passed 2/2 there.
+Not executed.
 
-## 30. Artifacts/SHA
+## 26. Which V29 root causes were actually corrected?
 
-The SHA inventory covers only authority, trust-block, preservation, test, and review
-artifacts generated before or at the fail-closed stop.
+The Jan–Mar causal source-authority blocker was corrected at 90/90 with deterministic production-contract-equivalent materialization. No downstream V29 service, bridge, or Q root cause can be claimed corrected.
 
-## 31. Preservation audit
+## 27. Which bottlenecks remain?
 
-Status `PASS` with zero protected-scope mismatch.
+The frozen trust sweep has no feasible rho because 26 D-1 anchor days already violate the absolute voltage gate (maximum anchor Vmax 1.056237079 pu); one also has line loading above 1.0 (maximum anchor rho_AC 1.067419228). Candidate-new violations were 0 days. Even though rho=1.0 resolves one anchor violation, it does not pass all 90 days.
 
-## 32. Final Git status
+## 28. Tests
 
-Recorded after the final commit in the task handoff; no push or merge is performed.
+8 gates passed, one mandatory trust-selection gate failed, and 19 downstream gates were blocked. Apr-04 execution was prohibited.
 
-## 33. Is Apr-5--30 integration preflight authorized?
+## 29. Artifact SHA
 
-No. `APRIL_5_30_PREFLIGHT_AUTHORIZED=false`.
+`V29R1_RESUME_ARTIFACT_SHA256.json` inventories the source-resume and trust-resume artifact roots, excluding itself to avoid a circular digest.
 
-V29R1 selected rho_AIDC=NOT_SELECTED through physics certification rather than April performance tuning.
+## 30. Preservation audit
 
-V29R1 did not reach the service stage; raw requested carry-in service was not promoted to production, and no causally calibrated nominal/lower representation was falsely claimed as frozen.
+`PASS` with 0 protected-scope mismatches. V28/V29/forensic/census authorities remained byte-identical.
 
-V29R1 did not reach Q release; MESS reactive-power deviation from B2 was never authorized.
+## 31. Final Git status
 
-Across the Apr-1–4 development/regression set, Actual B3 no-regret was not evaluated because the mandatory Stage-2 source-authority gate stopped execution.
+The implementation and fail-closed artifacts are committed locally; no push or merge is performed. The handoff records the final commit and clean status.
 
-Apr-1–4 remains development/regression evidence and is not final independent validation.
+## 32. Is Apr-1–4 full V29R1 regression now justified?
 
-Apr-5–30 integration preflight is NOT AUTHORIZED.
+No. It is not justified until a new prospective lineage resolves the pre-April physical-state infeasibility and all required gates pass.
+
+Jan–Mar causal trust-certification source authority was READY at 90/90 days.
+
+V29R1 selected rho_AIDC=NOT_SELECTED because no candidate passed pre-April physics certification; Apr-4 performance was not used.
+
+V29R1 did not reach executable-service authorization, so raw requested carry-in was not replaced and no H_NOM/H_LOW authority is claimed.
+
+On Apr-4, the MESS reactive-power decision was NOT_EVALUATED because Q and Apr-4 execution were blocked.
+
+On Apr-4, Actual B3 no-regret relative to B2 was NOT_EVALUATED.
+
+Apr-4 is a development checkpoint and is not independent or final validation.
+
+Full Apr-1–4 V29R1 development regression is NOT JUSTIFIED as the next prospective evaluation step.

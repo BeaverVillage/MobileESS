@@ -1,6 +1,3 @@
-# V29R1 reliability-calibrated no-regret prospective refreeze
+# V29R1 source-recovery resume
 
-This artifact root records a fail-closed Stage-2 result: `V29R1_BLOCKED_TRUST_CERT_SOURCE_AUTHORITY_INSUFFICIENT`.
-The current production source pipeline and cache cover April 2025, not the required
-Jan--Mar certification population. No April substitution, rho selection, downstream
-science, smoke, Apr-1--4 regression, Apr-5--30 preflight, or May execution occurred.
+Jan–Mar source authority is READY at 90/90, but the prospective trust sweep has no physics-certified rho. The lineage stops fail-closed before service, Bridge V2, V4, Q, freeze, or Apr-04 execution.

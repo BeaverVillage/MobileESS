@@ -1,34 +1,304 @@
 {
-  "Apr_1_4_development_regression_executed": false,
-  "Apr_5_30_integration_preflight_authorized": false,
-  "May_executed": false,
-  "RESULT_CLASSIFICATION": "V29R1_BLOCKED_TRUST_CERT_SOURCE_AUTHORITY_INSUFFICIENT",
-  "all_31_tests_passed": false,
-  "artifact_id": "V29R1_FINAL_DEVELOPMENT_REVIEW_V1",
+  "Apr04_executed": false,
+  "Apr_1_4_development_regression_justified": false,
+  "RESULT_CLASSIFICATION": "V29R1_BLOCKED_TRUST_CERT_PHYSICS_GATES",
+  "artifact_id": "V29R1_FINAL_DEVELOPMENT_REVIEW_V2",
   "axes": {
-    "ACTUAL_NOREGRET_STATUS": "NOT_EVALUATED",
-    "AC_PHYSICAL_STATUS": "NOT_EVALUATED",
-    "BRIDGE_V2_STATUS": "NOT_RUN",
-    "DAYAHEAD_GRID_EFFECT_STATUS": "NOT_EVALUATED",
+    "APR04_STATUS": "NOT_AUTHORIZED",
+    "BRIDGE_V2_STATUS": "BLOCKED",
+    "CONTRACT_EQUIVALENCE": "PASS",
     "PRESERVATION_STATUS": "PASS",
-    "Q_NOREGRET_STATUS": "NOT_RUN",
-    "SERVICE_CALIBRATION_STATUS": "NOT_RUN",
-    "SOURCE_AUTHORITY": "INSUFFICIENT_JAN_MAR_CAUSAL_ELECTRICAL_INPUTS",
-    "TECHNICAL_STATUS": "STOPPED_FAIL_CLOSED_AT_STAGE_2",
-    "TRUST_CERT_STATUS": "NOT_CERTIFIED"
+    "Q_NOREGRET_STATUS": "BLOCKED",
+    "REFERENCE_V4_STATUS": "BLOCKED",
+    "SERVICE_CALIBRATION_STATUS": "BLOCKED",
+    "SOURCE_AUTHORITY": "READY_90_OF_90",
+    "TRUST_CERT_STATUS": "FAIL_NO_PHYSICS_CERTIFIED_RHO"
   },
-  "blocked_at_stage": 2,
-  "blocked_reason": "The production materializer and cache cover April 2025 only; none of the 90 required Jan-Mar causal feeder-state days is materialized under the current production source authority.",
-  "downstream_stages_not_run": [
-    "CARRYIN_EXECUTABLE_SERVICE_V1",
-    "PRE_DAY_QUEUE_BRIDGE_V2",
-    "REFERENCE_COMPUTE_SCHEDULE_V4",
-    "B2_ANCHORED_NO_REGRET_Q_RELEASE_V1",
-    "V29R1_DEV_FREEZE_HEAD",
-    "CURRENT_HEAD_SMOKE",
-    "APR1_4_DEVELOPMENT_REGRESSION"
+  "candidate_results": [
+    {
+      "AC_all_days_pass": "False",
+      "April_rows_used": "0",
+      "C1_all_days_pass": "True",
+      "Fresh_OpenDSS_solve_count": "8640",
+      "Fresh_OpenDSS_trajectory_count": "90",
+      "all_frozen_AC_C1_gates_pass": "False",
+      "candidate_new_violation_day_count": "0",
+      "candidate_resolves_anchor_violation_day_count": "0",
+      "certification_day_count": "90",
+      "maximum_current_error_pu": "6.224705599544578e-05",
+      "maximum_rho_AC": "1.066065608388806",
+      "maximum_voltage_error_pu": "1.2203101143137829e-05",
+      "preexisting_anchor_violation_day_count": "26",
+      "rho_AIDC": "0.1",
+      "status": "FAIL"
+    },
+    {
+      "AC_all_days_pass": "False",
+      "April_rows_used": "0",
+      "C1_all_days_pass": "True",
+      "Fresh_OpenDSS_solve_count": "8640",
+      "Fresh_OpenDSS_trajectory_count": "90",
+      "all_frozen_AC_C1_gates_pass": "False",
+      "candidate_new_violation_day_count": "0",
+      "candidate_resolves_anchor_violation_day_count": "0",
+      "certification_day_count": "90",
+      "maximum_current_error_pu": "8.358306953459849e-05",
+      "maximum_rho_AC": "1.0640357373098792",
+      "maximum_voltage_error_pu": "1.2243955466173517e-05",
+      "preexisting_anchor_violation_day_count": "26",
+      "rho_AIDC": "0.25",
+      "status": "FAIL"
+    },
+    {
+      "AC_all_days_pass": "False",
+      "April_rows_used": "0",
+      "C1_all_days_pass": "True",
+      "Fresh_OpenDSS_solve_count": "8640",
+      "Fresh_OpenDSS_trajectory_count": "90",
+      "all_frozen_AC_C1_gates_pass": "False",
+      "candidate_new_violation_day_count": "0",
+      "candidate_resolves_anchor_violation_day_count": "0",
+      "certification_day_count": "90",
+      "maximum_current_error_pu": "0.00011347638908426605",
+      "maximum_rho_AC": "1.0619147427730204",
+      "maximum_voltage_error_pu": "1.2434926705218174e-05",
+      "preexisting_anchor_violation_day_count": "26",
+      "rho_AIDC": "0.5",
+      "status": "FAIL"
+    },
+    {
+      "AC_all_days_pass": "False",
+      "April_rows_used": "0",
+      "C1_all_days_pass": "True",
+      "Fresh_OpenDSS_solve_count": "8640",
+      "Fresh_OpenDSS_trajectory_count": "90",
+      "all_frozen_AC_C1_gates_pass": "False",
+      "candidate_new_violation_day_count": "0",
+      "candidate_resolves_anchor_violation_day_count": "1",
+      "certification_day_count": "90",
+      "maximum_current_error_pu": "0.0004958637239924624",
+      "maximum_rho_AC": "1.0682808907470613",
+      "maximum_voltage_error_pu": "1.3276988649169041e-05",
+      "preexisting_anchor_violation_day_count": "26",
+      "rho_AIDC": "1.0",
+      "status": "FAIL"
+    }
   ],
+  "candidate_set": [
+    0.1,
+    0.25,
+    0.5,
+    1.0
+  ],
+  "causal_day_count": 90,
+  "contract_equivalence": "PASS",
+  "deterministic_materialization": true,
+  "downstream_science_authorized": false,
+  "preservation": {
+    "protected_scope_mismatch_count": 0,
+    "status": "PASS"
+  },
   "production_rho_changed": false,
+  "raw_source_ready": true,
   "retrospective_tuning_performed": false,
-  "selected_rho_AIDC": null
+  "scientific_freeze_created": false,
+  "selected_rho_AIDC": null,
+  "starting_lineage": {
+    "base": "2bcfe7d48046c5c3f9f1bc43b6d35805e3ed589f",
+    "blocked_commit": "d1997bfbd59701c0183eb0252909267eb49facf2",
+    "resume_head": "7897a9204074d498aeecacc637b4d0804b7da904"
+  },
+  "tests": {
+    "Apr04_authorized": false,
+    "all_pre_April_gates_passed": false,
+    "artifact_id": "V29R1_RESUME_TEST_REPORT_V1",
+    "blocked_count": 19,
+    "failure_count": 1,
+    "gates": [
+      {
+        "gate": 1,
+        "name": "exact V29R1 lineage",
+        "status": "PASS"
+      },
+      {
+        "gate": 2,
+        "name": "raw source 90/90",
+        "status": "PASS"
+      },
+      {
+        "gate": 3,
+        "name": "causal source 90/90",
+        "status": "PASS"
+      },
+      {
+        "gate": 4,
+        "name": "Jan-Mar materialization deterministic",
+        "status": "PASS"
+      },
+      {
+        "gate": 5,
+        "name": "Jan-Mar/April schema equivalence",
+        "status": "PASS"
+      },
+      {
+        "gate": 6,
+        "name": "no future Actual leakage",
+        "status": "PASS"
+      },
+      {
+        "gate": 7,
+        "name": "trust candidate set unchanged",
+        "status": "PASS"
+      },
+      {
+        "gate": 8,
+        "name": "rho selected only from physical certificate",
+        "status": "FAIL_NO_PHYSICS_CERTIFIED_RHO"
+      },
+      {
+        "gate": 9,
+        "name": "service model causal",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 10,
+        "name": "90% lower coverage target unchanged",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 11,
+        "name": "Bridge V2 causal",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 12,
+        "name": "V4 B0/B2 reference identity",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 13,
+        "name": "no P/G double count",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 14,
+        "name": "residual nonnegative",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 15,
+        "name": "no clipping",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 16,
+        "name": "PARTIAL/shared excluded",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 17,
+        "name": "no preemption",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 18,
+        "name": "no synthetic deadline",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 19,
+        "name": "MESS ratings unchanged",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 20,
+        "name": "Q anchor exact",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 21,
+        "name": "Q release no-regret",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 22,
+        "name": "deterministic Q fallback",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 23,
+        "name": "primary objective unchanged",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 24,
+        "name": "Actual optimizer calls zero",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 25,
+        "name": "connection-delay alignment",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 26,
+        "name": "PI firewall",
+        "status": "BLOCKED_BY_GATE_8"
+      },
+      {
+        "gate": 27,
+        "name": "protected evidence unchanged",
+        "status": "PASS"
+      },
+      {
+        "gate": 28,
+        "name": "artifact SHA consistency",
+        "status": "BLOCKED_BY_GATE_8"
+      }
+    ],
+    "pass_count": 8,
+    "preservation_status": "PASS",
+    "pytest_verification": {
+      "command": "python -m pytest -q tests/dayahead/test_v29r1_source_resume.py tests/dayahead/test_v29r1_reliability_calibrated_noregret.py tests/dayahead/test_v29r1_janmar_source_authority.py",
+      "result": "18 passed"
+    },
+    "required_gate_count": 28,
+    "status": "V29R1_BLOCKED_TRUST_CERT_PHYSICS_GATES"
+  },
+  "trust_failure_causality": {
+    "anchor_violation_days": [
+      "2025-01-03",
+      "2025-01-05",
+      "2025-01-08",
+      "2025-01-10",
+      "2025-01-14",
+      "2025-01-20",
+      "2025-01-21",
+      "2025-01-27",
+      "2025-02-02",
+      "2025-02-03",
+      "2025-02-04",
+      "2025-02-06",
+      "2025-02-07",
+      "2025-02-10",
+      "2025-02-11",
+      "2025-02-12",
+      "2025-02-13",
+      "2025-02-22",
+      "2025-02-24",
+      "2025-02-26",
+      "2025-03-04",
+      "2025-03-07",
+      "2025-03-09",
+      "2025-03-10",
+      "2025-03-11",
+      "2025-03-14"
+    ],
+    "candidate_new_violation_day_count": 0,
+    "failed_candidate_day_union_count": 26,
+    "maximum_anchor_Vmax_pu": 1.056237079177566,
+    "maximum_anchor_rho_AC": 1.0674192275832552,
+    "minimum_anchor_Vmin_pu": 0.9638982378675779,
+    "preexisting_D1_anchor_violation_day_count": 26
+  }
 }
