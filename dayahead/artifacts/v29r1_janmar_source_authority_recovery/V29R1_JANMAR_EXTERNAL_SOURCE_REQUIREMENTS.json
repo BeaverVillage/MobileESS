@@ -1,0 +1,77 @@
+{
+  "artifact_id": "V29R1_JANMAR_EXTERNAL_SOURCE_REQUIREMENTS_V1",
+  "automatic_download_performed": false,
+  "missing_materialization_only": [
+    "generalize April materializer date axis after required raw acquisition",
+    "materialize into cache/v29r1_trust_cert_sources/jan_mar_2025 only"
+  ],
+  "requirements": [
+    {
+      "classification": "MISSING_RAW_DATA",
+      "current_local_coverage": "0/90 target days",
+      "dataset_source": "NOAA Global Forecast System 0.25-degree operational archive",
+      "missing_coverage": "all 90 target days",
+      "official_provider_source": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.YYYYMMDD/06/atmos/gfs.t06z.pgrb2.0p25.fNNN",
+      "required_fields": {
+        "DPT": "2 m above ground",
+        "PRES": "surface",
+        "RH": "2 m above ground",
+        "TMP": "2 m above ground",
+        "UGRD": "10 m above ground",
+        "VGRD": "10 m above ground"
+      },
+      "required_forecast_vintage_issue_time": "06Z D-1; available before D-1 18:00 fixed AEST",
+      "required_initialization_range_UTC": "2024-12-31 06Z through 2025-03-30 06Z",
+      "required_resolution": "f008-f032 hourly leads; production interpolation to 96x15-minute",
+      "required_target_date_range": "2025-01-01 through 2025-03-31",
+      "why_required": "production C1 wet-bulb/RH envelope and AIDC perturbation"
+    },
+    {
+      "classification": "MISSING_RAW_DATA",
+      "current_local_coverage": "30/90 target days (2025-03-02 through 2025-03-31)",
+      "dataset_source": "AEMO PREDISPATCHREGIONSUM ALL monthly archives",
+      "missing_coverage": "2025-01-01 through 2025-03-01",
+      "official_provider_source": "https://nemweb.com.au/Data_Archive/Wholesale_Electricity/MMSDM/YYYY/MMSDM_YYYY_MM/MMSDM_Historical_Data_SQLLoader/PREDISP_ALL_DATA/",
+      "required_archive_months_missing": [
+        "2024-12",
+        "2025-01",
+        "2025-02"
+      ],
+      "required_fields": [
+        "REGIONID",
+        "DATETIME",
+        "PREDISPATCHSEQNO",
+        "RUNNO",
+        "LASTCHANGED",
+        "TOTALDEMAND"
+      ],
+      "required_forecast_vintage_issue_time": "latest complete VIC1 vintage <= D-1 18:00 fixed AEST",
+      "required_resolution": "48x30-minute raw; production duplication to 96x15-minute MW",
+      "required_target_date_range": "2025-01-01 through 2025-03-31",
+      "why_required": "production feeder Day-Ahead demand background"
+    },
+    {
+      "classification": "MISSING_RAW_DATA",
+      "current_local_coverage": "30/90 target days (2025-03-02 through 2025-03-31)",
+      "dataset_source": "AEMO ROOFTOP_PV_FORECAST monthly archives",
+      "missing_coverage": "2025-01-01 through 2025-03-01",
+      "official_provider_source": "https://nemweb.com.au/Data_Archive/Wholesale_Electricity/MMSDM/YYYY/MMSDM_YYYY_MM/MMSDM_Historical_Data_SQLLoader/DATA/",
+      "required_archive_months_missing": [
+        "2024-12",
+        "2025-01",
+        "2025-02"
+      ],
+      "required_fields": [
+        "REGIONID",
+        "INTERVAL_DATETIME",
+        "VERSION_DATETIME",
+        "POWERMEAN"
+      ],
+      "required_forecast_vintage_issue_time": "latest complete VIC1 vintage <= D-1 18:00 fixed AEST",
+      "required_resolution": "48x30-minute raw; production duplication to 96x15-minute MW",
+      "required_target_date_range": "2025-01-01 through 2025-03-31",
+      "why_required": "production feeder Day-Ahead rooftop-PV background"
+    }
+  ],
+  "status": "EXTERNAL_ACQUISITION_REQUIRED_NOT_AUTHORIZED"
+}
