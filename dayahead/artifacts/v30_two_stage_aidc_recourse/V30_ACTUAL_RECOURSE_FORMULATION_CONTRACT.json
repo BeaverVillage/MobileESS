@@ -1,0 +1,24 @@
+{
+  "Fresh_OpenDSS_in_decision_loop": false,
+  "LP_phases": [
+    "physical service ceiling diagnostic",
+    "safety-constrained max service",
+    "fixed-service min phase-current metric",
+    "fixed-service-and-grid min DA deviation"
+  ],
+  "MESS_reoptimization": false,
+  "artifact_id": "V30_ACTUAL_RECOURSE_FORMULATION_CONTRACT_V1",
+  "decision_variable": "y_ACT[b,r,t]",
+  "epochs_per_day": 96,
+  "full_system_reoptimization": false,
+  "reported_subcalls_per_epoch": 4,
+  "same_slot_authorization": "sum_r y_ACT[b,r,t] <= sum_r x_DA[b,r,t]",
+  "status": "FROZEN",
+  "temporal_recourse_variable": null,
+  "tie_break": [
+    "original rack",
+    "same AIDC",
+    "other AIDC",
+    "canonical rack ID"
+  ]
+}

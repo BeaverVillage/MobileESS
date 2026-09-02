@@ -1,0 +1,53 @@
+{
+  "B1_policy_sha256": "ccc21ad3118dae01825b6ac678b2fd7f74fdd624f01639aa995be1d03ae5ac4a",
+  "B3_policy_sha256": "ccc21ad3118dae01825b6ac678b2fd7f74fdd624f01639aa995be1d03ae5ac4a",
+  "artifact_id": "V30_B1_B3_AIDC_POLICY_IDENTITY_V1",
+  "byte_config_identical": true,
+  "policy": {
+    "AIDC_PF": 0.95,
+    "causal": true,
+    "cross_site_semantics": "PRE_EXECUTION_REASSIGNMENT_NOT_LIVE_WAN_MIGRATION",
+    "eligibility": {
+      "artifact_id": "V30_RECOURSE_ELIGIBILITY_CONTRACT_V1",
+      "checkpoint_restart": 0,
+      "excluded": [
+        "PARTIAL/shared",
+        "uncontrolled",
+        "running",
+        "synthetic"
+      ],
+      "included": [
+        "strict FULL-node",
+        "source-backed actual availability",
+        "not-yet-started",
+        "no recorded sharing",
+        "supported node count"
+      ],
+      "preemption": 0,
+      "running_job_migration": 0,
+      "status": "FROZEN",
+      "synthetic_deadline": 0,
+      "synthetic_workload": 0
+    },
+    "future_actual_reads": 0,
+    "no_regret_margin_pu": 0.0009917274479849247,
+    "objective_hierarchy": [
+      "MAX_SERVICE",
+      "MIN_PHASE_CURRENT_METRIC",
+      "MIN_DA_DEVIATION"
+    ],
+    "policy_id": "V30_AIDC_TWO_STAGE_SPATIAL_RECOURSE_V1",
+    "rho_AIDC": 1.0,
+    "same_slot_only": true,
+    "scenario_count": 64,
+    "scenario_set_sha256": "02e29c64c8fa662c78bf88e43c10a6508efc0bb5669f9ffe6d33c798a887d2b0",
+    "spatial_domain": "ALL_AND_ONLY_48_FROZEN_CASE_STUDY_RACKS",
+    "tie_break": [
+      "ORIGINAL_RACK",
+      "SAME_AIDC",
+      "OTHER_AIDC",
+      "CANONICAL_RACK_ID"
+    ]
+  },
+  "status": "PASS"
+}
