@@ -104,6 +104,7 @@ def configure_model(model: object) -> None:
 def build_resource_model(
     data: V28R2FormulationData, voltage: object, case: str, *, rho: float = 0.1,
     rho_aidc: float | None = None, rho_mess: float | None = None,
+    mess_disabled: bool = False,
 ) -> VariableRegistry:
     import gurobipy as gp
     from gurobipy import GRB
@@ -117,6 +118,8 @@ def build_resource_model(
         raise ValueError("V28R2_TRUST_REGION_RANGE")
     compute_flexible = case in {"B1", "B3"}
     mess_flexible = case in {"B2", "B3"}
+    if mess_disabled and mess_flexible:
+        raise ValueError("V35_MESS_DISABLED_ONLY_VALID_FOR_AIDC_ONLY_STAGE")
     model = gp.Model(f"v28r2_{case}_resource")
     configure_model(model)
     cohort_index = {value: index for index, value in enumerate(data.cohort_ids)}
@@ -207,18 +210,20 @@ def build_resource_model(
         model.addConstr(mess_e[(mess_id, 0)] == E_INITIAL_KWH, name=f"mess_initial_soc[{mess_id}]")
         for slot in range(96):
             connected = slot not in unavailable
-            fixed = -5.0 if connected and slot in range(start - 8, start) else 0.0
+            fixed = 0.0 if mess_disabled else (-5.0 if connected and slot in range(start - 8, start) else 0.0)
             mess_p[(mess_id, slot)] = model.addVar(
-                lb=(-mess_trust * P_LIMIT_KW if connected else 0.0) if mess_flexible else fixed,
-                ub=(mess_trust * P_LIMIT_KW if connected else 0.0) if mess_flexible else fixed,
+                lb=0.0 if mess_disabled else ((-mess_trust * P_LIMIT_KW if connected else 0.0) if mess_flexible else fixed),
+                ub=0.0 if mess_disabled else ((mess_trust * P_LIMIT_KW if connected else 0.0) if mess_flexible else fixed),
                 name=f"mess_p_kw[{mess_id},{slot}]",
             )
             mess_q[(mess_id, slot)] = model.addVar(
-                lb=(-mess_trust * PCS_KVA if connected else 0.0) if mess_flexible else 0.0,
-                ub=(mess_trust * PCS_KVA if connected else 0.0) if mess_flexible else 0.0,
+                lb=0.0 if mess_disabled else ((-mess_trust * PCS_KVA if connected else 0.0) if mess_flexible else 0.0),
+                ub=0.0 if mess_disabled else ((mess_trust * PCS_KVA if connected else 0.0) if mess_flexible else 0.0),
                 name=f"mess_q_kvar[{mess_id},{slot}]",
             )
-            mobility = float(record["safe_mobility_energy_kwh"]) / len(transit) if slot in transit else 0.0
+            mobility = 0.0 if mess_disabled else (
+                float(record["safe_mobility_energy_kwh"]) / len(transit) if slot in transit else 0.0
+            )
             model.addConstr(
                 mess_e[(mess_id, slot + 1)] == mess_e[(mess_id, slot)]
                 - DT_HOURS * mess_p[(mess_id, slot)] - mobility,

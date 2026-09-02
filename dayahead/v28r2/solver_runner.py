@@ -20,6 +20,7 @@ def add_grid_rows(
     current: object,
     *,
     planning_vmax_pu: float | None = None,
+    voltage_correction: object | None = None,
 ) -> None:
     import gurobipy as gp
 
@@ -35,8 +36,17 @@ def add_grid_rows(
                 float(coefficient.voltage_matrix[index, node]) * controls[index]
                 for index in range(len(controls))
             )
-            model.addConstr(expression >= V_MIN_SQUARED, name=f"grid_voltage_low[{slot},{node}]")
-            model.addConstr(expression <= planning_vmax_squared, name=f"grid_voltage_high[{slot},{node}]")
+            if voltage_correction is None:
+                lower_squared, upper_squared = V_MIN_SQUARED, planning_vmax_squared
+            else:
+                from dayahead.v34.correction import bind_squared_voltage_bounds
+
+                node_name = str(voltage["node_names"][node])
+                phase = "ABC"[int(node_name.rsplit(".", 1)[1]) - 1]
+                up, low = voltage_correction.value_for(node_name, phase, slot)
+                lower_squared, upper_squared = bind_squared_voltage_bounds(up, low)
+            model.addConstr(expression >= lower_squared, name=f"grid_voltage_low[{slot},{node}]")
+            model.addConstr(expression <= upper_squared, name=f"grid_voltage_high[{slot},{node}]")
         for branch, branch_name in enumerate(coefficient.branch_names):
             if is_dominated_mess_current_row(branch_name):
                 continue
@@ -74,12 +84,17 @@ def add_grid_rows(
 
 def solve_monolithic(
     *, data, context: object, voltage: object, current: object, case: str,
+    voltage_correction: object | None = None,
+    mess_disabled: bool = False,
 ) -> SolverPayload:
     from gurobipy import GRB
 
     started = time.perf_counter()
-    registry = build_resource_model(data, voltage, case)
-    add_grid_rows(registry, context, voltage, current)
+    registry = build_resource_model(data, voltage, case, mess_disabled=mess_disabled)
+    add_grid_rows(
+        registry, context, voltage, current,
+        voltage_correction=voltage_correction,
+    )
     registry.model.optimize()
     runtime = time.perf_counter() - started
     if registry.model.Status != GRB.OPTIMAL:

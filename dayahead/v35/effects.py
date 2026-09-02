@@ -43,6 +43,10 @@ def aidc_effect_watchdog(
     rack_site_ids: Sequence[str] | None = None,
     solver_status_off: str = "UNKNOWN",
     solver_status_on: str = "UNKNOWN",
+    planning_rho_off: float | None = None,
+    planning_rho_on: float | None = None,
+    fresh_rho_off: float | None = None,
+    fresh_rho_on: float | None = None,
 ) -> dict[str, object]:
     workload_off = _array(off_workload, "off_workload")
     workload_on = _array(on_workload, "on_workload")
@@ -95,8 +99,16 @@ def aidc_effect_watchdog(
         "relative_objective_delta": delta_objective / max(abs(float(objective_off)), 1e-12),
         "effect_resolution_floor": resolution_floor,
         "resolved_effect": resolved,
-        "planning_rho_delta": float(np.max(planning_on) - np.max(planning_off)),
-        "fresh_rho_AC_delta": float(np.max(fresh_on) - np.max(fresh_off)),
+        "planning_rho_delta": float(
+            np.max(planning_on) - np.max(planning_off)
+            if planning_rho_off is None or planning_rho_on is None
+            else float(planning_rho_on) - float(planning_rho_off)
+        ),
+        "fresh_rho_AC_delta": float(
+            np.max(fresh_on) - np.max(fresh_off)
+            if fresh_rho_off is None or fresh_rho_on is None
+            else float(fresh_rho_on) - float(fresh_rho_off)
+        ),
         "shifted_workload_node_hours": float(0.5 * np.sum(np.abs(delta_workload))),
         "changed_workload_cells": int(np.count_nonzero(changed_workload)),
         "changed_execution_slot_count": changed_slots,

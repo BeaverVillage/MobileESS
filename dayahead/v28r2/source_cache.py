@@ -21,9 +21,11 @@ def atomic_bytes(path: Path, content: bytes) -> None:
     os.replace(temporary, path)
 
 
-def cache_root(repo: Path) -> Path:
+def cache_root(repo: Path, day: str | None = None) -> Path:
+    if day is not None and day.startswith("2025-05-"):
+        return repo / "cache/v28r2_campaign_sources/may_2025"
     return repo / "cache/v28r2_campaign_sources/april_2025"
 
 
 def day_root(repo: Path, day: str) -> Path:
-    return cache_root(repo) / "days" / day
+    return cache_root(repo, day) / "days" / day

@@ -137,7 +137,12 @@ def _mess_authority(payload: Mapping[str, object]) -> dict[str, dict[str, object
     return result
 
 
-def materialize_formulation_data(repo: Path, day: str) -> V28R2FormulationData:
+def materialize_formulation_data(
+    repo: Path,
+    day: str,
+    *,
+    disable_legacy_mess_source: bool = False,
+) -> V28R2FormulationData:
     artifacts = repo / "dayahead/artifacts/v28r2_heavy_backend"
     models = artifacts / "V28R2_OPTIMIZER_CHANNEL_MODELS"
     labels = load_optimizer_labels(repo)
@@ -198,12 +203,31 @@ def materialize_formulation_data(repo: Path, day: str) -> V28R2FormulationData:
         "reference_sha256": canonical_sha256(json.loads(reference.canonical_bytes())),
         "delta_P": delta.p_res_plan_kw.tolist(), "delta_G": delta.g_res_plan_gpu.tolist(),
         "vintage": vintage,
+        "legacy_MESS_source_disabled_for_AIDC_only_stage": disable_legacy_mess_source,
         "source_day_sha256": json.loads((source / "source_day_manifest.json").read_text(encoding="utf-8"))["source_day_sha256"],
     })
     result = V28R2FormulationData(
         day, labels.cohort_ids, rack_ids, rack_aidc, aidc_ids, rack_gpu_capacity,
         arrivals, reference, delta, p_q90, g_q90, tuple(coefficients), vintage,
-        _mess_authority(mobility), fingerprint, input_sha,
+        (
+            {
+                f"MESS{index:02d}": {
+                    "service_site": f"STA{index:02d}",
+                    "transit_slots": [0],
+                    "connection_delay_slots": [],
+                    "unavailable_slots": [],
+                    "safe_mobility_energy_kwh": 0.0,
+                    "mode_96": ["CONNECTED"] * 96,
+                    "location_96": [f"STA{index:02d}"] * 96,
+                    "available_96": [True] * 96,
+                    "travel_energy_kwh_96": [0.0] * 96,
+                    "initial_energy_kwh": 760.0,
+                }
+                for index in range(1, 5)
+            }
+            if disable_legacy_mess_source else _mess_authority(mobility)
+        ),
+        fingerprint, input_sha,
     )
     result.validate()
     return result

@@ -33,6 +33,9 @@ from dayahead.v35.storage import (
     invalidation_scope,
     storage_schema_sha256,
 )
+from dayahead.v35.calibration import calibrate_vectorized, prospective_coverage, select_family
+from dayahead.v35.may_sources import materialize_may_sources
+from dayahead.v28r2.source_cache import day_root
 
 
 REPO = Path(__file__).resolve().parents[2]
@@ -226,3 +229,49 @@ def test_15_preapril_audit_proves_feasible_stationary_effect():
     assert stationary["P_Q_nonzero"] and stationary["rho_improvement"] > 1e-6
     assert stationary["resolved_absolute_gap"] <= 1e-6
     assert not audit["MESS_PQ_coupling_probe"]["MESS_solver_starvation_confirmed"]
+
+
+def test_16_aidc_only_solver_has_zero_mess_and_correction_hooks():
+    import inspect
+
+    from dayahead.v28r2.solver_runner import solve_monolithic
+    from dayahead.v28r2.variable_registry import build_resource_model
+
+    assert "mess_disabled" in inspect.signature(build_resource_model).parameters
+    assert "mess_disabled" in inspect.signature(solve_monolithic).parameters
+    assert "voltage_correction" in inspect.signature(solve_monolithic).parameters
+
+
+def test_17_may_source_cache_is_separate_from_april(tmp_path: Path):
+    assert "april_2025" in str(day_root(tmp_path, "2025-04-30"))
+    assert "may_2025" in str(day_root(tmp_path, "2025-05-01"))
+
+
+def test_18_may_materialization_fails_before_any_numeric_read(tmp_path: Path):
+    with pytest.raises(PermissionError, match="ADMISSION"):
+        materialize_may_sources(tmp_path, {})
+    assert not (tmp_path / "cache").exists()
+
+
+def _tiny_residuals(value_by_node: tuple[float, float]):
+    signed = np.zeros((2, 96, 2), dtype=float)
+    signed[:, :, 0] = value_by_node[0]
+    signed[:, :, 1] = value_by_node[1]
+    return {
+        "signed": signed,
+        "node_names": ("n1.1", "n2.2"),
+        "node_phases": ("A", "B"),
+        "labels": (("2025-04-21", "B1"), ("2025-04-21", "B3")),
+    }
+
+
+def test_19_vectorized_correction_selection_preserves_25_percent_rule():
+    residuals = _tiny_residuals((0.01, 0.001))
+    candidates = calibrate_vectorized(residuals)
+    assert candidates.m1.up["GLOBAL"] == pytest.approx(0.01)
+    assert candidates.m2.up["n2.2|B"] == pytest.approx(0.001)
+    assert prospective_coverage(candidates.m2, residuals)["covering"] is True
+    selected, reports, reason = select_family(candidates, residuals)
+    assert selected is not None and selected.family == "M2"
+    assert reports["M1"]["covering"] is True
+    assert reason == "MORE_COMPLEX_COVERING_FAMILY_AT_LEAST_25_PERCENT_LESS_MEAN_CORRECTION"
