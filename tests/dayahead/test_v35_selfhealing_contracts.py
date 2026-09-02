@@ -37,6 +37,7 @@ from dayahead.v35.storage import (
 from dayahead.v35.calibration import calibrate_vectorized, prospective_coverage, select_family
 from dayahead.v35.may_sources import materialize_may_sources
 from dayahead.v35.campaign import windows_path_to_wsl
+from dayahead.v35.execution import normalize_v35_fresh_storage
 from dayahead.v28r2.source_cache import day_root
 
 
@@ -309,3 +310,27 @@ def test_21_serialization_only_rebind_preserves_old_checkpoint_and_scientific_fi
 def test_22_windows_path_translation_does_not_read_may_data(monkeypatch):
     monkeypatch.setattr(Path, "resolve", lambda self: Path(r"C:\work space\MobileESS"))
     assert windows_path_to_wsl(Path("unused")) == "/mnt/c/work space/MobileESS"
+
+
+def test_23_v35_fresh_storage_is_finite_with_explicit_transformer_mask(tmp_path: Path):
+    output = tmp_path / "fresh"; output.mkdir()
+    arrays_path = output / "OPENDSS_PHASE_ARRAYS.npz"
+    np.savez_compressed(
+        arrays_path,
+        branch_kinds=np.asarray(["line", "transformer"]),
+        transformer_total_kva_loading_pu=np.column_stack((
+            np.full(96, np.nan), np.full(96, .7),
+        )),
+        voltage_pu=np.ones((96, 2)),
+    )
+    atomic_json(output / "OPENDSS_OUTPUT_MANIFEST.json", {
+        "files": {arrays_path.name: {"sha256": "old", "bytes": arrays_path.stat().st_size}},
+        "manifest_payload_sha256": "old",
+    })
+    arrays_record, manifest_record = normalize_v35_fresh_storage(output)
+    assert arrays_record["sha256"] == __import__("hashlib").sha256(arrays_path.read_bytes()).hexdigest()
+    assert manifest_record["sha256"] == __import__("hashlib").sha256((output / "OPENDSS_OUTPUT_MANIFEST.json").read_bytes()).hexdigest()
+    with np.load(arrays_path, allow_pickle=False) as payload:
+        assert np.isfinite(payload["transformer_total_kva_loading_pu"]).all()
+        assert payload["transformer_total_kva_loading_pu"][0].tolist() == [0.0, .7]
+        assert payload["transformer_total_kva_applicable"].tolist() == [False, True]

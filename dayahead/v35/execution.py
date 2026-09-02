@@ -537,6 +537,55 @@ def _files_valid(records: Sequence[Mapping[str, object]]) -> bool:
         return False
 
 
+def normalize_v35_fresh_storage(output: Path) -> tuple[dict[str, object], dict[str, object]]:
+    """Encode non-applicable transformer kVA rows without non-finite sentinels."""
+
+    arrays_path = output / "OPENDSS_PHASE_ARRAYS.npz"
+    manifest_path = output / "OPENDSS_OUTPUT_MANIFEST.json"
+    with np.load(arrays_path, allow_pickle=False) as source:
+        arrays = {name: np.asarray(source[name]) for name in source.files}
+    kinds = np.asarray(arrays["branch_kinds"]).astype(str)
+    applicable = kinds == "transformer"
+    kva = np.asarray(arrays["transformer_total_kva_loading_pu"], dtype=float)
+    if kva.shape != (SLOTS, len(kinds)):
+        raise RuntimeError("V35_FRESH_TRANSFORMER_KVA_AXIS")
+    if not np.isfinite(kva[:, applicable]).all():
+        raise RuntimeError("V35_FRESH_APPLICABLE_TRANSFORMER_KVA_NONFINITE")
+    non_applicable = kva[:, ~applicable]
+    if not (np.isnan(non_applicable) | (non_applicable == 0.0)).all():
+        raise RuntimeError("V35_FRESH_NONAPPLICABLE_TRANSFORMER_KVA_ENCODING")
+    arrays["transformer_total_kva_loading_pu"] = np.where(applicable[None, :], kva, 0.0)
+    arrays["transformer_total_kva_applicable"] = applicable
+    numeric = tuple(
+        name for name, array in arrays.items()
+        if np.issubdtype(np.asarray(array).dtype, np.number)
+    )
+    arrays_record = atomic_npz(
+        arrays_path, arrays, {name: np.asarray(array).shape for name, array in arrays.items()},
+        require_finite=numeric,
+    )
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["files"][arrays_path.name] = {
+        "sha256": arrays_record["sha256"], "bytes": arrays_path.stat().st_size,
+    }
+    manifest["V35_transformer_kVA_encoding"] = {
+        "non_applicable_value": 0.0,
+        "applicability_array": "transformer_total_kva_applicable",
+        "applicable_branch_kind": "transformer",
+        "all_numeric_arrays_finite": True,
+    }
+    manifest.pop("manifest_payload_sha256", None)
+    manifest["manifest_payload_sha256"] = canonical_sha256(manifest)
+    manifest_sha = atomic_json(manifest_path, manifest)
+    with np.load(arrays_path, allow_pickle=False) as reloaded:
+        if not np.array_equal(np.asarray(reloaded["transformer_total_kva_applicable"]), applicable):
+            raise RuntimeError("V35_FRESH_TRANSFORMER_KVA_MASK_RELOAD")
+        for name in numeric:
+            if not np.isfinite(np.asarray(reloaded[name])).all():
+                raise RuntimeError(f"V35_FRESH_NUMERIC_RELOAD_NONFINITE:{name}")
+    return arrays_record, {"path": str(manifest_path.resolve()), "sha256": manifest_sha}
+
+
 def _load_cached_case(
     root: Path,
     *,
@@ -569,6 +618,9 @@ def _load_cached_case(
         return None
     if result.get("correction_sha256") != correction_sha or not _files_valid(checkpoint.get("storage_files", [])):
         return None
+    # CASE_RESULT cannot contain its own hash, so the immutable checkpoint is
+    # authoritative for the complete storage-file list during resume.
+    result["storage_files"] = list(checkpoint["storage_files"])
     return result
 
 
@@ -684,6 +736,7 @@ def execute_day(
             )
             if fresh.schedule_sha256 != combined_sha:
                 raise RuntimeError("V35_PLANNING_FRESH_SCHEDULE_SHA_IDENTITY")
+            fresh_array_record, fresh_manifest_record = normalize_v35_fresh_storage(case_root / "fresh")
             if stage not in actual_by_stage:
                 actual_by_stage[stage] = _actual_aidc(repo, source_repo, day, base)
             actual_aidc, actual_workload = actual_by_stage[stage]
@@ -792,13 +845,11 @@ def execute_day(
             }
             actual_sha = atomic_json(actual_summary_path, actual_summary)
             fresh_arrays = case_root / "fresh/OPENDSS_PHASE_ARRAYS.npz"
-            fresh_manifest = case_root / "fresh/OPENDSS_OUTPUT_MANIFEST.json"
             storage_files = [
                 aidc_record, mess_record, planning_record, actual_aidc_record, actual_mess_record,
                 {"path": str(trajectory_path.resolve()), "sha256": sha256_file(trajectory_path)},
                 {"path": str(actual_summary_path.resolve()), "sha256": actual_sha},
-                {"path": str(fresh_arrays.resolve()), "sha256": sha256_file(fresh_arrays)},
-                {"path": str(fresh_manifest.resolve()), "sha256": sha256_file(fresh_manifest)},
+                fresh_array_record, fresh_manifest_record,
                 *traffic_files,
             ]
             files_compact = [{"path": row["path"], "sha256": row["sha256"]} for row in storage_files]
@@ -850,6 +901,10 @@ def execute_day(
                 "input_authority": authority,
                 "runtime_seconds": time.perf_counter() - started,
                 "storage_validation": "PASS",
+                "fresh_storage_contract": {
+                    "all_numeric_arrays_finite": True,
+                    "transformer_kVA_non_applicable_encoding": "ZERO_WITH_EXPLICIT_APPLICABILITY_MASK",
+                },
                 "storage_files": files_compact,
             }
             result_path = case_root / "CASE_RESULT.json"
