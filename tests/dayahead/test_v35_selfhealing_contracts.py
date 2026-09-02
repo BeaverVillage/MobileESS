@@ -39,6 +39,7 @@ from dayahead.v35.may_sources import materialize_may_sources
 from dayahead.v35.campaign import windows_path_to_wsl
 from dayahead.v35.execution import normalize_v35_fresh_storage
 from dayahead.v28r2.source_cache import day_root
+from dayahead.v34.actual_resource_recourse import solve_resource_only_recourse
 
 
 REPO = Path(__file__).resolve().parents[2]
@@ -366,3 +367,25 @@ def test_25_small_aidc_effect_inside_nonzero_solver_gap_remains_diagnostic():
     )
     assert result["objective_effect_classification"] == "UNRESOLVED_WITHIN_SOLVER_GAP"
     assert "AIDC_OBJECTIVE_EFFECT_UNRESOLVED_RELATIVE_TO_SOLVER_GAP" in result["red_flags"]
+
+
+def test_26_actual_recourse_clamps_only_da_solver_tolerance_residue():
+    da = np.zeros((1, 1, 96), dtype=float)
+    da[0, 0, 0] = -4.7e-8
+    result = solve_resource_only_recourse(
+        da,
+        np.zeros((96, 1), dtype=float),
+        np.ones((96, 1), dtype=float),
+        np.ones((1, 1), dtype=bool),
+    )
+    assert np.all(result.executed_nodeh >= 0.0)
+    assert result.executed_total_nodeh == 0.0
+
+    da[0, 0, 0] = -2e-6
+    with pytest.raises(ValueError, match="V34_RESOURCE_INPUT_NEGATIVE"):
+        solve_resource_only_recourse(
+            da,
+            np.zeros((96, 1), dtype=float),
+            np.ones((96, 1), dtype=float),
+            np.ones((1, 1), dtype=bool),
+        )

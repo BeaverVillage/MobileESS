@@ -15,6 +15,11 @@ from .contracts import ACTUAL_AIDC_FIREWALL_FIELDS
 
 
 TOL = 1e-9
+# Day-Ahead authorization is produced by the Gurobi model whose frozen
+# feasibility tolerance is 1e-6.  Values inside that tolerance are numerical
+# residue, not physically negative authorization.  Exogenous Actual arrivals
+# and rack capacity remain subject to the exact non-negative contract.
+DA_FEASIBILITY_TOL = 1e-6
 
 
 @dataclass(frozen=True)
@@ -91,8 +96,11 @@ def solve_resource_only_recourse(
         raise ValueError("V34_ACTUAL_RESOURCE_AXIS")
     if compatible.shape != (cohorts, racks):
         raise ValueError("V34_COMPATIBILITY_AXIS")
-    if np.any(da < 0) or np.any(arrivals < 0) or np.any(capacity < 0):
+    if np.any(da < -DA_FEASIBILITY_TOL) or np.any(arrivals < 0) or np.any(capacity < 0):
         raise ValueError("V34_RESOURCE_INPUT_NEGATIVE")
+    # Normalize only solver-tolerance residue at the DA/Actual interface.  The
+    # raw Day-Ahead artifact remains untouched as solver evidence.
+    da = np.maximum(da, 0.0)
     initial = np.zeros(cohorts) if initial_backlog_nodeh is None else np.asarray(initial_backlog_nodeh, dtype=float)
     if initial.shape != (cohorts,) or np.any(initial < 0):
         raise ValueError("V34_INITIAL_BACKLOG_AXIS_OR_SIGN")
