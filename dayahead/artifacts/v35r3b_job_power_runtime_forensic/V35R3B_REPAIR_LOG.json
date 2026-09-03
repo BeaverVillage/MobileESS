@@ -1,0 +1,28 @@
+{
+  "artifact_id": "V35R3B_REPAIR_LOG_V1",
+  "repairs": [
+    {
+      "attempt": 1,
+      "invalidated_stage": "local file/schema inventory only",
+      "repair": "Use lstat, inventory unresolved link/reparse entries without opening or following their targets.",
+      "scientific_rules_changed": false,
+      "signature": "WINERROR_1920_UNRESOLVED_NLR_DOCS_SYMLINK_DURING_INVENTORY"
+    },
+    {
+      "attempt": 1,
+      "invalidated_stage": "job identity join audit only",
+      "repair": "Keep strict duplicate-key rejection; audit duplicate source keys and count only unique exact keys as diagnostic matches.",
+      "scientific_rules_changed": false,
+      "signature": "DUPLICATE_AUTHORITY_JOB_KEY_IN_MOBILEESS_RUNTIME_SOURCE"
+    },
+    {
+      "attempt": 1,
+      "invalidated_stage": "isolation regression assertion only",
+      "repair": "Audit start/end HEAD and status separately; do not misattribute another worktree's completed commit to V35R3B writes.",
+      "scientific_rules_changed": false,
+      "signature": "ACTIVE_V35R3_EXTERNAL_PROCESS_STATUS_CHANGED_DURING_REGRESSION"
+    }
+  ],
+  "scientific_rules_changed": false,
+  "unique_failure_signatures": 3
+}

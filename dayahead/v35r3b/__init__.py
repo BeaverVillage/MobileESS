@@ -1,0 +1,15 @@
+"""V35R3B local-only job power/runtime authority forensic."""
+
+from .contracts import (
+    POWER_AUTHORITY_LEVEL,
+    PRIMARY_CLASSIFICATION,
+    PRODUCTION_RECOMMENDATION,
+    RUNTIME_AUTHORITY_LEVEL,
+)
+
+__all__ = [
+    "POWER_AUTHORITY_LEVEL",
+    "PRIMARY_CLASSIFICATION",
+    "PRODUCTION_RECOMMENDATION",
+    "RUNTIME_AUTHORITY_LEVEL",
+]

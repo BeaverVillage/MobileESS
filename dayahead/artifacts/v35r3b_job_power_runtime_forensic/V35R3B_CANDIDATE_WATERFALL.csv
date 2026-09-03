@@ -1,0 +1,13 @@
+stage,name,count,unit,note
+1,temporal-controlled jobs,339,jobs,14832 GPU-h
+2,jobs scheduled/active under baseline,339,jobs,all scheduled; 253 active at some point in Apr-01
+3,jobs overlapping W1/W3/W5,202,jobs,"standby=201, normal=1"
+4,jobs outside W5 available for exchange,137,jobs,standby=137
+5,same-tier raw pair universe,27537,pairs,201 W5 standby x 137 outside-W5 standby
+6,resource-compatible exchange pairs replayed by V35R3A,24,pairs,deterministic scheduler replay; occupancy <=624
+7,authority-validated power-heterogeneous exchange pairs,0,pairs,P2+ unavailable
+8,queue-feasible power-aware candidates,0,pairs,power gate not reached
+9,tier-service-safe power-aware candidates,0,pairs,H0-only pair replays service-safe=24
+10,candidates with lower predicted W5 power,0,pairs,prediction unavailable
+11,candidates with lower Planning rho,0,pairs,binding incomplete and no power-aware candidate
+12,accepted candidates,0,pairs,no HP/HPR run

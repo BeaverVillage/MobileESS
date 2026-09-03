@@ -1,0 +1,20 @@
+candidate_model,feature,known_at_submission_or_issue,available_in_current_Apr01_adapter,role,policy_read_count,authorized_for_replay,reason
+RADDiT_BASELINE_XGB,nodes_req,True,True,INPUT,0,True,Submission-side in source design.
+RADDiT_BASELINE_XGB,wallclock_req_seconds,True,True,INPUT,0,True,Submission-side in source design.
+RADDiT_BASELINE_XGB,processors_req,True,True,INPUT,0,True,Submission-side in source design.
+RADDiT_BASELINE_XGB,memory_req_raw,True,False,INPUT,0,False,Causal in principle but exact source-name/transform or field is absent from the frozen Apr-01 adapter.
+RADDiT_BASELINE_XGB,job_type,True,False,INPUT,0,False,Causal in principle but exact source-name/transform or field is absent from the frozen Apr-01 adapter.
+RADDiT_BASELINE_XGB,user,True,False,INPUT,0,False,Causal in principle but exact source-name/transform or field is absent from the frozen Apr-01 adapter.
+RADDiT_BASELINE_XGB,account,True,False,INPUT,0,False,Causal in principle but exact source-name/transform or field is absent from the frozen Apr-01 adapter.
+RADDiT_BASELINE_XGB,partition,True,True,INPUT,0,True,Submission-side in source design.
+RADDiT_BASELINE_XGB,modules_set,True,False,INPUT,0,False,Causal in principle but exact source-name/transform or field is absent from the frozen Apr-01 adapter.
+RADDiT_BASELINE_XGB,conda_envs_set,True,False,INPUT,0,False,Causal in principle but exact source-name/transform or field is absent from the frozen Apr-01 adapter.
+RADDiT_BASELINE_XGB,avg_power_per_node,False,False,LABEL_OR_FORBIDDEN,0,False,Realized/future field; training label only and forbidden for policy inference.
+RADDiT_BASELINE_XGB,wallclock_used_sec,False,False,LABEL_OR_FORBIDDEN,0,False,Realized/future field; training label only and forbidden for policy inference.
+RADDiT_BASELINE_XGB,future actual start,False,False,LABEL_OR_FORBIDDEN,0,False,Realized/future field; training label only and forbidden for policy inference.
+RADDiT_BASELINE_XGB,future actual end,False,False,LABEL_OR_FORBIDDEN,0,False,Realized/future field; training label only and forbidden for policy inference.
+RADDiT_SEMANTIC_SEARCH,job script embedding,True,False,INPUT,0,False,Full pre-submission script/embedding and exact current-job binding are absent; a script hash is not the 4096-d embedding.
+RADDiT_SEMANTIC_SEARCH,neighbor end_time < issue,True,False,TRAINING_FILTER,0,False,Causal design is documented but historic LFS payload/vector index is absent.
+RADDiT_SEMANTIC_SEARCH,avg_power_per_node,False,False,HISTORICAL_NEIGHBOR_LABEL,0,False,Allowed only for neighbors completed before issue; payload absent and never read.
+RADDiT_SEMANTIC_SEARCH,wallclock_used_sec,False,False,HISTORICAL_NEIGHBOR_LABEL,0,False,Allowed only for neighbors completed before issue; payload absent and never read.
+H0_REQUESTED_WALLTIME,requested walltime,True,True,INPUT,0,True,Authorized conservative submission-side duration.
