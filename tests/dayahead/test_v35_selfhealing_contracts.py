@@ -37,7 +37,7 @@ from dayahead.v35.storage import (
 from dayahead.v35.calibration import calibrate_vectorized, prospective_coverage, select_family
 from dayahead.v35.may_sources import materialize_may_sources
 from dayahead.v35.campaign import windows_path_to_wsl
-from dayahead.v35.execution import normalize_v35_fresh_storage
+from dayahead.v35.execution import _actual_mess, normalize_v35_fresh_storage
 from dayahead.v28r2.source_cache import day_root
 from dayahead.v34.actual_resource_recourse import solve_resource_only_recourse
 
@@ -389,3 +389,11 @@ def test_26_actual_recourse_clamps_only_da_solver_tolerance_residue():
             np.ones((96, 1), dtype=float),
             np.ones((1, 1), dtype=bool),
         )
+
+
+def test_27_actual_mess_soc_uses_frozen_1200_kwh_capacity():
+    summary, availability = _actual_mess(
+        "2025-04-01", None, None, None, None,
+    )
+    assert summary["terminal_SoC"] == pytest.approx([760.0 / 1200.0] * 4)
+    assert availability.shape == (96, 4) and availability.all()

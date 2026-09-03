@@ -22,6 +22,7 @@ from typing import Mapping, Sequence
 
 import numpy as np
 
+from dayahead.mess_physics import CAPACITY_KWH, E_INITIAL_KWH
 from dayahead.v28r2.electrical_cache_prepare import prepare_electrical_context
 from dayahead.v28r2.electrical_context import build_electrical_context
 from dayahead.v28r2.electrical_subproblem import is_dominated_mess_current_row, slot_coefficients
@@ -498,18 +499,21 @@ def _actual_mess(
             "DA_commitments": [], "actual_replays": [], "route_identity": "PASS",
             "actual_MESS_optimizer_calls": 0, "actual_MESS_reroute_calls": 0,
             "actual_route_change_count": 0,
-            "terminal_SoC": [0.76] * 4,
+            "terminal_SoC": [E_INITIAL_KWH / CAPACITY_KWH] * 4,
         }, availability
     commitments = trajectory.planned_move_commitments()
     ledger = CausalityLedger(bundle.issue_time)
     freeze = ledger.freeze(trajectory.canonical_sha256)
     authority = actual_sumo_authority(day, bundle.link_ids, may_admission=admission)
     replays = [
-        replay_committed_move(item, authority, graph, ledger, freeze, battery_capacity_kwh=1000.0)
+        replay_committed_move(
+            item, authority, graph, ledger, freeze,
+            battery_capacity_kwh=CAPACITY_KWH,
+        )
         for item in commitments
     ]
     ledger.assert_clean()
-    terminal = {mess: 760.0 for mess in MESS_IDS}
+    terminal = {mess: E_INITIAL_KWH for mess in MESS_IDS}
     for replay in replays:
         terminal[replay.mess_id] += replay.planned_energy_kwh - replay.actual_energy_kwh
         column = MESS_IDS.index(replay.mess_id)
@@ -521,7 +525,7 @@ def _actual_mess(
         "actual_MESS_optimizer_calls": ledger.actual_mess_optimizer_calls,
         "actual_MESS_reroute_calls": ledger.actual_reroute_calls,
         "actual_route_change_count": ledger.actual_route_change_count,
-        "terminal_SoC": [terminal[mess] / 1000.0 for mess in MESS_IDS],
+        "terminal_SoC": [terminal[mess] / CAPACITY_KWH for mess in MESS_IDS],
     }, availability
 
 
