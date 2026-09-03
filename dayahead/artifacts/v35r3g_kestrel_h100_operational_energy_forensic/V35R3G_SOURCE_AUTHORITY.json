@@ -1,0 +1,99 @@
+{
+  "ZIP_CRC": "NOT_RESCANNED_SHA256_PRIMARY",
+  "ZIP_structure": "PASS",
+  "archive_SHA256_actual": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+  "archive_SHA256_expected": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+  "archive_bytes": 731139558,
+  "archive_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+  "authority_manifest": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR_scheduler_authority\\99_manifest\\kestrel_integrity.txt",
+  "classification": "PASS_CANONICAL_DATASET302_SOURCE",
+  "compressed_parquet_bytes": 731124510,
+  "dataset_doi": "10.7799/3023270",
+  "dataset_id": 302,
+  "documentation_files": {
+    "dataset302_datacard": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR_scheduler_authority\\01_Kestrel_job_trace\\datacard.md",
+      "relied_on": "parent-job rows; fields; node-level monitoring; sharing semantics",
+      "sha256": "0139b75b80cd3029e0af54e22fc0dbad3080e92a8a7a602f1bd62cd7a36f62e9"
+    },
+    "hpc_oda_descriptor": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR_scheduler_authority\\07_hpc-oda-commons\\src\\hpc_oda_commons\\datasets\\descriptors\\job-runtime\\nlr_kestrel.yml",
+      "relied_on": "frozen Dataset 302 identity and submission-feature mapping",
+      "sha256": "9e682f3e60e7b1ddc81e48be6285c5e33bf9a591eef6fbcee67272a58a1de0cc"
+    },
+    "local_NLR_H100_documentation": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR_scheduler_authority\\04_NLR_HPC_docs_repo\\h100buildrun\\about.md",
+      "relied_on": "four H100 GPUs per normal gpu-h100 node",
+      "sha256": "5b6f3ed6aae3ec90777c0df025efae17d18f5ad4a3014686f9e8ef303c8f67a3"
+    },
+    "local_Slurm_sacct_snapshot": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR_scheduler_authority\\06_official_web_docs\\Slurm_sacct.html",
+      "relied_on": "ConsumedEnergyRaw units and exclusive-allocation warning",
+      "sha256": "13b0880f2c242e993ecb55fe797ddc0db7f380aa0a030b361f655fa4cde9206f"
+    }
+  },
+  "external_documentation": [
+    {
+      "access_date": "2026-09-03",
+      "relied_on": "dataset identity and DOI",
+      "title": "NLR Data Catalog Dataset 302",
+      "url": "https://data.nlr.gov/submissions/302"
+    },
+    {
+      "access_date": "2026-09-03",
+      "relied_on": "ConsumedEnergyRaw is joules and only exclusive allocation reflects job energy",
+      "title": "Slurm Workload Manager - sacct",
+      "url": "https://slurm.schedmd.com/sacct.html"
+    },
+    {
+      "access_date": "2026-09-03",
+      "relied_on": "energy boundary depends on the configured AcctGatherEnergyType plugin",
+      "title": "Slurm Workload Manager - slurm.conf",
+      "url": "https://slurm.schedmd.com/slurm.conf.html"
+    },
+    {
+      "access_date": "2026-09-03",
+      "relied_on": "Kestrel GPU nodes have four H100 SXM GPUs and may request 1, 2, or 4 GPUs",
+      "title": "NREL HPC FY25 Allocation Cycle",
+      "url": "https://www.nrel.gov/docs/gen/fy24/90033.pdf"
+    }
+  ],
+  "parameter_contract": {
+    "H100_identity": "comma-delimited partition token starts with gpu-h100",
+    "full_node_shape": "nodes_req=nodes_used=gpu_nodes_occupied>0 and gpus_requested=4*nodes_used",
+    "positive_energy": "finite ConsumedEnergyRaw joules > 0",
+    "preissue_cutoff": "state_simple=COMPLETED and end_time<=2025-03-31T08:00:00Z",
+    "recency_windows_days": [
+      30,
+      60,
+      120,
+      180,
+      365
+    ],
+    "sharing": "positive shared_job_count or nonempty sharing lists => shared; null count and empty lists => realized no-co-residency"
+  },
+  "parquet_members": 29,
+  "primary_source_is_transformed_copy": false,
+  "redownloads": 0,
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+  "source_code_commit": "3390c63b653c3e352c18a8d7c84dd918a27049c2",
+  "source_mutations": 0,
+  "source_relative_paths": [
+    "esif.hpc.kestrel.job-anon/year=YYYY/month=M/kestrel_jobs_YYYYMM_0.parquet"
+  ],
+  "timezone_assumption": "source offsets normalized to UTC; frozen issue is 2025-03-31T18:00:00+10:00 = 2025-03-31T08:00:00+00:00",
+  "uncompressed_parquet_bytes": 913874789,
+  "units": {
+    "energy": "J and derived Wh",
+    "power": "W",
+    "runtime": "s"
+  }
+}

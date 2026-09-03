@@ -1,0 +1,53 @@
+{
+  "array_element_rows": 772976,
+  "array_parent_job_ids": 14530,
+  "classification": "ONE_PARENT_JOB_ROW_PER_ID_ARRAY_ELEMENTS_SEPARATE_NO_STEPS",
+  "dataset_doi": "10.7799/3023270",
+  "dataset_id": 302,
+  "duplicate_id_extra_rows": 0,
+  "duplicate_job_id_count": 11898,
+  "duplicate_job_id_extra_rows": 759375,
+  "energy_interpretation": "Repeated job_id values are distinct array elements identified by id/array_pos; their energy must not be deduplicated or summed as one allocation.",
+  "job_id_array_pos_duplicate_extra_rows": 0,
+  "job_id_cross_member_overlap": 0,
+  "nonnumeric_id_count": 0,
+  "parameter_contract": {
+    "H100_identity": "comma-delimited partition token starts with gpu-h100",
+    "full_node_shape": "nodes_req=nodes_used=gpu_nodes_occupied>0 and gpus_requested=4*nodes_used",
+    "positive_energy": "finite ConsumedEnergyRaw joules > 0",
+    "preissue_cutoff": "state_simple=COMPLETED and end_time<=2025-03-31T08:00:00Z",
+    "recency_windows_days": [
+      30,
+      60,
+      120,
+      180,
+      365
+    ],
+    "sharing": "positive shared_job_count or nonempty sharing lists => shared; null count and empty lists => realized no-co-residency"
+  },
+  "repeated_array_parent_groups_with_equal_energy_values": 1274,
+  "repeated_groups_with_complete_unique_array_positions": 10969,
+  "rows": 10559977,
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+  "source_code_commit": "3390c63b653c3e352c18a8d7c84dd918a27049c2",
+  "source_relative_paths": [
+    "esif.hpc.kestrel.job-anon/year=YYYY/month=M/kestrel_jobs_YYYYMM_0.parquet"
+  ],
+  "step_suffix_rows": 0,
+  "timezone_assumption": "source offsets normalized to UTC; frozen issue is 2025-03-31T18:00:00+10:00 = 2025-03-31T08:00:00+00:00",
+  "unique_id_count": 10559977,
+  "unique_job_id_count": 9800602,
+  "units": {
+    "energy": "J and derived Wh",
+    "power": "W",
+    "runtime": "s"
+  }
+}

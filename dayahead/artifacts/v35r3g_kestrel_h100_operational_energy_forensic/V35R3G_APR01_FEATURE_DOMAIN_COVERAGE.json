@@ -1,0 +1,102 @@
+{
+  "classification": "NO_TRAINING_LABEL_DOMAIN_NO_POSITIVE_H100_ENERGY",
+  "cohorts": {
+    "Apr01_running": {
+      "coverage_fraction": 0.0,
+      "covered_rows": 0,
+      "rows": 243,
+      "status": "NOT_COVERED_EMPTY_AUTHORIZED_TRAINING_DOMAIN"
+    },
+    "Apr01_temporal_pending": {
+      "coverage_fraction": 0.0,
+      "covered_rows": 0,
+      "rows": 339,
+      "status": "NOT_COVERED_EMPTY_AUTHORIZED_TRAINING_DOMAIN"
+    },
+    "PARTIAL_shared_temporal": {
+      "coverage_fraction": 0.0,
+      "covered_rows": 0,
+      "rows": 336,
+      "status": "NOT_COVERED_EMPTY_AUTHORIZED_TRAINING_DOMAIN"
+    },
+    "strict_current_F0_full_node": {
+      "coverage_fraction": 0.0,
+      "covered_rows": 0,
+      "rows": 3,
+      "status": "NOT_COVERED_EMPTY_AUTHORIZED_TRAINING_DOMAIN"
+    }
+  },
+  "column_projection_audit": {
+    "Apr01_consumed_energy_columns_read": [],
+    "Apr01_future_end_columns_read": [],
+    "Apr01_realized_runtime_columns_read": [],
+    "pending_audit_columns_read": [
+      "job_id",
+      "qos_raw",
+      "partition_raw",
+      "requested_GPUs",
+      "requested_nodes",
+      "requested_walltime_seconds",
+      "submit_time",
+      "state_at_cutoff",
+      "partial_shared_request",
+      "full_node_request_shape",
+      "workload_class"
+    ],
+    "runtime_point_columns_read": [
+      "job_id",
+      "state_at_issue",
+      "workload_class",
+      "requested_GPUs",
+      "requested_nodes",
+      "requested_walltime_seconds",
+      "prediction_issue_time"
+    ]
+  },
+  "coverage_basis": "authorized positive-energy preissue full-node H100 label domain",
+  "dataset_doi": "10.7799/3023270",
+  "dataset_id": 302,
+  "parameter_contract": {
+    "H100_identity": "comma-delimited partition token starts with gpu-h100",
+    "full_node_shape": "nodes_req=nodes_used=gpu_nodes_occupied>0 and gpus_requested=4*nodes_used",
+    "positive_energy": "finite ConsumedEnergyRaw joules > 0",
+    "preissue_cutoff": "state_simple=COMPLETED and end_time<=2025-03-31T08:00:00Z",
+    "recency_windows_days": [
+      30,
+      60,
+      120,
+      180,
+      365
+    ],
+    "sharing": "positive shared_job_count or nonempty sharing lists => shared; null count and empty lists => realized no-co-residency"
+  },
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+  "source_artifacts": [
+    {
+      "path": "dayahead\\artifacts\\v35r3d_kestrel_runtime_authority_closure\\V35R3D_APR01_RUNTIME_POINT.parquet",
+      "sha256": "e58539f8e47b80df2551f9a5c3c2f11c2f5511ba03934a5780a5a38244c4db27"
+    },
+    {
+      "path": "dayahead\\artifacts\\v35r3a_kestrel_scheduler_temporal\\V35R3A_PENDING_FIELD_AUDIT.parquet",
+      "sha256": "e03343625cc0b8d28b3a831fe8e5f02c6b5b716740326e0c39fc4e730c8c0711"
+    }
+  ],
+  "source_code_commit": "3390c63b653c3e352c18a8d7c84dd918a27049c2",
+  "source_relative_paths": [
+    "esif.hpc.kestrel.job-anon/year=YYYY/month=M/kestrel_jobs_YYYYMM_0.parquet"
+  ],
+  "timezone_assumption": "source offsets normalized to UTC; frozen issue is 2025-03-31T18:00:00+10:00 = 2025-03-31T08:00:00+00:00",
+  "units": {
+    "energy": "J and derived Wh",
+    "power": "W",
+    "runtime": "s"
+  }
+}

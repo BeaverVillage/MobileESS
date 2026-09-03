@@ -1,0 +1,192 @@
+{
+  "dataset_doi": "10.7799/3023270",
+  "dataset_id": 302,
+  "energy_power_columns_discovered": [
+    "consumed_energy_joules",
+    "consumed_energy_raw_joules",
+    "consumed_energy_raw_watt_hours",
+    "cpu_energy_tdp_estimated_max_watt_hours",
+    "cpu_energy_tdp_estimated_used_watt_hours"
+  ],
+  "fields": {
+    "consumed_energy_joules": {
+      "derived_or_direct": "DIRECT_FORMATTED_SLURM",
+      "maximum": 69020000000.0,
+      "minimum": 0.0,
+      "negative_count": 0,
+      "non_null_count": 9070047,
+      "nonfinite_count": 0,
+      "normalized_column": "consumed_energy_joules",
+      "physical_semantics": "formatted ConsumedEnergy",
+      "positive_count": 7064950,
+      "source_column": "consumed_energy_joules",
+      "source_non_null_count": 10501878,
+      "source_of_semantics": "Dataset 302 datacard lines 186-190",
+      "source_types": [
+        "string"
+      ],
+      "unit": "J",
+      "unparseable_non_null_count": 1431831,
+      "zero_count": 2005097
+    },
+    "consumed_energy_raw_joules": {
+      "derived_or_direct": "DIRECT_SLURM_FIELD",
+      "maximum": 69016497275.0,
+      "minimum": 0.0,
+      "negative_count": 0,
+      "non_null_count": 9070047,
+      "nonfinite_count": 0,
+      "normalized_column": "consumed_energy_raw_joules",
+      "physical_semantics": "ConsumedEnergyRaw",
+      "positive_count": 7064950,
+      "source_column": "consumed_energy_raw_joules",
+      "source_non_null_count": 9070047,
+      "source_of_semantics": "Dataset 302 datacard lines 186-190",
+      "source_types": [
+        "double"
+      ],
+      "unit": "J",
+      "zero_count": 2005097
+    },
+    "consumed_energy_raw_watt_hours": {
+      "derived_or_direct": "DERIVED_UNIT_CONVERSION",
+      "maximum": 19171249.243055556,
+      "minimum": 0.0,
+      "negative_count": 0,
+      "non_null_count": 9070047,
+      "nonfinite_count": 0,
+      "normalized_column": "consumed_energy_raw_watt_hours",
+      "physical_semantics": "ConsumedEnergyRaw / 3600",
+      "positive_count": 7064950,
+      "source_column": "consumed_energy_raw_watt_hours",
+      "source_non_null_count": 9070047,
+      "source_of_semantics": "Dataset 302 datacard lines 186-190",
+      "source_types": [
+        "double"
+      ],
+      "unit": "Wh",
+      "zero_count": 2005097
+    },
+    "cpu_energy_tdp_estimated_max_watt_hours": {
+      "derived_or_direct": "DERIVED",
+      "maximum": 18594102.722222224,
+      "minimum": 0.0,
+      "negative_count": 0,
+      "non_null_count": 10559977,
+      "nonfinite_count": 0,
+      "normalized_column": "cpu_energy_tdp_estimated_max_watt_hours",
+      "physical_semantics": "CPU TDP estimate from TotalCPU",
+      "positive_count": 9245784,
+      "source_column": "cpu_energy_tdp_estimated_max_watt_hours",
+      "source_non_null_count": 10559977,
+      "source_of_semantics": "Dataset 302 datacard lines 186-190",
+      "source_types": [
+        "double"
+      ],
+      "unit": "Wh",
+      "zero_count": 1314193
+    },
+    "cpu_energy_tdp_estimated_used_watt_hours": {
+      "derived_or_direct": "DERIVED",
+      "maximum": 18413368.043762222,
+      "minimum": 0.0,
+      "negative_count": 0,
+      "non_null_count": 10022034,
+      "nonfinite_count": 0,
+      "normalized_column": "cpu_energy_tdp_estimated_used_watt_hours",
+      "physical_semantics": "CPU TDP estimate from TotalCPU/CPUTime",
+      "positive_count": 9031755,
+      "source_column": "cpu_energy_tdp_estimated_used_watt_hours",
+      "source_non_null_count": 10022034,
+      "source_of_semantics": "Dataset 302 datacard lines 186-190",
+      "source_types": [
+        "double"
+      ],
+      "unit": "Wh",
+      "zero_count": 990279
+    }
+  },
+  "parameter_contract": {
+    "H100_identity": "comma-delimited partition token starts with gpu-h100",
+    "full_node_shape": "nodes_req=nodes_used=gpu_nodes_occupied>0 and gpus_requested=4*nodes_used",
+    "positive_energy": "finite ConsumedEnergyRaw joules > 0",
+    "preissue_cutoff": "state_simple=COMPLETED and end_time<=2025-03-31T08:00:00Z",
+    "recency_windows_days": [
+      30,
+      60,
+      120,
+      180,
+      365
+    ],
+    "sharing": "positive shared_job_count or nonempty sharing lists => shared; null count and empty lists => realized no-co-residency"
+  },
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+  "source_code_commit": "3390c63b653c3e352c18a8d7c84dd918a27049c2",
+  "source_columns_discovered": [
+    "account_hash",
+    "array_pos",
+    "array_range",
+    "avg_mem_eff",
+    "consumed_energy_joules",
+    "consumed_energy_raw_joules",
+    "consumed_energy_raw_watt_hours",
+    "cpu_eff",
+    "cpu_energy_tdp_estimated_max_watt_hours",
+    "cpu_energy_tdp_estimated_used_watt_hours",
+    "cpu_used",
+    "day",
+    "day_of_week",
+    "end_time",
+    "gpu_nodes_occupied",
+    "gpus_requested",
+    "hour",
+    "id",
+    "job_id",
+    "job_type_hash",
+    "jobs_shared",
+    "max_mem_eff",
+    "memory_req",
+    "min_mem_eff",
+    "minute",
+    "name_hash",
+    "nodelist",
+    "nodes_req",
+    "nodes_shared",
+    "nodes_used",
+    "partition",
+    "processors_req",
+    "processors_used",
+    "python_job",
+    "qos",
+    "queue_wait",
+    "reframe_job",
+    "shared_job_count",
+    "start_time",
+    "state",
+    "state_simple",
+    "submit_line_hash",
+    "submit_script_hash",
+    "submit_time",
+    "user_hash",
+    "wallclock_req",
+    "wallclock_used",
+    "work_dir_hash"
+  ],
+  "source_relative_paths": [
+    "esif.hpc.kestrel.job-anon/year=YYYY/month=M/kestrel_jobs_YYYYMM_0.parquet"
+  ],
+  "timezone_assumption": "source offsets normalized to UTC; frozen issue is 2025-03-31T18:00:00+10:00 = 2025-03-31T08:00:00+00:00",
+  "units": {
+    "energy": "J and derived Wh",
+    "power": "W",
+    "runtime": "s"
+  }
+}
