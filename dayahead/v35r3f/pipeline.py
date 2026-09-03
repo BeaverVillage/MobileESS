@@ -44,6 +44,7 @@ from .audit import (
     read_power_log,
     relative_error,
     sha256_file,
+    tree_file_summary,
     workload_identity,
     write_csv,
     write_json,
@@ -158,12 +159,12 @@ def ensure_source() -> dict[str, Any]:
     marker_text = marker.read_text(encoding="utf-8")
     if f"archive_sha256={ARCHIVE_SHA256}" not in marker_text or "version=2" not in marker_text:
         raise RuntimeError("Dataset 312 extraction marker mismatch")
-    files = [path for path in EXTRACTED_ROOT.rglob("*") if path.is_file()]
+    extracted_file_count, extracted_file_bytes = tree_file_summary(EXTRACTED_ROOT)
     return {
         "archive_sha256": actual_sha,
         "archive_bytes": ARCHIVE.stat().st_size,
-        "extracted_file_count": len(files),
-        "extracted_file_bytes": int(sum(file_size(path) for path in files)),
+        "extracted_file_count": extracted_file_count,
+        "extracted_file_bytes": extracted_file_bytes,
         "extraction_marker": str(marker),
         "extraction_marker_content": marker_text.strip().splitlines(),
         "manifest_root": str(MANIFEST_ROOT),
@@ -524,8 +525,8 @@ def process_training(
         gpu = align_and_sum(gpu_series, 0.2)
         package = align_and_sum(package_series, 0.2)
         core = align_and_sum(core_series, 0.2)
-        primary = align_and_sum([gpu, package], 0.2)
-        provided = align_and_sum([gpu, package, core], 0.2)
+        primary = align_and_sum([*gpu_series, *package_series], 0.2)
+        provided = align_and_sum([*gpu_series, *package_series, *core_series], 0.2)
         workload = "FINE_TUNING_LORA" if model == "LLAMA2_70B" else "TRAINING_STABLE_DIFFUSION"
         experiment_id = f"training:{slurm}"
         for boundary, series in (
@@ -617,11 +618,14 @@ def process_inference(
         for index, row in metadata.iterrows():
             start = pd.Timestamp(row["start_time"])
             end = pd.Timestamp(row["end_time"])
-            gpu = align_and_sum([_slice(gpu_all, start, end)], 0.1)
-            package = align_and_sum([_slice(package_all, start, end)], 0.1)
-            core = align_and_sum([_slice(core_all, start, end)], 0.1)
-            primary = align_and_sum([gpu, package], 0.1)
-            provided = align_and_sum([gpu, package, core], 0.1)
+            gpu_native = _slice(gpu_all, start, end)
+            package_native = _slice(package_all, start, end)
+            core_native = _slice(core_all, start, end)
+            gpu = align_and_sum([gpu_native], 0.1)
+            package = align_and_sum([package_native], 0.1)
+            core = align_and_sum([core_native], 0.1)
+            primary = align_and_sum([gpu_native, package_native], 0.1)
+            provided = align_and_sum([gpu_native, package_native, core_native], 0.1)
             trim_failed = False
             if use_trim:
                 trimmed, trim_failed = _trim_finite(provided)
@@ -1477,8 +1481,14 @@ def run(run_tests: bool = True, verify_zip_crc: bool = True) -> None:
                     "repair": "NORMALIZE_CATEGORICAL_METADATA_COLUMNS_TO_EXPLICIT_STRINGS",
                     "science_neutral": True,
                 },
+                {
+                    "failure_signature": "MULTISTAGE_ALIGNMENT_ENDPOINT_LOSS",
+                    "attempt": 1,
+                    "repair": "ALIGN_ALL_COMPATIBLE_RAW_CHANNELS_ONCE_ON_COMMON_OVERLAP",
+                    "science_neutral": True,
+                },
             ],
-            "unique_failure_signatures": 3,
+            "unique_failure_signatures": 4,
             "science_semantics_changed": False,
         },
     )

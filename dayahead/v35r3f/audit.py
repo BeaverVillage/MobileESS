@@ -78,6 +78,18 @@ def file_size(path: Path) -> int:
     return int(os.stat(filesystem_path(path)).st_size)
 
 
+def tree_file_summary(root: Path) -> tuple[int, int]:
+    """Count files/bytes without losing Windows paths longer than 260 chars."""
+
+    count = 0
+    total_bytes = 0
+    for directory, _subdirs, filenames in os.walk(filesystem_path(root)):
+        for filename in filenames:
+            count += 1
+            total_bytes += int(os.stat(os.path.join(directory, filename)).st_size)
+    return count, total_bytes
+
+
 def write_json(path: Path, value: Mapping[str, Any] | Sequence[Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
