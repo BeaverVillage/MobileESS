@@ -12,7 +12,7 @@ import statistics
 import subprocess
 import sys
 import time
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
 import psutil
 
@@ -111,6 +111,33 @@ def _distribution(values: Iterable[float]) -> dict[str, float | int | None]:
     }
 
 
+def _complete_terminal_result(repo: Path, day: str, status: Mapping[str, Any]) -> bool:
+    if status.get("status") not in {"PASS", "FAIL"}:
+        return False
+    path = repo / DATE_RESULT_ROOT / f"{day}.json"
+    if not path.is_file():
+        return False
+    result = read_json(path)
+    return result.get("status") in {"PASS", "FAIL"} and set(result.get("cases", {})) == {
+        "B0", "B1", "B2", "B3",
+    }
+
+
+def _date_wallclock_seconds(repo: Path, day: str, fallback: float) -> float:
+    starts: list[datetime] = []
+    ends: list[datetime] = []
+    for case in ("B0", "B1", "B2", "B3"):
+        path = repo / "frozen_artifacts/v36_final_schema" / "MAY_2025_LOCKED_FINAL" / day / case / "inputs/RUN_PROVENANCE.json"
+        if not path.is_file():
+            continue
+        provenance = read_json(path)
+        starts.append(datetime.fromisoformat(str(provenance["run_start_timestamp"])))
+        ends.append(datetime.fromisoformat(str(provenance["run_end_timestamp"])))
+    if len(starts) == len(ends) == 4:
+        return max(0.0, (max(ends) - min(starts)).total_seconds())
+    return float(fallback)
+
+
 def _meeting_row(day: str, result: dict[str, Any]) -> dict[str, Any]:
     if "cases" not in result:
         return {field: day if field == "date" else result.get("status", "FAIL") if field == "PASS_FAIL" else "" for field in MEETING_FIELDS}
@@ -139,6 +166,16 @@ def finalize_campaign(repo: Path, started: float, peak_active: int) -> dict[str,
         day: read_json(repo / DATE_RESULT_ROOT / f"{day}.json")
         for day in EXPECTED_DATES if (repo / DATE_RESULT_ROOT / f"{day}.json").is_file()
     }
+    for day, result in results.items():
+        if "cases" not in result:
+            continue
+        corrected = dict(result)
+        corrected["wallclock_seconds"] = _date_wallclock_seconds(
+            repo, day, float(result.get("wallclock_seconds", 0.0)),
+        )
+        corrected["wallclock_basis"] = "B0_START_TO_B3_END_FROM_PERSISTED_PROVENANCE"
+        results[day] = corrected
+        atomic_json(repo / DATE_RESULT_ROOT / f"{day}.json", corrected)
     pass_dates = [day for day in EXPECTED_DATES if results.get(day, {}).get("status") == "PASS"]
     fail_dates = [day for day in EXPECTED_DATES if results.get(day, {}).get("status") == "FAIL"]
     missing_dates = [row["date"] for row in manifest["missing_dates"]]
@@ -282,7 +319,7 @@ def run_campaign(repo: Path) -> dict[str, Any]:
         for day in manifest["runnable_dates"]:
             status_path = repo / STATUS_ROOT / f"{day}.json"
             prior = read_json(status_path) if status_path.is_file() else {}
-            if prior.get("status") != "PASS":
+            if not _complete_terminal_result(repo, day, prior):
                 write_status(status_path, day, "PENDING", 0, "SOURCE_PREPARATION")
         print(f"V37 source materialization: {len(manifest['runnable_dates'])} dates", flush=True)
         source_report = materialize_sources(repo, list(manifest["runnable_dates"]))
@@ -308,7 +345,7 @@ def run_campaign(repo: Path) -> dict[str, Any]:
         for day in manifest["runnable_dates"]:
             status_path = repo / STATUS_ROOT / f"{day}.json"
             status = read_json(status_path) if status_path.is_file() else {}
-            if status.get("status") == "PASS" and (repo / DATE_RESULT_ROOT / f"{day}.json").is_file():
+            if _complete_terminal_result(repo, day, status):
                 continue
             pending.append(day)
             write_status(status_path, day, "PENDING", int(status.get("completed_units", 0)), "QUEUED")

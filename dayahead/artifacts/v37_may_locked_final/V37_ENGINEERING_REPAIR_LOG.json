@@ -72,6 +72,13 @@
       "repair": "Aggregate every date that has complete case outputs, preserve FAIL in PASS_FAIL, explicitly list implementation-only failures, and add total and per-vehicle multi-relocation reporting.",
       "failed_dates_dropped_from_statistics": "NO",
       "science_changed": "NO"
+    },
+    {
+      "classification": "ENGINEERING_TERMINAL_FAIL_RESUME_AND_WALLCLOCK",
+      "effect": "A completed physical-gate FAIL was terminal but a supervisor restart briefly restored its four cases and overwrote the date-process elapsed field with the restore duration.",
+      "repair": "Skip PASS or FAIL dates only when all four case outputs exist, retry implementation-only failures, and reconstruct per-date wallclock from persisted B0 start through B3 end provenance.",
+      "case_recomputation_required": "NO",
+      "science_changed": "NO"
     }
   ]
 }

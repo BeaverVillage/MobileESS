@@ -544,8 +544,11 @@ def run_day(repo: Path, day: str) -> dict[str, Any]:
     started = time.perf_counter()
     status_path = _status_path(repo, day)
     previous = read_json(status_path) if status_path.is_file() else {}
-    if previous.get("status") == "PASS" and (repo / DATE_RESULT_ROOT / f"{day}.json").is_file():
-        return read_json(repo / DATE_RESULT_ROOT / f"{day}.json")
+    result_path = repo / DATE_RESULT_ROOT / f"{day}.json"
+    if previous.get("status") in {"PASS", "FAIL"} and result_path.is_file():
+        existing = read_json(result_path)
+        if set(existing.get("cases", {})) == set(OFFICIAL_CASES):
+            return existing
     write_status(status_path, day, "RUNNING", 0, "B0_PLANNING", extra={"workers": MAX_WORKERS_PER_DATE})
     try:
         aidc = {
@@ -591,7 +594,7 @@ def run_day(repo: Path, day: str) -> dict[str, Any]:
             "error": f"{type(error).__name__}:{error}", "traceback": traceback.format_exc(),
             "wallclock_seconds": time.perf_counter() - started, "firewall": FIREWALL,
         }
-        atomic_json(repo / DATE_RESULT_ROOT / f"{day}.json", failure)
+        atomic_json(result_path, failure)
         current = read_json(status_path) if status_path.is_file() else {"completed_units": 0}
         write_status(status_path, day, "FAIL", int(current.get("completed_units", 0)), None,
                      error=failure["error"], extra={"result_path": str((repo / DATE_RESULT_ROOT / f"{day}.json").resolve())})

@@ -10,7 +10,7 @@ from unittest.mock import patch
 import pandas as pd
 
 from dayahead.v37.contracts import DAY_TOTAL_UNITS, EXPECTED_DATES, MAX_PARALLEL_DATES, MAX_WORKERS_PER_DATE
-from dayahead.v37.campaign import MEETING_FIELDS, _meeting_row
+from dayahead.v37.campaign import MEETING_FIELDS, _date_wallclock_seconds, _meeting_row
 from dayahead.v37.manifest import build_date_manifest, build_may01_amendment
 from dayahead.v37.runner import (
     _beam_fallback_allowed,
@@ -150,6 +150,23 @@ def test_physical_fail_with_cases_remains_in_meeting_statistics() -> None:
     assert row["B3_Fresh_rho"] == 3.2
     assert row["B2_relocations"] == 2
     assert row["wallclock_min"] == 2.0
+
+
+def test_date_wallclock_restored_from_case_provenance(tmp_path: Path) -> None:
+    root = tmp_path / "frozen_artifacts/v36_final_schema/MAY_2025_LOCKED_FINAL/2025-05-04"
+    stamps = {
+        "B0": ("2026-09-03T16:54:54+00:00", "2026-09-03T16:56:07+00:00"),
+        "B1": ("2026-09-03T16:56:08+00:00", "2026-09-03T16:57:05+00:00"),
+        "B2": ("2026-09-03T18:00:00+00:00", "2026-09-03T18:05:00+00:00"),
+        "B3": ("2026-09-03T19:31:09+00:00", "2026-09-03T19:33:41+00:00"),
+    }
+    for case, (started, ended) in stamps.items():
+        path = root / case / "inputs/RUN_PROVENANCE.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps({
+            "run_start_timestamp": started, "run_end_timestamp": ended,
+        }), encoding="utf-8")
+    assert _date_wallclock_seconds(tmp_path, "2025-05-04", 1.0) == 9527.0
 
 
 def test_frozen_k_fallback_scope_and_sequence(tmp_path: Path) -> None:
