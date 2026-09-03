@@ -70,6 +70,9 @@ class IntegratedMessResult:
     work_limit_tiers_attempted: tuple[float, ...] = ()
     escalation_reason: str | None = None
     bounded_compute_classification: str = "NOT_APPLICABLE"
+    preferred_restricted_objective: float = math.inf
+    selected_restricted_start: str = "STAY"
+    preferred_mip_start_loaded: bool = False
 
 
 def _configured_model(name: str) -> gp.Model:
@@ -203,6 +206,211 @@ def _bounded_compute_classification(raw_status: str, objective: float, best_boun
     return "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT"
 
 
+def _apply_preferred_restricted_start(
+    model: gp.Model,
+    block: object,
+    mess_id: str,
+    payload: Mapping[str, object],
+    *,
+    aidc: np.ndarray | None = None,
+    coefficients: Sequence[SlotCoefficients] | None = None,
+    fixed_p: Mapping[tuple[str, int], float] | None = None,
+    fixed_q: Mapping[tuple[str, int], float] | None = None,
+) -> None:
+    """Translate one complete fixed-route opportunity solution to a MIPStart."""
+
+    candidate = payload["candidate"]
+    get = lambda name: getattr(candidate, name) if hasattr(candidate, name) else candidate[name]
+    if str(get("mess_id")) != mess_id:
+        raise ValueError("V35R3_MIPSTART_MESS_ID")
+    origin = str(get("origin"))
+    destination = str(get("destination"))
+    is_stay = bool(get("is_stay"))
+    departure = None if is_stay else int(get("departure_slot"))
+    ready = None if is_stay else int(get("connection_ready_slot"))
+    p_dis = np.asarray(payload["p_discharge_kw"], dtype=float)
+    p_ch = np.asarray(payload["p_charge_kw"], dtype=float)
+    q = np.asarray(payload["q_kvar"], dtype=float)
+    energy = np.asarray(payload["energy_kwh"], dtype=float)
+    if p_dis.shape != (96,) or p_ch.shape != (96,) or q.shape != (96,) or energy.shape != (97,):
+        raise ValueError("V35R3_MIPSTART_ARRAY_AXIS")
+    if np.any(p_dis < -1e-7) or np.any(p_ch < -1e-7) or np.any((p_dis > 1e-7) & (p_ch > 1e-7)):
+        raise ValueError("V35R3_MIPSTART_DIRECTION")
+    if not is_stay:
+        key = (mess_id, departure, origin, destination)
+        if key not in block.move or departure is None or ready is None:
+            raise ValueError("V35R3_MIPSTART_ROUTE_NOT_IN_FULL_MODEL")
+    for variable in model.getVars():
+        variable.Start = GRB.UNDEFINED
+    for (key_mess, boundary, service), variable in block.occupancy.items():
+        active = False
+        if key_mess == mess_id:
+            if is_stay:
+                active = service == origin
+            else:
+                active = (boundary <= departure and service == origin) or (boundary >= ready and service == destination)
+        variable.Start = float(active)
+    for (key_mess, slot, service), variable in block.stay.items():
+        active = False
+        if key_mess == mess_id:
+            if is_stay:
+                active = service == origin
+            else:
+                active = (slot < departure and service == origin) or (slot >= ready and service == destination)
+        variable.Start = float(active)
+    for key, variable in block.move.items():
+        variable.Start = float(not is_stay and key == (mess_id, departure, origin, destination))
+    services = block.inputs.route_table.service_ids
+    for slot in range(96):
+        active_service = origin if is_stay else (
+            origin if slot < departure else (destination if slot >= ready else None)
+        )
+        block.discharge_mode[mess_id, slot].Start = float(p_dis[slot] > 1e-7)
+        for service in services:
+            active = service == active_service
+            block.p_discharge[mess_id, slot, service].Start = float(p_dis[slot] if active else 0.0)
+            block.p_charge[mess_id, slot, service].Start = float(p_ch[slot] if active else 0.0)
+            block.q[mess_id, slot, service].Start = float(q[slot] if active else 0.0)
+    for boundary in range(97):
+        block.energy[mess_id, boundary].Start = float(energy[boundary])
+    if aidc is not None and coefficients is not None:
+        fixed_p = {} if fixed_p is None else fixed_p
+        fixed_q = {} if fixed_q is None else fixed_q
+        services = tuple(name[10:-1] for name in coefficients[0].control_names[12:36])
+        by_name = {variable.VarName: variable for variable in model.getVars()}
+        rho = 0.0
+        for slot, coefficient in enumerate(coefficients):
+            active_service = origin if is_stay else (
+                origin if slot < departure else (destination if slot >= ready else None)
+            )
+            p_values = [float(fixed_p.get((service, slot), 0.0)) for service in services]
+            q_values = [float(fixed_q.get((service, slot), 0.0)) for service in services]
+            if active_service is not None:
+                service_index = services.index(active_service)
+                p_values[service_index] += float(p_dis[slot] - p_ch[slot])
+                q_values[service_index] += float(q[slot])
+            controls = np.asarray(list(aidc[slot]) + p_values + q_values, dtype=float)
+            squared = coefficient.voltage_constant + coefficient.voltage_matrix.T @ controls
+            affine_current = coefficient.current_constant + coefficient.current_matrix.T @ controls
+            flow_p = coefficient.flow_p_constant + coefficient.flow_p_matrix @ controls
+            flow_q = coefficient.flow_q_constant + coefficient.flow_q_matrix @ controls
+            current = anchored_polygon_loading(coefficient, controls)
+            bias, tangent_delta, _ = anchored_polygon_parameters(coefficient)
+            del bias
+            tangent = tangent_delta.T @ (controls - coefficient.anchor)
+
+            def set_start(name: str, value: float) -> None:
+                variable = by_name.get(name)
+                if variable is not None:
+                    variable.Start = float(value)
+
+            for index in range(len(squared)):
+                set_start(f"v34_v_squared[{slot},{index}]", squared[index])
+            for index, branch in enumerate(coefficient.branch_names):
+                if not branch.startswith("transformer.") and not is_dominated_mess_current_row(branch):
+                    rho = max(rho, float(current[index]))
+                    set_start(f"v34_line_p[{slot},{index}]", flow_p[index])
+                    set_start(f"v34_line_q[{slot},{index}]", flow_q[index])
+                    set_start(f"v34_line_tangent_correction[{slot},{index}]", tangent[index])
+                elif not is_dominated_mess_current_row(branch):
+                    set_start(f"v34_i_aff[{slot},{index}]", affine_current[index])
+                    set_start(f"v34_i_hat[{slot},{index}]", max(0.0, float(affine_current[index])))
+                if coefficient.transformer_ratings[index] is not None:
+                    set_start(f"v34_tx_p[{slot},{index}]", flow_p[index])
+                    set_start(f"v34_tx_q[{slot},{index}]", flow_q[index])
+        set_start("v34_rho_planning", rho)
+    model.update()
+
+
+def _preferred_restricted_incumbent(
+    model: gp.Model,
+    block: object,
+    mess_id: str,
+    payload: Mapping[str, object],
+    aidc: np.ndarray,
+    coefficients: Sequence[SlotCoefficients],
+    fixed_p: Mapping[tuple[str, int], float],
+    fixed_q: Mapping[tuple[str, int], float],
+) -> dict[str, object]:
+    """Polish the selected opportunity in the exact full model.
+
+    Only the single selected route is fixed.  This closes any numerical gap
+    between the compact opportunity model and the production model, captures
+    every auxiliary value, and supplies a complete, solver-accepted MIPStart
+    after the temporary rows are removed.
+    """
+
+    candidate = payload["candidate"]
+    get = lambda name: getattr(candidate, name) if hasattr(candidate, name) else candidate[name]
+    origin = str(get("origin"))
+    destination = str(get("destination"))
+    is_stay = bool(get("is_stay"))
+    departure = None if is_stay else int(get("departure_slot"))
+    ready = None if is_stay else int(get("connection_ready_slot"))
+    fixed_bounds: list[tuple[gp.Var, float, float]] = []
+
+    def fix(variable: gp.Var, value: float) -> None:
+        fixed_bounds.append((variable, float(variable.LB), float(variable.UB)))
+        variable.LB = variable.UB = float(value)
+
+    for (key_mess, boundary, service), variable in block.occupancy.items():
+        active = False
+        if key_mess == mess_id:
+            if is_stay:
+                active = service == origin
+            else:
+                active = (boundary <= departure and service == origin) or (boundary >= ready and service == destination)
+        fix(variable, float(active))
+    for (key_mess, slot, service), variable in block.stay.items():
+        active = False
+        if key_mess == mess_id:
+            if is_stay:
+                active = service == origin
+            else:
+                active = (slot < departure and service == origin) or (slot >= ready and service == destination)
+        fix(variable, float(active))
+    selected_key = None if is_stay else (mess_id, departure, origin, destination)
+    for key, variable in block.move.items():
+        fix(variable, float(key == selected_key))
+    _apply_preferred_restricted_start(
+        model, block, mess_id, payload,
+        aidc=aidc, coefficients=coefficients, fixed_p=fixed_p, fixed_q=fixed_q,
+    )
+    production_gap = float(model.Params.MIPGap)
+    production_work_limit = float(model.Params.WorkLimit)
+    production_solution_limit = int(model.Params.SolutionLimit)
+    production_output_flag = int(model.Params.OutputFlag)
+    model.Params.MIPGap = RESTRICTED_MIP_GAP
+    model.Params.WorkLimit = WORK_LIMIT_TIERS[0]
+    model.Params.SolutionLimit = 1
+    model.Params.OutputFlag = 0
+    model.optimize()
+    available = model.SolCount > 0
+    result = {
+        "available": available,
+        "objective": float(model.ObjVal) if available else math.inf,
+        "status": (
+            {GRB.OPTIMAL: "OPTIMAL", GRB.WORK_LIMIT: "WORK_LIMIT", GRB.TIME_LIMIT: "TIME_LIMIT"}.get(
+                model.Status, f"STATUS_{model.Status}"
+            )
+        ),
+        "start": tuple(float(variable.X) for variable in model.getVars()) if available else (),
+    }
+    for variable, lower, upper in fixed_bounds:
+        variable.LB = lower
+        variable.UB = upper
+    model.update()
+    model.Params.MIPGap = production_gap
+    model.Params.WorkLimit = production_work_limit
+    model.Params.SolutionLimit = production_solution_limit
+    model.Params.OutputFlag = production_output_flag
+    model.reset()
+    if available:
+        for variable, value in zip(model.getVars(), result["start"], strict=True):
+            variable.Start = value
+    return result
+
+
 def solve_integrated_mess(
     *,
     case: str,
@@ -219,6 +427,7 @@ def solve_integrated_mess(
     enforce_planning_grid_constraints: bool = True,
     grid_coefficients: Sequence[SlotCoefficients] | None = None,
     force_at_least_one_move: bool = False,
+    preferred_restricted_start: Mapping[str, object] | None = None,
 ) -> IntegratedMessResult:
     if case not in {"B2", "B3"}:
         raise ValueError("V34_INTEGRATED_MESS_ONLY_FOR_B2_B3")
@@ -453,7 +662,57 @@ def solve_integrated_mess(
             if not branch.startswith("transformer.") and not is_dominated_mess_current_row(branch):
                 zero_rho = max(zero_rho, float(current[index]))
 
-    restricted = _stationary_restricted_incumbent(model, block, mess_id, initial_service)
+    # A V35R3 preferred start is supplied only after the opportunity scanner has
+    # exhaustively solved STAY and every feasible initial destination/departure
+    # candidate.  Re-solving STAY here is therefore redundant and, on the large
+    # B3 model, can consume most of the full-solve budget before the better
+    # candidate is even loaded.
+    if preferred_restricted_start is None:
+        restricted = _stationary_restricted_incumbent(model, block, mess_id, initial_service)
+    else:
+        restricted = {
+            "available": False,
+            "objective": math.inf,
+            "best_bound": math.inf,
+            "mip_gap": math.inf,
+            "status": "SKIPPED_COMPLETE_OPPORTUNITY_SCAN",
+            "start": (),
+            "sum_abs_p": 0.0,
+            "sum_abs_q": 0.0,
+        }
+    preferred_objective = math.inf
+    preferred_loaded = False
+    selected_start = "STAY"
+    if preferred_restricted_start is not None:
+        opportunity_objective = float(preferred_restricted_start["objective"])
+        if (
+            math.isfinite(opportunity_objective)
+            and (
+                not bool(restricted["available"])
+                or opportunity_objective < float(restricted["objective"]) - RESOLVED_OBJECTIVE_TOLERANCE
+            )
+        ):
+            preferred = _preferred_restricted_incumbent(
+                model, block, mess_id, preferred_restricted_start,
+                aidc, coefficients, fixed_p, fixed_q,
+            )
+            preferred_objective = float(preferred["objective"])
+            preferred_loaded = bool(preferred["available"])
+            candidate = preferred_restricted_start["candidate"]
+            candidate_is_stay = bool(
+                getattr(candidate, "is_stay")
+                if hasattr(candidate, "is_stay")
+                else candidate["is_stay"]
+            )
+            if preferred_loaded and not candidate_is_stay:
+                selected_start = "CONGESTION_AWARE_MOVE"
+            elif preferred_loaded:
+                selected_start = "STAY"
+            elif bool(restricted["available"]):
+                for variable, value in zip(model.getVars(), restricted["start"], strict=True):
+                    variable.Start = value
+                selected_start = "STAY"
+    quality_bound = min(float(restricted["objective"]), preferred_objective)
     attempted: list[float] = []
     escalation_reason: str | None = None
     solve_started = time.perf_counter()
@@ -464,15 +723,15 @@ def solve_integrated_mess(
         if model.SolCount < 1:
             escalation_reason = "NO_FULL_MODEL_FEASIBLE_INCUMBENT"
             continue
-        if bool(restricted["available"]) and float(model.ObjVal) > float(restricted["objective"]) + RESOLVED_OBJECTIVE_TOLERANCE:
-            escalation_reason = "FULL_MODEL_INCUMBENT_WORSE_THAN_RESTRICTED_FEASIBLE_INCUMBENT"
+        if math.isfinite(quality_bound) and float(model.ObjVal) > quality_bound + RESOLVED_OBJECTIVE_TOLERANCE:
+            escalation_reason = "FULL_MODEL_INCUMBENT_WORSE_THAN_BEST_RESTRICTED_FEASIBLE_INCUMBENT"
             continue
         break
     solve_seconds = time.perf_counter() - solve_started
     accepted_statuses = {GRB.OPTIMAL, GRB.WORK_LIMIT, GRB.TIME_LIMIT, GRB.SUBOPTIMAL}
     if model.Status not in accepted_statuses or model.SolCount < 1:
         raise RuntimeError(f"V34_INTEGRATED_MESS_SOLVER_STATUS:{model.Status}")
-    if bool(restricted["available"]) and float(model.ObjVal) > float(restricted["objective"]) + RESOLVED_OBJECTIVE_TOLERANCE:
+    if math.isfinite(quality_bound) and float(model.ObjVal) > quality_bound + RESOLVED_OBJECTIVE_TOLERANCE:
         raise RuntimeError("V35_MESS_FULL_MODEL_WORSE_THAN_RESTRICTED_INCUMBENT")
     # Evaluate the frozen solution numerically.  Keeping tens of thousands of
     # Python LinExpr wrappers alive through optimize materially increases RSS.
@@ -526,12 +785,15 @@ def solve_integrated_mess(
             and float(restricted["objective"]) < float(zero_rho) - RESOLVED_OBJECTIVE_TOLERANCE
         ),
         mip_start_accepted=bool(
-            bool(restricted["available"])
-            and float(model.ObjVal) <= float(restricted["objective"]) + RESOLVED_OBJECTIVE_TOLERANCE
+            math.isfinite(quality_bound)
+            and float(model.ObjVal) <= quality_bound + RESOLVED_OBJECTIVE_TOLERANCE
         ),
         work_limit_tiers_attempted=tuple(attempted),
         escalation_reason=escalation_reason if len(attempted) > 1 else None,
         bounded_compute_classification=classification,
+        preferred_restricted_objective=preferred_objective,
+        selected_restricted_start=selected_start,
+        preferred_mip_start_loaded=preferred_loaded,
     )
 
 

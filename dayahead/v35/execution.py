@@ -333,7 +333,14 @@ def _combined_trajectory_arrays(trajectory: MessTrajectory | None):
             p[slot, column] = row.p_kw
             q[slot, column] = row.q_kvar
             energy[slot, column] = row.battery_energy_kwh
-            locations[slot, column] = str(row.service_id) if row.service_id else "TRANSIT"
+            # The OpenDSS replay contract recognizes unavailable mobile units
+            # by a TRANSIT_* location token.  A bare "TRANSIT" is interpreted
+            # as a physical service and leads to a nonexistent generator name.
+            locations[slot, column] = (
+                str(row.service_id)
+                if row.service_id
+                else f"TRANSIT_ROUTE_{column + 1:02d}"
+            )
             modes[slot, column] = row.mode
     return p, q, energy, locations, modes
 
@@ -451,6 +458,9 @@ def _solver_record(mess_id: str, item: object) -> dict[str, object]:
         "restricted_stationary_sum_abs_Q_kvar_slots": item.restricted_stationary_sum_abs_q_kvar_slots,
         "restricted_incumbent_improves_zero": item.restricted_incumbent_improves_zero,
         "MIPStart_accepted": item.mip_start_accepted,
+        "preferred_restricted_objective": finite_or_none(item.preferred_restricted_objective),
+        "selected_restricted_start": item.selected_restricted_start,
+        "preferred_MIPStart_loaded": item.preferred_mip_start_loaded,
         "zero_actuation_objective": item.zero_actuation_objective,
         "escalation_reason": item.escalation_reason,
         "peak_rss_bytes": item.peak_rss_bytes,
