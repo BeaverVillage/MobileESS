@@ -747,6 +747,9 @@ def build_all() -> dict[str, Any]:
         all(row["watchdog_status"] == "PASS" for row in mess_rows)
         and not any(row["full_incumbent_worse_than_restricted"] for row in quality)
     )
+    defined_mip_gaps = [
+        float(row["MIP_gap"]) for row in quality if row["MIP_gap"] is not None
+    ]
     mess_summary = {
         "artifact_id": "V35R1_MESS_EFFECT_SUMMARY_V1",
         "status": "PASS" if mess_pass else "FAIL",
@@ -757,7 +760,9 @@ def build_all() -> dict[str, Any]:
         "B2_B0_Fresh_rho_delta": _summary_delta(results, "B2-B0", "fresh_rho_AC_delta"),
         "B3_B1_Fresh_rho_delta": _summary_delta(results, "B3-B1", "fresh_rho_AC_delta"),
         "termination_distribution": dict(Counter(row["termination"] for row in quality)),
-        "MIP_gap_distribution": distribution([float(row["MIP_gap"]) for row in quality]),
+        "MIP_gap_distribution": distribution(defined_mip_gaps),
+        "MIP_gap_defined_count": len(defined_mip_gaps),
+        "MIP_gap_unavailable_count": len(quality) - len(defined_mip_gaps),
         "MIPStart_rejected_count": sum(not row["MIPStart_accepted"] for row in quality),
         "full_incumbent_worse_than_restricted_count": sum(row["full_incumbent_worse_than_restricted"] for row in quality),
         "physical_interpretation": "All 20 days use stationary nonzero P/Q in both B2 and B3; MOVE and travel energy are zero. Q command magnitude dominates aggregate |P/Q|, but exact P-vs-Q causal attribution was not separated by a new counterfactual solve. Large improvements are Planning-model incumbent effects; Fresh rho changes are separately reported and do not show the same mean benefit.",
