@@ -371,7 +371,7 @@ def integrate_series_wh(series: pd.Series) -> float:
     if len(clean) < 2:
         return 0.0
     seconds = (clean.index.asi8 - clean.index.asi8[0]).astype(float) / 1e9
-    return float(np.trapezoid(clean.to_numpy(dtype=float), seconds) / 3600.0)
+    return float(np.trapz(clean.to_numpy(dtype=float), seconds) / 3600.0)
 
 
 def profile_statistics(

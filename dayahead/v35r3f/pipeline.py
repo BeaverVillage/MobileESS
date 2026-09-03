@@ -377,7 +377,7 @@ def _aggregate_metrics(path: Path) -> dict[str, Any]:
             values = sums / counts
             index = unique
     q = np.quantile(values, [0.05, 0.5, 0.95]) if len(values) else [np.nan] * 3
-    energy = float(np.trapezoid(values, index) / 3600.0) if len(values) > 1 else 0.0
+    energy = float(np.trapz(values, index) / 3600.0) if len(values) > 1 else 0.0
     return {
         "row_count": len(values),
         "mean_power_W": float(np.mean(values)) if len(values) else math.nan,
@@ -401,7 +401,7 @@ def _raw_metrics(series: pd.Series) -> dict[str, Any]:
         "median_power_W": float(q[1]),
         "p05_power_W": float(q[0]),
         "p95_power_W": float(q[2]),
-        "energy_Wh": float(np.trapezoid(values, index) / 3600.0) if len(values) > 1 else 0.0,
+        "energy_Wh": float(np.trapz(values, index) / 3600.0) if len(values) > 1 else 0.0,
         "duration_seconds": float(index[-1] - index[0]) if len(index) > 1 else 0.0,
         "sampling_interval_seconds": float(np.median(np.diff(index))) if len(index) > 1 else math.nan,
     }
@@ -1449,7 +1449,22 @@ def run(run_tests: bool = True, verify_zip_crc: bool = True) -> None:
     write_json(ARTIFACTS / "V35R3F_KESTREL_BRIDGE_ELIGIBILITY_MATRIX.json", bridge_matrix(source_commit))
     write_json(ARTIFACTS / "V35R3F_NEXT_NODE_PACKING_CONTRACT.json", next_node_packing_contract(source_commit))
     write_json(ARTIFACTS / "V35R3F_POWER_AUTHORITY_DECISION.json", authority_decision(source_commit))
-    write_json(ARTIFACTS / "V35R3F_REPAIR_LOG.json", common | {"attempts": [], "unique_failure_signatures": 0, "science_semantics_changed": False})
+    write_json(
+        ARTIFACTS / "V35R3F_REPAIR_LOG.json",
+        common
+        | {
+            "attempts": [
+                {
+                    "failure_signature": "NUMPY_1_26_HAS_NO_TRAPEZOID",
+                    "attempt": 1,
+                    "repair": "USE_EQUIVALENT_NUMPY_TRAPZ_API",
+                    "science_neutral": True,
+                }
+            ],
+            "unique_failure_signatures": 1,
+            "science_semantics_changed": False,
+        },
+    )
     write_json(ARTIFACTS / "V35R3F_COMPUTE_ACCOUNTING.json", accounting.payload(source_commit))
 
     stage = time.perf_counter()
