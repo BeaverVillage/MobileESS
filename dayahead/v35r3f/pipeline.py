@@ -1459,9 +1459,15 @@ def run(run_tests: bool = True, verify_zip_crc: bool = True) -> None:
                     "attempt": 1,
                     "repair": "USE_EQUIVALENT_NUMPY_TRAPZ_API",
                     "science_neutral": True,
-                }
+                },
+                {
+                    "failure_signature": "WINDOWS_PATH_EXCEEDS_LEGACY_MAX_PATH",
+                    "attempt": 1,
+                    "repair": "USE_WINDOWS_EXTENDED_LENGTH_PREFIX_FOR_RAW_LOG_READS",
+                    "science_neutral": True,
+                },
             ],
-            "unique_failure_signatures": 1,
+            "unique_failure_signatures": 2,
             "science_semantics_changed": False,
         },
     )

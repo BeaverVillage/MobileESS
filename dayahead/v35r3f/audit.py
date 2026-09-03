@@ -6,6 +6,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 import re
 import subprocess
 import zipfile
@@ -226,8 +227,11 @@ def read_power_log(path: Path) -> tuple[str, pd.DataFrame]:
     if device == "UNKNOWN":
         raise ValueError(f"Not a power log: {path}")
     columns = NVML_COLUMNS if device == "NVML" else RAPL_COLUMNS
+    input_path = os.fspath(path.resolve())
+    if os.name == "nt" and not input_path.startswith("\\\\?\\"):
+        input_path = "\\\\?\\" + input_path
     frame = pd.read_csv(
-        path,
+        input_path,
         sep=r"\s+",
         comment="#",
         header=None,
