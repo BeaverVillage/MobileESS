@@ -1,0 +1,52 @@
+{
+  "KESTREL_NODE_PACKING_NEXT": "DEFER",
+  "blocking_inputs_before_execution": [
+    "whole-node input or complete component/base-power authority",
+    "partial-GPU node-state power authority or independent conservative bounds",
+    "shared/co-resident state authority or fail-closed allocation policy",
+    "idle-node input power",
+    "deterministic mapping of requested resources to physical node occupancy"
+  ],
+  "dataset_doi": "10.7799/3025227",
+  "dataset_id": 312,
+  "dataset_version": 2,
+  "energy_unit": "Wh",
+  "execution_in_this_task": "FORBIDDEN_NOT_RUN",
+  "future_invariant": "P_IT(t) = SUM_OVER_PHYSICAL_NODES(P_n(t)); EACH PHYSICAL NODE COUNTED EXACTLY ONCE PER SLOT",
+  "not_allowed_invariant": "SUM_OVER_JOBS(P_j(t)) WHEN JOBS SHARE PHYSICAL RESOURCES",
+  "parameter_contract": {
+    "cross_sensor_alignment": "LINEAR_INTERPOLATION_COMMON_OVERLAP",
+    "native_raw_intervals_seconds": {
+      "inference": 0.1,
+      "training": 0.2
+    },
+    "robust_envelope": "CLASS_STRATIFIED_RUN_MEAN_P05_MEDIAN_OF_P50_P95",
+    "sample_quantiles": "NUMPY_LINEAR",
+    "sensor_invalid": "NONFINITE_NEGATIVE_OR_ABOVE_800W",
+    "time_integration": "TRAPEZOID_ACTUAL_TIMESTAMPS"
+  },
+  "power_unit": "W",
+  "requirements": [
+    "deterministic",
+    "grid-outcome independent",
+    "scheduler-outcome independent except resource occupancy",
+    "reproducible",
+    "no favorable placement tuning",
+    "node-capacity conserving",
+    "GPU-capacity conserving",
+    "co-resident jobs cannot double-count node power",
+    "unknown workload class uses a robust envelope only where the measurement boundary/state is supported",
+    "unsupported partial-node power fails closed or is explicitly sensitivity-only with independent public bounds"
+  ],
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+  "source_code_commit": "d14499748e3131723d2a208b0b2d423bdd2929a2",
+  "timezone_assumption": "SOURCE_TIMESTAMPS_NAIVE; NO_TIMEZONE CONVERSION; ELAPSED DIFFERENCES ONLY"
+}

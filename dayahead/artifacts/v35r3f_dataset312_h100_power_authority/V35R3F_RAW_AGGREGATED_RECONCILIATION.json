@@ -1,0 +1,53 @@
+{
+  "available_aggregate_runs": 2467,
+  "classification": "RAW_AGGREGATED_RECONCILIATION_PARTIAL",
+  "dataset_doi": "10.7799/3025227",
+  "dataset_id": 312,
+  "dataset_version": 2,
+  "energy_unit": "Wh",
+  "failed_runs": 4,
+  "important_interpretation": "Numerical reconciliation does not make the supplied overlapping RAPL package+core sum a whole-node physical boundary.",
+  "maximum_errors": {
+    "energy_absolute_error_Wh": 0.5556786509441736,
+    "energy_relative_error": 0.006294874438548781,
+    "mean_absolute_error_W": 6.860893543033853,
+    "mean_relative_error": 0.0024551404001276578,
+    "median_absolute_error_W": 5.6500530922203325,
+    "median_relative_error": 0.0007828127404475859,
+    "p05_absolute_error_W": 132.00794154705,
+    "p05_relative_error": 0.059510632828220375,
+    "p95_absolute_error_W": 2.2530449460286945,
+    "p95_relative_error": 0.0007760733963849025
+  },
+  "online_rate_resampling": "Dataset-supplied 0.001 s interpolation from approximately 0.1 s raw samples is reconciled for mean/energy but is not native measurement resolution.",
+  "parameter_contract": {
+    "cross_sensor_alignment": "LINEAR_INTERPOLATION_COMMON_OVERLAP",
+    "native_raw_intervals_seconds": {
+      "inference": 0.1,
+      "training": 0.2
+    },
+    "robust_envelope": "CLASS_STRATIFIED_RUN_MEAN_P05_MEDIAN_OF_P50_P95",
+    "sample_quantiles": "NUMPY_LINEAR",
+    "sensor_invalid": "NONFINITE_NEGATIVE_OR_ABOVE_800W",
+    "time_integration": "TRAPEZOID_ACTUAL_TIMESTAMPS"
+  },
+  "passed_runs": 2463,
+  "power_unit": "W",
+  "raw_only_runs": 5,
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+  "source_code_commit": "d14499748e3131723d2a208b0b2d423bdd2929a2",
+  "timezone_assumption": "SOURCE_TIMESTAMPS_NAIVE; NO_TIMEZONE CONVERSION; ELAPSED DIFFERENCES ONLY",
+  "tolerances": {
+    "energy_relative": 0.005,
+    "mean_relative": 0.0005,
+    "quantile_relative": 0.02
+  }
+}

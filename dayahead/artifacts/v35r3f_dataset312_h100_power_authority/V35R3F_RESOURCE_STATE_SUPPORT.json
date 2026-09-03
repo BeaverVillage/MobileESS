@@ -1,0 +1,64 @@
+{
+  "A_subset_of_H100_GPUs_active_experiment": "NO",
+  "B_direct_active_GPU_counts_per_node": [
+    4
+  ],
+  "C_1_2_4_8_16_semantics": "NODE_COUNTS",
+  "D_GPUs_per_node": 4,
+  "D_GPUs_per_node_constant": true,
+  "E_partial_node_GPU_occupancy": "NO",
+  "F_shared_node_co_resident_multiple_jobs": "NO",
+  "G_idle_node_power_in_frozen_dataset_files": "NO",
+  "H_node_power_on_off_transition_measurement": "NO",
+  "H_workload_ramp_transients_within_exclusive_runs": "YES",
+  "IDLE_POWER_DIRECT_AUTHORITY": "NO",
+  "I_all_workload_measurements_full_node_exclusive": "YES",
+  "PARTIAL_GPU_NODE_POWER_DIRECTLY_IDENTIFIED": "NO",
+  "P_node_k_c_directly_identified": "NO",
+  "SHARED_NODE_POWER_DIRECTLY_IDENTIFIED": "NO",
+  "classification": "STATE_SUPPORT_FULL_NODE_EXCLUSIVE_ONLY",
+  "dataset_doi": "10.7799/3025227",
+  "dataset_id": 312,
+  "dataset_version": 2,
+  "energy_unit": "Wh",
+  "node_counts_directly_observed": [
+    1,
+    2,
+    4,
+    8,
+    16
+  ],
+  "paper_appendix_idle_summary_not_dataset_authority": true,
+  "parameter_contract": {
+    "cross_sensor_alignment": "LINEAR_INTERPOLATION_COMMON_OVERLAP",
+    "native_raw_intervals_seconds": {
+      "inference": 0.1,
+      "training": 0.2
+    },
+    "robust_envelope": "CLASS_STRATIFIED_RUN_MEAN_P05_MEDIAN_OF_P50_P95",
+    "sample_quantiles": "NUMPY_LINEAR",
+    "sensor_invalid": "NONFINITE_NEGATIVE_OR_ABOVE_800W",
+    "time_integration": "TRAPEZOID_ACTUAL_TIMESTAMPS"
+  },
+  "power_unit": "W",
+  "reason": "Archive contains four GPU channels on every measured node and exclusive one-job experiments; no partial allocation, co-resident job, or dedicated idle trace is included.",
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+  "source_code_commit": "d14499748e3131723d2a208b0b2d423bdd2929a2",
+  "supported_function": "P_component_sum(N_nodes, workload_configuration) FOR FULL_NODE_EXCLUSIVE EXPERIMENTS",
+  "timezone_assumption": "SOURCE_TIMESTAMPS_NAIVE; NO_TIMEZONE CONVERSION; ELAPSED DIFFERENCES ONLY",
+  "total_GPU_counts_directly_observed": [
+    4,
+    8,
+    16,
+    32,
+    64
+  ]
+}

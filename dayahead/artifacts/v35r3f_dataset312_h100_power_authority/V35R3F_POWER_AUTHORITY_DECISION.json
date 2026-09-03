@@ -1,0 +1,45 @@
+{
+  "DATASET312_TO_KESTREL_JOB_DIRECT_JOIN": "FORBIDDEN",
+  "IDLE_POWER_DIRECT_AUTHORITY": "NO",
+  "KESTREL_NODE_PACKING_NEXT": "DEFER",
+  "PARTIAL_GPU_NODE_POWER_DIRECTLY_IDENTIFIED": "NO",
+  "PRODUCTION_INTEGRATION_RECOMMENDED": "NO",
+  "RADDIT_CPU_POWER_USED_FOR_H100_MAGNITUDE": "NO",
+  "SHARED_NODE_POWER_DIRECTLY_IDENTIFIED": "NO",
+  "dataset_doi": "10.7799/3025227",
+  "dataset_id": 312,
+  "dataset_version": 2,
+  "energy_unit": "Wh",
+  "facility_power_directly_measured": "NO",
+  "parameter_contract": {
+    "cross_sensor_alignment": "LINEAR_INTERPOLATION_COMMON_OVERLAP",
+    "native_raw_intervals_seconds": {
+      "inference": 0.1,
+      "training": 0.2
+    },
+    "robust_envelope": "CLASS_STRATIFIED_RUN_MEAN_P05_MEDIAN_OF_P50_P95",
+    "sample_quantiles": "NUMPY_LINEAR",
+    "sensor_invalid": "NONFINITE_NEGATIVE_OR_ABOVE_800W",
+    "time_integration": "TRAPEZOID_ACTUAL_TIMESTAMPS"
+  },
+  "partial_shared_public_data_answer": "NO_DEFENSIBLE_PUBLIC_BRIDGE",
+  "power_authority_level": "H1_COMPONENT_LEVEL_H100_POWER_AUTHORITY",
+  "power_unit": "W",
+  "primary_classification": "V35R3F_DATASET312_COMPONENT_ONLY",
+  "reason": "Dataset 312 measures H100 NVML and AMD RAPL component channels for full-node-exclusive benchmarks, but omits whole-node input/base power and partial/shared occupancy experiments.",
+  "resource_state_support_classification": "STATE_SUPPORT_FULL_NODE_EXCLUSIVE_ONLY",
+  "robust_component_envelope_available": "YES",
+  "robust_whole_node_envelope_available": "NO",
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+  "source_code_commit": "d14499748e3131723d2a208b0b2d423bdd2929a2",
+  "timezone_assumption": "SOURCE_TIMESTAMPS_NAIVE; NO_TIMEZONE CONVERSION; ELAPSED DIFFERENCES ONLY",
+  "whole_node_power_directly_measured": "NO"
+}

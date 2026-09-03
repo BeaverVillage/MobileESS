@@ -1,0 +1,91 @@
+{
+  "authorities": [
+    {
+      "boundary": "GPU_ONLY_POWER",
+      "status": "DIRECTLY_SUPPORTED",
+      "uses": {
+        "AIDC_IT_load": "NOT_AUTHORIZED_ALONE",
+        "component_level_sensitivity": "AUTHORIZED",
+        "energy_accounting": "AUTHORIZED_FOR_GPU_COMPONENT",
+        "facility_scaling": "NOT_AUTHORIZED",
+        "node_packing_bridge": "NOT_AUTHORIZED_AS_WHOLE_NODE"
+      }
+    },
+    {
+      "boundary": "RAPL_PACKAGE_POWER",
+      "status": "DIRECTLY_SUPPORTED_WITH_AMD_ACCURACY_LIMITATION",
+      "uses": {
+        "AIDC_IT_load": "NOT_AUTHORIZED_ALONE",
+        "component_level_sensitivity": "AUTHORIZED",
+        "energy_accounting": "AUTHORIZED_FOR_REPORTED_PACKAGE_DOMAIN",
+        "facility_scaling": "NOT_AUTHORIZED",
+        "node_packing_bridge": "NOT_AUTHORIZED_AS_WHOLE_NODE"
+      }
+    },
+    {
+      "boundary": "GPU_PLUS_RAPL_PACKAGE_COMPONENT_SUM",
+      "status": "DERIVED_NONOVERLAPPING_MEASURED_COMPONENT_SUM",
+      "uses": {
+        "AIDC_IT_load": "NOT_AUTHORIZED_MISSING_NODE_COMPONENTS_AND_CONVERSION_LOSSES",
+        "component_level_sensitivity": "AUTHORIZED",
+        "energy_accounting": "AUTHORIZED_FOR_COMPONENT_SUM_ONLY",
+        "facility_scaling": "NOT_AUTHORIZED",
+        "node_packing_bridge": "DIAGNOSTIC_ONLY"
+      }
+    },
+    {
+      "boundary": "DATASET_PROVIDED_GPU_PLUS_RAPL_PACKAGE_PLUS_CORE_SUM",
+      "status": "RECONCILED_BUT_PHYSICALLY_NONADDITIVE_RAPL_OVERLAP",
+      "uses": {
+        "AIDC_IT_load": "NOT_AUTHORIZED",
+        "component_level_sensitivity": "NOT_AUTHORIZED",
+        "energy_accounting": "NOT_AUTHORIZED",
+        "facility_scaling": "NOT_AUTHORIZED",
+        "node_packing_bridge": "NOT_AUTHORIZED"
+      }
+    },
+    {
+      "boundary": "WHOLE_NODE_INPUT_POWER",
+      "status": "NOT_MEASURED",
+      "uses": {
+        "AIDC_IT_load": "NOT_AUTHORIZED"
+      }
+    },
+    {
+      "boundary": "FACILITY_POWER",
+      "status": "SIMULATED_ONLY_NOT_MEASURED",
+      "uses": {
+        "facility_scaling": "NOT_AUTHORIZED_AS_MEASUREMENT"
+      }
+    }
+  ],
+  "dataset_doi": "10.7799/3025227",
+  "dataset_id": 312,
+  "dataset_version": 2,
+  "energy_unit": "Wh",
+  "parameter_contract": {
+    "cross_sensor_alignment": "LINEAR_INTERPOLATION_COMMON_OVERLAP",
+    "native_raw_intervals_seconds": {
+      "inference": 0.1,
+      "training": 0.2
+    },
+    "robust_envelope": "CLASS_STRATIFIED_RUN_MEAN_P05_MEDIAN_OF_P50_P95",
+    "sample_quantiles": "NUMPY_LINEAR",
+    "sensor_invalid": "NONFINITE_NEGATIVE_OR_ABOVE_800W",
+    "time_integration": "TRAPEZOID_ACTUAL_TIMESTAMPS"
+  },
+  "power_unit": "W",
+  "primary_authority": "GPU_PLUS_RAPL_PACKAGE_COMPONENT_SUM",
+  "primary_authority_level": "H1_COMPONENT_LEVEL_H100_POWER_AUTHORITY",
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+  "source_code_commit": "d14499748e3131723d2a208b0b2d423bdd2929a2",
+  "timezone_assumption": "SOURCE_TIMESTAMPS_NAIVE; NO_TIMEZONE CONVERSION; ELAPSED DIFFERENCES ONLY"
+}

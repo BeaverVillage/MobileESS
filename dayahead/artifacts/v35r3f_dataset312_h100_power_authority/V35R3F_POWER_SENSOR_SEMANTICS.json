@@ -1,0 +1,106 @@
+{
+  "channels_absent": [
+    "DRAM_POWER_AS_SEPARATE_SENSOR",
+    "WHOLE_NODE_INPUT_POWER",
+    "RACK_OR_PDU_POWER",
+    "MEASURED_FACILITY_POWER"
+  ],
+  "critical_firewall": "GPU power + CPU RAPL package proxy is not whole-node input power",
+  "dataset_doi": "10.7799/3025227",
+  "dataset_id": 312,
+  "dataset_version": 2,
+  "energy_unit": "Wh",
+  "evidence": {
+    "WattAMeter": "https://github.com/NatLabRockies/WattAMeter",
+    "dataset_README": "README.md repository structure",
+    "dataset_scripts": "01_aggregated_datasets/*/postprocess.py",
+    "paper": "https://arxiv.org/html/2604.07345"
+  },
+  "fields": [
+    {
+      "authority": "AUTHORITATIVE_COMPONENT",
+      "exact_internal_subcomponent_coverage": "UNKNOWN_FROM_DATASET",
+      "excludes": "CPU, system DRAM, NICs, storage, fans/pumps, PSU/conversion losses, rack and facility auxiliaries",
+      "field": "gpu-{0,1,2,3}[mW]",
+      "includes": "GPU device/module power covered by NVML's device power reading",
+      "missing_value_semantics": "No sentinel documented; parse failures/nonfinite/negative/>800 W are SENSOR_INVALID",
+      "physical_boundary": "INDIVIDUAL_H100_DEVICE_POWER_AS_REPORTED_BY_NVML",
+      "sampling_interval": "0.1 s inference raw; 0.2 s training raw",
+      "scope": "PER_GPU; FOUR_CHANNELS_PER_Kestrel_GPU_NODE",
+      "sensor_api": "WattAMeter NVML reader / NVIDIA Management Library",
+      "unit": "mW (normalized to W in derived artifacts)"
+    },
+    {
+      "authority": "NOT_A_POWER_CHANNEL",
+      "excludes": "Power",
+      "field": "gpu-{0,1,2,3}[C]",
+      "includes": "Reported device temperature",
+      "missing_value_semantics": "UNKNOWN",
+      "physical_boundary": "PER_GPU_DEVICE_TEMPERATURE",
+      "sampling_interval": "Same row cadence as NVML power",
+      "scope": "PER_GPU",
+      "sensor_api": "WattAMeter NVML reader",
+      "unit": "degrees C"
+    },
+    {
+      "authority": "AUTHORITATIVE_COMPONENT_WITH_AMD_ACCURACY_LIMITATION",
+      "excludes": "Discrete GPUs and all non-package node components; exact platform-domain internals UNKNOWN",
+      "field": "cpu-{0,1}[uJ] and cpu-{0,1}[W]",
+      "includes": "RAPL package/socket domain as exposed by the platform",
+      "missing_value_semantics": "No sentinel documented; parse failures/nonfinite/negative/>800 W are SENSOR_INVALID",
+      "physical_boundary": "CPU_SOCKET_PACKAGE_RAPL_DOMAIN",
+      "sampling_interval": "0.1 s inference raw; 0.2 s training raw",
+      "scope": "PER_CPU_SOCKET; TWO_SOCKETS_PER_NODE",
+      "sensor_api": "WattAMeter RAPL reader on AMD EPYC 9554",
+      "unit": "uJ cumulative energy and W derived power"
+    },
+    {
+      "authority": "COMPONENT_DIAGNOSTIC; NESTED_DOMAIN",
+      "excludes": "Not a second CPU package; must not be added to package as disjoint power",
+      "field": "cpu-{0,1}-core[uJ] and cpu-{0,1}-core[W]",
+      "includes": "Core energy domain exposed by RAPL",
+      "missing_value_semantics": "No sentinel documented; parse failures/nonfinite/negative/>800 W are SENSOR_INVALID",
+      "physical_boundary": "RAPL_CORE_SUBDOMAIN_NESTED_WITHIN_PACKAGE",
+      "sampling_interval": "0.1 s inference raw; 0.2 s training raw",
+      "scope": "ONE REPORTED CORE-DOMAIN CHANNEL PER SOCKET; EXACT CORE SELECTION UNKNOWN",
+      "sensor_api": "WattAMeter RAPL core-domain reader",
+      "unit": "uJ cumulative energy and W derived power"
+    },
+    {
+      "authority": "RECONCILIATION_ONLY; NOT WHOLE_NODE; RAPL PACKAGE/CORE OVERLAP",
+      "excludes": "System DRAM outside package, NIC, storage, fans/pumps, PSU/conversion losses, rack and facility auxiliaries",
+      "field": "aggregated power[W]",
+      "includes": "Four NVML GPU channels and four reported RAPL W columns per node",
+      "missing_value_semantics": "Scripts replace >800 W device samples by backward fill for inference; training has no such cleaning",
+      "physical_boundary": "SUM_OF_NVML_GPU + RAPL_PACKAGE + RAPL_CORE_REPORTED CHANNELS",
+      "sampling_interval": "0.1 s offline/finite inference; 0.001 s rate inference; 0.2 s training",
+      "scope": "PER_EXPERIMENT; ACROSS ALL ALLOCATED NODES",
+      "sensor_api": "Dataset postprocess.py sum after interpolation",
+      "unit": "W"
+    }
+  ],
+  "parameter_contract": {
+    "cross_sensor_alignment": "LINEAR_INTERPOLATION_COMMON_OVERLAP",
+    "native_raw_intervals_seconds": {
+      "inference": 0.1,
+      "training": 0.2
+    },
+    "robust_envelope": "CLASS_STRATIFIED_RUN_MEAN_P05_MEDIAN_OF_P50_P95",
+    "sample_quantiles": "NUMPY_LINEAR",
+    "sensor_invalid": "NONFINITE_NEGATIVE_OR_ABOVE_800W",
+    "time_integration": "TRAPEZOID_ACTUAL_TIMESTAMPS"
+  },
+  "power_unit": "W",
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+  "source_code_commit": "d14499748e3131723d2a208b0b2d423bdd2929a2",
+  "timezone_assumption": "SOURCE_TIMESTAMPS_NAIVE; NO_TIMEZONE CONVERSION; ELAPSED DIFFERENCES ONLY",
+  "whole_facility_directory_semantics": "DIPLOEE_SIMULATED_NOT_MEASURED"
+}

@@ -1,0 +1,54 @@
+{
+  "classification": "ENERGY_RECONCILED_COMPONENT_BOUNDARIES_SEPARATED",
+  "compatible_sums": [
+    "sum four GPU devices",
+    "sum two CPU package domains",
+    "GPU + CPU package component proxy"
+  ],
+  "dataset_doi": "10.7799/3025227",
+  "dataset_id": 312,
+  "dataset_version": 2,
+  "energy_unit": "Wh",
+  "experiment_boundary_energy_totals_Wh": {
+    "DATASET_PROVIDED_GPU_PLUS_RAPL_PACKAGE_PLUS_CORE_SUM": 790802.7629294482,
+    "GPU_ONLY_POWER": 711112.3312538633,
+    "GPU_PLUS_RAPL_PACKAGE_COMPONENT_SUM": 790573.5170597291,
+    "RAPL_CORE_SUBDOMAIN_POWER": 229.28414636412396,
+    "RAPL_PACKAGE_POWER": 79534.64274229541
+  },
+  "forbidden_sums": [
+    "RAPL package + nested core as disjoint CPU power",
+    "measured component power + synthetic facility power"
+  ],
+  "integration_method": "TRAPEZOID_WITH_ACTUAL_TIMESTAMPS_AFTER_NATIVE_AUDIT",
+  "parameter_contract": {
+    "cross_sensor_alignment": "LINEAR_INTERPOLATION_COMMON_OVERLAP",
+    "native_raw_intervals_seconds": {
+      "inference": 0.1,
+      "training": 0.2
+    },
+    "robust_envelope": "CLASS_STRATIFIED_RUN_MEAN_P05_MEDIAN_OF_P50_P95",
+    "sample_quantiles": "NUMPY_LINEAR",
+    "sensor_invalid": "NONFINITE_NEGATIVE_OR_ABOVE_800W",
+    "time_integration": "TRAPEZOID_ACTUAL_TIMESTAMPS"
+  },
+  "power_unit": "W",
+  "raw_aggregate_energy_reconciliation": {
+    "maximum_relative_error": 0.006294874438548781,
+    "median_relative_error": 0.000330630376990763,
+    "runs": 2467,
+    "within_tolerance_runs": 2465
+  },
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+  "source_code_commit": "d14499748e3131723d2a208b0b2d423bdd2929a2",
+  "source_integral_preserved": true,
+  "timezone_assumption": "SOURCE_TIMESTAMPS_NAIVE; NO_TIMEZONE CONVERSION; ELAPSED DIFFERENCES ONLY"
+}

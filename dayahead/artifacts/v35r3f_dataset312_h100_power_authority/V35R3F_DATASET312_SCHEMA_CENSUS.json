@@ -1,0 +1,1347 @@
+{
+  "all_fields_have_units_or_UNKNOWN": true,
+  "dataset_doi": "10.7799/3025227",
+  "dataset_id": 312,
+  "dataset_version": 2,
+  "energy_unit": "Wh",
+  "families": [
+    {
+      "family": "raw_nvml_wattameter_log",
+      "fields": {
+        "gpu-0[C]": {
+          "dtype": "integer",
+          "unit": "C"
+        },
+        "gpu-0[mW]": {
+          "dtype": "integer",
+          "unit": "mW"
+        },
+        "gpu-1[C]": {
+          "dtype": "integer",
+          "unit": "C"
+        },
+        "gpu-1[mW]": {
+          "dtype": "integer",
+          "unit": "mW"
+        },
+        "gpu-2[C]": {
+          "dtype": "integer",
+          "unit": "C"
+        },
+        "gpu-2[mW]": {
+          "dtype": "integer",
+          "unit": "mW"
+        },
+        "gpu-3[C]": {
+          "dtype": "integer",
+          "unit": "C"
+        },
+        "gpu-3[mW]": {
+          "dtype": "integer",
+          "unit": "mW"
+        },
+        "reading-time[ns]": {
+          "dtype": "integer",
+          "unit": "ns"
+        },
+        "timestamp": {
+          "dtype": "datetime string",
+          "unit": "naive local datetime"
+        }
+      },
+      "file_count": 302
+    },
+    {
+      "family": "raw_rapl_wattameter_log",
+      "fields": {
+        "cpu-0-core[W]": {
+          "dtype": "float",
+          "unit": "W"
+        },
+        "cpu-0-core[uJ]": {
+          "dtype": "integer",
+          "unit": "uJ"
+        },
+        "cpu-0[W]": {
+          "dtype": "float",
+          "unit": "W"
+        },
+        "cpu-0[uJ]": {
+          "dtype": "integer",
+          "unit": "uJ"
+        },
+        "cpu-1-core[W]": {
+          "dtype": "float",
+          "unit": "W"
+        },
+        "cpu-1-core[uJ]": {
+          "dtype": "integer",
+          "unit": "uJ"
+        },
+        "cpu-1[W]": {
+          "dtype": "float",
+          "unit": "W"
+        },
+        "cpu-1[uJ]": {
+          "dtype": "integer",
+          "unit": "uJ"
+        },
+        "reading-time[ns]": {
+          "dtype": "integer",
+          "unit": "ns"
+        },
+        "timestamp": {
+          "dtype": "datetime string",
+          "unit": "naive local datetime"
+        }
+      },
+      "file_count": 302
+    },
+    {
+      "family": "metadata:inference_offline_llama3_70b",
+      "fields": {
+        "batch_size": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "elapsed": {
+          "dtype": "float64",
+          "unit": "s"
+        },
+        "end_time": {
+          "dtype": "object",
+          "unit": "datetime_or_relative_time"
+        },
+        "max_output_tokens": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "mean_power[W]": {
+          "dtype": "float64",
+          "unit": "W"
+        },
+        "path_run": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "peak_power[W]": {
+          "dtype": "float64",
+          "unit": "W"
+        },
+        "repeat": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "seed": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "start_time": {
+          "dtype": "object",
+          "unit": "datetime_or_relative_time"
+        }
+      },
+      "source_relative_path": "01_aggregated_datasets/inference_offline_llama3_70b/metadata.csv"
+    },
+    {
+      "family": "metadata:inference_online_finite_llama3_70b",
+      "fields": {
+        "_repeat": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "backend": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "burstiness_x": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "burstiness_y": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "completed": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "dataset-name": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "dataset-path": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "date": {
+          "dtype": "object",
+          "unit": "datetime_or_relative_time"
+        },
+        "duration": {
+          "dtype": "float64",
+          "unit": "s"
+        },
+        "end_time": {
+          "dtype": "object",
+          "unit": "datetime_or_relative_time"
+        },
+        "end_time_exc": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "end_time_vllm": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "endpoint_type": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "execution_time_seconds": {
+          "dtype": "float64",
+          "unit": "s"
+        },
+        "hf-output-len": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "id": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "label": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "max_concurrency": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "max_concurrent_requests": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "max_output_tokens_per_s": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "mean_e2el_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "mean_itl_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "mean_power[W]": {
+          "dtype": "float64",
+          "unit": "W"
+        },
+        "mean_tpot_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "mean_ttft_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "median_e2el_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "median_itl_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "median_tpot_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "median_ttft_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "model_id": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "num-prompts": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "num_prompts": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "output_throughput": {
+          "dtype": "float64",
+          "unit": "count_per_second_or_metadata_defined"
+        },
+        "p10_e2el_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p10_itl_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p10_tpot_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p10_ttft_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p30_e2el_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p30_itl_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p30_tpot_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p30_ttft_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p50_e2el_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p50_itl_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p50_tpot_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p50_ttft_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p70_e2el_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p70_itl_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p70_tpot_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p70_ttft_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p90_e2el_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p90_itl_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p90_tpot_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "p90_ttft_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "path_run": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "peak_power[W]": {
+          "dtype": "float64",
+          "unit": "W"
+        },
+        "request_goodput": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "request_rate_x": {
+          "dtype": "int64",
+          "unit": "count_per_second_or_metadata_defined"
+        },
+        "request_rate_y": {
+          "dtype": "float64",
+          "unit": "count_per_second_or_metadata_defined"
+        },
+        "request_throughput": {
+          "dtype": "float64",
+          "unit": "count_per_second_or_metadata_defined"
+        },
+        "run_completed": {
+          "dtype": "bool",
+          "unit": "UNKNOWN"
+        },
+        "seed": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "start_time": {
+          "dtype": "object",
+          "unit": "datetime_or_relative_time"
+        },
+        "start_time_exc": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "start_time_vllm": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "std_e2el_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "std_itl_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "std_tpot_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "std_ttft_ms": {
+          "dtype": "float64",
+          "unit": "ms"
+        },
+        "tokenizer_id": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "total_input_tokens": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "total_output_tokens": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "total_token_throughput": {
+          "dtype": "float64",
+          "unit": "count_per_second_or_metadata_defined"
+        }
+      },
+      "source_relative_path": "01_aggregated_datasets/inference_online_finite_llama3_70b/metadata.csv"
+    },
+    {
+      "family": "metadata:inference_online_rate_llama3_70b",
+      "fields": {
+        "burstiness": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "dataset-name": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "dataset-path": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "end_time": {
+          "dtype": "object",
+          "unit": "datetime_or_relative_time"
+        },
+        "end_time_exc": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "execution_time_seconds": {
+          "dtype": "float64",
+          "unit": "s"
+        },
+        "id": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "mean_power[W]": {
+          "dtype": "float64",
+          "unit": "W"
+        },
+        "num-prompts": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "path_run": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "peak_power[W]": {
+          "dtype": "float64",
+          "unit": "W"
+        },
+        "request_rate": {
+          "dtype": "int64",
+          "unit": "count_per_second_or_metadata_defined"
+        },
+        "run_completed": {
+          "dtype": "bool",
+          "unit": "UNKNOWN"
+        },
+        "start_time": {
+          "dtype": "object",
+          "unit": "datetime_or_relative_time"
+        },
+        "start_time_exc": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        }
+      },
+      "source_relative_path": "01_aggregated_datasets/inference_online_rate_llama3_70b/metadata.csv"
+    },
+    {
+      "family": "metadata:training",
+      "fields": {
+        "Unnamed: 0": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "model": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "nodes": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "path_save": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        },
+        "repeat": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "slurmid": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        }
+      },
+      "source_relative_path": "01_aggregated_datasets/training/metadata.csv"
+    },
+    {
+      "encoding": "JSON",
+      "family": "raw_experiment_json:inference_offline_llama3_70b:config.json",
+      "fields": {
+        "SLURM_CPUS_ON_NODE": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "SLURM_GPUS_ON_NODE": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "SLURM_NODELIST": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "model": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        }
+      },
+      "record_count": 1,
+      "source_relative_path": "00_raw_datasets/inference_offline_llama3_70b/config.json"
+    },
+    {
+      "encoding": "JSON",
+      "family": "raw_experiment_json:inference_offline_llama3_70b:log.json",
+      "fields": {
+        "batch_size": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "elapsed": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "s"
+        },
+        "end_time": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "datetime_or_relative_time"
+        },
+        "max_output_tokens": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "repeat": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "seed": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "start_time": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "datetime_or_relative_time"
+        }
+      },
+      "record_count": 1200,
+      "source_relative_path": "00_raw_datasets/inference_offline_llama3_70b/log.json"
+    },
+    {
+      "encoding": "JSON",
+      "family": "raw_experiment_json:inference_online_finite_llama3_70b:config.json",
+      "fields": {
+        "experiments": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "output_directory": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "slurm": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        }
+      },
+      "record_count": 1,
+      "source_relative_path": "00_raw_datasets/inference_online_finite_llama3_70b/config.json"
+    },
+    {
+      "encoding": "JSON",
+      "family": "raw_experiment_json:inference_online_finite_llama3_70b:log.json",
+      "fields": {
+        "_repeat": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "burstiness": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "dataset-name": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "dataset-path": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "end_time": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "datetime_or_relative_time"
+        },
+        "hf-output-len": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "id": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "num-prompts": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "request_rate": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "count_per_second_or_metadata_defined"
+        },
+        "seed": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "start_time": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "datetime_or_relative_time"
+        }
+      },
+      "record_count": 1026,
+      "source_relative_path": "00_raw_datasets/inference_online_finite_llama3_70b/log.json"
+    },
+    {
+      "encoding": "JSON_LINES",
+      "family": "raw_experiment_json:inference_online_finite_llama3_70b:log_vllm.json",
+      "fields": {
+        "backend": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "burstiness": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "completed": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "date": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "datetime_or_relative_time"
+        },
+        "duration": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "s"
+        },
+        "endpoint_type": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "id": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "label": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "max_concurrency": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "max_concurrent_requests": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "max_output_tokens_per_s": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "mean_e2el_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "mean_itl_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "mean_tpot_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "mean_ttft_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "median_e2el_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "median_itl_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "median_tpot_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "median_ttft_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "model_id": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "num_prompts": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "output_throughput": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "count_per_second_or_metadata_defined"
+        },
+        "p10_e2el_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p10_itl_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p10_tpot_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p10_ttft_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p30_e2el_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p30_itl_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p30_tpot_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p30_ttft_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p50_e2el_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p50_itl_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p50_tpot_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p50_ttft_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p70_e2el_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p70_itl_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p70_tpot_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p70_ttft_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p90_e2el_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p90_itl_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p90_tpot_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "p90_ttft_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "request_goodput": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "request_rate": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "count_per_second_or_metadata_defined"
+        },
+        "request_throughput": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "count_per_second_or_metadata_defined"
+        },
+        "std_e2el_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "std_itl_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "std_tpot_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "std_ttft_ms": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "ms"
+        },
+        "tokenizer_id": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "total_input_tokens": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "total_output_tokens": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "total_token_throughput": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "count_per_second_or_metadata_defined"
+        }
+      },
+      "record_count": 1024,
+      "source_relative_path": "00_raw_datasets/inference_online_finite_llama3_70b/log_vllm.json"
+    },
+    {
+      "encoding": "JSON",
+      "family": "raw_experiment_json:inference_online_rate_llama3_70b:config.json",
+      "fields": {
+        "experiments": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "output_directory": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "slurm": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        }
+      },
+      "record_count": 1,
+      "source_relative_path": "00_raw_datasets/inference_online_rate_llama3_70b/config.json"
+    },
+    {
+      "encoding": "JSON",
+      "family": "raw_experiment_json:inference_online_rate_llama3_70b:log.json",
+      "fields": {
+        "burstiness": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "dataset-name": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "dataset-path": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "end_time": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "datetime_or_relative_time"
+        },
+        "id": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "num-prompts": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "UNKNOWN"
+        },
+        "request_rate": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "count_per_second_or_metadata_defined"
+        },
+        "start_time": {
+          "dtype": "nested_or_scalar_JSON",
+          "unit": "datetime_or_relative_time"
+        }
+      },
+      "record_count": 200,
+      "source_relative_path": "00_raw_datasets/inference_online_rate_llama3_70b/log.json"
+    },
+    {
+      "family": "aggregate_profile:inference_offline_llama3_70b",
+      "fields": {
+        "power[W]": {
+          "dtype": "double",
+          "unit": "W"
+        },
+        "timestep[s]": {
+          "dtype": "double",
+          "unit": "s"
+        }
+      },
+      "file_count": 1200,
+      "index": {
+        "name": "timestep[s]",
+        "unit": "s"
+      },
+      "source_relative_path_sample": "01_aggregated_datasets/inference_offline_llama3_70b/results/000000.parquet"
+    },
+    {
+      "family": "aggregate_profile:inference_online_finite_llama3_70b",
+      "fields": {
+        "power[W]": {
+          "dtype": "double",
+          "unit": "W"
+        },
+        "timestep[s]": {
+          "dtype": "double",
+          "unit": "s"
+        }
+      },
+      "file_count": 1026,
+      "index": {
+        "name": "timestep[s]",
+        "unit": "s"
+      },
+      "source_relative_path_sample": "01_aggregated_datasets/inference_online_finite_llama3_70b/results/000000.parquet"
+    },
+    {
+      "family": "aggregate_profile:inference_online_rate_llama3_70b",
+      "fields": {
+        "power[W]": {
+          "dtype": "double",
+          "unit": "W"
+        },
+        "timestep[s]": {
+          "dtype": "double",
+          "unit": "s"
+        }
+      },
+      "file_count": 200,
+      "index": {
+        "name": "timestep[s]",
+        "unit": "s"
+      },
+      "source_relative_path_sample": "01_aggregated_datasets/inference_online_rate_llama3_70b/results/000000.parquet"
+    },
+    {
+      "family": "aggregate_profile:training",
+      "fields": {
+        "power[W]": {
+          "dtype": "double",
+          "unit": "W"
+        },
+        "timestep[s]": {
+          "dtype": "double",
+          "unit": "s"
+        }
+      },
+      "file_count": 41,
+      "index": {
+        "name": "timestep[s]",
+        "unit": "s"
+      },
+      "source_relative_path_sample": "01_aggregated_datasets/training/results/000000.parquet"
+    },
+    {
+      "authority": "SYNTHETIC_NOT_MEASURED",
+      "family": "whole_facility:colocation:metadata.csv",
+      "fields": {
+        "Average Utilization": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "Performance Avg Daily Jobs": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "Performance Jobs Queued": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "Performance Mean Queue Time (hours)": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "Power 90th Percentile (MW)": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "Power Max (MW)": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "Power Mean (MW)": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "Power Median (MW)": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "Power Peak-to-Avg Ratio": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "Power Std Dev (MW)": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "Utilization 90th Percentile": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "Utilization Max": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "Utilization Mean": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "Utilization Median": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "Utilization Std Dev": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "name": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        }
+      },
+      "source_relative_path": "03_whole-facility_profiles/colocation/metadata.csv"
+    },
+    {
+      "authority": "SYNTHETIC_NOT_MEASURED",
+      "family": "whole_facility:simulated_data:colocation_10MW_2840nodes_20u_power.csv",
+      "fields": {
+        "power_W": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "timestamp": {
+          "dtype": "object",
+          "unit": "datetime_or_relative_time"
+        },
+        "utilization": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        }
+      },
+      "source_relative_path": "03_whole-facility_profiles/colocation/simulated_data/colocation_10MW_2840nodes_20u_power.csv"
+    },
+    {
+      "authority": "SYNTHETIC_NOT_MEASURED",
+      "family": "whole_facility:simulated_data:colocation_10MW_2840nodes_40u_power.csv",
+      "fields": {
+        "power_W": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "timestamp": {
+          "dtype": "object",
+          "unit": "datetime_or_relative_time"
+        },
+        "utilization": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        }
+      },
+      "source_relative_path": "03_whole-facility_profiles/colocation/simulated_data/colocation_10MW_2840nodes_40u_power.csv"
+    },
+    {
+      "authority": "SYNTHETIC_NOT_MEASURED",
+      "family": "whole_facility:simulated_data:colocation_10MW_2840nodes_60u_power.csv",
+      "fields": {
+        "power_W": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "timestamp": {
+          "dtype": "object",
+          "unit": "datetime_or_relative_time"
+        },
+        "utilization": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        }
+      },
+      "source_relative_path": "03_whole-facility_profiles/colocation/simulated_data/colocation_10MW_2840nodes_60u_power.csv"
+    },
+    {
+      "authority": "SYNTHETIC_NOT_MEASURED",
+      "family": "whole_facility:simulated_data:colocation_10MW_2840nodes_80u_power.csv",
+      "fields": {
+        "power_W": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "timestamp": {
+          "dtype": "object",
+          "unit": "datetime_or_relative_time"
+        },
+        "utilization": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        }
+      },
+      "source_relative_path": "03_whole-facility_profiles/colocation/simulated_data/colocation_10MW_2840nodes_80u_power.csv"
+    },
+    {
+      "authority": "SYNTHETIC_NOT_MEASURED",
+      "family": "whole_facility:inference:metadata.csv",
+      "fields": {
+        "Average Utilization": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "Avg Daily Prompts": {
+          "dtype": "int64",
+          "unit": "UNKNOWN"
+        },
+        "Avg Effective Request Rate": {
+          "dtype": "float64",
+          "unit": "count_per_second_or_metadata_defined"
+        },
+        "Avg Incoming Request Rate": {
+          "dtype": "float64",
+          "unit": "count_per_second_or_metadata_defined"
+        },
+        "Avg Incomplete Request Rate": {
+          "dtype": "float64",
+          "unit": "count_per_second_or_metadata_defined"
+        },
+        "Power 90th Percentile (MW)": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "Power Max (MW)": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "Power Mean (MW)": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "Power Median (MW)": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "Power Peak-to-Avg Ratio": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "Power Std Dev (MW)": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "Utilization 90th Percentile": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "Utilization Max": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "Utilization Mean": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "Utilization Median": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "Utilization Std Dev": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        },
+        "name": {
+          "dtype": "object",
+          "unit": "UNKNOWN"
+        }
+      },
+      "source_relative_path": "03_whole-facility_profiles/inference/metadata.csv"
+    },
+    {
+      "authority": "SYNTHETIC_NOT_MEASURED",
+      "family": "whole_facility:simulated_data:inference_1MW_283nodes_20u_power.csv",
+      "fields": {
+        "power_W": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "timestamp": {
+          "dtype": "object",
+          "unit": "datetime_or_relative_time"
+        },
+        "utilization": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        }
+      },
+      "source_relative_path": "03_whole-facility_profiles/inference/simulated_data/inference_1MW_283nodes_20u_power.csv"
+    },
+    {
+      "authority": "SYNTHETIC_NOT_MEASURED",
+      "family": "whole_facility:simulated_data:inference_1MW_283nodes_40u_power.csv",
+      "fields": {
+        "power_W": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "timestamp": {
+          "dtype": "object",
+          "unit": "datetime_or_relative_time"
+        },
+        "utilization": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        }
+      },
+      "source_relative_path": "03_whole-facility_profiles/inference/simulated_data/inference_1MW_283nodes_40u_power.csv"
+    },
+    {
+      "authority": "SYNTHETIC_NOT_MEASURED",
+      "family": "whole_facility:simulated_data:inference_1MW_283nodes_60u_power.csv",
+      "fields": {
+        "power_W": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "timestamp": {
+          "dtype": "object",
+          "unit": "datetime_or_relative_time"
+        },
+        "utilization": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        }
+      },
+      "source_relative_path": "03_whole-facility_profiles/inference/simulated_data/inference_1MW_283nodes_60u_power.csv"
+    },
+    {
+      "authority": "SYNTHETIC_NOT_MEASURED",
+      "family": "whole_facility:simulated_data:inference_1MW_283nodes_80u_power.csv",
+      "fields": {
+        "power_W": {
+          "dtype": "float64",
+          "unit": "W_or_filename_defined"
+        },
+        "timestamp": {
+          "dtype": "object",
+          "unit": "datetime_or_relative_time"
+        },
+        "utilization": {
+          "dtype": "float64",
+          "unit": "UNKNOWN"
+        }
+      },
+      "source_relative_path": "03_whole-facility_profiles/inference/simulated_data/inference_1MW_283nodes_80u_power.csv"
+    }
+  ],
+  "parameter_contract": {
+    "cross_sensor_alignment": "LINEAR_INTERPOLATION_COMMON_OVERLAP",
+    "native_raw_intervals_seconds": {
+      "inference": 0.1,
+      "training": 0.2
+    },
+    "robust_envelope": "CLASS_STRATIFIED_RUN_MEAN_P05_MEDIAN_OF_P50_P95",
+    "sample_quantiles": "NUMPY_LINEAR",
+    "sensor_invalid": "NONFINITE_NEGATIVE_OR_ABOVE_800W",
+    "time_integration": "TRAPEZOID_ACTUAL_TIMESTAMPS"
+  },
+  "power_unit": "W",
+  "schema_source": "HEADERS_AND_FILE_SCHEMAS_NOT_FILENAME_ONLY",
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+  "source_code_commit": "d14499748e3131723d2a208b0b2d423bdd2929a2",
+  "timezone_assumption": "SOURCE_TIMESTAMPS_NAIVE; NO_TIMEZONE CONVERSION; ELAPSED DIFFERENCES ONLY"
+}

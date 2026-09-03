@@ -1,0 +1,41 @@
+{
+  "dataset_doi": "10.7799/3025227",
+  "dataset_id": 312,
+  "dataset_supplied_backward_fill_not_used_as_hidden_authority": true,
+  "dataset_version": 2,
+  "energy_unit": "Wh",
+  "invalid_samples_excluded_from_authoritative_component_statistics": 8560,
+  "parameter_contract": {
+    "cross_sensor_alignment": "LINEAR_INTERPOLATION_COMMON_OVERLAP",
+    "native_raw_intervals_seconds": {
+      "inference": 0.1,
+      "training": 0.2
+    },
+    "robust_envelope": "CLASS_STRATIFIED_RUN_MEAN_P05_MEDIAN_OF_P50_P95",
+    "sample_quantiles": "NUMPY_LINEAR",
+    "sensor_invalid": "NONFINITE_NEGATIVE_OR_ABOVE_800W",
+    "time_integration": "TRAPEZOID_ACTUAL_TIMESTAMPS"
+  },
+  "power_unit": "W",
+  "rules": {
+    "SENSOR_INVALID": "nonfinite, negative, or >800 W per reported device channel",
+    "STRUCTURAL_INVALID": "unparseable log, missing paired node/device log, empty experiment window",
+    "UNKNOWN": "retained and labeled unless required semantics are absent",
+    "VALID_EXTREME": "finite 0..800 W inclusive; retained regardless of distributional extremeness"
+  },
+  "runs_removed_for_being_extreme": 0,
+  "sensor_invalid_source_files": 350,
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+  "source_code_commit": "d14499748e3131723d2a208b0b2d423bdd2929a2",
+  "structural_invalid_runs": 0,
+  "timezone_assumption": "SOURCE_TIMESTAMPS_NAIVE; NO_TIMEZONE CONVERSION; ELAPSED DIFFERENCES ONLY",
+  "valid_extreme_retained_source_field_records": 1154
+}

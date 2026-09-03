@@ -1,0 +1,79 @@
+{
+  "dataset_doi": "10.7799/3025227",
+  "dataset_id": 312,
+  "dataset_version": 2,
+  "dimensions": {
+    "batch_size": "EXPLICIT_FOR_OFFLINE_INFERENCE; PAPER/DATASET LIMITED FOR TRAINING",
+    "gpus_per_node": [
+      4
+    ],
+    "model_family": [
+      "LLAMA2_70B",
+      "LLAMA3_70B",
+      "STABLE_DIFFUSION_V2"
+    ],
+    "node_count": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "precision": [
+      "UNKNOWN"
+    ],
+    "repetition_index": "PRESENT_WHERE_METADATA_OR_SLURM_REPETITION_ORDER_SUPPORTS_IT",
+    "sequence_length": "UNKNOWN",
+    "task_type": [
+      "FINE_TUNING",
+      "INFERENCE",
+      "TRAINING"
+    ],
+    "total_gpu_count": [
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "workload_class": [
+      "FINE_TUNING_LORA",
+      "INFERENCE_OFFLINE",
+      "INFERENCE_ONLINE_FINITE",
+      "INFERENCE_ONLINE_RATE",
+      "TRAINING_STABLE_DIFFUSION"
+    ]
+  },
+  "energy_unit": "Wh",
+  "evidence": [
+    "raw path and slurmid structure",
+    "raw config.json/log.json",
+    "aggregated metadata.csv",
+    "dataset README.md and accompanying paper"
+  ],
+  "experiment_count": 2472,
+  "parameter_contract": {
+    "cross_sensor_alignment": "LINEAR_INTERPOLATION_COMMON_OVERLAP",
+    "native_raw_intervals_seconds": {
+      "inference": 0.1,
+      "training": 0.2
+    },
+    "robust_envelope": "CLASS_STRATIFIED_RUN_MEAN_P05_MEDIAN_OF_P50_P95",
+    "sample_quantiles": "NUMPY_LINEAR",
+    "sensor_invalid": "NONFINITE_NEGATIVE_OR_ABOVE_800W",
+    "time_integration": "TRAPEZOID_ACTUAL_TIMESTAMPS"
+  },
+  "power_unit": "W",
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+  "source_code_commit": "d14499748e3131723d2a208b0b2d423bdd2929a2",
+  "timezone_assumption": "SOURCE_TIMESTAMPS_NAIVE; NO_TIMEZONE CONVERSION; ELAPSED DIFFERENCES ONLY",
+  "unsupported_dimensions_are_UNKNOWN": true
+}

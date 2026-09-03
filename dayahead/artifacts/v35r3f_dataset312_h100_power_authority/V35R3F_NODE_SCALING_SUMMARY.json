@@ -1,0 +1,128 @@
+{
+  "dataset_doi": "10.7799/3025227",
+  "dataset_id": 312,
+  "dataset_version": 2,
+  "energy_unit": "Wh",
+  "matched_series_only": true,
+  "maximum_directly_observed_GPUs": 64,
+  "maximum_directly_observed_nodes": 16,
+  "node_counts": [
+    1,
+    2,
+    4,
+    8,
+    16
+  ],
+  "parameter_contract": {
+    "cross_sensor_alignment": "LINEAR_INTERPOLATION_COMMON_OVERLAP",
+    "native_raw_intervals_seconds": {
+      "inference": 0.1,
+      "training": 0.2
+    },
+    "robust_envelope": "CLASS_STRATIFIED_RUN_MEAN_P05_MEDIAN_OF_P50_P95",
+    "sample_quantiles": "NUMPY_LINEAR",
+    "sensor_invalid": "NONFINITE_NEGATIVE_OR_ABOVE_800W",
+    "time_integration": "TRAPEZOID_ACTUAL_TIMESTAMPS"
+  },
+  "power_unit": "W",
+  "series": {
+    "LLAMA2_70B:GPU_ONLY_POWER": {
+      "node_counts": [
+        2,
+        4,
+        8,
+        16
+      ],
+      "per_node_mean_power_W": [
+        2366.859256,
+        2313.731057,
+        2208.457363,
+        2146.110298
+      ],
+      "scaling_efficiency": [
+        1.0,
+        0.977553,
+        0.933075,
+        0.906733
+      ]
+    },
+    "LLAMA2_70B:GPU_PLUS_RAPL_PACKAGE_COMPONENT_SUM": {
+      "node_counts": [
+        2,
+        4,
+        8,
+        16
+      ],
+      "per_node_mean_power_W": [
+        2630.546425,
+        2575.689077,
+        2469.069319,
+        2401.467161
+      ],
+      "scaling_efficiency": [
+        1.0,
+        0.979146,
+        0.938615,
+        0.912916
+      ]
+    },
+    "STABLE_DIFFUSION_V2:GPU_ONLY_POWER": {
+      "node_counts": [
+        1,
+        2,
+        4,
+        8,
+        16
+      ],
+      "per_node_mean_power_W": [
+        2469.599483,
+        2416.005295,
+        2152.706075,
+        1990.890843,
+        1822.922272
+      ],
+      "scaling_efficiency": [
+        1.0,
+        0.978298,
+        0.871682,
+        0.806159,
+        0.738145
+      ]
+    },
+    "STABLE_DIFFUSION_V2:GPU_PLUS_RAPL_PACKAGE_COMPONENT_SUM": {
+      "node_counts": [
+        1,
+        2,
+        4,
+        8,
+        16
+      ],
+      "per_node_mean_power_W": [
+        2705.938576,
+        2656.492633,
+        2396.466094,
+        2235.033415,
+        2067.138588
+      ],
+      "scaling_efficiency": [
+        1.0,
+        0.981727,
+        0.885632,
+        0.825973,
+        0.763927
+      ]
+    }
+  },
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+  "source_code_commit": "d14499748e3131723d2a208b0b2d423bdd2929a2",
+  "timezone_assumption": "SOURCE_TIMESTAMPS_NAIVE; NO_TIMEZONE CONVERSION; ELAPSED DIFFERENCES ONLY",
+  "warning": "Weak scaling changes global batch/work; coefficients are descriptive, not causal node-count-only effects."
+}

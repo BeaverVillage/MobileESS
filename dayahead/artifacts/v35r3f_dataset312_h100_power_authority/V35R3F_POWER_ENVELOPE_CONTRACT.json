@@ -1,0 +1,48 @@
+{
+  "AIDC_IT_LOAD_AUTHORIZATION": "NOT_AUTHORIZED_WITHOUT_MISSING_NODE_INPUT_COMPONENTS",
+  "P_CENTER": "MEDIAN_ACROSS_WORKLOAD_CLASSES_OF_WITHIN_CLASS_RUN_MEAN_P50",
+  "P_HIGH": "MAX_ACROSS_WORKLOAD_CLASSES_OF_WITHIN_CLASS_RUN_MEAN_P95",
+  "P_LOW": "MIN_ACROSS_WORKLOAD_CLASSES_OF_WITHIN_CLASS_RUN_MEAN_P05",
+  "ROBUST_ENVELOPE_AVAILABLE": "YES",
+  "dataset_doi": "10.7799/3025227",
+  "dataset_id": 312,
+  "dataset_version": 2,
+  "energy_unit": "Wh",
+  "experiment_run_level_quantiles_used": true,
+  "grid_result_used_for_tuning": false,
+  "parameter_contract": {
+    "cross_sensor_alignment": "LINEAR_INTERPOLATION_COMMON_OVERLAP",
+    "native_raw_intervals_seconds": {
+      "inference": 0.1,
+      "training": 0.2
+    },
+    "robust_envelope": "CLASS_STRATIFIED_RUN_MEAN_P05_MEDIAN_OF_P50_P95",
+    "sample_quantiles": "NUMPY_LINEAR",
+    "sensor_invalid": "NONFINITE_NEGATIVE_OR_ABOVE_800W",
+    "time_integration": "TRAPEZOID_ACTUAL_TIMESTAMPS"
+  },
+  "partial_or_shared_unknown_workload_handling": "UNSUPPORTED_FAIL_CLOSED",
+  "pooled_quantiles_also_reported": true,
+  "power_unit": "W",
+  "primary_boundary": "GPU_PLUS_RAPL_PACKAGE_COMPONENT_SUM",
+  "primary_boundary_limit": "COMPONENT_SUM_ONLY_NOT_WHOLE_NODE_IT",
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+  "source_code_commit": "d14499748e3131723d2a208b0b2d423bdd2929a2",
+  "state_dimensions": [
+    "node_count",
+    "full_node_exclusive",
+    "power_boundary",
+    "normalization"
+  ],
+  "time_sample_quantiles_used_for_envelope": false,
+  "timezone_assumption": "SOURCE_TIMESTAMPS_NAIVE; NO_TIMEZONE CONVERSION; ELAPSED DIFFERENCES ONLY",
+  "unknown_workload_class_handling": "USE_CLASS_STRATIFIED_ENVELOPE_ONLY_FOR_DIRECTLY_SUPPORTED_FULL_NODE_EXCLUSIVE_COMPONENT_BOUNDARY"
+}

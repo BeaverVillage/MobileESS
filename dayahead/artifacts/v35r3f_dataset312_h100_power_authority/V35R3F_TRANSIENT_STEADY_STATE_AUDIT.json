@@ -1,0 +1,45 @@
+{
+  "dataset_defined": {
+    "offline_inference": "benchmark record start/end",
+    "online_finite": "10 s removed at both sides plus supplied fixed threshold start heuristic",
+    "online_rate": "start + 1 minute then up to 3 minute fixed window",
+    "training": "FULL CAPTURE; includes approximately three-minute initialization ramp per paper; no official steady-state cut"
+  },
+  "dataset_doi": "10.7799/3025227",
+  "dataset_id": 312,
+  "dataset_version": 2,
+  "diagnostic_steady_state_computed": false,
+  "energy_unit": "Wh",
+  "new_favorable_trimming_rule_invented": false,
+  "official_universal_steady_state_region": "NO",
+  "parameter_contract": {
+    "cross_sensor_alignment": "LINEAR_INTERPOLATION_COMMON_OVERLAP",
+    "native_raw_intervals_seconds": {
+      "inference": 0.1,
+      "training": 0.2
+    },
+    "robust_envelope": "CLASS_STRATIFIED_RUN_MEAN_P05_MEDIAN_OF_P50_P95",
+    "sample_quantiles": "NUMPY_LINEAR",
+    "sensor_invalid": "NONFINITE_NEGATIVE_OR_ABOVE_800W",
+    "time_integration": "TRAPEZOID_ACTUAL_TIMESTAMPS"
+  },
+  "power_unit": "W",
+  "primary_statistics": "FULL_DATASET_DEFINED_RUN_OR_WINDOW",
+  "segmentation_warnings": {
+    "inference_offline_llama3_70b": 0,
+    "inference_online_finite_llama3_70b": 2,
+    "inference_online_rate_llama3_70b": 0
+  },
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+  "source_code_commit": "d14499748e3131723d2a208b0b2d423bdd2929a2",
+  "timezone_assumption": "SOURCE_TIMESTAMPS_NAIVE; NO_TIMEZONE CONVERSION; ELAPSED DIFFERENCES ONLY",
+  "warmup_cooldown_authority_for_production": "NOT_ESTABLISHED"
+}

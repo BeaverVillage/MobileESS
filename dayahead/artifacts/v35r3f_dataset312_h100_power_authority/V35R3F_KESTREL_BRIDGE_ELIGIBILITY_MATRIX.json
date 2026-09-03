@@ -1,0 +1,94 @@
+{
+  "DATASET312_TO_KESTREL_JOB_DIRECT_JOIN": "FORBIDDEN",
+  "PRODUCTION_INTEGRATION_RECOMMENDED": "NO",
+  "RADDIT_CPU_POWER_USED_FOR_H100_MAGNITUDE": "NO",
+  "dataset_doi": "10.7799/3025227",
+  "dataset_id": 312,
+  "dataset_version": 2,
+  "energy_unit": "Wh",
+  "parameter_contract": {
+    "cross_sensor_alignment": "LINEAR_INTERPOLATION_COMMON_OVERLAP",
+    "native_raw_intervals_seconds": {
+      "inference": 0.1,
+      "training": 0.2
+    },
+    "robust_envelope": "CLASS_STRATIFIED_RUN_MEAN_P05_MEDIAN_OF_P50_P95",
+    "sample_quantiles": "NUMPY_LINEAR",
+    "sensor_invalid": "NONFINITE_NEGATIVE_OR_ABOVE_800W",
+    "time_integration": "TRAPEZOID_ACTUAL_TIMESTAMPS"
+  },
+  "power_unit": "W",
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+  "source_code_commit": "d14499748e3131723d2a208b0b2d423bdd2929a2",
+  "targets": [
+    {
+      "classification": "DIAGNOSTIC_ONLY",
+      "reason": "GPU+RAPL package components measured; whole-node input is not",
+      "target": "Full active H100 node power",
+      "target_number": 1
+    },
+    {
+      "classification": "DIAGNOSTIC_ONLY",
+      "reason": "components directly measured at 1/2/4/8/16 nodes",
+      "target": "Multi-node exclusive workload power",
+      "target_number": 2
+    },
+    {
+      "classification": "UNSUPPORTED",
+      "reason": "no partial GPU allocation experiment",
+      "target": "Partial-GPU node power",
+      "target_number": 3
+    },
+    {
+      "classification": "UNSUPPORTED",
+      "reason": "no co-residency experiment",
+      "target": "Shared-node co-resident multi-job power",
+      "target_number": 4
+    },
+    {
+      "classification": "UNSUPPORTED",
+      "reason": "no dedicated idle trace in frozen archive",
+      "target": "Idle H100 node power",
+      "target_number": 5
+    },
+    {
+      "classification": "UNSUPPORTED",
+      "reason": "direct Dataset312-to-Kestrel job join forbidden",
+      "target": "Per-job H100 power",
+      "target_number": 6
+    },
+    {
+      "classification": "DIRECTLY_SUPPORTED",
+      "reason": "only for included exclusive benchmark classes and component boundaries",
+      "target": "Workload-class-specific H100 power",
+      "target_number": 7
+    },
+    {
+      "classification": "SUPPORTED_WITH_ROBUST_ENVELOPE",
+      "reason": "exclusive full-node component boundary only",
+      "target": "Class-agnostic H100 power envelope",
+      "target_number": 8
+    },
+    {
+      "classification": "DIAGNOSTIC_ONLY",
+      "reason": "workload ramps captured, equipment power-on/off not measured",
+      "target": "Transition power",
+      "target_number": 9
+    },
+    {
+      "classification": "UNSUPPORTED",
+      "reason": "included profiles are synthetic DIPLOEE outputs",
+      "target": "Facility-level power",
+      "target_number": 10
+    }
+  ],
+  "timezone_assumption": "SOURCE_TIMESTAMPS_NAIVE; NO_TIMEZONE CONVERSION; ELAPSED DIFFERENCES ONLY"
+}

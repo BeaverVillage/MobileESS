@@ -1,0 +1,63 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "failure_signature": "NUMPY_1_26_HAS_NO_TRAPEZOID",
+      "repair": "USE_EQUIVALENT_NUMPY_TRAPZ_API",
+      "science_neutral": true
+    },
+    {
+      "attempt": 1,
+      "failure_signature": "WINDOWS_PATH_EXCEEDS_LEGACY_MAX_PATH",
+      "repair": "USE_WINDOWS_EXTENDED_LENGTH_PREFIX_FOR_RAW_LOG_READS",
+      "science_neutral": true
+    },
+    {
+      "attempt": 1,
+      "failure_signature": "PARQUET_MIXED_METADATA_SCALAR_TYPES",
+      "repair": "NORMALIZE_CATEGORICAL_METADATA_COLUMNS_TO_EXPLICIT_STRINGS",
+      "science_neutral": true
+    },
+    {
+      "attempt": 1,
+      "failure_signature": "MULTISTAGE_ALIGNMENT_ENDPOINT_LOSS",
+      "repair": "ALIGN_ALL_COMPATIBLE_RAW_CHANNELS_ONCE_ON_COMMON_OVERLAP",
+      "science_neutral": true
+    },
+    {
+      "attempt": 1,
+      "failure_signature": "ALIGNED_GRID_ENERGY_WAS_NOT_NATIVE_DELTA_INTEGRAL",
+      "repair": "INTEGRATE_EACH_COMPATIBLE_CHANNEL_ON_ACTUAL_NATIVE_TIMESTAMPS_OVER_COMMON_SUPPORT",
+      "science_neutral": true
+    }
+  ],
+  "dataset_doi": "10.7799/3025227",
+  "dataset_id": 312,
+  "dataset_version": 2,
+  "energy_unit": "Wh",
+  "parameter_contract": {
+    "cross_sensor_alignment": "LINEAR_INTERPOLATION_COMMON_OVERLAP",
+    "native_raw_intervals_seconds": {
+      "inference": 0.1,
+      "training": 0.2
+    },
+    "robust_envelope": "CLASS_STRATIFIED_RUN_MEAN_P05_MEDIAN_OF_P50_P95",
+    "sample_quantiles": "NUMPY_LINEAR",
+    "sensor_invalid": "NONFINITE_NEGATIVE_OR_ABOVE_800W",
+    "time_integration": "TRAPEZOID_ACTUAL_TIMESTAMPS"
+  },
+  "power_unit": "W",
+  "science_semantics_changed": false,
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+  "source_code_commit": "d14499748e3131723d2a208b0b2d423bdd2929a2",
+  "timezone_assumption": "SOURCE_TIMESTAMPS_NAIVE; NO_TIMEZONE CONVERSION; ELAPSED DIFFERENCES ONLY",
+  "unique_failure_signatures": 5
+}
