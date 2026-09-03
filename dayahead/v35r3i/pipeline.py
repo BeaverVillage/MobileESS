@@ -380,17 +380,35 @@ def build(test_passed: int = 0, test_failed: int = 0) -> Path:
 
     v22_scale = V22 / "V22SR1_FINAL_IEEE123_AIDC_SCALE.json"
     v22_capacity = V22 / "V22SR1_CAPACITY_CONVERSION_AUDIT.json"
+    v22_utilisation = V22 / "V22SR1_LOAD_UTILISATION_AUTHORITY.json"
+    v22_method = V22 / "V22SR1_SCALING_METHOD_FREEZE.json"
     v35a_review = V35A / "V35R3A_FINAL_REVIEW.json"
+    v35b_h0 = V35B / "V35R3B_MODE_H0_RESULTS.json"
     frozen = json.loads(v22_scale.read_text(encoding="utf-8"))
     capacity = json.loads(v22_capacity.read_text(encoding="utf-8"))
+    utilisation = json.loads(v22_utilisation.read_text(encoding="utf-8"))
+    h0 = json.loads(v35b_h0.read_text(encoding="utf-8"))
+    frozen_rw_it = np.asarray(h0["IT_power_kW_96_slots"], dtype=float)
+    if len(frozen_rw_it) != APR01_SLOTS or not np.allclose(frozen_rw_it, FROZEN_IT_REFERENCE_KW, atol=1e-12):
+        raise AssertionError("V35R3I_FROZEN_H0_TRAJECTORY_MISMATCH")
     if not math.isclose(frozen["final_aggregate_AIDC_IT_peak_MW_at_PUE_1_30"] * 1000, FROZEN_IT_REFERENCE_KW, abs_tol=1e-12):
         raise AssertionError("V35R3I_FROZEN_IT_REFERENCE_MISMATCH")
     scale_audit = {
         "artifact_id": "V35R3I_FROZEN_AIDC_POWER_SCALE_AUDIT_V1",
-        "sources": [source_record(v22_scale), source_record(v22_capacity), source_record(v35a_review)],
+        "sources": [source_record(v22_scale), source_record(v22_capacity),
+                    source_record(v22_utilisation), source_record(v22_method),
+                    source_record(v35a_review), source_record(v35b_h0)],
         "AIDC_total_IT_equivalent_capacity_MW": float(capacity["capacity_total_MW"]),
+        "frozen_primary_utilisation": float(utilisation["primary"]["value"]),
         "frozen_IEEE123_aggregate_C0_IT_reference_kW": FROZEN_IT_REFERENCE_KW,
         "frozen_aggregate_AIDC_PCC_peak_kW_at_PUE_1_30": float(frozen["final_aggregate_AIDC_PCC_peak_MW"] * 1000),
+        "frozen_AIDC_site_count": 12,
+        "twelve_site_scaling": "CAPACITY_WEIGHTED_SITE_ALLOCATION",
+        "real_world_to_IEEE123_scaling": "rho * frozen IEEE123 background peak demand",
+        "real_equivalent_rho": float(frozen["real_equivalent_rho"]),
+        "current_homogeneous_IT_proxy_kW_per_requested_GPU": float(h0["homogeneous_IT_kW_per_requested_GPU"]),
+        "legacy_node_power_coefficient_role": "FROZEN_H0_PROXY_ONLY; NOT USED TO FIT THE NEW PHYSICAL GPU DELTA",
+        "current_C0_C1_relation": "C0 is the frozen IT reference; C1 is the existing quasi-static thermal/PUE facility path with PUE authority 1.30 and is gated here by site binding.",
         "scheduler_H100_equivalent_pool_GPUs": GPU_CAPACITY,
         "scheduler_pool_and_frozen_AIDC_reference_same_testbed_equivalent_scale": True,
         "AIDC_DELTA_SCALE_BINDING": "PASS", "physical_kW_delta_scale_factor": AIDC_DELTA_SCALE,
@@ -442,10 +460,10 @@ def build(test_passed: int = 0, test_failed: int = 0) -> Path:
     })
 
     it = power[["apr01_slot", "issue_relative_slot", "timestamp_AEST"]].copy()
-    it["P_IT_RW_FROZEN_kW"] = FROZEN_IT_REFERENCE_KW
+    it["P_IT_RW_FROZEN_kW"] = frozen_rw_it
     for name in SCENARIOS:
         it[f"Delta_P_GPU_{name}_kW"] = power[f"Delta_P_GPU_{name}_kW"]
-        it[f"P_IT_RSP_{name}_kW"] = FROZEN_IT_REFERENCE_KW + AIDC_DELTA_SCALE * power[f"Delta_P_GPU_{name}_kW"]
+        it[f"P_IT_RSP_{name}_kW"] = frozen_rw_it + AIDC_DELTA_SCALE * power[f"Delta_P_GPU_{name}_kW"].to_numpy()
     it.to_csv(ARTIFACTS / "V35R3I_RW_RSP_AIDC_IT_CANDIDATE.csv", index=False)
 
     signs = np.column_stack([power[f"Delta_P_GPU_{x}_kW"].to_numpy() for x in SCENARIOS])
