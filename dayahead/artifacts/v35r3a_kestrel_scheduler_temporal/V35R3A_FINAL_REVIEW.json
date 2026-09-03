@@ -1,0 +1,401 @@
+{
+  "artifact_id": "V35R3A_FINAL_REVIEW_V1",
+  "numbered_report": {
+    "1": {
+      "label": "source baseline HEAD",
+      "value": "1b6916f2829106db9ad5a3589e0cdfa0508c4d5b"
+    },
+    "10": {
+      "label": "NLR HPC docs HEAD",
+      "value": "914f6da551424f6227e9bd65e0745b6686a6cbd8"
+    },
+    "11": {
+      "label": "Kestrel archive integrity",
+      "value": "PASS"
+    },
+    "12": {
+      "label": "runnable vendor components",
+      "value": "RADDiT/FastSim source inspectable; direct FastSim run unavailable"
+    },
+    "13": {
+      "label": "redacted/LFS/missing components",
+      "value": [
+        "sacctmgr association dump",
+        "sacctmgr QoS dump",
+        "node topology/state dump",
+        "reservation history",
+        "Kestrel slurm.conf priority weights",
+        "RADDiT frozen runtime result is a Git-LFS pointer"
+      ]
+    },
+    "14": {
+      "label": "authority level",
+      "value": "PUBLIC_POLICY_RELATIVE_SCHEDULER_TWIN"
+    },
+    "15": {
+      "label": "priority components",
+      "value": [
+        "QoS precedence: high before normal; standby only when otherwise idle",
+        "eligible age represented by submission-order FIFO",
+        "partition semantics preserved; *-stdby remains protected",
+        "stable job-ID tie breaking",
+        "SiteFactor reserved for eligible normal-QoS order changes"
+      ]
+    },
+    "16": {
+      "label": "backfill implementation",
+      "value": {
+        "duration": "submission-side requested walltime",
+        "hole_use": "later jobs may use an earlier compatible hole without moving an existing reservation",
+        "main_loop": "priority-order reservation",
+        "preemption": false,
+        "type": "CONSERVATIVE_REQUESTED_WALLTIME_FIRST_FIT"
+      }
+    },
+    "17": {
+      "label": "resource model",
+      "value": "156 shareable H100 nodes / 624 GPU aggregate feasibility; exact node packing unavailable"
+    },
+    "18": {
+      "label": "baseline fidelity metrics",
+      "value": {
+        "actual_wait_P50_hours": 0.0008333333333333334,
+        "actual_wait_P95_hours": 31.15416666666667,
+        "actual_wait_max_hours": 93.16583333333334,
+        "actual_wait_mean_hours": 4.3586474581921495,
+        "compared_start_count": 22331,
+        "qos": "ALL",
+        "replay_wait_P50_hours": 20.20138888888889,
+        "replay_wait_P95_hours": 372.0336111111111,
+        "replay_wait_max_hours": 442.6822222222222,
+        "replay_wait_mean_hours": 79.39226772448863,
+        "start_MAE_hours": 75.35254259151453,
+        "start_P95_AE_hours": 355.445,
+        "start_median_AE_hours": 20.19,
+        "start_order_spearman": 0.45960769738330454
+      }
+    },
+    "19": {
+      "label": "known limitations",
+      "value": [
+        "Kestrel priority weights and flags",
+        "fair-share usage tree/history",
+        "association priorities",
+        "reservation/dependency/hold/requeue history",
+        "complete node-state/topology history"
+      ]
+    },
+    "2": {
+      "label": "branch",
+      "value": "codex/v35r3a-kestrel-scheduler-temporal"
+    },
+    "20": {
+      "label": "running jobs/resources",
+      "value": {
+        "job_count": 243,
+        "policy": "FIXED_NON_PREEMPTIVE",
+        "requested_GPU_hours": 25571.133333333335,
+        "requested_GPUs_sum": 498.0,
+        "requested_nodes_sum": 267.0
+      }
+    },
+    "21": {
+      "label": "pending jobs/resources",
+      "value": {
+        "job_count": 421,
+        "known_requested_GPU_hours": 14832.0,
+        "known_requested_GPUs_sum": 384.0,
+        "partial_request_count": 336,
+        "partial_temporal_queue_controlled_count": 0,
+        "partition_counts": {
+          "gpu-h100-stdby": 421
+        },
+        "qos_counts": {
+          "normal": 1,
+          "standby": 420
+        },
+        "requested_node_hours": 16608.0,
+        "requested_nodes_sum": 421.0,
+        "schedulable_request_job_count": 339,
+        "temporal_queue_controlled_count": 0,
+        "unknown_GPU_request_count": 82,
+        "wallclock_hours": {
+          "max": 48.0,
+          "min": 36.0,
+          "p50": 36.0,
+          "p95": 48.0
+        }
+      }
+    },
+    "22": {
+      "label": "protected high-QoS jobs",
+      "value": 0
+    },
+    "23": {
+      "label": "temporal queue-controlled candidates",
+      "value": {
+        "authority_note": "Normal QoS, complete submission request, non-standby partition.",
+        "job_count": 0,
+        "known_requested_GPU_hours": 0.0,
+        "known_requested_GPUs": 0.0,
+        "subset_of_temporal": true,
+        "workload_class": "TEMPORAL_QUEUE_CONTROLLED"
+      }
+    },
+    "24": {
+      "label": "PARTIAL/shared temporal candidates",
+      "value": 0
+    },
+    "25": {
+      "label": "spatio-temporal candidates",
+      "value": {
+        "authority_note": "None: submission-time exclusivity and exact AIDC binding are absent.",
+        "job_count": 0,
+        "known_requested_GPU_hours": 0.0,
+        "known_requested_GPUs": 0.0,
+        "subset_of_temporal": true,
+        "workload_class": "SPATIO_TEMPORAL_CANDIDATE"
+      }
+    },
+    "26": {
+      "label": "unknown/excluded jobs",
+      "value": 82
+    },
+    "27": {
+      "label": "completed jobs",
+      "value": 75
+    },
+    "28": {
+      "label": "completed GPU-hours",
+      "value": 2786.75
+    },
+    "29": {
+      "label": "mean/P95/max wait",
+      "value": [
+        40.0375,
+        40.0375,
+        40.0375
+      ]
+    },
+    "3": {
+      "label": "worktree path",
+      "value": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\MobileESS_v35r3a_kestrel_scheduler_temporal"
+    },
+    "30": {
+      "label": "terminal pending GPU-hours",
+      "value": 3456.0
+    },
+    "31": {
+      "label": "critical W1/W3/W5 power",
+      "value": {
+        "W1_energy_kWh": 101.69399845345477,
+        "W1_mean_kW": 406.77599381381907,
+        "W1_peak_kW": 406.77599381381907,
+        "W3_energy_kWh": 305.0819953603643,
+        "W3_mean_kW": 406.77599381381907,
+        "W3_peak_kW": 406.77599381381907,
+        "W5_energy_kWh": 508.4699922672738,
+        "W5_mean_kW": 406.77599381381907,
+        "W5_peak_kW": 406.77599381381907
+      }
+    },
+    "32": {
+      "label": "Planning rho/critical exposure",
+      "value": [
+        0.5670071217020519,
+        null
+      ]
+    },
+    "33": {
+      "label": "reprioritized jobs",
+      "value": 0
+    },
+    "34": {
+      "label": "advanced jobs",
+      "value": 0
+    },
+    "35": {
+      "label": "delayed jobs",
+      "value": 0
+    },
+    "36": {
+      "label": "shifted GPU-hours",
+      "value": 0.0
+    },
+    "37": {
+      "label": "W1 power reduction",
+      "value": 0.0
+    },
+    "38": {
+      "label": "W3 power reduction",
+      "value": 0.0
+    },
+    "39": {
+      "label": "W5 power reduction",
+      "value": 0.0
+    },
+    "4": {
+      "label": "final HEAD",
+      "value": "RECORDED_IN_FINAL_RESPONSE_AFTER_COMMIT"
+    },
+    "40": {
+      "label": "maximum rebound",
+      "value": 0.0
+    },
+    "41": {
+      "label": "Planning rho improvement",
+      "value": 0.0
+    },
+    "42": {
+      "label": "critical-exposure improvement",
+      "value": 0.0
+    },
+    "43": {
+      "label": "number of modified priority pairs",
+      "value": 0
+    },
+    "44": {
+      "label": "total SiteFactor perturbation",
+      "value": 0
+    },
+    "45": {
+      "label": "high-QoS delay count",
+      "value": 0.0
+    },
+    "46": {
+      "label": "completed-job delta",
+      "value": 0.0
+    },
+    "47": {
+      "label": "completed-GPU-hour delta",
+      "value": 0.0
+    },
+    "48": {
+      "label": "mean-wait delta",
+      "value": 0.0
+    },
+    "49": {
+      "label": "P95-wait delta",
+      "value": 0.0
+    },
+    "5": {
+      "label": "clean status",
+      "value": "EXPECTED_AFTER_COMMIT"
+    },
+    "50": {
+      "label": "max-wait delta",
+      "value": 0.0
+    },
+    "51": {
+      "label": "terminal-pending-GPU-hour delta",
+      "value": 0.0
+    },
+    "52": {
+      "label": "service non-inferiority PASS/FAIL",
+      "value": "PASS"
+    },
+    "53": {
+      "label": "future job identity reads in KQ0",
+      "value": 0
+    },
+    "54": {
+      "label": "future start/end numeric reads",
+      "value": 0
+    },
+    "55": {
+      "label": "realized-runtime reads before freeze",
+      "value": 0
+    },
+    "56": {
+      "label": "Fresh reads during policy construction",
+      "value": 0
+    },
+    "57": {
+      "label": "post-issue grid-feedback calls",
+      "value": 0
+    },
+    "58": {
+      "label": "Fresh run available YES/NO",
+      "value": "NO"
+    },
+    "59": {
+      "label": "Planning/Fresh effect direction",
+      "value": "Planning no-change; Fresh not run"
+    },
+    "6": {
+      "label": "active V35R3 files changed",
+      "value": 0
+    },
+    "60": {
+      "label": "voltage/current/transformer violations",
+      "value": "NOT_EVALUATED_GRID_BINDING_AUTHORITY_INCOMPLETE"
+    },
+    "61": {
+      "label": "current W^F modified?",
+      "value": "NO"
+    },
+    "62": {
+      "label": "proposed W^T meaning",
+      "value": "scheduler-controlled temporal pending-queue workload"
+    },
+    "63": {
+      "label": "proposed W^ST meaning",
+      "value": "W^T subset with independent spatial exclusivity/resource/binding authority"
+    },
+    "64": {
+      "label": "W retraining required?",
+      "value": "YES_FOR_FUTURE_WT; NOT_PERFORMED"
+    },
+    "65": {
+      "label": "production-change recommendation",
+      "value": "NO"
+    },
+    "66": {
+      "label": "estimated invalidation scope",
+      "value": "future W target/schema, queue state, scheduler adapter, power/grid binding; current production preserved"
+    },
+    "67": {
+      "label": "passed/failed",
+      "value": {
+        "artifact_id": "V35R3A_TEST_REPORT_V1",
+        "command": "python -m pytest tests/dayahead/test_v35r2_aidc_mess_forensic.py tests/dayahead/test_v35r3a_kestrel_scheduler_temporal.py -q",
+        "failed": 0,
+        "output": "46 passed in 3.68s",
+        "passed": 46,
+        "status": "PASS",
+        "tested_at": "2026-09-03T05:41:38.409030+00:00"
+      }
+    },
+    "68": {
+      "label": "primary classification",
+      "value": "V35R3A_KNOWN_QUEUE_TEMPORAL_MASS_INSUFFICIENT"
+    },
+    "7": {
+      "label": "push/merge",
+      "value": "NO/NO"
+    },
+    "8": {
+      "label": "RADDiT HEAD",
+      "value": "ae1bf132addb41b469f3ef25a7626fe5ab06bc81"
+    },
+    "9": {
+      "label": "FastSim HEAD",
+      "value": "68c8ba7ede664e7678a84a924eaedaa58503defb"
+    }
+  },
+  "questions": {
+    "Q1": "\ubd80\ubd84\uc801\uc73c\ub85c \uac00\ub2a5. submit/start/end \uc774\ubca4\ud2b8 \ube44\uad50\ub85c R_tau/P_tau\ub294 \ubcf5\uad6c\ud588\uc9c0\ub9cc hold/dependency/requeue \uc774\ub825\uc774 \uc5c6\uc5b4 exact snapshot\uc740 \uc544\ub2c8\ub2e4.",
+    "Q10": "\uac1c\ub150\uc801 \ubd84\ub9ac\ub294 \ud0c0\ub2f9\ud558\uc9c0\ub9cc \ud604\uc7ac Apr-01 KQ0 \uc99d\uac70\ub294 \uc0dd\uc0b0 \ubd84\ub9ac\ub97c \uc815\ub2f9\ud654\ud558\uae30\uc5d0 \ubd80\uc871\ud558\ub2e4.",
+    "Q11": "\ud604\uc7ac\ub294 \uad8c\uace0\ud558\uc9c0 \uc54a\ub294\ub2e4(NO).",
+    "Q12": "\ud65c\uc131 V35R3 \uc885\ub8cc \ud6c4 read-only squeue/scontrol snapshot\uacfc slurm.conf/sprio/association/reservation \ub364\ud504\ub97c 1\ud68c \ud655\ubcf4\ud558\ub294 \uac83\uc774 \ucd5c\uc18c \ub2e4\uc74c \ub2e8\uacc4\ub2e4.",
+    "Q2": "\uc815\ud655\ud55c Kestrel \uc7ac\ud604\uc774 \uc544\ub2c8\ub77c PUBLIC_POLICY_RELATIVE_SCHEDULER_TWIN\uc774\ub2e4.",
+    "Q3": "\uc5c4\uaca9\ud55c \uc81c\ucd9c\uce21\u00b7QoS\u00b7\ud30c\ud2f0\uc158 \uc870\uac74\uc5d0\uc11c 0\uac74, 0.0 GPU-h\uc600\ub2e4.",
+    "Q4": "\uc544\ub2c8\uc624. KQ0\uc5d0 \uc548\uc804\ud55c \uad50\ud658\uc30d\uc774 \uc5c6\uc5b4 \uc774\ub3d9\ub7c9\uc740 0\uc774\uc5c8\ub2e4.",
+    "Q5": "W1/W3/W5 \ubaa8\ub450 0 kW \uac10\uc18c\uc600\ub2e4.",
+    "Q6": "\uc544\ub2c8\uc624. \ub3d9\uc77c \uc2a4\ucf00\uc904\uc774\ubbc0\ub85c rho\uc640 \uc784\uacc4 \ub178\ucd9c \uac1c\uc120\uc740 0\uc774\ub2e4.",
+    "Q7": "\uc544\ub2c8\uc624. high/urgent \uc9c0\uc5f0\uc740 0\uac74\uc774\ub2e4.",
+    "Q8": "NO. \uc9c0\uc6d0\ub418\uc9c0 \uc54a\uc740 \uac1c\ubcc4 \uc791\uc5c5 \uc9c0\uc5f0 \ub9c8\uac10\uc740 \ub9cc\ub4e4\uc9c0 \uc54a\uc558\ub2e4.",
+    "Q9": "NO. \ubbf8\ub798 actual start/end/runtime\uc740 \uc815\ucc45 \uacb0\uc815\uc5d0 \uc4f0\uc9c0 \uc54a\uc558\ub2e4."
+  },
+  "status": "SCIENTIFICALLY_VALID_NEGATIVE_RESULT"
+}

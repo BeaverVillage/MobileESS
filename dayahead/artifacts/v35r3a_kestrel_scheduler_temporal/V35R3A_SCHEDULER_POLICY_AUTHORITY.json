@@ -1,0 +1,64 @@
+{
+  "artifact_id": "V35R3A_SCHEDULER_POLICY_AUTHORITY_V1",
+  "authority_level": "PUBLIC_POLICY_RELATIVE_SCHEDULER_TWIN",
+  "backfill": {
+    "duration": "submission-side requested walltime",
+    "hole_use": "later jobs may use an earlier compatible hole without moving an existing reservation",
+    "main_loop": "priority-order reservation",
+    "preemption": false,
+    "type": "CONSERVATIVE_REQUESTED_WALLTIME_FIRST_FIT"
+  },
+  "documented_priority_components": [
+    "site_factor",
+    "eligible age",
+    "association",
+    "fair-share",
+    "job size/resources",
+    "partition",
+    "QoS",
+    "TRES",
+    "nice"
+  ],
+  "implemented_relative_components": [
+    "QoS precedence: high before normal; standby only when otherwise idle",
+    "eligible age represented by submission-order FIFO",
+    "partition semantics preserved; *-stdby remains protected",
+    "stable job-ID tie breaking",
+    "SiteFactor reserved for eligible normal-QoS order changes"
+  ],
+  "missing_historical_inputs": [
+    "Kestrel priority weights and flags",
+    "fair-share usage tree/history",
+    "association priorities",
+    "reservation/dependency/hold/requeue history",
+    "complete node-state/topology history"
+  ],
+  "policy_frozen_at": "2025-03-31T18:00:00+10:00",
+  "policy_sha256": "c79b15c455fd035d6c064562ff11b87cb5229b1da729bc92cbb218a13d2a999f",
+  "qos_authority": {
+    "high": "takes precedence in the queue",
+    "normal": "eligible for control only outside *-stdby partitions",
+    "standby": "runs only when nodes are idle"
+  },
+  "source_paths": [
+    "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR_scheduler_authority\\06_official_web_docs\\NLR_Kestrel_Running.html",
+    "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR_scheduler_authority\\06_official_web_docs\\NLR_Slurm_Batch_Jobs.html",
+    "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR_scheduler_authority\\06_official_web_docs\\Slurm_Priority_Multifactor.html",
+    "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR_scheduler_authority\\03_FastSim\\scheduler\\priority_sorters.py",
+    "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR_scheduler_authority\\03_FastSim\\scheduler\\controller.py",
+    "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR_scheduler_authority\\03_FastSim\\configs\\default_conf.yaml",
+    "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR_scheduler_authority\\02_RADDiT\\README.md"
+  ],
+  "source_sha256": {
+    "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR_scheduler_authority\\02_RADDiT\\README.md": "cf09f21e14c0af3461c95851ca6d7cc7fcb6f12770e6f2abc3bad3a46098af88",
+    "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR_scheduler_authority\\03_FastSim\\configs\\default_conf.yaml": "1a052d245dbeeb46290a6c9a080f0eaa5a15ca99a4eeb56836109c6fd122b293",
+    "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR_scheduler_authority\\03_FastSim\\scheduler\\controller.py": "c7daa39e208e7b4ff7489c2a3135c8bc5ef57e132721c32ba386efaae26abc03",
+    "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR_scheduler_authority\\03_FastSim\\scheduler\\priority_sorters.py": "f2364550ad97951102a520bc408cc5a1a9de53f29cd51c5e8f6d384c5f15cf63",
+    "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR_scheduler_authority\\06_official_web_docs\\NLR_Kestrel_Running.html": "2109bf310c4b09be942ded0719e19bcdc909b7a4647620649bec469cf43d256b",
+    "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR_scheduler_authority\\06_official_web_docs\\NLR_Slurm_Batch_Jobs.html": "5c181dd2b7a558ec36e4a5c6debb00248dd1c745317392bcdb95d458f9b1a219",
+    "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR_scheduler_authority\\06_official_web_docs\\Slurm_Priority_Multifactor.html": "93070c9ca1485ccfb5f59d627f6d33ebecdd8d0b2641b74163f52cf3d49a7291"
+  },
+  "unsupported_per_job_deadline_assumed": false,
+  "weights": null,
+  "weights_reason": "No Kestrel slurm.conf or sprio weight dump exists in the downloaded authority; sample SchedMD weights are not Kestrel weights."
+}

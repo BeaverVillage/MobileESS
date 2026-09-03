@@ -1,0 +1,24 @@
+{
+  "W_ST": {
+    "current_count": 0,
+    "meaning": "W_T subset with FULL-node/exclusive resource compatibility and exact spatial binding",
+    "subset_relation": "0 <= W_ST <= W_T"
+  },
+  "W_T": {
+    "future_arrivals": "forecast aggregate mass by resource/QoS class; never forecast identities",
+    "meaning": "scheduler-controlled temporal pending-queue workload",
+    "required_submission_features": [
+      "submit time",
+      "requested nodes/GPUs/walltime",
+      "QoS",
+      "partition",
+      "account/association if authoritative"
+    ],
+    "state_representation": "R_tau fixed + P_tau class/resource/backlog by pool; U_tau forecast only by resource/QoS class"
+  },
+  "artifact_id": "V35R3A_WT_WST_TARGET_IMPACT_V1",
+  "current_W_F_modified": false,
+  "retraining_performed": false,
+  "retraining_required": true,
+  "why_W_F_not_equivalent": "W_F is a completion/modelability cohort forecast, not a causal pending-queue state or scheduler-control target."
+}
