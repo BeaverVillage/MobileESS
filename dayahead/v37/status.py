@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
+import threading
+import time
 from typing import Any, Iterable
 
 from .contracts import DAY_TOTAL_UNITS, EXPECTED_DATES
@@ -16,12 +18,21 @@ TERMINAL = {"PASS", "FAIL"}
 
 def atomic_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(path.suffix + f".{os.getpid()}.tmp")
+    temporary = path.with_suffix(
+        path.suffix + f".{os.getpid()}.{threading.get_ident()}.tmp"
+    )
     temporary.write_text(
         json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False, allow_nan=False) + "\n",
         encoding="utf-8",
     )
-    os.replace(temporary, path)
+    for attempt in range(20):
+        try:
+            os.replace(temporary, path)
+            return
+        except PermissionError:
+            if attempt == 19:
+                raise
+            time.sleep(0.05)
 
 
 def read_json(path: Path) -> dict[str, Any]:

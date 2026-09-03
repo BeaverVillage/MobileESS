@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 import json
 from pathlib import Path
 import subprocess
@@ -79,6 +80,20 @@ def test_monitor_atomic_terminal_hiding_and_counters(tmp_path: Path) -> None:
     ]
     view = monitor_view(rows, expected_count=3)
     assert view["active_dates"] == [] and view["complete"] is True
+
+
+def test_atomic_status_concurrent_writers(tmp_path: Path) -> None:
+    path = tmp_path / "2025-05-01.json"
+
+    def update(index: int) -> None:
+        write_status(path, "2025-05-01", "RUNNING", index % 15, f"synthetic-{index}")
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        list(pool.map(update, range(80)))
+    value = json.loads(path.read_text(encoding="utf-8"))
+    assert value["date"] == "2025-05-01"
+    assert value["status"] == "RUNNING"
+    assert not list(tmp_path.glob("*.tmp"))
 
 
 def test_locked_execution_limits() -> None:

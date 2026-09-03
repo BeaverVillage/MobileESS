@@ -50,6 +50,14 @@
       "constraints_changed": "NO",
       "physical_tolerances_changed": "NO",
       "science_changed": "NO"
+    },
+    {
+      "classification": "ENGINEERING_ATOMIC_STATUS_FILE_LOCK",
+      "effect": "Concurrent date-status writers shared one PID-derived temporary filename, and brief Windows reader locks could reject the final atomic replace and terminate the progress watcher.",
+      "repair": "Use PID plus thread identity for each temporary JSON and retry only PermissionError during os.replace for at most one second.",
+      "status_schema_changed": "NO",
+      "campaign_results_changed": "NO",
+      "science_changed": "NO"
     }
   ]
 }
