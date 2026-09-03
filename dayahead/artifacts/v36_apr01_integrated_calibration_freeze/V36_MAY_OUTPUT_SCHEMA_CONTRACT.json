@@ -1,0 +1,1399 @@
+{
+  "FRESH_USED_AS_CONTROL_ORACLE": "NO",
+  "IDC_LOCATION_CHANGED": "NO",
+  "LOW_HIGH_MAIN_CASES": "DISABLED",
+  "LOW_HIGH_OPTIMIZATION": "DISABLED",
+  "May_policy": "ROWS_AND_DATES_MAY_BE_ADDED;SCHEMA_MUST_NOT_CHANGE",
+  "PRIMARY_AIDC_POWER_SCENARIO": "CENTER",
+  "artifact_id": "V36_MAY_OUTPUT_SCHEMA_CONTRACT_V1",
+  "contract_sha256": "a8fd8add4072ad64284032b2a9e75afaa58c47491d3e6df30a30f233874fa7a9",
+  "date": "2025-04-01",
+  "frozen": true,
+  "generated_from_saved_outputs": true,
+  "schema_version": "V36_MAY_OUTPUT_SCHEMA_V1",
+  "schemas": {
+    "aidc/AIDC_POWER_96.csv": {
+      "columns_or_keys": [
+        {
+          "dtype": "int64",
+          "name": "slot"
+        },
+        {
+          "dtype": "object",
+          "name": "timestamp"
+        },
+        {
+          "dtype": "float64",
+          "name": "N_active_GPU"
+        },
+        {
+          "dtype": "float64",
+          "name": "N_idle_GPU"
+        },
+        {
+          "dtype": "float64",
+          "name": "P_IT_RW_kW"
+        },
+        {
+          "dtype": "float64",
+          "name": "P_IT_case_kW"
+        },
+        {
+          "dtype": "float64",
+          "name": "Delta_P_AIDC_kW"
+        },
+        {
+          "dtype": "object",
+          "name": "AIDC_flexibility"
+        },
+        {
+          "dtype": "object",
+          "name": "official_scenario"
+        },
+        {
+          "dtype": "float64",
+          "name": "CENTER_swing_W_per_GPU"
+        },
+        {
+          "dtype": "float64",
+          "name": "aggregate_PCC_P_kW"
+        },
+        {
+          "dtype": "float64",
+          "name": "C1_effective_PUE"
+        },
+        {
+          "dtype": "float64",
+          "name": "aggregate_PCC_Q_kvar"
+        }
+      ],
+      "format": "csv",
+      "schema_id": "V36_AIDC_POWER_96_V1"
+    },
+    "aidc/AIDC_SCHEDULER_LEDGER.parquet": {
+      "columns_or_keys": [
+        {
+          "dtype": "object",
+          "name": "job_id"
+        },
+        {
+          "dtype": "object",
+          "name": "state_at_issue"
+        },
+        {
+          "dtype": "object",
+          "name": "workload_class"
+        },
+        {
+          "dtype": "float64",
+          "name": "requested_GPUs"
+        },
+        {
+          "dtype": "float64",
+          "name": "requested_walltime_seconds"
+        },
+        {
+          "dtype": "float64",
+          "name": "elapsed_seconds_at_issue"
+        },
+        {
+          "dtype": "float64",
+          "name": "diagnostic_point_total_seconds"
+        },
+        {
+          "dtype": "float64",
+          "name": "diagnostic_safe_total_seconds"
+        },
+        {
+          "dtype": "float64",
+          "name": "RSP_duration_seconds"
+        },
+        {
+          "dtype": "int64",
+          "name": "RSP_duration_slots"
+        },
+        {
+          "dtype": "object",
+          "name": "duration_authority"
+        },
+        {
+          "dtype": "bool",
+          "name": "RUNNING_ELAPSED_EXCEEDS_REQUESTED_WALLTIME"
+        },
+        {
+          "dtype": "float64",
+          "name": "q_selected_seconds"
+        },
+        {
+          "dtype": "object",
+          "name": "qos"
+        },
+        {
+          "dtype": "object",
+          "name": "partition"
+        },
+        {
+          "dtype": "object",
+          "name": "submit_time"
+        },
+        {
+          "dtype": "int64",
+          "name": "requested_nodes"
+        },
+        {
+          "dtype": "float64",
+          "name": "requested_gpus"
+        },
+        {
+          "dtype": "int64",
+          "name": "scheduled_start_slot_rw"
+        },
+        {
+          "dtype": "int64",
+          "name": "scheduled_end_slot_rw"
+        },
+        {
+          "dtype": "int64",
+          "name": "scheduled_start_slot_rsp"
+        },
+        {
+          "dtype": "int64",
+          "name": "scheduled_end_slot_rsp"
+        },
+        {
+          "dtype": "object",
+          "name": "known_running_start"
+        },
+        {
+          "dtype": "int32",
+          "name": "RW_scheduled_start"
+        },
+        {
+          "dtype": "int32",
+          "name": "RW_scheduled_completion"
+        },
+        {
+          "dtype": "int32",
+          "name": "RSP_scheduled_start"
+        },
+        {
+          "dtype": "int32",
+          "name": "RSP_scheduled_completion"
+        },
+        {
+          "dtype": "object",
+          "name": "safe_runtime_authority"
+        },
+        {
+          "dtype": "bool",
+          "name": "temporal_flexible"
+        },
+        {
+          "dtype": "bool",
+          "name": "PARTIAL_shared"
+        },
+        {
+          "dtype": "object",
+          "name": "coverage_fallback_status"
+        }
+      ],
+      "format": "parquet",
+      "schema_id": "V36_AIDC_SCHEDULER_LEDGER_V1"
+    },
+    "aidc/IDC_FACILITY_96.parquet": {
+      "columns_or_keys": [
+        {
+          "dtype": "int64",
+          "name": "slot"
+        },
+        {
+          "dtype": "object",
+          "name": "timestamp"
+        },
+        {
+          "dtype": "object",
+          "name": "IDC_id"
+        },
+        {
+          "dtype": "object",
+          "name": "AIDC_id"
+        },
+        {
+          "dtype": "object",
+          "name": "existing_feeder_PCC_node"
+        },
+        {
+          "dtype": "float64",
+          "name": "IT_power_kW"
+        },
+        {
+          "dtype": "float64",
+          "name": "PUE"
+        },
+        {
+          "dtype": "float64",
+          "name": "cooling_facility_auxiliary_kW"
+        },
+        {
+          "dtype": "float64",
+          "name": "PCC_P_kW"
+        },
+        {
+          "dtype": "float64",
+          "name": "PCC_Q_kvar"
+        },
+        {
+          "dtype": "float64",
+          "name": "total_facility_power_kW"
+        },
+        {
+          "dtype": "object",
+          "name": "IDC_LOCATION_CHANGED"
+        },
+        {
+          "dtype": "float64",
+          "name": "PF"
+        }
+      ],
+      "format": "parquet",
+      "schema_id": "V36_IDC_FACILITY_96_V1"
+    },
+    "fresh/FRESH_BUS_PHASE_96.parquet": {
+      "columns_or_keys": [
+        {
+          "dtype": "int64",
+          "name": "slot"
+        },
+        {
+          "dtype": "object",
+          "name": "timestamp"
+        },
+        {
+          "dtype": "object",
+          "name": "bus_phase_key"
+        },
+        {
+          "dtype": "object",
+          "name": "bus"
+        },
+        {
+          "dtype": "object",
+          "name": "phase"
+        },
+        {
+          "dtype": "float64",
+          "name": "fresh_voltage_magnitude_pu"
+        },
+        {
+          "dtype": "bool",
+          "name": "critical_voltage_element"
+        }
+      ],
+      "format": "parquet",
+      "schema_id": "V36_FRESH_BUS_PHASE_96_V1"
+    },
+    "fresh/FRESH_LINE_PHASE_96.parquet": {
+      "columns_or_keys": [
+        {
+          "dtype": "int64",
+          "name": "slot"
+        },
+        {
+          "dtype": "object",
+          "name": "timestamp"
+        },
+        {
+          "dtype": "object",
+          "name": "branch_phase_key"
+        },
+        {
+          "dtype": "object",
+          "name": "branch"
+        },
+        {
+          "dtype": "object",
+          "name": "phase"
+        },
+        {
+          "dtype": "object",
+          "name": "branch_kind"
+        },
+        {
+          "dtype": "float64",
+          "name": "phase_current_A"
+        },
+        {
+          "dtype": "float64",
+          "name": "phase_current_loading_pu"
+        },
+        {
+          "dtype": "float64",
+          "name": "transformer_loading_pu"
+        },
+        {
+          "dtype": "bool",
+          "name": "transformer_loading_applicable"
+        },
+        {
+          "dtype": "bool",
+          "name": "P_Q_available"
+        },
+        {
+          "dtype": "bool",
+          "name": "critical_element"
+        }
+      ],
+      "format": "parquet",
+      "schema_id": "V36_FRESH_LINE_PHASE_96_V1"
+    },
+    "fresh/FRESH_SYSTEM_96.parquet": {
+      "columns_or_keys": [
+        {
+          "dtype": "int64",
+          "name": "slot"
+        },
+        {
+          "dtype": "object",
+          "name": "timestamp"
+        },
+        {
+          "dtype": "float64",
+          "name": "system_rho"
+        },
+        {
+          "dtype": "object",
+          "name": "critical_phase_line_ID"
+        },
+        {
+          "dtype": "float64",
+          "name": "Vmin_pu"
+        },
+        {
+          "dtype": "float64",
+          "name": "Vmax_pu"
+        },
+        {
+          "dtype": "float64",
+          "name": "Imax_loading_ratio"
+        },
+        {
+          "dtype": "float64",
+          "name": "transformer_current_loading_max"
+        },
+        {
+          "dtype": "float64",
+          "name": "transformer_kva_loading_max"
+        },
+        {
+          "dtype": "bool",
+          "name": "OpenDSS_converged"
+        }
+      ],
+      "format": "parquet",
+      "schema_id": "V36_FRESH_SYSTEM_96_V1"
+    },
+    "inputs/INPUT_AUTHORITY.json": {
+      "columns_or_keys": [
+        {
+          "dtype": "int",
+          "name": "AIDC_GPU_capacity"
+        },
+        {
+          "dtype": "dict",
+          "name": "AIDC_queue_snapshot"
+        },
+        {
+          "dtype": "str",
+          "name": "AIDC_runtime_authority"
+        },
+        {
+          "dtype": "str",
+          "name": "FRESH_USED_AS_CONTROL_ORACLE"
+        },
+        {
+          "dtype": "str",
+          "name": "IDC_LOCATION_CHANGED"
+        },
+        {
+          "dtype": "str",
+          "name": "LOW_HIGH_MAIN_CASES"
+        },
+        {
+          "dtype": "str",
+          "name": "LOW_HIGH_OPTIMIZATION"
+        },
+        {
+          "dtype": "float",
+          "name": "MESS_initial_SoC"
+        },
+        {
+          "dtype": "list",
+          "name": "MESS_initial_location"
+        },
+        {
+          "dtype": "str",
+          "name": "MESS_vehicle_parameters"
+        },
+        {
+          "dtype": "str",
+          "name": "PRIMARY_AIDC_POWER_SCENARIO"
+        },
+        {
+          "dtype": "str",
+          "name": "case"
+        },
+        {
+          "dtype": "str",
+          "name": "date"
+        },
+        {
+          "dtype": "bool",
+          "name": "generated_from_saved_outputs"
+        },
+        {
+          "dtype": "dict",
+          "name": "immutable_references"
+        },
+        {
+          "dtype": "str",
+          "name": "schema_id"
+        },
+        {
+          "dtype": "str",
+          "name": "source_AIDC_HEAD"
+        },
+        {
+          "dtype": "str",
+          "name": "source_HEAD"
+        },
+        {
+          "dtype": "str",
+          "name": "source_MESS_HEAD"
+        },
+        {
+          "dtype": "str",
+          "name": "source_branch"
+        },
+        {
+          "dtype": "str",
+          "name": "static_candidate_library_sha256"
+        },
+        {
+          "dtype": "str",
+          "name": "worktree"
+        }
+      ],
+      "format": "json",
+      "schema_id": "V36_INPUT_AUTHORITY_V1"
+    },
+    "inputs/RUN_PROVENANCE.json": {
+      "columns_or_keys": [
+        {
+          "dtype": "str",
+          "name": "AIDC_contract_SHA"
+        },
+        {
+          "dtype": "str",
+          "name": "C1_contract_SHA"
+        },
+        {
+          "dtype": "bool",
+          "name": "CENTER_only_confirmation"
+        },
+        {
+          "dtype": "str",
+          "name": "DSS_Python_version"
+        },
+        {
+          "dtype": "str",
+          "name": "FRESH_USED_AS_CONTROL_ORACLE"
+        },
+        {
+          "dtype": "str",
+          "name": "Fresh_authority_SHA"
+        },
+        {
+          "dtype": "str",
+          "name": "IDC_LOCATION_CHANGED"
+        },
+        {
+          "dtype": "bool",
+          "name": "IDC_location_unchanged_confirmation"
+        },
+        {
+          "dtype": "str",
+          "name": "LOW_HIGH_MAIN_CASES"
+        },
+        {
+          "dtype": "str",
+          "name": "LOW_HIGH_OPTIMIZATION"
+        },
+        {
+          "dtype": "str",
+          "name": "MESS_contract_SHA"
+        },
+        {
+          "dtype": "str",
+          "name": "OpenDSS_version"
+        },
+        {
+          "dtype": "str",
+          "name": "PRIMARY_AIDC_POWER_SCENARIO"
+        },
+        {
+          "dtype": "str",
+          "name": "Planning_authority_SHA"
+        },
+        {
+          "dtype": "str",
+          "name": "Python_version"
+        },
+        {
+          "dtype": "bool",
+          "name": "SUMO_invoked"
+        },
+        {
+          "dtype": "str",
+          "name": "Safe_ETA_authority_SHA"
+        },
+        {
+          "dtype": "str",
+          "name": "case"
+        },
+        {
+          "dtype": "str",
+          "name": "date"
+        },
+        {
+          "dtype": "bool",
+          "name": "generated_from_saved_outputs"
+        },
+        {
+          "dtype": "str",
+          "name": "integration_Git_HEAD"
+        },
+        {
+          "dtype": "str",
+          "name": "objective_contract_SHA"
+        },
+        {
+          "dtype": "str",
+          "name": "pass_id"
+        },
+        {
+          "dtype": "int",
+          "name": "random_seed"
+        },
+        {
+          "dtype": "str",
+          "name": "run_end_timestamp"
+        },
+        {
+          "dtype": "str",
+          "name": "run_start_timestamp"
+        },
+        {
+          "dtype": "str",
+          "name": "schema_id"
+        },
+        {
+          "dtype": "dict",
+          "name": "solver_versions"
+        },
+        {
+          "dtype": "str",
+          "name": "source_AIDC_HEAD"
+        },
+        {
+          "dtype": "str",
+          "name": "source_HEAD"
+        },
+        {
+          "dtype": "str",
+          "name": "source_MESS_HEAD"
+        },
+        {
+          "dtype": "str",
+          "name": "source_branch"
+        },
+        {
+          "dtype": "str",
+          "name": "timezone"
+        },
+        {
+          "dtype": "str",
+          "name": "traffic_authority_SHA"
+        },
+        {
+          "dtype": "float",
+          "name": "wallclock_seconds"
+        },
+        {
+          "dtype": "str",
+          "name": "worktree"
+        }
+      ],
+      "format": "json",
+      "schema_id": "V36_RUN_PROVENANCE_V1"
+    },
+    "mess/MESS_MOVE_EVENTS.parquet": {
+      "columns_or_keys": [
+        {
+          "dtype": "object",
+          "name": "case"
+        },
+        {
+          "dtype": "object",
+          "name": "vehicle_id"
+        },
+        {
+          "dtype": "object",
+          "name": "origin"
+        },
+        {
+          "dtype": "object",
+          "name": "destination"
+        },
+        {
+          "dtype": "int64",
+          "name": "departure_slot"
+        },
+        {
+          "dtype": "int64",
+          "name": "arrival_slot"
+        },
+        {
+          "dtype": "int64",
+          "name": "connection_ready_slot"
+        },
+        {
+          "dtype": "object",
+          "name": "route_ID"
+        },
+        {
+          "dtype": "float64",
+          "name": "Q50_ETA_seconds"
+        },
+        {
+          "dtype": "float64",
+          "name": "Safe_ETA_seconds"
+        },
+        {
+          "dtype": "float64",
+          "name": "travel_energy_kWh"
+        }
+      ],
+      "format": "parquet",
+      "schema_id": "V36_MESS_MOVE_EVENTS_V1"
+    },
+    "mess/MESS_SEARCH_TRACE.parquet": {
+      "columns_or_keys": [
+        {
+          "dtype": "object",
+          "name": "case"
+        },
+        {
+          "dtype": "object",
+          "name": "vehicle"
+        },
+        {
+          "dtype": "object",
+          "name": "parent_beam_state"
+        },
+        {
+          "dtype": "object",
+          "name": "candidate_id"
+        },
+        {
+          "dtype": "object",
+          "name": "cheap_score"
+        },
+        {
+          "dtype": "int64",
+          "name": "cheap_rank"
+        },
+        {
+          "dtype": "bool",
+          "name": "Top_K_selected"
+        },
+        {
+          "dtype": "float64",
+          "name": "restricted_objective"
+        },
+        {
+          "dtype": "object",
+          "name": "restricted_status"
+        },
+        {
+          "dtype": "bool",
+          "name": "seed_flag"
+        },
+        {
+          "dtype": "object",
+          "name": "seed_trajectory_SHA"
+        },
+        {
+          "dtype": "object",
+          "name": "full_MILP_child_state"
+        },
+        {
+          "dtype": "object",
+          "name": "MIPStart_accepted"
+        },
+        {
+          "dtype": "float64",
+          "name": "full_objective"
+        },
+        {
+          "dtype": "float64",
+          "name": "best_bound"
+        },
+        {
+          "dtype": "float64",
+          "name": "gap"
+        },
+        {
+          "dtype": "object",
+          "name": "beam_retained"
+        },
+        {
+          "dtype": "object",
+          "name": "beam_parent_SHA"
+        },
+        {
+          "dtype": "object",
+          "name": "beam_child_SHA"
+        },
+        {
+          "dtype": "int64",
+          "name": "beam_width_used"
+        },
+        {
+          "dtype": "int64",
+          "name": "K_used"
+        },
+        {
+          "dtype": "bool",
+          "name": "beam_fallback_used"
+        },
+        {
+          "dtype": "bool",
+          "name": "K_fallback_used"
+        },
+        {
+          "dtype": "bool",
+          "name": "full_scan_used"
+        },
+        {
+          "dtype": "bool",
+          "name": "cheap_score_available"
+        },
+        {
+          "dtype": "object",
+          "name": "screen_authority_sha"
+        },
+        {
+          "dtype": "float64",
+          "name": "restricted_runtime_seconds"
+        },
+        {
+          "dtype": "object",
+          "name": "full_solver_status"
+        }
+      ],
+      "format": "parquet",
+      "schema_id": "V36_MESS_SEARCH_TRACE_V1"
+    },
+    "mess/MESS_TRAJECTORY_96.parquet": {
+      "columns_or_keys": [
+        {
+          "dtype": "object",
+          "name": "case"
+        },
+        {
+          "dtype": "object",
+          "name": "vehicle_id"
+        },
+        {
+          "dtype": "int64",
+          "name": "slot"
+        },
+        {
+          "dtype": "object",
+          "name": "timestamp"
+        },
+        {
+          "dtype": "object",
+          "name": "state"
+        },
+        {
+          "dtype": "object",
+          "name": "origin"
+        },
+        {
+          "dtype": "object",
+          "name": "current_location"
+        },
+        {
+          "dtype": "object",
+          "name": "destination"
+        },
+        {
+          "dtype": "float64",
+          "name": "departure_slot"
+        },
+        {
+          "dtype": "float64",
+          "name": "arrival_slot"
+        },
+        {
+          "dtype": "float64",
+          "name": "connection_ready_slot"
+        },
+        {
+          "dtype": "object",
+          "name": "route_ID"
+        },
+        {
+          "dtype": "object",
+          "name": "route_link_node_sequence_reference"
+        },
+        {
+          "dtype": "float64",
+          "name": "Q50_ETA_seconds"
+        },
+        {
+          "dtype": "float64",
+          "name": "Safe_ETA_seconds"
+        },
+        {
+          "dtype": "object",
+          "name": "realized_Actual_ETA_seconds"
+        },
+        {
+          "dtype": "float64",
+          "name": "travel_energy_kWh"
+        },
+        {
+          "dtype": "float64",
+          "name": "P_kW"
+        },
+        {
+          "dtype": "float64",
+          "name": "Q_kvar"
+        },
+        {
+          "dtype": "float64",
+          "name": "SoC_fraction"
+        },
+        {
+          "dtype": "object",
+          "name": "charge_discharge_status"
+        }
+      ],
+      "format": "parquet",
+      "schema_id": "V36_MESS_TRAJECTORY_96_V1"
+    },
+    "planning/PLANNING_BUS_PHASE_96.parquet": {
+      "columns_or_keys": [
+        {
+          "dtype": "int64",
+          "name": "slot"
+        },
+        {
+          "dtype": "object",
+          "name": "timestamp"
+        },
+        {
+          "dtype": "object",
+          "name": "bus_phase_key"
+        },
+        {
+          "dtype": "object",
+          "name": "bus"
+        },
+        {
+          "dtype": "object",
+          "name": "phase"
+        },
+        {
+          "dtype": "float64",
+          "name": "voltage_magnitude_pu"
+        },
+        {
+          "dtype": "float64",
+          "name": "P_controlled_injection_kW"
+        },
+        {
+          "dtype": "float64",
+          "name": "Q_controlled_injection_kvar"
+        },
+        {
+          "dtype": "object",
+          "name": "injection_scope"
+        },
+        {
+          "dtype": "bool",
+          "name": "critical_voltage_element"
+        }
+      ],
+      "format": "parquet",
+      "schema_id": "V36_PLANNING_BUS_PHASE_96_V1"
+    },
+    "planning/PLANNING_LINE_PHASE_96.parquet": {
+      "columns_or_keys": [
+        {
+          "dtype": "int64",
+          "name": "slot"
+        },
+        {
+          "dtype": "object",
+          "name": "timestamp"
+        },
+        {
+          "dtype": "object",
+          "name": "branch_phase_key"
+        },
+        {
+          "dtype": "object",
+          "name": "branch"
+        },
+        {
+          "dtype": "object",
+          "name": "phase"
+        },
+        {
+          "dtype": "object",
+          "name": "branch_kind"
+        },
+        {
+          "dtype": "float64",
+          "name": "phase_current_loading_pu"
+        },
+        {
+          "dtype": "float64",
+          "name": "current_limit_kVA_surrogate"
+        },
+        {
+          "dtype": "float64",
+          "name": "P_flow_kW"
+        },
+        {
+          "dtype": "float64",
+          "name": "Q_flow_kvar"
+        },
+        {
+          "dtype": "float64",
+          "name": "transformer_loading_pu"
+        },
+        {
+          "dtype": "bool",
+          "name": "transformer_loading_applicable"
+        },
+        {
+          "dtype": "bool",
+          "name": "critical_element"
+        }
+      ],
+      "format": "parquet",
+      "schema_id": "V36_PLANNING_LINE_PHASE_96_V1"
+    },
+    "planning/PLANNING_SYSTEM_96.parquet": {
+      "columns_or_keys": [
+        {
+          "dtype": "int64",
+          "name": "slot"
+        },
+        {
+          "dtype": "object",
+          "name": "timestamp"
+        },
+        {
+          "dtype": "float64",
+          "name": "system_rho"
+        },
+        {
+          "dtype": "object",
+          "name": "critical_phase_line_ID"
+        },
+        {
+          "dtype": "float64",
+          "name": "Vmin_pu"
+        },
+        {
+          "dtype": "float64",
+          "name": "Vmax_pu"
+        },
+        {
+          "dtype": "float64",
+          "name": "Imax_loading_ratio"
+        },
+        {
+          "dtype": "float64",
+          "name": "transformer_current_loading_max"
+        },
+        {
+          "dtype": "float64",
+          "name": "transformer_kva_loading_max"
+        }
+      ],
+      "format": "parquet",
+      "schema_id": "V36_PLANNING_SYSTEM_96_V1"
+    },
+    "residual/PLANNING_FRESH_CURRENT_RESIDUAL.parquet": {
+      "columns_or_keys": [
+        {
+          "dtype": "int64",
+          "name": "slot"
+        },
+        {
+          "dtype": "object",
+          "name": "timestamp"
+        },
+        {
+          "dtype": "object",
+          "name": "case"
+        },
+        {
+          "dtype": "object",
+          "name": "branch_phase_key"
+        },
+        {
+          "dtype": "object",
+          "name": "branch"
+        },
+        {
+          "dtype": "object",
+          "name": "phase"
+        },
+        {
+          "dtype": "object",
+          "name": "branch_kind"
+        },
+        {
+          "dtype": "float64",
+          "name": "phase_current_loading_pu_planning"
+        },
+        {
+          "dtype": "float64",
+          "name": "phase_current_loading_pu_fresh"
+        },
+        {
+          "dtype": "float64",
+          "name": "transformer_loading_pu_planning"
+        },
+        {
+          "dtype": "float64",
+          "name": "transformer_loading_pu_fresh"
+        },
+        {
+          "dtype": "bool",
+          "name": "transformer_loading_applicable_planning"
+        },
+        {
+          "dtype": "float64",
+          "name": "signed_current_residual"
+        },
+        {
+          "dtype": "float64",
+          "name": "absolute_current_residual"
+        },
+        {
+          "dtype": "float64",
+          "name": "signed_transformer_residual"
+        },
+        {
+          "dtype": "float64",
+          "name": "absolute_transformer_residual"
+        }
+      ],
+      "format": "parquet",
+      "schema_id": "V36_PLANNING_FRESH_CURRENT_RESIDUAL_V1"
+    },
+    "residual/PLANNING_FRESH_SYSTEM_RESIDUAL.parquet": {
+      "columns_or_keys": [
+        {
+          "dtype": "int64",
+          "name": "slot"
+        },
+        {
+          "dtype": "object",
+          "name": "timestamp"
+        },
+        {
+          "dtype": "object",
+          "name": "case"
+        },
+        {
+          "dtype": "float64",
+          "name": "system_rho_planning"
+        },
+        {
+          "dtype": "float64",
+          "name": "system_rho_fresh"
+        },
+        {
+          "dtype": "float64",
+          "name": "Vmin_pu_planning"
+        },
+        {
+          "dtype": "float64",
+          "name": "Vmin_pu_fresh"
+        },
+        {
+          "dtype": "float64",
+          "name": "Vmax_pu_planning"
+        },
+        {
+          "dtype": "float64",
+          "name": "Vmax_pu_fresh"
+        },
+        {
+          "dtype": "float64",
+          "name": "transformer_kva_loading_max_planning"
+        },
+        {
+          "dtype": "float64",
+          "name": "transformer_kva_loading_max_fresh"
+        },
+        {
+          "dtype": "float64",
+          "name": "signed_rho_residual"
+        },
+        {
+          "dtype": "float64",
+          "name": "absolute_rho_residual"
+        }
+      ],
+      "format": "parquet",
+      "schema_id": "V36_PLANNING_FRESH_SYSTEM_RESIDUAL_V1"
+    },
+    "residual/PLANNING_FRESH_VOLTAGE_RESIDUAL.parquet": {
+      "columns_or_keys": [
+        {
+          "dtype": "int64",
+          "name": "slot"
+        },
+        {
+          "dtype": "object",
+          "name": "timestamp"
+        },
+        {
+          "dtype": "object",
+          "name": "case"
+        },
+        {
+          "dtype": "object",
+          "name": "bus_phase_key"
+        },
+        {
+          "dtype": "object",
+          "name": "bus"
+        },
+        {
+          "dtype": "object",
+          "name": "phase"
+        },
+        {
+          "dtype": "float64",
+          "name": "voltage_magnitude_pu"
+        },
+        {
+          "dtype": "float64",
+          "name": "fresh_voltage_magnitude_pu"
+        },
+        {
+          "dtype": "float64",
+          "name": "signed_residual"
+        },
+        {
+          "dtype": "float64",
+          "name": "absolute_residual"
+        },
+        {
+          "dtype": "float64",
+          "name": "normalized_residual"
+        }
+      ],
+      "format": "parquet",
+      "schema_id": "V36_PLANNING_FRESH_VOLTAGE_RESIDUAL_V1"
+    },
+    "solver/SOLVER_RUNS.parquet": {
+      "columns_or_keys": [
+        {
+          "dtype": "object",
+          "name": "solve_id"
+        },
+        {
+          "dtype": "object",
+          "name": "candidate_id"
+        },
+        {
+          "dtype": "object",
+          "name": "solver_type"
+        },
+        {
+          "dtype": "object",
+          "name": "case"
+        },
+        {
+          "dtype": "object",
+          "name": "vehicle"
+        },
+        {
+          "dtype": "object",
+          "name": "beam_state"
+        },
+        {
+          "dtype": "object",
+          "name": "status"
+        },
+        {
+          "dtype": "object",
+          "name": "WorkLimit"
+        },
+        {
+          "dtype": "float64",
+          "name": "incumbent"
+        },
+        {
+          "dtype": "float64",
+          "name": "best_bound"
+        },
+        {
+          "dtype": "float64",
+          "name": "gap"
+        },
+        {
+          "dtype": "bool",
+          "name": "MIPStart_accepted"
+        },
+        {
+          "dtype": "float64",
+          "name": "wallclock"
+        },
+        {
+          "dtype": "int64",
+          "name": "threads"
+        },
+        {
+          "dtype": "object",
+          "name": "solve_classification"
+        },
+        {
+          "dtype": "int64",
+          "name": "retry_count"
+        },
+        {
+          "dtype": "object",
+          "name": "fallback_reason"
+        }
+      ],
+      "format": "parquet",
+      "schema_id": "V36_SOLVER_RUNS_V1"
+    },
+    "summary/COMPUTE_SUMMARY.json": {
+      "columns_or_keys": [
+        {
+          "dtype": "float",
+          "name": "Fresh_wallclock_seconds"
+        },
+        {
+          "dtype": "float",
+          "name": "MESS_wallclock_seconds"
+        },
+        {
+          "dtype": "str",
+          "name": "case"
+        },
+        {
+          "dtype": "str",
+          "name": "day"
+        },
+        {
+          "dtype": "int",
+          "name": "restricted_worker_count"
+        },
+        {
+          "dtype": "str",
+          "name": "schema_id"
+        },
+        {
+          "dtype": "int",
+          "name": "threads_per_day"
+        }
+      ],
+      "format": "json",
+      "schema_id": "V36_COMPUTE_SUMMARY_V1"
+    },
+    "summary/OBJECTIVE.json": {
+      "columns_or_keys": [
+        {
+          "dtype": "str",
+          "name": "case"
+        },
+        {
+          "dtype": "str",
+          "name": "date"
+        },
+        {
+          "dtype": "float",
+          "name": "deterministic_ordinal_tiebreak_weight"
+        },
+        {
+          "dtype": "float",
+          "name": "move_count_tiebreak_weight"
+        },
+        {
+          "dtype": "str",
+          "name": "objective_definition_SHA"
+        },
+        {
+          "dtype": "float",
+          "name": "primary_objective_J"
+        },
+        {
+          "dtype": "float",
+          "name": "rho_objective_component"
+        },
+        {
+          "dtype": "str",
+          "name": "schema_id"
+        },
+        {
+          "dtype": "float",
+          "name": "travel_energy_tiebreak_weight"
+        }
+      ],
+      "format": "json",
+      "schema_id": "V36_OBJECTIVE_V1"
+    },
+    "summary/PHYSICAL_GATES.json": {
+      "columns_or_keys": [
+        {
+          "dtype": "dict",
+          "name": "Fresh"
+        },
+        {
+          "dtype": "str",
+          "name": "Fresh_solve_coverage"
+        },
+        {
+          "dtype": "dict",
+          "name": "Planning"
+        },
+        {
+          "dtype": "str",
+          "name": "schema_id"
+        }
+      ],
+      "format": "json",
+      "schema_id": "V36_PHYSICAL_GATES_V1"
+    }
+  },
+  "source_AIDC_HEAD": "aa1a113abdd6eb1bc76cf3bfdcb6dcdb29660b2e",
+  "source_HEAD": "a5c46a5c8b06e97e9e13a2078cb801fe51b240a9",
+  "source_MESS_HEAD": "a5c46a5c8b06e97e9e13a2078cb801fe51b240a9",
+  "source_branch": "codex/v36-apr01-integrated-calibration-freeze",
+  "worktree": "C:\\codex_mobileess_workspace\\MobileESS_v36_apr01_calibration"
+}

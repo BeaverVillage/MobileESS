@@ -1,0 +1,161 @@
+{
+  "B3_resume": "REUSED_RESTRICTED_SEARCH_CHECKPOINT;COMPLETED_REMAINING_BEAM_SEARCH",
+  "FRESH_USED_AS_CONTROL_ORACLE": "NO",
+  "IDC_LOCATION_CHANGED": "NO",
+  "LOW_HIGH_MAIN_CASES": "DISABLED",
+  "LOW_HIGH_OPTIMIZATION": "DISABLED",
+  "PRIMARY_AIDC_POWER_SCENARIO": "CENTER",
+  "artifact_id": "V36_REPAIR_LOG_V1",
+  "completed_cases_recomputed": {
+    "B0": "NO",
+    "B1": "NO",
+    "B2": "NO"
+  },
+  "date": "2025-04-01",
+  "external_interruption": "CHATGPT_BACKEND_404",
+  "external_interruption_caused_science_loss": "NO",
+  "generated_from_saved_outputs": true,
+  "repairs": [
+    {
+      "attempts": 1,
+      "science_changed": false,
+      "scope": "V36 loader cwd restoration",
+      "signature": "WINDOWS_CWD_LONG_PATH"
+    },
+    {
+      "attempts": 1,
+      "science_changed": false,
+      "scope": "departure + travel slots serialization",
+      "signature": "MOVE_ARRIVAL_SLOT_SCHEMA"
+    },
+    {
+      "attempts": 1,
+      "science_changed": false,
+      "scope": "SHA-verified deterministic paths",
+      "signature": "ONEDRIVE_EXACT_SOURCE_LOOKUP"
+    },
+    {
+      "attempts": 1,
+      "science_changed": false,
+      "scope": "allow arrival and connection-ready in the same rounded 15-minute slot",
+      "signature": "CONNECTION_SLOT_EQUALITY_GATE"
+    },
+    {
+      "after_sha256": "86b197237df996cc5701164369b41e2522f022a8b57f76892d8b668699e1fe05",
+      "before_sha256": "86b197237df996cc5701164369b41e2522f022a8b57f76892d8b668699e1fe05",
+      "case": "B2",
+      "file": "frozen_artifacts/v36_final_schema/PRE_CALIBRATION/2025-04-01/B2/mess/MESS_MOVE_EVENTS.parquet",
+      "rule": "arrival_slot = departure_slot + travel_slots_15min",
+      "science_changed": false
+    },
+    {
+      "after_sha256": "bc9bb61182073ab3b58f6eb0c056936240fca8eeeb92afc2fef773187261acf9",
+      "before_sha256": "bc9bb61182073ab3b58f6eb0c056936240fca8eeeb92afc2fef773187261acf9",
+      "case": "B3",
+      "file": "frozen_artifacts/v36_final_schema/PRE_CALIBRATION/2025-04-01/B3/mess/MESS_MOVE_EVENTS.parquet",
+      "rule": "arrival_slot = departure_slot + travel_slots_15min",
+      "science_changed": false
+    },
+    {
+      "after_sha256": "a149ed0c4ea8eaa7dff1ff45a0473c23c8927173c816aaa628f8e6e5a80ea479",
+      "before_sha256": "a149ed0c4ea8eaa7dff1ff45a0473c23c8927173c816aaa628f8e6e5a80ea479",
+      "case": "B0",
+      "file": "frozen_artifacts/v36_final_schema/PRE_CALIBRATION/2025-04-01/B0/inputs/INPUT_AUTHORITY.json",
+      "rule": "deterministic frozen traffic-cache and Safe-ETA authority lookup",
+      "science_changed": false
+    },
+    {
+      "after_sha256": "f05fece63ba5ca9b8b832d6b0b247d6709d44121ce0753e0ee7eed4c1820fafb",
+      "before_sha256": "f05fece63ba5ca9b8b832d6b0b247d6709d44121ce0753e0ee7eed4c1820fafb",
+      "case": "B0",
+      "file": "frozen_artifacts/v36_final_schema/PRE_CALIBRATION/2025-04-01/B0/inputs/RUN_PROVENANCE.json",
+      "rule": "add recovery lineage and Safe-ETA authority SHA",
+      "science_changed": false
+    },
+    {
+      "after_sha256": "5d13b3b199a5047d1a87ebb9776326558d3121ccddc3bdf98ab52ca46f5fda9f",
+      "before_sha256": "5d13b3b199a5047d1a87ebb9776326558d3121ccddc3bdf98ab52ca46f5fda9f",
+      "case": "B1",
+      "file": "frozen_artifacts/v36_final_schema/PRE_CALIBRATION/2025-04-01/B1/inputs/INPUT_AUTHORITY.json",
+      "rule": "deterministic frozen traffic-cache and Safe-ETA authority lookup",
+      "science_changed": false
+    },
+    {
+      "after_sha256": "dd1320378c200c6d1f3d66651fd5a2748782e1ff44694d7f65ee8e94ee54ca06",
+      "before_sha256": "dd1320378c200c6d1f3d66651fd5a2748782e1ff44694d7f65ee8e94ee54ca06",
+      "case": "B1",
+      "file": "frozen_artifacts/v36_final_schema/PRE_CALIBRATION/2025-04-01/B1/inputs/RUN_PROVENANCE.json",
+      "rule": "add recovery lineage and Safe-ETA authority SHA",
+      "science_changed": false
+    },
+    {
+      "after_sha256": "a6d283bdd7705f9966d1b2a93094e52455f431d8f26eb1b5e4180a2c97b17f9a",
+      "before_sha256": "a6d283bdd7705f9966d1b2a93094e52455f431d8f26eb1b5e4180a2c97b17f9a",
+      "case": "B2",
+      "file": "frozen_artifacts/v36_final_schema/PRE_CALIBRATION/2025-04-01/B2/inputs/INPUT_AUTHORITY.json",
+      "rule": "deterministic frozen traffic-cache and Safe-ETA authority lookup",
+      "science_changed": false
+    },
+    {
+      "after_sha256": "1e515f368a5d19419b587ff2f318d1283421d37ab40500eb88097851e7641097",
+      "before_sha256": "1e515f368a5d19419b587ff2f318d1283421d37ab40500eb88097851e7641097",
+      "case": "B2",
+      "file": "frozen_artifacts/v36_final_schema/PRE_CALIBRATION/2025-04-01/B2/inputs/RUN_PROVENANCE.json",
+      "rule": "add recovery lineage and Safe-ETA authority SHA",
+      "science_changed": false
+    },
+    {
+      "after_sha256": "dc19e1e3fc6a09d18a0dab7d30679f8c39bab34446e30b4c7c5bf89db6e53010",
+      "before_sha256": "dc19e1e3fc6a09d18a0dab7d30679f8c39bab34446e30b4c7c5bf89db6e53010",
+      "case": "B3",
+      "file": "frozen_artifacts/v36_final_schema/PRE_CALIBRATION/2025-04-01/B3/inputs/INPUT_AUTHORITY.json",
+      "rule": "deterministic frozen traffic-cache and Safe-ETA authority lookup",
+      "science_changed": false
+    },
+    {
+      "after_sha256": "735e170462c236ac5ff0a988749df30940d9dd5cab5aaf960dcaa49a9210b857",
+      "before_sha256": "735e170462c236ac5ff0a988749df30940d9dd5cab5aaf960dcaa49a9210b857",
+      "case": "B3",
+      "file": "frozen_artifacts/v36_final_schema/PRE_CALIBRATION/2025-04-01/B3/inputs/RUN_PROVENANCE.json",
+      "rule": "add recovery lineage and Safe-ETA authority SHA",
+      "science_changed": false
+    },
+    {
+      "after_sha256": "8fda2a38c7a1b75a67b75e1740b8e47bee73c9903900e4e13ef5f9ffd0c0a7fa",
+      "before_sha256": "afc8293c6d8927b2e220e0242aab2eb867f9e2adffea4580b68b3666d14465e2",
+      "case": "B0",
+      "file": "frozen_artifacts/v36_final_schema/PRE_CALIBRATION/2025-04-01/B0/aidc/AIDC_POWER_96.csv",
+      "rule": "derive aggregate effective PUE from saved C1 facility and IT power",
+      "science_changed": false
+    },
+    {
+      "after_sha256": "ead3f3ab067604fd94405d7168f640f42bcbc183a58937ed25537d2ca3c8659f",
+      "before_sha256": "34c9c25e057df12ff8c657b89caff8f7d387e2eccf8900e914d528c5108a9a09",
+      "case": "B1",
+      "file": "frozen_artifacts/v36_final_schema/PRE_CALIBRATION/2025-04-01/B1/aidc/AIDC_POWER_96.csv",
+      "rule": "derive aggregate effective PUE from saved C1 facility and IT power",
+      "science_changed": false
+    },
+    {
+      "after_sha256": "8fda2a38c7a1b75a67b75e1740b8e47bee73c9903900e4e13ef5f9ffd0c0a7fa",
+      "before_sha256": "afc8293c6d8927b2e220e0242aab2eb867f9e2adffea4580b68b3666d14465e2",
+      "case": "B2",
+      "file": "frozen_artifacts/v36_final_schema/PRE_CALIBRATION/2025-04-01/B2/aidc/AIDC_POWER_96.csv",
+      "rule": "derive aggregate effective PUE from saved C1 facility and IT power",
+      "science_changed": false
+    },
+    {
+      "after_sha256": "ead3f3ab067604fd94405d7168f640f42bcbc183a58937ed25537d2ca3c8659f",
+      "before_sha256": "34c9c25e057df12ff8c657b89caff8f7d387e2eccf8900e914d528c5108a9a09",
+      "case": "B3",
+      "file": "frozen_artifacts/v36_final_schema/PRE_CALIBRATION/2025-04-01/B3/aidc/AIDC_POWER_96.csv",
+      "rule": "derive aggregate effective PUE from saved C1 facility and IT power",
+      "science_changed": false
+    }
+  ],
+  "source_AIDC_HEAD": "aa1a113abdd6eb1bc76cf3bfdcb6dcdb29660b2e",
+  "source_HEAD": "a5c46a5c8b06e97e9e13a2078cb801fe51b240a9",
+  "source_MESS_HEAD": "a5c46a5c8b06e97e9e13a2078cb801fe51b240a9",
+  "source_branch": "codex/v36-apr01-integrated-calibration-freeze",
+  "worktree": "C:\\codex_mobileess_workspace\\MobileESS_v36_apr01_calibration"
+}
