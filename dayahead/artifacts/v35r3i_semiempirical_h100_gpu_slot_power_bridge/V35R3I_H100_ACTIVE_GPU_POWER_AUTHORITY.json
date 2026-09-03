@@ -1,0 +1,54 @@
+{
+  "GPU_hardware_filter": "H100_ONLY",
+  "Scientific_Data_crosscheck_role": "SECONDARY_BOUND_ONLY",
+  "active_power_W_per_GPU": {
+    "CENTER": 620.2239090195797,
+    "HIGH": 656.5288975728544,
+    "LOW": 469.25416154435004
+  },
+  "artifact_id": "V35R3I_H100_ACTIVE_GPU_POWER_AUTHORITY_V1",
+  "class_quantiles_W_per_GPU": {
+    "INFERENCE_OFFLINE": {
+      "P05": 474.91630696053477,
+      "P50": 622.5707158561486,
+      "P95": 641.6891199374361
+    },
+    "INFERENCE_ONLINE_FINITE": {
+      "P05": 504.4830766265526,
+      "P50": 566.5750735591968,
+      "P95": 592.3916413199174
+    },
+    "INFERENCE_ONLINE_RATE": {
+      "P05": 469.25416154435004,
+      "P50": 636.5926482657696,
+      "P95": 656.5288975728544
+    },
+    "TRAINING_STABLE_DIFFUSION": {
+      "P05": 615.7996260857385,
+      "P50": 617.8771021830107,
+      "P95": 618.3628721810937
+    }
+  },
+  "dataset_DOI": "10.7799/3025227",
+  "job_class_mapping_used": false,
+  "measurement_boundary": "NVML GPU_ONLY_PER_GPU_COMPONENT",
+  "primary_source": "NLR Dataset 312 v2; same Kestrel 4-H100 hardware",
+  "run_count": 2431,
+  "scenario_rule": {
+    "CENTER": "MEDIAN_CLASS_RUN_MEAN_P50",
+    "HIGH": "MAX_CLASS_RUN_MEAN_P95",
+    "LOW": "MIN_CLASS_RUN_MEAN_P05"
+  },
+  "source": {
+    "bytes": 1772769,
+    "repository_relative_path": "dayahead/artifacts/v35r3f_dataset312_h100_power_authority/V35R3F_RAW_PROFILE_STATISTICS.parquet",
+    "sha256": "3d157de55bd4be5b237874f9dcfe232b920ff13655dd496d88db2858d589321f"
+  },
+  "statistics_basis": "EXPERIMENT_RUN_LEVEL_TIME_MEAN_CLASS_STRATIFIED_NOT_RAW_SAMPLE_WEIGHTED",
+  "workload_classes": [
+    "INFERENCE_OFFLINE",
+    "INFERENCE_ONLINE_FINITE",
+    "INFERENCE_ONLINE_RATE",
+    "TRAINING_STABLE_DIFFUSION"
+  ]
+}

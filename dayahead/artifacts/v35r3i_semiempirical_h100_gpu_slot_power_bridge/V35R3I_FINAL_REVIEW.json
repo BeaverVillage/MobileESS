@@ -1,0 +1,226 @@
+{
+  "ACTIVE_POWER_W_per_GPU": {
+    "28_source": "Dataset312 Kestrel H100 NVML run-level class-stratified",
+    "29_LOW": 469.25416154435004,
+    "30_CENTER": 620.2239090195797,
+    "31_HIGH": 656.5288975728544
+  },
+  "AIDC_BASELINE": {
+    "57_authority": "V22SR1 final IEEE123 AIDC scale + V35R3A H0",
+    "58_scale_binding": "PASS",
+    "59_scale_factor": 1.0,
+    "60_absolute_whole_node_reconstructed": "NO",
+    "61_non_GPU_primary_delta": "ZERO",
+    "62_candidate_IT_peak_RW_kW": 406.77599381381907,
+    "63_candidate_IT_peak_RSP_kW": {
+      "CENTER": 406.77599381381907,
+      "HIGH": 406.77599381381907,
+      "LOW": 406.77599381381907
+    }
+  },
+  "AUTHORITY": {
+    "70_level": "SE3_FROZEN_AIDC_IT_DELTA_CANDIDATE",
+    "71_primary_classification": "V35R3I_EXPANDED_H100_POWER_BRIDGE_PASS",
+    "72_EXPANDED_FLEX_POWER_READY": "YES",
+    "73_AIDC_GRID_INTEGRATION_NEXT": "YES_AFTER_SITE_BINDING",
+    "74_PRODUCTION_INTEGRATION_RECOMMENDED": "NO"
+  },
+  "EXPANDED_FLEXIBILITY": {
+    "14_temporal_controlled_jobs": 339,
+    "15_partial_shared_jobs": 336,
+    "16_job_count_coverage": 1.0,
+    "17_temporal_GPU_hours": 14832.0,
+    "18_partial_shared_GPU_hours": 14256.0,
+    "19_GPU_hour_power_coverage": 1.0
+  },
+  "FACILITY": {
+    "64_C1_reused": "NO",
+    "65_PCC_candidate_generated": "NO",
+    "66_PCC_peak_RW": "NOT_GENERATED",
+    "67_PCC_peak_RSP": "NOT_GENERATED"
+  },
+  "FIREWALL": {
+    "75_Apr01_realized_runtime_reads": 0,
+    "76_Apr01_future_end_reads": 0,
+    "77_Apr01_consumed_energy_reads": 0,
+    "78_future_node_assignment_reads": 0,
+    "79_Planning_reads": 0,
+    "80_Fresh_reads": 0,
+    "81_MESS_reads": 0,
+    "82_May_reads": 0
+  },
+  "GIT": {
+    "1_parent_HEAD": "549ce2aea231187a1df5f21b40fe49c5eb8c97a1",
+    "2_branch": "codex/v35r3i-semiempirical-h100-gpu-slot-power-bridge",
+    "3_worktree": "C:\\codex_mobileess_workspace\\MobileESS_v35r3i_h100_power_bridge",
+    "4_source_commit_at_build": "a34f6fb6a5b1d87dc3f35eb5728963b5dc7beb6d",
+    "5_clean_at_start": true,
+    "6_production_files_changed": 0,
+    "7_MESS_files_changed": 0,
+    "8_public_source_files_changed": 0,
+    "9_push_merge": "NO/NO"
+  },
+  "GPU_COMPONENT_TRAJECTORY": {
+    "40_RW_daily_energy_kWh": {
+      "CENTER": 9288.473261477224,
+      "HIGH": 9832.176770051068,
+      "LOW": 7027.550323288185
+    },
+    "41_RSP_daily_energy_kWh": {
+      "CENTER": 8754.031657251371,
+      "HIGH": 9262.408148244354,
+      "LOW": 6640.319875161287
+    },
+    "42_daily_energy_delta_kWh": {
+      "CENTER": -534.4416042258551,
+      "HIGH": -569.7686218067129,
+      "LOW": -387.2304481268996
+    },
+    "43_peak_slot_power_delta_kW": {
+      "CENTER": -112.28340134901384,
+      "HIGH": -119.70542400243517,
+      "LOW": -81.35510311659175
+    },
+    "44_W1_mean_power_delta_kW": {
+      "CENTER": -59.70190608313425,
+      "HIGH": -63.648249835441106,
+      "LOW": -43.25710360833415
+    },
+    "45_W3_mean_power_delta_kW": {
+      "CENTER": -59.33675681045454,
+      "HIGH": -63.258963903725906,
+      "LOW": -42.992534167304576
+    },
+    "46_W5_mean_power_delta_kW": {
+      "CENTER": -56.634652192624614,
+      "HIGH": -60.378248009033165,
+      "LOW": -41.03472030368579
+    }
+  },
+  "HARDWARE": {
+    "10_frozen_GPU_capacity": 624,
+    "11_H100_GPUs_per_node": 4,
+    "12_equivalent_node_count": 156,
+    "13_pool_scale_relationship": "SAME_FROZEN_TESTBED_EQUIVALENT_SCALE; physical delta scale=1"
+  },
+  "IDLE_POWER_W_per_GPU": {
+    "32_classification": "IDLE_AUTHORITY_DIRECT",
+    "33_source": "Dataset312 paper Appendix A.4 Kestrel no-task idle",
+    "34_LOW": 72.4,
+    "35_CENTER": 72.5,
+    "36_HIGH": 72.6
+  },
+  "INCREMENTAL_GPU_POWER_W_per_GPU": {
+    "37_LOW": 396.85416154435006,
+    "38_CENTER": 547.7239090195797,
+    "39_HIGH": 583.9288975728543
+  },
+  "PARTIAL_SHARED": {
+    "47_INCLUDED": "YES",
+    "48_SHARED_JOB_POWER_ATTRIBUTION_USED": "NO",
+    "49_node_packing_required": "NO",
+    "50_double_count_conservation": "PASS"
+  },
+  "QUESTIONS": {
+    "Q1": "YES; 336 PARTIAL/shared jobs are represented by conserved occupied GPU slots, without independent per-job power.",
+    "Q10": "Expanded cohort is 113x jobs and 25.75x requested GPU-h; energy-mass comparisons use the same scenario increments.",
+    "Q11": "NO.",
+    "Q12": "The 406.77599381381907-kW frozen RW IT baseline is copied unchanged for all 96 slots.",
+    "Q13": "YES; only scale-1 scheduler-induced GPU-component delta is added.",
+    "Q14": "NO.",
+    "Q15": "NO.",
+    "Q16": "NO.",
+    "Q17": "NO for aggregate GPU-component delta; unresolved for whole-node/site attribution.",
+    "Q18": "Not yet: aggregate IT is ready, but C1/PCC conversion is gated by the missing frozen site/rack/PCC binding.",
+    "Q19": "Freeze an exogenous site/rack/PCC binding, run C1 and downstream Apr-01 grid certification with all three scenarios, then approve production semantics.",
+    "Q2": "100% (14,832/14,832 requested GPU-h); PARTIAL/shared is 14,256 GPU-h (96.116505%).",
+    "Q20": "YES, as a measurement-calibrated semi-empirical GPU-component delta estimate, not measured per-job or whole-node power.",
+    "Q21": "Carry LOW/CENTER/HIGH workload-power spread and the zero-primary-non-GPU/component-boundary limitation.",
+    "Q22": "NO.",
+    "Q23": "NO.",
+    "Q3": "Every simultaneous requested GPU occupies one slot exactly once, class components sum to total occupancy, and occupancy never exceeds 624.",
+    "Q4": "Dataset312 Kestrel four-H100 NVML GPU-only experiment-run means, summarized by class-stratified P05/P50/P95 rules.",
+    "Q5": "Direct Level-A Kestrel idle evidence: 72.5 +/- 0.1 W/GPU in a powered no-task node (Dataset312 paper Appendix A.4).",
+    "Q6": "{\"LOW\": 396.85416154435006, \"CENTER\": 547.7239090195797, \"HIGH\": 583.9288975728543}",
+    "Q7": "RSP-minus-RW is zero in 59 equal-occupancy slots and robustly negative in 37 slots; daily energy deltas are reported by scenario.",
+    "Q8": "W1/W3/W5 slotwise and mean RSP-minus-RW kW deltas are reported in the energy and robustness artifacts.",
+    "Q9": "YES; all three scenarios are negative in every unequal-occupancy slot and zero otherwise."
+  },
+  "RW_RSP_OCCUPANCY": {
+    "20_RW_saturated_slots": 96,
+    "21_RSP_saturated_slots": 59,
+    "22_RW_mean_active_GPUs": 624.0,
+    "23_RSP_mean_active_GPUs": 583.34375,
+    "24_max_RW_minus_RSP": 205.0,
+    "25_W1_RSP_minus_RW": {
+      "apr01_slots": [
+        74
+      ],
+      "maximum": -109.0,
+      "mean": -109.0,
+      "minimum": -109.0,
+      "slot_values": [
+        -109.0
+      ]
+    },
+    "26_W3_RSP_minus_RW": {
+      "apr01_slots": [
+        73,
+        74,
+        75
+      ],
+      "maximum": -105.0,
+      "mean": -108.33333333333333,
+      "minimum": -111.0,
+      "slot_values": [
+        -105.0,
+        -109.0,
+        -111.0
+      ]
+    },
+    "27_W5_RSP_minus_RW": {
+      "apr01_slots": [
+        72,
+        73,
+        74,
+        75,
+        76
+      ],
+      "maximum": -81.0,
+      "mean": -103.4,
+      "minimum": -111.0,
+      "slot_values": [
+        -81.0,
+        -105.0,
+        -109.0,
+        -111.0,
+        -111.0
+      ]
+    }
+  },
+  "SITE_BINDING": {
+    "68_existing_binding_available": "NO",
+    "69_status": "MISSING_FOR_GRID_INTEGRATION"
+  },
+  "STRICT_F0": {
+    "51_job_count": 3,
+    "52_GPU_hours": 576.0,
+    "53_expanded_job_multiple": 113.0,
+    "54_expanded_GPU_hour_multiple": 25.75,
+    "55_strict_power_flex_energy_mass_kWh": {
+      "CENTER": 315.4889715952779,
+      "HIGH": 336.3430450019641,
+      "LOW": 228.58799704954563
+    },
+    "56_expanded_power_flex_energy_mass_kWh": {
+      "CENTER": 8123.841018578405,
+      "HIGH": 8660.833408800576,
+      "LOW": 5886.1409240258
+    }
+  },
+  "TESTS": {
+    "83_passed": 35,
+    "84_failed": 0
+  },
+  "artifact_id": "V35R3I_FINAL_REVIEW_V1"
+}

@@ -533,7 +533,7 @@ def build(test_passed: int = 0, test_failed: int = 0) -> Path:
     }
     answers = {
         "Q1": "YES; 336 PARTIAL/shared jobs are represented by conserved occupied GPU slots, without independent per-job power.",
-        "Q2": "100% (14,832/14,832 requested GPU-h); PARTIAL/shared is 14,256 GPU-h (96.117852%).",
+        "Q2": "100% (14,832/14,832 requested GPU-h); PARTIAL/shared is 14,256 GPU-h (96.116505%).",
         "Q3": "Every simultaneous requested GPU occupies one slot exactly once, class components sum to total occupancy, and occupancy never exceeds 624.",
         "Q4": "Dataset312 Kestrel four-H100 NVML GPU-only experiment-run means, summarized by class-stratified P05/P50/P95 rules.",
         "Q5": "Direct Level-A Kestrel idle evidence: 72.5 +/- 0.1 W/GPU in a powered no-task node (Dataset312 paper Appendix A.4).",
