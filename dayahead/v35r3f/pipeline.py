@@ -38,6 +38,7 @@ from .audit import (
     file_size,
     git,
     integrate_series_wh,
+    integrate_components_wh,
     inventory_record,
     parquet_schema,
     profile_statistics,
@@ -172,6 +173,95 @@ def ensure_source() -> dict[str, Any]:
     }
 
 
+def enrich_inventory(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Attach metadata-backed experiment identity to files with numeric result names."""
+
+    metadata_by_folder = {
+        path.parent.name: pd.read_csv(path)
+        for path in sorted(AGGREGATED.rglob("metadata.csv"))
+    }
+    training_meta = metadata_by_folder["training"]
+    training_by_result = {
+        int(row["Unnamed: 0"]): row for _, row in training_meta.iterrows()
+    }
+    training_by_slurm = {
+        str(int(row["slurmid"])): row for _, row in training_meta.iterrows()
+    }
+    raw_training_groups: dict[tuple[str, int], list[str]] = defaultdict(list)
+    for path in RAW.glob("training_*/*node/*wattameter*.log"):
+        _workload, model, _family = workload_identity(path.relative_to(EXTRACTED_ROOT).as_posix())
+        match = SLURM_RE.search(path.name)
+        if model and match:
+            raw_training_groups[(model, int(path.parent.name.removesuffix("node")))].append(match.group(1))
+    raw_repeat: dict[tuple[str, int, str], int] = {}
+    for (model, nodes), slurms in raw_training_groups.items():
+        for repeat, slurm in enumerate(sorted(set(slurms))):
+            raw_repeat[(model, nodes, slurm)] = repeat
+
+    inference_identity = {
+        "inference_offline_llama3_70b": ("INFERENCE_OFFLINE", "LLAMA3_70B"),
+        "inference_online_finite_llama3_70b": ("INFERENCE_ONLINE_FINITE", "LLAMA3_70B"),
+        "inference_online_rate_llama3_70b": ("INFERENCE_ONLINE_RATE", "LLAMA3_70B"),
+    }
+    for record in rows:
+        path = record["relative_path"]
+        parts = path.split("/")
+        if len(parts) >= 4 and parts[0] == "01_aggregated_datasets" and parts[2] == "results":
+            folder = parts[1]
+            result_index = int(Path(parts[-1]).stem)
+            if folder == "training":
+                meta = training_by_result[result_index]
+                model_raw = str(meta["model"])
+                model = "LLAMA2_70B" if model_raw == "llama2_70b_lora" else "STABLE_DIFFUSION_V2"
+                workload = "FINE_TUNING_LORA" if model == "LLAMA2_70B" else "TRAINING_STABLE_DIFFUSION"
+                nodes = int(meta["nodes"])
+                record.update(
+                    {
+                        "workload_identity": workload,
+                        "model_identity": model,
+                        "model_family": "LLM" if model == "LLAMA2_70B" else "DIFFUSION",
+                        "experiment_identity": f"training:{int(meta['slurmid'])}",
+                        "node_count": nodes,
+                        "gpus_per_node": GPUS_PER_NODE,
+                        "total_gpu_count": nodes * GPUS_PER_NODE,
+                        "repetition_index": int(meta["repeat"]),
+                    }
+                )
+            else:
+                meta = metadata_by_folder[folder].iloc[result_index]
+                workload, model = inference_identity[folder]
+                repeat = meta.get("repeat", meta.get("_repeat", None))
+                record.update(
+                    {
+                        "workload_identity": workload,
+                        "model_identity": model,
+                        "model_family": "LLM",
+                        "experiment_identity": f"{folder}:{result_index:06d}",
+                        "node_count": 1,
+                        "gpus_per_node": GPUS_PER_NODE,
+                        "total_gpu_count": GPUS_PER_NODE,
+                        "repetition_index": None if pd.isna(repeat) else int(repeat),
+                    }
+                )
+        elif parts[0] == "00_raw_datasets" and parts[1].startswith("training_"):
+            match = SLURM_RE.search(parts[-1])
+            if match and record["model_identity"]:
+                slurm = match.group(1)
+                nodes = int(record["node_count"])
+                record["repetition_index"] = raw_repeat[(record["model_identity"], nodes, slurm)]
+                record["experiment_identity"] = f"training:{slurm}"
+        elif len(parts) >= 2 and parts[0] == "00_raw_datasets" and parts[1] in inference_identity:
+            count = len(metadata_by_folder[parts[1]])
+            record["experiment_identity"] = f"MULTIPLE_EXPERIMENTS:{count}"
+        elif len(parts) >= 3 and parts[0] == "01_aggregated_datasets" and parts[-1] == "metadata.csv":
+            folder = parts[1]
+            record["experiment_identity"] = f"MULTIPLE_EXPERIMENTS:{len(metadata_by_folder[folder])}"
+            if folder == "training":
+                record["workload_identity"] = "MULTIPLE_TRAINING_CLASSES"
+                record["model_identity"] = "LLAMA2_70B_AND_STABLE_DIFFUSION_V2"
+    return rows
+
+
 def build_schema_census(inventory_rows: Sequence[dict[str, Any]], source_commit: str) -> dict[str, Any]:
     families: list[dict[str, Any]] = [
         {
@@ -210,6 +300,33 @@ def build_schema_census(inventory_rows: Sequence[dict[str, Any]], source_commit:
                 "fields": {
                     column: {"dtype": str(dtype), "unit": dataframe_units([column])[column]}
                     for column, dtype in frame.dtypes.items()
+                },
+            }
+        )
+    for json_path in sorted(RAW.glob("inference*/*.json")):
+        try:
+            with json_path.open("r", encoding="utf-8") as stream:
+                payload = json.load(stream)
+            encoding = "JSON"
+        except json.JSONDecodeError:
+            with json_path.open("r", encoding="utf-8") as stream:
+                payload = [json.loads(line) for line in stream if line.strip()]
+            encoding = "JSON_LINES"
+        if isinstance(payload, list):
+            keys = sorted({key for item in payload if isinstance(item, dict) for key in item})
+            count = len(payload)
+        else:
+            keys = sorted(payload)
+            count = 1
+        families.append(
+            {
+                "family": f"raw_experiment_json:{json_path.parent.name}:{json_path.name}",
+                "source_relative_path": json_path.relative_to(EXTRACTED_ROOT).as_posix(),
+                "encoding": encoding,
+                "record_count": count,
+                "fields": {
+                    key: {"dtype": "nested_or_scalar_JSON", "unit": dataframe_units([key])[key]}
+                    for key in keys
                 },
             }
         )
@@ -416,8 +533,12 @@ def _reconciliation_row(
     raw_series: pd.Series,
     aggregate_path: Path | None,
     accounting: Accounting,
+    source_integral_wh: float | None = None,
 ) -> dict[str, Any]:
     raw = _raw_metrics(raw_series)
+    raw_aligned_energy_wh = raw["energy_Wh"]
+    if source_integral_wh is not None:
+        raw["energy_Wh"] = float(source_integral_wh)
     if aggregate_path is None or not aggregate_path.is_file():
         return {
             "experiment_id": experiment_id,
@@ -426,14 +547,20 @@ def _reconciliation_row(
             "aggregate_available": False,
             "classification": "RAW_ONLY_NO_DATASET_AGGREGATE",
             **{f"raw_{key}": value for key, value in raw.items()},
+            "raw_aligned_grid_energy_Wh": raw_aligned_energy_wh,
         }
     supplied = _aggregate_metrics(aggregate_path)
     accounting.aggregate_rows += supplied["row_count"]
     errors = {
+        "mean_absolute_error_W": abs(raw["mean_power_W"] - supplied["mean_power_W"]),
         "mean_relative_error": relative_error(raw["mean_power_W"], supplied["mean_power_W"]),
+        "median_absolute_error_W": abs(raw["median_power_W"] - supplied["median_power_W"]),
         "median_relative_error": relative_error(raw["median_power_W"], supplied["median_power_W"]),
+        "p05_absolute_error_W": abs(raw["p05_power_W"] - supplied["p05_power_W"]),
         "p05_relative_error": relative_error(raw["p05_power_W"], supplied["p05_power_W"]),
+        "p95_absolute_error_W": abs(raw["p95_power_W"] - supplied["p95_power_W"]),
         "p95_relative_error": relative_error(raw["p95_power_W"], supplied["p95_power_W"]),
+        "energy_absolute_error_Wh": abs(raw["energy_Wh"] - supplied["energy_Wh"]),
         "energy_relative_error": relative_error(raw["energy_Wh"], supplied["energy_Wh"]),
     }
     passed = (
@@ -450,6 +577,7 @@ def _reconciliation_row(
         "aggregate_available": True,
         "aggregate_relative_path": aggregate_path.relative_to(EXTRACTED_ROOT).as_posix(),
         **{f"raw_{key}": value for key, value in raw.items()},
+        "raw_aligned_grid_energy_Wh": raw_aligned_energy_wh,
         **{f"aggregate_{key}": value for key, value in supplied.items()},
         **errors,
         "row_count_difference": supplied["row_count"] - raw["row_count"],
@@ -527,6 +655,18 @@ def process_training(
         core = align_and_sum(core_series, 0.2)
         primary = align_and_sum([*gpu_series, *package_series], 0.2)
         provided = align_and_sum([*gpu_series, *package_series, *core_series], 0.2)
+        boundary_energy = {
+            "GPU_ONLY_POWER": integrate_components_wh(gpu_series),
+            "RAPL_PACKAGE_POWER": integrate_components_wh(package_series),
+            "RAPL_CORE_SUBDOMAIN_POWER": integrate_components_wh(core_series),
+            PRIMARY_BOUNDARY: integrate_components_wh([*gpu_series, *package_series]),
+            "DATASET_PROVIDED_GPU_PLUS_RAPL_PACKAGE_PLUS_CORE_SUM": integrate_components_wh(
+                [*gpu_series, *package_series, *core_series]
+            ),
+        }
+        sensor_invalid_sample_count = int(
+            sum(series.isna().sum() for series in [*gpu_series, *package_series, *core_series])
+        )
         workload = "FINE_TUNING_LORA" if model == "LLAMA2_70B" else "TRAINING_STABLE_DIFFUSION"
         experiment_id = f"training:{slurm}"
         for boundary, series in (
@@ -546,6 +686,7 @@ def process_training(
                     series,
                     source_paths,
                     "FULL_CAPTURE_PRIMARY_NO_TRIMMING",
+                    boundary_energy[boundary],
                 )
             )
         repeat = repeats[(model, node_count)]
@@ -557,7 +698,15 @@ def process_training(
             else None
         )
         reconciliation.append(
-            _reconciliation_row(experiment_id, workload, node_count, provided, aggregate_path, accounting)
+            _reconciliation_row(
+                experiment_id,
+                workload,
+                node_count,
+                provided,
+                aggregate_path,
+                accounting,
+                boundary_energy["DATASET_PROVIDED_GPU_PLUS_RAPL_PACKAGE_PLUS_CORE_SUM"],
+            )
         )
         experiments.append(
             {
@@ -580,6 +729,8 @@ def process_training(
                 "batch_size": "1_PER_DEVICE_FOR_LLAMA; DATASET_ARTIFACT_UNKNOWN_FOR_STABLE_DIFFUSION",
                 "sequence_length": "UNKNOWN",
                 "validity": "VALID",
+                "sensor_invalid_sample_count": sensor_invalid_sample_count,
+                "sensor_invalid_run": sensor_invalid_sample_count > 0,
                 "aggregate_available": aggregate_path is not None,
                 "source_relative_paths_json": json.dumps(source_paths),
             }
@@ -635,7 +786,22 @@ def process_inference(
                 core = core.loc[trim_start:]
                 primary = primary.loc[trim_start:]
                 provided = provided.loc[trim_start:]
+                gpu_native = gpu_native.loc[trim_start:]
+                package_native = package_native.loc[trim_start:]
+                core_native = core_native.loc[trim_start:]
                 warnings += int(trim_failed)
+            boundary_energy = {
+                "GPU_ONLY_POWER": integrate_components_wh([gpu_native]),
+                "RAPL_PACKAGE_POWER": integrate_components_wh([package_native]),
+                "RAPL_CORE_SUBDOMAIN_POWER": integrate_components_wh([core_native]),
+                PRIMARY_BOUNDARY: integrate_components_wh([gpu_native, package_native]),
+                "DATASET_PROVIDED_GPU_PLUS_RAPL_PACKAGE_PLUS_CORE_SUM": integrate_components_wh(
+                    [gpu_native, package_native, core_native]
+                ),
+            }
+            sensor_invalid_sample_count = int(
+                gpu_native.isna().sum() + package_native.isna().sum() + core_native.isna().sum()
+            )
             experiment_id = f"{folder}:{index:06d}"
             sources = [
                 nvml_path.relative_to(EXTRACTED_ROOT).as_posix(),
@@ -659,11 +825,20 @@ def process_inference(
                         series,
                         sources,
                         segmentation + ("_FAILED_RETAINED_FULL_WINDOW" if trim_failed else ""),
+                        boundary_energy[boundary],
                     )
                 )
             aggregate_path = AGGREGATED / folder / "results" / f"{index:06d}.parquet"
             reconciliation.append(
-                _reconciliation_row(experiment_id, workload, 1, provided, aggregate_path, accounting)
+                _reconciliation_row(
+                    experiment_id,
+                    workload,
+                    1,
+                    provided,
+                    aggregate_path,
+                    accounting,
+                    boundary_energy["DATASET_PROVIDED_GPU_PLUS_RAPL_PACKAGE_PLUS_CORE_SUM"],
+                )
             )
             experiments.append(
                 {
@@ -689,6 +864,8 @@ def process_inference(
                     "request_rate_prompts_per_second": row.get("request_rate", row.get("request_rate_x", "NOT_APPLICABLE")),
                     "sequence_length": "UNKNOWN",
                     "validity": "VALID_WITH_DATASET_SEGMENTATION_WARNING" if trim_failed else "VALID",
+                    "sensor_invalid_sample_count": sensor_invalid_sample_count,
+                    "sensor_invalid_run": sensor_invalid_sample_count > 0,
                     "aggregate_available": True,
                     "source_relative_paths_json": json.dumps(sources),
                 }
@@ -992,7 +1169,18 @@ def reconciliation_summary(rows: pd.DataFrame, source_commit: str) -> dict[str, 
         },
         "maximum_errors": {
             column: float(available[column].max())
-            for column in ("mean_relative_error", "median_relative_error", "p05_relative_error", "p95_relative_error", "energy_relative_error")
+            for column in (
+                "mean_absolute_error_W",
+                "mean_relative_error",
+                "median_absolute_error_W",
+                "median_relative_error",
+                "p05_absolute_error_W",
+                "p05_relative_error",
+                "p95_absolute_error_W",
+                "p95_relative_error",
+                "energy_absolute_error_Wh",
+                "energy_relative_error",
+            )
         },
         "important_interpretation": "Numerical reconciliation does not make the supplied overlapping RAPL package+core sum a whole-node physical boundary.",
         "online_rate_resampling": "Dataset-supplied 0.001 s interpolation from approximately 0.1 s raw samples is reconciled for mean/energy but is not native measurement resolution.",
@@ -1236,7 +1424,7 @@ def final_review(
         "28": "NO",
         "29": int(experiments["validity"].ne("STRUCTURAL_INVALID").sum()),
         "30": int(experiments["validity"].eq("STRUCTURAL_INVALID").sum()),
-        "31": int(quality.loc[quality["classification"].eq("SENSOR_INVALID_PRESENT"), "relative_path"].nunique()),
+        "31": int(experiments["sensor_invalid_run"].fillna(False).astype(bool).sum()),
         "32": int(quality["classification"].eq("VALID_EXTREME_RETAINED").sum()),
         "33": reconciliation["classification"],
         "34": PRIMARY_BOUNDARY + " (component-level only)",
@@ -1252,7 +1440,11 @@ def final_review(
             for row in scaling.loc[scaling["power_boundary"].eq(PRIMARY_BOUNDARY)].itertuples()
         },
         "39": "16 nodes / 64 GPUs",
-        "40": "PASS_WITHIN_REPORTED_TOLERANCE" if reconciliation["failed_runs"] == 0 else "PARTIAL",
+        "40": (
+            "PASS_ALL_AGGREGATE_ENERGIES_WITHIN_TOLERANCE"
+            if reconciliation["maximum_errors"]["energy_relative_error"] <= RAW_AGGREGATE_ENERGY_RTOL
+            else "PARTIAL"
+        ),
         "41": RESOURCE_STATE_SUPPORT,
         "42": POWER_AUTHORITY_LEVEL,
         "43": "NO",
@@ -1326,7 +1518,7 @@ def final_markdown(review: dict[str, Any]) -> str:
         17: "authoritative CPU channels", 18: "whole-node directly measured", 19: "facility directly measured",
         20: "native intervals", 21: "timebase anomalies", 22: "workload classes", 23: "model families",
         24: "node counts", 25: "GPUs per node", 26: "partial GPU measured", 27: "shared jobs measured",
-        28: "idle measured", 29: "valid runs", 30: "structural-invalid runs", 31: "sensor-invalid files",
+        28: "idle measured", 29: "valid runs", 30: "structural-invalid runs", 31: "sensor-invalid runs",
         32: "valid-extreme field records", 33: "raw/aggregate reconciliation", 34: "primary boundary",
         35: "overall mean range W", 36: "overall P05/P50/P95 ranges", 37: "max workload spread W",
         38: "node scaling per-node means W", 39: "maximum scale", 40: "energy reconciliation",
@@ -1379,6 +1571,7 @@ def run(run_tests: bool = True, verify_zip_crc: bool = True) -> None:
     else:
         source["zip_crc_test"] = "SKIPPED_BY_EXPLICIT_OPTION"
     inventory_rows, inventory_summary = archive_inventory(ARCHIVE)
+    inventory_rows = enrich_inventory(inventory_rows)
     accounting.checkpoint("source_and_archive_inventory", stage)
 
     common = provenance(source_commit)
@@ -1487,8 +1680,14 @@ def run(run_tests: bool = True, verify_zip_crc: bool = True) -> None:
                     "repair": "ALIGN_ALL_COMPATIBLE_RAW_CHANNELS_ONCE_ON_COMMON_OVERLAP",
                     "science_neutral": True,
                 },
+                {
+                    "failure_signature": "ALIGNED_GRID_ENERGY_WAS_NOT_NATIVE_DELTA_INTEGRAL",
+                    "attempt": 1,
+                    "repair": "INTEGRATE_EACH_COMPATIBLE_CHANNEL_ON_ACTUAL_NATIVE_TIMESTAMPS_OVER_COMMON_SUPPORT",
+                    "science_neutral": True,
+                },
             ],
-            "unique_failure_signatures": 4,
+            "unique_failure_signatures": 5,
             "science_semantics_changed": False,
         },
     )

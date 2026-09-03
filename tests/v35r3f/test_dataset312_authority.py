@@ -68,6 +68,15 @@ def test_complete_machine_readable_inventory() -> None:
     }
     assert required <= set(csv_frame.columns)
     assert csv_frame["relative_path"].is_unique
+    training = csv_frame.loc[
+        csv_frame["relative_path"].eq(
+            "01_aggregated_datasets/training/results/000000.parquet"
+        )
+    ].iloc[0]
+    assert training["model_identity"] == "LLAMA2_70B"
+    assert int(training["node_count"]) == 2
+    assert int(training["total_gpu_count"]) == 8
+    assert int(training["repetition_index"]) == 0
 
 
 def test_schema_fields_have_unit_or_unknown() -> None:
@@ -134,6 +143,9 @@ def test_raw_profile_statistics_cover_every_valid_run_and_boundary() -> None:
     assert stats.groupby("experiment_id")["power_boundary"].nunique().eq(5).all()
     assert (stats["energy_integral_Wh"] >= 0).all()
     assert set(stats["unit"]) == {"W"}
+    assert stats["energy_method"].eq(
+        "SUM_OF_COMPATIBLE_CHANNEL_TRAPEZOIDS_USING_ACTUAL_NATIVE_TIMESTAMPS_COMMON_OVERLAP"
+    ).all()
 
 
 def test_full_run_primary_and_no_invented_steady_trim() -> None:
@@ -148,6 +160,13 @@ def test_raw_aggregate_reconciliation_is_independent_and_toleranced() -> None:
     frame = pd.read_csv(ART / "V35R3F_RAW_AGGREGATED_RECONCILIATION.csv")
     assert audit["available_aggregate_runs"] == int(frame["aggregate_available"].sum())
     assert audit["tolerances"]["mean_relative"] > 0
+    assert {
+        "mean_absolute_error_W",
+        "median_absolute_error_W",
+        "p05_absolute_error_W",
+        "p95_absolute_error_W",
+        "energy_absolute_error_Wh",
+    } <= set(frame.columns)
     assert "hard-coded expected aggregate" not in json.dumps(audit).lower()
 
 
@@ -166,6 +185,8 @@ def test_data_quality_exclusions_are_science_neutral() -> None:
     quality = pd.read_csv(ART / "V35R3F_DATA_QUALITY_AUDIT.csv")
     assert {"STRUCTURAL_INVALID", "SENSOR_INVALID", "VALID_EXTREME", "UNKNOWN"} <= set(manifest["rules"])
     assert (quality["sample_count"] > 0).all()
+    experiments = pd.read_parquet(ART / "V35R3F_EXPERIMENT_CENSUS.parquet")
+    assert {"sensor_invalid_sample_count", "sensor_invalid_run"} <= set(experiments.columns)
 
 
 def test_node_scaling_is_matched_and_weak_scaling_labeled() -> None:
@@ -251,7 +272,7 @@ def test_compute_firewall_no_heavy_model_or_solver() -> None:
 def test_repair_log_did_not_change_science() -> None:
     repairs = load("V35R3F_REPAIR_LOG.json")
     assert repairs["science_semantics_changed"] is False
-    assert repairs["unique_failure_signatures"] <= 5
+    assert repairs["unique_failure_signatures"] == 5
 
 
 def test_every_primary_profile_uses_declared_boundary() -> None:

@@ -401,6 +401,21 @@ def integrate_series_wh(series: pd.Series) -> float:
     return float(np.trapz(clean.to_numpy(dtype=float), seconds) / 3600.0)
 
 
+def integrate_components_wh(series_list: Sequence[pd.Series]) -> float:
+    """Integrate compatible channels on their actual native timestamp deltas."""
+
+    prepared = [collapse_duplicate_index(series.dropna()) for series in series_list if len(series.dropna())]
+    if not prepared:
+        return 0.0
+    common_start = max(series.index[0] for series in prepared)
+    common_end = min(series.index[-1] for series in prepared)
+    if common_end <= common_start:
+        return 0.0
+    return float(
+        sum(integrate_series_wh(series.loc[common_start:common_end]) for series in prepared)
+    )
+
+
 def profile_statistics(
     experiment_id: str,
     workload_class: str,
@@ -410,6 +425,7 @@ def profile_statistics(
     series: pd.Series,
     source_paths: Sequence[str],
     segmentation: str,
+    energy_integral_wh: float | None = None,
 ) -> dict[str, Any]:
     clean = collapse_duplicate_index(series.dropna())
     values = clean.to_numpy(dtype=float)
@@ -441,8 +457,8 @@ def profile_statistics(
         "p99_power_W": float(quantiles[8]),
         "min_power_W": float(np.min(values)) if len(values) else math.nan,
         "max_power_W": float(np.max(values)) if len(values) else math.nan,
-        "energy_integral_Wh": integrate_series_wh(clean),
-        "energy_method": "TRAPEZOID_ACTUAL_ALIGNED_TIMESTAMPS",
+        "energy_integral_Wh": integrate_series_wh(clean) if energy_integral_wh is None else float(energy_integral_wh),
+        "energy_method": "SUM_OF_COMPATIBLE_CHANNEL_TRAPEZOIDS_USING_ACTUAL_NATIVE_TIMESTAMPS_COMMON_OVERLAP",
         "statistic_timebase": "NATIVE_FAMILY_INTERVAL_AFTER_CROSS_SENSOR_ALIGNMENT",
         "segmentation": segmentation,
         "source_relative_paths_json": json.dumps(sorted(source_paths)),
