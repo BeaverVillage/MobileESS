@@ -156,6 +156,27 @@ def test_frozen_k_fallback_scope_and_sequence(tmp_path: Path) -> None:
     assert summary["K_fallback_used"] is True
     assert summary["full_scan_used"] is False
     assert frozen.DEFAULT_K == 200
+    calls.clear()
+    search_root = tmp_path / "s1" / parent.beam_state_id
+    (search_root / "RESTRICTED_VALUES.csv").unlink()
+    (search_root / "LOCAL_SEARCH.json").unlink()
+    _seeds, resumed = _run_local_with_frozen_k_fallback(
+        frozen,
+        local_search,
+        cache=tmp_path,
+        case="B2",
+        mess_id="MESS03",
+        sequence_index=0,
+        parent=parent,
+        aidc=None,
+        coefficients=None,
+        services=None,
+        route_table=None,
+        seed_line=None,
+        workers=4,
+    )
+    assert calls == [800]
+    assert resumed["K_fallback_attempts"][0]["status"] == "CERTIFICATION_FAILURE_RESTORED"
     assert _local_fallback_allowed(RuntimeError("V35R3_FIXED_CERTIFICATE_STALLED:x"))
     assert not _local_fallback_allowed(FileNotFoundError("path"))
     assert not _beam_fallback_allowed(RuntimeError("V35R3_FIXED_CERTIFICATE_STALLED:x"))

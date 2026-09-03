@@ -145,6 +145,35 @@ def _archive_local_attempt(search_root: Path, level: str) -> None:
             index += 1
 
 
+def _uncertified_rows(values: pd.DataFrame) -> list[dict[str, Any]]:
+    if not len(values) or "exact_optimality_certificate" not in values:
+        return []
+    failed = values.loc[
+        values["exact_optimality_certificate"].astype(str).str.startswith("V37_FAIL_CLOSED:")
+    ]
+    return failed.to_dict("records")
+
+
+def _archived_k_attempt(search_root: Path, label: str) -> dict[str, Any] | None:
+    archived = list(search_root.glob(f"RESTRICTED_VALUES.K{label}.ATTEMPT*.csv"))
+    if not archived:
+        return None
+    path = max(archived, key=lambda item: (item.stat().st_mtime_ns, item.name))
+    values = pd.read_csv(path)
+    failure_rows = _uncertified_rows(values)
+    if not failure_rows:
+        return None
+    return {
+        "K": label,
+        "status": "CERTIFICATION_FAILURE_RESTORED",
+        "restricted_candidates": int(len(values)),
+        "uncertified_candidate_count": len(failure_rows),
+        "uncertified_candidate_ids": [str(row["candidate_id"]) for row in failure_rows],
+        "signatures": [str(row["exact_optimality_certificate"]) for row in failure_rows],
+        "restored_from": str(path),
+    }
+
+
 def _run_local_with_frozen_k_fallback(
     frozen: Any, original_local: Any, **kwargs: Any,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
@@ -172,6 +201,10 @@ def _run_local_with_frozen_k_fallback(
         for index, level in enumerate(levels):
             label = "FULL" if level == full_k else str(level)
             frozen.DEFAULT_K = level
+            restored = _archived_k_attempt(search_root, label)
+            if restored is not None and index < len(levels) - 1:
+                attempts.append(restored)
+                continue
             try:
                 seeds, summary = original_local(**kwargs)
             except Exception as error:
@@ -187,11 +220,7 @@ def _run_local_with_frozen_k_fallback(
 
             values_path = search_root / "RESTRICTED_VALUES.csv"
             values = pd.read_csv(values_path) if values_path.is_file() else pd.DataFrame()
-            failed = values.loc[
-                values.get("exact_optimality_certificate", pd.Series(dtype=str))
-                .astype(str).str.startswith("V37_FAIL_CLOSED:")
-            ] if len(values) else values
-            failure_rows = failed.to_dict("records") if len(failed) else []
+            failure_rows = _uncertified_rows(values)
             attempt = {
                 "K": label,
                 "status": "CERTIFIED" if not failure_rows else "CERTIFICATION_FAILURE",
