@@ -1420,6 +1420,10 @@ def run(run_tests: bool = True, verify_zip_crc: bool = True) -> None:
     stage = time.perf_counter()
     stats = pd.DataFrame(train_stats + inference_stats).sort_values(["experiment_id", "power_boundary"]).reset_index(drop=True)
     experiments = pd.DataFrame(train_experiments + inference_experiments).sort_values("experiment_id").reset_index(drop=True)
+    for column in experiments.select_dtypes(include=["object"]).columns:
+        experiments[column] = experiments[column].map(
+            lambda value: None if value is None or (isinstance(value, float) and np.isnan(value)) else str(value)
+        )
     timebase = pd.DataFrame(time_rows).sort_values("relative_path").reset_index(drop=True)
     quality = pd.DataFrame(quality_rows).sort_values(["relative_path", "field"]).reset_index(drop=True)
     recon = pd.DataFrame(train_recon + inference_recon).sort_values("experiment_id").reset_index(drop=True)
@@ -1467,8 +1471,14 @@ def run(run_tests: bool = True, verify_zip_crc: bool = True) -> None:
                     "repair": "USE_WINDOWS_EXTENDED_LENGTH_PREFIX_FOR_RAW_LOG_READS",
                     "science_neutral": True,
                 },
+                {
+                    "failure_signature": "PARQUET_MIXED_METADATA_SCALAR_TYPES",
+                    "attempt": 1,
+                    "repair": "NORMALIZE_CATEGORICAL_METADATA_COLUMNS_TO_EXPLICIT_STRINGS",
+                    "science_neutral": True,
+                },
             ],
-            "unique_failure_signatures": 2,
+            "unique_failure_signatures": 3,
             "science_semantics_changed": False,
         },
     )
