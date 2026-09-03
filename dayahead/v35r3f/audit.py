@@ -65,6 +65,19 @@ def sha256_file(path: Path, chunk_size: int = 8 * 1024 * 1024) -> str:
     return digest.hexdigest()
 
 
+def filesystem_path(path: Path) -> str:
+    """Return a Windows extended-length path when required."""
+
+    value = os.fspath(path.resolve())
+    if os.name == "nt" and not value.startswith("\\\\?\\"):
+        value = "\\\\?\\" + value
+    return value
+
+
+def file_size(path: Path) -> int:
+    return int(os.stat(filesystem_path(path)).st_size)
+
+
 def write_json(path: Path, value: Mapping[str, Any] | Sequence[Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
@@ -227,9 +240,7 @@ def read_power_log(path: Path) -> tuple[str, pd.DataFrame]:
     if device == "UNKNOWN":
         raise ValueError(f"Not a power log: {path}")
     columns = NVML_COLUMNS if device == "NVML" else RAPL_COLUMNS
-    input_path = os.fspath(path.resolve())
-    if os.name == "nt" and not input_path.startswith("\\\\?\\"):
-        input_path = "\\\\?\\" + input_path
+    input_path = filesystem_path(path)
     frame = pd.read_csv(
         input_path,
         sep=r"\s+",

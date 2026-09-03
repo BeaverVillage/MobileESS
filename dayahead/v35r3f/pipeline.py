@@ -35,6 +35,7 @@ from .audit import (
     audit_timebase,
     component_series,
     dataframe_units,
+    file_size,
     git,
     integrate_series_wh,
     inventory_record,
@@ -162,7 +163,7 @@ def ensure_source() -> dict[str, Any]:
         "archive_sha256": actual_sha,
         "archive_bytes": ARCHIVE.stat().st_size,
         "extracted_file_count": len(files),
-        "extracted_file_bytes": int(sum(path.stat().st_size for path in files)),
+        "extracted_file_bytes": int(sum(file_size(path) for path in files)),
         "extraction_marker": str(marker),
         "extraction_marker_content": marker_text.strip().splitlines(),
         "manifest_root": str(MANIFEST_ROOT),
@@ -467,7 +468,7 @@ def _audit_loaded(
     relative = path.relative_to(EXTRACTED_ROOT).as_posix()
     time_rows.append(audit_timebase(relative, device, frame))
     quality_rows.extend(audit_quality(relative, device, frame))
-    accounting.raw_bytes += path.stat().st_size
+    accounting.raw_bytes += file_size(path)
     accounting.raw_rows += len(frame)
 
 
@@ -1210,7 +1211,7 @@ def final_review(
         "12": ARCHIVE_SHA256,
         "13": "PASS",
         "14": source["extracted_file_count"],
-        "15": int(sum(path.stat().st_size for path in RAW.rglob("*wattameter*.log"))),
+        "15": int(sum(file_size(path) for path in RAW.rglob("*wattameter*.log"))),
         "16": "gpu-0..3[mW] per node via NVML",
         "17": "cpu-0/1 package and core RAPL energy/power channels",
         "18": "NO",
