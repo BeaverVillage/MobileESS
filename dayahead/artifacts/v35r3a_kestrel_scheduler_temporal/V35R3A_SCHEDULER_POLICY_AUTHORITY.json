@@ -20,11 +20,12 @@
     "nice"
   ],
   "implemented_relative_components": [
-    "QoS precedence: high before normal; standby only when otherwise idle",
+    "hard service tiers: high > normal > standby, using the raw QoS field",
+    "standby consumes only residual capacity after high/normal reservations",
     "eligible age represented by submission-order FIFO",
-    "partition semantics preserved; *-stdby remains protected",
+    "partition names containing stdby are audited but do not define QoS",
     "stable job-ID tie breaking",
-    "SiteFactor reserved for eligible normal-QoS order changes"
+    "SiteFactor may reorder only within normal or standby tier"
   ],
   "missing_historical_inputs": [
     "Kestrel priority weights and flags",
@@ -34,10 +35,14 @@
     "complete node-state/topology history"
   ],
   "policy_frozen_at": "2025-03-31T18:00:00+10:00",
-  "policy_sha256": "c79b15c455fd035d6c064562ff11b87cb5229b1da729bc92cbb218a13d2a999f",
+  "policy_sha256": "2022471d6e9df6501b38c1b1b193c3a932515ca8121fa331d26d73dd185101a4",
   "qos_authority": {
     "high": "takes precedence in the queue",
-    "normal": "eligible for control only outside *-stdby partitions",
+    "normal": "submission-side normal QoS is queue controlled regardless of partition-name substring",
+    "partition_to_qos_mapping_present": false,
+    "source_lines": "7140-7151",
+    "source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR_scheduler_authority\\06_official_web_docs\\NLR_Slurm_Batch_Jobs.html",
+    "source_sha256": "5c181dd2b7a558ec36e4a5c6debb00248dd1c745317392bcdb95d458f9b1a219",
     "standby": "runs only when nodes are idle"
   },
   "source_paths": [

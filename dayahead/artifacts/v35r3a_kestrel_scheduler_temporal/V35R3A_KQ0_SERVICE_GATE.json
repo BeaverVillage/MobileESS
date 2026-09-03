@@ -1,28 +1,110 @@
 {
   "artifact_id": "V35R3A_KQ0_SERVICE_GATE_V1",
-  "baseline_schedule_sha256": "73467cfe1381b94920a009bd1d33cbee47218067513220da27c59aacf1d89476",
+  "baseline_schedule_sha256": "6724a98b68a2b813a2d6be82863de47badd8cf4d77fe065216a1f2b1c6eef350",
+  "baseline_tier_metrics": {
+    "high_protected": {
+      "completed_GPU_hours": 0.0,
+      "completed_job_count": 0,
+      "job_count": 0,
+      "terminal_pending_GPU_hours": 0.0,
+      "wait_max_hours": 0.0,
+      "wait_mean_hours": 0.0,
+      "wait_p50_hours": 0.0,
+      "wait_p95_hours": 0.0
+    },
+    "normal": {
+      "completed_GPU_hours": 0.0,
+      "completed_job_count": 0,
+      "job_count": 1,
+      "terminal_pending_GPU_hours": 0.0,
+      "wait_max_hours": 4.7875,
+      "wait_mean_hours": 4.7875,
+      "wait_p50_hours": 4.7875,
+      "wait_p95_hours": 4.7875
+    },
+    "standby": {
+      "completed_GPU_hours": 0.0,
+      "completed_job_count": 0,
+      "job_count": 338,
+      "terminal_pending_GPU_hours": 3408.0,
+      "wait_max_hours": 41.70472222222222,
+      "wait_mean_hours": 23.488202662721896,
+      "wait_p50_hours": 18.176111111111112,
+      "wait_p95_hours": 40.70527777777778
+    }
+  },
   "checks": {
-    "completed_GPU_hours_not_lower": true,
-    "completed_jobs_not_lower": true,
     "high_urgent_start_not_later": true,
     "max_normal_wait_not_higher": true,
     "mean_normal_wait_not_higher": true,
+    "normal_completed_GPU_hours_not_lower": true,
+    "normal_completed_jobs_not_lower": true,
+    "normal_terminal_pending_GPU_hours_not_higher": true,
     "p95_normal_wait_not_higher": true,
     "running_unchanged": true,
-    "terminal_pending_GPU_hours_not_higher": true
+    "standby_completed_GPU_hours_not_lower": true,
+    "standby_completed_jobs_not_lower": true,
+    "standby_never_delays_high_or_normal": true,
+    "standby_terminal_pending_GPU_hours_not_higher": true
   },
-  "controlled_schedule_sha256": "89c674d931bbf987363bcd6879569c8d3326d09dceef5cf22a4dc28600eac467",
+  "contract": "TIER_AWARE_HIGH_NORMAL_STANDBY",
+  "controlled_schedule_sha256": "7b5f4a52ceeaae34d2d6d29e8b0b6d922178748184ea741c50a328ee55f9cf0b",
+  "controlled_tier_metrics": {
+    "high_protected": {
+      "completed_GPU_hours": 0.0,
+      "completed_job_count": 0,
+      "job_count": 0,
+      "terminal_pending_GPU_hours": 0.0,
+      "wait_max_hours": 0.0,
+      "wait_mean_hours": 0.0,
+      "wait_p50_hours": 0.0,
+      "wait_p95_hours": 0.0
+    },
+    "normal": {
+      "completed_GPU_hours": 0.0,
+      "completed_job_count": 0,
+      "job_count": 1,
+      "terminal_pending_GPU_hours": 0.0,
+      "wait_max_hours": 4.7875,
+      "wait_mean_hours": 4.7875,
+      "wait_p50_hours": 4.7875,
+      "wait_p95_hours": 4.7875
+    },
+    "standby": {
+      "completed_GPU_hours": 0.0,
+      "completed_job_count": 0,
+      "job_count": 338,
+      "terminal_pending_GPU_hours": 3408.0,
+      "wait_max_hours": 41.70472222222222,
+      "wait_mean_hours": 23.488202662721896,
+      "wait_p50_hours": 18.176111111111112,
+      "wait_p95_hours": 40.70527777777778
+    }
+  },
   "deltas": {
     "completed_GPU_hours": 0.0,
     "completed_job_count": 0.0,
+    "high_normal_delay_count": 0.0,
     "high_urgent_delay_count": 0.0,
+    "normal_completed_GPU_hours": 0.0,
+    "normal_completed_job_count": 0.0,
+    "normal_terminal_pending_GPU_hours": 0.0,
     "normal_wait_max_hours": 0.0,
     "normal_wait_mean_hours": 0.0,
     "normal_wait_p95_hours": 0.0,
+    "standby_advanced_job_count": 0.0,
+    "standby_completed_GPU_hours": 0.0,
+    "standby_completed_job_count": 0.0,
+    "standby_delayed_job_count": 0.0,
+    "standby_terminal_pending_GPU_hours": 0.0,
+    "standby_wait_max_hours": 0.0,
+    "standby_wait_mean_hours": 0.0,
+    "standby_wait_p95_hours": 0.0,
     "terminal_pending_GPU_hours": 0.0
   },
   "passed": true,
   "preemption_count": 0,
   "running_job_count": 243,
+  "standby_wait_deltas_are_reported_not_gated": true,
   "tolerance": 0.0
 }

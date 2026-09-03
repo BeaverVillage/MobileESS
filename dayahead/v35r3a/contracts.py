@@ -46,8 +46,18 @@ W5 = (72, 73, 74, 75, 76)
 CRITICAL_ASSET = "line.sw2::A"
 CRITICAL_SLOT = 74
 
-FIXED_PROTECTED = "FIXED_PROTECTED"
+RUNNING_FIXED = "RUNNING_FIXED"
+HIGH_PROTECTED = "HIGH_PROTECTED"
+NORMAL_QUEUE_CONTROLLED = "NORMAL_QUEUE_CONTROLLED"
+STANDBY_QUEUE_CONTROLLED = "STANDBY_QUEUE_CONTROLLED"
+# Aggregate reporting class.  Individual jobs retain their service-tier class.
 TEMPORAL_QUEUE_CONTROLLED = "TEMPORAL_QUEUE_CONTROLLED"
+TEMPORAL_CONTROLLED_CLASSES = frozenset(
+    {NORMAL_QUEUE_CONTROLLED, STANDBY_QUEUE_CONTROLLED}
+)
+# Submission records that cannot be scheduled safely remain excluded rather
+# than being forced into one of the controllable tiers.
+FIXED_PROTECTED = "FIXED_PROTECTED"
 SPATIO_TEMPORAL_CANDIDATE = "SPATIO_TEMPORAL_CANDIDATE"
 PREEMPTIVE = "PREEMPTIVE_NOT_AUTHORIZED"
 
@@ -58,6 +68,8 @@ STANDBY_QOS = frozenset({"standby"})
 SUBMISSION_FIELDS = (
     "id",
     "job_id",
+    "array_range",
+    "account_hash",
     "partition",
     "submit_time",
     "nodes_req",
@@ -112,27 +124,28 @@ def submission_complete(row: Mapping[str, Any]) -> bool:
 def classify_pending(row: Mapping[str, Any]) -> tuple[str, tuple[str, ...]]:
     """Classify a pending row using submission-side information only.
 
-    ``*-stdby`` partitions and standby QoS retain their documented idle-only
-    semantics.  Spatial candidacy is not asserted because the trace exposes
-    co-residency only ex post and no submission-time exclusivity field exists.
+    Standby is established only by the raw QoS field.  A partition name that
+    contains ``stdby`` is diagnostic evidence, not QoS authority.  Spatial
+    candidacy is not asserted because the trace exposes co-residency only ex
+    post and no submission-time exclusivity field exists.
     """
 
-    reasons: list[str] = []
     qos = str(row.get("qos") or "").strip().lower()
     partition = str(row.get("partition") or "").strip().lower()
     if not submission_complete(row):
-        reasons.append("INSUFFICIENT_SUBMISSION_RESOURCE_AUTHORITY")
+        return FIXED_PROTECTED, ("INSUFFICIENT_SUBMISSION_RESOURCE_AUTHORITY",)
     if qos in PROTECTED_QOS:
-        reasons.append("PROTECTED_HIGH_OR_URGENT_QOS")
-    if qos in STANDBY_QOS or "stdby" in partition:
-        reasons.append("STANDBY_IDLE_ONLY_SEMANTICS")
-    if qos not in {"normal", "high", "urgent", "standby"}:
-        reasons.append("UNKNOWN_QOS_SEMANTICS")
-    if reasons:
-        return FIXED_PROTECTED, tuple(reasons)
+        return HIGH_PROTECTED, ("PROTECTED_HIGH_OR_URGENT_QOS",)
     if qos == "normal":
-        return TEMPORAL_QUEUE_CONTROLLED, ()
-    return FIXED_PROTECTED, ("UNREPRODUCIBLE_SPECIAL_POLICY",)
+        reasons = ("PARTITION_NAME_NOT_QOS_AUTHORITY",) if "stdby" in partition else ()
+        return NORMAL_QUEUE_CONTROLLED, reasons
+    if qos in STANDBY_QOS:
+        return STANDBY_QUEUE_CONTROLLED, ("STANDBY_IDLE_CAPACITY_SEMANTICS",)
+    return FIXED_PROTECTED, ("UNKNOWN_QOS_SEMANTICS",)
+
+
+def is_temporal_controlled_class(value: object) -> bool:
+    return str(value) in TEMPORAL_CONTROLLED_CLASSES
 
 
 @dataclass(frozen=True)

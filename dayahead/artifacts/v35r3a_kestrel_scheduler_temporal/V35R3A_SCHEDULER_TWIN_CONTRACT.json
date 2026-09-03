@@ -17,12 +17,22 @@
     "complete node-state/topology history"
   ],
   "node_packing_exact": false,
+  "partition_name_defines_qos": false,
   "preemption": false,
   "realized_runtime": "ex-post fidelity only",
   "resource_model": "aggregate GPU feasibility on documented shareable H100 nodes",
   "running_fixed": true,
   "simulation_start": "2025-03-31T18:00:00+10:00",
+  "standby_rule": "raw QoS=standby; residual capacity only; never crosses high/normal tier",
   "target_end_exclusive": "2025-04-02T00:00:00+10:00",
+  "temporal_union": "NORMAL_QUEUE_CONTROLLED union STANDBY_QUEUE_CONTROLLED",
   "time_resolution_minutes": 15,
-  "unsupported_job_deadline": false
+  "unsupported_job_deadline": false,
+  "workload_classes": [
+    "RUNNING_FIXED",
+    "HIGH_PROTECTED",
+    "NORMAL_QUEUE_CONTROLLED",
+    "STANDBY_QUEUE_CONTROLLED",
+    "SPATIO_TEMPORAL_CANDIDATE"
+  ]
 }

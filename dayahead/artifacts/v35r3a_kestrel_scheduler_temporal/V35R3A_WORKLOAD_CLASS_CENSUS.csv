@@ -1,5 +1,9 @@
 workload_class,job_count,known_requested_GPUs,known_requested_GPU_hours,subset_of_temporal,authority_note
-FIXED_PROTECTED,664,882.0,40403.13333333333,True,"Running, high/urgent, standby/special-policy, or incomplete request authority."
-TEMPORAL_QUEUE_CONTROLLED,0,0.0,0.0,True,"Normal QoS, complete submission request, non-standby partition."
+RUNNING_FIXED,243,498.0,25571.133333333335,False,Running at tau; fixed and non-preemptive.
+HIGH_PROTECTED,0,0.0,0.0,False,Pending high/urgent QoS; no grid-driven delay.
+NORMAL_QUEUE_CONTROLLED,1,4.0,192.0,True,Raw QoS=normal with complete submission resource authority.
+STANDBY_QUEUE_CONTROLLED,338,380.0,14640.0,True,Raw QoS=standby; residual-capacity ordering only.
+FIXED_PROTECTED,82,0.0,0.0,False,Incomplete or unknown submission-side scheduling authority.
+TEMPORAL_QUEUE_CONTROLLED,339,384.0,14832.0,True,Union of normal and standby queue-controlled classes.
 SPATIO_TEMPORAL_CANDIDATE,0,0.0,0.0,True,None: submission-time exclusivity and exact AIDC binding are absent.
-PREEMPTIVE_NOT_AUTHORIZED,0,0.0,0.0,True,Not authorized.
+PREEMPTIVE_NOT_AUTHORIZED,0,0.0,0.0,False,Not authorized.

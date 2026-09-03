@@ -33,16 +33,21 @@ from .contracts import (
     GPUS_PER_NODE,
     ISSUE_TIME,
     KESTREL_ZIP,
+    HIGH_PROTECTED,
+    NORMAL_QUEUE_CONTROLLED,
     PREEMPTIVE,
+    RUNNING_FIXED,
     SIMULATION_SLOTS,
     SLOT_MINUTES,
     SOURCE_BASELINE,
     SPATIO_TEMPORAL_CANDIDATE,
+    STANDBY_QUEUE_CONTROLLED,
     STATE_EVENT_FIELDS,
     SUBMISSION_FIELDS,
     TARGET_END,
     TARGET_START,
     TEMPORAL_QUEUE_CONTROLLED,
+    TEMPORAL_CONTROLLED_CLASSES,
     VALIDATION_END,
     VALIDATION_START,
     W1,
@@ -263,11 +268,12 @@ def policy_authority(authority_root: Path) -> dict[str, Any]:
             "nice",
         ],
         "implemented_relative_components": [
-            "QoS precedence: high before normal; standby only when otherwise idle",
+            "hard service tiers: high > normal > standby, using the raw QoS field",
+            "standby consumes only residual capacity after high/normal reservations",
             "eligible age represented by submission-order FIFO",
-            "partition semantics preserved; *-stdby remains protected",
+            "partition names containing stdby are audited but do not define QoS",
             "stable job-ID tie breaking",
-            "SiteFactor reserved for eligible normal-QoS order changes",
+            "SiteFactor may reorder only within normal or standby tier",
         ],
         "weights": None,
         "weights_reason": "No Kestrel slurm.conf or sprio weight dump exists in the downloaded authority; sample SchedMD weights are not Kestrel weights.",
@@ -281,7 +287,13 @@ def policy_authority(authority_root: Path) -> dict[str, Any]:
         "qos_authority": {
             "high": "takes precedence in the queue",
             "standby": "runs only when nodes are idle",
-            "normal": "eligible for control only outside *-stdby partitions",
+            "normal": "submission-side normal QoS is queue controlled regardless of partition-name substring",
+            "source_path": str(authority_root / "06_official_web_docs" / "NLR_Slurm_Batch_Jobs.html"),
+            "source_sha256": _sha256(
+                authority_root / "06_official_web_docs" / "NLR_Slurm_Batch_Jobs.html"
+            ),
+            "source_lines": "7140-7151",
+            "partition_to_qos_mapping_present": False,
         },
         "missing_historical_inputs": [
             "Kestrel priority weights and flags",
@@ -469,7 +481,7 @@ def _frame_to_jobs(frame: pd.DataFrame, cutoff: datetime) -> tuple[list[Schedule
         record = row.to_dict()
         state = str(record["state_at_cutoff"])
         if state == "RUNNING":
-            workload_class, reasons = FIXED_PROTECTED, ("RUNNING_NON_PREEMPTIVE",)
+            workload_class, reasons = RUNNING_FIXED, ("RUNNING_NON_PREEMPTIVE",)
         else:
             workload_class, reasons = classify_pending(record)
         record["workload_class"] = workload_class
@@ -499,7 +511,7 @@ def _frame_to_jobs(frame: pd.DataFrame, cutoff: datetime) -> tuple[list[Schedule
             processors_requested=int(_clean_value(record.get("processors_req"), 0)),
             memory_request=str(_clean_value(record.get("memory_req"), "")),
             workload_class=workload_class,
-            protected=workload_class == FIXED_PROTECTED,
+            protected=workload_class in {RUNNING_FIXED, HIGH_PROTECTED, FIXED_PROTECTED},
             running_at_issue=state == "RUNNING",
             arrival_slot=0,
             fixed_remaining_slots=remaining,
@@ -533,7 +545,7 @@ def _pr1_jobs(frame: pd.DataFrame) -> tuple[list[SchedulerJob], pd.DataFrame]:
                 processors_requested=int(_clean_value(record.get("processors_req"), 0)),
                 memory_request=str(_clean_value(record.get("memory_req"), "")),
                 workload_class=workload_class,
-                protected=workload_class == FIXED_PROTECTED,
+                protected=workload_class in {HIGH_PROTECTED, FIXED_PROTECTED},
                 arrival_slot=max(1, int(math.ceil((submit - ISSUE_TIME).total_seconds() / (SLOT_MINUTES * 60)))),
                 exclusion_reasons=tuple(reasons),
             )
@@ -560,8 +572,33 @@ def queue_snapshot(frame: pd.DataFrame, classified: pd.DataFrame) -> dict[str, A
     wall_h = pd.to_numeric(classified["wallclock_seconds"], errors="coerce") / 3600.0
     gpu = pd.to_numeric(classified["gpus_requested"], errors="coerce")
     nodes = pd.to_numeric(classified["nodes_req"], errors="coerce")
-    controlled = classified["workload_class"].eq(TEMPORAL_QUEUE_CONTROLLED)
+    controlled = classified["workload_class"].isin(TEMPORAL_CONTROLLED_CLASSES)
     partial_request = valid & gpu.lt(GPUS_PER_NODE * nodes)
+    full_request = valid & gpu.eq(GPUS_PER_NODE * nodes)
+    qos_lower = classified["qos"].fillna("UNKNOWN").astype(str).str.strip().str.lower()
+    partition_lower = classified["partition"].fillna("").astype(str).str.strip().str.lower()
+
+    def qos_summary(name: str) -> dict[str, float | int]:
+        if name == "high":
+            mask = pending & qos_lower.isin({"high", "urgent"})
+        else:
+            mask = pending & qos_lower.eq(name)
+        return {
+            "job_count": int(mask.sum()),
+            "schedulable_job_count": int((mask & valid).sum()),
+            "known_requested_GPU_hours": float((gpu[mask] * wall_h[mask]).fillna(0.0).sum()),
+            "full_node_request_count": int((mask & full_request).sum()),
+            "partial_shared_request_count": int((mask & partial_request).sum()),
+        }
+
+    partition_stdby = pending & partition_lower.str.contains("stdby|standby", regex=True)
+    qos_partition_ambiguous = partition_stdby & ~qos_lower.eq("standby")
+    pre_correction = (
+        pending
+        & valid
+        & qos_lower.eq("normal")
+        & ~partition_lower.str.contains("stdby", regex=False)
+    )
     return {
         "artifact_id": "V35R3A_APR01_QUEUE_SNAPSHOT_V1",
         "cutoff": ISSUE_TIME.isoformat(),
@@ -587,6 +624,27 @@ def queue_snapshot(frame: pd.DataFrame, classified: pd.DataFrame) -> dict[str, A
             "temporal_queue_controlled_count": int((pending & controlled).sum()),
             "partial_request_count": int((pending & partial_request).sum()),
             "partial_temporal_queue_controlled_count": int((pending & partial_request & controlled).sum()),
+            "full_node_request_count": int((pending & full_request).sum()),
+            "qos_resource_summary": {
+                "high": qos_summary("high"),
+                "normal": qos_summary("normal"),
+                "standby": qos_summary("standby"),
+            },
+            "partition_stdby_name_count": int(partition_stdby.sum()),
+            "partition_only_stdby_without_standby_qos_count": int(qos_partition_ambiguous.sum()),
+            "qos_partition_semantics_ambiguous_count": int(qos_partition_ambiguous.sum()),
+            "temporal_controllable_mass_before_standby_correction": {
+                "job_count": int(pre_correction.sum()),
+                "known_requested_GPU_hours": float(
+                    (gpu[pre_correction] * wall_h[pre_correction]).fillna(0.0).sum()
+                ),
+            },
+            "temporal_controllable_mass_after_standby_correction": {
+                "job_count": int((pending & controlled).sum()),
+                "known_requested_GPU_hours": float(
+                    (gpu[pending & controlled] * wall_h[pending & controlled]).fillna(0.0).sum()
+                ),
+            },
         },
         "U_tau": {
             "job_identity_count_known_at_issue": 0,
@@ -602,8 +660,12 @@ def workload_census(classified: pd.DataFrame) -> list[dict[str, Any]]:
     gpu = pd.to_numeric(classified["gpus_requested"], errors="coerce").fillna(0.0)
     wall_h = pd.to_numeric(classified["wallclock_seconds"], errors="coerce").fillna(0.0) / 3600.0
     masks = {
+        RUNNING_FIXED: classified["workload_class"].eq(RUNNING_FIXED),
+        HIGH_PROTECTED: classified["workload_class"].eq(HIGH_PROTECTED),
+        NORMAL_QUEUE_CONTROLLED: classified["workload_class"].eq(NORMAL_QUEUE_CONTROLLED),
+        STANDBY_QUEUE_CONTROLLED: classified["workload_class"].eq(STANDBY_QUEUE_CONTROLLED),
         FIXED_PROTECTED: classified["workload_class"].eq(FIXED_PROTECTED),
-        TEMPORAL_QUEUE_CONTROLLED: classified["workload_class"].eq(TEMPORAL_QUEUE_CONTROLLED),
+        TEMPORAL_QUEUE_CONTROLLED: classified["workload_class"].isin(TEMPORAL_CONTROLLED_CLASSES),
         SPATIO_TEMPORAL_CANDIDATE: classified["spatio_temporal_candidate"].eq(True),
         PREEMPTIVE: pd.Series(False, index=classified.index),
     }
@@ -613,18 +675,85 @@ def workload_census(classified: pd.DataFrame) -> list[dict[str, Any]]:
             "job_count": int(mask.sum()),
             "known_requested_GPUs": float(gpu[mask].sum()),
             "known_requested_GPU_hours": float((gpu[mask] * wall_h[mask]).sum()),
-            "subset_of_temporal": name != SPATIO_TEMPORAL_CANDIDATE or bool(
-                (~mask | classified["workload_class"].eq(TEMPORAL_QUEUE_CONTROLLED)).all()
+            "subset_of_temporal": (
+                bool((~mask | classified["workload_class"].isin(TEMPORAL_CONTROLLED_CLASSES)).all())
+                if name == SPATIO_TEMPORAL_CANDIDATE
+                else name
+                in {
+                    NORMAL_QUEUE_CONTROLLED,
+                    STANDBY_QUEUE_CONTROLLED,
+                    TEMPORAL_QUEUE_CONTROLLED,
+                }
             ),
             "authority_note": {
-                FIXED_PROTECTED: "Running, high/urgent, standby/special-policy, or incomplete request authority.",
-                TEMPORAL_QUEUE_CONTROLLED: "Normal QoS, complete submission request, non-standby partition.",
+                RUNNING_FIXED: "Running at tau; fixed and non-preemptive.",
+                HIGH_PROTECTED: "Pending high/urgent QoS; no grid-driven delay.",
+                NORMAL_QUEUE_CONTROLLED: "Raw QoS=normal with complete submission resource authority.",
+                STANDBY_QUEUE_CONTROLLED: "Raw QoS=standby; residual-capacity ordering only.",
+                FIXED_PROTECTED: "Incomplete or unknown submission-side scheduling authority.",
+                TEMPORAL_QUEUE_CONTROLLED: "Union of normal and standby queue-controlled classes.",
                 SPATIO_TEMPORAL_CANDIDATE: "None: submission-time exclusivity and exact AIDC binding are absent.",
                 PREEMPTIVE: "Not authorized.",
             }[name],
         }
         for name, mask in masks.items()
     ]
+
+
+def pending_field_audit(classified: pd.DataFrame, policy: Mapping[str, Any]) -> pd.DataFrame:
+    """Return the amendment-required row-level audit of every pending job."""
+
+    pending = classified.loc[classified["state_at_cutoff"].eq("PENDING")].copy()
+    rows: list[dict[str, Any]] = []
+    source = policy["qos_authority"]
+    for _, row in pending.iterrows():
+        record = row.to_dict()
+        qos = str(_clean_value(record.get("qos"), "UNKNOWN")).strip()
+        partition = str(_clean_value(record.get("partition"), "UNKNOWN")).strip()
+        qos_lower = qos.lower()
+        partition_lower = partition.lower()
+        gpu = pd.to_numeric(pd.Series([record.get("gpus_requested")]), errors="coerce").iloc[0]
+        nodes = pd.to_numeric(pd.Series([record.get("nodes_req")]), errors="coerce").iloc[0]
+        valid = submission_complete(record)
+        partial = bool(valid and float(gpu) < GPUS_PER_NODE * float(nodes))
+        full_shape = bool(valid and float(gpu) == GPUS_PER_NODE * float(nodes))
+        array_range = str(_clean_value(record.get("array_range"), "")).strip()
+        partition_names_standby = "stdby" in partition_lower or "standby" in partition_lower
+        if partition_names_standby and qos_lower != "standby":
+            relation = "PARTITION_ONLY_STDBY_NAME_WITH_NONSTANDBY_QOS"
+        elif qos_lower == "standby" and not partition_names_standby:
+            relation = "QOS_STANDBY_WITHOUT_STDBY_PARTITION_NAME"
+        else:
+            relation = "CONSISTENT_RAW_FIELDS_NO_PARTITION_TO_QOS_INFERENCE"
+        rows.append(
+            {
+                "job_id": str(record["id"]),
+                "qos_raw": qos,
+                "partition_raw": partition,
+                "requested_GPUs": None if pd.isna(gpu) else float(gpu),
+                "requested_nodes": None if pd.isna(nodes) else int(nodes),
+                "requested_walltime_seconds": float(record["wallclock_seconds"])
+                if pd.notna(record.get("wallclock_seconds"))
+                else None,
+                "submit_time": pd.Timestamp(record["submit_time"]).isoformat(),
+                "state_at_cutoff": str(record["state_at_cutoff"]),
+                "account_hash": str(_clean_value(record.get("account_hash"), "")),
+                "account_association_use": "HASH_AVAILABLE_CAUSALLY_NOT_MAPPED_TO_PRIORITY",
+                "partial_shared_request": partial,
+                "full_node_request_shape": full_shape,
+                "spatio_temporal_candidate": bool(record["spatio_temporal_candidate"]),
+                "array_range": array_range,
+                "explicit_special_constraint_present": bool(array_range),
+                "explicit_special_constraint": "ARRAY_RANGE" if array_range else "NONE_VISIBLE_IN_TRACE",
+                "dependency_hold_reservation_fields_available": False,
+                "qos_partition_semantics_relation": relation,
+                "workload_class": str(record["workload_class"]),
+                "classification_reasons": "|".join(record["exclusion_reasons"]),
+                "qos_semantics_source_path": source["source_path"],
+                "qos_semantics_source_sha256": source["source_sha256"],
+            }
+        )
+    return pd.DataFrame.from_records(rows).sort_values("job_id", ignore_index=True)
 
 
 def _validation_jobs(frame: pd.DataFrame) -> tuple[list[SchedulerJob], list[SchedulerJob], dict[str, dict[str, Any]]]:
@@ -639,7 +768,7 @@ def _validation_jobs(frame: pd.DataFrame) -> tuple[list[SchedulerJob], list[Sche
         submit = pd.Timestamp(record["submit_time"]).to_pydatetime()
         duration_slots = max(1, int(math.ceil(float(record["wallclock_seconds"]) / (SLOT_MINUTES * 60))))
         is_running = bool(record["running_at_validation_start"])
-        workload_class, reasons = (FIXED_PROTECTED, ("RUNNING_NON_PREEMPTIVE",)) if is_running else classify_pending(record)
+        workload_class, reasons = (RUNNING_FIXED, ("RUNNING_NON_PREEMPTIVE",)) if is_running else classify_pending(record)
         fixed_remaining = 0
         actual_start = pd.Timestamp(record["actual_start_validation"])
         if is_running:
@@ -656,7 +785,7 @@ def _validation_jobs(frame: pd.DataFrame) -> tuple[list[SchedulerJob], list[Sche
             processors_requested=int(_clean_value(record.get("processors_req"), 0)),
             memory_request=str(_clean_value(record.get("memory_req"), "")),
             workload_class=workload_class,
-            protected=workload_class == FIXED_PROTECTED,
+            protected=workload_class in {RUNNING_FIXED, HIGH_PROTECTED, FIXED_PROTECTED},
             running_at_issue=is_running,
             arrival_slot=max(0, int(math.ceil((submit - VALIDATION_START).total_seconds() / 900.0))),
             fixed_remaining_slots=fixed_remaining,
@@ -868,6 +997,7 @@ def _final_review_payload(
     gate: Mapping[str, Any],
     changes: Sequence[Mapping[str, Any]],
     test_report: Mapping[str, Any],
+    correction: Mapping[str, Any],
 ) -> dict[str, Any]:
     f_all = next(row for row in fidelity_rows if row["qos"] == "ALL")
     temporal = _class_summary(census, TEMPORAL_QUEUE_CONTROLLED)
@@ -941,27 +1071,44 @@ def _final_review_payload(
         "65": {"label": "production-change recommendation", "value": "NO"},
         "66": {"label": "estimated invalidation scope", "value": "future W target/schema, queue state, scheduler adapter, power/grid binding; current production preserved"},
         "67": {"label": "passed/failed", "value": test_report},
-        "68": {"label": "primary classification", "value": "V35R3A_KNOWN_QUEUE_TEMPORAL_MASS_INSUFFICIENT"},
+        "68": {"label": "primary classification", "value": correction["primary_classification"]},
     }
     questions = {
         "Q1": "부분적으로 가능. submit/start/end 이벤트 비교로 R_tau/P_tau는 복구했지만 hold/dependency/requeue 이력이 없어 exact snapshot은 아니다.",
         "Q2": "정확한 Kestrel 재현이 아니라 PUBLIC_POLICY_RELATIVE_SCHEDULER_TWIN이다.",
         "Q3": f"엄격한 제출측·QoS·파티션 조건에서 {temporal['job_count']}건, {temporal['known_requested_GPU_hours']} GPU-h였다.",
-        "Q4": "아니오. KQ0에 안전한 교환쌍이 없어 이동량은 0이었다.",
-        "Q5": "W1/W3/W5 모두 0 kW 감소였다.",
-        "Q6": "아니오. 동일 스케줄이므로 rho와 임계 노출 개선은 0이다.",
+        "Q4": f"tier-aware 서비스 게이트 하에서 이동 GPU-h는 {grid['shifted_GPU_hours']}였다.",
+        "Q5": f"W1/W3/W5 IT 감소는 각각 {grid['power_reduction_kW']['W1']}/{grid['power_reduction_kW']['W3']}/{grid['power_reduction_kW']['W5']} kW였다.",
+        "Q6": f"Planning rho 개선은 {grid['Planning_rho_improvement']}, critical-exposure proxy 개선은 {grid['critical_exposure_proxy_improvement_kW_slots']} kW-slot이었다.",
         "Q7": "아니오. high/urgent 지연은 0건이다.",
         "Q8": "NO. 지원되지 않은 개별 작업 지연 마감은 만들지 않았다.",
         "Q9": "NO. 미래 actual start/end/runtime은 정책 결정에 쓰지 않았다.",
-        "Q10": "개념적 분리는 타당하지만 현재 Apr-01 KQ0 증거는 생산 분리를 정당화하기에 부족하다.",
+        "Q10": "개념적 분리는 타당하고 standby temporal mass가 확인됐지만, 현재 relative twin과 불완전한 grid binding만으로 생산 분리를 승인하기에는 부족하다.",
         "Q11": "현재는 권고하지 않는다(NO).",
         "Q12": "활성 V35R3 종료 후 read-only squeue/scontrol snapshot과 slurm.conf/sprio/association/reservation 덤프를 1회 확보하는 것이 최소 다음 단계다.",
     }
+    addendum = {
+        "1": correction["answers"]["1"],
+        "2": correction["answers"]["2"],
+        "3": correction["answers"]["3"],
+        "4": correction["answers"]["4"],
+        "5": correction["answers"]["5"],
+        "6": correction["answers"]["6"],
+        "7": correction["answers"]["7"],
+        "8": correction["answers"]["8"],
+        "9": correction["answers"]["9"],
+        "10": correction["answers"]["10"],
+        "11": correction["answers"]["11"],
+        "12": correction["answers"]["12"],
+        "13": correction["answers"]["13"],
+        "14": correction["answers"]["14"],
+    }
     return {
         "artifact_id": "V35R3A_FINAL_REVIEW_V1",
-        "status": "SCIENTIFICALLY_VALID_NEGATIVE_RESULT",
+        "status": "STANDBY_SEMANTICS_CORRECTED",
         "numbered_report": report,
         "questions": questions,
+        "standby_semantics_correction_addendum": addendum,
     }
 
 
@@ -979,6 +1126,11 @@ def _write_review_markdown(path: Path, review: Mapping[str, Any]) -> None:
     lines.extend(["## Q1–Q12", ""])
     for question, answer in review["questions"].items():
         lines.extend([f"### {question}", "", str(answer), ""])
+    if "standby_semantics_correction_addendum" in review:
+        lines.extend(["## Standby semantics correction addendum", ""])
+        for number in map(str, range(1, 15)):
+            answer = review["standby_semantics_correction_addendum"][number]
+            lines.extend([f"### A{number}", "", str(answer), ""])
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
@@ -999,55 +1151,86 @@ def build(
     branch = _run(["git", "branch", "--show-current"], cwd=repo)
     head = _run(["git", "rev-parse", "HEAD"], cwd=repo)
     merge_base = _run(["git", "merge-base", "HEAD", SOURCE_BASELINE], cwd=repo)
-    if branch != EXPECTED_BRANCH or head != SOURCE_BASELINE or merge_base != SOURCE_BASELINE:
+    if branch != EXPECTED_BRANCH or merge_base != SOURCE_BASELINE:
         raise RuntimeError(f"V35R3A_ISOLATION_LINEAGE:{branch}:{head}:{merge_base}")
     active_status_start = _git_status(active_worktree)
-    start_state = {
-        "artifact_id": "V35R3A_START_STATE_V1",
-        "recorded_at": datetime.now(timezone.utc).isoformat(),
-        "source_baseline_HEAD": SOURCE_BASELINE,
-        "starting_HEAD": head,
-        "branch": branch,
-        "worktree_path": str(repo),
-        "active_V35R3_worktree": str(active_worktree),
-        "active_V35R3_status_at_start": active_status_start,
-        "issue_time": ISSUE_TIME.isoformat(),
-        "target": "2025-04-01_ONLY",
-        "push": False,
-        "merge": False,
-    }
-    _write_json(artifact_dir / "V35R3A_START_STATE.json", start_state)
-    isolation = {
-        "artifact_id": "V35R3A_ISOLATION_AUDIT_V1",
-        "source_commit_exists": True,
-        "source_commit_exact": head == SOURCE_BASELINE,
-        "merge_base_exact": merge_base == SOURCE_BASELINE,
-        "branch_exact": branch == EXPECTED_BRANCH,
-        "worktree_separate": repo.resolve() != active_worktree.resolve(),
-        "active_worktree_write_operations": 0,
-        "active_V35R3_files_changed_by_this_task": 0,
-        "artifact_path": str(artifact_dir),
-        "cache_path": str(cache_dir),
-        "log_path": str(log_dir),
-        "paths_shared_with_active_V35R3": False,
-        "push_performed": False,
-        "merge_performed": False,
-    }
+    start_path = artifact_dir / "V35R3A_START_STATE.json"
+    amendment_mode = start_path.exists()
+    if amendment_mode:
+        start_state = json.loads(start_path.read_text(encoding="utf-8"))
+        start_state["standby_semantics_amendment_HEAD"] = head
+        start_state["standby_semantics_amendment_recorded_at"] = datetime.now(timezone.utc).isoformat()
+    else:
+        start_state = {
+            "artifact_id": "V35R3A_START_STATE_V1",
+            "recorded_at": datetime.now(timezone.utc).isoformat(),
+            "source_baseline_HEAD": SOURCE_BASELINE,
+            "starting_HEAD": head,
+            "branch": branch,
+            "worktree_path": str(repo),
+            "active_V35R3_worktree": str(active_worktree),
+            "active_V35R3_status_at_start": active_status_start,
+            "issue_time": ISSUE_TIME.isoformat(),
+            "target": "2025-04-01_ONLY",
+            "push": False,
+            "merge": False,
+        }
+    _write_json(start_path, start_state)
+    isolation_path = artifact_dir / "V35R3A_ISOLATION_AUDIT.json"
+    if amendment_mode and isolation_path.exists():
+        isolation = json.loads(isolation_path.read_text(encoding="utf-8"))
+        isolation["standby_semantics_amendment_mode"] = True
+        isolation["amendment_input_HEAD"] = head
+    else:
+        isolation = {
+            "artifact_id": "V35R3A_ISOLATION_AUDIT_V1",
+            "source_commit_exists": True,
+            "source_commit_exact": head == SOURCE_BASELINE,
+            "merge_base_exact": merge_base == SOURCE_BASELINE,
+            "branch_exact": branch == EXPECTED_BRANCH,
+            "worktree_separate": repo.resolve() != active_worktree.resolve(),
+            "active_worktree_write_operations": 0,
+            "active_V35R3_files_changed_by_this_task": 0,
+            "artifact_path": str(artifact_dir),
+            "cache_path": str(cache_dir),
+            "log_path": str(log_dir),
+            "paths_shared_with_active_V35R3": False,
+            "push_performed": False,
+            "merge_performed": False,
+        }
     _write_json(artifact_dir / "V35R3A_ISOLATION_AUDIT.json", isolation)
 
-    inventory, heads = authority_inventory(authority_root)
+    inventory_path = artifact_dir / "V35R3A_DOWNLOADED_AUTHORITY_INVENTORY.json"
+    heads_path = artifact_dir / "V35R3A_VENDOR_REPO_HEADS.json"
+    if amendment_mode and inventory_path.exists() and heads_path.exists():
+        inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+        heads = json.loads(heads_path.read_text(encoding="utf-8"))
+    else:
+        inventory, heads = authority_inventory(authority_root)
     _write_json(artifact_dir / "V35R3A_DOWNLOADED_AUTHORITY_INVENTORY.json", inventory)
     _write_json(artifact_dir / "V35R3A_VENDOR_REPO_HEADS.json", heads)
     policy = policy_authority(authority_root)
     _write_json(artifact_dir / "V35R3A_SCHEDULER_POLICY_AUTHORITY.json", policy)
 
-    zip_sha = _sha256(kestrel_zip)
-    zip_md5 = _md5(kestrel_zip)
+    prior_source_path = artifact_dir / "V35R3A_KESREL_SOURCE_AUDIT.json"
+    prior_source = (
+        json.loads(prior_source_path.read_text(encoding="utf-8"))
+        if amendment_mode and prior_source_path.exists()
+        else None
+    )
+    zip_sha = prior_source["archive_sha256"] if prior_source else _sha256(kestrel_zip)
+    zip_md5 = prior_source["archive_md5"] if prior_source else _md5(kestrel_zip)
     datacard = authority_root / "01_Kestrel_job_trace" / "datacard.md"
     snapshot_frame, fidelity_frame, kq0_source = load_preissue_authority(kestrel_zip)
     running, pending, classified = _frame_to_jobs(snapshot_frame, ISSUE_TIME)
-    pr1_frame, pr1_source = load_pr1_submissions(kestrel_zip)
-    pr1_jobs, pr1_records = _pr1_jobs(pr1_frame)
+    if amendment_mode:
+        pr1_frame = pd.DataFrame()
+        pr1_source = prior_source["PR1_access"]
+        pr1_jobs: list[SchedulerJob] = []
+        pr1_records = pd.DataFrame()
+    else:
+        pr1_frame, pr1_source = load_pr1_submissions(kestrel_zip)
+        pr1_jobs, pr1_records = _pr1_jobs(pr1_frame)
     source_audit = {
         "artifact_id": "V35R3A_KESREL_SOURCE_AUDIT_V1",
         "filename_spelling_preserved_from_required_artifact": "KESREL",
@@ -1057,8 +1240,10 @@ def build(
         "official_md5": EXPECTED_KESREL_MD5,
         "archive_integrity": "PASS" if zip_sha == EXPECTED_KESREL_SHA256 and zip_md5 == EXPECTED_KESREL_MD5 else "FAIL",
         "datacard_path": str(datacard),
-        "datacard_sha256": _sha256(datacard),
-        "datacard_integrity": "PASS" if _sha256(datacard) == EXPECTED_DATACARD_SHA256 else "FAIL",
+        "datacard_sha256": prior_source["datacard_sha256"] if prior_source else _sha256(datacard),
+        "datacard_integrity": prior_source["datacard_integrity"] if prior_source else (
+            "PASS" if _sha256(datacard) == EXPECTED_DATACARD_SHA256 else "FAIL"
+        ),
         "KQ0_access": kq0_source,
         "PR1_access": pr1_source,
         "archive_duplicated": False,
@@ -1066,13 +1251,41 @@ def build(
         "Apr02_plus_grid_result_read": False,
         "missing_components": heads["FastSim_direct_adapter"]["missing_Kestrel_inputs"]
         + ["RADDiT frozen runtime result is a Git-LFS pointer"],
+        "standby_semantics_amendment": True,
+        "standby_qos_inferred_from_partition_name": False,
     }
     _write_json(artifact_dir / "V35R3A_KESREL_SOURCE_AUDIT.json", source_audit)
 
+    pre_correction_path = artifact_dir / "V35R3A_PRE_STANDBY_SEMANTICS_CORRECTION_DIAGNOSTIC.json"
+    if amendment_mode and not pre_correction_path.exists():
+        prior_snapshot = json.loads(
+            (artifact_dir / "V35R3A_APR01_QUEUE_SNAPSHOT.json").read_text(encoding="utf-8")
+        )
+        prior_grid = json.loads(
+            (artifact_dir / "V35R3A_KQ0_GRID_EFFECT.json").read_text(encoding="utf-8")
+        )
+        prior_review = json.loads(
+            (artifact_dir / "V35R3A_FINAL_REVIEW.json").read_text(encoding="utf-8")
+        )
+        _write_json(
+            pre_correction_path,
+            {
+                "artifact_id": "V35R3A_PRE_STANDBY_SEMANTICS_CORRECTION_DIAGNOSTIC_V1",
+                "status": "SUPERSEDED_PRE_CORRECTION_EVIDENCE",
+                "source_commit": head,
+                "temporal_candidate_count": prior_snapshot["P_tau"]["temporal_queue_controlled_count"],
+                "grid_effect": prior_grid,
+                "primary_classification": prior_review["numbered_report"]["68"]["value"],
+                "supersession_reason": "Standby QoS was incorrectly treated as protected and partition-name text was used as QoS authority.",
+                "may_be_used_as_final_scientific_conclusion": False,
+            },
+        )
     snapshot = queue_snapshot(snapshot_frame, classified)
     census = workload_census(classified)
     _write_json(artifact_dir / "V35R3A_APR01_QUEUE_SNAPSHOT.json", snapshot)
     _write_csv(artifact_dir / "V35R3A_WORKLOAD_CLASS_CENSUS.csv", census)
+    pending_audit = pending_field_audit(classified, policy)
+    pending_audit.to_parquet(artifact_dir / "V35R3A_PENDING_FIELD_AUDIT.parquet", index=False)
 
     twin_contract = {
         "artifact_id": "V35R3A_SCHEDULER_TWIN_CONTRACT_V1",
@@ -1089,16 +1302,46 @@ def build(
         "preemption": False,
         "unsupported_job_deadline": False,
         "running_fixed": True,
+        "workload_classes": [
+            RUNNING_FIXED,
+            HIGH_PROTECTED,
+            NORMAL_QUEUE_CONTROLLED,
+            STANDBY_QUEUE_CONTROLLED,
+            SPATIO_TEMPORAL_CANDIDATE,
+        ],
+        "temporal_union": f"{NORMAL_QUEUE_CONTROLLED} union {STANDBY_QUEUE_CONTROLLED}",
+        "standby_rule": "raw QoS=standby; residual capacity only; never crosses high/normal tier",
+        "partition_name_defines_qos": False,
         "deterministic_tie_break": "lexical job ID",
         "limitations": policy["missing_historical_inputs"],
     }
     _write_json(artifact_dir / "V35R3A_SCHEDULER_TWIN_CONTRACT.json", twin_contract)
 
-    fidelity_rows, fidelity_summary = baseline_fidelity(fidelity_frame, policy["policy_sha256"])
-    _write_csv(artifact_dir / "V35R3A_BASELINE_FIDELITY.csv", fidelity_rows)
+    fidelity_path = artifact_dir / "V35R3A_BASELINE_FIDELITY.csv"
+    prior_baseline_path = artifact_dir / "V35R3A_BASELINE_SERVICE_METRICS.json"
+    prior_baseline = (
+        json.loads(prior_baseline_path.read_text(encoding="utf-8"))
+        if amendment_mode and prior_baseline_path.exists()
+        else None
+    )
+    if (
+        prior_baseline
+        and fidelity_path.exists()
+        and prior_baseline.get("fidelity", {}).get("policy_sha256_frozen_before_expost_validation")
+        == policy["policy_sha256"]
+    ):
+        fidelity_rows = json.loads(pd.read_csv(fidelity_path).to_json(orient="records"))
+        fidelity_summary = prior_baseline["fidelity"]
+    else:
+        fidelity_rows, fidelity_summary = baseline_fidelity(
+            fidelity_frame, policy["policy_sha256"]
+        )
+        _write_csv(fidelity_path, fidelity_rows)
 
     baseline_rows, baseline_occupancy = schedule_known_queue(running, pending)
-    controlled_rows, search_trace, priority_changes = deterministic_control(baseline_rows, pending)
+    controlled_rows, search_trace, priority_changes = deterministic_control(
+        baseline_rows, running, pending
+    )
     baseline_frame = _schedule_frame(baseline_rows)
     controlled_frame = _schedule_frame(controlled_rows)
     baseline_frame.to_parquet(artifact_dir / "V35R3A_BASELINE_SCHEDULE.parquet", index=False)
@@ -1167,29 +1410,54 @@ def build(
         )
     pd.DataFrame(exposure_rows).to_parquet(artifact_dir / "V35R3A_JOB_CRITICAL_EXPOSURE.parquet", index=False)
 
-    temporal_count = int(sum(job.workload_class == TEMPORAL_QUEUE_CONTROLLED for job in pending))
+    temporal_count = int(sum(job.workload_class in TEMPORAL_CONTROLLED_CLASSES for job in pending))
+    standby_count = int(sum(job.workload_class == STANDBY_QUEUE_CONTROLLED for job in pending))
     sitefactor_policy = {
         "artifact_id": "V35R3A_SITEFACTOR_POLICY_V1",
         "frozen_at": ISSUE_TIME.isoformat(),
         "policy_sha256": policy["policy_sha256"],
-        "eligible_class": TEMPORAL_QUEUE_CONTROLLED,
+        "eligible_classes": [NORMAL_QUEUE_CONTROLLED, STANDBY_QUEUE_CONTROLLED],
+        "service_tier_precedence": ["high", "normal", "standby"],
+        "cross_tier_priority_boost_allowed": False,
         "protected_sitefactor": 0,
         "minimum_integer_rank_perturbation": True,
         "result_tuned_weight": False,
         "eligible_job_count": temporal_count,
-        "applied_sitefactor": {},
-        "reason": "No eligible service-neutral exchange pair exists in KQ0.",
+        "standby_eligible_job_count": standby_count,
+        "applied_sitefactor": {
+            row["job_id"]: row["sitefactor"] for row in priority_changes
+        },
+        "reason": "Frozen Planning critical-slot/W5 ordering inside each service tier; non-improving candidates are rejected.",
     }
     _write_json(artifact_dir / "V35R3A_SITEFACTOR_POLICY.json", sitefactor_policy)
     _write_csv(
         artifact_dir / "V35R3A_PRIORITY_CHANGE_LOG.csv",
         priority_changes,
-        ["job_id", "baseline_rank", "controlled_rank", "sitefactor", "changed_pair", "reason"],
+        [
+            "job_id",
+            "qos",
+            "workload_class",
+            "baseline_rank",
+            "controlled_rank",
+            "sitefactor",
+            "changed_pair",
+            "reason",
+        ],
     )
     _write_csv(
         artifact_dir / "V35R3A_SEARCH_TRACE.csv",
         search_trace,
-        ["iteration", "candidate", "accepted", "reason", "eligible_job_count"],
+        [
+            "iteration",
+            "candidate",
+            "accepted",
+            "reason",
+            "eligible_job_count",
+            "standby_eligible_job_count",
+            "service_gate_passed",
+            "critical_slot_GPU",
+            "W5_GPU_slots",
+        ],
     )
 
     gate_object = service_noninferiority(baseline_rows, controlled_rows)
@@ -1203,12 +1471,58 @@ def build(
         "controlled_schedule_sha256": schedule_hash(controlled_rows),
         "running_job_count": len(running),
         "preemption_count": 0,
+        "contract": "TIER_AWARE_HIGH_NORMAL_STANDBY",
+        "baseline_tier_metrics": service_metrics(baseline_rows)["tiers"],
+        "controlled_tier_metrics": service_metrics(controlled_rows)["tiers"],
+        "standby_wait_deltas_are_reported_not_gated": True,
     }
     _write_json(artifact_dir / "V35R3A_KQ0_SERVICE_GATE.json", gate)
 
     base_windows = window_metrics(baseline_kw)
     control_windows = window_metrics(controlled_kw)
     delta_kw = controlled_kw - baseline_kw
+    baseline_by_id = {row.job_id: row for row in baseline_rows}
+    controlled_by_id = {row.job_id: row for row in controlled_rows}
+    advanced = [
+        job_id
+        for job_id, row in controlled_by_id.items()
+        if job_id in baseline_by_id
+        and row.state_at_issue == "PENDING"
+        and row.scheduled_start_slot < baseline_by_id[job_id].scheduled_start_slot
+    ]
+    delayed = [
+        job_id
+        for job_id, row in controlled_by_id.items()
+        if job_id in baseline_by_id
+        and row.state_at_issue == "PENDING"
+        and row.scheduled_start_slot > baseline_by_id[job_id].scheduled_start_slot
+    ]
+    baseline_standby_gpu = target_gpu_profile(
+        [row for row in baseline_rows if row.qos.lower() == "standby"]
+    )
+    controlled_standby_gpu = target_gpu_profile(
+        [row for row in controlled_rows if row.qos.lower() == "standby"]
+    )
+    baseline_higher_gpu = target_gpu_profile(
+        [row for row in baseline_rows if row.qos.lower() != "standby"]
+    )
+    controlled_higher_gpu = target_gpu_profile(
+        [row for row in controlled_rows if row.qos.lower() != "standby"]
+    )
+
+    def power_reduction(base_profile: np.ndarray, controlled_profile: np.ndarray) -> dict[str, float]:
+        base = window_metrics(base_profile * gpu_to_kw)
+        control = window_metrics(controlled_profile * gpu_to_kw)
+        return {
+            name: base[f"{name}_mean_kW"] - control[f"{name}_mean_kW"]
+            for name in ("W1", "W3", "W5")
+        }
+
+    profile_identical = bool(np.allclose(baseline_gpu, controlled_gpu, atol=1e-12, rtol=0.0))
+    baseline_exposure_proxy = float(baseline_kw[list(W5)].sum())
+    controlled_exposure_proxy = float(controlled_kw[list(W5)].sum())
+    planning_controlled = PLANNING_RHO_APR01_B0 if profile_identical else None
+    planning_improvement = 0.0 if profile_identical else None
     grid = {
         "artifact_id": "V35R3A_KQ0_GRID_EFFECT_V1",
         "authority": "EQUIVALENT_AIDC_IT_SCALE_PROXY_WITHOUT_EXACT_JOB_GRID_BINDING",
@@ -1225,19 +1539,50 @@ def build(
             "W3": PUE * (base_windows["W3_mean_kW"] - control_windows["W3_mean_kW"]),
             "W5": PUE * (base_windows["W5_mean_kW"] - control_windows["W5_mean_kW"]),
         },
-        "advanced_jobs": 0,
-        "delayed_jobs": 0,
+        "advanced_jobs": len(advanced),
+        "delayed_jobs": len(delayed),
+        "advanced_job_ids": advanced,
+        "delayed_job_ids": delayed,
+        "standby_reprioritized_jobs": sum(
+            row["workload_class"] == STANDBY_QUEUE_CONTROLLED for row in priority_changes
+        ),
+        "standby_advanced_jobs": sum(controlled_by_id[job_id].qos.lower() == "standby" for job_id in advanced),
+        "standby_delayed_jobs": sum(controlled_by_id[job_id].qos.lower() == "standby" for job_id in delayed),
         "shifted_GPU_hours": float(0.5 * np.abs(controlled_gpu - baseline_gpu).sum() * 0.25),
+        "standby_shifted_GPU_hours": float(
+            0.5 * np.abs(controlled_standby_gpu - baseline_standby_gpu).sum() * 0.25
+        ),
+        "standby_power_reduction_kW": power_reduction(
+            baseline_standby_gpu, controlled_standby_gpu
+        ),
+        "normal_high_power_reduction_kW": power_reduction(
+            baseline_higher_gpu, controlled_higher_gpu
+        ),
+        "standby_GPU_hours_removed_from_windows": {
+            name: float(
+                max(
+                    0.0,
+                    (baseline_standby_gpu[list(slots)] - controlled_standby_gpu[list(slots)]).sum()
+                    * SLOT_MINUTES
+                    / 60.0,
+                )
+            )
+            for name, slots in (("W1", W1), ("W3", W3), ("W5", W5))
+        },
         "rebound_slots": np.flatnonzero(delta_kw > 1e-12).tolist(),
         "maximum_rebound_kW": float(max(0.0, delta_kw.max(initial=0.0))),
         "baseline_Planning_rho": PLANNING_RHO_APR01_B0,
-        "controlled_Planning_rho": PLANNING_RHO_APR01_B0,
-        "Planning_rho_improvement": 0.0,
+        "controlled_Planning_rho": planning_controlled,
+        "Planning_rho_improvement": planning_improvement,
+        "Planning_rho_status": "EXACT_ZERO_DELTA_IDENTICAL_PROFILE" if profile_identical else "UNIDENTIFIED_WITHOUT_EXACT_JOB_GRID_BINDING",
         "baseline_critical_exposure": None,
         "controlled_critical_exposure": None,
-        "critical_exposure_improvement": 0.0,
-        "P95_line_loading_change": 0.0,
-        "P99_line_loading_change": 0.0,
+        "critical_exposure_improvement": 0.0 if profile_identical else None,
+        "critical_exposure_proxy_baseline_kW_slots": baseline_exposure_proxy,
+        "critical_exposure_proxy_controlled_kW_slots": controlled_exposure_proxy,
+        "critical_exposure_proxy_improvement_kW_slots": baseline_exposure_proxy - controlled_exposure_proxy,
+        "P95_line_loading_change": 0.0 if profile_identical else None,
+        "P99_line_loading_change": 0.0 if profile_identical else None,
         "exact_grid_binding": False,
         "Fresh_status": "GRID_BINDING_AUTHORITY_INCOMPLETE",
         "comparison_to_current_strict_FULL_node_reference": {
@@ -1252,27 +1597,28 @@ def build(
             "strict_reference_shifted_node_hours": 95.06385234825807,
             "strict_reference_Planning_rho_improvement": 3.473623411243132e-06,
             "V35R3A_more_effective": False,
-            "reason": "V35R3A admissible KQ0 schedule change is zero.",
+            "reason": "Corrected standby semantics produced no accepted aggregate-profile improvement." if profile_identical else "Exact Planning comparison unavailable without job-grid binding.",
         },
-        "interpretation": "No schedule change was admissible; therefore every mapping-consistent power/grid delta is exactly zero, while absolute job-to-grid exposure remains unidentified.",
+        "interpretation": "Standby temporal mass is present. The frozen deterministic search accepts only tier-safe aggregate critical-profile improvements; exact absolute job-to-grid exposure remains unidentified.",
     }
     _write_json(artifact_dir / "V35R3A_KQ0_GRID_EFFECT.json", grid)
 
-    pr1_initial = list(pending) + pr1_jobs
-    pr1_rows, _ = schedule_online_replay(
-        running,
-        pr1_initial,
-        replay_start=ISSUE_TIME,
-        maximum_slots=SIMULATION_SLOTS,
-        policy="PR1_frozen_policy_replay",
-    )
-    pr1 = {
+    if not amendment_mode:
+        pr1_initial = list(pending) + pr1_jobs
+        pr1_rows, _ = schedule_online_replay(
+            running,
+            pr1_initial,
+            replay_start=ISSUE_TIME,
+            maximum_slots=SIMULATION_SLOTS,
+            policy="PR1_frozen_policy_replay",
+        )
+        pr1 = {
         "artifact_id": "V35R3A_PR1_POLICY_REPLAY_V1",
         "status": "EXECUTED_SEPARATELY_FROM_KQ0",
         "policy_sha256": policy["policy_sha256"],
         "post_issue_submit_event_count": len(pr1_frame),
         "post_issue_schedulable_request_count": len(pr1_jobs),
-        "post_issue_temporal_candidate_count": sum(job.workload_class == TEMPORAL_QUEUE_CONTROLLED for job in pr1_jobs),
+        "post_issue_temporal_candidate_count": sum(job.workload_class in TEMPORAL_CONTROLLED_CLASSES for job in pr1_jobs),
         "identity_reveal_rule": "at actual submit timestamp only",
         "submission_side_fields_only": True,
         "future_actual_start_end_runtime_reads": 0,
@@ -1282,12 +1628,126 @@ def build(
         "service_metrics": service_metrics(pr1_rows),
         "source_access": pr1_source,
         "combined_with_KQ0_authority": False,
-    }
-    _write_json(artifact_dir / "V35R3A_PR1_POLICY_REPLAY.json", pr1)
+        }
+        _write_json(artifact_dir / "V35R3A_PR1_POLICY_REPLAY.json", pr1)
+        fields, ledger = causality_tables(classified, pr1_records)
+        _write_csv(artifact_dir / "V35R3A_FIELD_CAUSALITY_AUDIT.csv", fields)
+        _write_csv(artifact_dir / "V35R3A_CAUSALITY_LEDGER.csv", ledger)
+    else:
+        pr1 = json.loads(
+            (artifact_dir / "V35R3A_PR1_POLICY_REPLAY.json").read_text(encoding="utf-8")
+        )
+        pr1["standby_semantics_status"] = "PRE_CORRECTION_PR1_PRESERVED_NOT_USED_IN_KQ0_AMENDMENT"
+        _write_json(artifact_dir / "V35R3A_PR1_POLICY_REPLAY.json", pr1)
+        pr1_rows = []
 
-    fields, ledger = causality_tables(classified, pr1_records)
-    _write_csv(artifact_dir / "V35R3A_FIELD_CAUSALITY_AUDIT.csv", fields)
-    _write_csv(artifact_dir / "V35R3A_CAUSALITY_LEDGER.csv", ledger)
+    standby_summary = snapshot["P_tau"]["qos_resource_summary"]["standby"]
+    temporal_after = snapshot["P_tau"]["temporal_controllable_mass_after_standby_correction"]
+    temporal_before = snapshot["P_tau"]["temporal_controllable_mass_before_standby_correction"]
+    if standby_summary["schedulable_job_count"] == 0:
+        primary_classification = "V35R3A_KNOWN_QUEUE_TEMPORAL_MASS_INSUFFICIENT"
+    elif grid["standby_reprioritized_jobs"] > 0 and gate["passed"] and any(
+        value > 1e-12 for value in grid["power_reduction_kW"].values()
+    ):
+        primary_classification = "V35R3A_STANDBY_TEMPORAL_CONTROL_PASS"
+    elif any(
+        row["reason"] == "SERVICE_GATE_FAIL" for row in search_trace
+    ) and any(
+        row["critical_slot_GPU"] < baseline_gpu[CRITICAL_SLOT] for row in search_trace
+    ):
+        primary_classification = "V35R3A_STANDBY_SERVICE_GATE_BLOCKS_GRID_SHIFT"
+    else:
+        primary_classification = "V35R3A_STANDBY_TEMPORAL_MASS_PRESENT_NO_GRID_BENEFIT"
+
+    correction = {
+        "artifact_id": "V35R3A_STANDBY_SEMANTICS_CORRECTION_V1",
+        "status": "CORRECTED_KQ0_COMPLETE",
+        "primary_classification": primary_classification,
+        "old_result_status": "PRE_STANDBY_SEMANTICS_CORRECTION_DIAGNOSTIC_ONLY",
+        "old_result_artifact": str(pre_correction_path),
+        "raw_qos_counts": snapshot["P_tau"]["qos_counts"],
+        "raw_partition_counts": snapshot["P_tau"]["partition_counts"],
+        "qos_resource_summary": snapshot["P_tau"]["qos_resource_summary"],
+        "partition_stdby_name_count": snapshot["P_tau"]["partition_stdby_name_count"],
+        "partition_only_stdby_without_standby_qos_count": snapshot["P_tau"]["partition_only_stdby_without_standby_qos_count"],
+        "qos_partition_semantics_ambiguous_count": snapshot["P_tau"]["qos_partition_semantics_ambiguous_count"],
+        "temporal_controllable_mass_before_correction": temporal_before,
+        "temporal_controllable_mass_after_correction": temporal_after,
+        "standby_jobs_actually_reprioritized": grid["standby_reprioritized_jobs"],
+        "standby_GPU_hours_shifted": grid["standby_shifted_GPU_hours"],
+        "standby_GPU_hours_removed_from_W1_W3_W5": grid["standby_GPU_hours_removed_from_windows"],
+        "standby_power_reduction_kW": grid["standby_power_reduction_kW"],
+        "normal_high_power_reduction_kW": grid["normal_high_power_reduction_kW"],
+        "AIDC_PCC_power_reduction_kW": grid["AIDC_PCC_power_reduction_kW"],
+        "normal_high_service_metrics": {
+            "baseline": {
+                "high_protected": gate["baseline_tier_metrics"]["high_protected"],
+                "normal": gate["baseline_tier_metrics"]["normal"],
+            },
+            "controlled": {
+                "high_protected": gate["controlled_tier_metrics"]["high_protected"],
+                "normal": gate["controlled_tier_metrics"]["normal"],
+            },
+            "delayed_count": gate["deltas"]["high_normal_delay_count"],
+        },
+        "standby_service_metrics": {
+            "baseline": gate["baseline_tier_metrics"]["standby"],
+            "controlled": gate["controlled_tier_metrics"]["standby"],
+            "wait_deltas": {
+                key: gate["deltas"][key]
+                for key in (
+                    "standby_wait_mean_hours",
+                    "standby_wait_p95_hours",
+                    "standby_wait_max_hours",
+                    "standby_advanced_job_count",
+                    "standby_delayed_job_count",
+                )
+            },
+        },
+        "tier_aware_service_gate_passed": gate["passed"],
+        "Planning_rho_change": None
+        if grid["Planning_rho_improvement"] is None
+        else (0.0 if grid["Planning_rho_improvement"] == 0 else -grid["Planning_rho_improvement"]),
+        "Planning_rho_improvement": grid["Planning_rho_improvement"],
+        "critical_exposure_change": None
+        if grid["critical_exposure_improvement"] is None
+        else (0.0 if grid["critical_exposure_improvement"] == 0 else -grid["critical_exposure_improvement"]),
+        "critical_exposure_proxy_improvement_kW_slots": grid["critical_exposure_proxy_improvement_kW_slots"],
+        "rebound_slots": grid["rebound_slots"],
+        "maximum_rebound_kW": grid["maximum_rebound_kW"],
+        "causality_counters": {
+            "post_issue_job_identity_reads_KQ0": 0,
+            "future_actual_start_numeric_reads": 0,
+            "future_actual_end_numeric_reads": 0,
+            "realized_runtime_reads_before_policy_freeze": 0,
+            "Fresh_reads_during_policy_selection": 0,
+            "actual_grid_feedback_calls": 0,
+        },
+        "qos_authority": policy["qos_authority"],
+        "unsupported_per_job_deadline_assumed": False,
+        "Fresh_used_to_choose_policy": False,
+        "PR1_role": "PRE_CORRECTION_REPLAY_PRESERVED; NOT_USED_IN_CORRECTED_KQ0_CONCLUSION",
+    }
+    correction["answers"] = {
+        "1": f"420건은 raw QoS 필드가 실제 standby였다. partition 이름만으로 추론하지 않았다. 별도의 1건은 raw QoS=normal, partition=gpu-h100-stdby로 감사됐다.",
+        "2": f"{policy['qos_authority']['source_path']} (SHA-256 {policy['qos_authority']['source_sha256']}, saved HTML lines {policy['qos_authority']['source_lines']})가 high precedence와 standby idle-only/AU-free 의미를 정의한다.",
+        "3": f"standby {standby_summary['schedulable_job_count']}건, {standby_summary['known_requested_GPU_hours']} GPU-h가 STANDBY_QUEUE_CONTROLLED가 됐다.",
+        "4": f"standby PARTIAL/shared 요청은 {standby_summary['partial_shared_request_count']}건이다.",
+        "5": f"NO. high/normal 지연은 {int(gate['deltas']['high_normal_delay_count'])}건이다.",
+        "6": f"실제로 재정렬된 standby 작업은 {grid['standby_reprioritized_jobs']}건이다.",
+        "7": f"W1/W3/W5에서 빠진 standby 실행 GPU-h는 각각 {grid['standby_GPU_hours_removed_from_windows']['W1']}/{grid['standby_GPU_hours_removed_from_windows']['W3']}/{grid['standby_GPU_hours_removed_from_windows']['W5']}이다.",
+        "8": f"AIDC PCC W1/W3/W5 감소는 각각 {grid['AIDC_PCC_power_reduction_kW']['W1']}/{grid['AIDC_PCC_power_reduction_kW']['W3']}/{grid['AIDC_PCC_power_reduction_kW']['W5']} kW다.",
+        "9": f"Planning rho_max 변화는 {correction.get('Planning_rho_change')}다.",
+        "10": f"정확한 critical exposure 변화는 {correction.get('critical_exposure_change')}; aggregate proxy 개선은 {grid['critical_exposure_proxy_improvement_kW_slots']} kW-slot이다.",
+        "11": "NO. 개별 작업 지연 deadline을 만들지 않았다.",
+        "12": "NO. Fresh 결과는 정책 선택에 사용하지 않았다.",
+        "13": f"후보 질량은 교정 전 {temporal_before['job_count']}건에서 교정 후 {temporal_after['job_count']}건으로 크게 늘었지만, 실제 grid-beneficial 이동은 {grid['standby_shifted_GPU_hours']} GPU-h였다.",
+        "14": "FIXED/TEMPORAL_QUEUE_CONTROLLED/SPATIO_TEMPORAL의 개념적 분리는 지지하지만, exact scheduler와 job-grid binding 전에는 생산 반영을 정당화하지 않는다.",
+    }
+    _write_json(
+        artifact_dir / "V35R3A_STANDBY_SEMANTICS_CORRECTION.json",
+        correction,
+    )
 
     wt_wst = {
         "artifact_id": "V35R3A_WT_WST_TARGET_IMPACT_V1",
@@ -1297,6 +1757,9 @@ def build(
             "required_submission_features": ["submit time", "requested nodes/GPUs/walltime", "QoS", "partition", "account/association if authoritative"],
             "state_representation": "R_tau fixed + P_tau class/resource/backlog by pool; U_tau forecast only by resource/QoS class",
             "future_arrivals": "forecast aggregate mass by resource/QoS class; never forecast identities",
+            "corrected_KQ0_count": temporal_after["job_count"],
+            "corrected_KQ0_requested_GPU_hours": temporal_after["known_requested_GPU_hours"],
+            "classes": [NORMAL_QUEUE_CONTROLLED, STANDBY_QUEUE_CONTROLLED],
         },
         "W_ST": {
             "meaning": "W_T subset with FULL-node/exclusive resource compatibility and exact spatial binding",
@@ -1311,7 +1774,7 @@ def build(
     integration = {
         "artifact_id": "V35R3A_PRODUCTION_INTEGRATION_PLAN_V1",
         "PRODUCTION_CHANGE_RECOMMENDED": "NO",
-        "reason": "KQ0 contains no admissible temporal exchange pair; exact scheduler and job-grid binding authorities are absent.",
+        "reason": "Corrected KQ0 contains standby temporal mass but no accepted grid-beneficial schedule under the relative twin; exact scheduler and job-grid binding authorities are absent.",
         "minimum_next_step": "After active V35R3 completes, capture one read-only D-1 squeue/scontrol snapshot plus slurm.conf/sprio/association/reservation inputs and exact AIDC job binding.",
         "production_files_modified": 0,
         "merge": False,
@@ -1354,6 +1817,7 @@ def build(
         gate,
         priority_changes,
         pending_test,
+        correction,
     )
     _write_json(artifact_dir / "V35R3A_FINAL_REVIEW.json", review)
     _write_review_markdown(artifact_dir / "V35R3A_FINAL_REVIEW.md", review)
@@ -1362,8 +1826,8 @@ def build(
         "artifact_count": len(list(artifact_dir.iterdir())),
         "baseline_schedule_rows": len(baseline_rows),
         "controlled_schedule_rows": len(controlled_rows),
-        "PR1_schedule_rows": len(pr1_rows),
-        "primary_classification": "V35R3A_KNOWN_QUEUE_TEMPORAL_MASS_INSUFFICIENT",
+        "PR1_schedule_rows": len(pr1_rows) if not amendment_mode else "PRESERVED_PRE_CORRECTION_NOT_RERUN",
+        "primary_classification": primary_classification,
         "service_gate": gate["passed"],
         "policy_sha256": policy["policy_sha256"],
     }

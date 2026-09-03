@@ -1,0 +1,70 @@
+{
+  "artifact_id": "V35R3A_PRE_STANDBY_SEMANTICS_CORRECTION_DIAGNOSTIC_V1",
+  "grid_effect": {
+    "AIDC_PCC_power_reduction_kW": {
+      "W1": 0.0,
+      "W3": 0.0,
+      "W5": 0.0
+    },
+    "Fresh_status": "GRID_BINDING_AUTHORITY_INCOMPLETE",
+    "P95_line_loading_change": 0.0,
+    "P99_line_loading_change": 0.0,
+    "Planning_rho_improvement": 0.0,
+    "advanced_jobs": 0,
+    "artifact_id": "V35R3A_KQ0_GRID_EFFECT_V1",
+    "authority": "EQUIVALENT_AIDC_IT_SCALE_PROXY_WITHOUT_EXACT_JOB_GRID_BINDING",
+    "baseline_Planning_rho": 0.5670071217020519,
+    "baseline_critical_exposure": null,
+    "baseline_equivalent_AIDC_IT_proxy": {
+      "W1_energy_kWh": 101.69399845345477,
+      "W1_mean_kW": 406.77599381381907,
+      "W1_peak_kW": 406.77599381381907,
+      "W3_energy_kWh": 305.0819953603643,
+      "W3_mean_kW": 406.77599381381907,
+      "W3_peak_kW": 406.77599381381907,
+      "W5_energy_kWh": 508.4699922672738,
+      "W5_mean_kW": 406.77599381381907,
+      "W5_peak_kW": 406.77599381381907
+    },
+    "comparison_to_current_strict_FULL_node_reference": {
+      "V35R3A_more_effective": false,
+      "reason": "V35R3A admissible KQ0 schedule change is zero.",
+      "source_path": "dayahead/artifacts/v35r2_aidc_mess_forensic/V35R2_AIDC_CONTROL_AUTHORITY.json",
+      "source_sha256": "507b4d854aa218d9830473ea71774d02ff1b281e60b3124534d69a7c2e5ada14",
+      "strict_reference_Planning_rho_improvement": 3.473623411243132e-06,
+      "strict_reference_shifted_node_hours": 95.06385234825807
+    },
+    "controlled_Planning_rho": 0.5670071217020519,
+    "controlled_critical_exposure": null,
+    "controlled_equivalent_AIDC_IT_proxy": {
+      "W1_energy_kWh": 101.69399845345477,
+      "W1_mean_kW": 406.77599381381907,
+      "W1_peak_kW": 406.77599381381907,
+      "W3_energy_kWh": 305.0819953603643,
+      "W3_mean_kW": 406.77599381381907,
+      "W3_peak_kW": 406.77599381381907,
+      "W5_energy_kWh": 508.4699922672738,
+      "W5_mean_kW": 406.77599381381907,
+      "W5_peak_kW": 406.77599381381907
+    },
+    "critical_exposure_improvement": 0.0,
+    "delayed_jobs": 0,
+    "equivalent_IT_kW_per_requested_GPU": 0.6518846054708639,
+    "exact_grid_binding": false,
+    "interpretation": "No schedule change was admissible; therefore every mapping-consistent power/grid delta is exactly zero, while absolute job-to-grid exposure remains unidentified.",
+    "maximum_rebound_kW": 0.0,
+    "power_reduction_kW": {
+      "W1": 0.0,
+      "W3": 0.0,
+      "W5": 0.0
+    },
+    "rebound_slots": [],
+    "shifted_GPU_hours": 0.0
+  },
+  "may_be_used_as_final_scientific_conclusion": false,
+  "primary_classification": "V35R3A_KNOWN_QUEUE_TEMPORAL_MASS_INSUFFICIENT",
+  "source_commit": "e2a9064544914dbe1a753241859895b90e80682f",
+  "status": "SUPERSEDED_PRE_CORRECTION_EVIDENCE",
+  "supersession_reason": "Standby QoS was incorrectly treated as protected and partition-name text was used as QoS authority.",
+  "temporal_candidate_count": 0
+}

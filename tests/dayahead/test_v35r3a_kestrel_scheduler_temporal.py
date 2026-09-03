@@ -15,10 +15,14 @@ from dayahead.v35r3a.contracts import (
     EXPECTED_BRANCH,
     FIXED_PROTECTED,
     GPU_CAPACITY,
+    HIGH_PROTECTED,
     ISSUE_TIME,
+    NORMAL_QUEUE_CONTROLLED,
     PREEMPTIVE,
+    RUNNING_FIXED,
     SOURCE_BASELINE,
     SPATIO_TEMPORAL_CANDIDATE,
+    STANDBY_QUEUE_CONTROLLED,
     TARGET_END,
     TARGET_START,
     TEMPORAL_QUEUE_CONTROLLED,
@@ -74,7 +78,7 @@ def _job(job_id: str, **updates) -> SchedulerJob:
         "duration_slots": 4,
         "processors_requested": 16,
         "memory_request": "16G",
-        "workload_class": TEMPORAL_QUEUE_CONTROLLED,
+        "workload_class": NORMAL_QUEUE_CONTROLLED,
         "protected": False,
     }
     values.update(updates)
@@ -85,7 +89,7 @@ def _row(job_id: str, **updates) -> ScheduleRow:
     values = {
         "job_id": job_id,
         "state_at_issue": "PENDING",
-        "workload_class": TEMPORAL_QUEUE_CONTROLLED,
+        "workload_class": NORMAL_QUEUE_CONTROLLED,
         "protected": False,
         "qos": "normal",
         "partition": "gpu-h100",
@@ -123,24 +127,27 @@ def test_apr02_and_naive_times_rejected():
 
 def test_complete_normal_submission_is_temporal():
     assert submission_complete(_request())
-    assert classify_pending(_request())[0] == TEMPORAL_QUEUE_CONTROLLED
+    assert classify_pending(_request())[0] == NORMAL_QUEUE_CONTROLLED
 
 
 def test_partial_normal_submission_can_be_temporal_only():
     request = _request(gpus_requested=1.0)
-    assert classify_pending(request)[0] == TEMPORAL_QUEUE_CONTROLLED
+    assert classify_pending(request)[0] == NORMAL_QUEUE_CONTROLLED
     assert request["gpus_requested"] < 4 * request["nodes_req"]
 
 
 def test_high_qos_is_fixed_protected():
     classification, reasons = classify_pending(_request(qos="high"))
-    assert classification == FIXED_PROTECTED
+    assert classification == HIGH_PROTECTED
     assert "PROTECTED_HIGH_OR_URGENT_QOS" in reasons
 
 
-def test_standby_qos_and_partition_are_fixed_protected():
-    assert classify_pending(_request(qos="standby"))[0] == FIXED_PROTECTED
-    assert classify_pending(_request(partition="gpu-h100-stdby"))[0] == FIXED_PROTECTED
+def test_standby_qos_is_controlled_but_partition_name_does_not_define_qos():
+    assert classify_pending(_request(qos="standby"))[0] == STANDBY_QUEUE_CONTROLLED
+    assert classify_pending(_request(qos="standby", gpus_requested=1.0))[0] == STANDBY_QUEUE_CONTROLLED
+    classification, reasons = classify_pending(_request(partition="gpu-h100-stdby"))
+    assert classification == NORMAL_QUEUE_CONTROLLED
+    assert "PARTITION_NAME_NOT_QOS_AUTHORITY" in reasons
 
 
 def test_missing_gpu_request_fails_closed():
@@ -151,7 +158,7 @@ def test_missing_gpu_request_fails_closed():
 def test_running_reservation_is_fixed_and_nonpreemptive():
     running = _job(
         "r",
-        workload_class=FIXED_PROTECTED,
+        workload_class=RUNNING_FIXED,
         protected=True,
         running_at_issue=True,
         fixed_remaining_slots=8,
@@ -193,10 +200,10 @@ def test_minimum_sitefactor_pair_perturbation():
 
 def test_deterministic_control_fails_closed_below_two_candidates():
     baseline, _ = schedule_known_queue([], [_job("a", workload_class=FIXED_PROTECTED, protected=True)])
-    controlled, trace, changes = deterministic_control(baseline, [])
+    controlled, trace, changes = deterministic_control(baseline, [], [])
     assert schedule_hash(controlled) != schedule_hash(baseline)  # policy label is intentionally part of identity
     assert not changes
-    assert trace[0]["reason"] == "FEWER_THAN_TWO_TEMPORAL_QUEUE_CONTROLLED_JOBS"
+    assert trace[0]["reason"] == "FEWER_THAN_TWO_STANDBY_QUEUE_CONTROLLED_JOBS"
 
 
 def test_identity_schedule_passes_strict_service_gate():
@@ -212,6 +219,73 @@ def test_high_qos_delay_fails_service_gate():
     gate = service_noninferiority(baseline, controlled)
     assert not gate.passed
     assert gate.deltas["high_urgent_delay_count"] == 1.0
+
+
+def test_standby_reordering_may_change_wait_without_failing_tier_gate():
+    baseline = [
+        _row("s1", qos="standby", workload_class=STANDBY_QUEUE_CONTROLLED),
+        _row(
+            "s2",
+            qos="standby",
+            workload_class=STANDBY_QUEUE_CONTROLLED,
+            scheduled_start_slot=4,
+            scheduled_end_slot=8,
+            wait_hours=2.0,
+            priority_rank=1,
+        ),
+    ]
+    controlled = [
+        replace(baseline[0], scheduled_start_slot=4, scheduled_end_slot=8, wait_hours=2.0),
+        replace(baseline[1], scheduled_start_slot=0, scheduled_end_slot=4, wait_hours=1.0),
+    ]
+    gate = service_noninferiority(baseline, controlled)
+    assert gate.passed
+    assert gate.deltas["standby_advanced_job_count"] == 1.0
+    assert gate.deltas["standby_delayed_job_count"] == 1.0
+
+
+def test_standby_control_cannot_delay_normal_job():
+    baseline = [_row("n", qos="normal", workload_class=NORMAL_QUEUE_CONTROLLED)]
+    controlled = [
+        replace(baseline[0], scheduled_start_slot=1, scheduled_end_slot=5, wait_hours=1.25)
+    ]
+    gate = service_noninferiority(baseline, controlled)
+    assert not gate.passed
+    assert not gate.checks["standby_never_delays_high_or_normal"]
+
+
+def test_standby_completion_conservation_is_hard_gate():
+    baseline = [
+        _row("s", qos="standby", workload_class=STANDBY_QUEUE_CONTROLLED)
+    ]
+    controlled = [
+        replace(
+            baseline[0],
+            scheduled_start_slot=120,
+            scheduled_end_slot=124,
+            wait_hours=31.0,
+        )
+    ]
+    gate = service_noninferiority(baseline, controlled)
+    assert not gate.passed
+    assert not gate.checks["standby_completed_jobs_not_lower"]
+    assert not gate.checks["standby_completed_GPU_hours_not_lower"]
+    assert not gate.checks["standby_terminal_pending_GPU_hours_not_higher"]
+
+
+def test_raw_qos_tier_precedence_ignores_stdby_partition_substring():
+    normal = _job("n", partition="gpu-h100-stdby", qos="normal")
+    standby = _job(
+        "s",
+        qos="standby",
+        workload_class=STANDBY_QUEUE_CONTROLLED,
+    )
+    rows, _ = schedule_known_queue(
+        [],
+        [standby, normal],
+        rank_override={"s": -1000, "n": 1000},
+    )
+    assert [row.job_id for row in rows] == ["n", "s"]
 
 
 def test_wait_increase_fails_service_gate():
@@ -277,19 +351,51 @@ def test_queue_partition_conservation_and_spatial_subset():
     assert bool(spatial.subset_of_temporal)
 
 
-def test_actual_kq0_has_no_unsafe_temporal_relabeling():
+def test_actual_kq0_uses_raw_standby_qos_and_audits_partition_ambiguity():
     snapshot = _json("V35R3A_APR01_QUEUE_SNAPSHOT.json")
     assert snapshot["P_tau"]["qos_counts"]["standby"] == 420
-    assert snapshot["P_tau"]["temporal_queue_controlled_count"] == 0
-    assert snapshot["P_tau"]["partial_temporal_queue_controlled_count"] == 0
+    assert snapshot["P_tau"]["temporal_queue_controlled_count"] > 0
+    assert snapshot["P_tau"]["partial_temporal_queue_controlled_count"] > 0
+    assert snapshot["P_tau"]["partition_only_stdby_without_standby_qos_count"] == 1
+    assert snapshot["P_tau"]["qos_resource_summary"]["standby"]["schedulable_job_count"] == 338
+    assert snapshot["P_tau"]["qos_resource_summary"]["standby"]["partial_shared_request_count"] == 336
+    assert snapshot["P_tau"]["temporal_queue_controlled_count"] == 339
+    audit = pd.read_parquet(ARTIFACTS / "V35R3A_PENDING_FIELD_AUDIT.parquet")
+    assert len(audit) == snapshot["P_tau"]["job_count"] == 421
+    assert (audit.qos_raw == "standby").sum() == 420
+    assert (
+        audit.qos_partition_semantics_relation
+        == "PARTITION_ONLY_STDBY_NAME_WITH_NONSTANDBY_QOS"
+    ).sum() == 1
 
 
-def test_baseline_controlled_identical_resources_and_service():
+def test_standby_authority_is_qos_specific_and_locally_hashed():
+    correction = _json("V35R3A_STANDBY_SEMANTICS_CORRECTION.json")
+    authority = correction["qos_authority"]
+    assert authority["standby"] == "runs only when nodes are idle"
+    assert not authority["partition_to_qos_mapping_present"]
+    assert len(authority["source_sha256"]) == 64
+
+
+def test_pre_correction_result_is_superseded_and_firewall_remains_zero():
+    old = _json("V35R3A_PRE_STANDBY_SEMANTICS_CORRECTION_DIAGNOSTIC.json")
+    correction = _json("V35R3A_STANDBY_SEMANTICS_CORRECTION.json")
+    assert old["status"] == "SUPERSEDED_PRE_CORRECTION_EVIDENCE"
+    assert not old["may_be_used_as_final_scientific_conclusion"]
+    assert set(correction["causality_counters"].values()) == {0}
+    assert not correction["Fresh_used_to_choose_policy"]
+    assert not correction["unsupported_per_job_deadline_assumed"]
+
+
+def test_corrected_control_preserves_tier_service_and_resource_feasibility():
     baseline = pd.read_parquet(ARTIFACTS / "V35R3A_BASELINE_SCHEDULE.parquet")
     controlled = pd.read_parquet(ARTIFACTS / "V35R3A_KQ0_CONTROLLED_SCHEDULE.parquet")
-    columns = [column for column in baseline.columns if column != "policy"]
-    pd.testing.assert_frame_equal(baseline[columns], controlled[columns])
-    assert _json("V35R3A_KQ0_SERVICE_GATE.json")["passed"]
+    gate = _json("V35R3A_KQ0_SERVICE_GATE.json")
+    assert set(baseline.job_id) == set(controlled.job_id)
+    assert gate["passed"]
+    assert gate["contract"] == "TIER_AWARE_HIGH_NORMAL_STANDBY"
+    assert gate["deltas"]["high_normal_delay_count"] == 0
+    assert gate["checks"]["standby_never_delays_high_or_normal"]
 
 
 def test_no_fresh_run_without_exact_binding():
@@ -361,12 +467,17 @@ def test_required_artifacts_exist():
         "V35R3A_TEST_REPORT.json",
         "V35R3A_FINAL_REVIEW.json",
         "V35R3A_FINAL_REVIEW.md",
+        "V35R3A_PRE_STANDBY_SEMANTICS_CORRECTION_DIAGNOSTIC.json",
+        "V35R3A_PENDING_FIELD_AUDIT.parquet",
+        "V35R3A_STANDBY_SEMANTICS_CORRECTION.json",
     }
     assert required <= {path.name for path in ARTIFACTS.iterdir()}
 
 
-def test_primary_classification_is_scientifically_negative():
+def test_primary_classification_is_recomputed_after_standby_correction():
     review = _json("V35R3A_FINAL_REVIEW.json")
-    assert review["numbered_report"]["68"]["value"] == "V35R3A_KNOWN_QUEUE_TEMPORAL_MASS_INSUFFICIENT"
+    assert review["numbered_report"]["68"]["value"] != "V35R3A_KNOWN_QUEUE_TEMPORAL_MASS_INSUFFICIENT"
+    assert review["numbered_report"]["68"]["value"].startswith("V35R3A_STANDBY_")
+    assert len(review["standby_semantics_correction_addendum"]) == 14
     assert review["questions"]["Q8"].startswith("NO")
     assert review["questions"]["Q9"].startswith("NO")
