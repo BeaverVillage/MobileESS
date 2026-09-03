@@ -1,0 +1,24 @@
+{
+  "artifact_id": "V37_ENGINEERING_REPAIR_LOG_V1",
+  "repairs": [
+    {
+      "classification": "ENGINEERING_WSL_IMPORT_PATH",
+      "effect": "Initial source materializer process could not import the repository package.",
+      "repair": "Prepend the existing V37 repository root to sys.path in the WSL entry point.",
+      "science_changed": "NO"
+    },
+    {
+      "classification": "ENGINEERING_COHORT_ACCOUNTING_SCOPE",
+      "effect": "Initial date workers compared the complete 582-row issue ledger against the 339-row temporal-flexible cohort count and failed before optimization.",
+      "repair": "Apply the frozen 339 and 336 invariants to temporal_flexible rows only; the 243 RUNNING_FIXED rows remain present and unchanged.",
+      "verification": {
+        "complete_ledger_rows": 582,
+        "temporal_flexible_rows": 339,
+        "partial_shared_temporal_flexible_rows": 336,
+        "power_slots": 96,
+        "scenario": "CENTER"
+      },
+      "science_changed": "NO"
+    }
+  ]
+}

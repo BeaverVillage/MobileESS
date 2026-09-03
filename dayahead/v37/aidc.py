@@ -88,8 +88,6 @@ def build_day(repo: Path, day: str, case: str) -> AIDCTrajectory:
             })
 
     authority = _apr01_ledger().copy()
-    if len(authority) != EXPANDED_TEMPORAL_JOBS:
-        raise RuntimeError("V37_EXPANDED_JOB_COUNT")
     rw_schedule, rsp_schedule = _rsp_schedule(authority)
     ledger = authority.merge(
         rw_schedule[["job_id", "qos", "partition", "submit_time", "requested_nodes",
@@ -116,7 +114,9 @@ def build_day(repo: Path, day: str, case: str) -> AIDCTrajectory:
     ledger["coverage_fallback_status"] = np.where(
         ledger["duration_authority"].eq("REQUESTED_WALLTIME_FAIL_CLOSED"), "FALLBACK", "COVERED"
     )
-    if int(ledger["PARTIAL_shared"].sum()) != PARTIAL_SHARED_TEMPORAL_JOBS:
+    if int(ledger["temporal_flexible"].sum()) != EXPANDED_TEMPORAL_JOBS:
+        raise RuntimeError("V37_EXPANDED_JOB_COUNT")
+    if int((ledger["PARTIAL_shared"] & ledger["temporal_flexible"]).sum()) != PARTIAL_SHARED_TEMPORAL_JOBS:
         raise RuntimeError("V37_PARTIAL_SHARED_JOB_COUNT")
     return AIDCTrajectory(
         day, power, ledger, pd.DataFrame(rows), pcc_p, pcc_q,
