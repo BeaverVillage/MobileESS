@@ -8,7 +8,11 @@ import time
 import numpy as np
 
 from dayahead.grid_lp import LINE_POLYGON_FACES, V_MAX_SQUARED, V_MIN_SQUARED
-from dayahead.v28r2.electrical_subproblem import is_dominated_mess_current_row, slot_coefficients
+from dayahead.v28r2.electrical_subproblem import (
+    anchored_polygon_parameters,
+    is_dominated_mess_current_row,
+    slot_coefficients,
+)
 from dayahead.v28r2.solver_payload import SolverPayload, payload_from_registry
 from dayahead.v28r2.variable_registry import VariableRegistry, build_resource_model
 
@@ -28,6 +32,9 @@ def add_grid_rows(
     if not math.isfinite(planning_vmax_squared) or planning_vmax_squared <= V_MIN_SQUARED:
         raise ValueError("V28R2_PLANNING_VMAX_RANGE")
     model = registry.model
+    # The common line-current objective is also the frozen hard line-loading
+    # gate.  One upper bound avoids duplicating every polygon face.
+    registry.eta.UB = min(float(registry.eta.UB), 1.0)
     for slot in range(96):
         coefficient = slot_coefficients(context, voltage, current, slot)
         controls = registry.control_expressions[slot]
@@ -47,20 +54,63 @@ def add_grid_rows(
                 lower_squared, upper_squared = bind_squared_voltage_bounds(up, low)
             model.addConstr(expression >= lower_squared, name=f"grid_voltage_low[{slot},{node}]")
             model.addConstr(expression <= upper_squared, name=f"grid_voltage_high[{slot},{node}]")
+        bias, correction, _polygon_anchor = anchored_polygon_parameters(coefficient)
         for branch, branch_name in enumerate(coefficient.branch_names):
             if is_dominated_mess_current_row(branch_name):
                 continue
-            expression = float(coefficient.current_constant[branch]) + gp.quicksum(
-                float(coefficient.current_matrix[index, branch]) * controls[index]
-                for index in range(len(controls))
-            )
-            current_hat = model.addVar(lb=0.0, name=f"current_hat[{slot},{branch}]")
-            model.addConstr(current_hat >= expression, name=f"current_epigraph[{slot},{branch}]")
             if branch_name.startswith("transformer."):
+                expression = float(coefficient.current_constant[branch]) + gp.quicksum(
+                    float(coefficient.current_matrix[index, branch]) * controls[index]
+                    for index in range(len(controls))
+                )
+                current_hat = model.addVar(lb=0.0, name=f"current_hat[{slot},{branch}]")
+                model.addConstr(current_hat >= expression, name=f"current_epigraph[{slot},{branch}]")
                 model.addConstr(current_hat <= 1.0, name=f"transformer_current_hard[{slot},{branch}]")
             else:
-                model.addConstr(current_hat <= 1.0, name=f"line_current_hard[{slot},{branch}]")
-                model.addConstr(registry.eta >= current_hat, name=f"line_objective[{slot},{branch}]")
+                # Store each 60-control sparse affine row once; the 16 face
+                # inequalities then contain only four scalar variables.
+                p_flow = model.addVar(lb=-gp.GRB.INFINITY, name=f"line_p[{slot},{branch}]")
+                q_flow = model.addVar(lb=-gp.GRB.INFINITY, name=f"line_q[{slot},{branch}]")
+                tangent_correction = model.addVar(
+                    lb=-gp.GRB.INFINITY, name=f"line_tangent_correction[{slot},{branch}]",
+                )
+                model.addConstr(
+                    p_flow == float(coefficient.flow_p_constant[branch]) + gp.quicksum(
+                        float(coefficient.flow_p_matrix[branch, index]) * controls[index]
+                        for index in range(len(controls))
+                    ),
+                    name=f"line_p_affine[{slot},{branch}]",
+                )
+                model.addConstr(
+                    q_flow == float(coefficient.flow_q_constant[branch]) + gp.quicksum(
+                        float(coefficient.flow_q_matrix[branch, index]) * controls[index]
+                        for index in range(len(controls))
+                    ),
+                    name=f"line_q_affine[{slot},{branch}]",
+                )
+                model.addConstr(
+                    tangent_correction == gp.quicksum(
+                        float(correction[index, branch])
+                        * (controls[index] - float(coefficient.anchor[index]))
+                        for index in range(len(controls))
+                    ),
+                    name=f"line_tangent_correction_affine[{slot},{branch}]",
+                )
+                apothem = (
+                    float(coefficient.branch_limits[branch])
+                    * math.cos(math.pi / LINE_POLYGON_FACES)
+                )
+                for face in range(LINE_POLYGON_FACES):
+                    angle = 2.0 * math.pi * face / LINE_POLYGON_FACES
+                    model.addConstr(
+                        registry.eta
+                        >= (
+                            math.cos(angle) * p_flow + math.sin(angle) * q_flow
+                        ) / apothem
+                        + tangent_correction
+                        + float(bias[branch]),
+                        name=f"line_current_polygon[{slot},{branch},{face}]",
+                    )
         for branch, rating in enumerate(coefficient.transformer_ratings):
             if rating is None:
                 continue

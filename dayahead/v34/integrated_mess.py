@@ -12,7 +12,13 @@ from gurobipy import GRB
 import numpy as np
 
 from dayahead.grid_lp import LINE_POLYGON_FACES
-from dayahead.v28r2.electrical_subproblem import SlotCoefficients, is_dominated_mess_current_row, slot_coefficients
+from dayahead.v28r2.electrical_subproblem import (
+    SlotCoefficients,
+    anchored_polygon_loading,
+    anchored_polygon_parameters,
+    is_dominated_mess_current_row,
+    slot_coefficients,
+)
 from dayahead.v33m import MessMobilityInputs, ServicePCCMapping, add_mess_mobility_block, extract_mess_trajectory
 from dayahead.v33m.mess_mobility_milp import MessElectricalAuthority
 from dayahead.v33m.mess_trajectory import MessTrajectory
@@ -283,7 +289,7 @@ def solve_integrated_mess(
                     raise RuntimeError(f"V34_UNKNOWN_COMMON_CONTROL:{name}")
             vector = np.asarray(numeric, dtype=float)
             planning_v.append(np.sqrt(np.maximum(0.0, coefficient.voltage_constant + coefficient.voltage_matrix.T @ vector)))
-            planning_i.append(coefficient.current_constant + coefficient.current_matrix.T @ vector)
+            planning_i.append(anchored_polygon_loading(coefficient, vector))
         return IntegratedMessResult(
             trajectory, np.asarray(planning_v), np.asarray(planning_i), 0.0,
             controls, "OPTIMAL", 0, int(model.NumVars), int(model.NumConstrs),
@@ -301,7 +307,7 @@ def solve_integrated_mess(
     )
     if len(coefficients) != 96 or tuple(item.slot for item in coefficients) != tuple(range(96)):
         raise ValueError("V34_GRID_COEFFICIENT_AXIS")
-    eta = model.addVar(lb=0.0, name="v34_rho_planning")
+    eta = model.addVar(lb=0.0, ub=1.0, name="v34_rho_planning")
     grid_constraints = 0
     p_services = tuple(name[10:-1] for name in controls[12:36])
     q_services = tuple(name[12:-1] for name in controls[36:60])
@@ -336,16 +342,66 @@ def solve_integrated_mess(
             model.addConstr(voltage == expression, name=f"v34_voltage_affine[{slot},{index}]")
             grid_constraints += 1
 
+        bias, tangent_delta, _polygon_anchor = anchored_polygon_parameters(coefficient)
         for index, branch in enumerate(coefficient.branch_names):
-            expression = sparse_expression(float(coefficient.current_constant[index]), coefficient.current_matrix[:, index], slot)
-            if not is_dominated_mess_current_row(branch):
+            if not is_dominated_mess_current_row(branch) and branch.startswith("transformer."):
+                expression = sparse_expression(
+                    float(coefficient.current_constant[index]),
+                    coefficient.current_matrix[:, index],
+                    slot,
+                )
                 current = model.addVar(lb=-GRB.INFINITY, name=f"v34_i_aff[{slot},{index}]")
                 current_hat = model.addVar(lb=0.0, ub=1.0, name=f"v34_i_hat[{slot},{index}]")
                 model.addConstr(current == expression, name=f"v34_current_affine[{slot},{index}]")
                 model.addConstr(current_hat >= current, name=f"v34_current_epigraph[{slot},{index}]")
                 grid_constraints += 2
-                if not branch.startswith("transformer."):
-                    model.addConstr(eta >= current_hat, name=f"v34_current_objective[{slot},{index}]")
+            elif not is_dominated_mess_current_row(branch):
+                p_flow = model.addVar(lb=-GRB.INFINITY, name=f"v34_line_p[{slot},{index}]")
+                q_flow = model.addVar(lb=-GRB.INFINITY, name=f"v34_line_q[{slot},{index}]")
+                tangent_correction = model.addVar(
+                    lb=-GRB.INFINITY,
+                    name=f"v34_line_tangent_correction[{slot},{index}]",
+                )
+                model.addConstr(
+                    p_flow == sparse_expression(
+                        float(coefficient.flow_p_constant[index]),
+                        coefficient.flow_p_matrix[index],
+                        slot,
+                    ),
+                    name=f"v34_line_p_affine[{slot},{index}]",
+                )
+                model.addConstr(
+                    q_flow == sparse_expression(
+                        float(coefficient.flow_q_constant[index]),
+                        coefficient.flow_q_matrix[index],
+                        slot,
+                    ),
+                    name=f"v34_line_q_affine[{slot},{index}]",
+                )
+                model.addConstr(
+                    tangent_correction == sparse_expression(
+                        -float(tangent_delta[:, index] @ coefficient.anchor),
+                        tangent_delta[:, index],
+                        slot,
+                    ),
+                    name=f"v34_line_tangent_correction_affine[{slot},{index}]",
+                )
+                grid_constraints += 3
+                apothem = (
+                    float(coefficient.branch_limits[index])
+                    * math.cos(math.pi / LINE_POLYGON_FACES)
+                )
+                for face in range(LINE_POLYGON_FACES):
+                    angle = 2.0 * math.pi * face / LINE_POLYGON_FACES
+                    model.addConstr(
+                        eta
+                        >= (
+                            math.cos(angle) * p_flow + math.sin(angle) * q_flow
+                        ) / apothem
+                        + tangent_correction
+                        + float(bias[index]),
+                        name=f"v34_line_current_polygon[{slot},{index},{face}]",
+                    )
                     grid_constraints += 1
             rating = coefficient.transformer_ratings[index]
             if rating is None:
@@ -392,7 +448,7 @@ def solve_integrated_mess(
             + [float(fixed_q.get((service, slot), 0.0)) for service in p_services],
             dtype=float,
         )
-        current = coefficient.current_constant + coefficient.current_matrix.T @ numeric
+        current = anchored_polygon_loading(coefficient, numeric)
         for index, branch in enumerate(coefficient.branch_names):
             if not branch.startswith("transformer.") and not is_dominated_mess_current_row(branch):
                 zero_rho = max(zero_rho, float(current[index]))
@@ -438,7 +494,7 @@ def solve_integrated_mess(
             dtype=float,
         )
         planning_v.append(np.sqrt(np.maximum(0.0, coefficient.voltage_constant + coefficient.voltage_matrix.T @ numeric)))
-        planning_i.append(coefficient.current_constant + coefficient.current_matrix.T @ numeric)
+        planning_i.append(anchored_polygon_loading(coefficient, numeric))
     termination = {
         GRB.OPTIMAL: "OPTIMAL",
         GRB.TIME_LIMIT: "TIME_LIMIT",

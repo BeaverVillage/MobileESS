@@ -25,7 +25,11 @@ import numpy as np
 from dayahead.mess_physics import CAPACITY_KWH, E_INITIAL_KWH
 from dayahead.v28r2.electrical_cache_prepare import prepare_electrical_context
 from dayahead.v28r2.electrical_context import build_electrical_context
-from dayahead.v28r2.electrical_subproblem import is_dominated_mess_current_row, slot_coefficients
+from dayahead.v28r2.electrical_subproblem import (
+    anchored_polygon_loading,
+    is_dominated_mess_current_row,
+    slot_coefficients,
+)
 from dayahead.v28r2.formulation import materialize_formulation_data
 from dayahead.v28r2.opendss_backend import run_fresh_opendss
 from dayahead.v28r2.reference_compute import CASE_CAPACITY_GPU
@@ -79,7 +83,12 @@ DEFAULT_SERVICE_MAPPING = Path(
     r"\power_side_p4f_hardening_v1\rating_contract_all_transformers"
     r"\service_node_electrical_mapping_v1.csv"
 )
-MESS_INITIAL = {mess: f"STA{index:02d}" for index, mess in enumerate(MESS_IDS, 1)}
+# V35R2 exogenous depot authority: deterministic farthest-point coverage on
+# the frozen physical road-distance graph over the 12 station-class nodes.
+# Seed STA01 and lexical tie-breaking are fixed; no electrical or April
+# objective value participates in this selection.
+MESS_INITIAL = dict(zip(MESS_IDS, ("STA01", "STA12", "STA08", "STA06"), strict=True))
+COMMON_RHO_CURRENT_MODEL = "ANCHOR_GRADIENT_MATCHED_16_FACE_APPARENT_POWER_EPIGRAPH_V1"
 
 
 def git_head(repo: Path) -> str:
@@ -241,6 +250,7 @@ def _schedule_from_payload(payload: object, *, day: str, correction_sha: str) ->
         "day": day,
         "aidc_stage_case": source["case"],
         "MESS_stage": "DISABLED_ZERO_STATIONARY_NOT_MODELLED_AS_LEGACY_ROUTE",
+        "common_rho_current_model": COMMON_RHO_CURRENT_MODEL,
         "correction_sha256": correction_sha,
         "solver_evidence": {
             "solver": payload.solver,
@@ -274,7 +284,13 @@ def prepare_aidc_stages(
         try:
             value = json.loads(path.read_text(encoding="utf-8"))
             stored = value.pop("schedule_sha256")
-            valid = valid and stored == canonical_sha256(value) and value["day"] == day and value["correction_sha256"] == correction_sha
+            valid = (
+                valid
+                and stored == canonical_sha256(value)
+                and value["day"] == day
+                and value["correction_sha256"] == correction_sha
+                and value.get("common_rho_current_model") == COMMON_RHO_CURRENT_MODEL
+            )
             value["schedule_sha256"] = stored
             schedules[case] = value
         except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError):
@@ -338,7 +354,8 @@ def _planning_grid(
                 key = (row.service_id, row.slot)
                 by_p[key] = by_p.get(key, 0.0) + row.p_kw
                 by_q[key] = by_q.get(key, 0.0) + row.q_kvar
-    voltage_rows, current_rows, flow_p_rows, flow_q_rows, kva_rows = [], [], [], [], []
+    voltage_rows, current_rows, affine_current_rows = [], [], []
+    exact_flow_current_rows, flow_p_rows, flow_q_rows, kva_rows = [], [], [], []
     for slot, coefficient in enumerate(coefficients):
         x = np.asarray(
             list(aidc_p[slot])
@@ -347,10 +364,20 @@ def _planning_grid(
             dtype=float,
         )
         voltage_rows.append(np.sqrt(np.maximum(0.0, coefficient.voltage_constant + coefficient.voltage_matrix.T @ x)))
-        current_rows.append(coefficient.current_constant + coefficient.current_matrix.T @ x)
+        affine_current = coefficient.current_constant + coefficient.current_matrix.T @ x
+        repaired_current = anchored_polygon_loading(coefficient, x)
+        line_branch = np.asarray([
+            not name.startswith("transformer.") and not is_dominated_mess_current_row(name)
+            for name in coefficient.branch_names
+        ])
+        current_rows.append(np.where(line_branch, repaired_current, affine_current))
+        affine_current_rows.append(affine_current)
         p_flow = coefficient.flow_p_constant + coefficient.flow_p_matrix @ x
         q_flow = coefficient.flow_q_constant + coefficient.flow_q_matrix @ x
         flow_p_rows.append(p_flow); flow_q_rows.append(q_flow)
+        exact_flow_current_rows.append(
+            np.hypot(p_flow, q_flow) / np.asarray(coefficient.branch_limits, dtype=float)
+        )
         kva_rows.append(np.asarray([
             0.0 if rating is None else math.hypot(float(p_flow[index]), float(q_flow[index])) / float(rating)
             for index, rating in enumerate(coefficient.transformer_ratings)
@@ -358,6 +385,8 @@ def _planning_grid(
     arrays = {
         "voltage_pu": np.asarray(voltage_rows),
         "phase_current_loading_pu": np.asarray(current_rows),
+        "phase_current_affine_loading_pu": np.asarray(affine_current_rows),
+        "phase_current_exact_flow_loading_pu": np.asarray(exact_flow_current_rows),
         "flow_p_kw": np.asarray(flow_p_rows),
         "flow_q_kvar": np.asarray(flow_q_rows),
         "transformer_kva_loading_pu": np.asarray(kva_rows),
@@ -374,6 +403,7 @@ def _planning_grid(
     voltage = arrays["voltage_pu"]
     summary = {
         "rho": float(np.max(line_values)),
+        "rho_model": COMMON_RHO_CURRENT_MODEL,
         "binding_asset": str(line_branches[rho_index[1]]),
         "binding_slot": int(rho_index[0]),
         "Vmin_pu": float(voltage.min()),
@@ -683,6 +713,8 @@ def execute_day(
     solver_sha = canonical_sha256({
         "seed": 20260828, "MESS_WorkLimit_tiers": [60, 180, 300],
         "vehicle_order": list(MESS_IDS), "AIDC_solver": "GUROBI_MONOLITHIC_OPTIMAL",
+        "common_rho_current_model": COMMON_RHO_CURRENT_MODEL,
+        "initial_service_by_mess": MESS_INITIAL,
         "correction_sha256": correction_sha,
     })
     bundle, graph, route_table, traffic_files = daily_traffic_authority(
@@ -813,6 +845,8 @@ def execute_day(
                 {
                     "voltage_pu": (96, len(fresh.node_names)),
                     "phase_current_loading_pu": (96, len(fresh.branch_names)),
+                    "phase_current_affine_loading_pu": (96, len(fresh.branch_names)),
+                    "phase_current_exact_flow_loading_pu": (96, len(fresh.branch_names)),
                     "flow_p_kw": (96, len(fresh.branch_names)),
                     "flow_q_kvar": (96, len(fresh.branch_names)),
                     "transformer_kva_loading_pu": (96, len(fresh.branch_names)),

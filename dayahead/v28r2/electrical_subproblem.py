@@ -80,8 +80,72 @@ class SlotCoefficients:
     flow_q_constant: np.ndarray
     flow_p_matrix: np.ndarray
     flow_q_matrix: np.ndarray
+    branch_limits: tuple[float, ...]
     transformer_ratings: tuple[float | None, ...]
     coefficient_sha256: str
+
+
+def anchored_polygon_parameters(
+    coefficients: SlotCoefficients,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Calibrate the frozen flow polygon to the audited AC-current tangent.
+
+    Returns a branch bias, a 60-by-branch linear correction, and the anchor
+    polygon loading.  Adding the bias and correction to every polygon face
+    makes the convex epigraph reproduce both the value and gradient of the
+    frozen current authority at its anchor.  Away from the anchor the existing
+    16-face apparent-power geometry supplies the missing magnitude curvature.
+    """
+
+    anchor = np.asarray(coefficients.anchor, dtype=float)
+    p_anchor = coefficients.flow_p_constant + coefficients.flow_p_matrix @ anchor
+    q_anchor = coefficients.flow_q_constant + coefficients.flow_q_matrix @ anchor
+    limits = np.asarray(coefficients.branch_limits, dtype=float)
+    apothem = limits * math.cos(math.pi / LINE_POLYGON_FACES)
+    angles = 2.0 * math.pi * np.arange(LINE_POLYGON_FACES) / LINE_POLYGON_FACES
+    cosines = np.cos(angles)
+    sines = np.sin(angles)
+    projections = (
+        cosines[:, None] * p_anchor[None, :]
+        + sines[:, None] * q_anchor[None, :]
+    ) / apothem[None, :]
+    active = np.argmax(projections, axis=0)
+    polygon_anchor = projections[active, np.arange(len(limits))]
+    polygon_gradient = np.column_stack([
+        (
+            cosines[face] * coefficients.flow_p_matrix[branch]
+            + sines[face] * coefficients.flow_q_matrix[branch]
+        ) / apothem[branch]
+        for branch, face in enumerate(active)
+    ])
+    correction = coefficients.current_matrix - polygon_gradient
+    current_anchor = coefficients.current_constant + coefficients.current_matrix.T @ anchor
+    bias = current_anchor - polygon_anchor
+    return bias, correction, polygon_anchor
+
+
+def anchored_polygon_loading(
+    coefficients: SlotCoefficients,
+    controls: Sequence[float],
+) -> np.ndarray:
+    """Evaluate the common repaired normalized-current surrogate."""
+
+    x = np.asarray(controls, dtype=float)
+    if x.shape != coefficients.anchor.shape or not np.isfinite(x).all():
+        raise ValueError("V35R2_ANCHORED_POLYGON_CONTROL_AXIS")
+    p = coefficients.flow_p_constant + coefficients.flow_p_matrix @ x
+    q = coefficients.flow_q_constant + coefficients.flow_q_matrix @ x
+    limits = np.asarray(coefficients.branch_limits, dtype=float)
+    apothem = limits * math.cos(math.pi / LINE_POLYGON_FACES)
+    values = np.stack([
+        (
+            math.cos(2.0 * math.pi * face / LINE_POLYGON_FACES) * p
+            + math.sin(2.0 * math.pi * face / LINE_POLYGON_FACES) * q
+        ) / apothem
+        for face in range(LINE_POLYGON_FACES)
+    ])
+    bias, correction, _polygon_anchor = anchored_polygon_parameters(coefficients)
+    return np.max(values, axis=0) + bias + correction.T @ (x - coefficients.anchor)
 
 
 def slot_coefficients(context: object, voltage: object, current: object, slot: int) -> SlotCoefficients:
@@ -97,6 +161,10 @@ def slot_coefficients(context: object, voltage: object, current: object, slot: i
     i0 = np.asarray(current["anchor_current_loading_pu"][slot], dtype=float)
     p0, q0, sp, sq = _planning_flow_base_and_sensitivity(binding, slot, anchor)
     rows = tuple(binding.factories[slot].data.branches)
+    limits = tuple(
+        float(binding.factories[slot].data.line_limit_kva_u080[(row.branch_id, row.phase)])
+        for row in rows
+    )
     ratings = tuple(
         binding.factories[slot].data.transformer_limit_kva.get((row.branch_id, row.phase))
         for row in rows
@@ -106,12 +174,12 @@ def slot_coefficients(context: object, voltage: object, current: object, slot: i
         "v_constant": (v0 - h.T @ anchor).tolist(), "H": h.tolist(),
         "i_constant": (i0 - ji.T @ anchor).tolist(), "J_I": ji.tolist(),
         "p_constant": (p0 - sp @ anchor).tolist(), "q_constant": (q0 - sq @ anchor).tolist(),
-        "S_P": sp.tolist(), "S_Q": sq.tolist(), "ratings": ratings,
+        "S_P": sp.tolist(), "S_Q": sq.tolist(), "limits": limits, "ratings": ratings,
     }
     return SlotCoefficients(
         slot, controls, branches, anchor, v0 - h.T @ anchor, h,
         i0 - ji.T @ anchor, ji, p0 - sp @ anchor, q0 - sq @ anchor,
-        sp, sq, ratings, _sha(payload),
+        sp, sq, limits, ratings, _sha(payload),
     )
 
 
@@ -154,21 +222,39 @@ class ExactGridSubproblem:
         ]
         flow_p = [model.addVar(lb=-GRB.INFINITY, name=f"tx_p[{index}]") for index in range(len(coefficients.flow_p_constant))]
         flow_q = [model.addVar(lb=-GRB.INFINITY, name=f"tx_q[{index}]") for index in range(len(coefficients.flow_q_constant))]
-        self.rho = model.addVar(lb=0.0, name="rho_t")
+        self.rho = model.addVar(lb=0.0, ub=1.0, name="rho_t")
         self.voltage_rows, self.current_rows, self.p_rows, self.q_rows = [], [], [], []
+        self.line_face_rows = []
         for index, variable in enumerate(voltage):
             row = model.addConstr(variable == float(coefficients.voltage_constant[index]), name=f"voltage_affine[{index}]")
             self.registry.append((row, coefficients.voltage_matrix[:, index]))
             self.voltage_rows.append(row)
+        bias, correction, _polygon_anchor = anchored_polygon_parameters(coefficients)
         for index, variable in enumerate(current):
+            branch_name = coefficients.branch_names[index]
+            if is_dominated_mess_current_row(branch_name):
+                continue
+            if not branch_name.startswith("transformer."):
+                apothem = (
+                    float(coefficients.branch_limits[index])
+                    * math.cos(math.pi / LINE_POLYGON_FACES)
+                )
+                for face in range(LINE_POLYGON_FACES):
+                    angle = 2.0 * math.pi * face / LINE_POLYGON_FACES
+                    row = model.addConstr(
+                        self.rho
+                        - math.cos(angle) / apothem * flow_p[index]
+                        - math.sin(angle) / apothem * flow_q[index]
+                        >= float(bias[index] - correction[:, index] @ coefficients.anchor),
+                        name=f"line_current_polygon[{index},{face}]",
+                    )
+                    self.registry.append((row, correction[:, index]))
+                    self.line_face_rows.append((index, row, correction[:, index], float(bias[index])))
+                continue
             row = model.addConstr(variable == float(coefficients.current_constant[index]), name=f"current_affine[{index}]")
             self.registry.append((row, coefficients.current_matrix[:, index]))
-            self.current_rows.append(row)
-            if is_dominated_mess_current_row(coefficients.branch_names[index]):
-                continue
+            self.current_rows.append((index, row))
             model.addConstr(self.current_hat[index] >= variable, name=f"current_epigraph[{index}]")
-            if not coefficients.branch_names[index].startswith("transformer."):
-                model.addConstr(self.rho >= self.current_hat[index], name=f"line_objective[{index}]")
         for index in range(len(flow_p)):
             p_row = model.addConstr(flow_p[index] == float(coefficients.flow_p_constant[index]), name=f"flow_p_affine[{index}]")
             q_row = model.addConstr(flow_q[index] == float(coefficients.flow_q_constant[index]), name=f"flow_q_affine[{index}]")
@@ -194,8 +280,10 @@ class ExactGridSubproblem:
         coefficient = self.coefficients
         for index, row in enumerate(self.voltage_rows):
             row.RHS = float(coefficient.voltage_constant[index] + coefficient.voltage_matrix[:, index] @ x)
-        for index, row in enumerate(self.current_rows):
+        for index, row in self.current_rows:
             row.RHS = float(coefficient.current_constant[index] + coefficient.current_matrix[:, index] @ x)
+        for _index, row, vector, bias in self.line_face_rows:
+            row.RHS = float(bias + np.asarray(vector, dtype=float) @ (x - coefficient.anchor))
         for index, row in enumerate(self.p_rows):
             row.RHS = float(coefficient.flow_p_constant[index] + coefficient.flow_p_matrix[index] @ x)
         for index, row in enumerate(self.q_rows):
@@ -210,10 +298,12 @@ class ExactGridSubproblem:
                 start=np.zeros(60),
             )
             objective = float(self.model.ObjVal)
+            repaired = anchored_polygon_loading(coefficient, x)
             lines = [
-                (float(self.current_hat[index].X), coefficient.branch_names[index])
-                for index in range(len(self.current_hat))
+                (float(repaired[index]), coefficient.branch_names[index])
+                for index in range(len(repaired))
                 if not coefficient.branch_names[index].startswith("transformer.")
+                and not is_dominated_mess_current_row(coefficient.branch_names[index])
             ]
             loading, branch = max(lines, key=lambda item: (item[0], item[1]))
             result = SubproblemResult(
