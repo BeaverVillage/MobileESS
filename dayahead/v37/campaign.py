@@ -112,7 +112,7 @@ def _distribution(values: Iterable[float]) -> dict[str, float | int | None]:
 
 
 def _meeting_row(day: str, result: dict[str, Any]) -> dict[str, Any]:
-    if result.get("status") != "PASS" or "cases" not in result:
+    if "cases" not in result:
         return {field: day if field == "date" else result.get("status", "FAIL") if field == "PASS_FAIL" else "" for field in MEETING_FIELDS}
     c = result["cases"]
     return {
@@ -142,37 +142,56 @@ def finalize_campaign(repo: Path, started: float, peak_active: int) -> dict[str,
     pass_dates = [day for day in EXPECTED_DATES if results.get(day, {}).get("status") == "PASS"]
     fail_dates = [day for day in EXPECTED_DATES if results.get(day, {}).get("status") == "FAIL"]
     missing_dates = [row["date"] for row in manifest["missing_dates"]]
-    successful = [results[day] for day in pass_dates if "cases" in results[day]]
+    evaluated = [day for day in EXPECTED_DATES if "cases" in results.get(day, {})]
+    evaluated_results = [results[day] for day in evaluated]
     objective_stats = {
-        case: _distribution(result["cases"][case]["J"] for result in successful)
+        case: _distribution(result["cases"][case]["J"] for result in evaluated_results)
         for case in ("B0", "B1", "B2", "B3")
     }
     planning_stats = {
-        case: _distribution(result["cases"][case]["Planning_rho"] for result in successful)
+        case: _distribution(result["cases"][case]["Planning_rho"] for result in evaluated_results)
         for case in ("B0", "B1", "B2", "B3")
     }
     fresh_stats = {
-        case: _distribution(result["cases"][case]["Fresh_rho"] for result in successful)
+        case: _distribution(result["cases"][case]["Fresh_rho"] for result in evaluated_results)
         for case in ("B0", "B1", "B2", "B3")
     }
     effect_stats = {
         label: {
-            metric: _distribution(result["effects"][label][metric] for result in successful)
+            metric: _distribution(result["effects"][label][metric] for result in evaluated_results)
             for metric in ("J", "Planning_rho", "Fresh_rho")
         }
         for label in ("B1-B0", "B2-B0", "B3-B0", "B3-B2", "B3-B1")
     }
-    evaluated = [day for day in EXPECTED_DATES if "cases" in results.get(day, {})]
     physical_dates = [day for day in evaluated if not results[day].get("physical_gates_PASS", False)]
     fresh_non96 = [day for day in evaluated if not results[day].get("Fresh_96_of_96_PASS", False)]
     fallback_dates = [
-        day for day in pass_dates
+        day for day in evaluated
         if any(results[day]["cases"][case]["fallback_count"] for case in ("B2", "B3"))
     ]
     relocation_stats = {
-        case: _distribution(result["cases"][case]["relocation_transitions"] for result in successful)
+        case: _distribution(result["cases"][case]["relocation_transitions"] for result in evaluated_results)
         for case in ("B2", "B3")
     }
+    multi_relocation_dates = [
+        day for day in evaluated
+        if any(
+            int(count) > 1
+            for case in ("B2", "B3")
+            for count in results[day]["cases"][case]["relocations_by_vehicle"].values()
+        )
+    ]
+    relocation_totals = {
+        case: sum(int(result["cases"][case]["relocation_transitions"]) for result in evaluated_results)
+        for case in ("B2", "B3")
+    }
+    campaign_log = repo / LOG_ROOT / "campaign.log"
+    start_epoch = (
+        campaign_log.stat().st_ctime
+        if campaign_log.is_file()
+        else time.time() - (time.perf_counter() - started)
+    )
+    total_wallclock = max(0.0, time.time() - start_epoch)
     all_runnable_terminal = bool(manifest["runnable_dates"]) and all(day in results for day in manifest["runnable_dates"])
     all_runnable_pass = all(results.get(day, {}).get("status") == "PASS" for day in manifest["runnable_dates"])
     classification = (
@@ -187,13 +206,24 @@ def finalize_campaign(repo: Path, started: float, peak_active: int) -> dict[str,
         "PASS_dates": pass_dates, "FAIL_dates": fail_dates, "missing_data_dates": missing_dates,
         "total_expected_dates": len(EXPECTED_DATES), "runnable_date_count": len(manifest["runnable_dates"]),
         "PASS_count": len(pass_dates), "FAIL_count": len(fail_dates), "missing_data_count": len(missing_dates),
-        "total_wallclock_seconds": time.perf_counter() - started,
+        "evaluated_date_count": len(evaluated),
+        "statistics_include_physical_FAIL_dates": True,
+        "campaign_started_at_utc": datetime.fromtimestamp(start_epoch, timezone.utc).isoformat(),
+        "total_wallclock_seconds": total_wallclock,
+        "current_supervisor_wallclock_seconds": time.perf_counter() - started,
+        "sum_date_wallclock_seconds": sum(float(result.get("wallclock_seconds", 0.0)) for result in results.values()),
         "parallelism": {"max_parallel_dates": MAX_PARALLEL_DATES, "max_workers_per_date": MAX_WORKERS_PER_DATE, "peak_active_dates": peak_active},
         "objective_statistics": objective_stats, "Planning_rho_statistics": planning_stats,
         "Fresh_rho_statistics": fresh_stats, "effect_distributions": effect_stats,
         "physical_violation_dates": physical_dates, "Fresh_non_96_of_96_dates": fresh_non96,
         "MESS_fallback_dates": fallback_dates, "MESS_relocation_statistics": relocation_stats,
-        "failures": {day: results[day].get("error") for day in fail_dates},
+        "MESS_relocation_totals": relocation_totals,
+        "MESS_total_physical_relocations": sum(relocation_totals.values()),
+        "dates_with_any_vehicle_over_one_relocation": multi_relocation_dates,
+        "failures": {
+            day: results[day].get("error", "FINAL_PHYSICAL_OR_FRESH_GATE_FAIL")
+            for day in fail_dates
+        },
         "firewall": FIREWALL,
         "meeting_ready": all_runnable_terminal and len(manifest["runnable_dates"]) == len(EXPECTED_DATES),
     }
@@ -214,7 +244,9 @@ def finalize_campaign(repo: Path, started: float, peak_active: int) -> dict[str,
         f"- Workers per date: {MAX_WORKERS_PER_DATE}",
         f"- Physical-violation dates: {physical_dates or 'none'}",
         f"- Fresh non-96/96 dates: {fresh_non96 or 'none'}",
-        f"- MESS fallback dates: {fallback_dates or 'none'}", "",
+        f"- MESS fallback dates: {fallback_dates or 'none'}",
+        f"- MESS physical relocation totals (B2 / B3 / combined): {relocation_totals['B2']} / {relocation_totals['B3']} / {sum(relocation_totals.values())}",
+        f"- Dates with any vehicle over one relocation: {multi_relocation_dates or 'none'}", "",
         "May outcomes were not used to tune CENTER, MESS, IDC locations, C1, or any Planning/Fresh decision.",
         "Fresh OpenDSS remained ex-post validation only.",
     ]

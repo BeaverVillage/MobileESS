@@ -10,7 +10,7 @@ from unittest.mock import patch
 import pandas as pd
 
 from dayahead.v37.contracts import DAY_TOTAL_UNITS, EXPECTED_DATES, MAX_PARALLEL_DATES, MAX_WORKERS_PER_DATE
-from dayahead.v37.campaign import MEETING_FIELDS
+from dayahead.v37.campaign import MEETING_FIELDS, _meeting_row
 from dayahead.v37.manifest import build_date_manifest, build_may01_amendment
 from dayahead.v37.runner import (
     _beam_fallback_allowed,
@@ -130,6 +130,26 @@ def test_locked_execution_limits() -> None:
         "B1_minus_B0_Fresh", "B2_minus_B0_Fresh", "B3_minus_B0_Fresh", "B3_minus_B2_Fresh",
         "B2_relocations", "B3_relocations", "B2_fallback", "B3_fallback", "wallclock_min",
     )
+
+
+def test_physical_fail_with_cases_remains_in_meeting_statistics() -> None:
+    cases = {
+        case: {
+            "Planning_rho": index + 0.1,
+            "Fresh_rho": index + 0.2,
+            "relocation_transitions": 0 if case in {"B0", "B1"} else index,
+            "fallback_count": 0,
+        }
+        for index, case in enumerate(("B0", "B1", "B2", "B3"))
+    }
+    row = _meeting_row("2025-05-04", {
+        "status": "FAIL", "cases": cases, "wallclock_seconds": 120.0,
+    })
+    assert row["PASS_FAIL"] == "FAIL"
+    assert row["B0_Planning_rho"] == 0.1
+    assert row["B3_Fresh_rho"] == 3.2
+    assert row["B2_relocations"] == 2
+    assert row["wallclock_min"] == 2.0
 
 
 def test_frozen_k_fallback_scope_and_sequence(tmp_path: Path) -> None:
