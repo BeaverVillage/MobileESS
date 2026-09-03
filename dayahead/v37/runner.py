@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 from pathlib import Path
 import threading
 import time
@@ -30,6 +31,17 @@ from .status import atomic_json, read_json, write_status
 
 
 ADMISSION = {"status": "PASS", "May_numeric_reads_before_admission": 0}
+
+
+def _beam_fallback_allowed(error: Exception) -> bool:
+    """Keep the frozen B=2 -> B=4 fallback limited to search failures."""
+
+    message = str(error)
+    return any(signature in message for signature in (
+        "V35R3E_R1_TOPK_ID_CONSERVATION",
+        "V35R3E_R1_RESTRICTED_COUNT",
+        "V35R3E_R1_NO_FEASIBLE_SEED",
+    ))
 
 
 def _status_path(repo: Path, day: str) -> Path:
@@ -110,10 +122,12 @@ def _beam_case(repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any) -> t
             if final_path.is_file():
                 return read_json(final_path), 0 if width == BEAM_WIDTH else 1
             try:
+                os.chdir(repo)
                 return frozen._run_case(case, width, MAX_WORKERS_PER_DATE), 0 if width == BEAM_WIDTH else 1
             except Exception as error:
                 last_error = error
-                if width == BEAM_WIDTH:
+                os.chdir(repo)
+                if width == BEAM_WIDTH and _beam_fallback_allowed(error):
                     continue
                 raise
         raise RuntimeError("V37_BEAM_EXHAUSTED") from last_error
@@ -124,6 +138,7 @@ def _beam_case(repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any) -> t
         frozen.daily_traffic_authority = original_traffic
         r3.assert_apr01_only, r3e.assert_apr01_only = original_guards
         electrical.voltage.close(); electrical.current.close()
+        os.chdir(repo)
 
 
 def _case_root(repo: Path, day: str, case: str) -> Path:
@@ -193,11 +208,13 @@ def _run_frozen_case(repo: Path, day: str, case: str, aidc: Any, beam: Mapping[s
     v36_runner.CACHE_ROOT = CACHE_ROOT
     v36_runner._input_authority = _input_authority
     try:
+        os.chdir(repo)
         return v36_runner.run_case(repo, PASS_ID, day, case, aidc, beam)
     finally:
         v36_runner.load_day_context = original_context
         v36_runner.CACHE_ROOT = original_cache
         v36_runner._input_authority = original_input
+        os.chdir(repo)
 
 
 def _case_metrics(repo: Path, day: str, case: str, result: Mapping[str, Any]) -> dict[str, Any]:

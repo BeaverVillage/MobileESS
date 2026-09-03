@@ -2,17 +2,19 @@
   "artifact_id": "V37_TARGETED_TEST_REPORT_V1",
   "commands": [
     "python -m pytest -q tests\\dayahead\\test_v37_may_cross_month_smoke.py",
-    "launcher synthetic live-PID duplicate protection smoke"
+    "launcher synthetic live-PID duplicate protection smoke",
+    "V37 frozen-runner working-directory restoration and fallback-scope smoke"
   ],
   "failed": 0,
-  "passed": 6,
+  "passed": 7,
   "scope": [
     "May01 cross-month demand/PV and causality",
     "May02 archive/identity regression",
     "V37 amendment and 31/31 manifest",
     "PowerShell monitor atomic status/counter/terminal hiding",
     "locked execution limits and progress denominator",
-    "launcher duplicate campaign protection"
+    "launcher duplicate campaign protection",
+    "OpenDSS working-directory restoration and filesystem-error non-fallback"
   ],
   "status": "PASS"
 }

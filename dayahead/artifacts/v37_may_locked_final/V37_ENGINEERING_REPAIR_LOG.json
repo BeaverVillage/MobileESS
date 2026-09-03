@@ -28,6 +28,16 @@
       "training_data_changed": "NO",
       "recursion_changed": "NO",
       "science_changed": "NO"
+    },
+    {
+      "classification": "ENGINEERING_CWD_RESTORATION_AND_FALLBACK_SCOPE",
+      "effect": "OpenDSS Compile changed the date worker process working directory. A later frozen beam invocation therefore resolved its relative cache root against the source feeder directory, and the unrestricted exception handler incorrectly attempted B=4 for this filesystem error.",
+      "repair": "Reset the date worker working directory to the V37 repository at every frozen runner boundary and after every return or exception. Permit B=2 to B=4 only for the frozen beam search's explicit conservation, restricted-count, or no-feasible-seed failures.",
+      "beam_width": "2_then_4_on_explicit_frozen_search_failure_only",
+      "optimizer_changed": "NO",
+      "objective_changed": "NO",
+      "constraints_changed": "NO",
+      "science_changed": "NO"
     }
   ]
 }
