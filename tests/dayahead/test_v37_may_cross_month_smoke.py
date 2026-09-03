@@ -3,10 +3,18 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import subprocess
+from types import SimpleNamespace
+
+import pandas as pd
 
 from dayahead.v37.contracts import DAY_TOTAL_UNITS, EXPECTED_DATES, MAX_PARALLEL_DATES, MAX_WORKERS_PER_DATE
 from dayahead.v37.campaign import MEETING_FIELDS
 from dayahead.v37.manifest import build_date_manifest, build_may01_amendment
+from dayahead.v37.runner import (
+    _beam_fallback_allowed,
+    _local_fallback_allowed,
+    _run_local_with_frozen_k_fallback,
+)
 from dayahead.v37.sources import archive_month_for_operating_day, select_cross_month_vintages
 from dayahead.v37.status import monitor_view, write_status
 
@@ -84,3 +92,55 @@ def test_locked_execution_limits() -> None:
         "B1_minus_B0_Fresh", "B2_minus_B0_Fresh", "B3_minus_B0_Fresh", "B3_minus_B2_Fresh",
         "B2_relocations", "B3_relocations", "B2_fallback", "B3_fallback", "wallclock_min",
     )
+
+
+def test_frozen_k_fallback_scope_and_sequence(tmp_path: Path) -> None:
+    calls = []
+
+    def write_json(path: Path, value: object) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(value), encoding="utf-8")
+
+    frozen = SimpleNamespace(
+        APR01="2025-05-01",
+        MESS_INITIAL={"MESS03": "STA08"},
+        DEFAULT_K=200,
+        enumerate_initial_relocations=lambda **_kwargs: SimpleNamespace(candidates=[object()] * 1001),
+        _json=write_json,
+    )
+    parent = SimpleNamespace(beam_state_id="B2-PARENT")
+
+    def local_search(**kwargs: object):
+        calls.append(frozen.DEFAULT_K)
+        root = Path(kwargs["cache"]) / "s1" / parent.beam_state_id
+        root.mkdir(parents=True, exist_ok=True)
+        certificate = "V37_FAIL_CLOSED:synthetic" if frozen.DEFAULT_K < 800 else "PASS"
+        pd.DataFrame([{
+            "candidate_id": "candidate",
+            "exact_optimality_certificate": certificate,
+        }]).to_csv(root / "RESTRICTED_VALUES.csv", index=False)
+        return [], {"restricted_solver_calls": frozen.DEFAULT_K + 1}
+
+    _seeds, summary = _run_local_with_frozen_k_fallback(
+        frozen,
+        local_search,
+        cache=tmp_path,
+        case="B2",
+        mess_id="MESS03",
+        sequence_index=0,
+        parent=parent,
+        aidc=None,
+        coefficients=None,
+        services=None,
+        route_table=None,
+        seed_line=None,
+        workers=4,
+    )
+    assert calls == [200, 400, 800]
+    assert summary["selected_K"] == "800"
+    assert summary["K_fallback_used"] is True
+    assert summary["full_scan_used"] is False
+    assert frozen.DEFAULT_K == 200
+    assert _local_fallback_allowed(RuntimeError("V35R3_FIXED_CERTIFICATE_STALLED:x"))
+    assert not _local_fallback_allowed(FileNotFoundError("path"))
+    assert not _beam_fallback_allowed(RuntimeError("V35R3_FIXED_CERTIFICATE_STALLED:x"))

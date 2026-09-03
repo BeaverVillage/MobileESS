@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import asdict
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -32,16 +33,204 @@ from .status import atomic_json, read_json, write_status
 
 ADMISSION = {"status": "PASS", "May_numeric_reads_before_admission": 0}
 
+_LOCAL_FALLBACK_SIGNATURES = (
+    "V35R3_FIXED_CANDIDATE_STATUS",
+    "V35R3_FIXED_CERTIFICATE_STALLED",
+    "V35R3_FIXED_CERTIFICATE_ROUND_LIMIT",
+    "V35R3E_R1_TOPK_ID_CONSERVATION",
+    "V35R3E_R1_RESTRICTED_COUNT",
+    "V35R3E_R1_NO_FEASIBLE_SEED",
+)
+
+
+def _local_fallback_allowed(error: Exception) -> bool:
+    return any(signature in str(error) for signature in _LOCAL_FALLBACK_SIGNATURES)
+
+
+def _failed_candidate_result(
+    case: str, candidate: Any, error: Exception, elapsed: float,
+) -> tuple[dict[str, Any], None, dict[str, Any], dict[str, Any], dict[str, set[tuple[int, int]]]]:
+    """Represent an explicitly uncertified restricted candidate as fail-closed."""
+
+    source = asdict(candidate)
+    signature = f"{type(error).__name__}:{error}"
+    row = {
+        "case": case,
+        "mess_id": source["mess_id"],
+        "candidate_id": source["candidate_id"],
+        "origin": source["origin"],
+        "destination": source["destination"],
+        "departure_slot": source["departure_slot"],
+        "connection_ready_slot": source["connection_ready_slot"],
+        "travel_slots": source["travel_slots"],
+        "q50_eta_seconds": source["q50_eta_seconds"],
+        "safe_eta_seconds": source["safe_eta_seconds"],
+        "safe_energy_kwh": source["safe_energy_kwh"],
+        "route_link_ids": ">".join(source["route_link_ids"]),
+        "is_stay": source["is_stay"],
+        "objective": 1.0e300,
+        "rho": 1.0e300,
+        "binding_asset": "UNCERTIFIED_FAIL_CLOSED",
+        "binding_slot": -1,
+        "Vmin_pu": 0.0,
+        "Vmax_pu": 0.0,
+        "post_arrival_sum_abs_p_kw_slots": 0.0,
+        "post_arrival_sum_abs_q_kvar_slots": 0.0,
+        "terminal_energy_kwh": 0.0,
+        "exact_optimality_certificate": f"V37_FAIL_CLOSED:{signature}",
+        "runtime_seconds": float(elapsed),
+    }
+    repair = {
+        "numeric_retry": False,
+        "attempts": 2,
+        "fail_closed": True,
+        "signature": signature,
+    }
+    empty_cuts = {name: set() for name in ("line", "voltage", "tx_current", "tx_kva")}
+    return row, None, {}, repair, empty_cuts
+
+
+def _v37_safe_restricted_worker(candidate: Any) -> tuple[Any, ...]:
+    """Process-pool entry that contains only frozen certification failures."""
+
+    import dayahead.tools.run_v35r3e_r1_beam as frozen
+
+    started = time.perf_counter()
+    try:
+        return frozen._solve_item(
+            str(frozen._WORKER["case"]),
+            candidate,
+            frozen._WORKER["aidc"],
+            frozen._WORKER["coefficients"],
+            frozen._WORKER["services"],
+            frozen._WORKER["fixed_p"],
+            frozen._WORKER["fixed_q"],
+            frozen._WORKER["line_states"],
+            frozen._WORKER["voltage_states"],
+            frozen._WORKER["tx_current_states"],
+            frozen._WORKER["tx_kva_states"],
+        )
+    except Exception as error:
+        if not _local_fallback_allowed(error):
+            raise
+        return _failed_candidate_result(
+            str(frozen._WORKER["case"]), candidate, error,
+            time.perf_counter() - started,
+        )
+
 
 def _beam_fallback_allowed(error: Exception) -> bool:
-    """Keep the frozen B=2 -> B=4 fallback limited to search failures."""
+    """Keep B=2 -> B=4 limited to an explicit frozen beam-path failure."""
 
     message = str(error)
     return any(signature in message for signature in (
-        "V35R3E_R1_TOPK_ID_CONSERVATION",
-        "V35R3E_R1_RESTRICTED_COUNT",
-        "V35R3E_R1_NO_FEASIBLE_SEED",
+        "V35R3E_R1_PATH_REGRESSION",
+        "V35R3E_R1_BEAM_PATH_FAILURE",
     ))
+
+
+def _archive_local_attempt(search_root: Path, level: str) -> None:
+    for name in ("RESTRICTED_VALUES.csv", "SEEDS.json", "LOCAL_SEARCH.json"):
+        source = search_root / name
+        if not source.is_file():
+            continue
+        suffix = Path(name).suffix
+        stem = Path(name).stem
+        index = 1
+        while True:
+            target = search_root / f"{stem}.K{level}.ATTEMPT{index}{suffix}"
+            if not target.exists():
+                source.replace(target)
+                break
+            index += 1
+
+
+def _run_local_with_frozen_k_fallback(
+    frozen: Any, original_local: Any, **kwargs: Any,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Apply the frozen 200 -> 400 -> 800 -> FULL local-search hierarchy."""
+
+    enumeration = frozen.enumerate_initial_relocations(
+        day=frozen.APR01,
+        mess_id=kwargs["mess_id"],
+        initial_service=frozen.MESS_INITIAL[kwargs["mess_id"]],
+        route_table=kwargs["route_table"],
+    )
+    full_k = max(0, len(enumeration.candidates) - 1)
+    numeric_levels = [level for level in (200, 400, 800) if level <= full_k]
+    levels = [*numeric_levels]
+    if full_k not in levels:
+        levels.append(full_k)
+    attempts: list[dict[str, Any]] = []
+    search_root = (
+        kwargs["cache"]
+        / f"s{int(kwargs['sequence_index']) + 1}"
+        / kwargs["parent"].beam_state_id
+    )
+    original_k = frozen.DEFAULT_K
+    try:
+        for index, level in enumerate(levels):
+            label = "FULL" if level == full_k else str(level)
+            frozen.DEFAULT_K = level
+            try:
+                seeds, summary = original_local(**kwargs)
+            except Exception as error:
+                if not _local_fallback_allowed(error) or index == len(levels) - 1:
+                    raise
+                attempts.append({
+                    "K": label,
+                    "status": "EXPLICIT_LOCAL_SEARCH_FAILURE",
+                    "signature": f"{type(error).__name__}:{error}",
+                })
+                _archive_local_attempt(search_root, label)
+                continue
+
+            values_path = search_root / "RESTRICTED_VALUES.csv"
+            values = pd.read_csv(values_path) if values_path.is_file() else pd.DataFrame()
+            failed = values.loc[
+                values.get("exact_optimality_certificate", pd.Series(dtype=str))
+                .astype(str).str.startswith("V37_FAIL_CLOSED:")
+            ] if len(values) else values
+            failure_rows = failed.to_dict("records") if len(failed) else []
+            attempt = {
+                "K": label,
+                "status": "CERTIFIED" if not failure_rows else "CERTIFICATION_FAILURE",
+                "restricted_candidates": int(len(values)),
+                "uncertified_candidate_count": len(failure_rows),
+                "uncertified_candidate_ids": [str(row["candidate_id"]) for row in failure_rows],
+                "signatures": [str(row["exact_optimality_certificate"]) for row in failure_rows],
+            }
+            attempts.append(attempt)
+            if failure_rows and index < len(levels) - 1:
+                _archive_local_attempt(search_root, label)
+                continue
+
+            updated = dict(summary)
+            updated.update({
+                "K0": 200,
+                "selected_K": label,
+                "K_fallback_used": index > 0,
+                "full_scan_used": label == "FULL",
+                "uncertified_candidates_fail_closed": len(failure_rows),
+                "K_fallback_attempts": attempts,
+                "K_fallback_sequence": [200, 400, 800, "FULL"],
+            })
+            frozen._json(search_root / "LOCAL_SEARCH.json", updated)
+            return seeds, updated
+        raise RuntimeError("V37_FROZEN_K_FALLBACK_EXHAUSTED")
+    finally:
+        frozen.DEFAULT_K = original_k
+
+
+def _beam_k_fallback_counts(root: Path) -> tuple[int, int]:
+    fallback_count = 0
+    full_count = 0
+    for stage_path in sorted(root.glob("STAGE_*.json")):
+        stage = read_json(stage_path)
+        for local in stage.get("parent_diagnostics", []):
+            fallback_count += int(bool(local.get("K_fallback_used")))
+            full_count += int(bool(local.get("full_scan_used")))
+    return fallback_count, full_count
 
 
 def _status_path(repo: Path, day: str) -> Path:
@@ -97,6 +286,8 @@ def _beam_case(repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any) -> t
     original = {
         "APR01": frozen.APR01, "CACHE_ROOT": frozen.CACHE_ROOT,
         "prepare": frozen.prepare_aidc_stages, "traffic": frozen.daily_traffic_authority,
+        "local_search": frozen._local_search, "solve_item": frozen._solve_item,
+        "solve_worker": frozen._solve_worker, "DEFAULT_K": frozen.DEFAULT_K,
     }
 
     def selected_day(value: str) -> None:
@@ -115,15 +306,41 @@ def _beam_case(repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any) -> t
     )
     r3.assert_apr01_only = selected_day
     r3e.assert_apr01_only = selected_day
+
+    def safe_parent_solve(*args: Any, **kwargs: Any) -> tuple[Any, ...]:
+        started = time.perf_counter()
+        try:
+            return original["solve_item"](*args, **kwargs)
+        except Exception as error:
+            if not _local_fallback_allowed(error):
+                raise
+            return _failed_candidate_result(
+                str(args[0]), args[1], error, time.perf_counter() - started,
+            )
+
+    frozen._solve_item = safe_parent_solve
+    frozen._solve_worker = _v37_safe_restricted_worker
+    frozen._local_search = lambda **kwargs: _run_local_with_frozen_k_fallback(
+        frozen, original["local_search"], **kwargs,
+    )
     try:
         last_error: Exception | None = None
         for width in (BEAM_WIDTH, BEAM_WIDTH_FALLBACK):
             final_path = repo / CACHE_ROOT / PASS_ID / "beam" / day / case / f"B{width}" / "FINAL_RESULT.json"
             if final_path.is_file():
-                return read_json(final_path), 0 if width == BEAM_WIDTH else 1
+                result = read_json(final_path)
+                k_count, full_count = _beam_k_fallback_counts(final_path.parent)
+                result["V37_K_fallback_count"] = k_count
+                result["V37_FULL_scan_count"] = full_count
+                return result, 0 if width == BEAM_WIDTH else 1
             try:
                 os.chdir(repo)
-                return frozen._run_case(case, width, MAX_WORKERS_PER_DATE), 0 if width == BEAM_WIDTH else 1
+                result = frozen._run_case(case, width, MAX_WORKERS_PER_DATE)
+                k_count, full_count = _beam_k_fallback_counts(final_path.parent)
+                result["V37_K_fallback_count"] = k_count
+                result["V37_FULL_scan_count"] = full_count
+                frozen._json(final_path, result)
+                return result, 0 if width == BEAM_WIDTH else 1
             except Exception as error:
                 last_error = error
                 os.chdir(repo)
@@ -136,6 +353,10 @@ def _beam_case(repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any) -> t
         frozen.CACHE_ROOT = original["CACHE_ROOT"]
         frozen.prepare_aidc_stages = original["prepare"]
         frozen.daily_traffic_authority = original_traffic
+        frozen._local_search = original["local_search"]
+        frozen._solve_item = original["solve_item"]
+        frozen._solve_worker = original["solve_worker"]
+        frozen.DEFAULT_K = original["DEFAULT_K"]
         r3.assert_apr01_only, r3e.assert_apr01_only = original_guards
         electrical.voltage.close(); electrical.current.close()
         os.chdir(repo)
@@ -318,7 +539,9 @@ def run_day(repo: Path, day: str) -> dict[str, Any]:
                 write_status(status_path, day, "RUNNING", BEAM_PROGRESS_BASE[case] + 4, f"{case}_FRESH")
             result = _run_frozen_case(repo, day, case, aidc[case], beam)
             result["beam_fallback"] = bool(fallback)
-            result["K_fallback"] = False
+            result["K_fallback"] = bool(
+                beam is not None and int(beam.get("V37_K_fallback_count", 0)) > 0
+            )
             _write_case_checkpoint(repo, day, case, result)
             results[case] = result
             write_status(status_path, day, "RUNNING", PROGRESS_AFTER_CASE[case], f"{case}_COMPLETE")

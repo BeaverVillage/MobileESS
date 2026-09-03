@@ -38,6 +38,18 @@
       "objective_changed": "NO",
       "constraints_changed": "NO",
       "science_changed": "NO"
+    },
+    {
+      "classification": "ENGINEERING_FROZEN_K_FALLBACK_ADAPTER",
+      "effect": "The V37 beam adapter did not invoke the already-frozen 200 -> 400 -> 800 -> FULL hierarchy when a restricted local-search candidate remained uncertified after its prescribed numeric retry.",
+      "repair": "Connect explicit fixed-candidate certification failures to the frozen K hierarchy, isolate only those uncertified candidates fail-closed, retain every attempt as an auditable cache artifact, and accept FULL only after scanning the entire dynamically feasible candidate set.",
+      "trigger_observed": "V35R3_FIXED_CERTIFICATE_STALLED",
+      "K_sequence": [200, 400, 800, "FULL"],
+      "MOVE_zero_trigger": "NO",
+      "objective_changed": "NO",
+      "constraints_changed": "NO",
+      "physical_tolerances_changed": "NO",
+      "science_changed": "NO"
     }
   ]
 }
