@@ -25,14 +25,14 @@ def atomic_json(path: Path, payload: Any) -> None:
         json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False, allow_nan=False) + "\n",
         encoding="utf-8",
     )
-    for attempt in range(20):
+    for attempt in range(300):
         try:
             os.replace(temporary, path)
             return
         except PermissionError:
-            if attempt == 19:
+            if attempt == 299:
                 raise
-            time.sleep(0.05)
+            time.sleep(0.1)
 
 
 def read_json(path: Path) -> dict[str, Any]:

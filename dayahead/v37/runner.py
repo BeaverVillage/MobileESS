@@ -443,11 +443,15 @@ def _watch_beam(repo: Path, day: str, case: str, stop: threading.Event) -> None:
             if count >= completed:
                 completed, current_width = count, width
         stage = min(4, completed + 1)
-        write_status(
-            path, day, "RUNNING", base + completed,
-            f"{case}_MESS{stage:02d}" if completed < 4 else f"{case}_FRESH",
-            extra={"workers": MAX_WORKERS_PER_DATE, "beam_width_active": current_width},
-        )
+        try:
+            write_status(
+                path, day, "RUNNING", base + completed,
+                f"{case}_MESS{stage:02d}" if completed < 4 else f"{case}_FRESH",
+                extra={"workers": MAX_WORKERS_PER_DATE, "beam_width_active": current_width},
+            )
+        except PermissionError:
+            # RUNNING telemetry is best-effort; the next two-second tick retries.
+            continue
 
 
 def _run_frozen_case(repo: Path, day: str, case: str, aidc: Any, beam: Mapping[str, Any] | None) -> dict[str, Any]:

@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import subprocess
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import pandas as pd
 
@@ -18,6 +19,7 @@ from dayahead.v37.runner import (
 )
 from dayahead.v37.sources import archive_month_for_operating_day, select_cross_month_vintages
 from dayahead.v37.status import monitor_view, write_status
+from dayahead.v37 import status as status_module
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -94,6 +96,27 @@ def test_atomic_status_concurrent_writers(tmp_path: Path) -> None:
     assert value["date"] == "2025-05-01"
     assert value["status"] == "RUNNING"
     assert not list(tmp_path.glob("*.tmp"))
+
+
+def test_atomic_status_retries_a_long_windows_reader_lock(tmp_path: Path) -> None:
+    path = tmp_path / "2025-05-01.json"
+    real_replace = status_module.os.replace
+    attempts = 0
+
+    def locked_then_available(source: object, target: object) -> None:
+        nonlocal attempts
+        attempts += 1
+        if attempts <= 25:
+            raise PermissionError("synthetic reader lock")
+        real_replace(source, target)
+
+    with (
+        patch.object(status_module.os, "replace", side_effect=locked_then_available),
+        patch.object(status_module.time, "sleep", return_value=None),
+    ):
+        write_status(path, "2025-05-01", "RUNNING", 6, "B2_MESS03")
+    assert attempts == 26
+    assert json.loads(path.read_text(encoding="utf-8"))["completed_units"] == 6
 
 
 def test_locked_execution_limits() -> None:
