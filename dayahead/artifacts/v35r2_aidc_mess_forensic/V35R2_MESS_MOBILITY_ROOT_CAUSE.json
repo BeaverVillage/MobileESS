@@ -1,0 +1,154 @@
+{
+  "Apr01_static_location_spreads": {
+    "COMBINED_PQ": {
+      "Fresh_rho_slot": {
+        "best_service": "IDC09",
+        "spread": 0.01611751323585353,
+        "worst_service": "IDC01"
+      },
+      "Planning_affine_rho_slot": {
+        "best_service": "IDC09",
+        "spread": 0.016368459593986695,
+        "worst_service": "IDC01"
+      },
+      "Planning_polygon_rho_slot": {
+        "best_service": "IDC05",
+        "spread": 0.010136468716506863,
+        "worst_service": "IDC01"
+      }
+    },
+    "P_ONLY": {
+      "Fresh_rho_slot": {
+        "best_service": "STA10",
+        "spread": 0.016935706224930236,
+        "worst_service": "IDC01"
+      },
+      "Planning_affine_rho_slot": {
+        "best_service": "STA03",
+        "spread": 0.016894186099047914,
+        "worst_service": "IDC01"
+      },
+      "Planning_polygon_rho_slot": {
+        "best_service": "IDC05",
+        "spread": 0.010136468716506863,
+        "worst_service": "IDC01"
+      }
+    },
+    "Q_ONLY": {
+      "Fresh_rho_slot": {
+        "best_service": "IDC06",
+        "spread": 0.0010662214752472643,
+        "worst_service": "STA12"
+      },
+      "Planning_affine_rho_slot": {
+        "best_service": "IDC02",
+        "spread": 0.0008581669622947929,
+        "worst_service": "STA12"
+      },
+      "Planning_polygon_rho_slot": {
+        "best_service": "IDC01",
+        "spread": 0.0,
+        "worst_service": "IDC01"
+      }
+    }
+  },
+  "artifact_id": "V35R2_MESS_MOBILITY_ROOT_CAUSE_APR01_SCOPE_V1",
+  "classification": "MESS_MOBILITY_UNRESOLVED",
+  "electrical_diversity": {
+    "artifact_id": "V35R2_MESS_ELECTRICAL_DIVERSITY_V1",
+    "diagnostic_days": [
+      "2025-04-01",
+      "2025-04-10",
+      "2025-04-20"
+    ],
+    "distinct_sensitivity_fingerprint_count": 24,
+    "equivalent_service_groups": [],
+    "maximum_pairwise_fingerprint_distance": 0.0003556684016195577,
+    "service_axis_note": "Frozen authority contains 24 nodes: IDC01-IDC12 plus STA01-STA12; STA13-STA24 do not exist and were not invented.",
+    "service_count": 24,
+    "status": "PASS",
+    "unique_electrical_PCC_count": 24
+  },
+  "initial_location_repair": {
+    "April_objective_inputs_read_for_selection": 0,
+    "artifact_id": "V35R2_MESS_INITIAL_LOCATION_AUDIT_V2",
+    "classification": "MESS_INITIAL_LOCATION_AUTHORITY_DEFECT_REPAIRED",
+    "electrical_inputs_read_for_selection": 0,
+    "eligible_nodes": [
+      "STA01",
+      "STA02",
+      "STA03",
+      "STA04",
+      "STA05",
+      "STA06",
+      "STA07",
+      "STA08",
+      "STA09",
+      "STA10",
+      "STA11",
+      "STA12"
+    ],
+    "nearest_selected_distance_km": {
+      "STA01": 19.834490000000002,
+      "STA06": 18.593499999999995,
+      "STA08": 18.593499999999995,
+      "STA12": 21.721210000000013
+    },
+    "new_initial_locations": {
+      "MESS01": "STA01",
+      "MESS02": "STA12",
+      "MESS03": "STA08",
+      "MESS04": "STA06"
+    },
+    "old_authority": "sequential STA identifier enumeration; no external depot source",
+    "old_initial_locations": {
+      "MESS01": "STA01",
+      "MESS02": "STA02",
+      "MESS03": "STA03",
+      "MESS04": "STA04"
+    },
+    "proof": "TOPOLOGY_ONLY_EXOGENOUS_ROAD_COVERAGE",
+    "road_graph_SHA256": "658fb2e56867a50597e9a21899748d8171439deda852e7db4f3339a99f71dd3d",
+    "selection_rule": "Seed lexicographically at STA01; repeatedly select the station maximizing minimum undirected shortest physical-road distance to selected stations; break exact ties lexicographically.",
+    "status": "REPAIRED",
+    "traffic_forecast_inputs_read_for_selection": 0
+  },
+  "net_move_audit": {
+    "beneficial_relocations_proven": 0,
+    "candidate_rows": 192,
+    "reason": "Destination MIP solves were not run after the user capped execution at Apr01 only.",
+    "solved_post_move_rows": 0,
+    "solved_stay_rows": 8,
+    "travel_connection_adjusted_beneficial_moves": "NOT_DETERMINED"
+  },
+  "original_zero_move_contributors": [
+    "The signed affine current tangent could be exploited by large stationary Q, so mobility was unnecessary to obtain a false Planning gain.",
+    "Initial STA01-STA04 positions were arbitrary identifier enumeration without depot authority.",
+    "Each production MESS subproblem accepted the restricted stationary incumbent at WORK_LIMIT with material unresolved MIP gaps; zero MOVE was not a proof of no beneficial relocation."
+  ],
+  "postrepair_Apr01": {
+    "B2_B0": {
+      "Fresh_rho_delta": -0.03545264427298156,
+      "MOVE_count": 0,
+      "Planning_rho_delta": -0.055786717469549774,
+      "sum_abs_P_kW_slots": 19506.809258704,
+      "sum_abs_Q_kvar_slots": 53724.237289895
+    },
+    "B3_B1": {
+      "Fresh_rho_delta": -0.037799616996033514,
+      "MOVE_count": 0,
+      "Planning_rho_delta": -0.05804653923574299,
+      "sum_abs_P_kW_slots": 21933.018801578997,
+      "sum_abs_Q_kvar_slots": 55678.948676831
+    },
+    "Fresh_physical_violation_cases": [
+      "B2",
+      "B3"
+    ],
+    "Planning_Fresh_effect_direction_agrees": true,
+    "movement_forced": false,
+    "natural_MOVE_count": 0
+  },
+  "service_mapping_defect": false,
+  "status": "UNRESOLVED_SCOPE_LIMITED"
+}

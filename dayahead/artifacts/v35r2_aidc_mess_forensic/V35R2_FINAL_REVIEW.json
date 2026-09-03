@@ -1,0 +1,254 @@
+{
+  "AIDC": {
+    "accepted_relaxed_electrical_upper_bound_improvement": null,
+    "classification": "AIDC_EFFECT_UNRESOLVED",
+    "critical_slot_flexible_fraction_B0": 0.0008896218454937266,
+    "critical_slot_flexible_fraction_B1": 0.007938482785104017,
+    "production_improvement": 3.473623411243132e-06,
+    "screening_ceiling": 0.0007542319039997474,
+    "shifted_workload_at_binding_nodeh": 0.1380181141330884,
+    "site_sensitivity_spread_pu_per_kW": 0.00033312432329662967
+  },
+  "COMMON_RHO_CURRENT": {
+    "Q_exploit_found": true,
+    "defect": "single signed affine current tangent was a local lower support exploitable by production-scale Q",
+    "finite_difference_sensitivity_error": {
+      "AIDC_P": {
+        "all_line_sign_match_rate_mean": 0.7752429235318969,
+        "all_line_slope_MAE_mean": 5.874809511928358e-07,
+        "all_line_slope_RMSE_mean": 1.3570790858895518e-06,
+        "critical_abs_error_MAE": 6.08057662545199e-06,
+        "critical_abs_error_max": 2.6225062355444972e-05,
+        "probe_count": 9
+      },
+      "MESS_P": {
+        "all_line_sign_match_rate_mean": 0.9860583016476553,
+        "all_line_slope_MAE_mean": 5.000228758083398e-08,
+        "all_line_slope_RMSE_mean": 1.1326724598268416e-07,
+        "critical_abs_error_MAE": 3.6696876708362956e-07,
+        "critical_abs_error_max": 1.1032378900988071e-06,
+        "probe_count": 9
+      },
+      "MESS_Q": {
+        "all_line_sign_match_rate_mean": 0.9915504858470636,
+        "all_line_slope_MAE_mean": 5.3351838583358666e-08,
+        "all_line_slope_RMSE_mean": 2.005060027181561e-07,
+        "critical_abs_error_MAE": 2.465416064658908e-07,
+        "critical_abs_error_max": 4.916762546547382e-07,
+        "probe_count": 9
+      }
+    },
+    "fix": "ANCHOR_GRADIENT_MATCHED_16_FACE_APPARENT_POWER_EPIGRAPH_V1",
+    "postrepair_Apr01": {
+      "MAE": 0.0008875591087231491,
+      "P95": 0.006825547904182791,
+      "P99": 0.018415148036536624,
+      "RMSE": 0.003595481297538674,
+      "cases": {
+        "B0": {
+          "Fresh_critical": [
+            74,
+            "line.sw2",
+            "A"
+          ],
+          "Planning_critical": [
+            74,
+            "line.sw2",
+            "A"
+          ],
+          "identity": "EXACT_LINE_PHASE_SLOT"
+        },
+        "B1": {
+          "Fresh_critical": [
+            74,
+            "line.sw2",
+            "A"
+          ],
+          "Planning_critical": [
+            74,
+            "line.sw2",
+            "A"
+          ],
+          "identity": "EXACT_LINE_PHASE_SLOT"
+        },
+        "B2": {
+          "Fresh_critical": [
+            74,
+            "line.sw2",
+            "A"
+          ],
+          "Planning_critical": [
+            65,
+            "line.sw2",
+            "A"
+          ],
+          "identity": "SAME_LINE_PHASE_DIFFERENT_SLOT"
+        },
+        "B3": {
+          "Fresh_critical": [
+            74,
+            "line.sw2",
+            "A"
+          ],
+          "Planning_critical": [
+            20,
+            "line.sw2",
+            "A"
+          ],
+          "identity": "SAME_LINE_PHASE_DIFFERENT_SLOT"
+        }
+      },
+      "count": 100992,
+      "critical_identity_counts": {
+        "DIFFERENT_LINE_OR_PHASE": 0,
+        "EXACT_LINE_PHASE_SLOT": 2,
+        "SAME_LINE_PHASE_DIFFERENT_SLOT": 2
+      },
+      "critical_identity_exact_rate": 0.5,
+      "max": 0.07581858151932581,
+      "signed_mean": 0.00034365728040397687
+    },
+    "pre_repair_Apr01_20": {
+      "Fresh_critical_asset_counts": {
+        "line.l10::A": 2,
+        "line.l58::A": 15,
+        "line.sw2::A": 63
+      },
+      "MAE": 0.0034310804036217233,
+      "P95": 0.011776604001084793,
+      "P99": 0.0879765729990509,
+      "Planning_critical_asset_counts": {
+        "line.l55::A": 1,
+        "line.l58::A": 2,
+        "line.sw2::A": 77
+      },
+      "RMSE": 0.018481379082259164,
+      "artifact_id": "V35R2_PRE_REPAIR_COMMON_CURRENT_FIDELITY_V1",
+      "case_days": 80,
+      "count": 2019840,
+      "critical_identity_counts": {
+        "DIFFERENT_LINE_OR_PHASE": 16,
+        "EXACT_LINE_PHASE_SLOT": 41,
+        "SAME_LINE_PHASE_DIFFERENT_SLOT": 23
+      },
+      "critical_identity_exact_rate": 0.5125,
+      "max": 0.41182571563026765,
+      "raw_csv": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\artifacts\\v35r2_aidc_mess_forensic\\V35R2_COMMON_CURRENT_FIDELITY.csv",
+      "raw_csv_SHA256": "4399526b58ee6e6a64a038b5831aefb644e9e5d254f9f869b35821f84fb23d8f",
+      "raw_csv_bytes": 361832604,
+      "scope": [
+        "2025-04-01",
+        "2025-04-20"
+      ],
+      "signed_mean": 0.003418394241122028,
+      "status": "DIAGNOSE"
+    }
+  },
+  "CONCLUSION": {
+    "primary_classification": "V35R2_MESS_MOBILITY_UNRESOLVED",
+    "reason": "The current defect is repaired and Apr01 direction is coherent, but 76 invalidated case-days were not rerun, the correction was not rebuilt, MESS net-move value was not resolved, and Apr01 B2/B3 have Fresh voltage violations.",
+    "scientifically_ready_for_Apr21": false
+  },
+  "GIT": {
+    "branch": "codex/v35-selfhealing-april-may-final",
+    "merge_performed": false,
+    "push_performed": false,
+    "report_generation_HEAD": "8d217f151885b4fcd078b939d38768b05a4e907f",
+    "start_HEAD": "7d8ec6eaae138782826b9fd87428c4a3874c35be"
+  },
+  "MESS": {
+    "Apr01_station_value_spreads": {
+      "COMBINED_PQ": {
+        "Fresh_rho_slot": {
+          "best_service": "IDC09",
+          "spread": 0.01611751323585353,
+          "worst_service": "IDC01"
+        },
+        "Planning_affine_rho_slot": {
+          "best_service": "IDC09",
+          "spread": 0.016368459593986695,
+          "worst_service": "IDC01"
+        },
+        "Planning_polygon_rho_slot": {
+          "best_service": "IDC05",
+          "spread": 0.010136468716506863,
+          "worst_service": "IDC01"
+        }
+      },
+      "P_ONLY": {
+        "Fresh_rho_slot": {
+          "best_service": "STA10",
+          "spread": 0.016935706224930236,
+          "worst_service": "IDC01"
+        },
+        "Planning_affine_rho_slot": {
+          "best_service": "STA03",
+          "spread": 0.016894186099047914,
+          "worst_service": "IDC01"
+        },
+        "Planning_polygon_rho_slot": {
+          "best_service": "IDC05",
+          "spread": 0.010136468716506863,
+          "worst_service": "IDC01"
+        }
+      },
+      "Q_ONLY": {
+        "Fresh_rho_slot": {
+          "best_service": "IDC06",
+          "spread": 0.0010662214752472643,
+          "worst_service": "STA12"
+        },
+        "Planning_affine_rho_slot": {
+          "best_service": "IDC02",
+          "spread": 0.0008581669622947929,
+          "worst_service": "STA12"
+        },
+        "Planning_polygon_rho_slot": {
+          "best_service": "IDC01",
+          "spread": 0.0,
+          "worst_service": "IDC01"
+        }
+      }
+    },
+    "B2_B0_Fresh_rho_effect": -0.03545264427298156,
+    "B2_B0_Planning_rho_effect": -0.055786717469549774,
+    "beneficial_relocation_candidates": "NOT_DETERMINED",
+    "classification": "MESS_MOBILITY_UNRESOLVED",
+    "distinct_sensitivity_fingerprints": 24,
+    "initial_location_authority": "repaired topology-only road farthest-point coverage",
+    "maximum_pairwise_fingerprint_distance": 0.0003556684016195577,
+    "movement_forced": false,
+    "postrepair_PQ_usage": {
+      "B2_sum_abs_P_kW_slots": 19506.809258704,
+      "B2_sum_abs_Q_kvar_slots": 53724.237289895,
+      "B3_sum_abs_P_kW_slots": 21933.018801578997,
+      "B3_sum_abs_Q_kvar_slots": 55678.948676831
+    },
+    "postrepair_production_MOVE_count": 0,
+    "travel_connection_adjusted_beneficial_moves": "NOT_DETERMINED",
+    "unique_electrical_PCCs": 24
+  },
+  "Q1": "Apr01 indicates the tiny AIDC effect is physical/flexible-fraction and timing limited; the current-model repair changed its Planning delta negligibly. Apr01-20 final acceptance remains unresolved.",
+  "Q10": "NO.",
+  "Q2": "At Apr01 slot 74, flexible IT is 0.089% in B0 and 0.794% in B1; only 0.1380 of 95.0639 shifted node-hours (0.145%) occurs at the binding slot.",
+  "Q3": "The old affine Q exploit made stationary Q look highly effective, arbitrary initial positions lacked authority, and WORK_LIMIT solutions retained the stationary restricted incumbent without excluding better moves.",
+  "Q4": "Yes: 24/24 unique PCCs and 24 distinct sensitivity fingerprints; no service mapping defect was proven.",
+  "Q5": "YES. Production-scale Q caused systematic Planning/Fresh effect inversion under the signed affine tangent.",
+  "Q6": "YES on the repaired Apr01 run: both Planning and Fresh show negative MESS rho deltas for B2-B0 and B3-B1.",
+  "Q7": "NO on the only rerun day, Apr01; Apr02-20 were not rerun.",
+  "Q8": "NO.",
+  "Q9": "All 80 case-days were scientifically invalidated; only Apr01 B0/B1/B2/B3 were rerun by explicit user scope, leaving 76 deferred.",
+  "RERUN": {
+    "correction_rebuilt": false,
+    "deferred_invalidated_case_days": 76,
+    "invalidated_case_days": 80,
+    "preserved_case_days": 0,
+    "rerun_case_days": 4
+  },
+  "STORAGE_TEST": {
+    "reloadable_postrepair_case_days": 4,
+    "tests_failed": 0,
+    "tests_passed": 105
+  },
+  "artifact_id": "V35R2_FINAL_REVIEW_USER_CAPPED_APR01_V1"
+}

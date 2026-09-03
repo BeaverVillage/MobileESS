@@ -23,6 +23,7 @@ from dayahead.v35.storage import invalidation_scope, sha256_file
 REPO = Path(__file__).resolve().parents[2]
 SOURCE = REPO / "dayahead/artifacts/v35_april_may_final"
 CACHE = REPO / "dayahead/cache/v35"
+HISTORICAL_CACHE = CACHE / "history/v35r2_pre_repair_7d8ec6e/cache"
 PHASE = "APR01_20_AC_FIDELITY_CALIBRATION"
 DAYS = tuple(f"2025-04-{day:02d}" for day in range(1, 21))
 B3_FIX_COMMIT = "bac32e1"
@@ -30,6 +31,27 @@ B3_FIX_COMMIT = "bac32e1"
 
 def load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def historical_case_root(day: str, case: str) -> Path:
+    """Return the recoverably archived V35R1 cache, never repaired V35R2 data."""
+
+    root = HISTORICAL_CACHE / day / case
+    if not (root / "CHECKPOINT.json").is_file():
+        raise FileNotFoundError(f"V35R1_HISTORICAL_CACHE_MISSING:{day}/{case}")
+    return root
+
+
+def historical_record_path(root: Path, day: str, case: str, recorded: str) -> Path:
+    """Rebase case-local immutable records after the cache was archived."""
+
+    path = Path(recorded)
+    parts = path.parts
+    marker = next(
+        (index for index in range(len(parts) - 1) if parts[index] == day and parts[index + 1] == case),
+        None,
+    )
+    return path if marker is None else root.joinpath(*parts[marker + 2 :])
 
 
 def synthetic_cases() -> dict[str, dict]:
@@ -88,16 +110,17 @@ def test_calibration_provenance_is_apr01_20_only_and_detects_apr21():
 def test_all_apr01_20_b3_results_have_current_lineage_and_aidc_identity():
     for day in DAYS:
         cases = load_json(SOURCE / "daily" / PHASE / day / "DAY_RESULT.json")["cases"]
-        checkpoint = load_json(CACHE / PHASE / day / "B3/CHECKPOINT.json")
+        b3_root = historical_case_root(day, "B3")
+        checkpoint = load_json(b3_root / "CHECKPOINT.json")
         completed = subprocess.run(
             ["git", "merge-base", "--is-ancestor", B3_FIX_COMMIT, checkpoint["code_HEAD"]],
             cwd=REPO,
             check=False,
         )
-        with np.load(CACHE / PHASE / day / "B1/DAYAHEAD_AIDC.npz", allow_pickle=False) as b1, np.load(
-            CACHE / PHASE / day / "B3/DAYAHEAD_AIDC.npz", allow_pickle=False
-        ) as b3, np.load(CACHE / PHASE / day / "B0/DAYAHEAD_AIDC.npz", allow_pickle=False) as b0, np.load(
-            CACHE / PHASE / day / "B2/DAYAHEAD_AIDC.npz", allow_pickle=False
+        with np.load(historical_case_root(day, "B1") / "DAYAHEAD_AIDC.npz", allow_pickle=False) as b1, np.load(
+            b3_root / "DAYAHEAD_AIDC.npz", allow_pickle=False
+        ) as b3, np.load(historical_case_root(day, "B0") / "DAYAHEAD_AIDC.npz", allow_pickle=False) as b0, np.load(
+            historical_case_root(day, "B2") / "DAYAHEAD_AIDC.npz", allow_pickle=False
         ) as b2:
             b1_b3_equal = b1.files == b3.files and all(np.array_equal(b1[key], b3[key]) for key in b1.files)
             b0_b2_equal = b0.files == b2.files and all(np.array_equal(b0[key], b2[key]) for key in b0.files)
@@ -168,10 +191,10 @@ def test_storage_reloads_and_actual_terminal_soc_uses_1200_kwh_capacity():
     expected_soc = 760.0 / 1200.0
     for day in DAYS:
         for case in CASES:
-            root = CACHE / PHASE / day / case
+            root = historical_case_root(day, case)
             checkpoint = load_json(root / "CHECKPOINT.json")
             for record in checkpoint["storage_files"]:
-                path = Path(record["path"])
+                path = historical_record_path(root, day, case, record["path"])
                 assert path.is_file() and path.stat().st_size > 0
                 assert sha256_file(path) == record["sha256"]
             with np.load(root / "ACTUAL_MESS.npz", allow_pickle=False) as payload:

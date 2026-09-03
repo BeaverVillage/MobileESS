@@ -1,10 +1,81 @@
 {
+  "Apr02_20_validation": "DEFERRED_BY_USER_SCOPE_CAP",
   "artifact_id": "V35R2_COMMON_RHO_MODEL_REPAIR_V1",
   "defect_classification": "COMMON_RHO_CURRENT_IMPLEMENTATION_DEFECT",
   "formula": "max_k[(cos(theta_k) P_line(x)+sin(theta_k) Q_line(x))/apothem] + anchor_bias + (J_current-J_active_polygon)^T(x-x_anchor)",
   "new_model": "ANCHOR_GRADIENT_MATCHED_16_FACE_APPARENT_POWER_EPIGRAPH_V1",
   "old_model": "One signed affine tangent row for normalized current magnitude; the row was a local lower support and had no large-signal curvature.",
   "polygon_faces": 16,
+  "postrepair_Apr01_MESS_effect_direction_agrees": true,
+  "postrepair_Apr01_current_metrics": {
+    "MAE": 0.0008875591087231491,
+    "P95": 0.006825547904182791,
+    "P99": 0.018415148036536624,
+    "RMSE": 0.003595481297538674,
+    "cases": {
+      "B0": {
+        "Fresh_critical": [
+          74,
+          "line.sw2",
+          "A"
+        ],
+        "Planning_critical": [
+          74,
+          "line.sw2",
+          "A"
+        ],
+        "identity": "EXACT_LINE_PHASE_SLOT"
+      },
+      "B1": {
+        "Fresh_critical": [
+          74,
+          "line.sw2",
+          "A"
+        ],
+        "Planning_critical": [
+          74,
+          "line.sw2",
+          "A"
+        ],
+        "identity": "EXACT_LINE_PHASE_SLOT"
+      },
+      "B2": {
+        "Fresh_critical": [
+          74,
+          "line.sw2",
+          "A"
+        ],
+        "Planning_critical": [
+          65,
+          "line.sw2",
+          "A"
+        ],
+        "identity": "SAME_LINE_PHASE_DIFFERENT_SLOT"
+      },
+      "B3": {
+        "Fresh_critical": [
+          74,
+          "line.sw2",
+          "A"
+        ],
+        "Planning_critical": [
+          20,
+          "line.sw2",
+          "A"
+        ],
+        "identity": "SAME_LINE_PHASE_DIFFERENT_SLOT"
+      }
+    },
+    "count": 100992,
+    "critical_identity_counts": {
+      "DIFFERENT_LINE_OR_PHASE": 0,
+      "EXACT_LINE_PHASE_SLOT": 2,
+      "SAME_LINE_PHASE_DIFFERENT_SLOT": 2
+    },
+    "critical_identity_exact_rate": 0.5,
+    "max": 0.07581858151932581,
+    "signed_mean": 0.00034365728040397687
+  },
   "properties": {
     "Fresh_used_in_production_control": false,
     "anchor_current_gradient_preserved_exactly": true,
@@ -44,5 +115,5 @@
     "vehicle": "MESS01"
   },
   "specific_classification": "AFFINE_CURRENT_Q_EXPLOIT_CONFIRMED",
-  "status": "IMPLEMENTED_PENDING_APR01_20_RERUN"
+  "status": "IMPLEMENTED_AND_VALIDATED_ON_APR01_ONLY"
 }
