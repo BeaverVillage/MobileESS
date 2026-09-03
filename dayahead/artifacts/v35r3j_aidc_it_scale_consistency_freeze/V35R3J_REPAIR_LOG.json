@@ -1,0 +1,19 @@
+{
+  "artifact_id": "V35R3J_REPAIR_LOG_V1",
+  "failures": [
+    {
+      "cause": "Binary git-show output was stripped before content SHA comparison.",
+      "repair": "Preserve exact bytes, including terminal newline, in parent-blob SHA computation.",
+      "signature": "V35R3J_V35R3I_INPUT_SHA_MISMATCH",
+      "status": "RESOLVED"
+    },
+    {
+      "cause": "JSON and CSV float deserialization differed at the last representable bit.",
+      "repair": "Verify V35R3B lineage at 1e-12 absolute tolerance and copy the immediate V35R3I CSV baseline values.",
+      "signature": "V35R3J_RW_BASELINE_NOT_NUMERICALLY_PRESERVED",
+      "status": "RESOLVED"
+    }
+  ],
+  "repair_attempts": 2,
+  "science_parameters_changed_during_repair": false
+}
