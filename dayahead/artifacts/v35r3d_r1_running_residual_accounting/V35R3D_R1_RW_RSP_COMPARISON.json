@@ -1,0 +1,93 @@
+{
+  "APR01": {
+    "RSP": {
+      "jobs_completed": 290,
+      "jobs_started": 175,
+      "normal_jobs_started": 0,
+      "post_refill_saturated_slots": 59,
+      "queue_depth_max": 171,
+      "queue_depth_mean": 46.635416666666664,
+      "release_events": 32,
+      "released_GPU_hours": 96.5,
+      "same_tier_ordering_opportunities": 119288,
+      "slots": 96,
+      "standby_jobs_started": 175,
+      "turnover": 465
+    },
+    "RW": {
+      "jobs_completed": 65,
+      "jobs_started": 161,
+      "normal_jobs_started": 0,
+      "post_refill_saturated_slots": 96,
+      "queue_depth_max": 243,
+      "queue_depth_mean": 149.86458333333334,
+      "release_events": 17,
+      "released_GPU_hours": 40.25,
+      "same_tier_ordering_opportunities": 299581,
+      "slots": 96,
+      "standby_jobs_started": 161,
+      "turnover": 226
+    }
+  },
+  "REQUESTED_WALLTIME_OVERSTATES_TEMPORAL_CONSTRAINT": "YES",
+  "artifact_id": "V35R3D_R1_RW_RSP_COMPARISON_V1",
+  "deltas_RSP_minus_RW": {
+    "W1_direct_opportunities": 0,
+    "W3_direct_opportunities": 0,
+    "W5_direct_opportunities": 0,
+    "pre_W5_decisions_with_W5_consequence": -51,
+    "release_events": 15,
+    "released_GPU_hours": 56.25,
+    "total_standby_starts": 86,
+    "turnover": 239
+  },
+  "interpretation": "TEMPORAL SCHEDULING OPPORTUNITY INCREASED",
+  "primary_modes": [
+    "RW",
+    "RSP"
+  ],
+  "start_accounting": {
+    "RSP": {
+      "initial_pending_jobs": 339,
+      "normal": {
+        "APR01": 0,
+        "NOT_STARTED_BY_T2": 0,
+        "PRE_DAY": 1,
+        "TOTAL_T0_T2": 1
+      },
+      "normal_conservation_PASS": true,
+      "pending_conservation_PASS": true,
+      "standby": {
+        "APR01": 175,
+        "NOT_STARTED_BY_T2": 0,
+        "PRE_DAY": 163,
+        "TOTAL_T0_T2": 338
+      },
+      "standby_conservation_PASS": true,
+      "started_by_T2": 339,
+      "terminal_pending_jobs": 0,
+      "terminal_pending_requested_GPU_hours": 0.0
+    },
+    "RW": {
+      "initial_pending_jobs": 339,
+      "normal": {
+        "APR01": 0,
+        "NOT_STARTED_BY_T2": 0,
+        "PRE_DAY": 1,
+        "TOTAL_T0_T2": 1
+      },
+      "normal_conservation_PASS": true,
+      "pending_conservation_PASS": true,
+      "standby": {
+        "APR01": 161,
+        "NOT_STARTED_BY_T2": 86,
+        "PRE_DAY": 91,
+        "TOTAL_T0_T2": 252
+      },
+      "standby_conservation_PASS": true,
+      "started_by_T2": 253,
+      "terminal_pending_jobs": 86,
+      "terminal_pending_requested_GPU_hours": 3408.0
+    }
+  }
+}
