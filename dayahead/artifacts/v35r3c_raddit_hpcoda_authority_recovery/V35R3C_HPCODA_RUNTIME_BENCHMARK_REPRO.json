@@ -1,0 +1,22 @@
+{
+  "MAE_seconds": null,
+  "RMSE_seconds": null,
+  "artifact_id": "V35R3C_HPCODA_RUNTIME_BENCHMARK_REPRO_V1",
+  "attempted_network_or_install": false,
+  "config_semantic_equivalence": "PASS",
+  "local_scope": "PREISSUE_WINDOW_ONLY; NO_APR02_PLUS; NO_MAY",
+  "local_xgboost_version": null,
+  "median_AE_seconds": null,
+  "published_reference": {
+    "MAE_seconds": 11527.4,
+    "RMSE_seconds": 33974.5,
+    "architecture_variance_allowed_by_source": true,
+    "declared_environment": "macOS/arm64 xgboost 3.2.0",
+    "median_AE_seconds": 1374.3,
+    "scored_rows": 254338
+  },
+  "reason": "Pinned MoE imports xgboost.XGBRegressor and requires xgboost>=2.0; no installed Windows, bundled, cached-wheel, or WSL runtime contains xgboost, and installation is forbidden.",
+  "scored_rows": 0,
+  "source_dataset_SHA_match": true,
+  "status": "NOT_REPRODUCED_MISSING_XGBOOST_DEPENDENCY"
+}

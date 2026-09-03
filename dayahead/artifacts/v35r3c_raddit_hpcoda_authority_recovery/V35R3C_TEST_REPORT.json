@@ -1,0 +1,12 @@
+{
+  "artifact_id": "V35R3C_TEST_REPORT_V1",
+  "command": "python -m pytest tests/dayahead/test_v35r3a_kestrel_scheduler_temporal.py tests/dayahead/test_v35r3c_raddit_hpcoda_authority_recovery.py -k 'not test_exact_starting_lineage_and_branch and not test_changes_are_confined_to_prototype_namespaces' -q",
+  "deselected_prior_branch_context_tests": 2,
+  "deselection_reason": "The two V35R3A-only tests hard-code the prior branch name and permit only V35R3A paths; equivalent V35R3C lineage and isolation checks are executed in the V35R3C test module.",
+  "failed": 0,
+  "output": ".............................................................            [100%]\n61 passed, 2 deselected in 2.52s",
+  "passed": 61,
+  "returncode": 0,
+  "status": "PASS",
+  "tested_at_utc": "2026-09-03T07:57:37.662780+00:00"
+}

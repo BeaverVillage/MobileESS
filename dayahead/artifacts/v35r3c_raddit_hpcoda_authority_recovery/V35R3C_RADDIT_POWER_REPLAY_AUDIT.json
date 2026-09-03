@@ -1,0 +1,85 @@
+{
+  "P3_eligible": false,
+  "aggregate_evaluation_metrics": {
+    "baseline_power_results.parquet": {
+      "MAE": 60.08754219578281,
+      "P95_AE": 240.53975643806484,
+      "RMSE": 99.55002441978321,
+      "Spearman": 0.7862453752951221,
+      "WAPE": 0.10530844480085859,
+      "median_AE": 26.921009916429398,
+      "rows": 1026975
+    },
+    "baseline_runtime_results.parquet": {
+      "MAE": 2.214080990878689,
+      "P95_AE": 10.476322222222223,
+      "RMSE": 5.908246257277872,
+      "Spearman": 0.6636556562717423,
+      "WAPE": 0.8762724302251659,
+      "median_AE": 0.41777488888888886,
+      "metric_unit": "hours",
+      "negative_prediction_rows": 35683,
+      "rows": 1035281
+    },
+    "semantic_search_power_results.parquet": {
+      "MAE": 55.946779856880326,
+      "P95_AE": 297.0020452502468,
+      "RMSE": 104.19320879513337,
+      "Spearman": 0.778779245756802,
+      "WAPE": 0.09786011385303395,
+      "median_AE": 17.38278657585488,
+      "rows": 1035365
+    },
+    "semantic_search_runtime_results.parquet": {
+      "MAE": 2.123480514591892,
+      "P95_AE": 10.145677777777761,
+      "RMSE": 7.3099755319413635,
+      "Spearman": 0.6635063956755226,
+      "WAPE": 0.8404575616944797,
+      "median_AE": 0.2109033251329711,
+      "metric_unit": "hours",
+      "negative_prediction_rows": 0,
+      "rows": 1035365
+    }
+  },
+  "aggregate_payload_scientific_use": "MODEL_VALIDATION_ONLY_NOT_APR01_JOIN",
+  "artifact_id": "V35R3C_RADDIT_POWER_REPLAY_AUDIT_V1",
+  "checkpoint_required": false,
+  "classification": "PUBLISHED_POWER_REPLAY_BLOCKED_INCOMPLETE_INPUT_TRANSFORM_AND_H100_DOMAIN",
+  "complete_exact_input_and_transform_required": true,
+  "local_xgboost_version": null,
+  "normalization_path": {
+    "array_pos": "ABSENT_FROM_RECOVERED_HISTORIC_TRACE",
+    "conda_envs_to_conda_envs_set": "NOT_FOUND",
+    "modules_to_modules_set": "NOT_FOUND",
+    "wallclock_req_sec_to_wallclock_req_seconds": "NOT_FOUND"
+  },
+  "required_input": "kestrel_baseline_data.parquet",
+  "required_input_present": false,
+  "source_defined_creation_path_found": false,
+  "source_model": "xgboost.XGBRegressor defaults, freshly fitted per one-hour split",
+  "source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR_scheduler_authority\\02_RADDiT\\energy_aware_scheduling\\scripts\\baseline_models.py",
+  "source_preprocessing": {
+    "PCA_components": 100,
+    "categorical": [
+      "job_type",
+      "user",
+      "account",
+      "partition"
+    ],
+    "minimum_frequency": 1000,
+    "multilabel": [
+      "modules_set",
+      "conda_envs_set"
+    ],
+    "numeric": [
+      "nodes_req",
+      "wallclock_req_seconds",
+      "processors_req",
+      "memory_req_raw"
+    ]
+  },
+  "source_sha256": "b6ae82c32ff5b3a9d648f22ef7ae378e141c12cc5cd8921d39f5d31201602845",
+  "source_test_hours": 1,
+  "source_training_days": 100
+}

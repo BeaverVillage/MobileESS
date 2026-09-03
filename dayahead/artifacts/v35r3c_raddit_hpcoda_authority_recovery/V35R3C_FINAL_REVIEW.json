@@ -1,0 +1,424 @@
+{
+  "artifact_id": "V35R3C_FINAL_REVIEW_V1",
+  "authority_decisions": {
+    "grid_binding": "GRID_BINDING_INCOMPLETE",
+    "power": "RADDIT_POWER_DOMAIN_MISMATCH_FOR_H100",
+    "runtime": "R1_REQUESTED_WALLTIME_ONLY"
+  },
+  "numbered_report": {
+    "1": {
+      "label": "parent HEAD",
+      "value": "27b427827bdf1c397b66391f012be41ef9b2ae87"
+    },
+    "10": {
+      "label": "RADDiT payload row counts",
+      "value": {
+        "data/baseline_power_results.parquet": 1035281,
+        "data/baseline_runtime_results.parquet": 1035281,
+        "data/historic_job_trace.parquet": 2557884,
+        "data/semantic_search_power_results.parquet": 1035365,
+        "data/semantic_search_runtime_results.parquet": 1035365
+      }
+    },
+    "11": {
+      "label": "payload schemas",
+      "value": {
+        "data/baseline_power_results.parquet": {
+          "avg_power_per_node": "double",
+          "predicted_power": "double"
+        },
+        "data/baseline_runtime_results.parquet": {
+          "predicted_runtime_hours": "double",
+          "wallclock_used_sec": "double"
+        },
+        "data/historic_job_trace.parquet": {
+          "account": "string",
+          "avg_power_per_node": "double",
+          "conda_envs": "list<element: string>",
+          "end_time": "timestamp[us, tz=-06:00]",
+          "job_id": "int64",
+          "job_type": "string",
+          "memory_req_raw": "double",
+          "modules": "list<element: string>",
+          "name": "string",
+          "nodes_req": "int64",
+          "partition": "string",
+          "processors_req": "int64",
+          "qos": "string",
+          "script": "string",
+          "start_time": "timestamp[us, tz=-06:00]",
+          "submit_line": "string",
+          "submit_time": "timestamp[us, tz=-06:00]",
+          "user": "string",
+          "wallclock_req_sec": "double",
+          "wallclock_used_sec": "double"
+        },
+        "data/semantic_search_power_results.parquet": {
+          "avg_power_per_node": "double",
+          "predicted_power": "double"
+        },
+        "data/semantic_search_runtime_results.parquet": {
+          "predicted_runtime_hours": "double",
+          "wallclock_used_sec": "double"
+        }
+      }
+    },
+    "12": {
+      "label": "payload time ranges",
+      "value": {
+        "data/baseline_power_results.parquet": {},
+        "data/baseline_runtime_results.parquet": {},
+        "data/historic_job_trace.parquet": {
+          "end_time": {
+            "max": "2025-03-10T10:19:04+00:00",
+            "min": "2023-12-15T20:24:12+00:00"
+          },
+          "start_time": {
+            "max": "2025-03-10T09:45:50+00:00",
+            "min": "2023-12-15T20:21:15+00:00"
+          },
+          "submit_time": {
+            "max": "2025-03-10T09:45:47+00:00",
+            "min": "2023-11-07T22:32:42+00:00"
+          }
+        },
+        "data/semantic_search_power_results.parquet": {},
+        "data/semantic_search_runtime_results.parquet": {}
+      }
+    },
+    "13": {
+      "label": "hpc-oda HEAD",
+      "value": "218d75f56b783ebfd698100f9406cfb46fa04c01"
+    },
+    "14": {
+      "label": "Kestrel source SHA match",
+      "value": true
+    },
+    "15": {
+      "label": "RADDiT/Kestrel exact ID overlap",
+      "value": 1172189
+    },
+    "16": {
+      "label": "timestamp-consistent overlap",
+      "value": 0
+    },
+    "17": {
+      "label": "Apr-01 R_tau overlap",
+      "value": 0
+    },
+    "18": {
+      "label": "Apr-01 P_tau overlap",
+      "value": 0
+    },
+    "19": {
+      "label": "339 temporal-job overlap",
+      "value": 0
+    },
+    "2": {
+      "label": "branch",
+      "value": "codex/v35r3c-raddit-hpcoda-authority-recovery"
+    },
+    "20": {
+      "label": "runtime authority R-level",
+      "value": "R1_REQUESTED_WALLTIME_ONLY"
+    },
+    "21": {
+      "label": "public benchmark reproduction",
+      "value": "NOT_REPRODUCED_MISSING_XGBOOST_DEPENDENCY"
+    },
+    "22": {
+      "label": "query adapter equivalence",
+      "value": "RUNTIME_QUERY_ADAPTER_EQUIVALENCE_FAIL"
+    },
+    "23": {
+      "label": "Apr-01 prediction coverage",
+      "value": "0/339 point; 0/339 safe"
+    },
+    "24": {
+      "label": "point MAE / median AE / P95 AE",
+      "value": "NOT_AVAILABLE"
+    },
+    "25": {
+      "label": "point underprediction rate",
+      "value": "NOT_AVAILABLE"
+    },
+    "26": {
+      "label": "q90 positive residual",
+      "value": null
+    },
+    "27": {
+      "label": "safe historical coverage",
+      "value": "NOT_AVAILABLE"
+    },
+    "28": {
+      "label": "requested-walltime/point ratio",
+      "value": "NOT_AVAILABLE"
+    },
+    "29": {
+      "label": "requested-walltime/safe ratio",
+      "value": "NOT_AVAILABLE"
+    },
+    "3": {
+      "label": "worktree",
+      "value": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v35r3c_raddit_hpcoda_authority_recovery"
+    },
+    "30": {
+      "label": "RW saturated slots",
+      "value": 96
+    },
+    "31": {
+      "label": "RP saturated slots",
+      "value": "NOT_RUN_RUNTIME_POINT_UNAVAILABLE"
+    },
+    "32": {
+      "label": "RS saturated slots",
+      "value": "NOT_RUN_RUNTIME_SAFE_UNAVAILABLE"
+    },
+    "33": {
+      "label": "first RS capacity-release slot",
+      "value": null
+    },
+    "34": {
+      "label": "W1 free GPU",
+      "value": 0.0
+    },
+    "35": {
+      "label": "W3 free GPU",
+      "value": 0.0
+    },
+    "36": {
+      "label": "W5 free GPU",
+      "value": 0.0
+    },
+    "37": {
+      "label": "free GPU-hours",
+      "value": 0.0
+    },
+    "38": {
+      "label": "requested-walltime artifact",
+      "value": "UNRESOLVED_NO_R3Q_SAFE_RUNTIME"
+    },
+    "39": {
+      "label": "power authority P-level",
+      "value": "RADDIT_POWER_DOMAIN_MISMATCH_FOR_H100"
+    },
+    "4": {
+      "label": "final HEAD",
+      "value": "RECORDED_AFTER_COMMIT_IN_FINAL_RESPONSE"
+    },
+    "40": {
+      "label": "RADDiT CPU/GPU domain",
+      "value": "CPU-exclusive validation; GPU/H100 not identifiable"
+    },
+    "41": {
+      "label": "H100 coverage",
+      "value": "0/339"
+    },
+    "42": {
+      "label": "exclusive/shared applicability",
+      "value": "No H100 applicability; PARTIAL/shared 0/336"
+    },
+    "43": {
+      "label": "attribution status",
+      "value": "POWER_ATTRIBUTION_AMBIGUOUS"
+    },
+    "44": {
+      "label": "model quality",
+      "value": "CPU aggregate evaluation only; no H100 model"
+    },
+    "45": {
+      "label": "same-GPU-count power spread",
+      "value": "NOT_AVAILABLE"
+    },
+    "46": {
+      "label": "Apr-01 power coverage",
+      "value": "0/339"
+    },
+    "47": {
+      "label": "production mapping authority",
+      "value": "GRID_BINDING_INCOMPLETE"
+    },
+    "48": {
+      "label": "result-independence PASS/FAIL",
+      "value": "FAIL_NO_JOB_TO_AIDC_MAPPING"
+    },
+    "49": {
+      "label": "Fresh eligibility",
+      "value": "FRESH_NOT_RUN_GRID_BINDING_INCOMPLETE"
+    },
+    "5": {
+      "label": "clean",
+      "value": "EXPECTED_CLEAN_AFTER_COMMIT"
+    },
+    "50": {
+      "label": "temporal jobs",
+      "value": 339
+    },
+    "51": {
+      "label": "W5-overlap jobs",
+      "value": 202
+    },
+    "52": {
+      "label": "raw same-tier pairs",
+      "value": 27537
+    },
+    "53": {
+      "label": "resource-feasible",
+      "value": 24
+    },
+    "54": {
+      "label": "service-safe",
+      "value": 24
+    },
+    "55": {
+      "label": "power-heterogeneous",
+      "value": 0
+    },
+    "56": {
+      "label": "power-reducing",
+      "value": 0
+    },
+    "57": {
+      "label": "Planning-improving",
+      "value": 0
+    },
+    "58": {
+      "label": "accepted reprioritizations",
+      "value": 0
+    },
+    "59": {
+      "label": "shifted GPU-hours",
+      "value": 0.0
+    },
+    "6": {
+      "label": "production files changed",
+      "value": 0
+    },
+    "60": {
+      "label": "W1 IT power change",
+      "value": 0.0
+    },
+    "61": {
+      "label": "W3 IT power change",
+      "value": 0.0
+    },
+    "62": {
+      "label": "W5 IT power change",
+      "value": 0.0
+    },
+    "63": {
+      "label": "PCC change",
+      "value": "UNAVAILABLE_GRID_BINDING_INCOMPLETE"
+    },
+    "64": {
+      "label": "Planning rho change",
+      "value": 0.0
+    },
+    "65": {
+      "label": "critical exposure change",
+      "value": "0.0 H0 proxy; exact unavailable"
+    },
+    "66": {
+      "label": "rebound",
+      "value": 0.0
+    },
+    "67": {
+      "label": "Fresh rho/direction if authorized",
+      "value": "NOT_AUTHORIZED"
+    },
+    "68": {
+      "label": "high/normal delay",
+      "value": 0
+    },
+    "69": {
+      "label": "completed-job delta",
+      "value": 0.0
+    },
+    "7": {
+      "label": "vendor/data files changed",
+      "value": 0
+    },
+    "70": {
+      "label": "completed-GPU-hour delta",
+      "value": 0.0
+    },
+    "71": {
+      "label": "terminal pending delta",
+      "value": 0.0
+    },
+    "72": {
+      "label": "future-feature reads",
+      "value": {
+        "Fresh_reads_during_selection": 0,
+        "future_actual_end_feature_reads": 0,
+        "future_actual_start_feature_reads": 0,
+        "post_issue_job_identity_reads_KQ0": 0,
+        "realized_runtime_feature_reads_for_query": 0
+      }
+    },
+    "73": {
+      "label": "unsupported deadline",
+      "value": "NO"
+    },
+    "74": {
+      "label": "Fresh used in selection",
+      "value": "NO"
+    },
+    "75": {
+      "label": "passed/failed",
+      "value": {
+        "command": "python -m pytest tests/dayahead/test_v35r3a_kestrel_scheduler_temporal.py tests/dayahead/test_v35r3c_raddit_hpcoda_authority_recovery.py -k 'not test_exact_starting_lineage_and_branch and not test_changes_are_confined_to_prototype_namespaces' -q",
+        "failed": 0,
+        "output": ".............................................................            [100%]\n61 passed, 2 deselected in 2.52s",
+        "passed": 61,
+        "status": "PASS"
+      }
+    },
+    "76": {
+      "label": "primary classification",
+      "value": "V35R3C_RECOVERED_AUTHORITY_STILL_INSUFFICIENT"
+    },
+    "77": {
+      "label": "production integration recommendation",
+      "value": "PRODUCTION_INTEGRATION_RECOMMENDED = NO"
+    },
+    "8": {
+      "label": "push/merge",
+      "value": "NO/NO"
+    },
+    "9": {
+      "label": "five RADDiT hashes PASS/FAIL",
+      "value": "PASS"
+    }
+  },
+  "questions": {
+    "Q1": "예. 5개 모두 지정 SHA-256·크기·PAR1 매직을 만족하는 실제 Parquet이다.",
+    "Q10": "0개다. H0의 resource/service-safe pair는 24개지만 power-beneficial 권위 교집합은 0개다.",
+    "Q11": "아니오. H0는 변화가 없고 job-to-AIDC/PCC binding이 없어 power-aware Planning을 실행하지 않았다.",
+    "Q12": "Fresh는 과학적으로 허가되지 않아 실행하지 않았다.",
+    "Q13": "아니오. V35R3 production 통합을 권고하지 않는다.",
+    "Q14": "정확한 blockers는 pinned xgboost 실행/adapter 동등성 부재, H100-valid power label·모델 부재, PARTIAL/shared attribution 모호성, exact job-to-AIDC/PCC binding 부재다.",
+    "Q2": "아니오. 숫자 full-ID는 1,172,189건 우연히 겹치지만 제출시각 일치는 0건이고 RADDiT ID는 연속 행 인덱스다.",
+    "Q3": "아니오. source/config/data SHA는 맞지만 필수 xgboost>=2.0 실행환경이 없고 설치가 금지되어 pinned MoE와 동등성 시험이 막혔다.",
+    "Q4": "point 0.0%, safe 0.0%다.",
+    "Q5": "판정 불가다. 권위 있는 safe runtime이 없어 RS를 실행하지 않았다.",
+    "Q6": "UNRESOLVED다. RP가 아니라 유효 RS로만 확정할 수 있다.",
+    "Q7": "CPU-exclusive 검증만 덮는다. recovered trace에는 GPU 요청/H100 식별 필드가 없다.",
+    "Q8": "아니오. 336개 PARTIAL/shared에 대한 incremental power 경계가 없고 합산은 이중계산 위험이 있다.",
+    "Q9": "아니오. canonical H100 최근 120일의 양의 raw-energy 행이 0이라 P2 전용-node cohort도 비었다."
+  },
+  "queue_contract": {
+    "high": 0,
+    "partial_shared_temporal": 336,
+    "pending": 421,
+    "preemptive": false,
+    "raw_normal": 1,
+    "raw_standby": 420,
+    "running": 243,
+    "standby": 338,
+    "standby_requested_GPU_hours": 14640.0,
+    "temporal": 339,
+    "temporal_requested_GPU_hours": 14832.0
+  },
+  "status": "RECOVERED_AUTHORITY_REVALIDATED_FAIL_CLOSED"
+}

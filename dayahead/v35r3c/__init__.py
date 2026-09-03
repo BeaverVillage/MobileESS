@@ -1,0 +1,17 @@
+"""V35R3C recovered-authority, Apr-01-only forensic package."""
+
+from .contracts import (
+    ARTIFACT_DIRNAME,
+    EXPECTED_BRANCH,
+    PRIMARY_CLASSIFICATION,
+    PRODUCTION_RECOMMENDATION,
+    SOURCE_PARENT,
+)
+
+__all__ = [
+    "ARTIFACT_DIRNAME",
+    "EXPECTED_BRANCH",
+    "PRIMARY_CLASSIFICATION",
+    "PRODUCTION_RECOMMENDATION",
+    "SOURCE_PARENT",
+]
