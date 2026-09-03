@@ -162,8 +162,9 @@ def finalize_campaign(repo: Path, started: float, peak_active: int) -> dict[str,
         }
         for label in ("B1-B0", "B2-B0", "B3-B0", "B3-B2", "B3-B1")
     }
-    physical_dates = [day for day in pass_dates if not results[day].get("physical_gates_PASS", False)]
-    fresh_non96 = [day for day in pass_dates if not results[day].get("Fresh_96_of_96_PASS", False)]
+    evaluated = [day for day in EXPECTED_DATES if "cases" in results.get(day, {})]
+    physical_dates = [day for day in evaluated if not results[day].get("physical_gates_PASS", False)]
+    fresh_non96 = [day for day in evaluated if not results[day].get("Fresh_96_of_96_PASS", False)]
     fallback_dates = [
         day for day in pass_dates
         if any(results[day]["cases"][case]["fallback_count"] for case in ("B2", "B3"))
@@ -172,7 +173,7 @@ def finalize_campaign(repo: Path, started: float, peak_active: int) -> dict[str,
         case: _distribution(result["cases"][case]["relocation_transitions"] for result in successful)
         for case in ("B2", "B3")
     }
-    all_runnable_terminal = all(day in results for day in manifest["runnable_dates"])
+    all_runnable_terminal = bool(manifest["runnable_dates"]) and all(day in results for day in manifest["runnable_dates"])
     all_runnable_pass = all(results.get(day, {}).get("status") == "PASS" for day in manifest["runnable_dates"])
     classification = (
         "V37_MAY_LOCKED_FINAL_EVALUATION_PASS_WITH_FAIL_CLOSED_MISSING_DATA"
@@ -193,7 +194,8 @@ def finalize_campaign(repo: Path, started: float, peak_active: int) -> dict[str,
         "physical_violation_dates": physical_dates, "Fresh_non_96_of_96_dates": fresh_non96,
         "MESS_fallback_dates": fallback_dates, "MESS_relocation_statistics": relocation_stats,
         "failures": {day: results[day].get("error") for day in fail_dates},
-        "firewall": FIREWALL, "meeting_ready": all_runnable_terminal,
+        "firewall": FIREWALL,
+        "meeting_ready": all_runnable_terminal and len(manifest["runnable_dates"]) == len(EXPECTED_DATES),
     }
     atomic_json(repo / ARTIFACT_ROOT / "V37_MAY_FINAL_SUMMARY.json", summary)
     rows = [_meeting_row(day, results.get(day, {"status": "FAIL"})) for day in EXPECTED_DATES]
@@ -243,6 +245,13 @@ def run_campaign(repo: Path) -> dict[str, Any]:
                 "error": error, "missing_data": True, "firewall": FIREWALL,
             })
             write_status(repo / STATUS_ROOT / f"{day}.json", day, "FAIL", 0, None, error=error, extra={"missing_data": True})
+        # Reset prior non-PASS engineering failures before source preparation so
+        # the live monitor never presents a stale terminal campaign as final.
+        for day in manifest["runnable_dates"]:
+            status_path = repo / STATUS_ROOT / f"{day}.json"
+            prior = read_json(status_path) if status_path.is_file() else {}
+            if prior.get("status") != "PASS":
+                write_status(status_path, day, "PENDING", 0, "SOURCE_PREPARATION")
         print(f"V37 source materialization: {len(manifest['runnable_dates'])} dates", flush=True)
         source_report = materialize_sources(repo, list(manifest["runnable_dates"]))
         source_runnable = set(source_report.get("runnable_dates", []))
