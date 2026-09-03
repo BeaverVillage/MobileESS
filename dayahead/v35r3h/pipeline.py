@@ -1125,7 +1125,26 @@ def build_artifacts(
         "V35R3H_KESTREL_BRIDGE_ELIGIBILITY_MATRIX.json": bridge,
         "V35R3H_AUTHORITY_DECISION.json": authority,
         "V35R3H_NEXT_STEP_DECISION.json": next_step,
-        "V35R3H_REPAIR_LOG.json": {"artifact_id": "V35R3H_REPAIR_LOG_V1", "repair_attempts": [], "unique_failure_signatures": 0, "science_neutral_repairs": 0},
+        "V35R3H_REPAIR_LOG.json": {
+            "artifact_id": "V35R3H_REPAIR_LOG_V1",
+            "repair_attempts": [
+                {
+                    "signature": "test_report_absent_during_pre_report_test_run",
+                    "attempt": 1,
+                    "repair": "write an explicit provisional test report before invoking the targeted suite",
+                    "science_neutral": True,
+                },
+                {
+                    "signature": "JSON_sort_keys_changes_numeric_string_insertion_order",
+                    "attempt": 1,
+                    "repair": "validate exact numbered key set; human-readable Markdown retains numeric order",
+                    "science_neutral": True,
+                },
+            ],
+            "unique_failure_signatures": 2,
+            "science_neutral_repairs": 2,
+            "maximum_attempts_per_signature": 1,
+        },
     }
     for filename, payload in json_artifacts.items():
         write_json(ARTIFACTS / filename, with_provenance(payload, code_commit))
@@ -1200,6 +1219,18 @@ def main() -> int:
     code_commit = git("rev-parse", "HEAD")
     build_artifacts(scan, science, source, metadata, start, isolation, crosscheck, accounting, code_commit)
     provisional = {"passed": 0, "failed": 0}
+    write_json(
+        ARTIFACTS / "V35R3H_TEST_REPORT.json",
+        with_provenance(
+            {
+                "artifact_id": "V35R3H_TEST_REPORT_V1",
+                "status": "PROVISIONAL_PENDING_TARGETED_TEST_RUN",
+                "passed": 0,
+                "failed": 0,
+            },
+            code_commit,
+        ),
+    )
     payload, markdown = build_final_review(scan, science, source, crosscheck, provisional, code_commit)
     write_json(ARTIFACTS / "V35R3H_FINAL_REVIEW.json", payload)
     (ARTIFACTS / "V35R3H_FINAL_REVIEW.md").write_text(markdown, encoding="utf-8")

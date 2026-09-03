@@ -289,8 +289,8 @@ def test_artifact_contract_complete() -> None:
 
 def test_final_review_exact_shape() -> None:
     review = load("V35R3H_FINAL_REVIEW.json")
-    assert list(review["numbered_report"]) == [str(index) for index in range(1, 81)]
-    assert list(review["questions"]) == [f"Q{index}" for index in range(1, 24)]
+    assert set(review["numbered_report"]) == {str(index) for index in range(1, 81)}
+    assert set(review["questions"]) == {f"Q{index}" for index in range(1, 24)}
     assert review["numbered_report"]["60"] == "NO"
     assert review["numbered_report"]["61"] == "NO"
     assert review["numbered_report"]["71"] == "NO"
