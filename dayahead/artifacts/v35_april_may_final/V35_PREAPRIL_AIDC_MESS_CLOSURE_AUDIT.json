@@ -4,6 +4,7 @@
   "artifact_id": "V35_PREAPRIL_AIDC_MESS_CLOSURE_AUDIT_V1",
   "checks": {
     "AIDC_decision_to_PQ_to_grid_to_objective": true,
+    "AIDC_only_stage_disables_legacy_MESS_internally": true,
     "B3_lineage_invariant": true,
     "MESS_PQ_to_planning_grid": true,
     "May_numeric_reads": 0,
@@ -14,14 +15,22 @@
     "stationary_PQ_improvement_resolved": true,
     "stationary_PQ_optimized_nonzero": true
   },
-  "code_HEAD": "f7899e01e9fc46c5be70cfc0601105e2007fb776",
-  "created_at": "2026-09-02T17:30:52.389764+00:00",
+  "code_HEAD": "a00af70b85125e770b9ca254fed442b1d98bcda3",
+  "created_at": "2026-09-02T18:17:11.057980+00:00",
   "defects_discovered": [
     {
       "classification": "ENGINEERING_SOLVER_INTEGRATION_DEFECT",
       "defect_id": "V35_STATIONARY_PQ_LOOSE_RELATIVE_GAP_ZERO_INCUMBENT_DEFECT",
       "repair": "Solve the exact full model temporarily fixed to STAY at MIPGap=1e-7, use the resulting P/Q trajectory as MIPStart, compare the full incumbent against it, and escalate deterministically through WorkLimit 60/180/300 only on starvation evidence.",
       "root_cause": "The restricted stationary P/Q MIP accepted the zero-actuation incumbent at MIPGap=1e-3 even though a fully feasible +50 kvar point reduced rho; Gurobi OPTIMAL meant within the requested relative gap, not an exact zero-actuation optimum.",
+      "science_changed": false
+    },
+    {
+      "classification": "CASE_BINDING_DEFECT",
+      "defect_id": "V35_AIDC_ONLY_STAGE_LEGACY_MESS_CONDITIONING_DEFECT",
+      "invalidation": "No V35 campaign result existed; V34 audit evidence is preserved and V35 case outputs are generated only from the repaired stage.",
+      "repair": "The V35 AIDC-only B0/B1 stage now fixes every MESS P/Q value to zero, removes legacy mobility energy from that stage, holds all four units stationary, and solves AIDC again before B2/B3 sequential V33M3 coordination.",
+      "root_cause": "Legacy V28R2 B0/B1 resource models fixed a small pre-route MESS charging trajectory and mobility energy, so merely zeroing MESS in the exported V34 schedule did not make the upstream AIDC optimization truly MESS-free.",
       "science_changed": false
     }
   ],

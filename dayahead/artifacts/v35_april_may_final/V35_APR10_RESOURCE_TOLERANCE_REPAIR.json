@@ -1,0 +1,95 @@
+{
+  "artifact_id": "V35_APR10_RESOURCE_TOLERANCE_REPAIR_V1",
+  "status": "PASS",
+  "classification": "ENGINEERING_RUNTIME_DEFECT",
+  "day": "2025-04-10",
+  "phase": "APR01_20_AC_FIDELITY_CALIBRATION",
+  "root_cause": {
+    "exception": "V34_RESOURCE_INPUT_NEGATIVE",
+    "input": "B1 Day-Ahead workload authorization",
+    "minimum_value": -4.670639137086481e-08,
+    "negative_cell_count": 1,
+    "negative_cell_index_cohort_rack_slot": [
+      11,
+      37,
+      34
+    ],
+    "frozen_solver_feasibility_tolerance": 1e-06,
+    "finding": "SOLVER_TOLERANCE_RESIDUE_REJECTED_AS_PHYSICAL_NEGATIVE"
+  },
+  "repair": {
+    "commit": "f4d7b5f1ac8b01a353087743379276775437de30",
+    "scope": "ACTUAL_AIDC_DA_AUTHORIZATION_BOUNDARY",
+    "behavior": "Clamp only optimizer-derived DA authorization in [-1e-6, 0) to zero before resource-only Actual recourse",
+    "meaningful_negative_policy": "FAIL_CLOSED_BELOW_MINUS_1E_6",
+    "exogenous_arrivals_and_capacity_policy": "EXACT_NONNEGATIVE",
+    "scientific_authority_changed": false,
+    "objective_or_scale_changed": false
+  },
+  "retry_evidence": {
+    "failed_attempts": 3,
+    "successful_attempt": 4,
+    "april_retry_limit": 5,
+    "failure_records": [
+      {
+        "path": "dayahead/artifacts/v35_april_may_final/failures/APR01_20_AC_FIDELITY_CALIBRATION/2025-04-10/attempt-1/FAILURE.json",
+        "sha256": "968cf6bd90df9d3bca0320f01d3816700b4a2404e1e8cecbf35afc20f59446bb"
+      },
+      {
+        "path": "dayahead/artifacts/v35_april_may_final/failures/APR01_20_AC_FIDELITY_CALIBRATION/2025-04-10/attempt-2/FAILURE.json",
+        "sha256": "97c61f17979515ae3d34c4993d3ed9842ef4fcad17c981f0def7f6b39d405aca"
+      },
+      {
+        "path": "dayahead/artifacts/v35_april_may_final/failures/APR01_20_AC_FIDELITY_CALIBRATION/2025-04-10/attempt-3/FAILURE.json",
+        "sha256": "7d4d04421022f573cf0845e3bc6d9d4060dac298b2f899c38271735fb92b8d5f"
+      }
+    ]
+  },
+  "impact_based_invalidation": {
+    "prior_days_preserved": [
+      "2025-04-01",
+      "2025-04-02",
+      "2025-04-03",
+      "2025-04-04",
+      "2025-04-05",
+      "2025-04-06",
+      "2025-04-07",
+      "2025-04-08",
+      "2025-04-09"
+    ],
+    "prior_day_case_passes_preserved": 36,
+    "invalidated_prior_passes": [
+      "2025-04-10/B0"
+    ],
+    "reason_for_current_day_B0_rerun": "Shared Actual AIDC implementation HEAD changed before the day could be completed",
+    "unstarted_cases_at_repair": [
+      "B2",
+      "B3"
+    ]
+  },
+  "targeted_tests": {
+    "command": "python -m pytest -q tests/dayahead/test_v35_selfhealing_contracts.py::test_26_actual_recourse_clamps_only_da_solver_tolerance_residue tests/dayahead/test_v34_april_calibration_validation.py",
+    "passed": 22,
+    "failed": 0,
+    "elapsed_seconds": 1.95
+  },
+  "post_repair_day_audit": {
+    "case_status": {
+      "B0": "PASS",
+      "B1": "PASS",
+      "B2": "PASS",
+      "B3": "PASS"
+    },
+    "all_checkpoint_code_HEAD": "f4d7b5f1ac8b01a353087743379276775437de30",
+    "storage_records": 48,
+    "finite_numeric_arrays": 116,
+    "storage_failures": 0,
+    "B3_B1_AIDC_lineage": "PASS",
+    "B2_B0_AIDC_lineage": "PASS",
+    "AIDC_Actual_firewall": "PASS",
+    "MESS_Actual_firewall": "PASS",
+    "MESS_restricted_beats_full_vehicle_count": 0
+  },
+  "May_numeric_reads_before_admission": 0,
+  "timestamp": "2026-09-02T21:38:02.2515737Z"
+}

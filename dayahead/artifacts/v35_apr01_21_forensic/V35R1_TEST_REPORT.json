@@ -1,0 +1,39 @@
+{
+  "artifact_id": "V35R1_TEST_REPORT_V1",
+  "status": "PASS",
+  "authority_scope": [
+    "2025-04-01",
+    "2025-04-20"
+  ],
+  "Apr21_executed_or_read": false,
+  "code_HEAD": "fa6976ef4a30ff8ceef63f17fcbfd9a459e37821",
+  "completed_at_UTC": "2026-09-03T00:38:41.6556960Z",
+  "commands": [
+    {
+      "command": "python -m pytest -q tests/dayahead/test_v35r1_forensic.py tests/dayahead/test_v35_selfhealing_contracts.py tests/dayahead/test_v34_april_calibration_validation.py",
+      "exit_code": 0,
+      "passed": 59,
+      "failed": 0,
+      "elapsed_seconds": 4.84
+    },
+    {
+      "command": "python -m py_compile dayahead/v35/execution.py dayahead/v35/forensic.py tools/v35/build_forensic_apr01_20.py tests/dayahead/test_v35r1_forensic.py",
+      "exit_code": 0
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "artifact_assertions": {
+    "canonical_day_rows": 20,
+    "algebraic_closure_rows": 80,
+    "maximum_daily_closure_residual": 0.0,
+    "B3_valid_lineage_days": 20,
+    "storage_reloadable_cases": 80,
+    "MESS_solver_quality_rows": 160,
+    "MESS_solver_quality_pass_rows": 160,
+    "scientific_optimization_reruns": 0,
+    "correction_leakage_count": 0
+  }
+}

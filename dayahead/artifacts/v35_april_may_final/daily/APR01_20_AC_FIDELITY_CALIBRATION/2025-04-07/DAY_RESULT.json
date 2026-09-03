@@ -1,0 +1,1378 @@
+{
+  "May_numeric_read": false,
+  "artifact_id": "V35_PHASE_DAY_RESULT_V1",
+  "cases": {
+    "B0": {
+      "MESS": {
+        "MOVE_count": 0,
+        "PQ_nonzero_slot_count": 0,
+        "solver_evidence": [],
+        "sum_abs_P_kW_slots": 0.0,
+        "sum_abs_Q_kvar_slots": 0.0,
+        "terminal_SoC": [
+          0.6333333333333333,
+          0.6333333333333333,
+          0.6333333333333333,
+          0.6333333333333333
+        ],
+        "throughput_kWh": 0.0,
+        "travel_energy_kWh": 0.0
+      },
+      "actual": {
+        "actual_AIDC": {
+          "blocked_or_backlog_nodeh": 181.77191940771223,
+          "cross_site_recourse_nodeh": 17.61595875114083,
+          "executed_nodeh": 18.86808059228769,
+          "firewall": {
+            "Fresh_reads_for_AIDC_decision": 0,
+            "grid_current_reads_for_AIDC_decision": 0,
+            "grid_voltage_reads_for_AIDC_decision": 0,
+            "planning_grid_sensitivity_reads_for_Actual_AIDC_decision": 0,
+            "rho_reads_for_AIDC_decision": 0,
+            "transformer_loading_reads_for_AIDC_decision": 0
+          },
+          "read_fields": [
+            "actual_rack_capacity",
+            "actual_workload_availability",
+            "dayahead_authorization",
+            "rack_compatibility"
+          ],
+          "resource_only_recourse_nodeh": 17.61595875114083,
+          "same_site_nodeh": 1.2521218411468613,
+          "solver_calls": 192
+        },
+        "actual_MESS": {
+          "DA_commitments": [],
+          "actual_MESS_optimizer_calls": 0,
+          "actual_MESS_reroute_calls": 0,
+          "actual_replays": [],
+          "actual_route_change_count": 0,
+          "route_identity": "PASS",
+          "terminal_SoC": [
+            0.6333333333333333,
+            0.6333333333333333,
+            0.6333333333333333,
+            0.6333333333333333
+          ]
+        },
+        "case": "B0",
+        "day": "2025-04-07"
+      },
+      "aidc_enabled": false,
+      "aidc_schedule_sha256": "12b85d3baa82e6ac854a1e231cd3a9bbb63f2826ad50b9bb907aed4e506ffd4a",
+      "aidc_stage_case": "B0",
+      "artifact_id": "V35_PHASE_DAY_CASE_RESULT_V1",
+      "case": "B0",
+      "combined_schedule_sha256": "a5b5464e6b4ea526efd0db7c601cea80a6f5af7d1add93135a1265cad78e210c",
+      "correction_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "day": "2025-04-07",
+      "fresh": {
+        "OpenDSS_solve_count": 96,
+        "Vmax_pu": 1.0493480115103506,
+        "Vmin_pu": 0.9790040308763015,
+        "artifact_id": "V28R2_FRESH_OPENDSS_TRAJECTORY_RESULT_V1",
+        "branch_phase_count": 383,
+        "case": "B0",
+        "clean_engine_count": 1,
+        "convergence_count": 96,
+        "day": "2025-04-07",
+        "elapsed_seconds": 1.3361315000802279,
+        "line_current_violation_count": 0,
+        "line_current_violation_exposure": 0.0,
+        "losses_kvarh": 1991.348527666908,
+        "losses_kwh": 993.7047629805996,
+        "namespace": "DAYAHEAD",
+        "node_phase_count": 386,
+        "opendss_version": "DSS C-API Library version 0.14.5 revision 87d85c2622c8281b92255335bc7c09b11191b21d based on OpenDSS SVN 3723 [FPC 3.2.2] (64-bit build) MVMULT INCREMENTAL_Y CONTEXT_API PM 20240329033747; License Status: Open \nDSS-Python version: 0.15.7\nOpenDSSDirect.py version: 0.9.4",
+        "p95_loading": 0.441651883895029,
+        "p99_loading": 0.5410254244641794,
+        "physical_violation": false,
+        "rho_max_AC": 0.6512866231302535,
+        "schedule_mutation_count": 0,
+        "schedule_sha256": "a5b5464e6b4ea526efd0db7c601cea80a6f5af7d1add93135a1265cad78e210c",
+        "status": "PHYSICAL_RESULT",
+        "transformer_current_violation_count": 0,
+        "transformer_current_violation_exposure": 0.0,
+        "transformer_kva_violation_count": 0,
+        "transformer_kva_violation_exposure_phase_rows": 0.0,
+        "transformer_phase_current_loading_max": 0.7080028642569605,
+        "transformer_total_kva_loading_max": 0.6016975524840225,
+        "voltage_violation_count": 0,
+        "voltage_violation_exposure": 0.0
+      },
+      "fresh_storage_contract": {
+        "all_numeric_arrays_finite": true,
+        "transformer_kVA_non_applicable_encoding": "ZERO_WITH_EXPLICIT_APPLICABILITY_MASK"
+      },
+      "input_authority": {
+        "AIDC_model_authority_SHA": "5bbdf9efadec532c329de83fba2dbe90425758fdcb87c045ee810b77f889c73e",
+        "AIDC_scale_SHA": "66464e16f5f1ba4500a98b612f83fac489c3c3b8262d473150521bab5649092f",
+        "C1_SHA": "66464e16f5f1ba4500a98b612f83fac489c3c3b8262d473150521bab5649092f",
+        "feature_cutoff": "2025-04-06T17:55:00+10:00",
+        "feeder_SHA": "66464e16f5f1ba4500a98b612f83fac489c3c3b8262d473150521bab5649092f",
+        "forecast_authority_SHA": "6a456e3ba77aa4ad262b1f989010865115df9849ba81dda2dffac067962f74bd",
+        "issue_time": "2025-04-06T18:00:00+10:00",
+        "road_graph_SHA": "658fb2e56867a50597e9a21899748d8171439deda852e7db4f3339a99f71dd3d",
+        "service_mapping_SHA": "c3763567f6785f182ab151ca0390918017d4e24c2733f6d72d2304bba416322e",
+        "solver_settings_SHA": "5f6874f1de3f31a42f44309e35cc7f3e217bfa1ba455870cf5beeb167e69ee5b",
+        "traffic_model_SHA": "93a30f54be207f6579a51af32ab6f84fbbb2608ffead3da6332886847a6163e6"
+      },
+      "mess_enabled": false,
+      "mess_trajectory_sha256": null,
+      "objective": 0.6512871029206265,
+      "objective_best_bound": 0.6512871029206265,
+      "objective_unresolved_absolute_gap": 0.0,
+      "phase": "APR01_20_AC_FIDELITY_CALIBRATION",
+      "planning": {
+        "Vmax_pu": 1.0493476704280553,
+        "Vmin_pu": 0.9790035184947709,
+        "binding_asset": "line.sw2::A",
+        "binding_slot": 72,
+        "line_current_violation_count": 0,
+        "pass": true,
+        "rho": 0.6512871029206265,
+        "transformer_current_violation_count": 0,
+        "transformer_kva_violation_count": 0,
+        "voltage_violation_count": 0
+      },
+      "runtime_seconds": 3.47591400006786,
+      "status": "PASS",
+      "storage_files": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B0\\DAYAHEAD_AIDC.npz",
+          "sha256": "4b02fb5a155ccf0eb7251f2fbd5c89363fc35ff81d548828921fb8df718a9316"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B0\\DAYAHEAD_MESS.npz",
+          "sha256": "7cbc02956d872462518626056516d5c2d48a5ecef005c7b2172ee7257a73f013"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B0\\PLANNING_GRID.npz",
+          "sha256": "a3d31b7de22e37ba04d55e0d5331b6b7b5c2f2893d02ae0b0d2a866db2ea1322"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B0\\ACTUAL_AIDC.npz",
+          "sha256": "9a431ad44807dde63d762c11d5582f27a769e07d26f5bfda3497ebdb09e0e19a"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B0\\ACTUAL_MESS.npz",
+          "sha256": "6a12d801dc034de61e7e6afec2f91f860e50fe25dd09a81c3547de06d9554ff0"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B0\\MESS_TRAJECTORY.json",
+          "sha256": "8766c25777867b1c40bb7b857e878002b5e9ba6ba03306e5bd074943cdacf712"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B0\\ACTUAL_SUMMARY.json",
+          "sha256": "1b3eba5fd3b673c50595abf476fc9bc19d7521b455f627acaaa98c8702f6373b"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B0\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+          "sha256": "19d5e4661b40c35f5345184921425944f7dc1618eca615ce36ddd161b9afaa86"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B0\\fresh\\OPENDSS_OUTPUT_MANIFEST.json",
+          "sha256": "70a7f72734eb674f704ceb8f2668a30d0f8b74f4871744110b13779516239df9"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\shared\\traffic\\2025-04-07\\TRAFFIC_FORECAST.npz",
+          "sha256": "dbdb8dd14c4f9b7c29b2780b9928de4fed5dfb6df1e914e7bb93a38fb53c9ca1"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\shared\\traffic\\2025-04-07\\ROUTE_TABLE.json.gz",
+          "sha256": "32a4a66e1298aec2725f9b789f0724a8d2a86eddba17df35965026b86e58d3c9"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B0\\CASE_RESULT.json",
+          "sha256": "89dedc11ef7c9da43133b8ea114e4f05bcd3f7e55c3122a8876adda98baa80b2"
+        }
+      ],
+      "storage_validation": "PASS"
+    },
+    "B1": {
+      "MESS": {
+        "MOVE_count": 0,
+        "PQ_nonzero_slot_count": 0,
+        "solver_evidence": [],
+        "sum_abs_P_kW_slots": 0.0,
+        "sum_abs_Q_kvar_slots": 0.0,
+        "terminal_SoC": [
+          0.6333333333333333,
+          0.6333333333333333,
+          0.6333333333333333,
+          0.6333333333333333
+        ],
+        "throughput_kWh": 0.0,
+        "travel_energy_kWh": 0.0
+      },
+      "actual": {
+        "actual_AIDC": {
+          "blocked_or_backlog_nodeh": 181.77191940771226,
+          "cross_site_recourse_nodeh": 11.157513037365511,
+          "executed_nodeh": 18.86808059228769,
+          "firewall": {
+            "Fresh_reads_for_AIDC_decision": 0,
+            "grid_current_reads_for_AIDC_decision": 0,
+            "grid_voltage_reads_for_AIDC_decision": 0,
+            "planning_grid_sensitivity_reads_for_Actual_AIDC_decision": 0,
+            "rho_reads_for_AIDC_decision": 0,
+            "transformer_loading_reads_for_AIDC_decision": 0
+          },
+          "read_fields": [
+            "actual_rack_capacity",
+            "actual_workload_availability",
+            "dayahead_authorization",
+            "rack_compatibility"
+          ],
+          "resource_only_recourse_nodeh": 11.157513037365511,
+          "same_site_nodeh": 7.710567554922178,
+          "solver_calls": 192
+        },
+        "actual_MESS": {
+          "DA_commitments": [],
+          "actual_MESS_optimizer_calls": 0,
+          "actual_MESS_reroute_calls": 0,
+          "actual_replays": [],
+          "actual_route_change_count": 0,
+          "route_identity": "PASS",
+          "terminal_SoC": [
+            0.6333333333333333,
+            0.6333333333333333,
+            0.6333333333333333,
+            0.6333333333333333
+          ]
+        },
+        "case": "B1",
+        "day": "2025-04-07"
+      },
+      "aidc_enabled": true,
+      "aidc_schedule_sha256": "df2b4665907efebcf41f5c155ddcb9905ce46b5d15c85f444ee1e69823aeeae6",
+      "aidc_stage_case": "B1",
+      "artifact_id": "V35_PHASE_DAY_CASE_RESULT_V1",
+      "case": "B1",
+      "combined_schedule_sha256": "67191085123a9f39ec96c3e719a10cef1f08700ebf2a008c675aeaca255712e6",
+      "correction_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "day": "2025-04-07",
+      "fresh": {
+        "OpenDSS_solve_count": 96,
+        "Vmax_pu": 1.0493478607889923,
+        "Vmin_pu": 0.9790062300255927,
+        "artifact_id": "V28R2_FRESH_OPENDSS_TRAJECTORY_RESULT_V1",
+        "branch_phase_count": 383,
+        "case": "B1",
+        "clean_engine_count": 1,
+        "convergence_count": 96,
+        "day": "2025-04-07",
+        "elapsed_seconds": 1.4569780000019819,
+        "line_current_violation_count": 0,
+        "line_current_violation_exposure": 0.0,
+        "losses_kvarh": 1991.4224298720555,
+        "losses_kwh": 993.7376601653802,
+        "namespace": "DAYAHEAD",
+        "node_phase_count": 386,
+        "opendss_version": "DSS C-API Library version 0.14.5 revision 87d85c2622c8281b92255335bc7c09b11191b21d based on OpenDSS SVN 3723 [FPC 3.2.2] (64-bit build) MVMULT INCREMENTAL_Y CONTEXT_API PM 20240329033747; License Status: Open \nDSS-Python version: 0.15.7\nOpenDSSDirect.py version: 0.9.4",
+        "p95_loading": 0.44164088604854357,
+        "p99_loading": 0.5409418385710916,
+        "physical_violation": false,
+        "rho_max_AC": 0.6512866641915595,
+        "schedule_mutation_count": 0,
+        "schedule_sha256": "67191085123a9f39ec96c3e719a10cef1f08700ebf2a008c675aeaca255712e6",
+        "status": "PHYSICAL_RESULT",
+        "transformer_current_violation_count": 0,
+        "transformer_current_violation_exposure": 0.0,
+        "transformer_kva_violation_count": 0,
+        "transformer_kva_violation_exposure_phase_rows": 0.0,
+        "transformer_phase_current_loading_max": 0.7083165921227159,
+        "transformer_total_kva_loading_max": 0.6021233840741195,
+        "voltage_violation_count": 0,
+        "voltage_violation_exposure": 0.0
+      },
+      "fresh_storage_contract": {
+        "all_numeric_arrays_finite": true,
+        "transformer_kVA_non_applicable_encoding": "ZERO_WITH_EXPLICIT_APPLICABILITY_MASK"
+      },
+      "input_authority": {
+        "AIDC_model_authority_SHA": "5bbdf9efadec532c329de83fba2dbe90425758fdcb87c045ee810b77f889c73e",
+        "AIDC_scale_SHA": "66464e16f5f1ba4500a98b612f83fac489c3c3b8262d473150521bab5649092f",
+        "C1_SHA": "66464e16f5f1ba4500a98b612f83fac489c3c3b8262d473150521bab5649092f",
+        "feature_cutoff": "2025-04-06T17:55:00+10:00",
+        "feeder_SHA": "66464e16f5f1ba4500a98b612f83fac489c3c3b8262d473150521bab5649092f",
+        "forecast_authority_SHA": "6a456e3ba77aa4ad262b1f989010865115df9849ba81dda2dffac067962f74bd",
+        "issue_time": "2025-04-06T18:00:00+10:00",
+        "road_graph_SHA": "658fb2e56867a50597e9a21899748d8171439deda852e7db4f3339a99f71dd3d",
+        "service_mapping_SHA": "c3763567f6785f182ab151ca0390918017d4e24c2733f6d72d2304bba416322e",
+        "solver_settings_SHA": "5f6874f1de3f31a42f44309e35cc7f3e217bfa1ba455870cf5beeb167e69ee5b",
+        "traffic_model_SHA": "93a30f54be207f6579a51af32ab6f84fbbb2608ffead3da6332886847a6163e6"
+      },
+      "mess_enabled": false,
+      "mess_trajectory_sha256": null,
+      "objective": 0.651287096636062,
+      "objective_best_bound": 0.651287096636062,
+      "objective_unresolved_absolute_gap": 0.0,
+      "phase": "APR01_20_AC_FIDELITY_CALIBRATION",
+      "planning": {
+        "Vmax_pu": 1.049347548638845,
+        "Vmin_pu": 0.979005694959746,
+        "binding_asset": "line.sw2::A",
+        "binding_slot": 72,
+        "line_current_violation_count": 0,
+        "pass": true,
+        "rho": 0.651287096636062,
+        "transformer_current_violation_count": 0,
+        "transformer_kva_violation_count": 0,
+        "voltage_violation_count": 0
+      },
+      "runtime_seconds": 3.653293500188738,
+      "status": "PASS",
+      "storage_files": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B1\\DAYAHEAD_AIDC.npz",
+          "sha256": "6e1b157c3cd32678d87a8d1195f38d48abb670051a9e7564fa0924662627d722"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B1\\DAYAHEAD_MESS.npz",
+          "sha256": "7cbc02956d872462518626056516d5c2d48a5ecef005c7b2172ee7257a73f013"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B1\\PLANNING_GRID.npz",
+          "sha256": "53059d1c18a11f2a5911aaf3ab25b26a697535c9fc9cd2775d5b54bd9f3aed0f"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B1\\ACTUAL_AIDC.npz",
+          "sha256": "7982aa8dbf876e2c468081fdc772894a04e58482bfc1183af8e00c5850758843"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B1\\ACTUAL_MESS.npz",
+          "sha256": "6a12d801dc034de61e7e6afec2f91f860e50fe25dd09a81c3547de06d9554ff0"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B1\\MESS_TRAJECTORY.json",
+          "sha256": "580b687ba0948434632f7505009ca43327c304bcdca495b9c4c1ad82faa0773a"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B1\\ACTUAL_SUMMARY.json",
+          "sha256": "2afccad6613ec1da90ccb4bfa4f60faffc02b9a1d4b265ea56c4a456e8fba276"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B1\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+          "sha256": "8ee7bca0fb9fb932c7a067a4059c7d8f0d0cc4034725c9c69dbd33e2a539069b"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B1\\fresh\\OPENDSS_OUTPUT_MANIFEST.json",
+          "sha256": "0ec60bc3f67c560ca9fb3aaea04627c828ab075c223944845d35018d41387e84"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\shared\\traffic\\2025-04-07\\TRAFFIC_FORECAST.npz",
+          "sha256": "dbdb8dd14c4f9b7c29b2780b9928de4fed5dfb6df1e914e7bb93a38fb53c9ca1"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\shared\\traffic\\2025-04-07\\ROUTE_TABLE.json.gz",
+          "sha256": "32a4a66e1298aec2725f9b789f0724a8d2a86eddba17df35965026b86e58d3c9"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B1\\CASE_RESULT.json",
+          "sha256": "1ca075a7ec4d7a7d4d7d7c024d8ffe297f80293e89397a1198abd6d8be8af41d"
+        }
+      ],
+      "storage_validation": "PASS"
+    },
+    "B2": {
+      "MESS": {
+        "MOVE_count": 0,
+        "PQ_nonzero_slot_count": 96,
+        "solver_evidence": [
+          {
+            "MIPStart_accepted": true,
+            "MIP_gap": 0.2713631430759272,
+            "MOVE_binary_count": 51961,
+            "STAY_variable_count": 2304,
+            "best_bound": 0.47425818640269213,
+            "binary_count": 56689,
+            "bounded_compute_classification": "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT",
+            "constraint_count": 342939,
+            "escalation_reason": null,
+            "mess_id": "MESS01",
+            "model_build_seconds": 17.09951620013453,
+            "objective_value": 0.6508841570336757,
+            "peak_rss_bytes": 4945752064,
+            "restricted_incumbent_improves_zero": true,
+            "restricted_stationary_MIP_gap": 0.0,
+            "restricted_stationary_best_bound": 0.6508841570336757,
+            "restricted_stationary_objective": 0.6508841570336757,
+            "restricted_stationary_status": "OPTIMAL",
+            "restricted_stationary_sum_abs_P_kW_slots": 2099.004811727993,
+            "restricted_stationary_sum_abs_Q_kvar_slots": 39244.67586517723,
+            "runtime_seconds": 58.857690799981356,
+            "solver_status": "WORK_LIMIT",
+            "termination": "WORK_LIMIT",
+            "variable_count": 183507,
+            "work_limit_tiers_attempted": [
+              60.0
+            ],
+            "zero_actuation_objective": 0.6512871029206265
+          },
+          {
+            "MIPStart_accepted": true,
+            "MIP_gap": 0.2880458999321493,
+            "MOVE_binary_count": 51961,
+            "STAY_variable_count": 2304,
+            "best_bound": 0.424905298721993,
+            "binary_count": 56689,
+            "bounded_compute_classification": "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT",
+            "constraint_count": 342939,
+            "escalation_reason": null,
+            "mess_id": "MESS02",
+            "model_build_seconds": 18.82970859995112,
+            "objective_value": 0.5968155793772361,
+            "peak_rss_bytes": 4952875008,
+            "restricted_incumbent_improves_zero": true,
+            "restricted_stationary_MIP_gap": 0.0,
+            "restricted_stationary_best_bound": 0.5968155793772361,
+            "restricted_stationary_objective": 0.5968155793772361,
+            "restricted_stationary_status": "OPTIMAL",
+            "restricted_stationary_sum_abs_P_kW_slots": 4222.131372890908,
+            "restricted_stationary_sum_abs_Q_kvar_slots": 5800.409836063724,
+            "runtime_seconds": 59.72999990009703,
+            "solver_status": "WORK_LIMIT",
+            "termination": "WORK_LIMIT",
+            "variable_count": 183507,
+            "work_limit_tiers_attempted": [
+              60.0
+            ],
+            "zero_actuation_objective": 0.6508841570336759
+          },
+          {
+            "MIPStart_accepted": true,
+            "MIP_gap": 0.34425150768032753,
+            "MOVE_binary_count": 51961,
+            "STAY_variable_count": 2304,
+            "best_bound": 0.3806865937866768,
+            "binary_count": 56689,
+            "bounded_compute_classification": "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT",
+            "constraint_count": 342939,
+            "escalation_reason": null,
+            "mess_id": "MESS03",
+            "model_build_seconds": 19.00559230009094,
+            "objective_value": 0.5805375052255476,
+            "peak_rss_bytes": 4952399872,
+            "restricted_incumbent_improves_zero": true,
+            "restricted_stationary_MIP_gap": 0.0,
+            "restricted_stationary_best_bound": 0.5805375052255476,
+            "restricted_stationary_objective": 0.5805375052255476,
+            "restricted_stationary_status": "OPTIMAL",
+            "restricted_stationary_sum_abs_P_kW_slots": 4922.513849424572,
+            "restricted_stationary_sum_abs_Q_kvar_slots": 12411.525318162712,
+            "runtime_seconds": 58.26531789987348,
+            "solver_status": "WORK_LIMIT",
+            "termination": "WORK_LIMIT",
+            "variable_count": 183507,
+            "work_limit_tiers_attempted": [
+              60.0
+            ],
+            "zero_actuation_objective": 0.5968155793773886
+          },
+          {
+            "MIPStart_accepted": true,
+            "MIP_gap": 0.3745680030269101,
+            "MOVE_binary_count": 51961,
+            "STAY_variable_count": 2304,
+            "best_bound": 0.3630867312109486,
+            "binary_count": 56689,
+            "bounded_compute_classification": "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT",
+            "constraint_count": 342939,
+            "escalation_reason": null,
+            "mess_id": "MESS04",
+            "model_build_seconds": 18.393266500206664,
+            "objective_value": 0.5805375052254816,
+            "peak_rss_bytes": 4951502848,
+            "restricted_incumbent_improves_zero": false,
+            "restricted_stationary_MIP_gap": 0.0,
+            "restricted_stationary_best_bound": 0.5805375052254816,
+            "restricted_stationary_objective": 0.5805375052254816,
+            "restricted_stationary_status": "OPTIMAL",
+            "restricted_stationary_sum_abs_P_kW_slots": 0.0,
+            "restricted_stationary_sum_abs_Q_kvar_slots": 0.0,
+            "runtime_seconds": 58.767492099897936,
+            "solver_status": "WORK_LIMIT",
+            "termination": "WORK_LIMIT",
+            "variable_count": 183507,
+            "work_limit_tiers_attempted": [
+              60.0
+            ],
+            "zero_actuation_objective": 0.580537505225689
+          }
+        ],
+        "sum_abs_P_kW_slots": 11243.650034043,
+        "sum_abs_Q_kvar_slots": 57456.611019403994,
+        "terminal_SoC": [
+          0.6333333333333333,
+          0.6333333333333333,
+          0.6333333333333333,
+          0.6333333333333333
+        ],
+        "throughput_kWh": 2810.91250851075,
+        "travel_energy_kWh": 0.0
+      },
+      "actual": {
+        "actual_AIDC": {
+          "blocked_or_backlog_nodeh": 181.77191940771223,
+          "cross_site_recourse_nodeh": 17.61595875114083,
+          "executed_nodeh": 18.86808059228769,
+          "firewall": {
+            "Fresh_reads_for_AIDC_decision": 0,
+            "grid_current_reads_for_AIDC_decision": 0,
+            "grid_voltage_reads_for_AIDC_decision": 0,
+            "planning_grid_sensitivity_reads_for_Actual_AIDC_decision": 0,
+            "rho_reads_for_AIDC_decision": 0,
+            "transformer_loading_reads_for_AIDC_decision": 0
+          },
+          "read_fields": [
+            "actual_rack_capacity",
+            "actual_workload_availability",
+            "dayahead_authorization",
+            "rack_compatibility"
+          ],
+          "resource_only_recourse_nodeh": 17.61595875114083,
+          "same_site_nodeh": 1.2521218411468613,
+          "solver_calls": 192
+        },
+        "actual_MESS": {
+          "DA_commitments": [],
+          "actual_MESS_optimizer_calls": 0,
+          "actual_MESS_reroute_calls": 0,
+          "actual_replays": [],
+          "actual_route_change_count": 0,
+          "route_identity": "PASS",
+          "terminal_SoC": [
+            0.6333333333333333,
+            0.6333333333333333,
+            0.6333333333333333,
+            0.6333333333333333
+          ]
+        },
+        "case": "B2",
+        "day": "2025-04-07"
+      },
+      "aidc_enabled": false,
+      "aidc_schedule_sha256": "12b85d3baa82e6ac854a1e231cd3a9bbb63f2826ad50b9bb907aed4e506ffd4a",
+      "aidc_stage_case": "B0",
+      "artifact_id": "V35_PHASE_DAY_CASE_RESULT_V1",
+      "case": "B2",
+      "combined_schedule_sha256": "92899e7772a022112240a78ceea2770309273b4926b8f3f843b791232ca6a698",
+      "correction_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "day": "2025-04-07",
+      "fresh": {
+        "OpenDSS_solve_count": 96,
+        "Vmax_pu": 1.0497758198323062,
+        "Vmin_pu": 0.9480515149889296,
+        "artifact_id": "V28R2_FRESH_OPENDSS_TRAJECTORY_RESULT_V1",
+        "branch_phase_count": 383,
+        "case": "B2",
+        "clean_engine_count": 1,
+        "convergence_count": 96,
+        "day": "2025-04-07",
+        "elapsed_seconds": 1.8411707000341266,
+        "line_current_violation_count": 0,
+        "line_current_violation_exposure": 0.0,
+        "losses_kvarh": 2736.150158881828,
+        "losses_kwh": 1197.5750680802155,
+        "namespace": "DAYAHEAD",
+        "node_phase_count": 386,
+        "opendss_version": "DSS C-API Library version 0.14.5 revision 87d85c2622c8281b92255335bc7c09b11191b21d based on OpenDSS SVN 3723 [FPC 3.2.2] (64-bit build) MVMULT INCREMENTAL_Y CONTEXT_API PM 20240329033747; License Status: Open \nDSS-Python version: 0.15.7\nOpenDSSDirect.py version: 0.9.4",
+        "p95_loading": 0.4630098202022462,
+        "p99_loading": 0.5536899844916722,
+        "physical_violation": true,
+        "rho_max_AC": 0.6497617411806542,
+        "schedule_mutation_count": 0,
+        "schedule_sha256": "92899e7772a022112240a78ceea2770309273b4926b8f3f843b791232ca6a698",
+        "status": "PHYSICAL_RESULT",
+        "transformer_current_violation_count": 0,
+        "transformer_current_violation_exposure": 0.0,
+        "transformer_kva_violation_count": 0,
+        "transformer_kva_violation_exposure_phase_rows": 0.0,
+        "transformer_phase_current_loading_max": 0.9786999602335351,
+        "transformer_total_kva_loading_max": 0.9845594148315869,
+        "voltage_violation_count": 52,
+        "voltage_violation_exposure": 0.0014032815198618308
+      },
+      "fresh_storage_contract": {
+        "all_numeric_arrays_finite": true,
+        "transformer_kVA_non_applicable_encoding": "ZERO_WITH_EXPLICIT_APPLICABILITY_MASK"
+      },
+      "input_authority": {
+        "AIDC_model_authority_SHA": "5bbdf9efadec532c329de83fba2dbe90425758fdcb87c045ee810b77f889c73e",
+        "AIDC_scale_SHA": "66464e16f5f1ba4500a98b612f83fac489c3c3b8262d473150521bab5649092f",
+        "C1_SHA": "66464e16f5f1ba4500a98b612f83fac489c3c3b8262d473150521bab5649092f",
+        "feature_cutoff": "2025-04-06T17:55:00+10:00",
+        "feeder_SHA": "66464e16f5f1ba4500a98b612f83fac489c3c3b8262d473150521bab5649092f",
+        "forecast_authority_SHA": "6a456e3ba77aa4ad262b1f989010865115df9849ba81dda2dffac067962f74bd",
+        "issue_time": "2025-04-06T18:00:00+10:00",
+        "road_graph_SHA": "658fb2e56867a50597e9a21899748d8171439deda852e7db4f3339a99f71dd3d",
+        "service_mapping_SHA": "c3763567f6785f182ab151ca0390918017d4e24c2733f6d72d2304bba416322e",
+        "solver_settings_SHA": "5f6874f1de3f31a42f44309e35cc7f3e217bfa1ba455870cf5beeb167e69ee5b",
+        "traffic_model_SHA": "93a30f54be207f6579a51af32ab6f84fbbb2608ffead3da6332886847a6163e6"
+      },
+      "mess_enabled": true,
+      "mess_trajectory_sha256": "34d87a9e6b89958234c1fe32c8a7250649812743ce41401d0d8ff30d3e371710",
+      "objective": 0.5805375052254816,
+      "objective_best_bound": 0.3630867312109486,
+      "objective_unresolved_absolute_gap": 0.21745077401453305,
+      "phase": "APR01_20_AC_FIDELITY_CALIBRATION",
+      "planning": {
+        "Vmax_pu": 1.0500000000000544,
+        "Vmin_pu": 0.9499999999999508,
+        "binding_asset": "line.sw2::A",
+        "binding_slot": 94,
+        "line_current_violation_count": 0,
+        "pass": true,
+        "rho": 0.580537505225689,
+        "transformer_current_violation_count": 0,
+        "transformer_kva_violation_count": 0,
+        "voltage_violation_count": 0
+      },
+      "runtime_seconds": 337.8431828999892,
+      "status": "PASS",
+      "storage_files": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B2\\DAYAHEAD_AIDC.npz",
+          "sha256": "4b02fb5a155ccf0eb7251f2fbd5c89363fc35ff81d548828921fb8df718a9316"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B2\\DAYAHEAD_MESS.npz",
+          "sha256": "605949422e73a559aa7332c53b6bbafe89063370b28f1e3c385cca022d5997b6"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B2\\PLANNING_GRID.npz",
+          "sha256": "cb7007813a7a31e75b53c754bde23b3fe45fe9e3873f4aa0d83215d48fe63461"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B2\\ACTUAL_AIDC.npz",
+          "sha256": "9a431ad44807dde63d762c11d5582f27a769e07d26f5bfda3497ebdb09e0e19a"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B2\\ACTUAL_MESS.npz",
+          "sha256": "6a12d801dc034de61e7e6afec2f91f860e50fe25dd09a81c3547de06d9554ff0"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B2\\MESS_TRAJECTORY.json",
+          "sha256": "ca1a790380a1b8a1818e7470eeff457a5808e6c14574345b531b3e47bf522f13"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B2\\ACTUAL_SUMMARY.json",
+          "sha256": "3f6e067f50659d19697d1e1b1bdcafe0097877f17d6a76cf61de13a53406105d"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B2\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+          "sha256": "998ad2b9adfa5a29c69589ebf28baff9e3f6b6d8b31e72caa7de3a593b7c9640"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B2\\fresh\\OPENDSS_OUTPUT_MANIFEST.json",
+          "sha256": "4e9cd0feb6aa89a52789c9180db0ecf6d592e5134f84417dff4e6f81a7b85d52"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\shared\\traffic\\2025-04-07\\TRAFFIC_FORECAST.npz",
+          "sha256": "dbdb8dd14c4f9b7c29b2780b9928de4fed5dfb6df1e914e7bb93a38fb53c9ca1"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\shared\\traffic\\2025-04-07\\ROUTE_TABLE.json.gz",
+          "sha256": "32a4a66e1298aec2725f9b789f0724a8d2a86eddba17df35965026b86e58d3c9"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B2\\CASE_RESULT.json",
+          "sha256": "26f7b6acc5373498a96b79be7eec2e3d4472011346bd5a2ac553efda53f8c543"
+        }
+      ],
+      "storage_validation": "PASS"
+    },
+    "B3": {
+      "MESS": {
+        "MOVE_count": 0,
+        "PQ_nonzero_slot_count": 96,
+        "solver_evidence": [
+          {
+            "MIPStart_accepted": true,
+            "MIP_gap": 0.27139604979957893,
+            "MOVE_binary_count": 51961,
+            "STAY_variable_count": 2304,
+            "best_bound": 0.47423542750020153,
+            "binary_count": 56689,
+            "bounded_compute_classification": "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT",
+            "constraint_count": 342939,
+            "escalation_reason": null,
+            "mess_id": "MESS01",
+            "model_build_seconds": 18.169181500095874,
+            "objective_value": 0.6508823172997498,
+            "peak_rss_bytes": 4947922944,
+            "restricted_incumbent_improves_zero": true,
+            "restricted_stationary_MIP_gap": 0.0,
+            "restricted_stationary_best_bound": 0.6508823172997498,
+            "restricted_stationary_objective": 0.6508823172997498,
+            "restricted_stationary_status": "OPTIMAL",
+            "restricted_stationary_sum_abs_P_kW_slots": 2380.5466686301206,
+            "restricted_stationary_sum_abs_Q_kvar_slots": 39272.90485146597,
+            "runtime_seconds": 59.101662299828604,
+            "solver_status": "WORK_LIMIT",
+            "termination": "WORK_LIMIT",
+            "variable_count": 183507,
+            "work_limit_tiers_attempted": [
+              60.0
+            ],
+            "zero_actuation_objective": 0.651287096636062
+          },
+          {
+            "MIPStart_accepted": true,
+            "MIP_gap": 0.28807199791425964,
+            "MOVE_binary_count": 51961,
+            "STAY_variable_count": 2304,
+            "best_bound": 0.4248891515692216,
+            "binary_count": 56689,
+            "bounded_compute_classification": "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT",
+            "constraint_count": 342939,
+            "escalation_reason": null,
+            "mess_id": "MESS02",
+            "model_build_seconds": 18.449148599989712,
+            "objective_value": 0.5968147766690184,
+            "peak_rss_bytes": 4944678912,
+            "restricted_incumbent_improves_zero": true,
+            "restricted_stationary_MIP_gap": 0.0,
+            "restricted_stationary_best_bound": 0.5968147766690184,
+            "restricted_stationary_objective": 0.5968147766690184,
+            "restricted_stationary_status": "OPTIMAL",
+            "restricted_stationary_sum_abs_P_kW_slots": 3885.80567455045,
+            "restricted_stationary_sum_abs_Q_kvar_slots": 7185.800390590529,
+            "runtime_seconds": 58.96781689999625,
+            "solver_status": "WORK_LIMIT",
+            "termination": "WORK_LIMIT",
+            "variable_count": 183507,
+            "work_limit_tiers_attempted": [
+              60.0
+            ],
+            "zero_actuation_objective": 0.6508823172997955
+          },
+          {
+            "MIPStart_accepted": true,
+            "MIP_gap": 0.25204449901526316,
+            "MOVE_binary_count": 51961,
+            "STAY_variable_count": 2304,
+            "best_bound": 0.43016823812589755,
+            "binary_count": 56689,
+            "bounded_compute_classification": "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT",
+            "constraint_count": 342939,
+            "escalation_reason": null,
+            "mess_id": "MESS03",
+            "model_build_seconds": 19.10076649999246,
+            "objective_value": 0.5751254420343862,
+            "peak_rss_bytes": 4984221696,
+            "restricted_incumbent_improves_zero": true,
+            "restricted_stationary_MIP_gap": 0.0,
+            "restricted_stationary_best_bound": 0.5751254420343862,
+            "restricted_stationary_objective": 0.5751254420343862,
+            "restricted_stationary_status": "OPTIMAL",
+            "restricted_stationary_sum_abs_P_kW_slots": 4916.3129909695135,
+            "restricted_stationary_sum_abs_Q_kvar_slots": 9412.460247299652,
+            "runtime_seconds": 59.733357599936426,
+            "solver_status": "WORK_LIMIT",
+            "termination": "WORK_LIMIT",
+            "variable_count": 183507,
+            "work_limit_tiers_attempted": [
+              60.0
+            ],
+            "zero_actuation_objective": 0.5968147766691327
+          },
+          {
+            "MIPStart_accepted": true,
+            "MIP_gap": 0.009752200421620652,
+            "MOVE_binary_count": 51961,
+            "STAY_variable_count": 2304,
+            "best_bound": 0.5582813701898175,
+            "binary_count": 56689,
+            "bounded_compute_classification": "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT",
+            "constraint_count": 342939,
+            "escalation_reason": null,
+            "mess_id": "MESS04",
+            "model_build_seconds": 19.104436699999496,
+            "objective_value": 0.5637794604820314,
+            "peak_rss_bytes": 4972732416,
+            "restricted_incumbent_improves_zero": true,
+            "restricted_stationary_MIP_gap": 0.0,
+            "restricted_stationary_best_bound": 0.5637794604820314,
+            "restricted_stationary_objective": 0.5637794604820314,
+            "restricted_stationary_status": "OPTIMAL",
+            "restricted_stationary_sum_abs_P_kW_slots": 5126.736843285003,
+            "restricted_stationary_sum_abs_Q_kvar_slots": 5027.273317248654,
+            "runtime_seconds": 57.64103420008905,
+            "solver_status": "WORK_LIMIT",
+            "termination": "WORK_LIMIT",
+            "variable_count": 183507,
+            "work_limit_tiers_attempted": [
+              60.0
+            ],
+            "zero_actuation_objective": 0.5751254420345437
+          }
+        ],
+        "sum_abs_P_kW_slots": 16309.402177433,
+        "sum_abs_Q_kvar_slots": 60898.438806598,
+        "terminal_SoC": [
+          0.6333333333333333,
+          0.6333333333333333,
+          0.6333333333333333,
+          0.6333333333333333
+        ],
+        "throughput_kWh": 4077.35054435825,
+        "travel_energy_kWh": 0.0
+      },
+      "actual": {
+        "actual_AIDC": {
+          "blocked_or_backlog_nodeh": 181.77191940771226,
+          "cross_site_recourse_nodeh": 11.157513037365511,
+          "executed_nodeh": 18.86808059228769,
+          "firewall": {
+            "Fresh_reads_for_AIDC_decision": 0,
+            "grid_current_reads_for_AIDC_decision": 0,
+            "grid_voltage_reads_for_AIDC_decision": 0,
+            "planning_grid_sensitivity_reads_for_Actual_AIDC_decision": 0,
+            "rho_reads_for_AIDC_decision": 0,
+            "transformer_loading_reads_for_AIDC_decision": 0
+          },
+          "read_fields": [
+            "actual_rack_capacity",
+            "actual_workload_availability",
+            "dayahead_authorization",
+            "rack_compatibility"
+          ],
+          "resource_only_recourse_nodeh": 11.157513037365511,
+          "same_site_nodeh": 7.710567554922178,
+          "solver_calls": 192
+        },
+        "actual_MESS": {
+          "DA_commitments": [],
+          "actual_MESS_optimizer_calls": 0,
+          "actual_MESS_reroute_calls": 0,
+          "actual_replays": [],
+          "actual_route_change_count": 0,
+          "route_identity": "PASS",
+          "terminal_SoC": [
+            0.6333333333333333,
+            0.6333333333333333,
+            0.6333333333333333,
+            0.6333333333333333
+          ]
+        },
+        "case": "B3",
+        "day": "2025-04-07"
+      },
+      "aidc_enabled": true,
+      "aidc_schedule_sha256": "df2b4665907efebcf41f5c155ddcb9905ce46b5d15c85f444ee1e69823aeeae6",
+      "aidc_stage_case": "B1",
+      "artifact_id": "V35_PHASE_DAY_CASE_RESULT_V1",
+      "case": "B3",
+      "combined_schedule_sha256": "bdf9f360476231d8a61fe5910ba4a5a5e6284cf84a5cf6ef8a5b357e69793c5a",
+      "correction_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "day": "2025-04-07",
+      "fresh": {
+        "OpenDSS_solve_count": 96,
+        "Vmax_pu": 1.0498088024662597,
+        "Vmin_pu": 0.9450875805947064,
+        "artifact_id": "V28R2_FRESH_OPENDSS_TRAJECTORY_RESULT_V1",
+        "branch_phase_count": 383,
+        "case": "B3",
+        "clean_engine_count": 1,
+        "convergence_count": 96,
+        "day": "2025-04-07",
+        "elapsed_seconds": 1.7809377000667155,
+        "line_current_violation_count": 0,
+        "line_current_violation_exposure": 0.0,
+        "losses_kvarh": 2758.142881468895,
+        "losses_kwh": 1204.518375682299,
+        "namespace": "DAYAHEAD",
+        "node_phase_count": 386,
+        "opendss_version": "DSS C-API Library version 0.14.5 revision 87d85c2622c8281b92255335bc7c09b11191b21d based on OpenDSS SVN 3723 [FPC 3.2.2] (64-bit build) MVMULT INCREMENTAL_Y CONTEXT_API PM 20240329033747; License Status: Open \nDSS-Python version: 0.15.7\nOpenDSSDirect.py version: 0.9.4",
+        "p95_loading": 0.46359321631845196,
+        "p99_loading": 0.5478439916019473,
+        "physical_violation": true,
+        "rho_max_AC": 0.6705853522786043,
+        "schedule_mutation_count": 0,
+        "schedule_sha256": "bdf9f360476231d8a61fe5910ba4a5a5e6284cf84a5cf6ef8a5b357e69793c5a",
+        "status": "PHYSICAL_RESULT",
+        "transformer_current_violation_count": 0,
+        "transformer_current_violation_exposure": 0.0,
+        "transformer_kva_violation_count": 0,
+        "transformer_kva_violation_exposure_phase_rows": 0.0,
+        "transformer_phase_current_loading_max": 0.971619783998397,
+        "transformer_total_kva_loading_max": 0.9703513533216245,
+        "voltage_violation_count": 62,
+        "voltage_violation_exposure": 0.0016731433506044905
+      },
+      "fresh_storage_contract": {
+        "all_numeric_arrays_finite": true,
+        "transformer_kVA_non_applicable_encoding": "ZERO_WITH_EXPLICIT_APPLICABILITY_MASK"
+      },
+      "input_authority": {
+        "AIDC_model_authority_SHA": "5bbdf9efadec532c329de83fba2dbe90425758fdcb87c045ee810b77f889c73e",
+        "AIDC_scale_SHA": "66464e16f5f1ba4500a98b612f83fac489c3c3b8262d473150521bab5649092f",
+        "C1_SHA": "66464e16f5f1ba4500a98b612f83fac489c3c3b8262d473150521bab5649092f",
+        "feature_cutoff": "2025-04-06T17:55:00+10:00",
+        "feeder_SHA": "66464e16f5f1ba4500a98b612f83fac489c3c3b8262d473150521bab5649092f",
+        "forecast_authority_SHA": "6a456e3ba77aa4ad262b1f989010865115df9849ba81dda2dffac067962f74bd",
+        "issue_time": "2025-04-06T18:00:00+10:00",
+        "road_graph_SHA": "658fb2e56867a50597e9a21899748d8171439deda852e7db4f3339a99f71dd3d",
+        "service_mapping_SHA": "c3763567f6785f182ab151ca0390918017d4e24c2733f6d72d2304bba416322e",
+        "solver_settings_SHA": "5f6874f1de3f31a42f44309e35cc7f3e217bfa1ba455870cf5beeb167e69ee5b",
+        "traffic_model_SHA": "93a30f54be207f6579a51af32ab6f84fbbb2608ffead3da6332886847a6163e6"
+      },
+      "mess_enabled": true,
+      "mess_trajectory_sha256": "af6b06a7ff577b4ab2b0f9d54ab87a20532fca0048b699cb45607e2de5a19cfc",
+      "objective": 0.5637794604820314,
+      "objective_best_bound": 0.5582813701898175,
+      "objective_unresolved_absolute_gap": 0.005498090292213931,
+      "phase": "APR01_20_AC_FIDELITY_CALIBRATION",
+      "planning": {
+        "Vmax_pu": 1.050000000000054,
+        "Vmin_pu": 0.9499999999999497,
+        "binding_asset": "line.sw2::A",
+        "binding_slot": 95,
+        "line_current_violation_count": 0,
+        "pass": true,
+        "rho": 0.5637794604821985,
+        "transformer_current_violation_count": 0,
+        "transformer_kva_violation_count": 0,
+        "voltage_violation_count": 0
+      },
+      "runtime_seconds": 338.77396130003035,
+      "status": "PASS",
+      "storage_files": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B3\\DAYAHEAD_AIDC.npz",
+          "sha256": "6e1b157c3cd32678d87a8d1195f38d48abb670051a9e7564fa0924662627d722"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B3\\DAYAHEAD_MESS.npz",
+          "sha256": "7fb1f63cbe2ed6c7a32d76d8a553288fc564733d6156d40e6923a98b6733c43e"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B3\\PLANNING_GRID.npz",
+          "sha256": "cb6c332c65fe0fa9e13c01ccc11aeadbe7c64f3e693263ef547da933bee53177"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B3\\ACTUAL_AIDC.npz",
+          "sha256": "7982aa8dbf876e2c468081fdc772894a04e58482bfc1183af8e00c5850758843"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B3\\ACTUAL_MESS.npz",
+          "sha256": "6a12d801dc034de61e7e6afec2f91f860e50fe25dd09a81c3547de06d9554ff0"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B3\\MESS_TRAJECTORY.json",
+          "sha256": "9bf36bb877e2beffb042af190146eb8d87b10a58df1ee2e488e419a8cdeaccd0"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B3\\ACTUAL_SUMMARY.json",
+          "sha256": "4113a4e7c610a762dc06525513959045a72b53d863145c5bcd5c67848f36a56a"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B3\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+          "sha256": "9952712025a4a686901cc9070afe54b8543278c578ab1aee542683332d8c91b7"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B3\\fresh\\OPENDSS_OUTPUT_MANIFEST.json",
+          "sha256": "a3e6415ddec4274e8e9ac029458b44a7574423bc77d326e8e87b9299bde80c55"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\shared\\traffic\\2025-04-07\\TRAFFIC_FORECAST.npz",
+          "sha256": "dbdb8dd14c4f9b7c29b2780b9928de4fed5dfb6df1e914e7bb93a38fb53c9ca1"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\shared\\traffic\\2025-04-07\\ROUTE_TABLE.json.gz",
+          "sha256": "32a4a66e1298aec2725f9b789f0724a8d2a86eddba17df35965026b86e58d3c9"
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v33x_fasttrack_grid_deliverable_aidc\\dayahead\\cache\\v35\\APR01_20_AC_FIDELITY_CALIBRATION\\2025-04-07\\B3\\CASE_RESULT.json",
+          "sha256": "f843aa8b70dffdf3b477a18fc7dec4065131274cf1a0eb150610d18ba8047d30"
+        }
+      ],
+      "storage_validation": "PASS"
+    }
+  },
+  "correction_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "day": "2025-04-07",
+  "effects": {
+    "B1-B0": {
+      "Fresh_losses_delta_kWh": 0.03289718478060877,
+      "actual_backlog_nodeh_delta": 2.842170943040401e-14,
+      "actual_executed_nodeh_delta": 0.0,
+      "actual_service_ratio_delta": -1.3877787807814457e-17,
+      "changed_execution_slot_count": 91,
+      "changed_rack_count": 48,
+      "changed_site_count": 12,
+      "changed_workload_cells": 13444,
+      "comparison": "B1-B0",
+      "effect_resolution_floor": 1e-06,
+      "fresh_grid_changed_cells": 36986,
+      "fresh_rho_AC_delta": 4.1061305910972123e-08,
+      "max_abs_Delta_P_AIDC": 7.182791097884291,
+      "max_abs_Delta_Q_AIDC": 2.360869264694802,
+      "objective_delta_on_minus_off": -6.2845645354414614e-09,
+      "objective_effect_classification": "BELOW_REPORTING_RESOLUTION_ZERO_SOLVER_GAP",
+      "objective_improvement_off_minus_on": 6.2845645354414614e-09,
+      "planning_grid_changed_cells": 35126,
+      "planning_rho_delta": -6.2845645354414614e-09,
+      "red_flags": [],
+      "relative_objective_delta": -9.649453378178398e-09,
+      "resolved_effect": false,
+      "shifted_workload_node_hours": 72.32304472078587,
+      "solver_status_off": "OPTIMAL",
+      "solver_status_on": "OPTIMAL",
+      "status": "PASS",
+      "sum_abs_Delta_P_AIDC": 148.98071619999428,
+      "sum_abs_Delta_Q_AIDC": 48.967593393101296,
+      "unresolved_absolute_solver_gap_off": 0.0,
+      "unresolved_absolute_solver_gap_on": 0.0,
+      "unresolved_solver_gap_floor": 0.0
+    },
+    "B2-B0": {
+      "Fresh_losses_delta_kWh": 203.87030509961585,
+      "MOVE_count": 0,
+      "PQ_nonzero_slot_count": 96,
+      "actual_backlog_nodeh_delta": 0.0,
+      "actual_executed_nodeh_delta": 0.0,
+      "actual_service_ratio_delta": 0.0,
+      "charge_energy_kWh": 1477.483578718,
+      "comparison": "B2-B0",
+      "discharge_energy_kWh": 1333.42892979275,
+      "fresh_rho_AC_delta": -0.0015248819495993216,
+      "objective_delta_on_minus_off": -0.07074959769514488,
+      "planning_rho_delta": -0.0707495976949375,
+      "red_flags": [],
+      "restricted_beats_full_vehicle_ids": [],
+      "solver_status_distribution": {
+        "WORK_LIMIT": 4
+      },
+      "status": "PASS",
+      "sum_abs_P_kW_slots": 11243.650034043,
+      "sum_abs_Q_kvar_slots": 57456.611019403994,
+      "terminal_SoC": [
+        0.6333333333333333,
+        0.6333333333333333,
+        0.6333333333333333,
+        0.6333333333333333
+      ],
+      "throughput_kWh": 2810.91250851075,
+      "travel_energy_kWh": 0.0,
+      "vehicle_solver_evidence": [
+        {
+          "MIPStart_accepted": true,
+          "MIP_gap": 0.2713631430759272,
+          "MOVE_binary_count": 51961,
+          "STAY_variable_count": 2304,
+          "best_bound": 0.47425818640269213,
+          "binary_count": 56689,
+          "bounded_compute_classification": "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT",
+          "constraint_count": 342939,
+          "escalation_reason": null,
+          "mess_id": "MESS01",
+          "model_build_seconds": 17.09951620013453,
+          "objective_value": 0.6508841570336757,
+          "peak_rss_bytes": 4945752064,
+          "restricted_incumbent_improves_zero": true,
+          "restricted_stationary_MIP_gap": 0.0,
+          "restricted_stationary_best_bound": 0.6508841570336757,
+          "restricted_stationary_objective": 0.6508841570336757,
+          "restricted_stationary_status": "OPTIMAL",
+          "restricted_stationary_sum_abs_P_kW_slots": 2099.004811727993,
+          "restricted_stationary_sum_abs_Q_kvar_slots": 39244.67586517723,
+          "runtime_seconds": 58.857690799981356,
+          "solver_status": "WORK_LIMIT",
+          "termination": "WORK_LIMIT",
+          "variable_count": 183507,
+          "work_limit_tiers_attempted": [
+            60.0
+          ],
+          "zero_actuation_objective": 0.6512871029206265
+        },
+        {
+          "MIPStart_accepted": true,
+          "MIP_gap": 0.2880458999321493,
+          "MOVE_binary_count": 51961,
+          "STAY_variable_count": 2304,
+          "best_bound": 0.424905298721993,
+          "binary_count": 56689,
+          "bounded_compute_classification": "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT",
+          "constraint_count": 342939,
+          "escalation_reason": null,
+          "mess_id": "MESS02",
+          "model_build_seconds": 18.82970859995112,
+          "objective_value": 0.5968155793772361,
+          "peak_rss_bytes": 4952875008,
+          "restricted_incumbent_improves_zero": true,
+          "restricted_stationary_MIP_gap": 0.0,
+          "restricted_stationary_best_bound": 0.5968155793772361,
+          "restricted_stationary_objective": 0.5968155793772361,
+          "restricted_stationary_status": "OPTIMAL",
+          "restricted_stationary_sum_abs_P_kW_slots": 4222.131372890908,
+          "restricted_stationary_sum_abs_Q_kvar_slots": 5800.409836063724,
+          "runtime_seconds": 59.72999990009703,
+          "solver_status": "WORK_LIMIT",
+          "termination": "WORK_LIMIT",
+          "variable_count": 183507,
+          "work_limit_tiers_attempted": [
+            60.0
+          ],
+          "zero_actuation_objective": 0.6508841570336759
+        },
+        {
+          "MIPStart_accepted": true,
+          "MIP_gap": 0.34425150768032753,
+          "MOVE_binary_count": 51961,
+          "STAY_variable_count": 2304,
+          "best_bound": 0.3806865937866768,
+          "binary_count": 56689,
+          "bounded_compute_classification": "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT",
+          "constraint_count": 342939,
+          "escalation_reason": null,
+          "mess_id": "MESS03",
+          "model_build_seconds": 19.00559230009094,
+          "objective_value": 0.5805375052255476,
+          "peak_rss_bytes": 4952399872,
+          "restricted_incumbent_improves_zero": true,
+          "restricted_stationary_MIP_gap": 0.0,
+          "restricted_stationary_best_bound": 0.5805375052255476,
+          "restricted_stationary_objective": 0.5805375052255476,
+          "restricted_stationary_status": "OPTIMAL",
+          "restricted_stationary_sum_abs_P_kW_slots": 4922.513849424572,
+          "restricted_stationary_sum_abs_Q_kvar_slots": 12411.525318162712,
+          "runtime_seconds": 58.26531789987348,
+          "solver_status": "WORK_LIMIT",
+          "termination": "WORK_LIMIT",
+          "variable_count": 183507,
+          "work_limit_tiers_attempted": [
+            60.0
+          ],
+          "zero_actuation_objective": 0.5968155793773886
+        },
+        {
+          "MIPStart_accepted": true,
+          "MIP_gap": 0.3745680030269101,
+          "MOVE_binary_count": 51961,
+          "STAY_variable_count": 2304,
+          "best_bound": 0.3630867312109486,
+          "binary_count": 56689,
+          "bounded_compute_classification": "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT",
+          "constraint_count": 342939,
+          "escalation_reason": null,
+          "mess_id": "MESS04",
+          "model_build_seconds": 18.393266500206664,
+          "objective_value": 0.5805375052254816,
+          "peak_rss_bytes": 4951502848,
+          "restricted_incumbent_improves_zero": false,
+          "restricted_stationary_MIP_gap": 0.0,
+          "restricted_stationary_best_bound": 0.5805375052254816,
+          "restricted_stationary_objective": 0.5805375052254816,
+          "restricted_stationary_status": "OPTIMAL",
+          "restricted_stationary_sum_abs_P_kW_slots": 0.0,
+          "restricted_stationary_sum_abs_Q_kvar_slots": 0.0,
+          "runtime_seconds": 58.767492099897936,
+          "solver_status": "WORK_LIMIT",
+          "termination": "WORK_LIMIT",
+          "variable_count": 183507,
+          "work_limit_tiers_attempted": [
+            60.0
+          ],
+          "zero_actuation_objective": 0.580537505225689
+        }
+      ],
+      "zero_actuation": false
+    },
+    "B3-B1": {
+      "Fresh_losses_delta_kWh": 210.7807155169187,
+      "MOVE_count": 0,
+      "PQ_nonzero_slot_count": 96,
+      "actual_backlog_nodeh_delta": 0.0,
+      "actual_executed_nodeh_delta": 0.0,
+      "actual_service_ratio_delta": 0.0,
+      "charge_energy_kWh": 2143.1540306652496,
+      "comparison": "B3-B1",
+      "discharge_energy_kWh": 1934.196513693,
+      "fresh_rho_AC_delta": 0.019298688087044824,
+      "objective_delta_on_minus_off": -0.08750763615403057,
+      "planning_rho_delta": -0.08750763615386348,
+      "red_flags": [],
+      "restricted_beats_full_vehicle_ids": [],
+      "solver_status_distribution": {
+        "WORK_LIMIT": 4
+      },
+      "status": "PASS",
+      "sum_abs_P_kW_slots": 16309.402177433,
+      "sum_abs_Q_kvar_slots": 60898.438806598,
+      "terminal_SoC": [
+        0.6333333333333333,
+        0.6333333333333333,
+        0.6333333333333333,
+        0.6333333333333333
+      ],
+      "throughput_kWh": 4077.35054435825,
+      "travel_energy_kWh": 0.0,
+      "vehicle_solver_evidence": [
+        {
+          "MIPStart_accepted": true,
+          "MIP_gap": 0.27139604979957893,
+          "MOVE_binary_count": 51961,
+          "STAY_variable_count": 2304,
+          "best_bound": 0.47423542750020153,
+          "binary_count": 56689,
+          "bounded_compute_classification": "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT",
+          "constraint_count": 342939,
+          "escalation_reason": null,
+          "mess_id": "MESS01",
+          "model_build_seconds": 18.169181500095874,
+          "objective_value": 0.6508823172997498,
+          "peak_rss_bytes": 4947922944,
+          "restricted_incumbent_improves_zero": true,
+          "restricted_stationary_MIP_gap": 0.0,
+          "restricted_stationary_best_bound": 0.6508823172997498,
+          "restricted_stationary_objective": 0.6508823172997498,
+          "restricted_stationary_status": "OPTIMAL",
+          "restricted_stationary_sum_abs_P_kW_slots": 2380.5466686301206,
+          "restricted_stationary_sum_abs_Q_kvar_slots": 39272.90485146597,
+          "runtime_seconds": 59.101662299828604,
+          "solver_status": "WORK_LIMIT",
+          "termination": "WORK_LIMIT",
+          "variable_count": 183507,
+          "work_limit_tiers_attempted": [
+            60.0
+          ],
+          "zero_actuation_objective": 0.651287096636062
+        },
+        {
+          "MIPStart_accepted": true,
+          "MIP_gap": 0.28807199791425964,
+          "MOVE_binary_count": 51961,
+          "STAY_variable_count": 2304,
+          "best_bound": 0.4248891515692216,
+          "binary_count": 56689,
+          "bounded_compute_classification": "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT",
+          "constraint_count": 342939,
+          "escalation_reason": null,
+          "mess_id": "MESS02",
+          "model_build_seconds": 18.449148599989712,
+          "objective_value": 0.5968147766690184,
+          "peak_rss_bytes": 4944678912,
+          "restricted_incumbent_improves_zero": true,
+          "restricted_stationary_MIP_gap": 0.0,
+          "restricted_stationary_best_bound": 0.5968147766690184,
+          "restricted_stationary_objective": 0.5968147766690184,
+          "restricted_stationary_status": "OPTIMAL",
+          "restricted_stationary_sum_abs_P_kW_slots": 3885.80567455045,
+          "restricted_stationary_sum_abs_Q_kvar_slots": 7185.800390590529,
+          "runtime_seconds": 58.96781689999625,
+          "solver_status": "WORK_LIMIT",
+          "termination": "WORK_LIMIT",
+          "variable_count": 183507,
+          "work_limit_tiers_attempted": [
+            60.0
+          ],
+          "zero_actuation_objective": 0.6508823172997955
+        },
+        {
+          "MIPStart_accepted": true,
+          "MIP_gap": 0.25204449901526316,
+          "MOVE_binary_count": 51961,
+          "STAY_variable_count": 2304,
+          "best_bound": 0.43016823812589755,
+          "binary_count": 56689,
+          "bounded_compute_classification": "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT",
+          "constraint_count": 342939,
+          "escalation_reason": null,
+          "mess_id": "MESS03",
+          "model_build_seconds": 19.10076649999246,
+          "objective_value": 0.5751254420343862,
+          "peak_rss_bytes": 4984221696,
+          "restricted_incumbent_improves_zero": true,
+          "restricted_stationary_MIP_gap": 0.0,
+          "restricted_stationary_best_bound": 0.5751254420343862,
+          "restricted_stationary_objective": 0.5751254420343862,
+          "restricted_stationary_status": "OPTIMAL",
+          "restricted_stationary_sum_abs_P_kW_slots": 4916.3129909695135,
+          "restricted_stationary_sum_abs_Q_kvar_slots": 9412.460247299652,
+          "runtime_seconds": 59.733357599936426,
+          "solver_status": "WORK_LIMIT",
+          "termination": "WORK_LIMIT",
+          "variable_count": 183507,
+          "work_limit_tiers_attempted": [
+            60.0
+          ],
+          "zero_actuation_objective": 0.5968147766691327
+        },
+        {
+          "MIPStart_accepted": true,
+          "MIP_gap": 0.009752200421620652,
+          "MOVE_binary_count": 51961,
+          "STAY_variable_count": 2304,
+          "best_bound": 0.5582813701898175,
+          "binary_count": 56689,
+          "bounded_compute_classification": "FEASIBLE_BOUNDED_COMPUTE_INCUMBENT",
+          "constraint_count": 342939,
+          "escalation_reason": null,
+          "mess_id": "MESS04",
+          "model_build_seconds": 19.104436699999496,
+          "objective_value": 0.5637794604820314,
+          "peak_rss_bytes": 4972732416,
+          "restricted_incumbent_improves_zero": true,
+          "restricted_stationary_MIP_gap": 0.0,
+          "restricted_stationary_best_bound": 0.5637794604820314,
+          "restricted_stationary_objective": 0.5637794604820314,
+          "restricted_stationary_status": "OPTIMAL",
+          "restricted_stationary_sum_abs_P_kW_slots": 5126.736843285003,
+          "restricted_stationary_sum_abs_Q_kvar_slots": 5027.273317248654,
+          "runtime_seconds": 57.64103420008905,
+          "solver_status": "WORK_LIMIT",
+          "termination": "WORK_LIMIT",
+          "variable_count": 183507,
+          "work_limit_tiers_attempted": [
+            60.0
+          ],
+          "zero_actuation_objective": 0.5751254420345437
+        }
+      ],
+      "zero_actuation": false
+    },
+    "B3-B2": {
+      "Fresh_losses_delta_kWh": 6.9433076020834505,
+      "actual_backlog_nodeh_delta": 2.842170943040401e-14,
+      "actual_executed_nodeh_delta": 0.0,
+      "actual_service_ratio_delta": -1.3877787807814457e-17,
+      "changed_execution_slot_count": 91,
+      "changed_rack_count": 48,
+      "changed_site_count": 12,
+      "changed_workload_cells": 13444,
+      "comparison": "B3-B2",
+      "effect_resolution_floor": 0.22294886430674699,
+      "fresh_grid_changed_cells": 37056,
+      "fresh_rho_AC_delta": 0.020823611097950057,
+      "max_abs_Delta_P_AIDC": 7.182791097884291,
+      "max_abs_Delta_Q_AIDC": 2.360869264694802,
+      "objective_delta_on_minus_off": -0.016758044743450218,
+      "objective_effect_classification": "UNRESOLVED_WITHIN_SOLVER_GAP",
+      "objective_improvement_off_minus_on": 0.016758044743450218,
+      "planning_grid_changed_cells": 36984,
+      "planning_rho_delta": -0.01675804474349052,
+      "red_flags": [
+        "AIDC_OBJECTIVE_EFFECT_UNRESOLVED_RELATIVE_TO_SOLVER_GAP"
+      ],
+      "relative_objective_delta": -0.028866429115447706,
+      "resolved_effect": false,
+      "shifted_workload_node_hours": 72.32304472078587,
+      "solver_status_off": "WORK_LIMIT",
+      "solver_status_on": "WORK_LIMIT",
+      "status": "DIAGNOSE",
+      "sum_abs_Delta_P_AIDC": 148.98071619999428,
+      "sum_abs_Delta_Q_AIDC": 48.967593393101296,
+      "unresolved_absolute_solver_gap_off": 0.21745077401453305,
+      "unresolved_absolute_solver_gap_on": 0.005498090292213931,
+      "unresolved_solver_gap_floor": 0.22294886430674699
+    }
+  },
+  "forecast_sha256": "6a456e3ba77aa4ad262b1f989010865115df9849ba81dda2dffac067962f74bd",
+  "phase": "APR01_20_AC_FIDELITY_CALIBRATION",
+  "route_table_sha256": "51271ae1a469a966788e17d3ab42abd2aee77305202f9a013d79a71e5e04a20e",
+  "status": "PASS"
+}
