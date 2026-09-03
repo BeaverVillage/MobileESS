@@ -1,0 +1,56 @@
+{
+  "artifact_id": "V35R3D_PUBLIC_RECIPE_CONTRACT_V1",
+  "exact_recipe_config_PASS": true,
+  "recipe": {
+    "dataset": {
+      "id": "nlr_kestrel",
+      "table_path": "data/windows/nlr_kestrel/data.parquet"
+    },
+    "metrics": [
+      {
+        "name": "mae",
+        "target": "runtime_seconds"
+      },
+      {
+        "name": "rmse",
+        "target": "runtime_seconds"
+      }
+    ],
+    "model": {
+      "id": "model.job_runtime_moe_xgboost",
+      "version": "0.1.0"
+    },
+    "problem_domain": [
+      "job-runtime-prediction"
+    ],
+    "recipe_id": "recipe.job_runtime.kestrel_moe_best_rolling",
+    "run": {
+      "output_dir": "runs",
+      "overwrite": false
+    },
+    "schema_version": "oda.job.v0.2.0",
+    "split": {
+      "enable_power_users": false,
+      "method": "rolling",
+      "n_windows": 120,
+      "objective": "reg:absoluteerror",
+      "test_window_hours": 6,
+      "time_decay_rate": 0.05,
+      "training_lookback_days": 120
+    }
+  },
+  "recipe_SHA256": "55da1585b1cbcbe54c3745eed710f8650bea62f8b2fae95bb281072467c67ecd",
+  "resolved_contract": {
+    "enable_power_users": false,
+    "model_id": "model.job_runtime_moe_xgboost",
+    "model_version": "0.1.0",
+    "n_windows": 120,
+    "objective": "reg:absoluteerror",
+    "recipe_id": "recipe.job_runtime.kestrel_moe_best_rolling",
+    "test_window_hours": 6,
+    "time_decay_rate": 0.05,
+    "training_lookback_days": 120,
+    "xgboost_version": "3.2.0"
+  },
+  "scientific_parameters_changed": false
+}

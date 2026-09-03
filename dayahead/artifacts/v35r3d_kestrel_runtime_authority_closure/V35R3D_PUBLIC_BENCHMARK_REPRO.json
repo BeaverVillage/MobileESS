@@ -1,0 +1,111 @@
+{
+  "B0": {
+    "bounded_slice_rows": 1528032,
+    "descriptor_resolved": true,
+    "imports": [
+      "hpc_oda_commons",
+      "xgboost"
+    ],
+    "recipe_resolved": true,
+    "status": "PASS"
+  },
+  "B1": {
+    "metrics": {
+      "MAE_seconds": 23883.485913825523,
+      "P95_AE_seconds": 137935.41816406246,
+      "RMSE_seconds": 52971.17991847005,
+      "finite": true,
+      "median_AE_seconds": 1428.053466796875,
+      "rows": 245,
+      "underprediction_rate": 0.4775510204081633
+    },
+    "status": "PASS",
+    "window_entries": [
+      {
+        "cache_reused": false,
+        "day_key": "2025-03-22",
+        "feature_info": {
+          "categorical_columns": [
+            "account",
+            "partition",
+            "qos",
+            "user"
+          ],
+          "feature_count": 135,
+          "numeric_columns": [
+            "num_cores_req",
+            "num_gpus_req",
+            "num_nodes_req",
+            "requested_memory_mib",
+            "requested_seconds"
+          ],
+          "one_hot_handle_unknown": "infrequent_if_exist",
+          "one_hot_min_frequency": 2,
+          "svd_components": 130,
+          "svd_coverage": 0.950479456023421
+        },
+        "metrics": {
+          "mae": 23883.485913825523,
+          "rmse": 52971.17991846991
+        },
+        "preprocessing_refit": true,
+        "reason": null,
+        "refresh_preprocessing": true,
+        "split_end_time": "2025-03-22T20:00:00Z",
+        "split_epoch": 1742652000,
+        "split_time": "2025-03-22T14:00:00Z",
+        "status": "ok",
+        "test_row_count": 245,
+        "test_rows_supervised": 245,
+        "train_row_count": 1276600,
+        "train_rows_supervised": 1276600
+      }
+    ]
+  },
+  "B2": {
+    "metrics": {
+      "MAE_seconds": 19164.626110965626,
+      "P95_AE_seconds": 144991.73828125,
+      "RMSE_seconds": 46685.2865952778,
+      "finite": true,
+      "median_AE_seconds": 1019.5386962890625,
+      "rows": 5987,
+      "underprediction_rate": 0.30065141139134793
+    },
+    "status": "PASS",
+    "windows": 4
+  },
+  "B3": {
+    "adapter_validation_sufficient": true,
+    "authority_cap_due_to_subset": "R2_DIAGNOSTIC_CAUSAL_RUNTIME",
+    "documented_reference": {
+      "MAE_seconds": 11527.4,
+      "RMSE_seconds": 33974.5,
+      "median_AE_seconds": 1374.3,
+      "scored_rows": 254338
+    },
+    "finite": true,
+    "full_120_serial_runtime_estimate_hours": 17.01964780999503,
+    "full_120_two_worker_runtime_estimate_hours": 8.509823904997514,
+    "metrics": {
+      "MAE_seconds": 5778.795127067649,
+      "P95_AE_seconds": 24373.015625,
+      "RMSE_seconds": 21483.769898399507,
+      "finite": true,
+      "median_AE_seconds": 428.809326171875,
+      "rows": 93811,
+      "underprediction_rate": 0.4946754644977668
+    },
+    "reference_metric_ratios": {
+      "MAE": 0.5013094997195942,
+      "RMSE": 0.6323498476327689,
+      "median_AE": 0.312020174759423
+    },
+    "same_order_of_magnitude": true,
+    "status": "FIXED_32_WINDOW_SUBSET_PASS_FULL_120_NOT_RUN_PROHIBITIVE",
+    "subset_actual_run_seconds": 3893.4964030000847,
+    "window_grid": "B2 four consecutive windows plus fixed final seven complete AEST calibration days",
+    "windows_executed": 32
+  },
+  "artifact_id": "V35R3D_PUBLIC_BENCHMARK_REPRO_V1"
+}
