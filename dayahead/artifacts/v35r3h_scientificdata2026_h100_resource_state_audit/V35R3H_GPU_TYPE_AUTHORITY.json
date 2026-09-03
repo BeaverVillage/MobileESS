@@ -1,0 +1,51 @@
+{
+  "B200_USED_FOR_H100_MAGNITUDE": "NO",
+  "H100_primary_bridge_only": true,
+  "artifact_id": "V35R3H_GPU_TYPE_AUTHORITY_V1",
+  "cohorts": {
+    "B200_CONFIRMED": {
+      "rule": "explicit /B200/ path, B200 filename, 183359 MB telemetry",
+      "sessions": 16
+    },
+    "GPU_TYPE_UNKNOWN": {
+      "rule": "fails closed",
+      "sessions": 0
+    },
+    "H100_CONFIRMED": {
+      "rule": "explicit /H100/ path, H100 filename, 81559 MB telemetry",
+      "sessions": 16
+    },
+    "NON_TARGET_RTX3060": {
+      "rule": "single-machine cohort, excluded from H100 authority",
+      "sessions": 40
+    }
+  },
+  "figshare_returned_doi": "10.6084/m9.figshare.31654879.v1",
+  "figshare_version": 1,
+  "paper_doi": "10.1038/s41597-026-07496-6",
+  "parameter_contract": {
+    "B200_identity": "explicit /B200/ archive path plus B200 filename and 183359 MB telemetry",
+    "H100_identity": "explicit /H100/ archive path plus H100 filename and 81559 MB telemetry",
+    "envelope": "class-stratified session-node-mean P05 / median P50 / max P95",
+    "integration": "trapezoidal using positive actual timestamp deltas and finite endpoint powers",
+    "native_timebase": "actual timestamps; gaps are delta > 1.5 * declared nominal interval",
+    "node_GPU_power": "sum gpu0_power_W through gpu7_power_W only when all eight are finite",
+    "resource_state": "explicit experiment configuration, never instantaneous utilization count",
+    "session_identity": "unique CSV content SHA256; duplicate factor-folder aliases excluded"
+  },
+  "software_versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "psutil": "6.1.1",
+    "pyarrow": "18.1.0",
+    "pytest": "8.3.5",
+    "python": "3.11.7"
+  },
+  "source_archive_sha256": "c0ccebea568612f5445b70c3baa7ce659935a949e5cc8f345a0af907739fa6f3",
+  "source_code_commit": "daaab77dfa52a6805cda0352874431e02700bbce",
+  "units": {
+    "energy": "J and derived Wh",
+    "power": "W",
+    "time": "s"
+  }
+}
