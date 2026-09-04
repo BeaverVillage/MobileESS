@@ -1,0 +1,41 @@
+{
+  "CURRENT_V38_CANONICAL_TERM": "AIDC",
+  "LEGACY_IDC_OCCURRENCES_PRESERVED_WITH_ALIAS": "PASS",
+  "NEW_V38_IDC_ONLY_USER_FACING_OCCURRENCES": 0,
+  "artifact_id": "V38_AIDC_TERMINOLOGY_AUDIT_V1",
+  "canonical_definition": "AIDC = AI Data Center",
+  "legacy_aliases": [
+    {
+      "current_V38_adapter": "V38WanAuthority.historical_idc",
+      "current_semantics": "AIDC01..AIDC12 and inter-AIDC WAN",
+      "legacy_fields": [
+        "idc_to_wan_node",
+        "IDC01..IDC12"
+      ],
+      "legacy_object": "pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json",
+      "reason_preserved": "frozen historical bytes and API compatibility"
+    },
+    {
+      "current_V38_adapter": "contents expose home_AIDC and SYNTHETIC_REFERENCE_HOME_AIDC_MAPPING",
+      "current_semantics": "reference/home AIDC",
+      "legacy_object": "V38_HOME_IDC_MAPPING_AUDIT.json filename/artifact id",
+      "reason_preserved": "required artifact name in the original V38 contract"
+    },
+    {
+      "current_V38_adapter": "runtime_AIDC_replacement_calls",
+      "current_semantics": "runtime AIDC replacement calls",
+      "legacy_object": "runtime_IDC_replacement_calls",
+      "reason_preserved": "earlier supplemental contract alias only"
+    },
+    {
+      "current_V38_adapter": "read-only historical audit mapping",
+      "current_semantics": "destination_AIDC",
+      "legacy_object": "historical pfr runtime destination_IDC fields",
+      "reason_preserved": "historical schema compatibility; disabled in V38 runtime"
+    }
+  ],
+  "modeled_site_claim": "TRACE_DRIVEN_CYBER_PHYSICAL_TESTBED_NOT_MEASURED_REAL_WORLD_AIDC_FACILITIES",
+  "numerical_science_changed": false,
+  "readiness_result_changed": false,
+  "status": "PASS"
+}

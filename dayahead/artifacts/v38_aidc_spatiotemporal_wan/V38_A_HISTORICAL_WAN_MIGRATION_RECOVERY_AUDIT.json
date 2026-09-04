@@ -1,0 +1,80 @@
+{
+  "artifact_id": "V38_A_HISTORICAL_WAN_MIGRATION_RECOVERY_AUDIT_V1",
+  "objects": [
+    {
+      "classification": "CURRENT_COMPATIBLE_REUSE",
+      "object": "12-AIDC WAN topology",
+      "source_sha256": "e620c92985e6d8b8c09c8e32588d806c8c1c03e3e944a07119672d1804fda512"
+    },
+    {
+      "classification": "CURRENT_COMPATIBLE_REUSE",
+      "identity": "BENCHMARK_12NODE_INTER_AIDC_WAN",
+      "object": "Abilene benchmark identity"
+    },
+    {
+      "classification": "REQUIRES_15MIN_ADAPTER",
+      "object": "preinstalled link capacity",
+      "raw_unit": "MBITPERSEC"
+    },
+    {
+      "classification": "HISTORICAL_ONLY",
+      "object": "5-minute observed demand matrices",
+      "primary_use": "NOT_APPLIED_TO_PREINSTALLED_CAPACITY"
+    },
+    {
+      "classification": "CURRENT_COMPATIBLE_REUSE",
+      "object": "routing/path authority",
+      "rule": "DETERMINISTIC_MINIMUM_HOP_LEXICOGRAPHIC"
+    },
+    {
+      "classification": "MISSING",
+      "object": "propagation/RTT latency",
+      "v38_disposition": "NO_SEPARATE_LATENCY_APPLIED"
+    },
+    {
+      "classification": "CURRENT_COMPATIBLE_REUSE",
+      "object": "checkpoint payload",
+      "rule": "rho_ckpt * requested_GPU * 80_000_000_000 bytes"
+    },
+    {
+      "classification": "REQUIRES_15MIN_ADAPTER",
+      "current_slots": 1,
+      "historical_seconds": 300,
+      "object": "restart delay"
+    },
+    {
+      "classification": "REQUIRES_15MIN_ADAPTER",
+      "historical_runtime_semantics": "bytes advance directly to arrived inventory at end of each transfer step",
+      "object": "SEND/PIPELINE/INVENTORY/READY"
+    },
+    {
+      "classification": "CURRENT_COMPATIBLE_REUSE",
+      "object": "48 logical Rack pools",
+      "scope": "GPU_GANG_ORACLE_ONLY"
+    },
+    {
+      "classification": "REJECTED",
+      "object": "historical Rack IT caps",
+      "reason": "V16 provenance proves ESIF/current boundary mismatch"
+    },
+    {
+      "classification": "HISTORICAL_ONLY",
+      "object": "historical rolling controller"
+    },
+    {
+      "classification": "MISSING",
+      "legacy_search_alias": "home IDC",
+      "object": "historical reference/home-AIDC mapping compatible with current Kestrel IDs"
+    }
+  ],
+  "prohibited_claim": "NOT_A_MEASURED_MELBOURNE_PRIVATE_AIDC_WAN",
+  "source_hashes": {
+    "migration_contract": "6a5729090a28a94c6952fb9986fd8da85e530c8a9bc29cbd368e6dbd5c9ea843",
+    "rack_capacity": "4546c0672a4d25aa5c7c92ea90fb90ec8d3c009dda426939179b293abdeb83c0",
+    "rack_contract": "d33444a19cfc6c4761f2e1b9a8adb88203b05cffc1d4a798e7b61c5add265d5b",
+    "wan_readme": "3a3ea1d4d28eab79a53aebfd7f6dc8a00b7731385ea62504871fdf7fc73625e5",
+    "wan_topology": "e620c92985e6d8b8c09c8e32588d806c8c1c03e3e944a07119672d1804fda512",
+    "wan_traffic": "2f311130d77e40db88da1aa6db8055b6fce8d077bf4bae87398563e1b84e70ce"
+  },
+  "status": "PASS"
+}

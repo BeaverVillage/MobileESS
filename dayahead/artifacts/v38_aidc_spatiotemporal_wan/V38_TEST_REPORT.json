@@ -1,0 +1,64 @@
+{
+  "artifact_id": "V38_TEST_REPORT_V1",
+  "status": "FAIL_BLOCKED",
+  "V38_READY": "NO",
+  "MAY_STARTED": "NO",
+  "focused_V38": {
+    "status": "PASS",
+    "command": "python -m pytest tests/dayahead/test_v38_aidc_spatiotemporal_wan.py -q",
+    "passed": 13,
+    "failed": 0
+  },
+  "V37_namespace_regression_preserved_original_worktree": {
+    "status": "PASS",
+    "command": "python -m pytest tests/dayahead/test_v37_r4a_per_day_aidc.py tests/dayahead/test_v37_r4_may_campaign_repair.py tests/dayahead/test_v37_r3r1_monitor_readiness.py -q",
+    "passed": 80,
+    "failed": 0
+  },
+  "V37_namespace_regression_clean_V38_worktree": {
+    "status": "FAIL",
+    "passed": 79,
+    "failed": 1,
+    "failure": "V37_PARENT_VOLTAGE_AUTHORITY_BYTE_SHA_MISMATCH",
+    "expected_sha256": "3ee89daad6d63cffb70c1a890f5141cf33bf4c951c9a9c364ae36692bcda6151",
+    "actual_sha256": "ffa1db91e4a7abca6312c3b4763d0bd9030eb115743fb3b17bd2b96381e37c24",
+    "explanation": "The original V37 working tree retains CRLF-era bytes and passes. The clean parent worktree obeys repository LF normalization, while the frozen applicability artifact hashes CRLF-era working bytes. Frozen bytes were not silently changed."
+  },
+  "launcher_fail_closed_test": {
+    "status": "PASS",
+    "ValidateOnly_exit_code": 1,
+    "observed": [
+      "V38_READY=NO",
+      "MAY_STARTED=NO"
+    ]
+  },
+  "passed_capabilities": [
+    "WAN field semantics separation",
+    "5-minute to 15-minute byte conservation",
+    "one fixed path for each of 132 ordered AIDC pairs",
+    "WAN path optimization absent",
+    "fixed-path shared-link capacity competition",
+    "D-1 transfer timing optimization without path choice",
+    "cumulative-byte checkpoint state machine",
+    "READY then restart then compute ordering",
+    "synthetic migration and STAY",
+    "exact D-1 logical-Rack assignment",
+    "zero D-day reoptimization counters",
+    "fail-closed launcher and atomic monitor read"
+  ],
+  "not_run_due_to_upstream_infeasibility": [
+    "V37 spatial-off V38 production equivalence",
+    "31-day pending AIDC placement",
+    "31-day running migration candidate materialization",
+    "31-day production Rack assignments",
+    "site power and C1 reconciliation",
+    "B0/B2 production identity",
+    "B1/B3 production identity",
+    "31/31 exact production-loader dry run",
+    "May campaign"
+  ],
+  "blockers": [
+    "V38_HOME_MAPPING_GLOBAL_CAPACITY_INFEASIBLE",
+    "V37_PARENT_VOLTAGE_AUTHORITY_BYTE_SHA_MISMATCH"
+  ]
+}

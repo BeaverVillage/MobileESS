@@ -1,0 +1,52 @@
+{
+  "artifact_id": "V38_WAN_FIELD_SEMANTICS_AUDIT_V1",
+  "background_traffic_subtracted": false,
+  "capacity_authority": "ABILENE_PREINSTALLED_LINK_CAPACITY",
+  "rows": [
+    {
+      "allowed_use": "ALLOWED",
+      "current_V38_use": "checkpoint transfer byte limit",
+      "field": "pre_installed_capacity",
+      "file_artifact": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\WAN\\abilene_network_native.txt.txt",
+      "physical_meaning": "benchmark link nameplate capacity",
+      "raw_unit": "MBITPERSEC",
+      "sha256": "e620c92985e6d8b8c09c8e32588d806c8c1c03e3e944a07119672d1804fda512",
+      "source": "Abilene SNDlib topology",
+      "time_resolution": "constant"
+    },
+    {
+      "allowed_use": "NOT_ALLOWED_AS_CAPACITY",
+      "current_V38_use": "provenance/sensitivity only; not subtracted in primary contract",
+      "field": "directed OD demand",
+      "file_artifact": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\WAN\\directed-abilene-zhang-5min-over-6months-ALL-native.tgz",
+      "physical_meaning": "observed historical traffic demand, not physical capacity",
+      "raw_unit": "Mbit/s",
+      "sha256": "2f311130d77e40db88da1aa6db8055b6fce8d077bf4bae87398563e1b84e70ce",
+      "source": "Abilene Zhang demand matrices",
+      "time_resolution": "5 minutes"
+    },
+    {
+      "allowed_use": "NOT_ALLOWED_AS_ABILENE_CAPACITY",
+      "current_V38_use": "none",
+      "field": "usable throughput samples",
+      "file_artifact": "historical raw-data inventory",
+      "physical_meaning": "external client throughput",
+      "raw_unit": "source-dependent",
+      "sha256": null,
+      "source": "M-Lab",
+      "time_resolution": "observational"
+    },
+    {
+      "allowed_use": "NOT_ALLOWED_AS_THROUGHPUT_OR_INTER_AIDC_LATENCY",
+      "current_V38_use": "none",
+      "field": "RTT/loss/ping/traceroute",
+      "file_artifact": "historical raw-data inventory",
+      "physical_meaning": "external network latency/context",
+      "raw_unit": "ms/fraction/path",
+      "sha256": null,
+      "source": "RIPE Atlas",
+      "time_resolution": "observational"
+    }
+  ],
+  "status": "PASS"
+}

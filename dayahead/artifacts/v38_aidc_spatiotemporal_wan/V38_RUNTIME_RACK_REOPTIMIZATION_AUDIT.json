@@ -1,0 +1,44 @@
+{
+  "V38_runtime_Rack_reoptimization_enabled": false,
+  "artifact_id": "V38_RUNTIME_RACK_REOPTIMIZATION_AUDIT_V1",
+  "historical_runtime_Rack_reoptimization_found": true,
+  "paths": [
+    {
+      "D_day_actual_visible": true,
+      "current_V38_disposition": "HISTORICAL_DISABLED",
+      "decision_variables_changed": "runtime logical placement/admission",
+      "module_function": "pfr.runtime._schedule_capacity_feasible_queued_jobs",
+      "when_called": "historical rolling runtime"
+    },
+    {
+      "D_day_actual_visible": true,
+      "current_V38_disposition": "INVALID_FOR_V38",
+      "decision_variables_changed": "legacy destination_IDC (adapted as current destination_AIDC)",
+      "module_function": "pfr.runtime._optimize_job_migrations",
+      "when_called": "historical slow replan"
+    },
+    {
+      "D_day_actual_visible": false,
+      "current_V38_disposition": "DAY_AHEAD_ALLOWED",
+      "decision_variables_changed": "frozen rack_pool_id/reservations",
+      "module_function": "dayahead.v38.rack.rack_plan_day_ahead",
+      "when_called": "D-1 one-shot planning"
+    },
+    {
+      "D_day_actual_visible": true,
+      "current_V38_disposition": "RUNTIME_EXECUTION_ONLY",
+      "decision_variables_changed": "none; validates frozen reservations only",
+      "module_function": "dayahead.v38.rack.validate_frozen_rack_execution",
+      "when_called": "D-day fixed replay"
+    }
+  ],
+  "production_counters": {
+    "runtime_AIDC_replacement_calls": 0,
+    "runtime_AIDC_reschedule_calls": 0,
+    "runtime_Rack_reoptimization_calls": 0,
+    "runtime_WAN_path_reoptimization_calls": 0,
+    "runtime_WAN_schedule_reoptimization_calls": 0,
+    "runtime_running_migration_reoptimization_calls": 0
+  },
+  "status": "PASS"
+}
