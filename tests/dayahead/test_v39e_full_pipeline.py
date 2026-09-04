@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+from pathlib import Path
+from unittest.mock import patch
+
 from dayahead.v38.authority import CapacityAuthority, RackPool
 from dayahead.v39a.spatial import ActivityJob
+from dayahead.v39c import freeze as freeze_module
 from dayahead.v39e.contracts import (
     GUROBI_THREADS_PER_MODEL,
     MAX_PARALLEL_DAY_WORKERS,
@@ -25,6 +29,29 @@ def test_runtime_only_parallelism_contract() -> None:
     assert MAX_PARALLEL_DAY_WORKERS == 4
     assert GUROBI_THREADS_PER_MODEL == 4
     assert MAX_PARALLEL_DAY_WORKERS * GUROBI_THREADS_PER_MODEL == 16
+
+
+def test_v39_atomic_json_retries_windows_reader_lock(tmp_path: Path) -> None:
+    path = tmp_path / "progress.json"
+    real_replace = freeze_module.os.replace
+    attempts = 0
+
+    def locked_then_available(source: object, target: object) -> None:
+        nonlocal attempts
+        attempts += 1
+        if attempts <= 25:
+            raise PermissionError("synthetic reader lock")
+        real_replace(source, target)
+
+    with (
+        patch.object(freeze_module.os, "replace", side_effect=locked_then_available),
+        patch.object(freeze_module.time, "sleep", return_value=None),
+    ):
+        freeze_module.atomic_json(path, {"status": "RUNNING"})
+
+    assert attempts == 26
+    assert path.read_text(encoding="utf-8").endswith("\n")
+    assert not list(tmp_path.glob("*.tmp"))
 
 
 def test_rack_compatibility_is_non_additive_under_site_capacity() -> None:

@@ -6,8 +6,11 @@ import csv
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import subprocess
+import threading
+import time
 from typing import Any, Mapping
 
 import pandas as pd
@@ -62,14 +65,23 @@ def canonical_sha256(value: Any) -> str:
 
 def atomic_json(path: Path, value: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary = path.with_suffix(
+        path.suffix + f".{os.getpid()}.{threading.get_ident()}.tmp"
+    )
     temporary.write_text(
         json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False, default=str)
         + "\n",
         encoding="utf-8",
         newline="\n",
     )
-    temporary.replace(path)
+    for attempt in range(300):
+        try:
+            os.replace(temporary, path)
+            return
+        except PermissionError:
+            if attempt == 299:
+                raise
+            time.sleep(0.1)
 
 
 def _git(repo: Path, *args: str) -> str:
