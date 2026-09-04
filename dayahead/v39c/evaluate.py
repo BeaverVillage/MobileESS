@@ -1248,7 +1248,9 @@ def evaluate(repo: Path) -> dict[str, Any]:
             "SCIENCE_NEUTRAL_FEASIBILITY_EXECUTION_SIMPLIFICATION"
         ),
         "StageC_feasibility_objective": "ZERO",
-        "StageC_feasibility_status": stage_c_raw["status"],
+        "StageC_feasibility_status": stage_c_raw.get(
+            "StageC1_migration_enabled_status", stage_c_raw["status"]
+        ),
         "witness_materialization_performed": stage_c_raw["status"] == "PASS",
         "selected_RUNNING_migration_count": stage_c_raw.get(
             "selected_RUNNING_migration_count"

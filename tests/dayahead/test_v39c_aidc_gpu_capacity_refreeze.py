@@ -153,7 +153,7 @@ def test_full_causal_chains_use_migration_enabled_c1_not_stay_only_c0() -> None:
     assert audit["StageC_feasibility_status"] == "PASS"
     assert audit["witness_materialization_performed"] is True
     assert audit["minimum_migration_witness_performed"] is True
-    assert audit["selected_RUNNING_migration_count"] >= 0
+    assert audit["selected_RUNNING_migration_count"] == 211
     assert audit["migration_count"] == audit["selected_RUNNING_migration_count"]
     assert audit["WAN_transfer_count"] == audit["selected_RUNNING_migration_count"]
     assert audit["checkpoint_transfer_count"] == audit["selected_RUNNING_migration_count"]
