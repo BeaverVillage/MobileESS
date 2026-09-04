@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import subprocess
 
-from dayahead.v37.status import atomic_json, monitor_view
+from dayahead.v37.status import atomic_json, monitor_view, read_json, write_status
 from dayahead.v37.campaign import (
     _complete_terminal_result,
     acquire_lock,
@@ -60,6 +60,35 @@ def test_python_monitor_view_removes_terminal_rows_and_advances_pending() -> Non
     assert view["PASS"] == 1
     assert view["FAIL"] == 1
     assert [row["date"] for row in view["active_dates"]] == ["2025-05-03"]
+
+
+def test_same_mess_stage_keeps_detail_until_stage_transition(tmp_path: Path) -> None:
+    path = tmp_path / "2025-05-01.json"
+    write_status(
+        path, "2025-05-01", "RUNNING", 4, "B2_MESS01",
+        extra={
+            "mess_index": 1,
+            "beam_parent_index": 1,
+            "beam_parent_total": 1,
+            "search_level": "K200",
+            "candidate_done": 77,
+            "candidate_total": 201,
+        },
+    )
+    write_status(
+        path, "2025-05-01", "RUNNING", 4, "B2_MESS01",
+        extra={"workers": 4, "beam_width_active": 2},
+    )
+    retained = read_json(path)
+    assert retained["candidate_done"] == 77
+    assert retained["candidate_total"] == 201
+    assert retained["beam_parent_index"] == 1
+
+    write_status(path, "2025-05-01", "RUNNING", 5, "B2_MESS02")
+    advanced = read_json(path)
+    assert advanced["candidate_done"] is None
+    assert advanced["candidate_total"] is None
+    assert advanced["beam_parent_index"] is None
 
 
 def test_campaign_duplicate_lock_and_verified_stale_recovery(tmp_path: Path) -> None:

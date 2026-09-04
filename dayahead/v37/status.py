@@ -14,6 +14,32 @@ from .contracts import DAY_TOTAL_UNITS, EXPECTED_DATES
 
 
 TERMINAL = {"PASS", "FAIL"}
+DETAIL_FIELDS = (
+    "mess_index",
+    "beam_parent_index",
+    "beam_parent_total",
+    "search_level",
+    "candidate_done",
+    "candidate_total",
+    "candidate_new_done",
+    "candidate_new_total",
+    "seed_done",
+    "seed_total",
+    "full_milp_status",
+    "restoration_round",
+    "restoration_round_max",
+    "restoration_new_cuts",
+    "restoration_total_cuts",
+    "fresh_slots_done",
+    "fresh_slots_total",
+)
+DETAIL_ACTIVITY_FIELDS = (
+    "candidate_total",
+    "seed_total",
+    "full_milp_status",
+    "restoration_round",
+    "fresh_slots_done",
+)
 
 
 def atomic_json(path: Path, payload: Any) -> None:
@@ -93,6 +119,25 @@ def write_status(
     }
     if extra:
         payload.update(extra)
+    # The two-second beam watcher reports the same major stage without the
+    # candidate detail emitted by the solver callback.  Preserve the most
+    # recent detail until the stage itself changes; otherwise a 10-second
+    # monitor refresh can make route-search progress flash and disappear.
+    incoming_has_detail = bool(
+        extra and any(field in extra for field in DETAIL_ACTIVITY_FIELDS)
+    )
+    if status == "RUNNING" and not incoming_has_detail and path.is_file():
+        try:
+            prior = read_json(path)
+        except (OSError, ValueError, json.JSONDecodeError):
+            prior = {}
+        if (
+            prior.get("status") == "RUNNING"
+            and prior.get("stage") == current_stage
+            and any(prior.get(field) is not None for field in DETAIL_ACTIVITY_FIELDS)
+        ):
+            for field in DETAIL_FIELDS:
+                payload[field] = prior.get(field)
     atomic_json(path, payload)
     return payload
 
