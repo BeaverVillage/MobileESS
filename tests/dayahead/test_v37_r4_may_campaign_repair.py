@@ -19,7 +19,11 @@ from dayahead.v33m.mess_mobility_milp import (
 )
 from dayahead.v33m.mess_trajectory import MessTrajectory, MessTrajectorySlot
 from dayahead.v33m.route_table import MobilityRouteTable
-from dayahead.v34.integrated_mess import _add_restoration_cuts, _fix_discrete_trajectory_and_load_start
+from dayahead.v34.integrated_mess import (
+    _add_restoration_cuts,
+    _add_restoration_recourse_trust_region,
+    _fix_discrete_trajectory_and_load_start,
+)
 from dayahead.v37.aidc import build_day, validate_cohort_contract
 from dayahead.v37.contracts import EXPECTED_DATES
 from dayahead.v37.preflight import validate_anchor_pair, validate_preflight_manifest
@@ -191,6 +195,39 @@ def test_all_restoration_cut_types_insert_with_frozen_trust_region(
     lhs = cut.actual_value + 0.001 * p.X + 0.001 * q.X
     rhs = cut.hard_limit + cut.margin if lower else cut.hard_limit - cut.margin
     assert lhs >= rhs - 1e-8 if lower else lhs <= rhs + 1e-8
+
+
+def test_restoration_recourse_trust_region_covers_every_slot() -> None:
+    model = gp.Model("v37_full_horizon_recourse_trust")
+    model.Params.OutputFlag = 0
+    names = tuple(
+        [f"aidc_load_kw[AIDC{index:02d}]" for index in range(1, 13)]
+        + [f"mess_p_kw[S{index:02d}]" for index in range(1, 25)]
+        + [f"mess_q_kvar[S{index:02d}]" for index in range(1, 25)]
+    )
+    expressions = []
+    variables = []
+    for slot in range(3):
+        p = model.addVar(lb=-1000.0, ub=1000.0, name=f"p[{slot}]")
+        q = model.addVar(lb=-1000.0, ub=1000.0, name=f"q[{slot}]")
+        variables.append((p, q))
+        expressions.append(tuple([0.0] * 12 + [p] + [0.0] * 23 + [q] + [0.0] * 23))
+    anchor = np.zeros((3, 60), dtype=float)
+    anchor[:, 12] = [10.0, 20.0, 30.0]
+    anchor[:, 36] = [-10.0, -20.0, -30.0]
+    rows = _add_restoration_recourse_trust_region(
+        model, names, tuple(expressions), anchor,
+        p_radius_kw=55.0, q_radius_kvar=70.0,
+    )
+    model.setObjective(
+        -gp.quicksum(p - q for p, q in variables), GRB.MINIMIZE,
+    )
+    model.optimize()
+    assert model.Status == GRB.OPTIMAL
+    assert rows == 3 * 48 * 2
+    for slot, (p, q) in enumerate(variables):
+        assert p.X == pytest.approx(anchor[slot, 12] + 55.0)
+        assert q.X == pytest.approx(anchor[slot, 36] - 70.0)
 
 
 def test_may_authority_and_all_31_anchors_are_authorized() -> None:

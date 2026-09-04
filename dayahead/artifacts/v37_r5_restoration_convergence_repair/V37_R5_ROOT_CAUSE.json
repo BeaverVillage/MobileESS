@@ -1,0 +1,59 @@
+{
+  "artifact_id": "V37_R5_RESTORATION_CONVERGENCE_ROOT_CAUSE_V1",
+  "status": "PASS_IDENTIFIED_AND_REPAIRED",
+  "campaign_stopped_before_repair": true,
+  "primary_classification": "RESTORATION_FULL_HORIZON_RECOURSE_TRUST_SCOPE_OMISSION",
+  "explanation": "The local Fresh cut and its same-slot stale-anchor guard were correct, but the fixed-discrete full-horizon recourse solve left every non-cut MESS P/Q slot free to be replaced. MESS energy coupling and a highly degenerate unchanged primary objective therefore moved the active voltage violation to unrelated slots on successive rounds.",
+  "evidence_before_repair": [
+    {
+      "operating_day": "2025-05-01",
+      "case": "B2",
+      "restoration_rounds": 5,
+      "cumulative_cuts": 26,
+      "final_Fresh_voltage_violation_count": 5,
+      "final_status": "FAIL_CLOSED_MAX_RESTORATION_ROUNDS",
+      "round_to_round_changed_slot_range": [89, 96],
+      "maximum_round_to_round_delta_P_kw": 1100.0,
+      "maximum_round_to_round_delta_Q_kvar": 1111.138264198
+    },
+    {
+      "operating_day": "2025-05-02",
+      "case": "B2",
+      "restoration_rounds": 5,
+      "cumulative_cuts": 13,
+      "final_Fresh_voltage_violation_count": 3,
+      "final_status": "FAIL_CLOSED_MAX_RESTORATION_ROUNDS",
+      "round_to_round_changed_slot_range": [64, 96],
+      "maximum_round_to_round_delta_P_kw": 1100.0,
+      "maximum_round_to_round_delta_Q_kvar": 1120.708512123
+    },
+    {
+      "operating_day": "2025-05-03",
+      "case": "B2",
+      "restoration_rounds": 5,
+      "cumulative_cuts": 8,
+      "final_Fresh_voltage_violation_count": 0,
+      "final_status": "PASS_AT_LIMIT",
+      "round_to_round_changed_slot_range": [89, 96],
+      "maximum_round_to_round_delta_P_kw": 1100.0,
+      "maximum_round_to_round_delta_Q_kvar": 1111.138264198
+    }
+  ],
+  "repair": {
+    "description": "Apply the already-frozen rho=0.10 P/Q recourse radius around the current failed Fresh trajectory at every one of the 96 slots during each restoration full solve, while retaining every accumulated violation cut and cut-specific stale-anchor guard.",
+    "P_radius_kw": 55.0,
+    "Q_radius_kvar": 70.0,
+    "full_horizon_recourse_trust_constraint_count": 9216,
+    "restoration_round_limit": 5,
+    "restoration_round_limit_changed": false,
+    "objective_changed": false,
+    "physical_limits_changed": false,
+    "route_or_discrete_decisions_changed": false,
+    "voltage_coefficients_changed": false,
+    "May_data_used_for_coefficient_or_margin_fit": false
+  },
+  "secondary_implementation_defect": {
+    "classification": "STALE_RESTORATION_CHECKPOINT_FINGERPRINT_OMISSION",
+    "repair": "Require the current restoration contract, runner, restoration adapter, integrated solver, and frozen voltage-authority fingerprint before accepting a saved restoration round."
+  }
+}

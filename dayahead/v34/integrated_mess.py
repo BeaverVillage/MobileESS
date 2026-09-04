@@ -80,6 +80,7 @@ class IntegratedMessResult:
     preferred_mip_start_loaded: bool = False
     restoration_cut_count: int = 0
     restoration_trust_region_constraint_count: int = 0
+    restoration_recourse_trust_region_constraint_count: int = 0
     restoration_cut_arithmetic: tuple[Mapping[str, object], ...] = ()
     fixed_discrete_MESS_decisions: bool = False
 
@@ -271,6 +272,61 @@ def _add_restoration_cuts(
             )
             trust_region_rows += 2
     return tuple(cut_rows), trust_region_rows
+
+
+def _add_restoration_recourse_trust_region(
+    model: gp.Model,
+    control_names: Sequence[str],
+    expressions_by_slot: Sequence[Sequence[object]],
+    anchor_controls_96x60: np.ndarray,
+    *,
+    p_radius_kw: float,
+    q_radius_kvar: float,
+) -> int:
+    """Keep every restoration P/Q recourse slot local to the failed Fresh run.
+
+    A violation cut is local in one slot, but MESS energy coupling lets an
+    otherwise unrestricted full-horizon re-solve replace P/Q in unrelated
+    slots.  That invalidates the sequential-locality assumption and can move
+    the physical violation to a new slot on every official round.  The frozen
+    rho is therefore applied to the full 96-slot recourse step while the
+    existing cut-specific stale-anchor guards remain in force.
+    """
+
+    names = tuple(map(str, control_names))
+    anchor = np.asarray(anchor_controls_96x60, dtype=float)
+    if anchor.shape != (len(expressions_by_slot), len(names)):
+        raise ValueError(
+            "V37_RESTORATION_RECOURSE_TRUST_ANCHOR_AXIS:"
+            f"{anchor.shape}:{len(expressions_by_slot)}x{len(names)}"
+        )
+    if not np.isfinite(anchor).all():
+        raise ValueError("V37_RESTORATION_RECOURSE_TRUST_ANCHOR_NONFINITE")
+    if p_radius_kw <= 0.0 or q_radius_kvar <= 0.0:
+        raise ValueError("V37_RESTORATION_RECOURSE_TRUST_RADIUS")
+
+    rows = 0
+    for slot, expressions in enumerate(expressions_by_slot):
+        if len(expressions) != len(names):
+            raise RuntimeError("V37_RESTORATION_RECOURSE_TRUST_EXPRESSION_AXIS")
+        for control_index, name in enumerate(names):
+            if name.startswith("mess_p_kw["):
+                radius = float(p_radius_kw)
+            elif name.startswith("mess_q_kvar["):
+                radius = float(q_radius_kvar)
+            else:
+                continue
+            center = float(anchor[slot, control_index])
+            model.addConstr(
+                expressions[control_index] >= center - radius,
+                name=f"fresh_ac_recourse_trust_low[{slot},{control_index}]",
+            )
+            model.addConstr(
+                expressions[control_index] <= center + radius,
+                name=f"fresh_ac_recourse_trust_high[{slot},{control_index}]",
+            )
+            rows += 2
+    return rows
 
 
 def _stationary_restricted_incumbent(
@@ -588,6 +644,7 @@ def solve_integrated_mess(
     fixed_discrete_trajectory: MessTrajectory | None = None,
     restoration_include_cuts: bool = True,
     restoration_include_trust_region: bool = True,
+    restoration_recourse_anchor_controls: np.ndarray | None = None,
     infeasible_iis_path: Path | None = None,
 ) -> IntegratedMessResult:
     if case not in {"B2", "B3"}:
@@ -608,6 +665,12 @@ def solve_integrated_mess(
         raise ValueError("V34_SEQUENTIAL_COORDINATION_REQUIRES_ONE_VEHICLE_BLOCK")
     if fixed_discrete and force_at_least_one_move:
         raise ValueError("V37_R3_FIXED_DISCRETE_CONFLICTS_WITH_FORCE_MOVE")
+    if restoration_recourse_anchor_controls is not None and not fixed_discrete:
+        raise ValueError("V37_RESTORATION_RECOURSE_TRUST_REQUIRES_FIXED_DISCRETE")
+    if restoration_recourse_anchor_controls is not None and not restoration_cuts:
+        raise ValueError("V37_RESTORATION_RECOURSE_TRUST_REQUIRES_CUT")
+    if restoration_recourse_anchor_controls is not None and not restoration_include_trust_region:
+        raise ValueError("V37_RESTORATION_RECOURSE_TRUST_DISABLED")
     build_started = time.perf_counter()
     model = _configured_model(f"v34_integrated_{case}")
     block = add_mess_mobility_block(model, inputs)
@@ -722,6 +785,19 @@ def solve_integrated_mess(
         for slot in range(96)
     )
 
+    recourse_trust_region_constraint_count = 0
+    if restoration_recourse_anchor_controls is not None:
+        recourse_trust_region_constraint_count = _add_restoration_recourse_trust_region(
+            model,
+            controls,
+            expressions_by_slot,
+            restoration_recourse_anchor_controls,
+            p_radius_kw=RESTORATION_RHO * float(
+                inputs.electrical_authority.active_power_limit_kw
+            ),
+            q_radius_kvar=RESTORATION_RHO * float(inputs.electrical_authority.pcs_kva),
+        )
+
     for slot, coefficient in enumerate(coefficients):
         for index, node in enumerate(node_names):
             expression = sparse_expression(float(coefficient.voltage_constant[index]), coefficient.voltage_matrix[:, index], slot)
@@ -825,7 +901,11 @@ def solve_integrated_mess(
         include_cuts=restoration_include_cuts,
         include_trust_region=restoration_include_trust_region,
     )
-    grid_constraints += len(cut_rows) + trust_region_constraint_count
+    grid_constraints += (
+        len(cut_rows)
+        + trust_region_constraint_count
+        + recourse_trust_region_constraint_count
+    )
 
     # The corrected V34 policy explicitly prioritizes reproducible completion
     # over exact global-optimal equivalence.  One scalar deterministic
@@ -1035,6 +1115,9 @@ def solve_integrated_mess(
         preferred_mip_start_loaded=preferred_loaded,
         restoration_cut_count=len(applied_cuts),
         restoration_trust_region_constraint_count=trust_region_constraint_count,
+        restoration_recourse_trust_region_constraint_count=(
+            recourse_trust_region_constraint_count
+        ),
         restoration_cut_arithmetic=tuple(cut_arithmetic),
         fixed_discrete_MESS_decisions=fixed_discrete,
     )

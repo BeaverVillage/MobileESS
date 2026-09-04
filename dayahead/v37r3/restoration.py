@@ -551,6 +551,13 @@ def solve_fixed_discrete_recourse(
     restoration_cuts: Sequence[RestorationCut],
 ) -> IntegratedMessResult:
     coefficients = joint_repaired_coefficients(repo, electrical)
+    recourse_anchor = frozen_trajectory(
+        str(electrical.voltage["operating_day"]),
+        case,
+        aidc,
+        selected_trajectory,
+        round_index=0,
+    )
     result = solve_integrated_mess(
         case=case,
         aidc_pcc_kw_96x12=np.asarray(aidc.pcc_p_kw, dtype=float),
@@ -563,6 +570,9 @@ def solve_fixed_discrete_recourse(
         grid_coefficients=coefficients,
         restoration_cuts=tuple(restoration_cuts),
         fixed_discrete_trajectory=selected_trajectory,
+        restoration_recourse_anchor_controls=control_matrix(
+            electrical.voltage, recourse_anchor,
+        ),
     )
     if _discrete_signature(result.trajectory) != _discrete_signature(selected_trajectory):
         raise RuntimeError("V37_R3_DISCRETE_MESS_DECISION_MUTATED")

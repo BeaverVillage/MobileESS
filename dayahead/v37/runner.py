@@ -842,6 +842,16 @@ def _run_frozen_case(
     fresh_root = repo / CACHE_ROOT / PASS_ID / "fresh" / day / case
     current_beam = copy.deepcopy(dict(beam))
     initial_beam_sha = canonical_sha256(dict(beam))
+    restoration_resume_fingerprint = canonical_sha256({
+        "contract": file_sha(
+            repo / "dayahead/artifacts/v17_candidate/"
+            "V17_AC_RESTORATION_OUTER_LOOP_CONTRACT_V1.json"
+        ),
+        "runner": file_sha256(repo / "dayahead/v37/runner.py"),
+        "restoration": file_sha256(repo / "dayahead/v37r3/restoration.py"),
+        "integrated_mess": file_sha256(repo / "dayahead/v34/integrated_mess.py"),
+        "voltage_authority": file_sha(repo / AUTHORITY_RELATIVE_PATH),
+    })
     resume_root = (
         repo / CACHE_ROOT / PASS_ID / "restoration"
         / initial_beam_sha / day / case
@@ -854,6 +864,8 @@ def _run_frozen_case(
             if (
                 candidate.get("status") == "FRESH_COMPLETE"
                 and candidate.get("initial_beam_sha256") == initial_beam_sha
+                and candidate.get("restoration_resume_fingerprint_sha256")
+                == restoration_resume_fingerprint
                 and all(
                     (repo / item["relative_path"]).is_file()
                     and file_sha256(repo / item["relative_path"]) == item["sha256"]
@@ -985,6 +997,9 @@ def _run_frozen_case(
             "new_cut_count": len(generated),
             "cumulative_cut_count": len(accumulated),
             "trust_region_constraint_count": full.restoration_trust_region_constraint_count,
+            "recourse_trust_region_constraint_count": (
+                full.restoration_recourse_trust_region_constraint_count
+            ),
             "Fresh_finite_difference_solve_count": derivative_audit[
                 "Fresh_finite_difference_solve_count"
             ],
@@ -1053,6 +1068,9 @@ def _run_frozen_case(
             "operating_day": day,
             "case": case,
             "initial_beam_sha256": initial_beam_sha,
+            "restoration_resume_fingerprint_sha256": (
+                restoration_resume_fingerprint
+            ),
             "restoration_round": iteration,
             "cuts": [cut.payload() for cut in accumulated],
             "trajectory_slots": [row.to_dict() for row in current_trajectory.slots],
