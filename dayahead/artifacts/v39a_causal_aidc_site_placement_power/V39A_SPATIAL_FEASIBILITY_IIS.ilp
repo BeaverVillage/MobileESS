@@ -1,0 +1,109 @@
+\ Model V39A_RELAXED_2025-05-21_RW_copy
+\ LP format - for model browsing. Use MPS format to capture full model detail.
+\ Signature: 0x745df959c7d4fc02
+Minimize
+
+Subject To
+ gang_interval[18]: gang_count[18,AIDC01] + gang_count[18,AIDC02]
+   + gang_count[18,AIDC03] + gang_count[18,AIDC04] + gang_count[18,AIDC05]
+   + gang_count[18,AIDC06] + gang_count[18,AIDC08] + gang_count[18,AIDC09]
+   = 13
+ gang_interval[19]: gang_count[19,AIDC01] + gang_count[19,AIDC02]
+   + gang_count[19,AIDC03] + gang_count[19,AIDC04] + gang_count[19,AIDC05]
+   + gang_count[19,AIDC06] + gang_count[19,AIDC08] + gang_count[19,AIDC09]
+   = 1
+ gang_interval[20]: gang_count[20,AIDC01] + gang_count[20,AIDC02]
+   + gang_count[20,AIDC03] + gang_count[20,AIDC04] + gang_count[20,AIDC05]
+   + gang_count[20,AIDC06] + gang_count[20,AIDC08] + gang_count[20,AIDC09]
+   = 1
+ site_capacity[AIDC01,87]: gang_count[2,AIDC01] + gang_count[4,AIDC01]
+   + gang_count[5,AIDC01] + 2 gang_count[7,AIDC01]
+   + 4 gang_count[13,AIDC01] + 4 gang_count[16,AIDC01]
+   + 32 gang_count[18,AIDC01] + 32 gang_count[19,AIDC01]
+   + 32 gang_count[20,AIDC01] <= 42
+ site_capacity[AIDC02,67]: gang_count[1,AIDC02] + gang_count[2,AIDC02]
+   + gang_count[3,AIDC02] + 2 gang_count[7,AIDC02]
+   + 4 gang_count[12,AIDC02] + 4 gang_count[13,AIDC02]
+   + 32 gang_count[18,AIDC02] + 32 gang_count[19,AIDC02]
+   + 32 gang_count[20,AIDC02] <= 75
+ site_capacity[AIDC03,71]: gang_count[1,AIDC03] + gang_count[2,AIDC03]
+   + gang_count[4,AIDC03] + 2 gang_count[7,AIDC03]
+   + 4 gang_count[12,AIDC03] + 4 gang_count[13,AIDC03]
+   + 32 gang_count[18,AIDC03] + 32 gang_count[19,AIDC03]
+   + 32 gang_count[20,AIDC03] <= 77
+ site_capacity[AIDC04,76]: gang_count[2,AIDC04] + gang_count[4,AIDC04]
+   + gang_count[5,AIDC04] + 2 gang_count[7,AIDC04]
+   + 4 gang_count[12,AIDC04] + 4 gang_count[13,AIDC04]
+   + 32 gang_count[18,AIDC04] + 32 gang_count[19,AIDC04]
+   + 32 gang_count[20,AIDC04] <= 34
+ site_capacity[AIDC05,74]: gang_count[2,AIDC05] + gang_count[4,AIDC05]
+   + gang_count[5,AIDC05] + 2 gang_count[7,AIDC05]
+   + 4 gang_count[12,AIDC05] + 4 gang_count[13,AIDC05]
+   + 32 gang_count[18,AIDC05] + 32 gang_count[19,AIDC05]
+   + 32 gang_count[20,AIDC05] <= 53
+ site_capacity[AIDC06,63]: gang_count[1,AIDC06] + gang_count[2,AIDC06]
+   + gang_count[3,AIDC06] + 2 gang_count[7,AIDC06]
+   + 4 gang_count[12,AIDC06] + 4 gang_count[13,AIDC06]
+   + 32 gang_count[18,AIDC06] + 32 gang_count[19,AIDC06]
+   + 32 gang_count[20,AIDC06] <= 68
+ site_capacity[AIDC08,82]: gang_count[2,AIDC08] + gang_count[4,AIDC08]
+   + gang_count[5,AIDC08] + 2 gang_count[7,AIDC08]
+   + 4 gang_count[13,AIDC08] + 4 gang_count[16,AIDC08]
+   + 32 gang_count[18,AIDC08] + 32 gang_count[19,AIDC08]
+   + 32 gang_count[20,AIDC08] <= 62
+ site_capacity[AIDC09,70]: gang_count[1,AIDC09] + gang_count[2,AIDC09]
+   + gang_count[4,AIDC09] + 2 gang_count[7,AIDC09]
+   + 4 gang_count[12,AIDC09] + 4 gang_count[13,AIDC09]
+   + 32 gang_count[18,AIDC09] + 32 gang_count[19,AIDC09]
+   + 32 gang_count[20,AIDC09] <= 139
+Bounds
+ gang_count[18,AIDC01] free
+ gang_count[18,AIDC02] free
+ gang_count[18,AIDC03] free
+ gang_count[18,AIDC04] free
+ gang_count[18,AIDC05] free
+ gang_count[18,AIDC06] free
+ gang_count[18,AIDC08] free
+ gang_count[18,AIDC09] free
+ gang_count[19,AIDC01] free
+ gang_count[19,AIDC02] free
+ gang_count[19,AIDC03] free
+ gang_count[19,AIDC04] free
+ gang_count[19,AIDC05] free
+ gang_count[19,AIDC06] free
+ gang_count[19,AIDC08] free
+ gang_count[19,AIDC09] free
+ gang_count[20,AIDC01] free
+ gang_count[20,AIDC02] free
+ gang_count[20,AIDC03] free
+ gang_count[20,AIDC04] free
+ gang_count[20,AIDC05] free
+ gang_count[20,AIDC06] free
+ gang_count[20,AIDC08] free
+ gang_count[20,AIDC09] free
+Generals
+ gang_count[1,AIDC02] gang_count[1,AIDC03] gang_count[1,AIDC06]
+ gang_count[1,AIDC09] gang_count[2,AIDC01] gang_count[2,AIDC02]
+ gang_count[2,AIDC03] gang_count[2,AIDC04] gang_count[2,AIDC05]
+ gang_count[2,AIDC06] gang_count[2,AIDC08] gang_count[2,AIDC09]
+ gang_count[3,AIDC02] gang_count[3,AIDC06] gang_count[4,AIDC01]
+ gang_count[4,AIDC03] gang_count[4,AIDC04] gang_count[4,AIDC05]
+ gang_count[4,AIDC08] gang_count[4,AIDC09] gang_count[5,AIDC01]
+ gang_count[5,AIDC04] gang_count[5,AIDC05] gang_count[5,AIDC08]
+ gang_count[7,AIDC01] gang_count[7,AIDC02] gang_count[7,AIDC03]
+ gang_count[7,AIDC04] gang_count[7,AIDC05] gang_count[7,AIDC06]
+ gang_count[7,AIDC08] gang_count[7,AIDC09] gang_count[12,AIDC02]
+ gang_count[12,AIDC03] gang_count[12,AIDC04] gang_count[12,AIDC05]
+ gang_count[12,AIDC06] gang_count[12,AIDC09] gang_count[13,AIDC01]
+ gang_count[13,AIDC02] gang_count[13,AIDC03] gang_count[13,AIDC04]
+ gang_count[13,AIDC05] gang_count[13,AIDC06] gang_count[13,AIDC08]
+ gang_count[13,AIDC09] gang_count[16,AIDC01] gang_count[16,AIDC08]
+ gang_count[18,AIDC01] gang_count[18,AIDC02] gang_count[18,AIDC03]
+ gang_count[18,AIDC04] gang_count[18,AIDC05] gang_count[18,AIDC06]
+ gang_count[18,AIDC08] gang_count[18,AIDC09] gang_count[19,AIDC01]
+ gang_count[19,AIDC02] gang_count[19,AIDC03] gang_count[19,AIDC04]
+ gang_count[19,AIDC05] gang_count[19,AIDC06] gang_count[19,AIDC08]
+ gang_count[19,AIDC09] gang_count[20,AIDC01] gang_count[20,AIDC02]
+ gang_count[20,AIDC03] gang_count[20,AIDC04] gang_count[20,AIDC05]
+ gang_count[20,AIDC06] gang_count[20,AIDC08] gang_count[20,AIDC09]
+End

@@ -1,0 +1,45 @@
+{
+  "MAY_STARTED": "NO",
+  "MAY_campaign_launched": false,
+  "V37_clean_regression": {
+    "command": "python -m pytest tests/dayahead/test_v37_r4a_per_day_aidc.py tests/dayahead/test_v37_r4_may_campaign_repair.py tests/dayahead/test_v37_r3r1_monitor_readiness.py -q",
+    "failed": 0,
+    "passed": 80,
+    "status": "PASS"
+  },
+  "V38_relevant_regression": {
+    "command": "python -m pytest tests/dayahead/test_v38_aidc_spatiotemporal_wan.py -q",
+    "failed": 0,
+    "passed": 13,
+    "status": "PASS",
+    "superseded_tests": []
+  },
+  "V39A_READY": "NO",
+  "V39A_focused": {
+    "command": "python -m pytest tests/dayahead/test_v39a_causal_aidc_site_placement_power.py -q",
+    "failed": 0,
+    "passed": 17,
+    "status": "PASS"
+  },
+  "artifact_id": "V39A_TEST_REPORT_V1",
+  "broader_relevant_regression": {
+    "failed": 0,
+    "files": [
+      "test_v37_r3_restore_intended_cuts.py",
+      "test_v37_p1_execution_acceleration.py",
+      "test_v37_r2_voltage_fidelity.py",
+      "test_v34_april_calibration_validation.py",
+      "test_v28r2_c1_affine.py"
+    ],
+    "passed": 42,
+    "status": "PASS"
+  },
+  "logical_normalized_SHA256": "ffa1db91e4a7abca6312c3b4763d0bd9030eb115743fb3b17bd2b96381e37c24",
+  "scientific_feasibility": {
+    "IIS_constraints": 11,
+    "gurobi_status": 3,
+    "status": "INFEASIBLE"
+  },
+  "status": "PASS_REGRESSIONS_SCIENCE_INFEASIBLE",
+  "voltage_authority_frozen_SHA256": "3ee89daad6d63cffb70c1a890f5141cf33bf4c951c9a9c364ae36692bcda6151"
+}
