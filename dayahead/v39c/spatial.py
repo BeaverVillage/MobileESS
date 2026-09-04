@@ -167,7 +167,7 @@ def causal_day_placement(
     *,
     name: str,
 ) -> dict[str, Any]:
-    """Place one D-1-visible day while preserving every known job location."""
+    """Place one D-1-visible day while preserving supplied RUNNING state."""
 
     rows = tuple(jobs)
     model = _new_model(name)

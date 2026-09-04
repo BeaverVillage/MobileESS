@@ -353,8 +353,15 @@ def _stage_c(
                 break
             assignments = plan["assignments"]
             plans[day, mode] = assignments
-            for assignment in assignments:
-                known_state[assignment["job_uid"]] = assignment["current_AIDC"]
+            # Reuse the V39A state contract exactly: only a job that is
+            # RUNNING at the cutoff has a carried current_AIDC on the next
+            # cutoff.  PENDING placement is an initial placement, not a
+            # migration source or a durable running-state observation.
+            known_state = {
+                assignment["job_uid"]: assignment["current_AIDC"]
+                for assignment in assignments
+                if assignment["state_at_issue"] == "RUNNING"
+            }
     optimal = sum(row["status"] == "OPTIMAL" for row in results)
     wan = load_wan_authority(repo)
     fixed_paths = sum(
