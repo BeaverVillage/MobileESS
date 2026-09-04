@@ -13,10 +13,11 @@ import time
 import traceback
 from typing import Any, Mapping
 
+import numpy as np
 import pandas as pd
 
 from dayahead.v35.contracts import PHASE_CALIBRATION
-from dayahead.v35.execution import daily_traffic_authority
+from dayahead.v35.execution import MESS_INITIAL, daily_traffic_authority
 from dayahead.v36 import runner as v36_runner
 from dayahead.v36.storage import CASE_FILES, file_sha
 
@@ -24,9 +25,13 @@ from .aidc import build_day
 from .context import load_day_context
 from .contracts import (
     ARTIFACT_ROOT, BEAM_PROGRESS_BASE, BEAM_WIDTH, BEAM_WIDTH_FALLBACK,
-    CACHE_ROOT, DATE_RESULT_ROOT, FIREWALL, MAX_WORKERS_PER_DATE,
+    CACHE_ROOT, DATE_RESULT_ROOT, DEFAULT_K, FIREWALL, K_FALLBACK,
+    MAX_WORKERS_PER_DATE, MESS_HEAD, MESS_ORDER,
     OFFICIAL_CASES, PASS_ID, PHASE, PROGRESS_AFTER_CASE, RAW_ROOT,
-    SOURCE_DATA_REPOSITORY, STATUS_ROOT,
+    SEED_WIDTH, SOURCE_DATA_REPOSITORY, STATUS_ROOT,
+)
+from .execution_acceleration import (
+    COMPATIBILITY_VERSION, canonical_sha256, file_sha256,
 )
 from .status import atomic_json, read_json, write_status
 from .voltage_fidelity import AUTHORITY_RELATIVE_PATH, repaired_coefficients
@@ -42,6 +47,112 @@ _LOCAL_FALLBACK_SIGNATURES = (
     "V35R3E_R1_RESTRICTED_COUNT",
     "V35R3E_R1_NO_FEASIBLE_SEED",
 )
+
+_FINGERPRINT_CACHE: dict[tuple[str, str, str], dict[str, Any]] = {}
+
+
+def _candidate_table_sha(repo: Path, day: str) -> str:
+    import dayahead.v35r3.algorithm as r3
+
+    _bundle, _graph, route_table, _files = daily_traffic_authority(
+        repo, repo / CACHE_ROOT / "traffic", PHASE, day, ADMISSION,
+    )
+    original_guard = r3.assert_apr01_only
+
+    def may_only(target: str) -> None:
+        if not str(target).startswith("2025-05-"):
+            raise PermissionError(f"V37_DATE_OUT_OF_SCOPE:{target}")
+
+    try:
+        r3.assert_apr01_only = may_only
+        payload = {
+            mess_id: [
+                asdict(candidate)
+                for candidate in r3.enumerate_initial_relocations(
+                    day=day, mess_id=mess_id,
+                    initial_service=MESS_INITIAL[mess_id], route_table=route_table,
+                ).candidates
+            ]
+            for mess_id in MESS_ORDER
+        }
+    finally:
+        r3.assert_apr01_only = original_guard
+    return canonical_sha256(payload)
+
+
+def case_execution_fingerprint(
+    repo: Path, day: str, case: str, aidc: Any,
+) -> dict[str, Any]:
+    """Fingerprint every science/config input that permits exact case reuse."""
+
+    authority_path = repo / AUTHORITY_RELATIVE_PATH
+    aidc_sha = canonical_sha256({
+        "contract_sha256": str(aidc.contract_sha256),
+        "P_sha256": hashlib.sha256(np.asarray(aidc.pcc_p_kw, dtype=float).tobytes()).hexdigest(),
+        "Q_sha256": hashlib.sha256(np.asarray(aidc.pcc_q_kvar, dtype=float).tobytes()).hexdigest(),
+    })
+    voltage_path = (
+        repo / CACHE_ROOT / "electrical" / day / "data"
+        / f"D1_AC_ANCHOR_SENSITIVITY_{day}.npz"
+    )
+    current_path = (
+        repo / CACHE_ROOT / "electrical" / day / "data"
+        / f"D1_AC_ANCHOR_CURRENT_SENSITIVITY_{day}.npz"
+    )
+    cache_key = (day, case, file_sha(authority_path))
+    cached = _FINGERPRINT_CACHE.get(cache_key)
+    if cached is not None and cached["AIDC_authority_sha256"] == aidc_sha:
+        return dict(cached)
+    identity = {
+        "infrastructure_compatibility_version": COMPATIBILITY_VERSION,
+        "operating_day": day,
+        "case": case,
+        "voltage_authority_sha256": file_sha(authority_path),
+        "AIDC_authority_sha256": aidc_sha,
+        "MESS_authority_sha256": MESS_HEAD,
+        "K": DEFAULT_K,
+        "K_fallback": list(K_FALLBACK),
+        "beam": BEAM_WIDTH,
+        "beam_fallback": BEAM_WIDTH_FALLBACK,
+        "seed": SEED_WIDTH,
+        "WorkLimit": 60.0,
+        "candidate_table_SHA": _candidate_table_sha(repo, day),
+        "network_context_SHA": canonical_sha256({
+            "voltage": file_sha(voltage_path), "current": file_sha(current_path),
+        }),
+        "execution_code_SHA": canonical_sha256({
+            relative: file_sha256(repo / relative)
+            for relative in (
+                "dayahead/v37/runner.py",
+                "dayahead/v37/execution_acceleration.py",
+                "dayahead/v37/voltage_fidelity.py",
+                "dayahead/tools/run_v35r3e_r1_beam.py",
+                "dayahead/v35r3/algorithm.py",
+                "dayahead/v34/integrated_mess.py",
+            )
+        }),
+        "solver_relevant_configuration": {
+            "restricted": {
+                "Threads": 1, "Seed": 20260828,
+                "FeasibilityTol": 1.0e-8, "OptimalityTol": 1.0e-8,
+                "numeric_retry_NumericFocus": 3,
+                "numeric_retry_OptimalityTol": 1.0e-8,
+            },
+            "full": {
+                "Threads": 4, "Seed": 20260828, "MIPGap": 1.0e-3,
+                "FeasibilityTol": 1.0e-6, "OptimalityTol": 1.0e-6,
+                "TimeLimit": 600.0, "WorkLimit": 60.0,
+                "WorkLimit_tiers": [60.0, 180.0, 300.0], "MIPFocus": 1,
+                "SoftMemLimit": 8.0, "NodefileStart": 1.0,
+            },
+        },
+    }
+    result = {
+        **identity,
+        "execution_fingerprint_sha256": canonical_sha256(identity),
+    }
+    _FINGERPRINT_CACHE[cache_key] = dict(result)
+    return result
 
 
 def _local_fallback_allowed(error: Exception) -> bool:
@@ -172,6 +283,10 @@ def _archived_k_attempt(search_root: Path, label: str) -> dict[str, Any] | None:
         "uncertified_candidate_ids": [str(row["candidate_id"]) for row in failure_rows],
         "signatures": [str(row["exact_optimality_certificate"]) for row in failure_rows],
         "restored_from": str(path),
+        "restricted_solver_calls": 0,
+        "restricted_cache_hits": int(len(values)),
+        "restricted_cache_misses": 0,
+        "restricted_duplicate_solves": 0,
     }
 
 
@@ -229,6 +344,10 @@ def _run_local_with_frozen_k_fallback(
                 "uncertified_candidate_count": len(failure_rows),
                 "uncertified_candidate_ids": [str(row["candidate_id"]) for row in failure_rows],
                 "signatures": [str(row["exact_optimality_certificate"]) for row in failure_rows],
+                "restricted_solver_calls": int(summary.get("restricted_solver_calls", 0)),
+                "restricted_cache_hits": int(summary.get("restricted_cache_hits", 0)),
+                "restricted_cache_misses": int(summary.get("restricted_cache_misses", 0)),
+                "restricted_duplicate_solves": int(summary.get("restricted_duplicate_solves", 0)),
             }
             attempts.append(attempt)
             if failure_rows and index < len(levels) - 1:
@@ -244,6 +363,21 @@ def _run_local_with_frozen_k_fallback(
                 "uncertified_candidates_fail_closed": len(failure_rows),
                 "K_fallback_attempts": attempts,
                 "K_fallback_sequence": [200, 400, 800, "FULL"],
+                "restricted_solver_calls_current_attempt": int(
+                    summary.get("restricted_solver_calls", 0)
+                ),
+                "restricted_solver_calls": sum(
+                    int(row.get("restricted_solver_calls", 0)) for row in attempts
+                ),
+                "restricted_cache_hits": sum(
+                    int(row.get("restricted_cache_hits", 0)) for row in attempts
+                ),
+                "restricted_cache_misses": sum(
+                    int(row.get("restricted_cache_misses", 0)) for row in attempts
+                ),
+                "restricted_duplicate_solves": sum(
+                    int(row.get("restricted_duplicate_solves", 0)) for row in attempts
+                ),
             })
             frozen._json(search_root / "LOCAL_SEARCH.json", updated)
             return seeds, updated
@@ -300,7 +434,20 @@ def _input_authority(repo: Path, day: str, case: str, trajectory: Any) -> dict[s
     }
 
 
-def _beam_case(repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any) -> tuple[dict[str, Any], int]:
+def _beam_root(
+    repo: Path, execution_fingerprint_sha256: str, day: str, case: str,
+    width: int,
+) -> Path:
+    return (
+        repo / CACHE_ROOT / PASS_ID / "beam"
+        / execution_fingerprint_sha256 / day / case / f"B{width}"
+    )
+
+
+def _beam_case(
+    repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any,
+    execution_fingerprint: Mapping[str, Any] | None = None,
+) -> tuple[dict[str, Any], int]:
     import dayahead.tools.run_v35r3e_r1_beam as frozen
     import dayahead.v35r3.algorithm as r3
     import dayahead.v35r3e.algorithm as r3e
@@ -308,6 +455,11 @@ def _beam_case(repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any) -> t
     data, electrical = load_day_context(repo, day)
     coefficients = repaired_coefficients(repo, electrical)
     selected = aidc_b0 if case == "B2" else aidc_b1
+    execution_fingerprint = dict(
+        execution_fingerprint
+        or case_execution_fingerprint(repo, day, case, selected)
+    )
+    fingerprint_sha = str(execution_fingerprint["execution_fingerprint_sha256"])
     from dayahead.v33m.mess_trajectory import MessTrajectory
     from dayahead.v35.execution import _planning_grid
     baseline_arrays, _ = _planning_grid(coefficients, electrical.voltage, selected.pcc_p_kw, MessTrajectory(()))
@@ -320,6 +472,7 @@ def _beam_case(repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any) -> t
         "local_search": frozen._local_search, "solve_item": frozen._solve_item,
         "solve_worker": frozen._solve_worker, "DEFAULT_K": frozen.DEFAULT_K,
         "slot_coefficients": frozen.slot_coefficients,
+        "execution_cache_context": frozen.EXECUTION_CACHE_CONTEXT,
     }
 
     def selected_day(value: str) -> None:
@@ -327,7 +480,10 @@ def _beam_case(repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any) -> t
             raise PermissionError(f"V37_DATE_OUT_OF_SCOPE:{value}")
 
     frozen.APR01 = day
-    frozen.CACHE_ROOT = CACHE_ROOT / PASS_ID / "beam"
+    # Every stage, local-search file and full-child checkpoint lives below the
+    # exact case fingerprint.  A later voltage-authority SHA therefore cannot
+    # restore an older stage before the individual cache checks even run.
+    frozen.CACHE_ROOT = CACHE_ROOT / PASS_ID / "beam" / fingerprint_sha
     frozen.prepare_aidc_stages = lambda *_args, **_kwargs: (
         data, electrical,
         {"B0": {"planning_pcc_power_kw": aidc_b0.pcc_p_kw},
@@ -340,6 +496,12 @@ def _beam_case(repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any) -> t
     frozen.slot_coefficients = (
         lambda _legacy, _voltage, _current, slot: coefficients[int(slot)]
     )
+    frozen.EXECUTION_CACHE_CONTEXT = {
+        **execution_fingerprint,
+        "candidate_cache_root": str(
+            (repo / CACHE_ROOT / "p1_candidate_solve_cache").resolve()
+        ),
+    }
     frozen.daily_traffic_authority = lambda _repo, _cache, _phase, target, _admission: daily_traffic_authority(
         repo, repo / CACHE_ROOT / "traffic", PHASE, target, ADMISSION,
     )
@@ -365,16 +527,30 @@ def _beam_case(repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any) -> t
     try:
         last_error: Exception | None = None
         for width in (BEAM_WIDTH, BEAM_WIDTH_FALLBACK):
-            final_path = repo / CACHE_ROOT / PASS_ID / "beam" / day / case / f"B{width}" / "FINAL_RESULT.json"
+            final_path = _beam_root(repo, fingerprint_sha, day, case, width) / "FINAL_RESULT.json"
             if final_path.is_file():
                 result = read_json(final_path)
-                k_count, full_count = _beam_k_fallback_counts(final_path.parent)
-                result["V37_K_fallback_count"] = k_count
-                result["V37_FULL_scan_count"] = full_count
-                return result, 0 if width == BEAM_WIDTH else 1
+                if result.get("execution_fingerprint_sha256") == fingerprint_sha:
+                    k_count, full_count = _beam_k_fallback_counts(final_path.parent)
+                    result["V37_K_fallback_count"] = k_count
+                    result["V37_FULL_scan_count"] = full_count
+                    result["reuse"] = {
+                        "REUSED": "YES",
+                        "source_artifact": str(final_path.resolve()),
+                        "source_SHA": file_sha256(final_path),
+                        "authority_SHA": execution_fingerprint["voltage_authority_sha256"],
+                        "reason": "EXACT_BEAM_FINGERPRINT_MATCH",
+                    }
+                    return result, 0 if width == BEAM_WIDTH else 1
             try:
                 os.chdir(repo)
                 result = frozen._run_case(case, width, MAX_WORKERS_PER_DATE)
+                result["execution_fingerprint_sha256"] = fingerprint_sha
+                result["reuse"] = {
+                    "REUSED": "NO", "source_artifact": None, "source_SHA": None,
+                    "authority_SHA": execution_fingerprint["voltage_authority_sha256"],
+                    "reason": "NO_EXACT_COMPLETED_BEAM_RESULT",
+                }
                 k_count, full_count = _beam_k_fallback_counts(final_path.parent)
                 result["V37_K_fallback_count"] = k_count
                 result["V37_FULL_scan_count"] = full_count
@@ -397,6 +573,7 @@ def _beam_case(repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any) -> t
         frozen._solve_worker = original["solve_worker"]
         frozen.DEFAULT_K = original["DEFAULT_K"]
         frozen.slot_coefficients = original["slot_coefficients"]
+        frozen.EXECUTION_CACHE_CONTEXT = original["execution_cache_context"]
         r3.assert_apr01_only, r3e.assert_apr01_only = original_guards
         electrical.voltage.close(); electrical.current.close()
         os.chdir(repo)
@@ -410,7 +587,10 @@ def _checkpoint_path(repo: Path, day: str, case: str) -> Path:
     return repo / CACHE_ROOT / PASS_ID / "case_checkpoints" / day / f"{case}.json"
 
 
-def _valid_case_checkpoint(repo: Path, day: str, case: str) -> dict[str, Any] | None:
+def _valid_case_checkpoint(
+    repo: Path, day: str, case: str,
+    execution_fingerprint: Mapping[str, Any],
+) -> dict[str, Any] | None:
     path = _checkpoint_path(repo, day, case)
     if not path.is_file():
         return None
@@ -418,38 +598,70 @@ def _valid_case_checkpoint(repo: Path, day: str, case: str) -> dict[str, Any] | 
         payload = read_json(path)
         if payload.get("status") != "PASS":
             return None
+        expected_sha = str(execution_fingerprint["execution_fingerprint_sha256"])
+        if payload.get("execution_fingerprint_sha256") != expected_sha:
+            return None
+        if payload.get("execution_fingerprint") != dict(execution_fingerprint):
+            return None
         root = _case_root(repo, day, case)
         for item in payload["files"]:
             candidate = root / item["relative_path"]
-            if not candidate.is_file() or candidate.stat().st_size != item["bytes"]:
+            if (
+                not candidate.is_file()
+                or candidate.stat().st_size != item["bytes"]
+                or file_sha256(candidate) != item["sha256"]
+            ):
                 return None
-        return dict(payload["result"])
+        result = dict(payload["result"])
+        result["execution_fingerprint_sha256"] = expected_sha
+        result["reuse"] = {
+            "REUSED": "YES",
+            "source_artifact": str(path.resolve()),
+            "source_SHA": file_sha256(path),
+            "authority_SHA": execution_fingerprint["voltage_authority_sha256"],
+            "reason": "EXACT_CASE_FINGERPRINT_AND_FILE_HASH_MATCH",
+        }
+        return result
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError):
         return None
 
 
-def _write_case_checkpoint(repo: Path, day: str, case: str, result: Mapping[str, Any]) -> None:
+def _write_case_checkpoint(
+    repo: Path, day: str, case: str, result: Mapping[str, Any],
+    execution_fingerprint: Mapping[str, Any],
+) -> None:
     root = _case_root(repo, day, case)
     files = [
-        {"relative_path": relative, "bytes": (root / relative).stat().st_size}
+        {
+            "relative_path": relative,
+            "bytes": (root / relative).stat().st_size,
+            "sha256": file_sha256(root / relative),
+        }
         for relative in CASE_FILES if (root / relative).is_file()
     ]
     if len(files) != len(CASE_FILES):
         raise RuntimeError(f"V37_CASE_ARTIFACT_INCOMPLETE:{day}:{case}:{len(files)}")
     atomic_json(_checkpoint_path(repo, day, case), {
-        "artifact_id": "V37_CASE_CHECKPOINT_V1", "date": day, "case": case,
-        "status": "PASS", "files": files, "result": dict(result),
+        "artifact_id": "V37_CASE_CHECKPOINT_V2", "date": day, "case": case,
+        "status": "PASS", "execution_fingerprint": dict(execution_fingerprint),
+        "execution_fingerprint_sha256": execution_fingerprint["execution_fingerprint_sha256"],
+        "files": files, "result": dict(result),
     })
 
 
-def _watch_beam(repo: Path, day: str, case: str, stop: threading.Event) -> None:
+def _watch_beam(
+    repo: Path, day: str, case: str, execution_fingerprint_sha256: str,
+    stop: threading.Event,
+) -> None:
     base = BEAM_PROGRESS_BASE[case]
     path = _status_path(repo, day)
     while not stop.wait(2.0):
         completed = 0
         current_width = BEAM_WIDTH
         for width in (BEAM_WIDTH, BEAM_WIDTH_FALLBACK):
-            root = repo / CACHE_ROOT / PASS_ID / "beam" / day / case / f"B{width}"
+            root = _beam_root(
+                repo, execution_fingerprint_sha256, day, case, width,
+            )
             count = sum((root / f"STAGE_{index}.json").is_file() for index in range(1, 5))
             if count >= completed:
                 completed, current_width = count, width
@@ -494,9 +706,12 @@ def _case_metrics(repo: Path, day: str, case: str, result: Mapping[str, Any]) ->
     moves = pd.read_parquet(root / "mess/MESS_MOVE_EVENTS.parquet")
     solvers = pd.read_parquet(root / "solver/SOLVER_RUNS.parquet")
     planning, fresh = gates["Planning"], gates["Fresh"]
-    beam_path = repo / CACHE_ROOT / PASS_ID / "beam" / day / case / f"B{BEAM_WIDTH}" / "FINAL_RESULT.json"
+    fingerprint_sha = str(result.get("execution_fingerprint_sha256", ""))
+    beam_path = _beam_root(repo, fingerprint_sha, day, case, BEAM_WIDTH) / "FINAL_RESULT.json"
     if not beam_path.is_file() and case in {"B2", "B3"}:
-        beam_path = repo / CACHE_ROOT / PASS_ID / "beam" / day / case / f"B{BEAM_WIDTH_FALLBACK}" / "FINAL_RESULT.json"
+        beam_path = _beam_root(
+            repo, fingerprint_sha, day, case, BEAM_WIDTH_FALLBACK,
+        ) / "FINAL_RESULT.json"
     trace = read_json(beam_path).get("trace", []) if beam_path.is_file() else []
     total = float(provenance["wallclock_seconds"])
     fresh_seconds = float(compute["Fresh_wallclock_seconds"])
@@ -523,6 +738,8 @@ def _case_metrics(repo: Path, day: str, case: str, result: Mapping[str, Any]) ->
         "Planning_wallclock_seconds": max(0.0, total - fresh_seconds),
         "Fresh_wallclock_seconds": fresh_seconds, "total_wallclock_seconds": total,
         "solver_statuses": sorted(set(map(str, solvers["status"]))) if len(solvers) else ["NOT_APPLICABLE"],
+        "execution_fingerprint_sha256": fingerprint_sha,
+        "reuse": dict(result.get("reuse", {})),
     }
 
 
@@ -557,21 +774,21 @@ def _finalize_day(repo: Path, day: str, results: Mapping[str, Mapping[str, Any]]
 def run_day(repo: Path, day: str) -> dict[str, Any]:
     started = time.perf_counter()
     status_path = _status_path(repo, day)
-    previous = read_json(status_path) if status_path.is_file() else {}
     result_path = repo / DATE_RESULT_ROOT / f"{day}.json"
-    if previous.get("status") in {"PASS", "FAIL"} and result_path.is_file():
-        existing = read_json(result_path)
-        if set(existing.get("cases", {})) == set(OFFICIAL_CASES):
-            return existing
     write_status(status_path, day, "RUNNING", 0, "B0_PLANNING", extra={"workers": MAX_WORKERS_PER_DATE})
     try:
         aidc = {
             "B0": build_day(repo, day, "B0"), "B1": build_day(repo, day, "B1"),
         }
         aidc["B2"], aidc["B3"] = aidc["B0"], aidc["B1"]
+        fingerprints = {
+            case: case_execution_fingerprint(repo, day, case, aidc[case])
+            for case in OFFICIAL_CASES
+        }
         results: dict[str, dict[str, Any]] = {}
         for case in OFFICIAL_CASES:
-            cached = _valid_case_checkpoint(repo, day, case)
+            fingerprint = fingerprints[case]
+            cached = _valid_case_checkpoint(repo, day, case, fingerprint)
             if cached is not None:
                 results[case] = cached
                 write_status(status_path, day, "RUNNING", PROGRESS_AFTER_CASE[case], f"{case}_RESTORED")
@@ -580,10 +797,19 @@ def run_day(repo: Path, day: str) -> dict[str, Any]:
             fallback = 0
             if case in {"B2", "B3"}:
                 stop = threading.Event()
-                watcher = threading.Thread(target=_watch_beam, args=(repo, day, case, stop), daemon=True)
+                watcher = threading.Thread(
+                    target=_watch_beam,
+                    args=(
+                        repo, day, case,
+                        str(fingerprint["execution_fingerprint_sha256"]), stop,
+                    ),
+                    daemon=True,
+                )
                 watcher.start()
                 try:
-                    beam, fallback = _beam_case(repo, day, case, aidc["B0"], aidc["B1"])
+                    beam, fallback = _beam_case(
+                        repo, day, case, aidc["B0"], aidc["B1"], fingerprint,
+                    )
                 finally:
                     stop.set(); watcher.join(timeout=5)
                 write_status(status_path, day, "RUNNING", BEAM_PROGRESS_BASE[case] + 4, f"{case}_FRESH")
@@ -592,7 +818,13 @@ def run_day(repo: Path, day: str) -> dict[str, Any]:
             result["K_fallback"] = bool(
                 beam is not None and int(beam.get("V37_K_fallback_count", 0)) > 0
             )
-            _write_case_checkpoint(repo, day, case, result)
+            result["execution_fingerprint_sha256"] = fingerprint["execution_fingerprint_sha256"]
+            result["reuse"] = {
+                "REUSED": "NO", "source_artifact": None, "source_SHA": None,
+                "authority_SHA": fingerprint["voltage_authority_sha256"],
+                "reason": "NO_EXACT_COMPLETED_CASE_CHECKPOINT",
+            }
+            _write_case_checkpoint(repo, day, case, result, fingerprint)
             results[case] = result
             write_status(status_path, day, "RUNNING", PROGRESS_AFTER_CASE[case], f"{case}_COMPLETE")
         final = _finalize_day(repo, day, results, started)
