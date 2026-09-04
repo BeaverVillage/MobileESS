@@ -1,0 +1,25 @@
+{
+  "aggregation_restores_deterministic_order": true,
+  "artifact_id": "V37_P1_PERSISTENT_WORKER_AUDIT_V1",
+  "dynamic_context_replaced_per_candidate": [
+    "fixed_p",
+    "fixed_q",
+    "line_states",
+    "voltage_states",
+    "transformer_current_states",
+    "transformer_kVA_states"
+  ],
+  "fresh_candidate_model_construction": true,
+  "immutable_context_preloaded": [
+    "case",
+    "AIDC",
+    "voltage_coefficients",
+    "services"
+  ],
+  "lifetime": "ONE_PROCESS_POOL_PER_BEAM_CASE",
+  "mutable_Gurobi_model_reuse": false,
+  "mutable_state_leakage_test": "PASS",
+  "new_warm_start_strategy": false,
+  "persistent_worker_implemented": true,
+  "test_evidence": "tests/dayahead/test_v37_p1_execution_acceleration.py"
+}

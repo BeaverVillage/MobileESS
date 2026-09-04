@@ -1,0 +1,84 @@
+{
+  "artifact_id": "V37_ENGINEERING_REPAIR_LOG_V1",
+  "repairs": [
+    {
+      "classification": "ENGINEERING_WSL_IMPORT_PATH",
+      "effect": "Initial source materializer process could not import the repository package.",
+      "repair": "Prepend the existing V37 repository root to sys.path in the WSL entry point.",
+      "science_changed": "NO"
+    },
+    {
+      "classification": "ENGINEERING_COHORT_ACCOUNTING_SCOPE",
+      "effect": "Initial date workers compared the complete 582-row issue ledger against the 339-row temporal-flexible cohort count and failed before optimization.",
+      "repair": "Apply the frozen 339 and 336 invariants to temporal_flexible rows only; the 243 RUNNING_FIXED rows remain present and unchanged.",
+      "verification": {
+        "complete_ledger_rows": 582,
+        "temporal_flexible_rows": 339,
+        "partial_shared_temporal_flexible_rows": 336,
+        "power_slots": 96,
+        "scenario": "CENTER"
+      },
+      "science_changed": "NO"
+    },
+    {
+      "classification": "ENGINEERING_HISTORICAL_DATE_GUARD",
+      "effect": "The frozen recursive optimizer-channel materializer retained its V28R2 April-only entry guard and rejected May before any solve.",
+      "repair": "V37 binds the unchanged frozen recursive prediction implementation behind a May01-May31 scope guard without modifying V28R2.",
+      "forecast_model_changed": "NO",
+      "training_data_changed": "NO",
+      "recursion_changed": "NO",
+      "science_changed": "NO"
+    },
+    {
+      "classification": "ENGINEERING_CWD_RESTORATION_AND_FALLBACK_SCOPE",
+      "effect": "OpenDSS Compile changed the date worker process working directory. A later frozen beam invocation therefore resolved its relative cache root against the source feeder directory, and the unrestricted exception handler incorrectly attempted B=4 for this filesystem error.",
+      "repair": "Reset the date worker working directory to the V37 repository at every frozen runner boundary and after every return or exception. Permit B=2 to B=4 only for the frozen beam search's explicit conservation, restricted-count, or no-feasible-seed failures.",
+      "beam_width": "2_then_4_on_explicit_frozen_search_failure_only",
+      "optimizer_changed": "NO",
+      "objective_changed": "NO",
+      "constraints_changed": "NO",
+      "science_changed": "NO"
+    },
+    {
+      "classification": "ENGINEERING_FROZEN_K_FALLBACK_ADAPTER",
+      "effect": "The V37 beam adapter did not invoke the already-frozen 200 -> 400 -> 800 -> FULL hierarchy when a restricted local-search candidate remained uncertified after its prescribed numeric retry.",
+      "repair": "Connect explicit fixed-candidate certification failures to the frozen K hierarchy, isolate only those uncertified candidates fail-closed, retain every attempt as an auditable cache artifact, and accept FULL only after scanning the entire dynamically feasible candidate set.",
+      "trigger_observed": "V35R3_FIXED_CERTIFICATE_STALLED",
+      "K_sequence": [200, 400, 800, "FULL"],
+      "MOVE_zero_trigger": "NO",
+      "objective_changed": "NO",
+      "constraints_changed": "NO",
+      "physical_tolerances_changed": "NO",
+      "science_changed": "NO"
+    },
+    {
+      "classification": "ENGINEERING_ATOMIC_STATUS_FILE_LOCK",
+      "effect": "Concurrent date-status writers shared one PID-derived temporary filename, and brief Windows reader locks could reject the final atomic replace and terminate the progress watcher.",
+      "repair": "Use PID plus thread identity for each temporary JSON, retry only PermissionError during os.replace for at most thirty seconds, and treat a still-locked RUNNING telemetry tick as best-effort so the watcher retries on its next cycle.",
+      "status_schema_changed": "NO",
+      "campaign_results_changed": "NO",
+      "science_changed": "NO"
+    },
+    {
+      "classification": "ENGINEERING_K_FALLBACK_CHECKPOINT_RESTORE",
+      "effect": "Completed K=200 and K=400 certification-failure attempts were archived for audit but were not consulted after a process interruption.",
+      "repair": "Restore the latest exact-parent archived restricted-scan attempt and skip only levels whose explicit certification failure is already materialized.",
+      "completed_solver_work_discarded": "NO",
+      "science_changed": "NO"
+    },
+    {
+      "classification": "ENGINEERING_FINAL_AGGREGATION_FAIL_INCLUSION",
+      "effect": "Physical-gate FAIL dates with complete B0-B3 outputs were blanked in the meeting table and excluded from distributions, relocation statistics, and fallback-date counts.",
+      "repair": "Aggregate every date that has complete case outputs, preserve FAIL in PASS_FAIL, explicitly list implementation-only failures, and add total and per-vehicle multi-relocation reporting.",
+      "failed_dates_dropped_from_statistics": "NO",
+      "science_changed": "NO"
+    },
+    {
+      "classification": "ENGINEERING_TERMINAL_FAIL_RESUME_AND_WALLCLOCK",
+      "effect": "A completed physical-gate FAIL was terminal but a supervisor restart briefly restored its four cases and overwrote the date-process elapsed field with the restore duration.",
+      "repair": "Skip PASS or FAIL dates only when all four case outputs exist, retry implementation-only failures, and reconstruct per-date wallclock from persisted B0 start through B3 end provenance.",
+      "case_recomputation_required": "NO",
+      "science_changed": "NO"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "artifact_id": "V37_R4_RESTORATION_ROOT_CAUSE_V1",
+  "beam_rerun": false,
+  "case": "B2",
+  "cut_or_trust_region_cause": false,
+  "day": "2025-05-01",
+  "explanation": "The saved slot state is TRANSIT at a departure slot, but the MILP boundary immediately before that slot must still be occupied at the origin.  The old adapter fixed boundary occupancy directly from the slot state, contradicting the preceding stay/flow equation.",
+  "failing_restoration_round": 1,
+  "identified_bug": "FIXED_DISCRETE_DEPARTURE_BOUNDARY_OCCUPANCY_OFF_BY_ONE",
+  "physical_limits_changed": false,
+  "post_repair": {
+    "CASE_A_BASE_ONLY": "FEASIBLE",
+    "CASE_B_TRUST_REGION_ONLY": "FEASIBLE",
+    "CASE_C_RESTORATION_CUTS_ONLY": "FEASIBLE",
+    "CASE_D_CUTS_PLUS_TRUST_REGION": "FEASIBLE"
+  },
+  "primary_classification": "G_OTHER_IDENTIFIED_IMPLEMENTATION_BUG",
+  "repair": "Derive every fixed boundary occupancy recursively from initial occupancy, prior-slot stay, and connection-ready arrivals; keep the saved move and stay binaries unchanged.",
+  "representative_IIS_constraint": "mess_flow_in[MESS01,22,STA01]",
+  "representative_IIS_variable_bounds": [
+    "mess_z[MESS01,22,STA01] = 0",
+    "mess_stay[MESS01,21,STA01] = 1"
+  ],
+  "rho_changed": false,
+  "status": "PASS"
+}

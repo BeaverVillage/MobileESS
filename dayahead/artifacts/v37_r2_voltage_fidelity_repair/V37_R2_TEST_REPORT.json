@@ -1,0 +1,50 @@
+{
+  "artifact_id": "V37_R2_TEST_REPORT_V2",
+  "pre_May_smoke": {
+    "compile_import": {
+      "command": "python -m py_compile dayahead/tools/run_v37_r2_voltage_fidelity_repair.py dayahead/v37/voltage_fidelity.py tests/dayahead/test_v37_r2_voltage_fidelity.py",
+      "passed": 3,
+      "failed": 0,
+      "PASS": true
+    },
+    "focused_R2_pytest": {
+      "commands": [
+        "python -m pytest tests/dayahead/test_v37_r2_voltage_fidelity.py -q -k not_repaired_production",
+        "python -m pytest tests/dayahead/test_v37_r2_voltage_fidelity.py::test_repaired_production_coefficients_change_only_authorized_cross_pq_rows_and_keep_anchor -q"
+      ],
+      "passed": 6,
+      "failed": 0,
+      "PASS": true
+    },
+    "focused_P1_pytest": {
+      "command": "python -m pytest tests/dayahead/test_v37_p1_execution_acceleration.py -q",
+      "passed": 8,
+      "failed": 0,
+      "PASS": true
+    },
+    "git_diff_check_PASS": true,
+    "coverage": [
+      "Apr-01 saved integrated calibration authority",
+      "24/24 selectable source and target MESS PCC coverage",
+      "386 full bus-phase responses per source state",
+      "cross-PCC and A/B/C phase indexing",
+      "two independent deterministic Fresh passes",
+      "13,124 saved Apr-01 baseline consistency comparisons",
+      "seven-state altered-order/history check",
+      "seven-slot minimum April background coverage",
+      "physical signed P/Q coefficient floors",
+      "exact zero-MESS anchor preservation",
+      "direct-affine production integration",
+      "V37-P1 fingerprinted cumulative cache and persistent-worker infrastructure",
+      "Benders/K/beam/seed/WorkLimit/AIDC/physical-limit firewalls"
+    ]
+  },
+  "final_voltage_authority_sha256": "aecd5f0822c432f972b9b63a17aae5904aaf6f81265b9ae18beb1530b399cf6b",
+  "May_validation": {
+    "status": "NOT_RUN_YET",
+    "reason": "REPAIR_COMMIT_PRECEDES_MAY01_B2_VALIDATION"
+  },
+  "total_passed_before_May": 14,
+  "total_failed_before_May": 0,
+  "PASS": true
+}

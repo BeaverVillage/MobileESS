@@ -1,0 +1,79 @@
+{
+  "artifact_id": "V37_R4_CAMPAIGN_STOP_AUDIT_V1",
+  "recorded_at": "2026-09-04T14:23:50.1278061+09:00",
+  "branch": "codex/v37-may2025-locked-final",
+  "initial_HEAD": "e6743b05bb829b28068adf39f5e60a1a490d7279",
+  "campaign_pid_from_lock": 233112,
+  "monitor_pid_from_lock": 265364,
+  "campaign_process_live_at_stop_action": false,
+  "monitor_process_live_at_stop_action": false,
+  "date_worker_processes_live_at_stop_action": [],
+  "stop_action": "NO_SIGNAL_REQUIRED_PROCESSES_ALREADY_EXITED",
+  "campaign_stopped": true,
+  "active_dates_at_observation": [
+    {
+      "date": "2025-05-05",
+      "status_file_state": "RUNNING",
+      "stage": "B2_MESS02",
+      "case": "B2",
+      "mess_index": 2,
+      "major_units_done": 5,
+      "major_units_total": 14,
+      "worker_pid_live": false,
+      "classification": "INTERRUPTED_OR_ORPHANED_RUNTIME_STATE_NOT_SCIENTIFIC_FAIL"
+    }
+  ],
+  "completed_case_checkpoints_preserved": {
+    "2025-05-01": ["B0", "B1", "B2", "B3"],
+    "2025-05-02": ["B0", "B1", "B2", "B3"],
+    "2025-05-03": ["B0", "B1", "B2", "B3"],
+    "2025-05-04": ["B0", "B1", "B2", "B3"],
+    "2025-05-05": ["B0", "B1", "B2", "B3"],
+    "2025-05-06": ["B0", "B1", "B2"],
+    "2025-05-07": ["B0", "B1", "B2"],
+    "2025-05-08": ["B0", "B1", "B2"],
+    "2025-05-09": ["B0", "B1"]
+  },
+  "partial_cases_preserved": [
+    {
+      "date": "2025-05-05",
+      "case": "B2",
+      "stage": "B2_MESS02",
+      "note": "status snapshot at repair-stop observation; underlying exact-match validity remains fingerprint gated"
+    }
+  ],
+  "saved_checkpoint_locations": [
+    "dayahead/cache/v37_may_locked_final/MAY_2025_LOCKED_FINAL/case_checkpoints",
+    "dayahead/cache/v37_may_locked_final/MAY_2025_LOCKED_FINAL/beam",
+    "dayahead/cache/v37_may_locked_final/MAY_2025_LOCKED_FINAL/restoration",
+    "dayahead/cache/v37_may_locked_final/MAY_2025_LOCKED_FINAL/fresh",
+    "dayahead/cache/v37_may_locked_final/p1_candidate_solve_cache",
+    "dayahead/artifacts/v37_may_locked_final/dates",
+    "dayahead/artifacts/v37_may_locked_final/status",
+    "logs/v37_may_locked_final"
+  ],
+  "preservation": {
+    "completed_results_deleted": false,
+    "beam_cache_deleted": false,
+    "restricted_cache_deleted": false,
+    "full_MILP_checkpoint_deleted": false,
+    "restoration_cut_artifact_deleted": false,
+    "Fresh_output_deleted": false,
+    "P1_cache_deleted": false,
+    "logs_deleted": false,
+    "status_JSON_deleted": false
+  },
+  "initial_git_status": [
+    "M dayahead/tools/run_v37_r2_voltage_fidelity_repair.py",
+    "?? dayahead/artifacts/v37_d1_may_voltage_failure_forensic/",
+    "?? dayahead/artifacts/v37_d2_may01_b2_benders_forensic/",
+    "?? dayahead/artifacts/v37_may_locked_final/",
+    "?? dayahead/artifacts/v37_r2_voltage_fidelity_repair/V37_R2_MAY01_B2_ATTEMPT_V2_DIAGNOSIS.json",
+    "?? dayahead/artifacts/v37_r2_voltage_fidelity_repair/V37_R2_MAY01_B2_FAILURE_DIAGNOSIS_FINAL_AUTHORITY.json",
+    "?? dayahead/artifacts/v37_r2_voltage_fidelity_repair/V37_R2_MAY01_B2_SMOKE.json",
+    "?? dayahead/tools/run_v37_d1_forensic.py",
+    "?? dayahead/tools/run_v37_d2_forensic.py",
+    "?? tests/dayahead/test_v37_d1_voltage_failure_forensic.py",
+    "?? tests/dayahead/test_v37_d2_benders_forensic.py"
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "April_background_coverage_PASS": true,
+  "acceptance_tolerance": {
+    "absolute_sensitivity": 1.39489888084654e-08,
+    "derivation": "MAX(2_X_MAX(IDENTICAL_SEQUENCE_BASELINE_SCATTER,ALTERED_ORDER_BASELINE_SCATTER)_DIV_MIN_PROBE_DELTA,64_X_FLOAT_EPSILON_X_SIGNAL_SCALE);_RELATIVE_GATE_APPLIES_ONLY_WHEN_FULL_PHYSICAL_RANGE_EFFECT_GE_1E-6_PU",
+    "relative_sensitivity": 7.665554903010165,
+    "saved_baseline_derivation": "MAX(SAVED_REPLAY_P99_PLUS_5_X_IQR,5_X_OBSERVED_ENGINE_ORDER_BASELINE_SCATTER,64_X_FLOAT_EPSILON)",
+    "saved_baseline_voltage": 6.619505528175919e-06
+  },
+  "artifact_id": "V37_R2_FRESH_REPRODUCIBILITY_AUDIT_V1",
+  "authority_freeze_allowed": true,
+  "baseline_consistency_PASS": true,
+  "cross_PCC_coverage": true,
+  "each_pass_new_OpenDSS_engine": true,
+  "frozen_scale_reproducibility_guard": {
+    "P_relative": 0.00019183930570964775,
+    "Q_relative": 0.023200069285436508,
+    "derivation": "MAX_RELATIVE_ERROR_OBSERVED_ACROSS_IDENTICAL_SEQUENCE_AND_ALTERED_ORDER_APR01_PASSES"
+  },
+  "full_bus_phase_target_count": 386,
+  "full_pass_count": 2,
+  "full_pass_state_count": 326,
+  "full_repeat_PASS": true,
+  "identical_deterministic_probe_sequence": true,
+  "order_history_PASS": true,
+  "order_history_check": {
+    "PASS": true,
+    "PCCs": [
+      "IDC01",
+      "IDC05",
+      "IDC06",
+      "IDC12",
+      "STA01",
+      "STA06",
+      "STA12"
+    ],
+    "P_full_probe_range_scatter_impact_pu": 1.4925208078448403e-06,
+    "Q_full_probe_range_scatter_impact_pu": 1.7135762373019902e-06,
+    "baseline_voltage_max_absolute_scatter_pu": 6.9744944042327e-08,
+    "dV_dP_max_absolute_error_pu_per_kW": 2.9850416156896806e-09,
+    "dV_dP_max_relative_error_material_signals": 0.00019183930570964775,
+    "dV_dQ_max_absolute_error_pu_per_kvar": 2.855960395503317e-09,
+    "dV_dQ_max_relative_error_material_signals": 0.023200069285436508,
+    "independent_new_engine": true,
+    "large_negative_Q_included": true,
+    "low_voltage_state_included": true,
+    "phases": [
+      "A",
+      "B",
+      "C"
+    ],
+    "probe_order_changed": true,
+    "state_count": 7,
+    "state_order_reversed": true
+  },
+  "pass1_vs_pass2": {
+    "P_material_row_count": 117002,
+    "Q_material_row_count": 125836,
+    "baseline_voltage_max_absolute_scatter_pu": 0.0,
+    "dV_dP_max_absolute_error_pu_per_kW": 0.0,
+    "dV_dP_max_relative_error_material_signals": 0.0,
+    "dV_dQ_max_absolute_error_pu_per_kvar": 0.0,
+    "dV_dQ_max_relative_error_material_signals": 0.0,
+    "full_bus_phase_row_count": 125836
+  },
+  "phase_coverage": [
+    "A",
+    "B",
+    "C"
+  ],
+  "saved_Apr01_baseline": {
+    "IQR_absolute_error_pu": 6.713773262334577e-07,
+    "P99_absolute_error_pu": 3.26261889700863e-06,
+    "PASS": true,
+    "all_unperturbed_saved_probe_baselines_checked_same_slot_bus_phase": true,
+    "comparison_count": 13124,
+    "exceedance_count": 0,
+    "maximum_absolute_error_pu": 4.31547839330193e-06,
+    "median_absolute_error_pu": 2.7388075907186504e-07
+  },
+  "source_PCC_coverage": "24/24"
+}

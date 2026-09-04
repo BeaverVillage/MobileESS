@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+from pathlib import Path
 import time
 from typing import Mapping, Sequence
 
@@ -23,6 +24,10 @@ from dayahead.v33m import MessMobilityInputs, ServicePCCMapping, add_mess_mobili
 from dayahead.v33m.mess_mobility_milp import MessElectricalAuthority
 from dayahead.v33m.mess_trajectory import MessTrajectory
 from dayahead.v33m.route_table import MobilityRouteTable
+from dayahead.v17_ac_restoration_contract import (
+    RHO as RESTORATION_RHO,
+    RestorationCut,
+)
 
 from .correction import StaticCorrection, bind_squared_voltage_bounds
 
@@ -73,6 +78,11 @@ class IntegratedMessResult:
     preferred_restricted_objective: float = math.inf
     selected_restricted_start: str = "STAY"
     preferred_mip_start_loaded: bool = False
+    restoration_cut_count: int = 0
+    restoration_trust_region_constraint_count: int = 0
+    restoration_recourse_trust_region_constraint_count: int = 0
+    restoration_cut_arithmetic: tuple[Mapping[str, object], ...] = ()
+    fixed_discrete_MESS_decisions: bool = False
 
 
 def _configured_model(name: str) -> gp.Model:
@@ -115,6 +125,208 @@ def _set_zero_stay_start(
         variable.Start = 0.0
     for variable in block.energy.values():
         variable.Start = float(initial_energy)
+
+
+def _fix_discrete_trajectory_and_load_start(
+    block: object,
+    trajectory: MessTrajectory,
+) -> None:
+    """Fix only selected mobility decisions and warm-start continuous P/Q/SoC."""
+
+    rows = {(row.mess_id, int(row.slot)): row for row in trajectory.slots}
+    expected = {
+        (mess_id, slot)
+        for mess_id in block.inputs.mess_ids
+        for slot in range(block.inputs.horizon_slots)
+    }
+    if set(rows) != expected:
+        raise ValueError("V37_R3_FIXED_DISCRETE_TRAJECTORY_AXIS")
+    selected_moves = {
+        (
+            move.mess_id,
+            int(move.departure_slot),
+            str(move.origin_service_id),
+            str(move.destination_service_id),
+        )
+        for move in trajectory.planned_move_commitments()
+    }
+    if not selected_moves.issubset(block.move):
+        raise ValueError("V37_R3_FIXED_DISCRETE_ROUTE_NOT_IN_MODEL")
+    for key, variable in block.move.items():
+        value = float(key in selected_moves)
+        variable.LB = value
+        variable.UB = value
+        variable.Start = value
+    stay_values: dict[tuple[str, int, str], float] = {}
+    for (mess_id, slot, service), variable in block.stay.items():
+        row = rows[mess_id, int(slot)]
+        value = float(row.mode == "CONNECTED" and row.service_id == service)
+        variable.LB = value
+        variable.UB = value
+        variable.Start = value
+        stay_values[mess_id, int(slot), service] = value
+    occupancy_values: dict[tuple[str, int, str], float] = {}
+    for mess_id in block.inputs.mess_ids:
+        for service in block.inputs.route_table.service_ids:
+            occupancy_values[mess_id, 0, service] = float(
+                service == block.inputs.initial_service_by_mess[mess_id]
+            )
+        for boundary in range(1, block.inputs.horizon_slots + 1):
+            for service in block.inputs.route_table.service_ids:
+                value = stay_values[mess_id, boundary - 1, service]
+                value += sum(
+                    1.0
+                    for key in selected_moves
+                    if key[0] == mess_id
+                    and key[3] == service
+                    and key[1] + block.move_route[key].connection_ready_slots_15min
+                    == boundary
+                )
+                if value not in {0.0, 1.0}:
+                    raise ValueError("V37_R4_FIXED_DISCRETE_OCCUPANCY_NOT_BINARY")
+                occupancy_values[mess_id, boundary, service] = value
+    for (mess_id, boundary, service), variable in block.occupancy.items():
+        value = occupancy_values[mess_id, int(boundary), service]
+        variable.LB = value
+        variable.UB = value
+        variable.Start = value
+    for mess_id, slot in expected:
+        row = rows[mess_id, slot]
+        block.discharge_mode[mess_id, slot].Start = float(row.p_kw > 1e-9)
+        for service in block.inputs.route_table.service_ids:
+            active = row.mode == "CONNECTED" and row.service_id == service
+            block.p_discharge[mess_id, slot, service].Start = (
+                max(float(row.p_kw), 0.0) if active else 0.0
+            )
+            block.p_charge[mess_id, slot, service].Start = (
+                max(-float(row.p_kw), 0.0) if active else 0.0
+            )
+            block.q[mess_id, slot, service].Start = (
+                float(row.q_kvar) if active else 0.0
+            )
+        block.energy[mess_id, slot].Start = float(row.battery_energy_kwh)
+    for mess_id in block.inputs.mess_ids:
+        block.energy[mess_id, block.inputs.horizon_slots].Start = float(
+            block.inputs.electrical_authority.terminal_energy_kwh
+        )
+    block.model.update()
+
+
+def _add_restoration_cuts(
+    model: gp.Model,
+    control_names: Sequence[str],
+    expressions_by_slot: Sequence[Sequence[object]],
+    restoration_cuts: Sequence[RestorationCut],
+    *,
+    include_cuts: bool = True,
+    include_trust_region: bool = True,
+) -> tuple[tuple[gp.Constr, ...], int]:
+    """Insert the frozen V17 same-slot affine cuts and trust regions."""
+
+    control_axis = tuple(map(str, control_names))
+    cut_rows: list[gp.Constr] = []
+    trust_region_rows = 0
+    for cut_index, cut in enumerate(restoration_cuts):
+        if cut.trust_region_rho != RESTORATION_RHO:
+            raise RuntimeError("V17_AC_RESTORATION_CUT_RHO_MISMATCH")
+        if cut.control_names != control_axis:
+            raise RuntimeError("V17_AC_RESTORATION_CUT_CONTROL_AXIS_MISMATCH")
+        if not 0 <= int(cut.slot) < len(expressions_by_slot):
+            raise RuntimeError("V17_AC_RESTORATION_CUT_SLOT_OUT_OF_RANGE")
+        expressions = expressions_by_slot[int(cut.slot)]
+        if len(expressions) != len(control_axis):
+            raise RuntimeError("V17_AC_RESTORATION_EXPRESSION_AXIS_MISMATCH")
+        affine = float(cut.actual_value) + gp.quicksum(
+            float(coefficient) * (expressions[index] - float(cut.anchor_controls[index]))
+            for index, coefficient in enumerate(cut.coefficients)
+        )
+        if include_cuts:
+            if cut.relation == "<=":
+                row = model.addConstr(
+                    affine <= float(cut.hard_limit) - float(cut.margin),
+                    name=f"fresh_ac_restoration_upper[{cut_index},{cut.slot}]",
+                )
+            elif cut.relation == ">=":
+                row = model.addConstr(
+                    affine >= float(cut.hard_limit) + float(cut.margin),
+                    name=f"fresh_ac_restoration_lower[{cut_index},{cut.slot}]",
+                )
+            else:
+                raise RuntimeError("V17_AC_RESTORATION_CUT_RELATION_INVALID")
+            cut_rows.append(row)
+        elif cut.relation not in {"<=", ">="}:
+            raise RuntimeError("V17_AC_RESTORATION_CUT_RELATION_INVALID")
+        if not include_trust_region:
+            continue
+        for control_index, radius in enumerate(cut.local_radius):
+            if float(radius) <= 0.0:
+                continue
+            center = float(cut.anchor_controls[control_index])
+            model.addConstr(
+                expressions[control_index] >= center - float(radius),
+                name=f"fresh_ac_cut_trust_low[{cut_index},{cut.slot},{control_index}]",
+            )
+            model.addConstr(
+                expressions[control_index] <= center + float(radius),
+                name=f"fresh_ac_cut_trust_high[{cut_index},{cut.slot},{control_index}]",
+            )
+            trust_region_rows += 2
+    return tuple(cut_rows), trust_region_rows
+
+
+def _add_restoration_recourse_trust_region(
+    model: gp.Model,
+    control_names: Sequence[str],
+    expressions_by_slot: Sequence[Sequence[object]],
+    anchor_controls_96x60: np.ndarray,
+    *,
+    p_radius_kw: float,
+    q_radius_kvar: float,
+) -> int:
+    """Keep every restoration P/Q recourse slot local to the failed Fresh run.
+
+    A violation cut is local in one slot, but MESS energy coupling lets an
+    otherwise unrestricted full-horizon re-solve replace P/Q in unrelated
+    slots.  That invalidates the sequential-locality assumption and can move
+    the physical violation to a new slot on every official round.  The frozen
+    rho is therefore applied to the full 96-slot recourse step while the
+    existing cut-specific stale-anchor guards remain in force.
+    """
+
+    names = tuple(map(str, control_names))
+    anchor = np.asarray(anchor_controls_96x60, dtype=float)
+    if anchor.shape != (len(expressions_by_slot), len(names)):
+        raise ValueError(
+            "V37_RESTORATION_RECOURSE_TRUST_ANCHOR_AXIS:"
+            f"{anchor.shape}:{len(expressions_by_slot)}x{len(names)}"
+        )
+    if not np.isfinite(anchor).all():
+        raise ValueError("V37_RESTORATION_RECOURSE_TRUST_ANCHOR_NONFINITE")
+    if p_radius_kw <= 0.0 or q_radius_kvar <= 0.0:
+        raise ValueError("V37_RESTORATION_RECOURSE_TRUST_RADIUS")
+
+    rows = 0
+    for slot, expressions in enumerate(expressions_by_slot):
+        if len(expressions) != len(names):
+            raise RuntimeError("V37_RESTORATION_RECOURSE_TRUST_EXPRESSION_AXIS")
+        for control_index, name in enumerate(names):
+            if name.startswith("mess_p_kw["):
+                radius = float(p_radius_kw)
+            elif name.startswith("mess_q_kvar["):
+                radius = float(q_radius_kvar)
+            else:
+                continue
+            center = float(anchor[slot, control_index])
+            model.addConstr(
+                expressions[control_index] >= center - radius,
+                name=f"fresh_ac_recourse_trust_low[{slot},{control_index}]",
+            )
+            model.addConstr(
+                expressions[control_index] <= center + radius,
+                name=f"fresh_ac_recourse_trust_high[{slot},{control_index}]",
+            )
+            rows += 2
+    return rows
 
 
 def _stationary_restricted_incumbent(
@@ -428,6 +640,12 @@ def solve_integrated_mess(
     grid_coefficients: Sequence[SlotCoefficients] | None = None,
     force_at_least_one_move: bool = False,
     preferred_restricted_start: Mapping[str, object] | None = None,
+    restoration_cuts: Sequence[RestorationCut] = (),
+    fixed_discrete_trajectory: MessTrajectory | None = None,
+    restoration_include_cuts: bool = True,
+    restoration_include_trust_region: bool = True,
+    restoration_recourse_anchor_controls: np.ndarray | None = None,
+    infeasible_iis_path: Path | None = None,
 ) -> IntegratedMessResult:
     if case not in {"B2", "B3"}:
         raise ValueError("V34_INTEGRATED_MESS_ONLY_FOR_B2_B3")
@@ -442,8 +660,17 @@ def solve_integrated_mess(
         mapping,
         electrical_authority=MessElectricalAuthority.from_repository(),
     )
-    if len(inputs.mess_ids) != 1:
+    fixed_discrete = fixed_discrete_trajectory is not None
+    if not fixed_discrete and len(inputs.mess_ids) != 1:
         raise ValueError("V34_SEQUENTIAL_COORDINATION_REQUIRES_ONE_VEHICLE_BLOCK")
+    if fixed_discrete and force_at_least_one_move:
+        raise ValueError("V37_R3_FIXED_DISCRETE_CONFLICTS_WITH_FORCE_MOVE")
+    if restoration_recourse_anchor_controls is not None and not fixed_discrete:
+        raise ValueError("V37_RESTORATION_RECOURSE_TRUST_REQUIRES_FIXED_DISCRETE")
+    if restoration_recourse_anchor_controls is not None and not restoration_cuts:
+        raise ValueError("V37_RESTORATION_RECOURSE_TRUST_REQUIRES_CUT")
+    if restoration_recourse_anchor_controls is not None and not restoration_include_trust_region:
+        raise ValueError("V37_RESTORATION_RECOURSE_TRUST_DISABLED")
     build_started = time.perf_counter()
     model = _configured_model(f"v34_integrated_{case}")
     block = add_mess_mobility_block(model, inputs)
@@ -454,8 +681,14 @@ def solve_integrated_mess(
     # Supplying it avoids spending campaign time rediscovering feasibility.
     mess_id = inputs.mess_ids[0]
     initial_service = inputs.initial_service_by_mess[mess_id]
-    initial_energy = inputs.initial_energy_by_mess[mess_id]
-    _set_zero_stay_start(block, mess_id, initial_service, initial_energy)
+    if fixed_discrete:
+        assert fixed_discrete_trajectory is not None
+        if {row.mess_id for row in fixed_discrete_trajectory.slots} != set(inputs.mess_ids):
+            raise ValueError("V37_R3_FIXED_DISCRETE_MESS_AXIS")
+        _fix_discrete_trajectory_and_load_start(block, fixed_discrete_trajectory)
+    else:
+        initial_energy = inputs.initial_energy_by_mess[mess_id]
+        _set_zero_stay_start(block, mess_id, initial_service, initial_energy)
     fixed_p = {} if fixed_mess_p_by_service is None else dict(fixed_mess_p_by_service)
     fixed_q = {} if fixed_mess_q_by_service is None else dict(fixed_mess_q_by_service)
     controls = tuple(map(str, voltage_authority["control_names"]))
@@ -464,6 +697,8 @@ def solve_integrated_mess(
         raise RuntimeError("V34_COMMON_GRID_AXIS")
 
     if not enforce_planning_grid_constraints:
+        if restoration_cuts:
+            raise ValueError("V37_R3_RESTORATION_CUT_REQUIRES_FULL_GRID_MODEL")
         # Phase-0 engineering smoke: construct the complete 24-service MESS
         # block and its common control axis, solve deterministically, then
         # evaluate the resulting frozen controls through the same affine rows.
@@ -527,17 +762,41 @@ def solve_integrated_mess(
         constant = float(base + vector[:12] @ aidc[slot])
         constant += sum(float(vector[12 + index]) * float(fixed_p.get((service, slot), 0.0)) for index, service in enumerate(p_services))
         constant += sum(float(vector[36 + index]) * float(fixed_q.get((service, slot), 0.0)) for index, service in enumerate(p_services))
-        variables = (
-            [block.p_discharge[mess_id, slot, service] for service in p_services]
-            + [block.p_charge[mess_id, slot, service] for service in p_services]
-            + [block.q[mess_id, slot, service] for service in p_services]
+        return gp.LinExpr(constant) + gp.quicksum(
+            float(vector[12 + index]) * block.p_injection_by_service_slot[service, slot]
+            + float(vector[36 + index]) * block.q_injection_by_service_slot[service, slot]
+            for index, service in enumerate(p_services)
+            if abs(float(vector[12 + index])) > 1e-15
+            or abs(float(vector[36 + index])) > 1e-15
         )
-        scalars = np.concatenate((vector[12:36], -vector[12:36], vector[36:60]))
-        nonzero = np.flatnonzero(np.abs(scalars) > 1e-15)
-        return gp.LinExpr(
-            [float(scalars[index]) for index in nonzero],
-            [variables[index] for index in nonzero],
-        ) + constant
+
+    expressions_by_slot = tuple(
+        tuple(map(float, aidc[slot]))
+        + tuple(
+            float(fixed_p.get((service, slot), 0.0))
+            + block.p_injection_by_service_slot[service, slot]
+            for service in p_services
+        )
+        + tuple(
+            float(fixed_q.get((service, slot), 0.0))
+            + block.q_injection_by_service_slot[service, slot]
+            for service in p_services
+        )
+        for slot in range(96)
+    )
+
+    recourse_trust_region_constraint_count = 0
+    if restoration_recourse_anchor_controls is not None:
+        recourse_trust_region_constraint_count = _add_restoration_recourse_trust_region(
+            model,
+            controls,
+            expressions_by_slot,
+            restoration_recourse_anchor_controls,
+            p_radius_kw=RESTORATION_RHO * float(
+                inputs.electrical_authority.active_power_limit_kw
+            ),
+            q_radius_kvar=RESTORATION_RHO * float(inputs.electrical_authority.pcs_kva),
+        )
 
     for slot, coefficient in enumerate(coefficients):
         for index, node in enumerate(node_names):
@@ -637,6 +896,17 @@ def solve_integrated_mess(
                 )
                 grid_constraints += 1
 
+    cut_rows, trust_region_constraint_count = _add_restoration_cuts(
+        model, controls, expressions_by_slot, restoration_cuts,
+        include_cuts=restoration_include_cuts,
+        include_trust_region=restoration_include_trust_region,
+    )
+    grid_constraints += (
+        len(cut_rows)
+        + trust_region_constraint_count
+        + recourse_trust_region_constraint_count
+    )
+
     # The corrected V34 policy explicitly prioritizes reproducible completion
     # over exact global-optimal equivalence.  One scalar deterministic
     # objective avoids four full MIP re-solves while retaining every allowed
@@ -667,7 +937,18 @@ def solve_integrated_mess(
     # candidate.  Re-solving STAY here is therefore redundant and, on the large
     # B3 model, can consume most of the full-solve budget before the better
     # candidate is even loaded.
-    if preferred_restricted_start is None:
+    if fixed_discrete:
+        restricted = {
+            "available": False,
+            "objective": math.inf,
+            "best_bound": math.inf,
+            "mip_gap": math.inf,
+            "status": "SKIPPED_FIXED_DISCRETE_RESTORATION_RECOURSE",
+            "start": (),
+            "sum_abs_p": 0.0,
+            "sum_abs_q": 0.0,
+        }
+    elif preferred_restricted_start is None:
         restricted = _stationary_restricted_incumbent(model, block, mess_id, initial_service)
     else:
         restricted = {
@@ -683,7 +964,7 @@ def solve_integrated_mess(
     preferred_objective = math.inf
     preferred_loaded = False
     selected_start = "STAY"
-    if preferred_restricted_start is not None:
+    if preferred_restricted_start is not None and not fixed_discrete:
         opportunity_objective = float(preferred_restricted_start["objective"])
         if (
             math.isfinite(opportunity_objective)
@@ -730,6 +1011,11 @@ def solve_integrated_mess(
     solve_seconds = time.perf_counter() - solve_started
     accepted_statuses = {GRB.OPTIMAL, GRB.WORK_LIMIT, GRB.TIME_LIMIT, GRB.SUBOPTIMAL}
     if model.Status not in accepted_statuses or model.SolCount < 1:
+        if model.Status == GRB.INFEASIBLE and infeasible_iis_path is not None:
+            target = Path(infeasible_iis_path)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            model.computeIIS()
+            model.write(str(target))
         raise RuntimeError(f"V34_INTEGRATED_MESS_SOLVER_STATUS:{model.Status}")
     if math.isfinite(quality_bound) and float(model.ObjVal) > quality_bound + RESOLVED_OBJECTIVE_TOLERANCE:
         raise RuntimeError("V35_MESS_FULL_MODEL_WORSE_THAN_RESTRICTED_INCUMBENT")
@@ -754,6 +1040,39 @@ def solve_integrated_mess(
         )
         planning_v.append(np.sqrt(np.maximum(0.0, coefficient.voltage_constant + coefficient.voltage_matrix.T @ numeric)))
         planning_i.append(anchored_polygon_loading(coefficient, numeric))
+    numeric_controls = np.asarray(
+        [
+            list(aidc[slot])
+            + [float(by_service_p.get((service, slot), 0.0)) for service in p_services]
+            + [float(by_service_q.get((service, slot), 0.0)) for service in p_services]
+            for slot in range(96)
+        ],
+        dtype=float,
+    )
+    cut_arithmetic: list[Mapping[str, object]] = []
+    applied_cuts = tuple(restoration_cuts) if restoration_include_cuts else ()
+    for cut_index, (cut, row) in enumerate(zip(applied_cuts, cut_rows, strict=True)):
+        values = numeric_controls[int(cut.slot)]
+        lhs = float(cut.actual_value) + float(
+            np.asarray(cut.coefficients, dtype=float)
+            @ (values - np.asarray(cut.anchor_controls, dtype=float))
+        )
+        rhs = float(cut.hard_limit) + (
+            float(cut.margin) if cut.relation == ">=" else -float(cut.margin)
+        )
+        arithmetic_slack = lhs - rhs if cut.relation == ">=" else rhs - lhs
+        solver_slack = -float(row.Slack) if cut.relation == ">=" else float(row.Slack)
+        cut_arithmetic.append({
+            "cut_index": cut_index,
+            "cut_sha256": cut.sha256,
+            "slot": int(cut.slot),
+            "relation": cut.relation,
+            "lhs": lhs,
+            "rhs": rhs,
+            "arithmetic_slack": float(arithmetic_slack),
+            "solver_slack": solver_slack,
+            "absolute_slack_crosscheck_error": abs(float(arithmetic_slack) - solver_slack),
+        })
     termination = {
         GRB.OPTIMAL: "OPTIMAL",
         GRB.TIME_LIMIT: "TIME_LIMIT",
@@ -794,6 +1113,13 @@ def solve_integrated_mess(
         preferred_restricted_objective=preferred_objective,
         selected_restricted_start=selected_start,
         preferred_mip_start_loaded=preferred_loaded,
+        restoration_cut_count=len(applied_cuts),
+        restoration_trust_region_constraint_count=trust_region_constraint_count,
+        restoration_recourse_trust_region_constraint_count=(
+            recourse_trust_region_constraint_count
+        ),
+        restoration_cut_arithmetic=tuple(cut_arithmetic),
+        fixed_discrete_MESS_decisions=fixed_discrete,
     )
 
 

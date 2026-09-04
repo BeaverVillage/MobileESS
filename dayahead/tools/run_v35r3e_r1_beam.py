@@ -10,7 +10,7 @@ import json
 import math
 from pathlib import Path
 import time
-from typing import Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 import numpy as np
 
@@ -59,6 +59,13 @@ PARENT_ARTIFACT_ROOT = Path(
 )
 STATIC_LIBRARY_COUNT = 2209
 _WORKER: dict[str, object] = {}
+EXECUTION_CACHE_CONTEXT: dict[str, object] | None = None
+PROGRESS_CALLBACK: Callable[[Mapping[str, object]], None] | None = None
+
+
+def _progress(**payload: object) -> None:
+    if PROGRESS_CALLBACK is not None:
+        PROGRESS_CALLBACK(payload)
 
 
 def _json_default(value: object) -> object:
@@ -86,6 +93,17 @@ def _json(path: Path, value: object) -> None:
         encoding="utf-8",
     )
     temporary.replace(path)
+
+
+def _cacheable_candidate_result(result: tuple[object, ...]) -> bool:
+    """Persist only completed certified solves; failures remain restart work."""
+
+    try:
+        row, dispatch = result[0], result[1]
+        certificate = str(row["exact_optimality_certificate"])
+        return dispatch is not None and not certificate.startswith("V37_FAIL_CLOSED:")
+    except (IndexError, KeyError, TypeError):
+        return False
 
 
 def _finite(value: object) -> float | None:
@@ -117,6 +135,54 @@ def _init_worker(
         "tx_current_states": set(tx_current_states),
         "tx_kva_states": set(tx_kva_states),
     })
+
+
+def _init_static_worker(
+    case: str,
+    aidc: np.ndarray,
+    coefficients: Sequence[object],
+    services: Sequence[str],
+) -> None:
+    """Load case-static immutable context once in a persistent worker."""
+
+    _WORKER.clear()
+    _WORKER.update({
+        "case": case,
+        "aidc": aidc,
+        "coefficients": tuple(coefficients),
+        "services": tuple(services),
+    })
+
+
+def _solve_cached_worker(
+    job: tuple[
+        MobilityCandidate,
+        Mapping[str, object],
+        Mapping[str, object] | None,
+        Callable[[MobilityCandidate], tuple[object, ...]],
+    ],
+) -> tuple[object, ...]:
+    """Reset every parent-dynamic field, build a fresh model, and cache it."""
+
+    candidate, dynamic, cache_specification, solve_worker = job
+    _WORKER.update({
+        "fixed_p": dict(dynamic["fixed_p"]),
+        "fixed_q": dict(dynamic["fixed_q"]),
+        "line_states": set(dynamic["line_states"]),
+        "voltage_states": set(dynamic["voltage_states"]),
+        "tx_current_states": set(dynamic["tx_current_states"]),
+        "tx_kva_states": set(dynamic["tx_kva_states"]),
+    })
+    if cache_specification is not None:
+        from dayahead.v37.execution_acceleration import CandidateResultCache
+
+        cached = CandidateResultCache.load(cache_specification)
+        if cached is not None and _cacheable_candidate_result(cached):
+            return cached
+    result = solve_worker(candidate)
+    if cache_specification is not None and _cacheable_candidate_result(result):
+        CandidateResultCache.store(cache_specification, result)
+    return result
 
 
 def _solve_item(
@@ -288,6 +354,10 @@ def _local_search(
     route_table: object,
     seed_line: set[tuple[int, int]],
     workers: int,
+    pool: ProcessPoolExecutor | None = None,
+    execution_context: Mapping[str, object] | None = None,
+    parent_index: int = 1,
+    parent_total: int = 1,
 ) -> tuple[list[dict[str, object]], dict[str, object]]:
     search_root = cache / f"s{sequence_index + 1}" / parent.beam_state_id
     search_root.mkdir(parents=True, exist_ok=True)
@@ -334,6 +404,48 @@ def _local_search(
     selected_ids = [stay.candidate_id, *top_move_ids]
     if len(selected_ids) != DEFAULT_K + 1 or len(set(selected_ids)) != DEFAULT_K + 1:
         raise RuntimeError(f"V35R3E_R1_TOPK_ID_CONSERVATION:{case}:{mess_id}")
+    _progress(
+        event="CANDIDATE_SEARCH", case=case, mess_index=sequence_index + 1,
+        parent_index=parent_index, parent_total=parent_total,
+        search_level="FULL" if DEFAULT_K >= len(enumeration.candidates) - 1 else f"K{DEFAULT_K}",
+        candidate_done=0, candidate_total=len(selected_ids),
+        candidate_new_done=0, candidate_new_total=None,
+    )
+
+    result_cache = None
+    cache_specifications: dict[str, Mapping[str, object]] = {}
+    cached_results: dict[str, tuple[object, ...]] = {}
+    if execution_context is not None:
+        from dayahead.v37.execution_acceleration import CandidateResultCache
+
+        candidate_table_sha = canonical_sha256([
+            asdict(candidate) for candidate in enumeration.candidates
+        ])
+        cache_context = {
+            **dict(execution_context),
+            "operating_day": APR01,
+            "case": case,
+            "MESS_step": int(sequence_index) + 1,
+            "MESS_id": mess_id,
+            "beam_parent_fingerprint": parent.state_sha256,
+            "fixed_previous_MESS_trajectory_SHA": parent.trajectory_equivalence_sha256,
+            "MESS_candidate_table_SHA": candidate_table_sha,
+            "screen_authority_SHA": context.authority_sha,
+        }
+        result_cache = CandidateResultCache(
+            Path(str(execution_context["candidate_cache_root"])), cache_context,
+        )
+        rank_by_id = {candidate_id: rank for rank, candidate_id in enumerate(selected_ids)}
+        cache_specifications = {
+            candidate_id: result_cache.specification(
+                candidate_id, rank_by_id[candidate_id]
+            )
+            for candidate_id in selected_ids
+        }
+        for candidate_id, specification in cache_specifications.items():
+            cached = CandidateResultCache.load(specification)
+            if cached is not None and _cacheable_candidate_result(cached):
+                cached_results[candidate_id] = cached
 
     line_states = set(seed_line)
     voltage_states: set[tuple[int, int]] = set()
@@ -351,64 +463,139 @@ def _local_search(
     solved: dict[str, tuple[dict[str, object], dict[str, object]]] = {}
     rows: list[dict[str, object]] = []
     numeric_repairs: list[dict[str, object]] = []
+    actual_numeric_retries = 0
+    cache_hits = len(cached_results)
+    cache_misses = 0
     for candidate in representatives:
-        row, dispatch, _evaluation, repair, cuts = _solve_item(
-            case,
-            candidate,
-            aidc,
-            coefficients,
-            services,
-            fixed_p,
-            fixed_q,
-            line_states,
-            voltage_states,
-            tx_current_states,
-            tx_kva_states,
-        )
+        cached = cached_results.get(candidate.candidate_id)
+        if cached is None:
+            cache_misses += 1
+            result = _solve_item(
+                case,
+                candidate,
+                aidc,
+                coefficients,
+                services,
+                fixed_p,
+                fixed_q,
+                line_states,
+                voltage_states,
+                tx_current_states,
+                tx_kva_states,
+            )
+            if result_cache is not None and _cacheable_candidate_result(result):
+                result_cache.store(
+                    cache_specifications[candidate.candidate_id], result,
+                )
+        else:
+            result = cached
+        row, dispatch, _evaluation, repair, cuts = result
         rows.append(row)
         solved[candidate.candidate_id] = (row, dispatch)
         if repair["numeric_retry"]:
             numeric_repairs.append({"candidate_id": candidate.candidate_id, **repair})
+            actual_numeric_retries += int(cached is None)
         line_states.update(cuts["line"])
         voltage_states.update(cuts["voltage"])
         tx_current_states.update(cuts["tx_current"])
         tx_kva_states.update(cuts["tx_kva"])
+        _progress(
+            event="CANDIDATE_SEARCH", case=case, mess_index=sequence_index + 1,
+            parent_index=parent_index, parent_total=parent_total,
+            search_level="FULL" if DEFAULT_K >= len(enumeration.candidates) - 1 else f"K{DEFAULT_K}",
+            candidate_done=len(rows), candidate_total=len(selected_ids),
+            candidate_new_done=cache_misses,
+            candidate_new_total=max(0, len(selected_ids) - len(cached_results)),
+        )
 
     representative_ids = {candidate.candidate_id for candidate in representatives}
     remaining = [
         by_id[candidate_id]
         for candidate_id in selected_ids
-        if candidate_id not in representative_ids
+        if candidate_id not in representative_ids and candidate_id not in cached_results
     ]
-    with ProcessPoolExecutor(
-        max_workers=max(1, int(workers)),
-        initializer=_init_worker,
-        initargs=(
-            case,
-            aidc,
-            coefficients,
-            services,
-            fixed_p,
-            fixed_q,
-            line_states,
-            voltage_states,
-            tx_current_states,
-            tx_kva_states,
-        ),
-    ) as pool:
-        for index, (row, dispatch, _evaluation, repair, _cuts) in enumerate(
-            pool.map(_solve_worker, remaining, chunksize=4), start=1
-        ):
+    for candidate_id in selected_ids:
+        if candidate_id in representative_ids or candidate_id not in cached_results:
+            continue
+        row, dispatch, _evaluation, repair, _cuts = cached_results[candidate_id]
+        rows.append(row)
+        solved[str(row["candidate_id"])] = (row, dispatch)
+        if repair["numeric_retry"]:
+            numeric_repairs.append({"candidate_id": row["candidate_id"], **repair})
+        _progress(
+            event="CANDIDATE_SEARCH", case=case, mess_index=sequence_index + 1,
+            parent_index=parent_index, parent_total=parent_total,
+            search_level="FULL" if DEFAULT_K >= len(enumeration.candidates) - 1 else f"K{DEFAULT_K}",
+            candidate_done=len(rows), candidate_total=len(selected_ids),
+            candidate_new_done=cache_misses,
+            candidate_new_total=max(0, len(selected_ids) - len(cached_results)),
+        )
+
+    dynamic = {
+        "fixed_p": fixed_p, "fixed_q": fixed_q,
+        "line_states": line_states, "voltage_states": voltage_states,
+        "tx_current_states": tx_current_states, "tx_kva_states": tx_kva_states,
+    }
+    cache_misses += len(remaining)
+    if pool is None:
+        local_pool = ProcessPoolExecutor(
+            max_workers=max(1, int(workers)),
+            initializer=_init_worker,
+            initargs=(
+                case,
+                aidc,
+                coefficients,
+                services,
+                fixed_p,
+                fixed_q,
+                line_states,
+                voltage_states,
+                tx_current_states,
+                tx_kva_states,
+            ),
+        )
+        results = local_pool.map(_solve_worker, remaining, chunksize=4)
+    else:
+        local_pool = None
+        jobs = [
+            (
+                candidate, dynamic,
+                cache_specifications.get(candidate.candidate_id), _solve_worker,
+            )
+            for candidate in remaining
+        ]
+        results = pool.map(_solve_cached_worker, jobs, chunksize=4)
+    try:
+        for index, (row, dispatch, _evaluation, repair, _cuts) in enumerate(results, start=1):
+            if (
+                result_cache is not None and pool is None
+                and _cacheable_candidate_result((row, dispatch, _evaluation, repair, _cuts))
+            ):
+                result_cache.store(cache_specifications[str(row["candidate_id"])], (
+                    row, dispatch, _evaluation, repair, _cuts,
+                ))
             rows.append(row)
             solved[str(row["candidate_id"])] = (row, dispatch)
             if repair["numeric_retry"]:
                 numeric_repairs.append({"candidate_id": row["candidate_id"], **repair})
+                actual_numeric_retries += 1
+            _progress(
+                event="CANDIDATE_SEARCH", case=case, mess_index=sequence_index + 1,
+                parent_index=parent_index, parent_total=parent_total,
+                search_level="FULL" if DEFAULT_K >= len(enumeration.candidates) - 1 else f"K{DEFAULT_K}",
+                candidate_done=len(rows), candidate_total=len(selected_ids),
+                candidate_new_done=min(len(remaining), index),
+                candidate_new_total=len(remaining),
+            )
             if index % 50 == 0:
                 print(
                     f"{case} width parent={parent.beam_state_id} {mess_id} "
                     f"restricted={len(rows)}/{DEFAULT_K + 1}",
                     flush=True,
                 )
+    finally:
+        if local_pool is not None:
+            local_pool.shutdown(wait=True)
     restricted_seconds = time.perf_counter() - started
     if len(rows) != DEFAULT_K + 1 or len(solved) != DEFAULT_K + 1:
         raise RuntimeError(f"V35R3E_R1_RESTRICTED_COUNT:{case}:{mess_id}:{len(rows)}")
@@ -437,6 +624,13 @@ def _local_search(
             break
     if not seeds:
         raise RuntimeError(f"V35R3E_R1_NO_FEASIBLE_SEED:{case}:{mess_id}")
+    _progress(
+        event="SEED_READY", case=case, mess_index=sequence_index + 1,
+        parent_index=parent_index, parent_total=parent_total,
+        search_level="FULL" if DEFAULT_K >= len(enumeration.candidates) - 1 else f"K{DEFAULT_K}",
+        candidate_done=len(rows), candidate_total=len(selected_ids),
+        seed_done=0, seed_total=len(seeds),
+    )
     serializable_seeds = [
         {
             key: (_dispatch_json(value, seed["trajectory_signature"]) if key == "dispatch" else value)
@@ -455,7 +649,12 @@ def _local_search(
         "dynamic_infeasible_candidates": STATIC_LIBRARY_COUNT - len(enumeration.candidates),
         "cheap_screen_wallclock_seconds": screen_seconds,
         "restricted_unique_candidate_state_solves": len(selected_ids),
-        "restricted_solver_calls": len(selected_ids) + len(numeric_repairs),
+        "restricted_solver_calls": cache_misses + actual_numeric_retries,
+        "restricted_logical_candidate_count": len(selected_ids),
+        "restricted_cache_hits": cache_hits,
+        "restricted_cache_misses": cache_misses,
+        "restricted_duplicate_solves": 0,
+        "persistent_worker_pool": pool is not None,
         "restricted_wallclock_seconds": restricted_seconds,
         "selected_candidate_ids": selected_ids,
         "distinct_seed_count": len(seeds),
@@ -612,6 +811,11 @@ def _run_case(case: str, width: int, workers: int) -> dict[str, object]:
         for name in map(str, electrical.voltage["control_names"])
         if name.startswith("mess_p_kw[")
     )
+    worker_pool = ProcessPoolExecutor(
+        max_workers=max(1, int(workers)),
+        initializer=_init_static_worker,
+        initargs=(case, aidc, coefficients, services),
+    )
     try:
         _arrays, baseline_planning = _planning_grid(
             coefficients, electrical.voltage, aidc, MessTrajectory(())
@@ -643,12 +847,16 @@ def _run_case(case: str, width: int, workers: int) -> dict[str, object]:
                 beam = [BeamState.from_dict(row) for row in payload["retained_states"]]
                 trace.append(dict(payload["trace"]))
                 all_dedup.extend(payload["dedup_audit"])
+                _progress(
+                    event="STAGE_RESTORED", case=case,
+                    mess_index=sequence_index + 1,
+                )
                 print(f"{case} beam={width} {mess_id} RESTORED", flush=True)
                 continue
 
             parent_diagnostics: list[dict[str, object]] = []
             children: list[BeamState] = []
-            for parent in beam:
+            for parent_index, parent in enumerate(beam, start=1):
                 seeds, local = _local_search(
                     cache=root,
                     case=case,
@@ -661,35 +869,119 @@ def _run_case(case: str, width: int, workers: int) -> dict[str, object]:
                     route_table=route_table,
                     seed_line=seed_line,
                     workers=workers,
+                    pool=worker_pool,
+                    execution_context=EXECUTION_CACHE_CONTEXT,
+                    parent_index=parent_index,
+                    parent_total=len(beam),
                 )
                 child_ids: list[str] = []
+                full_child_cache_hits = 0
+                full_child_cache_misses = 0
                 for seed in seeds:
-                    child = _make_child(
-                        case=case,
-                        mess_id=mess_id,
-                        sequence_index=sequence_index,
-                        parent=parent,
-                        seed=seed,
-                        aidc=aidc,
-                        electrical=electrical,
-                        route_table=route_table,
-                        coefficients=coefficients,
+                    _progress(
+                        event="FULL_MILP", case=case,
+                        mess_index=sequence_index + 1,
+                        parent_index=parent_index, parent_total=len(beam),
+                        search_level=(
+                            "FULL" if DEFAULT_K >= int(local["dynamic_feasible_candidates"]) - 1
+                            else f"K{DEFAULT_K}"
+                        ),
+                        seed_done=int(seed["seed_index"]) - 1,
+                        seed_total=len(seeds), full_milp_status="RUNNING",
                     )
+                    child_path = (
+                        root / f"s{sequence_index + 1}" / parent.beam_state_id
+                        / f"CHILD_{seed['seed_index']}.json"
+                    )
+                    child_meta_path = child_path.with_name(
+                        f"CHILD_{seed['seed_index']}.CACHE.json"
+                    )
+                    child_identity = None
+                    if EXECUTION_CACHE_CONTEXT is not None:
+                        from dayahead.v37.execution_acceleration import (
+                            canonical_sha256 as p1_sha,
+                            file_sha256 as p1_file_sha,
+                            full_child_identity,
+                        )
+
+                        child_identity = full_child_identity(
+                            EXECUTION_CACHE_CONTEXT,
+                            parent_state_sha256=parent.state_sha256,
+                            fixed_trajectory_sha256=parent.trajectory_equivalence_sha256,
+                            mess_step=sequence_index + 1,
+                            candidate_id=str(seed["candidate_id"]),
+                            seed_trajectory_sha256=str(seed["trajectory_signature"]),
+                        )
+                        if child_path.is_file() and child_meta_path.is_file():
+                            try:
+                                child_meta = json.loads(
+                                    child_meta_path.read_text(encoding="utf-8")
+                                )
+                                if (
+                                    child_meta.get("identity_sha256")
+                                    == p1_sha(child_identity)
+                                    and child_meta.get("source_SHA256")
+                                    == p1_file_sha(child_path)
+                                ):
+                                    child = BeamState.from_dict(json.loads(
+                                        child_path.read_text(encoding="utf-8")
+                                    ))
+                                    full_child_cache_hits += 1
+                                else:
+                                    child = None
+                            except (OSError, ValueError, KeyError, TypeError):
+                                child = None
+                        else:
+                            child = None
+                    else:
+                        child = None
+                    if child is None:
+                        full_child_cache_misses += 1
+                        child = _make_child(
+                            case=case,
+                            mess_id=mess_id,
+                            sequence_index=sequence_index,
+                            parent=parent,
+                            seed=seed,
+                            aidc=aidc,
+                            electrical=electrical,
+                            route_table=route_table,
+                            coefficients=coefficients,
+                        )
+                        _json(child_path, child.to_dict())
+                        if child_identity is not None:
+                            _json(child_meta_path, {
+                                "artifact_id": "V37_P1_FULL_CHILD_CACHE_V1",
+                                "identity": child_identity,
+                                "identity_sha256": p1_sha(child_identity),
+                                "source_artifact": str(child_path),
+                                "source_SHA256": p1_file_sha(child_path),
+                                "REUSED": "NO",
+                            })
                     children.append(child)
                     child_ids.append(child.beam_state_id)
-                    _json(
-                        root
-                        / f"s{sequence_index + 1}"
-                        / parent.beam_state_id
-                        / f"CHILD_{seed['seed_index']}.json",
-                        child.to_dict(),
+                    _progress(
+                        event="FULL_MILP", case=case,
+                        mess_index=sequence_index + 1,
+                        parent_index=parent_index, parent_total=len(beam),
+                        search_level=(
+                            "FULL" if DEFAULT_K >= int(local["dynamic_feasible_candidates"]) - 1
+                            else f"K{DEFAULT_K}"
+                        ),
+                        seed_done=int(seed["seed_index"]),
+                        seed_total=len(seeds), full_milp_status="COMPLETE",
                     )
                     print(
                         f"{case} beam={width} {mess_id} parent={parent.beam_state_id} "
                         f"seed={seed['seed_index']} rho={child.current_planning_objective}",
                         flush=True,
                     )
-                parent_diagnostics.append({**local, "child_state_ids": child_ids})
+                parent_diagnostics.append({
+                    **local,
+                    "full_child_cache_hits": full_child_cache_hits,
+                    "full_child_cache_misses": full_child_cache_misses,
+                    "child_state_ids": child_ids,
+                })
 
             unique, dedup = deduplicate_children(children)
             retained, pruned = prune_beam(unique, width)
@@ -712,10 +1004,34 @@ def _run_case(case: str, width: int, workers: int) -> dict[str, object]:
                 "restricted_solver_calls": sum(
                     int(row["restricted_solver_calls"]) for row in parent_diagnostics
                 ),
+                "restricted_logical_candidate_count": sum(
+                    int(row.get("restricted_logical_candidate_count", 0))
+                    for row in parent_diagnostics
+                ),
+                "restricted_cache_hits": sum(
+                    int(row.get("restricted_cache_hits", 0))
+                    for row in parent_diagnostics
+                ),
+                "restricted_cache_misses": sum(
+                    int(row.get("restricted_cache_misses", 0))
+                    for row in parent_diagnostics
+                ),
+                "restricted_duplicate_solves": sum(
+                    int(row.get("restricted_duplicate_solves", 0))
+                    for row in parent_diagnostics
+                ),
                 "distinct_seed_count": sum(
                     int(row["distinct_seed_count"]) for row in parent_diagnostics
                 ),
                 "full_MILP_child_solve_count": len(children),
+                "full_MILP_actual_solver_calls": sum(
+                    int(row.get("full_child_cache_misses", 0))
+                    for row in parent_diagnostics
+                ),
+                "full_MILP_cache_hits": sum(
+                    int(row.get("full_child_cache_hits", 0))
+                    for row in parent_diagnostics
+                ),
                 "deduplicated_child_count": len(unique),
                 "duplicate_children_removed": len(children) - len(unique),
                 "retained_beam_count": len(retained),
@@ -741,6 +1057,10 @@ def _run_case(case: str, width: int, workers: int) -> dict[str, object]:
                 ),
             }
             payload = {
+                "execution_fingerprint_sha256": (
+                    EXECUTION_CACHE_CONTEXT.get("execution_fingerprint_sha256")
+                    if EXECUTION_CACHE_CONTEXT is not None else None
+                ),
                 "trace": trace_row,
                 "parent_diagnostics": parent_diagnostics,
                 "retained_states": [state.to_dict() for state in retained],
@@ -773,6 +1093,10 @@ def _run_case(case: str, width: int, workers: int) -> dict[str, object]:
             "child_dedup_audit": all_dedup,
             "run_wallclock_seconds": time.perf_counter() - run_started,
             "Fresh_reads": 0,
+            "execution_fingerprint_sha256": (
+                EXECUTION_CACHE_CONTEXT.get("execution_fingerprint_sha256")
+                if EXECUTION_CACHE_CONTEXT is not None else None
+            ),
         }
         _json(root / "FINAL_RESULT.json", final)
         print(
@@ -782,6 +1106,7 @@ def _run_case(case: str, width: int, workers: int) -> dict[str, object]:
         )
         return final
     finally:
+        worker_pool.shutdown(wait=True)
         electrical.voltage.close()
         electrical.current.close()
 
