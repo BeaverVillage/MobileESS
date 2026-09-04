@@ -1,0 +1,56 @@
+{
+  "artifact_id": "V37_R2_EXISTING_VOLTAGE_AUTHORITY_TRACE_V1",
+  "authority_generation": {
+    "file": "dayahead\\run_v16_3_voltage_candidate.py",
+    "function": "_anchor_and_sensitivity_day",
+    "line": 219
+  },
+  "calibration_serialized_authority": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\frozen_artifacts\\v28r2_april_full_month_preflight\\2025-04-01\\dayahead\\electrical_cache\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-04-01.npz",
+  "full_model_builder": {
+    "file": "dayahead\\v34\\integrated_mess.py",
+    "function": "solve_integrated_mess",
+    "line": 414
+  },
+  "indexing": [
+    "day",
+    "slot/loading_state",
+    "source_service/PCC",
+    "target_bus",
+    "phase",
+    "P_or_Q"
+  ],
+  "old_authority_sha256_by_day": {
+    "2025-04-01": "96cb20e1f461e70377e883900eb3db8c19dece3e06b5f39f1c748e2232d100c3",
+    "2025-05-01": "f70f50f5aab93570b80af5cbb69c32cfa4bd4c794427013d69af8828b954a2a0",
+    "2025-05-02": "f3bdd7129e3113bf064c4c69a5431c7b6c025113f9ecbf18e5dcd4e4fb6f9f3c",
+    "2025-05-03": "6a562d66dd05fdca64007252dc94441dc30cd172cbb13f9e33d4be42bf46192e",
+    "2025-05-04": "6a35dd33506e74275fbf2b494d4385cd3507abe5e4093c83e939b8c17849cc16",
+    "2025-05-05": "40fab68201a084f77706d78a5f7cbaef18fef12aeb80fbfb7c4179bfffc2f01e"
+  },
+  "old_equation": "v2 = anchor_v2 + H_old.T @ (control - anchor_control)",
+  "production_base_authority_pattern": "dayahead/cache/v37_may_locked_final/electrical/<day>/data/D1_AC_ANCHOR_SENSITIVITY_<day>.npz",
+  "reference": {
+    "AIDC": "D1_REFERENCE_PLAN",
+    "MESS_P_kW": 0.0,
+    "MESS_Q_kvar": 0.0,
+    "capacitor_states": "FROZEN_PER_SLOT",
+    "regulator_taps": "FROZEN_PER_SLOT"
+  },
+  "repair_builder": {
+    "file": "dayahead\\v37\\voltage_fidelity.py",
+    "function": "repaired_coefficients",
+    "line": 70
+  },
+  "repaired_equation": "v2 = anchor_v2 + H_repaired.T @ (control - anchor_control)",
+  "repaired_serialized_authority": "dayahead\\artifacts\\v37_r2_voltage_fidelity_repair\\V37_R2_REPAIRED_VOLTAGE_AUTHORITY.json",
+  "restricted_row_injector": {
+    "file": "dayahead\\v35r3\\algorithm.py",
+    "function": "_add_fixed_voltage",
+    "line": 950
+  },
+  "slot_coefficient_builder": {
+    "file": "dayahead\\v28r2\\electrical_subproblem.py",
+    "function": "slot_coefficients",
+    "line": 151
+  }
+}

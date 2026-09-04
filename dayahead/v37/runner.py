@@ -29,6 +29,7 @@ from .contracts import (
     SOURCE_DATA_REPOSITORY, STATUS_ROOT,
 )
 from .status import atomic_json, read_json, write_status
+from .voltage_fidelity import AUTHORITY_RELATIVE_PATH, repaired_coefficients
 
 
 ADMISSION = {"status": "PASS", "May_numeric_reads_before_admission": 0}
@@ -277,6 +278,7 @@ def _input_authority(repo: Path, day: str, case: str, trajectory: Any) -> dict[s
         "C1_parameters": repo / "dayahead/artifacts/v24t_thermal_aware_aidc/V24T_C1_QUASISTATIC_MODEL.json",
         "grid_base_case": SOURCE_DATA_REPOSITORY / "dayahead/artifacts/v16_2/Generated_ThreePhase_PCC_v4.dss",
         "IDC_existing_location_mapping": repo / "dayahead/artifacts/v16/AIDC_RACK_MAPPING_CONTRACT.json",
+        "MESS_voltage_fidelity_authority": repo / AUTHORITY_RELATIVE_PATH,
     }
     files = {
         label: {"path": str(path), "exists": path.is_file(), "sha256": file_sha(path) if path.is_file() else None}
@@ -304,7 +306,7 @@ def _beam_case(repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any) -> t
     import dayahead.v35r3e.algorithm as r3e
 
     data, electrical = load_day_context(repo, day)
-    coefficients = v36_runner._coefficients(electrical)
+    coefficients = repaired_coefficients(repo, electrical)
     selected = aidc_b0 if case == "B2" else aidc_b1
     from dayahead.v33m.mess_trajectory import MessTrajectory
     from dayahead.v35.execution import _planning_grid
@@ -317,6 +319,7 @@ def _beam_case(repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any) -> t
         "prepare": frozen.prepare_aidc_stages, "traffic": frozen.daily_traffic_authority,
         "local_search": frozen._local_search, "solve_item": frozen._solve_item,
         "solve_worker": frozen._solve_worker, "DEFAULT_K": frozen.DEFAULT_K,
+        "slot_coefficients": frozen.slot_coefficients,
     }
 
     def selected_day(value: str) -> None:
@@ -329,6 +332,13 @@ def _beam_case(repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any) -> t
         data, electrical,
         {"B0": {"planning_pcc_power_kw": aidc_b0.pcc_p_kw},
          "B1": {"planning_pcc_power_kw": aidc_b1.pcc_p_kw}},
+    )
+    # The frozen beam driver normally reconstructs the legacy coefficient
+    # tuple internally.  Bind that factory to the already SHA-verified R2
+    # tuple so restricted children and their full-MILP certificates consume
+    # the same repaired direct-affine rows as final production reporting.
+    frozen.slot_coefficients = (
+        lambda _legacy, _voltage, _current, slot: coefficients[int(slot)]
     )
     frozen.daily_traffic_authority = lambda _repo, _cache, _phase, target, _admission: daily_traffic_authority(
         repo, repo / CACHE_ROOT / "traffic", PHASE, target, ADMISSION,
@@ -386,6 +396,7 @@ def _beam_case(repo: Path, day: str, case: str, aidc_b0: Any, aidc_b1: Any) -> t
         frozen._solve_item = original["solve_item"]
         frozen._solve_worker = original["solve_worker"]
         frozen.DEFAULT_K = original["DEFAULT_K"]
+        frozen.slot_coefficients = original["slot_coefficients"]
         r3.assert_apr01_only, r3e.assert_apr01_only = original_guards
         electrical.voltage.close(); electrical.current.close()
         os.chdir(repo)
@@ -458,9 +469,11 @@ def _run_frozen_case(repo: Path, day: str, case: str, aidc: Any, beam: Mapping[s
     original_context = v36_runner.load_day_context
     original_cache = v36_runner.CACHE_ROOT
     original_input = v36_runner._input_authority
+    original_coefficients = v36_runner._coefficients
     v36_runner.load_day_context = lambda target: load_day_context(repo, target)
     v36_runner.CACHE_ROOT = CACHE_ROOT
     v36_runner._input_authority = _input_authority
+    v36_runner._coefficients = lambda electrical: repaired_coefficients(repo, electrical)
     try:
         os.chdir(repo)
         return v36_runner.run_case(repo, PASS_ID, day, case, aidc, beam)
@@ -468,6 +481,7 @@ def _run_frozen_case(repo: Path, day: str, case: str, aidc: Any, beam: Mapping[s
         v36_runner.load_day_context = original_context
         v36_runner.CACHE_ROOT = original_cache
         v36_runner._input_authority = original_input
+        v36_runner._coefficients = original_coefficients
         os.chdir(repo)
 
 

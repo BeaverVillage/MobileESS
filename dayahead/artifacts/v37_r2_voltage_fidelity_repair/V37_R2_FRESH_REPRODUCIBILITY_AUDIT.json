@@ -1,0 +1,70 @@
+{
+  "acceptance_tolerance": {
+    "absolute_sensitivity": 6.20424011943399e-07,
+    "derivation": "MAX(2_X_MAX(IDENTICAL_SEQUENCE_BASELINE_SCATTER,ALTERED_ORDER_BASELINE_SCATTER)_DIV_MIN_PROBE_DELTA,64_X_FLOAT_EPSILON_X_SIGNAL_SCALE)",
+    "relative_sensitivity": 0.03669674661966055,
+    "saved_baseline_derivation": "MAX(SAVED_REPLAY_P99_PLUS_5_X_IQR,5_X_OBSERVED_ENGINE_ORDER_BASELINE_SCATTER,64_X_FLOAT_EPSILON)",
+    "saved_baseline_voltage": 1.1392111820038853e-05
+  },
+  "artifact_id": "V37_R2_FRESH_REPRODUCIBILITY_AUDIT_V1",
+  "authority_freeze_allowed": true,
+  "baseline_consistency_PASS": true,
+  "each_pass_new_OpenDSS_engine": true,
+  "frozen_scale_reproducibility_guard": {
+    "P_relative": 0.001069288716073256,
+    "Q_relative": 0.0009392224851904921,
+    "derivation": "MAX_RELATIVE_ERROR_OBSERVED_ACROSS_IDENTICAL_SEQUENCE_AND_ALTERED_ORDER_APR01_PASSES"
+  },
+  "full_pass_count": 2,
+  "full_pass_state_count": 62,
+  "full_repeat_PASS": true,
+  "identical_deterministic_probe_sequence": true,
+  "order_history_PASS": true,
+  "order_history_check": {
+    "PASS": true,
+    "PCCs": [
+      "IDC05",
+      "STA01",
+      "STA04",
+      "STA05",
+      "STA06",
+      "STA08",
+      "STA12"
+    ],
+    "P_full_probe_range_scatter_impact_pu": 1.9081108877864978e-05,
+    "Q_full_probe_range_scatter_impact_pu": 6.671070675545688e-05,
+    "baseline_voltage_max_absolute_scatter_pu": 3.102120059716995e-07,
+    "dV_dP_max_absolute_error_pu_per_kW": 3.8162217755729956e-08,
+    "dV_dP_max_relative_error": 0.001069288716073256,
+    "dV_dQ_max_absolute_error_pu_per_kvar": 1.111845112590948e-07,
+    "dV_dQ_max_relative_error": 0.0009392224851904921,
+    "independent_new_engine": true,
+    "large_negative_Q_included": true,
+    "low_voltage_state_included": true,
+    "phases": [
+      "A",
+      "B",
+      "C"
+    ],
+    "probe_order_changed": true,
+    "state_count": 8,
+    "state_order_reversed": true
+  },
+  "pass1_vs_pass2": {
+    "baseline_voltage_max_absolute_scatter_pu": 0.0,
+    "dV_dP_max_absolute_error_pu_per_kW": 0.0,
+    "dV_dP_max_relative_error": 0.0,
+    "dV_dQ_max_absolute_error_pu_per_kvar": 0.0,
+    "dV_dQ_max_relative_error": 0.0
+  },
+  "saved_Apr01_baseline": {
+    "IQR_absolute_error_pu": 1.425116138625837e-06,
+    "P99_absolute_error_pu": 4.266531126909667e-06,
+    "PASS": true,
+    "all_unperturbed_saved_probe_baselines_checked_same_slot_bus_phase": true,
+    "comparison_count": 102,
+    "exceedance_count": 0,
+    "maximum_absolute_error_pu": 4.313582265491611e-06,
+    "median_absolute_error_pu": 3.987261040228063e-07
+  }
+}
