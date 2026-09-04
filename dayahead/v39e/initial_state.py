@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from pathlib import Path
 from typing import Any, Iterable
 
 import gurobipy as gp
@@ -11,7 +12,8 @@ from gurobipy import GRB
 from dayahead.v38.authority import CapacityAuthority, canonical_sha256
 from dayahead.v39a.spatial import ActivityJob
 
-from .contracts import SLOTS, SOLVER_SEED, SOLVER_THREADS
+from .contracts import GUROBI_THREADS_PER_MODEL, SLOTS, SOLVER_SEED
+from .full_spatial import _add_frozen_planning_voltage_constraints
 
 
 def _eligible_sites(
@@ -30,6 +32,8 @@ def build_rw_anchored_initial_state(
     capacity: CapacityAuthority,
     *,
     name: str,
+    planning_repo: Path | None = None,
+    operating_day: str | None = None,
 ) -> dict[str, Any]:
     """Create one common state from the causal RW reference feasibility set.
 
@@ -44,6 +48,8 @@ def build_rw_anchored_initial_state(
         key=lambda row: row[0],
     ))
     active = tuple(sorted(rw_jobs, key=lambda row: row.job_uid))
+    if (planning_repo is None) != (operating_day is None):
+        raise ValueError("V39E_INITIAL_PLANNING_AUTHORITY_ARGUMENT_PAIR")
     running_gpu = dict(running)
     if len(running_gpu) != len(running):
         raise ValueError("V39E_DUPLICATE_RUNNING_JOB")
@@ -97,7 +103,7 @@ def build_rw_anchored_initial_state(
 
     model = gp.Model(name)
     model.Params.OutputFlag = 0
-    model.Params.Threads = SOLVER_THREADS
+    model.Params.Threads = GUROBI_THREADS_PER_MODEL
     model.Params.Seed = SOLVER_SEED
     model.Params.MIPGap = 0.0
     variables: dict[tuple[int, str], gp.Var] = {}
@@ -143,6 +149,22 @@ def build_rw_anchored_initial_state(
                 ) <= int(capacity.site_capacity[site]),
                 name=f"RW_site_capacity[{site},{slot}]",
             )
+
+    if planning_repo is not None and operating_day is not None:
+        active_gpu_expressions = {
+            (slot, site): gp.quicksum(
+                keys[index][1] * variables[index, site]
+                for index in range(len(keys))
+                if site in candidates[index]
+                and keys[index][2] is not None
+                and int(keys[index][2]) <= slot < int(keys[index][3])
+            )
+            for slot in range(SLOTS) for site in capacity.aidc_ids
+        }
+        _add_frozen_planning_voltage_constraints(
+            model, active_gpu_expressions, capacity,
+            planning_repo.resolve(), operating_day,
+        )
 
     model.setObjective(0.0, GRB.MINIMIZE)
     model.optimize()
@@ -206,7 +228,7 @@ def build_rw_anchored_initial_state(
         "status": "PASS",
         "feasibility_objective": "ZERO",
         "deterministic_materialization": (
-            "ZERO_OBJECTIVE_FIXED_ORDER_SINGLE_THREAD_FIXED_SEED_THEN_JOB_UID"
+            "ZERO_OBJECTIVE_FIXED_ORDER_FIXED_SEED_DETERMINISTIC_GUROBI_THEN_JOB_UID"
         ),
         "initial_state": initial_state,
         "initial_state_SHA256": canonical_sha256(initial_state),
@@ -227,6 +249,7 @@ def build_rw_anchored_initial_state(
         "grid_Actual_reads": 0,
         "migration_result_reads": 0,
         "previous_simulated_day_reads": 0,
+        "D1_frozen_planning_voltage_constraints": planning_repo is not None,
     }
 
 

@@ -21,7 +21,10 @@ START_HEAD = "692cfc2ce0949c8ac2f76ba6e37ca94fac9358fc"
 BRANCH = "codex/v39e-rw-anchored-initial-state-fast-validation"
 ARTIFACT_ROOT = Path("dayahead/artifacts/v39e_rw_anchored_initial_state_fast_validation")
 SOLVER_SEED = 20260905
-SOLVER_THREADS = 1
+MAX_PARALLEL_DAY_WORKERS = 4
+GUROBI_THREADS_PER_MODEL = 4
+# Backward-compatible internal name; runtime authority is the explicit constant above.
+SOLVER_THREADS = GUROBI_THREADS_PER_MODEL
 
 RACK_AUTHORITY_SHA256 = (
     "f302163fdc48a95aa27bb5b71893ad04b4fcb70b9682399d2d87e881b1f3d3ec"
@@ -41,6 +44,8 @@ __all__ = [
     "RACK_FREEZE_CERTIFICATE_PATH",
     "RACK_FREEZE_COMMIT",
     "SLOTS",
+    "GUROBI_THREADS_PER_MODEL",
+    "MAX_PARALLEL_DAY_WORKERS",
     "SOLVER_SEED",
     "SOLVER_THREADS",
     "START_HEAD",

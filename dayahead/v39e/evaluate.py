@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import json
 from pathlib import Path
 import subprocess
@@ -21,6 +22,7 @@ from .contracts import (
     EXPECTED_DATES,
     EXPECTED_GPU_CAPACITY,
     IMPLEMENTATION_ID,
+    MAX_PARALLEL_DAY_WORKERS,
     RACK_AUTHORITY_PATH,
     RACK_AUTHORITY_SHA256,
     RACK_FREEZE_COMMIT,
@@ -67,6 +69,57 @@ MAY_STARTED = NO
     )
 
 
+def _construct_initial_day(
+    repo_text: str, day: str, capacity: Any,
+) -> tuple[str, dict[str, Any]]:
+    repo = Path(repo_text)
+    source_root = repo / V37_DAY_ROOT / day
+    ledger = pd.read_parquet(source_root / "V37_R4A_JOB_LEDGER.parquet")
+    running = ledger.loc[ledger["state_at_issue"].eq("RUNNING")]
+    running_jobs = tuple(
+        (str(row.job_id), int(row.requested_GPUs))
+        for row in running.itertuples(index=False)
+    )
+    rw_path = source_root / "V37_R4A_RW_SCHEDULE.parquet"
+    rw_jobs = production_activity(pd.read_parquet(rw_path))
+    constructed = build_rw_anchored_initial_state(
+        running_jobs,
+        rw_jobs,
+        capacity,
+        name=f"V39E_RW_ANCHORED_INITIAL_{day}",
+        planning_repo=repo,
+        operating_day=day,
+    )
+    if constructed["status"] != "PASS":
+        return day, constructed
+    rows = [
+        {
+            "operating_day": day,
+            "job_uid": uid,
+            "requested_GPU": gpu,
+            "initial_AIDC": constructed["initial_state"][uid],
+            "initialization_class": "RW_REFERENCE_ANCHORED_SYNTHETIC",
+            "D1_visible": True,
+            "synthetic_site_claim": True,
+            "measured_site_claim": False,
+        }
+        for uid, gpu in sorted(running_jobs)
+    ]
+    initial_sha = canonical_sha256(rows)
+    return day, {
+        **constructed,
+        "operating_day": day,
+        "initial_state_SHA256": initial_sha,
+        "B0_initial_state_SHA": initial_sha,
+        "B1_initial_state_SHA": initial_sha,
+        "B2_initial_state_SHA": initial_sha,
+        "B3_initial_state_SHA": initial_sha,
+        "B0_B1_B2_B3_SHA_identity": True,
+        "RW_reference_schedule_SHA256": sha256_file(rw_path),
+        "initial_rows": rows,
+    }
+
+
 def evaluate(repo: Path) -> dict[str, Any]:
     repo = repo.resolve()
     if _git(repo, "branch", "--show-current") != BRANCH:
@@ -95,53 +148,22 @@ def evaluate(repo: Path) -> dict[str, Any]:
     day_results: dict[str, dict[str, Any]] = {}
     initial_days: list[dict[str, Any]] = []
     first_blocker: str | None = None
-    for day in EXPECTED_DATES:
-        day_root = repo / V37_DAY_ROOT / day
-        ledger = pd.read_parquet(day_root / "V37_R4A_JOB_LEDGER.parquet")
-        running = ledger.loc[ledger["state_at_issue"].eq("RUNNING")]
-        running_jobs = tuple(
-            (str(row.job_id), int(row.requested_GPUs))
-            for row in running.itertuples(index=False)
-        )
-        rw_path = day_root / "V37_R4A_RW_SCHEDULE.parquet"
-        rw_jobs = production_activity(pd.read_parquet(rw_path))
-        constructed = build_rw_anchored_initial_state(
-            running_jobs,
-            rw_jobs,
-            capacity,
-            name=f"V39E_RW_ANCHORED_INITIAL_{day}",
-        )
-        if constructed["status"] != "PASS":
-            first_blocker = f"{day}:{constructed.get('reason', 'INITIAL_STATE_FAILED')}"
-            day_results[day] = constructed
-            break
-        rows = [
-            {
-                "operating_day": day,
-                "job_uid": uid,
-                "requested_GPU": gpu,
-                "initial_AIDC": constructed["initial_state"][uid],
-                "initialization_class": "RW_REFERENCE_ANCHORED_SYNTHETIC",
-                "D1_visible": True,
-                "synthetic_site_claim": True,
-                "measured_site_claim": False,
-            }
-            for uid, gpu in sorted(running_jobs)
-        ]
-        initial_sha = canonical_sha256(rows)
-        result = {
-            **constructed,
-            "operating_day": day,
-            "initial_state_SHA256": initial_sha,
-            "B0_initial_state_SHA": initial_sha,
-            "B1_initial_state_SHA": initial_sha,
-            "B2_initial_state_SHA": initial_sha,
-            "B3_initial_state_SHA": initial_sha,
-            "B0_B1_B2_B3_SHA_identity": True,
-            "RW_reference_schedule_SHA256": sha256_file(rw_path),
-            "initial_rows": rows,
+    with ProcessPoolExecutor(max_workers=MAX_PARALLEL_DAY_WORKERS) as pool:
+        futures = {
+            pool.submit(_construct_initial_day, str(repo), day, capacity): day
+            for day in EXPECTED_DATES
         }
-        day_results[day] = result
+        for future in as_completed(futures):
+            day, result = future.result()
+            day_results[day] = result
+
+    for day in EXPECTED_DATES:
+        result = day_results[day]
+        if result["status"] != "PASS":
+            if first_blocker is None:
+                first_blocker = f"{day}:{result.get('reason', 'INITIAL_STATE_FAILED')}"
+            continue
+        rows = result["initial_rows"]
         initial_days.append({
             key: result[key] for key in (
                 "operating_day",
