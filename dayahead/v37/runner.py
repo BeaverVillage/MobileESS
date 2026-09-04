@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+import copy
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -34,7 +35,10 @@ from .execution_acceleration import (
     COMPATIBILITY_VERSION, canonical_sha256, file_sha256,
 )
 from .status import atomic_json, read_json, write_status
-from .voltage_fidelity import AUTHORITY_RELATIVE_PATH, repaired_coefficients
+from dayahead.v37r3.voltage_authority import (
+    AUTHORITY_RELATIVE_PATH,
+    joint_repaired_coefficients,
+)
 
 
 ADMISSION = {"status": "PASS", "May_numeric_reads_before_admission": 0}
@@ -99,7 +103,19 @@ def case_execution_fingerprint(
         repo / CACHE_ROOT / "electrical" / day / "data"
         / f"D1_AC_ANCHOR_CURRENT_SENSITIVITY_{day}.npz"
     )
-    cache_key = (day, case, file_sha(authority_path))
+    cut_contract_path = (
+        repo / "dayahead/artifacts/v17_candidate/"
+        "V17_AC_RESTORATION_OUTER_LOOP_CONTRACT_V1.json"
+    )
+    cut_implementation_path = repo / "dayahead/v37r3/restoration.py"
+    cut_fingerprint = canonical_sha256({
+        "contract": file_sha(cut_contract_path),
+        "implementation": file_sha256(cut_implementation_path),
+    })
+    cache_key = (day, case, canonical_sha256({
+        "joint_authority": file_sha(authority_path),
+        "cut": cut_fingerprint,
+    }))
     cached = _FINGERPRINT_CACHE.get(cache_key)
     if cached is not None and cached["AIDC_authority_sha256"] == aidc_sha:
         return dict(cached)
@@ -108,6 +124,9 @@ def case_execution_fingerprint(
         "operating_day": day,
         "case": case,
         "voltage_authority_sha256": file_sha(authority_path),
+        "restoration_cut_contract_sha256": file_sha(cut_contract_path),
+        "restoration_cut_implementation_sha256": file_sha256(cut_implementation_path),
+        "restoration_cut_fingerprint_sha256": cut_fingerprint,
         "AIDC_authority_sha256": aidc_sha,
         "MESS_authority_sha256": MESS_HEAD,
         "K": DEFAULT_K,
@@ -129,6 +148,8 @@ def case_execution_fingerprint(
                 "dayahead/tools/run_v35r3e_r1_beam.py",
                 "dayahead/v35r3/algorithm.py",
                 "dayahead/v34/integrated_mess.py",
+                "dayahead/v37r3/voltage_authority.py",
+                "dayahead/v37r3/restoration.py",
             )
         }),
         "solver_relevant_configuration": {
@@ -453,7 +474,7 @@ def _beam_case(
     import dayahead.v35r3e.algorithm as r3e
 
     data, electrical = load_day_context(repo, day)
-    coefficients = repaired_coefficients(repo, electrical)
+    coefficients = joint_repaired_coefficients(repo, electrical)
     selected = aidc_b0 if case == "B2" else aidc_b1
     execution_fingerprint = dict(
         execution_fingerprint
@@ -473,6 +494,7 @@ def _beam_case(
         "solve_worker": frozen._solve_worker, "DEFAULT_K": frozen.DEFAULT_K,
         "slot_coefficients": frozen.slot_coefficients,
         "execution_cache_context": frozen.EXECUTION_CACHE_CONTEXT,
+        "progress_callback": frozen.PROGRESS_CALLBACK,
     }
 
     def selected_day(value: str) -> None:
@@ -521,6 +543,54 @@ def _beam_case(
 
     frozen._solve_item = safe_parent_solve
     frozen._solve_worker = _v37_safe_restricted_worker
+    last_progress_write = 0.0
+    last_progress_key: tuple[object, ...] | None = None
+
+    def beam_progress(payload: Mapping[str, object]) -> None:
+        nonlocal last_progress_write, last_progress_key
+        now = time.monotonic()
+        event = str(payload.get("event", "MESS"))
+        key = (
+            event, payload.get("mess_index"), payload.get("parent_index"),
+            payload.get("search_level"), payload.get("seed_done"),
+            payload.get("full_milp_status"),
+        )
+        candidate_done = payload.get("candidate_done")
+        candidate_total = payload.get("candidate_total")
+        terminal_candidate_tick = (
+            candidate_done is not None and candidate_done == candidate_total
+        )
+        if (
+            key == last_progress_key and now - last_progress_write < 2.0
+            and not terminal_candidate_tick
+        ):
+            return
+        mess_index = int(payload.get("mess_index", 1))
+        final_full = event == "FULL_MILP" and mess_index == 4
+        units = BEAM_PROGRESS_BASE[case] + mess_index - 1 + int(final_full)
+        stage = f"{case}_FINAL_FULL" if final_full else f"{case}_MESS{mess_index:02d}"
+        write_status(
+            _status_path(repo, day), day, "RUNNING", units, stage,
+            extra={
+                "case": case, "stage": stage, "mess_index": mess_index,
+                "beam_parent_index": payload.get("parent_index"),
+                "beam_parent_total": payload.get("parent_total"),
+                "search_level": payload.get("search_level"),
+                "candidate_done": candidate_done,
+                "candidate_total": candidate_total,
+                "candidate_new_done": payload.get("candidate_new_done"),
+                "candidate_new_total": payload.get("candidate_new_total"),
+                "seed_done": payload.get("seed_done"),
+                "seed_total": payload.get("seed_total"),
+                "full_milp_status": payload.get("full_milp_status"),
+                "beam_fallback_width": width,
+                "workers": MAX_WORKERS_PER_DATE,
+            },
+        )
+        last_progress_write = now
+        last_progress_key = key
+
+    frozen.PROGRESS_CALLBACK = beam_progress
     frozen._local_search = lambda **kwargs: _run_local_with_frozen_k_fallback(
         frozen, original["local_search"], **kwargs,
     )
@@ -574,6 +644,7 @@ def _beam_case(
         frozen.DEFAULT_K = original["DEFAULT_K"]
         frozen.slot_coefficients = original["slot_coefficients"]
         frozen.EXECUTION_CACHE_CONTEXT = original["execution_cache_context"]
+        frozen.PROGRESS_CALLBACK = original["progress_callback"]
         r3.assert_apr01_only, r3e.assert_apr01_only = original_guards
         electrical.voltage.close(); electrical.current.close()
         os.chdir(repo)
@@ -677,15 +748,48 @@ def _watch_beam(
             continue
 
 
-def _run_frozen_case(repo: Path, day: str, case: str, aidc: Any, beam: Mapping[str, Any] | None) -> dict[str, Any]:
+def _run_frozen_case_once(
+    repo: Path,
+    day: str,
+    case: str,
+    aidc: Any,
+    beam: Mapping[str, Any] | None,
+    *,
+    restoration_round: int | None = None,
+    restoration_new_cuts: int | None = None,
+    restoration_total_cuts: int | None = None,
+) -> dict[str, Any]:
     original_context = v36_runner.load_day_context
     original_cache = v36_runner.CACHE_ROOT
     original_input = v36_runner._input_authority
     original_coefficients = v36_runner._coefficients
+    original_fresh_progress = v36_runner.FRESH_PROGRESS_CALLBACK
     v36_runner.load_day_context = lambda target: load_day_context(repo, target)
     v36_runner.CACHE_ROOT = CACHE_ROOT
     v36_runner._input_authority = _input_authority
-    v36_runner._coefficients = lambda electrical: repaired_coefficients(repo, electrical)
+    v36_runner._coefficients = lambda electrical: joint_repaired_coefficients(repo, electrical)
+    fresh_units = {"B0": 1, "B1": 3, "B2": 8, "B3": 13}[case]
+
+    def fresh_progress(payload: Mapping[str, object]) -> None:
+        fresh_done = int(payload.get("OpenDSS_slot", 0))
+        fresh_total = int(payload.get("OpenDSS_slots_total", 96))
+        if fresh_done != fresh_total and fresh_done % 8 != 0:
+            return
+        stage = f"{case}_RESTORATION" if restoration_round is not None else f"{case}_FRESH"
+        write_status(
+            _status_path(repo, day), day, "RUNNING", fresh_units, stage,
+            extra={
+                "case": case, "stage": stage,
+                "restoration_round": restoration_round,
+                "restoration_round_max": 5,
+                "restoration_new_cuts": restoration_new_cuts,
+                "restoration_total_cuts": restoration_total_cuts,
+                "fresh_slots_done": fresh_done,
+                "fresh_slots_total": fresh_total,
+            },
+        )
+
+    v36_runner.FRESH_PROGRESS_CALLBACK = fresh_progress
     try:
         os.chdir(repo)
         return v36_runner.run_case(repo, PASS_ID, day, case, aidc, beam)
@@ -694,7 +798,311 @@ def _run_frozen_case(repo: Path, day: str, case: str, aidc: Any, beam: Mapping[s
         v36_runner.CACHE_ROOT = original_cache
         v36_runner._input_authority = original_input
         v36_runner._coefficients = original_coefficients
+        v36_runner.FRESH_PROGRESS_CALLBACK = original_fresh_progress
         os.chdir(repo)
+
+
+def _run_frozen_case(
+    repo: Path,
+    day: str,
+    case: str,
+    aidc: Any,
+    beam: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    """Run normal Planning/Fresh once, then the frozen V17 restoration loop."""
+
+    if case not in {"B2", "B3"} or beam is None:
+        return _run_frozen_case_once(repo, day, case, aidc, beam)
+
+    from dayahead.tools.run_v35r3e_r1_beam import _restore_slots, _service_mapping
+    from dayahead.v17_ac_restoration_contract import K_MAX, ViolationType
+    from dayahead.v33m.mess_trajectory import MessTrajectory
+    from dayahead.v36.storage import write_json, write_parquet
+    from dayahead.v37r3.restoration import (
+        extract_ac_violations,
+        frozen_trajectory,
+        load_fresh_result,
+        local_fresh_ac_restoration_cuts,
+        restoration_cut_from_payload,
+        solve_fixed_discrete_recourse,
+    )
+
+    artifact_root = repo / "dayahead/artifacts/v37_r3_restore_intended_cuts"
+    artifact_root.mkdir(parents=True, exist_ok=True)
+    fresh_root = repo / CACHE_ROOT / PASS_ID / "fresh" / day / case
+    current_beam = copy.deepcopy(dict(beam))
+    initial_beam_sha = canonical_sha256(dict(beam))
+    resume_root = (
+        repo / CACHE_ROOT / PASS_ID / "restoration"
+        / initial_beam_sha / day / case
+    )
+    resume_root.mkdir(parents=True, exist_ok=True)
+    resume_payload: dict[str, Any] | None = None
+    for round_path in sorted(resume_root.glob("ROUND_*.json"), reverse=True):
+        try:
+            candidate = read_json(round_path)
+            if (
+                candidate.get("status") == "FRESH_COMPLETE"
+                and candidate.get("initial_beam_sha256") == initial_beam_sha
+                and all(
+                    (repo / item["relative_path"]).is_file()
+                    and file_sha256(repo / item["relative_path"]) == item["sha256"]
+                    for item in candidate.get("case_files", [])
+                )
+            ):
+                resume_payload = candidate
+                break
+        except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError):
+            continue
+
+    if resume_payload is None:
+        current_result = _run_frozen_case_once(repo, day, case, aidc, beam)
+        current_trajectory = v36_runner._trajectory(current_beam)
+        accumulated = []
+        arithmetic_rows: list[dict[str, Any]] = []
+        runtime_rows: list[dict[str, Any]] = []
+        first_iteration = 1
+    else:
+        current_result = dict(resume_payload["result"])
+        current_trajectory = MessTrajectory(tuple(
+            _restore_slots(resume_payload["trajectory_slots"])
+        ))
+        current_beam["trajectory_slots"] = [
+            row.to_dict() for row in current_trajectory.slots
+        ]
+        accumulated = [
+            restoration_cut_from_payload(row) for row in resume_payload["cuts"]
+        ]
+        arithmetic_rows = list(resume_payload.get("arithmetic_rows", []))
+        runtime_rows = list(resume_payload.get("runtime_rows", []))
+        first_iteration = int(resume_payload["restoration_round"]) + 1
+    margin_authority_path = (
+        repo / "dayahead/artifacts/v17_candidate/V17_AC_RESTORATION_CUT_VALIDATION.json"
+    )
+    margin_authority = read_json(margin_authority_path)
+    restoration_margins = dict(margin_authority["margins"])
+    _bundle, _graph, route_table, _files = daily_traffic_authority(
+        repo, repo / CACHE_ROOT / "traffic", PHASE, day, ADMISSION,
+    )
+    service_mapping = _service_mapping()
+    beam_reruns = 0
+    restricted_solves = 0
+    final_status = "PASS_WITHOUT_RESTORATION"
+
+    for iteration in range(first_iteration, K_MAX + 1):
+        fresh = load_fresh_result(fresh_root)
+        summary = fresh.summary
+        violations = extract_ac_violations(fresh)
+        if not bool(summary["physical_violation"]):
+            final_status = "PASS" if accumulated else "PASS_WITHOUT_RESTORATION"
+            break
+        if not violations:
+            raise RuntimeError(f"V37_R3_FRESH_PHYSICAL_VIOLATION_NOT_EXTRACTED:{day}:{case}")
+
+        electrical_started = time.perf_counter()
+        write_status(
+            _status_path(repo, day), day, "RUNNING",
+            {"B2": 8, "B3": 13}[case], f"{case}_RESTORATION",
+            extra={
+                "case": case, "stage": f"{case}_RESTORATION",
+                "restoration_round": iteration,
+                "restoration_round_max": K_MAX,
+                "restoration_new_cuts": len(violations),
+                "restoration_total_cuts": len(accumulated) + len(violations),
+                "full_milp_status": "P_Q_FULL_MILP_RUNNING",
+            },
+        )
+        _data, electrical = load_day_context(repo, day)
+        try:
+            frozen = frozen_trajectory(
+                day, case, aidc, current_trajectory, round_index=iteration - 1,
+            )
+            frozen = frozen.__class__(
+                frozen.day, frozen.namespace, frozen.case,
+                frozen.pcc_p_kw, frozen.pcc_q_kvar,
+                frozen.mess_p_kw, frozen.mess_q_kvar,
+                frozen.mess_ids, frozen.mess_locations_96x4,
+                fresh.schedule_sha256,
+            )
+            generated, derivative_audit = local_fresh_ac_restoration_cuts(
+                source_repo=SOURCE_DATA_REPOSITORY,
+                electrical=electrical,
+                voltage=electrical.voltage,
+                frozen=frozen,
+                fresh=fresh,
+                violations=violations,
+                iteration_index=iteration,
+                margins=restoration_margins,
+            )
+            if not generated:
+                raise RuntimeError("V37_R3_FRESH_VIOLATION_GENERATED_ZERO_CUTS")
+            accumulated.extend(generated)
+            full_started = time.perf_counter()
+            full = solve_fixed_discrete_recourse(
+                repo=repo,
+                case=case,
+                aidc=aidc,
+                electrical=electrical,
+                route_table=route_table,
+                service_to_pcc=service_mapping,
+                selected_trajectory=current_trajectory,
+                restoration_cuts=tuple(accumulated),
+            )
+            full_wallclock = time.perf_counter() - full_started
+        finally:
+            electrical.voltage.close()
+            electrical.current.close()
+
+        for row in full.restoration_cut_arithmetic:
+            arithmetic_rows.append({
+                "operating_day": day,
+                "case": case,
+                "restoration_round": iteration,
+                **dict(row),
+            })
+        runtime_rows.append({
+            "operating_day": day,
+            "case": case,
+            "restoration_round": iteration,
+            "triggered_AC_violation_count": len(violations),
+            "triggered_violation_counts": {
+                violation_type.value: sum(
+                    row.violation_type == violation_type for row in violations
+                )
+                for violation_type in ViolationType
+                if any(row.violation_type == violation_type for row in violations)
+            },
+            "new_cut_count": len(generated),
+            "cumulative_cut_count": len(accumulated),
+            "trust_region_constraint_count": full.restoration_trust_region_constraint_count,
+            "Fresh_finite_difference_solve_count": derivative_audit[
+                "Fresh_finite_difference_solve_count"
+            ],
+            "maximum_anchor_reproduction_error_pu": derivative_audit[
+                "maximum_anchor_reproduction_error_pu"
+            ],
+            "full_MILP_wallclock_seconds": full_wallclock,
+            "full_MILP_solver_seconds": full.solve_seconds,
+            "full_MILP_status": full.solver_status,
+            "restricted_solver_calls": 0,
+            "beam_reruns": 0,
+            "round_context_wallclock_seconds": time.perf_counter() - electrical_started,
+        })
+        current_trajectory = full.trajectory
+        current_beam["trajectory_slots"] = [
+            row.to_dict() for row in current_trajectory.slots
+        ]
+        current_beam["trajectory_sha256"] = current_trajectory.canonical_sha256
+        selected_state = dict(current_beam["selected_state"])
+        selected_state["solver_objective"] = float(full.objective)
+        selected_state["current_planning_objective"] = float(full.objective)
+        selected_state["trajectory_slots"] = current_beam["trajectory_slots"]
+        selected_state["restoration_cut_count"] = len(accumulated)
+        selected_state["restoration_round"] = iteration
+        current_beam["selected_state"] = selected_state
+
+        current_result = _run_frozen_case_once(
+            repo, day, case, aidc, current_beam,
+            restoration_round=iteration,
+            restoration_new_cuts=len(generated),
+            restoration_total_cuts=len(accumulated),
+        )
+        post = load_fresh_result(fresh_root)
+        runtime_rows[-1].update({
+            "Fresh_revalidation_wallclock_seconds": float(post.elapsed_seconds),
+            "post_Fresh_Vmin_pu": float(post.summary["Vmin_pu"]),
+            "post_Fresh_Vmax_pu": float(post.summary["Vmax_pu"]),
+            "post_Fresh_voltage_violation_count": int(
+                post.summary["voltage_violation_count"]
+            ),
+            "post_Fresh_line_current_violation_count": int(
+                post.summary["line_current_violation_count"]
+            ),
+            "post_Fresh_transformer_current_violation_count": int(
+                post.summary["transformer_current_violation_count"]
+            ),
+            "post_Fresh_transformer_kva_violation_count": int(
+                post.summary["transformer_kva_violation_count"]
+            ),
+            "post_Fresh_physical_violation": bool(post.summary["physical_violation"]),
+        })
+        case_files = [
+            {
+                "relative_path": str(path.relative_to(repo)).replace("\\", "/"),
+                "sha256": file_sha256(path),
+            }
+            for relative in CASE_FILES
+            for path in (_case_root(repo, day, case) / relative,)
+            if path.is_file()
+        ]
+        if len(case_files) != len(CASE_FILES):
+            raise RuntimeError("V37_R3_RESTORATION_ROUND_CASE_FILES_INCOMPLETE")
+        atomic_json(resume_root / f"ROUND_{iteration:02d}.json", {
+            "artifact_id": "V37_R3_RESTORATION_ROUND_CHECKPOINT_V1",
+            "status": "FRESH_COMPLETE",
+            "operating_day": day,
+            "case": case,
+            "initial_beam_sha256": initial_beam_sha,
+            "restoration_round": iteration,
+            "cuts": [cut.payload() for cut in accumulated],
+            "trajectory_slots": [row.to_dict() for row in current_trajectory.slots],
+            "arithmetic_rows": arithmetic_rows,
+            "runtime_rows": runtime_rows,
+            "result": current_result,
+            "case_files": case_files,
+            "Fresh_schedule_sha256": post.schedule_sha256,
+        })
+    else:
+        final_status = "FAIL_CLOSED_MAX_RESTORATION_ROUNDS"
+
+    final_fresh = load_fresh_result(fresh_root)
+    if bool(final_fresh.summary["physical_violation"]):
+        final_status = "FAIL_CLOSED_MAX_RESTORATION_ROUNDS"
+    elif accumulated:
+        final_status = "PASS"
+
+    existing_arithmetic = artifact_root / "V37_R3_CUT_ARITHMETIC_AUDIT.parquet"
+    arithmetic = pd.DataFrame(arithmetic_rows)
+    if existing_arithmetic.is_file():
+        prior = pd.read_parquet(existing_arithmetic)
+        prior = prior.loc[
+            ~((prior["operating_day"] == day) & (prior["case"] == case))
+        ]
+        arithmetic = pd.concat((prior, arithmetic), ignore_index=True)
+    if len(arithmetic):
+        write_parquet(existing_arithmetic, arithmetic)
+
+    runtime_path = artifact_root / "V37_R3_CUT_RUNTIME_AUDIT.json"
+    runtime = read_json(runtime_path) if runtime_path.is_file() else {
+        "artifact_id": "V37_R3_CUT_RUNTIME_AUDIT_V1", "cases": {},
+    }
+    runtime["cases"][f"{day}:{case}"] = {
+        "status": final_status,
+        "rounds": runtime_rows,
+        "restoration_round_count": len(runtime_rows),
+        "cut_count": len(accumulated),
+        "restricted_solver_calls": restricted_solves,
+        "beam_reruns_after_Fresh_violation": beam_reruns,
+        "initial_beam_result_sha256": initial_beam_sha,
+        "final_beam_discrete_source_sha256": initial_beam_sha,
+        "K_MAX": K_MAX,
+        "rho": 0.10,
+    }
+    write_json(runtime_path, runtime)
+    write_json(
+        artifact_root / f"V37_R3_{day}_{case}_RESTORATION_CUTS.json",
+        {
+            "artifact_id": "V37_R3_CASE_RESTORATION_CUTS_V1",
+            "operating_day": day,
+            "case": case,
+            "status": final_status,
+            "cuts": [cut.payload() for cut in accumulated],
+        },
+    )
+    current_result["restoration"] = runtime["cases"][f"{day}:{case}"]
+    if final_status.startswith("FAIL_CLOSED"):
+        raise RuntimeError(f"V37_R3_{final_status}:{day}:{case}")
+    return current_result
 
 
 def _case_metrics(repo: Path, day: str, case: str, result: Mapping[str, Any]) -> dict[str, Any]:

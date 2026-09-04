@@ -1,0 +1,47 @@
+{
+  "artifact_id": "V37_R3_MISSING_CUT_IMPLEMENTATION_FORENSIC_V1",
+  "classification": "IMPLEMENTATION_OMISSION",
+  "status": "CONFIRMED",
+  "intended_path": [
+    "optimize",
+    "serialize frozen schedule",
+    "Primary Fresh OpenDSS",
+    "extract immutable hard violations",
+    "generate central-difference local cuts",
+    "accumulate cuts",
+    "insert cuts and trust regions into full optimization",
+    "re-solve",
+    "repeat through Fresh PASS or K_MAX"
+  ],
+  "last_lineage_implementation_with_full_model_insertion": {
+    "path": "dayahead/v28/monolithic_authority.py",
+    "commit": "24adfef6ddef85660f6027cdfe288f488438121e",
+    "accepted_parameter": "restoration_cuts",
+    "installed_constraint_names": [
+      "fresh_ac_restoration_upper",
+      "fresh_ac_restoration_lower",
+      "fresh_ac_cut_trust_low",
+      "fresh_ac_cut_trust_high"
+    ]
+  },
+  "omission_introduction": {
+    "commit": "916de691834b3c1098fa2431fe21e4e3193542fb",
+    "path": "dayahead/v34/integrated_mess.py",
+    "path_sha256_at_V37_start": "bcaba241f2bec6245aebca4c30a5f709e9e243427600c5f8bd182b33a319f7ee",
+    "finding": "the newly introduced integrated MESS solver has no restoration_cuts input and contains no cut/trust-region insertion loop"
+  },
+  "current_disconnected_path": {
+    "dayahead/v36/runner.py": "run_case performs Planning evaluation followed by one Fresh replay and returns without PASS_OR_LOCAL_CUT_REOPTIMIZE",
+    "dayahead/v37/runner.py": "_run_frozen_case delegates to the V36 single-pass run_case and has no restoration outer loop",
+    "dayahead/v34/integrated_mess.py": "the full child builds direct grid rows only and cannot accept the frozen RestorationCut object"
+  },
+  "May01_D2_observation": {
+    "source": "dayahead/artifacts/v37_d2_may01_b2_benders_forensic/V37_D2_MAY01_B2_CUT_SUMMARY.json",
+    "relevant_cuts_generated": 0,
+    "relevant_cuts_installed": 0,
+    "relevant_cuts_present_in_final_model": 0,
+    "role": "confirms the omission at runtime but does not define cut semantics"
+  },
+  "root_cause": "the V34 production integration created a replacement full MESS optimization path without porting the already-frozen V17/V28 restoration-cut parameter, insertion loop, and post-Fresh re-solve state machine; V36/V37 then reused that no-cut path",
+  "May_used_to_invent_cut_semantics": false
+}

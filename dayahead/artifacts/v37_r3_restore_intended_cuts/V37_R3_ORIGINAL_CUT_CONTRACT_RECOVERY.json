@@ -1,0 +1,78 @@
+{
+  "artifact_id": "V37_R3_ORIGINAL_CUT_CONTRACT_RECOVERY_V1",
+  "status": "RECOVERED_WITH_SUFFICIENT_CONFIDENCE",
+  "classification": "RESTORATION_OF_PREEXISTING_INTENDED_CUT_CONTRACT",
+  "original_project_name": "V17_AC_RESTORATION_OUTER_LOOP_CONTRACT_V1",
+  "scientific_role": "COMMON_FEASIBILITY_CLOSURE_NOT_PROPOSED_METHOD_ADVANTAGE",
+  "lineage_evidence": {
+    "contract_freeze_commit": "7a85e226415623bf98795e65ebf9937391e93e4c",
+    "contract_freeze_commit_time": "2026-08-31T11:00:27+09:00",
+    "implementation_commit": "c677097c01508e4c55e9deb7570958fcf81040be",
+    "final_dayahead_model_commit_retaining_cut_insertion": "24adfef6ddef85660f6027cdfe288f488438121e",
+    "current_V37_HEAD": "aec49cda6c62b7fe904b5cbca025ff3a914d2f79",
+    "all_evidence_commits_are_ancestors_of_current_V37_lineage": true
+  },
+  "authority_sources": [
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_AC_RESTORATION_OUTER_LOOP_CONTRACT_V1.json",
+      "sha256": "97ef76db29f40ff47f734bd8b3d95db83057574c352117104d3b75bdef7ca3c5",
+      "role": "frozen machine-readable contract"
+    },
+    {
+      "path": "dayahead/artifacts/v17_candidate/V17_AC_RESTORATION_CUT_VALIDATION.json",
+      "sha256": "e6c5b20c409d79e958f19fb65b285577ceeb7fa689354b026a4735fd96c452d1",
+      "role": "pre-outcome frozen residual-margin authority"
+    },
+    {
+      "path": "dayahead/v17_ac_restoration_contract.py",
+      "sha256": "76830d6914cad83ea8e225c07b8d41ae696c224510dfa9dfe2cfe0c4f1fe5cc8",
+      "role": "contract vocabulary and frozen constants"
+    },
+    {
+      "path": "dayahead/v17_ac_restoration_runner.py",
+      "sha256": "693647f8a8579aaa858000b728f82cecb956884d7867d8495c10ea18132b5461",
+      "role": "original violation extraction, cut generation, accumulation, and stopping loop"
+    },
+    {
+      "path": "dayahead/v28/monolithic_authority.py",
+      "sha256": "273380d4ec63084a4ead42dd109a68d4f3dc917f10a02d7f71ccf89bdaebaf8a",
+      "role": "final day-ahead full-model cut and trust-region insertion"
+    }
+  ],
+  "intended_cut_type": "LOCAL_FRESH_AC_FEASIBILITY_RESTORATION_CUT",
+  "generation_trigger": "immutable hard-limit violation extracted after the optimized frozen schedule is replayed by Primary Fresh OpenDSS",
+  "source_model": "Fresh OpenDSS with frozen regulator taps and capacitor states at the failed schedule",
+  "coefficient_source": "central finite difference at the exact failed Fresh operating point",
+  "variables": {
+    "B0": [],
+    "B1": ["AIDC_COMPUTE_FLEX"],
+    "B2": ["MESS_P", "MESS_Q"],
+    "B3": ["AIDC_COMPUTE_FLEX", "MESS_P", "MESS_Q"]
+  },
+  "cut_equations": {
+    "upper_voltage": "V_AC(u_k)+J_V_k(u-u_k)<=V_MAX-m_V",
+    "lower_voltage": "V_AC(u_k)+J_V_k(u-u_k)>=V_MIN+m_V",
+    "current": "I_AC(u_k)+J_I_k(u-u_k)<=1-m_I",
+    "transformer_kva": "S_AC(u_k)+J_S_k(u-u_k)<=1-m_transformer_kva"
+  },
+  "insertion_stage": "FULL_MONOLITHIC_OPTIMIZATION_RE_SOLVE_ONLY",
+  "restricted_solve_insertion": false,
+  "Fresh_OpenDSS_inside_Benders": false,
+  "persistence_scope": "accumulate all cuts across restoration rounds for the same operating day and case; do not persist across a different day or case",
+  "iteration_rule": "iteration zero is the original optimization; after each failed Primary Fresh replay generate same-slot cuts for all immutable violations, append to the accumulated set, and re-solve",
+  "stopping_criterion": "stop immediately on Primary Fresh hard-feasibility PASS; otherwise fail closed after K_MAX rounds or an infeasible re-solve",
+  "maximum_cut_rounds": 5,
+  "trust_region": {
+    "rho": 0.1,
+    "rule": "every model carrying a local cut is constrained componentwise to the exact stored cut anchor plus/minus the authorized local radius",
+    "stale_cut_policy": "REJECT_OR_CONSTRAIN_OUTSIDE_EXACT_LOCAL_ANCHOR_NEIGHBORHOOD"
+  },
+  "frozen_margins": {
+    "m_V_pu": 0.000060616731687528454,
+    "m_I_pu": 0.02879389805121189,
+    "m_transformer_kva_pu": 0.02879389805121189,
+    "source": "9072 pre-outcome April validation probes plus deterministic repeat tolerance"
+  },
+  "May_values_used_to_recover_or_define_semantics": false,
+  "new_cut_method_invented": false
+}

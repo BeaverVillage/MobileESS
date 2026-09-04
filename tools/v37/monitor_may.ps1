@@ -59,15 +59,56 @@ function Get-MonitorView {
     $passed = @($rows | Where-Object { $_.status -eq 'PASS' }).Count
     $failed = @($rows | Where-Object { $_.status -eq 'FAIL' }).Count
     $active = @($rows | Where-Object { $_.status -eq 'RUNNING' } | Sort-Object date)
+    $pending = @($rows | Where-Object { $_.status -eq 'PENDING' } | Sort-Object date)
+    $lastFail = @($rows | Where-Object { $_.status -eq 'FAIL' } | Sort-Object last_update -Descending | Select-Object -First 1)
     [ordered]@{
         PASS = $passed
         FAIL = $failed
         ACTIVE = $active.Count
         REMAIN = [Math]::Max(0, $ExpectedCount - $passed - $failed)
-        active_dates = @($active | ForEach-Object {
-            [ordered]@{ date=$_.date; status=$_.status; completed_units=[int]$_.completed_units; total_units=[int]$_.total_units }
-        })
+        active_dates = @($active)
+        next_pending = if ($pending.Count) { $pending[0].date } else { $null }
+        last_fail = if ($lastFail.Count) { [ordered]@{ date=$lastFail[0].date; error_summary=$lastFail[0].error_summary } } else { $null }
         complete = (($passed + $failed) -ge $ExpectedCount -and $active.Count -eq 0)
+    }
+}
+
+function Write-ActiveDetail([object]$row) {
+    $done = if ($null -ne $row.major_units_done) { [int]$row.major_units_done } else { [int]$row.completed_units }
+    $total = if ($null -ne $row.major_units_total) { [int]$row.major_units_total } else { [int]$row.total_units }
+    $stage = if ($row.stage) { [string]$row.stage } else { [string]$row.current_stage }
+    Write-Host (" {0} RUN {1,2}/{2}  {3}" -f $row.date,$done,$total,$stage)
+    if ($stage -match '_RESTORATION$') {
+        $round = if ($null -ne $row.restoration_round) { [int]$row.restoration_round } else { 0 }
+        $roundMax = if ($null -ne $row.restoration_round_max) { [int]$row.restoration_round_max } else { 5 }
+        $newCuts = if ($null -ne $row.restoration_new_cuts) { [int]$row.restoration_new_cuts } else { 0 }
+        $totalCuts = if ($null -ne $row.restoration_total_cuts) { [int]$row.restoration_total_cuts } else { 0 }
+        if ($null -ne $row.fresh_slots_done) {
+            Write-Host ("   round {0}/{1} | cuts +{2} / total {3} | Fresh {4}/{5}" -f $round,$roundMax,$newCuts,$totalCuts,$row.fresh_slots_done,$row.fresh_slots_total)
+        } else {
+            Write-Host ("   round {0}/{1} | cuts +{2} / total {3} | {4}" -f $round,$roundMax,$newCuts,$totalCuts,$row.full_milp_status)
+        }
+        return
+    }
+    if ($null -ne $row.fresh_slots_done) {
+        Write-Host ("   Fresh {0}/{1}" -f $row.fresh_slots_done,$row.fresh_slots_total)
+        return
+    }
+    if ($null -ne $row.seed_total) {
+        $parent = if ($null -ne $row.beam_parent_index) { "parent $($row.beam_parent_index)/$($row.beam_parent_total) | " } else { '' }
+        Write-Host ("   {0}{1} | seed {2}/{3} | {4}" -f $parent,$row.search_level,$row.seed_done,$row.seed_total,$row.full_milp_status)
+        return
+    }
+    if ($null -ne $row.candidate_total) {
+        $parent = if ($null -ne $row.beam_parent_index) { "parent $($row.beam_parent_index)/$($row.beam_parent_total) | " } else { '' }
+        $newPart = if ($null -ne $row.candidate_new_total) { " | new $($row.candidate_new_done)/$($row.candidate_new_total)" } else { '' }
+        Write-Host ("   {0}{1} | cand {2}/{3}{4}" -f $parent,$row.search_level,$row.candidate_done,$row.candidate_total,$newPart)
+        return
+    }
+    if ($row.full_milp_status) {
+        Write-Host ("   {0}" -f $row.full_milp_status)
+    } else {
+        Write-Host '   running'
     }
 }
 
@@ -77,7 +118,7 @@ try {
         if ($Json) {
             $view | ConvertTo-Json -Depth 6 -Compress
         } else {
-            Clear-Host
+            if (-not $Once) { Clear-Host }
             Write-Host '=========================================================='
             if ($view.complete) {
                 Write-Host ' V37 MAY LOCKED FINAL - COMPLETE'
@@ -87,7 +128,10 @@ try {
             Write-Host (" PASS  {0}   FAIL  {1}   ACTIVE  {2}   REMAIN  {3}" -f $view.PASS,$view.FAIL,$view.ACTIVE,$view.REMAIN)
             Write-Host '=========================================================='
             foreach ($row in $view.active_dates) {
-                Write-Host (" {0}   RUN   {1,2}/{2}" -f $row.date,$row.completed_units,$row.total_units)
+                Write-ActiveDetail $row
+            }
+            if ($null -ne $view.last_fail) {
+                Write-Host (" LAST FAIL: {0} {1}" -f $view.last_fail.date,$view.last_fail.error_summary)
             }
             Write-Host ''
             Write-Host (" Updated: {0}" -f (Get-Date -Format 'HH:mm:ss'))

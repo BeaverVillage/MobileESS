@@ -34,6 +34,9 @@ from .science import canonical_sha256, git_head, verify_science
 from .storage import attach_context, file_sha, write_case, write_json
 
 
+FRESH_PROGRESS_CALLBACK: Any | None = None
+
+
 def _git(*args: str, repo: Path) -> str:
     return subprocess.check_output(["git", "-C", str(repo), *args], text=True, encoding="utf-8").strip()
 
@@ -196,6 +199,7 @@ def run_case(repo: Path, pass_id: str, day: str, case: str,
             repo=SOURCE_DATA_REPOSITORY, context=electrical,
             voltage=electrical.voltage, trajectory=frozen,
             output=repo / CACHE_ROOT / pass_id / "fresh" / day / case,
+            progress=FRESH_PROGRESS_CALLBACK,
         )
         ended = datetime.now(timezone.utc)
         objective_value = (

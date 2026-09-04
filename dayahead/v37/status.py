@@ -60,10 +60,36 @@ def write_status(
         "completed_units": units,
         "total_units": DAY_TOTAL_UNITS,
         "current_stage": current_stage,
+        "major_units_done": units,
+        "major_units_total": DAY_TOTAL_UNITS,
+        "case": (
+            str(current_stage).split("_", 1)[0]
+            if current_stage and str(current_stage).startswith(("B0_", "B1_", "B2_", "B3_"))
+            else None
+        ),
+        "stage": current_stage,
+        "mess_index": None,
+        "beam_parent_index": None,
+        "beam_parent_total": None,
+        "search_level": None,
+        "candidate_done": None,
+        "candidate_total": None,
+        "candidate_new_done": None,
+        "candidate_new_total": None,
+        "seed_done": None,
+        "seed_total": None,
+        "full_milp_status": None,
+        "restoration_round": None,
+        "restoration_round_max": 5,
+        "restoration_new_cuts": None,
+        "restoration_total_cuts": None,
+        "fresh_slots_done": None,
+        "fresh_slots_total": 96,
         "pass": status == "PASS",
         "fail": status == "FAIL",
         "last_update": datetime.now(timezone.utc).isoformat(),
         "error": error,
+        "error_summary": error,
     }
     if extra:
         payload.update(extra)

@@ -60,6 +60,12 @@ PARENT_ARTIFACT_ROOT = Path(
 STATIC_LIBRARY_COUNT = 2209
 _WORKER: dict[str, object] = {}
 EXECUTION_CACHE_CONTEXT: dict[str, object] | None = None
+PROGRESS_CALLBACK: Callable[[Mapping[str, object]], None] | None = None
+
+
+def _progress(**payload: object) -> None:
+    if PROGRESS_CALLBACK is not None:
+        PROGRESS_CALLBACK(payload)
 
 
 def _json_default(value: object) -> object:
@@ -350,6 +356,8 @@ def _local_search(
     workers: int,
     pool: ProcessPoolExecutor | None = None,
     execution_context: Mapping[str, object] | None = None,
+    parent_index: int = 1,
+    parent_total: int = 1,
 ) -> tuple[list[dict[str, object]], dict[str, object]]:
     search_root = cache / f"s{sequence_index + 1}" / parent.beam_state_id
     search_root.mkdir(parents=True, exist_ok=True)
@@ -396,6 +404,13 @@ def _local_search(
     selected_ids = [stay.candidate_id, *top_move_ids]
     if len(selected_ids) != DEFAULT_K + 1 or len(set(selected_ids)) != DEFAULT_K + 1:
         raise RuntimeError(f"V35R3E_R1_TOPK_ID_CONSERVATION:{case}:{mess_id}")
+    _progress(
+        event="CANDIDATE_SEARCH", case=case, mess_index=sequence_index + 1,
+        parent_index=parent_index, parent_total=parent_total,
+        search_level="FULL" if DEFAULT_K >= len(enumeration.candidates) - 1 else f"K{DEFAULT_K}",
+        candidate_done=0, candidate_total=len(selected_ids),
+        candidate_new_done=0, candidate_new_total=None,
+    )
 
     result_cache = None
     cache_specifications: dict[str, Mapping[str, object]] = {}
@@ -484,6 +499,14 @@ def _local_search(
         voltage_states.update(cuts["voltage"])
         tx_current_states.update(cuts["tx_current"])
         tx_kva_states.update(cuts["tx_kva"])
+        _progress(
+            event="CANDIDATE_SEARCH", case=case, mess_index=sequence_index + 1,
+            parent_index=parent_index, parent_total=parent_total,
+            search_level="FULL" if DEFAULT_K >= len(enumeration.candidates) - 1 else f"K{DEFAULT_K}",
+            candidate_done=len(rows), candidate_total=len(selected_ids),
+            candidate_new_done=cache_misses,
+            candidate_new_total=max(0, len(selected_ids) - len(cached_results)),
+        )
 
     representative_ids = {candidate.candidate_id for candidate in representatives}
     remaining = [
@@ -499,6 +522,14 @@ def _local_search(
         solved[str(row["candidate_id"])] = (row, dispatch)
         if repair["numeric_retry"]:
             numeric_repairs.append({"candidate_id": row["candidate_id"], **repair})
+        _progress(
+            event="CANDIDATE_SEARCH", case=case, mess_index=sequence_index + 1,
+            parent_index=parent_index, parent_total=parent_total,
+            search_level="FULL" if DEFAULT_K >= len(enumeration.candidates) - 1 else f"K{DEFAULT_K}",
+            candidate_done=len(rows), candidate_total=len(selected_ids),
+            candidate_new_done=cache_misses,
+            candidate_new_total=max(0, len(selected_ids) - len(cached_results)),
+        )
 
     dynamic = {
         "fixed_p": fixed_p, "fixed_q": fixed_q,
@@ -548,6 +579,14 @@ def _local_search(
             if repair["numeric_retry"]:
                 numeric_repairs.append({"candidate_id": row["candidate_id"], **repair})
                 actual_numeric_retries += 1
+            _progress(
+                event="CANDIDATE_SEARCH", case=case, mess_index=sequence_index + 1,
+                parent_index=parent_index, parent_total=parent_total,
+                search_level="FULL" if DEFAULT_K >= len(enumeration.candidates) - 1 else f"K{DEFAULT_K}",
+                candidate_done=len(rows), candidate_total=len(selected_ids),
+                candidate_new_done=min(len(remaining), index),
+                candidate_new_total=len(remaining),
+            )
             if index % 50 == 0:
                 print(
                     f"{case} width parent={parent.beam_state_id} {mess_id} "
@@ -585,6 +624,13 @@ def _local_search(
             break
     if not seeds:
         raise RuntimeError(f"V35R3E_R1_NO_FEASIBLE_SEED:{case}:{mess_id}")
+    _progress(
+        event="SEED_READY", case=case, mess_index=sequence_index + 1,
+        parent_index=parent_index, parent_total=parent_total,
+        search_level="FULL" if DEFAULT_K >= len(enumeration.candidates) - 1 else f"K{DEFAULT_K}",
+        candidate_done=len(rows), candidate_total=len(selected_ids),
+        seed_done=0, seed_total=len(seeds),
+    )
     serializable_seeds = [
         {
             key: (_dispatch_json(value, seed["trajectory_signature"]) if key == "dispatch" else value)
@@ -801,12 +847,16 @@ def _run_case(case: str, width: int, workers: int) -> dict[str, object]:
                 beam = [BeamState.from_dict(row) for row in payload["retained_states"]]
                 trace.append(dict(payload["trace"]))
                 all_dedup.extend(payload["dedup_audit"])
+                _progress(
+                    event="STAGE_RESTORED", case=case,
+                    mess_index=sequence_index + 1,
+                )
                 print(f"{case} beam={width} {mess_id} RESTORED", flush=True)
                 continue
 
             parent_diagnostics: list[dict[str, object]] = []
             children: list[BeamState] = []
-            for parent in beam:
+            for parent_index, parent in enumerate(beam, start=1):
                 seeds, local = _local_search(
                     cache=root,
                     case=case,
@@ -821,11 +871,24 @@ def _run_case(case: str, width: int, workers: int) -> dict[str, object]:
                     workers=workers,
                     pool=worker_pool,
                     execution_context=EXECUTION_CACHE_CONTEXT,
+                    parent_index=parent_index,
+                    parent_total=len(beam),
                 )
                 child_ids: list[str] = []
                 full_child_cache_hits = 0
                 full_child_cache_misses = 0
                 for seed in seeds:
+                    _progress(
+                        event="FULL_MILP", case=case,
+                        mess_index=sequence_index + 1,
+                        parent_index=parent_index, parent_total=len(beam),
+                        search_level=(
+                            "FULL" if DEFAULT_K >= int(local["dynamic_feasible_candidates"]) - 1
+                            else f"K{DEFAULT_K}"
+                        ),
+                        seed_done=int(seed["seed_index"]) - 1,
+                        seed_total=len(seeds), full_milp_status="RUNNING",
+                    )
                     child_path = (
                         root / f"s{sequence_index + 1}" / parent.beam_state_id
                         / f"CHILD_{seed['seed_index']}.json"
@@ -897,6 +960,17 @@ def _run_case(case: str, width: int, workers: int) -> dict[str, object]:
                             })
                     children.append(child)
                     child_ids.append(child.beam_state_id)
+                    _progress(
+                        event="FULL_MILP", case=case,
+                        mess_index=sequence_index + 1,
+                        parent_index=parent_index, parent_total=len(beam),
+                        search_level=(
+                            "FULL" if DEFAULT_K >= int(local["dynamic_feasible_candidates"]) - 1
+                            else f"K{DEFAULT_K}"
+                        ),
+                        seed_done=int(seed["seed_index"]),
+                        seed_total=len(seeds), full_milp_status="COMPLETE",
+                    )
                     print(
                         f"{case} beam={width} {mess_id} parent={parent.beam_state_id} "
                         f"seed={seed['seed_index']} rho={child.current_planning_objective}",
