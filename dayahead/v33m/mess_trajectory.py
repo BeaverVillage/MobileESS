@@ -28,6 +28,7 @@ class MessTrajectorySlot:
     route_q10_eta_sec: float
     route_q50_eta_sec: float
     route_q90_eta_sec: float
+    route_safe_eta_sec: float
     travel_slots_15min: int
     connection_ready_slot: int | None
     energy_nominal_kwh: float
@@ -52,6 +53,7 @@ class PlannedMoveCommitment:
     departure_slot: int
     planned_q50_eta_sec: float
     planned_q90_eta_sec: float
+    planned_safe_eta_sec: float
     planned_connection_ready_slot: int
     planned_safe_energy_kwh: float
     execution_rule: str = (
@@ -86,6 +88,7 @@ class MessTrajectory:
                 departure_slot=int(row.departure_slot),
                 planned_q50_eta_sec=row.route_q50_eta_sec,
                 planned_q90_eta_sec=row.route_q90_eta_sec,
+                planned_safe_eta_sec=row.route_safe_eta_sec,
                 planned_connection_ready_slot=int(row.connection_ready_slot),
                 planned_safe_energy_kwh=row.energy_safe_kwh,
             )
@@ -135,7 +138,7 @@ def extract_mess_trajectory(block: MessMobilityBlock) -> MessTrajectory:
             if connected:
                 row = MessTrajectorySlot(
                     mess_id, slot, "CONNECTED", connected[0], None, None, (), None,
-                    0.0, 0.0, 0.0, 0, None, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 0, None, 0.0, 0.0,
                     _number(p_kw), _number(q_kvar), battery,
                     _number(battery / authority.capacity_kwh),
                 )
@@ -159,6 +162,7 @@ def extract_mess_trajectory(block: MessMobilityBlock) -> MessTrajectory:
                     route_q10_eta_sec=route.route_q10_eta_sec,
                     route_q50_eta_sec=route.route_q50_eta_sec,
                     route_q90_eta_sec=route.route_q90_eta_sec,
+                    route_safe_eta_sec=route.route_safe_eta_sec,
                     travel_slots_15min=route.travel_slots_15min,
                     connection_ready_slot=departure + route.connection_ready_slots_15min,
                     energy_nominal_kwh=route.energy_nominal_kwh,

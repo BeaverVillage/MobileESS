@@ -1,0 +1,30 @@
+{
+  "forbidden": [
+    "D-day SCATS Actual",
+    "D-day SUMO realized values",
+    "post-issue refresh",
+    "recursive Actual assimilation"
+  ],
+  "inputs": [
+    "historical seasonal link travel time",
+    "same-time previous-week link travel time",
+    "available D-1 slots 00:00..17:55 only",
+    "recent 24x5-min link state",
+    "recent causal SCATS log intensity",
+    "calendar and frozen directed graph"
+  ],
+  "issue_time": "D-1 18:00 fixed AEST",
+  "links": 509,
+  "max_input_time": "D-1 17:55",
+  "sample_metadata": [
+    "forecast_day",
+    "issue_time",
+    "max_input_timestamp",
+    "target_start",
+    "target_end",
+    "source_days_used"
+  ],
+  "split": "blocked/expanding time; no random dates",
+  "target": "D 00:00..23:55 final_tt_sec",
+  "target_steps": 288
+}

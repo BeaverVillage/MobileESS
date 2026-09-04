@@ -113,7 +113,7 @@ def test_q50_and_q90_sum_same_selected_path():
     assert route.route_q10_eta_sec == 2.0 + 3.0
     assert route.route_q50_eta_sec == 3.0 + 4.0
     assert route.route_q90_eta_sec == 5.0 + 6.0
-    assert SAFE_ETA_AUTHORITY == "DEVELOPMENT_Q90_ONLY_PENDING_CALIBRATION_AUDIT"
+    assert SAFE_ETA_AUTHORITY == "BLOCKED_OOF_ROUTE_RESIDUAL_Q90_ONE_SIDED"
     assert ROUTING_TIME_MODEL == "DEPARTURE_EPOCH_STATIC_FORECAST_SNAPSHOT"
 
 
