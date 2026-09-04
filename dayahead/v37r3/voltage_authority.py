@@ -9,6 +9,7 @@ MESS=0 AC anchor is retained exactly by recomputing the affine constant.
 from __future__ import annotations
 
 from dataclasses import replace
+from datetime import date, timedelta
 import hashlib
 import json
 from pathlib import Path
@@ -25,6 +26,11 @@ AUTHORITY_RELATIVE_PATH = Path(
     "V37_R3_JOINT_VOLTAGE_AUTHORITY.json"
 )
 AUTHORITY_SCHEMA = "V37_R3_JOINT_DIRECTIONAL_AFFINE_VOLTAGE_AUTHORITY_V1"
+APPLICABILITY_RELATIVE_PATH = Path(
+    "dayahead/artifacts/v37_r4_may_campaign_repair/"
+    "V37_R4_MAY_VOLTAGE_APPLICABILITY.json"
+)
+APPLICABILITY_SCHEMA = "V37_R4_MAY_VOLTAGE_APPLICABILITY_V1"
 
 
 def _file_sha256(path: Path) -> str:
@@ -57,6 +63,49 @@ def load_joint_voltage_authority(repo: Path) -> tuple[dict[str, Any], str]:
     return payload, _file_sha256(path)
 
 
+def coefficient_payload_sha256(authority: Mapping[str, Any]) -> str:
+    """Hash coefficient values independently from evaluation-date metadata."""
+
+    payload = {
+        "schema_id": authority.get("schema_id"),
+        "classification": authority.get("classification"),
+        "selectable_service_PCCs": authority.get("selectable_service_PCCs"),
+        "joint_gradients": authority.get("joint_gradients"),
+    }
+    return hashlib.sha256(json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+    ).encode("utf-8")).hexdigest()
+
+
+def load_may_voltage_applicability(
+    repo: Path, authority: Mapping[str, Any], authority_sha: str,
+) -> tuple[dict[str, Any], str]:
+    path = repo.resolve() / APPLICABILITY_RELATIVE_PATH
+    if not path.is_file():
+        raise RuntimeError(f"V37_R4_MAY_APPLICABILITY_MISSING:{path}")
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if payload.get("schema_id") != APPLICABILITY_SCHEMA:
+        raise RuntimeError("V37_R4_MAY_APPLICABILITY_SCHEMA")
+    if payload.get("coefficient_authority_file_sha256") != authority_sha:
+        raise RuntimeError("V37_R4_MAY_APPLICABILITY_AUTHORITY_SHA")
+    if payload.get("coefficient_payload_sha256") != coefficient_payload_sha256(authority):
+        raise RuntimeError("V37_R4_MAY_APPLICABILITY_COEFFICIENT_SHA")
+    expected_dates = tuple(
+        (date(2025, 5, 1) + timedelta(days=offset)).isoformat()
+        for offset in range(31)
+    )
+    if payload.get("authorized_date_count") != 31:
+        raise RuntimeError("V37_R4_MAY_APPLICABILITY_DATE_COUNT")
+    if tuple(payload.get("authorized_dates", ())) != expected_dates:
+        raise RuntimeError("V37_R4_MAY_APPLICABILITY_DATE_AXIS")
+    anchor_map = payload.get("base_voltage_authority_sha256_by_day", {})
+    if set(anchor_map) != set(expected_dates) or any(
+        len(str(anchor_map[day])) != 64 for day in expected_dates
+    ):
+        raise RuntimeError("V37_R4_MAY_APPLICABILITY_ANCHOR_AXIS")
+    return payload, _file_sha256(path)
+
+
 def _entries_by_key(
     authority: Mapping[str, Any],
 ) -> dict[tuple[str, str], Mapping[str, Any]]:
@@ -84,7 +133,13 @@ def joint_repaired_coefficients(repo: Path, electrical: Any) -> tuple[Any, ...]:
 
     authority, authority_sha = load_joint_voltage_authority(repo)
     day = str(electrical.voltage["operating_day"])
-    expected = authority.get("base_voltage_authority_sha256_by_day", {}).get(day)
+    if day.startswith("2025-05-"):
+        applicability, _applicability_sha = load_may_voltage_applicability(
+            repo, authority, authority_sha,
+        )
+        expected = applicability.get("base_voltage_authority_sha256_by_day", {}).get(day)
+    else:
+        expected = authority.get("base_voltage_authority_sha256_by_day", {}).get(day)
     if expected is None:
         raise RuntimeError(f"V37_R3_DAY_NOT_AUTHORIZED:{day}")
     if _file_sha256(Path(electrical.voltage_path)) != str(expected):

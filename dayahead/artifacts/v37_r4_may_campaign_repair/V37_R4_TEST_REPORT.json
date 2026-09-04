@@ -1,0 +1,45 @@
+{
+  "artifact_id": "V37_R4_TEST_REPORT_V1",
+  "focused_pytest": {
+    "command": "python -m pytest -q tests\\dayahead\\test_v37_r3_restore_intended_cuts.py tests\\dayahead\\test_v37_r4_may_campaign_repair.py",
+    "passed": 18,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "coverage": {
+    "restoration_cut_trigger_creation_insertion_arithmetic": "PASS",
+    "voltage_lower_and_upper_paths": "PASS",
+    "line_current_path": "PASS",
+    "transformer_current_path": "PASS",
+    "transformer_kVA_path": "PASS",
+    "trust_region_rho_0_10": "PASS",
+    "P_Q_only_restoration": "PASS",
+    "fixed_discrete_decisions": "PASS",
+    "departure_boundary_occupancy_regression": "PASS",
+    "no_beam_rerun_during_restoration": "PASS",
+    "authority_May01_31_applicability": "PASS",
+    "D1_anchor_31_of_31": "PASS",
+    "AIDC_rule_multiple_May_dates": "PASS",
+    "preflight_fail_closed": "PASS",
+    "launcher_refuses_incomplete_readiness": "PASS"
+  },
+  "production_loader_dry_run": {
+    "expected": 31,
+    "ready": 31,
+    "not_ready": 0,
+    "missing": 0,
+    "optimization_calls": 0,
+    "Gurobi_optimize_calls": 0,
+    "campaign_processes_spawned": 0,
+    "status": "PASS"
+  },
+  "launcher_validate_only": {
+    "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\tools\\v37\\run_may_locked_final.ps1 -ValidateOnly -NoMonitor",
+    "output": "MAY_LAUNCHER_VALIDATION_PASS",
+    "campaign_started": false,
+    "status": "PASS"
+  },
+  "broad_suite_run": false,
+  "MAY_STARTED": "NO",
+  "status": "PASS"
+}

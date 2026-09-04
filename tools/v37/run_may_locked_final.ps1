@@ -1,4 +1,8 @@
-param([switch]$NoMonitor, [switch]$ValidateOnly)
+param(
+    [switch]$NoMonitor,
+    [switch]$ValidateOnly,
+    [string]$ReadinessPathOverride = ''
+)
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
@@ -7,7 +11,11 @@ $statusRoot = Join-Path $artifactRoot 'status'
 $logRoot = Join-Path $projectRoot 'logs\v37_may_locked_final'
 $campaignLock = Join-Path $artifactRoot 'V37_CAMPAIGN.lock.json'
 $monitorScript = Join-Path $PSScriptRoot 'monitor_may.ps1'
-$readinessPath = Join-Path $projectRoot 'dayahead\artifacts\v37_r3_restore_intended_cuts\V37_MAY_FINAL_RUN_READINESS.json'
+$readinessPath = if ($ReadinessPathOverride) {
+    (Resolve-Path -LiteralPath $ReadinessPathOverride).Path
+} else {
+    Join-Path $projectRoot 'dayahead\artifacts\v37_r4_may_campaign_repair\V37_R4_MAY_31DAY_PRODUCTION_PREFLIGHT.json'
+}
 $monitorLock = Join-Path $artifactRoot 'V37_MONITOR.lock.json'
 $launchState = Join-Path $artifactRoot 'V37_MAY_LAUNCH_STATE.json'
 New-Item -ItemType Directory -Force -Path $statusRoot,$logRoot | Out-Null
@@ -37,26 +45,55 @@ function Get-Sha256([string]$Path) {
     }
 }
 
+function Stop-Preflight([string]$Reason) {
+    Write-Host 'MAY_CAMPAIGN_PREFLIGHT_FAIL'
+    throw $Reason
+}
+
 if (-not (Test-Path -LiteralPath $readinessPath)) {
-    throw "READINESS_MANIFEST_MISSING: $readinessPath"
+    Stop-Preflight "READINESS_MANIFEST_MISSING: $readinessPath"
 }
-$ready = Get-Content -LiteralPath $readinessPath -Raw | ConvertFrom-Json
+$ready = Get-Content -LiteralPath $readinessPath -Raw -Encoding UTF8 | ConvertFrom-Json
 if ($ready.MAY_CAMPAIGN_LAUNCH_READY -ne 'YES' -or $ready.MAY_STARTED -ne 'NO') {
-    throw 'MAY_CAMPAIGN_NOT_READY'
+    Stop-Preflight 'MAY_CAMPAIGN_NOT_READY'
 }
-if ([int]$ready.expected_dates -ne 31 -or [int]$ready.runnable_dates -ne 31 -or [int]$ready.missing_dates -ne 0) {
-    throw 'MAY_DATE_MANIFEST_NOT_31_OF_31'
+if (
+    [int]$ready.expected_dates -ne 31 -or
+    [int]$ready.ready_dates -ne 31 -or
+    [int]$ready.not_ready_dates -ne 0 -or
+    [int]$ready.missing_dates -ne 0
+) {
+    Stop-Preflight 'MAY_DATE_MANIFEST_NOT_31_OF_31'
 }
-foreach ($authority in $ready.authority_fingerprints) {
-    $candidate = Join-Path $projectRoot ([string]$authority.path)
-    if (-not (Test-Path -LiteralPath $candidate)) { throw "AUTHORITY_MISSING: $candidate" }
+$dateRows = @($ready.dates)
+if ($dateRows.Count -ne 31 -or @($dateRows | Where-Object { $_.status -ne 'READY' }).Count -ne 0) {
+    Stop-Preflight 'MAY_DATE_ROWS_NOT_31_READY'
+}
+$expectedDateAxis = 1..31 | ForEach-Object { '2025-05-{0:D2}' -f $_ }
+$actualDateAxis = @($dateRows | ForEach-Object { [string]$_.operating_day })
+if ((Compare-Object -ReferenceObject $expectedDateAxis -DifferenceObject $actualDateAxis).Count -ne 0) {
+    Stop-Preflight 'MAY_DATE_AXIS_MISMATCH'
+}
+if ($null -eq $ready.launch_fingerprints -or @($ready.launch_fingerprints).Count -eq 0) {
+    Stop-Preflight 'MAY_LAUNCH_FINGERPRINTS_MISSING'
+}
+foreach ($authority in $ready.launch_fingerprints) {
+    $rawPath = [string]$authority.path
+    $candidate = if ([System.IO.Path]::IsPathRooted($rawPath)) {
+        $rawPath
+    } else {
+        Join-Path $projectRoot $rawPath
+    }
+    if (-not (Test-Path -LiteralPath $candidate)) {
+        Stop-Preflight "AUTHORITY_MISSING: $candidate"
+    }
     $actual = Get-Sha256 $candidate
     if ($actual -ne ([string]$authority.sha256).ToLowerInvariant()) {
-        throw "AUTHORITY_SHA_MISMATCH: $candidate"
+        Stop-Preflight "AUTHORITY_SHA_MISMATCH: $candidate"
     }
 }
 $branch = (& git -C $projectRoot branch --show-current).Trim()
-if ($branch -ne [string]$ready.branch) { throw "WRONG_BRANCH: $branch" }
+if ($branch -ne [string]$ready.branch) { Stop-Preflight "WRONG_BRANCH: $branch" }
 
 $alreadyRunning = $false
 if (Test-Path -LiteralPath $campaignLock) {

@@ -1,0 +1,38 @@
+\ Model v34_integrated_B2_copy
+\ LP format - for model browsing. Use MPS format to capture full model detail.
+\ Signature: 0x3a7efaa975199260
+Minimize
+
+Subject To
+ mess_flow_in[MESS01,22,STA01]: mess_z[MESS01,22,STA01]
+   - mess_stay[MESS01,21,STA01] - mess_move[MESS01,17,STA09,STA01]
+   - mess_move[MESS01,18,IDC02,STA01] - mess_move[MESS01,18,IDC03,STA01]
+   - mess_move[MESS01,18,IDC07,STA01] - mess_move[MESS01,18,IDC11,STA01]
+   - mess_move[MESS01,18,STA07,STA01] - mess_move[MESS01,18,STA08,STA01]
+   - mess_move[MESS01,18,STA09,STA01] - mess_move[MESS01,18,STA10,STA01]
+   - mess_move[MESS01,18,STA11,STA01] - mess_move[MESS01,18,STA12,STA01]
+   - mess_move[MESS01,19,IDC04,STA01] - mess_move[MESS01,19,IDC06,STA01]
+   - mess_move[MESS01,19,IDC08,STA01] - mess_move[MESS01,19,IDC09,STA01]
+   - mess_move[MESS01,19,IDC10,STA01] - mess_move[MESS01,19,STA05,STA01]
+   - mess_move[MESS01,19,STA06,STA01] - mess_move[MESS01,20,IDC01,STA01]
+   - mess_move[MESS01,20,IDC05,STA01] - mess_move[MESS01,20,IDC12,STA01]
+   - mess_move[MESS01,20,STA02,STA01] - mess_move[MESS01,20,STA03,STA01]
+   = 0
+Bounds
+ mess_z[MESS01,22,STA01] = 0
+ mess_stay[MESS01,21,STA01] = 1
+Binaries
+ mess_z[MESS01,22,STA01] mess_stay[MESS01,21,STA01]
+ mess_move[MESS01,17,STA09,STA01] mess_move[MESS01,18,IDC02,STA01]
+ mess_move[MESS01,18,IDC03,STA01] mess_move[MESS01,18,IDC07,STA01]
+ mess_move[MESS01,18,IDC11,STA01] mess_move[MESS01,18,STA07,STA01]
+ mess_move[MESS01,18,STA08,STA01] mess_move[MESS01,18,STA09,STA01]
+ mess_move[MESS01,18,STA10,STA01] mess_move[MESS01,18,STA11,STA01]
+ mess_move[MESS01,18,STA12,STA01] mess_move[MESS01,19,IDC04,STA01]
+ mess_move[MESS01,19,IDC06,STA01] mess_move[MESS01,19,IDC08,STA01]
+ mess_move[MESS01,19,IDC09,STA01] mess_move[MESS01,19,IDC10,STA01]
+ mess_move[MESS01,19,STA05,STA01] mess_move[MESS01,19,STA06,STA01]
+ mess_move[MESS01,20,IDC01,STA01] mess_move[MESS01,20,IDC05,STA01]
+ mess_move[MESS01,20,IDC12,STA01] mess_move[MESS01,20,STA02,STA01]
+ mess_move[MESS01,20,STA03,STA01]
+End

@@ -18,9 +18,107 @@ from dayahead.v36.aidc import (
 from dayahead.v36.contracts import AEST, GPU_CAPACITY, PF, RW_IT_REFERENCE_KW, SCIENCE_AUTHORITIES, SLOTS
 
 from .contracts import (
-    CENTER_SWING_W_PER_GPU, EXPANDED_TEMPORAL_JOBS,
-    PARTIAL_SHARED_TEMPORAL_JOBS, SOURCE_DATA_REPOSITORY,
+    CENTER_SWING_W_PER_GPU, SOURCE_DATA_REPOSITORY,
 )
+
+
+COHORT_CONSTRUCTION_RULE_ID = "V37_R4_FROZEN_AIDC_COHORT_RULE_V1"
+TEMPORAL_WORKLOAD_CLASSES = frozenset({
+    "NORMAL_QUEUE_CONTROLLED", "STANDBY_QUEUE_CONTROLLED",
+})
+
+
+def validate_cohort_contract(ledger: pd.DataFrame, day: str) -> dict[str, Any]:
+    """Validate the frozen cohort-construction rule without freezing a count."""
+
+    required = {
+        "job_id", "state_at_issue", "workload_class", "requested_GPUs",
+        "requested_nodes", "requested_walltime_seconds", "duration_authority",
+        "RSP_duration_slots",
+        "temporal_flexible", "PARTIAL_shared", "template_operating_day",
+        "evaluation_operating_day", "known_running_start",
+    }
+    missing = sorted(required - set(ledger.columns))
+    if missing:
+        raise RuntimeError(f"V37_R4_AIDC_COHORT_COLUMNS:{missing}")
+    job_ids = ledger["job_id"].astype(str)
+    if job_ids.eq("").any() or job_ids.duplicated().any():
+        raise RuntimeError("V37_R4_AIDC_COHORT_JOB_ID_UNIQUENESS")
+    states = ledger["state_at_issue"].astype(str)
+    unknown_states = sorted(set(states) - {"RUNNING", "PENDING"})
+    if unknown_states:
+        raise RuntimeError(f"V37_R4_AIDC_COHORT_STATE:{unknown_states}")
+    requested_gpus = ledger["requested_GPUs"].to_numpy(float)
+    requested_nodes = ledger["requested_nodes"].to_numpy(float)
+    requested_walltime = ledger["requested_walltime_seconds"].to_numpy(float)
+    rsp_duration_slots = ledger["RSP_duration_slots"].to_numpy(float)
+    if (
+        not np.isfinite(requested_gpus).all()
+        or not np.isfinite(requested_nodes).all()
+        or not np.isfinite(requested_walltime).all()
+        or not np.isfinite(rsp_duration_slots).all()
+        or np.any(requested_gpus <= 0.0)
+        or np.any(requested_nodes <= 0.0)
+        or np.any(requested_walltime <= 0.0)
+        or np.any(rsp_duration_slots <= 0.0)
+    ):
+        raise RuntimeError("V37_R4_AIDC_COHORT_RESOURCE_OR_RUNTIME")
+    expected_temporal = ledger["workload_class"].isin(TEMPORAL_WORKLOAD_CLASSES)
+    if not ledger["temporal_flexible"].astype(bool).equals(expected_temporal):
+        raise RuntimeError("V37_R4_AIDC_COHORT_TEMPORAL_RULE")
+    expected_partial = ledger["requested_GPUs"] < 4 * ledger["requested_nodes"]
+    if not ledger["PARTIAL_shared"].astype(bool).equals(expected_partial):
+        raise RuntimeError("V37_R4_AIDC_COHORT_PARTIAL_RULE")
+    if not ledger["evaluation_operating_day"].astype(str).eq(day).all():
+        raise RuntimeError("V37_R4_AIDC_COHORT_EVALUATION_DAY")
+    if not ledger["template_operating_day"].astype(str).eq("2025-04-01").all():
+        raise RuntimeError("V37_R4_AIDC_COHORT_TEMPLATE_DAY")
+    running = states.eq("RUNNING")
+    pending = states.eq("PENDING")
+    if ledger.loc[running, "known_running_start"].isna().any():
+        raise RuntimeError("V37_R4_AIDC_COHORT_RUNNING_START")
+    if ledger.loc[pending, "known_running_start"].notna().any():
+        raise RuntimeError("V37_R4_AIDC_COHORT_PENDING_START")
+    duration = ledger["duration_authority"].astype(str)
+    if not duration.loc[running].eq("REQUESTED_REMAINING").all():
+        raise RuntimeError("V37_R4_AIDC_COHORT_RUNNING_RUNTIME_AUTHORITY")
+    if not duration.loc[pending].isin({
+        "SAFE_CAUSAL_RUNTIME_PENDING", "REQUESTED_WALLTIME_FAIL_CLOSED",
+    }).all():
+        raise RuntimeError("V37_R4_AIDC_COHORT_PENDING_RUNTIME_AUTHORITY")
+    temporal = ledger["temporal_flexible"].astype(bool)
+    partial = ledger["PARTIAL_shared"].astype(bool)
+    fallback = ledger["duration_authority"].eq("REQUESTED_WALLTIME_FAIL_CLOSED")
+    rsp_gpu_hours = (
+        ledger.loc[temporal, "requested_GPUs"].to_numpy(float)
+        * ledger.loc[temporal, "RSP_duration_slots"].to_numpy(float)
+        * 0.25
+    )
+    requested_gpu_hours = (
+        ledger.loc[temporal, "requested_GPUs"].to_numpy(float)
+        * ledger.loc[temporal, "requested_walltime_seconds"].to_numpy(float)
+        / 3600.0
+    )
+    return {
+        "rule_id": COHORT_CONSTRUCTION_RULE_ID,
+        "operating_day": day,
+        "D_minus_1_issue_time": (
+            datetime.fromisoformat(day).replace(tzinfo=AEST) - timedelta(hours=6)
+        ).isoformat(),
+        "scheduler_source": "FROZEN_APR01_RW_AND_RSP_TEMPLATE",
+        "source_trace_window": "APR01_AUTHORITY_PRESERVED_FOR_MAY_EVALUATION",
+        "total_jobs": int(len(ledger)),
+        "running_jobs": int(running.sum()),
+        "pending_jobs": int(pending.sum()),
+        "temporal_controllable_jobs": int(temporal.sum()),
+        "PARTIAL_shared_temporal_jobs": int((partial & temporal).sum()),
+        "unknown_GPU_request_exclusions": 0,
+        "fail_closed_exclusions": int((fallback & ~temporal).sum()),
+        "temporal_requested_GPU_hours": float(requested_gpu_hours.sum()),
+        "temporal_RSP_duration_GPU_hours": float(rsp_gpu_hours.sum()),
+        "no_double_counting": True,
+        "rule_validation": "PASS",
+    }
 
 
 def build_day(repo: Path, day: str, case: str) -> AIDCTrajectory:
@@ -114,10 +212,7 @@ def build_day(repo: Path, day: str, case: str) -> AIDCTrajectory:
     ledger["coverage_fallback_status"] = np.where(
         ledger["duration_authority"].eq("REQUESTED_WALLTIME_FAIL_CLOSED"), "FALLBACK", "COVERED"
     )
-    if int(ledger["temporal_flexible"].sum()) != EXPANDED_TEMPORAL_JOBS:
-        raise RuntimeError("V37_EXPANDED_JOB_COUNT")
-    if int((ledger["PARTIAL_shared"] & ledger["temporal_flexible"]).sum()) != PARTIAL_SHARED_TEMPORAL_JOBS:
-        raise RuntimeError("V37_PARTIAL_SHARED_JOB_COUNT")
+    validate_cohort_contract(ledger, day)
     return AIDCTrajectory(
         day, power, ledger, pd.DataFrame(rows), pcc_p, pcc_q,
         str(SCIENCE_AUTHORITIES["AIDC"]["sha256"]),

@@ -1,0 +1,122 @@
+{
+  "IIS_constraint_names": [
+    "mess_flow_in[MESS01,22,STA01]"
+  ],
+  "IIS_cut_details": [],
+  "IIS_ilp_sha256": "f2ebc0f92c493cdb448262f3228e5bf2bd3aa0195577c8fdb927f44c4f961e1d",
+  "IIS_ilp_supported": true,
+  "IIS_variable_bounds": [
+    "mess_z[MESS01,22,STA01] = 0",
+    "mess_stay[MESS01,21,STA01] = 1"
+  ],
+  "artifact_id": "V37_R4_MAY01_B2_RESTORATION_IIS_V1",
+  "beam_result": "dayahead/cache/v37_may_locked_final/MAY_2025_LOCKED_FINAL/beam/ece1c70fd0330eabdc41ae9fc3981e668dba1fb1a164d666e2bfff36528b5474/2025-05-01/B2/B2/FINAL_RESULT.json",
+  "beam_result_sha256": "e8bee1403b2625891ce1c12e4dc82c3565036828bee0c8faad9da8fe3846830d",
+  "case": "B2",
+  "cut_count": 4,
+  "day": "2025-05-01",
+  "post_repair_decomposition": [
+    {
+      "IIS_path": null,
+      "case": "CASE_A_BASE_ONLY",
+      "cuts_enabled": false,
+      "feasible": true,
+      "fixed_discrete_MESS_decisions": true,
+      "objective": 0.5751244254994975,
+      "restoration_cut_count": 0,
+      "solve_seconds": 10.612024700036272,
+      "solver_status": "OPTIMAL",
+      "trajectory_discrete_signature_preserved": true,
+      "trust_region_constraint_count": 0,
+      "trust_region_enabled": false
+    },
+    {
+      "IIS_path": null,
+      "case": "CASE_B_TRUST_REGION_ONLY",
+      "cuts_enabled": false,
+      "feasible": true,
+      "fixed_discrete_MESS_decisions": true,
+      "objective": 0.5751286507162703,
+      "restoration_cut_count": 0,
+      "solve_seconds": 10.596951300045475,
+      "solver_status": "OPTIMAL",
+      "trajectory_discrete_signature_preserved": true,
+      "trust_region_constraint_count": 384,
+      "trust_region_enabled": true
+    },
+    {
+      "IIS_path": null,
+      "case": "CASE_C_RESTORATION_CUTS_ONLY",
+      "cuts_enabled": true,
+      "feasible": true,
+      "fixed_discrete_MESS_decisions": true,
+      "objective": 0.5750068365116641,
+      "restoration_cut_count": 4,
+      "solve_seconds": 20.262830999912694,
+      "solver_status": "OPTIMAL",
+      "trajectory_discrete_signature_preserved": true,
+      "trust_region_constraint_count": 0,
+      "trust_region_enabled": false
+    },
+    {
+      "IIS_path": null,
+      "case": "CASE_D_CUTS_PLUS_TRUST_REGION",
+      "cuts_enabled": true,
+      "feasible": true,
+      "fixed_discrete_MESS_decisions": true,
+      "objective": 0.5750068562187066,
+      "restoration_cut_count": 4,
+      "solve_seconds": 21.744307999964803,
+      "solver_status": "OPTIMAL",
+      "trajectory_discrete_signature_preserved": true,
+      "trust_region_constraint_count": 384,
+      "trust_region_enabled": true
+    }
+  ],
+  "pre_repair_decomposition": [
+    {
+      "case": "CASE_A_BASE_ONLY",
+      "feasible": false,
+      "primary_IIS_constraint": "mess_flow_in[MESS01,22,STA01]",
+      "primary_IIS_variable_bounds": [
+        "mess_z[MESS01,22,STA01] = 0",
+        "mess_stay[MESS01,21,STA01] = 1"
+      ],
+      "solver_status": "GUROBI_STATUS_3_INFEASIBLE"
+    },
+    {
+      "case": "CASE_B_TRUST_REGION_ONLY",
+      "feasible": false,
+      "primary_IIS_constraint": "mess_flow_in[MESS01,22,STA01]",
+      "primary_IIS_variable_bounds": [
+        "mess_z[MESS01,22,STA01] = 0",
+        "mess_stay[MESS01,21,STA01] = 1"
+      ],
+      "solver_status": "GUROBI_STATUS_3_INFEASIBLE"
+    },
+    {
+      "case": "CASE_C_RESTORATION_CUTS_ONLY",
+      "feasible": false,
+      "primary_IIS_constraint": "mess_flow_in[MESS01,22,STA01]",
+      "primary_IIS_variable_bounds": [
+        "mess_z[MESS01,22,STA01] = 0",
+        "mess_stay[MESS01,21,STA01] = 1"
+      ],
+      "solver_status": "GUROBI_STATUS_3_INFEASIBLE"
+    },
+    {
+      "case": "CASE_D_CUTS_PLUS_TRUST_REGION",
+      "feasible": false,
+      "primary_IIS_constraint": "mess_flow_in[MESS01,22,STA01]",
+      "primary_IIS_variable_bounds": [
+        "mess_z[MESS01,22,STA01] = 0",
+        "mess_stay[MESS01,21,STA01] = 1"
+      ],
+      "solver_status": "GUROBI_STATUS_3_INFEASIBLE"
+    }
+  ],
+  "restoration_round": 1,
+  "saved_Fresh_schedule_sha256": "7c99e797465fe7f6260babe18a7e5f60a9afae3d7d4d59055630bacc379e8efd",
+  "selected_trajectory_sha256": "f3496788aec0642228fb7d678f7a8dd5ebf3ecc6b529b5aa8becee9dffed2fed",
+  "violation_count": 4
+}

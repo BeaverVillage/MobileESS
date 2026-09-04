@@ -36,6 +36,7 @@ from .execution_acceleration import (
 )
 from .status import atomic_json, read_json, write_status
 from dayahead.v37r3.voltage_authority import (
+    APPLICABILITY_RELATIVE_PATH,
     AUTHORITY_RELATIVE_PATH,
     joint_repaired_coefficients,
 )
@@ -90,6 +91,8 @@ def case_execution_fingerprint(
     """Fingerprint every science/config input that permits exact case reuse."""
 
     authority_path = repo / AUTHORITY_RELATIVE_PATH
+    applicability_path = repo / APPLICABILITY_RELATIVE_PATH
+    aidc_contract_path = repo / "dayahead/v37/aidc.py"
     aidc_sha = canonical_sha256({
         "contract_sha256": str(aidc.contract_sha256),
         "P_sha256": hashlib.sha256(np.asarray(aidc.pcc_p_kw, dtype=float).tobytes()).hexdigest(),
@@ -114,6 +117,10 @@ def case_execution_fingerprint(
     })
     cache_key = (day, case, canonical_sha256({
         "joint_authority": file_sha(authority_path),
+        "may_applicability": file_sha(applicability_path),
+        "aidc_cohort_contract": file_sha256(aidc_contract_path),
+        "voltage_anchor": file_sha(voltage_path),
+        "current_anchor": file_sha(current_path),
         "cut": cut_fingerprint,
     }))
     cached = _FINGERPRINT_CACHE.get(cache_key)
@@ -124,10 +131,12 @@ def case_execution_fingerprint(
         "operating_day": day,
         "case": case,
         "voltage_authority_sha256": file_sha(authority_path),
+        "voltage_applicability_sha256": file_sha(applicability_path),
         "restoration_cut_contract_sha256": file_sha(cut_contract_path),
         "restoration_cut_implementation_sha256": file_sha256(cut_implementation_path),
         "restoration_cut_fingerprint_sha256": cut_fingerprint,
         "AIDC_authority_sha256": aidc_sha,
+        "AIDC_cohort_contract_sha256": file_sha256(aidc_contract_path),
         "MESS_authority_sha256": MESS_HEAD,
         "K": DEFAULT_K,
         "K_fallback": list(K_FALLBACK),
@@ -143,6 +152,7 @@ def case_execution_fingerprint(
             relative: file_sha256(repo / relative)
             for relative in (
                 "dayahead/v37/runner.py",
+                "dayahead/v37/aidc.py",
                 "dayahead/v37/execution_acceleration.py",
                 "dayahead/v37/voltage_fidelity.py",
                 "dayahead/tools/run_v35r3e_r1_beam.py",

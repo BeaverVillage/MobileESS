@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+from pathlib import Path
 import time
 from typing import Mapping, Sequence
 
@@ -155,23 +156,36 @@ def _fix_discrete_trajectory_and_load_start(
         variable.LB = value
         variable.UB = value
         variable.Start = value
+    stay_values: dict[tuple[str, int, str], float] = {}
     for (mess_id, slot, service), variable in block.stay.items():
         row = rows[mess_id, int(slot)]
         value = float(row.mode == "CONNECTED" and row.service_id == service)
         variable.LB = value
         variable.UB = value
         variable.Start = value
+        stay_values[mess_id, int(slot), service] = value
+    occupancy_values: dict[tuple[str, int, str], float] = {}
+    for mess_id in block.inputs.mess_ids:
+        for service in block.inputs.route_table.service_ids:
+            occupancy_values[mess_id, 0, service] = float(
+                service == block.inputs.initial_service_by_mess[mess_id]
+            )
+        for boundary in range(1, block.inputs.horizon_slots + 1):
+            for service in block.inputs.route_table.service_ids:
+                value = stay_values[mess_id, boundary - 1, service]
+                value += sum(
+                    1.0
+                    for key in selected_moves
+                    if key[0] == mess_id
+                    and key[3] == service
+                    and key[1] + block.move_route[key].connection_ready_slots_15min
+                    == boundary
+                )
+                if value not in {0.0, 1.0}:
+                    raise ValueError("V37_R4_FIXED_DISCRETE_OCCUPANCY_NOT_BINARY")
+                occupancy_values[mess_id, boundary, service] = value
     for (mess_id, boundary, service), variable in block.occupancy.items():
-        if boundary < block.inputs.horizon_slots:
-            row = rows[mess_id, int(boundary)]
-            value = float(row.mode == "CONNECTED" and row.service_id == service)
-        else:
-            last = rows[mess_id, block.inputs.horizon_slots - 1]
-            if last.mode == "CONNECTED":
-                terminal_service = last.service_id
-            else:
-                terminal_service = last.destination_service_id
-            value = float(terminal_service == service)
+        value = occupancy_values[mess_id, int(boundary), service]
         variable.LB = value
         variable.UB = value
         variable.Start = value
@@ -202,6 +216,9 @@ def _add_restoration_cuts(
     control_names: Sequence[str],
     expressions_by_slot: Sequence[Sequence[object]],
     restoration_cuts: Sequence[RestorationCut],
+    *,
+    include_cuts: bool = True,
+    include_trust_region: bool = True,
 ) -> tuple[tuple[gp.Constr, ...], int]:
     """Insert the frozen V17 same-slot affine cuts and trust regions."""
 
@@ -222,19 +239,24 @@ def _add_restoration_cuts(
             float(coefficient) * (expressions[index] - float(cut.anchor_controls[index]))
             for index, coefficient in enumerate(cut.coefficients)
         )
-        if cut.relation == "<=":
-            row = model.addConstr(
-                affine <= float(cut.hard_limit) - float(cut.margin),
-                name=f"fresh_ac_restoration_upper[{cut_index},{cut.slot}]",
-            )
-        elif cut.relation == ">=":
-            row = model.addConstr(
-                affine >= float(cut.hard_limit) + float(cut.margin),
-                name=f"fresh_ac_restoration_lower[{cut_index},{cut.slot}]",
-            )
-        else:
+        if include_cuts:
+            if cut.relation == "<=":
+                row = model.addConstr(
+                    affine <= float(cut.hard_limit) - float(cut.margin),
+                    name=f"fresh_ac_restoration_upper[{cut_index},{cut.slot}]",
+                )
+            elif cut.relation == ">=":
+                row = model.addConstr(
+                    affine >= float(cut.hard_limit) + float(cut.margin),
+                    name=f"fresh_ac_restoration_lower[{cut_index},{cut.slot}]",
+                )
+            else:
+                raise RuntimeError("V17_AC_RESTORATION_CUT_RELATION_INVALID")
+            cut_rows.append(row)
+        elif cut.relation not in {"<=", ">="}:
             raise RuntimeError("V17_AC_RESTORATION_CUT_RELATION_INVALID")
-        cut_rows.append(row)
+        if not include_trust_region:
+            continue
         for control_index, radius in enumerate(cut.local_radius):
             if float(radius) <= 0.0:
                 continue
@@ -564,6 +586,9 @@ def solve_integrated_mess(
     preferred_restricted_start: Mapping[str, object] | None = None,
     restoration_cuts: Sequence[RestorationCut] = (),
     fixed_discrete_trajectory: MessTrajectory | None = None,
+    restoration_include_cuts: bool = True,
+    restoration_include_trust_region: bool = True,
+    infeasible_iis_path: Path | None = None,
 ) -> IntegratedMessResult:
     if case not in {"B2", "B3"}:
         raise ValueError("V34_INTEGRATED_MESS_ONLY_FOR_B2_B3")
@@ -797,6 +822,8 @@ def solve_integrated_mess(
 
     cut_rows, trust_region_constraint_count = _add_restoration_cuts(
         model, controls, expressions_by_slot, restoration_cuts,
+        include_cuts=restoration_include_cuts,
+        include_trust_region=restoration_include_trust_region,
     )
     grid_constraints += len(cut_rows) + trust_region_constraint_count
 
@@ -904,6 +931,11 @@ def solve_integrated_mess(
     solve_seconds = time.perf_counter() - solve_started
     accepted_statuses = {GRB.OPTIMAL, GRB.WORK_LIMIT, GRB.TIME_LIMIT, GRB.SUBOPTIMAL}
     if model.Status not in accepted_statuses or model.SolCount < 1:
+        if model.Status == GRB.INFEASIBLE and infeasible_iis_path is not None:
+            target = Path(infeasible_iis_path)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            model.computeIIS()
+            model.write(str(target))
         raise RuntimeError(f"V34_INTEGRATED_MESS_SOLVER_STATUS:{model.Status}")
     if math.isfinite(quality_bound) and float(model.ObjVal) > quality_bound + RESOLVED_OBJECTIVE_TOLERANCE:
         raise RuntimeError("V35_MESS_FULL_MODEL_WORSE_THAN_RESTRICTED_INCUMBENT")
@@ -938,7 +970,8 @@ def solve_integrated_mess(
         dtype=float,
     )
     cut_arithmetic: list[Mapping[str, object]] = []
-    for cut_index, (cut, row) in enumerate(zip(restoration_cuts, cut_rows, strict=True)):
+    applied_cuts = tuple(restoration_cuts) if restoration_include_cuts else ()
+    for cut_index, (cut, row) in enumerate(zip(applied_cuts, cut_rows, strict=True)):
         values = numeric_controls[int(cut.slot)]
         lhs = float(cut.actual_value) + float(
             np.asarray(cut.coefficients, dtype=float)
@@ -1000,7 +1033,7 @@ def solve_integrated_mess(
         preferred_restricted_objective=preferred_objective,
         selected_restricted_start=selected_start,
         preferred_mip_start_loaded=preferred_loaded,
-        restoration_cut_count=len(restoration_cuts),
+        restoration_cut_count=len(applied_cuts),
         restoration_trust_region_constraint_count=trust_region_constraint_count,
         restoration_cut_arithmetic=tuple(cut_arithmetic),
         fixed_discrete_MESS_decisions=fixed_discrete,
