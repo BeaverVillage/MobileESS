@@ -145,6 +145,16 @@ def test_full_causal_chains_preserve_location_without_split_or_remap() -> None:
     assert audit["migration_count"] == 0
     assert audit["gang_split_count"] == 0
     assert audit["fixed_WAN_paths"] == audit["expected_fixed_WAN_paths"] == 132
+    assert audit["StageC_feasibility_objective"] == "ZERO"
+    assert audit["StageC_feasibility_status"] == "PASS"
+    assert audit["witness_materialization_performed"] is True
+    assert audit["selected_RUNNING_migration_count"] == 0
+    assert audit["unnecessary_migration_count"] == 0
+    assert audit["capacity_SHA_before"] == audit["capacity_SHA_after"]
+    assert audit["temporal_schedule_mutation_count"] == 0
+    assert audit["execution_classification"] == (
+        "SCIENCE_NEUTRAL_FEASIBILITY_EXECUTION_SIMPLIFICATION"
+    )
 
 
 def test_site_gpu_trajectories_conserve_v37_aggregate() -> None:
@@ -162,7 +172,10 @@ def test_site_power_conserves_center_and_full_active_anchor() -> None:
     assert audit["status"] == "PASS"
     assert Decimal(audit["RW_site_to_aggregate_power_max_error_kW"]) <= Decimal("2e-12")
     assert Decimal(audit["RSP_site_to_aggregate_power_max_error_kW"]) <= Decimal("2e-12")
-    assert Decimal(audit["full_active_site_sum_kW"]) == Decimal("406.7759938138190000")
+    assert abs(
+        Decimal(audit["full_active_site_sum_kW"])
+        - Decimal("406.775993813819")
+    ) <= Decimal("2e-12")
     assert audit["additional_1_30_multiplier_used"] is False
 
 

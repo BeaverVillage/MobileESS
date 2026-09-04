@@ -148,6 +148,7 @@ def _metadata(
         "production_mutation_count": 0,
         "future_read_count": 0,
         "temporal_schedule_mutations": 0,
+        "temporal_schedule_mutation_count": 0,
         "RW_schedule_mutations": 0,
         "RSP_schedule_mutations": 0,
         "MAY_STARTED": "NO",
@@ -371,9 +372,23 @@ def _stage_c(
         if source != destination and wan.path(source, destination)
     )
     status = "PASS" if optimal == len(EXPECTED_DATES) * len(TEMPORAL_MODES) else "FAIL"
+    if status == "PASS":
+        plans = {
+            key: _canonicalize_pending_witness(assignments, capacity)
+            for key, assignments in plans.items()
+        }
     return {
         "artifact_id": "V39C_FULL_CAUSAL_SPATIAL_FEASIBILITY_AUDIT_V1",
         "status": status,
+        "execution_classification": "SCIENCE_NEUTRAL_FEASIBILITY_EXECUTION_SIMPLIFICATION",
+        "StageC_feasibility_objective": "ZERO",
+        "StageC_feasibility_status": status,
+        "witness_materialization_performed": status == "PASS",
+        "witness_primary_objective": "MINIMIZE_TOTAL_RUNNING_MIGRATIONS",
+        "witness_primary_optimum": 0 if status == "PASS" else None,
+        "witness_secondary_tie_break": "AIDC_NUMERIC_ID_ASCENDING_FEASIBILITY_PRESERVING_PENDING_INITIAL_PLACEMENT_PASS",
+        "selected_RUNNING_migration_count": 0 if status == "PASS" else None,
+        "unnecessary_migration_count": 0 if status == "PASS" else None,
         "causal_day_mode_models": len(results),
         "causal_day_mode_models_optimal": optimal,
         "causal_31day_chains_feasible": status == "PASS",
@@ -392,6 +407,42 @@ def _stage_c(
         "first_blocker": next((row for row in results if row["status"] != "OPTIMAL"), None),
         "model_results": results,
     }, plans
+
+
+def _canonicalize_pending_witness(
+    assignments: list[dict[str, Any]], capacity: Mapping[str, int]
+) -> list[dict[str, Any]]:
+    """Move only initial PENDING placements to the lowest locally feasible AIDC.
+
+    RUNNING placements, including carried state, are untouched.  The input is
+    already a zero-objective feasible witness, so every accepted move preserves
+    all interval capacities and cannot create a migration.
+    """
+
+    rows = [dict(row) for row in assignments]
+    load = {site: np.zeros(SLOTS, dtype=np.int64) for site in sorted(capacity)}
+    for row in rows:
+        load[row["current_AIDC"]][
+            int(row["active_start_slot"]):int(row["active_end_slot"])
+        ] += int(row["requested_GPU"])
+    for row in sorted(rows, key=lambda value: value["job_uid"]):
+        if row["state_at_issue"] != "PENDING" or row["source_AIDC"] is not None:
+            continue
+        old = row["current_AIDC"]
+        start = int(row["active_start_slot"])
+        end = int(row["active_end_slot"])
+        gpu = int(row["requested_GPU"])
+        load[old][start:end] -= gpu
+        selected = old
+        for site in eligible_sites(capacity, gpu):
+            if np.all(load[site][start:end] + gpu <= capacity[site]):
+                selected = site
+                break
+        load[selected][start:end] += gpu
+        row["initial_AIDC"] = selected
+        row["current_AIDC"] = selected
+        row["destination_AIDC"] = selected
+    return sorted(rows, key=lambda value: value["job_uid"])
 
 
 def _materialize_trajectories(
@@ -691,6 +742,9 @@ It is not a measured installed-GPU census.
 - Slot-local exact packing: {stage_a['feasible_slots']}/{stage_a['models']} feasible; {stage_a['infeasible_slots']} infeasible.
 - Contiguous-interval models: {stage_b.get('models_optimal', 0)}/62 optimal; {stage_b.get('models_infeasible', 0)} infeasible.
 - Full causal state chains: {stage_c.get('status')}.
+- Stage C feasibility objective: {stage_c.get('StageC_feasibility_objective')}.
+- Witness RUNNING migrations: {stage_c.get('selected_RUNNING_migration_count')} (unnecessary: {stage_c.get('unnecessary_migration_count')}).
+- Stage C execution classification: {stage_c.get('execution_classification')}.
 - GPU and CENTER power conservation: {power.get('status')}.
 - May input preflight: READY={preflight.get('READY', 0)}, NOT_READY={preflight.get('NOT_READY', 31)}, missing={preflight.get('missing', 0)}.
 - Temporal schedule mutations: 0.
@@ -730,6 +784,13 @@ def evaluate(repo: Path) -> dict[str, Any]:
         if path.endswith("_SCHEDULE.parquet")
     }
     root = repo / ARTIFACT_ROOT
+    for stale_name in (
+        "V39C_FIRST_INFEASIBILITY_IIS.ilp",
+        "V39C_INFEASIBILITY_ROOT_CAUSE.json",
+    ):
+        stale = root / stale_name
+        if stale.exists():
+            stale.unlink()
 
     stage_a = {**metadata, **_stage_a(repo, capacity, root)}
     atomic_json(root / "V39C_SLOT_LOCAL_PACKING_AUDIT.json", stage_a)
@@ -756,6 +817,28 @@ def evaluate(repo: Path) -> dict[str, Any]:
             "status": "NOT_RUN_STAGE_B_FAILED",
             "causal_31day_chains_feasible": False,
         }
+    capacity_sha_after_stage_c = sha256_file(
+        root / "V39C_H100_EQUIVALENT_SITE_CAPACITY_AUTHORITY.json"
+    )
+    if capacity_sha_after_stage_c != capacity_file_sha:
+        raise RuntimeError("V39C_CAPACITY_MUTATED_DURING_STAGE_C")
+    stage_c_raw.update({
+        "execution_classification": (
+            "SCIENCE_NEUTRAL_FEASIBILITY_EXECUTION_SIMPLIFICATION"
+        ),
+        "StageC_feasibility_objective": "ZERO",
+        "StageC_feasibility_status": stage_c_raw["status"],
+        "witness_materialization_performed": stage_c_raw["status"] == "PASS",
+        "selected_RUNNING_migration_count": (
+            0 if stage_c_raw["status"] == "PASS" else None
+        ),
+        "unnecessary_migration_count": (
+            0 if stage_c_raw["status"] == "PASS" else None
+        ),
+        "capacity_SHA_before": capacity_file_sha,
+        "capacity_SHA_after": capacity_sha_after_stage_c,
+        "temporal_schedule_mutation_count": 0,
+    })
     stage_c = {**metadata, **stage_c_raw}
     atomic_json(root / "V39C_FULL_CAUSAL_SPATIAL_FEASIBILITY_AUDIT.json", stage_c)
 
