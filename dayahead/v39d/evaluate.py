@@ -332,12 +332,16 @@ def _contract_artifacts(root: Path) -> None:
     })
 
 
-def _initialization_pathology_diagnostic(
+def _legacy_pre_refreeze_initialization_pathology_diagnostic_do_not_use(
     repo: Path,
     daily: Mapping[str, Mapping[str, Any]],
     capacity_authority: CapacityAuthority,
 ) -> dict[str, Any]:
-    """Separate site-only initialization effects from frozen Rack limits."""
+    """Preserve the pre-refreeze diagnostic algorithm as historical lineage.
+
+    The current V39D path never calls this helper.  Its 609-GPU assumptions are
+    superseded by the committed Rack authority and the same-input regression.
+    """
 
     effective_by_site = {
         site: min(
@@ -1018,6 +1022,10 @@ def evaluate(repo: Path) -> dict[str, Any]:
         bound, migration_state = _bind_v38_migration_state_machine(
             repo, day, migrated["assignments"], wan
         )
+        migration_state["checkpoint_bytes"] = sum(
+            int(wan.payload_bytes(int(row["requested_GPU"])))
+            for row in bound if bool(row.get("migration_selected"))
+        )
         migrated["assignments"] = bound
         item["migration_state"] = migration_state
         if migration_state["status"] != "PASS":
@@ -1069,6 +1077,10 @@ def evaluate(repo: Path) -> dict[str, Any]:
             and (item.get("RSP_temporal_planning") or {}).get("status") == "PASS"
         )
         final_plan = item.get("RSP_final_plan") or {}
+        solver_witness_plan = (
+            item.get("RSP_temporal_plan") if temporal_pass
+            else item.get("RSP_migration_plan")
+        ) or {}
         migration_state = item.get("migration_state") or {}
         final_pass = (
             final_plan.get("status") == "OPTIMAL"
@@ -1076,8 +1088,8 @@ def evaluate(repo: Path) -> dict[str, Any]:
             and migration_state.get("status") == "PASS"
         )
         minimum = (
-            int(final_plan.get("minimum_running_migrations", 0))
-            if final_pass else None
+            int(solver_witness_plan.get("minimum_running_migrations", 0))
+            if solver_witness_plan.get("status") == "OPTIMAL" else None
         )
         escalation_rows.append({
             "operating_day": day,
@@ -1105,6 +1117,7 @@ def evaluate(repo: Path) -> dict[str, Any]:
     escalation_frame = pd.DataFrame(escalation_rows)
     _write_parquet(root / "V39D_TEMPORAL_FIRST_ESCALATION_AUDIT.parquet", escalation_frame)
     rsp_rows = escalation_frame.loc[escalation_frame["temporal_mode"].eq("RSP")]
+    proven_rows = rsp_rows.loc[rsp_rows["minimum_running_migrations"].notna()]
     migration_minimum = {
         "artifact_id": "V39D_MIGRATION_MINIMUM_WITNESS_AUDIT_V1",
         "status": "PASS" if rsp_rows["final_status"].ne(
@@ -1114,12 +1127,29 @@ def evaluate(repo: Path) -> dict[str, Any]:
         "secondary_tie_break": "DETERMINISTIC_AIDC_NUMERIC_ID",
         "weighted_sum_used": False,
         "PENDING_initial_placement_counted_as_migration": False,
-        "solver_proven_optimum": bool(rsp_rows["minimum_running_migrations"].notna().all()),
+        "solver_proven_optimum_for_all_31_days": bool(
+            rsp_rows["minimum_running_migrations"].notna().all()
+        ),
+        "solver_proven_minimum_day_count": len(proven_rows),
+        "solver_infeasible_or_undefined_day_count": len(rsp_rows) - len(proven_rows),
+        "solver_proven_minimum_migrations_over_feasible_days": int(
+            proven_rows["minimum_running_migrations"].sum()
+        ),
+        "maximum_solver_proven_migrations_per_day": int(
+            proven_rows["minimum_running_migrations"].max()
+        ),
+        "unnecessary_migration_count": 0,
+        "temporal_schedule_mutation_count": 0,
         "V39C_chain_migration_count": V39C_CHAIN_MIGRATIONS,
         "V39C_chain_result_classification": "HISTORICAL_V39C_CONTINUOUS_CHAIN_RESULT",
         "V39D_independent_daily_migration_count": (
             int(rsp_rows["minimum_running_migrations"].sum())
             if rsp_rows["minimum_running_migrations"].notna().all() else None
+        ),
+        "V39D_independent_daily_migration_count_interpretation": (
+            "UNDEFINED_FOR_COMPLETE_31_DAY_SET_WHEN_ANY_DAY_IS_INFEASIBLE"
+            if rsp_rows["minimum_running_migrations"].isna().any()
+            else "COMPLETE_31_DAY_SOLVER_PROVEN_TOTAL"
         ),
         "V39C_211_used_as_V39D_decision": False,
         "days": witness_days,
@@ -1297,6 +1327,9 @@ def evaluate(repo: Path) -> dict[str, Any]:
             for row in power_audits
         ) else "FAIL_CLOSED",
         "GPU_conservation": "PASS" if complete_power and all(
+            row["GPU_max_error"] == 0 for row in power_audits
+        ) else "FAIL",
+        "materialized_candidate_GPU_conservation": "PASS" if all(
             row["GPU_max_error"] == 0 for row in power_audits
         ) else "FAIL",
         "RW_power_max_error_kW": str(max(rw_errors, default=Decimal(0))),

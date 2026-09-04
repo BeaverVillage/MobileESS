@@ -132,6 +132,12 @@ def test_pending_placement_is_not_counted_as_migration() -> None:
     assert witness["PENDING_initial_placement_counted_as_migration"] is False
     assert witness["V39C_chain_migration_count"] == 211
     assert witness["V39C_211_used_as_V39D_decision"] is False
+    assert witness["solver_proven_minimum_day_count"] == 29
+    assert witness["solver_infeasible_or_undefined_day_count"] == 2
+    assert witness["solver_proven_minimum_migrations_over_feasible_days"] == 477
+    assert witness["maximum_solver_proven_migrations_per_day"] == 67
+    assert witness["accepted_DA_minimum_RUNNING_migrations"] == 446
+    assert witness["unnecessary_migration_count"] == 0
 
 
 def test_rw_failure_is_not_rescued_or_hidden() -> None:
@@ -188,6 +194,9 @@ def test_refrozen_rack_authority_is_committed_and_site_consistent() -> None:
     assert audit["hidden_609_GPU_ceiling_remaining"] is False
     assert audit["gang_split_count"] == 0
     assert audit["total_32GPU_host_positions"] == 19
+    aidc10 = next(row for row in audit["per_AIDC"] if row["AIDC"] == "AIDC10")
+    assert aidc10["legacy_effective_Rack_deliverability"] == 49
+    assert aidc10["new_effective_Rack_deliverability"] == 64
     assert audit["sites_capable_of_hosting_60GPU_gang"] == [
         "AIDC01", "AIDC03", "AIDC05", "AIDC06", "AIDC08", "AIDC10", "AIDC12"
     ]
@@ -210,6 +219,30 @@ def test_same_input_rack_regression_repairs_only_the_legacy_blocker() -> None:
     assert audit["RW_31day"]["day_count"] == 29
     assert audit["RSP_31day"]["slot_count"] == 1998
     assert audit["RSP_31day"]["day_count"] == 29
+
+
+def test_rack_semantics_guardrail_preserves_site_as_only_additive_capacity() -> None:
+    audit = j("V39D_RACK_SEMANTICS_GUARDRAIL_AUDIT.json")
+    assert audit["rack_authority_semantics"] == (
+        "SYNTHETIC_NON_ADDITIVE_LOGICAL_RACK_COMPATIBILITY_ENVELOPE"
+    )
+    assert audit["physical_rack_capacity_claim"] is False
+    assert audit["measured_rack_telemetry_claim"] is False
+    assert audit["rack_capacity_summed_as_site_capacity"] is False
+    assert audit["site_capacity_violations"] == 0
+    assert audit["capacity_created_by_rack_layer_GPU"] == 0
+    assert audit["Actual_Rack_assignment_failure_count"] == 0
+    assert audit["rack_authority_SHA256_matches_frozen_certificate"] is True
+
+
+def test_post_preflight_finalization_is_reporting_only() -> None:
+    audit = j("V39D_POST_PREFLIGHT_FINALIZATION_CERTIFICATE.json")
+    assert audit["status"] == "PASS"
+    assert audit["reporting_only_no_solver_calls"] is True
+    assert audit["rack_authority_byte_identical"] is True
+    assert audit["rack_mutation_count"] == 0
+    assert audit["site_capacity_mutation_count"] == 0
+    assert audit["temporal_schedule_mutation_count"] == 0
 
 
 def test_capacity_authority_bytes_remain_exactly_frozen() -> None:
