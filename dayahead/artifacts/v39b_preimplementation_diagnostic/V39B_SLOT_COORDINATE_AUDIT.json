@@ -1,0 +1,43 @@
+{
+  "MAY_STARTED": "NO",
+  "artifact_id": "V39B_SLOT_COORDINATE_AUDIT_V1",
+  "authority_sources": {
+    "V39A_revalidation": "dayahead/v39a/spatial.py:production_activity",
+    "constants": "dayahead/v37/aidc_materializer.py:SLOT_SECONDS,SLOTS,TARGET_OFFSET_SLOTS,SIMULATION_SLOTS",
+    "cutoff": "dayahead/v37/aidc_materializer.py:issue_time",
+    "mapping": "dayahead/v37/aidc_materializer.py:_target_profile",
+    "timezone": "dayahead/v36/contracts.py:AEST"
+  },
+  "boundary_rule": "intersect [scheduled_start,scheduled_end) with [24,120), then subtract 24",
+  "conflict_rows_ending_after_production": 59023,
+  "conflict_rows_starting_before_production": 67216,
+  "diagnostic_label": "NON_PRODUCTION_DIAGNOSTIC_ONLY",
+  "exact_mapping": "production_slot = stored_slot - 24 for stored slots [24,120)",
+  "future_read_count": 0,
+  "implementation_id": "V39B_PREIMPLEMENTATION_SCIENTIFIC_DIAGNOSTIC_V1",
+  "input_hashes": {
+    "Rack_capacity_source_SHA256": "4546c0672a4d25aa5c7c92ea90fb90ec8d3c009dda426939179b293abdeb83c0",
+    "V39A_implementation_fingerprint": "43a4c15aa88bc84cc0433ca20a81410b0885a3a90f70b64bd480e6e483bc3f76",
+    "V39A_source_HEAD": "b78fa725e8f98ef43091dd67a8a642275de7f963",
+    "diagnostic_input_manifest_SHA256": "41c4fc0db7ff056a0a6b1cfaa8f6806ed90742caed591da75f4e16393e6f7df6"
+  },
+  "input_manifest_sha256": "41c4fc0db7ff056a0a6b1cfaa8f6806ed90742caed591da75f4e16393e6f7df6",
+  "mapping_fail_closed": false,
+  "production_day_coordinate": {
+    "range": "0..95",
+    "slots": 96
+  },
+  "production_mutation_count": 0,
+  "solver_seed": 20260904,
+  "solver_threads": 1,
+  "source_HEAD": "b78fa725e8f98ef43091dd67a8a642275de7f963",
+  "source_implementation_fingerprint": "43a4c15aa88bc84cc0433ca20a81410b0885a3a90f70b64bd480e6e483bc3f76",
+  "status": "PASS",
+  "stored_schedule_coordinate": {
+    "slot_seconds": 900,
+    "slot_zero": "D-1 18:00 fixed AEST",
+    "slots": 120
+  },
+  "target_offset_slots": 24,
+  "timezone": "AEST_FIXED_UTC_PLUS_10"
+}

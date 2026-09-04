@@ -1,0 +1,61 @@
+{
+  "MAY_STARTED": "NO",
+  "artifact_id": "V39B_FLEXIBILITY_AUTHORITY_AUDIT_V1",
+  "classification_counts_unique_day_mode_job": {
+    "NON_SHIFTABLE": 1095,
+    "SHIFTABLE": 330
+  },
+  "classification_counts_unique_global_job": {
+    "NON_SHIFTABLE": 328,
+    "SHIFTABLE": 249
+  },
+  "diagnostic_label": "NON_PRODUCTION_DIAGNOSTIC_ONLY",
+  "exact_authority_sources": {
+    "classification": "dayahead/v37/aidc_materializer.py:TEMPORAL_CLASSES and _classify_pending",
+    "queueing": "dayahead/v37/aidc_materializer.py:_first_fit and schedule",
+    "recovered_contract": "dayahead/artifacts/v37_r4a_per_day_aidc/V37_R4A_SCHEDULER_CONTRACT_RECOVERY.json",
+    "runtime": "dayahead/v37/aidc_materializer.py:_jobs_and_ledger"
+  },
+  "fail_closed_rule": "UNKNOWN_NOT_AUTHORIZED is non-shiftable; no 20000-slot synthetic window",
+  "future_read_count": 0,
+  "implementation_id": "V39B_PREIMPLEMENTATION_SCIENTIFIC_DIAGNOSTIC_V1",
+  "input_hashes": {
+    "Rack_capacity_source_SHA256": "4546c0672a4d25aa5c7c92ea90fb90ec8d3c009dda426939179b293abdeb83c0",
+    "V39A_implementation_fingerprint": "43a4c15aa88bc84cc0433ca20a81410b0885a3a90f70b64bd480e6e483bc3f76",
+    "V39A_source_HEAD": "b78fa725e8f98ef43091dd67a8a642275de7f963",
+    "diagnostic_input_manifest_SHA256": "41c4fc0db7ff056a0a6b1cfaa8f6806ed90742caed591da75f4e16393e6f7df6"
+  },
+  "input_manifest_sha256": "41c4fc0db7ff056a0a6b1cfaa8f6806ed90742caed591da75f4e16393e6f7df6",
+  "missing_flexibility_authority": [
+    "authoritative latest legal start",
+    "deadline or terminal-service requirement",
+    "maximum shift",
+    "legal alternate-start set relative to the V37 reference start",
+    "cross-day service conservation for deferred work"
+  ],
+  "production_mutation_count": 0,
+  "recovered_contract": {
+    "deadline": "UNKNOWN",
+    "earliest_legal_start": 0,
+    "earliest_start_authority": "_first_fit initializes start=0 in the cutoff-based 120-slot frame",
+    "existing_RSP_constraints": "same aggregate capacity and tier/FIFO first-fit as RW; only PENDING duration authority differs",
+    "implementation_search_guard": 20000,
+    "latest_legal_start": "UNKNOWN",
+    "maximum_shift": "UNKNOWN",
+    "movement_direction_relative_to_V37_start": "UNKNOWN; deliberate recourse movement is not defined by the first-fit reference scheduler",
+    "original_nominal_start": "V37 scheduled_start_slot; a reference-dispatch output, not raw execution start",
+    "preemption_allowed": false,
+    "queueing_rule": "protected QoS then normal then standby then other; FIFO by submit time and job id; aggregate 624-GPU first-fit",
+    "remaining_runtime": "RUNNING requested walltime minus elapsed at cutoff, at least one slot",
+    "restart_allowed": false,
+    "safe_runtime": "RW requested walltime; RSP frozen causal-safe duration; requested fallback",
+    "search_guard_is_scientific_deadline": false,
+    "temporal_controllable": "YES only for PENDING NORMAL_QUEUE_CONTROLLED or STANDBY_QUEUE_CONTROLLED"
+  },
+  "solver_seed": 20260904,
+  "solver_threads": 1,
+  "source_HEAD": "b78fa725e8f98ef43091dd67a8a642275de7f963",
+  "source_implementation_fingerprint": "43a4c15aa88bc84cc0433ca20a81410b0885a3a90f70b64bd480e6e483bc3f76",
+  "status": "FAIL_CLOSED_MISSING_BOUNDED_WINDOW_AUTHORITY",
+  "temporal_recourse_model_authorized": false
+}
