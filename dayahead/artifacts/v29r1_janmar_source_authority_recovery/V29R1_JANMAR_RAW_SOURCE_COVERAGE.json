@@ -1,0 +1,434 @@
+{
+  "April_production_cache_JanMar_day_count": 0,
+  "March_AEMO_parser_audit": {
+    "failures": {
+      "2025-03-01": [
+        "NO_COMPLETE_CAUSAL_AEMO_DEMAND_VINTAGE",
+        "NO_COMPLETE_CAUSAL_AEMO_PV_VINTAGE"
+      ]
+    },
+    "selected_day_count": 30,
+    "selected_range": [
+      {
+        "day_count": 30,
+        "end": "2025-03-31",
+        "start": "2025-03-02"
+      }
+    ]
+  },
+  "SCATS_raw_audit": {
+    "December_2024_days_nested_in_annual_zip": 31,
+    "February_2025_days": 27,
+    "January_2025_days": 31,
+    "March_2025_days": 31
+  },
+  "artifact_id": "V29R1_JANMAR_RAW_SOURCE_COVERAGE_V1",
+  "automatic_external_download_performed": false,
+  "calendar": {
+    "day_count": 90,
+    "end": "2025-03-31",
+    "start": "2025-01-01"
+  },
+  "categories": {
+    "causal_grid_demand_forecast_vintage": {
+      "already_materialized_JanMar_day_count": 0,
+      "available_ranges": [
+        {
+          "day_count": 30,
+          "end": "2025-03-31",
+          "start": "2025-03-02"
+        }
+      ],
+      "category": "causal_grid_demand_forecast_vintage",
+      "coverage_classification": "AVAILABLE_PARTIAL",
+      "external_download_required_for_trust": true,
+      "forecast_vs_realized_semantics": "forecast",
+      "issue_cutoff_semantics": "latest complete issue <= D-1 18:00 fixed AEST",
+      "materializer_function": "materialize_aemo/select_month_vintages",
+      "missing_day_count": 60,
+      "missing_ranges": [
+        {
+          "day_count": 60,
+          "end": "2025-03-01",
+          "start": "2025-01-01"
+        }
+      ],
+      "namespace": "AEMO_DA_FORECAST",
+      "new_namespace_materialized_day_count": 0,
+      "output_filename": "aemo_forecast.json",
+      "raw_JanMar_day_count": 30,
+      "raw_source_exists_local": true,
+      "raw_source_path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\april_2025\\aemo_downloads\\PUBLIC_ARCHIVE#PREDISPATCHREGIONSUM#ALL#FILE01#202503010000.zip",
+      "raw_source_sha256": "375daab60ed4a98470851b2a262580e6873567f411900602bfdb19d049b08acb",
+      "temporal_resolution": "30-minute duplicated to 15-minute",
+      "trust_cert_requirement": "REQUIRED_FOR_TRUST_CERT",
+      "unit": "MW"
+    },
+    "causal_rooftop_pv_forecast_vintage": {
+      "already_materialized_JanMar_day_count": 0,
+      "available_ranges": [
+        {
+          "day_count": 30,
+          "end": "2025-03-31",
+          "start": "2025-03-02"
+        }
+      ],
+      "category": "causal_rooftop_pv_forecast_vintage",
+      "coverage_classification": "AVAILABLE_PARTIAL",
+      "external_download_required_for_trust": true,
+      "forecast_vs_realized_semantics": "forecast",
+      "issue_cutoff_semantics": "latest complete issue <= D-1 18:00 fixed AEST",
+      "materializer_function": "materialize_aemo/select_month_vintages",
+      "missing_day_count": 60,
+      "missing_ranges": [
+        {
+          "day_count": 60,
+          "end": "2025-03-01",
+          "start": "2025-01-01"
+        }
+      ],
+      "namespace": "AEMO_DA_FORECAST",
+      "new_namespace_materialized_day_count": 0,
+      "output_filename": "aemo_forecast.json",
+      "raw_JanMar_day_count": 30,
+      "raw_source_exists_local": true,
+      "raw_source_path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\april_2025\\aemo_downloads\\PUBLIC_ARCHIVE#ROOFTOP_PV_FORECAST#FILE01#202503010000.zip",
+      "raw_source_sha256": "9e8fa965ac343b7e8eb59afd3bc056ec8495b7ec2744e75a1b067befb8aa6006",
+      "temporal_resolution": "30-minute duplicated to 15-minute",
+      "trust_cert_requirement": "REQUIRED_FOR_TRUST_CERT",
+      "unit": "MW"
+    },
+    "daily_initial_state_authority": {
+      "already_materialized_JanMar_day_count": 0,
+      "available_ranges": [
+        {
+          "day_count": 90,
+          "end": "2025-03-31",
+          "start": "2025-01-01"
+        }
+      ],
+      "category": "daily_initial_state_authority",
+      "coverage_classification": "AVAILABLE_FULL_90",
+      "external_download_required_for_trust": false,
+      "forecast_vs_realized_semantics": "causal engineering input",
+      "issue_cutoff_semantics": "not used by trust certificate",
+      "materializer_function": "materialize_traffic_and_mobility",
+      "missing_day_count": 0,
+      "missing_ranges": [],
+      "namespace": "MESS_DA_INITIAL_STATE",
+      "new_namespace_materialized_day_count": 0,
+      "output_filename": "traffic_mobility.json",
+      "raw_JanMar_day_count": 90,
+      "raw_source_exists_local": true,
+      "raw_source_path": "V16 E_INITIAL_KWH=760 authority",
+      "raw_source_sha256": null,
+      "temporal_resolution": "daily plus 96-slot binding",
+      "trust_cert_requirement": "NOT_REQUIRED_FOR_TRUST_CERT",
+      "unit": "kWh"
+    },
+    "gfs_d1_weather": {
+      "already_materialized_JanMar_day_count": 0,
+      "available_ranges": [],
+      "category": "gfs_d1_weather",
+      "coverage_classification": "NOT_AVAILABLE",
+      "external_download_required_for_trust": true,
+      "forecast_vs_realized_semantics": "forecast",
+      "issue_cutoff_semantics": "06Z D-1 initialization (16:00 fixed AEST), f008-f032",
+      "materializer_function": "materialize_gfs",
+      "missing_day_count": 90,
+      "missing_ranges": [
+        {
+          "day_count": 90,
+          "end": "2025-03-31",
+          "start": "2025-01-01"
+        }
+      ],
+      "namespace": "GFS_D1_FORECAST",
+      "new_namespace_materialized_day_count": 0,
+      "output_filename": "gfs_d1_weather.parquet",
+      "raw_JanMar_day_count": 0,
+      "raw_source_exists_local": false,
+      "raw_source_path": "NOAA_GFS_S3_URL_TEMPLATE",
+      "raw_source_sha256": null,
+      "temporal_resolution": "hourly leads interpolated to 15-minute",
+      "trust_cert_requirement": "REQUIRED_FOR_TRUST_CERT",
+      "unit": "degC, %, Pa, m/s"
+    },
+    "kestrel_realized_h100_workload": {
+      "already_materialized_JanMar_day_count": 0,
+      "available_ranges": [
+        {
+          "day_count": 90,
+          "end": "2025-03-31",
+          "start": "2025-01-01"
+        }
+      ],
+      "category": "kestrel_realized_h100_workload",
+      "coverage_classification": "AVAILABLE_FULL_90",
+      "external_download_required_for_trust": false,
+      "forecast_vs_realized_semantics": "realized",
+      "issue_cutoff_semantics": "not used by trust certificate",
+      "materializer_function": "materialize_kestrel",
+      "missing_day_count": 0,
+      "missing_ranges": [],
+      "namespace": "ACTUAL_WORKLOAD",
+      "new_namespace_materialized_day_count": 0,
+      "output_filename": "kestrel_realized_jobs.parquet",
+      "raw_JanMar_day_count": 90,
+      "raw_source_exists_local": true,
+      "raw_source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+      "raw_source_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+      "temporal_resolution": "job-event",
+      "trust_cert_requirement": "NOT_REQUIRED_FOR_TRUST_CERT",
+      "unit": "job/request fields; derived node-hours"
+    },
+    "mess_route_location_availability": {
+      "already_materialized_JanMar_day_count": 0,
+      "available_ranges": [
+        {
+          "day_count": 90,
+          "end": "2025-03-31",
+          "start": "2025-01-01"
+        }
+      ],
+      "category": "mess_route_location_availability",
+      "coverage_classification": "AVAILABLE_FULL_90",
+      "external_download_required_for_trust": false,
+      "forecast_vs_realized_semantics": "causal engineering input",
+      "issue_cutoff_semantics": "not used by trust certificate",
+      "materializer_function": "materialize_traffic_and_mobility",
+      "missing_day_count": 0,
+      "missing_ranges": [],
+      "namespace": "MESS_DA_AUTHORITY",
+      "new_namespace_materialized_day_count": 0,
+      "output_filename": "traffic_mobility.json",
+      "raw_JanMar_day_count": 90,
+      "raw_source_exists_local": true,
+      "raw_source_path": "V16 frozen route/location semantics",
+      "raw_source_sha256": null,
+      "temporal_resolution": "15-minute/96-slot",
+      "trust_cert_requirement": "NOT_REQUIRED_FOR_TRUST_CERT",
+      "unit": "mode/location/boolean"
+    },
+    "noaa_melbourne_observed_weather": {
+      "already_materialized_JanMar_day_count": 0,
+      "available_ranges": [
+        {
+          "day_count": 90,
+          "end": "2025-03-31",
+          "start": "2025-01-01"
+        }
+      ],
+      "category": "noaa_melbourne_observed_weather",
+      "coverage_classification": "AVAILABLE_FULL_90",
+      "external_download_required_for_trust": false,
+      "forecast_vs_realized_semantics": "realized",
+      "issue_cutoff_semantics": "not used by trust certificate",
+      "materializer_function": "materialize_noaa",
+      "missing_day_count": 0,
+      "missing_ranges": [],
+      "namespace": "ACTUAL_WEATHER",
+      "new_namespace_materialized_day_count": 0,
+      "output_filename": "noaa_actual_weather.parquet",
+      "raw_JanMar_day_count": 90,
+      "raw_source_exists_local": true,
+      "raw_source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NOAANCEI Global Hourly\\4384652.csv",
+      "raw_source_sha256": "40bea5c958d2a7561dc1961235975a42d78b7f66db696d7d9b4367e40d21279e",
+      "temporal_resolution": "hourly interpolated to 15-minute",
+      "trust_cert_requirement": "NOT_REQUIRED_FOR_TRUST_CERT",
+      "unit": "degC, %, Pa, m/s"
+    },
+    "realized_grid_demand": {
+      "already_materialized_JanMar_day_count": 0,
+      "available_ranges": [],
+      "category": "realized_grid_demand",
+      "coverage_classification": "NOT_REQUIRED_FOR_TRUST_CERT",
+      "external_download_required_for_trust": false,
+      "forecast_vs_realized_semantics": "realized",
+      "issue_cutoff_semantics": "not used by trust certificate",
+      "materializer_function": "materialize_aemo",
+      "missing_day_count": 90,
+      "missing_ranges": [
+        {
+          "day_count": 90,
+          "end": "2025-03-31",
+          "start": "2025-01-01"
+        }
+      ],
+      "namespace": "AEMO_ACTUAL",
+      "new_namespace_materialized_day_count": 0,
+      "output_filename": "aemo_actual.parquet",
+      "raw_JanMar_day_count": 0,
+      "raw_source_exists_local": false,
+      "raw_source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\AEMO\\Realized demand\\PUBLIC_ARCHIVE#DISPATCHREGIONSUM#FILE01#202504010000.zip",
+      "raw_source_sha256": "7aff4926cabc29758dc7b9428018db1062196721b5956d5027464b20c5b7c1b1",
+      "temporal_resolution": "15-minute production axis",
+      "trust_cert_requirement": "NOT_REQUIRED_FOR_TRUST_CERT",
+      "unit": "MW"
+    },
+    "realized_rooftop_pv": {
+      "already_materialized_JanMar_day_count": 0,
+      "available_ranges": [],
+      "category": "realized_rooftop_pv",
+      "coverage_classification": "NOT_REQUIRED_FOR_TRUST_CERT",
+      "external_download_required_for_trust": false,
+      "forecast_vs_realized_semantics": "realized",
+      "issue_cutoff_semantics": "not used by trust certificate",
+      "materializer_function": "materialize_aemo",
+      "missing_day_count": 90,
+      "missing_ranges": [
+        {
+          "day_count": 90,
+          "end": "2025-03-31",
+          "start": "2025-01-01"
+        }
+      ],
+      "namespace": "AEMO_ACTUAL",
+      "new_namespace_materialized_day_count": 0,
+      "output_filename": "aemo_actual.parquet",
+      "raw_JanMar_day_count": 0,
+      "raw_source_exists_local": false,
+      "raw_source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\AEMO\\AEMO Rooftop PV — forecast + actual\\Actual\\PUBLIC_ARCHIVE#ROOFTOP_PV_ACTUAL#FILE01#202504010000.zip",
+      "raw_source_sha256": "6da02c957c1601361ffc761d984fbd2998635dacee9b5cb2be30324e658e8b68",
+      "temporal_resolution": "30-minute duplicated to 15-minute",
+      "trust_cert_requirement": "NOT_REQUIRED_FOR_TRUST_CERT",
+      "unit": "MW"
+    },
+    "realized_traffic_replay": {
+      "already_materialized_JanMar_day_count": 0,
+      "available_ranges": [
+        {
+          "day_count": 58,
+          "end": "2025-02-27",
+          "start": "2025-01-01"
+        },
+        {
+          "day_count": 31,
+          "end": "2025-03-31",
+          "start": "2025-03-01"
+        }
+      ],
+      "category": "realized_traffic_replay",
+      "coverage_classification": "AVAILABLE_PARTIAL",
+      "external_download_required_for_trust": false,
+      "forecast_vs_realized_semantics": "realized",
+      "issue_cutoff_semantics": "not used by trust certificate",
+      "materializer_function": "materialize_traffic_and_mobility",
+      "missing_day_count": 1,
+      "missing_ranges": [
+        {
+          "day_count": 1,
+          "end": "2025-02-28",
+          "start": "2025-02-28"
+        }
+      ],
+      "namespace": "TRAFFIC_DA_ACTUAL",
+      "new_namespace_materialized_day_count": 0,
+      "output_filename": "traffic_mobility.json",
+      "raw_JanMar_day_count": 89,
+      "raw_source_exists_local": true,
+      "raw_source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\교통 장기 데이터 Victoria SCATS",
+      "raw_source_sha256": null,
+      "temporal_resolution": "15-minute/96-slot",
+      "trust_cert_requirement": "NOT_REQUIRED_FOR_TRUST_CERT",
+      "unit": "SCATS volume"
+    },
+    "traffic_forecast": {
+      "already_materialized_JanMar_day_count": 0,
+      "available_ranges": [
+        {
+          "day_count": 90,
+          "end": "2025-03-31",
+          "start": "2025-01-01"
+        }
+      ],
+      "category": "traffic_forecast",
+      "coverage_classification": "AVAILABLE_FULL_90",
+      "external_download_required_for_trust": false,
+      "forecast_vs_realized_semantics": "forecast from prior-month same-DOW actuals",
+      "issue_cutoff_semantics": "not used by trust certificate",
+      "materializer_function": "materialize_traffic_and_mobility",
+      "missing_day_count": 0,
+      "missing_ranges": [],
+      "namespace": "TRAFFIC_DA_FORECAST",
+      "new_namespace_materialized_day_count": 0,
+      "output_filename": "traffic_mobility.json",
+      "raw_JanMar_day_count": 90,
+      "raw_source_exists_local": true,
+      "raw_source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\교통 장기 데이터 Victoria SCATS",
+      "raw_source_sha256": null,
+      "temporal_resolution": "15-minute/96-slot",
+      "trust_cert_requirement": "NOT_REQUIRED_FOR_TRUST_CERT",
+      "unit": "SCATS volume"
+    },
+    "travel_energy_input": {
+      "already_materialized_JanMar_day_count": 0,
+      "available_ranges": [
+        {
+          "day_count": 90,
+          "end": "2025-03-31",
+          "start": "2025-01-01"
+        }
+      ],
+      "category": "travel_energy_input",
+      "coverage_classification": "AVAILABLE_FULL_90",
+      "external_download_required_for_trust": false,
+      "forecast_vs_realized_semantics": "causal engineering input",
+      "issue_cutoff_semantics": "not used by trust certificate",
+      "materializer_function": "materialize_traffic_and_mobility",
+      "missing_day_count": 0,
+      "missing_ranges": [],
+      "namespace": "MESS_MOBILITY_ENERGY_DA_V1",
+      "new_namespace_materialized_day_count": 0,
+      "output_filename": "traffic_mobility.json",
+      "raw_JanMar_day_count": 90,
+      "raw_source_exists_local": true,
+      "raw_source_path": "frozen engineering mobility authority",
+      "raw_source_sha256": null,
+      "temporal_resolution": "15-minute/96-slot",
+      "trust_cert_requirement": "NOT_REQUIRED_FOR_TRUST_CERT",
+      "unit": "kWh"
+    },
+    "travel_time_input": {
+      "already_materialized_JanMar_day_count": 0,
+      "available_ranges": [
+        {
+          "day_count": 90,
+          "end": "2025-03-31",
+          "start": "2025-01-01"
+        }
+      ],
+      "category": "travel_time_input",
+      "coverage_classification": "AVAILABLE_FULL_90",
+      "external_download_required_for_trust": false,
+      "forecast_vs_realized_semantics": "causal engineering input",
+      "issue_cutoff_semantics": "not used by trust certificate",
+      "materializer_function": "materialize_traffic_and_mobility",
+      "missing_day_count": 0,
+      "missing_ranges": [],
+      "namespace": "ENGINEERING_ROUTE_V1",
+      "new_namespace_materialized_day_count": 0,
+      "output_filename": "traffic_mobility.json",
+      "raw_JanMar_day_count": 90,
+      "raw_source_exists_local": true,
+      "raw_source_path": "frozen engineering route authority",
+      "raw_source_sha256": null,
+      "temporal_resolution": "15-minute/96-slot",
+      "trust_cert_requirement": "NOT_REQUIRED_FOR_TRUST_CERT",
+      "unit": "minutes"
+    }
+  },
+  "new_namespace_materialized_day_count": 0,
+  "raw_source_coverage_is_distinct_from_materialized_cache_coverage": true,
+  "required_90_of_90": {
+    "causal_grid_demand_forecast_vintage": false,
+    "causal_rooftop_pv_forecast_vintage": false,
+    "gfs_d1_weather": false
+  },
+  "required_categories": [
+    "gfs_d1_weather",
+    "causal_grid_demand_forecast_vintage",
+    "causal_rooftop_pv_forecast_vintage"
+  ],
+  "status": "V29R1_JANMAR_TRUST_SOURCE_AUTHORITY_BLOCKED"
+}

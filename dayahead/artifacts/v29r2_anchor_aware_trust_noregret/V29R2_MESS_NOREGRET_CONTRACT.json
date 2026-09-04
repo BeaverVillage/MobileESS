@@ -1,0 +1,37 @@
+{
+  "AC_gate": "rho_AC_B3(omega) <= rho_AC_B2(omega) + epsilon_AC_NR for every frozen scenario",
+  "Actual_reads": 0,
+  "April_result_reads": 0,
+  "B2_FALLBACK": "production B3 decision is byte-equivalent B2 schedule",
+  "FULL_MESS_ANCHOR": "P_B3=P_B2 and Q_B3=Q_B2; AIDC workload free",
+  "MESS_rating_authority": {
+    "PCS_KVA": 700.0,
+    "PCS_POLYGON_FACES": 16,
+    "P_LIMIT_KW": 550.0,
+    "source_sha256": "d7bac71fb7522a8c94cf181b3a3ca8dcf1034b8faa6cf561ad3663ef2726a50b"
+  },
+  "Q_ANCHOR": "Q_B3=Q_B2; AIDC workload and MESS P free",
+  "Q_RELEASE": "AIDC workload and MESS P/Q free within unchanged authorities",
+  "artifact_id": "V29R2_MESS_NOREGRET_CONTRACT_V1",
+  "authority": "B2_ANCHORED_NO_REGRET_MESS_V2",
+  "epsilon_AC_NR": 0.0001,
+  "epsilon_NR": 0.0001,
+  "objective_change": false,
+  "planning_gate": "J_PLAN_B3(omega) <= J_PLAN_B2(omega) + epsilon_NR for every frozen scenario",
+  "rating_changes": 0,
+  "result_driven_threshold_changes": 0,
+  "rung_order": [
+    "Q_RELEASE",
+    "Q_ANCHOR",
+    "FULL_MESS_ANCHOR",
+    "B2_FALLBACK"
+  ],
+  "safety_anchor": "solve and store B2 P/Q first in every scenario",
+  "scenario_set": [
+    "S_NOM",
+    "S_LOW",
+    "S_ZERO_CARRY"
+  ],
+  "status": "PASS",
+  "tie_break": "only inside primary-objective equivalence: minimize sum abs(Q_B3-Q_B2)"
+}

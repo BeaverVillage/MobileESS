@@ -1,0 +1,423 @@
+{
+  "artifact_id": "V29R1_APRIL_PRODUCTION_SOURCE_CONTRACT_V1",
+  "categories_in_manifest_order": [
+    "causal_grid_demand_forecast_vintage",
+    "causal_rooftop_pv_forecast_vintage",
+    "daily_initial_state_authority",
+    "gfs_d1_weather",
+    "kestrel_realized_h100_workload",
+    "mess_route_location_availability",
+    "noaa_melbourne_observed_weather",
+    "realized_grid_demand",
+    "realized_rooftop_pv",
+    "realized_traffic_replay",
+    "traffic_forecast",
+    "travel_energy_input",
+    "travel_time_input"
+  ],
+  "category_count": 13,
+  "category_evidence": {
+    "causal_grid_demand_forecast_vintage": {
+      "authority_evidence": "latest complete VIC1 PREDISPATCH vintage <= cutoff",
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\april_2025\\days\\2025-04-02\\aemo_forecast.json",
+      "sha256": "c668c61a80cb513a9a14bba5de470ebf422245f6fa1762b1a004561b7be43c67",
+      "status": "MATERIALIZED"
+    },
+    "causal_rooftop_pv_forecast_vintage": {
+      "authority_evidence": "latest complete VIC1 rooftop PV forecast vintage <= cutoff",
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\april_2025\\days\\2025-04-02\\aemo_forecast.json",
+      "sha256": "c668c61a80cb513a9a14bba5de470ebf422245f6fa1762b1a004561b7be43c67",
+      "status": "MATERIALIZED"
+    },
+    "daily_initial_state_authority": {
+      "authority_evidence": "V16 E_INITIAL_KWH=760 authority",
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\april_2025\\days\\2025-04-02\\traffic_mobility.json",
+      "sha256": "5a30cc96adb1183b1ebfe9f3c7da1b6e6f3251804c250c8d8bda2fa6ec522fa3",
+      "status": "MATERIALIZED"
+    },
+    "gfs_d1_weather": {
+      "authority_evidence": "NOAA GFS 06Z D-1 f008-f032 byte ranges only",
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\april_2025\\days\\2025-04-02\\gfs_d1_weather.parquet",
+      "sha256": "1c14d403f11f8300d35e81798d081e4fecabf671148ff93ab3727d4d5951ebb3",
+      "status": "MATERIALIZED"
+    },
+    "kestrel_realized_h100_workload": {
+      "authority_evidence": "NLR_KESTREL_H100_ELIGIBILITY_V1 plus uncontrolled reference retention",
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\april_2025\\days\\2025-04-02\\kestrel_realized_jobs.parquet",
+      "sha256": "639d38b6117e5e1fd66d2e2c1f5a4f76d102c94739d2ac9261a3bbd954585972",
+      "status": "MATERIALIZED"
+    },
+    "mess_route_location_availability": {
+      "authority_evidence": "V16 frozen route/location semantics",
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\april_2025\\days\\2025-04-02\\traffic_mobility.json",
+      "sha256": "5a30cc96adb1183b1ebfe9f3c7da1b6e6f3251804c250c8d8bda2fa6ec522fa3",
+      "status": "MATERIALIZED"
+    },
+    "noaa_melbourne_observed_weather": {
+      "authority_evidence": "station 94866099999 accepted ISD QC",
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\april_2025\\days\\2025-04-02\\noaa_actual_weather.parquet",
+      "sha256": "1ea16bd17de36f0a2a17a62dc63344d60105a3f838e538a7bd6736695da61a27",
+      "status": "MATERIALIZED"
+    },
+    "realized_grid_demand": {
+      "authority_evidence": "official VIC1 DISPATCHREGIONSUM realized values",
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\april_2025\\days\\2025-04-02\\aemo_actual.parquet",
+      "sha256": "b0b123c40da4053dffc829ad1f8768b438678094a6a587262f22f40af07ac6da",
+      "status": "MATERIALIZED"
+    },
+    "realized_rooftop_pv": {
+      "authority_evidence": "official VIC1 rooftop PV ACTUAL MEASUREMENT",
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\april_2025\\days\\2025-04-02\\aemo_actual.parquet",
+      "sha256": "b0b123c40da4053dffc829ad1f8768b438678094a6a587262f22f40af07ac6da",
+      "status": "MATERIALIZED"
+    },
+    "realized_traffic_replay": {
+      "authority_evidence": "April 2025 Victoria SCATS actual namespace",
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\april_2025\\days\\2025-04-02\\traffic_mobility.json",
+      "sha256": "5a30cc96adb1183b1ebfe9f3c7da1b6e6f3251804c250c8d8bda2fa6ec522fa3",
+      "status": "MATERIALIZED"
+    },
+    "traffic_forecast": {
+      "authority_evidence": "DA_TRAFFIC_SUPPORT_V1 pre-April SCATS forecast namespace",
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\april_2025\\days\\2025-04-02\\traffic_mobility.json",
+      "sha256": "5a30cc96adb1183b1ebfe9f3c7da1b6e6f3251804c250c8d8bda2fa6ec522fa3",
+      "status": "MATERIALIZED"
+    },
+    "travel_energy_input": {
+      "authority_evidence": "MESS_MOBILITY_ENERGY_DA_V1",
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\april_2025\\days\\2025-04-02\\traffic_mobility.json",
+      "sha256": "5a30cc96adb1183b1ebfe9f3c7da1b6e6f3251804c250c8d8bda2fa6ec522fa3",
+      "status": "MATERIALIZED"
+    },
+    "travel_time_input": {
+      "authority_evidence": "ENGINEERING_ROUTE_V1",
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\april_2025\\days\\2025-04-02\\traffic_mobility.json",
+      "sha256": "5a30cc96adb1183b1ebfe9f3c7da1b6e6f3251804c250c8d8bda2fa6ec522fa3",
+      "status": "MATERIALIZED"
+    }
+  },
+  "common_contract": {
+    "AEMO": "latest complete VIC1 demand/PV forecast vintage with issue <= D-1 18:00 fixed AEST; raw 30-minute values duplicated to 15-minute slots",
+    "GFS": {
+      "cycle": "06Z D-1",
+      "leads": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32
+      ],
+      "variables": {
+        "DPT": "2 m above ground",
+        "PRES": "surface",
+        "RH": "2 m above ground",
+        "TMP": "2 m above ground",
+        "UGRD": "10 m above ground",
+        "VGRD": "10 m above ground"
+      }
+    },
+    "grid_sign_convention": "demand MW positive, rooftop PV MW subtracts from demand",
+    "resolution_minutes": 15,
+    "slots_per_day": 96,
+    "timezone": "fixed AEST UTC+10; no DST"
+  },
+  "extraction_rule": "category names read directly from verified production source_day_manifest.json",
+  "materializer_files": {
+    "production_handlers": {
+      "path": "dayahead/v28r2/production_handlers.py",
+      "sha256": "1ee5038fd1ca3619caf7f310637daa79e618d3d318d4bbaa56d773805250ea04"
+    },
+    "source_manifest": {
+      "path": "dayahead/v28r2/source_manifest.py",
+      "sha256": "8fbc6d3ada216b5706d9951a84825f3c60e43428b3fe2848e040faecd75b6ecd"
+    },
+    "source_preflight": {
+      "path": "dayahead/v28r2/source_preflight.py",
+      "sha256": "e2585f1dc97b9219951eadeaf2620bf53e6d2decf459e085f1fd7432a27476a8"
+    },
+    "vintage_parser": {
+      "path": "dayahead/final_science_inputs_v16_3.py",
+      "sha256": "d6b3b6adab258d939b7ea105175186de8060172cf0e8947f9ef8628077c466ec"
+    }
+  },
+  "output_schema": {
+    "aemo_actual.parquet": {
+      "columns": [
+        "ts_fixed_aest_end",
+        "demand_mw",
+        "rooftop_pv_mw"
+      ],
+      "dtypes": {
+        "demand_mw": "float64",
+        "rooftop_pv_mw": "float64",
+        "ts_fixed_aest_end": "datetime64[ns, pytz.FixedOffset(600)]"
+      },
+      "rows": 96
+    },
+    "aemo_forecast.json": {
+      "array_lengths": {
+        "demand_mw_96": 96,
+        "pv_mw_96": 96,
+        "timestamps_96": 96
+      },
+      "fields": [
+        "cutoff_fixed_aest",
+        "demand_identity",
+        "demand_issue",
+        "demand_mw_96",
+        "demand_source_sha256",
+        "pv_identity",
+        "pv_issue",
+        "pv_mw_96",
+        "pv_source_sha256",
+        "timestamps_96"
+      ]
+    },
+    "gfs_d1_weather.parquet": {
+      "columns": [
+        "ts_fixed_aest",
+        "lead_hours",
+        "t_db_c",
+        "t_dew_c",
+        "rh_pct_raw",
+        "pressure_pa",
+        "u10_mps",
+        "v10_mps",
+        "grid_latitude",
+        "grid_longitude",
+        "distance_km",
+        "rh_pct",
+        "wind_speed_mps",
+        "t_wb_c"
+      ],
+      "dtypes": {
+        "distance_km": "float64",
+        "grid_latitude": "float64",
+        "grid_longitude": "float64",
+        "lead_hours": "float64",
+        "pressure_pa": "float64",
+        "rh_pct": "float64",
+        "rh_pct_raw": "float64",
+        "t_db_c": "float64",
+        "t_dew_c": "float64",
+        "t_wb_c": "float64",
+        "ts_fixed_aest": "datetime64[ns, pytz.FixedOffset(600)]",
+        "u10_mps": "float64",
+        "v10_mps": "float64",
+        "wind_speed_mps": "float64"
+      },
+      "rows": 96
+    },
+    "kestrel_realized_jobs.parquet": {
+      "columns": [
+        "id",
+        "job_id",
+        "array_pos",
+        "array_range",
+        "name_hash",
+        "user_hash",
+        "account_hash",
+        "submit_line_hash",
+        "work_dir_hash",
+        "submit_script_hash",
+        "job_type_hash",
+        "python_job",
+        "reframe_job",
+        "partition",
+        "state",
+        "state_simple",
+        "submit_time",
+        "start_time",
+        "end_time",
+        "nodes_req",
+        "processors_req",
+        "memory_req",
+        "wallclock_req",
+        "nodes_used",
+        "processors_used",
+        "wallclock_used",
+        "cpu_used",
+        "nodelist",
+        "cpu_energy_tdp_estimated_max_watt_hours",
+        "cpu_energy_tdp_estimated_used_watt_hours",
+        "consumed_energy_joules",
+        "consumed_energy_raw_joules",
+        "consumed_energy_raw_watt_hours",
+        "qos",
+        "queue_wait",
+        "cpu_eff",
+        "max_mem_eff",
+        "min_mem_eff",
+        "avg_mem_eff",
+        "gpus_requested",
+        "gpu_nodes_occupied",
+        "shared_job_count",
+        "nodes_shared",
+        "jobs_shared",
+        "day",
+        "day_of_week",
+        "hour",
+        "minute",
+        "v28r2_strict_fullnode_eligible",
+        "v28r2_uncontrolled_reference_component"
+      ],
+      "dtypes": {
+        "account_hash": "object",
+        "array_pos": "float64",
+        "array_range": "object",
+        "avg_mem_eff": "float64",
+        "consumed_energy_joules": "object",
+        "consumed_energy_raw_joules": "float64",
+        "consumed_energy_raw_watt_hours": "float64",
+        "cpu_eff": "float64",
+        "cpu_energy_tdp_estimated_max_watt_hours": "float64",
+        "cpu_energy_tdp_estimated_used_watt_hours": "float64",
+        "cpu_used": "timedelta64[us]",
+        "day": "float64",
+        "day_of_week": "float64",
+        "end_time": "datetime64[us, UTC]",
+        "gpu_nodes_occupied": "float64",
+        "gpus_requested": "float64",
+        "hour": "float64",
+        "id": "object",
+        "job_id": "int64",
+        "job_type_hash": "object",
+        "jobs_shared": "object",
+        "max_mem_eff": "float64",
+        "memory_req": "object",
+        "min_mem_eff": "float64",
+        "minute": "float64",
+        "name_hash": "object",
+        "nodelist": "object",
+        "nodes_req": "int64",
+        "nodes_shared": "object",
+        "nodes_used": "int64",
+        "partition": "object",
+        "processors_req": "int64",
+        "processors_used": "int64",
+        "python_job": "bool",
+        "qos": "object",
+        "queue_wait": "timedelta64[ns]",
+        "reframe_job": "bool",
+        "shared_job_count": "float64",
+        "start_time": "datetime64[us, UTC]",
+        "state": "object",
+        "state_simple": "object",
+        "submit_line_hash": "object",
+        "submit_script_hash": "object",
+        "submit_time": "datetime64[us, UTC]",
+        "user_hash": "object",
+        "v28r2_strict_fullnode_eligible": "bool",
+        "v28r2_uncontrolled_reference_component": "bool",
+        "wallclock_req": "timedelta64[ns]",
+        "wallclock_used": "timedelta64[ns]",
+        "work_dir_hash": "object"
+      },
+      "rows": 15579
+    },
+    "noaa_actual_weather.parquet": {
+      "columns": [
+        "ts_fixed_aest",
+        "t_db_c",
+        "t_db_qc",
+        "t_dew_c",
+        "t_dew_qc",
+        "slp_hpa",
+        "slp_qc",
+        "altimeter_hpa",
+        "altimeter_qc",
+        "station_pressure_hpa",
+        "station_pressure_qc",
+        "pressure_hpa",
+        "pressure_source",
+        "wind_direction_deg",
+        "wind_direction_qc",
+        "wind_type",
+        "wind_speed_mps",
+        "wind_speed_qc",
+        "report_type",
+        "source",
+        "quality_control",
+        "rh_pct",
+        "pressure_pa",
+        "t_wb_c"
+      ],
+      "dtypes": {
+        "altimeter_hpa": "float64",
+        "altimeter_qc": "object",
+        "pressure_hpa": "float64",
+        "pressure_pa": "float64",
+        "pressure_source": "object",
+        "quality_control": "object",
+        "report_type": "object",
+        "rh_pct": "float64",
+        "slp_hpa": "float64",
+        "slp_qc": "object",
+        "source": "float64",
+        "station_pressure_hpa": "float64",
+        "station_pressure_qc": "object",
+        "t_db_c": "float64",
+        "t_db_qc": "object",
+        "t_dew_c": "float64",
+        "t_dew_qc": "object",
+        "t_wb_c": "float64",
+        "ts_fixed_aest": "datetime64[ns, pytz.FixedOffset(600)]",
+        "wind_direction_deg": "float64",
+        "wind_direction_qc": "object",
+        "wind_speed_mps": "float64",
+        "wind_speed_qc": "object",
+        "wind_type": "object"
+      },
+      "rows": 96
+    },
+    "traffic_mobility.json": {
+      "array_lengths": {
+        "forecast_q10_volume": 96,
+        "forecast_q50_volume": 96,
+        "forecast_q90_volume": 96,
+        "mess": 4
+      },
+      "fields": [
+        "actual_volume",
+        "day",
+        "event_trigger",
+        "forecast_method",
+        "forecast_q10_volume",
+        "forecast_q50_volume",
+        "forecast_q90_volume",
+        "initial_state_authority",
+        "local_repair",
+        "mess",
+        "mobility_energy_authority",
+        "route_authority",
+        "source_sha256",
+        "traffic_actual_namespace",
+        "traffic_forecast_namespace"
+      ]
+    }
+  },
+  "source_day_sha256": "72b481420d6fdf09e6f6857581bd89fd7dc47db3531ffcec0daf8bf5c1a518f2",
+  "source_manifest_file_sha256": "6f4b33aa33494af8236d58677e04b1f3de5230f66c682b633696e32f8e3ab63a",
+  "source_manifest_path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\april_2025\\days\\2025-04-02\\source_day_manifest.json",
+  "status": "PASS"
+}

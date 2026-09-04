@@ -1,0 +1,109 @@
+{
+  "artifact_id": "V29R1_TRUST_CERT_REQUIRED_SOURCE_CONTRACT_V1",
+  "common_contract": {
+    "AEMO_cutoff": "latest complete VIC1 vintage <= D-1 18:00 fixed AEST",
+    "GFS_cycle": "06Z D-1",
+    "GFS_leads": [
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32
+    ],
+    "GFS_variables": {
+      "DPT": "2 m above ground",
+      "PRES": "surface",
+      "RH": "2 m above ground",
+      "TMP": "2 m above ground",
+      "UGRD": "10 m above ground",
+      "VGRD": "10 m above ground"
+    },
+    "future_actual_allowed": false,
+    "resolution_minutes": 15,
+    "slots": 96,
+    "timezone": "fixed AEST UTC+10"
+  },
+  "coverage_gate": {
+    "causal_grid_demand_forecast_vintage": {
+      "pass": false,
+      "raw_day_count": 30,
+      "required_day_count": 90
+    },
+    "causal_rooftop_pv_forecast_vintage": {
+      "pass": false,
+      "raw_day_count": 30,
+      "required_day_count": 90
+    },
+    "gfs_d1_weather": {
+      "pass": false,
+      "raw_day_count": 0,
+      "required_day_count": 90
+    }
+  },
+  "materialization_authorized": false,
+  "not_a_reduced_substitute_model": true,
+  "not_required_categories": [
+    "kestrel_realized_h100_workload",
+    "noaa_melbourne_observed_weather",
+    "realized_grid_demand",
+    "realized_rooftop_pv",
+    "traffic_forecast",
+    "realized_traffic_replay",
+    "travel_time_input",
+    "travel_energy_input",
+    "mess_route_location_availability",
+    "daily_initial_state_authority"
+  ],
+  "required_categories": {
+    "causal_grid_demand_forecast_vintage": {
+      "reason": "production feeder background demand",
+      "used_by": [
+        "LinDistFlow planning evaluation",
+        "Fresh OpenDSS comparison"
+      ]
+    },
+    "causal_rooftop_pv_forecast_vintage": {
+      "reason": "production feeder background rooftop-PV offset",
+      "used_by": [
+        "LinDistFlow planning evaluation",
+        "Fresh OpenDSS comparison"
+      ]
+    },
+    "gfs_d1_weather": {
+      "reason": "wet-bulb/RH drive the production C1 endpoint-secant envelope",
+      "used_by": [
+        "C1 planning-envelope evaluation",
+        "AIDC trust-region perturbation"
+      ]
+    }
+  },
+  "static_production_authorities_retained": [
+    "IEEE123 feeder and mapping",
+    "V22SR1 AIDC scale",
+    "V24T C1 model family",
+    "PF=.95",
+    "line/transformer ratings",
+    "site weights"
+  ],
+  "status": "PASS_CONTRACT_FROZEN_SOURCE_COVERAGE_BLOCKED"
+}
