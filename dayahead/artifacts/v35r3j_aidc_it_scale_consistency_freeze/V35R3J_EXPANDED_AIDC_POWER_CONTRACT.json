@@ -1,0 +1,62 @@
+{
+  "ABSOLUTE_WHOLE_NODE_POWER_RECONSTRUCTED": "NO",
+  "FULL_ACTIVE_REFERENCE_PRESERVED": "YES",
+  "GPU_capacity": 624,
+  "GPU_slot_conservation_rule": "Each occupied equivalent GPU slot counted once; total <= 624.",
+  "H100_GPUs_per_node": 4,
+  "IDC_LOCATION_HANDLING": "UNCHANGED_EXISTING_PRODUCTION_LOCATION_OUT_OF_SCOPE",
+  "PRIMARY_NON_GPU_DELTA_KW": 0.0,
+  "RW_baseline_authority": {
+    "bytes": 9435,
+    "parent_blob_content_sha256": "0f1882243ba6310f65786694702eb065104b4cd89c9929078b564311c196847f",
+    "path": "dayahead/artifacts/v35r3b_job_power_runtime_forensic/V35R3B_MODE_H0_RESULTS.json",
+    "sha256": "0f1882243ba6310f65786694702eb065104b4cd89c9929078b564311c196847f",
+    "unchanged_from_parent": true
+  },
+  "active_measurement_authority": {
+    "bytes": 1730,
+    "parent_blob_content_sha256": "667ccb12ce4ac0c2cc6bd832f96b2224b3e0d5b4a1e8337de69ca8a4c1d2c24c",
+    "path": "dayahead/artifacts/v35r3i_semiempirical_h100_gpu_slot_power_bridge/V35R3I_H100_ACTIVE_GPU_POWER_AUTHORITY.json",
+    "sha256": "667ccb12ce4ac0c2cc6bd832f96b2224b3e0d5b4a1e8337de69ca8a4c1d2c24c",
+    "unchanged_from_parent": true
+  },
+  "arbitrary_beta_introduced": "NO",
+  "contract_id": "V35R3J_EXPANDED_AIDC_POWER_CONTRACT_V1",
+  "expanded_temporal_cohort_authority": {
+    "bytes": 837,
+    "parent_blob_content_sha256": "9f50f803044ad30cd21923b40d466af72e12baf480157cd17e8cd2e2c412aa55",
+    "path": "dayahead/artifacts/v35r3i_semiempirical_h100_gpu_slot_power_bridge/V35R3I_EXPANDED_FLEX_POWER_COVERAGE.json",
+    "sha256": "9f50f803044ad30cd21923b40d466af72e12baf480157cd17e8cd2e2c412aa55",
+    "unchanged_from_parent": true
+  },
+  "final_swing_W_per_GPU": {
+    "CENTER": 547.7239090195797,
+    "HIGH": 579.7981786096108,
+    "LOW": 396.85416154435006
+  },
+  "formula_96_slots": "P_IT_RSP^omega(t)=P_IT_RW_FROZEN(t)+(N_active_RSP(t)-N_active_RW(t))*d_final^omega/1000",
+  "full_active_power_function": "P_IT^omega(N)=P_IT_RW_FROZEN-(624-N)*d_final^omega/1000; P_IT^omega(624)=P_IT_RW_FROZEN",
+  "idle_measurement_authority": {
+    "bytes": 904,
+    "parent_blob_content_sha256": "0d0286d1de1a8ff69b7f43e168ad46ef307948ff852ccd4d5333996e37b67c47",
+    "path": "dayahead/artifacts/v35r3i_semiempirical_h100_gpu_slot_power_bridge/V35R3I_H100_IDLE_GPU_POWER_AUTHORITY.json",
+    "sha256": "0d0286d1de1a8ff69b7f43e168ad46ef307948ff852ccd4d5333996e37b67c47",
+    "unchanged_from_parent": true
+  },
+  "job_class_treatment": "CLASS_AGNOSTIC_NO_KESTREL_CLASS_INVENTION",
+  "parent_lineage": "3b0ce2c3276e32a1174976a44356e6b137123939",
+  "partial_shared_treatment": "INCLUDED_BY_GPU_SLOT_WITHOUT_PER_JOB_POWER_OR_NODE_BASE",
+  "penetration_rescaling_introduced": "NO",
+  "prohibited_interpretations": [
+    "directly measured partial/shared Kestrel job power",
+    "directly measured whole-node Kestrel IT power",
+    "exact job-level H100 power"
+  ],
+  "selected_scale_closure_method": "M2_CONSERVATIVE_DUAL_ANCHOR_MODULATION",
+  "strict_F0_relation": "Same swing applied to 576 GPU-h only for scale-consistent cohort-mass comparison; strict model not refit.",
+  "uncertainty_scenarios": [
+    "LOW",
+    "CENTER",
+    "HIGH"
+  ]
+}
