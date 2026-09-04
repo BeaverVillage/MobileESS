@@ -38,7 +38,7 @@ violate fail-closed semantics.
 - Broader C1/voltage/restoration regression: 42/42 PASS.
 - May preflight: READY=0, NOT_READY=31,
   missing=0.
-- V39A implementation fingerprint: `8cc98af7f4b88d1ba8a580c3badab0536d51db23774bc8aceb5d2a22a83ad063`.
+- V39A implementation fingerprint: `43a4c15aa88bc84cc0433ca20a81410b0885a3a90f70b64bd480e6e483bc3f76`.
 - `V39A_SCIENCE_FROZEN=NO`
 - `MAY_CAMPAIGN_LAUNCH_READY=NO`
 - `MAY_STARTED=NO`

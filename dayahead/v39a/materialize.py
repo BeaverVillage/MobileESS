@@ -496,7 +496,7 @@ def _fingerprint(repo: Path) -> dict[str, Any]:
         "artifact_id": "V39A_IMPLEMENTATION_FINGERPRINT_V1",
         "V38_FAIL_EVIDENCE_HEAD": V38_FAIL_EVIDENCE_HEAD,
         "V38_IMPLEMENTATION_FINGERPRINT": V38_IMPLEMENTATION_FINGERPRINT,
-        "V39A_production_code_HEAD": _git(repo, "rev-parse", "HEAD"),
+        "V39A_git_HEAD_at_materialization": _git(repo, "rev-parse", "HEAD"),
         "V39A_branch": _git(repo, "branch", "--show-current"),
         "fingerprint_inputs": inputs,
         "V39A_IMPLEMENTATION_FINGERPRINT": canonical_sha256(inputs),
