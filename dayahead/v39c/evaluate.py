@@ -709,7 +709,11 @@ def evaluate(repo: Path) -> dict[str, Any]:
     if _git(repo, "merge-base", "HEAD", START_HEAD) != START_HEAD:
         raise RuntimeError("V39C_START_HEAD_ANCESTRY")
     capacity, authority, certificate, capacity_file_sha = _load_frozen_capacity(repo)
-    freeze_commit = _git(repo, "rev-parse", "HEAD")
+    freeze_commit = _git(
+        repo,
+        "log", "--format=%H", "--diff-filter=A", "-1", "--",
+        (ARTIFACT_ROOT / "V39C_H100_EQUIVALENT_SITE_CAPACITY_AUTHORITY.json").as_posix(),
+    )
     input_manifest, input_manifest_sha = _input_manifest(repo)
     metadata = _metadata(
         authority, certificate, capacity_file_sha, input_manifest_sha, freeze_commit
