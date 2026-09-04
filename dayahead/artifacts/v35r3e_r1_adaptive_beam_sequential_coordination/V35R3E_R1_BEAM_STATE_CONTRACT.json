@@ -1,0 +1,23 @@
+{
+  "BEAM_SEARCH_IS_NOT_GLOBAL_JOINT_OPTIMALITY": true,
+  "beam_states_are_physically_consistent_not_averaged": true,
+  "fields": [
+    "case_id",
+    "beam_state_id",
+    "parent_state_id",
+    "completed_vehicles",
+    "vehicles[].final unrestricted full-MILP trajectory",
+    "vehicles[].final destination/move history",
+    "trajectory_slots[].p_kw",
+    "trajectory_slots[].q_kvar",
+    "trajectory_slots[].battery_energy_kwh",
+    "vehicles[].solver objective/status/bound/gap",
+    "vehicles[].MIPStart source candidate",
+    "combined_fixed_p_by_service",
+    "combined_fixed_q_by_service",
+    "current_planning_objective",
+    "state_sha256"
+  ],
+  "state_SHA": "SHA256(case, completed vehicles, tolerance-normalized accumulated trajectory)",
+  "trajectory_tolerance": 1e-06
+}
