@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections import Counter, defaultdict
-import hashlib
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
@@ -161,10 +160,6 @@ def interval_spatial_feasibility(
     return result
 
 
-def _rank(job_uid: str, site: str) -> int:
-    return int(hashlib.sha256(f"V39C:{job_uid}:{site}".encode()).hexdigest()[:12], 16)
-
-
 def causal_day_placement(
     jobs: Iterable[ActivityJob],
     site_capacity: Mapping[str, int],
@@ -201,7 +196,6 @@ def causal_day_placement(
             ) == 1,
             name=f"one_AIDC[{job.job_uid}]",
         )
-    peak = model.addVar(lb=0.0, name="peak_normalized_AIDC_utilization")
     for site in sorted(site_capacity):
         for slot in range(SLOTS):
             fixed_gpu = sum(
@@ -220,17 +214,10 @@ def causal_day_placement(
             model.addConstr(
                 load <= site_capacity[site], name=f"AIDC_capacity[{site},{slot}]"
             )
-            model.addConstr(load <= peak * site_capacity[site])
-    model.setObjectiveN(peak, 0, priority=2, name="minimum_peak_utilization")
-    model.setObjectiveN(
-        gp.quicksum(
-            ((_rank(uid, site) % 1_000_003) + 1) * variable
-            for (uid, site), variable in variables.items()
-        ),
-        1,
-        priority=1,
-        name="deterministic_tie_break",
-    )
+    # Stage C asks only whether a causal state chain exists.  A zero objective
+    # avoids introducing a new load-balancing policy; one thread and a frozen
+    # seed make the feasibility witness reproducible.
+    model.setObjective(0.0, GRB.MINIMIZE)
     model.optimize()
     if model.Status != GRB.OPTIMAL:
         status = int(model.Status)
