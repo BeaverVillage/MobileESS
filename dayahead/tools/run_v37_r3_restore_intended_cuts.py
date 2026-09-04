@@ -522,10 +522,15 @@ def prepare_readiness(repo: Path) -> dict[str, Any]:
         ["git", "branch", "--show-current"], cwd=repo,
         text=True, encoding="utf-8",
     ).strip()
+    implementation_commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=repo,
+        text=True, encoding="utf-8",
+    ).strip()
     readiness = {
         "artifact_id": "V37_MAY_FINAL_RUN_READINESS_V1",
         "status": "PASS",
         "branch": branch,
+        "implementation_commit": implementation_commit,
         "restoration_cut_contract": "V17_AC_RESTORATION_OUTER_LOOP_CONTRACT_V1",
         "restoration_cut_contract_restored": "YES",
         "joint_P_Q_repair_status": "PASS",
@@ -623,7 +628,7 @@ def prepare_readiness(repo: Path) -> dict[str, Any]:
         "37. exact-match resume: PASS",
         "38. interrupted candidate/round resume: PASS",
         f"39. branch: `{branch}`",
-        "40. final implementation commit(s): 최종 Git 기록 참조",
+        f"40. final implementation commit(s): `{implementation_commit}`",
         "41. clean/dirty: 범위 외 기존 변경은 보존",
         "42. push: NO",
         "43. merge: NO",

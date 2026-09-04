@@ -39,7 +39,7 @@
 37. exact-match resume: PASS
 38. interrupted candidate/round resume: PASS
 39. branch: `codex/v37-may2025-locked-final`
-40. final implementation commit(s): 최종 Git 기록 참조
+40. final implementation commit(s): `ee9f435f6b98633208850cf6f9d573a3a70db3cd`
 41. clean/dirty: 범위 외 기존 변경은 보존
 42. push: NO
 43. merge: NO
