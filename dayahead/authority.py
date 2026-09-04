@@ -9,8 +9,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from dataclasses import asdict, dataclass
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any, Mapping, Sequence
 
 
@@ -40,8 +41,13 @@ AIDC_D1_ADMISSION = "D1_ADMISSION_ELIGIBILITY_V1"
 AIDC_REFERENCE_FIDELITY = "REFERENCE_BASELINE_FIDELITY_DIAGNOSTIC_V1"
 AIDC_REALIZED_DECOMPOSITION = "AIDC_REALIZED_REFERENCE_DECOMPOSITION_V1"
 
-DEFAULT_RAW_ROOT = Path(
+_WINDOWS_RAW_ROOT = PureWindowsPath(
     r"C:\Users\kjw39\OneDrive\Desktop\4-2\Mobile ESS\raw데이터"
+)
+DEFAULT_RAW_ROOT = (
+    Path(_WINDOWS_RAW_ROOT)
+    if os.name == "nt"
+    else Path("/mnt", _WINDOWS_RAW_ROOT.drive.rstrip(":").lower(), *_WINDOWS_RAW_ROOT.parts[1:])
 )
 
 AIDC_SCIENTIFIC_STATUS = "READY_FOR_IMPLEMENTATION"

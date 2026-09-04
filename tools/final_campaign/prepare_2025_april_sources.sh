@@ -3,4 +3,4 @@ set -euo pipefail
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 cd "$ROOT"
-exec python -m tools.final_campaign.monitor_v28r2_april "$@"
+python -m tools.final_campaign.prepare_v28r2_april_sources --gfs-workers 12

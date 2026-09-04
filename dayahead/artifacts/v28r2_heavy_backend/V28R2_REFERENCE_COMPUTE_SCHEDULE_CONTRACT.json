@@ -1,0 +1,38 @@
+{
+  "REFERENCE_COMPUTE_SCHEDULE_READY": true,
+  "artifact_id": "V28R2_REFERENCE_COMPUTE_SCHEDULE_CONTRACT_V1",
+  "authority_id": "REFERENCE_COMPUTE_SCHEDULE_V2",
+  "capacity_authority_sha256": "7ff19aa8c9c12febf081b04e15e30956cf5a2ead770b6dda77fe71e877d7ad77",
+  "case_capacity_GPU": 528.0,
+  "feasibility_rule": "per rack/cohort/slot service <= min(physical nodeh capacity, mapped G_REF envelope, mapped P_REF envelope at frozen kappa); unserved W remains in B_REF",
+  "initial_backlog_nodeh": 0,
+  "inputs": [
+    "forecast_cohort_Q50_arrivals",
+    "P_REF_Q90_reference_envelope",
+    "G_REF_Q90_reference_envelope",
+    "frozen_rack_axis",
+    "frozen_rack_GPU_weights",
+    "528_GPU_capacity_authority"
+  ],
+  "policy": "as-arrived earliest-feasible fluid service with frozen capacity-proportional rack utilization invariant",
+  "prohibited_inputs": [
+    "actual",
+    "grid_loading",
+    "voltage",
+    "MESS_state",
+    "future_start",
+    "future_end",
+    "future_runtime",
+    "sharing"
+  ],
+  "rack_capacity_formula": "528 * frozen_gpu_weight / 4_GPU_per_node * 0.25_hour",
+  "rack_mapping_sha256": "d33444a19cfc6c4761f2e1b9a8adb88203b05cffc1d4a798e7b61c5add265d5b",
+  "status": "PASS",
+  "tie_break": [
+    "cohort_id",
+    "AIDC_id",
+    "rack_id",
+    "slot_order_with_time_progressing_earliest_first"
+  ],
+  "tie_break_scope": "cohort service priority and floating arithmetic residual only; rack fluid mass follows frozen GPU capacity weights"
+}
