@@ -182,9 +182,11 @@ def main() -> None:
         "default_refresh_seconds": 10,
         "compact_default_view": True,
         "default_fields": [
-            "campaign_status", "current_day", "current_issue/30",
-            "completed_issues/900", "overall_percent", "failed_day_count", "first_failure",
+            "campaign_status", "current_day", "current_issue/96",
+            "completed_issues/2880", "overall_percent", "failed_day_count", "first_failure",
         ],
+        "ignores_stale_previous_run_state": True,
+        "issue_progress_basis": "30 backend execution steps mapped monotonically to 96 quarter-hour issues per day",
         "lists_all_30_days_by_default": False,
     })
     write_json("V28R2_APRIL_MONITOR_CONTRACT.json", monitor)
@@ -207,7 +209,7 @@ def main() -> None:
     write_json("V28R2_TEST_REPORT.json", {
         "artifact_id": "V28R2_TEST_REPORT_V1", "status": "PASS",
         "command": "python -m pytest tests/dayahead -k v28r2 -q",
-        "passed": 69, "failed": 0, "deselected": 142,
+        "passed": 71, "failed": 0, "deselected": 142,
         "heavy_smoke_verified_separately": True,
         "repository_wide_collection_note": "science execution scripts named *_test.py exit during pytest import; tests/dayahead is the maintained test suite",
         "maintained_suite_result": "207 passed; 1 unavailable optional legacy torch test",
@@ -236,7 +238,7 @@ The only permitted smoke completed all 30 steps on {smoke['date']}: 7 solver cal
 
 ## 20–23. Tests, artifacts, Git, and remaining state
 
-All 69 V28R2 tests pass. Artifact hashes are in `V28R2_ARTIFACT_SHA256.json`; historical/raw preservation passes. The fixed commit sequence is retained with no merge. April full-month PASS, May runner, May final science, and final grid-science authorization remain false until their separate work is completed.
+All 71 V28R2 tests pass. Artifact hashes are in `V28R2_ARTIFACT_SHA256.json`; historical/raw preservation passes. The fixed commit sequence is retained with no merge. April full-month PASS, May runner, May final science, and final grid-science authorization remain false until their separate work is completed.
 
 ## 24–25. Local execution and monitoring
 

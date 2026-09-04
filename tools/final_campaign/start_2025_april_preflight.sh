@@ -2,11 +2,39 @@
 set -euo pipefail
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+DOT_GIT="$ROOT/.git"
 VENV_ROOT="${XDG_CACHE_HOME:-$HOME/.cache}/mobileess-v28r2"
 VENV="$VENV_ROOT/venv"
 REQUIREMENTS="$ROOT/tools/final_campaign/requirements-v28.txt"
 MARKER="$VENV/.requirements-v28.sha256"
 cd "$ROOT"
+
+# Git for Windows writes an absolute Windows gitdir into linked-worktree .git
+# files. Translate it once for every child launched from WSL. Keeping this in
+# the foreground start script also preserves normal Ctrl+C propagation.
+if [[ -f "$DOT_GIT" ]]; then
+  RAW_GIT_DIR="$(sed -n 's/^gitdir:[[:space:]]*//p' "$DOT_GIT")"
+  if [[ -z "$RAW_GIT_DIR" ]]; then
+    echo "[FAIL] linked-worktree gitdir marker missing: $DOT_GIT" >&2
+    exit 2
+  elif [[ "$RAW_GIT_DIR" =~ ^[A-Za-z]:[/\\] ]]; then
+    GIT_DIR="$(wslpath -u "$RAW_GIT_DIR")"
+  elif [[ "$RAW_GIT_DIR" = /* ]]; then
+    GIT_DIR="$RAW_GIT_DIR"
+  else
+    GIT_DIR="$ROOT/$RAW_GIT_DIR"
+  fi
+  if [[ ! -d "$GIT_DIR" ]]; then
+    echo "[FAIL] resolved gitdir not found: $GIT_DIR" >&2
+    exit 2
+  fi
+  export GIT_DIR
+  export GIT_WORK_TREE="$ROOT"
+elif [[ ! -d "$DOT_GIT" ]]; then
+  echo "[FAIL] Git metadata not found: $DOT_GIT" >&2
+  exit 2
+fi
+git cat-file -e "HEAD^{commit}"
 
 if [[ ! -x "$VENV/bin/python" ]]; then
   echo "[1/4] WSL 실행 환경 생성"

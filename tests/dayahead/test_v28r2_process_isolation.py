@@ -115,8 +115,39 @@ def test_monitor_snapshot_is_read_only_and_supports_day_filter(tmp_path: Path):
     assert len(value["days"]) == 1
     assert value["days"][0]["predecessor_sha_status"] == "VERIFIED"
     assert value["days"][0]["heartbeat_age_seconds"] == 10.0
-    assert value["days"][0]["current_issue"] == 2
-    assert value["totals"]["total_issues"] == 900
+    assert value["days"][0]["completed_issues"] == 3
+    assert value["days"][0]["current_issue"] == 4
+    assert value["totals"]["total_issues"] == 2880
+
+
+def test_monitor_ignores_stale_failure_from_previous_supervisor_run(tmp_path: Path, monkeypatch):
+    paths = campaign_roots(tmp_path)
+    state_path = paths["progress"] / "2025-04-01" / "DAY_STATE.json"
+    state_path.parent.mkdir(parents=True)
+    state_path.write_text(json.dumps({
+        "status": "FAIL",
+        "completed_steps": ["01_INPUT_AUTHORITY_CHECK"],
+        "heartbeat_epoch": 100.0,
+        "failure": {"message": "old failure"},
+    }), encoding="utf-8")
+    (paths["progress"] / "supervisor.json").write_text(json.dumps({
+        "status": "RUNNING", "pid": 1234, "started_epoch": 200.0, "results": [],
+    }), encoding="utf-8")
+    monkeypatch.setattr("tools.final_campaign.monitor_v28r2_april.process_alive", lambda _pid: True)
+    value = snapshot(tmp_path, selected_day="2025-04-01", now=210.0)
+    assert value["days"][0]["status"] == "PENDING"
+    assert value["days"][0]["completed_issues"] == 0
+    assert value["days"][0]["last_error"] is None
+    assert value["totals"]["FAIL"] == 0
+
+    (paths["progress"] / "supervisor.json").write_text(json.dumps({
+        "status": "RUNNING", "pid": 1234, "started_epoch": 50.0,
+        "planned": ["2025-04-01"], "results": [],
+    }), encoding="utf-8")
+    monkeypatch.setattr("tools.final_campaign.monitor_v28r2_april.process_alive", lambda _pid: False)
+    orphaned = snapshot(tmp_path, selected_day="2025-04-01", now=210.0)
+    assert orphaned["days"][0]["status"] == "INCOMPLETE"
+    assert orphaned["days"][0]["last_error"] == "SUPERVISOR_PROCESS_NOT_RUNNING"
 
 
 def test_monitor_default_view_is_compact_and_does_not_list_thirty_dates(tmp_path: Path):
@@ -132,7 +163,7 @@ def test_monitor_default_view_is_compact_and_does_not_list_thirty_dates(tmp_path
     )
     value = snapshot(tmp_path)
     text = render(value)
-    assert "0/900 issue (0.00%)" in text
+    assert "0/2880 issue (0.00%)" in text
     assert "FAIL: 30일" in text
     assert "lightgbm" in text
     assert "2025-04-30" not in text

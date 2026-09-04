@@ -13,7 +13,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 
 from dayahead.v28r2.source_manifest import verify_day_manifest  # noqa: E402
-from dayahead.v28r2.backend_contract import DAY_WORKERS, GUROBI_THREADS  # noqa: E402
+from dayahead.v28r2.backend_contract import DAY_WORKERS, GUROBI_THREADS, git_output  # noqa: E402
 from dayahead.v28r2.source_preflight import APRIL_DAYS, day_root  # noqa: E402
 from tools.final_campaign.run_v28r2_april import verify_launch_gates  # noqa: E402
 
@@ -60,6 +60,15 @@ def check_runtime(repo: Path = REPO) -> dict[str, object]:
 
     spec = build_day_run_spec(repo, APRIL_DAYS[0], "authority-preflight")
     spec.validate()
+    # Exercise the same historical-object operations used by final certificate
+    # verification. A linked-worktree path problem must fail before workers run,
+    # not after every day reaches step 30.
+    git_output(repo, "cat-file", "-e", f"{spec.git_head}^{{commit}}")
+    committed_contract = git_output(
+        repo, "show", f"{spec.git_head}:dayahead/v28r2/backend_contract.py",
+    )
+    if not isinstance(committed_contract, bytes) or not committed_contract:
+        raise RuntimeError("V28R2_GIT_HISTORICAL_OBJECT_PREFLIGHT")
     production = ProductionHandlers(
         spec=spec, repo=repo, day_output=repo,
         state_path=repo / "DAY_STATE.json", mode="authority-preflight",
@@ -86,6 +95,7 @@ def check_runtime(repo: Path = REPO) -> dict[str, object]:
         "source_days_verified": verified_days,
         "production_contract_sha256": spec.sha256,
         "production_handlers_verified": 30,
+        "certificate_git_operations_verified": True,
         "optimizer_rollout_verified_through": APRIL_DAYS[-1],
         "day_workers": DAY_WORKERS,
         "gurobi_threads": GUROBI_THREADS,

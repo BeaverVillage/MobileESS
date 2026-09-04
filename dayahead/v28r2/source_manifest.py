@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import re
+import subprocess
 from pathlib import Path, PureWindowsPath
 from typing import Iterable
 
@@ -26,9 +29,22 @@ CATEGORIES = (
 ALLOWED_STATUS = {"SOURCE_PRESENT", "MATERIALIZED", "NOT_APPLICABLE_BY_AUTHORITY"}
 
 
+def _wsl_portable_path(path: Path) -> Path:
+    path_text = str(path)
+    if path.is_file() or os.name == "nt" or not re.match(r"^[A-Za-z]:[\\/]", path_text):
+        return path
+    converted = subprocess.run(
+        ["wslpath", "-u", path_text], text=True, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, check=False,
+    )
+    if converted.returncode == 0 and converted.stdout.strip():
+        return Path(converted.stdout.strip())
+    return path
+
+
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
-    with path.open("rb") as stream:
+    with _wsl_portable_path(path).open("rb") as stream:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
@@ -41,10 +57,13 @@ def canonical_sha256(payload: dict[str, object]) -> str:
 
 def _portable_evidence_path(path_text: str, base_dir: Path | None) -> Path:
     path = Path(path_text)
-    if path.is_file() or base_dir is None:
+    if path.is_file():
         return path
-    portable = base_dir / PureWindowsPath(path_text).name
-    return portable if portable.is_file() else path
+    if base_dir is not None:
+        portable = base_dir / PureWindowsPath(path_text).name
+        if portable.is_file():
+            return portable
+    return _wsl_portable_path(path)
 
 
 def verify_day_manifest(payload: dict[str, object], base_dir: Path | None = None) -> None:

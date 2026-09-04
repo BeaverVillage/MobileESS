@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import hashlib
 import json
-import subprocess
 from pathlib import Path
 from typing import Mapping
 
-from .backend_contract import canonical_sha256, sha256_file
+from .backend_contract import canonical_sha256, git_output, sha256_file
 from .day_state import atomic_json
 
 
@@ -72,9 +71,11 @@ def _verify_code_tree(payload: Mapping[str, object], references: Mapping[str, ob
     files = manifest.get("files")
     if not isinstance(files, dict) or manifest.get("code_tree_sha256") != canonical_sha256(files):
         raise RuntimeError("V28R2_CODE_TREE_MANIFEST_SHA")
-    subprocess.run(["git", "cat-file", "-e", f"{commit}^{{commit}}"], cwd=repo, check=True, capture_output=True)
+    git_output(repo, "cat-file", "-e", f"{commit}^{{commit}}")
     for relative, expected in files.items():
-        content = subprocess.check_output(["git", "show", f"{commit}:{relative}"], cwd=repo)
+        content = git_output(repo, "show", f"{commit}:{relative}")
+        if not isinstance(content, bytes):
+            raise RuntimeError("V28R2_CODE_TREE_GIT_OUTPUT_TYPE")
         if hashlib.sha256(content).hexdigest() != expected:
             raise RuntimeError(f"V28R2_CODE_TREE_COMMIT_MISMATCH:{relative}")
 

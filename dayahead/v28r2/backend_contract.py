@@ -79,19 +79,28 @@ def fixed_aest_axis(day: str) -> tuple[str, ...]:
     return tuple((start + timedelta(minutes=RESOLUTION_MINUTES * slot)).isoformat() for slot in range(SLOTS))
 
 
-def _run_git_head(repo: Path, git_dir: Path | None = None) -> tuple[str | None, str]:
+def _git_command(repo: Path, args: tuple[str, ...], git_dir: Path | None = None) -> list[str]:
     command = ["git"]
     if git_dir is not None:
         command.extend((f"--git-dir={git_dir}", f"--work-tree={repo}"))
-    command.extend(("rev-parse", "HEAD"))
+    command.extend(args)
+    return command
+
+
+def _run_git(
+    repo: Path, args: tuple[str, ...], *, git_dir: Path | None = None, text: bool = False,
+) -> tuple[bytes | str | None, str]:
+    command = _git_command(repo, args, git_dir)
     completed = subprocess.run(
-        command, cwd=repo, text=True, stdout=subprocess.PIPE,
+        command, cwd=repo, text=text, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE, check=False,
     )
-    value = completed.stdout.strip()
-    if completed.returncode == 0 and re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", value):
-        return value, ""
-    return None, completed.stderr.strip()
+    if completed.returncode == 0:
+        return completed.stdout, ""
+    error = completed.stderr
+    if isinstance(error, bytes):
+        error = error.decode("utf-8", errors="replace")
+    return None, str(error).strip()
 
 
 def _worktree_git_dir(repo: Path) -> Path | None:
@@ -115,22 +124,31 @@ def _worktree_git_dir(repo: Path) -> Path | None:
     return path if path.is_absolute() else (repo / path).resolve()
 
 
-def git_head(repo: Path) -> str:
-    value, first_error = _run_git_head(repo)
+def git_output(repo: Path, *args: str, text: bool = False) -> bytes | str:
+    """Run Git with linked-worktree path recovery under WSL."""
+    value, first_error = _run_git(repo, tuple(args), text=text)
     if value is not None:
         return value
     git_dir = _worktree_git_dir(repo)
     if git_dir is not None:
-        value, fallback_error = _run_git_head(repo, git_dir)
+        value, fallback_error = _run_git(repo, tuple(args), git_dir=git_dir, text=text)
         if value is not None:
             return value
     else:
         fallback_error = "linked worktree gitdir unavailable"
     raise RuntimeError(
-        "V28R2_GIT_HEAD_UNAVAILABLE: "
+        "V28R2_GIT_COMMAND_FAILED: "
+        f"command={' '.join(args)}; "
         f"default={first_error or 'invalid object id'}; "
         f"worktree={fallback_error or 'invalid object id'}"
     )
+
+
+def git_head(repo: Path) -> str:
+    value = str(git_output(repo, "rev-parse", "HEAD", text=True)).strip()
+    if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", value):
+        raise RuntimeError(f"V28R2_GIT_HEAD_INVALID:{value}")
+    return value
 
 
 def code_tree_manifest(repo: Path) -> dict[str, str]:

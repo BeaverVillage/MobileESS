@@ -1,3 +1,4 @@
+import hashlib
 import json
 import subprocess
 from pathlib import Path
@@ -5,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from dayahead.v28r2 import backend_contract
+from dayahead.v28r2 import certificate as certificate_module
 from dayahead.v28r2.backend_contract import DayRunSpec, NativeSettings, fixed_aest_axis
 from dayahead.v28r2.certificate import verify_certificate, write_certificate
 from dayahead.v28r2.day_state import DayState
@@ -40,13 +42,20 @@ def test_git_head_retries_windows_linked_worktree_path_under_wsl(tmp_path: Path,
         commands.append(command)
         if command[:2] == ["wslpath", "-u"]:
             return subprocess.CompletedProcess(command, 0, "/mnt/c/repo/.git/worktrees/child\n", "")
+        text = _kwargs.get("text", False)
         if any(str(arg).startswith("--git-dir=") for arg in command):
-            return subprocess.CompletedProcess(command, 0, "b" * 40 + "\n", "")
-        return subprocess.CompletedProcess(command, 128, "", "not a git repository")
+            output = "b" * 40 + "\n" if "rev-parse" in command else "commit object"
+            return subprocess.CompletedProcess(
+                command, 0, output if text else output.encode(), "" if text else b"",
+            )
+        return subprocess.CompletedProcess(
+            command, 128, "" if text else b"", "not a git repository" if text else b"not a git repository",
+        )
 
     monkeypatch.setattr(backend_contract, "NATIVE_WINDOWS", False)
     monkeypatch.setattr(backend_contract.subprocess, "run", fake_run)
     assert backend_contract.git_head(tmp_path) == "b" * 40
+    assert backend_contract.git_output(tmp_path, "cat-file", "-p", "HEAD") == b"commit object"
     assert any(
         "--git-dir=/mnt/c/repo/.git/worktrees/child" in str(argument).replace("\\", "/")
         for command in commands for argument in command
@@ -104,3 +113,29 @@ def test_certificate_digest_is_recomputed_from_disk(tmp_path: Path):
     path.write_text(json.dumps(payload), encoding="utf-8")
     with pytest.raises(RuntimeError):
         verify_certificate(path)
+
+
+def test_certificate_code_tree_uses_portable_git_operations(tmp_path: Path, monkeypatch):
+    tracked_content = b"tracked content\n"
+    files = {"dayahead/v28r2/example.py": hashlib.sha256(tracked_content).hexdigest()}
+    manifest = tmp_path / "code_tree.json"
+    manifest.write_text(json.dumps({
+        "code_tree_sha256": backend_contract.canonical_sha256(files),
+        "files": files,
+    }), encoding="utf-8")
+    commands = []
+
+    def fake_git_output(repo: Path, *args: str, text: bool = False):
+        commands.append((repo, args, text))
+        return b"" if args[0] == "cat-file" else tracked_content
+
+    monkeypatch.setattr(certificate_module, "git_output", fake_git_output)
+    path = tmp_path / "certificate.json"
+    write_certificate(path, {
+        "artifact_id": "TEST_CODE_TREE",
+        "repository_root": str(tmp_path),
+        "git_head": "a" * 40,
+        "references": certificate_module.file_references({"code_tree_manifest": manifest}),
+    })
+    verify_certificate(path)
+    assert [args[0] for _repo, args, _text in commands] == ["cat-file", "show"]

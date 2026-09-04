@@ -10,14 +10,24 @@ import time
 from pathlib import Path
 from typing import Mapping
 
-from dayahead.v28r2.backend_contract import DAY_WORKERS, GUROBI_THREADS
+from dayahead.v28r2.backend_contract import DAY_WORKERS, EXECUTION_STEPS, GUROBI_THREADS
 
 
 REPO = Path(__file__).resolve().parents[2]
 ROOT_SUFFIX = "v28r2_april_full_month_preflight"
 APRIL_DAYS = tuple(f"2025-04-{day:02d}" for day in range(1, 31))
-ISSUES_PER_DAY = 30
+STEPS_PER_DAY = len(EXECUTION_STEPS)
+ISSUES_PER_DAY = 96
 TOTAL_ISSUES = len(APRIL_DAYS) * ISSUES_PER_DAY
+
+
+def issue_progress(completed_steps: int, status: str) -> tuple[int, int]:
+    """Map backend-step progress onto the requested 96-issue day scale."""
+    if status == "PASS":
+        return ISSUES_PER_DAY, ISSUES_PER_DAY
+    completed = min(ISSUES_PER_DAY - 1, completed_steps * ISSUES_PER_DAY // STEPS_PER_DAY)
+    current = min(ISSUES_PER_DAY, completed + (1 if status == "RUNNING" else 0))
+    return completed, current
 
 
 def roots(repo: Path = REPO) -> dict[str, Path]:
@@ -85,6 +95,16 @@ def process_stats(pid: int | None) -> dict[str, float | int | None]:
         return {"cpu_percent": None, "current_rss_bytes": None}
 
 
+def process_alive(pid: int | None) -> bool:
+    if not pid:
+        return False
+    try:
+        os.kill(pid, 0)
+    except (OSError, PermissionError):
+        return False
+    return True
+
+
 def certificate_status(path: Path, day: str) -> tuple[str | None, str | None]:
     payload = read_json(path)
     if not payload:
@@ -131,6 +151,16 @@ def snapshot(
         str(row.get("day")): str(row.get("status"))
         for row in supervisor.get("results", []) if isinstance(row, dict) and row.get("day")
     }
+    supervisor_status = str(supervisor.get("status", "WAITING"))
+    supervisor_pid_value = supervisor.get("pid")
+    supervisor_pid = (
+        int(supervisor_pid_value)
+        if isinstance(supervisor_pid_value, (int, float)) and supervisor_pid_value > 0 else None
+    )
+    supervisor_active = supervisor_status == "RUNNING" and process_alive(supervisor_pid)
+    planned_days = set(map(str, supervisor.get("planned", [])))
+    started_value = supervisor.get("started_epoch")
+    supervisor_started = float(started_value) if isinstance(started_value, (int, float)) else None
     rows: list[dict[str, object]] = []
     statuses: list[str] = []
     completed_issues_total = 0
@@ -139,15 +169,40 @@ def snapshot(
         state = read_json(state_path)
         cert_path = paths["frozen_artifacts"] / day / f"APRIL_DAY_CERTIFICATE_{day.replace('-', '_')}.json"
         cert_status, cert_error = certificate_status(cert_path, day)
+        heartbeat_value = state.get("heartbeat_epoch")
+        heartbeat = float(heartbeat_value) if isinstance(heartbeat_value, (int, float)) else None
+        state_is_current = supervisor_status != "RUNNING" or (
+            supervisor_active
+            and (supervisor_started is None or (heartbeat is not None and heartbeat >= supervisor_started))
+        )
         state_status = state.get("status")
-        status = cert_status or (str(state_status) if state_status else supervisor_results.get(day, "PENDING"))
+        if cert_status is not None:
+            status = cert_status
+        elif day in skipped_days:
+            status = "PASS"
+        elif day in supervisor_results:
+            status = supervisor_results[day]
+        elif supervisor_status == "RUNNING" and not supervisor_active:
+            status = "INCOMPLETE" if day in planned_days else "PENDING"
+        elif supervisor_status == "RUNNING" and day not in planned_days:
+            status = "PENDING"
+        elif not state_is_current:
+            status = "PENDING"
+        else:
+            status = str(state_status) if state_status else "PENDING"
         if status not in {"PENDING", "RUNNING", "PASS", "FAIL", "INCOMPLETE"}:
             status = "INCOMPLETE"
         statuses.append(status)
-        completed_steps = state.get("completed_steps", [])
-        completed_issue_count = len(completed_steps) if isinstance(completed_steps, list) else 0
-        if status == "PASS":
-            completed_issue_count = ISSUES_PER_DAY
+        effective_state = state if state_is_current else {}
+        effective_heartbeat = heartbeat if state_is_current else None
+        supervisor_error = (
+            "SUPERVISOR_PROCESS_NOT_RUNNING"
+            if status == "INCOMPLETE" and supervisor_status == "RUNNING" and not supervisor_active
+            else None
+        )
+        completed_steps = effective_state.get("completed_steps", [])
+        completed_step_count = len(completed_steps) if isinstance(completed_steps, list) else 0
+        completed_issue_count, current_issue = issue_progress(completed_step_count, status)
         completed_issues_total += min(ISSUES_PER_DAY, completed_issue_count)
         if selected_day is not None and day != selected_day:
             continue
@@ -155,23 +210,22 @@ def snapshot(
             continue
         if failed_only and status not in {"FAIL", "INCOMPLETE"}:
             continue
-        counters = state.get("counters", {}) if isinstance(state.get("counters"), dict) else {}
-        failure = state.get("failure", {}) if isinstance(state.get("failure"), dict) else {}
-        heartbeat = state.get("heartbeat_epoch")
-        pid_value = state.get("pid")
+        counters = effective_state.get("counters", {}) if isinstance(effective_state.get("counters"), dict) else {}
+        failure = effective_state.get("failure", {}) if isinstance(effective_state.get("failure"), dict) else {}
+        pid_value = effective_state.get("pid")
         pid = int(pid_value) if isinstance(pid_value, (int, float)) and pid_value > 0 else None
         log_path = paths["logs"] / f"{day}.log"
         row = {
             "day": day,
             "status": status,
             "skipped_immutable_pass": day in skipped_days,
-            "current_step": state.get("current_step"),
+            "current_step": effective_state.get("current_step"),
             "completed_issues": completed_issue_count,
-            "current_issue": min(ISSUES_PER_DAY, completed_issue_count + (1 if status == "RUNNING" else 0)),
+            "current_issue": current_issue,
             "total_issues": ISSUES_PER_DAY,
-            "predecessor_sha_status": predecessor_status(state) if state else "NOT_STARTED",
+            "predecessor_sha_status": predecessor_status(effective_state) if effective_state else "NOT_STARTED",
             "pid": pid,
-            "heartbeat_age_seconds": None if not isinstance(heartbeat, (int, float)) else max(0.0, current - float(heartbeat)),
+            "heartbeat_age_seconds": None if effective_heartbeat is None else max(0.0, current - effective_heartbeat),
             **process_stats(pid),
             "peak_rss_bytes": counters.get("peak_rss_bytes"),
             "active_solver": counters.get("active_solver"),
@@ -186,7 +240,7 @@ def snapshot(
             "active_opendss_trajectory": counters.get("active_opendss_trajectory"),
             "opendss_slot": counters.get("opendss_slot", 0),
             "latest_log_line": latest_line(log_path),
-            "last_error": cert_error or failure.get("message") or state.get("_read_error") or (failure_summary(log_path) if status in {"FAIL", "INCOMPLETE"} else None),
+            "last_error": cert_error or supervisor_error or failure.get("message") or effective_state.get("_read_error") or (failure_summary(log_path) if status in {"FAIL", "INCOMPLETE"} else None),
             "output_path": str((paths["frozen_artifacts"] / day).resolve()),
         }
         rows.append(row)
