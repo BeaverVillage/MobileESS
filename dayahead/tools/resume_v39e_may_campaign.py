@@ -100,14 +100,17 @@ def main() -> int:
             preflight_NOT_READY=preflight["NOT_READY"],
             preflight_missing=preflight["missing"],
             preflight_attempt=preflight.get("attempt", 1),
-            repair_iteration=2,
+            repair_iteration=4,
             last_repair_classification="EXECUTION_INFRASTRUCTURE_DEFECT",
             last_repair_commit=head,
-            repair_summary="WINDOWS_ATOMIC_REPLACE_RETRY_AND_VALIDATED_PREFLIGHT_RESUME",
+            repair_summary=(
+                "WINDOWS_ATOMIC_REPLACE_RETRY_VALIDATED_PREFLIGHT_RESUME_"
+                "AND_PATH_LENGTH_SAFE_K_ARCHIVE"
+            ),
             rerun_mode="AFFECTED_SCOPE",
             reusable_count=0,
-            invalidated_count=0,
-            rerun_count=4,
+            invalidated_count=1,
+            rerun_count=5,
             exact_current_blocker="RESUMING_INTERRUPTED_MAY_WORKERS_FROM_EXACT_CHECKPOINTS",
             PRECHECK_BYPASSED="YES",
         )

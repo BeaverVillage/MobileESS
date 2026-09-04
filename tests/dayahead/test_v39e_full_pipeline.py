@@ -14,6 +14,7 @@ from dayahead.v39e.full_spatial import (
     deterministic_rack_labels,
     plan_fixed_temporal_schedule,
 )
+from dayahead.tools.run_v39e_may_day import _install_windows_safe_k_archive
 
 
 def toy_authority() -> CapacityAuthority:
@@ -52,6 +53,41 @@ def test_v39_atomic_json_retries_windows_reader_lock(tmp_path: Path) -> None:
     assert attempts == 26
     assert path.read_text(encoding="utf-8").endswith("\n")
     assert not list(tmp_path.glob("*.tmp"))
+
+
+def test_v39e_k_archive_uses_short_windows_safe_names(tmp_path: Path) -> None:
+    import dayahead.v37.runner as runner
+
+    originals = (
+        runner._archive_local_attempt,
+        runner._archived_k_attempt,
+        getattr(runner, "_v39e_windows_safe_k_archive", False),
+    )
+    search_root = tmp_path / ("x" * 120)
+    search_root.mkdir()
+    (search_root / "RESTRICTED_VALUES.csv").write_text(
+        "candidate_id,exact_optimality_certificate\n"
+        "candidate-1,V37_FAIL_CLOSED:synthetic\n",
+        encoding="utf-8",
+    )
+    (search_root / "SEEDS.json").write_text("[]\n", encoding="utf-8")
+    (search_root / "LOCAL_SEARCH.json").write_text("{}\n", encoding="utf-8")
+    try:
+        if hasattr(runner, "_v39e_windows_safe_k_archive"):
+            delattr(runner, "_v39e_windows_safe_k_archive")
+        _install_windows_safe_k_archive()
+        runner._archive_local_attempt(search_root, "200")
+        assert (search_root / "RV.K200.A1.csv").is_file()
+        assert (search_root / "S.K200.A1.json").is_file()
+        assert (search_root / "LS.K200.A1.json").is_file()
+        restored = runner._archived_k_attempt(search_root, "200")
+        assert restored is not None
+        assert restored["status"] == "CERTIFICATION_FAILURE_RESTORED"
+        assert restored["uncertified_candidate_count"] == 1
+    finally:
+        runner._archive_local_attempt = originals[0]
+        runner._archived_k_attempt = originals[1]
+        runner._v39e_windows_safe_k_archive = originals[2]
 
 
 def test_rack_compatibility_is_non_additive_under_site_capacity() -> None:
