@@ -1,0 +1,185 @@
+{
+  "32GPU_host_position_count": 19,
+  "GPU_per_node": 4,
+  "MAY_STARTED": "NO",
+  "May_outcome_used_in_numeric_allocation": false,
+  "V22SR1_prior_SHA256": "1fb7931dcc86b190af7e9cc0e18b3466897ea66a35a79e53e452b36524a6e63b",
+  "V22SR1_prior_role": "MELBOURNE_FACILITY_SIZE_SOFT_PRIOR",
+  "V22SR1_prior_source": "dayahead/artifacts/v22s_r1_final_operating_scale/V22SR1_PRIMARY_SITE_WEIGHTS.csv",
+  "allocation_rule": {
+    "base": "8 equivalent H100 nodes to each of 12 modeled AIDC sites",
+    "final_residual": "four nodes/16 GPU to the highest-weight site AIDC05",
+    "residual_full_blocks": "one 8-node/32-GPU block to each of the seven highest-weight sites",
+    "tie_break": "AIDC numeric ID ascending"
+  },
+  "artifact_id": "V39C_H100_EQUIVALENT_SITE_CAPACITY_AUTHORITY_V1",
+  "canonical_GPU_vector": [
+    64,
+    32,
+    64,
+    32,
+    80,
+    64,
+    32,
+    64,
+    32,
+    64,
+    32,
+    64
+  ],
+  "canonical_SHA256": "6af48aa50f4cfbaa42f40eedb966fdc99c77656ec5a415c2d84089baccfb99ce",
+  "canonical_node_vector": [
+    16,
+    8,
+    16,
+    8,
+    20,
+    16,
+    8,
+    16,
+    8,
+    16,
+    8,
+    16
+  ],
+  "capacity_rule_source_commit": "3cd14441fba0d574678339fc7d206e05496a4887",
+  "capacity_semantics": "SYNTHETIC_H100_EQUIVALENT_SITE_COMPUTE_CAPACITY",
+  "classification": "POSTHOC_ENGINEERING_CAPACITY_REFREEZE",
+  "facility_weight_order": [
+    "AIDC05",
+    "AIDC12",
+    "AIDC10",
+    "AIDC03",
+    "AIDC08",
+    "AIDC06",
+    "AIDC01",
+    "AIDC07",
+    "AIDC11",
+    "AIDC09",
+    "AIDC02",
+    "AIDC04"
+  ],
+  "four_GPU_granularity": true,
+  "future_read_count": 0,
+  "implementation_id": "V39C_GANG_AWARE_AIDC_GPU_CAPACITY_REFREEZE_V1",
+  "measured_GPU_claim": false,
+  "minimum_GPU_per_site": 32,
+  "minimum_nodes_per_site": 8,
+  "modeled_AIDC_sites": true,
+  "numeric_construction_Fresh_grid_reads": 0,
+  "numeric_construction_May_reads": 0,
+  "production_mutation_count": 0,
+  "residual_recipient": "AIDC05",
+  "site_table": [
+    {
+      "AIDC": "AIDC01",
+      "equivalent_H100_nodes": 16,
+      "facility_size_soft_prior": 0.05918596533827055,
+      "received_16GPU_residual": false,
+      "received_extra_32GPU_block": true,
+      "synthetic_H100_equivalent_GPU_capacity": 64
+    },
+    {
+      "AIDC": "AIDC02",
+      "equivalent_H100_nodes": 8,
+      "facility_size_soft_prior": 0.009864327556378425,
+      "received_16GPU_residual": false,
+      "received_extra_32GPU_block": false,
+      "synthetic_H100_equivalent_GPU_capacity": 32
+    },
+    {
+      "AIDC": "AIDC03",
+      "equivalent_H100_nodes": 16,
+      "facility_size_soft_prior": 0.13810058578929796,
+      "received_16GPU_residual": false,
+      "received_extra_32GPU_block": true,
+      "synthetic_H100_equivalent_GPU_capacity": 64
+    },
+    {
+      "AIDC": "AIDC04",
+      "equivalent_H100_nodes": 8,
+      "facility_size_soft_prior": 0.009295231735818131,
+      "received_16GPU_residual": false,
+      "received_extra_32GPU_block": false,
+      "synthetic_H100_equivalent_GPU_capacity": 32
+    },
+    {
+      "AIDC": "AIDC05",
+      "equivalent_H100_nodes": 20,
+      "facility_size_soft_prior": 0.20715087868394694,
+      "received_16GPU_residual": true,
+      "received_extra_32GPU_block": true,
+      "synthetic_H100_equivalent_GPU_capacity": 80
+    },
+    {
+      "AIDC": "AIDC06",
+      "equivalent_H100_nodes": 16,
+      "facility_size_soft_prior": 0.06658421100555437,
+      "received_16GPU_residual": false,
+      "received_extra_32GPU_block": true,
+      "synthetic_H100_equivalent_GPU_capacity": 64
+    },
+    {
+      "AIDC": "AIDC07",
+      "equivalent_H100_nodes": 8,
+      "facility_size_soft_prior": 0.04438947400370292,
+      "received_16GPU_residual": false,
+      "received_extra_32GPU_block": false,
+      "synthetic_H100_equivalent_GPU_capacity": 32
+    },
+    {
+      "AIDC": "AIDC08",
+      "equivalent_H100_nodes": 16,
+      "facility_size_soft_prior": 0.07398245667283819,
+      "received_16GPU_residual": false,
+      "received_extra_32GPU_block": true,
+      "synthetic_H100_equivalent_GPU_capacity": 64
+    },
+    {
+      "AIDC": "AIDC09",
+      "equivalent_H100_nodes": 8,
+      "facility_size_soft_prior": 0.011571615018059306,
+      "received_16GPU_residual": false,
+      "received_extra_32GPU_block": false,
+      "synthetic_H100_equivalent_GPU_capacity": 32
+    },
+    {
+      "AIDC": "AIDC10",
+      "equivalent_H100_nodes": 16,
+      "facility_size_soft_prior": 0.16769356845843322,
+      "received_16GPU_residual": false,
+      "received_extra_32GPU_block": true,
+      "synthetic_H100_equivalent_GPU_capacity": 64
+    },
+    {
+      "AIDC": "AIDC11",
+      "equivalent_H100_nodes": 8,
+      "facility_size_soft_prior": 0.03462378972288827,
+      "received_16GPU_residual": false,
+      "received_extra_32GPU_block": false,
+      "synthetic_H100_equivalent_GPU_capacity": 32
+    },
+    {
+      "AIDC": "AIDC12",
+      "equivalent_H100_nodes": 16,
+      "facility_size_soft_prior": 0.17755789601481167,
+      "received_16GPU_residual": false,
+      "received_extra_32GPU_block": true,
+      "synthetic_H100_equivalent_GPU_capacity": 64
+    }
+  ],
+  "source_HEAD": "46edb9a6637de430d08f0bd8948758e28d3262ab",
+  "status": "PASS_FROZEN",
+  "top_full_block_recipients": [
+    "AIDC05",
+    "AIDC12",
+    "AIDC10",
+    "AIDC03",
+    "AIDC08",
+    "AIDC06",
+    "AIDC01"
+  ],
+  "total_GPUs": 624,
+  "total_conservation": true,
+  "total_nodes": 156
+}
