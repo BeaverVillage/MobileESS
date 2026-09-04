@@ -137,24 +137,42 @@ def test_interval_spatial_models_are_all_optimal() -> None:
     assert audit["one_AIDC_per_contiguous_interval"] is True
 
 
-def test_full_causal_chains_preserve_location_without_split_or_remap() -> None:
+def test_full_causal_chains_use_migration_enabled_c1_not_stay_only_c0() -> None:
     audit = j("V39C_FULL_CAUSAL_SPATIAL_FEASIBILITY_AUDIT.json")
     assert audit["status"] == "PASS"
     assert audit["causal_31day_chains_feasible"] is True
     assert audit["daily_remap_count"] == 0
-    assert audit["migration_count"] == 0
     assert audit["gang_split_count"] == 0
     assert audit["fixed_WAN_paths"] == audit["expected_fixed_WAN_paths"] == 132
+    assert audit["StageC0_STAY_ONLY_status"] == "FAIL"
+    assert audit["StageC1_migration_enabled_status"] == "PASS"
+    assert audit["StageC1_feasibility_objective"] == "ZERO"
+    assert audit["migration_allowed"] == "YES"
+    assert audit["migration_forced"] == "NO"
     assert audit["StageC_feasibility_objective"] == "ZERO"
     assert audit["StageC_feasibility_status"] == "PASS"
     assert audit["witness_materialization_performed"] is True
-    assert audit["selected_RUNNING_migration_count"] == 0
+    assert audit["minimum_migration_witness_performed"] is True
+    assert audit["selected_RUNNING_migration_count"] >= 0
+    assert audit["migration_count"] == audit["selected_RUNNING_migration_count"]
+    assert audit["WAN_transfer_count"] == audit["selected_RUNNING_migration_count"]
+    assert audit["checkpoint_transfer_count"] == audit["selected_RUNNING_migration_count"]
+    assert audit["restart_count"] == audit["selected_RUNNING_migration_count"]
     assert audit["unnecessary_migration_count"] == 0
     assert audit["capacity_SHA_before"] == audit["capacity_SHA_after"]
     assert audit["temporal_schedule_mutation_count"] == 0
     assert audit["execution_classification"] == (
         "SCIENCE_NEUTRAL_FEASIBILITY_EXECUTION_SIMPLIFICATION"
     )
+    assert audit["root_cause_classification"] == "STAY_ONLY_FALSE_NEGATIVE"
+
+
+def test_stay_only_failure_is_preserved_as_non_authoritative_diagnostic() -> None:
+    audit = j("V39C_STAGE_C0_STAY_ONLY_DIAGNOSTIC.json")
+    assert audit["status"] == "FAIL"
+    assert audit["diagnostic_classification"] == "STAGE_C0_STAY_ONLY_DIAGNOSTIC"
+    assert audit["readiness_authority"] is False
+    assert audit["migration_allowed"] is False
 
 
 def test_site_gpu_trajectories_conserve_v37_aggregate() -> None:

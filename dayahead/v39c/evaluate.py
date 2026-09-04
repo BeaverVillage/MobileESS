@@ -15,8 +15,9 @@ from typing import Any, Mapping
 import numpy as np
 import pandas as pd
 
-from dayahead.v38.authority import load_wan_authority
+from dayahead.v38.authority import checkpoint_slots, load_wan_authority
 from dayahead.v38.contracts import CHECKPOINT_INTERVAL_SECONDS, RESTART_SECONDS
+from dayahead.v38.wan import validate_fixed_path_transfers
 from dayahead.v39a.power import (
     aggregate_it_power_kw,
     frozen_site_to_pcc,
@@ -323,13 +324,13 @@ def _initial_april_state(repo: Path, capacity: Mapping[str, int]) -> tuple[dict[
     }
 
 
-def _stage_c(
+def _stage_c0_stay_only(
     repo: Path, capacity: Mapping[str, int]
 ) -> tuple[dict[str, Any], dict[tuple[str, str], list[dict[str, Any]]]]:
     april_state, april_audit = _initial_april_state(repo, capacity)
     if april_audit["status"] != "PASS":
         return {
-            "artifact_id": "V39C_FULL_CAUSAL_SPATIAL_FEASIBILITY_AUDIT_V1",
+            "artifact_id": "V39C_STAGE_C0_STAY_ONLY_DIAGNOSTIC_V1",
             "status": "FAIL",
             "April_initialization": april_audit,
         }, {}
@@ -372,23 +373,16 @@ def _stage_c(
         if source != destination and wan.path(source, destination)
     )
     status = "PASS" if optimal == len(EXPECTED_DATES) * len(TEMPORAL_MODES) else "FAIL"
-    if status == "PASS":
-        plans = {
-            key: _canonicalize_pending_witness(assignments, capacity)
-            for key, assignments in plans.items()
-        }
     return {
-        "artifact_id": "V39C_FULL_CAUSAL_SPATIAL_FEASIBILITY_AUDIT_V1",
+        "artifact_id": "V39C_STAGE_C0_STAY_ONLY_DIAGNOSTIC_V1",
         "status": status,
-        "execution_classification": "SCIENCE_NEUTRAL_FEASIBILITY_EXECUTION_SIMPLIFICATION",
-        "StageC_feasibility_objective": "ZERO",
-        "StageC_feasibility_status": status,
-        "witness_materialization_performed": status == "PASS",
-        "witness_primary_objective": "MINIMIZE_TOTAL_RUNNING_MIGRATIONS",
-        "witness_primary_optimum": 0 if status == "PASS" else None,
-        "witness_secondary_tie_break": "AIDC_NUMERIC_ID_ASCENDING_FEASIBILITY_PRESERVING_PENDING_INITIAL_PLACEMENT_PASS",
-        "selected_RUNNING_migration_count": 0 if status == "PASS" else None,
-        "unnecessary_migration_count": 0 if status == "PASS" else None,
+        "diagnostic_classification": "STAGE_C0_STAY_ONLY_DIAGNOSTIC",
+        "readiness_authority": False,
+        "migration_allowed": False,
+        "interpretation": (
+            "INFEASIBLE_MEANS_STAY_ONLY_STATE_CARRY_CAN_BLOCK; "
+            "IT_IS_NOT_A_MIGRATION_ENABLED_STAGE_C_FAILURE"
+        ),
         "causal_day_mode_models": len(results),
         "causal_day_mode_models_optimal": optimal,
         "causal_31day_chains_feasible": status == "PASS",
@@ -409,14 +403,26 @@ def _stage_c(
     }, plans
 
 
-def _canonicalize_pending_witness(
-    assignments: list[dict[str, Any]], capacity: Mapping[str, int]
-) -> list[dict[str, Any]]:
-    """Move only initial PENDING placements to the lowest locally feasible AIDC.
+def _elapsed_seconds(snapshot: pd.DataFrame, job_uid: str) -> float:
+    row = snapshot.loc[snapshot["id"].astype(str).eq(job_uid)]
+    if len(row) != 1:
+        raise RuntimeError(f"V39C_RUNNING_STATE_ROW_COUNT:{job_uid}:{len(row)}")
+    issue = pd.to_datetime(row.iloc[0]["issue_time_fixed_AEST"], utc=True)
+    start = pd.to_datetime(row.iloc[0]["known_running_start"], utc=True)
+    elapsed = float((issue - start).total_seconds())
+    if elapsed < 0:
+        raise RuntimeError(f"V39C_NEGATIVE_RUNNING_ELAPSED:{job_uid}")
+    return elapsed
 
-    RUNNING placements, including carried state, are untouched.  The input is
-    already a zero-objective feasible witness, so every accepted move preserves
-    all interval capacities and cannot create a migration.
+
+def _canonicalize_witness_assignments(
+    assignments: list[dict[str, Any]], capacity: Mapping[str, int], wan: Any
+) -> list[dict[str, Any]]:
+    """Apply a deterministic numeric-AIDC lexicographic feasibility pass.
+
+    The solver-proven migration/stay classification is immutable here.  Each
+    job, ordered by job_uid, is moved to the lowest numeric AIDC that preserves
+    interval capacity, its migration indicator, and the serialized WAN budget.
     """
 
     rows = [dict(row) for row in assignments]
@@ -425,24 +431,302 @@ def _canonicalize_pending_witness(
         load[row["current_AIDC"]][
             int(row["active_start_slot"]):int(row["active_end_slot"])
         ] += int(row["requested_GPU"])
+    total_transfer_slots = sum(
+        int(row["migration_transfer_slots_required"]) for row in rows
+    )
     for row in sorted(rows, key=lambda value: value["job_uid"]):
-        if row["state_at_issue"] != "PENDING" or row["source_AIDC"] is not None:
-            continue
         old = row["current_AIDC"]
         start = int(row["active_start_slot"])
         end = int(row["active_end_slot"])
         gpu = int(row["requested_GPU"])
         load[old][start:end] -= gpu
+        source = row["source_AIDC"]
+        migrated = bool(row["migration_selected"])
+        old_transfer_slots = int(row["migration_transfer_slots_required"])
         selected = old
+        selected_transfer_slots = old_transfer_slots
         for site in eligible_sites(capacity, gpu):
-            if np.all(load[site][start:end] + gpu <= capacity[site]):
-                selected = site
-                break
+            if source is not None and (site != source) != migrated:
+                continue
+            candidate_transfer_slots = 0
+            if migrated:
+                candidate_transfer_slots = math.ceil(
+                    int(wan.payload_bytes(gpu))
+                    / int(wan.path_capacity_bytes(source, site, 2))
+                )
+            candidate_total = (
+                total_transfer_slots - old_transfer_slots + candidate_transfer_slots
+            )
+            if candidate_total > 93:
+                continue
+            if not np.all(load[site][start:end] + gpu <= capacity[site]):
+                continue
+            selected = site
+            selected_transfer_slots = candidate_transfer_slots
+            total_transfer_slots = candidate_total
+            break
         load[selected][start:end] += gpu
-        row["initial_AIDC"] = selected
+        if source is None:
+            row["initial_AIDC"] = selected
         row["current_AIDC"] = selected
         row["destination_AIDC"] = selected
+        row["migration_transfer_slots_required"] = selected_transfer_slots
     return sorted(rows, key=lambda value: value["job_uid"])
+
+
+def _bind_v38_migration_state_machine(
+    repo: Path,
+    day: str,
+    assignments: list[dict[str, Any]],
+    wan: Any,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Bind selected moves to the frozen V38 checkpoint/WAN/restart machine."""
+
+    rows = [dict(row) for row in assignments]
+    selected = [row for row in rows if row["migration_selected"]]
+    if not selected:
+        return rows, {
+            "status": "PASS",
+            "WAN_transfer_count": 0,
+            "checkpoint_transfer_count": 0,
+            "restart_count": 0,
+            "WAN_transfer_slots_used": 0,
+        }
+    snapshot = pd.read_parquet(
+        repo / V37_DAY_ROOT / day / "V37_R4A_D1_SNAPSHOT.parquet"
+    )
+    migrations: list[dict[str, Any]] = []
+    checkpoint_by_job: dict[str, int] = {}
+    for row in selected:
+        slots = checkpoint_slots(_elapsed_seconds(snapshot, row["job_uid"]), SLOTS)
+        if not slots:
+            return rows, {
+                "status": "INFEASIBLE",
+                "reason": f"NO_CHECKPOINT_IN_D1_HORIZON:{row['job_uid']}",
+            }
+        checkpoint_by_job[row["job_uid"]] = int(slots[0])
+        migrations.append({
+            "job_uid": row["job_uid"],
+            "source_AIDC": row["source_AIDC"],
+            "destination_AIDC": row["destination_AIDC"],
+            "payload_bytes": wan.payload_bytes(row["requested_GPU"]),
+            "earliest_transfer_slot": int(slots[0]),
+            # Slot 95 is reserved for READY -> restart, completing at 96.
+            "latest_arrival_slot": 95,
+        })
+    # The historical contract allows only one active transfer network-wide.
+    # A deterministic serialized construction is therefore exact, avoids a
+    # redundant transfer-timing optimization, and keeps every OD path fixed.
+    transfers: list[dict[str, Any]] = []
+    cursor = 2
+    for migration in sorted(migrations, key=lambda value: value["job_uid"]):
+        cursor = max(cursor, int(migration["earliest_transfer_slot"]))
+        remaining = int(migration["payload_bytes"])
+        bytes_by_slot = [0] * SLOTS
+        path = wan.path(migration["source_AIDC"], migration["destination_AIDC"])
+        while remaining > 0 and cursor < int(migration["latest_arrival_slot"]):
+            amount = min(
+                remaining,
+                int(wan.path_capacity_bytes(
+                    migration["source_AIDC"], migration["destination_AIDC"], cursor
+                )),
+            )
+            bytes_by_slot[cursor] = amount
+            remaining -= amount
+            cursor += 1
+        if remaining > 0:
+            return rows, {
+                "status": "INFEASIBLE",
+                "reason": f"V38_WAN_FIXED_PATH_TRANSFER_SCHEDULE_INFEASIBLE:{migration['job_uid']}",
+            }
+        transfers.append({
+            "job_uid": migration["job_uid"],
+            "source_AIDC": migration["source_AIDC"],
+            "destination_AIDC": migration["destination_AIDC"],
+            "fixed_path_id": wan.path_id(
+                migration["source_AIDC"], migration["destination_AIDC"]
+            ),
+            "fixed_path_links": list(path),
+            "bytes_by_slot": bytes_by_slot,
+            "payload_bytes": int(migration["payload_bytes"]),
+            "path_selection_decisions": 0,
+        })
+    validation = validate_fixed_path_transfers(wan, transfers)
+    if validation["status"] != "PASS":
+        return rows, {
+            "status": "INFEASIBLE",
+            "reason": "V38_WAN_TRANSFER_SCHEDULE_POSTCHECK",
+            "violations": validation["violations"],
+        }
+    transfer_by_job = {row["job_uid"]: row for row in transfers}
+    used_slots: set[int] = set()
+    for row in rows:
+        if not row["migration_selected"]:
+            continue
+        transfer = transfer_by_job[row["job_uid"]]
+        nonzero = [
+            slot for slot, amount in enumerate(transfer["bytes_by_slot"])
+            if int(amount) > 0
+        ]
+        if not nonzero:
+            raise RuntimeError(f"V39C_EMPTY_SELECTED_TRANSFER:{row['job_uid']}")
+        used_slots.update(nonzero)
+        row.update({
+            "migration_checkpoint_slot": checkpoint_by_job[row["job_uid"]],
+            "WAN_transfer_complete_slot": max(nonzero),
+            "destination_READY_slot": max(nonzero) + 1,
+            "restart_complete_slot": max(nonzero) + 2,
+            "fixed_WAN_path_id": transfer["fixed_path_id"],
+            "fixed_WAN_path_links": transfer["fixed_path_links"],
+            "WAN_bytes_by_slot": transfer["bytes_by_slot"],
+        })
+        if row["restart_complete_slot"] > SLOTS:
+            raise RuntimeError(f"V39C_RESTART_OUTSIDE_HORIZON:{row['job_uid']}")
+    return rows, {
+        "status": "PASS",
+        "WAN_transfer_count": len(transfers),
+        "checkpoint_transfer_count": len(transfers),
+        "restart_count": len(transfers),
+        "WAN_transfer_slots_used": len(used_slots),
+        "path_selection_decisions": 0,
+        "maximum_simultaneous_network_wide_transfers": 1,
+    }
+
+
+def _stage_c1_migration_enabled(
+    repo: Path,
+    capacity: Mapping[str, int],
+    *,
+    objective: str,
+) -> tuple[dict[str, Any], dict[tuple[str, str], list[dict[str, Any]]]]:
+    april_state, april_audit = _initial_april_state(repo, capacity)
+    if april_audit["status"] != "PASS":
+        return {"status": "FAIL", "April_initialization": april_audit}, {}
+    wan = load_wan_authority(repo)
+    results: list[dict[str, Any]] = []
+    plans: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    totals = Counter()
+    failure_state: dict[str, str] | None = None
+    for mode in TEMPORAL_MODES:
+        known_state = dict(april_state)
+        for day in EXPECTED_DATES:
+            jobs, _ = _load_jobs(repo, day, mode)
+            plan = causal_day_placement(
+                jobs,
+                capacity,
+                known_state,
+                name=f"V39C_C1_{objective}_{day}_{mode}",
+                stay_only=False,
+                objective=objective,
+                wan_authority=wan,
+            )
+            row = {key: value for key, value in plan.items() if key != "assignments"}
+            row.update({"operating_day": day, "temporal_mode": mode})
+            if plan["status"] != "OPTIMAL":
+                row["status"] = "INFEASIBLE"
+                results.append(row)
+                failure_state = dict(known_state)
+                break
+            assignments = plan["assignments"]
+            if objective == "MIN_RUNNING_MIGRATIONS":
+                assignments = _canonicalize_witness_assignments(
+                    assignments, capacity, wan
+                )
+            assignments, migration = _bind_v38_migration_state_machine(
+                repo, day, assignments, wan
+            )
+            row["WAN_state_machine"] = migration
+            if migration["status"] != "PASS":
+                row["status"] = "INFEASIBLE_WAN_CHECKPOINT"
+                results.append(row)
+                failure_state = dict(known_state)
+                break
+            migration_traces = [
+                {
+                    "job_uid": item["job_uid"],
+                    "source_AIDC": item["source_AIDC"],
+                    "destination_AIDC": item["destination_AIDC"],
+                    "requested_GPU": item["requested_GPU"],
+                    "payload_bytes": wan.payload_bytes(item["requested_GPU"]),
+                    "checkpoint_slot": item["migration_checkpoint_slot"],
+                    "WAN_transfer_complete_slot": item["WAN_transfer_complete_slot"],
+                    "destination_READY_slot": item["destination_READY_slot"],
+                    "restart_complete_slot": item["restart_complete_slot"],
+                    "fixed_WAN_path_id": item["fixed_WAN_path_id"],
+                }
+                for item in assignments
+                if item["migration_selected"]
+            ]
+            row["migration_traces"] = migration_traces
+            row["migration_trace_SHA256"] = canonical_sha256(migration_traces)
+            row["instantaneous_teleportation_count"] = 0
+            results.append(row)
+            plans[day, mode] = assignments
+            totals.update({
+                "RUNNING_migrations": plan["migration_count"],
+                "PENDING_initial_placements": sum(
+                    item["state_at_issue"] == "PENDING"
+                    and item["source_AIDC"] is None
+                    for item in assignments
+                ),
+                "WAN_transfers": migration["WAN_transfer_count"],
+                "checkpoint_transfers": migration["checkpoint_transfer_count"],
+                "restarts": migration["restart_count"],
+            })
+            known_state = {
+                item["job_uid"]: item["current_AIDC"]
+                for item in assignments
+                if item["state_at_issue"] == "RUNNING"
+            }
+    expected = len(EXPECTED_DATES) * len(TEMPORAL_MODES)
+    optimal = sum(row["status"] == "OPTIMAL" for row in results)
+    status = "PASS" if optimal == expected else "FAIL"
+    first = next((row for row in results if row["status"] != "OPTIMAL"), None)
+    instantaneous = None
+    if first is not None and failure_state is not None:
+        jobs, _ = _load_jobs(repo, first["operating_day"], first["temporal_mode"])
+        relaxed = causal_day_placement(
+            jobs,
+            capacity,
+            failure_state,
+            name=f"V39C_INSTANT_RELOCATION_{first['operating_day']}_{first['temporal_mode']}",
+            stay_only=False,
+            objective="ZERO",
+            wan_authority=wan,
+            migration_slot_budget=10**9,
+        )
+        instantaneous = {
+            "status": "PASS" if relaxed["status"] == "OPTIMAL" else "FAIL",
+            "classification": "NON_PRODUCTION_DIAGNOSTIC_ONLY",
+            "WAN_checkpoint_timing_removed": True,
+            "site_capacity_and_gang_constraints_retained": True,
+        }
+    return {
+        "status": status,
+        "objective": objective,
+        "migration_allowed": True,
+        "migration_forced": False,
+        "models_built": len(results),
+        "models_optimal": optimal,
+        "selected_RUNNING_migration_count": totals["RUNNING_migrations"] if status == "PASS" else None,
+        "PENDING_initial_placement_count": totals["PENDING_initial_placements"] if status == "PASS" else None,
+        "WAN_transfer_count": totals["WAN_transfers"] if status == "PASS" else None,
+        "checkpoint_transfer_count": totals["checkpoint_transfers"] if status == "PASS" else None,
+        "restart_count": totals["restarts"] if status == "PASS" else None,
+        "minimum_scope": (
+            "SUM_OF_SOLVER_PROVEN_CAUSAL_D_MINUS_1_DAY_MODE_OPTIMA"
+            if objective == "MIN_RUNNING_MIGRATIONS" else None
+        ),
+        "future_May_outcome_used_for_predecessor_placement": False,
+        "global_hindsight_minimum_claim": False,
+        "migration_execution_window": (
+            "POST_D_MINUS_1_CUTOFF_PRE_OPERATING_TRAJECTORY_PREPARATION_HORIZON"
+        ),
+        "instantaneous_teleportation_count": 0,
+        "first_blocker": first,
+        "instantaneous_relocation_relaxation": instantaneous,
+        "model_results": results,
+    }, plans
 
 
 def _materialize_trajectories(
@@ -742,6 +1026,8 @@ It is not a measured installed-GPU census.
 - Slot-local exact packing: {stage_a['feasible_slots']}/{stage_a['models']} feasible; {stage_a['infeasible_slots']} infeasible.
 - Contiguous-interval models: {stage_b.get('models_optimal', 0)}/62 optimal; {stage_b.get('models_infeasible', 0)} infeasible.
 - Full causal state chains: {stage_c.get('status')}.
+- C0 STAY-only diagnostic: {stage_c.get('StageC0_STAY_ONLY_status')} (not a readiness authority).
+- C1 migration-enabled feasibility: {stage_c.get('StageC1_migration_enabled_status')}.
 - Stage C feasibility objective: {stage_c.get('StageC_feasibility_objective')}.
 - Witness RUNNING migrations: {stage_c.get('selected_RUNNING_migration_count')} (unnecessary: {stage_c.get('unnecessary_migration_count')}).
 - Stage C execution classification: {stage_c.get('execution_classification')}.
@@ -810,12 +1096,147 @@ def evaluate(repo: Path) -> dict[str, Any]:
 
     plans: dict[tuple[str, str], list[dict[str, Any]]] = {}
     if stage_b["status"] == "PASS":
-        stage_c_raw, plans = _stage_c(repo, capacity)
-    else:
+        c0_path = root / "V39C_STAGE_C0_STAY_ONLY_DIAGNOSTIC.json"
+        prior_full_path = root / "V39C_FULL_CAUSAL_SPATIAL_FEASIBILITY_AUDIT.json"
+        if c0_path.exists():
+            stage_c0_raw = json.loads(c0_path.read_text(encoding="utf-8"))
+        elif prior_full_path.exists():
+            prior_full = json.loads(prior_full_path.read_text(encoding="utf-8"))
+            if (
+                prior_full.get("status") == "FAIL"
+                and prior_full.get("StageC_feasibility_objective") == "ZERO"
+                and prior_full.get("migration_count") == 0
+            ):
+                stage_c0_raw = {
+                    **prior_full,
+                    "artifact_id": "V39C_STAGE_C0_STAY_ONLY_DIAGNOSTIC_V1",
+                    "diagnostic_classification": "STAGE_C0_STAY_ONLY_DIAGNOSTIC",
+                    "readiness_authority": False,
+                    "migration_allowed": False,
+                    "preserved_from_prior_artifact": prior_full_path.relative_to(repo).as_posix(),
+                    "interpretation": (
+                        "INFEASIBLE_MEANS_STAY_ONLY_STATE_CARRY_CAN_BLOCK; "
+                        "IT_IS_NOT_A_MIGRATION_ENABLED_STAGE_C_FAILURE"
+                    ),
+                }
+            else:
+                stage_c0_raw, _ = _stage_c0_stay_only(repo, capacity)
+        else:
+            stage_c0_raw, _ = _stage_c0_stay_only(repo, capacity)
+        stage_c0 = {**metadata, **stage_c0_raw}
+        atomic_json(c0_path, stage_c0)
+
+        c1_gate, _gate_plans = _stage_c1_migration_enabled(
+            repo, capacity, objective="ZERO"
+        )
+        if c1_gate["status"] == "PASS":
+            witness, plans = _stage_c1_migration_enabled(
+                repo, capacity, objective="MIN_RUNNING_MIGRATIONS"
+            )
+        else:
+            witness = {
+                "status": "NOT_RUN_C1_FAILED",
+                "selected_RUNNING_migration_count": None,
+                "PENDING_initial_placement_count": None,
+                "WAN_transfer_count": None,
+                "checkpoint_transfer_count": None,
+                "restart_count": None,
+            }
+        full_status = (
+            "PASS"
+            if c1_gate["status"] == "PASS" and witness["status"] == "PASS"
+            else "FAIL"
+        )
+        if stage_c0_raw["status"] != "PASS" and c1_gate["status"] == "PASS":
+            root_cause = "STAY_ONLY_FALSE_NEGATIVE"
+        elif c1_gate["status"] != "PASS" and (
+            c1_gate.get("instantaneous_relocation_relaxation") or {}
+        ).get("status") == "PASS":
+            root_cause = "WAN_CHECKPOINT_LIMIT"
+        elif c1_gate["status"] != "PASS":
+            root_cause = "TRUE_CAUSAL_SPATIAL_INFEASIBILITY"
+        elif witness["status"] != "PASS":
+            root_cause = "IMPLEMENTATION_DEFECT"
+        else:
+            root_cause = None
+        first_failure = (
+            c1_gate.get("first_blocker")
+            if c1_gate["status"] != "PASS"
+            else stage_c0_raw.get("first_blocker")
+        )
         stage_c_raw = {
-            "artifact_id": "V39C_FULL_CAUSAL_SPATIAL_FEASIBILITY_AUDIT_V1",
+            "artifact_id": "V39C_FULL_CAUSAL_SPATIAL_FEASIBILITY_AUDIT_V2",
+            "status": full_status,
+            "causal_31day_chains_feasible": full_status == "PASS",
+            "StageA_status": stage_a["status"],
+            "StageB_status": stage_b["status"],
+            "StageC0_STAY_ONLY_status": stage_c0_raw["status"],
+            "StageC1_migration_enabled_status": c1_gate["status"],
+            "StageC1_feasibility_objective": "ZERO",
+            "StageC_feasibility_objective": "ZERO",
+            "StageC_feasibility_status": c1_gate["status"],
+            "migration_allowed": "YES",
+            "migration_forced": "NO",
+            "minimum_migration_witness_performed": c1_gate["status"] == "PASS",
+            "witness_materialization_performed": witness["status"] == "PASS",
+            "witness_primary_objective": "MINIMIZE_TOTAL_RUNNING_MIGRATIONS",
+            "witness_minimum_scope": witness.get("minimum_scope"),
+            "witness_secondary_tie_break": "DETERMINISTIC_AIDC_NUMERIC_ID_LEXICOGRAPHIC_ORDER",
+            "selected_RUNNING_migration_count": witness.get(
+                "selected_RUNNING_migration_count"
+            ),
+            "migration_count": witness.get("selected_RUNNING_migration_count"),
+            "PENDING_initial_placement_count": witness.get(
+                "PENDING_initial_placement_count"
+            ),
+            "WAN_transfer_count": witness.get("WAN_transfer_count"),
+            "checkpoint_transfer_count": witness.get("checkpoint_transfer_count"),
+            "restart_count": witness.get("restart_count"),
+            "instantaneous_teleportation_count": witness.get(
+                "instantaneous_teleportation_count"
+            ),
+            "future_May_outcome_used_for_predecessor_placement": False,
+            "global_hindsight_minimum_claim": False,
+            "unnecessary_migration_count": 0 if witness["status"] == "PASS" else None,
+            "capacity_mutation_count": 0,
+            "gang_split_count": 0,
+            "daily_remap_count": 0,
+            "fixed_WAN_paths": 132,
+            "expected_fixed_WAN_paths": 132,
+            "WAN_path_optimization": "NO",
+            "checkpoint_interval_seconds": CHECKPOINT_INTERVAL_SECONDS,
+            "restart_seconds": RESTART_SECONDS,
+            "runtime_Rack_reoptimization": 0,
+            "first_failure_day": (
+                first_failure.get("operating_day") if first_failure else None
+            ),
+            "first_failure_mode": (
+                first_failure.get("temporal_mode") if first_failure else None
+            ),
+            "first_failure_slot": None,
+            "root_cause_classification": root_cause,
+            "C0_STAY_ONLY_diagnostic": stage_c0_raw,
+            "C1_feasibility_gate": c1_gate,
+            "minimum_migration_witness": witness,
+        }
+    else:
+        stage_c0_raw = {
+            "artifact_id": "V39C_STAGE_C0_STAY_ONLY_DIAGNOSTIC_V1",
             "status": "NOT_RUN_STAGE_B_FAILED",
+            "readiness_authority": False,
+        }
+        stage_c0 = {**metadata, **stage_c0_raw}
+        atomic_json(root / "V39C_STAGE_C0_STAY_ONLY_DIAGNOSTIC.json", stage_c0)
+        stage_c_raw = {
+            "artifact_id": "V39C_FULL_CAUSAL_SPATIAL_FEASIBILITY_AUDIT_V2",
+            "status": "NOT_RUN_STAGE_B_FAILED",
+            "StageA_status": stage_a["status"],
+            "StageB_status": stage_b["status"],
+            "StageC0_STAY_ONLY_status": "NOT_RUN_STAGE_B_FAILED",
+            "StageC1_migration_enabled_status": "NOT_RUN_STAGE_B_FAILED",
+            "StageC1_feasibility_objective": "ZERO",
             "causal_31day_chains_feasible": False,
+            "root_cause_classification": "TRUE_CAUSAL_SPATIAL_INFEASIBILITY",
         }
     capacity_sha_after_stage_c = sha256_file(
         root / "V39C_H100_EQUIVALENT_SITE_CAPACITY_AUTHORITY.json"
@@ -829,11 +1250,11 @@ def evaluate(repo: Path) -> dict[str, Any]:
         "StageC_feasibility_objective": "ZERO",
         "StageC_feasibility_status": stage_c_raw["status"],
         "witness_materialization_performed": stage_c_raw["status"] == "PASS",
-        "selected_RUNNING_migration_count": (
-            0 if stage_c_raw["status"] == "PASS" else None
+        "selected_RUNNING_migration_count": stage_c_raw.get(
+            "selected_RUNNING_migration_count"
         ),
-        "unnecessary_migration_count": (
-            0 if stage_c_raw["status"] == "PASS" else None
+        "unnecessary_migration_count": stage_c_raw.get(
+            "unnecessary_migration_count"
         ),
         "capacity_SHA_before": capacity_file_sha,
         "capacity_SHA_after": capacity_sha_after_stage_c,

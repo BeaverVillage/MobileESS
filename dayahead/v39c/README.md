@@ -12,4 +12,16 @@ evaluation. May results cannot feed back into the numeric vector. Evaluation
 then retains the V37 RW/RSP schedules byte-for-byte and tests slot-local,
 contiguous-interval, and causal stateful AIDC placement in sequence.
 
+Stage C preserves the zero-migration result as a non-authoritative C0
+STAY-only diagnostic.  The readiness gate is C1: RUNNING jobs carry their
+source `current_AIDC` but may stay or complete a frozen-path V38 checkpoint,
+serialized inter-AIDC WAN transfer, READY transition, and restart.  C1 uses a
+literal zero feasibility objective.  Only after C1 passes, a separate causal
+witness solve minimizes RUNNING migrations; PENDING initial placement is not a
+migration.  A deterministic numeric-AIDC feasibility-preserving pass resolves
+placement ties without peak-utilization, grid, Fresh, or May-result objectives.
+
+Stage C execution classification:
+`SCIENCE_NEUTRAL_FEASIBILITY_EXECUTION_SIMPLIFICATION`.
+
 Classification: `POSTHOC_ENGINEERING_CAPACITY_REFREEZE`.
