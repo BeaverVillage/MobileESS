@@ -5,6 +5,7 @@ from pathlib import Path
 import subprocess
 
 from dayahead.v37.status import atomic_json, monitor_view, read_json, write_status
+from dayahead.v37.contracts import CAMPAIGN_LOCK, DATE_RESULT_ROOT, PRODUCTION_PREFLIGHT
 from dayahead.v37.campaign import (
     _complete_terminal_result,
     acquire_lock,
@@ -104,14 +105,8 @@ def test_terminal_date_reuse_requires_current_implementation_fingerprint(
     tmp_path: Path,
 ) -> None:
     day = "2025-05-01"
-    readiness = (
-        tmp_path / "dayahead/artifacts/v37_r3_restore_intended_cuts/"
-        "V37_MAY_FINAL_RUN_READINESS.json"
-    )
-    result = (
-        tmp_path / "dayahead/artifacts/v37_may_locked_final/dates"
-        / f"{day}.json"
-    )
+    readiness = tmp_path / PRODUCTION_PREFLIGHT
+    result = tmp_path / DATE_RESULT_ROOT / f"{day}.json"
     atomic_json(readiness, {"final_implementation_fingerprint_sha256": "new"})
     terminal = {"status": "PASS"}
     old_payload = {
@@ -130,7 +125,7 @@ def test_terminal_date_reuse_requires_current_implementation_fingerprint(
         "final_implementation_fingerprint_sha256": "new",
     })
     assert _complete_terminal_result(tmp_path, day, terminal) is True
-    lock = tmp_path / "dayahead/artifacts/v37_may_locked_final/V37_CAMPAIGN.lock.json"
+    lock = tmp_path / CAMPAIGN_LOCK
     atomic_json(lock, {"pid": 999_999_999, "artifact_id": "STALE_TEST"})
     acquired_after_stale, _new = acquire_lock(tmp_path)
     assert acquired_after_stale is True
@@ -225,7 +220,7 @@ def test_powershell_monitor_renders_31_date_complete_screen(tmp_path: Path) -> N
         day = f"2025-05-{day_index:02d}"
         atomic_json(status_root / f"{day}.json", _row(day, status="PASS"))
     text = _render(status_root)
-    assert "V37 MAY LOCKED FINAL - COMPLETE" in text
+    assert "V37-R4A MAY PER-DAY FINAL - COMPLETE" in text
     assert "PASS  31" in text
     assert "ACTIVE  0" in text
     assert "REMAIN  0" in text

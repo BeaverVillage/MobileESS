@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import Counter
 import csv
 from datetime import datetime, timezone
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -16,11 +17,13 @@ from typing import Any, Iterable, Mapping
 
 import psutil
 
+from dayahead.v28r2.source_cache import day_root
+
 from .contracts import (
-    ARTIFACT_ROOT, BRANCH, CAMPAIGN_LOCK, DATE_MANIFEST, DATE_RESULT_ROOT,
+    ARTIFACT_ROOT, BRANCH, CACHE_ROOT, CAMPAIGN_LOCK, DATE_MANIFEST, DATE_RESULT_ROOT,
     EXPECTED_DATES, FIREWALL, LOG_ROOT, MAX_PARALLEL_DATES,
     MAX_WORKERS_PER_DATE, PARENT_HEAD, SOURCE_DATA_REPOSITORY,
-    STATUS_ROOT, WSL_DISTRIBUTION, WSL_PYTHON,
+    PASS_ID, PRODUCTION_PREFLIGHT, STATUS_ROOT, WSL_DISTRIBUTION, WSL_PYTHON,
 )
 from .manifest import build_date_manifest
 from .status import atomic_json, read_json, write_status
@@ -80,11 +83,59 @@ def _windows_to_wsl(path: Path) -> str:
     raise RuntimeError(f"V37_WSL_PATH:{value}")
 
 
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _source_readiness_identity(repo: Path, days: list[str]) -> str:
+    paths = [
+        repo / "dayahead/v37/sources.py",
+        repo / "dayahead/v37/aidc_materializer.py",
+        repo / "dayahead/v37r3/restoration.py",
+        repo / "dayahead/artifacts/v37_r4a_per_day_aidc/V37_R4A_MAY_AIDC_31DAY_PREFLIGHT.json",
+    ]
+    for day in days:
+        source = day_root(SOURCE_DATA_REPOSITORY, day)
+        paths.extend([
+            repo / "dayahead/artifacts/v37_r4a_per_day_aidc/days" / day / "V37_R4A_DAY_MANIFEST.json",
+            source / "source_day_manifest.json",
+            source / "aemo_forecast.json",
+            source / "gfs_d1_weather.parquet",
+            source / "kestrel_d1_scheduler_snapshot.parquet",
+            repo / CACHE_ROOT / "traffic/shared/traffic" / day / "TRAFFIC_FORECAST.npz",
+            repo / CACHE_ROOT / "traffic/shared/traffic" / day / "ROUTE_TABLE.json.gz",
+            repo / CACHE_ROOT / "electrical" / day / "data" / f"D1_AC_ANCHOR_SENSITIVITY_{day}.npz",
+            repo / CACHE_ROOT / "electrical" / day / "data" / f"D1_AC_ANCHOR_CURRENT_SENSITIVITY_{day}.npz",
+        ])
+    if any(not path.is_file() for path in paths):
+        return "MISSING"
+    def label(path: Path) -> str:
+        try:
+            return str(path.resolve().relative_to(repo.resolve())).replace("\\", "/")
+        except ValueError:
+            return str(path.resolve()).replace("\\", "/")
+
+    payload = [(label(path), _file_sha256(path)) for path in paths]
+    return hashlib.sha256(json.dumps(payload, separators=(",", ":")).encode()).hexdigest()
+
+
 def materialize_sources(repo: Path, days: list[str]) -> dict[str, Any]:
     output = repo / ARTIFACT_ROOT / "V37_MAY_SOURCE_MATERIALIZATION.json"
+    identity = _source_readiness_identity(repo, days)
     if output.is_file():
         prior = read_json(output)
-        if prior.get("status") == "PASS" and set(prior.get("requested_dates", [])) == set(days):
+        if (
+            prior.get("status") == "PASS"
+            and prior.get("readiness_identity_sha256") == identity
+            and prior.get("requested_dates") == days
+            and int(prior.get("requested_count", -1)) == len(days)
+            and int(prior.get("runnable_count", -1)) == len(days)
+            and int(prior.get("failed_count", -1)) == 0
+        ):
             return prior
     command = [
         "wsl.exe", "-d", WSL_DISTRIBUTION, "--", WSL_PYTHON,
@@ -98,7 +149,23 @@ def materialize_sources(repo: Path, days: list[str]) -> dict[str, Any]:
             "status": "FAIL", "requested_dates": days, "runnable_dates": [],
             "failed_dates": {day: [f"SOURCE_MATERIALIZER_EXIT_{completed.returncode}"] for day in days},
         }
-    return read_json(output)
+    result = read_json(output)
+    # Source files may have been absent before this repair run; fingerprint the
+    # post-materialization bytes that the production loader will actually use.
+    identity = _source_readiness_identity(repo, days)
+    result["readiness_identity_sha256"] = identity
+    result["readiness_identity_components"] = (
+        "R4A_AIDC+KESTREL_SNAPSHOT+TRAFFIC+ELECTRICAL+RESTORATION"
+    )
+    if (
+        result.get("status") != "PASS"
+        or int(result.get("requested_count", -1)) != len(days)
+        or int(result.get("runnable_count", len(result.get("runnable_dates", [])))) != len(days)
+        or int(result.get("failed_count", len(result.get("failed_dates", {})))) != 0
+    ):
+        result["status"] = "FAIL"
+    atomic_json(output, result)
+    return result
 
 
 def _distribution(values: Iterable[float]) -> dict[str, float | int | None]:
@@ -119,11 +186,7 @@ def _complete_terminal_result(repo: Path, day: str, status: Mapping[str, Any]) -
         return False
     try:
         result = read_json(path)
-        readiness = read_json(
-            repo
-            / "dayahead/artifacts/v37_r3_restore_intended_cuts/"
-            "V37_MAY_FINAL_RUN_READINESS.json"
-        )
+        readiness = read_json(repo / PRODUCTION_PREFLIGHT)
     except (OSError, ValueError, json.JSONDecodeError):
         return False
     expected_fingerprint = readiness.get("final_implementation_fingerprint_sha256")
@@ -140,7 +203,7 @@ def _date_wallclock_seconds(repo: Path, day: str, fallback: float) -> float:
     starts: list[datetime] = []
     ends: list[datetime] = []
     for case in ("B0", "B1", "B2", "B3"):
-        path = repo / "frozen_artifacts/v36_final_schema" / "MAY_2025_LOCKED_FINAL" / day / case / "inputs/RUN_PROVENANCE.json"
+        path = repo / "frozen_artifacts/v36_final_schema" / PASS_ID / day / case / "inputs/RUN_PROVENANCE.json"
         if not path.is_file():
             continue
         provenance = read_json(path)
@@ -319,6 +382,13 @@ def run_campaign(repo: Path) -> dict[str, Any]:
         (repo / DATE_RESULT_ROOT).mkdir(parents=True, exist_ok=True)
         (repo / LOG_ROOT).mkdir(parents=True, exist_ok=True)
         manifest = build_date_manifest(repo)
+        if (
+            manifest.get("status") != "PASS"
+            or int(manifest.get("expected_count", -1)) != len(EXPECTED_DATES)
+            or int(manifest.get("runnable_count", -1)) != len(EXPECTED_DATES)
+            or int(manifest.get("missing_count", -1)) != 0
+        ):
+            raise RuntimeError("V37_R4A_DATE_MANIFEST_NOT_31_OF_31")
         for missing in manifest["missing_dates"]:
             day = missing["date"]
             error = ";".join(missing["reasons"])
@@ -336,6 +406,13 @@ def run_campaign(repo: Path) -> dict[str, Any]:
                 write_status(status_path, day, "PENDING", 0, "SOURCE_PREPARATION")
         print(f"V37 source materialization: {len(manifest['runnable_dates'])} dates", flush=True)
         source_report = materialize_sources(repo, list(manifest["runnable_dates"]))
+        if (
+            source_report.get("status") != "PASS"
+            or int(source_report.get("requested_count", -1)) != len(EXPECTED_DATES)
+            or int(source_report.get("runnable_count", -1)) != len(EXPECTED_DATES)
+            or int(source_report.get("failed_count", -1)) != 0
+        ):
+            raise RuntimeError("V37_R4A_SOURCE_MATERIALIZATION_NOT_31_OF_31")
         source_runnable = set(source_report.get("runnable_dates", []))
         newly_missing = []
         for day in manifest["runnable_dates"]:

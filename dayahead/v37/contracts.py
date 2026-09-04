@@ -24,10 +24,10 @@ AIDC_HEAD = "aa1a113abdd6eb1bc76cf3bfdcb6dcdb29660b2e"
 MESS_HEAD = "a5c46a5c8b06e97e9e13a2078cb801fe51b240a9"
 AIDC_PRIMARY_SCENARIO = "CENTER"
 CENTER_SWING_W_PER_GPU = 547.7239090195797
-EXPANDED_TEMPORAL_JOBS = 339
-EXPANDED_TEMPORAL_GPU_HOURS = 14_832
-PARTIAL_SHARED_TEMPORAL_JOBS = 336
-PARTIAL_SHARED_TEMPORAL_GPU_HOURS = 14_256
+APR01_EXPANDED_TEMPORAL_JOBS = 339
+APR01_EXPANDED_TEMPORAL_GPU_HOURS = 14_832
+APR01_PARTIAL_SHARED_TEMPORAL_JOBS = 336
+APR01_PARTIAL_SHARED_TEMPORAL_GPU_HOURS = 14_256
 
 DEFAULT_K = 200
 K_FALLBACK = (200, 400, 800, "FULL")
@@ -36,13 +36,13 @@ BEAM_WIDTH_FALLBACK = 4
 SEED_WIDTH = 2
 MESS_ORDER = ("MESS01", "MESS02", "MESS03", "MESS04")
 
-ARTIFACT_ROOT = Path("dayahead/artifacts/v37_may_locked_final")
+ARTIFACT_ROOT = Path("dayahead/artifacts/v37_may_r4a_per_day_final")
 STATUS_ROOT = ARTIFACT_ROOT / "status"
 DATE_RESULT_ROOT = ARTIFACT_ROOT / "dates"
-LOG_ROOT = Path("logs/v37_may_locked_final")
+LOG_ROOT = Path("logs/v37_may_r4a_per_day_final")
 CACHE_ROOT = Path("dayahead/cache/v37_may_locked_final")
 RAW_ROOT = Path("frozen_artifacts/v36_final_schema")
-PASS_ID = "MAY_2025_LOCKED_FINAL"
+PASS_ID = "MAY_2025_R4A_PER_DAY_FINAL"
 PHASE = "LOCKED_FINAL_EVALUATION"
 
 SOURCE_DATA_REPOSITORY = Path(
@@ -52,6 +52,10 @@ WSL_DISTRIBUTION = "Ubuntu-MobileESS-D"
 WSL_PYTHON = "/home/jaewon/.cache/mobileess-v28r2/venv/bin/python"
 
 DATE_MANIFEST = ARTIFACT_ROOT / "V37_MAY_DATE_MANIFEST.json"
+PRODUCTION_PREFLIGHT = Path(
+    "dayahead/artifacts/v37_r4_may_campaign_repair/"
+    "V37_R4_MAY_31DAY_PRODUCTION_PREFLIGHT.json"
+)
 CAMPAIGN_LOCK = ARTIFACT_ROOT / "V37_CAMPAIGN.lock.json"
 MONITOR_LOCK = ARTIFACT_ROOT / "V37_MONITOR.lock.json"
 
@@ -62,7 +66,10 @@ FIREWALL = {
     "May_result_used_to_tune_CENTER": "NO",
     "May_result_used_to_tune_MESS": "NO",
     "IDC_location_changed": "NO",
-    "Fresh_used_for_decisions": "NO",
+    "Fresh_used_for_AIDC_or_MESS_initial_decisions": "NO",
+    "Fresh_used_for_post_selection_AC_feasibility_detection": "YES",
+    "Fresh_used_by_frozen_fixed_discrete_PQ_restoration": "YES",
+    "Fresh_changes_MESS_destination_route_departure_or_move": "NO",
     "LOW_HIGH_official_runs": 0,
     "Apr01_rerun": "NO",
 }

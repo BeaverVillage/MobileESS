@@ -12,13 +12,13 @@ if (-not $ProjectRoot) {
     $ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 }
 if (-not $StatusRoot) {
-    $StatusRoot = Join-Path $ProjectRoot 'dayahead\artifacts\v37_may_locked_final\status'
+    $StatusRoot = Join-Path $ProjectRoot 'dayahead\artifacts\v37_may_r4a_per_day_final\status'
 }
-$artifactRoot = Join-Path $ProjectRoot 'dayahead\artifacts\v37_may_locked_final'
+$artifactRoot = Join-Path $ProjectRoot 'dayahead\artifacts\v37_may_r4a_per_day_final'
 $lockPath = Join-Path $artifactRoot 'V37_MONITOR.lock.json'
 $summaryPath = Join-Path $artifactRoot 'V37_MAY_FINAL_REVIEW.md'
 $meetingPath = Join-Path $artifactRoot 'V37_MAY_MEETING_TABLE.csv'
-[Console]::Title = 'MobileESS V37 May Final Monitor'
+[Console]::Title = 'MobileESS V37-R4A May Per-Day Final Monitor'
 New-Item -ItemType Directory -Force -Path $StatusRoot | Out-Null
 
 function Test-LivePid([int]$ProcessId) {
@@ -121,9 +121,9 @@ try {
             if (-not $Once) { Clear-Host }
             Write-Host '=========================================================='
             if ($view.complete) {
-                Write-Host ' V37 MAY LOCKED FINAL - COMPLETE'
+                Write-Host ' V37-R4A MAY PER-DAY FINAL - COMPLETE'
             } else {
-                Write-Host " V37 MAY LOCKED FINAL | 4 DAYS PARALLEL | REFRESH ${RefreshSeconds}s"
+                Write-Host " V37-R4A MAY PER-DAY FINAL | 4 DAYS PARALLEL | REFRESH ${RefreshSeconds}s"
             }
             Write-Host (" PASS  {0}   FAIL  {1}   ACTIVE  {2}   REMAIN  {3}" -f $view.PASS,$view.FAIL,$view.ACTIVE,$view.REMAIN)
             Write-Host '=========================================================='

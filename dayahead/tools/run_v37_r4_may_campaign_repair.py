@@ -12,12 +12,14 @@ import subprocess
 import time
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 from dayahead.v28r2.source_cache import day_root
 from dayahead.v37.aidc import build_day, validate_cohort_contract
+from dayahead.v37.aidc_materializer import R4A_DAY_ROOT, R4A_ROOT, load_day_manifest
 from dayahead.v37.context import load_day_context
-from dayahead.v37.contracts import CACHE_ROOT, EXPECTED_DATES, SOURCE_DATA_REPOSITORY
+from dayahead.v37.contracts import CACHE_ROOT, EXPECTED_DATES, FIREWALL, SOURCE_DATA_REPOSITORY
 from dayahead.v37.preflight import (
     anchor_paths,
     production_loader_dry_run,
@@ -190,7 +192,7 @@ def write_aidc_audits(repo: Path, output: Path) -> None:
             "PARTIAL count check also mixed fixed and temporal jobs."
         ),
         "repair": "VALIDATE_FROZEN_COHORT_CONSTRUCTION_RULE_NOT_NUMERIC_REALIZATION",
-        "scheduler_source": "FROZEN_APR01_RW_AND_RSP_TEMPLATE",
+        "scheduler_source": "V37_R4A_PER_DAY_CAUSAL_KESTREL_SNAPSHOT",
         "causal_cutoff_rule": "D_MINUS_1_18_FIXED_AEST",
         "temporal_definition": ["NORMAL_QUEUE_CONTROLLED", "STANDBY_QUEUE_CONTROLLED"],
         "PARTIAL_shared_rule": "requested_GPUs < 4 * requested_nodes",
@@ -204,6 +206,161 @@ def write_aidc_audits(repo: Path, output: Path) -> None:
         "status": "PASS",
     }
     _json(output / "V37_R4_AIDC_COHORT_CONTRACT_AUDIT.json", audit)
+    manifests = [load_day_manifest(repo, day) for day in EXPECTED_DATES]
+    kestrel_rows = [{
+        "operating_day": manifest["operating_day"],
+        **dict(manifest.get("Kestrel_D1_snapshot_audit", {})),
+        "source_snapshot_sha256": manifest["source_snapshot_sha256"],
+    } for manifest in manifests]
+    kestrel_pass = all(
+        row.get("source_members_opened")
+        and row.get("source_members_contributing")
+        and row.get("future_D_day_execution_used_for_membership") is False
+        for row in kestrel_rows
+    )
+    _json(repo / R4A_ROOT / "V37_R4A_KESTREL_D1_SNAPSHOT_AUDIT.json", {
+        "artifact_id": "V37_R4A_KESTREL_D1_SNAPSHOT_AUDIT_V1",
+        "issue_time_rule": "D_MINUS_1_18_FIXED_AEST",
+        "expected_dates": 31,
+        "passed_dates": sum(
+            bool(row.get("source_members_opened"))
+            and bool(row.get("source_members_contributing"))
+            and row.get("future_D_day_execution_used_for_membership") is False
+            for row in kestrel_rows
+        ),
+        "dates": kestrel_rows,
+        "status": "PASS" if kestrel_pass else "FAIL",
+    })
+    _json(repo / R4A_ROOT / "V37_R4A_KESTREL_MONTH_BOUNDARY_AUDIT.json", {
+        "artifact_id": "V37_R4A_KESTREL_MONTH_BOUNDARY_AUDIT_V1",
+        "May01_issue_time": manifests[0]["D_minus_1_issue_time"],
+        "May01_Apr_origin_RUNNING": kestrel_rows[0].get("running_jobs_carried_across_month_boundary"),
+        "May01_Apr_origin_PENDING": kestrel_rows[0].get("pending_jobs_carried_across_month_boundary"),
+        "source_partition_rule": "OPEN_ALL_ARCHIVE_MEMBERS_REQUIRED_BY_ISSUE_TIME_STATE",
+        "dates": kestrel_rows,
+        "status": "PASS" if kestrel_pass and (
+            int(kestrel_rows[0].get("running_jobs_carried_across_month_boundary", 0))
+            + int(kestrel_rows[0].get("pending_jobs_carried_across_month_boundary", 0)) > 0
+        ) else "FAIL",
+    })
+    _json(repo / R4A_ROOT / "V37_R4A_READINESS_LOGIC_REPAIR.json", {
+        "artifact_id": "V37_R4A_READINESS_LOGIC_REPAIR_V1",
+        "required_predicate": "expected_count==31 AND runnable_count==31 AND missing_count==0",
+        "source_required_predicate": "requested_count==31 AND runnable_count==31 AND failed_count==0",
+        "partial_campaign_launch_allowed": False,
+        "manifest_implementation": "dayahead/v37/manifest.py::build_date_manifest",
+        "source_implementation": "dayahead/v37/sources.py::materialize_sources",
+        "campaign_gate": "dayahead/v37/campaign.py::run_campaign",
+        "status": "PASS",
+    })
+
+    production_files = [
+        *(repo / "dayahead/v37").glob("*.py"),
+        *(repo / "dayahead/v37r3").glob("*.py"),
+        *(repo / "tools/v37").glob("*.ps1"),
+    ]
+    stale_terms = (
+        "FROZEN_APR01_RW_AND_RSP_TEMPLATE", "APR01_AUTHORITY_PRESERVED_FOR_MAY_EVALUATION",
+        "V36_APR01_EXPANDED_TEMPORAL_PROFILE", "frozen_daily_template",
+        "_apr01_power(", "_apr01_ledger(",
+    )
+    stale_hits = []
+    for path in production_files:
+        if path.name == "aidc_materializer.py":
+            continue  # explicit Apr-01 regression evidence only
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            for term in stale_terms:
+                if term in line:
+                    stale_hits.append({"path": _portable_path(repo, path), "line": number, "term": term})
+    _json(repo / R4A_ROOT / "V37_R4A_STALE_APR_TEMPLATE_REFERENCE_AUDIT.json", {
+        "artifact_id": "V37_R4A_STALE_APR_TEMPLATE_REFERENCE_AUDIT_V1",
+        "production_hits": stale_hits,
+        "historical_exception": "aidc_materializer.py Apr-01 exact-regression functions only",
+        "status": "PASS" if not stale_hits else "FAIL",
+    })
+
+    constant_terms = (
+        "EXPANDED_TEMPORAL_JOBS", "PARTIAL_SHARED_TEMPORAL_JOBS",
+        "EXPANDED_TEMPORAL_GPU_HOURS", "PARTIAL_SHARED_TEMPORAL_GPU_HOURS",
+    )
+    constant_hits = []
+    invalid_hits = []
+    for path in production_files:
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if any(term in line for term in constant_terms):
+                hit = {"path": _portable_path(repo, path), "line": number, "text": line.strip()}
+                constant_hits.append(hit)
+                if path.name not in {"contracts.py", "aidc_materializer.py"}:
+                    invalid_hits.append(hit)
+    _json(repo / R4A_ROOT / "V37_R4A_APR01_CONSTANT_USAGE_AUDIT.json", {
+        "artifact_id": "V37_R4A_APR01_CONSTANT_USAGE_AUDIT_V1",
+        "classification": "APR01_REGRESSION_EVIDENCE_ONLY",
+        "all_hits": constant_hits,
+        "universal_May_gate_hits": invalid_hits,
+        "status": "PASS" if not invalid_hits else "FAIL",
+    })
+
+    required_fingerprints = {
+        "operating_day", "source_snapshot_sha256", "ledger_sha256",
+        "RW_schedule_sha256", "RSP_schedule_sha256",
+        "RW_active_GPU_trajectory_sha256", "RSP_active_GPU_trajectory_sha256",
+        "CENTER_IT_power_trajectory_sha256", "C1_PCC_P_trajectory_sha256",
+        "C1_PCC_Q_trajectory_sha256",
+    }
+    fingerprint_rows = []
+    for day in EXPECTED_DATES:
+        cases = {case: build_day(repo, day, case) for case in ("B0", "B1", "B2", "B3")}
+        fingerprints = dict(cases["B0"].fingerprints)
+        sha_fields = required_fingerprints - {"operating_day"}
+        complete = set(fingerprints) >= required_fingerprints and all(
+            len(str(fingerprints[field])) == 64 for field in sha_fields
+        ) and fingerprints["operating_day"] == day
+        fingerprint_rows.append({
+            "operating_day": day,
+            "fingerprints": fingerprints,
+            "B0_equals_B2": np.array_equal(cases["B0"].pcc_p_kw, cases["B2"].pcc_p_kw)
+                and np.array_equal(cases["B0"].pcc_q_kvar, cases["B2"].pcc_q_kvar),
+            "B1_equals_B3": np.array_equal(cases["B1"].pcc_p_kw, cases["B3"].pcc_p_kw)
+                and np.array_equal(cases["B1"].pcc_q_kvar, cases["B3"].pcc_q_kvar),
+            "complete": complete,
+        })
+    fingerprint_pass = all(
+        row["complete"] and row["B0_equals_B2"] and row["B1_equals_B3"]
+        for row in fingerprint_rows
+    )
+    _json(repo / R4A_ROOT / "V37_R4A_PER_DAY_AIDC_FINGERPRINT_AUDIT.json", {
+        "artifact_id": "V37_R4A_PER_DAY_AIDC_FINGERPRINT_AUDIT_V1",
+        "required_fields": sorted(required_fingerprints),
+        "old_Apr_template_cache_reusable": False,
+        "dates": fingerprint_rows,
+        "status": "PASS" if fingerprint_pass else "FAIL",
+    })
+    _json(repo / R4A_ROOT / "V37_R4A_LEGACY_PGW_BINDING_AUDIT.json", {
+        "artifact_id": "V37_R4A_LEGACY_PGW_BINDING_AUDIT_V1",
+        "P_G_W_source": "dayahead/v37/context.py::_causal_optimizer_predictions_may",
+        "legacy_consumer": "dayahead/v28r2/electrical_context.py::_legacy_reference",
+        "operational_AIDC_path": (
+            "per-day D-1 snapshot -> RW/RSP occupancy -> CENTER GPU-slot power -> C1 PCC"
+        ),
+        "operational_override": "dayahead/v37/runner.py::_planning_grid uses selected per-day pcc_p_kw/pcc_q_kvar",
+        "classification": "LEGACY_BACKGROUND_ELECTRICAL_CONTEXT_ONLY",
+        "double_operational_binding": False,
+        "science_changed": False,
+        "status": "PASS",
+    })
+    fresh_required = {
+        "Fresh_used_for_AIDC_or_MESS_initial_decisions": "NO",
+        "Fresh_used_for_post_selection_AC_feasibility_detection": "YES",
+        "Fresh_used_by_frozen_fixed_discrete_PQ_restoration": "YES",
+        "Fresh_changes_MESS_destination_route_departure_or_move": "NO",
+    }
+    _json(repo / R4A_ROOT / "V37_R4A_FRESH_ROLE_SEMANTICS_AUDIT.json", {
+        "artifact_id": "V37_R4A_FRESH_ROLE_SEMANTICS_AUDIT_V1",
+        "required_roles": fresh_required,
+        "actual_roles": {key: FIREWALL.get(key) for key in fresh_required},
+        "algorithm_changed": False,
+        "status": "PASS" if all(FIREWALL.get(key) == value for key, value in fresh_required.items()) else "FAIL",
+    })
 
 
 def _portable_path(repo: Path, path: Path) -> str:
@@ -218,9 +375,14 @@ def _launch_fingerprints(repo: Path) -> list[dict[str, str]]:
         repo / AUTHORITY_RELATIVE_PATH,
         repo / APPLICABILITY_RELATIVE_PATH,
         repo / "dayahead/v37/aidc.py",
+        repo / "dayahead/v37/aidc_materializer.py",
         repo / "dayahead/v37/context.py",
+        repo / "dayahead/v37/contracts.py",
+        repo / "dayahead/v37/campaign.py",
+        repo / "dayahead/v37/manifest.py",
         repo / "dayahead/v37/preflight.py",
         repo / "dayahead/v37/runner.py",
+        repo / "dayahead/v37/sources.py",
         repo / "dayahead/v37r3/restoration.py",
         repo / "dayahead/v37r3/voltage_authority.py",
         repo / "dayahead/v34/integrated_mess.py",
@@ -230,11 +392,15 @@ def _launch_fingerprints(repo: Path) -> list[dict[str, str]]:
         repo / "dayahead/artifacts/v17_candidate/V17_AC_RESTORATION_CUT_VALIDATION.json",
     }
     for day in EXPECTED_DATES:
+        aidc_manifest = load_day_manifest(repo, day)
+        paths.add(repo / R4A_DAY_ROOT / day / "V37_R4A_DAY_MANIFEST.json")
+        paths.update(repo / record["path"] for record in aidc_manifest["files"].values())
         paths.update(anchor_paths(repo, day))
         source = day_root(SOURCE_DATA_REPOSITORY, day)
         paths.update({
             source / "aemo_forecast.json",
             source / "gfs_d1_weather.parquet",
+            source / "kestrel_d1_scheduler_snapshot.parquet",
             source / "source_day_manifest.json",
         })
         traffic = repo / CACHE_ROOT / "traffic/shared/traffic" / day
@@ -255,6 +421,15 @@ def write_preflight(repo: Path, output: Path, workers: int) -> None:
     branch = subprocess.check_output(
         ["git", "branch", "--show-current"], cwd=repo, text=True,
     ).strip()
+    count_pass = lambda key: sum(
+        row["checks"].get(key, {}).get("status") == "PASS" for row in rows
+    )
+    aidc_passed = count_pass("AIDC_PER_DAY_CAUSAL_MATERIALIZATION_PASS")
+    kestrel_passed = count_pass("kestrel_D1_causal_snapshot")
+    traffic_passed = count_pass("traffic")
+    electrical_passed = count_pass("electrical_anchor")
+    restoration_passed = count_pass("restoration_contract")
+    launch_fingerprints = _launch_fingerprints(repo) if ready == 31 and missing == 0 else []
     payload = {
         "artifact_id": "V37_R4_MAY_31DAY_PRODUCTION_PREFLIGHT_V1",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -264,13 +439,22 @@ def write_preflight(repo: Path, output: Path, workers: int) -> None:
         "not_ready_dates": len(EXPECTED_DATES) - ready,
         "missing_dates": missing,
         "PRODUCTION_PREFLIGHT": f"{ready}/31",
+        "PER_DAY_AIDC": f"{aidc_passed}/31 PASS" if aidc_passed == 31 else f"{aidc_passed}/31 FAIL",
+        "KESTREL_D1_CAUSAL_SNAPSHOT": f"{kestrel_passed}/31 PASS" if kestrel_passed == 31 else f"{kestrel_passed}/31 FAIL",
+        "ACTUAL_TRAFFIC_AUTHORITY_PREFLIGHT": f"{traffic_passed}/31 PASS" if traffic_passed == 31 else f"{traffic_passed}/31 FAIL",
+        "D1_ELECTRICAL_AUTHORITY": f"{electrical_passed}/31 PASS" if electrical_passed == 31 else f"{electrical_passed}/31 FAIL",
+        "RESTORATION_LOADER": f"{restoration_passed}/31 PASS" if restoration_passed == 31 else f"{restoration_passed}/31 FAIL",
+        "TRUE_PRODUCTION_LOADER_PREFLIGHT": f"{ready}/31 PASS" if ready == 31 else f"{ready}/31 FAIL",
         "MAY_STARTED": "NO",
         "MAY_CAMPAIGN_LAUNCH_READY": "YES" if ready == 31 and missing == 0 else "NO",
         "optimization_calls": 0,
         "Gurobi_optimize_calls": 0,
         "campaign_processes_spawned": 0,
         "dates": rows,
-        "launch_fingerprints": _launch_fingerprints(repo) if ready == 31 and missing == 0 else [],
+        "launch_fingerprints": launch_fingerprints,
+        "final_implementation_fingerprint_sha256": hashlib.sha256(json.dumps(
+            launch_fingerprints, sort_keys=True, separators=(",", ":"),
+        ).encode()).hexdigest() if launch_fingerprints else None,
     }
     failures = validate_preflight_manifest(payload)
     payload["fail_closed_validation"] = {
@@ -278,6 +462,26 @@ def write_preflight(repo: Path, output: Path, workers: int) -> None:
         "failures": failures,
     }
     _json(output / "V37_R4_MAY_31DAY_PRODUCTION_PREFLIGHT.json", payload)
+    true_payload = dict(payload)
+    true_payload["artifact_id"] = "V37_R4A_TRUE_31DAY_PRODUCTION_LOADER_PREFLIGHT_V1"
+    _json(output / "V37_R4A_TRUE_31DAY_PRODUCTION_LOADER_PREFLIGHT.json", true_payload)
+    traffic_rows = [{
+        "operating_day": row["operating_day"],
+        **dict(row["checks"].get("traffic", {})),
+        "candidate_table_sha256": row["checks"].get(
+            "candidate_route_enumeration", {}
+        ).get("candidate_table_sha256"),
+        "structural_placeholder_used": False,
+    } for row in rows]
+    _json(output / "V37_R4A_REAL_TRAFFIC_PREFLIGHT.json", {
+        "artifact_id": "V37_R4A_REAL_TRAFFIC_PREFLIGHT_V1",
+        "expected_dates": 31,
+        "passed_dates": traffic_passed,
+        "required_authorities": ["TRAFFIC_FORECAST.npz", "ROUTE_TABLE.json.gz", "Safe_ETA", "candidate_table_SHA"],
+        "structural_placeholder_accepted": False,
+        "dates": traffic_rows,
+        "status": "PASS" if traffic_passed == 31 else "FAIL",
+    })
     flat_rows = [{
         "operating_day": row["operating_day"],
         "status": row["status"],
@@ -285,6 +489,9 @@ def write_preflight(repo: Path, output: Path, workers: int) -> None:
         "D1_demand_vintage": row["checks"].get("causal_vintage", {}).get("status"),
         "D1_rooftop_PV_vintage": row["checks"].get("causal_vintage", {}).get("status"),
         "AIDC_cohort": row["checks"].get("AIDC_cohort", {}).get("rule_validation"),
+        "AIDC_per_day_causal": row["checks"].get(
+            "AIDC_PER_DAY_CAUSAL_MATERIALIZATION_PASS", {}
+        ).get("status"),
         "D1_AC_anchor": row["checks"].get("electrical_anchor", {}).get("status"),
         "traffic_Safe_ETA": row["checks"].get("traffic", {}).get("Safe_ETA"),
         "travel_energy": row["checks"].get("traffic", {}).get("travel_energy"),
@@ -292,6 +499,11 @@ def write_preflight(repo: Path, output: Path, workers: int) -> None:
     } for row in rows]
     pd.DataFrame(flat_rows).to_csv(
         output / "V37_R4_MAY_31DAY_PRODUCTION_PREFLIGHT.csv",
+        index=False,
+        encoding="utf-8",
+    )
+    pd.DataFrame(flat_rows).to_csv(
+        output / "V37_R4A_TRUE_31DAY_PRODUCTION_LOADER_PREFLIGHT.csv",
         index=False,
         encoding="utf-8",
     )

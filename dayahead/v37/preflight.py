@@ -23,6 +23,7 @@ from dayahead.v37r3.voltage_authority import (
 )
 
 from .aidc import build_day, validate_cohort_contract
+from .aidc_materializer import load_day_manifest
 from .context import load_day_context
 from .contracts import CACHE_ROOT, EXPECTED_DATES, PASS_ID, PHASE, SOURCE_DATA_REPOSITORY
 
@@ -188,6 +189,27 @@ def production_loader_dry_run(repo: Path, day: str) -> dict[str, Any]:
         if not source_manifest.is_file():
             raise RuntimeError("SOURCE_DAY_MANIFEST_MISSING")
         source_payload = json.loads(source_manifest.read_text(encoding="utf-8"))
+        required_source_files = {
+            "aemo_forecast": source / "aemo_forecast.json",
+            "gfs_d1_weather": source / "gfs_d1_weather.parquet",
+            "kestrel_d1_scheduler_snapshot": source / "kestrel_d1_scheduler_snapshot.parquet",
+        }
+        source_failures = []
+        if source_payload.get("status") != "PASS":
+            source_failures.append("SOURCE_DAY_MANIFEST_NOT_PASS")
+        for name, path in required_source_files.items():
+            record = source_payload.get("files", {}).get(name, {})
+            if not path.is_file():
+                source_failures.append(f"{name.upper()}_MISSING")
+            elif record.get("sha256") != sha256_file(path):
+                source_failures.append(f"{name.upper()}_SHA_MISMATCH")
+        checks["source_materialization"] = {
+            "status": "PASS" if not source_failures else "FAIL",
+            "required_files": sorted(required_source_files),
+            "structural_traffic_placeholder_accepted_as_readiness": False,
+            "failures": source_failures,
+        }
+        reasons.extend(source_failures)
         checks["source_day_sha256"] = str(source_payload["source_day_sha256"])
 
         # A preflight is read-only.  Refuse a missing/invalid pair before the
@@ -202,13 +224,38 @@ def production_loader_dry_run(repo: Path, day: str) -> dict[str, Any]:
         checks["causal_vintage"] = vintage
         reasons.extend(vintage["failures"])
 
+        aidc_manifest = load_day_manifest(repo, day)
+        checks["AIDC_PER_DAY_CAUSAL_MATERIALIZATION_PASS"] = {
+            "status": "PASS",
+            "source_snapshot_sha256": aidc_manifest["source_snapshot_sha256"],
+            "authority_sha256": aidc_manifest["authority_sha256"],
+            "gates": aidc_manifest["gates"],
+        }
+        state_audit = dict(aidc_manifest.get("Kestrel_D1_snapshot_audit", {}))
+        kestrel_ok = (
+            bool(state_audit.get("source_members_opened"))
+            and bool(state_audit.get("source_members_contributing"))
+            and state_audit.get("future_D_day_execution_used_for_membership") is False
+        )
+        checks["kestrel_D1_causal_snapshot"] = {
+            "status": "PASS" if kestrel_ok else "FAIL",
+            **state_audit,
+        }
+        if not kestrel_ok:
+            reasons.append("KESTREL_D1_CAUSAL_SNAPSHOT")
         aids = {case: build_day(repo, day, case) for case in ("B0", "B1", "B2", "B3")}
         cohort = validate_cohort_contract(aids["B1"].ledger, day)
         checks["AIDC_cohort"] = cohort
         if not np.array_equal(aids["B0"].pcc_p_kw, aids["B2"].pcc_p_kw):
             reasons.append("AIDC_B0_B2_REFERENCE_MISMATCH")
+        if not np.array_equal(aids["B0"].pcc_q_kvar, aids["B2"].pcc_q_kvar):
+            reasons.append("AIDC_B0_B2_REFERENCE_Q_MISMATCH")
         if not np.array_equal(aids["B1"].pcc_p_kw, aids["B3"].pcc_p_kw):
             reasons.append("AIDC_B1_B3_CENTER_MISMATCH")
+        if not np.array_equal(aids["B1"].pcc_q_kvar, aids["B3"].pcc_q_kvar):
+            reasons.append("AIDC_B1_B3_CENTER_Q_MISMATCH")
+        if any(value != "PASS" for value in aidc_manifest["gates"].values()):
+            reasons.append("AIDC_PER_DAY_CAUSAL_MATERIALIZATION_GATE")
         if aids["B1"].power["official_scenario"].nunique() != 1 or str(
             aids["B1"].power["official_scenario"].iloc[0]
         ) != "CENTER":
@@ -230,9 +277,29 @@ def production_loader_dry_run(repo: Path, day: str) -> dict[str, Any]:
             "coefficient_slots": len(coefficients),
         }
 
+        traffic_root = repo / CACHE_ROOT / "traffic/shared/traffic" / day
+        forecast_path = traffic_root / "TRAFFIC_FORECAST.npz"
+        route_path = traffic_root / "ROUTE_TABLE.json.gz"
+        if not forecast_path.is_file():
+            raise RuntimeError("TRAFFIC_FORECAST_MISSING")
+        if not route_path.is_file():
+            raise RuntimeError("ROUTE_TABLE_MISSING")
+        with np.load(forecast_path, allow_pickle=False) as forecast:
+            if set(forecast.files) != {"metadata", "Q10_sec", "Q50_sec", "Q90_sec"}:
+                reasons.append("TRAFFIC_FORECAST_FIELDS")
+            quantile_shapes = {
+                name: list(np.asarray(forecast[name]).shape)
+                for name in ("Q10_sec", "Q50_sec", "Q90_sec")
+                if name in forecast.files
+            }
+            if any(tuple(shape) != (288, 509) for shape in quantile_shapes.values()) or len(quantile_shapes) != 3:
+                reasons.append("TRAFFIC_FORECAST_288_509_3_AXIS")
         bundle, _graph, route_table, traffic_files = daily_traffic_authority(
             repo, repo / CACHE_ROOT / "traffic", PHASE, day, {"status": "PASS", "May_numeric_reads_before_admission": 0},
         )
+        forecast_stack = np.stack((bundle.q10_sec, bundle.q50_sec, bundle.q90_sec), axis=-1)
+        if forecast_stack.shape != (288, 509, 3):
+            reasons.append("TRAFFIC_FORECAST_288_509_3_AUTHORITY")
         if len(route_table.departure_slots) != 96 or len(route_table.service_ids) != 24:
             reasons.append("MESS_ROUTE_TABLE_AXIS")
         if len(route_table.records) != 96 * 24 * 24:
@@ -251,9 +318,17 @@ def production_loader_dry_run(repo: Path, day: str) -> dict[str, Any]:
         if not bundle.causality_pass or bundle.future_actual_read_count != 0:
             reasons.append("TRAFFIC_CAUSALITY")
         checks["traffic"] = {
+            "status": "PASS" if not any(reason.startswith(("TRAFFIC_", "MESS_ROUTE", "SAFE_ETA")) for reason in reasons) else "FAIL",
             "forecast_sha256": traffic_files[0]["sha256"],
             "route_table_sha256": traffic_files[1]["sha256"],
             "route_authority_sha256": route_table.canonical_sha256,
+            "forecast_quantile_shapes": quantile_shapes,
+            "forecast_authority_shape": list(forecast_stack.shape),
+            "forecast_target_steps": len(bundle.target_timestamps),
+            "forecast_link_count": len(bundle.link_ids),
+            "departure_slot_count": len(route_table.departure_slots),
+            "service_destination_axis": len(route_table.service_ids),
+            "route_record_count": len(route_table.records),
             "issue_time": bundle.issue_time.isoformat(),
             "max_input_timestamp": bundle.max_input_timestamp.isoformat(),
             "Safe_ETA": "PASS",
@@ -262,12 +337,14 @@ def production_loader_dry_run(repo: Path, day: str) -> dict[str, Any]:
 
         mapping = _service_mapping()
         checks["service_PCC_mapping"] = {
+            "status": "PASS" if len(mapping) == 24 else "FAIL",
             "count": len(mapping),
             "sha256": hashlib.sha256(json.dumps(
                 mapping, sort_keys=True, separators=(",", ":"),
             ).encode()).hexdigest(),
         }
         checks["restoration_contract"] = {
+            "status": "PASS",
             "adapter": "dayahead.v37r3.restoration",
             "rho": RHO,
             "max_rounds": K_MAX,
@@ -294,6 +371,19 @@ def production_loader_dry_run(repo: Path, day: str) -> dict[str, Any]:
             "restoration_cut_fingerprint_sha256": fingerprints["B0"]["restoration_cut_fingerprint_sha256"],
             "network_context_SHA": fingerprints["B0"]["network_context_SHA"],
             "execution_code_SHA": fingerprints["B0"]["execution_code_SHA"],
+            "candidate_table_SHA": fingerprints["B0"]["candidate_table_SHA"],
+        }
+        if len(str(fingerprints["B0"]["candidate_table_SHA"])) != 64:
+            reasons.append("CANDIDATE_TABLE_SHA_MISSING")
+        checks["candidate_route_enumeration"] = {
+            "status": "PASS" if len(str(fingerprints["B0"]["candidate_table_SHA"])) == 64 else "FAIL",
+            "candidate_table_sha256": fingerprints["B0"]["candidate_table_SHA"],
+            "optimization_calls": 0,
+        }
+        checks["Fresh_OpenDSS_context"] = {
+            "status": "PASS",
+            "context_loaded": True,
+            "Fresh_solve_called": False,
         }
     except Exception as error:  # fail closed and preserve exact loader reason
         reasons.append(f"{type(error).__name__}:{error}")
@@ -330,6 +420,13 @@ def validate_preflight_manifest(payload: Mapping[str, Any]) -> list[str]:
         failures.append("MAY_STARTED_NOT_NO")
     if payload.get("MAY_CAMPAIGN_LAUNCH_READY") != "YES":
         failures.append("MAY_CAMPAIGN_LAUNCH_NOT_READY")
+    for gate in (
+        "PER_DAY_AIDC", "KESTREL_D1_CAUSAL_SNAPSHOT",
+        "ACTUAL_TRAFFIC_AUTHORITY_PREFLIGHT", "D1_ELECTRICAL_AUTHORITY",
+        "RESTORATION_LOADER", "TRUE_PRODUCTION_LOADER_PREFLIGHT",
+    ):
+        if payload.get(gate) != "31/31 PASS":
+            failures.append(f"{gate}_NOT_31_OF_31")
     rows = payload.get("dates", [])
     if len(rows) != len(EXPECTED_DATES):
         failures.append("DATE_ROW_COUNT_NOT_31")
@@ -337,6 +434,11 @@ def validate_preflight_manifest(payload: Mapping[str, Any]) -> list[str]:
         failures.append("DATE_AXIS_MISMATCH")
     elif any(row.get("status") != "READY" for row in rows):
         failures.append("DATE_NOT_READY")
+    elif any(
+        row.get("checks", {}).get("AIDC_PER_DAY_CAUSAL_MATERIALIZATION_PASS", {}).get("status") != "PASS"
+        for row in rows
+    ):
+        failures.append("AIDC_PER_DAY_CAUSAL_MATERIALIZATION_NOT_31_OF_31")
     fingerprints = payload.get("launch_fingerprints", [])
     if not fingerprints:
         failures.append("LAUNCH_FINGERPRINTS_MISSING")

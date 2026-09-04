@@ -7,10 +7,6 @@ from collections import defaultdict
 from datetime import date, datetime, time, timedelta
 import json
 from pathlib import Path
-import re
-import shutil
-import tempfile
-import zipfile
 from typing import Any, Sequence
 
 import numpy as np
@@ -18,10 +14,8 @@ import pandas as pd
 
 from dayahead.authority import DEFAULT_RAW_ROOT, NLR_SOURCE_SHA256, sha256_file
 from dayahead.final_science_inputs_v16_3 import select_month_vintages
-from dayahead.reproduce_nlr_authority import object_empty
 from dayahead.thermal.contracts import GFS_LEADS, GFS_VARIABLES
 from dayahead.thermal.psychrometrics import relative_humidity_from_dewpoint, wet_bulb_temperature_c
-from dayahead.v28r2.authority import CONTROLLABLE_NODE_CLASSES
 from dayahead.v28r2.source_cache import atomic_json, day_root
 from dayahead.v28r2.source_manifest import canonical_sha256
 from dayahead.v28r2.source_preflight import AEST, STATION_LAT, STATION_LON, _gfs_one
@@ -85,8 +79,6 @@ def select_cross_month_vintages(days: Sequence[str]) -> tuple[
 
 
 def _materialize_gfs(source_repo: Path, days: Sequence[str], workers: int = 12) -> dict[str, str]:
-    from dayahead.thermal.gfs_decode import decode_nearest
-
     failures: dict[str, str] = {}
     tasks = [
         (day, lead) for day in days
@@ -111,6 +103,11 @@ def _materialize_gfs(source_repo: Path, days: Sequence[str], workers: int = 12) 
             failures.setdefault(day, "GFS_D_MINUS_1_INCOMPLETE")
             continue
         rows, source_records = [], []
+        # Decoder is imported only when at least one missing day was actually
+        # materialized above.  Existing immutable files have no eccodes
+        # runtime dependency during readiness validation.
+        from dayahead.thermal.gfs_decode import decode_nearest
+
         for lead in GFS_LEADS:
             payload = manifests[(day, lead)]
             decoded = {}
@@ -165,51 +162,49 @@ def _materialize_aemo(source_repo: Path, days: Sequence[str]) -> tuple[dict[str,
     return output_failures, evidence
 
 
-def _materialize_kestrel(source_repo: Path, days: Sequence[str]) -> None:
-    outputs = {day: day_root(source_repo, day) / "kestrel_realized_jobs.parquet" for day in days}
-    if all(path.is_file() and path.stat().st_size > 0 for path in outputs.values()):
-        return
-    import pyarrow.parquet as pq
-    candidates = sorted(DEFAULT_RAW_ROOT.rglob("esif.hpc.kestrel.job-anon.zip"))
-    source = next(path for path in candidates if sha256_file(path) == NLR_SOURCE_SHA256["kestrel_jobs_zip"])
-    with zipfile.ZipFile(source) as archive, tempfile.TemporaryDirectory(prefix="v37-may-kestrel-") as temporary:
-        members = [
-            name for name in archive.namelist()
-            if re.search(r"year=2025/month=0?5", name.replace("\\", "/")) and name.endswith(".parquet")
-        ]
-        if len(members) != 1:
-            raise RuntimeError(f"V37_MAY_KESTREL_MEMBER_COUNT:{len(members)}")
-        local = Path(temporary) / "may.parquet"
-        with archive.open(members[0]) as raw, local.open("wb") as target:
-            shutil.copyfileobj(raw, target)
-        frame = pq.read_table(local).to_pandas()
-    start = pd.to_datetime(frame["start_time"], utc=True, errors="coerce", format="mixed")
-    end = pd.to_datetime(frame["end_time"], utc=True, errors="coerce", format="mixed")
-    submit = pd.to_datetime(frame["submit_time"], utc=True, errors="coerce", format="mixed")
-    nodes = pd.to_numeric(frame["gpu_nodes_occupied"], errors="coerce")
-    gpus = pd.to_numeric(frame["gpus_requested"], errors="coerce")
-    sharing = pd.to_numeric(frame["shared_job_count"], errors="coerce")
-    no_share = (sharing.isna() | sharing.eq(0)) & frame["nodes_shared"].apply(object_empty) & frame["jobs_shared"].apply(object_empty)
-    frame["v28r2_strict_fullnode_eligible"] = (
-        frame["partition"].astype(str).str.casefold().str.contains("gpu-h100")
-        & frame["state_simple"].astype(str).str.upper().eq("COMPLETED")
-        & start.notna() & end.gt(start) & nodes.isin(CONTROLLABLE_NODE_CLASSES)
-        & np.isclose(gpus, 4.0 * nodes) & no_share
+def _materialize_kestrel(source_repo: Path, days: Sequence[str]) -> tuple[dict[str, str], dict[str, Any]]:
+    """Materialize D-1 scheduler state, never a realized D-day execution slice."""
+
+    from .aidc_materializer import load_state_source, snapshot_at_issue
+
+    source = (
+        DEFAULT_RAW_ROOT / "데이터 센터" / "NLR HPC Kestrel Jobs Data"
+        / "esif.hpc.kestrel.job-anon.zip"
     )
-    frame["v28r2_uncontrolled_reference_component"] = ~frame["v28r2_strict_fullnode_eligible"]
-    for day, output in outputs.items():
-        begin = pd.Timestamp(day, tz=AEST).tz_convert("UTC")
-        finish = begin + pd.Timedelta(days=1)
-        selected = frame[(start.lt(finish) & end.gt(begin)) | (submit.ge(begin) & submit.lt(finish))].copy()
-        output.parent.mkdir(parents=True, exist_ok=True)
-        selected.to_parquet(output, index=False)
+    if not source.is_file() or sha256_file(source) != NLR_SOURCE_SHA256["kestrel_jobs_zip"]:
+        return ({day: "KESTREL_ARCHIVE_AUTHORITY_MISSING" for day in days}, {})
+    try:
+        frame, source_audit = load_state_source(tuple(map(str, days)), archive_path=source)
+    except Exception as error:
+        reason = f"KESTREL_D1_SOURCE:{type(error).__name__}:{error}"
+        return ({day: reason for day in map(str, days)}, {})
+    failures: dict[str, str] = {}
+    per_day: dict[str, Any] = {}
+    for day in map(str, days):
+        try:
+            snapshot = snapshot_at_issue(frame, day)
+            output = day_root(source_repo, day) / "kestrel_d1_scheduler_snapshot.parquet"
+            output.parent.mkdir(parents=True, exist_ok=True)
+            temporary = output.with_suffix(".parquet.tmp")
+            snapshot.to_parquet(temporary, index=False)
+            temporary.replace(output)
+            per_day[day] = {
+                **dict(snapshot.attrs["state_audit"]),
+                "path": str(output.resolve()), "sha256": sha256_file(output),
+                "RUNNING": int(snapshot["state_at_issue"].eq("RUNNING").sum()),
+                "PENDING": int(snapshot["state_at_issue"].eq("PENDING").sum()),
+                "status": "PASS",
+            }
+        except Exception as error:
+            failures[day] = f"KESTREL_D1_SNAPSHOT:{type(error).__name__}:{error}"
+    return failures, {"source": source_audit, "dates": per_day}
 
 
 def materialize_sources(source_repo: Path, days: Sequence[str], workers: int = 12) -> dict[str, Any]:
     selected_days = tuple(map(str, days))
     aemo_failures, archive_evidence = _materialize_aemo(source_repo, selected_days)
     gfs_failures = _materialize_gfs(source_repo, selected_days, workers=workers)
-    _materialize_kestrel(source_repo, selected_days)
+    kestrel_failures, kestrel_audit = _materialize_kestrel(source_repo, selected_days)
     failures: dict[str, list[str]] = {}
     for day in selected_days:
         reasons = []
@@ -217,19 +212,23 @@ def materialize_sources(source_repo: Path, days: Sequence[str], workers: int = 1
             reasons.append(aemo_failures[day])
         if day in gfs_failures:
             reasons.append(gfs_failures[day])
+        if day in kestrel_failures:
+            reasons.append(kestrel_failures[day])
         if reasons:
             failures[day] = reasons
             continue
         root = day_root(source_repo, day)
         mobility = root / "traffic_mobility.json"
-        atomic_json(mobility, {"day": day, "mess": [], "role": "STRUCTURAL_PLACEHOLDER_NOT_READ_BY_V37"})
+        atomic_json(mobility, {
+            "day": day, "mess": [],
+            "role": "LEGACY_FORMULATION_CONTEXT_ONLY_NOT_PRODUCTION_TRAFFIC_READINESS",
+        })
         files = {
             name: {"path": str(path.resolve()), "sha256": sha256_file(path), "bytes": path.stat().st_size}
             for name, path in {
                 "gfs_d1_weather": root / "gfs_d1_weather.parquet",
                 "aemo_forecast": root / "aemo_forecast.json",
-                "kestrel_realized_jobs": root / "kestrel_realized_jobs.parquet",
-                "traffic_mobility_placeholder": mobility,
+                "kestrel_d1_scheduler_snapshot": root / "kestrel_d1_scheduler_snapshot.parquet",
             }.items()
         }
         payload = {
@@ -240,11 +239,15 @@ def materialize_sources(source_repo: Path, days: Sequence[str], workers: int = 1
         payload["source_day_sha256"] = canonical_sha256(payload)
         atomic_json(root / "source_day_manifest.json", payload)
     runnable = [day for day in selected_days if day not in failures]
+    complete = len(selected_days) > 0 and len(runnable) == len(selected_days) and not failures
     return {
         "artifact_id": "V37_MAY_SOURCE_MATERIALIZATION_V1",
-        "status": "PASS" if runnable else "FAIL",
+        "status": "PASS" if complete else "FAIL",
         "requested_dates": list(selected_days), "runnable_dates": runnable,
+        "requested_count": len(selected_days), "runnable_count": len(runnable),
+        "failed_count": len(failures),
         "failed_dates": failures, "archive_evidence": archive_evidence,
+        "kestrel_D1_snapshot_audit": kestrel_audit,
         "archive_selection_rule": "MONTH_OF_D_MINUS_1_18_FIXED_AEST_CUTOFF",
         "May_results_read_for_materialization": False,
     }

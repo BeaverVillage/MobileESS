@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .contracts import DATE_MANIFEST, EXPECTED_DATES
+from .contracts import ARTIFACT_ROOT, DATE_MANIFEST, EXPECTED_DATES
 from .status import atomic_json
 from .sources import select_cross_month_vintages
 
@@ -17,7 +17,7 @@ ELIGIBILITY = Path(
 
 
 def build_may01_amendment(repo: Path) -> dict[str, Any]:
-    path = repo / "dayahead/artifacts/v37_may_locked_final/V37_MAY01_CROSS_MONTH_ELIGIBILITY_AMENDMENT.json"
+    path = repo / ARTIFACT_ROOT / "V37_MAY01_CROSS_MONTH_ELIGIBILITY_AMENDMENT.json"
     if path.is_file():
         value = json.loads(path.read_text(encoding="utf-8"))
         if value.get("new_V37_status") == "RUNNABLE" and value.get("causality") == "PASS":
@@ -84,7 +84,9 @@ def build_date_manifest(repo: Path) -> dict[str, Any]:
     ]
     payload = {
         "artifact_id": "V37_MAY_DATE_MANIFEST_V1",
-        "status": "PASS" if len(runnable) + len(missing) == len(EXPECTED_DATES) else "FAIL",
+        "status": "PASS" if (
+            len(EXPECTED_DATES) == 31 and len(runnable) == len(EXPECTED_DATES) and not missing
+        ) else "FAIL",
         "authority_path": ELIGIBILITY.as_posix(),
         "expected_dates": list(EXPECTED_DATES),
         "runnable_dates": runnable,

@@ -28,7 +28,7 @@ from .contracts import (
     ARTIFACT_ROOT, BEAM_PROGRESS_BASE, BEAM_WIDTH, BEAM_WIDTH_FALLBACK,
     CACHE_ROOT, DATE_RESULT_ROOT, DEFAULT_K, FIREWALL, K_FALLBACK,
     MAX_WORKERS_PER_DATE, MESS_HEAD, MESS_ORDER,
-    OFFICIAL_CASES, PASS_ID, PHASE, PROGRESS_AFTER_CASE, RAW_ROOT,
+    OFFICIAL_CASES, PASS_ID, PHASE, PRODUCTION_PREFLIGHT, PROGRESS_AFTER_CASE, RAW_ROOT,
     SEED_WIDTH, SOURCE_DATA_REPOSITORY, STATUS_ROOT,
 )
 from .execution_acceleration import (
@@ -97,6 +97,7 @@ def case_execution_fingerprint(
         "contract_sha256": str(aidc.contract_sha256),
         "P_sha256": hashlib.sha256(np.asarray(aidc.pcc_p_kw, dtype=float).tobytes()).hexdigest(),
         "Q_sha256": hashlib.sha256(np.asarray(aidc.pcc_q_kvar, dtype=float).tobytes()).hexdigest(),
+        "per_day_fingerprints": dict(aidc.fingerprints),
     })
     voltage_path = (
         repo / CACHE_ROOT / "electrical" / day / "data"
@@ -137,6 +138,7 @@ def case_execution_fingerprint(
         "restoration_cut_fingerprint_sha256": cut_fingerprint,
         "AIDC_authority_sha256": aidc_sha,
         "AIDC_cohort_contract_sha256": file_sha256(aidc_contract_path),
+        "AIDC_operating_day_fingerprints": dict(aidc.fingerprints),
         "MESS_authority_sha256": MESS_HEAD,
         "K": DEFAULT_K,
         "K_fallback": list(K_FALLBACK),
@@ -153,6 +155,7 @@ def case_execution_fingerprint(
             for relative in (
                 "dayahead/v37/runner.py",
                 "dayahead/v37/aidc.py",
+                "dayahead/v37/aidc_materializer.py",
                 "dayahead/v37/execution_acceleration.py",
                 "dayahead/v37/voltage_fidelity.py",
                 "dayahead/tools/run_v35r3e_r1_beam.py",
@@ -454,14 +457,19 @@ def _input_authority(repo: Path, day: str, case: str, trajectory: Any) -> dict[s
         "immutable_references": files,
         "AIDC_queue_snapshot": {
             "ledger_rows": len(trajectory.ledger), "D_minus_1_only": True,
-            "frozen_daily_template": "V36_APR01_EXPANDED_TEMPORAL_PROFILE",
+            "scheduler_source": "V37_R4A_PER_DAY_CAUSAL_KESTREL_SNAPSHOT",
+            "operating_day": day,
+            "per_day_fingerprints": dict(trajectory.fingerprints),
         },
         "AIDC_runtime_authority": "V35R3D_R1_SAFE_CAUSAL_RUNTIME",
         "AIDC_GPU_capacity": 624,
         "MESS_initial_location": ["STA01", "STA12", "STA08", "STA06"],
         "MESS_initial_SoC": 760.0 / 1200.0,
         "MESS_vehicle_parameters": "dayahead.mess_physics + V33M3 route authority",
-        "IDC_LOCATION_CHANGED": "NO", "Fresh_used_for_decisions": "NO",
+        "IDC_LOCATION_CHANGED": "NO",
+        "Fresh_used_for_AIDC_or_MESS_initial_decisions": "NO",
+        "Fresh_used_for_post_selection_AC_feasibility_detection": "YES",
+        "Fresh_used_by_frozen_fixed_discrete_PQ_restoration": "YES",
     }
 
 
@@ -1195,11 +1203,7 @@ def _finalize_day(repo: Path, day: str, results: Mapping[str, Mapping[str, Any]]
     fresh_pass = all(cases[case]["Fresh_convergence"] == "96/96" for case in OFFICIAL_CASES)
     physical_pass = all(cases[case]["physical_violation_count"] == 0 for case in OFFICIAL_CASES)
     elapsed = time.perf_counter() - started
-    readiness = read_json(
-        repo
-        / "dayahead/artifacts/v37_r3_restore_intended_cuts/"
-        "V37_MAY_FINAL_RUN_READINESS.json"
-    )
+    readiness = read_json(repo / PRODUCTION_PREFLIGHT)
     payload = {
         "artifact_id": "V37_MAY_DATE_RESULT_V1", "date": day,
         "status": "PASS" if fresh_pass and physical_pass else "FAIL",

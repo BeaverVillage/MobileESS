@@ -1,0 +1,22 @@
+{
+  "GPU_slot_conservation": "one request contributes once and occupancy<=624",
+  "PARTIAL_shared": "requested_GPUs < 4*requested_nodes; aggregate GPU slots only",
+  "PENDING": "submit<=issue and (start missing or start>issue) and end>issue",
+  "RSP": "running requested-remaining; pending frozen causal-safe; tier/FIFO first-fit",
+  "RUNNING": "submit<=issue and start<=issue and end>issue",
+  "RW": "running requested-remaining; pending requested-walltime; tier/FIFO first-fit",
+  "artifact_id": "V37_R4A_SCHEDULER_CONTRACT_RECOVERY_V1",
+  "capacity_GPUs": 624.0,
+  "cross_D_day_jobs": "retained by interval intersection",
+  "issue_time": "start_of_operating_day_fixed_AEST_minus_6_hours",
+  "outside_horizon": "scheduled but sliced from 96-slot power",
+  "pending_duration": "min(requested,max(frozen_point+5576.44921875,900)); requested fallback",
+  "release_before_refill": true,
+  "running_duration": "max(requested_walltime-elapsed_at_issue,900); ceil(seconds/900)",
+  "status": "PASS",
+  "temporal_classes": [
+    "NORMAL_QUEUE_CONTROLLED",
+    "STANDBY_QUEUE_CONTROLLED"
+  ],
+  "unknown_GPU": "excluded fail-closed"
+}

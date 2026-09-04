@@ -16,6 +16,7 @@ from dayahead.v37.execution_acceleration import (
     full_child_identity,
 )
 from dayahead.v37.aidc import build_day
+from dayahead.v37.contracts import PASS_ID, RAW_ROOT
 from dayahead.v37.runner import (
     _valid_case_checkpoint, _write_case_checkpoint, case_execution_fingerprint,
 )
@@ -142,7 +143,7 @@ def test_persistent_worker_replaces_every_dynamic_field_without_leakage() -> Non
 
 def test_completed_case_reuse_requires_exact_fingerprint_and_file_hashes(tmp_path: Path) -> None:
     repo = tmp_path
-    case_root = repo / "frozen_artifacts/v36_final_schema/MAY_2025_LOCKED_FINAL/2025-05-01/B2"
+    case_root = repo / RAW_ROOT / PASS_ID / "2025-05-01/B2"
     for relative in CASE_FILES:
         path = case_root / relative
         path.parent.mkdir(parents=True, exist_ok=True)

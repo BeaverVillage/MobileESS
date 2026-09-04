@@ -6,9 +6,9 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-$artifactRoot = Join-Path $projectRoot 'dayahead\artifacts\v37_may_locked_final'
+$artifactRoot = Join-Path $projectRoot 'dayahead\artifacts\v37_may_r4a_per_day_final'
 $statusRoot = Join-Path $artifactRoot 'status'
-$logRoot = Join-Path $projectRoot 'logs\v37_may_locked_final'
+$logRoot = Join-Path $projectRoot 'logs\v37_may_r4a_per_day_final'
 $campaignLock = Join-Path $artifactRoot 'V37_CAMPAIGN.lock.json'
 $monitorScript = Join-Path $PSScriptRoot 'monitor_may.ps1'
 $readinessPath = if ($ReadinessPathOverride) {
@@ -18,6 +18,7 @@ $readinessPath = if ($ReadinessPathOverride) {
 }
 $monitorLock = Join-Path $artifactRoot 'V37_MONITOR.lock.json'
 $launchState = Join-Path $artifactRoot 'V37_MAY_LAUNCH_STATE.json'
+$aidcReadinessPath = Join-Path $projectRoot 'dayahead\artifacts\v37_r4a_per_day_aidc\V37_R4A_MAY_AIDC_31DAY_PREFLIGHT.json'
 New-Item -ItemType Directory -Force -Path $statusRoot,$logRoot | Out-Null
 
 function Test-LivePid([int]$ProcessId) {
@@ -52,6 +53,18 @@ function Stop-Preflight([string]$Reason) {
 
 if (-not (Test-Path -LiteralPath $readinessPath)) {
     Stop-Preflight "READINESS_MANIFEST_MISSING: $readinessPath"
+}
+if (-not (Test-Path -LiteralPath $aidcReadinessPath)) {
+    Stop-Preflight "AIDC_PER_DAY_READINESS_MISSING: $aidcReadinessPath"
+}
+$aidcReady = Get-Content -LiteralPath $aidcReadinessPath -Raw -Encoding UTF8 | ConvertFrom-Json
+if (
+    $aidcReady.status -ne 'PASS' -or
+    [int]$aidcReady.expected_dates -ne 31 -or
+    [int]$aidcReady.ready_dates -ne 31 -or
+    $aidcReady.AIDC_PER_DAY_CAUSAL_MATERIALIZATION_PASS -ne $true
+) {
+    Stop-Preflight 'AIDC_PER_DAY_CAUSAL_MATERIALIZATION_NOT_31_OF_31'
 }
 $ready = Get-Content -LiteralPath $readinessPath -Raw -Encoding UTF8 | ConvertFrom-Json
 if ($ready.MAY_CAMPAIGN_LAUNCH_READY -ne 'YES' -or $ready.MAY_STARTED -ne 'NO') {
