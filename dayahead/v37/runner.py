@@ -1167,12 +1167,20 @@ def _finalize_day(repo: Path, day: str, results: Mapping[str, Mapping[str, Any]]
     fresh_pass = all(cases[case]["Fresh_convergence"] == "96/96" for case in OFFICIAL_CASES)
     physical_pass = all(cases[case]["physical_violation_count"] == 0 for case in OFFICIAL_CASES)
     elapsed = time.perf_counter() - started
+    readiness = read_json(
+        repo
+        / "dayahead/artifacts/v37_r3_restore_intended_cuts/"
+        "V37_MAY_FINAL_RUN_READINESS.json"
+    )
     payload = {
         "artifact_id": "V37_MAY_DATE_RESULT_V1", "date": day,
         "status": "PASS" if fresh_pass and physical_pass else "FAIL",
         "cases": cases, "effects": effects,
         "Fresh_96_of_96_PASS": fresh_pass, "physical_gates_PASS": physical_pass,
         "workers": MAX_WORKERS_PER_DATE, "wallclock_seconds": elapsed,
+        "final_implementation_fingerprint_sha256": readiness[
+            "final_implementation_fingerprint_sha256"
+        ],
         "firewall": FIREWALL,
     }
     atomic_json(repo / DATE_RESULT_ROOT / f"{day}.json", payload)

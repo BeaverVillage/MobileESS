@@ -510,6 +510,8 @@ def prepare_readiness(repo: Path) -> dict[str, Any]:
         Path("dayahead/v37r3/voltage_authority.py"),
         Path("dayahead/v34/integrated_mess.py"),
         Path("dayahead/v37/runner.py"),
+        Path("dayahead/v37/campaign.py"),
+        Path("dayahead/tools/run_v37_may.py"),
         Path("dayahead/tools/run_v35r3e_r1_beam.py"),
         Path("tools/v37/run_may_locked_final.ps1"),
         Path("tools/v37/monitor_may.ps1"),

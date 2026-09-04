@@ -5,7 +5,11 @@ from pathlib import Path
 import subprocess
 
 from dayahead.v37.status import atomic_json, monitor_view
-from dayahead.v37.campaign import acquire_lock, release_lock
+from dayahead.v37.campaign import (
+    _complete_terminal_result,
+    acquire_lock,
+    release_lock,
+)
 
 
 REPO = Path(__file__).resolve().parents[2]
@@ -65,6 +69,38 @@ def test_campaign_duplicate_lock_and_verified_stale_recovery(tmp_path: Path) -> 
     assert acquired_again is False
     assert existing["pid"] == current["pid"]
     release_lock(tmp_path)
+
+
+def test_terminal_date_reuse_requires_current_implementation_fingerprint(
+    tmp_path: Path,
+) -> None:
+    day = "2025-05-01"
+    readiness = (
+        tmp_path / "dayahead/artifacts/v37_r3_restore_intended_cuts/"
+        "V37_MAY_FINAL_RUN_READINESS.json"
+    )
+    result = (
+        tmp_path / "dayahead/artifacts/v37_may_locked_final/dates"
+        / f"{day}.json"
+    )
+    atomic_json(readiness, {"final_implementation_fingerprint_sha256": "new"})
+    terminal = {"status": "PASS"}
+    old_payload = {
+        "status": "PASS",
+        "cases": {case: {} for case in ("B0", "B1", "B2", "B3")},
+    }
+    atomic_json(result, old_payload)
+    assert _complete_terminal_result(tmp_path, day, terminal) is False
+    atomic_json(result, {
+        **old_payload,
+        "final_implementation_fingerprint_sha256": "old",
+    })
+    assert _complete_terminal_result(tmp_path, day, terminal) is False
+    atomic_json(result, {
+        **old_payload,
+        "final_implementation_fingerprint_sha256": "new",
+    })
+    assert _complete_terminal_result(tmp_path, day, terminal) is True
     lock = tmp_path / "dayahead/artifacts/v37_may_locked_final/V37_CAMPAIGN.lock.json"
     atomic_json(lock, {"pid": 999_999_999, "artifact_id": "STALE_TEST"})
     acquired_after_stale, _new = acquire_lock(tmp_path)

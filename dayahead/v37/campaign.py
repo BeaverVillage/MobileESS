@@ -117,10 +117,23 @@ def _complete_terminal_result(repo: Path, day: str, status: Mapping[str, Any]) -
     path = repo / DATE_RESULT_ROOT / f"{day}.json"
     if not path.is_file():
         return False
-    result = read_json(path)
-    return result.get("status") in {"PASS", "FAIL"} and set(result.get("cases", {})) == {
-        "B0", "B1", "B2", "B3",
-    }
+    try:
+        result = read_json(path)
+        readiness = read_json(
+            repo
+            / "dayahead/artifacts/v37_r3_restore_intended_cuts/"
+            "V37_MAY_FINAL_RUN_READINESS.json"
+        )
+    except (OSError, ValueError, json.JSONDecodeError):
+        return False
+    expected_fingerprint = readiness.get("final_implementation_fingerprint_sha256")
+    return (
+        result.get("status") in {"PASS", "FAIL"}
+        and set(result.get("cases", {})) == {"B0", "B1", "B2", "B3"}
+        and bool(expected_fingerprint)
+        and result.get("final_implementation_fingerprint_sha256")
+        == expected_fingerprint
+    )
 
 
 def _date_wallclock_seconds(repo: Path, day: str, fallback: float) -> float:
@@ -373,7 +386,9 @@ def run_campaign(repo: Path) -> dict[str, Any]:
                     continue
                 stream.close(); finished.append(day)
                 print(f"V37 TERMINAL {day} exit={code}", flush=True)
-                if not (repo / DATE_RESULT_ROOT / f"{day}.json").is_file():
+                status_path = repo / STATUS_ROOT / f"{day}.json"
+                terminal_status = read_json(status_path) if status_path.is_file() else {}
+                if not _complete_terminal_result(repo, day, terminal_status):
                     atomic_json(repo / DATE_RESULT_ROOT / f"{day}.json", {
                         "date": day, "status": "FAIL", "error": f"DATE_PROCESS_EXIT_{code}", "firewall": FIREWALL,
                     })
