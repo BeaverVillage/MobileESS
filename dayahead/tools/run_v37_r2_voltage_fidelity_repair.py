@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import inspect
 import json
+import os
 from pathlib import Path
 import time
 from typing import Any, Iterable, Mapping
@@ -13,7 +14,11 @@ from typing import Any, Iterable, Mapping
 import numpy as np
 import pandas as pd
 
+from dayahead.mess_physics import PCS_KVA, P_LIMIT_KW
+from dayahead.v28r2.electrical_cache_prepare import prepare_electrical_context
+from dayahead.v28r2.electrical_context import build_electrical_context
 from dayahead.v28r2.electrical_subproblem import slot_coefficients
+from dayahead.v28r2.formulation import PF_TAN, materialize_formulation_data
 from dayahead.v28r2.opendss_backend import _voltage_vector
 from dayahead.v28r2.opendss_mapping import (
     FeederAssets, apply_frozen_native_state, apply_trajectory_slot,
@@ -37,13 +42,22 @@ CASES = ("B2", "B3")
 APRIL_WORKTREE = Path(r"C:\codex_mobileess_workspace\MobileESS_v36_apr01_calibration")
 APRIL_ROOT = APRIL_WORKTREE / "frozen_artifacts/v36_final_schema/PRE_CALIBRATION"
 OLD_PASS_ID = "MAY_2025_LOCKED_FINAL"
-R2_PASS_ID = "MAY_2025_V37_R2_REVALIDATION_V2"
+R2_PASS_ID = "MAY_2025_V37_R2_FINAL_AUTHORITY"
 RAW_ROOT = Path("frozen_artifacts/v36_final_schema")
 OLD_ROOT = RAW_ROOT / OLD_PASS_ID
 NEW_ROOT = RAW_ROOT / R2_PASS_ID
 OUT = Path("dayahead/artifacts/v37_r2_voltage_fidelity_repair")
-DELTA_P_KW = 1.0
-DELTA_Q_KVAR = 1.0
+APRIL_BACKGROUND_CACHE = Path("dayahead/cache/v37_r2_april_background")
+APRIL_DAYS = tuple(f"2025-04-{index:02d}" for index in range(1, 31))
+SELECTABLE_SERVICES = tuple(
+    [f"IDC{index:02d}" for index in range(1, 13)]
+    + [f"STA{index:02d}" for index in range(1, 13)]
+)
+# A 10-unit symmetric step is tiny relative to the frozen 550 kW / 700 kVA
+# equipment limits, while moving remote cross-PCC voltage responses above the
+# independently measured OpenDSS numerical scatter.
+DELTA_P_KW = 10.0
+DELTA_Q_KVAR = 10.0
 PHYSICAL_TOLERANCE = 1.0e-6
 
 
@@ -124,7 +138,223 @@ def _aggregate_states(repo: Path) -> tuple[pd.DataFrame, dict[tuple[str, str], d
     return pd.DataFrame(rows), loaded
 
 
-def _select_calibration_states(states: pd.DataFrame) -> pd.DataFrame:
+def _background_audit_plan() -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Select the smallest deterministic pre-May background coverage set."""
+
+    source_days = (
+        SOURCE_DATA_REPOSITORY
+        / "cache/v28r2_campaign_sources/april_2025/days"
+    )
+    raw_rows: list[dict[str, Any]] = []
+    for day in APRIL_DAYS:
+        path = source_days / day / "aemo_forecast.json"
+        if not path.is_file():
+            raise FileNotFoundError(f"V37_R2_APRIL_BACKGROUND_SOURCE_MISSING:{path}")
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        demand = np.asarray(payload["demand_mw_96"], dtype=float)
+        pv = np.asarray(payload["pv_mw_96"], dtype=float)
+        timestamps = tuple(map(str, payload["timestamps_96"]))
+        if demand.shape != (96,) or pv.shape != (96,) or len(timestamps) != 96:
+            raise RuntimeError(f"V37_R2_APRIL_BACKGROUND_AXIS:{day}")
+        for slot in range(96):
+            raw_rows.append({
+                "day": day, "slot": slot, "timestamp": timestamps[slot],
+                "demand_MW": float(demand[slot]), "PV_MW": float(pv[slot]),
+                "net_demand_MW": float(demand[slot] - pv[slot]),
+            })
+    raw = pd.DataFrame(raw_rows)
+    median_net = float(raw["net_demand_MW"].median())
+    raw_candidates = (
+        (raw.loc[raw["net_demand_MW"].idxmin()], "FULL_APRIL_LOW_NET_HIGH_PV"),
+        (raw.loc[(raw["net_demand_MW"] - median_net).abs().idxmin()], "FULL_APRIL_MEDIAN_NET"),
+        (raw.loc[raw["net_demand_MW"].idxmax()], "FULL_APRIL_HIGH_NET_HIGH_DEMAND"),
+    )
+
+    electrical_rows: list[dict[str, Any]] = []
+    exact_days: list[str] = []
+    exact_root = (
+        SOURCE_DATA_REPOSITORY
+        / "frozen_artifacts/v28r2_april_full_month_preflight"
+    )
+    for day in APRIL_DAYS:
+        path = (
+            exact_root / day / "dayahead/electrical_cache/data"
+            / f"D1_AC_ANCHOR_SENSITIVITY_{day}.npz"
+        )
+        if not path.is_file():
+            continue
+        exact_days.append(day)
+        with np.load(path, allow_pickle=False) as voltage:
+            nodes = tuple(map(str, voltage["node_names"]))
+            anchor_v = np.sqrt(np.maximum(0.0, np.asarray(voltage["anchor_v_squared"], dtype=float)))
+            root_pq = np.asarray(voltage["root_pq"], dtype=float)
+        complete_bus_indices: list[tuple[int, int, int]] = []
+        by_bus: dict[str, dict[str, int]] = {}
+        for index, node in enumerate(nodes):
+            bus, suffix = node.rsplit(".", 1)
+            phase = {"1": "A", "2": "B", "3": "C"}.get(suffix)
+            if phase is not None:
+                by_bus.setdefault(bus, {})[phase] = index
+        for phases in by_bus.values():
+            if set(phases) == set("ABC"):
+                complete_bus_indices.append(tuple(phases[p] for p in "ABC"))
+        for slot in range(96):
+            imbalance = max(
+                float(np.ptp(anchor_v[slot, list(indices)]))
+                for indices in complete_bus_indices
+            )
+            electrical_rows.append({
+                "day": day, "slot": slot,
+                "D1_root_P_kW": float(root_pq[slot, 0]),
+                "D1_root_Q_kvar": float(root_pq[slot, 1]),
+                "D1_anchor_Vmin_pu": float(anchor_v[slot].min()),
+                "D1_max_three_phase_imbalance_pu": imbalance,
+            })
+    if not electrical_rows:
+        raise RuntimeError("V37_R2_NO_SAVED_APRIL_ELECTRICAL_BACKGROUND")
+    electrical = pd.DataFrame(electrical_rows)
+    electrical_candidates = (
+        (electrical.loc[electrical["D1_anchor_Vmin_pu"].idxmin()], "SAVED_APRIL_LOW_D1_ANCHOR_VOLTAGE"),
+        (electrical.loc[electrical["D1_max_three_phase_imbalance_pu"].idxmax()], "SAVED_APRIL_STRONG_PHASE_IMBALANCE"),
+        (electrical.loc[electrical["D1_root_Q_kvar"].idxmin()], "SAVED_APRIL_LOW_ROOT_Q"),
+        (electrical.loc[electrical["D1_root_Q_kvar"].idxmax()], "SAVED_APRIL_HIGH_ROOT_Q"),
+    )
+
+    representatives: dict[tuple[str, int], dict[str, Any]] = {}
+    for row, reason in (*raw_candidates, *electrical_candidates):
+        key = (str(row["day"]), int(row["slot"]))
+        target = representatives.setdefault(key, {
+            "day": key[0], "slot": key[1], "selection_reasons": [],
+        })
+        target["selection_reasons"].append(reason)
+        for name, value in row.items():
+            if name not in {"day", "slot", "timestamp"} and pd.notna(value):
+                target[name] = float(value)
+    planned = []
+    raw_indexed = raw.set_index(["day", "slot"])
+    for key, row in sorted(representatives.items()):
+        raw_row = raw_indexed.loc[key]
+        row.update({
+            "timestamp": str(raw_row["timestamp"]),
+            "demand_MW": float(raw_row["demand_MW"]),
+            "PV_MW": float(raw_row["PV_MW"]),
+            "net_demand_MW": float(raw_row["net_demand_MW"]),
+            "selection_reasons": "|".join(sorted(row["selection_reasons"])),
+        })
+        planned.append(row)
+
+    apr01 = raw.loc[raw["day"] == CALIBRATION_DAY]
+    audit = {
+        "artifact_id": "V37_R2_APRIL_BACKGROUND_COVERAGE_AUDIT_V1",
+        "scope": "PRE_MAY_APRIL_BACKGROUND_ONLY",
+        "raw_April_day_count": int(raw["day"].nunique()),
+        "raw_April_slot_count": int(len(raw)),
+        "saved_D1_electrical_day_count_before_targeted_generation": len(exact_days),
+        "saved_D1_electrical_days_before_targeted_generation": exact_days,
+        "Apr01_raw_range": {
+            "demand_MW": [float(apr01["demand_MW"].min()), float(apr01["demand_MW"].max())],
+            "PV_MW": [float(apr01["PV_MW"].min()), float(apr01["PV_MW"].max())],
+            "net_demand_MW": [float(apr01["net_demand_MW"].min()), float(apr01["net_demand_MW"].max())],
+        },
+        "full_April_raw_range": {
+            "demand_MW": [float(raw["demand_MW"].min()), float(raw["demand_MW"].max())],
+            "PV_MW": [float(raw["PV_MW"].min()), float(raw["PV_MW"].max())],
+            "net_demand_MW": [float(raw["net_demand_MW"].min()), float(raw["net_demand_MW"].max())],
+        },
+        "Apr01_background_alone_sufficient": False,
+        "representative_selection_rule": (
+            "FULL_APRIL_RAW_LOW_MEDIAN_HIGH_NET_PLUS_SAVED_APRIL_ELECTRICAL_"
+            "LOW_VOLTAGE_MAX_PHASE_IMBALANCE_LOW_HIGH_ROOT_Q"
+        ),
+        "representative_background_slot_count": len(planned),
+        "representatives": planned,
+        "full_April_optimization_campaign_run": False,
+        "May_data_used": False,
+        "PASS": False,
+    }
+    return audit, planned
+
+
+def _materialize_april_background_data(
+    repo: Path, representatives: list[dict[str, Any]],
+) -> tuple[pd.DataFrame, dict[tuple[str, str], dict[str, Any]]]:
+    """Create only the D1/Fresh context needed by the selected April slots."""
+
+    from dayahead.v36.context import install_exact_source_lookup
+
+    rows: list[dict[str, Any]] = []
+    loaded: dict[tuple[str, str], dict[str, Any]] = {}
+    for representative in representatives:
+        day = str(representative["day"]); slot = int(representative["slot"])
+        key = (day, "FRESH_ONLY")
+        if key not in loaded:
+            install_exact_source_lookup()
+            previous = Path.cwd()
+            try:
+                formulation = materialize_formulation_data(
+                    SOURCE_DATA_REPOSITORY, day, disable_legacy_mess_source=True,
+                )
+            finally:
+                os.chdir(previous)
+            source_cache = (
+                SOURCE_DATA_REPOSITORY
+                / "frozen_artifacts/v28r2_april_full_month_preflight"
+                / day / "dayahead/electrical_cache"
+            )
+            local_cache = repo / APRIL_BACKGROUND_CACHE / day
+            cache = source_cache if (
+                source_cache / "data" / f"D1_AC_ANCHOR_SENSITIVITY_{day}.npz"
+            ).is_file() else local_cache
+            try:
+                electrical = build_electrical_context(
+                    SOURCE_DATA_REPOSITORY, formulation, cache,
+                )
+            except RuntimeError as error:
+                if not str(error).startswith("V28R2_D1_ELECTRICAL_CACHE_MISSING:"):
+                    raise
+                electrical = prepare_electrical_context(
+                    SOURCE_DATA_REPOSITORY, formulation, cache,
+                )
+            try:
+                anchor_control = np.asarray(electrical.voltage["anchor_control"], dtype=float)
+                pcc_p = anchor_control[:, :12].copy()
+                pcc_q = pcc_p * PF_TAN
+            finally:
+                electrical.voltage.close(); electrical.current.close()
+            loaded[key] = {
+                "pcc_p": pcc_p, "pcc_q": pcc_q,
+                "p": np.zeros((96, len(MESS_IDS)), dtype=float),
+                "q": np.zeros((96, len(MESS_IDS)), dtype=float),
+                "locations": np.asarray([
+                    [f"TRANSIT_{vehicle}" for vehicle in MESS_IDS]
+                    for _slot in range(96)
+                ], dtype=object),
+                "fresh": None, "planning": None,
+                "formulation_data": formulation, "electrical_cache": cache,
+            }
+        for service in SELECTABLE_SERVICES:
+            rows.append({
+                "day": day, "case": "FRESH_ONLY", "slot": slot,
+                "service": service, "timestamp": str(representative["timestamp"]),
+                "P_kW": 0.0, "Q_kvar": 0.0,
+                "Fresh_local_Vmin_pu": np.nan, "vehicle_ids": str(MESS_IDS[0]),
+                "selection_reasons": str(representative["selection_reasons"]),
+                "calibration_state_id": (
+                    f"APRIL_BACKGROUND_{day.replace('-', '')}_S{slot:02d}_{service}"
+                ),
+                "probe_kind": "TARGETED_APRIL_BACKGROUND_FRESH_ONLY_PROBE",
+                "probe_target_P_kW": 500.0,
+                "probe_target_Q_kvar": -450.0,
+                "probe_vehicle_index": 0,
+                "override_source_location": True,
+                "zero_all_MESS_at_slot": True,
+            })
+    return pd.DataFrame(rows), loaded
+
+
+def _select_calibration_states(
+    states: pd.DataFrame, services: tuple[str, ...] = SELECTABLE_SERVICES,
+) -> pd.DataFrame:
     selected: dict[tuple[str, str, int, str], set[str]] = {}
 
     def add(row: pd.Series, reason: str) -> None:
@@ -156,6 +386,9 @@ def _select_calibration_states(states: pd.DataFrame) -> pd.DataFrame:
         row["probe_kind"] = "SAVED_APRIL_OPERATING_STATE"
         row["probe_target_P_kW"] = float(row["P_kW"])
         row["probe_target_Q_kvar"] = float(row["Q_kvar"])
+        row["probe_vehicle_index"] = -1
+        row["override_source_location"] = False
+        row["zero_all_MESS_at_slot"] = False
         rows.append(row)
 
     # The completed Apr-01 B2/B3 paths do not contain both P and Q directions
@@ -167,6 +400,10 @@ def _select_calibration_states(states: pd.DataFrame) -> pd.DataFrame:
         (-500.0, 0.0, "APRIL_FRESH_ONLY_NEGATIVE_P"),
         (0.0, 600.0, "APRIL_FRESH_ONLY_POSITIVE_Q"),
         (0.0, -600.0, "APRIL_FRESH_ONLY_NEGATIVE_Q"),
+        (500.0, 450.0, "APRIL_FRESH_ONLY_JOINT_POSITIVE_P_POSITIVE_Q"),
+        (500.0, -450.0, "APRIL_FRESH_ONLY_JOINT_POSITIVE_P_NEGATIVE_Q"),
+        (-500.0, 450.0, "APRIL_FRESH_ONLY_JOINT_NEGATIVE_P_POSITIVE_Q"),
+        (-500.0, -450.0, "APRIL_FRESH_ONLY_JOINT_NEGATIVE_P_NEGATIVE_Q"),
     )
     for service, frame in states.groupby("service", sort=True):
         reference = frame.loc[frame["Fresh_local_Vmin_pu"].idxmin()].to_dict()
@@ -178,27 +415,83 @@ def _select_calibration_states(states: pd.DataFrame) -> pd.DataFrame:
             row["probe_kind"] = "TARGETED_APRIL_FRESH_ONLY_ELECTRICAL_PROBE"
             row["probe_target_P_kW"] = p_target
             row["probe_target_Q_kvar"] = q_target
+            row["probe_vehicle_index"] = -1
+            row["override_source_location"] = False
+            row["zero_all_MESS_at_slot"] = False
+            rows.append(row)
+
+    # Apr-01 has saved nonzero operation at only a subset of selectable PCCs.
+    # Complete the source axis at the single lowest-voltage saved Apr-01
+    # background without pretending that the synthetic states were completed
+    # integrated operating days.
+    observed = set(states["service"].astype(str))
+    reference = states.loc[states["Fresh_local_Vmin_pu"].idxmin()].to_dict()
+    missing_targets = (
+        (500.0, 450.0, "APRIL_FRESH_ONLY_MISSING_PCC_POSITIVE_Q"),
+        (500.0, -450.0, "APRIL_FRESH_ONLY_MISSING_PCC_NEGATIVE_Q"),
+        (-500.0, 450.0, "APRIL_FRESH_ONLY_MISSING_PCC_NEGATIVE_P_POSITIVE_Q"),
+        (-500.0, -450.0, "APRIL_FRESH_ONLY_MISSING_PCC_NEGATIVE_P_NEGATIVE_Q"),
+    )
+    for service in services:
+        if service in observed:
+            continue
+        for p_target, q_target, reason in missing_targets:
+            sequence = len(rows) + 1
+            row = dict(reference)
+            row.update({
+                "service": service, "P_kW": 0.0, "Q_kvar": 0.0,
+                "selection_reasons": reason,
+                "calibration_state_id": f"APRIL_PCC_COVERAGE_{sequence:03d}",
+                "probe_kind": "TARGETED_APR01_MISSING_PCC_FRESH_ONLY_PROBE",
+                "probe_target_P_kW": p_target,
+                "probe_target_Q_kvar": q_target,
+                "probe_vehicle_index": 0,
+                "override_source_location": True,
+                "zero_all_MESS_at_slot": True,
+            })
             rows.append(row)
     return pd.DataFrame(rows)
 
 
-def _changed_trajectory(data: Mapping[str, Any], day: str, case: str, slot: int,
-                        vehicle_index: int, dp: float, dq: float, label: str) -> FrozenTrajectory:
+def _changed_trajectory(
+    data: Mapping[str, Any], day: str, case: str, slot: int,
+    vehicle_index: int, service: str, target_p: float, target_q: float,
+    label: str, *, zero_all_mess: bool, override_source_location: bool,
+) -> FrozenTrajectory:
     p = np.asarray(data["p"], dtype=float).copy()
     q = np.asarray(data["q"], dtype=float).copy()
-    p[slot, vehicle_index] += dp
-    q[slot, vehicle_index] += dq
-    return FrozenTrajectory(
+    locations = np.asarray(data["locations"], dtype=object).copy()
+    if zero_all_mess:
+        p[slot, :] = 0.0; q[slot, :] = 0.0
+        p[slot, vehicle_index] = target_p
+        q[slot, vehicle_index] = target_q
+    else:
+        source_indices = [
+            index for index, location in enumerate(locations[slot])
+            if str(location).upper() == service
+        ]
+        current_p = float(p[slot, source_indices].sum())
+        current_q = float(q[slot, source_indices].sum())
+        p[slot, vehicle_index] += target_p - current_p
+        q[slot, vehicle_index] += target_q - current_q
+    if override_source_location:
+        locations[slot, vehicle_index] = service
+    result = FrozenTrajectory(
         day=day, namespace="DAYAHEAD", case=case,
         pcc_p_kw=np.asarray(data["pcc_p"]), pcc_q_kvar=np.asarray(data["pcc_q"]),
         mess_p_kw=p, mess_q_kvar=q, mess_ids=tuple(MESS_IDS),
-        mess_locations_96x4=np.asarray(data["locations"]),
+        mess_locations_96x4=locations,
         source_schedule_sha256=canonical_sha256({
             "authority": "V37_R2_LOCAL_FINITE_DIFFERENCE", "day": day,
             "case": case, "slot": slot, "vehicle": MESS_IDS[vehicle_index],
-            "delta_P_kW": dp, "delta_Q_kvar": dq, "label": label,
+            "source_service": service, "target_P_kW": target_p,
+            "target_Q_kvar": target_q, "label": label,
+            "zero_all_mess": zero_all_mess,
+            "override_source_location": override_source_location,
         }),
     )
+    result.validate()
+    return result
 
 
 def _solve_slot_voltage(odd: Any, adapter: Mapping[str, Any], context: Any,
@@ -227,8 +520,16 @@ def _measure_calibration(
     rows: list[dict[str, Any]] = []
     assets = FeederAssets.from_repo(SOURCE_DATA_REPOSITORY)
     for day, day_states in selected.groupby("day", sort=True):
-        from dayahead.v36.context import load_day_context as load_april_context
-        _formulation, context = load_april_context(str(day))
+        sample_data = loaded[(str(day), str(day_states.iloc[0]["case"]))]
+        if sample_data.get("formulation_data") is not None:
+            context = build_electrical_context(
+                SOURCE_DATA_REPOSITORY,
+                sample_data["formulation_data"],
+                Path(sample_data["electrical_cache"]),
+            )
+        else:
+            from dayahead.v36.context import load_day_context as load_april_context
+            _formulation, context = load_april_context(str(day))
         nodes = tuple(map(str, context.voltage["node_names"]))
         coefficients = tuple(
             slot_coefficients(context.legacy_context, context.voltage, context.current, slot)
@@ -243,33 +544,46 @@ def _measure_calibration(
             for _, state in ordered_states.iterrows():
                 case = str(state["case"]); slot = int(state["slot"]); service = str(state["service"])
                 data = loaded[(str(day), case)]
-                local_vehicle = next(
+                requested_vehicle = int(state.get("probe_vehicle_index", -1))
+                local_vehicle = requested_vehicle if requested_vehicle >= 0 else next(
                     index for index, location in enumerate(data["locations"][slot])
                     if str(location).upper() == service
                 )
                 target_p = float(state["probe_target_P_kW"])
                 target_q = float(state["probe_target_Q_kvar"])
-                base_dp = target_p - float(state["P_kW"])
-                base_dq = target_q - float(state["Q_kvar"])
+                zero_all = bool(state.get("zero_all_MESS_at_slot", False))
+                override_location = bool(state.get("override_source_location", False))
                 trajectories = {
-                    "BASE": _changed_trajectory(data, str(day), case, slot, local_vehicle, base_dp, base_dq, "BASE"),
-                    "P_PLUS": _changed_trajectory(data, str(day), case, slot, local_vehicle, base_dp + DELTA_P_KW, base_dq, "P_PLUS"),
-                    "P_MINUS": _changed_trajectory(data, str(day), case, slot, local_vehicle, base_dp - DELTA_P_KW, base_dq, "P_MINUS"),
-                    "Q_PLUS": _changed_trajectory(data, str(day), case, slot, local_vehicle, base_dp, base_dq + DELTA_Q_KVAR, "Q_PLUS"),
-                    "Q_MINUS": _changed_trajectory(data, str(day), case, slot, local_vehicle, base_dp, base_dq - DELTA_Q_KVAR, "Q_MINUS"),
+                    "BASE": _changed_trajectory(data, str(day), case, slot, local_vehicle, service, target_p, target_q, "BASE", zero_all_mess=zero_all, override_source_location=override_location),
+                    "P_PLUS": _changed_trajectory(data, str(day), case, slot, local_vehicle, service, target_p + DELTA_P_KW, target_q, "P_PLUS", zero_all_mess=zero_all, override_source_location=override_location),
+                    "P_MINUS": _changed_trajectory(data, str(day), case, slot, local_vehicle, service, target_p - DELTA_P_KW, target_q, "P_MINUS", zero_all_mess=zero_all, override_source_location=override_location),
+                    "Q_PLUS": _changed_trajectory(data, str(day), case, slot, local_vehicle, service, target_p, target_q + DELTA_Q_KVAR, "Q_PLUS", zero_all_mess=zero_all, override_source_location=override_location),
+                    "Q_MINUS": _changed_trajectory(data, str(day), case, slot, local_vehicle, service, target_p, target_q - DELTA_Q_KVAR, "Q_MINUS", zero_all_mess=zero_all, override_source_location=override_location),
                 }
                 values = {
                     label: _solve_slot_voltage(odd, adapter, context, trajectories[label], slot, nodes)
                     for label in probe_order
                 }
-                planning = data["planning"].set_index(["slot", "bus_phase_key"])
-                saved_fresh = data["fresh"].set_index(["slot", "bus_phase_key"])
+                planning = (
+                    data["planning"].set_index(["slot", "bus_phase_key"])
+                    if data.get("planning") is not None else None
+                )
+                saved_fresh = (
+                    data["fresh"].set_index(["slot", "bus_phase_key"])
+                    if data.get("fresh") is not None else None
+                )
                 coefficient = coefficients[slot]
                 p_index = controls.index(f"mess_p_kw[{service}]")
                 q_index = controls.index(f"mess_q_kvar[{service}]")
-                for phase_index, phase in enumerate("ABC", start=1):
-                    node = f"mess_{service.lower()}_pcc.{phase_index}"
-                    node_index = nodes.index(node)
+                pcc_targets = {
+                    f"mess_{target.lower()}_pcc.{phase_index}": (target, phase)
+                    for target in SELECTABLE_SERVICES
+                    for phase_index, phase in enumerate("ABC", start=1)
+                }
+                for node_index, node in enumerate(nodes):
+                    target_service, phase = pcc_targets.get(node, ("", {
+                        "1": "A", "2": "B", "3": "C",
+                    }.get(node.rsplit(".", 1)[-1], "OTHER")))
                     base_v = float(values["BASE"][node_index])
                     fresh_hp = float(
                         (values["P_PLUS"][node_index] ** 2 - values["P_MINUS"][node_index] ** 2)
@@ -282,35 +596,48 @@ def _measure_calibration(
                     old_hp = float(coefficient.voltage_matrix[p_index, node_index])
                     old_hq = float(coefficient.voltage_matrix[q_index, node_index])
                     saved_state = str(state["probe_kind"]) == "SAVED_APRIL_OPERATING_STATE"
-                    saved_fresh_value = float(saved_fresh.loc[(slot, node), "fresh_voltage_magnitude_pu"])
-                    saved_planning_value = float(planning.loc[(slot, node), "voltage_magnitude_pu"])
+                    saved_fresh_value = (
+                        float(saved_fresh.loc[(slot, node), "fresh_voltage_magnitude_pu"])
+                        if saved_state and saved_fresh is not None else np.nan
+                    )
+                    saved_planning_value = (
+                        float(planning.loc[(slot, node), "voltage_magnitude_pu"])
+                        if saved_state and planning is not None else np.nan
+                    )
+                    p_ratio = fresh_hp / old_hp if abs(old_hp) > np.finfo(float).tiny else np.nan
+                    q_ratio = fresh_hq / old_hq if abs(old_hq) > np.finfo(float).tiny else np.nan
                     rows.append({
-                        "day": str(day), "case": case, "slot": slot,
-                        "timestamp": str(state["timestamp"]), "service": service,
-                        "target_PCC": service, "phase": phase, "target_bus_phase_key": node,
-                        "perturbed_vehicle_id": str(MESS_IDS[local_vehicle]),
-                        "calibration_state_id": str(state["calibration_state_id"]),
-                        "probe_kind": str(state["probe_kind"]),
-                        "P_at_PCC_kW": target_p,
-                        "Q_at_PCC_kvar": target_q,
-                        "selection_reasons": str(state["selection_reasons"]),
-                        "delta_P_kW": DELTA_P_KW, "delta_Q_kvar": DELTA_Q_KVAR,
-                        "Fresh_base_voltage_pu": base_v,
-                        "saved_Fresh_voltage_pu": saved_fresh_value if saved_state else np.nan,
-                        "saved_Planning_voltage_pu": saved_planning_value if saved_state else np.nan,
-                        "Fresh_replay_abs_error_pu": abs(base_v - saved_fresh_value) if saved_state else np.nan,
-                        "old_H_P_pu_squared_per_kW": old_hp,
-                        "Fresh_H_P_pu_squared_per_kW": fresh_hp,
-                        "old_dV_dP_pu_per_kW": old_hp / (2.0 * base_v),
-                        "Fresh_dV_dP_pu_per_kW": fresh_hp / (2.0 * base_v),
-                        "old_H_Q_pu_squared_per_kvar": old_hq,
-                        "Fresh_H_Q_pu_squared_per_kvar": fresh_hq,
-                        "old_dV_dQ_pu_per_kvar": old_hq / (2.0 * base_v),
-                        "Fresh_dV_dQ_pu_per_kvar": fresh_hq / (2.0 * base_v),
-                        "Fresh_to_old_H_P_ratio": fresh_hp / old_hp,
-                        "Fresh_to_old_H_Q_ratio": fresh_hq / old_hq,
-                        "P_sign_match": bool(np.sign(fresh_hp) == np.sign(old_hp)),
-                        "Q_sign_match": bool(np.sign(fresh_hq) == np.sign(old_hq)),
+                            "day": str(day), "case": case, "slot": slot,
+                            "timestamp": str(state["timestamp"]), "service": service,
+                            "source_service": service, "target_service": target_service,
+                            "source_PCC": service, "target_PCC": target_service,
+                            "phase": phase, "target_bus_phase_key": node,
+                            "target_is_selectable_MESS_PCC": bool(node in pcc_targets),
+                            "perturbed_vehicle_id": str(MESS_IDS[local_vehicle]),
+                            "calibration_state_id": str(state["calibration_state_id"]),
+                            "probe_kind": str(state["probe_kind"]),
+                            "P_at_source_PCC_kW": target_p,
+                            "Q_at_source_PCC_kvar": target_q,
+                            "P_at_PCC_kW": target_p,
+                            "Q_at_PCC_kvar": target_q,
+                            "selection_reasons": str(state["selection_reasons"]),
+                            "delta_P_kW": DELTA_P_KW, "delta_Q_kvar": DELTA_Q_KVAR,
+                            "Fresh_base_voltage_pu": base_v,
+                            "saved_Fresh_voltage_pu": saved_fresh_value if saved_state else np.nan,
+                            "saved_Planning_voltage_pu": saved_planning_value if saved_state else np.nan,
+                            "Fresh_replay_abs_error_pu": abs(base_v - saved_fresh_value) if saved_state else np.nan,
+                            "old_H_P_pu_squared_per_kW": old_hp,
+                            "Fresh_H_P_pu_squared_per_kW": fresh_hp,
+                            "old_dV_dP_pu_per_kW": old_hp / (2.0 * base_v),
+                            "Fresh_dV_dP_pu_per_kW": fresh_hp / (2.0 * base_v),
+                            "old_H_Q_pu_squared_per_kvar": old_hq,
+                            "Fresh_H_Q_pu_squared_per_kvar": fresh_hq,
+                            "old_dV_dQ_pu_per_kvar": old_hq / (2.0 * base_v),
+                            "Fresh_dV_dQ_pu_per_kvar": fresh_hq / (2.0 * base_v),
+                            "Fresh_to_old_H_P_ratio": p_ratio,
+                            "Fresh_to_old_H_Q_ratio": q_ratio,
+                            "P_sign_match": bool(np.sign(fresh_hp) == np.sign(old_hp)),
+                            "Q_sign_match": bool(np.sign(fresh_hq) == np.sign(old_hq)),
                     })
         finally:
             odd.Basic.ClearAll()
@@ -320,9 +647,14 @@ def _measure_calibration(
 
 def _order_history_subset(selected: pd.DataFrame) -> pd.DataFrame:
     rows = []
+    representative_pccs = {"IDC01", "IDC06", "IDC12", "STA01", "STA06", "STA12"}
     negative_q = selected.loc[
-        selected["selection_reasons"] == "APRIL_FRESH_ONLY_NEGATIVE_Q"
-    ].sort_values("service")
+        (selected["day"] == CALIBRATION_DAY)
+        & (selected["probe_kind"] != "SAVED_APRIL_OPERATING_STATE")
+        & (selected["probe_target_Q_kvar"] <= -450.0)
+        & (selected["probe_target_P_kW"] >= 500.0)
+        & selected["service"].isin(representative_pccs)
+    ].sort_values("service").drop_duplicates("service")
     rows.extend(negative_q.to_dict("records"))
     saved = selected.loc[selected["probe_kind"] == "SAVED_APRIL_OPERATING_STATE"]
     if len(saved):
@@ -336,31 +668,106 @@ def _order_history_subset(selected: pd.DataFrame) -> pd.DataFrame:
 def _authority(
     repo: Path, calibration: pd.DataFrame, *,
     p_reproducibility_guard: float, q_reproducibility_guard: float,
+    april_background_audit: Mapping[str, Any],
 ) -> dict[str, Any]:
+    relevant = calibration.loc[calibration["target_is_selectable_MESS_PCC"]].copy()
+    expected_sources = set(SELECTABLE_SERVICES)
+    if set(relevant["source_service"].unique()) != expected_sources:
+        raise RuntimeError("V37_R2_SOURCE_PCC_COVERAGE_NOT_24_OF_24")
+    if set(relevant["target_service"].unique()) != expected_sources:
+        raise RuntimeError("V37_R2_TARGET_PCC_COVERAGE_NOT_24_OF_24")
+    if set(relevant["phase"].unique()) != set("ABC"):
+        raise RuntimeError("V37_R2_PHASE_COVERAGE_NOT_ABC")
+
+    def axis_authority(frame: pd.DataFrame, axis: str) -> dict[str, Any]:
+        unit = "kW" if axis == "P" else "kvar"
+        limit = P_LIMIT_KW if axis == "P" else PCS_KVA
+        old = frame[f"old_H_{axis}_pu_squared_per_{unit}"].to_numpy(float)
+        fresh = frame[f"Fresh_H_{axis}_pu_squared_per_{unit}"].to_numpy(float)
+        base = frame["Fresh_base_voltage_pu"].to_numpy(float)
+        material = (
+            np.abs(fresh) / (2.0 * np.maximum(base, np.finfo(float).tiny)) * limit
+            >= PHYSICAL_TOLERANCE
+        )
+        if material.any():
+            physical_signs = set(map(int, np.sign(fresh[material])))
+            if len(physical_signs) != 1 or 0 in physical_signs:
+                raise RuntimeError("V37_R2_MATERIAL_FRESH_SIGN_NOT_STABLE")
+            physical_sign = physical_signs.pop()
+            guard = p_reproducibility_guard if axis == "P" else q_reproducibility_guard
+            minimum_abs_h = float(np.nextafter(
+                np.abs(fresh[material]).max() * (1.0 + guard), np.inf,
+            ))
+            old_sign_mismatch = int((np.sign(old[material]) != physical_sign).sum())
+            repaired = np.where(
+                (np.sign(old) == physical_sign) & (np.abs(old) >= minimum_abs_h),
+                old, physical_sign * minimum_abs_h,
+            )
+            maximum_abs_correction = float(np.max(np.abs(repaired - old)))
+        else:
+            physical_sign = 0
+            minimum_abs_h = 0.0
+            old_sign_mismatch = 0
+            maximum_abs_correction = 0.0
+        return {
+            "physical_sign": physical_sign,
+            "minimum_abs_H": minimum_abs_h,
+            "material_state_count": int(material.sum()),
+            "immaterial_state_count": int((~material).sum()),
+            "old_sign_mismatch_count_on_material_states": old_sign_mismatch,
+            "maximum_absolute_H_correction": maximum_abs_correction,
+            "materiality_rule": (
+                f"ABS_FRESH_DV_D{axis}_TIMES_{limit:g}_"
+                f"{unit.upper()}_GE_{PHYSICAL_TOLERANCE:g}_PU"
+            ),
+        }
+
     corrections = []
-    for (service, phase), frame in calibration.groupby(["service", "phase"], sort=True):
-        if not frame["P_sign_match"].all() or not frame["Q_sign_match"].all():
-            raise RuntimeError(f"V37_R2_PHYSICAL_SIGN_MISMATCH:{service}:{phase}")
-        if (frame[["old_H_P_pu_squared_per_kW", "Fresh_H_P_pu_squared_per_kW",
-                   "old_H_Q_pu_squared_per_kvar", "Fresh_H_Q_pu_squared_per_kvar"]] <= 0.0).any().any():
-            raise RuntimeError(f"V37_R2_NONPOSITIVE_LOCAL_SENSITIVITY:{service}:{phase}")
-        p_ratio = max(1.0, float(frame["Fresh_to_old_H_P_ratio"].max()))
-        q_ratio = max(1.0, float(frame["Fresh_to_old_H_Q_ratio"].max()))
-        p_scale = float(np.nextafter(p_ratio * (1.0 + p_reproducibility_guard), np.inf))
-        q_scale = float(np.nextafter(q_ratio * (1.0 + q_reproducibility_guard), np.inf))
+    for (source_service, target_service, phase), frame in relevant.groupby(
+        ["source_service", "target_service", "phase"], sort=True,
+    ):
+        try:
+            p = axis_authority(frame, "P")
+            q = axis_authority(frame, "Q")
+        except RuntimeError as error:
+            raise RuntimeError(
+                f"{error}:{source_service}:{target_service}:{phase}"
+            ) from error
         phase_index = "ABC".index(str(phase)) + 1
         corrections.append({
-            "service": str(service), "PCC": str(service), "phase": str(phase),
-            "target_bus_phase_key": f"mess_{str(service).lower()}_pcc.{phase_index}",
-            "P_scale": p_scale, "Q_scale": q_scale,
+            "service": str(source_service), "source_service": str(source_service),
+            "target_service": str(target_service),
+            "source_PCC": str(source_service), "target_PCC": str(target_service),
+            "phase": str(phase),
+            "target_bus_phase_key": f"mess_{str(target_service).lower()}_pcc.{phase_index}",
+            "P_repair_mode": "PHYSICAL_SIGNED_MINIMUM_ABSOLUTE_H_FLOOR",
+            "Q_repair_mode": "PHYSICAL_SIGNED_MINIMUM_ABSOLUTE_H_FLOOR",
+            "P_physical_sign": p["physical_sign"],
+            "Q_physical_sign": q["physical_sign"],
+            "P_minimum_abs_H": p["minimum_abs_H"],
+            "Q_minimum_abs_H": q["minimum_abs_H"],
             "calibration_state_count": int(len(frame)),
-            "maximum_observed_Fresh_to_old_H_P_ratio": float(frame["Fresh_to_old_H_P_ratio"].max()),
-            "maximum_observed_Fresh_to_old_H_Q_ratio": float(frame["Fresh_to_old_H_Q_ratio"].max()),
+            "P_material_state_count": p["material_state_count"],
+            "Q_material_state_count": q["material_state_count"],
+            "P_immaterial_state_count": p["immaterial_state_count"],
+            "Q_immaterial_state_count": q["immaterial_state_count"],
+            "P_old_sign_mismatch_count_on_material_states": p[
+                "old_sign_mismatch_count_on_material_states"
+            ],
+            "Q_old_sign_mismatch_count_on_material_states": q[
+                "old_sign_mismatch_count_on_material_states"
+            ],
+            "P_maximum_absolute_H_correction": p["maximum_absolute_H_correction"],
+            "Q_maximum_absolute_H_correction": q["maximum_absolute_H_correction"],
             "P_reproducibility_relative_guard": p_reproducibility_guard,
             "Q_reproducibility_relative_guard": q_reproducibility_guard,
-            "selection_rule": "MAX_OF_ONE_AND_MAX_OBSERVED_LOCAL_FRESH_TO_OLD_SLOPE_RATIO_TIMES_APRIL_REPRODUCIBILITY_GUARD",
-            "strict_conservatism": "NEXTAFTER_TOWARD_POSITIVE_INFINITY",
+            "P_materiality_rule": p["materiality_rule"],
+            "Q_materiality_rule": q["materiality_rule"],
+            "selection_rule": "STABLE_MATERIAL_FRESH_SIGN_AND_MAXIMUM_MATERIAL_ABSOLUTE_FRESH_H_TIMES_APRIL_REPRODUCIBILITY_GUARD",
+            "strict_conservatism": "REPLACE_WRONG_SIGN_OR_WEAKER_BASE_ROW_WITH_PHYSICAL_SIGNED_MINIMUM_ABSOLUTE_H_FLOOR;_NEXTAFTER_AWAY_FROM_ZERO",
         })
+    if len(corrections) != 24 * 24 * 3:
+        raise RuntimeError(f"V37_R2_CORRECTION_AXIS:{len(corrections)}")
     base_hashes = {}
     for day in MAY_DAYS:
         path = repo / "dayahead/cache/v37_may_locked_final/electrical" / day / "data" / f"D1_AC_ANCHOR_SENSITIVITY_{day}.npz"
@@ -374,12 +781,16 @@ def _authority(
     return {
         "schema_id": AUTHORITY_SCHEMA,
         "classification": "DIRECT_AFFINE_VOLTAGE_FIDELITY_REPAIR",
-        "calibration_days": [CALIBRATION_DAY], "calibration_cases": list(CASES),
+        "calibration_days": sorted(calibration["day"].unique().tolist()),
+        "calibration_cases": list(CASES),
         "calibration_source": {
             "worktree": str(APRIL_WORKTREE),
             "saved_result_root": str(APRIL_ROOT),
             "completed_integrated_April_authority_days": [CALIBRATION_DAY],
-            "targeted_Fresh_only_probe_rule": "APRIL_BACKGROUND_EXISTING_LOCATION_SLOT_P_OR_Q_AT_PLUS_MINUS_500_OR_600",
+            "targeted_Fresh_only_probe_rule": "APR01_MISSING_PCC_CORNERS_PLUS_MINIMUM_APRIL_BACKGROUND_REPRESENTATIVE_PROBES",
+            "targeted_Fresh_only_April_days": sorted(
+                set(calibration["day"].astype(str)) - {CALIBRATION_DAY}
+            ),
             "May_results_used_for_coefficient_derivation": False,
             "May_results_used_for_intercept_derivation": False,
             "May_margin_used": False
@@ -399,7 +810,20 @@ def _authority(
         "reference_operating_point": "ORIGINAL_D1_AC_ANCHOR_WITH_MESS_P_EQ_Q_EQ_0",
         "reference_intercept_policy": "RECOMPUTE_CONSTANT_TO_PRESERVE_ORIGINAL_ANCHOR_EXACTLY",
         "loading_state_dependence": "ORIGINAL_96_SLOT_COEFFICIENT_VARIATION_PRESERVED",
-        "correction_scope": "SAME_SERVICE_LOCAL_MESS_PCC_PHASE_ROWS_ONLY",
+        "correction_scope": "ALL_24_SOURCE_MESS_PCC_TO_ALL_24_TARGET_MESS_PCC_A_B_C_ROWS",
+        "authority_frozen": True,
+        "selectable_service_PCCs": list(SELECTABLE_SERVICES),
+        "selectable_service_PCC_coverage": "24/24",
+        "target_MESS_PCC_coverage": "24/24",
+        "cross_PCC_sensitivity": True,
+        "phase_coverage": ["A", "B", "C"],
+        "full_bus_phase_capture_per_source_state": True,
+        "full_bus_phase_target_count": int(calibration["target_bus_phase_key"].nunique()),
+        "April_background_coverage_PASS": bool(april_background_audit["PASS"]),
+        "April_background_representative_slot_count": int(
+            april_background_audit["representative_background_slot_count"]
+        ),
+        "May_outcomes_examined_before_freeze": False,
         "base_voltage_authority_sha256_by_day": base_hashes,
         "corrections": corrections,
         "Benders_changed": False, "K_changed": False, "beam_changed": False,
@@ -409,31 +833,57 @@ def _authority(
 
 
 def _apply_new_columns(calibration: pd.DataFrame, authority: Mapping[str, Any]) -> pd.DataFrame:
-    scales = {
-        (str(row["service"]), str(row["phase"])): (float(row["P_scale"]), float(row["Q_scale"]))
+    repairs = {
+        (str(row["source_service"]), str(row["target_service"]), str(row["phase"])):
+            {
+                "P": (int(row["P_physical_sign"]), float(row["P_minimum_abs_H"])),
+                "Q": (int(row["Q_physical_sign"]), float(row["Q_minimum_abs_H"])),
+            }
         for row in authority["corrections"]
     }
-    result = calibration.copy()
+    result = calibration.loc[calibration["target_is_selectable_MESS_PCC"]].copy()
+    def repaired_value(row: Any, axis: str, old: float) -> float:
+        sign, floor = repairs[
+            (str(row.source_service), str(row.target_service), str(row.phase))
+        ][axis]
+        if sign == 0 or (int(np.sign(old)) == sign and abs(old) >= floor):
+            return old
+        return float(sign) * floor
+
     result["new_H_P_pu_squared_per_kW"] = [
-        row.old_H_P_pu_squared_per_kW * scales[(str(row.service), str(row.phase))][0]
+        repaired_value(row, "P", float(row.old_H_P_pu_squared_per_kW))
         for row in result.itertuples()
     ]
     result["new_H_Q_pu_squared_per_kvar"] = [
-        row.old_H_Q_pu_squared_per_kvar * scales[(str(row.service), str(row.phase))][1]
+        repaired_value(row, "Q", float(row.old_H_Q_pu_squared_per_kvar))
         for row in result.itertuples()
     ]
     result["new_dV_dP_pu_per_kW"] = result["new_H_P_pu_squared_per_kW"] / (2.0 * result["Fresh_base_voltage_pu"])
     result["new_dV_dQ_pu_per_kvar"] = result["new_H_Q_pu_squared_per_kvar"] / (2.0 * result["Fresh_base_voltage_pu"])
-    result["P_conservatism_pu_squared_per_kW"] = result["new_H_P_pu_squared_per_kW"] - result["Fresh_H_P_pu_squared_per_kW"]
-    result["Q_conservatism_pu_squared_per_kvar"] = result["new_H_Q_pu_squared_per_kvar"] - result["Fresh_H_Q_pu_squared_per_kvar"]
-    p_changed = result["new_H_P_pu_squared_per_kW"] > result["old_H_P_pu_squared_per_kW"] * (1.0 + 1e-12)
-    q_changed = result["new_H_Q_pu_squared_per_kvar"] > result["old_H_Q_pu_squared_per_kvar"] * (1.0 + 1e-12)
+    result["P_conservatism_pu_squared_per_kW"] = np.abs(result["new_H_P_pu_squared_per_kW"]) - np.abs(result["Fresh_H_P_pu_squared_per_kW"])
+    result["Q_conservatism_pu_squared_per_kvar"] = np.abs(result["new_H_Q_pu_squared_per_kvar"]) - np.abs(result["Fresh_H_Q_pu_squared_per_kvar"])
+    result["P_material"] = (
+        np.abs(result["Fresh_dV_dP_pu_per_kW"]) * P_LIMIT_KW
+        >= PHYSICAL_TOLERANCE
+    )
+    result["Q_material"] = (
+        np.abs(result["Fresh_dV_dQ_pu_per_kvar"]) * PCS_KVA
+        >= PHYSICAL_TOLERANCE
+    )
+    p_changed = ~np.isclose(
+        result["new_H_P_pu_squared_per_kW"], result["old_H_P_pu_squared_per_kW"],
+        rtol=1e-12, atol=0.0,
+    )
+    q_changed = ~np.isclose(
+        result["new_H_Q_pu_squared_per_kvar"], result["old_H_Q_pu_squared_per_kvar"],
+        rtol=1e-12, atol=0.0,
+    )
     result["classification"] = np.select(
         [p_changed & q_changed, p_changed, q_changed],
         ["CORRECT_BOTH", "CORRECT_P", "CORRECT_Q"],
         default="PASS_UNCHANGED",
     )
-    result["reason"] = "OBSERVED_LOCAL_FRESH_SLOPE_ENVELOPE_WITH_EXACT_ZERO_MESS_ANCHOR"
+    result["reason"] = "OBSERVED_APRIL_FULL_CROSS_PCC_FRESH_SLOPE_MAGNITUDE_ENVELOPE_WITH_EXACT_ZERO_MESS_ANCHOR"
     return result
 
 
@@ -512,10 +962,19 @@ def _fidelity_rows(repo: Path, states: pd.DataFrame,
 def calibrate(repo: Path) -> dict[str, Any]:
     repo = repo.resolve(); out = repo / OUT; out.mkdir(parents=True, exist_ok=True)
     states, loaded = _aggregate_states(repo)
-    selected = _select_calibration_states(states)
+    background_audit, representatives = _background_audit_plan()
+    april_background_states, april_background_loaded = _materialize_april_background_data(
+        repo, representatives,
+    )
+    loaded.update(april_background_loaded)
+    selected = pd.concat([
+        _select_calibration_states(states), april_background_states,
+    ], ignore_index=True)
+    if set(selected["service"].astype(str)) != set(SELECTABLE_SERVICES):
+        raise RuntimeError("V37_R2_SELECTED_SOURCE_PCC_COVERAGE")
     calibration = _measure_calibration(repo, selected, loaded)
     repeated = _measure_calibration(repo, selected, loaded)
-    identity = ["calibration_state_id", "phase"]
+    identity = ["calibration_state_id", "source_service", "target_bus_phase_key"]
     repeated = repeated.set_index(identity).sort_index()
     first_indexed = calibration.set_index(identity).sort_index()
     if not first_indexed.index.equals(repeated.index):
@@ -530,6 +989,10 @@ def calibrate(repo: Path) -> dict[str, Any]:
     )
     p_signal = np.abs(first_indexed["Fresh_dV_dP_pu_per_kW"].to_numpy(float))
     q_signal = np.abs(first_indexed["Fresh_dV_dQ_pu_per_kvar"].to_numpy(float))
+    p_material = p_signal * P_LIMIT_KW >= PHYSICAL_TOLERANCE
+    q_material = q_signal * PCS_KVA >= PHYSICAL_TOLERANCE
+    if not p_material.any() or not q_material.any():
+        raise RuntimeError("V37_R2_NO_MATERIAL_SENSITIVITY_SIGNAL")
     p_relative = p_repeat / np.maximum(p_signal, np.finfo(float).tiny)
     q_relative = q_repeat / np.maximum(q_signal, np.finfo(float).tiny)
     voltage_scatter = float(v_repeat.max())
@@ -537,7 +1000,8 @@ def calibrate(repo: Path) -> dict[str, Any]:
     calibration = calibration.merge(
         pd.DataFrame({
             "calibration_state_id": first_indexed.index.get_level_values(0),
-            "phase": first_indexed.index.get_level_values(1),
+            "source_service": first_indexed.index.get_level_values(1),
+            "target_bus_phase_key": first_indexed.index.get_level_values(2),
             "repeat_dV_dP_abs_error_pu_per_kW": p_repeat,
             "repeat_dV_dQ_abs_error_pu_per_kvar": q_repeat,
             "repeat_dV_dP_relative_error": p_relative,
@@ -564,6 +1028,10 @@ def calibrate(repo: Path) -> dict[str, Any]:
     order_q_relative = order_q / np.maximum(
         np.abs(reference_subset["Fresh_dV_dQ_pu_per_kvar"].to_numpy(float)), np.finfo(float).tiny,
     )
+    order_p_signal = np.abs(reference_subset["Fresh_dV_dP_pu_per_kW"].to_numpy(float))
+    order_q_signal = np.abs(reference_subset["Fresh_dV_dQ_pu_per_kvar"].to_numpy(float))
+    order_p_material = order_p_signal * P_LIMIT_KW >= PHYSICAL_TOLERANCE
+    order_q_material = order_q_signal * PCS_KVA >= PHYSICAL_TOLERANCE
 
     # The acceptance band is measured, not a bit-equality constant.  A
     # central difference contains two perturbed endpoints, so conservatively
@@ -575,21 +1043,21 @@ def calibrate(repo: Path) -> dict[str, Any]:
         2.0 * observed_voltage_scatter / min(DELTA_P_KW, DELTA_Q_KVAR),
         64.0 * np.finfo(float).eps * max(1.0, signal_scale),
     ))
-    minimum_signal = float(min(p_signal.min(), q_signal.min()))
+    minimum_signal = float(min(p_signal[p_material].min(), q_signal[q_material].min()))
     sensitivity_relative_tolerance = float(
         sensitivity_abs_tolerance / max(minimum_signal, np.finfo(float).tiny)
     )
     repeat_pass = bool(
         p_repeat.max() <= sensitivity_abs_tolerance
         and q_repeat.max() <= sensitivity_abs_tolerance
-        and p_relative.max() <= sensitivity_relative_tolerance
-        and q_relative.max() <= sensitivity_relative_tolerance
+        and p_relative[p_material].max() <= sensitivity_relative_tolerance
+        and q_relative[q_material].max() <= sensitivity_relative_tolerance
     )
     order_pass = bool(
         order_p.max() <= sensitivity_abs_tolerance
         and order_q.max() <= sensitivity_abs_tolerance
-        and order_p_relative.max() <= sensitivity_relative_tolerance
-        and order_q_relative.max() <= sensitivity_relative_tolerance
+        and order_p_relative[order_p_material].max() <= sensitivity_relative_tolerance
+        and order_q_relative[order_q_material].max() <= sensitivity_relative_tolerance
     )
 
     replay = calibration["Fresh_replay_abs_error_pu"].dropna().to_numpy(float)
@@ -607,8 +1075,55 @@ def calibrate(repo: Path) -> dict[str, Any]:
         64.0 * np.finfo(float).eps,
     ))
     baseline_pass = bool(replay_max <= baseline_tolerance)
-    p_guard = float(max(p_relative.max(), order_p_relative.max()))
-    q_guard = float(max(q_relative.max(), order_q_relative.max()))
+    p_guard = float(max(
+        p_relative[p_material].max(), order_p_relative[order_p_material].max(),
+    ))
+    q_guard = float(max(
+        q_relative[q_material].max(), order_q_relative[order_q_material].max(),
+    ))
+
+    background_rows = calibration.loc[
+        calibration["probe_kind"] == "TARGETED_APRIL_BACKGROUND_FRESH_ONLY_PROBE"
+    ]
+    expected_background_states = len(representatives) * len(SELECTABLE_SERVICES)
+    background_state_count = int(background_rows["calibration_state_id"].nunique())
+    full_target_counts = background_rows.groupby("calibration_state_id")[
+        "target_bus_phase_key"
+    ].nunique()
+    pcc_target_counts = background_rows.loc[
+        background_rows["target_is_selectable_MESS_PCC"]
+    ].groupby("calibration_state_id")["target_bus_phase_key"].nunique()
+    background_pass = bool(
+        background_state_count == expected_background_states
+        and len(full_target_counts) == expected_background_states
+        and (full_target_counts == calibration["target_bus_phase_key"].nunique()).all()
+        and len(pcc_target_counts) == expected_background_states
+        and (pcc_target_counts == 24 * 3).all()
+        and set(background_rows["source_service"].unique()) == set(SELECTABLE_SERVICES)
+    )
+    background_audit.update({
+        "targeted_Fresh_only_representative_state_count": background_state_count,
+        "expected_targeted_Fresh_only_representative_state_count": expected_background_states,
+        "source_PCC_coverage": "24/24",
+        "full_bus_phase_target_count_per_source_perturbation": int(
+            full_target_counts.min()
+        ),
+        "selectable_MESS_PCC_phase_target_count_per_source_perturbation": int(
+            pcc_target_counts.min()
+        ),
+        "phase_coverage": ["A", "B", "C"],
+        "cross_PCC_response_captured": True,
+        "additional_integrated_optimization_days_assumed": 0,
+        "additional_full_April_optimization_runs": 0,
+        "PASS": background_pass,
+    })
+    write_json(out / "V37_R2_APRIL_BACKGROUND_COVERAGE_AUDIT.json", background_audit)
+    pd.DataFrame(representatives).to_csv(
+        out / "V37_R2_APRIL_BACKGROUND_REPRESENTATIVES.csv", index=False,
+    )
+    if not background_pass:
+        raise RuntimeError("V37_R2_APRIL_BACKGROUND_COVERAGE_FAIL")
+
     reproducibility = {
         "artifact_id": "V37_R2_FRESH_REPRODUCIBILITY_AUDIT_V1",
         "full_pass_count": 2,
@@ -617,15 +1132,18 @@ def calibrate(repo: Path) -> dict[str, Any]:
         "full_pass_state_count": int(len(selected)),
         "pass1_vs_pass2": {
             "dV_dP_max_absolute_error_pu_per_kW": float(p_repeat.max()),
-            "dV_dP_max_relative_error": float(p_relative.max()),
+            "dV_dP_max_relative_error_material_signals": float(p_relative[p_material].max()),
             "dV_dQ_max_absolute_error_pu_per_kvar": float(q_repeat.max()),
-            "dV_dQ_max_relative_error": float(q_relative.max()),
+            "dV_dQ_max_relative_error_material_signals": float(q_relative[q_material].max()),
             "baseline_voltage_max_absolute_scatter_pu": voltage_scatter,
+            "full_bus_phase_row_count": int(len(first_indexed)),
+            "P_material_row_count": int(p_material.sum()),
+            "Q_material_row_count": int(q_material.sum()),
         },
         "acceptance_tolerance": {
             "absolute_sensitivity": sensitivity_abs_tolerance,
             "relative_sensitivity": sensitivity_relative_tolerance,
-            "derivation": "MAX(2_X_MAX(IDENTICAL_SEQUENCE_BASELINE_SCATTER,ALTERED_ORDER_BASELINE_SCATTER)_DIV_MIN_PROBE_DELTA,64_X_FLOAT_EPSILON_X_SIGNAL_SCALE)",
+            "derivation": "MAX(2_X_MAX(IDENTICAL_SEQUENCE_BASELINE_SCATTER,ALTERED_ORDER_BASELINE_SCATTER)_DIV_MIN_PROBE_DELTA,64_X_FLOAT_EPSILON_X_SIGNAL_SCALE);_RELATIVE_GATE_APPLIES_ONLY_WHEN_FULL_PHYSICAL_RANGE_EFFECT_GE_1E-6_PU",
             "saved_baseline_voltage": baseline_tolerance,
             "saved_baseline_derivation": "MAX(SAVED_REPLAY_P99_PLUS_5_X_IQR,5_X_OBSERVED_ENGINE_ORDER_BASELINE_SCATTER,64_X_FLOAT_EPSILON)",
         },
@@ -643,16 +1161,16 @@ def calibrate(repo: Path) -> dict[str, Any]:
             "state_count": int(len(order_subset)),
             "PCCs": sorted(order_subset["service"].unique().tolist()),
             "phases": ["A", "B", "C"],
-            "large_negative_Q_included": bool((order_subset["probe_target_Q_kvar"] <= -600.0).any()),
+            "large_negative_Q_included": bool((order_subset["probe_target_Q_kvar"] <= -450.0).any()),
             "low_voltage_state_included": True,
             "independent_new_engine": True,
             "state_order_reversed": True,
             "probe_order_changed": True,
             "baseline_voltage_max_absolute_scatter_pu": float(order_v.max()),
             "dV_dP_max_absolute_error_pu_per_kW": float(order_p.max()),
-            "dV_dP_max_relative_error": float(order_p_relative.max()),
+            "dV_dP_max_relative_error_material_signals": float(order_p_relative[order_p_material].max()),
             "dV_dQ_max_absolute_error_pu_per_kvar": float(order_q.max()),
-            "dV_dQ_max_relative_error": float(order_q_relative.max()),
+            "dV_dQ_max_relative_error_material_signals": float(order_q_relative[order_q_material].max()),
             "P_full_probe_range_scatter_impact_pu": float(order_p.max() * 500.0),
             "Q_full_probe_range_scatter_impact_pu": float(order_q.max() * 600.0),
             "PASS": order_pass,
@@ -665,19 +1183,34 @@ def calibrate(repo: Path) -> dict[str, Any]:
         "full_repeat_PASS": repeat_pass,
         "baseline_consistency_PASS": baseline_pass,
         "order_history_PASS": order_pass,
-        "authority_freeze_allowed": bool(repeat_pass and baseline_pass and order_pass),
+        "source_PCC_coverage": "24/24",
+        "cross_PCC_coverage": True,
+        "full_bus_phase_target_count": int(calibration["target_bus_phase_key"].nunique()),
+        "phase_coverage": ["A", "B", "C"],
+        "April_background_coverage_PASS": background_pass,
+        "authority_freeze_allowed": bool(
+            repeat_pass and baseline_pass and order_pass and background_pass
+        ),
     }
     write_json(out / "V37_R2_FRESH_REPRODUCIBILITY_AUDIT.json", reproducibility)
     if not reproducibility["authority_freeze_allowed"]:
         raise RuntimeError("V37_R2_OPENDSS_STATE_HISTORY_MATERIAL")
+    # Preserve the full pre-May evidence before attempting to build a frozen
+    # authority, so any physical-sign/loading-state refusal is diagnosable
+    # without looking at May or repeating the Fresh passes.
+    write_parquet(out / "V37_R2_FRESH_FULL_BUS_PHASE_SENSITIVITY.parquet", calibration)
+    write_parquet(
+        out / "V37_R2_FRESH_LOCAL_SENSITIVITY.parquet",
+        calibration.loc[calibration["target_is_selectable_MESS_PCC"]],
+    )
     authority = _authority(
         repo, calibration,
         p_reproducibility_guard=p_guard,
         q_reproducibility_guard=q_guard,
+        april_background_audit=background_audit,
     )
     write_json(repo / AUTHORITY_RELATIVE_PATH, authority)
     correction = _apply_new_columns(calibration, authority)
-    write_parquet(out / "V37_R2_FRESH_LOCAL_SENSITIVITY.parquet", calibration)
     write_parquet(out / "V37_R2_VOLTAGE_SENSITIVITY_CORRECTION_TABLE.parquet", correction)
 
     fidelity = _fidelity_rows(repo, states, loaded, selected)
@@ -710,12 +1243,16 @@ def calibrate(repo: Path) -> dict[str, Any]:
         },
         "conservative_slope_envelope": {
             "new_P_weaker_than_Fresh_count": int(
-                (correction["new_H_P_pu_squared_per_kW"]
-                 < correction["Fresh_H_P_pu_squared_per_kW"]).sum()
+                ((np.abs(correction["new_H_P_pu_squared_per_kW"])
+                  + np.finfo(float).eps
+                  < np.abs(correction["Fresh_H_P_pu_squared_per_kW"]))
+                 & correction["P_material"]).sum()
             ),
             "new_Q_weaker_than_Fresh_count": int(
-                (correction["new_H_Q_pu_squared_per_kvar"]
-                 < correction["Fresh_H_Q_pu_squared_per_kvar"]).sum()
+                ((np.abs(correction["new_H_Q_pu_squared_per_kvar"])
+                  + np.finfo(float).eps
+                  < np.abs(correction["Fresh_H_Q_pu_squared_per_kvar"]))
+                 & correction["Q_material"]).sum()
             ),
             "interpretation": "MAE_CAN_INCREASE_BECAUSE_ONE_LINEAR_SLOPE_ENVELOPES_BOTH_NEGATIVE_AND_POSITIVE_PHYSICAL_RESPONSE;_SAFETY_GATE_IS_NO_WEAKER_THAN_FRESH",
         },
@@ -785,15 +1322,28 @@ def calibrate(repo: Path) -> dict[str, Any]:
         "K_changed": False, "beam_changed": False, "MESS_physical_limits_changed": False,
         "AIDC_changed": False, "voltage_physical_limit_changed": False,
         "base_anchor_files_modified": False,
+        "V37_P1_cumulative_cache_and_persistent_worker_required": True,
+        "planning_validation_pass_id": R2_PASS_ID,
     }
     write_json(out / "V37_R2_PRODUCTION_INTEGRATION_AUDIT.json", integration)
     return {
         "calibration_states": int(len(selected)), "calibration_rows": int(len(calibration)),
         "services": sorted(calibration["service"].unique().tolist()),
         "correction_entries": len(authority["corrections"]),
+        "full_bus_phase_target_count": int(calibration["target_bus_phase_key"].nunique()),
+        "April_background_representative_slot_count": len(representatives),
+        "April_background_coverage_PASS": background_pass,
+        "authority_sha256": file_sha(repo / AUTHORITY_RELATIVE_PATH),
+        "authority_frozen": True,
         "old_holdout": old_metrics, "new_holdout": new_metrics,
-        "maximum_P_scale": max(float(row["P_scale"]) for row in authority["corrections"]),
-        "maximum_Q_scale": max(float(row["Q_scale"]) for row in authority["corrections"]),
+        "maximum_absolute_P_H_correction": max(
+            float(row["P_maximum_absolute_H_correction"])
+            for row in authority["corrections"]
+        ),
+        "maximum_absolute_Q_H_correction": max(
+            float(row["Q_maximum_absolute_H_correction"])
+            for row in authority["corrections"]
+        ),
     }
 
 
