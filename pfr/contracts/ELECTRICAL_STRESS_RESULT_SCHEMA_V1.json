@@ -1,0 +1,110 @@
+{
+  "schema_version": "ELECTRICAL_STRESS_RESULT_SCHEMA_V1",
+  "status": "FROZEN",
+  "campaign_method_axis": ["B00", "B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B09"],
+  "time_step_minutes": 5,
+  "full_day_issue_count_per_method": 288,
+  "campaign_summary_row_count": 10,
+  "atomic_source_evidence": "Bxx/issue_NNNNNN/COMMIT_MARKER.json",
+  "tables": {
+    "ISSUE_RESULT.parquet": {
+      "grain": "one committed method-issue action",
+      "mandatory_non_null": [
+        "date", "timestamp", "issue", "method_id", "predicted_worst_stress_z",
+        "ac_worst_stress_z", "ac_voltage_stress_max", "ac_line_stress_max",
+        "ac_transformer_stress_max", "ac_hard_constraint_pass",
+        "commit_accepted", "root_import_kw", "run_status", "attempt_id"
+      ],
+      "required_groups": [
+        "identity_and_plan_lineage", "predicted_electrical_stress",
+        "fresh_exact_ac_stress_and_raw_extrema", "hard_safety",
+        "service_and_recovery", "root_power_and_economic_kpis",
+        "controller_runtime", "failure_lineage"
+      ],
+      "controller_runtime_fields": [
+        "slow_solver_time_s",
+        "h54_reference_anchor_time_s",
+        "h54_domain_generation_time_s",
+        "h54_model_build_once_time_s",
+        "h54_parameter_update_time_s",
+        "h54_slow_master_time_s",
+        "h54_exact_recourse_time_s",
+        "h54_planner_total_time_s",
+        "opendss_time_s",
+        "commit_marker_storage_time_s",
+        "total_issue_wall_time_s"
+      ]
+    },
+    "MESS_TRAJECTORY.parquet": {
+      "grain": "one MESS per committed method-issue",
+      "required_groups": [
+        "location_and_route", "planned_pq", "accepted_pq", "soc_and_energy",
+        "route_eta_and_energy_prediction_realization", "mobility_events"
+      ]
+    },
+    "JOB_WAN_TRAJECTORY.parquet": {
+      "grain": "one admitted job per committed method-issue",
+      "empty_table_allowed": true,
+      "required_groups": [
+        "arrival_actual_start_completion_deadline_and_remaining_work", "current_and_assigned_idc",
+        "planned_and_accepted_compute_rate", "gang_gpu_and_lifecycle",
+        "checkpoint_restart_migration", "wan_step_and_cumulative_transfer",
+        "prestart_wan_target_required_progress_and_readiness"
+      ]
+    },
+    "EVENT_CONTROL_LOG.parquet": {
+      "grain": "one controller observation per method-issue",
+      "required_groups": [
+        "raw_and_calibrated_risk_components", "trigger_cause",
+        "full_replan_and_fast_recourse", "safety_filter", "runtime"
+      ]
+    },
+    "DAILY_SUMMARY.json": {
+      "grain": "one method-day",
+      "primary_order": [
+        "daily_max_ac_stress", "daily_ac_stress_exposure",
+        "daily_max_voltage_stress", "daily_max_line_stress",
+        "daily_max_transformer_stress", "daily_peak_root_import_kw",
+        "daily_rebound_peak_kw", "daily_rebound_energy_kwh",
+        "deadline_miss_count", "mess_move_count", "migration_count",
+        "full_replan_count", "grid_cost_aud", "solver_time_p95_s"
+      ]
+    },
+    "CAMPAIGN_SUMMARY.parquet": {
+      "grain": "one ordered B00-B09 method row",
+      "daily_location": "each independent date root",
+      "period_location": "campaign root after all dates pass storage verification",
+      "period_aggregation": {
+        "worst_stress_peak_and_component_stress": "maximum over committed dates",
+        "stress_exposure_cost_and_action_counts": "sum over committed dates",
+        "solver_and_control_p95": "recomputed from all issue rows, never averaged from daily p95 values"
+      },
+      "exact_method_order_required": true,
+      "factorial_cells": {
+        "B00": [0, 0],
+        "B01": [1, 0],
+        "B04": [0, 1],
+        "B06": [1, 1]
+      }
+    }
+  },
+  "nullable_with_authority_reason": {
+    "predicted_worst_phase": "balanced planning surrogate has no phase identity",
+    "wan_power_kw": "null because no frozen WAN auxiliary-power coefficient exists; GB transfer remains measured",
+    "raw_current_or_phase_extrema": "null only when the Fresh OpenDSS metrics provider does not expose the underlying physical field"
+  },
+  "fail_closed_checks": [
+    "read every Parquet file back after atomic write",
+    "required columns present even for an empty job table",
+    "ISSUE_RESULT and EVENT_CONTROL_LOG row counts equal committed issue count",
+    "no duplicate issue within a method",
+    "every materialized action is commit accepted",
+    "predicted and realized worst stress are non-null for B00-B09",
+    "simulation-local date is identical across all 288 rows of a method-day",
+    "energy-flex methods have non-null matched-shadow rebound fields",
+    "execution PASS is classified separately from service feasibility",
+    "CAMPAIGN_SUMMARY contains exactly B00-B09 in frozen order",
+    "period CAMPAIGN_SUMMARY is rebuilt from every passing date and read back",
+    "period p95 runtimes are recomputed from issue-level samples"
+  ]
+}

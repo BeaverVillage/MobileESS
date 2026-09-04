@@ -1,0 +1,34 @@
+{
+  "stage": "PFR5",
+  "risk_definition": "R_t = max_{xi in U_t} max_l violation_margin_l(xi) / predeclared_scale_l",
+  "required_families": [
+    "R_SOC",
+    "R_deadline",
+    "R_GPU",
+    "R_WAN",
+    "R_voltage",
+    "R_thermal"
+  ],
+  "safety_trigger": "R_t > 0",
+  "opportunity_trigger": "expected_benefit > C_solve + C_migration + C_communication + epsilon",
+  "maximum_refresh_steps": 6,
+  "maximum_refresh_minutes": 30,
+  "sensitivity_only_refresh_steps": 12,
+  "sensitivity_only_refresh_minutes": 60,
+  "interfaces": {
+    "B6": "RAW_UNCALIBRATED",
+    "B7": "CALIBRATED_EVENT_TRIGGER",
+    "B8": "CALIBRATED_MONITOR_ONLY_PERIODIC_5MIN_TRIGGER"
+  },
+  "calibration_authority": "PFR5_EVENT_RISK_CALIBRATION_PROTOCOL_V3.json",
+  "development_split": {
+    "2025-01-01_TO_2025-01-14": "B07_RAW_CALIBRATION_FIT",
+    "2025-02": "NO_CALIBRATION_VALIDATION_EXECUTION_BY_CURRENT_EXPERIMENT_POLICY",
+    "2025-03": "INDEPENDENT_EXECUTION_PROHIBITED_FROM_CALIBRATION_ACCESS"
+  },
+  "prohibited": [
+    "direct maximum across dimensional margins",
+    "outcome-selected scale",
+    "Local Repair"
+  ]
+}

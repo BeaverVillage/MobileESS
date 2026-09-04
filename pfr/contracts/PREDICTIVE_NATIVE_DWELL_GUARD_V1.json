@@ -1,0 +1,58 @@
+{
+  "schema_version": "PREDICTIVE_NATIVE_DWELL_GUARD_V1.authority.v1",
+  "status": "FEBRUARY_POST_HOC_DEVELOPMENT_IMPLEMENTED_TARGETED_REPLAY_REQUIRED",
+  "identity": "PREDICTIVE_NATIVE_DWELL_GUARD_V1",
+  "base_native_control": "COMMON_NATIVE_GRID_VOLT_VAR_CONTROL_V1",
+  "common_to_methods": ["B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8"],
+  "trigger": "A_DWELL_ADMISSIBLE_LOCAL_CAPACITOR_TRANSITION_IS_PROPOSED",
+  "horizon_steps": 12,
+  "step_minutes": 5,
+  "horizon_minutes": 60,
+  "horizon_basis": "TWO_TIMES_THE_FROZEN_30_MINUTE_CAPACITOR_DWELL",
+  "forecast_authority": {
+    "background_p": "CAUSAL_Q90_GROSS_BACKGROUND_P",
+    "background_q": "CAUSAL_Q90_BACKGROUND_Q",
+    "pv": "CAUSAL_Q10_PV_AVAILABILITY",
+    "lead_steps": [1, 12],
+    "future_actual_used": false
+  },
+  "candidate_domain": "ALL_SUBSETS_OF_THE_CURRENT_DWELL_ADMISSIBLE_LOCAL_CAPACITOR_TRANSITION_WITH_REGCONTROL_REEVALUATED",
+  "forecast_path": "CANDIDATE_CAPACITOR_STATE_HELD_FIXED_WHILE_EXISTING_REGCONTROLS_TRANSITION_CAUSALLY_AT_EACH_FORECAST_STEP",
+  "selection_order": [
+    "CURRENT_REALIZED_H0_FRESH_EXACT_HARD_PASS_REQUIRED",
+    "MINIMUM_FORECAST_HARD_VIOLATION_STEP_COUNT",
+    "MINIMUM_MAXIMUM_NORMALIZED_FORECAST_HARD_VIOLATION",
+    "MINIMUM_CUMULATIVE_NORMALIZED_FORECAST_HARD_VIOLATION",
+    "KEEP_LOCAL_TRANSITION_IF_FORECAST_RISK_TIES",
+    "MINIMUM_CAPACITOR_SWITCH_COUNT",
+    "MINIMUM_REGULATOR_TAP_MOVEMENT",
+    "DETERMINISTIC_CAPACITOR_AND_TAP_VECTOR"
+  ],
+  "commit_policy": "ONLY_THE_CURRENT_H0_ACTION_IS_COMMITTED_AND_FRESH_EXACT_VERIFIED",
+  "fallback": "UNCHANGED_CURRENT_STATE_GLOBAL_GUARD_CONTINUOUS_METHOD_PROJECTION_AND_DEEP_NATIVE_RESTORATION",
+  "offline_oracle_policy": {
+    "actual_future_allowed": true,
+    "production_import_prohibited": true,
+    "positive_path_interpretation": "TEMPORAL_PREPARATION_CAN_RESTORE_FEASIBILITY",
+    "negative_heuristic_interpretation": "NO_PATH_FOUND_WITHIN_BOUND_NOT_A_PHYSICAL_INFEASIBILITY_CERTIFICATE"
+  },
+  "invariants": {
+    "hard_limits_relaxed": false,
+    "asset_or_rating_change": false,
+    "background_scale_change": false,
+    "emergency_mess": false,
+    "load_shedding": false,
+    "method_capability_added": false,
+    "fresh_exact_realized_h0_acceptance_required": true
+  },
+  "development_evidence": {
+    "date": "2025-02-03",
+    "failure_issue": 9712,
+    "failure_timestamp_utc": "2025-02-03T07:20:00Z",
+    "observed_c83_on_issue": 9707,
+    "observed_c83_off_issue": 9708,
+    "c83_kvar": 600.0,
+    "failure_reg1a_current_loading_pu_B0": 1.0088069754106184,
+    "classification": "POST_HOC_TEMPORAL_MYOPIA_HYPOTHESIS_NOT_HOLDOUT_EVIDENCE"
+  }
+}

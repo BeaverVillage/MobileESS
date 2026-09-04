@@ -1,0 +1,206 @@
+{
+  "artifact_id": "V17_EXTERNAL_SCI_FLEXIBLE_SHARE_ADMISSIBILITY_V1",
+  "cao_supporting_source": {
+    "SCIE_verification": {
+      "evidence": "Applied Energy appears in the Science Citation Index Expanded journal list.",
+      "status": "PASS",
+      "url": "https://lkouniv.ac.in/site/writereaddata/siteContent/ESCI_011024.pdf"
+    },
+    "archive": {
+      "crossref_metadata_path": "output/pdf/v17_external_literature/Cao_2022_Crossref_metadata.json",
+      "crossref_metadata_sha256": "094ba9016b4252ae8c1a11caaf63eba2d3afefaae661778989dc8eaac5fe0331",
+      "local_full_pdf_redistributed": false,
+      "public_author_full_text_inspected": true,
+      "public_author_full_text_url": "https://www.researchgate.net/publication/362489057_Data-driven_flexibility_assessment_for_internet_data_center_towards_periodic_batch_workloads",
+      "publisher_url": "https://www.sciencedirect.com/science/article/pii/S0306261922009631",
+      "redistribution_note": "Publisher PDF is not open access; metadata and exact inspection provenance are archived without redistributing it."
+    },
+    "citation": "Y. Cao, M. Cheng, S. Zhang, H. Mao, P. Wang, C. Li, Y. Feng, and Z. Ding, Data-driven flexibility assessment for internet data center towards periodic batch workloads, Applied Energy 324 (2022) 119665.",
+    "doi": "10.1016/j.apenergy.2022.119665",
+    "full_text_findings": {
+      "basis": "Three Alibaba production batch clusters and a data-driven job-level power mapping.",
+      "denominator_problem": "The case-study slack distribution is conditioned on periodic-job power, not total whole-IT power; non-periodic and auxiliary other load is modeled separately. Task-count and batch-power percentages do not directly produce a whole-IT schedulable energy share.",
+      "main_authority_decision": "REJECTED_NO_DIRECT_SCOPE_MATCHED_SINGLE_SHARE",
+      "prohibited_derivation_used": false,
+      "reported_context": [
+        "Table I background: batch workloads are about 40 percent by count and about 70 percent of total power.",
+        "Background: periodic workloads are about 24 percent by count of all workloads and about 60 percent of batch workloads.",
+        "Figure 11 case study: about 68 percent of periodic-job power has slack shorter than 15 minutes; other bins describe longer slack."
+      ],
+      "supporting_evidence_only": true
+    },
+    "journal": "Applied Energy",
+    "peer_reviewed_journal_article": true
+  },
+  "caprara_full_paper_forensic": {
+    "CAPRARA_MAIN_AUTHORITY": "REJECTED_SCOPE_MISMATCH",
+    "SCIE_verification": {
+      "evidence": "RWTH Publications journal authority records Web of Science Science Citation Index Expanded coverage and Clarivate Master Journal List coverage, updated 2025-11-07.",
+      "status": "PASS",
+      "url": "https://publications.rwth-aachen.de/record/25002/export/print?ln=en"
+    },
+    "admissibility_gates": {
+      "1_peer_reviewed_SCIE": "PASS",
+      "2_real_trace_or_measurement_basis": "PASS_REAL_TRACE",
+      "3_explicit_power_or_energy_attribution": "PASS_ESTIMATED_GPU_POWER",
+      "4_explicit_schedulable_definition": "PASS_LATENCY_BASED_DEFERRAL",
+      "5_service_deferred_not_removed": "PASS_WITH_REBOUND_LIMITATION",
+      "6_denominator_close_to_V17_IT_envelope": "FAIL_GPU_ONLY_SCOPE",
+      "7_no_denominator_conversion_required": "FAIL_GPU_TO_WHOLE_IT_CONVERSION_REQUIRED"
+    },
+    "adopted_value": null,
+    "archive": {
+      "bytes": 9261880,
+      "crossref_metadata_path": "output/pdf/v17_external_literature/Caprara_2026_Crossref_metadata.json",
+      "crossref_metadata_sha256": "5875d3d5f583be2c4f1364a5d32eba8ed23f4365413d4c3bd4bbc64ce7ed68d3",
+      "license": "CC BY 4.0",
+      "publisher_version_path": "output/pdf/v17_external_literature/Caprara_2026_IJEPES_111940_CC_BY_4_0.pdf",
+      "publisher_version_sha256": "9afe7c3efe6fb986de0c95cf524c3309255447306258c7e2a378a53d35da78a6",
+      "repository": "Universitat Politecnica de Catalunya UPCommons",
+      "repository_bitstream_uuid": "e87ee20a-d65c-451d-8023-ef0bc3ec3325",
+      "repository_item_uuid": "c15cab92-e0eb-4124-852d-e02e1dde9bdc",
+      "upcommons_metadata_path": "output/pdf/v17_external_literature/Caprara_2026_UPCommons_metadata.json",
+      "upcommons_metadata_sha256": "36e6c6684c2798218e0170133d2cdf69f5fe0764388e1dab5da6133d0bbc5b58"
+    },
+    "citation": "A. Caprara, Y. Yu, F. Teng, A. Junyent-Ferre, E. Bullich-Massague, and M. Aragues-Penalba, Data center workload flexibility for power system demand response: Evidence from Alibaba traces, International Journal of Electrical Power & Energy Systems 178 (2026) 111940.",
+    "doi": "10.1016/j.ijepes.2026.111940",
+    "evidence_locations": [
+      {
+        "finding": "No measured per-device telemetry; first-order GPU model supports workload-level estimates only.",
+        "location": "Section 3.1 power-model preamble",
+        "page": 5
+      },
+      {
+        "finding": "IT-side GPU model and latency-class power/energy aggregation; cooling, UPS, and auxiliaries excluded.",
+        "location": "Section 3.1, Equations (1)-(7)",
+        "page": 6
+      },
+      {
+        "finding": "Latency greater than 10 minutes accounts for 20.5 percent of estimated GPU-side average power.",
+        "location": "Table 5 and Section 5.1",
+        "page": 11
+      },
+      {
+        "finding": "Whole-facility response and PUE are unobserved; favorable-window deferral percentages are separate outcomes.",
+        "location": "Figure 10 and Section 5.2.1",
+        "page": 14
+      },
+      {
+        "finding": "Deferred tasks later consume the same energy; rescheduling rebound is not quantified.",
+        "location": "Section 5.2.4 and Table 12",
+        "page": 20
+      },
+      {
+        "finding": "First-order GPU-side, not whole-facility; no facility telemetry or dynamic PUE; multi-task dependencies remain a limitation.",
+        "location": "Section 6 limitations and Section 7 conclusions",
+        "pages": [
+          24,
+          25
+        ]
+      }
+    ],
+    "full_paper_inspected": true,
+    "journal": "International Journal of Electrical Power & Energy Systems",
+    "main_authority_decision": "REJECTED_SCOPE_MISMATCH",
+    "peer_review_verification": {
+      "evidence": "UPCommons item metadata marks the publisher version Peer Reviewed.",
+      "status": "PASS",
+      "url": "https://upcommons.upc.edu/entities/publication/c15cab92-e0eb-4124-852d-e02e1dde9bdc"
+    },
+    "reported_approximately_20_percent": {
+      "denominator": "Average total estimated GPU-side power of all modeled Alibaba MLaaS tasks over the common trace interval. Because all bins share the same interval, the power share is also an energy-share ratio for that modeled GPU trace.",
+      "exact_table_sum_fraction": 0.205,
+      "flexibility_semantics": "Temporal task deferral/postponement, not spatial migration, cancellation, or permanent load removal.",
+      "not_equivalent_to": [
+        "server IT power",
+        "total IT equipment power",
+        "whole-facility utility power",
+        "V17 ESIF whole-facility IT envelope",
+        "the separate up-to-22-percent favorable-window peak deferral outcome"
+      ],
+      "numerator": "Average estimated GPU-side power attributable to tasks with observed queue latency greater than 10 minutes; Table 5 bins sum to 20.5 percent.",
+      "reported_main_rounded_fraction": 0.2,
+      "service_semantics": "Tasks are not cancelled, are assumed to run to completion, and eligibility uses observed latency plus duration/window rules. Later rescheduling rebound and full inter-task dependency costs are not modeled.",
+      "time_aggregation": "A-posteriori latency-class distribution over the cleaned two-month Alibaba MLaaS trace. It is distinct from the one-week LAD-Flex activation study."
+    }
+  },
+  "checkpoint": {
+    "branch": "codex/dayahead-aidc-joint-v1",
+    "prior_evidence_checkpoint": "1d9dd4be2c519ce25c0bc4cf67d6389defede2ac",
+    "starting_checkpoint": "6baa991ee52c2ac8bf3d6d16348c204434d8ab7a"
+  },
+  "counters": {
+    "AIDC_site_changes": 0,
+    "April_B0_B1_B2_B3_calls": 0,
+    "Fresh_OpenDSS_calls": 0,
+    "June_result_content_reads": 0,
+    "June_scientific_input_reads": 0,
+    "May_June_result_dependent_tuning": 0,
+    "May_result_content_reads": 0,
+    "May_scientific_input_reads": 0,
+    "OpenDSS_calls_inside_Benders": 0,
+    "PF_changes": 0,
+    "PUE_changes": 0,
+    "RC_MQT_retraining_calls": 0,
+    "V16_3_historical_result_changes": 0,
+    "V16_3_scientific_authority_changes": 0,
+    "arbitrary_clipping_calls": 0,
+    "arbitrary_flexible_share_values": 0,
+    "beta_changes": 0,
+    "effect_selected_share_values": 0,
+    "eta_FLEX_calibration_calls": 0,
+    "kappa_changes": 0
+  },
+  "downstream_actions_not_run": [
+    "eta_FLEX calibration",
+    "Reference Scheduler V4",
+    "fixed-plus-flex label construction",
+    "RC-MQT retraining",
+    "April D-1 anchors and surrogate validation",
+    "April B0/B1/B2/B3",
+    "Primary or Secondary Fresh OpenDSS",
+    "April-15 decomposition equivalence"
+  ],
+  "eta_FLEX": null,
+  "exact_adopted_main_value": null,
+  "external_authority_artifact_created": false,
+  "final_classification": "V17_SHARE_AUTH_C_CAPRARA_SCOPE_MISMATCH_OTHER_SOURCE_NOT_FOUND",
+  "main_authority_rule": "Select the numeric deferrable IT-power/energy share from the highest-scope-matching SCI/SCIE source that: (a) uses real production traces or measurements, (b) directly maps schedulable workload to power/energy, (c) preserves service through deferral, and (d) requires no denominator conversion.",
+  "next_decision": "V17_FURTHER_REDESIGN_REQUIRED",
+  "replacement_search": {
+    "qualifying_replacement_found": false,
+    "screened_nonqualifying_examples": [
+      {
+        "doi": "10.1016/j.isci.2026.116497",
+        "rejection": "Uses 20/60/100-percent flexible-share scenarios as model inputs, not an empirically derived authority value.",
+        "source": "Flexible data centers reduce power system costs but can increase emissions"
+      },
+      {
+        "doi": "10.1007/s40518-025-00258-9",
+        "rejection": "Review reports that the potential scale remains poorly understood and supplies no direct whole-IT trace-derived share satisfying the rule.",
+        "source": "The Potential of Data Center Energy Demand To Provide Grid Flexibility"
+      },
+      {
+        "doi": "10.1016/j.crsus.2026.100755",
+        "rejection": "Energy-system scenario study; flexible share is an input scenario rather than a production-trace-derived whole-IT fraction.",
+        "source": "Workload-flexible data centers reduce renewable curtailment in Europe's net-zero energy system"
+      },
+      {
+        "doi": "10.1016/j.apenergy.2026.127561",
+        "rejection": "Assumes a 70-percent flexible workload share in simulation instead of estimating it from the Alibaba trace.",
+        "source": "Mixture-of-experts based multi-critic deep reinforcement learning for sustainable management of data center microgrids"
+      }
+    ],
+    "search_conclusion": "OTHER_SOURCE_NOT_FOUND",
+    "search_scope": "Peer-reviewed journal studies of numeric schedulable, deferrable, or shiftable data-center compute power/energy shares using real production traces or measurements."
+  },
+  "required_quantity": {
+    "definition": "facility-level schedulable/deferrable IT workload energy share",
+    "denominator": "V17 IT-only whole-facility P_IT_REF envelope",
+    "symbol": "f_FLEX_AUTH",
+    "temporal_semantics": "D-1 schedulable workload envelope with service preserved"
+  },
+  "rule_frozen_before_April_execution": true,
+  "scientific_refreeze_resumed": false,
+  "status": "FAIL_CLOSED_NO_ADMISSIBLE_EXTERNAL_AUTHORITY"
+}

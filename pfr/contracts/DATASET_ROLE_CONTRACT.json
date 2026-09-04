@@ -1,0 +1,26 @@
+{
+  "contract_version": "PFR1_ROLE_V1",
+  "main_operational": "KESTREL_F30",
+  "measured_power_utilization": {
+    "primary": "H100",
+    "sensitivity": "B200"
+  },
+  "optional_semantic": ["MIT_SUPERCLOUD_GPU"],
+  "optional_sensitivity": ["ALIBABA_GPU_2026"],
+  "prohibited_operations": [
+    "ROW_WISE_KESTREL_MIT_MERGE",
+    "ROW_WISE_KESTREL_ALIBABA_MERGE",
+    "CLAIM_SINGLE_REAL_DEPLOYMENT_TRACE",
+    "KESTREL_MODEL_ARCHITECTURE_LABEL",
+    "INVENT_CHECKPOINT_OR_RESTART_MEASUREMENT"
+  ],
+  "work_accounting": {
+    "resource_unit": "GPUh",
+    "progress_unit": "NORMALIZED_EFFECTIVE_COMPUTE",
+    "separate_quantities": true
+  },
+  "inference": {
+    "role": "FIXED_INFLEXIBLE_BACKGROUND",
+    "flexible_decision": false
+  }
+}

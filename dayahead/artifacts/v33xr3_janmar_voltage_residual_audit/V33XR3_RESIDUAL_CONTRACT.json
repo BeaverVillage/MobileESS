@@ -1,0 +1,43 @@
+{
+  "E_LOW": "max(0, V_PLAN - V_FRESH)",
+  "E_SIGNED": "V_FRESH - V_PLAN",
+  "E_UP": "max(0, V_FRESH - V_PLAN)",
+  "absolute_error_role": "SECONDARY_DIAGNOSTIC_ONLY",
+  "artifact_id": "V33XR3_RESIDUAL_CONTRACT_V1",
+  "correction_structures": [
+    "M0_NONE",
+    "M1_GLOBAL_ADDITIVE",
+    "M2_NODE_PHASE_ADDITIVE",
+    "M3_NODE_PHASE_FIXED_FOUR_BLOCK_ADDITIVE"
+  ],
+  "date_gate": {
+    "April_allowed": false,
+    "May_allowed": false,
+    "end": "2025-03-31",
+    "start": "2025-01-01"
+  },
+  "exact_match_fields": [
+    "day",
+    "case",
+    "slot",
+    "schedule_sha256",
+    "AIDC_P_Q",
+    "MESS_P_Q",
+    "background_demand",
+    "PV",
+    "C1_PUE",
+    "regulator_capacitor_native_state",
+    "source_voltage",
+    "feeder_construction",
+    "node",
+    "phase"
+  ],
+  "primary_comparison": "DAYAHEAD_PLAN_vs_FRESH_AC_OF_EXACT_SAME_FROZEN_DAYAHEAD_PLAN",
+  "production_margin_selection": "PROHIBITED",
+  "split": {
+    "calibration": "2025-01-01..2025-02-28",
+    "random": false,
+    "validation": "2025-03-01..2025-03-31"
+  },
+  "units": "pu"
+}

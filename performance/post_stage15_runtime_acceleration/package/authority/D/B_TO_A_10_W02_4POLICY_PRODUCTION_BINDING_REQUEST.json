@@ -1,0 +1,55 @@
+{
+  "D_current_handoff_sha256": "a9a2c16426786f01543f4a772007cdb1fc2b02c0377dd45b8138545e5d67fbf1",
+  "candidate_id": "W02_2025-01-13",
+  "controller_burn_in_steps": 0,
+  "evaluation_end_step_inclusive": 5471,
+  "evaluation_start_step": 3456,
+  "hard_scientific_rules": [
+    "same canonical W02 PRE across all policies",
+    "same exogenous realization across all policies",
+    "future actual forbidden",
+    "future optimizer plans not persisted in physical state",
+    "Fresh Exact OpenDSS/certificate evidence for committed actions",
+    "right-censored jobs retained",
+    "F7 expected cohort from independent runtime job authority, not job_event",
+    "commit-critical runtime reported separately from slow-planner runtime"
+  ],
+  "official_15_step_number": 10,
+  "parallel_contract": {
+    "outer_processes": 4,
+    "threads_per_process": 4,
+    "week_parallelism": 1
+  },
+  "policy_ids": [
+    "PROPOSED_EVENT30_LOCAL_REPAIR",
+    "FIXED30",
+    "EVENT30_NO_LOCAL_REPAIR",
+    "FIXED15"
+  ],
+  "required_binding_manifest": "A_TO_B_10_W02_4POLICY_PRODUCTION_BINDING.json",
+  "required_launcher": "RUN_W02_4POLICY_ACTUAL.sh",
+  "required_output_root_structure": [
+    "P1_PROPOSED_EVENT30_LOCAL_REPAIR",
+    "P2_FIXED30",
+    "P3_EVENT30_NO_LOCAL_REPAIR",
+    "P4_FIXED15"
+  ],
+  "required_per_policy_outputs": [
+    "episode_manifest.json",
+    "CONTROLLER_POLICY_MANIFEST.json",
+    "EVALUATION_END_RUNTIME_STATE.json",
+    "F7_JOB_EVENT_COHORT_COVERAGE_CERTIFICATE_V1.json",
+    "12 K9H7_RESULT_V1 tables",
+    "logs",
+    "progress",
+    "failure artifacts"
+  ],
+  "runtime_note": "development-host >=300 s commit-critical runtime is recorded, not a scientific failure by itself",
+  "schema_version": "mobileess.b_to_a.10.w02_4policy_production_binding_request.v1",
+  "scientific_method_config_sha256": "3f712ec02c4c5ebb6a424267b043f07469d29f4a4abeaea7fcdd8b765e13624a",
+  "scientific_method_id": "B5",
+  "scored_issues_per_policy": 2016,
+  "selection_window_pre_history_role": "provenance only",
+  "selection_window_pre_history_steps": 576,
+  "supersedes": "B_TO_A_10_FIRST_REAL_REP_WEEK_ISSUE_REQUEST"
+}

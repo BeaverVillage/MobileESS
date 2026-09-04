@@ -1,0 +1,34 @@
+requirement_id,V16 requirement,existing implementation file/function,status,required action,test evidence
+V16-0,Resume inspect reuse patch,dayahead/* and tests/dayahead/*,ALREADY_COMPLIANT,Preserve canonical modules and patch in place,"Baseline: 54 passed"
+V16-1,Repository branch SHA and worktree snapshot,dayahead/cli.py authority_snapshot,COMPLIANT_BUT_REVERIFY,Regenerate V16 authority snapshot,test_authority_snapshot_v16
+V16-2,V16 authority IDs and READY status,dayahead/authority.py,NEEDS_V16_PATCH,Replace V15/HOLD identifiers and bind V16 source authorities,test_v16_authority_ids
+V16-3,96-slot fixed-AEST D-1 contract,dayahead/input_contract.py,ALREADY_COMPLIANT,Retain and rerun,test_exact_96_slot_fixed_aest_axis_and_cutoff
+V16-4,AEMO complete-vintage freeze,dayahead/input_contract.py select_latest_complete_vintage,ALREADY_COMPLIANT,Retain and rerun,test_latest_complete_product_vintage_is_selected_without_slot_mixing
+V16-5,Traffic supporting-only D-1 interface,dayahead/traffic_da.py,ALREADY_COMPLIANT,Retain and rerun,test_route_forecast_has_ordered_96_slot_safe_interface
+V16-6,Mobile ESS 15-min P/Q/SOC/connection invariants,dayahead/mess_physics.py,ALREADY_COMPLIANT,Retain and rerun,test_mess_soc_recursion_and_exact_terminal_energy
+V16-7,Safe mobility energy 5-to-15 sum and no regen precredit,dayahead/mobility_energy_da.py,ALREADY_COMPLIANT,Retain and rerun,test_mobility_energy_5_to_15_sum_preserves_signed_total_and_hash
+V16-8,Phase-aware LinDistFlow squared voltage masks u080,dayahead/grid_lp.py,ALREADY_COMPLIANT,Retain and rerun,test_squared_voltage_bounds_and_round_trip
+V16-9,Grid LP Pi/Farkas master-row registry,dayahead/grid_lp.py,ALREADY_COMPLIANT,Retain and rerun,test_phase_aware_lindistflow_factory_has_explicit_master_registry_and_pi_cut
+V16-10,Standard BD and CL-MC-BD cut rules and certified bounds,dayahead/benders.py,ALREADY_COMPLIANT,Retain and rerun,test_standard_bd_selects_only_worst_time_optimality_cut
+V16-11,Fresh immutable OpenDSS 96-slot orchestration,dayahead/opendss_qsts.py,COMPLIANT_BUT_REVERIFY,Add G13 status classification test,test_opendss_96_slot_interface_masks_phases_and_keeps_schedule_immutable
+V16-12,P_IT_REF G_REF W_F source-backed lineage,dayahead/aidc_labels.py,SUPERSEDED_OLD_LOGIC,Replace P_NF/G_NF and same-source-system assumption with hierarchy/parameter firewall,test_v16_label_lineage_firewall
+V16-13,HISTORICAL_LABEL_ELIGIBILITY_V1,absent,MISSING,Implement historical-only eligibility predicate and sharing semantics,test_historical_label_eligibility_v1
+V16-14,D1_ADMISSION_ELIGIBILITY_V1 forecast-cohort-only B1=0,absent,MISSING,Implement separate denylist firewall and admission contract,test_d1_admission_expost_denylist
+V16-15,NLR four-source SHA hierarchy reproduction,dayahead/aidc_preflight.py,NEEDS_V16_PATCH,Bind exact ESIF parquet/CSV Kestrel Dataset312 files and hashes,test_nlr_source_sha_reproduction
+V16-16,Dataset312 package-only corrected kappa,absent,MISSING,Implement frozen coefficient authority and raw/audit reproducer,test_corrected_kappa_authority
+V16-17,Train-Apr-May-Jun split and locked loaders,dayahead/aidc_labels.py SPLIT_CONTRACT,SUPERSEDED_OLD_LOGIC,Replace Sep-Oct-Nov-Dec split and add freeze token loader firewall,test_locked_period_access_firewall
+V16-18,Direct96 resource-coupled quantile architecture,absent,MISSING,Implement deterministic tensor-contract module and optional torch model,test_resource_coupling_contract
+V16-19,Positive-only target scaling and monotone quantiles,absent,MISSING,Implement scaling/head helpers,test_positive_scaling_and_monotone_quantiles
+V16-20,H100-node-hour fluid cohort dimensional contract,dayahead/aidc_rack_model.py,NEEDS_V16_PATCH,Add work-to-GPU/power conversions with dt exactly once,test_fluid_service_dimensions
+V16-21,REFERENCE_COMPUTE_SCHEDULE_V2,dayahead/reference_compute.py,SUPERSEDED_OLD_LOGIC,Replace HOLD/V1 interface with deterministic earliest-feasible fluid scheduler,test_reference_schedule_v2_determinism
+V16-22,Reference-delta planning residual nonnegative,absent,MISSING,Implement mapped reference minus frozen flexible reference and DA add-back,test_reference_delta_identity
+V16-23,Reference-matched terminal service parity no deadline,absent,MISSING,Implement backlog recursion and parity validator,test_terminal_service_parity
+V16-24,Planning PUE 1.30 PF 0.95 once,absent,MISSING,Implement facility conversion boundary,test_planning_pue_pf_once
+V16-25,Realized remove-then-add decomposition,absent,MISSING,Implement nonnegative residual and frozen mapping replay,test_realized_no_double_count
+V16-26,Reference baseline fidelity diagnostic-only firewall,absent,MISSING,Implement metrics and Train-Apr access restriction,test_reference_fidelity_firewall
+V16-27,B0-B3 reference identity and case dispatcher,dayahead/master.py,NEEDS_V16_PATCH,Bind V2 reference schedule and remove authority HOLD,test_b0_b2_reference_bytes_identity
+V16-28,Monolithic and BD equivalence fixture,grid/benders factories,NEEDS_V16_PATCH,Add controlled identical-problem equivalence harness,test_solver_equivalence_fixture
+V16-29,G13 OpenDSS physical status policy,dayahead/opendss_qsts.py,NEEDS_V16_PATCH,Add B3 RELEASE_FAIL and benchmark infeasible classifier,test_g13_status_policy
+V16-30,G14 result/replay independent recalculator,dayahead/result_schema.py,NEEDS_V16_PATCH,Add mandatory V2 matrices and zero-call recalculator audit,test_g14_independent_recalculator
+V16-31,Required V16 artifacts and traceability,dayahead/artifacts/precode/*,NEEDS_V16_PATCH,Regenerate without overwriting historical artifacts,test_v16_artifact_manifest
+V16-32,May June remain locked before all gates,dayahead/science_firewall.py,SUPERSEDED_OLD_LOGIC,Replace four unresolved V15 blockers with G0-G15 freeze gate,test_may_june_remain_locked

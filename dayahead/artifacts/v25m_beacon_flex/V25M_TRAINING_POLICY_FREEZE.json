@@ -1,0 +1,17 @@
+{
+  "artifact_id": "V25M_TRAINING_POLICY_FREEZE_V1",
+  "frozen_before_full_outer_evaluation": true,
+  "primary_metric": "POOLED_OUTER_FOLD_OOF",
+  "thresholds": [0.6, 0.7, 0.8, 0.9, 0.95],
+  "hazard_loss": "UNWEIGHTED_BERNOULLI_LOG_LIKELIHOOD",
+  "neural_optimizer": "AdamW",
+  "learning_rate_candidates": [0.001, 0.0003],
+  "weight_decay_candidates": [0.0001, 0.001],
+  "minimum_epochs": 15,
+  "maximum_epochs": 100,
+  "early_stopping_patience": 10,
+  "gradient_clipping": 1.0,
+  "outer_result_based_config_additions": 0,
+  "lucky_seed_selection": 0,
+  "April_reads": 0
+}

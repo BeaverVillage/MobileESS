@@ -1,0 +1,158 @@
+"""Post-feedback scientific-rebase foundation.
+
+PFR0-PFR2 deliberately stops at authority contracts and reusable AI-training
+primitives.  It does not start a scientific campaign or implement the future
+slow/fast controller.
+"""
+
+from .data_authority import (
+    AuthorityKind,
+    DataAuthorityError,
+    DatasetAuthority,
+    DatasetRole,
+    FixedInferenceLoad,
+    MeasuredPowerUtilizationEnvelope,
+    PowerUtilizationPoint,
+    reject_row_wise_cross_dataset_merge,
+)
+from .training import (
+    CheckpointStatePayload,
+    DatasetPayload,
+    JobLifecycle,
+    KestrelOperationalJob,
+    ParameterAuthority,
+    PreemptibilityMode,
+    PowerState,
+    TrainingJobModelState,
+    TrainingParameterization,
+    WorkUnit,
+    advance_restart,
+    arrive,
+    baseline_compute_work_gpu_hours,
+    begin_migration,
+    complete_migration,
+    gang_allocation_feasible,
+    mark_ready,
+    migration_payload_bytes,
+    run_compute_step,
+    run_compute_fraction_step,
+    start_prefetch,
+    start_running,
+    validate_assignment_transition,
+)
+from .uncertainty import (
+    JointMobilityCalibration,
+    MobilityResidualObservation,
+    MobilitySafeBound,
+    UncertaintyUniverse,
+    empirical_coverage,
+    finite_sample_upper_quantile,
+    fit_joint_mobility_calibration,
+)
+from .slow_fast import (
+    FastControl,
+    FastLayerLimits,
+    FastLayerState,
+    FastRecourseResult,
+    GridScreenResult,
+    SlowDiscretePlan,
+    SlowFastArchitecture,
+    execute_fast_recourse,
+)
+from .risk import (
+    EventAudit,
+    EventMetricsSummary,
+    PlanValidityRiskMonitor,
+    ReplanCost,
+    RiskConstraint,
+    RiskDecision,
+    RiskFamily,
+)
+from .safety import (
+    AcSafetyFilter,
+    ExactAcResult,
+    FilterMetricsSummary,
+    ProjectionCandidate,
+    ProjectionCertificate,
+    SafetyFilterResult,
+)
+from .debt import (
+    DebtAblation,
+    DebtMetrics,
+    DebtState,
+    EnergyReachability,
+    RecoveryStep,
+    evaluate_recovery,
+    update_dual_debt,
+)
+from .methods import (
+    ComparisonMethod,
+    ELECTRICAL_STRESS_COMPARISON_METHODS,
+    FACTORIAL_ELECTRICAL_STRESS_CELLS,
+    ElectricalStressMethod,
+    ExperimentAuthority,
+    K9H7ResultIdentityV2,
+    K9H7ResultIdentityV3,
+    MethodConfig,
+    MethodFactory,
+)
+from .power import H100UtilizationPowerCurve, PowerCurveContractError
+from .runtime import (
+    CausalExperimentFrame,
+    OperationalTrainingJob,
+    PfrRuntimeRunner,
+    RuntimeInitialState,
+)
+from .electrical_stress import (
+    OBJECTIVE_AUTHORITY,
+    ElectricalStress,
+    stress_from_extrema,
+    trajectory_summary,
+    voltage_stress_from_extrema,
+)
+
+__all__ = [
+    "AuthorityKind",
+    "CheckpointStatePayload",
+    "DataAuthorityError",
+    "DatasetAuthority",
+    "DatasetPayload",
+    "DatasetRole",
+    "FixedInferenceLoad",
+    "JobLifecycle",
+    "JointMobilityCalibration",
+    "KestrelOperationalJob",
+    "MeasuredPowerUtilizationEnvelope",
+    "MobilityResidualObservation",
+    "MobilitySafeBound",
+    "ParameterAuthority",
+    "PreemptibilityMode",
+    "PowerState",
+    "PowerUtilizationPoint",
+    "TrainingJobModelState",
+    "TrainingParameterization",
+    "UncertaintyUniverse",
+    "WorkUnit",
+    "OBJECTIVE_AUTHORITY",
+    "ElectricalStress",
+    "advance_restart",
+    "arrive",
+    "baseline_compute_work_gpu_hours",
+    "begin_migration",
+    "complete_migration",
+    "empirical_coverage",
+    "finite_sample_upper_quantile",
+    "fit_joint_mobility_calibration",
+    "gang_allocation_feasible",
+    "mark_ready",
+    "migration_payload_bytes",
+    "reject_row_wise_cross_dataset_merge",
+    "run_compute_step",
+    "run_compute_fraction_step",
+    "start_prefetch",
+    "start_running",
+    "stress_from_extrema",
+    "trajectory_summary",
+    "validate_assignment_transition",
+    "voltage_stress_from_extrema",
+]

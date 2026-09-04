@@ -1,0 +1,42 @@
+{
+  "B0_B2_reference_compute": "BYTE_AND_SHA_IDENTICAL",
+  "B1_B3_AIDC_policy": "CANONICAL_CONFIG_IDENTICAL",
+  "PI_status": "DIAGNOSTIC_ONLY_NOT_AN_OFFICIAL_CASE",
+  "artifact_id": "V30_FOUR_CASE_CONTRACT_V1",
+  "case_actuators": {
+    "B0": {
+      "aidc": false,
+      "mess": false,
+      "recourse": false
+    },
+    "B1": {
+      "aidc": true,
+      "mess": false,
+      "recourse": true
+    },
+    "B2": {
+      "aidc": false,
+      "mess": true,
+      "recourse": false
+    },
+    "B3": {
+      "aidc": true,
+      "mess": true,
+      "recourse": true
+    }
+  },
+  "comparisons": {
+    "B0_to_B1": "AIDC_TWO_STAGE",
+    "B0_to_B2": "MESS",
+    "B1_to_B3": "MESS_WITH_AIDC",
+    "B2_to_B3": "AIDC_TWO_STAGE_WITH_MESS"
+  },
+  "official_case_count": 4,
+  "official_cases": [
+    "B0",
+    "B1",
+    "B2",
+    "B3"
+  ],
+  "status": "FROZEN"
+}

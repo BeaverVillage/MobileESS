@@ -1,0 +1,53 @@
+{
+  "schema_version": "mobileess.post_stage15.rep12.rootcause_correction.r20_8.v1",
+  "status": "PASS_ROOT_CAUSE_IDENTIFIED_AND_BOUNDED_CORRECTION_IMPLEMENTED",
+  "created_utc": "2026-08-18T14:58:24Z",
+  "run_id": "B_12_REP_WEEKS_ACTUAL_FINAL_R20",
+  "failed_task": {
+    "candidate_id": "W07_2025-02-17",
+    "policy": "M2_FIXED30_MOBILE",
+    "issue": 15170,
+    "last_committed_issue": 15169,
+    "error": "GRID_CORRECTION_EXHAUSTED"
+  },
+  "root_cause": {
+    "initial_exact_ac": {
+      "voltage_violation_count": 1,
+      "line_violation_count": 1,
+      "transformer_current_violation_count": 2,
+      "transformer_max_current_loading_pu": 1.170789203494316
+    },
+    "measured_recovery_progress": {
+      "round": 6,
+      "transformer_max_current_loading_pu": 1.0126426509153084,
+      "explanation": "Sequential exact-state P/Q relinearization was relieving the overload."
+    },
+    "defect": "The last three bounded rounds unconditionally selected a near-zero-P/Q low-stress anchor that was designed for voltage/tap-only oscillation.",
+    "defect_effect": {
+      "repeated_rounds": [7, 8, 9],
+      "repeated_transformer_max_current_loading_pu": 1.1617804883136373,
+      "explanation": "Near-zero ESS output restored upstream transformer current and discarded the improving overload trajectory."
+    },
+    "power_scale_error": false,
+    "missing_576_constraint_error": false,
+    "hard_limit_inaccuracy": false
+  },
+  "correction": {
+    "overload_origin_low_stress_anchor_guard": true,
+    "line_or_transformer_overload_uses_all_bounded_sensitivity_rounds": true,
+    "fresh_opendss_remains_final_physical_acceptance_authority": true,
+    "hard_limits_relaxed": false,
+    "objective_changed": false,
+    "power_scale_changed": false,
+    "future_actual_used": false,
+    "ctrl_c_empty_wait_pid_guard": true,
+    "ctrl_c_cleanup_status": "INTERRUPTED_RESUMABLE"
+  },
+  "preservation": {
+    "committed_prefix_integrity_audit": "/home/jaewon/mobile_ess_work/frozen_artifacts/B_12_REP_WEEKS_ACTUAL_FINAL_R20/REP12_COMMITTED_PREFIX_INTEGRITY_AUDIT_R20_8.json",
+    "committed_issue_count": 11486,
+    "atomic_markers_and_hashes_valid": true,
+    "existing_results_modified": false,
+    "resume_issue": 15170
+  }
+}

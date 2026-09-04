@@ -1,0 +1,46 @@
+{
+  "artifact_id": "V24M_CAUSAL_DATASET_CONTRACT_V1",
+  "allowed_feature_fields": [
+    "submit_time",
+    "inter_arrival_time",
+    "gpus_requested",
+    "nodes_req",
+    "wallclock_req",
+    "partition",
+    "qos",
+    "account_hash",
+    "request_full_partial",
+    "historical_event_counts",
+    "historical_requested_GPU",
+    "historical_requested_GPU_h",
+    "historical_node_counts",
+    "historical_account_diversity",
+    "calendar",
+    "holiday",
+    "causal_rolling_statistics"
+  ],
+  "target_only_fields": [
+    "realized_runtime",
+    "semantic_flexible_label",
+    "historical_queue_wait_derived_label",
+    "completion_state_for_target_construction"
+  ],
+  "forbidden_feature_fields": [
+    "D_day_actual_submissions",
+    "future_start",
+    "future_end",
+    "future_queue_wait",
+    "future_completion",
+    "future_realized_runtime",
+    "future_state",
+    "future_job_id",
+    "retrospective_future_flexible_label"
+  ],
+  "cutoff": "D-1 18:00 AEST",
+  "training_interval": [
+    "2024-08-19",
+    "2025-03-31"
+  ],
+  "April_members_opened": 0,
+  "same_day_target_fields_in_features": 0
+}

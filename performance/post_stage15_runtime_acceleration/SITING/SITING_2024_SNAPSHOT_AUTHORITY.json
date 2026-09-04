@@ -1,0 +1,361 @@
+{
+  "opendss_adapter_residuals": [
+    {
+      "p_kw": 1.4210854715202004e-14,
+      "pv_kw": 0.0,
+      "q_kvar": 1.4210854715202004e-14,
+      "rule": "ANNUAL_MAX_NET_LOAD"
+    },
+    {
+      "p_kw": 1.4210854715202004e-14,
+      "pv_kw": 0.0,
+      "q_kvar": 2.842170943040401e-14,
+      "rule": "ANNUAL_MAX_GROSS_LOAD"
+    },
+    {
+      "p_kw": 7.105427357601002e-15,
+      "pv_kw": 0.0,
+      "q_kvar": 7.105427357601002e-15,
+      "rule": "HIGH_PV_LOW_NET"
+    },
+    {
+      "p_kw": 1.4210854715202004e-14,
+      "pv_kw": 0.0,
+      "q_kvar": 1.4210854715202004e-14,
+      "rule": "HIGH_LOAD_LOW_PV"
+    },
+    {
+      "p_kw": 1.4210854715202004e-14,
+      "pv_kw": 0.0,
+      "q_kvar": 1.4210854715202004e-14,
+      "rule": "MAX_UP_30MIN_RAMP"
+    },
+    {
+      "p_kw": 7.105427357601002e-15,
+      "pv_kw": 0.0,
+      "q_kvar": 7.105427357601002e-15,
+      "rule": "MAX_DOWN_30MIN_RAMP"
+    },
+    {
+      "p_kw": 7.105427357601002e-15,
+      "pv_kw": 0.0,
+      "q_kvar": 7.105427357601002e-15,
+      "rule": "ANNUAL_MIN_NET_LOAD"
+    },
+    {
+      "p_kw": 7.105427357601002e-15,
+      "pv_kw": 0.0,
+      "q_kvar": 3.552713678800501e-15,
+      "rule": "MULTIVARIATE_MEDIAN"
+    },
+    {
+      "p_kw": 1.4210854715202004e-14,
+      "pv_kw": 0.0,
+      "q_kvar": 1.4210854715202004e-14,
+      "rule": "SUMMER_NET_Q90"
+    },
+    {
+      "p_kw": 1.4210854715202004e-14,
+      "pv_kw": 0.0,
+      "q_kvar": 1.4210854715202004e-14,
+      "rule": "AUTUMN_NET_Q90"
+    },
+    {
+      "p_kw": 7.105427357601002e-15,
+      "pv_kw": 0.0,
+      "q_kvar": 7.105427357601002e-15,
+      "rule": "WINTER_NET_Q90"
+    },
+    {
+      "p_kw": 7.105427357601002e-15,
+      "pv_kw": 0.0,
+      "q_kvar": 7.105427357601002e-15,
+      "rule": "SPRING_NET_Q90"
+    }
+  ],
+  "preregistration_sha256": "66e0eae8b4588985e0f61a0a900b5ae5fd212b97f6b3cf377e5b51244810f18e",
+  "rooftop_cleaning": {
+    "accepted_repair_authority_path": "/mnt/c/Users/kjw39/OneDrive/문서/ChatGPT/Mobile ESS 2/github_MobileESS_rep_period_pr/period_selection/aemo_pv_repair.py",
+    "accepted_repair_authority_sha256": "f0727602c7f90afa6efa6edd2ad3e7cf58f4d41706b2ab4722d40d1843ae799d",
+    "authorized_defect_count": 5,
+    "cleaning_rule": "exact accepted PR3 rule: exact deduplication; same-timestamp SATELLITE fallback; linear interpolation only for an authorized defect when both measurement and satellite are absent and same-fixed-AEST-day brackets exist; exact six-slot hold to 5 minutes",
+    "exact_duplicate_measurement_rows_removed": 336,
+    "exact_duplicate_satellite_rows_removed": 336,
+    "expected_30min": 17568,
+    "linear_interpolation_30min": 2,
+    "linear_interpolation_5min": 12,
+    "measurement_nonfinite": 5,
+    "repairs": [
+      {
+        "interval_end_aest": "2024-09-05 13:00:00",
+        "interval_start_utc": "2024-09-05T02:30:00+00:00",
+        "left_interval_start_utc": "2024-09-05T02:00:00+00:00",
+        "repair_method": "LINEAR_INTERPOLATION_NO_SATELLITE_AVAILABLE",
+        "repaired_power_mw": 474.608,
+        "right_interval_start_utc": "2024-09-05T04:00:00+00:00",
+        "source_issue": "MISSING"
+      },
+      {
+        "interval_end_aest": "2024-09-05 13:30:00",
+        "interval_start_utc": "2024-09-05T03:00:00+00:00",
+        "left_interval_start_utc": "2024-09-05T02:00:00+00:00",
+        "repair_method": "LINEAR_INTERPOLATION_NO_SATELLITE_AVAILABLE",
+        "repaired_power_mw": 418.86,
+        "right_interval_start_utc": "2024-09-05T04:00:00+00:00",
+        "source_issue": "MISSING"
+      },
+      {
+        "interval_end_aest": "2024-09-05 14:00:00",
+        "interval_start_utc": "2024-09-05T03:30:00+00:00",
+        "left_interval_start_utc": null,
+        "repair_method": "SAME_TIMESTAMP_SATELLITE_FALLBACK",
+        "repaired_power_mw": 324.449,
+        "right_interval_start_utc": null,
+        "source_issue": "BLANK"
+      },
+      {
+        "interval_end_aest": "2024-12-10 10:30:00",
+        "interval_start_utc": "2024-12-10T00:00:00+00:00",
+        "left_interval_start_utc": null,
+        "repair_method": "SAME_TIMESTAMP_SATELLITE_FALLBACK",
+        "repaired_power_mw": 3432.737,
+        "right_interval_start_utc": null,
+        "source_issue": "BLANK"
+      },
+      {
+        "interval_end_aest": "2024-12-10 11:00:00",
+        "interval_start_utc": "2024-12-10T00:30:00+00:00",
+        "left_interval_start_utc": null,
+        "repair_method": "SAME_TIMESTAMP_SATELLITE_FALLBACK",
+        "repaired_power_mw": 3588.724,
+        "right_interval_start_utc": null,
+        "source_issue": "BLANK"
+      }
+    ],
+    "satellite_fallback_30min": 3,
+    "satellite_fallback_5min": 18,
+    "unresolved": 0
+  },
+  "snapshot_count": 12,
+  "snapshots": [
+    {
+      "feeder_pv_target_kw": 119.15983482750235,
+      "gross_background_target_kw": 4979.066361454053,
+      "net_ramp_30min_kw": 201.38524480790966,
+      "operational_net_target_kw": 4859.906526626551,
+      "regional_totaldemand_mw": 9887.28,
+      "rooftop_pv_mw": 686.488,
+      "rule": "ANNUAL_MAX_NET_LOAD",
+      "snapshot_order": 1,
+      "timestamp_fixed_aest": "2024-12-16T16:55:00+10:00",
+      "timestamp_utc": "2024-12-16T06:55:00+00:00"
+    },
+    {
+      "feeder_pv_target_kw": 119.15983482750235,
+      "gross_background_target_kw": 4927.494908755202,
+      "net_ramp_30min_kw": 190.674780127124,
+      "operational_net_target_kw": 4808.3350739277,
+      "regional_totaldemand_mw": 9782.36,
+      "rooftop_pv_mw": 686.488,
+      "rule": "ANNUAL_MAX_GROSS_LOAD",
+      "snapshot_order": 2,
+      "timestamp_fixed_aest": "2024-12-16T16:50:00+10:00",
+      "timestamp_utc": "2024-12-16T06:50:00+00:00"
+    },
+    {
+      "feeder_pv_target_kw": 636.0892679208712,
+      "gross_background_target_kw": 1832.5499190863145,
+      "net_ramp_30min_kw": 22.384330498528698,
+      "operational_net_target_kw": 1196.4606511654433,
+      "regional_totaldemand_mw": 2434.15,
+      "rooftop_pv_mw": 3664.554,
+      "rule": "HIGH_PV_LOW_NET",
+      "snapshot_order": 3,
+      "timestamp_fixed_aest": "2024-12-04T12:00:00+10:00",
+      "timestamp_utc": "2024-12-04T02:00:00+00:00"
+    },
+    {
+      "feeder_pv_target_kw": 0.0,
+      "gross_background_target_kw": 4114.347098794463,
+      "net_ramp_30min_kw": 114.61032811466657,
+      "operational_net_target_kw": 4114.347098794463,
+      "regional_totaldemand_mw": 8370.47,
+      "rooftop_pv_mw": 0.0,
+      "rule": "HIGH_LOAD_LOW_PV",
+      "snapshot_order": 4,
+      "timestamp_fixed_aest": "2024-07-15T17:50:00+10:00",
+      "timestamp_utc": "2024-07-15T07:50:00+00:00"
+    },
+    {
+      "feeder_pv_target_kw": 515.9389918656624,
+      "gross_background_target_kw": 3078.463132743684,
+      "net_ramp_30min_kw": 1103.6988851846988,
+      "operational_net_target_kw": 2562.5241408780216,
+      "regional_totaldemand_mw": 5213.35,
+      "rooftop_pv_mw": 2972.36,
+      "rule": "MAX_UP_30MIN_RAMP",
+      "snapshot_order": 5,
+      "timestamp_fixed_aest": "2024-12-09T14:30:00+10:00",
+      "timestamp_utc": "2024-12-09T04:30:00+00:00"
+    },
+    {
+      "feeder_pv_target_kw": 489.2935885883573,
+      "gross_background_target_kw": 1843.6045668573906,
+      "net_ramp_30min_kw": -1357.894241296119,
+      "operational_net_target_kw": 1354.3109782690333,
+      "regional_totaldemand_mw": 2755.29,
+      "rooftop_pv_mw": 2818.854,
+      "rule": "MAX_DOWN_30MIN_RAMP",
+      "snapshot_order": 6,
+      "timestamp_fixed_aest": "2024-12-09T15:05:00+10:00",
+      "timestamp_utc": "2024-12-09T05:05:00+00:00"
+    },
+    {
+      "feeder_pv_target_kw": 592.2302182870259,
+      "gross_background_target_kw": 1325.1671244651507,
+      "net_ramp_30min_kw": -53.54740809200064,
+      "operational_net_target_kw": 732.9369061781248,
+      "regional_totaldemand_mw": 1491.13,
+      "rooftop_pv_mw": 3411.879,
+      "rule": "ANNUAL_MIN_NET_LOAD",
+      "snapshot_order": 7,
+      "timestamp_fixed_aest": "2024-11-03T12:20:00+10:00",
+      "timestamp_utc": "2024-11-03T02:20:00+00:00"
+    },
+    {
+      "feeder_pv_target_kw": 0.0,
+      "gross_background_target_kw": 2341.7529058447726,
+      "net_ramp_30min_kw": -16.028832181752932,
+      "operational_net_target_kw": 2341.7529058447726,
+      "regional_totaldemand_mw": 4764.2,
+      "rooftop_pv_mw": 0.0,
+      "rule": "MULTIVARIATE_MEDIAN",
+      "snapshot_order": 8,
+      "timestamp_fixed_aest": "2024-06-23T02:40:00+10:00",
+      "timestamp_utc": "2024-06-22T16:40:00+00:00"
+    },
+    {
+      "feeder_pv_target_kw": 355.7695786966437,
+      "gross_background_target_kw": 3057.283994828704,
+      "net_ramp_30min_kw": 55.60692378784688,
+      "operational_net_target_kw": 2701.5144161320604,
+      "regional_totaldemand_mw": 5496.12,
+      "rooftop_pv_mw": 2049.613,
+      "rule": "SUMMER_NET_Q90",
+      "snapshot_order": 9,
+      "timestamp_fixed_aest": "2024-12-06T12:10:00+10:00",
+      "timestamp_utc": "2024-12-06T02:10:00+00:00"
+    },
+    {
+      "feeder_pv_target_kw": 0.0,
+      "gross_background_target_kw": 2940.5902727675316,
+      "net_ramp_30min_kw": 289.21203825272914,
+      "operational_net_target_kw": 2940.5902727675316,
+      "regional_totaldemand_mw": 5982.51,
+      "rooftop_pv_mw": 0.0,
+      "rule": "AUTUMN_NET_Q90",
+      "snapshot_order": 10,
+      "timestamp_fixed_aest": "2024-05-24T06:25:00+10:00",
+      "timestamp_utc": "2024-05-23T20:25:00+00:00"
+    },
+    {
+      "feeder_pv_target_kw": 0.0,
+      "gross_background_target_kw": 3466.3762738867918,
+      "net_ramp_30min_kw": -136.28193838432253,
+      "operational_net_target_kw": 3466.3762738867918,
+      "regional_totaldemand_mw": 7052.2,
+      "rooftop_pv_mw": 0.0,
+      "rule": "WINTER_NET_Q90",
+      "snapshot_order": 11,
+      "timestamp_fixed_aest": "2024-07-01T20:50:00+10:00",
+      "timestamp_utc": "2024-07-01T10:50:00+00:00"
+    },
+    {
+      "feeder_pv_target_kw": 1.1853703371901816,
+      "gross_background_target_kw": 2714.2458541769897,
+      "net_ramp_30min_kw": 226.35011406614922,
+      "operational_net_target_kw": 2713.0604838397994,
+      "regional_totaldemand_mw": 5519.61,
+      "rooftop_pv_mw": 6.829,
+      "rule": "SPRING_NET_Q90",
+      "snapshot_order": 12,
+      "timestamp_fixed_aest": "2024-10-08T05:35:00+10:00",
+      "timestamp_utc": "2024-10-07T19:35:00+00:00"
+    }
+  ],
+  "spatial_conservation": [
+    {
+      "background_p_conservation_kw": 9.094947017729282e-13,
+      "background_q_conservation_kvar": 4.547473508864641e-13,
+      "pv_conservation_kw": 0.0,
+      "rule": "ANNUAL_MAX_NET_LOAD"
+    },
+    {
+      "background_p_conservation_kw": 9.094947017729282e-13,
+      "background_q_conservation_kvar": 0.0,
+      "pv_conservation_kw": 0.0,
+      "rule": "ANNUAL_MAX_GROSS_LOAD"
+    },
+    {
+      "background_p_conservation_kw": 2.2737367544323206e-13,
+      "background_q_conservation_kvar": 0.0,
+      "pv_conservation_kw": 0.0,
+      "rule": "HIGH_PV_LOW_NET"
+    },
+    {
+      "background_p_conservation_kw": 9.094947017729282e-13,
+      "background_q_conservation_kvar": 0.0,
+      "pv_conservation_kw": 0.0,
+      "rule": "HIGH_LOAD_LOW_PV"
+    },
+    {
+      "background_p_conservation_kw": 0.0,
+      "background_q_conservation_kvar": 0.0,
+      "pv_conservation_kw": 0.0,
+      "rule": "MAX_UP_30MIN_RAMP"
+    },
+    {
+      "background_p_conservation_kw": 0.0,
+      "background_q_conservation_kvar": 2.2737367544323206e-13,
+      "pv_conservation_kw": 0.0,
+      "rule": "MAX_DOWN_30MIN_RAMP"
+    },
+    {
+      "background_p_conservation_kw": 0.0,
+      "background_q_conservation_kvar": 1.1368683772161603e-13,
+      "pv_conservation_kw": 0.0,
+      "rule": "ANNUAL_MIN_NET_LOAD"
+    },
+    {
+      "background_p_conservation_kw": 4.547473508864641e-13,
+      "background_q_conservation_kvar": 0.0,
+      "pv_conservation_kw": 0.0,
+      "rule": "MULTIVARIATE_MEDIAN"
+    },
+    {
+      "background_p_conservation_kw": 4.547473508864641e-13,
+      "background_q_conservation_kvar": 0.0,
+      "pv_conservation_kw": 5.684341886080802e-14,
+      "rule": "SUMMER_NET_Q90"
+    },
+    {
+      "background_p_conservation_kw": 0.0,
+      "background_q_conservation_kvar": 0.0,
+      "pv_conservation_kw": 0.0,
+      "rule": "AUTUMN_NET_Q90"
+    },
+    {
+      "background_p_conservation_kw": 9.094947017729282e-13,
+      "background_q_conservation_kvar": 2.2737367544323206e-13,
+      "pv_conservation_kw": 0.0,
+      "rule": "WINTER_NET_Q90"
+    },
+    {
+      "background_p_conservation_kw": 4.547473508864641e-13,
+      "background_q_conservation_kvar": 2.2737367544323206e-13,
+      "pv_conservation_kw": 0.0,
+      "rule": "SPRING_NET_Q90"
+    }
+  ],
+  "status": "PASS_12_OUTCOME_BLIND_SNAPSHOTS"
+}

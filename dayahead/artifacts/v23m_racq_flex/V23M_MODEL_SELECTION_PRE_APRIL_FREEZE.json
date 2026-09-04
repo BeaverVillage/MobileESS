@@ -1,0 +1,92 @@
+{
+  "artifact_id": "V23M_MODEL_SELECTION_PRE_APRIL_FREEZE_V1",
+  "created_utc": "2026-09-01T03:14:06.163580+00:00",
+  "git_head_before_freeze": "22961d71d6cb595f36a35ca79ab54ac7f19e5f1c",
+  "April_target_reads_before_freeze": 0,
+  "recurrence_gate": false,
+  "RACQ_status": "REJECTED_RECURRENCE_GATE_FAIL_NOT_TRAINED",
+  "ACQ_status": "EVALUATED_NOT_ACCEPTED_PERFORMANCE_FAIL",
+  "classification": "V23M_RACQ_RECURRENCE_GATE_FAIL_ACQ_ONLY",
+  "selected_production_authorities": {
+    "conditional_mean": "B2_LIGHTGBM_TWEEDIE_FROZEN_V19_V21",
+    "Q50": "B3_LIGHTGBM_QUANTILE_FROZEN_V19",
+    "Q90": "B3_LIGHTGBM_QUANTILE_FROZEN_V19",
+    "reason": "RACQ recurrence gate failed and ACQ failed performance/mass/calibration gates"
+  },
+  "experimental_ACQ": {
+    "selected_architecture": "ACQ_FLEX_NO_RECURRENCE",
+    "selected_hyperparameter_policy": "MODAL_INNER_CV_CONFIG",
+    "selected_seed_policy": [
+      20260901,
+      20260902,
+      20260903
+    ],
+    "calibration": "TRAINING_ONLY_ADDITIVE_RESIDUAL_QUANTILES",
+    "config_file": "V23M_SELECTED_ACQ_FLEX_CONFIG.json",
+    "config_sha256": "7cb12136c9011bf165039a0e628ed6697d9cd652b72628689e1fb0932f837109",
+    "state_file": "V23M_SELECTED_ACQ_FLEX_STATE.pt",
+    "state_sha256": "832c72d757a6d080a0a33997bb57ebe517fade00e359c6eb43231ddaa87b010f"
+  },
+  "best_baseline": "B3_LIGHTGBM_QUANTILE_FOR_Q50_Q90; B2_LIGHTGBM_TWEEDIE_FOR_MEAN",
+  "acceptance_result": {
+    "artifact_id": "V23M_RACQ_ACCEPTANCE_TEST_V1",
+    "classification": "V23M_RACQ_RECURRENCE_GATE_FAIL_ACQ_ONLY",
+    "RACQ_RECURRENCE_GATE_PASS": false,
+    "RACQ_PROPOSED_MODEL_ACCEPTED": false,
+    "ACQ_evaluated": true,
+    "ACQ_metrics": {
+      "daily_WAPE": 1.091156165344103,
+      "Q50_WAPE": 1.0609612917929359,
+      "daily_MAE_GPU_h": 3617.663083380158,
+      "daily_RMSE_GPU_h": 7155.284560546616,
+      "aggregate_mass_ratio": 0.5967570632350877,
+      "burst_WAPE": 0.8897447088530759,
+      "Q50_coverage": 0.3708609271523179,
+      "Q90_coverage": 0.8543046357615894,
+      "negative_prediction_count": 0,
+      "quantile_crossing_count": 0,
+      "flexible_IT_power_WAPE": 1.5623611757575064,
+      "peak_flexible_IT_power_error_kW": -160.32491961541575,
+      "peak_timing_error_slots": 2561.0
+    },
+    "conditional_mean_gates": {
+      "daily_WAPE_le": 0.927302659814271,
+      "actual": 1.091156165344103,
+      "pass": false,
+      "burst_WAPE_le": 0.864089906167401,
+      "burst_actual": 0.8897447088530759,
+      "burst_pass": false,
+      "mass_ratio_range": [
+        0.85,
+        1.15
+      ],
+      "mass_ratio_actual": 0.5967570632350877,
+      "mass_pass": false
+    },
+    "quantile_gates": {
+      "Q50_WAPE_le": 0.845737555557761,
+      "actual": 1.0609612917929359,
+      "pass": false,
+      "Q50_coverage_range": [
+        0.45,
+        0.55
+      ],
+      "Q50_coverage": 0.3708609271523179,
+      "Q90_coverage_range": [
+        0.85,
+        0.95
+      ],
+      "Q90_coverage": 0.8543046357615894
+    },
+    "power_gate": {
+      "semantic_LightGBM_reference_WAPE": 1.5703531589156716,
+      "ACQ_IT_power_WAPE": 1.5623611757575064,
+      "relative_improvement": 0.005089290337521035,
+      "pass_5pct": false
+    },
+    "decision_basis": "RECURRENCE_GATE_FAIL_PRECEDES_PERFORMANCE_GATES"
+  },
+  "locked_test_created": false,
+  "grid_science_authorized": false,
+  "result_based_retuning": 0
+}

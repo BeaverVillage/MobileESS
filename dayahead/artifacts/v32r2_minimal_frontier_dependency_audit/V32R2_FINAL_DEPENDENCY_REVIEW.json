@@ -1,0 +1,268 @@
+{
+  "Feb28_SCATS": {
+    "B1_B0_realized_SCATS_read": false,
+    "B3_B2_realized_SCATS_read": false,
+    "V32_frontier_classification": "NOT_REQUIRED_BY_V32_FRONTIER",
+    "artifact_id": "V32R2_FEB28_SCATS_DEPENDENCY_AUDIT_V1",
+    "conclusion": "The V32R1 90/90 gate was over-broad; the missing value is not a scientific blocker.",
+    "day": "2025-02-28",
+    "effects": {
+      "AIDC_recourse": false,
+      "Fresh_trajectory": false,
+      "MESS_availability": false,
+      "MESS_location": false,
+      "MESS_route": false,
+      "feeder_injection": false,
+      "travel_energy": false
+    },
+    "exact_numerical_quantity_affected": null,
+    "field_consumers": {
+      "_mess_authority": [
+        "mess.mode",
+        "mess.location",
+        "mess.available",
+        "mess.safe_travel_energy_kwh",
+        "mess.initial_energy_kwh"
+      ],
+      "not_read": [
+        "actual_volume",
+        "forecast_q10_volume",
+        "forecast_q50_volume",
+        "forecast_q90_volume"
+      ],
+      "replay_mess": [
+        "mess.mode",
+        "mess.location",
+        "mess.available",
+        "mess.safe_travel_energy_kwh",
+        "mess.initial_energy_kwh"
+      ]
+    },
+    "final_classification": "DIAGNOSTIC_ONLY",
+    "frontier_source_ready": {
+      "B1_B0": true,
+      "B3_B2": true
+    },
+    "functions_reading_actual_volume_on_frontier_path": [],
+    "interpolated": false,
+    "raw_record_available": false,
+    "replacement_downloaded": false,
+    "status": "PASS",
+    "synthesized": false
+  },
+  "Fresh_frontier_calls": 0,
+  "MESS": {
+    "B1_B0": {
+      "Fresh_requirement": "one common fixed P/Q trajectory plus engineering location/state/energy",
+      "candidate_anchor_identical": true,
+      "controllable_MESS": false,
+      "fixed_reference_injection_remains": true,
+      "separate_case_schedule_required": false
+    },
+    "B3_B2": {
+      "Apr04_artifact_dependency": "current orchestration/serialization only; primitives and rule are not date-limited",
+      "B2_producer": "solve_case(B2)",
+      "B3_producer": "solve_b3_rung + select_first_safe_rung using the frozen V29R2 rung contract",
+      "both_P_Q_trajectories_required": true,
+      "trajectories_can_differ": true
+    },
+    "artifact_id": "V32R2_MESS_DEPENDENCY_AUDIT_V1",
+    "classification": "MESS_GENERAL_DAY_RECONSTRUCTABLE_FROM_FROZEN_AUTHORITY",
+    "missing_capability": "science-neutral date/path orchestration and serialization of the already-frozen rule",
+    "new_MESS_scientific_rule_required": false,
+    "policy_invented": false,
+    "ratings_changed": false,
+    "route_changed": false,
+    "status": "PASS"
+  },
+  "RESULT_CLASSIFICATION": "V32R2_MINIMAL_AUTHORITY_RECONSTRUCTABLE",
+  "SCATS_interpolations_or_synthesis": 0,
+  "Stage1": {
+    "K64_current_role": "scenario metric and policy-identity reporting; not connected to the inherited x_DA optimizer",
+    "artifact_id": "V32R2_GENERAL_DAY_STAGE1_REVIEW_V1",
+    "current_V30_path": "Apr-04 schedule loader plus reporter, then Stage-2",
+    "depends_on_Apr04_schedules_in_current_V30_loader": true,
+    "exact_V30_entry_point": null,
+    "gap_classification": "SCIENCE_NEUTRAL_ENGINEERING",
+    "genuine_arbitrary_day_V30_entry_point_exists": false,
+    "h_REC_endogenous": false,
+    "h_REC_reconstructable": true,
+    "lower_level_arbitrary_day_primitives_exist": true,
+    "proof_run_status": "NOT_RUN_NO_ASSEMBLED_GENERAL_DAY_V30_ENTRY_POINT",
+    "reason": "The mathematical producers and MESS selector are frozen and date-parameterized below the Apr-04 runner; no new objective, variable, or selection rule is needed.",
+    "reconstruction_path": [
+      "materialize_formulation_data_v29r2(day, scenario)",
+      "solve_case for B0/B1/B2",
+      "solve_b3_rung and select_first_safe_rung for B3",
+      "derive h_REC in stage1_rows"
+    ],
+    "status": "PASS_AUDIT",
+    "uses_K64_to_change_x_DA": false,
+    "x_DA_reconstructable": true
+  },
+  "artifact_id": "V32R2_FINAL_DEPENDENCY_REVIEW_V1",
+  "full_campaign_runs": 0,
+  "h_REC": {
+    "artifact_id": "V32R2_HREC_ENDOGENEITY_AUDIT_V1",
+    "classification": "DERIVED_POST_SOLVE",
+    "constraint_participation": false,
+    "declared_as_variable_in_contract": true,
+    "evidence": "np.maximum is evaluated after loading the frozen workload_service_tensor; the value is only serialized to DA/headroom reports.",
+    "exact_code": "dayahead/v30/dayahead_formulation.py::stage1_rows",
+    "exact_relationship": "h_REC[r,t] = max(0, CASE_CAPACITY_GPU*gpu_weight[r]*0.25/4 - sum_b x_DA[b,r,t])",
+    "objective_participation": false,
+    "scenario_coupling": false,
+    "solver_output_extraction": false,
+    "solver_variable_declaration": null,
+    "status": "PASS"
+  },
+  "minimum_authority": {
+    "B1_B0": {
+      "derived_not_materialized": [
+        "h_REC=max(0,rack_capacity-sum_b(x_DA))",
+        "source_available",
+        "y_ACT",
+        "backlog_post",
+        "candidate_direction"
+      ],
+      "required_fields": [
+        "shared_B0_B2_x_DA[15,48,96]",
+        "candidate_x_DA[15,48,96]",
+        "actual_arrivals_through_t[15]",
+        "initial_and_current_backlog[15]",
+        "actual_residual_rack_capacity[48]",
+        "rack_to_AIDC_and_strict_FULL_compatibility",
+        "anchor_actual_flexible_AIDC_P[12]",
+        "V30_scalar_s[t,12]",
+        "M_CURRENT",
+        "candidate_and_anchor_AIDC_P_Q[96,12]",
+        "realized_demand_PV[96]",
+        "realized_weather_C1[96]",
+        "frozen_feeder_ratings_and_native_states[96]",
+        "one_common_fixed_MESS_P_Q[96,4]",
+        "engineering_MESS_location_state_travel_energy[96,4]"
+      ]
+    },
+    "B3_B2": {
+      "derived_not_materialized": [
+        "h_REC=max(0,rack_capacity-sum_b(x_DA))",
+        "source_available",
+        "y_ACT",
+        "backlog_post",
+        "candidate_direction"
+      ],
+      "required_fields": [
+        "shared_B0_B2_x_DA[15,48,96]",
+        "candidate_x_DA[15,48,96]",
+        "actual_arrivals_through_t[15]",
+        "initial_and_current_backlog[15]",
+        "actual_residual_rack_capacity[48]",
+        "rack_to_AIDC_and_strict_FULL_compatibility",
+        "anchor_actual_flexible_AIDC_P[12]",
+        "V30_scalar_s[t,12]",
+        "M_CURRENT",
+        "candidate_and_anchor_AIDC_P_Q[96,12]",
+        "realized_demand_PV[96]",
+        "realized_weather_C1[96]",
+        "frozen_feeder_ratings_and_native_states[96]",
+        "B2_MESS_P_Q[96,4]",
+        "B3_MESS_P_Q[96,4]",
+        "engineering_MESS_location_state_travel_energy[96,4]"
+      ]
+    },
+    "artifact_id": "V32R2_MINIMUM_FRONTIER_AUTHORITY_SCHEMA_V1",
+    "explicitly_excluded": {
+      "SCATS_actual": "DIAGNOSTIC_ONLY",
+      "SCATS_forecast": "NOT_REQUIRED",
+      "full_Stage2_resource_tensor": "reconstructed causally from x_DA plus actual inputs",
+      "full_line_phase_sensitivity_cache": "scalar s is sufficient after exact frozen reduction",
+      "materialized_h_REC": "exactly derived",
+      "raw_traffic_volume": "NOT_REQUIRED"
+    },
+    "reconstruction_source_inputs": [
+      "frozen DA workload model/raw queue authority",
+      "aemo_forecast demand/PV",
+      "GFS D-1 weather and C1",
+      "actual strict-FULL workload",
+      "realized AEMO demand/PV",
+      "realized NOAA weather",
+      "engineering MESS route authority",
+      "IEEE123/native-state authority",
+      "frozen exact sensitivity-generation method"
+    ],
+    "shared_reduction": "B0 and B2 workload_service_tensor is one byte-identical reference x_DA; three workload tensors, not four independent full schedules.",
+    "status": "PASS_MINIMIZED"
+  },
+  "new_MESS_rules": 0,
+  "official_case_count": 4,
+  "official_cases": [
+    "B0",
+    "B1",
+    "B2",
+    "B3"
+  ],
+  "one_next_recommended_action": "Implement science-neutral general-day materialization plumbing for the frozen V29R2/V30 producers, serialize the three minimum workload tensors plus required MESS trajectories and scalar s for Jan-Mar, then rerun frozen V32.",
+  "production_science_changed": false,
+  "secondary_gaps": [
+    "general-day orchestration not assembled",
+    "per-day scalar s not serialized",
+    "Jan-Mar operational objects not yet materialized"
+  ],
+  "sensitivity": {
+    "V32_operations_supported": [
+      "frontier-eligible slot identification",
+      "AIDC leverage ranking",
+      "leverage quartiles",
+      "audit-set freeze",
+      "candidate direction",
+      "S_PLAN",
+      "S_AC_POLICY"
+    ],
+    "artifact_id": "V32R2_SENSITIVITY_MINIMUM_AUTHORITY_AUDIT_V1",
+    "classification": "FULL_SENSITIVITY_CACHE_NOT_REQUIRED",
+    "exact_consumers": [
+      "solve_causal_day",
+      "_lp"
+    ],
+    "frozen_scalar_s_sufficient": true,
+    "full_line_phase_cache_required": false,
+    "minimum_object": {
+      "companions": [
+        "M_CURRENT",
+        "matched anchor_site_flexible_kw[96,12]",
+        "peak_control_kw=max(1,max_t sum_i anchor[t,i])"
+      ],
+      "definition": "s[t,i]=max_j S[t,i,j] over j whose anchor_loading[t,j] is at or above the slotwise 95th percentile; all j only if mask empty",
+      "name": "V30_SCALAR_PHASE_CURRENT_SITE_SCORE",
+      "shape_per_day": [
+        96,
+        12
+      ],
+      "units": "normalized-current pu per site-kW control"
+    },
+    "operation_requiring_full_S_tensor": null,
+    "reconstruction": "SCIENCE_NEUTRAL_ENGINEERING using the frozen exact sensitivity method, then exact phase_aware_site_scores reduction",
+    "scalar_currently_materialized_for_JanMar": false,
+    "status": "PASS"
+  },
+  "source_coverage": {
+    "B1_B0_frontier_source_ready_days": 90,
+    "B3_B2_frontier_source_ready_days": 90,
+    "Feb28_SCATS_actual_status": "DIAGNOSTIC_MISSING",
+    "Feb28_frontier_source_ready": {
+      "B1_B0": true,
+      "B3_B2": true
+    },
+    "artifact_id": "V32R2_MINIMAL_SOURCE_COVERAGE_SUMMARY_V1",
+    "day_count": 90,
+    "note": "Source readiness does not assert that x_DA/scalar-s operational objects are already serialized.",
+    "operational_authority_materialized": false,
+    "remaining_diagnostic_only_missing_days": [
+      "2025-02-28"
+    ],
+    "remaining_required_source_missing_days": [],
+    "status": "PASS"
+  },
+  "source_downloads": 0,
+  "status": "COMPLETE"
+}

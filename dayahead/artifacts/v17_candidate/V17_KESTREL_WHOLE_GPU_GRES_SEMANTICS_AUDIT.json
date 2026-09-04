@@ -1,0 +1,337 @@
+{
+  "April_scientific_input_reads_before_freeze": 0,
+  "June_result_content_reads": 0,
+  "June_scientific_input_reads": 0,
+  "May_result_content_reads": 0,
+  "May_scientific_input_reads": 0,
+  "OpenDSS_calls_inside_Benders": 0,
+  "U2": {
+    "GPU_hours": 488950.9716666713,
+    "gpus_requested_distribution": {
+      "1": 64333,
+      "2": 3531,
+      "3": 6,
+      "4": 4
+    },
+    "jobs": 67874,
+    "multi_node_jobs": [
+      {
+        "gpu_nodes_occupied": 2,
+        "gpus_requested": 4,
+        "id": "6056120",
+        "job_id": 6056120,
+        "nodelist": [
+          "x3101c0s17b0n0",
+          "x3111c0s41b0n0"
+        ],
+        "uniform_gpus_per_node": 2
+      },
+      {
+        "gpu_nodes_occupied": 2,
+        "gpus_requested": 4,
+        "id": "6973195",
+        "job_id": 6973195,
+        "nodelist": [
+          "x3107c0s25b0n0",
+          "x3108c0s21b0n0"
+        ],
+        "uniform_gpus_per_node": 2
+      },
+      {
+        "gpu_nodes_occupied": 2,
+        "gpus_requested": 4,
+        "id": "6973194",
+        "job_id": 6973194,
+        "nodelist": [
+          "x3106c0s37b0n0",
+          "x3107c0s17b0n0"
+        ],
+        "uniform_gpus_per_node": 2
+      },
+      {
+        "gpu_nodes_occupied": 2,
+        "gpus_requested": 4,
+        "id": "6972848",
+        "job_id": 6972848,
+        "nodelist": [
+          "x3101c0s41b0n0",
+          "x3102c0s25b0n0"
+        ],
+        "uniform_gpus_per_node": 2
+      }
+    ],
+    "node_equivalent_hours": 122237.74291666782,
+    "uniform_gpus_per_node_distribution": {
+      "1": 64333,
+      "2": 3535,
+      "3": 6
+    }
+  },
+  "U2_reclassification": "U2_WHOLE_GPU_GRES_RECLASSIFICATION_NOT_AUTHORIZED",
+  "arbitrary_flexible_scaling_calls": 0,
+  "artifact_id": "V17_KESTREL_WHOLE_GPU_GRES_SEMANTICS_AUDIT_V1",
+  "contextual_checks_not_used_to_override_U2_gates": {
+    "all_valid_H100_jobs_have_whole_GPU_1_to_4_per_node": false
+  },
+  "forbidden_mechanism_examples": [],
+  "gates": {
+    "no_MPS_MIG_shard_evidence_in_available_fields": true,
+    "node_time_concurrent_GPU_sum_le_4": false,
+    "u2_gpus_requested_integer_1_to_4": true,
+    "u2_uniform_integer_multi_node_distribution_identifiable": true
+  },
+  "grid_outcome_used_for_model_selection": 0,
+  "limitations": [
+    "The public extract does not expose physical GPU UUIDs or raw ReqTRES strings.",
+    "Whole-device exclusivity is inferred from official gres/gpu semantics plus trace capacity consistency; no utilization fraction is treated as allocation fraction."
+  ],
+  "members_opened": [
+    "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+    "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+    "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+    "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+    "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+    "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+    "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+    "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet"
+  ],
+  "node_time_capacity_sweep": {
+    "boundary_semantics": "half-open [start,end); releases processed before starts at equal timestamps",
+    "maximum_concurrent_allocated_GPUs": 5,
+    "node_count": 156,
+    "nodes_at_maximum": 1,
+    "violation_count": 1,
+    "violations": [
+      {
+        "active_job_ids": [
+          "7539787",
+          "7543918",
+          "7545385"
+        ],
+        "active_jobs": [
+          {
+            "end_utc": "2025-03-19T17:47:40+00:00",
+            "gpu_nodes_occupied": 1.0,
+            "gpus_requested": 2.0,
+            "id": "7539787",
+            "job_id": 7539787,
+            "jobs_shared": [
+              "7539700",
+              "7543918",
+              "7545385"
+            ],
+            "nodelist": [
+              "x3107c0s17b0n0"
+            ],
+            "nodes_shared": [
+              "x3107c0s17b0n0"
+            ],
+            "shared_job_count": 3,
+            "start_utc": "2025-03-19T16:14:20+00:00",
+            "uniform_gpus_per_node": 2
+          },
+          {
+            "end_utc": "2025-03-19T19:37:04+00:00",
+            "gpu_nodes_occupied": 1.0,
+            "gpus_requested": 2.0,
+            "id": "7543918",
+            "job_id": 7543918,
+            "jobs_shared": [
+              "7539787",
+              "7543935",
+              "7544016",
+              "7545385"
+            ],
+            "nodelist": [
+              "x3107c0s17b0n0"
+            ],
+            "nodes_shared": [
+              "x3107c0s17b0n0"
+            ],
+            "shared_job_count": 4,
+            "start_utc": "2025-03-19T17:46:27+00:00",
+            "uniform_gpus_per_node": 2
+          },
+          {
+            "end_utc": "2025-03-19T17:46:34+00:00",
+            "gpu_nodes_occupied": 1.0,
+            "gpus_requested": 1.0,
+            "id": "7545385",
+            "job_id": 7545385,
+            "jobs_shared": [
+              "7539787",
+              "7543918"
+            ],
+            "nodelist": [
+              "x3107c0s17b0n0"
+            ],
+            "nodes_shared": [
+              "x3107c0s17b0n0"
+            ],
+            "shared_job_count": 2,
+            "start_utc": "2025-03-19T17:46:25+00:00",
+            "uniform_gpus_per_node": 1
+          }
+        ],
+        "allocated_GPUs": 5,
+        "node": "x3107c0s17b0n0",
+        "timestamp_ns_utc": 1742406387000000000
+      }
+    ]
+  },
+  "non_whole_or_nonuniform_examples": [
+    {
+      "end_utc": "2024-11-01T19:51:55+00:00",
+      "gpu_nodes_occupied": 3.0,
+      "gpus_requested": 4.0,
+      "id": "5951944",
+      "job_id": 5951944,
+      "jobs_shared": [],
+      "nodelist": [
+        "x3102c0s33b0n0",
+        "x3103c0s21b0n0",
+        "x3103c0s29b0n0"
+      ],
+      "nodes_shared": [],
+      "shared_job_count": null,
+      "start_utc": "2024-11-01T19:50:57+00:00",
+      "uniform_gpus_per_node": -1
+    },
+    {
+      "end_utc": "2025-02-13T11:06:57+00:00",
+      "gpu_nodes_occupied": 2.0,
+      "gpus_requested": 5.0,
+      "id": "7019867",
+      "job_id": 7019867,
+      "jobs_shared": [
+        "7019852",
+        "7019899",
+        "7020124",
+        "7020605",
+        "7020606",
+        "7021539",
+        "7021559",
+        "7022603",
+        "7022620",
+        "7022633",
+        "7024203"
+      ],
+      "nodelist": [
+        "x3114c0s41b0n0",
+        "x3115c0s9b0n0"
+      ],
+      "nodes_shared": [
+        "x3114c0s21b0n0",
+        "x3114c0s41b0n0",
+        "x3115c0s9b0n0"
+      ],
+      "shared_job_count": 11,
+      "start_utc": "2025-02-12T19:12:36+00:00",
+      "uniform_gpus_per_node": -1
+    },
+    {
+      "end_utc": "2025-02-13T09:40:15+00:00",
+      "gpu_nodes_occupied": 2.0,
+      "gpus_requested": 5.0,
+      "id": "7019852",
+      "job_id": 7019852,
+      "jobs_shared": [
+        "7019867"
+      ],
+      "nodelist": [
+        "x3114c0s21b0n0",
+        "x3114c0s41b0n0"
+      ],
+      "nodes_shared": [
+        "x3114c0s41b0n0",
+        "x3115c0s9b0n0"
+      ],
+      "shared_job_count": 1,
+      "start_utc": "2025-02-12T18:58:08+00:00",
+      "uniform_gpus_per_node": -1
+    },
+    {
+      "end_utc": "2025-02-12T14:54:44+00:00",
+      "gpu_nodes_occupied": 2.0,
+      "gpus_requested": 5.0,
+      "id": "7016295",
+      "job_id": 7016295,
+      "jobs_shared": [],
+      "nodelist": [
+        "x3107c0s13b0n0",
+        "x3107c0s17b0n0"
+      ],
+      "nodes_shared": [],
+      "shared_job_count": null,
+      "start_utc": "2025-02-12T14:54:31+00:00",
+      "uniform_gpus_per_node": -1
+    },
+    {
+      "end_utc": "2025-02-12T14:39:59+00:00",
+      "gpu_nodes_occupied": 2.0,
+      "gpus_requested": 5.0,
+      "id": "7016247",
+      "job_id": 7016247,
+      "jobs_shared": [],
+      "nodelist": [
+        "x3107c0s13b0n0",
+        "x3107c0s17b0n0"
+      ],
+      "nodes_shared": [],
+      "shared_job_count": null,
+      "start_utc": "2025-02-12T14:39:41+00:00",
+      "uniform_gpus_per_node": -1
+    },
+    {
+      "end_utc": "2025-02-12T14:32:21+00:00",
+      "gpu_nodes_occupied": 2.0,
+      "gpus_requested": 5.0,
+      "id": "7016039",
+      "job_id": 7016039,
+      "jobs_shared": [],
+      "nodelist": [
+        "x3105c0s37b0n0",
+        "x3105c0s41b0n0"
+      ],
+      "nodes_shared": [],
+      "shared_job_count": null,
+      "start_utc": "2025-02-12T14:30:53+00:00",
+      "uniform_gpus_per_node": -1
+    }
+  ],
+  "official_source_semantics": {
+    "Kestrel_GPU_node": "4 x NVIDIA H100 SXM 80 GB",
+    "MPS_shard_MIG": "separate Slurm GRES/configuration mechanisms, not synonyms for gres/gpu count",
+    "Slurm_GPU_GRES": "device GRES; CUDA_VISIBLE_DEVICES exposes allocated GPU devices",
+    "URLs": [
+      "https://www.nrel.gov/docs/gen/fy24/90033.pdf",
+      "https://slurm.schedmd.com/gres.html",
+      "https://slurm.schedmd.com/gres.conf.html",
+      "https://slurm.schedmd.com/gres_design.html"
+    ],
+    "documented_request_cardinality_per_node": [
+      1,
+      2,
+      4
+    ],
+    "gpus_requested": "Slurm ReqTRES GPU count (Kestrel datacard)",
+    "multi_node_uniformity": "Slurm GRES design does not support different GRES counts on different nodes in one job allocation"
+  },
+  "remaining_April_day_runs": 0,
+  "source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+  "source_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+  "status": "FAIL_CLOSED",
+  "trace_counts": {
+    "exact_nodelist_jobs": 181085,
+    "semantic_flexible_jobs": 85671,
+    "u2_jobs": 67874,
+    "uniform_integer_per_node_jobs": 181079,
+    "v1_jobs": 15003,
+    "valid_h100_completed_jobs": 181085,
+    "whole_gpu_1_to_4_per_node_jobs": 181079
+  },
+  "training_window_AEST": [
+    "2024-08-19",
+    "2025-03-31"
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "actual_assimilation": false,
+  "architecture": [
+    "fixed directed line-graph encoder",
+    "causal recent-state/SCATS temporal encoder",
+    "daily and weekly periodic features",
+    "one-shot 288-step decoder",
+    "positive incremental ordered quantile heads"
+  ],
+  "baseline_comparison": {
+    "B0": "seasonal historical median",
+    "B1": "MR-DRA-MHSTGNN-QRA diagnostic only; not comparable beyond 54 steps",
+    "B2": "DA-RQSTG direct 288-step selected"
+  },
+  "candidate_scores_q50_mae_sec": [
+    {
+      "mae": 27.55991045633952,
+      "parameters": {
+        "available_previous_day_weight": 0.05,
+        "graph_smoothing_weight": 0.0,
+        "lower_increment_fraction": [
+          0.12,
+          0.13,
+          0.14,
+          0.15
+        ],
+        "recent_scats_weight": 0.005,
+        "recent_state_weight": 0.02,
+        "seasonal_weight": 0.65,
+        "upper_increment_fraction": [
+          0.17,
+          0.18,
+          0.19,
+          0.2
+        ],
+        "weekly_weight": 0.3
+      }
+    },
+    {
+      "mae": 27.406768798828125,
+      "parameters": {
+        "available_previous_day_weight": 0.1,
+        "graph_smoothing_weight": 0.0,
+        "lower_increment_fraction": [
+          0.12,
+          0.13,
+          0.14,
+          0.15
+        ],
+        "recent_scats_weight": 0.01,
+        "recent_state_weight": 0.04,
+        "seasonal_weight": 0.55,
+        "upper_increment_fraction": [
+          0.17,
+          0.18,
+          0.19,
+          0.2
+        ],
+        "weekly_weight": 0.35
+      }
+    },
+    {
+      "mae": 31.148054758707683,
+      "parameters": {
+        "available_previous_day_weight": 0.1,
+        "graph_smoothing_weight": 0.03,
+        "lower_increment_fraction": [
+          0.12,
+          0.13,
+          0.14,
+          0.15
+        ],
+        "recent_scats_weight": 0.01,
+        "recent_state_weight": 0.04,
+        "seasonal_weight": 0.55,
+        "upper_increment_fraction": [
+          0.17,
+          0.18,
+          0.19,
+          0.2
+        ],
+        "weekly_weight": 0.35
+      }
+    },
+    {
+      "mae": 31.512175877888996,
+      "parameters": {
+        "available_previous_day_weight": 0.1,
+        "graph_smoothing_weight": 0.03,
+        "lower_increment_fraction": [
+          0.12,
+          0.13,
+          0.14,
+          0.15
+        ],
+        "recent_scats_weight": 0.01,
+        "recent_state_weight": 0.04,
+        "seasonal_weight": 0.45,
+        "upper_increment_fraction": [
+          0.17,
+          0.18,
+          0.19,
+          0.2
+        ],
+        "weekly_weight": 0.45
+      }
+    }
+  ],
+  "development_name": "DA-RQSTG",
+  "energy_ml": null,
+  "output_shape": [
+    288,
+    509,
+    3
+  ],
+  "parameters": {
+    "available_previous_day_weight": 0.1,
+    "graph_smoothing_weight": 0.0,
+    "lower_increment_fraction": [
+      0.03517897017300132,
+      0.06230728849768641,
+      0.07141649425029767,
+      0.06316208690404893
+    ],
+    "recent_scats_weight": 0.01,
+    "recent_state_weight": 0.04,
+    "seasonal_weight": 0.55,
+    "upper_increment_fraction": [
+      0.05214059837162498,
+      0.05280529893934729,
+      0.053112349659204534,
+      0.055105145648121856
+    ],
+    "weekly_weight": 0.35
+  },
+  "production_model_id": "DA-RQSTG-DIRECT-288-V1",
+  "recursive_rollout": false,
+  "selection_pre_april_only": true,
+  "target": "next-day 509-link travel time seconds"
+}

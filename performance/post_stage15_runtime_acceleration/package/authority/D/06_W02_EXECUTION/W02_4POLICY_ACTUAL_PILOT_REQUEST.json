@@ -1,0 +1,84 @@
+{
+  "request_id": "D_TO_B_W02_4POLICY_ACTUAL_PILOT_V1",
+  "candidate_id": "W02_2025-01-13",
+  "scenario_id": "W02_2025-01-13",
+  "evaluation_start_step": 3456,
+  "evaluation_end_step_inclusive": 5471,
+  "scored_issues_per_policy": 2016,
+  "controller_burn_in_steps": 0,
+  "scientific_method_id": "B5",
+  "scientific_method_config_sha256": "3f712ec02c4c5ebb6a424267b043f07469d29f4a4abeaea7fcdd8b765e13624a",
+  "canonical_pre": "03_C_ZERO_BURNIN/initial_states/CANONICAL_PRE_STATE_W02_2025-01-13.json",
+  "policies": [
+    {
+      "base_policy": "EVENT_TRIGGERED",
+      "event_triggered": true,
+      "local_repair_enabled": true,
+      "max_refresh_minutes": 30,
+      "max_refresh_steps": 6,
+      "paper_role": "PROPOSED",
+      "policy_id": "PROPOSED_EVENT30_LOCAL_REPAIR",
+      "slot": "P1"
+    },
+    {
+      "base_policy": "FIXED_PERIODIC",
+      "event_triggered": false,
+      "local_repair_enabled": false,
+      "max_refresh_minutes": 30,
+      "max_refresh_steps": 6,
+      "paper_role": "MAIN_PERIODIC_BASELINE",
+      "policy_id": "FIXED30",
+      "slot": "P2"
+    },
+    {
+      "base_policy": "EVENT_TRIGGERED",
+      "event_triggered": true,
+      "local_repair_enabled": false,
+      "max_refresh_minutes": 30,
+      "max_refresh_steps": 6,
+      "paper_role": "LOCAL_REPAIR_ABLATION",
+      "policy_id": "EVENT30_NO_LOCAL_REPAIR",
+      "slot": "P3"
+    },
+    {
+      "base_policy": "FIXED_PERIODIC",
+      "event_triggered": false,
+      "local_repair_enabled": false,
+      "max_refresh_minutes": 15,
+      "max_refresh_steps": 3,
+      "paper_role": "HIGHER_FREQUENCY_PERIODIC_BASELINE",
+      "policy_id": "FIXED15",
+      "slot": "P4"
+    }
+  ],
+  "parallel_execution": {
+    "outer_processes": 4,
+    "threads_per_process": 4,
+    "week_parallelism": 1,
+    "policy_parallelism": 4,
+    "rule": "launch P1-P4 concurrently for W02; each policy is constrained to its own 4-core CPU budget"
+  },
+  "runtime_semantics": {
+    "development_host_ge_300s": "record overrun; DO NOT fail scientific trajectory solely for wallclock",
+    "real_time_claim": "requires separate measured qualification on declared target hardware",
+    "slow_planner_runtime": "report separately",
+    "commit_critical_runtime": "report separately"
+  },
+  "required_delivery": {
+    "policy_directories": [
+      "P1_PROPOSED_EVENT30_LOCAL_REPAIR",
+      "P2_FIXED30",
+      "P3_EVENT30_NO_LOCAL_REPAIR",
+      "P4_FIXED15"
+    ],
+    "twelve_K9H7_tables_per_policy": true,
+    "controller_policy_manifest_per_policy": true,
+    "episode_manifest_per_policy": true,
+    "evaluation_end_runtime_state_per_policy": true,
+    "F7_certificate_per_policy": true,
+    "logs_per_policy": true,
+    "progress_manifest": true,
+    "failure_artifacts_preserved": true
+  },
+  "release_rule": "Do not launch remaining 11 weeks until W02 four-policy delivery passes D acceptance."
+}

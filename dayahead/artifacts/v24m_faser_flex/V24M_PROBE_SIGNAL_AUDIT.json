@@ -1,0 +1,212 @@
+{
+  "artifact_id": "V24M_PROBE_SIGNAL_AUDIT_V1",
+  "SIGNATURE_SIGNAL_READY": true,
+  "RETRIEVAL_SIGNAL_READY": true,
+  "signature_improved_fold_count": 4,
+  "retrieval_improved_fold_count": 4,
+  "fold_comparisons": [
+    {
+      "fold_id": 1,
+      "signature_CRPS_improved": true,
+      "signature_WAPE_improved": false,
+      "retrieval_CRPS_improved": true
+    },
+    {
+      "fold_id": 2,
+      "signature_CRPS_improved": true,
+      "signature_WAPE_improved": true,
+      "retrieval_CRPS_improved": true
+    },
+    {
+      "fold_id": 3,
+      "signature_CRPS_improved": false,
+      "signature_WAPE_improved": true,
+      "retrieval_CRPS_improved": true
+    },
+    {
+      "fold_id": 4,
+      "signature_CRPS_improved": true,
+      "signature_WAPE_improved": true,
+      "retrieval_CRPS_improved": false
+    },
+    {
+      "fold_id": 5,
+      "signature_CRPS_improved": false,
+      "signature_WAPE_improved": false,
+      "retrieval_CRPS_improved": true
+    }
+  ],
+  "aggregate_metrics_mean_of_folds": [
+    {
+      "model": "P0_DIRECT_LIGHTGBM",
+      "Mean_WAPE": 1.0561929282458133,
+      "Q50_WAPE": 0.9190721219002596,
+      "CRPS": 2561.6934087160694,
+      "Burst_WAPE": 0.8262019789643913,
+      "mass_ratio": 0.7496413660615506,
+      "Q50_coverage": 0.4473732718894009,
+      "Q90_coverage": 0.7306605222734255
+    },
+    {
+      "model": "P1_FACTORIZED_LIGHTGBM",
+      "Mean_WAPE": 1.020753835290654,
+      "Q50_WAPE": 0.9209486926788649,
+      "CRPS": 2671.6061645583004,
+      "Burst_WAPE": 0.8339936543775455,
+      "mass_ratio": 0.6260371636139006,
+      "Q50_coverage": 0.36766513056835637,
+      "Q90_coverage": 0.6845929339477727
+    },
+    {
+      "model": "P2_ORDINARY_GP",
+      "Mean_WAPE": 13.151666019105397,
+      "Q50_WAPE": 0.9522269454365535,
+      "CRPS": 2973.75183969954,
+      "Burst_WAPE": 2.129704634262771,
+      "mass_ratio": 14.046225250389488,
+      "Q50_coverage": 0.2880030721966206,
+      "Q90_coverage": 0.9070967741935483
+    },
+    {
+      "model": "P3_SIGNATURE_GP_DIRECT",
+      "Mean_WAPE": 12.56927479500819,
+      "Q50_WAPE": 0.9461926340635287,
+      "CRPS": 2927.554512050504,
+      "Burst_WAPE": 2.212181390587293,
+      "mass_ratio": 13.52295135521641,
+      "Q50_coverage": 0.3201689708141321,
+      "Q90_coverage": 0.9408141321044546
+    },
+    {
+      "model": "P4_FACTORIZED_SIGNATURE_GP",
+      "Mean_WAPE": 1.895576061227899,
+      "Q50_WAPE": 0.9618867166861985,
+      "CRPS": 2657.081817842425,
+      "Burst_WAPE": 0.6536257854351092,
+      "mass_ratio": 1.9915197231236443,
+      "Q50_coverage": 0.28124423963133643,
+      "Q90_coverage": 0.8237788018433181
+    },
+    {
+      "model": "P5_HANDCRAFTED_ANALOG",
+      "Mean_WAPE": 1.316602652344709,
+      "Q50_WAPE": 1.0234033204478254,
+      "CRPS": 2716.3559871780462,
+      "Burst_WAPE": 0.7629680307424526,
+      "mass_ratio": 1.2548206721974497,
+      "Q50_coverage": 0.5136098310291859,
+      "Q90_coverage": 0.8885560675883257
+    },
+    {
+      "model": "P6_SIGNATURE_ANALOG",
+      "Mean_WAPE": 1.306865994659304,
+      "Q50_WAPE": 0.9973944423973033,
+      "CRPS": 2646.539269424766,
+      "Burst_WAPE": 0.7946824271075317,
+      "mass_ratio": 1.178029728914718,
+      "Q50_coverage": 0.561705069124424,
+      "Q90_coverage": 0.8433947772657451
+    },
+    {
+      "model": "P7_FASER_MIXTURE",
+      "Mean_WAPE": 1.333304441130921,
+      "Q50_WAPE": 1.020876726911072,
+      "CRPS": 2788.804090288197,
+      "Burst_WAPE": 0.7933643149810858,
+      "mass_ratio": 1.1807808744126194,
+      "Q50_coverage": 0.529447004608295,
+      "Q90_coverage": 0.7982334869431644
+    }
+  ],
+  "gate_validation": [
+    {
+      "fold_id": 1,
+      "selection": "ANALOG_ONLY",
+      "raw_parameters": [
+        0.4729061571634695,
+        -0.5196525766510725,
+        0.7257353435345967,
+        -0.9494312062515682,
+        -7.067841823408703,
+        -0.5196484813510288
+      ],
+      "inner_CRPS_gp": 2669.661323400946,
+      "inner_CRPS_analog": 2169.08464225173,
+      "inner_CRPS_gate_proxy": 2237.735800848909,
+      "outer_alpha_mean": 1.0,
+      "fit_on_inner_validation_only": true
+    },
+    {
+      "fold_id": 2,
+      "selection": "ANALOG_ONLY",
+      "raw_parameters": [
+        0.7656262146915882,
+        0.2168890096322111,
+        0.873100155403753,
+        -2.222337997083584,
+        -4.548501487882365,
+        0.21689271888516387
+      ],
+      "inner_CRPS_gp": 1920.4208602111773,
+      "inner_CRPS_analog": 1539.2435456155786,
+      "inner_CRPS_gate_proxy": 1567.5339728466504,
+      "outer_alpha_mean": 1.0,
+      "fit_on_inner_validation_only": true
+    },
+    {
+      "fold_id": 3,
+      "selection": "GP_ONLY",
+      "raw_parameters": [
+        -0.012049937157696906,
+        -0.5361651447982619,
+        3.070715778666369,
+        2.6571391233263717,
+        -4.297138565336257,
+        -0.536166490717631
+      ],
+      "inner_CRPS_gp": 2417.000614675689,
+      "inner_CRPS_analog": 2648.061968872812,
+      "inner_CRPS_gate_proxy": 2449.9242340119804,
+      "outer_alpha_mean": 0.0,
+      "fit_on_inner_validation_only": true
+    },
+    {
+      "fold_id": 4,
+      "selection": "ANALOG_ONLY",
+      "raw_parameters": [
+        0.41282307339260066,
+        -0.9096173268622273,
+        -0.39206090141441113,
+        -1.0267759668998622,
+        -6.740423975204687,
+        -0.9096199738802813
+      ],
+      "inner_CRPS_gp": 3701.141874574368,
+      "inner_CRPS_analog": 3357.3059989651806,
+      "inner_CRPS_gate_proxy": 3496.725808142812,
+      "outer_alpha_mean": 1.0,
+      "fit_on_inner_validation_only": true
+    },
+    {
+      "fold_id": 5,
+      "selection": "ANALOG_ONLY",
+      "raw_parameters": [
+        0.46637916636169935,
+        0.7227127152905842,
+        0.706441656567926,
+        1.4344949150824042,
+        -5.085980073148234,
+        0.7227170384862265
+      ],
+      "inner_CRPS_gp": 1673.3903138046426,
+      "inner_CRPS_analog": 1528.7222482544844,
+      "inner_CRPS_gate_proxy": 1617.2799838856317,
+      "outer_alpha_mean": 1.0,
+      "fit_on_inner_validation_only": true
+    }
+  ],
+  "full_execution_policy": "F1_TO_F4",
+  "runtime_seconds": 11.1414969,
+  "predictive_samples": 4096,
+  "April_reads": 0
+}

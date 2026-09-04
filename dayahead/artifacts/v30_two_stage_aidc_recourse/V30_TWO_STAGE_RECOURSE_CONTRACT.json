@@ -1,0 +1,40 @@
+{
+  "artifact_id": "V30_TWO_STAGE_RECOURSE_CONTRACT_V1",
+  "stage_1": {
+    "decision_variables": [
+      "x_DA[b,r,t]",
+      "h_REC[r,t]",
+      "rho_V30",
+      "P_MESS_DA[m,t] when enabled",
+      "Q_MESS_DA[m,t] when enabled",
+      "scenario recourse feasibility z[omega,b,r,t] when enabled"
+    ],
+    "manual_headroom_percentage": null,
+    "namespace": "DAYAHEAD",
+    "objective_hierarchy": [
+      "min worst certified phase-current loading",
+      "min expected recourse displacement",
+      "deterministic schedule tie-break"
+    ]
+  },
+  "stage_2": {
+    "decision_variable": "y_ACT[b,r,t]",
+    "epochs_per_complete_day": 96,
+    "full_system_reoptimization": false,
+    "mess_reoptimization": false,
+    "namespace": "ACTUAL_CAUSAL",
+    "objective_hierarchy": [
+      "physical/causal/safety feasibility",
+      "max service",
+      "min phase-aware grid metric",
+      "min DA placement deviation"
+    ],
+    "preemption": false,
+    "resolution_minutes": 15,
+    "running_job_migration": false,
+    "same_slot_constraint": "sum_r y_ACT[b,r,t] <= sum_r x_DA[b,r,t]",
+    "spatial_only": true,
+    "temporal_recourse_variable": null
+  },
+  "status": "FROZEN"
+}

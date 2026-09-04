@@ -1,0 +1,61 @@
+{
+  "artifact_id": "V24M_FASER_ACCEPTANCE_TEST_V1",
+  "classification": "V24M_FASER_NOVELTY_PASS_PERFORMANCE_FAIL",
+  "FASER_PROPOSED_MODEL_ACCEPTED": false,
+  "aggregate_metrics_mean_of_folds_and_seeds": {
+    "model": "ML-B11_FASER_FLEX",
+    "Mean_WAPE": 1.1877478294617465,
+    "Q50_WAPE": 0.9414334518461079,
+    "Q90_pinball": 1841.7091218161709,
+    "CRPS": 2454.95935288857,
+    "Burst_WAPE": 0.763990358554532,
+    "aggregate_mass_ratio": 1.1200518371982742,
+    "Q50_coverage": 0.4992012288786482,
+    "Q90_coverage": 0.8088428059395801,
+    "15min_GPU_h_WAPE": 2.0775536216208503,
+    "IT_power_WAPE": 1.8881341588356073,
+    "status": "REPRODUCED_V24M_5FOLD_3SEED",
+    "evidence_source": "V24M_FASER_BLOCKED_CV_RESULTS.csv"
+  },
+  "acceptance_gates": {
+    "novelty": true,
+    "mean_absolute": false,
+    "mean_vs_current_P0_5pct": false,
+    "Q50_absolute": false,
+    "Q50_vs_current_P0_5pct": false,
+    "CRPS_vs_best_probe_5pct": false,
+    "burst_noninferiority": true,
+    "mass_ratio": true,
+    "Q50_coverage": true,
+    "Q90_coverage": false,
+    "bootstrap_absolute_error": false,
+    "bootstrap_CRPS": false,
+    "structural": true
+  },
+  "bootstrap": {
+    "label": "SEVEN_DAY_BLOCK_BOOTSTRAP_VS_CURRENT_P0_DIRECT_LIGHTGBM",
+    "replicates": 10000,
+    "seed": 20260901,
+    "paired_days": 151,
+    "absolute_error_difference_FASER_minus_baseline": {
+      "point": 382.83947445205763,
+      "CI95": [
+        -54.971146512689586,
+        886.5573699049606
+      ]
+    },
+    "CRPS_difference_FASER_minus_baseline": {
+      "point": -108.88989298951772,
+      "CI95": [
+        -281.5581498440789,
+        38.78520376497773
+      ]
+    },
+    "strong_pass_requires_upper_bounds_below_zero": false
+  },
+  "best_accepted_production_mean": "B2_LIGHTGBM_TWEEDIE",
+  "best_accepted_production_Q50": "B3_LIGHTGBM_QUANTILE",
+  "best_accepted_production_Q90": "B3_LIGHTGBM_QUANTILE",
+  "reason": "FASER failed the preregistered mean, Q50, distributional, Q90-calibration, and bootstrap gates; no post-result retuning was performed.",
+  "April_reads": 0
+}

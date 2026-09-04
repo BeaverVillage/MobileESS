@@ -1,0 +1,68 @@
+{
+  "schema_version": "mobileess.post_stage15.rep12.r20_4.causal_route_tail.v1",
+  "status": "PASS_ROOT_CAUSE_CORRECTED_TARGET_AND_NEXT_BOUNDARY_REPRODUCED_PREFIX_PRESERVED",
+  "created_date": "2026-08-18",
+  "run_id": "B_12_REP_WEEKS_ACTUAL_FINAL_R20",
+  "failure": {
+    "candidate_id": "W07_2025-02-17",
+    "policy": "M1_PROPOSED_EVENT30_LOCAL_REPAIR_MOBILE",
+    "failed_issue": 13662,
+    "last_committed_issue": 13661,
+    "error": "MESS04: terminal plan is not stationary; explicit tail policy required"
+  },
+  "root_cause": {
+    "category": "causal mobility plan report serialization drift",
+    "scientific_solver_failure": false,
+    "power_scale_failure": false,
+    "previous_full_replan_status": "COMMITTED_FRESH_OPENDSS_PASS",
+    "defect": "The Full-Replan report serialized connected node-occupancy steps as TRANSIT with blank service_id after selected moves had already arrived.",
+    "bad_report_row_count": 50,
+    "bad_report_scope": {"MESS01": 10, "MESS04": 40},
+    "prior_plan_sha256": "d9d7a9565b45311894707b1f6674aa33cf5fa1fd104b9b9371c484d8e23a8246",
+    "causal_authorities": ["BUILD7C_PRECOMMIT_STATE.json", "BUILD7B_FULL54_MOVE_ARCS_SELECTED.csv"],
+    "unique_route_reconstruction": true
+  },
+  "correction": {
+    "legacy_committed_plan_mutated": false,
+    "load_time_causal_route_reconstruction": true,
+    "commit_time_causal_route_canonicalization": true,
+    "route_discontinuity_fails_closed": true,
+    "duplicate_move_fails_closed": true,
+    "transit_beyond_active_horizon_fails_closed": true,
+    "future_actual_used": false,
+    "objective_changed": false,
+    "hard_constraint_relaxed": false,
+    "power_scale_changed": false
+  },
+  "source": {
+    "runner_sha256_before": "90488dea741dd9b3f196f5806c93f182422d3f9c47123fa368a3019c44f6d458",
+    "runner_sha256_after": "46e4f8eae023b100059c4303113c4b1ae00957e339cba94078e02e1abbc83cdd",
+    "step4_helper_sha256_before": "c09ff129e8d52ef1fa279d9dd229d7dd41620a519f58a27509ab79933a0a7f90",
+    "step4_helper_sha256_after": "e02dd6bff1ac32dbfb0d9627f020a4f7bcf58d8c2bd594a9d088c1b7bd402170"
+  },
+  "actual_target_regression": {
+    "root": "/home/jaewon/mobile_ess_work/frozen_artifacts/PRE_W02_R20_4_CAUSAL_ROUTE_TAIL_REGRESSION_CURRENT",
+    "benchmark_isolated_from_production_results": true,
+    "target_issue": 13662,
+    "status": "COMMITTED",
+    "atomic_commit_marker_sha256": "7fbe63c7158aa7740eee14828eb2196cf0db7282c309bed4e1e714c0dbf017cd",
+    "policy_issue_audit_sha256": "d92a9406aeeb20b7289d972034187c823fe0955dda693509db5f3053ec38e59b",
+    "fresh_exact_ac_pass": true,
+    "fresh_exact_ac_sha256": "3ade418a4fdbbe63ef32cf22a49af9b09d616da60bd84e5d105c8daac5f660aa",
+    "unsafe_action_committed": false,
+    "pre_post_chain_pass": true,
+    "next_issue_13663_reference_load_pass": true,
+    "new_plan_report_correction_count_at_next_boundary": 0
+  },
+  "preserved_production_prefix": {
+    "audit_path": "/home/jaewon/mobile_ess_work/frozen_artifacts/B_12_REP_WEEKS_ACTUAL_FINAL_R20/REP12_COMMITTED_PREFIX_INTEGRITY_AUDIT_R20_4.json",
+    "audit_sha256": "bdea34d32f7688cf47416419d96067e4fe95d9d59161bc38c8447ff987dc29f8",
+    "status": "PASS_ALL_EXISTING_RESULTS_ATOMICALLY_COMMITTED_AND_CONTIGUOUS",
+    "total_committed_issues": 5651,
+    "W02": {"M1": 1135, "M2": 1346, "M3": 1022, "M4": 2016},
+    "W07": {"M1": 126, "M2": 6, "M3": 0, "M4": 0},
+    "ctrl_c_corrupted_committed_result": false,
+    "unmarked_incomplete_issue_is_authoritative": false,
+    "same_command_resume_safe": true
+  }
+}

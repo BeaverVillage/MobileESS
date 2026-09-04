@@ -1,0 +1,110 @@
+{
+  "April_rows_used": 0,
+  "Fresh_ex_post_only": true,
+  "adaptive_refinement_stop": "lambda_interval<=0.005 OR incremental_service_interval<=0.01_nodeh",
+  "artifact_id": "V32_FRONTIER_DEFINITION_CONTRACT_V1",
+  "frontiers": {
+    "F_AC_PHYSICAL": {
+      "authority": "NON_AUTHORITY_DIAGNOSTIC_ONLY",
+      "limits": [
+        "Fresh convergence",
+        "frozen voltage bounds",
+        "line/phase current<=1.0",
+        "frozen transformer ratings",
+        "frozen source/regulator/capacitor semantics"
+      ],
+      "not_evaluated": true,
+      "status": "NOT_COMPUTABLE_MISSING_FROZEN_JANMAR_STAGE2_AUTHORITY"
+    },
+    "F_AC_POLICY": {
+      "authority": "NON_AUTHORITY_DIAGNOSTIC_ONLY",
+      "geometry": "Fresh counterpart of exact same-slot scalar anchor-relative V30 policy",
+      "not_evaluated": true,
+      "status": "NOT_COMPUTABLE_MISSING_FROZEN_JANMAR_STAGE2_AUTHORITY"
+    },
+    "F_AC_TRAJECTORY": {
+      "authority": "NON_AUTHORITY_DIAGNOSTIC_ONLY",
+      "geometry": "rho_max_AC(candidate full-day causal trajectory)<=rho_max_AC(anchor full-day trajectory)",
+      "not_evaluated": true,
+      "status": "NOT_COMPUTABLE_MISSING_FROZEN_JANMAR_STAGE2_AUTHORITY"
+    },
+    "F_PLAN": {
+      "M_pu": 0.0,
+      "authority": "NON_AUTHORITY_DIAGNOSTIC_ONLY",
+      "nominal_envelope_retained": true,
+      "not_evaluated": true,
+      "status": "NOT_COMPUTABLE_MISSING_FROZEN_JANMAR_STAGE2_AUTHORITY"
+    },
+    "F_RESOURCE": {
+      "authority": "NON_AUTHORITY_DIAGNOSTIC_ONLY",
+      "hard_grid_envelope_removed_only": true,
+      "lexicographic_priorities": [
+        "maximize service",
+        "minimize existing planning grid metric",
+        "minimize DA placement deviation"
+      ],
+      "non_grid_constraints_retained": [
+        "actual source availability",
+        "strict FULL eligibility",
+        "same-slot DA authorization",
+        "backlog conservation",
+        "rack capacity",
+        "frozen compatibility",
+        "no preemption",
+        "no running-job migration",
+        "site rules",
+        "causal information"
+      ],
+      "not_evaluated": true,
+      "status": "NOT_COMPUTABLE_MISSING_FROZEN_JANMAR_STAGE2_AUTHORITY"
+    }
+  },
+  "initial_lambda_grid": [
+    0.0,
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0
+  ],
+  "interpolation_constraints_to_verify": [
+    "nonnegativity",
+    "DA authorization",
+    "source availability",
+    "rack capacity",
+    "compatibility",
+    "same-slot rule"
+  ],
+  "inventory_conclusion": "NOT_COMPUTABLE_MISSING_FROZEN_JANMAR_STAGE2_AUTHORITY",
+  "mass_identity_tolerance_nodeh": 1e-09,
+  "nonmonotonic_rule": "refine every feasible/infeasible transition; report largest certified feasible lambda",
+  "source_authority_inventory": {
+    "anchor_background_present_but_insufficient": true,
+    "conclusion": "NOT_COMPUTABLE_MISSING_FROZEN_JANMAR_STAGE2_AUTHORITY",
+    "day_count": 90,
+    "file_day_counts": {
+      "CURRENT_SENSITIVITY.npz": 0,
+      "D1_AC_ANCHOR.npz": 90,
+      "aemo_actual.parquet": 0,
+      "aemo_forecast.json": 90,
+      "gfs_d1_weather.parquet": 90,
+      "noaa_actual_weather.parquet": 0,
+      "traffic_mobility.json": 0
+    },
+    "required_missing_day_counts": {
+      "B2_MESS_route_and_trajectory_authority": 90,
+      "actual_workload_inputs": 90,
+      "causal_stage2_resource_tensors": 90,
+      "official_B0_B1_B2_B3_stage2_schedules": 90,
+      "phase_current_sensitivity": 90,
+      "traffic_mobility": 90
+    },
+    "trust_cache": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v29r1_reliability_calibrated_noregret\\cache\\v29r1_trust_cert_sources\\jan_mar_2025"
+  },
+  "status": "FROZEN_BEFORE_FRESH_FAIL_CLOSED"
+}

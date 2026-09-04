@@ -1,0 +1,49 @@
+{
+  "schema_version": "B8_PERIODIC_5MIN_SUPPLEMENTARY_BASELINE_V1",
+  "status": "POST_HOC_BASELINE_DEFINED_AFTER_JANUARY_B0_B7_OUTCOME",
+  "comparison_method_id": "B8",
+  "label": "Joint calibrated five-minute periodic full-replan timing baseline",
+  "scientific_role": "SUPPLEMENTARY_TIMING_AND_COMPUTATIONAL_EFFICIENCY_COMPARATOR",
+  "main_B0_B7_registry_unchanged": true,
+  "independent_holdout_claim": false,
+  "treatment": {
+    "energy_flexibility": "MESS",
+    "temporal_workload_shift": true,
+    "spatial_workload_migration": true,
+    "slow_fast_control": true,
+    "fast_recourse": "IDENTICAL_TO_B7",
+    "ac_safety_filter": "IDENTICAL_TO_B7",
+    "risk_interface": "CALIBRATED_MONITOR_ONLY",
+    "slow_replan_trigger": "PERIODIC_EVERY_1_STEP",
+    "step_minutes": 5,
+    "periodic_replan_minutes": 5
+  },
+  "primary_contrast": {
+    "id": "B7_EVENT_CALIBRATED_MINUS_B8_PERIODIC_5MIN",
+    "minuend": "B7",
+    "subtrahend": "B8",
+    "primary_sample_unit": "PAIRED_CALENDAR_DAY"
+  },
+  "interpretation": {
+    "B7_vs_B5": "adaptive event responsiveness versus 30-minute periodic MPC",
+    "B7_vs_B8": "event timing efficiency versus five-minute periodic full replanning",
+    "B7_vs_B6": "marginal operational value of calibrated versus raw event risk"
+  },
+  "required_metrics": [
+    "realized_grid_cost_aud",
+    "deadline_misses",
+    "compute_debt_gpu_hours",
+    "energy_debt_kwh",
+    "full_replan_count",
+    "communication_bytes",
+    "safety_filter_interventions",
+    "mobility_energy_kwh",
+    "runtime_seconds"
+  ],
+  "prohibited": [
+    "RETUNE_B7_AFTER_OBSERVING_B8",
+    "CLAIM_B8_WAS_IN_THE_ORIGINAL_JANUARY_PREREGISTRATION",
+    "ALTER_B0_B7_COMPLETENESS_COUNTS",
+    "USE_FEBRUARY_OR_MARCH_OUTCOMES_TO_SELECT_B8_PARAMETERS"
+  ]
+}

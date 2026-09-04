@@ -1,0 +1,23 @@
+{
+  "Fresh_leverage_inputs": 0,
+  "Gurobi_Threads": 4,
+  "HiGHS_threads": 4,
+  "MESS_reoptimization": false,
+  "Stage2_contract_identity": "EXACTLY_E1_FULL_GRID_RECOURSE",
+  "artifact_id": "V33X_E2_FORMULATION_CONTRACT_V1",
+  "capacity_constraint": "sum_b x_DA[b,r,t] + h_REC[r,t] <= C_available_DA[r,t]",
+  "h_REC": "ENDOGENOUS_NONNEGATIVE_STAGE1_SOLVER_VARIABLE",
+  "leverage_source": "frozen Apr-04 planning current sensitivity only",
+  "objective_hierarchy": [
+    "MIN_EXISTING_PRIMARY_GRID_OBJECTIVE",
+    "PRESERVE_E1_DA_SERVICE",
+    "MAX_SUM_L_TIMES_H_SITE",
+    "MIN_RACK_SLOT_DISPLACEMENT_FROM_E1"
+  ],
+  "official_case": false,
+  "service_parity": "aggregate_and_each_cohort >= E1 minus frozen numerical tolerance",
+  "status": "FROZEN_BEFORE_E2_SOLVE",
+  "tunable_lambda": null,
+  "variant": "E2_FULL_GRID_ENVELOPE_PLUS_ENDOGENOUS_HEADROOM",
+  "weighted_sum": false
+}

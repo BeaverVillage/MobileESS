@@ -1,0 +1,64 @@
+{
+  "audit_version": "PFR1_SCHEMA_V1",
+  "kestrel_f30": {
+    "rows": 59901,
+    "row_groups": 1,
+    "selected_columns": {
+      "job_uid": "large_string",
+      "arrival_timestamp_ns": "int64",
+      "source_start_timestamp_ns": "int64",
+      "source_end_timestamp_ns": "int64",
+      "latest_completion_timestamp_ns": "int64",
+      "runtime_seconds_source": "double",
+      "requested_gpu": "double",
+      "input_bytes": "int64",
+      "IT_power_kW": "double",
+      "IT_power_measurement_claim": "bool"
+    },
+    "architecture_identity_column_present": false,
+    "checkpoint_fields_present": false,
+    "throughput_field_present": false
+  },
+  "h100_b200_training_archive": {
+    "csv_members": 95,
+    "representative_h100_rows": 45000,
+    "representative_b200_rows": 45000,
+    "representative_columns": [
+      "timestamp",
+      "cpu_utilization_percent",
+      "cpu_freq_MHz",
+      "cpu_power_W",
+      "cpu_temp_C",
+      "gpu0_to_gpu7_utilization_percent",
+      "gpu0_to_gpu7_mem_utilization",
+      "gpu0_to_gpu7_Power_TDP",
+      "gpu0_to_gpu7_mem_used_MB",
+      "gpu0_to_gpu7_mem_total_MB",
+      "gpu0_to_gpu7_power_W",
+      "gpu0_to_gpu7_temp_C"
+    ],
+    "representative_session_envelopes": {
+      "H100_8GPU_Llama8B_ds_z3_batch16": {
+        "node_power_w_min": 999.174,
+        "node_power_w_max": 5361.54,
+        "node_power_w_mean": 4230.161409133334,
+        "mean_gpu_utilization_percent_min": 0.0,
+        "mean_gpu_utilization_percent_max": 100.0,
+        "mean_gpu_utilization_percent_mean": 84.20518333333334
+      },
+      "B200_8GPU_Llama8B_ds_z3_batch16": {
+        "node_power_w_min": 1574.38,
+        "node_power_w_max": 7219.506,
+        "node_power_w_mean": 5340.092352622222,
+        "mean_gpu_utilization_percent_min": 0.0,
+        "mean_gpu_utilization_percent_max": 100.0,
+        "mean_gpu_utilization_percent_mean": 76.39156666666666
+      }
+    },
+    "throughput_target_present": false,
+    "checkpoint_fields_present": false,
+    "restart_fields_present": false,
+    "binding_decision": "MEASURED_POWER_UTILIZATION_ENVELOPE_ONLY",
+    "power_throughput_curve_status": "BLOCKED_NO_MEASURED_THROUGHPUT_TARGET"
+  }
+}

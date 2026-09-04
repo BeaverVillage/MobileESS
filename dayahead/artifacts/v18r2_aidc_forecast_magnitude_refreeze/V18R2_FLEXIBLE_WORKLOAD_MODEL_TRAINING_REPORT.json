@@ -1,0 +1,46 @@
+{
+  "artifact_id": "V18R2_FLEXIBLE_WORKLOAD_MODEL_TRAINING_REPORT_V1",
+  "status": "PASS_TRAINING_ONLY_FIT",
+  "selected_model": "CANDIDATE_B",
+  "fit_period": [
+    "2024-08-19",
+    "2025-03-31"
+  ],
+  "training_days": 225,
+  "training_target_GPU_h": 614322.9725,
+  "features": [
+    "known day-of-week at D-1 cutoff"
+  ],
+  "feature_authority": "calendar-only D-1-known variables; no realized workload fields",
+  "CV_selected_metrics": {
+    "day_count": 151,
+    "daily_MAE_GPU_h": 3031.665248344371,
+    "daily_RMSE_GPU_h": 7184.7498492295845,
+    "daily_WAPE": 0.914408046245931,
+    "mean_bias_GPU_h_per_day": -2436.8647277409864,
+    "median_bias_GPU_h_per_day": -337.2597222222223,
+    "aggregate_mass_ratio": 0.2649951323365423,
+    "Q50_pinball_GPU_h_per_day": 1515.8326241721854,
+    "Q50_empirical_coverage": 0.41721854304635764,
+    "Q90_pinball_GPU_h_per_day": 1795.9189963576162,
+    "Q90_empirical_coverage": 0.7947019867549668,
+    "slot_MAE_GPU_h": 42.020947544197156,
+    "normalized_shape_L1_error": 1.8134471044726779,
+    "mean_peak_timing_error_hours": 8.592715231788079,
+    "actual_zero_slot_fraction": 0.8805877483443708,
+    "predicted_near_zero_slot_fraction": 0.019798565121412804,
+    "negative_prediction_count": 0,
+    "quantile_crossing_count": 0,
+    "mean_tier_share_L1_error": 0.8102504320341525
+  },
+  "quantile_semantics": {
+    "Q50": "nominal daily scheduling scenario",
+    "Q90": "reserve/sensitivity only; not used in main facility result",
+    "hierarchical_rule": "daily Q50 first, then normalized intraday/tier/latency distribution"
+  },
+  "nonnegative_prediction_rule": "empirical quantiles and convex normalized shapes are nonnegative by construction; no clipping",
+  "April_rows_in_fit": 0,
+  "future_realized_feature_reads": 0,
+  "literature_target_reads": 0,
+  "grid_result_reads": 0
+}

@@ -1,0 +1,60 @@
+{
+  "authority_id": "DAYAHEAD_TEST_REPORT_V1",
+  "commands": [
+    {
+      "command": "python -m pytest -q tests/dayahead tests/test_pfr_ai_training.py tests/test_pfr_power.py tests/test_pfr_methods.py tests/test_git_identity.py",
+      "result": "PASS",
+      "summary": "50 passed, 71 subtests passed"
+    },
+    {
+      "command": "python -m compileall -q dayahead",
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    },
+    {
+      "command": "python -m dayahead.aidc_preflight --raw-root <authority> --output RAW_DATA_PREFLIGHT.json --full-inventory-hashes",
+      "result": "PASS",
+      "summary": "385 files; 56157210220 bytes; full SHA-256 complete"
+    },
+    {
+      "command": "python -m dayahead.materialize_precode_gate --preflight RAW_DATA_PREFLIGHT.json --authority DAYAHEAD_IMPLEMENTATION_AUTHORITY.json --output-dir dayahead/artifacts/precode",
+      "result": "EXPECTED_FAIL_CLOSED",
+      "summary": "FAIL_AIDC_JOINT_LABEL_ALIGNMENT, FAIL_AIDC_P_LABEL"
+    },
+    {
+      "command": "python -m pytest -q tests",
+      "result": "ENVIRONMENTAL/PREEXISTING_FAILURES",
+      "summary": "362 passed, 4 skipped, 84 subtests passed, 3 failed; two require POSIX fcntl and one existing Gurobi trust-region test differs under Windows/Gurobi 13.0.3; no failing file is under dayahead/"
+    }
+  ],
+  "december_replication_started": false,
+  "expected_blocking_failures": [
+    "FAIL_AIDC_JOINT_LABEL_ALIGNMENT",
+    "FAIL_AIDC_P_LABEL"
+  ],
+  "gates": {
+    "G0 Source isolation": "PASS",
+    "G1 Terminology": "PASS",
+    "G10 AIDC/MESS hard constraints": "NOT_RUN_BLOCKED_BY_C2_LABEL_ALIGNMENT_GATE",
+    "G11 Benders validity": "NOT_RUN_BLOCKED_BY_C2_LABEL_ALIGNMENT_GATE",
+    "G12 Solver equivalence": "NOT_RUN_BLOCKED_BY_C2_LABEL_ALIGNMENT_GATE",
+    "G13 OpenDSS": "NOT_RUN_BLOCKED_BY_C2_LABEL_ALIGNMENT_GATE",
+    "G14 Result audit": "NOT_RUN_BLOCKED_BY_C2_LABEL_ALIGNMENT_GATE",
+    "G2 Raw integrity": "PASS",
+    "G3 No-look-ahead": "PASS_CONTRACT_TEST_ONLY_NO_SCIENTIFIC_LOADER_EXECUTED",
+    "G4 AIDC labels": "FAIL",
+    "G5 Split lock": "NOT_RUN_BLOCKED_BY_C2_LABEL_ALIGNMENT_GATE",
+    "G6 ML outputs": "NOT_RUN_BLOCKED_BY_C2_LABEL_ALIGNMENT_GATE",
+    "G7 Traffic support": "NOT_RUN_BLOCKED_BY_C2_LABEL_ALIGNMENT_GATE",
+    "G8 Time/input": "PASS_UNIT_CONTRACT_ONLY_INTEGRATION_BLOCKED_BY_C2",
+    "G9 Objective identity": "NOT_RUN_BLOCKED_BY_C2_LABEL_ALIGNMENT_GATE"
+  },
+  "generated_at_utc": "2026-08-28T10:26:34.684222+00:00",
+  "november_primary_evaluation_started": false,
+  "opendss_calls": 0,
+  "overall_status": "SCIENTIFIC_FAIL_CLOSED_AT_C2",
+  "solver_calls": 0
+}

@@ -1,0 +1,49 @@
+{
+  "artifact_id": "V22S_MATCHED_HOST_DENOMINATORS_V1",
+  "unique_host_rule": true,
+  "sets": {
+    "SET_A_ACTUAL_LOAD": {
+      "site_subset": [],
+      "matched_host_subset": [],
+      "denominator": null
+    },
+    "SET_B_IT_CAPACITY_MATCHED": {
+      "site_subset": [
+        "AIDC01",
+        "AIDC03",
+        "AIDC08"
+      ],
+      "matched_host_subset": [
+        "HOST_LVN",
+        "HOST_NP",
+        "HOST_PM"
+      ],
+      "firm_MW": 166.39100000000002,
+      "normal_MW": 249.55599999999998
+    },
+    "SET_C_OFFICIAL_BUILT_MATCHED": {
+      "site_subset": [
+        "AIDC01",
+        "AIDC08",
+        "AIDC12"
+      ],
+      "excluded_common_set_sites_missing_host_capacity": [
+        "AIDC05",
+        "AIDC06",
+        "AIDC10"
+      ],
+      "matched_host_subset": [
+        "HOST_LVN",
+        "HOST_PM",
+        "HOST_TNA"
+      ],
+      "firm_MW": 190.981,
+      "normal_MW": 286.446
+    }
+  },
+  "coverage_tests": {
+    "numerator_site_set_equals_denominator_site_set": true,
+    "four_site_twelve_host_mismatch_count": 0,
+    "overlapping_DPTS_aggregate_count": 0
+  }
+}

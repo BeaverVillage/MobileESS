@@ -1,0 +1,92 @@
+{
+  "schema_version": "mobileess.post_stage15.rep12.r20_7.local_repair_vtype_restore.v1",
+  "status": "PASS_ROOT_CAUSE_CORRECTED_TARGET_AND_NEXT_ISSUE_REPRODUCED_PREFIX_PRESERVED",
+  "created_date": "2026-08-18",
+  "run_id": "B_12_REP_WEEKS_ACTUAL_FINAL_R20",
+  "failure": {
+    "candidate_id": "W07_2025-02-17",
+    "policy": "M1_PROPOSED_EVENT30_LOCAL_REPAIR_MOBILE",
+    "failed_issue": 13975,
+    "last_committed_issue": 13974,
+    "error": "MESS03 transit must have P=Q=0 and disconnected",
+    "failed_full_planner_integer_variable_count": 276,
+    "failed_mess03_state": "MOVE",
+    "failed_mess03_charge_kW": 264.277708,
+    "failed_mess03_q_kvar": -56.870958
+  },
+  "root_cause": {
+    "category": "local-repair escalation restored bounds but not original integer variable types",
+    "scientific_model_infeasible": false,
+    "power_scale_failure": false,
+    "power_scale_changed": false,
+    "local_repair_fixed_integer_acceleration": "_set_fixed default relax_integer=True converted fixed STAY/node-occupancy binaries to continuous variables",
+    "escalation_defect": "restore_slow_bounds restored LB/UB only, leaving formerly binary variables continuous for the full replan",
+    "physical_consequence": "The relaxed mobility domain admitted a fractional MOVE/STAY mixture, while result serialization selected MOVE by threshold and retained material PCS charging from the fractional STAY component.",
+    "exact_grid_role": "Fresh OpenDSS input validation correctly rejected the nonphysical moving-and-charging state before commit."
+  },
+  "correction": {
+    "strategy": "atomic same-PRE restoration of LB, UB, and VType before full replan",
+    "snapshot_fields": ["LB", "UB", "VType"],
+    "restored_slow_variable_count_at_target": 104161,
+    "restored_integer_variable_type_count_at_target": 8512,
+    "corrected_full_planner_integer_variable_count": 8728,
+    "sparse_dense_fallback_also_restores_variable_types": true,
+    "hard_constraint_relaxed": false,
+    "scientific_objective_changed": false,
+    "scientific_feasible_set_changed": false,
+    "power_scale_changed": false,
+    "future_actual_used": false
+  },
+  "source": {
+    "runner_sha256_before": "970f9118126399267e13d521c1d871e17e51226a6bbb6198bc9dd210c5cbd123",
+    "runner_sha256_after": "5f9ed86a93094fc4b18ab3dfcfe9cdde646b6d4820d874e3cc51a29cff10b0c5",
+    "safety_validator_sha256_after": "8ae166faaf451224d9e55c8d39cad98a6f3f64987e573ed99fe37a6b7b1450e1"
+  },
+  "actual_regression": {
+    "root": "/tmp/mobileess_r20_7_vtype_out",
+    "benchmark_isolated_from_production_results": true,
+    "target_issue_13975": {
+      "status": "PASS_COMMITTED",
+      "domain_restore_evidence_sha256": "0283ad5f413c6a49114d03a2887f5e514e7bae2a7936a9ab454c31336ac93ffe",
+      "full_planner_evidence_sha256": "0b52b81da856486fd92674e009e579cc5907f8cb0b928139dc6f61352f2422bd",
+      "full_planner_integer_variable_count": 8728,
+      "full_planner_constraint_violation": 8.810861276686843e-10,
+      "full_planner_integer_violation": 0.0,
+      "conditioned_constraint_violation": 1.2476125351494565e-09,
+      "conditioned_integer_violation": 0.0,
+      "conditioned_mip_gap": 0.00045330585365348355,
+      "transit_mess_all_zero_pq": true,
+      "atomic_commit_marker_sha256": "ee2a2fc948f572ba93a2b03bfea8834e3fb00f72ccb6b21f75f85dbc4badcfd2",
+      "policy_issue_audit_sha256": "658c9b8e0072a830ebe2f7f6055b1dcca35a54334750bcea414c9f7910d68656",
+      "fresh_exact_ac_sha256": "96003c2e23131d5b847086c47bdd4b71f6d33fee8f5335e8a2dcbb5bfef09baf",
+      "fresh_exact_ac_pass": true,
+      "unsafe_action_committed": false
+    },
+    "next_issue_13976": {
+      "status": "PASS_COMMITTED",
+      "conditioned_constraint_violation": 7.489758813150615e-10,
+      "conditioned_integer_violation": 0.0,
+      "conditioned_mip_gap": 0.01624193627033199,
+      "transit_mess_all_zero_pq": true,
+      "atomic_commit_marker_sha256": "6faf312ae3bded23c72db47f83037b7fbbb741c4d70deebfb793c157684b0d38",
+      "policy_issue_audit_sha256": "70ace1537607bea4781a603233c2dd4f0446d9c39f0f0d78c1606aa8ded77952",
+      "fresh_exact_ac_sha256": "385797e473d609ef28df135626f94546c83d6fbb20a3899dec079d26f4822b7f",
+      "fresh_exact_ac_pass": true,
+      "unsafe_action_committed": false
+    },
+    "static_safety_contract": {
+      "status": "PASS",
+      "evidence_sha256": "4a1ec643ff419b25f4d466f8cc4cc9b170e7ac4edf65e54d2aa5a366bdb3d819"
+    }
+  },
+  "preserved_production_prefix": {
+    "audit_path": "/home/jaewon/mobile_ess_work/frozen_artifacts/B_12_REP_WEEKS_ACTUAL_FINAL_R20/REP12_COMMITTED_PREFIX_INTEGRITY_AUDIT_R20_7.json",
+    "audit_sha256": "d3e03a7a9abd4b48cd67542f3f311e18849a89dc25c0b1059b501f96e9d51208",
+    "status": "PASS_ALL_EXISTING_RESULTS_ATOMICALLY_COMMITTED_AND_CONTIGUOUS",
+    "total_committed_issues": 7297,
+    "W02": {"M1": 1328, "M2": 1880, "M3": 1328, "M4": 2016},
+    "W07": {"M1": 439, "M2": 306, "M3": 0, "M4": 0},
+    "ctrl_c_corrupted_committed_result": false,
+    "same_command_resume_safe": true
+  }
+}

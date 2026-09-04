@@ -1,0 +1,77 @@
+{
+  "artifact_id": "V20A_FINAL_SCALE_REVIEW_V1",
+  "classification": "A4_BOUNDARY_HETEROGENEITY_BLOCKS_FINAL_SCALE",
+  "SITE_SCALE_AUTHORITY_READY": false,
+  "final_realworld_numerator_MW": null,
+  "final_model_AIDC_peak_MW": null,
+  "final_site_weights": null,
+  "partial_common_boundary": {
+    "boundary": "OPERATING_CAPACITY",
+    "sites": 4,
+    "MW": 106.5
+  },
+  "diagnostic_candidates": {
+    "LOW": {
+      "denominator": "D_APRIL_NORMAL_MW",
+      "denominator_MW": 804.2664,
+      "partial_operating_capacity_numerator_MW": 106.5,
+      "rho": 0.13241881048369047,
+      "IEEE123_background_peak_MW": 2.3154691360756456,
+      "IEEE123_equivalent_AIDC_MW": 0.30661166871083545,
+      "authority": "PARTIAL_COVERAGE_DIAGNOSTIC_NOT_FINAL_SCALE"
+    },
+    "PRIMARY": {
+      "denominator": "D_APRIL_2025_FORECAST_PEAK_MW",
+      "denominator_MW": 567.9513,
+      "partial_operating_capacity_numerator_MW": 106.5,
+      "rho": 0.18751607752284397,
+      "IEEE123_background_peak_MW": 2.3154691360756456,
+      "IEEE123_equivalent_AIDC_MW": 0.4341876900221133,
+      "authority": "PARTIAL_COVERAGE_DIAGNOSTIC_NOT_FINAL_SCALE"
+    },
+    "HIGH": {
+      "denominator": "D_APRIL_FIRM_MW",
+      "denominator_MW": 531.9662,
+      "partial_operating_capacity_numerator_MW": 106.5,
+      "rho": 0.20020068944229916,
+      "IEEE123_background_peak_MW": 2.3154691360756456,
+      "IEEE123_equivalent_AIDC_MW": 0.46355851742470905,
+      "authority": "PARTIAL_COVERAGE_DIAGNOSTIC_NOT_FINAL_SCALE"
+    }
+  },
+  "unresolved": [
+    "No direct/common IT MW for 12/12 sites",
+    "No actual DNSP interconnection rating per site",
+    "No site-specific GPU capacity authority",
+    "IBM April-2025 operation unresolved"
+  ],
+  "firewall": {
+    "artifact_id": "V20A_CAPACITY_BOUNDARY_HARMONIZATION_V1",
+    "sets": {
+      "DIRECT_IT_MW_SET": [],
+      "OPERATING_CAPACITY_MW_SET": [
+        "NEXTDC M2",
+        "NEXTDC M3",
+        "NEXTDC M1",
+        "STACK MEL01A"
+      ],
+      "FACILITY_INCOMING_POWER_SET": [],
+      "MVA_ONLY_SET": [
+        "Fujitsu Noble Park",
+        "AAPT / TPG Richmond"
+      ]
+    },
+    "set_totals": {
+      "DIRECT_IT_MW_SET": null,
+      "OPERATING_CAPACITY_MW_SET": 106.5,
+      "FACILITY_INCOMING_POWER_SET": null,
+      "MVA_ONLY_SET": "NOT_SUMMED_AS_MW"
+    },
+    "mixed_boundary_silent_aggregation_count": 0,
+    "MVA_to_MW_unsupported_conversion_count": 0,
+    "unknown_to_zero_count": 0,
+    "facility_power_divided_by_PUE_count": 0,
+    "PUE_1_30_role": "CASE_STUDY_PCC_CONVERSION_ONLY_NOT_REAL_CAPACITY_HARMONIZER",
+    "grid_benefit_based_scale_selection_count": 0
+  }
+}

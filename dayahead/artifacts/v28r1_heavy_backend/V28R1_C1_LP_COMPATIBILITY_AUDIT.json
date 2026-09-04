@@ -1,0 +1,106 @@
+{
+  "C1_SURROGATE_LP_COMPATIBLE": false,
+  "allowed_continuous_epigraph": {
+    "LP_compatible_as_relaxation": true,
+    "exact_graph_equality_proven": false,
+    "reason": "The current objective minimizes maximum normalized phase-line current, not PCC itself. With reverse flow, reactive power, voltage bounds, and network coupling, no repository proof establishes that lowering every PCC auxiliary is globally feasibility- and objective-monotone. Therefore an epigraph slack solution cannot be excluded.",
+    "representation": "PCC >= slope_s * IT + intercept_s for every segment line"
+  },
+  "artifact_id": "V28R1_C1_LP_COMPATIBILITY_AUDIT_V1",
+  "current_solver_binding": {
+    "CL_MC_BD_uses_C1_surrogate": false,
+    "current_frozen_binding": "PUE_PLAN constant",
+    "monolithic_uses_C1_surrogate": false,
+    "standard_BD_uses_C1_surrogate": false
+  },
+  "defect_id": "V28R1-BLOCK-006_C1_SURROGATE_NOT_LP_COMPATIBLE",
+  "exact_alternatives_rejected_by_contract": [
+    "binary segment selection",
+    "SOS2 graph equality",
+    "nonlinear complementarity",
+    "decomposition semantics change"
+  ],
+  "finding": "Convexity alone proves only a continuous LP epigraph. It does not prove exact accepted C1 equality in this grid objective, so the mandatory LP-compatibility gate fails.",
+  "gate": "E_C1_SURROGATE_LP_COMPATIBILITY",
+  "serialized_surrogate": {
+    "contract": {
+      "artifact_id": "V28_FINAL_C1_PLANNING_SURROGATE_V1",
+      "file": {
+        "exists": true,
+        "path": "dayahead/artifacts/v28_final_dayahead_actual/V28_FINAL_C1_PLANNING_SURROGATE.json",
+        "sha256": "6f6d5e73cc3b107167a37898fdb8bedb2b1f9bea7119173471dd4e607d2017c1",
+        "size_bytes": 1263
+      },
+      "it_breakpoints_kw": [
+        0.0,
+        18.64389971646671,
+        37.28779943293342,
+        55.93169914940013,
+        74.57559886586684,
+        93.21949858233354,
+        111.86339829880026,
+        130.50729801526697,
+        149.15119773173367,
+        167.79509744820038,
+        186.4389971646671,
+        205.0828968811338,
+        223.72679659760053,
+        242.37069631406723,
+        261.01459603053394,
+        279.65849574700064,
+        298.30239546346735,
+        316.94629517993405,
+        335.59019489640076,
+        354.23409461286747,
+        372.8779943293342,
+        391.5218940458009,
+        410.1657937622676,
+        428.8096934787343,
+        447.453593195201
+      ],
+      "maximum_overestimate_kw": 1.8242124735055825,
+      "maximum_rmse_kw": 1.2552525882336558,
+      "minimum_conservatism_kw": -2.2737367544323206e-13,
+      "nlr_equivalent_scale": 3.4987194698200215,
+      "objective_role": "planning only; exact C1 is always used for physical evaluation",
+      "rh_knots_pct": [
+        20.0,
+        50.0,
+        80.0,
+        100.0
+      ],
+      "surrogate_validation_pass": true,
+      "type": "WEATHER_CONDITIONAL_CONSERVATIVE_PIECEWISE_LINEAR_SECANTS",
+      "valid_it_range_kw": [
+        0.0,
+        447.453593195201
+      ],
+      "wetbulb_knots_c": [
+        -5.0,
+        0.0,
+        5.0,
+        10.0,
+        15.0,
+        20.0,
+        25.0
+      ]
+    },
+    "convex_piecewise_linear_with_numerical_tolerance": true,
+    "csv": {
+      "exists": true,
+      "path": "dayahead/artifacts/v28_final_dayahead_actual/V28_FINAL_C1_PLANNING_SURROGATE.csv",
+      "sha256": "4e91589c83a2837dca98120b773349dc421c10528e309414e160145672a09649",
+      "size_bytes": 220671
+    },
+    "maximum_slope_difference": 0.4319717640742251,
+    "minimum_slope_difference": -1.2212453270876722e-14,
+    "negative_differences_beyond_1e_12": 0,
+    "row_count": 2016,
+    "segments_per_group": [
+      24
+    ],
+    "slope_difference_count": 1932,
+    "weather_namespace_group_count": 84
+  },
+  "status": "FAIL_CLOSED"
+}

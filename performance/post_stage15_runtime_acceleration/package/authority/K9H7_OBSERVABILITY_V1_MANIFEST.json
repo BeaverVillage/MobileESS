@@ -1,0 +1,37 @@
+{
+  "schema_version": "K9H7_OBSERVABILITY_V1.manifest.v1",
+  "status": "FROZEN_PRE_OUTCOME",
+  "production_policy": "CAPTURE_ALREADY_COMPUTED_VALUES_ONLY_THEN_MATERIALIZE_OFFLINE",
+  "forbidden_in_observability": ["SECOND_GUROBI_SOLVE", "SECOND_OPENDSS_SOLVE", "PAPER_STATISTICS_IN_ISSUE_LOOP"],
+  "required_issue_families": {
+    "exact_ac_bus_phase_voltage": "NONEMPTY_EVERY_COMMITTED_ISSUE",
+    "exact_ac_line_terminal_phase": "NONEMPTY_EVERY_COMMITTED_ISSUE_WITH_FROM_TO_BUS_TERMINAL_P_Q_CURRENT_LOADING",
+    "exact_ac_transformer_terminal": "NONEMPTY_EVERY_COMMITTED_ISSUE_WITH_WINDING_TERMINAL_PHASE_P_Q_CURRENT_LOADING",
+    "mess_physical_state": "EXACTLY_4_ROWS_PER_ISSUE",
+    "rack_pool_state": "EXACTLY_48_ROWS_PER_ISSUE",
+    "causal_forecast_issued": "EXACTLY_54_ROWS_PER_ISSUE",
+    "debt_rebound_state": "EXACTLY_1_ROW_PER_ISSUE",
+    "objective_breakdown": "EXACTLY_1_ROW_PER_ISSUE",
+    "controller_decision": "EXACTLY_1_ROW_PER_ISSUE",
+    "causal_exogenous_identity": "EXACTLY_1_DIGEST_PER_ISSUE",
+    "ac_recovery_attempt": "OBSERVED_ZERO_EVENTS_ALLOWED_WITH_EXPLICIT_ZERO_STATUS",
+    "wan_transfer_event": "OBSERVED_ZERO_EVENTS_ALLOWED_WITH_EXPLICIT_ZERO_STATUS"
+  },
+  "missingness_semantics": ["OBSERVED_VALUE", "OBSERVED_ZERO_EVENTS", "NOT_APPLICABLE", "OBSERVABILITY_MISSING"],
+  "dense_storage": "OFFLINE_CHUNKED_COMPRESSED_PARQUET",
+  "required_numeric_values": "FINITE_AND_UNIT_DECLARED",
+  "canonical_units": {
+    "active_power": "kW",
+    "reactive_power": "kvar",
+    "energy": "kWh",
+    "current": "A",
+    "voltage": "pu",
+    "angle": "degree",
+    "price": "AUD/MWh",
+    "cost": "AUD",
+    "gpu_capacity": "GPU",
+    "workload_debt": "GPUh"
+  },
+  "raw_commit_evidence_retained": true,
+  "future_actual_used": false
+}

@@ -1,0 +1,24 @@
+{
+  "artifact_id": "V26M_V25M_CANONICAL_FIELD_FORENSIC_V1",
+  "authority": "NON_AUTHORITY_DIAGNOSTIC",
+  "V25_historical_artifacts_modified": false,
+  "V25_serialized_canonical_benchmarks": {
+    "Mean_WAPE": 0.8902500584818535,
+    "Q50_WAPE": 0.8902500584818535,
+    "CRPS": 2469.147787297833
+  },
+  "all_model_rows_minimum": {
+    "model": "C-B1_B3_LIGHTGBM_QUANTILE",
+    "Mean_WAPE": 0.8902500584818535
+  },
+  "conditional_mean_model_rows_minimum": {
+    "model": "C-B4_WEEKDAY_FACTORIZED",
+    "Mean_WAPE": 0.9467355624694638
+  },
+  "B2_Mean_WAPE": 0.976108062962391,
+  "weekday_factorized_Mean_WAPE": 0.9467355624694638,
+  "same_pooled_OOF_days": true,
+  "diagnosis": "SUMMARY_FIELD_MODEL_UNIVERSE_MAPPING_DEFECT",
+  "result_class": "SUMMARY_MAPPING_DEFECT_ONLY",
+  "explanation": "V25 evaluation took min(canonical.Mean_WAPE) across every row. The B3 quantile row copied Q50 into its point-prediction column, so 0.890250 was serialized as best conventional Mean_WAPE although the best eligible conditional-mean diagnostic was weekday-factorized 0.946736."
+}

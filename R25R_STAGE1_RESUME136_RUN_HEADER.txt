@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -u -o pipefail
+SELF="${BASH_SOURCE[0]}"
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+LOG="$TMP/BOOTSTRAP_STDOUT_STDERR.txt"
+set +e
+python3 - "$SELF" "$TMP" >"$LOG" 2>&1 <<'PYEXTRACT'
+import sys,base64,tarfile,io,re
+from pathlib import Path
+b=Path(sys.argv[1]).read_bytes();m=b'\n__PAYLOAD_BELOW__\n'
+if b.count(m)!=1:raise RuntimeError(f'R25R payload marker count={b.count(m)}')
+raw=base64.b64decode(re.sub(br'\s+',b'',b.split(m,1)[1]),validate=True)
+with tarfile.open(fileobj=io.BytesIO(raw),mode='r:gz') as tf:
+    try:tf.extractall(sys.argv[2],filter='data')
+    except TypeError:tf.extractall(sys.argv[2])
+PYEXTRACT
+rc=$?;set -e
+if [[ $rc -ne 0 ]];then cat "$LOG";exit "$rc";fi
+PY="${HOME}/miniconda3/envs/power_v61/bin/python"
+[[ -x "$PY" ]] || PY=python3
+"$PY" -m py_compile "$TMP/driver.py"
+set +e
+"$PY" "$TMP/driver.py" 2>&1 | tee -a "$LOG"
+rc=${PIPESTATUS[0]};set -e
+exit "$rc"
+
+__PAYLOAD_BELOW__

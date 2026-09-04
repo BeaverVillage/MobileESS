@@ -1,0 +1,37 @@
+{
+  "artifact_id": "V28_FINAL_PI_AUTHORITY",
+  "implementation_authority": {
+    "artifact_id": "FINAL_PERFECT_INFORMATION_ORACLE_V1",
+    "contract": {
+      "Fresh_OpenDSS_slots": 96,
+      "additional_resources": false,
+      "artifact_id": "V28_PI_CONTRACT_V1",
+      "case": "B3",
+      "known_before_PI_optimization": [
+        "realized_AIDC_workload",
+        "realized_weather",
+        "realized_grid_demand",
+        "realized_PV",
+        "realized_mobility_travel"
+      ],
+      "leakage_to_dayahead": false,
+      "namespace": "PERFECT_INFORMATION_SEPARATE_EXPOST",
+      "primary_solver": "CL_MC_BD",
+      "regret_primary": "rho_max_B3_ACTUAL-rho_max_B3_PI",
+      "same_system_required": [
+        "15_minute_96_slot_horizon",
+        "12_AIDC_sites",
+        "same_MESS",
+        "same_capacities",
+        "same_objective",
+        "same_constraints",
+        "same_IEEE123_feeder",
+        "same_C1",
+        "same_OpenDSS",
+        "same_tolerances"
+      ],
+      "status": "IMPLEMENTATION_READY"
+    }
+  },
+  "science_complete": false
+}

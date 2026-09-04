@@ -1,0 +1,25 @@
+{
+  "conversation": "A",
+  "release": "R25A_A1_FORWARD_BACKWARD_EXACT_MOBILITY_PRUNING",
+  "stage": "A1/6",
+  "foundation": "R24 permanent exact rebase",
+  "long_solver_validation": "FORBIDDEN_IN_A1; deferred to A6",
+  "changes": [
+    "forward optimistic maximum-SOC envelope retained",
+    "forward optimistic minimum support-debt lower-bound DP added",
+    "backward spatial terminal reachability DP added",
+    "backward terminal support-debt repayment necessary-condition pruning added",
+    "post-pruning forward path-support recomputation added"
+  ],
+  "exactness": {
+    "minDE": "optimistic lower bound because it assumes maximum charging and ignores grid/E_MAX restrictions",
+    "repayUB": "unconditional upper bound (H-arrival)*eta_ch*DT*P_MAX",
+    "prune": "only when minDE > repayUB, which is impossible for every physical realization",
+    "terminal_SOC_extra_pruning": false,
+    "integer_feasible_set_changed": false,
+    "objective_changed": false,
+    "physical_constraints_relaxed": false
+  },
+  "known_structural_expectation": "because any service can be terminal and STAY is always a mobility option, spatial backward pruning is expected to be zero; issue152 debt magnitudes also imply only a small debt-based opportunity",
+  "next_stage": "A2 K=3 exact route dominance + equivalent-state merge"
+}

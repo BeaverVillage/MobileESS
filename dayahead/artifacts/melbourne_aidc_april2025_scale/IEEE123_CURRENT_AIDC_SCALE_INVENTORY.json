@@ -1,0 +1,106 @@
+{
+  "authority_classification": "V17_AIDC_POWER_V4R1_A_CLEAN_WHOLE_GPU_SUPPORT_PASS",
+  "beta_AIDC": 0.25,
+  "beta_interpretation": "Equivalent AIDC footprint scaling applied to frozen P_IT_REF/G_REF/W_F; not power-per-compute scaling.",
+  "pue": 1.3,
+  "current_model_site_ids": [
+    "AIDC01",
+    "AIDC02",
+    "AIDC03",
+    "AIDC04",
+    "AIDC05",
+    "AIDC06",
+    "AIDC07",
+    "AIDC08",
+    "AIDC09",
+    "AIDC10",
+    "AIDC11",
+    "AIDC12"
+  ],
+  "equivalent_IEEE123_electrical_overlay_hosts": {
+    "AIDC01": "149",
+    "AIDC02": "300_open",
+    "AIDC03": "35",
+    "AIDC04": "50",
+    "AIDC05": "61s",
+    "AIDC06": "48",
+    "AIDC07": "250",
+    "AIDC08": "21",
+    "AIDC09": "152",
+    "AIDC10": "81",
+    "AIDC11": "79",
+    "AIDC12": "108"
+  },
+  "frozen_site_spatial_weights": {
+    "AIDC01": 0.06741573033707865,
+    "AIDC02": 0.1198501872659176,
+    "AIDC03": 0.12359550561797754,
+    "AIDC04": 0.054307116104868915,
+    "AIDC05": 0.08426966292134833,
+    "AIDC06": 0.10861423220973783,
+    "AIDC07": 0.033707865168539325,
+    "AIDC08": 0.09925093632958804,
+    "AIDC09": 0.22284644194756553,
+    "AIDC10": 0.028089887640449437,
+    "AIDC11": 0.018726591760299626,
+    "AIDC12": 0.03932584269662921
+  },
+  "AIDC_PCC_transformer_rating_kva_each": 1500,
+  "AIDC_PCC_transformer_count": 12,
+  "AIDC_PCC_transformer_semantics": "Synthetic case-study interface scenario; actual DNSP nameplate claim is false.",
+  "background_operational_MW": {
+    "min": 1.2748232290504322,
+    "mean": 1.7062703035727893,
+    "peak": 2.3154691360756456,
+    "day": "2025-04-15",
+    "source": "dayahead/artifacts/v16_2/GRID_BACKGROUND_MAPPING_CONTRACT_V16_2_BINDING.json"
+  },
+  "background_gross_after_alpha_MW": {
+    "min": 1.44579,
+    "mean": 1.79607,
+    "peak": 2.3154691360756456,
+    "day": "2025-04-15"
+  },
+  "background_gross_pre_alpha_MW": {
+    "min": 1.9325,
+    "mean": 2.40071,
+    "peak": 3.09496,
+    "day": "2025-04-15"
+  },
+  "V4R1_AIDC_IT_MW_7day": {
+    "minimum": 0.6969298709106255,
+    "mean_of_day_means": 0.7856195024474119,
+    "peak": 0.9295416000732274
+  },
+  "V4R1_AIDC_PCC_MW_7day": {
+    "minimum": 0.9060088321838133,
+    "mean_of_day_means": 1.021305353366581,
+    "peak": 1.208404080095196
+  },
+  "V4R1_AIDC_2025_04_15": {
+    "IT_MW": {
+      "min": 0.7143435157151088,
+      "mean": 0.7885365401727557,
+      "peak": 0.9167495200112395
+    },
+    "PCC_MW": {
+      "min": 0.9286465704296415,
+      "mean": 1.0250975022245823,
+      "peak": 1.1917743760146118
+    },
+    "background_plus_AIDC_PCC_MW": {
+      "min": 2.213202634757721,
+      "mean": 2.7313678057973716,
+      "peak": 3.4124158930798987,
+      "peak_slot": 72
+    }
+  },
+  "site_level_mean_peak_PCC_note": "Exact 96x12 site means/peaks remain in frozen reference NPZs; spatial weights and global site peak are inventoried without altering them.",
+  "global_site_PCC_peak_MW": 0.2692885496841354,
+  "provenance": [
+    "dayahead/artifacts/v17_candidate/reference_v6_v4r1/*.npz",
+    "dayahead/artifacts/v16_2/GRID_BACKGROUND_MAPPING_CONTRACT_V16_2_BINDING.json",
+    "dayahead/artifacts/v16_2/AIDC_PCC_TRANSFORMER_CONTRACT_V2.json",
+    "dayahead/artifacts/v16_2/AIDC_PCC_TRANSFORMER_SIZING_DIAGNOSTIC_V1.json"
+  ]
+}

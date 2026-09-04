@@ -1,0 +1,27 @@
+{
+  "artifact_id": "V24M_FASER_ARCHITECTURE_CONTRACT_V1",
+  "name": "Factorized Aggregate Signature-kernel Event-Retrieval Forecaster",
+  "factor_identity": "H_F = R_ALL * PI_F * KAPPA_F for every sample",
+  "components": {
+    "A": "support-aware exact GP factor marginals",
+    "B": "separate marginal GPs plus expanding-OOF Gaussian residual copula",
+    "C": "past-only historical analog joint-tuple retrieval",
+    "D": "six-parameter monotonic reliability gate or best single component",
+    "E": "analog/global shrinkage shape transfer with exact mass reconciliation"
+  },
+  "R_model": "unweighted logistic hurdle plus fixed Matern-3/2 exact GP on positive log R_ALL",
+  "PI_model": "unweighted logistic hurdle plus exact GP on positive logit PI_F",
+  "KAPPA_model": "exact GP on logit KAPPA_F",
+  "joint_dependence": "J2 OOF Gaussian copula",
+  "negative_samples_allowed": false,
+  "PI_support": [
+    0.0,
+    1.0
+  ],
+  "KAPPA_support": [
+    0.0,
+    1.0
+  ],
+  "queue_power_in_training_loss": false,
+  "facility_scale_in_model": false
+}

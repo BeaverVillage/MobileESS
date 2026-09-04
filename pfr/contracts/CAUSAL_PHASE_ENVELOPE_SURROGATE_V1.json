@@ -1,0 +1,12 @@
+{
+  "identity": "CAUSAL_PHASE_ENVELOPE_SURROGATE_V1",
+  "status": "FROZEN_PRE_MARCH",
+  "problem": "The balanced surrogate can optimize the lower-voltage side while Fresh three-phase AC is dominated by an upper-phase PCC voltage.",
+  "anchor": "previous committed issue Fresh-AC minimum and maximum voltage",
+  "causal_lag_steps": 1,
+  "rule": "Reapply the previous committed MESS action to the balanced voltage model, then shift the zero-action reference profile uniformly so that action's dominant boundary matches the previous committed Fresh-AC phase envelope; preserve spatial voltage differences and analytical action sensitivities.",
+  "first_issue_rule": "Use the balanced causal reference because no previous committed issue exists.",
+  "future_actual_used": false,
+  "outcome_fit": false,
+  "positive_result_required": false
+}

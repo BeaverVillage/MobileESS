@@ -1,0 +1,16 @@
+object,classification,entry_point,already_materialized_JanMar,proof_run,new_scientific_choice
+B0 x_DA,RECONSTRUCTABLE_FROM_FROZEN_AUTHORITY,"materialize_formulation_data_v29r2(day,S_NOM) + solve_case(...,B0)",NO,NOT_RUN_BY_TASK_BOUNDARY,NO
+B1 x_DA,RECONSTRUCTABLE_FROM_FROZEN_AUTHORITY,"materialize_formulation_data_v29r2(day,S_NOM) + solve_case(...,B1)",NO,NOT_RUN_BY_TASK_BOUNDARY,NO
+B2 x_DA,RECONSTRUCTABLE_FROM_FROZEN_AUTHORITY,"materialize_formulation_data_v29r2(day,S_NOM) + solve_case(...,B2)",NO,NOT_RUN_BY_TASK_BOUNDARY,NO
+B3 x_DA,RECONSTRUCTABLE_FROM_FROZEN_AUTHORITY,solve_b3_rung for frozen rung order + select_first_safe_rung across Q_SCENARIOS,NO,NOT_RUN_BY_TASK_BOUNDARY,NO
+B1 h_REC,RECONSTRUCTABLE_FROM_FROZEN_AUTHORITY,stage1_rows exact capacity-minus-x_DA derivation,NO,NOT_RUN_BY_TASK_BOUNDARY,NO
+B3 h_REC,RECONSTRUCTABLE_FROM_FROZEN_AUTHORITY,stage1_rows exact capacity-minus-x_DA derivation,NO,NOT_RUN_BY_TASK_BOUNDARY,NO
+B1 causal Stage-2 resources,RECONSTRUCTABLE_FROM_FROZEN_AUTHORITY,"solve_causal_day inputs from x_DA, actual workload, capacity, scalar s, B0 anchor",NO,NOT_RUN_BY_TASK_BOUNDARY,NO
+B3 causal Stage-2 resources,RECONSTRUCTABLE_FROM_FROZEN_AUTHORITY,"solve_causal_day inputs from x_DA, actual workload, capacity, scalar s, B2 anchor",NO,NOT_RUN_BY_TASK_BOUNDARY,NO
+B0 anchor electrical trajectory,RECONSTRUCTABLE_FROM_FROZEN_AUTHORITY,replay_actual_case + exact_pcc_from_site_it + common fixed MESS replay,NO,NOT_RUN_BY_TASK_BOUNDARY,NO
+B2 anchor electrical trajectory,RECONSTRUCTABLE_FROM_FROZEN_AUTHORITY,replay_actual_case + exact C1 + B2 MESS replay,NO,NOT_RUN_BY_TASK_BOUNDARY,NO
+B1 candidate electrical trajectory,RECONSTRUCTABLE_FROM_FROZEN_AUTHORITY,_recourse_trajectory + common fixed MESS replay,NO,NOT_RUN_BY_TASK_BOUNDARY,NO
+B3 candidate electrical trajectory,RECONSTRUCTABLE_FROM_FROZEN_AUTHORITY,_recourse_trajectory + B3 MESS replay,NO,NOT_RUN_BY_TASK_BOUNDARY,NO
+B1/B0 MESS trajectory,RECONSTRUCTABLE_FROM_FROZEN_AUTHORITY,build_resource_model fixed-maintenance rule + engineering route + replay_mess,NO,NOT_RUN_BY_TASK_BOUNDARY,NO
+B2/B3 MESS trajectories,RECONSTRUCTABLE_FROM_FROZEN_AUTHORITY,solve_case/solve_b3_rung/select_first_safe_rung + replay_mess,NO,NOT_RUN_BY_TASK_BOUNDARY,NO
+V30 scalar s,RECONSTRUCTABLE_FROM_FROZEN_AUTHORITY,exact frozen sensitivity method + load_phase_current_safety + phase_aware_site_scores; serialize only s,NO,NOT_RUN_BY_TASK_BOUNDARY,NO

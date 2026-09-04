@@ -1,0 +1,68 @@
+{
+  "artifact_id": "V17_AIDC_FLEXIBILITY_ROOT_CAUSE_FINAL_REVIEW_V1",
+  "result_classification": "D. MULTI_FACTOR_ATTRITION",
+  "classification_basis": "coverage-denominator mismatch, GPU-board-only electrical boundary, forecast-cohort policy with unquantified excluded cohorts, and partial actuation utilization all contribute; no single supported factor fully explains the funnel",
+  "core_findings": {
+    "semantic_modelable_GPU_hour_coverage": 0.9209445408280355,
+    "facility_flexible_energy_share": 0.004577558020002474,
+    "facility_flexible_peak_share": 0.005421550712620818,
+    "actual_peak_AIDC_PCC_shift_kW": 4.111208181373968,
+    "actual_peak_shift_as_fraction_of_peak_total_PCC": 0.00340217999019839,
+    "B1_upper_bound_realization_mean": 0.9990104982285343
+  },
+  "hypotheses": {
+    "H1": {
+      "verdict": "PASS",
+      "evidence": {
+        "semantic_modelable_GPU_hour_coverage": 0.9209445408280355,
+        "facility_flexible_energy_share": 0.004577558020002474
+      },
+      "reason": "the two ratios have different denominators"
+    },
+    "H2": {
+      "verdict": "PARTIAL",
+      "evidence": {
+        "identified_flexible_IT_kWh": 604.1647675981244,
+        "unidentified_or_residual_IT_kWh": 131379.91166750467,
+        "identified_share": 0.004577558020002474
+      },
+      "reason": "GPU-board-only authority leaves host/CPU/memory/network and other load in residual, but their workload-dependent flexible part is not identifiable"
+    },
+    "H3": {
+      "verdict": "PARTIAL",
+      "evidence": {
+        "forecast_cohort_admission_fraction": 1.0,
+        "excluded_already_running_GPU_hours": null,
+        "excluded_queue_backlog_GPU_hours": null
+      },
+      "reason": "policy excludes non-forecast cohorts, but all forecast arrivals are served and excluded amounts are unavailable"
+    },
+    "H4": {
+      "verdict": "PASS",
+      "evidence": {
+        "B1_shift_utilization_energy": 0.09665943990328191,
+        "B1_upper_bound_realization_mean": 0.9990104982285343
+      },
+      "reason": "available flexible energy exceeds the moved energy, while objective relief closely approaches the independent AIDC-only bound"
+    }
+  },
+  "counterfactual_reference": "V17_AIDC_FLEXIBILITY_COUNTERFACTUAL_DIAGNOSTIC_V1.json",
+  "reviewer_safe_claim": "92.0945% is coverage within the semantic-flexible training GPU-hour subset; under frozen V4R1, the source-backed seven-day flexible component is GPU-board incremental power and is a small modeled fraction of whole-facility IT, while the optimized PCC shift is smaller still.",
+  "forbidden_overclaim": "Do not generalize the modeled facility share to real data centers or claim that 92% of facility load is flexible.",
+  "missing_authority": [
+    "D-1 snapshots of already-running and queued/backlog GPU-hours with causal deadlines",
+    "co-timed per-job or per-node host/CPU/memory/network incremental power",
+    "source-backed workload attribution within whole-facility ESIF IT telemetry",
+    "slot/deadline profile for any full-S1 counterfactual"
+  ],
+  "firewall_counters": {
+    "scientific_solver_calls": 0,
+    "OpenDSS_calls": 0,
+    "ML_retraining_calls": 0,
+    "beta_mutations": 0,
+    "PUE_mutations": 0,
+    "PF_mutations": 0,
+    "final_scale_selection_calls": 0,
+    "existing_V17_files_modified": 0
+  }
+}

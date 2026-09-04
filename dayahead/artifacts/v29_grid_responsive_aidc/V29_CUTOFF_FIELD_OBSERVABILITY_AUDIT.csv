@@ -1,0 +1,21 @@
+﻿field,classification,basis,used_by_V29_DA,use
+partition,CUTOFF_OBSERVABLE,request-time queue/partition field,True,strict full-node admission
+nodes_req,CUTOFF_OBSERVABLE,request-time requested nodes,True,strict full-node admission and service mass
+gpus_requested,CUTOFF_OBSERVABLE,request-time requested GPUs,True,strict full-node admission
+wallclock_req,CUTOFF_OBSERVABLE,request-time requested walltime,True,service mass
+processors_req,CUTOFF_OBSERVABLE,request-time resource request,False,audit only
+memory_req,CUTOFF_OBSERVABLE,request-time resource request,False,audit only
+qos,CUTOFF_OBSERVABLE,request-time scheduling field,False,audit only
+submit_time,CUTOFF_OBSERVABLE,submission event timestamp,True,submitted_at <= cutoff
+start_time,RECONSTRUCTED_PAST_STATE,future event timestamp used only to reconstruct not-started-at-cutoff,True,queue membership reconstruction only
+end_time,RECONSTRUCTED_PAST_STATE,used only to exclude a never-started job already terminated before cutoff,True,queue membership reconstruction only
+state,POST_CUTOFF_EX_POST_ONLY,final/eventual state,False,prohibited
+state_simple,POST_CUTOFF_EX_POST_ONLY,eventual COMPLETED status,False,prohibited
+wallclock_used,POST_CUTOFF_EX_POST_ONLY,actual runtime,False,prohibited
+nodes_used,POST_CUTOFF_EX_POST_ONLY,allocated/used nodes,False,prohibited
+gpu_nodes_occupied,POST_CUTOFF_EX_POST_ONLY,allocated GPU nodes,False,prohibited
+nodelist,POST_CUTOFF_EX_POST_ONLY,future allocated-node evidence,False,prohibited
+shared_job_count,POST_CUTOFF_EX_POST_ONLY,realized sharing indicator,False,prohibited
+nodes_shared,POST_CUTOFF_EX_POST_ONLY,realized sharing indicator,False,prohibited
+jobs_shared,POST_CUTOFF_EX_POST_ONLY,realized sharing indicator,False,prohibited
+queue_wait,POST_CUTOFF_EX_POST_ONLY,realized wait duration,False,prohibited

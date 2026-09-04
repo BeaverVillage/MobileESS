@@ -1,0 +1,18 @@
+{
+  "stage": "PFR7",
+  "compute_debt": "D_C(t+1) = max(0, D_C(t) + C_ref(t) - C_exec(t))",
+  "compute_debt_unit": "H100-equivalent GPU-hour",
+  "energy_debt": "D_E(t+1) = max(0, D_E(t) + E_support(t) - E_repay(t))",
+  "energy_debt_unit": "kWh",
+  "energy_repayment_gate": "E_repay <= min(SOC, route/location, plug, D2, charging headroom, grid headroom)",
+  "recovery_window_gates": [
+    "terminal_compute_debt <= epsilon_C",
+    "terminal_energy_debt <= epsilon_E",
+    "recovery_peak <= preregistered_peak_limit"
+  ],
+  "ablations": {
+    "A-Debt0": "debt-aware recovery OFF",
+    "A-Debt1": "debt-aware recovery ON"
+  },
+  "contribution_status": "PROVISIONAL_UNTIL_PFR14"
+}

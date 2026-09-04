@@ -1,0 +1,88 @@
+{
+  "base_policy": "FIXED_PERIODIC",
+  "candidate_id": "W02_2025-01-13",
+  "canonical_pre_file_sha256": "deecff989d60223cb08d9070874a053f12ef7dc9e44a85554fb2821cd8ba6aba",
+  "canonical_pre_state_sha256": "4fd2b4e8a6ef052fd08454f9888ad1e08e2706ed99d1118cac6d96d33c8a5a7b",
+  "initial_service_authority_relpath": "../../SITING/FIXED_ESS_FINAL_SITE_AUTHORITY.json",
+  "initial_service_authority_sha256": "7a1009856160efda0f56269cd096e5f57465b5b185c182221481638e920b0a48",
+  "initial_service_sites": {"MESS01": "STA09", "MESS02": "IDC12", "MESS03": "STA07", "MESS04": "STA11"},
+  "controller_burn_in_steps": 0,
+  "evaluation_end_step_inclusive": 5471,
+  "evaluation_start_step": 3456,
+  "event_config": {
+    "full_replan_hard_flags": [
+      "GRID_HARD_RISK",
+      "WORKLOAD_DEADLINE_RISK"
+    ],
+    "hard_flags": [
+      "ACTIVE_PLAN_INFEASIBLE",
+      "MESS_TRANSIT_CONFLICT",
+      "SOC_HARD_RISK",
+      "GRID_HARD_RISK",
+      "WORKLOAD_DEADLINE_RISK"
+    ],
+    "local_repair_enabled": false,
+    "local_repair_horizon_steps": 12,
+    "max_refresh_steps": 6,
+    "soft_dwell_steps": 2,
+    "soft_rules": []
+  },
+  "event_triggered": false,
+  "fast_dispatch": {
+    "deadline_overrun_is_scientific_failure": false,
+    "development_host_deadline_seconds": 300,
+    "hard_time_limit_seconds": null,
+    "mip_gap": 0.03
+  },
+  "fixed_periodic_semantics": "No experimental soft/deviation trigger; periodic MAX_REFRESH plus universal fail-closed hard-safety handling.",
+  "fresh_exact_opendss_required": true,
+  "future_actual_used": false,
+  "future_plans_persisted": false,
+  "h0_only_commit_required": true,
+  "hard_event_binding": {
+    "ACTIVE_PLAN_INFEASIBLE": "shifted active slow-plan choice absent from current causal admissible model",
+    "GRID_HARD_RISK": "Fresh Exact OpenDSS hard-constraint failure; current issue is not committed",
+    "MESS_TRANSIT_CONFLICT": "shifted active MESS transit/occupancy no longer admissible",
+    "SOC_HARD_RISK": "reserved for fast-dispatch/SOC feasibility gate; scientific solve fails closed if unresolved",
+    "WORKLOAD_DEADLINE_RISK": "new/unplanned urgent job or shifted work choice no longer admissible"
+  },
+  "hard_safety_events_are_universal": true,
+  "local_repair_enabled": false,
+  "max_refresh_minutes": 30,
+  "max_refresh_steps": 6,
+  "method_config_sha256": "3f712ec02c4c5ebb6a424267b043f07469d29f4a4abeaea7fcdd8b765e13624a",
+  "method_id": "B5",
+  "paper_role": "MAIN_PERIODIC_BASELINE",
+  "planner": {
+    "full_replan_time_budget_seconds": 300.0,
+    "local_repair_time_budget_seconds": 300.0,
+    "online_global_3pct_certificate_claimed": false,
+    "planner_mip_gap": 0.1
+  },
+  "planner_execution_on_development_host": "BOUNDARY_SYNCHRONOUS_SCIENTIFIC_REPLAY_WITH_SEPARATE_SLOW_PLANNER_RUNTIME",
+  "policy_id": "FIXED30",
+  "r26_controller_parent": "PR2:r26/controller.py",
+  "r26_event_engine_parent": "PR2:r26/event_engine.py",
+  "runtime": {
+    "asynchronous_worker_cpu_budget_rule": "CHILDREN_INHERIT_POLICY_CPU_AFFINITY",
+    "outer_processes": 4,
+    "threads_per_process": 4,
+    "week_parallelism": 1
+  },
+  "schema_version": "mobileess.r26.w02_policy_production_config.v1",
+  "scored_issues": 2016,
+  "selection_window_pre_history_role": "PROVENANCE_ONLY",
+  "selection_window_pre_history_steps": 576,
+  "slot": "M2",
+  "slow_planner_horizon": {
+    "D12_sensitivity_26_vs_54": "DEFERRED_NOT_PART_OF_MAIN_W02_MATRIX",
+    "authority": "B5_NATIVE_FROZEN_H54",
+    "scientific_horizon_steps": 54,
+    "stage_duration_minutes": 5
+  },
+  "soft_metric_binding": {
+    "load_forecast_error_pct": "100*abs(current_observed_background_netP_kW - prior_issue_q50_h1_background_netP_kW)/max(1,abs(prior_issue_q50_h1_background_netP_kW)); first scored issue=0",
+    "soc_reserve_margin_kwh": "min_mess(current_PRE_SOC_kWh - 440.0)"
+  },
+  "threads": 4
+}

@@ -1,0 +1,1061 @@
+{
+  "artifact_id": "V16_3_AIDC_TOPOLOGY_CUTSET_AUDIT",
+  "firewall": {
+    "AIDC_site_changes": 0,
+    "H_changes": 0,
+    "J_I_changes": 0,
+    "May_June_result_dependent_tuning": 0,
+    "beta_changes": 0,
+    "historical_result_changes": 0,
+    "retraining_calls": 0,
+    "rho_changes": 0,
+    "scientific_authority_changes": 0
+  },
+  "line_l10_cut_set": {
+    "AIDC_downstream_of_line_l10": [
+      "AIDC02",
+      "AIDC03",
+      "AIDC04",
+      "AIDC05",
+      "AIDC06",
+      "AIDC07",
+      "AIDC08",
+      "AIDC09",
+      "AIDC10",
+      "AIDC11",
+      "AIDC12"
+    ],
+    "AIDC_upstream_of_line_l10": [
+      "AIDC01"
+    ],
+    "downstream_count": 11,
+    "upstream_count": 1
+  },
+  "root_bus": "150",
+  "sites": [
+    {
+      "AIDC_ID": "AIDC01",
+      "PCC_bus": "idc_idc01_pcc",
+      "feeder_subtree_or_electrical_zone": "line.sw1::A",
+      "host_bus": "149",
+      "line_l10_cut_side": "UPSTREAM",
+      "line_l10_on_all_phase_paths": false,
+      "mean_electrical_distance_from_line_l10_model_units": null,
+      "mean_electrical_distance_from_source_model_units": 0.00011611388204503988,
+      "phase_connectivity": [
+        "A",
+        "B",
+        "C"
+      ],
+      "phase_paths": {
+        "A": {
+          "electrical_distance_from_line_l10_model_units": null,
+          "electrical_distance_from_source_model_units": 0.00011611388204503988,
+          "line_l10_on_path": false,
+          "path_branch_count": 3,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::A",
+            "line.sw1::A",
+            "transformer.idc_idc01_tx::A"
+          ]
+        },
+        "B": {
+          "electrical_distance_from_line_l10_model_units": null,
+          "electrical_distance_from_source_model_units": 0.00011611388204503988,
+          "line_l10_on_path": false,
+          "path_branch_count": 3,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::B",
+            "line.sw1::B",
+            "transformer.idc_idc01_tx::B"
+          ]
+        },
+        "C": {
+          "electrical_distance_from_line_l10_model_units": null,
+          "electrical_distance_from_source_model_units": 0.00011611388204503988,
+          "line_l10_on_path": false,
+          "path_branch_count": 3,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::C",
+            "line.sw1::C",
+            "transformer.idc_idc01_tx::C"
+          ]
+        }
+      }
+    },
+    {
+      "AIDC_ID": "AIDC02",
+      "PCC_bus": "idc_idc02_pcc",
+      "feeder_subtree_or_electrical_zone": "line.sw1::A",
+      "host_bus": "300_open",
+      "line_l10_cut_side": "DOWNSTREAM",
+      "line_l10_on_all_phase_paths": true,
+      "mean_electrical_distance_from_line_l10_model_units": 0.00024557050456494275,
+      "mean_electrical_distance_from_source_model_units": 0.0002912693071379778,
+      "phase_connectivity": [
+        "A",
+        "B",
+        "C"
+      ],
+      "phase_paths": {
+        "A": {
+          "electrical_distance_from_line_l10_model_units": 0.0002456442765043659,
+          "electrical_distance_from_source_model_units": 0.0002917903804193945,
+          "line_l10_on_path": true,
+          "path_branch_count": 19,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::A",
+            "line.sw1::A",
+            "line.l115::A",
+            "line.l3::A",
+            "line.l7::A",
+            "line.l10::A",
+            "line.l13::A",
+            "line.sw3::A",
+            "line.l114::A",
+            "line.l36::A",
+            "line.l41::A",
+            "line.l43::A",
+            "line.l45::A",
+            "line.l48::A",
+            "line.l49::A",
+            "line.l50::A",
+            "line.l51::A",
+            "line.sw7::A",
+            "transformer.idc_idc02_tx::A"
+          ]
+        },
+        "B": {
+          "electrical_distance_from_line_l10_model_units": 0.00024455121845167794,
+          "electrical_distance_from_source_model_units": 0.0002897619526082712,
+          "line_l10_on_path": true,
+          "path_branch_count": 19,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::B",
+            "line.sw1::B",
+            "line.l115::B",
+            "line.l3::B",
+            "line.l7::B",
+            "line.l10::B",
+            "line.l13::B",
+            "line.sw3::B",
+            "line.l114::B",
+            "line.l36::B",
+            "line.l41::B",
+            "line.l43::B",
+            "line.l45::B",
+            "line.l48::B",
+            "line.l49::B",
+            "line.l50::B",
+            "line.l51::B",
+            "line.sw7::B",
+            "transformer.idc_idc02_tx::B"
+          ]
+        },
+        "C": {
+          "electrical_distance_from_line_l10_model_units": 0.00024651601873878446,
+          "electrical_distance_from_source_model_units": 0.0002922555883862677,
+          "line_l10_on_path": true,
+          "path_branch_count": 19,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::C",
+            "line.sw1::C",
+            "line.l115::C",
+            "line.l3::C",
+            "line.l7::C",
+            "line.l10::C",
+            "line.l13::C",
+            "line.sw3::C",
+            "line.l114::C",
+            "line.l36::C",
+            "line.l41::C",
+            "line.l43::C",
+            "line.l45::C",
+            "line.l48::C",
+            "line.l49::C",
+            "line.l50::C",
+            "line.l51::C",
+            "line.sw7::C",
+            "transformer.idc_idc02_tx::C"
+          ]
+        }
+      }
+    },
+    {
+      "AIDC_ID": "AIDC03",
+      "PCC_bus": "idc_idc03_pcc",
+      "feeder_subtree_or_electrical_zone": "line.sw1::A",
+      "host_bus": "35",
+      "line_l10_cut_side": "DOWNSTREAM",
+      "line_l10_on_all_phase_paths": true,
+      "mean_electrical_distance_from_line_l10_model_units": 0.00016180051111378593,
+      "mean_electrical_distance_from_source_model_units": 0.00020749931368682097,
+      "phase_connectivity": [
+        "A",
+        "B",
+        "C"
+      ],
+      "phase_paths": {
+        "A": {
+          "electrical_distance_from_line_l10_model_units": 0.00016147770378824728,
+          "electrical_distance_from_source_model_units": 0.00020762380770327589,
+          "line_l10_on_path": true,
+          "path_branch_count": 10,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::A",
+            "line.sw1::A",
+            "line.l115::A",
+            "line.l3::A",
+            "line.l7::A",
+            "line.l10::A",
+            "line.l13::A",
+            "line.sw3::A",
+            "line.l114::A",
+            "transformer.idc_idc03_tx::A"
+          ]
+        },
+        "B": {
+          "electrical_distance_from_line_l10_model_units": 0.000161676017097331,
+          "electrical_distance_from_source_model_units": 0.00020688675125392431,
+          "line_l10_on_path": true,
+          "path_branch_count": 10,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::B",
+            "line.sw1::B",
+            "line.l115::B",
+            "line.l3::B",
+            "line.l7::B",
+            "line.l10::B",
+            "line.l13::B",
+            "line.sw3::B",
+            "line.l114::B",
+            "transformer.idc_idc03_tx::B"
+          ]
+        },
+        "C": {
+          "electrical_distance_from_line_l10_model_units": 0.00016224781245577949,
+          "electrical_distance_from_source_model_units": 0.00020798738210326274,
+          "line_l10_on_path": true,
+          "path_branch_count": 10,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::C",
+            "line.sw1::C",
+            "line.l115::C",
+            "line.l3::C",
+            "line.l7::C",
+            "line.l10::C",
+            "line.l13::C",
+            "line.sw3::C",
+            "line.l114::C",
+            "transformer.idc_idc03_tx::C"
+          ]
+        }
+      }
+    },
+    {
+      "AIDC_ID": "AIDC04",
+      "PCC_bus": "idc_idc04_pcc",
+      "feeder_subtree_or_electrical_zone": "line.sw1::A",
+      "host_bus": "50",
+      "line_l10_cut_side": "DOWNSTREAM",
+      "line_l10_on_all_phase_paths": true,
+      "mean_electrical_distance_from_line_l10_model_units": 0.00021701243799581184,
+      "mean_electrical_distance_from_source_model_units": 0.0002627112405688469,
+      "phase_connectivity": [
+        "A",
+        "B",
+        "C"
+      ],
+      "phase_paths": {
+        "A": {
+          "electrical_distance_from_line_l10_model_units": 0.00021706073051370485,
+          "electrical_distance_from_source_model_units": 0.00026320683442873345,
+          "line_l10_on_path": true,
+          "path_branch_count": 16,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::A",
+            "line.sw1::A",
+            "line.l115::A",
+            "line.l3::A",
+            "line.l7::A",
+            "line.l10::A",
+            "line.l13::A",
+            "line.sw3::A",
+            "line.l114::A",
+            "line.l36::A",
+            "line.l41::A",
+            "line.l43::A",
+            "line.l45::A",
+            "line.l48::A",
+            "line.l49::A",
+            "transformer.idc_idc04_tx::A"
+          ]
+        },
+        "B": {
+          "electrical_distance_from_line_l10_model_units": 0.00021629819464282312,
+          "electrical_distance_from_source_model_units": 0.0002615089287994164,
+          "line_l10_on_path": true,
+          "path_branch_count": 16,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::B",
+            "line.sw1::B",
+            "line.l115::B",
+            "line.l3::B",
+            "line.l7::B",
+            "line.l10::B",
+            "line.l13::B",
+            "line.sw3::B",
+            "line.l114::B",
+            "line.l36::B",
+            "line.l41::B",
+            "line.l43::B",
+            "line.l45::B",
+            "line.l48::B",
+            "line.l49::B",
+            "transformer.idc_idc04_tx::B"
+          ]
+        },
+        "C": {
+          "electrical_distance_from_line_l10_model_units": 0.00021767838883090753,
+          "electrical_distance_from_source_model_units": 0.0002634179584783908,
+          "line_l10_on_path": true,
+          "path_branch_count": 16,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::C",
+            "line.sw1::C",
+            "line.l115::C",
+            "line.l3::C",
+            "line.l7::C",
+            "line.l10::C",
+            "line.l13::C",
+            "line.sw3::C",
+            "line.l114::C",
+            "line.l36::C",
+            "line.l41::C",
+            "line.l43::C",
+            "line.l45::C",
+            "line.l48::C",
+            "line.l49::C",
+            "transformer.idc_idc04_tx::C"
+          ]
+        }
+      }
+    },
+    {
+      "AIDC_ID": "AIDC05",
+      "PCC_bus": "idc_idc05_pcc",
+      "feeder_subtree_or_electrical_zone": "line.sw1::A",
+      "host_bus": "61s",
+      "line_l10_cut_side": "DOWNSTREAM",
+      "line_l10_on_all_phase_paths": true,
+      "mean_electrical_distance_from_line_l10_model_units": 0.00020654138383799343,
+      "mean_electrical_distance_from_source_model_units": 0.00025224018641102847,
+      "phase_connectivity": [
+        "A",
+        "B",
+        "C"
+      ],
+      "phase_paths": {
+        "A": {
+          "electrical_distance_from_line_l10_model_units": 0.0002066253001928229,
+          "electrical_distance_from_source_model_units": 0.0002527714041078515,
+          "line_l10_on_path": true,
+          "path_branch_count": 15,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::A",
+            "line.sw1::A",
+            "line.l115::A",
+            "line.l3::A",
+            "line.l7::A",
+            "line.l10::A",
+            "line.sw2::A",
+            "line.l116::A",
+            "line.l52::A",
+            "line.l53::A",
+            "line.l55::A",
+            "line.l58::A",
+            "line.l60::A",
+            "line.sw6::A",
+            "transformer.idc_idc05_tx::A"
+          ]
+        },
+        "B": {
+          "electrical_distance_from_line_l10_model_units": 0.00020686154851496768,
+          "electrical_distance_from_source_model_units": 0.00025207228267156096,
+          "line_l10_on_path": true,
+          "path_branch_count": 15,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::B",
+            "line.sw1::B",
+            "line.l115::B",
+            "line.l3::B",
+            "line.l7::B",
+            "line.l10::B",
+            "line.sw2::B",
+            "line.l116::B",
+            "line.l52::B",
+            "line.l53::B",
+            "line.l55::B",
+            "line.l58::B",
+            "line.l60::B",
+            "line.sw6::B",
+            "transformer.idc_idc05_tx::B"
+          ]
+        },
+        "C": {
+          "electrical_distance_from_line_l10_model_units": 0.00020613730280618966,
+          "electrical_distance_from_source_model_units": 0.00025187687245367294,
+          "line_l10_on_path": true,
+          "path_branch_count": 15,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::C",
+            "line.sw1::C",
+            "line.l115::C",
+            "line.l3::C",
+            "line.l7::C",
+            "line.l10::C",
+            "line.sw2::C",
+            "line.l116::C",
+            "line.l52::C",
+            "line.l53::C",
+            "line.l55::C",
+            "line.l58::C",
+            "line.l60::C",
+            "line.sw6::C",
+            "transformer.idc_idc05_tx::C"
+          ]
+        }
+      }
+    },
+    {
+      "AIDC_ID": "AIDC06",
+      "PCC_bus": "idc_idc06_pcc",
+      "feeder_subtree_or_electrical_zone": "line.sw1::A",
+      "host_bus": "48",
+      "line_l10_cut_side": "DOWNSTREAM",
+      "line_l10_on_all_phase_paths": true,
+      "mean_electrical_distance_from_line_l10_model_units": 0.00020368542116221938,
+      "mean_electrical_distance_from_source_model_units": 0.0002493842237352544,
+      "phase_connectivity": [
+        "A",
+        "B",
+        "C"
+      ],
+      "phase_paths": {
+        "A": {
+          "electrical_distance_from_line_l10_model_units": 0.00020372182328339832,
+          "electrical_distance_from_source_model_units": 0.00024986792719842695,
+          "line_l10_on_path": true,
+          "path_branch_count": 15,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::A",
+            "line.sw1::A",
+            "line.l115::A",
+            "line.l3::A",
+            "line.l7::A",
+            "line.l10::A",
+            "line.l13::A",
+            "line.sw3::A",
+            "line.l114::A",
+            "line.l36::A",
+            "line.l41::A",
+            "line.l43::A",
+            "line.l45::A",
+            "line.l47::A",
+            "transformer.idc_idc06_tx::A"
+          ]
+        },
+        "B": {
+          "electrical_distance_from_line_l10_model_units": 0.0002031135310973595,
+          "electrical_distance_from_source_model_units": 0.00024832426525395277,
+          "line_l10_on_path": true,
+          "path_branch_count": 15,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::B",
+            "line.sw1::B",
+            "line.l115::B",
+            "line.l3::B",
+            "line.l7::B",
+            "line.l10::B",
+            "line.l13::B",
+            "line.sw3::B",
+            "line.l114::B",
+            "line.l36::B",
+            "line.l41::B",
+            "line.l43::B",
+            "line.l45::B",
+            "line.l47::B",
+            "transformer.idc_idc06_tx::B"
+          ]
+        },
+        "C": {
+          "electrical_distance_from_line_l10_model_units": 0.0002042209091059003,
+          "electrical_distance_from_source_model_units": 0.00024996047875338353,
+          "line_l10_on_path": true,
+          "path_branch_count": 15,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::C",
+            "line.sw1::C",
+            "line.l115::C",
+            "line.l3::C",
+            "line.l7::C",
+            "line.l10::C",
+            "line.l13::C",
+            "line.sw3::C",
+            "line.l114::C",
+            "line.l36::C",
+            "line.l41::C",
+            "line.l43::C",
+            "line.l45::C",
+            "line.l47::C",
+            "transformer.idc_idc06_tx::C"
+          ]
+        }
+      }
+    },
+    {
+      "AIDC_ID": "AIDC07",
+      "PCC_bus": "idc_idc07_pcc",
+      "feeder_subtree_or_electrical_zone": "line.sw1::A",
+      "host_bus": "250",
+      "line_l10_cut_side": "DOWNSTREAM",
+      "line_l10_on_all_phase_paths": true,
+      "mean_electrical_distance_from_line_l10_model_units": 0.00021891612418917797,
+      "mean_electrical_distance_from_source_model_units": 0.000264614926762213,
+      "phase_connectivity": [
+        "A",
+        "B",
+        "C"
+      ],
+      "phase_paths": {
+        "A": {
+          "electrical_distance_from_line_l10_model_units": 0.000217817970252184,
+          "electrical_distance_from_source_model_units": 0.0002639640741672126,
+          "line_l10_on_path": true,
+          "path_branch_count": 15,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::A",
+            "line.sw1::A",
+            "line.l115::A",
+            "line.l3::A",
+            "line.l7::A",
+            "line.l10::A",
+            "line.l13::A",
+            "line.l19::A",
+            "line.l22::A",
+            "line.l24::A",
+            "line.l26::A",
+            "line.l30::A",
+            "line.l31::A",
+            "line.l32::A",
+            "transformer.idc_idc07_tx::A"
+          ]
+        },
+        "B": {
+          "electrical_distance_from_line_l10_model_units": 0.00021900785010668642,
+          "electrical_distance_from_source_model_units": 0.0002642185842632797,
+          "line_l10_on_path": true,
+          "path_branch_count": 15,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::B",
+            "line.sw1::B",
+            "line.l115::B",
+            "line.l3::B",
+            "line.l7::B",
+            "line.l10::B",
+            "line.l13::B",
+            "line.l19::B",
+            "line.l22::B",
+            "line.l24::B",
+            "line.l26::B",
+            "line.l30::B",
+            "line.l31::B",
+            "line.l32::B",
+            "transformer.idc_idc07_tx::B"
+          ]
+        },
+        "C": {
+          "electrical_distance_from_line_l10_model_units": 0.00021992255220866348,
+          "electrical_distance_from_source_model_units": 0.0002656621218561467,
+          "line_l10_on_path": true,
+          "path_branch_count": 15,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::C",
+            "line.sw1::C",
+            "line.l115::C",
+            "line.l3::C",
+            "line.l7::C",
+            "line.l10::C",
+            "line.l13::C",
+            "line.l19::C",
+            "line.l22::C",
+            "line.l24::C",
+            "line.l26::C",
+            "line.l30::C",
+            "line.l31::C",
+            "line.l32::C",
+            "transformer.idc_idc07_tx::C"
+          ]
+        }
+      }
+    },
+    {
+      "AIDC_ID": "AIDC08",
+      "PCC_bus": "idc_idc08_pcc",
+      "feeder_subtree_or_electrical_zone": "line.sw1::A",
+      "host_bus": "21",
+      "line_l10_cut_side": "DOWNSTREAM",
+      "line_l10_on_all_phase_paths": true,
+      "mean_electrical_distance_from_line_l10_model_units": 0.00015894454843801188,
+      "mean_electrical_distance_from_source_model_units": 0.00020464335101104693,
+      "phase_connectivity": [
+        "A",
+        "B",
+        "C"
+      ],
+      "phase_paths": {
+        "A": {
+          "electrical_distance_from_line_l10_model_units": 0.00015848698429759775,
+          "electrical_distance_from_source_model_units": 0.00020463308821262635,
+          "line_l10_on_path": true,
+          "path_branch_count": 9,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::A",
+            "line.sw1::A",
+            "line.l115::A",
+            "line.l3::A",
+            "line.l7::A",
+            "line.l10::A",
+            "line.l13::A",
+            "line.l19::A",
+            "transformer.idc_idc08_tx::A"
+          ]
+        },
+        "B": {
+          "electrical_distance_from_line_l10_model_units": 0.00015898276757030707,
+          "electrical_distance_from_source_model_units": 0.00020419350172690037,
+          "line_l10_on_path": true,
+          "path_branch_count": 9,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::B",
+            "line.sw1::B",
+            "line.l115::B",
+            "line.l3::B",
+            "line.l7::B",
+            "line.l10::B",
+            "line.l13::B",
+            "line.l19::B",
+            "transformer.idc_idc08_tx::B"
+          ]
+        },
+        "C": {
+          "electrical_distance_from_line_l10_model_units": 0.00015936389344613087,
+          "electrical_distance_from_source_model_units": 0.0002051034630936141,
+          "line_l10_on_path": true,
+          "path_branch_count": 9,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::C",
+            "line.sw1::C",
+            "line.l115::C",
+            "line.l3::C",
+            "line.l7::C",
+            "line.l10::C",
+            "line.l13::C",
+            "line.l19::C",
+            "transformer.idc_idc08_tx::C"
+          ]
+        }
+      }
+    },
+    {
+      "AIDC_ID": "AIDC09",
+      "PCC_bus": "idc_idc09_pcc",
+      "feeder_subtree_or_electrical_zone": "line.sw1::A",
+      "host_bus": "152",
+      "line_l10_cut_side": "DOWNSTREAM",
+      "line_l10_on_all_phase_paths": true,
+      "mean_electrical_distance_from_line_l10_model_units": 0.00011610788197004034,
+      "mean_electrical_distance_from_source_model_units": 0.0001618066845430754,
+      "phase_connectivity": [
+        "A",
+        "B",
+        "C"
+      ],
+      "phase_paths": {
+        "A": {
+          "electrical_distance_from_line_l10_model_units": 0.00011610788197004034,
+          "electrical_distance_from_source_model_units": 0.00016225398588506896,
+          "line_l10_on_path": true,
+          "path_branch_count": 8,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::A",
+            "line.sw1::A",
+            "line.l115::A",
+            "line.l3::A",
+            "line.l7::A",
+            "line.l10::A",
+            "line.sw2::A",
+            "transformer.idc_idc09_tx::A"
+          ]
+        },
+        "B": {
+          "electrical_distance_from_line_l10_model_units": 0.00011610788197004034,
+          "electrical_distance_from_source_model_units": 0.00016131861612663363,
+          "line_l10_on_path": true,
+          "path_branch_count": 8,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::B",
+            "line.sw1::B",
+            "line.l115::B",
+            "line.l3::B",
+            "line.l7::B",
+            "line.l10::B",
+            "line.sw2::B",
+            "transformer.idc_idc09_tx::B"
+          ]
+        },
+        "C": {
+          "electrical_distance_from_line_l10_model_units": 0.00011610788197004034,
+          "electrical_distance_from_source_model_units": 0.0001618474516175236,
+          "line_l10_on_path": true,
+          "path_branch_count": 8,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::C",
+            "line.sw1::C",
+            "line.l115::C",
+            "line.l3::C",
+            "line.l7::C",
+            "line.l10::C",
+            "line.sw2::C",
+            "transformer.idc_idc09_tx::C"
+          ]
+        }
+      }
+    },
+    {
+      "AIDC_ID": "AIDC10",
+      "PCC_bus": "idc_idc10_pcc",
+      "feeder_subtree_or_electrical_zone": "line.sw1::A",
+      "host_bus": "81",
+      "line_l10_cut_side": "DOWNSTREAM",
+      "line_l10_on_all_phase_paths": true,
+      "mean_electrical_distance_from_line_l10_model_units": 0.0002608513809524413,
+      "mean_electrical_distance_from_source_model_units": 0.00030655018352547633,
+      "phase_connectivity": [
+        "A",
+        "B",
+        "C"
+      ],
+      "phase_paths": {
+        "A": {
+          "electrical_distance_from_line_l10_model_units": 0.0002617342589759343,
+          "electrical_distance_from_source_model_units": 0.0003078803628909629,
+          "line_l10_on_path": true,
+          "path_branch_count": 22,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::A",
+            "line.sw1::A",
+            "line.l115::A",
+            "line.l3::A",
+            "line.l7::A",
+            "line.l10::A",
+            "line.sw2::A",
+            "line.l116::A",
+            "line.l52::A",
+            "line.l53::A",
+            "line.l55::A",
+            "line.l58::A",
+            "line.sw4::A",
+            "transformer.reg4a::A",
+            "line.l117::A",
+            "line.l67::A",
+            "line.l73::A",
+            "line.l76::A",
+            "line.l78::A",
+            "line.l80::A",
+            "line.l81::A",
+            "transformer.idc_idc10_tx::A"
+          ]
+        },
+        "B": {
+          "electrical_distance_from_line_l10_model_units": 0.0002611945481386012,
+          "electrical_distance_from_source_model_units": 0.0003064052822951945,
+          "line_l10_on_path": true,
+          "path_branch_count": 22,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::B",
+            "line.sw1::B",
+            "line.l115::B",
+            "line.l3::B",
+            "line.l7::B",
+            "line.l10::B",
+            "line.sw2::B",
+            "line.l116::B",
+            "line.l52::B",
+            "line.l53::B",
+            "line.l55::B",
+            "line.l58::B",
+            "line.sw4::B",
+            "transformer.reg4b::B",
+            "line.l117::B",
+            "line.l67::B",
+            "line.l73::B",
+            "line.l76::B",
+            "line.l78::B",
+            "line.l80::B",
+            "line.l81::B",
+            "transformer.idc_idc10_tx::B"
+          ]
+        },
+        "C": {
+          "electrical_distance_from_line_l10_model_units": 0.00025962533574278837,
+          "electrical_distance_from_source_model_units": 0.0003053649053902716,
+          "line_l10_on_path": true,
+          "path_branch_count": 22,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::C",
+            "line.sw1::C",
+            "line.l115::C",
+            "line.l3::C",
+            "line.l7::C",
+            "line.l10::C",
+            "line.sw2::C",
+            "line.l116::C",
+            "line.l52::C",
+            "line.l53::C",
+            "line.l55::C",
+            "line.l58::C",
+            "line.sw4::C",
+            "transformer.reg4c::C",
+            "line.l117::C",
+            "line.l67::C",
+            "line.l73::C",
+            "line.l76::C",
+            "line.l78::C",
+            "line.l80::C",
+            "line.l81::C",
+            "transformer.idc_idc10_tx::C"
+          ]
+        }
+      }
+    },
+    {
+      "AIDC_ID": "AIDC11",
+      "PCC_bus": "idc_idc11_pcc",
+      "feeder_subtree_or_electrical_zone": "line.sw1::A",
+      "host_bus": "79",
+      "line_l10_cut_side": "DOWNSTREAM",
+      "line_l10_on_all_phase_paths": true,
+      "mean_electrical_distance_from_line_l10_model_units": 0.00024466857479736473,
+      "mean_electrical_distance_from_source_model_units": 0.0002903673773703998,
+      "phase_connectivity": [
+        "A",
+        "B",
+        "C"
+      ],
+      "phase_paths": {
+        "A": {
+          "electrical_distance_from_line_l10_model_units": 0.00024539303359556833,
+          "electrical_distance_from_source_model_units": 0.000291539137510597,
+          "line_l10_on_path": true,
+          "path_branch_count": 21,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::A",
+            "line.sw1::A",
+            "line.l115::A",
+            "line.l3::A",
+            "line.l7::A",
+            "line.l10::A",
+            "line.sw2::A",
+            "line.l116::A",
+            "line.l52::A",
+            "line.l53::A",
+            "line.l55::A",
+            "line.l58::A",
+            "line.sw4::A",
+            "transformer.reg4a::A",
+            "line.l117::A",
+            "line.l67::A",
+            "line.l73::A",
+            "line.l76::A",
+            "line.l78::A",
+            "line.l79::A",
+            "transformer.idc_idc11_tx::A"
+          ]
+        },
+        "B": {
+          "electrical_distance_from_line_l10_model_units": 0.0002449973036446576,
+          "electrical_distance_from_source_model_units": 0.00029020803780125087,
+          "line_l10_on_path": true,
+          "path_branch_count": 21,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::B",
+            "line.sw1::B",
+            "line.l115::B",
+            "line.l3::B",
+            "line.l7::B",
+            "line.l10::B",
+            "line.sw2::B",
+            "line.l116::B",
+            "line.l52::B",
+            "line.l53::B",
+            "line.l55::B",
+            "line.l58::B",
+            "line.sw4::B",
+            "transformer.reg4b::B",
+            "line.l117::B",
+            "line.l67::B",
+            "line.l73::B",
+            "line.l76::B",
+            "line.l78::B",
+            "line.l79::B",
+            "transformer.idc_idc11_tx::B"
+          ]
+        },
+        "C": {
+          "electrical_distance_from_line_l10_model_units": 0.0002436153871518683,
+          "electrical_distance_from_source_model_units": 0.0002893549567993515,
+          "line_l10_on_path": true,
+          "path_branch_count": 21,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::C",
+            "line.sw1::C",
+            "line.l115::C",
+            "line.l3::C",
+            "line.l7::C",
+            "line.l10::C",
+            "line.sw2::C",
+            "line.l116::C",
+            "line.l52::C",
+            "line.l53::C",
+            "line.l55::C",
+            "line.l58::C",
+            "line.sw4::C",
+            "transformer.reg4c::C",
+            "line.l117::C",
+            "line.l67::C",
+            "line.l73::C",
+            "line.l76::C",
+            "line.l78::C",
+            "line.l79::C",
+            "transformer.idc_idc11_tx::C"
+          ]
+        }
+      }
+    },
+    {
+      "AIDC_ID": "AIDC12",
+      "PCC_bus": "idc_idc12_pcc",
+      "feeder_subtree_or_electrical_zone": "line.sw1::A",
+      "host_bus": "108",
+      "line_l10_cut_side": "DOWNSTREAM",
+      "line_l10_on_all_phase_paths": true,
+      "mean_electrical_distance_from_line_l10_model_units": 0.00024086102905634255,
+      "mean_electrical_distance_from_source_model_units": 0.0002865598316293776,
+      "phase_connectivity": [
+        "A",
+        "B",
+        "C"
+      ],
+      "phase_paths": {
+        "A": {
+          "electrical_distance_from_line_l10_model_units": 0.00024133647614503348,
+          "electrical_distance_from_source_model_units": 0.0002874825800600621,
+          "line_l10_on_path": true,
+          "path_branch_count": 21,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::A",
+            "line.sw1::A",
+            "line.l115::A",
+            "line.l3::A",
+            "line.l7::A",
+            "line.l10::A",
+            "line.sw2::A",
+            "line.l116::A",
+            "line.l52::A",
+            "line.l53::A",
+            "line.l55::A",
+            "line.l58::A",
+            "line.sw4::A",
+            "transformer.reg4a::A",
+            "line.l117::A",
+            "line.l68::A",
+            "line.sw5::A",
+            "line.l118::A",
+            "line.l101::A",
+            "line.l105::A",
+            "transformer.idc_idc12_tx::A"
+          ]
+        },
+        "B": {
+          "electrical_distance_from_line_l10_model_units": 0.00024139809724511125,
+          "electrical_distance_from_source_model_units": 0.0002866088314017045,
+          "line_l10_on_path": true,
+          "path_branch_count": 21,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::B",
+            "line.sw1::B",
+            "line.l115::B",
+            "line.l3::B",
+            "line.l7::B",
+            "line.l10::B",
+            "line.sw2::B",
+            "line.l116::B",
+            "line.l52::B",
+            "line.l53::B",
+            "line.l55::B",
+            "line.l58::B",
+            "line.sw4::B",
+            "transformer.reg4b::B",
+            "line.l117::B",
+            "line.l68::B",
+            "line.sw5::B",
+            "line.l118::B",
+            "line.l101::B",
+            "line.l105::B",
+            "transformer.idc_idc12_tx::B"
+          ]
+        },
+        "C": {
+          "electrical_distance_from_line_l10_model_units": 0.0002398485137788829,
+          "electrical_distance_from_source_model_units": 0.00028558808342636616,
+          "line_l10_on_path": true,
+          "path_branch_count": 21,
+          "root_to_AIDC_path": [
+            "transformer.reg1a::C",
+            "line.sw1::C",
+            "line.l115::C",
+            "line.l3::C",
+            "line.l7::C",
+            "line.l10::C",
+            "line.sw2::C",
+            "line.l116::C",
+            "line.l52::C",
+            "line.l53::C",
+            "line.l55::C",
+            "line.l58::C",
+            "line.sw4::C",
+            "transformer.reg4c::C",
+            "line.l117::C",
+            "line.l68::C",
+            "line.sw5::C",
+            "line.l118::C",
+            "line.l101::C",
+            "line.l105::C",
+            "transformer.idc_idc12_tx::C"
+          ]
+        }
+      }
+    }
+  ],
+  "source": {
+    "PCC_asset": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix\\dayahead\\artifacts\\v16_2\\Generated_ThreePhase_PCC_v4.dss",
+    "PCC_asset_sha256": "ba13e3081df606c18d61f1e02300b23f7be00dc2d22bc4c8064d04f40beec719"
+  },
+  "status": "PASS_READ_ONLY",
+  "topology_identity": {
+    "all_12_AIDCs_downstream_of_line_l10": false,
+    "explanation": "For a radial feeder, line.l10 flow equals the sum of downstream injections. Moving equal active power among AIDCs on the same downstream side leaves that cut sum unchanged; only temporal/system-total AIDC changes can alter line.l10 flow.",
+    "spatial_redistribution_with_conserved_total_active_power_can_change_line_l10_flow": true
+  }
+}

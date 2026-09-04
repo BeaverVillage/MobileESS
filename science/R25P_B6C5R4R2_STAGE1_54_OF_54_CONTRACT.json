@@ -1,0 +1,39 @@
+{
+  "release": "R25P_B6C5R4R2_STAGE1_54_OF_54_UNLIMITED",
+  "parent": "R25O_B6C5R4R1_RC_DUAL_RECOVERY",
+  "authoritative_issue_axis": [113, 166],
+  "issue_count": 54,
+  "resume_issue": 113,
+  "target_global_gap": 0.03,
+  "threads_per_process": 4,
+  "processes_in_stage1_rolling_chain": 1,
+  "limits": {
+    "root_column_generation_wall_clock": null,
+    "root_column_generation_iterations": null,
+    "restricted_integer_master_wall_clock": null,
+    "fixed_integer_continuous_polish_wall_clock": null,
+    "branch_and_price_wall_clock": null,
+    "branch_and_price_nodes": null,
+    "child_column_generation_wall_clock": null,
+    "child_column_generation_iterations": null
+  },
+  "termination": {
+    "per_issue": "global 3% certificate plus numerical and Fresh Exact OpenDSS gates",
+    "whole_run": "54 consecutive h0-only PRE-to-POST commits",
+    "certificate_failure_commits_physical_h0": false
+  },
+  "repairs": {
+    "projected_constant_voltage_output_supported": true,
+    "polish_optimal_status_not_global_certificate": true,
+    "certificate_fail_closed_before_extraction": true
+  },
+  "scientific_contract": {
+    "horizon_steps": 54,
+    "cadence_minutes": 5,
+    "feasible_set_changed": false,
+    "objective_changed": false,
+    "causality_changed": false,
+    "gap_semantics_changed": false
+  },
+  "next_after_pass": "annual monthly 48h causal burn-in runner: 4 processes x 4 Gurobi threads"
+}

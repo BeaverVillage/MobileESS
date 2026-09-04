@@ -1,0 +1,106 @@
+{
+  "Eagle_absolute_kW_to_H100_transfer_calls": 0,
+  "June_result_content_reads": 0,
+  "June_scientific_input_reads": 0,
+  "May_result_content_reads": 0,
+  "May_scientific_input_reads": 0,
+  "OpenDSS_calls_inside_Benders": 0,
+  "U2_statistics": {
+    "U2_jobs": 67874,
+    "energy_negative": 0,
+    "energy_null": 67871,
+    "energy_positive": 0,
+    "energy_zero": 3,
+    "joule_to_wh_max_abs_error": 0.0,
+    "multi_gpu_node": 4,
+    "multi_nodelist": 4,
+    "multi_shared_node": 102,
+    "null_fraction": 0.999955800453782,
+    "positive_fraction": 0.0,
+    "zero_fraction": 4.4199546217992164e-05
+  },
+  "arbitrary_flexible_scaling_calls": 0,
+  "classification": "KESTREL_NODE_ENERGY_NOT_IDENTIFIABLE",
+  "datacard": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR HPC Kestrel Jobs Data\\datacard.md",
+    "sha256": "0139b75b80cd3029e0af54e22fc0dbad3080e92a8a7a602f1bd62cd7a36f62e9"
+  },
+  "direct_job_power_authorized": false,
+  "direct_node_interval_power_authorized": false,
+  "effect_selected_power_parameters": 0,
+  "fields": {
+    "consumed_energy_joules": {
+      "Slurm_field": "ConsumedEnergy",
+      "type": "formatted string",
+      "unit": "J"
+    },
+    "consumed_energy_raw_joules": {
+      "Slurm_field": "ConsumedEnergyRaw",
+      "type": "double",
+      "unit": "J"
+    },
+    "consumed_energy_raw_watt_hours": {
+      "source": "ConsumedEnergyRaw / 3600",
+      "type": "derived double",
+      "unit": "Wh"
+    }
+  },
+  "grid_benefit_selected_power_parameters": 0,
+  "multi_node_semantics": "single scalar per parent Slurm row; no per-node energy array, reset trace, or allocation record is exposed",
+  "remaining_April_day_runs": 0,
+  "reset_or_wrap_audit": "NO_NEGATIVE_VALUES_BUT_NULL_ZERO_ONLY_CANNOT_VALIDATE_COUNTER_BEHAVIOR_FOR_U2",
+  "rowwise_Eagle_to_Kestrel_merges": 0,
+  "schema": "V17_KESTREL_NATIVE_ENERGY_FIELD_AUDIT_V1",
+  "source": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+    "sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f"
+  },
+  "source_semantics": "Slurm-reported energy from node-level power monitoring; public datacard does not document shared-job attribution or expose per-node time series",
+  "status": "PASS_FIELD_AUDIT_FAIL_CLOSED_NO_POSITIVE_U2_ENERGY",
+  "training_members_opened": [
+    {
+      "member": "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+      "month": 202408,
+      "rows": 428165
+    },
+    {
+      "member": "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+      "month": 202409,
+      "rows": 405655
+    },
+    {
+      "member": "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+      "month": 202410,
+      "rows": 273571
+    },
+    {
+      "member": "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+      "month": 202411,
+      "rows": 248055
+    },
+    {
+      "member": "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+      "month": 202412,
+      "rows": 290267
+    },
+    {
+      "member": "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+      "month": 202501,
+      "rows": 400896
+    },
+    {
+      "member": "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+      "month": 202502,
+      "rows": 453728
+    },
+    {
+      "member": "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+      "month": 202503,
+      "rows": 406258
+    }
+  ],
+  "training_window": [
+    "2024-08-19",
+    "2025-03-31"
+  ]
+}

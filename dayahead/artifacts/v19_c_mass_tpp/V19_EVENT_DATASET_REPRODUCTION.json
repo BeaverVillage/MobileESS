@@ -1,0 +1,107 @@
+{
+  "artifact_id": "V19_EVENT_DATASET_REPRODUCTION_V1",
+  "source": {
+    "source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+    "source_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+    "members_opened": [
+      {
+        "month": 202410,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+        "H100_rows": 21679
+      },
+      {
+        "month": 202411,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+        "H100_rows": 26933
+      },
+      {
+        "month": 202412,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+        "H100_rows": 41814
+      },
+      {
+        "month": 202407,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=7/kestrel_jobs_202407_0.parquet",
+        "H100_rows": 42284
+      },
+      {
+        "month": 202408,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+        "H100_rows": 20192
+      },
+      {
+        "month": 202409,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+        "H100_rows": 26532
+      },
+      {
+        "month": 202501,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+        "H100_rows": 96880
+      },
+      {
+        "month": 202502,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+        "H100_rows": 22295
+      },
+      {
+        "month": 202503,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+        "H100_rows": 86148
+      }
+    ],
+    "H100_rows": 384757,
+    "requested_columns": [
+      "account_hash",
+      "end_time",
+      "gpu_nodes_occupied",
+      "gpus_requested",
+      "id",
+      "jobs_shared",
+      "nodelist",
+      "nodes_req",
+      "nodes_shared",
+      "partition",
+      "qos",
+      "shared_job_count",
+      "start_time",
+      "state_simple",
+      "submit_time",
+      "wallclock_req"
+    ]
+  },
+  "all_H100_source_rows_loaded_July2024_to_March2025": 384757,
+  "source_valid_submission_request_input_events": 323354,
+  "semantic_flexible_target_events_after_76_conflict_exclusion": 85866,
+  "training_days": 225,
+  "training_total_master_mass_GPU_h": 614322.9724999999,
+  "positive_target_days": 205,
+  "K_max_training_observed": 10012,
+  "event_count_quantiles": {
+    "0.5": 90.0,
+    "0.9": 998.1999999999999,
+    "0.95": 1567.9999999999993,
+    "0.99": 3155.1199999999935,
+    "1.0": 10012.0
+  },
+  "daily_master_event_sum_max_abs_error_GPU_h": 0.0,
+  "causality": {
+    "main_input_boundary": "REQUEST_AND_SUBMISSION_SIDE_ONLY_BEFORE_D_MINUS_1_18_00_AEST",
+    "D_day_actual_feature_reads": 0,
+    "future_start_feature_reads": 0,
+    "future_end_feature_reads": 0,
+    "future_queue_wait_feature_reads": 0,
+    "future_completion_feature_reads": 0,
+    "historical_realized_runtime_feature_reads": 0,
+    "target_label_queue_wait_reads": 1,
+    "target_label_realized_runtime_reads": 1
+  },
+  "daily_master_mass_identity_max_abs_error_GPU_h": 0.0,
+  "daily_slot_mass_identity_max_abs_error_GPU_h": 6.548361852765083e-11,
+  "daily_tier_mass_identity_max_abs_error_GPU_h": 8.731149137020111e-11,
+  "zero_target_days": 20,
+  "target_event_mass_min_GPU_h": 0.0002777777777777778,
+  "target_event_mass_max_GPU_h": 1199.1144444444446,
+  "KMAX_RESOURCE_BLOCKER": true,
+  "KMAX_resolution": "10,012 queries retained through chunked decoder; no target-event truncation"
+}

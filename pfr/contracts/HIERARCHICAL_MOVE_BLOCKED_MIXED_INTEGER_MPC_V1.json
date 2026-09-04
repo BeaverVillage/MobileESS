@@ -1,0 +1,207 @@
+{
+  "schema_version": "HIERARCHICAL_MOVE_BLOCKED_MIXED_INTEGER_MPC_V1",
+  "status": "FROZEN_FOR_JANUARY_DEVELOPMENT_VALIDATION",
+  "paper_facing_name": "Hierarchical Move-Blocked Mixed-Integer MPC with Causal Domain Reduction",
+  "objective_authority": "ELECTRICAL_STRESS_OBJECTIVE_V1",
+  "planning_horizon": {
+    "steps": 54,
+    "step_minutes": 5,
+    "total_minutes": 270
+  },
+  "slow_master": {
+    "grid_minutes": 30,
+    "stages": 9,
+    "decisions": [
+      "MESS route/location",
+      "queued-job start block, rack, and IDC placement",
+      "checkpoint/migration option when eligible"
+    ],
+    "solver": "persistent bounded MILP",
+    "resident_job_slots": {
+      "initial": 16,
+      "growth": "Per-method growth to the next 32-slot block when the visible causal queue exceeds the resident frontier; all visible jobs remain represented and only inactive dummy slots are removed",
+      "maximum": 1024,
+      "reuse": "A grown model is reused for every later issue of that method; growth never drops or hides queued work"
+    },
+    "queued_dataset_residency": {
+      "authority": "IDC_MIGRATION_AUTHORITY_V1",
+      "mode": "PRESTAGED_AT_ALL_12_IDCS",
+      "remote_prestart_transfer_bytes": 0,
+      "checkpoint_separation": "The engineering checkpoint payload applies only to migration of an already-running job, never to queued-job placement"
+    },
+    "circle_role": "16-face polyhedral stress epigraph for causal ranking; normalized planning stress may exceed one and Fresh exact three-phase OpenDSS is the H0 grid-safety commit authority",
+    "exact_forced_domain_rule": "Skip the MILP only when every retained slow decision has exactly one feasible option"
+  },
+  "fast_recourse": {
+    "grid_minutes": 5,
+    "steps": 54,
+    "slow_decisions_fixed": true,
+    "solver": "persistent continuous LP with a conservative 16-face inscribed circle model",
+    "lexicographic_backend": "Gurobi native multiobjective",
+    "charge_discharge_exclusivity_recovery": "If the relaxed continuous incumbent exceeds the frozen 1e-4 kW simultaneous charge/discharge gate, fix every five-minute dispatch direction from incumbent net power and re-solve all lexicographic priorities inside the original watchdog; never widen the gate or commit the relaxed incumbent.",
+    "exact_constraints": [
+      "line P-Q inner-polygon stress epigraph with independent Euclidean objective audit",
+      "service-transformer P-Q inner-polygon stress epigraph with independent Euclidean objective audit",
+      "MESS PCS P-Q inner polygons with independent Euclidean-norm audit",
+      "voltage and thermal hard limits",
+      "SOC, travel energy, support-energy recovery",
+      "fixed slow-decision GPU, rack, IDC, WAN, checkpoint, and deadline feasibility"
+    ],
+    "acceptance": "Independent dimensionless stress-epigraph residual at the frozen scale-aware numerical tolerance, hard PCS headroom, no simultaneous charge/discharge, and downstream Fresh exact three-phase OpenDSS H0 grid acceptance"
+  },
+  "lexicographic_objectives": [
+    "min max_h z_h",
+    "min sum_h z_h * delta_t subject to priority 1",
+    "min secondary actuation subject to priorities 1 and 2"
+  ],
+  "capacity_admission_gate": {
+    "order": "Before the frozen electrical-stress objective priorities, maximize the number of exact-hard-feasible queued whole gangs in the bounded H54 domain; break equal-count ties by least-start-slack EDF order.",
+    "deferred_semantics": "A gang that cannot be jointly admitted remains visible and work-conserving in the runtime capacity-blocked queue for the next rolling horizon; it is never dropped and no GPU, rack, IDC, WAN, grid, or deadline constraint is relaxed.",
+    "candidate_truncation_guard": "Any selected deferral expands the exact-safe workload candidate set through the approved K grid before deferral is accepted at maximum K.",
+    "screened_optimum_reuse": "After an admission-only solve proves the optimal count plus EDF tie-break value, the full electrical solve constrains that exact objective value within the same 1e-8 absolute tolerance and optimizes only the three lower priorities. This is a lexicographically equivalent reformulation and leaves every tied admission optimum available to the electrical objectives."
+  },
+  "runtime_rack_materialization": {
+    "ordering": "Materialize gangs with an existing physical rack assignment before migration or restart reservations, then place all remaining unassigned gangs.",
+    "migration_restart_reservation": "Every MIGRATING or RESTARTING gang reserves both its full GPU count and its full post-restart IT power at the destination rack before any later gang is placed.",
+    "safety_reason": "A zero-power migration or restart placeholder can otherwise overbook destination-rack power and fail only after the job returns to RUNNING."
+  },
+  "planning_surrogate_feasibility_semantics": {
+    "stress_range": "The normalized causal radial-surrogate epigraph is reportable above 1.0 and is not clipped at the physical endpoint.",
+    "reason": "Clipping a conservative surrogate at 1.0 converts forecast-model error or a future-horizon warning into solver INFEASIBLE before the exact execution authority can evaluate H0.",
+    "hard_grid_authority": "Fresh exact three-phase OpenDSS remains mandatory at every committed H0 action and fails closed on realized voltage, line, or transformer violations."
+  },
+  "unchanged_scientific_semantics": [
+    "electrical-stress definitions",
+    "H54 causal forecast horizon",
+    "Fresh-H0 voltage, line, and transformer acceptance plus planning SOC, PCS, mobility, GPU, rack, IDC, WAN, checkpoint, deadline, and recovery constraints",
+    "Fresh exact three-phase OpenDSS commit gate",
+    "price excluded from optimization"
+  ],
+  "online_commit_chain": [
+    "event trigger",
+    "exact-safe causal pruning",
+    "bounded 9-stage slow MILP master or exact forced-domain skip",
+    "fixed-slow-decision conservative H54 continuous LP recourse",
+    "five-minute continuous operating adjustment",
+    "Fresh exact three-phase OpenDSS",
+    "commit or fail closed"
+  ],
+  "offline_reference": {
+    "solver": "Full H54 MIQCP",
+    "role": "sampled-state offline oracle only",
+    "prohibited_online_use": true
+  },
+  "watchdog": {
+    "cold_start_bootstrap_seconds": 60.0,
+    "january_development_steady_state_seconds": 60.0,
+    "physical_control_interval_seconds": 300.0,
+    "stage_allocation": "One shared 60-second planner deadline with no stage sub-deadlines. The slow master sees the total remaining deadline; exact recourse receives exactly the wall time left after the master and fixed-decision transfer. Fail closed only when the combined stages exhaust the watchdog.",
+    "shared_deadline_evidence": "R6 issue 1424 failed at the former master partition; R8 issue 1705 then failed at a nominal 20-second master reserve while issue 1704 measured master 16.03 s plus exact recourse 5.16 s, only 22.01 s total. R9 removed stage partitions and proved the combined master-plus-recourse solve itself exceeded 30 seconds. Therefore 30 seconds was a performance target masquerading as a fail-close watchdog, not a defensible physical deadline.",
+    "watchdog_margin": "The 60-second watchdog is one fifth of the physical five-minute control interval, retaining 240 seconds for downstream exact AC, storage, and actuation while allowing January to measure the hard-instance tail. Normal solves terminate at optimality and do not consume the unused allowance.",
+    "r6_root_cause": "The former fixed 55/45 split stopped issue 1424 at the master's 16.5-second sub-deadline even though issue 1423 completed master plus exact recourse in 20.99 seconds and the unchanged total watchdog was 30 seconds.",
+    "production_freeze_rule": "After January development, set the production watchdog from the measured steady-state p99 plus a documented margin; do not use the runtime performance target itself as the timeout",
+    "semantics": "Fail closed on timeout; never relax an objective priority or hard constraint"
+  },
+  "runtime_acceptance": {
+    "comparison_scope": "Same issue, state, forecast, candidate K, objective, hard constraints, Fresh OpenDSS gate, and storage path; worker/thread topology may vary because it is the measured factor",
+    "measured_quantity": "End-to-end total issue wall time, with component timings retained",
+    "rule": "A computational alternative with no paired speed improvement is removed from the production path",
+    "watchdog_is_not_speed_evidence": true
+  },
+  "latency_accuracy_tradeoff": {
+    "explicitly_changes_scientific_results": true,
+    "online_candidate_k_reduction": "Base K is 4 for latency; a proven slow-master INFEASIBLE status expands the same issue through K=8 and K=16 so truncation is never misclassified as physical infeasibility",
+    "circle_approximation": "A 16-face inscribed polygon replaces online QCP circles and sacrifices at most 1.921471959676957 percent radial capability while remaining physically conservative",
+    "native_guard_search_reduction": "Online regulator beam width 4 to 2 and maximum depth 16 to 2; unresolved cases still enter continuous safety projection and must pass Fresh OpenDSS or fail closed",
+    "hard_safety_tradeoff": false,
+    "retained_fail_closed_gates": [
+      "independent exact Euclidean-norm audit",
+      "charge/discharge exclusivity",
+      "Fresh exact three-phase OpenDSS realized-H0 verification",
+      "state-chain and storage verification"
+    ]
+  },
+  "approved_solver_runtime_settings": {
+    "gurobi_threads": 2,
+    "day_process_workers": 6,
+    "planner_watchdog_seconds": 60.0,
+    "burst_visible_queue_threshold": 128,
+    "burst_planner_watchdog_seconds": 150.0,
+    "burst_watchdog_policy": "Keep the frozen 60-second planner budget for ordinary issues. When at least 128 queued jobs are simultaneously visible, allow 150 seconds for the same exact lexicographic model; the physical 300-second process watchdog remains unchanged.",
+    "burst_watchdog_evidence": "January issue 2517 has 265 simultaneous arrivals. Exact H54 coefficient aggregation reduced the active slow-master workload axis from 8480 columns to 256 exact symmetry-class columns and passed in isolation in 63.95 seconds, but the required six-day-worker by two-Gurobi-thread topology reached the former 90-second burst watchdog at 87.56 seconds before all priorities completed because its affinity slot shared both physical cores. The 150-second burst-only budget covers the measured topology tail with margin while remaining one half of the 300-second physical control interval; normal issues retain 60 seconds.",
+    "online_candidate_base_k": 4,
+    "online_candidate_adaptive_grid": [4, 8, 16, 32, 64],
+    "online_candidate_adaptive_max_k": 64,
+    "online_candidate_expansion_trigger": "SLOW_MASTER_STATUS_INFEASIBLE_OR_CAPACITY_DEFERRAL",
+    "online_candidate_expansion_evidence": "January issue 2069 was INFEASIBLE under both inner-polygon and exact-QCP models at K=4, while the identical checkpoint passed under both models at K=16. Candidate truncation is a latency approximation, not a physical hard limit.",
+    "mobility_route_candidate_min_k": 16,
+    "mobility_route_candidate_policy": "Keep workload choices at the latency base K while exposing a destination-balanced causal route prefix of at least K=16 whenever mobility is enabled. The persistent model already reserves the adaptive K=64 route axis, so this does not add model-build memory.",
+    "mobility_candidate_screen_dispatch_domain": "Bidirectional active-P probes at plus/minus 100 kW; choosing only discharge reverses location ranking during upper-voltage stress.",
+    "slow_master_admission_primary_exposure_relative_mip_gap": 0.001,
+    "slow_master_tertiary_relative_mip_gap": 0.03,
+    "slow_master_gap_policy": "Admission, worst-stress, and exposure priorities retain the strict 0.1% gap so solver tolerance cannot erase a marginal mobility treatment. After those priorities are certified, the secondary-actuation tie-break may terminate at the objective authority's published 3% certified gap. Hard constraints and downstream exact recourse remain unchanged.",
+    "slow_master_gap_evidence": "A 3% primary discrete-master gap admitted STAY while a mobility counterfactual improved predicted worst stress by 2.97%, so the first scientific priorities remain at 0.1%. January issue 2759 certified admission, worst stress, and exposure at the strict gap, then explored 1,379,998 nodes trying to reduce a tertiary 1.5669% gap below 0.1% until the 60-second watchdog. Accepting that already-certified tertiary gap follows the frozen 3% objective authority and removes only proof work on the last tie-break.",
+    "persistent_model_max_reuses": 16,
+    "persistent_model_refresh_policy": "After 16 successful solves, call Gurobi Model.reset() on both retained models so the next optimize starts from scratch while preserving the identical variable/constraint skeleton. Rebuild remains mandatory only for resident job-slot growth. R10 issue 1722 established that retained Gurobi multiobjective numerical state can time out while an identical cold checkpoint passes, and R11 failed after 25 post-refresh solves; the 16-solve age bound is unchanged. January R52 measured eight periodic replacement builds costing 135.349 aggregate seconds in 954 committed issues, so solution-state reset removes duplicate construction without changing the mathematical model, candidate domain, solver tolerances, or accepted decision authority.",
+    "persistent_model_periodic_refresh_mechanism": "GUROBI_MODEL_RESET_DISCARD_SOLUTION_AND_REOPTIMIZATION_STATE",
+    "cpu_affinity": "DISJOINT_TOPOLOGY_AWARE_BALANCED_SMT_CONTENTION",
+    "runtime_topology_evidence": "PFR_RUNTIME_TOPOLOGY_BENCHMARK_20260826",
+    "initial_resident_queued_job_slots": 16,
+    "maximum_dynamic_queued_job_slots": 1024,
+    "dynamic_job_slot_growth": "NEXT_32_SLOT_BLOCK_PER_METHOD_THEN_PERSISTENT_REUSE",
+    "dynamic_job_slot_growth_evidence": "January issue 2517 exposed 265 simultaneous visible jobs. Power-of-two growth allocated a 512-slot by K64 skeleton and timed out twice, including a cold-planner replay; 32-slot growth allocates 288 slots for the same 265 job decisions and removes only 224 inactive dummy slots relative to the former skeleton.",
+    "persistent_candidate_axis_policy": "Retain the adaptive K64 superset while resident_job_slots times K64 is at most 8192. Above that bound, build only the active K axis and rebuild on a proven adaptive-K expansion; inactive candidate variables are omitted, while every active candidate and every expansion gate remains identical.",
+    "persistent_candidate_axis_evidence": "At January issue 2517 the active K4 domain needs 1152 job-option variables for 288 slots, whereas an unconditional K64 superset creates 18432 variables of which 17280 are fixed inactive. The bounded-axis policy removes only those inactive variables.",
+    "workload_symmetry_breaking": "In the slow master only, jobs whose complete option vectors have identical H54 coefficients share one integer option-count vector. Per-job binary defer variables remain, preserving the exact EDF admission objective. After optimization, integral counts are deterministically expanded to per-job one-hot choices and fixed in the unaggregated continuous exact-recourse QCP. Aggregate GPU, rack, WAN, P-Q, deadline feasibility, admission value, and all three electrical objectives are unchanged.",
+    "workload_symmetry_evidence": "Of the 265 jobs arriving at January issue 2517, 251 share the same one-GPU 0.70625-kW option coefficients after durations beyond H54 are clipped at the model horizon; only eight effective H54 classes remain.",
+    "slow_master_numeric_focus": 0,
+    "exact_recourse_numeric_focus": 2,
+    "norm_constraint_mode": "INNER_POLYGON",
+    "norm_inner_polygon_sides": 16,
+    "norm_inner_polygon_max_radial_conservatism_fraction": 0.01921471959676957,
+    "norm_constraint_scaling": "Every line, service-transformer, and PCS P-Q pair is normalized by its physical nameplate. Sixteen regularly spaced halfspaces use apothem R*cos(pi/16), so the complete feasible polygon lies inside the exact physical circle.",
+    "exact_qcp_relative_tolerance": 1e-6,
+    "norm_engineering_margin_fraction": 1e-5,
+    "norm_safety_invariant": "The paper-facing stress objective remains normalized to physical nameplate. A separate zmax hard cap and PCS hard circle reserve an engineering margin ten times the scale-aware numerical tolerance; even an accepted solution at the positive residual boundary remains strictly inside nameplate because (1 - 1e-5) + 1e-6 < 1.",
+    "exact_norm_fail_closed_audit": "Independently evaluate every accepted line, service-transformer, and PCS point against the exact Euclidean circle; any scale-aware residual above the frozen gate fails closed. The inner polygon is conservative and therefore needs no numerical feasibility restoration in normal operation.",
+    "numeric_focus_evidence": "Paired 19-step B06 validation reduced steady end-to-end median and p95 with identical route decisions, predicted objectives, Fresh-AC values, zero exact residual, and AC PASS. NumericFocus 0 and 1 remain prohibited for exact recourse after clean reruns exceeded the frozen simultaneous charge/discharge residual tolerance",
+    "crossover": "AUTO",
+    "multi_objective_presolve": "AUTO"
+  },
+  "required_runtime_fields": [
+    "reference_anchor_seconds",
+    "causal_domain_generation_seconds",
+    "model_build_once_seconds",
+    "parameter_update_seconds",
+    "persistent_model_refresh_reason",
+    "persistent_model_solve_generation",
+    "persistent_model_max_reuses",
+    "shared_master_wall_budget_seconds",
+    "shared_recourse_wall_budget_seconds",
+    "shared_watchdog_unused_master_seconds_transferred",
+    "slow_master_milp_seconds",
+    "slow_master_skipped_exact_forced_domain",
+    "fixed_binary_exact_h54_recourse_seconds",
+    "Fresh_OpenDSS_seconds",
+    "storage_seconds",
+    "total_issue_wall_seconds",
+    "maximum_exact_norm_residual",
+    "maximum_exact_norm_relative_residual",
+    "norm_relative_tolerance",
+    "norm_engineering_margin_fraction",
+    "exact_qcp_feasibility_restoration_rounds",
+    "exact_qcp_implied_tangent_cuts_added",
+    "resident_job_slot_capacity",
+    "visible_queued_jobs"
+  ],
+  "rejected_diagnostics": [
+    "54-step exact-cut MILP outer approximation: no primary convergence within 120 seconds",
+    "persistent sequential lexicographic QCP: slower than native multiobjective",
+    "condensed QCP diagnostic: objective and Fresh-AC trajectory mismatch",
+    "bounded topology diagnostics selected six day processes with two Gurobi threads each over arbitrary 4x4, 5x3, 7x2, and unpinned alternatives",
+    "exact-recourse NumericFocus=0 diagnostic: faster but failed a clean default rerun at the frozen charge/discharge residual tolerance",
+    "exact-recourse NumericFocus=1 diagnostic: failed the same frozen charge/discharge residual tolerance",
+    "Crossover=0 diagnostic: identical output but slower median and p95",
+    "MultiObjPre=2 diagnostic: identical output but slower median and p95"
+  ]
+}

@@ -1,0 +1,213 @@
+{
+  "artifact_id": "V16_3_FINAL_SCIENCE_EXECUTION_CONTRACT",
+  "authority_commit": "2246063175977f152f3ac8df8f65a861cc7bbd22",
+  "authority_id": "V16_3_DA_AIDC_ICPS_AC_ANCHORED_FROZEN_D1_CONTROL",
+  "authority_sha256": "9f43711b586172a784709fa501301d1506d127d5c98d9ab0dcce634bb43d65a6",
+  "benders": {
+    "benchmark_day_rule": "LEXICOGRAPHICALLY_FIRST_ELIGIBLE_DAY_IN_EACH_PERIOD",
+    "certification_tolerance": 0.001,
+    "cl_mc_bd_optimality_cut": "ALL_CRITICAL_TIME_FULL_LP_CUTS",
+    "feasibility_cut": "FARKAS_CUT_FOR_EVERY_INFEASIBLE_TIME",
+    "gamma_crit": 0.98,
+    "gap": "max(0,(UB-LB)/max(abs(UB),1e-6))",
+    "initialization": "FROZEN_B3_REFERENCE_MASTER_TRAJECTORY",
+    "lower_bound": "MONOTONE_MAXIMUM_OF_GUROBI_MASTER_OBJBOUND",
+    "max_iterations": 200,
+    "method_time_limit_seconds": 1800.0,
+    "standard_optimality_cut": "WORST_TIME_SINGLE_FULL_LP_CUT",
+    "stopping_rule": "STOP_ON_CERTIFIED_GAP_LE_1E_3_OR_PRECOMMITTED_TIME_OR_ITERATION_LIMIT",
+    "upper_bound": "MINIMUM_FULLY_FEASIBLE_96_LP_INCUMBENT_OBJECTIVE"
+  },
+  "cases": {
+    "B0": {
+      "compute_flexibility": false,
+      "label": "NO_FLEXIBILITY",
+      "mess_flexibility": false
+    },
+    "B1": {
+      "compute_flexibility": true,
+      "label": "AIDC_COMPUTE_FLEXIBILITY_ONLY",
+      "mess_flexibility": false
+    },
+    "B2": {
+      "compute_flexibility": false,
+      "label": "MOBILE_ESS_FLEXIBILITY_ONLY",
+      "mess_flexibility": true
+    },
+    "B3": {
+      "compute_flexibility": true,
+      "label": "JOINT_AIDC_AND_MOBILE_ESS_FLEXIBILITY",
+      "mess_flexibility": true
+    }
+  },
+  "data_access_at_contract_creation": {
+    "june_result_inspection_count": 0,
+    "june_scientific_loader_access_count": 0,
+    "may_result_inspection_count": 0,
+    "may_scientific_loader_access_count": 0
+  },
+  "eligibility": {
+    "admission": "D1_FORECAST_COHORT_FIELDS_ONLY_EXPOST_FIELD_ACCESS_ZERO",
+    "aemo_demand": "ONE_LATEST_COMPLETE_48_SLOT_VIC1_PREDISPATCH_VINTAGE_AT_OR_BEFORE_CUTOFF_NO_SLOT_MIXING",
+    "aemo_rooftop_pv": "ONE_LATEST_COMPLETE_48_SLOT_VIC1_ROOFTOP_PV_VINTAGE_AT_OR_BEFORE_CUTOFF_NO_SLOT_MIXING",
+    "aidc_forecast": "FROZEN_PRODUCTION_RC_MQT_DIRECT96_Q10_Q50_Q90_FINITE_ORDERED_D1_OUTPUT",
+    "allowed_exclusion_reasons": [
+      "NO_COMPLETE_CAUSAL_AEMO_DEMAND_VINTAGE",
+      "NO_COMPLETE_CAUSAL_AEMO_PV_VINTAGE",
+      "FROZEN_RC_MQT_DIRECT96_INPUT_OR_OUTPUT_INCOMPLETE",
+      "FROZEN_SUPPORTING_INPUT_INCOMPLETE"
+    ],
+    "candidate_day_rule": "EVERY_CALENDAR_DAY_IN_PREDECLARED_PERIOD",
+    "d1_cutoff": "PREVIOUS_DAY_18:00:00_FIXED_AEST",
+    "june_outage_interval": "2025-06-26_THROUGH_2025-07-03_OUTSIDE_PREDECLARED_COHORT",
+    "mapping": "FROZEN_PWC_HOLD_30_TO_15_EXACTLY_96_SLOTS",
+    "result_dependent_exclusion_allowed": false,
+    "supporting_inputs": "FROZEN_BACKGROUND_PV_PCC_TRAFFIC_SAFE_ETA_AND_MESS_MOBILITY_INPUTS_COMPLETE"
+  },
+  "evaluation_periods": {
+    "JUNE_REPLICATION": {
+      "end": "2025-06-25",
+      "start": "2025-06-01"
+    },
+    "MAY_PRIMARY": {
+      "end": "2025-05-31",
+      "start": "2025-05-01"
+    }
+  },
+  "fresh_AC": {
+    "hard_tolerance": 1e-09,
+    "phase_current_max_pu": 1.0,
+    "physically_validated": "PRIMARY_PASS_AND_SECONDARY_PASS",
+    "post_hoc_tuning_allowed": false,
+    "primary": "FRESH_OPENDSS_EXACT_COMMON_FROZEN_D1_TAPS",
+    "required_converged_slots": 96,
+    "secondary": "FRESH_OPENDSS_NATIVE_REGCONTROL_ON",
+    "transformer_total_kva_max_pu": 1.0,
+    "voltage_max_pu": 1.05,
+    "voltage_min_pu": 0.95
+  },
+  "frozen_parameters": {
+    "PF": 0.95,
+    "PUE": 1.3,
+    "beta_AIDC": 0.25,
+    "control_semantics": "D1_FROZEN_COMMON_NATIVE_CONTROL_STATE",
+    "objective": "MINIMUM_MAXIMUM_NORMALIZED_PHASE_LINE_CURRENT_LOADING",
+    "phase_current_model": "D1_AC_ANCHORED_AFFINE_PHASE_CURRENT_WITH_NONNEGATIVE_EPIGRAPH",
+    "rho_valid": 0.1,
+    "voltage_model": "D1_AC_ANCHORED_AFFINE_VOLTAGE"
+  },
+  "no_tuning_counters_at_contract_freeze": {
+    "H_changes": 0,
+    "J_I_changes": 0,
+    "OpenDSS_calls_inside_Benders": 0,
+    "PF_changes": 0,
+    "PUE_changes": 0,
+    "alpha_grid_changes": 0,
+    "beta_changes": 0,
+    "current_rating_changes": 0,
+    "gamma_crit_changes": 0,
+    "kappa_changes": 0,
+    "native_ieee123_changes": 0,
+    "objective_changes": 0,
+    "post_hoc_AC_tuning_count": 0,
+    "rho_changes": 0,
+    "scientific_authority_changes": 0,
+    "tap_semantics_changes": 0,
+    "transformer_rating_changes": 0,
+    "voltage_limit_changes": 0
+  },
+  "output_schema": {
+    "ac_fields": [
+      "convergence_count",
+      "Vmin",
+      "Vmax",
+      "maximum_normalized_phase_line_current",
+      "maximum_transformer_phase_current_loading",
+      "maximum_transformer_kva_loading",
+      "voltage_violation_count",
+      "phase_current_violation_count",
+      "transformer_kva_violation_count"
+    ],
+    "day_case_key": [
+      "period",
+      "operating_day",
+      "case"
+    ],
+    "large_schedule_policy": "REPRODUCIBLE_CACHE_PLUS_SHA256_MANIFEST_NOT_NORMAL_GIT",
+    "planning_fields": [
+      "optimization_status",
+      "objective_lambda",
+      "runtime_seconds",
+      "mip_gap",
+      "maximum_normalized_phase_line_current",
+      "critical_line",
+      "critical_phase",
+      "critical_slot",
+      "Vmin",
+      "Vmax",
+      "worst_transformer_phase_current_loading",
+      "worst_transformer_total_kva_loading",
+      "trust_region_maximum_utilization",
+      "trust_region_boundary_variable_count",
+      "trust_region_active_slot_count",
+      "aidc_flexible_workload_shifted",
+      "aidc_redistribution_summary",
+      "mess_charge_energy_kwh",
+      "mess_discharge_energy_kwh",
+      "mess_reactive_utilization",
+      "mess_travel_connectivity_schedule",
+      "initial_soc_kwh",
+      "terminal_soc_kwh",
+      "service_parity_residual",
+      "hard_constraint_residuals"
+    ],
+    "secondary_extra_fields": [
+      "tap_change_slots",
+      "changes_by_regulator",
+      "max_tap_deviation"
+    ]
+  },
+  "protocol_mutation_after_commit_allowed": false,
+  "refreeze_manifest_sha256": "42b277f16b3beb425c6d298aafed142700418b4ecfb69220e02dd0aa17abec1e",
+  "solver": {
+    "name": "Gurobi",
+    "parameters": {
+      "DualReductions": 0,
+      "FeasibilityTol": 1e-06,
+      "InfUnbdInfo": 1,
+      "MIPGap": 0.001,
+      "Method": 1,
+      "NumericFocus": 1,
+      "OptimalityTol": 1e-06,
+      "OutputFlag": 0,
+      "Seed": 20260828,
+      "Threads": 1,
+      "TimeLimit_seconds": 1800.0
+    },
+    "version": "13.0.3"
+  },
+  "statistical_aggregation": {
+    "absolute_improvement": "B0_metric-Bk_metric",
+    "aggregates": [
+      "count",
+      "mean",
+      "median",
+      "p25",
+      "p75",
+      "min",
+      "max"
+    ],
+    "complementarity_B3_vs_B1": "B1_metric-B3_metric",
+    "complementarity_B3_vs_B2": "B2_metric-B3_metric",
+    "daily_improvement": "(B0_metric-Bk_metric)/max(abs(B0_metric),1e-6)",
+    "infeasible_and_AC_failed_days": "PRESERVE_STATUS_AND_EXCLUDE_ONLY_FROM_UNDEFINED_NUMERIC_PAIR",
+    "periods_reported_separately_before_pooling": true,
+    "required_counts": [
+      "eligible_days",
+      "planning_feasible_days",
+      "dual_AC_validated_days"
+    ],
+    "synergy_test": "(B0-B3)>((B0-B1)+(B0-B2)); REPORT_ONLY_NO_DEFAULT_CLAIM"
+  },
+  "status": "FROZEN_COMMITTED_BEFORE_MAY_JUNE_SCIENTIFIC_ACCESS"
+}

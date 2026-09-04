@@ -1,0 +1,29 @@
+{
+  "artifact_id": "V29R3_TEST_REPORT_V1",
+  "status": "PASS",
+  "required_test_not_run_count": 0,
+  "passed": 92,
+  "failed": 0,
+  "not_run": 0,
+  "suites": [
+    {
+      "name": "V29R3 forensic gates",
+      "passed": 20,
+      "failed": 0,
+      "command": "python -m pytest -q tests/dayahead/test_v29r3_aidc_effect_forensic.py"
+    },
+    {
+      "name": "V29R2 preserved regression gates",
+      "passed": 31,
+      "failed": 0,
+      "command": "python -m pytest -q tests/dayahead/test_v29r2_anchor_forensic.py tests/dayahead/test_v29r2_trust_certification.py tests/dayahead/test_v29r2_service_model.py tests/dayahead/test_v29r2_bridge_v2.py tests/dayahead/test_v29r2_reference_v4.py tests/dayahead/test_v29r2_mess_noregret.py tests/dayahead/test_v29r2_apr04_runner.py tests/dayahead/test_v29r2_final_review.py"
+    },
+    {
+      "name": "V29 and V29R1 preserved regression gates",
+      "passed": 41,
+      "failed": 0,
+      "command": "python -m pytest -q tests/dayahead/test_v29_stage1_contracts.py tests/dayahead/test_v29_stage2_bounds.py tests/dayahead/test_v29_stage3_carryin.py tests/dayahead/test_v29_stage4_formulation.py tests/dayahead/test_v29_stage5_backend.py tests/dayahead/test_v29_stage5_smoke.py tests/dayahead/test_v29_stage6_reporting.py tests/dayahead/test_v29_final_review.py tests/dayahead/test_v29r1_janmar_source_authority.py tests/dayahead/test_v29r1_reliability_calibrated_noregret.py tests/dayahead/test_v29r1_source_resume.py",
+      "read_only_cache_links_removed_after_run": true
+    }
+  ]
+}

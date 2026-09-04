@@ -1,0 +1,50 @@
+{
+  "cadence_seconds": 300,
+  "commit_critical_path": {
+    "definition": "state load + fast dispatch + execution certificates + fresh OpenDSS + atomic commit",
+    "development_host_ge_300s_action": "do not FAIL scientific experiment; record deadline overrun and mark realtime claim unverified on this host",
+    "qualification_hardware_ge_300s_action": "realtime claim fails for that declared hardware; trajectory data may still be scientifically usable if all causal/safety gates pass"
+  },
+  "contract_id": "D12_RUNTIME_CLAIM_SEMANTICS_V2",
+  "reporting_required": [
+    "hardware/CPU/RAM/OS/runtime environment",
+    "threads/process and process count",
+    "commit-critical p50/p95/p99/max",
+    "slow-planner p50/p95/p99/max",
+    "deadline_miss_count on development host",
+    "solver work/model-size diagnostics when available"
+  ],
+  "separation": {
+    "development_host_runtime_characterization": {
+      "if_commit_critical_runtime_ge_300s": "RECORD_OVERRUN_AND_CONTINUE_EXPERIMENT",
+      "purpose": "Measure the actual WSL workstation runtime without converting hardware slowness into scientific invalidity.",
+      "realtime_claim_status": "NOT_DEMONSTRATED_ON_THIS_HOST",
+      "scientific_result_status": "CAN_REMAIN_PASS"
+    },
+    "scientific_trajectory_acceptance": {
+      "hard_failures": [
+        "causal-state or no-future-actual violation",
+        "invalid/missing required result schema",
+        "certificate or Fresh OpenDSS safety failure for a committed action",
+        "state-chain/restart corruption",
+        "F7 independent-cohort/censoring violation"
+      ],
+      "purpose": "Accept causal/economic/service/safety experiment outputs.",
+      "wallclock_deadline_is_hard_failure": false
+    },
+    "target_hardware_realtime_qualification": {
+      "acceptance_rule": "commit-critical runtime max < 300 s and deadline_miss_count = 0 on the declared qualification hardware",
+      "no_unvalidated_linear_scaling_from_development_host": true,
+      "purpose": "Support an explicit real-time/deployment claim on declared hardware.",
+      "require_declared_hardware": true,
+      "require_measured_wallclock": true,
+      "required_if_manuscript_claims_realtime_execution": true
+    }
+  },
+  "slow_planner": {
+    "may_exceed_300s": true,
+    "must_report_separately": true,
+    "reason": "asynchronous background planner is outside the commit-critical path while a valid active plan remains in service"
+  },
+  "status": "FROZEN_BEFORE_W02_ACTUAL_RESULTS"
+}

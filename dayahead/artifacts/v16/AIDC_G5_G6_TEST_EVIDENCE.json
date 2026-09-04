@@ -1,0 +1,121 @@
+{
+  "authority_id": "AIDC_G5_G6_TEST_EVIDENCE_V16",
+  "checks": {
+    "deterministic_math_sdp_only": true,
+    "direct96_exactly_96_output_slots": true,
+    "expost_d1_eligibility_field_access_count": 0,
+    "fingerprint_recomputed_equal": true,
+    "finite_outputs": true,
+    "may_june_loader_access_count": 0,
+    "mean_subtraction": 0.0,
+    "positive_scaling_inverse_transform_roundtrip": true,
+    "positive_target_scaling": true,
+    "posthoc_calibration_none_v1": true,
+    "production_refit_count": 1,
+    "production_seed": 20260828,
+    "quantile_order_q10_le_q50_le_q90": true,
+    "vanilla_vs_proposed_coupling_only_delta": true
+  },
+  "coupling_delta": {
+    "allowed_delta": "GPU_TO_POWER_GATED_RESIDUAL_ONLY",
+    "authority_id": "AIDC_RESOURCE_COUPLING_BLOCK_V1",
+    "common_architecture_fields_equal": true,
+    "proposed_added_parameter_names": [
+      "gpu_to_power_gate.bias",
+      "gpu_to_power_gate.weight",
+      "gpu_to_power_value.bias",
+      "gpu_to_power_value.weight"
+    ],
+    "status": "PASS",
+    "vanilla_removed_parameter_names": []
+  },
+  "data_access_audit": {
+    "d1_expost_eligibility_field_access_count": 0,
+    "esif_causal_history_imputation_count": 572,
+    "esif_imputation_rule": "PAST_SAME_SLOT_MEDIAN_UP_TO_7_DAYS; TARGET_DAYS_WITH_MISSING_P_EXCLUDED",
+    "esif_raw_15min_missing_count": 572,
+    "esif_returned_max_timestamp": "2025-04-30T23:59:07.527000+10:00",
+    "kestrel_archive_member_open_count": 9,
+    "max_kestrel_month_opened": 202504,
+    "may_june_loader_access_count": 0,
+    "split_access_counts": {
+      "PRIMARY_2025MAY": 0,
+      "REPLICATION_2025JUN01_25": 0,
+      "TRAIN_2024AUG19_2025MAR31": 1,
+      "VALIDATION_2025APR": 1
+    }
+  },
+  "deterministic_backend": {
+    "flash_sdp": false,
+    "math_sdp": true,
+    "memory_efficient_sdp": false,
+    "torch_deterministic_algorithms": true
+  },
+  "excluded_training_target_days_for_raw_esif_gaps": [
+    "2024-08-21",
+    "2024-08-29",
+    "2024-08-30",
+    "2024-10-01",
+    "2024-10-02",
+    "2024-10-03",
+    "2024-10-04",
+    "2024-11-03",
+    "2024-11-06",
+    "2025-03-04",
+    "2025-03-13"
+  ],
+  "excluded_validation_target_days_for_raw_esif_gaps": [],
+  "fingerprints": {
+    "canonical_state_sha256": "dcd6fd8c2216e7d26abb41554dd820bb2358affb3e9570103374d3c89e808939",
+    "config_sha256": "b58dae8a0899ea8ec31a122168be91b04fc20f583c08ec35fcd91efe7bff49cb",
+    "final_weight_config_fingerprint": "309d9019c8ff97cce92953755b96100717d00f7fa6cfb5311caf8797c14d43e3",
+    "weights_file_sha256": "30603de0f1cf19e84d2280970aa8a74e6aff2b63cfa11d00200e161860bfc4bc"
+  },
+  "lightgbm": {
+    "backend": "lightgbm",
+    "model_string_sha256_by_target": {
+      "G_REF": "45755bf069c34f79baba6d82d2588e54c5921143c9fa865bb2600f132b0217a8",
+      "P_IT_REF": "785bc1f1d06855a8ae85d7e37dc45acfe7cee2c7137686e7cdf78ce9d7cf3d2e",
+      "W_F::N01_R00": "53fd8f981a8412b9bc7c8ee87f18e83d564dac781990b47c30713545354061e4",
+      "W_F::N01_R01": "8f4fde9586ddfb2b97299422710ecd0feba79337117e5da04b8e463c493aa103",
+      "W_F::N01_R02": "d384fdfc9b68473bd666f30d318b7478dca1bc6a1160e169a17a24cfaece03c0",
+      "W_F::N02_R00": "6ea0f3ff625bb392fba87ac109be3b4fec936d318dcc5eb51b5b39a0b3b32024",
+      "W_F::N02_R01": "75e9e96245b06b5a80266a10840f7ad9aa4d60475e10e5fd02a3603c5df38469",
+      "W_F::N02_R02": "a8565fad58cd77a634ccbe065cf3d16489ef81b2f4c0b6c92de6d66b68155b02",
+      "W_F::N04_R00": "7eb7fff8353eed8cc33bdc2fc2d4af7fb1c117ceb5a04055bdf841335b69b1dc",
+      "W_F::N04_R01": "a932d7deee58ac0e9d5b2ff9fdb04b52d5a30339cd43246917dff651d4c57076",
+      "W_F::N04_R02": "e3ad76e8293503bfcc16ef62382bfc6cb8ed182b7020861e553cdb19f4febfea",
+      "W_F::N08_R00": "613ccc153874cd6b794f3b1acbe80de50be93132a88018b1de41a90c55b5a7e3",
+      "W_F::N08_R01": "e8df7d20341c2b6a6cd522eba91c0e42a28e4de2d3d02a0449047eb5743da5c4",
+      "W_F::N08_R02": "7c853a1aa711d3ef2e4205fa5f677192b74ba3da35e4688222a4549b047ddefa",
+      "W_F::N16_R00": "1b86e39e72634322e92e5cc6cc8e4743fd143522ae5ca5336fa283125652a5f8",
+      "W_F::N16_R01": "647570ef604da38ab96a1b73ed4644fcf1b4cbe78468e0bfe140b064fec9a742",
+      "W_F::N16_R02": "2f52355a455d997f8cefdae9a769f5a21c5b3f510ecda59903c64b8d9b80817b"
+    },
+    "num_boost_round": 80,
+    "seed": 20260828,
+    "task": "DIRECT96_NON_RECURSIVE_Q50_ONLY",
+    "version": "4.6.0"
+  },
+  "selected_candidate": {
+    "attention_heads": 4,
+    "candidate_id": "C02",
+    "d_model": 64,
+    "dropout": 0.2,
+    "encoder_layers": 2,
+    "learning_rate": 0.0003,
+    "lookback": 1344
+  },
+  "selected_paired_april_normalized_mean_pinball": 0.011221904126182736,
+  "selected_proposed_april_normalized_mean_pinball": 0.010804086290938958,
+  "selected_vanilla_april_normalized_mean_pinball": 0.011639721961426512,
+  "source_paths": {
+    "esif_parquet": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR ESIF PUE  IT Power\\esif.influx.buildingData.PUE.combined.parquet",
+    "kestrel_jobs_zip": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip"
+  },
+  "source_sha256": {
+    "esif_parquet": "19cd12405dde9144b1a360e8c8418666c399a3d0d15a7f846880d71ab22f9dd4",
+    "kestrel_jobs_zip": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f"
+  },
+  "status": "PASS"
+}

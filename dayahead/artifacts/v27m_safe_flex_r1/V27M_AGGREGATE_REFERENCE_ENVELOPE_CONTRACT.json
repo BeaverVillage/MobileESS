@@ -1,0 +1,41 @@
+{
+  "artifact_id": "V27M_AGGREGATE_REFERENCE_ENVELOPE_CONTRACT_V1",
+  "statistical_target": "AGGREGATE_TEMPORAL_CUMULATIVE_FEASIBLE_ENVELOPE",
+  "label": "REFERENCE_AGGREGATE_FEASIBILITY_ENVELOPE_FROM_REALIZED_SERVICE_DEMAND",
+  "not_label": "MEASURED_FLEXIBILITY",
+  "target_shape_per_day": [
+    96,
+    2
+  ],
+  "boundary_values_per_day": 192,
+  "legacy_target_shape_per_day": [
+    96,
+    6,
+    5,
+    2
+  ],
+  "projection": {
+    "L_aggregate_t": "sum over tier and latency of V26 deadline-required cumulative lower bounds",
+    "U_aggregate_t": "sum over tier and latency of V26 release-limited cumulative upper bounds",
+    "mathematical_basis": "linear projection of separable component cumulative bounds onto total cumulative service"
+  },
+  "capacity_semantics": {
+    "monthly_C_src_GPU": "OBSERVED_USE_LOWER_BOUND_NOT_INSTALLED_CAPACITY",
+    "used_as_upper_bound": false,
+    "reason": "A lower bound on observed source use cannot scientifically serve as an installed-capacity upper bound.",
+    "applicable_frozen_upper": "realized release-limited workload mass only"
+  },
+  "date_range": {
+    "start": "2024-08-19",
+    "end_inclusive": "2025-03-31",
+    "all_days": 225,
+    "outer_OOF_days": 151
+  },
+  "source_service_set_contract": "dayahead/artifacts/v26m_safe_flex/V26M_SERVICE_SET_CONTRACT.json",
+  "source_service_set_contract_SHA256": "1fa6c861008eb7f370ce7c4c358effc472f094afb306199985bcc404b84187f7",
+  "raw_source_SHA256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+  "cache": "dayahead/artifacts/v27m_safe_flex_r1/V27M_AGGREGATE_REFERENCE_ALL_DAYS.npz",
+  "cache_SHA256": "03d4b13afbba49092e00c63bb6785f5662d426dc223e1c0c1e23e2eacc8a4187",
+  "future_service_values_are_labels_only": true,
+  "April_reads": 0
+}

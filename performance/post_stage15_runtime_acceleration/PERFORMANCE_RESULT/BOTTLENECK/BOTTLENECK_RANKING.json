@@ -1,0 +1,31 @@
+{
+  "ranking": [
+    {
+      "component": "dense R25K planner matrix/presolve",
+      "evidence": "~7.2M nonzeros; exact sparse equivalent ~1.7M",
+      "rank": 1
+    },
+    {
+      "component": "repeated pandas Rack scalar lookup",
+      "evidence": "ordinary issue 7.25s to 1.28s with exact scalar index",
+      "rank": 2
+    },
+    {
+      "component": "over-broad science cache invalidation",
+      "evidence": "D2-only immutable scalar retention is byte-identical",
+      "rank": 3
+    },
+    {
+      "component": "planned projected build/fail/rebuild retry",
+      "evidence": "known replan can request full domain before construction",
+      "rank": 4
+    },
+    {
+      "component": "Fresh OpenDSS",
+      "evidence": "~0.03s; retained and not a material bottleneck",
+      "rank": 5
+    }
+  ],
+  "schema_version": "mobileess.bottleneck_ranking.v1",
+  "status": "MEASURED"
+}

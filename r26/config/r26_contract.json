@@ -1,0 +1,74 @@
+{
+  "schema_version": "r26.controller_contract.v2",
+  "cadence_seconds": 300,
+  "horizon_steps": 54,
+  "commit_steps": 1,
+  "causality": "PRE_TO_POST_NO_FUTURE_ACTUAL",
+  "route_planner": {
+    "workers": 1,
+    "blocking_fast_loop": false,
+    "online_exact_gap_claim": false,
+    "prior_plan_usage": "WARM_START_OR_VAR_HINT_ONLY",
+    "candidate_swap": "ISSUE_BOUNDARY_ATOMIC_VALIDATED",
+    "request_modes": ["LOCAL_REPAIR", "FULL_REPLAN"],
+    "local_repair": {
+      "requires_explicit_affected_scope": true,
+      "default_horizon_steps": 12,
+      "unaffected_decisions_fixed": true,
+      "empty_scope_action": "ESCALATE_TO_FULL_REPLAN"
+    },
+    "full_replan_horizon": {
+      "first_60_minutes_step_minutes": 5,
+      "remaining_210_minutes_step_minutes": 15,
+      "integer_stages": 26,
+      "offline_r25t_certificate_uses_this_approximation": false
+    },
+    "opportunity_gap_lower_bound_authority": "GLOBAL_SAME_CAUSAL_STATE_ONLY",
+    "recursive_feasibility": {
+      "claim": "CONDITIONAL_SHIFTED_PLAN_ADMISSIBILITY_NOT_GENERAL_STABILITY",
+      "prevalidated_safe_fallback": true,
+      "fail_closed_without_safe_plan": true
+    }
+  },
+  "fast_dispatch": {
+    "grid_model": "EXISTING_AC_AWARE_RADIAL_QCP",
+    "mobility_and_work_decisions_conditioned": true,
+    "continuity_claim_requires_num_integer_vars_zero": true,
+    "runtime_claim_threshold_seconds": 300
+  },
+  "commit_gates": [
+    "DISPATCH_FEASIBLE",
+    "NUMERICAL_GATES",
+    "FRESH_NONLINEAR_OPENDSS_AC_POWER_FLOW"
+  ],
+  "method_name": "EVENT_TRIGGERED_MOBILITY_REPLANNING_WITH_FIVE_MINUTE_AC_AWARE_DISPATCH",
+  "novelty_not_claimed": "EVENT_TRIGGERED_MPC_BY_ITSELF",
+  "offline_r25r": {
+    "immutable": true,
+    "global_modeled_total_gap": 0.03,
+    "lower_bound_authority": "EXACT_ALL_COLUMN",
+    "restricted_master_objbound_global_authority": false
+  },
+  "annual_execution_after_validation": {
+    "calendar_months": 12,
+    "scored_days_per_month": 7,
+    "scored_steps_per_month": 2016,
+    "total_scored_days": 84,
+    "total_scored_steps": 24192,
+    "window_shape": "ONE_CONTIGUOUS_SEVEN_DAY_BLOCK_PER_MONTH",
+    "window_selector": "PREDECLARED_MINIMUM_NORMALIZED_FEATURE_DISTANCE_TO_MONTHLY_CENTROID",
+    "full_calendar_month_evaluation": false,
+    "monthly_processes": 4,
+    "solver_threads_per_process": 4,
+    "monthly_waves": 3,
+    "causal_burn_in_hours": 48,
+    "burn_in_steps_per_month": 576,
+    "burn_in_excluded_from_reported_metrics": true,
+    "exact_oracle": {
+      "solver": "R25T_GLOBAL_3PCT",
+      "issues_per_month": 54,
+      "coverage": "ONE_PREDECLARED_4P5H_WINDOW_WITHIN_EACH_MONTHLY_7DAY_BLOCK",
+      "full_7day_exact_run_required": false
+    }
+  }
+}

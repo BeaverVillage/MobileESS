@@ -1,0 +1,17 @@
+{
+  "identity": "EPISODE_BOUNDARY_RECOVERY_V1",
+  "status": "FROZEN_PRE_MARCH",
+  "step_minutes": 5,
+  "nominal_horizon_steps": 54,
+  "effective_horizon_steps": "min(54, steps_to_physical_episode_end)",
+  "terminal_contract": {
+    "mess_energy_debt_kwh_max": 1e-09,
+    "boundary": "physical simulation day end",
+    "dispatch_after_boundary": "disabled"
+  },
+  "fixed_debt_deadline": "A deadline is assigned when positive discharge debt first appears and is never rolled forward while that debt remains positive.",
+  "new_discharge_with_carried_debt": "disabled",
+  "recovery_active": "true only when remaining deadline steps minus full-rate repayment steps is <= 1",
+  "rationale": "H0 discharge cannot be justified by repayment in virtual time after the physical episode ends.",
+  "positive_result_required": false
+}

@@ -1,0 +1,689 @@
+{
+  "artifact_id": "V23M_FINAL_REVIEW_V1",
+  "RESULT_CLASSIFICATION": "V23M_RACQ_RECURRENCE_GATE_FAIL_ACQ_ONLY",
+  "ready_flags": {
+    "NOVELTY_GATE_PASS": true,
+    "RECURRENCE_SIGNAL_READY": false,
+    "RACQ_MODEL_DEVELOPMENT_READY": false,
+    "RACQ_PROPOSED_MODEL_ACCEPTED": false,
+    "CONDITIONAL_MEAN_AUTHORITY_READY": true,
+    "QUANTILE_AUTHORITY_READY": true,
+    "FORECAST_BUNDLE_V2_READY": true,
+    "QUEUE_CONSISTENCY_READY": true,
+    "POWER_FORECAST_READY": true,
+    "SCALE_DEPENDENT_DIAGNOSTIC_READY": false,
+    "NEW_LOCKED_TEST_READY": false,
+    "PUBLISHABLE_LOCKED_GENERALIZATION_READY": false,
+    "NEW_GRID_SCIENCE_RUN_READY": false,
+    "FINAL_GRID_SCIENCE_AUTHORIZED": false
+  },
+  "novelty": {
+    "gate": "PARTIAL_OVERLAP_BUT_DISTINCT_COMBINATION",
+    "WORLD_FIRST": "NOT_YET",
+    "near_duplicate": false
+  },
+  "recurrence": {
+    "account_hash_status": "PASS",
+    "strict_event_share": 0.7726457503552047,
+    "strict_GPU_h_share": 0.8424318284792778,
+    "family_event_share": 0.005229077865511378,
+    "family_GPU_h_share": 0.003703906290468769,
+    "innovation_event_share": 0.222125171779284,
+    "innovation_GPU_h_share": 0.1538642652302536,
+    "median_fold_recurring_GPU_h_share": 0.8987781967017255,
+    "predictive_lift": {
+      "artifact_id": "V23M_RECURRENCE_PREDICTIVE_LIFT_V1",
+      "models": {
+        "R0_CALENDAR": [
+          "hour_sin",
+          "hour_cos",
+          "dow_sin",
+          "dow_cos"
+        ],
+        "R1_CALENDAR_AGGREGATE": [
+          "hour_sin",
+          "hour_cos",
+          "dow_sin",
+          "dow_cos",
+          "hist_events_1d",
+          "hist_events_7d",
+          "hist_mass_7d",
+          "hist_mass_28d"
+        ],
+        "R2_CALENDAR_AGGREGATE_MOTIF": [
+          "hour_sin",
+          "hour_cos",
+          "dow_sin",
+          "dow_cos",
+          "hist_events_1d",
+          "hist_events_7d",
+          "hist_mass_7d",
+          "hist_mass_28d",
+          "motif_hour_events_28d",
+          "motif_hour_recurring_28d",
+          "motif_hour_mass_28d",
+          "motif_same_dow_hour_events_28d",
+          "motif_same_dow_hour_mass_28d",
+          "motif_hour_unique_strict_28d",
+          "motif_hour_unique_family_28d",
+          "motif_hour_decay_score_28d",
+          "motif_hour_decay_mass_28d",
+          "active_strict_motifs_28d",
+          "active_family_motifs_28d"
+        ]
+      },
+      "fold_metrics": [
+        {
+          "fold_id": 1,
+          "model": "R0_CALENDAR",
+          "log_loss": 2.5413539789662933,
+          "brier_score": 0.6543470861921226,
+          "AUROC": 0.635491356855316,
+          "average_precision": 0.42342895344325326,
+          "GPU_h_weighted_brier": 0.003986338152108112,
+          "mean_predicted_probability": 0.9591311088684501,
+          "observed_frequency": 0.2847222222222222
+        },
+        {
+          "fold_id": 1,
+          "model": "R1_CALENDAR_AGGREGATE",
+          "log_loss": 5.1167113983896675,
+          "brier_score": 0.7104735369598252,
+          "AUROC": 0.6098744968032205,
+          "average_precision": 0.3577585737521062,
+          "GPU_h_weighted_brier": 0.004038288718483087,
+          "mean_predicted_probability": 0.9969407700728643,
+          "observed_frequency": 0.2847222222222222
+        },
+        {
+          "fold_id": 1,
+          "model": "R2_CALENDAR_AGGREGATE_MOTIF",
+          "log_loss": 2.471286976671087,
+          "brier_score": 0.44884714232923906,
+          "AUROC": 0.5564101349751361,
+          "average_precision": 0.3358644558152568,
+          "GPU_h_weighted_brier": 0.10975713824163065,
+          "mean_predicted_probability": 0.6395410761943648,
+          "observed_frequency": 0.2847222222222222
+        },
+        {
+          "fold_id": 2,
+          "model": "R0_CALENDAR",
+          "log_loss": 3.243447061528385,
+          "brier_score": 0.7602096854560314,
+          "AUROC": 0.5954963692747484,
+          "average_precision": 0.22143845587808197,
+          "GPU_h_weighted_brier": 0.0072567566547091416,
+          "mean_predicted_probability": 0.9586148017704191,
+          "observed_frequency": 0.17069892473118278
+        },
+        {
+          "fold_id": 2,
+          "model": "R1_CALENDAR_AGGREGATE",
+          "log_loss": 4.196646662896263,
+          "brier_score": 0.7942546622223773,
+          "AUROC": 0.6111742110032032,
+          "average_precision": 0.2566726326999,
+          "GPU_h_weighted_brier": 0.007480624506666491,
+          "mean_predicted_probability": 0.9792596067598643,
+          "observed_frequency": 0.17069892473118278
+        },
+        {
+          "fold_id": 2,
+          "model": "R2_CALENDAR_AGGREGATE_MOTIF",
+          "log_loss": 3.089980254828226,
+          "brier_score": 0.7088523783641449,
+          "AUROC": 0.5282354292423332,
+          "average_precision": 0.22119337151209006,
+          "GPU_h_weighted_brier": 0.04311708219021211,
+          "mean_predicted_probability": 0.8768900039264711,
+          "observed_frequency": 0.17069892473118278
+        },
+        {
+          "fold_id": 3,
+          "model": "R0_CALENDAR",
+          "log_loss": 2.467737522510279,
+          "brier_score": 0.5831161345039806,
+          "AUROC": 0.6009532739490545,
+          "average_precision": 0.4489847859283046,
+          "GPU_h_weighted_brier": 0.005469020512607462,
+          "mean_predicted_probability": 0.9595930896211828,
+          "observed_frequency": 0.3629032258064516
+        },
+        {
+          "fold_id": 3,
+          "model": "R1_CALENDAR_AGGREGATE",
+          "log_loss": 2.8092604512219834,
+          "brier_score": 0.6051776649324033,
+          "AUROC": 0.6155336771370526,
+          "average_precision": 0.46472091283331207,
+          "GPU_h_weighted_brier": 0.004277128583522764,
+          "mean_predicted_probability": 0.9772941825877698,
+          "observed_frequency": 0.3629032258064516
+        },
+        {
+          "fold_id": 3,
+          "model": "R2_CALENDAR_AGGREGATE_MOTIF",
+          "log_loss": 2.6479507721599083,
+          "brier_score": 0.5802585819608195,
+          "AUROC": 0.5500390686044694,
+          "average_precision": 0.41895037090486636,
+          "GPU_h_weighted_brier": 0.010328608391297468,
+          "mean_predicted_probability": 0.9485894763274108,
+          "observed_frequency": 0.3629032258064516
+        },
+        {
+          "fold_id": 4,
+          "model": "R0_CALENDAR",
+          "log_loss": 3.5031821263388627,
+          "brier_score": 0.7636114314391031,
+          "AUROC": 0.6119801365611421,
+          "average_precision": 0.31091351462561173,
+          "GPU_h_weighted_brier": 0.011141624646296925,
+          "mean_predicted_probability": 0.9782472926012401,
+          "observed_frequency": 0.20089285714285715
+        },
+        {
+          "fold_id": 4,
+          "model": "R1_CALENDAR_AGGREGATE",
+          "log_loss": 3.3572302265897314,
+          "brier_score": 0.7532452921715997,
+          "AUROC": 0.6706807366025245,
+          "average_precision": 0.45426070243468575,
+          "GPU_h_weighted_brier": 0.010744758835450174,
+          "mean_predicted_probability": 0.9720228320878945,
+          "observed_frequency": 0.20089285714285715
+        },
+        {
+          "fold_id": 4,
+          "model": "R2_CALENDAR_AGGREGATE_MOTIF",
+          "log_loss": 3.8346809735648937,
+          "brier_score": 0.7609884938188995,
+          "AUROC": 0.6474377543278848,
+          "average_precision": 0.40341496500502494,
+          "GPU_h_weighted_brier": 0.010418290721300245,
+          "mean_predicted_probability": 0.9770570548428348,
+          "observed_frequency": 0.20089285714285715
+        },
+        {
+          "fold_id": 5,
+          "model": "R0_CALENDAR",
+          "log_loss": 3.272057650032831,
+          "brier_score": 0.71164550777322,
+          "AUROC": 0.5791835972163841,
+          "average_precision": 0.33304597047130197,
+          "GPU_h_weighted_brier": 0.007452097116271187,
+          "mean_predicted_probability": 0.9826822955569855,
+          "observed_frequency": 0.2620967741935484
+        },
+        {
+          "fold_id": 5,
+          "model": "R1_CALENDAR_AGGREGATE",
+          "log_loss": 3.028593021160693,
+          "brier_score": 0.6951401624772869,
+          "AUROC": 0.6397832889636169,
+          "average_precision": 0.40461213293304815,
+          "GPU_h_weighted_brier": 0.007490563932262039,
+          "mean_predicted_probability": 0.9721188559319224,
+          "observed_frequency": 0.2620967741935484
+        },
+        {
+          "fold_id": 5,
+          "model": "R2_CALENDAR_AGGREGATE_MOTIF",
+          "log_loss": 3.1989295678760694,
+          "brier_score": 0.6958959565428076,
+          "AUROC": 0.6451637009014058,
+          "average_precision": 0.397216348284127,
+          "GPU_h_weighted_brier": 0.007414963984513512,
+          "mean_predicted_probability": 0.9734812234091794,
+          "observed_frequency": 0.2620967741935484
+        }
+      ],
+      "R2_vs_R1_GPU_h_weighted_brier_relative_improvement_by_fold": [
+        -26.179121131006948,
+        -4.763834577151622,
+        -1.4148463600293575,
+        0.030383940593697926,
+        0.010092691075356345
+      ],
+      "median_fold_relative_improvement": -1.4148463600293575,
+      "seven_day_block_bootstrap": {
+        "replicates": 2000,
+        "seed": 20260901,
+        "relative_improvement_mean": -6.287028540009608,
+        "CI95": [
+          -12.711906292494943,
+          -1.6136339835402735
+        ],
+        "supports_improvement_direction": false
+      }
+    },
+    "gate": false
+  },
+  "dataset": {
+    "source_valid_H100_events": 323354,
+    "flexible_target_events": 85866,
+    "total_target_GPU_h": 614322.9725,
+    "primary_days": 225,
+    "augmented_cutoffs": 900,
+    "feature_boundary": [
+      "submit_time",
+      "inter_arrival_seconds",
+      "gpus_requested",
+      "nodes_req",
+      "wallclock_req",
+      "partition",
+      "qos",
+      "account_hash",
+      "request_full_partial",
+      "historical_submission_counts",
+      "historical_requested_GPU_sums",
+      "historical_requested_walltime_sums",
+      "calendar",
+      "public_holiday",
+      "causal_rolling_statistics"
+    ],
+    "target_only_fields": [
+      "start_time",
+      "end_time",
+      "queue_wait",
+      "state_simple",
+      "realized_runtime_hours",
+      "semantic_flexible_label"
+    ]
+  },
+  "architecture": {
+    "artifact_id": "V23M_RACQ_FLEX_ARCHITECTURE_CONTRACT_V1",
+    "proposed_model_name": "ACQ-Flex",
+    "RACQ_RECURRENCE_GATE_PASS": false,
+    "recurrence_branch_status": "DISABLED_BY_PREREGISTERED_GATE",
+    "modules": {
+      "A": "hourly DeepSets plus causal decay-GRU",
+      "B": "all-motif chunked attention memory; experimental only when recurrence gate fails",
+      "C": "recurring/innovation decomposition; disabled in ACQ fallback",
+      "D": "hurdle Bernoulli plus zero-truncated negative binomial count",
+      "E": "two-component LogNormal body plus bounded-shape GPD tail",
+      "F": "low-rank 24x6x5 cohort decoder",
+      "G": "exactly coherent 96x6x5 allocation",
+      "H": "differentiable fluid EDF and frozen exact scheduler adapter",
+      "I": "frozen tier-to-power IT projection; PUE excluded from ML loss"
+    },
+    "mass_identity_tolerance_GPU_h": 1e-09,
+    "motif_top_K": null,
+    "all_active_motifs_required": true,
+    "C_MODEL_GPU_equivalent": 528,
+    "C_MODEL_interpretation": "CASE_STUDY_ONLY_NOT_MELBOURNE_INSTALLED_CAPACITY"
+  },
+  "training_only_blocked_CV": {
+    "daily_WAPE": 1.091156165344103,
+    "Q50_WAPE": 1.0609612917929359,
+    "daily_MAE_GPU_h": 3617.663083380158,
+    "daily_RMSE_GPU_h": 7155.284560546616,
+    "aggregate_mass_ratio": 0.5967570632350877,
+    "burst_WAPE": 0.8897447088530759,
+    "Q50_coverage": 0.3708609271523179,
+    "Q90_coverage": 0.8543046357615894,
+    "negative_prediction_count": 0,
+    "quantile_crossing_count": 0,
+    "flexible_IT_power_WAPE": 1.5623611757575064,
+    "peak_flexible_IT_power_error_kW": -160.32491961541575,
+    "peak_timing_error_slots": 2561.0
+  },
+  "acceptance": {
+    "artifact_id": "V23M_RACQ_ACCEPTANCE_TEST_V1",
+    "classification": "V23M_RACQ_RECURRENCE_GATE_FAIL_ACQ_ONLY",
+    "RACQ_RECURRENCE_GATE_PASS": false,
+    "RACQ_PROPOSED_MODEL_ACCEPTED": false,
+    "ACQ_evaluated": true,
+    "ACQ_metrics": {
+      "daily_WAPE": 1.091156165344103,
+      "Q50_WAPE": 1.0609612917929359,
+      "daily_MAE_GPU_h": 3617.663083380158,
+      "daily_RMSE_GPU_h": 7155.284560546616,
+      "aggregate_mass_ratio": 0.5967570632350877,
+      "burst_WAPE": 0.8897447088530759,
+      "Q50_coverage": 0.3708609271523179,
+      "Q90_coverage": 0.8543046357615894,
+      "negative_prediction_count": 0,
+      "quantile_crossing_count": 0,
+      "flexible_IT_power_WAPE": 1.5623611757575064,
+      "peak_flexible_IT_power_error_kW": -160.32491961541575,
+      "peak_timing_error_slots": 2561.0
+    },
+    "conditional_mean_gates": {
+      "daily_WAPE_le": 0.927302659814271,
+      "actual": 1.091156165344103,
+      "pass": false,
+      "burst_WAPE_le": 0.864089906167401,
+      "burst_actual": 0.8897447088530759,
+      "burst_pass": false,
+      "mass_ratio_range": [
+        0.85,
+        1.15
+      ],
+      "mass_ratio_actual": 0.5967570632350877,
+      "mass_pass": false
+    },
+    "quantile_gates": {
+      "Q50_WAPE_le": 0.845737555557761,
+      "actual": 1.0609612917929359,
+      "pass": false,
+      "Q50_coverage_range": [
+        0.45,
+        0.55
+      ],
+      "Q50_coverage": 0.3708609271523179,
+      "Q90_coverage_range": [
+        0.85,
+        0.95
+      ],
+      "Q90_coverage": 0.8543046357615894
+    },
+    "power_gate": {
+      "semantic_LightGBM_reference_WAPE": 1.5703531589156716,
+      "ACQ_IT_power_WAPE": 1.5623611757575064,
+      "relative_improvement": 0.005089290337521035,
+      "pass_5pct": false
+    },
+    "decision_basis": "RECURRENCE_GATE_FAIL_PRECEDES_PERFORMANCE_GATES"
+  },
+  "April_postfreeze": {
+    "artifact_id": "V23M_APRIL_POSTFREEZE_DIAGNOSTIC_V1",
+    "label": "APRIL_OBSERVED_DIAGNOSTIC_NOT_LOCKED_TEST",
+    "freeze_sha256": "c5dc6ea772e7d2dcf63e6ded45a2a1b04a01d3ee406b96a1cbe85378151be686",
+    "freeze_verified_before_April_read": true,
+    "days": [
+      {
+        "date": "2025-04-02",
+        "mean_GPU_h": 1436.6522877736825,
+        "Q50_GPU_h": 2883.7449919956034,
+        "Q90_GPU_h": 5235.909627946268,
+        "observed_GPU_h": 5235.122777777778
+      },
+      {
+        "date": "2025-04-03",
+        "mean_GPU_h": 2535.039765149632,
+        "Q50_GPU_h": 1981.1435359257098,
+        "Q90_GPU_h": 5379.646390682174,
+        "observed_GPU_h": 7104.636111111111
+      },
+      {
+        "date": "2025-04-12",
+        "mean_GPU_h": 2981.36707776361,
+        "Q50_GPU_h": 2148.8970637289244,
+        "Q90_GPU_h": 8800.146858490365,
+        "observed_GPU_h": 3511.347777777778
+      },
+      {
+        "date": "2025-04-13",
+        "mean_GPU_h": 3183.254356340016,
+        "Q50_GPU_h": 2185.746168590209,
+        "Q90_GPU_h": 10602.538735312715,
+        "observed_GPU_h": 5609.301111111112
+      },
+      {
+        "date": "2025-04-15",
+        "mean_GPU_h": 1648.071398657387,
+        "Q50_GPU_h": 2113.992508788966,
+        "Q90_GPU_h": 9249.576045083882,
+        "observed_GPU_h": 3435.956666666667
+      },
+      {
+        "date": "2025-04-22",
+        "mean_GPU_h": 656.0013800612224,
+        "Q50_GPU_h": 1049.0182146731115,
+        "Q90_GPU_h": 3693.323509255634,
+        "observed_GPU_h": 4036.016111111111
+      },
+      {
+        "date": "2025-04-23",
+        "mean_GPU_h": 2162.0911977309825,
+        "Q50_GPU_h": 1967.2946474841572,
+        "Q90_GPU_h": 3392.7524040966346,
+        "observed_GPU_h": 5115.490833333334
+      }
+    ],
+    "daily_mean_WAPE": 0.571119225143635,
+    "Q50_WAPE": 0.5791267839474086,
+    "mass_ratio": 0.42888077485636517,
+    "Q50_coverage": 0.0,
+    "Q90_coverage": 0.5714285714285714,
+    "IT_power_WAPE": 1.0912310148772568,
+    "April_target_reads_before_freeze": 0,
+    "April_target_reads_after_freeze": 1,
+    "April_reads_for_model_selection_or_tuning": 0,
+    "retraining_after_April_read": 0,
+    "source": {
+      "source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+      "source_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+      "members_opened": [
+        {
+          "month": 202410,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+          "H100_rows": 21679
+        },
+        {
+          "month": 202411,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+          "H100_rows": 26933
+        },
+        {
+          "month": 202412,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+          "H100_rows": 41814
+        },
+        {
+          "month": 202407,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=7/kestrel_jobs_202407_0.parquet",
+          "H100_rows": 42284
+        },
+        {
+          "month": 202408,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+          "H100_rows": 20192
+        },
+        {
+          "month": 202409,
+          "member": "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+          "H100_rows": 26532
+        },
+        {
+          "month": 202501,
+          "member": "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+          "H100_rows": 96880
+        },
+        {
+          "month": 202502,
+          "member": "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+          "H100_rows": 22295
+        },
+        {
+          "month": 202503,
+          "member": "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+          "H100_rows": 86148
+        },
+        {
+          "month": 202504,
+          "member": "esif.hpc.kestrel.job-anon/year=2025/month=4/kestrel_jobs_202504_0.parquet",
+          "H100_rows": 65762
+        }
+      ],
+      "H100_rows": 450519,
+      "requested_columns": [
+        "account_hash",
+        "end_time",
+        "gpu_nodes_occupied",
+        "gpus_requested",
+        "id",
+        "jobs_shared",
+        "nodelist",
+        "nodes_req",
+        "nodes_shared",
+        "partition",
+        "qos",
+        "shared_job_count",
+        "start_time",
+        "state_simple",
+        "submit_time",
+        "wallclock_req"
+      ]
+    }
+  },
+  "production_authority": {
+    "mean": "B2_LIGHTGBM_TWEEDIE",
+    "Q50": "B3_LIGHTGBM_QUANTILE",
+    "Q90": "B3_LIGHTGBM_QUANTILE",
+    "RACQ_or_fallback": "FALLBACK_EXISTING_ACCEPTED_BASELINES"
+  },
+  "queue": {
+    "artifact_id": "V23M_QUEUE_SCHEDULER_PREFLIGHT_V1",
+    "execution_device": "cuda",
+    "C_MODEL_GPU_equivalent": 528,
+    "slot_capacity_GPU_h": 132.0,
+    "fluid_scheduler_label": "DIFFERENTIABLE_APPROXIMATION_NOT_EXACT",
+    "exact_scheduler_authority": "FROZEN_V19_GRID_BLIND_EDF",
+    "fluid_work_conservation_max_error_GPU_h": 0.0,
+    "exact_work_conservation_error_GPU_h": 0.0,
+    "fluid_vs_exact_served_difference_GPU_h": 0.0,
+    "hidden_shedding_GPU_h": 0.0,
+    "status": "PASS"
+  },
+  "power": {
+    "artifact_id": "V23M_POWER_FORECAST_VALIDATION_V1",
+    "boundary": "IT_SIDE",
+    "IT_power_WAPE": 1.0912310148772568,
+    "predicted_peak_kW": 301.6194023373821,
+    "target_peak_kW": 302.21021780278625,
+    "PUE_calls": 0,
+    "facility_scale_calls_on_GPU_h": 0,
+    "grid_objective_calls": 0,
+    "queue_rows": [
+      {
+        "date": "2025-04-02",
+        "predicted_arrival_GPU_h": 1436.6522877736825,
+        "predicted_terminal_backlog_GPU_h": 0.0,
+        "target_terminal_backlog_GPU_h": 0.0,
+        "predicted_work_conservation_error_GPU_h": 0.0,
+        "target_work_conservation_error_GPU_h": 0.0
+      },
+      {
+        "date": "2025-04-03",
+        "predicted_arrival_GPU_h": 2535.0397651496323,
+        "predicted_terminal_backlog_GPU_h": 0.0,
+        "target_terminal_backlog_GPU_h": 28.537222222222198,
+        "predicted_work_conservation_error_GPU_h": 0.0,
+        "target_work_conservation_error_GPU_h": 8.810729923425242e-13
+      },
+      {
+        "date": "2025-04-12",
+        "predicted_arrival_GPU_h": 2981.36707776361,
+        "predicted_terminal_backlog_GPU_h": 0.0,
+        "target_terminal_backlog_GPU_h": 0.0,
+        "predicted_work_conservation_error_GPU_h": 0.0,
+        "target_work_conservation_error_GPU_h": 4.547473508864641e-13
+      },
+      {
+        "date": "2025-04-13",
+        "predicted_arrival_GPU_h": 3183.254356340016,
+        "predicted_terminal_backlog_GPU_h": 0.0,
+        "target_terminal_backlog_GPU_h": 933.8694444444445,
+        "predicted_work_conservation_error_GPU_h": 0.0,
+        "target_work_conservation_error_GPU_h": 9.094947017729282e-13
+      },
+      {
+        "date": "2025-04-15",
+        "predicted_arrival_GPU_h": 1648.071398657387,
+        "predicted_terminal_backlog_GPU_h": 0.0,
+        "target_terminal_backlog_GPU_h": 0.0,
+        "predicted_work_conservation_error_GPU_h": 0.0,
+        "target_work_conservation_error_GPU_h": 4.547473508864641e-13
+      },
+      {
+        "date": "2025-04-22",
+        "predicted_arrival_GPU_h": 656.0013800612224,
+        "predicted_terminal_backlog_GPU_h": 0.0,
+        "target_terminal_backlog_GPU_h": 0.0,
+        "predicted_work_conservation_error_GPU_h": 0.0,
+        "target_work_conservation_error_GPU_h": 0.0
+      },
+      {
+        "date": "2025-04-23",
+        "predicted_arrival_GPU_h": 2162.0911977309825,
+        "predicted_terminal_backlog_GPU_h": 0.0,
+        "target_terminal_backlog_GPU_h": 1909.7769444444457,
+        "predicted_work_conservation_error_GPU_h": 0.0,
+        "target_work_conservation_error_GPU_h": 0.0
+      }
+    ]
+  },
+  "frozen_scale_diagnostic": {
+    "artifact_id": "V23M_SCALE_DEPENDENT_DIAGNOSTIC_V1",
+    "label": "FROZEN_V22SR1_ENVELOPE_COMPARISON_ONLY",
+    "V22SR1_aggregate_PCC_peak_MW": 0.5288087919579648,
+    "V22SR1_aggregate_IT_peak_MW": 0.40677599381381907,
+    "facility_scale_multiplication_on_GPU_h": 0,
+    "predicted_flexible_IT_peak_kW": 301.6194023373821,
+    "P_flex_IT_le_P_total_IT": true,
+    "violation_kW": 0.0,
+    "clipping_calls": 0,
+    "FINAL_FACILITY_FLEXIBILITY_SHARE": null,
+    "status": "DIAGNOSTIC_NOT_AUTHORITY"
+  },
+  "limitations": [
+    "NO_UNTOUCHED_LOCKED_TEST",
+    "FORECAST_NEW_ONLY_SCOPE",
+    "RETROSPECTIVE_FLEXIBLE_TARGET",
+    "PARTIAL_NODE_HOST_POWER_LOWER_BOUND_GAP",
+    "SITE_SPECIFIC_GPU_ALLOCATION_UNAVAILABLE",
+    "RACQ_ABLATIONS_NOT_RUN_AFTER_GATE_FAILURE"
+  ],
+  "preservation": {
+    "checked_files": 550,
+    "mismatch_count": 0,
+    "failures": [],
+    "status": "PASS"
+  },
+  "tests": {
+    "count": 17,
+    "status": "PASS"
+  },
+  "git": {
+    "starting_head": "499d5793ed4b725fa5d0b38691b07752c4f88482",
+    "branch": "codex/v23m-racq-flex",
+    "worktree": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v23m_racq_flex",
+    "commits_before_final": [
+      "22961d71d6cb595f36a35ca79ab54ac7f19e5f1c\tEvaluate RACQ-Flex against strong baselines",
+      "8ef9bca87e84f09482113a426cd5ab8c5709bcf6\tAdd queue-consistent and power-aware forecast layers",
+      "7588a83c67a4028af6550a1bdda35657fc969756\tImplement RACQ-Flex compound recurrence architecture",
+      "697ac923d5b88e7396e9fc7b70c2f1642ab41a12\tAdd RACQ-Flex causal event and cohort datasets",
+      "dab8959c592fb6f91783cf58ee1b11d0a02c726c\tAudit RACQ-Flex novelty and Kestrel recurrence",
+      "b172bb5077fe02655a184e14ffe9fc9259eb52d6\tFreeze V23M RACQ-Flex development baseline"
+    ],
+    "final_commit_sha": "REPORTED_EXTERNALLY_AFTER_NON_SELF_REFERENTIAL_FINAL_COMMIT"
+  },
+  "Q1_Q15": {
+    "Q1": "사실상 동일한 prior architecture는 찾지 못했으나 각 구성요소와 GPU recurrence 활용에는 강한 부분 중복이 있었다.",
+    "Q2": "반복 GPU-h 비중은 컸지만 preregistered predictive recurrence gate를 만족하는 신호는 입증되지 않았다.",
+    "Q3": "fold 중앙 recurring GPU-h 비중은 89.877820%였다.",
+    "Q4": "아니다. R2-vs-R1 GPU-h weighted Brier 중앙 상대 개선은 -141.484636%, bootstrap CI는 [-12.711906292494943, -1.6136339835402735]였다.",
+    "Q5": "B2_LIGHTGBM_TWEEDIE가 유지된 mean baseline이다.",
+    "Q6": "B3_LIGHTGBM_QUANTILE이 유지된 Q50/Q90 baseline이다.",
+    "Q7": "RACQ는 gate 실패로 학습하지 않았다. ACQ fallback daily WAPE는 1.091156165344였다.",
+    "Q8": "RACQ 값은 없다. ACQ fallback Q50 WAPE는 1.060961291793였다.",
+    "Q9": "아니다. ACQ burst WAPE 0.889744708853는 C-MASS 0.847146966831보다 나빴다.",
+    "Q10": "입증하지 못했다. RACQ가 gate에서 중단되어 GPD 독립 ablation은 실행하지 않았고 개선 주장을 하지 않는다.",
+    "Q11": "입증하지 못했다. queue/power 구조 보존은 통과했지만 성능 개선 및 mass 비열화 조건을 만족하지 못했다.",
+    "Q12": "아니다. recurrence gate 실패로 RACQ를 paper proposed model로 채택할 수 없다.",
+    "Q13": "production mean은 B2 LightGBM Tweedie, Q50/Q90은 B3 LightGBM Quantile이다.",
+    "Q14": "NO. GPU-h에 0.528808792 MW scale을 곱한 호출은 0이다.",
+    "Q15": "NO. 새 grid science run은 승인되지 않았다."
+  },
+  "firewall": {
+    "ML_retraining_after_April": 0,
+    "GPU_h_scale_calls": 0,
+    "B0_B1_B2_B3_science_runs": 0,
+    "OpenDSS_calls": 0,
+    "grid_science_calls": 0,
+    "locked_test_created": 0
+  }
+}

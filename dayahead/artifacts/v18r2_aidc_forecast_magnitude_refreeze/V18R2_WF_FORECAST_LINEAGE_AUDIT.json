@@ -1,0 +1,171 @@
+{
+  "artifact_id": "V18R2_WF_FORECAST_LINEAGE_AUDIT_V1",
+  "reproduction": {
+    "prediction_shape": [
+      7,
+      96,
+      22,
+      3
+    ],
+    "target_count": 22,
+    "work_target_count": 20,
+    "quantile_axis": [
+      0.1,
+      0.5,
+      0.9
+    ],
+    "selected_quantile": "Q50_INDEX_1",
+    "Q50_before_beta_GPU_h_by_day": {
+      "2025-04-02": 719.7878093138914,
+      "2025-04-03": 735.0752236105652,
+      "2025-04-12": 667.0046788337582,
+      "2025-04-13": 621.2594646335767,
+      "2025-04-15": 709.5130567692792,
+      "2025-04-22": 732.2323497700452,
+      "2025-04-23": 791.402837577132
+    },
+    "Q50_before_beta_7day_GPU_h": 4976.275420508247,
+    "beta_AIDC": 0.25,
+    "after_beta_GPU_h_by_day": {
+      "2025-04-02": 179.94695232847286,
+      "2025-04-03": 183.7688059026413,
+      "2025-04-12": 166.75116970843956,
+      "2025-04-13": 155.31486615839418,
+      "2025-04-15": 177.3782641923198,
+      "2025-04-22": 183.0580874425113,
+      "2025-04-23": 197.850709394283
+    },
+    "after_beta_7day_GPU_h": 1244.0688551270619,
+    "frozen_scheduler_7day_GPU_h": 1244.068855127062,
+    "arithmetic_reproduction_abs_error_GPU_h": 2.2737367544323206e-13,
+    "scheduler_identity_abs_error_GPU_h": 2.842170943040401e-14
+  },
+  "stages": [
+    {
+      "stage": "raw Kestrel jobs",
+      "variable": "frame",
+      "shape": "monthly rows",
+      "unit": "job record",
+      "resolution": "event",
+      "boundary": "H100 partitions",
+      "scale_factor": 1.0,
+      "file": "esif.hpc.kestrel.job-anon.zip",
+      "function": "v17_v4r1_ml._load_kestrel_v4r1"
+    },
+    {
+      "stage": "semantic/modelable target",
+      "variable": "workload",
+      "shape": "time x 20",
+      "unit": "GPU-h/15min arrival slot",
+      "resolution": "15min",
+      "boundary": "V1 or U2 exact-uniform, three-job quarantine",
+      "scale_factor": 1.0,
+      "file": "dayahead/v17_v4r1_ml.py",
+      "function": "_load_kestrel_v4r1"
+    },
+    {
+      "stage": "positive target scale",
+      "variable": "scaled",
+      "shape": "time x 22",
+      "unit": "dimensionless",
+      "resolution": "15min",
+      "boundary": "positive P95 per target",
+      "scale_factor": "1/P95",
+      "file": "dayahead\\artifacts\\v17_candidate\\V17_RCMQT_V4R1_TRAINING_REPORT.json",
+      "function": "_scales/_build_samples"
+    },
+    {
+      "stage": "direct96 quantile output",
+      "variable": "prediction",
+      "shape": [
+        7,
+        96,
+        22,
+        3
+      ],
+      "unit": "scaled target",
+      "resolution": "96 slots/day",
+      "boundary": "frozen RC-MQT",
+      "scale_factor": 1.0,
+      "quantile": "Q10/Q50/Q90",
+      "file": "dayahead\\artifacts\\v17_candidate\\V17_RCMQT_V4R1_APRIL_7DAY_PREDICTIONS.npz",
+      "function": "predict_transformer"
+    },
+    {
+      "stage": "inverse target scale",
+      "variable": "prediction_raw",
+      "shape": [
+        7,
+        96,
+        22,
+        3
+      ],
+      "unit": "GPU-h/slot",
+      "resolution": "15min",
+      "boundary": "20 W targets",
+      "scale_factor": "P95",
+      "file": "dayahead\\artifacts\\v17_candidate\\cache_v4r1\\V17_RCMQT_V4R1_APRIL_7DAY_PREPARATION.json",
+      "function": "materialize_references"
+    },
+    {
+      "stage": "Q50 aggregation",
+      "variable": "q50_before_beta",
+      "shape": [
+        7
+      ],
+      "unit": "GPU-h/day",
+      "resolution": "day",
+      "boundary": "sum 96 marginal Q50 x20 targets",
+      "scale_factor": 1.0,
+      "quantile": "Q50",
+      "file": "dayahead/v17_v4r1_april.py",
+      "function": "materialize_references"
+    },
+    {
+      "stage": "equivalent-footprint beta",
+      "variable": "arrivals",
+      "shape": "7x20x96",
+      "unit": "GPU-h",
+      "resolution": "15min",
+      "boundary": "system total before rack distribution",
+      "scale_factor": 0.25,
+      "file": "dayahead/v17_v4r1_april.py",
+      "function": "materialize_references"
+    },
+    {
+      "stage": "48-rack/12-site distribution",
+      "variable": "allocation",
+      "shape": "20x48x96",
+      "unit": "GPU-h",
+      "resolution": "15min",
+      "boundary": "weights sum one",
+      "scale_factor": 1.0,
+      "file": "dayahead/v17_reference_scheduler_v6.py",
+      "function": "build_reference_schedule_v6_gpu_hour"
+    }
+  ],
+  "factor_audit": {
+    "GPU_vs_node_factor_4": "NOT_APPLIED_TO_OLD_WORKLOAD; TARGET_ALREADY_GPU_HOUR",
+    "slot_hours_0_25": "NOT_APPLIED_TO_WORKLOAD; USED_ONCE_FOR_CAPACITY_AND_POWER_RATE",
+    "beta_AIDC_0_25": "APPLIED_ONCE_TO_W_F_AND_CAUSES_75_PERCENT_MECHANICAL_LOSS",
+    "spatial_weights": "SUM_ONE_NO_LOSS",
+    "12_site_distribution": "DISTRIBUTION_NOT_REPLICATION_NO_LOSS",
+    "target_standardization": "POSITIVE_P95_AND_EXACT_INVERSE",
+    "log1p_expm1": "ABSENT",
+    "quantile_transform": "ABSENT; DIRECT_MONOTONE_QUANTILE_HEAD",
+    "cumulative_horizon_target": "ABSENT",
+    "node_hour_conversion": "ABSENT_IN_WORKLOAD_PATH",
+    "modelable_filter": "V1_OR_U2_EXACT_UNIFORM_ONLY",
+    "Q50_selection": "PRESENT_SLOTWISE_MARGINAL",
+    "hidden_clipping_or_flooring": "NO_POSTHOC_CLIP; SOFTPLUS_MODEL_HEAD",
+    "normalization_denominator": "PER_TARGET_POSITIVE_P95_NOT_CAPACITY"
+  },
+  "provenance": {
+    "dayahead\\artifacts\\v17_candidate\\V17_RCMQT_V4R1_APRIL_7DAY_PREDICTIONS.npz": "7fa045c9d5d8f015ff4a43c40518ab81afe0d791c652d90ea6a6a3f50013b39a",
+    "dayahead\\artifacts\\v17_candidate\\V17_RCMQT_V4R1_TRAINING_REPORT.json": "a8f6394335a3ba5dcff23cb35e4889f769af0b77b21b41ce91a7c16575e1ea33",
+    "dayahead\\artifacts\\v17_candidate\\cache_v4r1\\V17_RCMQT_V4R1_APRIL_7DAY_PREPARATION.json": "01a5d9cf97b2eb834cd2bfad0c5913da0c4f77457cb64fd8adf3163778687803",
+    "dayahead/v17_v4r1_ml.py": "2dab60c3af3637eb936d4d56d777aa29e6e5c9058a7abfb9f4a3e46e689a235d",
+    "dayahead/v17_v4r1_april.py": "d52068cd0593884750ea8bac54c7d5f262eba402676ae66a26dcecf1d58eed92",
+    "dayahead/v17_reference_scheduler_v6.py": "47068a529793a9b4774c8b3295ae3d9bfacdaa96d68a308c5e3b285d21cc3082"
+  }
+}

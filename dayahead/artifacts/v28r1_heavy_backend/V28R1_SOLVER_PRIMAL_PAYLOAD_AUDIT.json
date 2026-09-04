@@ -1,0 +1,80 @@
+{
+  "SOLVER_PRIMAL_ACCESS_AUTHORITY_PRESENT": true,
+  "SOLVER_PRIMAL_PAYLOAD_READY": false,
+  "artifact_id": "V28R1_SOLVER_PRIMAL_PAYLOAD_AUDIT_V1",
+  "decomposition": {
+    "ResourceMaster_controls_accessor_present": true,
+    "file": {
+      "exists": true,
+      "path": "dayahead/v16_3_decomposition_executor.py",
+      "sha256": "b0ff5ab4faab683b1f78060a57399a979399f123fa833c689bd304682dadaa7a",
+      "size_bytes": 22081
+    },
+    "function": "dayahead.v16_3_decomposition_executor.solve_benders",
+    "function_evidence": {
+      "line": 260,
+      "return_count": 2
+    },
+    "internal_variable_registry_present": {
+      "backlog": true,
+      "control_expressions": true,
+      "mess_e": true,
+      "mess_p": true,
+      "mess_q": true,
+      "x": true
+    },
+    "methods": [
+      "STANDARD_BD",
+      "CL_MC_BD"
+    ],
+    "public_primal_fields_missing": [
+      "controls_96x60",
+      "workload_payload",
+      "mess_p_96x4",
+      "mess_q_96x4",
+      "mess_e_97x4",
+      "route_location_payload",
+      "feasibility_residuals",
+      "termination_reason"
+    ],
+    "public_scalar_and_bound_fields_present": {
+      "LB": true,
+      "UB": true,
+      "farkas_cut_count": true,
+      "gap": true,
+      "iteration_log": true,
+      "iterations": true,
+      "objective": true,
+      "optimality_cut_count": true
+    }
+  },
+  "defect_id": null,
+  "finding": "The frozen decomposition executor retains live access to all master primal variables, so a wrapper can expose them without changing CL-MC-BD. No V28R1 implementation was written because Gate A already failed.",
+  "gate": "C_SOLVER_PRIMAL_PAYLOAD",
+  "monolithic": {
+    "file": {
+      "exists": true,
+      "path": "dayahead/final_science_solver_v16_3.py",
+      "sha256": "240182078ab36843e410efafba397b8b6b6aba04645671669819a8419a75f160",
+      "size_bytes": 17647
+    },
+    "function": "dayahead.final_science_solver_v16_3.solve_shadow",
+    "function_evidence": {
+      "line": 41,
+      "return_count": 4
+    },
+    "returned_fields_present": {
+      "controls_96x60": true,
+      "mess_e_97x4": true,
+      "mess_p_96x4": true,
+      "mess_q_96x4": true,
+      "mip_gap": true,
+      "obj_bound": true,
+      "objective_max_normalized_phase_line_current": true,
+      "schedule_sha256": true,
+      "workload_payload": true
+    }
+  },
+  "production_code_permitted_after_gate_A": false,
+  "status": "PASS_AUTHORITY_ACCESS_PRESENT_PRODUCTION_PAYLOAD_NOT_EXPOSED"
+}

@@ -1,0 +1,142 @@
+{
+  "actual_DNSP_nameplate_claim": false,
+  "aidc_transformer": {
+    "common_rating_kva": 1500.0,
+    "count": 12,
+    "phases": 3,
+    "primary_kv": 4.16,
+    "secondary_kv": 0.48,
+    "scenario_role": "SYNTHETIC_CASE_STUDY_DEDICATED_AIDC_PCC_INTERFACE"
+  },
+  "artifact_id": "V16_2_AIDC_PCC_TRANSFORMER_REFREEZE_AUTHORITY",
+  "authority_id": "V16_2_DA_AIDC_ICPS_AIDC_PCC_1500KVA",
+  "candidate_family": {
+    "candidate_kva": [
+      750.0,
+      1000.0,
+      1500.0,
+      2000.0
+    ],
+    "interpretation": "SOURCE_BACKED_DISCRETE_ENGINEERING_SCENARIO_FAMILY",
+    "manufacturer_examples": [
+      {
+        "candidate_kva": 750.0,
+        "primary_secondary_v": "4160-480",
+        "product_id": "750T21HCU",
+        "source_title": "TRANSFORMER 750 KVA DRY-TYPE 4160 - 480",
+        "source_url": "https://www.se.com/us/en/product/750T21HCU/transformer-750-kva-drytype-4160-480/"
+      },
+      {
+        "candidate_kva": 1000.0,
+        "primary_secondary_v": "4160-480",
+        "product_id": "1000T21H",
+        "source_title": "TRANSFORMER 1000 KVA DRY-TYPE 4160 - 480",
+        "source_url": "https://www.se.com/us/en/product/1000T21H/transformer-1000-kva-drytype-4160-480/"
+      },
+      {
+        "candidate_kva": 1500.0,
+        "primary_secondary_v": "4160-480",
+        "product_id": "1500T21H",
+        "source_title": "TRANSFORMER 1500 KVA DRY-TYPE 4160 - 480",
+        "source_url": "https://www.se.com/us/en/product/1500T21H/transformer-1500-kva-drytype-4160-480/"
+      },
+      {
+        "candidate_kva": 2000.0,
+        "primary_secondary_v": "4160-480",
+        "product_id": "2000T21HF",
+        "source_title": "TRANSFORMER 2000 KVA DRY-TYPE 4160 - 480",
+        "source_url": "https://www.se.com/us/en/product/2000T21HF/transformer-2000-kva-drytype-4160-480/"
+      }
+    ],
+    "official_catalog_evidence": {
+      "accessed_on": "2026-08-29",
+      "catalog_page_label": "14-22",
+      "catalog_sha256": "18f53d35412311caf377fa41267abf948e258410710f4769e16356ba037d54de",
+      "catalog_size_bytes": 1007930,
+      "catalog_title": "Digest Section 14: Transformers",
+      "catalog_url": "https://iportal.se.com/Contents/docs/DIGEST%20SECITON%2014_TRANSFORMERS_CATALOGUE.PDF",
+      "publisher": "Schneider Electric",
+      "table_14_47_candidate_rows_kva": [
+        750.0,
+        1000.0,
+        1500.0,
+        2000.0
+      ],
+      "table_14_48_voltage_code": {
+        "code": 21,
+        "primary": "4160 Delta",
+        "secondary": "480 Delta"
+      }
+    },
+    "prohibited_interpretations": [
+      "ACTUAL_INSTALLED_AIDC_TRANSFORMERS",
+      "DNSP_NAMEPLATES",
+      "IEEE_REQUIRED_EXACT_RATING_SET",
+      "1500_KVA_UNIVERSALLY_ONLY_VALID_TRANSFORMER_SIZE"
+    ]
+  },
+  "effective_scope": "V16_2_APRIL_OFFICIAL_AEMO_FULL_IEEE123_PREPRODUCTION_AND_FUTURE_UNOPENED_PRIMARY_CAMPAIGNS",
+  "historical_evidence": {
+    "generated_three_phase_pcc_v3_sha256": "3c3e27020e266dc8f1c4e28e90d49f298d6ca741ef6b54599e44265882cd747c",
+    "old_750_kva_aidc_scenario_active_in_v16_2": false,
+    "old_750_kva_aidc_scenario_retained": true,
+    "old_750_kva_aidc_scenario_role": "HISTORICAL_SYNTHETIC_ENGINEERING_EVIDENCE_ONLY"
+  },
+  "mess_transformer": {
+    "count": 24,
+    "count_changed": false,
+    "phases": 3,
+    "primary_kv": 4.16,
+    "rating_kva": 750.0,
+    "rating_status": "UNCHANGED",
+    "secondary_kv": 0.48
+  },
+  "minted_before_may_june_scientific_access": true,
+  "prospective": true,
+  "selection_authority": {
+    "excluded_selection_inputs": [
+      "MAY_DATA",
+      "JUNE_DATA",
+      "FEEDER_LINE_LOADING",
+      "OPENDSS_PERFORMANCE",
+      "SOLVER_OBJECTIVE",
+      "B0_B1_B2_B3_RESULTS"
+    ],
+    "full_april_resource_feasible_envelope_kva": 1299.6372272511665,
+    "policy": "MINIMUM_FROZEN_CANDIDATE_GREATER_THAN_OR_EQUAL_TO_FULL_APRIL_RESOURCE_FEASIBLE_ENVELOPE",
+    "selected_candidate_kva": 1500.0,
+    "selected_custom_continuous_rating": false,
+    "selection_dataset": "APRIL_VALIDATION_ONLY",
+    "transformer_sizing_is_optimization_decision": false
+  },
+  "source_bindings": {
+    "AIDC_PCC_TRANSFORMER_PROVENANCE_AUDIT_V1": {
+      "path": "dayahead/artifacts/v16_2/AIDC_PCC_TRANSFORMER_PROVENANCE_AUDIT_V1.json",
+      "sha256": "1ee119daf026582e68188321367a84b0ebb80daeea1f4f926cc7025a18bbda06"
+    },
+    "AIDC_PCC_TRANSFORMER_SIZING_DIAGNOSTIC_V1": {
+      "classification": "TX_CLASS_B_EXISTING_GRID_INSUFFICIENT",
+      "path": "dayahead/artifacts/v16_2/AIDC_PCC_TRANSFORMER_SIZING_DIAGNOSTIC_V1.json",
+      "sha256": "d2bc347de2064134219eb8bb5ea54178ff500e129b799b4a6953337423cd28dd"
+    }
+  },
+  "status": "PROSPECTIVE_REFREEZE_MINTED_IMPLEMENTATION_PENDING",
+  "synthetic_case_study_interface_authority": true,
+  "immutability": {
+    "freeze_token": "V16_2_AIDC_PCC_1500KVA_PREMAY_FREEZE_20260829",
+    "rating_change_after_may_opened_allowed": false,
+    "runtime_fitting_allowed": false,
+    "runtime_rating_optimization_variable_allowed": false,
+    "transformer_constraint_slack_allowed": false
+  },
+  "execution_firewall_at_mint": {
+    "c12_call_count": 0,
+    "g11_call_count": 0,
+    "g12_call_count": 0,
+    "g13_call_count": 0,
+    "g14_call_count": 0,
+    "june_scientific_loader_access_count": 0,
+    "may_scientific_loader_access_count": 0,
+    "scientific_implementation_change_count_before_authority_mint": 0
+  }
+}

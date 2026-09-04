@@ -1,0 +1,41 @@
+{
+  "artifact_id": "V25M_EVENT_ENCODER_CONTRACT_V1",
+  "architecture": "CAUSAL_TCN",
+  "input_shape": [
+    168,
+    12
+  ],
+  "dilations": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "kernel": 3,
+  "dropout": 0.1,
+  "pooling": [
+    "LAST_CAUSAL_STATE",
+    "MASKED_ATTENTION",
+    "TEMPORAL_MAX"
+  ],
+  "candidates": {
+    "EC-A": {
+      "width": 32,
+      "latent": 64,
+      "parameters": 128129
+    },
+    "EC-B": {
+      "width": 64,
+      "latent": 96,
+      "parameters": 305889
+    }
+  },
+  "parameter_target": [
+    100000,
+    350000
+  ],
+  "future_padding": 0,
+  "April_reads": 0
+}

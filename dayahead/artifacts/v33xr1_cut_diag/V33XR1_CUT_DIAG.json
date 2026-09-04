@@ -1,0 +1,164 @@
+{
+  "artifact_id": "V33XR1_CUT_DIAG_V1",
+  "status": "PASS",
+  "primary_classification": "V33XR1_DIAG_CUT_CORRECT_CONTROL_AUTHORITY_INSUFFICIENT",
+  "day": "2025-04-04",
+  "case": "B1",
+  "starting_head": "2ea73e9141974d2e79683f2875b33e0f859332cd",
+  "branch": "codex/v33x-r1-e1-fresh-voltage-cuts",
+  "scope": {
+    "diagnostic_only": true,
+    "full_96_slot_fresh_rerun": false,
+    "B3_rerun": false,
+    "E2_touched": false,
+    "MESS_touched": false,
+    "Stage1_touched": false,
+    "production_code_modified": false,
+    "HiGHS_threads": 4,
+    "BLAS_threads": 4,
+    "fresh_single_slot_solves": 7
+  },
+  "anchor_identity": {
+    "formula": "V_fresh_k + a_k^T(p-p_k) <= 1.05",
+    "tolerance_pu": 1e-10,
+    "pass": true,
+    "cuts": [
+      {
+        "cut_id": "I01_B1_T85_N238_01",
+        "slot": 85,
+        "node": "83.1",
+        "fresh_voltage_pu": 1.050210480163198,
+        "cut_lhs_at_anchor_pu": 1.050210480163198,
+        "absolute_error_pu": 0.0,
+        "pass": true
+      },
+      {
+        "cut_id": "I01_B1_T85_N383_02",
+        "slot": 85,
+        "node": "mess_sta12_pcc.1",
+        "fresh_voltage_pu": 1.0502104499696476,
+        "cut_lhs_at_anchor_pu": 1.0502104499696476,
+        "absolute_error_pu": 0.0,
+        "pass": true
+      },
+      {
+        "cut_id": "I01_B1_T95_N238_03",
+        "slot": 95,
+        "node": "83.1",
+        "fresh_voltage_pu": 1.0500688686001751,
+        "cut_lhs_at_anchor_pu": 1.0500688686001751,
+        "absolute_error_pu": 0.0,
+        "pass": true
+      },
+      {
+        "cut_id": "I01_B1_T95_N383_04",
+        "slot": 95,
+        "node": "mess_sta12_pcc.1",
+        "fresh_voltage_pu": 1.0500688384106958,
+        "cut_lhs_at_anchor_pu": 1.0500688384106958,
+        "absolute_error_pu": 0.0,
+        "pass": true
+      }
+    ],
+    "rederived_gradient_max_absolute_error_pu_per_kw": 0.0
+  },
+  "sign_convention": {
+    "optimization_P_convention": "LOAD_POSITIVE",
+    "planning_sensitivity_convention": "dV_pu/d(AIDC_load_kW); negative means added load lowers voltage",
+    "fresh_opendss_convention": "positive P and Q are applied to dedicated PCC Load objects",
+    "pass": true,
+    "code_trace": [
+      "dayahead/v33xr1/voltage_cut_recourse.py:127-131",
+      "dayahead/full_ieee123_g11_v16_1.py:306-313",
+      "dayahead/v28r2/opendss_mapping.py:56-59",
+      "dayahead/v28r2/opendss_mapping.py:144-146"
+    ]
+  },
+  "unit_consistency": {
+    "p_units": "kW",
+    "sensitivity_units": "pu/kW",
+    "cut_product_units": "pu",
+    "conversion": "dV/dP = d(V^2)/dP / (2*V_plan_at_anchor)",
+    "pass": true,
+    "example": {
+      "slot": 85,
+      "node": "83.1",
+      "site": "AIDC10",
+      "a_i_pu_per_kw": -3.097963330982653e-05,
+      "delta_P_i_kw": 1.0,
+      "a_i_times_delta_P_i_pu": -3.097963330982653e-05
+    },
+    "scale_mismatch_x1000_or_div1000": false
+  },
+  "site_axis": {
+    "pass": true,
+    "rows": [
+      {"index_zero_based": 0, "site_id": "AIDC01", "optimization_control": "aidc_load_kw[AIDC01]", "cut_anchor": "trajectory.pcc_p_kw[slot,0]", "sensitivity_column": "voltage_matrix[0,node]/(2*V_plan)", "fresh_load": "IDC_IDC01"},
+      {"index_zero_based": 1, "site_id": "AIDC02", "optimization_control": "aidc_load_kw[AIDC02]", "cut_anchor": "trajectory.pcc_p_kw[slot,1]", "sensitivity_column": "voltage_matrix[1,node]/(2*V_plan)", "fresh_load": "IDC_IDC02"},
+      {"index_zero_based": 2, "site_id": "AIDC03", "optimization_control": "aidc_load_kw[AIDC03]", "cut_anchor": "trajectory.pcc_p_kw[slot,2]", "sensitivity_column": "voltage_matrix[2,node]/(2*V_plan)", "fresh_load": "IDC_IDC03"},
+      {"index_zero_based": 3, "site_id": "AIDC04", "optimization_control": "aidc_load_kw[AIDC04]", "cut_anchor": "trajectory.pcc_p_kw[slot,3]", "sensitivity_column": "voltage_matrix[3,node]/(2*V_plan)", "fresh_load": "IDC_IDC04"},
+      {"index_zero_based": 4, "site_id": "AIDC05", "optimization_control": "aidc_load_kw[AIDC05]", "cut_anchor": "trajectory.pcc_p_kw[slot,4]", "sensitivity_column": "voltage_matrix[4,node]/(2*V_plan)", "fresh_load": "IDC_IDC05"},
+      {"index_zero_based": 5, "site_id": "AIDC06", "optimization_control": "aidc_load_kw[AIDC06]", "cut_anchor": "trajectory.pcc_p_kw[slot,5]", "sensitivity_column": "voltage_matrix[5,node]/(2*V_plan)", "fresh_load": "IDC_IDC06"},
+      {"index_zero_based": 6, "site_id": "AIDC07", "optimization_control": "aidc_load_kw[AIDC07]", "cut_anchor": "trajectory.pcc_p_kw[slot,6]", "sensitivity_column": "voltage_matrix[6,node]/(2*V_plan)", "fresh_load": "IDC_IDC07"},
+      {"index_zero_based": 7, "site_id": "AIDC08", "optimization_control": "aidc_load_kw[AIDC08]", "cut_anchor": "trajectory.pcc_p_kw[slot,7]", "sensitivity_column": "voltage_matrix[7,node]/(2*V_plan)", "fresh_load": "IDC_IDC08"},
+      {"index_zero_based": 8, "site_id": "AIDC09", "optimization_control": "aidc_load_kw[AIDC09]", "cut_anchor": "trajectory.pcc_p_kw[slot,8]", "sensitivity_column": "voltage_matrix[8,node]/(2*V_plan)", "fresh_load": "IDC_IDC09"},
+      {"index_zero_based": 9, "site_id": "AIDC10", "optimization_control": "aidc_load_kw[AIDC10]", "cut_anchor": "trajectory.pcc_p_kw[slot,9]", "sensitivity_column": "voltage_matrix[9,node]/(2*V_plan)", "fresh_load": "IDC_IDC10"},
+      {"index_zero_based": 10, "site_id": "AIDC11", "optimization_control": "aidc_load_kw[AIDC11]", "cut_anchor": "trajectory.pcc_p_kw[slot,10]", "sensitivity_column": "voltage_matrix[10,node]/(2*V_plan)", "fresh_load": "IDC_IDC11"},
+      {"index_zero_based": 11, "site_id": "AIDC12", "optimization_control": "aidc_load_kw[AIDC12]", "cut_anchor": "trajectory.pcc_p_kw[slot,11]", "sensitivity_column": "voltage_matrix[11,node]/(2*V_plan)", "fresh_load": "IDC_IDC12"}
+    ]
+  },
+  "slot_axis": {
+    "pass": true,
+    "zero_based_everywhere": true,
+    "rows": [
+      {"slot_zero_based": 85, "slot_one_based": 86, "physical_interval_end_fixed_aest": "2025-04-04 21:30:00+10:00"},
+      {"slot_zero_based": 95, "slot_one_based": 96, "physical_interval_end_fixed_aest": "2025-04-05 00:00:00+10:00"}
+    ]
+  },
+  "fresh_finite_difference": {
+    "slot": 85,
+    "node": "83.1",
+    "perturbation": "+/-1 kW with +/-0.3286841051788632 kvar at PF=0.95",
+    "same_physical_pcc_and_pf_rule": true,
+    "baseline_isolated_single_slot_voltage_pu": 1.050207750106921,
+    "stored_sequential_run_voltage_pu": 1.050210480163198,
+    "baseline_difference_pu": -2.730056277044923e-06,
+    "baseline_difference_note": "The allowed diagnostic compiles a clean engine per single-slot solve; the derivative is central and all comparisons use this identical isolated context.",
+    "sign_agreement_pass": true,
+    "approximate_magnitude_agreement_pass": true,
+    "maximum_relative_magnitude_error": 0.00322474882147193,
+    "rows": [
+      {"site": "AIDC10", "planning_gradient_pu_per_kw": -3.097963330982653e-05, "fresh_central_gradient_pu_per_kw": -3.101988680509482e-05, "sign_match": true, "relative_magnitude_error": 0.0012993535096336728, "fresh_to_plan_magnitude_ratio": 1.0012993535096337},
+      {"site": "AIDC11", "planning_gradient_pu_per_kw": -2.808909749603725e-05, "fresh_central_gradient_pu_per_kw": -2.81548316362068e-05, "sign_match": true, "relative_magnitude_error": 0.002340201217886224, "fresh_to_plan_magnitude_ratio": 1.0023402012178861},
+      {"site": "AIDC12", "planning_gradient_pu_per_kw": -2.3430248200493033e-05, "fresh_central_gradient_pu_per_kw": -2.3505804865764368e-05, "sign_match": true, "relative_magnitude_error": 0.00322474882147193, "fresh_to_plan_magnitude_ratio": 1.0032247488214718}
+    ]
+  },
+  "auxiliary_maximum_correction_lp": {
+    "service_objective_used": false,
+    "feasible_set": "frozen E1 Stage-2 base grid/resource feasible set",
+    "prior_shortfall_origin": "The prior values were already produced by minimizing a^T p over the frozen base feasible set before adding each cut (dayahead/v33xr1/voltage_cut_recourse.py:188-205).",
+    "prior_values_were_requested_auxiliary_lp": true,
+    "independent_reproduction_pass": true,
+    "maximum_reproduction_absolute_error_pu": 0.0,
+    "cuts": [
+      {"cut_id": "I01_B1_T85_N238_01", "slot": 85, "node": "83.1", "minimum_achievable_a_dot_p_pu": -0.004200073214328348, "required_a_dot_p_rhs_pu": -0.004259350002936165, "minimum_achievable_affine_voltage_pu": 1.0500592767886079, "physical_cut_shortfall_pu": 5.927678860781667e-05, "cut_feasible": false},
+      {"cut_id": "I01_B1_T85_N383_02", "slot": 85, "node": "mess_sta12_pcc.1", "minimum_achievable_a_dot_p_pu": -0.004200073093581201, "required_a_dot_p_rhs_pu": -0.004259319692986343, "minimum_achievable_affine_voltage_pu": 1.0500592465994052, "physical_cut_shortfall_pu": 5.924659940514162e-05, "cut_feasible": false},
+      {"cut_id": "I01_B1_T95_N238_03", "slot": 95, "node": "83.1", "minimum_achievable_a_dot_p_pu": -0.0039350011947857245, "required_a_dot_p_rhs_pu": -0.004003932790555909, "minimum_achievable_affine_voltage_pu": 1.0500689315957703, "physical_cut_shortfall_pu": 6.893159577018443e-05, "cut_feasible": false},
+      {"cut_id": "I01_B1_T95_N383_04", "slot": 95, "node": "mess_sta12_pcc.1", "minimum_achievable_a_dot_p_pu": -0.003935001081665487, "required_a_dot_p_rhs_pu": -0.0040039024879545, "minimum_achievable_affine_voltage_pu": 1.0500689014062892, "physical_cut_shortfall_pu": 6.890140628901253e-05, "cut_feasible": false}
+    ],
+    "unique_slot_summary": [
+      {"slot": 85, "binding_node": "83.1", "minimum_achievable_affine_voltage_pu": 1.0500592767886079, "physical_cut_shortfall_pu": 5.927678860781667e-05},
+      {"slot": 95, "binding_node": "83.1", "minimum_achievable_affine_voltage_pu": 1.0500689315957703, "physical_cut_shortfall_pu": 6.893159577018443e-05}
+    ]
+  },
+  "same_slot_electrical_dependence": [
+    {"slot": 85, "nodes": ["83.1", "mess_sta12_pcc.1"], "sensitivity_cosine_similarity": 0.9999999999999999, "maximum_gradient_component_difference_pu_per_kw": 8.908561280156213e-13, "minimum_83_minus_pcc_affine_voltage_over_frozen_feasible_set_pu": 3.0189202674098953e-08, "maximum_83_minus_pcc_affine_voltage_over_frozen_feasible_set_pu": 3.0195188492047686e-08, "effectively_same_mode": true, "83_1_cut_dominates_over_frozen_feasible_set": true, "vectors_bitwise_identical": false},
+    {"slot": 95, "nodes": ["83.1", "mess_sta12_pcc.1"], "sensitivity_cosine_similarity": 1.0, "maximum_gradient_component_difference_pu_per_kw": 8.801615374574336e-13, "minimum_83_minus_pcc_affine_voltage_over_frozen_feasible_set_pu": 3.0189481171729065e-08, "maximum_83_minus_pcc_affine_voltage_over_frozen_feasible_set_pu": 3.018948117253511e-08, "effectively_same_mode": true, "83_1_cut_dominates_over_frozen_feasible_set": true, "vectors_bitwise_identical": false}
+  ],
+  "conclusion": {
+    "cut_implementation_defect": false,
+    "sensitivity_model_defect": false,
+    "frozen_E1_control_authority_shortage": true,
+    "smallest_next_action": "Design Stage-1 voltage-corrective recourse capability; do not touch E2 or MESS."
+  }
+}

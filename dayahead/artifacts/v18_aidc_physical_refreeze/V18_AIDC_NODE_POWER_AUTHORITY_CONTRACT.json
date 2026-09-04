@@ -1,0 +1,81 @@
+{
+  "artifact_id": "V18_AIDC_NODE_POWER_AUTHORITY_CONTRACT_V1",
+  "gate_C_status": "PASS_HYBRID_AUTHORITY",
+  "fullnode": {
+    "authority": "Dataset312 paired NVML GPU-board + two-socket RAPL CPU-package incremental above frozen idle",
+    "supported_node_classes": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "kappa_total_kW_per_active_node": {
+      "1": 2.289471346990805,
+      "2": 2.2220251879720374,
+      "4": 2.0938566188449466,
+      "8": 2.026464800777849,
+      "16": 1.9654597010662909
+    },
+    "source_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137"
+  },
+  "partialnode": {
+    "authority": "V17 per-GPU board Q50 lower bound",
+    "kappa_kW_per_GPU": 0.48563611660901085,
+    "CPU_package_increment": null,
+    "reason": "node packing/partial occupancy counterfactual absent"
+  },
+  "memory_network_fan_increment": null,
+  "PUE_application": "after IT-side component sum exactly once",
+  "arbitrary_host_multiplier_calls": 0,
+  "raw_reproduction": {
+    "source_sha256": "dcad6de800fb565d850b163902e2eddae48aabd1ed1c7336f9a1cdaf3012f137",
+    "parsed_complete_runs": 46,
+    "node_classes": {
+      "1": {
+        "complete_run_count": 5,
+        "median_GPU_board_incremental_kW_per_node": 2.1816052764508407,
+        "median_CPU_package_incremental_kW_per_node": 0.10570818432785387,
+        "median_paired_node_total_incremental_kW_per_node": 2.2894713469908043,
+        "paired_total_authority_kW_per_node": 2.289471346990805,
+        "component_medians_are_diagnostic": true
+      },
+      "2": {
+        "complete_run_count": 11,
+        "median_GPU_board_incremental_kW_per_node": 2.090650297635585,
+        "median_CPU_package_incremental_kW_per_node": 0.1180961127330495,
+        "median_paired_node_total_incremental_kW_per_node": 2.2220251879720374,
+        "paired_total_authority_kW_per_node": 2.2220251879720374,
+        "component_medians_are_diagnostic": true
+      },
+      "4": {
+        "complete_run_count": 10,
+        "median_GPU_board_incremental_kW_per_node": 1.9732668756360066,
+        "median_CPU_package_incremental_kW_per_node": 0.1281396753159803,
+        "median_paired_node_total_incremental_kW_per_node": 2.0938566188449466,
+        "paired_total_authority_kW_per_node": 2.0938566188449466,
+        "component_medians_are_diagnostic": true
+      },
+      "8": {
+        "complete_run_count": 11,
+        "median_GPU_board_incremental_kW_per_node": 1.8939576000745455,
+        "median_CPU_package_incremental_kW_per_node": 0.12870241264332288,
+        "median_paired_node_total_incremental_kW_per_node": 2.026464800777849,
+        "paired_total_authority_kW_per_node": 2.026464800777849,
+        "component_medians_are_diagnostic": true
+      },
+      "16": {
+        "complete_run_count": 9,
+        "median_GPU_board_incremental_kW_per_node": 1.8394878438844766,
+        "median_CPU_package_incremental_kW_per_node": 0.12597185718181458,
+        "median_paired_node_total_incremental_kW_per_node": 1.9654597010662913,
+        "paired_total_authority_kW_per_node": 1.9654597010662909,
+        "component_medians_are_diagnostic": true
+      }
+    },
+    "authority_reproduction_failures": [],
+    "measurement_boundary": "four NVML GPU-board channels plus two-socket RAPL CPU-package power, both above frozen idle subtraction",
+    "memory_network_fan_incremental_power": null,
+    "partial_node_CPU_package_authorized": false
+  }
+}

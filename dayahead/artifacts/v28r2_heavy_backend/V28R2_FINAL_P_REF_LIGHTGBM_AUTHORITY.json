@@ -1,0 +1,141 @@
+{
+  "April_01_training_end": "2025-03-30",
+  "April_training_rows": 0,
+  "May_training_rows": 0,
+  "P_REF_LIGHTGBM_READY": true,
+  "access_audit": {
+    "April_archive_member_role": "boundary_completion_for_pre_April_submit_targets_only",
+    "April_training_rows": 0,
+    "G_unit": "H100_GPU_equivalent_15min_average",
+    "May_training_rows": 0,
+    "W_unit": "H100_node_hour_arrival",
+    "axis_end_exclusive": "2025-04-01",
+    "axis_start": "2024-08-01",
+    "kestrel_archive_members_opened": [
+      "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+      "esif.hpc.kestrel.job-anon/year=2025/month=4/kestrel_jobs_202504_0.parquet"
+    ],
+    "maximum_kestrel_month_opened": 202504,
+    "maximum_target_timestamp_exclusive": "2025-04-01",
+    "p_missing_slots": 572,
+    "partial_and_shared_controllable_W": false,
+    "partial_and_shared_retained_in_total_G": true,
+    "resolution_minutes": 15,
+    "slots_per_day": 96,
+    "strict_fullnode_eligible_jobs": 37434,
+    "strict_fullnode_node_hours": 47131.946388888886,
+    "strict_fullnode_training_jobs": 31971,
+    "strict_fullnode_training_jobs_equivalent_check": "submit-time slot mass on 2024-08-19 through 2025-03-31",
+    "strict_fullnode_training_node_hours": 44174.44472222223,
+    "timezone": "FIXED_AEST_UTC_PLUS_10",
+    "valid_total_reference_h100_jobs": 227993
+  },
+  "artifact_id": "V28R2_FINAL_P_REF_LIGHTGBM_AUTHORITY_V1",
+  "configuration": {
+    "deterministic": true,
+    "learning_rate": 0.035,
+    "max_depth": 3,
+    "min_child_samples": 12,
+    "n_estimators": 120,
+    "n_jobs": 1,
+    "num_leaves": 7,
+    "random_state": 20260901,
+    "reg_lambda": 1.0,
+    "verbosity": -1
+  },
+  "features": [
+    "slot",
+    "slot_sin",
+    "slot_cos",
+    "dow_sin",
+    "dow_cos",
+    "weekend",
+    "month_sin",
+    "month_cos",
+    "lag_2d",
+    "lag_7d",
+    "same_slot_mean_2_8d",
+    "same_slot_std_2_8d"
+  ],
+  "fits": [
+    {
+      "channel": "P_REF",
+      "model_sha256": {
+        "q10": "9857456310302e4030279a1aaba77601dec30f0e7567edef95a1b40852a0a772",
+        "q50": "716d224325515f1672e9f517bf57b58e5da1e0da961b5412a49ad8d18c0e04b3",
+        "q90": "eeadd26eb10b7cdabd63a2fd11729cb2f284c4d623dbc8f8eaa19ee2c328c37d"
+      },
+      "noncrossing_projection_cells": 118,
+      "noncrossing_violations": 0,
+      "prediction_min": {
+        "q10": 392.1091756018053,
+        "q50": 513.4252273837386,
+        "q90": 2224.6880600169466
+      },
+      "raw_noncrossing_violations": 59,
+      "training_end": "2025-03-30",
+      "training_rows": 20239,
+      "variant": "APRIL_01_CAUSAL_FIT"
+    },
+    {
+      "channel": "P_REF",
+      "model_sha256": {
+        "q10": "48216186c010d6ba2f34aad2493d16fef6fdf51b01c8c567fefcd9f30e3935a2",
+        "q50": "90633084657941cd19bdf8bb5a348181b4729511b7d0a2813e419b11de64fc87",
+        "q90": "d06147ad5dead8b21bd9c2238881449894b3f236125758a5eb8eecfcb984a4e3"
+      },
+      "noncrossing_projection_cells": 112,
+      "noncrossing_violations": 0,
+      "prediction_min": {
+        "q10": 469.74889614600227,
+        "q50": 526.415129419265,
+        "q90": 2357.3285415009423
+      },
+      "raw_noncrossing_violations": 56,
+      "training_end": "2025-03-31",
+      "training_rows": 20335,
+      "variant": "GENERAL_THROUGH_MARCH_31_FIT"
+    }
+  ],
+  "general_training_end": "2025-03-31",
+  "mean_is_Q50_copy": false,
+  "model_family": "LIGHTGBM_QUANTILE",
+  "no_post_April_calibration": true,
+  "optimizer_statistic": "Q90",
+  "optimizer_unit": "equivalent_case_kW",
+  "public_quantile_integrity": "FIXED_PER_CELL_ASCENDING_REARRANGEMENT_THEN_EXPM1; NOT_FITTED; RAW_CROSSINGS_AUDITED",
+  "quantiles": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "raw_unit": "kW",
+  "scale_binding": {
+    "V22SR1_scale_source_sha256": "63a8150dabdbd1773491dd4012e33855fd7a15fb27ed180d1a7df96a42d4135b",
+    "alpha_IT": 0.1094023101768049,
+    "case_study_reference_peak_kW": 406.77599381381907,
+    "formula": "P_case_kW = alpha_IT * P_source_kW",
+    "historical_beta_lineage_inversion_only": 0.25,
+    "production_beta_calls": 0,
+    "source_reference_peak_kW": 3718.1664002929097
+  },
+  "seed": 20260901,
+  "shape": [
+    96
+  ],
+  "source_sha256": {
+    "esif": "19cd12405dde9144b1a360e8c8418666c399a3d0d15a7f846880d71ab22f9dd4",
+    "kestrel": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f"
+  },
+  "status": "PASS",
+  "target": "ESIF observed total IT active power",
+  "target_transform": "log1p_nonnegative_target",
+  "training_start": "2024-08-19"
+}

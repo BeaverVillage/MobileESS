@@ -1,0 +1,35 @@
+{
+  "schema_version": "PFR10_MESS_ENERGY_RECOVERY_REMEDIATION_V1",
+  "status": "FROZEN_BEFORE_REMEDIATION_REPLAY",
+  "trigger": "JAN03_FAIL_CLOSED_AFTER_MESS_DEPLETION_TO_PROTECTED_FLOOR",
+  "scientific_classification": "TECHNICAL_SAFETY_REMEDIATION_NOT_OUTCOME_EXCLUSION",
+  "causal_inputs": [
+    "current_price_aud_per_mwh",
+    "horizon_price_median_aud_per_mwh",
+    "current_mess_energy_kwh",
+    "current_mess_transit_state"
+  ],
+  "policy": {
+    "price_deadband_fraction_of_absolute_horizon_median": 0.05,
+    "low_price_target_kwh": 1080.0,
+    "neutral_price_recovery_target_kwh": 760.0,
+    "recovery_window_steps": 6,
+    "step_minutes": 5,
+    "maximum_charge_kw": 550.0,
+    "nominal_high_price_discharge_kw": 20.0,
+    "charge_efficiency": 0.95,
+    "protected_floor_kwh": 440.0,
+    "future_actual_used": false
+  },
+  "interpretation": [
+    "Low-price connected storage precharges toward physical capacity.",
+    "Outside the high-price band, energy below canonical daily PRE is recovered over the frozen 30-minute maximum refresh window.",
+    "High-price nominal discharge is clipped so the protected 440-kWh floor cannot be crossed.",
+    "Fresh Exact OpenDSS remains the fail-closed commit authority for every applied action."
+  ],
+  "required_replay_order": [
+    "PFR9_JAN01_FULL_DAY_B0_B7",
+    "PFR10_JAN03_DIAGNOSTIC",
+    "PFR10_JAN01_07_INDEPENDENT_B0_B7"
+  ]
+}

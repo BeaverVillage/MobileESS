@@ -1,0 +1,79 @@
+{
+  "Apr04_checkpoint_tests": "PASS",
+  "Apr04_results_opened_before_freeze": false,
+  "SHA_self_consistency": "PASS_BY_FINALIZER_AND_POSTWRITE_RECHECK",
+  "artifact_id": "V29R2_TEST_REPORT_V1",
+  "environment_path_resolution": {
+    "cause": "two legacy tests required existing frozen evidence/cache roots in the current worktree",
+    "initial_result": "64 passed, 2 failed",
+    "resolution": "read-only NTFS junctions to the existing authoritative roots; no evidence copied or modified",
+    "superseding_result": "66 passed, 0 failed"
+  },
+  "final_post_Apr04_suite": {
+    "command": "the 17-file V29R2/V29R1/V29 regression suite including tests/dayahead/test_v29r2_final_review.py",
+    "elapsed_seconds": 173.03,
+    "failed": 0,
+    "passed": 70
+  },
+  "invalidated_freeze_attempt": {
+    "V29R2_DEV_FREEZE_HEAD": "5b13bd4d0c46a0119a1fc56129757d73d8e9fa2c",
+    "affected_pre_April_evidence": "none; full regression and preservation audit rerun before replacement freeze",
+    "reason": "V29R2_APR04_B2_FALLBACK_AC_GATE_LEDGER_INCOMPLETE"
+  },
+  "known_unexplained_failures": 0,
+  "required_checks": {
+    "01_exact_V29R2_base": "PASS",
+    "02_V29R1_read_only": "PASS",
+    "03_Jan_Mar_source_hash_identity": "PASS",
+    "04_F3_exact_anchor_reproduction": "PASS",
+    "05_F0_F3_accounting": "PASS",
+    "06_component_attribution_identity": "PASS",
+    "07_demand_scaling_identity": "PASS",
+    "08_PV_scaling_and_sign_identity": "PASS",
+    "09_AIDC_P_Q_identity": "PASS",
+    "10_C1_identity": "PASS",
+    "11_regulator_contract_identity": "PASS",
+    "12_capacitor_contract_identity": "PASS",
+    "13_line_transformer_rating_identity": "PASS",
+    "14_source_voltage_identity": "PASS",
+    "15_anchor_control_days_deterministic": "PASS",
+    "16_trust_candidate_set_unchanged": "PASS",
+    "17_trust_contract_frozen_before_rerun": "PASS",
+    "18_no_old_sweep_reclassification": "PASS",
+    "19_model_fidelity_tolerances_unchanged": "PASS",
+    "20_rho_selected_only_by_fidelity": "PASS",
+    "21_April_rows_in_trust_zero": "PASS",
+    "22_service_causal_labels": "PASS",
+    "23_April_rows_in_service_fit_zero": "PASS",
+    "24_aggregate_lower_bound_coverage_90pct": "PASS",
+    "25_nondegenerate_H_LOW": "PASS",
+    "26_Bridge_V2_causal": "PASS",
+    "27_Reference_V4_B0_B2_byte_identity": "PASS",
+    "28_no_P_G_double_counting": "PASS",
+    "29_no_clipping": "PASS",
+    "30_no_PARTIAL_shared": "PASS",
+    "31_no_preemption": "PASS",
+    "32_no_synthetic_deadline": "PASS",
+    "33_MESS_rating_unchanged": "PASS",
+    "34_Q_P_fallback_ladder_deterministic": "PASS",
+    "35_no_regret_planning_gates": "PASS",
+    "36_no_regret_Fresh_OpenDSS_scenario_gates": "PASS",
+    "37_Actual_optimizer_calls_zero_contract": "PASS",
+    "38_PI_firewall": "PASS",
+    "39_connection_delay_aligned": "PASS",
+    "40_protected_scope_preservation": "PASS",
+    "41_SHA_self_consistency_contract": "PASS"
+  },
+  "status": "PASS",
+  "suites": [
+    {
+      "command": "python -m pytest -q tests/dayahead/test_v29r2_anchor_forensic.py tests/dayahead/test_v29r2_trust_certification.py tests/dayahead/test_v29r2_service_model.py tests/dayahead/test_v29r2_bridge_v2.py tests/dayahead/test_v29r2_reference_v4.py tests/dayahead/test_v29r2_mess_noregret.py tests/dayahead/test_v29r2_apr04_runner.py tests/dayahead/test_v29_stage1_contracts.py tests/dayahead/test_v29_stage2_bounds.py tests/dayahead/test_v29_stage3_carryin.py tests/dayahead/test_v29_stage4_formulation.py tests/dayahead/test_v29_stage5_backend.py tests/dayahead/test_v29_stage5_smoke.py tests/dayahead/test_v29_stage6_reporting.py tests/dayahead/test_v29r1_janmar_source_authority.py tests/dayahead/test_v29r1_reliability_calibrated_noregret.py tests/dayahead/test_v29r1_source_resume.py",
+      "elapsed_seconds": 211.62,
+      "failed": 0,
+      "passed": 67
+    }
+  ],
+  "total_failed": 0,
+  "total_passed": 70,
+  "total_required_not_run": 0
+}

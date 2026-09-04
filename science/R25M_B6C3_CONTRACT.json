@@ -1,0 +1,42 @@
+{
+  "release": "R25M_B6C3_TRUE_DUAL_CERTIFIED_DUAL_STABILIZATION",
+  "conversation": "A",
+  "stage": "B6-C3",
+  "status": "STATIC_IMPLEMENTATION_READY",
+  "parent": "R25M_B6C2_GLOBAL_PATH_CACHE_CHILD_BATCH_PRICING",
+  "purpose": "Reduce root/child column-generation dual oscillation without changing exact pricing closure or scientific lower-bound authority.",
+  "changes": {
+    "root_dual_stabilization": true,
+    "child_dual_stabilization": true,
+    "dual_blend_alpha_default": 0.65,
+    "dual_center_beta_default": 0.75,
+    "stabilized_candidate_batch_default": 8,
+    "stabilized_candidates_rechecked_under_true_current_dual": true,
+    "exact_true_dual_minimum_path_remains_closure_oracle": true,
+    "stabilized_dual_is_never_certificate_authority": true
+  },
+  "scientific_contract": {
+    "H": 54,
+    "cadence_min": 5,
+    "economic_mipgap_target": 0.03,
+    "threads": 1,
+    "future_actual_optimizer_use": false,
+    "future_D2_reinjection": false,
+    "posthoc_same_issue_MIP_start": false,
+    "physical_feasible_set_changed": false,
+    "objective_changed": false,
+    "fresh_exact_opendss_gate_changed": false
+  },
+  "certificate_contract": {
+    "true_current_dual_exact_minimum_path_is_closure_oracle": true,
+    "stabilized_dual_certificate_authority": false,
+    "stabilized_candidate_must_have_true_current_negative_reduced_cost": true,
+    "child_node_lower_bound_requires_true_dual_all_column_pricing_closure": true,
+    "restricted_master_bound_is_authority": false
+  },
+  "runtime_policy": {
+    "long_issue152_solve_in_C3": false,
+    "C3_is_implementation_and_proof_only": true,
+    "performance_effect_measured_at_C5_integrated_gate": true
+  }
+}

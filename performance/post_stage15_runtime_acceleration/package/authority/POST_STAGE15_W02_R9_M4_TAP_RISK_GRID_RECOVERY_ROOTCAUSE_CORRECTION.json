@@ -1,0 +1,44 @@
+{
+  "schema_version": "mobileess.post_stage15.w02_r9_m4_tap_risk_grid_recovery.v1",
+  "status": "PASS_TAP_RISK_GRID_RECOVERY_FIVE_BOUNDARIES",
+  "root_cause": {
+    "r8_actual_issue3577": "A voltage-only excess of 0.000725661 pu was above the discrete tap-risk region but below the shared 0.002 pu severe threshold. The 10/10 local correction crossed the regulator boundary and increased violations from one to four.",
+    "design": "Voltage-only and voltage-plus-line events require separate severe thresholds. Coupled severe events retain bounded two-stage relinearization and protected original line constraints.",
+    "power_scale_error": false,
+    "unsafe_action_committed": false
+  },
+  "correction": {
+    "runner": {"path": "runtime/W02_POLICY_EPISODE_RUNNER.py", "sha256": "fab5752b0ed1962b843689543872e419a02acfcae6123c1475d2ab0605c2a122"},
+    "runner_sha256": "fab5752b0ed1962b843689543872e419a02acfcae6123c1475d2ab0605c2a122",
+    "launcher_sha256": "5dc9d20658176df9af5931e8825ce8ebf87ead9436949761640ec25ba9e30792",
+    "run_id": "B_W02_4POLICY_ACTUAL_FINAL_R9",
+    "voltage_only_severe_threshold_pu": 0.0005,
+    "coupled_line_severe_threshold_pu": 0.002,
+    "severe_voltage_only_p_kw": 1100.0,
+    "severe_voltage_only_q_kvar": 0.0,
+    "max_cut_rounds": 2,
+    "max_fresh_ac_candidates": 4,
+    "power_scale_kw_per_model_unit": 1000.0,
+    "power_scale_changed": false,
+    "hard_limits_relaxed": false,
+    "future_actual_used": false
+  },
+  "validation": {
+    "safety_validator_sha256": "6174cc8ad2e7c99d4e77fd56633287eb818710a01ec91aa6288046ab1c00c428",
+    "safety_result_sha256": "404811ef3294f3265a5485d7da1502ea931fe5de5c012a4345ca6c31455f8e5c",
+    "five_boundary_validator_sha256": "be07b40015aea6faf0c2dc0e0b1e1ea9b10a857c29173a3dbf86ca73737d4fca",
+    "five_boundary_result_sha256": "bdc3f2677565ce80efdec17859252dd5240e0b368ca02ab4a9b5bfc1d2b34a7b",
+    "r8_issue3577_evidence_sha256": "628fa52471b5144a5ecf4ab22dc8becc4bd0c09a07834197c0f7662a3c08ba0c",
+    "r8_issue3577_initial_voltage_max_pu": 1.050725661082675,
+    "r8_issue3577_final_voltage_max_pu": 1.049895831162217,
+    "initial_voltage_violations": 1,
+    "final_voltage_violations": 0,
+    "final_line_violations": 0,
+    "all_five_boundaries_pass": true,
+    "same_causal_pre_state": true,
+    "atomic_commit": true,
+    "full_W02_executed": false
+  },
+  "supersedes_for_current_runner_binding": ["authority/POST_STAGE15_W02_R8_M4_TWO_STAGE_GRID_RECOVERY_ROOTCAUSE_CORRECTION.json"],
+  "historical_authorities_remain_immutable": true
+}

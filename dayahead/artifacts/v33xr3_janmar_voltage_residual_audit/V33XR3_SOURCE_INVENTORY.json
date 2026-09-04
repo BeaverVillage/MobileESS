@@ -1,0 +1,89 @@
+{
+  "artifact_id": "V33XR3_SOURCE_INVENTORY_V1",
+  "classification": "V33XR3_JANMAR_MATCHED_DAYAHEAD_AUTHORITY_MISSING",
+  "coverage": {
+    "B1_matched_days": 0,
+    "Fresh_node_phase_voltage_days": 0,
+    "exact_matched_days": 0,
+    "matched_cases": [],
+    "matched_slots": 0,
+    "node_phase_count": 0,
+    "planning_node_phase_voltage_days": 0,
+    "schedule_identity_failures": 0,
+    "schedule_identity_unavailable_days": 90,
+    "schedule_sha_identity_proven_days": 0
+  },
+  "excluded_evidence": [
+    {
+      "days": 90,
+      "object": "V29R1 TRUST_RHO synthetic-probe summaries",
+      "reason": "not official B1 Day-Ahead schedules; no retained row-level planning/Fresh node-phase arrays or exact B1 schedule SHA"
+    }
+  ],
+  "materialization_decision": "STOP_NO_NEW_90_DAY_OPTIMIZATION",
+  "reason": "Frozen Jan-Mar B1 Day-Ahead schedules are absent; creating them would require new scientific scheduling authority.",
+  "scope": {
+    "end": "2025-03-31",
+    "expected_days": 90,
+    "primary_case": "B1",
+    "start": "2025-01-01"
+  },
+  "sources": [
+    {
+      "bytes": 1454,
+      "finding": "B1_DA_days=0; planning_sensitivity_days=0",
+      "path": "dayahead/artifacts/v32r1_janmar_v30_authority/V32R1_AUTHORITY_COVERAGE_AUDIT.json",
+      "sha256": "2142a9ab01719ec08f7aa6c0798d6c0a634279b73255437625bcccdea7e731c3"
+    },
+    {
+      "bytes": 2382,
+      "finding": "freeze_pass=false; B1_DA_days=0",
+      "path": "dayahead/artifacts/v32r1_janmar_v30_authority/V32R1_JANMAR_AUTHORITY_FREEZE.json",
+      "sha256": "1cd96e530c543c6b1b6a2391aba2ecbe94a8ddfe9f53c3925a40c6c914d6d709"
+    },
+    {
+      "bytes": 52278,
+      "finding": "all Jan-Mar case schedules NOT_MATERIALIZED",
+      "path": "dayahead/artifacts/v32r1_janmar_v30_authority/V32R1_DA_SCHEDULE_COVERAGE.csv",
+      "sha256": "720c5b6e6a40a73a0c952e02d05c5dd48cd6c93afbbedcae178d418efe9ece24"
+    },
+    {
+      "bytes": 668,
+      "finding": "X_B1=0/90 and B1_epochs=0/8640",
+      "path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\MobileESS_v32r3_minimal_janmar_authority_frontier\\dayahead\\artifacts\\v32r3_minimal_janmar_authority\\V32R3_AUTHORITY_COVERAGE_AUDIT.json",
+      "sha256": "581afc23e865a14a958a1ed0fe47942d64ad5322968252c222256c3bcd417ac4"
+    },
+    {
+      "bytes": 1631,
+      "finding": "authority_frozen=false",
+      "path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\MobileESS_v32r3_minimal_janmar_authority_frontier\\dayahead\\artifacts\\v32r3_minimal_janmar_authority\\V32R3_MINIMAL_JANMAR_AUTHORITY_FREEZE.json",
+      "sha256": "54884638d7933ac75c4a1cfb0096134caa30c9ac8dfd2b5c1fe0ddd2ce8c81c8"
+    },
+    {
+      "bytes": 318,
+      "finding": "X_B1 materialized_day_count=0",
+      "path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\MobileESS_v32r3_minimal_janmar_authority_frontier\\dayahead\\artifacts\\v32r3_minimal_janmar_authority\\V32R3_XB1_MANIFEST.json",
+      "sha256": "4733fb268de435f0c8c38106f8be6a0ff93f4db1549b8f32d8a4245def81d0fc"
+    },
+    {
+      "bytes": 182589,
+      "finding": "90-day scalar summaries are TRUST_RHO synthetic probes, not B1 schedules or node-phase arrays",
+      "path": "dayahead/artifacts/v29r1_reliability_calibrated_noregret/V29R1_TRUST_CERT_OPENDSS_RESULTS.csv",
+      "sha256": "34df2a1cc87d962ac84b60ced0ae8a7377287a1f094ebe5dbb900cdf8c40699b"
+    },
+    {
+      "bytes": 3384,
+      "finding": "documents non-B1 source-materialization history",
+      "path": "dayahead/artifacts/v29r1_reliability_calibrated_noregret/V29R1_TRUST_CERT_INPUT_PROVENANCE.json",
+      "sha256": "64b895664acac85a5e9f28a078adf580434e107ebee1121116172d48487a3aa5"
+    }
+  ],
+  "workspace_filename_census": {
+    "DAYAHEAD_B1_SCHEDULE_json_April": 11,
+    "DAYAHEAD_B1_SCHEDULE_json_JanMar": 0,
+    "DAYAHEAD_B1_SCHEDULE_json_total": 11,
+    "OPENDSS_PHASE_ARRAYS_npz_April": 105,
+    "OPENDSS_PHASE_ARRAYS_npz_JanMar": 0,
+    "OPENDSS_PHASE_ARRAYS_npz_total": 105
+  }
+}

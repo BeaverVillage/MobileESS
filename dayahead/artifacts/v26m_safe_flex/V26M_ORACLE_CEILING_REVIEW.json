@@ -1,0 +1,85 @@
+{
+  "artifact_id": "V26M_ORACLE_CEILING_REVIEW_V1",
+  "case_summaries": [
+    {
+      "case_id": "O0",
+      "case": "LEGACY_INNOVATION_ONLY",
+      "days": 151,
+      "boundary_MAE_GPU_h": 2708.8179976128645,
+      "primary_normalized_envelope_score": 0.8207348038355843,
+      "WIS_CRPS_proxy_GPU_h": 2368.27037235193,
+      "simultaneous_aggregate_coverage": 0.7748344370860927,
+      "reserve_shortfall_GPU_h": 46370.169249933664,
+      "mean_safe_envelope_width_GPU_h": 527.0148703347242,
+      "mean_feasible_set_volume_proxy_GPU_h2": 26556493.316530682,
+      "projector_feasible_rate": 0.9933774834437086,
+      "hidden_shedding_GPU_h": 0.0
+    },
+    {
+      "case_id": "O1",
+      "case": "ORACLE_PRE_CUTOFF_PENDING_SERVICE",
+      "days": 151,
+      "boundary_MAE_GPU_h": 1303.920983445109,
+      "primary_normalized_envelope_score": 0.3950702238053682,
+      "WIS_CRPS_proxy_GPU_h": 1253.8119128115088,
+      "simultaneous_aggregate_coverage": 0.9006622516556292,
+      "reserve_shortfall_GPU_h": 57762.89120804592,
+      "mean_safe_envelope_width_GPU_h": 651.1779001090018,
+      "mean_feasible_set_volume_proxy_GPU_h2": 38713653.216275215,
+      "projector_feasible_rate": 0.9536423841059603,
+      "hidden_shedding_GPU_h": 0.0
+    },
+    {
+      "case_id": "O2",
+      "case": "ORACLE_PRE_CUTOFF_ALL_FUTURE_SERVICE",
+      "days": 151,
+      "boundary_MAE_GPU_h": 1048.1315223507884,
+      "primary_normalized_envelope_score": 0.3175695156147619,
+      "WIS_CRPS_proxy_GPU_h": 1113.588452548331,
+      "simultaneous_aggregate_coverage": 0.9536423841059603,
+      "reserve_shortfall_GPU_h": 87162.71467320248,
+      "mean_safe_envelope_width_GPU_h": 702.668574088829,
+      "mean_feasible_set_volume_proxy_GPU_h2": 44619618.987391405,
+      "projector_feasible_rate": 0.9337748344370861,
+      "hidden_shedding_GPU_h": 0.0
+    },
+    {
+      "case_id": "O3",
+      "case": "ORACLE_INNOVATION",
+      "days": 151,
+      "boundary_MAE_GPU_h": 2200.9850901398086,
+      "primary_normalized_envelope_score": 0.6668683786776545,
+      "WIS_CRPS_proxy_GPU_h": 3081.3791261957326,
+      "simultaneous_aggregate_coverage": 0.12582781456953643,
+      "reserve_shortfall_GPU_h": 4.547473508864641e-13,
+      "mean_safe_envelope_width_GPU_h": 87.74715520161854,
+      "mean_feasible_set_volume_proxy_GPU_h2": 1494226.377680465,
+      "projector_feasible_rate": 1.0,
+      "hidden_shedding_GPU_h": 0.0
+    },
+    {
+      "case_id": "O4",
+      "case": "FULL_ORACLE",
+      "days": 151,
+      "boundary_MAE_GPU_h": 0.0,
+      "primary_normalized_envelope_score": 0.0,
+      "WIS_CRPS_proxy_GPU_h": 0.0,
+      "simultaneous_aggregate_coverage": 1.0,
+      "reserve_shortfall_GPU_h": 0.0,
+      "mean_safe_envelope_width_GPU_h": 263.4008589557233,
+      "mean_feasible_set_volume_proxy_GPU_h2": 9446752.002834292,
+      "projector_feasible_rate": 1.0,
+      "hidden_shedding_GPU_h": 0.0
+    }
+  ],
+  "O1_vs_O0": {
+    "primary_envelope_score_relative_improvement": 0.5186383933530475,
+    "reserve_shortfall_relative_improvement": -0.2456907564150966,
+    "interpretation": "pending oracle materially improves the primary boundary score; reserve over-nomination shortfall does not improve"
+  },
+  "limitations": [
+    "Aggregate 96-slot proxy is intentionally simpler than the gated full class-resolved SAFE set.",
+    "Oracle values are post-hoc labels and cannot be deployed.",
+    "B2/B3 innovation target is submission-cohort service while the reference is realized D-day overlap; the mismatch is held fixed for O0/O1 comparison."
+  ]
+}

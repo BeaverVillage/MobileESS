@@ -1,0 +1,52 @@
+{
+  "AIDC_EFFECT_SANITY": "PASS",
+  "APR01_20_AUTHORITY_CLEAN": true,
+  "APR21_PROSPECTIVE_AUTHORITY_CLEAN": null,
+  "Apr21_status": "OUT_OF_SCOPE_UNTOUCHED",
+  "B3_LINEAGE_ALL_VALID": true,
+  "CORRECTION_LEAKAGE": 0,
+  "MESS_EFFECT_SANITY": "PASS",
+  "STORAGE_INTEGRITY": "PASS",
+  "SUMMARY_ALGEBRAIC_CLOSURE": true,
+  "artifact_SHA256": {
+    "aidc_forensic": "59d894ecd83a442a81b11413ff621cf87d36c3d0d7ca4356a6a9414a1db532fe",
+    "canonical": "1b4483071fa08abbca482c4f2d7a66bea12c51532d66d9a6f4948d8a85074423",
+    "closure": "192974c577b98830c13c8647435facc7fd7d40a06b53aac7049819e022ad72bf",
+    "lineage": "c568b2862d87596aff34df5cfa3a8f53f821a2be05b069f40c3826e5c3aee0cb",
+    "mess_forensic": "bc613119430507cef64987301d135ebc0bac711cd4c6088f15ad3aaa8075a1c5",
+    "mess_solver_quality": "2563d68985e8a3093a6eb3938da1c4dab4c44e9d6bc1a6c3688898ec325e8357",
+    "storage": "bc9afc32fdd3d902ce0cf006f4cf1701d50ff7b1783c9445fd8e995c3cdf42e9"
+  },
+  "artifact_id": "V35R1_FINAL_REVIEW_V1",
+  "authority_scope": [
+    "2025-04-01",
+    "2025-04-20"
+  ],
+  "primary_classification": "V35R1_MULTIPLE_DEFECTS_REPAIRED",
+  "scientific_optimization_reruns": 0,
+  "status": "PASS",
+  "storage_only_repaired_cases": 80,
+  "summary_defect": {
+    "all_rows_same_day_cohort_and_metric": true,
+    "canonical_B3_minus_B0": -0.06397771571474017,
+    "canonical_left_residual": 0.0,
+    "canonical_means": {
+      "B1-B0": -4.8144838798613865e-05,
+      "B2-B0": -0.0647509826358634,
+      "B3-B1": -0.06392957087594156,
+      "B3-B2": 0.0007732669211232418
+    },
+    "canonical_right_residual": 1.3877787807814457e-17,
+    "classification": "INVALID_REPORTED_SUMMARY_DECIMAL_SCALE",
+    "reported_left_path": -0.06393481,
+    "reported_path_to_path_residual": 4.3190000000012385e-05,
+    "reported_right_path": -0.06397800000000001,
+    "reported_values": {
+      "B1-B0": -4.81e-06,
+      "B2-B0": -0.064751,
+      "B3-B1": -0.06393,
+      "B3-B2": 0.000773
+    },
+    "root_cause": "B1-B0 was transcribed/displayed as -0.00000481 instead of the canonical -0.0000481448387986; remaining displayed values were rounded."
+  }
+}

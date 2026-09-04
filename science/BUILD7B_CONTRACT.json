@@ -1,0 +1,285 @@
+{
+  "stage": "V2044R12B1D1B2_JOINTMASTER_BUILD7BR9_LOSSLESS_CACHE_INDEX",
+  "parents": {
+    "BUILD7AR2": "3b9588046cf202e2843c81e6874e0dc36d4794405eb91696c23496f9260079b0",
+    "BUILD6R3R5": "d1ae78d02ce55e4ba402c8ed21ca49255e9cf305c5a02ca90ca7862c2285d403",
+    "SOURCEAUTH_FIX1R1": "412f31a21dce9be42b59de0fd82c364d9a4df7e8d1f971ac58cdfef31771ec5a",
+    "BUILD5R3_external": "67415ca4c6795796b28a251ec21d742255be8d40e66585efa76f913c6ca65dbc"
+  },
+  "exact_sources": {
+    "BUILD4_base_main": "70dd6eb55000890f08398a80faeef3d673ca900bb196519f5753ce846c798b2b",
+    "BUILD4R1_overlay_main": "9defcb7ea7046709424198c4cc515e90c6d44ec9c027db709cf55f0d53cc8159",
+    "exact_grid_parent": "89eb3d6a6e4f8f9940091410ba11fd2e27394496a8dd76a6b92f7e1350d520d4",
+    "exact_metrics": "3184fd256c50a5cd2625d2cd0346a9d3ab8d2bc7e58a34ebb5d9126caa7df007"
+  },
+  "pilot": {
+    "issue_step": 113,
+    "horizon_steps": 54,
+    "rolling_commit_count": 1
+  },
+  "mobility": {
+    "service_nodes": 24,
+    "ordered_od": 552,
+    "K_routes": 3,
+    "route_slots": 1656,
+    "safe_duration": "profile_safe_horizon_steps + empirically frozen D2 connection-delay steps",
+    "planning_energy": "safe_energy_kWh deducted at move departure",
+    "departure_floor": "E_floor + global exact E4B safe-depletion-prefix maximum",
+    "global_safe_depletion_prefix_reserve_kWh": 72.55304645914745,
+    "selected_h0_move": "exact signed profile lazily regenerated and certified before commit"
+  },
+  "grid": {
+    "h0_background": "current realized/observed issue-time OpenDSS anchor only",
+    "future_background": "componentwise conservative gross-q90 minus PV-q10, Q-q90",
+    "future_voltage": "issue-specific anchored recursive LinDistFlow using exact current tap ratio2_ref",
+    "future_line_limit": "absolute subtree P/Q apparent flow <= frozen line rating",
+    "first_step_gate": "patched 24-service Fresh Exact OpenDSS"
+  },
+  "debts": {
+    "workload": "prospective origin-GPUh start-service debt relative to deterministic local shadow; nominal wait token 60 min",
+    "support_energy": "battery-side active support debt kWh; feasible scheduled charging is constructive repayment witness",
+    "terminal": "both workload and support-energy debts must be zero at horizon end for this pilot",
+    "claim_scope": "BUILD7 prospective full-master extension; not misrepresented as historical offset-0 source equivalence"
+  },
+  "results": "K9H7_RESULT_V1 plus full-horizon pilot plan/certificates",
+  "no_lookahead": {
+    "future_actual_jobs_read": false,
+    "future_actual_grid_read": false,
+    "future_actual_traffic_read": false,
+    "E5C_realized_used": false,
+    "2025_parameter_fit_used": false,
+    "retuning": false
+  },
+  "claims": {
+    "single_issue_full_54step_joint_master_executed_if_pass": true,
+    "full_54issue_rolling_joint_master_executed": false,
+    "annual_executed": false
+  },
+  "parent_BUILD7B_run_sha256": "478d40f500e96341748ae9a64ebfb170c4ccf78e8ddf7ff42992bd0669c36047",
+  "parent_BUILD7B_failure_archive_sha256": "ac391f1037bc656fa1e7154c13185d5ca933f1b8d87b394fe5ecc6a4877adcd8",
+  "runtime_fix": {
+    "failure": "ValueError: too many values to unpack (expected 2) at departure-indicator quicksum",
+    "root_cause": "mv is keyed by (mess_id, horizon_step, route_slot), but the departure-indicator generator unpacked each key as only (horizon_step, route_slot).",
+    "repair": "Iterate mv.items() with the exact 3-tuple key and filter by both mess_id and horizon_step.",
+    "old_expression": "depflag=gp.quicksum(mv[(mid,h,slot)] for (hh,slot) in mv if hh==h)",
+    "new_expression": "depflag=gp.quicksum(v for (m0,hh,slot),v in mv.items() if m0==mid and hh==h)",
+    "scientific_formulation_changed": false,
+    "variable_set_changed": false,
+    "constraint_set_intent_changed": false,
+    "objective_changed": false,
+    "data_authority_changed": false
+  },
+  "parent_BUILD7BR1_run_sha256": "d32c4ba67571ef05d369592e21f4c798df39270ac0832c249edee42c36dd3a60",
+  "parent_BUILD7BR1_abrupt_log_sha256": "398b2e12e3a5430be9651210f3481a75624782a9c9769846617e3bf1ce692bb7",
+  "runtime_memory_hardening": {
+    "diagnosis": "BUILD7BR1 ended abruptly after MIQCP presolve/root-relaxation setup, with no Python exception, no Gurobi status, no wrapper trap, and no final archive. Treat as external hard termination; memory pressure is the leading cause.",
+    "parent_model": {
+      "rows": 75388,
+      "columns": 153462,
+      "linear_nonzeros": 20993620,
+      "quadratic_constraints": 3510,
+      "binary_variables": 134164
+    },
+    "primary_fix": "Sparse explicit branch-flow and local voltage-delta variables replace recursively expanded subtree expressions; same radial LinDistFlow algebra.",
+    "service_transformer_fix": "All 24 dedicated MESS service-transformer kVA circles enforced at all 54 future steps.",
+    "route_pruning": "Only structurally unreachable route binaries removed; feasible path set unchanged.",
+    "solver_runtime": {
+      "Threads": 1,
+      "MIQCPMethod": 1,
+      "PreSparsify": 2,
+      "NodefileStart_GB": 0.5,
+      "SoftMemLimit": "min(18 GB, 55% of WSL MemTotal), floor 4 GB"
+    },
+    "checkpointing": "External PREOPT checkpoint + ~20 s live heartbeat survive normal process death and often survive hard WSL termination.",
+    "scientific_tolerances_relaxed": false,
+    "MIPGap_relaxed": false,
+    "objective_priorities_changed": false,
+    "no_lookahead_changed": false
+  },
+  "parent_BUILD7BR2_run_sha256": "2c8ac7701b77f01a34fa1d41b3be17947a7da12fa2ea6ef17debf47011f783cd",
+  "parent_BUILD7BR2_failure_archive_sha256": "14ac736fe36f76d128bdb9ebd6729654ad5c8af0a2ceb22222e14ccf887e3713",
+  "parent_BUILD7BR2_failure_log_sha256": "ef74d1c6bfe7a75575a20f5c7145d73b1aaccc92ff678d29f4b8ebf7dc834108",
+  "runtime_fix_BR3": {
+    "root_cause": "BR2 pruned structurally unreachable move binaries from mv, but departure energy iterated the larger unpruned moves authority and indexed missing mv keys.",
+    "repair": "Departure energy iterates mv.items() only and reads immutable route metadata from moves[(h,slot)].",
+    "scientific_formulation_changed": false,
+    "feasible_route_set_changed": false,
+    "sparse_grid_changed": false,
+    "memory_parameters_changed": false,
+    "objective_changed": false,
+    "no_lookahead_changed": false
+  },
+  "parent_BUILD7BR3_run_sha256": "cb5b8a26efd2ae14df635c652097fba723dc951ba94f076024597dbbe8c320ef",
+  "solver_speed_contract": {
+    "purpose": "Stop exact proof on final economic objective at 1.5% relative MIP gap and trial 8 physical-core threads on the bottleneck pass.",
+    "objective_1_defer": {
+      "MIPGap": 0.0,
+      "Threads": 1
+    },
+    "objective_2_wait": {
+      "MIPGap": 0.0,
+      "Threads": 1
+    },
+    "objective_3_remote": {
+      "MIPGap": 0.0,
+      "Threads": 1
+    },
+    "objective_4_WAN": {
+      "MIPGap": 0.0,
+      "Threads": 1
+    },
+    "objective_5_economic": {
+      "MIPGap": 0.015,
+      "MIPGapAbs": 0.0,
+      "Threads": 8,
+      "MIPFocus": 2
+    },
+    "memory_protection_preserved": {
+      "MIQCPMethod": 1,
+      "PreSparsify": 2,
+      "NodefileStart_GB": 0.5,
+      "SoftMemLimit": "unchanged dynamic BR3 rule"
+    },
+    "physical_constraints_relaxed": false,
+    "solver_feasibility_tolerances_relaxed": false,
+    "lexicographic_degradation_tolerances_changed": false,
+    "no_lookahead_changed": false,
+    "comparison_rule": "Use the same final economic MIPGap target and thread policy for all B0-B6/A1-A8 production comparisons after the speed trial is accepted."
+  },
+  "parent_BUILD7BR4_run_sha256": "06b977a0800da94cd3a1f9ee2a4350f145e8a6ab933495ae8a065343e4ec987d",
+  "parent_BUILD7BR4_result_sha256": "d164d0349d998c88df43c6cf759ffa3f6c278e96f61b7e157a5176920a6aba47",
+  "parent_BUILD7BR4_log_sha256": "cbc5a07c69ef9beccddac0c1ce5c834217ff0b53197a6c10e42974232b198ae6",
+  "BR4_runtime_diagnosis": {
+    "requested_obj5_threads": 8,
+    "actual_thread_counts_by_pass_from_Gurobi_log": [
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "actual_obj5_threads": 1,
+    "conclusion": "BR4 did NOT actually run Obj5 with 8 threads. Gurobi's runtime log is authoritative.",
+    "runtime_s": 1761.2243959903717,
+    "obj5_runtime_s": 1555.7564489841461,
+    "obj5_gap": 0.014929429644580015,
+    "peak_python_rss_MB": 3156.28515625,
+    "mem_available_MB_at_end": 23745.13671875
+  },
+  "BR5_speed_contract": {
+    "global_threads_default": 8,
+    "global_threads_env_override": "MOBILEESS_GUROBI_THREADS in {1,2,4,8}",
+    "InheritParams": 1,
+    "MultiObjPre": 2,
+    "Obj1_4_MIPGap": 0.0,
+    "Obj5_MIPGap": 0.015,
+    "Obj5_MIPFocus": 3,
+    "Obj5_threads": "same verified global thread count",
+    "thread_verification": "parse Gurobi log and fail speed-trial closure if actual Obj5 thread count differs from requested",
+    "physical_constraints_relaxed": false,
+    "feasibility_tolerances_relaxed": false,
+    "no_lookahead_changed": false
+  },
+  "parent_BUILD7BR5_run_sha256": "c439b9086310f3bddd1dd67bca2472b8e20ab46411dd5fd535d42815d969a121",
+  "parent_BUILD7BR5_result_archive_sha256": "79145bab05c4deb99c08a9099096d665ab36a53bd6e40ff3b55f56d715bb9974",
+  "parent_BUILD7BR5_log_sha256": "fb0c0c42c4f8de025d58164cdbb2d3ff4188cd3788e434cfafd78306893d9216",
+  "BR5_runtime_forensics": {
+    "wrapper_status": "FAILED only after successful optimize due pre-flush log-file thread verifier race",
+    "gurobi_actual_threads": 8,
+    "gurobi_solve_runtime_s": 665.16,
+    "economic_gap": 0.013787557040219025,
+    "scientific_postsolve_certification_completed": false,
+    "lesson": "MESSAGE callback, not immediate LogFile reread, is the synchronous thread-use authority."
+  },
+  "BR6_speed_and_exact_pruning": {
+    "default_threads": 14,
+    "thread_override": "MOBILEESS_GUROBI_THREADS=1..16",
+    "root_Method": 2,
+    "economic_MIPGap": 0.015,
+    "economic_MIPFocus": 3,
+    "exact_route_pruning": [
+      "forward structural reachability",
+      "terminal-arrival strict dominance",
+      "optimistic maximum-SOC infeasibility"
+    ],
+    "terminal_arrival_proof": "arrival exactly at H has no connected control step; zero-dispatch stay preserves constraints, raises SOC, and avoids positive mobility tie-break",
+    "soc_pruning_proof": "maximum-SOC DP ignores grid restrictions and allows maximum charging, so it is an upper bound; failure under the upper bound implies infeasibility",
+    "lex_zero_certificate": "when immediate local shadow attains nonnegative lower bounds, objectives 1-4 are fixed at proven optima and only economic objective is solved",
+    "warm_start": "prior causal issue113 PASS plan only; no future realized data; rolling will use shifted previous-issue solution",
+    "thread_verification": "Gurobi MESSAGE callback parses Thread count was N synchronously",
+    "physical_constraints_relaxed": false,
+    "feasibility_tolerances_relaxed": false,
+    "no_lookahead_changed": false
+  },
+  "parent_BUILD7BR6_run_sha256": "365f1deeb5451b78f24be8ac10edcabf3d138dd802ebb3d127156cec94622684",
+  "gap_contract": {
+    "Obj1_to_Obj4": "0% exact; or exact lower-bound certificate when mathematically proven",
+    "Obj5_economic": "1.5% relative MIP gap for now; subject to later sensitivity/runtime review"
+  },
+  "BR7_exact_speed_changes": {
+    "reachable_stay_state_pruning": "Do not instantiate stay binaries at unreachable (MESS,h,service) states.",
+    "reachable_dispatch_state_pruning": "Do not instantiate Pcharge/Pdischarge/Q variables at unreachable service states.",
+    "zero_flow_row_elimination": "Omit only identically 0=0 mobility-flow rows.",
+    "sparse_service_transformer_constraints": "Instantiate service kVA QCs only when at least one MESS can be connected there at that horizon.",
+    "indexed_move_domain": "Use mv_by_mid_h index instead of rescanning all move binaries in every SOC/extraction expression.",
+    "zero_workload_debt_elimination": "When the exact lex-zero certificate proves immediate local start equals shadow lower bound, workload debt is identically zero and is not instantiated.",
+    "runtime_profiler": "Real stage timestamps inside scientific runtime; wrapper banners are no longer treated as true progress state.",
+    "feasible_set_relaxed": false,
+    "physical_constraints_relaxed": false,
+    "objective_changed": false,
+    "no_lookahead_changed": false
+  },
+  "parent_BUILD7BR7_run_sha256": "fbaa6553d473e758f9d1160ba1d028ffffd45f8791554fe9ebf2ed29535f478a",
+  "parent_BUILD7BR7_result_sha256": "854e9fe4ba35da5765bca884d633e886e29b4b17497be1821f3f4ac824c27548",
+  "BR8_exact_acceleration": {
+    "pareto_hotpath": "one-time stable OD/rank grouping; identical h->OD->rank candidate/dominance/order semantics",
+    "legacy_dataframe_filters_removed_per_issue": 29808,
+    "route_domain_issue113_runtime_regression": "counts-by-h and total must equal frozen BR7 PASS authority",
+    "mobility_state_domain_scan": "legacy incoming/outgoing union replaced by reachable[h] construction invariant; same flow rows",
+    "static_rack_index": "precompute rack_to_idc/racks_by_idc; preserve rack order",
+    "static_grid_topology_order": "precompute topological node order once",
+    "Gurobi_model_structure_intentionally_changed": false,
+    "variable_creation_order_intentionally_changed": false,
+    "constraint_creation_order_intentionally_changed": false,
+    "physical_constraints_relaxed": false,
+    "feasible_set_relaxed": false,
+    "objective_changed": false,
+    "MIPGap_changed": false,
+    "economic_MIPGap": 0.015,
+    "threads_changed": false,
+    "default_threads": 14
+  },
+  "parent_BUILD7BR8_run_sha256": "5f3e616684698f4c257c4ed17ef911b1d4c4a915db993eea42da4c59dc6ea0a7",
+  "parent_BUILD7BR8_result_sha256": "7c6148b6f1bb35bf13860efdbdd9f6670744a845b3be8573d7afb2a4196438ed",
+  "parent_BUILD7BR8_log_sha256": "f1a852c2280cc6743d033d782413d2a1540548d7a3aa7748c113a5ce26f11cfb",
+  "BR9_lossless_acceleration": {
+    "golden_BR8_model_fingerprint": "0x24b788bc",
+    "golden_model_counts": {
+      "variables": 151810,
+      "constraints": 92202,
+      "qconstraints": 8180,
+      "linear_nonzeros": 609618.0,
+      "binary_variables": 110489
+    },
+    "A1_persistent_python_runtime_cache": true,
+    "A2_immutable_input_load_once": true,
+    "A3_static_topology_index_cache": true,
+    "A4_exact_decision_lookup_indices": true,
+    "A5_fixed_numeric_vector_precompute": true,
+    "A6_exact_pareto_issue_cache": {
+      "cache_sha256": "74d0d063fc36e576138b09b7a1af6f0767db1e57139855134e1f55bfd9e90a80",
+      "issue_npz_sha256": "d4c30aa61825403d66cebc7a9d1dcb3ec2480160928e1bbb3d902515b38a9ac0",
+      "route_static_sha256": "58383ce60257f539b96f3d6e17837b06f901c8f5c9fd3c70f775df8c00e24aaa",
+      "connection_delay_steps": 2
+    },
+    "A7_pandas_string_hotpath_reduction": true,
+    "A8_lightweight_runtime_logging": true,
+    "Gurobi_model_reuse": false,
+    "matrix_API_rewrite": false,
+    "new_pruning": false,
+    "solver_parameter_change": false,
+    "warm_start_change": false,
+    "Obj5_MIPGap": 0.015,
+    "fail_closed": "Abort before optimize unless Gurobi Fingerprint and model counts exactly equal BR8."
+  }
+}

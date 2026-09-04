@@ -1,0 +1,39 @@
+{
+  "release": "R25N_B6C5R4_NUMERICAL_CONDITIONING_POLISH",
+  "stage": "B6-C5R4",
+  "screen_issue": 152,
+  "scientific_freeze": {
+    "horizon_steps": 54,
+    "cadence_minutes": 5,
+    "full_modeled_cost_gap": 0.03,
+    "objective_changed": false,
+    "physical_feasible_set_changed": false,
+    "causality_changed": false,
+    "fresh_exact_opendss_interface_changed": false
+  },
+  "conditioning": {
+    "internal_mess_power_units": "MW/Mvar",
+    "internal_soc_debt_route_energy_units": "MWh",
+    "external_input_output_units": "kW/kvar/kWh",
+    "power_scale_kw_per_model_unit": 1000.0,
+    "energy_scale_kwh_per_model_unit": 1000.0,
+    "coordinate_change_only": true
+  },
+  "incumbent_polish": {
+    "integer_decisions_fixed": true,
+    "post_fix_model": "continuous convex QCP",
+    "same_issue_mip_start": false,
+    "ConstrVio_gate": 1e-06,
+    "BoundVio_gate": 1e-07
+  },
+  "certificate": {
+    "fixed_dual_prepass_removed": true,
+    "exact_child_qcp_reoptimization_retained": true,
+    "exact_child_pricing_closure_retained": true,
+    "branch_price_time_limit_s": 1200,
+    "branch_price_node_limit": 256,
+    "child_cg_time_limit_s": 120,
+    "threads": 4
+  },
+  "B6_final_freeze_requires_actual_issue152_pass": true
+}

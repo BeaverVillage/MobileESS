@@ -1,0 +1,52 @@
+{
+  "schema_version": "r26.experiment_matrix.v2",
+  "evaluation_sampling": {
+    "months": 12,
+    "scored_days_per_month": 7,
+    "scored_issues_per_month": 2016,
+    "contiguous": true,
+    "weekday_weekend_shape": "FIVE_WEEKDAYS_TWO_WEEKEND_DAYS",
+    "selection_rule": "PREDECLARED_MINIMUM_NORMALIZED_FEATURE_DISTANCE_TO_MONTHLY_CENTROID",
+    "complete_input_and_48h_prior_history_required": true,
+    "primary_score_weights": "EQUAL_MONTH_WEIGHT",
+    "stress_cases_reported_separately": true
+  },
+  "exact_oracle_sampling": {
+    "issues_per_month": 54,
+    "within_selected_7day_block": true,
+    "same_causal_input_required": true,
+    "used_for_full_7day_objective_imputation": false
+  },
+  "required_baselines": [
+    "R25T_EXACT_5MIN_MONTHLY_54_ISSUE_ORACLE",
+    "FIXED_15MIN",
+    "FIXED_30MIN",
+    "FIXED_60MIN",
+    "EVENT_MAX15MIN",
+    "EVENT_MAX30MIN",
+    "EVENT_MAX60MIN"
+  ],
+  "eta_error_trigger_minutes": [5, 10, 15],
+  "max_refresh_minutes": [15, 30, 60],
+  "soc_margin_multipliers": [0.5, 1.0, 1.5],
+  "reported_metrics": [
+    "economic_degradation_vs_exact",
+    "route_replans_per_day",
+    "route_replan_fraction_of_288",
+    "travel_energy_kwh",
+    "minimum_soc_reserve_margin_kwh",
+    "minimum_rack_support_margin",
+    "ac_violation_count",
+    "fast_runtime_median_seconds",
+    "fast_runtime_p95_seconds",
+    "fast_runtime_p99_seconds",
+    "fast_runtime_max_seconds",
+    "deadline_miss_count"
+  ],
+  "realtime_acceptance": {
+    "cadence_seconds": 300,
+    "maximum_fast_runtime_strictly_below_seconds": 300,
+    "deadline_miss_count": 0
+  },
+  "winner_declaration_before_complete_results": false
+}

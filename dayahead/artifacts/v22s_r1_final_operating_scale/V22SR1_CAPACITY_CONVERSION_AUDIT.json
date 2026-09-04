@@ -1,0 +1,33 @@
+{
+  "artifact_id": "V22SR1_CAPACITY_CONVERSION_AUDIT_V1",
+  "capacity_total_MW": 202.75076923076924,
+  "expected_capacity_total_MW": 202.750769230769,
+  "absolute_error_MW": 2.2737367544323206e-13,
+  "tolerance_MW": 1e-09,
+  "AIDC04": {
+    "input": {
+      "value": 2.5,
+      "unit": "MVA",
+      "boundary": "MVA_INPUT"
+    },
+    "PF": 0.98,
+    "PUE": 1.3,
+    "formula": "2.5 * 0.98 / 1.30",
+    "IT_equivalent_MW": 1.8846153846153846,
+    "label": "ENGINEERING_PF_SENSITIVITY_NOT_REAL_LOAD"
+  },
+  "AIDC09": {
+    "input_generator_nameplate_MW": 4.175,
+    "largest_unit_N_plus_1_exclusion_MW": 1.125,
+    "PUE": 1.3,
+    "formula": "(4.175 - 1.125) / 1.30",
+    "IT_equivalent_MW": 2.346153846153846,
+    "label": "GENERATOR_N_PLUS_1_ENGINEERING_PROXY_NOT_REAL_LOAD"
+  },
+  "counters": {
+    "unsupported_MVA_to_MW": 0,
+    "generator_to_actual_IT_load": 0,
+    "capacity_to_actual_load_relabel": 0,
+    "future_capacity_backcast": 0
+  }
+}

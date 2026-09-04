@@ -1,0 +1,157 @@
+{
+  "Apr04_authorized": false,
+  "all_pre_April_gates_passed": false,
+  "artifact_id": "V29R1_RESUME_TEST_REPORT_V1",
+  "blocked_count": 19,
+  "failure_count": 1,
+  "gates": [
+    {
+      "gate": 1,
+      "name": "exact V29R1 lineage",
+      "status": "PASS"
+    },
+    {
+      "gate": 2,
+      "name": "raw source 90/90",
+      "status": "PASS"
+    },
+    {
+      "gate": 3,
+      "name": "causal source 90/90",
+      "status": "PASS"
+    },
+    {
+      "gate": 4,
+      "name": "Jan-Mar materialization deterministic",
+      "status": "PASS"
+    },
+    {
+      "gate": 5,
+      "name": "Jan-Mar/April schema equivalence",
+      "status": "PASS"
+    },
+    {
+      "gate": 6,
+      "name": "no future Actual leakage",
+      "status": "PASS"
+    },
+    {
+      "gate": 7,
+      "name": "trust candidate set unchanged",
+      "status": "PASS"
+    },
+    {
+      "gate": 8,
+      "name": "rho selected only from physical certificate",
+      "status": "FAIL_NO_PHYSICS_CERTIFIED_RHO"
+    },
+    {
+      "gate": 9,
+      "name": "service model causal",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 10,
+      "name": "90% lower coverage target unchanged",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 11,
+      "name": "Bridge V2 causal",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 12,
+      "name": "V4 B0/B2 reference identity",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 13,
+      "name": "no P/G double count",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 14,
+      "name": "residual nonnegative",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 15,
+      "name": "no clipping",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 16,
+      "name": "PARTIAL/shared excluded",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 17,
+      "name": "no preemption",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 18,
+      "name": "no synthetic deadline",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 19,
+      "name": "MESS ratings unchanged",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 20,
+      "name": "Q anchor exact",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 21,
+      "name": "Q release no-regret",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 22,
+      "name": "deterministic Q fallback",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 23,
+      "name": "primary objective unchanged",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 24,
+      "name": "Actual optimizer calls zero",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 25,
+      "name": "connection-delay alignment",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 26,
+      "name": "PI firewall",
+      "status": "BLOCKED_BY_GATE_8"
+    },
+    {
+      "gate": 27,
+      "name": "protected evidence unchanged",
+      "status": "PASS"
+    },
+    {
+      "gate": 28,
+      "name": "artifact SHA consistency",
+      "status": "BLOCKED_BY_GATE_8"
+    }
+  ],
+  "pass_count": 8,
+  "preservation_status": "PASS",
+  "pytest_verification": {
+    "command": "python -m pytest -q tests/dayahead/test_v29r1_source_resume.py tests/dayahead/test_v29r1_reliability_calibrated_noregret.py tests/dayahead/test_v29r1_janmar_source_authority.py",
+    "result": "18 passed"
+  },
+  "required_gate_count": 28,
+  "status": "V29R1_BLOCKED_TRUST_CERT_PHYSICS_GATES"
+}

@@ -1,0 +1,104 @@
+{
+  "ACTUAL_FULL_SYSTEM_REOPTIMIZATION_CALLS": 0,
+  "ACTUAL_MESS_REOPTIMIZATION_CALLS": 0,
+  "AIDC_SECOND_STAGE_RECOURSE_EPOCHS": 192,
+  "AIDC_SECOND_STAGE_SOLVER_SUBCALLS": 768,
+  "April_rows_used_for_tuning_or_certification": 0,
+  "B1_B0_Fresh_no_regret": true,
+  "B3_B2_Fresh_no_regret": true,
+  "DA_objective": {
+    "B0": 0.5887508621211441,
+    "B1": 0.5873955172145338,
+    "B2": 0.5249616170577897,
+    "B3": 0.5228128973573808
+  },
+  "Fresh_OpenDSS_convergence_count": 384,
+  "Fresh_OpenDSS_sequential_slot_solves": 384,
+  "Fresh_OpenDSS_trajectory_count": 4,
+  "RESULT_CLASSIFICATION": "V30_APR04_TWO_STAGE_AIDC_DEVELOPMENT_CHECKPOINT_PASS",
+  "answers": {
+    "Q1": "YES. B1/B3 executable node-hours rose without any physical-scale change; the increase was 16.6096/22.0229 node-h versus frozen replay.",
+    "Q10": "YES.",
+    "Q2": "Gross spatial recourse placed 47.5646 node-h in B1 and 48.7522 node-h in B3 away from the original rack (same-site plus cross-site).",
+    "Q3": "YES, but unevenly: B3 delivered negative critical-slot AIDC delta and negative sensitivity-weighted actuation; B1 improved rho although its anchor critical-slot aggregate AIDC delta was positive.",
+    "Q4": "NO. B0-to-B1 Fresh rho relief was slightly less pronounced than frozen replay despite higher service.",
+    "Q5": "YES. B2-to-B3 Fresh rho relief increased from about -0.00162997 to -0.00175138 pu.",
+    "Q6": "NO.",
+    "Q7": "NO.",
+    "Q8": "YES.",
+    "Q9": "NO."
+  },
+  "artifact_id": "V30_APR04_DEVELOPMENT_REVIEW_V1",
+  "causal_chain": {
+    "B1": {
+      "Fresh_anchor_relative_rho_delta": -0.0013369438341975792,
+      "critical_slot_delta_P_AIDC_kw": 1.3883807483335406,
+      "executed_AIDC_nodeh": 59.18816048947252,
+      "recovered_spatial_recourse_nodeh": 47.564599536272986,
+      "sensitivity_weighted_AIDC_actuation_pu": -0.0013268055039602875
+    },
+    "B3": {
+      "Fresh_anchor_relative_rho_delta": -0.0017513819689845,
+      "critical_slot_delta_P_AIDC_kw": -1.5189912317288456,
+      "executed_AIDC_nodeh": 62.38843607314548,
+      "recovered_spatial_recourse_nodeh": 48.7522219796202,
+      "sensitivity_weighted_AIDC_actuation_pu": -0.0016799869049061496
+    }
+  },
+  "comparisons": {
+    "B0_to_B1": -0.0013369438341975792,
+    "B0_to_B2": -0.05628404517335439,
+    "B1_to_B3": -0.05669848330814131,
+    "B2_to_B3": -0.0017513819689845
+  },
+  "day": "2025-04-04",
+  "execution": {
+    "B1": {
+      "DA_authorized_nodeh": 179.80406907977604,
+      "cross_site_recourse_nodeh": 40.78345593610148,
+      "executed_nodeh": 59.18816048947252,
+      "execution_ratio": 0.32918142949930534,
+      "frozen_replay_executed_nodeh": 42.5781295029127,
+      "grid_safety_blocked_nodeh": 70.50466825581421,
+      "increase_vs_frozen_replay_nodeh": 16.61003098655982,
+      "same_site_recourse_nodeh": 6.7811436001715055,
+      "true_capacity_limit_nodeh": 14.002243376318667
+    },
+    "B3": {
+      "DA_authorized_nodeh": 179.80406907977599,
+      "cross_site_recourse_nodeh": 42.361116518969666,
+      "executed_nodeh": 62.38843607314548,
+      "execution_ratio": 0.3469801122546609,
+      "frozen_replay_executed_nodeh": 40.36557721992672,
+      "grid_safety_blocked_nodeh": 57.92726733418155,
+      "increase_vs_frozen_replay_nodeh": 22.022858853218757,
+      "same_site_recourse_nodeh": 6.391105460650536,
+      "true_capacity_limit_nodeh": 23.530679550524944
+    }
+  },
+  "final_validation": false,
+  "frozen_replay_comparison": {
+    "V29R2_B0_to_B1_rho_delta": -0.001349232428252356,
+    "V29R2_B2_to_B3_rho_delta": -0.0016299652654621077,
+    "V30_B0_to_B1_rho_delta": -0.0013369438341975792,
+    "V30_B2_to_B3_rho_delta": -0.0017513819689845
+  },
+  "independent_validation": false,
+  "no_regret_margin_pu": 0.0009917274479849247,
+  "official_case_count": 4,
+  "official_cases": [
+    "B0",
+    "B1",
+    "B2",
+    "B3"
+  ],
+  "physical_scale_or_rating_change": false,
+  "rho_AC": {
+    "B0": 0.6149823258620969,
+    "B1": 0.6136453820278993,
+    "B2": 0.5586982806887425,
+    "B3": 0.556946898719758
+  },
+  "scenario_count": 64,
+  "scenario_set_sha256": "02e29c64c8fa662c78bf88e43c10a6508efc0bb5669f9ffe6d33c798a887d2b0"
+}

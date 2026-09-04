@@ -1,0 +1,53 @@
+{
+  "Git_HEAD_at_attempt": "e604d8f41e6207fa2881dd06ba944bd5479cd228",
+  "K": 64,
+  "MESS_trajectory_aggregate_sha256": null,
+  "M_CURRENT_pu": 0.0009917274479849247,
+  "V30_production_HEAD": "f0fcc1c2835cc90b65aab7b788f1b55af544f6ea",
+  "artifact_id": "V32R1_JANMAR_AUTHORITY_FREEZE_V1",
+  "complete_authority_aggregate_sha256": null,
+  "day_coverage": {
+    "April_rows_used": 0,
+    "B0_Actual_anchor_days": 0,
+    "B0_DA_days": 0,
+    "B1_DA_days": 0,
+    "B1_Stage2_days": 0,
+    "B1_Stage2_epochs": 0,
+    "B2_Actual_anchor_days": 0,
+    "B2_DA_days": 0,
+    "B2_MESS_days": 0,
+    "B3_DA_days": 0,
+    "B3_MESS_days": 0,
+    "B3_Stage2_days": 0,
+    "B3_Stage2_epochs": 0,
+    "artifact_id": "V32R1_AUTHORITY_COVERAGE_AUDIT_V1",
+    "blocking_gate": "MISSING_REALIZED_TRAFFIC_AUTHORITY_2025-02-28",
+    "code_evidence": {
+      "V30_loader": "dayahead/v30/dayahead_formulation.py::load_frozen_schedules",
+      "V30_runner_day_constant": "dayahead/v30/four_case_runner.py::DAY='2025-04-04'",
+      "V30_stage1_behavior": "reports headroom and carries the frozen V29R2 objective; it does not solve a general-day V30 Stage-1 model",
+      "loader_scope": "Apr-04 only: V29R2_APR04_DAYAHEAD_{B0,B1,B2,B3}_SCHEDULE.json",
+      "lower_level_conflict": "V29R2 apr04_runner is also day-fixed and selects B3 MESS rung using same-day scenario Fresh AC; binding that into a general-day V30 Stage-1 would be new integration/scientific authority",
+      "prohibited_substitutions": [
+        "reuse Apr-04 schedule for Jan-Mar",
+        "silently generalize V29R2 Apr-04 runner",
+        "invent V30 robust Stage-1 implementation",
+        "choose a new MESS rung rule"
+      ]
+    },
+    "combined_Stage2_epochs": 0,
+    "future_Actual_reads": 0,
+    "planning_sensitivity_days": 0,
+    "required_source_days": 90,
+    "source_days": 89,
+    "status": "FAIL_CLOSED_INCOMPLETE"
+  },
+  "freeze_pass": false,
+  "frontier_phase_authorized": false,
+  "planning_sensitivity_aggregate_sha256": null,
+  "reason": "MISSING_REALIZED_TRAFFIC_AUTHORITY_2025-02-28",
+  "resource_tensor_schema_sha256": "a5ffe725c8728075f9f1cf1180a8e450f49374c545162647765518df0d9a5559",
+  "scenario_set_sha256": "02e29c64c8fa662c78bf88e43c10a6508efc0bb5669f9ffe6d33c798a887d2b0",
+  "source_manifest_sha256": "80c4315aa6ac03ac49fb848f23069e8f1be5a999ed751a630f043ffc5d28ccd5",
+  "status": "FAIL_CLOSED_NOT_FROZEN"
+}

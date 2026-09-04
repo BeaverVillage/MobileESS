@@ -1,0 +1,102 @@
+{
+  "artifact_id": "V18R1_KESTREL_CAPACITY_TIMELINE_AUTHORITY_V1",
+  "C_K_SOURCE_definition": "Kestrel source-system installed H100 capacity authority, distinct from case-study equivalent capacity",
+  "official_evidence": [
+    {
+      "date_or_period": "2024-08-19",
+      "claim": "NREL reported full Kestrel buildout completed in summer 2024",
+      "source": "https://www.nrel.gov/news/program/2024/kestrel-supercomputer-ready-to-energize-renewable-energy-research.html"
+    },
+    {
+      "date_or_period": "FY25 allocation / October 2024",
+      "installed_H100_nodes": 132,
+      "GPUs_per_node": 4,
+      "installed_GPU": 528,
+      "source": "https://www.nrel.gov/docs/gen/fy24/90033.pdf"
+    },
+    {
+      "date_or_period": "October 2024",
+      "installed_H100_nodes": 132,
+      "source": "https://www.nrel.gov/docs/fy25osti/91696.pdf"
+    },
+    {
+      "date_or_period": "December 2024 installation; January 2025 procurement completion",
+      "claim": "VTO Kestrel GPU buy-in/expanded capacity exists",
+      "additional_node_count": null,
+      "sources": [
+        "https://www.nrel.gov/docs/libraries/transportation/fy25-q3-vto-accomplishments-report.pdf",
+        "https://www.nrel.gov/docs/libraries/transportation/fy25-q1-vto-accomplishments-report.pdf"
+      ]
+    }
+  ],
+  "exact_schedule": [
+    {
+      "period": "2024-08-19 through contemporaneous October-2024 authority",
+      "C_K_nodes": 132,
+      "C_K_GPU": 528,
+      "authority": "OFFICIAL"
+    },
+    {
+      "period": "post VTO buy-in installation during Dec-2024/Jan-2025",
+      "C_K_nodes": null,
+      "C_K_GPU": null,
+      "authority": "EXPANSION_CONFIRMED_QUANTITY_NOT_PUBLICLY_IDENTIFIED"
+    }
+  ],
+  "raw_nodelist_observation": {
+    "distinct_nodes_entire_training": 156,
+    "monthly": {
+      "2024-08": {
+        "distinct_H100_nodelist_nodes": 130,
+        "new_first_seen_nodes": 130,
+        "last_seen_nodes": 0,
+        "max_concurrently_active_distinct_nodes": 128
+      },
+      "2024-09": {
+        "distinct_H100_nodelist_nodes": 130,
+        "new_first_seen_nodes": 0,
+        "last_seen_nodes": 0,
+        "max_concurrently_active_distinct_nodes": 129
+      },
+      "2024-10": {
+        "distinct_H100_nodelist_nodes": 132,
+        "new_first_seen_nodes": 2,
+        "last_seen_nodes": 0,
+        "max_concurrently_active_distinct_nodes": 130
+      },
+      "2024-11": {
+        "distinct_H100_nodelist_nodes": 130,
+        "new_first_seen_nodes": 0,
+        "last_seen_nodes": 0,
+        "max_concurrently_active_distinct_nodes": 130
+      },
+      "2024-12": {
+        "distinct_H100_nodelist_nodes": 154,
+        "new_first_seen_nodes": 22,
+        "last_seen_nodes": 0,
+        "max_concurrently_active_distinct_nodes": 127
+      },
+      "2025-01": {
+        "distinct_H100_nodelist_nodes": 154,
+        "new_first_seen_nodes": 2,
+        "last_seen_nodes": 0,
+        "max_concurrently_active_distinct_nodes": 150
+      },
+      "2025-02": {
+        "distinct_H100_nodelist_nodes": 154,
+        "new_first_seen_nodes": 0,
+        "last_seen_nodes": 1,
+        "max_concurrently_active_distinct_nodes": 153
+      },
+      "2025-03": {
+        "distinct_H100_nodelist_nodes": 155,
+        "new_first_seen_nodes": 0,
+        "last_seen_nodes": 28,
+        "max_concurrently_active_distinct_nodes": 153
+      }
+    },
+    "interpretation": "distinct/first-seen nodes are OBSERVED_USE_LOWER_BOUND only and are not promoted to installed capacity"
+  },
+  "timeline_status": "TIME_VARYING_INSTALLED_CAPACITY_NOT_FULLY_IDENTIFIED",
+  "gate_A3": "PARTIAL_OFFICIAL_EXPANSION_WITHOUT_PUBLIC_NODE_COUNT"
+}

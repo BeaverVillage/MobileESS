@@ -1,0 +1,180 @@
+{
+  "artifact_id": "V24M_SIGNATURE_REPRESENTATION_AUDIT_V1",
+  "SIGNATURE_BACKEND": "EXACT_TRUNCATED_CHEN_TENSOR_IMPLEMENTATION",
+  "backend_module": "dayahead.ml.faser_flex.signatures",
+  "verification": {
+    "status": "PASS",
+    "reference_backend": "iisignature==0.24",
+    "isolated_reference_numpy": "1.26.4",
+    "seed": 20260901,
+    "test_path_shape": [
+      17,
+      4
+    ],
+    "depth_2_signature_max_abs_error": 0.0,
+    "depth_2_logsignature_X_max_abs_error": 0.0,
+    "depth_3_signature_max_abs_error": 7.105427357601002e-15,
+    "depth_3_logsignature_X_max_abs_error": 2.842170943040401e-14,
+    "main_environment_iisignature_import": "INCOMPATIBLE_WITH_NUMPY_2; NOT_USED"
+  },
+  "candidates": {
+    "SIG-A": {
+      "path_channels_including_time": 9,
+      "transform": "EXACT_TENSOR_LOG_SIGNATURE",
+      "depth": 2,
+      "dimension": 90
+    },
+    "SIG-B": {
+      "path_channels_including_time": 9,
+      "transform": "EXACT_TENSOR_LOG_SIGNATURE",
+      "depth": 3,
+      "dimension": 819
+    },
+    "SIG-C": {
+      "lead_lag_channels": 18,
+      "transform": "EXACT_CHEN_SIGNATURE",
+      "depth": 2,
+      "dimension": 342
+    }
+  },
+  "fold_audit": [
+    {
+      "fold_id": 1,
+      "candidate": "SIG-A",
+      "dimension": 90,
+      "finite": true,
+      "max_abs": 3399.722750687115,
+      "outer_training_scaler_sha256": "dabb787d63b21505e89f796fed8cc670f43ae8124727d64510eecfbf1c9bee5b",
+      "validation_statistics_used_for_scaling": 0
+    },
+    {
+      "fold_id": 1,
+      "candidate": "SIG-B",
+      "dimension": 819,
+      "finite": true,
+      "max_abs": 96210.39190440427,
+      "outer_training_scaler_sha256": "dabb787d63b21505e89f796fed8cc670f43ae8124727d64510eecfbf1c9bee5b",
+      "validation_statistics_used_for_scaling": 0
+    },
+    {
+      "fold_id": 1,
+      "candidate": "SIG-C",
+      "dimension": 342,
+      "finite": true,
+      "max_abs": 12802.29721490317,
+      "outer_training_scaler_sha256": "dabb787d63b21505e89f796fed8cc670f43ae8124727d64510eecfbf1c9bee5b",
+      "validation_statistics_used_for_scaling": 0
+    },
+    {
+      "fold_id": 2,
+      "candidate": "SIG-A",
+      "dimension": 90,
+      "finite": true,
+      "max_abs": 3398.970080963917,
+      "outer_training_scaler_sha256": "900cb8f009f829653d51c23cf9d5011fc8c78bef5899741a9dd3fab4c91fc105",
+      "validation_statistics_used_for_scaling": 0
+    },
+    {
+      "fold_id": 2,
+      "candidate": "SIG-B",
+      "dimension": 819,
+      "finite": true,
+      "max_abs": 98481.47972142952,
+      "outer_training_scaler_sha256": "900cb8f009f829653d51c23cf9d5011fc8c78bef5899741a9dd3fab4c91fc105",
+      "validation_statistics_used_for_scaling": 0
+    },
+    {
+      "fold_id": 2,
+      "candidate": "SIG-C",
+      "dimension": 342,
+      "finite": true,
+      "max_abs": 12207.819603687887,
+      "outer_training_scaler_sha256": "900cb8f009f829653d51c23cf9d5011fc8c78bef5899741a9dd3fab4c91fc105",
+      "validation_statistics_used_for_scaling": 0
+    },
+    {
+      "fold_id": 3,
+      "candidate": "SIG-A",
+      "dimension": 90,
+      "finite": true,
+      "max_abs": 3328.9555163088926,
+      "outer_training_scaler_sha256": "4ac9debc227a4e14642a6eba7c4a3853814617a41c6b5eb57038af02c16097bd",
+      "validation_statistics_used_for_scaling": 0
+    },
+    {
+      "fold_id": 3,
+      "candidate": "SIG-B",
+      "dimension": 819,
+      "finite": true,
+      "max_abs": 96452.88348049927,
+      "outer_training_scaler_sha256": "4ac9debc227a4e14642a6eba7c4a3853814617a41c6b5eb57038af02c16097bd",
+      "validation_statistics_used_for_scaling": 0
+    },
+    {
+      "fold_id": 3,
+      "candidate": "SIG-C",
+      "dimension": 342,
+      "finite": true,
+      "max_abs": 11710.067628262152,
+      "outer_training_scaler_sha256": "4ac9debc227a4e14642a6eba7c4a3853814617a41c6b5eb57038af02c16097bd",
+      "validation_statistics_used_for_scaling": 0
+    },
+    {
+      "fold_id": 4,
+      "candidate": "SIG-A",
+      "dimension": 90,
+      "finite": true,
+      "max_abs": 3072.2841219480797,
+      "outer_training_scaler_sha256": "c829644087d5b005706b54e4cc213f811e0ef5147d9dcb534a303d987199e7a4",
+      "validation_statistics_used_for_scaling": 0
+    },
+    {
+      "fold_id": 4,
+      "candidate": "SIG-B",
+      "dimension": 819,
+      "finite": true,
+      "max_abs": 85083.63430925843,
+      "outer_training_scaler_sha256": "c829644087d5b005706b54e4cc213f811e0ef5147d9dcb534a303d987199e7a4",
+      "validation_statistics_used_for_scaling": 0
+    },
+    {
+      "fold_id": 4,
+      "candidate": "SIG-C",
+      "dimension": 342,
+      "finite": true,
+      "max_abs": 10917.20103177647,
+      "outer_training_scaler_sha256": "c829644087d5b005706b54e4cc213f811e0ef5147d9dcb534a303d987199e7a4",
+      "validation_statistics_used_for_scaling": 0
+    },
+    {
+      "fold_id": 5,
+      "candidate": "SIG-A",
+      "dimension": 90,
+      "finite": true,
+      "max_abs": 2964.4222979099645,
+      "outer_training_scaler_sha256": "629157100a5f7266ab1745f02a2e38847bf9a63c12d5fd09bd736f3b93893d69",
+      "validation_statistics_used_for_scaling": 0
+    },
+    {
+      "fold_id": 5,
+      "candidate": "SIG-B",
+      "dimension": 819,
+      "finite": true,
+      "max_abs": 74522.88357451535,
+      "outer_training_scaler_sha256": "629157100a5f7266ab1745f02a2e38847bf9a63c12d5fd09bd736f3b93893d69",
+      "validation_statistics_used_for_scaling": 0
+    },
+    {
+      "fold_id": 5,
+      "candidate": "SIG-C",
+      "dimension": 342,
+      "finite": true,
+      "max_abs": 10750.625206888899,
+      "outer_training_scaler_sha256": "629157100a5f7266ab1745f02a2e38847bf9a63c12d5fd09bd736f3b93893d69",
+      "validation_statistics_used_for_scaling": 0
+    }
+  ],
+  "all_finite": true,
+  "validation_statistics_in_path_scaling": 0,
+  "depth_4_candidates_added": 0
+}

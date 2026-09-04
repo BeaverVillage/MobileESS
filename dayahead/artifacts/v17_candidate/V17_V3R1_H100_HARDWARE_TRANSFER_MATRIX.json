@@ -1,0 +1,53 @@
+{
+  "Dataset312_kappa_changes": 0,
+  "June_result_content_reads": 0,
+  "June_scientific_input_reads": 0,
+  "May_result_content_reads": 0,
+  "May_scientific_input_reads": 0,
+  "OpenDSS_calls_inside_Benders": 0,
+  "arbitrary_flexible_scaling_calls": 0,
+  "artifact_id": "V17_V3R1_H100_HARDWARE_TRANSFER_MATRIX_V1",
+  "candidate_equation_authorized_for_fit": false,
+  "direct_absolute_external_kW_transfer_authorized": false,
+  "effect_selected_power_parameters": 0,
+  "grid_benefit_selected_power_parameters": 0,
+  "only_candidate_equation": "P_V3R1(state) = kappa_V1(reference) * g_Zenodo(state), with g_Zenodo(full-node reference)=1",
+  "platforms": [
+    {
+      "GPU": "NVIDIA H100 exact SKU/form factor not encoded",
+      "GPUs_per_node": 4,
+      "power_boundary": "NVML GPU board power + two-socket RAPL CPU package power, frozen idle subtraction",
+      "power_cap_W": "NOT_ENCODED",
+      "role": "ABSOLUTE_KAPPA_AUTHORITY",
+      "source": "Dataset312 / Kestrel V1"
+    },
+    {
+      "GPU": "H100-PCIE-80GB",
+      "GPUs_per_node": 1,
+      "power_boundary": "per-device SMI/DCGM board power; IPMI temperature only",
+      "power_cap_W": 350,
+      "relationship_to_Dataset312": "DIMENSIONLESS_RESPONSE_TRANSFER_ONLY",
+      "source": "EuroSys Zenodo OVH"
+    },
+    {
+      "GPU": "H100-NVL-94GB",
+      "GPUs_per_node": 2,
+      "power_boundary": "per-device SMI/DCGM board power; IPMI temperature only",
+      "power_cap_W": 400,
+      "relationship_to_Dataset312": "DIMENSIONLESS_RESPONSE_TRANSFER_ONLY",
+      "source": "EuroSys Zenodo MUVA"
+    },
+    {
+      "GPU": "H100-SXM-80GB",
+      "GPUs_per_node": 8,
+      "power_boundary": "per-device pynvml board power; CPU/node power absent",
+      "power_cap_W": 700,
+      "relationship_to_Dataset312": "DIMENSIONLESS_RESPONSE_TRANSFER_ONLY",
+      "source": "Scientific Data H100"
+    }
+  ],
+  "reason": "The causal state bridge fails before a dimensionless response can be transferred to Kestrel cohorts.",
+  "remaining_April_day_runs": 0,
+  "rowwise_external_to_Kestrel_merges": 0,
+  "status": "PASS_NO_DIRECT_ABSOLUTE_POWER_TRANSFER"
+}

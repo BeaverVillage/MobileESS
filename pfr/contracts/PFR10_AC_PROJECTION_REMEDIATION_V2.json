@@ -1,0 +1,25 @@
+{
+  "schema_version": "PFR10_AC_PROJECTION_REMEDIATION_V2",
+  "status": "FROZEN_BEFORE_V2_REPLAY",
+  "trigger_artifact": "PFR9_JAN2025_DAY01_FULL288_ENERGY_RECOVERY_CURRENT",
+  "observed_failure": {
+    "comparison_methods": ["B1", "B4", "B5", "B6", "B7"],
+    "first_failed_local_issue": 107,
+    "cause": "ACTIVE_RELIEF_PASSED_THERMAL_LIMIT_BUT_CREATED_HIGH_VOLTAGE_WHILE_Q_ONLY_RELIEF_COULD_NOT_PASS_THERMAL_LIMIT",
+    "outcome_exclusion": false
+  },
+  "technical_amendment": {
+    "name": "FRESH_OPENDSS_ACTIVE_COORDINATE_Q_SEARCH",
+    "active_relief_fractions": [0.25, 0.5, 0.75, 1.0],
+    "q_search": "EXISTING_LOCATION_SENSITIVE_BIDIRECTIONAL_COORDINATE_Q",
+    "acceptance": "FRESH_EXACT_OPENDSS_PASS_ONLY",
+    "selection": "MINIMUM_SQUARED_DISTANCE_FROM_NOMINAL_AMONG_PASSING_CANDIDATES",
+    "slow_binary_state_fixed": true,
+    "future_actual_used": false
+  },
+  "required_replay_order": [
+    "PFR9_JAN01_FULL_DAY_B0_B7",
+    "PFR10_JAN03_DIAGNOSTIC",
+    "PFR10_JAN01_07_INDEPENDENT_B0_B7"
+  ]
+}

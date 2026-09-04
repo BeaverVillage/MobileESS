@@ -1,0 +1,100 @@
+{
+  "schema_version": "mobileess.post_stage15.w02_r19_post_grid_root_sign_dynamic_workers_rep12.v1",
+  "status": "PASS_ROOTCAUSE_CORRECTION_TARGETED_VALIDATION",
+  "lineage": {
+    "supersedes_for_current_runner_binding": "authority/POST_STAGE15_W02_R15_FINAL_RECOVERY_ATOMIC_ROOTCAUSE_CORRECTION.json",
+    "historical_authorities_remain_immutable": true,
+    "previous_formal_run_id": "B_W02_4POLICY_ACTUAL_FINAL_R18",
+    "new_clean_formal_run_id": "B_12_REP_WEEKS_ACTUAL_FINAL_R19",
+    "mixed_runner_formal_episode_forbidden": true
+  },
+  "observed_failure": {
+    "policy": "M4_FIXED_LOCATION_ESS_MOBILITY_ABLATION",
+    "issue": 4925,
+    "exception": "GRID_HARD_RISK_FULL_REPLAN_RETRY_FAILED",
+    "failed_replan_root_sign_pass": false,
+    "failed_replan_voltage_min_pu": 0.9928733457047727,
+    "failed_replan_voltage_max_pu": 1.0412644369750503,
+    "failed_replan_line_max_loading_pu": 0.5495665664500788,
+    "unsafe_action_committed": false
+  },
+  "root_cause": {
+    "classification": "RECOVERY_STATE_TRANSITION_GAP",
+    "detail": "The direct root reverse-power recovery branch was reachable only when reverse power was the initial and sole Fresh-AC violation. A voltage/current correction could remove every grid-row violation while creating reverse power; the next loop then saw no controllable voltage/current row and escaped to the same-PRE full replan, which reproduced an exported action.",
+    "power_scale_error": false,
+    "power_scale_kw_per_model_unit": 1000.0,
+    "hard_limit_error": false
+  },
+  "correction": {
+    "runner": {
+      "path": "runtime/W02_POLICY_EPISODE_RUNNER.py",
+      "sha256": "26562382654a119643818abebb981516e10514d3a0f9613cc2d7c9958b8adb8d"
+    },
+    "post_grid_root_only_state_routes_to_direct_aggregate_p_recovery": true,
+    "root_import_inner_margin_kw": 10.0,
+    "same_exact_pre_state": true,
+    "fresh_exact_opendss_required": true,
+    "pcs_active_limit_kW": 550.0,
+    "pcs_apparent_limit_kVA": 700.0,
+    "voltage_limits_pu": [0.95, 1.05],
+    "hard_limits_relaxed": false,
+    "future_actual_used": false
+  },
+  "targeted_validation": {
+    "output_root": "/home/jaewon/mobile_ess_work/frozen_artifacts/R19_FINAL_TARGET_M4_ISSUE4925",
+    "status": "PASS_RECOVERED_ROOT_SIGN_AFTER_GRID_CORRECTION",
+    "fresh_exact_opendss_hard_constraint_pass": true,
+    "converged": true,
+    "root_sign_pass": true,
+    "root_import_p_kw": 9.56096752835912,
+    "voltage_min_pu": 0.9886612599514649,
+    "voltage_max_pu": 1.0401051402131316,
+    "line_max_loading_pu": 0.4275270708186389,
+    "transformer_max_current_loading_pu": 0.7049619623538832,
+    "command_error_count": 0
+  },
+  "global_episode_worker_queue": {
+    "launcher_sha256": "17009c8694dfd3ccc5614824b06c72f8ca22a9de0b3c1e3fac938e6a4ef4c53d",
+    "worker_slots": 4,
+    "cpu_groups_per_worker": 1,
+    "logical_cpus_per_group": 4,
+    "gurobi_threads_per_episode": 4,
+    "selection": "WEEK_MAJOR_POLICY_MINOR_FIFO_NEXT_NOT_COMPLETE_EPISODE",
+    "all_policies_release_worker_identically": true,
+    "same_week_unstarted_policy_is_eligible": true,
+    "next_week_policy_is_eligible": true,
+    "completed_worker_starts_new_episode": true,
+    "cpu_groups_are_not_donated_to_running_processes": true,
+    "rolling_policy_state_is_not_split_across_processes": true,
+    "peer_failure_interrupts_remaining_workers_resumably": true
+  },
+  "representative_campaign": {
+    "canonical_launcher": "RUN_12_REP_WEEKS_ACTUAL.sh",
+    "canonical_launcher_sha256": "d0fc1714e62fa9154820d19072ee41ce574d4b56cb45558d3bb1a30a7f35b9d9",
+    "implementation_launcher_sha256": "17009c8694dfd3ccc5614824b06c72f8ca22a9de0b3c1e3fac938e6a4ef4c53d",
+    "delivery_root": "/home/jaewon/mobile_ess_work/frozen_artifacts/B_12_REP_WEEKS_ACTUAL_FINAL_R19",
+    "representative_week_count": 12,
+    "policy_count": 4,
+    "episode_count": 48,
+    "issues_per_episode": 2016,
+    "maximum_concurrent_episodes": 4,
+    "cross_week_overlap_allowed": true,
+    "w02_preacceptance_barrier": false,
+    "w02_is_first_of_twelve_not_an_extra_week": true,
+    "weeks": [
+      ["W02_2025-01-13", 3456],
+      ["W07_2025-02-17", 13536],
+      ["W10_2025-03-10", 19584],
+      ["W17_2025-04-28", 33696],
+      ["W18_2025-05-05", 35712],
+      ["W25_2025-06-23", 49824],
+      ["W26_2025-06-30", 51840],
+      ["W32_2025-08-11", 63936],
+      ["W38_2025-09-22", 76032],
+      ["W41_2025-10-13", 82080],
+      ["W44_2025-11-03", 88128],
+      ["W51_2025-12-22", 102240]
+    ],
+    "full_campaign_executed": false
+  }
+}

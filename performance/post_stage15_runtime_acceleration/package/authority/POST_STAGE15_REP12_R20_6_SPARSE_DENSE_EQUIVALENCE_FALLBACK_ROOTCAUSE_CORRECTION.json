@@ -1,0 +1,95 @@
+{
+  "schema_version": "mobileess.post_stage15.rep12.r20_6.sparse_dense_equivalence_fallback.v1",
+  "status": "PASS_ROOT_CAUSE_CORRECTED_TARGET_AND_NEXT_ISSUE_REPRODUCED_PREFIX_PRESERVED",
+  "created_date": "2026-08-18",
+  "run_id": "B_12_REP_WEEKS_ACTUAL_FINAL_R20",
+  "failure": {
+    "candidate_id": "W02_2025-01-13",
+    "policy": "M1_PROPOSED_EVENT30_LOCAL_REPAIR_MOBILE",
+    "failed_issue": 4777,
+    "last_committed_issue": 4776,
+    "error": "fast conditioned dispatch has no feasible incumbent",
+    "sparse_planner_rows": 37714,
+    "dense_physical_rows": 38290,
+    "restored_rows": 576,
+    "sparse_planner_candidate_available": true,
+    "sparse_planner_candidate_int_violation": 8.6937333e-06,
+    "dense_conditioned_dispatch_candidate_available": false
+  },
+  "root_cause": {
+    "category": "sparse-planner candidate transfer is not equivalence-preserving after integer canonicalization",
+    "scientific_model_infeasible": false,
+    "power_scale_failure": false,
+    "power_scale_changed": false,
+    "gurobi_runtime_failure": false,
+    "omitted_rows_claimed_redundant": 576,
+    "observed_counterexample": "The sparse planner accepted a tolerance-feasible mixed-integer incumbent, but the canonicalized slow commitment was infeasible after all 576 authoritative R25K rows were restored.",
+    "dense_same_pre_counterfactual": "PASS_EXACT_FULL_ROW_PLANNER_AND_FRESH_OPENDSS",
+    "design_defect": "The accelerated path treated sparse-planner feasibility as sufficient instead of verifying equivalence against the restored authoritative dense model and automatically re-planning on mismatch."
+  },
+  "correction": {
+    "strategy": "bounded same-PRE dense equivalence fallback",
+    "sparse_fast_path_retained": true,
+    "trigger": "SPARSE_CANDIDATE_INFEASIBLE_AFTER_576_ROW_RESTORATION",
+    "unconditioned_slow_and_mode_bounds_snapshotted_before_sparse_planning": true,
+    "same_pre_full_domain_restored": true,
+    "dense_exact_full_row_planner_retry_limit": 1,
+    "dense_candidate_conditioned_dispatch_revalidated": true,
+    "fresh_opendss_revalidated": true,
+    "hard_constraint_relaxed": false,
+    "scientific_objective_changed": false,
+    "scientific_feasible_set_changed": false,
+    "power_scale_changed": false,
+    "future_actual_used": false
+  },
+  "source": {
+    "runner_sha256_before": "9364dfd356950ec7a7e5db3855ef0f3b07f7dfadb5cf6cc9c1e4063eb6d35117",
+    "runner_sha256_after": "970f9118126399267e13d521c1d871e17e51226a6bbb6198bc9dd210c5cbd123",
+    "safety_validator_sha256_after": "981c94c341555d8de3eed4c8f5dabff9bdcc527323a5ca905a1fa50fe575106f"
+  },
+  "actual_regression": {
+    "root": "/tmp/mobileess_r20_6_fallback_out",
+    "benchmark_isolated_from_production_results": true,
+    "target_issue_4777": {
+      "status": "PASS_COMMITTED",
+      "planner_mode": "FULL_REPLAN+DENSE_EQUIVALENCE_FALLBACK",
+      "fallback_evidence_sha256": "8fa56b48ed938200249f1b371546fc821e96ae03dfd469a523e1039476d75e03",
+      "dense_planner_constraint_violation": 1.6875811859051737e-10,
+      "dense_planner_integer_violation": 0.0,
+      "conditioned_constraint_violation": 1.5912807876938828e-10,
+      "conditioned_integer_violation": 0.0,
+      "conditioned_mip_gap": 0.001095572508125395,
+      "atomic_commit_marker_sha256": "d654f83ea136452575a1423ddd2c5749044cccdab10de17270785264199b646d",
+      "policy_issue_audit_sha256": "4b06d3b21fd5468f24b5bb3139655ee6276bf11a3b01d5997686c810bd87e585",
+      "fresh_exact_ac_sha256": "cb4bc1d9400397c8ddbed69ae154d49079311614b5c94e9670abdbb654c472ff",
+      "fresh_exact_ac_pass": true,
+      "unsafe_action_committed": false
+    },
+    "next_issue_4778": {
+      "status": "PASS_COMMITTED",
+      "planner_mode": "FULL_REPLAN",
+      "conditioned_constraint_violation": 9.242452810032109e-11,
+      "conditioned_integer_violation": 0.0,
+      "conditioned_mip_gap": 0.0011712813839813948,
+      "atomic_commit_marker_sha256": "00c1b91d504f5b7b4c5c46e1968782b937edf12e5062b6e12665174d60c3c929",
+      "policy_issue_audit_sha256": "7c300eed6cd89d84642f89f64a9ada9d8e345010265f01cd826120ad0376fb07",
+      "fresh_exact_ac_sha256": "35450e140ee4ef82183f03ac66183b6db6049f96fdbee6d89c3bf0cbf35a5f76",
+      "fresh_exact_ac_pass": true,
+      "unsafe_action_committed": false
+    },
+    "static_safety_contract": {
+      "status": "PASS",
+      "evidence_sha256": "b7b4dbc6ab2243e826d91af310a3d71c2786e0e02afb83e5c99e6041e88442be"
+    }
+  },
+  "preserved_production_prefix": {
+    "audit_path": "/home/jaewon/mobile_ess_work/frozen_artifacts/B_12_REP_WEEKS_ACTUAL_FINAL_R20/REP12_COMMITTED_PREFIX_INTEGRITY_AUDIT_R20_6.json",
+    "audit_sha256": "c9a5ed8fd524c0ec74c2a08a98da5a49e3f5cfd79fa466e14ca79c363daff316",
+    "status": "PASS_ALL_EXISTING_RESULTS_ATOMICALLY_COMMITTED_AND_CONTIGUOUS",
+    "total_committed_issues": 7203,
+    "W02": {"M1": 1321, "M2": 1847, "M3": 1304, "M4": 2016},
+    "W07": {"M1": 422, "M2": 293, "M3": 0, "M4": 0},
+    "ctrl_c_corrupted_committed_result": false,
+    "same_command_resume_safe": true
+  }
+}

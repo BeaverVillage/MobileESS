@@ -1,0 +1,82 @@
+{
+  "May_June_firewall": {
+    "G12_G13_G14_C12": "NOT_RUN",
+    "May_forecast_rows": 0,
+    "final_B0_B1_B2_B3_run": "NOT_RUN",
+    "june_scientific_loader_access_count": 0,
+    "may_scientific_loader_access_count": 0
+  },
+  "activation_counters": {
+    "AIDC_PCC_rating_changes": 0,
+    "C12_calls": 0,
+    "G12_final_calls": 0,
+    "G13_calls": 0,
+    "G14_calls": 0,
+    "G_REF_changes": 0,
+    "MESS_PCC_rating_changes": 0,
+    "MESS_parameter_changes": 0,
+    "OpenDSS_calls_inside_Benders": 0,
+    "PF_changes": 0,
+    "PUE_changes": 0,
+    "P_IT_REF_changes": 0,
+    "W_F_changes": 0,
+    "alpha_grid_changes": 0,
+    "capacitor_hardware_or_authority_changes": 0,
+    "gamma_crit_changes": 0,
+    "host_mapping_changes": 0,
+    "june_scientific_loader_access_count": 0,
+    "kappa_changes": 0,
+    "legacy_v13_control_sidecar_loads": 0,
+    "line_rating_changes": 0,
+    "may_scientific_loader_access_count": 0,
+    "native_ieee123_changes": 0,
+    "native_regulator_setting_changes": 0,
+    "objective_meaning_changes": 0,
+    "production_V16_3_activations": 1,
+    "raw_AIDC_data_changes": 0,
+    "scientific_authority_changes": 1,
+    "source_voltage_changes": 0,
+    "tap_cooptimization_variables_added": 0,
+    "transformer_rating_changes": 0,
+    "u080_changes": 0,
+    "voltage_limit_changes": 0
+  },
+  "artifact_id": "V16_3_IMPLEMENTATION_BINDING",
+  "authority_id": "V16_3_DA_AIDC_ICPS_AC_ANCHORED_FROZEN_D1_CONTROL",
+  "decomposition": {
+    "CL_MC_BD_all_critical_time_multi_cut": "UNCHANGED",
+    "Farkas_feasibility_cuts": "PRESERVED",
+    "LB_UB_gap_definitions": "UNCHANGED",
+    "OpenDSS_calls_inside_Benders": 0,
+    "Pi_optimality_cuts": "PRESERVED",
+    "gamma_crit": "UNCHANGED",
+    "master_dependence": "AFFINE",
+    "standard_BD_worst_time_single_cut": "UNCHANGED",
+    "time_local_grid_LP_count": 96
+  },
+  "evidence_checkpoint_sha": "ea8dac048bf756a65a22fb4e906e6ef2812570c8",
+  "phase_current_rows": {
+    "epigraph": "I_hat_pu >= I_aff_pu",
+    "hard": "I_hat_pu <= 1",
+    "integer_or_binary_variables_added": 0,
+    "line_objective": "lambda >= I_hat_pu",
+    "nonnegative": "I_hat_pu >= 0"
+  },
+  "production_active": true,
+  "prospective": true,
+  "python_binding": {
+    "authority_module": "dayahead.v16_3_authority",
+    "module_sha256": "58b3b03062f6fdafaa3ba2ad453ac4992fc86a34556bf92112ba4eb52f4432f0",
+    "phase_current_epigraph": "dayahead.v16_3_authority.add_phase_current_epigraph",
+    "physical_current_materializer": "dayahead.v16_3_authority.physical_phase_current_pu",
+    "shadow_module_sha256": "dbbe9ee0b318f02247469501db32d68fb2f51e4335a9380c08e89fa38763da78",
+    "shadow_regression_binding": "dayahead.v16_3_shadow.solve_shadow"
+  },
+  "separate_thermal_families": [
+    "LINE_PHASE_CURRENT",
+    "TRANSFORMER_PHASE_CURRENT",
+    "TRANSFORMER_TOTAL_KVA_WHERE_AUTHORITATIVE",
+    "MESS_PCS_700_KVA"
+  ],
+  "status": "ACTIVE_PROSPECTIVE_PRODUCTION_PLANNING_AUTHORITY"
+}

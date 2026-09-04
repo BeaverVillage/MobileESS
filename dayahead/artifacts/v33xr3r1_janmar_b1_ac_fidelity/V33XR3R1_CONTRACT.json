@@ -1,0 +1,52 @@
+{
+  "FRESH_PHYSICAL_VMAX_PU": 1.05,
+  "PLANNING_VMAX_PU": 1.05,
+  "artifact_id": "V33XR3R1_CONTRACT_V1",
+  "branch": "codex/v33xr3r1-janmar-b1-ac-fidelity-materialization",
+  "case": "B1",
+  "expected_days": 90,
+  "operational_policy": {
+    "ACTUAL_GRID_FEEDBACK_AIDC_CONTROL_ALLOWED": false,
+    "DayAhead_decisions_frozen_D_minus_1": true,
+    "Fresh_role": "VALIDATION_CALIBRATION_EVIDENCE_ONLY"
+  },
+  "parallelism_if_launched": {
+    "Fresh_process_isolated": true,
+    "independent_day_processes": 4,
+    "solver_threads_per_process": 4
+  },
+  "period": [
+    "2025-01-01",
+    "2025-03-31"
+  ],
+  "planning_voltage_limit_authority": {
+    "path": "dayahead/grid_lp.py",
+    "sha256": "f18d0e01e8e985ba3232d250882492538dc854c37640501b166bd09877c3112e",
+    "symbol": "V_MAX_SQUARED",
+    "value": 1.1025
+  },
+  "prohibited": [
+    "voltage correction selection",
+    "safety margin selection",
+    "Actual Stage-2",
+    "E2",
+    "PI",
+    "Fresh cuts",
+    "Fresh-derived repair",
+    "MESS optimization"
+  ],
+  "resolution_minutes": 15,
+  "slots_per_day": 96,
+  "source_audit_provenance": {
+    "AIDC_site_mapping": {
+      "path": "dayahead/mapping_authority.py",
+      "sha256": "30aab43e80667d37bb4d9e747a560d8fce195fb8895fc163a72e8aa2fc259c3b"
+    },
+    "prior_90_day_coverage": {
+      "path": "dayahead/artifacts/v32r2_minimal_frontier_dependency_audit/V32R2_MINIMAL_SOURCE_COVERAGE.csv",
+      "sha256": "61da0ace9bc4c9ebef02487ed5d5443452708a39e56d471580a33bf0be3270ca"
+    },
+    "stable_native_master_sha256": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969"
+  },
+  "starting_HEAD": "f49bb4e2028c49621c22854b536f5c4cf22f574d"
+}

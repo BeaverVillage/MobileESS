@@ -1,0 +1,64 @@
+{
+  "schema_version": "mobileess.post_stage15.rep12.r20_3.isolated_task_failure_continuation.v1",
+  "status": "PASS_ROOT_CAUSE_CORRECTED_DETERMINISTIC_FAILURE_INJECTION_PASSED",
+  "created_date": "2026-08-18",
+  "run_id": "B_12_REP_WEEKS_ACTUAL_FINAL_R20",
+  "root_cause": {
+    "component": "RUN_FIRST6_REP_WEEKS_ACTUAL.sh global queue completion loop",
+    "old_behavior": "any nonzero child return code invoked cleanup, terminated every active process group, and exited immediately",
+    "failure_scope_defect": "one episode-local failure was incorrectly escalated to campaign-wide cancellation",
+    "wasted_work": "three unrelated active workers were interrupted even though their episodes remained valid and resumable"
+  },
+  "correction": {
+    "episode_failure_isolated_to_worker_slot": true,
+    "failed_episode_not_retried_in_same_campaign": true,
+    "failed_worker_immediately_takes_next_global_fifo_task": true,
+    "other_active_workers_continue_untouched": true,
+    "source_failure_skips_only_blocked_week_pending_policies": true,
+    "source_failure_does_not_immediately_retry_same_week": true,
+    "missing_episode_completion_artifact_is_isolated": true,
+    "week_structure_validation_failure_is_isolated": true,
+    "ctrl_c_still_stops_all_active_process_groups_resumably": true,
+    "campaign_pass_blocked_when_any_task_failed": true,
+    "failure_jsonl_and_campaign_summary_written": true,
+    "atomic_committed_prefixes_preserved": true
+  },
+  "regression": {
+    "validator": "tools/VALIDATE_REP12_GLOBAL_QUEUE.py",
+    "validator_schema": "mobileess.post_stage15.rep12_global_queue_validation.v2",
+    "deterministic_episode_failure_injection": {
+      "failed_assignment": "W02 M1 on worker 0",
+      "unchanged_assignments": ["W02 M2 on worker 1", "W02 M3 on worker 2", "W02 M4 on worker 3"],
+      "worker_0_next_assignment": "W07 M1",
+      "status": "PASS"
+    },
+    "deterministic_source_failure_injection": {
+      "failed_source_week": "W07",
+      "blocked_scope": "only unstarted W07 policies",
+      "next_queue_item": "W10 M1",
+      "status": "PASS"
+    },
+    "foreground_ctrl_c_process_group_cleanup_static_gate": "PASS",
+    "final_false_pass_prevention_static_gate": "PASS"
+  },
+  "source": {
+    "runner_sha256_unchanged": "90488dea741dd9b3f196f5806c93f182422d3f9c47123fa368a3019c44f6d458",
+    "launcher_sha256_before": "de52c4ea5b4de97c8c5c9dc932ebaaae5ab3e6f16d41a4ae1d66d76c864f20db",
+    "launcher_sha256_after": "3dcd1f47222650777f642fca2f1f764cb0e4dcae915d55b927b08f957552a6d1",
+    "validator_sha256_after": "5167cf574cb15ea20e6dafa288f5f2bb37a8a607aec3e6ef6f9a017e6a838c39"
+  },
+  "preserved_committed_results": {
+    "committed_issue_count": 4166,
+    "W02": {"M1": 716, "M2": 882, "M3": 552, "M4": 2016},
+    "W07_shared_source_prefix": "1725/2304",
+    "integrity_audit_sha256": "69f04e85add6835b0d113e1ee5623a415e07ef37e1224e69b3c75a877006daa5",
+    "restart_rule": "same launcher resumes atomic prefixes and queues only policies without RUNTIME_CHARACTERIZATION.json"
+  },
+  "scientific_contract": {
+    "objective_changed": false,
+    "hard_constraint_relaxed": false,
+    "power_scale_changed": false,
+    "episode_runner_changed": false,
+    "scheduler_failure_scope_only": true
+  }
+}

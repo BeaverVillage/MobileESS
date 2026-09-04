@@ -1,0 +1,47 @@
+{
+  "schema_version": "mobileess.post_stage15.rep12_rootcause_correction.v1",
+  "status": "PASS_ROOT_CAUSE_CORRECTED_AND_EVIDENCE_VALIDATED",
+  "run_id": "B_12_REP_WEEKS_ACTUAL_FINAL_R20",
+  "failure_scope": "W07_2025-02-17/M2_FIXED30_MOBILE issues 15170-15174",
+  "root_cause": {
+    "primary": "The R25D planning projection represented regulator ratios as fixed. At discrete tap transitions its H0 LinDistFlow voltage-drop rows excluded Fresh-OpenDSS-safe P/Q points, and forecast constant-voltage propagation could fail before model construction.",
+    "secondary": "The bounded exact-state local sensitivity loop oscillated between discrete tap states and its small hand-selected terminal anchor set did not cover the feasible four-dimensional Q region.",
+    "not_caused_by_user_ctrl_c": true,
+    "not_a_576_r25k_row_omission": true,
+    "physical_power_scale_error": false,
+    "transformer_rating_error": false
+  },
+  "correction": {
+    "h0_voltage_drop_rows_replaced_by_fresh_exact_ac": true,
+    "fixed_tap_constant_contradictions_deferred_to_receding_exact_ac": true,
+    "power_balance_rows_removed": 0,
+    "line_thermal_rows_removed": 0,
+    "pcs_soc_mobility_service_kva_constraints_preserved": true,
+    "maximum_active_power_anchor": true,
+    "deterministic_halton_q_candidates": 48,
+    "maximum_terminal_search_candidates": 64,
+    "maximum_total_unique_production_fresh_ac_candidates": 96,
+    "fresh_opendss_is_the_only_physical_acceptance_gate": true,
+    "voltage_limits_pu": [0.95, 1.05],
+    "line_current_limit_pu": 1.0,
+    "transformer_current_and_kva_limit_pu": 1.0,
+    "pcs_active_limit_kw": 550.0,
+    "pcs_apparent_limit_kva": 700.0,
+    "hard_limits_relaxed": false,
+    "future_actual_used": false
+  },
+  "validation": {
+    "runner_sha256": "9a38980adb6385f20b32a9ab02ac889c0d974f4d848c5647d96cba6ba3ca2078",
+    "safety_validator_sha256": "d96e543a03adf8b42028d477ea1a8dfe8cd340d3f5c837658cf231d68e55edf5",
+    "safety_validator_status": "PASS",
+    "atomic_prefix_audit_sha256": "2722e90420894509f33f99f3059f256710f71c9ea251ae0d71fdc855f6e350d2",
+    "atomic_prefix_audit_status": "PASS_ALL_EXISTING_RESULTS_ATOMICALLY_COMMITTED_AND_CONTIGUOUS",
+    "total_atomic_commits": 11494,
+    "w07_m2_last_committed_issue": 15177,
+    "w07_m2_next_resume_issue": 15178,
+    "consecutive_corrected_pass_issues": [15170, 15171, 15172, 15173, 15174, 15175, 15176, 15177],
+    "ctrl_c_boundary_issue": 15178,
+    "ctrl_c_boundary_committed": false
+  },
+  "created_utc": "2026-08-18T15:52:13Z"
+}

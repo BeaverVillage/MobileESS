@@ -1,0 +1,18 @@
+{
+  "artifact_id": "V20D_MODEL_SELECTION_ADAPTER_CONTRACT_V1",
+  "selection_rule": "C-MASS iff V19 PROPOSED_MODEL_ACCEPTED=true; else minimum training-only blocked-CV WAPE accepted baseline",
+  "facility_or_grid_metric_reads": 0,
+  "V19_absent_behavior": "MOCK_FIXTURE_TEST_ONLY_NO_PRODUCTION_SELECTION",
+  "accepted_fixture": {
+    "model_id": "C-MASS-TPP",
+    "model_class": "C_MASS_TPP",
+    "model_acceptance_status": "PROPOSED_ACCEPTED",
+    "selection_basis": "TRAINING_ONLY_BLOCKED_CV"
+  },
+  "fallback_fixture": {
+    "model_id": "B2",
+    "model_class": "LIGHTGBM",
+    "model_acceptance_status": "FALLBACK_ACCEPTED_BASELINE",
+    "selection_basis": "TRAINING_ONLY_BLOCKED_CV"
+  }
+}

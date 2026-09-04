@@ -1,0 +1,80 @@
+{
+  "schema_version": "EVENT_TRIGGERED_RESTRICTED_DOMAIN_MILP_MPC_V1",
+  "status": "SUPERSEDED_DIAGNOSTIC_ONLY_BY_HIERARCHICAL_MOVE_BLOCKED_MIXED_INTEGER_MPC_V1",
+  "paper_facing_name": "Event-Triggered Mixed-Integer MPC with Causal Domain Reduction",
+  "implementation_acceleration": "Persistent model reoptimization with causal MIP warm starts",
+  "objective_authority": "ELECTRICAL_STRESS_OBJECTIVE_V1",
+  "offline_reference_oracle": "science/main.py::build_full Full H54 MIQCP",
+  "online_problem_relation": "Same objective, hard constraints, H54 horizon, causal inputs, and physical semantics; restricted online discrete decision domain",
+  "online_domain_authority": "BOUNDED_CAUSAL_ROUTE_AND_WORKLOAD_OPTION_DOMAIN_V1",
+  "domain_reduction_layers": {
+    "exact_safe": "Only choices proven infeasible or K3 duration-energy dominated are removed without approximation",
+    "bounded_approximation": "Remaining feasible route and workload options are causally ranked and truncated to the frozen January-development K",
+    "required_audit_fields": [
+      "domain_before_exact_safe",
+      "exact_infeasible_removed",
+      "exact_dominated_removed",
+      "domain_after_exact_safe",
+      "bounded_domain_size",
+      "bounded_feasible_choices_removed"
+    ]
+  },
+  "candidate_k_development_grid": [4, 8, 16, 32, 64],
+  "candidate_k_freeze_rule": "Choose once using January runtime-versus-oracle-gap results; never refit on February, March, or April",
+  "persistent_update_scope": [
+    "initial SOC and support-energy debt",
+    "causal H54 P/Q/PV forecast",
+    "issue-causal voltage/tap anchor",
+    "active and queued workload state",
+    "route availability, ETA, energy, and location coefficients",
+    "RHS, bounds, and sparse coefficients only"
+  ],
+  "milp_circle_authority": {
+    "method": "Iterative exact norm separation cuts",
+    "prohibited": [
+      "unsafe circumscribed finite polygon acceptance",
+      "unreported conservative polygon substitution",
+      "acceptance with an unresolved line, transformer, or PCS norm violation"
+    ],
+    "acceptance": "Every accepted MILP incumbent must pass vectorized exact Euclidean-norm separation at the frozen numerical tolerance",
+    "timeout": "Fail closed or execute a previously Fresh-AC-certified fallback; never commit an unseparated incumbent"
+  },
+  "lexicographic_objectives": [
+    "min max_h z_h",
+    "min sum_h z_h * delta_t subject to the accepted priority-1 incumbent",
+    "min secondary actuation subject to accepted priorities 1 and 2"
+  ],
+  "hard_constraints_unchanged": [
+    "0.95 <= surrogate voltage <= 1.05 pu",
+    "line loading <= 1 pu",
+    "transformer loading <= 1 pu",
+    "MESS route, connection, travel energy, SOC, charge/discharge mode, and PCS P-Q circle",
+    "GPU gang, rack, IDC transformer, WAN, checkpoint, and deadline",
+    "terminal support-energy and workload recovery"
+  ],
+  "online_commit_chain": [
+    "event trigger",
+    "exact-safe causal pruning",
+    "bounded persistent H54 MILP",
+    "five-minute continuous operating adjustment",
+    "Fresh exact three-phase OpenDSS",
+    "commit or fail closed"
+  ],
+  "runtime_reporting": [
+    "model_build_once_seconds",
+    "parameter_update_seconds",
+    "milp_solve_seconds",
+    "norm_separation_seconds",
+    "Fresh_OpenDSS_seconds",
+    "storage_seconds",
+    "total_issue_wall_seconds",
+    "p50_p95_max"
+  ],
+  "online_certificate_prohibitions": [
+    "Full-MIQCP global-optimality claim",
+    "oracle result use in the online loop",
+    "future actual use",
+    "price use in the optimizer",
+    "objective or hard-limit relaxation for latency"
+  ]
+}

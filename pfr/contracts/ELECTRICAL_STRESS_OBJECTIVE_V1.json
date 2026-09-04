@@ -1,0 +1,47 @@
+{
+  "schema_version": "ELECTRICAL_STRESS_OBJECTIVE_V1",
+  "status": "FROZEN",
+  "research_objective": "Minimize worst-case predicted distribution-network electrical stress while satisfying hard grid, mobility, storage, AI-service, and recovery constraints.",
+  "planning_authority": "CAUSAL_RADIAL_NETWORK_SURROGATE",
+  "execution_authority": "FRESH_EXACT_THREE_PHASE_OPENDSS",
+  "authoritative_method_registry": "ELECTRICAL_STRESS_METHOD_REGISTRY_V1",
+  "common_formulation_rule": "B00-B09 use one H54 formulation and objective; only capability, replan-policy, and risk-interface masks may differ according to the frozen registry.",
+  "planning_resolution": "All grid, SOC, dispatch, workload, recovery, and stress quantities are evaluated on 54 physical five-minute steps. Mobility departure decisions use the common R26 multiresolution grid: five-minute starts through 60 minutes and fifteen-minute starts thereafter.",
+  "rolling_mobility_trust_region": "Each H54 solve may schedule at most one new relocation per MESS. A subsequent relocation can be scheduled by the next causal event replan from the newly committed state; all destination, allowed departure-stage, and frozen K3 route choices remain available for the planned relocation.",
+  "solver_quality_contract": "Each lexicographic priority pass requires a certified relative MIP gap no larger than 3%. Hard physical and service constraints retain their original tolerances and are not softened. A 300-second engineering ceiling fails closed unless the solver has reached the tertiary pass and its certified gap target.",
+  "soft_mobility_screening_contract": "Workload-based or score-based mobility screening is disabled by default and has no production hard-fixing authority. It may be enabled only for paired technical diagnostics through PFR_EXPERIMENTAL_LEGACY_CAUSAL_SCREENING=1; until a predeclared multi-state oracle gate passes, the heuristic may serve only as MIP-start and branching guidance.",
+  "stress_components": {
+    "voltage_planning": "limit-normalized LinDistFlow squared-voltage epigraph; 0 at 1 pu and 1 at 0.95/1.05 pu",
+    "voltage_realized_exact_ac": "max((1-v_min)/0.05, (v_max-1)/0.05, 0)",
+    "line": "max_line_current/loading_rating",
+    "transformer": "max(transformer_current_loading, transformer_kVA_loading)"
+  },
+  "planning_to_evaluation_semantics": "The causal planner minimizes a radial-network surrogate normalized to the physical limit endpoints, may report predicted stress above one, and never treats the surrogate epigraph cap as execution authority; the paper-facing realized KPI and hard H0 commit decision are recomputed from Fresh three-phase OpenDSS voltage magnitudes and current/kVA loadings.",
+  "lexicographic_objectives": [
+    "min max_h z_h",
+    "min sum_h z_h * delta_t",
+    "min secondary_actuation"
+  ],
+  "hard_constraints": [
+    "Fresh exact H0 voltage remains within 0.95 and 1.05 pu",
+    "Fresh exact H0 line loading <= 1 pu",
+    "Fresh exact H0 transformer loading <= 1 pu",
+    "MESS route, connection, SOC, PCS P-Q circle",
+    "GPU gang, rack, IDC, WAN, checkpoint, deadline",
+    "terminal workload debt and support-energy debt recovery",
+    "recovery rebound bound where active"
+  ],
+  "excluded_from_optimization_objective": [
+    "electricity price or ex-post grid cost",
+    "root peak",
+    "rebound KPI",
+    "number of modalities used"
+  ],
+  "evaluation_only": [
+    "realized root peak kW",
+    "realized rebound kW and kWh",
+    "realized electricity cost AUD",
+    "Fresh OpenDSS exact electrical stress",
+    "counterfactual z_E, z_C, z_EC"
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "schema_version": "mobileess.post_stage15.w02_r4_m4_issue3518_rootcause_correction.v1",
+  "status": "PASS_ROOT_CAUSE_FIXED_AND_R4_ISSUE3518_REPLAYED",
+  "root_cause": {
+    "failure": "The AC voltage cut used local +/-10 kW/kvar finite-difference sensitivities without constraining the recovered dispatch to that local neighborhood.",
+    "observed_effect": "An economically degenerate Q solution moved individual MESS reactive power by more than 150 kvar, crossed OpenDSS control regimes, and invalidated the local voltage direction.",
+    "original_issue": 3518,
+    "original_policy": "M4_FIXED_LOCATION_ESS_MOBILITY_ABLATION",
+    "original_failure_status": "FAIL_CLOSED_AFTER_SINGLE_SAME_PRE_H54_FULL_REPLAN",
+    "unsafe_action_committed": false
+  },
+  "correction": {
+    "runner": {
+      "path": "runtime/W02_POLICY_EPISODE_RUNNER.py",
+      "sha256": "0ca08fdddd2a0a1b58d050a267262bfd280d06c004b8984042c6289828c3cc59"
+    },
+    "launcher": {
+      "path": "RUN_W02_4POLICY_ACTUAL.sh",
+      "sha256": "8e35d9deb2e53cf061019cb3609888c44b258031005fc8b0844ef7d410d3ff18",
+      "run_id": "B_W02_4POLICY_ACTUAL_FINAL_R5"
+    },
+    "finite_difference_step_kw_kvar": 10.0,
+    "matched_trust_region_radius_kw_kvar": 10.0,
+    "conservative_voltage_cut_margin_pu": 0.0001,
+    "max_ac_correction_rounds": 1,
+    "hard_limits_relaxed": false,
+    "feasible_set_expanded": false,
+    "future_actual_used": false
+  },
+  "regression": {
+    "validator": {
+      "path": "tools/VALIDATE_W02_R4_M4_ISSUE3518_RECOVERY.py",
+      "sha256": "68c00bd60e92b73f9dcab61ec70d1f0ad2af6dd995cc41be2c113fff6aa7011b"
+    },
+    "result": {
+      "path": "/home/jaewon/mobile_ess_work/frozen_artifacts/PRE_W02_R4_M4_ISSUE3518_RECOVERY_CURRENT.json",
+      "sha256": "3ae7a0f82b027e724451288555f40cf0d97eabf3a18a981cd591d69665bc4cf1",
+      "status": "PASS"
+    },
+    "same_causal_pre_state": true,
+    "same_initial_candidate": true,
+    "candidate_stages": [
+      "INITIAL",
+      "AC_CORRECTION"
+    ],
+    "fresh_exact_ac_pass": true,
+    "fresh_voltage_min_pu": 0.9794069859884359,
+    "fresh_voltage_max_pu": 1.0489631901552428,
+    "atomic_commit": true,
+    "full_W02_executed": false
+  },
+  "supersedes_for_current_runner_binding": [
+    "authority/POST_STAGE15_W02_R3_ACTUAL_FAILURE_ROOTCAUSE_CORRECTION.json"
+  ],
+  "historical_authorities_remain_immutable": true,
+  "document_files_modified": false
+}

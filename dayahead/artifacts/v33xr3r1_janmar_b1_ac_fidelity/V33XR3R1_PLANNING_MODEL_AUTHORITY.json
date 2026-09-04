@@ -1,0 +1,69 @@
+{
+  "JanMar_frozen_causal_P_G_W_prediction_days": 0,
+  "JanMar_frozen_day_specific_model_sets": 0,
+  "artifact_id": "V33XR3R1_PLANNING_MODEL_AUTHORITY_V1",
+  "canonical_entry_point": "dayahead.v28r2.lightgbm_channels.causal_optimizer_predictions",
+  "classification": "V33XR3R1_PLANNING_MODEL_MATERIALIZATION_BLOCKED",
+  "electrical_model_materialization": {
+    "authorized": true,
+    "existing_full_current_sensitivity_days": 0,
+    "existing_full_voltage_sensitivity_days": 0,
+    "existing_native_anchor_days": 90,
+    "native_master_sha256": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969",
+    "reason_not_started": "upstream canonical AIDC Day-Ahead forecast authority failed before electrical construction",
+    "stable_native_master": true,
+    "started": false
+  },
+  "entry_point_source": {
+    "path": "dayahead/v28r2/lightgbm_channels.py",
+    "sha256": "20d5d8aad4744d31730936904453225e9952ff19e474682a5429dc8e71550c79"
+  },
+  "frozen_predictor_authorities": [
+    {
+      "frozen_fit_training_ends": [
+        "2025-03-30",
+        "2025-03-31"
+      ],
+      "frozen_variants": [
+        "APRIL_01_CAUSAL_FIT",
+        "GENERAL_THROUGH_MARCH_31_FIT"
+      ],
+      "path": "dayahead/artifacts/v28r2_heavy_backend/V28R2_FINAL_P_REF_LIGHTGBM_AUTHORITY.json",
+      "sha256": "e0b0a48627a1efc2cab28fcf8c032cabaa13dca9887c3f705671a856986b617f",
+      "training_start": "2024-08-19"
+    },
+    {
+      "frozen_fit_training_ends": [
+        "2025-03-30",
+        "2025-03-31"
+      ],
+      "frozen_variants": [
+        "APRIL_01_CAUSAL_FIT",
+        "GENERAL_THROUGH_MARCH_31_FIT"
+      ],
+      "path": "dayahead/artifacts/v28r2_heavy_backend/V28R2_FINAL_G_REF_LIGHTGBM_AUTHORITY.json",
+      "sha256": "5ed52cbe492e62f4a848be67f161f8ae8de73581c9bffe44d0813558423eb2e6",
+      "training_start": "2024-08-19"
+    },
+    {
+      "frozen_fit_training_ends": [
+        "2025-03-30",
+        "2025-03-31"
+      ],
+      "frozen_variants": [
+        "APRIL_01_CAUSAL_FIT",
+        "GENERAL_THROUGH_MARCH_31_FIT"
+      ],
+      "path": "dayahead/artifacts/v28r2_heavy_backend/V28R2_FINAL_W_FULLNODE_LIGHTGBM_AUTHORITY.json",
+      "sha256": "fe327d4dd2647d63b020629fdd7a6f561a9bd717b08b5770968560833c35abf6",
+      "training_start": "2024-08-19"
+    }
+  ],
+  "observed_guard": "target must be in 2025-04-01..2025-04-30; otherwise V28R2_OPTIMIZER_MATERIALIZATION_APRIL_ONLY",
+  "production_science_changed": false,
+  "representative_blocked_day": "2025-01-01",
+  "representative_error": "V28R2_OPTIMIZER_MATERIALIZATION_APRIL_ONLY",
+  "status": "FAIL_CLOSED",
+  "why_existing_models_are_inadmissible": "Their training ends are 2025-03-30/31, after every Jan-Feb target and most March targets; using them would violate prospective D-1 causality.",
+  "why_generation_is_not_started": "Creating daily cutoff-specific model coefficients or choosing a substitute forecast requires an unprovided scientific authority, which this task forbids."
+}

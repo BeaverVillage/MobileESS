@@ -1,0 +1,27 @@
+{
+  "stage": "PFR4",
+  "planning_horizon_minutes": 270,
+  "replanning_interval_minutes": 30,
+  "fast_recourse_interval_minutes": 5,
+  "slow_discrete_decisions": [
+    "MESS_destination",
+    "native_K3_route",
+    "AI_job_IDC_placement",
+    "checkpoint_migration",
+    "GPU_gang_allocation",
+    "job_start",
+    "coarse_charging_schedule"
+  ],
+  "fast_continuous_variables": [
+    "MESS_P",
+    "MESS_Q",
+    "charge",
+    "discharge",
+    "AI_compute_rate_fraction",
+    "site_workload_throughput"
+  ],
+  "conditioned_binary_policy": "fingerprint-immutable during fast recourse",
+  "local_repair": "PROHIBITED",
+  "screening_authority": "reject-only; Fresh Exact OpenDSS is mandatory before commit",
+  "h0_only_physical_commit": true
+}

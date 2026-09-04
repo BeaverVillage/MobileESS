@@ -1,0 +1,58 @@
+{
+  "artifact_id": "V23M_RACQ_ACCEPTANCE_TEST_V1",
+  "classification": "V23M_RACQ_RECURRENCE_GATE_FAIL_ACQ_ONLY",
+  "RACQ_RECURRENCE_GATE_PASS": false,
+  "RACQ_PROPOSED_MODEL_ACCEPTED": false,
+  "ACQ_evaluated": true,
+  "ACQ_metrics": {
+    "daily_WAPE": 1.091156165344103,
+    "Q50_WAPE": 1.0609612917929359,
+    "daily_MAE_GPU_h": 3617.663083380158,
+    "daily_RMSE_GPU_h": 7155.284560546616,
+    "aggregate_mass_ratio": 0.5967570632350877,
+    "burst_WAPE": 0.8897447088530759,
+    "Q50_coverage": 0.3708609271523179,
+    "Q90_coverage": 0.8543046357615894,
+    "negative_prediction_count": 0,
+    "quantile_crossing_count": 0,
+    "flexible_IT_power_WAPE": 1.5623611757575064,
+    "peak_flexible_IT_power_error_kW": -160.32491961541575,
+    "peak_timing_error_slots": 2561.0
+  },
+  "conditional_mean_gates": {
+    "daily_WAPE_le": 0.927302659814271,
+    "actual": 1.091156165344103,
+    "pass": false,
+    "burst_WAPE_le": 0.864089906167401,
+    "burst_actual": 0.8897447088530759,
+    "burst_pass": false,
+    "mass_ratio_range": [
+      0.85,
+      1.15
+    ],
+    "mass_ratio_actual": 0.5967570632350877,
+    "mass_pass": false
+  },
+  "quantile_gates": {
+    "Q50_WAPE_le": 0.845737555557761,
+    "actual": 1.0609612917929359,
+    "pass": false,
+    "Q50_coverage_range": [
+      0.45,
+      0.55
+    ],
+    "Q50_coverage": 0.3708609271523179,
+    "Q90_coverage_range": [
+      0.85,
+      0.95
+    ],
+    "Q90_coverage": 0.8543046357615894
+  },
+  "power_gate": {
+    "semantic_LightGBM_reference_WAPE": 1.5703531589156716,
+    "ACQ_IT_power_WAPE": 1.5623611757575064,
+    "relative_improvement": 0.005089290337521035,
+    "pass_5pct": false
+  },
+  "decision_basis": "RECURRENCE_GATE_FAIL_PRECEDES_PERFORMANCE_GATES"
+}

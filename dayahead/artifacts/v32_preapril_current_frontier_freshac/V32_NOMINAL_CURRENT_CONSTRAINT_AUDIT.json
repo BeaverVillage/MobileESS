@@ -1,0 +1,28 @@
+{
+  "B1_anchor": "B0 same-day same-slot flexible AIDC site-kW vector",
+  "B3_anchor": "B2 same-day same-slot flexible AIDC site-kW vector",
+  "M_CURRENT_pu": 0.0009917274479849247,
+  "M_zero_semantics": "s·(p_candidate-p_anchor) <= 0",
+  "absolute_feeder_rating_constraint": false,
+  "absolute_rating_terms": null,
+  "artifact_id": "V32_NOMINAL_CURRENT_CONSTRAINT_AUDIT_V1",
+  "branch_phase_constraints_individually": false,
+  "classification": "ANCHOR_RELATIVE_SAME_SLOT_SCALAR_SURROGATE_WITH_L1_ROBUST_MARGIN",
+  "code_locations": [
+    "dayahead/v30/grid_safety.py::phase_aware_site_scores",
+    "dayahead/v30/actual_recourse.py::_lp"
+  ],
+  "equivalent_delta_form": "s·(p_candidate-p_anchor) + (M_CURRENT/peak_control_kw)*||p_candidate-p_anchor||_1 <= 0",
+  "implemented_inequality": "s·p_candidate + (M_CURRENT/peak_control_kw)*sum_i |p_candidate_i-p_anchor_i| <= s·p_anchor",
+  "monitored_branches": "branches whose anchor_loading is at or above the slotwise 95th percentile; all if empty",
+  "monitored_phases": "phase conductors are flattened into branch_names/current-loading columns by the frozen cache",
+  "normalization": "anchor_current_loading_pu and sensitivity_pu_per_control; L1 displacement normalized by peak_control_kw",
+  "planning_metric_only": true,
+  "same_slot": true,
+  "site_score": "max_active_branch current_sensitivity_pu_per_site_kw",
+  "slot_max": false,
+  "status": "PASS_EXACT_CODE_RECONSTRUCTION",
+  "transformer_constraint": false,
+  "voltage_constraint": false,
+  "whole_day_max": false
+}

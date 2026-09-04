@@ -1,0 +1,30 @@
+{
+  "B0_B2_AIDC_scenario_variables": "FIXED_DISABLED",
+  "B1_B3_AIDC_scenario_variables": "ENABLED",
+  "artifact_id": "V30_DAYAHEAD_FORMULATION_CONTRACT_V1",
+  "common_cases": [
+    "B0",
+    "B1",
+    "B2",
+    "B3"
+  ],
+  "decision_variables": [
+    "x_DA[b,r,t]",
+    "h_REC[r,t]",
+    "rho_V30",
+    "z[omega,b,r,t] when AIDC recourse enabled",
+    "P_MESS_DA/Q_MESS_DA when MESS enabled"
+  ],
+  "headroom_definition": "h_REC[r,t] = max(0, frozen_physical_rack_capacity - sum_b x_DA[b,r,t])",
+  "headroom_reward": null,
+  "manual_fixed_headroom": null,
+  "objective_hierarchy": [
+    "min worst certified phase-current loading over nominal and enabled scenario set",
+    "min expected recourse displacement",
+    "frozen deterministic schedule tie-break"
+  ],
+  "physical_constants_source": "frozen lower-level V28R2/V29R2 authorities",
+  "scenario_recourse_role": "feasibility/deliverability only",
+  "service_mass": "HARD_FROZEN_REFERENCE_PARITY",
+  "status": "FROZEN"
+}

@@ -1,0 +1,35 @@
+{
+  "artifact_id": "V18R1_D1_MAIN_CAUSAL_SCOPE_CONTRACT_V1",
+  "MAIN_D1_CONTROL_SCOPE": "FORECAST_NEW_FLEXIBLE_WORKLOAD_ONLY",
+  "known_running": "LOCKED_REFERENCE_RESIDUAL",
+  "known_queue": "LOCKED_REFERENCE_RESIDUAL",
+  "other_H100_and_facility_IT": "LOCKED_REFERENCE_RESIDUAL",
+  "KNOWN_QUEUE_EXTENSION_STATUS": "UNAVAILABLE",
+  "snapshot_source_research": {
+    "searched_on": "2026-08-31",
+    "repository_root": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\github_MobileESS_march_validity_fix",
+    "raw_data_root": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터",
+    "filename_patterns": [
+      "squeue",
+      "scheduler snapshot",
+      "queue snapshot",
+      "pending snapshot",
+      "scheduler state",
+      "slurm state",
+      "state dump",
+      "queue event"
+    ],
+    "repository_matches": 0,
+    "raw_data_matches": 0,
+    "archive_allocation_snapshot_fields": 0
+  },
+  "main_gate_B1": "PASS_CAUSAL_FORECAST_ONLY_SCOPE",
+  "publication_statement": "The main day-ahead control authority is restricted to newly forecast delay-tolerant workload; pre-existing running/queued work is retained inside the locked reference residual because exact cutoff-state snapshots are unavailable.",
+  "causality_counters": {
+    "future_realized_start_feature_reads": 0,
+    "future_realized_end_feature_reads": 0,
+    "D_day_actual_feature_reads": 0,
+    "future_job_id_injections": 0
+  },
+  "oracle_import_firewall": "RETROSPECTIVE ORACLE MODULE OUTPUT IS NON_AUTHORITY AND IS NOT IMPORTABLE BY MODEL OR SCHEDULER"
+}

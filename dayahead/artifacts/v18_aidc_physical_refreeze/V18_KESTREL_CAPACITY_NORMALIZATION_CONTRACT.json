@@ -1,0 +1,26 @@
+{
+  "artifact_id": "V18_KESTREL_CAPACITY_NORMALIZATION_CONTRACT_V1",
+  "capacity_name": "KESTREL_PHYSICAL_INSTALLED_H100_CAPACITY",
+  "C_K_GPU_equivalent": 528.0,
+  "derivation": "132 official Kestrel H100 nodes x 4 H100 GPUs/node",
+  "official_sources": [
+    "https://www.nrel.gov/docs/fy25osti/91696.pdf",
+    "https://www.nrel.gov/docs/gen/fy24/90033.pdf"
+  ],
+  "legacy_48_rack_capacity_GPU": 1815.6,
+  "legacy_capacity_classification": "KESTREL_VIRTUAL_PLANNING_CAPACITY_NOT_PHYSICAL_INSTALLED_CAPACITY",
+  "q99_5_u85_virtual_planning_capacity_diagnostic_GPU": 668.108346405229,
+  "virtual_planning_capacity_selected": false,
+  "physical_capacity_conflict": {
+    "peak_trace_GPU": 589.4111111111112,
+    "violation_slot_count": 902,
+    "status": "FAIL_PHYSICAL_COHERENCE"
+  },
+  "C_MODEL_GPU_equivalent": 528.0,
+  "C_MODEL_selection": "same source-backed Kestrel H100 subsystem boundary; no grid-benefit selection",
+  "definitions": {
+    "u_TOTAL": "G_K_TOTAL/C_K",
+    "u_FLEX": "G_K_FLEX/C_K",
+    "a_FLEX_b": "W_K_FLEX_b/(C_K*0.25h)"
+  }
+}

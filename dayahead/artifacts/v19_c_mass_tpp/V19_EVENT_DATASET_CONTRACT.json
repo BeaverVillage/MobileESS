@@ -1,0 +1,133 @@
+{
+  "artifact_id": "V19_EVENT_DATASET_CONTRACT_V1",
+  "training_source": {
+    "source_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+    "source_sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+    "members_opened": [
+      {
+        "month": 202410,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+        "H100_rows": 21679
+      },
+      {
+        "month": 202411,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+        "H100_rows": 26933
+      },
+      {
+        "month": 202412,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+        "H100_rows": 41814
+      },
+      {
+        "month": 202407,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=7/kestrel_jobs_202407_0.parquet",
+        "H100_rows": 42284
+      },
+      {
+        "month": 202408,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+        "H100_rows": 20192
+      },
+      {
+        "month": 202409,
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+        "H100_rows": 26532
+      },
+      {
+        "month": 202501,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+        "H100_rows": 96880
+      },
+      {
+        "month": 202502,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+        "H100_rows": 22295
+      },
+      {
+        "month": 202503,
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+        "H100_rows": 86148
+      }
+    ],
+    "H100_rows": 384757,
+    "requested_columns": [
+      "account_hash",
+      "end_time",
+      "gpu_nodes_occupied",
+      "gpus_requested",
+      "id",
+      "jobs_shared",
+      "nodelist",
+      "nodes_req",
+      "nodes_shared",
+      "partition",
+      "qos",
+      "shared_job_count",
+      "start_time",
+      "state_simple",
+      "submit_time",
+      "wallclock_req"
+    ]
+  },
+  "training_period_AEST": [
+    "2024-08-19",
+    "2025-03-31"
+  ],
+  "D_minus_1_cutoff": "18:00 AEST on the day before target day",
+  "micro_history": "previous 7 days, every source-valid H100 submission event",
+  "macro_history": "previous 28 days, submission/request-side only",
+  "input_event_fields": [
+    "submission timestamp",
+    "continuous age/delta-time",
+    "gpus_requested",
+    "nodes_req",
+    "wallclock_req",
+    "full/partial request structure",
+    "partition",
+    "QoS",
+    "calendar"
+  ],
+  "main_model_realized_history_fields": [],
+  "target_label": "next-day submitted semantic-flexible completed H100 jobs; retrospective queue>600 seconds and realized service runtime are TRAINING_TARGET_LABEL_ONLY",
+  "target_event_fields": [
+    "arrival_time_h",
+    "power_tier",
+    "latency_C1_C5",
+    "service_mass_GPU_h"
+  ],
+  "daily_master_mass": "H_d^F = sum(gpus_requested * realized_runtime_h) of target events",
+  "tiers": [
+    "FULL_1",
+    "FULL_2",
+    "FULL_4",
+    "FULL_8",
+    "FULL_16",
+    "PARTIAL"
+  ],
+  "latencies": [
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5"
+  ],
+  "global_conflict_jobs_excluded": 76,
+  "causality": {
+    "main_input_boundary": "REQUEST_AND_SUBMISSION_SIDE_ONLY_BEFORE_D_MINUS_1_18_00_AEST",
+    "D_day_actual_feature_reads": 0,
+    "future_start_feature_reads": 0,
+    "future_end_feature_reads": 0,
+    "future_queue_wait_feature_reads": 0,
+    "future_completion_feature_reads": 0,
+    "historical_realized_runtime_feature_reads": 0,
+    "target_label_queue_wait_reads": 1,
+    "target_label_realized_runtime_reads": 1
+  },
+  "facility_scale_firewall": {
+    "GPU_h_is_scale_independent_ML_authority": true,
+    "C_MODEL_role": "EQUIVALENT_CASE_STUDY_H100_CAPACITY",
+    "facility_scale_factor_applied_to_GPU_h": false,
+    "beta_AIDC_applied": false
+  }
+}

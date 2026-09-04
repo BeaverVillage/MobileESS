@@ -1,0 +1,44 @@
+{
+  "schema_version": "mobileess.post_stage15.w02_r13_m4_unified_iterative_recovery.v1",
+  "status": "PASS_UNIFIED_ITERATIVE_RECOVERY_NINE_BOUNDARIES",
+  "root_cause": {
+    "r12_actual_issue3582": "A sub-threshold overvoltage at 1.0503228160429916 pu was restricted to one local correction by an arbitrary severity selector. The first correction reached 1.0500499946662967 pu but still had two hard violations, after which the loop terminated.",
+    "design": "Every Fresh-AC voltage or line-current hard violation receives the same bounded sequential relinearization budget. Severity selects the trust profile, never whether another exact-state iteration is permitted.",
+    "power_scale_error": false,
+    "unsafe_action_committed": false
+  },
+  "correction": {
+    "runner": {"path": "runtime/W02_POLICY_EPISODE_RUNNER.py", "sha256": "2d34a61670fbb3518187867eb5aa26910415f16041b91afc89ae2d3f6905f4a4"},
+    "runner_sha256": "2d34a61670fbb3518187867eb5aa26910415f16041b91afc89ae2d3f6905f4a4",
+    "launcher_sha256": "146534910781938a70565635f406fee602861cf95f470c7386292d67bb61f5aa",
+    "run_id": "B_W02_4POLICY_ACTUAL_FINAL_R13",
+    "max_cut_rounds": 8,
+    "max_fresh_ac_candidates": 9,
+    "unified_iteration_for_all_violation_severities": true,
+    "power_scale_kw_per_model_unit": 1000.0,
+    "power_scale_changed": false,
+    "hard_limits_relaxed": false,
+    "future_actual_used": false
+  },
+  "validation": {
+    "safety_validator_sha256": "c738dbeded12fe63c498a05f8f1cf62782c55d9971c2bd399c80dcb762bf6358",
+    "safety_result_sha256": "e4da8807ac9d3d90b30f2354d8e0efdb5318871306efde2f3627217ea87557ea",
+    "nine_boundary_validator_sha256": "5bc649e069e4526ece8c2422e726a5546ade111352eaa218a1435b5106010118",
+    "nine_boundary_result_sha256": "8f2c8a23c3324d88b34368d408887897872b603eb239ad8e13bf9a9606b9f370",
+    "r12_issue3582_evidence_sha256": "df7afdc435ccf2d3f49203fcd2c2afe896f02c479f0c7996f1cd99cd791033c2",
+    "causal_pre_state_sha256": "312994b94aaa522b4f70eda1c21752df8bf3b3bc79e1a421bc53b5cdde6fc21b",
+    "actual_correction_rounds_used": 2,
+    "initial_voltage_max_pu": 1.0503228160429916,
+    "round1_voltage_max_pu": 1.0500499946662967,
+    "final_voltage_max_pu": 1.0490966691726413,
+    "initial_voltage_violations": 2,
+    "final_voltage_violations": 0,
+    "final_line_violations": 0,
+    "all_nine_boundaries_pass": true,
+    "same_causal_pre_state": true,
+    "atomic_commit": true,
+    "full_W02_executed": false
+  },
+  "supersedes_for_current_runner_binding": ["authority/POST_STAGE15_W02_R12_M4_BOUNDED_ITERATIVE_TAP_RECOVERY_ROOTCAUSE_CORRECTION.json"],
+  "historical_authorities_remain_immutable": true
+}

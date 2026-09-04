@@ -1,0 +1,206 @@
+{
+  "artifact_fingerprint": "51e2cee1342311cc62d571e4176dcd7f69c74c39a792feae9a2a4998052a979d",
+  "artifact_id": "V17_GPU_SUBSYSTEM_BOUNDARY_TRAINING_AUDIT_V1",
+  "caprara_GPU_scope_plausibility_only": {
+    "Caprara_fraction": 0.205,
+    "Kestrel_candidate_fraction_all_executed_H100": 0.1063698081166533,
+    "absolute_difference": 0.0986301918833467,
+    "calibration_calls": 0,
+    "forced_equal": false,
+    "interpretation": "Numerical comparison only; the Kestrel candidate is not accepted because current W_F lacks a service-deferrability label."
+  },
+  "checkpoint": {
+    "branch": "codex/dayahead-aidc-joint-v1",
+    "historical_admissibility_sha256": "350dee04bda2ef405223515aff85f54d2c1ee568cff69d106984fbe43cdc8015",
+    "historical_artifacts_modified": false,
+    "historical_gap_resolution_sha256": "a318f99fd9ee889e483dbef033dfed23dc388842a7b18f780e3d7480371d526c",
+    "historical_whole_IT_share_classification_preserved": "V17_SHARE_AUTH_C_CAPRARA_SCOPE_MISMATCH_OTHER_SOURCE_NOT_FOUND",
+    "starting_checkpoint": "2d68395171d05b899ba4d6040f5f8e28ca1fb3bd"
+  },
+  "counters": {
+    "AC_restoration_calls": 0,
+    "AC_surrogate_revalidation_calls": 0,
+    "AIDC_site_changes": 0,
+    "April_B0_B1_B2_B3_calls": 0,
+    "April_result_reads": 0,
+    "June_result_content_reads": 0,
+    "June_scientific_input_reads": 0,
+    "May_result_content_reads": 0,
+    "May_scientific_input_reads": 0,
+    "OpenDSS_calls_inside_Benders": 0,
+    "PF_changes": 0,
+    "PUE_changes": 0,
+    "RC_MQT_retraining_calls": 0,
+    "V16_3_historical_changes": 0,
+    "arbitrary_clipping_calls": 0,
+    "beta_changes": 0,
+    "decomposition_regression_calls": 0,
+    "effect_selected_scaling_values": 0,
+    "kappa_changes": 0,
+    "whole_facility_flexible_share_assumptions": 0
+  },
+  "denominator_authority_gate": {
+    "GPU_per_node_application_count": 1,
+    "GPU_per_node_identity": 4,
+    "exact_existing_G_REF_rule": "Integral of gpus_requested/4 for valid COMPLETED H100 jobs with positive execution intervals.",
+    "exact_total_executed_H100_rule": "Integral of gpus_requested/4 for all H100 records with positive observed execution intervals, independent of terminal state.",
+    "existing_G_REF_completed_jobs_overlapping_training": 181085,
+    "existing_G_REF_equivalent_node_hours": 240081.00013888892,
+    "existing_G_REF_requested_GPU_hours": 960324.0005555557,
+    "measured_not_forecast": true,
+    "same_Kestrel_H100_population": true,
+    "same_timezone_and_training_interval": true,
+    "status": "PASS_NODE_EQUIVALENT_DENOMINATOR_IDENTIFIABLE",
+    "total_H100_equivalent_node_hours": 415199.95145833323,
+    "total_executed_H100_jobs_overlapping_training": 276218,
+    "total_requested_H100_GPU_hours": 1660799.805833333
+  },
+  "downstream_not_run": [
+    "cross-head retraining",
+    "April P_OTHER_IT nonnegativity validation",
+    "April B0/B1/B2/B3",
+    "April AC-surrogate revalidation",
+    "AC-feasibility restoration",
+    "Fresh OpenDSS",
+    "April-15 Monolithic/Standard-BD/CL-MC-BD regression"
+  ],
+  "final_classification": "V17_GPU_BOUNDARY_D_FLEX_COHORT_SEMANTICS_DEFECT",
+  "flexible_cohort_semantics_audit": {
+    "SLA_preservation_test_in_current_rule": null,
+    "classification": "FLEX_COHORT_SEMANTICS_DEFECT",
+    "cohort_broadened": false,
+    "current_rule": "H100 + COMPLETED + valid runtime + gpus_requested=4*gpu_nodes_occupied + node class in {1,2,4,8,16} + no sharing evidence",
+    "deadline_or_slack_threshold_in_current_rule": null,
+    "eligible_active_node_hour_fraction_wait_gt_10_minutes": 0.41624255539051486,
+    "eligible_active_node_hour_fraction_wait_le_10_minutes": 0.5837574446094852,
+    "eligible_active_node_hours_wait_gt_10_minutes": 18383.24388888889,
+    "eligible_active_node_hours_wait_le_10_minutes": 25781.495277777776,
+    "eligible_active_node_hours_wait_le_20_seconds": 22030.52055555556,
+    "eligible_queue_wait_seconds": {
+      "max": 1371637.0,
+      "min": 0.0,
+      "p50": 298.0,
+      "p95": 40924.59999999999
+    },
+    "excluded_active_GPU_hours_not_mutually_exclusive": {
+      "invalid_or_missing_execution_interval": 0.0,
+      "node_class_outside_1_2_4_8_16": 54194.985,
+      "not_completed": 699385.6233333334,
+      "not_full_node_allocation": 729754.9094444445,
+      "sharing_evidence_present": 687510.2427777778
+    },
+    "exclusion_counts_not_mutually_exclusive": {
+      "invalid_or_missing_execution_interval": 4365,
+      "node_class_outside_1_2_4_8_16": 916,
+      "not_completed": 144243,
+      "not_full_node_allocation": 148435,
+      "sharing_evidence_present": 138550
+    },
+    "physical_interpretation": "The rule is a source-quality and scheduling-model tractability subset. It is not an observed service-deferrability label: it excludes work for sharing, allocation-shape, state, and node-class reasons while admitting substantial work with queue wait at or below ten minutes.",
+    "queue_wait_threshold_in_current_rule": null,
+    "training_submitted_H100_state_counts": {
+      "CANCELLED": 44036,
+      "COMPLETED": 185625,
+      "DEADLINE": 11530,
+      "FAILED": 75279,
+      "NODE_FAIL": 1791,
+      "OUT_OF_MEMORY": 688,
+      "TIMEOUT": 10919
+    }
+  },
+  "next_decision": "V17_GPU_BOUNDARY_REDESIGN_REQUIRED",
+  "same_source_candidate_share": {
+    "accepted_as_scientific_flexible_share": false,
+    "energy_weighted_candidate": null,
+    "energy_weighted_failure_reason": "The total H100 population contains shared/partial-GPU or out-of-class records; frozen kappa_n is defined only for full-node classes {1,2,4,8,16}. No average kappa or partial-GPU conversion is authorized.",
+    "energy_weighted_status": "NOT_IDENTIFIABLE_FOR_TOTAL_H100_WITH_FROZEN_KAPPA",
+    "f_H100_FLEX_NODEH_all_executed_H100": 0.1063698081166533,
+    "f_H100_FLEX_NODEH_existing_completed_G_REF": 0.18395766071083086,
+    "node_hour_GPU_hour_identity_error": 0.0,
+    "qualified_W_F_arrival_node_hours": 44173.638333333336,
+    "qualified_flexible_active_node_hours": 44164.739166666666,
+    "qualified_flexible_jobs_active_in_training": 31943,
+    "qualified_flexible_jobs_submitted_in_training": 31919,
+    "qualified_flexible_requested_GPU_hours": 176658.95666666667,
+    "qualified_subset_incremental_energy_kWh": 98198.80507141384
+  },
+  "source": {
+    "April_member_reads": 0,
+    "Eagle_rows": 0,
+    "June_member_reads": 0,
+    "May_member_reads": 0,
+    "datacard_path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR HPC Kestrel Jobs Data\\datacard.md",
+    "datacard_sha256": "0139b75b80cd3029e0af54e22fc0dbad3080e92a8a7a602f1bd62cd7a36f62e9",
+    "maximum_member_month": 202503,
+    "members_opened": [
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=8/kestrel_jobs_202408_0.parquet",
+        "month": 202408,
+        "uncompressed_bytes": 38662321
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=9/kestrel_jobs_202409_0.parquet",
+        "month": 202409,
+        "uncompressed_bytes": 34441059
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=10/kestrel_jobs_202410_0.parquet",
+        "month": 202410,
+        "uncompressed_bytes": 21738672
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=11/kestrel_jobs_202411_0.parquet",
+        "month": 202411,
+        "uncompressed_bytes": 22661420
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2024/month=12/kestrel_jobs_202412_0.parquet",
+        "month": 202412,
+        "uncompressed_bytes": 26852825
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=1/kestrel_jobs_202501_0.parquet",
+        "month": 202501,
+        "uncompressed_bytes": 34269310
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=2/kestrel_jobs_202502_0.parquet",
+        "month": 202502,
+        "uncompressed_bytes": 37935029
+      },
+      {
+        "member": "esif.hpc.kestrel.job-anon/year=2025/month=3/kestrel_jobs_202503_0.parquet",
+        "month": 202503,
+        "uncompressed_bytes": 36496609
+      }
+    ],
+    "minimum_member_month": 202408,
+    "non_H100_rows_in_denominator": 0,
+    "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw\ub370\uc774\ud130\\\ub370\uc774\ud130 \uc13c\ud130\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+    "sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+    "source_scope": "KESTREL_ONLY_GPU_H100_PARTITIONS",
+    "system": "NLR Kestrel H100 Slurm job archive"
+  },
+  "status": "FAIL_CLOSED_FLEX_COHORT_SEMANTICS_DEFECT",
+  "time_contract": {
+    "alignment_rule": "PARSE_OFFSET_AWARE_TO_UTC_THEN_CLIP_TO_FROZEN_AEST_TRAINING_INTERVAL",
+    "numerator_denominator_same_interval": true,
+    "source_datacard_timezone": "America/Denver with exported UTC offsets",
+    "source_schema_timestamp_types": [
+      "timestamp[us, tz=-06:00]",
+      "timestamp[us, tz=-07:00]",
+      "timestamp[us, tz=UTC]"
+    ],
+    "training_end_exclusive_AEST_fixed": "2025-04-01T00:00:00+10:00",
+    "training_end_exclusive_UTC": "2025-03-31T14:00:00+00:00",
+    "training_start_AEST_fixed": "2024-08-19T00:00:00+10:00",
+    "training_start_UTC": "2024-08-18T14:00:00+00:00"
+  },
+  "whole_IT_boundary_actions": {
+    "ESIF_reads": 0,
+    "P_GPU_FIXED_constructed": false,
+    "P_OTHER_IT_constructed": false,
+    "eta_FLEX_created": false,
+    "whole_facility_flexible_share_parameter_removed_from_candidate": true
+  }
+}

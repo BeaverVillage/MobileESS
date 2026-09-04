@@ -1,0 +1,39 @@
+{
+  "schema_version": "IEEE123_NATIVE_CONTROL_ASSET_AUDIT_V1.audit.v1",
+  "status": "PASS_ASSET_AUDIT_PARAMETER_GAP_FOUND",
+  "identity": "IEEE123_NATIVE_CONTROL_ASSET_AUDIT_V1",
+  "source_file": "IEEE123Master.dss",
+  "source_sha256": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969",
+  "source_modified": false,
+  "compiled_audit": {
+    "capacitor_count": 4,
+    "capcontrol_count": 0,
+    "regcontrol_count": 7,
+    "capacitor_initial_state": "ON",
+    "capacitor_connection": "WYE",
+    "capacitor_step_count": 1,
+    "total_capacitor_kvar": 750.0
+  },
+  "capacitors": [
+    {"name": "C83", "bus": "83", "phases": 3, "kvar": 600.0, "kv": 4.16, "connection": "WYE", "steps": 1, "initial_state": [1]},
+    {"name": "C88a", "bus": "88.1", "phases": 1, "kvar": 50.0, "kv": 2.402, "connection": "WYE", "steps": 1, "initial_state": [1]},
+    {"name": "C90b", "bus": "90.2", "phases": 1, "kvar": 50.0, "kv": 2.402, "connection": "WYE", "steps": 1, "initial_state": [1]},
+    {"name": "C92c", "bus": "92.3", "phases": 1, "kvar": 50.0, "kv": 2.402, "connection": "WYE", "steps": 1, "initial_state": [1]}
+  ],
+  "regcontrols": [
+    {"name": "creg1a", "vreg_v": 120.0, "band_v": 2.0, "pt_ratio": 20.0, "delay_s": 15.0, "tap_delay_s": 2.0},
+    {"name": "creg2a", "vreg_v": 120.0, "band_v": 2.0, "pt_ratio": 20.0, "delay_s": 15.0, "tap_delay_s": 2.0},
+    {"name": "creg3a", "vreg_v": 120.0, "band_v": 1.0, "pt_ratio": 20.0, "delay_s": 15.0, "tap_delay_s": 2.0},
+    {"name": "creg3c", "vreg_v": 120.0, "band_v": 1.0, "pt_ratio": 20.0, "delay_s": 15.0, "tap_delay_s": 2.0},
+    {"name": "creg4a", "vreg_v": 124.0, "band_v": 2.0, "pt_ratio": 20.0, "delay_s": 15.0, "tap_delay_s": 2.0},
+    {"name": "creg4b", "vreg_v": 124.0, "band_v": 2.0, "pt_ratio": 20.0, "delay_s": 15.0, "tap_delay_s": 2.0},
+    {"name": "creg4c", "vreg_v": 124.0, "band_v": 2.0, "pt_ratio": 20.0, "delay_s": 15.0, "tap_delay_s": 2.0}
+  ],
+  "source_authorized_capacitor_control_parameters": {
+    "on_threshold": null,
+    "off_threshold": null,
+    "delay": null,
+    "minimum_dwell": null
+  },
+  "conclusion": "Existing capacitor assets are authoritative; capacitor switching parameters require a separate prospective common-control authority."
+}

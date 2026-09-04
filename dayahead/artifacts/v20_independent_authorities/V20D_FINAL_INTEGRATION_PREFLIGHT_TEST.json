@@ -1,0 +1,54 @@
+{
+  "artifact_id": "V20D_FINAL_INTEGRATION_PREFLIGHT_TEST_V1",
+  "deterministic_fixture": {
+    "gates": {
+      "G1_forecast_mass": "PASS",
+      "G2_causality_certificate": "PASS",
+      "G3_scheduler_conservation": "PASS",
+      "G4_deadline": "PASS",
+      "G5_compute_capacity": "PASS",
+      "G6_power_tier_conversion": "PASS",
+      "G7_site_allocation": "PASS",
+      "G8_facility_conservation": "PASS",
+      "G9_PUE": "PASS",
+      "G10_PCC_interface_rating": "PASS",
+      "G11_site_system_sum": "PASS",
+      "G12_scale_authority": "PASS",
+      "G13_locked_test_authority": "PASS",
+      "G14_preservation": "PASS"
+    },
+    "passed": true,
+    "grid_solver_calls": 0,
+    "OpenDSS_calls": 0,
+    "B0_B1_B2_B3_calls": 0
+  },
+  "current_authority_state": {
+    "gates": {
+      "G1_forecast_mass": "PASS",
+      "G2_causality_certificate": "PASS",
+      "G3_scheduler_conservation": "PASS",
+      "G4_deadline": "PASS",
+      "G5_compute_capacity": "PASS",
+      "G6_power_tier_conversion": "PASS",
+      "G7_site_allocation": "PASS",
+      "G8_facility_conservation": "PASS",
+      "G9_PUE": "PASS",
+      "G10_PCC_interface_rating": "FAIL",
+      "G11_site_system_sum": "PASS",
+      "G12_scale_authority": "FAIL",
+      "G13_locked_test_authority": "FAIL",
+      "G14_preservation": "PASS"
+    },
+    "passed": false,
+    "grid_solver_calls": 0,
+    "OpenDSS_calls": 0,
+    "B0_B1_B2_B3_calls": 0
+  },
+  "current_authority_expected_blockers": [
+    "G10_PCC_interface_rating",
+    "G12_scale_authority",
+    "G13_locked_test_authority"
+  ],
+  "MODEL_AGNOSTIC_INTEGRATION_READY": true,
+  "grid_solver_calls": 0
+}

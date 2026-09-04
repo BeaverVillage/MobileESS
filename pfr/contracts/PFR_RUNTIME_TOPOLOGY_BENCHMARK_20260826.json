@@ -1,0 +1,51 @@
+{
+  "schema_version": "PFR_RUNTIME_TOPOLOGY_BENCHMARK_20260826",
+  "status": "PASS_SELECTED_6X2_BALANCED_DISJOINT",
+  "host": {
+    "cpu": "Intel Core i7-13620H",
+    "logical_cpus": 16,
+    "visible_physical_core_groups": 8,
+    "memory_gib": 25,
+    "windows_power_plan": "HIGH_PERFORMANCE"
+  },
+  "workload": {
+    "calendar_days": 6,
+    "issues_per_day": 15,
+    "total_committed_issues": 90,
+    "episode_horizon_issues": 288,
+    "mode": "BOUNDED_DIAGNOSTIC_STOP_NOT_SCIENTIFIC_RESULT",
+    "same_inputs_and_physical_acceptance_chain": true
+  },
+  "candidates": [
+    {"workers": 4, "gurobi_threads": 4, "affinity": "disjoint", "wall_seconds": 239.6916603, "issues_per_second": 0.3754824},
+    {"workers": 5, "gurobi_threads": 3, "affinity": "disjoint", "wall_seconds": 223.2058238, "issues_per_second": 0.4032153},
+    {"workers": 6, "gurobi_threads": 2, "affinity": "none", "wall_seconds": 201.2653859, "issues_per_second": 0.4471708},
+    {"workers": 6, "gurobi_threads": 2, "affinity": "disjoint_legacy_smt_concentration", "wall_seconds": 172.5810407, "issues_per_second": 0.5214941},
+    {"workers": 6, "gurobi_threads": 2, "affinity": "disjoint_all_logical_cpus", "wall_seconds": 175.5748529, "issues_per_second": 0.5126019},
+    {"workers": 6, "gurobi_threads": 2, "affinity": "disjoint_balanced_smt_contention", "wall_seconds": 160.57, "issues_per_second": 0.5605032},
+    {"workers": 7, "gurobi_threads": 2, "affinity": "disjoint_all_logical_cpus", "wall_seconds": 246.4791782, "issues_per_second": 0.4259995}
+  ],
+  "selected": {
+    "workers": 6,
+    "gurobi_threads_per_worker": 2,
+    "cpu_affinity": "DISJOINT_TOPOLOGY_AWARE_BALANCED_SMT_CONTENTION",
+    "cpu_groups_on_measured_host": [[0, 2], [4, 6], [8, 10], [12, 14], [1, 5], [9, 13]],
+    "wall_reduction_vs_4x4_percent": 33.01,
+    "wall_reduction_vs_6x2_unpinned_percent": 20.22
+  },
+  "acceptance_audit": {
+    "commit_markers": 90,
+    "actual_gurobi_pass": true,
+    "fresh_opendss_pass": true,
+    "exact_ac_hard_constraints_pass": true,
+    "charge_discharge_exclusivity_pass": true,
+    "qcp_norm_separation_pass": true,
+    "failure_evidence_count": 0,
+    "maximum_exact_norm_relative_residual": 2.204305597040926e-9,
+    "norm_relative_tolerance": 1e-6
+  },
+  "rejected_solver_micro_optimizations": [
+    "EXACT_QCP_CROSSOVER_0_SLOWER_OR_NOT_REPRODUCIBLY_FASTER",
+    "REMOVE_CONTINUOUS_QCP_VAR_START_NOT_REPRODUCIBLY_FASTER"
+  ]
+}

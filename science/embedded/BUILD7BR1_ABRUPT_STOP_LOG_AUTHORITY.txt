@@ -1,0 +1,140 @@
+[2026-08-10T10:56:40+09:00] START V2044R12B1D1B2_JOINTMASTER_BUILD7BR1_MV_KEY_ARITY_FIX
+[0/12] PAYLOAD CHECKSUM
+BUILD7B_CONTRACT.json: OK
+EXACT_GRID_RUNNER_24SERVICE.py: OK
+README.md: OK
+README_BUILD7BR1.md: OK
+embedded/BUILD6R3R5_PASS.tar.gz: OK
+embedded/BUILD7AR2_PASS.tar.gz: OK
+embedded/BUILD7B_FAILURE_ARITY_AUTHORITY.tar.gz: OK
+embedded/SOURCEAUTH_FIX1R1_PASS.tar.gz: OK
+ensure_failure.py: OK
+main.py: OK
+release_self_test.py: OK
+write_checksums.py: OK
+[1/12] RELEASE SELF-TEST
+{
+  "PASS": true,
+  "ar2_sha": true,
+  "b6_sha": true,
+  "build7b_failure_sha": true,
+  "failure_json_unique": true,
+  "failure_semantics": true,
+  "grid_service_api": true,
+  "guard_Fresh_Exact_OpenDSS_24service_firststep_pass": true,
+  "guard_K9H7_RESULT_V1_DATA": true,
+  "guard_exact_profile_cert": true,
+  "guard_full_54step_joint_master_executed": true,
+  "guard_future_actual_used_for_optimizer": true,
+  "guard_global_departure_prefix_reserve_kWh": true,
+  "guard_lineS_": true,
+  "guard_mess_location_service_id": true,
+  "guard_pareto_moves": true,
+  "guard_profile_safe_horizon_steps": true,
+  "guard_ratio2_ref": true,
+  "guard_safe_Q_bus_kvar": true,
+  "guard_safe_netP_bus_kW": true,
+  "guard_single_issue_full_54step_joint_master_execute": true,
+  "guard_support_debt_terminal": true,
+  "guard_workload_debt_terminal": true,
+  "mv_key_arity_static_audit": true,
+  "new_3tuple_depflag_present": true,
+  "old_bad_depflag_removed": true,
+  "sa_sha": true,
+  "semantic_selftest": true,
+  "syntax_EXACT_GRID_RUNNER_24SERVICE.py": true,
+  "syntax_ensure_failure.py": true,
+  "syntax_main.py": true,
+  "syntax_write_checksums.py": true
+}
+[2/12] SELECT SCIENTIFIC PYTHON
+PYTHON_RUNTIME=/home/jaewon/miniconda3/envs/power_v61/bin/python
+[3/12] VERIFY AR2/B6/SOURCEAUTH PARENTS + LOCATE EXACT BUILD5R3
+[4/12] RECONSTRUCT EXACT BUILD4R1 ENGINE FROM BASE SHA + R1 OVERLAY SHA
+[5/12] VERIFY 24-SERVICE OPENDSS ELEMENT DOMAIN
+[6/12] AUDIT D2 CONNECTION DELAY + BUILD PARETO K3 TIME-EXPANDED ROUTE GRAPH
+[7/12] BUILD ISSUE113 CURRENT INFORMATION STATE ONLY (NO FUTURE ACTUAL JOB ARRIVALS)
+[8/12] SOLVE FULL 54-STEP JOINT MASTER (BUILD7BR1 MV-KEY FIX)
+[9/12] CERTIFY CURRENT/COMMITMENT RACK + WAN + SELECTED H0 SIGNED MOBILITY PROFILES
+[10/12] FRESH EXACT OPENDSS 24-SERVICE FIRST-STEP GATE + K9H7_RESULT_V1
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2848159
+Academic license 2848159 - for non-commercial use only - registered to ha___@gmail.com
+Set parameter OutputFlag to value 1
+Set parameter LogFile to value "/home/jaewon/mobile_ess_work/frozen_artifacts/stage_k9h7_v2044r12b1d1b2_jointmaster_build7br1_issue113_full54_20260810T105640/GUROBI_BUILD7B_ISSUE113.log"
+Set parameter Threads to value 1
+Set parameter Seed to value 0
+Set parameter MIPGap to value 0
+Set parameter MIPGapAbs to value 0
+Set parameter NumericFocus to value 3
+Set parameter FeasibilityTol to value 1e-09
+Set parameter IntFeasTol to value 1e-09
+Set parameter OptimalityTol to value 1e-09
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (linux64 - "Ubuntu 24.04.4 LTS")
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+FeasibilityTol  1e-09
+IntFeasTol  1e-09
+MIPGap  0
+MIPGapAbs  0
+OptimalityTol  1e-09
+NumericFocus  3
+Threads  1
+
+Academic license 2848159 - for non-commercial use only - registered to ha___@gmail.com
+Optimize a model with 75388 rows, 153462 columns and 20993620 nonzeros (Min)
+Model fingerprint: 0x364f9cfe
+Model has 0 linear objective coefficients
+Model has 3510 quadratic constraints
+Variable types: 19298 continuous, 134164 integer (134164 binary)
+Coefficient statistics:
+  Matrix range     [2e-11, 7e+02]
+  QMatrix range    [6e-01, 2e+00]
+  QLMatrix range   [2e+00, 5e+03]
+  Objective range  [1e-05, 5e+00]
+  Bounds range     [1e+00, 1e+03]
+  RHS range        [1e-10, 8e+06]
+  QRHS range       [5e+05, 3e+07]
+Warning: Model contains large matrix coefficient range
+
+
+---------------------------------------------------------------------------
+Multi-objectives: starting optimization (min) with 5 objectives... 
+---------------------------------------------------------------------------
+
+Multi-objectives: applying initial presolve...
+---------------------------------------------------------------------------
+
+Presolve removed 3726 rows and 0 columns (presolve time = 10s)...
+Presolve removed 22481 rows and 1257 columns (presolve time = 10s)...
+Presolve removed 27516 rows and 21510 columns (presolve time = 20s)...
+Presolve removed 41134 rows and 21510 columns (presolve time = 22s)...
+Presolve removed 41134 rows and 21510 columns (presolve time = 28s)...
+Presolve removed 41149 rows and 21525 columns (presolve time = 30s)...
+Presolve removed 42157 rows and 23760 columns (presolve time = 36s)...
+Presolve removed 42158 rows and 23760 columns (presolve time = 41s)...
+Presolve removed 42160 rows and 23760 columns (presolve time = 46s)...
+Presolve removed 42260 rows and 23760 columns (presolve time = 50s)...
+Presolve removed 44163 rows and 23760 columns (presolve time = 69s)...
+Presolve removed 40412 rows and 21230 columns
+Presolve time: 69.11s
+Presolved: 34976 rows, 132424 columns, 4841354 nonzeros
+---------------------------------------------------------------------------
+
+Multi-objectives: optimize objective 1 () ...
+---------------------------------------------------------------------------
+
+Presolve removed 0 rows and 1711 columns (presolve time = 6s)...
+Presolve removed 64 rows and 1711 columns (presolve time = 10s)...
+Presolve removed 705 rows and 1711 columns (presolve time = 16s)...
+Presolve removed 708 rows and 1714 columns (presolve time = 24s)...
+Presolve removed 2323 rows and 3329 columns (presolve time = 49s)...
+Presolve removed 691 rows and 1697 columns
+Presolve time: 48.98s
+Presolved: 34285 rows, 130727 columns, 3159255 nonzeros
+Presolved model has 1705 quadratic constraint(s)
+Variable types: 16873 continuous, 113854 integer (113833 binary)

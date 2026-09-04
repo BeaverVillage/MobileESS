@@ -1,0 +1,110 @@
+{
+  "aemo_vintage_contract_sha256": "b11cd2548afc24cb123dd995e5d4ae0cdf3ca8a39d9ad9eadc8da4e93c6fb3c9",
+  "authority_id": "G11_V16_1_FULL_IEEE123_OFFICIAL_AEMO_APRIL_REBIND",
+  "c7_rebind_sha256": "e59d93bac33ee72b0a4c8af485d86facced223ca52df97b57cf263f45f29d8de",
+  "dedicated_aidc_pcc_transformer_audit": {
+    "aidc_power_factor": 0.95,
+    "frozen_rating_kva_each": 750.0,
+    "rating_relaxation_or_uprate_used": false,
+    "violation_count_aidc_slots": 96,
+    "worst": {
+      "active_power_kw": 983.1693566721235,
+      "aidc_id": "AIDC09",
+      "apparent_power_kva": 1034.915112286446,
+      "time_index": 21,
+      "violation_kva": 284.91511228644595
+    }
+  },
+  "downstream_call_counts": {
+    "C12": 0,
+    "G12": 0,
+    "G13": 0,
+    "G14": 0,
+    "realized_replay": 0
+  },
+  "execution": {
+    "aidc_electrical_injection_derivatives": "PASS",
+    "baseline_feasible_incumbent_admitted": false,
+    "farkasdual_sign_convention": "PASS",
+    "feasible_grid_lp_count": 0,
+    "grid_lp_count": 96,
+    "infeasible_incumbent_exclusion": {
+      "feasible_background_satisfies_cut": true,
+      "incumbent_satisfies_cut": false,
+      "infeasible_delta_kw": null,
+      "master_key": "aidc_load_kw[AIDC01]",
+      "status": "PASS",
+      "time_index": 0
+    },
+    "input": {
+      "aidc_derivative_p_per_phase": 0.3333333333333333,
+      "aidc_derivative_q_per_phase": 0.1095613683929544,
+      "aidc_power_factor": 0.95,
+      "background_kw_per_regional_mw": 0.367734994779006,
+      "background_mapping": "FROZEN_AEMO_VIC1_P100_TO_IEEE123_NATIVE_OPERATIONAL_NET",
+      "frozen_pv_allocation_total_kw": 698.000002861023,
+      "legacy_rack_kw_row_active_count": 0,
+      "native_active_load_kw": 3490.0,
+      "native_capacitor_injection_kvar": 750.0,
+      "native_reactive_load_kvar": 1920.0,
+      "pv_addback_generation_max_abs_cancellation_error_kw": 0.0,
+      "pv_projection": "FROZEN_RESIDENTIAL_PHASE_WEIGHTS_EXPLICIT_ADD_BACK_AND_GENERATOR"
+    },
+    "legacy_rack_kw_row_active_count": 0,
+    "master_dependent_row_registry_complete": true,
+    "objective_max": null,
+    "objective_min": null,
+    "pi_sign_convention": "PASS",
+    "reduced_star_used_as_final_evidence": false,
+    "sampled_perturbation_cut_validity": {
+      "cut_minus_exact": -5.551115123125783e-17,
+      "cut_value": 0.40884625402113584,
+      "delta_kw": 1.0,
+      "exact_subproblem_value": 0.4088462540211359,
+      "finite_difference": 0.00020391823164173095,
+      "master_key": "aidc_load_kw[AIDC01]",
+      "pi_gradient": 0.00020391823164166365,
+      "status": "PASS",
+      "time_index": 0
+    },
+    "status": "FAIL_FULL_IEEE123_BASELINE_INFEASIBLE",
+    "topology": {
+      "compiled_bus_count": 168,
+      "compiled_node_count_including_neutrals": 386,
+      "factory_count": 96,
+      "line_phase_count": 263,
+      "native_capacitor_count": 4,
+      "native_regulator_count": 7,
+      "phase_graph_connected": true,
+      "phase_graph_radial": true,
+      "present_phase_branch_count": 383,
+      "present_phase_node_count": 386,
+      "reduced_star_used": false,
+      "registry_complete_all_96": true,
+      "registry_rows_per_time": 766,
+      "root_phase_nodes": [
+        "150.1",
+        "150.2",
+        "150.3"
+      ],
+      "transformer_phase_count": 120
+    }
+  },
+  "firewall": {
+    "actual_as_forecast_read_count": 0,
+    "june_results_created": false,
+    "june_scientific_loader_access_count": 0,
+    "may_b0_b3_results_created": false,
+    "may_forecast_rows": 0,
+    "may_reference_schedule_created": false,
+    "may_scientific_loader_access_count": 0
+  },
+  "g10_rebind_sha256": "3ef30e260a6c5e94af2c1237f3afed373b9eb99a82c2bd0b985c3df8ac9beb1c",
+  "input_manifest_sha256": "bb40a00cd80d979de4e425cd3a5ac7cf70aad1e21e725a30919101eaacdd5381",
+  "operating_day": "2025-04-15",
+  "prior_g11_failure_artifact_preserved_sha256": "a592758d4009d4ccdca711550db19d4393faad8c1b736fb63de1889967e27bec",
+  "required_pass_status": "PASS_FULL_IEEE123_V16_1",
+  "status": "FAIL_FULL_IEEE123_BASELINE_INFEASIBLE",
+  "stop_rule": "STOP_AFTER_G11",
+  "stop_rule_applied": true
+}
