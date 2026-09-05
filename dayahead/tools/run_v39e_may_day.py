@@ -81,8 +81,17 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--day", required=True)
     parser.add_argument("--repo", type=Path, default=ROOT)
+    parser.add_argument("--check-launch-gate", action="store_true")
     args = parser.parse_args()
+    from dayahead.tools.v39h_terminal_launch_gate import admission, wait_for_admission
+    if args.check_launch_gate:
+        print(admission(args.repo.resolve(), args.day), flush=True)
+        return 0
+    wait_for_admission(args.repo.resolve(), args.day)
     _install_windows_safe_k_archive()
+    if (args.repo / "dayahead/artifacts/v39h_production_refreeze_may_close/PRODUCTION_REFREEZE_AUTHORITY.json").is_file():
+        from dayahead.v39e.runtime import install_runtime
+        print(f"V39H_RUNTIME_AUTHORITY {install_runtime()}", flush=True)
     result = run_day_with_unavailable_da(args.repo.resolve(), args.day)
     print(f"V39E MAY DATE {args.day} {result['status']}", flush=True)
     return 0 if result.get("status") != "FAIL" else 1
