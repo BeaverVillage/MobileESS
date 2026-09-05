@@ -48,12 +48,20 @@ def _reusable(repo: Path, day: str, classification: str) -> bool:
         certificate = _read(certificate_path)
     except (OSError, ValueError, json.JSONDecodeError):
         return False
-    return (
+    exact_files = (
         certificate.get("terminal") is True
-        and certificate.get("campaign_classification") == classification
+        and certificate.get("status") == "PASS"
         and certificate.get("DA_freeze_file_SHA256") == _freeze_shas(repo, day)
         and certificate.get("result_file_SHA256") == sha256_file(result_path)
     )
+    if not exact_files:
+        return False
+    if certificate.get("campaign_classification") == classification:
+        return True
+    # Retain immutable diagnostic-era result/certificate files. Their authorized
+    # promotion requires an independently sealed per-day equivalence certificate.
+    from .temporal_refreeze import equivalent_completed_day
+    return equivalent_completed_day(repo, day, classification)
 
 
 def _certify(repo: Path, day: str, classification: str) -> dict[str, Any]:

@@ -222,6 +222,11 @@ def _migration_wave_day(
 
 def run_full_preflight(repo: Path, progress: ProgressTracker) -> dict[str, Any]:
     repo = repo.resolve()
+    if (repo / "dayahead/artifacts/v39h_production_refreeze_may_close/PRODUCTION_REFREEZE_AUTHORITY.json").is_file():
+        # The authorized V39H layer already performed selective verification;
+        # subsequent preflight calls assemble/check authorities, never rerun 31 days.
+        from .temporal_refreeze import load_ready_refreeze
+        return load_ready_refreeze(repo, progress)
     root = repo / FULL_ROOT
     root.mkdir(parents=True, exist_ok=True)
     if _git(repo, "branch", "--show-current") != BRANCH:

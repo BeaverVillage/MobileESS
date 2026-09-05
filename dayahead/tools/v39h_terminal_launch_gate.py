@@ -7,8 +7,8 @@ import os
 from pathlib import Path
 import time
 
-# May24 was added by explicit user approval after the terminal audit.
-HELD_DAYS = frozenset(("2025-05-24", "2025-05-25", "2025-05-26"))
+# May23 added after the user-requested terminal-site audit failed; admission only.
+HELD_DAYS = frozenset(("2025-05-23", "2025-05-24", "2025-05-25", "2025-05-26"))
 GATE = Path("dayahead/artifacts/v39h_terminal_state_audit/TERMINAL_AUDIT_LAUNCH_GATE.json")
 
 

@@ -1,83 +1,242 @@
 param(
-    [string]$Repo = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+    [string]$Repo = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path,
+    [switch]$LibraryOnly
 )
 
-$progressPath = Join-Path $Repo "progress\V39E_OVERNIGHT_PROGRESS.json"
-$logPath = Join-Path $Repo "logs\v39e_overnight.log"
+# Presentation only: read existing authorities; never start/stop campaign work.
+function Get-MonitorText {
+    param($Value, [int]$Width = 120)
+    $text = ([string]$Value -replace '\s+', ' ').Trim()
+    if (-not $text) { return '-' }
+    if ($text.Length -gt $Width) { return $text.Substring(0, $Width - 3) + '...' }
+    return $text
+}
+
+function Get-MonitorDayRow {
+    param([string]$Day, [string]$State, $Detail, [string]$Reason)
+    $stage = Get-MonitorText $Detail.case
+    $substage = [string]$Detail.current_stage
+    if (-not $substage) { $substage = [string]$Detail.stage }
+    if ($stage -ne '-' -and $substage.StartsWith($stage + '_')) {
+        $substage = $substage.Substring($stage.Length + 1)
+    }
+    if ($Detail.full_milp_status) { $substage += ' / ' + $Detail.full_milp_status }
+    elseif ($Detail.search_level) { $substage += ' / ' + $Detail.search_level }
+    $progress = $State
+    if ($null -ne $Detail.completed_units -and $null -ne $Detail.total_units -and $Detail.total_units -gt 0) {
+        $progress = '{0}/{1}' -f $Detail.completed_units, $Detail.total_units
+    }
+    [pscustomobject]@{
+        Date = $Day; Status = $State; Stage = $stage
+        Substage = (Get-MonitorText $substage); Progress = $progress
+        Result = $(if ($State -eq 'FAIL') { 'FAIL' } else { '-' })
+        Reason = (Get-MonitorText $Reason)
+    }
+}
+
+function Get-CampaignLiveness {
+    param(
+        $Master,
+        [datetime]$NowUtc = ([DateTime]::UtcNow),
+        [int]$FreshSeconds = 45,
+        $ProcessInfo = $null
+    )
+    $heartbeat = [string]$Master.heartbeat_timestamp_utc
+    if (-not $heartbeat) { $heartbeat = [string]$Master.last_update }
+    $age = [double]::PositiveInfinity
+    try { $age = [math]::Max(0, ($NowUtc.ToUniversalTime() - ([datetime]$heartbeat).ToUniversalTime()).TotalSeconds) }
+    catch { }
+    $pidValue = 0
+    try { $pidValue = [int]$Master.orchestrator_pid } catch { }
+    if ($pidValue -le 0) {
+        return [pscustomobject]@{ State = 'DEAD'; Orchestrator = 'DEAD'; HeartbeatAgeSeconds = $age; IdentityMatches = $false }
+    }
+    if ($null -eq $ProcessInfo) {
+        try { $ProcessInfo = Get-CimInstance Win32_Process -Filter "ProcessId = $pidValue" -ErrorAction Stop }
+        catch { $ProcessInfo = $null }
+    }
+    if ($null -eq $ProcessInfo) {
+        return [pscustomobject]@{ State = 'DEAD'; Orchestrator = 'DEAD'; HeartbeatAgeSeconds = $age; IdentityMatches = $false }
+    }
+    $identity = $true
+    try {
+        $expectedCreation = ([datetime]([string]$Master.orchestrator_creation_time_utc)).ToUniversalTime()
+        $actualCreation = ([datetime]$ProcessInfo.CreationDate).ToUniversalTime()
+        $identity = [math]::Abs(($expectedCreation - $actualCreation).TotalSeconds) -le 2
+    } catch { $identity = $false }
+    $tokens = @($Master.orchestrator_command_match_tokens | Where-Object { $_ })
+    if ($tokens.Count -eq 0) { $identity = $false }
+    $command = [string]$ProcessInfo.CommandLine
+    foreach ($token in $tokens) {
+        if ($command.IndexOf([string]$token, [System.StringComparison]::OrdinalIgnoreCase) -lt 0) { $identity = $false }
+    }
+    if (-not $identity) {
+        return [pscustomobject]@{ State = 'DEAD'; Orchestrator = 'DEAD'; HeartbeatAgeSeconds = $age; IdentityMatches = $false }
+    }
+    if ($age -gt $FreshSeconds) {
+        return [pscustomobject]@{ State = 'STALE'; Orchestrator = 'ALIVE'; HeartbeatAgeSeconds = $age; IdentityMatches = $true }
+    }
+    return [pscustomobject]@{ State = 'RUNNING'; Orchestrator = 'ALIVE'; HeartbeatAgeSeconds = $age; IdentityMatches = $true }
+}
+
+function Get-MonitorView {
+    param($Master, [hashtable]$Details, [hashtable]$Failures, $Liveness = $null)
+    $completed = @($Master.completed_days | Where-Object { $_ })
+    $running = @($Master.running_days | Where-Object { $_ })
+    $failed = @($Master.failed_days | Where-Object { $_ })
+    $days = @(@($completed) + @($running) + @($failed) + @($Failures.Keys) | Sort-Object -Unique)
+    $passed = @{}
+    foreach ($day in $days) {
+        $detail = $Details[$day]
+        $isFailure = $day -in $failed -or $detail.status -eq 'FAIL' -or $detail.fail -eq $true
+        if ($isFailure) {
+            $reason = [string]$detail.error_summary
+            if (-not $reason) { $reason = [string]$detail.error }
+            if (-not $reason -and $day -eq $Master.latest_failure) { $reason = [string]$Master.exact_current_blocker }
+            if (-not $reason -and $Failures.ContainsKey($day)) { $reason = $Failures[$day].Reason }
+            # Preserve the failing stage while a subsequent repair is RUNNING.
+            if (-not $Failures.ContainsKey($day) -or $detail.status -eq 'FAIL' -or $detail.fail -eq $true) {
+                $Failures[$day] = Get-MonitorDayRow $day 'FAIL' $detail $reason
+            }
+        }
+        elseif ($detail.status -eq 'PASS' -or $detail.pass -eq $true -or
+                ($day -in $completed -and $day -notin $running -and -not $Failures.ContainsKey($day))) {
+            $Failures.Remove($day)
+            $passed[$day] = $true
+        }
+    }
+    $rows = @()
+    foreach ($day in @(@($running) + @($Failures.Keys) | Sort-Object -Unique)) {
+        if ($Failures.ContainsKey($day)) {
+            if ($day -in $running -and $Details[$day].status -eq 'RUNNING') {
+                $rows += Get-MonitorDayRow $day 'FAIL' $Details[$day] $Failures[$day].Reason
+            }
+            else { $rows += $Failures[$day] }
+        }
+        elseif (-not $passed.ContainsKey($day)) {
+            $state = 'RUNNING'
+            if ($null -ne $Liveness -and $Liveness.State -in @('DEAD', 'STALE')) { $state = $Liveness.State }
+            if ($Details[$day].status -eq 'PENDING') { $state = 'PENDING' }
+            $rows += Get-MonitorDayRow $day $state $Details[$day] ''
+        }
+    }
+    $status = 'RUNNING'
+    if ($Failures.Count -gt 0) { $status = 'FAIL' }
+    elseif ($passed.Count -eq 31 -and $rows.Count -eq 0) { $status = 'PASS' }
+    elseif ($null -ne $Liveness -and $Liveness.State -in @('DEAD', 'STALE')) { $status = $Liveness.State }
+    $runningCount = @($running | Where-Object { -not $passed.ContainsKey($_) }).Count
+    if ($null -ne $Liveness -and $Liveness.State -ne 'RUNNING') { $runningCount = 0 }
+    [pscustomobject]@{
+        Completed = $passed.Count; Total = 31
+        Percent = [math]::Round(100.0 * $passed.Count / 31, 1)
+        Running = $runningCount
+        Failed = $Failures.Count; Status = $status
+        Rows = @($rows); Failures = @($Failures.Values | Sort-Object Date)
+        LastUpdate = $Master.last_update
+        Orchestrator = $(if ($null -eq $Liveness) { 'UNKNOWN' } else { $Liveness.Orchestrator })
+        HeartbeatAgeSeconds = $(if ($null -eq $Liveness) { $null } else { $Liveness.HeartbeatAgeSeconds })
+    }
+}
+
+function Get-MonitorFrame {
+    param($View, [int]$Width = 120, [string]$SourceWarning = '')
+    # Keep the ordinary four-worker display within a 120 x 30 console.
+    $width = [math]::Max(70, $Width - 1)
+    $subWidth = [math]::Max(14, $width - 55)
+    $lines = [System.Collections.Generic.List[string]]::new()
+    $lines.Add(('=' * [math]::Min(76, $width)))
+    $lines.Add(' MAY 2025 CAMPAIGN MONITOR')
+    if ($View.Failed -gt 0) { $lines.Add('!!! FAILURE DETECTED !!!') }
+    if ($SourceWarning) { $lines.Add((Get-MonitorText "SOURCE WARNING: $SourceWarning" $width)) }
+    $lines.Add(('Progress : {0} / {1} days ({2}%)' -f $View.Completed, $View.Total, $View.Percent))
+    $lines.Add(('Running  : {0}' -f $View.Running))
+    $lines.Add(('Failed   : {0}' -f $View.Failed))
+    $lines.Add(('Status   : {0}' -f $View.Status))
+    $lines.Add(('Orchestrator : {0}' -f $View.Orchestrator))
+    $heartbeatText = if ($null -eq $View.HeartbeatAgeSeconds) { '-' } elseif ([double]::IsPositiveInfinity($View.HeartbeatAgeSeconds)) { 'STALE' } elseif ($View.Status -in @('DEAD', 'STALE')) { 'STALE ({0:N0} s)' -f $View.HeartbeatAgeSeconds } else { '{0:N0} s ago' -f $View.HeartbeatAgeSeconds }
+    $lines.Add(('Heartbeat    : {0}' -f $heartbeatText))
+    $lines.Add('')
+    $lines.Add('ACTIVE / FAILED DATES')
+    $format = '{0,-10} {1,-7} {2,-10} {3,-' + $subWidth + '} {4,-8} {5}'
+    $lines.Add(($format -f 'DATE', 'STATUS', 'STAGE', 'SUB-STAGE', 'PROGRESS', 'RESULT'))
+    if ($View.Rows.Count -eq 0) { $lines.Add('None') }
+    foreach ($row in $View.Rows) {
+        $lines.Add(($format -f $row.Date, $row.Status, (Get-MonitorText $row.Stage 10),
+            (Get-MonitorText $row.Substage $subWidth), $row.Progress, $row.Result))
+    }
+    $lines.Add('')
+    $lines.Add('FAILURES')
+    if ($View.Failures.Count -eq 0) { $lines.Add('None') }
+    foreach ($failure in $View.Failures) {
+        $lines.Add((Get-MonitorText ('{0} | {1} / {2} | {3}' -f $failure.Date,
+            $failure.Stage, $failure.Substage, $failure.Reason) $width))
+    }
+    $lines.Add('')
+    $lines.Add(('Last update: {0}' -f $View.LastUpdate))
+    $lines.Add('Refresh: 10s | Ctrl+C: close monitor only')
+    $lines.Add(('=' * [math]::Min(76, $width)))
+    return $lines.ToArray()
+}
+
+if ($LibraryOnly) { return }
+
+$progressPath = Join-Path $Repo 'progress\V39E_OVERNIGHT_PROGRESS.json'
+$statusRoot = Join-Path $Repo 'dayahead\artifacts\v39e_full_may_2025\status'
+$resultRoot = Join-Path $Repo 'dayahead\artifacts\v39e_full_may_2025\dates'
+$dayLogRoot = Join-Path $Repo 'logs\v39e_may_2025'
+$failureLatch = @{}
+$detailCache = @{}
+$masterCache = $null
 
 while ($true) {
-    Clear-Host
-    Write-Host "=================================================="
-    Write-Host "MobileESS V39E MAY 2025 OVERNIGHT CAMPAIGN"
-    Write-Host "=================================================="
-    if (-not (Test-Path -LiteralPath $progressPath)) {
-        Write-Host "Waiting for atomic progress evidence..."
-        Start-Sleep -Seconds 10
-        continue
-    }
+    $sourceWarning = ''
     try {
-        $p = Get-Content -LiteralPath $progressPath -Raw | ConvertFrom-Json
-        Write-Host "MODE: $($p.campaign_classification)"
-        Write-Host "PHASE: $($p.phase)"
-        Write-Host "Git HEAD: $($p.git_HEAD)"
-        Write-Host "Branch: $($p.branch)"
-        Write-Host "Elapsed: $($p.elapsed_seconds) sec"
-        Write-Host ""
-        Write-Host "PREFLIGHT: $($p.preflight_READY) READY / $($p.preflight_NOT_READY) NOT_READY / $($p.preflight_missing) missing"
-        Write-Host "Attempt: $($p.preflight_attempt)  Current blocker: $($p.exact_current_blocker)"
-        Write-Host "MAY DAYS: $($p.completed_days.Count) completed / $($p.running_days.Count) running / $($p.pending_days.Count) pending / $($p.failed_days.Count) failed"
-        Write-Host "CASE STATUS: B0=$($p.case_status.B0) B1=$($p.case_status.B1) B2=$($p.case_status.B2) B3=$($p.case_status.B3)"
-        Write-Host "Running: $($p.running_days -join ', ')"
-        foreach ($runningDay in @($p.running_days)) {
-            $dayStatusPath = Join-Path $Repo "dayahead\artifacts\v39e_full_may_2025\status\$runningDay.json"
-            if (Test-Path -LiteralPath $dayStatusPath) {
-                try {
-                    $dayStatus = Get-Content -LiteralPath $dayStatusPath -Raw | ConvertFrom-Json
-                    Write-Host "  $runningDay $($dayStatus.case) $($dayStatus.current_stage) $($dayStatus.completed_units)/$($dayStatus.total_units) level=$($dayStatus.search_level) candidate=$($dayStatus.candidate_done)/$($dayStatus.candidate_total) restoration=$($dayStatus.restoration_round)/$($dayStatus.restoration_round_max)"
-                }
-                catch {
-                    Write-Host "  $runningDay status read retry"
-                }
-            }
-        }
-        Write-Host "Latest completed: $($p.latest_completed_day)  Latest failure: $($p.latest_failure)"
-        Write-Host ""
-        Write-Host "REPAIR: iteration=$($p.repair_iteration) class=$($p.last_repair_classification) commit=$($p.last_repair_commit)"
-        Write-Host "Impact: $($p.change_impact_scope)  Rerun mode: $($p.rerun_mode)"
-        Write-Host "Reuse/invalidated/rerun: $($p.reusable_count)/$($p.invalidated_count)/$($p.rerun_count)"
-        Write-Host "Worker PIDs: $($p.worker_PIDs -join ', ')"
-        $totalCpu = 0.0
-        $totalRam = 0.0
-        foreach ($workerPid in @($p.worker_PIDs)) {
-            $proc = Get-Process -Id $workerPid -ErrorAction SilentlyContinue
-            if ($null -ne $proc) {
-                Write-Host "PID $workerPid CPU=$([math]::Round($proc.CPU,1))s RAM=$([math]::Round($proc.WorkingSet64/1MB,0))MB"
-                $totalCpu += $proc.CPU
-                $totalRam += $proc.WorkingSet64 / 1MB
-            }
-        }
-        Write-Host "Worker aggregate CPU=$([math]::Round($totalCpu,1))s RAM=$([math]::Round($totalRam,0))MB"
-        Write-Host "Temporal-only days: $($p.temporal_only_days)"
-        Write-Host "Migration-escalated days: $($p.migration_escalated_days)"
-        Write-Host "Frozen-DA migrations: $($p.total_migrations_from_frozen_DA)"
-        Write-Host "Actual reoptimization: temporal=$($p.Actual_temporal_reoptimization_calls) AIDC=$($p.Actual_AIDC_reoptimization_calls) migration=$($p.Actual_migration_reoptimization_calls) WAN=$($p.Actual_WAN_reroute_calls)"
-        Write-Host "Fresh: PASS=$($p.Fresh_PASS) restoration=$($p.Fresh_restoration) restoration PASS=$($p.restoration_PASS) restoration FAIL=$($p.restoration_FAIL) FAIL=$($p.Fresh_FAIL)"
-        Write-Host "Progress: $($p.overall_progress_percent)%"
-        Write-Host "ETA seconds: $($p.estimated_remaining_seconds)"
-        Write-Host "Last update: $($p.last_update)"
-        if (Test-Path -LiteralPath $logPath) {
-            Write-Host ""
-            Write-Host "Recent log:"
-            Get-Content -LiteralPath $logPath -Tail 12
-        }
-        if ($p.phase -eq "COMPLETE") {
-            Write-Host ""
-            Write-Host "Campaign workflow complete. This monitor remains open."
-            break
-        }
+        $masterCache = Get-Content -LiteralPath $progressPath -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
     }
-    catch {
-        Write-Host "Progress read retry: $($_.Exception.Message)"
+    catch { $sourceWarning = 'Progress source unavailable; retaining last snapshot.' }
+    if ($null -ne $masterCache) {
+        $readDays = @(@($masterCache.completed_days) + @($masterCache.running_days) +
+            @($masterCache.failed_days) + @($failureLatch.Keys) | Where-Object { $_ } | Sort-Object -Unique)
+        foreach ($day in $readDays) {
+            # Only dates from the authoritative May axis may identify local files.
+            if ($day -notmatch '^2025-05-(0[1-9]|[12][0-9]|3[01])$') { continue }
+            $path = Join-Path $statusRoot "$day.json"
+            if (Test-Path -LiteralPath $path) {
+                try { $detailCache[$day] = Get-Content -LiteralPath $path -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop }
+                catch { $sourceWarning = "Status source unavailable for $day; retaining last snapshot." }
+            }
+            if (($day -in $masterCache.failed_days -or $detailCache[$day].status -eq 'FAIL') -and
+                    -not $detailCache[$day].error_summary -and -not $detailCache[$day].error) {
+                $reason = $null
+                try {
+                    $result = Get-Content -LiteralPath (Join-Path $resultRoot "$day.json") -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+                    $reason = $result.error
+                } catch { }
+                if (-not $reason) {
+                    # Logs are supplementary, only for an already authoritative failure.
+                    $logPath = Join-Path $dayLogRoot "$day.log"
+                    if (Test-Path -LiteralPath $logPath) {
+                        $reason = Get-Content -LiteralPath $logPath -Tail 40 -ErrorAction SilentlyContinue |
+                            Where-Object { $_ -match '(^|\s)(\w*Error|\w*Exception):' } | Select-Object -Last 1
+                    }
+                }
+                if ($reason) {
+                    if ($null -eq $detailCache[$day]) { $detailCache[$day] = [pscustomobject]@{} }
+                    $detailCache[$day] | Add-Member -NotePropertyName error_summary -NotePropertyValue ([string]$reason) -Force
+                }
+            }
+        }
+        $liveness = Get-CampaignLiveness $masterCache
+        $view = Get-MonitorView $masterCache $detailCache $failureLatch $liveness
+        $consoleWidth = 120
+        try { $consoleWidth = $Host.UI.RawUI.WindowSize.Width } catch { }
+        Clear-Host
+        Get-MonitorFrame $view $consoleWidth $sourceWarning | ForEach-Object { Write-Host $_ }
+    }
+    else {
+        Clear-Host
+        Write-Host 'MAY 2025 CAMPAIGN MONITOR'
+        Write-Host 'Waiting for authoritative progress source...'
     }
     Start-Sleep -Seconds 10
 }
