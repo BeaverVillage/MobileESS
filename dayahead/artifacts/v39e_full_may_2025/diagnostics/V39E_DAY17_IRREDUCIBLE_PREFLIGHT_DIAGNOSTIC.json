@@ -1,0 +1,45 @@
+{
+  "artifact_id": "V39E_DAY17_IRREDUCIBLE_PREFLIGHT_DIAGNOSTIC_V1",
+  "status": "TRUE_SCIENTIFIC_INFEASIBILITY_CANDIDATE_AFTER_IMPLEMENTATION_REPAIR",
+  "operating_day": "2025-05-17",
+  "case_family": "B1_B3_RSP",
+  "exact_blocker": "FROZEN_RSP_TEMPORAL_OCCUPANCY_AND_SITE_CAPACITY_CANNOT_SATISFY_FROZEN_PLANNING_VOLTAGE_AUTHORITY",
+  "full_exact_model": {
+    "status": "INFEASIBLE",
+    "gurobi_status": 3,
+    "MAX_PARALLEL_DAY_WORKERS": 4,
+    "GUROBI_THREADS_PER_MODEL": 4,
+    "IIS_path": "dayahead/artifacts/v39e_full_may_2025/diagnostics/V39E_RSP_MIGRATION_2025-05-17_IIS.ilp",
+    "IIS_SHA256": "c6ac36dfa717c603e26aa8da1a43842be814990201dba2ae7cccfa6911fe3efa",
+    "IIS_linear_constraint_count": 44,
+    "IIS_general_constraint_count": 10,
+    "IIS_constraint_families": {
+      "all_cohort": 21,
+      "frozen_C1_integer_exact": 10,
+      "frozen_planning_voltage": 1,
+      "planning_active_GPU_link": 13,
+      "site_capacity": 9
+    }
+  },
+  "diagnostics": {
+    "site_only_without_planning_voltage": "OPTIMAL_WITH_0_RUNNING_MIGRATIONS",
+    "Rack_relaxation": "NOT_APPLICABLE_RACK_IS_ALREADY_NON_ADDITIVE_COMPATIBILITY_ONLY_AND_NO_RACK_CONSTRAINT_APPEARS_IN_IIS",
+    "WAN_unlimited_capacity": "INFEASIBLE",
+    "migration_availability": "ALL_RUNNING_DESTINATIONS_ENABLED_STAY_OR_MIGRATE",
+    "temporal_window": "RW_FIXED_TEMPORAL_REFERENCE_PASSES_FOR_2025-05-17_WHILE_FROZEN_RSP_TEMPORAL_OCCUPANCY_IS_INFEASIBLE",
+    "common_initial_state": "31_OF_31_PASS_B0_B1_B2_B3_SHA_IDENTICAL_INTER_DAY_CARRY_0",
+    "previous_accepted_implementation": "V39D_DID_NOT_WIRE_PLANNING_VOLTAGE_INTO_SPATIAL_OR_MIGRATION_MILP_AND_COULD_RETURN_0_MIGRATION_BEFORE_A_FAILING_POSTCHECK",
+    "current_vs_intended_contract": "V39E_NOW_WIRES_INTEGER_EXACT_FROZEN_C1_AND_D1_FROZEN_PLANNING_VOLTAGE_INTO_RW_RSP_AND_MIGRATION_PLACEMENT",
+    "loader_authority_SHA_audit": "PASS"
+  },
+  "authority_SHA256": {
+    "Rack": "f302163fdc48a95aa27bb5b71893ad04b4fcb70b9682399d2d87e881b1f3d3ec",
+    "site_capacity": "bef9175ce8bcbbfcbdde6d66d41f7f10da18998859dec5000ec9fbed44fe0c9e",
+    "common_initial_state": "9d20c64d1f4f7bdbc56f70839b36f427dab255f8d606025a3b9da48b06711296",
+    "joint_voltage_authority": "3ee89daad6d63cffb70c1a890f5141cf33bf4c951c9a9c364ae36692bcda6151",
+    "May_voltage_applicability": "45c96a5654e1c70868b9e12ecf7f60d6443a88e5b62dab46138648a8f27faf81"
+  },
+  "frozen_science_changed": false,
+  "May_outcomes_used": false,
+  "recommended_next_mode": "DIAGNOSTIC_OVERRIDE_AFTER_EXHAUSTIVE_IMPLEMENTATION_REPAIR"
+}

@@ -1,0 +1,72 @@
+{
+  "CURRENT_PRODUCTION_AUTHORITY": "V39K",
+  "GLOBAL_MONTH_RERUN": "NO",
+  "GUROBI_THREADS_PER_MODEL": 4,
+  "MAX_PARALLEL_DAY_WORKERS": 4,
+  "MAY01_12_REUSE": true,
+  "MAY13_16_PASS_PROMOTION": false,
+  "ORCHESTRATOR_RESTART_COUNT_FOR_RESUME": 1,
+  "V39K": {
+    "May17_retained": true,
+    "RUNNING_migration_days": 12,
+    "authority": "V39K",
+    "authority_path": "dayahead/artifacts/v39k_may23_26_fallback_live_integration/V39K_PRODUCTION_INTEGRATION_AUTHORITY.json",
+    "authority_sha256": "7cff1c23614e29e36e4dac94554c889be0781820c9f39330275d9707a3c85b7a",
+    "fallback_migrations": {
+      "2025-05-23": 4,
+      "2025-05-24": 2,
+      "2025-05-25": 8,
+      "2025-05-26": 15
+    },
+    "minimum_RUNNING_migrations": 105,
+    "status": "PASS"
+  },
+  "artifact_id": "V39L_RESUME_AUTHORIZATION_V1",
+  "authorized_at_utc": "2026-09-05T08:47:00.930128+00:00",
+  "campaign_fingerprint": {
+    "authority_path": "dayahead/artifacts/v39k_may23_26_fallback_live_integration/V39K_PRODUCTION_INTEGRATION_AUTHORITY.json",
+    "authority_sha256": "7cff1c23614e29e36e4dac94554c889be0781820c9f39330275d9707a3c85b7a",
+    "campaign_fingerprint_sha256": "039510427e659729daa3341d4ae8276b00a44dfd51e007f5e5b3d439a16e2cd1",
+    "freeze_count": 124,
+    "freeze_manifest_sha256": "23ad2b73b63da117c18a59b654b1c7f67d9fa8a8c57b0cdc558fc6b923ee307e",
+    "preflight_sha256": "3b0f963ea7cc50cf0095b4076a36dfe64d3a58894e194432a674e9f2385bf3da"
+  },
+  "gates": {
+    "DETACHED_LAUNCH_TEST": "PASS",
+    "DUPLICATE_PROTECTION_TEST": "PASS",
+    "MAY01_12_PRESERVATION": "PASS",
+    "MAY13_16_CHECKPOINT_AUDIT": "PASS",
+    "MONITOR_DEAD_PID_TEST": "PASS",
+    "MONITOR_STALE_HEARTBEAT_TEST": "PASS",
+    "V39K_AUTHORITY_BINDING": "PASS"
+  },
+  "git_HEAD": "b5038922310aa6001bf8ef281cc9b1649f8bb637",
+  "git_branch": "codex/v39e-rw-anchored-initial-state-fast-validation",
+  "launch_client": {
+    "initiating_shell_exit_code": 0,
+    "initiating_shell_exited": true,
+    "initiating_shell_exited_at_utc": "2026-09-05T08:47:01.828320+00:00",
+    "launcher_pid": 47160,
+    "run_stdout": "SUCCESS: Attempted to run the scheduled task \"MobileESS_V39L_May_Resume_20260905_174700\".",
+    "started_at_utc": "2026-09-05T08:47:01.6937646Z"
+  },
+  "prelaunch_inventory": {
+    "ACTIVE_AUTHORITATIVE_ORCHESTRATORS": 0,
+    "DUPLICATE_DAY_WORKERS": 0,
+    "captured_at_utc": "2026-09-05T08:47:00.265850+00:00",
+    "duplicate_day_worker_pids": {},
+    "orchestrators": [],
+    "workers": []
+  },
+  "status": "PASS",
+  "task": {
+    "allow_start_on_batteries": true,
+    "do_not_stop_on_battery_transition": true,
+    "execution_time_limit": "PT0S",
+    "multiple_instances": "IgnoreNew",
+    "registered_at_utc": "2026-09-05T08:47:00.930128+00:00",
+    "registration_stdout": "SUCCESS: The scheduled task \"MobileESS_V39L_May_Resume_20260905_174700\" has successfully been created.",
+    "task_action": "cmd.exe /d /c \"C:\\codex_mobileess_workspace\\MobileESS_v39a_causal_aidc\\dayahead\\artifacts\\v39l_detached_may_resume\\V39L_SCHEDULED_MAY_RESUME.cmd\"",
+    "task_name": "MobileESS_V39L_May_Resume_20260905_174700"
+  }
+}
