@@ -12,7 +12,8 @@ def run_missing(day,case,progress):
     from dayahead.tools.run_v39e_may_day import _install_windows_safe_k_archive
     from dayahead.v40b.reuse import validate_case_files
     install_runtime();_install_windows_safe_k_archive()
-    runner=configure_v37_runner();runner.PASS_ID='MAY_2025_V40A_BASELINES'
+    # Keep nested beam checkpoint filenames below the Windows path limit.
+    runner=configure_v37_runner();runner.PASS_ID='V40B'
     runner.STATUS_ROOT=ROOT/'baseline_status';runner.DATE_RESULT_ROOT=ROOT/'baseline_dates'
     aidc=build_day(REPO,day,'B0' if case=='B2' else case)
     fp=runner.case_execution_fingerprint(REPO,day,case,aidc);beam=None
@@ -57,10 +58,13 @@ def day_worker(day):
                 validate_case_files(day,case,Path(cert['historical_checkpoint']),Path(cert['historical_case_root']))
                 completed[case]={'status':'REUSE_CERTIFIED','certificate':row['certificate'],'certificate_SHA':sha(Path(row['certificate']))}
             else:
-                if case=='B3':
-                    from dayahead.v40b.b3 import run
-                    run(day,emit)
-                else:run_missing(day,case,emit)
+                from dayahead.v40b.recovery import completed_case
+                saved=completed_case(day,case,method['method_SHA'])
+                if saved is None:
+                    if case=='B3':
+                        from dayahead.v40b.b3 import run
+                        run(day,emit)
+                    else:run_missing(day,case,emit)
                 p=output/case/'CASE_CERTIFICATE.json'
                 completed[case]={'status':'COMPLETE_NEW_V40A','certificate':str(p),'certificate_SHA':sha(p)}
             write(output/'CASE_COMPLETION.json',{'day':day,'cases':completed})
@@ -119,8 +123,13 @@ def orchestrate():
 
 def main():
     p=argparse.ArgumentParser();g=p.add_mutually_exclusive_group(required=True);g.add_argument('--orchestrate',action='store_true');g.add_argument('--day',choices=DAYS)
+    p.add_argument('--resume',action='store_true')
     a=p.parse_args();os.chdir(REPO)
-    if a.orchestrate:orchestrate()
+    if a.resume and not a.orchestrate:p.error('--resume requires --orchestrate')
+    if a.resume:
+        from dayahead.v40b.recovery import orchestrate_recovery
+        orchestrate_recovery()
+    elif a.orchestrate:orchestrate()
     else:day_worker(a.day)
 
 if __name__=='__main__':main()
