@@ -1,0 +1,25 @@
+{
+  "affected_reexecution_scope": "NONE: display only; May19 recovery uses previously sealed repair02 unchanged",
+  "campaign_processes_terminated": 0,
+  "cause": "The frozen monitor reads outer status only; B2 detail is emitted separately under baseline_status. The already-running May19 old worker also encountered the known Windows long-path defect and was automatically retried.",
+  "checks": [
+    "live baseline candidate/full MILP display and zero-based seed index",
+    "reject previous-worker/date/case data",
+    "preserve original failure latch and clear on PASS",
+    "54 stage/layout assertions",
+    "9 liveness assertions",
+    "live May18 progressed to MESS03",
+    "live May19 saved the previously failing MESS02 checkpoint"
+  ],
+  "execution_SHA": "d11c25cedd62d60069c2308a8a35eff8265352bbb68111c64d4dbb6ca96b6977",
+  "frozen_method_and_execution_source_input_verification": "PASS_UNCHANGED",
+  "method_SHA": "9af44cb41650c0e3c5643800f6600a4f8e91bb213a775a12b8d4cc47560b584a",
+  "new_files": {
+    "dayahead/tools/monitor_v40b_may_live.ps1": "86e0d203d375f31016312e5e69450e3e58ac9ad653940af855488fd6da37300f",
+    "tests/dayahead/test_v40b_live_detail.ps1": "9baeb337be6d58fdf956521f5d2d56da628b1f16b2222632f7848864e299d873"
+  },
+  "scope": "READ_ONLY_MONITOR_COMPANION",
+  "solver_and_science_changes": 0,
+  "status": "PASS",
+  "time_utc": "2026-09-05T16:07:32.080435+00:00"
+}

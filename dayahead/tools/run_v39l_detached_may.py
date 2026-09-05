@@ -185,18 +185,18 @@ def self_test() -> dict[str, Any]:
     _write_cmd(command, ["--detach-probe", str(output.resolve())], log)
     task = register_one_shot_task(task_name, command)
     launcher_record_path = ROOT / "V39L_DETACHMENT_LAUNCHER.json"
-    launcher: dict[str, Any] = {}
-    final: dict[str, Any] = {}
-    try:
-        launcher = run_task_from_terminating_shell(task_name, launcher_record_path)
-        deadline = time.time() + 30
-        while time.time() < deadline:
-            if output.is_file() and read_json(output).get("state") == "COMPLETE":
+    launcher = run_task_from_terminating_shell(task_name, launcher_record_path)
+
+    running: dict[str, Any] | None = None
+    deadline = time.time() + 30
+    while time.time() < deadline:
+        if output.is_file():
+            running = read_json(output)
+            if running.get("state") == "COMPLETE":
                 break
-            time.sleep(0.5)
-        final = read_json(output) if output.is_file() else {}
-    finally:
-        delete_task_registration(task_name)
+        time.sleep(0.5)
+    final = read_json(output) if output.is_file() else {}
+    delete_task_registration(task_name)
     shell_exit = launcher.get("initiating_shell_exited_at_utc")
     child_complete = final.get("completed_at_utc")
     passed = bool(
@@ -357,7 +357,7 @@ def launch() -> dict[str, Any]:
     cycles: list[dict[str, Any]] = []
     last_heartbeat = None
     deadline = time.time() + 80
-    while time.time() < deadline:
+    while time.time() < deadline and len(cycles) < 4:
         time.sleep(10)
         if not PROGRESS.is_file():
             continue
@@ -392,12 +392,6 @@ def launch() -> dict[str, Any]:
             "day_status": day_status,
             "inventory": inventory,
         })
-        if len(cycles) >= 3:
-            signatures = [
-                json.dumps(row.get("day_status", {}), sort_keys=True) for row in cycles
-            ]
-            if len(set(signatures)) > 1:
-                break
     inventory = process_inventory()
     progress_signatures = [
         json.dumps(row.get("day_status", {}), sort_keys=True) for row in cycles

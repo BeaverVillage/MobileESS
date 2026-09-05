@@ -1,0 +1,69 @@
+{
+  "development_diagnostics": [
+    "Initial schema validator used April aliases; corrected to unchanged current V39E producer schema before freeze.",
+    "Missing May20-31 D-1 traffic inputs materialized with frozen model; method/source parameters unchanged.",
+    "Evidence test uses April fixtures and test doubles, not May scientific results. Native OpenDSS emitted a Windows exception diagnostic; the final uncaptured test completed PASS. Corrected test-double signature before final PASS."
+  ],
+  "execution_SHA": "91266a7c196850a00627af2c1d6e72b721f963742fb1552136cb375fb74563a5",
+  "gates": {
+    "V40B_ADDITIONAL_D1_TRAFFIC_INPUTS.json": "PASS",
+    "V40B_DETACHED_TEST.json": "PASS",
+    "V40B_MAY_A0_ADMISSION_TEST.json": "PASS",
+    "V40B_NUMERICAL_REGRESSION.json": "PASS",
+    "V40B_PRESERVATION_RECHECK.json": "PASS",
+    "V40B_REUSE_AUTHORIZATION.json": "PASS"
+  },
+  "implementation_repair_SHA": "cd9a5c09e13fc9df0c4325f6d886b9d0bf0deac2cf46d9ec42862fe45baeea4c",
+  "monitor": {
+    "test_v39l_monitor_liveness.ps1": {
+      "output": "PASS: 9 V39L liveness assertions; RUNNING/STALE/DEAD/FAIL/PASS verified.",
+      "source_SHA": "c78054b11fd0defd0a76d436162746e57256305bcac540b48647a43d74dd758f",
+      "status": "PASS"
+    },
+    "test_v40b_monitor.ps1": {
+      "output": "PASS: 54 V40A stage/layout assertions; monitor syntax PASS.",
+      "source_SHA": "e5355f9ad96ea011e88740ee3bd685cbcb5af22785fb7c2e7d1c006929949644",
+      "status": "PASS"
+    }
+  },
+  "pytest": {
+    "V40B_EVIDENCE_PYTEST.xml": {
+      "SHA": "d05776e4b456e1dcccaeeb54274a6dbda4be8da4d398757ffff495896c5ded3b",
+      "tests": 1
+    },
+    "V40B_PYTEST.xml": {
+      "SHA": "f802144d94e0c96df4c16cf2b655861beb72d281f3846c74be81960b78ef6329",
+      "tests": 62
+    }
+  },
+  "required_checks": {
+    "124_case_matrix": "PASS",
+    "B0_B1_B2_current_loader": "PASS",
+    "dead_PID": "PASS",
+    "detached_child_survival": "PASS",
+    "duplicate_orchestrator": "PASS",
+    "exactly_one_M1": "PASS",
+    "joint_Fresh_Actual_binding": "PASS",
+    "method_freeze": "PASS",
+    "no_Fresh_inside_loop": "PASS",
+    "old_B3_rejection": "PASS",
+    "old_result_preservation": "PASS",
+    "stale_heartbeat": "PASS",
+    "terminal_invariant": "PASS"
+  },
+  "scheduler_environment_test": "PASS",
+  "sealed_at_utc": "2026-09-05T11:41:31.156804+00:00",
+  "status": "PASS",
+  "tests_source_files": {
+    "tests/dayahead/test_v40a_accepted_initial.py": "5b42e81853a974c145f8bb1167dd07b75e9510ee85ddddfa2b587d275181c8b5",
+    "tests/dayahead/test_v40a_coordination.py": "81f5ba9ab79fdf136a51608e9a5184fe347b7dcc45ad0bc3c17502c865a73c8b",
+    "tests/dayahead/test_v40a_firewall_physics.py": "12a8c1551e04fb1d139fb5b76ad23391df1d79df88f06a274eb9608e4028e3cf",
+    "tests/dayahead/test_v40a_grid.py": "24f2a694ee86d6ee5f2d8ed84e04d2225eaa72539aaac9e62afc9c70bc85a229",
+    "tests/dayahead/test_v40a_invariants.py": "ad12a9b4fc2490d196477652a71a9bedcbd38c4cd47a438ff601521591f0c3ba",
+    "tests/dayahead/test_v40a_postfreeze.py": "d575c566fa5b0c325286574d30a857176af90814ee174e7a7c1ab0733c85be9c",
+    "tests/dayahead/test_v40a_recourse_model.py": "cca656d12f930b51697adaa5c6528714c1b567b8dd7ffce2d93f104a1a506e5e",
+    "tests/dayahead/test_v40a_runtime_guard.py": "0ac8915e42e845f9ec146e3da332f6b79219cb6df915ab86e1d09ff44d82e963",
+    "tests/dayahead/test_v40b_b3_evidence.py": "dad7a4dcfb4af3d14bcf00c4be7e6e86ce0b986a70f69eecc0ab123dd4a9ce23",
+    "tests/dayahead/test_v40b_gates.py": "dc2ff6c96a4b8c2969f23a10be061dd7d04142a851c3a5b7493bc5a9f990c8ac"
+  }
+}

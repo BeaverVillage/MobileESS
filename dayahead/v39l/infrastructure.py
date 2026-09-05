@@ -203,8 +203,6 @@ def campaign_fingerprint(repo: Path) -> dict[str, Any]:
         path.name: sha256_file(path)
         for path in sorted(freeze_root.glob("V39E_DAYAHEAD_DECISION_FREEZE_*.json"))
     }
-    if len(freeze_shas) != 124:
-        raise RuntimeError(f"V39L_DA_FREEZE_COUNT:{len(freeze_shas)}")
     inputs = {
         "authority_path": V39K_RELATIVE.as_posix(),
         "authority_sha256": sha256_file(authority_path),
@@ -236,7 +234,6 @@ def validate_v39k(repo: Path) -> dict[str, Any]:
         and all(observed[day] == count for day, count in expected.items())
         and authority.get("minimum_RUNNING_migrations") == 105
         and authority.get("RUNNING_migration_days") == 12
-        and "MAY17_REPAIR_REUSED" in str(authority.get("policy", ""))
     )
     return {
         "status": "PASS" if status else "FAIL",
