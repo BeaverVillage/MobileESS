@@ -1,0 +1,54 @@
+{
+  "PRIMARY_OBJECTIVE_IDENTITY_PASS": "YES",
+  "exact_J": "sum_j sum_t g_j * abs(1_[s0_j,s0_j+d_j)(t) - 1_[s_j,s_j+d_j)(t)) = sum_j 2*g_j*min(s_j-s0_j,d_j)",
+  "absolute_value_inside_job_sum": true,
+  "aggregate_net_load_absolute_value": false,
+  "aggregation": "Per-job symmetric reservation deviation summed; identical cohort counts multiply the same coefficient",
+  "GPU_weighting": "Immutable integer requested GPUs",
+  "slot_weighting": "1 per integer 15-minute slot",
+  "time_domain": "Complete reservation intervals, including pre-day and post-H; no clipping to [24,120)",
+  "site_dimension_in_objective": false,
+  "site_placement_change_objective_cost": 0,
+  "factor_of_two": true,
+  "one_way_GPU_slots": "J/2",
+  "symmetric_GPU_hours": "J/4",
+  "one_way_GPU_hours": "J/8",
+  "omitted_constant_terms": 0,
+  "upper_bound": "For each job, delta_max=max allowed start minus RSP start; U=sum_j 2*g_j*min(delta_max,d_j). Monotone per-job cost, relaxation of all coupling constraints: a rigorous upper bound, not a lower bound.",
+  "source_function": "def occupancy_cost(start0,duration,start,gpu):\n    assert start>=start0 and duration>0\n    return 2*gpu*min(start-start0,duration)\n",
+  "source_builder": "def build_model(a,out,name):\n    cap,_=_load_capacity(REPO);sites=tuple(cap.aidc_ids);cs=v39g.cohorts(a)\n    assert [cap.site_capacity[s] for s in sites]==[64,32,64,32,80,64,32,64,32,64,32,64]\n    horizon=max(120,int((a.latest_start+a.RSP_duration_slots).max()))\n    m=gp.Model(name);configure(m,out,name);vs={};events=defaultdict(list);siteevents=defaultdict(list);objs=[gp.LinExpr(),gp.LinExpr(),gp.LinExpr()]\n    for k,c in enumerate(cs):\n        legal=_compatible_sites(cap,c[\"g\"],c[\"fixed_site\"] or None);group=[]\n        for site,start in candidate_options(c,legal):\n            v=m.addVar(vtype=GRB.INTEGER,ub=len(c[\"members\"]),name=f\"n[{k},{site},{start}]\");vs[k,site,start]=v;group.append(v)\n            events[start].append((c[\"g\"],v));events[start+c[\"d\"]].append((-c[\"g\"],v))\n            if start<120 and start+c[\"d\"]>24:\n                siteevents[max(start,24),site].append((c[\"g\"],v));siteevents[min(start+c[\"d\"],120),site].append((-c[\"g\"],v))\n            delta=start-c[\"lo\"]\n            for obj,weight in zip(objs,(v39g.occupancy_cost(c[\"lo\"],c[\"d\"],start,c[\"g\"]),int(delta>0),c[\"g\"]*delta)):obj.addTerms(weight,v)\n        m.addConstr(gp.quicksum(group)==len(c[\"members\"]),name=f\"cohort_all_jobs[{k}]\")\n    # Exact sparse difference representation of the same interval sums, with\n    # O(options+horizon) nonzeros instead of O(options*duration).\n    total=m.addVars(horizon,lb=0,ub=624,name=\"complete_total_GPU\")\n    for t in range(horizon):\n        terms=events[t];delta=gp.LinExpr([w for w,v in terms],[v for w,v in terms])\n        m.addConstr(total[t]==(total[t-1] if t else 0)+delta,name=f\"complete_aggregate_recurrence[{t}]\")\n    gpu={}\n    for s in sites:\n        for t in range(24,120):\n            gpu[t,s]=m.addVar(vtype=GRB.INTEGER,lb=0,ub=cap.site_capacity[s],name=f\"site_GPU[{s},{t}]\")\n            terms=siteevents[t,s];delta=gp.LinExpr([w for w,v in terms],[v for w,v in terms])\n            m.addConstr(gpu[t,s]==(gpu[t-1,s] if t>24 else 0)+delta,name=f\"site_recurrence[{s},{t}]\")\n    coeff,nodes=grid.load_coefficients(out)\n    with np.load(out/\"V39G_C1_INTEGER_TABLES.npz\") as raw:tables={s:raw[s].copy() for s in sites}\n    assert all(np.all(np.diff(v,axis=1)>0) for v in tables.values())\n    screen=[]\n    for t,c in enumerate(coeff):\n        aa,bb,names=grid.inequalities(c);lo=np.array([tables[s][t,0] for s in sites]);hi=np.array([tables[s][t,-1] for s in sites])\n        box=np.maximum(aa,0)@hi+np.minimum(aa,0)@lo;keep=box>bb-1e-10\n        if keep.any():\n            pcc=m.addMVar(12,lb=lo,ub=hi,name=f\"PCC[{t}]\")\n            for i,s in enumerate(sites):m.addGenConstrPWL(gpu[t+24,s],pcc[i].item(),list(range(cap.site_capacity[s]+1)),tables[s][t].tolist(),name=f\"C1[{t},{s}]\")\n            m.addMConstr(aa[keep],pcc,\"<\",bb[keep],name=np.array(names)[keep].tolist())\n        screen.append({\"slot\":t,\"all\":len(bb),\"kept\":int(keep.sum()),\"min_redundant_margin\":float((bb-box)[~keep].min()) if (~keep).any() else None})\n    m.update();atomic(out/f\"{name}_ALGEBRA.json\",{\"allocation_variables\":len(vs),\"cohorts\":len(cs),\"reservation_objective_time_domain\":[0,horizon],\"site_grid_constraint_time_domain\":[24,120],\"exact_event_recurrence\":True,\"outside_domain_site_elimination\":\"smallest compatible site; exact lexical projection\", \"grid_screening_proof\":screen,\"RUNNING_migration_variables\":0,\"site_capacities\":[cap.site_capacity[s] for s in sites]})\n    return {\"model\":m,\"variables\":vs,\"cohorts\":cs,\"objectives\":objs,\"capacity\":cap,\"sites\":sites,\"coefficients\":coeff,\"nodes\":nodes,\"tables\":tables}\n",
+  "source_function_SHA256": "c94047c0019d637cf4590d34356fdaca822eff9c52288f7e74b0733301fb439d",
+  "source_builder_SHA256": "ed52cc96df7f6d399dd19c7e4ddfe1785db859671b4972302b2d1229f5b9eb67",
+  "source_seal": {
+    "dayahead/tools/run_v39h_shadow.py": "c8cc5c731b257260084c99f78f5da012aa4baebbc3efaa1991d6f9f8520cc8eb",
+    "dayahead/tools/run_v39g_day17_shadow.py": "cbdb713e150bb558c49774a1fe82c2e3d08bca380fb9134bdf5cef135614bb56",
+    "dayahead/tools/v39h_shadow_grid.py": "3d6b5fc9bcdd88c24f3a08f9f8455ae0e2bc98c60c236b55dbeceee368aacbf9",
+    "dayahead/tools/v39g_shadow_grid.py": "7b3ec771196dc8f33a42d8d33451319b094a649c3ce13e83ee7f2c1559831487"
+  },
+  "witnesses": [
+    {
+      "day": "2025-05-24",
+      "explicit_per_job_symmetric_occupancy_GPU_slots": 108,
+      "certified_global_lower_bound": 108,
+      "saved_raw_lower_bound": 107.9999999999996,
+      "schedule_SHA256": "f3bb2f84199b87ff2e000bfc01ff75cb71baa3070291a5303d0fa91e7f2c92e6",
+      "certificate_SHA256": "4b6370e9b097fef584d9c773a1f42fedc78922486296f9c9a7533c7a19022ebe"
+    },
+    {
+      "day": "2025-05-25",
+      "explicit_per_job_symmetric_occupancy_GPU_slots": 29568,
+      "certified_global_lower_bound": 29568,
+      "saved_raw_lower_bound": 29568.0,
+      "schedule_SHA256": "79159248061ce4842bf896637026323d183e518256309180d4b214f8c95ea269",
+      "certificate_SHA256": "80b8ad1559e625940f718680e31729554fe4d14456393d9aa293b3f4eae5ceed"
+    },
+    {
+      "day": "2025-05-26",
+      "explicit_per_job_symmetric_occupancy_GPU_slots": 13086,
+      "certified_global_lower_bound": 13086,
+      "saved_raw_lower_bound": 13086.0,
+      "schedule_SHA256": "2ebee2cb043c75388d29258a55ed181248894f160d653abd8935765dc2feb8ac",
+      "certificate_SHA256": "34ddb4113867880f8d7ebd7abc033519338915581c8917359719c58197d97946"
+    }
+  ]
+}
