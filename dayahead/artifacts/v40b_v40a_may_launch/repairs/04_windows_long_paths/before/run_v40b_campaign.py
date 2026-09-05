@@ -28,14 +28,10 @@ def run_missing(day,case,progress):
     write(ROOT/'days'/day/case/'CASE_CERTIFICATE.json',certificate);return certificate
 
 def day_worker(day):
-    method,_=verify_freeze()
-    from dayahead.v40b.windows_paths import install_beam_paths
-    install_beam_paths()
-    identity=current_process_identity();output=ROOT/'days'/day
+    method,_=verify_freeze();identity=current_process_identity();output=ROOT/'days'/day
     output.mkdir(parents=True,exist_ok=True);stop=threading.Event();lock=threading.RLock()
     state={'day':day,'status':'RUNNING','case':'B3','current_stage':'A0','completed_units':0,'total_units':10,
-           'worker_pid':os.getpid(),'worker_creation_time_utc':identity['creation_time_utc'],'method_SHA':method['method_SHA'],
-           'windows_path_policy':'EXTENDED_LENGTH_BEAM_CHECKPOINTS'}
+           'worker_pid':os.getpid(),'worker_creation_time_utc':identity['creation_time_utc'],'method_SHA':method['method_SHA']}
     def emit(value=None):
         with lock:
             if value:
@@ -128,14 +124,11 @@ def orchestrate():
 def main():
     p=argparse.ArgumentParser();g=p.add_mutually_exclusive_group(required=True);g.add_argument('--orchestrate',action='store_true');g.add_argument('--day',choices=DAYS)
     p.add_argument('--resume',action='store_true')
-    p.add_argument('--repair-id',choices=['02_windows_baseline_path','04_windows_long_paths'])
     a=p.parse_args();os.chdir(REPO)
-    if a.repair_id and not a.resume:p.error('--repair-id requires --resume')
     if a.resume and not a.orchestrate:p.error('--resume requires --orchestrate')
     if a.resume:
-        from dayahead.v40b import recovery
-        if a.repair_id:recovery.REPAIR=ROOT/'repairs'/a.repair_id
-        recovery.orchestrate_recovery()
+        from dayahead.v40b.recovery import orchestrate_recovery
+        orchestrate_recovery()
     elif a.orchestrate:orchestrate()
     else:day_worker(a.day)
 
