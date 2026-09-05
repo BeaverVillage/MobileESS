@@ -1,0 +1,90 @@
+{
+  "Fresh_Actual_same_joint_SHA": "33fa59373e71d55b16ffa02c82b12acc19807eb05ea23dfdf5392dc3d0252520",
+  "M1_MF_post_AC_mobility_identical": true,
+  "joint_recomputed_from_complete_payload": true,
+  "source_and_contract_SHAs_rechecked": true,
+  "status": "PASS",
+  "table_audit": {
+    "AIDC_FEEDBACK_PASS1_DECISION.parquet": {
+      "required_columns": [
+        "job_uid",
+        "state_at_issue",
+        "qos",
+        "requested_GPU",
+        "safe_duration_slots",
+        "start_slot",
+        "end_slot",
+        "AIDC_site",
+        "Rack_label",
+        "migration_selected",
+        "migration_destination",
+        "terminal_class",
+        "post_H_site"
+      ],
+      "rows": 582,
+      "sha256": "f69138206de22e196c684841472240c571b6281792b913c717bde2dc470e2b7c"
+    },
+    "AIDC_PASS0_DECISION.parquet": {
+      "required_columns": [
+        "job_uid",
+        "state_at_issue",
+        "qos",
+        "requested_GPU",
+        "safe_duration_slots",
+        "start_slot",
+        "end_slot",
+        "AIDC_site",
+        "Rack_label",
+        "migration_selected",
+        "migration_destination",
+        "terminal_class",
+        "post_H_site"
+      ],
+      "rows": 582,
+      "sha256": "f69138206de22e196c684841472240c571b6281792b913c717bde2dc470e2b7c"
+    },
+    "MESS_FINAL_PQ_RECOURSE.parquet": {
+      "required_columns": [
+        "mess_id",
+        "slot",
+        "P_kw_M1",
+        "Q_kvar_M1",
+        "P_kw_final",
+        "Q_kvar_final",
+        "delta_P_kw",
+        "delta_Q_kvar",
+        "SoC_final"
+      ],
+      "rows": 384,
+      "sha256": "8956ed0f44173792e57b5b1503a59d310bbf14d367878f08d87e1f4249dfc3f5"
+    },
+    "MESS_PASS1_TRAJECTORY.parquet": {
+      "required_columns": [
+        "mess_id",
+        "slot",
+        "mode",
+        "origin_service",
+        "destination_service",
+        "departure_slot",
+        "route_link_ids",
+        "connection_ready_slot",
+        "P_kw",
+        "Q_kvar",
+        "SoC",
+        "battery_energy_kWh",
+        "travel_energy_kWh",
+        "ETA_Q50",
+        "ETA_Q90"
+      ],
+      "rows": 384,
+      "sha256": "d82a5b793c66b569f27789831343eefa2872982fa6941a3d8b02089d5de5108f"
+    }
+  },
+  "terminal": {
+    "POST_H_RESERVATION_PROFILE_CHANGED_JOBS": 0,
+    "POST_H_SITE_STATE_CHANGED_JOBS": 0,
+    "REPAIR_INDUCED_INCREMENTAL_POST_MIDNIGHT_GPU_H": 0.0,
+    "safe_runtime_GPU_state_qos_preserved": true,
+    "status": "PASS"
+  }
+}

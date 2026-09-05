@@ -1,0 +1,36 @@
+{
+  "May_joint_decisions_before_failure": 0,
+  "May_result_based_tuning": 0,
+  "May_route_searches_before_failure": 0,
+  "V40A_method_SHA_unchanged": "9af44cb41650c0e3c5643800f6600a4f8e91bb213a775a12b8d4cc47560b584a",
+  "affected_B3_dates": [
+    "2025-05-01",
+    "2025-05-02",
+    "2025-05-03",
+    "2025-05-04",
+    "2025-05-05",
+    "2025-05-06",
+    "2025-05-07",
+    "2025-05-08",
+    "2025-05-09",
+    "2025-05-10",
+    "2025-05-11",
+    "2025-05-12"
+  ],
+  "changed_sources": {
+    "dayahead/tools/v40b_launch.py": {
+      "after": "a7ab91c2b6891d74dcb7233112c6bdb3de4cc94988048523ed90911ad60fc387",
+      "before": "b6e3f95167c2a2038be0cd7e0cc55d69b8704a4cdb495381144c791eca541c24"
+    }
+  },
+  "classification": "DETACHED_ENVIRONMENT_IMPLEMENTATION_DEFECT_ONLY",
+  "environment_test_SHA": "3644862a03beed2a249bcd9f15a4ce7aecbe60a901180fef74f8477d5bd5c829",
+  "old_baseline_cases_rerun": 0,
+  "preserved_attempt": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40b_v40a_may_launch\\attempts\\01_missing_scheduler_git",
+  "repair": "Pin the detected Git directory in scheduled CMD PATH; leave inherited PATH entries intact.",
+  "root_cause": "Task Scheduler PATH did not contain the bundled git cmd directory; _load_capacity failed before A0 completion.",
+  "status": "PASS",
+  "stop_method": "Stop-ScheduledTask followed by identity-scoped termination of remaining failed-scope orchestrator, day workers, and its monitor",
+  "task_stop_alone_did_not_terminate_python_descendants": true,
+  "timestamp": "2026-09-05T11:46:53.443894+00:00"
+}

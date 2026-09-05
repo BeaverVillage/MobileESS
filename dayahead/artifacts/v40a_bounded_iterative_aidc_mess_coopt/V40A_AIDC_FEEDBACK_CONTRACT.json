@@ -1,0 +1,26 @@
+{
+  "MESS_during_A1": "ALL mobility and M1 P/Q FIXED",
+  "PENDING_placement": "existing site GPU and logical Rack compatibility",
+  "RUNNING_A0_decision": "FIXED_IN_A1",
+  "RUNNING_mobility_policy": "User confirmed: retain temporal-infeasibility prerequisite; no added migration from feasible A0/M1",
+  "WorkLimit_reporting": "incumbent and bound; no global certificate unless solver OPTIMAL",
+  "new_SLA_or_deadline": false,
+  "primary": "MIN rho_max",
+  "primary_nondegradation_tolerance": 1e-06,
+  "quaternary": "DETERMINISTIC_TIE",
+  "secondary": "MIN complete-interval site-time symmetric GPU-slot occupancy deviation",
+  "solver": {
+    "FeasibilityTol": 1e-08,
+    "IntFeasTol": 1e-09,
+    "MIPGap": 0,
+    "MIPGapAbs": 0,
+    "OptimalityTol": 1e-08,
+    "Seed": 20260905,
+    "Threads": 4,
+    "WorkLimit_per_lex_stage": 60
+  },
+  "source_eligibility": "dayahead/tools/run_v39g_day17_shadow.py:eligible_mask",
+  "temporal_domain": "RSP_start <= start <= RW_completion - safe_duration, intersect exact A0 post-H profile equality",
+  "temporal_eligibility": "D1-visible PENDING standby with SAFE_CAUSAL_RUNTIME_PENDING and RSP_start <= RW_completion - safe_duration",
+  "tertiary": "MIN additional RUNNING migrations; identically zero under retained escalation policy"
+}
