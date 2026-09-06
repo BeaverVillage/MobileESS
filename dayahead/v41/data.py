@@ -74,6 +74,19 @@ def atomic_json(path, value):
     write_json(Path(path), value)
 
 
+def parquet_index(frame):
+    """Parquet retains every timestamp but has no DatetimeIndex.freq field.
+
+    Normalize only that nonserialized metadata before writing so the strict
+    full read-back comparison remains enabled, including timestamp equality.
+    """
+    if isinstance(frame.index, pd.DatetimeIndex):
+        frame = frame.copy()
+        frame.index = frame.index.copy(deep=True)
+        frame.index.freq = None
+    return frame
+
+
 def causal_history(day):
     """Expanding all positive-GPU raw history, no rolling-window/decay restriction.
 
@@ -166,6 +179,7 @@ def causal_history(day):
     work['bin'] = work.submit_time.dt.floor('30min')
     modeled = work.groupby('bin').agg(work_GPUh=('work_GPUh', 'sum'), modeled_end_max=('end_time', 'max'))
     bins = bins.join(modeled); bins['work_GPUh'] = bins.work_GPUh.fillna(0.)
+    bins = parquet_index(bins)
     bins.index.name = 'arrival_bin'
     for name, frame in [('runtime_history', history), ('bins', bins), ('mature_work_jobs', work)]:
         path = folder / (name + '.parquet')

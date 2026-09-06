@@ -157,3 +157,14 @@ def test_terminal_persistence_roundtrip_and_independent_snapshot(tmp_path):
     independent=read(tmp_path/'INDEPENDENT_DAY_TERMINAL_BOUNDARY_AUDIT.json')
     assert independent['initial_snapshot']==common['snapshot']
     assert not independent['previous_policy_day_terminal_state_used']
+
+
+def test_causal_bin_index_strict_parquet_roundtrip_preserves_all_values(tmp_path):
+    import pandas as pd
+    from dayahead.v41.data import parquet_index
+    original=pd.DataFrame({'count':[3,0,4]},index=pd.date_range('2025-04-30',periods=3,freq='30min',tz='UTC',name='arrival_bin'))
+    frame=parquet_index(original)
+    assert original.index.freq is not None and frame.index.freq is None
+    assert frame.index.equals(original.index) and frame.equals(original)
+    path=tmp_path/'bins.parquet';frame.to_parquet(path,index=True)
+    pd.testing.assert_frame_equal(frame,pd.read_parquet(path),check_exact=True)
