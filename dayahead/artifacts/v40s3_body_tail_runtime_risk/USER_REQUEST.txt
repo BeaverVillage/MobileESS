@@ -1,0 +1,1495 @@
+# ============================================================
+# V40S3 — SELECTIVE BODY / LONG-RUNTIME-RISK FORECAST
+#
+# Goal:
+#   Improve PENDING-job Day-Ahead runtime handling WITHOUT
+#   reopening migration, terminal-state, Rack/WAN, MESS,
+#   event-trigger, local-repair, or electrical logic.
+#
+# Core principle:
+#
+#   BODY jobs:
+#       predict runtime probabilistically
+#
+#   LONG-RUNTIME-RISK jobs:
+#       do NOT require an accurate tail runtime point estimate
+#       use a conservative existing-authority fallback
+#       and mark them as unsuitable for aggressive flexibility.
+#
+# THIS REVISION IS ML + INTERFACE RESEARCH ONLY.
+# NO PRODUCTION OPTIMIZER INTEGRATION.
+# ============================================================
+
+WORKING NAME:
+V40S3_BODY_TAIL_RUNTIME_RISK
+
+NEW BRANCH:
+codex/v40s3-body-tail-runtime-risk
+
+NEW WORKTREE:
+C:\codex_mobileess_workspace\MobileESS_v40s3_body_tail_runtime_risk
+
+SOURCE:
+dayahead/v40s3/
+
+ARTIFACTS:
+dayahead/artifacts/v40s3_body_tail_runtime_risk/
+
+============================================================
+0. CURRENT AUTHORITY MUST BE RESOLVED FIRST
+============================================================
+
+Before doing any scientific work:
+
+1. Fetch/resolve the LIVE current PR #27 head.
+
+Do NOT assume the v17.0 document's historical PR #27 SHA
+8ff3dc608d91cbd76c750713167d675297365f0d
+is still the current Git head.
+
+The repository has advanced after that document.
+
+Record:
+
+- exact live PR #27 head SHA
+- branch
+- ancestry
+- current V40J/V40 runtime artifacts present at that head
+
+2. Resolve and record V40S2:
+
+scientific commit:
+e1a14ff69d6ce1581b3e11ca37b2cc9fe5f7da84
+
+reported final receipt short SHA:
+00dadb1
+
+Resolve the full receipt SHA from Git.
+
+3. V40S2 is a READ-ONLY scientific reference.
+
+Do NOT merge V40S2 into current production code.
+
+4. Create V40S3 as a separate worktree.
+
+============================================================
+1. CURRENT OPTIMIZATION CONTRACT — ABSOLUTELY FROZEN
+============================================================
+
+The current operational architecture is:
+
+D-1 18:00 fixed AEST
+one-shot Day-Ahead
+15-minute / 96-slot
+
+B3:
+
+A0
+→ M1_ROUTE_PQ
+→ A1_FEEDBACK
+→ MF_FIXED_ROUTE_PQ
+→ JOINT_FREEZE
+→ FRESH
+→ optional fixed-discrete P/Q AC restoration
+
+This structure MUST NOT change in V40S3.
+
+Explicitly forbidden:
+
+- event-trigger
+- rolling MPC
+- local repair
+- event-only AC loop
+- repeated AIDC feedback
+- second MESS route search
+- new post-Fresh AIDC optimization
+- new post-Fresh migration
+- additional coordination rounds
+
+Event-trigger / rolling / local-repair historical code must remain
+HISTORICAL / SUPERSEDED.
+
+============================================================
+2. MIGRATION / TERMINAL CONTRACT — DO NOT TOUCH
+============================================================
+
+This is the most important scope firewall.
+
+Do NOT modify:
+
+- RUNNING migration
+- checkpoint mechanics
+- WAN
+- READY/restart
+- Rack compatibility
+- site-capacity logic
+- terminal-state preservation
+- V39J/V39K fallback authority
+- A1 RUNNING freeze
+- Actual fixed replay
+
+Current rule remains:
+
+A1 freezes ALL RUNNING-job:
+
+- site
+- start
+- end
+- migration state
+
+A1 must NEVER create a new RUNNING migration.
+
+V40S3 must not introduce:
+
+TAIL_RISK -> MIGRATE
+
+as a hard or soft production rule.
+
+Do not reopen the migration problem.
+
+============================================================
+3. EXACT SCIENTIFIC QUESTION
+============================================================
+
+The question is NOT:
+
+"Can every job runtime be predicted accurately?"
+
+The question is:
+
+Can PENDING jobs be separated at D-1 into:
+
+A. a BODY region where runtime is predictable enough
+   for Day-Ahead temporal/spatial scheduling
+
+and
+
+B. a LONG-RUNTIME-RISK region where exact runtime prediction
+   is unreliable and should not be relied upon for aggressive
+   flexibility decisions?
+
+Mathematically:
+
+p_tail,j(u)
+=
+P(T_j > u | X_j)
+
+BODY:
+p_tail,j < eta
+
+TAIL-RISK:
+p_tail,j >= eta
+
+For BODY jobs:
+
+Q50_j(T)
+Q90_j(T)
+
+For TAIL-RISK jobs:
+
+do NOT require a precise T_hat_j.
+
+============================================================
+4. THIS REVISION TARGETS PENDING JOBS ONLY
+============================================================
+
+Primary runtime redesign scope:
+
+PENDING jobs at Day-Ahead issue time.
+
+Do NOT redesign RUNNING duration.
+
+Current RUNNING handling remains frozen/current authority.
+
+Reason:
+
+- A1 RUNNING decisions are already frozen
+- RUNNING migration/terminal authority was difficult to close
+- V40S3 must remain a local change
+
+Create:
+
+V40S3_SCOPE_CONTRACT.json
+
+with:
+
+PENDING_RUNTIME_REDESIGN = YES
+RUNNING_RUNTIME_REDESIGN = NO
+RUNNING_MIGRATION_CHANGE = NO
+A1_RUNNING_CHANGE = NO
+
+============================================================
+5. DO NOT ALTER CURRENT PRODUCTION RUNTIME YET
+============================================================
+
+Current production/current reference runtime remains read-only.
+
+Do NOT replace:
+
+- V35R3D-R1
+- V40J current baseline
+- production q
+- current RSP materialization
+
+during this revision.
+
+V40S3 outputs a candidate runtime interface only.
+
+PRODUCTION_INTEGRATION = NO
+
+============================================================
+6. FIRST TASK — REUSE EXISTING FORENSICS
+============================================================
+
+Before any new fit, read and summarize the existing:
+
+- V40I runtime forensic
+- V40K
+- V40L
+- V40N
+- V40Q
+- V40S
+- V40S2
+- V40J current runtime redesign artifacts if present
+
+Do not repeat expensive work already completed.
+
+Create:
+
+V40S3_EXISTING_RUNTIME_EVIDENCE_AUDIT.md
+V40S3_EXISTING_RUNTIME_EVIDENCE_AUDIT.json
+
+Answer specifically:
+
+1. Is large positive runtime error concentrated in long jobs?
+2. Which runtime ranges contribute most GPU-weighted underprediction?
+3. Does a body region exist where Q90 prediction is materially safer?
+4. At what durations does error variance sharply increase?
+5. What fraction of dangerous underprediction mass lies above
+   candidate duration thresholds?
+
+============================================================
+7. PRIMARY RISK IS POSITIVE UNDERPREDICTION
+============================================================
+
+Do NOT focus only on absolute runtime length.
+
+The operationally dangerous event is:
+
+actual runtime
+>
+safe predicted runtime
+
+Define for job j:
+
+e_j^+ =
+max(
+    T_actual,j - T_pred,j^safe,
+    0
+)
+
+GPU-weighted error mass:
+
+M_j =
+g_j * e_j^+
+
+This is important because:
+
+a long job predicted reasonably well
+is less dangerous than
+
+a medium job predicted far too short.
+
+All tail diagnostics must report BOTH:
+
+- absolute long-runtime tail
+- positive-underprediction tail
+
+============================================================
+8. LABEL AUTHORITY
+============================================================
+
+Historical target:
+
+T_j =
+end_j - start_j
+
+only where exact authoritative service start/end are available.
+
+Do not fabricate runtime.
+
+Do not alter zero-duration rows silently.
+
+Audit:
+
+- zero runtime
+- negative runtime
+- missing start/end
+- terminal status semantics
+- duplicate job identity
+
+If using the V40S2 positive-service-time cohort,
+reproduce its exact identity first.
+
+Do not silently change the population.
+
+============================================================
+9. FEATURE AUTHORITY MUST BE RE-AUDITED
+============================================================
+
+There is a known authority tension:
+
+current production documents expose scheduler-visible fields,
+while V40S/V40S2 found insufficient proof for some historical
+submit-time resource attributes.
+
+Therefore DO NOT simply assume these features are causal.
+
+For every candidate predictor feature record:
+
+feature
+source
+available_at
+historical provenance
+original-submit-time authority
+current-D-1 authority
+admission decision
+
+Only features with defensible historical available_at authority
+may enter the causal model.
+
+At minimum audit:
+
+- submit hour
+- weekday
+- requested walltime
+- requested GPU
+- requested nodes
+- requested cores
+- memory
+- partition
+- QoS
+- hardware
+- standby/tier
+- account/user-derived fields
+- structural-support features
+
+Create:
+
+V40S3_FEATURE_AUTHORITY_AUDIT.json
+V40S3_CAUSAL_FEATURE_CONTRACT.json
+
+If only submit_hour/weekday remain authoritative,
+do NOT silently promote proxy features.
+
+============================================================
+10. NO NEW NONCAUSAL PRODUCTION TRACK
+============================================================
+
+V40S2 already demonstrated a retrospective proxy track.
+
+Do not build another large proxy-model program unless absolutely
+necessary for a targeted diagnostic.
+
+The V40S3 candidate that can eventually feed Day-Ahead must be:
+
+CAUSAL
+
+If causal information is insufficient:
+
+fail closed with:
+
+V40S3_CAUSAL_TAIL_RISK_INFORMATION_INSUFFICIENT
+
+Do not solve an authority problem with retrospective leakage.
+
+============================================================
+11. BODY / TAIL CANDIDATE THRESHOLDS
+============================================================
+
+Use fixed physical-duration candidates.
+
+Primary candidate set:
+
+u ∈ {
+    4 h,
+    6 h,
+    8 h,
+    12 h,
+    24 h
+}
+
+All thresholds align exactly to the 15-minute scheduler grid.
+
+Do not add/remove thresholds after seeing evaluation outcomes.
+
+Also report corresponding TRAIN percentiles.
+
+Do NOT select u from May.
+
+============================================================
+12. WHY FIXED-HOUR THRESHOLDS
+============================================================
+
+The future optimizer needs an interpretable operational rule:
+
+"jobs with substantial probability of running longer than u hours"
+
+not an opaque post-hoc residual cluster.
+
+u therefore must have a physical runtime meaning.
+
+Quantile statistics may explain the selected u,
+but the final threshold remains an explicit duration in hours.
+
+============================================================
+13. PHASE A — THRESHOLD FORENSIC BEFORE NEW MODEL
+============================================================
+
+Using TRAIN/development authority only, for each u report:
+
+- P(T > u)
+- job count
+- requested-GPU weighted fraction
+- runtime-hours fraction
+- positive-underprediction mass fraction
+- GPU-weighted positive-underprediction mass fraction
+- current-baseline Q90/body coverage for T <= u
+- current-baseline body MAE
+- current-baseline body WAPE
+- body underprediction rate
+- tail contribution to worst 1%, 5%, 10% errors
+
+Create:
+
+V40S3_THRESHOLD_FORENSIC.csv
+V40S3_THRESHOLD_FORENSIC.json
+
+============================================================
+14. BODY-PREDICTABILITY GATE
+============================================================
+
+For each candidate u, evaluate only jobs with:
+
+T_actual <= u
+
+for diagnostic body predictability.
+
+This is NOT the inference-time classifier yet.
+
+The purpose is to answer:
+
+"If body/tail membership were known, is the body itself predictable?"
+
+If body performance remains poor for every u:
+
+STOP new hybrid development.
+
+Classification:
+
+V40S3_BODY_RUNTIME_INTRINSICALLY_INSUFFICIENT
+
+Do not proceed to tail-risk classifier if no useful body exists.
+
+============================================================
+15. BODY MODEL REGISTRY
+============================================================
+
+Keep this compact.
+
+Use at minimum:
+
+B0:
+current frozen/current-baseline runtime model
+
+B1:
+causal LightGBM quantile
+
+B2:
+causal XGBoost quantile
+
+B3:
+one strong simple probabilistic/quantile baseline selected from
+existing V40J/V40S evidence before fitting
+
+No large new neural architecture unless existing evidence
+demonstrates a clear reason.
+
+The point of V40S3 is NOT to invent another complicated runtime model.
+
+============================================================
+16. BODY MODEL OUTPUT
+============================================================
+
+For candidate BODY jobs predict:
+
+Q50(T_j)
+Q90(T_j)
+
+Runtime must be:
+
+- positive
+- finite
+- in seconds
+- converted to scheduler 15-min duration by ceiling only once
+
+No future information.
+
+Do not use direct end_time as a feature.
+
+============================================================
+17. BODY CALIBRATION
+============================================================
+
+Do NOT reuse the old global +5576.44921875 s automatically.
+
+Evaluate the frozen current baseline as reference.
+
+For new body candidates, calibration must be preregistered.
+
+Allowed:
+
+C0 = no additional calibration
+
+C1 = one-sided body-only calibration
+     using CALIBRATION block only
+
+Do not choose calibration after evaluation.
+
+Do not use May.
+
+Do not permit a huge global margin to turn all body jobs into
+de facto tail jobs.
+
+============================================================
+18. BODY SAFETY METRICS
+============================================================
+
+For Q90 runtime report:
+
+- empirical Q90 coverage
+- GPU-weighted Q90 coverage
+- underprediction rate
+- mean positive residual
+- P95 positive residual
+- maximum positive residual
+- MAE
+- WAPE
+- log-MAE
+- completion-slot absolute error
+- GPU*runtime underprediction mass
+
+Report by:
+
+- overall body
+- temporal block
+- GPU request band
+- candidate threshold u
+
+A pooled PASS may not hide a failed temporal block.
+
+============================================================
+19. TAIL-RISK CLASSIFICATION TARGET
+============================================================
+
+For each selected candidate u:
+
+y_tail,j =
+1(T_actual,j > u)
+
+Predict:
+
+p_tail,j =
+P(T_j > u | X_j)
+
+Candidate classifiers:
+
+C0:
+base-rate / calendar baseline
+
+C1:
+logistic regression
+
+C2:
+LightGBM classifier
+
+C3:
+XGBoost classifier
+
+Use only causal features.
+
+Keep identical rows/splits across classifiers.
+
+============================================================
+20. TAIL-RISK METRICS
+============================================================
+
+Report:
+
+- ROC-AUC
+- PR-AUC
+- Brier score
+- calibration ECE
+- recall
+- precision
+- specificity
+- false-negative rate
+- GPU-weighted recall
+- GPU-weighted false-negative rate
+
+Most important:
+
+underprediction-mass capture
+
+Capture =
+sum_j M_j * 1(flagged tail-risk)
+/
+sum_j M_j
+
+where:
+
+M_j =
+g_j * max(T_actual - T_body_safe, 0)
+
+This directly measures whether the tail-risk filter catches
+the jobs that would hurt Day-Ahead occupancy the most.
+
+============================================================
+21. eta — TAIL-RISK DECISION THRESHOLD
+============================================================
+
+Do not use eta=0.5 automatically.
+
+Select eta on CALIBRATION data only.
+
+Primary rule:
+
+choose the LARGEST eta such that:
+
+tail recall >= 90%
+
+AND
+
+GPU-weighted tail recall >= 90%
+
+when support is sufficient.
+
+This minimizes the number of jobs unnecessarily sent to robust handling
+while preserving tail detection.
+
+Also report 95% recall sensitivity.
+
+Do not tune eta on evaluation.
+
+============================================================
+22. DO NOT REMOVE TAIL JOBS FROM EVALUATION
+============================================================
+
+Critical rule:
+
+TAIL jobs remain in the denominator.
+
+Never report body-only performance as total runtime performance.
+
+Final hybrid evaluation must include:
+
+BODY
++
+TAIL-RISK
+
+together.
+
+============================================================
+23. ROBUST TAIL HANDLING — KEEP IT LOCAL
+============================================================
+
+Do NOT create a new tail runtime regression model as primary.
+
+Compare only two conservative EXISTING-AUTHORITY-style fallback
+policies.
+
+------------------------------------------------------------
+R0 — CURRENT-RSP PROTECTED
+------------------------------------------------------------
+
+For flagged tail-risk jobs:
+
+- do not trust new precise runtime prediction
+- retain current/frozen RSP-style duration authority
+- classify the job as FLEXIBILITY_PROTECTED
+
+This means V40S3 recommends that later scheduling should not
+aggressively exploit this job's predicted completion.
+
+No migration rule change.
+
+------------------------------------------------------------
+R1 — RW REQUESTED-WALLTIME PROTECTED
+------------------------------------------------------------
+
+For flagged tail-risk jobs:
+
+use the existing RW requested-walltime duration representation
+as a conservative scheduling-envelope comparator.
+
+This is NOT a claim that requested walltime is actual runtime
+or a proven hard bound.
+
+It is a pre-existing scheduler authority/comparator.
+
+No new invented Q99 duration.
+
+No nodes×anything reconstruction.
+
+No new long-tail model.
+
+============================================================
+24. REQUESTED WALLTIME CAVEAT
+============================================================
+
+Existing forensic evidence showed some actual runtimes exceed
+recorded requested walltime.
+
+Therefore:
+
+requested walltime must NEVER be described as:
+
+- exact completion
+- physical hard upper bound
+- guaranteed runtime ceiling
+
+R1 is only:
+
+EXISTING_CONSERVATIVE_SCHEDULER_COMPARATOR
+
+If it does not improve hybrid safety, reject it.
+
+============================================================
+25. FLEXIBILITY_PROTECTED MEANING
+============================================================
+
+This is an INTERFACE PROPOSAL only.
+
+For a future integration revision, a tail-risk PENDING job may be
+marked:
+
+FLEXIBILITY_PROTECTED = 1
+
+Meaning:
+
+- do not rely on its exact predicted completion for aggressive timing
+- do not add a new migration
+- do not alter RUNNING logic
+- do not alter WAN
+- do not alter terminal contract
+- do not alter MF
+- do not alter Fresh
+
+It does NOT mean:
+
+MIGRATE = 1
+
+It does NOT mean:
+
+new hard site rule
+
+It does NOT mean:
+
+new event trigger
+
+============================================================
+26. NO OPTIMIZER CODE CHANGE IN V40S3
+============================================================
+
+This revision must NOT modify:
+
+A0 solver
+M1 solver
+A1 solver
+MF solver
+migration code
+WAN code
+Rack code
+terminal code
+Fresh code
+restoration code
+
+Create only a future adapter proposal:
+
+V40S3_RUNTIME_ADAPTER_PROPOSAL.json
+
+No actual integration.
+
+============================================================
+27. FUTURE ADAPTER PROPOSAL MUST BE MINIMAL
+============================================================
+
+The proposal may contain only these candidate fields:
+
+job_uid
+runtime_class
+runtime_body_q50_sec
+runtime_body_q90_sec
+tail_probability
+tail_threshold_sec
+tail_flag
+robust_tail_policy
+candidate_duration_sec
+flexibility_protected
+
+No site decision.
+
+No migration decision.
+
+No MESS decision.
+
+No electrical decision.
+
+============================================================
+28. HYBRID DURATION EVALUATION
+============================================================
+
+Without running optimizer, build a pure runtime/scheduler-duration
+replay.
+
+For each PENDING job:
+
+if tail_flag == 0:
+
+T_candidate =
+BODY_Q90
+
+if tail_flag == 1 and policy R0:
+
+T_candidate =
+CURRENT_RSP_REFERENCE_DURATION
+
+if tail_flag == 1 and policy R1:
+
+T_candidate =
+RW_REQUESTED_WALLTIME_DURATION
+
+Then compare against actual runtime.
+
+Evaluate:
+
+- overall coverage
+- GPU-weighted coverage
+- underprediction job count
+- GPU-weighted underprediction mass
+- overreservation GPU-hours
+- P95 overreservation
+- body underprediction
+- tail underprediction
+- completion-slot error
+
+No grid.
+No optimizer.
+No migration.
+
+============================================================
+29. WHY THIS HYBRID GATE MATTERS
+============================================================
+
+The model is useful only if:
+
+body prediction improves efficiency
+
+WHILE
+
+tail robust handling prevents dangerous underprediction.
+
+Do not select a model merely because body MAE is low.
+
+Primary scientific quantity:
+
+GPU-weighted runtime underprediction mass
+
+Secondary:
+
+overreservation burden
+
+The goal is:
+
+safety / conservatism balance.
+
+============================================================
+30. THRESHOLD u SELECTION RULE
+============================================================
+
+Use DEVELOPMENT + CALIBRATION only.
+
+For each u:
+
+1. body model must have acceptable Q90 safety
+2. tail classifier must meet recall gate
+3. hybrid duration must reduce GPU-weighted underprediction
+4. robust treatment must not trivially flag nearly all jobs
+
+Selection hierarchy:
+
+A. mandatory causal-authority PASS
+B. body Q90 safety
+C. tail recall safety
+D. hybrid GPU-weighted underprediction
+E. overreservation burden
+F. largest usable body region
+G. simpler model
+
+Choose ONE final u.
+
+Do not use evaluation to switch u.
+
+============================================================
+31. SUGGESTED BODY Q90 GATES
+============================================================
+
+When support N >= 100:
+
+BODY Q90 overall coverage:
+>= 90%
+
+BODY GPU-weighted Q90 coverage:
+>= 90%
+
+Per major temporal block:
+>= 88%
+
+Also report upper calibration control:
+
+coverage > 97.5%
+=
+OVERCONSERVATIVE_BODY_WARNING
+
+Do not call 99% coverage a well-calibrated Q90.
+
+============================================================
+32. TAIL CLASSIFIER GATES
+============================================================
+
+When support permits:
+
+Tail recall:
+>= 90%
+
+GPU-weighted tail recall:
+>= 90%
+
+Dangerous-underprediction mass capture:
+>= 80%
+
+ECE:
+<= 0.05 pooled
+
+If these fail:
+
+TAIL_RISK_DETECTION_FAIL
+
+Do not proceed to optimizer integration.
+
+============================================================
+33. HYBRID SAFETY GATE
+============================================================
+
+Final selected body + tail policy must:
+
+1. reduce GPU-weighted positive runtime-underprediction mass
+   versus current production/reference runtime
+
+AND
+
+2. not create a catastrophic overreservation increase
+
+AND
+
+3. preserve temporal-block robustness
+
+AND
+
+4. never rely on May scientific selection.
+
+Do not hard-code a favorable pass.
+
+============================================================
+34. CURRENT BASELINE MUST REMAIN THE COMPARATOR
+============================================================
+
+Compare against:
+
+CURRENT frozen/current PR #27 runtime authority
+
+and separately:
+
+RW requested-walltime reference
+
+Do not erase or overwrite them.
+
+Report:
+
+HYBRID vs CURRENT_RSP
+HYBRID vs RW
+
+============================================================
+35. CURRENT 15-MINUTE GRID
+============================================================
+
+All final runtime durations must have a diagnostic 15-minute form:
+
+duration_slots =
+ceil(duration_sec / 900)
+
+Do not switch optimizer resolution.
+
+Do not introduce 5-minute AIDC scheduling.
+
+Current optimizer remains:
+
+15-minute / 96-slot.
+
+============================================================
+36. TERMINAL H=120 FIREWALL
+============================================================
+
+Do not change terminal-state semantics in V40S3.
+
+For diagnostics, report how many candidate duration changes would:
+
+- remain complete before H
+- become cross-boundary
+- remain cross-boundary
+- move from cross-boundary to complete
+
+But DO NOT modify terminal decisions.
+
+Create:
+
+V40S3_TERMINAL_CLASS_IMPACT_AUDIT.json
+
+This is important because future integration must not silently
+reopen V39J/V39K terminal consistency.
+
+If many jobs change terminal class:
+
+mark:
+
+FUTURE_INTEGRATION_TERMINAL_RISK = HIGH
+
+and do not integrate automatically.
+
+============================================================
+37. MIGRATION IMPACT AUDIT — READ ONLY
+============================================================
+
+Do NOT recompute migration.
+
+Simply identify whether a candidate duration change would touch jobs
+that already have inherited migration authority.
+
+Report counts only.
+
+No migration solve.
+No WAN solve.
+No new migration witness.
+
+Create:
+
+V40S3_EXISTING_MIGRATION_TOUCH_AUDIT.json
+
+============================================================
+38. MAY FIREWALL
+============================================================
+
+2025 May scientific reads:
+
+0
+
+Do not use May:
+
+- runtime label
+- status
+- model fitting
+- threshold selection
+- calibration
+- eta selection
+- model selection
+- hybrid selection
+
+May path/metadata discovery must be disclosed separately if nonzero.
+
+Do not open May for "just checking."
+
+============================================================
+39. SHADOW / CONFIRMATORY
+============================================================
+
+Audit prior exposure.
+
+If Apr-24–30 remains sealed:
+
+do not open it.
+
+If no untouched confirmatory block exists:
+
+TRUE_CONFIRMATORY_AVAILABLE = NO
+
+Maximum positive claim:
+
+PREVALIDATED
+
+Do not invent a new untouched test set from previously exposed dates.
+
+============================================================
+40. TEMPORAL SPLITS
+============================================================
+
+Use blocked temporal splits.
+
+No random row split.
+
+Audit and freeze:
+
+TRAIN
+DEVELOPMENT
+CALIBRATION
+EXPOSED_EVALUATION
+
+before fitting.
+
+All labels used for TRAIN must satisfy historical label availability.
+
+============================================================
+41. PREREGISTRATION
+============================================================
+
+Before ANY new V40S3 model fit, freeze:
+
+- exact population
+- feature authority
+- threshold candidates u
+- body models
+- tail classifiers
+- calibration method
+- eta rule
+- robust policies R0/R1
+- metrics
+- safety gates
+- temporal splits
+- selection hierarchy
+- May firewall
+- no-integration boundary
+
+Create:
+
+V40S3_PREREGISTRATION.json
+
+Commit it.
+
+NO FIT BEFORE PREREGISTRATION COMMIT.
+
+============================================================
+42. GPU / COMPUTE
+============================================================
+
+This task does not require a large neural model.
+
+Prefer simple, auditable models.
+
+GPU may be used only if justified.
+
+Do not expand model complexity merely because RTX 4060 is available.
+
+Record:
+
+library
+version
+device
+seed
+threads
+determinism
+training time
+
+============================================================
+43. SCIENTIFIC CLASSIFICATIONS
+============================================================
+
+Possible results:
+
+V40S3_BODY_RUNTIME_INTRINSICALLY_INSUFFICIENT
+
+V40S3_CAUSAL_TAIL_RISK_INFORMATION_INSUFFICIENT
+
+V40S3_TAIL_RISK_DETECTION_FAIL
+
+V40S3_HYBRID_RUNTIME_SAFETY_FAIL
+
+V40S3_BODY_TAIL_RUNTIME_PREVALIDATED
+
+V40S3_EXISTING_RUNTIME_REMAINS_SELECTED
+
+Do NOT use:
+
+PRODUCTION_READY
+
+in this revision.
+
+============================================================
+44. PRODUCTION / OPTIMIZER HOLDS
+============================================================
+
+Keep unchanged:
+
+production q = 5576.44921875
+
+PF = 0.95
+
+Q control = NO
+
+electrical regeneration = HOLD
+
+B0/B1/B2/B3 = NO
+
+FULL_MAY = NO
+
+optimizer integration = NO
+
+RUNNING migration change = NO
+
+A1 migration change = NO
+
+terminal contract change = NO
+
+============================================================
+45. REQUIRED ARTIFACTS
+============================================================
+
+V40S3_START_STATE.json
+V40S3_CURRENT_PR27_HEAD_AUDIT.json
+
+V40S3_V40S2_REFERENCE_FREEZE.json
+V40S3_EXISTING_RUNTIME_EVIDENCE_AUDIT.md
+V40S3_EXISTING_RUNTIME_EVIDENCE_AUDIT.json
+
+V40S3_SCOPE_CONTRACT.json
+
+V40S3_RUNTIME_LABEL_CONTRACT.json
+V40S3_POPULATION_AUDIT.json
+
+V40S3_FEATURE_AUTHORITY_AUDIT.json
+V40S3_CAUSAL_FEATURE_CONTRACT.json
+
+V40S3_TEMPORAL_SPLIT_CONTRACT.json
+V40S3_UNTOUCHED_HOLDOUT_AUDIT.json
+
+V40S3_THRESHOLD_FORENSIC.csv
+V40S3_THRESHOLD_FORENSIC.json
+V40S3_BODY_PREDICTABILITY_REPORT.json
+
+V40S3_PREREGISTRATION.json
+V40S3_PREREGISTRATION_COMMIT_RECEIPT.json
+
+V40S3_BODY_BASELINE_REPORT.json
+V40S3_BODY_LIGHTGBM_REPORT.json
+V40S3_BODY_XGBOOST_REPORT.json
+V40S3_BODY_EXTRA_BASELINE_REPORT.json
+
+V40S3_TAIL_BASELINE_REPORT.json
+V40S3_TAIL_LOGISTIC_REPORT.json
+V40S3_TAIL_LIGHTGBM_REPORT.json
+V40S3_TAIL_XGBOOST_REPORT.json
+
+V40S3_BODY_METRICS.csv
+V40S3_TAIL_CLASSIFICATION_METRICS.csv
+
+V40S3_TAIL_THRESHOLD_SELECTION.json
+V40S3_ETA_SELECTION.json
+
+V40S3_ROBUST_POLICY_R0_REPORT.json
+V40S3_ROBUST_POLICY_R1_REPORT.json
+
+V40S3_HYBRID_RUNTIME_METRICS.json
+V40S3_GPU_WEIGHTED_UNDERPREDICTION_REPORT.json
+V40S3_OVERRESERVATION_REPORT.json
+
+V40S3_TERMINAL_CLASS_IMPACT_AUDIT.json
+V40S3_EXISTING_MIGRATION_TOUCH_AUDIT.json
+
+V40S3_RUNTIME_ADAPTER_PROPOSAL.json
+
+V40S3_METHOD_SELECTION.json
+V40S3_MODEL_FREEZE.json
+
+V40S3_MAY_FIREWALL.json
+V40S3_PROTECTED_SCOPE_DIFF.json
+V40S3_TEST_REPORT.json
+
+V40S3_FINAL_REVIEW.md
+V40S3_FINAL_COMMIT_RECEIPT.json
+
+============================================================
+46. MINIMUM TESTS
+============================================================
+
+At minimum:
+
+1. live PR #27 head resolved
+2. separate branch/worktree
+3. current production tree not modified
+4. V40S2 reference SHA verified
+
+5. PENDING-only redesign exact
+6. RUNNING redesign count = 0
+7. migration source changes = 0
+8. WAN changes = 0
+9. terminal code changes = 0
+
+10. event-trigger added = 0
+11. local-repair added = 0
+12. rolling-MPC added = 0
+
+13. runtime label = end-start exact
+14. no future feature
+15. feature available_at authority exact
+
+16. threshold candidates exact
+17. no evaluation-defined threshold
+18. no May-defined threshold
+
+19. body rows exact
+20. tail rows exact
+21. no tail exclusion from final denominator
+
+22. Q50 <= Q90
+23. runtime > 0
+24. 15-min ceiling conversion exact
+
+25. eta selected on calibration only
+26. no evaluation-tuned eta
+
+27. tail recall exact
+28. GPU-weighted recall exact
+29. underprediction-mass capture exact
+
+30. R0 uses current RSP reference only
+31. R1 uses existing requested-walltime reference only
+32. no invented tail Q99 duration
+
+33. requested walltime never claimed as hard bound
+
+34. hybrid duration reconstruction exact
+35. GPU-weighted underprediction exact
+36. overreservation exact
+
+37. terminal-class impact is audit only
+38. existing migration touch audit is read-only
+
+39. optimizer calls = 0
+40. Gurobi optimization calls from V40S3 = 0
+41. Fresh/OpenDSS calls = 0
+
+42. May scientific reads = 0
+
+43. q unchanged
+44. PF unchanged
+45. Q control NO
+46. electrical HOLD
+47. B0-B3 NO
+48. FULL_MAY NO
+
+============================================================
+47. FINAL RESPONSE FORMAT
+============================================================
+
+Report in Korean.
+
+Start with:
+
+- final classification
+- selected runtime threshold u
+- selected body model
+- selected tail classifier
+- selected eta
+- selected robust policy R0/R1/NONE
+- causal authority PASS/FAIL
+- body safety PASS/FAIL
+- tail detection PASS/FAIL
+- hybrid safety PASS/FAIL
+- production integration NO
+
+Then report:
+
+1. exact current PR #27 head
+2. exact population
+3. PENDING population
+4. feature authority
+5. rejected features
+
+6. threshold forensic table
+7. selected u and reason
+
+8. body model comparison
+9. body Q90 overall coverage
+10. body GPU-weighted coverage
+11. body WAPE/MAE
+12. body underprediction mass
+
+13. tail prevalence
+14. tail classifier ROC/PR
+15. tail recall
+16. GPU-weighted recall
+17. dangerous-underprediction mass capture
+18. eta
+
+19. R0 hybrid result
+20. R1 hybrid result
+21. selected hybrid policy
+22. overall hybrid coverage
+23. GPU-weighted hybrid coverage
+24. underprediction reduction vs current
+25. overreservation change vs current
+
+26. terminal-class impact
+27. existing-migration touch count
+28. explicit statement:
+    migration changed = NO
+
+29. May zero-read
+30. confirmatory status
+31. tests
+32. protected scope
+
+33. future adapter proposal
+34. exact list of optimizer files that WOULD need local modification
+    in a later integration revision
+35. exact list of optimizer/migration/WAN/terminal files that must
+    remain untouched
+
+============================================================
+48. FINAL SCIENTIFIC PRINCIPLE
+============================================================
+
+The desired outcome is NOT:
+
+"predict long runtime exactly."
+
+The desired outcome is:
+
+BODY:
+predict runtime accurately enough for scheduling
+
+TAIL-RISK:
+detect it early enough that the scheduler does not rely on an
+unreliable exact completion estimate.
+
+Keep the current optimization architecture intact.
+
+Do not solve the tail problem by reopening migration.
+
+Do not solve the tail problem by introducing event triggering.
+
+Do not solve the tail problem by introducing local repair.
+
+Do not alter RUNNING decisions.
+
+This revision is successful only if a small, causal runtime-interface
+change can improve safety without reopening the already-closed
+migration/terminal/WAN architecture.

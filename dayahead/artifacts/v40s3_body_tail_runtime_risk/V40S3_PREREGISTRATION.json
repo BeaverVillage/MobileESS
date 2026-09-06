@@ -1,0 +1,185 @@
+{
+  "timestamp": "2026-09-06T14:52:59.218709+00:00",
+  "phase": "AUTHORITY_STOP_BEFORE_FIT",
+  "phase_A_exposed_before_freeze": true,
+  "phase_A_authorized_by_user": true,
+  "new_fit_before_commit": 0,
+  "new_prediction_before_commit": 0,
+  "candidate_ranking_observed": false,
+  "classification_if_authority_fails": "V40S3_CAUSAL_TAIL_RISK_INFORMATION_INSUFFICIENT",
+  "authority_gate": "FAIL",
+  "exact_population": {
+    "original_N": 73504,
+    "positive_service_N": 72292,
+    "zero_N": 1212,
+    "negative_N": 0,
+    "missing_timestamp_N": 0,
+    "duplicate_job_id_N": 0,
+    "exact_end_minus_start": true,
+    "exact_S2_identity": true,
+    "all_ID_SHA256": "85b2a50794480c7cc4c91e2d260f809f68883bfbc7c1e102ababfa6defa16c62",
+    "positive_ID_SHA256": "a8bd7b34fa4b6235773f6ab097795ac606f84bf1a92b958b72838881e5ba9b25",
+    "terminal_status_counts": {
+      "UNAVAILABLE": 73504
+    },
+    "PENDING_N": null,
+    "PENDING_N_reason": "Historical independently observed D1 membership unavailable; 0 admitted is not 0 pending jobs.",
+    "original_population": "pre-Apr24 terminal-event complete cases; not successful COMPLETED-only and not PENDING-at-issue",
+    "max_accepted_timestamp": "2025-04-23T23:52:58+00:00",
+    "current_runtime_prediction_identity": "S2 K0/T7 NOT used as current RSP comparator"
+  },
+  "feature_contract": "V40S3_CAUSAL_FEATURE_CONTRACT.json",
+  "threshold_hours": [
+    4,
+    6,
+    8,
+    12,
+    24
+  ],
+  "model_registry": {
+    "body": {
+      "B0": "current frozen RSP reference; archived rolling comparator only",
+      "B1": "causal LightGBM Q50/Q90",
+      "B2": "causal XGBoost Q50/Q90",
+      "B3": "unconditional empirical TRAIN body Q50/Q90; simple quantile analogue of existing S2 KM baseline"
+    },
+    "tail": {
+      "C0": "TRAIN base rate",
+      "C1": "logistic on authorized clock features",
+      "C2": "causal LightGBM",
+      "C3": "causal XGBoost"
+    }
+  },
+  "model_execution": "ALL NEW MODELS BLOCKED; this preregistration does not authorize later fitting",
+  "registry_hyperparameters": "NOT_ACTIVATED_AUTHORITY_STOP; any later fit requires new revision with fully frozen hyperparameters and new authority",
+  "calibration": "C0 no additional calibration reserved for new body candidates; no automatic old global q",
+  "eta_rule": "CALIBRATION only: largest observed probability or endpoint eta meeting recall>=.90 and GPU recall>=.90; 95% sensitivity; N>=100 and tail N>=100. Equality flags tail.",
+  "robust_policies": {
+    "R0": "current RSP duration only + flexibility_protected",
+    "R1": "existing requested-walltime comparator only; NOT a hard bound"
+  },
+  "metrics": [
+    "coverage",
+    "GPU coverage",
+    "MAE",
+    "WAPE",
+    "log-MAE",
+    "completion-slot error",
+    "positive residual mean/P95/max",
+    "ROC-AUC",
+    "PR-AUC",
+    "Brier",
+    "ECE",
+    "recall",
+    "precision",
+    "specificity",
+    "FNR",
+    "GPU recall/FNR",
+    "danger mass capture",
+    "overreservation"
+  ],
+  "gates": {
+    "causal_authority": "MANDATORY PASS",
+    "body_N_min": 100,
+    "body_coverage_min": 0.9,
+    "body_GPU_coverage_min": 0.9,
+    "temporal_body_coverage_min": 0.88,
+    "body_upper_warning": 0.975,
+    "tail_recall_min": 0.9,
+    "tail_GPU_recall_min": 0.9,
+    "mass_capture_min": 0.8,
+    "ECE_max": 0.05,
+    "hybrid": "NOT_EXECUTABLE_AUTHORITY_STOP; no permissive numeric overreservation or near-all-flag threshold invented after outcomes"
+  },
+  "splits": {
+    "timezone": "UTC blocked half-open submission intervals",
+    "TRAIN": {
+      "interval": [
+        "2025-03-14T00:00Z",
+        "2025-03-22T00:00Z"
+      ],
+      "end_known_before": "2025-03-22T00:00Z",
+      "N": 13017,
+      "ID_SHA256": "6b991c689adbb95927bf11f8a5b5fdd68a1da5c8fe87c5a8ca8c7a316ea784d5",
+      "role": "reference TRAIN percentile only; no fit"
+    },
+    "DEVELOPMENT": {
+      "interval": [
+        "2025-03-22T00:00Z",
+        "2025-04-01T00:00Z"
+      ],
+      "end_known_before": "2025-04-01T00:00Z",
+      "N": 20957,
+      "ID_SHA256": "415b4abb8b1be07543e547ca5b6d11cc88ec044ce894568802bd89f4a834fd4c",
+      "actual_min_submit": "2025-03-23T15:16:23+00:00",
+      "actual_max_submit": "2025-03-30T13:59:58+00:00",
+      "role": "existing March rolling reference predictions, positive GPU rows only"
+    },
+    "CALIBRATION": {
+      "interval": [
+        "2025-04-01T00:00Z",
+        "2025-04-08T00:00Z"
+      ],
+      "execution": "BLOCKED; no eta/q fit"
+    },
+    "EXPOSED_EVALUATION": {
+      "interval": [
+        "2025-04-08T00:00Z",
+        "2025-04-24T00:00Z"
+      ],
+      "execution": "BLOCKED; identity audit only; no candidate scoring"
+    },
+    "SHADOW": {
+      "interval": [
+        "2025-04-24T00:00Z",
+        "2025-05-01T00:00Z"
+      ],
+      "status": "SEALED"
+    },
+    "strict_timestamp_cutoff": "2025-05-01T00:00:00+10:00 fixed AEST = 2025-04-30T14:00:00Z",
+    "no_random_split": true,
+    "baseline_q_caveat": "Existing q used March24-31 calibration outcomes; reused only as frozen CURRENT formula descriptive comparator. Not causal out-of-sample Q90 calibration evidence.",
+    "baseline_state_caveat": "Archived rolling predictions share current recipe and formula, but are not exact frozen Apr01 final model state predictions. No new predictions/refit attempted."
+  },
+  "selection_hierarchy": [
+    "causal authority",
+    "body safety",
+    "tail recall",
+    "GPU underprediction",
+    "overreservation",
+    "largest body region",
+    "simplicity"
+  ],
+  "selected_u": null,
+  "selected_eta": null,
+  "shadow": "SEALED",
+  "May_scientific_reads": 0,
+  "holds": {
+    "production_q_seconds": 5576.44921875,
+    "PF": 0.95,
+    "Q_control": "NO",
+    "electrical_regeneration": "HOLD",
+    "B0_B1_B2_B3": "NO",
+    "FULL_MAY": "NO",
+    "optimizer_integration": "NO",
+    "RUNNING_migration_change": "NO",
+    "A1_migration_change": "NO",
+    "terminal_contract_change": "NO"
+  },
+  "compute": {
+    "libraries": {
+      "numpy": "2.2.6",
+      "pandas": "2.2.3",
+      "pyarrow": "18.1.0",
+      "xgboost": "3.2.0",
+      "lightgbm": "NOT_INSTALLED; no install required for authority stop",
+      "scikit-learn": "1.6.1",
+      "pytest": "8.3.5"
+    },
+    "device": "CPU",
+    "threads": 1,
+    "seed": 4003,
+    "determinism": "pure deterministic diagnostics; no model fit",
+    "training_seconds": 0
+  }
+}
