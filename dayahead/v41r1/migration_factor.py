@@ -15,7 +15,7 @@ def eligible(row,opts):
     return pending_in_day(row) and bool(moves) and len({o.transfer_end-o.transfer_start for o in moves})==1
 
 
-def compile(model,row,opts,costs,index,load,wan_active,*,inject_reference=False):
+def compile(model,row,opts,costs,index,load,wan_active,*,inject_reference=False,interval=None):
     gpu=row['requested_GPU'];duration=row['safe_duration_slots'];by_arrival=defaultdict(list)
     cp=next(o.checkpoint for o in opts if o.migrated)
     from .migration import checkpoints
@@ -38,6 +38,10 @@ def compile(model,row,opts,costs,index,load,wan_active,*,inject_reference=False)
         assert all(s==sets[0] for s in sets)
     stay={};routes={};arrivals={};dev=gp.LinExpr();tie=gp.LinExpr()
     reference=Option(row['AIDC_site'],row['start_slot'],row['end_slot'])
+    if interval is None:
+        from .migration_load import add_interval
+        def interval(site,start,end,weight):
+            add_interval(load,site,start,end,weight,END-BEGIN,event_form=False)
     def binary(name,start=0):
         v=model.addVar(vtype=GRB.BINARY,name=name);v.Start=start
         if inject_reference:v.LB=start;v.UB=start
@@ -47,7 +51,7 @@ def compile(model,row,opts,costs,index,load,wan_active,*,inject_reference=False)
         v=binary(f'placement[{index},{k}]',int(o==reference));stay[o]=v
         dev+=costs[k]*v;tie+=(index+1)*(k+1)*v
         for s,a,b in o.segments(row):
-            for t in range(max(BEGIN,a),min(END,b)):load[t-BEGIN,s]+=gpu*v
+            interval(s,a,b,gpu*v)
     for source,destination in sorted(pairs):
         v=binary(f'migration_route[{index},{source},{destination}]');routes[source,destination]=v
         overlap=cp-row['start_slot'] if source==row['AIDC_site'] else 0
@@ -56,11 +60,11 @@ def compile(model,row,opts,costs,index,load,wan_active,*,inject_reference=False)
     for source in sorted({s for s,d in pairs}):
         source_choice=model.addVar(vtype=GRB.BINARY,name=f'migration_source[{index},{source}]')
         model.addConstr(source_choice==gp.quicksum(v for (s,d),v in routes.items() if s==source))
-        for t in range(max(BEGIN,row['start_slot']),min(END,cp)):load[t-BEGIN,source]+=gpu*source_choice
+        interval(source,row['start_slot'],cp,gpu*source_choice)
     for (destination,restart),values in sorted(by_arrival.items()):
         v=binary(f'migration_arrival[{index},{destination},{restart}]');arrivals[destination,restart]=v
         opt=values[0][1]
-        for t in range(restart,min(END,opt.end)):load[t-BEGIN,destination]+=gpu*v
+        interval(destination,restart,opt.end,gpu*v)
         overlap=max(0,min(row['end_slot'],opt.end)-max(row['start_slot'],restart)) if destination==row['AIDC_site'] else 0
         dev-=2*gpu*overlap*v;tie+=(index+1)*base[destination,restart]*v
         for t in range(restart-1-length,restart-1):wan_active[t]+=v

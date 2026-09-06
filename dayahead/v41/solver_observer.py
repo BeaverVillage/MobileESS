@@ -29,6 +29,12 @@ def install(root, stage):
 
 
 def observed(model, *args, **kwargs):
+    import gurobipy as gp
+    # User-authorized campaign-wide operational settings, including M1 children.
+    model.Params.MemLimit=gp.GRB.INFINITY;model.Params.SoftMemLimit=gp.GRB.INFINITY
+    model.Params.Threads=4;model.Params.NodefileStart=.5
+    node_dir=_root/'gurobi_nodefiles';node_dir.mkdir(parents=True,exist_ok=True)
+    model.Params.NodefileDir=str(node_dir.resolve())
     started = time.perf_counter()
     token = uuid.uuid4().hex
     try:
@@ -46,7 +52,7 @@ def observed(model, *args, **kwargs):
                 iteration_count=finite(model.IterCount), barrier_iteration_count=int(model.BarIterCount),
                 mip_gap=finite(model.MIPGap) if model.IsMIP and incumbent else None,
                 configuration={k: getattr(model.Params, k) for k in ('Threads', 'Seed', 'FeasibilityTol',
-                    'IntFeasTol', 'OptimalityTol', 'MIPGap', 'MIPGapAbs', 'WorkLimit', 'SoftMemLimit', 'NodefileStart')},
+                    'IntFeasTol', 'OptimalityTol', 'MIPGap', 'MIPGapAbs', 'WorkLimit', 'MemLimit', 'SoftMemLimit', 'NodefileStart', 'NodefileDir')},
                 active_freeze_constraints=[dict(name=c.ConstrName, sense=c.Sense, rhs=finite(c.RHS),
                     lhs=str(model.getRow(c))) for c in model.getConstrs()
                     if 'LOCK' in c.ConstrName or 'EXACT_CAP' in c.ConstrName or 'EXACT_PRIMARY_NUMERIC_ROW' in c.ConstrName])

@@ -2,7 +2,7 @@
 from collections import defaultdict, Counter
 from copy import deepcopy
 from pathlib import Path
-import time, math
+import time, math, gc
 import numpy as np
 import gurobipy as gp
 from gurobipy import GRB
@@ -14,14 +14,17 @@ from dayahead.paper_analysis.storage import write_json
 from .domain import Option, options, segments, deviation, materialize, audit
 
 
-def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False, work_limits=(60,180,300), inject_reference=False, factorize=True, build_only=False):
+def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False, work_limits=(60,180,300), inject_reference=False, factorize=True, build_only=False, event_load=None, diagnostic_work_limit=None):
     output=Path(output); output.mkdir(parents=True,exist_ok=True)
     if (output/'ACCEPTED_AIDC.json').exists(): raise RuntimeError('PRESERVE_COMPLETED_SOLVE')
+    from dayahead.v41r1.migration_memory import process_measure
+    memory_before_build=process_measure()
     started=time.perf_counter(); refs={r['job_uid']:deepcopy(r) for r in reference_jobs}
     assert len(refs)==len(reference_jobs)
     sites=tuple(context.capacity.aidc_ids); T=len(context.coefficients)
     from dayahead.v41r1.migration import active,model_boundary
     revision=any(active(r) for r in reference_jobs)
+    if event_load is None:event_load=revision
     if revision and T!=96:raise ValueError('SCIENTIFIC_DAY_MUST_HAVE_96_SLOTS')
     if revision and getattr(context,'day',None)=='2025-05-01' and factorize and not build_only:
         from dayahead.v41r1.migration_factor import verify_gate
@@ -55,10 +58,13 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
         domain_counts['jobs_with_spatial_options']+=len({o.site for o in opts})>1
         domain_counts['jobs_with_temporal_options']+=len({o.start for o in opts})>1
     keys=sorted(groups,key=lambda k:tuple(groups[k])); model=gp.Model('V40G_JOINT_AIDC')
-    model.Params.OutputFlag=0; model.Params.Threads=4; model.Params.Seed=20260905
+    model.Params.OutputFlag=1; model.Params.LogToConsole=0; model.Params.Threads=4; model.Params.Seed=20260905
     model.Params.MIPGap=0; model.Params.MIPGapAbs=0; model.Params.FeasibilityTol=1e-9
     model.Params.IntFeasTol=1e-9; model.Params.OptimalityTol=1e-9
-    model.Params.SoftMemLimit=8; model.Params.NodefileStart=1
+    model.Params.MemLimit=GRB.INFINITY; model.Params.SoftMemLimit=GRB.INFINITY; model.Params.NodefileStart=.5
+    model.Params.Method=1  # One dual-simplex root LP; avoid concurrent LP copies across four days.
+    nodefile_dir=(output/'gurobi_nodefiles').resolve();nodefile_dir.mkdir(exist_ok=True)
+    model.Params.NodefileDir=str(nodefile_dir)
     model.Params.LogFile=str((output/'SOLVER.log').resolve())
     stages=[]; events=[]; primary=None; numerical_cut_keys=set()
     def callback(m,where):
@@ -66,11 +72,15 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
             e={'stage':len(stages),'objective':m.cbGet(GRB.Callback.MIPSOL_OBJ),'bound':m.cbGet(GRB.Callback.MIPSOL_OBJBND),'runtime':m.cbGet(GRB.Callback.RUNTIME)}
             events.append(e); print('V40G incumbent '+str(e),flush=True)
     def optimize(label):
-        for limit in work_limits:
+        tier=0
+        while True:
+            limit=work_limits[min(tier,len(work_limits)-1)]*3**max(0,tier-len(work_limits)+1)
             model.Params.WorkLimit=limit; model.optimize(callback)
+            from dayahead.v41r1.migration_memory import measure
             entry={'stage':label,'status':int(model.Status),'OPTIMAL':model.Status==GRB.OPTIMAL,
                    'incumbent':float(model.ObjVal) if model.SolCount else None,'bound':float(model.ObjBound),
-                   'work':float(model.Work),'runtime_seconds':float(model.Runtime),'work_limit':limit}
+                   'work':float(model.Work),'runtime_seconds':float(model.Runtime),'work_limit':limit,
+                   'memory':measure(model,output/'SOLVER.log')}
             stages.append(entry); write_json(output/'SOLVER_STAGES.json',{'stages':stages,'events':events})
             print('V40G '+str(entry),flush=True)
             if model.Status==GRB.OPTIMAL:
@@ -93,16 +103,23 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
                             model.addConstr(1e6*expr<=1e6*primary,name=f'EXACT_PRIMARY_NUMERIC_ROW[{t},{k},{face}]')
                         return optimize(label+'_NUMERICAL_CAP_RECHECK')
                 return entry
+            if model.Status==GRB.WORK_LIMIT:
+                tier+=1
+                continue
+            break
         raise RuntimeError(label+'_OPTIMUM_NOT_CERTIFIED')
     try:
         variables={}; factors={}; load=defaultdict(gp.LinExpr); wan_active=defaultdict(gp.LinExpr)
+        from dayahead.v41r1.migration_load import add_interval
+        def interval(site,start,end,weight):
+            add_interval(load,site,start,end,weight,T,event_form=event_load)
         migration=gp.LinExpr(); dev=gp.LinExpr(); tie=gp.LinExpr(); migration_groups=[]
         for i,key in enumerate(keys):
             gpu,duration,opts,costs,_,_=key; members=groups[key]; row=refs[members[0]]; n=len(members)
             from dayahead.v41r1.migration_factor import eligible,compile as compile_factor
             if revision and factorize and eligible(row,opts):
                 assert n==1
-                factor=compile_factor(model,row,opts,costs,i,load,wan_active,inject_reference=inject_reference)
+                factor=compile_factor(model,row,opts,costs,i,load,wan_active,inject_reference=inject_reference,interval=interval)
                 factors[i]=factor;migration+=factor['migration'];dev+=factor['deviation'];tie+=factor['tie']
                 migration_groups.append((members[0],factor['migration'],factor['start'],factor['length']))
                 continue
@@ -116,7 +133,7 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
                     v.Start=counts[opt]
                     if inject_reference:v.LB=counts[opt];v.UB=counts[opt]
                 for s,a,b in opt.segments(row):
-                    for t in range(max(BEGIN,a),min(BEGIN+T,b)):load[t-BEGIN,s]+=gpu*v
+                    interval(s,a,b,gpu*v)
                 dev+=costs[k]*v; tie+=(i+1)*(k+1)*v
                 if opt.migrated:
                     mig+=v; migration+=v; transfer_start+=opt.transfer_start*v
@@ -155,13 +172,14 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
                 g=model.addVar(vtype=GRB.INTEGER,lb=0,ub=cap,name=f'GPU[{t},{s}]')
                 gpu_variables[t,s]=g
                 p=model.addVar(lb=float(vals.min()),ub=float(vals.max()),name=f'PCC[{t},{s}]')
-                model.addConstr(g==load[t,s]);model.addGenConstrPWL(g,p,list(range(cap+1)),vals.tolist())
+                rhs=load[t,s]+(gpu_variables[t-1,s] if event_load and t else 0)
+                model.addConstr(g==rhs);model.addGenConstrPWL(g,p,list(range(cap+1)),vals.tolist())
                 controls[t][k]=p
         rho,grid_rows=add_grid(model,context.coefficients,controls,min(1.,before['rho_max']+1e-6))
         reserve_mean = None
         if hasattr(context, 'v41_ml_snapshot'):
             from dayahead.v41.reserve import add_constraints
-            reserve_mean, reserve_xi = add_constraints(model, context, load)
+            reserve_mean, reserve_xi = add_constraints(model, context, gpu_variables)
         model.setObjective(rho,GRB.MINIMIZE);model.update()
         objective=[(v.VarName,float(v.Obj)) for v in model.getVars() if v.Obj]
         assert objective==[('rho_max',1.)]
@@ -174,14 +192,33 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
             'model_variables':model.NumVars,'model_constraints':model.NumConstrs,
             'binary_variables':model.NumBinVars,'integer_variables_including_binary':model.NumIntVars,
             'general_constraints':model.NumGenConstrs,'build_only':build_only,
+            'continuous_variables':model.NumVars-model.NumIntVars,
+            'matrix_nonzeros':model.NumNZs,'event_load_recurrence':event_load,
             'TEMPORAL_FIRST_HARD_HIERARCHY':'NO','TEMPORAL_AND_SPATIAL_AIDC_PRIMARY_JOINT':not temporal_only,
             'reference_candidate_included':True,'migration_penalty_in_primary':0,'MESS_variables':0,
             'WAN_policy':'Existing first checkpoint / fixed OD / UID serial / full frozen path budget / one restart slot',
             'all_migration_options_present_before_first_solve':True})
         if revision:write_json(output/'DAY_BOUNDARY_AUDIT.json',model_boundary(model,reference_jobs,uid_options,T))
-        model.write(str((output/'PRIMARY_MODEL.mps').resolve()))
+        from dayahead.v41r1.migration_memory import persist_model
+        persist_model(model,output)
+        from dayahead.v41r1.migration_memory import measure
+        build_memory=measure(model,output/'SOLVER.log')
+        # Persisted boundary/candidate counts are sufficient audit evidence.
+        # Factored decisions reconstruct an Option from route and arrival;
+        # the multi-million-column reference enumeration is no longer needed.
+        decode=[(tuple(groups[key]),() if i in factors else key[2]) for i,key in enumerate(keys)]
+        del groups,keys,uid_options,load,wan_active,migration_groups
+        del key,opts,costs,members,row
+        gc.collect()
+        write_json(output/'MODEL_BUILD_MEMORY.json',dict(before_build=memory_before_build,
+            after_model_build=build_memory,after_builder_release=measure(model,output/'SOLVER.log'),
+            explicit_candidate_diagnostics_released=True,one_model_reused_for_P1_P5=True))
         print(f'V40G model {model.NumVars} variables {model.NumConstrs} rows {dict(domain_counts)}',flush=True)
         if build_only:
+            if diagnostic_work_limit is not None:
+                model.Params.WorkLimit=diagnostic_work_limit;model.optimize()
+                write_json(output/'INFRASTRUCTURE_SOLVE_MEMORY.json',dict(scientific_result=False,
+                    status=int(model.Status),work=float(model.Work),memory=measure(model,output/'SOLVER.log')))
             from dayahead.paper_analysis.storage import read
             return read(output/'PRIMARY_STRUCTURE.json')
         pstage=optimize('PRIMARY_MIN_RHO'); primary=float(rho.X); bound=float(model.ObjBound)
@@ -210,15 +247,15 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
             stages[-1]['freeze_for_subsequent_stage'] = dict(name='REFERENCE_DEVIATION_EXACT_LOCK', sense='=', bound=tertiary)
         model.setObjective(tie,GRB.MINIMIZE);optimize('QUATERNARY_STABLE_TIE')
         selected=[]; materialized_dev=0
-        for i,key in enumerate(keys):
+        for i,(members,opts) in enumerate(decode):
             places=[]
             if i in factors:
                 from dayahead.v41r1.migration_factor import selected as selected_factor
-                places=[selected_factor(factors[i],refs[groups[key][0]])]
+                places=[selected_factor(factors[i],refs[members[0]])]
             else:
-                for k,opt in enumerate(key[2]):places.extend([opt]*int(round(variables[i,k] if isinstance(variables[i,k],int) else variables[i,k].X)))
-            assert len(places)==len(groups[key])
-            for uid,opt in zip(sorted(groups[key]),places):
+                for k,opt in enumerate(opts):places.extend([opt]*int(round(variables[i,k] if isinstance(variables[i,k],int) else variables[i,k].X)))
+            assert len(places)==len(members)
+            for uid,opt in zip(sorted(members),places):
                 selected.append(materialize(refs[uid],opt,context.capacity,wan));materialized_dev+=deviation(refs[uid],opt)
         selected.sort(key=lambda r:r['job_uid']); assert materialized_dev==tertiary
         terminal=audit(reference_jobs,selected,context.capacity,wan)

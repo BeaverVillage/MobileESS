@@ -5,7 +5,7 @@ B1_SOLVER = dict(Threads=4, Seed=20260905, MIPGap=0, MIPGapAbs=0,
 A1_SOLVER = dict(Threads=4, Seed=20260905, MIPGap=0, MIPGapAbs=0,
     FeasibilityTol=1e-8, IntFeasTol=1e-9, OptimalityTol=1e-8, WorkLimit=60)
 MF_SOLVER = dict(Threads=4, Seed=20260828, MIPGap=1e-3, FeasibilityTol=1e-6,
-    OptimalityTol=1e-6, TimeLimit=600, WorkLimit=60, MIPFocus=1, SoftMemLimit=8, NodefileStart=1)
+    OptimalityTol=1e-6, TimeLimit=600, WorkLimit=60, MIPFocus=1, SoftMemLimit=1e100, MemLimit=1e100, NodefileStart=.5)
 INTERPRETATION = {
     'Planning': 'Optimization under the frozen affine/polyhedral distribution-system surrogate. Solver optimum or bounded incumbent refers only to this surrogate.',
     'Fresh': 'Post-decision exact three-phase OpenDSS physical verification.',

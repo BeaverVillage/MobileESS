@@ -28,6 +28,9 @@ def unchanged_nodes(source,allowed):
 
 
 def validate(receipt,current_source):
+    from dayahead.v41r1.migration_retention import PRODUCER,validate as retain_complete_B0
+    if receipt.get('scientific_commit')==PRODUCER:
+        return retain_complete_B0(receipt,current_source)
     pre=read(OUT/'V41_B0_DAYAHEAD_RETENTION_PRECHECK.json')
     require(pre['status']=='PASS' and pre['captured_before_Actual_code_change'],'MISSING_PRE_CHANGE_DAYAHEAD_RETENTION_PROOF')
     require(receipt.get('day')=='2025-05-01' and receipt.get('policy')=='B0','ONLY_MAY01_B0_RETENTION_AUTHORIZED')

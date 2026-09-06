@@ -12,8 +12,9 @@ from dayahead.v40g.domain import options,deviation
 from dayahead.v41r1.migration_factor import compile,selected
 
 
+@pytest.mark.parametrize('event_form',[False,True])
 @pytest.mark.parametrize('start,duration',[(96,44),(24,6),(115,10)])
-def test_all_explicit_to_compressed_and_all_compressed_to_explicit(start,duration):
+def test_all_explicit_to_compressed_and_all_compressed_to_explicit(start,duration,event_form):
     ctx,row=job(start,duration)
     sites=('AIDC01','AIDC02','AIDC03')
     cap=SimpleNamespace(aidc_ids=sites,site_capacity={s:2 for s in sites},
@@ -33,7 +34,10 @@ def test_all_explicit_to_compressed_and_all_compressed_to_explicit(start,duratio
                         checkpoint,transfer,transfer+1,source))
     assert set(opts)==oracle
     model=gp.Model();model.Params.OutputFlag=0;load=defaultdict(gp.LinExpr);wan=defaultdict(gp.LinExpr)
-    f=compile(model,row,opts,costs,7,load,wan);represented=set()
+    from dayahead.v41r1.migration_load import add_interval
+    def interval(site,a,b,weight):
+        add_interval(load,site,a,b,weight,96,event_form=event_form)
+    f=compile(model,row,opts,costs,7,load,wan,interval=interval);represented=set()
     # The reverse enumeration covers every allowed compressed route/arrival
     # product plus every stay. Constraints disallow every other combination.
     reverse=list(f['stay'])
@@ -53,12 +57,41 @@ def test_all_explicit_to_compressed_and_all_compressed_to_explicit(start,duratio
         assert f['migration'].getValue()==int(out.migrated)
         assert f['deviation'].getValue()==costs[opts.index(out)]
         assert f['tie'].getValue()==8*(opts.index(out)+1)
+        state=defaultdict(float)
         for t in range(96):
             for site in sites:
                 expected=sum(row['requested_GPU'] for s,a,b in out.segments(row) if s==site and a<=t+24<b)
-                assert load[t,site].getValue()==expected
+                state[site]=(state[site] if event_form else 0)+load[t,site].getValue()
+                assert state[site]==expected
             assert wan[t+24].getValue()==int(out.migrated and out.transfer_start<=t+24<out.transfer_end)
     assert represented==set(opts);model.dispose()
+
+
+def assert_full_physical_identity(explicit,compressed,context):
+    from dayahead.v40g_segments.canonical import import_frozen,planning_power,identities
+    a=import_frozen(explicit['jobs']);b=import_frozen(compressed['jobs'])
+    assert a==b and identities(a)==identities(b)
+    pa=planning_power(a,context);pb=planning_power(b,context)
+    for field in ('gpu','it','pcc','qcc'):
+        np.testing.assert_array_equal(pa[field],pb[field])
+    assert explicit['reserve_diagnostics']==compressed['reserve_diagnostics']
+    # Independently compare per-rack interval expansion to endpoint recurrence.
+    # Canonical events above bind the pause, WAN, and destination restart too.
+    dense=defaultdict(lambda:np.zeros(96,dtype=int))
+    delta=defaultdict(lambda:np.zeros(96,dtype=int))
+    for rows,target,event in ((a,dense,False),(b,delta,True)):
+        for row in rows:
+            for index,seg in enumerate(row['compute_segments']):
+                rack=row['initial_Rack_label'] if row.get('migration_selected') and index==0 else row['Rack_label']
+                lo=max(24,seg['start'])-24;hi=min(120,seg['end'])-24
+                if lo>=hi:continue
+                key=(seg['site'],rack);g=row['requested_GPU']
+                if event:
+                    target[key][lo]+=g
+                    if hi<96:target[key][hi]-=g
+                else:target[key][lo:hi]+=g
+    assert set(dense)==set(delta)
+    for key in dense:np.testing.assert_array_equal(dense[key],np.cumsum(delta[key]))
 
 
 def test_mixed_running_pending_shared_gpu_wan_exact_optimum(tmp_path):
@@ -78,10 +111,11 @@ def test_mixed_running_pending_shared_gpu_wan_exact_optimum(tmp_path):
     snapshot['PENDING_JOB_Q90_SECONDS']={'b':9000.};snapshot['PENDING_JOB_DURATION_SLOTS']={'b':10}
     path=tmp_path/'ML.json';write_json(path,snapshot);bind(ctx,path,sha(path))
     pcc=np.zeros((96,2));pcc[:10,0]=2
-    explicit=solve(rows,pcc,ctx,tmp_path/'explicit',factorize=False)
+    explicit=solve(rows,pcc,ctx,tmp_path/'explicit',factorize=False,event_load=False)
     compressed=solve(rows,pcc,ctx,tmp_path/'compressed',factorize=True)
     np.testing.assert_allclose(explicit['OBJECTIVE_VECTOR'],compressed['OBJECTIVE_VECTOR'],rtol=0,atol=1e-9)
     assert explicit['jobs']==compressed['jobs']
+    assert_full_physical_identity(explicit,compressed,ctx)
     assert np.array_equal(explicit['GPU'],compressed['GPU'])
     for value in (explicit,compressed):
         assert value['GPU'].max()<=2
@@ -106,11 +140,34 @@ def test_full_five_priority_optimum_decisions_and_occupancy_equal(tmp_path,cross
     snapshot['PENDING_JOB_Q90_SECONDS']={'one':duration*900.};snapshot['PENDING_JOB_DURATION_SLOTS']={'one':duration}
     path=tmp_path/'ML.json';write_json(path,snapshot);bind(ctx,path,sha(path))
     pcc=np.zeros((96,2));pcc[72:min(96,72+duration),0]=1
-    explicit=solve([row],pcc,ctx,tmp_path/'explicit',factorize=False)
+    explicit=solve([row],pcc,ctx,tmp_path/'explicit',factorize=False,event_load=False)
     compressed=solve([row],pcc,ctx,tmp_path/'compressed',factorize=True)
     np.testing.assert_allclose(explicit['OBJECTIVE_VECTOR'],compressed['OBJECTIVE_VECTOR'],rtol=0,atol=1e-9)
     assert explicit['jobs']==compressed['jobs']
+    assert_full_physical_identity(explicit,compressed,ctx)
     assert np.array_equal(explicit['GPU'],compressed['GPU']) and np.array_equal(explicit['PCC'],compressed['PCC'])
     assert explicit['secondary_migration_optimum']==compressed['secondary_migration_optimum']
     assert explicit['quaternary_tie_optimum']==compressed['quaternary_tie_optimum']
     if not equal:assert compressed['secondary_migration_optimum']==1
+
+
+def test_interval_difference_bijection_including_fractional_relaxation():
+    from dayahead.v41r1.migration_load import add_interval
+    from collections import defaultdict
+    rng=np.random.default_rng(20260907)
+    # Signed/fractional weights also prove the linear identity, beyond binary
+    # feasible choices. Include both boundaries, pre-day and post-day tails.
+    dense=defaultdict(float);delta=defaultdict(float)
+    intervals=[(0,24),(0,25),(24,120),(23,121),(120,145),(119,145),(96,137)]
+    intervals+=list(zip(rng.integers(0,120,100),rng.integers(121,160,100)))
+    for i,(a,b) in enumerate(intervals):
+        for site in ('A','B'):
+            weight=(i%7-3)/8
+            add_interval(dense,site,a,b,weight,96,event_form=False)
+            add_interval(delta,site,a,b,weight,96,event_form=True)
+    for site in ('A','B'):
+        state=0.
+        for t in range(96):
+            state+=delta[t,site]
+            assert state==dense[t,site]
+            assert delta[t,site]==dense[t,site]-(dense[t-1,site] if t else 0.)

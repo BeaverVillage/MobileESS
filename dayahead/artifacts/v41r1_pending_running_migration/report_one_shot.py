@@ -51,7 +51,10 @@ def run():
         manifests[p]=verify_manifest(unit/'UNIT_SCIENTIFIC_MANIFEST.json')
         for phase in ('dayahead','actual'):
             path=unit/phase/(phase.upper()+'_RECEIPT.json');r=read(path)
-            assert r['science']==frozen['science'] and r['scientific_commit']==frozen['scientific_commit']
+            if p=='B0':
+                from dayahead.v41r1.migration_retention import validate
+                validate(r,science())
+            else:assert r['science']==frozen['science'] and r['scientific_commit']==frozen['scientific_commit']
             receipts.append(record(path))
     prep=read(RUNTIME/'inputs'/DAY/'PRE_SOLVE_PERSISTENCE_AUDIT.json')
     for entry in prep['tables'].values():verify_table(entry)
@@ -74,22 +77,22 @@ def run():
             if g['raw_voltage_violation_count'] or g['line_current_violation_count']:blockers.append(p+'_'+stage+'_RAW_ELECTRICAL_VIOLATION')
     model=read(RUNTIME/'pilot'/DAY/'B1/dayahead/A0/PRIMARY_STRUCTURE.json')
     pre=read(OUT/'PRE_MAY01_ONE_SHOT_AUDIT/MODEL/PRIMARY_STRUCTURE.json')
-    for key in ('domain_counts','model_variables','model_constraints','integer_variables_including_binary','general_constraints'):
+    for key in ('domain_counts','model_variables','model_constraints','integer_variables_including_binary','general_constraints','matrix_nonzeros'):
         assert model[key]==pre[key],key
     gate=read(OUT/'EXACT_COMPRESSION_GATE.json')
     report=dict(status='COMPLETE_RAW_OUTCOMES_REPORTED',scientific_commit=frozen['scientific_commit'],
         contract=gate['contract'],results=results,primary_gains=gains,model_structure=model,
         compression_gate=record(OUT/'EXACT_COMPRESSION_GATE.json'),regression_test_count=len(list(ET.parse(OUT/'V41_TEST_RESULTS.xml').iter('testcase'))),
         P0=record(OUT/'V41_LEGACY_P0_01_07_CLOSURE_AUDIT.json'),B0_in_B1=record(OUT/'V41_MAY01_B0_IN_B1_FEASIBILITY.json'),
-        all_four_phases_same_scientific_commit=True,receipts=receipts,
+        all_four_phases_same_scientific_commit=False,retained_B0=record(OUT/'V41R1_RETAINED_B0_CLOSURE_AUDIT.json'),receipts=receipts,
         full_May_readiness='FAIL' if blockers else 'PASS',full_May_blocking_reasons=blockers,
-        full_May_launched=False,full_May_requires_user_review=True,new_voltage_margin=None,
+        full_May_launched=False,full_May_requires_fixed_four_worker_stress_PASS=True,new_voltage_margin=None,
         Actual_voltage_retuning=False,optimizer_scalar_outputs_unchanged=True,
         attribution='Only fixed-start initial placement and one-shot first-checkpoint migration are flexible. No time shifting, extra checkpoint, terminal cap or Actual optimization.',
         generator=record(__file__))
     document(OUT/'V41R1_MAY01_FINAL_ONE_SHOT_RESULTS.json',report)
     document(OUT/'V41R1_COMPLETE_PERSISTENCE_AUDIT.json',dict(status='PASS',manifests=manifests,
-        receipts=receipts,ML_persistence=prep,all_manifest_leaves_reopened=True,all_four_phases_same_scientific_commit=True))
+        receipts=receipts,ML_persistence=prep,all_manifest_leaves_reopened=True,all_four_phases_same_scientific_commit=False,retained_B0=record(OUT/'V41R1_RETAINED_B0_CLOSURE_AUDIT.json')))
     flat=[]
     for label,policies in results.items():
         for p,v in policies.items():

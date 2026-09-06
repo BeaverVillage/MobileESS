@@ -41,7 +41,7 @@ def solve_feedback(a0, m1, context, *, tolerance=1e-6, work_limit=60.0):
     model=gp.Model('V40G_SEGMENT_AIDC_FEEDBACK');model.Params.OutputFlag=0
     model.Params.Threads=4;model.Params.Seed=20260905;model.Params.MIPGap=0;model.Params.MIPGapAbs=0
     model.Params.FeasibilityTol=1e-8;model.Params.IntFeasTol=1e-9;model.Params.OptimalityTol=1e-8
-    model.Params.WorkLimit=work_limit;model.Params.SoftMemLimit=8;model.Params.NodefileStart=1
+    model.Params.WorkLimit=work_limit;model.Params.SoftMemLimit=GRB.INFINITY;model.Params.MemLimit=GRB.INFINITY;model.Params.NodefileStart=.5
     sites=tuple(context.capacity.aidc_ids);load=defaultdict(gp.LinExpr)
     variables={};options={};deviation=gp.LinExpr();tie=gp.LinExpr()
     try:

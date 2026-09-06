@@ -12,16 +12,18 @@ from dayahead.v41r1.migration import CONTRACT
 def run():
     xml=OUT/'V41_TEST_RESULTS.xml';tree=ET.parse(xml)
     cases=list(tree.iter('testcase'))
-    assert len(cases)>=217 and not any(list(tree.iter(tag)) for tag in ('failure','error','skipped'))
+    assert len(cases)>=221 and not any(list(tree.iter(tag)) for tag in ('failure','error','skipped'))
     equivalent=[c for c in cases if c.attrib['classname'].endswith('test_v41r1_compression')]
-    assert len(equivalent)==7
+    assert len(equivalent)==11
     pre=OUT/'PRE_MAY01_ONE_SHOT_AUDIT';receipt=read(pre/'PRE_MAY01_GATE.json')
     assert receipt['status']=='PASS' and receipt['contract']==CONTRACT and receipt['optimizer_calls']==0
     candidate=read(pre/'MIGRATION_ELIGIBILITY_SUMMARY.json');model=read(pre/'MODEL/PRIMARY_STRUCTURE.json')
     assert candidate['explicit_candidate_combination_count']==model['domain_counts']['options']
     request=record(OUT/'USER_FINAL_ONE_SHOT_MIGRATION_CONTRACT.txt')
     sources=[record(ROOT/p) for p in ('dayahead/v40g/domain.py','dayahead/v40g/optimizer.py',
-        'dayahead/v41r1/migration.py','dayahead/v41r1/migration_factor.py',
+        'dayahead/v41r1/migration.py','dayahead/v41r1/migration_factor.py','dayahead/v41r1/migration_load.py','dayahead/v41r1/migration_memory.py',
+        'dayahead/v41r1/migration_retention.py','dayahead/v41/retention.py','dayahead/v41/solver_observer.py',
+        'dayahead/v40a/feedback.py','dayahead/v40h/feedback.py','dayahead/v40h/policy.py',
         'tests/dayahead/test_v41r1_compression.py','tests/dayahead/test_v41r1_migration.py')]
     prior=read(OUT/'SUPERSEDED_FIRST_CHECKPOINT_COMPRESSION_GATE.json')
     gate={k:prior[k] for k in ('method','forward','reverse','P1_P2','P3','P4','P5','checks')}
@@ -42,6 +44,10 @@ def run():
         dimension_reduction_is_user_authorized_scientific_revision=True,
         factorization_is_exact_under_final_semantics=True,pruning_methods_used=[],
         diagnostic_only_build=True,Actual_reads=0)
+    gate.update(event_load_recurrence=True,matrix_nonzeros=model['matrix_nonzeros'],
+        interval_incidence_equivalence='GPU[t]=GPU[t-1]+starts[t]-ends[t], GPU[-1]=0; summing recovers every dense interval row, differencing reverses it. Exact for the continuous relaxation too.',
+        H4_expression='Same headroom computed from constrained GPU state variables instead of repeatedly expanding equivalent option sums.',
+        dense_reference_matrix_nonzeros=52197761)
     document(OUT/'EXACT_COMPRESSION_GATE.json',gate)
     scope=read(OUT/'FINAL_SCOPE_REGISTRATION.json')
     scope.update(contract=CONTRACT,checkpoint_contract=request,
@@ -50,7 +56,9 @@ def run():
         previous_all_valid_checkpoint_interpretation_wrong=False,
         first_checkpoint_UID_serial_cursor_rule='First checkpoint fixed by new user contract; inherited WAN cursor=max(cursor,first_checkpoint) from operating slot 2',
         selected_checkpoint_opportunities_per_eligible_job=1,additional_checkpoint_opportunities=0,
-        prestart_placement_not_running_migration=True,full_May_authorized=False,
+        prestart_placement_not_running_migration=True,full_May_authorized='CONDITIONAL_ON_MAY01_AUDITS_AND_FIXED_FOUR_WORKER_STRESS_PASS',
+        parallel_day_workers=4,solver_threads_per_day=4,
+        memory_contract=record(OUT/'USER_FIXED_FOUR_WORKER_MEMORY_CONTRACT.txt'),
         voltage_margin='CANCELLED_BY_USER',new_voltage_margin=None)
     document(OUT/'FINAL_SCOPE_REGISTRATION.json',scope)
     registry=read(OUT/'V41_POLICY_REGISTRY_FREEZE.json')
