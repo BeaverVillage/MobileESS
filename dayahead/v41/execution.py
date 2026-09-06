@@ -36,14 +36,22 @@ def verify_dayahead(day, policy):
     receipt = read(path)
     require(receipt.get('schema')=='V41_PHASE_RECEIPT_V1','LEGACY_DAYAHEAD_RECEIPT_FORBIDDEN')
     require(receipt['status'] == 'COMPLETE', 'DAYAHEAD_NOT_COMPLETE')
-    require(receipt['science']['manifest_SHA'] == science()['manifest_SHA'], 'DAYAHEAD_SCIENTIFIC_SOURCE_DRIFT')
-    verify_manifest(receipt['science'])
+    retained_sources=None
+    if receipt['science']['manifest_SHA'] == science()['manifest_SHA']:
+        verify_manifest(receipt['science'])
+    else:
+        from .retention import validate
+        retained_sources=validate(receipt,science())
     for file in receipt['files'].values():
         require(record(file['path']) == file, 'DAYAHEAD_OUTPUT_HASH_DRIFT')
     from .scientific_archive import verify_manifest as verify_scientific_manifest
-    verify_scientific_manifest(receipt['files']['scientific_manifest']['path'])
+    verify_scientific_manifest(path.parent/'SCIENTIFIC_MANIFEST.json')
     from dayahead.v40h.identity import verify_bound_files
-    verify_bound_files(read(path.parent/'GENERATION_INPUT_IDENTITY.json'))
+    generation=read(path.parent/'GENERATION_INPUT_IDENTITY.json')
+    if retained_sources is None: verify_bound_files(generation)
+    else:
+        from .retention import verify_bound
+        verify_bound(generation,retained_sources)
     frozen = read(receipt['files']['decision']['path'])
     require(frozen['decision_SHA'] == digest(frozen['decision']), 'DAYAHEAD_DECISION_CONTENT_DRIFT')
     return frozen['decision'], receipt
@@ -291,7 +299,8 @@ def actual(day, policy):
         from dayahead.v40d_actual.inputs import observations, capacity
         from dayahead.v40d_actual.exogenous import load as load_exogenous
         from dayahead.v40d_actual.rack_dispatch import Rack
-        from .actual import replay_jobs, power_from_execution, realized_workload
+        from .actual_dispatch import replay_jobs, power_from_execution, persist as persist_dispatch
+        from .actual import realized_workload
         from dayahead.v40d_actual.mobility_inputs import actual_mobility
         obs = observations(SOURCE_REPO / 'dayahead/artifacts/v40d_actual_realized_replay')
         authority, _, *unused = capacity(SOURCE_REPO)
@@ -299,6 +308,7 @@ def actual(day, policy):
         replay = replay_jobs(decision['AIDC_decision'], obs, issue_time=issue_time(day),
                              site_capacity=context.capacity.site_capacity, racks=racks)
         write_json(output / 'ACTUAL_JOB_REPLAY.json', replay)
+        persist_dispatch(output,replay,obs,issue_time(day),context.capacity.site_capacity,racks)
         require(replay['capacity_audit']['status'] == 'PASS', 'FROZEN_ACTUAL_CAPACITY_VIOLATION')
         exo = load_exogenous(SOURCE_REPO, day)
         write_json(output / 'ACTUAL_EXOGENOUS_AUTHORITY.json', exo['authority'])
@@ -347,10 +357,18 @@ def actual(day, policy):
             frozen_future_workload_score=score, H4_raw_vs_actionable_coverage=coverage,
             realized_workload_source=record(workload_path), runtime_diagnostics=runtime,
             counters=replay['counters'], power_audit=power['power_audit'], Actual_optimizer_calls=0,
+            execution_delay_KPIs=replay['execution_delay_KPIs'],
+            execution_rate=replay['execution_rate'],
+            raw_contention_classification=replay['raw_runtime_contention']['classification'],
+            final_execution_feasibility=replay['exact_execution_feasibility'],
             AIDC_energy_kWh=float(.25 * power['PCC_P'].sum()), decision_SHA=da_receipt['decision_SHA'])
         write_json(output / 'ACTUAL_RESULT.json', summary)
         da_output=RUNS/day/policy/'dayahead'
         archive.actual_inputs(output,day,decision,da_output,obs,exo,mess,workload)
+        actual_authority=read(output/'authority/AUTHORITY_MANIFEST.json')
+        actual_authority.update(scientific_commit=commit(),Actual_source_manifest=source,
+            frozen_DayAhead_producer_commit=da_receipt['scientific_commit'])
+        archive.document(output/'authority/AUTHORITY_MANIFEST.json',actual_authority)
         import pandas as pd
         classes=pd.read_parquet(da_output/'authority/JOB_CLASSES.parquet').set_index('job_id')
         requests=pd.read_parquet(da_output/'authority/JOB_REQUEST_INPUTS.parquet').set_index('job_id')

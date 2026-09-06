@@ -146,7 +146,10 @@ def pilot_report():
         m=verify_manifest(root/policy/'UNIT_SCIENTIFIC_MANIFEST.json')
         for phase in ('dayahead','actual'):
             r=read(root/policy/phase/(phase.upper()+'_RECEIPT.json'))
-            require(r['science']==science(),'PILOT_SOURCE_CHANGED_REQUIRES_RERUN')
+            if r['science']!=science():
+                require(policy=='B0' and phase=='dayahead','PILOT_SOURCE_CHANGED_REQUIRES_RERUN')
+                from .retention import evidence
+                evidence(r,science())
         reports[policy]=dict(DayAhead=read(root/policy/'dayahead/PLANNING_RESULT.json'),
             Fresh=read(root/policy/'dayahead/FRESH_RESULT.json'),Actual=read(root/policy/'actual/ACTUAL_RESULT.json'),
             comparison=pd.read_parquet(root/policy/'actual/comparison/DAYAHEAD_VS_ACTUAL.parquet').where(lambda x:pd.notna(x),None).to_dict('records'))
@@ -194,6 +197,8 @@ def freeze_release():
         complete_scientific_source_manifest=complete_source(),science=science(),
         policy_registry=record(OUT/'V41_POLICY_REGISTRY_FREEZE.json'),propagation=propagation,
         persistence_schema=SCHEMA,freeze_commit_receipt='V41_FINAL_INTERFACE_FREEZE_COMMIT_RECEIPT.json')
+    frozen['retained_B0_DayAhead']=record(OUT/'V41_B0_DAYAHEAD_RETENTION_AUDIT.json')
+    frozen['Actual_rack_dispatch_contract']=record(OUT/'V41_COUNTERFACTUAL_ACTUAL_REPLAY_CONTRACT.json')
     document(OUT/'V41_FINAL_INTERFACE_FREEZE.json',frozen)
     return frozen
 

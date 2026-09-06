@@ -47,15 +47,18 @@ def verify_receipt(path, frozen=None):
     require(receipt.get('schema')=='V41_PHASE_RECEIPT_V1','LEGACY_PHASE_RECEIPT_FORBIDDEN')
     require(receipt['status'] == 'COMPLETE', 'INCOMPLETE_PHASE_RECEIPT')
     if frozen:
-        require(receipt['scientific_commit'] == frozen['scientific_commit'], 'MIXED_SCIENTIFIC_COMMIT')
-        require(receipt['science']['manifest_SHA'] == frozen['science']['manifest_SHA'], 'MIXED_SOURCE_IDENTITY')
+        if receipt['scientific_commit'] != frozen['scientific_commit'] or receipt['science']['manifest_SHA'] != frozen['science']['manifest_SHA']:
+            require(Path(path).name=='DAYAHEAD_RECEIPT.json' and receipt.get('day')==DAYS[0] and receipt.get('policy')=='B0',
+                    'MIXED_SCIENTIFIC_COMMIT')
+            from .retention import validate
+            validate(receipt,frozen['science'])
     for entry in receipt['files'].values():
         require(record(entry['path']) == entry, 'PHASE_RECEIPT_HASH_DRIFT')
     if 'day_ahead' in receipt:
         require(record(receipt['day_ahead']['path']) == receipt['day_ahead'], 'ACTUAL_DAYAHEAD_BINDING_DRIFT')
     from .scientific_archive import verify_manifest
     require('scientific_manifest' in receipt['files'],'COMPLETE_WITHOUT_SCIENTIFIC_PERSISTENCE')
-    verify_manifest(receipt['files']['scientific_manifest']['path'])
+    verify_manifest(Path(path).parent/'SCIENTIFIC_MANIFEST.json')
     if 'day_ahead' in receipt:
         verify_manifest(Path(path).parent.parent/'UNIT_SCIENTIFIC_MANIFEST.json')
     return receipt
@@ -118,10 +121,30 @@ class Supervisor:
 
     def phase(self, row, phase):
         day, policy = row['day'], row['policy']; folder = RUNTIME / day / policy / phase
+        if phase=='dayahead' and day==DAYS[0] and policy=='B0' and not folder.exists():
+            # Explicit latest user amendment preserves this exact valid freeze.
+            # Copy bytes without claiming a new DayAhead generation or commit.
+            source=RUNTIME/'pilot'/day/policy/'dayahead'
+            retained=read(source/'DAYAHEAD_RECEIPT.json')
+            from .retention import validate
+            validate(retained,self.frozen['science'])
+            from .scientific_archive import verify_manifest,copy_atomic,document
+            verify_manifest(source/'SCIENTIFIC_MANIFEST.json')
+            for original in sorted(source.rglob('*')):
+                if original.is_file(): copy_atomic(original,folder/original.relative_to(source))
+            copy_atomic(source/'authority/COMMON_INPUT_IDENTITY.json',RUNTIME/day/'COMMON_INPUT_IDENTITY.json')
+            document(folder.parent/'RETAINED_DAYAHEAD_ADOPTION.json',dict(
+                authorization='Final Actual rack-dispatch amendment: preserve valid B0 DayAhead without rerun',
+                original_receipt=record(source/'DAYAHEAD_RECEIPT.json'),original_producer_commit=retained['scientific_commit'],
+                current_campaign_commit=self.sha,DayAhead_rerun=False,bytes_modified=False))
         receipt_path = folder / (phase.upper() + '_RECEIPT.json')
         if receipt_path.exists():
             stored=read(receipt_path)
-            require(stored['scientific_commit']==self.sha and stored['science']==self.frozen['science'],'CANNOT_RESUME_DIFFERENT_SCIENCE')
+            if stored['scientific_commit']!=self.sha or stored['science']!=self.frozen['science']:
+                require(phase=='dayahead' and day==DAYS[0] and policy=='B0' and
+                        stored.get('day')==DAYS[0] and stored.get('policy')=='B0','CANNOT_RESUME_DIFFERENT_SCIENCE')
+                from .retention import validate
+                validate(stored,self.frozen['science'])
             try:
                 verify_receipt(receipt_path, self.frozen)
             except (ValueError,FileNotFoundError,OSError) as error:

@@ -1,0 +1,620 @@
+# ============================================================
+# V41 ACTUAL RACK-DISPATCH FLEXIBILITY AMENDMENT
+#
+# FINAL ACTUAL EXECUTION SEMANTICS
+#
+# This instruction supersedes prior conflicting Actual-start
+# instructions wherever they disagree.
+#
+# Goal:
+# Increase physically executable job rate in Actual replay
+# WITHOUT weakening physical GPU/rack capacity constraints
+# and WITHOUT re-optimizing the Day-Ahead policy.
+# ============================================================
+
+
+# 1. CORE PRINCIPLE
+
+Machine learning is used ONLY in Day-Ahead planning.
+
+Actual does NOT:
+
+- rerun runtime ML
+- rerun future-workload ML
+- recompute Q90
+- re-optimize A0/M1/A1/MF
+- change policy
+- change selected IDC/site
+- change admission/selected jobs
+- create new migration
+- alter MESS route
+
+
+Actual performs ONLY:
+
+REALIZED RUNTIME
++
+RACK/GPU-LEVEL EXECUTION DISPATCH
+within the already frozen Day-Ahead site decision.
+
+
+
+# 2. PLANNED START IS A RELEASE TIME
+
+Do NOT require:
+
+ACTUAL_START_j == DA_PLANNED_START_j
+
+
+Instead freeze:
+
+ACTUAL_START_j >= DA_PLANNED_START_j
+
+
+Interpret:
+
+DA_PLANNED_START_j
+=
+earliest authorized execution time
+
+
+Actual execution may be delayed if rack/GPU capacity is not yet
+physically available because earlier jobs run longer than predicted.
+
+
+
+# 3. SAME IDC / SITE MUST REMAIN FROZEN
+
+For every job:
+
+ACTUAL_SITE_j = DA_SITE_j
+
+
+No cross-site repair.
+
+No site reassignment.
+
+No workload migration created in Actual.
+
+
+The only spatial flexibility allowed is:
+
+RACK assignment
+within the already frozen IDC/site.
+
+
+
+# 4. ACTUAL RACK ASSIGNMENT
+
+At Actual execution time, assign each job to a physically feasible
+rack or set of authoritative rack resources within its frozen site.
+
+Rack assignment may differ from the preliminary Day-Ahead rack
+representation ONLY if the existing Actual contract already allows
+rack-level execution assignment.
+
+Do NOT create a new rack topology or capacity.
+
+Use the authoritative existing rack/GPU capacities.
+
+
+
+# 5. EARLIEST FEASIBLE EXECUTION
+
+For every selected job j:
+
+ACTUAL_START_j
+=
+earliest t >= DA_PLANNED_START_j
+
+such that its frozen site can provide the required physical
+rack/GPU capacity.
+
+
+Then:
+
+ACTUAL_END_j
+=
+ACTUAL_START_j
++
+REALIZED_RUNTIME_j
+
+
+No artificial shortening of runtime.
+
+No GPU clipping.
+
+
+
+# 6. RESOURCE CAPACITY REMAINS HARD
+
+At every exact execution event:
+
+GPU_OCCUPANCY[i,t]
+<=
+GPU_CAPACITY[i,t]
+
+
+and all authoritative rack-level capacity constraints must hold.
+
+
+Do NOT "loosen" physical capacity.
+
+65/64 GPU execution is NOT allowed.
+
+
+If naive replay produces 65/64:
+
+classify the event first as:
+
+RUNTIME_OVERRUN_INDUCED_RESOURCE_CONTENTION
+
+
+Then resolve the physical execution through rack/GPU availability
+delay, NOT by changing Day-Ahead policy.
+
+
+
+# 7. MAY-1 AIDC01 CASE
+
+Preserve evidence of the discovered event:
+
+AIDC01
+slot/time near 06:00
+naive realized-runtime overlap:
+65 GPU demand / 64 GPU capacity
+approximately 10 seconds
+
+
+Verify:
+
+- not duplicate counting
+- not rounding error
+- not ML executed in Actual
+- caused by earlier realized runtimes exceeding Day-Ahead Q90 durations
+
+
+Then apply the final Actual rack-dispatch rule.
+
+
+Expected behavior:
+
+DA planned start:
+06:00:00
+
+if GPU becomes available:
+06:00:10
+
+then:
+
+ACTUAL_EXECUTION_START = 06:00:10
+START_DELAY_SECONDS = 10
+
+
+same site
+same selected job
+same policy decision.
+
+
+
+# 8. THIS IS NOT ACTUAL RE-OPTIMIZATION
+
+The following remain frozen from Day-Ahead:
+
+- admitted/selected job set
+- IDC/site
+- policy
+- migration
+- WAN decisions
+- MESS route
+- A0/M1/A1/MF decisions
+
+
+Actual rack dispatch does NOT optimize the grid objective.
+
+
+It only constructs a physically executable realization of the frozen
+Day-Ahead job plan under realized runtimes.
+
+
+
+# 9. NO EARLY START
+
+A job may NEVER be moved earlier than its Day-Ahead planned start.
+
+Require:
+
+ACTUAL_START_j >= DA_PLANNED_START_j
+
+
+This prevents Actual information from creating an unrealistically
+better schedule than the Day-Ahead plan.
+
+
+
+# 10. DELAY PROPAGATION
+
+If runtime overrun delays a job, the resulting occupancy may also
+delay later jobs at the same site.
+
+
+Allow deterministic delay propagation.
+
+
+Do NOT drop later jobs merely because an earlier job overran,
+unless the authoritative terminal/horizon contract makes their
+execution impossible.
+
+
+Do NOT invent a new cross-day completion rule.
+
+Use the already-authoritative terminal/carryover semantics.
+
+
+
+# 11. SIMULTANEOUS JOBS
+
+If multiple jobs become eligible at the same time:
+
+preserve the existing authoritative Day-Ahead ordering/tie-break rule.
+
+
+Do NOT reorder jobs using Actual runtime knowledge.
+
+
+If an existing deterministic rack-dispatch ordering already exists,
+reuse it exactly.
+
+
+
+# 12. EXECUTION RATE
+
+Actual execution rate must be measured explicitly.
+
+
+At minimum persist:
+
+N_DA_SELECTED_JOBS
+
+N_ACTUAL_STARTED_JOBS
+
+N_ACTUAL_COMPLETED_JOBS
+
+N_DELAYED_JOBS
+
+N_NOT_STARTED_BY_HORIZON
+
+N_NOT_COMPLETED_BY_HORIZON
+
+
+Report:
+
+START_EXECUTION_RATE
+=
+N_ACTUAL_STARTED_JOBS
+/
+N_DA_SELECTED_JOBS
+
+
+COMPLETION_RATE
+=
+N_ACTUAL_COMPLETED_JOBS
+/
+N_DA_SELECTED_JOBS
+
+
+Do not hide delayed/uncompleted jobs.
+
+
+
+# 13. DELAY METRICS
+
+Persist:
+
+START_DELAY_SECONDS_j
+=
+ACTUAL_START_j
+-
+DA_PLANNED_START_j
+
+
+Report:
+
+mean delay
+median delay
+P90 delay
+P95 delay
+P99 delay
+maximum delay
+
+GPU-weighted mean delay
+
+number/fraction delayed >15 min
+number/fraction delayed >1 h
+number/fraction delayed >4 h
+
+
+Also report delay-induced:
+
+SLA impact
+service debt impact
+if these are already authoritative quantities.
+
+
+
+# 14. JOB-LEVEL PERSISTENCE
+
+For every selected job persist:
+
+job_id
+
+DA_SITE
+DA_PLANNED_START
+
+ACTUAL_SITE
+ACTUAL_RACK
+
+REALIZED_RUNTIME_SECONDS
+
+ACTUAL_EXECUTION_START
+ACTUAL_EXECUTION_END
+
+START_DELAY_SECONDS
+
+GPU_REQUEST
+
+EXECUTION_STATUS
+
+DELAY_REASON
+
+BLOCKING_JOB_IDS
+where causally identifiable
+
+
+Allowed delay reason example:
+
+RESOURCE_CONTENTION_FROM_RUNTIME_OVERRUN
+
+
+
+# 15. EVENT-LEVEL RESOURCE TRACE
+
+Persist exact event-level occupancy around:
+
+job starts
+job completions
+rack allocation changes
+
+
+At minimum:
+
+timestamp
+IDC
+rack
+job_id
+GPU_delta
+GPU_occupancy_before
+GPU_occupancy_after
+GPU_capacity
+
+
+Validate globally:
+
+max_actual_GPU_occupancy
+<=
+capacity
+
+
+Then aggregate the physically feasible execution trace to the existing
+15-min power-resolution trajectory.
+
+
+
+# 16. 15-MIN POWER AGGREGATION
+
+Do NOT round Actual execution start back to the original Day-Ahead slot.
+
+
+Use the actual physically feasible execution interval when deriving
+15-min occupancy / IT-power contributions.
+
+
+If a job starts 10 seconds late, its energy/power overlap with the
+15-min intervals must reflect that actual execution timing according
+to the existing aggregation convention.
+
+
+
+# 17. ACTUAL GRID EVALUATION
+
+Use the resulting physically feasible Actual AIDC execution trajectory
+for Actual power/grid evaluation.
+
+
+Do NOT send the infeasible naive 65/64 trajectory to the final
+physical Actual result.
+
+
+However preserve the naive-contention evidence separately for audit.
+
+
+
+# 18. MESS REMAINS UNCHANGED
+
+Actual AIDC rack dispatch must NOT change:
+
+MESS route
+MESS travel decision
+MESS P/Q Day-Ahead command authority
+M1
+MF
+
+
+MESS Actual continues to use its already-defined realized travel replay.
+
+
+
+# 19. COUNTERFACTUAL ACTUAL SEMANTICS
+
+Final V41 interpretation:
+
+DAY-AHEAD:
+select policy/job/site/planned start using forecast information
+
+ACTUAL:
+hold policy/site/planned release time fixed,
+open realized runtime,
+perform only within-site rack/GPU execution dispatch,
+and measure resulting delay/service/power outcomes.
+
+
+This is:
+
+COUNTERFACTUAL EXECUTION REPLAY
+
+not:
+
+SECOND-STAGE GLOBAL REOPTIMIZATION
+
+
+
+# 20. MAY-1 INVALIDATION RULE
+
+Because this changes Actual execution semantics:
+
+- preserve the valid frozen May-1 B0 Day-Ahead artifact
+- invalidate any partial/failed May-1 B0 Actual artifact produced under
+  the previous exact-start semantics
+- rerun May-1 B0 Actual from the SAME frozen Day-Ahead receipt
+
+Then run:
+
+B1 Day-Ahead
+B1 Actual
+
+under the same finalized Actual rack-dispatch contract.
+
+
+If B1 Day-Ahead was already run before this amendment but is otherwise
+scientifically valid, it may remain frozen.
+
+Any Actual result produced with conflicting semantics must be rerun.
+
+
+
+# 21. B0-B3 CONSISTENCY
+
+Apply exactly the same Actual rack-dispatch semantics to:
+
+B0
+B1
+B2
+B3
+
+
+No policy-specific execution relaxation.
+
+
+
+# 22. LEGACY 72 CASES
+
+Use this same Actual execution contract when resolving the legacy
+72 counterfactual policy-day replay cases.
+
+
+Historical policy-specific rack execution records are NOT required.
+
+The Day-Ahead counterfactual decision supplies policy-dependent
+authority.
+
+Realized runtime supplies the execution uncertainty.
+
+Rack/GPU dispatch supplies only physical realization.
+
+
+
+# 23. TESTS
+
+Add explicit tests for:
+
+- ML calls in Actual = 0
+- Q90 recomputation in Actual = 0
+- site changes in Actual = 0
+- migration changes in Actual = 0
+- ACTUAL_START >= DA_PLANNED_START
+- no early starts
+- rack capacity hard
+- GPU capacity hard
+- delay propagation works
+- deterministic tie-break
+- no Actual global reoptimization
+- May-1 65/64 naive contention detected
+- final May-1 occupancy <=64
+- exact 10-second delay reproduced if the underlying authority remains
+  unchanged
+- job-level delay persistence
+- event-level occupancy persistence
+- 15-min aggregation from actual execution intervals
+- execution/completion-rate metrics exact
+
+
+Run the full V41 regression suite after implementation.
+
+
+
+# 24. PILOT GATE
+
+May-1 pilot may proceed only if:
+
+B0 Actual physical replay PASS
+
+GPU capacity PASS
+
+rack capacity PASS
+
+execution-rate artifact PASS
+
+delay artifact PASS
+
+Actual persistence contract PASS
+
+
+Then continue:
+
+B1 Day-Ahead
+B1 Actual
+
+B0/B1 objective/nesting audit
+
+P0-01..P0-07 closure audit
+
+final V41 interface freeze
+
+full-May propagation audit
+
+detached full-May launch.
+
+
+
+# 25. PAPER-FACING INTERPRETATION
+
+Use terminology such as:
+
+"Realized runtime overruns are absorbed by within-site rack-level
+execution delays while the Day-Ahead site and scheduling decisions
+remain fixed."
+
+
+Do NOT say:
+
+"Actual optimization corrects Day-Ahead errors."
+
+
+Do NOT say:
+
+"physical constraints are relaxed."
+
+
+The physical constraints remain hard;
+only exact-start equality is relaxed to an earliest-feasible
+execution rule.
