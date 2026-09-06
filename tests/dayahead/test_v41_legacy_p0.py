@@ -14,6 +14,27 @@ def test_p0_01_old_success_is_not_v41_execution(tmp_path,monkeypatch,policy):
     with pytest.raises(ValueError,match='LEGACY_DAYAHEAD_RECEIPT'): execution.verify_dayahead('2025-05-01',policy)
 
 
+def test_complete_current_day_ahead_verifies_source_and_artifact_manifests(tmp_path,monkeypatch):
+    from dayahead.v40h.identity import manifest
+    from dayahead.v41.preflight import record
+    from dayahead.v41.scientific_archive import artifact_entry,SCHEMA
+    monkeypatch.setattr(execution,'RUNS',tmp_path)
+    source=tmp_path/'source.py'; source.write_text('frozen source')
+    source_manifest=manifest([source],tmp_path)
+    monkeypatch.setattr(execution,'science',lambda:source_manifest)
+    out=tmp_path/'2025-05-01/B0/dayahead'; decision={'test':'frozen'}
+    write_json(out/'FROZEN.json',dict(decision=decision,decision_SHA=digest(decision)))
+    write_json(out/'GENERATION_INPUT_IDENTITY.json',dict(source=record(source)))
+    write_json(out/'SCIENTIFIC_MANIFEST.json',dict(schema=SCHEMA,status='PASS',artifacts=[
+        artifact_entry(out/p,out,'dayahead') for p in ('FROZEN.json','GENERATION_INPUT_IDENTITY.json')]))
+    receipt=dict(schema='V41_PHASE_RECEIPT_V1',status='COMPLETE',science=source_manifest,files=dict(
+        decision=record(out/'FROZEN.json'),scientific_manifest=record(out/'SCIENTIFIC_MANIFEST.json')))
+    write_json(out/'DAYAHEAD_RECEIPT.json',receipt)
+    assert execution.verify_dayahead('2025-05-01','B0')==(decision,receipt)
+    source.write_text('changed source')
+    with pytest.raises(ValueError): execution.verify_dayahead('2025-05-01','B0')
+
+
 def test_p0_03_v41_snapshot_changes_all_cache_families(tmp_path):
     from dayahead.v40h.cache import ROLES,execution_identity,cache_identity,store_candidate,restore_candidate
     base={k:digest(k) for k in ROLES}; base['V41_ML_snapshot_SHA']='first'

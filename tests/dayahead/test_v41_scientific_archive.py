@@ -207,3 +207,16 @@ def test_fixed_route_travel_comparison_and_empty_fleet(tmp_path):
         travel_comparisons(tmp_path/'bad',pd.DataFrame([command]),[{**move,'route_link_ids':['b','a']}])
     empty=travel_comparisons(tmp_path/'empty',pd.DataFrame([{**command,'departure_slot':None}]),[])
     assert len(empty)==0 and empty.travel_seconds_actual.sum()==0
+
+
+def test_frozen_route_persists_each_from_to_road_node_in_order():
+    from dayahead.v41.scientific_archive import route_node_rows
+    commands=[dict(mess_id='M',slot=4,departure_slot=4,origin_service_id='A',destination_service_id='B',route_link_ids=['x','y'])]
+    links=pd.DataFrame([dict(reduced_link_id='x',from_node='1',to_node='2'),dict(reduced_link_id='y',from_node='2',to_node='3')])
+    services=pd.DataFrame([dict(service_id='A',traffic_node=1),dict(service_id='B',traffic_node=3)])
+    before=deepcopy(commands); frame,sequences=route_node_rows(commands,links,services)
+    assert sequences[0]['road_node_sequence']==['TN_01','TN_02','TN_03']
+    assert list(zip(frame.from_road_node,frame.to_road_node))==[('TN_01','TN_02'),('TN_02','TN_03')]
+    assert commands==before
+    with pytest.raises(ValueError,match='CHAIN_BROKEN'):
+        route_node_rows(commands,links.assign(from_node=['1','8']),services)

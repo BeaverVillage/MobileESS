@@ -196,12 +196,55 @@ def mess(output, day, commands, *, realized=None, elements=None):
     table(output / 'DISCRETE_STATES.parquet', scalar_frame(routes))
     table(output / 'TRAJECTORIES_96.parquet', frame)
     route_ref=document(output / 'FROZEN_ROUTE_DISCRETE.json', dict(rows=routes, route_discrete_SHA=digest(routes)))
+    route_node_archive(output, commands)
     if realized is not None:
         actual_frame=scalar_frame(realized['frame'].to_dict('records')); actual_frame['timestamp']=[dates[t] for t in actual_frame.slot]
         full_axis(actual_frame,['mess_id'],[(m,) for m in ids]); table(output / 'ACTUAL_TRAJECTORIES_96.parquet', actual_frame)
         document(output / 'REALIZED_TRAVERSALS.json', dict(moves=realized['moves'], frozen_routes=route_ref,
             route_search_calls=0, frozen_command_SHA=realized['frozen_commands_SHA']))
     return frame
+
+
+def route_node_rows(commands, links, services):
+    from dayahead.v33m.road_graph_authority import _traffic_node
+    link_map={str(r.reduced_link_id):r for r in links.itertuples()}
+    service_map={str(r.service_id):_traffic_node(r.traffic_node) for r in services.itertuples()}
+    require(len(link_map)==len(links) and len(service_map)==len(services), 'ROUTE_NODE_AUTHORITY_DUPLICATE')
+    rows=[]; sequences=[]
+    for c in commands:
+        if c.get('departure_slot') != c['slot']: continue
+        ids=c['route_link_ids']; require(ids and all(k in link_map for k in ids), 'ROUTE_LINK_UNAVAILABLE')
+        edges=[link_map[k] for k in ids]
+        pairs=[(_traffic_node(e.from_node),_traffic_node(e.to_node)) for e in edges]
+        require(all(a[1]==b[0] for a,b in zip(pairs,pairs[1:])), 'ROUTE_NODE_CHAIN_BROKEN')
+        require(pairs[0][0]==service_map[c['origin_service_id']] and pairs[-1][1]==service_map[c['destination_service_id']],
+                'ROUTE_NODE_ENDPOINT_MISMATCH')
+        base=dict(mess_id=c['mess_id'],departure_slot=c['departure_slot'],origin_service_id=c['origin_service_id'],
+                  destination_service_id=c['destination_service_id'],route_link_SHA=digest(ids))
+        sequences.append(dict(**base,road_node_sequence=[pairs[0][0]]+[b for a,b in pairs],route_link_ids=ids))
+        rows.extend(dict(**base,edge_index=i,link_id=k,from_road_node=a,to_road_node=b)
+                    for i,(k,(a,b)) in enumerate(zip(ids,pairs)))
+    columns=['mess_id','departure_slot','origin_service_id','destination_service_id','route_link_SHA',
+             'edge_index','link_id','from_road_node','to_road_node']
+    return pd.DataFrame(rows,columns=columns),sequences
+
+
+def route_node_archive(output, commands):
+    departures=[c for c in commands if c.get('departure_slot')==c['slot']]
+    sources={}
+    if departures:
+        inventory=read(SOURCE_REPO/'dayahead/artifacts/v40h_production_integrity/CURRENT_TRANSITIVE_INPUT_INVENTORY.json')['road_graph']
+        from dayahead.v40h.identity import verify_file
+        for name in ('link_order','service_nodes'):
+            verify_file(inventory[name]); sources[name]=inventory[name]
+        links=pd.read_csv(sources['link_order']['path']); services=pd.read_csv(sources['service_nodes']['path'])
+    else:
+        links=pd.DataFrame(columns=['reduced_link_id','from_node','to_node'])
+        services=pd.DataFrame(columns=['service_id','traffic_node'])
+    rows,sequences=route_node_rows(commands,links,services)
+    table(output/'ROUTE_NODE_EDGES.parquet',rows)
+    document(output/'ROUTE_NODE_SEQUENCES.json',dict(schema=SCHEMA,sequences=sequences,source_authorities=sources,
+        travel_commitment_count=len(departures),route_search_calls=0,derivation='Exact ordered endpoints of frozen links'))
 
 
 def stage(output, name, jobs, commands, *, context, allowed, frozen, previous=None, info=None):
@@ -317,6 +360,7 @@ def seal(output, phase):
     base=['authority/AUTHORITY_MANIFEST.json','authority/INPUT_MANIFEST.json','authority/COMMON_INPUT_IDENTITY.json',
           'aidc/JOB_DECISIONS.parquet','aidc/JOB_DECISION_PAYLOAD.json','aidc/SITE_TRAJECTORIES_96.parquet',
           'mess/DISCRETE_STATES.parquet','mess/TRAJECTORIES_96.parquet','mess/FROZEN_ROUTE_DISCRETE.json',
+          'mess/ROUTE_NODE_EDGES.parquet','mess/ROUTE_NODE_SEQUENCES.json',
           'grid/BUS_PHASE_VOLTAGES.parquet','grid/BRANCH_PHASE_CURRENTS.parquet','grid/FEEDER_SYSTEM_96.parquet',
           'grid/GRID_AXIS_CONTRACT.json','audit/CRITICAL_PHYSICAL_EVENTS.parquet','H4_OPTIMIZER_WINDOWS.parquet']
     if phase=='dayahead':

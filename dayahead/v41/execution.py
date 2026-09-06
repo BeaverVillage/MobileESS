@@ -40,8 +40,8 @@ def verify_dayahead(day, policy):
     verify_manifest(receipt['science'])
     for file in receipt['files'].values():
         require(record(file['path']) == file, 'DAYAHEAD_OUTPUT_HASH_DRIFT')
-    from .scientific_archive import verify_manifest
-    verify_manifest(receipt['files']['scientific_manifest']['path'])
+    from .scientific_archive import verify_manifest as verify_scientific_manifest
+    verify_scientific_manifest(receipt['files']['scientific_manifest']['path'])
     from dayahead.v40h.identity import verify_bound_files
     verify_bound_files(read(path.parent/'GENERATION_INPUT_IDENTITY.json'))
     frozen = read(receipt['files']['decision']['path'])
