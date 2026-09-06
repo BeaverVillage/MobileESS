@@ -111,7 +111,7 @@ def main():
        '', f"외부 P/Q 판정: **{external['classification']}**. 총 PF P5/P50/P95 = {external['PF_magnitude']['P5']:.6f}/{external['PF_magnitude']['P50']:.6f}/{external['PF_magnitude']['P95']:.6f}. SHA 일치·원본 불변. 극성 반전 때문에 leading/lagging은 조건부 해석이다. 상세 출처와 계산은 별도 외부 감사 문서에 있다.",
        '', 'Protected scope, current q/model, PF=0.95를 보존한다. 72 authority blockers 유지, 31-day electrical regeneration HOLD, B2/B3 NO, FULL_MAY NO, Q control NO. Optional B0/B1 shadow도 gate 미통과로 실행하지 않았다.',
        '', '테스트 실행 수와 로그·hash는 V40J_TEST_REPORT.json에 기록한다. 기존 V40H 106/V40I 80 PASS는 frozen receipt와 소스 보존으로 유지하며 May outcome/row fixtures를 다시 열어 재실행하지 않았다. 새 V40J 회귀는 실제 실행했다. Shadow를 열거나 cutoff·후보·support threshold를 바꿔 실패를 보정하지 않았다.']
-    (OUT/'V40J_FINAL_REVIEW.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+    (OUT/'V40J_FINAL_REVIEW.md').write_text('\n'.join(lines)+'\n',encoding='utf-8',newline='\n')
     print(classification)
 
 if __name__=='__main__':main()

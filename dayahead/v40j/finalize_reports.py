@@ -6,6 +6,12 @@ from .contracts import ROOT, OUT, START
 from .firewall import sha,write
 
 def main():
+    # Canonical LF bytes must agree with Git's existing text normalization.
+    # Only V40J-authored outputs are normalized; no input/legacy file is touched.
+    for path in OUT.rglob('*'):
+        if path.is_file() and path.suffix in {'.json','.jsonl','.md','.csv','.log','.txt','.xml'}:
+            raw=path.read_bytes()
+            if b'\r\n' in raw:path.write_bytes(raw.replace(b'\r\n',b'\n'))
     baseline_receipt=ROOT/'dayahead/artifacts/v40i_authority_electrical_closure/V40I_FINAL_FORENSIC_COMMIT_RECEIPT.json'
     receipt=json.loads(baseline_receipt.read_text(encoding='utf-8'))
     start=json.loads((OUT/'V40J_START_STATE.json').read_text(encoding='utf-8'))

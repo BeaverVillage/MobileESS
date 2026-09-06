@@ -82,7 +82,7 @@ def main():
       'AIDC_PF':PF,'AIDC_Q_CONTROL':'NO','facility_PQ_authority':'INDEPENDENT_LOCAL_DATA_REQUIRED',
       'UPS_STATCOM_capability_authority':'NOT_PROVIDED'}
     write('V40J_EXTERNAL_DATACENTER_PQ_AUDIT.json',report)
-    frame[['time_utc','P_consumption_W','Q_raw_var','S_sum_VA','PF_magnitude','Q_abs_over_P_abs']].to_csv(OUT/'EXTERNAL_PQ_DERIVED_REFERENCE.csv',index=False)
+    frame[['time_utc','P_consumption_W','Q_raw_var','S_sum_VA','PF_magnitude','Q_abs_over_P_abs']].to_csv(OUT/'EXTERNAL_PQ_DERIVED_REFERENCE.csv',index=False,lineterminator='\n')
     text=f'''# 외부 데이터센터 P/Q 감사
 
 판정: **{classification}**. University of Córdoba 외부 참고자료이며 우리 AIDC의 직접 authority가 아니다.
@@ -97,7 +97,7 @@ def main():
 
 고정 PF=0.95의 외부 집계 근사 적합성과 상별·시간별 fidelity는 구분한다. 이번 revision은 AIDC PF=0.95와 Q control NO를 유지한다. 시변 외생 PF에는 우리 시설의 독립 P/Q 자료, 제어 Q에는 UPS/STATCOM의 P-Q capability authority가 필요하다.
 '''
-    (OUT/'V40J_EXTERNAL_DATACENTER_PQ_AUDIT.md').write_text(text,encoding='utf-8')
+    (OUT/'V40J_EXTERNAL_DATACENTER_PQ_AUDIT.md').write_text(text,encoding='utf-8',newline='\n')
     print(classification, pfstats)
 
 if __name__=='__main__':
