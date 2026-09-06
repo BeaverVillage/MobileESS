@@ -1,0 +1,39 @@
+{
+  "OOF_authority_SHA": "9d8d0f61a96fdf29f559c4c9737ccc7d849565f178cc48c3c131517132ba703c",
+  "full_distribution": true,
+  "model_SHA": "05b2d106467febb1660ef43a5c51e88a1875d749a415c7ae19d87b40a1be3f79",
+  "nonpositive_rows": 17873,
+  "objective": {
+    "alphas": [
+      0.9,
+      0.95
+    ],
+    "features": [
+      "requested_seconds",
+      "num_nodes_req",
+      "num_cores_req",
+      "num_gpus_req",
+      "requested_memory_mib",
+      "partition",
+      "qos",
+      "user",
+      "account",
+      "submit_hour",
+      "submit_dow",
+      "submit_week",
+      "hardware",
+      "standby",
+      "wall_bucket",
+      "exact_count",
+      "near_count",
+      "support_class"
+    ],
+    "objective": "reg:quantileerror",
+    "output": "K0 + max(0,3600*predicted residual quantile); monotonic repair",
+    "rounds": 400,
+    "target": "ALL signed rolling OOF residual /3600"
+  },
+  "positive_rows": 9919,
+  "rows": 27792,
+  "status": "FITTED_CPU_FROZEN"
+}

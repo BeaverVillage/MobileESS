@@ -102,3 +102,26 @@ def test_shadow_requires_winner(monkeypatch):
 def test_global_holds():
     from dayahead.v40l.common import load
     s=load(K/'V40K_FINAL_STATUS.json');assert s['PF']==.95 and s['Q_control']=='NO' and s['authority_missing']==72
+
+def evaluation_rows(n=120):
+    f=jobs(n);h=f.copy();f.submit_time=pd.Timestamp('2025-04-15',tz='UTC');f.start_time=f.submit_time;f.end_time=f.start_time+pd.Timedelta(seconds=600)
+    return f,Support(h).transform(f)
+def test_Q95_cannot_rescue_Q90_failure():
+    from dayahead.v40l.metrics import report
+    f,x=evaluation_rows();p=np.full((120,2),10000.);p[:20,0]=100.
+    r=report(f,np.ones(120),p,x,'selection')
+    assert r['metrics']['overall']['Q95']['coverage']==1 and not r['gates']['overall'] and not r['eligible']
+def test_missing_support_gate_not_omitted():
+    from dayahead.v40l.metrics import report
+    f,x=evaluation_rows();x.loc[2:,'standby']=0
+    r=report(f,np.ones(120),np.full((120,2),10000.),x,'selection')
+    assert r['required_insufficient_subgroups']==['STRONG_SUPPORT H100-standby'] and not r['eligible']
+def test_exact_90pct_native_gate():
+    from dayahead.v40l.metrics import report
+    f,x=evaluation_rows();p=np.full((120,2),600.);p[:12,0]=599.999
+    r=report(f,np.ones(120),p,x,'selection')
+    assert r['metrics']['overall']['Q90']['coverage']==.9 and r['eligible']
+def test_hybrid_ood_abstains():
+    f,x=evaluation_rows();m=Hierarchy(100).fit(x,np.arange(120),block='calibration');x.loc[:,'support_class']='OUT_OF_SUPPORT'
+    p,info=m.predict(x,np.ones(120),hybrid=True,ml=np.ones((120,2)))
+    assert np.isnan(p).all() and info['levels']=={'-2':120}
