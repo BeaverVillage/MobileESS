@@ -5,7 +5,13 @@ import shutil
 import sys
 
 def fit():
-    reg,pre=authority(); assert not (OUT/'fits').exists(),'Fit stage may run once only'
+    reg,pre=authority()
+    resumed=(OUT/'fits').exists()
+    if resumed:
+        fix=read('EXECUTION_CORRECTION')
+        assert not (OUT/'V40R6_HYPERPARAMETER_FREEZE.json').exists(),'Completed fit stage cannot repeat'
+        existing={p.relative_to(ROOT).as_posix():sha(p) for p in (OUT/'fits').rglob('*.txt')}
+        assert existing==fix['preserved_partial_models'],'Only the documented interrupted model can be reused'
     frame,arrays=data(); X=arrays['X']; y=frame.target_GPUh.to_numpy(); dev=role_mask(frame,'DEVELOPMENT')
     devix=np.flatnonzero(dev); base,support=baseline(frame,arrays,devix)
     np.savez_compressed(OUT/'development_baselines.npz',row_ids=devix,predictions=base)
@@ -17,9 +23,18 @@ def fit():
             tr=role_mask(frame,'TRAIN')&(frame.horizon==h).to_numpy(); de=dev&(frame.horizon==h).to_numpy()
             pair=[]
             for q in [.5,.9]:
-                model,entry=fit_model(X[tr],y[tr],config,q,OUT/'fits'/config/f'{h}_Q{int(q*100)}.txt')
+                path=OUT/'fits'/config/f'{h}_Q{int(q*100)}.txt'
+                if path.exists():
+                    model=Booster(model_file=str(path))
+                    entry={'family':'B2','config':config,'quantile':q,'rows':int(tr.sum()),'features':X.shape[1],
+                        'seconds':None,'device':'cpu','threads':1,'seed':SEED,'target_transform':'log1p',
+                        'model':path.relative_to(ROOT).as_posix(),'SHA256':sha(path),
+                        'time_UTC':read('EXECUTION_CORRECTION')['original_model_file_time_UTC'],
+                        'resumed_existing_fit':True,'timing_status':'Initial process failed before persisting duration; not fabricated; no refit'}
+                else:
+                    model,entry=fit_model(X[tr],y[tr],config,q,path)
                 ledger.append(entry); pair.append(inverse(model.predict(X[de])))
-                print(f'Fit {config} {h} Q{int(q*100)}: {entry["seconds"]:.2f}s',flush=True)
+                print(f'Fit {config} {h} Q{int(q*100)}: {entry["seconds"]}s',flush=True)
             qhat,ca=repair(np.column_stack(pair)); crossings.append({'phase':'DEVELOPMENT','config':config,'horizon':h,**ca})
             loc=(frame.iloc[devix].horizon==h).to_numpy(); devq[loc]=qhat; yy=y[de]
             scale=max(float(np.mean(y[tr])),1e-12)

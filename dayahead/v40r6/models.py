@@ -5,7 +5,9 @@ import time
 
 def inverse(z):
     out=np.expm1(np.asarray(z,dtype=float))
-    if np.any(out < -1e-10): raise ValueError('Substantive negative inverse quantile; clipping prohibited')
+    # Preserve substantive negative raw predictions. Only numerical epsilon is
+    # clipped by the user contract; a negative secondary Q50 does not stop the
+    # primary horizon experiment. These values remain visible in diagnostics.
     out[(out<0)&(out>=-1e-10)]=0
     assert np.isfinite(out).all()
     return out

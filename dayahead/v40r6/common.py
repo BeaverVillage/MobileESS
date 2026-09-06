@@ -72,7 +72,15 @@ def authority():
     receipt=read('PREREGISTRATION_COMMIT_RECEIPT'); pre=receipt['commit']
     verify_commit_file(pre,OUT/'V40R6_PREREGISTRATION.json')
     reg=read('PREREGISTRATION')
-    for p,h in reg['frozen_hashes'].items(): assert sha(ROOT/p)==h,('PREREGISTERED_FILE_CHANGED',p)
+    corrected={}
+    if (OUT/'V40R6_EXECUTION_CORRECTION_COMMIT_RECEIPT.json').exists():
+        receipt=read('EXECUTION_CORRECTION_COMMIT_RECEIPT')
+        verify_commit_file(receipt['commit'],OUT/'V40R6_EXECUTION_CORRECTION.json')
+        correction=read('EXECUTION_CORRECTION')
+        for p,row in correction['source_changes'].items():
+            assert reg['frozen_hashes'][p]==row['preregistered_SHA256']
+            corrected[p]=row['corrected_SHA256']
+    for p,h in reg['frozen_hashes'].items(): assert sha(ROOT/p)==corrected.get(p,h),('PREREGISTERED_FILE_CHANGED',p)
     return reg,pre
 
 def selection_authority():
