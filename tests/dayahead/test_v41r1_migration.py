@@ -16,7 +16,7 @@ def job(start=96,duration=44,state='PENDING'):
     ctx,row=setup()
     row.update(start_slot=start,end_slot=start+duration,safe_duration_slots=duration,
         safe_duration_seconds=duration*900.,state_at_issue=state)
-    return ctx,attach([row])[0]
+    return ctx,attach([row],{'one':0.})[0]
 
 
 @pytest.mark.parametrize('start,duration,state,expected',[(0,200,'RUNNING','RUNNING'),(20,20,'PENDING','RUNNING'),
@@ -44,7 +44,7 @@ def test_placement_no_checkpoint_no_restart_no_migration_count_and_start_frozen(
     out=import_frozen([materialize(row,opt,ctx.capacity,Wan())])[0]
     assert out['start_slot']==96 and out['safe_duration_slots']==44
     assert not out['migration_selected'] and out['migration_events']==[]
-    assert out['AIDC_site']=='AIDC02' and checkpoints(row)==tuple(range(98,120,2))
+    assert out['AIDC_site']=='AIDC02' and checkpoints(row)==(98,)
     assert all(o.start==96 for o in opts)
 
 
@@ -66,6 +66,47 @@ def test_no_checkpoint_before_start_and_no_restart_at_boundary():
 def test_disabled_policy_keeps_reference_site_and_no_migration():
     ctx,row=job();opts=options(row,ctx.capacity,Wan(),{},temporal_only=True)
     assert len(opts)==1 and opts[0].site==row['AIDC_site'] and not opts[0].migrated
+
+
+@pytest.mark.parametrize('elapsed,expected',[(0.,24),(900.,25),(1.,26),(1800.,24)])
+def test_first_running_checkpoint_includes_exact_d00_boundary(elapsed,expected):
+    ctx,row=job(0,140,'RUNNING')
+    row['r1_elapsed_seconds_at_issue']=elapsed
+    row['r1_first_valid_checkpoint']=expected
+    assert checkpoints(row,{'one':elapsed})==(expected,)
+    assert {o.checkpoint for o in options(row,ctx.capacity,Wan(),{'one':elapsed}) if o.migrated}=={expected}
+
+
+@pytest.mark.parametrize('start,state',[(20,'PENDING'),(0,'RUNNING'),(96,'PENDING')])
+def test_one_shot_no_later_checkpoint_and_single_event(start,state):
+    ctx,row=job(start,150,state)
+    opts=options(row,ctx.capacity,Wan(),{'one':0.})
+    first=checkpoints(row)[0]
+    assert {o.checkpoint for o in opts if o.migrated}=={first}
+    for opt in (next(o for o in opts if o.migrated),next(o for o in opts if not o.migrated)):
+        out=import_frozen([materialize(row,opt,ctx.capacity,Wan())])[0]
+        assert len(out['migration_events'])==int(opt.migrated)<=1
+        if opt.migrated:
+            bad=deepcopy(out);bad['migration_checkpoint_slot']=first+2
+            with pytest.raises(ValueError,match='ONE_SHOT_FIRST_CHECKPOINT'):
+                check(row,bad)
+            with pytest.raises(ValueError,match='PREEXISTING_MIGRATION'):
+                options(out,ctx.capacity,Wan(),{'one':0.})
+
+
+def test_causal_checkpoint_metadata_cannot_drift():
+    ctx,row=job(0,140,'RUNNING')
+    with pytest.raises(ValueError,match='CAUSAL_ELAPSED_DRIFT'):
+        options(row,ctx.capacity,Wan(),{'one':1.})
+
+
+def test_native_issue_axis_explicit_off_by_24_regression():
+    from dayahead.v41r1.migration import BEGIN,END,H
+    for issue in range(BEGIN,END):
+        for duration in (1,2,41,140):
+            assert max(0,issue-BEGIN+duration-H)==max(0,issue+duration-END)
+    assert 18*4==72 and 18*4+BEGIN==96
+    assert max(0,96+41-H)!=max(0,96+41-END)
 
 
 def test_a1_freezes_pending_migration_and_crossmidnight_placement():

@@ -35,14 +35,14 @@ ITEMS = {
     tests=['test_p0_05_reuse_requires_current_generation_inputs','test_b1_external_generation_identity_rejects_stale','test_unattested_b1_no_posthoc_adoption'],
     scope='B1 DayAhead generation, B3 A0 and B2 common reference reuse'),
  'P0-06':dict(original_defect='RUNNING migration could collapse source/destination compute segments and incorrectly count transfer/restart gaps as service.',
-    paths=['dayahead/v40g_segments/canonical.py','dayahead/v40g/domain.py','dayahead/v41/actual.py','dayahead/v41/common.py'],
-    exact_fix='Use canonical segment/event records throughout planning, feedback, freeze and Actual; preserve original source rack, checkpoint/restart times, WAN and exact service sum.',
-    tests=['test_8666895_required_canonical_migration_example','test_canonical_normalization_and_pause_conserve_service','test_invalid_migration_fails_closed','test_running_migration_retains_frozen_checkpoint_and_ready'],
+    paths=['dayahead/v40g_segments/canonical.py','dayahead/v40g/domain.py','dayahead/v41/actual.py','dayahead/v41/common.py','dayahead/v41r1/migration.py','dayahead/v41r1/migration_dispatch.py'],
+    exact_fix='Use canonical source/pause/destination service throughout. V41R1 freezes one first-checkpoint progress offset, initial site, destination, path, payload and UID ordering. Actual physical dispatch shifts checkpoint/WAN/restart clocks deterministically without optimization; exact compute service and capacity are verified.',
+    tests=['test_8666895_required_canonical_migration_example','test_canonical_normalization_and_pause_conserve_service','test_invalid_migration_fails_closed','test_running_migration_retains_frozen_checkpoint_and_ready','test_one_shot_no_later_checkpoint_and_single_event','test_actual_checkpoint_follows_delayed_progress_without_new_decision','test_actual_shifted_wan_queues_same_path_and_frozen_uid_order'],
     scope='B1/B3 RUNNING migration, A0/A1/MF/Actual occupancy and service'),
  'P0-07':dict(original_defect='Observed historical end time incorrectly justified PRE_DAY_COMPLETE even when frozen policy start plus realized service crossed D00 (UID 8749975).',
     paths=['dayahead/v41/actual.py','dayahead/v40h/pre_day_complete.py'],
     exact_fix='Classify only reconstructed counterfactual compute segments. Do not drop any job by observed end. Under the explicit V41 admission amendment, unadmitted service remains explicit full backlog, never invented site/execution or zero-service exclusion.',
-    tests=['test_p0_07_8749975_not_excluded_from_counterfactual_day','test_8749975_counterfactual_day_overlap_fail_closed','test_known_site_overlap_is_preserved_in_actual_gpu'],
+    tests=['test_p0_07_8749975_not_excluded_from_counterfactual_day','test_8749975_counterfactual_day_overlap_fail_closed','test_known_site_overlap_is_preserved_in_actual_gpu','test_actual_migration_carry_out_is_recorded_not_policy_failure','test_native_issue_axis_explicit_off_by_24_regression'],
     scope='B0-B3 Actual completion, occupancy, service/backlog and pre-day exclusion')}
 
 

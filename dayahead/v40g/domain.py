@@ -1,8 +1,8 @@
 """Inherited choices with explicit service-preserving checkpoint/WAN states.
 
 Slots use the common D-1 issue origin. The operating day starts at BEGIN.
-The existing V39C binding chooses the first checkpoint and serializes selected
-moves by UID, starting at operating slot 2. Those rules remain constraints.
+V41R1 uses the user-authorized deterministic first checkpoint. The existing
+fixed-path WAN binder serializes selected moves by UID from operating slot 2.
 """
 from copy import deepcopy
 from dataclasses import dataclass

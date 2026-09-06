@@ -18,6 +18,8 @@ def eligible(row,opts):
 def compile(model,row,opts,costs,index,load,wan_active,*,inject_reference=False):
     gpu=row['requested_GPU'];duration=row['safe_duration_slots'];by_arrival=defaultdict(list)
     cp=next(o.checkpoint for o in opts if o.migrated)
+    from .migration import checkpoints
+    assert {o.checkpoint for o in opts if o.migrated}==set(checkpoints(row))
     length=next(o.transfer_end-o.transfer_start for o in opts if o.migrated)
     for k,o in enumerate(opts):
         if o.migrated:by_arrival[o.site,o.transfer_end+1].append((k,o))
@@ -88,6 +90,8 @@ def verify_gate():
     from dayahead.v41.preflight import OUT,record
     from dayahead.v41.reserve import require
     gate=read(OUT/'EXACT_COMPRESSION_GATE.json')
+    from .migration import CONTRACT
+    require(gate.get('contract')==CONTRACT,'SUPERSEDED_COMPRESSION_CONTRACT')
     require(gate['status']=='PASS' and gate['equivalence_test_count']>=6,'EXACT_COMPRESSION_GATE_NOT_PASSED')
     for ref in gate['sources']+[gate['test_results']]:
         require(ref==record(ref['path']),'COMPRESSION_EQUIVALENCE_EVIDENCE_DRIFT')

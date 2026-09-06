@@ -19,6 +19,19 @@ def test_all_explicit_to_compressed_and_all_compressed_to_explicit(start,duratio
     cap=SimpleNamespace(aidc_ids=sites,site_capacity={s:2 for s in sites},
         eligible_racks=lambda s,g:(SimpleNamespace(rack_pool_id=s+'_LP01'),))
     opts=options(row,cap,Wan(),{});costs=[deviation(row,o) for o in opts]
+    # Independent direct contract enumeration, without options/checkpoints or
+    # the factor builder. Toy authority is 30 min, one WAN slot, one restart.
+    from dayahead.v40g.domain import Option,materialize
+    oracle={Option(s,start,start+duration) for s in sites}
+    checkpoint=start+2
+    if checkpoint<min(120,start+duration):
+        for source in sites:
+            for destination in sites:
+                if source==destination:continue
+                for transfer in range(max(26,checkpoint),118):
+                    oracle.add(Option(destination,start,start+duration+transfer+2-checkpoint,
+                        checkpoint,transfer,transfer+1,source))
+    assert set(opts)==oracle
     model=gp.Model();model.Params.OutputFlag=0;load=defaultdict(gp.LinExpr);wan=defaultdict(gp.LinExpr)
     f=compile(model,row,opts,costs,7,load,wan);represented=set()
     # The reverse enumeration covers every allowed compressed route/arrival
@@ -36,6 +49,7 @@ def test_all_explicit_to_compressed_and_all_compressed_to_explicit(start,duratio
         for pair,v in f['arrivals'].items():v.LB=v.UB=int(desired.migrated and pair==(desired.site,desired.transfer_end+1))
         model.optimize();assert model.Status==GRB.OPTIMAL
         out=selected(f,row);represented.add(out);assert out==desired
+        assert materialize(row,out,cap,Wan())==materialize(row,desired,cap,Wan())
         assert f['migration'].getValue()==int(out.migrated)
         assert f['deviation'].getValue()==costs[opts.index(out)]
         assert f['tie'].getValue()==8*(opts.index(out)+1)
@@ -45,6 +59,33 @@ def test_all_explicit_to_compressed_and_all_compressed_to_explicit(start,duratio
                 assert load[t,site].getValue()==expected
             assert wan[t+24].getValue()==int(out.migrated and out.transfer_start<=t+24<out.transfer_end)
     assert represented==set(opts);model.dispose()
+
+
+def test_mixed_running_pending_shared_gpu_wan_exact_optimum(tmp_path):
+    from tests.dayahead.test_v41_scalar_interface import fixture
+    from dayahead.v41.reserve import bind
+    from dayahead.paper_analysis.storage import write_json,sha
+    from dayahead.v41r1.migration import attach
+    from dayahead.v40g.optimizer import solve
+    from dayahead.v40g_segments.canonical import import_frozen,wan_audit
+    ctx,row,snapshot=fixture()
+    first={**row,'job_uid':'a','state_at_issue':'RUNNING','start_slot':0,'end_slot':34,
+        'safe_duration_slots':34,'safe_duration_seconds':30600.}
+    second={**row,'job_uid':'b','start_slot':24,'end_slot':34,
+        'safe_duration_slots':10,'safe_duration_seconds':9000.}
+    rows=attach([first,second],{'a':0.});ctx.elapsed={'a':0.};ctx.wan=Wan()
+    c=ctx.coefficients[0];ctx.coefficients=tuple(replace(c,slot=t) for t in range(96))
+    snapshot['PENDING_JOB_Q90_SECONDS']={'b':9000.};snapshot['PENDING_JOB_DURATION_SLOTS']={'b':10}
+    path=tmp_path/'ML.json';write_json(path,snapshot);bind(ctx,path,sha(path))
+    pcc=np.zeros((96,2));pcc[:10,0]=2
+    explicit=solve(rows,pcc,ctx,tmp_path/'explicit',factorize=False)
+    compressed=solve(rows,pcc,ctx,tmp_path/'compressed',factorize=True)
+    np.testing.assert_allclose(explicit['OBJECTIVE_VECTOR'],compressed['OBJECTIVE_VECTOR'],rtol=0,atol=1e-9)
+    assert explicit['jobs']==compressed['jobs']
+    assert np.array_equal(explicit['GPU'],compressed['GPU'])
+    for value in (explicit,compressed):
+        assert value['GPU'].max()<=2
+        assert wan_audit(import_frozen(value['jobs']),Wan())['status']=='PASS'
 
 
 @pytest.mark.parametrize('cross_midnight,equal',[(False,False),(True,False),(True,True)])

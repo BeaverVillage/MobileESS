@@ -14,7 +14,7 @@ from dayahead.paper_analysis.storage import write_json
 from .domain import Option, options, segments, deviation, materialize, audit
 
 
-def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False, work_limits=(60,180,300), inject_reference=False, factorize=True):
+def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False, work_limits=(60,180,300), inject_reference=False, factorize=True, build_only=False):
     output=Path(output); output.mkdir(parents=True,exist_ok=True)
     if (output/'ACCEPTED_AIDC.json').exists(): raise RuntimeError('PRESERVE_COMPLETED_SOLVE')
     started=time.perf_counter(); refs={r['job_uid']:deepcopy(r) for r in reference_jobs}
@@ -23,7 +23,7 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
     from dayahead.v41r1.migration import active,model_boundary
     revision=any(active(r) for r in reference_jobs)
     if revision and T!=96:raise ValueError('SCIENTIFIC_DAY_MUST_HAVE_96_SLOTS')
-    if revision and getattr(context,'day',None)=='2025-05-01' and factorize:
+    if revision and getattr(context,'day',None)=='2025-05-01' and factorize and not build_only:
         from dayahead.v41r1.migration_factor import verify_gate
         verify_gate()
     wan=getattr(context,'wan',None); elapsed=getattr(context,'elapsed',{})
@@ -166,12 +166,14 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
         objective=[(v.VarName,float(v.Obj)) for v in model.getVars() if v.Obj]
         assert objective==[('rho_max',1.)]
         write_json(output/'PRIMARY_STRUCTURE.json',{'method':'JOINT_TEMPORAL_SPATIAL_AIDC_GRID_OPTIMIZATION',
-            'diagnostic_only':temporal_only or inject_reference or not factorize,'reference_injected':inject_reference,
+            'diagnostic_only':build_only or temporal_only or inject_reference or not factorize,'reference_injected':inject_reference,
             'objective':objective,'grid_rows':grid_rows,'domain_counts':dict(domain_counts),
             'cohort_count':len(keys),'factored_cohorts':len(factors),
             'factorization_exact_original_options':sum(f['original_option_count'] for f in factors.values()),
             'factorization_choice_variables':sum(f['factored_choice_count'] for f in factors.values()),
             'model_variables':model.NumVars,'model_constraints':model.NumConstrs,
+            'binary_variables':model.NumBinVars,'integer_variables_including_binary':model.NumIntVars,
+            'general_constraints':model.NumGenConstrs,'build_only':build_only,
             'TEMPORAL_FIRST_HARD_HIERARCHY':'NO','TEMPORAL_AND_SPATIAL_AIDC_PRIMARY_JOINT':not temporal_only,
             'reference_candidate_included':True,'migration_penalty_in_primary':0,'MESS_variables':0,
             'WAN_policy':'Existing first checkpoint / fixed OD / UID serial / full frozen path budget / one restart slot',
@@ -179,6 +181,9 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
         if revision:write_json(output/'DAY_BOUNDARY_AUDIT.json',model_boundary(model,reference_jobs,uid_options,T))
         model.write(str((output/'PRIMARY_MODEL.mps').resolve()))
         print(f'V40G model {model.NumVars} variables {model.NumConstrs} rows {dict(domain_counts)}',flush=True)
+        if build_only:
+            from dayahead.paper_analysis.storage import read
+            return read(output/'PRIMARY_STRUCTURE.json')
         pstage=optimize('PRIMARY_MIN_RHO'); primary=float(rho.X); bound=float(model.ObjBound)
         # NO tolerance allowance for lower priorities. Only solver feasibility
         # roundoff remains; a 1e-6 rho degradation is explicitly not permitted.
