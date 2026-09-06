@@ -1,0 +1,467 @@
+{
+  "model": "XGBOOST",
+  "status": "EVALUATED_EXPOSED_BLOCK_NOT_UNTOUCHED_CONFIRMATION",
+  "preregistration_commit": "fbde550fee28065ad1b9946b430c1b3e69cefe42",
+  "fit": {
+    "status": "COMPLETE",
+    "preregistration_commit": "fbde550fee28065ad1b9946b430c1b3e69cefe42",
+    "trials": [
+      {
+        "trial": 0,
+        "learning_rate": 0.03,
+        "development_primary": 0.6786202892916067,
+        "training_walltime_seconds": 34.95299999997951,
+        "seed": 20260906,
+        "device": "cpu"
+      },
+      {
+        "trial": 1,
+        "learning_rate": 0.08,
+        "development_primary": 0.676244984399263,
+        "training_walltime_seconds": 31.344000000011874,
+        "seed": 20260906,
+        "device": "cpu"
+      }
+    ],
+    "selected_trial": {
+      "trial": 1,
+      "learning_rate": 0.08,
+      "development_primary": 0.676244984399263,
+      "training_walltime_seconds": 31.344000000011874,
+      "seed": 20260906,
+      "device": "cpu"
+    },
+    "seed": 20260906,
+    "device": "cpu",
+    "framework": "3.0.5",
+    "raw_quantile_crossings": 563,
+    "prediction_SHA256": "85ca03629a2122e1d560bdd7b124f0a91b96a39132ddf5ff462eb32b3274f3bb"
+  },
+  "development_uncalibrated": {
+    "point": {
+      "overall": {
+        "N": 2784,
+        "MAE": 119.16201108158157,
+        "RMSE": 567.0646819765133,
+        "WAPE": 1.0083035299764076,
+        "bias": -105.27147430518717
+      },
+      "positive": {
+        "N": 1558,
+        "MAE": 206.46926877280742,
+        "RMSE": 757.9453356587015,
+        "WAPE": 0.977703355222734,
+        "bias": -194.57233797736208
+      }
+    },
+    "probabilistic": {
+      "overall": {
+        "N": 2784,
+        "Q90_pinball": 94.84854811103483,
+        "Q90_coverage": 0.9055316091954023,
+        "calibration_error": 0.005531609195402298
+      },
+      "positive": {
+        "N": 1558,
+        "Q90_pinball": 142.80794547174915,
+        "Q90_coverage": 0.831193838254172,
+        "calibration_error": 0.06880616174582799
+      },
+      "burst": {
+        "N": 145,
+        "Q90_pinball": 1078.2868630569878,
+        "Q90_coverage": 0.1724137931034483,
+        "calibration_error": 0.7275862068965517
+      },
+      "Q50_pinball": 59.581005540790784,
+      "primary_positive_Q90_normalized_pinball": 0.676244984399263,
+      "quantile_crossing_count": 0,
+      "CRPS": null,
+      "CRPS_reason": "Two marginal quantiles do not identify CRPS"
+    },
+    "burst": {
+      "N": 145,
+      "threshold_GPUh": 441.77754166666665,
+      "missed_burst_GPUh": 172891.134805087,
+      "captured_burst_GPUh_fraction": 0.2769945157246276,
+      "underprediction_GPUh": 1192.3526538281862
+    },
+    "cumulative": {
+      "MAE_GPUh": 3228.247316863359,
+      "WAPE": 0.9055016556213197,
+      "daily_total_MAE_GPUh": 5151.863542151229,
+      "daily_total_bias_GPUh": -5053.030766648983,
+      "maximum_cumulative_underforecast_GPUh": 8536.875562235546,
+      "horizon_crossing_count": 0,
+      "derived_curve_semantics": "Sums of marginal quantile increments, not asserted quantiles of random cumulative sum",
+      "compatibility_horizons": {
+        "30": {
+          "N": 58,
+          "MAE": 60.24679353328956,
+          "RMSE": 160.33720021446814,
+          "WAPE": 1.050326501732883,
+          "bias": -42.184319752527834
+        },
+        "60": {
+          "N": 58,
+          "MAE": 133.67236227709213,
+          "RMSE": 272.72387734132013,
+          "WAPE": 0.9768329236464033,
+          "bias": -105.65472007236718
+        },
+        "120": {
+          "N": 58,
+          "MAE": 330.62473699896253,
+          "RMSE": 834.1590346700332,
+          "WAPE": 0.8995313940658745,
+          "bias": -300.04311772378986
+        },
+        "240": {
+          "N": 58,
+          "MAE": 1082.3140206836977,
+          "RMSE": 2049.799315710942,
+          "WAPE": 0.9050704324704367,
+          "bias": -1044.8669116144088
+        },
+        "1440": {
+          "N": 58,
+          "MAE": 5151.863542151229,
+          "RMSE": 6689.903343685492,
+          "WAPE": 0.9081897110004451,
+          "bias": -5053.030766648983
+        }
+      }
+    }
+  },
+  "calibration": {
+    "additive_Q90_delta_GPUh": 4810.689847412108,
+    "conditional_residual_quantiles": {
+      "overall": 48.071148274739585,
+      "positive": 180.6597403801812,
+      "burst": 4810.689847412108
+    },
+    "data": "CALIBRATION mature origins only",
+    "no_future_guarantee": true
+  },
+  "evaluation": {
+    "point": {
+      "overall": {
+        "N": 4224,
+        "MAE": 157.72138833377852,
+        "RMSE": 945.0848639347425,
+        "WAPE": 0.9909624985251068,
+        "bias": -141.95167312678143
+      },
+      "positive": {
+        "N": 2839,
+        "MAE": 229.40403661092006,
+        "RMSE": 1152.742797763,
+        "WAPE": 0.9687443148235059,
+        "bias": -216.46387871468937
+      }
+    },
+    "probabilistic": {
+      "overall": {
+        "N": 4224,
+        "Q90_pinball": 537.3750352073326,
+        "Q90_coverage": 0.9952651515151515,
+        "calibration_error": 0.09526515151515147
+      },
+      "positive": {
+        "N": 2839,
+        "Q90_pinball": 547.8533476909149,
+        "Q90_coverage": 0.9929552659387109,
+        "calibration_error": 0.09295526593871084
+      },
+      "burst": {
+        "N": 240,
+        "Q90_pinball": 819.1025161321174,
+        "Q90_coverage": 0.9166666666666666,
+        "calibration_error": 0.016666666666666607
+      },
+      "Q50_pinball": 78.86069416688926,
+      "primary_positive_Q90_normalized_pinball": 2.3135155935932454,
+      "quantile_crossing_count": 0,
+      "CRPS": null,
+      "CRPS_reason": "Two marginal quantiles do not identify CRPS"
+    },
+    "burst": {
+      "N": 240,
+      "threshold_GPUh": 441.77754166666665,
+      "missed_burst_GPUh": 118212.31944956497,
+      "captured_burst_GPUh_fraction": 0.7618159331112403,
+      "underprediction_GPUh": 492.551331039854
+    },
+    "cumulative": {
+      "MAE_GPUh": 4468.989083657913,
+      "WAPE": 0.9036147826170928,
+      "daily_total_MAE_GPUh": 6878.0310242494315,
+      "daily_total_bias_GPUh": -6813.680310085509,
+      "maximum_cumulative_underforecast_GPUh": 0.0,
+      "horizon_crossing_count": 0,
+      "derived_curve_semantics": "Sums of marginal quantile increments, not asserted quantiles of random cumulative sum",
+      "compatibility_horizons": {
+        "30": {
+          "N": 88,
+          "MAE": 143.892296365282,
+          "RMSE": 306.04911734863833,
+          "WAPE": 0.9911707892578308,
+          "bias": -125.65602488612963
+        },
+        "60": {
+          "N": 88,
+          "MAE": 261.02693596609913,
+          "RMSE": 439.2935506382196,
+          "WAPE": 0.9395981942177897,
+          "bias": -238.83099498919918
+        },
+        "120": {
+          "N": 88,
+          "MAE": 766.9092002438807,
+          "RMSE": 1354.4717563775448,
+          "WAPE": 0.9108012229504948,
+          "bias": -757.2901351650721
+        },
+        "240": {
+          "N": 88,
+          "MAE": 2039.164278425901,
+          "RMSE": 4466.715318930732,
+          "WAPE": 0.9210255224264803,
+          "bias": -2027.092563163187
+        },
+        "1440": {
+          "N": 88,
+          "MAE": 6878.0310242494315,
+          "RMSE": 9753.725353842769,
+          "WAPE": 0.9003047082908553,
+          "bias": -6813.680310085509
+        }
+      }
+    }
+  },
+  "raw_evaluation": {
+    "point": {
+      "overall": {
+        "N": 4224,
+        "MAE": 157.72138833377852,
+        "RMSE": 945.0848639347425,
+        "WAPE": 0.9909624985251068,
+        "bias": -141.95167312678143
+      },
+      "positive": {
+        "N": 2839,
+        "MAE": 229.40403661092006,
+        "RMSE": 1152.742797763,
+        "WAPE": 0.9687443148235059,
+        "bias": -216.46387871468937
+      }
+    },
+    "probabilistic": {
+      "overall": {
+        "N": 4224,
+        "Q90_pinball": 125.24080136666238,
+        "Q90_coverage": 0.9064867424242424,
+        "calibration_error": 0.006486742424242409
+      },
+      "positive": {
+        "N": 2839,
+        "Q90_pinball": 169.34878274677467,
+        "Q90_coverage": 0.8608665022895385,
+        "calibration_error": 0.039133497710461485
+      },
+      "burst": {
+        "N": 240,
+        "Q90_pinball": 1470.0802420913126,
+        "Q90_coverage": 0.19166666666666668,
+        "calibration_error": 0.7083333333333334
+      },
+      "Q50_pinball": 78.86069416688926,
+      "primary_positive_Q90_normalized_pinball": 0.7151385517529714,
+      "quantile_crossing_count": 0,
+      "CRPS": null,
+      "CRPS_reason": "Two marginal quantiles do not identify CRPS"
+    },
+    "burst": {
+      "N": 240,
+      "threshold_GPUh": 441.77754166666665,
+      "missed_burst_GPUh": 389903.5300176623,
+      "captured_burst_GPUh_fraction": 0.21438976152132153,
+      "underprediction_GPUh": 1624.5980417402598
+    },
+    "cumulative": {
+      "MAE_GPUh": 4468.989083657913,
+      "WAPE": 0.9036147826170928,
+      "daily_total_MAE_GPUh": 6878.0310242494315,
+      "daily_total_bias_GPUh": -6813.680310085509,
+      "maximum_cumulative_underforecast_GPUh": 21184.050949096654,
+      "horizon_crossing_count": 0,
+      "derived_curve_semantics": "Sums of marginal quantile increments, not asserted quantiles of random cumulative sum",
+      "compatibility_horizons": {
+        "30": {
+          "N": 88,
+          "MAE": 143.892296365282,
+          "RMSE": 306.04911734863833,
+          "WAPE": 0.9911707892578308,
+          "bias": -125.65602488612963
+        },
+        "60": {
+          "N": 88,
+          "MAE": 261.02693596609913,
+          "RMSE": 439.2935506382196,
+          "WAPE": 0.9395981942177897,
+          "bias": -238.83099498919918
+        },
+        "120": {
+          "N": 88,
+          "MAE": 766.9092002438807,
+          "RMSE": 1354.4717563775448,
+          "WAPE": 0.9108012229504948,
+          "bias": -757.2901351650721
+        },
+        "240": {
+          "N": 88,
+          "MAE": 2039.164278425901,
+          "RMSE": 4466.715318930732,
+          "WAPE": 0.9210255224264803,
+          "bias": -2027.092563163187
+        },
+        "1440": {
+          "N": 88,
+          "MAE": 6878.0310242494315,
+          "RMSE": 9753.725353842769,
+          "WAPE": 0.9003047082908553,
+          "bias": -6813.680310085509
+        }
+      }
+    }
+  },
+  "safety": {
+    "groups": {
+      "overall": {
+        "N": 4224,
+        "coverage": 0.9952651515151515,
+        "status": "PASS"
+      },
+      "positive": {
+        "N": 2839,
+        "coverage": 0.9929552659387109,
+        "status": "PASS"
+      },
+      "burst": {
+        "N": 240,
+        "coverage": 0.9166666666666666,
+        "status": "PASS"
+      }
+    },
+    "temporal_blocks": [
+      {
+        "month": "2024-12",
+        "coverage_checks": {
+          "overall": "PASS",
+          "positive": "PASS",
+          "burst": "NOT_REQUIRED_N_LT_100"
+        },
+        "point_WAPE": 1.0161709636229577,
+        "catastrophic_WAPE_gt_2": false,
+        "pass": true
+      },
+      {
+        "month": "2025-01",
+        "coverage_checks": {
+          "overall": "PASS",
+          "positive": "PASS",
+          "burst": "FAIL"
+        },
+        "point_WAPE": 0.9884239701567573,
+        "catastrophic_WAPE_gt_2": false,
+        "pass": false
+      },
+      {
+        "month": "2025-02",
+        "coverage_checks": {
+          "overall": "PASS",
+          "positive": "PASS",
+          "burst": "NOT_REQUIRED_N_LT_100"
+        },
+        "point_WAPE": 0.9690041694980911,
+        "catastrophic_WAPE_gt_2": false,
+        "pass": true
+      }
+    ],
+    "causal_gate": "PASS",
+    "all_pass": false,
+    "small_sample_rule": "Pooled overall/positive/burst require N>=100 for an affirmative safety claim; monthly conditional gate enforced when N>=100"
+  },
+  "worst_burst_intervals": [
+    {
+      "day": "2024-12-30",
+      "slot": 7,
+      "actual_GPUh": 22570.464999999975,
+      "Q90_GPUh": 5528.184232177733,
+      "miss_GPUh": 17042.28076782224
+    },
+    {
+      "day": "2024-12-03",
+      "slot": 19,
+      "actual_GPUh": 20415.02722222214,
+      "Q90_GPUh": 4925.275868835448,
+      "miss_GPUh": 15489.751353386691
+    },
+    {
+      "day": "2025-01-08",
+      "slot": 26,
+      "actual_GPUh": 20699.639999999978,
+      "Q90_GPUh": 5626.505277099608,
+      "miss_GPUh": 15073.13472290037
+    },
+    {
+      "day": "2025-01-30",
+      "slot": 18,
+      "actual_GPUh": 19263.81583333336,
+      "Q90_GPUh": 5587.064603271483,
+      "miss_GPUh": 13676.751230061876
+    },
+    {
+      "day": "2025-02-03",
+      "slot": 35,
+      "actual_GPUh": 17252.945277777795,
+      "Q90_GPUh": 5356.551724853514,
+      "miss_GPUh": 11896.39355292428
+    },
+    {
+      "day": "2025-01-24",
+      "slot": 29,
+      "actual_GPUh": 14930.805555555713,
+      "Q90_GPUh": 5280.203854980467,
+      "miss_GPUh": 9650.601700575246
+    },
+    {
+      "day": "2025-01-19",
+      "slot": 19,
+      "actual_GPUh": 13642.12111111113,
+      "Q90_GPUh": 4906.51518005371,
+      "miss_GPUh": 8735.60593105742
+    },
+    {
+      "day": "2024-12-01",
+      "slot": 7,
+      "actual_GPUh": 10456.25611111113,
+      "Q90_GPUh": 5300.71178955078,
+      "miss_GPUh": 5155.54432156035
+    },
+    {
+      "day": "2025-01-14",
+      "slot": 16,
+      "actual_GPUh": 10352.343611111304,
+      "Q90_GPUh": 5211.947690429686,
+      "miss_GPUh": 5140.395920681618
+    },
+    {
+      "day": "2024-12-20",
+      "slot": 5,
+      "actual_GPUh": 10348.017222222245,
+      "Q90_GPUh": 5898.235257568358,
+      "miss_GPUh": 4449.7819646538865
+    }
+  ]
+}

@@ -1,0 +1,518 @@
+{
+  "models": {
+    "ZERO": {
+      "groups": {
+        "overall": {
+          "N": 4224,
+          "coverage": 0.32788825757575757,
+          "status": "FAIL"
+        },
+        "positive": {
+          "N": 2839,
+          "coverage": 0.0,
+          "status": "FAIL"
+        },
+        "burst": {
+          "N": 240,
+          "coverage": 0.0,
+          "status": "FAIL"
+        }
+      },
+      "temporal_blocks": [
+        {
+          "month": "2024-12",
+          "coverage_checks": {
+            "overall": "FAIL",
+            "positive": "FAIL",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 1.0,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": false
+        },
+        {
+          "month": "2025-01",
+          "coverage_checks": {
+            "overall": "FAIL",
+            "positive": "FAIL",
+            "burst": "FAIL"
+          },
+          "point_WAPE": 1.0,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": false
+        },
+        {
+          "month": "2025-02",
+          "coverage_checks": {
+            "overall": "FAIL",
+            "positive": "FAIL",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 1.0,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": false
+        }
+      ],
+      "causal_gate": "PASS",
+      "all_pass": false,
+      "small_sample_rule": "Pooled overall/positive/burst require N>=100 for an affirmative safety claim; monthly conditional gate enforced when N>=100"
+    },
+    "SEASONAL": {
+      "groups": {
+        "overall": {
+          "N": 4224,
+          "coverage": 0.9950284090909091,
+          "status": "PASS"
+        },
+        "positive": {
+          "N": 2839,
+          "coverage": 0.9926030292356464,
+          "status": "PASS"
+        },
+        "burst": {
+          "N": 240,
+          "coverage": 0.9125,
+          "status": "PASS"
+        }
+      },
+      "temporal_blocks": [
+        {
+          "month": "2024-12",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 1.165339697990018,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": true
+        },
+        {
+          "month": "2025-01",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "FAIL"
+          },
+          "point_WAPE": 1.0237882040079664,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": false
+        },
+        {
+          "month": "2025-02",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 1.0328175776909576,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": true
+        }
+      ],
+      "causal_gate": "PASS",
+      "all_pass": false,
+      "small_sample_rule": "Pooled overall/positive/burst require N>=100 for an affirmative safety claim; monthly conditional gate enforced when N>=100"
+    },
+    "LIGHTGBM": {
+      "groups": {
+        "overall": {
+          "N": 4224,
+          "coverage": 0.9950284090909091,
+          "status": "PASS"
+        },
+        "positive": {
+          "N": 2839,
+          "coverage": 0.9926030292356464,
+          "status": "PASS"
+        },
+        "burst": {
+          "N": 240,
+          "coverage": 0.9125,
+          "status": "PASS"
+        }
+      },
+      "temporal_blocks": [
+        {
+          "month": "2024-12",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 1.0051117414003417,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": true
+        },
+        {
+          "month": "2025-01",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "FAIL"
+          },
+          "point_WAPE": 0.9876319735695045,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": false
+        },
+        {
+          "month": "2025-02",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 0.9772261889162034,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": true
+        }
+      ],
+      "causal_gate": "PASS",
+      "all_pass": false,
+      "small_sample_rule": "Pooled overall/positive/burst require N>=100 for an affirmative safety claim; monthly conditional gate enforced when N>=100"
+    },
+    "HURDLE_LIGHTGBM": {
+      "groups": {
+        "overall": {
+          "N": 4224,
+          "coverage": 0.9947916666666666,
+          "status": "PASS"
+        },
+        "positive": {
+          "N": 2839,
+          "coverage": 0.9922507925325819,
+          "status": "PASS"
+        },
+        "burst": {
+          "N": 240,
+          "coverage": 0.9083333333333333,
+          "status": "PASS"
+        }
+      },
+      "temporal_blocks": [
+        {
+          "month": "2024-12",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 0.9982549031743966,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": true
+        },
+        {
+          "month": "2025-01",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "FAIL"
+          },
+          "point_WAPE": 0.9784973090192653,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": false
+        },
+        {
+          "month": "2025-02",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 0.9568113244371999,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": true
+        }
+      ],
+      "causal_gate": "PASS",
+      "all_pass": false,
+      "small_sample_rule": "Pooled overall/positive/burst require N>=100 for an affirmative safety claim; monthly conditional gate enforced when N>=100"
+    },
+    "XGBOOST": {
+      "groups": {
+        "overall": {
+          "N": 4224,
+          "coverage": 0.9952651515151515,
+          "status": "PASS"
+        },
+        "positive": {
+          "N": 2839,
+          "coverage": 0.9929552659387109,
+          "status": "PASS"
+        },
+        "burst": {
+          "N": 240,
+          "coverage": 0.9166666666666666,
+          "status": "PASS"
+        }
+      },
+      "temporal_blocks": [
+        {
+          "month": "2024-12",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 1.0161709636229577,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": true
+        },
+        {
+          "month": "2025-01",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "FAIL"
+          },
+          "point_WAPE": 0.9884239701567573,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": false
+        },
+        {
+          "month": "2025-02",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 0.9690041694980911,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": true
+        }
+      ],
+      "causal_gate": "PASS",
+      "all_pass": false,
+      "small_sample_rule": "Pooled overall/positive/burst require N>=100 for an affirmative safety claim; monthly conditional gate enforced when N>=100"
+    },
+    "TFT": {
+      "groups": {
+        "overall": {
+          "N": 4224,
+          "coverage": 0.9950284090909091,
+          "status": "PASS"
+        },
+        "positive": {
+          "N": 2839,
+          "coverage": 0.9926030292356464,
+          "status": "PASS"
+        },
+        "burst": {
+          "N": 240,
+          "coverage": 0.9125,
+          "status": "PASS"
+        }
+      },
+      "temporal_blocks": [
+        {
+          "month": "2024-12",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 1.2996439292269657,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": true
+        },
+        {
+          "month": "2025-01",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "FAIL"
+          },
+          "point_WAPE": 1.0748257099668808,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": false
+        },
+        {
+          "month": "2025-02",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 1.1132364572714613,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": true
+        }
+      ],
+      "causal_gate": "PASS",
+      "all_pass": false,
+      "small_sample_rule": "Pooled overall/positive/burst require N>=100 for an affirmative safety claim; monthly conditional gate enforced when N>=100"
+    },
+    "DEEPAR": {
+      "groups": {
+        "overall": {
+          "N": 4224,
+          "coverage": 0.9950284090909091,
+          "status": "PASS"
+        },
+        "positive": {
+          "N": 2839,
+          "coverage": 0.9926030292356464,
+          "status": "PASS"
+        },
+        "burst": {
+          "N": 240,
+          "coverage": 0.9125,
+          "status": "PASS"
+        }
+      },
+      "temporal_blocks": [
+        {
+          "month": "2024-12",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 1.3020822044065556,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": true
+        },
+        {
+          "month": "2025-01",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "FAIL"
+          },
+          "point_WAPE": 1.0787513473599697,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": false
+        },
+        {
+          "month": "2025-02",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 1.1198374524693657,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": true
+        }
+      ],
+      "causal_gate": "PASS",
+      "all_pass": false,
+      "small_sample_rule": "Pooled overall/positive/burst require N>=100 for an affirmative safety claim; monthly conditional gate enforced when N>=100"
+    },
+    "NHITS": {
+      "groups": {
+        "overall": {
+          "N": 4224,
+          "coverage": 0.9952651515151515,
+          "status": "PASS"
+        },
+        "positive": {
+          "N": 2839,
+          "coverage": 0.9929552659387109,
+          "status": "PASS"
+        },
+        "burst": {
+          "N": 240,
+          "coverage": 0.9166666666666666,
+          "status": "PASS"
+        }
+      },
+      "temporal_blocks": [
+        {
+          "month": "2024-12",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 1.0033889574251815,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": true
+        },
+        {
+          "month": "2025-01",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "FAIL"
+          },
+          "point_WAPE": 0.9846307644528878,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": false
+        },
+        {
+          "month": "2025-02",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 0.9696157665563011,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": true
+        }
+      ],
+      "causal_gate": "PASS",
+      "all_pass": false,
+      "small_sample_rule": "Pooled overall/positive/burst require N>=100 for an affirmative safety claim; monthly conditional gate enforced when N>=100"
+    },
+    "CMABF": {
+      "groups": {
+        "overall": {
+          "N": 4224,
+          "coverage": 0.9950284090909091,
+          "status": "PASS"
+        },
+        "positive": {
+          "N": 2839,
+          "coverage": 0.9926030292356464,
+          "status": "PASS"
+        },
+        "burst": {
+          "N": 240,
+          "coverage": 0.9125,
+          "status": "PASS"
+        }
+      },
+      "temporal_blocks": [
+        {
+          "month": "2024-12",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 1.2050364349356575,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": true
+        },
+        {
+          "month": "2025-01",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "FAIL"
+          },
+          "point_WAPE": 1.0351162351747871,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": false
+        },
+        {
+          "month": "2025-02",
+          "coverage_checks": {
+            "overall": "PASS",
+            "positive": "PASS",
+            "burst": "NOT_REQUIRED_N_LT_100"
+          },
+          "point_WAPE": 1.0392123373407804,
+          "catastrophic_WAPE_gt_2": false,
+          "pass": true
+        }
+      ],
+      "causal_gate": "PASS",
+      "all_pass": false,
+      "small_sample_rule": "Pooled overall/positive/burst require N>=100 for an affirmative safety claim; monthly conditional gate enforced when N>=100"
+    }
+  },
+  "failed_months_never_pooled_away": true
+}

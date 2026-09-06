@@ -89,11 +89,11 @@ class Contracts(unittest.TestCase):
     def test_31_lightgbm_repeat(self):
         p=OUT/'V40R3_TREE_REPRODUCTION_REPORT.json'
         if not p.exists():self.skipTest('Fitting has not run; no reproducibility claim yet')
-        r=read(p.name)['models'];self.assertTrue(all(v['byte_identical_prediction_arrays'] for v in r if 'LIGHTGBM' in v['name']))
+        r=read(p.name)['models'];self.assertTrue(all(v['max_prediction_difference_GPUh']==0 for v in r if 'LIGHTGBM' in v['name']))
     def test_32_xgboost_repeat(self):
         p=OUT/'V40R3_TREE_REPRODUCTION_REPORT.json'
         if not p.exists():self.skipTest('Fitting has not run; no reproducibility claim yet')
-        self.assertTrue(next(v for v in read(p.name)['models'] if v['name']=='XGBOOST')['byte_identical_prediction_arrays'])
+        self.assertEqual(next(v for v in read(p.name)['models'] if v['name']=='XGBOOST')['max_prediction_difference_GPUh'],0)
     def test_33_seed_device(self):
         e=read('V40R3_COMPUTE_ENVIRONMENT.json');self.assertEqual(e['training_settings']['search_seeds'],[SEED]);self.assertIn(e['device'],['cpu','cuda:0'])
     def test_34_GPU_policy(self):
