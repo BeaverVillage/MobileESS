@@ -1,0 +1,235 @@
+{
+  "issue_time": "2025-04-23 08:00:00+00:00",
+  "diagnostic_only": true,
+  "feature_selection": false,
+  "preprocessing": {
+    "track": "P",
+    "cutoff": "2025-04-10T09:12:11+00:00",
+    "columns": [
+      "requested_seconds",
+      "num_gpus_req",
+      "num_nodes_req",
+      "num_cores_req",
+      "requested_memory_mib",
+      "partition",
+      "qos",
+      "submit_hour",
+      "submit_dow"
+    ],
+    "medians": {
+      "requested_seconds": 3600.0,
+      "num_gpus_req": 1.0,
+      "num_nodes_req": 1.0,
+      "num_cores_req": 2.0,
+      "requested_memory_mib": 40960.0
+    },
+    "vocab": {
+      "partition": [
+        "__UNKNOWN__",
+        "debug-gpu",
+        "debug-gpu-stdby",
+        "gpu-h100",
+        "gpu-h100-stdby",
+        "gpu-h100l",
+        "gpu-h100s",
+        "gpu-h100s-stdby",
+        "project_3"
+      ],
+      "qos": [
+        "__UNKNOWN__",
+        "high",
+        "normal",
+        "standby"
+      ]
+    },
+    "groups": [
+      "requested_seconds",
+      "requested_seconds",
+      "num_gpus_req",
+      "num_gpus_req",
+      "num_nodes_req",
+      "num_nodes_req",
+      "num_cores_req",
+      "num_cores_req",
+      "requested_memory_mib",
+      "requested_memory_mib",
+      "partition",
+      "partition",
+      "partition",
+      "partition",
+      "partition",
+      "partition",
+      "partition",
+      "partition",
+      "partition",
+      "qos",
+      "qos",
+      "qos",
+      "qos",
+      "submit_hour",
+      "submit_dow"
+    ],
+    "fit_ids_sha256": "b2abd24ed98b0214c4743413683df863863338d5cab834b3eac62b13ccdf31a6",
+    "fit_N": 57832,
+    "max_fit_end": "2025-04-10T09:11:28+00:00"
+  },
+  "reports": {
+    "Q50": {
+      "base_loss": 3718.870065204891,
+      "walltime_mean_loss_increase": 1291.5642529497645,
+      "replicates": [
+        1298.1449472347795,
+        1258.1047034428293,
+        1318.4431081716848
+      ],
+      "loss": "raw pinball",
+      "validation_N": 14459,
+      "validation_ids": "84dc5ca9f5aea2aeb04671af61a2c7e453976acd161215e99d04bed4efec12e3",
+      "max_train_end": "2025-04-10 09:11:28+00:00",
+      "min_validation_end": "2025-04-10 09:12:11+00:00",
+      "max_validation_end": "2025-04-22 22:42:44+00:00",
+      "validation_overlap": 0,
+      "all_before_issue": true
+    },
+    "Q90": {
+      "base_loss": 2818.4460073168116,
+      "walltime_mean_loss_increase": 3174.869357535959,
+      "replicates": [
+        3167.9699894340506,
+        3146.381898869004,
+        3210.256184304821
+      ],
+      "loss": "raw pinball",
+      "validation_N": 14459,
+      "validation_ids": "84dc5ca9f5aea2aeb04671af61a2c7e453976acd161215e99d04bed4efec12e3",
+      "max_train_end": "2025-04-10 09:11:28+00:00",
+      "min_validation_end": "2025-04-10 09:12:11+00:00",
+      "max_validation_end": "2025-04-22 22:42:44+00:00",
+      "validation_overlap": 0,
+      "all_before_issue": true
+    },
+    "Q95": {
+      "base_loss": 2167.5994628772596,
+      "walltime_mean_loss_increase": 3727.3338963512238,
+      "replicates": [
+        3672.4772548224764,
+        3712.8622546472643,
+        3796.66217958393
+      ],
+      "loss": "raw pinball",
+      "validation_N": 14459,
+      "validation_ids": "84dc5ca9f5aea2aeb04671af61a2c7e453976acd161215e99d04bed4efec12e3",
+      "max_train_end": "2025-04-10 09:11:28+00:00",
+      "min_validation_end": "2025-04-10 09:12:11+00:00",
+      "max_validation_end": "2025-04-22 22:42:44+00:00",
+      "validation_overlap": 0,
+      "all_before_issue": true
+    },
+    "Q99": {
+      "base_loss": 1250.6958819904175,
+      "walltime_mean_loss_increase": 3222.8504213131746,
+      "replicates": [
+        3193.8003114509356,
+        3186.998822972754,
+        3287.752129515834
+      ],
+      "loss": "raw pinball",
+      "validation_N": 14459,
+      "validation_ids": "84dc5ca9f5aea2aeb04671af61a2c7e453976acd161215e99d04bed4efec12e3",
+      "max_train_end": "2025-04-10 09:11:28+00:00",
+      "min_validation_end": "2025-04-10 09:12:11+00:00",
+      "max_validation_end": "2025-04-22 22:42:44+00:00",
+      "validation_overlap": 0,
+      "all_before_issue": true
+    },
+    "RESIDUAL": {
+      "base_loss": 1.9239720780616045e+19,
+      "walltime_mean_loss_increase": 6.093342293070221e+18,
+      "replicates": [
+        6.272566104508465e+18,
+        5.672448006013444e+18,
+        6.335012768688755e+18
+      ],
+      "loss": "MSE of historical OOF squared error",
+      "validation_N": 14459,
+      "validation_ids": "84dc5ca9f5aea2aeb04671af61a2c7e453976acd161215e99d04bed4efec12e3",
+      "max_train_end": "2025-04-10 09:11:28+00:00",
+      "min_validation_end": "2025-04-10 09:12:11+00:00",
+      "max_validation_end": "2025-04-22 22:42:44+00:00",
+      "validation_overlap": 0,
+      "all_before_issue": true
+    }
+  },
+  "fit_records": [
+    {
+      "name": "Q50.txt.gz",
+      "config_id": "L2",
+      "alpha": 0.5,
+      "N": 57832,
+      "fit_ids_sha256": "b2abd24ed98b0214c4743413683df863863338d5cab834b3eac62b13ccdf31a6",
+      "max_training_end": "2025-04-10 09:11:28+00:00",
+      "preprocessing_fit_ids": "b2abd24ed98b0214c4743413683df863863338d5cab834b3eac62b13ccdf31a6",
+      "model_text_SHA256": "abc8162bc82405fa0b63ba90a300fafc0a50aad9b866db1e7423f79b8602df49",
+      "compressed_SHA256": "4879071308e408c6a1088548d4ab455924eab8224c122101ea6b6cf8deb4001c",
+      "num_trees": 800,
+      "fit_seconds": 2.2960463000054006,
+      "seconds": 2.446760599996196
+    },
+    {
+      "name": "Q90.txt.gz",
+      "config_id": "L2",
+      "alpha": 0.9,
+      "N": 57832,
+      "fit_ids_sha256": "b2abd24ed98b0214c4743413683df863863338d5cab834b3eac62b13ccdf31a6",
+      "max_training_end": "2025-04-10 09:11:28+00:00",
+      "preprocessing_fit_ids": "b2abd24ed98b0214c4743413683df863863338d5cab834b3eac62b13ccdf31a6",
+      "model_text_SHA256": "e36e928fe2be520a23ca59208106e7dec98e5c00af10611fc7350cffc8431f7b",
+      "compressed_SHA256": "b18f8fede7136da193393c1ee4f0b42d9e5e2efab5ffe885ee931f956cc7e5fe",
+      "num_trees": 800,
+      "fit_seconds": 2.0977179000037722,
+      "seconds": 2.251916400011396
+    },
+    {
+      "name": "Q95.txt.gz",
+      "config_id": "L2",
+      "alpha": 0.95,
+      "N": 57832,
+      "fit_ids_sha256": "b2abd24ed98b0214c4743413683df863863338d5cab834b3eac62b13ccdf31a6",
+      "max_training_end": "2025-04-10 09:11:28+00:00",
+      "preprocessing_fit_ids": "b2abd24ed98b0214c4743413683df863863338d5cab834b3eac62b13ccdf31a6",
+      "model_text_SHA256": "77c81293aa575ae1b19f9790ed1e8bc98e2f3b06c4c4804f42114a8dbd39e547",
+      "compressed_SHA256": "59a7986edf9d60b3245bdbf7f56712e88d6b4baf13a457216a994b95cb706a8e",
+      "num_trees": 800,
+      "fit_seconds": 1.9756464999809396,
+      "seconds": 2.129366299981484
+    },
+    {
+      "name": "Q99.txt.gz",
+      "config_id": "L2",
+      "alpha": 0.99,
+      "N": 57832,
+      "fit_ids_sha256": "b2abd24ed98b0214c4743413683df863863338d5cab834b3eac62b13ccdf31a6",
+      "max_training_end": "2025-04-10 09:11:28+00:00",
+      "preprocessing_fit_ids": "b2abd24ed98b0214c4743413683df863863338d5cab834b3eac62b13ccdf31a6",
+      "model_text_SHA256": "fe1ae6b0ea800299352c5dfa6b21196c5b8a207681f60cd4f794478b802d8a54",
+      "compressed_SHA256": "1216e6f23832e27f76c11dbc5ea08b112594505b4cc475054d9a24d963d89e2c",
+      "num_trees": 800,
+      "fit_seconds": 1.8558335000125226,
+      "seconds": 2.007391999999527
+    },
+    {
+      "name": "RESIDUAL.txt.gz",
+      "config_id": "L2",
+      "alpha": null,
+      "N": 45784,
+      "fit_ids_sha256": "2123b7a532083b394d96d0f4bf668ae2e71ae87a5521ac7ec3e05edbbae8f749",
+      "max_training_end": "2025-04-10 09:11:28+00:00",
+      "preprocessing_fit_ids": "b2abd24ed98b0214c4743413683df863863338d5cab834b3eac62b13ccdf31a6",
+      "model_text_SHA256": "fc49ba3e8ad275c4ed085f6f5c1ff461b6ceafb873654ea2ecfbca8a322b4475",
+      "compressed_SHA256": "e1b7026359062533ee2f48811ee8490b5a98fddd7363dc5a531f6b6a5f8cbb0c",
+      "num_trees": 800,
+      "fit_seconds": 1.1180954000155907,
+      "seconds": 1.2754647000110708
+    }
+  ]
+}

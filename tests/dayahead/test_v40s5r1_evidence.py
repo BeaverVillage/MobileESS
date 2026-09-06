@@ -196,7 +196,7 @@ def test_firewalls_holds_adapter_and_no_operational_imports():
         assert not a['recommended_rows'] and read('FINAL_DECISION')['FURTHER_RUNTIME_MODEL_WORK']=='DEFER_UNTIL_RICHER_AUTHORITY_OR_DATA'
     for p in (ROOT/'dayahead/v40s5r1').glob('*.py'):
         imports=[]
-        for n in ast.walk(ast.parse(p.read_text())):
+        for n in ast.walk(ast.parse(p.read_text(encoding='utf-8'))):
             if isinstance(n,ast.Import):imports += [a.name for a in n.names]
             if isinstance(n,ast.ImportFrom):imports.append(n.module or '')
         assert not any(any(bad in s.lower() for bad in ['gurobi','opendss','v37','v40a','xgboost','tensorflow','torch']) for s in imports)
