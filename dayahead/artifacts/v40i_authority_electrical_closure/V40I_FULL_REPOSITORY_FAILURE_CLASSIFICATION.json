@@ -1,0 +1,1764 @@
+{
+  "status": "CLASSIFIED",
+  "total": 64,
+  "failures": 55,
+  "errors": 9,
+  "reproduced_on_pre_I_source": 64,
+  "V40I_failures": 0,
+  "classification_counts": {
+    "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE": 52,
+    "UNRELATED_PREEXISTING_FROZEN_ARTIFACT_FAILURE": 8,
+    "UNRELATED_PREEXISTING_LEGACY_STATE_FAILURE": 3,
+    "UNRELATED_PREEXISTING_LEGACY_TEST_FAILURE": 1
+  },
+  "all_legacy_test_and_trace_source_bytes_unchanged": true,
+  "baseline_reproduction_scope": "Same Python/site-packages. Fresh detached H checkout; three differing initial failure points rerun with unchanged H code and the existing original artifact fixtures. No I imports in same-fixture run.",
+  "source_diff_since_pre_I": [
+    "dayahead/v40i/__init__.py",
+    "dayahead/v40i/electrical.py",
+    "tests/dayahead/test_v40i_electrical.py"
+  ],
+  "source_changes_to_force_old_tests_pass": 0,
+  "rows": [
+    {
+      "index": 0,
+      "failure_test_name": "tests.dayahead.test_g56_freeze_artifacts::test_production_weight_file_and_config_fingerprints_are_reproducible",
+      "failure_file": "tests\\dayahead\\test_g56_freeze_artifacts.py",
+      "failure_namespace_version": "g56",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "DEPENDENCY_MISSING: torch (legacy frozen Torch 2.8.0 assertion)",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_g56_freeze_artifacts.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "b158f2d0d09cef9b65b125e97f3d83082087ac3c0c26faff5a55feeb4a51dca5",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "ModuleNotFoundError: No module named 'torch'",
+      "baseline_message": "ModuleNotFoundError: No module named 'torch'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 1,
+      "failure_test_name": "tests.dayahead.test_v28r2_certificates_ledgers::test_production_factory_binds_all_steps_without_running_them",
+      "failure_file": "tests\\dayahead\\test_v28r2_certificates_ledgers.py",
+      "failure_namespace_version": "v28r2",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "dayahead/v28r2/production_handlers.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tests/dayahead/test_v28r2_certificates_ledgers.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "c3710f93bc9bab16c3a1ccf936800d53b210193b20bd37dc7ac51c3202e5b688",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\cache\\\\v28r2_campaign_sources\\\\april_2025\\\\days\\\\2025-04-01\\\\source_day_manifest.json'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\cache\\\\v28r2_campaign_sources\\\\april_2025\\\\days\\\\2025-04-01\\\\source_day_manifest.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 2,
+      "failure_test_name": "tests.dayahead.test_v28r2_certificates_ledgers::test_first_four_handlers_materialize_real_authorities_without_native_solves",
+      "failure_file": "tests\\dayahead\\test_v28r2_certificates_ledgers.py",
+      "failure_namespace_version": "v28r2",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "dayahead/v28r2/production_handlers.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tests/dayahead/test_v28r2_certificates_ledgers.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "c3710f93bc9bab16c3a1ccf936800d53b210193b20bd37dc7ac51c3202e5b688",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\cache\\\\v28r2_campaign_sources\\\\april_2025\\\\days\\\\2025-04-01\\\\source_day_manifest.json'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\cache\\\\v28r2_campaign_sources\\\\april_2025\\\\days\\\\2025-04-01\\\\source_day_manifest.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 3,
+      "failure_test_name": "tests.dayahead.test_v28r2_certificates_ledgers::test_missing_electrical_cache_invokes_real_preparation_adapter",
+      "failure_file": "tests\\dayahead\\test_v28r2_certificates_ledgers.py",
+      "failure_namespace_version": "v28r2",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "dayahead/v28r2/production_handlers.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tests/dayahead/test_v28r2_certificates_ledgers.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "c3710f93bc9bab16c3a1ccf936800d53b210193b20bd37dc7ac51c3202e5b688",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\cache\\\\v28r2_campaign_sources\\\\april_2025\\\\days\\\\2025-04-01\\\\source_day_manifest.json'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\cache\\\\v28r2_campaign_sources\\\\april_2025\\\\days\\\\2025-04-01\\\\source_day_manifest.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 4,
+      "failure_test_name": "tests.dayahead.test_v28r2_certificates_ledgers::test_failed_old_run_spec_is_archived_before_new_revision_retry",
+      "failure_file": "tests\\dayahead\\test_v28r2_certificates_ledgers.py",
+      "failure_namespace_version": "v28r2",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "dayahead/v28r2/production_handlers.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tests/dayahead/test_v28r2_certificates_ledgers.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "c3710f93bc9bab16c3a1ccf936800d53b210193b20bd37dc7ac51c3202e5b688",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\cache\\\\v28r2_campaign_sources\\\\april_2025\\\\days\\\\2025-04-01\\\\source_day_manifest.json'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\cache\\\\v28r2_campaign_sources\\\\april_2025\\\\days\\\\2025-04-01\\\\source_day_manifest.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 5,
+      "failure_test_name": "tests.dayahead.test_v29_final_review::test_v29_artifact_sha_self_consistency",
+      "failure_file": "tests\\dayahead\\test_v29_final_review.py",
+      "failure_namespace_version": "v29",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_FROZEN_ARTIFACT_FAILURE",
+      "failure_cause": "HISTORICAL_FROZEN_ARTIFACT_HASH_OR_SIZE_MISMATCH: inherited files do not match older version seal; reproduced before I code exists",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v29_final_review.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "35509b41553a643de659b5f3aaeca1b98aca6bbca2fd9d679eae2f079e9ecd04",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": false,
+      "original_message": "AssertionError: assert 3052 == 3073\n +  where 3052 = os.stat_result(st_mode=33206, st_ino=1407374885488162, st_dev=2426045862, st_nlink=1, st_uid=0, st_gid=0, st_size=3052, st_atime=1788603242, st_mtime=1788603242, st_ctime=1788603242).st_size\n +    where os.stat_result(st_mode=33206, st_ino=1407374885488162, st_dev=2426045862, st_nlink=1, st_uid=0, st_gid=0, st_size=3052, st_atime=1788603242, st_mtime=1788603242, st_ctime=1788603242) = stat()\n +      where stat = WindowsPath('C:/codex_mobileess_workspace/MobileESS_v40a_bounded_iterative_coopt/dayahead/artifacts/v29_grid_responsive_aidc/V29_4DAY_ACTUAL_RESULTS.csv').stat",
+      "baseline_message": "AssertionError: assert 3052 == 3073\n +  where 3052 = os.stat_result(st_mode=33206, st_ino=562949955460530, st_dev=2426045862, st_nlink=1, st_uid=0, st_gid=0, st_size=3052, st_atime=1788682822, st_mtime=1788682822, st_ctime=1788682822).st_size\n +    where os.stat_result(st_mode=33206, st_ino=562949955460530, st_dev=2426045862, st_nlink=1, st_uid=0, st_gid=0, st_size=3052, st_atime=1788682822, st_mtime=1788682822, st_ctime=1788682822) = stat()\n +      where stat = WindowsPath('C:/codex_mobileess_workspace/v40i_prechange_tests/dayahead/artifacts/v29_grid_responsive_aidc/V29_4DAY_ACTUAL_RESULTS.csv').stat",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 6,
+      "failure_test_name": "tests.dayahead.test_v28r2_source_preflight::test_materialized_source_cache_is_sha_verified_when_coverage_passes",
+      "failure_file": "tests\\dayahead\\test_v28r2_source_preflight.py",
+      "failure_namespace_version": "v28r2",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v28r2_source_preflight.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "e047c35da16d500e53241b83ca11688a8e77b861682b65fe8733b601af82f575",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\cache\\\\v28r2_campaign_sources\\\\april_2025\\\\days\\\\2025-04-01\\\\source_day_manifest.json'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\cache\\\\v28r2_campaign_sources\\\\april_2025\\\\days\\\\2025-04-01\\\\source_day_manifest.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 7,
+      "failure_test_name": "tests.dayahead.test_v29_stage1_contracts::test_combined_traffic_source_is_split_into_strict_namespaces",
+      "failure_file": "tests\\dayahead\\test_v29_stage1_contracts.py",
+      "failure_namespace_version": "v29",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "dayahead/v29/source_namespace.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tests/dayahead/test_v29_stage1_contracts.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "ea282bea2730ceccb9fad3d546a34a397a8c7da3ee33e47c58f4b63b66ae1bed",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\cache\\\\v28r2_campaign_sources\\\\april_2025\\\\days\\\\2025-04-01\\\\traffic_mobility.json'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\cache\\\\v28r2_campaign_sources\\\\april_2025\\\\days\\\\2025-04-01\\\\traffic_mobility.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 8,
+      "failure_test_name": "tests.dayahead.test_v29_stage6_reporting::test_v29_stage6_frozen_day_contracts",
+      "failure_file": "tests\\dayahead\\test_v29_stage6_reporting.py",
+      "failure_namespace_version": "v29",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v29_stage6_reporting.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "f90cacd4043196ac11c7d22816377db5d161479204bba33d31569feeeaba5f48",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\frozen_artifacts\\\\v29_development_regression_apr01_04\\\\2025-04-01\\\\V29_DAY_RESULT.json'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\frozen_artifacts\\\\v29_development_regression_apr01_04\\\\2025-04-01\\\\V29_DAY_RESULT.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 9,
+      "failure_test_name": "tests.dayahead.test_v29_stage4_formulation::test_reference_v3_carryin_mass_delta_and_no_double_counting",
+      "failure_file": "tests\\dayahead\\test_v29_stage4_formulation.py",
+      "failure_namespace_version": "v29",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "dayahead/v28r2/formulation.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "dayahead/v28r2/source_labels.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "dayahead/v29/formulation.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tests/dayahead/test_v29_stage4_formulation.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "0b0e6f404007e46a3dd3bb0ec5e44e4761ae04c1d50389d51afc580e74005fc3",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [WinError 3] 지정된 경로를 찾을 수 없습니다: 'C:\\\\Users\\\\kjw39\\\\OneDrive\\\\Desktop\\\\4-2\\\\Mobile ESS\\\\raw데이터\\\\데이터 센터\\\\NLR_scheduler_authority\\\\09_ScientificData2026_H100_B200_Workloads_Figshare31654879\\\\02_code_repo\\\\Single_Machine_Dataset\\\\Reinforcment Learning\\\\Training Code\\\\slprj\\\\sim\\\\varcache\\\\RL_Renewable_energy_smoothing'",
+      "baseline_message": "FileNotFoundError: [WinError 3] 지정된 경로를 찾을 수 없습니다: 'C:\\\\Users\\\\kjw39\\\\OneDrive\\\\Desktop\\\\4-2\\\\Mobile ESS\\\\raw데이터\\\\데이터 센터\\\\NLR_scheduler_authority\\\\09_ScientificData2026_H100_B200_Workloads_Figshare31654879\\\\02_code_repo\\\\Single_Machine_Dataset\\\\Reinforcment Learning\\\\Training Code\\\\slprj\\\\sim\\\\varcache\\\\RL_Renewable_energy_smoothing'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 10,
+      "failure_test_name": "tests.dayahead.test_v29r1_source_resume::test_each_day_has_96_slot_sources_and_verified_manifest",
+      "failure_file": "tests\\dayahead\\test_v29r1_source_resume.py",
+      "failure_namespace_version": "v29r1",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v29r1_source_resume.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "6e046c7c85f119483a8dc70e488054827d80f45c6b18a4982f8175485ce3ffed",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "AssertionError: assert False\n +  where False = is_file()\n +    where is_file = (WindowsPath('C:/codex_mobileess_workspace/MobileESS_v40a_bounded_iterative_coopt/cache/v29r1_trust_cert_sources/jan_mar_2025/days/2025-01-01') / 'gfs_d1_weather.parquet').is_file",
+      "baseline_message": "AssertionError: assert False\n +  where False = is_file()\n +    where is_file = (WindowsPath('C:/codex_mobileess_workspace/v40i_prechange_tests/cache/v29r1_trust_cert_sources/jan_mar_2025/days/2025-01-01') / 'gfs_d1_weather.parquet').is_file",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 11,
+      "failure_test_name": "tests.dayahead.test_v29r2_service_model::test_final_service_model_files_match_frozen_sha",
+      "failure_file": "tests\\dayahead\\test_v29r2_service_model.py",
+      "failure_namespace_version": "v29r2",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_FROZEN_ARTIFACT_FAILURE",
+      "failure_cause": "HISTORICAL_FROZEN_ARTIFACT_HASH_OR_SIZE_MISMATCH: inherited files do not match older version seal; reproduced before I code exists",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v29r2_service_model.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "dbba6647d8c6547f8ab3784141f36847ddbb0bc7b2210c16746ada2faa24f3fb",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": false,
+      "original_message": "AssertionError: assert '97a0aaa8581f...21860429164e9' == '75a60dc688ad...84f41dc173a47'\n  \n  - 75a60dc688ad5255c2fe6e82950c3f8a0577c4fde6b9705103884f41dc173a47\n  + 97a0aaa8581fd03b8cea3b4479d01b82f967f928b1d2eae6d7621860429164e9",
+      "baseline_message": "AssertionError: assert '97a0aaa8581f...21860429164e9' == '75a60dc688ad...84f41dc173a47'\n  \n  - 75a60dc688ad5255c2fe6e82950c3f8a0577c4fde6b9705103884f41dc173a47\n  + 97a0aaa8581fd03b8cea3b4479d01b82f967f928b1d2eae6d7621860429164e9",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 12,
+      "failure_test_name": "tests.dayahead.test_v29r3_aidc_effect_forensic::test_14_no_scale_rho_or_mess_rating_changes",
+      "failure_file": "tests\\dayahead\\test_v29r3_aidc_effect_forensic.py",
+      "failure_namespace_version": "v29r3",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_GIT_IDENTITY_CONTRACT: old branch/starting HEAD/base comparison is incompatible with later V40H/V40I branch; legacy source differences predate I",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v29r3_aidc_effect_forensic.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "b52dc885247048d2567d13204062dcad96e1fbf0cc87a605c8aca04e1c332dee",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "AssertionError: assert 'dayahead/v28...e_registry.py' == ''\n  \n  + dayahead/v28r2/variable_registry.py",
+      "baseline_message": "AssertionError: assert 'dayahead/v28...e_registry.py' == ''\n  \n  + dayahead/v28r2/variable_registry.py",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 13,
+      "failure_test_name": "tests.dayahead.test_v30_two_stage_aidc_recourse::test_39_historical_preservation",
+      "failure_file": "tests\\dayahead\\test_v30_two_stage_aidc_recourse.py",
+      "failure_namespace_version": "v30",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_FROZEN_ARTIFACT_FAILURE",
+      "failure_cause": "HISTORICAL_FROZEN_ARTIFACT_HASH_OR_SIZE_MISMATCH: inherited files do not match older version seal; reproduced before I code exists",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "dayahead/v29r3/forensic.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tests/dayahead/test_v30_two_stage_aidc_recourse.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "d645965f5f393a47ec0539105f3fad76110e726c4f3094ded477066610e89b88",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": false,
+      "original_message": "RuntimeError: V29R3_PROTECTED_ARTIFACT_MISMATCH",
+      "baseline_message": "RuntimeError: V29R3_PROTECTED_ARTIFACT_MISMATCH",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 14,
+      "failure_test_name": "tests.dayahead.test_v33xr3_janmar_voltage_residual_audit::test_22_mess_unchanged",
+      "failure_file": "tests\\dayahead\\test_v33xr3_janmar_voltage_residual_audit.py",
+      "failure_namespace_version": "v33xr3",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_GIT_IDENTITY_CONTRACT: old branch/starting HEAD/base comparison is incompatible with later V40H/V40I branch; legacy source differences predate I",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v33xr3_janmar_voltage_residual_audit.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "1c4355deae6f24058e376951080c7c7cacc4807b99f915522470856baa371726",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "AssertionError: assert ['dayahead/v2..._registry.py'] == []\n  \n  Left contains one more item: 'dayahead/v28r2/variable_registry.py'\n  Use -v to get more diff",
+      "baseline_message": "AssertionError: assert ['dayahead/v2..._registry.py'] == []\n  \n  Left contains one more item: 'dayahead/v28r2/variable_registry.py'\n  Use -v to get more diff",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 15,
+      "failure_test_name": "tests.dayahead.test_v33xr3_janmar_voltage_residual_audit::test_24_artifact_determinism",
+      "failure_file": "tests\\dayahead\\test_v33xr3_janmar_voltage_residual_audit.py",
+      "failure_namespace_version": "v33xr3",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v33xr3_janmar_voltage_residual_audit.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tools/v33xr3/run_v33xr3.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "1c4355deae6f24058e376951080c7c7cacc4807b99f915522470856baa371726",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v32r3_minimal_janmar_authority_frontier\\\\dayahead\\\\artifacts\\\\v32r3_minimal_janmar_authority\\\\V32R3_AUTHORITY_COVERAGE_AUDIT.json'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v32r3_minimal_janmar_authority_frontier\\\\dayahead\\\\artifacts\\\\v32r3_minimal_janmar_authority\\\\V32R3_AUTHORITY_COVERAGE_AUDIT.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 16,
+      "failure_test_name": "tests.dayahead.test_v33xr2_e1_vmax10495::test_11_mess_is_unchanged_and_not_reoptimized",
+      "failure_file": "tests\\dayahead\\test_v33xr2_e1_vmax10495.py",
+      "failure_namespace_version": "v33xr2",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_GIT_IDENTITY_CONTRACT: old branch/starting HEAD/base comparison is incompatible with later V40H/V40I branch; legacy source differences predate I",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v33xr2_e1_vmax10495.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "d57c14fbf567218756e951bae4c89a11e98c287c3fb8d2b99f596a7bc7bb58c0",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "AssertionError: assert ['dayahead/v2..._registry.py'] == []\n  \n  Left contains one more item: 'dayahead/v28r2/variable_registry.py'\n  Use -v to get more diff",
+      "baseline_message": "AssertionError: assert ['dayahead/v2..._registry.py'] == []\n  \n  Left contains one more item: 'dayahead/v28r2/variable_registry.py'\n  Use -v to get more diff",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 17,
+      "failure_test_name": "tests.dayahead.test_v33xr3r1_janmar_b1_ac_fidelity::test_01_exact_starting_head",
+      "failure_file": "tests\\dayahead\\test_v33xr3r1_janmar_b1_ac_fidelity.py",
+      "failure_namespace_version": "v33xr3r1",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_GIT_IDENTITY_CONTRACT: old branch/starting HEAD/base comparison is incompatible with later V40H/V40I branch; legacy source differences predate I",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v33xr3r1_janmar_b1_ac_fidelity.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "f9033524e5b3a263091e72a9981ce3c285b9237fc03c9d45f8b9765123418eab",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "AssertionError: assert 'codex/v40a-b...dc-mess-coopt' == 'codex/v33xr3...terialization'\n  \n  - codex/v33xr3r1-janmar-b1-ac-fidelity-materialization\n  + codex/v40a-bounded-iterative-aidc-mess-coopt",
+      "baseline_message": "AssertionError: assert '' == 'codex/v33xr3...terialization'\n  \n  - codex/v33xr3r1-janmar-b1-ac-fidelity-materialization",
+      "branch_test_note": "Baseline detached HEAD also fails old branch assertion; START_GIT_STATUS and V40I start branch record establish current V40A branch predated I.",
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 18,
+      "failure_test_name": "tests.dayahead.test_v33xr3r1_janmar_b1_ac_fidelity::test_23_mess_code_untouched",
+      "failure_file": "tests\\dayahead\\test_v33xr3r1_janmar_b1_ac_fidelity.py",
+      "failure_namespace_version": "v33xr3r1",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_GIT_IDENTITY_CONTRACT: old branch/starting HEAD/base comparison is incompatible with later V40H/V40I branch; legacy source differences predate I",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v33xr3r1_janmar_b1_ac_fidelity.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "f9033524e5b3a263091e72a9981ce3c285b9237fc03c9d45f8b9765123418eab",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "AssertionError: assert 'dayahead/v28...e_registry.py' == ''\n  \n  + dayahead/v28r2/variable_registry.py",
+      "baseline_message": "AssertionError: assert 'dayahead/v28...e_registry.py' == ''\n  \n  + dayahead/v28r2/variable_registry.py",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 19,
+      "failure_test_name": "tests.dayahead.test_v35r1_forensic::test_all_apr01_20_b3_results_have_current_lineage_and_aidc_identity",
+      "failure_file": "tests\\dayahead\\test_v35r1_forensic.py",
+      "failure_namespace_version": "v35r1",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v35r1_forensic.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "79a767b8213c8cd4c7b2270d8a4c9f0926ad61e03454c24e5ced0e754f76284b",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: V35R1_HISTORICAL_CACHE_MISSING:2025-04-01/B3",
+      "baseline_message": "FileNotFoundError: V35R1_HISTORICAL_CACHE_MISSING:2025-04-01/B3",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 20,
+      "failure_test_name": "tests.dayahead.test_v35r1_forensic::test_storage_reloads_and_actual_terminal_soc_uses_1200_kwh_capacity",
+      "failure_file": "tests\\dayahead\\test_v35r1_forensic.py",
+      "failure_namespace_version": "v35r1",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v35r1_forensic.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "79a767b8213c8cd4c7b2270d8a4c9f0926ad61e03454c24e5ced0e754f76284b",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: V35R1_HISTORICAL_CACHE_MISSING:2025-04-01/B0",
+      "baseline_message": "FileNotFoundError: V35R1_HISTORICAL_CACHE_MISSING:2025-04-01/B0",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 21,
+      "failure_test_name": "tests.dayahead.test_v33xr3r2_causal_pgw_ac_residual::test_v33xr3r2_targeted_gate[01-exact starting HEAD]",
+      "failure_file": "tests\\dayahead\\test_v33xr3r2_causal_pgw_ac_residual.py",
+      "failure_namespace_version": "v33xr3r2",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_GIT_IDENTITY_CONTRACT: old branch/starting HEAD/base comparison is incompatible with later V40H/V40I branch; legacy source differences predate I",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v33xr3r2_causal_pgw_ac_residual.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "e414f40c6e3f6d33762273625ef50e70018687b4e764aeb142f37834ea942178",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "AssertionError: exact starting HEAD\nassert False",
+      "baseline_message": "AssertionError: exact starting HEAD\nassert False",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 22,
+      "failure_test_name": "tests.dayahead.test_v33xr3r2_causal_pgw_ac_residual::test_v33xr3r2_targeted_gate[52-MESS unchanged]",
+      "failure_file": "tests\\dayahead\\test_v33xr3r2_causal_pgw_ac_residual.py",
+      "failure_namespace_version": "v33xr3r2",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_GIT_IDENTITY_CONTRACT: old branch/starting HEAD/base comparison is incompatible with later V40H/V40I branch; legacy source differences predate I",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v33xr3r2_causal_pgw_ac_residual.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "e414f40c6e3f6d33762273625ef50e70018687b4e764aeb142f37834ea942178",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "AssertionError: MESS unchanged\nassert False",
+      "baseline_message": "AssertionError: MESS unchanged\nassert False",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 23,
+      "failure_test_name": "tests.dayahead.test_v39f_day17_diagnostic::test_exact_job_cohort_conservation",
+      "failure_file": "tests\\dayahead\\test_v39f_day17_diagnostic.py",
+      "failure_namespace_version": "v39f",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39f_day17_diagnostic.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "024228028c527207a704cf61ed1ada4f4d7c681e7574026769aa179548794603",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39f_day17_rsp_temporal_grid_diagnostic\\\\V39F_DAY17_SLOT82_SHIFT_DECOMPOSITION.json'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39f_day17_rsp_temporal_grid_diagnostic\\\\V39F_DAY17_SLOT82_SHIFT_DECOMPOSITION.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 24,
+      "failure_test_name": "tests.dayahead.test_v39f_day17_diagnostic::test_undefined_shadow_is_not_faked_as_feasible_or_infeasible",
+      "failure_file": "tests\\dayahead\\test_v39f_day17_diagnostic.py",
+      "failure_namespace_version": "v39f",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39f_day17_diagnostic.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "024228028c527207a704cf61ed1ada4f4d7c681e7574026769aa179548794603",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39f_day17_rsp_temporal_grid_diagnostic\\\\V39F_DAY17_RSP_OBJECTIVE_AUDIT.json'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39f_day17_rsp_temporal_grid_diagnostic\\\\V39F_DAY17_RSP_OBJECTIVE_AUDIT.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 25,
+      "failure_test_name": "tests.dayahead.test_v39f_day17_diagnostic::test_month_audit_preserves_sign_and_population",
+      "failure_file": "tests\\dayahead\\test_v39f_day17_diagnostic.py",
+      "failure_namespace_version": "v39f",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39f_day17_diagnostic.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "024228028c527207a704cf61ed1ada4f4d7c681e7574026769aa179548794603",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39f_day17_rsp_temporal_grid_diagnostic\\\\V39F_MAY31_TEMPORAL_FLEXIBILITY_REALISM_AUDIT.csv'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39f_day17_rsp_temporal_grid_diagnostic\\\\V39F_MAY31_TEMPORAL_FLEXIBILITY_REALISM_AUDIT.csv'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 26,
+      "failure_test_name": "tests.dayahead.test_v39f_day17_diagnostic::test_frozen_rsp_voltage_reproduced_without_temporal_change",
+      "failure_file": "tests\\dayahead\\test_v39f_day17_diagnostic.py",
+      "failure_namespace_version": "v39f",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39f_day17_diagnostic.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "024228028c527207a704cf61ed1ada4f4d7c681e7574026769aa179548794603",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39f_day17_rsp_temporal_grid_diagnostic\\\\V39F_DAY17_FROZEN_RSP_SITE_ONLY_DIAGNOSTIC.json'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39f_day17_rsp_temporal_grid_diagnostic\\\\V39F_DAY17_FROZEN_RSP_SITE_ONLY_DIAGNOSTIC.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 27,
+      "failure_test_name": "tests.dayahead.test_v39g_shadow::test_frozen_grid_inequalities_match_original_algebra",
+      "failure_file": "tests\\dayahead\\test_v39g_shadow.py",
+      "failure_namespace_version": "v39g",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "dayahead/tools/v39g_shadow_grid.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tests/dayahead/test_v39g_shadow.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "e5934cf93455e8c5b4f895a6d054e534d6998ed3aa411ae1c5301149f662d2dd",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39g_day17_standby_temporal_repair_shadow\\\\V39G_FROZEN_GRID_COEFFICIENTS.npz'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39g_day17_standby_temporal_repair_shadow\\\\V39G_FROZEN_GRID_COEFFICIENTS.npz'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 28,
+      "failure_test_name": "tests.dayahead.test_v39g_shadow::test_production_sources_preserved",
+      "failure_file": "tests\\dayahead\\test_v39g_shadow.py",
+      "failure_namespace_version": "v39g",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "dayahead/tools/run_v39g_day17_shadow.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tests/dayahead/test_v39g_shadow.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "e5934cf93455e8c5b4f895a6d054e534d6998ed3aa411ae1c5301149f662d2dd",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39g_day17_standby_temporal_repair_shadow\\\\V39G_START_STATE.json'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39g_day17_standby_temporal_repair_shadow\\\\V39G_START_STATE.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 29,
+      "failure_test_name": "tests.dayahead.test_v39g_shadow::test_exact_C1_tables_are_monotone_for_box_elimination_proof",
+      "failure_file": "tests\\dayahead\\test_v39g_shadow.py",
+      "failure_namespace_version": "v39g",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39g_shadow.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "e5934cf93455e8c5b4f895a6d054e534d6998ed3aa411ae1c5301149f662d2dd",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39g_day17_standby_temporal_repair_shadow\\\\V39G_C1_INTEGER_TABLES.npz'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39g_day17_standby_temporal_repair_shadow\\\\V39G_C1_INTEGER_TABLES.npz'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 30,
+      "failure_test_name": "tests.dayahead.test_v39h_terminal_audit.TerminalAuditTests::test_gate_live_hold_and_unaffected",
+      "failure_file": "tests\\dayahead\\test_v39h_terminal_audit.py",
+      "failure_namespace_version": "v39h",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_LEGACY_STATE_FAILURE",
+      "failure_cause": "PREEXISTING_MUTABLE_V39H_GATE_FIXTURE: release mask differs from old expected mask; file already modified in V40I START_GIT_STATUS",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39h_terminal_audit.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "bd0f3426f199317b79cc1a53ffacd51f0fc14920cd1159a44883750af9107bd3",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "PRE_I_SOURCE_SAME_EXISTING_WORKSPACE_FIXTURES",
+      "independent_environment_or_missing_dependency": false,
+      "original_message": "AssertionError: False is not true",
+      "baseline_message": "AssertionError: False is not true",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 31,
+      "failure_test_name": "tests.dayahead.test_v39h_production_refreeze.SelectiveTests::test_cheap_readiness_is_31_without_v39i_gate",
+      "failure_file": "tests\\dayahead\\test_v39h_production_refreeze.py",
+      "failure_namespace_version": "v39h",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_LEGACY_STATE_FAILURE",
+      "failure_cause": "LEGACY_MIGRATION_COUNT_FIXTURE: expected 76 vs persisted 105; same H-source assertion",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39h_production_refreeze.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "04b310a9c1b46e103e1c09512d032bb972dfb73215460f9c11bb920c1f8efb30",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": false,
+      "original_message": "AssertionError: 105 != 76",
+      "baseline_message": "AssertionError: 105 != 76",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 32,
+      "failure_test_name": "tests.dayahead.test_v39h_production_refreeze.SelectiveTests::test_frozen_production_loader_consumes_repaired_schedule",
+      "failure_file": "tests\\dayahead\\test_v39h_production_refreeze.py",
+      "failure_namespace_version": "v39h",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_LEGACY_STATE_FAILURE",
+      "failure_cause": "LEGACY_REPAIRED_SCHEDULE_LOADER_MISMATCH: 8/96 occupancy slots differ by 1 GPU; H source with identical existing fixtures reproduces exactly",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39h_production_refreeze.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "04b310a9c1b46e103e1c09512d032bb972dfb73215460f9c11bb920c1f8efb30",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "PRE_I_SOURCE_SAME_EXISTING_WORKSPACE_FIXTURES",
+      "independent_environment_or_missing_dependency": false,
+      "original_message": "AssertionError: \nArrays are not equal\n\nMismatched elements: 8 / 96 (8.33%)\nMax absolute difference: 1.\nMax relative difference: 0.00163399\n x: array([624., 624., 624., 624., 624., 621., 621., 621., 613., 604., 624.,\n       624., 624., 624., 624., 624., 624., 624., 624., 624., 624., 623.,\n       623., 623., 623., 623., 623., 623., 623., 621., 620., 620., 623.,...\n y: array([624, 624, 624, 624, 624, 620, 620, 620, 612, 604, 624, 624, 624,\n       624, 624, 624, 624, 624, 624, 624, 624, 623, 623, 623, 623, 623,\n       623, 623, 623, 621, 621, 621, 624, 623, 617, 617, 623, 620, 624,...",
+      "baseline_message": "AssertionError: \nArrays are not equal\n\nMismatched elements: 8 / 96 (8.33%)\nMax absolute difference: 1.\nMax relative difference: 0.00163399\n x: array([624., 624., 624., 624., 624., 621., 621., 621., 613., 604., 624.,\n       624., 624., 624., 624., 624., 624., 624., 624., 624., 624., 623.,\n       623., 623., 623., 623., 623., 623., 623., 621., 620., 620., 623.,...\n y: array([624, 624, 624, 624, 624, 620, 620, 620, 612, 604, 624, 624, 624,\n       624, 624, 624, 624, 624, 624, 624, 624, 623, 623, 623, 623, 623,\n       623, 623, 623, 621, 621, 621, 624, 623, 617, 617, 623, 620, 624,...",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 33,
+      "failure_test_name": "tests.dayahead.test_v39h_production_refreeze.SelectiveTests::test_h_proofs_and_frozen_scientific_sources_untouched",
+      "failure_file": "tests\\dayahead\\test_v39h_production_refreeze.py",
+      "failure_namespace_version": "v39h",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "dayahead/v39c/freeze.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tests/dayahead/test_v39h_production_refreeze.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "04b310a9c1b46e103e1c09512d032bb972dfb73215460f9c11bb920c1f8efb30",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39h_13day_temporal_repair_migration_shadow\\\\V39H_MODEL_CONTRACT.md'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39h_production_refreeze_may_close\\\\PRODUCTION_CLOSE_START_STATE.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 34,
+      "failure_test_name": "tests.dayahead.test_v39h_production_refreeze.SelectiveTests::test_may01_05_exact_result_reuse_and_immutable_files",
+      "failure_file": "tests\\dayahead\\test_v39h_production_refreeze.py",
+      "failure_namespace_version": "v39h",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "dayahead/v39e/temporal_refreeze.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tests/dayahead/test_v39h_production_refreeze.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "04b310a9c1b46e103e1c09512d032bb972dfb73215460f9c11bb920c1f8efb30",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "PRE_I_SOURCE_SAME_EXISTING_WORKSPACE_FIXTURES",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [WinError 3] 지정된 경로를 찾을 수 없습니다: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39e_full_may_2025\\\\certificates\\\\V39E_MAY_DAY_CERTIFICATE_2025-05-01.json'",
+      "baseline_message": "FileNotFoundError: [WinError 3] 지정된 경로를 찾을 수 없습니다: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39e_full_may_2025\\\\certificates\\\\V39E_MAY_DAY_CERTIFICATE_2025-05-01.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 35,
+      "failure_test_name": "tests.dayahead.test_v39h_shadow::test_final_results_work_no_migration_and_optimality",
+      "failure_file": "tests\\dayahead\\test_v39h_shadow.py",
+      "failure_namespace_version": "v39h",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39h_shadow.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "06dd9c7c780a93246e8de9fb86cf32a3a1aee07418d1168cbaf4278080bd9c86",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "AssertionError: Final evidence missing: 2025-05-06\nassert False\n +  where False = exists()\n +    where exists = WindowsPath('C:/codex_mobileess_workspace/MobileESS_v40a_bounded_iterative_coopt/dayahead/artifacts/v39h_13day_temporal_repair_migration_shadow/days/2025-05-06/V39H_SHADOW_A_RESULT.json').exists",
+      "baseline_message": "AssertionError: Final evidence missing: 2025-05-06\nassert False\n +  where False = exists()\n +    where exists = WindowsPath('C:/codex_mobileess_workspace/v40i_prechange_tests/dayahead/artifacts/v39h_13day_temporal_repair_migration_shadow/days/2025-05-06/V39H_SHADOW_A_RESULT.json').exists",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 36,
+      "failure_test_name": "tests.dayahead.test_v39h_shadow::test_may06_full_option_IIS_is_not_fixed_only_voltage_screen",
+      "failure_file": "tests\\dayahead\\test_v39h_shadow.py",
+      "failure_namespace_version": "v39h",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "dayahead/tools/run_v39h_shadow.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tests/dayahead/test_v39h_shadow.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "06dd9c7c780a93246e8de9fb86cf32a3a1aee07418d1168cbaf4278080bd9c86",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39h_13day_temporal_repair_migration_shadow\\\\days\\\\2025-05-06\\\\V39H_SHADOW_A_IIS_SUMMARY.json'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39h_13day_temporal_repair_migration_shadow\\\\days\\\\2025-05-06\\\\V39H_SHADOW_A_IIS_SUMMARY.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 37,
+      "failure_test_name": "tests.dayahead.test_v39h_shadow::test_completed_grid_witness_reuse_is_bound_to_schedule",
+      "failure_file": "tests\\dayahead\\test_v39h_shadow.py",
+      "failure_namespace_version": "v39h",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39h_shadow.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "06dd9c7c780a93246e8de9fb86cf32a3a1aee07418d1168cbaf4278080bd9c86",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39h_13day_temporal_repair_migration_shadow\\\\V39H_PRE_ASSEMBLY_FORMULATION_SHA.json'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39h_13day_temporal_repair_migration_shadow\\\\V39H_PRE_ASSEMBLY_FORMULATION_SHA.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 38,
+      "failure_test_name": "tests.dayahead.test_v39h_shadow::test_existing_sources_and_old_artifacts_not_mutated",
+      "failure_file": "tests\\dayahead\\test_v39h_shadow.py",
+      "failure_namespace_version": "v39h",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "dayahead/tools/run_v39h_shadow.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tests/dayahead/test_v39h_shadow.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "06dd9c7c780a93246e8de9fb86cf32a3a1aee07418d1168cbaf4278080bd9c86",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39h_13day_temporal_repair_migration_shadow\\\\V39H_START_STATE.json'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39h_13day_temporal_repair_migration_shadow\\\\V39H_START_STATE.json'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 39,
+      "failure_test_name": "tests.dayahead.test_v39i_minmax.FinalArtifactTests::test_certified_primary_exact_integer_equality",
+      "failure_file": "tests\\dayahead\\test_v39i_minmax.py",
+      "failure_namespace_version": "v39i",
+      "failure_kind": "error",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39i_minmax.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "7115f5bd4a80e66545d011f0e627ec87171b4c966d1b6567488b930e36a18e65",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "baseline_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 40,
+      "failure_test_name": "tests.dayahead.test_v39i_minmax.FinalArtifactTests::test_dmax_global_exactness_and_definition",
+      "failure_file": "tests\\dayahead\\test_v39i_minmax.py",
+      "failure_namespace_version": "v39i",
+      "failure_kind": "error",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39i_minmax.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "7115f5bd4a80e66545d011f0e627ec87171b4c966d1b6567488b930e36a18e65",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "baseline_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 41,
+      "failure_test_name": "tests.dayahead.test_v39i_minmax.FinalArtifactTests::test_frozen_sources_authorities_and_earlier_artifacts_unchanged",
+      "failure_file": "tests\\dayahead\\test_v39i_minmax.py",
+      "failure_namespace_version": "v39i",
+      "failure_kind": "error",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39i_minmax.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "7115f5bd4a80e66545d011f0e627ec87171b4c966d1b6567488b930e36a18e65",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "baseline_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 42,
+      "failure_test_name": "tests.dayahead.test_v39i_minmax.FinalArtifactTests::test_full_job_gpu_runtime_and_service_preservation",
+      "failure_file": "tests\\dayahead\\test_v39i_minmax.py",
+      "failure_namespace_version": "v39i",
+      "failure_kind": "error",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39i_minmax.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "7115f5bd4a80e66545d011f0e627ec87171b4c966d1b6567488b930e36a18e65",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "baseline_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 43,
+      "failure_test_name": "tests.dayahead.test_v39i_minmax.FinalArtifactTests::test_grid_independent_certificate_and_zero_violations",
+      "failure_file": "tests\\dayahead\\test_v39i_minmax.py",
+      "failure_namespace_version": "v39i",
+      "failure_kind": "error",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39i_minmax.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "7115f5bd4a80e66545d011f0e627ec87171b4c966d1b6567488b930e36a18e65",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "baseline_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 44,
+      "failure_test_name": "tests.dayahead.test_v39i_minmax.FinalArtifactTests::test_max_attaining_job_audit_is_complete",
+      "failure_file": "tests\\dayahead\\test_v39i_minmax.py",
+      "failure_namespace_version": "v39i",
+      "failure_kind": "error",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39i_minmax.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "7115f5bd4a80e66545d011f0e627ec87171b4c966d1b6567488b930e36a18e65",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "baseline_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 45,
+      "failure_test_name": "tests.dayahead.test_v39i_minmax.FinalArtifactTests::test_no_migration_or_forbidden_calls",
+      "failure_file": "tests\\dayahead\\test_v39i_minmax.py",
+      "failure_namespace_version": "v39i",
+      "failure_kind": "error",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39i_minmax.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "7115f5bd4a80e66545d011f0e627ec87171b4c966d1b6567488b930e36a18e65",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "baseline_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 46,
+      "failure_test_name": "tests.dayahead.test_v39i_minmax.FinalArtifactTests::test_saved_integer_occupancy_and_c1_witness",
+      "failure_file": "tests\\dayahead\\test_v39i_minmax.py",
+      "failure_namespace_version": "v39i",
+      "failure_kind": "error",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39i_minmax.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "7115f5bd4a80e66545d011f0e627ec87171b4c966d1b6567488b930e36a18e65",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "baseline_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 47,
+      "failure_test_name": "tests.dayahead.test_v39i_minmax.FinalArtifactTests::test_time_domain_exact_partition_no_offdomain_authority",
+      "failure_file": "tests\\dayahead\\test_v39i_minmax.py",
+      "failure_namespace_version": "v39i",
+      "failure_kind": "error",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/dayahead/test_v39i_minmax.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "7115f5bd4a80e66545d011f0e627ec87171b4c966d1b6567488b930e36a18e65",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "baseline_message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v39i_may25_26_primary_optimal_minmax_delay\\\\days\\\\2025-05-25\\\\V39I_MINMAX_DELAY_SCHEDULE.parquet'\"",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 48,
+      "failure_test_name": "tests.test_melbourne_aidc_april2025_scale_packet::test_v4r1_and_all_v17_candidate_files_are_byte_preserved",
+      "failure_file": "tests\\test_melbourne_aidc_april2025_scale_packet.py",
+      "failure_namespace_version": "melbourne_aidc_april2025_scale_packet",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_FROZEN_ARTIFACT_FAILURE",
+      "failure_cause": "HISTORICAL_FROZEN_ARTIFACT_HASH_OR_SIZE_MISMATCH: inherited files do not match older version seal; reproduced before I code exists",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/test_melbourne_aidc_april2025_scale_packet.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "2b234e86a2cdd9e58f4628df9f00a5fc55b6ce095ad9b75bf4d93823e5059f46",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": false,
+      "original_message": "AssertionError: assert 38722 == 39526\n +  where 38722 = os.stat_result(st_mode=33206, st_ino=1407374885487118, st_dev=2426045862, st_nlink=1, st_uid=0, st_gid=0, st_size=38722, st_atime=1788603239, st_mtime=1788603239, st_ctime=1788603239).st_size\n +    where os.stat_result(st_mode=33206, st_ino=1407374885487118, st_dev=2426045862, st_nlink=1, st_uid=0, st_gid=0, st_size=38722, st_atime=1788603239, st_mtime=1788603239, st_ctime=1788603239) = stat()\n +      where stat = WindowsPath('C:/codex_mobileess_workspace/MobileESS_v40a_bounded_iterative_coopt/dayahead/artifacts/v17_candidate/V17_AIDC_FLEXIBLE_SCALE_ATTRITION_FORENSIC.json').stat",
+      "baseline_message": "AssertionError: assert 38722 == 39526\n +  where 38722 = os.stat_result(st_mode=33206, st_ino=844424932170142, st_dev=2426045862, st_nlink=1, st_uid=0, st_gid=0, st_size=38722, st_atime=1788682819, st_mtime=1788682819, st_ctime=1788682819).st_size\n +    where os.stat_result(st_mode=33206, st_ino=844424932170142, st_dev=2426045862, st_nlink=1, st_uid=0, st_gid=0, st_size=38722, st_atime=1788682819, st_mtime=1788682819, st_ctime=1788682819) = stat()\n +      where stat = WindowsPath('C:/codex_mobileess_workspace/v40i_prechange_tests/dayahead/artifacts/v17_candidate/V17_AIDC_FLEXIBLE_SCALE_ATTRITION_FORENSIC.json').stat",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 49,
+      "failure_test_name": "tests.test_pfr_mess_energy_recovery::test_joint_projection_restores_feasibility_across_multiple_trust_regions",
+      "failure_file": "tests\\test_pfr_mess_energy_recovery.py",
+      "failure_namespace_version": "pfr",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_LEGACY_TEST_FAILURE",
+      "failure_cause": "LEGACY_SYNTHETIC_QCP_ASSERTION: mock exact verifier rejects projected control; same assertion with H source and current solver environment. Numerical/library root cause not further established.",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/test_pfr_mess_energy_recovery.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "9bcb7afd9e12546d5de3dac8bea28438339b1bfa366b162aca841bf304c971a0",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": false,
+      "original_message": "AssertionError: assert False\n +  where False = ExactAcResult(passed=False, status='VIOLATION', fresh_instance=True, exact_three_phase_authority=True, minimum_voltage...ltage_pu=1.04, maximum_line_loading_fraction=1.3, maximum_transformer_loading_fraction=0.8, final_ac_violation_count=1).passed",
+      "baseline_message": "AssertionError: assert False\n +  where False = ExactAcResult(passed=False, status='VIOLATION', fresh_instance=True, exact_three_phase_authority=True, minimum_voltage...ltage_pu=1.04, maximum_line_loading_fraction=1.3, maximum_transformer_loading_fraction=0.8, final_ac_violation_count=1).passed",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 50,
+      "failure_test_name": "tests.test_shared_exact_source_preparation::test_exact_sources_are_prepared_once_and_reused_by_day_workers",
+      "failure_file": "tests\\test_shared_exact_source_preparation.py",
+      "failure_namespace_version": "shared",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "PLATFORM_UNSUPPORTED: Windows environment lacks POSIX locking required by old source-cache test",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "pfr/tools/run_pfr_matrix.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tests/test_shared_exact_source_preparation.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "9638f44162e4f6c12790d28e50757bb47be6fd342af110b7eddf11188183185c",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "RuntimeError: shared exact-source preparation requires POSIX locking",
+      "baseline_message": "RuntimeError: shared exact-source preparation requires POSIX locking",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 51,
+      "failure_test_name": "tests.test_shared_exact_source_preparation::test_exact_source_cache_is_invalidated_by_source_identity",
+      "failure_file": "tests\\test_shared_exact_source_preparation.py",
+      "failure_namespace_version": "shared",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "PLATFORM_UNSUPPORTED: Windows environment lacks POSIX locking required by old source-cache test",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "pfr/tools/run_pfr_matrix.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tests/test_shared_exact_source_preparation.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "9638f44162e4f6c12790d28e50757bb47be6fd342af110b7eddf11188183185c",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "RuntimeError: shared exact-source preparation requires POSIX locking",
+      "baseline_message": "RuntimeError: shared exact-source preparation requires POSIX locking",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 52,
+      "failure_test_name": "tests.test_v16_3_correction::test_current_cache_manifest_covers_each_reproducible_npz",
+      "failure_file": "tests\\test_v16_3_correction.py",
+      "failure_namespace_version": "v16",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/test_v16_3_correction.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "5cd01ce84ea4690978e12251a970f2410fb4f5e2357e906e10227e1e85f1b459",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [WinError 3] 지정된 경로를 찾을 수 없습니다: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v16_3_candidate\\\\data\\\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-04-02.npz'",
+      "baseline_message": "FileNotFoundError: [WinError 3] 지정된 경로를 찾을 수 없습니다: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v16_3_candidate\\\\data\\\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-04-02.npz'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 53,
+      "failure_test_name": "tests.test_v16_3_final_artifacts::test_all_final_days_are_preserved",
+      "failure_file": "tests\\test_v16_3_final_artifacts.py",
+      "failure_namespace_version": "v16",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/test_v16_3_final_artifacts.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "736d2b1ad07d5f2afd0737b55be2f76f5696b4c7723a75263ddd21f549e2014d",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "assert 0 == 54\n +  where 0 = len([])",
+      "baseline_message": "assert 0 == 54\n +  where 0 = len([])",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 54,
+      "failure_test_name": "tests.test_v16_3_final_artifacts::test_case_status_and_dual_ac_counts_are_exact",
+      "failure_file": "tests\\test_v16_3_final_artifacts.py",
+      "failure_namespace_version": "v16",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/test_v16_3_final_artifacts.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "736d2b1ad07d5f2afd0737b55be2f76f5696b4c7723a75263ddd21f549e2014d",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "assert (0 == 21)",
+      "baseline_message": "assert (0 == 21)",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 55,
+      "failure_test_name": "tests.test_v16_3_final_artifacts::test_independent_planning_and_trust_audit_passes",
+      "failure_file": "tests\\test_v16_3_final_artifacts.py",
+      "failure_namespace_version": "v16",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/test_v16_3_final_artifacts.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "736d2b1ad07d5f2afd0737b55be2f76f5696b4c7723a75263ddd21f549e2014d",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "ValueError: max() arg is an empty sequence",
+      "baseline_message": "ValueError: max() arg is an empty sequence",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 56,
+      "failure_test_name": "tests.test_v16_3_final_artifacts::test_raw_schedule_hashes_and_tracked_artifact_hashes_match",
+      "failure_file": "tests\\test_v16_3_final_artifacts.py",
+      "failure_namespace_version": "v16",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/test_v16_3_final_artifacts.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "736d2b1ad07d5f2afd0737b55be2f76f5696b4c7723a75263ddd21f549e2014d",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "StopIteration",
+      "baseline_message": "StopIteration",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 57,
+      "failure_test_name": "tests.test_v17_external_h100_identifiability::test_prechange_authority_v1_v2_rcmqt_v5_hj_and_restoration_are_byte_identical",
+      "failure_file": "tests\\test_v17_external_h100_identifiability.py",
+      "failure_namespace_version": "v17",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/test_v17_external_h100_identifiability.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "0512a903ae6ef126895927814faad6ce0adb33f14da5e59e3fd2be8a8e8dc508",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "AssertionError: dayahead/artifacts/v17_candidate/ac_cache/data/D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-04-02.npz\nassert False\n +  where False = is_file()\n +    where is_file = WindowsPath('C:/codex_mobileess_workspace/MobileESS_v40a_bounded_iterative_coopt/dayahead/artifacts/v17_candidate/ac_cache/data/D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-04-02.npz').is_file",
+      "baseline_message": "AssertionError: dayahead/artifacts/v17_candidate/ac_cache/data/D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-04-02.npz\nassert False\n +  where False = is_file()\n +    where is_file = WindowsPath('C:/codex_mobileess_workspace/v40i_prechange_tests/dayahead/artifacts/v17_candidate/ac_cache/data/D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-04-02.npz').is_file",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 58,
+      "failure_test_name": "tests.test_v17_external_h100_identifiability::test_final_review_is_fail_closed_v1_active_and_hash_complete",
+      "failure_file": "tests\\test_v17_external_h100_identifiability.py",
+      "failure_namespace_version": "v17",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_FROZEN_ARTIFACT_FAILURE",
+      "failure_cause": "HISTORICAL_FROZEN_ARTIFACT_HASH_OR_SIZE_MISMATCH: inherited files do not match older version seal; reproduced before I code exists",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/test_v17_external_h100_identifiability.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "0512a903ae6ef126895927814faad6ce0adb33f14da5e59e3fd2be8a8e8dc508",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": false,
+      "original_message": "AssertionError: assert 'f41e38664584...feccf4ed189e4' == '2436416fb24b...ac659bcd594f7'\n  \n  - 2436416fb24b5c2e21c18e9f84e9ede09776714a6097074c133ac659bcd594f7\n  + f41e38664584c99a8e61d580236fce0641fc7d09f08c8ddf94afeccf4ed189e4",
+      "baseline_message": "AssertionError: assert 'f41e38664584...feccf4ed189e4' == '2436416fb24b...ac659bcd594f7'\n  \n  - 2436416fb24b5c2e21c18e9f84e9ede09776714a6097074c133ac659bcd594f7\n  + f41e38664584c99a8e61d580236fce0641fc7d09f08c8ddf94afeccf4ed189e4",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 59,
+      "failure_test_name": "tests.test_v17_external_share_admissibility::test_archived_sources_and_parent_evidence_match_frozen_hashes",
+      "failure_file": "tests\\test_v17_external_share_admissibility.py",
+      "failure_namespace_version": "v17",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_FROZEN_ARTIFACT_FAILURE",
+      "failure_cause": "HISTORICAL_FROZEN_ARTIFACT_HASH_OR_SIZE_MISMATCH: inherited files do not match older version seal; reproduced before I code exists",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "dayahead/v17_external_share_admissibility.py",
+          "same_baseline_source_bytes": true
+        },
+        {
+          "path": "tests/test_v17_external_share_admissibility.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "8607daada577b5d4bd96e1cc93b0ec3610966f65c2514cdea258b6401323d76f",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": false,
+      "original_message": "RuntimeError: archive hash mismatch for dayahead/artifacts/v17_candidate/V17_AIDC_FLEXIBLE_SHARE_AUTHORITY_PRECHECK.json: 7e7c58e8c3309fa4c1c82acf21c1160f98357b99a3d11e4169ea81e3f59f9302 != 2e3797d20b38ed9a97280b6a51446bf28a4b879b49290f25a003e85063af3232",
+      "baseline_message": "RuntimeError: archive hash mismatch for dayahead/artifacts/v17_candidate/V17_AIDC_FLEXIBLE_SHARE_AUTHORITY_PRECHECK.json: 7e7c58e8c3309fa4c1c82acf21c1160f98357b99a3d11e4169ea81e3f59f9302 != 2e3797d20b38ed9a97280b6a51446bf28a4b879b49290f25a003e85063af3232",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 60,
+      "failure_test_name": "tests.test_v17_v3r2_eagle_forensic::test_active_v1_hj_ac_and_rejected_extensions_remain_byte_identical",
+      "failure_file": "tests\\test_v17_v3r2_eagle_forensic.py",
+      "failure_namespace_version": "v17",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_ARTIFACT_OR_SOURCE_MISSING: see exact original/baseline failure message; current workspace lacks required historical cache/source/result",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/test_v17_v3r2_eagle_forensic.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "5629bb236375a565f7c214a4064e8114459d7884a85d91b46313092fc0acb1be",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v17_candidate\\\\ac_cache_v5\\\\data\\\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-04-02.npz'",
+      "baseline_message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\codex_mobileess_workspace\\\\v40i_prechange_tests\\\\dayahead\\\\artifacts\\\\v17_candidate\\\\ac_cache_v5\\\\data\\\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-04-02.npz'",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 61,
+      "failure_test_name": "tests.test_v17_v4_whole_gpu_gres::test_frozen_prechange_records_remain_byte_identical",
+      "failure_file": "tests\\test_v17_v4_whole_gpu_gres.py",
+      "failure_namespace_version": "v17",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_FROZEN_ARTIFACT_FAILURE",
+      "failure_cause": "HISTORICAL_FROZEN_ARTIFACT_HASH_OR_SIZE_MISMATCH: inherited files do not match older version seal; reproduced before I code exists",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/test_v17_v4_whole_gpu_gres.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "adf0d80cfcd0160aa30475ec021599525c677cdbd7b305813481e9f973439d6e",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": false,
+      "original_message": "AssertionError: dayahead/artifacts/v17_candidate/V17_AIDC_FLEXIBLE_SCALE_ATTRITION_FORENSIC.json\nassert 38722 == 39526\n +  where 38722 = os.stat_result(st_mode=33206, st_ino=1407374885487118, st_dev=2426045862, st_nlink=1, st_uid=0, st_gid=0, st_size=38722, st_atime=1788603239, st_mtime=1788603239, st_ctime=1788603239).st_size\n +    where os.stat_result(st_mode=33206, st_ino=1407374885487118, st_dev=2426045862, st_nlink=1, st_uid=0, st_gid=0, st_size=38722, st_atime=1788603239, st_mtime=1788603239, st_ctime=1788603239) = stat()\n +      where stat = WindowsPath('C:/codex_mobileess_workspace/MobileESS_v40a_bounded_iterative_coopt/dayahead/artifacts/v17_candidate/V17_AIDC_FLEXIBLE_SCALE_ATTRITION_FORENSIC.json').stat",
+      "baseline_message": "AssertionError: dayahead/artifacts/v17_candidate/V17_AIDC_FLEXIBLE_SCALE_ATTRITION_FORENSIC.json\nassert 38722 == 39526\n +  where 38722 = os.stat_result(st_mode=33206, st_ino=844424932170142, st_dev=2426045862, st_nlink=1, st_uid=0, st_gid=0, st_size=38722, st_atime=1788682819, st_mtime=1788682819, st_ctime=1788682819).st_size\n +    where os.stat_result(st_mode=33206, st_ino=844424932170142, st_dev=2426045862, st_nlink=1, st_uid=0, st_gid=0, st_size=38722, st_atime=1788682819, st_mtime=1788682819, st_ctime=1788682819) = stat()\n +      where stat = WindowsPath('C:/codex_mobileess_workspace/v40i_prechange_tests/dayahead/artifacts/v17_candidate/V17_AIDC_FLEXIBLE_SCALE_ATTRITION_FORENSIC.json').stat",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 62,
+      "failure_test_name": "tests.test_v22s_scale_authority.V22SAuthorityTests::test_ml_code_changed_files_zero",
+      "failure_file": "tests\\test_v22s_scale_authority.py",
+      "failure_namespace_version": "v22s",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_TEST_ENVIRONMENT_FAILURE",
+      "failure_cause": "HISTORICAL_GIT_IDENTITY_CONTRACT: old branch/starting HEAD/base comparison is incompatible with later V40H/V40I branch; legacy source differences predate I",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/test_v22s_scale_authority.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "337f0379c64ff13adae3d13d72de7a3f33a148750628abd58690b67bebb37b3d",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": true,
+      "original_message": "AssertionError: '' != 'dayahead/ml/beacon_flex/__init__.py\\ndaya[4434 chars]c.py'\nDiff is 4593 characters long. Set self.maxDiff to None to see it.",
+      "baseline_message": "AssertionError: '' != 'dayahead/ml/beacon_flex/__init__.py\\ndaya[4434 chars]c.py'\nDiff is 4593 characters long. Set self.maxDiff to None to see it.",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    },
+    {
+      "index": 63,
+      "failure_test_name": "tests.test_v22s_scale_authority.V22SAuthorityTests::test_preservation_manifest_matches_all_protected_files",
+      "failure_file": "tests\\test_v22s_scale_authority.py",
+      "failure_namespace_version": "v22s",
+      "failure_kind": "failure",
+      "classification": "UNRELATED_PREEXISTING_FROZEN_ARTIFACT_FAILURE",
+      "failure_cause": "HISTORICAL_FROZEN_ARTIFACT_HASH_OR_SIZE_MISMATCH: inherited files do not match older version seal; reproduced before I code exists",
+      "dependency_on_V40I_source_changes": false,
+      "dependency_evidence": [
+        {
+          "path": "tests/test_v22s_scale_authority.py",
+          "same_baseline_source_bytes": true
+        }
+      ],
+      "test_source_identical_to_pre_I": true,
+      "test_source_SHA256": "337f0379c64ff13adae3d13d72de7a3f33a148750628abd58690b67bebb37b3d",
+      "pre_existing_failure_reproduced_without_V40I_source": true,
+      "baseline_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "baseline_mode": "ISOLATED_PRE_I_DETACHED_CHECKOUT",
+      "independent_environment_or_missing_dependency": false,
+      "original_message": "AssertionError: False is not true : dayahead/artifacts/v17_candidate/ac_cache/data/D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-04-02.npz",
+      "baseline_message": "AssertionError: False is not true : dayahead/artifacts/v17_candidate/ac_cache/data/D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-04-02.npz",
+      "branch_test_note": null,
+      "forensic_source_changes_to_force_pass": false
+    }
+  ]
+}

@@ -17,7 +17,7 @@ def fixture(tmp_path, monkeypatch):
         source_input_freeze=file_record(frozen), date='2025-05-01')
     def producer(pre):
         assert read(run / 'PRE_GENERATION_IDENTITY.json')['input_identity'] == identity
-        assert read(run / 'GENERATION_STARTED.json')['pre_generation_identity_completed_before_start']
+        assert read(run / 'RUN_STARTED.json')['pre_generation_identity_completed_before_start']
         outputs = {}
         for name in e.OUTPUT_NAMES:
             path = run / name; path.write_text('fresh'); outputs[name] = path
@@ -88,3 +88,29 @@ def test_missing_certificate_blocks_31_day_aggregate(tmp_path):
     result = e.aggregate(tmp_path)
     assert result['CERTIFIED_DAYS'] == 0 and result['certificate_status'] == 'FAIL'
     assert len(result['days']) == 31
+
+
+def test_exactly_one_missing_may_certificate_prevents_pass(tmp_path,monkeypatch):
+    pre,meta,producer,_=fixture(tmp_path,monkeypatch)
+    cert=e.certify_run(tmp_path/'fixture_certificate.json',lambda:pre,producer,metadata=meta)
+    for day in e.DAYS[:-1]:
+        write_json(tmp_path/e.ROOT/'electrical_generation_certificates'/(day+'.json'),{**cert,'date':day})
+    result=e.aggregate(tmp_path,verify=False)
+    assert result['CERTIFIED_DAYS']==30 and result['MISSING_DAYS']==1 and result['certificate_status']=='FAIL'
+
+
+def test_post_identity_payload_change_fails_even_if_files_unchanged(tmp_path,monkeypatch):
+    pre,meta,producer,_=fixture(tmp_path,monkeypatch);calls=0
+    def builder():
+        nonlocal calls
+        calls+=1
+        return pre if calls==1 else bind('CHANGED_PARAMETERS',pre['identity']['inputs'],['source'])
+    with pytest.raises(IntegrityError,match='PRE_POST_INPUT_MISMATCH'):
+        e.certify_run(tmp_path/'certificate.json',builder,producer,metadata=meta)
+
+
+def test_windows_generation_namespace_includes_atomic_path_budget():
+    repo=Path('C:/codex_mobileess_workspace/MobileESS_v40a_bounded_iterative_coopt')
+    e.validate_windows_output_path(repo/e.OUTPUT_ROOT/'2025-05-31'/'20260906T123456_01234567')
+    with pytest.raises(IntegrityError,match='PATH_TOO_LONG'):
+        e.validate_windows_output_path(repo/e.EPOCH_ROOT/'generated'/'2025-05-31'/'20260906T123456_01234567')
