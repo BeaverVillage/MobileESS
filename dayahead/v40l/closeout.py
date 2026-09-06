@@ -2,6 +2,7 @@ from .common import *
 from .protocol import IDS,REGISTRY
 
 REQUIRED=['V40L_START_STATE.json','V40L_TAIL_ESTIMAND_CONTRACT.json','V40L_TEMPORAL_SPLIT_CONTRACT.json','V40L_TAIL_CANDIDATE_REGISTRY.json','V40L_K0_FREEZE_VERIFICATION.json','V40L_OOF_RESIDUAL_AUTHORITY.json','V40L_CENSORED_JOB_CENSUS.json','V40L_T1_RESIDUAL_QUANTILE_REPORT.json','V40L_T2_DIRECT_QUANTILE_REPORT.json','V40L_T3_CQR_REPORT.json','V40L_T4_HIERARCHICAL_CONFORMAL_REPORT.json','V40L_T5_AFT_REPORT.json','V40L_T6_HAZARD_REPORT.json','V40L_T7_EXCEEDANCE_REPORT.json','V40L_T8_HYBRID_REPORT.json','V40L_TAIL_SELECTION_COMPARISON.json','V40L_GPU_WEIGHTED_SAFETY_REPORT.json','V40L_TAIL_METHOD_FREEZE.json','V40L_FINAL_SHADOW_REPORT.json','V40L_PROTECTED_SCOPE_DIFF.json','V40L_TEST_REPORT.json','V40L_FINAL_REVIEW.md']
+REQUIRED+=['V40L_POST_SELECTION_TAIL_DIAGNOSTIC.json','V40L_T7_FAILURE_DECOMPOSITION.json','V40L_TAIL_MISS_COHORT.csv','V40L_TAIL_FAILURE_CLASSIFICATION.md']
 def main():
     require_prereg();verify_k0()
     start=read('V40L_START_STATE.json');changed=[]
@@ -41,6 +42,11 @@ def main():
         m=r['metrics'];o=m['overall']['Q90']
         fmt=lambda name:f"{m[name]['Q90']['coverage']:.3%}" if m[name]['Q90']['N'] else 'N=0'
         lines.append(f"| {cid} | {statuses[cid]} | {fmt('overall')} | {fmt('H100')} | {fmt('H100-standby')} | {fmt('STRONG_SUPPORT H100-standby')} | {o['GPU_weighted_coverage']:.3%} | {o['overreserved_GPU_hours']:.3f} | {o['active_miss_GPU_5min_slots']:,.0f} |")
+    if 'T7' in c['candidates'] and 'metrics' in c['candidates']['T7']:
+        t=c['candidates']['T7'];o=t['metrics']['overall']['Q90'];hs=t['metrics']['STRONG_SUPPORT H100-standby']['Q90']
+        lines+=['',f"T7은 overall {o['coverage']:.3%}, H100 {t['metrics']['H100']['Q90']['coverage']:.3%}, 전체 H100-standby {t['metrics']['H100-standby']['Q90']['coverage']:.3%}, GPU-weighted {o['GPU_weighted_coverage']:.3%}다. 그러나 사전등록한 strong-support H100-standby 평가 표본은 N={hs['N']}로 최소 100에 못 미친다. 해당 gate는 INSUFFICIENT_SUPPORT이며 생략할 수 없어 winner NONE이다. 이는 T7의 aggregate coverage 실패라는 뜻이 아니다.",
+          f"T7 overall day-block 95% CI={o['UTC_day_block_bootstrap95_coverage']}; GPU-weighted CI={o['UTC_day_block_bootstrap95_GPU_coverage']}. Q95 overall coverage={t['metrics']['overall']['Q95']['coverage']:.3%}는 별도 진단이다.",
+          f"Baseline→winner active-miss/overreservation은 winner 부재로 비교값 없음(null)이다. 참고용 baseline→T7(비선정 후보)은 active miss {c['candidates']['T0']['metrics']['overall']['Q90']['active_miss_GPU_5min_slots']:,.0f}→{o['active_miss_GPU_5min_slots']:,.0f} GPU 5분 슬롯, overreserved {c['candidates']['T0']['metrics']['overall']['Q90']['overreserved_GPU_hours']:,.3f}→{o['overreserved_GPU_hours']:,.3f} GPUh다. T7을 winner나 배포 방법으로 재해석하지 않는다."]
     lines+=['',f"Calibration: {extractions.get('calibration',{}).get('rows')}행, dates {extractions.get('calibration',{}).get('dates')}. Selection: {c['rows']}행, dates {extractions.get('selection',{}).get('dates')}.",'',
       '선택 순서는 native Q90 coverage gates 이후 overreservation → mean safe-duration inflation → active miss → registry order다. 일별 block bootstrap CI는 comparison JSON에 공개했으며 iid/기간 밖 보장은 주장하지 않는다. Q95는 extreme-risk diagnostic이며 Q90 실패를 덮지 않는다.','',
       f"Shadow: {sh['status']}; 실제 row payload opened={sh['opened']}, read rows={sh['runtime_status_rows_read']}. Winner/q/model/support threshold를 변경하지 않았다.",'',
@@ -50,6 +56,11 @@ def main():
       'May scientific counters 전부 0. 초기 path/code discovery 및 footer metadata 접근은 NONZERO로 분리 공개했다. CPU only; GPU scientific fit 0.','',
       'PF=0.95, Q control NO, 72 authority blockers, 31-day electrical generation HOLD, B0–B3 NO, FULL_MAY NO. Production model/q와 외부 P/Q authority는 바꾸지 않았다.','',
       'XGBoost API 확인: https://xgboost.readthedocs.io/en/release_3.2.0/parameter.html . 실제 objective 가용성은 설치된 3.2.0 CPU synthetic probe로 검증했다.']
+    diagnostic=read('V40L_POST_SELECTION_TAIL_DIAGNOSTIC.json');cohort=diagnostic['T7_undercovered_cohort']
+    lines+=['',f"사용자 요청 post-selection 진단: **{diagnostic['classification']}**. 기존 classification/winner/shadow lock은 그대로다. 새 fit/runtime prediction/threshold/support-rule/conformal retuning은 0회이며, selection 당시 동결된 support lookup을 저장된 selection rows에 조인했다.",
+      f"T7 miss {cohort['N']}개 job의 GPU-underprediction은 {cohort['GPU_underprediction_seconds']:,.3f}초다. Miss jobs 기준 top 1%/5%/10% ({'/'.join(str(cohort['pareto']['miss_jobs'][p]['top_job_count_in_universe']) for p in ['0.01','0.05','0.1'])}개)가 전체 miss mass의 {' / '.join(format(cohort['pareto']['miss_jobs'][p]['share_of_total_GPU_underprediction_seconds'],'.3%') for p in ['0.01','0.05','0.1'])}를 설명한다.",
+      'T0–T8 모든 variant의 exact metric/gate 표와 threshold, T7 실패 분해, raw-vs-calibrated delta, Pareto 분모별 표는 V40L_POST_SELECTION_TAIL_DIAGNOSTIC.json 및 V40L_TAIL_FAILURE_CLASSIFICATION.md에 있다. 324개 miss job의 상세 행은 V40L_TAIL_MISS_COHORT.csv에 저장했다.',
+      '이 진단에서 standby는 기존 동결된 QoS==standby 정의다. Partition에 stdby가 포함돼도 QoS가 normal인 경우는 별도 partition/QoS 조합으로 공개했다. 정의를 변경하지 않았다. T5의 후속 진단 표기는 CENSOR_AUTHORITY_INSUFFICIENT다.']
     (OUT/'V40L_FINAL_REVIEW.md').write_bytes(('\n'.join(lines)+'\n').encode('utf-8'))
     assert all((OUT/n).exists() for n in REQUIRED)
     write('V40L_ARTIFACT_MANIFEST.json',{'classification':classification,'required_artifacts':{n:sha(OUT/n) for n in REQUIRED},'final_commit_receipt':'Generated after final research commit, outside referenced commit to avoid self-referential SHA'})

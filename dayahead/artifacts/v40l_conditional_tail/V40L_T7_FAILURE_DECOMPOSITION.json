@@ -1,0 +1,113 @@
+{
+  "GPU_miss_mass_not_GPU_coverage_failure": "Remaining miss mass concentration is a diagnostic; T7 GPU-weighted job coverage passes >=90%",
+  "GPU_weighted_coverage_failure": false,
+  "H100_failure": false,
+  "Q95_not_used_to_rescue_Q90": true,
+  "Q95_overall_diagnostic": 0.9467723669309174,
+  "T7_overall_Q90_coverage": 0.9082672706681767,
+  "abstention_failure": false,
+  "all_H100_standby_reference_failure": false,
+  "classification": "V40L_TAIL_MODEL_INSUFFICIENT",
+  "conservatism_failure": "NOT_A_PREREGISTERED_ABSOLUTE_GATE; efficiency comparison not reached because no eligible candidate",
+  "failed_mandatory_gates": [
+    "support_sufficient_H100_standby"
+  ],
+  "gates": {
+    "GPU_underprediction_seconds": {
+      "N": null,
+      "hard_gate": false,
+      "status": "NOT_A_HARD_GATE",
+      "threshold": "diagnostic only; no absolute threshold",
+      "value": 14960009.13748151
+    },
+    "GPU_weighted_coverage": {
+      "N": null,
+      "hard_gate": true,
+      "status": "PASS",
+      "threshold": ">= 0.90",
+      "value": 0.9138530287984111
+    },
+    "H100": {
+      "N": 3220,
+      "hard_gate": true,
+      "status": "PASS",
+      "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+      "value": 0.9037267080745341
+    },
+    "H100_standby_all_rows": {
+      "N": 1317,
+      "hard_gate": false,
+      "status": "PASS",
+      "threshold": "reference 0.90; diagnostic only, not an additional preregistered hard gate",
+      "value": 0.9126803340926348
+    },
+    "Q90_Q95_monotonicity": {
+      "N": null,
+      "hard_gate": true,
+      "status": "PASS",
+      "threshold": "post-repair crossing count == 0 on served rows",
+      "value": 0
+    },
+    "abstention": {
+      "N": null,
+      "hard_gate": true,
+      "status": "PASS",
+      "threshold": "== 0",
+      "value": 0
+    },
+    "active_miss": {
+      "N": null,
+      "hard_gate": false,
+      "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+      "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+      "value": 49898.0
+    },
+    "finite_predictions": {
+      "N": null,
+      "hard_gate": true,
+      "status": "PASS",
+      "threshold": "all predictions finite; no abstentions",
+      "value": true
+    },
+    "inflation": {
+      "N": null,
+      "hard_gate": false,
+      "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+      "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+      "value": 31814.358868700576
+    },
+    "overall": {
+      "N": 3532,
+      "hard_gate": true,
+      "status": "PASS",
+      "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+      "value": 0.9082672706681767
+    },
+    "overreservation": {
+      "N": null,
+      "hard_gate": false,
+      "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+      "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+      "value": 61659.653843320135
+    },
+    "safe_ge_K0": {
+      "N": null,
+      "hard_gate": true,
+      "status": "PASS",
+      "threshold": "served-row violation count == 0",
+      "value": 0
+    },
+    "support_sufficient_H100_standby": {
+      "N": 4,
+      "hard_gate": true,
+      "status": "INSUFFICIENT_SUPPORT",
+      "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+      "value": 1.0
+    }
+  },
+  "overreservation_vs_T0_ratio": 4.577710425374922,
+  "selection_unchanged": true,
+  "shadow": "SEALED",
+  "support_sufficient_H100_standby_failure": "INSUFFICIENT_SUPPORT: N=4 <100; observed 4/4 coverage does not validate this gate",
+  "winner": null
+}

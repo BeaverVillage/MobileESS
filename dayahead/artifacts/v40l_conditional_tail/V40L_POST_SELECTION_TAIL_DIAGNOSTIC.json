@@ -1,0 +1,2557 @@
+{
+  "T5_censoring": {
+    "May_completion_reads": 0,
+    "V40L_T5_status_unchanged": "NOT_EVALUATED_CAUSAL_CENSOR_AUTHORITY_UNAVAILABLE",
+    "XGBoost_AFT_dependency": "AVAILABLE_SYNTHETIC_CPU_PROBE_PASS",
+    "available": "Static retrospective April Parquet and aggregate footer bounds; these do not identify individual cutoff-alive jobs without forbidden completion/status value reads.",
+    "censored_job_count": null,
+    "censored_rows_imputed": 0,
+    "missing": [
+      "cutoff-timestamp job alive/status snapshot",
+      "job identity and start_time known by cutoff for still-active jobs",
+      "observation timestamp supporting lower=cutoff-start for each censored job without future completion lookup"
+    ],
+    "no_undeclared_authority_search_or_payload_open": true,
+    "preMay_alive_state_authority": "NOT_AVAILABLE_IN_REGISTERED_INPUTS",
+    "status": "CENSOR_AUTHORITY_INSUFFICIENT"
+  },
+  "T7_failure_decomposition": {
+    "GPU_miss_mass_not_GPU_coverage_failure": "Remaining miss mass concentration is a diagnostic; T7 GPU-weighted job coverage passes >=90%",
+    "GPU_weighted_coverage_failure": false,
+    "H100_failure": false,
+    "Q95_not_used_to_rescue_Q90": true,
+    "Q95_overall_diagnostic": 0.9467723669309174,
+    "T7_overall_Q90_coverage": 0.9082672706681767,
+    "abstention_failure": false,
+    "all_H100_standby_reference_failure": false,
+    "classification": "V40L_TAIL_MODEL_INSUFFICIENT",
+    "conservatism_failure": "NOT_A_PREREGISTERED_ABSOLUTE_GATE; efficiency comparison not reached because no eligible candidate",
+    "failed_mandatory_gates": [
+      "support_sufficient_H100_standby"
+    ],
+    "gates": {
+      "GPU_underprediction_seconds": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_A_HARD_GATE",
+        "threshold": "diagnostic only; no absolute threshold",
+        "value": 14960009.13748151
+      },
+      "GPU_weighted_coverage": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": ">= 0.90",
+        "value": 0.9138530287984111
+      },
+      "H100": {
+        "N": 3220,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.9037267080745341
+      },
+      "H100_standby_all_rows": {
+        "N": 1317,
+        "hard_gate": false,
+        "status": "PASS",
+        "threshold": "reference 0.90; diagnostic only, not an additional preregistered hard gate",
+        "value": 0.9126803340926348
+      },
+      "Q90_Q95_monotonicity": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "post-repair crossing count == 0 on served rows",
+        "value": 0
+      },
+      "abstention": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "== 0",
+        "value": 0
+      },
+      "active_miss": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 49898.0
+      },
+      "finite_predictions": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "all predictions finite; no abstentions",
+        "value": true
+      },
+      "inflation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 31814.358868700576
+      },
+      "overall": {
+        "N": 3532,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.9082672706681767
+      },
+      "overreservation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 61659.653843320135
+      },
+      "safe_ge_K0": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "served-row violation count == 0",
+        "value": 0
+      },
+      "support_sufficient_H100_standby": {
+        "N": 4,
+        "hard_gate": true,
+        "status": "INSUFFICIENT_SUPPORT",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 1.0
+      }
+    },
+    "overreservation_vs_T0_ratio": 4.577710425374922,
+    "selection_unchanged": true,
+    "shadow": "SEALED",
+    "support_sufficient_H100_standby_failure": "INSUFFICIENT_SUPPORT: N=4 <100; observed 4/4 coverage does not validate this gate",
+    "winner": null
+  },
+  "T7_undercovered_cohort": {
+    "GPU_count_distribution": {
+      "N": 324,
+      "P50": 1.0,
+      "P90": 4.0,
+      "P95": 4.0,
+      "max": 36.0,
+      "mean": 2.1419753086419755,
+      "min": 1.0
+    },
+    "GPU_underprediction_seconds": 14960009.13748151,
+    "K0_residual_seconds": {
+      "N": 324,
+      "P50": 36768.904296875,
+      "P90": 144791.10507812497,
+      "P95": 155298.40361328112,
+      "max": 417346.48828125,
+      "mean": 50518.479156082794,
+      "min": 0.12404513359069824
+    },
+    "N": 324,
+    "T7_Q90_excess_seconds": {
+      "N": 324,
+      "P50": 7254.4847872878345,
+      "P90": 35895.29414672851,
+      "P95": 76253.0047006043,
+      "max": 264752.53302001953,
+      "mean": 15837.241247605636,
+      "min": 0.12404513359069824
+    },
+    "active_miss_GPU_5min_slots": 49898.0,
+    "actual_runtime_seconds": {
+      "N": 324,
+      "P50": 42137.0,
+      "P90": 172815.0,
+      "P95": 172822.85,
+      "max": 432030.0,
+      "mean": 58409.33641975309,
+      "min": 4.0
+    },
+    "group_breakdowns": {
+      "hardware": [
+        {
+          "GPU_miss_mass_share": 0.9190655808334448,
+          "GPU_underprediction_seconds": 13749229.487213086,
+          "N": 310,
+          "active_miss_GPU_5min_slots": 45843.0,
+          "excess_seconds": {
+            "N": 310,
+            "P50": 7236.643247891552,
+            "P90": 36272.213077093904,
+            "P95": 76253.5547006043,
+            "max": 264752.53302001953,
+            "mean": 15543.359793778694,
+            "min": 0.12404513359069824
+          },
+          "group": {
+            "hardware": "H100"
+          },
+          "job_count_share": 0.9567901234567902,
+          "requested_GPU_count_sum": 652.0
+        },
+        {
+          "GPU_miss_mass_share": 0.08093441916655504,
+          "GPU_underprediction_seconds": 1210779.6502684222,
+          "N": 14,
+          "active_miss_GPU_5min_slots": 4055.0,
+          "excess_seconds": {
+            "N": 14,
+            "P50": 29943.964408121392,
+            "P90": 34581.41305918305,
+            "P95": 45208.184119572485,
+            "max": 64943.61608886719,
+            "mean": 22344.61629663076,
+            "min": 263.7605323791504
+          },
+          "group": {
+            "hardware": "OTHER_GPU"
+          },
+          "job_count_share": 0.043209876543209874,
+          "requested_GPU_count_sum": 42.0
+        }
+      ],
+      "job_state": [
+        {
+          "GPU_miss_mass_share": 0.10465495800291313,
+          "GPU_underprediction_seconds": 1565639.1280063242,
+          "N": 35,
+          "active_miss_GPU_5min_slots": 5210.0,
+          "excess_seconds": {
+            "N": 35,
+            "P50": 5423.445159912109,
+            "P90": 39063.87550623071,
+            "P95": 47104.58588425687,
+            "max": 48559.29150390625,
+            "mean": 11497.81363234532,
+            "min": 563.4451599121094
+          },
+          "group": {
+            "job_state": "CANCELLED"
+          },
+          "job_count_share": 0.10802469135802469,
+          "requested_GPU_count_sum": 90.0
+        },
+        {
+          "GPU_miss_mass_share": 0.0790618035996962,
+          "GPU_underprediction_seconds": 1182765.3042772238,
+          "N": 130,
+          "active_miss_GPU_5min_slots": 3937.0,
+          "excess_seconds": {
+            "N": 130,
+            "P50": 3065.6240451335907,
+            "P90": 16212.255169630052,
+            "P95": 20776.968212332013,
+            "max": 28745.53855547172,
+            "mean": 6012.2390836034265,
+            "min": 0.12404513359069824
+          },
+          "group": {
+            "job_state": "COMPLETED"
+          },
+          "job_count_share": 0.4012345679012346,
+          "requested_GPU_count_sum": 173.0
+        },
+        {
+          "GPU_miss_mass_share": 0.018813384119357242,
+          "GPU_underprediction_seconds": 281448.3983325339,
+          "N": 14,
+          "active_miss_GPU_5min_slots": 939.0,
+          "excess_seconds": {
+            "N": 14,
+            "P50": 3444.6874618530273,
+            "P90": 33680.27785664522,
+            "P95": 34505.84924250453,
+            "max": 35539.14667226501,
+            "mean": 10848.83156645283,
+            "min": 302.1400194168091
+          },
+          "group": {
+            "job_state": "FAILED"
+          },
+          "job_count_share": 0.043209876543209874,
+          "requested_GPU_count_sum": 23.0
+        },
+        {
+          "GPU_miss_mass_share": 0.0016698620734512714,
+          "GPU_underprediction_seconds": 24981.15187716484,
+          "N": 2,
+          "active_miss_GPU_5min_slots": 83.0,
+          "excess_seconds": {
+            "N": 2,
+            "P50": 8413.565501570702,
+            "P90": 12970.012336421012,
+            "P95": 13539.568190777301,
+            "max": 14109.12404513359,
+            "mean": 8413.565501570702,
+            "min": 2718.0069580078125
+          },
+          "group": {
+            "job_state": "NODE_FAIL"
+          },
+          "job_count_share": 0.006172839506172839,
+          "requested_GPU_count_sum": 5.0
+        },
+        {
+          "GPU_miss_mass_share": 0.7957999922045822,
+          "GPU_underprediction_seconds": 11905175.154988265,
+          "N": 143,
+          "active_miss_GPU_5min_slots": 39729.0,
+          "excess_seconds": {
+            "N": 143,
+            "P50": 10368.643247891552,
+            "P90": 76531.26104754274,
+            "P95": 84938.65213012695,
+            "max": 264752.53302001953,
+            "mean": 26423.36247056093,
+            "min": 86.67702841758728
+          },
+          "group": {
+            "job_state": "TIMEOUT"
+          },
+          "job_count_share": 0.44135802469135804,
+          "requested_GPU_count_sum": 403.0
+        }
+      ],
+      "num_gpus_req": [
+        {
+          "GPU_miss_mass_share": 0.12341227219011928,
+          "GPU_underprediction_seconds": 1846248.7196415397,
+          "N": 164,
+          "active_miss_GPU_5min_slots": 6148.0,
+          "excess_seconds": {
+            "N": 164,
+            "P50": 3692.6653548722898,
+            "P90": 21120.743441708357,
+            "P95": 78132.34682816488,
+            "max": 86451.40808105469,
+            "mean": 11257.61414415573,
+            "min": 0.12404513359069824
+          },
+          "group": {
+            "num_gpus_req": 1.0
+          },
+          "job_count_share": 0.5061728395061729,
+          "requested_GPU_count_sum": 164.0
+        },
+        {
+          "GPU_miss_mass_share": 0.1153652538554959,
+          "GPU_underprediction_seconds": 1725865.2518260926,
+          "N": 93,
+          "active_miss_GPU_5min_slots": 5766.0,
+          "excess_seconds": {
+            "N": 93,
+            "P50": 6423.7446000464115,
+            "P90": 14423.655687012286,
+            "P95": 37492.0713308739,
+            "max": 41355.190111646894,
+            "mean": 9278.84543992523,
+            "min": 263.7605323791504
+          },
+          "group": {
+            "num_gpus_req": 2.0
+          },
+          "job_count_share": 0.28703703703703703,
+          "requested_GPU_count_sum": 186.0
+        },
+        {
+          "GPU_miss_mass_share": 0.5462658492845117,
+          "GPU_underprediction_seconds": 8172142.096790394,
+          "N": 57,
+          "active_miss_GPU_5min_slots": 27248.0,
+          "excess_seconds": {
+            "N": 57,
+            "P50": 28735.53855547172,
+            "P90": 69462.57153356202,
+            "P95": 76253.2047006043,
+            "max": 264752.53302001953,
+            "mean": 35842.72849469471,
+            "min": 1.6962408423423767
+          },
+          "group": {
+            "num_gpus_req": 4.0
+          },
+          "job_count_share": 0.17592592592592593,
+          "requested_GPU_count_sum": 228.0
+        },
+        {
+          "GPU_miss_mass_share": 0.19173915075226497,
+          "GPU_underprediction_seconds": 2868419.4472668287,
+          "N": 8,
+          "active_miss_GPU_5min_slots": 9552.0,
+          "excess_seconds": {
+            "N": 8,
+            "P50": 59245.86420156269,
+            "P90": 78357.81981912124,
+            "P95": 80232.06226515982,
+            "max": 82106.3047111984,
+            "mean": 44819.0538635442,
+            "min": 86.67702841758728
+          },
+          "group": {
+            "num_gpus_req": 8.0
+          },
+          "job_count_share": 0.024691358024691357,
+          "requested_GPU_count_sum": 64.0
+        },
+        {
+          "GPU_miss_mass_share": 0.0208851993469756,
+          "GPU_underprediction_seconds": 312442.77306887787,
+          "N": 1,
+          "active_miss_GPU_5min_slots": 1040.0,
+          "excess_seconds": {
+            "N": 1,
+            "P50": 19527.673316804867,
+            "P90": 19527.673316804867,
+            "P95": 19527.673316804867,
+            "max": 19527.673316804867,
+            "mean": 19527.673316804867,
+            "min": 19527.673316804867
+          },
+          "group": {
+            "num_gpus_req": 16.0
+          },
+          "job_count_share": 0.0030864197530864196,
+          "requested_GPU_count_sum": 16.0
+        },
+        {
+          "GPU_miss_mass_share": 0.002332274570632441,
+          "GPU_underprediction_seconds": 34890.84888777709,
+          "N": 1,
+          "active_miss_GPU_5min_slots": 144.0,
+          "excess_seconds": {
+            "N": 1,
+            "P50": 969.1902468826969,
+            "P90": 969.1902468826969,
+            "P95": 969.1902468826969,
+            "max": 969.1902468826969,
+            "mean": 969.1902468826969,
+            "min": 969.1902468826969
+          },
+          "group": {
+            "num_gpus_req": 36.0
+          },
+          "job_count_share": 0.0030864197530864196,
+          "requested_GPU_count_sum": 36.0
+        }
+      ],
+      "partition+qos": [
+        {
+          "GPU_miss_mass_share": 0.0006907898576122302,
+          "GPU_underprediction_seconds": 10334.222581958515,
+          "N": 5,
+          "active_miss_GPU_5min_slots": 35.0,
+          "excess_seconds": {
+            "N": 5,
+            "P50": 855.8395569262134,
+            "P90": 2097.610656792527,
+            "P95": 2188.482115499981,
+            "max": 2279.3535742074346,
+            "mean": 1119.0062138884728,
+            "min": 263.7605323791504
+          },
+          "group": {
+            "partition": "debug-gpu",
+            "qos": "normal"
+          },
+          "job_count_share": 0.015432098765432098,
+          "requested_GPU_count_sum": 9.0
+        },
+        {
+          "GPU_miss_mass_share": 0.37229572504584196,
+          "GPU_underprediction_seconds": 5569547.4485311,
+          "N": 185,
+          "active_miss_GPU_5min_slots": 18565.0,
+          "excess_seconds": {
+            "N": 185,
+            "P50": 6376.4169921875,
+            "P90": 40112.18837142501,
+            "P95": 76253.8047006043,
+            "max": 86451.40808105469,
+            "mean": 14459.321248571465,
+            "min": 0.12404513359069824
+          },
+          "group": {
+            "partition": "gpu-h100",
+            "qos": "normal"
+          },
+          "job_count_share": 0.5709876543209876,
+          "requested_GPU_count_sum": 375.0
+        },
+        {
+          "GPU_miss_mass_share": 0.16695215772135077,
+          "GPU_underprediction_seconds": 2497605.805033662,
+          "N": 4,
+          "active_miss_GPU_5min_slots": 8328.0,
+          "excess_seconds": {
+            "N": 4,
+            "P50": 76746.92289186601,
+            "P90": 80499.81118602247,
+            "P95": 81303.05794861044,
+            "max": 82106.3047111984,
+            "mean": 78050.18140730193,
+            "min": 76600.57513427734
+          },
+          "group": {
+            "partition": "gpu-h100-stdby",
+            "qos": "normal"
+          },
+          "job_count_share": 0.012345679012345678,
+          "requested_GPU_count_sum": 32.0
+        },
+        {
+          "GPU_miss_mass_share": 0.2102575674443717,
+          "GPU_underprediction_seconds": 3145455.130192436,
+          "N": 115,
+          "active_miss_GPU_5min_slots": 10494.0,
+          "excess_seconds": {
+            "N": 115,
+            "P50": 7236.643247891552,
+            "P90": 26036.8779381012,
+            "P95": 35887.29414672851,
+            "max": 63602.022399902344,
+            "mean": 10182.555516919698,
+            "min": 433.5852235380444
+          },
+          "group": {
+            "partition": "gpu-h100-stdby",
+            "qos": "standby"
+          },
+          "job_count_share": 0.3549382716049383,
+          "requested_GPU_count_sum": 224.0
+        },
+        {
+          "GPU_miss_mass_share": 0.1695601306218805,
+          "GPU_underprediction_seconds": 2536621.103455891,
+          "N": 6,
+          "active_miss_GPU_5min_slots": 8456.0,
+          "excess_seconds": {
+            "N": 6,
+            "P50": 47127.58588425687,
+            "P90": 264238.1787109375,
+            "P95": 264495.3558654785,
+            "max": 264752.53302001953,
+            "mean": 110045.41583511687,
+            "min": 2718.0069580078125
+          },
+          "group": {
+            "partition": "gpu-h100l",
+            "qos": "normal"
+          },
+          "job_count_share": 0.018518518518518517,
+          "requested_GPU_count_sum": 21.0
+        },
+        {
+          "GPU_miss_mass_share": 0.08024362930894283,
+          "GPU_underprediction_seconds": 1200445.4276864638,
+          "N": 9,
+          "active_miss_GPU_5min_slots": 4020.0,
+          "excess_seconds": {
+            "N": 9,
+            "P50": 34581.41305918305,
+            "P90": 40653.85366511988,
+            "P95": 52798.73487699352,
+            "max": 64943.61608886719,
+            "mean": 34136.62189815425,
+            "min": 9490.98688236301
+          },
+          "group": {
+            "partition": "project_3",
+            "qos": "normal"
+          },
+          "job_count_share": 0.027777777777777776,
+          "requested_GPU_count_sum": 33.0
+        }
+      ],
+      "requested_walltime_bucket": [
+        {
+          "GPU_miss_mass_share": 0.004779226729239421,
+          "GPU_underprediction_seconds": 71497.2755395176,
+          "N": 15,
+          "active_miss_GPU_5min_slots": 257.0,
+          "excess_seconds": {
+            "N": 15,
+            "P50": 1061.5492143630981,
+            "P90": 1907.9169752120972,
+            "P95": 2058.044279030266,
+            "max": 2279.3535742074346,
+            "mean": 1033.28730293354,
+            "min": 86.67702841758728
+          },
+          "group": {
+            "requested_walltime_bucket": 0
+          },
+          "job_count_share": 0.046296296296296294,
+          "requested_GPU_count_sum": 74.0
+        },
+        {
+          "GPU_miss_mass_share": 0.0025128550359652608,
+          "GPU_underprediction_seconds": 37592.334299206734,
+          "N": 10,
+          "active_miss_GPU_5min_slots": 124.0,
+          "excess_seconds": {
+            "N": 10,
+            "P50": 246.6727111041546,
+            "P90": 3439.887461853027,
+            "P95": 3445.2874618530273,
+            "max": 3450.6874618530273,
+            "mean": 1156.902588608861,
+            "min": 1.6962408423423767
+          },
+          "group": {
+            "requested_walltime_bucket": 1
+          },
+          "job_count_share": 0.030864197530864196,
+          "requested_GPU_count_sum": 35.0
+        },
+        {
+          "GPU_miss_mass_share": 0.2277237424978173,
+          "GPU_underprediction_seconds": 3406749.2685888335,
+          "N": 235,
+          "active_miss_GPU_5min_slots": 11368.0,
+          "excess_seconds": {
+            "N": 235,
+            "P50": 6423.7446000464115,
+            "P90": 15953.269091218812,
+            "P95": 22121.060310351262,
+            "max": 41355.190111646894,
+            "mean": 8405.830482864272,
+            "min": 0.12404513359069824
+          },
+          "group": {
+            "requested_walltime_bucket": 2
+          },
+          "job_count_share": 0.7253086419753086,
+          "requested_GPU_count_sum": 363.0
+        },
+        {
+          "GPU_miss_mass_share": 0.5954240451150975,
+          "GPU_underprediction_seconds": 8907549.155598061,
+          "N": 58,
+          "active_miss_GPU_5min_slots": 29693.0,
+          "excess_seconds": {
+            "N": 58,
+            "P50": 35877.094146728516,
+            "P90": 84938.65213012695,
+            "P95": 85274.03982543945,
+            "max": 86451.40808105469,
+            "mean": 42561.29603983325,
+            "min": 722.3954467773438
+          },
+          "group": {
+            "requested_walltime_bucket": 3
+          },
+          "job_count_share": 0.17901234567901234,
+          "requested_GPU_count_sum": 201.0
+        },
+        {
+          "GPU_miss_mass_share": 0.1695601306218805,
+          "GPU_underprediction_seconds": 2536621.103455891,
+          "N": 6,
+          "active_miss_GPU_5min_slots": 8456.0,
+          "excess_seconds": {
+            "N": 6,
+            "P50": 47127.58588425687,
+            "P90": 264238.1787109375,
+            "P95": 264495.3558654785,
+            "max": 264752.53302001953,
+            "mean": 110045.41583511687,
+            "min": 2718.0069580078125
+          },
+          "group": {
+            "requested_walltime_bucket": 4
+          },
+          "job_count_share": 0.018518518518518517,
+          "requested_GPU_count_sum": 21.0
+        }
+      ],
+      "standby": [
+        {
+          "GPU_miss_mass_share": 0.7897424325556284,
+          "GPU_underprediction_seconds": 11814554.007289076,
+          "N": 209,
+          "active_miss_GPU_5min_slots": 39404.0,
+          "excess_seconds": {
+            "N": 209,
+            "P50": 7272.326326684117,
+            "P90": 47093.08588425687,
+            "P95": 83796.71316255552,
+            "max": 264752.53302001953,
+            "mean": 18948.671195112252,
+            "min": 0.12404513359069824
+          },
+          "group": {
+            "standby": false
+          },
+          "job_count_share": 0.6450617283950617,
+          "requested_GPU_count_sum": 470.0
+        },
+        {
+          "GPU_miss_mass_share": 0.2102575674443717,
+          "GPU_underprediction_seconds": 3145455.130192436,
+          "N": 115,
+          "active_miss_GPU_5min_slots": 10494.0,
+          "excess_seconds": {
+            "N": 115,
+            "P50": 7236.643247891552,
+            "P90": 26036.8779381012,
+            "P95": 35887.29414672851,
+            "max": 63602.022399902344,
+            "mean": 10182.555516919698,
+            "min": 433.5852235380444
+          },
+          "group": {
+            "standby": true
+          },
+          "job_count_share": 0.3549382716049383,
+          "requested_GPU_count_sum": 224.0
+        }
+      ],
+      "support_class": [
+        {
+          "GPU_miss_mass_share": 0.5221197906517818,
+          "GPU_underprediction_seconds": 7810916.83901059,
+          "N": 140,
+          "active_miss_GPU_5min_slots": 26067.0,
+          "excess_seconds": {
+            "N": 140,
+            "P50": 3249.7249063253403,
+            "P90": 76614.76956982828,
+            "P95": 84955.42151489257,
+            "max": 264752.53302001953,
+            "mean": 20466.143997690488,
+            "min": 0.12404513359069824
+          },
+          "group": {
+            "support_class": "OUT_OF_SUPPORT"
+          },
+          "job_count_share": 0.43209876543209874,
+          "requested_GPU_count_sum": 271.0
+        },
+        {
+          "GPU_miss_mass_share": 0.07811218926946072,
+          "GPU_underprediction_seconds": 1168559.0652198175,
+          "N": 104,
+          "active_miss_GPU_5min_slots": 3909.0,
+          "excess_seconds": {
+            "N": 104,
+            "P50": 6430.7446000464115,
+            "P90": 10151.383821497722,
+            "P95": 10376.643247891552,
+            "max": 11281.0536251597,
+            "mean": 6556.332102994506,
+            "min": 433.5852235380444
+          },
+          "group": {
+            "support_class": "REGIME_MISMATCH"
+          },
+          "job_count_share": 0.32098765432098764,
+          "requested_GPU_count_sum": 177.0
+        },
+        {
+          "GPU_miss_mass_share": 0.3995575953245173,
+          "GPU_underprediction_seconds": 5977385.277004918,
+          "N": 72,
+          "active_miss_GPU_5min_slots": 19914.0,
+          "excess_seconds": {
+            "N": 72,
+            "P50": 14703.326539512651,
+            "P90": 41291.74735663608,
+            "P95": 69289.56443521826,
+            "max": 76254.0047006043,
+            "mean": 21965.974767160114,
+            "min": 86.67702841758728
+          },
+          "group": {
+            "support_class": "SPARSE_SUPPORT"
+          },
+          "job_count_share": 0.2222222222222222,
+          "requested_GPU_count_sum": 223.0
+        },
+        {
+          "GPU_miss_mass_share": 0.00021042475424022035,
+          "GPU_underprediction_seconds": 3147.9562461859978,
+          "N": 8,
+          "active_miss_GPU_5min_slots": 8.0,
+          "excess_seconds": {
+            "N": 8,
+            "P50": 67.19624084234238,
+            "P90": 1076.0287863712408,
+            "P95": 1081.33886036778,
+            "max": 1086.6489343643188,
+            "mean": 324.6603250750278,
+            "min": 1.6962408423423767
+          },
+          "group": {
+            "support_class": "STRONG_SUPPORT"
+          },
+          "job_count_share": 0.024691358024691357,
+          "requested_GPU_count_sum": 23.0
+        }
+      ]
+    },
+    "hardware_counts": {
+      "H100": 310,
+      "OTHER_GPU": 14
+    },
+    "miss_job_rate": 0.09173272933182333,
+    "pareto": {
+      "all_selection_jobs": {
+        "0.01": {
+          "GPU_underprediction_seconds": 10263674.59113559,
+          "denominator_jobs": 3532,
+          "mean_actual_runtime_seconds": 179624.58333333334,
+          "multi_GPU_job_count": 36,
+          "positive_miss_jobs_in_top": 36,
+          "requested_GPU_count_sum": 176.0,
+          "share_of_total_GPU_underprediction_seconds": 0.6860740857049676,
+          "top_job_count_in_universe": 36
+        },
+        "0.05": {
+          "GPU_underprediction_seconds": 14435647.603408908,
+          "denominator_jobs": 3532,
+          "mean_actual_runtime_seconds": 86431.37853107345,
+          "multi_GPU_job_count": 126,
+          "positive_miss_jobs_in_top": 177,
+          "requested_GPU_count_sum": 485.0,
+          "share_of_total_GPU_underprediction_seconds": 0.9649491167248794,
+          "top_job_count_in_universe": 177
+        },
+        "0.1": {
+          "GPU_underprediction_seconds": 14960009.137481509,
+          "denominator_jobs": 3532,
+          "mean_actual_runtime_seconds": 58409.33641975309,
+          "multi_GPU_job_count": 160,
+          "positive_miss_jobs_in_top": 324,
+          "requested_GPU_count_sum": 694.0,
+          "share_of_total_GPU_underprediction_seconds": 0.9999999999999999,
+          "top_job_count_in_universe": 354
+        }
+      },
+      "miss_jobs": {
+        "0.01": {
+          "GPU_underprediction_seconds": 3384766.47772865,
+          "denominator_jobs": 324,
+          "mean_actual_runtime_seconds": 302422.75,
+          "multi_GPU_job_count": 4,
+          "positive_miss_jobs_in_top": 4,
+          "requested_GPU_count_sum": 24.0,
+          "share_of_total_GPU_underprediction_seconds": 0.22625430550361744,
+          "top_job_count_in_universe": 4
+        },
+        "0.05": {
+          "GPU_underprediction_seconds": 7619447.686745137,
+          "denominator_jobs": 324,
+          "mean_actual_runtime_seconds": 192684.9411764706,
+          "multi_GPU_job_count": 17,
+          "positive_miss_jobs_in_top": 17,
+          "requested_GPU_count_sum": 100.0,
+          "share_of_total_GPU_underprediction_seconds": 0.5093210583444775,
+          "top_job_count_in_universe": 17
+        },
+        "0.1": {
+          "GPU_underprediction_seconds": 9929517.332984785,
+          "denominator_jobs": 324,
+          "mean_actual_runtime_seconds": 184301.21212121213,
+          "multi_GPU_job_count": 33,
+          "positive_miss_jobs_in_top": 33,
+          "requested_GPU_count_sum": 164.0,
+          "share_of_total_GPU_underprediction_seconds": 0.6637373842310634,
+          "top_job_count_in_universe": 33
+        }
+      }
+    },
+    "pareto_sort": "GPU_underprediction_seconds descending; job_id ascending for ties; ceil(p*N); denominators reported separately",
+    "requested_GPU_count_sum": 694.0,
+    "requested_walltime_bucket_upper_seconds": [
+      3600.0,
+      21600.0,
+      86400.0,
+      259200.0
+    ],
+    "requested_walltime_seconds": {
+      "N": 324,
+      "P50": 57600.0,
+      "P90": 172800.0,
+      "P95": 172800.0,
+      "max": 648000.0,
+      "mean": 82387.03703703704,
+      "min": 600.0
+    },
+    "retrospective_status_counts": {
+      "CANCELLED": 35,
+      "COMPLETED": 130,
+      "FAILED": 14,
+      "NODE_FAIL": 2,
+      "TIMEOUT": 143
+    },
+    "selection_N": 3532,
+    "standby_counts": {
+      "False": 209,
+      "True": 115
+    },
+    "support_class_counts": {
+      "OUT_OF_SUPPORT": 140,
+      "REGIME_MISMATCH": 104,
+      "SPARSE_SUPPORT": 72,
+      "STRONG_SUPPORT": 8
+    }
+  },
+  "classification": "MIXED_FAILURE",
+  "created_at": "2026-09-06T11:07:32.653076+00:00",
+  "exact_gate_table": {
+    "T0": {
+      "GPU_underprediction_seconds": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_A_HARD_GATE",
+        "threshold": "diagnostic only; no absolute threshold",
+        "value": 69370623.6965046
+      },
+      "GPU_weighted_coverage": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": ">= 0.90",
+        "value": 0.6598808341608738
+      },
+      "H100": {
+        "N": 3220,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.5391304347826087
+      },
+      "H100_standby_all_rows": {
+        "N": 1317,
+        "hard_gate": false,
+        "status": "FAIL",
+        "threshold": "reference 0.90; diagnostic only, not an additional preregistered hard gate",
+        "value": 0.14578587699316628
+      },
+      "Q90_Q95_monotonicity": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "post-repair crossing count == 0 on served rows",
+        "value": 0
+      },
+      "abstention": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "== 0",
+        "value": 0
+      },
+      "active_miss": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 231224.0
+      },
+      "finite_predictions": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "all predictions finite; no abstentions",
+        "value": true
+      },
+      "inflation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 5576.44921875
+      },
+      "overall": {
+        "N": 3532,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.5693657984144961
+      },
+      "overreservation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 13469.540035020917
+      },
+      "safe_ge_K0": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "served-row violation count == 0",
+        "value": 0
+      },
+      "support_sufficient_H100_standby": {
+        "N": 4,
+        "hard_gate": true,
+        "status": "INSUFFICIENT_SUPPORT",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.75
+      }
+    },
+    "T1": {
+      "GPU_underprediction_seconds": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_A_HARD_GATE",
+        "threshold": "diagnostic only; no absolute threshold",
+        "value": 43341547.6448288
+      },
+      "GPU_weighted_coverage": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": ">= 0.90",
+        "value": 0.7255461767626614
+      },
+      "H100": {
+        "N": 3220,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.6782608695652174
+      },
+      "H100_standby_all_rows": {
+        "N": 1317,
+        "hard_gate": false,
+        "status": "FAIL",
+        "threshold": "reference 0.90; diagnostic only, not an additional preregistered hard gate",
+        "value": 0.3697798025816249
+      },
+      "Q90_Q95_monotonicity": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "post-repair crossing count == 0 on served rows",
+        "value": 0
+      },
+      "abstention": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "== 0",
+        "value": 0
+      },
+      "active_miss": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 144438.0
+      },
+      "finite_predictions": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "all predictions finite; no abstentions",
+        "value": true
+      },
+      "inflation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 19929.22843531305
+      },
+      "overall": {
+        "N": 3532,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.6987542468856173
+      },
+      "overreservation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 47099.460913688046
+      },
+      "safe_ge_K0": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "served-row violation count == 0",
+        "value": 0
+      },
+      "support_sufficient_H100_standby": {
+        "N": 4,
+        "hard_gate": true,
+        "status": "INSUFFICIENT_SUPPORT",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 1.0
+      }
+    },
+    "T2": {
+      "GPU_underprediction_seconds": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_A_HARD_GATE",
+        "threshold": "diagnostic only; no absolute threshold",
+        "value": 19202587.63677597
+      },
+      "GPU_weighted_coverage": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": ">= 0.90",
+        "value": 0.8690417080436942
+      },
+      "H100": {
+        "N": 3220,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.8456521739130435
+      },
+      "H100_standby_all_rows": {
+        "N": 1317,
+        "hard_gate": false,
+        "status": "FAIL",
+        "threshold": "reference 0.90; diagnostic only, not an additional preregistered hard gate",
+        "value": 0.7896735003796507
+      },
+      "Q90_Q95_monotonicity": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "post-repair crossing count == 0 on served rows",
+        "value": 0
+      },
+      "abstention": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "== 0",
+        "value": 0
+      },
+      "active_miss": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 64003.0
+      },
+      "finite_predictions": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "all predictions finite; no abstentions",
+        "value": true
+      },
+      "inflation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 26574.42661373981
+      },
+      "overall": {
+        "N": 3532,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.853907134767837
+      },
+      "overreservation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 58095.98378539625
+      },
+      "safe_ge_K0": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "served-row violation count == 0",
+        "value": 0
+      },
+      "support_sufficient_H100_standby": {
+        "N": 4,
+        "hard_gate": true,
+        "status": "INSUFFICIENT_SUPPORT",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 1.0
+      }
+    },
+    "T3_D": {
+      "GPU_underprediction_seconds": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_A_HARD_GATE",
+        "threshold": "diagnostic only; no absolute threshold",
+        "value": 22015927.101914853
+      },
+      "GPU_weighted_coverage": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": ">= 0.90",
+        "value": 0.7601787487586892
+      },
+      "H100": {
+        "N": 3220,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.7711180124223602
+      },
+      "H100_standby_all_rows": {
+        "N": 1317,
+        "hard_gate": false,
+        "status": "FAIL",
+        "threshold": "reference 0.90; diagnostic only, not an additional preregistered hard gate",
+        "value": 0.744874715261959
+      },
+      "Q90_Q95_monotonicity": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "post-repair crossing count == 0 on served rows",
+        "value": 0
+      },
+      "abstention": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "== 0",
+        "value": 0
+      },
+      "active_miss": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 73371.0
+      },
+      "finite_predictions": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "all predictions finite; no abstentions",
+        "value": true
+      },
+      "inflation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 24084.963434335736
+      },
+      "overall": {
+        "N": 3532,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.7669875424688561
+      },
+      "overreservation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 53662.121829604046
+      },
+      "safe_ge_K0": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "served-row violation count == 0",
+        "value": 0
+      },
+      "support_sufficient_H100_standby": {
+        "N": 4,
+        "hard_gate": true,
+        "status": "INSUFFICIENT_SUPPORT",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 1.0
+      }
+    },
+    "T3_R": {
+      "GPU_underprediction_seconds": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_A_HARD_GATE",
+        "threshold": "diagnostic only; no absolute threshold",
+        "value": 43853205.12628031
+      },
+      "GPU_weighted_coverage": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": ">= 0.90",
+        "value": 0.6533018867924528
+      },
+      "H100": {
+        "N": 3220,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.6357142857142857
+      },
+      "H100_standby_all_rows": {
+        "N": 1317,
+        "hard_gate": false,
+        "status": "FAIL",
+        "threshold": "reference 0.90; diagnostic only, not an additional preregistered hard gate",
+        "value": 0.3659832953682612
+      },
+      "Q90_Q95_monotonicity": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "post-repair crossing count == 0 on served rows",
+        "value": 0
+      },
+      "abstention": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "== 0",
+        "value": 0
+      },
+      "active_miss": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 146137.0
+      },
+      "finite_predictions": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "all predictions finite; no abstentions",
+        "value": true
+      },
+      "inflation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 19474.2400733865
+      },
+      "overall": {
+        "N": 3532,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.6574178935447339
+      },
+      "overreservation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 46239.69451328749
+      },
+      "safe_ge_K0": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "served-row violation count == 0",
+        "value": 0
+      },
+      "support_sufficient_H100_standby": {
+        "N": 4,
+        "hard_gate": true,
+        "status": "INSUFFICIENT_SUPPORT",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 1.0
+      }
+    },
+    "T4_N100": {
+      "GPU_underprediction_seconds": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_A_HARD_GATE",
+        "threshold": "diagnostic only; no absolute threshold",
+        "value": 49781864.06956959
+      },
+      "GPU_weighted_coverage": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": ">= 0.90",
+        "value": 0.5779543197616683
+      },
+      "H100": {
+        "N": 3220,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.5003105590062111
+      },
+      "H100_standby_all_rows": {
+        "N": 1317,
+        "hard_gate": false,
+        "status": "FAIL",
+        "threshold": "reference 0.90; diagnostic only, not an additional preregistered hard gate",
+        "value": 0.1624905087319666
+      },
+      "Q90_Q95_monotonicity": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "post-repair crossing count == 0 on served rows",
+        "value": 0
+      },
+      "abstention": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "== 0",
+        "value": 0
+      },
+      "active_miss": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 165879.0
+      },
+      "finite_predictions": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "all predictions finite; no abstentions",
+        "value": true
+      },
+      "inflation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 20767.855843128866
+      },
+      "overall": {
+        "N": 3532,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.5263306908267271
+      },
+      "overreservation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 82190.36321697176
+      },
+      "safe_ge_K0": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "served-row violation count == 0",
+        "value": 0
+      },
+      "support_sufficient_H100_standby": {
+        "N": 4,
+        "hard_gate": true,
+        "status": "INSUFFICIENT_SUPPORT",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.75
+      }
+    },
+    "T4_N200": {
+      "GPU_underprediction_seconds": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_A_HARD_GATE",
+        "threshold": "diagnostic only; no absolute threshold",
+        "value": 49781864.06956959
+      },
+      "GPU_weighted_coverage": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": ">= 0.90",
+        "value": 0.5779543197616683
+      },
+      "H100": {
+        "N": 3220,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.5003105590062111
+      },
+      "H100_standby_all_rows": {
+        "N": 1317,
+        "hard_gate": false,
+        "status": "FAIL",
+        "threshold": "reference 0.90; diagnostic only, not an additional preregistered hard gate",
+        "value": 0.1624905087319666
+      },
+      "Q90_Q95_monotonicity": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "post-repair crossing count == 0 on served rows",
+        "value": 0
+      },
+      "abstention": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "== 0",
+        "value": 0
+      },
+      "active_miss": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 165879.0
+      },
+      "finite_predictions": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "all predictions finite; no abstentions",
+        "value": true
+      },
+      "inflation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 20767.855843128866
+      },
+      "overall": {
+        "N": 3532,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.5263306908267271
+      },
+      "overreservation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 82190.36321697176
+      },
+      "safe_ge_K0": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "served-row violation count == 0",
+        "value": 0
+      },
+      "support_sufficient_H100_standby": {
+        "N": 4,
+        "hard_gate": true,
+        "status": "INSUFFICIENT_SUPPORT",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.75
+      }
+    },
+    "T4_N500": {
+      "GPU_underprediction_seconds": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_A_HARD_GATE",
+        "threshold": "diagnostic only; no absolute threshold",
+        "value": 50638311.53311491
+      },
+      "GPU_weighted_coverage": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": ">= 0.90",
+        "value": 0.5716236345580934
+      },
+      "H100": {
+        "N": 3220,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.4788819875776398
+      },
+      "H100_standby_all_rows": {
+        "N": 1317,
+        "hard_gate": false,
+        "status": "FAIL",
+        "threshold": "reference 0.90; diagnostic only, not an additional preregistered hard gate",
+        "value": 0.11009870918754745
+      },
+      "Q90_Q95_monotonicity": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "post-repair crossing count == 0 on served rows",
+        "value": 0
+      },
+      "abstention": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "== 0",
+        "value": 0
+      },
+      "active_miss": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 168720.0
+      },
+      "finite_predictions": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "all predictions finite; no abstentions",
+        "value": true
+      },
+      "inflation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 20446.436417240653
+      },
+      "overall": {
+        "N": 3532,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.5107587768969423
+      },
+      "overreservation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 82134.29524187102
+      },
+      "safe_ge_K0": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "served-row violation count == 0",
+        "value": 0
+      },
+      "support_sufficient_H100_standby": {
+        "N": 4,
+        "hard_gate": true,
+        "status": "INSUFFICIENT_SUPPORT",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.75
+      }
+    },
+    "T5": {
+      "availability": {
+        "N": null,
+        "hard_gate": true,
+        "status": "NOT_EVALUATED_CAUSAL_CENSOR_AUTHORITY_UNAVAILABLE",
+        "threshold": "causal censor authority required",
+        "value": false
+      }
+    },
+    "T6": {
+      "GPU_underprediction_seconds": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_A_HARD_GATE",
+        "threshold": "diagnostic only; no absolute threshold",
+        "value": 14552482.180344129
+      },
+      "GPU_weighted_coverage": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": ">= 0.90",
+        "value": 0.8543942403177756
+      },
+      "H100": {
+        "N": 3220,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.7847826086956522
+      },
+      "H100_standby_all_rows": {
+        "N": 1317,
+        "hard_gate": false,
+        "status": "FAIL",
+        "threshold": "reference 0.90; diagnostic only, not an additional preregistered hard gate",
+        "value": 0.6370539104024298
+      },
+      "Q90_Q95_monotonicity": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "post-repair crossing count == 0 on served rows",
+        "value": 0
+      },
+      "abstention": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "== 0",
+        "value": 0
+      },
+      "active_miss": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 48504.0
+      },
+      "finite_predictions": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "all predictions finite; no abstentions",
+        "value": true
+      },
+      "inflation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 38958.235898464445
+      },
+      "overall": {
+        "N": 3532,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.7950169875424689
+      },
+      "overreservation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 123488.09863717979
+      },
+      "safe_ge_K0": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "served-row violation count == 0",
+        "value": 0
+      },
+      "support_sufficient_H100_standby": {
+        "N": 4,
+        "hard_gate": true,
+        "status": "INSUFFICIENT_SUPPORT",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 1.0
+      }
+    },
+    "T7": {
+      "GPU_underprediction_seconds": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_A_HARD_GATE",
+        "threshold": "diagnostic only; no absolute threshold",
+        "value": 14960009.13748151
+      },
+      "GPU_weighted_coverage": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": ">= 0.90",
+        "value": 0.9138530287984111
+      },
+      "H100": {
+        "N": 3220,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.9037267080745341
+      },
+      "H100_standby_all_rows": {
+        "N": 1317,
+        "hard_gate": false,
+        "status": "PASS",
+        "threshold": "reference 0.90; diagnostic only, not an additional preregistered hard gate",
+        "value": 0.9126803340926348
+      },
+      "Q90_Q95_monotonicity": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "post-repair crossing count == 0 on served rows",
+        "value": 0
+      },
+      "abstention": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "== 0",
+        "value": 0
+      },
+      "active_miss": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 49898.0
+      },
+      "finite_predictions": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "all predictions finite; no abstentions",
+        "value": true
+      },
+      "inflation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 31814.358868700576
+      },
+      "overall": {
+        "N": 3532,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.9082672706681767
+      },
+      "overreservation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 61659.653843320135
+      },
+      "safe_ge_K0": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "served-row violation count == 0",
+        "value": 0
+      },
+      "support_sufficient_H100_standby": {
+        "N": 4,
+        "hard_gate": true,
+        "status": "INSUFFICIENT_SUPPORT",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 1.0
+      }
+    },
+    "T8_N100": {
+      "GPU_underprediction_seconds": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_A_HARD_GATE",
+        "threshold": "diagnostic only; no absolute threshold",
+        "value": 28244175.196825266
+      },
+      "GPU_weighted_coverage": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": ">= 0.90",
+        "value": 0.25347567030784507
+      },
+      "H100": {
+        "N": 3220,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.2754658385093168
+      },
+      "H100_standby_all_rows": {
+        "N": 1317,
+        "hard_gate": false,
+        "status": "FAIL",
+        "threshold": "reference 0.90; diagnostic only, not an additional preregistered hard gate",
+        "value": 0.09187547456340167
+      },
+      "Q90_Q95_monotonicity": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "post-repair crossing count == 0 on served rows",
+        "value": 0
+      },
+      "abstention": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "== 0",
+        "value": 1164
+      },
+      "active_miss": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 94132.0
+      },
+      "finite_predictions": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "all predictions finite; no abstentions",
+        "value": false
+      },
+      "inflation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 11838.952473092506
+      },
+      "overall": {
+        "N": 3532,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.29303510758776896
+      },
+      "overreservation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 11063.141939000778
+      },
+      "safe_ge_K0": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "served-row violation count == 0",
+        "value": 0
+      },
+      "support_sufficient_H100_standby": {
+        "N": 4,
+        "hard_gate": true,
+        "status": "INSUFFICIENT_SUPPORT",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 1.0
+      }
+    },
+    "T8_N200": {
+      "GPU_underprediction_seconds": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_A_HARD_GATE",
+        "threshold": "diagnostic only; no absolute threshold",
+        "value": 28244175.196825266
+      },
+      "GPU_weighted_coverage": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": ">= 0.90",
+        "value": 0.25347567030784507
+      },
+      "H100": {
+        "N": 3220,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.2754658385093168
+      },
+      "H100_standby_all_rows": {
+        "N": 1317,
+        "hard_gate": false,
+        "status": "FAIL",
+        "threshold": "reference 0.90; diagnostic only, not an additional preregistered hard gate",
+        "value": 0.09187547456340167
+      },
+      "Q90_Q95_monotonicity": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "post-repair crossing count == 0 on served rows",
+        "value": 0
+      },
+      "abstention": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "== 0",
+        "value": 1164
+      },
+      "active_miss": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 94132.0
+      },
+      "finite_predictions": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "all predictions finite; no abstentions",
+        "value": false
+      },
+      "inflation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 11838.952473092506
+      },
+      "overall": {
+        "N": 3532,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.29303510758776896
+      },
+      "overreservation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 11063.141939000778
+      },
+      "safe_ge_K0": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "served-row violation count == 0",
+        "value": 0
+      },
+      "support_sufficient_H100_standby": {
+        "N": 4,
+        "hard_gate": true,
+        "status": "INSUFFICIENT_SUPPORT",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 1.0
+      }
+    },
+    "T8_N500": {
+      "GPU_underprediction_seconds": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_A_HARD_GATE",
+        "threshold": "diagnostic only; no absolute threshold",
+        "value": 28226168.448708773
+      },
+      "GPU_weighted_coverage": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": ">= 0.90",
+        "value": 0.25397219463753723
+      },
+      "H100": {
+        "N": 3220,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.2754658385093168
+      },
+      "H100_standby_all_rows": {
+        "N": 1317,
+        "hard_gate": false,
+        "status": "FAIL",
+        "threshold": "reference 0.90; diagnostic only, not an additional preregistered hard gate",
+        "value": 0.09187547456340167
+      },
+      "Q90_Q95_monotonicity": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "post-repair crossing count == 0 on served rows",
+        "value": 0
+      },
+      "abstention": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "== 0",
+        "value": 1164
+      },
+      "active_miss": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 94061.0
+      },
+      "finite_predictions": {
+        "N": null,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "all predictions finite; no abstentions",
+        "value": false
+      },
+      "inflation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 11861.784100104913
+      },
+      "overall": {
+        "N": 3532,
+        "hard_gate": true,
+        "status": "FAIL",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 0.29388448471121176
+      },
+      "overreservation": {
+        "N": null,
+        "hard_gate": false,
+        "status": "NOT_REACHED_NO_ELIGIBLE_CANDIDATE",
+        "threshold": "no absolute threshold; lexicographic efficiency among eligible candidates",
+        "value": 11078.209251109916
+      },
+      "safe_ge_K0": {
+        "N": null,
+        "hard_gate": true,
+        "status": "PASS",
+        "threshold": "served-row violation count == 0",
+        "value": 0
+      },
+      "support_sufficient_H100_standby": {
+        "N": 4,
+        "hard_gate": true,
+        "status": "INSUFFICIENT_SUPPORT",
+        "threshold": "coverage >= 0.90 AND evaluation N >= 100",
+        "value": 1.0
+      }
+    }
+  },
+  "exact_metric_table": {
+    "T0": {
+      "GPU_weighted_Q90_coverage": 0.6598808341608738,
+      "GPU_weighted_underprediction_seconds": 69370623.6965046,
+      "H100_Q90_coverage": 0.5391304347826087,
+      "H100_standby_Q90_coverage": 0.14578587699316628,
+      "N": 3532,
+      "abstention_count": 0,
+      "active_miss_GPU_5min_slots": 231224.0,
+      "critical_subgroup_N_shortfall": 96,
+      "eligible": false,
+      "evaluated": true,
+      "insufficient_historical_exact_support_job_count": 3164,
+      "insufficient_required_evaluation_subgroup_count": 1,
+      "mean_safe_duration_inflation_seconds": 5576.44921875,
+      "overall_Q90_coverage": 0.5693657984144961,
+      "overreserved_GPU_hours": 13469.540035020917,
+      "post_repair_Q90_Q95_crossing_count": 0,
+      "raw_Q90_Q95_crossing_count": 0,
+      "safe_below_K0_count": 0,
+      "support_sufficient_H100_standby_N": 4,
+      "support_sufficient_H100_standby_Q90_coverage": 0.75
+    },
+    "T1": {
+      "GPU_weighted_Q90_coverage": 0.7255461767626614,
+      "GPU_weighted_underprediction_seconds": 43341547.6448288,
+      "H100_Q90_coverage": 0.6782608695652174,
+      "H100_standby_Q90_coverage": 0.3697798025816249,
+      "N": 3532,
+      "abstention_count": 0,
+      "active_miss_GPU_5min_slots": 144438.0,
+      "critical_subgroup_N_shortfall": 96,
+      "eligible": false,
+      "evaluated": true,
+      "insufficient_historical_exact_support_job_count": 3164,
+      "insufficient_required_evaluation_subgroup_count": 1,
+      "mean_safe_duration_inflation_seconds": 19929.22843531305,
+      "overall_Q90_coverage": 0.6987542468856173,
+      "overreserved_GPU_hours": 47099.460913688046,
+      "post_repair_Q90_Q95_crossing_count": 0,
+      "raw_Q90_Q95_crossing_count": 384,
+      "safe_below_K0_count": 0,
+      "support_sufficient_H100_standby_N": 4,
+      "support_sufficient_H100_standby_Q90_coverage": 1.0
+    },
+    "T2": {
+      "GPU_weighted_Q90_coverage": 0.8690417080436942,
+      "GPU_weighted_underprediction_seconds": 19202587.63677597,
+      "H100_Q90_coverage": 0.8456521739130435,
+      "H100_standby_Q90_coverage": 0.7896735003796507,
+      "N": 3532,
+      "abstention_count": 0,
+      "active_miss_GPU_5min_slots": 64003.0,
+      "critical_subgroup_N_shortfall": 96,
+      "eligible": false,
+      "evaluated": true,
+      "insufficient_historical_exact_support_job_count": 3164,
+      "insufficient_required_evaluation_subgroup_count": 1,
+      "mean_safe_duration_inflation_seconds": 26574.42661373981,
+      "overall_Q90_coverage": 0.853907134767837,
+      "overreserved_GPU_hours": 58095.98378539625,
+      "post_repair_Q90_Q95_crossing_count": 0,
+      "raw_Q90_Q95_crossing_count": 1030,
+      "safe_below_K0_count": 0,
+      "support_sufficient_H100_standby_N": 4,
+      "support_sufficient_H100_standby_Q90_coverage": 1.0
+    },
+    "T3_D": {
+      "GPU_weighted_Q90_coverage": 0.7601787487586892,
+      "GPU_weighted_underprediction_seconds": 22015927.101914853,
+      "H100_Q90_coverage": 0.7711180124223602,
+      "H100_standby_Q90_coverage": 0.744874715261959,
+      "N": 3532,
+      "abstention_count": 0,
+      "active_miss_GPU_5min_slots": 73371.0,
+      "critical_subgroup_N_shortfall": 96,
+      "eligible": false,
+      "evaluated": true,
+      "insufficient_historical_exact_support_job_count": 3164,
+      "insufficient_required_evaluation_subgroup_count": 1,
+      "mean_safe_duration_inflation_seconds": 24084.963434335736,
+      "overall_Q90_coverage": 0.7669875424688561,
+      "overreserved_GPU_hours": 53662.121829604046,
+      "post_repair_Q90_Q95_crossing_count": 0,
+      "raw_Q90_Q95_crossing_count": 0,
+      "safe_below_K0_count": 0,
+      "support_sufficient_H100_standby_N": 4,
+      "support_sufficient_H100_standby_Q90_coverage": 1.0
+    },
+    "T3_R": {
+      "GPU_weighted_Q90_coverage": 0.6533018867924528,
+      "GPU_weighted_underprediction_seconds": 43853205.12628031,
+      "H100_Q90_coverage": 0.6357142857142857,
+      "H100_standby_Q90_coverage": 0.3659832953682612,
+      "N": 3532,
+      "abstention_count": 0,
+      "active_miss_GPU_5min_slots": 146137.0,
+      "critical_subgroup_N_shortfall": 96,
+      "eligible": false,
+      "evaluated": true,
+      "insufficient_historical_exact_support_job_count": 3164,
+      "insufficient_required_evaluation_subgroup_count": 1,
+      "mean_safe_duration_inflation_seconds": 19474.2400733865,
+      "overall_Q90_coverage": 0.6574178935447339,
+      "overreserved_GPU_hours": 46239.69451328749,
+      "post_repair_Q90_Q95_crossing_count": 0,
+      "raw_Q90_Q95_crossing_count": 0,
+      "safe_below_K0_count": 0,
+      "support_sufficient_H100_standby_N": 4,
+      "support_sufficient_H100_standby_Q90_coverage": 1.0
+    },
+    "T4_N100": {
+      "GPU_weighted_Q90_coverage": 0.5779543197616683,
+      "GPU_weighted_underprediction_seconds": 49781864.06956959,
+      "H100_Q90_coverage": 0.5003105590062111,
+      "H100_standby_Q90_coverage": 0.1624905087319666,
+      "N": 3532,
+      "abstention_count": 0,
+      "active_miss_GPU_5min_slots": 165879.0,
+      "critical_subgroup_N_shortfall": 96,
+      "eligible": false,
+      "evaluated": true,
+      "insufficient_historical_exact_support_job_count": 3164,
+      "insufficient_required_evaluation_subgroup_count": 1,
+      "mean_safe_duration_inflation_seconds": 20767.855843128866,
+      "overall_Q90_coverage": 0.5263306908267271,
+      "overreserved_GPU_hours": 82190.36321697176,
+      "post_repair_Q90_Q95_crossing_count": 0,
+      "raw_Q90_Q95_crossing_count": 0,
+      "safe_below_K0_count": 0,
+      "support_sufficient_H100_standby_N": 4,
+      "support_sufficient_H100_standby_Q90_coverage": 0.75
+    },
+    "T4_N200": {
+      "GPU_weighted_Q90_coverage": 0.5779543197616683,
+      "GPU_weighted_underprediction_seconds": 49781864.06956959,
+      "H100_Q90_coverage": 0.5003105590062111,
+      "H100_standby_Q90_coverage": 0.1624905087319666,
+      "N": 3532,
+      "abstention_count": 0,
+      "active_miss_GPU_5min_slots": 165879.0,
+      "critical_subgroup_N_shortfall": 96,
+      "eligible": false,
+      "evaluated": true,
+      "insufficient_historical_exact_support_job_count": 3164,
+      "insufficient_required_evaluation_subgroup_count": 1,
+      "mean_safe_duration_inflation_seconds": 20767.855843128866,
+      "overall_Q90_coverage": 0.5263306908267271,
+      "overreserved_GPU_hours": 82190.36321697176,
+      "post_repair_Q90_Q95_crossing_count": 0,
+      "raw_Q90_Q95_crossing_count": 0,
+      "safe_below_K0_count": 0,
+      "support_sufficient_H100_standby_N": 4,
+      "support_sufficient_H100_standby_Q90_coverage": 0.75
+    },
+    "T4_N500": {
+      "GPU_weighted_Q90_coverage": 0.5716236345580934,
+      "GPU_weighted_underprediction_seconds": 50638311.53311491,
+      "H100_Q90_coverage": 0.4788819875776398,
+      "H100_standby_Q90_coverage": 0.11009870918754745,
+      "N": 3532,
+      "abstention_count": 0,
+      "active_miss_GPU_5min_slots": 168720.0,
+      "critical_subgroup_N_shortfall": 96,
+      "eligible": false,
+      "evaluated": true,
+      "insufficient_historical_exact_support_job_count": 3164,
+      "insufficient_required_evaluation_subgroup_count": 1,
+      "mean_safe_duration_inflation_seconds": 20446.436417240653,
+      "overall_Q90_coverage": 0.5107587768969423,
+      "overreserved_GPU_hours": 82134.29524187102,
+      "post_repair_Q90_Q95_crossing_count": 0,
+      "raw_Q90_Q95_crossing_count": 0,
+      "safe_below_K0_count": 0,
+      "support_sufficient_H100_standby_N": 4,
+      "support_sufficient_H100_standby_Q90_coverage": 0.75
+    },
+    "T5": {
+      "evaluated": false,
+      "metrics": null,
+      "status": "NOT_EVALUATED_CAUSAL_CENSOR_AUTHORITY_UNAVAILABLE"
+    },
+    "T6": {
+      "GPU_weighted_Q90_coverage": 0.8543942403177756,
+      "GPU_weighted_underprediction_seconds": 14552482.180344129,
+      "H100_Q90_coverage": 0.7847826086956522,
+      "H100_standby_Q90_coverage": 0.6370539104024298,
+      "N": 3532,
+      "abstention_count": 0,
+      "active_miss_GPU_5min_slots": 48504.0,
+      "critical_subgroup_N_shortfall": 96,
+      "eligible": false,
+      "evaluated": true,
+      "insufficient_historical_exact_support_job_count": 3164,
+      "insufficient_required_evaluation_subgroup_count": 1,
+      "mean_safe_duration_inflation_seconds": 38958.235898464445,
+      "overall_Q90_coverage": 0.7950169875424689,
+      "overreserved_GPU_hours": 123488.09863717979,
+      "post_repair_Q90_Q95_crossing_count": 0,
+      "raw_Q90_Q95_crossing_count": 0,
+      "safe_below_K0_count": 0,
+      "support_sufficient_H100_standby_N": 4,
+      "support_sufficient_H100_standby_Q90_coverage": 1.0
+    },
+    "T7": {
+      "GPU_weighted_Q90_coverage": 0.9138530287984111,
+      "GPU_weighted_underprediction_seconds": 14960009.13748151,
+      "H100_Q90_coverage": 0.9037267080745341,
+      "H100_standby_Q90_coverage": 0.9126803340926348,
+      "N": 3532,
+      "abstention_count": 0,
+      "active_miss_GPU_5min_slots": 49898.0,
+      "critical_subgroup_N_shortfall": 96,
+      "eligible": false,
+      "evaluated": true,
+      "insufficient_historical_exact_support_job_count": 3164,
+      "insufficient_required_evaluation_subgroup_count": 1,
+      "mean_safe_duration_inflation_seconds": 31814.358868700576,
+      "overall_Q90_coverage": 0.9082672706681767,
+      "overreserved_GPU_hours": 61659.653843320135,
+      "post_repair_Q90_Q95_crossing_count": 0,
+      "raw_Q90_Q95_crossing_count": 0,
+      "safe_below_K0_count": 0,
+      "support_sufficient_H100_standby_N": 4,
+      "support_sufficient_H100_standby_Q90_coverage": 1.0
+    },
+    "T8_N100": {
+      "GPU_weighted_Q90_coverage": 0.25347567030784507,
+      "GPU_weighted_underprediction_seconds": 28244175.196825266,
+      "H100_Q90_coverage": 0.2754658385093168,
+      "H100_standby_Q90_coverage": 0.09187547456340167,
+      "N": 3532,
+      "abstention_count": 1164,
+      "active_miss_GPU_5min_slots": 94132.0,
+      "critical_subgroup_N_shortfall": 96,
+      "eligible": false,
+      "evaluated": true,
+      "insufficient_historical_exact_support_job_count": 3164,
+      "insufficient_required_evaluation_subgroup_count": 1,
+      "mean_safe_duration_inflation_seconds": 11838.952473092506,
+      "overall_Q90_coverage": 0.29303510758776896,
+      "overreserved_GPU_hours": 11063.141939000778,
+      "post_repair_Q90_Q95_crossing_count": 0,
+      "raw_Q90_Q95_crossing_count": 0,
+      "safe_below_K0_count": 0,
+      "support_sufficient_H100_standby_N": 4,
+      "support_sufficient_H100_standby_Q90_coverage": 1.0
+    },
+    "T8_N200": {
+      "GPU_weighted_Q90_coverage": 0.25347567030784507,
+      "GPU_weighted_underprediction_seconds": 28244175.196825266,
+      "H100_Q90_coverage": 0.2754658385093168,
+      "H100_standby_Q90_coverage": 0.09187547456340167,
+      "N": 3532,
+      "abstention_count": 1164,
+      "active_miss_GPU_5min_slots": 94132.0,
+      "critical_subgroup_N_shortfall": 96,
+      "eligible": false,
+      "evaluated": true,
+      "insufficient_historical_exact_support_job_count": 3164,
+      "insufficient_required_evaluation_subgroup_count": 1,
+      "mean_safe_duration_inflation_seconds": 11838.952473092506,
+      "overall_Q90_coverage": 0.29303510758776896,
+      "overreserved_GPU_hours": 11063.141939000778,
+      "post_repair_Q90_Q95_crossing_count": 0,
+      "raw_Q90_Q95_crossing_count": 0,
+      "safe_below_K0_count": 0,
+      "support_sufficient_H100_standby_N": 4,
+      "support_sufficient_H100_standby_Q90_coverage": 1.0
+    },
+    "T8_N500": {
+      "GPU_weighted_Q90_coverage": 0.25397219463753723,
+      "GPU_weighted_underprediction_seconds": 28226168.448708773,
+      "H100_Q90_coverage": 0.2754658385093168,
+      "H100_standby_Q90_coverage": 0.09187547456340167,
+      "N": 3532,
+      "abstention_count": 1164,
+      "active_miss_GPU_5min_slots": 94061.0,
+      "critical_subgroup_N_shortfall": 96,
+      "eligible": false,
+      "evaluated": true,
+      "insufficient_historical_exact_support_job_count": 3164,
+      "insufficient_required_evaluation_subgroup_count": 1,
+      "mean_safe_duration_inflation_seconds": 11861.784100104913,
+      "overall_Q90_coverage": 0.29388448471121176,
+      "overreserved_GPU_hours": 11078.209251109916,
+      "post_repair_Q90_Q95_crossing_count": 0,
+      "raw_Q90_Q95_crossing_count": 0,
+      "safe_below_K0_count": 0,
+      "support_sufficient_H100_standby_N": 4,
+      "support_sufficient_H100_standby_Q90_coverage": 1.0
+    }
+  },
+  "failure_classification_evidence": {
+    "GPU_extreme_tail": {
+      "evidence": "T7 GPU-weighted coverage passes; Pareto concentration alone is not classified as a GPU-weighted coverage gate failure.",
+      "observed": "remaining miss contribution concentration quantified separately"
+    },
+    "ML_distribution_error": {
+      "evidence": "T1 and T2 raw Q90 under-cover overall/H100/standby/GPU on this selection cohort; T7 passes aggregate coverage, so failure is not universal across ML families.",
+      "observed": true
+    },
+    "calibration_inadequacy": {
+      "evidence": "T3_R/T3_D lower selection coverage than their frozen raw T1/T2 bounds. Calibration-block signed corrections were negative; no correction is changed here. This demonstrates transfer inadequacy on this cohort, not a causal proof of why the population changed.",
+      "observed": true
+    },
+    "excessive_conservatism": {
+      "evidence": "T4 and T6 reserve substantially more GPU-hours than T0 while failing coverage; T7 reservation ratio is diagnostic only.",
+      "observed": "reservation inefficiency, not a new hard-gate FAIL"
+    },
+    "support_fallback_inadequacy": {
+      "evidence": "Critical strong-support standby subgroup N=4 blocks every candidate; T8 abstains on 1164 OOD jobs; T4 variants still under-cover.",
+      "observed": true
+    }
+  },
+  "gate_semantics": "Only preregistered hard gates determine eligibility. All-H100-standby is a diagnostic reference. Efficiency has no absolute cutoff and was not reached. Raw crossing is repaired; only post-repair monotonicity and finite availability are hard requirements.",
+  "insufficient_support_count_definition": "Job-level count with historical exact_count<100 is distinct from number of insufficient required evaluation groups (1) and their N (4). Do not conflate these counts.",
+  "integrity": {
+    "CSV_SHA": "7eca5c4d832dd107b33a86069514bd2b4468297efc40e967680d01e4aa919ef2",
+    "conformal_retuning": 0,
+    "frozen_source_model_calibration_SHA_unchanged": true,
+    "new_fits": 0,
+    "new_raw_payload_reads": 0,
+    "new_runtime_predictions": 0,
+    "shadow_opened": false,
+    "status": "PASS",
+    "support_counts": {
+      "OUT_OF_SUPPORT": 1164,
+      "REGIME_MISMATCH": 1172,
+      "SPARSE_SUPPORT": 828,
+      "STRONG_SUPPORT": 368
+    },
+    "support_lookup_SHA": "6c183e792f7092b2b668501075245fd6b418b4d4b50602cbd1ef9a27d35b29eb",
+    "support_reconstruction": "Read-only join of existing frozen lookup tables to stored selection rows; no fit/predict/transform invocation; counts match pre-existing selection support verification",
+    "support_rule_changes": 0,
+    "threshold_changes": 0,
+    "unchanged_selection_and_freeze_SHA": {
+      "SELECTION_PREDICTIONS.parquet": "88f453943cb99b484b9acd18c99ec9a782cfca137cf9ce4b8ad73761d63e04dc",
+      "V40L_CALIBRATION_FREEZE.json": "b17b383c7f264f1e5bf2d07580c6a1a72a76fea16efbd70746875e6d49438e84",
+      "V40L_FINAL_SHADOW_REPORT.json": "5fe9811add4fa9944fc2e2684474d72185f600af9eca1b01f6d39fd0bb3b503f",
+      "V40L_FINAL_STATUS.json": "5f26c8bb46d9d799b48afe26fb5aad5f042427b2d4468df1c526d8e706308b19",
+      "V40L_PRECALIBRATION_EXECUTION_FREEZE.json": "454cd936e5eb6578f97eb090c077b7e06173a9b8d058c73716f39b172fa0ba82",
+      "V40L_TAIL_CANDIDATE_REGISTRY.json": "d1de7d1f6998a35e917558226190c95a5faf8c1d3b8f28b3339e25914f34ca7e",
+      "V40L_TAIL_ESTIMAND_CONTRACT.json": "0e39f83f0b3fc196c6b406bdd966b1015ba18f878a1b1c4a8f334246db7bc51c",
+      "V40L_TAIL_METHOD_FREEZE.json": "4f86c2ae64f101d0924808b0fbb40d23c56657601453d6761bf1a00c0473719c",
+      "V40L_TAIL_SELECTION_COMPARISON.json": "9a64104ca714a63ac96b780052d64e83ff32a9c97e0481dea3eb5086b67e5fdb"
+    },
+    "winner_reselection": 0
+  },
+  "raw_vs_calibrated": {
+    "T3_D": {
+      "GPU_weighted_coverage_delta": -0.108862959285005,
+      "H100_standby_coverage_delta": -0.04479878511769164,
+      "abstentions": 0,
+      "active_miss_GPU_slots_delta": 9368.0,
+      "comparison_type": "same underlying raw bound plus CQR",
+      "overall_coverage_delta": -0.08691959229898083,
+      "overreserved_GPU_hours_delta": -4433.861955792207,
+      "reference": "T2"
+    },
+    "T3_R": {
+      "GPU_weighted_coverage_delta": -0.0722442899702086,
+      "H100_standby_coverage_delta": -0.00379650721336372,
+      "abstentions": 0,
+      "active_miss_GPU_slots_delta": 1699.0,
+      "comparison_type": "same underlying raw bound plus CQR",
+      "overall_coverage_delta": -0.04133635334088337,
+      "overreserved_GPU_hours_delta": -859.7664004005564,
+      "reference": "T1"
+    },
+    "T4_N100": {
+      "GPU_weighted_coverage_delta": -0.08192651439920551,
+      "H100_standby_coverage_delta": 0.016704631738800324,
+      "abstentions": 0,
+      "active_miss_GPU_slots_delta": -65345.0,
+      "comparison_type": "same cohort different registered method; not an isolated treatment effect",
+      "overall_coverage_delta": -0.04303510758776896,
+      "overreserved_GPU_hours_delta": 68720.82318195084,
+      "reference": "T0"
+    },
+    "T4_N200": {
+      "GPU_weighted_coverage_delta": -0.08192651439920551,
+      "H100_standby_coverage_delta": 0.016704631738800324,
+      "abstentions": 0,
+      "active_miss_GPU_slots_delta": -65345.0,
+      "comparison_type": "same cohort different registered method; not an isolated treatment effect",
+      "overall_coverage_delta": -0.04303510758776896,
+      "overreserved_GPU_hours_delta": 68720.82318195084,
+      "reference": "T0"
+    },
+    "T4_N500": {
+      "GPU_weighted_coverage_delta": -0.08825719960278045,
+      "H100_standby_coverage_delta": -0.03568716780561883,
+      "abstentions": 0,
+      "active_miss_GPU_slots_delta": -62504.0,
+      "comparison_type": "same cohort different registered method; not an isolated treatment effect",
+      "overall_coverage_delta": -0.058607021517553815,
+      "overreserved_GPU_hours_delta": 68664.7552068501,
+      "reference": "T0"
+    },
+    "T8_N100": {
+      "GPU_weighted_coverage_delta": -0.47207050645481635,
+      "H100_standby_coverage_delta": -0.27790432801822323,
+      "abstentions": 1164,
+      "active_miss_GPU_slots_delta": -50306.0,
+      "comparison_type": "same cohort different registered method; not an isolated treatment effect",
+      "overall_coverage_delta": -0.4057191392978483,
+      "overreserved_GPU_hours_delta": -36036.31897468727,
+      "reference": "T1"
+    },
+    "T8_N200": {
+      "GPU_weighted_coverage_delta": -0.47207050645481635,
+      "H100_standby_coverage_delta": -0.27790432801822323,
+      "abstentions": 1164,
+      "active_miss_GPU_slots_delta": -50306.0,
+      "comparison_type": "same cohort different registered method; not an isolated treatment effect",
+      "overall_coverage_delta": -0.4057191392978483,
+      "overreserved_GPU_hours_delta": -36036.31897468727,
+      "reference": "T1"
+    },
+    "T8_N500": {
+      "GPU_weighted_coverage_delta": -0.4715739821251242,
+      "H100_standby_coverage_delta": -0.27790432801822323,
+      "abstentions": 1164,
+      "active_miss_GPU_slots_delta": -50377.0,
+      "comparison_type": "same cohort different registered method; not an isolated treatment effect",
+      "overall_coverage_delta": -0.4048697621744055,
+      "overreserved_GPU_hours_delta": -36021.25166257813,
+      "reference": "T1"
+    }
+  },
+  "scope": "POST_SELECTION_DIAGNOSTIC_ONLY; no change to V40L acceptance",
+  "selection_classification": "V40L_TAIL_MODEL_INSUFFICIENT",
+  "shadow": "SEALED",
+  "winner": null
+}
