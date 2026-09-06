@@ -178,7 +178,7 @@ R0=1609.317222222 GPUh; R1=3442.890416667 GPUh. 비교는 동일한 고정 BODY/
 
 **46. 수정 금지.** Optimizer modified=NO; migration=NO; WAN=NO; terminal=NO; event trigger=NO; local repair=NO. A0/A1/M1/MF/Fresh/rollingMPC/second route search/V40S2 변경 없음. Production q=UNCHANGED; PF=.95; Q control=NO; electrical=HOLD; electricalB0–B3=NO; FULL_MAY=NO.
 
-**47. Tests.** 73/75 PASS, 실패0, 아직 미실행2. Required-artifact/clean-state 검사는 receipt commit 이후 단계다. 테스트 성공은 과학적 safety 성공을 뜻하지 않는다. 최초 post-fit 검사에서 float64 극소확률과 등록된 float32 feature를 상대오차로 비교한 오류1건을 발견했다. 등록된 dtype 변환 후 정확한 배열 일치 검사로 수정했으며 모델·입력·예측·게이트는 변경하지 않았다. 최초 검사와 정정 기록을 보존했다.
+**47. Tests.** 75/75 PASS, 실패0, 아직 미실행0. Required-artifact/clean-state 검사를 receipt commit 후 완료했다. 테스트 성공은 과학적 safety 성공을 뜻하지 않는다. 최초 post-fit 검사에서 float64 극소확률과 등록된 float32 feature를 상대오차로 비교한 오류1건을 발견했다. 등록된 dtype 변환 후 정확한 배열 일치 검사로 수정했으며 모델·입력·예측·게이트는 변경하지 않았다. 최초 검사와 정정 기록을 보존했다.
 
 **48. 재현.** 독립 same-seed rebuild1회. Safe prediction max/mean 차이=0/0 GPUh, CAL primary 원본/재현=1.113141187/1.113141187. 더 좋은 재현을 선택하지 않았다. Count crossfit, BODY, classifier를 다시 학습했다. [장치·버전·시드·학습/예측시간](<C:/codex_mobileess_workspace/MobileESS_v40r5_15min_selective_burst_gpuwork/dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_COMPUTE_LEDGER.json>).
 

@@ -13,7 +13,13 @@
   "NEXT_RECOMMENDED_REVISION": "V40R5R1_ZERO_INFLATION_AWARE_GATE_CORRECTION",
   "next_revision_created_or_executed": false,
   "post_result_amendment": "Interpretation audit only; no refit, calibration, threshold/eta/gate change, reselection or winner promotion",
-  "closure_tests": "Required-artifact and clean-state checks follow this initial receipt commit; final closure update records75/75 without refitting",
+  "closure_tests": {
+    "passed": 75,
+    "failed": 0,
+    "not_run": 0,
+    "clean_state_measured_before_closure_reporting_update": true,
+    "final_read_only_test_command": "python tests/dayahead/test_v40r5_contracts.py --final --closure --read-only"
+  },
   "required_artifact_count": 59,
   "May_scientific_reads": 0,
   "optimizer_Gurobi_OpenDSS_calls": 0
