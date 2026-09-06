@@ -4,6 +4,7 @@ import argparse,platform,importlib.metadata as md,re
 def link(name,label=None):return f'[{label or name}](<{(OUT/name).as_posix()}>)'
 def audit():
     reg,pre=authority();start=read('V40R5_PROTECTED_SCOPE_START.json');rows=[]
+    prior_compute=read('V40R5_COMPUTE_LEDGER.json') if (OUT/'V40R5_COMPUTE_LEDGER.json').exists() else {}
     for row in start['files']:
         root=R3 if row['root']=='R3' else R4;h=sha(root/row['path']);assert h==row['SHA256'],row['path'];rows.append({**row,'end_SHA256':h,'unchanged':True})
     states={}
@@ -26,7 +27,8 @@ def audit():
       'libraries':{n:md.version(n) for n in ['torch','lightgbm','xgboost','scikit-learn','numpy','pandas','scipy']},'exact_device_used':'CPU for all fits and prediction/scenario calculations',
       'GPU_training_used':False,'reason':'Preregistered compact tree/logistic architecture; no neural escalation','seed':SEED,'threads':4,'mixed_precision':False,
       'determinism':reg['tree_parameters'],'runs':runs,'fit_time_seconds_sum':sum(r['fit_time_seconds'] for r in runs),'prediction_time_seconds_sum':sum(r['prediction_time_seconds'] for r in runs),
-      'timer_scope':'Summed component timers, including Tweedie simulation in prediction time; not total task wall time','replicate_not_additional_search':True})
+      'timer_scope':'Summed component timers, including Tweedie simulation in prediction time; not total task wall time','replicate_not_additional_search':True,
+      **{k:v for k,v in prior_compute.items() if k.startswith('native_') or k=='thread_controls_note'}})
     dump('V40R5_NO_INTEGRATION_AUDIT.json',{'optimizer_calls':0,'Gurobi_calls':0,'OpenDSS_calls':0,'modifications':{k:False for k in ['A0','A1','M1','MF','migration','WAN','terminal','event_trigger','local_repair','rolling_MPC','second_route_search','V40S2']},
       'evidence':'Only R5 namespace diff; import AST tests exclude optimizer/Gurobi/OpenDSS; execution entrypoints confined to recorded ML modules; no whole-machine process monitor claim',
       'holds':reg['holds'],'interface':'Proposal only; optimizer_use_allowed False on every row'})
@@ -40,7 +42,14 @@ def audit():
             for month in sorted(set(d[:7] for d in dates[m[role]])):
                 ix=m[role]&np.array([d[:7]==month for d in dates]);periods[name].append({'role':role,'month':month,'metrics':aggregate(a['y'][ix],q[ix,0],q[ix,1],u)})
     dump('V40R5_BASELINE_DEVELOPMENT_TEMPORAL_DIAGNOSTIC.json',{'models':periods,'scope':'Saved-prediction exposed diagnostics only; no new selection'})
-    print('Protected hashes verified:',len(rows),'files. May scientific reads0; optimizer/Gurobi/OpenDSS calls0. Compute ledger ready.')
+    chosen=read('V40R5_CAL_SELECTION_FREEZE.json')['frozen_diagnostic_pipeline'];bt=read('fits/PB1/result.json')['selected']['trial']
+    ct=read(f'fits/{chosen["classifier"]}/result.json')['selected']['trial'];pairs=[]
+    for k in range(10):pairs.append((OUT/'fits/PB1'/f'trial_{bt}_head{k}.txt',OUT/'reproduction/PB1'/f'repeat_head{k}.txt'))
+    for p in (OUT/'reproduction/N1').glob('*_count.txt'):pairs.append((OUT/'fits/N1'/p.name,p))
+    pairs.append((OUT/'fits'/chosen['classifier']/f'trial_{ct}_model.pkl',OUT/'reproduction'/chosen['classifier']/'repeat_model.pkl'))
+    checks=[{'original':a.relative_to(ROOT).as_posix(),'repeat':b.relative_to(ROOT).as_posix(),'original_SHA256':sha(a),'repeat_SHA256':sha(b),'same_bytes':sha(a)==sha(b)} for a,b in pairs]
+    dump('V40R5_REBUILD_MODEL_PARAMETER_AUDIT.json',{'files':checks,'all_same_bytes':all(x['same_bytes'] for x in checks),'scope':'Own R5 model files only; parent files never normalized','prediction_audit':'V40R5_REPRODUCIBILITY_AUDIT.json'})
+    print('Protected hashes verified:',len(rows),'files. May scientific reads0; optimizer/Gurobi/OpenDSS calls0. Compute ledger ready. Rebuild model bytes equal:',all(x['same_bytes'] for x in checks))
 
 def review():
     reg,pre=authority();sel=read('V40R5_MODEL_SELECTION.json');f=read('V40R5_CAL_SELECTION_FREEZE.json');c=f['frozen_diagnostic_pipeline'];h=read('V40R5_HYBRID_METRICS.json');ev=h['metrics'];det=h['detector']
@@ -77,6 +86,22 @@ def review():
       'BODY 게이트의 수학적 가능성도 별도로 검사했다. 비음수 Q90은 모든 실제0을 덮으므로 overall=z+(1−z)×positive다. BODY zero 비율 z>50%이면 positive coverage≥90%와 overall≤95%는 동시에 불가능하다. 아래는 모델 성능과 별개의 구성비 제약이며 게이트를 완화하지 않았다.','',
       '| 역할 | BODY zero fraction | positive90%일 때 최소 overall | 동시 가능 |','|---|---:|---:|---|']
     for role,r in feas['roles'].items():rows.append(f'| {role} | {r["body_zero_fraction"]:.4%} | {r["minimum_overall_coverage_if_positive_coverage_90"]:.4%} | {r["both_requested_body_bands_feasible"]} |')
+    zero=read('V40R5_ZERO_INFLATION_GATE_AUDIT.json')
+    rows+=['','PRIMARY RESULT: **NO REGISTERED COMBINATION PASSED THE FROZEN SAFETY GATES**','',
+      'IMPORTANT METHODOLOGICAL FINDING: **BODY_GATE_STRUCTURAL_INCOMPATIBILITY_DUE_TO_ZERO_INFLATION**','',
+      'BODY_GATE_STRUCTURAL_INCOMPATIBILITY=YES. 전체 TRAIN의 zero 비율과 BODY-only zero 비율은 서로 다른 분모다. 실제 CAL BODY는 1,195/2,345가 zero이므로 양수 coverage≥90%이면 전체 coverage≥95.095949%다. 이 때문에 필수 CAL BODY 게이트는 모델과 무관하게 동시 통과가 불가능하다. 정수 표본에서도 양수 구간을 최소1,035개 덮어야 하지만 전체 상한이 허용하는 최대는1,032개다.','',
+      'The 15-min target increased zero inflation sufficiently that the preregistered simultaneous overall and positive BODY Q90 coverage bounds became structurally incompatible. Therefore, failure of the registered BODY gate cannot be interpreted solely as evidence of poor forecast quality.','',
+      'The comparison is retrospective and diagnostic. The frozen failure taxonomy is retained; it does not mean that all models are poor.','',
+      '| 역할 / BODY 후보 | 전체 coverage | zero coverage | 양수 BODY coverage | 양수 Q90 normalized pinball | 양수 Q50 WAPE | 양수 Q50 MAE GPUh | under GPUh | over GPUh |',
+      '|---|---:|---:|---:|---:|---:|---:|---:|---:|']
+    for role in ['CALIBRATION','EXPOSED_EVALUATION']:
+        for name,candidate in zero['candidates'].items():
+            v=candidate['roles'][role];pt=v['positive_Q50_point']
+            rows.append(f'| {role} / {name} | {v["overall_coverage"]:.6%} | {v["zero_only_coverage"]:.2%} | {v["positive_BODY_coverage"]:.6%} | {v["positive_Q90_normalized_pinball"]:.9f} | {pt["WAPE"]:.6%} | {pt["MAE"]:.6f} | {v["underprediction_GPUh"]:.3f} | {v["overprediction_GPUh"]:.3f} |')
+    rows+=['','A: PB1 trial0/BC1은 CAL·EXPOSED 모두 양수 BODY coverage90–95%를 충족한다. B: BODY 게이트 내에서는 두 split 모두 전체 upper95%만으로 탈락한다. CAL은 구조적 충돌이고, EXPOSED는 zero 비율이50%미만이라 원리적으로 가능한 게이트에서 해당 예측의 전체 상한 초과다. 이 결과는 전체 pipeline의 통과를 뜻하지 않는다. C: raw PB1 trial0/BC0와 trial1/BC0는 양수 BODY coverage 자체도90%미만이다.','',
+      '모든 기존 BODY 옵션과 두 raw tuning trial을 보고했다. Trial1은 사후 진단뿐이며 새 BC1 calibration을 만들지 않았다. BC1은 기존 저장 배열만 읽었다. Pinball 평균·합, Q90 기준 양수 WAPE/MAE와 월별 실패 사유는 '+link('V40R5_ZERO_INFLATION_GATE_AUDIT.json','정식 감사 JSON')+' 및 '+link('V40R5_BODY_GATE_FEASIBILITY_PROOF.md','수학적 증명')+'에 있다.','',
+      'Burst detector/eta/envelope/overreservation 게이트는 모두 그대로이며 자동 PASS는 없다. 모델 재학습·새 calibration·새 threshold·재선택·winner promotion=0.','',
+      'V40R5 remains failed under its frozen preregistration; the evaluation contract will be corrected only in a separate prospective revision.','']
     rows+=['','**20. Auxiliary count.** N0 causal seasonal 대비 N1 LightGBM Poisson mean+TRAIN conditional NB dispersion. Classifier TRAIN count feature는5개 chronological expanding folds와 N0 warm-up으로 만들었다. 완료 label이 destination의 첫 origin까지 성숙해야 fold fit에 들어간다.','',
       f'**21. Large-count recall.** N_high={threshold["N_high"]:.6f}; N1 recall(P90>N_high)={countn["large_count_recall_using_P90"]:.6%}, count MAE={countn["MAE"]:.6f}, RMSE={countn["RMSE"]:.6f}.','',
       '**22. Classifier 비교.** C0 TRAIN base rate, C1 logistic, C2 LightGBM, C3 XGBoost. Trial은 DEV PR-AUC/Brier, eta는 CAL에서만 고정했다.','',
@@ -103,11 +128,18 @@ def review():
       '**44. May.** 2025년5월 scientific reads=0. 경로/index/source/provenance metadata는 NONZERO로 공개한다. Raw archive 및 May scientific payload를 새로 열지 않았다.','',
       '**45. 호출.** Optimizer=0, Gurobi=0, OpenDSS=0. Interface는 proposal뿐이다.','',
       '**46. 수정 금지.** Optimizer modified=NO; migration=NO; WAN=NO; terminal=NO; event trigger=NO; local repair=NO. A0/A1/M1/MF/Fresh/rollingMPC/second route search/V40S2 변경 없음. Production q=UNCHANGED; PF=.95; Q control=NO; electrical=HOLD; electricalB0–B3=NO; FULL_MAY=NO.','',
-      f'**47. Tests.** {tests["passed"]}/{tests["tests"]} PASS, 실패{tests["failed"]}, 아직 미실행{tests["not_run"]}. 마지막 required-artifact/clean-state 검사는 receipt commit 후 실행한다. 테스트 성공은 과학적 safety 성공을 뜻하지 않는다.','',
+      f'**47. Tests.** {tests["passed"]}/{tests["tests"]} PASS, 실패{tests["failed"]}, 아직 미실행{tests["not_run"]}. '+('Required-artifact/clean-state 검사를 receipt commit 후 완료했다.' if tests['not_run']==0 else 'Required-artifact/clean-state 검사는 receipt commit 이후 단계다.')+' 테스트 성공은 과학적 safety 성공을 뜻하지 않는다. 최초 post-fit 검사에서 float64 극소확률과 등록된 float32 feature를 상대오차로 비교한 오류1건을 발견했다. 등록된 dtype 변환 후 정확한 배열 일치 검사로 수정했으며 모델·입력·예측·게이트는 변경하지 않았다. 최초 검사와 정정 기록을 보존했다.','',
       f'**48. 재현.** 독립 same-seed rebuild1회. Safe prediction max/mean 차이={repro["differences"]["selected_safe"]["max"]:.12g}/{repro["differences"]["selected_safe"]["mean"]:.12g} GPUh, CAL primary 원본/재현={repro["CAL_primary_original"]:.9f}/{repro["CAL_primary_repeat"]:.9f}. 더 좋은 재현을 선택하지 않았다. Count crossfit, BODY, classifier를 다시 학습했다. '+link('V40R5_COMPUTE_LEDGER.json','장치·버전·시드·학습/예측시간')+'.','',
       '**49. 연구 커밋.** '+link('V40R5_FINAL_COMMIT_RECEIPT.json','Final research commit receipt')+'에 exact SHA를 저장한다. Scientific result commit과 후속 closure verification commit을 구분한다.','',
       '**50. Receipt 커밋.** 자기참조 SHA 대신 receipt JSON에 git log로 해석하는 명령을 저장한다. 최종 응답에 실제 closure/receipt HEAD를 보고한다.','',
+      'NEXT_RECOMMENDED_REVISION=**V40R5R1_ZERO_INFLATION_AWARE_GATE_CORRECTION**. 제안만 기록하며 R5R1 생성·실행은 하지 않았다. 향후 수정 범위는 평가계약뿐이다: occurrence와 양수 magnitude 분리, positive BODY Q90 gate, overall coverage의 diagnostic 전환, burst 및 hybrid 과예약·안전 게이트 유지. 15분×96 target/cohort/splits/causal features/burst threshold/model registry/hyperparameters/optimizer firewall/May firewall은 유지한다. 현재 R5에 이 변경을 선반영하지 않았다.','',
       link('V40R5_PREREGISTRATION.json','사전등록')+' · '+link('V40R5_MODEL_SELECTION.json','선택 결과')+' · '+link('V40R5_BODY_GATE_FEASIBILITY_AUDIT.json','BODY gate 가능성')+' · '+link('V40R5_OPTIMIZER_INTERFACE_CONTRACT.json','연결 제안 계약')]
+    comparison=['| Envelope | CAL primary | CAL burst coverage | CAL overreservation GPUh |','|---|---:|---:|---:|']
+    for choice in f['combinations']:
+        if choice['classifier']==c['classifier'] and choice['body_calibration']==c['body_calibration']:
+            v=choice['CAL_metrics'];comparison.append(f'| {choice["envelope"]} | {v["primary"]:.6f} | {v["coverage"]["burst"]["value"]:.4%} | {v["overprediction_GPUh"]:,.3f} |')
+    comparison+=['',f'R0={read("V40R5_ROBUST_ENVELOPE_R0.json")["value_GPUh"]:.9f} GPUh; R1={read("V40R5_ROBUST_ENVELOPE_R1.json")["value_GPUh"]:.9f} GPUh. 비교는 동일한 고정 BODY/classifier에서 CAL만 사용했다. R2의 각 group 지원 수·quantile·fallback은 별도 JSON에 있다.','']
+    position=next(k for k,x in enumerate(rows) if x.startswith('**29.'));rows[position:position]=comparison
     (OUT/'V40R5_FINAL_REVIEW.md').write_text('\n\n'.join(rows[:10])+'\n\n'+'\n'.join(rows[10:])+'\n',encoding='utf-8',newline='\n')
     print('Korean review generated; requested sections1..50.')
 
@@ -119,6 +151,10 @@ def receipt():
       'selection_freeze_commit':read('V40R5_MODEL_SELECTION.json')['selection_commit'],'final_research_commit':science,
       'final_receipt_commit':'Resolve following closure commit: git log -1 --format=%H -- dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_FINAL_COMMIT_RECEIPT.json',
       'classification':read('V40R5_MODEL_SELECTION.json')['classification'],'selected_model':read('V40R5_MODEL_SELECTION.json')['selected_model'],
+      'scientific_status':'FAIL','PRIMARY_RESULT':'NO REGISTERED COMBINATION PASSED THE FROZEN SAFETY GATES',
+      'IMPORTANT_METHODOLOGICAL_FINDING':'BODY_GATE_STRUCTURAL_INCOMPATIBILITY_DUE_TO_ZERO_INFLATION',
+      'NEXT_RECOMMENDED_REVISION':'V40R5R1_ZERO_INFLATION_AWARE_GATE_CORRECTION','next_revision_created_or_executed':False,
+      'post_result_amendment':'Interpretation audit only; no refit, calibration, threshold/eta/gate change, reselection or winner promotion',
       'closure_tests':'Required-artifact and clean-state checks follow this initial receipt commit; final closure update records75/75 without refitting',
       'required_artifact_count':len(names),'May_scientific_reads':0,'optimizer_Gurobi_OpenDSS_calls':0})
     print('Receipt for scientific result commit',science)

@@ -80,7 +80,9 @@ class Contracts(unittest.TestCase):
         for fold in r['folds']:
             if fold['max_training_label_available_at']:self.assertLessEqual(pd.Timestamp(fold['max_training_label_available_at']),pd.Timestamp(fold['fit_label_cutoff']))
     def test_34_predicted_count_only(self):
-        x=np.load(self.exists('classifier_X.npy'));p=np.load(self.exists('fits/N1/predictions.npz'))['TRAIN_crossfit_N1'];np.testing.assert_allclose(x[:,-2],np.log1p(p[:,0]),rtol=1e-6);np.testing.assert_allclose(x[:,-1],p[:,2],rtol=1e-6)
+        x=np.load(self.exists('classifier_X.npy'));p=np.load(self.exists('fits/N1/predictions.npz'))['TRAIN_crossfit_N1']
+        # Validate exact preregistered float32 conversion, including tiny-probability underflow.
+        np.testing.assert_array_equal(x[:,-2],np.log1p(p[:,0]).astype(np.float32));np.testing.assert_array_equal(x[:,-1],p[:,2].astype(np.float32))
     def test_35_classifier_causal_inputs(self):
         x=np.load(self.exists('classifier_X.npy'));self.assertEqual(x.shape[1],63);np.testing.assert_array_equal(x[:,:61],self.a['X'])
     def test_36_eta_CAL_only(self):

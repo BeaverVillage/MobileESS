@@ -1,0 +1,6 @@
+{
+  "issue": "Test34 compared a preregistered float32 classifier feature against its float64 NB probability using relative-only tolerance. Tiny positive probabilities correctly underflow to0 in float32, causing relative error1.",
+  "resolution": "Compare exact arrays after the registered float32 cast, including log1p mean; no model/data/metric/evaluation source or prediction changed.",
+  "initial_report": "V40R5_POSTFIT_TEST_INITIAL_ATTEMPT.json",
+  "scientific_retraining": false
+}
