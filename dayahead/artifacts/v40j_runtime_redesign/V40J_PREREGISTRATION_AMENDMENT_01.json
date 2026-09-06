@@ -1,0 +1,84 @@
+{
+  "April_metadata_only_exception": "footer metadata used for range census; not shadow runtime/status row read",
+  "aggregate_or_selection_artifact_existence_before_amendment": {
+    "V40J_CONDITIONAL_CALIBRATION_REPORT.json": false,
+    "V40J_POINT_MODEL_COMPARISON.json": false,
+    "V40J_RUNTIME_METHOD_FREEZE.json": false,
+    "V40J_SELECTION_FREEZE.json": false
+  },
+  "amendment_id": "V40J_01",
+  "candidate_ranking_observed_before_changes": false,
+  "candidate_registry_changed": false,
+  "candidate_training_complete": true,
+  "candidate_training_determinism_sha256": "88b7188bb4f1071a219ebc33bfe0cce990876f2dca5de9e0e2b86c5b2e15108b",
+  "changes": [
+    {
+      "affected_source_files": [
+        "C:/codex_mobileess_workspace/MobileESS_v40a_bounded_iterative_coopt/dayahead/v40j/methods.py"
+      ],
+      "baseline_reproduction_metrics_observed": true,
+      "candidate_metric_outcomes_observed_before_change": false,
+      "candidate_ranking_observed_before_change": false,
+      "corrected_rule": "Explicitly generate one empty tuple for every row when grouping columns are empty.",
+      "correction_tool_timestamp": "2026-09-06T09:34:53.542Z",
+      "discovery_timestamp": "2026-09-06T09:34:46.160Z",
+      "discovery_timestamp_basis": "first failing automated test output",
+      "final_shadow_opened": false,
+      "id": "A",
+      "original_preregistered_rule": "Hierarchy level 4 is a pooled fallback for every query.",
+      "patch_sha256": "0d2c1c6bce4df4446d4af7deed9f0e199ad550a634409c632c4df73f9816c920",
+      "problem_found": "Empty-column pandas tuple iteration omitted pooled keys.",
+      "recorded_tool_call_id": "call_vpzUJgaP3N9xdXhxVdw5LC42",
+      "scientific_impact": "Repairs previously invalid pooled calibration. No threshold, candidate or split change.",
+      "source_SHA_after": "142ae3036461671b1c6754e908c703de6baeb6f5f568465db7bba4d28c402cda",
+      "source_SHA_before": "57f9593c9b243b5b137f0096c033f04b67aa3058615f45c5caa3b694f24cfb02",
+      "source_snapshot_provenance": "Exact tool patch history replayed from the local task transcript; replay of all later patches matches current file SHA."
+    },
+    {
+      "affected_source_files": [
+        "C:/codex_mobileess_workspace/MobileESS_v40a_bounded_iterative_coopt/dayahead/v40j/evaluate.py"
+      ],
+      "baseline_reproduction_metrics_observed": true,
+      "candidate_metric_outcomes_observed_before_change": false,
+      "candidate_ranking_observed_before_change": false,
+      "corrected_rule": "Gate on native conditional Q90 itself; R3/Q95 is evaluated separately for GPU miss and conservatism.",
+      "correction_tool_timestamp": "2026-09-06T09:36:58.094Z",
+      "discovery_timestamp": "2026-09-06T09:36:58.094Z",
+      "discovery_timestamp_basis": "first recorded corrective tool call; earlier mental discovery time is not asserted",
+      "final_shadow_opened": false,
+      "id": "B",
+      "original_preregistered_rule": "Target coverage 90%; point, upper-tail calibration and robust reserve are separate layers.",
+      "patch_sha256": "9e41227844236eff5ca4a884bbd5a7eb8ed1984d60d965028bd2b5e71f191c66",
+      "problem_found": "Early evaluator incorrectly used the selected grid reserve envelope for the coverage gate, allowing Q95 to conceal Q90 failure.",
+      "recorded_tool_call_id": "call_HKKX2wCkq3IkQ5UvPgOzerJi",
+      "scientific_impact": "Makes acceptance stricter and restores registered layer separation. No candidate ranking had been emitted or viewed.",
+      "source_SHA_after": "e61241530d840dd4853dad4543b01c1ef37ea5d7e559c2679281c36897b224bd",
+      "source_SHA_before": "e64b0f43406d186bc22155364c59a5edb77cefd718ba57a25501b565bf87b6ae",
+      "source_snapshot_provenance": "Exact tool patch history replayed from the local task transcript; replay of all later patches matches current file SHA."
+    }
+  ],
+  "counter_report_sha256": "c10dcb2bd41cce399c37635757d24544bd820d57fe31b490a1d4ca465f33b655",
+  "created_at": "2026-09-06T09:46:57.466733+00:00",
+  "current_source_SHA": {
+    "C:/codex_mobileess_workspace/MobileESS_v40a_bounded_iterative_coopt/dayahead/v40j/evaluate.py": "a67f78a0e4da8a0c80e67f84a4ae5d2bda250823d04173c272d5579dfa37d068",
+    "C:/codex_mobileess_workspace/MobileESS_v40a_bounded_iterative_coopt/dayahead/v40j/methods.py": "142ae3036461671b1c6754e908c703de6baeb6f5f568465db7bba4d28c402cda"
+  },
+  "current_source_patch_replay_verified": true,
+  "draft_refinement_before_first_commit": true,
+  "evidence_files": {
+    "A_after_methods.py": "142ae3036461671b1c6754e908c703de6baeb6f5f568465db7bba4d28c402cda",
+    "A_before_methods.py": "57f9593c9b243b5b137f0096c033f04b67aa3058615f45c5caa3b694f24cfb02",
+    "B_after_evaluate.py": "e61241530d840dd4853dad4543b01c1ef37ea5d7e559c2679281c36897b224bd",
+    "B_before_evaluate.py": "e64b0f43406d186bc22155364c59a5edb77cefd718ba57a25501b565bf87b6ae"
+  },
+  "final_shadow_runtime_status_rows_read": 0,
+  "ordering_enforcement": "evaluate.check_amendment_commit verifies committed amendment SHA before evaluation and again before winner selection; shadow open requires non-null frozen winner",
+  "other_preselection_implementation_repairs": "zero duration grid slots and actual-start grid phase corrections logged in IMPLEMENTATION_REPAIR_LOG.md; microsecond timestamp dtype explicitly converted to nanoseconds before epoch-second division; no outcome-dependent protocol change",
+  "preregistration_commit": "570c653",
+  "requested_by": "user mid-run integrity amendment",
+  "shadow_payload_ever_opened": false,
+  "split_contract_changed": false,
+  "support_thresholds_changed": false,
+  "target_changed": false,
+  "timestamp_firewall_sha256": "f2a3c8220f5898b708fad8a727d32787c60c9307755c8b1c7075168767fb323a"
+}
