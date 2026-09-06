@@ -25,7 +25,7 @@ def clean(x):
 
 def dump(name,obj):
     OUT.mkdir(parents=True,exist_ok=True)
-    (OUT/name).write_text(json.dumps(clean(obj),ensure_ascii=False,indent=2,allow_nan=False)+'\n',encoding='utf-8')
+    (OUT/name).write_text(json.dumps(clean(obj),ensure_ascii=False,indent=2,allow_nan=False)+'\n',encoding='utf-8',newline='\n')
 
 def read(name):return json.loads((OUT/name).read_text(encoding='utf-8-sig'))
 def sha(path):
@@ -36,4 +36,3 @@ def day_contract(day):
     begin=pd.Timestamp(day,tz=AEST).tz_convert('UTC')
     return begin-pd.Timedelta(hours=6),begin,begin+pd.Timedelta(days=1)
 def utc_ns(values):return pd.DatetimeIndex(values).as_unit('ns').asi8
-
