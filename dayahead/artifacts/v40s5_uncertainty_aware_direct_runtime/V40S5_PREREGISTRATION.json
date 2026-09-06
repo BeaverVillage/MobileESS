@@ -1,0 +1,423 @@
+{
+  "timestamp": "2026-09-06T16:09:21.943183+00:00",
+  "name": "V40S5_UNCERTAINTY_AWARE_DIRECT_RUNTIME",
+  "base": "ea9e5133657d417ce66c8436cac7e05f8634926b",
+  "source_SHA256": "fed0270c4e90362bc97b3583d92bfc6e00d6083297ee502b098e08896e086df9",
+  "panel_SHA256": "fbd99e403891139150441c7374640ae5607a8671e9c511cc52f92f3959e795b7",
+  "user_request_SHA256": "849eae5004d075f5fcae73b3266b87706a7c3cf813a3de2ec17f2f1c49cda7e4",
+  "all_user_sections_binding": true,
+  "eligibility": "end < cutoff AND positive finite end-start AND proxy feature constructible AND same source contract",
+  "cutoff": "2025-03-14 08:00:00+00:00",
+  "feature_contract": {
+    "assumption_id": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+    "P": [
+      "requested_seconds",
+      "num_gpus_req",
+      "num_nodes_req",
+      "num_cores_req",
+      "requested_memory_mib",
+      "partition",
+      "qos",
+      "submit_hour",
+      "submit_dow"
+    ],
+    "PW": [
+      "num_gpus_req",
+      "num_nodes_req",
+      "num_cores_req",
+      "requested_memory_mib",
+      "partition",
+      "qos",
+      "submit_hour",
+      "submit_dow"
+    ],
+    "HISTORICAL_D1_SNAPSHOT_PROVENANCE": "UNVERIFIED",
+    "ORIGINAL_SUBMISSION_VALUE_PROVENANCE": "UNVERIFIED",
+    "REQUEST_MODIFICATION_HISTORY": "UNOBSERVED",
+    "paper_label": "ASSUMPTION-BASED TRACE-DRIVEN RUNTIME MODEL",
+    "excluded": [
+      "job_uid",
+      "job_id",
+      "user ID",
+      "account ID",
+      "username",
+      "job name",
+      "application identity",
+      "start_time",
+      "end_time",
+      "runtime_seconds",
+      "terminal status",
+      "K0",
+      "reference_safe_sec",
+      "future scheduler state",
+      "migration information",
+      "future electrical result"
+    ],
+    "mapping": {
+      "wallclock_req": "requested_seconds",
+      "gpus_requested": "num_gpus_req",
+      "nodes_req": "num_nodes_req",
+      "processors_req": "num_cores_req",
+      "memory_req": "requested_memory_mib",
+      "partition": "partition",
+      "qos": "qos",
+      "submit_hour": "submit_hour",
+      "weekday": "submit_dow"
+    },
+    "GPU_weight": "Recorded num_gpus_req, frozen separately from predictions"
+  },
+  "preprocessing": {
+    "log1p": [
+      "requested_seconds",
+      "num_gpus_req",
+      "num_nodes_req",
+      "num_cores_req",
+      "requested_memory_mib"
+    ],
+    "categorical": [
+      "partition",
+      "qos"
+    ],
+    "clock": [
+      "submit_hour",
+      "submit_dow"
+    ],
+    "numeric_missing": "historical fit-subset median + explicit indicator",
+    "categorical_encoding": "one-hot; UNKNOWN always represented",
+    "unseen": "__UNKNOWN__",
+    "missing_categorical": "__UNKNOWN__",
+    "target_encoding": false,
+    "fit_scope": "HIST_FIT for tuning, strictly preceding historical subset for each OOF fold, whole mature library for final models",
+    "final_P": {
+      "track": "P",
+      "columns": [
+        "requested_seconds",
+        "num_gpus_req",
+        "num_nodes_req",
+        "num_cores_req",
+        "requested_memory_mib",
+        "partition",
+        "qos",
+        "submit_hour",
+        "submit_dow"
+      ],
+      "medians": {
+        "requested_seconds": 57600.0,
+        "num_gpus_req": 1.0,
+        "num_nodes_req": 1.0,
+        "num_cores_req": 1.0,
+        "requested_memory_mib": 80000.0
+      },
+      "vocab": {
+        "partition": [
+          "__UNKNOWN__",
+          "debug-gpu",
+          "gpu-h100",
+          "gpu-h100-stdby",
+          "gpu-h100l",
+          "project_3"
+        ],
+        "qos": [
+          "__UNKNOWN__",
+          "high",
+          "normal",
+          "standby"
+        ]
+      },
+      "groups": [
+        "requested_seconds",
+        "requested_seconds",
+        "num_gpus_req",
+        "num_gpus_req",
+        "num_nodes_req",
+        "num_nodes_req",
+        "num_cores_req",
+        "num_cores_req",
+        "requested_memory_mib",
+        "requested_memory_mib",
+        "partition",
+        "partition",
+        "partition",
+        "partition",
+        "partition",
+        "partition",
+        "qos",
+        "qos",
+        "qos",
+        "qos",
+        "submit_hour",
+        "submit_dow"
+      ],
+      "fit_ids_sha256": "7a4f86f5104adf5de2bdd0f7ba11061b7134c57c7b720ad88433face5ec86de5",
+      "fit_N": 421,
+      "max_fit_end": "2025-03-14T07:53:15+00:00"
+    },
+    "final_PW": {
+      "track": "PW",
+      "columns": [
+        "num_gpus_req",
+        "num_nodes_req",
+        "num_cores_req",
+        "requested_memory_mib",
+        "partition",
+        "qos",
+        "submit_hour",
+        "submit_dow"
+      ],
+      "medians": {
+        "num_gpus_req": 1.0,
+        "num_nodes_req": 1.0,
+        "num_cores_req": 1.0,
+        "requested_memory_mib": 80000.0
+      },
+      "vocab": {
+        "partition": [
+          "__UNKNOWN__",
+          "debug-gpu",
+          "gpu-h100",
+          "gpu-h100-stdby",
+          "gpu-h100l",
+          "project_3"
+        ],
+        "qos": [
+          "__UNKNOWN__",
+          "high",
+          "normal",
+          "standby"
+        ]
+      },
+      "groups": [
+        "num_gpus_req",
+        "num_gpus_req",
+        "num_nodes_req",
+        "num_nodes_req",
+        "num_cores_req",
+        "num_cores_req",
+        "requested_memory_mib",
+        "requested_memory_mib",
+        "partition",
+        "partition",
+        "partition",
+        "partition",
+        "partition",
+        "partition",
+        "qos",
+        "qos",
+        "qos",
+        "qos",
+        "submit_hour",
+        "submit_dow"
+      ],
+      "fit_ids_sha256": "7a4f86f5104adf5de2bdd0f7ba11061b7134c57c7b720ad88433face5ec86de5",
+      "fit_N": 421,
+      "max_fit_end": "2025-03-14T07:53:15+00:00"
+    }
+  },
+  "historical_split": {
+    "order": [
+      "end_time",
+      "job_uid"
+    ],
+    "fraction": 0.8,
+    "boundary": "2025-03-14 06:28:53+00:00",
+    "timestamp_block_to": "HIST_TUNE",
+    "HIST_FIT_N": 332,
+    "HIST_TUNE_N": 89,
+    "HIST_FIT_ids": "5fb91700291ed17489a13608f8d206754a074cfc2235968d001b840c44677130",
+    "HIST_TUNE_ids": "20a7f1ce02a7b24437d4cda47972d8b0483d74bc7c3daa0ae3cc8d843920474e",
+    "max_fit_end": "2025-03-14 06:28:48+00:00",
+    "min_tune_end": "2025-03-14 06:28:53+00:00",
+    "overlap": 0
+  },
+  "configs": {
+    "L0": {
+      "num_leaves": 15,
+      "learning_rate": 0.03,
+      "n_estimators": 400,
+      "min_child_samples": 50
+    },
+    "L1": {
+      "num_leaves": 31,
+      "learning_rate": 0.03,
+      "n_estimators": 600,
+      "min_child_samples": 50
+    },
+    "L2": {
+      "num_leaves": 31,
+      "learning_rate": 0.02,
+      "n_estimators": 800,
+      "min_child_samples": 100
+    }
+  },
+  "fixed_parameters": {
+    "n_jobs": 1,
+    "random_state": 4005,
+    "deterministic": true,
+    "force_col_wise": true,
+    "verbosity": -1,
+    "subsample": 1.0,
+    "subsample_freq": 0,
+    "colsample_bytree": 1.0,
+    "reg_alpha": 0.0,
+    "reg_lambda": 1.0,
+    "device_type": "cpu",
+    "max_depth": -1,
+    "max_bin": 255,
+    "min_child_weight": 0.001,
+    "min_split_gain": 0.0,
+    "data_random_seed": 4005,
+    "feature_fraction_seed": 4005,
+    "bagging_seed": 4005
+  },
+  "model_family": "LightGBM only",
+  "quantiles": [
+    0.5,
+    0.9,
+    0.95,
+    0.99
+  ],
+  "target": "runtime_seconds in seconds; no target transform",
+  "tuning_score": "Mean raw quantile pinball / HIST_TUNE mean actual runtime; shared configuration",
+  "tuning_tie_break": [
+    "Q99 pinball",
+    "raw crossing fraction",
+    "L0 then L1 then L2"
+  ],
+  "quantile_repair": "Fixed physical lower bound max(raw,0), then cumulative maximum Q50,Q90,Q95,Q99; record both raw negatives and crossings. No upper cap.",
+  "residual": {
+    "folds": [
+      {
+        "fold": 1,
+        "fit_N": 70,
+        "valid_N": 69,
+        "fit_ids": "05aa37de6efdcf0049267e7a53ae29f32188edc1ee97d0db5b914f75d58f9137",
+        "valid_ids": "b7fd64356fb604a752d0484312570720d52d885f165e74ea25f6a585dab15159",
+        "max_fit_end": "2025-03-14 01:55:46+00:00",
+        "min_valid_end": "2025-03-14 01:56:01+00:00",
+        "max_valid_end": "2025-03-14 02:36:10+00:00"
+      },
+      {
+        "fold": 2,
+        "fit_N": 139,
+        "valid_N": 70,
+        "fit_ids": "ef2875d1324093e617f4bd4bb6ffd9164cbaccf73fef3f77a992145d46ba5827",
+        "valid_ids": "dee71e14f7450ce51c1e0b830ad1b35047c56ebbaddf9e9ae30b3ed70ed7b2b5",
+        "max_fit_end": "2025-03-14 02:36:10+00:00",
+        "min_valid_end": "2025-03-14 02:37:43+00:00",
+        "max_valid_end": "2025-03-14 02:51:32+00:00"
+      },
+      {
+        "fold": 3,
+        "fit_N": 209,
+        "valid_N": 71,
+        "fit_ids": "3755fecbaa1e8ffc4d83ed0d0951588ffd75adfef779a15399f962527234abab",
+        "valid_ids": "6f267fa6a8b5b353bf64784e830e4dc92367de62bcf502fd93df3a9a632390d8",
+        "max_fit_end": "2025-03-14 02:51:32+00:00",
+        "min_valid_end": "2025-03-14 02:51:44+00:00",
+        "max_valid_end": "2025-03-14 03:13:22+00:00"
+      },
+      {
+        "fold": 4,
+        "fit_N": 280,
+        "valid_N": 60,
+        "fit_ids": "40c733ef514b74a36aafdf51638db5ba16edbaf711c3163147f2c98e6fa39b54",
+        "valid_ids": "89ea401c1c1af717f3a4cf9618b75f523fdd2780bb352315b4dfa2d35ff85d5b",
+        "max_fit_end": "2025-03-14 03:13:22+00:00",
+        "min_valid_end": "2025-03-14 03:15:40+00:00",
+        "max_valid_end": "2025-03-14 06:28:53+00:00"
+      },
+      {
+        "fold": 5,
+        "fit_N": 340,
+        "valid_N": 81,
+        "fit_ids": "a0fa6a2fd36e50ae39976439cf8bd53e3d6469cd39a0cdc3e1da7df96f7367d6",
+        "valid_ids": "08bf6dc2e0b6ebdee4ff659258c9c20e2758a544b92acf29b474625cddf8c6c3",
+        "max_fit_end": "2025-03-14 06:28:53+00:00",
+        "min_valid_end": "2025-03-14 06:28:56+00:00",
+        "max_valid_end": "2025-03-14 07:53:15+00:00"
+      }
+    ],
+    "OOF_Q50_config": "L0",
+    "OOF_config_reason": "Auxiliary median fixed before tuning so HIST_TUNE labels cannot affect any OOF prediction through hyperparameter selection.",
+    "final_residual_config": "shared selected configuration",
+    "target": "(runtime-Q50_OOF)^2",
+    "sigma": "sqrt(max(predicted_r2,0))",
+    "warmup": "First chronological sixth has no OOF label; excluded from residual model only",
+    "diagnostic_residual": "One auxiliary instance on HIST_FIT OOF only; HIST_TUNE OOF squared errors for held-out permutation. No candidate search."
+  },
+  "UARP": {
+    "name": "U1_PUBLISHED_STYLE_ADAPTIVE_RUNTIME",
+    "alpha": 0.2,
+    "beta": 0.5,
+    "formula": "Q99+max(.20*Q99,.50*sigma)",
+    "walltime_cap": false
+  },
+  "candidates": [
+    "R0_CURRENT_RSP",
+    "R1_RECORDED_REQUESTED_WALLTIME",
+    "R2_Q90",
+    "R3_Q95",
+    "R4_Q99",
+    "R5_UARP_STYLE"
+  ],
+  "new_eligible": [
+    "R2_Q90",
+    "R3_Q95",
+    "R4_Q99",
+    "R5_UARP_STYLE"
+  ],
+  "selection_roles": [
+    "DEVELOPMENT",
+    "CALIBRATION"
+  ],
+  "safety": {
+    "coverage": 0.9,
+    "GPU_coverage": 0.9,
+    "major_day_N": 100,
+    "major_day_coverage": 0.88,
+    "major_day_GPU_coverage": 0.88,
+    "GPU_under": "strictly less than RSP"
+  },
+  "efficiency": "GPU_over_h strictly less than requested walltime separately on DEV and CAL",
+  "selection_hierarchy": [
+    "CAL GPU_over_h",
+    "CAL GPU_under_sec",
+    "DEV+CAL GPU_over_h",
+    "DEV+CAL corresponding raw quantile pinball (Q99 for UARP)",
+    "Q90,Q95,Q99,UARP"
+  ],
+  "exposed": "Committed selected candidate must pass all same gates; no refit or reselection after exposure",
+  "PW": "Exactly one feature removal with shared config, same OOF fixed L0, quantiles and formula, after primary freeze and before exposed; if NONE all four fixed formulas diagnostic only, selected remains NONE",
+  "reproducibility": "One independent P pipeline rebuild before exposed, same seed; compare all Qs,sigma and all candidate safe outputs; never choose better repeat",
+  "permutation": "3 deterministic permutations per source feature; raw pinball on HIST_TUNE for HIST_FIT quantile models; MSE for auxiliary HIST_FIT residual; diagnostic only",
+  "shift": "Training-decile edges for continuous predictors, unique edges, infinities outer; PSI probabilities floored at 1e-6; diagnostic only",
+  "slots": "ceil(seconds/900) once for actual and candidate; no 96-slot truncation",
+  "unique_job": "earliest issue per job per split; diagnostic only",
+  "firewalls": {
+    "shadow": "SEALED",
+    "May_scientific_rows": 0,
+    "optimizer": 0,
+    "Gurobi": 0,
+    "OpenDSS": 0,
+    "Fresh": 0
+  },
+  "holds": {
+    "production_q_seconds": 5576.44921875,
+    "PF": 0.95,
+    "Q_control": "NO",
+    "electrical": "HOLD",
+    "electrical_B0_B3": "NO",
+    "FULL_MAY": "NO",
+    "optimizer_integration": "NO"
+  },
+  "failure": "CURRENT_RSP_REMAINS_OPERATIONAL; DEFER_UNTIL_RICHER_AUTHORITY_OR_DATA",
+  "paper": {
+    "authors": "Jiheon Choi; Sangyoon Oh",
+    "title": "UARP: uncertainty-aware runtime prediction for preventing scheduler termination under Wallclock constraints in HPC",
+    "year": 2026,
+    "doi": "10.1007/s11227-026-08422-8",
+    "url": "https://link.springer.com/article/10.1007/s11227-026-08422-8",
+    "verified": "Section 4.3 equation 2 and alpha=.2,beta=.5; section 4.4 Q99+margin",
+    "scope": "Formula adaptation; not reproduction of paper datasets or scheduler results; chronological OOF is this experiment leakage control."
+  }
+}

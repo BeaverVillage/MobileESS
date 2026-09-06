@@ -1,0 +1,58 @@
+{
+  "assumption_id": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+  "P": [
+    "requested_seconds",
+    "num_gpus_req",
+    "num_nodes_req",
+    "num_cores_req",
+    "requested_memory_mib",
+    "partition",
+    "qos",
+    "submit_hour",
+    "submit_dow"
+  ],
+  "PW": [
+    "num_gpus_req",
+    "num_nodes_req",
+    "num_cores_req",
+    "requested_memory_mib",
+    "partition",
+    "qos",
+    "submit_hour",
+    "submit_dow"
+  ],
+  "HISTORICAL_D1_SNAPSHOT_PROVENANCE": "UNVERIFIED",
+  "ORIGINAL_SUBMISSION_VALUE_PROVENANCE": "UNVERIFIED",
+  "REQUEST_MODIFICATION_HISTORY": "UNOBSERVED",
+  "paper_label": "ASSUMPTION-BASED TRACE-DRIVEN RUNTIME MODEL",
+  "excluded": [
+    "job_uid",
+    "job_id",
+    "user ID",
+    "account ID",
+    "username",
+    "job name",
+    "application identity",
+    "start_time",
+    "end_time",
+    "runtime_seconds",
+    "terminal status",
+    "K0",
+    "reference_safe_sec",
+    "future scheduler state",
+    "migration information",
+    "future electrical result"
+  ],
+  "mapping": {
+    "wallclock_req": "requested_seconds",
+    "gpus_requested": "num_gpus_req",
+    "nodes_req": "num_nodes_req",
+    "processors_req": "num_cores_req",
+    "memory_req": "requested_memory_mib",
+    "partition": "partition",
+    "qos": "qos",
+    "submit_hour": "submit_hour",
+    "weekday": "submit_dow"
+  },
+  "GPU_weight": "Recorded num_gpus_req, frozen separately from predictions"
+}

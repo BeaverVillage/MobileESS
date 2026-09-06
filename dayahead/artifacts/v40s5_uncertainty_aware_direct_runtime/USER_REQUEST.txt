@@ -1,0 +1,2063 @@
+# ============================================================
+# V40S5 — LITERATURE-ANCHORED UNCERTAINTY-AWARE
+#         DIRECT RUNTIME PREDICTION
+#
+# FINAL PURPOSE
+#
+# V40S2/S3/S4의 survival / BODY-tail selective architecture를
+# 더 이상 확장하지 않는다.
+#
+# 이번 revision의 질문은 하나다:
+#
+#   Can a direct uncertainty-aware runtime estimator provide
+#   substantially safer PENDING-job duration estimates than the
+#   current RSP while being materially less conservative than
+#   recorded requested walltime?
+#
+# 핵심 변경:
+#
+# 1. BODY/TAIL classifier를 제거한다.
+# 2. u={4,6,8,12,24h} threshold search를 제거한다.
+# 3. eta를 제거한다.
+# 4. tail robust policy를 제거한다.
+# 5. 과거 PENDING-only training이 아니라,
+#    model-fit cutoff 이전에 이미 완료된 historical jobs를
+#    causally available runtime-training library로 사용한다.
+# 6. LightGBM quantile runtime prediction을 직접 수행한다.
+# 7. Q50/Q90/Q95/Q99와 literature-anchored UARP-style
+#    adaptive uncertainty runtime을 비교한다.
+#
+# NO optimizer integration.
+# NO migration redesign.
+# NO A0/A1/M1/MF modification.
+#
+# If V40S5 also fails, do NOT create another runtime-model family.
+# Current RSP remains the operational authority and runtime ML
+# research is closed pending genuinely richer data/authority.
+# ============================================================
+
+
+# ============================================================
+# 0. WORKING IDENTITY
+# ============================================================
+
+WORKING NAME:
+V40S5_UNCERTAINTY_AWARE_DIRECT_RUNTIME
+
+NEW BRANCH:
+codex/v40s5-uncertainty-aware-direct-runtime
+
+NEW WORKTREE:
+C:\codex_mobileess_workspace\MobileESS_v40s5_uncertainty_aware_direct_runtime
+
+SOURCE:
+dayahead/v40s5/
+
+ARTIFACTS:
+dayahead/artifacts/v40s5_uncertainty_aware_direct_runtime/
+
+TESTS:
+tests/dayahead/test_v40s5_*.py
+
+
+# ============================================================
+# 1. BASE AUTHORITY — START ONLY FROM CLOSED S4
+# ============================================================
+
+Known V40S4 scientific commit:
+
+7d83ea7385b8b4596efe7791a7aad6a60926dcb7
+
+Known V40S4 receipt commit reported by final closeout:
+
+ea9e5133657d417ce66c8436cac7e05f8634926b
+
+
+Resolve and independently verify both with Git.
+
+Verify that the receipt commit:
+
+- contains V40S4_FINAL_COMMIT_RECEIPT.json
+- has the scientific commit as ancestor
+- closes with clean Git
+- reports classification exactly:
+
+V40S4_PROXY_BODY_RUNTIME_INSUFFICIENT
+
+- selected track = NONE
+- selected u = NONE
+- selected body = NONE
+- selected classifier = NONE
+- selected eta = NONE
+- selected robust policy = NONE
+- optimizer integration = NO
+
+
+Also verify V40S4 inherited S3 lineage:
+
+S3 scientific:
+836dfa1008c6810d077582892745b1892210c029
+
+S3 receipt:
+bfeb9c3312b397fdd15a00dfc9eac37dd4b2b6aa
+
+
+Create:
+
+V40S5_START_STATE.json
+V40S5_GIT_LINEAGE_AUDIT.json
+
+
+# ============================================================
+# 2. S2 / S3 / S4 ARE IMMUTABLE EVIDENCE
+# ============================================================
+
+Do NOT:
+
+- rewrite prior classifications
+- rerun S4 to obtain a more favorable result
+- modify S4 thresholds
+- change S4 selectivity gates
+- reinterpret S4 as success
+- delete S2/S3/S4 artifacts
+
+Scientific interpretation:
+
+S4 showed that adding assumption-based request-state proxy
+metadata did not make the registered BODY/tail selective
+architecture operationally safe.
+
+This does NOT mean runtime prediction is impossible.
+
+V40S5 tests a DIFFERENT architecture.
+
+
+# ============================================================
+# 3. RETIRE THE BODY / TAIL ARCHITECTURE
+# ============================================================
+
+V40S5 SHALL NOT contain:
+
+- oracle BODY label
+- T <= u BODY definition
+- T > u tail label
+- u threshold search
+- body classifier
+- tail classifier
+- eta
+- flagged fraction selection
+- selective R0/R1/R2 tail policies
+
+Do not port the S4 architecture forward.
+
+S4 remains a comparator/evidence source only.
+
+
+# ============================================================
+# 4. NEW PRIMARY SCIENTIFIC QUESTION
+# ============================================================
+
+The target is direct realized runtime:
+
+T_j = end_j - start_j  [seconds]
+
+
+For a D-1 PENDING job with scheduler-visible request metadata X_j,
+predict directly:
+
+Q50(T_j | X_j)
+Q90(T_j | X_j)
+Q95(T_j | X_j)
+Q99(T_j | X_j)
+
+
+Also estimate job-specific residual uncertainty:
+
+sigma_j
+
+
+Then construct a literature-anchored uncertainty-aware
+safe duration.
+
+Primary objective:
+
+Find the LEAST over-reserving new runtime candidate that
+passes reliability gates.
+
+In words:
+
+current RSP
+    -> too much underprediction
+
+recorded requested walltime
+    -> safe-ish but extremely conservative
+
+V40S5
+    -> search for the safety-efficiency region between them
+
+
+# ============================================================
+# 5. CRITICAL NEW TRAINING-LIBRARY PRINCIPLE
+# ============================================================
+
+Do NOT train only on historical jobs that happened to appear in
+the S4 PENDING issue panel.
+
+Runtime-model training does not require a historical job to have
+been PENDING at a reconstructed D-1 issue.
+
+For model fitting, a historical job is causally usable if its
+realized runtime label was already known before the MODEL FIT
+CUTOFF.
+
+Define:
+
+MODEL_FIT_CUTOFF =
+2025-03-14T08:00:00Z
+
+This is the start of the existing S4 TRAIN issue block and equals
+D-1 18:00 fixed AEST for that boundary.
+
+
+Historical training eligibility:
+
+job end_time < MODEL_FIT_CUTOFF
+
+AND
+
+positive finite realized runtime
+
+AND
+
+required request-state proxy features can be constructed
+
+AND
+
+job belongs to the same authorized source/cohort contract.
+
+
+The actual realized start/end/runtime may be used ONLY:
+
+- to determine that the historical label was already mature
+- to construct historical runtime labels
+
+They may NOT become predictor features.
+
+
+Create:
+
+V40S5_HISTORICAL_TRAINING_LIBRARY.parquet
+V40S5_HISTORICAL_TRAINING_LIBRARY_AUDIT.json
+
+
+# ============================================================
+# 6. PHASE 0 — TRAINING LIBRARY AUTHORITY AUDIT FIRST
+# ============================================================
+
+BEFORE any new model fit, independently audit:
+
+SOURCE rows
+SOURCE unique jobs
+positive-runtime jobs
+zero-runtime jobs
+
+Then count:
+
+A. jobs with end < MODEL_FIT_CUTOFF
+B. jobs with end >= MODEL_FIT_CUTOFF
+C. feature-complete historically mature jobs
+D. exact unique-job count used for training
+
+
+Report:
+
+- earliest submit
+- latest submit
+- earliest start
+- latest end in training library
+- runtime distribution
+- GPU distribution
+- partition/QoS distribution
+- requested walltime distribution
+- actual/request ratio distribution
+- temporal monthly counts
+
+Important:
+
+The S4 source warning remains applicable:
+
+the underlying source is an existing exposed positive
+terminal-service complete-case dataset,
+not a proven full cluster backlog.
+
+Record explicitly:
+
+TRAINING_LIBRARY_FULL_BACKLOG_AUTHORITY = NO
+TRAINING_LIBRARY_COMPLETE_CASE_SELECTION_LIMITATION = YES
+
+
+Do NOT silently claim this is the complete Kestrel scheduler log.
+
+
+# ============================================================
+# 7. TRAINING-LIBRARY TEMPORAL CAUSALITY
+# ============================================================
+
+Every row used for model fitting must satisfy:
+
+end_time < MODEL_FIT_CUTOFF
+
+strictly.
+
+No row with end_time equal to or after cutoff is allowed.
+
+No future label maturation.
+
+No DEV/CAL/EVAL outcome is allowed to enter model fit.
+
+Create exact proof:
+
+V40S5_TRAINING_LABEL_AVAILABILITY_PROOF.parquet
+
+For each training row include at minimum:
+
+job_uid
+submit_time
+start_time
+end_time
+runtime_sec
+model_fit_cutoff
+label_available_before_cutoff
+source_row_identity
+
+
+Hard assertion:
+
+label_available_before_cutoff == TRUE
+for 100% of training rows.
+
+
+# ============================================================
+# 8. PROXY ASSUMPTION — KEEP S4 EXACTLY
+# ============================================================
+
+Reuse:
+
+D1_SCHEDULER_REQUEST_STATE_PROXY_V1
+
+
+Scientific meaning:
+
+recorded Slurm request attributes are treated as proxies for
+scheduler-visible request states.
+
+Do NOT upgrade provenance.
+
+Keep:
+
+HISTORICAL_D1_SNAPSHOT_PROVENANCE = UNVERIFIED
+ORIGINAL_SUBMISSION_VALUE_PROVENANCE = UNVERIFIED
+REQUEST_MODIFICATION_HISTORY = UNOBSERVED
+
+
+Paper-facing terminology:
+
+ASSUMPTION-BASED TRACE-DRIVEN RUNTIME MODEL
+
+
+# ============================================================
+# 9. PRIMARY FEATURE SET — TRACK P
+# ============================================================
+
+Use the exact S4 request-state proxy feature family:
+
+requested_seconds
+num_gpus_req
+num_nodes_req
+num_cores_req
+requested_memory_mib
+partition
+qos
+submit_hour
+submit_dow
+
+
+Use exact repository field names after audit.
+
+No newly invented scheduler metadata.
+
+No K0/reference-safe fields as predictors.
+
+
+# ============================================================
+# 10. EXCLUDED FEATURES
+# ============================================================
+
+PRIMARY predictor exclusion remains:
+
+user ID
+account ID
+username
+job name
+application identity
+actual start
+actual end
+actual runtime
+terminal status
+K0
+reference_safe_sec
+future scheduler state
+migration information
+future electrical result
+
+
+No user/account memorization experiment in S5.
+
+No post-hoc application clustering.
+
+
+# ============================================================
+# 11. P-W SENSITIVITY
+# ============================================================
+
+Primary selection is Track P only.
+
+After the Track-P model family and candidate are frozen,
+run exactly ONE walltime-removal sensitivity:
+
+Track P-W =
+Track P minus requested_seconds
+
+
+Use:
+
+- same preprocessing
+- same model family
+- same hyperparameters
+- same quantiles
+- same evaluation splits
+- same selection candidate formula
+
+Do NOT run a separate winner search for P-W.
+
+P-W is interpretation/sensitivity only.
+
+
+# ============================================================
+# 12. PREPROCESSING
+# ============================================================
+
+Freeze preprocessing before fit.
+
+Continuous request quantities:
+
+log1p transformation for:
+
+requested_seconds
+num_gpus_req
+num_nodes_req
+num_cores_req
+requested_memory_mib
+
+
+Categoricals:
+
+partition
+qos
+
+
+Rules:
+
+- vocabulary fitted on historical training library only
+- unseen -> UNKNOWN
+- missing categorical -> UNKNOWN
+- continuous missing -> explicit missing indicator + historical
+  training median
+- no target encoding
+- no label-derived feature transformations
+
+
+Record:
+
+V40S5_FEATURE_CONTRACT.json
+V40S5_PREPROCESSING_CONTRACT.json
+V40S5_FEATURE_MISSINGNESS_AUDIT.json
+
+
+# ============================================================
+# 13. HISTORICAL INTERNAL MODEL-TUNING SPLIT
+# ============================================================
+
+The historical training library is ordered by end_time.
+
+Create a deterministic temporal 80/20 split:
+
+first 80% by end_time:
+HIST_FIT
+
+last 20% by end_time:
+HIST_TUNE
+
+
+No random split.
+
+If many rows share the boundary timestamp,
+move the entire timestamp block to HIST_TUNE.
+
+No job appears in both.
+
+Create:
+
+V40S5_HISTORICAL_INTERNAL_SPLIT.json
+
+
+# ============================================================
+# 14. MODEL FAMILY — LIGHTGBM ONLY
+# ============================================================
+
+This revision tests uncertainty-aware DIRECT runtime prediction,
+not architecture proliferation.
+
+Use ONLY LightGBM for new runtime predictors.
+
+Do NOT add:
+
+- Random Forest
+- RSF
+- DeepSurv
+- neural networks
+- transformer
+- XGBoost candidate family
+- survival forest
+- body/tail models
+
+
+Quantile models:
+
+Q50
+Q90
+Q95
+Q99
+
+
+Objective:
+
+quantile
+
+
+# ============================================================
+# 15. SMALL PREREGISTERED HYPERPARAMETER SET
+# ============================================================
+
+Use exactly THREE modest configurations.
+
+Freeze exact values before fitting.
+
+Suggested registry:
+
+L0:
+num_leaves = 15
+learning_rate = 0.03
+n_estimators = 400
+min_child_samples = 50
+
+L1:
+num_leaves = 31
+learning_rate = 0.03
+n_estimators = 600
+min_child_samples = 50
+
+L2:
+num_leaves = 31
+learning_rate = 0.02
+n_estimators = 800
+min_child_samples = 100
+
+
+Use fixed:
+
+subsample / bagging according to deterministic setting
+feature_fraction according to deterministic setting
+L1/L2 regularization fixed before fit
+seed fixed
+n_jobs = 1
+
+
+Do NOT add configurations after HIST_TUNE is seen.
+
+
+Choose ONE shared configuration for all four quantiles using
+HIST_TUNE only.
+
+Primary tuning score:
+
+mean of normalized pinball losses for:
+
+Q50
+Q90
+Q95
+Q99
+
+
+Tie-break:
+
+1. lower Q99 pinball
+2. fewer quantile crossings
+3. simpler model
+
+
+Freeze the chosen configuration before PENDING-panel evaluation.
+
+
+# ============================================================
+# 16. QUANTILE CROSSING CONTRACT
+# ============================================================
+
+Report raw quantile crossing rate.
+
+Then apply a fixed deterministic monotone rearrangement:
+
+q50* = q50
+
+q90* = max(q90, q50*)
+
+q95* = max(q95, q90*)
+
+q99* = max(q99, q95*)
+
+
+No parameter fitting is involved.
+
+Report:
+
+- raw crossing N/fraction
+- corrected crossing N/fraction
+- magnitude of correction
+
+Use corrected quantiles for downstream runtime candidates.
+
+
+# ============================================================
+# 17. RESIDUAL UNCERTAINTY MODEL
+# ============================================================
+
+The uncertainty model must NOT use in-sample residuals from a
+model that was trained on the same job.
+
+Generate cross-fitted Q50 predictions on the historical
+training library using chronological expanding folds.
+
+Use at least 5 temporal folds where feasible.
+
+For each eligible OOF historical job:
+
+e_j =
+T_j - Q50_OOF,j
+
+target:
+
+r2_j = e_j^2
+
+
+Fit ONE LightGBM regression model:
+
+E[r2 | X]
+
+
+Then define:
+
+sigma_j =
+sqrt(max(predicted_r2_j, 0))
+
+
+The final residual model is fitted only on causally available
+historical OOF residual evidence.
+
+Create:
+
+V40S5_RESIDUAL_CROSSFIT_AUDIT.json
+V40S5_RESIDUAL_MODEL_REPORT.json
+
+
+# ============================================================
+# 18. LITERATURE-ANCHORED UARP-STYLE CANDIDATE
+# ============================================================
+
+Use the fixed published-style formula supplied in this request.
+
+Do NOT tune its coefficients.
+
+Define:
+
+M_j =
+max(
+    0.20 * Q99_j,
+    0.50 * sigma_j
+)
+
+
+Then:
+
+T_UARP,j =
+Q99_j + M_j
+
+
+Call this:
+
+U1_PUBLISHED_STYLE_ADAPTIVE_RUNTIME
+
+
+Important:
+
+The coefficients 0.20 and 0.50 are FROZEN.
+
+Do NOT try:
+
+0.10
+0.15
+0.25
+0.3
+0.7
+
+after results.
+
+
+Do NOT cap T_UARP by requested walltime.
+
+
+# ============================================================
+# 19. FINAL RUNTIME CANDIDATE REGISTRY
+# ============================================================
+
+Evaluate exactly:
+
+R0_CURRENT_RSP
+
+R1_RECORDED_REQUESTED_WALLTIME
+
+R2_Q90
+
+R3_Q95
+
+R4_Q99
+
+R5_UARP_STYLE
+
+
+Definitions:
+
+R0:
+existing reference_safe_sec
+READ-ONLY comparator
+
+R1:
+requested_seconds
+READ-ONLY comparator
+
+R2:
+corrected Q90
+
+R3:
+corrected Q95
+
+R4:
+corrected Q99
+
+R5:
+Q99 + max(0.2*Q99, 0.5*sigma)
+
+
+Only R2-R5 are eligible NEW models.
+
+R0 and R1 are anchors/comparators.
+
+
+# ============================================================
+# 20. REQUESTED WALLTIME IS NOT A HARD BOUND
+# ============================================================
+
+Preserve the S4 finding that actual runtime can exceed
+recorded requested walltime.
+
+Do NOT enforce:
+
+T_actual <= requested_seconds
+
+
+Do NOT cap any new candidate by requested_seconds.
+
+Retain all actual>request rows.
+
+Report actual/request forensic again for the new historical
+training library and evaluation panel.
+
+
+# ============================================================
+# 21. PENDING EVALUATION PANEL — KEEP S4 EXACTLY
+# ============================================================
+
+Use the exact immutable S4 PENDING issue panel.
+
+Expected:
+
+TRAIN:
+1,190 job-issue
+
+DEVELOPMENT:
+4,346
+
+CALIBRATION:
+2,634
+
+EXPOSED_EVALUATION:
+2,713
+
+
+Reuse exact:
+
+job_uid
+issue time
+runtime label
+requested metadata
+split membership
+
+
+Do not reconstruct a different test population unless an
+identity mismatch is discovered.
+
+If mismatch:
+
+STOP.
+
+
+# ============================================================
+# 22. IMPORTANT — MODEL FIT VS PENDING EVALUATION
+# ============================================================
+
+Do not confuse:
+
+HISTORICAL_MODEL_TRAINING_LIBRARY
+
+with
+
+PENDING_JOB_ISSUE_EVALUATION_PANEL.
+
+
+The model is fitted from causally completed historical jobs.
+
+The scheduler-facing evaluation is performed on D-1 PENDING
+job-issue rows.
+
+This separation is a PRIMARY scientific artifact.
+
+
+Create:
+
+V40S5_TRAINING_VS_EVALUATION_CONTRACT.md
+
+
+# ============================================================
+# 23. DUPLICATE JOB-ISSUE SEMANTICS
+# ============================================================
+
+A PENDING job may appear at multiple issue instants.
+
+Primary operational evaluation denominator:
+
+JOB-ISSUE
+
+
+This is correct because each D-1 issue is a separate planning
+decision.
+
+However also report a secondary UNIQUE-JOB audit:
+
+- one earliest issue per unique job in each split
+- no winner reselection using this metric
+
+
+Create:
+
+V40S5_UNIQUE_JOB_SENSITIVITY.json
+
+
+# ============================================================
+# 24. PRIMARY METRICS
+# ============================================================
+
+For every candidate/split report:
+
+Coverage:
+
+C =
+mean(T_actual <= T_candidate)
+
+
+GPU-weighted coverage:
+
+C_GPU =
+sum(g_j * 1[T_actual <= T_candidate])
+/
+sum(g_j)
+
+
+Underprediction:
+
+under_sec =
+sum(max(T_actual - T_candidate, 0))
+
+
+GPU-weighted underprediction mass:
+
+GPU_under_sec =
+sum(
+    g_j *
+    max(T_actual - T_candidate, 0)
+)
+
+
+Overreservation:
+
+over_sec =
+sum(max(T_candidate - T_actual, 0))
+
+
+GPU-weighted overreservation:
+
+GPU_over_h =
+sum(
+    g_j *
+    max(T_candidate - T_actual, 0)
+) / 3600
+
+
+Also:
+
+MAE
+median absolute error
+P90 absolute error
+P95 absolute error
+P99 absolute error
+WAPE
+bias
+safe/actual ratio
+P50/P90/P95/P99 safe/actual ratio
+
+
+For Q50 report:
+
+Q50 MAE
+Q50 WAPE
+Q50 bias
+
+
+For quantiles report pinball loss separately.
+
+
+# ============================================================
+# 25. 15-MIN SCHEDULER COMPLETION METRICS
+# ============================================================
+
+The current Day-Ahead optimizer is 15-min / 96 slots.
+
+Convert runtime to scheduler duration exactly once:
+
+duration_slots =
+ceil(runtime_sec / 900)
+
+
+For each candidate report:
+
+- completion-slot MAE
+- completion-slot signed error
+- fraction ending >=1 slot too early
+- fraction ending >=4 slots too early
+- fraction ending >=8 slots too early
+- GPU-weighted versions
+
+
+Do NOT double-round seconds.
+
+
+# ============================================================
+# 26. SAFETY GATES
+# ============================================================
+
+A NEW runtime candidate R2-R5 is SAFETY ELIGIBLE only if
+DEV + CAL both satisfy:
+
+overall job-issue coverage >= 90%
+
+GPU-weighted coverage >= 90%
+
+
+For each major issue-day with N >= 100:
+
+coverage >= 88%
+
+GPU-weighted coverage >= 88%
+
+
+Also require:
+
+GPU_under_sec(candidate)
+<
+GPU_under_sec(current RSP)
+
+
+No upper coverage gate.
+
+Coverage > 99.5% is:
+
+EXTREME_CONSERVATISM_WARNING
+
+but not automatic failure.
+
+Efficiency is handled separately.
+
+
+# ============================================================
+# 27. EFFICIENCY GATE
+# ============================================================
+
+Recorded requested walltime R1 is the safety/conservatism anchor.
+
+For a new candidate to be deployable-prevalidation eligible:
+
+GPU_over_h(candidate)
+<
+GPU_over_h(requested walltime)
+
+
+on DEV and CAL.
+
+
+Do NOT use the old:
+
+candidate <= 3x current-RSP overreservation
+
+rule.
+
+That old reference is inappropriate here because current RSP
+is highly under-covering.
+
+
+New design principle:
+
+RSP:
+low reserve, unsafe
+
+Requested walltime:
+high reserve, safer
+
+New model:
+must enter the useful region between them.
+
+
+# ============================================================
+# 28. MODEL SELECTION RULE
+# ============================================================
+
+Selection is based ONLY on:
+
+HIST_TUNE for model configuration
+
+then DEV + CAL for runtime-candidate selection.
+
+
+Among R2-R5:
+
+Step 1:
+must pass all safety gates
+
+Step 2:
+must pass efficiency gate vs requested walltime
+
+Step 3:
+choose minimum GPU_over_h on CAL
+
+Tie-break:
+
+1. lower CAL GPU_under_sec
+2. lower DEV+CAL total GPU_over_h
+3. lower Q90/Q95/Q99 pinball according to candidate
+4. simpler candidate
+
+Candidate simplicity order:
+
+Q90
+Q95
+Q99
+UARP-style
+
+
+Do NOT use EXPOSED to select.
+
+
+If none passes:
+
+SELECTED_MODEL = NONE
+
+
+# ============================================================
+# 29. SELECTION FREEZE
+# ============================================================
+
+After DEV+CAL:
+
+freeze:
+
+- selected LightGBM configuration
+- all trained model SHA256
+- selected runtime candidate or NONE
+- preprocessing
+- UARP coefficients
+- evaluation contract
+
+
+Commit selection freeze.
+
+Only then score EXPOSED_EVALUATION.
+
+
+Create:
+
+V40S5_SELECTION_FREEZE.json
+V40S5_SELECTION_FREEZE_COMMIT_RECEIPT.json
+
+
+# ============================================================
+# 30. EXPOSED EVALUATION
+# ============================================================
+
+EXPOSED is still exposed historical evidence.
+
+It is NOT untouched confirmation.
+
+After opening:
+
+NO:
+
+- refit
+- coefficient change
+- candidate change
+- quantile change
+- feature change
+- calibration
+- winner promotion
+
+
+If a DEV+CAL selected candidate fails EXPOSED safety:
+
+final result = FAIL.
+
+
+# ============================================================
+# 31. EXPOSED SUCCESS GATES
+# ============================================================
+
+For a frozen candidate:
+
+overall coverage >= 90%
+
+GPU-weighted coverage >= 90%
+
+
+For issue-day N >= 100:
+
+coverage >= 88%
+GPU coverage >= 88%
+
+
+Require:
+
+GPU_under_sec
+<
+current RSP GPU_under_sec
+
+
+Require:
+
+GPU_over_h
+<
+requested-walltime GPU_over_h
+
+
+Also report exact relative reductions:
+
+Underprediction reduction vs RSP:
+
+1 -
+GPU_under(candidate) / GPU_under(RSP)
+
+
+Overreservation reduction vs requested walltime:
+
+1 -
+GPU_over(candidate) / GPU_over(requested_walltime)
+
+
+Do not invent a positive claim if reduction is negligible.
+
+
+# ============================================================
+# 32. TEMPORAL DISTRIBUTION SHIFT AUDIT
+# ============================================================
+
+S4 showed substantial drift in actual/request behavior.
+
+Therefore V40S5 MUST report split drift for:
+
+requested_seconds
+actual runtime
+actual/request ratio
+GPU request
+partition
+QoS
+submit hour
+weekday
+
+
+Compute:
+
+TRAINING LIBRARY vs
+S4 TRAIN vs
+DEV vs
+CAL vs
+EXPOSED
+
+
+At minimum:
+
+median
+P90
+P95
+P99
+
+and categorical frequencies.
+
+
+Also compute PSI or another preregistered simple distribution
+shift statistic for continuous predictor variables.
+
+Use diagnostic only.
+
+No adaptive post-hoc retraining.
+
+
+Create:
+
+V40S5_TEMPORAL_SHIFT_AUDIT.json
+
+
+# ============================================================
+# 33. WALLTIME IMPORTANCE AUDIT
+# ============================================================
+
+S4 observed near-zero tree gain for requested walltime in most
+registered models.
+
+V40S5 must reassess this under the new full historical
+training library and direct runtime objective.
+
+For every quantile model and residual model:
+
+- grouped gain importance
+- permutation importance on HIST_TUNE only
+
+For Track P vs P-W report:
+
+- Q50 MAE delta
+- Q90/95/99 pinball delta
+- safety coverage delta
+- GPU coverage delta
+- overreservation delta
+- underprediction delta
+
+
+Do NOT conclude walltime is generally useless from S4 alone.
+
+
+# ============================================================
+# 34. FEATURE IMPORTANCE IS DIAGNOSTIC ONLY
+# ============================================================
+
+No SHAP-based feature selection.
+
+No dropping features because importance appears small.
+
+No new feature subsets after observing importance.
+
+
+# ============================================================
+# 35. UARP-STYLE ABLATION
+# ============================================================
+
+Because R5 includes two uncertainty terms, report which term
+dominates:
+
+A_j = 0.20 * Q99_j
+
+B_j = 0.50 * sigma_j
+
+
+Report:
+
+fraction A >= B
+fraction B > A
+
+and distributions.
+
+Do NOT alter coefficients.
+
+
+# ============================================================
+# 36. SAFE-DURATION SANITY AUDIT
+# ============================================================
+
+For every candidate report:
+
+minimum
+median
+P90
+P95
+P99
+maximum
+
+of candidate runtime.
+
+
+Report fraction:
+
+candidate < 0
+candidate == 0
+candidate > requested walltime
+candidate > 24h
+candidate > 72h
+candidate > 7d
+
+
+Do not cap extreme outputs post hoc.
+
+Flag them for scientific interpretation.
+
+
+# ============================================================
+# 37. PRE-REGISTRATION
+# ============================================================
+
+Before fitting ANY V40S5 model freeze:
+
+- base lineage
+- historical training eligibility
+- model-fit cutoff
+- training vs evaluation distinction
+- proxy assumption
+- feature set
+- exclusions
+- preprocessing
+- historical 80/20 split
+- 3 LightGBM configs
+- Q50/Q90/Q95/Q99
+- monotone repair
+- residual crossfit
+- UARP coefficients 0.20 / 0.50
+- candidate registry R0-R5
+- safety gates
+- efficiency gate
+- selection hierarchy
+- exposed rule
+- P-W sensitivity
+- shift audit
+- May firewall
+- optimizer firewall
+
+
+Create:
+
+V40S5_PREREGISTRATION.json
+
+Commit BEFORE FIT.
+
+Create:
+
+V40S5_PREREGISTRATION_COMMIT_RECEIPT.json
+
+
+# ============================================================
+# 38. MAY / SHADOW FIREWALL
+# ============================================================
+
+Preserve S4 firewall.
+
+Apr-24–30 shadow:
+
+SEALED
+
+scientific row reads:
+
+0
+
+
+2025 May scientific:
+
+runtime rows = 0
+outcomes = 0
+training = 0
+calibration = 0
+selection = 0
+sensitivity = 0
+
+
+Metadata/path/index discovery must be disclosed separately.
+
+Do not rename exposed historical data as untouched.
+
+
+# ============================================================
+# 39. OPTIMIZER FIREWALL
+# ============================================================
+
+V40S5 is ML validation ONLY.
+
+Do NOT modify:
+
+dayahead/v37/aidc_materializer.py
+dayahead/v40a/initial.py
+
+or any operational consumer.
+
+
+Optimizer calls:
+0
+
+Gurobi calls:
+0
+
+OpenDSS calls:
+0
+
+Fresh calls:
+0
+
+
+# ============================================================
+# 40. SYSTEM ARCHITECTURE HARD FREEZE
+# ============================================================
+
+Absolutely NO modifications to:
+
+A0
+M1
+A1
+MF
+
+RUNNING jobs
+RUNNING migration
+PENDING migration semantics
+WAN
+Rack
+terminal
+MESS route
+MESS P/Q
+Fresh OpenDSS
+AC restoration
+
+
+NO:
+
+event trigger
+local repair
+rolling MPC
+second route search
+
+
+Current normative sequence remains:
+
+A0
+-> M1 route+P/Q
+-> A1 feedback
+-> MF fixed-route P/Q
+-> Joint Freeze
+-> Fresh OpenDSS
+
+
+# ============================================================
+# 41. CURRENT HOLDS
+# ============================================================
+
+Keep unchanged:
+
+production q =
+5576.44921875 s
+
+PF =
+0.95
+
+Q control =
+NO
+
+electrical =
+HOLD
+
+electrical B0-B3 =
+NO
+
+FULL_MAY =
+NO
+
+optimizer integration =
+NO
+
+
+# ============================================================
+# 42. PROTECTED SCOPE
+# ============================================================
+
+Protect all inherited S4 authority.
+
+Expected inherited tracked Git entries from S4 receipt:
+
+5,352
+
+
+Expected S4 owned files verified:
+
+106
+
+
+Expected S3 preserved files:
+
+109
+
+
+Independently inventory current base.
+
+Do not force counts if Git proves otherwise;
+record exact resolved values.
+
+
+Allowed changes ONLY:
+
+dayahead/v40s5/**
+dayahead/artifacts/v40s5_uncertainty_aware_direct_runtime/**
+tests/dayahead/test_v40s5_*.py
+
+
+No changes outside allowed scope.
+
+
+Create:
+
+V40S5_PROTECTED_SCOPE_START.json
+V40S5_PROTECTED_SCOPE_END.json
+V40S5_PROTECTED_SCOPE_DIFF.json
+
+
+# ============================================================
+# 43. POSSIBLE FINAL CLASSIFICATIONS
+# ============================================================
+
+Allowed:
+
+V40S5_HISTORICAL_TRAINING_LIBRARY_AUTHORITY_FAIL
+
+V40S5_FEATURE_PROXY_BINDING_FAIL
+
+V40S5_DIRECT_RUNTIME_SAFETY_FAIL
+
+V40S5_RUNTIME_EFFICIENCY_FAIL
+
+V40S5_UNCERTAINTY_AWARE_RUNTIME_PREVALIDATED
+
+V40S5_EXISTING_RSP_REMAINS_SELECTED
+
+
+Maximum positive claim:
+
+PREVALIDATED
+
+
+Never:
+
+PRODUCTION_READY
+
+without subsequent integration/shadow validation.
+
+
+# ============================================================
+# 44. FAILURE INTERPRETATION
+# ============================================================
+
+If no new candidate passes:
+
+Do NOT conclude:
+
+runtime prediction is impossible.
+
+
+Conclude:
+
+Under the available complete-case Kestrel trace,
+the explicit request-state proxy assumption,
+the expanded causally mature historical training library,
+and the preregistered direct quantile/UARP-style model family,
+no replacement satisfied the required reliability-efficiency
+trade-off.
+
+
+Then:
+
+RECOMMENDED_OPERATIONAL_RUNTIME =
+CURRENT_RSP
+
+
+And:
+
+FURTHER_RUNTIME_MODEL_PROLIFERATION =
+NO
+
+
+Future reconsideration requires genuinely richer data, e.g.:
+
+verified historical scheduler snapshots
+application semantics
+job/user historical context under an authorized contract
+progress/checkpoint signals
+full backlog/censoring-aware source
+
+
+# ============================================================
+# 45. SUCCESS INTERPRETATION
+# ============================================================
+
+If a new candidate passes all gates:
+
+Maximum statement:
+
+"Under the explicit scheduler-visible request-state proxy
+assumption, a direct uncertainty-aware runtime estimator was
+prevalidated as safer than the current RSP and less
+over-reserving than the recorded requested-walltime anchor."
+
+
+Do NOT claim:
+
+- exact historical D-1 causal snapshot verified
+- production deployment validated
+- universal Kestrel runtime prediction solved
+
+
+# ============================================================
+# 46. ADAPTER PROPOSAL — ONLY IF SUCCESS
+# ============================================================
+
+If success:
+
+create proposal only:
+
+job_uid
+runtime_q50_sec
+runtime_q90_sec
+runtime_q95_sec
+runtime_q99_sec
+runtime_sigma_sec
+runtime_candidate_name
+runtime_safe_sec
+runtime_safe_slots_15min
+request_state_assumption_id
+model_sha256
+preprocessing_sha256
+
+
+No:
+
+site
+migration
+WAN
+MESS
+terminal
+electrical fields
+
+
+optimizer_use_allowed =
+FALSE
+
+
+proposal_only =
+TRUE
+
+
+If fail:
+
+recommended_rows = []
+
+
+# ============================================================
+# 47. REQUIRED ARTIFACTS
+# ============================================================
+
+At minimum:
+
+V40S5_START_STATE.json
+V40S5_GIT_LINEAGE_AUDIT.json
+
+V40S5_S4_REFERENCE_FREEZE.json
+
+V40S5_HISTORICAL_TRAINING_LIBRARY.parquet
+V40S5_HISTORICAL_TRAINING_LIBRARY_AUDIT.json
+V40S5_TRAINING_LABEL_AVAILABILITY_PROOF.parquet
+V40S5_TRAINING_VS_EVALUATION_CONTRACT.md
+
+V40S5_FEATURE_CONTRACT.json
+V40S5_PREPROCESSING_CONTRACT.json
+V40S5_FEATURE_MISSINGNESS_AUDIT.json
+V40S5_HISTORICAL_INTERNAL_SPLIT.json
+
+V40S5_PREREGISTRATION.json
+V40S5_PREREGISTRATION_COMMIT_RECEIPT.json
+
+V40S5_HYPERPARAMETER_RESULTS.csv
+V40S5_HYPERPARAMETER_FREEZE.json
+
+V40S5_QUANTILE_CROSSING_AUDIT.json
+
+V40S5_RESIDUAL_CROSSFIT_AUDIT.json
+V40S5_RESIDUAL_MODEL_REPORT.json
+
+V40S5_Q50_MODEL_REPORT.json
+V40S5_Q90_MODEL_REPORT.json
+V40S5_Q95_MODEL_REPORT.json
+V40S5_Q99_MODEL_REPORT.json
+
+V40S5_UARP_STYLE_REPORT.json
+
+V40S5_CANDIDATE_RESULTS_TRAIN.csv
+V40S5_CANDIDATE_RESULTS_DEV.csv
+V40S5_CANDIDATE_RESULTS_CAL.csv
+
+V40S5_DAILY_SAFETY_AUDIT.json
+V40S5_GPU_WEIGHTED_UNDERPREDICTION.json
+V40S5_OVERRESERVATION_AUDIT.json
+
+V40S5_SELECTION_FREEZE.json
+V40S5_SELECTION_FREEZE_COMMIT_RECEIPT.json
+
+V40S5_EXPOSED_RESULTS.json
+
+V40S5_UNIQUE_JOB_SENSITIVITY.json
+V40S5_TEMPORAL_SHIFT_AUDIT.json
+V40S5_WALLTIME_DEPENDENCE_ANALYSIS.json
+V40S5_FEATURE_IMPORTANCE_DIAGNOSTIC.json
+V40S5_UARP_MARGIN_ABLATION.json
+V40S5_SAFE_DURATION_SANITY_AUDIT.json
+
+V40S5_RUNTIME_ADAPTER_PROPOSAL.json
+
+V40S5_MAY_FIREWALL.json
+
+V40S5_PROTECTED_SCOPE_START.json
+V40S5_PROTECTED_SCOPE_END.json
+V40S5_PROTECTED_SCOPE_DIFF.json
+
+V40S5_COMPUTE_LEDGER.json
+V40S5_REPRODUCIBILITY_AUDIT.json
+
+V40S5_TEST_REPORT.json
+V40S5_FINAL_REVIEW.md
+V40S5_FINAL_COMMIT_RECEIPT.json
+
+
+# ============================================================
+# 48. MINIMUM TESTS
+# ============================================================
+
+At minimum verify:
+
+1. S4 scientific SHA exact
+2. S4 receipt SHA exact/resolved
+3. S4 classification exact
+4. new isolated S5 worktree
+
+5. S4/S3 immutable
+6. protected scope exact
+
+7. model-fit cutoff exact
+8. every training job end < cutoff
+9. no future-mature label in training
+10. unique training job identity
+
+11. runtime = end-start exact
+12. zero/negative handling exact
+
+13. training library != PENDING evaluation panel
+14. S4 PENDING panel identity exact
+
+15. Track P feature set exact
+16. excluded predictors absent
+17. actual start predictor absent
+18. actual end predictor absent
+19. actual runtime predictor absent
+20. RSP/reference-safe absent from predictors
+
+21. preprocessing fit only on historical training
+22. unseen category -> UNKNOWN
+23. no target encoding
+
+24. historical temporal 80/20 split exact
+25. no job overlap across HIST_FIT/HIST_TUNE
+
+26. prereg commit precedes fit
+27. exactly three LGB configs
+28. no unregistered config
+
+29. Q50/Q90/Q95/Q99 finite
+30. all runtime predictions nonnegative
+31. raw quantile crossing audited
+32. monotone repair exact
+
+33. residual Q50 is OOF
+34. no in-sample residual leakage
+35. sigma finite nonnegative
+
+36. UARP formula exact:
+    q99 + max(.2*q99,.5*sigma)
+
+37. coefficients unchanged
+38. no cap to requested walltime
+
+39. actual>requested rows retained
+
+40. R0 current RSP exact
+41. R1 requested walltime exact
+42. R2 Q90 exact
+43. R3 Q95 exact
+44. R4 Q99 exact
+45. R5 UARP exact
+
+46. scheduler slots = ceil(sec/900) exactly once
+
+47. coverage exact
+48. GPU-weighted coverage exact
+49. underprediction exact
+50. GPU underprediction exact
+51. overreservation exact
+52. GPU overreservation exact
+
+53. daily support gate exact
+54. safety gate exact
+55. efficiency gate exact
+
+56. selection uses DEV+CAL only
+57. exposed not used for selection
+58. selection freeze commit before exposed
+
+59. P-W removes only requested_seconds
+60. P-W does not reselect winner
+
+61. unique-job sensitivity diagnostic only
+
+62. May scientific reads = 0
+63. sealed shadow reads = 0
+
+64. optimizer calls = 0
+65. Gurobi calls = 0
+66. OpenDSS calls = 0
+67. Fresh calls = 0
+
+68. A0 change = 0
+69. A1 change = 0
+70. M1 change = 0
+71. MF change = 0
+72. migration change = 0
+73. WAN change = 0
+74. terminal change = 0
+75. event-trigger change = 0
+76. local-repair change = 0
+77. rolling-MPC change = 0
+
+78. production q unchanged
+79. PF=.95
+80. Q control NO
+81. electrical HOLD
+82. FULL_MAY NO
+
+83. adapter proposal_only
+84. optimizer_use_allowed false
+
+85. reproducibility same-seed repeat
+86. required artifacts present
+87. final Git clean
+
+
+# ============================================================
+# 49. REPRODUCIBILITY
+# ============================================================
+
+Use CPU.
+
+n_jobs / threads = 1.
+
+Freeze one seed.
+
+Record:
+
+Python
+numpy
+pandas
+sklearn
+LightGBM
+CPU
+threads
+seed
+training time
+inference time
+
+
+Rebuild selected-capable model once independently with
+same seed.
+
+Compare:
+
+Q50
+Q90
+Q95
+Q99
+sigma
+safe runtime
+
+max difference
+mean difference
+
+
+Do NOT choose the better repeat.
+
+
+# ============================================================
+# 50. FINAL RESPONSE FORMAT
+# ============================================================
+
+Report in Korean.
+
+Begin exactly:
+
+FINAL CLASSIFICATION:
+SELECTED MODEL:
+SELECTED LIGHTGBM CONFIG:
+HISTORICAL TRAINING JOBS:
+Q50 MODEL:
+Q90 MODEL:
+Q95 MODEL:
+Q99 MODEL:
+UNCERTAINTY MODEL:
+UARP-STYLE CANDIDATE:
+DEV SAFETY:
+CAL SAFETY:
+EXPOSED SAFETY:
+EFFICIENCY VS REQUESTED WALLTIME:
+CURRENT RSP REPLACED:
+OPTIMIZER INTEGRATION:
+PRODUCTION READY:
+
+
+Then report:
+
+1. Git lineage
+2. S4 preservation
+3. training-library authority
+
+4. historical source counts
+5. mature training count
+6. date range
+7. complete-case limitation
+
+8. proxy assumption
+9. feature inventory
+10. exclusions
+11. missingness
+
+12. actual/request runtime forensic
+
+13. HIST_FIT/HIST_TUNE
+14. hyperparameter comparison
+15. selected LGB config
+
+16. Q50 metrics
+17. Q90 metrics
+18. Q95 metrics
+19. Q99 metrics
+
+20. quantile crossing
+
+21. residual crossfit
+22. sigma diagnostics
+23. UARP margin decomposition
+
+24. RSP comparator
+25. requested-walltime comparator
+26. Q90 candidate
+27. Q95 candidate
+28. Q99 candidate
+29. UARP candidate
+
+30. DEV candidate table
+31. CAL candidate table
+32. safety gate
+33. efficiency gate
+
+34. selected candidate / NONE
+35. selection freeze commit
+
+36. exposed results
+
+37. GPU underprediction reduction vs RSP
+38. overreservation reduction vs requested walltime
+
+39. 15-min completion-slot errors
+
+40. unique-job sensitivity
+41. temporal shift
+42. P vs P-W dependence
+43. walltime importance
+
+44. May firewall
+45. optimizer/Gurobi/OpenDSS/Fresh calls
+
+46. A0/A1/M1/MF/migration/WAN/terminal unchanged
+
+47. tests
+48. reproducibility
+49. protected scope
+50. scientific commit
+51. receipt commit
+
+
+# ============================================================
+# 51. STOP RULE — IMPORTANT
+# ============================================================
+
+If V40S5 fails:
+
+DO NOT:
+
+- add another quantile
+- tune UARP coefficients
+- add XGBoost
+- add neural models
+- resurrect BODY/tail
+- relax safety gates
+- create a new runtime model family
+
+
+Final recommendation must be:
+
+CURRENT_RSP_REMAINS_OPERATIONAL
+
+and:
+
+FURTHER_RUNTIME_MODEL_WORK =
+DEFER_UNTIL_RICHER_AUTHORITY_OR_DATA
+
+
+This is the final registered runtime-ML model-family experiment
+under the current Kestrel authority.
