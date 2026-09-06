@@ -132,6 +132,7 @@ def test_real_a1_solver_result_ignores_legacy_probabilities(tmp_path, monkeypatc
     assert results[0]['reserve_diagnostics'] == results[1]['reserve_diagnostics']
     assert results[0]['reserve_diagnostics']['mean_xi_GPUh'] == 0.
     assert results[0]['jobs'][0]['start_slot'] >= 79
+    assert [stage['requested_relative_gap'] for stage in results[0]['solver'][:2]] == [.03, .03]
 
 
 def test_snapshot_mutation_rejected_at_optimizer_entry(tmp_path):

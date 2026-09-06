@@ -72,14 +72,30 @@ def solve_feedback(a0, m1, context, *, tolerance=1e-6, work_limit=60.0):
         if hasattr(context, 'v41_ml_snapshot'):
             from dayahead.v41.reserve import add_constraints
             reserve_mean, reserve_xi = add_constraints(model, context, load)
-        model.setObjective(rho,GRB.MINIMIZE);model.optimize();stages=[]
-        def record(label):
-            stages.append({'objective':label,'status':int(model.Status),'incumbent':float(model.ObjVal) if model.SolCount else None,
-                           'bound':float(model.ObjBound) if model.IsMIP and model.SolCount else None,
-                           'solver_runtime_seconds':float(model.Runtime),'work':float(model.Work),
-                           'global_optimality_certified':False,'surrogate_solver_optimal':model.Status==GRB.OPTIMAL,
-                           'optimality_scope':'Frozen affine/polyhedral Planning surrogate only'})
-        record('rho_max')
+        stages=[]
+        def record(label, attempts):
+            from dayahead.v41r1.migration_solver_policy import certificate
+            entry={'objective':label,'status':int(model.Status),'incumbent':float(model.ObjVal) if model.SolCount else None,
+                   'bound':float(model.ObjBound) if model.IsMIP and model.SolCount else None,
+                   'solver_runtime_seconds':float(model.Runtime),'work':float(model.Work),
+                   'global_optimality_certified':False,'surrogate_solver_optimal':model.Status==GRB.OPTIMAL,
+                   'optimality_scope':'Frozen affine/polyhedral Planning surrogate only','attempts':attempts}
+            entry.update(certificate(model));stages.append(entry)
+        def optimize(label):
+            from dayahead.v41r1.migration_solver_policy import apply_gap
+            apply_gap(model,label,revision=hasattr(context,'v41_ml_snapshot'),policy='B3')
+            tier=0;attempts=[]
+            while True:
+                limit=work_limit*(3**tier);model.Params.WorkLimit=limit;model.optimize()
+                attempts.append({'status':int(model.Status),'work_limit':limit,'work':float(model.Work),
+                    'incumbent':float(model.ObjVal) if model.SolCount else None,
+                    'bound':float(model.ObjBound) if model.IsMIP and model.SolCount else None})
+                if model.Status==GRB.OPTIMAL or model.Status!=GRB.WORK_LIMIT or model.Params.MIPGap==0.:break
+                tier+=1
+            record(label,attempts)
+            if model.Params.MIPGap>0. and model.Status!=GRB.OPTIMAL:
+                raise RuntimeError(label+'_REGISTERED_GAP_NOT_CERTIFIED')
+        model.setObjective(rho,GRB.MINIMIZE);optimize('rho_max')
         if not model.SolCount:return {'status':'NO_INCUMBENT','jobs':deepcopy(a0),'solver':stages,'wallclock_seconds':time.perf_counter()-started}
         # Save incumbent before another solve; limit termination must never discard it.
         chosen={i:next(k for k in range(len(options[i])) if variables[i,k].X>.5) for i in options}
@@ -95,7 +111,7 @@ def solve_feedback(a0, m1, context, *, tolerance=1e-6, work_limit=60.0):
                 scale=1000, bound=accepted_primary, intentional_degradation=0., feasibility_tolerance=model.Params.FeasibilityTol)
         reserve_optimum = None
         if reserve_mean is not None:
-            model.setObjective(reserve_mean, GRB.MINIMIZE); model.optimize(); record('V41_mean_H4_shortfall_GPUh')
+            model.setObjective(reserve_mean, GRB.MINIMIZE);optimize('V41_mean_H4_shortfall_GPUh')
             if not model.SolCount:
                 raise RuntimeError('V41_A1_RESERVE_STAGE_NO_INCUMBENT')
             reserve_optimum = float(reserve_mean.getValue())
@@ -111,14 +127,14 @@ def solve_feedback(a0, m1, context, *, tolerance=1e-6, work_limit=60.0):
                 raise RuntimeError('V41_A1_PRIMARY_SACRIFICED_IN_RESERVE_STAGE')
             primary_jobs=reserve_jobs
             primary_materialized=reserve_materialized
-        model.setObjective(deviation,GRB.MINIMIZE);model.optimize();record('complete_segment_site_symmetric_GPU_slots')
+        model.setObjective(deviation,GRB.MINIMIZE);optimize('complete_segment_site_symmetric_GPU_slots')
         if model.SolCount:
             chosen={i:next(k for k in range(len(options[i])) if variables[i,k].X>.5) for i in options}
             if model.Status==GRB.OPTIMAL:
                 model.addConstr(deviation<=round(deviation.getValue()),name='SECONDARY_EXACT_CAP')
                 if reserve_mean is not None:
                     stages[-1]['freeze_for_subsequent_stage'] = dict(name='SECONDARY_EXACT_CAP', sense='<=', bound=round(deviation.getValue()))
-                model.setObjective(tie,GRB.MINIMIZE);model.optimize();record('deterministic_tie')
+                model.setObjective(tie,GRB.MINIMIZE);optimize('deterministic_tie')
                 if model.SolCount:chosen={i:next(k for k in range(len(options[i])) if variables[i,k].X>.5) for i in options}
         jobs=[deepcopy(options[i][chosen[i]]) for i in range(len(a0))]
         jobs,primary_guard=preserve(primary_jobs,primary_materialized,jobs,recompute)

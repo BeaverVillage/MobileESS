@@ -71,13 +71,16 @@ def prepare():
     verify_coefficients()
     operations=[record(Path(__file__)),record(ROOT/'dayahead/v41r1/campaign_run.py'),
                 record(ROOT/'dayahead/v41r1/campaign_resources.py'),record(ROOT/'dayahead/v41r1/campaign_revision.py'),
+                record(ROOT/'dayahead/v41r1/gap03_revision.py'),record(ROOT/'dayahead/v41r1/watchdog.py'),
                 record(ROOT/'dayahead/v41r1/baseline_audit.py'),record(ROOT/'dayahead/v41r1/coefficient_prepare.py')]
     config=dict(PARALLEL_DAY_WORKERS=4,SOLVER_THREADS_PER_DAY=4,adaptive_parallelism=False,
         A0_Method=1,MemLimit='UNLIMITED',SoftMemLimit='UNLIMITED',NodefileStart_GB=.5,
         NodefileDir='Per worker under the local SSD campaign workspace',
-        A0_MIPGap={'P1':.001,'P2':.001,'P3':0.,'P4':0.,'P5':0.},A0_MIPGapAbs=0,A0_FeasibilityTol=1e-9,A0_IntFeasTol=1e-9,A0_OptimalityTol=1e-9,
+        B1_A0_MIPGap={'P1':.03,'P2':.03,'P3':0.,'P4':0.,'P5':0.},
+        B3_A1_MIPGap={'P1':.03,'P2':.03,'P4':0.,'P5':0.},
+        A0_MIPGapAbs=0,A0_FeasibilityTol=1e-9,A0_IntFeasTol=1e-9,A0_OptimalityTol=1e-9,
         all_other_stage_objective_and_optimality_requirements='UNCHANGED',
-        one_model_for_P1_P5=True,work_limit_exhaustion='CONTINUE_IDENTICAL_MODEL_UNTIL_REGISTERED_GAP_CERTIFICATE',
+        one_model_for_P1_P5=True,work_limit_exhaustion='B1/B3 P1/P2 CONTINUE_IDENTICAL_MODEL_UNTIL_REGISTERED_GAP_CERTIFICATE',
         candidate_pruning=False,Actual_optimization=False,independent_days=True,
         policy_order=['B0','B1','B2','B3'],target_days=31,policy_days=124,
         separate_May1_pilot='CANCELLED_BY_USER',completed_May1_B0='RETAINED_BYTE_IDENTICAL')
@@ -88,7 +91,7 @@ def prepare():
         stress=record(OUT/'FIXED_FOUR_WORKER_MEMORY_STRESS_GATE.json'),
         stress_reuse=record(OUT/'Q90_REVISION_STRESS_REUSE.json'),
         baseline=record(OUT/'Q90_BASELINE_31_DAY_AUDIT.json'),baseline_retention=record(OUT/'Q90_BASELINE_RETAINED_B0_GATE.json'),
-        gap_authorization=record(OUT/'USER_APPROVED_P1_P2_GAP.json'),
+        gap_authorization=record(OUT/'USER_APPROVED_B1_B3_GAP_3PCT.json'),
         electrical_coefficients=record(OUT/'V41R1_31_DAY_PLANNING_COEFFICIENT_MANIFEST.json'),
         configuration=record(OUT/'FIXED_FOUR_WORKER_SOLVER_CONFIGURATION.json'),
         runtime_tests=record(OUT/'CAMPAIGN_RUNTIME_TESTS.xml'),

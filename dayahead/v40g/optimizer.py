@@ -75,7 +75,7 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
             events.append(e); print('V40G incumbent '+str(e),flush=True)
     def optimize(label):
         from dayahead.v41r1.migration_solver_policy import apply_gap, certificate
-        apply_gap(model, label, revision=revision and hasattr(context, 'v41_ml_snapshot'))
+        apply_gap(model, label, revision=revision and hasattr(context, 'v41_ml_snapshot'), policy='B1')
         tier=0
         while True:
             limit=work_limits[min(tier,len(work_limits)-1)]*3**max(0,tier-len(work_limits)+1)
