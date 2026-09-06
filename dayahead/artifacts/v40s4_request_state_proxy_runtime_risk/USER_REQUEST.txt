@@ -1,0 +1,1864 @@
+# ============================================================
+# V40S4 — D-1 SCHEDULER REQUEST-STATE PROXY RUNTIME RISK
+#
+# Purpose:
+#   Extend V40S3 with ONE explicit modeling assumption:
+#
+#   The resource-request metadata recorded in the public
+#   Kestrel trace are treated as PROXIES for the scheduler-visible
+#   request state available for each PENDING job at the D-1
+#   planning instant.
+#
+#   This does NOT claim that the public trace preserves the exact
+#   historical D-1 snapshot or the original submission values.
+#
+#   Re-evaluate the SAME selective runtime architecture:
+#
+#       BODY job
+#           -> Q50/Q90 runtime prediction
+#
+#       LONG-RUNTIME-RISK job
+#           -> tail-risk detection
+#           -> do not require precise tail runtime
+#           -> conservative robust handling
+#
+# This revision is ML / runtime-interface research ONLY.
+#
+# NO optimizer integration.
+# NO migration redesign.
+# NO WAN modification.
+# NO terminal-contract modification.
+# NO A0/A1/M1/MF/Fresh modification.
+# ============================================================
+
+
+# ============================================================
+# 0. WORKING IDENTITY
+# ============================================================
+
+WORKING NAME:
+V40S4_REQUEST_STATE_PROXY_RUNTIME_RISK
+
+NEW BRANCH:
+codex/v40s4-request-state-proxy-runtime-risk
+
+NEW WORKTREE:
+C:\codex_mobileess_workspace\MobileESS_v40s4_request_state_proxy_runtime_risk
+
+SOURCE:
+dayahead/v40s4/
+
+ARTIFACTS:
+dayahead/artifacts/v40s4_request_state_proxy_runtime_risk/
+
+TESTS:
+tests/dayahead/test_v40s4_*.py
+
+
+# ============================================================
+# 1. BASE / S3 AUTHORITY
+# ============================================================
+
+V40S4 is a direct scientific follow-up to V40S3.
+
+Known V40S3 scientific commit:
+
+836dfa1008c6810d077582892745b1892210c029
+
+Known V40S3 receipt short commit:
+
+bfeb9c3
+
+Resolve the FULL receipt commit using Git.
+
+Verify:
+
+- receipt exists
+- scientific commit is its ancestor
+- V40S3 final classification is exactly:
+
+V40S3_CAUSAL_TAIL_RISK_INFORMATION_INSUFFICIENT
+
+- selected u = NONE
+- selected body model = NONE
+- selected tail classifier = NONE
+- selected eta = NONE
+- selected robust policy = NONE
+- optimizer integration = NO
+
+Create V40S4 from the V40S3 final receipt lineage.
+
+Also resolve the current LIVE PR #27 head for metadata only.
+
+Do NOT merge live PR #27 into V40S4 merely because its head
+may have advanced.
+
+Record the relationship among:
+
+- V40S3 starting PR27 head
+- V40S3 scientific commit
+- V40S3 receipt
+- current live PR27 head
+- V40S4 branch
+
+Create:
+
+V40S4_START_STATE.json
+V40S4_GIT_LINEAGE_AUDIT.json
+
+
+# ============================================================
+# 2. V40S3 IS IMMUTABLE
+# ============================================================
+
+V40S3 remains a valid strict-provenance comparator.
+
+Do NOT:
+
+- change its classification
+- delete its results
+- rewrite its artifacts
+- retune its thresholds
+- merge proxy features into S3 and relabel it
+- claim S3 was wrong
+
+S3 scientific conclusion remains:
+
+under the strictly verified feature set
+{submit_hour, weekday},
+the selective body/tail runtime strategy did not satisfy
+all safety and selection gates.
+
+V40S4 asks a DIFFERENT question under an explicit
+trace-driven modeling assumption.
+
+
+# ============================================================
+# 3. FREEZE THE NEW MODELING ASSUMPTION FIRST
+# ============================================================
+
+Create an explicit contract:
+
+D1_SCHEDULER_REQUEST_STATE_PROXY_V1
+
+
+Scientific assumption:
+
+At D-1 18:00 fixed AEST, the scheduler is assumed to have
+access to the currently effective resource-request metadata
+for all PENDING jobs.
+
+Because the public Kestrel trace does not preserve historical
+request-modification snapshots, the recorded Slurm request
+attributes are used as proxies for these issue-time
+scheduler-visible states.
+
+This assumption MUST NOT be rewritten as:
+
+- verified original submission metadata
+- verified historical D-1 scheduler snapshot
+- immutable job requests
+- actual causal snapshot ground truth
+
+Required labels:
+
+REQUEST_STATE_ROLE =
+ASSUMPTION_BASED_SCHEDULER_VISIBLE_PROXY
+
+HISTORICAL_D1_SNAPSHOT_PROVENANCE =
+UNVERIFIED
+
+ORIGINAL_SUBMISSION_VALUE_PROVENANCE =
+UNVERIFIED
+
+OPERATIONAL_AVAILABILITY_ASSUMPTION =
+FROZEN
+
+
+Create BEFORE fitting:
+
+V40S4_REQUEST_STATE_PROXY_ASSUMPTION.json
+V40S4_ASSUMPTION_BOUNDARY.md
+
+
+# ============================================================
+# 4. PENDING MEMBERSHIP REMAINS NORMATIVE
+# ============================================================
+
+Do NOT reopen the membership question.
+
+Use the same normative historical issue-time reconstruction
+accepted in V40S3.
+
+PENDING:
+
+submit_time <= issue_time
+
+AND
+
+(start_time missing OR start_time > issue_time)
+
+AND
+
+end_time > issue_time
+
+
+RUNNING:
+
+submit_time <= issue_time
+
+AND
+
+start_time <= issue_time
+
+AND
+
+end_time > issue_time
+
+
+Important separation:
+
+start/end may be used for:
+
+- historical membership reconstruction
+- label availability
+- runtime target construction
+
+start/end may NOT be predictor features.
+
+
+V40S4 primary modeling scope remains:
+
+PENDING jobs ONLY.
+
+RUNNING runtime redesign:
+NO
+
+
+# ============================================================
+# 5. FREEZE THE PROXY FEATURE REGISTRY
+# ============================================================
+
+Primary proxy feature candidate set:
+
+1. wallclock_req
+2. gpus_requested
+3. nodes_req
+4. processors_req / cores request
+5. memory_req
+6. partition
+7. qos
+8. submit_hour
+9. weekday
+
+
+Use exact repository/source field names after auditing them.
+
+Do NOT invent missing fields.
+
+If a listed field does not exist or cannot be mapped
+unambiguously, record:
+
+NOT_AVAILABLE
+
+and omit it.
+
+
+Hardware/GPU-type constraint may be admitted ONLY if:
+
+- an explicit source field exists,
+- it represents a request/scheduler constraint rather than
+  realized execution hardware,
+- its semantics can be documented.
+
+Otherwise exclude it.
+
+
+# ============================================================
+# 6. USER / ACCOUNT FEATURES — PRIMARY EXCLUSION
+# ============================================================
+
+Do NOT use:
+
+- user ID
+- account ID
+- username
+- job name
+- hashed application identity
+- any identifier that allows model memorization of a submitter
+
+in the PRIMARY proxy model.
+
+Reason:
+
+avoid obtaining apparent runtime skill mainly from
+user-specific memorization and improve reviewer defensibility.
+
+They may be counted in source inventory but:
+
+PRIMARY_PREDICTOR_USE = NO
+
+
+# ============================================================
+# 7. REQUESTED WALLTIME SEMANTICS
+# ============================================================
+
+wallclock_req is a PREDICTIVE COVARIATE only.
+
+Do NOT impose:
+
+actual_runtime <= wallclock_req
+
+Do NOT call it:
+
+- hard runtime bound
+- guaranteed completion ceiling
+- actual service duration
+
+Existing forensic evidence already showed that recorded
+actual runtime can exceed recorded requested walltime.
+
+Therefore:
+
+W_req = predictive metadata
+
+NOT:
+
+W_req = physical hard constraint
+
+
+No runtime prediction may be clipped to wallclock_req
+unless a separately preregistered diagnostic comparator
+explicitly requires it.
+
+The NEW proxy body model itself must not silently cap
+Q50/Q90 by wallclock_req.
+
+
+# ============================================================
+# 8. POST-ISSUE REQUEST MODIFICATION SEMANTICS
+# ============================================================
+
+The public trace does not provide complete historical request
+modification state.
+
+Therefore the planning assumption is:
+
+the recorded request-state proxy is frozen at issue time
+for the Day-Ahead study.
+
+Do NOT simulate future request modifications.
+
+Do NOT claim modification frequency = 0.
+
+Record:
+
+POST_ISSUE_REQUEST_MODIFICATION_HISTORY =
+UNOBSERVED
+
+POST_ISSUE_REQUEST_MODIFICATION_MODEL =
+OUT_OF_SCOPE
+
+This is a limitation, not a hidden certainty.
+
+
+# ============================================================
+# 9. THREE TRACKS
+# ============================================================
+
+Use exactly THREE interpretive tracks.
+
+------------------------------------------------------------
+TRACK C — STRICT PROVENANCE
+------------------------------------------------------------
+
+Read-only comparator from V40S3.
+
+Features:
+
+submit_hour
+weekday
+
+Do NOT retrain unless required solely for exact reproducibility.
+
+Primary role:
+
+STRICT_PROVENANCE_REFERENCE
+
+
+------------------------------------------------------------
+TRACK P — FULL REQUEST-STATE PROXY
+------------------------------------------------------------
+
+Primary new experimental track.
+
+Candidate predictors:
+
+wallclock_req
+gpus_requested
+nodes_req
+processors_req / cores
+memory_req
+partition
+qos
+optional source-authorized request hardware field
+submit_hour
+weekday
+
+
+Role:
+
+ASSUMPTION_BASED_OPERATIONAL_PROXY
+
+
+------------------------------------------------------------
+TRACK P-W — NO-WALLTIME SENSITIVITY
+------------------------------------------------------------
+
+Same as Track P but remove:
+
+wallclock_req
+
+
+Role:
+
+WALLTIME_DEPENDENCE_SENSITIVITY
+
+
+Do NOT create additional feature subsets after seeing results.
+
+No P+user.
+No lucky-feature subset search.
+
+
+# ============================================================
+# 10. FEATURE PREPROCESSING
+# ============================================================
+
+Freeze preprocessing before fit.
+
+Continuous positive/count variables:
+
+- use raw and/or log1p representation according to a
+  preregistered fixed rule
+- do not HPO-transform feature representations after outcomes
+
+Recommended:
+
+log1p(wallclock_req_seconds)
+log1p(gpus_requested)
+log1p(nodes_req)
+log1p(processors_req)
+log1p(memory_request_normalized)
+
+Categorical:
+
+partition
+qos
+optional request hardware
+
+Use:
+
+- explicit UNKNOWN category for missing/unrecognized
+- train-fitted category vocabulary
+- unseen category -> UNKNOWN
+
+Never use target encoding that reads held-out runtime labels.
+
+Calendar:
+
+submit_hour
+weekday
+
+may retain the same treatment as S3.
+
+
+# ============================================================
+# 11. MISSINGNESS AUDIT
+# ============================================================
+
+Before fitting report for every proxy feature:
+
+- total population nonmissing %
+- PENDING panel nonmissing %
+- TRAIN/DEV/CAL/EVAL nonmissing %
+- unique values
+- invalid values
+- zero values
+- impossible values
+- unseen categories by split
+
+Do NOT impute an arbitrary median without preregistration.
+
+Preferred rule:
+
+continuous missing ->
+explicit missing indicator + TRAIN median
+
+categorical missing ->
+UNKNOWN
+
+Freeze this before model training.
+
+
+Create:
+
+V40S4_PROXY_FEATURE_INVENTORY.json
+V40S4_PROXY_FEATURE_MISSINGNESS_AUDIT.json
+V40S4_PROXY_FEATURE_PREPROCESSING_CONTRACT.json
+
+
+# ============================================================
+# 12. TARGET / POPULATION
+# ============================================================
+
+Reuse the V40S3 positive-runtime source identity.
+
+Expected source:
+
+73,504 rows
+positive runtime = 72,292
+zero runtime = 1,212
+
+Runtime label:
+
+T_j = end_j - start_j
+
+exactly.
+
+Reuse the V40S3 PENDING-panel construction unless independent
+rebuild discovers an implementation mismatch.
+
+Expected V40S3 panel:
+
+10,883 job-issue
+7,603 unique jobs
+
+Do NOT force these counts if an exact reproducibility audit
+shows that the parent data have legitimately changed.
+
+If current bytes differ from S3 source authority:
+
+STOP and report source mismatch.
+
+Do not silently rebuild a new population.
+
+
+# ============================================================
+# 13. SPLITS — KEEP S3 EXACTLY
+# ============================================================
+
+Use the exact V40S3 temporal split contract.
+
+Expected:
+
+TRAIN:
+1,190
+
+DEVELOPMENT:
+4,346
+
+CALIBRATION:
+2,634
+
+EXPOSED_EVALUATION:
+2,713
+
+
+Preserve exact label-availability cutoffs.
+
+Do not create new random splits.
+
+Do not open Apr-24–30 sealed shadow.
+
+TRUE_CONFIRMATORY_AVAILABLE = NO
+
+
+# ============================================================
+# 14. THRESHOLDS — KEEP S3 EXACTLY
+# ============================================================
+
+Use the same preregistered runtime thresholds:
+
+u ∈ {
+4 h,
+6 h,
+8 h,
+12 h,
+24 h
+}
+
+Do NOT add:
+
+2 h
+10 h
+16 h
+18 h
+
+after seeing proxy performance.
+
+This preserves direct comparability with S3.
+
+
+# ============================================================
+# 15. PRIMARY SCIENTIFIC QUESTION
+# ============================================================
+
+The main question is:
+
+Does the explicit scheduler-request-state proxy assumption
+supply enough information to make selective runtime handling
+operationally useful?
+
+Specifically:
+
+1. Can BODY runtime Q90 be predicted safely?
+
+2. Can long-runtime-risk jobs be identified without
+   flagging nearly the entire population?
+
+3. Can body prediction + tail robust handling reduce
+   dangerous underprediction WITHOUT catastrophic
+   overreservation?
+
+4. How much of any improvement depends specifically on
+   requested walltime?
+
+
+# ============================================================
+# 16. BODY MODEL REGISTRY
+# ============================================================
+
+Keep the SAME compact structure as S3.
+
+B0:
+current recipe reference
+READ-ONLY comparator
+
+B1:
+LightGBM quantile
+
+B2:
+XGBoost quantile
+
+B3:
+TRAIN-body empirical quantile baseline
+
+
+Train independently for:
+
+Track P
+Track P-W
+
+
+Output:
+
+Q50 runtime
+Q90 runtime
+
+
+Do NOT:
+
+- introduce neural survival models
+- introduce DeepSurv
+- add random forest families
+- HPO hundreds of configurations
+
+This revision tests INFORMATION,
+not architecture proliferation.
+
+
+# ============================================================
+# 17. BODY ORACLE DIAGNOSTIC
+# ============================================================
+
+For each u:
+
+oracle BODY =
+actual runtime <= u
+
+This label is evaluation/training structure only.
+
+It is NOT available to inference.
+
+Measure whether the richer request-state feature set actually
+improves body prediction relative to S3.
+
+
+Report:
+
+- Q50 MAE
+- Q90 MAE
+- log-MAE
+- WAPE
+- Q90 coverage
+- GPU-weighted Q90 coverage
+- positive residual mass
+- GPU-weighted underprediction mass
+- completion-slot error
+
+
+Use 15-min runtime slot conversion:
+
+duration_slots =
+ceil(duration_sec / 900)
+
+
+# ============================================================
+# 18. BODY SAFETY GATES
+# ============================================================
+
+Retain the S3-style safety discipline.
+
+For support N >= 100:
+
+overall BODY Q90 coverage:
+90%–95%
+
+GPU-weighted BODY Q90 coverage:
+>= 90%
+
+major temporal block:
+>= 88%
+
+Coverage > 97.5%:
+OVERCONSERVATIVE_BODY_WARNING
+
+
+A candidate must pass DEV + CAL before exposed promotion.
+
+Do not choose based on exposed evaluation.
+
+
+# ============================================================
+# 19. TAIL-RISK CLASSIFIER
+# ============================================================
+
+For each u:
+
+y_tail,j =
+1{T_actual,j > u}
+
+
+Predict:
+
+p_tail,j =
+P(T_j > u | X_j)
+
+
+Classifier registry:
+
+C0:
+base-rate comparator
+
+C1:
+logistic regression
+
+C2:
+LightGBM classifier
+
+C3:
+XGBoost classifier
+
+
+Fit separately for:
+
+Track P
+Track P-W
+
+
+No user/account identity.
+
+
+# ============================================================
+# 20. TAIL DETECTION METRICS
+# ============================================================
+
+Report:
+
+- ROC-AUC
+- PR-AUC
+- Brier
+- ECE
+- recall
+- precision
+- specificity
+- false-negative rate
+- false-positive rate
+- flagged fraction
+
+GPU weighted:
+
+- GPU-weighted recall
+- GPU-weighted FN rate
+
+
+Danger-mass capture:
+
+For body predictor b:
+
+M_j =
+g_j * max(
+    T_actual,j - Q90_body,j,
+    0
+)
+
+Capture =
+sum_j M_j * tail_flag_j
+/
+sum_j M_j
+
+
+This quantity remains diagnostic because GPU request itself
+is evaluation weighting, not necessarily a predictor in
+Track P-W only if gpus_requested remains otherwise allowed.
+Clarify its dual role explicitly.
+
+
+# ============================================================
+# 21. SELECTIVITY GATE
+# ============================================================
+
+S3 showed that 90%+ recall can be meaningless if nearly every
+job is flagged.
+
+Therefore ADD an explicit preregistered selectivity gate.
+
+Mandatory:
+
+tail recall >= 90%
+
+GPU-weighted tail recall >= 90%
+
+danger-mass capture >= 80%
+
+AND
+
+flagged fraction <= 60%
+
+
+For thresholds whose TRUE tail prevalence itself exceeds 60%,
+flagged-fraction gate is not meaningful.
+
+In that case use:
+
+flagged fraction
+<=
+tail prevalence + 20 percentage points
+
+with upper cap 80%.
+
+
+Freeze this rule before fits.
+
+Do NOT change it after results.
+
+
+# ============================================================
+# 22. eta SELECTION
+# ============================================================
+
+Select eta using CALIBRATION ONLY.
+
+For every model/u/track:
+
+choose the LARGEST eta satisfying:
+
+1. recall >= 90%
+2. GPU-weighted recall >= 90%
+3. danger-mass capture >= 80%
+4. selectivity gate
+5. calibration support sufficient
+
+
+If no eta satisfies all:
+
+eta = NONE
+
+
+Do not lower eta on exposed evaluation.
+
+
+# ============================================================
+# 23. ROBUST POLICY REGISTRY
+# ============================================================
+
+Do NOT require exact tail runtime.
+
+Evaluate exactly THREE small policies.
+
+
+------------------------------------------------------------
+R0 — CURRENT RSP PROTECTED
+------------------------------------------------------------
+
+For tail-flagged PENDING jobs:
+
+candidate_duration =
+current frozen/current-recipe RSP reference duration
+
+Role:
+
+CURRENT_AUTHORITY_FALLBACK
+
+
+------------------------------------------------------------
+R1 — THRESHOLD-FLOOR PROTECTED
+------------------------------------------------------------
+
+For tail-flagged jobs:
+
+candidate_duration =
+max(
+    current RSP reference duration,
+    u
+)
+
+This is intentionally simple.
+
+It does NOT predict exact tail runtime.
+
+It only ensures that a job classified as T > u
+is not scheduled using a duration shorter than u.
+
+Role:
+
+SELECTIVE_THRESHOLD_FLOOR
+
+
+------------------------------------------------------------
+R2 — REQUESTED-WALLTIME PROTECTED COMPARATOR
+------------------------------------------------------------
+
+For tail-flagged jobs:
+
+candidate_duration =
+recorded requested walltime proxy
+
+Role:
+
+CONSERVATIVE_REQUESTED_WALLTIME_COMPARATOR
+
+
+R2 must NEVER be called a guaranteed upper bound.
+
+
+Do NOT invent Q99.
+
+Do NOT introduce a new tail regressor.
+
+
+# ============================================================
+# 24. BODY + TAIL HYBRID
+# ============================================================
+
+For each eligible combination:
+
+if tail_flag == 0:
+
+candidate_duration =
+body Q90
+
+if tail_flag == 1:
+
+candidate_duration =
+R0 / R1 / R2 according to the registered policy
+
+
+Final denominator:
+
+BODY + TAIL together.
+
+Never report body-only metrics as total hybrid performance.
+
+
+# ============================================================
+# 25. HYBRID METRICS
+# ============================================================
+
+Report:
+
+- overall coverage
+- GPU-weighted coverage
+- underpredicted job count
+- GPU-weighted positive miss
+- positive residual seconds
+- overreservation GPU-hours
+- P95 overreservation/job
+- completion-slot MAE
+- body miss
+- tail miss
+- flagged fraction
+- fallback-use rate
+
+
+Compare against:
+
+A. current recipe reference
+
+B. Track C / S3 strict-provenance evidence
+
+C. RW requested-walltime comparator
+
+
+Do not fabricate exact current-production Apr01 equivalence
+if source identity cannot be joined.
+
+
+# ============================================================
+# 26. HYBRID SAFETY / EFFICIENCY GATE
+# ============================================================
+
+Mandatory:
+
+overall coverage >= 90%
+
+GPU-weighted coverage >= 90%
+
+GPU-weighted positive underprediction mass
+must be lower than current reference
+
+AND
+
+overreservation GPU-hours must not exceed:
+
+3.0 × current reference
+
+
+The 3× cap is preregistered before evaluation.
+
+Reason:
+
+S3 R2/RW-style protection produced ~13.2× overreservation
+in a representative candidate and is operationally unacceptable.
+
+
+Also require no major temporal block to catastrophically fail.
+
+
+If R2 exceeds the cap:
+
+reject R2 even if coverage improves.
+
+
+# ============================================================
+# 27. WALLTIME DEPENDENCE ANALYSIS
+# ============================================================
+
+This is REQUIRED.
+
+Compare selected-capable candidates between:
+
+Track P
+vs
+Track P-W
+
+
+Measure:
+
+- body Q90 coverage delta
+- body GPU coverage delta
+- MAE/WAPE delta
+- tail ROC/PR delta
+- tail recall delta
+- mass capture delta
+- hybrid underprediction delta
+- overreservation delta
+
+
+If Track P passes but Track P-W clearly fails:
+
+classification note:
+
+PERFORMANCE_DEPENDS_STRONGLY_ON_RECORDED_WALLTIME_PROXY
+
+
+Do NOT call this invalid.
+
+It is an important scientific finding.
+
+
+If both pass:
+
+REQUEST_STATE_INFORMATION_BEYOND_WALLTIME_IS_USEFUL
+
+
+If neither passes:
+
+REQUEST_STATE_PROXY_INFORMATION_STILL_INSUFFICIENT
+
+
+# ============================================================
+# 28. FEATURE IMPORTANCE — DIAGNOSTIC ONLY
+# ============================================================
+
+For tree models, report:
+
+- gain importance
+- permutation importance on DEVELOPMENT only
+
+Do NOT use exposed evaluation feature importance
+to redesign the model.
+
+Do NOT use SHAP to select/drop features post hoc.
+
+Required question:
+
+How dominant is wallclock_req?
+
+Report its rank and relative importance.
+
+
+# ============================================================
+# 29. REQUEST-RUNTIME RELATIONSHIP FORENSIC
+# ============================================================
+
+Before final interpretation report:
+
+actual_runtime / requested_walltime
+
+distribution for positive valid rows.
+
+At minimum:
+
+- median
+- P90
+- P95
+- P99
+- fraction actual > requested
+- by requested-walltime bins
+- by GPU count
+- by partition/QoS when support sufficient
+
+
+This is a descriptive diagnostic.
+
+It must reinforce:
+
+requested walltime != hard upper bound.
+
+
+# ============================================================
+# 30. ASSUMPTION SENSITIVITY
+# ============================================================
+
+Because issue-time request-state equality is assumed rather than
+historically observed, include one simple perturbation sensitivity.
+
+Do NOT simulate arbitrary realistic modifications.
+
+Use a preregistered generic uncertainty test on continuous
+request values:
+
+S0:
+recorded proxy unchanged
+
+S1:
+wallclock proxy × 0.9
+
+S2:
+wallclock proxy × 1.1
+
+
+ONLY for post-selection sensitivity.
+
+Do NOT retrain/reselect under S1/S2.
+
+Purpose:
+
+test whether a small proxy discrepancy destroys runtime decisions.
+
+Do not claim ±10% corresponds to observed historical modifications.
+
+
+# ============================================================
+# 31. PREREGISTRATION
+# ============================================================
+
+Before ANY new S4 model fit freeze:
+
+- proxy assumption
+- feature registry
+- exclusion registry
+- Track C/P/P-W definitions
+- thresholds u
+- body model registry
+- classifier registry
+- eta rule
+- selectivity gate
+- robust policies R0/R1/R2
+- hybrid safety gate
+- 3× overreservation cap
+- walltime-dependence analysis
+- ±10% proxy sensitivity
+- split
+- May firewall
+- optimizer integration NO
+
+
+Create:
+
+V40S4_PREREGISTRATION.json
+
+Commit it.
+
+NO FIT BEFORE THIS COMMIT.
+
+
+Create:
+
+V40S4_PREREGISTRATION_COMMIT_RECEIPT.json
+
+
+# ============================================================
+# 32. MODEL SELECTION HIERARCHY
+# ============================================================
+
+Selection order:
+
+1. proxy-contract validity
+2. temporal / label firewall
+3. body safety
+4. tail detection safety
+5. selectivity
+6. hybrid overall/GPU safety
+7. underprediction improvement
+8. overreservation <= 3×
+9. lower overreservation
+10. lower body pinball/MAE
+11. simpler model
+
+
+Do NOT select on exposed evaluation.
+
+Freeze selected method or NONE after DEV+CAL.
+
+Then commit the selection freeze.
+
+Only then open/run the predefined exposed evaluation.
+
+
+# ============================================================
+# 33. EXPOSED EVALUATION
+# ============================================================
+
+The exposed evaluation remains EXPOSED,
+not untouched confirmation.
+
+No model/eta/u/policy change after opening.
+
+If the frozen method fails exposed safety:
+
+final classification = FAIL
+
+Do not return to DEV/CAL and retune.
+
+
+# ============================================================
+# 34. SUCCESS CLAIM BOUNDARY
+# ============================================================
+
+Even if S4 succeeds, maximum positive classification is:
+
+V40S4_REQUEST_STATE_PROXY_RUNTIME_PREVALIDATED
+
+
+Do NOT use:
+
+- causal ground-truth runtime predictor
+- historically verified D-1 request-state model
+- production ready
+- deployment ready
+
+
+Paper-facing language:
+
+ASSUMPTION-BASED TRACE-DRIVEN RUNTIME MODEL
+
+
+# ============================================================
+# 35. OPTIMIZER FIREWALL
+# ============================================================
+
+Optimizer integration remains ZERO.
+
+Do NOT modify:
+
+dayahead/v37/aidc_materializer.py
+dayahead/v40a/initial.py
+
+They were identified by S3 only as possible FUTURE consumers.
+
+
+Do NOT modify any:
+
+A0
+M1
+A1
+MF
+migration
+WAN
+Rack
+terminal
+Fresh
+restoration
+
+code.
+
+
+No Gurobi calls.
+No OpenDSS calls.
+
+
+# ============================================================
+# 36. MIGRATION / RUNNING HARD FIREWALL
+# ============================================================
+
+RUNNING runtime redesign:
+NO
+
+RUNNING migration change:
+NO
+
+A1 RUNNING change:
+NO
+
+new migration witness:
+NO
+
+WAN solve:
+NO
+
+terminal repair:
+NO
+
+event trigger:
+NO
+
+local repair:
+NO
+
+rolling MPC:
+NO
+
+
+# ============================================================
+# 37. MAY FIREWALL
+# ============================================================
+
+2025 May scientific reads:
+
+0
+
+Do not use May:
+
+- runtime labels
+- feature values for fitting
+- threshold selection
+- calibration
+- eta
+- model selection
+- proxy sensitivity
+- result-based tuning
+
+
+Metadata/path/code/index discovery may be nonzero
+only if unavoidable and must be disclosed separately.
+
+Apr-24–30 sealed shadow remains:
+
+SEALED
+
+rows read:
+0
+
+
+# ============================================================
+# 38. PROTECTED SCOPE
+# ============================================================
+
+Protect ALL V40S3 source/artifacts.
+
+V40S3 receipt reports:
+
+existing tracked blobs unchanged = 5,243
+
+S2 reference verified files = 145
+
+required S3 artifacts = 44
+
+
+At S4 start:
+
+hash:
+
+- all V40S3 tracked source
+- all required V40S3 artifacts
+- protected optimizer/migration/WAN/terminal files
+
+
+At S4 end:
+
+verify byte identity.
+
+
+Allowed changed paths ONLY:
+
+dayahead/v40s4/**
+dayahead/artifacts/v40s4_request_state_proxy_runtime_risk/**
+tests/dayahead/test_v40s4_*.py
+
+
+Create:
+
+V40S4_PROTECTED_SCOPE_START.json
+V40S4_PROTECTED_SCOPE_END.json
+V40S4_PROTECTED_SCOPE_DIFF.json
+
+
+# ============================================================
+# 39. CURRENT HOLDS
+# ============================================================
+
+Keep:
+
+production q = 5576.44921875 s
+PF = 0.95
+Q control = NO
+electrical = HOLD
+B0/B1/B2/B3 electrical = NO
+FULL_MAY = NO
+optimizer integration = NO
+RUNNING migration change = NO
+A1 migration change = NO
+terminal contract change = NO
+
+
+# ============================================================
+# 40. POSSIBLE FINAL CLASSIFICATIONS
+# ============================================================
+
+Allowed final classifications:
+
+V40S4_PROXY_FEATURE_BINDING_FAIL
+
+V40S4_PROXY_BODY_RUNTIME_INSUFFICIENT
+
+V40S4_PROXY_TAIL_DETECTION_FAIL
+
+V40S4_PROXY_HYBRID_RUNTIME_SAFETY_FAIL
+
+V40S4_REQUEST_STATE_PROXY_RUNTIME_PREVALIDATED
+
+V40S4_EXISTING_RUNTIME_REMAINS_SELECTED
+
+
+Additional interpretation labels:
+
+PERFORMANCE_DEPENDS_STRONGLY_ON_RECORDED_WALLTIME_PROXY
+
+REQUEST_STATE_INFORMATION_BEYOND_WALLTIME_IS_USEFUL
+
+REQUEST_STATE_PROXY_INFORMATION_STILL_INSUFFICIENT
+
+
+# ============================================================
+# 41. SUPERIORITY BOOTSTRAP
+# ============================================================
+
+Only run superiority bootstrap if:
+
+- frozen S4 method passes all safety gates
+- proxy contract passes
+- body/tail/hybrid pass
+- overreservation <= 3×
+- method was frozen before exposed evaluation
+
+
+Otherwise:
+
+BOOTSTRAP =
+NOT_EXECUTED_SAFETY_FAIL
+
+
+Do not calculate a favorable CI after failure.
+
+
+# ============================================================
+# 42. REPRODUCIBILITY
+# ============================================================
+
+Use CPU unless there is a genuine need for GPU.
+
+Tree models should be deterministic where possible.
+
+Record:
+
+- Python
+- sklearn
+- LightGBM
+- XGBoost
+- CPU
+- threads
+- seed
+- fit time
+- inference time
+
+
+For all selected-capable models:
+
+run an independent same-seed repeat.
+
+Compare prediction max/mean difference.
+
+Do not select the better repeat.
+
+
+# ============================================================
+# 43. REQUIRED ARTIFACTS
+# ============================================================
+
+At minimum:
+
+V40S4_START_STATE.json
+V40S4_GIT_LINEAGE_AUDIT.json
+
+V40S4_S3_REFERENCE_FREEZE.json
+
+V40S4_REQUEST_STATE_PROXY_ASSUMPTION.json
+V40S4_ASSUMPTION_BOUNDARY.md
+
+V40S4_PROXY_FEATURE_INVENTORY.json
+V40S4_PROXY_FEATURE_MISSINGNESS_AUDIT.json
+V40S4_PROXY_FEATURE_PREPROCESSING_CONTRACT.json
+V40S4_PROXY_FEATURE_CONTRACT.json
+
+V40S4_POPULATION_AUDIT.json
+V40S4_RUNTIME_LABEL_CONTRACT.json
+V40S4_TEMPORAL_SPLIT_CONTRACT.json
+V40S4_MAY_FIREWALL.json
+V40S4_UNTOUCHED_HOLDOUT_AUDIT.json
+
+V40S4_REQUEST_RUNTIME_RELATIONSHIP.json
+
+V40S4_PREREGISTRATION.json
+V40S4_PREREGISTRATION_COMMIT_RECEIPT.json
+
+V40S4_TRACK_C_REFERENCE.json
+
+V40S4_TRACK_P_BODY_RESULTS.csv
+V40S4_TRACK_PW_BODY_RESULTS.csv
+
+V40S4_TRACK_P_TAIL_RESULTS.csv
+V40S4_TRACK_PW_TAIL_RESULTS.csv
+
+V40S4_ETA_SELECTION.json
+V40S4_SELECTIVITY_AUDIT.json
+
+V40S4_R0_REPORT.json
+V40S4_R1_REPORT.json
+V40S4_R2_REPORT.json
+
+V40S4_HYBRID_RESULTS.csv
+V40S4_OVERRESERVATION_REPORT.json
+V40S4_GPU_WEIGHTED_UNDERPREDICTION.json
+
+V40S4_WALLTIME_DEPENDENCE_ANALYSIS.json
+V40S4_FEATURE_IMPORTANCE_DIAGNOSTIC.json
+V40S4_PROXY_PERTURBATION_SENSITIVITY.json
+
+V40S4_METHOD_SELECTION.json
+V40S4_MODEL_FREEZE.json
+V40S4_METHOD_SELECTION_COMMIT_RECEIPT.json
+
+V40S4_EXPOSED_RESULTS.json
+
+V40S4_RUNTIME_ADAPTER_PROPOSAL.json
+
+V40S4_PROTECTED_SCOPE_START.json
+V40S4_PROTECTED_SCOPE_END.json
+V40S4_PROTECTED_SCOPE_DIFF.json
+
+V40S4_COMPUTE_LEDGER.json
+V40S4_REPRODUCIBILITY_AUDIT.json
+
+V40S4_TEST_REPORT.json
+V40S4_FINAL_REVIEW.md
+V40S4_FINAL_COMMIT_RECEIPT.json
+
+
+# ============================================================
+# 44. RUNTIME ADAPTER PROPOSAL — NO INTEGRATION
+# ============================================================
+
+If S4 succeeds, create only a proposal with fields:
+
+job_uid
+runtime_class
+runtime_body_q50_sec
+runtime_body_q90_sec
+tail_probability
+tail_threshold_sec
+tail_flag
+robust_tail_policy
+candidate_duration_sec
+flexibility_protected
+
+Add:
+
+runtime_information_track =
+STRICT_PROVENANCE
+or
+REQUEST_STATE_PROXY
+
+request_state_assumption_id =
+D1_SCHEDULER_REQUEST_STATE_PROXY_V1
+
+
+No:
+
+site
+migration
+MESS
+electrical
+WAN
+terminal decision fields.
+
+
+If S4 fails:
+
+recommended rows = []
+
+
+# ============================================================
+# 45. MINIMUM TESTS
+# ============================================================
+
+At minimum verify:
+
+1. S3 scientific SHA exact
+2. S3 receipt full SHA resolved
+3. S3 classification exact
+4. new isolated S4 worktree
+
+5. proxy assumption frozen before fit
+6. historical D1 snapshot provenance remains UNVERIFIED
+7. original submission provenance remains UNVERIFIED
+
+8. PENDING membership unchanged
+9. RUNNING redesign = 0
+
+10. source population identity
+11. runtime=end-start exact
+12. zero/positive counts exact
+
+13. Track C fields exact
+14. Track P fields exact
+15. Track P-W removes wallclock only
+
+16. user/account/job-name predictors absent
+17. actual start predictor absent
+18. actual end predictor absent
+19. actual runtime predictor absent
+
+20. wallclock is predictor only
+21. no runtime clipping to wallclock
+22. actual>wallclock rows retained
+
+23. preprocessing fit on TRAIN only
+24. unseen categories -> UNKNOWN
+25. no target encoding leakage
+
+26. S3 temporal split exact
+27. S3 thresholds exact
+
+28. body Q50 <= Q90
+29. runtime outputs finite positive
+30. 15-min slot conversion exact
+
+31. tail labels exact
+32. classifiers causal/proxy-field only
+
+33. eta CAL only
+34. selectivity gate exact
+35. mass capture exact
+
+36. R0 current RSP only
+37. R1 max(RSP,u) exact
+38. R2 requested walltime proxy exact
+39. R2 never treated as guaranteed bound
+
+40. final denominator BODY+TAIL
+
+41. overall coverage exact
+42. GPU coverage exact
+43. underprediction exact
+44. overreservation exact
+45. 3× cap exact
+
+46. Track P vs P-W comparison exact
+
+47. ±10% walltime sensitivity post-selection only
+48. sensitivity does not retrain/reselect
+
+49. optimizer calls = 0
+50. Gurobi calls = 0
+51. OpenDSS calls = 0
+
+52. A0 change = 0
+53. A1 change = 0
+54. M1 change = 0
+55. MF change = 0
+
+56. migration change = 0
+57. WAN change = 0
+58. terminal change = 0
+59. event-trigger change = 0
+60. local-repair change = 0
+
+61. May scientific reads = 0
+62. sealed shadow reads = 0
+
+63. production q unchanged
+64. PF = 0.95
+65. Q control = NO
+66. electrical HOLD
+67. B0-B3 electrical = NO
+68. FULL_MAY = NO
+69. optimizer integration = NO
+
+70. all S3 protected hashes unchanged
+71. protected optimizer/migration/WAN/terminal hashes unchanged
+
+72. required artifacts present
+73. final Git status clean
+
+
+# ============================================================
+# 46. FINAL RESPONSE FORMAT
+# ============================================================
+
+Report in Korean.
+
+Begin:
+
+FINAL CLASSIFICATION:
+SELECTED TRACK:
+SELECTED u:
+SELECTED BODY MODEL:
+SELECTED TAIL CLASSIFIER:
+SELECTED eta:
+SELECTED ROBUST POLICY:
+PROXY ASSUMPTION:
+HISTORICAL D-1 SNAPSHOT VERIFIED:
+BODY SAFETY:
+TAIL DETECTION:
+HYBRID SAFETY:
+OPTIMIZER INTEGRATION:
+PRODUCTION READY:
+
+
+Then report:
+
+1. exact Git lineage
+2. S3 preservation
+3. assumption contract
+
+4. population
+5. PENDING population
+6. split
+
+7. proxy feature inventory
+8. missingness
+9. excluded features
+
+10. actual/requested walltime forensic
+11. actual > request fraction
+
+12. Track C reference
+13. Track P body table
+14. Track P-W body table
+
+15. body Q90/GPU coverage
+16. body MAE/WAPE/miss
+
+17. Track P classifier table
+18. Track P-W classifier table
+19. ROC/PR/ECE
+20. recall/GPU recall
+21. mass capture
+22. flagged fraction
+23. eta
+
+24. R0
+25. R1
+26. R2
+
+27. hybrid coverage
+28. GPU coverage
+29. underprediction reduction
+30. overreservation ratio
+31. selected policy
+
+32. walltime dependence
+33. feature importance
+
+34. ±10% proxy sensitivity
+
+35. exposed evaluation result
+36. bootstrap status
+37. confirmation status
+
+38. May firewall
+39. optimizer/Gurobi/OpenDSS calls
+
+40. migration/WAN/terminal change statement
+
+41. tests
+42. reproducibility
+43. protected scope
+
+44. scientific commit
+45. receipt commit
+
+
+# ============================================================
+# 47. FINAL INTERPRETATION RULE
+# ============================================================
+
+The study MUST distinguish:
+
+STRICTLY VERIFIED FEATURE AUTHORITY
+
+from
+
+ASSUMPTION-BASED SCHEDULER REQUEST-STATE PROXY.
+
+
+If Track P succeeds:
+
+Do NOT conclude:
+
+"historical D-1 request states were causally verified."
+
+Conclude:
+
+"Under the explicit scheduler-visible request-state proxy
+assumption, recorded resource-request metadata provide
+sufficient information for prevalidated selective runtime-risk
+handling."
+
+If only Track P with wallclock succeeds:
+
+state explicitly that the improvement depends strongly on the
+recorded requested-walltime proxy.
+
+If S4 fails:
+
+do not add more models.
+
+Conclude that the request-state proxy assumption, under the
+registered feature/model family, was still insufficient to
+support safe selective runtime handling.
+
+Do not modify the optimizer in V40S4.

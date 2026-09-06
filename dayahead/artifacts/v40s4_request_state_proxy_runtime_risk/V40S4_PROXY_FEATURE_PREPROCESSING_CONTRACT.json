@@ -1,0 +1,117 @@
+{
+  "rule": "Valid continuous: log1p after TRAIN median imputation plus missing indicator; categorical train-only one-hot vocabulary with UNKNOWN; clock raw hour/weekday; no target encoding",
+  "invalid_rule": "nonfinite invalid; wall/GPU/nodes/cores<=0 invalid; memory<0 invalid; fractional GPU/node/core counts invalid; memory0 retained",
+  "missing_category_rule": "NA or trimmed empty/nan/none/unknown -> __UNKNOWN__; unseen -> __UNKNOWN__",
+  "logistic": "Same transformed columns as trees; no post-outcome scaling search; max_iter1000",
+  "descriptors": {
+    "P": {
+      "track": "P",
+      "source_fields": [
+        "requested_seconds",
+        "num_gpus_req",
+        "num_nodes_req",
+        "num_cores_req",
+        "requested_memory_mib",
+        "partition",
+        "qos",
+        "submit_hour",
+        "submit_dow"
+      ],
+      "medians": {
+        "requested_seconds": 172800.0,
+        "num_gpus_req": 1.0,
+        "num_nodes_req": 1.0,
+        "num_cores_req": 2.0,
+        "requested_memory_mib": 80000.0
+      },
+      "vocab": {
+        "partition": [
+          "__UNKNOWN__",
+          "gpu-h100",
+          "gpu-h100-stdby",
+          "project_3"
+        ],
+        "qos": [
+          "__UNKNOWN__",
+          "normal",
+          "standby"
+        ]
+      },
+      "encoded_feature_groups": [
+        "requested_seconds",
+        "requested_seconds",
+        "num_gpus_req",
+        "num_gpus_req",
+        "num_nodes_req",
+        "num_nodes_req",
+        "num_cores_req",
+        "num_cores_req",
+        "requested_memory_mib",
+        "requested_memory_mib",
+        "partition",
+        "partition",
+        "partition",
+        "partition",
+        "qos",
+        "qos",
+        "qos",
+        "submit_hour",
+        "submit_dow"
+      ],
+      "train_ID_SHA256": "f23e1518d91207e36cdb7017a0af7c106200bf12ea197f09f8bb143e41b35d88"
+    },
+    "PW": {
+      "track": "PW",
+      "source_fields": [
+        "num_gpus_req",
+        "num_nodes_req",
+        "num_cores_req",
+        "requested_memory_mib",
+        "partition",
+        "qos",
+        "submit_hour",
+        "submit_dow"
+      ],
+      "medians": {
+        "num_gpus_req": 1.0,
+        "num_nodes_req": 1.0,
+        "num_cores_req": 2.0,
+        "requested_memory_mib": 80000.0
+      },
+      "vocab": {
+        "partition": [
+          "__UNKNOWN__",
+          "gpu-h100",
+          "gpu-h100-stdby",
+          "project_3"
+        ],
+        "qos": [
+          "__UNKNOWN__",
+          "normal",
+          "standby"
+        ]
+      },
+      "encoded_feature_groups": [
+        "num_gpus_req",
+        "num_gpus_req",
+        "num_nodes_req",
+        "num_nodes_req",
+        "num_cores_req",
+        "num_cores_req",
+        "requested_memory_mib",
+        "requested_memory_mib",
+        "partition",
+        "partition",
+        "partition",
+        "partition",
+        "qos",
+        "qos",
+        "qos",
+        "submit_hour",
+        "submit_dow"
+      ],
+      "train_ID_SHA256": "f23e1518d91207e36cdb7017a0af7c106200bf12ea197f09f8bb143e41b35d88"
+    }
+  },
+  "fit_role": "TRAIN_ONLY"
+}

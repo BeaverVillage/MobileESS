@@ -1,0 +1,424 @@
+{
+  "timestamp": "2026-09-06T15:35:04.408678+00:00",
+  "new_fits_before_commit": 0,
+  "new_predictions_before_commit": 0,
+  "assumption": {
+    "assumption_id": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+    "REQUEST_STATE_ROLE": "ASSUMPTION_BASED_SCHEDULER_VISIBLE_PROXY",
+    "HISTORICAL_D1_SNAPSHOT_PROVENANCE": "UNVERIFIED",
+    "ORIGINAL_SUBMISSION_VALUE_PROVENANCE": "UNVERIFIED",
+    "OPERATIONAL_AVAILABILITY_ASSUMPTION": "FROZEN",
+    "definition": "Recorded public Kestrel request fields proxy currently effective PENDING request state at D-1 18:00 fixed AEST. This is an assumption, not verified snapshot equality or request immutability.",
+    "POST_ISSUE_REQUEST_MODIFICATION_HISTORY": "UNOBSERVED",
+    "POST_ISSUE_REQUEST_MODIFICATION_MODEL": "OUT_OF_SCOPE",
+    "observed_modification_frequency": null,
+    "paper_label": "ASSUMPTION-BASED TRACE-DRIVEN RUNTIME MODEL"
+  },
+  "feature_contract": {
+    "assumption_id": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+    "tracks": {
+      "C": {
+        "role": "STRICT_PROVENANCE_REFERENCE",
+        "features": [
+          "submit_hour",
+          "submit_dow"
+        ],
+        "retrain": false
+      },
+      "P": {
+        "role": "ASSUMPTION_BASED_OPERATIONAL_PROXY",
+        "features": [
+          "requested_seconds",
+          "num_gpus_req",
+          "num_nodes_req",
+          "num_cores_req",
+          "requested_memory_mib",
+          "partition",
+          "qos",
+          "submit_hour",
+          "submit_dow"
+        ]
+      },
+      "PW": {
+        "role": "WALLTIME_DEPENDENCE_SENSITIVITY",
+        "features": [
+          "num_gpus_req",
+          "num_nodes_req",
+          "num_cores_req",
+          "requested_memory_mib",
+          "partition",
+          "qos",
+          "submit_hour",
+          "submit_dow"
+        ]
+      }
+    },
+    "requested_GPU_dual_role": "Predictor in both P and P-W, independently frozen evaluation weight in all tracks; recorded request, not measured allocation",
+    "forbidden_predictors": [
+      "job_id",
+      "job_issue_uid",
+      "user",
+      "account",
+      "job_name",
+      "start_time",
+      "end_time",
+      "runtime_seconds",
+      "K0",
+      "reference_safe_sec",
+      "support counts"
+    ],
+    "walltime": "Predictive covariate; new model quantiles never clipped to walltime",
+    "proxy_values_frozen_at_issue_by_assumption": true
+  },
+  "preprocessing": {
+    "rule": "Valid continuous: log1p after TRAIN median imputation plus missing indicator; categorical train-only one-hot vocabulary with UNKNOWN; clock raw hour/weekday; no target encoding",
+    "invalid_rule": "nonfinite invalid; wall/GPU/nodes/cores<=0 invalid; memory<0 invalid; fractional GPU/node/core counts invalid; memory0 retained",
+    "missing_category_rule": "NA or trimmed empty/nan/none/unknown -> __UNKNOWN__; unseen -> __UNKNOWN__",
+    "logistic": "Same transformed columns as trees; no post-outcome scaling search; max_iter1000",
+    "descriptors": {
+      "P": {
+        "track": "P",
+        "source_fields": [
+          "requested_seconds",
+          "num_gpus_req",
+          "num_nodes_req",
+          "num_cores_req",
+          "requested_memory_mib",
+          "partition",
+          "qos",
+          "submit_hour",
+          "submit_dow"
+        ],
+        "medians": {
+          "requested_seconds": 172800.0,
+          "num_gpus_req": 1.0,
+          "num_nodes_req": 1.0,
+          "num_cores_req": 2.0,
+          "requested_memory_mib": 80000.0
+        },
+        "vocab": {
+          "partition": [
+            "__UNKNOWN__",
+            "gpu-h100",
+            "gpu-h100-stdby",
+            "project_3"
+          ],
+          "qos": [
+            "__UNKNOWN__",
+            "normal",
+            "standby"
+          ]
+        },
+        "encoded_feature_groups": [
+          "requested_seconds",
+          "requested_seconds",
+          "num_gpus_req",
+          "num_gpus_req",
+          "num_nodes_req",
+          "num_nodes_req",
+          "num_cores_req",
+          "num_cores_req",
+          "requested_memory_mib",
+          "requested_memory_mib",
+          "partition",
+          "partition",
+          "partition",
+          "partition",
+          "qos",
+          "qos",
+          "qos",
+          "submit_hour",
+          "submit_dow"
+        ],
+        "train_ID_SHA256": "f23e1518d91207e36cdb7017a0af7c106200bf12ea197f09f8bb143e41b35d88"
+      },
+      "PW": {
+        "track": "PW",
+        "source_fields": [
+          "num_gpus_req",
+          "num_nodes_req",
+          "num_cores_req",
+          "requested_memory_mib",
+          "partition",
+          "qos",
+          "submit_hour",
+          "submit_dow"
+        ],
+        "medians": {
+          "num_gpus_req": 1.0,
+          "num_nodes_req": 1.0,
+          "num_cores_req": 2.0,
+          "requested_memory_mib": 80000.0
+        },
+        "vocab": {
+          "partition": [
+            "__UNKNOWN__",
+            "gpu-h100",
+            "gpu-h100-stdby",
+            "project_3"
+          ],
+          "qos": [
+            "__UNKNOWN__",
+            "normal",
+            "standby"
+          ]
+        },
+        "encoded_feature_groups": [
+          "num_gpus_req",
+          "num_gpus_req",
+          "num_nodes_req",
+          "num_nodes_req",
+          "num_cores_req",
+          "num_cores_req",
+          "requested_memory_mib",
+          "requested_memory_mib",
+          "partition",
+          "partition",
+          "partition",
+          "partition",
+          "qos",
+          "qos",
+          "qos",
+          "submit_hour",
+          "submit_dow"
+        ],
+        "train_ID_SHA256": "f23e1518d91207e36cdb7017a0af7c106200bf12ea197f09f8bb143e41b35d88"
+      }
+    },
+    "fit_role": "TRAIN_ONLY"
+  },
+  "population": {
+    "status": "PASS",
+    "original_N": 73504,
+    "positive_N": 72292,
+    "zero_N": 1212,
+    "negative_N": 0,
+    "duplicates": 0,
+    "missing_start_end": 0,
+    "job_issue_N": 10883,
+    "unique_jobs": 7603,
+    "source": "C:\\codex_mobileess_workspace\\MobileESS_v40s2_survival_occupancy_ml\\dayahead\\artifacts\\v40q_regime_conditioned_tail\\clean_execution_01\\PREPARED_ROWS.parquet",
+    "source_SHA256": "fed0270c4e90362bc97b3583d92bfc6e00d6083297ee502b098e08896e086df9",
+    "parent_panel_SHA256": "b55f1c47b9b0a743b90b3d80d68895eea189904b0385761a25acac7ce04d5887",
+    "panel_SHA256": "fbd99e403891139150441c7374640ae5607a8671e9c511cc52f92f3959e795b7",
+    "exact_independent_S3_rebuild": true,
+    "blocks": {
+      "CALIBRATION": {
+        "N": 2634,
+        "unique_jobs": 1738,
+        "ID_SHA256": "f12cee5bf80b3bb3a83fc2e7f95ee697a5f498d569b88732d6d69737ea4b3d2c",
+        "max_label_end": "2025-04-07T18:21:08+00:00"
+      },
+      "DEVELOPMENT": {
+        "N": 4346,
+        "unique_jobs": 2893,
+        "ID_SHA256": "6cdb30a91dbf087b62a695d0862e1f25c9b68fba90c176bee269f7010ea66e54",
+        "max_label_end": "2025-03-31T00:00:45+00:00"
+      },
+      "EXPOSED_EVALUATION": {
+        "N": 2713,
+        "unique_jobs": 1812,
+        "ID_SHA256": "32db38f441b4831d0acb020f94ba3237394fa83cd6aa787dcc419ee83b5d6c09",
+        "max_label_end": "2025-04-23T23:52:58+00:00"
+      },
+      "TRAIN": {
+        "N": 1190,
+        "unique_jobs": 1160,
+        "ID_SHA256": "f23e1518d91207e36cdb7017a0af7c106200bf12ea197f09f8bb143e41b35d88",
+        "max_label_end": "2025-03-22T07:43:55+00:00"
+      }
+    },
+    "source_limitation": "Previously exposed positive terminal-service complete cases, not full cluster backlog; unresolved censoring and raw rowgroup exclusion bias unchanged."
+  },
+  "splits": {
+    "TRAIN": [
+      "2025-03-14T08:00Z",
+      "2025-03-22T08:00Z"
+    ],
+    "DEVELOPMENT": [
+      "2025-03-22T08:00Z",
+      "2025-04-01T08:00Z"
+    ],
+    "CALIBRATION": [
+      "2025-04-01T08:00Z",
+      "2025-04-08T08:00Z"
+    ],
+    "EXPOSED_EVALUATION": [
+      "2025-04-08T08:00Z",
+      "2025-04-24T00:00Z"
+    ]
+  },
+  "threshold_hours": [
+    4,
+    6,
+    8,
+    12,
+    24
+  ],
+  "tracks": [
+    "C",
+    "P",
+    "PW"
+  ],
+  "C_retrain": false,
+  "body_registry": {
+    "B0": "Immutable current recipe comparator only, no selection",
+    "B1": {
+      "library": "LightGBM",
+      "quantiles": [
+        0.5,
+        0.9
+      ],
+      "params": {
+        "n_estimators": 100,
+        "num_leaves": 7,
+        "max_depth": 3,
+        "learning_rate": 0.05,
+        "min_child_samples": 50,
+        "n_jobs": 1,
+        "random_state": 4003,
+        "deterministic": true,
+        "force_col_wise": true,
+        "verbosity": -1
+      }
+    },
+    "B2": {
+      "library": "XGBoost",
+      "objective": "reg:quantileerror",
+      "quantiles": [
+        0.5,
+        0.9
+      ],
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 3,
+        "learning_rate": 0.05,
+        "min_child_weight": 20,
+        "n_jobs": 1,
+        "random_state": 4003,
+        "tree_method": "hist",
+        "device": "cpu",
+        "subsample": 1.0,
+        "colsample_bytree": 1.0
+      }
+    },
+    "B3": "TRAIN body empirical linear quantiles"
+  },
+  "classifier_registry": {
+    "C0": "TRAIN tail base rate",
+    "C1": {
+      "library": "sklearn LogisticRegression",
+      "C": 1,
+      "solver": "lbfgs",
+      "max_iter": 1000,
+      "random_state": 4003
+    },
+    "C2": {
+      "library": "LightGBM",
+      "objective": "binary",
+      "params": {
+        "n_estimators": 100,
+        "num_leaves": 7,
+        "max_depth": 3,
+        "learning_rate": 0.05,
+        "min_child_samples": 50,
+        "n_jobs": 1,
+        "random_state": 4003,
+        "deterministic": true,
+        "force_col_wise": true,
+        "verbosity": -1
+      }
+    },
+    "C3": {
+      "library": "XGBoost",
+      "objective": "binary:logistic",
+      "eval_metric": "logloss",
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 3,
+        "learning_rate": 0.05,
+        "min_child_weight": 20,
+        "n_jobs": 1,
+        "random_state": 4003,
+        "tree_method": "hist",
+        "device": "cpu",
+        "subsample": 1.0,
+        "colsample_bytree": 1.0
+      }
+    }
+  },
+  "body_train": "TRAIN rows T<=u; transformed with unsupervised full TRAIN map; no additional quantile calibration, as S3",
+  "output_rule": "Sort raw Q50/Q90 pair, clip only numerical nonpositive to1s; never cap to walltime. Report raw crossings. ceil(seconds/900) once for scheduler metrics.",
+  "eta_rule": "Per track/u/body/classifier CAL only; largest unique probability or endpoint satisfying recall>=.90, requested-GPU recall>=.90, g*positive body-Q90 miss capture>=.80, selectivity. CAL N>=100 and tailN>=100; no qualifying eta =>NONE.",
+  "selectivity": "flagged<=.60; if true tail prevalence>.60 use min(.80,prevalence+.20). CAL uses CAL prevalence; each evaluation metric applies its own prevalence rule without retuning eta.",
+  "body_gates": {
+    "overall_min": 0.9,
+    "overall_max": 0.95,
+    "GPU_min": 0.9,
+    "major_day_min": 0.88,
+    "major_day_GPU_min": 0.88,
+    "support_N": 100,
+    "upper_warning": 0.975
+  },
+  "tail_gates": {
+    "recall": 0.9,
+    "GPU_recall": 0.9,
+    "mass_capture": 0.8,
+    "support_N": 100,
+    "tail_N": 100,
+    "ECE": "Diagnostic only; S4 specification does not carry S3 ECE<=.05 gate into eta or eligibility."
+  },
+  "ECE_definition": "10 equal-width bins [0,.1)...[.9,1], N-weighted absolute bin observed-predicted difference",
+  "robust": {
+    "R0": "current recipe reference_safe_sec",
+    "R1": "max(reference_safe_sec,u_seconds)",
+    "R2": "recorded requested_seconds, not hard bound"
+  },
+  "hybrid_gates": {
+    "overall_min": 0.9,
+    "GPU_min": 0.9,
+    "GPU_underprediction_ratio_strict_max": 1.0,
+    "overreservation_ratio_max": 3.0,
+    "major_day_N": 100,
+    "major_day_overall_min": 0.85,
+    "major_day_GPU_min": 0.85,
+    "major_day_overreservation_ratio_max": 3.0
+  },
+  "zero_reference_rule": "If reference mass or reserve0, candidate must also be0; no smoothing. Strict improvement still impossible for zero total reference miss.",
+  "selection": "Require every gate on both DEV and CAL. Per track freeze best eligible by pooled overreservation, pooled oracle body Q50 MAE, B3/B1/B2 simplicity, C0/C1/C2/C3, larger u, R0/R1/R2. Freeze overall best across per-track winners by same criteria (PW beforeP only final tie). No refit/reselection after freeze.",
+  "exposed": "After committed selection, evaluate frozen candidates as diagnostics and frozen per-track/global winners as promotion tests; no winner rescue after global selected failure.",
+  "importance": "All tree models: aggregate gain by original feature; DEVELOPMENT-only3-repeat raw-feature permutation, seed4003+i; body oracle pinball at native alpha, classifier Brier; no redesign.",
+  "walltime_dependence": "Matched P-PW comparisons per u/body/classifier/role; separately assess frozen per-track winners. P-only success strong walltime dependence; both or PW-only success beyond-walltime information; neither insufficient.",
+  "perturbation": "Post-selection only S0,wallclock*.9,wallclock*1.1; no refit or eta change. Evaluate frozen global winner; if NONE use preregistered diagnostic anchor P/u4/B1/C2/R1 (and PW identical anchor) without claiming selection. Perturb predictor walltime and R2 walltime fallback together if selected policyR2; current RSP and actual labels fixed. Not an observed modification model.",
+  "bootstrap": "Only if frozen global winner passes all exposed gates:5000 paired issue-day block bootstrap of GPU underprediction improvement vs current reference; seed4003; otherwise NOT_EXECUTED_SAFETY_FAIL",
+  "classification": "Binding failure first; no DEV+CAL body-safe pair =>PROXY_BODY_RUNTIME_INSUFFICIENT; body exists but no tail/selectivity-safe pair =>PROXY_TAIL_DETECTION_FAIL; otherwise no eligible or exposed failed global method =>PROXY_HYBRID_RUNTIME_SAFETY_FAIL; frozen global all-pass =>REQUEST_STATE_PROXY_RUNTIME_PREVALIDATED.",
+  "compute": {
+    "device": "CPU",
+    "threads": 1,
+    "seed": 4003,
+    "versions": {
+      "numpy": "2.2.6",
+      "pandas": "2.2.3",
+      "scikit-learn": "1.6.1",
+      "xgboost": "3.2.0",
+      "lightgbm": "4.6.0"
+    },
+    "independent_same_seed_repeat": "All new fitted model objects, compare predictions on TRAIN+DEV+CAL before selection; never choose better repeat",
+    "extra_package_path": "C:/codex_mobileess_workspace/v40s3_runtime_packages"
+  },
+  "optimizer_integration": "NO",
+  "holds": {
+    "production_q_seconds": 5576.44921875,
+    "PF": 0.95,
+    "Q_control": "NO",
+    "electrical": "HOLD",
+    "B0_B1_B2_B3_electrical": "NO",
+    "FULL_MAY": "NO",
+    "optimizer_integration": "NO",
+    "RUNNING_migration_change": "NO",
+    "A1_migration_change": "NO",
+    "terminal_contract_change": "NO"
+  },
+  "May_scientific_reads": 0,
+  "shadow": "SEALED"
+}

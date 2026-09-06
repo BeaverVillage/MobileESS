@@ -1,0 +1,19 @@
+{
+  "role": "STRICT_PROVENANCE_REFERENCE",
+  "classification": "V40S3_CAUSAL_TAIL_RISK_INFORMATION_INSUFFICIENT",
+  "selected": null,
+  "retrained": false,
+  "features": [
+    "submit_hour",
+    "submit_dow"
+  ],
+  "S3_receipt": "bfeb9c3312b397fdd15a00dfc9eac37dd4b2b6aa",
+  "source_predictions": "Immutable V40S3_PREDICTIONS_u*_{role}.parquet",
+  "source_results": [
+    "V40S3_DEV_CAL_RESULTS.json",
+    "V40S3_EXPOSED_RESULTS.json"
+  ],
+  "raw_S3_eta_rule": "CAL recall/GPU recall90% only, with separate80% flag/ECE gates; do not relabel as S4 eta protocol",
+  "raw_S3_gate_results_preserved": true,
+  "comparison_rule": "Matched same-u/body/classifier metrics; S3 R1 is S4 R2, S4 R1 is new threshold floor"
+}

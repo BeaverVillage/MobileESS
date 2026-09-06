@@ -1,0 +1,102 @@
+{
+  "parent_contract": {
+    "timezone": "fixed AEST UTC+10; issue 18:00 local =08:00 UTC",
+    "blocks": {
+      "TRAIN": [
+        "2025-03-14T08:00Z",
+        "2025-03-22T08:00Z"
+      ],
+      "DEVELOPMENT": [
+        "2025-03-22T08:00Z",
+        "2025-04-01T08:00Z"
+      ],
+      "CALIBRATION": [
+        "2025-04-01T08:00Z",
+        "2025-04-08T08:00Z"
+      ],
+      "EXPOSED_EVALUATION": [
+        "2025-04-08T08:00Z",
+        "2025-04-24T00:00Z"
+      ]
+    },
+    "split_axis": "issue_time half-open interval; end_time strictly before next stage cutoff",
+    "rows": "one job per daily issue; repeated issue exposure retained, no random split",
+    "final_shadow_cutoff": "2025-04-24T00:00:00Z",
+    "canonical_preMay_local": "2025-05-01T00:00:00+10:00",
+    "canonical_preMay_UTC": "2025-04-30T14:00:00Z",
+    "block_counts": {
+      "CALIBRATION": {
+        "N": 2634,
+        "unique_jobs": 1738,
+        "ID_SHA256": "f12cee5bf80b3bb3a83fc2e7f95ee697a5f498d569b88732d6d69737ea4b3d2c",
+        "max_label_end": "2025-04-07T18:21:08+00:00"
+      },
+      "DEVELOPMENT": {
+        "N": 4346,
+        "unique_jobs": 2893,
+        "ID_SHA256": "6cdb30a91dbf087b62a695d0862e1f25c9b68fba90c176bee269f7010ea66e54",
+        "max_label_end": "2025-03-31T00:00:45+00:00"
+      },
+      "EXPOSED_EVALUATION": {
+        "N": 2713,
+        "unique_jobs": 1812,
+        "ID_SHA256": "32db38f441b4831d0acb020f94ba3237394fa83cd6aa787dcc419ee83b5d6c09",
+        "max_label_end": "2025-04-23T23:52:58+00:00"
+      },
+      "TRAIN": {
+        "N": 1190,
+        "unique_jobs": 1160,
+        "ID_SHA256": "f23e1518d91207e36cdb7017a0af7c106200bf12ea197f09f8bb143e41b35d88",
+        "max_label_end": "2025-03-22T07:43:55+00:00"
+      }
+    },
+    "no_random_split": true,
+    "selection": "DEV+CAL only; freeze method before EXPOSED_EVALUATION scoring; no refit after selection"
+  },
+  "exact_blocks": {
+    "TRAIN": [
+      "2025-03-14T08:00Z",
+      "2025-03-22T08:00Z"
+    ],
+    "DEVELOPMENT": [
+      "2025-03-22T08:00Z",
+      "2025-04-01T08:00Z"
+    ],
+    "CALIBRATION": [
+      "2025-04-01T08:00Z",
+      "2025-04-08T08:00Z"
+    ],
+    "EXPOSED_EVALUATION": [
+      "2025-04-08T08:00Z",
+      "2025-04-24T00:00Z"
+    ]
+  },
+  "block_counts": {
+    "CALIBRATION": {
+      "N": 2634,
+      "unique_jobs": 1738,
+      "ID_SHA256": "f12cee5bf80b3bb3a83fc2e7f95ee697a5f498d569b88732d6d69737ea4b3d2c",
+      "max_label_end": "2025-04-07T18:21:08+00:00"
+    },
+    "DEVELOPMENT": {
+      "N": 4346,
+      "unique_jobs": 2893,
+      "ID_SHA256": "6cdb30a91dbf087b62a695d0862e1f25c9b68fba90c176bee269f7010ea66e54",
+      "max_label_end": "2025-03-31T00:00:45+00:00"
+    },
+    "EXPOSED_EVALUATION": {
+      "N": 2713,
+      "unique_jobs": 1812,
+      "ID_SHA256": "32db38f441b4831d0acb020f94ba3237394fa83cd6aa787dcc419ee83b5d6c09",
+      "max_label_end": "2025-04-23T23:52:58+00:00"
+    },
+    "TRAIN": {
+      "N": 1190,
+      "unique_jobs": 1160,
+      "ID_SHA256": "f23e1518d91207e36cdb7017a0af7c106200bf12ea197f09f8bb143e41b35d88",
+      "max_label_end": "2025-03-22T07:43:55+00:00"
+    }
+  },
+  "axis": "issue_time; strict end<stage cutoff; no random split",
+  "S3_contract_SHA256": "10c557723080567b85253546dc19350004bd71404afc4546fad27567cb6e91ed"
+}
