@@ -1,0 +1,41 @@
+{
+  "candidate_forecast_fits_so_far": 0,
+  "scope": "TRAIN-only design diagnostics; V40R3 exposed bursts solely for descriptive failure decomposition",
+  "TRAIN": "V40R3 mature TRAIN origins only; same excluded days and cutoff",
+  "target_reproduction_tolerance_absolute_GPUh": 1e-07,
+  "burst_threshold_GPUh": 441.77754166666665,
+  "burst_rule": {
+    "count_high": "N strictly above TRAIN all-interval N Q95",
+    "severity_high": "max Z strictly above TRAIN positive-interval max Z Q95",
+    "COUNT_DRIVEN": "count_high and not severity_high",
+    "SEVERITY_DRIVEN": "severity_high and not count_high",
+    "MIXED": "both",
+    "UNRESOLVED": "neither",
+    "tail_exceedance_definition": "Z above TRAIN job-severity Q95, descriptive only; distinct from any selected GPD threshold",
+    "use": "Descriptive, never deployment logic"
+  },
+  "count_family_rule": "Intercept-only Poisson/NB/ZIP/ZINB maximum likelihood, minimum BIC among converged fits with valid parameters; no forecast candidate fits in phase0",
+  "severity_body_rule": "Full TRAIN positive-job Lognormal versus Gamma MLE by BIC; no dev/test values",
+  "EVT_rule": {
+    "candidate_quantiles": [
+      0.9,
+      0.95,
+      0.975
+    ],
+    "min_exceedances": 500,
+    "min_unique_excesses": 50,
+    "shape_domain_for_admission": [
+      0,
+      0.9
+    ],
+    "require_shape_CI95_upper_below": 1.0,
+    "max_neighbor_shape_difference": 0.2,
+    "KS_max": 0.05,
+    "QQ_log_correlation_min": 0.98,
+    "uncertainty": "100 operating-day block bootstrap MLE fits at each threshold; threshold itself held fixed",
+    "selection": "Lowest threshold satisfying support, valid finite mean, CI, fit and neighboring-shape stability. If none, EVT_TAIL_NOT_SUPPORTED.",
+    "GOF_caveat": "Raw KS p-value is not calibrated after fitted parameters; admission uses frozen KS distance and QQ criteria, not a false simple-null p-value"
+  },
+  "dependence_rule": "Meaningful if absolute Spearman(N,mean Z) over positive TRAIN intervals >=0.2; permit severity head to depend on predicted mu, never realized future N",
+  "seed": 20260907
+}
