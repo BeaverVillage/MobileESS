@@ -1,0 +1,43 @@
+project:
+  name: kestrel_stage_k5b2_zero_inflated_forecasting
+  version: "1.0.1"
+paths:
+  stage_search_root: "/mnt/c/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed데이터/데이터센터/NLR Kestrel Jobs Data"
+  stage_k5a_input_dir: ""
+  stage_k5b_input_dir: ""
+  copy_inputs_to_wsl: true
+  wsl_work_root: "~/mobile_ess_work/kestrel"
+  publish_root: "/mnt/c/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed데이터/데이터센터/NLR Kestrel Jobs Data"
+  review_root: "/mnt/c/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/work"
+resources:
+  lightgbm_threads: 4
+  random_seed: 20260721
+  parquet_compression: zstd
+  minimum_free_disk_gib: 10
+analysis:
+  interval_minutes: 5
+  daily_seasonal_steps: 288
+  weekly_seasonal_steps: 2016
+  positive_peak_quantile: 0.95
+models:
+  max_estimators: 1000
+  early_stopping_rounds: 50
+  minimum_final_estimators: 30
+  maximum_final_estimators: 1000
+  default_final_estimators: 200
+  base_parameters:
+    num_leaves: 15
+    max_depth: 5
+    learning_rate: 0.05
+    min_child_samples: 100
+    feature_fraction: 1.0
+    bagging_fraction: 1.0
+    bagging_freq: 0
+    lambda_l1: 0.0
+    lambda_l2: 5.0
+selection:
+  fixed_minimum_mae_improvement_fraction: 0.005
+  underprediction_weight: 2.0
+  overprediction_weight: 1.0
+  scale_grid: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0]
+  event_threshold_grid: [0.02, 0.05, 0.10, 0.15, 0.20, 0.30, 0.40, 0.50, 0.65, 0.80]
