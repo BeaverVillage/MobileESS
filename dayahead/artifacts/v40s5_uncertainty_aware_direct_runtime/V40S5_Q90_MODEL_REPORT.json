@@ -1,0 +1,309 @@
+{
+  "model": "LightGBM quantile",
+  "config": "L2",
+  "alpha": 0.9,
+  "model_SHA256": "f08411eb82be6c521469dac25dee4fc6d48787be64a4f5a50441c836de8c6a51",
+  "historical_fit_N": 421,
+  "HIST_TUNE_results": [
+    {
+      "config": "L0",
+      "Q50_pinball": 387.56859982224177,
+      "Q90_pinball": 516.1326085528995,
+      "Q95_pinball": 314.9062565570404,
+      "Q99_pinball": 86.7146250629562,
+      "raw_crossing_fraction": 0.011235955056179775,
+      "mean_normalized_pinball": 0.5962883466933259
+    },
+    {
+      "config": "L1",
+      "Q50_pinball": 387.5599755881783,
+      "Q90_pinball": 515.6203376425898,
+      "Q95_pinball": 313.70157255477335,
+      "Q99_pinball": 86.1475789761966,
+      "raw_crossing_fraction": 0.011235955056179775,
+      "mean_normalized_pinball": 0.5952410452491156
+    },
+    {
+      "config": "L2",
+      "Q50_pinball": 379.21617429769384,
+      "Q90_pinball": 398.787859400069,
+      "Q95_pinball": 331.8898584969146,
+      "Q99_pinball": 120.5169664039192,
+      "raw_crossing_fraction": 0.07865168539325842,
+      "mean_normalized_pinball": 0.5620679081819611
+    }
+  ],
+  "splits": {
+    "TRAIN": {
+      "raw_pinball": 15485.149230077603,
+      "corrected_pinball": 15485.147398225105,
+      "metrics": {
+        "N": 1190,
+        "coverage": 0.1369747899159664,
+        "GPU_coverage": 0.2915162454873646,
+        "under_sec": 20404725.48894546,
+        "GPU_under_sec": 27195131.37405067,
+        "over_sec": 630724.6383695487,
+        "GPU_over_h": 664.7993897427859,
+        "MAE": 17676.848846483204,
+        "median_absolute_error": 10801.926516726075,
+        "P90_absolute_error": 41590.22644504684,
+        "P95_absolute_error": 78701.5738618,
+        "P99_absolute_error": 105196.11534353376,
+        "WAPE": 0.8810208066114229,
+        "bias": -16616.807437458752,
+        "safe_actual_ratio": 0.17181205660593918,
+        "safe_actual_ratio_distribution": {
+          "N": 1190,
+          "min": 0.0,
+          "mean": 8.500222995464426,
+          "median": 0.19846062092320915,
+          "P90": 5.444011078591033,
+          "P95": 34.51906283906611,
+          "P99": 169.22069286304225,
+          "max": 989.0705728492901
+        },
+        "completion_slot_MAE": 19.639495798319327,
+        "completion_slot_signed_error": -18.42436974789916,
+        "GPU_completion_slot_MAE": 14.754963898916968,
+        "GPU_completion_slot_signed_error": -12.408393501805055,
+        "EXTREME_CONSERVATISM_WARNING": false,
+        "ending_at_least_1_slots_early": 0.8596638655462185,
+        "GPU_ending_at_least_1_slots_early": 0.7048736462093863,
+        "ending_at_least_4_slots_early": 0.7747899159663866,
+        "GPU_ending_at_least_4_slots_early": 0.6119133574007221,
+        "ending_at_least_8_slots_early": 0.6361344537815126,
+        "GPU_ending_at_least_8_slots_early": 0.4684115523465704
+      }
+    },
+    "DEVELOPMENT": {
+      "raw_pinball": 20965.389807956264,
+      "corrected_pinball": 20965.35569992494,
+      "metrics": {
+        "N": 4346,
+        "coverage": 0.4305108145421077,
+        "GPU_coverage": 0.45741546232636454,
+        "under_sec": 100685770.9997703,
+        "GPU_under_sec": 145950564.9743326,
+        "over_sec": 4982419.720805137,
+        "GPU_over_h": 2732.718402877389,
+        "MAE": 24313.895701927162,
+        "median_absolute_error": 4423.930519058756,
+        "P90_absolute_error": 54223.175343533774,
+        "P95_absolute_error": 75488.17534353377,
+        "P99_absolute_error": 167885.80250091973,
+        "WAPE": 0.9688475273828162,
+        "bias": -22021.019622403397,
+        "safe_actual_ratio": 0.12251781149480868,
+        "safe_actual_ratio_distribution": {
+          "N": 4346,
+          "min": 0.0,
+          "mean": 60.66847506603973,
+          "median": 0.5243769258080937,
+          "P90": 442.1649312932458,
+          "P95": 442.1649312932458,
+          "P99": 442.1649312932458,
+          "max": 2496.104037438757
+        },
+        "completion_slot_MAE": 26.96663598711459,
+        "completion_slot_signed_error": -24.4180855959503,
+        "GPU_completion_slot_MAE": 24.277816753192088,
+        "GPU_completion_slot_signed_error": -21.08741405921145,
+        "EXTREME_CONSERVATISM_WARNING": false,
+        "ending_at_least_1_slots_early": 0.5653474459272895,
+        "GPU_ending_at_least_1_slots_early": 0.5372527009962116,
+        "ending_at_least_4_slots_early": 0.5190980211688909,
+        "GPU_ending_at_least_4_slots_early": 0.4786024975445489,
+        "ending_at_least_8_slots_early": 0.4431661297745053,
+        "GPU_ending_at_least_8_slots_early": 0.3851550441981198
+      }
+    },
+    "CALIBRATION": {
+      "raw_pinball": 10971.76003366477,
+      "corrected_pinball": 10971.643341739706,
+      "metrics": {
+        "N": 2634,
+        "coverage": 0.5288534548215642,
+        "GPU_coverage": 0.7700956319462393,
+        "under_sec": 31699875.55861011,
+        "GPU_under_sec": 55749417.42895013,
+        "over_sec": 3694205.593932833,
+        "GPU_over_h": 6183.295424588642,
+        "MAE": 13437.388440600967,
+        "median_absolute_error": 2817.9265167260755,
+        "P90_absolute_error": 50723.10069549164,
+        "P95_absolute_error": 63576.62534353374,
+        "P99_absolute_error": 170601.17534353377,
+        "WAPE": 0.9557255794648313,
+        "bias": -10632.372803598057,
+        "safe_actual_ratio": 0.2437793471757075,
+        "safe_actual_ratio_distribution": {
+          "N": 2634,
+          "min": 0.0,
+          "mean": 18.058835853699495,
+          "median": 1.101789520645438,
+          "P90": 17.71891058279059,
+          "P95": 233.00367416369622,
+          "P99": 242.17677351628282,
+          "max": 491.61974990802617
+        },
+        "completion_slot_MAE": 14.961655277145027,
+        "completion_slot_signed_error": -11.805239179954443,
+        "GPU_completion_slot_MAE": 11.25936934608426,
+        "GPU_completion_slot_signed_error": -4.7305505298526755,
+        "EXTREME_CONSERVATISM_WARNING": false,
+        "ending_at_least_1_slots_early": 0.4419134396355353,
+        "GPU_ending_at_least_1_slots_early": 0.211941070043939,
+        "ending_at_least_4_slots_early": 0.2680334092634776,
+        "GPU_ending_at_least_4_slots_early": 0.13918325148617214,
+        "ending_at_least_8_slots_early": 0.2331055429005315,
+        "GPU_ending_at_least_8_slots_early": 0.11979839751873869
+      }
+    },
+    "EXPOSED_EVALUATION": {
+      "raw_pinball": 11432.869128962453,
+      "corrected_pinball": 11432.869128962453,
+      "metrics": {
+        "N": 2713,
+        "coverage": 0.23479542941393292,
+        "GPU_coverage": 0.28612405880243813,
+        "under_sec": 34208381.80660933,
+        "GPU_under_sec": 67436163.6956354,
+        "over_sec": 2298303.209267414,
+        "GPU_over_h": 1780.338706873917,
+        "MAE": 13456.205313629465,
+        "median_absolute_error": 11820.080847580715,
+        "P90_absolute_error": 27895.080847580717,
+        "P95_absolute_error": 34571.175343533774,
+        "P99_absolute_error": 48348.26146851052,
+        "WAPE": 0.9214058071776267,
+        "bias": -11761.916180369302,
+        "safe_actual_ratio": 0.19460965260750568,
+        "safe_actual_ratio_distribution": {
+          "N": 2713,
+          "min": 0.01802323761852018,
+          "mean": 12.10360395266582,
+          "median": 0.14893469999302675,
+          "P90": 17.41321431072694,
+          "P95": 117.74649676777264,
+          "P99": 170.06343511278686,
+          "max": 983.2394998160523
+        },
+        "completion_slot_MAE": 15.112421673424254,
+        "completion_slot_signed_error": -13.308514559528197,
+        "GPU_completion_slot_MAE": 14.854069558981713,
+        "GPU_completion_slot_signed_error": -12.40946575833632,
+        "EXTREME_CONSERVATISM_WARNING": false,
+        "ending_at_least_1_slots_early": 0.7615186140803538,
+        "GPU_ending_at_least_1_slots_early": 0.7111868053065615,
+        "ending_at_least_4_slots_early": 0.7239218577220788,
+        "GPU_ending_at_least_4_slots_early": 0.6764073144496235,
+        "ending_at_least_8_slots_early": 0.6959085882786583,
+        "GPU_ending_at_least_8_slots_early": 0.6496952312656866
+      }
+    }
+  },
+  "importance": {
+    "grouped_gain": {
+      "requested_seconds": 53.16686624288559,
+      "num_gpus_req": 0.0,
+      "num_nodes_req": 0.0,
+      "num_cores_req": 0.0,
+      "requested_memory_mib": 203.84038658440113,
+      "partition": 23.706109046936035,
+      "qos": 0.0,
+      "submit_hour": 155.49170295894146,
+      "submit_dow": 0.0
+    },
+    "grouped_gain_fraction": {
+      "requested_seconds": 0.1218850273167286,
+      "num_gpus_req": 0.0,
+      "num_nodes_req": 0.0,
+      "num_cores_req": 0.0,
+      "requested_memory_mib": 0.4673040343132287,
+      "partition": 0.05434624895060064,
+      "qos": 0.0,
+      "submit_hour": 0.35646468941944204,
+      "submit_dow": 0.0
+    },
+    "permutation_HIST_TUNE": {
+      "requested_seconds": {
+        "mean_loss_increase": 13.450204666049975,
+        "values": [
+          7.686267439273422,
+          11.011263522715922,
+          21.65308303616058
+        ]
+      },
+      "num_gpus_req": {
+        "mean_loss_increase": 0.0,
+        "values": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "num_nodes_req": {
+        "mean_loss_increase": 0.0,
+        "values": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "num_cores_req": {
+        "mean_loss_increase": 0.0,
+        "values": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "requested_memory_mib": {
+        "mean_loss_increase": 5.5257575171353706,
+        "values": [
+          0.0,
+          5.5257575171352755,
+          11.051515034270835
+        ]
+      },
+      "partition": {
+        "mean_loss_increase": 34.14004804088919,
+        "values": [
+          41.70232777150761,
+          28.523232869478534,
+          32.194583481681434
+        ]
+      },
+      "qos": {
+        "mean_loss_increase": 0.0,
+        "values": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "submit_hour": {
+        "mean_loss_increase": 0.0,
+        "values": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "submit_dow": {
+        "mean_loss_increase": 0.0,
+        "values": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "baseline_loss": 398.787859400069,
+    "loss": "pinball",
+    "permutation_model": "HIST_FIT-only auxiliary instance",
+    "in_sample_permutation": false,
+    "feature_selection": false
+  }
+}

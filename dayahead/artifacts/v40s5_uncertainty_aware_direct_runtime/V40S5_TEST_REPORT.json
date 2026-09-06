@@ -1,0 +1,592 @@
+{
+  "status": "PASS",
+  "pytest": {
+    "tests": 50,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "passed": 50,
+  "runtime_seconds": 23.493,
+  "command": "python -B -m pytest -q tests/dayahead/test_v40s5_core.py tests/dayahead/test_v40s5_evidence.py -p no:cacheprovider --junitxml=.../V40S5_TEST_JUNIT.xml",
+  "minimum_requirement_count": 87,
+  "minimum_check_coverage": [
+    {
+      "check": 1,
+      "description": "S4 scientific SHA exact",
+      "status": "PASS",
+      "pytest_methods": "exact_lineage_and_isolation;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 2,
+      "description": "S4 receipt SHA exact/resolved",
+      "status": "PASS",
+      "pytest_methods": "exact_lineage_and_isolation;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 3,
+      "description": "S4 classification exact",
+      "status": "PASS",
+      "pytest_methods": "exact_lineage_and_isolation;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 4,
+      "description": "new isolated S5 worktree",
+      "status": "PASS",
+      "pytest_methods": "exact_lineage_and_isolation;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 5,
+      "description": "S4/S3 immutable",
+      "status": "PASS",
+      "pytest_methods": "exact_lineage_and_isolation;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 6,
+      "description": "protected scope exact",
+      "status": "PASS",
+      "pytest_methods": "exact_lineage_and_isolation;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 7,
+      "description": "model-fit cutoff exact",
+      "status": "PASS",
+      "pytest_methods": "source_counts_recomputed_independently;proof_mature_unique_exact_runtime;preprocess_future_and_duplicate_jobs_rejected"
+    },
+    {
+      "check": 8,
+      "description": "every training job end < cutoff",
+      "status": "PASS",
+      "pytest_methods": "source_counts_recomputed_independently;proof_mature_unique_exact_runtime;preprocess_future_and_duplicate_jobs_rejected"
+    },
+    {
+      "check": 9,
+      "description": "no future-mature label in training",
+      "status": "PASS",
+      "pytest_methods": "source_counts_recomputed_independently;proof_mature_unique_exact_runtime;preprocess_future_and_duplicate_jobs_rejected"
+    },
+    {
+      "check": 10,
+      "description": "unique training job identity",
+      "status": "PASS",
+      "pytest_methods": "source_counts_recomputed_independently;proof_mature_unique_exact_runtime;preprocess_future_and_duplicate_jobs_rejected"
+    },
+    {
+      "check": 11,
+      "description": "runtime = end-start exact",
+      "status": "PASS",
+      "pytest_methods": "source_counts_recomputed_independently;proof_mature_unique_exact_runtime;preprocess_future_and_duplicate_jobs_rejected"
+    },
+    {
+      "check": 12,
+      "description": "zero/negative handling exact",
+      "status": "PASS",
+      "pytest_methods": "source_counts_recomputed_independently;proof_mature_unique_exact_runtime;preprocess_future_and_duplicate_jobs_rejected"
+    },
+    {
+      "check": 13,
+      "description": "training library != PENDING evaluation panel",
+      "status": "PASS",
+      "pytest_methods": "training_separate_from_exact_s4_panel"
+    },
+    {
+      "check": 14,
+      "description": "S4 PENDING panel identity exact",
+      "status": "PASS",
+      "pytest_methods": "training_separate_from_exact_s4_panel"
+    },
+    {
+      "check": 15,
+      "description": "Track P feature set exact",
+      "status": "PASS",
+      "pytest_methods": "exact_features;excluded_predictors_cannot_change_transform;preprocessing_exact_train_only;unknown_missing_and_medians"
+    },
+    {
+      "check": 16,
+      "description": "excluded predictors absent",
+      "status": "PASS",
+      "pytest_methods": "exact_features;excluded_predictors_cannot_change_transform;preprocessing_exact_train_only;unknown_missing_and_medians"
+    },
+    {
+      "check": 17,
+      "description": "actual start predictor absent",
+      "status": "PASS",
+      "pytest_methods": "exact_features;excluded_predictors_cannot_change_transform;preprocessing_exact_train_only;unknown_missing_and_medians"
+    },
+    {
+      "check": 18,
+      "description": "actual end predictor absent",
+      "status": "PASS",
+      "pytest_methods": "exact_features;excluded_predictors_cannot_change_transform;preprocessing_exact_train_only;unknown_missing_and_medians"
+    },
+    {
+      "check": 19,
+      "description": "actual runtime predictor absent",
+      "status": "PASS",
+      "pytest_methods": "exact_features;excluded_predictors_cannot_change_transform;preprocessing_exact_train_only;unknown_missing_and_medians"
+    },
+    {
+      "check": 20,
+      "description": "RSP/reference-safe absent from predictors",
+      "status": "PASS",
+      "pytest_methods": "exact_features;excluded_predictors_cannot_change_transform;preprocessing_exact_train_only;unknown_missing_and_medians"
+    },
+    {
+      "check": 21,
+      "description": "preprocessing fit only on historical training",
+      "status": "PASS",
+      "pytest_methods": "exact_features;excluded_predictors_cannot_change_transform;preprocessing_exact_train_only;unknown_missing_and_medians"
+    },
+    {
+      "check": 22,
+      "description": "unseen category -> UNKNOWN",
+      "status": "PASS",
+      "pytest_methods": "exact_features;excluded_predictors_cannot_change_transform;preprocessing_exact_train_only;unknown_missing_and_medians"
+    },
+    {
+      "check": 23,
+      "description": "no target encoding",
+      "status": "PASS",
+      "pytest_methods": "exact_features;excluded_predictors_cannot_change_transform;preprocessing_exact_train_only;unknown_missing_and_medians"
+    },
+    {
+      "check": 24,
+      "description": "historical temporal 80/20 split exact",
+      "status": "PASS",
+      "pytest_methods": "historical_split_and_tuning;boundary_timestamp_is_never_split"
+    },
+    {
+      "check": 25,
+      "description": "no job overlap across HIST_FIT/HIST_TUNE",
+      "status": "PASS",
+      "pytest_methods": "historical_split_and_tuning;boundary_timestamp_is_never_split"
+    },
+    {
+      "check": 26,
+      "description": "prereg commit precedes fit",
+      "status": "PASS",
+      "pytest_methods": "all_fits_preregistered_and_historical"
+    },
+    {
+      "check": 27,
+      "description": "exactly three LGB configs",
+      "status": "PASS",
+      "pytest_methods": "all_fits_preregistered_and_historical"
+    },
+    {
+      "check": 28,
+      "description": "no unregistered config",
+      "status": "PASS",
+      "pytest_methods": "all_fits_preregistered_and_historical"
+    },
+    {
+      "check": 29,
+      "description": "Q50/Q90/Q95/Q99 finite",
+      "status": "PASS",
+      "pytest_methods": "saved_predictions_exact_metrics_and_comparators;monotone_repair_and_physical_floor_exact"
+    },
+    {
+      "check": 30,
+      "description": "all runtime predictions nonnegative",
+      "status": "PASS",
+      "pytest_methods": "saved_predictions_exact_metrics_and_comparators;monotone_repair_and_physical_floor_exact"
+    },
+    {
+      "check": 31,
+      "description": "raw quantile crossing audited",
+      "status": "PASS",
+      "pytest_methods": "saved_predictions_exact_metrics_and_comparators;monotone_repair_and_physical_floor_exact"
+    },
+    {
+      "check": 32,
+      "description": "monotone repair exact",
+      "status": "PASS",
+      "pytest_methods": "saved_predictions_exact_metrics_and_comparators;monotone_repair_and_physical_floor_exact"
+    },
+    {
+      "check": 33,
+      "description": "residual Q50 is OOF",
+      "status": "PASS",
+      "pytest_methods": "residual_oof_row_level_evidence;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 34,
+      "description": "no in-sample residual leakage",
+      "status": "PASS",
+      "pytest_methods": "residual_oof_row_level_evidence;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 35,
+      "description": "sigma finite nonnegative",
+      "status": "PASS",
+      "pytest_methods": "residual_oof_row_level_evidence;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 36,
+      "description": "UARP formula exact:",
+      "status": "PASS",
+      "pytest_methods": "uarp_exact_both_terms_and_no_request_cap;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 37,
+      "description": "coefficients unchanged",
+      "status": "PASS",
+      "pytest_methods": "uarp_exact_both_terms_and_no_request_cap;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 38,
+      "description": "no cap to requested walltime",
+      "status": "PASS",
+      "pytest_methods": "uarp_exact_both_terms_and_no_request_cap;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 39,
+      "description": "actual>requested rows retained",
+      "status": "PASS",
+      "pytest_methods": "uarp_exact_both_terms_and_no_request_cap;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 40,
+      "description": "R0 current RSP exact",
+      "status": "PASS",
+      "pytest_methods": "uarp_exact_both_terms_and_no_request_cap;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 41,
+      "description": "R1 requested walltime exact",
+      "status": "PASS",
+      "pytest_methods": "uarp_exact_both_terms_and_no_request_cap;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 42,
+      "description": "R2 Q90 exact",
+      "status": "PASS",
+      "pytest_methods": "uarp_exact_both_terms_and_no_request_cap;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 43,
+      "description": "R3 Q95 exact",
+      "status": "PASS",
+      "pytest_methods": "uarp_exact_both_terms_and_no_request_cap;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 44,
+      "description": "R4 Q99 exact",
+      "status": "PASS",
+      "pytest_methods": "uarp_exact_both_terms_and_no_request_cap;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 45,
+      "description": "R5 UARP exact",
+      "status": "PASS",
+      "pytest_methods": "uarp_exact_both_terms_and_no_request_cap;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 46,
+      "description": "scheduler slots = ceil(sec/900) exactly once",
+      "status": "PASS",
+      "pytest_methods": "metrics_independent_arithmetic;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 47,
+      "description": "coverage exact",
+      "status": "PASS",
+      "pytest_methods": "metrics_independent_arithmetic;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 48,
+      "description": "GPU-weighted coverage exact",
+      "status": "PASS",
+      "pytest_methods": "metrics_independent_arithmetic;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 49,
+      "description": "underprediction exact",
+      "status": "PASS",
+      "pytest_methods": "metrics_independent_arithmetic;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 50,
+      "description": "GPU underprediction exact",
+      "status": "PASS",
+      "pytest_methods": "metrics_independent_arithmetic;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 51,
+      "description": "overreservation exact",
+      "status": "PASS",
+      "pytest_methods": "metrics_independent_arithmetic;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 52,
+      "description": "GPU overreservation exact",
+      "status": "PASS",
+      "pytest_methods": "metrics_independent_arithmetic;saved_predictions_exact_metrics_and_comparators"
+    },
+    {
+      "check": 53,
+      "description": "daily support gate exact",
+      "status": "PASS",
+      "pytest_methods": "daily_gate_support_boundary;gate_inclusivity_strict_anchor_improvement_and_no_upper_gate;selection_and_exposed_gates_independently"
+    },
+    {
+      "check": 54,
+      "description": "safety gate exact",
+      "status": "PASS",
+      "pytest_methods": "daily_gate_support_boundary;gate_inclusivity_strict_anchor_improvement_and_no_upper_gate;selection_and_exposed_gates_independently"
+    },
+    {
+      "check": 55,
+      "description": "efficiency gate exact",
+      "status": "PASS",
+      "pytest_methods": "daily_gate_support_boundary;gate_inclusivity_strict_anchor_improvement_and_no_upper_gate;selection_and_exposed_gates_independently"
+    },
+    {
+      "check": 56,
+      "description": "selection uses DEV+CAL only",
+      "status": "PASS",
+      "pytest_methods": "candidate_selection_uses_dev_cal_minimum_and_never_exposed;selection_commit_precedes_exposure_and_no_model_changes"
+    },
+    {
+      "check": 57,
+      "description": "exposed not used for selection",
+      "status": "PASS",
+      "pytest_methods": "candidate_selection_uses_dev_cal_minimum_and_never_exposed;selection_commit_precedes_exposure_and_no_model_changes"
+    },
+    {
+      "check": 58,
+      "description": "selection freeze commit before exposed",
+      "status": "PASS",
+      "pytest_methods": "candidate_selection_uses_dev_cal_minimum_and_never_exposed;selection_commit_precedes_exposure_and_no_model_changes"
+    },
+    {
+      "check": 59,
+      "description": "P-W removes only requested_seconds",
+      "status": "PASS",
+      "pytest_methods": "walltime_removal_preserves_every_other_encoded_column;pw_and_unique_job_are_diagnostic_only"
+    },
+    {
+      "check": 60,
+      "description": "P-W does not reselect winner",
+      "status": "PASS",
+      "pytest_methods": "walltime_removal_preserves_every_other_encoded_column;pw_and_unique_job_are_diagnostic_only"
+    },
+    {
+      "check": 61,
+      "description": "unique-job sensitivity diagnostic only",
+      "status": "PASS",
+      "pytest_methods": "walltime_removal_preserves_every_other_encoded_column;pw_and_unique_job_are_diagnostic_only"
+    },
+    {
+      "check": 62,
+      "description": "May scientific reads = 0",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 63,
+      "description": "sealed shadow reads = 0",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 64,
+      "description": "optimizer calls = 0",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 65,
+      "description": "Gurobi calls = 0",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 66,
+      "description": "OpenDSS calls = 0",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 67,
+      "description": "Fresh calls = 0",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 68,
+      "description": "A0 change = 0",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 69,
+      "description": "A1 change = 0",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 70,
+      "description": "M1 change = 0",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 71,
+      "description": "MF change = 0",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 72,
+      "description": "migration change = 0",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 73,
+      "description": "WAN change = 0",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 74,
+      "description": "terminal change = 0",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 75,
+      "description": "event-trigger change = 0",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 76,
+      "description": "local-repair change = 0",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 77,
+      "description": "rolling-MPC change = 0",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 78,
+      "description": "production q unchanged",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 79,
+      "description": "PF=.95",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 80,
+      "description": "Q control NO",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 81,
+      "description": "electrical HOLD",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 82,
+      "description": "FULL_MAY NO",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 83,
+      "description": "adapter proposal_only",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 84,
+      "description": "optimizer_use_allowed false",
+      "status": "PASS",
+      "pytest_methods": "firewalls_and_current_holds;scientific_sources_have_no_operational_imports;original_s4_and_s3_immutable;no_out_of_scope_differences"
+    },
+    {
+      "check": 85,
+      "description": "reproducibility same-seed repeat",
+      "status": "PASS",
+      "pytest_methods": "reproducibility_actual_independent_models"
+    },
+    {
+      "check": 86,
+      "description": "required artifacts present",
+      "status": "VERIFIED_AT_FINAL_RECEIPT",
+      "method": "closeout.verify after receipt commit"
+    },
+    {
+      "check": 87,
+      "description": "final Git clean",
+      "status": "VERIFIED_AT_FINAL_RECEIPT",
+      "method": "closeout.verify after receipt commit"
+    }
+  ],
+  "closure_checks_86_87": "Final receipt verifier; no self-referential clean claim in a dirty worktree",
+  "test_names": [
+    "test_cutoff_and_configuration_registry",
+    "test_exact_features",
+    "test_unknown_missing_and_medians",
+    "test_excluded_predictors_cannot_change_transform[runtime_seconds]",
+    "test_excluded_predictors_cannot_change_transform[reference_safe_sec]",
+    "test_excluded_predictors_cannot_change_transform[job_uid]",
+    "test_excluded_predictors_cannot_change_transform[end_time]",
+    "test_excluded_predictors_cannot_change_transform[start_time]",
+    "test_excluded_predictors_cannot_change_transform[user_id]",
+    "test_excluded_predictors_cannot_change_transform[account]",
+    "test_excluded_predictors_cannot_change_transform[terminal_status]",
+    "test_excluded_predictors_cannot_change_transform[K0]",
+    "test_preprocess_future_and_duplicate_jobs_rejected",
+    "test_walltime_removal_preserves_every_other_encoded_column",
+    "test_boundary_timestamp_is_never_split",
+    "test_five_expanding_oof_folds",
+    "test_monotone_repair_and_physical_floor_exact",
+    "test_uarp_exact_both_terms_and_no_request_cap",
+    "test_metrics_independent_arithmetic",
+    "test_daily_gate_support_boundary[99-False]",
+    "test_daily_gate_support_boundary[100-True]",
+    "test_daily_gate_support_boundary[101-True]",
+    "test_gate_inclusivity_strict_anchor_improvement_and_no_upper_gate",
+    "test_candidate_selection_uses_dev_cal_minimum_and_never_exposed",
+    "test_exact_lineage_and_isolation",
+    "test_original_s4_and_s3_immutable",
+    "test_source_counts_recomputed_independently",
+    "test_proof_mature_unique_exact_runtime",
+    "test_training_separate_from_exact_s4_panel",
+    "test_preprocessing_exact_train_only",
+    "test_historical_split_and_tuning",
+    "test_all_fits_preregistered_and_historical",
+    "test_residual_oof_row_level_evidence[P]",
+    "test_residual_oof_row_level_evidence[PW]",
+    "test_residual_oof_row_level_evidence[REPEAT_P]",
+    "test_saved_predictions_exact_metrics_and_comparators[TRAIN-P]",
+    "test_saved_predictions_exact_metrics_and_comparators[TRAIN-PW]",
+    "test_saved_predictions_exact_metrics_and_comparators[DEVELOPMENT-P]",
+    "test_saved_predictions_exact_metrics_and_comparators[DEVELOPMENT-PW]",
+    "test_saved_predictions_exact_metrics_and_comparators[CALIBRATION-P]",
+    "test_saved_predictions_exact_metrics_and_comparators[CALIBRATION-PW]",
+    "test_saved_predictions_exact_metrics_and_comparators[EXPOSED_EVALUATION-P]",
+    "test_saved_predictions_exact_metrics_and_comparators[EXPOSED_EVALUATION-PW]",
+    "test_selection_and_exposed_gates_independently",
+    "test_selection_commit_precedes_exposure_and_no_model_changes",
+    "test_pw_and_unique_job_are_diagnostic_only",
+    "test_firewalls_and_current_holds",
+    "test_reproducibility_actual_independent_models",
+    "test_scientific_sources_have_no_operational_imports",
+    "test_no_out_of_scope_differences"
+  ],
+  "prefit_unit_tests_passed": 24,
+  "prefit_non_scientific_erratum": "V40S5_PREFIT_IMPLEMENTATION_ERRATUM.json"
+}
