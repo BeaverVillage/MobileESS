@@ -19,6 +19,7 @@ def fit_model(frame,pre,target,config,alpha,name):
     return model
 
 def save_pre(name,pre):
+    (OUT/'models').mkdir(exist_ok=True)
     (OUT/'models'/f'{name}_preprocessing.json').write_text(json.dumps(pre.descriptor(),indent=2)+'\n')
 
 def load_pre(name):
