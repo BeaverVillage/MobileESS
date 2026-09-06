@@ -21,11 +21,27 @@ def exact_intervals(replay, observations, issue_time):
         seconds_ns=int((pd.Timestamp(o['end_time'])-(issue if row['state_at_issue']=='RUNNING' else pd.Timestamp(o['start_time']))).value)
         require(seconds_ns>0,'EXACT_ACTUAL_RUNTIME_NOT_POSITIVE')
         if row.get('migration_selected'):
-            event=row['migration_events'][0]; source_ns=min(seconds_ns,int(event['checkpoint'])*SLOT_NS)
+            event=row['migration_events'][0]
+            planned=(0 if row['state_at_issue']=='RUNNING' else int(row['start_slot']))*SLOT_NS
+            begin=row.get('actual_start_ns_from_issue',planned)
+            require(begin>=planned,'ACTUAL_MIGRATION_EXECUTION_BEFORE_PLAN')
+            execution=row.get('actual_migration_execution')
+            checkpoint=int(event['checkpoint'])*SLOT_NS
+            restart=int(event['restart_end'])*SLOT_NS
+            if execution:
+                require(execution['CHECKPOINT_OFFSET_NS']==checkpoint-planned,'FROZEN_CHECKPOINT_OFFSET_DRIFT')
+                require(execution['ACTUAL_CHECKPOINT_NS']==begin+checkpoint-planned,'ACTUAL_CHECKPOINT_PROGRESS_DRIFT')
+                checkpoint=execution['ACTUAL_CHECKPOINT_NS']
+                if execution['migration_executed']:
+                    restart=execution['ACTUAL_RESTART_NS']
+                    require(execution['ACTUAL_WAN_START_NS']>=checkpoint and restart>=execution['ACTUAL_WAN_END_NS']+SLOT_NS,
+                        'ACTUAL_MIGRATION_EVENT_ORDER')
+            source_ns=min(seconds_ns,checkpoint-begin)
+            require(source_ns>0,'FROZEN_CHECKPOINT_PRECEDES_PHYSICAL_START')
             expected=[]
-            if source_ns: expected.append((row['compute_segments'][0]['site'],0,source_ns))
+            if source_ns: expected.append((row['compute_segments'][0]['site'],begin,begin+source_ns))
             if seconds_ns>source_ns:
-                start=int(event['restart_end'])*SLOT_NS
+                start=restart
                 expected.append((row['compute_segments'][1]['site'],start,start+seconds_ns-source_ns))
         else:
             planned=(0 if row['state_at_issue']=='RUNNING' else int(row['start_slot']))*SLOT_NS

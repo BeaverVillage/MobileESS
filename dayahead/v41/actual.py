@@ -39,11 +39,13 @@ def replay_jobs(jobs, observations, *, issue_time, site_capacity, racks):
         parts = []
         if admitted:
             if row.get('migration_selected'):
-                require(row['state_at_issue'] == 'RUNNING', 'NEW_ACTUAL_PENDING_MIGRATION')
+                from dayahead.v41r1.migration import target
+                require(row['state_at_issue']=='RUNNING' or target(row),'UNAUTHORIZED_FROZEN_MIGRATION')
                 source, destination = row['compute_segments']; event = row['migration_events'][0]
-                source_seconds = min(seconds, event['checkpoint'] * 900)
+                begin=0 if row['state_at_issue']=='RUNNING' else row['start_slot']
+                source_seconds = min(seconds, (event['checkpoint']-begin) * 900)
                 if source_seconds:
-                    parts.append(dict(site=source['site'], start=0., end=source_seconds / 900,
+                    parts.append(dict(site=source['site'], start=float(begin), end=begin+source_seconds / 900,
                         Rack=row['initial_Rack_label'], phase='SOURCE'))
                 remaining = seconds - source_seconds
                 if remaining:

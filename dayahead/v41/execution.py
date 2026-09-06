@@ -23,9 +23,10 @@ def now(): return datetime.now(timezone.utc).isoformat()
 
 def science():
     paths = list((ROOT / 'dayahead/v41').glob('*.py'))
-    paths += [ROOT / 'dayahead/v40g/optimizer.py', ROOT / 'dayahead/v40h/feedback.py']
-    paths += [ROOT / p for p in ('dayahead/v41r1/terminal.py', 'dayahead/v40a/feedback.py',
-        'dayahead/v40g/domain.py', 'dayahead/v40g_segments/canonical.py')]
+    paths += [ROOT / p for p in ('dayahead/v40g/optimizer.py','dayahead/v40g/domain.py',
+        'dayahead/v40g_segments/canonical.py','dayahead/v40h/feedback.py','dayahead/v40a/feedback.py',
+        'dayahead/v40h/pre_day_complete.py')]
+    paths += [p for p in (ROOT/'dayahead/v41r1').glob('migration*.py')]
     return manifest(paths, ROOT)
 
 
@@ -137,6 +138,8 @@ def dayahead(day, policy):
         electrical=context.v41_electrical_certificate))
     try:
         reference, common = build(day, snapshot_path, context.capacity)
+        from dayahead.v41r1.migration_audit import persist as persist_migration_domain
+        persist_migration_domain(output/'authority/migration_before_solve',day,policy,reference,import_frozen(reference),context)
         from . import scientific_archive as archive
         from .solver_observer import observe as observe_solver
         classes, requests = archive.input_archive(output, day, policy, context, snapshot_path, common, commit())
@@ -215,6 +218,8 @@ def dayahead(day, policy):
                 optimizer_rows(output / 'A1', context.v41_ml_snapshot, context.v41_ml_snapshot_sha256,
                                diagnostics(context.v41_ml_snapshot, context.capacity, planning_power(jobs, context)['gpu']))
                 require(coordinated['counts']['SECOND_MESS_FULL_ROUTE_SEARCH_CALLS'] == 0, 'SECOND_ROUTE_SEARCH_FORBIDDEN')
+        from dayahead.v41r1.migration_audit import persist as persist_migration
+        persist_migration(output/'aidc/migration',day,policy,reference,jobs,context)
         commands = off_commands() if trajectory is None else [asdict(s) for s in trajectory.slots]
         if policy in ('B0','B1'): trace('A0_OUTPUT',jobs,info=stages.get('A0',objective))
         trace('JOINT_FREEZE',jobs,trajectory,frozen=('all AIDC/MESS decisions','ML','terminal','route/discrete'))
@@ -223,8 +228,6 @@ def dayahead(day, policy):
             M1='ACTIVE' if policy in ('B2','B3') else 'NOT_APPLICABLE_MESS_OFF',
             A1='ACTIVE' if policy=='B3' else 'NOT_APPLICABLE_BY_POLICY',MF='ACTIVE' if policy=='B3' else 'NOT_APPLICABLE_BY_POLICY'))
         power = planning_power(jobs, context)
-        from dayahead.v41r1.terminal import persist as persist_terminal
-        persist_terminal(output / 'terminal', day, policy, reference, jobs, common)
         grid = evaluate_grid(context.coefficients, controls_from_trajectory(context.coefficients, power['pcc'],
                              () if trajectory is None else trajectory.slots), context.nodes)
         require(grid['status'] == 'PASS', 'DAYAHEAD_PLANNING_GRID_FAILED')
@@ -310,7 +313,7 @@ def actual(day, policy):
         authority, _, *unused = capacity(SOURCE_REPO)
         racks = [Rack(r['aidc_id'], r['rack_pool_id'], int(r['compatibility_GPU_limit'])) for r in authority['logical_Rack_pools']]
         replay = replay_jobs(decision['AIDC_decision'], obs, issue_time=issue_time(day),
-                             site_capacity=context.capacity.site_capacity, racks=racks)
+                             site_capacity=context.capacity.site_capacity, racks=racks,wan=context.wan)
         write_json(output / 'ACTUAL_JOB_REPLAY.json', replay)
         persist_dispatch(output,replay,obs,issue_time(day),context.capacity.site_capacity,racks)
         require(replay['capacity_audit']['status'] == 'PASS', 'FROZEN_ACTUAL_CAPACITY_VIOLATION')

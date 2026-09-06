@@ -15,7 +15,7 @@ from .persistence import table
 REASON='RESOURCE_CONTENTION_FROM_RUNTIME_OVERRUN'
 
 
-def replay_jobs(jobs,observations,*,issue_time,site_capacity,racks):
+def replay_jobs(jobs,observations,*,issue_time,site_capacity,racks,wan=None):
     before=identities(jobs); original={j['job_uid']:j for j in jobs}; issue=pd.Timestamp(issue_time)
     naive=naive_replay(jobs,observations,issue_time=issue_time,site_capacity=site_capacity,racks=racks)
     _,raw_violations,raw_jobs,raw_summary=audit(naive,observations,issue,site_capacity)
@@ -36,69 +36,85 @@ def replay_jobs(jobs,observations,*,issue_time,site_capacity,racks):
             else: fixed.append((uid,r['AIDC_site'],0,duration,r['requested_GPU']))
         else:
             pending.append(uid); times.add(int(r['start_slot'])*SLOT_NS)
-    for uid,site,a,b,g in fixed: times.update((a,b))
-    for t in sorted(times):
-        for site,cap in site_capacity.items():
-            require(sum(g for uid,s,a,b,g in fixed if s==site and a<=t<b)<=cap,'IMMUTABLE_RUNNING_EXECUTION_CAPACITY_CONFLICT')
-    pending.sort(key=lambda uid:priority_key(original[uid]))
-    queue=sorted(times); heapq.heapify(queue); queued=set(times); active={}; dispatched={}; blockers={uid:set() for uid in pending}; waits=[]
+    migrated=any(r.get('migration_selected') for r in rows.values())
+    if migrated:
+        from dayahead.v41r1.migration_dispatch import execute
+        execution=execute(rows,original,durations,site_capacity,wan)
+        execution_parts=execution['parts'];blockers=execution['blockers'];waits=execution['waits']
+        dispatched={u:v for u,v in execution_parts.items() if rows[u]['state_at_issue']=='PENDING'}
+        result['migration_execution_replay']=dict(evidence=execution['evidence'],WAN_chunks=execution['WAN_chunks'],
+            authority=execution['authority'],Actual_optimizer_calls=0)
+    else:
+        for uid,site,a,b,g in fixed: times.update((a,b))
+        for t in sorted(times):
+            for site,cap in site_capacity.items():
+                require(sum(g for uid,s,a,b,g in fixed if s==site and a<=t<b)<=cap,'IMMUTABLE_RUNNING_EXECUTION_CAPACITY_CONFLICT')
+        pending.sort(key=lambda uid:priority_key(original[uid]))
+        queue=sorted(times); heapq.heapify(queue); queued=set(times); active={}; dispatched={}; blockers={uid:set() for uid in pending}; waits=[]
 
-    def conflicts(uid,t):
-        r=rows[uid]; end=t+durations[uid]; site=r['AIDC_site']
-        # Future RUNNING migration arrivals are immutable reservations. An
-        # admitted nonpreemptive gang must also fit those existing segments.
-        occupied=[v for v in fixed if v[1]==site and v[2]<end and v[3]>t]
-        occupied += [(u,rows[u]['AIDC_site'],a,b,rows[u]['requested_GPU']) for u,(a,b) in active.items()
-                     if rows[u]['AIDC_site']==site and b>t]
-        points={t}|{a for u,s,a,b,g in occupied if t<a<end}|{b for u,s,a,b,g in occupied if t<b<end}
-        bad=[]
-        for point in sorted(points):
-            held=[v for v in occupied if v[2]<=point<v[3]]
-            if sum(v[4] for v in held)+r['requested_GPU']>site_capacity[site]:
-                bad.append((point,sorted({v[0] for v in held})))
-        return bad
+        def proposed(uid,t):
+            r=rows[uid]
+            return [(uid,r['AIDC_site'],t,t+durations[uid],r['requested_GPU'])]
 
-    while queue:
-        t=heapq.heappop(queue)
-        active={u:v for u,v in active.items() if v[1]>t}
-        remaining=[]
-        for uid in pending:
-            r=rows[uid]; planned=int(r['start_slot'])*SLOT_NS
-            if planned>t: remaining.append(uid); continue
-            bad=conflicts(uid,t)
-            if bad:
-                held=sorted({u for point,ids in bad for u in ids}); blockers[uid].update(held)
-                waits.append(dict(job_id=uid,event_ns_from_issue=t,blocking_job_ids=held,
-                    first_conflicting_ns_from_issue=bad[0][0],SITE=r['AIDC_site'],GPU_REQUEST=r['requested_GPU'],
-                    frozen_priority_key=list(priority_key(original[uid])),DELAY_REASON=REASON))
-                remaining.append(uid); continue
-            end=t+durations[uid]; active[uid]=(t,end); dispatched[uid]=(t,end)
-            if end not in queued: heapq.heappush(queue,end); queued.add(end)
-        pending=remaining
-    require(not pending,'DETERMINISTIC_DISPATCH_DID_NOT_DRAIN_ASSIGNED_JOBS')
+        def conflicts(uid,parts):
+            bad=[]
+            for _,site,t,end,gpu in parts:
+                occupied=[v for v in fixed if v[1]==site and v[2]<end and v[3]>t]
+                occupied += [v for values in active.values() for v in values if v[1]==site and v[2]<end and v[3]>t]
+                points={t}|{a for u,s,a,b,g in occupied if t<a<end}|{b for u,s,a,b,g in occupied if t<b<end}
+                for point in sorted(points):
+                    held=[v for v in occupied if v[2]<=point<v[3]]
+                    if sum(v[4] for v in held)+gpu>site_capacity[site]:
+                        bad.append((point,sorted({v[0] for v in held})))
+            return sorted(bad)
+
+        while queue:
+            t=heapq.heappop(queue)
+            active={u:v for u,v in active.items() if v[-1][3]>t}
+            remaining=[]
+            for uid in pending:
+                r=rows[uid]; planned=int(r['start_slot'])*SLOT_NS
+                if planned>t: remaining.append(uid); continue
+                parts=proposed(uid,t);bad=conflicts(uid,parts)
+                if bad:
+                    held=sorted({u for point,ids in bad for u in ids}); blockers[uid].update(held)
+                    waits.append(dict(job_id=uid,event_ns_from_issue=t,blocking_job_ids=held,
+                        first_conflicting_ns_from_issue=bad[0][0],SITE=r['AIDC_site'],GPU_REQUEST=r['requested_GPU'],
+                        frozen_priority_key=list(priority_key(original[uid])),DELAY_REASON=REASON))
+                    remaining.append(uid); continue
+                active[uid]=parts;dispatched[uid]=parts
+                for _,_,a,b,_ in parts:
+                    for event_time in (a,b):
+                        if event_time>t and event_time not in queued:heapq.heappush(queue,event_time);queued.add(event_time)
+            pending=remaining
+        require(not pending,'DETERMINISTIC_DISPATCH_DID_NOT_DRAIN_ASSIGNED_JOBS')
+        execution_parts=dispatched
     for uid,r in rows.items():
         planned=int(r['start_slot'])*SLOT_NS
-        if uid in dispatched:
-            start,end=dispatched[uid]; delay=(start-planned)/NS
-            require(delay>=0 and r['state_at_issue']=='PENDING','INVALID_EXECUTION_DISPATCH')
-            r['actual_compute_segments']=[dict(site=r['AIDC_site'],start=start/SLOT_NS,end=end/SLOT_NS,
-                Rack=r['Rack_label'],phase='SINGLE')]
+        if uid in execution_parts:
+            parts=execution_parts[uid];start=parts[0][2];end=parts[-1][3];delay=(start-planned)/NS
+            require(delay>=0,'INVALID_EXECUTION_DISPATCH')
+            r['actual_compute_segments']=[dict(site=site,start=a/SLOT_NS,end=b/SLOT_NS,
+                Rack=(r['initial_Rack_label'] if r.get('migration_selected') and i==0 else r['Rack_label']),
+                phase=('SOURCE' if i==0 else 'DESTINATION') if r.get('migration_selected') else 'SINGLE')
+                for i,(_,site,a,b,_) in enumerate(parts)]
+            r['migration_executed']=bool(r.get('migration_selected')) and len(parts)==2
             r.update(actual_start_ns_from_issue=start,actual_end_ns_from_issue=end,
                 actual_execution_start=start/SLOT_NS,actual_residual_start=start/SLOT_NS,actual_execution_end=end/SLOT_NS,
-                actual_Rack=r['Rack_label'],start_delay_seconds=delay,start_delay_slots=delay/900,
+                actual_Rack=r['actual_compute_segments'][-1]['Rack'],start_delay_seconds=delay,start_delay_slots=delay/900,
                 actual_execution_origin='DETERMINISTIC_PHYSICAL_EXECUTION_WITHIN_FROZEN_SITE',
                 delayed_by_GPU_capacity=delay>0,delayed_by_Rack_capacity=False)
-            remaining=max(0,end-max(120*SLOT_NS,start))/NS
+            remaining=sum(max(0,b-max(120*SLOT_NS,a)) for _,site,a,b,g in parts)/NS
             r.update(unfinished_at_H=remaining>0,remaining_runtime_at_H=remaining,remaining_GPU_hours_at_H=remaining*r['requested_GPU']/3600,
                 post_H_completion_time=end/SLOT_NS if end>120*SLOT_NS else None,
-                post_H_site=r['AIDC_site'] if end>120*SLOT_NS else None)
+                post_H_site=parts[-1][1] if end>120*SLOT_NS else None)
             r['terminal_segment_state']=terminal(r,actual=True)
             r['counterfactual_day_classification']=classify(original[uid],observations[uid],issue,execution_segments=r['actual_compute_segments'])
         else:
             start=None if not r['frozen_policy_admitted'] else 0
             end=None if start is None else round(r['actual_execution_end']*SLOT_NS)
             delay=0.
-        no_contention_end=planned+durations[uid] if uid in dispatched else None
+        no_contention_end=round(naive['job_ledger'][next(i for i,v in enumerate(naive['job_ledger']) if v['job_uid']==uid)]['actual_execution_end']*SLOT_NS) if uid in dispatched else None
         deadline=int(r['RW_completion_slot'])*SLOT_NS
         extra_lateness=0. if no_contention_end is None else (max(0,end-deadline)-max(0,no_contention_end-deadline))/NS
         r.update(DA_PLANNED_START=(issue+pd.Timedelta(planned,unit='ns')).isoformat(),
@@ -106,6 +122,9 @@ def replay_jobs(jobs,observations,*,issue_time,site_capacity,racks):
             START_DELAY_SECONDS=delay,REALIZED_RUNTIME=r['actual_service_seconds'],
             ACTUAL_EXECUTION_END=None if end is None else (issue+pd.Timedelta(end,unit='ns')).isoformat(),
             ACTUAL_RACK=r['actual_Rack'],SITE=r['AIDC_site'],GPU_REQUEST=r['requested_GPU'],
+            DA_INITIAL_SITE=original[uid]['compute_segments'][0]['site'],DA_FINAL_SITE=original[uid]['AIDC_site'],
+            ACTUAL_INITIAL_SITE=r['actual_compute_segments'][0]['site'] if start is not None else None,
+            ACTUAL_FINAL_SITE=r['actual_compute_segments'][-1]['site'] if start is not None else None,
             BLOCKING_JOB_IDS=sorted(blockers.get(uid,set())),DELAY_REASON=REASON if delay else None,
             frozen_priority_key=list(priority_key(original[uid])),
             contention_added_completion_lateness_seconds=extra_lateness,
@@ -185,11 +204,15 @@ def persist(output,replay,observations,issue_time,capacity,racks):
     table(output/'aidc/DELAYED_JOBS.parquet',jobs[jobs.START_DELAY_SECONDS>0].reset_index(drop=True))
     document(output/'aidc/DISPATCH_PRIORITY_AUTHORITY.json',dict(
         source='dayahead.v40d_actual.job_replay.priority_key',keys=['frozen start_slot','existing qos tier','submit timestamp','job_uid'],
-        ordering_unchanged=True,frozen_rack_preserved=True,RUNNING_segments_immutable=True,
+        ordering_unchanged=True,frozen_rack_preserved=True,RUNNING_decisions_immutable=True,
+        RUNNING_event_clock_follows_actual_progress='migration_execution_replay' in replay,
         scheduling_optimizer_calls=0,ML_prediction_calls=0,DayAhead_feedback_calls=0))
     document(output/'ACTUAL_EXECUTION_DELAY_KPIS.json',replay['execution_delay_KPIs'])
     document(output/'ACTUAL_EXECUTION_RATE.json',replay['execution_rate'])
     resource_trace(output,replay,observations,issue_time,capacity,racks)
+    if 'migration_execution_replay' in replay:
+        from dayahead.v41r1.migration_dispatch import persist as persist_migrations
+        persist_migrations(output,replay['migration_execution_replay'],issue_time)
     return final
 
 

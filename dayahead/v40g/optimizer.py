@@ -14,15 +14,18 @@ from dayahead.paper_analysis.storage import write_json
 from .domain import Option, options, segments, deviation, materialize, audit
 
 
-def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False, work_limits=(60,180,300), inject_reference=False):
+def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False, work_limits=(60,180,300), inject_reference=False, factorize=True):
     output=Path(output); output.mkdir(parents=True,exist_ok=True)
     if (output/'ACCEPTED_AIDC.json').exists(): raise RuntimeError('PRESERVE_COMPLETED_SOLVE')
     started=time.perf_counter(); refs={r['job_uid']:deepcopy(r) for r in reference_jobs}
     assert len(refs)==len(reference_jobs)
     sites=tuple(context.capacity.aidc_ids); T=len(context.coefficients)
-    from dayahead.v41r1.terminal import active
-    if any(active(r) for r in reference_jobs):
-        assert T == 96, 'SCIENTIFIC_DAY_MUST_HAVE_96_SLOTS'
+    from dayahead.v41r1.migration import active,model_boundary
+    revision=any(active(r) for r in reference_jobs)
+    if revision and T!=96:raise ValueError('SCIENTIFIC_DAY_MUST_HAVE_96_SLOTS')
+    if revision and getattr(context,'day',None)=='2025-05-01' and factorize:
+        from dayahead.v41r1.migration_factor import verify_gate
+        verify_gate()
     wan=getattr(context,'wan',None); elapsed=getattr(context,'elapsed',{})
     def occupancy(rows):
         result=np.zeros((T,len(sites)),dtype=int)
@@ -92,22 +95,26 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
                 return entry
         raise RuntimeError(label+'_OPTIMUM_NOT_CERTIFIED')
     try:
-        variables={}; load=defaultdict(gp.LinExpr); wan_active=defaultdict(gp.LinExpr)
+        variables={}; factors={}; load=defaultdict(gp.LinExpr); wan_active=defaultdict(gp.LinExpr)
         migration=gp.LinExpr(); dev=gp.LinExpr(); tie=gp.LinExpr(); migration_groups=[]
         for i,key in enumerate(keys):
             gpu,duration,opts,costs,_,_=key; members=groups[key]; row=refs[members[0]]; n=len(members)
+            from dayahead.v41r1.migration_factor import eligible,compile as compile_factor
+            if revision and factorize and eligible(row,opts):
+                assert n==1
+                factor=compile_factor(model,row,opts,costs,i,load,wan_active,inject_reference=inject_reference)
+                factors[i]=factor;migration+=factor['migration'];dev+=factor['deviation'];tie+=factor['tie']
+                migration_groups.append((members[0],factor['migration'],factor['start'],factor['length']))
+                continue
             counts=Counter(Option(refs[u]['AIDC_site'],refs[u]['start_slot'],refs[u]['end_slot']) for u in members)
             vs=[]; mig=gp.LinExpr(); transfer_start=gp.LinExpr(); transfer_length=gp.LinExpr()
             for k,opt in enumerate(opts):
-                from dayahead.v41r1.terminal import active
-                fixed_r1 = active(row) and len(opts) == 1
-                v=n if fixed_r1 else model.addVar(vtype=GRB.INTEGER,lb=0,ub=n,name=f'choice[{i},{k}]')
-                variables[i,k]=v;vs.append(v)
-                if not fixed_r1: v.Start=counts[opt]
-                if inject_reference and not fixed_r1:
-                    # Diagnostic feasibility injection into the identical B1
-                    # model, including its reserve constraints and objectives.
-                    v.LB = counts[opt]; v.UB = counts[opt]
+                if revision and len(opts)==1:
+                    v=n;variables[i,k]=v
+                else:
+                    v=model.addVar(vtype=GRB.INTEGER,lb=0,ub=n,name=f'choice[{i},{k}]');variables[i,k]=v;vs.append(v)
+                    v.Start=counts[opt]
+                    if inject_reference:v.LB=counts[opt];v.UB=counts[opt]
                 for s,a,b in opt.segments(row):
                     for t in range(max(BEGIN,a),min(BEGIN+T,b)):load[t-BEGIN,s]+=gpu*v
                 dev+=costs[k]*v; tie+=(i+1)*(k+1)*v
@@ -115,15 +122,30 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
                     mig+=v; migration+=v; transfer_start+=opt.transfer_start*v
                     transfer_length+=(opt.transfer_end-opt.transfer_start)*v
                     for t in range(opt.transfer_start,opt.transfer_end):wan_active[t]+=v
-            model.addConstr(gp.quicksum(vs)==n,name=f'common_service[{i}]')
+            if vs:model.addConstr(gp.quicksum(vs)==n,name=f'common_service[{i}]')
             if any(o.migrated for o in opts):migration_groups.append((members[0],mig,transfer_start,transfer_length))
         # Existing UID-serial full-rate transfer construction, jointly coupled
         # to migration choices; no temporal feasibility prerequisite.
         cursor=BEGIN+2
         for uid,mig,start,length in sorted(migration_groups):
-            model.addConstr(start>=cursor-H*(1-mig),name='WAN_serial_start_lb_'+uid)
-            model.addConstr(start<=cursor+H*(1-mig),name='WAN_serial_start_ub_'+uid)
-            cursor=cursor+length
+            if revision:
+                # Existing V39C binder: cursor=max(cursor,first_checkpoint).
+                # Late releases were absent from the legacy issue-RUNNING set.
+                cp=next(o.checkpoint for o in uid_options[uid] if o.migrated)
+                ready=model.addVar(vtype=GRB.INTEGER,lb=BEGIN+2,ub=H-1,name='WAN_ready_'+uid)
+                if isinstance(cursor,int):model.addConstr(ready==max(cursor,cp))
+                else:model.addGenConstrMax(ready,[cursor],constant=cp,name='WAN_release_'+uid)
+                selected_flag=model.addVar(vtype=GRB.BINARY,name='WAN_selected_'+uid)
+                model.addConstr(selected_flag==mig)
+                after=model.addVar(vtype=GRB.INTEGER,lb=BEGIN+2,ub=H-1,name='WAN_cursor_'+uid)
+                model.addGenConstrIndicator(selected_flag,True,start==ready)
+                model.addGenConstrIndicator(selected_flag,True,after==start+length)
+                model.addGenConstrIndicator(selected_flag,False,after==cursor)
+                cursor=after
+            else:
+                model.addConstr(start>=cursor-H*(1-mig),name='WAN_serial_start_lb_'+uid)
+                model.addConstr(start<=cursor+H*(1-mig),name='WAN_serial_start_ub_'+uid)
+                cursor=cursor+length
         for t,expr in wan_active.items():model.addConstr(expr<=1,name=f'WAN_one_active[{t}]')
         controls=[[0.0]*len(c.control_names) for c in context.coefficients];gpu_variables={}
         for t in range(T):
@@ -141,19 +163,20 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
             from dayahead.v41.reserve import add_constraints
             reserve_mean, reserve_xi = add_constraints(model, context, load)
         model.setObjective(rho,GRB.MINIMIZE);model.update()
-        if any(active(r) for r in reference_jobs):
-            from dayahead.v41r1.terminal import model_boundary
-            write_json(output/'HORIZON_MODEL_AUDIT.json',model_boundary(model,reference_jobs,uid_options,T))
         objective=[(v.VarName,float(v.Obj)) for v in model.getVars() if v.Obj]
         assert objective==[('rho_max',1.)]
         write_json(output/'PRIMARY_STRUCTURE.json',{'method':'JOINT_TEMPORAL_SPATIAL_AIDC_GRID_OPTIMIZATION',
-            'diagnostic_only':temporal_only or inject_reference,'reference_injected':inject_reference,
+            'diagnostic_only':temporal_only or inject_reference or not factorize,'reference_injected':inject_reference,
             'objective':objective,'grid_rows':grid_rows,'domain_counts':dict(domain_counts),
-            'cohort_count':len(keys),'model_variables':model.NumVars,'model_constraints':model.NumConstrs,
+            'cohort_count':len(keys),'factored_cohorts':len(factors),
+            'factorization_exact_original_options':sum(f['original_option_count'] for f in factors.values()),
+            'factorization_choice_variables':sum(f['factored_choice_count'] for f in factors.values()),
+            'model_variables':model.NumVars,'model_constraints':model.NumConstrs,
             'TEMPORAL_FIRST_HARD_HIERARCHY':'NO','TEMPORAL_AND_SPATIAL_AIDC_PRIMARY_JOINT':not temporal_only,
             'reference_candidate_included':True,'migration_penalty_in_primary':0,'MESS_variables':0,
             'WAN_policy':'Existing first checkpoint / fixed OD / UID serial / full frozen path budget / one restart slot',
             'all_migration_options_present_before_first_solve':True})
+        if revision:write_json(output/'DAY_BOUNDARY_AUDIT.json',model_boundary(model,reference_jobs,uid_options,T))
         model.write(str((output/'PRIMARY_MODEL.mps').resolve()))
         print(f'V40G model {model.NumVars} variables {model.NumConstrs} rows {dict(domain_counts)}',flush=True)
         pstage=optimize('PRIMARY_MIN_RHO'); primary=float(rho.X); bound=float(model.ObjBound)
@@ -184,9 +207,11 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
         selected=[]; materialized_dev=0
         for i,key in enumerate(keys):
             places=[]
-            for k,opt in enumerate(key[2]):
-                variable = variables[i,k]
-                places.extend([opt]*int(round(variable if isinstance(variable, int) else variable.X)))
+            if i in factors:
+                from dayahead.v41r1.migration_factor import selected as selected_factor
+                places=[selected_factor(factors[i],refs[groups[key][0]])]
+            else:
+                for k,opt in enumerate(key[2]):places.extend([opt]*int(round(variables[i,k] if isinstance(variables[i,k],int) else variables[i,k].X)))
             assert len(places)==len(groups[key])
             for uid,opt in zip(sorted(groups[key]),places):
                 selected.append(materialize(refs[uid],opt,context.capacity,wan));materialized_dev+=deviation(refs[uid],opt)
@@ -202,7 +227,7 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
                'primary_degradation_allowance':0.,'solver_feasibility_tolerance':1e-9,
                'secondary_migration_optimum':secondary,'tertiary_reference_deviation_optimum':tertiary,
                'quaternary_tie_optimum':float(tie.getValue()),'solver_stages':stages,'terminal_audit':terminal,
-               'final_decision_SHA':digest(selected),'diagnostic_only':temporal_only or inject_reference,
+               'final_decision_SHA':digest(selected),'diagnostic_only':temporal_only or inject_reference or not factorize,
                'reference_injected':inject_reference,'domain_counts':dict(domain_counts),
                'TEMPORAL_FIRST_HARD_HIERARCHY':'NO','TEMPORAL_AND_SPATIAL_AIDC_PRIMARY_JOINT':'NO' if temporal_only else 'YES',
                'MIGRATION_PENALTY_LEVEL':'SECONDARY_ONLY','PRIMARY_GRID_OBJECTIVE_SACRIFICED_FOR_MIGRATION_AVOIDANCE':'NO',

@@ -16,6 +16,11 @@ def classify(job, observation, issue_time, *, execution_segments=None):
     seconds = (end - issue).total_seconds() if job['state_at_issue'] == 'RUNNING' else (end - start).total_seconds()
     require(seconds > 0, 'NONPOSITIVE_COUNTERFACTUAL_SERVICE')
     ready = 0 if job['state_at_issue'] == 'RUNNING' else max(float(job['start_slot']), float(job.get('frozen_execution_ready_slot', 0)))
+    from dayahead.v41r1.migration import active
+    if active(job) and job.get('migration_selected') and job['state_at_issue']=='PENDING':
+        # Source compute begins at the frozen initial start; destination READY
+        # is not first-placement readiness. Migration pause remains in trace.
+        ready=float(job['start_slot'])
     earliest_end = ready + seconds / 900
     # This is a lower-bound timing witness only. It cannot prove that unknown
     # site capacity caused no delay. A completed exclusion requires the actual

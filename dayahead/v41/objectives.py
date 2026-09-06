@@ -5,6 +5,7 @@ from dayahead.v40g.domain import options, Option, deviation
 from dayahead.v40g_segments.canonical import import_frozen, planning_power
 from dayahead.v40a.grid import evaluate_grid, controls_from_trajectory
 from .reserve import require, diagnostics, OBJECTIVE_HIERARCHY
+from dayahead.v41r1.migration import pending_in_day
 
 
 def evaluate(reference, selected, context):
@@ -24,7 +25,8 @@ def evaluate(reference, selected, context):
             if row.get('migration_selected'):
                 active = [t + 24 for t, b in enumerate(row['frozen_WAN_transfer']['bytes_by_slot']) if b]
                 opt = Option(row['AIDC_site'], row['start_slot'], row['end_slot'],
-                             row['migration_checkpoint_slot'], min(active), max(active) + 1)
+                             row['migration_checkpoint_slot'], min(active), max(active) + 1,
+                             row['initial_AIDC'] if pending_in_day(row) else '')
             else:
                 opt = Option(row['AIDC_site'], row['start_slot'], row['end_slot'])
             require(opt in key[2], 'OBJECTIVE_DECISION_OUTSIDE_B1_DOMAIN:' + uid)

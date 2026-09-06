@@ -21,19 +21,36 @@ class Option:
     checkpoint: int = -1
     transfer_start: int = -1
     transfer_end: int = -1
+    initial_site: str = ''
 
     @property
     def migrated(self): return self.checkpoint >= 0
 
     def segments(self, row):
         if not self.migrated: return ((self.site, self.start, self.end),)
-        return ((row['AIDC_site'], self.start, self.checkpoint),
+        return ((self.initial_site or row['AIDC_site'], self.start, self.checkpoint),
                 (self.site, self.transfer_end + 1, self.end))
 
 
 def options(row, capacity, wan, elapsed, temporal_only=False):
     if row.get('migration_selected'):
         raise ValueError('REFERENCE_WITH_PREEXISTING_MIGRATION_REQUIRES_BOUND_TRACE')
+    from dayahead.v41r1.migration import active,target,checkpoints,placement_sites,pending_in_day
+    if active(row):
+        initial_sites=placement_sites(row,capacity)
+        if temporal_only:initial_sites=(row['AIDC_site'],)
+        result=[];cp=checkpoints(row,elapsed)
+        for site in initial_sites:
+            placed={**row,'AIDC_site':site}
+            if temporal_only or not target(row) or not cp:
+                result.append(Option(site,int(row['start_slot']),int(row['end_slot'])))
+            else:
+                if wan is None:raise ValueError('RUNNING_WAN_AUTHORITY_MISSING')
+                for opt in migration_options(placed,capacity,wan,cp[0],allow_cross_midnight=True):
+                    if opt.migrated and pending_in_day(row):
+                        opt=Option(opt.site,opt.start,opt.end,opt.checkpoint,opt.transfer_start,opt.transfer_end,site)
+                    result.append(opt)
+        return tuple(sorted(result))
     if row['state_at_issue'] != 'RUNNING':
         return tuple(Option(s, t, t + row['safe_duration_slots'])
                      for s, t in authorized_options(row, capacity)
@@ -46,6 +63,12 @@ def options(row, capacity, wan, elapsed, temporal_only=False):
         raise ValueError('RUNNING_MIGRATION_CAUSAL_WAN_AUTHORITY_MISSING')
     cp = checkpoint_slots(elapsed[row['job_uid']] + BEGIN * 900, H - BEGIN)[0] + BEGIN
     if cp >= row['end_slot']: return (stay,)
+    return migration_options(row,capacity,wan,cp)
+
+
+def migration_options(row,capacity,wan,cp,*,allow_cross_midnight=False):
+    """Same checkpoint, fixed-path full-rate transfer and one-slot restart."""
+    stay=Option(row['AIDC_site'],int(row['start_slot']),int(row['end_slot']))
     result = [stay]
     for site in capacity.aidc_ids:
         if site == row['AIDC_site'] or capacity.site_capacity[site] < row['requested_GPU'] or not capacity.eligible_racks(site, row['requested_GPU']):
@@ -56,7 +79,7 @@ def options(row, capacity, wan, elapsed, temporal_only=False):
                 remaining -= min(remaining, wan.path_capacity_bytes(row['AIDC_site'], site, end - BEGIN))
                 end += 1
             finish = int(row['end_slot']) + end + 1 - cp
-            if remaining == 0 and finish <= H:
+            if remaining == 0 and (finish <= H if not allow_cross_midnight else end+1 < H):
                 result.append(Option(site, stay.start, finish, cp, start, end))
     return tuple(sorted(result))
 
@@ -75,25 +98,26 @@ def deviation(row, option):
 def materialize(row, option, capacity, wan):
     value = deepcopy(row)
     value.update(AIDC_site=option.site, start_slot=option.start, end_slot=option.end)
-    from dayahead.v41r1.terminal import active
-    if active(row) and row['state_at_issue'] == 'PENDING':
-        value['post_H_site'] = option.site if option.end > H else None
+    from dayahead.v41r1.migration import active
+    if active(row):value['post_H_site']=option.site if option.end>H else None
     if (option.site, option.start, option.end) == (row['AIDC_site'], row['start_slot'], row['end_slot']) and not option.migrated:
         return value
     if option.site != 'UNASSIGNED':
         value['Rack_label'] = sorted(p.rack_pool_id for p in capacity.eligible_racks(option.site, row['requested_GPU']))[0]
     if not option.migrated: return value
+    source=option.initial_site or row['AIDC_site']
+    value['initial_Rack_label']=(row['Rack_label'] if source==row['AIDC_site'] else sorted(p.rack_pool_id for p in capacity.eligible_racks(source,row['requested_GPU']))[0])
     sent = [0] * (H - BEGIN); remaining = wan.payload_bytes(row['requested_GPU'])
     for t in range(option.transfer_start, option.transfer_end):
-        sent[t - BEGIN] = min(remaining, wan.path_capacity_bytes(row['AIDC_site'], option.site, t - BEGIN))
+        sent[t - BEGIN] = min(remaining, wan.path_capacity_bytes(source, option.site, t - BEGIN))
         remaining -= sent[t - BEGIN]
     assert remaining == 0
-    transfer = {'job_uid': row['job_uid'], 'source_AIDC': row['AIDC_site'],
+    transfer = {'job_uid': row['job_uid'], 'source_AIDC': source,
                 'destination_AIDC': option.site, 'payload_bytes': sum(sent),
-                'bytes_by_slot': sent, 'fixed_path_id': wan.path_id(row['AIDC_site'], option.site),
-                'fixed_path_links': list(wan.path(row['AIDC_site'], option.site)), 'path_selection_decisions': 0}
+                'bytes_by_slot': sent, 'fixed_path_id': wan.path_id(source, option.site),
+                'fixed_path_links': list(wan.path(source, option.site)), 'path_selection_decisions': 0}
     value.update(migration_selected=True, migration_destination=option.site,
-                 initial_AIDC=row['AIDC_site'], frozen_execution_ready_slot=option.transfer_end + 1,
+                 initial_AIDC=source, frozen_execution_ready_slot=option.transfer_end + 1,
                  compute_segments=[{'site': s, 'start': a, 'end': b} for s, a, b in option.segments(row)],
                  migration_checkpoint_slot=option.checkpoint,
                  WAN_transfer_complete_slot=option.transfer_end - 1,
@@ -122,24 +146,22 @@ def audit(reference_jobs, selected, capacity, wan):
         assert all(a < b for s,a,b in parts)
         old_tail = [(s,max(H,a),b) for s,a,b in segments(before) if b>H]
         new_tail = [(s,max(H,a),b) for s,a,b in parts if b>H]
-        from dayahead.v41r1.terminal import active, check
-        if active(before) and before['state_at_issue'] == 'PENDING':
-            check(before, row)
-            changed_tail += old_tail != new_tail
-        else:
-            assert old_tail == new_tail
+        from dayahead.v41r1.migration import active,target,check
+        if active(before):check(before,row)
+        if not active(before):assert old_tail == new_tail
+        changed_tail+=int(old_tail!=new_tail)
         if row.get('migration_selected'):
-            assert before['state_at_issue']=='RUNNING' and row['start_slot']==before['start_slot']
-            assert parts[0][0]==before['AIDC_site'] and parts[-1][0]==row['migration_destination']
+            assert (before['state_at_issue']=='RUNNING' or target(before)) and row['start_slot']==before['start_slot']
+            assert parts[0][0]==row['initial_AIDC'] and parts[-1][0]==row['migration_destination']
             assert parts[0][2]==row['migration_checkpoint_slot']
-            assert parts[-1][1]==row['restart_complete_slot'] and row['end_slot']<=H
+            assert parts[-1][1]==row['restart_complete_slot']
+            assert (parts[-1][1]<H if target(before) else row['end_slot']<=H)
             transfer=row['frozen_WAN_transfer']; assert sum(transfer['bytes_by_slot'])==wan.payload_bytes(row['requested_GPU'])
             transfers.append(transfer)
         elif before['state_at_issue']=='RUNNING':
             assert parts==segments(before)
     validation = validate_fixed_path_transfers(wan, transfers) if transfers else {'status':'PASS','path_selection_decisions':0,'violations':[]}
     assert validation['status']=='PASS'
-    return {'status':'PASS','POST_H_RESERVATION_PROFILE_CHANGED_JOBS':changed_tail,'POST_H_SITE_STATE_CHANGED_JOBS':sum(
-            bool(tail(refs[r['job_uid']]) or tail(r)) and refs[r['job_uid']]['AIDC_site'] != r['AIDC_site'] for r in selected),
-            'REPAIR_INDUCED_INCREMENTAL_POST_MIDNIGHT_GPU_H':0.,'safe_runtime_GPU_state_qos_preserved':True,
+    return {'status':'PASS','POST_H_RESERVATION_PROFILE_CHANGED_JOBS':changed_tail,
+            'POST_H_OPTIMIZATION':False,'common_reference_tail_is_service_ledger_not_cap':any(active(r) for r in reference_jobs),'safe_runtime_GPU_state_qos_preserved':True,
             'common_service_compute_GPU_slots_preserved':True,'WAN':validation,'migration_count':len(transfers)}

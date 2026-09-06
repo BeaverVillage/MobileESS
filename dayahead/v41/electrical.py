@@ -114,7 +114,8 @@ def load(day):
             require(np.array_equal(stored[key],np.asarray([getattr(c,key) for c in context.coefficients])),
                     'ELECTRICAL_REOPEN_NUMERICAL_DRIFT:'+key)
     from dayahead.v38.authority import load_wan_authority
-    context.wan = load_wan_authority(ROOT)
+    from dayahead.v41r1.migration import FrozenWanView
+    context.wan = FrozenWanView(load_wan_authority(ROOT))
     import pandas as pd
     from .data import issue_time
     path = SOURCE_REPO / 'dayahead/artifacts/v37_r4a_per_day_aidc/days' / day / 'V37_R4A_D1_SNAPSHOT.parquet'

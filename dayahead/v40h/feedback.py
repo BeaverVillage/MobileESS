@@ -16,27 +16,23 @@ from .primary import preserve
 
 def candidates(row, capacity):
     validate(row)
+    from dayahead.v41r1.migration import fixed_pending
+    if fixed_pending(row) or row.get('migration_selected'):return [deepcopy(row)]
     # Existing A1 authorization fixes every RUNNING choice, including all
-    # accepted migration segments/events. R1 PENDING uses its common per-job
-    # terminal-residual cap; only legacy callers retain exact post-H tails.
-    from dayahead.v41r1.terminal import active
-    if row['state_at_issue']=='RUNNING' or (row['end_slot']>H and not active(row)):
+    # accepted migration segments/events. It also fixes exact post-H tails.
+    if row['state_at_issue']=='RUNNING' or row['end_slot']>H:
         return [deepcopy(row)]
     result=[]
     for site,start in authorized_options(row,capacity):
         value=deepcopy(row);end=start+row['safe_duration_slots']
         value.update(AIDC_site=site,start_slot=start,end_slot=end,
                      compute_segments=[{'site':site,'start':start,'end':end}])
-        if active(row): value['post_H_site'] = site if end > H else None
         if site!='UNASSIGNED':
             value['Rack_label']=sorted(p.rack_pool_id for p in capacity.eligible_racks(site,row['requested_GPU']))[0]
         validate(value);result.append(value)
     return result
 
 def solve_feedback(a0, m1, context, *, tolerance=1e-6, work_limit=60.0):
-    from dayahead.v41r1.terminal import active
-    if any(active(r) for r in a0):
-        require(len(context.coefficients)==96,'SCIENTIFIC_DAY_MUST_HAVE_96_SLOTS')
     started=time.perf_counter(); frozen_route=route_sha(m1.slots); frozen_m1=digest(m1)
     p0,_=pcc_from_jobs(a0,context)
     fixed=controls_from_trajectory(context.coefficients,p0,m1.slots)
@@ -54,11 +50,8 @@ def solve_feedback(a0, m1, context, *, tolerance=1e-6, work_limit=60.0):
             require(any(x['compute_segments']==row['compute_segments'] for x in options[i]), 'A0_OUTSIDE_AUTHORIZED_DOMAIN')
             vs=[]
             for k,candidate in enumerate(options[i]):
-                from dayahead.v41r1.terminal import active
-                fixed_r1 = active(row) and len(options[i]) == 1
-                v=1 if fixed_r1 else model.addVar(vtype=GRB.BINARY,name=f'job[{i},{k}]')
-                variables[i,k]=v;vs.append(v)
-                if not fixed_r1: v.Start=float(candidate['compute_segments']==row['compute_segments'])
+                v=model.addVar(vtype=GRB.BINARY,name=f'job[{i},{k}]');variables[i,k]=v;vs.append(v)
+                v.Start=float(candidate['compute_segments']==row['compute_segments'])
                 for part in candidate['compute_segments']:
                     for t in range(max(BEGIN,int(part['start'])),min(H,int(part['end']))):
                         load[t-BEGIN,part['site']]+=int(row['requested_GPU'])*v
@@ -88,8 +81,7 @@ def solve_feedback(a0, m1, context, *, tolerance=1e-6, work_limit=60.0):
         record('rho_max')
         if not model.SolCount:return {'status':'NO_INCUMBENT','jobs':deepcopy(a0),'solver':stages,'wallclock_seconds':time.perf_counter()-started}
         # Save incumbent before another solve; limit termination must never discard it.
-        value=lambda v: v if isinstance(v,int) else v.X
-        chosen={i:next(k for k in range(len(options[i])) if value(variables[i,k])>.5) for i in options}
+        chosen={i:next(k for k in range(len(options[i])) if variables[i,k].X>.5) for i in options}
         accepted_primary=float(rho.X)
         primary_jobs=[deepcopy(options[i][chosen[i]]) for i in range(len(a0))]
         def recompute(current):
@@ -110,7 +102,7 @@ def solve_feedback(a0, m1, context, *, tolerance=1e-6, work_limit=60.0):
                             name='V41_MEAN_H4_SHORTFALL_LOCK')
             stages[-1]['freeze_for_subsequent_stage'] = dict(name='V41_MEAN_H4_SHORTFALL_LOCK', sense='<=',
                 bound=reserve_optimum + model.Params.FeasibilityTol, feasibility_tolerance=model.Params.FeasibilityTol)
-            chosen={i:next(k for k in range(len(options[i])) if value(variables[i,k])>.5) for i in options}
+            chosen={i:next(k for k in range(len(options[i])) if variables[i,k].X>.5) for i in options}
             # Lower priorities must fall back to the accepted P1/P2 decision.
             reserve_jobs=[deepcopy(options[i][chosen[i]]) for i in range(len(a0))]
             reserve_materialized=float(recompute(reserve_jobs))
@@ -120,13 +112,13 @@ def solve_feedback(a0, m1, context, *, tolerance=1e-6, work_limit=60.0):
             primary_materialized=reserve_materialized
         model.setObjective(deviation,GRB.MINIMIZE);model.optimize();record('complete_segment_site_symmetric_GPU_slots')
         if model.SolCount:
-            chosen={i:next(k for k in range(len(options[i])) if value(variables[i,k])>.5) for i in options}
+            chosen={i:next(k for k in range(len(options[i])) if variables[i,k].X>.5) for i in options}
             if model.Status==GRB.OPTIMAL:
                 model.addConstr(deviation<=round(deviation.getValue()),name='SECONDARY_EXACT_CAP')
                 if reserve_mean is not None:
                     stages[-1]['freeze_for_subsequent_stage'] = dict(name='SECONDARY_EXACT_CAP', sense='<=', bound=round(deviation.getValue()))
                 model.setObjective(tie,GRB.MINIMIZE);model.optimize();record('deterministic_tie')
-                if model.SolCount:chosen={i:next(k for k in range(len(options[i])) if value(variables[i,k])>.5) for i in options}
+                if model.SolCount:chosen={i:next(k for k in range(len(options[i])) if variables[i,k].X>.5) for i in options}
         jobs=[deepcopy(options[i][chosen[i]]) for i in range(len(a0))]
         jobs,primary_guard=preserve(primary_jobs,primary_materialized,jobs,recompute)
         audit=terminal_audit(a0,jobs);pcc,_=pcc_from_jobs(jobs,context)

@@ -16,15 +16,15 @@ def authorized_options(row, capacity):
     RUNNING decisions and checkpoint/WAN state are fixed. The user confirmed
     that feasible A0/M1 does not authorize new performance-driven migrations.
     """
-    from dayahead.v41r1.terminal import active, authorized_options as terminal_options
-    if active(row):
-        return terminal_options(row, capacity)
+    from dayahead.v41r1.migration import active, placement_sites
+    if active(row):return [(site,int(row['start_slot'])) for site in placement_sites(row,capacity)]
     if row['state_at_issue']=='RUNNING' or row['end_slot']>H:
         return [(row['AIDC_site'],int(row['start_slot']))]
     gpu=int(row['requested_GPU']);duration=int(row['safe_duration_slots'])
     if row['eligible_standby']:
         lo=int(row['RSP_start_slot']);hi=min(int(row['RW_completion_slot'])-duration,H-duration)
     else:lo=hi=int(row['start_slot'])
+    if active(row):lo=max(BEGIN,lo);hi=min(H-1,hi)
     if lo>hi:raise ValueError('EMPTY_AUTHORIZED_TEMPORAL_DOMAIN:'+row['job_uid'])
     sites=tuple(s for s in capacity.aidc_ids if capacity.site_capacity[s]>=gpu and capacity.eligible_racks(s,gpu))
     result=[]

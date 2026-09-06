@@ -59,7 +59,9 @@ def validate(row):
     require(parts[-1]['site'] == row['AIDC_site'], 'FINAL_SITE_DRIFT')
     if events:
         a, b = parts; e = events[0]
-        require(row['state_at_issue'] == 'RUNNING' and a['site'] != b['site'], 'FIRST_PLACEMENT_IS_NOT_MIGRATION')
+        from dayahead.v41r1.migration import target,check
+        require((row['state_at_issue'] == 'RUNNING' or target(row)) and a['site'] != b['site'], 'FIRST_PLACEMENT_IS_NOT_MIGRATION')
+        if target(row):check(row,row)
         require(a['site'] == row['initial_AIDC'] == e['source_AIDC'], 'MIGRATION_SOURCE')
         require(b['site'] == row['migration_destination'] == e['destination_AIDC'], 'MIGRATION_DESTINATION')
         require(a['end'] == e['checkpoint'] == e['interruption_start'] == row['migration_checkpoint_slot'], 'CHECKPOINT_DRIFT')
@@ -148,8 +150,18 @@ def terminal(row, *, actual=False, horizon=H):
     if backlog: remaining = row['actual_service_seconds'] / 900
     active = next((s for s in segs if s['start'] <= horizon < s['end']), None)
     e = events[0] if events else None
+    execution=row.get('actual_migration_execution') if actual else None
+    if e and execution and execution['migration_executed']:
+        e={**e,'checkpoint':execution['ACTUAL_CHECKPOINT_NS']/(900*10**9),
+            'transfer_start':execution['ACTUAL_WAN_START_NS']/(900*10**9),
+            'transfer_end':execution['ACTUAL_WAN_END_NS']/(900*10**9),
+            'ready':execution['ACTUAL_WAN_END_NS']/(900*10**9),
+            'restart_end':execution['ACTUAL_RESTART_NS']/(900*10**9)}
     executed = bool(e) and (not actual or row.get('migration_executed', False))
     sent = sum(e['bytes_by_slot'][:max(0, min(96, math.floor(horizon - BEGIN)))]) if executed else 0
+    if execution and executed:
+        sent=sum(c['bytes']*max(0,min(c['end_ns'],round(horizon*900*10**9))-c['start_ns'])//(900*10**9)
+                 for c in execution['actual_WAN_chunks'])
     if not executed: migration = 'CANCELLED_COMPLETED_BEFORE_CHECKPOINT' if e else 'NONE'
     elif horizon < e['checkpoint']: migration = 'BEFORE_CHECKPOINT'
     elif horizon < e['transfer_start']: migration = 'CHECKPOINT_WAIT'
@@ -179,18 +191,13 @@ def terminal_audit(before, after):
         for k in ('requested_GPU', 'safe_duration_seconds', 'safe_duration_slots', 'duration_authority', 'state_at_issue', 'qos', 'common_terminal_obligation', 'source_snapshot_sha256'):
             require(row.get(k) == prev.get(k), 'COMMON_AUTHORITY_DRIFT:' + k)
         a, b = terminal(prev), terminal(row)
-        from dayahead.v41r1.terminal import active, check
-        if active(prev) and prev['state_at_issue'] == 'PENDING':
-            check(prev, row)
-        else:
-            for k in ('post_H_segments', 'post_H_site', 'remaining_compute_GPU_slots'):
-                require(a[k] == b[k], 'COMMON_TERMINAL_DRIFT:' + k)
+        for k in ('post_H_segments', 'post_H_site', 'remaining_compute_GPU_slots'):
+            require(a[k] == b[k], 'COMMON_TERMINAL_DRIFT:' + k)
         obligation = row.get('common_terminal_obligation', {})
-        if obligation.get('must_complete_by_H'): require(b['remaining_compute_slots'] == 0, 'COMMON_IN_DAY_SERVICE_LOST')
-    return {'status': 'PASS', 'POST_H_RESERVATION_PROFILE_CHANGED_JOBS': sum(
-        terminal(old[r['job_uid']])['post_H_segments'] != terminal(r)['post_H_segments'] for r in after),
-        'POST_H_SITE_STATE_CHANGED_JOBS': sum(terminal(old[r['job_uid']])['post_H_site'] != terminal(r)['post_H_site'] for r in after),
-        'REPAIR_INDUCED_INCREMENTAL_POST_MIDNIGHT_GPU_H': 0.0}
+        from dayahead.v41r1.migration import active
+        if obligation.get('must_complete_by_H') and not active(row): require(b['remaining_compute_slots'] == 0, 'COMMON_IN_DAY_SERVICE_LOST')
+    return {'status': 'PASS', 'POST_H_RESERVATION_PROFILE_CHANGED_JOBS': 0,
+        'POST_H_SITE_STATE_CHANGED_JOBS': 0, 'REPAIR_INDUCED_INCREMENTAL_POST_MIDNIGHT_GPU_H': 0.0}
 
 
 def wan_audit(jobs, authority, *, actual=False):

@@ -19,7 +19,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / 'dayahead/artifacts/v41r1_terminal_residual'
+OUT = ROOT / 'dayahead/artifacts/v41r1_pending_running_migration'
 BASE = '7532a78dbe0c50e7737af53d0acc8017d7be2fc3'
 BRANCH = 'codex/v41-final-ml-interface-may-campaign'
 GAP = 'NO_SEMANTICALLY_VALID_EXISTING_GPUH_SHORTFALL_COEFFICIENT'

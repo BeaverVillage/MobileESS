@@ -18,7 +18,7 @@ from dayahead.v40s5.common import FEATURES, CLOCK
 from .preflight import ROOT, record
 from .reserve import require
 
-RUNTIME = ROOT / 'frozen_artifacts/v41r1_terminal'
+RUNTIME = ROOT / 'frozen_artifacts/v41r1_migration'
 SOURCE_REPO = Path('C:/codex_mobileess_workspace/MobileESS_v40a_bounded_iterative_coopt')
 SLOT_NS = 900_000_000_000
 HISTORY_LOWER = pd.Timestamp('2025-01-29T00:00:00Z')
