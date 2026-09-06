@@ -1,0 +1,1195 @@
+======================================================================
+V40A — BOUNDED ITERATIVE AIDC–MESS CO-OPTIMIZATION
+STOP CURRENT MAY CAMPAIGN / PRESERVE EVIDENCE / IMPLEMENT NEW SCIENCE
+======================================================================
+
+This is an authorized SCIENTIFIC FORMULATION CHANGE.
+
+The current sequential May campaign must first be stopped safely.
+
+Do NOT continue the existing May campaign after this instruction.
+
+The new proposed B3 method is:
+
+    A0
+      ↓
+    M1(route + P/Q)
+      ↓
+    A1(feedback AIDC optimization)
+      ↓
+    MF(fixed-route P/Q-only recourse)
+
+Official terminology:
+
+BOUNDED_ITERATIVE_AIDC_MESS_CO_OPTIMIZATION
+
+Recommended paper-facing name:
+
+"Bounded Iterative AIDC–MESS Co-Optimization"
+
+or
+
+"Single-Round Bidirectional AIDC–MESS Co-Optimization
+ with Fixed-Route Electrical Recourse"
+
+Do NOT claim:
+
+- global joint optimum
+- monolithic joint optimization
+- convergence to a joint optimum
+- iterative optimization until convergence
+
+The coordination depth is deliberately bounded to ONE bidirectional
+AIDC←MESS feedback round because repeated MESS mobility-route searches are
+computationally expensive.
+
+======================================================================
+0. FIRST: STOP THE CURRENT RUNNING MAY CAMPAIGN
+======================================================================
+
+Before editing any scientific source:
+
+1. detect the authoritative current May orchestrator
+2. detect all active May day workers
+3. detect the monitor process
+4. detect any Task Scheduler / detached launcher registration
+5. record current active/completed/failed dates
+6. record current heartbeat
+7. record current branch/HEAD/source fingerprints
+8. record all current production authority fingerprints
+
+Create:
+
+V40A_PRESTOP_CAMPAIGN_SNAPSHOT.json
+
+The snapshot must include:
+
+- timestamp
+- orchestrator PID
+- orchestrator process creation time
+- active worker PIDs
+- active dates
+- completed PASS dates
+- incomplete dates
+- failed dates
+- monitor PID
+- detached launch mechanism
+- current production authority
+- V39K authority SHA
+- current common-source fingerprint
+- current DA freeze manifest SHA
+
+======================================================================
+1. GRACEFUL STOP RULE
+======================================================================
+
+Stop the campaign intentionally.
+
+Preferred order:
+
+A. prevent orchestrator from starting any new date
+B. request clean/controlled stop at the next safe checkpoint
+C. allow active writers to flush atomic progress/checkpoint files
+D. terminate campaign-owned processes only if graceful stop does not close
+   within a bounded waiting interval
+
+Do NOT terminate unrelated Python/Gurobi/PowerShell processes.
+
+Do NOT leave a detached scheduled task capable of relaunching the old
+campaign.
+
+If a one-shot Task Scheduler entry is active:
+
+- disable/remove only the old campaign launch registration as appropriate
+- preserve evidence of its configuration
+- do not delete unrelated scheduled tasks
+
+After stop verify:
+
+AUTHORITATIVE_ORCHESTRATOR_COUNT = 0
+ACTIVE_MAY_WORKER_COUNT = 0
+OLD_CAMPAIGN_CAN_AUTO_RELAUNCH = NO
+
+The monitor must no longer display stale RUNNING.
+
+Final old-campaign status must be:
+
+STOPPED_BY_USER_FOR_V40A_SCIENCE_CHANGE
+
+======================================================================
+2. PRESERVE ALL EXISTING RESULTS
+======================================================================
+
+Do NOT delete or overwrite any completed May result.
+
+All existing completed cases produced under the old sequential formulation
+must be preserved as:
+
+HISTORICAL_SEQUENTIAL_AIDC_THEN_MESS_RESULT
+
+They are not new V40A co-optimization results.
+
+Do not silently relabel old B3 results as V40A B3.
+
+For any date that was interrupted:
+
+- final PASS certificate absent => INCOMPLETE
+- incomplete output is non-authoritative
+- preserve checkpoint/cache/log evidence
+- do not promote to PASS
+
+Create:
+
+V40A_OLD_CAMPAIGN_PRESERVATION_MANIFEST.json
+
+======================================================================
+3. REUSE POLICY FOR OLD CASES
+======================================================================
+
+The new science primarily changes B3.
+
+B0, B1 and B2 may later be reused ONLY if an exact change-impact audit proves:
+
+- same inputs
+- same source
+- same decision semantics
+- same objective
+- same solver settings
+- same DA authority
+- same Fresh authority
+- same resulting decision fingerprint
+
+Expected method registry:
+
+B0:
+    RW / AIDC reference / MESS OFF
+
+B1:
+    current AIDC-only planning authority / MESS OFF
+
+B2:
+    RW / MESS full mobility+P/Q optimization
+
+B3:
+    NEW V40A bounded iterative co-optimization
+
+No reuse decision is authorized merely because numerical J values match.
+
+Old B3 results are always superseded for V40A final science.
+
+======================================================================
+4. CREATE A SEPARATE V40A WORKTREE
+======================================================================
+
+Do not develop the science change directly inside the preserved old campaign
+tree.
+
+Create a separate worktree/branch, for example:
+
+branch:
+codex/v40a-bounded-iterative-aidc-mess-coopt
+
+worktree:
+C:\codex_mobileess_workspace\MobileESS_v40a_bounded_iterative_coopt
+
+Base it on the accepted current production implementation.
+
+IMPORTANT:
+
+If accepted production science contains sealed working-tree bytes that differ
+from plain Git HEAD, reconstruct/verify against the accepted production
+fingerprint rather than blindly assuming Git HEAD is the full authority.
+
+Preserve:
+
+- V39K terminal-safe production logic
+- V39K fallback provenance
+- current 12-site GPU capacities
+- Rack compatibility semantics
+- current WAN/checkpoint semantics
+- current traffic authority
+- current CENTER/C1 authority
+- current Planning/Fresh authority
+- current MESS physics
+- current detached launcher/monitor liveness fixes if V39L exists
+
+======================================================================
+5. SCIENTIFIC METHOD — EXACT NEW B3 STRUCTURE
+======================================================================
+
+The new B3 pipeline is:
+
+D-1 causal inputs
+    ↓
+causal RSP/base AIDC materialization
+    ↓
+A0 — initial AIDC planning authority
+    ↓
+M1 — ONE full MESS route + P/Q optimization
+    ↓
+A1 — ONE AIDC feedback optimization using the frozen M1 solution
+    ↓
+MF — fixed-route MESS P/Q-only recourse
+    ↓
+joint freeze
+    ↓
+Fresh AC verification
+    ↓
+Actual fixed replay
+
+There is exactly ONE expensive MESS discrete mobility search.
+
+Required:
+
+MESS_FULL_DISCRETE_ROUTE_SEARCH_CALLS_PER_B3 = 1
+
+======================================================================
+6. A0 — INITIAL AIDC AUTHORITY
+======================================================================
+
+A0 must start from the existing causal AIDC science.
+
+Do not redefine the RSP scheduler as a temporal MILP.
+
+Existing RSP semantics remain:
+
+- causal safe runtime
+- QoS/service-tier ordering
+- FIFO / earliest continuous first-fit
+- current spatial/site-capacity authority
+- terminal-safe escalation logic
+- existing migration/WAN semantics where required
+
+A0 represents the accepted initial AIDC planning result before MESS feedback.
+
+Store its complete accepted job-level decision.
+
+======================================================================
+7. M1 — FULL MESS OPTIMIZATION
+======================================================================
+
+Given A0 fixed, run the current expensive MESS optimization exactly once.
+
+M1 may optimize the currently authorized MESS decision set:
+
+- destination
+- departure
+- STAY/MOVE
+- route
+- connection-ready timing
+- P
+- Q
+- SoC / energy trajectory
+
+Use the existing:
+
+- K / adaptive beam / fallback hierarchy
+- route authority
+- Safe ETA authority
+- travel-energy physics
+- PCS constraints
+- voltage/current/transformer constraints
+- objective J
+
+Do not alter K/beam/seed/WorkLimit merely to make V40A work.
+
+Save the selected M1 mobility trajectory and route signature.
+
+======================================================================
+8. A1 — NEW AIDC FEEDBACK OPTIMIZATION
+======================================================================
+
+This is the key new science.
+
+Freeze the accepted M1 MESS state while solving A1.
+
+During A1:
+
+MESS destination = fixed
+MESS route = fixed
+MESS departure = fixed
+MESS STAY/MOVE = fixed
+MESS P/Q from M1 = fixed for this AIDC-feedback solve
+
+AIDC is now allowed to respond to the grid state created by M1.
+
+A1 must optimize only already-authorized AIDC degrees of freedom.
+
+Do NOT invent a new SLA/deadline/latest-start rule.
+
+Allowed degrees must be derived from existing accepted science and may
+include, where already authorized:
+
+- terminal-safe standby PENDING temporal recourse
+- PENDING initial AIDC placement
+- RUNNING inter-AIDC migration
+- existing checkpoint/WAN restart logic
+
+Do NOT silently enlarge the AIDC feasible set.
+
+If the exact set of legally movable AIDC decisions is ambiguous:
+
+FAIL CLOSED
+and report the exact missing scientific authority.
+
+Do not invent it.
+
+======================================================================
+9. A1 COMMON SYSTEM OBJECTIVE
+======================================================================
+
+The A1 primary electrical objective is the same system objective:
+
+    minimize J = rho_max
+
+where
+
+    rho_max >= |I_line,phase,t| / I_rating
+
+for all modeled line/phase/time combinations.
+
+A1 must use the same Planning grid authority as M1.
+
+The AIDC feedback solve must therefore see:
+
+- background demand
+- PV
+- AIDC PCC injection
+- frozen M1 MESS injection
+- voltage constraints
+- line-current constraints
+- transformer-current constraints
+- transformer-kVA constraints
+- existing site capacity constraints
+- existing Rack/gang constraints
+- existing WAN constraints
+
+No separate heuristic "critical slot only" feedback is sufficient.
+
+The feedback block must solve against the actual Planning model.
+
+======================================================================
+10. A1 SECONDARY OBJECTIVE / MINIMUM INTERVENTION
+======================================================================
+
+After the primary electrical objective, use a predeclared lexicographic
+secondary objective to avoid gratuitous AIDC changes.
+
+Recommended hierarchy:
+
+Primary:
+    minimize rho_max
+
+Secondary:
+    minimize A0→A1 complete-interval symmetric occupancy deviation
+
+Tertiary:
+    minimize number of additional RUNNING migrations
+
+Quaternary:
+    deterministic tie-break only
+
+Do not allow the secondary levels to worsen the accepted primary objective
+outside existing solver tolerance.
+
+If global optimality is not certified because of WorkLimit:
+
+report incumbent/bound status honestly.
+
+Do not claim exact global optimum.
+
+======================================================================
+11. HARD AIDC FEEDBACK CONSTRAINTS
+======================================================================
+
+A1 must preserve:
+
+- D-1 causality
+- no Actual reads
+- no Fresh reads
+- safe runtime
+- requested GPU
+- gang indivisibility
+- site GPU capacity
+- logical Rack compatibility
+- existing WAN fixed paths
+- existing checkpoint payload rule
+- existing READY/restart semantics
+- no future-day state carry
+- independent daily evaluation
+
+Most importantly:
+
+BASELINE_RELATIVE_PER_JOB_TERMINAL_STATE_PRESERVATION
+
+must remain a hard constraint.
+
+For every job:
+
+- no repair-created new post-H occupancy
+- no repair-created post-H site change
+- existing legal baseline overnight reservation may remain
+- cross-boundary terminal site must remain consistent
+- unauthorized post-H site cannot be invented
+
+Required:
+
+POST_H_RESERVATION_PROFILE_CHANGED_JOBS = 0
+POST_H_SITE_STATE_CHANGED_JOBS = 0
+REPAIR_INDUCED_INCREMENTAL_POST_MIDNIGHT_GPU_H = 0
+
+======================================================================
+12. MONOTONIC ACCEPTANCE OF A1
+======================================================================
+
+Compute:
+
+J_M1 = Planning objective after M1
+J_A1_candidate = Planning objective after A1
+
+Accept A1 only if:
+
+- all hard constraints PASS
+- terminal invariants PASS
+- causality PASS
+- J_A1_candidate <= J_M1 + frozen numerical tolerance
+
+Otherwise:
+
+A1 := A0
+
+and record:
+
+AIDC_FEEDBACK_ACCEPTED = NO
+
+The method must never worsen the accepted Planning objective merely because a
+feedback solve was executed.
+
+Zero-change feedback is a valid outcome.
+
+======================================================================
+13. MF — FIXED-ROUTE MESS P/Q-ONLY RECOURSE
+======================================================================
+
+After accepted A1, do NOT repeat the expensive MESS route search.
+
+Freeze from M1:
+
+- destination
+- route
+- departure
+- STAY/MOVE
+- transit sequence
+- connection-ready schedule
+
+Then solve only the MESS electrical recourse needed to adapt to A1:
+
+- P
+- Q
+- SoC / energy consistency
+- existing continuous/fixed-discrete electrical variables as required
+
+Absolutely no new mobility route enumeration / K-search / beam search.
+
+Required:
+
+FINAL_MESS_ROUTE_CHANGED = NO
+FINAL_MESS_DESTINATION_CHANGED = NO
+FINAL_MESS_DEPARTURE_CHANGED = NO
+FINAL_MESS_MOVE_STAY_CHANGED = NO
+
+Required:
+
+SECOND_MESS_FULL_ROUTE_SEARCH_CALLS = 0
+
+======================================================================
+14. MONOTONIC ACCEPTANCE OF MF
+======================================================================
+
+Compute:
+
+J_A1
+J_FINAL
+
+Accept MF only if:
+
+- route/discrete identity preserved
+- all Planning hard constraints PASS
+- SoC/PCS/mobility constraints PASS
+- J_FINAL <= J_A1 + frozen numerical tolerance
+
+Otherwise retain the previous feasible fixed-route electrical state according
+to the fail-closed policy.
+
+======================================================================
+15. NO FRESH INSIDE THE CO-OPTIMIZATION LOOP
+======================================================================
+
+Fresh OpenDSS is NOT a co-optimization oracle.
+
+During:
+
+A0 → M1 → A1 → MF
+
+Fresh read count must be:
+
+0
+
+After final joint decision freeze only:
+
+run Fresh three-phase OpenDSS.
+
+If Fresh detects a violation:
+
+use the existing fixed-discrete P/Q-only AC restoration authority.
+
+Do NOT:
+
+- rerun AIDC from Fresh
+- change AIDC site/timing from Fresh
+- rerun MESS route from Fresh
+- change destination from Fresh
+- change route from Fresh
+
+======================================================================
+16. FINAL JOINT FREEZE
+======================================================================
+
+After A1 + MF are accepted, construct one final B3 joint authority.
+
+At minimum bind:
+
+FINAL_AIDC_DECISION_SHA
+FINAL_MESS_ROUTE_SHA
+FINAL_MESS_PQ_SHA
+
+Then derive:
+
+FINAL_JOINT_DECISION_SHA
+
+Conceptually:
+
+JOINT_SHA = H(
+    AIDC_SHA,
+    MESS_ROUTE_SHA,
+    MESS_PQ_SHA,
+    input/config/fingerprint authority
+)
+
+Fresh and Actual must both bind to this joint decision.
+
+======================================================================
+17. NEW REQUIRED SAVED DATA
+======================================================================
+
+For every B3 day save:
+
+A. A0 AIDC decision
+B. M1 full MESS trajectory
+C. A1 AIDC feedback decision
+D. MF final fixed-route MESS P/Q trajectory
+
+Recommended artifacts:
+
+AIDC_PASS0_DECISION.parquet
+MESS_PASS1_TRAJECTORY.parquet
+AIDC_FEEDBACK_PASS1_DECISION.parquet
+MESS_FINAL_PQ_RECOURSE.parquet
+
+======================================================================
+18. AIDC JOB-LEVEL SAVED FIELDS
+======================================================================
+
+A0 and A1 must permit exact comparison.
+
+At minimum save per job:
+
+job_uid
+state_at_issue
+qos
+requested_GPU
+safe_duration_slots
+
+start_slot
+end_slot
+AIDC_site
+Rack_label
+
+migration_selected
+migration_destination
+
+terminal_class
+post_H_site
+
+Also preserve required source/provenance fields and decision hashes.
+
+======================================================================
+19. MESS SAVED FIELDS
+======================================================================
+
+For M1 save at least:
+
+mess_id
+slot
+mode
+origin_service
+destination_service
+departure_slot
+route_link_ids
+connection_ready_slot
+P_kw
+Q_kvar
+SoC
+battery_energy_kWh
+travel_energy_kWh
+ETA_Q50
+ETA_Q90
+
+For MF save:
+
+mess_id
+slot
+P_kw_M1
+Q_kvar_M1
+P_kw_final
+Q_kvar_final
+delta_P_kw
+delta_Q_kvar
+SoC_final
+
+======================================================================
+20. STAGE OBJECTIVE LEDGER
+======================================================================
+
+For B3 store:
+
+J_A0
+J_M1
+J_A1
+J_FINAL
+
+and derive:
+
+DELTA_J_MESS =
+    J_A0 - J_M1
+
+DELTA_J_AIDC_FEEDBACK =
+    J_M1 - J_A1
+
+DELTA_J_FINAL_PQ =
+    J_A1 - J_FINAL
+
+DELTA_J_TOTAL =
+    J_A0 - J_FINAL
+
+Create:
+
+COOPT_STAGE_OBJECTIVES.json
+
+This artifact is mandatory.
+
+======================================================================
+21. FEEDBACK DELTA LEDGER
+======================================================================
+
+Create:
+
+AIDC_FEEDBACK_DELTA.csv
+COOPT_COUPLING_SUMMARY.json
+
+Report at minimum:
+
+A0_to_A1_start_changed_jobs
+A0_to_A1_advanced_jobs
+A0_to_A1_delayed_jobs
+A0_to_A1_site_changed_jobs
+A0_to_A1_pending_initial_placement_changed_jobs
+A0_to_A1_running_migrations_added
+A0_to_A1_total_shifted_GPU_h
+A0_to_A1_symmetric_GPU_h
+A0_to_A1_max_time_shift_minutes
+A0_to_A1_median_time_shift_minutes
+
+terminal-state changed jobs
+post-H site changed jobs
+incremental post-H GPU-h
+
+======================================================================
+22. GRID FEEDBACK STATE
+======================================================================
+
+After M1 and after A1 save:
+
+rho_max
+critical_line
+critical_phase
+critical_slot
+
+Vmin
+Vmax
+
+maximum_line_loading
+maximum_transformer_phase_current
+maximum_transformer_kVA
+
+Preferably also save the top-N binding/near-binding constraints.
+
+Create:
+
+MESS_PASS1_GRID_FEEDBACK.json
+AIDC_FEEDBACK_GRID_RESULT.json
+
+======================================================================
+23. RUNTIME / COMPUTATIONAL BURDEN DATA
+======================================================================
+
+The computational contribution is important.
+
+Store wallclock and solver information separately for:
+
+RSP/base materialization
+A0
+M1 route/candidate search
+M1 full MILP
+A1
+MF fixed-route P/Q recourse
+Planning verification
+Fresh
+AC restoration if any
+Total
+
+Create:
+
+COOPT_RUNTIME_PROFILE.json
+
+Required counters:
+
+AIDC_OPTIMIZATION_PASSES
+MESS_FULL_DISCRETE_ROUTE_SEARCH_CALLS
+FINAL_FIXED_ROUTE_PQ_RECOURSE_CALLS
+TOTAL_GUROBI_OPTIMIZE_CALLS
+TOTAL_ROUTE_CANDIDATES_EVALUATED
+TOTAL_RUNTIME_SECONDS
+
+The design target is:
+
+MESS_FULL_DISCRETE_ROUTE_SEARCH_CALLS = 1
+
+======================================================================
+24. B0–B3 METHOD REGISTRY
+======================================================================
+
+Freeze the intended method registry as:
+
+B0:
+    RW reference
+    MESS OFF
+
+B1:
+    AIDC-only current authority
+    MESS OFF
+
+B2:
+    RW reference
+    full MESS mobility + P/Q optimization
+
+B3:
+    A0
+    → one full MESS mobility+P/Q optimization
+    → one AIDC feedback optimization
+    → fixed-route MESS P/Q recourse
+
+Do not call B3 monolithic.
+
+Do not call B3 globally optimal.
+
+======================================================================
+25. FAIRNESS / INTERACTION METRICS
+======================================================================
+
+Prepare offline result support for:
+
+AIDC_effect =
+    J_B0 - J_B1
+
+MESS_effect =
+    J_B0 - J_B2
+
+Combined_effect =
+    J_B0 - J_B3
+
+Interaction =
+    J_B3 - J_B2 - J_B1 + J_B0
+
+Do not interpret statistical significance in this implementation task.
+
+Just ensure required values are observable.
+
+======================================================================
+26. DEVELOPMENT / VALIDATION DATA FIREWALL
+======================================================================
+
+The user has already observed May results.
+
+Therefore:
+
+Do NOT use completed May J values to:
+
+- choose the coordination depth
+- tune objective weights
+- tune epsilon
+- select A1 eligibility
+- tune migration penalty
+- select route parameters
+- choose K/beam
+- choose stopping rules
+
+The coordination depth is predeclared:
+
+ONE feedback round.
+
+Use pre-May development/calibration evidence only for implementation smoke.
+
+May results may be used only for:
+
+- regression/equivalence checking of unaffected old methods
+- post-freeze final evaluation
+
+No result-based science tuning.
+
+======================================================================
+27. INITIAL IMPLEMENTATION VALIDATION
+======================================================================
+
+Do NOT immediately start the full 31-day May campaign.
+
+First run targeted tests.
+
+Then run a small pre-May development smoke on a predeclared development day
+using already-authorized April inputs.
+
+The smoke must verify:
+
+A0 PASS
+M1 PASS
+A1 PASS or accepted zero-change
+MF PASS
+
+and:
+
+Fresh after joint freeze = PASS or existing fixed-route restoration closes
+fail-closed.
+
+Do not use May results for this smoke.
+
+======================================================================
+28. REQUIRED COMPARISON SMOKE
+======================================================================
+
+For the same development day compare:
+
+OLD:
+    A0 → M1
+
+NEW:
+    A0 → M1 → A1 → MF
+
+Report:
+
+J_old
+J_new
+relative J improvement
+runtime_old
+runtime_new
+runtime ratio
+
+MESS full discrete route searches:
+
+OLD = 1
+NEW = 1
+
+This verifies that bidirectional feedback was added without multiplying the
+most expensive route-search stage.
+
+======================================================================
+29. TESTS
+======================================================================
+
+Add focused tests for:
+
+- one and only one full MESS route search
+- A1 receives M1 grid/P/Q state
+- A1 cannot change MESS route
+- MF cannot change MESS route
+- A1 terminal invariant
+- no post-H new occupancy
+- no post-H new site
+- no future reads
+- Fresh calls inside coopt loop = 0
+- final Fresh binds FINAL_JOINT_DECISION_SHA
+- Actual binds same FINAL_JOINT_DECISION_SHA
+- stage objective ledger complete
+- stage runtime ledger complete
+- monotonic acceptance
+- A1 infeasible fallback to A0
+- MF failure fail-closed
+- B0/B1/B2 regression unchanged unless an explicitly documented shared bug
+- old sequential B3 cannot be loaded as V40A B3
+
+======================================================================
+30. PRESERVE V39K TERMINAL / MIGRATION EVIDENCE
+======================================================================
+
+Historical V39K must remain intact.
+
+Do not rewrite history.
+
+The existing certified fallback count 105 remains the accepted old sequential
+production fallback accounting.
+
+Do NOT automatically assert that V40A has 105 migrations.
+
+V40A must recompute/report its own AIDC migration decisions under the new
+co-optimization formulation.
+
+Existing V39K artifacts remain provenance/history.
+
+======================================================================
+31. DO NOT MIX V39H/V39J DIAGNOSTICS INTO NEW SCIENCE
+======================================================================
+
+Preserve:
+
+V39H
+V39J
+V39K
+
+as historical lineage.
+
+Do not reuse a terminal-inconsistent V39H schedule.
+
+Do not treat the V39J 101 intermediate candidate as production authority.
+
+Terminal-safe constraints remain inherited science.
+
+======================================================================
+32. CURRENT CAMPAIGN RESULTS AFTER SCIENCE CHANGE
+======================================================================
+
+The old campaign is now:
+
+SUPERSEDED_FOR_V40A_B3_FINAL_SCIENCE
+
+Do not delete it.
+
+Do not continue it.
+
+After V40A implementation is frozen:
+
+a separate later task will decide exact B0/B1/B2 reuse and the required
+new B3 May campaign.
+
+This task must NOT automatically launch the full May campaign.
+
+======================================================================
+33. INFRASTRUCTURE
+======================================================================
+
+Preserve/fix the detached execution infrastructure.
+
+Any future V40A May campaign must:
+
+- survive Codex task termination
+- have liveness heartbeat
+- have dead-PID detection
+- have stale-heartbeat detection
+- prevent duplicate orchestrators
+- prevent duplicate date workers
+
+Do not regress the V39L infrastructure fix if already implemented.
+
+======================================================================
+34. REQUIRED V40A ARTIFACT ROOT
+======================================================================
+
+Create:
+
+dayahead/artifacts/v40a_bounded_iterative_aidc_mess_coopt/
+
+Required minimum artifacts:
+
+V40A_PRESTOP_CAMPAIGN_SNAPSHOT.json
+V40A_OLD_CAMPAIGN_PRESERVATION_MANIFEST.json
+V40A_START_STATE.json
+V40A_METHOD_CONTRACT.json
+V40A_CASE_REGISTRY.json
+V40A_AIDC_FEEDBACK_CONTRACT.json
+V40A_FIXED_ROUTE_PQ_RECOURSE_CONTRACT.json
+V40A_TERMINAL_INVARIANT_CONTRACT.json
+V40A_SAVED_DATA_SCHEMA.json
+V40A_RUNTIME_OBSERVABILITY_CONTRACT.json
+V40A_DEVELOPMENT_SMOKE_RESULT.json
+V40A_OLD_VS_NEW_RUNTIME_COMPARISON.json
+V40A_TEST_REPORT.json
+V40A_ARTIFACT_SHA256.json
+V40A_FINAL_REVIEW.md
+
+For the smoke day also save:
+
+AIDC_PASS0_DECISION.parquet
+MESS_PASS1_TRAJECTORY.parquet
+MESS_PASS1_GRID_FEEDBACK.json
+AIDC_FEEDBACK_PASS1_DECISION.parquet
+AIDC_FEEDBACK_DELTA.csv
+AIDC_FEEDBACK_GRID_RESULT.json
+MESS_FINAL_PQ_RECOURSE.parquet
+COOPT_STAGE_OBJECTIVES.json
+COOPT_RUNTIME_PROFILE.json
+COOPT_TERMINAL_AUDIT.json
+COOPT_COUPLING_SUMMARY.json
+FINAL_JOINT_DECISION.json
+
+======================================================================
+35. FINAL REVIEW — REQUIRED QUESTIONS
+======================================================================
+
+Answer explicitly:
+
+Q1.
+Was the old running May campaign fully stopped?
+
+Q2.
+Were all old completed results preserved?
+
+Q3.
+Can the old detached launcher auto-restart the old science?
+
+Q4.
+Is B3 now bidirectionally coupled?
+
+Q5.
+How many full MESS mobility-route searches occur per B3 day?
+
+Required answer target:
+1
+
+Q6.
+Does A1 directly see the grid state created by M1?
+
+Q7.
+Can A1 change MESS route/destination/departure?
+
+Required:
+NO
+
+Q8.
+Can MF change route/destination/departure?
+
+Required:
+NO
+
+Q9.
+Does Fresh participate inside the A0→M1→A1→MF loop?
+
+Required:
+NO
+
+Q10.
+Are terminal-state invariants preserved?
+
+Q11.
+Can V40A honestly be described as bounded iterative co-optimization?
+
+Q12.
+Is global joint optimality claimed?
+
+Required:
+NO
+
+Q13.
+What is the measured runtime overhead of the feedback pass?
+
+Q14.
+What is the measured J improvement of the feedback pass?
+
+Q15.
+Did the expensive MESS route-search count increase?
+
+Required:
+NO
+
+Q16.
+Is the full May V40A campaign launched?
+
+Required:
+NO
+
+======================================================================
+36. FINAL STATUS BLOCK
+======================================================================
+
+Print exactly:
+
+OLD_MAY_CAMPAIGN_STOPPED = YES/NO
+OLD_MAY_AUTO_RELAUNCH_DISABLED = YES/NO
+
+OLD_COMPLETED_RESULTS_PRESERVED = YES/NO
+OLD_B3_CLASSIFICATION =
+HISTORICAL_SEQUENTIAL_AIDC_THEN_MESS_RESULT
+
+V40A_IMPLEMENTED = YES/NO
+
+METHOD =
+BOUNDED_ITERATIVE_AIDC_MESS_CO_OPTIMIZATION
+
+B3_SEQUENCE =
+A0 -> M1_ROUTE_PQ -> A1_FEEDBACK -> MF_FIXED_ROUTE_PQ
+
+BIDIRECTIONAL_AIDC_MESS_COUPLING = YES/NO
+
+MESS_FULL_DISCRETE_ROUTE_SEARCH_CALLS = N
+SECOND_MESS_FULL_ROUTE_SEARCH_CALLS = N
+
+AIDC_FEEDBACK_PASSES = N
+FINAL_FIXED_ROUTE_PQ_RECOURSE_CALLS = N
+
+FRESH_CALLS_INSIDE_COOPT_LOOP = N
+
+TERMINAL_INVARIANT = PASS/FAIL
+POST_H_RESERVATION_PROFILE_CHANGED_JOBS = N
+POST_H_SITE_STATE_CHANGED_JOBS = N
+
+J_A0 = ...
+J_M1 = ...
+J_A1 = ...
+J_FINAL = ...
+
+DELTA_J_MESS = ...
+DELTA_J_AIDC_FEEDBACK = ...
+DELTA_J_FINAL_PQ = ...
+DELTA_J_TOTAL = ...
+
+RUNTIME_A0_SECONDS = ...
+RUNTIME_M1_SECONDS = ...
+RUNTIME_A1_SECONDS = ...
+RUNTIME_MF_SECONDS = ...
+RUNTIME_TOTAL_SECONDS = ...
+
+FINAL_JOINT_DECISION_SHA = ...
+
+B0_REGRESSION = PASS/FAIL/NOT_RUN
+B1_REGRESSION = PASS/FAIL/NOT_RUN
+B2_REGRESSION = PASS/FAIL/NOT_RUN
+
+GLOBAL_JOINT_OPTIMALITY_CLAIM = NO
+FULL_MAY_V40A_CAMPAIGN_STARTED = NO
+
+SCIENCE_CHANGED = YES
+MAY_RESULT_BASED_TUNING = 0
+
+push = NO
+PR = NO
+
+======================================================================
+END V40A
+======================================================================

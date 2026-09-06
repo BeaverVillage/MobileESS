@@ -1,0 +1,24 @@
+{
+  "required_counters": [
+    "AIDC_OPTIMIZATION_PASSES",
+    "MESS_FULL_DISCRETE_ROUTE_SEARCH_CALLS",
+    "FINAL_FIXED_ROUTE_PQ_RECOURSE_CALLS",
+    "TOTAL_GUROBI_OPTIMIZE_CALLS",
+    "TOTAL_ROUTE_CANDIDATES_EVALUATED",
+    "TOTAL_RUNTIME_SECONDS"
+  ],
+  "required_stages": [
+    "RSP_base_materialization",
+    "A0",
+    "M1_route_candidate_search",
+    "M1_full_MILP",
+    "A1",
+    "MF",
+    "Planning_verification",
+    "Fresh",
+    "AC_restoration",
+    "Total"
+  ],
+  "route_search_count_unit": "ONE_FULL_FLEET_SEARCH_CAMPAIGN; internal vehicle/candidate/MILP calls reported separately",
+  "solver_accounting": "per-process optimize completion events, including beam workers"
+}

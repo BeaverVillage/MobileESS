@@ -1,0 +1,83 @@
+{
+  "candidate_comparison_authorized": true,
+  "ceil_coverage": 0.710204081632653,
+  "fallback": "sparse MoE route uses fitted pooled fallback; missing mandatory request input uses requested-walltime scheduler fallback",
+  "features": [
+    "requested_seconds",
+    "num_nodes_req",
+    "num_cores_req",
+    "num_gpus_req",
+    "requested_memory_mib",
+    "partition",
+    "qos",
+    "user",
+    "account"
+  ],
+  "prediction_bytes_identical": true,
+  "prediction_max_abs_difference": 0.0,
+  "q_seconds": 5576.44921875,
+  "query_adapter_equivalence": {
+    "PASS": true,
+    "exact_query_key_correspondence": true,
+    "feature_order": [
+      "num_cores_req",
+      "num_gpus_req",
+      "num_nodes_req",
+      "requested_memory_mib",
+      "requested_seconds",
+      "account",
+      "partition",
+      "qos",
+      "user"
+    ],
+    "prediction_max_abs_difference": 0.0,
+    "prediction_tolerance": 1e-09,
+    "rows": 245,
+    "same_feature_policy": true,
+    "same_preprocessing": true,
+    "same_query_rows": true,
+    "same_routing": true,
+    "same_training_rows": true,
+    "window": "2025-03-22T14:00:00Z"
+  },
+  "recipe": {
+    "enable_power_users": false,
+    "model_id": "model.job_runtime_moe_xgboost",
+    "model_version": "0.1.0",
+    "n_windows": 120,
+    "objective": "reg:absoluteerror",
+    "recipe_id": "recipe.job_runtime.kestrel_moe_best_rolling",
+    "test_window_hours": 6,
+    "time_decay_rate": 0.05,
+    "training_lookback_days": 120,
+    "xgboost_version": "3.2.0"
+  },
+  "reference_file_sha256": "7d11dbd0150c925e1a1987476b7f8a0a253b5e454d5fab8e32d3590b040f3d2a",
+  "reference_metrics": {
+    "MAE_seconds": 23883.485913825523,
+    "P95_AE_seconds": 137935.41816406246,
+    "RMSE_seconds": 52971.17991847005,
+    "finite": true,
+    "median_AE_seconds": 1428.053466796875,
+    "rows": 245,
+    "underprediction_rate": 0.4775510204081633
+  },
+  "reference_prediction_sha256": "7da92c9e336ce3c9abe0a7e4d29ef48c52839c48761b8d70667827044f5c0c15",
+  "reproduced_metrics": {
+    "MAE_seconds": 23883.485913825523,
+    "P95_AE_seconds": 137935.41816406246,
+    "RMSE_seconds": 52971.17991847005,
+    "finite": true,
+    "median_AE_seconds": 1428.053466796875,
+    "rows": 245,
+    "underprediction_rate": 0.4775510204081633
+  },
+  "reproduced_prediction_sha256": "7da92c9e336ce3c9abe0a7e4d29ef48c52839c48761b8d70667827044f5c0c15",
+  "safe_coverage": 0.7061224489795919,
+  "safe_formula": "min(requested_seconds,max(point+q,900)); then max(1,ceil(safe/900))",
+  "scope": "exact current algorithm and archived pre-May window; no frozen May prediction consulted",
+  "status": "PASS",
+  "support": "current MoE min_expert_rows=100; no V40J support guard retrofitted",
+  "training_input_sha256": "2a8cf4ac8f86a30d0a7dcf999e2064316b556194f8bbc291f09cc85a2d7e101f",
+  "window": "2025-03-22T14:00:00Z/2025-03-22T20:00:00Z"
+}

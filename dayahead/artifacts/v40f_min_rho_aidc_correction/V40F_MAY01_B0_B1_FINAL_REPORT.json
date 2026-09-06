@@ -1,0 +1,627 @@
+{
+  "Actual_run_ids": {
+    "B0": "b03bbb41-ca4c-4c09-a435-c98034016d42",
+    "B1": "167e12b9-6e15-427e-a644-9f95c6b91330"
+  },
+  "Actual_runtime_service_equivalence": {
+    "ACTUAL_SERVICE_EQUIVALENCE": "PASS",
+    "GPU_hours_definition": "Exact execution seconds times requested GPU / 3600. GPU_slot_hours separately uses 15-minute sampled occupancy and drives frozen power.",
+    "asymmetric_clipping_count": 0,
+    "backlog_is_subset_of_postH_remaining_do_not_add_twice": true,
+    "boundary_convention": "Half-open [D00,H); full service also includes observed pre-issue RUNNING history. Unstarted UNASSIGNED post-H service stays in remaining/backlog; no site or execution time is invented.",
+    "case_specific_runtime_count": 0,
+    "cases": [
+      {
+        "Dday_GPU_hours": 7771.135833333334,
+        "Dday_GPU_slot_hours": 7866.5,
+        "Dday_IT_energy_kWh": 5868.5807203569575,
+        "Dday_PCC_energy_kWh": 7303.480164321923,
+        "PENDING_end_exact_identity_checked_count": 887,
+        "PENDING_end_exact_identity_failure_count": 0,
+        "PENDING_shifted_start_from_historical_count": 887,
+        "actual_start_delay_denominator": 887,
+        "actual_start_delay_max_seconds_assigned_pending_including_postH": 900.0,
+        "actual_start_delay_max_seconds_started_by_H": 900.0,
+        "actual_start_delay_mean_seconds_assigned_pending_including_postH": 1.0146561443066517,
+        "actual_start_delay_mean_seconds_started_by_H": 1.0146561443066517,
+        "actual_start_delay_started_by_H_denominator": 887,
+        "backlog_GPU_hours_at_H": 9591.534444444445,
+        "boundary_crossing_unique_job_count": 364,
+        "case": "B0",
+        "completed_jobs_by_H": 965,
+        "crosses_D00_job_count": 218,
+        "crosses_H_job_count": 176,
+        "full_population_service_GPU_hours": 35639.25361111111,
+        "job_count": 1649,
+        "never_started_postH_backlog_job_count": 508,
+        "postH_GPU_hours": 13025.146388888888,
+        "pre_D00_GPU_hours": 14842.971388888887,
+        "service_conservation_max_error_seconds": 0.0,
+        "sum_realized_runtime_seconds": 75775583.0,
+        "unfinished_jobs_at_H": 684
+      },
+      {
+        "Dday_GPU_hours": 7797.0569444444445,
+        "Dday_GPU_slot_hours": 7894.5,
+        "Dday_IT_energy_kWh": 5883.916989809506,
+        "Dday_PCC_energy_kWh": 7318.816433787811,
+        "PENDING_end_exact_identity_checked_count": 887,
+        "PENDING_end_exact_identity_failure_count": 0,
+        "PENDING_shifted_start_from_historical_count": 887,
+        "actual_start_delay_denominator": 887,
+        "actual_start_delay_max_seconds_assigned_pending_including_postH": 900.0,
+        "actual_start_delay_max_seconds_started_by_H": 900.0,
+        "actual_start_delay_mean_seconds_assigned_pending_including_postH": 1.0146561443066517,
+        "actual_start_delay_mean_seconds_started_by_H": 1.0146561443066517,
+        "actual_start_delay_started_by_H_denominator": 887,
+        "backlog_GPU_hours_at_H": 9591.534444444445,
+        "boundary_crossing_unique_job_count": 355,
+        "case": "B1",
+        "completed_jobs_by_H": 974,
+        "crosses_D00_job_count": 218,
+        "crosses_H_job_count": 167,
+        "full_population_service_GPU_hours": 35639.25361111111,
+        "job_count": 1649,
+        "never_started_postH_backlog_job_count": 508,
+        "postH_GPU_hours": 12999.225277777778,
+        "pre_D00_GPU_hours": 14842.971388888887,
+        "service_conservation_max_error_seconds": 0.0,
+        "sum_realized_runtime_seconds": 75775583.0,
+        "unfinished_jobs_at_H": 675
+      }
+    ],
+    "classification_service_axis": "C. HORIZON_BOUNDARY_REDISTRIBUTION",
+    "deltas_B1_minus_B0": {
+      "Delta_Dday_GPU_h": 25.92111111111111,
+      "Delta_Dday_GPU_slot_h": 28.0,
+      "Delta_postH_GPU_h": -25.921111111111113,
+      "Delta_pre_D00_GPU_h": 0.0,
+      "Delta_slot_minus_exact_GPU_h": 2.0788888888888906,
+      "delta_partition_balance_GPU_h": -2.609024107869118e-15
+    },
+    "duplicated_execution_count": 0,
+    "full_campaign_authorized": false,
+    "historical_absolute_end_combined_with_shifted_start_count": 0,
+    "missing_service_accounting_count": 0,
+    "observations": {
+      "bytes": 429570,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40d_actual_realized_replay\\V40D_FROZEN_JOB_OBSERVATIONS.parquet",
+      "sha256": "3f6053f660e76bcd724e88278da1e6fe23442876af625cedd6ddf046f06fc6e4"
+    },
+    "overall_classification_requires_power_scale_and_same_exogenous_audit": true,
+    "same_job_uid_population": true,
+    "same_realized_runtime_each_job": true,
+    "same_requested_GPU_each_job": true,
+    "scientific_performance_interpretation_authorized": false,
+    "sources": {
+      "B0": [
+        {
+          "bytes": 106600,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40f_min_rho_aidc_correction\\smoke\\2025-05-01\\B0\\job_ledger.parquet",
+          "sha256": "34f6852a147b275537f8a2b5c41f1bee0984e4bd95e13216bae95ab78863e3c4"
+        },
+        {
+          "bytes": 14417,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40f_min_rho_aidc_correction\\smoke\\2025-05-01\\B0\\job_GPU_contributions.parquet",
+          "sha256": "f3aba30348c7a2f05ea95c10c3ae346e7989273226f484b501432983d6e31525"
+        },
+        {
+          "bytes": 23696,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40f_min_rho_aidc_correction\\smoke\\2025-05-01\\B0\\aidc_site_timeseries.parquet",
+          "sha256": "4275361b4c4493ed95df5b84488eea74284eb1339384a4796fa692b13b669bc2"
+        }
+      ],
+      "B1": [
+        {
+          "bytes": 106368,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40f_min_rho_aidc_correction\\smoke\\2025-05-01\\B1\\job_ledger.parquet",
+          "sha256": "9baab6e9cab9d0d201845e6546801378cdc6a70b4cb698f90ff804d7b781b744"
+        },
+        {
+          "bytes": 14415,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40f_min_rho_aidc_correction\\smoke\\2025-05-01\\B1\\job_GPU_contributions.parquet",
+          "sha256": "f7e3e8002d25bae8a9c4bac1f0c0a13b4d293852dcbb9f75343a384b66b9654f"
+        },
+        {
+          "bytes": 23534,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40f_min_rho_aidc_correction\\smoke\\2025-05-01\\B1\\aidc_site_timeseries.parquet",
+          "sha256": "85a60f71c05f732e0fcc68ae380ea7b262b83e760bb21b4b7eafc60ae4792858"
+        }
+      ]
+    }
+  },
+  "B0_B2_AIDC_REFERENCE_IDENTITY": "PASS",
+  "B0_REFERENCE_IN_COMMON_DOMAIN": "PASS",
+  "B1_B3_A0_IDENTITY": "PASS",
+  "B1_MESS_ENABLED": "NO",
+  "B1_PLANNING_NONWORSENING": "PASS",
+  "B1_PRIMARY_OBJECTIVE": "MIN_RHO_MAX",
+  "B1_SECONDARY_OBJECTIVE": "MIN_DEVIATION_FROM_B0",
+  "B1_critical_coordinate_comparison": {
+    "B0_rho": 0.5892357967005808,
+    "B1_rho": 0.5886722465241153,
+    "line": "line.sw2",
+    "phase": "A",
+    "sites": [
+      {
+        "B0_GPU_capacity": 64,
+        "B0_P_IT_kW": 39.529719114056974,
+        "B0_P_PCC_kW": 44.51200886181531,
+        "B0_Q_PCC_kvar": 14.630389802459394,
+        "B0_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B0_observed_rh_pct": 71.63697259241056,
+        "B0_observed_t_wb_c": 10.355402735254732,
+        "B0_occupied_GPU": 60,
+        "B1_GPU_capacity": 64,
+        "B1_P_IT_kW": 39.529719114056974,
+        "B1_P_PCC_kW": 44.51200886181531,
+        "B1_Q_PCC_kvar": 14.630389802459394,
+        "B1_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B1_observed_rh_pct": 71.63697259241056,
+        "B1_observed_t_wb_c": 10.355402735254732,
+        "B1_occupied_GPU": 60,
+        "Delta_P_PCC_kW": 0.0,
+        "Delta_Q_PCC_kvar": 0.0,
+        "Delta_occupied_GPU": 0,
+        "site_id": "AIDC01"
+      },
+      {
+        "B0_GPU_capacity": 32,
+        "B0_P_IT_kW": 13.739896557813111,
+        "B0_P_PCC_kW": 18.722186287070834,
+        "B0_Q_PCC_kvar": 6.15368504675786,
+        "B0_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B0_observed_rh_pct": 71.63697259241056,
+        "B0_observed_t_wb_c": 10.355402735254732,
+        "B0_occupied_GPU": 19,
+        "B1_GPU_capacity": 32,
+        "B1_P_IT_kW": 11.549000921734793,
+        "B1_P_PCC_kW": 16.53129065096752,
+        "B1_Q_PCC_kvar": 5.433572475064967,
+        "B1_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B1_observed_rh_pct": 71.63697259241056,
+        "B1_observed_t_wb_c": 10.355402735254732,
+        "B1_occupied_GPU": 15,
+        "Delta_P_PCC_kW": -2.1908956361033134,
+        "Delta_Q_PCC_kvar": -0.7201125716928933,
+        "Delta_occupied_GPU": -4,
+        "site_id": "AIDC02"
+      },
+      {
+        "B0_GPU_capacity": 64,
+        "B0_P_IT_kW": 23.645725752489167,
+        "B0_P_PCC_kW": 28.628015482255,
+        "B0_Q_PCC_kvar": 9.409573651831627,
+        "B0_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B0_observed_rh_pct": 71.63697259241056,
+        "B0_observed_t_wb_c": 10.355402735254732,
+        "B0_occupied_GPU": 31,
+        "B1_GPU_capacity": 64,
+        "B1_P_IT_kW": 21.454830116410847,
+        "B1_P_PCC_kW": 26.437119845958115,
+        "B1_Q_PCC_kvar": 8.689461080075109,
+        "B1_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B1_observed_rh_pct": 71.63697259241056,
+        "B1_observed_t_wb_c": 10.355402735254732,
+        "B1_occupied_GPU": 27,
+        "Delta_P_PCC_kW": -2.1908956362968866,
+        "Delta_Q_PCC_kvar": -0.720112571756518,
+        "Delta_occupied_GPU": -4,
+        "site_id": "AIDC03"
+      },
+      {
+        "B0_GPU_capacity": 32,
+        "B0_P_IT_kW": 18.66941173898933,
+        "B0_P_PCC_kW": 23.65170146837447,
+        "B0_Q_PCC_kvar": 7.773938333090268,
+        "B0_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B0_observed_rh_pct": 71.63697259241056,
+        "B0_observed_t_wb_c": 10.355402735254732,
+        "B0_occupied_GPU": 28,
+        "B1_GPU_capacity": 32,
+        "B1_P_IT_kW": 18.66941173898933,
+        "B1_P_PCC_kW": 23.65170146837447,
+        "B1_Q_PCC_kvar": 7.773938333090268,
+        "B1_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B1_observed_rh_pct": 71.63697259241056,
+        "B1_observed_t_wb_c": 10.355402735254732,
+        "B1_occupied_GPU": 28,
+        "Delta_P_PCC_kW": 0.0,
+        "Delta_Q_PCC_kvar": 0.0,
+        "Delta_occupied_GPU": 0,
+        "site_id": "AIDC04"
+      },
+      {
+        "B0_GPU_capacity": 80,
+        "B0_P_IT_kW": 30.24181207688593,
+        "B0_P_PCC_kW": 35.22410180850892,
+        "B0_Q_PCC_kvar": 11.577602383658931,
+        "B0_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B0_observed_rh_pct": 71.63697259241056,
+        "B0_observed_t_wb_c": 10.355402735254732,
+        "B0_occupied_GPU": 40,
+        "B1_GPU_capacity": 80,
+        "B1_P_IT_kW": 29.146364258846774,
+        "B1_P_PCC_kW": 34.12865398995149,
+        "B1_Q_PCC_kvar": 11.217546097646244,
+        "B1_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B1_observed_rh_pct": 71.63697259241056,
+        "B1_observed_t_wb_c": 10.355402735254732,
+        "B1_occupied_GPU": 38,
+        "Delta_P_PCC_kW": -1.0954478185574317,
+        "Delta_Q_PCC_kvar": -0.36005628601268747,
+        "Delta_occupied_GPU": -2,
+        "site_id": "AIDC05"
+      },
+      {
+        "B0_GPU_capacity": 64,
+        "B0_P_IT_kW": 32.957032205822024,
+        "B0_P_PCC_kW": 37.93932193941855,
+        "B0_Q_PCC_kvar": 12.470052082750598,
+        "B0_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B0_observed_rh_pct": 71.63697259241056,
+        "B0_observed_t_wb_c": 10.355402735254732,
+        "B0_occupied_GPU": 48,
+        "B1_GPU_capacity": 64,
+        "B1_P_IT_kW": 32.957032205822024,
+        "B1_P_PCC_kW": 37.93932193941855,
+        "B1_Q_PCC_kvar": 12.470052082750598,
+        "B1_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B1_observed_rh_pct": 71.63697259241056,
+        "B1_observed_t_wb_c": 10.355402735254732,
+        "B1_occupied_GPU": 48,
+        "Delta_P_PCC_kW": 0.0,
+        "Delta_Q_PCC_kvar": 0.0,
+        "Delta_occupied_GPU": 0,
+        "site_id": "AIDC06"
+      },
+      {
+        "B0_GPU_capacity": 32,
+        "B0_P_IT_kW": 18.12168782996975,
+        "B0_P_PCC_kW": 23.10397755933308,
+        "B0_Q_PCC_kvar": 7.59391019016193,
+        "B0_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B0_observed_rh_pct": 71.63697259241056,
+        "B0_observed_t_wb_c": 10.355402735254732,
+        "B0_occupied_GPU": 27,
+        "B1_GPU_capacity": 32,
+        "B1_P_IT_kW": 18.12168782996975,
+        "B1_P_PCC_kW": 23.10397755933308,
+        "B1_Q_PCC_kvar": 7.59391019016193,
+        "B1_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B1_observed_rh_pct": 71.63697259241056,
+        "B1_observed_t_wb_c": 10.355402735254732,
+        "B1_occupied_GPU": 27,
+        "Delta_P_PCC_kW": 0.0,
+        "Delta_Q_PCC_kvar": 0.0,
+        "Delta_occupied_GPU": 0,
+        "site_id": "AIDC07"
+      },
+      {
+        "B0_GPU_capacity": 64,
+        "B0_P_IT_kW": 14.33441929915631,
+        "B0_P_PCC_kW": 19.31670902842315,
+        "B0_Q_PCC_kvar": 6.3490952220077315,
+        "B0_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B0_observed_rh_pct": 71.63697259241056,
+        "B0_observed_t_wb_c": 10.355402735254732,
+        "B0_occupied_GPU": 14,
+        "B1_GPU_capacity": 64,
+        "B1_P_IT_kW": 14.33441929915631,
+        "B1_P_PCC_kW": 19.31670902842315,
+        "B1_Q_PCC_kvar": 6.3490952220077315,
+        "B1_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B1_observed_rh_pct": 71.63697259241056,
+        "B1_observed_t_wb_c": 10.355402735254732,
+        "B1_occupied_GPU": 14,
+        "Delta_P_PCC_kW": 0.0,
+        "Delta_Q_PCC_kvar": 0.0,
+        "Delta_occupied_GPU": 0,
+        "site_id": "AIDC08"
+      },
+      {
+        "B0_GPU_capacity": 32,
+        "B0_P_IT_kW": 6.071761831538996,
+        "B0_P_PCC_kW": 11.05405156074335,
+        "B0_Q_PCC_kvar": 3.633291045843944,
+        "B0_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B0_observed_rh_pct": 71.63697259241056,
+        "B0_observed_t_wb_c": 10.355402735254732,
+        "B0_occupied_GPU": 5,
+        "B1_GPU_capacity": 32,
+        "B1_P_IT_kW": 6.071761831538996,
+        "B1_P_PCC_kW": 11.05405156074335,
+        "B1_Q_PCC_kvar": 3.633291045843944,
+        "B1_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B1_observed_rh_pct": 71.63697259241056,
+        "B1_observed_t_wb_c": 10.355402735254732,
+        "B1_occupied_GPU": 5,
+        "Delta_P_PCC_kW": 0.0,
+        "Delta_Q_PCC_kvar": 0.0,
+        "Delta_occupied_GPU": 0,
+        "site_id": "AIDC09"
+      },
+      {
+        "B0_GPU_capacity": 64,
+        "B0_P_IT_kW": 32.40930829680244,
+        "B0_P_PCC_kW": 37.391598029901324,
+        "B0_Q_PCC_kvar": 12.290023939665861,
+        "B0_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B0_observed_rh_pct": 71.63697259241056,
+        "B0_observed_t_wb_c": 10.355402735254732,
+        "B0_occupied_GPU": 47,
+        "B1_GPU_capacity": 64,
+        "B1_P_IT_kW": 31.861584387782862,
+        "B1_P_PCC_kW": 36.84387412044033,
+        "B1_Q_PCC_kvar": 12.109995796599607,
+        "B1_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B1_observed_rh_pct": 71.63697259241056,
+        "B1_observed_t_wb_c": 10.355402735254732,
+        "B1_occupied_GPU": 46,
+        "Delta_P_PCC_kW": -0.5477239094609914,
+        "Delta_Q_PCC_kvar": -0.18002814306625403,
+        "Delta_occupied_GPU": -1,
+        "site_id": "AIDC10"
+      },
+      {
+        "B0_GPU_capacity": 32,
+        "B0_P_IT_kW": 15.38306828487185,
+        "B0_P_PCC_kW": 20.365358014157977,
+        "B0_Q_PCC_kvar": 6.693769475530705,
+        "B0_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B0_observed_rh_pct": 71.63697259241056,
+        "B0_observed_t_wb_c": 10.355402735254732,
+        "B0_occupied_GPU": 22,
+        "B1_GPU_capacity": 32,
+        "B1_P_IT_kW": 15.38306828487185,
+        "B1_P_PCC_kW": 20.365358014157977,
+        "B1_Q_PCC_kvar": 6.693769475530705,
+        "B1_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B1_observed_rh_pct": 71.63697259241056,
+        "B1_observed_t_wb_c": 10.355402735254732,
+        "B1_occupied_GPU": 22,
+        "Delta_P_PCC_kW": 0.0,
+        "Delta_Q_PCC_kvar": 0.0,
+        "Delta_occupied_GPU": 0,
+        "site_id": "AIDC11"
+      },
+      {
+        "B0_GPU_capacity": 64,
+        "B0_P_IT_kW": 37.88654738699824,
+        "B0_P_PCC_kW": 42.86883712914765,
+        "B0_Q_PCC_kvar": 14.090305371852322,
+        "B0_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B0_observed_rh_pct": 71.63697259241056,
+        "B0_observed_t_wb_c": 10.355402735254732,
+        "B0_occupied_GPU": 57,
+        "B1_GPU_capacity": 64,
+        "B1_P_IT_kW": 37.88654738699824,
+        "B1_P_PCC_kW": 42.86883712914765,
+        "B1_Q_PCC_kvar": 14.090305371852322,
+        "B1_field_role": "ACTUAL_EXECUTION_ONLY",
+        "B1_observed_rh_pct": 71.63697259241056,
+        "B1_observed_t_wb_c": 10.355402735254732,
+        "B1_occupied_GPU": 57,
+        "Delta_P_PCC_kW": 0.0,
+        "Delta_Q_PCC_kvar": 0.0,
+        "Delta_occupied_GPU": 0,
+        "site_id": "AIDC12"
+      }
+    ],
+    "slot": 73
+  },
+  "B2_B3_AUTHORIZED": "NO",
+  "B2_B3_EXECUTED": false,
+  "COMMON_DURATION_IDENTITY": "PASS",
+  "CORRECTION_TYPE": "IMPLEMENTATION_DEFECT_CORRECTION",
+  "FULL_MAY_AUTHORIZED": "NO",
+  "FULL_MAY_EXECUTED": false,
+  "INVALIDATED_OLD_IMPLEMENTATION": [
+    "BACKGROUND_LOAD_MAPPING_DEFECT",
+    "AIDC_OBJECTIVE_IMPLEMENTATION_DEFECT"
+  ],
+  "REFERENCE_CANDIDATE_INCLUDED": "PASS",
+  "UNASSIGNED_44_case_blocker": "PRESERVED",
+  "ZERO_FEASIBILITY_FINAL_OBJECTIVE": "NO",
+  "common_service": {
+    "B0_B1_COMMON_SERVICE_IDENTITY": "PASS",
+    "B0_B1_DURATION_AUTHORITY_IDENTITY": "PASS",
+    "B0_B2_DURATION_AUTHORITY_IDENTITY": "PASS",
+    "B0_Planning_J": 0.5985767372289207,
+    "B0_REFERENCE_IN_COMMON_DOMAIN": "PASS",
+    "B1_B3_A0_DURATION_AUTHORITY_IDENTITY": "PASS",
+    "B1_min_rho_started": false,
+    "B2_B3_AUTHORIZED": "NO",
+    "COMMON_DA_DURATION_SHA": "2f241ec63646ebec23bad86ac69b8b92d7c9daa9f2771b7c80b0eecfafab40f1",
+    "COMMON_DA_DURATION_SOURCE": {
+      "bytes": 39340,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-01\\V37_R4A_JOB_LEDGER.parquet",
+      "sha256": "c4176c2d5d02d4d2d6661fe6a896917182bf4a8f025e3dadddbc55fec1aac201"
+    },
+    "COMMON_DURATION_IDENTITY": "PASS",
+    "FULL_MAY_AUTHORIZED": "NO",
+    "RW_vs_RSP_duration_difference_count": 1395,
+    "case_common_services": [
+      "job_uid",
+      "requested_GPU",
+      "state_at_issue",
+      "qos",
+      "T_DA",
+      "terminal_obligation"
+    ],
+    "case_dependent_duration_count_after_correction": 0,
+    "case_service_SHA": {
+      "B0": "2f241ec63646ebec23bad86ac69b8b92d7c9daa9f2771b7c80b0eecfafab40f1",
+      "B1": "2f241ec63646ebec23bad86ac69b8b92d7c9daa9f2771b7c80b0eecfafab40f1",
+      "B2": "2f241ec63646ebec23bad86ac69b8b92d7c9daa9f2771b7c80b0eecfafab40f1",
+      "B3": "2f241ec63646ebec23bad86ac69b8b92d7c9daa9f2771b7c80b0eecfafab40f1"
+    },
+    "common_authority_file": {
+      "bytes": 760303,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40f_min_rho_aidc_correction\\common_service\\COMMON_DA_SERVICE_AUTHORITY.json",
+      "sha256": "5265763cc789fa1853b134d47e32952414a22ac5cdae57d4b92d32c140536b5d"
+    },
+    "failures": [],
+    "job_count": 1649,
+    "reference_start_site_inherited_state_preserved": true,
+    "reported_to_user_before_solve": true,
+    "terminal_baseline": "COMMON_B0_REFERENCE, not RSP"
+  },
+  "complete_reference_selected": false,
+  "critical_metrics": {
+    "B0": {
+      "Vmax": 1.0499176635287233,
+      "Vmin": 0.979785676484775,
+      "critical_current_A": 246.3005630208428,
+      "critical_line": "line.sw2",
+      "critical_phase": "A",
+      "critical_slot": 73,
+      "critical_time": "18:15",
+      "losses_kWh": 839.0035789836909,
+      "rho": 0.5892357967005808,
+      "source": {
+        "bytes": 848802,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40f_min_rho_aidc_correction\\smoke\\2025-05-01\\B0\\actual_grid\\OPENDSS_PHASE_ARRAYS.npz",
+        "sha256": "0897b8516d849924b4bd9474e9651e8e2af9677e2e5f9e22247c7544c9905844"
+      },
+      "voltage_violations": 0
+    },
+    "B1": {
+      "Vmax": 1.0499176635287233,
+      "Vmin": 0.979785676484775,
+      "critical_current_A": 246.0649990470802,
+      "critical_line": "line.sw2",
+      "critical_phase": "A",
+      "critical_slot": 73,
+      "critical_time": "18:15",
+      "losses_kWh": 838.9485626837106,
+      "rho": 0.5886722465241153,
+      "source": {
+        "bytes": 848725,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40f_min_rho_aidc_correction\\smoke\\2025-05-01\\B1\\actual_grid\\OPENDSS_PHASE_ARRAYS.npz",
+        "sha256": "af73903e0f8f664741f843f0a22b6b3cee8bd0214e003f838020b0fcdc455c46"
+      },
+      "voltage_violations": 0
+    }
+  },
+  "decision_delta": {
+    "MIGRATION_CHANGED_JOB_COUNT": 0,
+    "SITE_CHANGED_JOB_COUNT": 0,
+    "START_ADVANCED_JOB_COUNT": 72,
+    "START_CHANGED_JOB_COUNT": 72,
+    "START_DELAYED_JOB_COUNT": 0
+  },
+  "method": "COMMON_SERVICE_MIN_RHO_AIDC",
+  "next_action": "MAY01_B0_B1_COMPLETE_PENDING_ACCEPTANCE_BEFORE_B2_B3",
+  "primary_bound": 0.5920473944907508,
+  "primary_optimum_incumbent": 0.5920473944907508,
+  "primary_tolerance": 1e-06,
+  "protected_artifact_checks": {
+    "Planning_Fresh": {
+      "diff_count": 0,
+      "files": 4346
+    },
+    "V40E": {
+      "diff_count": 0,
+      "files": 212
+    }
+  },
+  "results": {
+    "Actual": {
+      "B0": 0.5892357967005808,
+      "B1": 0.5886722465241153,
+      "Delta_B0_minus_B1": 0.0005635501764654771
+    },
+    "Fresh": {
+      "B0": 0.5988178982252748,
+      "B1": 0.5921962032844279,
+      "Delta_B0_minus_B1": 0.006621694940846856
+    },
+    "Planning": {
+      "B0": 0.5985767372289207,
+      "B1": 0.5920481995850182,
+      "Delta_B0_minus_B1": 0.006528537643902488
+    }
+  },
+  "same_exogenous": [
+    {
+      "background_PQ_PV_mapping_ratings_exact_equal": true,
+      "namespace": "Fresh",
+      "native_controls_exact_equal": true,
+      "non_AIDC_input_difference_count": 0
+    },
+    {
+      "background_PQ_PV_mapping_ratings_exact_equal": true,
+      "namespace": "Actual",
+      "native_controls_exact_equal": true,
+      "non_AIDC_input_difference_count": 0
+    }
+  ],
+  "secondary_reference_deviation_GPU_slots": 992,
+  "solver_stages": [
+    {
+      "OPTIMAL": false,
+      "bound": 0.5920473944907508,
+      "incumbent": 0.5920587057876328,
+      "runtime_seconds": 24.657999992370605,
+      "solutions": 8,
+      "stage": "PRIMARY_MIN_RHO",
+      "status": 16,
+      "work": 61.50281897769604
+    },
+    {
+      "OPTIMAL": true,
+      "bound": 0.5920473944907508,
+      "incumbent": 0.5920473944907508,
+      "runtime_seconds": 6.087000131607056,
+      "solutions": 10,
+      "stage": "PRIMARY_MIN_RHO_PROOF_WORK_180",
+      "status": 2,
+      "work": 8.99955618142157
+    },
+    {
+      "OPTIMAL": true,
+      "bound": 992.0,
+      "incumbent": 992.0,
+      "runtime_seconds": 28.45799994468689,
+      "solutions": 6,
+      "stage": "SECONDARY_RW_OCCUPANCY_DEVIATION",
+      "status": 2,
+      "work": 33.9646926170886
+    },
+    {
+      "OPTIMAL": true,
+      "bound": 6189564.0,
+      "incumbent": 6189564.0,
+      "runtime_seconds": 16.121999979019165,
+      "solutions": 5,
+      "stage": "TERTIARY_STABLE_TIE",
+      "status": 2,
+      "work": 17.769254340364434
+    }
+  ],
+  "status": "COMPLETE",
+  "superseded_mixed_duration_development_attempt": "REJECTED_NO_FINAL_RESULT",
+  "terminal_audit": {
+    "POST_H_RESERVATION_PROFILE_CHANGED_JOBS": 0,
+    "POST_H_SITE_STATE_CHANGED_JOBS": 0,
+    "REPAIR_INDUCED_INCREMENTAL_POST_MIDNIGHT_GPU_H": 0.0,
+    "safe_runtime_GPU_state_qos_preserved": true,
+    "status": "PASS"
+  },
+  "final_execution_source_lineage": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40f_min_rho_aidc_correction\\V40F_FINAL_EXECUTION_SOURCE_LINEAGE.json",
+    "sha256": "8b0a032e1fdcec86fc0f8abb3f16fa36f6b659424b4cc10f61a0c169b42b6248"
+  },
+  "historical_invalidation_status": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40f_min_rho_aidc_correction\\V40F_HISTORICAL_INVALIDATION_STATUS.json",
+    "sha256": "ccfa68c98b1f6ff3bd6a80a30dcdb60c764e12574132426d01eed793a8d08049"
+  },
+  "validation": {
+    "command": "python -m pytest tests/dayahead/test_v40f_min_rho.py tests/dayahead/test_v40a_grid.py tests/dayahead/test_v40a_invariants.py -q",
+    "passed": 26,
+    "failed": 0
+  },
+  "common_service_record_semantics": "Embedded common_service is the preserved pre-solve preflight snapshot; B1_min_rho_started=False refers to that earlier boundary. Final execution status is COMPLETE.",
+  "B0_B2_and_B1_B3_identity_scope": "Static frozen AIDC authority/decision identity only; B2/B3 physical execution has not run."
+}

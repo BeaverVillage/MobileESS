@@ -1,0 +1,5 @@
+from pathlib import Path
+import sys
+REPO=Path(__file__).resolve().parents[2];sys.path.insert(0,str(REPO))
+from dayahead.v40e.electrical import main
+if __name__=='__main__':main(REPO)

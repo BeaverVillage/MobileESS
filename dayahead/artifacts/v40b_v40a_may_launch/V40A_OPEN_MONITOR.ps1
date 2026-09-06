@@ -1,0 +1,2 @@
+$m=Start-Process -FilePath powershell.exe -ArgumentList @('-NoProfile','-NoExit','-ExecutionPolicy','Bypass','-File','C:\codex_mobileess_workspace\MobileESS_v40a_bounded_iterative_coopt\dayahead\tools\monitor_v40a_may_campaign.ps1') -WindowStyle Normal -PassThru
+@{pid=$m.Id;started_at_utc=[DateTime]::UtcNow.ToString('o');launcher_pid=$PID;detached_parent='Task Scheduler'} | ConvertTo-Json | Set-Content -LiteralPath 'C:\codex_mobileess_workspace\MobileESS_v40a_bounded_iterative_coopt\dayahead\artifacts\v40b_v40a_may_launch\V40B_MONITOR_LAUNCH.json' -Encoding UTF8

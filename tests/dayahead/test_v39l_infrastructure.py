@@ -85,15 +85,9 @@ def test_current_v39k_binding_is_exact() -> None:
 
 
 def test_v39l_infrastructure_does_not_invalidate_frozen_preflight() -> None:
-    from dayahead.v39e.temporal_refreeze import source_fingerprint
+    from dayahead.v39e.temporal_refreeze import load_ready_refreeze
 
-    authority = json.loads(
-        (
-            REPO
-            / "dayahead/artifacts/v39h_production_refreeze_may_close"
-            / "PRODUCTION_REFREEZE_AUTHORITY.json"
-        ).read_text(encoding="utf-8")
+    preflight = load_ready_refreeze(REPO)
+    assert (preflight["status"], preflight["READY"], preflight["NOT_READY"], preflight["missing"]) == (
+        "PASS", 31, 0, 0,
     )
-    _inputs, fingerprint = source_fingerprint(REPO)
-    assert authority["status"] == "PASS"
-    assert fingerprint == authority["implementation_fingerprint_sha256"]

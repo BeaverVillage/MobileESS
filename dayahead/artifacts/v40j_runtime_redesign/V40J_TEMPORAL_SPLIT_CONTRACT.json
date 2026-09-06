@@ -1,0 +1,65 @@
+{
+  "calibration_rule": "submit in calibration block and end_time known before following validation/shadow issue",
+  "censoring": "unknown/late end is excluded from complete-case metrics and counted; no future runtime computed",
+  "final_calibration": [
+    "2025-03-08",
+    "2025-04-01"
+  ],
+  "final_fit_before": "2025-03-08",
+  "final_shadow": [
+    "2025-04-24",
+    "2025-05-01"
+  ],
+  "folds": [
+    {
+      "calibration": [
+        "2025-02-08",
+        "2025-02-15"
+      ],
+      "fit_before": "2025-02-08",
+      "id": "F1",
+      "validation": [
+        "2025-02-15",
+        "2025-02-22"
+      ]
+    },
+    {
+      "calibration": [
+        "2025-02-15",
+        "2025-02-22"
+      ],
+      "fit_before": "2025-02-15",
+      "id": "F2",
+      "validation": [
+        "2025-02-22",
+        "2025-03-01"
+      ]
+    },
+    {
+      "calibration": [
+        "2025-02-22",
+        "2025-03-01"
+      ],
+      "fit_before": "2025-02-22",
+      "id": "F3",
+      "validation": [
+        "2025-03-01",
+        "2025-03-08"
+      ]
+    }
+  ],
+  "intervals": "left closed, right open",
+  "model_scope": "submitted GPU jobs, num_gpus_req > 0; no CPU-only claim",
+  "no_may": true,
+  "shadow_isolation": "April member payload is never opened until winner freeze; metadata census only before freeze",
+  "shadow_label_deadline": "2025-05-01",
+  "shadow_use": "acceptance only, cannot replace winner; latest seven UTC dates must each have rows, otherwise HOLD",
+  "timezone": "UTC",
+  "training_lookback_days": 120,
+  "training_rule": "end_time < fit_before, submit_time < fit_before, end_time >= fit_before - 120d",
+  "unused_buffer": [
+    "2025-04-01",
+    "2025-04-24"
+  ],
+  "validation_label_deadline": "2025-03-08"
+}

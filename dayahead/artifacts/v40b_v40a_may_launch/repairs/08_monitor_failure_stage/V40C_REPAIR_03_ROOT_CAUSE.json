@@ -1,0 +1,18 @@
+{
+  "artifact_id": "V40C_REPAIR_03_ROOT_CAUSE_V1",
+  "captured_utc": "2026-09-06T01:05:46.976091+00:00",
+  "classification": "IMPLEMENTATION_DEFECT",
+  "scope": "READ_ONLY_MONITOR_PRESENTATION",
+  "root_cause": [
+    "The visible monitor had been relaunched using the frozen outer-status-only monitor instead of the live baseline companion.",
+    "The live companion used baseline_status only while RUNNING, losing the actual B2 restoration failure location when outer status changed to FAIL.",
+    "Outer completed_units=2 means B0 and B1 are completed; the shared /10 denominator describes B3 workflow units and misleadingly suggested step 2."
+  ],
+  "affected_display_dates": [
+    "2025-05-21",
+    "2025-05-28",
+    "2025-05-30"
+  ],
+  "numerical_failure_not_resolved_by_monitor_repair": true,
+  "scientific_diagnosis": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40b_v40a_may_launch\\incidents\\20260906T005921Z_may30_b2_failure\\FAILED_B2_FORENSIC_REVIEW.json"
+}
