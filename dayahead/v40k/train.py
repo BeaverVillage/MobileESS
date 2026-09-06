@@ -21,7 +21,9 @@ def main():
         write('V40K_RESIDUAL_CROSSFIT_PROVENANCE.json',{'rows':len(oof),'row_ids_unique':True,'self_fit_overlap':0,
           'sources':{k:int(v) for k,v in oof.C0_source.value_counts().items()},'max_training_time_before_each_query':True,
           'further_filter':'end_time strictly before each correction fit timestamp','rows_SHA':sha(OUT/'RESIDUAL_OOF_ROWS.parquet')})
-        (OUT/'models').mkdir(exist_ok=True);records=[];inner=[];unavailable={}
+        (OUT/'models').mkdir(exist_ok=True)
+        records=read('V40K_TRAINING_DETERMINISM.json') if (OUT/'V40K_TRAINING_DETERMINISM.json').exists() else []
+        inner=[];unavailable={}
         stages=SPLIT['inner_folds']+[{'id':'FINAL','fit_before':SPLIT['final_point_fit_before']}]
         for stage in stages:
             sid=stage['id'];when=stage['fit_before'];train=f.loc[train_mask(f,when)]
@@ -32,6 +34,14 @@ def main():
                 val=f.loc[train_mask(f,when)].tail(1024).copy();base=np.zeros(len(val))
             x=features(val);preds={'K0':base}
             for cid in IDS[1:-1]:
+                model_path=OUT/'models'/f'{sid}_{cid}.pkl'
+                previous=[r for r in records if r['stage']==sid and r['candidate']==cid and r['status']=='PASS']
+                if previous and model_path.exists() and sha(model_path)==previous[-1]['model_SHA']:
+                    m=pickle.loads(model_path.read_bytes())
+                    assert all(model.get_params().get('device_type','cpu')=='cpu' for model in m.models)
+                    preds[cid]=m.predict(x,c0=base)
+                    print('RESUME_VERIFIED_CPU_MODEL',sid,cid,flush=True)
+                    continue
                 print('TRAIN',sid,cid,'rows',len(train),flush=True)
                 try:
                     m=fit_one(cid,train,oof,when);p=m.predict(x,c0=base)
@@ -41,7 +51,7 @@ def main():
                     unavailable[cid]=str(e);records.append({'stage':sid,'candidate':cid,'status':'NOT_EVALUATED_COMPONENT_SUPPORT_UNAVAILABLE'});continue
                 assert p.tobytes()==p2.tobytes(),'NONDETERMINISTIC:'+sid+cid
                 if cid=='K4_INTERVAL_HAZARD':assert (m.predict(x,alpha=.9)>=p).all()
-                model_path=OUT/'models'/f'{sid}_{cid}.pkl';model_path.write_bytes(pickle.dumps(m,protocol=5))
+                model_path.write_bytes(pickle.dumps(m,protocol=5))
                 preds[cid]=p
                 records.append({'stage':sid,'candidate':cid,'status':'PASS','train_rows':m.training_rows,
                   'max_training_end':str(train.end_time.max()),'fit_before':when,'same_seed_independent_refit':True,

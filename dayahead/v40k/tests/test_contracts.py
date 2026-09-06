@@ -68,7 +68,7 @@ def test_median_not_mean_gate():
     new={'overall':{'N':100,'pinball_Q50':9.,'MAE':18.,'median_calibration_error':.1,'mean_signed_error_diagnostic':10000},'COMPLETED H100-standby':{'N':100,'MAE':18.,'median_calibration_error':.1}}
     assert point_gate(base,new,True)['eligible']
 def test_calibration_separation():assert SPLIT['point_selection'][1]==SPLIT['safe_fit'][0] and SPLIT['safe_fit'][1]==SPLIT['safe_selection'][0] and SPLIT['safe_selection'][1]==SPLIT['final_shadow'][0]
-@pytest.mark.parametrize('value,expected',[('160G',163840),('90000Mn',90000),('4096',4096),('1.5T',1572864),('bad',np.nan)])
+@pytest.mark.parametrize('value,expected',[('160G',163840),('90000Mn',90000),('4096',4096),('1.5T',1572864),('bad',np.nan),('4Gc',np.nan),('.5G',512)])
 def test_memory_mapping(value,expected):assert memory(value)==expected if np.isfinite(expected) else np.isnan(memory(value))
 def test_prior_receipt_and_pf():
     f=json.loads((J/'V40J_RUNTIME_METHOD_FREEZE.json').read_text());assert f['PF']==.95 and f['Q_control']=='NO' and f['winner'] is None

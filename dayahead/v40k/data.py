@@ -20,7 +20,8 @@ def block_mask(f,interval,deadline=None):
     return timestamp_mask(f)&(f.submit_time>=utc(interval[0]))&(f.submit_time<utc(interval[1]))&(f.end_time<utc(deadline or interval[1]))&f.runtime_seconds.ge(0)&np.isfinite(f.runtime_seconds)&f.requested_seconds.gt(0)&np.isfinite(f.requested_seconds)
 def memory(x):
     if pd.isna(x):return np.nan
-    m=re.fullmatch(r'\s*([0-9]+(?:\.[0-9]+)?)\s*([KkMmGgTtPp]?)\s*[ncNC]?\s*',str(x))
+    # Match the pinned canonical parser: per-CPU 'c' is not a per-node MiB value.
+    m=re.fullmatch(r'([\d.]+)([KMGTPkmgtp]?)[nN]?',str(x).strip())
     return float(m[1])*{'K':1/1024,'M':1,'G':1024,'T':1024**2,'P':1024**3,'':1}[m[2].upper()] if m else np.nan
 def normalize(r):
     mapping={'id':'job_id','nodes_req':'num_nodes_req','processors_req':'num_cores_req','gpus_requested':'num_gpus_req','state_simple':'job_state','user_hash':'user','account_hash':'account'}
@@ -59,6 +60,9 @@ def extract(stage):
             with z.open(APRIL) as stream:
                 p=pq.ParquetFile(stream)
                 for item in allowed:
+                    for col in ['submit_time','start_time','end_time']:
+                        stat=p.metadata.row_group(item['row_group']).column(p.schema_arrow.get_field_index(col)).statistics
+                        assert str(stat.min)==item['bounds'][col]['min'] and str(stat.max)==item['bounds'][col]['max'],'RAW_FOOTER_CHANGED_AFTER_REGISTRATION'
                     event('raw_row_group_decoded',stage=stage,member=APRIL,row_group=item['row_group'],rows=item['rows'])
                     raw=p.read_row_group(item['row_group'],columns=cols).to_pandas()
                     a=normalize(raw);a['source_row_group']=item['row_group'];parts.append(a)

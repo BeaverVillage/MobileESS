@@ -13,9 +13,12 @@ from dayahead.v40j.methods import SupportGuard,groups,key_rows,conformal_q
 
 PYTHON=Path('C:/Users/kjw39/AppData/Local/MobileESS/venvs/v35r3d-runtime/Scripts/python.exe')
 def verify_lock():
-    lock=read('V40K_PREHOLDOUT_MODEL_LOCK.json')
+    lock=read('V40K_PREHOLDOUT_EXECUTION_FREEZE.json')
     for n,h in lock['models_SHA'].items():assert sha(OUT/'models'/n)==h
     assert sha(OUT/'V40K_STACKING_WEIGHTS.json')==lock['weights_SHA']
+    for n,h in lock['source_SHA'].items():assert sha(ROOT/'dayahead/v40k'/n)==h,('EXECUTION_SOURCE_CHANGED',n)
+    receipt=read('V40K_PREHOLDOUT_COMMIT_RECEIPT.json')
+    assert hashlib.sha256(git('show',receipt['commit']+':dayahead/artifacts/v40k_central_runtime/V40K_PREHOLDOUT_EXECUTION_FREEZE.json')).hexdigest()==sha(OUT/'V40K_PREHOLDOUT_EXECUTION_FREEZE.json')
     return lock
 def c0(f,stage):
     target=OUT/(stage+'_C0.parquet')
