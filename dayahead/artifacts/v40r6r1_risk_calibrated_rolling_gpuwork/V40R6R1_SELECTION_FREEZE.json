@@ -1,0 +1,83 @@
+{
+  "time_UTC": "2026-09-06T16:58:40.780278+00:00",
+  "selected_H4": "NONE",
+  "selected_H24": "NONE",
+  "selected_candidates": {
+    "H4": "NONE",
+    "H24": "NONE"
+  },
+  "selection_scope": "Full CALIBRATION prequential block only",
+  "service_level": 0.85,
+  "coverage_band": [
+    0.85,
+    0.925
+  ],
+  "temporal_floor": 0.8,
+  "calibration_policy": {
+    "policy": "FULL_EXPANDING_CAUSAL_HISTORY",
+    "initial_source": "DEVELOPMENT_OOS",
+    "allowed_source_roles": [
+      "DEVELOPMENT",
+      "CALIBRATION",
+      "EXPOSED_EVALUATION"
+    ],
+    "TRAIN_residuals": false,
+    "availability": {
+      "user_choice": "날짜 종료와 정답 확정 시각을 모두 지난 뒤 편입 — 실제 가용성을 지키는 기준 (권장)",
+      "rule": "max(target_day_end, target_label_available_at) < current issue_time",
+      "rationale": "159 of 172 frozen OOS day labels mature after their calendar day ends",
+      "explicit_user_clarification": true,
+      "before_CAL_candidate_evaluation": true,
+      "partial_day_residuals": false,
+      "future_runtime_or_label_information_used": false
+    },
+    "full_day_membership": true,
+    "drop_old_residuals": false,
+    "decay": false,
+    "smoothing": false,
+    "order_statistic": "k=min(max(ceil((n+1)*17/20),1),n); kth smallest residual; integer arithmetic",
+    "interpolation": false,
+    "delta": "max(0,q85_residual)",
+    "upper": "expm1(log1p(max(base_Q90,0))+delta)",
+    "H4_min_days": 20,
+    "H4_min_rows": 500,
+    "H24_min_days": 30,
+    "insufficient": "No static fallback; candidate fails support gate",
+    "per_issue_per_horizon_per_base": true
+  },
+  "candidate_registry": {
+    "R85_B1": "B1",
+    "R85_B2": "B2_L0"
+  },
+  "gates": {
+    "positive_coverage_band": [
+      0.85,
+      0.925
+    ],
+    "mean_day_positive_coverage_min": 0.8,
+    "supported_month_positive_coverage_min": 0.8,
+    "supported_month_mean_day_coverage_min": 0.8,
+    "day_min_positive_windows": 1,
+    "month_min_positive_days": 5,
+    "block_min_positive_days": 5,
+    "miss_severity": "under_GPUh strictly below own frozen raw base Q90",
+    "over_anchor_A": "strictly below exact frozen R6 TRAIN per-horizon unconditional Q95 anchor on same evaluation rows",
+    "over_anchor_B": "strictly below frozen R6 static U2-90 over on same rows",
+    "positive_upper_WAPE_strict_max": 2.0
+  },
+  "R6_BASE_SKILL_LIMITATION": "PRESENT",
+  "R6_raw_Q90_skill_gate_used_as_automatic_disqualifier": false,
+  "candidate_comparators_selectable": false,
+  "PRIMARY_WORKLOAD_RESERVE_CANDIDATE_AVAILABLE": false,
+  "PARTIAL_HORIZON_ONLY": false,
+  "JOINT_WORKLOAD_MODEL_SELECTED": false,
+  "exposed_evaluated": false,
+  "frozen_hashes": {
+    "dayahead/artifacts/v40r6r1_risk_calibrated_rolling_gpuwork/cal_rolling_predictions.parquet": "53f4749f5211a315eaa2380b9200b3ca528f2b491097d3bec3a5ebb8045f1049",
+    "dayahead/artifacts/v40r6r1_risk_calibrated_rolling_gpuwork/cal_calibration_ledger.parquet": "e8ffce86b0be595396806ebf26c9d74f20aae7e4bd5ae75692bce88ee0b0be73",
+    "dayahead/artifacts/v40r6r1_risk_calibrated_rolling_gpuwork/cal_availability_proof.parquet": "1d8365a4fbd69602a03cc6a1602130343cd44032fe3b0ec9f04ecb34cbf05e02",
+    "dayahead/artifacts/v40r6r1_risk_calibrated_rolling_gpuwork/V40R6R1_CAL_RESULTS.csv": "5390df32f4a6da0bc2088a7ebda4e0680ddf662a0926da54d225ea7bc54ddc16",
+    "dayahead/artifacts/v40r6r1_risk_calibrated_rolling_gpuwork/V40R6R1_CAL_EVALUATION.json": "1cd39e2379f50f96590cd87ad2133660c43cfaa8b77fa73c71addd0909ad01a4",
+    "dayahead/artifacts/v40r6r1_risk_calibrated_rolling_gpuwork/V40R6R1_CAL_COMPARISON.json": "b72cd4895af55a7d97bf2748abb14fe5ef1e5acb08024d962c171ee52c7ce555"
+  }
+}
