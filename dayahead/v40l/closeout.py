@@ -3,6 +3,7 @@ from .protocol import IDS,REGISTRY
 
 REQUIRED=['V40L_START_STATE.json','V40L_TAIL_ESTIMAND_CONTRACT.json','V40L_TEMPORAL_SPLIT_CONTRACT.json','V40L_TAIL_CANDIDATE_REGISTRY.json','V40L_K0_FREEZE_VERIFICATION.json','V40L_OOF_RESIDUAL_AUTHORITY.json','V40L_CENSORED_JOB_CENSUS.json','V40L_T1_RESIDUAL_QUANTILE_REPORT.json','V40L_T2_DIRECT_QUANTILE_REPORT.json','V40L_T3_CQR_REPORT.json','V40L_T4_HIERARCHICAL_CONFORMAL_REPORT.json','V40L_T5_AFT_REPORT.json','V40L_T6_HAZARD_REPORT.json','V40L_T7_EXCEEDANCE_REPORT.json','V40L_T8_HYBRID_REPORT.json','V40L_TAIL_SELECTION_COMPARISON.json','V40L_GPU_WEIGHTED_SAFETY_REPORT.json','V40L_TAIL_METHOD_FREEZE.json','V40L_FINAL_SHADOW_REPORT.json','V40L_PROTECTED_SCOPE_DIFF.json','V40L_TEST_REPORT.json','V40L_FINAL_REVIEW.md']
 REQUIRED+=['V40L_POST_SELECTION_TAIL_DIAGNOSTIC.json','V40L_T7_FAILURE_DECOMPOSITION.json','V40L_TAIL_MISS_COHORT.csv','V40L_TAIL_FAILURE_CLASSIFICATION.md']
+REQUIRED+=['V40L_STRONG_STANDBY_SUPPORT_PROVENANCE.json','V40L_STRONG_STANDBY_SUPPORT_PROVENANCE.md']
 def main():
     require_prereg();verify_k0()
     start=read('V40L_START_STATE.json');changed=[]
@@ -61,6 +62,9 @@ def main():
       f"T7 miss {cohort['N']}개 job의 GPU-underprediction은 {cohort['GPU_underprediction_seconds']:,.3f}초다. Miss jobs 기준 top 1%/5%/10% ({'/'.join(str(cohort['pareto']['miss_jobs'][p]['top_job_count_in_universe']) for p in ['0.01','0.05','0.1'])}개)가 전체 miss mass의 {' / '.join(format(cohort['pareto']['miss_jobs'][p]['share_of_total_GPU_underprediction_seconds'],'.3%') for p in ['0.01','0.05','0.1'])}를 설명한다.",
       'T0–T8 모든 variant의 exact metric/gate 표와 threshold, T7 실패 분해, raw-vs-calibrated delta, Pareto 분모별 표는 V40L_POST_SELECTION_TAIL_DIAGNOSTIC.json 및 V40L_TAIL_FAILURE_CLASSIFICATION.md에 있다. 324개 miss job의 상세 행은 V40L_TAIL_MISS_COHORT.csv에 저장했다.',
       '이 진단에서 standby는 기존 동결된 QoS==standby 정의다. Partition에 stdby가 포함돼도 QoS가 normal인 경우는 별도 partition/QoS 조합으로 공개했다. 정의를 변경하지 않았다. T5의 후속 진단 표기는 CENSOR_AUTHORITY_INSUFFICIENT다.']
+    provenance=read('V40L_STRONG_STANDBY_SUPPORT_PROVENANCE.json')
+    lines+=['',f"Strong-support standby N=4 provenance 추가 확인: **{provenance['provenance_classification']}**. 기간별 total/strong은 Apr01–07 2291/1772, Apr08–14 383/130, Apr15–23 1317/4다. Selection의 12h 1223개 중 1153개는 과거 48h로만 관측된 두 feature8 profile(과거 지원 3237/1501개)에 해당한다. Exact walltime 포함 9개 key를 그대로 적용해 exact_count=0, REGIME_MISMATCH가 됐다.",
+      '세 기간 모두 동일한 support lookup, hardware/standby 정의, numeric/string key 정규화를 사용했다. 원인 분류는 허용된 cohort의 walltime covariate shift이며, implementation inconsistency가 발견되거나 support gate가 변경된 것은 아니다. 상세 기간별 수치·분포·4개 strong row provenance는 V40L_STRONG_STANDBY_SUPPORT_PROVENANCE.json/.md에 기록했다.']
     (OUT/'V40L_FINAL_REVIEW.md').write_bytes(('\n'.join(lines)+'\n').encode('utf-8'))
     assert all((OUT/n).exists() for n in REQUIRED)
     write('V40L_ARTIFACT_MANIFEST.json',{'classification':classification,'required_artifacts':{n:sha(OUT/n) for n in REQUIRED},'final_commit_receipt':'Generated after final research commit, outside referenced commit to avoid self-referential SHA'})

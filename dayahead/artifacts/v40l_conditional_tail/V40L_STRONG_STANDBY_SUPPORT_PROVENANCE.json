@@ -1,0 +1,955 @@
+{
+  "V40L_classification": "V40L_TAIL_MODEL_INSUFFICIENT",
+  "classification_rationale": {
+    "IMPLEMENTATION_INCONSISTENCY": "No evidence found: identical frozen source/lookup, consistent hardware/QoS definitions, independently canonicalized keys and reproduced 1772/130/4 strong counts.",
+    "MIXED": "Not selected; the observed collapse has a specific requested-walltime/profile explanation. Cohort extraction limitations remain a separate uncertainty.",
+    "POPULATION_SCARCITY": "Not the primary explanation for the whole H100-standby cohort: selection N=1317. The supported conditional subset is scarce because the key mix differs.",
+    "SUPPORT_DEFINITION_TOO_STRICT": "Exact feature9 matching, including exact requested walltime and identity/resource fields, mechanically makes new combinations non-strong. No alternative definition or threshold was evaluated; this diagnostic does not judge or change the frozen rule.",
+    "TEMPORAL_COVARIATE_SHIFT": "Primary explanation within the accepted cohorts: requested-walltime mix shifted to 12h; 1153 jobs belong to two already well-supported feature8 profiles whose historical requests were exclusively 48h."
+  },
+  "cohort_limitation": "Results concern accepted pre-May/end-known whole-row-group-filtered cohorts. Their actual dates differ: April08 and April21-23 are absent. Do not infer the same distribution shift for excluded jobs or the full raw calendar population.",
+  "created_at": "2026-09-06T11:13:36.307926+00:00",
+  "data_sources": {
+    "Apr-01--07": {
+      "SHA": "c4a3e0e44f6fbee9acc9d487581b7117e714b6c92c94121596c15a28b8f6dfbc",
+      "columns_read": [
+        "job_id",
+        "submit_time",
+        "requested_seconds",
+        "num_nodes_req",
+        "num_cores_req",
+        "num_gpus_req",
+        "requested_memory_mib",
+        "partition",
+        "qos",
+        "user",
+        "account"
+      ],
+      "path": "dayahead/artifacts/v40l_conditional_tail/VISIBLE_DEVELOPMENT_ROWS.parquet",
+      "runtime_status_outcome_columns_decoded": false
+    },
+    "Apr-08--14": {
+      "SHA": "bd9a458f2c0512dcc10fb92f8e1ba9f59043bdffae05a536f0c34ec0440df802",
+      "columns_read": [
+        "job_id",
+        "submit_time",
+        "requested_seconds",
+        "num_nodes_req",
+        "num_cores_req",
+        "num_gpus_req",
+        "requested_memory_mib",
+        "partition",
+        "qos",
+        "user",
+        "account"
+      ],
+      "path": "dayahead/artifacts/v40l_conditional_tail/CALIBRATION_ROWS.parquet",
+      "runtime_status_outcome_columns_decoded": false
+    },
+    "Apr-15--23": {
+      "SHA": "98711fd45e183e2df571b3f37a3d8f3eb8dd6831d07c2c145f371a9d91d5bb17",
+      "columns_read": [
+        "job_id",
+        "submit_time",
+        "requested_seconds",
+        "num_nodes_req",
+        "num_cores_req",
+        "num_gpus_req",
+        "requested_memory_mib",
+        "partition",
+        "qos",
+        "user",
+        "account"
+      ],
+      "path": "dayahead/artifacts/v40l_conditional_tail/SELECTION_ROWS.parquet",
+      "runtime_status_outcome_columns_decoded": false
+    }
+  },
+  "integrity": {
+    "before_after_SHA": {
+      "V40L_FINAL_SHADOW_REPORT.json": "5fe9811add4fa9944fc2e2684474d72185f600af9eca1b01f6d39fd0bb3b503f",
+      "V40L_FINAL_STATUS.json": "5f26c8bb46d9d799b48afe26fb5aad5f042427b2d4468df1c526d8e706308b19",
+      "V40L_POST_SELECTION_TAIL_DIAGNOSTIC.json": "7e2aa2e36a5538c804b28c94c8ecbb10e51a284baebe2b65f0f7105beafbd125",
+      "V40L_T7_FAILURE_DECOMPOSITION.json": "c82ad65bfe4a28fbe2cc5216746a1223d522c9d35af24443cf328e2a23389799",
+      "V40L_TAIL_CANDIDATE_REGISTRY.json": "d1de7d1f6998a35e917558226190c95a5faf8c1d3b8f28b3339e25914f34ca7e",
+      "V40L_TAIL_ESTIMAND_CONTRACT.json": "0e39f83f0b3fc196c6b406bdd966b1015ba18f878a1b1c4a8f334246db7bc51c",
+      "V40L_TAIL_METHOD_FREEZE.json": "4f86c2ae64f101d0924808b0fbb40d23c56657601453d6761bf1a00c0473719c",
+      "V40L_TAIL_SELECTION_COMPARISON.json": "9a64104ca714a63ac96b780052d64e83ff32a9c97e0481dea3eb5086b67e5fdb"
+    },
+    "conformal_retuning": 0,
+    "new_fits": 0,
+    "new_model_predict_calls": 0,
+    "new_raw_partitions_opened": 0,
+    "new_runtime_predictions": 0,
+    "new_support_transform_calls": 0,
+    "retuning": 0,
+    "runtime_status_outcome_columns_read": false,
+    "selection_winner_shadow_unchanged": true,
+    "status": "PASS",
+    "support_rule_changes": 0,
+    "threshold_changes": 0
+  },
+  "periods": {
+    "Apr-01--07": {
+      "actual_H100_standby_submit_dates": [
+        "2025-04-01",
+        "2025-04-02",
+        "2025-04-03",
+        "2025-04-04",
+        "2025-04-05",
+        "2025-04-06",
+        "2025-04-07"
+      ],
+      "actual_H100_standby_submit_range": [
+        "2025-04-01 12:19:08+00:00",
+        "2025-04-07 22:14:24+00:00"
+      ],
+      "exact_count": {
+        "P5": 0.0,
+        "P50": 3237.0,
+        "P95": 50939.0,
+        "max": 50939.0
+      },
+      "feature_key_consistent": true,
+      "hardware_definition_consistent": true,
+      "independent_key_construction_mismatches": 0,
+      "near_count": {
+        "P5": 0.0,
+        "P50": 3237.0,
+        "P95": 51992.0,
+        "max": 51992.0
+      },
+      "partition_QoS_counts": [
+        {
+          "N": 2291,
+          "partition": "gpu-h100-stdby",
+          "qos": "standby"
+        }
+      ],
+      "projected_columns": [
+        "job_id",
+        "submit_time",
+        "requested_seconds",
+        "num_nodes_req",
+        "num_cores_req",
+        "num_gpus_req",
+        "requested_memory_mib",
+        "partition",
+        "qos",
+        "user",
+        "account"
+      ],
+      "raw_stored_dtypes": {
+        "account": "object",
+        "num_cores_req": "float64",
+        "num_gpus_req": "float64",
+        "num_nodes_req": "float64",
+        "partition": "object",
+        "qos": "object",
+        "requested_memory_mib": "float64",
+        "requested_seconds": "float64",
+        "user": "object"
+      },
+      "requested_walltime_distribution": [
+        {
+          "N": 2,
+          "exact_count": {
+            "P5": 0.0,
+            "P50": 0.0,
+            "P95": 0.0,
+            "max": 0.0
+          },
+          "fraction": 0.0008729812309035355,
+          "hours": 0.5,
+          "near_count": {
+            "P5": 0.0,
+            "P50": 0.0,
+            "P95": 0.0,
+            "max": 0.0
+          },
+          "seconds": 1800.0,
+          "support_class_counts": {
+            "OUT_OF_SUPPORT": 2
+          }
+        },
+        {
+          "N": 10,
+          "exact_count": {
+            "P5": 293.55,
+            "P50": 645.0,
+            "P95": 645.0,
+            "max": 645.0
+          },
+          "fraction": 0.004364906154517678,
+          "hours": 2.0,
+          "near_count": {
+            "P5": 697.2,
+            "P50": 1542.0,
+            "P95": 1542.0,
+            "max": 1542.0
+          },
+          "seconds": 7200.0,
+          "support_class_counts": {
+            "SPARSE_SUPPORT": 1,
+            "STRONG_SUPPORT": 9
+          }
+        },
+        {
+          "N": 103,
+          "exact_count": {
+            "P5": 0.0,
+            "P50": 0.0,
+            "P95": 0.0,
+            "max": 0.0
+          },
+          "fraction": 0.04495853339153208,
+          "hours": 3.0,
+          "near_count": {
+            "P5": 51992.0,
+            "P50": 51992.0,
+            "P95": 51992.0,
+            "max": 51992.0
+          },
+          "seconds": 10800.0,
+          "support_class_counts": {
+            "REGIME_MISMATCH": 103
+          }
+        },
+        {
+          "N": 11,
+          "exact_count": {
+            "P5": 0.0,
+            "P50": 0.0,
+            "P95": 0.0,
+            "max": 0.0
+          },
+          "fraction": 0.004801396769969445,
+          "hours": 6.0,
+          "near_count": {
+            "P5": 201.0,
+            "P50": 2230.0,
+            "P95": 2230.0,
+            "max": 2230.0
+          },
+          "seconds": 21600.0,
+          "support_class_counts": {
+            "REGIME_MISMATCH": 11
+          }
+        },
+        {
+          "N": 2,
+          "exact_count": {
+            "P5": 13.0,
+            "P50": 13.0,
+            "P95": 13.0,
+            "max": 13.0
+          },
+          "fraction": 0.0008729812309035355,
+          "hours": 9.0,
+          "near_count": {
+            "P5": 13.0,
+            "P50": 13.0,
+            "P95": 13.0,
+            "max": 13.0
+          },
+          "seconds": 32400.0,
+          "support_class_counts": {
+            "SPARSE_SUPPORT": 2
+          }
+        },
+        {
+          "N": 26,
+          "exact_count": {
+            "P5": 16.0,
+            "P50": 16.0,
+            "P95": 16.0,
+            "max": 16.0
+          },
+          "fraction": 0.011348756001745963,
+          "hours": 12.0,
+          "near_count": {
+            "P5": 16.0,
+            "P50": 16.0,
+            "P95": 16.0,
+            "max": 16.0
+          },
+          "seconds": 43200.0,
+          "support_class_counts": {
+            "SPARSE_SUPPORT": 26
+          }
+        },
+        {
+          "N": 573,
+          "exact_count": {
+            "P5": 128.0,
+            "P50": 571.0,
+            "P95": 50939.0,
+            "max": 50939.0
+          },
+          "fraction": 0.2501091226538629,
+          "hours": 24.0,
+          "near_count": {
+            "P5": 136.0,
+            "P50": 4091.0,
+            "P95": 51992.0,
+            "max": 51992.0
+          },
+          "seconds": 86400.0,
+          "support_class_counts": {
+            "OUT_OF_SUPPORT": 2,
+            "STRONG_SUPPORT": 571
+          }
+        },
+        {
+          "N": 605,
+          "exact_count": {
+            "P5": 0.0,
+            "P50": 12093.0,
+            "P95": 12093.0,
+            "max": 12093.0
+          },
+          "fraction": 0.26407682234831953,
+          "hours": 36.0,
+          "near_count": {
+            "P5": 0.0,
+            "P50": 12093.0,
+            "P95": 12093.0,
+            "max": 12093.0
+          },
+          "seconds": 129600.0,
+          "support_class_counts": {
+            "OUT_OF_SUPPORT": 187,
+            "STRONG_SUPPORT": 418
+          }
+        },
+        {
+          "N": 959,
+          "exact_count": {
+            "P5": 0.0,
+            "P50": 3237.0,
+            "P95": 3237.0,
+            "max": 3237.0
+          },
+          "fraction": 0.4185945002182453,
+          "hours": 48.0,
+          "near_count": {
+            "P5": 0.0,
+            "P50": 3237.0,
+            "P95": 3237.0,
+            "max": 4091.0
+          },
+          "seconds": 172800.0,
+          "support_class_counts": {
+            "OUT_OF_SUPPORT": 166,
+            "SPARSE_SUPPORT": 19,
+            "STRONG_SUPPORT": 774
+          }
+        }
+      ],
+      "requested_walltime_seconds": {
+        "P5": 16200.0,
+        "P50": 129600.0,
+        "P95": 172800.0,
+        "max": 172800.0
+      },
+      "source_rows_SHA": "c4a3e0e44f6fbee9acc9d487581b7117e714b6c92c94121596c15a28b8f6dfbc",
+      "standby_definition_consistent": true,
+      "strong_support_fraction": 0.7734613705805325,
+      "support_class_counts": {
+        "OUT_OF_SUPPORT": 357,
+        "REGIME_MISMATCH": 114,
+        "SPARSE_SUPPORT": 48,
+        "STRONG_SUPPORT": 1772
+      },
+      "support_lookup_SHA": "6c183e792f7092b2b668501075245fd6b418b4d4b50602cbd1ef9a27d35b29eb",
+      "total_H100_standby_N": 2291
+    },
+    "Apr-08--14": {
+      "actual_H100_standby_submit_dates": [
+        "2025-04-09",
+        "2025-04-10",
+        "2025-04-11",
+        "2025-04-12",
+        "2025-04-13",
+        "2025-04-14"
+      ],
+      "actual_H100_standby_submit_range": [
+        "2025-04-09 13:12:37+00:00",
+        "2025-04-14 17:05:18+00:00"
+      ],
+      "exact_count": {
+        "P5": 0.0,
+        "P50": 0.0,
+        "P95": 50939.0,
+        "max": 50939.0
+      },
+      "feature_key_consistent": true,
+      "hardware_definition_consistent": true,
+      "independent_key_construction_mismatches": 0,
+      "near_count": {
+        "P5": 0.0,
+        "P50": 3237.0,
+        "P95": 51992.0,
+        "max": 51992.0
+      },
+      "partition_QoS_counts": [
+        {
+          "N": 383,
+          "partition": "gpu-h100-stdby",
+          "qos": "standby"
+        }
+      ],
+      "projected_columns": [
+        "job_id",
+        "submit_time",
+        "requested_seconds",
+        "num_nodes_req",
+        "num_cores_req",
+        "num_gpus_req",
+        "requested_memory_mib",
+        "partition",
+        "qos",
+        "user",
+        "account"
+      ],
+      "raw_stored_dtypes": {
+        "account": "object",
+        "num_cores_req": "float64",
+        "num_gpus_req": "float64",
+        "num_nodes_req": "float64",
+        "partition": "object",
+        "qos": "object",
+        "requested_memory_mib": "float64",
+        "requested_seconds": "float64",
+        "user": "object"
+      },
+      "requested_walltime_distribution": [
+        {
+          "N": 20,
+          "exact_count": {
+            "P5": 0.0,
+            "P50": 0.0,
+            "P95": 0.0,
+            "max": 0.0
+          },
+          "fraction": 0.05221932114882506,
+          "hours": 4.0,
+          "near_count": {
+            "P5": 51992.0,
+            "P50": 51992.0,
+            "P95": 51992.0,
+            "max": 51992.0
+          },
+          "seconds": 14400.0,
+          "support_class_counts": {
+            "REGIME_MISMATCH": 20
+          }
+        },
+        {
+          "N": 225,
+          "exact_count": {
+            "P5": 0.0,
+            "P50": 0.0,
+            "P95": 0.0,
+            "max": 0.0
+          },
+          "fraction": 0.587467362924282,
+          "hours": 6.0,
+          "near_count": {
+            "P5": 0.0,
+            "P50": 3237.0,
+            "P95": 3237.0,
+            "max": 3237.0
+          },
+          "seconds": 21600.0,
+          "support_class_counts": {
+            "OUT_OF_SUPPORT": 72,
+            "REGIME_MISMATCH": 153
+          }
+        },
+        {
+          "N": 1,
+          "exact_count": {
+            "P5": 208.0,
+            "P50": 208.0,
+            "P95": 208.0,
+            "max": 208.0
+          },
+          "fraction": 0.0026109660574412533,
+          "hours": 9.0,
+          "near_count": {
+            "P5": 220.0,
+            "P50": 220.0,
+            "P95": 220.0,
+            "max": 220.0
+          },
+          "seconds": 32400.0,
+          "support_class_counts": {
+            "STRONG_SUPPORT": 1
+          }
+        },
+        {
+          "N": 7,
+          "exact_count": {
+            "P5": 16.0,
+            "P50": 16.0,
+            "P95": 16.0,
+            "max": 16.0
+          },
+          "fraction": 0.018276762402088774,
+          "hours": 12.0,
+          "near_count": {
+            "P5": 16.0,
+            "P50": 16.0,
+            "P95": 16.0,
+            "max": 16.0
+          },
+          "seconds": 43200.0,
+          "support_class_counts": {
+            "SPARSE_SUPPORT": 7
+          }
+        },
+        {
+          "N": 78,
+          "exact_count": {
+            "P5": 50939.0,
+            "P50": 50939.0,
+            "P95": 50939.0,
+            "max": 50939.0
+          },
+          "fraction": 0.20365535248041775,
+          "hours": 24.0,
+          "near_count": {
+            "P5": 51992.0,
+            "P50": 51992.0,
+            "P95": 51992.0,
+            "max": 51992.0
+          },
+          "seconds": 86400.0,
+          "support_class_counts": {
+            "STRONG_SUPPORT": 78
+          }
+        },
+        {
+          "N": 13,
+          "exact_count": {
+            "P5": 576.0,
+            "P50": 576.0,
+            "P95": 576.0,
+            "max": 576.0
+          },
+          "fraction": 0.033942558746736295,
+          "hours": 36.0,
+          "near_count": {
+            "P5": 576.0,
+            "P50": 576.0,
+            "P95": 576.0,
+            "max": 576.0
+          },
+          "seconds": 129600.0,
+          "support_class_counts": {
+            "STRONG_SUPPORT": 13
+          }
+        },
+        {
+          "N": 39,
+          "exact_count": {
+            "P5": 3128.0,
+            "P50": 3128.0,
+            "P95": 3128.0,
+            "max": 3128.0
+          },
+          "fraction": 0.10182767624020887,
+          "hours": 48.0,
+          "near_count": {
+            "P5": 4091.0,
+            "P50": 4091.0,
+            "P95": 4091.0,
+            "max": 4091.0
+          },
+          "seconds": 172800.0,
+          "support_class_counts": {
+            "SPARSE_SUPPORT": 1,
+            "STRONG_SUPPORT": 38
+          }
+        }
+      ],
+      "requested_walltime_seconds": {
+        "P5": 15120.000000000011,
+        "P50": 21600.0,
+        "P95": 172800.0,
+        "max": 172800.0
+      },
+      "source_rows_SHA": "bd9a458f2c0512dcc10fb92f8e1ba9f59043bdffae05a536f0c34ec0440df802",
+      "standby_definition_consistent": true,
+      "strong_support_fraction": 0.3394255874673629,
+      "support_class_counts": {
+        "OUT_OF_SUPPORT": 72,
+        "REGIME_MISMATCH": 173,
+        "SPARSE_SUPPORT": 8,
+        "STRONG_SUPPORT": 130
+      },
+      "support_lookup_SHA": "6c183e792f7092b2b668501075245fd6b418b4d4b50602cbd1ef9a27d35b29eb",
+      "total_H100_standby_N": 383
+    },
+    "Apr-15--23": {
+      "actual_H100_standby_submit_dates": [
+        "2025-04-15",
+        "2025-04-16",
+        "2025-04-17",
+        "2025-04-18",
+        "2025-04-19",
+        "2025-04-20"
+      ],
+      "actual_H100_standby_submit_range": [
+        "2025-04-15 19:48:24+00:00",
+        "2025-04-20 15:28:56+00:00"
+      ],
+      "exact_count": {
+        "P5": 0.0,
+        "P50": 0.0,
+        "P95": 0.0,
+        "max": 50939.0
+      },
+      "feature_key_consistent": true,
+      "hardware_definition_consistent": true,
+      "independent_key_construction_mismatches": 0,
+      "near_count": {
+        "P5": 0.0,
+        "P50": 3237.0,
+        "P95": 3237.0,
+        "max": 51992.0
+      },
+      "partition_QoS_counts": [
+        {
+          "N": 1317,
+          "partition": "gpu-h100-stdby",
+          "qos": "standby"
+        }
+      ],
+      "projected_columns": [
+        "job_id",
+        "submit_time",
+        "requested_seconds",
+        "num_nodes_req",
+        "num_cores_req",
+        "num_gpus_req",
+        "requested_memory_mib",
+        "partition",
+        "qos",
+        "user",
+        "account"
+      ],
+      "raw_stored_dtypes": {
+        "account": "object",
+        "num_cores_req": "float64",
+        "num_gpus_req": "float64",
+        "num_nodes_req": "float64",
+        "partition": "object",
+        "qos": "object",
+        "requested_memory_mib": "float64",
+        "requested_seconds": "float64",
+        "user": "object"
+      },
+      "requested_walltime_distribution": [
+        {
+          "N": 72,
+          "exact_count": {
+            "P5": 0.0,
+            "P50": 0.0,
+            "P95": 0.0,
+            "max": 0.0
+          },
+          "fraction": 0.05466970387243736,
+          "hours": 6.0,
+          "near_count": {
+            "P5": 0.0,
+            "P50": 0.0,
+            "P95": 0.0,
+            "max": 0.0
+          },
+          "seconds": 21600.0,
+          "support_class_counts": {
+            "OUT_OF_SUPPORT": 72
+          }
+        },
+        {
+          "N": 1,
+          "exact_count": {
+            "P5": 208.0,
+            "P50": 208.0,
+            "P95": 208.0,
+            "max": 208.0
+          },
+          "fraction": 0.0007593014426727411,
+          "hours": 9.0,
+          "near_count": {
+            "P5": 220.0,
+            "P50": 220.0,
+            "P95": 220.0,
+            "max": 220.0
+          },
+          "seconds": 32400.0,
+          "support_class_counts": {
+            "STRONG_SUPPORT": 1
+          }
+        },
+        {
+          "N": 1223,
+          "exact_count": {
+            "P5": 0.0,
+            "P50": 0.0,
+            "P95": 0.0,
+            "max": 16.0
+          },
+          "fraction": 0.9286256643887624,
+          "hours": 12.0,
+          "near_count": {
+            "P5": 16.0,
+            "P50": 3237.0,
+            "P95": 3237.0,
+            "max": 3237.0
+          },
+          "seconds": 43200.0,
+          "support_class_counts": {
+            "OUT_OF_SUPPORT": 48,
+            "REGIME_MISMATCH": 1153,
+            "SPARSE_SUPPORT": 22
+          }
+        },
+        {
+          "N": 1,
+          "exact_count": {
+            "P5": 0.0,
+            "P50": 0.0,
+            "P95": 0.0,
+            "max": 0.0
+          },
+          "fraction": 0.0007593014426727411,
+          "hours": 16.5,
+          "near_count": {
+            "P5": 0.0,
+            "P50": 0.0,
+            "P95": 0.0,
+            "max": 0.0
+          },
+          "seconds": 59400.0,
+          "support_class_counts": {
+            "OUT_OF_SUPPORT": 1
+          }
+        },
+        {
+          "N": 6,
+          "exact_count": {
+            "P5": 0.0,
+            "P50": 0.0,
+            "P95": 38347.0,
+            "max": 50939.0
+          },
+          "fraction": 0.004555808656036446,
+          "hours": 24.0,
+          "near_count": {
+            "P5": 0.0,
+            "P50": 0.0,
+            "P95": 40016.75,
+            "max": 51992.0
+          },
+          "seconds": 86400.0,
+          "support_class_counts": {
+            "OUT_OF_SUPPORT": 4,
+            "STRONG_SUPPORT": 2
+          }
+        },
+        {
+          "N": 14,
+          "exact_count": {
+            "P5": 1.0,
+            "P50": 74.0,
+            "P95": 1142.899999999999,
+            "max": 3128.0
+          },
+          "fraction": 0.010630220197418374,
+          "hours": 48.0,
+          "near_count": {
+            "P5": 1.0,
+            "P50": 76.0,
+            "P95": 1481.2499999999986,
+            "max": 4091.0
+          },
+          "seconds": 172800.0,
+          "support_class_counts": {
+            "SPARSE_SUPPORT": 13,
+            "STRONG_SUPPORT": 1
+          }
+        }
+      ],
+      "requested_walltime_seconds": {
+        "P5": 21600.0,
+        "P50": 43200.0,
+        "P95": 43200.0,
+        "max": 172800.0
+      },
+      "source_rows_SHA": "98711fd45e183e2df571b3f37a3d8f3eb8dd6831d07c2c145f371a9d91d5bb17",
+      "standby_definition_consistent": true,
+      "strong_support_fraction": 0.0030372057706909645,
+      "support_class_counts": {
+        "OUT_OF_SUPPORT": 125,
+        "REGIME_MISMATCH": 1153,
+        "SPARSE_SUPPORT": 35,
+        "STRONG_SUPPORT": 4
+      },
+      "support_lookup_SHA": "6c183e792f7092b2b668501075245fd6b418b4d4b50602cbd1ef9a27d35b29eb",
+      "total_H100_standby_N": 1317
+    }
+  },
+  "provenance_classification": "TEMPORAL_COVARIATE_SHIFT",
+  "scope": "READ_ONLY_SUPPORT_PROVENANCE; no V40L selection change",
+  "shadow": "SEALED",
+  "support_authority": {
+    "April_support_update": "None: frozen Apr01 lookup used unchanged for all three periods. No April job added to support.",
+    "categorical_key_normalization": "string values; missing -> __MISSING__",
+    "class_rules": {
+      "OUT_OF_SUPPORT": "exact_count==0 and near_count<100",
+      "REGIME_MISMATCH": "exact_count==0 and near_count>=100",
+      "SPARSE_SUPPORT": "0<exact_count<100",
+      "STRONG_SUPPORT": "exact_count>=100"
+    },
+    "exact_key_fields": [
+      "requested_seconds",
+      "num_nodes_req",
+      "num_cores_req",
+      "num_gpus_req",
+      "requested_memory_mib",
+      "partition",
+      "qos",
+      "user",
+      "account"
+    ],
+    "freeze_UTC": "2025-04-01 00:00:00+00:00",
+    "hardware_definition": "partition contains h100, case-insensitive",
+    "historical_rows": 210334,
+    "lookup_SHA": "6c183e792f7092b2b668501075245fd6b418b4d4b50602cbd1ef9a27d35b29eb",
+    "max_historical_known_end": "2025-03-31 07:59:56+00:00",
+    "near_key_fields": [
+      "num_nodes_req",
+      "num_cores_req",
+      "num_gpus_req",
+      "requested_memory_mib",
+      "partition",
+      "qos",
+      "user",
+      "account"
+    ],
+    "numeric_key_normalization": "float values; missing -> __MISSING__",
+    "source_SHA": "c4cb2809eda215218d7d948eee7faa1c3c7b72a48da80db3125a32db9287672a",
+    "standby_definition": "QoS.lower()==standby; partition substring alone is not the definition"
+  },
+  "why_selection_N4": {
+    "48h_historical_to_12h_query_profiles": [
+      {
+        "exact_count": 0,
+        "historical_requested_seconds_counts": {
+          "172800.0": 3237
+        },
+        "near_count": 3237,
+        "near_feature8_profile_SHA": "6d6e21d6e54d33b55d4c059582cbe51bb94ad6610dad3e9df65172b65801b2da",
+        "observed_period_requested_seconds_counts": {
+          "Apr-01--07": {
+            "172800.0": 769
+          },
+          "Apr-08--14": {
+            "21600.0": 153
+          },
+          "Apr-15--23": {
+            "43200.0": 808
+          }
+        },
+        "selection_N": 808,
+        "selection_requested_hours": 12.0,
+        "selection_requested_seconds": 43200.0
+      },
+      {
+        "exact_count": 0,
+        "historical_requested_seconds_counts": {
+          "172800.0": 1501
+        },
+        "near_count": 1501,
+        "near_feature8_profile_SHA": "0186187da5c2f52255a382304d8b4d7ebf149158bf6a454320d9d29651b88665",
+        "observed_period_requested_seconds_counts": {
+          "Apr-01--07": {
+            "172800.0": 2
+          },
+          "Apr-08--14": {},
+          "Apr-15--23": {
+            "43200.0": 345
+          }
+        },
+        "selection_N": 345,
+        "selection_requested_hours": 12.0,
+        "selection_requested_seconds": 43200.0
+      }
+    ],
+    "four_strong_rows": [
+      {
+        "exact_count": 3128,
+        "hardware": "H100",
+        "job_id": "8501779",
+        "near_count": 4091,
+        "num_gpus_req": 1.0,
+        "partition": "gpu-h100-stdby",
+        "qos": "standby",
+        "requested_seconds": 172800.0,
+        "standby": 1.0,
+        "submit_time": "2025-04-15 19:48:24+00:00"
+      },
+      {
+        "exact_count": 208,
+        "hardware": "H100",
+        "job_id": "8522208",
+        "near_count": 220,
+        "num_gpus_req": 48.0,
+        "partition": "gpu-h100-stdby",
+        "qos": "standby",
+        "requested_seconds": 32400.0,
+        "standby": 1.0,
+        "submit_time": "2025-04-18 18:04:26+00:00"
+      },
+      {
+        "exact_count": 50939,
+        "hardware": "H100",
+        "job_id": "8527709",
+        "near_count": 51992,
+        "num_gpus_req": 1.0,
+        "partition": "gpu-h100-stdby",
+        "qos": "standby",
+        "requested_seconds": 86400.0,
+        "standby": 1.0,
+        "submit_time": "2025-04-19 04:30:55+00:00"
+      },
+      {
+        "exact_count": 571,
+        "hardware": "H100",
+        "job_id": "8531022",
+        "near_count": 4091,
+        "num_gpus_req": 1.0,
+        "partition": "gpu-h100-stdby",
+        "qos": "standby",
+        "requested_seconds": 86400.0,
+        "standby": 1.0,
+        "submit_time": "2025-04-19 23:39:40+00:00"
+      }
+    ],
+    "out_of_support": 125,
+    "regime_mismatch": 1153,
+    "requested_12h_N": 1223,
+    "requested_12h_fraction": 0.9286256643887624,
+    "sparse": 35,
+    "strong": 4,
+    "total_H100_standby_N": 1317,
+    "walltime_total_variation_distance": {
+      "Apr-01--07 vs selection": 0.9679045169321571,
+      "Apr-08--14 vs selection": 0.9111082034293463
+    }
+  },
+  "winner": null
+}

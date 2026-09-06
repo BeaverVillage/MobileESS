@@ -53,3 +53,6 @@ XGBoost API 확인: https://xgboost.readthedocs.io/en/release_3.2.0/parameter.ht
 T7 miss 324개 job의 GPU-underprediction은 14,960,009.137초다. Miss jobs 기준 top 1%/5%/10% (4/17/33개)가 전체 miss mass의 22.625% / 50.932% / 66.374%를 설명한다.
 T0–T8 모든 variant의 exact metric/gate 표와 threshold, T7 실패 분해, raw-vs-calibrated delta, Pareto 분모별 표는 V40L_POST_SELECTION_TAIL_DIAGNOSTIC.json 및 V40L_TAIL_FAILURE_CLASSIFICATION.md에 있다. 324개 miss job의 상세 행은 V40L_TAIL_MISS_COHORT.csv에 저장했다.
 이 진단에서 standby는 기존 동결된 QoS==standby 정의다. Partition에 stdby가 포함돼도 QoS가 normal인 경우는 별도 partition/QoS 조합으로 공개했다. 정의를 변경하지 않았다. T5의 후속 진단 표기는 CENSOR_AUTHORITY_INSUFFICIENT다.
+
+Strong-support standby N=4 provenance 추가 확인: **TEMPORAL_COVARIATE_SHIFT**. 기간별 total/strong은 Apr01–07 2291/1772, Apr08–14 383/130, Apr15–23 1317/4다. Selection의 12h 1223개 중 1153개는 과거 48h로만 관측된 두 feature8 profile(과거 지원 3237/1501개)에 해당한다. Exact walltime 포함 9개 key를 그대로 적용해 exact_count=0, REGIME_MISMATCH가 됐다.
+세 기간 모두 동일한 support lookup, hardware/standby 정의, numeric/string key 정규화를 사용했다. 원인 분류는 허용된 cohort의 walltime covariate shift이며, implementation inconsistency가 발견되거나 support gate가 변경된 것은 아니다. 상세 기간별 수치·분포·4개 strong row provenance는 V40L_STRONG_STANDBY_SUPPORT_PROVENANCE.json/.md에 기록했다.
