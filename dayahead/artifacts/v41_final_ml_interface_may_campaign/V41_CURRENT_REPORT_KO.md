@@ -41,23 +41,28 @@ B1 Actual 전압 위반 2건과 Vmax=1.0500097929594858 pu는 실제 평가 결�
 26. B1 Day-Ahead: PASS. rho=0.603375019615, Vmin=0.980021845178, Vmax=1.046331019587, 수렴 96/96, 전압 위반 0건.
 27. B1 Actual: 실행 PASS. rho=0.590162022079, Vmin=0.979825587101, Vmax=1.050009792959, 수렴 96/96, 전압 위반 2건. 지연 0, 시작률 1097/1097, horizon 내 완료 920/1097, 미완료 177건. 전압 위반은 숨기거나 보정하지 않았습니다.
 28. DA/Actual 차이: 아래 비교표와 `actual/comparison` 전체 파일. Actual ML/전역 최적화 호출 0, 새로운 사이트·migration·MESS 경로 변경 0. H4 RAW/capped 성능은 별도 보고.
-29. 발견 결함: 열린 파일 핸들의 Windows 원자 교체 실패, manifest 검증 함수 이름 충돌, 여행 비교 저장 누락 등. 전체 발견 11건과 영향 범위는 [V41_DEFECT_LOG.json](C:/codex_mobileess_workspace/MobileESS_v41_final_ml_interface_may_campaign/dayahead/artifacts/v41_final_ml_interface_may_campaign/V41_DEFECT_LOG.json). 65/64 경합은 실제 런타임 결과이며 별도의 사용자 계약 변경으로 처리했습니다.
+29. 발견 결함: 열린 파일 핸들의 Windows 원자 교체 실패, manifest 검증 함수 이름 충돌, 여행 비교 저장 누락, WMI 자식 PATH에서 Git 누락 등. 전체 발견 12건과 영향 범위는 [V41_DEFECT_LOG.json](C:/codex_mobileess_workspace/MobileESS_v41_final_ml_interface_may_campaign/dayahead/artifacts/v41_final_ml_interface_may_campaign/V41_DEFECT_LOG.json). 65/64 경합은 실제 런타임 결과이며 별도의 사용자 계약 변경으로 처리했습니다.
 30. 수리: 핸들 종료 후 원자 교체, 명시적 검증 함수 별칭, 여행시간/에너지 및 도로 노드 경로 저장 등. 최신 Actual에는 정확한 물리 실행 디스패처·지연/사건 기록 추가. 기존 최적화 모형을 다시 설계하지 않았습니다.
-31. 재실행: 초기 B0 DA 봉인 실패 및 경계 검증 실패 후 영향 경계를 재실행. 최신 계약에서는 유효한 B0 DA 바이트를 보존하고 실패한 B0 Actual만 무효화·재실행했습니다. 기존 실패 증거는 diagnostics/prepilot_archive에 보존.
+31. 재실행: 초기 B0 DA 봉인 실패 및 경계 검증 실패 후 영향 경계를 재실행. 최신 계약에서는 유효한 B0 DA 바이트를 보존하고 실패한 B0 Actual만 무효화·재실행했습니다. WMI PATH 실패는 과학 실행 시작 전이므로 유효한 B0/B1 결과를 보존하고 환경 smoke 및 최종 봉인·시작만 다시 했습니다. 기존 실패 증거는 diagnostics/prepilot_archive에 보존.
 32. May 31일 입력 준비 PASS. 미래 날짜 모델/라벨을 미리 생성했다고 주장하지 않으며 날짜별 인과적 ML 입력을 solve 전에 봉인합니다.
 33. 124/124 정책-일에 Day-Ahead+Actual 전체 저장·공통 ML·동일 Actual 디스패처 설정 PASS. 본 캠페인 완료 수는 실시간 progress의 값만 사용합니다.
 34. 독립 프로세스 smoke PASS: 부모 종료 후 자식 생존, Windows job 미소속, heartbeat 2회 갱신, 정상 종료.
-35. 실행 명령: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\codex_mobileess_workspace\MobileESS_v41_final_ml_interface_may_campaign\dayahead\tools\run_v41_may_campaign.ps1"`. 내부 명령은 `python -m dayahead.v41.detached launch`.
+35. 실행 명령: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\codex_mobileess_workspace\MobileESS_v41_final_ml_interface_may_campaign\dayahead\tools\run_v41_may_campaign.ps1"`. 내부 명령은 `python -m dayahead.tools.v41_detached_launcher launch`; 자식 프로세스에 검증된 Git 경로를 명시적으로 전달합니다.
 36. 캠페인 PID: 최종 커밋 뒤 launch receipt에 기록.
 37. launch receipt: [V41_MAY_CAMPAIGN_LAUNCH_RECEIPT.json](C:/codex_mobileess_workspace/MobileESS_v41_final_ml_interface_may_campaign/dayahead/artifacts/v41_final_ml_interface_may_campaign/V41_MAY_CAMPAIGN_LAUNCH_RECEIPT.json). 원 생성/최종 캠페인 커밋을 구분합니다.
 38. 본 heartbeat는 실행 뒤 검증하며 smoke heartbeat와 혼동하지 않습니다.
 39. 진행/상태: [campaign_progress.json](C:/codex_mobileess_workspace/MobileESS_v41_final_ml_interface_may_campaign/frozen_artifacts/v41_may_campaign/campaign_progress.json), [campaign_state.json](C:/codex_mobileess_workspace/MobileESS_v41_final_ml_interface_may_campaign/frozen_artifacts/v41_may_campaign/campaign_state.json), [campaign_heartbeat.json](C:/codex_mobileess_workspace/MobileESS_v41_final_ml_interface_may_campaign/frozen_artifacts/v41_may_campaign/campaign_heartbeat.json).
 40. 중지: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\codex_mobileess_workspace\MobileESS_v41_final_ml_interface_may_campaign\dayahead\tools\stop_v41_may_campaign.ps1"`; 재개: 같은 명령의 파일을 `resume_v41_may_campaign.ps1`로 변경. 현재 단계 종료 후 정지하며 새 캠페인을 중복 생성하지 않습니다.
-41. 회귀 테스트 174 PASS, 실패/오류/skip=0. JUnit 및 테스트 당시 source manifest 봉인.
+41. 회귀 테스트 177 PASS, 실패/오류/skip=0. JUnit 및 테스트 당시 source manifest 봉인.
 42. 보호 범위 PASS; P0-01~P0-07 7/7 PASS. Planning+2 Fresh+2 Actual의 모든 공유 native bus-phase 그룹 중복 0, 각 96슬롯 P/Q 보존·readback PASS.
 43. Git: 파일럿 생성 코드는 커밋됐으며 이 문서와 최종 감사 메타데이터는 최종 freeze 커밋에 포함됩니다.
-44. 최종 freeze commit: V41_FINAL_INTERFACE_FREEZE_COMMIT_RECEIPT.json을 따름; 현재 과학 코드 177a22ba2cbd3c4fa1d827645afa7130dc131744.
+44. 최종 freeze commit: V41_FINAL_INTERFACE_FREEZE_COMMIT_RECEIPT.json을 따름; 현재 과학 코드 c60029b1f03055f773ffff43e299bedf14a9b4bc.
 45. 시작 상태: PRE_LAUNCH. 이 문서를 최종 freeze 전에 봉인하며 실제 시작 성공은 별도 검증 receipt와 실행 후 보고서만 주장합니다.
+
+## 최적화 동작과 이행률
+
+B0 대비 B1은 PENDING 354개의 시작 시각(80개 앞당김, 274개 늦춤; 최대 105분), PENDING 423개의 사이트 배치를 바꿨고 RUNNING migration 17개를 선택했습니다. admission 변경 및 보호 작업 시작 변경은 0입니다. 주목적 rho 개선은 0.1329702740%이며 최종 solver는 incumbent=bound인 OPTIMAL을 반환했습니다. 목적 동일성 검증은 같은 B0 결정을 같은 모델에서 평가하는 검증이며 B0와 B1의 최종 목적값이 같다는 뜻이 아닙니다.
+선택 작업 실행 시작률은 두 정책 모두 100%입니다. horizon 내 완료율 B0=83.9562443026%, B1=83.8650865998%; 미완료 176/177개는 horizon 이후까지 실행이 이어지며 작업을 누락한 것이 아닙니다.
 
 ## RAW / ACTIONABLE 평가
 
@@ -213,6 +218,8 @@ B0 전체 과학 파일 134개, B1 145개. 아래 Parquet 외 JSON/NPZ/모든 �
 - [V41_B0_DAYAHEAD_RETENTION_AUDIT.json](C:/codex_mobileess_workspace/MobileESS_v41_final_ml_interface_may_campaign/dayahead/artifacts/v41_final_ml_interface_may_campaign/V41_B0_DAYAHEAD_RETENTION_AUDIT.json)
 - [V41_MAY01_B0_IN_B1_FEASIBILITY.json](C:/codex_mobileess_workspace/MobileESS_v41_final_ml_interface_may_campaign/dayahead/artifacts/v41_final_ml_interface_may_campaign/V41_MAY01_B0_IN_B1_FEASIBILITY.json)
 - [V41_MAY01_B0_B1_OBJECTIVE_IDENTITY.json](C:/codex_mobileess_workspace/MobileESS_v41_final_ml_interface_may_campaign/dayahead/artifacts/v41_final_ml_interface_may_campaign/V41_MAY01_B0_B1_OBJECTIVE_IDENTITY.json)
+- [V41_MAY01_B0_B1_DECISION_CHANGE_AUDIT.json](C:/codex_mobileess_workspace/MobileESS_v41_final_ml_interface_may_campaign/dayahead/artifacts/v41_final_ml_interface_may_campaign/V41_MAY01_B0_B1_DECISION_CHANGE_AUDIT.json)
 - [V41_MAY01_COMPLETE_PERSISTENCE_AUDIT.json](C:/codex_mobileess_workspace/MobileESS_v41_final_ml_interface_may_campaign/dayahead/artifacts/v41_final_ml_interface_may_campaign/V41_MAY01_COMPLETE_PERSISTENCE_AUDIT.json)
 - [V41_MAY_CAMPAIGN_PROPAGATION_AUDIT.json](C:/codex_mobileess_workspace/MobileESS_v41_final_ml_interface_may_campaign/dayahead/artifacts/v41_final_ml_interface_may_campaign/V41_MAY_CAMPAIGN_PROPAGATION_AUDIT.json)
+- [V41_INFRASTRUCTURE_LAUNCH_REPAIR.json](C:/codex_mobileess_workspace/MobileESS_v41_final_ml_interface_may_campaign/dayahead/artifacts/v41_final_ml_interface_may_campaign/V41_INFRASTRUCTURE_LAUNCH_REPAIR.json)
 - [V41_FINAL_INTERFACE_FREEZE_COMMIT_RECEIPT.json](C:/codex_mobileess_workspace/MobileESS_v41_final_ml_interface_may_campaign/dayahead/artifacts/v41_final_ml_interface_may_campaign/V41_FINAL_INTERFACE_FREEZE_COMMIT_RECEIPT.json)
