@@ -1,0 +1,33 @@
+{
+  "status": "PROPOSAL_ONLY_NO_SELECTED_EXPORT",
+  "candidate_fields": [
+    "job_uid",
+    "runtime_class",
+    "runtime_body_q50_sec",
+    "runtime_body_q90_sec",
+    "tail_probability",
+    "tail_threshold_sec",
+    "tail_flag",
+    "robust_tail_policy",
+    "candidate_duration_sec",
+    "flexibility_protected"
+  ],
+  "records": [],
+  "semantics": {
+    "runtime_class": "BODY or TAIL_RISK",
+    "tail_flag": "probability>=CAL eta",
+    "runtime_body_q50_sec": "positive finite",
+    "runtime_body_q90_sec": "positive finite >=Q50",
+    "tail_threshold_sec": "one preregistered physical u",
+    "robust_tail_policy": "NONE for BODY, R0 or R1 for TAIL_RISK",
+    "candidate_duration_sec": "BODY Q90 or existing R0/R1 duration",
+    "flexibility_protected": "tail flag only; no migration/site/electrical decision"
+  },
+  "production_integration": "NO",
+  "future_integration_entrypoints": [
+    "dayahead/v37/aidc_materializer.py:_jobs_and_ledger (PENDING duration admission only)",
+    "dayahead/v40a/initial.py:build_initial (PENDING metadata/eligible_standby admission only)"
+  ],
+  "optimizer_solver_files_requiring_changes": [],
+  "future_note": "These are proposed local consumer entrypoints, not implemented changes. Solvers, RUNNING, A1, MF, WAN and terminal semantics remain protected."
+}
