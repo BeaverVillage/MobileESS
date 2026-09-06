@@ -1,0 +1,280 @@
+{
+  "family": "B5",
+  "trial": 1,
+  "device": "cpu",
+  "seed": 20260907,
+  "threads": 4,
+  "fit_time_seconds": 11.452999999979511,
+  "lightgbm_version": "4.6.0",
+  "numpy_version": "1.26.4",
+  "training_rows": 8016,
+  "training_job_N": 337235,
+  "development_choices": [
+    {
+      "method": "C0",
+      "provisional_score": 0.0,
+      "metrics": {
+        "point": {
+          "N": 1344,
+          "MAE": 106.55533153079284,
+          "RMSE": 684.5634760647308,
+          "WAPE": 1.0030292104412366,
+          "bias": -102.1933489527844
+        },
+        "positive_point": {
+          "N": 611,
+          "MAE": 231.10520849724367,
+          "RMSE": 1015.2821849721811,
+          "WAPE": 0.988985834485994,
+          "bias": -228.07355839298194
+        },
+        "probabilistic": {
+          "overall": {
+            "N": 1344,
+            "coverage": 0.8214285714285714,
+            "calibration_error": 0.07857142857142863,
+            "Q90_pinball": 88.25669448690701
+          },
+          "positive": {
+            "N": 611,
+            "coverage": 0.6072013093289689,
+            "calibration_error": 0.29279869067103115,
+            "Q90_pinball": 189.52987318151082
+          },
+          "burst": {
+            "N": 45,
+            "coverage": 0.0,
+            "calibration_error": 0.9,
+            "Q90_pinball": 2155.1360803504144
+          }
+        },
+        "primary": 0.8110693870003224,
+        "overprediction_GPUh": 48601.99838579408,
+        "underprediction_GPUh": 126396.44172424846,
+        "missed_burst_GPUh": 107756.80401752073,
+        "captured_burst_fraction": 0.026193865376912005,
+        "mean_burst_shortfall_GPUh": 2394.595644833794,
+        "quantile_crossings": 0,
+        "cumulative_WAPE": 0.9249372391053973
+      },
+      "gates": {
+        "coverage": {
+          "overall": {
+            "N": 1344,
+            "coverage": 0.8214285714285714,
+            "low": 0.9,
+            "high": 0.95,
+            "status": "FAIL"
+          },
+          "positive": {
+            "N": 611,
+            "coverage": 0.6072013093289689,
+            "low": 0.9,
+            "high": 0.95,
+            "status": "FAIL"
+          },
+          "burst": {
+            "N": 45,
+            "coverage": 0.0,
+            "low": 0.9,
+            "high": 0.975,
+            "status": "INSUFFICIENT_SUPPORT"
+          }
+        },
+        "temporal": [
+          {
+            "month": "2024-10",
+            "burst_N": 45,
+            "burst_coverage": 0.0,
+            "burst_gate": "INSUFFICIENT_SUPPORT",
+            "catastrophic": false,
+            "metrics": {
+              "point": {
+                "N": 1344,
+                "MAE": 106.55533153079284,
+                "RMSE": 684.5634760647308,
+                "WAPE": 1.0030292104412366,
+                "bias": -102.1933489527844
+              },
+              "positive_point": {
+                "N": 611,
+                "MAE": 231.10520849724367,
+                "RMSE": 1015.2821849721811,
+                "WAPE": 0.988985834485994,
+                "bias": -228.07355839298194
+              },
+              "probabilistic": {
+                "overall": {
+                  "N": 1344,
+                  "coverage": 0.8214285714285714,
+                  "calibration_error": 0.07857142857142863,
+                  "Q90_pinball": 88.25669448690701
+                },
+                "positive": {
+                  "N": 611,
+                  "coverage": 0.6072013093289689,
+                  "calibration_error": 0.29279869067103115,
+                  "Q90_pinball": 189.52987318151082
+                },
+                "burst": {
+                  "N": 45,
+                  "coverage": 0.0,
+                  "calibration_error": 0.9,
+                  "Q90_pinball": 2155.1360803504144
+                }
+              },
+              "primary": 0.8110693870003224,
+              "overprediction_GPUh": 48601.99838579408,
+              "underprediction_GPUh": 126396.44172424846,
+              "missed_burst_GPUh": 107756.80401752073,
+              "captured_burst_fraction": 0.026193865376912005,
+              "mean_burst_shortfall_GPUh": 2394.595644833794,
+              "quantile_crossings": 0
+            }
+          }
+        ],
+        "primary_better_than_ZERO": true,
+        "OVERCONSERVATIVE_CALIBRATION": false,
+        "registered_safety_justification": false,
+        "MC_convergence_pass": true,
+        "authority_leakage": "PASS",
+        "all_pass": false
+      },
+      "trial": 1
+    },
+    {
+      "method": "C1",
+      "provisional_score": 2.802504028038541,
+      "metrics": {
+        "point": {
+          "N": 1344,
+          "MAE": 153.0397661639995,
+          "RMSE": 681.096603494349,
+          "WAPE": 1.4405976089260986,
+          "bias": -24.14176287186454
+        },
+        "positive_point": {
+          "N": 611,
+          "MAE": 263.95866649852405,
+          "RMSE": 1005.347355500603,
+          "WAPE": 1.1295780988854973,
+          "bias": -125.78270015319656
+        },
+        "probabilistic": {
+          "overall": {
+            "N": 1344,
+            "coverage": 0.9657738095238095,
+            "calibration_error": 0.06577380952380951,
+            "Q90_pinball": 131.77452460259477
+          },
+          "positive": {
+            "N": 611,
+            "coverage": 0.9247135842880524,
+            "calibration_error": 0.02471358428805237,
+            "Q90_pinball": 212.0696458835761
+          },
+          "burst": {
+            "N": 45,
+            "coverage": 0.2222222222222222,
+            "calibration_error": 0.6777777777777778,
+            "Q90_pinball": 1666.5570660191138
+          }
+        },
+        "primary": 0.9075255251368304,
+        "overprediction_GPUh": 1031514.3297490493,
+        "underprediction_GPUh": 82170.58676775827,
+        "missed_burst_GPUh": 81212.49639056047,
+        "captured_burst_fraction": 0.2660767186420609,
+        "mean_burst_shortfall_GPUh": 1804.722142012455,
+        "quantile_crossings": 0,
+        "cumulative_WAPE": 1.6722200176309527
+      },
+      "gates": {
+        "coverage": {
+          "overall": {
+            "N": 1344,
+            "coverage": 0.9657738095238095,
+            "low": 0.9,
+            "high": 0.95,
+            "status": "FAIL"
+          },
+          "positive": {
+            "N": 611,
+            "coverage": 0.9247135842880524,
+            "low": 0.9,
+            "high": 0.95,
+            "status": "PASS"
+          },
+          "burst": {
+            "N": 45,
+            "coverage": 0.2222222222222222,
+            "low": 0.9,
+            "high": 0.975,
+            "status": "INSUFFICIENT_SUPPORT"
+          }
+        },
+        "temporal": [
+          {
+            "month": "2024-10",
+            "burst_N": 45,
+            "burst_coverage": 0.2222222222222222,
+            "burst_gate": "INSUFFICIENT_SUPPORT",
+            "catastrophic": false,
+            "metrics": {
+              "point": {
+                "N": 1344,
+                "MAE": 153.0397661639995,
+                "RMSE": 681.096603494349,
+                "WAPE": 1.4405976089260986,
+                "bias": -24.14176287186454
+              },
+              "positive_point": {
+                "N": 611,
+                "MAE": 263.95866649852405,
+                "RMSE": 1005.347355500603,
+                "WAPE": 1.1295780988854973,
+                "bias": -125.78270015319656
+              },
+              "probabilistic": {
+                "overall": {
+                  "N": 1344,
+                  "coverage": 0.9657738095238095,
+                  "calibration_error": 0.06577380952380951,
+                  "Q90_pinball": 131.77452460259477
+                },
+                "positive": {
+                  "N": 611,
+                  "coverage": 0.9247135842880524,
+                  "calibration_error": 0.02471358428805237,
+                  "Q90_pinball": 212.0696458835761
+                },
+                "burst": {
+                  "N": 45,
+                  "coverage": 0.2222222222222222,
+                  "calibration_error": 0.6777777777777778,
+                  "Q90_pinball": 1666.5570660191138
+                }
+              },
+              "primary": 0.9075255251368304,
+              "overprediction_GPUh": 1031514.3297490493,
+              "underprediction_GPUh": 82170.58676775827,
+              "missed_burst_GPUh": 81212.49639056047,
+              "captured_burst_fraction": 0.2660767186420609,
+              "mean_burst_shortfall_GPUh": 1804.722142012455,
+              "quantile_crossings": 0
+            }
+          }
+        ],
+        "primary_better_than_ZERO": false,
+        "OVERCONSERVATIVE_CALIBRATION": true,
+        "registered_safety_justification": false,
+        "MC_convergence_pass": true,
+        "authority_leakage": "PASS",
+        "all_pass": false
+      },
+      "trial": 1
+    }
+  ],
+  "development_simulation_seconds": 4.921999999991385,
+  "preregistration_commit": "f10187e0b0cbaadde5b28186e70822f5ff258f76"
+}

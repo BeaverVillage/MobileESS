@@ -133,6 +133,37 @@ class Contracts(unittest.TestCase):
         from .train import authority
         _,c=authority()
         for p in (OUT/'fits').glob('*/trial_*_start.json'):self.assertEqual(json.loads(p.read_text())['commit'],c)
+    def final_files(self):
+        from .train import NAMES
+        if not (OUT/'V40R4_METHOD_SELECTION.json').exists():self.skipTest('Final exposed evaluation not executed')
+        return [(n,np.load(OUT/'fits'/n/'exposed_distribution_summary.npz')) for n in NAMES]
+    def test_60_saved_forecast_invariants(self):
+        for name,p in self.final_files():
+            for key in ['raw_q','C1_q','selected_q','raw_cumulative_q','C1_cumulative_q','selected_cumulative_q','raw_CDF_quantiles','C1_CDF_quantiles']:
+                v=p[key];self.assertTrue(np.isfinite(v).all(),(name,key));self.assertTrue((v>=0).all(),(name,key))
+                self.assertTrue((np.diff(v,axis=-1)>=-1e-7).all(),(name,key))
+                if 'cumulative' in key:self.assertTrue((np.diff(v,axis=1)>=-1e-7).all(),(name,key))
+            self.assertEqual(p['selected_q'].shape,(int(self.m['EXPOSED_EVALUATION'].sum()),48,3))
+            np.testing.assert_array_equal(p['days'],self.i.operating_day.to_numpy()[self.m['EXPOSED_EVALUATION']])
+    def test_61_saved_scores_independent_arithmetic(self):
+        reports=read('V40R4_AGGREGATE_GPUH_METRICS.json')['models'] if (OUT/'V40R4_METHOD_SELECTION.json').exists() else {}
+        y=self.a['target'][self.m['EXPOSED_EVALUATION']];pos=y>0;burst=y>=self.reg['burst_GPUh']
+        for name,p in self.final_files():
+            q=p['selected_q'][:,:,1];e=y-q;loss=np.where(e>=0,.9*e,-.1*e)
+            self.assertAlmostEqual(float(loss[pos].sum()/y[pos].sum()),reports[name]['primary'],places=12)
+            self.assertAlmostEqual(float(np.maximum(q-y,0).sum()),reports[name]['overprediction_GPUh'],places=7)
+            self.assertAlmostEqual(float(np.maximum(y-q,0)[burst].sum()),reports[name]['missed_burst_GPUh'],places=7)
+            self.assertAlmostEqual(float((y[burst]<=q[burst]).mean()),reports[name]['probabilistic']['burst']['coverage'],places=12)
+    def test_62_failed_models_cannot_be_selected(self):
+        self.final_files();s=read('V40R4_METHOD_SELECTION.json');g=read('V40R4_SAFETY_GATE_TABLE.json')['models'];b=read('V40R4_PAIRED_BOOTSTRAP_SUPERIORITY.json')
+        if s['selected_model'] is not None:self.assertTrue(g[s['selected_model']]['all_pass'])
+        if not g['P1']['all_pass']:self.assertFalse(s['CCAF_superiority']);self.assertIsNone(b['CI95']);self.assertTrue(b['status'].startswith('NOT_EXECUTED'))
+        if not any(v['all_pass'] for v in g.values()):self.assertIsNone(s['selected_model']);self.assertEqual(s['classification'],'V40R4_COMPOUND_GPUWORK_SAFETY_FAIL')
+        for n,v in read('V40R4_MONTE_CARLO_CONVERGENCE.json')['models'].items():
+            if not v['convergence_pass']:self.assertFalse(g[n]['all_pass'])
+    def test_63_selected_parameters_unchanged(self):
+        for name,_ in self.final_files():
+            r=read(f'fits/{name}/result.json');self.assertEqual(sha(OUT/'fits'/name/'selected_params.npz'),r['selected_params_SHA256'])
 
 class Record(unittest.TextTestResult):
     def __init__(self,*a,**kw):super().__init__(*a,**kw);self.records=[]
