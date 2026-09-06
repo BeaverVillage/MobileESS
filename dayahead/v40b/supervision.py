@@ -1,10 +1,48 @@
 """Task Scheduler process identity and a durable, exclusive campaign lock."""
 from contextlib import contextmanager
-import os,time,uuid
+from datetime import datetime, timezone
+import os,subprocess,time,uuid
 from .common import *
-from dayahead.v39l.infrastructure import _process_rows,_parse_time,current_process_identity,identity_matches,write_exclusive_json
+from dayahead.v39l.infrastructure import _parse_time,identity_matches,write_exclusive_json
 
 TOKENS=('run_v40b_campaign.py','--orchestrate')
+
+
+def _process_rows():
+    """Enumerate V40B process identities without the blocking Windows CIM API."""
+    import psutil
+
+    rows=[]
+    attributes=('pid','ppid','create_time','name','exe','cmdline')
+    for process in psutil.process_iter(attributes,ad_value=None):
+        info=process.info
+        created=info.get('create_time')
+        command=[str(value) for value in (info.get('cmdline') or [])]
+        rows.append({
+            'ProcessId':int(info.get('pid') or 0),
+            'ParentProcessId':int(info.get('ppid') or 0),
+            'CreationDate':datetime.fromtimestamp(float(created),tz=timezone.utc).isoformat() if created is not None else None,
+            'Name':info.get('name'),
+            'ExecutablePath':info.get('exe'),
+            'CommandLine':subprocess.list2cmdline(command) if command else None,
+        })
+    return rows
+
+
+def current_process_identity():
+    pid=os.getpid()
+    row=next((item for item in _process_rows() if int(item.get('ProcessId') or 0)==pid),None)
+    if row is None:raise RuntimeError(f'V40B_CURRENT_PROCESS_NOT_FOUND:{pid}')
+    return {
+        'pid':pid,
+        'parent_pid':int(row.get('ParentProcessId') or 0),
+        'creation_time_utc':_parse_time(str(row['CreationDate'])).isoformat(),
+        'name':row.get('Name'),
+        'executable_path':row.get('ExecutablePath'),
+        'command_line':row.get('CommandLine'),
+    }
+
+
 def inventory(rows=None):
     result={'orchestrators':[],'workers':[]}
     for row in (_process_rows() if rows is None else rows):

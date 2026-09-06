@@ -13,14 +13,28 @@ function Get-V40BLiveDetail {
     $stage=[string]$Detail.current_stage
     $sd=$Detail.solver_detail
     $useBaseline=$false
-    if ($Detail.status -eq 'RUNNING' -and $Detail.case -in @('B0','B1','B2') -and $null -ne $Baseline) {
+    if ($Detail.status -in @('RUNNING','FAIL') -and $Detail.case -in @('B0','B1','B2') -and $null -ne $Baseline) {
         try {
             $useBaseline=$Baseline.date -eq $Detail.day -and $Baseline.case -eq $Detail.case -and
                 ([datetime]$Baseline.last_update).ToUniversalTime() -ge ([datetime]$Detail.worker_creation_time_utc).ToUniversalTime()
+            if ($useBaseline -and $Detail.status -eq 'FAIL') {
+                $useBaseline=([datetime]$Baseline.last_update).ToUniversalTime() -le
+                    ([datetime]$Detail.heartbeat_timestamp_utc).ToUniversalTime()
+            }
         } catch { $useBaseline=$false }
     }
+    # Before B3, completed_units counts finished cases, not B3's ten units.
+    $localProgress='-'
+    if ($Detail.case -eq 'B3') {$localProgress='U{0}/{1}' -f $Detail.completed_units,$Detail.total_units}
     if ($useBaseline) {
         $parts=@([string]$Baseline.current_stage)
+        if ($Baseline.current_stage -eq ($Detail.case+'_RESTORATION')) {
+            $parts=@($Detail.case+'_AC_RESTORE')
+            if ($Baseline.restoration_round -and $Baseline.restoration_round_max) {
+                $parts+=('{0}/{1}' -f $Baseline.restoration_round,$Baseline.restoration_round_max)
+                $localProgress='R{0}/{1}' -f $Baseline.restoration_round,$Baseline.restoration_round_max
+            }
+        }
         if ($Baseline.beam_parent_total) {$parts+=('P{0}/{1}' -f $Baseline.beam_parent_index,$Baseline.beam_parent_total)}
         if ($Baseline.full_milp_status -eq 'RUNNING') {
             if ($Baseline.seed_total) {$parts+=('full MILP {0}/{1}' -f ([int]$Baseline.seed_done+1),$Baseline.seed_total)}
@@ -29,12 +43,22 @@ function Get-V40BLiveDetail {
         elseif ($null -ne $Baseline.candidate_done -and $Baseline.candidate_total) {
             if ($Baseline.search_level) {$parts+=[string]$Baseline.search_level}
             $parts+=('cand {0}/{1}' -f $Baseline.candidate_done,$Baseline.candidate_total)
+            $localProgress='{0}/{1}' -f $Baseline.candidate_done,$Baseline.candidate_total
         }
         elseif ($Baseline.full_milp_status) {$parts+=[string]$Baseline.full_milp_status}
         elseif ($null -ne $Baseline.fresh_slots_done -and $Baseline.fresh_slots_total) {
-            $parts+=('AC {0}/{1}' -f $Baseline.fresh_slots_done,$Baseline.fresh_slots_total)
+            $parts+=('Fresh {0}/{1}' -f $Baseline.fresh_slots_done,$Baseline.fresh_slots_total)
+            if ($localProgress -eq '-') {$localProgress='AC{0}/{1}' -f $Baseline.fresh_slots_done,$Baseline.fresh_slots_total}
+        }
+        if ($Detail.status -eq 'FAIL' -and [string]$Detail.error -match 'V37_R3_FAIL_CLOSED_MAX_RESTORATION_ROUNDS:') {
+            $parts+='FAIL'
+            $view | Add-Member -NotePropertyName error_summary -NotePropertyValue 'Fresh physical gate FAIL at K_MAX; route search completed.' -Force
         }
         $view.current_stage=$parts -join ' / '
+    }
+    elseif ($Detail.status -eq 'FAIL' -and [string]$Detail.error -match ('V37_R3_FAIL_CLOSED_MAX_RESTORATION_ROUNDS:'+([regex]::Escape([string]$Detail.day))+':'+([regex]::Escape([string]$Detail.case)))) {
+        # The exact terminal exception establishes the phase even without telemetry.
+        $view.current_stage=$Detail.case+'_AC_RESTORE / terminal Fresh FAIL'
     }
     elseif ($stage -eq 'M1_ROUTE_PQ' -and $sd) {
         $parts=@($stage)
@@ -44,24 +68,55 @@ function Get-V40BLiveDetail {
         $view.current_stage=$parts -join ' / '
     }
     elseif ($sd.OpenDSS_slot) {$view.current_stage=('{0} / {1}/96' -f $stage,$sd.OpenDSS_slot)}
+    $view | Add-Member -NotePropertyName display_progress -NotePropertyValue $localProgress -Force
     return $view
+}
+
+function Set-V40BDisplayProgress {
+    param($View, [hashtable]$Details)
+    foreach ($row in @($View.Rows)+@($View.Failures)) {
+        $detail=$Details[$row.Date]
+        if ($null -ne $detail -and $detail.display_progress) {$row.Progress=$detail.display_progress}
+    }
+}
+
+function Get-V40BPausedView {
+    param($Master, [hashtable]$Details)
+    $paused=@($Master.paused_days | Where-Object {$_})
+    if (-not $paused.Count) {$paused=@($Master.preserved_running_days | Where-Object {$_})}
+    $rows=@($paused | Sort-Object -Unique | ForEach-Object {Get-MonitorDayRow $_ 'PAUSED' $Details[$_] ''})
+    $failed=@($Master.failed_days | Where-Object {$_} | ForEach-Object {Get-MonitorDayRow $_ 'FAIL' $Details[$_] ([string]$Details[$_].error)})
+    [pscustomobject]@{
+        Completed=@($Master.completed_days).Count;Total=31
+        Percent=[math]::Round(100.0*@($Master.completed_days).Count/31,1)
+        Running=0;Failed=$failed.Count;Status='PAUSED_BY_USER'
+        Rows=@($rows)+@($failed);Failures=@($failed)
+        LastUpdate=$Master.last_update;Orchestrator='STOPPED_BY_USER';HeartbeatAgeSeconds=$null
+    }
 }
 
 if ($liveLibraryOnly) {return}
 $root=Join-Path $Repo 'dayahead\artifacts\v40b_v40a_may_launch'
 $failures=@{}; $details=@{}; $master=$null
-try {$Host.UI.RawUI.WindowTitle='V40A May 2025 Campaign Monitor - Live B2'} catch {}
+try {$Host.UI.RawUI.WindowTitle='V40A May 2025 Campaign Monitor - Live stages'} catch {}
 do {
     $warning=''
     try {$master=Get-Content -LiteralPath (Join-Path $root 'V40A_MAY_PROGRESS.json') -Raw -ErrorAction Stop | ConvertFrom-Json}
     catch {$warning='Progress source unavailable; retaining last snapshot.'}
     if ($null -ne $master) {
-        foreach ($day in @(@($master.running_days)+@($master.completed_days)+@($master.failed_days)|Sort-Object -Unique)) {
+        $resolvedPath=Join-Path $root 'V40D_RESOLVED_FAILURES.json'
+        if (Test-Path -LiteralPath $resolvedPath) {
+            try {
+                $resolved=Get-Content -LiteralPath $resolvedPath -Raw -ErrorAction Stop | ConvertFrom-Json
+                foreach ($day in @($resolved.days)) {if ($day -notin @($master.failed_days)) {$failures.Remove($day)}}
+            } catch {$warning='Resolved-failure record unavailable.'}
+        }
+        foreach ($day in @(@($master.running_days)+@($master.completed_days)+@($master.failed_days)+@($master.paused_days)+@($master.preserved_running_days)|Sort-Object -Unique)) {
             if ($day -notmatch '^2025-05-(0[1-9]|[12][0-9]|3[01])$') {continue}
             try {
                 $detail=Get-Content -LiteralPath (Join-Path $root "status\$day.json") -Raw -ErrorAction Stop | ConvertFrom-Json
                 $baseline=$null
-                if ($detail.status -eq 'RUNNING' -and $detail.case -in @('B0','B1','B2')) {
+                if ($detail.status -in @('RUNNING','FAIL') -and $detail.case -in @('B0','B1','B2')) {
                     try {$baseline=Get-Content -LiteralPath (Join-Path $root "baseline_status\$day.json") -Raw -ErrorAction Stop | ConvertFrom-Json}
                     catch {$warning="Baseline detail unavailable for $day."}
                 }
@@ -78,8 +133,14 @@ do {
                 $details[$day]=$detail
             } catch {$warning="Status source unavailable for $day; retaining last snapshot."}
         }
-        $live=Get-CampaignLiveness $master
-        $view=Get-MonitorView $master $details $failures $live
+        if ($master.status -eq 'PAUSED_BY_USER') {
+            $view=Get-V40BPausedView $master $details
+        } else {
+            foreach ($day in @($master.repaired_days)) {$failures.Remove($day)}
+            $live=Get-CampaignLiveness $master
+            $view=Get-MonitorView $master $details $failures $live
+        }
+        Set-V40BDisplayProgress $view $details
         foreach ($row in $view.Rows) {
             $detail=$details[$row.Date]
             if ($null -eq $detail -or $detail.status -ne 'RUNNING') {continue}
@@ -100,7 +161,7 @@ do {
         }
         if (-not $Once) {Clear-Host}
         Get-MonitorFrame $view 120 $warning | ForEach-Object {Write-Host $_}
-        Write-Host 'PROGRESS = completed major units; B2 details update within 2/10. P = beam parent.'
+        Write-Host 'STAGE = case. PROGRESS: R = restoration round; AC = Fresh slots; U = B3 workflow units.'
         if ($failures.Count) {Write-Host 'RETRY = active recovery; the prior FAIL stays visible until that day passes.'}
     }
     else {if (-not $Once) {Clear-Host};Write-Host 'MAY 2025 CAMPAIGN MONITOR';Write-Host 'Waiting for campaign progress.'}

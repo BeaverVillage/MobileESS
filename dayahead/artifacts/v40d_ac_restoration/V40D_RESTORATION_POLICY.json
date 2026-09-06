@@ -1,0 +1,42 @@
+{
+  "status": "APPROVED",
+  "identity": {
+    "revision": "V40D_AC_RESTORATION_CAP10",
+    "base_max_rounds": 5,
+    "max_rounds": 10,
+    "changed_controls": [
+      "max_restoration_rounds"
+    ],
+    "voltage_limits": [
+      0.95,
+      1.05
+    ],
+    "scope": [
+      "B2",
+      "B3"
+    ],
+    "inherited_files": {
+      "dayahead/v17_ac_restoration_contract.py": "76830d6914cad83ea8e225c07b8d41ae696c224510dfa9dfe2cfe0c4f1fe5cc8",
+      "dayahead/artifacts/v17_candidate/V17_AC_RESTORATION_OUTER_LOOP_CONTRACT_V1.json": "97ef76db29f40ff47f734bd8b3d95db83057574c352117104d3b75bdef7ca3c5",
+      "dayahead/artifacts/v17_candidate/V17_AC_RESTORATION_CUT_VALIDATION.json": "e6c5b20c409d79e958f19fb65b285577ceeb7fa689354b026a4735fd96c452d1",
+      "dayahead/v37/runner.py": "0ba664e373d69666453d8eaa0429f2701cf5a67217f34b04c01061375f1ef07c",
+      "dayahead/v37r3/restoration.py": "5dd67c9ddd1ac5c0f89656a09ac5b4820ebec8ff9df644f7b5ba99ebf8698db0",
+      "dayahead/v34/integrated_mess.py": "fb92793b9bc8cada5fb09bbf5c3c866cc644e18a052ee1fa97494d09bfa6ea32",
+      "dayahead/v40a/postfreeze.py": "3194a13a078578baf47828cfa58279c80910bd69d1f354c775fe5570095a18d5"
+    },
+    "preserve_margins": true,
+    "preserve_route_and_aidc_decisions": true,
+    "preserve_original_objective": true,
+    "stopping_rule": "first full Fresh hard-feasibility PASS; fail closed after round 10",
+    "earlier_pass_compatibility": "A PASS in rounds 0..5 is identical under the extended bound; preserve certified completed results."
+  },
+  "policy_sha256": "8cfe7e2c07f1d65fd93318cbaf487c623f2a98b178afbeadd7451081f8a1856e",
+  "authorization": "2026-09-06: user requested pausing May and fixing restoration after the proposed 5-to-10 trial.",
+  "May_failure_informed_revision": true,
+  "supersedes_only": "V17 termination.K_MAX for this May campaign; historical V17 source and artifacts remain unchanged.",
+  "validation": {
+    "2025-05-21": 8,
+    "2025-05-28": 6,
+    "2025-05-30": 6
+  }
+}

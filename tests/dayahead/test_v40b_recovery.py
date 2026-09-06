@@ -13,6 +13,17 @@ def test_path_failure_requires_exact_infrastructure_signature():
     assert not r.is_path_failure({'error': 'FileNotFoundError', 'traceback': "No such file or directory: 'missing.json'"})
 
 
+def test_source_authority_linkage_failure_requires_exact_frozen_non_science_drift():
+    failure = {
+        'status': 'FAIL',
+        'error': 'ValueError("ACCEPTED_PRODUCTION_SOURCE_DRIFT:[\'dayahead/v39l/infrastructure.py\', \'tests/dayahead/test_v39l_infrastructure.py\']")',
+        'traceback': 'dayahead\\v40a\\authority.py source_authority',
+    }
+    assert r.is_source_authority_linkage_failure(failure)
+    assert not r.is_source_authority_linkage_failure({**failure, 'status': 'RUNNING'})
+    assert not r.is_source_authority_linkage_failure({**failure, 'error': failure['error'].replace('infrastructure.py', 'science.py')})
+
+
 def test_real_shortened_windows_beam_path_can_write_and_replace():
     import ast
     failure = r.read(r.REPAIR / 'before/days/2025-05-18/FAILURE.json')

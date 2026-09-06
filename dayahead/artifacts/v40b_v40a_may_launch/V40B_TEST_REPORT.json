@@ -1,10 +1,44 @@
 {
+  "V40C_REPAIR_01": {
+    "adoptable_workers": 4,
+    "command": "python -m pytest -q tests/dayahead/test_v39l_infrastructure.py tests/dayahead/test_v40b_recovery.py tests/dayahead/test_v40b_gates.py",
+    "orchestrators_before_resume": 0,
+    "production_inventory_elapsed_seconds": 4.854,
+    "result": "23 passed in 14.40s",
+    "status": "PASS",
+    "tests": 23
+  },
+  "V40C_REPAIR_02": {
+    "accepted_source_files_verified": 1123,
+    "adoptable_workers": 4,
+    "command": "python -m pytest -q tests/dayahead/test_v40b_gates.py tests/dayahead/test_v40b_recovery.py tests/dayahead/test_v39l_infrastructure.py",
+    "may26_preserved_cases": [
+      "B0",
+      "B1",
+      "B2"
+    ],
+    "orchestrators_before_resume": 0,
+    "result": "24 passed in 19.35s",
+    "status": "PASS",
+    "tests": 24
+  },
+  "V40D_REPAIR_08": {
+    "PowerShell_monitor_checks": "Existing live-detail and new paused-display tests PASS",
+    "real_B2_Fresh_revalidations": {
+      "2025-05-21": 8,
+      "2025-05-28": 6,
+      "2025-05-30": 6
+    },
+    "status": "PASS",
+    "tests": 37,
+    "xml_SHA": "a5b17506368503f5660102efd645d2c50dbdca15eb78e4e50641e7a3babdbb99"
+  },
   "development_diagnostics": [
     "Initial schema validator used April aliases; corrected to unchanged current V39E producer schema before freeze.",
     "Missing May20-31 D-1 traffic inputs materialized with frozen model; method/source parameters unchanged.",
     "Evidence test uses April fixtures and test doubles, not May scientific results. Native OpenDSS emitted a Windows exception diagnostic; the final uncaptured test completed PASS. Corrected test-double signature before final PASS."
   ],
-  "execution_SHA": "91266a7c196850a00627af2c1d6e72b721f963742fb1552136cb375fb74563a5",
+  "execution_SHA": "65fc658e119a760cf650749d34b3d19166c0d9c3e893f3638bf8a011d4b7ec05",
   "gates": {
     "V40B_ADDITIONAL_D1_TRAFFIC_INPUTS.json": "PASS",
     "V40B_DETACHED_TEST.json": "PASS",
@@ -52,7 +86,7 @@
     "terminal_invariant": "PASS"
   },
   "scheduler_environment_test": "PASS",
-  "sealed_at_utc": "2026-09-05T11:41:31.156804+00:00",
+  "sealed_at_utc": "2026-09-05T23:57:15.872453+00:00",
   "status": "PASS",
   "tests_source_files": {
     "tests/dayahead/test_v40a_accepted_initial.py": "5b42e81853a974c145f8bb1167dd07b75e9510ee85ddddfa2b587d275181c8b5",
@@ -64,6 +98,8 @@
     "tests/dayahead/test_v40a_recourse_model.py": "cca656d12f930b51697adaa5c6528714c1b567b8dd7ffce2d93f104a1a506e5e",
     "tests/dayahead/test_v40a_runtime_guard.py": "0ac8915e42e845f9ec146e3da332f6b79219cb6df915ab86e1d09ff44d82e963",
     "tests/dayahead/test_v40b_b3_evidence.py": "dad7a4dcfb4af3d14bcf00c4be7e6e86ce0b986a70f69eecc0ab123dd4a9ce23",
-    "tests/dayahead/test_v40b_gates.py": "dc2ff6c96a4b8c2969f23a10be061dd7d04142a851c3a5b7493bc5a9f990c8ac"
+    "tests/dayahead/test_v40b_gates.py": "1e083344547e74bffa5af52a0771105978aedc8dfad461351148d319cb74a505",
+    "tests/dayahead/test_v40b_recovery.py": "2f426defc86088de924fafe8db540def079f77dfbb85b68bc1350b297633c6fa",
+    "tests/dayahead/test_v40b_windows_paths.py": "d29f6728862a05675d7b0b79d9ae8047e5aa593da3ef247b2d8a73a198d830c7"
   }
 }

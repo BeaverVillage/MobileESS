@@ -1,0 +1,20 @@
+{
+  "artifact_id": "V40C_REPAIR_03_TEST_REPORT_V1",
+  "captured_utc": "2026-09-06T01:05:46.976091+00:00",
+  "status": "PASS",
+  "focused_command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests/dayahead/test_v40b_live_detail.ps1",
+  "focused_result": "PASS",
+  "integration": "Real failures for May21, May28 and May30 show AC_RESTORE / 5/5 / Fresh 96/96 / FAIL and R5/5; original 120-column layout retained.",
+  "frame": "VERIFIED_FRAME.txt",
+  "source_and_input_freeze_validation": "PASS_UNCHANGED",
+  "checks": [
+    "same-attempt FAIL detail",
+    "reject pre-worker and post-failure baseline",
+    "reject wrong day/case and B2-to-B3 contamination",
+    "do not relabel unrelated exceptions",
+    "source objects remain unchanged",
+    "failure latch and retry progression",
+    "clear latch on PASS",
+    "candidate progress and frame width"
+  ]
+}

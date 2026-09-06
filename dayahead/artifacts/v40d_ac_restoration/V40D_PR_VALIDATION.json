@@ -1,0 +1,43 @@
+{
+  "status": "CURRENT_V40_REGRESSION_PASS_WITH_LEGACY_LIMITATIONS",
+  "checked_at_utc": "2026-09-06T03:30:05.917647+00:00",
+  "current_python_regression": {
+    "passed": 141,
+    "failed": 0,
+    "errors": 0,
+    "seconds": 44.62,
+    "scope": "V39L infrastructure, V40A, V40B and V40D restoration policy",
+    "native_diagnostic": "OpenDSS import printed Windows native exception diagnostics during pytest capture; pytest exited 0 with 141 passed."
+  },
+  "PowerShell": {
+    "test_v40b_monitor.ps1": "PASS 54 assertions",
+    "test_v40b_live_detail.ps1": "PASS including terminal-failure stage and stale-attempt rejection",
+    "test_v39l_monitor_liveness.ps1": "PASS 9 assertions",
+    "test_v40d_paused_monitor.ps1": "PASS"
+  },
+  "legacy_additional_tests": {
+    "passed": 34,
+    "failed": 15,
+    "errors": 9,
+    "scope": "Inherited V39F/V39G/V39H/V39I historical diagnostic and artifact tests",
+    "reasons": [
+      "22 cases require missing historical result fixtures (including one explicit missing-evidence assertion).",
+      "Two V39H assertions use older expectations: readiness source count 76 versus 105, and an earlier GPU occupancy schedule differs in 8/96 slots by at most 1 GPU."
+    ],
+    "not_claimed_as_pass": true,
+    "xml": "V40D_LEGACY_FIXTURE_TESTS.xml"
+  },
+  "completion_audit": "V40D_MAY_COMPLETION_AUDIT.json",
+  "preservation_audit": "V40D_FINAL_PRESERVATION_AUDIT.json",
+  "staged_frozen_bytes": {
+    "status": "PASS",
+    "entries_checked": 1184,
+    "drift": 0,
+    "scope": "All execution source/test manifest entries and the V40D policy; Git blob bytes compared with sealed SHA256"
+  },
+  "source_input_recheck_after_legacy_tests": "PASS",
+  "compile_selected_python": "PASS",
+  "whitespace_check": {
+    "result": "Two trailing-whitespace lines in generated legacy pytest XML retained as diagnostic evidence. CR-at-EOL-aware check reports no selected source-code whitespace findings. Existing earlier PR evidence has previously documented whitespace."
+  }
+}

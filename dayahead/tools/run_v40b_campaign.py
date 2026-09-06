@@ -19,12 +19,17 @@ def run_missing(day,case,progress):
     fp=runner.case_execution_fingerprint(REPO,day,case,aidc);beam=None
     progress({'case':case,'current_stage':'M1_ROUTE_PQ' if case=='B2' else 'FRESH'})
     if case=='B2':beam,_=runner._beam_case(REPO,day,case,aidc,aidc,fp)
-    result=runner._run_frozen_case(REPO,day,case,aidc,beam)
-    runner._write_case_checkpoint(REPO,day,case,result,fp)
-    cp=runner._checkpoint_path(REPO,day,case);case_root=runner._case_root(REPO,day,case)
+    from dayahead.v40d.policy import applied,case_fingerprint
+    with applied(REPO,baseline_namespace=True) as restoration_policy:
+        fp=case_fingerprint(fp,restoration_policy)
+        result=runner._run_frozen_case(REPO,day,case,aidc,beam)
+        result['AC_restoration_policy_sha256']=restoration_policy['policy_sha256']
+        runner._write_case_checkpoint(REPO,day,case,result,fp)
+        cp=runner._checkpoint_path(REPO,day,case);case_root=runner._case_root(REPO,day,case)
     validated=validate_case_files(day,case,cp,case_root)
     certificate={'status':'PASS','day':day,'case':case,'checkpoint':str(cp),'checkpoint_SHA':sha(cp),
-        'case_root':str(case_root),'files':validated['files'],'execution_fingerprint':fp}
+        'case_root':str(case_root),'files':validated['files'],'execution_fingerprint':fp,
+        'AC_restoration_policy_sha256':restoration_policy['policy_sha256']}
     write(ROOT/'days'/day/case/'CASE_CERTIFICATE.json',certificate);return certificate
 
 def day_worker(day):
@@ -128,8 +133,19 @@ def orchestrate():
 def main():
     p=argparse.ArgumentParser();g=p.add_mutually_exclusive_group(required=True);g.add_argument('--orchestrate',action='store_true');g.add_argument('--day',choices=DAYS)
     p.add_argument('--resume',action='store_true')
-    p.add_argument('--repair-id',choices=['02_windows_baseline_path','04_windows_long_paths'])
+    p.add_argument(
+        '--repair-id',
+        choices=[
+            '02_windows_baseline_path',
+            '04_windows_long_paths',
+            '06_orchestrator_inventory_timeout',
+            '07_v40b_authority_linkage',
+            '08_ac_restoration',
+        ],
+    )
     a=p.parse_args();os.chdir(REPO)
+    from dayahead.v40d.policy import assert_campaign_not_paused
+    assert_campaign_not_paused(REPO)
     if a.repair_id and not a.resume:p.error('--repair-id requires --resume')
     if a.resume and not a.orchestrate:p.error('--resume requires --orchestrate')
     if a.resume:

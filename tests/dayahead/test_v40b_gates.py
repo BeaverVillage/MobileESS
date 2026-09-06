@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from dayahead.v40b.common import REPO,ROOT,read,digest,sha
 from dayahead.v40b.reuse import build_matrix,load_historical,validate_case_files
-from dayahead.v40b.supervision import reject_duplicates,inventory
+from dayahead.v40b.supervision import _process_rows,reject_duplicates,inventory
 
 def test_sealed_method_and_date_adapter():
     f=read(ROOT/'V40B_V40A_METHOD_FREEZE.json')
@@ -28,6 +28,19 @@ def test_duplicate_orchestrator_and_date_protection():
     with pytest.raises(RuntimeError):reject_duplicates({'orchestrators':[{'pid':2}],'workers':[]},1)
     with pytest.raises(RuntimeError):reject_duplicates({'orchestrators':[],'workers':[{'day':'2025-05-01'},{'day':'2025-05-01'}]},1)
     reject_duplicates({'orchestrators':[{'pid':1}],'workers':[{'day':'2025-05-01'}]},1)
+
+def test_v40b_process_rows_uses_psutil_without_windows_cim(monkeypatch):
+    import psutil
+    from datetime import datetime,timezone
+    class Process:
+        info={'pid':101,'ppid':1,'create_time':datetime(2026,9,5,8,tzinfo=timezone.utc).timestamp(),
+              'name':'python.exe','exe':'C:/Python/python.exe',
+              'cmdline':['python','run_v40b_campaign.py','--day','2025-05-26']}
+    monkeypatch.setattr(psutil,'process_iter',lambda attrs,ad_value:[Process()])
+    assert _process_rows()==[{
+        'ProcessId':101,'ParentProcessId':1,'CreationDate':'2026-09-05T08:00:00+00:00',
+        'Name':'python.exe','ExecutablePath':'C:/Python/python.exe',
+        'CommandLine':'python run_v40b_campaign.py --day 2025-05-26'}]
 
 @pytest.mark.parametrize('case',['B0','B1','B2'])
 def test_real_current_loader_probe_and_schema(case):

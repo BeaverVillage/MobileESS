@@ -105,7 +105,10 @@ def run(day,progress):
                 return original_install(event_root,event_stage)
             observability.install=show_restoration
             try:
-                post=production_verification(REPO,day,result['a1'],result['mf'],authority,context,output/'postfreeze',write,fresh_progress)
+                from dayahead.v40d.policy import applied,reference
+                with applied(REPO) as restoration_policy:
+                    authority['AC_restoration_policy']=reference(REPO,restoration_policy)
+                    post=production_verification(REPO,day,result['a1'],result['mf'],authority,context,output/'postfreeze',write,fresh_progress)
             finally:observability.install=original_install
             joint_sha=validate_joint(post['joint'])
             write(output/'FINAL_JOINT_DECISION.json',post['joint'])
@@ -130,6 +133,7 @@ def run(day,progress):
             certificate={'status':'PASS','day':day,'case':'B3','method':freeze['identity']['method'],'method_SHA':freeze['method_SHA'],
               'FINAL_JOINT_DECISION_SHA':joint_sha,'files':files,'full_route_search_passes':1,'second_route_search':0,
               'Fresh_coverage':96,'Actual_scope':'EXISTING_FIXED_DECISION_REPLAY_IDENTITY_GATE'}
+            certificate['AC_restoration_policy_sha256']=restoration_policy['policy_sha256']
             write(output/'CASE_CERTIFICATE.json',certificate);return certificate
     finally:
         firewall.deactivate()

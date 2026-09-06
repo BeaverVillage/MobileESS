@@ -1,18 +1,23 @@
 {
-  "May_result_based_tuning_allowed": false,
-  "amendment": "Windows extended-length beam checkpoint addressing; full cache identities and scientific sources unchanged",
-  "execution_SHA": "5888a5021934bc391a3117ecd67c8c05e90af2e46e47193986f33307845e505a",
+  "May_result_based_tuning_allowed": true,
+  "amendment": "User-authorized V40D: post-selection AC restoration limit 5 to 10 for B2/B3. Planning method, margins, physical limits and route decisions unchanged. May-failure-informed revision explicitly recorded.",
+  "authorized_revision_controls": [
+    "max_restoration_rounds"
+  ],
+  "execution_SHA": "65fc658e119a760cf650749d34b3d19166c0d9c3e893f3638bf8a011d4b7ec05",
   "identity": {
+    "AC_restoration_policy_SHA": "8cfe7e2c07f1d65fd93318cbaf487c623f2a98b178afbeadd7451081f8a1856e",
     "Gurobi_threads_per_model": 4,
-    "input_manifest_SHA": "38f26cd955f51ea77d65e18a30579a920634868606732085c37b6cd5766f8710",
+    "effective_scientific_SHA": "bb8bf7feeee06c07d12111d0356b0e85edbd470232fc08630df17a2343f1273b",
+    "input_manifest_SHA": "aa872d6d1afadefa03676ad75d0dcdfc3d7ecb084555e1c945d3304ba3ecd8ae",
     "max_parallel_day_workers": 4,
     "method_SHA": "9af44cb41650c0e3c5643800f6600a4f8e91bb213a775a12b8d4cc47560b584a",
     "namespace": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40b_v40a_may_launch",
     "old_B3_reuse": false,
-    "repair_id": "V40B_WINDOWS_EXTENDED_PATHS_04",
-    "source_manifest_SHA": "911205c9c49ca1c4237e041d41d558e782b6226aedf621e8f3fe657f3b04efd4",
-    "supersedes_execution_SHA": "d11c25cedd62d60069c2308a8a35eff8265352bbb68111c64d4dbb6ca96b6977",
-    "tests_manifest_SHA": "890c710f2e4e3ab230143918dac5d8c599d5430faf851639373b7772b5e7681b"
+    "repair_id": "V40D_AC_RESTORATION_08",
+    "source_manifest_SHA": "d70f762d358a8a58bfcc134362dbd7acec06d9a633c40492c9a2d1dbd7e76469",
+    "supersedes_execution_SHA": "69729dab4ec414edeaf3924a4ab64f76eab1fec4ec49291cd2d1e8300d6e8065",
+    "tests_manifest_SHA": "3f2859cc13e12c9742d9542988924222480e01384f8ce022faebd23f916a4bdc"
   },
   "input_files": {
     "dayahead/artifacts/melbourne_aidc_april2025_scale/MELBOURNE_AIDC_APRIL2025_PRECHANGE_MANIFEST.json": "843ef31419acb5b14d8474dfed62437be1f7f308ccf2b37b1d673952b91f0069",
@@ -979,6 +984,7 @@
     "dayahead/artifacts/v40b_v40a_may_launch/reuse_certificates/2025-05-17_B2.json": "58060c8abd6f503ce26385bbbaed0cbe1252ec08db932f02ede47cea8710ba2a",
     "dayahead/artifacts/v40b_v40a_may_launch/reuse_certificates/2025-05-18_B0.json": "f1e638f57ef255789c34e1abbbd3e646ccd8154d55664186e6bfbb8c255e870e",
     "dayahead/artifacts/v40b_v40a_may_launch/reuse_certificates/2025-05-18_B1.json": "13f787932d97e02ea218ac1fa6242cdf5be90df29e6a0b3bd55c7ca73367e1b9",
+    "dayahead/artifacts/v40d_ac_restoration/V40D_RESTORATION_POLICY.json": "edb1e3b3bc9f96b6f822d211648f5d8f164b8b1fa1038812e6b3061cc5ce6b7f",
     "dayahead/cache/v37_may_locked_final/electrical/2025-05-01/data/D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-01.npz": "418f4b6a192e911ad5deaca3aa0799035882f835a7cdc9843e3a8fee7c5535bc",
     "dayahead/cache/v37_may_locked_final/electrical/2025-05-01/data/D1_AC_ANCHOR_SENSITIVITY_2025-05-01.npz": "f70f50f5aab93570b80af5cbb69c32cfa4bd4c794427013d69af8828b954a2a0",
     "dayahead/cache/v37_may_locked_final/electrical/2025-05-02/data/D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-02.npz": "c01f9992f83561a595f883c82b8302556d835463da68fccf33d3fd88ee435cc0",
@@ -1104,7 +1110,7 @@
     "dayahead/cache/v37_may_locked_final/traffic/shared/traffic/2025-05-31/ROUTE_TABLE.json.gz": "e2e391f10629e3db88d06c049c7e98f29f10af19d99e704bef7c7ddb9e58ac2d",
     "dayahead/cache/v37_may_locked_final/traffic/shared/traffic/2025-05-31/TRAFFIC_FORECAST.npz": "0a22d60bf3e60d0bc339fb6ff9ec7616195086105cf6014f80e2705981495934"
   },
-  "sealed_at_utc": "2026-09-05T16:11:53.191191+00:00",
+  "sealed_at_utc": "2026-09-06T01:22:40.741567+00:00",
   "source_files": {
     "dayahead/__init__.py": "91058936a21860f50bf6b48f5448ff02660c5d72ddc5affae15158b24abd0d09",
     "dayahead/aemo_vintage_v16_1.py": "d179c8a67e176cae3cb9f66a9546ee51df504c811a5f9515502f4ec40e0ad446",
@@ -1348,6 +1354,7 @@
     "dayahead/thermal/tests/test_models.py": "f3decf4520f2bd223cdd7b01064fcc7b01e5d8e933a663fd1198f4baa4d243c4",
     "dayahead/thermal/tests/test_psychrometrics.py": "3976122087f10fafa477fb1ebc31c4b014094fbaf2c9bdf2295127b863b56475",
     "dayahead/thermal/utils.py": "17609ec1b733686b0f1ce4c1adc19a4f285be74d2500ae007ee56ce3c7a2fced",
+    "dayahead/tools/adopt_v40d_restoration_trial.py": "0c793671b230154e698e57360b2caf15c096117c68f69e70df7b8a6ef48ed058",
     "dayahead/tools/audit_v39d_rack_semantics.py": "b8263ec8f0d515e4d07f31d19c64f9079d9f15a45f9b6afb50a2919809a1ac11",
     "dayahead/tools/audit_v39h_terminal_state.py": "630d1213bd524e045f6c1bfac55e3252233e264cc99dc870e07b0e80d9443837",
     "dayahead/tools/build_v17_flexibility_funnel_forensic.py": "6f1c527413961902848389beef5bb898cddd3d30772ee9238ea36ad0ced788a3",
@@ -1459,7 +1466,9 @@
     "dayahead/tools/run_v39i_threshold.py": "43229baa6cab94015f9acaf082a65b6272d6a7b6ab0ccd20f789b45be94b434d",
     "dayahead/tools/run_v39l_detached_may.py": "0f5d77c867f69c451e9679805664ef73c95358cb4e33bba15efc8a692c972a77",
     "dayahead/tools/run_v40a_development_smoke.py": "750e05ccc9e69db905f62900632e261f0ae0efe7e6ebec3b4777baec6a5e95ec",
-    "dayahead/tools/run_v40b_campaign.py": "6a2529783c86ef7a62f7fa8703608a58aab257274cfeef763ad4c936ba8d055d",
+    "dayahead/tools/run_v40b_campaign.py": "46ebae476c62e56de5f34c542da20ca5d4adb0d2ab30eb11cfd6141a74b66d7d",
+    "dayahead/tools/run_v40d_restoration_trial.py": "ca6df196e653c119187e7fcefab3da5c1fc13ed2aa98b25149473718d0bcd92a",
+    "dayahead/tools/seal_v40d_repair.py": "1627724ec09b97bd3d92510b48435db981c0faaaa22ee6633ac76663e4a3473b",
     "dayahead/tools/v39g_shadow_grid.py": "7b3ec771196dc8f33a42d8d33451319b094a649c3ce13e83ee7f2c1559831487",
     "dayahead/tools/v39g_shadow_report.py": "5d64b1a8abb5afbb148a6c7248955a2113219c7cc0b24b3986c3645a339dcb41",
     "dayahead/tools/v39h_closeout.py": "b38396d5649fc6c5d35ec3b5e2a228d8fe9f8275bd39aa8933dbd00314f84526",
@@ -1485,6 +1494,7 @@
     "dayahead/tools/v40b_regression.py": "6504295b4a1dd4827e2db578c23fcafde4d7fd4d34a8a5a6a3ba4b8e7b6170e8",
     "dayahead/tools/v40b_seal_prelaunch.py": "b09af702c25775d725036e568497971ea0be5052fe4c8cbfc5bc2b7e814721e8",
     "dayahead/tools/v40b_snapshot.py": "c4cd62fdf6a72b58f1f2403457b3f30cdd68ed4217aee5d80c0eca58bd1b85d1",
+    "dayahead/tools/v40c_supervise_once.py": "55018cd93a2d62e93cabbea6edab64c010a7dc02324411266fa1714c88c8e252",
     "dayahead/traffic_da.py": "d31b5cba0205505151912625b1251b50516200cd89398e4450836b74a299ed6e",
     "dayahead/v16_3_authority.py": "58b3b03062f6fdafaa3ba2ad453ac4992fc86a34556bf92112ba4eb52f4432f0",
     "dayahead/v16_3_correction.py": "096c457300e926cd41afa7bba2c4e52e391c8142b5d90d439aa517b2e8e2c5f4",
@@ -1783,13 +1793,15 @@
     "dayahead/v40a/recourse.py": "85f954e183091cc96353129b7bed1ffc2c3db360ec59f4dbb8aa5aa88356c95d",
     "dayahead/v40a/runtime.py": "c1cf3fd64e7a042a0ebaf25dcd3b82544c53bf03e23cfa46ab967a97ef6bae75",
     "dayahead/v40b/__init__.py": "2c65cc9b96372fb4a92a7013e469149d43bdc0e0c14ba4364b2bc7df12467d16",
-    "dayahead/v40b/b3.py": "bdfa488238f2e6403624a80f5b74c1f9ae1ff414e354d81a52f495f4c0610443",
+    "dayahead/v40b/b3.py": "03cb4350be8788d7b058bafb743a9ea8b54ce0aab55f4d8b7eaea38668d3717e",
     "dayahead/v40b/common.py": "0a206d81eb520f182e303fe32e0c317c0510ba148a8e43997564d32d6f99d044",
     "dayahead/v40b/may_adapter.py": "6029504322298ed369a3cd67d3787f34f68938c47bbf7af13043c8b1e70c2717",
-    "dayahead/v40b/recovery.py": "9530e5ed8ba3e305e684e0d62214a66eae9fba0983211c9c6d2a5f2285548db6",
+    "dayahead/v40b/recovery.py": "c0f51547983ef364d4266ef57625c54e82e0bb79282105f408ca763f7b294a6a",
     "dayahead/v40b/reuse.py": "d5d801c3bbe92e7bc1b4ad53323959ae6150a71f6b2c594804ee8fbd758b8bae",
-    "dayahead/v40b/supervision.py": "14059eb88bd5ada2ae506fbbad969b024e6b2f9d69cf7c40dcc3c74748547b6a",
+    "dayahead/v40b/supervision.py": "dafcda8e1712d0aee115d4812d268f6a67b99817e604c8d6e82807d6390f9186",
     "dayahead/v40b/windows_paths.py": "067db67ea81511245fb9bbfbd267915d859e4068d74d39c24cd624d7f7669da1",
+    "dayahead/v40d/__init__.py": "830aadb3068d6baa0f23477f78d74ccd3097c2c977da2350f97c4a9ad4278494",
+    "dayahead/v40d/policy.py": "7a74620e93a39644c47ff48669f0a22aa411db997bf7c90c99a1a4b88b6545b5",
     "driver_r25r_stage1_resume136.py": "f41c9019301a68b23a43d6521fe37e69a868c115cd57806f2e97ba23f8a1a4e0",
     "driver_r25s_stage1_resume_latest.py": "4a8f7a33515d5d1ef74c530fbdae8c07129f4829d4081b7b13e9a985b01ece15",
     "driver_r25t_stage1_resume_latest.py": "b804b209b727f07b83fc5d69d56265bcc1c1c326eb6cd66b5dc8ac919fe72fda",
@@ -2271,7 +2283,7 @@
     "tools/v37/prepare_may_sources.py": "43408f2a0170fda0b77fafd2726ea50cf0138884dc61e597a4e813dd4eb3828d"
   },
   "status": "PASS",
-  "supersedes_execution_SHA": "d11c25cedd62d60069c2308a8a35eff8265352bbb68111c64d4dbb6ca96b6977",
+  "supersedes_execution_SHA": "69729dab4ec414edeaf3924a4ab64f76eab1fec4ec49291cd2d1e8300d6e8065",
   "test_source_files": {
     "tests/dayahead/test_v40a_accepted_initial.py": "5b42e81853a974c145f8bb1167dd07b75e9510ee85ddddfa2b587d275181c8b5",
     "tests/dayahead/test_v40a_coordination.py": "81f5ba9ab79fdf136a51608e9a5184fe347b7dcc45ad0bc3c17502c865a73c8b",
@@ -2282,8 +2294,10 @@
     "tests/dayahead/test_v40a_recourse_model.py": "cca656d12f930b51697adaa5c6528714c1b567b8dd7ffce2d93f104a1a506e5e",
     "tests/dayahead/test_v40a_runtime_guard.py": "0ac8915e42e845f9ec146e3da332f6b79219cb6df915ab86e1d09ff44d82e963",
     "tests/dayahead/test_v40b_b3_evidence.py": "dad7a4dcfb4af3d14bcf00c4be7e6e86ce0b986a70f69eecc0ab123dd4a9ce23",
-    "tests/dayahead/test_v40b_gates.py": "dc2ff6c96a4b8c2969f23a10be061dd7d04142a851c3a5b7493bc5a9f990c8ac",
-    "tests/dayahead/test_v40b_recovery.py": "c845ead43f8e76a0b203d24e9d7bd585cd3cccf4cbd69bbbed276aa6bbfe4321",
-    "tests/dayahead/test_v40b_windows_paths.py": "d29f6728862a05675d7b0b79d9ae8047e5aa593da3ef247b2d8a73a198d830c7"
+    "tests/dayahead/test_v40b_gates.py": "1e083344547e74bffa5af52a0771105978aedc8dfad461351148d319cb74a505",
+    "tests/dayahead/test_v40b_recovery.py": "2f426defc86088de924fafe8db540def079f77dfbb85b68bc1350b297633c6fa",
+    "tests/dayahead/test_v40b_windows_paths.py": "d29f6728862a05675d7b0b79d9ae8047e5aa593da3ef247b2d8a73a198d830c7",
+    "tests/dayahead/test_v40d_paused_monitor.ps1": "2d2874e56b7d4ec38a7e7dd8b6201fe80d558f31bda3feb50a236b69668d917a",
+    "tests/dayahead/test_v40d_restoration_policy.py": "0e52a4b41af8adbb73bc775df558fb1a81bae6a079dd652ac6353223afeacb2e"
   }
 }

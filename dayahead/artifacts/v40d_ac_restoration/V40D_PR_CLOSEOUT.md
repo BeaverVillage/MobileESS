@@ -1,0 +1,21 @@
+The May campaign now completes all 31 dates and all 124 B0–B3 cases. The production path combines bounded AIDC–MESS coordination, detached Windows execution, checkpoint recovery and a monitor that shows the actual search/restoration phase.
+
+- V40A performs one full MESS route search, one AIDC feedback pass and one final fixed-route P/Q recourse. A feasible temporal solution cannot add RUNNING migrations just to improve J. Hard terminal, causal, capacity, WAN, route and battery constraints remain enforced.
+- V40B runs independently through Windows Task Scheduler, with at most four date workers and four Gurobi threads per model. Certified B0/B1/B2 reuse counts are 18/18/17; all 31 B3 cases use V40A.
+- Windows extended-length paths retain complete cache fingerprints. Recovery verifies checkpoints and process creation identities before adopting workers or retrying an exact classified failure. V40B process inventory uses psutil to avoid the blocking CIM query.
+- The established monitor layout now displays candidate, Fresh and restoration progress within the correct phase, including terminal failure, user pause and resolved-failure states.
+- V40D is an explicitly user-authorized, May-failure-informed scientific stop-rule revision: the post-selection AC restoration maximum increases from 5 to 10. Voltage limits (0.95–1.05 p.u.), margins, objective, AIDC decisions and selected routes are unchanged. Its own policy/result identities distinguish this revision from the original cap-5 method. May 21 B2 passed at round 8; May 28 and 30 passed at round 6. Original failed results and 24 previously completed dates were preserved.
+- Include previously untracked inherited source snapshots referenced by the execution freeze. Preserve exact CRLF bytes in two sealed source files through explicit Git attributes, so checkout conversion does not invalidate their SHA bindings.
+
+Validation and evidence:
+
+- Current V39L/V40A/V40B/V40D regression suite: **141 passed**. PowerShell monitor checks passed, including 54 layout assertions and 9 liveness assertions. OpenDSS emitted native import diagnostics under pytest capture; the suite exited successfully.
+- The final read-only audit independently checked all 124 case certificates, stored result hashes/schema and physical gates. All 31 B3 cases passed joint-decision identity, route/terminal invariants, bounded workflow, data firewall, Fresh 96/96 coverage and fixed-decision Actual replay checks.
+- Git blob verification: all 1,184 sealed source/test/policy entries match the bytes used in execution; selected Python files compile successfully. Frozen source/input verification passed again after testing.
+- Historical preservation: **64,845 files / 4,086,616,346 bytes, zero changes**.
+- Additional inherited V39 diagnostic/artifact suites: **34 passed, 15 failed, 9 errors**. Twenty-two unsuccessful cases need absent historical fixtures; two V39H assertions retain older source-count and occupancy expectations. These results are disclosed and are not counted as passing current-campaign regression.
+- Review receipts: `dayahead/artifacts/v40d_ac_restoration/V40D_MAY_COMPLETION_AUDIT.json`, `V40D_FINAL_PRESERVATION_AUDIT.json`, `V40D_PR_VALIDATION.json`, policy, trial certificates and repair audits.
+
+Generated pytest XML retains two diagnostic trailing-whitespace lines; the selected source diff passes the CR-at-EOL-aware whitespace check. Earlier frozen PR evidence retains its previously documented whitespace.
+
+Execution remains tied to the accepted local campaign workspace and frozen data. The 418 external frozen input files (1,682,208,955 bytes) are catalogued by the execution manifest; bulk case outputs and historical datasets are not all shipped in this PR. The completion audit requires those local inputs/results. Actual validation is the existing fixed-decision identity gate; this PR makes no independent realized-data superiority, statistical significance or global joint-optimality claim.

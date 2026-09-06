@@ -10,8 +10,8 @@ import time
 import uuid
 
 from .common import CASES, DAYS, REPO, ROOT, read, write, sha, now_utc
-from .supervision import inventory, reject_duplicates, verify_freeze, TOKENS
-from dayahead.v39l.infrastructure import current_process_identity, identity_matches, write_exclusive_json
+from .supervision import current_process_identity, inventory, reject_duplicates, verify_freeze, TOKENS
+from dayahead.v39l.infrastructure import identity_matches, write_exclusive_json
 
 REPAIR = ROOT / 'repairs/02_windows_baseline_path'
 SHORT_PASS = 'V40B'
@@ -71,6 +71,20 @@ def is_path_failure(failure):
     return len(path) >= 260 and OLD_PASS in path and 'RESTRICTED_VALUES.csv.tmp' in path and 'run_missing' in trace
 
 
+def is_source_authority_linkage_failure(failure):
+    expected = (
+        'ValueError("ACCEPTED_PRODUCTION_SOURCE_DRIFT:'
+        "['dayahead/v39l/infrastructure.py', 'tests/dayahead/test_v39l_infrastructure.py']\")"
+    )
+    trace = failure.get('traceback', '')
+    return (
+        failure.get('status') == 'FAIL'
+        and failure.get('error') == expected
+        and 'dayahead\\v40a\\authority.py' in trace
+        and 'source_authority' in trace
+    )
+
+
 def extended_path(path):
     path = Path(path).absolute()
     return Path('\\\\?\\' + str(path)) if os.name == 'nt' and not str(path).startswith('\\\\?\\') else path
@@ -102,16 +116,28 @@ def copy_baseline_cache(day):
 
 def prepare_retry(day):
     failure = ROOT / 'days' / day / 'FAILURE.json'
-    if not failure.exists() or not is_path_failure(read(failure)):
+    if not failure.exists():
+        return False
+    payload = read(failure)
+    path_failure = is_path_failure(payload)
+    authority_failure = is_source_authority_linkage_failure(payload)
+    if not path_failure and not authority_failure:
         return False
     archive = REPAIR / 'failed_attempts' / day
     if archive.exists():
         return False
     archive.mkdir(parents=True)
+    if authority_failure:
+        completion = read(ROOT / 'days' / day / 'CASE_COMPLETION.json')
+        if set(completion.get('cases', {})) != {'B0', 'B1', 'B2'}:
+            raise RuntimeError('AUTHORITY_RETRY_CHECKPOINT_MISMATCH')
+        for case in ('B0', 'B1', 'B2'):
+            completed_case(day, case, '')
     for path in (failure, ROOT / 'status' / (day + '.json'), ROOT / 'logs' / (day + '.log'), ROOT / 'days' / day / 'CASE_COMPLETION.json'):
         if path.exists():
             shutil.copyfile(path, archive / path.name)
-    copy_baseline_cache(day)
+    if path_failure:
+        copy_baseline_cache(day)
     failure.unlink()  # Its exact bytes now live in failed_attempts/day/FAILURE.json.
     return True
 
