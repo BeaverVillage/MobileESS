@@ -1,20 +1,49 @@
 {
-  "status": "FAIL",
-  "conditionally_causal_features": [
+  "status": "PASS_STRICT_CLOCK_ONLY",
+  "admitted_model_features": [
     "submit_hour",
     "weekday"
   ],
-  "admitted_model_features": [],
-  "admitted_PENDING_rows": 0,
-  "observed_PENDING_count": null,
-  "forbidden": [
-    "future start/end",
-    "runtime label",
-    "final status",
-    "unproven original requests",
-    "unproven support derivatives"
+  "predictor_matrix_columns": [
+    "submit_hour",
+    "submit_dow"
   ],
-  "training_and_support_rule": "end_time strictly before historical fit or prediction/support time; no V40S3 fit/support calculation executed",
-  "proxy_track": false,
-  "reason": "Independent D-1 PENDING membership and required resource feature provenance unavailable"
+  "available_at": "recorded submission episode; submit_time <= issue_time verified",
+  "membership_only": [
+    "submit_time",
+    "start_time",
+    "end_time"
+  ],
+  "labels_only": [
+    "runtime_seconds",
+    "end_time-start_time"
+  ],
+  "evaluation_weights_only": [
+    "num_gpus_req"
+  ],
+  "existing_comparators_only": [
+    "K0",
+    "requested_seconds"
+  ],
+  "rejected_predictors": [
+    "requested_seconds",
+    "num_gpus_req",
+    "num_nodes_req",
+    "num_cores_req",
+    "requested_memory_mib",
+    "partition",
+    "qos",
+    "hardware",
+    "standby",
+    "account",
+    "user",
+    "exact_count",
+    "structural_count",
+    "s_wall",
+    "d_wall",
+    "nearest_ratio"
+  ],
+  "original_submit_vs_episode": "Recorded episode clock; no promotion of unproven request versions or first-attempt linkage",
+  "support_calculation": "No support predictor used",
+  "new_proxy_track": false
 }

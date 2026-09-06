@@ -1,5 +1,5 @@
 {
-  "status": "PASS_STRICT_CLOCK_ONLY",
+  "status": "FAIL",
   "features": [
     {
       "feature": "submit_hour",
@@ -7,8 +7,8 @@
       "available_at": "recorded submission episode",
       "historical_provenance": "V40S feature census and V40S2 exact clock reconstruction",
       "original_submit_time_authority": "episode timestamp only; first-submit/attempt linkage unverified",
-      "current_D1_authority": "recorded submit<=issue, UTC hour/day derived exactly",
-      "admission_decision": "ADMITTED_STRICT_CAUSAL_CLOCK",
+      "current_D1_authority": "clock derivable if job independently observed PENDING; membership unproven",
+      "admission_decision": "CLOCK_ONLY_CONDITIONAL; NO_PENDINGS_AUTHORIZED",
       "evaluation_use": "historical requested GPU weights and subgroups only; not measured allocations"
     },
     {
@@ -17,8 +17,8 @@
       "available_at": "recorded submission episode",
       "historical_provenance": "V40S feature census and V40S2 exact clock reconstruction",
       "original_submit_time_authority": "episode timestamp only; first-submit/attempt linkage unverified",
-      "current_D1_authority": "recorded submit<=issue, UTC hour/day derived exactly",
-      "admission_decision": "ADMITTED_STRICT_CAUSAL_CLOCK",
+      "current_D1_authority": "clock derivable if job independently observed PENDING; membership unproven",
+      "admission_decision": "CLOCK_ONLY_CONDITIONAL; NO_PENDINGS_AUTHORIZED",
       "evaluation_use": "historical requested GPU weights and subgroups only; not measured allocations"
     },
     {
@@ -191,10 +191,10 @@
     "dayahead/v40a/invariants.py": "8a4fac784d3bd1647f5f2732e050f1b1135f2c472cea535d66eca761c7f638e7",
     "dayahead/v40g/domain.py": "a82f9a6871d11fdc99b779f247fa23fa2c5c8653ac70db840d4cfc436cea0686"
   },
-  "historical_PENDING_count": 10883,
+  "historical_PENDING_count": null,
   "original_request_ledger": "NOT_RECOVERED_IN_AUDITED_SOURCES",
-  "independent_D1_PENDING_snapshot": "NOT_REQUIRED_FOR_USER_AUTHORIZED_NORMATIVE_RECONSTRUCTION",
-  "causal_training_population": "RECONSTRUCTED_PENDING_JOB_ISSUE_ROWS",
-  "finding": "Membership reconstruction admitted by current normative authority; resource-feature edit provenance remains absent.",
+  "independent_D1_PENDING_snapshot": "NOT_RECOVERED_IN_AUDITED_SOURCES",
+  "causal_training_population": "UNAVAILABLE",
+  "finding": "Current snapshot_at_issue derives alive and PENDING from final start/end; dropping timestamps afterwards does not establish historical capture. Prior scoped source census remains applicable; no fresh raw archive recovery program run.",
   "inference_limit": "No claim that no authority can exist anywhere. Clock-only is not itself declared noncausal; missing PENDING selection authority independently blocks this task."
 }
