@@ -110,7 +110,7 @@ def review():
         47:('May/shadow firewall','May scientific reads=0, Apr24–30 shadow scientific reads=0, SEALED. Git 경로/index·기존 provenance 메타데이터 접근은 NONZERO로 별도 공개. 초기 sparse checkout으로 materialize된 R4 자료에는 과학적 row query 없음.'),
         48:('optimizer/Gurobi/OpenDSS/Fresh','모두 0회. 새 optimizer/전기 계산 호출 없음.'),
         49:('시스템 동결','A0/A1/M1/MF/migration/WAN/terminal 포함 전체 상속 Git 범위 변경 0. q=5576.44921875 s, PF=.95, Q control=NO, electrical=HOLD, FULL_MAY=NO.'),
-        50:('tests','PREFIT 79 checks PASS. 최종 TEST_REPORT 및 receipt에 postfit/closure 실제 결과를 기록. 과학적 안전성 판정과 별개.'),
+        50:('tests','PREFIT 79 checks PASS. '+('POSTFIT '+str(read('TEST_REPORT')['passed'])+' checks PASS. ' if (OUT/'V40R6_TEST_REPORT.json').exists() else '')+'최종 TEST_REPORT 및 receipt에 postfit/closure 실제 결과를 기록. 과학적 안전성 판정과 별개.'),
         51:('동일 seed 재현성','최종 8개 모델 독립 재학습 1회. CAL과 EXPOSED Q50/Q90/calibrated upper의 최대·평균 차이는 각 재현성 감사에 기록.'),
         52:('보호 범위','R5/R5R1 모든 materialized 파일 SHA256와 전체 inherited Git diff를 검사하여 변경 0. R6 source/artifacts/tests만 추가.'),
         53:('과학 커밋','FINAL_COMMIT_RECEIPT.json의 scientific_commit에서 정확한 SHA를 확인한다.'),
