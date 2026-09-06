@@ -1,0 +1,106 @@
+{
+  "candidate_addition_after_results": "FORBIDDEN",
+  "candidates": [
+    {
+      "family": "CURRENT_BASELINE",
+      "id": "C0",
+      "objective": "exact pinned MoE-XGBoost reg:absoluteerror",
+      "q": 5576.44921875
+    },
+    {
+      "family": "CAUSAL_POINT",
+      "id": "C1_L1",
+      "objective": "regression_l1"
+    },
+    {
+      "family": "CAUSAL_POINT",
+      "id": "C1_LOG",
+      "objective": "regression",
+      "target": "log1p(runtime_seconds)"
+    },
+    {
+      "alpha": 0.9,
+      "family": "CAUSAL_POINT",
+      "id": "C1_HUBER",
+      "objective": "huber",
+      "target": "runtime hours"
+    },
+    {
+      "alpha": 0.5,
+      "family": "CAUSAL_POINT",
+      "id": "C1_Q50",
+      "objective": "quantile"
+    },
+    {
+      "components": "log1p runtime regression in early/other historical groups",
+      "early_target": "FAILED or runtime <= 300 seconds",
+      "family": "MIXTURE",
+      "gate": "LightGBM binary causal X",
+      "id": "C2_MIXTURE",
+      "nominal": "probability-weighted component runtime expectations; future status never required"
+    },
+    {
+      "family": "DIRECT_QUANTILE",
+      "id": "C3_QUANTILE",
+      "quantiles": [
+        0.5,
+        0.9,
+        0.95
+      ],
+      "repair": "row-wise cumulative maximum"
+    },
+    {
+      "family": "SURVIVAL_DISTRIBUTIONAL",
+      "id": "C4",
+      "reason": "no lifelines or scikit-survival in candidate environment; no package installation",
+      "status": "NOT_EVALUATED_DEPENDENCY_UNAVAILABLE"
+    }
+  ],
+  "dependencies_install": "NO",
+  "envelopes": {
+    "R0": {
+      "grid_reserve": "0",
+      "hard_occupancy": "ceil900(point)",
+      "service": "point"
+    },
+    "R1": {
+      "grid_reserve": "0",
+      "hard_occupancy": "ceil900(upper90)",
+      "service": "point"
+    },
+    "R2": {
+      "grid_reserve": "GPU * (I[0,ceil900(upper90)) - I[0,ceil900(point)))",
+      "hard_occupancy": "ceil900(point)",
+      "service": "point"
+    },
+    "R3": {
+      "grid_reserve": "GPU * (I[0,ceil900(upper95)) - I[0,ceil900(upper90)))",
+      "hard_occupancy": "ceil900(upper90)",
+      "service": "point"
+    }
+  },
+  "lightgbm": {
+    "deterministic": true,
+    "force_col_wise": true,
+    "learning_rate": 0.05,
+    "max_bin": 255,
+    "min_child_samples": 100,
+    "n_estimators": 200,
+    "n_jobs": 1,
+    "num_leaves": 31,
+    "random_state": 4010,
+    "verbosity": -1
+  },
+  "seed": 4010,
+  "support_thresholds": [
+    100,
+    200,
+    500
+  ],
+  "walltime_bucket_upper_seconds": [
+    3600,
+    21600,
+    86400,
+    259200
+  ]
+}

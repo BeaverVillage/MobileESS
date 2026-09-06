@@ -1,0 +1,89 @@
+{
+  "bootstrap": {
+    "replicates": 2000,
+    "seed": 4010,
+    "unit": "UTC submit day; paired across methods"
+  },
+  "calibration": {
+    "bound": "max(point, base quantile + nonnegative q); no requested-walltime cap on candidate bounds",
+    "hierarchy": [
+      [
+        "hardware",
+        "standby",
+        "wall_bucket"
+      ],
+      [
+        "hardware",
+        "wall_bucket"
+      ],
+      [
+        "hardware"
+      ],
+      []
+    ],
+    "levels": [
+      0.9,
+      0.95
+    ],
+    "min_support": [
+      100,
+      200,
+      500
+    ],
+    "q_rule": "nonnegative residual finite-sample higher rank ceil((n+1)*coverage), capped at n",
+    "sparse_fallback": "skip exact group and use maximum q across eligible causal parents; out-of-support additionally uses requested walltime; abstain if request invalid"
+  },
+  "conservatism_gate": "overreserved GPU-hours and reserved GPU-hours <= requested-walltime reference; retain positive savings versus requested-walltime reference",
+  "coverage_gate": "overall and each critical group with N >= selected min_support in every non-overlapping fold and pooled validation",
+  "critical_groups": [
+    "H100",
+    "standby",
+    "H100-standby",
+    "COMPLETED H100-standby (evaluation only)"
+  ],
+  "critical_slot_definition": "all active-miss slots conservatively critical without independent pre-May line-loading authority; grid-specific metric unavailable",
+  "envelopes": {
+    "R0": {
+      "grid_reserve": "0",
+      "hard_occupancy": "ceil900(point)",
+      "service": "point"
+    },
+    "R1": {
+      "grid_reserve": "0",
+      "hard_occupancy": "ceil900(upper90)",
+      "service": "point"
+    },
+    "R2": {
+      "grid_reserve": "GPU * (I[0,ceil900(upper90)) - I[0,ceil900(point)))",
+      "hard_occupancy": "ceil900(point)",
+      "service": "point"
+    },
+    "R3": {
+      "grid_reserve": "GPU * (I[0,ceil900(upper95)) - I[0,ceil900(upper90)))",
+      "hard_occupancy": "ceil900(upper90)",
+      "service": "point"
+    }
+  },
+  "gpu_gate": "predicted-finished-but-actually-active GPU-slots strictly lower than C0 on paired replay",
+  "layer_separation": true,
+  "no_feasible_candidate": "retain current production baseline; report best research candidate without calling it a winner; HOLD",
+  "point_gate": "paired day bootstrap 95% CI strictly below zero for completed H100-standby underprediction difference and absolute mean-bias difference",
+  "priority": [
+    "underprediction safety eligibility",
+    "GPU-weighted critical active miss",
+    "coverage",
+    "overreserved GPU-hours",
+    "point MAE then absolute bias",
+    "complexity"
+  ],
+  "production_integration_default": "NO",
+  "replay": "same submit/start anchors for every method; realized start only evaluation anchor, never feature; capacity envelope comparison, no solver or site assignment",
+  "shadow_fail": "HOLD, never choose another candidate",
+  "support_classes": {
+    "OUT_OF_SUPPORT": "otherwise",
+    "REGIME_MISMATCH": "exact9 == 0 and other8 >= min_support",
+    "SPARSE_SUPPORT": "0 < exact9 < min_support",
+    "STRONG_SUPPORT": "exact9 >= min_support"
+  },
+  "target_coverage": 0.9
+}

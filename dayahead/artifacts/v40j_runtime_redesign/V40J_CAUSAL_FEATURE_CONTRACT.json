@@ -1,0 +1,61 @@
+{
+  "PF": 0.95,
+  "baseline_features": [
+    "requested_seconds",
+    "num_nodes_req",
+    "num_cores_req",
+    "num_gpus_req",
+    "requested_memory_mib",
+    "partition",
+    "qos",
+    "user",
+    "account"
+  ],
+  "categorical": [
+    "partition",
+    "qos",
+    "user",
+    "account",
+    "hardware"
+  ],
+  "causality_limitation": "source is retrospective sacct export; request fields assumed immutable as original nine-input authority; no historical request-edit ledger",
+  "features": [
+    "requested_seconds",
+    "num_nodes_req",
+    "num_cores_req",
+    "num_gpus_req",
+    "requested_memory_mib",
+    "partition",
+    "qos",
+    "user",
+    "account",
+    "submit_hour",
+    "submit_dow",
+    "submit_week",
+    "hardware",
+    "standby"
+  ],
+  "forbidden": [
+    "actual_runtime",
+    "actual_runtime_seconds",
+    "end_time",
+    "exit_code",
+    "final_status",
+    "job_state",
+    "nodelist",
+    "nodes_used",
+    "num_cores_alloc",
+    "num_nodes_alloc",
+    "processors_used",
+    "queue_wait",
+    "runtime_seconds",
+    "shared_job_count",
+    "start_time",
+    "state",
+    "state_simple",
+    "wallclock_used"
+  ],
+  "metadata": "submit timestamp derives UTC hour/day/week; hardware from requested partition, standby from QoS",
+  "production_api": "accept exact feature names/order; reject unknown or retrospective columns, not silently strip",
+  "status_use": "historical mixture target or evaluation strata only"
+}
