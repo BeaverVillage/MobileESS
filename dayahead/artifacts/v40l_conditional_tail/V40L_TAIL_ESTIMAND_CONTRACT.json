@@ -1,0 +1,79 @@
+{
+  "T90": "primary safe bound",
+  "T95": "extreme-risk diagnostic only",
+  "T_nom": "frozen K0",
+  "conditional_point_bias": "acknowledged, nominal not corrected",
+  "created_at": "2026-09-06T10:53:43.454307+00:00",
+  "features": [
+    "requested_seconds",
+    "num_nodes_req",
+    "num_cores_req",
+    "num_gpus_req",
+    "requested_memory_mib",
+    "partition",
+    "qos",
+    "user",
+    "account",
+    "submit_hour",
+    "submit_dow",
+    "submit_week",
+    "hardware",
+    "standby",
+    "wall_bucket",
+    "exact_count",
+    "near_count",
+    "support_class"
+  ],
+  "gates": {
+    "bootstrap": {
+      "interpretation": "descriptive day-dependence sensitivity; no iid or out-of-period coverage guarantee",
+      "interval": [
+        0.025,
+        0.975
+      ],
+      "resamples": 2000,
+      "seed": 4012,
+      "unit": "UTC submission date"
+    },
+    "coverage": "native unrounded Q90, independent of Q95; ties y<=bound covered; GPU weights requested GPU counts",
+    "coverage_threshold": 0.9,
+    "efficiency_order": [
+      "overreserved_GPU_hours",
+      "mean_safe_inflation_seconds",
+      "active_miss_GPU_5min_slots",
+      "registry_order"
+    ],
+    "eligibility": "all required coverage gates, no abstentions, finite safe>=K0 and Q95>=Q90, deterministic, provenance PASS",
+    "minimum_evaluation_N": 100,
+    "missing_required_subgroup": "INSUFFICIENT_SUPPORT and ineligible, never silently drop gate",
+    "no_winner": "V40L_TAIL_MODEL_INSUFFICIENT; shadow remains sealed",
+    "nominal": "Frozen K0 only; acknowledged conditional point bias remains; no point-winner reinterpretation",
+    "ordering_reconciliation": "Section10 explicitly includes inflation; use its complete efficiency ordering, followed by Section15 simpler-model tie break. No performance-dependent ordering change.",
+    "required": [
+      "overall",
+      "H100",
+      "STRONG_SUPPORT H100-standby",
+      "GPU_weighted_overall"
+    ],
+    "shadow_failure": "V40L_FINAL_SHADOW_FAIL_HOLD; no reselection/refit/q/threshold changes",
+    "success_mapping": {
+      "T0": "V40L_CONFORMAL_TAIL_READY",
+      "T4": "V40L_ML_TAIL_INSUFFICIENT_HIERARCHICAL_CONFORMAL_READY if no ML-containing method eligible, otherwise V40L_CONFORMAL_TAIL_READY",
+      "other": "V40L_K0_PLUS_CONDITIONAL_TAIL_READY"
+    },
+    "support_sufficient_definition": "exact causal feature9 historical count>=100, with end-known support before query; not calibration-group support chosen per candidate"
+  },
+  "positive_only": "permitted only in T7 conditional component with unconditional CDF reconstruction",
+  "residual": "actual - blocked rolling OOF K0",
+  "support_minimums": [
+    100,
+    200,
+    500
+  ],
+  "walltime_buckets_seconds": [
+    3600.0,
+    21600.0,
+    86400.0,
+    259200.0
+  ]
+}

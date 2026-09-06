@@ -1,0 +1,14 @@
+.......................F........................                         [100%]
+================================== FAILURES ===================================
+______________________ test_support_numeric_equivalence _______________________
+
+    def test_support_numeric_equivalence():
+        h=jobs();q=h.iloc[:1].copy();q.submit_time=pd.Timestamp('2025-03-01',tz='UTC');q['num_gpus_req']=2
+>       assert Support(h).transform(q).exact_count.iloc[0]==120
+E       assert np.float64(0.0) == 120
+
+dayahead\v40l\tests\test_contracts.py:49: AssertionError
+- generated xml file: C:\codex_mobileess_workspace\MobileESS_v40a_bounded_iterative_coopt\dayahead\artifacts\v40l_conditional_tail\TEST_RESULTS.xml -
+=========================== short test summary info ===========================
+FAILED dayahead/v40l/tests/test_contracts.py::test_support_numeric_equivalence
+1 failed, 47 passed in 2.40s

@@ -1,0 +1,857 @@
+# V40L — K0-PRESERVING CONDITIONAL TAIL RUNTIME MODEL
+# XGBoost Quantile / Residual Quantile / Conformal / AFT / Tail-Mixture Comparison
+
+STARTING RESEARCH COMMIT:
+2434a0e8a870ad7c52c34fdc0e270c6e164aebd8
+
+V40K는 최종 동결 상태다.
+
+V40K classification:
+V40K_POINT_MODEL_INSUFFICIENT
+
+V40K post-selection diagnostic:
+CONDITIONAL_POINT_BIAS_REMAINS
+
+point winner = NONE
+safe-bound fit = NOT OPENED
+final shadow = NOT OPENED
+
+============================================================
+0. SCIENTIFIC OBJECTIVE
+============================================================
+
+이번 V40L에서는 global point model을 교체하지 않는다.
+
+Nominal runtime authority:
+
+    T_nom(X) = frozen K0 prediction
+
+으로 고정한다.
+
+목적은 K0의 conditional residual upper tail을 예측하여:
+
+    T_safe,90(X)
+    T_safe,95(X)
+
+를 생성하는 것이다.
+
+핵심 질문:
+
+"어떤 job이 K0보다 훨씬 오래 살아남는가?"
+
+이다.
+
+즉 V40L은 point-model competition이 아니라
+conditional tail / uncertainty-model competition이다.
+
+============================================================
+1. WHY TAIL MODEL IS NECESSARY
+============================================================
+
+V40K Apr-01--07 frozen diagnostics:
+
+overall:
+N = 13,060
+underprediction = 50.061%
+median residual = +0.523 s
+
+그러나 conditional behavior는 크게 다름:
+
+12h exact:
+underprediction = 7.812%
+
+24h exact:
+underprediction = 66.605%
+
+48h exact:
+underprediction = 47.163%
+
+COMPLETED H100-standby:
+underprediction = 61.107%
+
+H100-standby positive residual:
+Q90 = 47,213.965 s
+Q95 = 86,380.965 s
+
+SPARSE_SUPPORT positive residual:
+Q90 = 108,305.613 s
+Q95 = 150,650.567 s
+
+따라서 fixed global q는
+heteroscedastic conditional tail을 충분히 표현하지 못한다.
+
+단:
+V40K의 conditional point bias도 존재하므로
+"point model is universally correct"라고 주장하지 않는다.
+
+============================================================
+2. FREEZE K0
+============================================================
+
+K0 point model은 절대 변경하지 않는다.
+
+Required SHA:
+기존 V40K K0 model/prediction hashes를
+V40K final receipt에서 읽어 검증한다.
+
+금지:
+
+- K0 refit
+- K0 hyperparameter change
+- K0 bias offset
+- K0 subgroup correction
+- K0 winner reinterpretation
+- Apr-01--07을 이용한 point retuning
+
+V40L에서는 K0가 nominal layer다.
+
+============================================================
+3. NEW V40L DATA PROTOCOL
+============================================================
+
+Apr-01--07은 이미 V40K에서 개봉됐으므로
+새 blind evaluation이라고 주장하지 않는다.
+
+사용 역할:
+
+<= 2025-03-31:
+tail-model training / OOF residual authority
+
+2025-04-01 ... 2025-04-07:
+VISIBLE DEVELOPMENT DIAGNOSTIC
+candidate sanity check / architecture development only
+
+2025-04-08 ... 2025-04-14:
+TAIL CALIBRATION BLOCK
+
+2025-04-15 ... 2025-04-23:
+TAIL MODEL SELECTION BLOCK
+
+2025-04-24 ... 2025-04-30:
+FINAL SHADOW — SEALED
+
+모든 boundary는 정확한 UTC timestamp로 preregister한다.
+
+2025-05-01 00:00 UTC 이후
+runtime/status/outcome row read 금지.
+
+============================================================
+4. RESIDUAL TARGET
+============================================================
+
+기본 residual:
+
+    r_i = T_actual,i - T_K0,i
+
+중요:
+
+tail model training에 사용할 residual은
+in-sample K0 residual이어서는 안 된다.
+
+historical training rows에는 반드시
+blocked / rolling OOF K0 prediction을 사용한다.
+
+즉:
+
+    r_i^OOF = T_actual,i - T_K0,i^OOF
+
+self-fit leakage 금지.
+
+기존 V40K OOF residual authority가 정확히 존재하면
+SHA와 temporal provenance를 검증해 재사용 가능.
+
+============================================================
+5. PREDECLARE TAIL CANDIDATES
+============================================================
+
+결과를 보기 전에 registry를 freeze한다.
+
+------------------------------------------------------------
+T0 — CURRENT GLOBAL q BASELINE
+------------------------------------------------------------
+
+현재 production:
+
+T_safe =
+T_K0 + 5576.44921875 s
+
+비교 기준.
+
+------------------------------------------------------------
+T1 — XGBOOST RESIDUAL Q90 / Q95
+------------------------------------------------------------
+
+가장 중요한 후보.
+
+XGBoost:
+
+objective = reg:quantileerror
+
+target:
+
+r^OOF = actual - K0_OOF
+
+quantiles:
+
+Q90 residual
+Q95 residual
+
+최종:
+
+T90 =
+K0 + max(0, q90_residual(X))
+
+T95 =
+K0 + max(0, q95_residual(X))
+
+필수 causal features:
+
+- requested walltime
+- GPU count
+- hardware
+- standby indicator if available pre-issue
+- partition/QoS
+- submission-time temporal features
+- existing causal 9 features
+- support diagnostics
+
+final COMPLETED/FAILED feature 금지.
+
+------------------------------------------------------------
+T2 — DIRECT XGBOOST RUNTIME QUANTILES
+------------------------------------------------------------
+
+직접:
+
+Q50(X)
+Q90(X)
+Q95(X)
+
+를 학습한다.
+
+단 nominal K0는 교체하지 않는다.
+
+이번 revision에서는 direct Q90/Q95만
+safe-bound candidate로 사용한다.
+
+비교:
+
+T90_direct = Q90_XGB
+
+T95_direct = Q95_XGB
+
+그리고:
+
+T90 >= K0
+T95 >= T90
+
+가 되도록 deterministic monotonic repair.
+
+quantile crossing count도 보고.
+
+------------------------------------------------------------
+T3 — XGBOOST Q90 + ONE-SIDED CONFORMAL
+------------------------------------------------------------
+
+T1 또는 T2의 raw Q90에
+별도 calibration block에서
+one-sided conformal correction을 적용한다.
+
+예:
+
+score_i =
+T_actual,i - Q90_raw,i
+
+calibration quantile c_0.90을 계산하여
+
+T90_CQR =
+Q90_raw + c
+
+단 c는 calibration block에서만 추정.
+
+목적:
+
+heteroscedastic quantile model의 적응성
++
+empirical 90% safety coverage.
+
+------------------------------------------------------------
+T4 — HIERARCHICAL CONDITIONAL CONFORMAL
+------------------------------------------------------------
+
+K0 residual 위에
+condition-aware conformal margin.
+
+Hierarchy:
+
+L1:
+hardware + standby + requested-walltime bucket
+
+L2:
+hardware + requested-walltime bucket
+
+L3:
+hardware
+
+L4:
+pooled
+
+support thresholds:
+
+100
+200
+500
+
+을 preregister.
+
+지원 부족 시 deterministic parent fallback.
+
+final status grouping 금지.
+
+------------------------------------------------------------
+T5 — XGBOOST AFT
+------------------------------------------------------------
+
+현재 설치된 XGBoost가 survival:aft를 지원하는지 확인.
+
+사용 가능한 경우 비교.
+
+목적:
+pre-May cutoff까지 종료되지 않은
+right-censored long-running job의 정보를
+버리지 않고 활용.
+
+단 censored label은
+May payload를 읽지 않고 만들 수 있을 때만 허용.
+
+예:
+
+known completed:
+lower = runtime
+upper = runtime
+
+right-censored:
+lower = observed_alive_duration_at_cutoff
+upper = +inf
+
+May 이후 actual completion time을 읽는 것은 금지.
+
+AFT에서 Q90/Q95 runtime extraction 방법은
+코드와 수식으로 명시.
+
+불가능하면:
+
+T5 = NOT_EVALUATED_CAUSAL_CENSOR_AUTHORITY_UNAVAILABLE
+
+------------------------------------------------------------
+T6 — DISCRETE HAZARD TAIL MODEL
+------------------------------------------------------------
+
+V40K K4의 point median과 별개로
+survival curve 자체를 tail 용도로 평가.
+
+P(T > t | X)
+
+를 추정하여
+
+Q90
+Q95
+
+를 복원.
+
+이번에는 Q50 point 경쟁에 쓰지 않는다.
+
+tail model로만 평가한다.
+
+------------------------------------------------------------
+T7 — TWO-STAGE EXCEEDANCE MODEL
+------------------------------------------------------------
+
+tail event를 별도 예측.
+
+Stage 1:
+
+p_plus(X) =
+P(actual > K0 | X)
+
+Stage 2:
+
+positive excess:
+
+e =
+actual - K0
+given e > 0
+
+의 upper conditional quantile 예측.
+
+중요:
+positive residual만 학습한 Q90을
+그대로 unconditional Q90이라고 부르지 않는다.
+
+Stage-1 probability와
+conditional excess distribution을 결합해
+unconditional tail CDF를 구성한다.
+
+수학적으로 올바르게 재구성할 수 있을 때만 승인.
+
+------------------------------------------------------------
+T8 — SUPPORT-AWARE HYBRID
+------------------------------------------------------------
+
+strong support에서는 ML quantile,
+sparse / regime mismatch에서는
+hierarchical conformal fallback.
+
+예:
+
+STRONG_SUPPORT
+→ XGB residual Q90
+
+SPARSE_SUPPORT
+→ parent-group conformal
+
+REGIME_MISMATCH
+→ more conservative parent
+
+OUT_OF_SUPPORT
+→ predeclared abstain / requested-walltime-based ceiling authority
+
+May-specific rule 금지.
+
+============================================================
+6. DO NOT TRAIN ONLY ON POSITIVE RESIDUALS
+============================================================
+
+중요한 통계적 규칙.
+
+T1 residual quantile model은
+전체 residual distribution을 학습한다.
+
+positive residual rows만으로 Q90을 학습한 뒤
+그 값을 unconditional Q90이라고 주장하는 것 금지.
+
+positive-only residual은
+T7 two-stage exceedance candidate에서만 허용.
+
+============================================================
+7. WALLTIME REGIME MUST BE EXPLICIT
+============================================================
+
+V40K에서:
+
+12h underprediction = 7.812%
+24h = 66.605%
+48h = 47.163%
+
+으로 크게 달랐다.
+
+따라서 requested walltime은
+tail model의 핵심 causal feature다.
+
+하지만:
+
+12h special-case rule
+24h special-case hand correction
+
+은 금지.
+
+general feature / bucket / interaction으로 사용.
+
+bucket boundary는 training 전에 freeze.
+
+============================================================
+8. PRIMARY TAIL METRICS
+============================================================
+
+모델 선택의 최우선은 MAE가 아니다.
+
+각 T candidate에 대해:
+
+A. Overall empirical Q90 coverage
+
+B. H100 Q90 coverage
+
+C. H100-standby Q90 coverage
+
+D. support-sufficient subgroup coverage
+
+E. GPU-weighted Q90 coverage
+
+F. predicted-finished-but-actually-active
+   GPU 5-min slots
+
+G. GPU-weighted underprediction seconds
+
+H. overreserved GPU-hours
+
+I. mean safe-duration inflation
+
+J. Q90/Q95 monotonicity
+
+계산.
+
+============================================================
+9. COVERAGE GATE
+============================================================
+
+Tail winner는 최소:
+
+overall Q90 coverage >= 90%
+
+H100 Q90 coverage >= 90%
+
+support-sufficient H100-standby Q90 coverage >= 90%
+
+GPU-weighted coverage >= 90%
+
+를 만족해야 한다.
+
+단 subgroup sample size가 너무 작으면
+INSUFFICIENT_SUPPORT로 별도 기록.
+
+Day-block bootstrap CI도 보고하되
+iid guarantee라고 주장하지 않는다.
+
+============================================================
+10. EFFICIENCY GATE
+============================================================
+
+coverage gate를 통과한 후보끼리는:
+
+MINIMIZE
+
+1. overreserved GPU-hours
+2. safe-duration inflation
+3. active-miss GPU slots
+
+순서로 선택.
+
+즉:
+
+"무조건 크게 예측해 100% coverage"
+
+는 winner가 아니다.
+
+V40J의 과도한 reservation 문제를 반복하지 않는다.
+
+============================================================
+11. Q95 ROLE
+============================================================
+
+Q95는 primary hard occupancy로 자동 사용하지 않는다.
+
+Q90:
+primary safe runtime
+
+Q95:
+extreme-risk diagnostic / future reserve candidate
+
+로 분리한다.
+
+Q95를 Q90 coverage failure를 숨기는 용도로 사용 금지.
+
+============================================================
+12. CONDITIONAL POINT BIAS HANDLING
+============================================================
+
+V40K에서 conditional point bias가 남아 있음을 인정한다.
+
+하지만 V40L에서는 K0 point를 변경하지 않는다.
+
+Residual tail model이
+subgroup별 location shift까지 안전 upper bound에서
+얼마나 흡수하는지 평가한다.
+
+예:
+
+24h regime에 positive residual bias가 있으면
+conditional Q90 margin이 자동으로 커질 수 있다.
+
+이것으로 nominal point가 교정됐다고 주장하지 않는다.
+
+============================================================
+13. APR-01--07 DEVELOPMENT USE
+============================================================
+
+Apr-01--07은 이미 노출됐으므로
+V40L candidate architecture를 진단하는 데 사용할 수 있다.
+
+하지만:
+
+- final tail winner 선정
+- conformal correction 선택
+- support threshold 선택
+
+은 Apr-01--07 결과로 하지 않는다.
+
+threshold/candidate registry는
+Apr-08 이후 payload를 열기 전에 freeze.
+
+============================================================
+14. CALIBRATION BLOCK
+============================================================
+
+Apr-08--14를 처음 열 때:
+
+tail-model structure와 hyperparameters는 이미 frozen.
+
+이 block에서는:
+
+- conformal correction
+- hierarchy residual quantiles
+
+만 fit.
+
+candidate family 변경 금지.
+
+============================================================
+15. SELECTION BLOCK
+============================================================
+
+Apr-15--23에서 처음으로
+T0–T8 frozen candidates를 비교.
+
+winner selection:
+
+FIRST:
+coverage gates
+
+THEN:
+minimum overreservation
+
+THEN:
+minimum active-miss
+
+THEN:
+simpler model
+
+winner가 없으면:
+
+V40L_TAIL_MODEL_INSUFFICIENT
+
+shadow는 열지 않는다.
+
+============================================================
+16. FINAL SHADOW
+============================================================
+
+tail winner가 frozen된 경우에만
+Apr-24--30을 처음 연다.
+
+아무것도 retune하지 않는다.
+
+검증:
+
+- overall Q90 coverage
+- H100
+- H100-standby
+- GPU-weighted coverage
+- active-miss GPU slots
+- overreserved GPU-hours
+- Q95 diagnostics
+
+FAIL 시:
+
+winner 변경 NO
+q 변경 NO
+model refit NO
+support threshold 변경 NO
+
+classification:
+
+V40L_FINAL_SHADOW_FAIL_HOLD
+
+============================================================
+17. CENSORED APRIL JOBS
+============================================================
+
+4월 submit이지만 May-01 cutoff 시점까지
+outcome이 알려지지 않은 job을 별도 census.
+
+May payload를 읽지 않는다.
+
+가능한 경우:
+
+right-censored
+
+로 AFT/hazard candidate에만 사용.
+
+일반 quantile regression에서는
+uncensored label이 없는 row를 임의 runtime으로 채우지 않는다.
+
+보고:
+
+- censored job count
+- GPU count
+- walltime distribution
+- hardware
+- standby
+- requested GPU-hours
+
+============================================================
+18. COMPUTE
+============================================================
+
+V40L도 CPU deterministic을 기본으로 한다.
+
+기존 V40K compute lineage와 분리.
+
+GPU 사용은 이번 revision에서 금지하거나,
+사용하려면 training 전에 별도 preregistration 필요.
+
+가장 간단한 선택:
+
+CPU ONLY.
+
+============================================================
+19. MAY FIREWALL
+============================================================
+
+May scientific reads:
+
+runtime/status = 0
+Actual = 0
+training = 0
+calibration = 0
+selection = 0
+
+V40I/V40J/V40K 문서는
+motivation/history authority로만 읽을 수 있다.
+
+May outcome 수치를
+tail threshold 선택에 사용 금지.
+
+============================================================
+20. GLOBAL HOLDS
+============================================================
+
+V40L 성공 여부와 무관하게:
+
+PF = 0.95 유지
+
+Q control = NO
+
+authority missing = 72 유지
+
+31-day electrical generation = HOLD
+
+B0/B1/B2/B3 optimization = NO
+
+FULL_MAY = NO
+
+============================================================
+21. TESTS
+============================================================
+
+최소:
+
+- K0 SHA unchanged
+- K0 prediction unchanged
+- OOF residual provenance
+- self-fit leakage rejection
+- May firewall
+- April split chronology
+- quantile alpha correctness
+- quantile crossing detection
+- monotonic repair determinism
+- residual Q90 full-population training
+- positive-only misuse rejection
+- CQR calibration separation
+- hierarchical fallback determinism
+- AFT censor bound validity
+- no May completion read
+- hazard CDF monotonicity
+- Q90 <= Q95
+- safe >= K0
+- GPU-weighted coverage accounting
+- overreservation accounting
+- selection before shadow
+- shadow no-retune
+- PF unchanged
+- Q control unchanged
+
+============================================================
+22. REQUIRED ARTIFACTS
+============================================================
+
+V40L_START_STATE.json
+V40L_TAIL_ESTIMAND_CONTRACT.json
+V40L_TEMPORAL_SPLIT_CONTRACT.json
+V40L_TAIL_CANDIDATE_REGISTRY.json
+V40L_K0_FREEZE_VERIFICATION.json
+V40L_OOF_RESIDUAL_AUTHORITY.json
+V40L_CENSORED_JOB_CENSUS.json
+V40L_T1_RESIDUAL_QUANTILE_REPORT.json
+V40L_T2_DIRECT_QUANTILE_REPORT.json
+V40L_T3_CQR_REPORT.json
+V40L_T4_HIERARCHICAL_CONFORMAL_REPORT.json
+V40L_T5_AFT_REPORT.json
+V40L_T6_HAZARD_REPORT.json
+V40L_T7_EXCEEDANCE_REPORT.json
+V40L_T8_HYBRID_REPORT.json
+V40L_TAIL_SELECTION_COMPARISON.json
+V40L_GPU_WEIGHTED_SAFETY_REPORT.json
+V40L_TAIL_METHOD_FREEZE.json
+V40L_FINAL_SHADOW_REPORT.json
+V40L_PROTECTED_SCOPE_DIFF.json
+V40L_TEST_REPORT.json
+V40L_FINAL_REVIEW.md
+V40L_FINAL_COMMIT_RECEIPT.json
+
+============================================================
+23. SUCCESS CLASSIFICATION
+============================================================
+
+Full success:
+
+V40L_K0_PLUS_CONDITIONAL_TAIL_READY
+
+Calibration-only success:
+
+V40L_CONFORMAL_TAIL_READY
+
+ML-tail insufficient but conformal adequate:
+
+V40L_ML_TAIL_INSUFFICIENT_HIERARCHICAL_CONFORMAL_READY
+
+Failure:
+
+V40L_TAIL_MODEL_INSUFFICIENT
+
+Shadow failure:
+
+V40L_FINAL_SHADOW_FAIL_HOLD
+
+============================================================
+24. FINAL RESPONSE
+============================================================
+
+한국어로 보고.
+
+반드시 포함:
+
+- starting commit
+- preregistration commit
+- final commit
+- K0 SHA unchanged
+- candidate T0–T8 status
+- selected Q90 method
+- selected Q95 method/diagnostic
+- overall coverage
+- H100 coverage
+- H100-standby coverage
+- GPU-weighted coverage
+- active-miss GPU slots baseline→winner
+- overreserved GPU-hours baseline→winner
+- censored jobs treatment
+- Apr-24--30 shadow opened 여부
+- shadow result
+- May reads
+- protected scope
+- tests
+- PF=0.95
+- Q control NO
+- 72 blockers
+- electrical HOLD
+- B0–B3 NO
+- FULL_MAY NO

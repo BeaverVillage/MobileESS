@@ -1,0 +1,157 @@
+{
+  "CPU_only": true,
+  "K0_refit_prohibited": true,
+  "XGBoost_parameters": {
+    "colsample_bytree": 1.0,
+    "device": "cpu",
+    "eta": 0.05,
+    "lambda": 1.0,
+    "max_bin": 256,
+    "max_depth": 5,
+    "min_child_weight": 20,
+    "nthread": 1,
+    "seed": 4012,
+    "subsample": 1.0,
+    "tree_method": "hist",
+    "verbosity": 0
+  },
+  "architecture_changes_after_calibration_open": false,
+  "family_addition_after_freeze": false,
+  "registry": {
+    "T0": {
+      "Q95": "same legacy bound diagnostic only; not claimed calibrated Q95",
+      "method": "K0+5576.44921875 seconds"
+    },
+    "T1": {
+      "alphas": [
+        0.9,
+        0.95
+      ],
+      "features": [
+        "requested_seconds",
+        "num_nodes_req",
+        "num_cores_req",
+        "num_gpus_req",
+        "requested_memory_mib",
+        "partition",
+        "qos",
+        "user",
+        "account",
+        "submit_hour",
+        "submit_dow",
+        "submit_week",
+        "hardware",
+        "standby",
+        "wall_bucket",
+        "exact_count",
+        "near_count",
+        "support_class"
+      ],
+      "objective": "reg:quantileerror",
+      "output": "K0 + max(0,3600*predicted residual quantile); monotonic repair",
+      "rounds": 400,
+      "target": "ALL signed rolling OOF residual /3600"
+    },
+    "T2": {
+      "Q50": "diagnostic only; K0 never replaced",
+      "alphas": [
+        0.5,
+        0.9,
+        0.95
+      ],
+      "objective": "reg:quantileerror",
+      "output": "max(K0,direct Q90), then max(T90,direct Q95)",
+      "rounds": 400,
+      "target": "runtime/3600 on pre-April end-known historical GPU jobs"
+    },
+    "T3_D": {
+      "base": "T2",
+      "calibration": "same as T3_R; base variants predeclared and not chosen using April01-07"
+    },
+    "T3_R": {
+      "base": "T1",
+      "calibration": "April08-14 signed one-sided score actual - repaired raw bound, independently at alpha .90/.95; add finite-sample order quantile; repair after correction"
+    },
+    "T4": {
+      "fallback": "first support-sufficient level, finally pooled; pooled N<100 means unavailable",
+      "hierarchy": [
+        [
+          "hardware",
+          "standby",
+          "wall_bucket"
+        ],
+        [
+          "hardware",
+          "wall_bucket"
+        ],
+        [
+          "hardware"
+        ],
+        []
+      ],
+      "minimum_support_variants": [
+        100,
+        200,
+        500
+      ],
+      "quantile": "ceil((n+1)*alpha) order statistic; insufficient order gives +infinity, not clipped sample maximum",
+      "scores": "April08-14 actual-K0, full signed residual"
+    },
+    "T5": {
+      "availability": "NOT_EVALUATED_CAUSAL_CENSOR_AUTHORITY_UNAVAILABLE",
+      "distribution": "normal",
+      "no_May_completion_read": true,
+      "objective": "survival:aft",
+      "quantile_formula": "T_alpha=exp(mu(X)+scale*Phi_inverse(alpha)), mu=raw output_margin; then safe monotonic repair",
+      "scale": 1.0
+    },
+    "T6": {
+      "censored_rows_added": 0,
+      "method": "Reuse SHA-frozen V40K FINAL_K4_INTERVAL_HAZARD.pkl survival curve, CPU prediction only",
+      "no_median_competition": true,
+      "quantiles": [
+        0.9,
+        0.95
+      ],
+      "training_end_known_before": "2025-04-01T00:00:00Z"
+    },
+    "T7": {
+      "conditional_alphas": [
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3,
+        0.35,
+        0.4,
+        0.45,
+        0.5,
+        0.55,
+        0.6,
+        0.65,
+        0.7,
+        0.75,
+        0.8,
+        0.85,
+        0.9,
+        0.95
+      ],
+      "reconstruction": "For e>=0, F(e|X)=1-p_plus+p_plus*F_plus(e|X). If alpha<=1-p_plus margin=0; else u=(alpha-1+p_plus)/p_plus and invert conditional CDF. u<=alpha<=.95. Conditional quantile knots monotonic repaired with Q_plus(0)=0; piecewise-linear inverse. Negative residual mass conservatively placed at zero.",
+      "stage1": "binary:logistic on all OOF rows, event residual>0, 300 rounds",
+      "stage2": "reg:quantileerror on strictly positive OOF excess/3600, 250 rounds"
+    },
+    "T8": {
+      "OUT_OF_SUPPORT": "ABSTAIN; no invented requested-walltime ceiling authority",
+      "REGIME_MISMATCH": "maximum supported parent margin L2-L4",
+      "SPARSE_SUPPORT": "hierarchy first supported parent, omit L1",
+      "STRONG_SUPPORT": "T1",
+      "abstain_gate": "Any abstention blocks full-cohort winner eligibility; never silently drop from coverage denominator",
+      "variants": [
+        100,
+        200,
+        500
+      ]
+    }
+  }
+}
