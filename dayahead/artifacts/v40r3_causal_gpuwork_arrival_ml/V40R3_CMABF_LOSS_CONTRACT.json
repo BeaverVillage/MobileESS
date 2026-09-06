@@ -1,0 +1,16 @@
+{
+  "target_scale": "TRAIN mature positive-target Q95 GPUh",
+  "occurrence": "Binary cross entropy on Y>0, coefficient 1",
+  "quantile": ".5*(mean pinball_Q50 + mean pinball_Q90), coefficient 1",
+  "positive_distribution": ".2*mean positive-only grid pinball; A1 uses all targets instead",
+  "burst": ".25*mean[(1+min(Y/Q95_train,3))*pinball_Q90]",
+  "alpha": 1.0,
+  "cap": 3.0,
+  "lambda_occ": 1.0,
+  "lambda_q": 1.0,
+  "lambda_positive": 0.2,
+  "lambda_burst": 0.25,
+  "peak_loss": null,
+  "target_day_loss_weights_used": false,
+  "interpretation": "Outcome weighting is operational emphasis, not a proper conditional quantile guarantee; raw and calibrated coverage separately reported"
+}

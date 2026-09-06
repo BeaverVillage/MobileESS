@@ -1,0 +1,284 @@
+{
+  "version": "V40R3",
+  "execution_authorized": true,
+  "fits_so_far": 0,
+  "start": "37ac7b4ee4f9130fd8c65cfb40184502663a9e5f",
+  "target": "Scoped authorized GPUh increments assigned by SUBMIT, K=48, fixed 30-minute bins; no active-GPU target",
+  "splits": {
+    "TRAIN": [
+      "2024-03-15",
+      "2024-08-30"
+    ],
+    "DEVELOPMENT": [
+      "2024-09-01",
+      "2024-10-30"
+    ],
+    "CALIBRATION": [
+      "2024-11-01",
+      "2024-11-29"
+    ],
+    "EXPOSED_EVALUATION": [
+      "2024-12-01",
+      "2025-02-26"
+    ],
+    "training_cutoff": "2024-08-31 08:00:00+00:00",
+    "selection_cutoff": "2024-10-31 08:00:00+00:00",
+    "calibration_cutoff": "2024-11-30 08:00:00+00:00",
+    "maturity_counts": {
+      "CALIBRATION": {
+        "days": 29,
+        "eligible": 26
+      },
+      "DEVELOPMENT": {
+        "days": 60,
+        "eligible": 58
+      },
+      "EXPOSED_EVALUATION": {
+        "days": 88,
+        "eligible": 88
+      },
+      "PURGE": {
+        "days": 3,
+        "eligible": 0
+      },
+      "TRAIN": {
+        "days": 169,
+        "eligible": 167
+      }
+    },
+    "random_split": false,
+    "holdout": null
+  },
+  "models": {
+    "ZERO": {
+      "family": "zero",
+      "output": [
+        0.0,
+        0.0
+      ],
+      "trials": 0,
+      "Q90_calibration": false
+    },
+    "SEASONAL": {
+      "family": "same-slot mature historical profiles",
+      "lags_days": [
+        7,
+        14,
+        21,
+        28
+      ],
+      "quantiles": [
+        0.5,
+        0.9
+      ],
+      "empty_fallback": 0.0,
+      "trials": 0,
+      "Q90_calibration": true
+    },
+    "LIGHTGBM": {
+      "family": "direct quantile gradient boosting",
+      "heads": [
+        0.5,
+        0.9
+      ],
+      "objective": "quantile",
+      "trials": 2
+    },
+    "HURDLE_LIGHTGBM": {
+      "family": "binary plus positive quantile boosting",
+      "positive_quantiles": [
+        0.01,
+        0.05,
+        0.1,
+        0.25,
+        0.5,
+        0.75,
+        0.9,
+        0.95,
+        0.99
+      ],
+      "trials": 2,
+      "quantile_math": "mixture inverse CDF, not p*Q90"
+    },
+    "XGBOOST": {
+      "family": "direct quantile gradient boosting",
+      "objective": "reg:quantileerror",
+      "quantile_alpha": [
+        0.5,
+        0.9
+      ],
+      "tree_method": "hist",
+      "trials": 2
+    },
+    "TFT": {
+      "family": "upstream TemporalFusionTransformer",
+      "hidden_size": 32,
+      "lstm_layers": 1,
+      "attention_heads": 2,
+      "hidden_continuous_size": 8,
+      "dropout": 0.1,
+      "trials": 2
+    },
+    "DEEPAR": {
+      "family": "upstream DeepAR",
+      "hidden_size": 32,
+      "rnn_layers": 2,
+      "dropout": 0.1,
+      "likelihood": "Gaussian on scaled continuous GPUh",
+      "forecast": "256 autoregressive samples, negative samples censored at zero",
+      "trials": 2,
+      "teacher_forcing": "Allowed only for training likelihood; evaluation uses generated rollouts and no observed decoder targets"
+    },
+    "NHITS": {
+      "family": "upstream NHiTS",
+      "hidden_size": 128,
+      "blocks": [
+        1,
+        1,
+        1
+      ],
+      "layers": 2,
+      "pooling": [
+        8,
+        4,
+        1
+      ],
+      "downsample_frequencies": [
+        8,
+        4,
+        1
+      ],
+      "dropout": 0.1,
+      "naive_level": false,
+      "backcast_loss": 0.0,
+      "trials": 2
+    },
+    "CMABF": {
+      "family": "independent dual-stream TCN hurdle",
+      "architecture_file": "V40R3_CMABF_ARCHITECTURE.json",
+      "trials": 2
+    }
+  },
+  "deep_training": {
+    "learning_rates": [
+      0.001,
+      0.0003
+    ],
+    "epochs": 40,
+    "batch_size": 16,
+    "patience": 8,
+    "min_delta": 1e-06,
+    "optimizer": "Adam",
+    "weight_decay": 0.0001,
+    "gradient_clip_norm": 1.0,
+    "search_seeds": [
+      20260906
+    ],
+    "repeat_seed": 20260906,
+    "forecast_samples": 256,
+    "forecast_sampling_seed": 20261906,
+    "mixed_precision": false,
+    "early_stopping": "Development primary metric, no teacher-forced metric; identical validation rule across families",
+    "max_trial_walltime_seconds": 1200,
+    "deadline_rule": "Checked at epoch boundary, keep best observed development checkpoint; disclose if reached",
+    "device": "cuda:0 when available, CPU fallback otherwise",
+    "deterministic_algorithms": true,
+    "warn_only": true,
+    "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+    "cudnn_deterministic": true,
+    "cudnn_benchmark": false,
+    "TF32": false
+  },
+  "tree_training": {
+    "learning_rates": [
+      0.03,
+      0.08
+    ],
+    "n_estimators": 400,
+    "max_depth": 6,
+    "lightgbm_num_leaves": 31,
+    "lightgbm_min_child_samples": 30,
+    "xgboost_min_child_weight": 10,
+    "reg_lambda": 1.0,
+    "max_bin": 127,
+    "seed": 20260906,
+    "threads": 4,
+    "device": "cpu",
+    "early_stopping": null,
+    "subsample": 1.0,
+    "feature_fraction": 1.0,
+    "deterministic_lightgbm": true,
+    "force_col_wise": true
+  },
+  "burst": {
+    "definition": "Y>=positive TRAIN Q95",
+    "training_positive_Q95_GPUh": 441.77754166666665,
+    "source": "Mature TRAIN targets only"
+  },
+  "primary_metric": "sum positive-interval Q90 pinball / sum positive actual GPUh",
+  "selection_hierarchy": [
+    "all required safety gates",
+    "primary probabilistic metric",
+    "missed burst GPUh",
+    "positive WAPE",
+    "cumulative WAPE",
+    "simpler model"
+  ],
+  "hyperparameter_selection": "Uncalibrated development primary, tie lower trial index; development labels mature before selection cutoff",
+  "strongest_baseline_freeze": "Before bootstrap/evaluation metrics: rank development safety-pass non-CMABF models by hierarchy; if none pass, freeze minimum-primary comparator and disclose diagnostic status",
+  "calibration": "Every nonzero family including seasonal: Q90 += max(0, finite-sample .9 quantile of residuals for overall, positive and training-threshold burst calibration subsets). Q50 unchanged. ZERO remains exactly zero.",
+  "calibration_claim_limit": "Conservative operational Q90 forecast; conditional calibration does not guarantee future coverage or exact nominal conditional quantiles",
+  "postprocessing": "All families: clamp negative increments at zero, then Q90=max(Q90,Q50); raw crossing counts retained. TFT/NHiTS raw head uses softplus. No result-driven repair.",
+  "safety": {
+    "overall_Q90": 0.9,
+    "positive_Q90": 0.9,
+    "burst_Q90": 0.9,
+    "minimum_pooled_group_N": 100,
+    "monthly_gate": "All conditional coverage gates when N>=100, every natural month separately; no pooling away a failure",
+    "catastrophic_block": "Overall point WAPE>2 in any month",
+    "causal_gate": "Every admitted feature available_at<=origin; no immature history or training label",
+    "crossing": "Cumulative horizon crossing=0 and final quantile crossing=0"
+  },
+  "bootstrap": {
+    "method": "Paired circular consecutive-day blocks",
+    "block_days": 7,
+    "replicates": 5000,
+    "seed": 20260906,
+    "CI": "percentile 2.5/97.5",
+    "superiority": "lower95>0"
+  },
+  "method_selection": "CMABF only if safety PASS, primary strictly better than every existing benchmark, and paired CI lower>0; otherwise strongest safety-pass existing model. If none safety-pass, safety FAIL.",
+  "cumulative": "cumsum nonnegative marginal increments; summed Q90 is a derived scenario, not asserted distributional cumulative Q90",
+  "maximum_positive_claim": "PREVALIDATED",
+  "confirmatory_available": false,
+  "May_scientific_reads": 0,
+  "holds": {
+    "PF": 0.95,
+    "Q_control": false,
+    "electrical_regeneration": "HOLD",
+    "B0_B3_electrical": false,
+    "FULL_MAY": false,
+    "optimizer": false,
+    "production_q": "UNCHANGED"
+  },
+  "V40R2_status": "SUPERSEDED_BY_V40R3; no resumption/code reuse/merge/fitting/deletion",
+  "frozen_source_and_data_SHA256": {
+    "dayahead/v40r3/common.py": "845310bea0ebd8455c7fb585a44ee4e7fdf9c172abe77e83d7c559ff5ec3cb6b",
+    "dayahead/v40r3/causal_snapshot.py": "dbdb62f1a9cd8b1dfa7a294164cb31ec4b79839b8f842c7bcd250afd71a7b15a",
+    "dayahead/v40r3/build_dataset.py": "371d4ec0a6dc7e0859be356b891a20f3fefe8751398129a82656d2fc4f123cc0",
+    "dayahead/v40r3/ingest.py": "2a82c06244062ac813f59108824f45ac388b246428cd1358e464237f8e6f3a18",
+    "dayahead/v40r3/neural.py": "fc6ab9e48b95683455d32fe3bba3aa29fc3b5bc8ee2372ab652b613c1d37f66b",
+    "dayahead/v40r3/metrics.py": "cfd96fa90e5472745fd7904c9fad62709bd2e52541dd5cffc548e7b340296105",
+    "dayahead/v40r3/train.py": "5eb9e88af490beed0a897acb8dfa2d8f2829dac17b00614c3b45cf6887d72b64",
+    "dayahead/v40r3/evaluate.py": "13f73cf0e3a44279b5d4dc031cd62540d8cc85e925452975e5feeef4369fcb2e",
+    "dayahead/artifacts/v40r3_causal_gpuwork_arrival_ml/causal_dataset.npz": "d434299f0ca9131a234239aaddfc0c9bd248fc93e6ba2aedcc06f1fa9a7eed36",
+    "dayahead/artifacts/v40r3_causal_gpuwork_arrival_ml/V40R3_LABEL_MATURITY_LEDGER.parquet": "64fb7614531f7aabbc6c76741299c7023b23421906485c341087d4c6d42140ed",
+    "dayahead/artifacts/v40r3_causal_gpuwork_arrival_ml/V40R3_FEATURE_AVAILABILITY_LEDGER.json": "f741da664d82e15e0f2c355ae3be3b0acf2aa90c6ad6e2072ee60db513373aa6",
+    "dayahead/artifacts/v40r3_causal_gpuwork_arrival_ml/V40R3_TARGET_POPULATION_CONTRACT.json": "ce623d225707b7feab81fde2d1fd81676af89d5787206082fcf361e365fa22db",
+    "dayahead/artifacts/v40r3_causal_gpuwork_arrival_ml/V40R3_INCREMENTAL_GPUH_TARGET_CONTRACT.json": "a9c56d47d3a38bf56280f24f10b824b84c2ecb1f81510825e3251980d27ba0c4",
+    "dayahead/artifacts/v40r3_causal_gpuwork_arrival_ml/V40R3_CMABF_ARCHITECTURE.json": "185e44396edca3b904b5edd9c96eea3ea6aa198378eae5eb14c96b122a7949a9",
+    "dayahead/artifacts/v40r3_causal_gpuwork_arrival_ml/V40R3_CMABF_LOSS_CONTRACT.json": "41499ab1355ff3c0fe379adb6fa3ded201ae4144b2c40325f35b46c954ddf23c",
+    "dayahead/artifacts/v40r3_causal_gpuwork_arrival_ml/V40R3_BENCHMARK_FAIRNESS_CONTRACT.json": "324f35f02f340290df3f63db8c1ea21167487ffb285568b7e984e3a6cb9cf6aa",
+    "dayahead/artifacts/v40r3_causal_gpuwork_arrival_ml/V40R3_SCI_BENCHMARK_REVIEW.md": "8e1a9b12d81960d98f4395a75c53d695fc3126452aa09096ef56071150132040"
+  }
+}

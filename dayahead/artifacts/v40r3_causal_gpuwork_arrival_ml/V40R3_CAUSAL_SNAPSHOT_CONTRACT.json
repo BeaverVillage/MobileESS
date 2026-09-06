@@ -1,0 +1,39 @@
+{
+  "implementation": "dayahead/v40r3/causal_snapshot.py",
+  "source_SHA256": "dbdb62f1a9cd8b1dfa7a294164cb31ec4b79839b8f842c7bcd250afd71a7b15a",
+  "past_names": [
+    "submission_count",
+    "mature_GPUh",
+    "mature_flag",
+    "maturity_age_hours",
+    "hour_sin",
+    "hour_cos",
+    "weekday_sin",
+    "weekday_cos"
+  ],
+  "future_names": [
+    "slot_fraction",
+    "lead_days",
+    "hour_sin",
+    "hour_cos",
+    "weekday_sin",
+    "weekday_cos",
+    "weekend",
+    "seasonal_GPUh_lag7d",
+    "seasonal_mature_lag7d",
+    "seasonal_GPUh_lag14d",
+    "seasonal_mature_lag14d",
+    "seasonal_GPUh_lag21d",
+    "seasonal_mature_lag21d",
+    "seasonal_GPUh_lag28d",
+    "seasonal_mature_lag28d"
+  ],
+  "history_intervals": 336,
+  "rolling_boundary": "[t0-L,t0), all right edges <=t0",
+  "mature_history": "Unmature values are zero placeholders with explicit mask=0; future completion timestamp and immature GPUh never encoded",
+  "resources": "No retrospective request-resource/QoS/partition fields admitted as features",
+  "normalization": "Training-only after preregistration; never include immature GPUh in scaler fit",
+  "telemetry_limit": "Logical event-time historical contract; periodic sacct export lacks physical ingestion/latency history, so no production telemetry certification",
+  "V40R2_code_reused": false,
+  "V40R2_estimator_reused": false
+}

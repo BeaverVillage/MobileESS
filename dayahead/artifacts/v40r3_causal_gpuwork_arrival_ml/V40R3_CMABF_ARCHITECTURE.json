@@ -1,0 +1,56 @@
+{
+  "working_name": "CMABF",
+  "novelty_established": false,
+  "encoder": "dual-stream causal dilated TCN",
+  "selected_after_target_statistics": true,
+  "history_steps": 336,
+  "step_minutes": 30,
+  "target_steps": 48,
+  "hidden_size": 32,
+  "dilations": [
+    1,
+    2,
+    4,
+    8
+  ],
+  "kernel_size": 3,
+  "normalization": "per-position LayerNorm",
+  "pooling": "last state concatenated with mean over historical states, linear projection to 32",
+  "stream_A": [
+    "submission_count",
+    "hour_sin",
+    "hour_cos",
+    "weekday_sin",
+    "weekday_cos"
+  ],
+  "stream_B": [
+    "mature_GPUh",
+    "mature_flag",
+    "maturity_age_hours"
+  ],
+  "fusion": "sigmoid gate of concatenated stream summaries; g*A+(1-g)*B",
+  "decoder": "Shared MLP (32+15)->64 GELU->32 GELU, residual 3-tap convolution over known-future representations",
+  "occurrence": "Linear(32,1) then sigmoid",
+  "magnitude": "Linear(32,9), softplus nonnegative spacings, cumulative sum / 9",
+  "positive_quantile_grid": [
+    0.01,
+    0.05,
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    0.9,
+    0.95,
+    0.99
+  ],
+  "unconditional_quantile": "0 if tau<=1-p; else positive quantile at (tau-1+p)/p",
+  "interpolation": "piecewise linear; add (u=0,Q=0) endpoint; desired unconditional .5/.9 imply u<=.9",
+  "hard_sanitation": "Maturity masking precedes all models and every ablation; no immature actual label is ever supplied",
+  "ablations": {
+    "A0": "Single encoder, mask/age information removed, hard value sanitation retained",
+    "A1": "No occurrence head in loss; p=1 and grid trained on all targets",
+    "A2": "No burst loss term",
+    "A3": "FULL"
+  },
+  "V40R2_code_or_estimand_reused": false
+}

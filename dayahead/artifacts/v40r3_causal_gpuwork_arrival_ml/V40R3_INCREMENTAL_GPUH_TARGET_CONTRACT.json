@@ -1,0 +1,20 @@
+{
+  "unit": "GPUh",
+  "formula": "Delta_W[k]=sum(gpus_requested*(end-start).total_seconds()/3600) for cohort jobs with submit in [bin_start,bin_end)",
+  "K": 48,
+  "interval_minutes": 30,
+  "forecast_origin": "D-1 18:00 fixed AEST",
+  "target_window": "Next operating day [00:00,24:00) fixed AEST",
+  "assignment": "Entire service demand to submission interval, never historical execution slots",
+  "cumulative": "cumsum of nonnegative increments",
+  "cumulative_uncertainty_warning": "Sum of marginal Q90 increments is a derived conservative scenario, not generally the Q90 of the cumulative random total",
+  "compatibility_horizons_minutes": [
+    30,
+    60,
+    120,
+    240,
+    1440
+  ],
+  "compatibility_horizon_anchor": "Operating-day start, not issue time; first target begins 360 minutes after issue",
+  "no_GPU_to_power_conversion": true
+}

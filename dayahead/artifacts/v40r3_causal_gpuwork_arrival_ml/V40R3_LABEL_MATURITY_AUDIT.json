@@ -1,0 +1,42 @@
+{
+  "definition": "max(interval/day right edge, max end of every contributing modeled job); empty-bin knowledge cannot precede bin close",
+  "history_guard": "max right edge/all raw job ENDs, no unresolved ENDs; stricter than modeled-label maturity and calculable from observed event completion counts",
+  "training_cutoff": "2024-08-31 08:00:00+00:00",
+  "development_selection_cutoff": "2024-10-31 08:00:00+00:00",
+  "calibration_cutoff": "2024-11-30 08:00:00+00:00",
+  "counts": {
+    "CALIBRATION": {
+      "days": 29,
+      "eligible": 26
+    },
+    "DEVELOPMENT": {
+      "days": 60,
+      "eligible": 58
+    },
+    "EXPOSED_EVALUATION": {
+      "days": 88,
+      "eligible": 88
+    },
+    "PURGE": {
+      "days": 3,
+      "eligible": 0
+    },
+    "TRAIN": {
+      "days": 169,
+      "eligible": 167
+    }
+  },
+  "excluded_before_fit": 2,
+  "history_mature_fraction": {
+    "N": 349,
+    "mean": 0.7449430348538396,
+    "median": 0.7470238208770752,
+    "P90_P95_P99": [
+      0.8333333134651184,
+      0.8636904597282408,
+      0.928690481185913
+    ],
+    "max": 0.9970238208770752
+  },
+  "unmature_workload_published": false
+}

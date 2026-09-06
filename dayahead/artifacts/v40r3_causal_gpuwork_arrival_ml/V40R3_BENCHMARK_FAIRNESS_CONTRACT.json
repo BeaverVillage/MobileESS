@@ -1,0 +1,16 @@
+{
+  "same_cohort": true,
+  "same_target": true,
+  "same_origin": true,
+  "same_label_maturity_exclusions": true,
+  "same_train_dev_calibration_evaluation_dates": true,
+  "same_source_information": true,
+  "representations": "Trees flatten the exact past tensor and concatenate the exact decoder context; deep models receive the same tensors",
+  "no_privileged_CMABF_input": true,
+  "ML_trials_per_family": 2,
+  "deep_budget_identical": true,
+  "neural_repeat_policy": "Winner independently retrained from the same fixed seed; max/mean prediction difference and metric variation measured, never assume bitwise equality",
+  "tree_repeat_policy": "Selected LightGBM/hurdle/XGBoost retrained independently with the same seed",
+  "ablation_budget": "Each of A0/A1/A2 gets one configuration using preregistered full-model selected LR plus one independent repeat; secondary only, cannot replace P1 or enlarge primary search",
+  "concurrent_execution": "CPU tree fitting may overlap GPU deep fitting; trial/epoch ceilings unchanged, walltime logged"
+}

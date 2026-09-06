@@ -1,0 +1,166 @@
+{
+  "status": "RECOVERED_WITH_INTERFACE_LIMITS",
+  "before_target_resolution": true,
+  "slow_scheduling_grid_minutes": 30,
+  "event_observation_interval_minutes": 5,
+  "maximum_refresh_minutes": 30,
+  "fast_service_step_minutes": 5,
+  "DayAhead_existing_planner_grid_minutes": 15,
+  "R26_multires_route_grid": "5 minutes for first hour, 15 thereafter; route stages are distinct from the 30-minute workload slow-master contract",
+  "work_units": "Original PFR normalized GPU-hour accounting; V40R3 unnormalized observed authorized GPUh proxy, not hardware-independent work",
+  "initial_work": "required_gpu_count * baseline_runtime_hours",
+  "service_progress": "remaining_next=max(0,remaining - gpu_count*compute_rate_fraction*5/60)",
+  "aggregate_conservation": "B[k+1]=B[k]+Delta_W[k]-S[k], S cannot exceed arrived available work",
+  "legacy_DayAhead_adapter": "96x15-min H100-node-hour increments, backlog conservation; conversion is NOT reused for R3 GPU counts",
+  "cumulative_vs_incremental": "Legacy K5B2 independently predicted cumulative horizons. Downstream service accounting subtracts work increments; cumulative availability derives by summation.",
+  "R3_target_intervals": 48,
+  "R3_interval_minutes": 30,
+  "integration_authorized": false,
+  "forecast_origin": "D-1 18:00 fixed AEST = D-1 08:00 UTC",
+  "operating_day": "D 00:00..D+1 00:00 fixed AEST; [start,end)",
+  "evidence": [
+    {
+      "path": "pfr/contracts/SLOW_FAST_CONTROLLER_CONTRACT.json",
+      "SHA256": "10ec4d84b7edec14494d7ff554ee50fe65bc8acad608fceb604453450d427ce5",
+      "excerpts": [
+        {
+          "line": 4,
+          "text": "  \"replanning_interval_minutes\": 30,"
+        }
+      ]
+    },
+    {
+      "path": "pfr/contracts/AI_TRAINING_MODEL.json",
+      "SHA256": "040877f220600fe3e7bf6105c1dd0bc078cd790abd215a98b036d6c2323aa060",
+      "excerpts": [
+        {
+          "line": 8,
+          "text": "  \"work_unit\": \"H100_EQUIVALENT_GPU_HOUR\","
+        },
+        {
+          "line": 9,
+          "text": "  \"work_unit_claim\": \"normalized_progress_accounting_not_FLOP_or_token_ground_truth\","
+        },
+        {
+          "line": 10,
+          "text": "  \"initial_work_formula\": \"required_gpu_count * baseline_runtime_hours\","
+        },
+        {
+          "line": 11,
+          "text": "  \"five_minute_progress_formula\": \"max(0, remaining - required_gpu_count * compute_rate_fraction * 5/60)\","
+        }
+      ]
+    },
+    {
+      "path": "pfr/contracts/HIERARCHICAL_MOVE_BLOCKED_MIXED_INTEGER_MPC_V1.json",
+      "SHA256": "563d185e0fbce61ac677d397e5862d516b643086aeb92fe36f0a495c014ab70a",
+      "excerpts": [
+        {
+          "line": 12,
+          "text": "    \"grid_minutes\": 30,"
+        },
+        {
+          "line": 36,
+          "text": "    \"grid_minutes\": 5,"
+        }
+      ]
+    },
+    {
+      "path": "r26/config/r26_contract.json",
+      "SHA256": "05053f6dc994e5f4c58fa11142967962c5dd8d3c9acafcbb44df71f3cb3cd184",
+      "excerpts": [
+        {
+          "line": 3,
+          "text": "  \"cadence_seconds\": 300,"
+        }
+      ]
+    },
+    {
+      "path": "r26/config/event_config.example.json",
+      "SHA256": "1cec84b4863a6e85caf86d0477ac73a2ce05d01ab22c9d02ff46f4b287422608",
+      "excerpts": [
+        {
+          "line": 28,
+          "text": "  \"max_refresh_steps\": 6,"
+        }
+      ]
+    },
+    {
+      "path": "pfr/slow_fast.py",
+      "SHA256": "c981aed04b2e3f1991ba3433546020f68cbb763fa5f8b64e1a8ce0adecd6c41b",
+      "excerpts": [
+        {
+          "line": 39,
+          "text": "    replanning_interval_minutes: int = 30"
+        },
+        {
+          "line": 49,
+          "text": "        if not (self.fast_step_minutes < self.replanning_interval_minutes <= self.planning_horizon_minutes):"
+        },
+        {
+          "line": 51,
+          "text": "        if self.replanning_interval_minutes % self.fast_step_minutes:"
+        },
+        {
+          "line": 150,
+          "text": "    remaining_work_gpu_hours: Mapping[str, float]"
+        },
+        {
+          "line": 157,
+          "text": "        _finite_nonnegative(self.remaining_work_gpu_hours, \"remaining work\")"
+        },
+        {
+          "line": 263,
+          "text": "    jobs = set(state.remaining_work_gpu_hours)"
+        },
+        {
+          "line": 293,
+          "text": "        executed = int(limits.job_gpu_count[job_id]) * fraction * dt_hours"
+        },
+        {
+          "line": 295,
+          "text": "        remaining[job_id] = max(0.0, float(state.remaining_work_gpu_hours[job_id]) - executed)"
+        }
+      ]
+    },
+    {
+      "path": "dayahead/aidc_service_contract.py",
+      "SHA256": "972a2f1b4dc75753d1673b2ef8c5e9d96f8d6cd3543157a8059a0f94b452b643",
+      "excerpts": [
+        {
+          "line": 24,
+          "text": "        if cumulative_processed > cumulative_arrival + 1e-9:"
+        },
+        {
+          "line": 26,
+          "text": "        backlog.append(backlog[-1] + arrival - processed)"
+        }
+      ]
+    },
+    {
+      "path": "dayahead/v36/contracts.py",
+      "SHA256": "e15be2ebc818d31c9a17de0ec048d7fddfbf705a99243220e875fbf66fba2b90",
+      "excerpts": [
+        {
+          "line": 20,
+          "text": "AEST = timezone(timedelta(hours=10), name=\"AEST_FIXED_UTC_PLUS_10\")"
+        }
+      ]
+    },
+    {
+      "path": "dayahead/v37/aidc_materializer.py",
+      "SHA256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+      "excerpts": [
+        {
+          "line": 103,
+          "text": "def issue_time(day: str) -> datetime:"
+        },
+        {
+          "line": 104,
+          "text": "    return datetime.fromisoformat(day).replace(tzinfo=AEST) - timedelta(hours=6)"
+        }
+      ]
+    }
+  ],
+  "authority_read_scope": "Allowlisted code/config; some January development runtime commentary was exposed in the hierarchical contract; no May scientific outcomes read"
+}

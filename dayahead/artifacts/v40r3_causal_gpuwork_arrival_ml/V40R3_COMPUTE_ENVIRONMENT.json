@@ -1,0 +1,50 @@
+{
+  "python": "3.11.7",
+  "python_executable": "C:\\codex_mobileess_workspace\\v40r3_ml_runtime\\Scripts\\python.exe",
+  "frameworks": {
+    "torch": "2.8.0+cu128",
+    "pytorch-forecasting": "1.5.0",
+    "lightning": "2.5.5",
+    "pytorch-lightning": "2.6.5",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "lightgbm": "4.6.0",
+    "xgboost": "3.0.5"
+  },
+  "GPU": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "CUDA_runtime": "12.8",
+  "CUDA_available_and_tensor_execution_verified": true,
+  "driver_supported_CUDA_max": "13.0",
+  "device": "cuda:0",
+  "training_settings": {
+    "learning_rates": [
+      0.001,
+      0.0003
+    ],
+    "epochs": 40,
+    "batch_size": 16,
+    "patience": 8,
+    "min_delta": 1e-06,
+    "optimizer": "Adam",
+    "weight_decay": 0.0001,
+    "gradient_clip_norm": 1.0,
+    "search_seeds": [
+      20260906
+    ],
+    "repeat_seed": 20260906,
+    "forecast_samples": 256,
+    "forecast_sampling_seed": 20261906,
+    "mixed_precision": false,
+    "early_stopping": "Development primary metric, no teacher-forced metric; identical validation rule across families",
+    "max_trial_walltime_seconds": 1200,
+    "deadline_rule": "Checked at epoch boundary, keep best observed development checkpoint; disclose if reached",
+    "device": "cuda:0 when available, CPU fallback otherwise",
+    "deterministic_algorithms": true,
+    "warn_only": true,
+    "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+    "cudnn_deterministic": true,
+    "cudnn_benchmark": false,
+    "TF32": false
+  },
+  "fits_before_registration": 0
+}
