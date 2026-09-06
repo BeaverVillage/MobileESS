@@ -127,6 +127,24 @@ def evidence():
     gate_path = OUT / 'Q90_BASELINE_RETAINED_B0_GATE.json'
     gate = read(gate_path)
     from dayahead.v41.campaign import verify_receipt
+    state = read(RUNTIME / 'campaign_state.json')
+    for row in state['units'].values():
+        if row['status'] != 'COMPLETE':
+            continue
+        require(row['policy'] == 'B0', 'NON_B0_COMPLETE_REQUIRES_SEPARATE_GAP03_AUDIT')
+        for phase in ('dayahead', 'actual'):
+            receipt_path = Path(row[phase + '_receipt']['path'])
+            receipt = read(receipt_path)
+            matches = [entry for entry in gate['receipts']
+                if entry['day'] == row['day'] and read(entry['receipt']['path']) == receipt]
+            if matches:
+                require(len(matches) == 1, 'DUPLICATE_B0_REUSE_RECEIPT')
+                continue
+            common = RUNTIME / 'inputs' / row['day'] / 'common_q90_v3'
+            reference = record(common / 'COMMON_B0_REFERENCE_JOBS.json')
+            gate['receipts'].append(dict(day=row['day'], phase=phase, receipt=record(receipt_path),
+                old_reference=reference, new_reference=reference, attested_changed_paths=[],
+                input_equality_evidence=[record(common / 'COMMON_INPUT_RECEIPT.json')]))
     checks = []
     for entry in gate['receipts']:
         receipt = verify_receipt(Path(entry['receipt']['path']), None)
