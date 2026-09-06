@@ -1,0 +1,18 @@
+{
+  "legacy_F30": "runtime>=30min AND observed queue>=15min; fixed=complement in primary clean cohort",
+  "raw_jobs_checked": 405777,
+  "fixed_jobs": 387746,
+  "flexible_jobs": 18031,
+  "fixed_flexible_job_overlap": 0,
+  "time_series_rows": 122880,
+  "max_abs_fixed_plus_flex_minus_total": 1.1368683772161603e-13,
+  "retrospective_identity_pass": true,
+  "causal_partition_pass": false,
+  "current_DayAhead": "RUNNING and protected/unknown QoS fixed; normal/standby pending temporally controllable per submission-side rules; different semantics from retrospective F30",
+  "evidence": {
+    "path": "dayahead/v37/aidc_materializer.py",
+    "line": 126,
+    "needle": "def _classify_pending",
+    "file_sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022"
+  }
+}

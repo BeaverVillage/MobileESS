@@ -1,0 +1,46 @@
+version: "2.0.2"
+
+paths:
+  raw_root: "/mnt/c/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/raw데이터"
+  input_filename: "esif.hpc.kestrel.job-anon.zip"
+  local_work_root: "~/mobile_ess_work/kestrel"
+  review_root: "/mnt/c/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/work"
+  processed_root: "/mnt/c/Users/kjw39/OneDrive/Desktop/4-2/Mobile ESS/processed데이터/데이터센터/NLR Kestrel Jobs Data"
+
+integrity:
+  expected_sha256: "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f"
+  verify_sha256: true
+
+resources:
+  threads: 4
+  memory_limit: "4GB"
+  minimum_free_disk_gib: 6
+  enable_progress_bar: true
+
+filters:
+  completed_state: "COMPLETED"
+  # 쉼표로 결합된 partition token도 인식합니다.
+  h100_partition_regex: "(^|,)gpu-h100(s|l)?(-stdby)?($|,)"
+  standby_marker: "-stdby"
+  exclude_standby_from_primary: true
+  require_positive_gpu: true
+  require_valid_time_order: true
+  deduplicate_by_id: true
+
+aggregation:
+  interval_minutes: 5
+  make_dense_series: true
+
+timezone:
+  source_local: "America/Denver"
+  canonical: "UTC"
+
+publish:
+  copy_processed_to_windows: true
+  make_review_zip: true
+
+cleanup:
+  remove_local_input_zip_after_success: true
+  remove_extracted_parquet_after_success: true
+  remove_duckdb_database_after_success: true
+  keep_local_processed: true

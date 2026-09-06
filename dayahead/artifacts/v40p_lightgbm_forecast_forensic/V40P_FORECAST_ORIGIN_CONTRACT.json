@@ -1,0 +1,25 @@
+{
+  "primary_origin": "t0 = row timestamp_utc, as used in K5C3 origin field",
+  "canonical_timezone": "UTC",
+  "feature_calendar": "Australia/Melbourne: AEST/AEDT DST",
+  "raw_submit_schema": "timestamp[us, tz=UTC]",
+  "raw_start_end_schema": "timestamps with numeric UTC offsets; converted to UTC without treating Denver wall-clock as UTC",
+  "source_display_timezone": "America/Denver",
+  "target_bin_labels": "left edges",
+  "alternative_right_edge_origin": "If t0 is redefined as row timestamp+5min, A becomes [t0,t0+h), B is final 5min bin ending t0+h; production timestamp contract does not perform this shift",
+  "evidence": [
+    {
+      "path": "dayahead/artifacts/v40p_lightgbm_forecast_forensic/source_snapshots/kestrel_stage_k5a_ml_dataset_modular_v101/src/kestrel_k5a/workload.py",
+      "line": 72,
+      "needle": "AS timestamp_utc",
+      "file_sha256": "f2e5bc39e8176ba79603e4590e0345e59c0243bf5cfdb2e389f5b82bc66088ae"
+    },
+    {
+      "path": "dayahead/artifacts/v40p_lightgbm_forecast_forensic/source_snapshots/kestrel_stage_k5c3_optimization_ready_modular_v104/src/kestrel_k5c3/trajectory.py",
+      "line": 73,
+      "needle": "origin_fixed_active_gpus",
+      "file_sha256": "0022485da4a1f09685ea71d0f4fe8baf6ec61687ff740bd7757f98b0a56b410d"
+    }
+  ],
+  "Dayahead_origin": "D-1 18:00 FIXED_AEST_UTC_PLUS_10; distinct from legacy Melbourne DST calendar"
+}

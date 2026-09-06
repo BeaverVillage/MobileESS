@@ -1,0 +1,34 @@
+{
+  "legacy_K5B2": "K5A -> K5B2 selected forecast -> K5C2 site shares; deterministic arrival benchmark, event probabilities feed scenario path; K5C3 fixed 48-step interpolation",
+  "historical_V28R2": "P_Q90/G_Q90 references minus controlled reference service plus scheduled flexible service; residual decomposition, not independent fixed+flex addition",
+  "current_V40A": "V37 known RUNNING/PENDING ledger, V39A synthetic capacity-idle plus active GPU swing, C1 cooling + fixed PF; load_planning_context has no K5B2 or V28R2 forecast invocation",
+  "current_total_formula": "site_capacity*idle_W_per_GPU + active_known_job_GPU*CENTER_SWING_W_per_GPU, then C1; future unsubmitted arrival component absent",
+  "future_LightGBM_adequacy_validates_current_closed_cohort": "NO",
+  "V40N_reads": 0,
+  "evidence": [
+    {
+      "path": "dayahead/v40a/context.py",
+      "line": 29,
+      "needle": "from dayahead.v39a.power",
+      "file_sha256": "46e59459ef60fb1d105d4213f840bc898912b5e9026ce45fb1e34f85488c59c0"
+    },
+    {
+      "path": "dayahead/v39a/power.py",
+      "line": 36,
+      "needle": "Decimal(active) * CENTER_SWING_W_PER_GPU",
+      "file_sha256": "7b5899b0b0ae15a1d1515e49b6664cef9d9c968d968cabc1bfe40a5c21ae77c5"
+    },
+    {
+      "path": "dayahead/v28r2/reference_delta.py",
+      "line": 72,
+      "needle": "raw_p = mapped_p - p_fixed",
+      "file_sha256": "03db75e1b2d7a37fc562c3b740170f0f0817b276401a4b04adba9865f745409e"
+    },
+    {
+      "path": "dayahead/v37/aidc_materializer.py",
+      "line": 244,
+      "needle": "not_yet_submitted_at_issue_excluded",
+      "file_sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022"
+    }
+  ]
+}

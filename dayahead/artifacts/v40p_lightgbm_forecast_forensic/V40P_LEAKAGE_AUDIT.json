@@ -1,0 +1,188 @@
+{
+  "track_A": "FUTURE_ARRIVAL_FORECAST_LEAKAGE_FOUND",
+  "track_B": "FIXED_LOAD_FORECAST_LEAKAGE_FOUND",
+  "feature_class_counts": {
+    "FUTURE_LEAKAGE": 70,
+    "LAGGED_AVAILABLE": 60,
+    "TIMESTAMP_AMBIGUOUS": 20,
+    "CAUSAL_AVAILABLE": 15,
+    "STATIC_AVAILABLE": 12
+  },
+  "models_using_leaky_features": [
+    {
+      "model_id": "target_cumulative_arriving_flexible_gpu_hours_F30_h03__tweedie_1.7",
+      "leaky_features_used_in_splits": 69,
+      "leaky_feature_total_splits": 3865
+    },
+    {
+      "model_id": "target_fixed_avg_active_gpus_F30_h06__residual_l1",
+      "leaky_features_used_in_splits": 41,
+      "leaky_feature_total_splits": 245
+    },
+    {
+      "model_id": "target_cumulative_arriving_flexible_gpu_hours_F30_h06__tweedie_1.7",
+      "leaky_features_used_in_splits": 67,
+      "leaky_feature_total_splits": 4250
+    },
+    {
+      "model_id": "target_fixed_avg_active_gpus_F30_h12__residual_l1",
+      "leaky_features_used_in_splits": 41,
+      "leaky_feature_total_splits": 322
+    },
+    {
+      "model_id": "target_cumulative_arriving_flexible_gpu_hours_F30_h12__tweedie_1.7",
+      "leaky_features_used_in_splits": 67,
+      "leaky_feature_total_splits": 4655
+    },
+    {
+      "model_id": "target_fixed_avg_active_gpus_F30_h24__residual_l1",
+      "leaky_features_used_in_splits": 42,
+      "leaky_feature_total_splits": 374
+    },
+    {
+      "model_id": "target_cumulative_arriving_flexible_gpu_hours_F30_h24__tweedie_1.7",
+      "leaky_features_used_in_splits": 65,
+      "leaky_feature_total_splits": 5818
+    },
+    {
+      "model_id": "target_fixed_avg_active_gpus_F30_h48__residual_l1",
+      "leaky_features_used_in_splits": 43,
+      "leaky_feature_total_splits": 277
+    },
+    {
+      "model_id": "target_cumulative_arriving_flexible_gpu_hours_F30_h48__tweedie_1.7",
+      "leaky_features_used_in_splits": 61,
+      "leaky_feature_total_splits": 5655
+    },
+    {
+      "model_id": "target_cumulative_arriving_flexible_gpu_hours_F30_h03__event_classifier",
+      "leaky_features_used_in_splits": 49,
+      "leaky_feature_total_splits": 245
+    },
+    {
+      "model_id": "target_cumulative_arriving_flexible_gpu_hours_F30_h06__event_classifier",
+      "leaky_features_used_in_splits": 47,
+      "leaky_feature_total_splits": 218
+    },
+    {
+      "model_id": "target_cumulative_arriving_flexible_gpu_hours_F30_h12__event_classifier",
+      "leaky_features_used_in_splits": 48,
+      "leaky_feature_total_splits": 238
+    },
+    {
+      "model_id": "target_cumulative_arriving_flexible_gpu_hours_F30_h24__event_classifier",
+      "leaky_features_used_in_splits": 39,
+      "leaky_feature_total_splits": 232
+    },
+    {
+      "model_id": "target_cumulative_arriving_flexible_gpu_hours_F30_h48__event_classifier",
+      "leaky_features_used_in_splits": 39,
+      "leaky_feature_total_splits": 220
+    }
+  ],
+  "findings": [
+    {
+      "id": "L1",
+      "severity": "FAIL",
+      "finding": "Realized GPUh of future-completing jobs is attached to their submission bucket and used as past input without availability mask",
+      "evidence": [
+        {
+          "path": "dayahead/artifacts/v40p_lightgbm_forecast_forensic/source_snapshots/kestrel_stage_k5a_ml_dataset_modular_v101/src/kestrel_k5a/workload.py",
+          "line": 91,
+          "needle": "THEN gpu_hours ELSE 0 END",
+          "file_sha256": "f2e5bc39e8176ba79603e4590e0345e59c0243bf5cfdb2e389f5b82bc66088ae"
+        },
+        {
+          "path": "dayahead/artifacts/v40p_lightgbm_forecast_forensic/source_snapshots/kestrel_stage_k5a_ml_dataset_modular_v101/src/kestrel_k5a/features.py",
+          "line": 171,
+          "needle": "CURRENT ROW",
+          "file_sha256": "f99271a30c1e4cd5d2e5b29fa5dc325f3ec7c0488209dddc2cf45ebceef5c666"
+        }
+      ],
+      "raw_safe_job_witness_count": 18031
+    },
+    {
+      "id": "L2",
+      "severity": "FAIL",
+      "finding": "60 rolling features include nonqueue current bin [t0,t0+5min), and B persistence/residual add-back directly uses the same completed current bin",
+      "evidence": [
+        {
+          "path": "dayahead/artifacts/v40p_lightgbm_forecast_forensic/source_snapshots/kestrel_stage_k5a_ml_dataset_modular_v101/src/kestrel_k5a/features.py",
+          "line": 171,
+          "needle": "PRECEDING AND CURRENT ROW",
+          "file_sha256": "f99271a30c1e4cd5d2e5b29fa5dc325f3ec7c0488209dddc2cf45ebceef5c666"
+        },
+        {
+          "path": "dayahead/artifacts/v40p_lightgbm_forecast_forensic/source_snapshots/kestrel_stage_k5b2_zero_inflated_modular_v101/src/kestrel_k5b2/modeling.py",
+          "line": 138,
+          "needle": "current=evalf[source]",
+          "file_sha256": "0517758768f5740d5768f7e2add68526ebb245dbe75b9ceef7ebff4ae42bb2a9"
+        }
+      ]
+    },
+    {
+      "id": "L3",
+      "severity": "FAIL_OR_AUTHORITY_MISSING",
+      "finding": "Global COMPLETED filtering and F30 based on realized runtime/observed queue are retrospective; historical fixed/flex labels are not live eligibility",
+      "evidence": [
+        {
+          "path": "dayahead/artifacts/v40p_lightgbm_forecast_forensic/source_snapshots/kestrel_stage_k2_modular_v202/src/kestrel_pipeline/sql.py",
+          "line": 87,
+          "needle": "AND state_simple =",
+          "file_sha256": "e1e606268e369605f177d21cd17f4bdda8fec2f729e395e8b14b60b55f0d0782"
+        },
+        {
+          "path": "dayahead/artifacts/v40p_lightgbm_forecast_forensic/source_snapshots/kestrel_stage_k35_modular_v102/src/kestrel_k35/sql.py",
+          "line": 23,
+          "needle": "runtime_s >=",
+          "file_sha256": "9a5d0850911f4893df961ce6930328a9bf0c3cde528390ecd126c283444106bc"
+        }
+      ]
+    },
+    {
+      "id": "L4",
+      "severity": "FAIL_HISTORICAL_V28_DAILY",
+      "finding": "V28 18 macro features: D1 complete calendar-day requested_GPU_h and 7/14d summaries include D-1 18:00..24:00 after issue",
+      "affected_features": [
+        "requested_GPU_h_D1",
+        "requested_GPU_h_mean_7d",
+        "requested_GPU_h_std_7d",
+        "requested_GPU_h_mean_14d"
+      ],
+      "evidence": [
+        {
+          "path": "dayahead/ml/c_mass_tpp/data.py",
+          "line": 406,
+          "needle": "macro_features=_macro_features(input_events",
+          "file_sha256": "9bfd87450a5ddd18cba587d5cfb0c16c2face38db873af560505dd0f0bd95cdf"
+        },
+        {
+          "path": "dayahead/ml/c_mass_tpp/data.py",
+          "line": 332,
+          "needle": "_proxy_for_day(events, target_day",
+          "file_sha256": "9bfd87450a5ddd18cba587d5cfb0c16c2face38db873af560505dd0f0bd95cdf"
+        }
+      ]
+    },
+    {
+      "id": "L5",
+      "severity": "AUTHORITY_MISSING",
+      "finding": "V28R2 W daily lag2/lag7 and rolling statistics use full realized runtime labels without completion mask; P/G use completed-derived labels and fixed historical recursion; slot timestamps alone do not prove data availability",
+      "evidence": [
+        {
+          "path": "dayahead/v28r2/source_labels.py",
+          "line": 200,
+          "needle": "float(row.nodes) * float(row.runtime_hours)",
+          "file_sha256": "80faf546592022848f83f626ece0e44cc2c3148e6f759a2641d2df12f2bad90f"
+        },
+        {
+          "path": "dayahead/v28r2/lightgbm_channels.py",
+          "line": 114,
+          "needle": "frame[\"lag_2d\"]",
+          "file_sha256": "20d5d8aad4744d31730936904453225e9952ff19e474682a5429dc8e71550c79"
+        }
+      ]
+    }
+  ],
+  "leakage_fixed": false
+}

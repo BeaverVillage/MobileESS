@@ -1,0 +1,15 @@
+{
+  "literal_origin_rule": "known submit<=t0 versus A target submit in [t0+5min,t0+h+5min)",
+  "identity_overlap_checks": 212,
+  "overlap_total": 0,
+  "status": "NO_OVERLAP_IN_INDEPENDENT_SAFE_RAW_JOB_CHECKS",
+  "gap": "submissions inside (t0,t0+5min) omitted from next-bin target while current feature may already see them",
+  "current_DayAhead": "No future arrival component in submitted-job ledger; no numerical May replay read",
+  "limitation": "No shared job-ID interface exists between aggregate legacy model and current ledger; end-to-end runtime doublecount cannot be fully certified by aggregate predictions alone",
+  "evidence": {
+    "path": "dayahead/v37/aidc_materializer.py",
+    "line": 218,
+    "needle": "pending = submit.le(cutoff)",
+    "file_sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "strict_zero_scientific_read_gate": "FAIL",
+  "MAY_SCIENTIFIC_OUTCOME_READS": 2,
+  "counter_unit": "Distinct source files with embedded May scientific outcome snippets exposed in an initial broad source search; NOT number of data records",
+  "MAY_SCIENTIFIC_OUTCOME_DATA_FILE_READS": 0,
+  "MAY_SCIENTIFIC_OUTCOME_DATA_ROWS_DECODED": 0,
+  "MAY_METADATA_CODE_DISCOVERY": "NONZERO",
+  "incident": {
+    "id": "INITIAL_SOURCE_SEARCH_EXPOSURE",
+    "source_files": [
+      "dayahead/v40i/may01_forensic.py",
+      "dayahead/v40i/pending_forensic.py"
+    ],
+    "search_calls": 1,
+    "exact_snippet_count": "not retained; at least two files exposed",
+    "description": "A broad rg search returned hard-coded May result summaries embedded in source. This is scientific exposure even though no May result dataset was opened. Disclosed to user immediately; numerical values are deliberately not copied here.",
+    "used_for_V40P_model_assessment_or_tuning": false,
+    "remediation": "Restricted later reads to explicit source allowlists, immutable model artifacts, footer-only inspection and physically segregated pre-May row groups; cannot undo prior exposure"
+  },
+  "data_firewall": {
+    "method": "Do not decode a mixed May group then filter. Require physical timestamp-max metadata plus 245-minute forecast-window margin for aggregate data. Raw jobs require submit/start/end maxima before May, archive members February 2024 through March 2025 only.",
+    "raw_members_opened": 14,
+    "cross_May_raw_groups_skipped": 2,
+    "latest_primary_origin": "2025-04-24T14:55:00Z",
+    "access_log": "access_log.jsonl",
+    "logged_operation_counts": {
+      "SOURCE_CODE_SNAPSHOT": 72,
+      "EXACT_START_COMMIT_ARTIFACT": 39,
+      "PRE_MAY_PARQUET_ROW_GROUPS": 16,
+      "PRE_MAY_RAW_JOB_GROUPS": 14,
+      "PRE2025_SELECTION_OR_SOURCE_METADATA": 11,
+      "PARQUET_FOOTER_ONLY": 9,
+      "FROZEN_MODEL": 9,
+      "DIAGNOSTIC_MODEL_SHA_ONLY": 5,
+      "FROZEN_DIAGNOSTIC_EVENT_MODEL_COPY": 5,
+      "SOURCE_CODE_OR_CONFIG": 2
+    }
+  },
+  "derived_label_dependency_limit": "Pre-May aggregate GPU-hour labels contain complete future runtime. Row-window checks alone cannot prove that every contributing job completed before May. This availability flaw is an audit finding, not a claim that the derived dependency firewall is complete.",
+  "metadata_examples": [
+    "dayahead/v37/context.py",
+    "dayahead/v37/aidc_materializer.py",
+    "dayahead/v39a/power.py",
+    "dayahead/v40a/context.py",
+    "historical artifact manifests and parquet footers"
+  ],
+  "no_May_tuning": true,
+  "FULL_MAY": "NO",
+  "V40N_content_reads": 0,
+  "interpretation": "Do not report this run as fully compliant with MAY_SCIENTIFIC_OUTCOME_READS=0. A clean-room repeat would be required for that protocol claim."
+}

@@ -1,0 +1,29 @@
+{
+  "primary_models": {
+    "normalizer": "none",
+    "scaler": "none",
+    "imputation": "no bfill/interpolation; native LightGBM missing handling",
+    "categorical_encoder": "none, all 177 inputs numeric float32",
+    "target_transform": "identity; A frozen scale=0.5 from validation calibration, B subtract current/add current",
+    "clipping": "fixed nonnegative output floor",
+    "feature_selection": "configured feature dictionary, no fitted feature selector",
+    "clipping_threshold_fit": "none"
+  },
+  "selection_calibration": "Same Sep-Dec OOF chooses objective, family, scale and median early-stop iterations; post-selection OOF scores are not independent",
+  "historical_V28": "log1p deterministic transform; pd.Categorical whole-data codes exist in micro branch but do NOT enter the 18 LightGBM macro inputs; not falsely classified as LightGBM encoder leakage",
+  "downstream_power_preprocessing": "K5C2 representative utilization uses whole provided site-workload mean (includes evaluation year); power scaling is not train-only. This is outside the primary GPU forecast model, and not repaired.",
+  "evidence": [
+    {
+      "path": "dayahead/artifacts/v40p_lightgbm_forecast_forensic/source_snapshots/kestrel_stage_k5b2_zero_inflated_modular_v101/src/kestrel_k5b2/modeling.py",
+      "line": 100,
+      "needle": "scale=choose_scale",
+      "file_sha256": "0517758768f5740d5768f7e2add68526ebb245dbe75b9ceef7ebff4ae42bb2a9"
+    },
+    {
+      "path": "dayahead/artifacts/v40p_lightgbm_forecast_forensic/source_snapshots/kestrel_stage_k5c2_final_dc_inputs_modular_v103/src/kestrel_k5c2/power.py",
+      "line": 30,
+      "needle": "mean_active = float(site_workload",
+      "file_sha256": "32f6243f122ff4ff82696f444c99f6be140f65ffdcde1652f2b641ffade2d6ba"
+    }
+  ]
+}

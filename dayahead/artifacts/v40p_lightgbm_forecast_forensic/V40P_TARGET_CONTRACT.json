@@ -1,0 +1,130 @@
+{
+  "A": {
+    "target": "cumulative realized complete-job GPU-hours for F30 jobs whose submission-bin index is 1..h after origin",
+    "unit": "GPU-hours = requested GPUs * (end-start)/3600, not requested walltime",
+    "eligibility": "K2 COMPLETED, positive valid-runtime H100 non-standby, then runtime >=30min and observed queue >=15min",
+    "known_runtime_overlap": "arrival mark is total job work, not work executed inside horizon",
+    "evidence": [
+      {
+        "path": "dayahead/artifacts/v40p_lightgbm_forecast_forensic/source_snapshots/kestrel_stage_k5a_ml_dataset_modular_v101/src/kestrel_k5a/features.py",
+        "line": 102,
+        "needle": "ROWS BETWEEN 1 FOLLOWING",
+        "file_sha256": "f99271a30c1e4cd5d2e5b29fa5dc325f3ec7c0488209dddc2cf45ebceef5c666"
+      },
+      {
+        "path": "dayahead/artifacts/v40p_lightgbm_forecast_forensic/source_snapshots/kestrel_stage_k5a_ml_dataset_modular_v101/src/kestrel_k5a/workload.py",
+        "line": 115,
+        "needle": "time_bucket(INTERVAL",
+        "file_sha256": "f2e5bc39e8176ba79603e4590e0345e59c0243bf5cfdb2e389f5b82bc66088ae"
+      },
+      {
+        "path": "dayahead/artifacts/v40p_lightgbm_forecast_forensic/source_snapshots/kestrel_stage_k35_modular_v102/src/kestrel_k35/sql.py",
+        "line": 23,
+        "needle": "runtime_s >=",
+        "file_sha256": "9a5d0850911f4893df961ce6930328a9bf0c3cde528390ecd126c283444106bc"
+      }
+    ]
+  },
+  "B": {
+    "target": "point-at-horizon 5-minute-average active GPUs among non-F30 jobs",
+    "unit": "average active GPUs; neither PUE, utilization fraction nor facility power",
+    "evidence": {
+      "path": "dayahead/artifacts/v40p_lightgbm_forecast_forensic/source_snapshots/kestrel_stage_k5a_ml_dataset_modular_v101/src/kestrel_k5a/features.py",
+      "line": 79,
+      "needle": "lead({source}",
+      "file_sha256": "f99271a30c1e4cd5d2e5b29fa5dc325f3ec7c0488209dddc2cf45ebceef5c666"
+    }
+  },
+  "numeric_reconstruction": [
+    {
+      "track": "A",
+      "horizon_minutes": 15,
+      "rows": 122877,
+      "max_abs_difference": 0.0,
+      "reconstruction_pass": true,
+      "exact_window": "[t0+5min,t0+20min)",
+      "not_conventional_t0_to_horizon": true
+    },
+    {
+      "track": "B",
+      "horizon_minutes": 15,
+      "rows": 122877,
+      "max_abs_difference": 0.0,
+      "reconstruction_pass": true,
+      "exact_window": "average occupancy in [t0+15min,t0+20min)",
+      "not_conventional_t0_to_horizon": true
+    },
+    {
+      "track": "A",
+      "horizon_minutes": 30,
+      "rows": 122874,
+      "max_abs_difference": 0.0,
+      "reconstruction_pass": true,
+      "exact_window": "[t0+5min,t0+35min)",
+      "not_conventional_t0_to_horizon": true
+    },
+    {
+      "track": "B",
+      "horizon_minutes": 30,
+      "rows": 122874,
+      "max_abs_difference": 0.0,
+      "reconstruction_pass": true,
+      "exact_window": "average occupancy in [t0+30min,t0+35min)",
+      "not_conventional_t0_to_horizon": true
+    },
+    {
+      "track": "A",
+      "horizon_minutes": 60,
+      "rows": 122868,
+      "max_abs_difference": 0.0,
+      "reconstruction_pass": true,
+      "exact_window": "[t0+5min,t0+65min)",
+      "not_conventional_t0_to_horizon": true
+    },
+    {
+      "track": "B",
+      "horizon_minutes": 60,
+      "rows": 122868,
+      "max_abs_difference": 0.0,
+      "reconstruction_pass": true,
+      "exact_window": "average occupancy in [t0+60min,t0+65min)",
+      "not_conventional_t0_to_horizon": true
+    },
+    {
+      "track": "A",
+      "horizon_minutes": 120,
+      "rows": 122856,
+      "max_abs_difference": 1.8189894035458565e-12,
+      "reconstruction_pass": true,
+      "exact_window": "[t0+5min,t0+125min)",
+      "not_conventional_t0_to_horizon": true
+    },
+    {
+      "track": "B",
+      "horizon_minutes": 120,
+      "rows": 122856,
+      "max_abs_difference": 0.0,
+      "reconstruction_pass": true,
+      "exact_window": "average occupancy in [t0+120min,t0+125min)",
+      "not_conventional_t0_to_horizon": true
+    },
+    {
+      "track": "A",
+      "horizon_minutes": 240,
+      "rows": 122832,
+      "max_abs_difference": 1.8189894035458565e-12,
+      "reconstruction_pass": true,
+      "exact_window": "[t0+5min,t0+245min)",
+      "not_conventional_t0_to_horizon": true
+    },
+    {
+      "track": "B",
+      "horizon_minutes": 240,
+      "rows": 122832,
+      "max_abs_difference": 0.0,
+      "reconstruction_pass": true,
+      "exact_window": "average occupancy in [t0+240min,t0+245min)",
+      "not_conventional_t0_to_horizon": true
+    }
+  ]
+}

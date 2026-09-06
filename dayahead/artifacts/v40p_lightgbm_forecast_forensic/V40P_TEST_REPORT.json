@@ -1,0 +1,226 @@
+{
+  "tests_run": 35,
+  "passed": 32,
+  "expected_scientific_failures": 3,
+  "unexpected_failures": 0,
+  "unexpected_successes": 0,
+  "harness_completed_as_expected": true,
+  "scientific_all_gates_pass": false,
+  "scope_note": "11/12/27 remain scientific FAIL. Passing diagnostic tests do not establish causal validity or an untouched holdout. 19 applies to V40P clones, not historical model selection.",
+  "cases": [
+    {
+      "test": "test_01_start",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_02_v40ijkl",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_03_v40n",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_04_v40m",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_05_model_sha",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_06_feature_order",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_07_frozen_determinism_and_saved_predictions",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_08_target_horizons",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_09_origin_contract",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_10_original_split_chronology",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_11_no_future_features",
+      "scientific_contract_status": "FAIL",
+      "expected_scientific_failure": true,
+      "detail": "Traceback (most recent call last):\n  File \"C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v40p_lightgbm_forecast_forensic\\dayahead\\v40p\\test_forensic.py\", line 84, in test_11_no_future_features\n    self.assertFalse(any(r['leakage_classification']=='FUTURE_LEAKAGE' for r in self.ledger),'70 original feature definitions fail the causal gate')\nAssertionError: True is not false : 70 original feature definitions fail the causal gate\n"
+    },
+    {
+      "test": "test_12_rolling_right_edge",
+      "scientific_contract_status": "FAIL",
+      "expected_scientific_failure": true,
+      "detail": "Traceback (most recent call last):\n  File \"C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v40p_lightgbm_forecast_forensic\\dayahead\\v40p\\test_forensic.py\", line 88, in test_12_rolling_right_edge\n    self.assertTrue(all(r['latest_bin_right_edge_minutes_from_t0']<=0 for r in self.ledger),'60 rolling features include the future current bin')\nAssertionError: False is not true : 60 rolling features include the future current bin\n"
+    },
+    {
+      "test": "test_13_no_centered_rolling",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_14_no_future_imputation",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_15_scaler_encoder",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_16_known_future_identity",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_17_fixed_flexible_identity",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_18_rolling_chronology",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_19_no_diagnostic_parameter_changes",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_20_preregistration_unchanged",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_21_baseline_accounting",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_22_zero_denominator",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_23_shortfall",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_24_overreservation",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_25_bootstrap_deterministic",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_26_horizon_diagnostics",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_27_may_scientific_reads_zero",
+      "scientific_contract_status": "FAIL",
+      "expected_scientific_failure": true,
+      "detail": "Traceback (most recent call last):\n  File \"C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v40p_lightgbm_forecast_forensic\\dayahead\\v40p\\test_forensic.py\", line 177, in test_27_may_scientific_reads_zero\n    self.assertEqual(read('V40P_MAY_READ_FIREWALL.json')['MAY_SCIENTIFIC_OUTCOME_READS'],0,'Two source files exposed embedded scientific summaries; zero-read claim fails')\nAssertionError: 2 != 0 : Two source files exposed embedded scientific summaries; zero-read claim fails\n"
+    },
+    {
+      "test": "test_28_no_production_overwrite",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_29_no_production_feature_changes",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_30_no_production_adapter_changes",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_31_pf",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_32_q_control",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_33_electrical_hold",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_34_b0_b3",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    },
+    {
+      "test": "test_35_full_may",
+      "scientific_contract_status": "PASS",
+      "expected_scientific_failure": false,
+      "detail": ""
+    }
+  ],
+  "python": "3.11.7 (tags/v3.11.7:fa7a6f2, Dec  4 2023, 19:24:49) [MSC v.1937 64 bit (AMD64)]",
+  "lightgbm": "4.6.0",
+  "numpy": "1.26.4",
+  "pandas": "2.2.3"
+}

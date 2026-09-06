@@ -1,0 +1,24 @@
+{
+  "A": {
+    "TRAIN_FACILITY": "NLR/NREL ESIF Kestrel H100",
+    "VALIDATION_FACILITY": "same Kestrel trace",
+    "TARGET_FACILITY": "same Kestrel, 2025 Jan-Apr24 block",
+    "DEPLOYMENT_SEMANTICS": "synthetic assignment to 12 IDC sites; forecasting F30 completed/non-standby population, not whole facility",
+    "Eagle_trace_used": false
+  },
+  "B": {
+    "TRAIN_FACILITY": "same Kestrel H100 jobs",
+    "VALIDATION_FACILITY": "same Kestrel",
+    "TARGET_FACILITY": "same Kestrel",
+    "DEPLOYMENT_SEMANTICS": "non-F30 Kestrel GPU occupancy, not Eagle power or facility PUE",
+    "Eagle_trace_used": false
+  },
+  "historical_DayAhead": {
+    "P_REF": "ESIF combined buildingData PUE dataset it_power_kw column, source facility boundary not uniquely proven to equal Kestrel H100",
+    "G_REF": "Kestrel H100 completed occupancy",
+    "W": "Kestrel strict full-node arrivals",
+    "power_coefficients": "separate NLR D312/GenAI experiment authority",
+    "synthetic_inference_load": "BurstGPT token-aware separate trace in legacy K5C2, outside these primary targets"
+  },
+  "primary_source_SHA256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f"
+}
