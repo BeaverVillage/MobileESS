@@ -87,6 +87,19 @@ def parquet_index(frame):
     return frame
 
 
+def parquet_bins(frame):
+    """Normalize mixed raw timestamp units without changing any event instant."""
+    result=parquet_index(frame)
+    for column in ('max_observed_end','modeled_end_max'):
+        original=result[column]
+        normalized=pd.to_datetime(original,utc=True).astype('datetime64[ns, UTC]')
+        require(original.isna().equals(normalized.isna()),'CAUSAL_TIMESTAMP_NULL_DRIFT')
+        require(all(pd.Timestamp(a)==b for a,b in zip(original,normalized) if pd.notna(a)),
+                'CAUSAL_TIMESTAMP_VALUE_DRIFT')
+        result[column]=normalized
+    return result
+
+
 def causal_history(day):
     """Expanding all positive-GPU raw history, no rolling-window/decay restriction.
 
@@ -179,7 +192,7 @@ def causal_history(day):
     work['bin'] = work.submit_time.dt.floor('30min')
     modeled = work.groupby('bin').agg(work_GPUh=('work_GPUh', 'sum'), modeled_end_max=('end_time', 'max'))
     bins = bins.join(modeled); bins['work_GPUh'] = bins.work_GPUh.fillna(0.)
-    bins = parquet_index(bins)
+    bins = parquet_bins(bins)
     bins.index.name = 'arrival_bin'
     for name, frame in [('runtime_history', history), ('bins', bins), ('mature_work_jobs', work)]:
         path = folder / (name + '.parquet')
