@@ -136,7 +136,8 @@ class Contracts(unittest.TestCase):
     def final_files(self):
         from .train import NAMES
         if not (OUT/'V40R4_METHOD_SELECTION.json').exists():self.skipTest('Final exposed evaluation not executed')
-        return [(n,np.load(OUT/'fits'/n/'exposed_distribution_summary.npz')) for n in NAMES]
+        # This task's own generated NPZ stores operating-day strings as an object array.
+        return [(n,np.load(OUT/'fits'/n/'exposed_distribution_summary.npz',allow_pickle=True)) for n in NAMES]
     def test_60_saved_forecast_invariants(self):
         for name,p in self.final_files():
             for key in ['raw_q','C1_q','selected_q','raw_cumulative_q','C1_cumulative_q','selected_cumulative_q','raw_CDF_quantiles','C1_CDF_quantiles']:

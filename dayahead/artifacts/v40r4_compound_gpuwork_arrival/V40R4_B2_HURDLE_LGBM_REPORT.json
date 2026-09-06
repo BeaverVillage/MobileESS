@@ -1,0 +1,3307 @@
+{
+  "candidate": "B2",
+  "status": "EXPOSED_STRESS_EVALUATION",
+  "selected_development_pipeline": {
+    "method": "C0",
+    "provisional_score": 0.0,
+    "metrics": {
+      "point": {
+        "N": 1344,
+        "MAE": 105.77118965537669,
+        "RMSE": 682.5469316458237,
+        "WAPE": 0.995647907273452,
+        "bias": -99.05363030721108
+      },
+      "positive_point": {
+        "N": 611,
+        "MAE": 229.56430589708543,
+        "RMSE": 1012.2759572372411,
+        "WAPE": 0.9823917345356361,
+        "bias": -220.98325225302585
+      },
+      "probabilistic": {
+        "overall": {
+          "N": 1344,
+          "coverage": 0.8883928571428571,
+          "calibration_error": 0.011607142857142927,
+          "Q90_pinball": 86.61174550304692
+        },
+        "positive": {
+          "N": 611,
+          "coverage": 0.7545008183306056,
+          "calibration_error": 0.14549918166939446,
+          "Q90_pinball": 180.14250683686782
+        },
+        "burst": {
+          "N": 45,
+          "coverage": 0.0,
+          "calibration_error": 0.9,
+          "Q90_pinball": 2057.713892172471
+        }
+      },
+      "primary": 0.7708973268449009,
+      "overprediction_GPUh": 154986.98018101897,
+      "underprediction_GPUh": 112119.43104221464,
+      "missed_burst_GPUh": 102885.69460862354,
+      "captured_burst_fraction": 0.0702144380734913,
+      "mean_burst_shortfall_GPUh": 2286.348769080523,
+      "quantile_crossings": 0,
+      "cumulative_WAPE": 0.7924886741263152
+    },
+    "gates": {
+      "coverage": {
+        "overall": {
+          "N": 1344,
+          "coverage": 0.8883928571428571,
+          "low": 0.9,
+          "high": 0.95,
+          "status": "FAIL"
+        },
+        "positive": {
+          "N": 611,
+          "coverage": 0.7545008183306056,
+          "low": 0.9,
+          "high": 0.95,
+          "status": "FAIL"
+        },
+        "burst": {
+          "N": 45,
+          "coverage": 0.0,
+          "low": 0.9,
+          "high": 0.975,
+          "status": "INSUFFICIENT_SUPPORT"
+        }
+      },
+      "temporal": [
+        {
+          "month": "2024-10",
+          "burst_N": 45,
+          "burst_coverage": 0.0,
+          "burst_gate": "INSUFFICIENT_SUPPORT",
+          "catastrophic": false,
+          "metrics": {
+            "point": {
+              "N": 1344,
+              "MAE": 105.77118965537669,
+              "RMSE": 682.5469316458237,
+              "WAPE": 0.995647907273452,
+              "bias": -99.05363030721108
+            },
+            "positive_point": {
+              "N": 611,
+              "MAE": 229.56430589708543,
+              "RMSE": 1012.2759572372411,
+              "WAPE": 0.9823917345356361,
+              "bias": -220.98325225302585
+            },
+            "probabilistic": {
+              "overall": {
+                "N": 1344,
+                "coverage": 0.8883928571428571,
+                "calibration_error": 0.011607142857142927,
+                "Q90_pinball": 86.61174550304692
+              },
+              "positive": {
+                "N": 611,
+                "coverage": 0.7545008183306056,
+                "calibration_error": 0.14549918166939446,
+                "Q90_pinball": 180.14250683686782
+              },
+              "burst": {
+                "N": 45,
+                "coverage": 0.0,
+                "calibration_error": 0.9,
+                "Q90_pinball": 2057.713892172471
+              }
+            },
+            "primary": 0.7708973268449009,
+            "overprediction_GPUh": 154986.98018101897,
+            "underprediction_GPUh": 112119.43104221464,
+            "missed_burst_GPUh": 102885.69460862354,
+            "captured_burst_fraction": 0.0702144380734913,
+            "mean_burst_shortfall_GPUh": 2286.348769080523,
+            "quantile_crossings": 0
+          }
+        }
+      ],
+      "primary_better_than_ZERO": true,
+      "OVERCONSERVATIVE_CALIBRATION": false,
+      "registered_safety_justification": false,
+      "MC_convergence_pass": true,
+      "authority_leakage": "PASS",
+      "all_pass": false
+    },
+    "trial": 0
+  },
+  "preregistration_commit": "f10187e0b0cbaadde5b28186e70822f5ff258f76",
+  "strongest_baseline_commit": "1a178ceba65a4bf830c6e0955effb4838d922f3f",
+  "raw": {
+    "point": {
+      "N": 4224,
+      "MAE": 155.7152941379093,
+      "RMSE": 945.1404769325516,
+      "WAPE": 0.9783582212129629,
+      "bias": -144.6082075119176
+    },
+    "positive_point": {
+      "N": 2839,
+      "MAE": 229.01134368655644,
+      "RMSE": 1152.8265608525116,
+      "WAPE": 0.9670860221292327,
+      "bias": -217.82432766563406
+    },
+    "probabilistic": {
+      "overall": {
+        "N": 4224,
+        "coverage": 0.875,
+        "calibration_error": 0.025000000000000022,
+        "Q90_pinball": 112.38566378437405
+      },
+      "positive": {
+        "N": 2839,
+        "coverage": 0.8140190207819655,
+        "calibration_error": 0.08598097921803449,
+        "Q90_pinball": 161.4746576916511
+      },
+      "burst": {
+        "N": 240,
+        "coverage": 0.029166666666666667,
+        "calibration_error": 0.8708333333333333,
+        "Q90_pinball": 1615.5756514655639
+      }
+    },
+    "primary": 0.6818871147074334,
+    "overprediction_GPUh": 636246.9485024274,
+    "underprediction_GPUh": 456769.27663883695,
+    "missed_burst_GPUh": 430781.6368412259,
+    "captured_burst_fraction": 0.13202513340738303,
+    "mean_burst_shortfall_GPUh": 1794.9234868384412,
+    "quantile_crossings": 0
+  },
+  "calibrated": {
+    "point": {
+      "N": 4224,
+      "MAE": 159.91057170749392,
+      "RMSE": 940.4992314017417,
+      "WAPE": 1.0047171239989559,
+      "bias": -118.48968023861606
+    },
+    "positive_point": {
+      "N": 2839,
+      "MAE": 229.95088995247605,
+      "RMSE": 1146.9620433205907,
+      "WAPE": 0.9710536075173092,
+      "bias": -184.26632181940437
+    },
+    "probabilistic": {
+      "overall": {
+        "N": 4224,
+        "coverage": 0.943655303030303,
+        "calibration_error": 0.04365530303030296,
+        "Q90_pinball": 122.74026103304882
+      },
+      "positive": {
+        "N": 2839,
+        "coverage": 0.9161676646706587,
+        "calibration_error": 0.016167664670658666,
+        "Q90_pinball": 167.16177070038717
+      },
+      "burst": {
+        "N": 240,
+        "coverage": 0.3333333333333333,
+        "calibration_error": 0.5666666666666667,
+        "Q90_pinball": 1330.110805383919
+      }
+    },
+    "primary": 0.7059030757008139,
+    "overprediction_GPUh": 1973842.407035006,
+    "underprediction_GPUh": 356745.135444553,
+    "missed_burst_GPUh": 351166.7561522041,
+    "captured_burst_fraction": 0.2924398529194649,
+    "mean_burst_shortfall_GPUh": 1463.1948173008504,
+    "quantile_crossings": 0
+  },
+  "selected": {
+    "point": {
+      "N": 4224,
+      "MAE": 155.7152941379093,
+      "RMSE": 945.1404769325516,
+      "WAPE": 0.9783582212129629,
+      "bias": -144.6082075119176
+    },
+    "positive_point": {
+      "N": 2839,
+      "MAE": 229.01134368655644,
+      "RMSE": 1152.8265608525116,
+      "WAPE": 0.9670860221292327,
+      "bias": -217.82432766563406
+    },
+    "probabilistic": {
+      "overall": {
+        "N": 4224,
+        "coverage": 0.875,
+        "calibration_error": 0.025000000000000022,
+        "Q90_pinball": 112.38566378437405
+      },
+      "positive": {
+        "N": 2839,
+        "coverage": 0.8140190207819655,
+        "calibration_error": 0.08598097921803449,
+        "Q90_pinball": 161.4746576916511
+      },
+      "burst": {
+        "N": 240,
+        "coverage": 0.029166666666666667,
+        "calibration_error": 0.8708333333333333,
+        "Q90_pinball": 1615.5756514655639
+      }
+    },
+    "primary": 0.6818871147074334,
+    "overprediction_GPUh": 636246.9485024274,
+    "underprediction_GPUh": 456769.27663883695,
+    "missed_burst_GPUh": 430781.6368412259,
+    "captured_burst_fraction": 0.13202513340738303,
+    "mean_burst_shortfall_GPUh": 1794.9234868384412,
+    "quantile_crossings": 0,
+    "cumulative_WAPE": 0.6742913846841591
+  },
+  "calibration": {
+    "frozen_method": "C0",
+    "C1_log_score": 0.9856214680248647,
+    "calibration_origins": 26,
+    "score_population": "CALIBRATION positive intervals only; finite-sample 90% score quantile",
+    "transformation": "T(z)=max(0,expm1(log1p(z)+s)) applied to entire aggregate CDF including Q50 and every scenario; raw compound sum untouched",
+    "C0": {
+      "point": {
+        "N": 4224,
+        "MAE": 155.7152941379093,
+        "RMSE": 945.1404769325516,
+        "WAPE": 0.9783582212129629,
+        "bias": -144.6082075119176
+      },
+      "positive_point": {
+        "N": 2839,
+        "MAE": 229.01134368655644,
+        "RMSE": 1152.8265608525116,
+        "WAPE": 0.9670860221292327,
+        "bias": -217.82432766563406
+      },
+      "probabilistic": {
+        "overall": {
+          "N": 4224,
+          "coverage": 0.875,
+          "calibration_error": 0.025000000000000022,
+          "Q90_pinball": 112.38566378437405
+        },
+        "positive": {
+          "N": 2839,
+          "coverage": 0.8140190207819655,
+          "calibration_error": 0.08598097921803449,
+          "Q90_pinball": 161.4746576916511
+        },
+        "burst": {
+          "N": 240,
+          "coverage": 0.029166666666666667,
+          "calibration_error": 0.8708333333333333,
+          "Q90_pinball": 1615.5756514655639
+        }
+      },
+      "primary": 0.6818871147074334,
+      "overprediction_GPUh": 636246.9485024274,
+      "underprediction_GPUh": 456769.27663883695,
+      "missed_burst_GPUh": 430781.6368412259,
+      "captured_burst_fraction": 0.13202513340738303,
+      "mean_burst_shortfall_GPUh": 1794.9234868384412,
+      "quantile_crossings": 0
+    },
+    "C1": {
+      "point": {
+        "N": 4224,
+        "MAE": 159.91057170749392,
+        "RMSE": 940.4992314017417,
+        "WAPE": 1.0047171239989559,
+        "bias": -118.48968023861606
+      },
+      "positive_point": {
+        "N": 2839,
+        "MAE": 229.95088995247605,
+        "RMSE": 1146.9620433205907,
+        "WAPE": 0.9710536075173092,
+        "bias": -184.26632181940437
+      },
+      "probabilistic": {
+        "overall": {
+          "N": 4224,
+          "coverage": 0.943655303030303,
+          "calibration_error": 0.04365530303030296,
+          "Q90_pinball": 122.74026103304882
+        },
+        "positive": {
+          "N": 2839,
+          "coverage": 0.9161676646706587,
+          "calibration_error": 0.016167664670658666,
+          "Q90_pinball": 167.16177070038717
+        },
+        "burst": {
+          "N": 240,
+          "coverage": 0.3333333333333333,
+          "calibration_error": 0.5666666666666667,
+          "Q90_pinball": 1330.110805383919
+        }
+      },
+      "primary": 0.7059030757008139,
+      "overprediction_GPUh": 1973842.407035006,
+      "underprediction_GPUh": 356745.135444553,
+      "missed_burst_GPUh": 351166.7561522041,
+      "captured_burst_fraction": 0.2924398529194649,
+      "mean_burst_shortfall_GPUh": 1463.1948173008504,
+      "quantile_crossings": 0
+    },
+    "C1_gate": {
+      "coverage": {
+        "overall": {
+          "N": 4224,
+          "coverage": 0.943655303030303,
+          "low": 0.9,
+          "high": 0.95,
+          "status": "PASS"
+        },
+        "positive": {
+          "N": 2839,
+          "coverage": 0.9161676646706587,
+          "low": 0.9,
+          "high": 0.95,
+          "status": "PASS"
+        },
+        "burst": {
+          "N": 240,
+          "coverage": 0.3333333333333333,
+          "low": 0.9,
+          "high": 0.975,
+          "status": "FAIL"
+        }
+      },
+      "temporal": [
+        {
+          "month": "2024-12",
+          "burst_N": 61,
+          "burst_coverage": 0.09836065573770492,
+          "burst_gate": "INSUFFICIENT_SUPPORT",
+          "catastrophic": false,
+          "metrics": {
+            "point": {
+              "N": 1488,
+              "MAE": 125.38010641652419,
+              "RMSE": 942.0592622294312,
+              "WAPE": 1.0385078132142007,
+              "bias": -96.81384364456584
+            },
+            "positive_point": {
+              "N": 819,
+              "MAE": 217.02741341287103,
+              "RMSE": 1269.4977362014688,
+              "WAPE": 0.9894109196399139,
+              "bias": -186.66562406075772
+            },
+            "probabilistic": {
+              "overall": {
+                "N": 1488,
+                "coverage": 0.9240591397849462,
+                "calibration_error": 0.024059139784946226,
+                "Q90_pinball": 99.13370300084415
+              },
+              "positive": {
+                "N": 819,
+                "coverage": 0.8620268620268621,
+                "calibration_error": 0.03797313797313795,
+                "Q90_pinball": 161.44224680335287
+              },
+              "burst": {
+                "N": 61,
+                "coverage": 0.09836065573770492,
+                "calibration_error": 0.8016393442622951,
+                "Q90_pinball": 1632.4297121349196
+              }
+            },
+            "primary": 0.7360025139983825,
+            "overprediction_GPUh": 443106.2512399296,
+            "underprediction_GPUh": 114667.02771251462,
+            "missed_burst_GPUh": 110556.25261237807,
+            "captured_burst_fraction": 0.1960799720854848,
+            "mean_burst_shortfall_GPUh": 1812.3975838094766,
+            "quantile_crossings": 0
+          }
+        },
+        {
+          "month": "2025-01",
+          "burst_N": 114,
+          "burst_coverage": 0.39473684210526316,
+          "burst_gate": "FAIL",
+          "catastrophic": false,
+          "metrics": {
+            "point": {
+              "N": 1488,
+              "MAE": 217.63248129241703,
+              "RMSE": 1128.7001473826665,
+              "WAPE": 0.999980099949436,
+              "bias": -167.96385402965012
+            },
+            "positive_point": {
+              "N": 1098,
+              "MAE": 287.80003776878266,
+              "RMSE": 1313.7679417747452,
+              "WAPE": 0.9757934516496138,
+              "bias": -234.75674452560352
+            },
+            "probabilistic": {
+              "overall": {
+                "N": 1488,
+                "coverage": 0.9448924731182796,
+                "calibration_error": 0.0448924731182796,
+                "Q90_pinball": 164.2422089578974
+              },
+              "positive": {
+                "N": 1098,
+                "coverage": 0.9253187613843351,
+                "calibration_error": 0.025318761384335087,
+                "Q90_pinball": 208.03138801955248
+              },
+              "burst": {
+                "N": 114,
+                "coverage": 0.39473684210526316,
+                "calibration_error": 0.5052631578947369,
+                "Q90_pinball": 1457.3786968559552
+              }
+            },
+            "primary": 0.7053357871000181,
+            "overprediction_GPUh": 793924.9508587106,
+            "underprediction_GPUh": 183333.23538164474,
+            "missed_burst_GPUh": 182558.51614513353,
+            "captured_burst_fraction": 0.28593785694822954,
+            "mean_burst_shortfall_GPUh": 1601.3904925011714,
+            "quantile_crossings": 0
+          }
+        },
+        {
+          "month": "2025-02",
+          "burst_N": 65,
+          "burst_coverage": 0.4461538461538462,
+          "burst_gate": "INSUFFICIENT_SUPPORT",
+          "catastrophic": false,
+          "metrics": {
+            "point": {
+              "N": 1248,
+              "MAE": 132.2592342800879,
+              "RMSE": 645.5404656221785,
+              "WAPE": 0.977842856824609,
+              "bias": -85.3455089652892
+            },
+            "positive_point": {
+              "N": 922,
+              "MAE": 172.53870229914838,
+              "RMSE": 750.7865981286714,
+              "WAPE": 0.942423108399646,
+              "bias": -122.00654669242492
+            },
+            "probabilistic": {
+              "overall": {
+                "N": 1248,
+                "coverage": 0.9655448717948718,
+                "calibration_error": 0.06554487179487178,
+                "Q90_pinball": 101.40345000720416
+              },
+              "positive": {
+                "N": 922,
+                "coverage": 0.9533622559652929,
+                "calibration_error": 0.05336225596529287,
+                "Q90_pinball": 123.57115275594852
+              },
+              "burst": {
+                "N": 65,
+                "coverage": 0.4461538461538462,
+                "calibration_error": 0.45384615384615384,
+                "Q90_pinball": 823.1878370820233
+              }
+            },
+            "primary": 0.6749576085652714,
+            "overprediction_GPUh": 736811.2049363658,
+            "underprediction_GPUh": 58744.872350393576,
+            "missed_burst_GPUh": 58051.98739469253,
+            "captured_burst_fraction": 0.4370616947949892,
+            "mean_burst_shortfall_GPUh": 893.1074983798851,
+            "quantile_crossings": 0
+          }
+        }
+      ],
+      "primary_better_than_ZERO": true,
+      "OVERCONSERVATIVE_CALIBRATION": false,
+      "registered_safety_justification": false,
+      "MC_convergence_pass": true,
+      "authority_leakage": "PASS",
+      "all_pass": false
+    },
+    "evaluation_retuning": false,
+    "global_additive_GPUh_margin": false
+  },
+  "safety": {
+    "coverage": {
+      "overall": {
+        "N": 4224,
+        "coverage": 0.875,
+        "low": 0.9,
+        "high": 0.95,
+        "status": "FAIL"
+      },
+      "positive": {
+        "N": 2839,
+        "coverage": 0.8140190207819655,
+        "low": 0.9,
+        "high": 0.95,
+        "status": "FAIL"
+      },
+      "burst": {
+        "N": 240,
+        "coverage": 0.029166666666666667,
+        "low": 0.9,
+        "high": 0.975,
+        "status": "FAIL"
+      }
+    },
+    "temporal": [
+      {
+        "month": "2024-12",
+        "burst_N": 61,
+        "burst_coverage": 0.0,
+        "burst_gate": "INSUFFICIENT_SUPPORT",
+        "catastrophic": false,
+        "metrics": {
+          "point": {
+            "N": 1488,
+            "MAE": 120.52950975158416,
+            "RMSE": 944.384249773837,
+            "WAPE": 0.9983309248762988,
+            "bias": -112.43174922499325
+          },
+          "positive_point": {
+            "N": 819,
+            "MAE": 215.47679174743354,
+            "RMSE": 1272.8998069459956,
+            "WAPE": 0.9823417573442945,
+            "bias": -207.77882895726393
+          },
+          "probabilistic": {
+            "overall": {
+              "N": 1488,
+              "coverage": 0.8669354838709677,
+              "calibration_error": 0.03306451612903227,
+              "Q90_pinball": 94.6216502984925
+            },
+            "positive": {
+              "N": 819,
+              "coverage": 0.7582417582417582,
+              "calibration_error": 0.1417582417582418,
+              "Q90_pinball": 164.99719540548782
+            },
+            "burst": {
+              "N": 61,
+              "coverage": 0.0,
+              "calibration_error": 0.9,
+              "Q90_pinball": 1876.817634339984
+            }
+          },
+          "primary": 0.7522092452605741,
+          "overprediction_GPUh": 148934.18983464298,
+          "underprediction_GPUh": 139892.88517854727,
+          "missed_burst_GPUh": 127206.52854971003,
+          "captured_burst_fraction": 0.0750059488617125,
+          "mean_burst_shortfall_GPUh": 2085.3529270444265,
+          "quantile_crossings": 0
+        }
+      },
+      {
+        "month": "2025-01",
+        "burst_N": 114,
+        "burst_coverage": 0.02631578947368421,
+        "burst_gate": "FAIL",
+        "catastrophic": false,
+        "metrics": {
+          "point": {
+            "N": 1488,
+            "MAE": 212.95373287137593,
+            "RMSE": 1134.8520435027863,
+            "WAPE": 0.9784821356477537,
+            "bias": -199.72529847579196
+          },
+          "positive_point": {
+            "N": 1098,
+            "MAE": 286.1533579148487,
+            "RMSE": 1321.0876780337132,
+            "WAPE": 0.9702103411299308,
+            "bias": -273.1056572441549
+          },
+          "probabilistic": {
+            "overall": {
+              "N": 1488,
+              "coverage": 0.8595430107526881,
+              "calibration_error": 0.04045698924731189,
+              "Q90_pinball": 156.5756948204988
+            },
+            "positive": {
+              "N": 1098,
+              "coverage": 0.8096539162112932,
+              "calibration_error": 0.09034608378870679,
+              "Q90_pinball": 206.78277597380392
+            },
+            "burst": {
+              "N": 114,
+              "coverage": 0.02631578947368421,
+              "calibration_error": 0.8736842105263158,
+              "Q90_pinball": 1751.1377508352111
+            }
+          },
+          "primary": 0.7011023357518598,
+          "overprediction_GPUh": 254550.21062273736,
+          "underprediction_GPUh": 230588.45870069828,
+          "missed_burst_GPUh": 221788.62673052246,
+          "captured_burst_fraction": 0.13249260866142418,
+          "mean_burst_shortfall_GPUh": 1945.5142695659865,
+          "quantile_crossings": 0
+        }
+      },
+      {
+        "month": "2025-02",
+        "burst_N": 65,
+        "burst_coverage": 0.06153846153846154,
+        "burst_gate": "INSUFFICIENT_SUPPORT",
+        "catastrophic": false,
+        "metrics": {
+          "point": {
+            "N": 1248,
+            "MAE": 129.42174472400978,
+            "RMSE": 651.5452617912981,
+            "WAPE": 0.9568642165895572,
+            "bias": -117.25591470478498
+          },
+          "positive_point": {
+            "N": 922,
+            "MAE": 172.9840838334945,
+            "RMSE": 757.9964629654667,
+            "WAPE": 0.9448558254911108,
+            "bias": -160.91365908096955
+          },
+          "probabilistic": {
+            "overall": {
+              "N": 1248,
+              "coverage": 0.9030448717948718,
+              "calibration_error": 0.003044871794871784,
+              "Q90_pinball": 80.87771978216101
+            },
+            "positive": {
+              "N": 922,
+              "coverage": 0.868763557483731,
+              "calibration_error": 0.031236442516269003,
+              "Q90_pinball": 104.38867910007177
+            },
+            "burst": {
+              "N": 65,
+              "coverage": 0.06153846153846154,
+              "calibration_error": 0.8384615384615385,
+              "Q90_pinball": 1132.6550317197268
+            }
+          },
+          "primary": 0.5701810789596299,
+          "overprediction_GPUh": 232762.54804504706,
+          "underprediction_GPUh": 86287.93275959138,
+          "missed_burst_GPUh": 81786.48156099337,
+          "captured_burst_fraction": 0.20690495907404874,
+          "mean_burst_shortfall_GPUh": 1258.2535624768211,
+          "quantile_crossings": 0
+        }
+      }
+    ],
+    "primary_better_than_ZERO": true,
+    "OVERCONSERVATIVE_CALIBRATION": false,
+    "registered_safety_justification": false,
+    "MC_convergence_pass": true,
+    "authority_leakage": "PASS",
+    "all_pass": false
+  },
+  "count_metrics": {
+    "status": "NOT_APPLICABLE",
+    "reason": "Aggregate reference has no actual modeled-job count head; Tweedie latent jumps are not job counts"
+  },
+  "severity_metrics": {
+    "status": "NOT_APPLICABLE",
+    "reason": "Aggregate reference has no job severity head"
+  },
+  "cumulative": {
+    "selected": {
+      "MAE_GPUh": 3334.8290613733966,
+      "WAPE": 0.6742913846841591,
+      "daily_total_MAE_GPUh": 4997.273677496474,
+      "daily_total_bias_GPUh": -3999.5450577590495,
+      "maximum_cumulative_underforecast_GPUh": 27032.920391380216,
+      "horizon_crossing_count": 0,
+      "semantics": "Quantiles of summed nonnegative scenario increments under registered conditional-independence scenario model"
+    },
+    "C0": {
+      "MAE_GPUh": 3334.8290613733966,
+      "WAPE": 0.6742913846841591,
+      "daily_total_MAE_GPUh": 4997.273677496474,
+      "daily_total_bias_GPUh": -3999.5450577590495,
+      "maximum_cumulative_underforecast_GPUh": 27032.920391380216,
+      "horizon_crossing_count": 0,
+      "semantics": "Quantiles of summed nonnegative scenario increments under registered conditional-independence scenario model"
+    },
+    "C1": {
+      "MAE_GPUh": 4125.203314410464,
+      "WAPE": 0.8341024393711984,
+      "daily_total_MAE_GPUh": 6402.831547782704,
+      "daily_total_bias_GPUh": 2194.5746787634384,
+      "maximum_cumulative_underforecast_GPUh": 23098.98672784078,
+      "horizon_crossing_count": 0,
+      "semantics": "Quantiles of summed nonnegative scenario increments under registered conditional-independence scenario model"
+    }
+  },
+  "worst20_burst_misses": [
+    {
+      "day": "2024-12-30",
+      "slot": 7,
+      "actual_GPUh": 22570.464999999975,
+      "Q90_GPUh": 189.33808976086644,
+      "miss_GPUh": 22381.12691023911,
+      "N": 1523,
+      "max_severity_GPUh": 36.00861111111111,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-08",
+      "slot": 26,
+      "actual_GPUh": 20699.639999999978,
+      "Q90_GPUh": 133.9040850740643,
+      "miss_GPUh": 20565.735914925914,
+      "N": 1226,
+      "max_severity_GPUh": 533.35,
+      "classification": "MIXED"
+    },
+    {
+      "day": "2024-12-03",
+      "slot": 19,
+      "actual_GPUh": 20415.02722222214,
+      "Q90_GPUh": 345.49069016403433,
+      "miss_GPUh": 20069.536532058104,
+      "N": 1761,
+      "max_severity_GPUh": 36.007222222222225,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-30",
+      "slot": 18,
+      "actual_GPUh": 19263.81583333336,
+      "Q90_GPUh": 274.49156728106027,
+      "miss_GPUh": 18989.3242660523,
+      "N": 933,
+      "max_severity_GPUh": 48.009166666666665,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-02-03",
+      "slot": 35,
+      "actual_GPUh": 17252.945277777795,
+      "Q90_GPUh": 32.25754506144147,
+      "miss_GPUh": 17220.687732716353,
+      "N": 999,
+      "max_severity_GPUh": 24.00888888888889,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-24",
+      "slot": 29,
+      "actual_GPUh": 14930.805555555713,
+      "Q90_GPUh": 303.7235805810087,
+      "miss_GPUh": 14627.081974974704,
+      "N": 1336,
+      "max_severity_GPUh": 36.009166666666665,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-19",
+      "slot": 19,
+      "actual_GPUh": 13642.12111111113,
+      "Q90_GPUh": 164.14529411910047,
+      "miss_GPUh": 13477.97581699203,
+      "N": 953,
+      "max_severity_GPUh": 48.00666666666667,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2024-12-01",
+      "slot": 7,
+      "actual_GPUh": 10456.25611111113,
+      "Q90_GPUh": 236.97297415889471,
+      "miss_GPUh": 10219.283136952236,
+      "N": 539,
+      "max_severity_GPUh": 96.01555555555555,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2024-12-20",
+      "slot": 5,
+      "actual_GPUh": 10348.017222222245,
+      "Q90_GPUh": 170.98523708224187,
+      "miss_GPUh": 10177.031985140002,
+      "N": 488,
+      "max_severity_GPUh": 110.33666666666667,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-14",
+      "slot": 16,
+      "actual_GPUh": 10352.343611111304,
+      "Q90_GPUh": 410.27898280078335,
+      "miss_GPUh": 9942.064628310522,
+      "N": 811,
+      "max_severity_GPUh": 87.74555555555555,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-07",
+      "slot": 7,
+      "actual_GPUh": 7680.153333333333,
+      "Q90_GPUh": 100.51754781909108,
+      "miss_GPUh": 7579.635785514241,
+      "N": 10,
+      "max_severity_GPUh": 960.0355555555556,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-26",
+      "slot": 4,
+      "actual_GPUh": 7326.075833333336,
+      "Q90_GPUh": 446.4068253469856,
+      "miss_GPUh": 6879.66900798635,
+      "N": 482,
+      "max_severity_GPUh": 106.38666666666667,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-18",
+      "slot": 31,
+      "actual_GPUh": 6977.647499999999,
+      "Q90_GPUh": 177.4073580870386,
+      "miss_GPUh": 6800.24014191296,
+      "N": 463,
+      "max_severity_GPUh": 24.010277777777777,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-15",
+      "slot": 22,
+      "actual_GPUh": 7000.21638888889,
+      "Q90_GPUh": 340.982252284604,
+      "miss_GPUh": 6659.234136604286,
+      "N": 425,
+      "max_severity_GPUh": 24.009444444444444,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-07",
+      "slot": 4,
+      "actual_GPUh": 6788.593055555558,
+      "Q90_GPUh": 335.0719703181353,
+      "miss_GPUh": 6453.521085237422,
+      "N": 456,
+      "max_severity_GPUh": 96.02333333333333,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-02-10",
+      "slot": 25,
+      "actual_GPUh": 5812.705555555558,
+      "Q90_GPUh": 100.82767494004035,
+      "miss_GPUh": 5711.877880615518,
+      "N": 131,
+      "max_severity_GPUh": 48.006388888888885,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-20",
+      "slot": 18,
+      "actual_GPUh": 6036.515000000001,
+      "Q90_GPUh": 380.20701413064177,
+      "miss_GPUh": 5656.307985869359,
+      "N": 9,
+      "max_severity_GPUh": 960.0166666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-23",
+      "slot": 28,
+      "actual_GPUh": 5793.630277777777,
+      "Q90_GPUh": 312.3109807937107,
+      "miss_GPUh": 5481.319296984067,
+      "N": 27,
+      "max_severity_GPUh": 320.0188888888889,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-31",
+      "slot": 14,
+      "actual_GPUh": 5830.277777777778,
+      "Q90_GPUh": 406.53760453036733,
+      "miss_GPUh": 5423.740173247411,
+      "N": 232,
+      "max_severity_GPUh": 71.59444444444445,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-07",
+      "slot": 16,
+      "actual_GPUh": 5530.3961111111175,
+      "Q90_GPUh": 630.7538298295755,
+      "miss_GPUh": 4899.642281281542,
+      "N": 125,
+      "max_severity_GPUh": 48.00666666666667,
+      "classification": "UNRESOLVED"
+    }
+  ],
+  "all_missed_burst_classifications": [
+    {
+      "day": "2024-12-01",
+      "slot": 0,
+      "actual_GPUh": 453.12138888888865,
+      "Q90_GPUh": 136.54393050853918,
+      "miss_GPUh": 316.57745838034947,
+      "N": 145,
+      "max_severity_GPUh": 3.6280555555555556,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-01",
+      "slot": 2,
+      "actual_GPUh": 3846.077222222222,
+      "Q90_GPUh": 142.31961767630472,
+      "miss_GPUh": 3703.7576045459173,
+      "N": 143,
+      "max_severity_GPUh": 33.92666666666667,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-01",
+      "slot": 7,
+      "actual_GPUh": 10456.25611111113,
+      "Q90_GPUh": 236.97297415889471,
+      "miss_GPUh": 10219.283136952236,
+      "N": 539,
+      "max_severity_GPUh": 96.01555555555555,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2024-12-01",
+      "slot": 8,
+      "actual_GPUh": 1622.6538888888888,
+      "Q90_GPUh": 264.09811977383833,
+      "miss_GPUh": 1358.5557691150505,
+      "N": 37,
+      "max_severity_GPUh": 307.0933333333333,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-02",
+      "slot": 7,
+      "actual_GPUh": 877.7591666666666,
+      "Q90_GPUh": 325.97599939148864,
+      "miss_GPUh": 551.7831672751779,
+      "N": 261,
+      "max_severity_GPUh": 384.1111111111111,
+      "classification": "MIXED"
+    },
+    {
+      "day": "2024-12-03",
+      "slot": 0,
+      "actual_GPUh": 903.1722222222222,
+      "Q90_GPUh": 158.3837467687621,
+      "miss_GPUh": 744.7884754534601,
+      "N": 8,
+      "max_severity_GPUh": 302.38666666666666,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-03",
+      "slot": 6,
+      "actual_GPUh": 1005.6705555555558,
+      "Q90_GPUh": 408.031441059932,
+      "miss_GPUh": 597.6391144956237,
+      "N": 35,
+      "max_severity_GPUh": 104.65444444444445,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-03",
+      "slot": 10,
+      "actual_GPUh": 862.8922222222221,
+      "Q90_GPUh": 401.4698126409571,
+      "miss_GPUh": 461.422409581265,
+      "N": 24,
+      "max_severity_GPUh": 72.05333333333333,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-03",
+      "slot": 15,
+      "actual_GPUh": 906.6022222222222,
+      "Q90_GPUh": 344.68194255361595,
+      "miss_GPUh": 561.9202796686062,
+      "N": 11,
+      "max_severity_GPUh": 236.47444444444446,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-03",
+      "slot": 19,
+      "actual_GPUh": 20415.02722222214,
+      "Q90_GPUh": 345.49069016403433,
+      "miss_GPUh": 20069.536532058104,
+      "N": 1761,
+      "max_severity_GPUh": 36.007222222222225,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2024-12-03",
+      "slot": 24,
+      "actual_GPUh": 828.9630555555557,
+      "Q90_GPUh": 248.40290035688372,
+      "miss_GPUh": 580.560155198672,
+      "N": 22,
+      "max_severity_GPUh": 405.35777777777776,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-03",
+      "slot": 34,
+      "actual_GPUh": 1495.2575,
+      "Q90_GPUh": 45.75859778678833,
+      "miss_GPUh": 1449.4989022132115,
+      "N": 16,
+      "max_severity_GPUh": 366.4066666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-03",
+      "slot": 47,
+      "actual_GPUh": 717.8575,
+      "Q90_GPUh": 110.47257724263689,
+      "miss_GPUh": 607.384922757363,
+      "N": 5,
+      "max_severity_GPUh": 432.32,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-04",
+      "slot": 5,
+      "actual_GPUh": 3850.7347222222256,
+      "Q90_GPUh": 209.2024723914789,
+      "miss_GPUh": 3641.532249830747,
+      "N": 149,
+      "max_severity_GPUh": 27.50583333333333,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-04",
+      "slot": 7,
+      "actual_GPUh": 1076.4886111111111,
+      "Q90_GPUh": 264.48668747065943,
+      "miss_GPUh": 812.0019236404517,
+      "N": 9,
+      "max_severity_GPUh": 768.0177777777777,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-05",
+      "slot": 5,
+      "actual_GPUh": 644.5800000000006,
+      "Q90_GPUh": 219.02598941465837,
+      "miss_GPUh": 425.5540105853422,
+      "N": 842,
+      "max_severity_GPUh": 192.01555555555555,
+      "classification": "MIXED"
+    },
+    {
+      "day": "2024-12-05",
+      "slot": 27,
+      "actual_GPUh": 855.2911111111113,
+      "Q90_GPUh": 159.6432217648065,
+      "miss_GPUh": 695.6478893463047,
+      "N": 33,
+      "max_severity_GPUh": 48.00388888888889,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-05",
+      "slot": 30,
+      "actual_GPUh": 1536.6638888888888,
+      "Q90_GPUh": 142.13409451556004,
+      "miss_GPUh": 1394.5297943733287,
+      "N": 6,
+      "max_severity_GPUh": 384.0311111111111,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-07",
+      "slot": 9,
+      "actual_GPUh": 859.956111111111,
+      "Q90_GPUh": 199.06666579363213,
+      "miss_GPUh": 660.8894453174789,
+      "N": 14,
+      "max_severity_GPUh": 384.14222222222224,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-07",
+      "slot": 15,
+      "actual_GPUh": 1348.073333333333,
+      "Q90_GPUh": 266.75971328730526,
+      "miss_GPUh": 1081.3136200460278,
+      "N": 103,
+      "max_severity_GPUh": 18.573055555555555,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-09",
+      "slot": 21,
+      "actual_GPUh": 450.5161111111111,
+      "Q90_GPUh": 215.56319426598202,
+      "miss_GPUh": 234.9529168451291,
+      "N": 5,
+      "max_severity_GPUh": 432.1066666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-14",
+      "slot": 15,
+      "actual_GPUh": 672.2316666666668,
+      "Q90_GPUh": 130.24102253587054,
+      "miss_GPUh": 541.9906441307962,
+      "N": 29,
+      "max_severity_GPUh": 158.88222222222223,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-14",
+      "slot": 20,
+      "actual_GPUh": 3304.954444444443,
+      "Q90_GPUh": 44.172427688039164,
+      "miss_GPUh": 3260.782016756404,
+      "N": 171,
+      "max_severity_GPUh": 23.1125,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-14",
+      "slot": 34,
+      "actual_GPUh": 1055.226111111111,
+      "Q90_GPUh": 0.0,
+      "miss_GPUh": 1055.226111111111,
+      "N": 3,
+      "max_severity_GPUh": 1054.72,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-15",
+      "slot": 18,
+      "actual_GPUh": 501.49000000000007,
+      "Q90_GPUh": 275.1978369494895,
+      "miss_GPUh": 226.29216305051057,
+      "N": 78,
+      "max_severity_GPUh": 14.896666666666667,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-16",
+      "slot": 19,
+      "actual_GPUh": 453.06444444444446,
+      "Q90_GPUh": 89.79395494770772,
+      "miss_GPUh": 363.27048949673673,
+      "N": 2,
+      "max_severity_GPUh": 286.2311111111111,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-17",
+      "slot": 6,
+      "actual_GPUh": 535.9755555555556,
+      "Q90_GPUh": 177.44924534277894,
+      "miss_GPUh": 358.5263102127767,
+      "N": 11,
+      "max_severity_GPUh": 194.16,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-18",
+      "slot": 3,
+      "actual_GPUh": 4676.2861111111115,
+      "Q90_GPUh": 245.55079419886786,
+      "miss_GPUh": 4430.735316912243,
+      "N": 367,
+      "max_severity_GPUh": 21.26,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2024-12-18",
+      "slot": 11,
+      "actual_GPUh": 2291.3325000000027,
+      "Q90_GPUh": 113.06371540284383,
+      "miss_GPUh": 2178.268784597159,
+      "N": 193,
+      "max_severity_GPUh": 16.180555555555557,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-18",
+      "slot": 12,
+      "actual_GPUh": 1421.4688888888886,
+      "Q90_GPUh": 128.50574436515942,
+      "miss_GPUh": 1292.9631445237292,
+      "N": 206,
+      "max_severity_GPUh": 11.25361111111111,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-18",
+      "slot": 18,
+      "actual_GPUh": 535.8347222222222,
+      "Q90_GPUh": 102.04424035076148,
+      "miss_GPUh": 433.79048187146077,
+      "N": 14,
+      "max_severity_GPUh": 432.2266666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-18",
+      "slot": 34,
+      "actual_GPUh": 891.4933333333333,
+      "Q90_GPUh": 63.64563314138846,
+      "miss_GPUh": 827.8477001919449,
+      "N": 1,
+      "max_severity_GPUh": 891.4933333333333,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-18",
+      "slot": 35,
+      "actual_GPUh": 449.00666666666666,
+      "Q90_GPUh": 64.69569550855326,
+      "miss_GPUh": 384.3109711581134,
+      "N": 6,
+      "max_severity_GPUh": 110.22444444444444,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-19",
+      "slot": 3,
+      "actual_GPUh": 1156.133888888889,
+      "Q90_GPUh": 208.4157393156587,
+      "miss_GPUh": 947.7181495732303,
+      "N": 88,
+      "max_severity_GPUh": 16.921388888888888,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-19",
+      "slot": 9,
+      "actual_GPUh": 544.9038888888888,
+      "Q90_GPUh": 197.65524889792277,
+      "miss_GPUh": 347.248639990966,
+      "N": 12,
+      "max_severity_GPUh": 338.5288888888889,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-19",
+      "slot": 24,
+      "actual_GPUh": 743.1894444444443,
+      "Q90_GPUh": 130.60467412000477,
+      "miss_GPUh": 612.5847703244395,
+      "N": 7,
+      "max_severity_GPUh": 169.26444444444445,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-20",
+      "slot": 4,
+      "actual_GPUh": 675.7291666666669,
+      "Q90_GPUh": 197.22910877336673,
+      "miss_GPUh": 478.5000578933001,
+      "N": 35,
+      "max_severity_GPUh": 56.64277777777778,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-20",
+      "slot": 5,
+      "actual_GPUh": 10348.017222222245,
+      "Q90_GPUh": 170.98523708224187,
+      "miss_GPUh": 10177.031985140002,
+      "N": 488,
+      "max_severity_GPUh": 110.33666666666667,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2024-12-20",
+      "slot": 7,
+      "actual_GPUh": 510.36444444444436,
+      "Q90_GPUh": 222.32702677899573,
+      "miss_GPUh": 288.03741766544863,
+      "N": 7,
+      "max_severity_GPUh": 432.02666666666664,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-25",
+      "slot": 3,
+      "actual_GPUh": 1377.06,
+      "Q90_GPUh": 0.0,
+      "miss_GPUh": 1377.06,
+      "N": 6,
+      "max_severity_GPUh": 286.06,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-25",
+      "slot": 8,
+      "actual_GPUh": 641.4347222222224,
+      "Q90_GPUh": 11.22053726225295,
+      "miss_GPUh": 630.2141849599694,
+      "N": 12,
+      "max_severity_GPUh": 400.74666666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-25",
+      "slot": 29,
+      "actual_GPUh": 483.9333333333334,
+      "Q90_GPUh": 2.245749726649752,
+      "miss_GPUh": 481.68758360668363,
+      "N": 7,
+      "max_severity_GPUh": 87.72055555555555,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-26",
+      "slot": 3,
+      "actual_GPUh": 1398.648888888889,
+      "Q90_GPUh": 268.513071948371,
+      "miss_GPUh": 1130.135816940518,
+      "N": 88,
+      "max_severity_GPUh": 37.733333333333334,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-26",
+      "slot": 4,
+      "actual_GPUh": 7326.075833333336,
+      "Q90_GPUh": 446.4068253469856,
+      "miss_GPUh": 6879.66900798635,
+      "N": 482,
+      "max_severity_GPUh": 106.38666666666667,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2024-12-26",
+      "slot": 18,
+      "actual_GPUh": 1831.0466666666675,
+      "Q90_GPUh": 138.7816291544617,
+      "miss_GPUh": 1692.2650375122057,
+      "N": 162,
+      "max_severity_GPUh": 12.008611111111112,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-27",
+      "slot": 22,
+      "actual_GPUh": 1517.327222222221,
+      "Q90_GPUh": 109.91348711944454,
+      "miss_GPUh": 1407.4137351027766,
+      "N": 164,
+      "max_severity_GPUh": 37.69777777777778,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-27",
+      "slot": 23,
+      "actual_GPUh": 665.8108333333337,
+      "Q90_GPUh": 137.88834994565434,
+      "miss_GPUh": 527.9224833876793,
+      "N": 29,
+      "max_severity_GPUh": 89.26833333333333,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-28",
+      "slot": 1,
+      "actual_GPUh": 1014.9911111111112,
+      "Q90_GPUh": 178.0943503778117,
+      "miss_GPUh": 836.8967607332995,
+      "N": 6,
+      "max_severity_GPUh": 377.37333333333333,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-28",
+      "slot": 2,
+      "actual_GPUh": 1018.6775,
+      "Q90_GPUh": 183.36205565462006,
+      "miss_GPUh": 835.31544434538,
+      "N": 60,
+      "max_severity_GPUh": 512.2666666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-28",
+      "slot": 12,
+      "actual_GPUh": 1371.574166666667,
+      "Q90_GPUh": 165.25446598762264,
+      "miss_GPUh": 1206.3197006790444,
+      "N": 62,
+      "max_severity_GPUh": 33.945277777777775,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-28",
+      "slot": 13,
+      "actual_GPUh": 2017.951111111111,
+      "Q90_GPUh": 159.01685323662943,
+      "miss_GPUh": 1858.9342578744815,
+      "N": 86,
+      "max_severity_GPUh": 27.41861111111111,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-29",
+      "slot": 5,
+      "actual_GPUh": 533.3711111111111,
+      "Q90_GPUh": 167.85137189193009,
+      "miss_GPUh": 365.519739219181,
+      "N": 4,
+      "max_severity_GPUh": 533.3511111111111,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-29",
+      "slot": 28,
+      "actual_GPUh": 480.3955555555556,
+      "Q90_GPUh": 0.001110706767527865,
+      "miss_GPUh": 480.39444484878805,
+      "N": 2,
+      "max_severity_GPUh": 432.3466666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-30",
+      "slot": 0,
+      "actual_GPUh": 808.0266666666666,
+      "Q90_GPUh": 93.47083846053044,
+      "miss_GPUh": 714.5558282061362,
+      "N": 5,
+      "max_severity_GPUh": 379.7866666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-30",
+      "slot": 2,
+      "actual_GPUh": 893.2322222222223,
+      "Q90_GPUh": 138.90188241311316,
+      "miss_GPUh": 754.3303398091091,
+      "N": 13,
+      "max_severity_GPUh": 93.04666666666667,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-30",
+      "slot": 6,
+      "actual_GPUh": 702.656388888889,
+      "Q90_GPUh": 66.97478369917194,
+      "miss_GPUh": 635.6816051897171,
+      "N": 51,
+      "max_severity_GPUh": 16.02888888888889,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2024-12-30",
+      "slot": 7,
+      "actual_GPUh": 22570.464999999975,
+      "Q90_GPUh": 189.33808976086644,
+      "miss_GPUh": 22381.12691023911,
+      "N": 1523,
+      "max_severity_GPUh": 36.00861111111111,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2024-12-30",
+      "slot": 20,
+      "actual_GPUh": 446.02666666666664,
+      "Q90_GPUh": 80.6884884236056,
+      "miss_GPUh": 365.33817824306107,
+      "N": 3,
+      "max_severity_GPUh": 348.81333333333333,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-30",
+      "slot": 37,
+      "actual_GPUh": 3135.7977777777796,
+      "Q90_GPUh": 43.857451098811595,
+      "miss_GPUh": 3091.940326678968,
+      "N": 359,
+      "max_severity_GPUh": 19.00722222222222,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2024-12-31",
+      "slot": 5,
+      "actual_GPUh": 917.9052777777779,
+      "Q90_GPUh": 128.4890621083227,
+      "miss_GPUh": 789.4162156694551,
+      "N": 35,
+      "max_severity_GPUh": 369.32,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2024-12-31",
+      "slot": 24,
+      "actual_GPUh": 588.7311111111111,
+      "Q90_GPUh": 198.59509491321896,
+      "miss_GPUh": 390.1360161978921,
+      "N": 86,
+      "max_severity_GPUh": 12.007777777777777,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-01",
+      "slot": 15,
+      "actual_GPUh": 1215.6280555555554,
+      "Q90_GPUh": 258.355905564851,
+      "miss_GPUh": 957.2721499907044,
+      "N": 21,
+      "max_severity_GPUh": 133.09333333333333,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-01",
+      "slot": 20,
+      "actual_GPUh": 542.0405555555557,
+      "Q90_GPUh": 393.7525939748942,
+      "miss_GPUh": 148.2879615806615,
+      "N": 20,
+      "max_severity_GPUh": 350.05333333333334,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-01",
+      "slot": 39,
+      "actual_GPUh": 2222.013055555555,
+      "Q90_GPUh": 49.97005224764015,
+      "miss_GPUh": 2172.043003307915,
+      "N": 252,
+      "max_severity_GPUh": 17.944444444444443,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-02",
+      "slot": 21,
+      "actual_GPUh": 576.0933333333334,
+      "Q90_GPUh": 386.6843770669701,
+      "miss_GPUh": 189.40895626636325,
+      "N": 3,
+      "max_severity_GPUh": 432.29333333333335,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-03",
+      "slot": 0,
+      "actual_GPUh": 775.2133333333334,
+      "Q90_GPUh": 211.24906945803335,
+      "miss_GPUh": 563.9642638753,
+      "N": 2,
+      "max_severity_GPUh": 405.52,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-03",
+      "slot": 12,
+      "actual_GPUh": 977.3155555555555,
+      "Q90_GPUh": 369.62538483835397,
+      "miss_GPUh": 607.6901707172016,
+      "N": 66,
+      "max_severity_GPUh": 134.02916666666667,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-03",
+      "slot": 16,
+      "actual_GPUh": 515.6402777777778,
+      "Q90_GPUh": 288.8233360271702,
+      "miss_GPUh": 226.81694175060755,
+      "N": 7,
+      "max_severity_GPUh": 432.2,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-03",
+      "slot": 18,
+      "actual_GPUh": 454.60722222222245,
+      "Q90_GPUh": 407.34248396342554,
+      "miss_GPUh": 47.26473825879691,
+      "N": 90,
+      "max_severity_GPUh": 401.56,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-03",
+      "slot": 21,
+      "actual_GPUh": 883.8036111111112,
+      "Q90_GPUh": 350.3248574911857,
+      "miss_GPUh": 533.4787536199256,
+      "N": 22,
+      "max_severity_GPUh": 92.88722222222222,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-03",
+      "slot": 47,
+      "actual_GPUh": 480.3644444444445,
+      "Q90_GPUh": 125.72285532935466,
+      "miss_GPUh": 354.6415891150898,
+      "N": 2,
+      "max_severity_GPUh": 432.3066666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-04",
+      "slot": 0,
+      "actual_GPUh": 865.7766666666666,
+      "Q90_GPUh": 408.95201117389536,
+      "miss_GPUh": 456.8246554927713,
+      "N": 3,
+      "max_severity_GPUh": 432.36,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-04",
+      "slot": 10,
+      "actual_GPUh": 609.0672222222229,
+      "Q90_GPUh": 400.27244052292696,
+      "miss_GPUh": 208.79478169929592,
+      "N": 70,
+      "max_severity_GPUh": 245.31555555555556,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-04",
+      "slot": 14,
+      "actual_GPUh": 895.9266666666655,
+      "Q90_GPUh": 636.767788130284,
+      "miss_GPUh": 259.1588785363815,
+      "N": 225,
+      "max_severity_GPUh": 768.5066666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-05",
+      "slot": 4,
+      "actual_GPUh": 831.3377777777777,
+      "Q90_GPUh": 252.93692957840133,
+      "miss_GPUh": 578.4008481993764,
+      "N": 4,
+      "max_severity_GPUh": 394.6533333333333,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-05",
+      "slot": 14,
+      "actual_GPUh": 614.1230555555557,
+      "Q90_GPUh": 368.3792266906973,
+      "miss_GPUh": 245.74382886485836,
+      "N": 10,
+      "max_severity_GPUh": 96.00722222222223,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-05",
+      "slot": 21,
+      "actual_GPUh": 545.1052777777778,
+      "Q90_GPUh": 219.75947759652618,
+      "miss_GPUh": 325.34580018125166,
+      "N": 9,
+      "max_severity_GPUh": 374.3066666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-06",
+      "slot": 5,
+      "actual_GPUh": 456.0066666666666,
+      "Q90_GPUh": 276.00787439616477,
+      "miss_GPUh": 179.99879227050184,
+      "N": 5,
+      "max_severity_GPUh": 92.9811111111111,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-07",
+      "slot": 2,
+      "actual_GPUh": 819.6177777777777,
+      "Q90_GPUh": 264.8782729905973,
+      "miss_GPUh": 554.7395047871805,
+      "N": 3,
+      "max_severity_GPUh": 429.04,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-07",
+      "slot": 4,
+      "actual_GPUh": 6788.593055555558,
+      "Q90_GPUh": 335.0719703181353,
+      "miss_GPUh": 6453.521085237422,
+      "N": 456,
+      "max_severity_GPUh": 96.02333333333333,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-07",
+      "slot": 5,
+      "actual_GPUh": 2329.321111111111,
+      "Q90_GPUh": 262.53566737219495,
+      "miss_GPUh": 2066.785443738916,
+      "N": 6,
+      "max_severity_GPUh": 1920.0266666666666,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-07",
+      "slot": 6,
+      "actual_GPUh": 2335.5066666666667,
+      "Q90_GPUh": 409.35294949619527,
+      "miss_GPUh": 1926.1537171704713,
+      "N": 17,
+      "max_severity_GPUh": 960.0066666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-07",
+      "slot": 7,
+      "actual_GPUh": 7680.153333333333,
+      "Q90_GPUh": 100.51754781909108,
+      "miss_GPUh": 7579.635785514241,
+      "N": 10,
+      "max_severity_GPUh": 960.0355555555556,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-07",
+      "slot": 19,
+      "actual_GPUh": 3520.183888888883,
+      "Q90_GPUh": 197.05860435122523,
+      "miss_GPUh": 3323.1252845376575,
+      "N": 395,
+      "max_severity_GPUh": 47.67722222222222,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-07",
+      "slot": 20,
+      "actual_GPUh": 2764.6449999999995,
+      "Q90_GPUh": 102.9600032416374,
+      "miss_GPUh": 2661.684996758362,
+      "N": 204,
+      "max_severity_GPUh": 390.7733333333333,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-08",
+      "slot": 3,
+      "actual_GPUh": 963.1738888888889,
+      "Q90_GPUh": 375.87339375425864,
+      "miss_GPUh": 587.3004951346302,
+      "N": 12,
+      "max_severity_GPUh": 128.02777777777777,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-08",
+      "slot": 4,
+      "actual_GPUh": 505.5766666666667,
+      "Q90_GPUh": 242.2266733871472,
+      "miss_GPUh": 263.3499932795195,
+      "N": 4,
+      "max_severity_GPUh": 370.36,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-08",
+      "slot": 16,
+      "actual_GPUh": 1242.5738888888889,
+      "Q90_GPUh": 395.417227739174,
+      "miss_GPUh": 847.1566611497149,
+      "N": 90,
+      "max_severity_GPUh": 47.97944444444445,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-08",
+      "slot": 17,
+      "actual_GPUh": 888.0674999999999,
+      "Q90_GPUh": 436.04822195161717,
+      "miss_GPUh": 452.0192780483827,
+      "N": 9,
+      "max_severity_GPUh": 488.26,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-08",
+      "slot": 25,
+      "actual_GPUh": 1635.9691666666665,
+      "Q90_GPUh": 247.52876910816167,
+      "miss_GPUh": 1388.4403975585049,
+      "N": 147,
+      "max_severity_GPUh": 19.570555555555554,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-08",
+      "slot": 26,
+      "actual_GPUh": 20699.639999999978,
+      "Q90_GPUh": 133.9040850740643,
+      "miss_GPUh": 20565.735914925914,
+      "N": 1226,
+      "max_severity_GPUh": 533.35,
+      "classification": "MIXED"
+    },
+    {
+      "day": "2025-01-09",
+      "slot": 35,
+      "actual_GPUh": 4242.088055555559,
+      "Q90_GPUh": 37.4657415075665,
+      "miss_GPUh": 4204.622314047992,
+      "N": 454,
+      "max_severity_GPUh": 43.123333333333335,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-10",
+      "slot": 5,
+      "actual_GPUh": 614.1416666666667,
+      "Q90_GPUh": 301.6682536320704,
+      "miss_GPUh": 312.47341303459626,
+      "N": 45,
+      "max_severity_GPUh": 35.343333333333334,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-10",
+      "slot": 8,
+      "actual_GPUh": 1607.169999999999,
+      "Q90_GPUh": 188.7281194704115,
+      "miss_GPUh": 1418.4418805295875,
+      "N": 38,
+      "max_severity_GPUh": 68.48,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-10",
+      "slot": 14,
+      "actual_GPUh": 591.7119444444445,
+      "Q90_GPUh": 237.46378707875903,
+      "miss_GPUh": 354.2481573656855,
+      "N": 21,
+      "max_severity_GPUh": 384.12444444444446,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-10",
+      "slot": 16,
+      "actual_GPUh": 966.518611111111,
+      "Q90_GPUh": 426.2350051057615,
+      "miss_GPUh": 540.2836060053495,
+      "N": 179,
+      "max_severity_GPUh": 545.04,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-10",
+      "slot": 31,
+      "actual_GPUh": 1788.8627777777779,
+      "Q90_GPUh": 146.41534280763818,
+      "miss_GPUh": 1642.4474349701397,
+      "N": 138,
+      "max_severity_GPUh": 23.845277777777778,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-11",
+      "slot": 0,
+      "actual_GPUh": 579.3866666666667,
+      "Q90_GPUh": 190.0352162997331,
+      "miss_GPUh": 389.3514503669336,
+      "N": 6,
+      "max_severity_GPUh": 384.02222222222224,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-11",
+      "slot": 34,
+      "actual_GPUh": 3545.3786111111144,
+      "Q90_GPUh": 165.62810533059127,
+      "miss_GPUh": 3379.7505057805233,
+      "N": 361,
+      "max_severity_GPUh": 23.826666666666668,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-12",
+      "slot": 11,
+      "actual_GPUh": 456.35055555555556,
+      "Q90_GPUh": 327.1159079596961,
+      "miss_GPUh": 129.23464759585949,
+      "N": 2,
+      "max_severity_GPUh": 432.3466666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-12",
+      "slot": 23,
+      "actual_GPUh": 1203.4872222222223,
+      "Q90_GPUh": 346.8643572923159,
+      "miss_GPUh": 856.6228649299064,
+      "N": 7,
+      "max_severity_GPUh": 228.02666666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-13",
+      "slot": 6,
+      "actual_GPUh": 489.97277777777737,
+      "Q90_GPUh": 128.61776974250859,
+      "miss_GPUh": 361.3550080352688,
+      "N": 331,
+      "max_severity_GPUh": 12.004166666666666,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-13",
+      "slot": 8,
+      "actual_GPUh": 572.6188888888894,
+      "Q90_GPUh": 154.14602440322295,
+      "miss_GPUh": 418.47286448566643,
+      "N": 115,
+      "max_severity_GPUh": 373.94666666666666,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-13",
+      "slot": 11,
+      "actual_GPUh": 756.71,
+      "Q90_GPUh": 196.35312834287387,
+      "miss_GPUh": 560.3568716571261,
+      "N": 11,
+      "max_severity_GPUh": 217.1511111111111,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-13",
+      "slot": 31,
+      "actual_GPUh": 2581.167777777779,
+      "Q90_GPUh": 135.01202187670515,
+      "miss_GPUh": 2446.155755901074,
+      "N": 325,
+      "max_severity_GPUh": 16.227777777777778,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-14",
+      "slot": 1,
+      "actual_GPUh": 699.9677777777778,
+      "Q90_GPUh": 182.5065891909174,
+      "miss_GPUh": 517.4611885868603,
+      "N": 73,
+      "max_severity_GPUh": 375.52,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-14",
+      "slot": 2,
+      "actual_GPUh": 635.1952777777777,
+      "Q90_GPUh": 328.66390327497504,
+      "miss_GPUh": 306.5313745028027,
+      "N": 4,
+      "max_severity_GPUh": 587.04,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-14",
+      "slot": 4,
+      "actual_GPUh": 665.4941666666667,
+      "Q90_GPUh": 347.46250975559445,
+      "miss_GPUh": 318.0316569110723,
+      "N": 13,
+      "max_severity_GPUh": 177.9777777777778,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-14",
+      "slot": 5,
+      "actual_GPUh": 596.6238888888886,
+      "Q90_GPUh": 212.76976570392216,
+      "miss_GPUh": 383.8541231849664,
+      "N": 58,
+      "max_severity_GPUh": 533.3344444444444,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-14",
+      "slot": 9,
+      "actual_GPUh": 730.2683333333333,
+      "Q90_GPUh": 291.0915917208644,
+      "miss_GPUh": 439.1767416124689,
+      "N": 21,
+      "max_severity_GPUh": 93.86,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-14",
+      "slot": 12,
+      "actual_GPUh": 965.0925,
+      "Q90_GPUh": 335.12600740904605,
+      "miss_GPUh": 629.966492590954,
+      "N": 8,
+      "max_severity_GPUh": 960.01,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-14",
+      "slot": 16,
+      "actual_GPUh": 10352.343611111304,
+      "Q90_GPUh": 410.27898280078335,
+      "miss_GPUh": 9942.064628310522,
+      "N": 811,
+      "max_severity_GPUh": 87.74555555555555,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-14",
+      "slot": 17,
+      "actual_GPUh": 1167.518055555556,
+      "Q90_GPUh": 346.51607987560385,
+      "miss_GPUh": 821.0019756799521,
+      "N": 788,
+      "max_severity_GPUh": 5.915555555555556,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-14",
+      "slot": 36,
+      "actual_GPUh": 519.0691666666667,
+      "Q90_GPUh": 136.2597123336532,
+      "miss_GPUh": 382.8094543330135,
+      "N": 18,
+      "max_severity_GPUh": 44.01555555555556,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-15",
+      "slot": 3,
+      "actual_GPUh": 780.6077777777791,
+      "Q90_GPUh": 461.30236289228156,
+      "miss_GPUh": 319.30541488549756,
+      "N": 67,
+      "max_severity_GPUh": 96.00666666666666,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-15",
+      "slot": 14,
+      "actual_GPUh": 557.6833333333333,
+      "Q90_GPUh": 512.728210240416,
+      "miss_GPUh": 44.95512309291723,
+      "N": 23,
+      "max_severity_GPUh": 38.57361111111111,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-15",
+      "slot": 16,
+      "actual_GPUh": 582.091111111108,
+      "Q90_GPUh": 559.2141431615433,
+      "miss_GPUh": 22.876967949564687,
+      "N": 509,
+      "max_severity_GPUh": 8.032222222222222,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-15",
+      "slot": 22,
+      "actual_GPUh": 7000.21638888889,
+      "Q90_GPUh": 340.982252284604,
+      "miss_GPUh": 6659.234136604286,
+      "N": 425,
+      "max_severity_GPUh": 24.009444444444444,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-15",
+      "slot": 37,
+      "actual_GPUh": 469.45,
+      "Q90_GPUh": 37.33349995927238,
+      "miss_GPUh": 432.1165000407276,
+      "N": 53,
+      "max_severity_GPUh": 33.733333333333334,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-16",
+      "slot": 12,
+      "actual_GPUh": 490.9505555555556,
+      "Q90_GPUh": 212.0726356775074,
+      "miss_GPUh": 278.87791987804815,
+      "N": 9,
+      "max_severity_GPUh": 92.83611111111111,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-17",
+      "slot": 2,
+      "actual_GPUh": 551.0850000000002,
+      "Q90_GPUh": 294.9782113147244,
+      "miss_GPUh": 256.1067886852758,
+      "N": 13,
+      "max_severity_GPUh": 376.6,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-17",
+      "slot": 18,
+      "actual_GPUh": 1124.8408333333334,
+      "Q90_GPUh": 355.3808558827029,
+      "miss_GPUh": 769.4599774506305,
+      "N": 39,
+      "max_severity_GPUh": 384.0888888888889,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-17",
+      "slot": 26,
+      "actual_GPUh": 1832.6230555555576,
+      "Q90_GPUh": 290.1141500489277,
+      "miss_GPUh": 1542.5089055066298,
+      "N": 109,
+      "max_severity_GPUh": 24.009166666666665,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-17",
+      "slot": 27,
+      "actual_GPUh": 3415.386111111109,
+      "Q90_GPUh": 201.97251071976163,
+      "miss_GPUh": 3213.4136003913477,
+      "N": 217,
+      "max_severity_GPUh": 24.00861111111111,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-18",
+      "slot": 3,
+      "actual_GPUh": 640.5833333333289,
+      "Q90_GPUh": 356.4117107777537,
+      "miss_GPUh": 284.17162255557525,
+      "N": 547,
+      "max_severity_GPUh": 80.08,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-18",
+      "slot": 11,
+      "actual_GPUh": 981.3388888888888,
+      "Q90_GPUh": 229.5303318425368,
+      "miss_GPUh": 751.808557046352,
+      "N": 35,
+      "max_severity_GPUh": 960.0144444444444,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-18",
+      "slot": 12,
+      "actual_GPUh": 3849.9322222222227,
+      "Q90_GPUh": 381.35597122085454,
+      "miss_GPUh": 3468.5762510013683,
+      "N": 8,
+      "max_severity_GPUh": 960.0244444444445,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-18",
+      "slot": 13,
+      "actual_GPUh": 480.43055555555554,
+      "Q90_GPUh": 371.08819017378636,
+      "miss_GPUh": 109.34236538176918,
+      "N": 8,
+      "max_severity_GPUh": 384.3466666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-18",
+      "slot": 30,
+      "actual_GPUh": 617.1122222222227,
+      "Q90_GPUh": 153.56040884618008,
+      "miss_GPUh": 463.5518133760427,
+      "N": 677,
+      "max_severity_GPUh": 24.005555555555556,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-18",
+      "slot": 31,
+      "actual_GPUh": 6977.647499999999,
+      "Q90_GPUh": 177.4073580870386,
+      "miss_GPUh": 6800.24014191296,
+      "N": 463,
+      "max_severity_GPUh": 24.010277777777777,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-19",
+      "slot": 0,
+      "actual_GPUh": 541.9091666666667,
+      "Q90_GPUh": 274.95775332135645,
+      "miss_GPUh": 266.95141334531024,
+      "N": 8,
+      "max_severity_GPUh": 247.15555555555557,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-19",
+      "slot": 15,
+      "actual_GPUh": 545.8755555555556,
+      "Q90_GPUh": 301.9828430462434,
+      "miss_GPUh": 243.89271250931222,
+      "N": 2,
+      "max_severity_GPUh": 401.7733333333333,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-19",
+      "slot": 19,
+      "actual_GPUh": 13642.12111111113,
+      "Q90_GPUh": 164.14529411910047,
+      "miss_GPUh": 13477.97581699203,
+      "N": 953,
+      "max_severity_GPUh": 48.00666666666667,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-19",
+      "slot": 21,
+      "actual_GPUh": 2822.9894444444412,
+      "Q90_GPUh": 268.76598953190125,
+      "miss_GPUh": 2554.22345491254,
+      "N": 71,
+      "max_severity_GPUh": 57.96888888888889,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-19",
+      "slot": 45,
+      "actual_GPUh": 533.3377777777778,
+      "Q90_GPUh": 74.07392139075407,
+      "miss_GPUh": 459.2638563870237,
+      "N": 1,
+      "max_severity_GPUh": 533.3377777777778,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-20",
+      "slot": 1,
+      "actual_GPUh": 710.5861111111111,
+      "Q90_GPUh": 224.61023879516156,
+      "miss_GPUh": 485.9758723159496,
+      "N": 9,
+      "max_severity_GPUh": 181.53333333333333,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-20",
+      "slot": 12,
+      "actual_GPUh": 4942.468611111103,
+      "Q90_GPUh": 186.15226931936397,
+      "miss_GPUh": 4756.316341791739,
+      "N": 342,
+      "max_severity_GPUh": 77.92111111111112,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-20",
+      "slot": 18,
+      "actual_GPUh": 6036.515000000001,
+      "Q90_GPUh": 380.20701413064177,
+      "miss_GPUh": 5656.307985869359,
+      "N": 9,
+      "max_severity_GPUh": 960.0166666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-20",
+      "slot": 19,
+      "actual_GPUh": 461.4125,
+      "Q90_GPUh": 373.690138108953,
+      "miss_GPUh": 87.722361891047,
+      "N": 13,
+      "max_severity_GPUh": 96.01277777777777,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-20",
+      "slot": 37,
+      "actual_GPUh": 2617.160833333331,
+      "Q90_GPUh": 118.22146024445543,
+      "miss_GPUh": 2498.9393730888755,
+      "N": 1945,
+      "max_severity_GPUh": 24.00777777777778,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-21",
+      "slot": 11,
+      "actual_GPUh": 1036.1783333333333,
+      "Q90_GPUh": 248.4069469215047,
+      "miss_GPUh": 787.7713864118286,
+      "N": 58,
+      "max_severity_GPUh": 134.51555555555555,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-21",
+      "slot": 15,
+      "actual_GPUh": 504.9033333333333,
+      "Q90_GPUh": 250.2371764602296,
+      "miss_GPUh": 254.66615687310372,
+      "N": 12,
+      "max_severity_GPUh": 87.70277777777778,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-22",
+      "slot": 17,
+      "actual_GPUh": 1726.516388888888,
+      "Q90_GPUh": 411.687518521235,
+      "miss_GPUh": 1314.828870367653,
+      "N": 60,
+      "max_severity_GPUh": 37.65472222222222,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-22",
+      "slot": 30,
+      "actual_GPUh": 1169.7833333333333,
+      "Q90_GPUh": 292.82351796340885,
+      "miss_GPUh": 876.9598153699244,
+      "N": 85,
+      "max_severity_GPUh": 18.80666666666667,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-22",
+      "slot": 31,
+      "actual_GPUh": 1570.7211111110935,
+      "Q90_GPUh": 322.65200074139227,
+      "miss_GPUh": 1248.0691103697013,
+      "N": 1447,
+      "max_severity_GPUh": 19.313055555555554,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-23",
+      "slot": 4,
+      "actual_GPUh": 699.2094444444447,
+      "Q90_GPUh": 494.60135861808044,
+      "miss_GPUh": 204.60808582636423,
+      "N": 12,
+      "max_severity_GPUh": 293.76444444444445,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-23",
+      "slot": 10,
+      "actual_GPUh": 5315.606666666663,
+      "Q90_GPUh": 427.9277247049606,
+      "miss_GPUh": 4887.678941961703,
+      "N": 437,
+      "max_severity_GPUh": 24.00861111111111,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-23",
+      "slot": 20,
+      "actual_GPUh": 3038.459722222223,
+      "Q90_GPUh": 507.6087917298114,
+      "miss_GPUh": 2530.8509304924114,
+      "N": 62,
+      "max_severity_GPUh": 110.16444444444444,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-24",
+      "slot": 15,
+      "actual_GPUh": 960.8133333333334,
+      "Q90_GPUh": 335.8223859432095,
+      "miss_GPUh": 624.9909473901239,
+      "N": 4,
+      "max_severity_GPUh": 960.0133333333333,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-24",
+      "slot": 29,
+      "actual_GPUh": 14930.805555555713,
+      "Q90_GPUh": 303.7235805810087,
+      "miss_GPUh": 14627.081974974704,
+      "N": 1336,
+      "max_severity_GPUh": 36.009166666666665,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-24",
+      "slot": 32,
+      "actual_GPUh": 4005.3724999999968,
+      "Q90_GPUh": 317.14714569113505,
+      "miss_GPUh": 3688.225354308862,
+      "N": 280,
+      "max_severity_GPUh": 96.00444444444445,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-25",
+      "slot": 14,
+      "actual_GPUh": 646.1041666666665,
+      "Q90_GPUh": 452.20025358748114,
+      "miss_GPUh": 193.90391307918537,
+      "N": 72,
+      "max_severity_GPUh": 384.1333333333333,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-25",
+      "slot": 24,
+      "actual_GPUh": 569.2027777777776,
+      "Q90_GPUh": 566.8331050013816,
+      "miss_GPUh": 2.369672776395987,
+      "N": 11,
+      "max_severity_GPUh": 533.3388888888888,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-25",
+      "slot": 25,
+      "actual_GPUh": 533.3525000000001,
+      "Q90_GPUh": 293.8726004357092,
+      "miss_GPUh": 239.47989956429086,
+      "N": 4,
+      "max_severity_GPUh": 533.35,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-25",
+      "slot": 39,
+      "actual_GPUh": 3425.1852777777717,
+      "Q90_GPUh": 16.1476490887207,
+      "miss_GPUh": 3409.037628689051,
+      "N": 1407,
+      "max_severity_GPUh": 48.00944444444445,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-26",
+      "slot": 9,
+      "actual_GPUh": 1661.6741666666667,
+      "Q90_GPUh": 322.835859226826,
+      "miss_GPUh": 1338.8383074398407,
+      "N": 99,
+      "max_severity_GPUh": 36.00388888888889,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-26",
+      "slot": 28,
+      "actual_GPUh": 450.78027777777777,
+      "Q90_GPUh": 414.821544295401,
+      "miss_GPUh": 35.95873348237677,
+      "N": 6,
+      "max_severity_GPUh": 233.32,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-26",
+      "slot": 34,
+      "actual_GPUh": 461.49611111111096,
+      "Q90_GPUh": 272.1363498192683,
+      "miss_GPUh": 189.3597612918427,
+      "N": 80,
+      "max_severity_GPUh": 96.01388888888889,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-27",
+      "slot": 16,
+      "actual_GPUh": 2411.901388888889,
+      "Q90_GPUh": 315.738984397238,
+      "miss_GPUh": 2096.1624044916507,
+      "N": 73,
+      "max_severity_GPUh": 432.1066666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-28",
+      "slot": 37,
+      "actual_GPUh": 2957.733055555554,
+      "Q90_GPUh": 183.663745474098,
+      "miss_GPUh": 2774.069310081456,
+      "N": 157,
+      "max_severity_GPUh": 48.00861111111111,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-29",
+      "slot": 3,
+      "actual_GPUh": 4823.955,
+      "Q90_GPUh": 753.9044816737904,
+      "miss_GPUh": 4070.0505183262094,
+      "N": 14,
+      "max_severity_GPUh": 960.0322222222222,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-29",
+      "slot": 16,
+      "actual_GPUh": 463.3086111111112,
+      "Q90_GPUh": 325.1169830701514,
+      "miss_GPUh": 138.1916280409598,
+      "N": 55,
+      "max_severity_GPUh": 226.52,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-29",
+      "slot": 23,
+      "actual_GPUh": 630.5344444444441,
+      "Q90_GPUh": 321.0358421592619,
+      "miss_GPUh": 309.49860228518224,
+      "N": 141,
+      "max_severity_GPUh": 116.99555555555555,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-30",
+      "slot": 14,
+      "actual_GPUh": 451.63111111111095,
+      "Q90_GPUh": 388.14146494110435,
+      "miss_GPUh": 63.48964617000661,
+      "N": 151,
+      "max_severity_GPUh": 45.72944444444445,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-30",
+      "slot": 17,
+      "actual_GPUh": 1173.3694444444445,
+      "Q90_GPUh": 233.82603734984596,
+      "miss_GPUh": 939.5434070945986,
+      "N": 1243,
+      "max_severity_GPUh": 5.333888888888889,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-30",
+      "slot": 18,
+      "actual_GPUh": 19263.81583333336,
+      "Q90_GPUh": 274.49156728106027,
+      "miss_GPUh": 18989.3242660523,
+      "N": 933,
+      "max_severity_GPUh": 48.009166666666665,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-01-31",
+      "slot": 2,
+      "actual_GPUh": 587.9855555555555,
+      "Q90_GPUh": 217.8479295995573,
+      "miss_GPUh": 370.1376259559982,
+      "N": 9,
+      "max_severity_GPUh": 533.3444444444444,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-31",
+      "slot": 3,
+      "actual_GPUh": 4886.1513888888885,
+      "Q90_GPUh": 250.00254014078172,
+      "miss_GPUh": 4636.1488487481065,
+      "N": 13,
+      "max_severity_GPUh": 960.0333333333333,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-31",
+      "slot": 4,
+      "actual_GPUh": 1618.2808333333332,
+      "Q90_GPUh": 278.58484072865923,
+      "miss_GPUh": 1339.695992604674,
+      "N": 9,
+      "max_severity_GPUh": 960.0022222222223,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-31",
+      "slot": 14,
+      "actual_GPUh": 5830.277777777778,
+      "Q90_GPUh": 406.53760453036733,
+      "miss_GPUh": 5423.740173247411,
+      "N": 232,
+      "max_severity_GPUh": 71.59444444444445,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-01-31",
+      "slot": 45,
+      "actual_GPUh": 533.35,
+      "Q90_GPUh": 96.71005867259554,
+      "miss_GPUh": 436.6399413274045,
+      "N": 1,
+      "max_severity_GPUh": 533.35,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-01-31",
+      "slot": 46,
+      "actual_GPUh": 533.6347222222222,
+      "Q90_GPUh": 169.99420364350644,
+      "miss_GPUh": 363.6405185787157,
+      "N": 2,
+      "max_severity_GPUh": 533.3677777777777,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-01",
+      "slot": 1,
+      "actual_GPUh": 1011.2316666666666,
+      "Q90_GPUh": 239.40963707726056,
+      "miss_GPUh": 771.822029589406,
+      "N": 12,
+      "max_severity_GPUh": 533.3577777777778,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-01",
+      "slot": 3,
+      "actual_GPUh": 533.8752777777779,
+      "Q90_GPUh": 331.8163742246639,
+      "miss_GPUh": 202.05890355311402,
+      "N": 11,
+      "max_severity_GPUh": 533.3566666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-01",
+      "slot": 6,
+      "actual_GPUh": 567.041388888889,
+      "Q90_GPUh": 232.38183396791297,
+      "miss_GPUh": 334.659554920976,
+      "N": 19,
+      "max_severity_GPUh": 192.0311111111111,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-01",
+      "slot": 46,
+      "actual_GPUh": 489.5261111111111,
+      "Q90_GPUh": 76.86183506905063,
+      "miss_GPUh": 412.66427604206046,
+      "N": 2,
+      "max_severity_GPUh": 488.5211111111111,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-02",
+      "slot": 1,
+      "actual_GPUh": 533.3433333333334,
+      "Q90_GPUh": 168.19118762431654,
+      "miss_GPUh": 365.15214570901685,
+      "N": 1,
+      "max_severity_GPUh": 533.3433333333334,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-02",
+      "slot": 3,
+      "actual_GPUh": 516.615,
+      "Q90_GPUh": 180.36012197972133,
+      "miss_GPUh": 336.2548780202787,
+      "N": 15,
+      "max_severity_GPUh": 48.00472222222222,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-02",
+      "slot": 25,
+      "actual_GPUh": 2187.2400000000002,
+      "Q90_GPUh": 108.44959352781879,
+      "miss_GPUh": 2078.7904064721815,
+      "N": 122,
+      "max_severity_GPUh": 43.80138888888889,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-02",
+      "slot": 28,
+      "actual_GPUh": 871.4088888888888,
+      "Q90_GPUh": 90.1504520312369,
+      "miss_GPUh": 781.2584368576519,
+      "N": 29,
+      "max_severity_GPUh": 48.004444444444445,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-03",
+      "slot": 35,
+      "actual_GPUh": 17252.945277777795,
+      "Q90_GPUh": 32.25754506144147,
+      "miss_GPUh": 17220.687732716353,
+      "N": 999,
+      "max_severity_GPUh": 24.00888888888889,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-02-03",
+      "slot": 47,
+      "actual_GPUh": 733.1380555555555,
+      "Q90_GPUh": 133.93431011270863,
+      "miss_GPUh": 599.2037454428469,
+      "N": 8,
+      "max_severity_GPUh": 672.03,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-04",
+      "slot": 0,
+      "actual_GPUh": 1344.0544444444445,
+      "Q90_GPUh": 224.7825238823568,
+      "miss_GPUh": 1119.2719205620876,
+      "N": 2,
+      "max_severity_GPUh": 672.0288888888889,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-04",
+      "slot": 1,
+      "actual_GPUh": 538.4216666666666,
+      "Q90_GPUh": 484.1187229747397,
+      "miss_GPUh": 54.30294369192694,
+      "N": 6,
+      "max_severity_GPUh": 432.06666666666666,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-04",
+      "slot": 12,
+      "actual_GPUh": 862.2688888888893,
+      "Q90_GPUh": 479.6564367490382,
+      "miss_GPUh": 382.61245213985103,
+      "N": 130,
+      "max_severity_GPUh": 41.26138888888889,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-04",
+      "slot": 17,
+      "actual_GPUh": 996.5844444444441,
+      "Q90_GPUh": 562.4058624411431,
+      "miss_GPUh": 434.178582003301,
+      "N": 145,
+      "max_severity_GPUh": 60.03111111111111,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-04",
+      "slot": 20,
+      "actual_GPUh": 478.95583333333326,
+      "Q90_GPUh": 344.4545600096162,
+      "miss_GPUh": 134.50127332371704,
+      "N": 6,
+      "max_severity_GPUh": 432.4,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-04",
+      "slot": 29,
+      "actual_GPUh": 1160.1375000000005,
+      "Q90_GPUh": 387.9793593246433,
+      "miss_GPUh": 772.1581406753571,
+      "N": 272,
+      "max_severity_GPUh": 18.923055555555557,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-02-05",
+      "slot": 14,
+      "actual_GPUh": 699.9641666666668,
+      "Q90_GPUh": 298.37210201573976,
+      "miss_GPUh": 401.592064650927,
+      "N": 27,
+      "max_severity_GPUh": 60.032222222222224,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-05",
+      "slot": 16,
+      "actual_GPUh": 1922.923611111112,
+      "Q90_GPUh": 649.9628874104479,
+      "miss_GPUh": 1272.960723700664,
+      "N": 135,
+      "max_severity_GPUh": 42.401666666666664,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-06",
+      "slot": 19,
+      "actual_GPUh": 1740.288055555555,
+      "Q90_GPUh": 546.5518248908471,
+      "miss_GPUh": 1193.7362306647078,
+      "N": 113,
+      "max_severity_GPUh": 48.003055555555555,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-06",
+      "slot": 25,
+      "actual_GPUh": 554.0022222222223,
+      "Q90_GPUh": 526.4981222496536,
+      "miss_GPUh": 27.50409997256861,
+      "N": 12,
+      "max_severity_GPUh": 48.004444444444445,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-06",
+      "slot": 26,
+      "actual_GPUh": 536.9955555555555,
+      "Q90_GPUh": 384.58579323306355,
+      "miss_GPUh": 152.40976232249193,
+      "N": 168,
+      "max_severity_GPUh": 4.096666666666667,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-07",
+      "slot": 3,
+      "actual_GPUh": 1703.9308333333329,
+      "Q90_GPUh": 381.9507111119173,
+      "miss_GPUh": 1321.9801222214155,
+      "N": 11,
+      "max_severity_GPUh": 533.3611111111111,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-07",
+      "slot": 13,
+      "actual_GPUh": 445.5277777777777,
+      "Q90_GPUh": 263.8624962016808,
+      "miss_GPUh": 181.6652815760969,
+      "N": 367,
+      "max_severity_GPUh": 9.333333333333334,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-02-07",
+      "slot": 16,
+      "actual_GPUh": 5530.3961111111175,
+      "Q90_GPUh": 630.7538298295755,
+      "miss_GPUh": 4899.642281281542,
+      "N": 125,
+      "max_severity_GPUh": 48.00666666666667,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-07",
+      "slot": 30,
+      "actual_GPUh": 980.3136111111113,
+      "Q90_GPUh": 483.16475232018263,
+      "miss_GPUh": 497.14885879092867,
+      "N": 33,
+      "max_severity_GPUh": 48.006388888888885,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-07",
+      "slot": 37,
+      "actual_GPUh": 794.6261111111113,
+      "Q90_GPUh": 39.64412604840293,
+      "miss_GPUh": 754.9819850627084,
+      "N": 324,
+      "max_severity_GPUh": 8.265,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-02-07",
+      "slot": 47,
+      "actual_GPUh": 534.3633333333333,
+      "Q90_GPUh": 168.2788650407783,
+      "miss_GPUh": 366.084468292555,
+      "N": 2,
+      "max_severity_GPUh": 533.3633333333333,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-08",
+      "slot": 1,
+      "actual_GPUh": 965.4277777777777,
+      "Q90_GPUh": 304.3499644827721,
+      "miss_GPUh": 661.0778132950056,
+      "N": 2,
+      "max_severity_GPUh": 533.3477777777778,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-08",
+      "slot": 4,
+      "actual_GPUh": 1002.4405555555556,
+      "Q90_GPUh": 385.2310621634364,
+      "miss_GPUh": 617.2094933921193,
+      "N": 28,
+      "max_severity_GPUh": 48.016666666666666,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-08",
+      "slot": 6,
+      "actual_GPUh": 676.1847222222223,
+      "Q90_GPUh": 459.95197012813344,
+      "miss_GPUh": 216.23275209408882,
+      "N": 16,
+      "max_severity_GPUh": 533.3622222222223,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-08",
+      "slot": 14,
+      "actual_GPUh": 1058.7391666666663,
+      "Q90_GPUh": 424.17175149890255,
+      "miss_GPUh": 634.5674151677638,
+      "N": 55,
+      "max_severity_GPUh": 139.34,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-08",
+      "slot": 31,
+      "actual_GPUh": 447.7277777777779,
+      "Q90_GPUh": 235.62114669664842,
+      "miss_GPUh": 212.10663108112945,
+      "N": 9,
+      "max_severity_GPUh": 96.01444444444445,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-08",
+      "slot": 36,
+      "actual_GPUh": 1407.4422222222213,
+      "Q90_GPUh": 48.2757655289619,
+      "miss_GPUh": 1359.1664566932593,
+      "N": 216,
+      "max_severity_GPUh": 48.00861111111111,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-10",
+      "slot": 25,
+      "actual_GPUh": 5812.705555555558,
+      "Q90_GPUh": 100.82767494004035,
+      "miss_GPUh": 5711.877880615518,
+      "N": 131,
+      "max_severity_GPUh": 48.006388888888885,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-10",
+      "slot": 32,
+      "actual_GPUh": 643.2594444444444,
+      "Q90_GPUh": 248.65944821312488,
+      "miss_GPUh": 394.59999623131955,
+      "N": 26,
+      "max_severity_GPUh": 57.214166666666664,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-11",
+      "slot": 8,
+      "actual_GPUh": 3893.779444444445,
+      "Q90_GPUh": 305.89907916408197,
+      "miss_GPUh": 3587.8803652803626,
+      "N": 27,
+      "max_severity_GPUh": 672.9522222222222,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-11",
+      "slot": 47,
+      "actual_GPUh": 456.0772222222223,
+      "Q90_GPUh": 152.03008262530554,
+      "miss_GPUh": 304.04713959691674,
+      "N": 16,
+      "max_severity_GPUh": 120.00361111111111,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-13",
+      "slot": 0,
+      "actual_GPUh": 1384.2872222222225,
+      "Q90_GPUh": 316.9943652910516,
+      "miss_GPUh": 1067.2928569311707,
+      "N": 13,
+      "max_severity_GPUh": 960.16,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-13",
+      "slot": 2,
+      "actual_GPUh": 979.5741666666665,
+      "Q90_GPUh": 573.1760701173135,
+      "miss_GPUh": 406.398096549353,
+      "N": 15,
+      "max_severity_GPUh": 506.2322222222222,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-13",
+      "slot": 18,
+      "actual_GPUh": 4558.484444444444,
+      "Q90_GPUh": 473.27129748531513,
+      "miss_GPUh": 4085.213146959129,
+      "N": 442,
+      "max_severity_GPUh": 48.00805555555556,
+      "classification": "COUNT_DRIVEN"
+    },
+    {
+      "day": "2025-02-13",
+      "slot": 47,
+      "actual_GPUh": 829.8588888888889,
+      "Q90_GPUh": 113.09836669739708,
+      "miss_GPUh": 716.7605221914919,
+      "N": 2,
+      "max_severity_GPUh": 415.36333333333334,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-14",
+      "slot": 2,
+      "actual_GPUh": 1386.8311111111109,
+      "Q90_GPUh": 375.5479930396797,
+      "miss_GPUh": 1011.2831180714312,
+      "N": 24,
+      "max_severity_GPUh": 137.25083333333333,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-14",
+      "slot": 9,
+      "actual_GPUh": 636.2425000000002,
+      "Q90_GPUh": 410.14733050118457,
+      "miss_GPUh": 226.0951694988156,
+      "N": 14,
+      "max_severity_GPUh": 305.3333333333333,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-15",
+      "slot": 13,
+      "actual_GPUh": 939.609722222222,
+      "Q90_GPUh": 492.7831463989429,
+      "miss_GPUh": 446.8265758232791,
+      "N": 40,
+      "max_severity_GPUh": 48.005,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-17",
+      "slot": 6,
+      "actual_GPUh": 513.4433333333333,
+      "Q90_GPUh": 260.29072551007846,
+      "miss_GPUh": 253.1526078232548,
+      "N": 26,
+      "max_severity_GPUh": 52.50388888888889,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-18",
+      "slot": 9,
+      "actual_GPUh": 1200.9966666666667,
+      "Q90_GPUh": 252.80091598370592,
+      "miss_GPUh": 948.1957506829608,
+      "N": 146,
+      "max_severity_GPUh": 335.4066666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-18",
+      "slot": 13,
+      "actual_GPUh": 1156.902222222223,
+      "Q90_GPUh": 411.19684586391367,
+      "miss_GPUh": 745.7053763583092,
+      "N": 157,
+      "max_severity_GPUh": 48.00666666666667,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-18",
+      "slot": 14,
+      "actual_GPUh": 2103.281944444445,
+      "Q90_GPUh": 273.89294979748456,
+      "miss_GPUh": 1829.3889946469603,
+      "N": 51,
+      "max_severity_GPUh": 666.7,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-18",
+      "slot": 22,
+      "actual_GPUh": 899.1377777777776,
+      "Q90_GPUh": 312.6658389667322,
+      "miss_GPUh": 586.4719388110454,
+      "N": 49,
+      "max_severity_GPUh": 119.46805555555555,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-19",
+      "slot": 3,
+      "actual_GPUh": 584.5752777777778,
+      "Q90_GPUh": 454.89697118080045,
+      "miss_GPUh": 129.6783065969774,
+      "N": 19,
+      "max_severity_GPUh": 136.875,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-19",
+      "slot": 16,
+      "actual_GPUh": 4534.752222222221,
+      "Q90_GPUh": 388.1026818618457,
+      "miss_GPUh": 4146.649540360375,
+      "N": 35,
+      "max_severity_GPUh": 320.02777777777777,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-19",
+      "slot": 27,
+      "actual_GPUh": 462.69277777777785,
+      "Q90_GPUh": 335.6061012804994,
+      "miss_GPUh": 127.08667649727846,
+      "N": 7,
+      "max_severity_GPUh": 80.02666666666667,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-20",
+      "slot": 14,
+      "actual_GPUh": 936.7447222222223,
+      "Q90_GPUh": 496.9242669688997,
+      "miss_GPUh": 439.8204552533226,
+      "N": 29,
+      "max_severity_GPUh": 48.00222222222222,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-21",
+      "slot": 18,
+      "actual_GPUh": 666.1077777777778,
+      "Q90_GPUh": 366.7610325254182,
+      "miss_GPUh": 299.34674525235954,
+      "N": 32,
+      "max_severity_GPUh": 160.17777777777778,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-22",
+      "slot": 6,
+      "actual_GPUh": 3401.688611111111,
+      "Q90_GPUh": 447.98336700793965,
+      "miss_GPUh": 2953.7052441031715,
+      "N": 20,
+      "max_severity_GPUh": 960.0355555555556,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-22",
+      "slot": 7,
+      "actual_GPUh": 1069.5922222222223,
+      "Q90_GPUh": 327.37589479097454,
+      "miss_GPUh": 742.2163274312477,
+      "N": 28,
+      "max_severity_GPUh": 960.0466666666666,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-22",
+      "slot": 19,
+      "actual_GPUh": 1920.253888888889,
+      "Q90_GPUh": 189.12881093372692,
+      "miss_GPUh": 1731.125077955162,
+      "N": 10,
+      "max_severity_GPUh": 960.0666666666667,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-22",
+      "slot": 27,
+      "actual_GPUh": 484.7413888888886,
+      "Q90_GPUh": 192.58044145194916,
+      "miss_GPUh": 292.1609474369394,
+      "N": 97,
+      "max_severity_GPUh": 44.39861111111111,
+      "classification": "UNRESOLVED"
+    },
+    {
+      "day": "2025-02-23",
+      "slot": 28,
+      "actual_GPUh": 5793.630277777777,
+      "Q90_GPUh": 312.3109807937107,
+      "miss_GPUh": 5481.319296984067,
+      "N": 27,
+      "max_severity_GPUh": 320.0188888888889,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-25",
+      "slot": 11,
+      "actual_GPUh": 1848.183611111111,
+      "Q90_GPUh": 121.29048633185376,
+      "miss_GPUh": 1726.8931247792573,
+      "N": 12,
+      "max_severity_GPUh": 666.6755555555555,
+      "classification": "SEVERITY_DRIVEN"
+    },
+    {
+      "day": "2025-02-26",
+      "slot": 6,
+      "actual_GPUh": 970.726388888889,
+      "Q90_GPUh": 345.07996859709505,
+      "miss_GPUh": 625.6464202917939,
+      "N": 30,
+      "max_severity_GPUh": 192.02555555555554,
+      "classification": "SEVERITY_DRIVEN"
+    }
+  ],
+  "miss_type_counts": {
+    "SEVERITY_DRIVEN": 110,
+    "UNRESOLVED": 85,
+    "COUNT_DRIVEN": 35,
+    "MIXED": 3
+  },
+  "scenario_distribution_assumption": "Independent intervals and independent jobs conditional on causal shared context and predicted intensity; no fitted residual temporal copula"
+}
