@@ -75,6 +75,9 @@ def deviation(row, option):
 def materialize(row, option, capacity, wan):
     value = deepcopy(row)
     value.update(AIDC_site=option.site, start_slot=option.start, end_slot=option.end)
+    from dayahead.v41r1.terminal import active
+    if active(row) and row['state_at_issue'] == 'PENDING':
+        value['post_H_site'] = option.site if option.end > H else None
     if (option.site, option.start, option.end) == (row['AIDC_site'], row['start_slot'], row['end_slot']) and not option.migrated:
         return value
     if option.site != 'UNASSIGNED':
@@ -119,7 +122,12 @@ def audit(reference_jobs, selected, capacity, wan):
         assert all(a < b for s,a,b in parts)
         old_tail = [(s,max(H,a),b) for s,a,b in segments(before) if b>H]
         new_tail = [(s,max(H,a),b) for s,a,b in parts if b>H]
-        assert old_tail == new_tail
+        from dayahead.v41r1.terminal import active, check
+        if active(before) and before['state_at_issue'] == 'PENDING':
+            check(before, row)
+            changed_tail += old_tail != new_tail
+        else:
+            assert old_tail == new_tail
         if row.get('migration_selected'):
             assert before['state_at_issue']=='RUNNING' and row['start_slot']==before['start_slot']
             assert parts[0][0]==before['AIDC_site'] and parts[-1][0]==row['migration_destination']
@@ -131,6 +139,7 @@ def audit(reference_jobs, selected, capacity, wan):
             assert parts==segments(before)
     validation = validate_fixed_path_transfers(wan, transfers) if transfers else {'status':'PASS','path_selection_decisions':0,'violations':[]}
     assert validation['status']=='PASS'
-    return {'status':'PASS','POST_H_RESERVATION_PROFILE_CHANGED_JOBS':0,'POST_H_SITE_STATE_CHANGED_JOBS':0,
+    return {'status':'PASS','POST_H_RESERVATION_PROFILE_CHANGED_JOBS':changed_tail,'POST_H_SITE_STATE_CHANGED_JOBS':sum(
+            bool(tail(refs[r['job_uid']]) or tail(r)) and refs[r['job_uid']]['AIDC_site'] != r['AIDC_site'] for r in selected),
             'REPAIR_INDUCED_INCREMENTAL_POST_MIDNIGHT_GPU_H':0.,'safe_runtime_GPU_state_qos_preserved':True,
             'common_service_compute_GPU_slots_preserved':True,'WAN':validation,'migration_count':len(transfers)}

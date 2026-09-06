@@ -74,9 +74,16 @@ def build(day, snapshot_path, capacity):
             failures.append({'job_uid': uid, 'reason': 'B0_OUTSIDE_COMMON_AUTHORIZED_DOMAIN'})
         if max(24, job['start_slot']) < min(120, job['end_slot']) and job['AIDC_site'] not in capacity.aidc_ids:
             failures.append({'job_uid': uid, 'reason': 'UNASSIGNED_OPERATING_DAY_SERVICE'})
+    from dayahead.v41r1.terminal import attach
+    jobs = attach(jobs)
+    # Revalidate every common reference against the new per-job domain.
+    for job in jobs:
+        from dayahead.v40a.feedback import authorized_options
+        require((job['AIDC_site'], job['start_slot']) in authorized_options(job, capacity), 'R1_REFERENCE_OUTSIDE_DOMAIN')
     atomic_json(folder / 'COMMON_B0_REFERENCE_JOBS.json', jobs)
     rows = [{k: job[k] for k in ('job_uid', 'requested_GPU', 'state_at_issue', 'qos', 'safe_duration_seconds',
-             'safe_duration_slots', 'duration_authority', 'common_terminal_obligation')} for job in jobs]
+             'safe_duration_slots', 'duration_authority', 'common_terminal_obligation', 'terminal_contract',
+             'terminal_reference_start_issue_slot', 'terminal_reference_site', 'terminal_reference_remaining_slots')} for job in jobs]
     rows.sort(key=lambda r: r['job_uid'])
     atomic_json(folder / 'COMMON_DA_SERVICE_AUTHORITY.json', dict(rows=rows, COMMON_DA_DURATION_SHA=digest(rows),
         source_ledger=record(lp), source_snapshot=record(sp), ML_snapshot=record(snapshot_path),

@@ -20,6 +20,9 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
     started=time.perf_counter(); refs={r['job_uid']:deepcopy(r) for r in reference_jobs}
     assert len(refs)==len(reference_jobs)
     sites=tuple(context.capacity.aidc_ids); T=len(context.coefficients)
+    from dayahead.v41r1.terminal import active
+    if any(active(r) for r in reference_jobs):
+        assert T == 96, 'SCIENTIFIC_DAY_MUST_HAVE_96_SLOTS'
     wan=getattr(context,'wan',None); elapsed=getattr(context,'elapsed',{})
     def occupancy(rows):
         result=np.zeros((T,len(sites)),dtype=int)
@@ -96,9 +99,12 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
             counts=Counter(Option(refs[u]['AIDC_site'],refs[u]['start_slot'],refs[u]['end_slot']) for u in members)
             vs=[]; mig=gp.LinExpr(); transfer_start=gp.LinExpr(); transfer_length=gp.LinExpr()
             for k,opt in enumerate(opts):
-                v=model.addVar(vtype=GRB.INTEGER,lb=0,ub=n,name=f'choice[{i},{k}]'); variables[i,k]=v;vs.append(v)
-                v.Start=counts[opt]
-                if inject_reference:
+                from dayahead.v41r1.terminal import active
+                fixed_r1 = active(row) and len(opts) == 1
+                v=n if fixed_r1 else model.addVar(vtype=GRB.INTEGER,lb=0,ub=n,name=f'choice[{i},{k}]')
+                variables[i,k]=v;vs.append(v)
+                if not fixed_r1: v.Start=counts[opt]
+                if inject_reference and not fixed_r1:
                     # Diagnostic feasibility injection into the identical B1
                     # model, including its reserve constraints and objectives.
                     v.LB = counts[opt]; v.UB = counts[opt]
@@ -135,6 +141,9 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
             from dayahead.v41.reserve import add_constraints
             reserve_mean, reserve_xi = add_constraints(model, context, load)
         model.setObjective(rho,GRB.MINIMIZE);model.update()
+        if any(active(r) for r in reference_jobs):
+            from dayahead.v41r1.terminal import model_boundary
+            write_json(output/'HORIZON_MODEL_AUDIT.json',model_boundary(model,reference_jobs,uid_options,T))
         objective=[(v.VarName,float(v.Obj)) for v in model.getVars() if v.Obj]
         assert objective==[('rho_max',1.)]
         write_json(output/'PRIMARY_STRUCTURE.json',{'method':'JOINT_TEMPORAL_SPATIAL_AIDC_GRID_OPTIMIZATION',
@@ -175,7 +184,9 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
         selected=[]; materialized_dev=0
         for i,key in enumerate(keys):
             places=[]
-            for k,opt in enumerate(key[2]):places.extend([opt]*int(round(variables[i,k].X)))
+            for k,opt in enumerate(key[2]):
+                variable = variables[i,k]
+                places.extend([opt]*int(round(variable if isinstance(variable, int) else variable.X)))
             assert len(places)==len(groups[key])
             for uid,opt in zip(sorted(groups[key]),places):
                 selected.append(materialize(refs[uid],opt,context.capacity,wan));materialized_dev+=deviation(refs[uid],opt)

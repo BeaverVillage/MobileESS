@@ -24,6 +24,8 @@ def now(): return datetime.now(timezone.utc).isoformat()
 def science():
     paths = list((ROOT / 'dayahead/v41').glob('*.py'))
     paths += [ROOT / 'dayahead/v40g/optimizer.py', ROOT / 'dayahead/v40h/feedback.py']
+    paths += [ROOT / p for p in ('dayahead/v41r1/terminal.py', 'dayahead/v40a/feedback.py',
+        'dayahead/v40g/domain.py', 'dayahead/v40g_segments/canonical.py')]
     return manifest(paths, ROOT)
 
 
@@ -221,6 +223,8 @@ def dayahead(day, policy):
             M1='ACTIVE' if policy in ('B2','B3') else 'NOT_APPLICABLE_MESS_OFF',
             A1='ACTIVE' if policy=='B3' else 'NOT_APPLICABLE_BY_POLICY',MF='ACTIVE' if policy=='B3' else 'NOT_APPLICABLE_BY_POLICY'))
         power = planning_power(jobs, context)
+        from dayahead.v41r1.terminal import persist as persist_terminal
+        persist_terminal(output / 'terminal', day, policy, reference, jobs, common)
         grid = evaluate_grid(context.coefficients, controls_from_trajectory(context.coefficients, power['pcc'],
                              () if trajectory is None else trajectory.slots), context.nodes)
         require(grid['status'] == 'PASS', 'DAYAHEAD_PLANNING_GRID_FAILED')

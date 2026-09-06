@@ -79,10 +79,15 @@ def test_firewall_and_old_preservation():
 
 
 def test_scientific_contracts_unchanged():
-    from dayahead.v41r1.audit import ROOT, OLD
+    # This is the historical authority-stop audit, before the subsequently
+    # authorized terminal revision. Verify its frozen base rather than assert
+    # that the current terminal formulation still has the old source bytes.
+    import hashlib, subprocess
+    from dayahead.v41r1.audit import ROOT, OLD, BASE
     audit = read(OUT / 'V41R1_UNCHANGED_SCIENTIFIC_IMPLEMENTATION.json')
     for source in audit['files']:
-        assert sha(ROOT / source['path']) == source['sha256'] == sha(OLD / source['path'])
+        blob=subprocess.check_output(['git','show',BASE+':'+source['path']],cwd=ROOT)
+        assert hashlib.sha256(blob).hexdigest() == source['sha256'] == sha(OLD / source['path'])
     assert audit['new_optimizer_calls'] == audit['new_Actual_calls'] == 0
 
 

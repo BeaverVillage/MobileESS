@@ -179,12 +179,18 @@ def terminal_audit(before, after):
         for k in ('requested_GPU', 'safe_duration_seconds', 'safe_duration_slots', 'duration_authority', 'state_at_issue', 'qos', 'common_terminal_obligation', 'source_snapshot_sha256'):
             require(row.get(k) == prev.get(k), 'COMMON_AUTHORITY_DRIFT:' + k)
         a, b = terminal(prev), terminal(row)
-        for k in ('post_H_segments', 'post_H_site', 'remaining_compute_GPU_slots'):
-            require(a[k] == b[k], 'COMMON_TERMINAL_DRIFT:' + k)
+        from dayahead.v41r1.terminal import active, check
+        if active(prev) and prev['state_at_issue'] == 'PENDING':
+            check(prev, row)
+        else:
+            for k in ('post_H_segments', 'post_H_site', 'remaining_compute_GPU_slots'):
+                require(a[k] == b[k], 'COMMON_TERMINAL_DRIFT:' + k)
         obligation = row.get('common_terminal_obligation', {})
         if obligation.get('must_complete_by_H'): require(b['remaining_compute_slots'] == 0, 'COMMON_IN_DAY_SERVICE_LOST')
-    return {'status': 'PASS', 'POST_H_RESERVATION_PROFILE_CHANGED_JOBS': 0,
-        'POST_H_SITE_STATE_CHANGED_JOBS': 0, 'REPAIR_INDUCED_INCREMENTAL_POST_MIDNIGHT_GPU_H': 0.0}
+    return {'status': 'PASS', 'POST_H_RESERVATION_PROFILE_CHANGED_JOBS': sum(
+        terminal(old[r['job_uid']])['post_H_segments'] != terminal(r)['post_H_segments'] for r in after),
+        'POST_H_SITE_STATE_CHANGED_JOBS': sum(terminal(old[r['job_uid']])['post_H_site'] != terminal(r)['post_H_site'] for r in after),
+        'REPAIR_INDUCED_INCREMENTAL_POST_MIDNIGHT_GPU_H': 0.0}
 
 
 def wan_audit(jobs, authority, *, actual=False):
