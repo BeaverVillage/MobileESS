@@ -1,0 +1,34 @@
+{
+  "id": "V41_COUNTERFACTUAL_ACTUAL_REPLAY_V1",
+  "authority": {
+    "path": "C:\\Users\\kjw39\\.codex\\attachments\\9607e7bf-ebdf-4786-a5fd-dbf75147b72f\\pasted-text.txt",
+    "sha256": "33fd3e578b3f1bf5b502a12117f32f43cd25d5f5e6965c6161d11064d498f9eb",
+    "bytes": 8677
+  },
+  "definition": "REPLAY(FROZEN_DAYAHEAD_DECISION(policy,day), REALIZED_EXOGENOUS_OUTCOMES(day))",
+  "policy_variables": [
+    "admission/selection",
+    "site",
+    "scheduled start",
+    "rack where decided",
+    "migration"
+  ],
+  "pending_runtime": "authoritative realized duration of the same job",
+  "pending_completion": "frozen DA start plus realized duration; existing 900-second time discretization",
+  "frozen_start_reoptimization": false,
+  "frozen_site_change": false,
+  "RUNNING_authority_reopened": false,
+  "future_workload": "score frozen reserve/headroom using realized arriving GPUh; no synthetic jobs or scheduling",
+  "MESS": "existing realized link-entry traversal and energy contract, frozen route/commands",
+  "grid": "existing exact OpenDSS with realized grid inputs and frozen counterfactual policy",
+  "ordering": [
+    "DA decision",
+    "decision hash",
+    "freeze receipt",
+    "open Actual inputs",
+    "replay",
+    "OpenDSS"
+  ],
+  "legacy_72_blocking": false,
+  "missing_realized_inputs": "FAIL_CLOSED with exact missing source"
+}

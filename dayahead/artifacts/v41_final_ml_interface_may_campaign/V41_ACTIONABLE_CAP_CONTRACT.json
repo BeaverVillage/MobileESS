@@ -1,0 +1,20 @@
+{
+  "status": "SPECIFICATION_FROZEN_NOT_INTEGRATED",
+  "RAW": "H4_RAW_R85_B2_GPUh",
+  "historical_quantile": 0.99,
+  "historical_pool": "Fully mature historical actual H4 windows available strictly before issue",
+  "historical_order_statistic": "k=min(max(ceil((n+1)*0.99),1),n); sorted_values[k-1]; no interpolation",
+  "empty_historical_pool": "BLOCK; no invented fallback",
+  "physical_cap": "0.25 * sum(eligible future-service GPU capacity over 16 slots)",
+  "capacity_authority_candidate": "context.capacity.site_capacity with context.capacity.eligible_racks; dayahead/v40d_actual/inputs.py:capacity",
+  "future_service_eligibility_binding": "NOT_VERIFIED; cannot substitute total installed capacity",
+  "actionable": "min(RAW,CAP_HIST,CAP_PHYS)",
+  "retain_separate_fields": [
+    "RAW",
+    "CAP_HIST",
+    "CAP_PHYS",
+    "ACTIONABLE_RESERVE"
+  ],
+  "forecast_accuracy_improvement_claim": false,
+  "May_objective_based_tuning": false
+}

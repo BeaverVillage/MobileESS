@@ -65,6 +65,10 @@ def solve_feedback(a0, m1, context, *, tolerance=1e-6, work_limit=60.0):
                 model.addConstr(g==load[t,s]);model.addGenConstrPWL(g,p,list(range(cap+1)),values.tolist())
                 controls[t][i]=p
         rho,grid_rows=add_grid(model,context.coefficients,controls,min(1,initial['rho_max']+tolerance))
+        reserve_mean = None
+        if hasattr(context, 'v41_ml_snapshot'):
+            from dayahead.v41.reserve import add_constraints
+            reserve_mean, reserve_xi = add_constraints(model, context, load)
         model.setObjective(rho,GRB.MINIMIZE);model.optimize();stages=[]
         def record(label):
             stages.append({'objective':label,'status':int(model.Status),'incumbent':float(model.ObjVal) if model.SolCount else None,
@@ -83,11 +87,34 @@ def solve_feedback(a0, m1, context, *, tolerance=1e-6, work_limit=60.0):
             return evaluate_grid(context.coefficients,controls_from_trajectory(context.coefficients,pp,m1.slots),context.nodes)['rho_max']
         primary_materialized=float(recompute(primary_jobs))
         model.addConstr(1000*rho<=1000*accepted_primary,name='PRIMARY_EXACT_VALUE_LOCK')
+        if reserve_mean is not None:
+            stages[-1]['freeze_for_subsequent_stage'] = dict(name='PRIMARY_EXACT_VALUE_LOCK', sense='<=',
+                scale=1000, bound=accepted_primary, intentional_degradation=0., feasibility_tolerance=model.Params.FeasibilityTol)
+        reserve_optimum = None
+        if reserve_mean is not None:
+            model.setObjective(reserve_mean, GRB.MINIMIZE); model.optimize(); record('V41_mean_H4_shortfall_GPUh')
+            if not model.SolCount:
+                raise RuntimeError('V41_A1_RESERVE_STAGE_NO_INCUMBENT')
+            reserve_optimum = float(reserve_mean.getValue())
+            model.addConstr(reserve_mean <= reserve_optimum + model.Params.FeasibilityTol,
+                            name='V41_MEAN_H4_SHORTFALL_LOCK')
+            stages[-1]['freeze_for_subsequent_stage'] = dict(name='V41_MEAN_H4_SHORTFALL_LOCK', sense='<=',
+                bound=reserve_optimum + model.Params.FeasibilityTol, feasibility_tolerance=model.Params.FeasibilityTol)
+            chosen={i:next(k for k in range(len(options[i])) if variables[i,k].X>.5) for i in options}
+            # Lower priorities must fall back to the accepted P1/P2 decision.
+            reserve_jobs=[deepcopy(options[i][chosen[i]]) for i in range(len(a0))]
+            reserve_materialized=float(recompute(reserve_jobs))
+            if reserve_materialized > primary_materialized + 1e-10:
+                raise RuntimeError('V41_A1_PRIMARY_SACRIFICED_IN_RESERVE_STAGE')
+            primary_jobs=reserve_jobs
+            primary_materialized=reserve_materialized
         model.setObjective(deviation,GRB.MINIMIZE);model.optimize();record('complete_segment_site_symmetric_GPU_slots')
         if model.SolCount:
             chosen={i:next(k for k in range(len(options[i])) if variables[i,k].X>.5) for i in options}
             if model.Status==GRB.OPTIMAL:
                 model.addConstr(deviation<=round(deviation.getValue()),name='SECONDARY_EXACT_CAP')
+                if reserve_mean is not None:
+                    stages[-1]['freeze_for_subsequent_stage'] = dict(name='SECONDARY_EXACT_CAP', sense='<=', bound=round(deviation.getValue()))
                 model.setObjective(tie,GRB.MINIMIZE);model.optimize();record('deterministic_tie')
                 if model.SolCount:chosen={i:next(k for k in range(len(options[i])) if variables[i,k].X>.5) for i in options}
         jobs=[deepcopy(options[i][chosen[i]]) for i in range(len(a0))]
@@ -95,10 +122,26 @@ def solve_feedback(a0, m1, context, *, tolerance=1e-6, work_limit=60.0):
         audit=terminal_audit(a0,jobs);pcc,_=pcc_from_jobs(jobs,context)
         result=evaluate_grid(context.coefficients,controls_from_trajectory(context.coefficients,pcc,m1.slots),context.nodes)
         if route_sha(m1.slots)!=frozen_route or digest(m1)!=frozen_m1:raise ValueError('A1_MUTATED_MESS')
+        v41 = {}
+        if reserve_mean is not None:
+            from dayahead.v41.reserve import diagnostics, OBJECTIVE_HIERARCHY
+            _, gpu = pcc_from_jobs(jobs, context)
+            reserve_report = diagnostics(context.v41_ml_snapshot, context.capacity, gpu)
+            if reserve_report['mean_xi_GPUh'] > reserve_optimum + 2 * model.Params.FeasibilityTol:
+                raise RuntimeError('V41_A1_RESERVE_PRIORITY_SACRIFICED')
+            v41 = dict(ML_snapshot_sha256=context.v41_ml_snapshot_sha256, reserve_interface_version='V41',
+                       reserve_diagnostics=reserve_report, reserve_optimum=reserve_optimum,
+                       objective_hierarchy=list(OBJECTIVE_HIERARCHY),
+                       OBJECTIVE_VECTOR=[result['rho_max'], reserve_report['mean_xi_GPUh'],
+                           sum(bool(r.get('migration_selected')) for r in jobs),
+                           sum(occupancy_deviation(old, new) for old, new in zip(a0, jobs)),
+                           sum((i+1)*(next(k for k, opt in enumerate(options[i]) if opt == job)+1)
+                               for i, job in enumerate(jobs))],
+                       P3_fixed_by_existing_RUNNING_decision=True)
         return {'status':'PASS' if audit['status']=='PASS' and result['status']=='PASS' else 'FAIL','jobs':jobs,'grid':result,
                 'terminal_audit':audit,'solver':stages,'Gurobi_optimize_calls':len(stages),'grid_rows':grid_rows,
                 'A1_primary_incumbent':stages[0]['incumbent'],'A1_primary_bound':stages[0]['bound'],
                 'A1_final_recomputed_rho':result['rho_max'],'A1_primary_degradation_due_to_lower_priorities':primary_guard['primary_degradation_due_to_lower_priorities'],
                 'strict_primary_guard':primary_guard,'M1_fixed_controls_SHA':digest(fixed[:,12:]),'M1_route_SHA':frozen_route,
-                'running_migrations_added':0,'wallclock_seconds':time.perf_counter()-started}
+                'running_migrations_added':0,'wallclock_seconds':time.perf_counter()-started, **v41}
     finally:model.dispose()

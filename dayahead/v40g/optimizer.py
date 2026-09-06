@@ -14,7 +14,7 @@ from dayahead.paper_analysis.storage import write_json
 from .domain import Option, options, segments, deviation, materialize, audit
 
 
-def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False, work_limits=(60,180,300)):
+def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False, work_limits=(60,180,300), inject_reference=False):
     output=Path(output); output.mkdir(parents=True,exist_ok=True)
     if (output/'ACCEPTED_AIDC.json').exists(): raise RuntimeError('PRESERVE_COMPLETED_SOLVE')
     started=time.perf_counter(); refs={r['job_uid']:deepcopy(r) for r in reference_jobs}
@@ -98,6 +98,10 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
             for k,opt in enumerate(opts):
                 v=model.addVar(vtype=GRB.INTEGER,lb=0,ub=n,name=f'choice[{i},{k}]'); variables[i,k]=v;vs.append(v)
                 v.Start=counts[opt]
+                if inject_reference:
+                    # Diagnostic feasibility injection into the identical B1
+                    # model, including its reserve constraints and objectives.
+                    v.LB = counts[opt]; v.UB = counts[opt]
                 for s,a,b in opt.segments(row):
                     for t in range(max(BEGIN,a),min(BEGIN+T,b)):load[t-BEGIN,s]+=gpu*v
                 dev+=costs[k]*v; tie+=(i+1)*(k+1)*v
@@ -126,11 +130,16 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
                 model.addConstr(g==load[t,s]);model.addGenConstrPWL(g,p,list(range(cap+1)),vals.tolist())
                 controls[t][k]=p
         rho,grid_rows=add_grid(model,context.coefficients,controls,min(1.,before['rho_max']+1e-6))
+        reserve_mean = None
+        if hasattr(context, 'v41_ml_snapshot'):
+            from dayahead.v41.reserve import add_constraints
+            reserve_mean, reserve_xi = add_constraints(model, context, load)
         model.setObjective(rho,GRB.MINIMIZE);model.update()
         objective=[(v.VarName,float(v.Obj)) for v in model.getVars() if v.Obj]
         assert objective==[('rho_max',1.)]
         write_json(output/'PRIMARY_STRUCTURE.json',{'method':'JOINT_TEMPORAL_SPATIAL_AIDC_GRID_OPTIMIZATION',
-            'diagnostic_only':temporal_only,'objective':objective,'grid_rows':grid_rows,'domain_counts':dict(domain_counts),
+            'diagnostic_only':temporal_only or inject_reference,'reference_injected':inject_reference,
+            'objective':objective,'grid_rows':grid_rows,'domain_counts':dict(domain_counts),
             'cohort_count':len(keys),'model_variables':model.NumVars,'model_constraints':model.NumConstrs,
             'TEMPORAL_FIRST_HARD_HIERARCHY':'NO','TEMPORAL_AND_SPATIAL_AIDC_PRIMARY_JOINT':not temporal_only,
             'reference_candidate_included':True,'migration_penalty_in_primary':0,'MESS_variables':0,
@@ -142,10 +151,26 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
         # NO tolerance allowance for lower priorities. Only solver feasibility
         # roundoff remains; a 1e-6 rho degradation is explicitly not permitted.
         model.addConstr(1000*rho<=1000*primary,name='PRIMARY_EXACT_VALUE_LOCK')
+        if reserve_mean is not None:
+            stages[-1]['freeze_for_subsequent_stage'] = dict(name='PRIMARY_EXACT_VALUE_LOCK', sense='<=',
+                scale=1000, bound=primary, intentional_degradation=0., feasibility_tolerance=model.Params.FeasibilityTol)
+        reserve_stage = None
+        if reserve_mean is not None:
+            model.setObjective(reserve_mean, GRB.MINIMIZE)
+            reserve_stage = optimize('V41_SECONDARY_MIN_MEAN_H4_SHORTFALL')
+            reserve_optimum = float(reserve_mean.getValue())
+            model.addConstr(reserve_mean <= reserve_optimum + model.Params.FeasibilityTol,
+                            name='V41_MEAN_H4_SHORTFALL_LOCK')
+            stages[-1]['freeze_for_subsequent_stage'] = dict(name='V41_MEAN_H4_SHORTFALL_LOCK', sense='<=',
+                bound=reserve_optimum + model.Params.FeasibilityTol, feasibility_tolerance=model.Params.FeasibilityTol)
         model.setObjective(migration,GRB.MINIMIZE); optimize('SECONDARY_MIN_MIGRATIONS')
         secondary=int(round(migration.getValue()));model.addConstr(migration==secondary,name='MIGRATION_EXACT_LOCK')
+        if reserve_mean is not None:
+            stages[-1]['freeze_for_subsequent_stage'] = dict(name='MIGRATION_EXACT_LOCK', sense='=', bound=secondary)
         model.setObjective(dev,GRB.MINIMIZE);optimize('TERTIARY_COMPLETE_REFERENCE_DEVIATION')
         tertiary=int(round(dev.getValue()));model.addConstr(dev==tertiary,name='REFERENCE_DEVIATION_EXACT_LOCK')
+        if reserve_mean is not None:
+            stages[-1]['freeze_for_subsequent_stage'] = dict(name='REFERENCE_DEVIATION_EXACT_LOCK', sense='=', bound=tertiary)
         model.setObjective(tie,GRB.MINIMIZE);optimize('QUATERNARY_STABLE_TIE')
         selected=[]; materialized_dev=0
         for i,key in enumerate(keys):
@@ -166,9 +191,20 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
                'primary_degradation_allowance':0.,'solver_feasibility_tolerance':1e-9,
                'secondary_migration_optimum':secondary,'tertiary_reference_deviation_optimum':tertiary,
                'quaternary_tie_optimum':float(tie.getValue()),'solver_stages':stages,'terminal_audit':terminal,
-               'final_decision_SHA':digest(selected),'diagnostic_only':temporal_only,'domain_counts':dict(domain_counts),
+               'final_decision_SHA':digest(selected),'diagnostic_only':temporal_only or inject_reference,
+               'reference_injected':inject_reference,'domain_counts':dict(domain_counts),
                'TEMPORAL_FIRST_HARD_HIERARCHY':'NO','TEMPORAL_AND_SPATIAL_AIDC_PRIMARY_JOINT':'NO' if temporal_only else 'YES',
                'MIGRATION_PENALTY_LEVEL':'SECONDARY_ONLY','PRIMARY_GRID_OBJECTIVE_SACRIFICED_FOR_MIGRATION_AVOIDANCE':'NO',
                'FULL_MAY_AUTHORIZED':'NO','B2_B3_AUTHORIZED':'NO','wallclock_seconds':time.perf_counter()-started}
+        if reserve_mean is not None:
+            from dayahead.v41.reserve import diagnostics, OBJECTIVE_HIERARCHY
+            reserve_report = diagnostics(context.v41_ml_snapshot, context.capacity, gpu)
+            if reserve_report['mean_xi_GPUh'] > reserve_optimum + 2 * model.Params.FeasibilityTol:
+                raise RuntimeError('V41_RESERVE_PRIORITY_SACRIFICED')
+            value.update(ML_snapshot_sha256=context.v41_ml_snapshot_sha256, reserve_interface_version='V41',
+                objective_hierarchy=list(OBJECTIVE_HIERARCHY), reserve_diagnostics=reserve_report,
+                reserve_optimum=reserve_optimum, reserve_stage=reserve_stage,
+                OBJECTIVE_VECTOR=[grid['rho_max'], reserve_report['mean_xi_GPUh'], secondary,
+                                  tertiary, float(tie.getValue())])
         write_json(output/'ACCEPTED_AIDC.json',value); return value
     finally:model.dispose()

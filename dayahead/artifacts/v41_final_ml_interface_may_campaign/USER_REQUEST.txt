@@ -1,0 +1,2192 @@
+# =====================================================================
+# V41 — FINAL ML INTERFACE FREEZE + MAY DAY-AHEAD/ACTUAL CAMPAIGN
+#
+# FINAL OPERATIONAL INTEGRATION SCOPE
+#
+# Objectives:
+#
+# 1. Freeze the final ML-to-optimizer operational interface:
+#
+#    KNOWN PENDING runtime
+#      = causal rolling Track-P LightGBM Q90
+#
+#    FUTURE UNSEEN workload
+#      = H4 R85_B2 raw reserve signal
+#      + optimizer-facing actionable cap
+#
+#    H24
+#      = OFF
+#
+# 2. Modify ONLY the local AIDC/ML interface and reserve constraint.
+#
+# 3. Run May 1, 2025:
+#
+#      B0 DAY-AHEAD -> freeze -> B0 ACTUAL
+#      B1 DAY-AHEAD -> freeze -> B1 ACTUAL
+#
+#    and perform a strict B0/B1 nesting/objective/interface audit.
+#
+# 4. Verify that the final ML/runtime/workload changes are propagated to
+#    EVERY May campaign day and EVERY B0/B1/B2/B3 policy.
+#
+# 5. Build and launch the FULL MAY campaign:
+#
+#      2025-05-01 through 2025-05-31
+#
+#      B0/B1/B2/B3
+#
+#      DAY-AHEAD + ACTUAL
+#
+#    using ONE campaign command / runner.
+#
+# 6. The full campaign MUST continue independently if Codex, the Codex
+#    terminal, or this interactive session is closed.
+#
+# 7. Repair implementation/integration defects as they are found,
+#    but NEVER silently change scientific policy inside an already-running
+#    campaign.
+#
+#
+# This is NOT:
+#
+# - a new ML study
+# - runtime model proliferation
+# - future workload model proliferation
+# - event-triggered optimization
+# - rolling MPC
+# - local repair optimization
+# - second route search
+#
+# =====================================================================
+
+
+
+# =====================================================================
+# 0. NEW RELEASE IDENTITY
+# =====================================================================
+
+WORKING NAME:
+
+V41_FINAL_ML_INTERFACE_MAY_CAMPAIGN
+
+
+Suggested branch:
+
+codex/v41-final-ml-interface-may-campaign
+
+
+Create an isolated worktree.
+
+
+IMPORTANT:
+
+Do NOT automatically branch from S5R1 or R6R1 experimental HEADs.
+
+First identify the latest authoritative optimization HEAD containing:
+
+A0
+M1
+A1
+MF
+Joint Freeze
+Fresh/OpenDSS
+B0/B1/B2/B3 campaign infrastructure
+Day-Ahead execution
+Actual evaluation
+
+
+Create V41 from that authoritative optimization HEAD.
+
+
+S5R1 and R6R1 are scientific input authorities,
+not the base optimization branch.
+
+
+
+# =====================================================================
+# 1. USER AUTHORIZATION / PRIOR HOLDS
+# =====================================================================
+
+The user explicitly authorizes, in THIS V41 scope:
+
+- ML adapter integration
+- May 1 Day-Ahead execution
+- May 1 Actual execution
+- B0/B1 pilot
+- full May B0/B1/B2/B3 campaign execution
+- Day-Ahead + Actual campaign launch
+
+
+Historical V40 artifacts that say:
+
+optimizer integration = NO
+electrical B0-B3 = NO
+FULL_MAY = NO
+
+must NOT be edited or reclassified.
+
+Instead create a NEW V41 execution authority.
+
+This instruction supersedes those old execution holds ONLY for V41.
+
+
+Preserve the frozen electrical constants unless current authority
+explicitly contains a newer approved value:
+
+production q = 5576.44921875 s
+PF = 0.95
+Q control = NO
+
+
+Do not silently modify them.
+
+
+
+# =====================================================================
+# 2. PRESERVE SCIENTIFIC HISTORY
+# =====================================================================
+
+S5R1 remains:
+
+V40S5R1_ROLLING_DIRECT_RUNTIME_SAFETY_FAIL
+
+
+R6R1 remains:
+
+V40R6R1_JOINT_GPUWORK_RESERVE_FAIL
+
+
+Do NOT rewrite either as PASS.
+
+
+Operational selection is a NEW V41 engineering-interface decision.
+
+
+Create:
+
+V41_S5R1_REFERENCE_FREEZE.json
+V41_R6R1_REFERENCE_FREEZE.json
+V41_OPERATIONAL_SELECTION_RATIONALE.md
+
+
+
+# =====================================================================
+# 3. FINAL RUNTIME OPERATIONAL FREEZE
+# =====================================================================
+
+Final known-PENDING runtime authority:
+
+ROLLING_Q90_TRACK_P_L2
+
+
+Source lineage:
+
+V40S5R1
+Track P
+LightGBM L2
+Q90
+
+
+NOT:
+
+UARP
+Q95
+Q99
+current RSP
+requested walltime
+P-W
+
+
+Preserve exact S5R1 Track-P features:
+
+requested_seconds
+num_gpus_req
+num_nodes_req
+num_cores_req
+requested_memory_mib
+partition
+qos
+submit_hour
+submit_dow
+
+
+Preserve exact preprocessing:
+
+- quantitative request fields log1p as frozen
+- train-history median + missing indicator
+- issue-history category vocabulary
+- UNKNOWN handling
+- no future preprocessing information
+
+
+Preserve:
+
+D1_SCHEDULER_REQUEST_STATE_PROXY_V1
+
+
+Do not claim historical original-submission provenance is verified.
+
+
+
+# =====================================================================
+# 4. CAUSAL ROLLING Q90 RULE
+# =====================================================================
+
+At target-day issue time t_d:
+
+D_train(d)
+=
+{
+  job j:
+  end_j < t_d
+  AND runtime_j > 0
+  AND finite
+  AND feature-eligible
+}
+
+
+Use all eligible matured historical jobs.
+
+Expanding history.
+
+No rolling window.
+
+No decay weighting.
+
+No future jobs.
+
+No current evaluation labels.
+
+
+For each D-1 issue:
+
+FIT preprocessing
+FIT frozen L2 Q90
+PREDICT current PENDING jobs
+SAVE
+HASH
+FREEZE
+
+
+Then convert runtime seconds to 15-min optimization duration exactly once:
+
+duration_slots_j
+=
+ceil(Q90_seconds_j / 900)
+
+
+No additional multiplier.
+
+No UARP margin.
+
+No walltime cap.
+
+No hand correction.
+
+
+
+# =====================================================================
+# 5. RUNTIME APPLICABILITY
+# =====================================================================
+
+Rolling Q90 applies ONLY to PENDING jobs for Day-Ahead planning.
+
+
+Do NOT alter established RUNNING-job authority.
+
+
+Especially do NOT reopen:
+
+RUNNING site
+RUNNING start
+RUNNING end
+RUNNING migration
+terminal-service closure
+
+
+A1 still cannot create new RUNNING migration.
+
+
+
+# =====================================================================
+# 6. FINAL FUTURE-WORKLOAD OPERATIONAL FREEZE
+# =====================================================================
+
+Use ONLY:
+
+H4 R85_B2
+
+
+Interpretation:
+
+4-hour cumulative ARRIVING GPU-SERVICE WORK [GPUh]
+
+
+It is NOT:
+
+GPU occupancy
+GPU count
+IT power
+PCC power
+
+
+H24:
+
+OFF
+
+
+H1:
+
+OFF for optimizer
+
+
+H8:
+
+OFF for optimizer
+
+
+15-min exact burst forecast:
+
+OFF for optimizer
+
+
+
+# =====================================================================
+# 7. H4 R85_B2 DEFINITION
+# =====================================================================
+
+Preserve the exact frozen R6/R6R1 B2 family/configuration and target authority.
+
+
+R85_B2 means:
+
+frozen H4 B2 L0 base upper
++
+the causal 85%-service-level expanding residual calibration
+registered in R6R1
+
+
+For a live May issue, regenerate/apply the SAME rule causally.
+
+
+No model-family change.
+
+No hyperparameter retuning.
+
+No new quantile model.
+
+No burst classifier.
+
+
+For calibration residual membership:
+
+max(
+    target_day_end,
+    target_label_available_at
+)
+<
+current_issue_time
+
+
+Only fully mature labels may enter.
+
+
+No same-day partial-window residual.
+
+
+
+# =====================================================================
+# 8. RAW FORECAST MUST REMAIN AUDITABLE
+# =====================================================================
+
+For every H4 window store:
+
+H4_RAW_R85_B2_GPUh
+
+
+Never overwrite the raw value with the capped value.
+
+
+Scientific/forecast reporting must retain RAW prediction.
+
+
+Optimizer consumes a separate field:
+
+H4_ACTIONABLE_RESERVE_GPUh
+
+
+
+# =====================================================================
+# 9. ACTIONABLE CAP
+# =====================================================================
+
+This is an optimizer-interface saturation rule,
+NOT a modification of the ML evaluation result.
+
+
+For every 4-hour H4 window k:
+
+RAW_k
+=
+H4 R85_B2 raw upper
+
+
+Define:
+
+CAP_HIST_k
+
+and
+
+CAP_PHYS_k
+
+
+Final optimizer-facing reserve:
+
+R_k
+=
+min(
+    RAW_k,
+    CAP_HIST_k,
+    CAP_PHYS_k
+)
+
+
+Store all four:
+
+RAW
+CAP_HIST
+CAP_PHYS
+ACTIONABLE_RESERVE
+
+
+
+# =====================================================================
+# 10. HISTORICAL CAP — FIXED RULE
+# =====================================================================
+
+Do NOT tune the cap using B0/B1 objective results.
+
+
+At each D-1 issue:
+
+construct the causal pool of fully mature historical actual H4 workload
+windows available before that issue.
+
+
+Use a fixed empirical 99th-percentile order statistic.
+
+
+If sorted values are x_(1)...x_(n):
+
+k99
+=
+ceil((n + 1) * 0.99)
+
+k99
+=
+min(max(k99,1),n)
+
+
+CAP_HIST
+=
+x_(k99)
+
+
+No interpolation.
+
+
+No:
+
+Q95 search
+Q97.5 search
+Q99.5 search
+manual GPUh threshold
+May-result tuning
+
+
+
+# =====================================================================
+# 11. PHYSICAL / ACTIONABLE CAP
+# =====================================================================
+
+For an H4 window consisting of 16 x 15-min slots:
+
+CAP_PHYS_k
+=
+0.25
+*
+sum over tau in k..k+15
+sum over eligible IDC sites i
+G_future_service_cap[i,tau]
+
+
+Unit:
+
+GPUh
+
+
+Use the existing authoritative GPU-service capacity available to future
+eligible jobs.
+
+
+Do NOT invent capacity.
+
+Do NOT count GPUs that are not eligible for future service.
+
+
+Record the source variables/path used for G_future_service_cap.
+
+
+
+# =====================================================================
+# 12. CAP SEMANTICS
+# =====================================================================
+
+Paper/engineering meaning:
+
+The optimizer reserves only the amount of predicted future GPU work that
+is actionable within the four-hour service horizon.
+
+
+Do NOT state:
+
+"the forecast is corrected to the true value"
+
+
+Do state:
+
+"extreme raw reserve forecasts are saturated before optimization by
+causally historical and physically actionable capacity limits."
+
+
+
+# =====================================================================
+# 13. ONE IMMUTABLE ML SNAPSHOT PER ISSUE
+# =====================================================================
+
+For each target day D at D-1 18:00 fixed AEST create:
+
+V41_ML_SNAPSHOT_<DATE>.json
+
+
+Must contain at least:
+
+issue_time
+target_day
+
+runtime_model_id
+runtime_training_N
+runtime_training_membership_hash
+
+PENDING_JOB_Q90_SECONDS
+PENDING_JOB_DURATION_SLOTS
+
+H4_model_id
+H4_raw_predictions
+H4_delta85
+H4_calibration_support
+
+H4_CAP_HIST
+H4_CAP_PHYS
+H4_ACTIONABLE_RESERVE
+
+H24_OFF = true
+
+
+A0 and A1 MUST consume the SAME snapshot hash.
+
+
+B0/B1/B2/B3 on the same target day MUST consume the SAME snapshot hash.
+
+
+No policy-specific ML forecast.
+
+
+
+# =====================================================================
+# 14. AIDC OPTIMIZER CHANGE — LOCAL ONLY
+# =====================================================================
+
+Modify only the AIDC-side ML/reserve interface needed to consume:
+
+Rolling Q90 runtime
+H4 actionable reserve
+
+
+Do NOT redesign the optimizer.
+
+
+
+# =====================================================================
+# 15. H4 HEADROOM DEFINITION
+# =====================================================================
+
+For each IDC i and 15-min slot t:
+
+G_cap[i,t]
+=
+authoritative usable GPU capacity
+
+
+G_known[i,t]
+=
+GPU occupancy due to known scheduled jobs under the candidate schedule
+
+
+Available future-work headroom:
+
+h[t]
+=
+sum_i
+(
+    G_cap[i,t]
+    -
+    G_known[i,t]
+)
+
+
+Respect existing bounds and eligibility.
+
+
+
+# =====================================================================
+# 16. H4 RESERVE CONSTRAINT
+# =====================================================================
+
+For each valid 4-hour window k:
+
+H_available[k]
+=
+0.25
+*
+sum_{tau=k}^{k+15}
+h[tau]
+
+
+Introduce nonnegative reserve shortfall:
+
+xi[k] >= 0
+
+
+Constraint:
+
+H_available[k]
++
+xi[k]
+>=
+H4_ACTIONABLE_RESERVE[k]
+
+
+
+# =====================================================================
+# 17. RESERVE SHORTFALL OBJECTIVE
+# =====================================================================
+
+Do NOT create an arbitrary new tuned lambda.
+
+
+Search the current authoritative AIDC objective for the existing
+GPUh backlog / workload debt / unmet service / service-shortfall
+penalty already used by the formulation.
+
+
+Reuse the semantically matching EXISTING coefficient.
+
+
+Document:
+
+source variable
+source file
+coefficient
+unit
+reason for reuse
+
+
+Normalize overlapping-window aggregation consistently with existing
+objective scaling.
+
+
+Preferred form if compatible with existing formulation:
+
+reserve_shortfall_term
+=
+existing_GPUh_debt_coefficient
+*
+mean_k(xi[k])
+
+
+If the current implementation already contains a semantically equivalent
+future-reserve/debt term, modify that term rather than creating a duplicate.
+
+
+If NO semantically valid existing coefficient exists:
+
+STOP BEFORE MAY CAMPAIGN.
+
+Do NOT invent/tune a new scientific penalty parameter.
+
+Report the authority gap.
+
+
+
+# =====================================================================
+# 18. B0/B1/B2/B3 SEMANTICS MUST NOT CHANGE
+# =====================================================================
+
+Discover the exact current B0/B1/B2/B3 registry from the authoritative
+optimization branch.
+
+
+Freeze it.
+
+
+Do NOT rename or redefine the policies.
+
+
+All four policies receive identical:
+
+- target-day exogenous data
+- ML snapshot
+- Rolling Q90 runtime authority
+- H4 raw forecast
+- H4 cap
+- H4 actionable reserve rule
+- objective definition where applicable
+
+
+Only their already-authorized policy differences remain.
+
+
+
+# =====================================================================
+# 19. PRESERVE CURRENT OPTIMIZATION ARCHITECTURE
+# =====================================================================
+
+Keep exactly:
+
+A0
+ ->
+M1 route+P/Q
+ ->
+A1 single feedback
+ ->
+MF fixed-route P/Q
+ ->
+Joint Freeze
+ ->
+Fresh OpenDSS / existing actual verification
+
+
+Do NOT add:
+
+event trigger
+rolling MPC
+optimization local repair
+second route search
+iterative A0-M1-A1 loop
+
+
+
+# =====================================================================
+# 20. M1 / MESS / MF FIREWALL
+# =====================================================================
+
+Do NOT change M1 search logic.
+
+
+Do NOT change:
+
+MESS mobility
+route
+travel contract
+SoC transition semantics
+P/Q search semantics
+migration
+WAN
+Rack authority
+terminal contract
+
+
+MF remains:
+
+fixed M1 route/discrete state
+P/Q/SoC recourse only
+
+
+Fresh behavior remains unchanged.
+
+
+
+# =====================================================================
+# 21. ACTUAL EVALUATION SEMANTICS
+# =====================================================================
+
+Day-Ahead decision must be frozen before Actual data are opened for
+scientific evaluation.
+
+
+For each policy/day:
+
+DAY-AHEAD
+ -> write decision artifact
+ -> hash
+ -> freeze receipt
+ -> only then ACTUAL
+
+
+Actual evaluation uses realized authoritative:
+
+runtime
+workload arrivals
+traffic/travel
+power/grid inputs
+
+according to the existing Actual pipeline.
+
+
+Actual does NOT re-solve the Day-Ahead optimizer using realized future
+information.
+
+
+No future leakage.
+
+
+
+# =====================================================================
+# 22. MAY ACCESS IS NOW AUTHORIZED
+# =====================================================================
+
+Previous S5R1/R6R1 May firewalls remain historical evidence.
+
+
+For V41 the user explicitly authorizes scientific use of May 2025
+for the May campaign.
+
+
+Create:
+
+V41_MAY_ACCESS_AUTHORITY.json
+
+
+Clearly distinguish:
+
+previous experiment:
+May reads = 0
+
+new V41 campaign:
+May reads = AUTHORIZED
+
+
+Do NOT edit old firewall artifacts.
+
+
+
+# =====================================================================
+# 23. MAY 1 EXACT ISSUE
+# =====================================================================
+
+Target day:
+
+2025-05-01
+
+
+Day-Ahead issue:
+
+2025-04-30 18:00 AEST
+
+
+Equivalent UTC:
+
+2025-04-30T08:00:00Z
+
+
+Verify timezone handling explicitly.
+
+
+No DST ambiguity:
+use the existing fixed-AEST contract.
+
+
+
+# =====================================================================
+# 24. MAY 1 PILOT — B0/B1 ONLY
+# =====================================================================
+
+Before any full-May campaign launch run exactly:
+
+
+B0:
+May 1 DAY-AHEAD
+then
+May 1 ACTUAL
+
+
+B1:
+May 1 DAY-AHEAD
+then
+May 1 ACTUAL
+
+
+Do NOT run B2/B3 in the pilot yet.
+
+
+
+# =====================================================================
+# 25. MAY 1 PRE-RUN AUDITS
+# =====================================================================
+
+Before solving B0/B1 verify:
+
+
+A. Runtime
+
+- rolling Q90 Track-P only
+- correct D_train membership
+- end < issue
+- no future May runtime in training
+- no UARP
+
+
+B. H4
+
+- R85_B2 only
+- H24 OFF
+- mature residual membership exact
+
+
+C. cap
+
+- raw retained
+- CAP_HIST causal
+- CAP_PHYS authority
+- actionable=min(raw,hist,phys)
+
+
+D. snapshot
+
+- B0 and B1 same hash
+- A0 and A1 same hash
+
+
+E. optimizer
+
+- M1/MF unchanged
+- migration/WAN/terminal unchanged
+
+
+
+# =====================================================================
+# 26. B0 -> B1 NESTING AUDIT
+# =====================================================================
+
+This is mandatory.
+
+
+Take the solved B0 Day-Ahead schedule.
+
+
+Map/inject the B0 schedule into B1 using the exact same:
+
+ML snapshot
+exogenous inputs
+objective coefficients
+reserve definition
+
+
+Verify B0 schedule is feasible in B1.
+
+
+Create:
+
+V41_MAY01_B0_IN_B1_FEASIBILITY.json
+
+
+If infeasible:
+
+DO NOT proceed to full May.
+
+
+Identify the exact constraint/objective mismatch.
+
+
+Repair ONLY if it is an implementation/integration defect.
+
+
+
+# =====================================================================
+# 27. OBJECTIVE IDENTITY AUDIT
+# =====================================================================
+
+Evaluate the SAME injected B0 decision under:
+
+B0 evaluator
+B1 evaluator
+
+
+Require equivalent objective component values within existing numerical
+tolerance for all common terms.
+
+
+Then for the optimized solutions, if minimization:
+
+J_B1_star
+<=
+J_B0_star
++
+existing_solver_numerical_tolerance
+
+
+If not:
+
+STOP.
+
+
+Do NOT explain it away as ML noise.
+
+
+Audit:
+
+energy/cost term
+compute term
+SLA/debt term
+future reserve shortfall term
+all other common terms
+
+
+Create:
+
+V41_MAY01_B0_B1_OBJECTIVE_IDENTITY.json
+
+
+
+# =====================================================================
+# 28. MAY 1 CAP / RESERVE DIAGNOSTICS
+# =====================================================================
+
+Report:
+
+
+H4 raw minimum/median/P90/P99/max
+
+CAP_HIST
+
+CAP_PHYS distribution
+
+actionable reserve min/median/P90/max
+
+number and fraction of windows clipped by:
+
+historical cap
+physical cap
+either cap
+
+
+Total raw reserve GPUh
+Total actionable reserve GPUh
+
+
+For B0 and B1:
+
+H_available[k]
+xi[k]
+
+mean xi
+P90 xi
+max xi
+total/mean reserve penalty contribution
+
+
+
+# =====================================================================
+# 29. MAY 1 RUNTIME DIAGNOSTICS
+# =====================================================================
+
+Report:
+
+N rolling training jobs
+N PENDING jobs
+
+Q90 seconds:
+median
+P90
+P99
+max
+
+duration slots:
+median
+P90
+max
+
+
+After Actual:
+
+runtime coverage
+GPU-weighted coverage
+runtime under/over
+slot error
+
+
+This is campaign diagnostics,
+NOT a new model-selection experiment.
+
+
+
+# =====================================================================
+# 30. MAY 1 DAY-AHEAD/ACTUAL REPORT
+# =====================================================================
+
+For B0/B1 report separately:
+
+
+DAY-AHEAD:
+
+solver status
+objective
+objective decomposition
+AIDC energy
+GPU occupancy
+future headroom
+reserve shortfall
+SLA/debt
+critical feeder loading
+voltage min/max
+MESS/PQ quantities as already defined
+
+
+ACTUAL:
+
+same available outcome KPIs
+plus Day-Ahead -> Actual deltas
+
+
+Do not invent new KPIs if the current pipeline has authoritative ones.
+
+
+
+# =====================================================================
+# 31. MAY 1 PILOT PASS CONDITIONS
+# =====================================================================
+
+Pilot can advance only if:
+
+
+1. Both B0 and B1 DAY-AHEAD complete.
+2. Both B0 and B1 ACTUAL complete.
+3. No future leakage.
+4. Runtime authority exact.
+5. H4 authority exact.
+6. H24 OFF.
+7. cap exact.
+8. B0/B1 same ML snapshot.
+9. A0/A1 same ML snapshot.
+10. B0-in-B1 feasible.
+11. objective identity PASS.
+12. B1 planning optimum is not worse than B0 beyond solver tolerance.
+13. no protected optimizer authority changed.
+14. all integration tests PASS.
+
+
+Actual B1 being worse than Actual B0 is NOT by itself an integration failure.
+
+If that occurs, report it as an outcome.
+
+
+
+# =====================================================================
+# 32. DEFECT REPAIR POLICY DURING PILOT
+# =====================================================================
+
+The user authorizes local defect repair.
+
+
+Allowed:
+
+schema mismatch
+path bug
+timezone bug
+wrong adapter field
+wrong units
+incorrect slot conversion
+missing manifest wiring
+wrong campaign propagation
+serialization bug
+resume bug
+process detachment bug
+incorrect objective-term hookup
+incorrect cap hookup
+
+
+Not allowed without stopping:
+
+new ML model
+new quantile
+new cap percentile
+new objective coefficient
+new B0-B3 definition
+new optimization architecture
+new route logic
+
+
+Every defect fix must record:
+
+symptom
+root cause
+affected files
+scientific impact
+whether previous pilot result was invalidated
+
+
+If a fix changes any scientific result:
+
+rerun May 1 B0/B1 from scratch.
+
+
+
+# =====================================================================
+# 33. FINAL INTEGRATION FREEZE AFTER PILOT
+# =====================================================================
+
+Once May 1 pilot passes:
+
+
+freeze:
+
+runtime model
+runtime features
+runtime preprocessing
+rolling membership rule
+
+H4 model
+H4 calibration rule
+
+99% historical cap
+physical cap
+
+reserve constraint
+reserve penalty source
+
+B0/B1/B2/B3 registry
+
+all campaign input schemas
+
+
+Commit BEFORE full May launch.
+
+
+Create:
+
+V41_FINAL_INTERFACE_FREEZE.json
+V41_FINAL_INTERFACE_FREEZE_COMMIT_RECEIPT.json
+
+
+
+# =====================================================================
+# 34. FULL-MAY CAMPAIGN PLAN
+# =====================================================================
+
+Target dates:
+
+2025-05-01
+through
+2025-05-31
+
+
+Require exactly 31 target days unless the authoritative source itself
+proves a missing day.
+
+
+Policies:
+
+B0
+B1
+B2
+B3
+
+
+Expected policy-day units:
+
+31 * 4 = 124
+
+
+Each unit contains:
+
+DAY-AHEAD
+then
+ACTUAL
+
+
+Expected phase executions:
+
+124 DAY-AHEAD
+124 ACTUAL
+
+
+Do not synthesize missing source data.
+
+
+
+# =====================================================================
+# 35. FULL-MAY PROPAGATION AUDIT BEFORE LAUNCH
+# =====================================================================
+
+Materialize the entire campaign plan BEFORE execution.
+
+
+For all 124 policy-day units verify:
+
+
+runtime_model
+=
+ROLLING_Q90_TRACK_P_L2
+
+
+future_workload
+=
+H4_R85_B2
+
+
+H24
+=
+OFF
+
+
+historical_cap_quantile
+=
+0.99
+
+
+cap rule
+=
+min(raw,historical,physical)
+
+
+A0 reserve interface version
+=
+V41
+
+
+A1 reserve interface version
+=
+V41
+
+
+same target-day ML snapshot shared by B0/B1/B2/B3
+
+
+same issue time contract
+
+
+same electrical constants
+
+
+No unit may point to old RSP or old future-workload adapter.
+
+
+Create:
+
+V41_MAY_CAMPAIGN_PLAN.csv
+V41_MAY_CAMPAIGN_PROPAGATION_AUDIT.json
+
+
+Require:
+
+124 / 124 PASS
+
+
+
+# =====================================================================
+# 36. MAY 1 PILOT REUSE
+# =====================================================================
+
+If May 1 B0/B1 pilot was run from the exact FINAL freeze commit and all
+receipts/hashes match:
+
+the full campaign may import/reuse those two completed policy-day units.
+
+
+Do not recompute them unnecessarily.
+
+
+If ANY scientific code changed after the pilot:
+
+invalidate pilot reuse
+and rerun May 1 B0/B1.
+
+
+
+# =====================================================================
+# 37. ONE COMMAND FOR DAY-AHEAD + ACTUAL
+# =====================================================================
+
+Create a campaign runner supporting:
+
+--mode both
+
+
+For each policy-day unit:
+
+DAY-AHEAD
+ -> seal receipt
+ -> ACTUAL
+ -> unit receipt
+
+
+Never run Actual before Day-Ahead freeze.
+
+
+Suggested user-facing launcher:
+
+run_v41_may_campaign.ps1
+
+
+It must launch the full campaign with one command.
+
+
+
+# =====================================================================
+# 38. CRASH-SAFE / RESUMABLE CAMPAIGN
+# =====================================================================
+
+The campaign must be resumable.
+
+
+Every unit state:
+
+PENDING
+DAYAHEAD_RUNNING
+DAYAHEAD_DONE
+ACTUAL_RUNNING
+COMPLETE
+FAILED
+
+
+Persist state atomically.
+
+
+Use a campaign-level lock to prevent duplicate launch.
+
+
+For a restart:
+
+- validate existing receipt/hash
+- skip valid COMPLETE units
+- resume incomplete units
+- rerun corrupted/incomplete phase only when scientifically valid
+
+
+Do not rerun a valid completed unit silently.
+
+
+
+# =====================================================================
+# 39. CODEX-INDEPENDENT EXECUTION
+# =====================================================================
+
+CRITICAL REQUIREMENT:
+
+
+After launch, stopping:
+
+Codex
+Codex CLI
+interactive terminal
+this conversation/session
+
+must NOT kill the May campaign.
+
+
+The heavy campaign process must NOT remain dependent on the Codex parent
+process or an interactive shell lifetime.
+
+
+
+# =====================================================================
+# 40. WINDOWS DETACHED PROCESS
+# =====================================================================
+
+This environment is Windows.
+
+
+Create a committed campaign runner and a detached launcher.
+
+
+Use an independent PowerShell/Python process started via Windows
+Start-Process or an equivalently detached mechanism.
+
+
+The launcher must:
+
+
+1. start a new independent process
+2. return immediately
+3. record child PID
+4. record start timestamp
+5. verify child is alive
+6. write launch receipt
+7. not pipe runtime through the Codex terminal
+
+
+Do NOT use a foreground process owned by the Codex session.
+
+
+
+# =====================================================================
+# 41. RUNTIME OUTPUT LOCATIONS
+# =====================================================================
+
+Respect the workspace convention:
+
+
+results:
+
+<workspace_root>/frozen_artifacts/v41_may_campaign/
+
+
+logs:
+
+<workspace_root>/logs/v41_may_campaign/
+
+
+Create:
+
+campaign_state.json
+campaign_progress.json
+campaign_heartbeat.json
+campaign_pid.json
+campaign_launch_receipt.json
+
+
+Per unit:
+
+frozen_artifacts/v41_may_campaign/YYYY-MM-DD/Bx/dayahead/
+frozen_artifacts/v41_may_campaign/YYYY-MM-DD/Bx/actual/
+
+
+Logs similarly separated.
+
+
+
+# =====================================================================
+# 42. HEARTBEAT / PROGRESS
+# =====================================================================
+
+Campaign process must update at least:
+
+
+timestamp
+PID
+current target day
+current policy
+current phase
+completed policy-days
+completed Day-Ahead phases
+completed Actual phases
+failed units
+remaining units
+last completed receipt
+scientific commit
+
+
+Write atomically.
+
+
+This allows progress inspection without touching the running solver.
+
+
+
+# =====================================================================
+# 43. RUNNER CONCURRENCY
+# =====================================================================
+
+Discover and preserve the currently authorized production campaign
+concurrency.
+
+
+Do NOT arbitrarily change:
+
+Gurobi threads
+OpenDSS concurrency
+worker count
+BLAS threads
+
+
+If an existing campaign runner already defines concurrency,
+reuse it exactly.
+
+
+If no safe frozen concurrency authority exists:
+
+prefer correctness/reproducibility over speed.
+
+Do not invent aggressive parallelism.
+
+
+
+# =====================================================================
+# 44. CAMPAIGN SCIENTIFIC COMMIT IMMUTABILITY
+# =====================================================================
+
+The campaign launch manifest must point to ONE exact scientific commit.
+
+
+After full-May launch:
+
+do NOT edit scientific logic in place.
+
+
+If a scientific/integration defect is discovered during the full campaign:
+
+
+PAUSE/STOP the campaign runner cleanly.
+
+Determine earliest affected unit.
+
+Create a new revision commit.
+
+Invalidate every affected result.
+
+Restart/resume under ONE consistent new commit.
+
+
+Never mix results from different scientific logic under the same campaign
+identity.
+
+
+
+# =====================================================================
+# 45. DEFECTS DURING FULL CAMPAIGN
+# =====================================================================
+
+Infrastructure-only repairs that provably do NOT alter scientific outputs
+may be repaired with evidence.
+
+
+Examples:
+
+log path
+heartbeat serialization
+UI/progress output
+
+
+Scientific-impacting defect examples:
+
+wrong runtime model
+wrong H4 input
+wrong cap
+wrong issue time
+wrong objective term
+wrong optimizer constraint
+wrong Actual ordering
+leakage
+
+
+These require result invalidation and rerun.
+
+
+
+# =====================================================================
+# 46. CAMPAIGN STOP SAFETY
+# =====================================================================
+
+Create helper commands/scripts:
+
+
+status_v41_may_campaign.ps1
+
+stop_v41_may_campaign.ps1
+
+resume_v41_may_campaign.ps1
+
+
+STOP must:
+
+- request graceful shutdown
+- allow current atomic write to finish
+- preserve all completed receipts
+- leave resumable state
+
+
+Do not kill solver children without cleanup unless emergency mode is
+explicitly requested.
+
+
+
+# =====================================================================
+# 47. NO CODEX DEPENDENCE TEST
+# =====================================================================
+
+Before launching the real full campaign:
+
+
+run a lightweight detached-process smoke test.
+
+
+Verify:
+
+- parent launcher exits
+- child stays alive
+- heartbeat continues changing
+- state survives reopening a shell
+- status command can discover the process
+
+
+Then terminate the smoke process cleanly.
+
+
+Only then launch full May.
+
+
+
+# =====================================================================
+# 48. REQUIRED INTEGRATION TESTS
+# =====================================================================
+
+At minimum test:
+
+
+1. authoritative optimizer base identified
+
+2. S5R1 SHA/receipt identity
+3. R6R1 SHA/receipt identity
+
+4. old FAIL classifications unchanged
+
+5. Rolling Q90 only
+6. Track P only
+7. L2 exact
+8. no UARP in optimizer
+9. no P-W
+
+10. end < issue
+11. causal rolling membership
+12. no future runtime leakage
+
+13. ceil(seconds/900) exactly once
+
+14. RUNNING unchanged
+
+15. H4 R85_B2 exact
+16. H24 OFF
+17. no new workload model
+18. residual maturity exact
+
+19. raw H4 retained
+20. CAP_HIST Q99 exact order statistic
+21. CAP_HIST causal only
+22. CAP_PHYS unit GPUh
+23. actionable=min(raw,hist,phys)
+
+24. one ML snapshot/day
+25. same snapshot B0-B3
+26. same snapshot A0/A1
+
+27. reserve headroom unit GPUh
+28. 16 slots per H4
+29. factor 0.25 exact
+30. xi >= 0
+31. reserve constraint correct
+
+32. existing penalty coefficient reused
+33. no new tuned lambda
+
+34. B0 registry unchanged
+35. B1 registry unchanged
+36. B2 registry unchanged
+37. B3 registry unchanged
+
+38. A0 topology unchanged except local reserve interface
+39. M1 unchanged
+40. A1 one feedback only
+41. MF unchanged
+42. Fresh unchanged
+
+43. migration unchanged
+44. WAN unchanged
+45. terminal unchanged
+46. Rack authority unchanged
+47. MESS route unchanged
+
+48. no event trigger
+49. no rolling MPC
+50. no optimization local repair
+51. no second route search
+
+52. May1 issue UTC exact
+53. Day-Ahead sealed before Actual
+
+54. May1 B0 DA PASS
+55. May1 B0 Actual PASS
+56. May1 B1 DA PASS
+57. May1 B1 Actual PASS
+
+58. B0 injected into B1 feasible
+59. objective identity PASS
+60. B1 plan objective <= B0 plan objective + tolerance
+
+61. full May =31 days
+62. policy-day units=124
+63. Day-Ahead phases=124
+64. Actual phases=124
+
+65. propagation audit=124/124
+
+66. detached launcher works
+67. parent exit does not kill child
+68. heartbeat changes
+69. PID recorded
+
+70. resume skips valid complete units
+71. duplicate-launch lock works
+72. graceful stop preserves state
+
+73. results only frozen_artifacts runtime path
+74. logs only logs runtime path
+
+75. scientific commit fixed in launch receipt
+
+76. no mixed scientific commits in one campaign identity
+
+
+
+# =====================================================================
+# 49. REQUIRED REPOSITORY ARTIFACTS
+# =====================================================================
+
+Create at minimum:
+
+
+V41_START_STATE.json
+
+V41_OPTIMIZER_BASE_AUTHORITY.json
+
+V41_S5R1_REFERENCE_FREEZE.json
+V41_R6R1_REFERENCE_FREEZE.json
+
+V41_OPERATIONAL_SELECTION_RATIONALE.md
+
+V41_RUNTIME_Q90_FREEZE.json
+
+V41_H4_R85B2_FREEZE.json
+
+V41_ACTIONABLE_CAP_CONTRACT.json
+
+V41_RESERVE_INTERFACE_CONTRACT.json
+
+V41_MAY_ACCESS_AUTHORITY.json
+
+V41_MAY01_ML_SNAPSHOT.json
+
+V41_MAY01_B0_IN_B1_FEASIBILITY.json
+
+V41_MAY01_B0_B1_OBJECTIVE_IDENTITY.json
+
+V41_MAY01_CAP_RESERVE_AUDIT.json
+
+V41_MAY01_RUNTIME_AUDIT.json
+
+V41_MAY01_DAYAHEAD_ACTUAL_RESULTS.json
+
+V41_MAY01_PILOT_DECISION.json
+
+V41_FINAL_INTERFACE_FREEZE.json
+
+V41_FINAL_INTERFACE_FREEZE_COMMIT_RECEIPT.json
+
+V41_MAY_CAMPAIGN_PLAN.csv
+
+V41_MAY_CAMPAIGN_PROPAGATION_AUDIT.json
+
+V41_DETACHED_PROCESS_SMOKE_TEST.json
+
+V41_MAY_CAMPAIGN_LAUNCH_MANIFEST.json
+
+V41_MAY_CAMPAIGN_LAUNCH_RECEIPT.json
+
+V41_TEST_REPORT.json
+
+V41_PROTECTED_SCOPE_START.json
+V41_PROTECTED_SCOPE_END.json
+V41_PROTECTED_SCOPE_DIFF.json
+
+
+
+# =====================================================================
+# 50. REQUIRED EXECUTION SCRIPTS
+# =====================================================================
+
+Create stable committed scripts:
+
+
+run_v41_may_campaign.ps1
+
+status_v41_may_campaign.ps1
+
+stop_v41_may_campaign.ps1
+
+resume_v41_may_campaign.ps1
+
+
+If Python orchestration is used, keep PowerShell as the user-facing entry.
+
+
+
+# =====================================================================
+# 51. FULL CAMPAIGN LAUNCH CONDITION
+# =====================================================================
+
+DO NOT launch the full campaign until ALL are true:
+
+
+May1 B0/B1 pilot PASS
+
+nesting PASS
+
+objective identity PASS
+
+runtime integration PASS
+
+H4 cap integration PASS
+
+protected scope PASS
+
+all tests PASS
+
+propagation 124/124 PASS
+
+detached-process smoke test PASS
+
+Git scientific tree clean
+
+final interface freeze commit exists
+
+
+
+# =====================================================================
+# 52. AFTER FULL CAMPAIGN LAUNCH
+# =====================================================================
+
+After launching the independent full-May process:
+
+
+verify:
+
+child PID alive
+
+heartbeat observed at least twice
+
+campaign scientific commit matches freeze commit
+
+first queue unit visible
+
+campaign state writable
+
+Codex parent process is NOT required
+
+
+Then STOP INTERACTIVE WORK.
+
+
+Do NOT wait for the full May campaign to finish inside Codex.
+
+
+
+# =====================================================================
+# 53. IMPORTANT RESULT INTERPRETATION
+# =====================================================================
+
+Runtime:
+
+Rolling Q90 is selected as the best operational safety-efficiency
+compromise.
+
+
+Do NOT claim S5R1 became PASS.
+
+
+Future workload:
+
+H4 R85_B2 is retained as the best available 4-hour reserve signal.
+
+
+Do NOT claim R6R1 became PASS.
+
+
+The optimizer-facing cap is an engineering decision-layer saturation rule.
+
+
+Do NOT claim it improves raw ML forecast accuracy.
+
+
+
+# =====================================================================
+# 54. PROTECTED SCIENTIFIC SCOPE
+# =====================================================================
+
+Preserve all inherited:
+
+S3
+S4
+S5
+S5R1
+R5
+R5R1
+R6
+R6R1
+
+
+Do not alter their artifacts or classifications.
+
+
+Preserve closed:
+
+migration
+WAN
+terminal
+MESS
+Fresh architecture
+
+
+Local integration only.
+
+
+
+# =====================================================================
+# 55. CODING/REPAIR PRINCIPLE
+# =====================================================================
+
+Work top-down and locally.
+
+
+Before editing:
+
+locate authoritative implementation.
+
+Reuse existing adapter/schema/objective infrastructure.
+
+Avoid duplicate abstractions.
+
+
+Do not create a parallel optimization system.
+
+
+Every change must answer:
+
+"What exact V41 interface requirement requires this change?"
+
+
+If not necessary, do not modify it.
+
+
+
+# =====================================================================
+# 56. FINAL CODEX RESPONSE FORMAT
+# =====================================================================
+
+Report in Korean.
+
+
+Begin exactly:
+
+
+V41 INTEGRATION STATUS:
+
+RUNTIME FREEZE:
+
+FUTURE WORKLOAD FREEZE:
+
+H4 CAP:
+
+H24:
+
+MAY 1 B0 DAY-AHEAD:
+
+MAY 1 B0 ACTUAL:
+
+MAY 1 B1 DAY-AHEAD:
+
+MAY 1 B1 ACTUAL:
+
+B0->B1 NESTING:
+
+OBJECTIVE IDENTITY:
+
+MAY CAMPAIGN PROPAGATION:
+
+FULL MAY CAMPAIGN:
+
+CAMPAIGN PID:
+
+DETACHED FROM CODEX:
+
+CAMPAIGN PROGRESS PATH:
+
+SCIENTIFIC COMMIT:
+
+
+
+Then report:
+
+
+1. authoritative optimization base
+2. S5R1/R6R1 lineage
+3. operational model freeze
+4. runtime adapter change
+5. H4 adapter change
+6. cap definition
+7. reserve constraint
+8. reused objective coefficient
+9. exact modified files
+10. protected files unchanged
+
+11. May1 runtime training N
+12. May1 PENDING N
+13. May1 runtime Q90 distribution
+
+14. May1 H4 raw distribution
+15. May1 CAP_HIST
+16. May1 CAP_PHYS
+17. May1 clipping frequency
+18. May1 actionable reserve
+
+19. B0 reserve/headroom
+20. B1 reserve/headroom
+
+21. B0/B1 objective decomposition
+22. B0-in-B1 feasibility
+23. B1<=B0 planning check
+
+24. B0 Day-Ahead result
+25. B0 Actual result
+26. B1 Day-Ahead result
+27. B1 Actual result
+
+28. Day-Ahead vs Actual differences
+
+29. defects found
+30. defects repaired
+31. reruns caused by defects
+
+32. all-May input readiness
+33. 124-unit propagation audit
+
+34. detached-process smoke test
+35. campaign launch command
+36. PID
+37. launch receipt
+38. heartbeat
+39. progress/state paths
+40. resume/stop commands
+
+41. test count
+42. protected scope
+43. final Git status
+44. freeze commit
+45. launch status
+
+
+FINAL RULE:
+
+Once the detached May campaign is confirmed alive and independent,
+do not remain attached to the heavy run.
+
+Leave the campaign running independently and return control to the user.
