@@ -22,7 +22,7 @@ def freeze(stage):
     commit=stage_commit('Freeze V40S5 '+stage+' before '+('any model fit' if stage=='prereg' else 'exposed scoring'))
     if stage=='prereg':
         paths=list((ROOT/'dayahead/v40s5').glob('*.py'))
-        paths += [p for p in OUT.iterdir() if p.is_file() and p.name not in ['V40S5_COMPUTE_LEDGER.json','V40S5_MAY_FIREWALL.json']]
+        paths += [p for p in OUT.iterdir() if p.is_file() and p.name not in ['V40S5_COMPUTE_LEDGER.json','V40S5_MAY_FIREWALL.json','V40S5_PREREGISTRATION_COMMIT_RECEIPT.json']]
     elif stage=='selection':
         paths=list((OUT/'models').glob('*'))+[OUT/'V40S5_SELECTION_FREEZE.json',OUT/'V40S5_HYPERPARAMETER_FREEZE.json']
         paths += [p for p in OUT.glob('V40S5_P_*_REPORT.json')]

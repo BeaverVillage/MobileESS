@@ -1,8 +1,12 @@
 {
-  "reason": "First primary invocation failed while writing preprocessing because models directory did not exist. No model fit occurred and no HIST_TUNE prediction was produced.",
+  "reason": "First primary invocation failed before any model fit because preprocessing output directory did not exist. Follow-up review also excluded the mutable preregistration receipt from its own freeze hash inventory.",
   "original_preregistration_commit": "8477fda59945815dc70e7896b42feff981d2936c",
-  "change": "Create models directory in save_pre before writing descriptor.",
-  "model_fits_before_fix": 0,
+  "intermediate_prefit_commit": "edaa0d8354529799cdaebba69e01e68420022c62",
+  "changes": [
+    "Create models directory in save_pre.",
+    "Exclude self-referential receipt hash from preregistration freeze."
+  ],
+  "model_fits_before_fixes": 0,
   "scientific_contract_changes": 0,
   "hyperparameter_changes": 0,
   "exposed_scores": 0
