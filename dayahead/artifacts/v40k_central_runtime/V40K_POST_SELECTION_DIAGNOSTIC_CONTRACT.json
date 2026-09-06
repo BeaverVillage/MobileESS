@@ -1,0 +1,33 @@
+{
+  "V40K_classification_unchanged": "V40K_POINT_MODEL_INSUFFICIENT",
+  "active_miss_rate": "Job-level mean(actual>K0); exactly identical to point underprediction for this duration replay. Also report GPU-weighted any-miss rate and active-miss GPU 5-min slot rate against actual active GPU slots.",
+  "created_at": "2026-09-06T10:31:02.211167+00:00",
+  "decision_order": [
+    "C if a primary diagnostic population has fewer than the frozen 100 jobs",
+    "B if pooled interval contains .5 and any supported primary conditional population interval excludes .5",
+    "A if pooled and all supported primary intervals contain .5"
+  ],
+  "diagnostic_calibration_readout": "Descriptive Wilson 95% interval for P(actual>K0), checked against 0.5; report UTC-day block bootstrap sensitivity separately. This is a post-selection statistical readout, not a changed point acceptance threshold or proof of production readiness.",
+  "existing_holdout_prediction_SHA": "c4a3e0e44f6fbee9acc9d487581b7117e714b6c92c94121596c15a28b8f6dfbc",
+  "historical_comparison": [
+    "V40I forensic COMPLETED H100 ~64.13%, user-supplied historical summary, no V40I outcome read",
+    "V40J development COMPLETED H100-standby ~73.64%, separate population and split",
+    "V40K April pooled K0 50.061%, separate population and split"
+  ],
+  "minimum_support": 100,
+  "model_lock_SHA_before": "4b3e352459542c494ccc91d52e977910f53c0860dbac46528badaa3aa011e04f",
+  "point_comparison_SHA_before": "cd29b3b9d5a1a708b54364213dfd128de4e5c63b04d79c9ae22bad73bedba7d2",
+  "primary_diagnostic_populations": [
+    "H100",
+    "H100-standby",
+    "retrospective COMPLETED H100",
+    "retrospective COMPLETED H100-standby"
+  ],
+  "quantile_definition": "NumPy linear quantile on residual actual-K0; positive residual Q90/Q95 use strictly positive residuals only; normalized residual=(actual-K0)/requested_seconds, valid positive requests only",
+  "requested_by": "User post-selection read-only diagnostic amendment",
+  "retrospective_interpretation": "Status-conditioned diagnostics do not redefine Q50(T|causal X). A conditional completed-group error can coexist with calibrated pooled unconditional Q50; no final status used as prediction feature.",
+  "safe_fit_and_shadow_remain_sealed": true,
+  "scope": "Existing POINT_HOLDOUT_PREDICTIONS.parquet only for outcomes; frozen previously exposed training population only for causal support counts. No new holdout opening, model prediction, fit, calibration, threshold tuning or candidate selection.",
+  "selection_result_SHA_before": "40d739248c0184ba9047ace85a69f029866603da50e2b03ca58534a919065cd2",
+  "support_definition": "Reuse V40J exact9/other8 SupportGuard against V40K final-fit historical rows end-known before 2025-04-01; no support threshold change"
+}
