@@ -1,0 +1,196 @@
+{
+  "working_name": "V40R6R1_RISK_CALIBRATED_ROLLING_GPUWORK",
+  "time_UTC": "2026-09-06T16:58:13.393078+00:00",
+  "base": "2d6e22e2b448454bb4a860a07f38c20ad3ef834d",
+  "before_R6R1_candidate_outcomes": true,
+  "service_level": 0.85,
+  "alpha": 0.15,
+  "term": "85% WORKLOAD-RESERVE SERVICE LEVEL",
+  "grid_security_probability": false,
+  "physical_electrical_feasibility_separate": true,
+  "horizons": {
+    "H4": 16,
+    "H24": 96
+  },
+  "candidate_registry": {
+    "R85_B1": "B1",
+    "R85_B2": "B2_L0"
+  },
+  "new_models_features_targets": false,
+  "base_identity": "Exact saved R6 B1 and common-L0 B2 repaired Q90; Q50 diagnostics frozen",
+  "residual": "log1p(actual)-log1p(max(frozen_base_Q90,0))",
+  "calibration": {
+    "policy": "FULL_EXPANDING_CAUSAL_HISTORY",
+    "initial_source": "DEVELOPMENT_OOS",
+    "allowed_source_roles": [
+      "DEVELOPMENT",
+      "CALIBRATION",
+      "EXPOSED_EVALUATION"
+    ],
+    "TRAIN_residuals": false,
+    "availability": {
+      "user_choice": "날짜 종료와 정답 확정 시각을 모두 지난 뒤 편입 — 실제 가용성을 지키는 기준 (권장)",
+      "rule": "max(target_day_end, target_label_available_at) < current issue_time",
+      "rationale": "159 of 172 frozen OOS day labels mature after their calendar day ends",
+      "explicit_user_clarification": true,
+      "before_CAL_candidate_evaluation": true,
+      "partial_day_residuals": false,
+      "future_runtime_or_label_information_used": false
+    },
+    "full_day_membership": true,
+    "drop_old_residuals": false,
+    "decay": false,
+    "smoothing": false,
+    "order_statistic": "k=min(max(ceil((n+1)*17/20),1),n); kth smallest residual; integer arithmetic",
+    "interpolation": false,
+    "delta": "max(0,q85_residual)",
+    "upper": "expm1(log1p(max(base_Q90,0))+delta)",
+    "H4_min_days": 20,
+    "H4_min_rows": 500,
+    "H24_min_days": 30,
+    "insufficient": "No static fallback; candidate fails support gate",
+    "per_issue_per_horizon_per_base": true
+  },
+  "role_scope": "Use exactly R6 mature DEV58/CAL26/EXPOSED88 days and their original saved arrays; preserve maturity exclusions",
+  "CAL": "Full 26-day CAL prequential selection; R6 CAL_FIT/CAL_SELECT static procedure not reused",
+  "gates": {
+    "positive_coverage_band": [
+      0.85,
+      0.925
+    ],
+    "mean_day_positive_coverage_min": 0.8,
+    "supported_month_positive_coverage_min": 0.8,
+    "supported_month_mean_day_coverage_min": 0.8,
+    "day_min_positive_windows": 1,
+    "month_min_positive_days": 5,
+    "block_min_positive_days": 5,
+    "miss_severity": "under_GPUh strictly below own frozen raw base Q90",
+    "over_anchor_A": "strictly below exact frozen R6 TRAIN per-horizon unconditional Q95 anchor on same evaluation rows",
+    "over_anchor_B": "strictly below frozen R6 static U2-90 over on same rows",
+    "positive_upper_WAPE_strict_max": 2.0
+  },
+  "selection": {
+    "scope": "CAL_ONLY",
+    "all_gates_required": true,
+    "ranking": "minimum CAL over_GPUh",
+    "tie": "If max(over)-min(over) <= .02*min(over), choose R85_B1; equality included",
+    "no_pass": "NONE",
+    "joint_requires": [
+      "H4",
+      "H24"
+    ],
+    "partial_success_not_promoted": true
+  },
+  "comparators_only": [
+    "R6_U0_STATIC_B1_Q90",
+    "R6_U1_STATIC_B2_Q90",
+    "R6_U2_STATIC_90_CALIBRATED"
+  ],
+  "R6_BASE_SKILL_LIMITATION": "PRESENT",
+  "R6_raw_Q90_skill_gate_automatic_disqualification": false,
+  "exposed": {
+    "after_selection_freeze_commit": true,
+    "same_prequential_rule": true,
+    "earlier_exposed_may_enter_only_after_maturity": true,
+    "no_reselection": true,
+    "NONE": "Remains NONE; both preregistered candidates may be diagnostic-only",
+    "gates": "Identical to CAL",
+    "TRUE_CONFIRMATORY_AVAILABLE": "NO"
+  },
+  "classification_precedence": [
+    "joint pass => 85PCT_GPUWORK_RESERVE_PREVALIDATED",
+    "all exposed candidates unsupported => CALIBRATION_SUPPORT_INSUFFICIENT",
+    "H4 fails and H24 selected passes => H4_RESERVE_SAFETY_FAIL",
+    "H4 selected passes and selected H24 efficiency fails => H24_RESERVE_EFFICIENCY_FAIL",
+    "otherwise => JOINT_GPUWORK_RESERVE_FAIL"
+  ],
+  "miss_metrics": "positive shortfall amount per missed window; mean/P90/P95/max conditional on actual>upper; diagnostic percentiles linear",
+  "overlap": "H4 rolling-window loss sums count overlapping atomic work repeatedly; calendar-day clusters required",
+  "reproducibility": "Repeat the entire CAL+EXPOSED calibration exactly once after original exposed run; require exact deltas/uppers/membership/metrics; no better-repeat selection",
+  "bootstrap": {
+    "only_joint_exposed_pass": true,
+    "draws": 1000,
+    "seed": 20260907,
+    "unit": "calendar day",
+    "metrics": [
+      "under_GPUh",
+      "over_GPUh",
+      "positive_coverage"
+    ],
+    "comparison": "selected rolling85 minus R6 static U2-90"
+  },
+  "interface": {
+    "only_joint_success": true,
+    "H4": "81-element arrays aligned to window starts 0..80",
+    "H24": "daily scalar",
+    "proposal_only": true,
+    "optimizer_use_allowed": false,
+    "failure_recommended_rows": []
+  },
+  "physical_semantics": "Arriving GPU-service work [GPUh]; not instantaneous GPU occupancy/count/IT/PCC power",
+  "backlog_equation": "Future proposal only: B[t+1]=B[t]+A[t]-S[t], S[t]=0.25*r[t]; not implemented",
+  "H1_H8": "Frozen R6 diagnostics only; not recalibrated or used in selection",
+  "15min": "Frozen SHAPE_ONLY; no new model or burst safety claim",
+  "no_new_fit": {
+    "LightGBM": 0,
+    "statistical_models": 0,
+    "classifiers": 0,
+    "feature_engineering": 0,
+    "target_construction": 0
+  },
+  "firewall": {
+    "optimizer_calls": 0,
+    "Gurobi_calls": 0,
+    "OpenDSS_calls": 0,
+    "Fresh_calls": 0,
+    "May_scientific_reads": 0,
+    "shadow_scientific_reads": 0
+  },
+  "system_changes": false,
+  "synthetic_jobs": false,
+  "event_trigger": false,
+  "local_repair": false,
+  "rolling_MPC": false,
+  "holds": {
+    "production_q_seconds": 5576.44921875,
+    "PF": 0.95,
+    "Q_control": "NO",
+    "electrical": "HOLD",
+    "electrical_B0_B3": "NO",
+    "FULL_MAY": "NO",
+    "optimizer_integration": "NO",
+    "production_ready": "NO"
+  },
+  "closure": {
+    "mandatory": true,
+    "NO_R6R2": true,
+    "NO_R7": true,
+    "no_new_calibration_family_or_service_level_search": true,
+    "FURTHER_FUTURE_WORKLOAD_MODEL_WORK": "DEFER_UNTIL_NEW_DATA_OR_AUTHORITY"
+  },
+  "frozen_hashes": {
+    "dayahead/v40r6r1/calibration.py": "cadf14c5092cf1746ac0a1823dbc79efa0fab99dfd0d04957a361ec4bab9965d",
+    "dayahead/v40r6r1/common.py": "43deab87723ebd070c7c6cb304c0fef0b02256e6f1f91504497bafd64ebe092c",
+    "dayahead/v40r6r1/initialize.py": "b86c06bb120d4bd132d5f24f628ccedb30bb71f0937ec794b14e5cfb457ac00f",
+    "dayahead/v40r6r1/metrics.py": "cf57768eac96f2e487134699f92001be20762509bdeac58fbc64e4e7d637bf8b",
+    "dayahead/v40r6r1/pipeline.py": "fee3b6b97068c875c731ee1b1a2541a2da45cc02e465f3f60f3157f549997b4d",
+    "dayahead/v40r6r1/preregister.py": "49cf53645adf0c51d259c223dc1e80f0652ef911557f80b6269af237a8bc48fc",
+    "dayahead/v40r6r1/__init__.py": "6b02e1d4e3cb91e756a6324f7a3695f6e3192145d4ac2d408381ada5dcfd213a",
+    "dayahead/artifacts/v40r6r1_risk_calibrated_rolling_gpuwork/V40R6R1_OPERATING_POINT.json": "fa2b5b16520c72b8304ae311c28b43d52f014111907572f2a465185d69d4a6da",
+    "dayahead/artifacts/v40r6r1_risk_calibrated_rolling_gpuwork/V40R6R1_TARGET_IDENTITY_AUDIT.json": "9ac98f5edcfcd4d81b7c4023a5ddbbcd5118894d2b09d2b03bae3f6f97477758",
+    "dayahead/artifacts/v40r6r1_risk_calibrated_rolling_gpuwork/V40R6R1_BASE_PREDICTION_IDENTITY.json": "2814118903c6c1ec9fa28ab822abb8e099a52f34e578c0ed60e1536f88846186",
+    "dayahead/artifacts/v40r6r1_risk_calibrated_rolling_gpuwork/V40R6R1_RESIDUAL_AVAILABILITY_CONTRACT.json": "e1087da2c5fc4934407244564010e5e99b4b84d471e26a81ed309091bc8f1a99",
+    "dayahead/artifacts/v40r6r1_risk_calibrated_rolling_gpuwork/V40R6R1_R6_REFERENCE_FREEZE.json": "2531aa1f4bf3c27f94ff31a7d0a2f4ff7fc6390b8213f18a69378657124d5266",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_CUMULATIVE_TARGET.parquet": "091025b3da865e88099d68e2993e841660ee8baa2a07064099e6b777d85774a8",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/development_baselines.npz": "9d25c8e39b77238692566d9a6fcdd68f08ecee7cf05f6944596aaefdcc8455bd",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/fits/L0/development_q.npy": "15cf3e800380664a89b60c699aded8b9a9043d83a1a779fa9171b45bfd6a5092",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/calibration_predictions.npz": "3d4abed102de7335c072efa67c04b7f23a39d46224996f85ccb2c1453b800bd9",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/exposed_predictions.npz": "4865f62e52f117ff296ef9445ee5668a8f36415d8c93e8837b07d380f5645e73",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_SELECTION_FREEZE.json": "6f9fc2695eb8604211e5dd1e0c96487817970ce2f2b59313429090edd15520a7",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_HYPERPARAMETER_FREEZE.json": "151eb7be99baf29237e2799993d590a810093dc5bcbed1f4901cdcb625dd97c8",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_PREREGISTRATION.json": "271784e3fac116c36658109b94ea7057101259dfda691277ab25382bd19ec34d",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_FINAL_COMMIT_RECEIPT.json": "489b210cbdff420dc4a4de605173189db1ff45f6ce396efadfeb9982e224ed55",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/data.npz": "e3463e17ad27ac27c963a523ce9f9db0b33f3d540188036b87a80b3da80520ff",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/inputs/V40R3_LABEL_MATURITY_LEDGER.parquet": "64fb7614531f7aabbc6c76741299c7023b23421906485c341087d4c6d42140ed"
+  }
+}
