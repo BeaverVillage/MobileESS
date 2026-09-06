@@ -1,0 +1,9 @@
+{
+  "initial_check": "Assertion stopped before all diagnostics and candidate fits",
+  "cause": "Parquet submit_time dtype us, operating-day boundary dtype ns; initial integer bin arithmetic mixed units",
+  "fix": "Explicitly convert submit_time to nanoseconds before integer bin arithmetic",
+  "target_contract_changed": false,
+  "tolerance_changed": false,
+  "candidate_fits_before_fix": 0,
+  "tail_diagnostic_fits_before_fix": 0
+}

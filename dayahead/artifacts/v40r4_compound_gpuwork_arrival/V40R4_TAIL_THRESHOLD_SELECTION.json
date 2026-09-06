@@ -1,0 +1,69 @@
+{
+  "status": "EVT_TAIL_NOT_SUPPORTED",
+  "chosen_threshold_GPUh": null,
+  "chosen_TRAIN_quantile": null,
+  "chosen_parameters": null,
+  "threshold_rule": {
+    "candidate_quantiles": [
+      0.9,
+      0.95,
+      0.975
+    ],
+    "min_exceedances": 500,
+    "min_unique_excesses": 50,
+    "shape_domain_for_admission": [
+      0,
+      0.9
+    ],
+    "require_shape_CI95_upper_below": 1.0,
+    "max_neighbor_shape_difference": 0.2,
+    "KS_max": 0.05,
+    "QQ_log_correlation_min": 0.98,
+    "uncertainty": "100 operating-day block bootstrap MLE fits at each threshold; threshold itself held fixed",
+    "selection": "Lowest threshold satisfying support, valid finite mean, CI, fit and neighboring-shape stability. If none, EVT_TAIL_NOT_SUPPORTED.",
+    "GOF_caveat": "Raw KS p-value is not calibrated after fitted parameters; admission uses frozen KS distance and QQ criteria, not a false simple-null p-value"
+  },
+  "candidates": [
+    {
+      "TRAIN_quantile": 0.9,
+      "threshold_GPUh": 0.9722222222222222,
+      "admissibility": {
+        "support": true,
+        "shape_domain": false,
+        "finite_mean_CI": false,
+        "stability": false,
+        "KS_fit": false,
+        "QQ_fit": false
+      },
+      "admissible": false
+    },
+    {
+      "TRAIN_quantile": 0.95,
+      "threshold_GPUh": 2.506749999999997,
+      "admissibility": {
+        "support": true,
+        "shape_domain": false,
+        "finite_mean_CI": false,
+        "stability": false,
+        "KS_fit": false,
+        "QQ_fit": true
+      },
+      "admissible": false
+    },
+    {
+      "TRAIN_quantile": 0.975,
+      "threshold_GPUh": 9.325277777777583,
+      "admissibility": {
+        "support": true,
+        "shape_domain": true,
+        "finite_mean_CI": true,
+        "stability": false,
+        "KS_fit": false,
+        "QQ_fit": true
+      },
+      "admissible": false
+    }
+  ],
+  "future_performance_used": false,
+  "fallback_if_rejected": "Preregister positive heavy-tailed lognormal mixture for P1; B6 marked not executed; never force GPD"
+}

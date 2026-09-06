@@ -1,0 +1,16 @@
+{
+  "count_Q95": 255.0,
+  "positive_interval_max_severity_Q95": 146.5298888888891,
+  "job_severity_Q95": 2.506749999999997,
+  "source": "Mature TRAIN only",
+  "definitions": {
+    "count_high": "N strictly above TRAIN all-interval N Q95",
+    "severity_high": "max Z strictly above TRAIN positive-interval max Z Q95",
+    "COUNT_DRIVEN": "count_high and not severity_high",
+    "SEVERITY_DRIVEN": "severity_high and not count_high",
+    "MIXED": "both",
+    "UNRESOLVED": "neither",
+    "tail_exceedance_definition": "Z above TRAIN job-severity Q95, descriptive only; distinct from any selected GPD threshold",
+    "use": "Descriptive, never deployment logic"
+  }
+}

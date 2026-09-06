@@ -1,0 +1,17 @@
+V40R4의 사전 문헌 검토. 아래 방법은 이미 연구된 frequency–severity/확률 예측 계열이다. CCAF는 작업 명칭이며 구조적 새로움이나 성능 우위를 선험적으로 주장하지 않는다. 보험 연구의 확률 모형을 GPUh 도착 수요에 적용하는 것은 전이 가능한 모델링 가정이지 동일한 생성 과정이라는 증명이 아니다.
+
+| 근거 | V40R4 설계와 한계 |
+|---|---|
+| [Dunn & Smyth, Statistics and Computing (2005)](https://gksmyth.github.io/pubs/tweediepdf-series-preprint.pdf) | 1<p<2 Tweedie의 compound Poisson–Gamma 표현을 B3에 사용한다. 평균만 예측하고 Q90이라고 부르지 않고, TRAIN dispersion과 명시적 분포로 시뮬레이션한다. Tweedie latent jump 수는 실제 job count가 아니다. |
+| [Lambert, Technometrics 34(1), 1992](https://www.tandfonline.com/doi/abs/10.1080/00401706.1992.10485228) | Structural zero와 Poisson count를 구분하는 ZIP 계열의 근거다. zero가 많다는 이유만으로 ZINB를 강제하지 않는다. TRAIN 진단에서는 NB와 거의 경계로 수렴한 ZINB를 BIC로 비교했다. |
+| [Garrido, Genest & Schulz, Insurance: Mathematics and Economics (2016)](https://www.sciencedirect.com/science/article/pii/S0167668715303358) | Frequency–severity 독립성 가정을 완화하는 문헌. 미래 실제 count를 사용할 수 없는 본 문제에서는 realized count를 predictor로 복사하지 않고 predicted intensity만 전달한다. 이는 문헌의 관측 count conditioning과 동일한 모형이 아니다. |
+| [Investigating dependence between frequency and severity via simple GLMs, JKSS (2019)](https://www.sciencedirect.com/science/article/pii/S1226319218300577) | 평균 severity로 자료를 축약하면 개별 분포의 정보가 사라질 수 있다. 본 lognormal likelihood는 job-level log 충분통계 N, ΣlogZ, Σ(logZ)^2를 정확히 보존한다. Simple dependence 구조의 misspecification 가능성도 남는다. |
+| [Predictive compound risk models with dependence, IME (2020)](https://www.sciencedirect.com/science/article/pii/S0167668720301116) | 종단적 의존성과 frequency–severity 결합을 별도로 다룰 필요성을 보여 준다. R4는 residual temporal copula를 추가하지 않으므로 joint daily quantile의 보장은 제한된다. |
+| [Scarrott & MacDonald, REVSTAT 10(1), 2012](https://research.universityofgalway.ie/en/publications/a-review-of-extreme-value-threshold-estimation-and-uncertainty-qu-3/) | POT threshold와 불확실성을 함께 점검해야 한다. Q90/Q95/Q97.5 지점의 support, shape, bootstrap CI, QQ, KS distance 및 안정성으로 TRAIN-only admission을 사전에 고정했다. |
+| [MacDonald et al., Computational Statistics & Data Analysis (2011)](https://www.math.canterbury.ac.nz/~m.reale/pub/MacDonaldetal2011.pdf) | Body와 extreme tail의 혼합은 기존 연구 계열이다. GPD가 부적합하면 도입을 강제하지 않는다. 이번 진단에서는 threshold 간 xi 변동 때문에 B6를 제외하고 양의 spliced-lognormal 대안을 사전등록한다. |
+| [Romano, Patterson & Candès, NeurIPS (2019)](https://papers.neurips.cc/paper_files/paper/2019/hash/5103c3584b063c431bd1268e9b5e76fb-Abstract.html) | 예측 불확실성에 맞추는 quantile calibration의 근거다. R4의 양수 구간 log-ratio 절차가 이 논문의 theorem을 그대로 충족한다고 주장하지 않는다. 시간 이동과 conditional population 때문에 exchangeability 보장은 없다. |
+| [Gneiting & Raftery, JASA (2007)](https://sites.stat.washington.edu/people/raftery/Research/PDF/Gneiting2007jasa.pdf) | Coverage 하나만 높이는 것과 좋은 확률 예측을 구분한다. Pinball, upper calibration control, overprediction 및 burst miss를 함께 평가한다. |
+| [LightGBM 4.6.0 공식 parameter 문서](https://lightgbm.readthedocs.io/en/v4.6.0/Parameters.html) | Poisson/Tweedie/quantile objectives와 deterministic CPU 설정의 구현 근거. B2/B5는 동일 인과 정보와 2회 탐색 예산을 사용한다. |
+| [SciPy 1.14.1 genpareto 문서](https://docs.scipy.org/doc/scipy-1.14.1/reference/generated/scipy.stats.genpareto.html) | GPD의 support 및 shape/scale 매개화 확인. fitted-parameter KS의 단순-null p-value를 유효한 합성-null 검정처럼 사용하지 않는다. |
+
+설계 선택은 TRAIN 진단과 문헌에 근거하며 V40R4 후보 예측 결과를 보기 전에 고정한다. R3에서 실패한 전역 +GPUh 보정은 금지하고 C0/C1만 비교한다. C1은 전체 aggregate CDF에 같은 log 변환을 적용해 marginal quantile과 시나리오 누적이 일관되게 정의되도록 한다. 이 때문에 Q50도 변하며 원시 compound sample과 보정된 aggregate sample을 구분해 저장한다.
