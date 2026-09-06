@@ -18,6 +18,9 @@ ADDED={'dayahead/v41r1/migration_load.py','dayahead/v41r1/migration_memory.py',
 
 
 def validate(receipt,current_source):
+    gate_path=OUT/'Q90_BASELINE_RETAINED_B0_GATE.json'
+    if gate_path.exists():
+        return validate_baseline_revision(receipt,current_source,read(gate_path))
     pre=read(OUT/'V41R1_RETAINED_B0_PRECHECK.json')
     require(pre['status']=='PASS' and pre['producer_commit']==PRODUCER,'B0_RETENTION_AUTHORITY')
     require(record(pre['authorization']['path'])==pre['authorization'],'B0_RETENTION_USER_CONTRACT_DRIFT')
@@ -51,4 +54,27 @@ def validate(receipt,current_source):
                     'UNGATED_RETENTION_ADDED_MODULE')
     for entry in pre['full_file_records']:
         require(record(entry['path'])==entry,'COMPLETED_B0_ARTIFACT_BYTES_CHANGED')
+    return changed
+
+
+def validate_baseline_revision(receipt,current_source,gate):
+    """Retain only enumerated B0 phases with an exactly identical rebuilt input."""
+    require(gate['status']=='PASS' and gate['current_source']==current_source,'BASELINE_RETENTION_SOURCE_DRIFT')
+    require(receipt.get('policy')=='B0' and receipt.get('status')=='COMPLETE','ONLY_COMPLETED_B0_BASELINE_RETENTION')
+    entries=[e for e in gate['receipts'] if e['day']==receipt.get('day') and read(e['receipt']['path'])==receipt]
+    require(len(entries)==1,'BASELINE_RECEIPT_NOT_IN_EXACT_RETENTION_GATE')
+    entry=entries[0]
+    require(record(entry['receipt']['path'])==entry['receipt'],'BASELINE_RETAINED_RECEIPT_DRIFT')
+    for ref in entry['input_equality_evidence']+[gate['audit'],gate['proof']]:
+        require(record(ref['path'])==ref,'BASELINE_RETENTION_EVIDENCE_DRIFT')
+    require(entry['old_reference']['sha256']==entry['new_reference']['sha256'],'BASELINE_REFERENCE_NOT_BYTE_IDENTICAL')
+    for ref in (entry['old_reference'],entry['new_reference']):require(record(ref['path'])==ref,'BASELINE_REFERENCE_DRIFT')
+    changed={}
+    old=receipt['science'];require(old['manifest_SHA']==digest(old['files']),'RETAINED_SOURCE_MANIFEST_DRIFT')
+    require(current_source['manifest_SHA']==digest(current_source['files']),'CURRENT_SOURCE_MANIFEST_DRIFT')
+    for ref in old['files']:
+        original=subprocess.check_output(['git','show',receipt['scientific_commit']+':'+ref['relative_path']],cwd=ROOT)
+        require(hashlib.sha256(original).hexdigest()==ref['sha256'] and len(original)==ref['bytes'],'RETAINED_ORIGINAL_GIT_BLOB_DRIFT')
+        if record(ref['path'])['sha256']!=ref['sha256']:changed[str(Path(ref['path']).resolve())]=ref
+    require(set(changed)<=set(entry['attested_changed_paths']),'BASELINE_UNATTESTED_SOURCE_CHANGE')
     return changed

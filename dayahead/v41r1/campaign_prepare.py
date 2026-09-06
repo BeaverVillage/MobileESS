@@ -62,16 +62,22 @@ def prepare():
     runtime_tests=ET.parse(OUT/'CAMPAIGN_RUNTIME_TESTS.xml')
     require(len(list(runtime_tests.iter('testcase')))==5 and not any(list(runtime_tests.iter(t)) for t in ('failure','error','skipped')),'CAMPAIGN_RUNTIME_REGRESSION_GATE')
     stress=read(OUT/'FIXED_FOUR_WORKER_MEMORY_STRESS_GATE.json')
-    require(stress['status']=='PASS' and stress['source']==science(),'FIXED_FOUR_WORKER_STRESS_NOT_PASS')
+    from .campaign_revision import verify_stress_reuse
+    verify_stress_reuse(stress,science())
     require(stress['paging_counters_available'],'PAGING_MEASUREMENT_MISSING')
+    baseline=read(OUT/'Q90_BASELINE_31_DAY_AUDIT.json')
+    require(baseline['status']=='PASS' and baseline['verified_days']==31 and baseline['failed_days']==0,'Q90_BASELINE_31_DAY_GATE')
+    from .coefficient_prepare import verify_manifest as verify_coefficients
+    verify_coefficients()
     operations=[record(Path(__file__)),record(ROOT/'dayahead/v41r1/campaign_run.py'),
-                record(ROOT/'dayahead/v41r1/campaign_resources.py')]
+                record(ROOT/'dayahead/v41r1/campaign_resources.py'),record(ROOT/'dayahead/v41r1/campaign_revision.py'),
+                record(ROOT/'dayahead/v41r1/baseline_audit.py'),record(ROOT/'dayahead/v41r1/coefficient_prepare.py')]
     config=dict(PARALLEL_DAY_WORKERS=4,SOLVER_THREADS_PER_DAY=4,adaptive_parallelism=False,
         A0_Method=1,MemLimit='UNLIMITED',SoftMemLimit='UNLIMITED',NodefileStart_GB=.5,
         NodefileDir='Per worker under the local SSD campaign workspace',
-        A0_MIPGap=0,A0_MIPGapAbs=0,A0_FeasibilityTol=1e-9,A0_IntFeasTol=1e-9,A0_OptimalityTol=1e-9,
+        A0_MIPGap={'P1':.001,'P2':.001,'P3':0.,'P4':0.,'P5':0.},A0_MIPGapAbs=0,A0_FeasibilityTol=1e-9,A0_IntFeasTol=1e-9,A0_OptimalityTol=1e-9,
         all_other_stage_objective_and_optimality_requirements='UNCHANGED',
-        one_model_for_P1_P5=True,work_limit_exhaustion='CONTINUE_IDENTICAL_MODEL_UNTIL_CERTIFIED_OPTIMUM',
+        one_model_for_P1_P5=True,work_limit_exhaustion='CONTINUE_IDENTICAL_MODEL_UNTIL_REGISTERED_GAP_CERTIFICATE',
         candidate_pruning=False,Actual_optimization=False,independent_days=True,
         policy_order=['B0','B1','B2','B3'],target_days=31,policy_days=124,
         separate_May1_pilot='CANCELLED_BY_USER',completed_May1_B0='RETAINED_BYTE_IDENTICAL')
@@ -80,6 +86,10 @@ def prepare():
         test_results=record(OUT/'V41_TEST_RESULTS.xml'),exact_equivalence=record(OUT/'EXACT_COMPRESSION_GATE.json'),
         legacy_P0=record(OUT/'V41_LEGACY_P0_01_07_CLOSURE_AUDIT.json'),
         stress=record(OUT/'FIXED_FOUR_WORKER_MEMORY_STRESS_GATE.json'),
+        stress_reuse=record(OUT/'Q90_REVISION_STRESS_REUSE.json'),
+        baseline=record(OUT/'Q90_BASELINE_31_DAY_AUDIT.json'),baseline_retention=record(OUT/'Q90_BASELINE_RETAINED_B0_GATE.json'),
+        gap_authorization=record(OUT/'USER_APPROVED_P1_P2_GAP.json'),
+        electrical_coefficients=record(OUT/'V41R1_31_DAY_PLANNING_COEFFICIENT_MANIFEST.json'),
         configuration=record(OUT/'FIXED_FOUR_WORKER_SOLVER_CONFIGURATION.json'),
         runtime_tests=record(OUT/'CAMPAIGN_RUNTIME_TESTS.xml'),
         input_plan=record(OUT/'V41_MAY_CAMPAIGN_PLAN.csv'),
@@ -104,9 +114,16 @@ def verify_release():
     require(release['scientific_commit']==commit() and release['science']==science(),'CAMPAIGN_SOURCE_NOT_FROZEN')
     require(record(release['preparation']['path'])==release['preparation'],'PREPARATION_DRIFT')
     prep=read(release['preparation']['path'])
-    for name in ('test_results','exact_equivalence','legacy_P0','stress','configuration','input_plan','separate_pilot_waiver','runtime_tests'):
+    for name in ('test_results','exact_equivalence','legacy_P0','stress','stress_reuse','baseline','baseline_retention','gap_authorization','electrical_coefficients','configuration','input_plan','separate_pilot_waiver','runtime_tests'):
         require(record(prep[name]['path'])==prep[name],'CAMPAIGN_GATE_DRIFT:'+name)
     for ref in release['operations']:require(record(ref['path'])==ref,'CAMPAIGN_OPERATION_DRIFT')
+    return release
+
+
+def verify_launch_authority():
+    release=verify_release()
+    from .coefficient_prepare import verify_manifest
+    verify_manifest()  # Rehash all 31 days before the supervisor can start optimization.
     return release
 
 

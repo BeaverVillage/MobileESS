@@ -83,7 +83,7 @@ def coordinate_segments(jobs, context, search_numeric, feedback, recourse_numeri
         result = feedback(current, m1)
         require(identities(current) == before_sha, 'A1_MUTATED_INPUT')
         old = {r['job_uid']: r for r in before}
-        from .feedback import candidates
+        from dayahead.v40h.feedback import candidates
         for row in result['jobs']:
             previous = old[row['job_uid']]
             allowed = candidates(previous, context.capacity)

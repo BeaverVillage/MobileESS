@@ -24,7 +24,7 @@ def now(): return datetime.now(timezone.utc).isoformat()
 def science():
     paths = list((ROOT / 'dayahead/v41').glob('*.py'))
     paths += [ROOT / p for p in ('dayahead/v40g/optimizer.py','dayahead/v40g/domain.py',
-        'dayahead/v40g_segments/canonical.py','dayahead/v40h/feedback.py','dayahead/v40a/feedback.py',
+        'dayahead/v40g_segments/canonical.py','dayahead/v40g_segments/b3.py','dayahead/v40h/feedback.py','dayahead/v40a/feedback.py',
         'dayahead/v40h/pre_day_complete.py')]
     paths += [p for p in (ROOT/'dayahead/v41r1').glob('migration*.py')]
     return manifest(paths, ROOT)
@@ -130,7 +130,8 @@ def dayahead(day, policy):
     from .electrical import load
     snapshot_path, snapshot_seal = create(day)
     context = load(day); bind(context, snapshot_path, snapshot_seal['snapshot']['sha256'])
-    from .persistence import pre_solve, optimizer_rows
+    from .persistence import optimizer_rows
+    from dayahead.v41r1.migration_persistence import pre_solve
     persistence = pre_solve(day, snapshot_path, context.capacity)
     source = science(); started = now()
     write_json(output / 'DAYAHEAD_STARTED.json', dict(day=day, policy=policy, started_at=started,

@@ -17,12 +17,14 @@ from .scalars import policy_inputs
 def build(day, snapshot_path, capacity):
     snapshot = read(snapshot_path)
     values = policy_inputs(snapshot, 'B0', 'REFERENCE').payload()
-    folder = RUNTIME / 'inputs' / day / 'common'
+    folder = RUNTIME / 'inputs' / day / 'common_q90_v3'
     if (folder / 'COMMON_INPUT_RECEIPT.json').exists():
         seal = read(folder / 'COMMON_INPUT_RECEIPT.json')
         require(seal['status'] == 'PASS' and seal['generator'] == record(__file__), 'COMMON_GENERATOR_OR_STATUS_DRIFT')
         require(seal['snapshot'] == record(snapshot_path), 'COMMON_SNAPSHOT_DRIFT')
         require(seal.get('migration_contract_source')==record(Path(__file__).parents[1]/'v41r1/migration.py'),'COMMON_MIGRATION_CONTRACT_SOURCE_DRIFT')
+        require(seal.get('baseline_source')==record(Path(__file__).parents[1]/'v41r1/migration_baseline.py'),'COMMON_BASELINE_SOURCE_DRIFT')
+        require(seal.get('admission_source')==record(Path(__file__).parents[1]/'v41r1/migration_admission.py'),'COMMON_ADMISSION_SOURCE_DRIFT')
         for entry in seal['files'].values():
             require(entry == record(entry['path']), 'COMMON_INPUT_DRIFT')
         return read(folder / 'COMMON_B0_REFERENCE_JOBS.json'), seal
@@ -59,6 +61,14 @@ def build(day, snapshot_path, capacity):
     # durations. No old runtime prediction/RSP start is forwarded to A0 or A1.
     earliest, _ = schedule(scheduling, 'V41_Q90_COMMON_SERVICE')
     earliest = earliest.set_index('job_id')
+    from dayahead.v41r1.migration_baseline import materialize
+    jobs, baseline = materialize(jobs, scheduling, capacity)
+    from dayahead.v41r1.migration import attach
+    causal=pd.read_parquet(sp,columns=['id','state_at_issue','known_running_start'])
+    elapsed={str(r.id):(issue_time(day)-pd.Timestamp(r.known_running_start)).total_seconds()
+        for r in causal[causal.state_at_issue=='RUNNING'].itertuples()}
+    jobs=attach(jobs,elapsed)
+    atomic_json(folder / 'Q90_BASELINE_MATERIALIZATION.json', baseline)
     failures = []
     for old, job in zip(before, jobs):
         uid = job['job_uid']; row = ledger.loc[uid]
@@ -69,18 +79,14 @@ def build(day, snapshot_path, capacity):
         job['post_H_site'] = job['AIDC_site'] if job['end_slot'] > 120 else None
         job['terminal_class'] = 'IN_DAY_COMPLETE' if job['end_slot'] <= 120 else 'CROSS_BOUNDARY' if job['start_slot'] < 120 else 'POST_H_ONLY'
         job['common_terminal_obligation'] = {'must_complete_by_H': job['end_slot'] <= 120, 'postH_profile': tail(job)}
-        for field in ('job_uid', 'start_slot', 'AIDC_site', 'Rack_label', 'migration_selected', 'state_at_issue', 'qos', 'requested_GPU'):
+        for field in ('job_uid', 'AIDC_site', 'migration_selected', 'state_at_issue', 'qos', 'requested_GPU'):
             require(job.get(field) == old.get(field), 'B0_REFERENCE_GEOMETRY_CHANGED:' + field)
         from dayahead.v40a.feedback import authorized_options
         if (job['AIDC_site'], job['start_slot']) not in authorized_options(job, capacity):
             failures.append({'job_uid': uid, 'reason': 'B0_OUTSIDE_COMMON_AUTHORIZED_DOMAIN'})
-        if max(24, job['start_slot']) < min(120, job['end_slot']) and job['AIDC_site'] not in capacity.aidc_ids:
+        from dayahead.v41r1.migration_admission import unadmitted
+        if max(24, job['start_slot']) < min(120, job['end_slot']) and job['AIDC_site'] not in capacity.aidc_ids and not unadmitted(job):
             failures.append({'job_uid': uid, 'reason': 'UNASSIGNED_OPERATING_DAY_SERVICE'})
-    from dayahead.v41r1.migration import attach
-    causal=pd.read_parquet(sp,columns=['id','state_at_issue','known_running_start'])
-    elapsed={str(r.id):(issue_time(day)-pd.Timestamp(r.known_running_start)).total_seconds()
-        for r in causal[causal.state_at_issue=='RUNNING'].itertuples()}
-    jobs=attach(jobs,elapsed)
     atomic_json(folder / 'COMMON_B0_REFERENCE_JOBS.json', jobs)
     rows = [{k: job[k] for k in ('job_uid', 'requested_GPU', 'state_at_issue', 'qos', 'safe_duration_seconds',
              'safe_duration_slots', 'duration_authority', 'common_terminal_obligation',
@@ -98,7 +104,10 @@ def build(day, snapshot_path, capacity):
     seal = dict(day=day, status='FAIL' if failures else 'PASS', failures=failures, snapshot=record(snapshot_path),
         COMMON_DA_DURATION_SHA=digest(rows), job_count=len(jobs), policy_dependent_duration=False,
         generator=record(__file__),migration_contract_source=record(Path(__file__).parents[1]/'v41r1/migration.py'),
-        files={name: record(folder / name) for name in ('COMMON_B0_REFERENCE_JOBS.json', 'COMMON_DA_SERVICE_AUTHORITY.json')})
+        baseline_source=record(Path(__file__).parents[1]/'v41r1/migration_baseline.py'),
+        admission_source=record(Path(__file__).parents[1]/'v41r1/migration_admission.py'),
+        baseline_contract=baseline['contract'],
+        files={name: record(folder / name) for name in ('COMMON_B0_REFERENCE_JOBS.json', 'COMMON_DA_SERVICE_AUTHORITY.json','Q90_BASELINE_MATERIALIZATION.json')})
     atomic_json(folder / 'COMMON_INPUT_RECEIPT.json', seal)
     require(not failures, 'V41_COMMON_REFERENCE_PREFLIGHT_FAILED')
     return jobs, seal

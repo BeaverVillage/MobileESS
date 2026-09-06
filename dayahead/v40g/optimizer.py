@@ -1,4 +1,4 @@
-"""Four strict objective passes on ONE joint temporal/spatial/migration model."""
+"""Lexicographic objectives on one joint model, with registered per-pass gaps."""
 from collections import defaultdict, Counter
 from copy import deepcopy
 from pathlib import Path
@@ -31,8 +31,10 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
         verify_gate()
     wan=getattr(context,'wan',None); elapsed=getattr(context,'elapsed',{})
     def occupancy(rows):
+        from dayahead.v41r1.migration_admission import unadmitted
         result=np.zeros((T,len(sites)),dtype=int)
         for row in rows:
+            if unadmitted(row):continue
             for s,a,b in segments(row):
                 lo,hi=max(BEGIN,a),min(BEGIN+T,b)
                 if lo<hi: result[lo-BEGIN:hi-BEGIN,sites.index(s)]+=row['requested_GPU']
@@ -72,6 +74,8 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
             e={'stage':len(stages),'objective':m.cbGet(GRB.Callback.MIPSOL_OBJ),'bound':m.cbGet(GRB.Callback.MIPSOL_OBJBND),'runtime':m.cbGet(GRB.Callback.RUNTIME)}
             events.append(e); print('V40G incumbent '+str(e),flush=True)
     def optimize(label):
+        from dayahead.v41r1.migration_solver_policy import apply_gap, certificate
+        apply_gap(model, label, revision=revision and hasattr(context, 'v41_ml_snapshot'))
         tier=0
         while True:
             limit=work_limits[min(tier,len(work_limits)-1)]*3**max(0,tier-len(work_limits)+1)
@@ -81,6 +85,7 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
                    'incumbent':float(model.ObjVal) if model.SolCount else None,'bound':float(model.ObjBound),
                    'work':float(model.Work),'runtime_seconds':float(model.Runtime),'work_limit':limit,
                    'memory':measure(model,output/'SOLVER.log')}
+            entry.update(certificate(model))
             stages.append(entry); write_json(output/'SOLVER_STAGES.json',{'stages':stages,'events':events})
             print('V40G '+str(entry),flush=True)
             if model.Status==GRB.OPTIMAL:
@@ -266,6 +271,9 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
         assert sum(bool(r.get('migration_selected')) for r in selected)==secondary
         value={'status':'PASS','jobs':selected,'PCC':pcc,'GPU':gpu,'grid':grid,'reference_grid':before,
                'primary_optimum':primary,'primary_bound':bound,'primary_value_lock':primary,
+               'primary_accepted_value':primary,'primary_optimality_certificate':pstage['optimality_certificate'],
+               'primary_achieved_relative_gap':pstage['achieved_relative_gap'],
+               'primary_optimum_field_semantics':'Accepted incumbent; exact optimum only when certificate says EXACT_WITHIN_SOLVER_TOLERANCES',
                'primary_degradation_allowance':0.,'solver_feasibility_tolerance':1e-9,
                'secondary_migration_optimum':secondary,'tertiary_reference_deviation_optimum':tertiary,
                'quaternary_tie_optimum':float(tie.getValue()),'solver_stages':stages,'terminal_audit':terminal,
@@ -282,6 +290,9 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
             value.update(ML_snapshot_sha256=context.v41_ml_snapshot_sha256, reserve_interface_version='V41',
                 objective_hierarchy=list(OBJECTIVE_HIERARCHY), reserve_diagnostics=reserve_report,
                 reserve_optimum=reserve_optimum, reserve_stage=reserve_stage,
+                reserve_accepted_value=reserve_optimum,
+                reserve_optimality_certificate=reserve_stage['optimality_certificate'],
+                lexicographic_semantics='P1/P2 accepted incumbents frozen; P3-P5 exact under those locks',
                 OBJECTIVE_VECTOR=[grid['rho_max'], reserve_report['mean_xi_GPUh'], secondary,
                                   tertiary, float(tie.getValue())])
         write_json(output/'ACCEPTED_AIDC.json',value); return value

@@ -26,6 +26,40 @@ do {
         $lines.Add(('상태  {0}' -f $progress.status))
         $lines.Add('')
         $active=@($units | Where-Object {$_.status -match 'RUNNING'} | Sort-Object day,policy)
+        $prepFile=Join-Path $runtime 'BASELINE_PREPARATION_PROGRESS.json'
+        if($progress.status -like 'PAUSED*' -and (Test-Path -LiteralPath $prepFile)){
+            $prep=Read-LiveJson $prepFile
+            $prepRows=@($prep.days.PSObject.Properties)
+            $ready=@($prepRows | Where-Object {$_.Value.status -eq 'PASS'}).Count
+            $lines.Add(('재개 준비: Q90 입력 검증 {0}/31일 ({1:N1}%)' -f $ready,(100.0*$ready/31)))
+            $active=@($prepRows | Where-Object {$_.Value.status -eq 'RUNNING'} | ForEach-Object {
+                [pscustomobject]@{day=$_.Name;policy='공통';phase='CAUSAL_ML';worker_pid=$_.Value.pid}
+            })
+            $electricalFile=Join-Path $runtime 'COEFFICIENT_PREPARATION_PROGRESS.json'
+            if(Test-Path -LiteralPath $electricalFile){
+                $electrical=Read-LiveJson $electricalFile
+                $electricalRows=@($electrical.days.PSObject.Properties)
+                $electricReady=@($electricalRows | Where-Object {$_.Value.status -eq 'PASS'}).Count
+                $electricFail=@($electricalRows | Where-Object {$_.Value.status -eq 'FAIL'}).Count
+                $lines.Add(('전기계수 검증: {0}/31일 ({1:N1}%) · FAIL {2}일' -f $electricReady,(100.0*$electricReady/31),$electricFail))
+                if($prep.status -eq 'PASS'){
+                    $active=@($electricalRows | Where-Object {$_.Value.status -eq 'RUNNING'} | ForEach-Object {
+                        [pscustomobject]@{day=$_.Name;policy='공통';phase='ELECTRICAL_GENERATION';worker_pid=$_.Value.pid}
+                    })
+                }
+                $stressFile=Join-Path $out 'FOUR_WORKER_STRESS_CURRENT.json'
+                if($electrical.status -eq 'PASS' -and (Test-Path -LiteralPath $stressFile)){
+                    $stress=Read-LiveJson $stressFile
+                    $heartbeatFile=Join-Path $stress.folder 'heartbeat.json'
+                    if((Test-Path -LiteralPath $heartbeatFile) -and -not (Test-Path -LiteralPath (Join-Path $stress.folder 'RESULT.json'))){
+                        $memory=Read-LiveJson $heartbeatFile
+                        $active=@($memory.workers | ForEach-Object {
+                            [pscustomobject]@{day='2025-05-01';policy='검사';phase='MEMORY_CHECK';worker_pid=$_.pid}
+                        })
+                    }
+                }
+            }
+        }
         $lines.Add('워커   날짜       정책   현재 단계          일 진행률   세부 진행')
         $lines.Add('--------------------------------------------------------------------------------------------')
         for($i=0;$i -lt 4;$i++) {
@@ -33,7 +67,9 @@ do {
             $u=$active[$i];$stage=[string]$u.phase;$detail='진행 중'
             $dayUnits=@($units | Where-Object {$_.day -eq $u.day})
             $dayPct=100.0*(@($dayUnits | Where-Object {$_.status -eq 'COMPLETE'}).Count)/4
-            if($stage -eq 'ELECTRICAL_GENERATION'){$stage='계통 입력 생성';$detail='OpenDSS 계수 생성 / 검증'}
+            if($stage -eq 'CAUSAL_ML'){$stage='Q90 입력 준비';$detail='인과적 학습 / 예측 저장 / 재읽기 검증'}
+            elseif($stage -eq 'MEMORY_CHECK'){$stage='동시 메모리 검사';$detail='전체 크기 모델 / 4개 워커 동시 실행'}
+            elseif($stage -eq 'ELECTRICAL_GENERATION'){$stage='계통 입력 생성';$detail='OpenDSS 계수 생성 / 검증'}
             elseif($stage -eq 'actual'){$stage='Actual';$detail='고정 결정 재생 / OpenDSS 평가'}
             elseif($stage -eq 'dayahead'){
                 $stage='Day-Ahead'

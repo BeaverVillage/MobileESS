@@ -102,10 +102,11 @@ def parts(row, actual=False):
 
 
 def occupancy(jobs, sites, *, actual=False):
+    from dayahead.v41r1.migration_admission import physical_parts
     sites = tuple(sites); index = {s: i for i, s in enumerate(sites)}
     occ = np.zeros((H - BEGIN, len(sites)), dtype=int); contributions = []; seen = set()
     for row in jobs:
-        for seg in parts(row, actual):
+        for seg in physical_parts(row, parts(row, actual)):
             start, end = seg['start'], seg['end']
             for slot in range(max(BEGIN, math.ceil(start)), min(H, math.ceil(end))):
                 require(seg['site'] in index, 'UNASSIGNED_OPERATING_COMPUTE')
@@ -143,6 +144,15 @@ def deviation(before, after):
 
 
 def terminal(row, *, actual=False, horizon=H):
+    from dayahead.v41r1.migration_admission import overlapping_backlog
+    if not actual and overlapping_backlog(row):
+        remaining=row['safe_duration_slots']
+        return dict(job_uid=row['job_uid'],H=horizon,site_at_H='UNASSIGNED',state_at_H='PENDING',
+            RUNNING_at_H=False,PENDING_at_H=True,remaining_compute_slots=remaining,
+            remaining_compute_GPU_slots=remaining*row['requested_GPU'],post_H_segments=[],
+            post_H_site='UNASSIGNED',migration_state='NONE',WAN_bytes_sent=0,
+            WAN_bytes_remaining=0,WAN_bytes_arrived=0,WAN_bytes_in_pipeline=0,
+            status='FROZEN_UNADMITTED_BACKLOG',common_terminal_obligation=row.get('common_terminal_obligation'))
     segs = parts(row, actual); events = row['migration_events']
     tail = [{**s, 'start': max(horizon, s['start'])} for s in segs if s['end'] > horizon]
     remaining = sum(s['end'] - s['start'] for s in tail)

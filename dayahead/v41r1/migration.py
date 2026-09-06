@@ -28,7 +28,8 @@ def pending_in_day(row):
 
 
 def target(row):
-    return active(row) and (state_at_d00(row)=='RUNNING' or pending_in_day(row))
+    return (active(row) and row['r1_reference_site']!='UNASSIGNED'
+        and (state_at_d00(row)=='RUNNING' or pending_in_day(row)))
 
 
 def attach(jobs,elapsed=None):

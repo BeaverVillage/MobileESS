@@ -14,7 +14,7 @@ from dayahead.v41.preflight import ROOT,OUT,record
 from dayahead.v41.data import RUNTIME
 from dayahead.v41.reserve import require
 from dayahead.v41 import campaign as native
-from .campaign_prepare import verify_release
+from .campaign_prepare import verify_release,verify_launch_authority
 
 original_verify=native.verify_receipt
 
@@ -57,7 +57,7 @@ class Supervisor(native.Supervisor):
 
     def phase(self,row,phase):
         path=RUNTIME/row['day']/row['policy']/phase/(phase.upper()+'_RECEIPT.json')
-        if row['day']=='2025-05-01' and row['policy']=='B0' and path.exists():
+        if row['policy']=='B0' and path.exists():
             verify_phase(path,self.frozen)
             with self.lock:
                 row[phase+'_receipt']=record(path);row['retained_previously_complete']=True;self.save()
@@ -92,7 +92,7 @@ def worker(token,git):
         started_at=time.time(),command_line=psutil.Process().cmdline(),git_executable=git)
     write_json(RUNTIME/'DETACHED_FULL_MAY_PROOF.json',proof)
     require(not proof['in_Windows_job'],'CAMPAIGN_NOT_DETACHED_FROM_CODEX')
-    verify_release();adopt_completed_B0()
+    verify_launch_authority();adopt_completed_B0()
     native.frozen_identity=verify_release;native.verify_receipt=verify_phase;native.Supervisor=Supervisor
     native.LOGS=ROOT/'logs/v41r1_migration/full_may'
     sys.argv=[sys.argv[0],'--mode','both'];native.main()
@@ -101,7 +101,7 @@ def worker(token,git):
 def launch():
     from dayahead.tools.v41_detached_launcher import git_executable
     with native.campaign_lock():
-        release=verify_release()
+        release=verify_launch_authority()
         require(not (RUNTIME/'STOP_REQUESTED.json').exists(),'PREVIOUS_EXPLICIT_STOP_REQUEST')
         for p in psutil.process_iter(['cmdline']):
             cmd=p.info['cmdline'] or []

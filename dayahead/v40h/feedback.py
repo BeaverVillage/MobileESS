@@ -33,6 +33,7 @@ def candidates(row, capacity):
     return result
 
 def solve_feedback(a0, m1, context, *, tolerance=1e-6, work_limit=60.0):
+    from dayahead.v41r1.migration_admission import physical_parts
     started=time.perf_counter(); frozen_route=route_sha(m1.slots); frozen_m1=digest(m1)
     p0,_=pcc_from_jobs(a0,context)
     fixed=controls_from_trajectory(context.coefficients,p0,m1.slots)
@@ -52,7 +53,7 @@ def solve_feedback(a0, m1, context, *, tolerance=1e-6, work_limit=60.0):
             for k,candidate in enumerate(options[i]):
                 v=model.addVar(vtype=GRB.BINARY,name=f'job[{i},{k}]');variables[i,k]=v;vs.append(v)
                 v.Start=float(candidate['compute_segments']==row['compute_segments'])
-                for part in candidate['compute_segments']:
+                for part in physical_parts(candidate,candidate['compute_segments']):
                     for t in range(max(BEGIN,int(part['start'])),min(H,int(part['end']))):
                         load[t-BEGIN,part['site']]+=int(row['requested_GPU'])*v
                 deviation+=occupancy_deviation(row,candidate)*v

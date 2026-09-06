@@ -29,7 +29,7 @@ def unchanged_nodes(source,allowed):
 
 def validate(receipt,current_source):
     from dayahead.v41r1.migration_retention import PRODUCER,validate as retain_complete_B0
-    if receipt.get('scientific_commit')==PRODUCER:
+    if receipt.get('scientific_commit')==PRODUCER or (OUT/'Q90_BASELINE_RETAINED_B0_GATE.json').exists():
         return retain_complete_B0(receipt,current_source)
     pre=read(OUT/'V41_B0_DAYAHEAD_RETENTION_PRECHECK.json')
     require(pre['status']=='PASS' and pre['captured_before_Actual_code_change'],'MISSING_PRE_CHANGE_DAYAHEAD_RETENTION_PROOF')

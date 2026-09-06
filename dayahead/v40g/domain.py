@@ -27,6 +27,10 @@ class Option:
     def migrated(self): return self.checkpoint >= 0
 
     def segments(self, row):
+        from dayahead.v41r1.migration_admission import unadmitted
+        if unadmitted(row):
+            if self.site!='UNASSIGNED' or self.migrated:raise ValueError('FROZEN_ADMISSION_CHANGED')
+            return ()
         if not self.migrated: return ((self.site, self.start, self.end),)
         return ((self.initial_site or row['AIDC_site'], self.start, self.checkpoint),
                 (self.site, self.transfer_end + 1, self.end))
