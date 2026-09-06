@@ -1,0 +1,39 @@
+{
+  "Python_audit": "V40J read-only, V40K-only writes; native Arrow reads explicitly use audited byte streams or gated row groups",
+  "inherited_V40J_counters_preserved": {
+    "MAY_ACTUAL_OUTCOME_READS": 0,
+    "MAY_CALIBRATION_READS": 0,
+    "MAY_METADATA_ONLY_READS": {
+      "exact_total": null,
+      "observed_lower_bound": 1,
+      "status": "NONZERO_NOT_FULLY_COUNTED",
+      "unit": "metadata operations; central directory/path inventories and April footer boundary observation"
+    },
+    "MAY_MODEL_BUILDING_READS": 0,
+    "MAY_MODEL_SELECTION_READS": 0,
+    "MAY_PATH_OR_CODE_DISCOVERY_READS": {
+      "exact_total": null,
+      "observed_lower_bound": 1,
+      "status": "NONZERO_NOT_FULLY_COUNTED",
+      "unit": "discovery operations; includes initial rg content search and path inventories, not a falsely exact file count"
+    },
+    "MAY_RUNTIME_OR_STATUS_ROW_READS": 0,
+    "MAY_TRAINING_READS": 0
+  },
+  "initial_nondata_denials": "SciPy temporary-file probes outside V40K were denied during forensic import; temp directory was moved into V40K before successful audit. No May payload exposed.",
+  "new_April_footer_metadata_operations": 1,
+  "new_May_path_code_payload_search": false,
+  "new_May_scientific_counters": {
+    "MAY_ACTUAL_OUTCOME_READS": 0,
+    "MAY_CALIBRATION_READS": 0,
+    "MAY_HYPERPARAMETER_SELECTION_READS": 0,
+    "MAY_MODEL_BUILDING_READS": 0,
+    "MAY_MODEL_SELECTION_READS": 0,
+    "MAY_RUNTIME_OR_STATUS_ROW_READS": 0,
+    "MAY_TRAINING_READS": 0
+  },
+  "raw_access": "single allowlisted April member, whole group submit/start/end footer gating before column decoding; May members never opened",
+  "session_total_read_zero_claim": false,
+  "shadow": "both winners frozen, no retune/refit after opening",
+  "temporal_guard": "Only decode whole Parquet row groups whose submit min/max are within the authorized block and whose submit/start/end maxima are all before May cutoff. Exclude boundary-crossing and post-cutoff-containing groups before value-array decoding. Then apply row timestamp and end-known filters."
+}

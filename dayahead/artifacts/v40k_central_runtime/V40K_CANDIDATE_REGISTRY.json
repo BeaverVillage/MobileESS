@@ -1,0 +1,98 @@
+{
+  "LightGBM": {
+    "deterministic": true,
+    "force_col_wise": true,
+    "learning_rate": 0.05,
+    "max_bin": 255,
+    "min_child_samples": 100,
+    "n_estimators": 400,
+    "n_jobs": 1,
+    "num_leaves": 31,
+    "random_state": 4011,
+    "verbosity": -1
+  },
+  "baseline": "Existing pinned 3.2.0 XGBoost environment; old state adapter byte-reproduction plus final causal double fit",
+  "candidates": [
+    {
+      "family": "Existing pinned MoE-XGBoost absolute-error recipe, end-known 120-day training; unchanged q baseline diagnostic",
+      "id": "K0"
+    },
+    {
+      "id": "K1_L1_RESIDUAL",
+      "objective": "L1 on (actual - rolling OOF C0)/3600; output max(0,C0+3600*correction)"
+    },
+    {
+      "id": "K1_HUBER_RESIDUAL",
+      "objective": "Huber alpha=.9 on (actual - rolling OOF C0)/3600; exploratory central candidate evaluated by Q50 gates"
+    },
+    {
+      "id": "K1_Q50_RESIDUAL",
+      "objective": "quantile .5 on (actual - rolling OOF C0)/3600"
+    },
+    {
+      "id": "K2_NORMALIZED_Q50",
+      "objective": "quantile .5 on log((runtime+1)/(requested+1)); inverse max(0,exp(z)*(requested+1)-1); no smearing, no walltime cap"
+    },
+    {
+      "components": "log1p runtime regressions on two historical groups; empirical log residual CDFs on internal last-7-day chronological block",
+      "early_label": "FAILED OR duration<=300 seconds; historical label only",
+      "fit": "gate and component training end-known before internal CDF block; residual labels end-known before model fit date; minimum 30 per component or candidate unavailable",
+      "gate": "binary LightGBM on causal X; no hard branch",
+      "id": "K3_SOFT_CDF_MEDIAN",
+      "quantile": "inf t>=0 such that p*F_short(t)+(1-p)*F_service(t)>=.5; 64 log-domain bisections; no component-mean mixing"
+    },
+    {
+      "binary_trees": 160,
+      "family": "one LightGBM binary model on expanded at-risk interval records",
+      "id": "K4_INTERVAL_HAZARD",
+      "interval_uppers_seconds": [
+        60.0,
+        300.0,
+        900.0,
+        3600.0,
+        14400.0,
+        43200.0,
+        86400.0,
+        172800.0,
+        604800.0
+      ],
+      "quantile": "survival product of (1-h); uniform interpolation within finite interval, exponential beyond final edge",
+      "tail": "exponential beyond last edge with mean observed training excess, or last-edge scale if no tail observations; quantile is not clipped to a walltime cap"
+    },
+    {
+      "base_ids": [
+        "K0",
+        "K1_L1_RESIDUAL",
+        "K1_HUBER_RESIDUAL",
+        "K1_Q50_RESIDUAL",
+        "K2_NORMALIZED_Q50",
+        "K3_SOFT_CDF_MEDIAN"
+      ],
+      "id": "K5_STACKING",
+      "no_available_component": "exclude unavailable components by predeclared availability, not performance",
+      "weights": "nonnegative sum1, sparse linear-program pinball objective on I1/I2 OOF predictions only; no hand weights"
+    }
+  ],
+  "created_at": "2026-09-06T10:17:40.717915+00:00",
+  "estimated_compute": "single-thread deterministic fits, double refits; approximately 10-25 minutes on this host, no optimizer campaigns",
+  "feature_contract": [
+    "requested_seconds",
+    "num_nodes_req",
+    "num_cores_req",
+    "num_gpus_req",
+    "requested_memory_mib",
+    "partition",
+    "qos",
+    "user",
+    "account",
+    "submit_hour",
+    "submit_dow",
+    "submit_week",
+    "hardware",
+    "standby"
+  ],
+  "invalid_requested_walltime": "exclude from common scientific cohort and record; no physical cap invented",
+  "long_history": "not added",
+  "source_forensic_SHA": "7f92801c39ee2ce5ab8a618fb1eddb1577799b5186e2ce2c409e2538549959d0",
+  "training_order": "preregister commit, fit locked models/inner weights, commit model lock, open point holdout once"
+}

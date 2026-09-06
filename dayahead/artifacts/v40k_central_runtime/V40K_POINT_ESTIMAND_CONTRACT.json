@@ -1,0 +1,35 @@
+{
+  "OOF_C0_source": "existing V40J F1/F2/F3 end-known models and out-of-fit predictions; latest causal fit per query, label known before each correction fit; never in-sample C0 predictions",
+  "catastrophic_rule": "No >=100-row critical subgroup, terminal-status group or walltime bucket has MAE > 1.25 times K0 MAE; required retrospective subgroup N>=100 otherwise insufficient",
+  "critical_subgroups": [
+    "H100",
+    "standby",
+    "H100-standby",
+    "COMPLETED H100-standby"
+  ],
+  "estimand": "CONDITIONAL_MEDIAN_RUNTIME_Q50",
+  "mean_signed_error": "diagnostic only, never a gate",
+  "no_winner": "V40K_POINT_MODEL_INSUFFICIENT; no point freeze, safe fit or shadow",
+  "pinball_MAE_identity": "Q50 pinball=0.5*MAE; report both, do not pretend they are independent evidence",
+  "primary": [
+    "Q50 pinball",
+    "MAE",
+    "abs(P(actual>Q50)-0.5)"
+  ],
+  "requirements": [
+    "strictly improve pooled pinball",
+    "strictly improve pooled MAE",
+    "strictly improve pooled median calibration error",
+    "strictly improve COMPLETED H100-standby median calibration error",
+    "no catastrophic subgroup MAE regression",
+    "independent deterministic refit"
+  ],
+  "support_threshold": 100,
+  "wall_buckets": [
+    3600,
+    21600,
+    86400,
+    259200
+  ],
+  "winner": "minimum pooled pinball among eligible; within 0.1% of minimum use simpler registry order"
+}

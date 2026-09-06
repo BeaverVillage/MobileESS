@@ -1,0 +1,51 @@
+{
+  "canonical_cutoff": "2025-05-01T00:00:00+00:00",
+  "cohort_limitation": "Whole-group firewall is deliberately conservative and may omit otherwise eligible jobs and dates. Report omitted groups/counts and no full-period generalization. Missing final-shadow dates forces HOLD; never relax this policy after outcomes.",
+  "development_label_deadline": "2025-03-08",
+  "final_point_fit_before": "2025-04-01",
+  "final_shadow": [
+    "2025-04-24",
+    "2025-05-01"
+  ],
+  "fixed_AEST_equivalent": "2025-05-01T10:00:00+10:00",
+  "inner_folds": [
+    {
+      "C0_state": "C0_F3",
+      "fit_before": "2025-02-22",
+      "id": "I1",
+      "validation": [
+        "2025-02-22",
+        "2025-03-01"
+      ]
+    },
+    {
+      "C0_state": "C0_F3",
+      "fit_before": "2025-03-01",
+      "id": "I2",
+      "validation": [
+        "2025-03-01",
+        "2025-03-08"
+      ]
+    }
+  ],
+  "intervals": "[inclusive start, exclusive stop)",
+  "labels_known_by": "Each block stop; exclude later completions from complete-case metrics and all later training/support.",
+  "lookback_days": 120,
+  "new_holdout_reason": "V40J March08-21 entered its baseline reproduction input; use previously footer-only April.",
+  "point_model_refit_after_selection": false,
+  "point_selection": [
+    "2025-04-01",
+    "2025-04-08"
+  ],
+  "raw_decoder_policy": "Only decode whole Parquet row groups whose submit min/max are within the authorized block and whose submit/start/end maxima are all before May cutoff. Exclude boundary-crossing and post-cutoff-containing groups before value-array decoding. Then apply row timestamp and end-known filters.",
+  "safe_fit": [
+    "2025-04-08",
+    "2025-04-15"
+  ],
+  "safe_selection": [
+    "2025-04-15",
+    "2025-04-24"
+  ],
+  "shadow_requirement": "Both nonnull point and safe freezes required; all seven UTC submit dates and N>=100 overall/critical group required for readiness; no retune/refit/reselection.",
+  "timezone": "UTC"
+}

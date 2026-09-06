@@ -1,0 +1,61 @@
+{
+  "fallback": "S0/S1/S2 first support-sufficient group then pooled; S3 reuse causal exact9/other8 support classes, skip leaf when sparse/mismatched, conservative parent max; OOD at least requested walltime, invalid request abstains",
+  "gate": "overall >=.90 and support-sufficient H100 and H100-standby >=.90; at least 100 pooled rows, deterministic fallback, chronology PASS",
+  "groups": {
+    "S0": [
+      []
+    ],
+    "S1": [
+      [
+        "hardware",
+        "wall_bucket"
+      ],
+      [
+        "hardware"
+      ],
+      []
+    ],
+    "S2": [
+      [
+        "hardware",
+        "standby",
+        "wall_bucket"
+      ],
+      [
+        "hardware",
+        "wall_bucket"
+      ],
+      [
+        "hardware"
+      ],
+      []
+    ],
+    "S3": [
+      [
+        "hardware",
+        "standby",
+        "wall_bucket"
+      ],
+      [
+        "hardware",
+        "wall_bucket"
+      ],
+      [
+        "hardware"
+      ],
+      []
+    ]
+  },
+  "ids": [
+    "S0",
+    "S1",
+    "S2",
+    "S3"
+  ],
+  "minimum_support": 100,
+  "optimization_integration": "NONE; workload duration metrics only",
+  "q": "nonnegative one-sided residual order ceil((n+1)*.9), capped n; native point+q, no ceil at coverage gate",
+  "shadow": "same point gates versus K0 and safe coverage gates; all seven dates, no retuning",
+  "target_coverage": 0.9,
+  "winner": "minimum native-bound overreserved GPU-hours among eligible, then registry order"
+}
