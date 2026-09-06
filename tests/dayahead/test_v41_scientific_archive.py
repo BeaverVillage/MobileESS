@@ -175,3 +175,35 @@ def test_stage_snapshots_contain_inputs_allowed_frozen_and_decision_hashes(tmp_p
         saved=read(tmp_path/'optimization/stages'/f'{name}.json')
         assert saved['ML_snapshot_hash']=='same' and saved['AIDC_identity']==before['AIDC_identity']
         assert saved['frozen']==['ML','RUNNING'] and len(saved['MESS_commands'])==384
+
+
+def test_atomic_republication_closes_source_before_replace(tmp_path,monkeypatch):
+    from dayahead.v41.scientific_archive import republish_atomic
+    from dayahead.paper_analysis import storage
+    path=tmp_path/'durable.bin'; original=bytes(range(256))*4096; path.write_bytes(original)
+    replace=storage.os.replace; opened=[]; original_open=Path.open
+    def tracked_open(self,*args,**kwargs):
+        stream=original_open(self,*args,**kwargs)
+        if self==path: opened.append(stream)
+        return stream
+    def checked_replace(source,destination):
+        assert all(s.closed for s in opened)
+        return replace(source,destination)
+    monkeypatch.setattr(Path,'open',tracked_open); monkeypatch.setattr(storage.os,'replace',checked_replace)
+    republish_atomic(path)
+    assert path.read_bytes()==original and not list(tmp_path.glob('*.tmp'))
+
+
+def test_fixed_route_travel_comparison_and_empty_fleet(tmp_path):
+    from dayahead.v41.scientific_archive import travel_comparisons
+    command=dict(mess_id='m1',slot=4,departure_slot=4,route_link_ids='["a", "b"]',
+        route_safe_eta_sec=1200.,connection_ready_slot=7,energy_safe_kwh=2.)
+    move=dict(mess_id='m1',departure_slot=4,route_link_ids=['a','b'],actual_eta_seconds=900.,
+        actual_arrival_slot=5.,actual_connection_ready_slot=6,actual_travel_energy_kWh=1.5)
+    frame=travel_comparisons(tmp_path/'travel',pd.DataFrame([command]),[move])
+    assert frame.travel_seconds_delta.iloc[0]==-300. and frame.mobility_energy_kWh_delta.iloc[0]==-.5
+    assert pd.read_parquet(tmp_path/'travel/MESS_TRAVEL_DELTAS.parquet').equals(frame)
+    with pytest.raises(ValueError,match='ROUTE_CHANGED'):
+        travel_comparisons(tmp_path/'bad',pd.DataFrame([command]),[{**move,'route_link_ids':['b','a']}])
+    empty=travel_comparisons(tmp_path/'empty',pd.DataFrame([{**command,'departure_slot':None}]),[])
+    assert len(empty)==0 and empty.travel_seconds_actual.sum()==0

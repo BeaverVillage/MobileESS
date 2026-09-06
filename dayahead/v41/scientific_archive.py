@@ -51,6 +51,15 @@ def copy_atomic(source, destination):
     return record(destination)
 
 
+def republish_atomic(path):
+    before = record(path)
+    # Windows cannot replace a destination while our source handle is open.
+    with atomic(path) as target:
+        with path.open('rb') as stream:
+            shutil.copyfileobj(stream, target, 8*1024*1024)
+    require(record(path) == before, 'ATOMIC_REPUBLICATION_BYTES_DRIFT')
+
+
 def scalar_frame(rows):
     return pd.DataFrame([{k: json.dumps(native(v), sort_keys=True, ensure_ascii=False) if isinstance(v, (dict, list, tuple, np.ndarray))
                          else v for k, v in row.items()} for row in rows])
@@ -319,6 +328,7 @@ def seal(output, phase):
                  'authority/ACTUAL_EXOGENOUS_96.parquet','mess/ACTUAL_TRAJECTORIES_96.parquet','mess/REALIZED_TRAVERSALS.json',
                  'H4_ACTUAL_WINDOW_EVALUATION.parquet','comparison/DAYAHEAD_VS_ACTUAL.parquet',
                  'comparison/AIDC_SLOT_DELTAS.parquet','comparison/MESS_SLOT_DELTAS.parquet',
+                 'comparison/MESS_TRAVEL_DELTAS.parquet',
                  'comparison/GRID_SLOT_DELTAS.parquet','ACTUAL_BOUNDARY_RECEIPT.json']
     for name in base: require((output/name).is_file(),'REQUIRED_SCIENTIFIC_FILE_MISSING:'+name)
     sf=pd.read_parquet(output/'aidc/SITE_TRAJECTORIES_96.parquet')
@@ -336,7 +346,7 @@ def seal(output, phase):
     # Publish inherited producer files with a final durable atomic replacement
     # once all producers have closed them; bytes and scientific values unchanged.
     for p in paths:
-        with p.open('rb') as stream, atomic(p) as target: shutil.copyfileobj(stream,target,8*1024*1024)
+        republish_atomic(p)
     entries=[artifact_entry(p,output,phase) for p in paths]
     document(path,dict(schema=SCHEMA,status='PASS',phase=phase,required=base,artifacts=entries,
         complete_temporal_coverage=True,exact_readback=True,scientific_file_count=len(entries)))
@@ -416,6 +426,7 @@ def comparisons(output, da_output):
     mda=pd.read_parquet(da_output/'mess/TRAJECTORIES_96.parquet').rename(columns={'p_kw':'P_EXEC','q_kvar':'Q_EXEC','soc_fraction':'SoC_before'})
     mac=pd.read_parquet(output/'mess/ACTUAL_TRAJECTORIES_96.parquet')
     delta_table(output/'comparison','MESS_SLOT_DELTAS.parquet',mda,mac,['slot','mess_id'],['P_EXEC','Q_EXEC','SoC_before'])
+    travel=travel_comparisons(output/'comparison',mda,read(output/'mess/REALIZED_TRAVERSALS.json')['moves'])
     gda=pd.read_parquet(da_output/'grid/FEEDER_SYSTEM_96.parquet'); gac=pd.read_parquet(output/'grid/FEEDER_SYSTEM_96.parquet')
     delta_table(output/'comparison','GRID_SLOT_DELTAS.parquet',gda,gac,['slot'],
         ['rho_max','Vmin_pu','Vmax_pu','max_line_current_A','feeder_import_P_kW','feeder_import_Q_kvar','loss_P_kW','loss_Q_kvar'])
@@ -441,5 +452,37 @@ def comparisons(output, da_output):
     metric('maximum_line_current',gda.max_line_current_A.max(),gac.max_line_current_A.max(),'A',True)
     metric('feeder_import_energy',gda.feeder_import_P_kW.sum()*.25,gac.feeder_import_P_kW.sum()*.25,'kWh',True)
     metric('MESS_discharge_energy',np.maximum(mda.P_EXEC,0).sum()*.25,np.maximum(mac.P_EXEC,0).sum()*.25,'kWh',True)
+    metric('MESS_travel_time',travel.travel_seconds_dayahead.sum(),travel.travel_seconds_actual.sum(),'seconds',True)
+    metric('MESS_mobility_energy',travel.mobility_energy_kWh_dayahead.sum(),travel.mobility_energy_kWh_actual.sum(),'kWh',True)
     metric('completion_lateness_vs_RW',jda.completion_lateness_vs_frozen_RW_seconds.sum(),jac.completion_lateness_vs_frozen_RW_seconds.sum(),'job_seconds')
     return table(output/'comparison/DAYAHEAD_VS_ACTUAL.parquet',pd.DataFrame(rows))
+
+
+def travel_comparisons(output, commands, moves):
+    """Compare the existing safe route forecast with fixed-route realized travel."""
+    departures=commands[commands.departure_slot.eq(commands.slot)]
+    expected={(r.mess_id,int(r.slot)):r for r in departures.itertuples()}
+    require(len(expected)==len(departures), 'DUPLICATE_TRAVEL_DEPARTURE')
+    require(len(moves)==len(expected) and {(m['mess_id'],int(m['departure_slot'])) for m in moves}==set(expected),
+            'DAYAHEAD_ACTUAL_TRAVEL_AXIS_MISMATCH')
+    columns=['mess_id','departure_slot','frozen_route_SHA','travel_seconds_dayahead','travel_seconds_actual',
+             'travel_seconds_delta','arrival_slot_dayahead','arrival_slot_actual','arrival_slot_delta',
+             'connection_ready_slot_dayahead','connection_ready_slot_actual','connection_ready_slot_delta',
+             'mobility_energy_kWh_dayahead','mobility_energy_kWh_actual','mobility_energy_kWh_delta']
+    rows=[]
+    for move in moves:
+        c=expected[(move['mess_id'],int(move['departure_slot']))]
+        links=json.loads(c.route_link_ids) if isinstance(c.route_link_ids,str) else list(c.route_link_ids)
+        require(links==move['route_link_ids'], 'ACTUAL_ROUTE_CHANGED')
+        row=dict(mess_id=c.mess_id,departure_slot=int(c.slot),frozen_route_SHA=digest(links))
+        for field,da,ac in (
+            ('travel_seconds',c.route_safe_eta_sec,move['actual_eta_seconds']),
+            ('arrival_slot',c.slot+c.route_safe_eta_sec/900,move['actual_arrival_slot']),
+            ('connection_ready_slot',c.connection_ready_slot,move['actual_connection_ready_slot']),
+            ('mobility_energy_kWh',c.energy_safe_kwh,move['actual_travel_energy_kWh'])):
+            require(np.isfinite([da,ac]).all(), 'MISSING_AUTHORITATIVE_TRAVEL_VALUE')
+            row.update({field+'_dayahead':float(da),field+'_actual':float(ac),field+'_delta':float(ac-da)})
+        rows.append(row)
+    frame=pd.DataFrame(rows,columns=columns)
+    table(output/'MESS_TRAVEL_DELTAS.parquet',frame)
+    return frame
