@@ -1,0 +1,86 @@
+{
+  "artifact_id": "V40D_MAY_RAW_RESULTS_ARCHIVE_RECEIPT_V1",
+  "status": "PASS",
+  "period": {
+    "start": "2025-05-01",
+    "end": "2025-05-31",
+    "days": 31,
+    "cases": [
+      "B0",
+      "B1",
+      "B2",
+      "B3"
+    ],
+    "final_pass_cases": 124
+  },
+  "archive": {
+    "filename": "MobileESS_2025_05_31days_all_raw_results.tar.gz",
+    "format": "POSIX PAX TAR with gzip compression",
+    "gzip_level": 3,
+    "bytes": 5330593093,
+    "sha256": "bd18cf61ab6bb2c0ca470de24a42fd8ad608587f6f5f0f7446f122528a7b9e73",
+    "delivery": "User-selected local results directory",
+    "verified_at_utc": "2026-09-06T03:40:46.187992+00:00"
+  },
+  "contents": {
+    "source_files": 166131,
+    "source_bytes": 11365349392,
+    "guide_and_manifest_files": 5,
+    "total_files": 166136,
+    "included": [
+      "Final certificates and complete B0-B3 raw result directories for all 31 May dates",
+      "MESS trajectories, move events, route link IDs, departure and connection slots, P/Q and SoC",
+      "AIDC assignments, migration state, RW/RSP schedules, original and final job timing, B3 feedback deltas",
+      "Planning/Fresh bus-phase, line-phase and system Parquet/NPZ data and residuals",
+      "All saved AC restoration rounds, search candidates, beam caches, solver events and campaign logs",
+      "Referenced D1 inputs, traffic route tables, road graph and service-node mappings",
+      "Historical attempts and recovery evidence retained with final results indexed separately"
+    ]
+  },
+  "validation": {
+    "scope": "Every archive member read back and compared with the collected source manifest",
+    "files_verified": 166136,
+    "missing_files": 0,
+    "file_hash_mismatches": 0,
+    "certificate_bound_source_hashes_checked": 4178,
+    "certificate_bound_source_hash_mismatches": 0,
+    "gzip_crc_verified": true
+  },
+  "navigation": {
+    "root": "MobileESS_2025_05_31days_all_raw_results",
+    "readme": "README_KO.txt",
+    "case_index": "INDEX_BY_DAY.json",
+    "source_manifest": "SOURCE_MANIFEST.jsonl",
+    "bundle_info": "BUNDLE_INFO.json",
+    "packaging_verification": "ARCHIVE_CONTENT_VERIFICATION.json",
+    "B2_AIDC_authority": "B2 uses the B0 AIDC decision under AIDC_STAGE_CASE. The index follows the checkpoint-bound B0 SHA and also retains case-labelled B2 files.",
+    "time_axes": "Keep original time axes; B3 uses fixed AEST UTC+10, 15-minute slots, with distinct AIDC and MESS/grid slot origins."
+  },
+  "embedded_support_files": [
+    {
+      "archive": "MobileESS_2025_05_31days_all_raw_results/README_KO.txt",
+      "bytes": 3389,
+      "sha256": "39d7ba290226ead92e117cbb22fe8081cafe11bd1dc560c3f6d53097b54c4985"
+    },
+    {
+      "archive": "MobileESS_2025_05_31days_all_raw_results/INDEX_BY_DAY.json",
+      "bytes": 213267,
+      "sha256": "3f1e7de4d2f2285160b601e260b1f757a9a9e441af5544393774610fdd3ddfd4"
+    },
+    {
+      "archive": "MobileESS_2025_05_31days_all_raw_results/BUNDLE_INFO.json",
+      "bytes": 8476,
+      "sha256": "8a56aa864d868c9f9afd00b6246575ea19eaad998faadb2dcba0926a55b94f39"
+    },
+    {
+      "archive": "MobileESS_2025_05_31days_all_raw_results/SOURCE_MANIFEST.jsonl",
+      "bytes": 86910449,
+      "sha256": "3ae20bfafd60ba61e38d11a72515dd0b71d5f9517b7b5d037e13b78f72e162ac"
+    },
+    {
+      "archive": "MobileESS_2025_05_31days_all_raw_results/ARCHIVE_CONTENT_VERIFICATION.json",
+      "bytes": 2102,
+      "sha256": "43ba6a7076350083ebb8656c278b07562160c874ae5bb41cf7b55e9ed8dbdac1"
+    }
+  ]
+}
