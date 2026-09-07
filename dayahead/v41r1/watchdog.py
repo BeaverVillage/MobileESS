@@ -13,7 +13,8 @@ import uuid
 
 import psutil
 
-from dayahead.paper_analysis.storage import atomic, read, write_json
+from dayahead.paper_analysis.storage import atomic, read
+from dayahead.v39l.infrastructure import durable_atomic_json as write_json
 from dayahead.v41.data import RUNTIME
 from dayahead.v41.detached import job_membership
 from dayahead.v41.preflight import ROOT, OUT, record
@@ -168,7 +169,9 @@ def _append(value):
         os.fsync(stream.fileno())
 
 
-def worker(token):
+def worker(token, git):
+    from dayahead.tools.v41_detached_launcher import provision_git
+    provision_git(git)
     sys.stdin = open(os.devnull, 'r')
     sys.stdout = (ROOT / 'logs/v41r1_migration/watchdog_process.log').open('a', encoding='utf-8', buffering=1)
     sys.stderr = sys.stdout
@@ -207,11 +210,13 @@ def worker(token):
 
 
 def launch():
+    from dayahead.tools.v41_detached_launcher import git_executable
     for process in psutil.process_iter(['pid', 'cmdline']):
         command = process.info['cmdline'] or []
         require(not ('dayahead.v41r1.watchdog' in command and 'worker' in command), 'WATCHDOG_ALREADY_RUNNING')
     token = uuid.uuid4().hex
-    args = [sys.executable, '-u', '-m', 'dayahead.v41r1.watchdog', 'worker', '--token', token]
+    args = [sys.executable, '-u', '-m', 'dayahead.v41r1.watchdog', 'worker', '--token', token,
+        '--git', git_executable()]
     quote = lambda value: "'" + value.replace("'", "''") + "'"
     script = ("$ErrorActionPreference='Stop'\n"
         "$v41Startup=New-CimInstance -CimClass (Get-CimClass Win32_ProcessStartup) -ClientOnly -Property @{ShowWindow=[uint16]0;CreateFlags=[uint32]8}\n"
@@ -240,10 +245,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', choices=['launch', 'worker', 'once'])
     parser.add_argument('--token')
+    parser.add_argument('--git')
     args = parser.parse_args()
     if args.mode == 'launch':
         launch()
     elif args.mode == 'worker':
-        worker(args.token)
+        worker(args.token, args.git)
     else:
         print(json.dumps(inspect(), ensure_ascii=False, indent=2), flush=True)

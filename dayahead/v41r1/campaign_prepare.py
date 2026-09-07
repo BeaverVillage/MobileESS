@@ -60,7 +60,7 @@ def prepare():
     from dayahead.v41.release import plan
     verify_gate();p0_gate();plan()
     runtime_tests=ET.parse(OUT/'CAMPAIGN_RUNTIME_TESTS.xml')
-    require(len(list(runtime_tests.iter('testcase')))==5 and not any(list(runtime_tests.iter(t)) for t in ('failure','error','skipped')),'CAMPAIGN_RUNTIME_REGRESSION_GATE')
+    require(len(list(runtime_tests.iter('testcase')))>=6 and not any(list(runtime_tests.iter(t)) for t in ('failure','error','skipped')),'CAMPAIGN_RUNTIME_REGRESSION_GATE')
     stress=read(OUT/'FIXED_FOUR_WORKER_MEMORY_STRESS_GATE.json')
     from .campaign_revision import verify_stress_reuse
     verify_stress_reuse(stress,science())
@@ -72,10 +72,11 @@ def prepare():
     operations=[record(Path(__file__)),record(ROOT/'dayahead/v41r1/campaign_run.py'),
                 record(ROOT/'dayahead/v41r1/campaign_resources.py'),record(ROOT/'dayahead/v41r1/campaign_revision.py'),
                 record(ROOT/'dayahead/v41r1/gap03_revision.py'),record(ROOT/'dayahead/v41r1/watchdog.py'),
+                record(ROOT/'dayahead/v41r1/runtime_write_lock_recovery.py'),
                 record(ROOT/'dayahead/v41r1/baseline_audit.py'),record(ROOT/'dayahead/v41r1/coefficient_prepare.py')]
     config=dict(PARALLEL_DAY_WORKERS=4,SOLVER_THREADS_PER_DAY=4,adaptive_parallelism=False,
         A0_Method=1,MemLimit='UNLIMITED',SoftMemLimit='UNLIMITED',NodefileStart_GB=.5,
-        NodefileDir='Per worker under the local SSD campaign workspace',
+        NodefileDir='Per worker through verified junctions to D:\\MobileESS_v41r1_nodefiles on the local NVMe SSD',
         B1_A0_MIPGap={'P1':.03,'P2':.03,'P3':0.,'P4':0.,'P5':0.},
         B3_A1_MIPGap={'P1':.03,'P2':.03,'P4':0.,'P5':0.},
         A0_MIPGapAbs=0,A0_FeasibilityTol=1e-9,A0_IntFeasTol=1e-9,A0_OptimalityTol=1e-9,
@@ -92,6 +93,8 @@ def prepare():
         stress_reuse=record(OUT/'Q90_REVISION_STRESS_REUSE.json'),
         baseline=record(OUT/'Q90_BASELINE_31_DAY_AUDIT.json'),baseline_retention=record(OUT/'Q90_BASELINE_RETAINED_B0_GATE.json'),
         gap_authorization=record(OUT/'USER_APPROVED_B1_B3_GAP_3PCT.json'),
+        runtime_write_lock_recovery=record(OUT/'RUNTIME_WRITE_LOCK_REPAIR_AUTHORITY.json'),
+        host_oom_recovery=record(OUT/'HOST_OOM_NODEFILE_SPILL_RECOVERY.json'),
         electrical_coefficients=record(OUT/'V41R1_31_DAY_PLANNING_COEFFICIENT_MANIFEST.json'),
         configuration=record(OUT/'FIXED_FOUR_WORKER_SOLVER_CONFIGURATION.json'),
         runtime_tests=record(OUT/'CAMPAIGN_RUNTIME_TESTS.xml'),
@@ -117,7 +120,9 @@ def verify_release():
     require(release['scientific_commit']==commit() and release['science']==science(),'CAMPAIGN_SOURCE_NOT_FROZEN')
     require(record(release['preparation']['path'])==release['preparation'],'PREPARATION_DRIFT')
     prep=read(release['preparation']['path'])
-    for name in ('test_results','exact_equivalence','legacy_P0','stress','stress_reuse','baseline','baseline_retention','gap_authorization','electrical_coefficients','configuration','input_plan','separate_pilot_waiver','runtime_tests'):
+    for name in ('test_results','exact_equivalence','legacy_P0','stress','stress_reuse','baseline','baseline_retention','gap_authorization',
+                 'runtime_write_lock_recovery','host_oom_recovery','electrical_coefficients','configuration','input_plan',
+                 'separate_pilot_waiver','runtime_tests'):
         require(record(prep[name]['path'])==prep[name],'CAMPAIGN_GATE_DRIFT:'+name)
     for ref in release['operations']:require(record(ref['path'])==ref,'CAMPAIGN_OPERATION_DRIFT')
     return release

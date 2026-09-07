@@ -54,3 +54,18 @@ def test_campaign_fixed_parallelism_and_unlimited_observed_solver(tmp_path):
         assert m.Params.Threads==4 and m.Params.MemLimit==m.Params.SoftMemLimit==float('inf')
         assert m.Params.NodefileStart==.5 and Path(m.Params.NodefileDir).is_relative_to(tmp_path)
     m.dispose()
+
+
+def test_campaign_installs_windows_reader_lock_retry(monkeypatch):
+    sentinel = object()
+    monkeypatch.setattr(run, 'write_json', sentinel)
+    run.install_resilient_runtime_writes()
+    assert run.native.write_json is sentinel
+
+
+def test_campaign_provisions_verified_nodefile_spill_junction(tmp_path,monkeypatch):
+    monkeypatch.setattr(run, 'NODEFILE_SPILL_ROOT', tmp_path / 'spill')
+    folder = tmp_path / 'runtime/2025-05-03/B1/dayahead'
+    link = run.provision_nodefile_spill('2025-05-03', 'B1', folder)
+    assert link.is_dir()
+    assert link.resolve() == (tmp_path / 'spill/2025-05-03/B1').resolve()

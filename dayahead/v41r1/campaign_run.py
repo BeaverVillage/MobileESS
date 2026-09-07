@@ -9,7 +9,8 @@ import sys
 import time
 import uuid
 import psutil
-from dayahead.paper_analysis.storage import read,write_json,atomic
+from dayahead.paper_analysis.storage import read,atomic
+from dayahead.v39l.infrastructure import durable_atomic_json as write_json
 from dayahead.v41.preflight import ROOT,OUT,record
 from dayahead.v41.data import RUNTIME
 from dayahead.v41.reserve import require
@@ -17,6 +18,7 @@ from dayahead.v41 import campaign as native
 from .campaign_prepare import verify_release,verify_launch_authority
 
 original_verify=native.verify_receipt
+NODEFILE_SPILL_ROOT=Path('D:/MobileESS_v41r1_nodefiles')
 
 
 def verify_phase(path,frozen=None):
@@ -26,6 +28,21 @@ def verify_phase(path,frozen=None):
         validate(receipt,frozen['science'])
         return original_verify(path,None)
     return original_verify(path,frozen)
+
+
+def provision_nodefile_spill(day,policy,folder):
+    """Create the operational D-drive junction after any interrupted folder is archived."""
+    require(policy in ('B1','B3'),'NODEFILE_SPILL_POLICY_SCOPE')
+    target=(NODEFILE_SPILL_ROOT/day/policy).resolve()
+    target.mkdir(parents=True,exist_ok=True)
+    link=folder/'optimization/solver_passes/gurobi_nodefiles'
+    link.parent.mkdir(parents=True,exist_ok=True)
+    if not link.exists():
+        created=subprocess.run(['cmd.exe','/d','/c','mklink','/J',str(link),str(target)],
+            capture_output=True,text=True)
+        require(created.returncode==0,'NODEFILE_SPILL_JUNCTION_CREATE_FAILED:'+created.stderr)
+    require(link.is_dir() and link.resolve()==target,'NODEFILE_SPILL_JUNCTION_VERIFY_FAILED')
+    return link
 
 
 class Supervisor(native.Supervisor):
@@ -62,7 +79,61 @@ class Supervisor(native.Supervisor):
             with self.lock:
                 row[phase+'_receipt']=record(path);row['retained_previously_complete']=True;self.save()
             return
+        if phase=='dayahead' and row['policy'] in ('B1','B3'):
+            return self.spilled_phase(row,phase,path)
         return super().phase(row,phase)
+
+    def spilled_phase(self,row,phase,path):
+        """Native phase lifecycle plus a post-archive local-NVMe nodefile junction."""
+        day,policy=row['day'],row['policy'];folder=path.parent
+        if path.exists():
+            try:
+                verify_phase(path,self.frozen)
+            except (ValueError,FileNotFoundError,OSError) as error:
+                archive=RUNTIME/'interrupted'/(day+'_'+policy+'_invalid_'+uuid.uuid4().hex[:8])
+                archive.mkdir(parents=True)
+                for target in (folder,RUNTIME/day/policy/'actual',RUNTIME/day/policy/'UNIT_SCIENTIFIC_MANIFEST.json',
+                               RUNTIME/day/policy/'UNIT_RECEIPT.json'):
+                    target.resolve().relative_to((RUNTIME/day/policy).resolve())
+                    if target.exists():target.rename(archive/target.name)
+                write_json(archive/'INVALIDATION.json',dict(reason=repr(error),scientific_commit=self.sha,
+                    earliest_affected_phase=phase,descendant_Actual_invalidated=True,completed_data_preserved=True))
+                with self.lock:
+                    row.pop(phase+'_receipt',None);row.pop('actual_receipt',None)
+                    row['invalidation']=record(archive/'INVALIDATION.json');self.save()
+            else:
+                with self.lock:row[phase+'_receipt']=record(path);self.save()
+                return
+        matches=[]
+        for process in psutil.process_iter(['pid','cmdline']):
+            command=process.info['cmdline'] or []
+            if all(token in command for token in ('dayahead.v41.execution',day,policy,phase,self.sha)):
+                matches.append(process)
+        require(len(matches)<=1,'DUPLICATE_PHASE_WORKERS')
+        if matches:
+            process=matches[0]
+            with self.lock:row.update(status='DAYAHEAD_RUNNING',phase=phase,worker_pid=process.pid);self.save()
+            while process.is_running():time.sleep(1)
+            verify_phase(path,self.frozen)
+        else:
+            verify_release()
+            if folder.exists():
+                destination=RUNTIME/'interrupted'/(day+'_'+policy+'_'+phase+'_'+uuid.uuid4().hex[:8])
+                folder.resolve().relative_to(RUNTIME.resolve());destination.resolve().relative_to(RUNTIME.resolve())
+                destination.parent.mkdir(parents=True,exist_ok=True);folder.rename(destination)
+            provision_nodefile_spill(day,policy,folder)
+            log=native.LOGS/day/policy/(phase+'.log');log.parent.mkdir(parents=True,exist_ok=True)
+            command=[sys.executable,'-u','-m','dayahead.v41.execution','--day',day,'--policy',policy,
+                     '--phase',phase,'--campaign-sha',self.sha]
+            with log.open('a',encoding='utf-8') as stream:
+                process=subprocess.Popen(command,cwd=ROOT,stdin=subprocess.DEVNULL,stdout=stream,stderr=subprocess.STDOUT)
+                with self.lock:
+                    row.update(status='DAYAHEAD_RUNNING',phase=phase,worker_pid=process.pid,log=str(log));self.save()
+                code=process.wait()
+            require(code==0,'PHASE_PROCESS_FAILED:'+str(log))
+            verify_phase(path,self.frozen)
+        with self.lock:
+            row[phase+'_receipt']=record(path);row.update(status='DAYAHEAD_DONE',worker_pid=None);self.save()
 
 
 def adopt_completed_B0():
@@ -82,6 +153,11 @@ def adopt_completed_B0():
         embedded_paths_continue_to_reference_preserved_originals=True))
 
 
+def install_resilient_runtime_writes():
+    """Keep transient Windows reader locks from killing the supervisor heartbeat."""
+    native.write_json = write_json
+
+
 def worker(token,git):
     from dayahead.tools.v41_detached_launcher import provision_git
     from dayahead.v41.detached import job_membership
@@ -92,7 +168,7 @@ def worker(token,git):
         started_at=time.time(),command_line=psutil.Process().cmdline(),git_executable=git)
     write_json(RUNTIME/'DETACHED_FULL_MAY_PROOF.json',proof)
     require(not proof['in_Windows_job'],'CAMPAIGN_NOT_DETACHED_FROM_CODEX')
-    verify_launch_authority();adopt_completed_B0()
+    verify_launch_authority();adopt_completed_B0();install_resilient_runtime_writes()
     native.frozen_identity=verify_release;native.verify_receipt=verify_phase;native.Supervisor=Supervisor
     native.LOGS=ROOT/'logs/v41r1_migration/full_may'
     sys.argv=[sys.argv[0],'--mode','both'];native.main()
