@@ -1,0 +1,1233 @@
+# ============================================================
+# V41R1 FULL-MAY FIX-AND-OPTIMIZE COMPUTATIONAL REVISION
+#
+# FINAL DIRECTION
+#
+# Replace the current long-running monolithic MILP search used for
+# monthly production evaluation with a deterministic, auditable
+# Fix-and-Optimize (F&O) matheuristic.
+#
+# The purpose is to make the 31-day x B0-B3 experiment computationally
+# realistic WITHOUT reducing the scientific migration/relocation
+# flexibility and WITHOUT relaxing any physical constraint.
+#
+# This is now the intended Full-May production solve strategy.
+#
+# ============================================================
+
+
+# ============================================================
+# 0. NON-NEGOTIABLE SCIENTIFIC CONTRACT
+# ============================================================
+
+DO NOT change the scientific feasible set.
+
+Preserve exactly:
+
+- B0/B1/B2/B3 policy definitions
+- final Rolling Track-P LightGBM Q90 runtime
+- H4 R85_B2 workload interface
+- independent 24-hour days
+- PENDING pre-start relocation
+- fixed post-materialization planned start semantics
+- PENDING -> RUNNING transition
+- exactly one RUNNING migration opportunity at the first valid checkpoint
+- STAY or one feasible destination
+- at most one RUNNING migration/job/day
+- D00 RUNNING first-valid-checkpoint opportunity
+- checkpoint/pause/WAN/restart physics
+- Actual migration replay semantics
+- corrected background-load mapper
+- MESS model
+- Fresh OpenDSS
+- Actual replay
+- lexicographic P1-P5 scientific priorities
+
+
+Do not create a new scientific approximation merely for runtime.
+
+
+# ============================================================
+# 1. MIGRATION / RELOCATION CANDIDATES MUST NOT BE PRUNED
+# ============================================================
+
+This is critical.
+
+Do NOT reduce migration or relocation flexibility using:
+
+- top-K destination filtering
+- top-K job filtering
+- critical-line-only destination filtering
+- electrical-sensitivity threshold pruning
+- distance-based pruning
+- objective-improvement prediction pruning
+- "unlikely to help" pruning
+- random candidate removal
+- manually selected IDC subsets
+- permanent removal of low-impact candidates
+
+
+The complete scientifically feasible candidate set remains authoritative.
+
+
+Only remove a candidate if it is PROVABLY STRUCTURALLY/HARD INFEASIBLE
+under existing authority.
+
+
+Examples of legitimate hard-infeasibility screening:
+
+- destination prohibited by policy
+- impossible rack compatibility
+- impossible WAN path under frozen authority
+- checkpoint timing makes transfer/restart impossible
+- invalid job state
+- destination not allowed by existing model
+- other mathematically proven impossibility
+
+
+Every removed candidate must have an auditable hard-infeasibility reason.
+
+
+Create:
+
+V41R1_FULL_CANDIDATE_MANIFEST.json
+
+containing, per day/policy:
+
+- total PENDING relocation candidates
+- total RUNNING migration candidates
+- total destination arcs
+- hard-infeasible removals
+- reason counts
+- final authoritative candidate counts
+- candidate-set SHA
+
+
+F&O must use this same complete candidate universe.
+
+
+# ============================================================
+# 2. GPU CAPACITY REMAINS A HARD CONSTRAINT
+# ============================================================
+
+No relocation or migration may physically exceed the receiving
+datacenter GPU capacity.
+
+
+At every relevant execution time:
+
+GPU_OCCUPANCY[site,t] <= GPU_CAPACITY[site]
+
+
+This must include:
+
+- locally executing jobs
+- relocated PENDING jobs
+- migrated RUNNING jobs after restart
+- jobs whose execution overlaps because of Q90 durations
+- any applicable rack-level capacity coupling
+
+
+A structurally available destination is NOT automatically selectable.
+
+The optimization must simultaneously satisfy:
+
+- GPU capacity
+- rack capacity / compatibility
+- WAN capacity
+- timing
+- job-state
+- H4
+- electrical constraints
+
+
+Do not permit a migration and rely on Actual to repair a Day-Ahead
+GPU-capacity violation.
+
+
+Day-Ahead selected decisions must themselves be model-feasible.
+
+
+Actual queue/delay remains only for realized-runtime contention under
+the already-authorized Actual execution semantics.
+
+
+# ============================================================
+# 3. PRESERVE CURRENT WORK
+# ============================================================
+
+Preserve:
+
+- completed B0 results
+- historical long-running B1 logs
+- solver logs
+- gap traces
+- memory evidence
+- failed/no-incumbent evidence
+- existing sparse recurrence implementation
+- existing one-model/multi-objective-stage reuse if already correct
+- 31-day electrical coefficient audit work currently in progress
+
+
+Do not rewrite working components unnecessarily.
+
+
+Mark the old unbounded/long global attempts as:
+
+SUPERSEDED_BY_FIX_AND_OPTIMIZE_COMPUTE_STRATEGY
+
+where scientifically appropriate.
+
+
+Do NOT erase them.
+
+
+# ============================================================
+# 4. FIRST REQUIREMENT: VERIFIED FEASIBLE SEED
+# ============================================================
+
+F&O must NEVER start from an unverified solution.
+
+
+For each policy-day construct a deterministic, physically feasible seed.
+
+
+B0:
+
+use the final Q90-consistent reference schedule materialization.
+
+If requested GPU/rack capacity is unavailable at the old reference
+start:
+
+- keep the authoritative B0 site
+- queue at that same site
+- start the complete job at the earliest physically feasible time
+- no clipping
+- no partial job execution
+
+
+For B1/B2/B3:
+
+map the appropriate valid baseline/reference schedule into the policy
+using the neutral/non-flexibility decision whenever policy semantics
+allow it.
+
+
+Examples:
+
+- reference initial placement
+- no optional relocation
+- STAY at the migration opportunity
+- no optional migration
+
+
+Do not merely assume feasibility.
+
+
+Before optimization, independently evaluate the complete seed against:
+
+- GPU capacity
+- rack constraints
+- WAN constraints
+- job-state constraints
+- checkpoint constraints
+- H4 constraints
+- electrical Planning constraints
+- policy constraints
+- terminal/day-boundary rules
+
+
+Persist:
+
+POLICY_FEASIBLE_SEED_AUDIT.json
+
+
+Require an accepted seed before F&O begins.
+
+
+If a valid B0-derived seed SHOULD be feasible in B1 but fails:
+
+classify first as a formulation/mapping implementation defect.
+
+Repair it before proceeding.
+
+
+# ============================================================
+# 5. USE EXACT MODEL REDUCTIONS WHERE ALREADY VALID
+# ============================================================
+
+Keep the existing sparse event/state recurrence.
+
+Do not return to dense per-job/per-slot repeated expansion.
+
+
+Continue to audit exact job-equivalence aggregation.
+
+Aggregate only jobs that are mathematically indistinguishable for ALL
+optimization-relevant coefficients.
+
+
+If exact aggregation is safe, use it.
+
+If not proven exact, keep the jobs separate.
+
+
+F&O does NOT depend on unsafe aggregation.
+
+
+# ============================================================
+# 6. FIX-AND-OPTIMIZE DEFINITION
+# ============================================================
+
+Let x* be the current complete feasible incumbent.
+
+
+At iteration r choose a neighborhood N_r.
+
+
+Variables associated with N_r:
+
+FREE
+
+
+All other discrete relocation/migration/assignment decisions:
+
+FIXED to the current incumbent x*
+
+
+Then solve the ORIGINAL scientific model restricted to that
+neighborhood.
+
+
+All original physical constraints remain active.
+
+
+Conceptually:
+
+x_j = x*_j    for j not in N_r
+
+x_j free      for j in N_r
+
+
+subject to the complete original:
+
+- GPU
+- rack
+- WAN
+- job state
+- migration
+- H4
+- electrical
+- MESS
+- policy
+
+constraints.
+
+
+This is a search restriction for one iteration.
+
+It is NOT permanent candidate pruning.
+
+
+# ============================================================
+# 7. EVERY CANDIDATE MUST REMAIN REVISITABLE
+# ============================================================
+
+A candidate being fixed in one iteration does NOT mean it has been
+removed.
+
+
+Across deterministic neighborhood sweeps, every eligible relocation and
+migration decision must eventually have an opportunity to become free.
+
+
+Maintain:
+
+CANDIDATE_VISIT_COUNT
+
+
+for every decision/candidate.
+
+
+Before beginning a second full cycle, require:
+
+all eligible candidate decision blocks have visit_count >= 1
+
+unless the compute budget expires first.
+
+
+If the budget expires before full coverage:
+
+persist exact coverage percentage.
+
+Do not claim exhaustive neighborhood coverage.
+
+
+# ============================================================
+# 8. NEIGHBORHOOD FAMILY A — ELECTRICAL CRITICAL WINDOW
+# ============================================================
+
+Identify the current incumbent's binding or near-binding:
+
+- branch
+- phase
+- time slot
+
+
+for P1 rho_max.
+
+
+Open decisions for jobs whose execution/relocation/migration can affect
+AIDC injections during a deterministic temporal window around that
+critical interval.
+
+
+Important:
+
+electrical relevance determines which variables are opened FIRST.
+
+It must NOT permanently delete other candidates.
+
+
+All destination choices for the opened jobs that belong to the full
+authoritative candidate set remain available.
+
+
+Do not keep only the "best sensitivity" destinations.
+
+
+# ============================================================
+# 9. NEIGHBORHOOD FAMILY B — IDC BLOCK
+# ============================================================
+
+Partition the IDC sites deterministically into small blocks.
+
+
+For each block, open:
+
+- PENDING initial-site/relocation decisions connected to those sites
+- RUNNING migration decisions whose source or destination is in the block
+
+
+Rotate through all site blocks.
+
+
+Do not permanently restrict decisions to one critical IDC.
+
+
+The exact partition must be persisted and reproducible.
+
+
+# ============================================================
+# 10. NEIGHBORHOOD FAMILY C — RUNNING MIGRATION BLOCK
+# ============================================================
+
+Open batches of first-valid-checkpoint RUNNING migration decisions.
+
+
+For an opened job:
+
+allow its COMPLETE authoritative decision:
+
+STAY
+
+or
+
+any scientifically feasible destination from its full candidate set.
+
+
+Do not open only one preferred destination.
+
+
+Respect:
+
+maximum one migration/job/day.
+
+
+# ============================================================
+# 11. NEIGHBORHOOD FAMILY D — PENDING RELOCATION BLOCK
+# ============================================================
+
+Open batches of eligible PENDING pre-start relocation decisions.
+
+
+For each opened job:
+
+allow the complete authoritative initial-site candidate set.
+
+
+The final Q90-consistent planned start remains fixed at the optimization
+layer unless the current scientific contract explicitly says otherwise.
+
+
+Do not turn this into start-time optimization.
+
+
+# ============================================================
+# 12. NEIGHBORHOOD FAMILY E — COVERAGE / DIVERSIFICATION
+# ============================================================
+
+Critical-neighborhood search alone can become biased.
+
+
+Therefore include deterministic coverage neighborhoods containing
+decisions that:
+
+- have not been free recently
+- were not included in critical-line neighborhoods
+- belong to different IDC groups
+- have low visit counts
+
+
+This guarantees that the F&O process does not permanently ignore valid
+migration flexibility.
+
+
+No random nondeterministic sampling.
+
+
+Use a frozen deterministic ranking/tie-break.
+
+
+# ============================================================
+# 13. NEIGHBORHOOD SIZE
+# ============================================================
+
+Do not begin with enormous neighborhoods that recreate the original
+million-variable combinatorial problem.
+
+
+Use a bounded number of FREE DISCRETE decisions per iteration.
+
+
+Implement configurable targets, initially approximately:
+
+MIN_FREE_DISCRETE = 2,000
+TARGET_FREE_DISCRETE = 5,000
+MAX_FREE_DISCRETE = 10,000
+
+
+These are COMPUTATIONAL neighborhood sizes,
+not scientific candidate limits.
+
+
+Measure actual:
+
+- free binaries/integers
+- total variables
+- matrix nonzeros
+- solve time
+- memory
+- incumbent improvement
+
+
+Neighborhood size may adapt deterministically according to previous
+iteration performance.
+
+
+Example:
+
+if previous neighborhoods solve very quickly:
+    modestly increase size
+
+if repeated neighborhoods hit their time cap or memory stress:
+    decrease size
+
+
+Never adapt by permanently removing candidates.
+
+
+Persist every size change and reason.
+
+
+# ============================================================
+# 14. PER-NEIGHBORHOOD TIME LIMIT
+# ============================================================
+
+Each F&O neighborhood must have a short finite solve budget.
+
+
+Initial recommendation:
+
+NEIGHBORHOOD_TIME_LIMIT = 60 to 120 seconds
+
+
+Do not let one neighborhood consume the entire policy-day budget.
+
+
+If an improved feasible solution is found before optimality is proven:
+
+it may still be accepted if lexicographically better and independently
+feasible.
+
+
+Record actual neighborhood MIP gap where available.
+
+
+# ============================================================
+# 15. POLICY-DAY TOTAL COMPUTE BUDGET
+# ============================================================
+
+Keep the previously authorized bounded-compute contract:
+
+TOTAL_OPTIMIZATION_BUDGET_PER_POLICY_DAY = 30 minutes
+
+
+This includes all optimization improvement work for that policy-day.
+
+
+The clock must be shared.
+
+
+Do NOT allow:
+
+30 min per P1
++ 30 min per P2
++ 30 min per P3
+...
+
+
+The total remains approximately 30 minutes.
+
+
+Fresh OpenDSS and Actual replay are outside the optimization search
+budget and still execute normally.
+
+
+# ============================================================
+# 16. LEXICOGRAPHIC OBJECTIVES MUST BE PRESERVED
+# ============================================================
+
+Scientific priority remains:
+
+P1 = rho_max
+
+P2 = mean H4 reserve shortfall GPUh
+
+P3 = migration count
+
+P4 = reference schedule deviation
+
+P5 = deterministic tie-break
+
+
+Do NOT convert them to one weighted objective.
+
+
+F&O must operate lexicographically.
+
+
+# ============================================================
+# 17. P1 FIX-AND-OPTIMIZE
+# ============================================================
+
+Start from the verified feasible incumbent.
+
+
+Run deterministic F&O neighborhoods to improve P1.
+
+
+Accept a new incumbent only when:
+
+P1_new < P1_old - numerical_tolerance
+
+
+or when equal within tolerance and the current lexicographic contract
+allows consideration of lower priorities.
+
+
+All physical constraints must pass.
+
+
+Use approximately the first half of the shared compute budget for P1,
+unless P1 stagnates early.
+
+
+Suggested initial envelope:
+
+~15-18 minutes maximum for P1 improvement.
+
+
+This is not a hard scientific number; implement within the overall
+30-minute contract.
+
+
+# ============================================================
+# 18. P1 LOCK BEFORE P2
+# ============================================================
+
+After P1 improvement ends, lock the accepted P1 incumbent:
+
+
+P1 <= P1_accepted + existing numerical tolerance
+
+
+Do NOT allow P2 to worsen P1 by 3%.
+
+
+MIPGap is not permission to degrade the accepted higher-priority
+incumbent.
+
+
+# ============================================================
+# 19. P2 FIX-AND-OPTIMIZE
+# ============================================================
+
+Under the P1 lock, continue deterministic F&O for P2.
+
+
+Neighborhood definitions may emphasize:
+
+- jobs contributing to H4 shortfall
+- IDC/time blocks associated with reserve stress
+
+but all candidate decisions must still remain in the global F&O
+coverage rotation.
+
+
+Do not prune electrically weak or reserve-weak candidates permanently.
+
+
+Suggested compute envelope:
+
+~7-9 minutes
+
+
+within the SAME 30-minute total budget.
+
+
+# ============================================================
+# 20. P2 LOCK / P3 / P4
+# ============================================================
+
+After P2:
+
+lock P2_accepted within numerical tolerance.
+
+
+Use remaining budget for:
+
+P3 migration count
+
+then
+
+P4 reference deviation
+
+
+Do not spend hours proving secondary-objective global optimality.
+
+
+A feasible lexicographic improvement is sufficient for bounded-compute
+monthly evaluation.
+
+
+Persist incumbent/bound/gap/status for every stage.
+
+
+# ============================================================
+# 21. P5 AUDIT
+# ============================================================
+
+Determine whether P5 is purely a deterministic tie-break among
+scientifically identical P1-P4 solutions.
+
+
+If equivalence is proven:
+
+perform P5 outside the expensive F&O/MILP using deterministic
+post-solve assignment/disaggregation.
+
+
+Require:
+
+- P1-P4 unchanged
+- all physical trajectories unchanged
+- migration count unchanged
+- aggregate decisions unchanged
+
+
+If P5 has real scientific impact:
+
+keep it inside the remaining bounded budget.
+
+
+# ============================================================
+# 22. OPTIONAL SHORT GLOBAL BOUND PASS
+# ============================================================
+
+Where memory permits, retain a SHORT bounded global MILP pass to obtain
+a valid solver lower bound / global gap estimate.
+
+
+This is for solution-quality certification.
+
+
+Do NOT allow the global pass to become another multi-hour solve.
+
+
+Suggested maximum:
+
+2-3 minutes per important objective stage,
+
+only if it fits inside the same policy-day optimization budget.
+
+
+The verified feasible F&O incumbent must always be retained.
+
+
+A short global bound pass must never erase a better F&O incumbent.
+
+
+# ============================================================
+# 23. F&O ACCEPTANCE RULE
+# ============================================================
+
+A newly found solution may replace the incumbent only if:
+
+1. all original model constraints PASS
+
+2. the lexicographic vector is strictly better according to the
+   currently active objective and existing higher-priority locks
+
+3. the complete job-level decision can be materialized
+
+4. persistence/readback PASS
+
+
+Never accept an infeasible intermediate solution.
+
+
+# ============================================================
+# 24. STAGNATION HANDLING
+# ============================================================
+
+If multiple consecutive neighborhoods produce no improvement:
+
+do NOT enlarge to the full monolithic problem immediately.
+
+
+Instead:
+
+1. rotate to a different neighborhood family
+2. prioritize low-visit candidates
+3. enlarge the neighborhood modestly
+4. use an overlapping IDC/time block
+5. continue deterministic coverage
+
+
+Optionally after one complete neighborhood sweep, use a small local
+branching diversification neighborhood around the incumbent.
+
+
+Do not use nondeterministic candidate deletion.
+
+
+# ============================================================
+# 25. FULL PHYSICAL VALIDATION AFTER F&O
+# ============================================================
+
+The final F&O decision is still only the Day-Ahead optimization result.
+
+
+Perform the existing:
+
+Fresh three-phase OpenDSS verification
+
+
+and then:
+
+Actual replay
+
+
+without changing those semantics.
+
+
+Persist all existing AIDC/MESS/Grid/WAN/migration/Actual outputs.
+
+
+If Fresh reveals a violation:
+
+preserve it as scientific evidence unless caused by implementation or
+stale coefficient authority.
+
+
+Do not silently repair/retune the result.
+
+
+# ============================================================
+# 26. COMPUTATIONAL CLASSIFICATION
+# ============================================================
+
+Use explicit result classes.
+
+
+F_AND_O_FEASIBLE
+    physically feasible bounded-compute F&O result
+
+F_AND_O_WITH_GLOBAL_3PCT_CERTIFICATE
+    F&O incumbent and valid global bound imply <=3% gap
+
+F_AND_O_WITH_REPORTED_BOUND
+    global bound exists but certified gap >3%
+
+F_AND_O_NO_GLOBAL_CERTIFICATE
+    valid F&O result, no useful global certificate
+
+PROVEN_OPTIMAL
+    only if actually proven by global MILP
+
+NO_FEASIBLE_INCUMBENT
+    only if no verified feasible solution exists
+
+PHYSICAL_INFEASIBLE
+    genuine scientific infeasibility
+
+
+Do not label F&O as global optimum without proof.
+
+
+# ============================================================
+# 27. SAVE F&O ITERATION HISTORY
+# ============================================================
+
+Persist every F&O iteration.
+
+
+Required fields:
+
+- day
+- policy
+- objective stage
+- iteration
+- neighborhood family
+- neighborhood ID
+- free candidate/job count
+- free discrete variable count
+- total model variable count
+- matrix nonzeros
+- candidate coverage count
+- incumbent before
+- incumbent after
+- higher-priority locked values
+- solve runtime
+- solver status
+- MIP gap if available
+- memory usage
+- changed job IDs / aggregate groups
+- changed relocation decisions
+- changed migration decisions
+- artifact SHA
+
+
+Create a compact improvement trace suitable for later paper analysis.
+
+
+# ============================================================
+# 28. CANDIDATE COVERAGE REPORT
+# ============================================================
+
+For every policy-day persist:
+
+- total eligible relocation jobs
+- total eligible migration jobs
+- total destination decisions
+- unique candidates ever opened
+- fraction of candidates visited
+- visit-count distribution
+- candidates never opened because compute budget expired
+
+
+This is important.
+
+
+The paper must be able to distinguish:
+
+"candidate was scientifically pruned"
+
+from
+
+"candidate remained available but was not reached within the bounded
+neighborhood-search budget."
+
+
+The former is prohibited.
+
+The latter is acceptable and must be reported.
+
+
+# ============================================================
+# 29. DIFFICULT-INSTANCE ACCEPTANCE TEST
+# ============================================================
+
+Do NOT immediately restart all 31 days.
+
+
+First use a previously difficult B1 instance.
+
+
+Primary acceptance candidate:
+
+2025-05-04 B1
+
+
+because the old monolithic attempt failed to obtain an accepted integer
+incumbent.
+
+
+Acceptance requirements:
+
+A. verified seed exists
+
+B. seed passes all hard constraints
+
+C. F&O begins immediately from the seed
+
+D. no hours-long incumbent search
+
+E. no OOM
+
+F. candidate set is unchanged except hard-infeasible eliminations
+
+G. GPU/rack/WAN limits are never exceeded
+
+H. F&O produces either an improvement or a valid unchanged incumbent
+
+I. total optimization stops by the 30-minute contract
+
+J. complete iteration/candidate-coverage records persist
+
+K. result can be consumed by Fresh OpenDSS
+
+L. Actual replay can consume the freeze
+
+
+Do not require May-04 to achieve global optimality.
+
+
+# ============================================================
+# 30. PERFORMANCE COMPARISON
+# ============================================================
+
+For the difficult acceptance instance, compare:
+
+OLD MONOLITHIC:
+- runtime
+- first-incumbent time
+- final incumbent
+- bound
+- gap
+- memory
+
+NEW F&O:
+- seed time
+- first-incumbent time
+- final incumbent
+- available bound
+- certified/reported gap
+- memory
+- candidate coverage
+- iteration count
+
+
+This will determine whether F&O is actually solving the engineering
+runtime problem.
+
+
+# ============================================================
+# 31. FULL-MAY EXECUTION AFTER ACCEPTANCE
+# ============================================================
+
+After the difficult-instance acceptance test passes:
+
+freeze the F&O computational contract
+
+then resume Full May.
+
+
+Keep:
+
+PARALLEL_DAY_WORKERS = 4
+
+GUROBI_THREADS_PER_DAY = 4
+
+
+Do not reduce scientific candidate flexibility.
+
+
+Do not change the final model after Full May begins unless an
+implementation defect is found.
+
+
+# ============================================================
+# 32. REPRESENTATIVE STRONG MILP VALIDATION
+# ============================================================
+
+The monthly F&O solution does not by itself prove global optimality.
+
+
+Therefore preserve the plan to run stronger global MILP solves on a
+small set of representative/critical days.
+
+
+Use approximately 3-5 days.
+
+
+Selection must be based on predefined/B0 physical characteristics,
+not cherry-picked based on favorable proposed-policy outcomes.
+
+
+Possible categories:
+
+- high feeder-loading day
+- median/typical day
+- low-loading day
+- computationally difficult day
+- small B0-vs-proposed difference day
+
+
+Run stronger global optimization there with:
+
+0.5%
+0.1%
+or optimality where practical.
+
+
+Compare F&O incumbents against valid global bounds/solutions.
+
+
+# ============================================================
+# 33. PAPER-FACING METHOD TERMINOLOGY
+# ============================================================
+
+Do not describe the monthly solver as an exact global MILP solution.
+
+
+Use:
+
+"bounded-compute fix-and-optimize matheuristic"
+
+
+with:
+
+"full physical feasibility constraints retained at every neighborhood
+subproblem"
+
+
+and:
+
+"representative instances validated against stronger global MILP
+bounds."
+
+
+The scientific formulation remains MILP.
+
+The monthly solution algorithm is F&O matheuristic.
+
+
+# ============================================================
+# 34. 31-DAY ELECTRICAL COEFFICIENT WORK CONTINUES
+# ============================================================
+
+Continue the already-started coefficient gate.
+
+
+For May 1-31 require:
+
+CURRENT_V41R1_GENERATED_AND_CERTIFIED
+
+or
+
+REUSED_BY_EXACT_INPUT_AND_METHOD_EQUIVALENCE
+
+
+before that day enters optimization.
+
+
+This work is independent of F&O candidate selection.
+
+
+Do not use stale electrical coefficients.
+
+
+# ============================================================
+# 35. FULL-MAY INFRASTRUCTURE REMAINS
+# ============================================================
+
+Keep all previously authorized campaign infrastructure:
+
+- detached campaign
+- existing monitoring UI
+- detached watchdog
+- 10-minute health checks
+- PASS checkpoint reuse
+- atomic persistence
+- four-day parallel campaign
+- four solver threads/day
+- implementation-defect repair/resume logic
+- no timeout-based scientific FAIL
+
+
+The new 30-minute policy-day optimization contract IS intentional.
+
+A healthy F&O solver should terminate by its compute budget.
+
+This is not the old "10-minute watchdog timeout" concept.
+
+
+# ============================================================
+# 36. IMMEDIATE WORK ORDER
+# ============================================================
+
+Proceed now in this order:
+
+
+1. Preserve current logs/results.
+
+2. Finish the verified seed audit.
+
+3. Confirm GPU/rack/WAN hard feasibility of the seed.
+
+4. Freeze the complete relocation/migration candidate manifest.
+
+5. Confirm there is NO top-K or sensitivity pruning.
+
+6. Implement deterministic F&O neighborhoods.
+
+7. Implement candidate visit/coverage accounting.
+
+8. Implement shared 30-minute policy-day optimization budget.
+
+9. Preserve P1 -> P2 -> P3 -> P4 lexicographic locks.
+
+10. Audit P5 post-solve eligibility.
+
+11. Run the 2025-05-04 B1 difficult-instance acceptance test.
+
+12. Report before/after computational evidence.
+
+13. If acceptance passes, freeze one final scientific/compute commit.
+
+14. Resume Full May at 4 days x 4 solver threads.
+
+15. Continue monitoring and automatic implementation-defect repair as
+    previously authorized.
+
+
+# ============================================================
+# 37. FINAL PRINCIPLE
+# ============================================================
+
+The intended solution is NOT:
+
+"reduce migration flexibility until the MILP becomes easy."
+
+
+The intended solution is:
+
+"retain the complete scientifically feasible relocation/migration
+decision space, begin from a verified feasible schedule, and explore
+that decision space through deterministic bounded Fix-and-Optimize
+neighborhoods while preserving every original physical constraint."
+
+
+Proceed.

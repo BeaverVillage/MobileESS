@@ -1,0 +1,903 @@
+# ============================================================
+# V41R1 F&O EARLY-STOPPING / COMPUTE-CONTROL REVISION
+#
+# DELTA INSTRUCTION
+#
+# Keep the currently validated V41R1 Fix-and-Optimize formulation,
+# candidate universe, physical constraints, feasible-seed logic,
+# persistence, Fresh OpenDSS, and Actual replay unchanged.
+#
+# This revision changes ONLY the COMPUTE CONTROL / EARLY-STOPPING
+# policy so that a policy-day does not wastefully consume the full
+# 30-minute budget when an objective stage has already stagnated.
+#
+# ============================================================
+
+
+# ============================================================
+# 0. NON-NEGOTIABLE: DO NOT CHANGE THE SCIENCE
+# ============================================================
+
+Do NOT change:
+
+- B0/B1/B2/B3 policy definitions
+- Q90 runtime authority
+- H4 R85_B2 authority
+- PENDING pre-start relocation semantics
+- first-valid-checkpoint RUNNING migration semantics
+- full relocation/migration candidate universe
+- candidate destination sets
+- GPU capacity
+- rack constraints
+- WAN constraints
+- electrical constraints
+- MESS semantics
+- Fresh OpenDSS
+- Actual replay
+- corrected electrical coefficients / mapper
+- lexicographic objective order P1 -> P2 -> P3 -> P4 -> P5
+
+
+Do NOT introduce:
+
+- top-K pruning
+- sensitivity pruning
+- destination pruning
+- job pruning
+- candidate deletion for performance
+- physical-constraint relaxation
+- objective weighting
+
+
+The F&O scientific feasible set remains exactly the same.
+
+
+# ============================================================
+# 1. 30 MINUTES IS A HARD CAP, NOT A TARGET
+# ============================================================
+
+Keep:
+
+POLICY_DAY_TOTAL_OPTIMIZATION_BUDGET = 30 minutes
+
+
+Interpret this as:
+
+MAXIMUM wall-clock optimization time
+
+NOT:
+
+"always run for 30 minutes."
+
+
+The solver/F&O procedure may terminate substantially earlier when
+the stage-specific convergence conditions below are satisfied.
+
+
+Fresh OpenDSS and Actual replay remain outside this optimization
+budget.
+
+
+# ============================================================
+# 2. SHARED BUDGET ACROSS P1-P5
+# ============================================================
+
+The same policy-day timer is shared across all lexicographic stages.
+
+
+Require:
+
+T_P1 + T_P2 + T_P3 + T_P4 + T_P5 <= 30 min
+
+
+Do NOT reset a new 30-minute timer at each stage.
+
+
+Unused time rolls forward to later stages.
+
+
+# ============================================================
+# 3. STAGE GUARDS
+# ============================================================
+
+Add soft stage guards to prevent one objective from consuming the
+entire policy-day budget.
+
+
+Initial guards:
+
+P1_SOFT_GUARD = 16 minutes
+P2_SOFT_GUARD = 8 minutes
+P3_SOFT_GUARD = 3 minutes
+P4_SOFT_GUARD = 2 minutes
+P5_SOFT_GUARD = 1 minute
+
+
+These sum to the 30-minute hard cap.
+
+
+Important:
+
+These are COMPUTE GUARDS, not scientific limits.
+
+
+If P1 ends in 9 minutes:
+
+the unused 7 minutes remain available to later stages.
+
+
+Do not artificially hold a later stage to its nominal guard when
+significant shared budget remains.
+
+
+The 30-minute policy-day hard cap remains absolute.
+
+
+# ============================================================
+# 4. DEFINE A SWEEP EXPLICITLY
+# ============================================================
+
+A "sweep" is one deterministic traversal of the F&O neighborhood
+schedule for the current objective stage.
+
+
+The schedule must include the existing neighborhood families:
+
+- electrical-critical
+- IDC block
+- RUNNING migration
+- PENDING relocation
+- low-visit / coverage / diversification families
+
+
+The exact ordering may depend on the current objective priority,
+but no authoritative candidate is permanently removed.
+
+
+Track separately for each objective stage:
+
+STAGE_CANDIDATE_VISIT_COUNT
+STAGE_UNIQUE_CANDIDATES_OPENED
+STAGE_COVERAGE_FRACTION
+STAGE_SWEEP_ID
+
+
+Do not rely only on the global all-stage coverage counter.
+
+
+We need to know what was actually explored during P1, P2, etc.
+
+
+# ============================================================
+# 5. OBJECTIVE IMPROVEMENT MUST USE RECOMPUTED VALUES
+# ============================================================
+
+Do NOT accept solver raw floating-point objective changes as
+scientific improvement.
+
+
+For every proposed incumbent:
+
+1. materialize the actual job-level decision
+2. recompute all relevant physical trajectories
+3. recompute the objective independently
+4. validate all constraints
+5. compare against the currently accepted incumbent
+
+
+Use the already validated numerical objective tolerance.
+
+
+Do NOT silently loosen the physical feasibility tolerance.
+
+
+A change such as ~1e-10 caused by floating-point noise must NOT reset
+the stagnation logic.
+
+
+Define conceptually:
+
+MATERIAL_IMPROVEMENT =
+    recomputed_new_objective
+    <
+    recomputed_current_objective
+    - validated_objective_tolerance
+
+
+If not:
+
+NO_MATERIAL_IMPROVEMENT
+
+
+# ============================================================
+# 6. P1 EARLY-STOPPING LOGIC
+# ============================================================
+
+P1 remains:
+
+minimize rho_max
+
+
+At the beginning of every P1 sweep:
+
+recompute the current incumbent's:
+
+- maximum-loading branch
+- phase
+- time
+- near-binding electrical set
+
+
+Use that information only to PRIORITIZE the first neighborhoods.
+
+
+Do NOT prune candidates using sensitivity.
+
+
+For an opened job, preserve its complete authoritative feasible
+destination set.
+
+
+P1 algorithm:
+
+
+START from verified feasible incumbent.
+
+
+Run NORMAL SWEEP.
+
+
+If at least one MATERIAL P1 IMPROVEMENT occurs during the sweep:
+
+- accept the best validated incumbent
+- recompute the new critical branch/phase/time
+- reset the stagnation state
+- begin another normal sweep if P1 time remains
+
+
+If one completed normal sweep yields:
+
+NO MATERIAL P1 IMPROVEMENT
+
+
+then run exactly ONE additional:
+
+OVERLAP / DIVERSIFICATION SWEEP
+
+
+The diversification sweep must:
+
+- use overlapping neighborhoods
+- emphasize low-visit decisions
+- include decisions that were not central to the current critical line
+- permit coupled reallocations that may indirectly free GPU/rack/WAN
+  capacity
+
+
+If the diversification sweep also yields:
+
+NO MATERIAL P1 IMPROVEMENT
+
+
+then:
+
+EARLY STOP P1
+
+and lock the accepted P1 incumbent.
+
+
+Do NOT continue repeating identical no-improvement sweeps merely
+because the 30-minute policy-day timer has time remaining.
+
+
+# ============================================================
+# 7. P1 SOFT-GUARD CONDITION
+# ============================================================
+
+If P1 reaches its approximately 16-minute soft guard before the above
+stagnation sequence completes:
+
+do not blindly continue until 30 minutes.
+
+
+At the guard:
+
+- preserve best validated P1 incumbent
+- record current stage coverage
+- record whether a full sweep completed
+- record whether diversification completed
+- record remaining candidate visit state
+- move to P2 unless a currently running short neighborhood is needed
+  to close an atomic checkpoint
+
+
+No candidate is classified as pruned merely because the compute guard
+expired.
+
+
+Classify such candidates as:
+
+NOT_VISITED_WITHIN_P1_COMPUTE_BUDGET
+
+
+# ============================================================
+# 8. P1 LOCK
+# ============================================================
+
+After P1 terminates:
+
+P1 <= P1_ACCEPTED + existing numerical tolerance
+
+
+P2 must not degrade the accepted P1 solution.
+
+
+Do NOT use:
+
+1.03 * P1_ACCEPTED
+
+
+The optimization-gap concept does not permit degradation of the
+accepted lexicographically superior incumbent.
+
+
+# ============================================================
+# 9. P2 EARLY-STOPPING LOGIC
+# ============================================================
+
+P2 remains:
+
+mean H4 reserve shortfall GPUh
+
+
+under the fixed P1 lock.
+
+
+At the start of P2:
+
+prioritize neighborhoods associated with:
+
+- H4 reserve stress
+- relevant IDC/time windows
+- placement/migration decisions contributing to the current P2 value
+
+
+But preserve the complete scientific candidate universe.
+
+
+Run one NORMAL P2 SWEEP.
+
+
+If MATERIAL P2 IMPROVEMENT occurs:
+
+- update incumbent
+- recompute reserve-stress structure
+- allow another normal sweep while compute budget remains
+
+
+If one completed P2 sweep has no material improvement:
+
+run ONE diversification/overlap sweep.
+
+
+If diversification also gives no improvement:
+
+EARLY STOP P2
+
+and lock the accepted P2 value.
+
+
+Do not repeatedly cycle P2 after demonstrated stagnation.
+
+
+# ============================================================
+# 10. P3 EARLY-STOPPING
+# ============================================================
+
+P3 remains:
+
+minimize migration count
+
+
+under P1 and P2 locks.
+
+
+Prioritize migration-sensitive neighborhoods first,
+but do not permanently freeze other scientifically coupled
+relocation decisions if they may participate in a feasible
+lexicographic improvement.
+
+
+Run one deterministic relevant sweep.
+
+
+If no material P3 improvement occurs over the sweep:
+
+perform at most one short overlap/diversification pass if useful.
+
+
+If still no improvement:
+
+EARLY STOP P3.
+
+
+Do not spend hours proving global optimality of migration count.
+
+
+# ============================================================
+# 11. P4 EARLY-STOPPING
+# ============================================================
+
+P4 remains:
+
+minimize reference schedule deviation
+
+
+under P1-P3 locks.
+
+
+Use the same principle:
+
+- one relevant deterministic sweep
+- optional one overlap/diversification pass
+- no material improvement -> stop P4
+
+
+Respect the shared budget.
+
+
+# ============================================================
+# 12. P5 EARLY-STOPPING
+# ============================================================
+
+P5 remains inside the optimization because the current audit showed
+that it can affect actual site selection and is not merely a
+post-processing job-ID tie-break.
+
+
+Therefore do NOT remove P5.
+
+
+However P5 must also obey bounded compute.
+
+
+Use remaining shared budget.
+
+
+Run a short deterministic sweep.
+
+
+If no material P5 improvement:
+
+stop.
+
+
+Do not require global zero-gap proof.
+
+
+# ============================================================
+# 13. DO NOT USE "N CONSECUTIVE FAILED NEIGHBORHOODS" ALONE
+# ============================================================
+
+Do NOT implement:
+
+"stop after 10 failed neighborhoods"
+
+as the sole convergence rule.
+
+
+That could stop when only a small fraction of the authoritative
+candidate universe was examined.
+
+
+Primary convergence evidence must be:
+
+- sweep completion / coverage
+- no material improvement
+- one diversification attempt
+- stage guard / policy-day hard cap
+
+
+Consecutive no-improvement neighborhood count may be logged as
+diagnostic information only.
+
+
+# ============================================================
+# 14. COVERAGE IS NOT THE SAME AS OPTIMALITY
+# ============================================================
+
+Do NOT claim:
+
+100% candidate coverage == global optimality
+
+
+It does not.
+
+
+Coverage only means every authoritative candidate decision was opened
+at least once within the F&O neighborhood schedule.
+
+
+Persist:
+
+- coverage fraction
+- sweep count
+- accepted improvements
+- objective trajectory
+- whether diversification occurred
+- termination reason
+
+
+Use accurate terminology:
+
+F&O convergence / bounded-compute termination
+
+not:
+
+global optimum
+
+
+unless separately proven.
+
+
+# ============================================================
+# 15. IMPROVEMENT RESETS THE STAGNATION STATE
+# ============================================================
+
+Whenever a MATERIAL objective improvement is accepted:
+
+- set incumbent = new solution
+- recompute objective-specific structure
+- recompute critical electrical point where relevant
+- begin a fresh sweep
+- reset no-improvement state
+
+
+This is necessary because the active bottleneck can move.
+
+
+Example for P1:
+
+old:
+line L10 / phase A / 18:00
+
+after relocation:
+
+new:
+line L27 / phase C / 20:15
+
+
+The next F&O sweep must be based on the new incumbent,
+not the old critical set.
+
+
+# ============================================================
+# 16. DIVERSIFICATION DOES NOT MEAN RANDOMNESS
+# ============================================================
+
+Keep deterministic reproducibility.
+
+
+Diversification may use:
+
+- low-visit candidates
+- overlapping IDC blocks
+- overlapping time windows
+- coupled source/destination blocks
+- stale/fixed decisions not opened recently
+
+
+Do NOT use nondeterministic random candidate sampling unless an
+explicit frozen seed and reproducibility contract already exists.
+
+
+Prefer deterministic ordering.
+
+
+# ============================================================
+# 17. TERMINATION REASONS
+# ============================================================
+
+Persist an explicit termination reason for every objective stage.
+
+
+Allowed examples:
+
+FULL_SWEEP_PLUS_DIVERSIFICATION_NO_IMPROVEMENT
+
+STAGE_SOFT_GUARD_REACHED
+
+POLICY_DAY_HARD_CAP_REACHED
+
+OBJECTIVE_PROVEN_OPTIMAL
+
+OBJECTIVE_CERTIFIED_GAP_REACHED
+
+NO_REMAINING_FEASIBLE_IMPROVEMENT_IN_VISITED_NEIGHBORHOODS
+
+
+Do not simply write:
+
+TIME_LIMIT
+
+
+without stage context.
+
+
+# ============================================================
+# 18. POLICY-DAY FINAL COMPUTE CLASSIFICATION
+# ============================================================
+
+The final policy-day optimization report must include:
+
+total optimization runtime
+
+P1 runtime
+P2 runtime
+P3 runtime
+P4 runtime
+P5 runtime
+
+for each stage:
+
+- starting objective
+- accepted final objective
+- number of material improvements
+- number of normal sweeps
+- number of diversification sweeps
+- candidate coverage
+- neighborhoods solved
+- termination reason
+- best available global bound if any
+- achieved global gap if any
+
+
+Also persist:
+
+TOTAL_UNUSED_BUDGET_SECONDS
+
+
+This lets us verify that early stopping actually reduces runtime.
+
+
+# ============================================================
+# 19. CURRENT MAY-04 EVIDENCE MUST BE PRESERVED
+# ============================================================
+
+Preserve the current May-04 B1 acceptance-test evidence.
+
+
+Do NOT overwrite it.
+
+
+The existing run is valuable PRE-EARLY-STOP evidence showing:
+
+- verified feasible seed
+- candidate coverage progression
+- P1/P2 no accepted improvement
+- numerical candidate rejection behavior
+- memory usage
+- old bounded-compute trajectory
+
+
+Classify it as appropriate, for example:
+
+PRE_EARLY_STOP_ACCEPTANCE_EVIDENCE
+
+
+After implementing this revision:
+
+rerun May-04 B1 under the NEW early-stop compute contract.
+
+
+Produce a before/after comparison:
+
+OLD bounded F&O:
+- optimization runtime
+- P1 runtime
+- P2 runtime
+- candidate coverage
+- final P1-P5
+
+NEW early-stop F&O:
+- same fields
+
+
+The scientific decision/objective must not become worse merely because
+a previously accepted higher-priority incumbent was discarded.
+
+
+# ============================================================
+# 20. MAY-04 EARLY-STOP ACCEPTANCE TEST
+# ============================================================
+
+Before restarting Full May, rerun:
+
+2025-05-04 B1
+
+
+Acceptance requirements:
+
+
+A.
+verified seed PASS
+
+
+B.
+Gurobi/F&O accepts the seed immediately
+
+
+C.
+all hard physical constraints unchanged
+
+
+D.
+full candidate universe unchanged
+
+
+E.
+normal F&O neighborhoods execute correctly
+
+
+F.
+objective improvements are based on independently recomputed values
+
+
+G.
+1e-10-scale numerical noise is NOT accepted as improvement
+
+
+H.
+no-improvement sweep -> exactly one diversification attempt
+
+
+I.
+no-improvement after diversification -> stage ends early
+
+
+J.
+shared policy-day runtime <=30 minutes
+
+
+K.
+unused budget is reported
+
+
+L.
+P1-P5 locks are preserved correctly
+
+
+M.
+Fresh OpenDSS consumes the frozen decision
+
+
+N.
+Actual replay consumes the same freeze
+
+
+O.
+all persistence/readback/hash checks PASS
+
+
+# ============================================================
+# 21. IF EARLY STOP SAVES NO TIME, DIAGNOSE — DO NOT PRUNE
+# ============================================================
+
+If May-04 still uses nearly the full 30 minutes despite no objective
+improvement:
+
+inspect:
+
+- what constitutes one sweep
+- overlap between neighborhoods
+- duplicated candidate visits
+- neighborhood scheduler
+- stage coverage bookkeeping
+- excessive repeated solve work
+
+
+Do NOT respond by pruning migration candidates.
+
+
+Fix the computational schedule, not the scientific feasible set.
+
+
+# ============================================================
+# 22. FULL MAY AFTER ACCEPTANCE
+# ============================================================
+
+After May-04 B1 passes the new early-stop acceptance gate:
+
+freeze the compute-control contract
+
+and resume Full May.
+
+
+Keep:
+
+PARALLEL_DAY_WORKERS = 4
+GUROBI_THREADS_PER_DAY = 4
+
+
+For every policy-day:
+
+verified seed
+-> F&O
+-> early stopping where justified
+-> decision freeze
+-> Fresh OpenDSS
+-> Actual replay
+
+
+30 minutes remains the absolute optimization maximum,
+not the expected runtime.
+
+
+# ============================================================
+# 23. MONITORING UI
+# ============================================================
+
+Extend the existing monitor, without redesigning it, to show:
+
+- current objective stage
+- current sweep ID
+- normal/diversification mode
+- stage runtime
+- total optimization runtime
+- stage coverage
+- global candidate coverage
+- material improvements count
+- current incumbent
+- termination condition status
+- remaining policy-day budget
+
+
+This will make it obvious whether a job is:
+
+actively improving
+
+or
+
+merely consuming the remaining hard cap.
+
+
+# ============================================================
+# 24. FINAL COMPUTE PRINCIPLE
+# ============================================================
+
+The final Full-May rule is:
+
+
+30-minute hard cap
+
+PLUS
+
+sweep-based convergence.
+
+
+For each lexicographic objective:
+
+NORMAL SWEEP
+
+if improvement:
+    accept
+    recompute current structure
+    continue while justified
+
+if no improvement:
+    run ONE diversification/overlap sweep
+
+if still no improvement:
+    EARLY STOP that objective
+
+
+then proceed to the next lexicographic objective.
+
+
+Do not consume compute merely because unused budget remains.
+
+
+Do not reduce the scientific candidate universe.
+
+
+Proceed with this delta revision.

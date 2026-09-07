@@ -117,6 +117,9 @@ def freeze():
 
 def verify_release():
     release=read(RUNTIME/'FULL_MAY_FROZEN_RELEASE.json')
+    if release.get('kind')=='V41R1_BOUNDED_COMPUTE_30MIN_V1':
+        from .fo_release import verify
+        return verify()
     require(release['scientific_commit']==commit() and release['science']==science(),'CAMPAIGN_SOURCE_NOT_FROZEN')
     require(record(release['preparation']['path'])==release['preparation'],'PREPARATION_DRIFT')
     prep=read(release['preparation']['path'])

@@ -27,6 +27,10 @@ def science():
         'dayahead/v40g_segments/canonical.py','dayahead/v40g_segments/b3.py','dayahead/v40h/feedback.py','dayahead/v40a/feedback.py',
         'dayahead/v40h/pre_day_complete.py')]
     paths += [p for p in (ROOT/'dayahead/v41r1').glob('migration*.py')]
+    paths += [p for p in (ROOT/'dayahead/v41r1').glob('*.py') if p.name in (
+        'feasible_seed.py','exact_aggregation.py','candidate_manifest.py','bounded_solver.py',
+        'bounded_mess.py','bounded_runtime.py','early_stop.py')]
+    paths += [ROOT/'dayahead/v40h/recourse.py']
     return manifest(paths, ROOT)
 
 
@@ -86,14 +90,15 @@ def command_arrays(rows):
 
 def m1_identity(day, jobs, pcc, context):
     from dayahead.v40h.cache import execution_identity
+    from dayahead.v40a.invariants import digest as mess_digest
     inventory = read(SOURCE_REPO / 'dayahead/artifacts/v40h_production_integrity/CURRENT_TRANSITIVE_INPUT_INVENTORY.json')
     traffic = inventory['traffic'][day]
     segment = identities(jobs); power = planning_power(jobs, context)
     values = dict(campaign_SHA=digest({'V41_science': science()['manifest_SHA'], 'ML': context.v41_ml_snapshot_sha256}),
         A0_decision_SHA=segment['canonical_decision_SHA'], A0_segment_SHA=segment['segment_and_event_SHA'],
-        A0_GPU_SHA=digest(power['gpu']), A0_PCC_SHA=digest(pcc),
+        A0_GPU_SHA=mess_digest(power['gpu']), A0_PCC_SHA=mess_digest(pcc),
         electrical_coefficients=[c.coefficient_sha256 for c in context.coefficients],
-        traffic_forecast=traffic['forecast'], road_graph=inventory['road_graph'], route_table=traffic['route_table'],
+        traffic_forecast=traffic['forecast'], road_graph={'files':inventory['road_graph'],'canonical_SHA':traffic['forecast']['graph_SHA']}, route_table=traffic['route_table'],
         service_road_mapping=inventory['road_graph']['service_nodes'], mobility_physics=inventory['MESS_mobility'],
         MESS_electrical=inventory['MESS_electrical'], connection_delay={'source': inventory['MESS_mobility']},
         route_energy={'source': inventory['MESS_mobility']}, MESS_PCC_mapping=inventory['service_PCC_mapping'],
@@ -104,6 +109,9 @@ def m1_identity(day, jobs, pcc, context):
 
 
 def run_m1(day, jobs, context, output):
+    if getattr(context,'v41_bounded_compute',None):
+        from dayahead.v41r1.bounded_mess import run
+        return run(day,jobs,context,output)
     from dayahead.v40h.mobility import search_once
     from dayahead.v40h.beam_driver import _restore_slots
     from dayahead.v33m.mess_trajectory import MessTrajectory
@@ -130,6 +138,8 @@ def dayahead(day, policy):
     from .electrical import load
     snapshot_path, snapshot_seal = create(day)
     context = load(day); bind(context, snapshot_path, snapshot_seal['snapshot']['sha256'])
+    from dayahead.v41r1.bounded_runtime import activate
+    activate(context,policy,output)
     from .persistence import optimizer_rows
     from dayahead.v41r1.migration_persistence import pre_solve
     persistence = pre_solve(day, snapshot_path, context.capacity)
@@ -150,6 +160,9 @@ def dayahead(day, policy):
             input_manifest=record(output/'authority/INPUT_MANIFEST.json'),captured_before_optimizer=True,Actual_reads=0))
         canonical_reference = import_frozen(reference)
         power0 = planning_power(canonical_reference, context)
+        if getattr(context,'v41_bounded_compute',None) and policy in ('B0','B1'):
+            from dayahead.v41r1.feasible_seed import policy_reference
+            policy_reference(reference,context,output/'policy_seed',policy)
         objective = None; stages = {}; trajectory = None; traces = {}; previous_stage = None
         def trace(name, current, mess=None, allowed=(), frozen=(), info=None):
             nonlocal previous_stage
@@ -174,6 +187,9 @@ def dayahead(day, policy):
             base, base_receipt = verify_dayahead(day, base_policy)
             validate_reused_base(base,snapshot_seal['snapshot'],common,context)
             jobs = deepcopy(base['AIDC_decision'])
+            if getattr(context,'v41_bounded_compute',None):
+                from dayahead.v41r1.feasible_seed import policy_reference
+                policy_reference(jobs,context,output/'policy_seed',policy)
             stages['BASE_OBJECTIVE'] = read(RUNS / day / base_policy / 'dayahead/optimization/OBJECTIVE_LEDGER.json')
             stages['A0_REUSE'] = dict(source_policy=base_policy, source=record(RUNS / day / base_policy / 'dayahead/DAYAHEAD_RECEIPT.json'),
                 AIDC_decision_SHA=identities(jobs)['canonical_decision_SHA'], additional_A0_optimization_calls=0)
@@ -198,6 +214,7 @@ def dayahead(day, policy):
                     trace('A1_INPUT',current,mess,allowed=('authorized PENDING site/start',),frozen=('M1 grid/PQ','RUNNING site/start/end/migration','terminal','ML'))
                     with observe_solver(output/'optimization/solver_passes','A1'):
                         result=solve_feedback(current,mess,context)
+                    context.v41_a1_reference_choices=(deepcopy(current),deepcopy(result['jobs']))
                     trace('A1_CANDIDATE_OUTPUT',result['jobs'],mess,allowed=('authorized PENDING site/start',),frozen=('M1 grid/PQ','RUNNING site/start/end/migration'),info=result)
                     return result
                 def mf_callback(pcc,mess,certificate):
@@ -206,6 +223,10 @@ def dayahead(day, policy):
                     archive.document(output/'optimization/stages/MF_INPUT_CERTIFICATE.json',dict(
                         AIDC=certificate,frozen_M1=mess,PCC=pcc,allowed_to_change=['P/Q/SoC'],frozen=['route/discrete','AIDC']))
                     with observe_solver(output/'optimization/solver_passes','MF'):
+                        if getattr(context,'v41_bounded_compute',None):
+                            matches=[rows for rows in context.v41_a1_reference_choices if np.array_equal(planning_power(rows,context)['pcc'],pcc) and all(certificate.get(k)==v for k,v in identities(rows).items())]
+                            require(bool(matches),'MF_ACCEPTED_AIDC_REFERENCE_NOT_FOUND')
+                            context.v41_current_jobs=matches[-1]
                         return solve_fixed_route(pcc,mess,context)
                 coordinated = coordinate_segments(jobs, context,
                     m1_callback, a1_callback, mf_callback,
@@ -219,6 +240,8 @@ def dayahead(day, policy):
                 optimizer_rows(output / 'A1', context.v41_ml_snapshot, context.v41_ml_snapshot_sha256,
                                diagnostics(context.v41_ml_snapshot, context.capacity, planning_power(jobs, context)['gpu']))
                 require(coordinated['counts']['SECOND_MESS_FULL_ROUTE_SEARCH_CALLS'] == 0, 'SECOND_ROUTE_SEARCH_FORBIDDEN')
+        from dayahead.v41r1.bounded_runtime import finish
+        finish(context,output)
         from dayahead.v41r1.migration_audit import persist as persist_migration
         persist_migration(output/'aidc/migration',day,policy,reference,jobs,context)
         commands = off_commands() if trajectory is None else [asdict(s) for s in trajectory.slots]

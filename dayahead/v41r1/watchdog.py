@@ -48,22 +48,34 @@ def _monitor_processes():
     result = []
     for process in psutil.process_iter(['pid', 'cmdline']):
         command = process.info['cmdline'] or []
-        if any('monitor_v41r1_may_live.ps1' in item for item in command):
+        if any(str(item).replace('\\','/').split('/')[-1].lower()=='monitor_v41r1_may_live.ps1' for item in command):
             result.append(process.pid)
     return result
 
 
 def _restart_monitor():
     script = ROOT / 'dayahead/tools/monitor_v41r1_may_live.ps1'
-    process = subprocess.Popen(['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', str(script)],
-        cwd=ROOT, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-        creationflags=subprocess.CREATE_NEW_CONSOLE | subprocess.DETACHED_PROCESS)
+    args=['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',str(script)]
+    quote=lambda value:"'"+value.replace("'","''")+"'"
+    # CREATE_NEW_CONSOLE and DETACHED_PROCESS are mutually exclusive. WMI
+    # supplies independent parentage while the monitor gets its visible console.
+    helper=RUNTIME/'launcher_helpers'/('monitor_'+uuid.uuid4().hex+'.ps1')
+    body=("$ErrorActionPreference='Stop'\n"
+        "$s=New-CimInstance -CimClass (Get-CimClass Win32_ProcessStartup) -ClientOnly -Property @{ShowWindow=[uint16]1;CreateFlags=[uint32]16}\n"
+        "$p=Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine="+
+        quote(subprocess.list2cmdline(args))+";CurrentDirectory="+quote(str(ROOT))+";ProcessStartupInformation=$s}\n"
+        "$p | Select-Object ProcessId,ReturnValue | ConvertTo-Json -Compress\n")
+    with atomic(helper) as stream:stream.write(body.encode('utf-8-sig'))
+    created=subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',str(helper)],
+        cwd=ROOT,capture_output=True,text=True,check=True,creationflags=subprocess.CREATE_NO_WINDOW)
+    response=json.loads(created.stdout);require(response['ReturnValue']==0,'MONITOR_CIM_RESTART_FAILED')
+    pid=int(response['ProcessId'])
     time.sleep(.5)
-    alive, _ = _process(process.pid)
+    alive, _ = _process(pid)
     require(alive, 'MONITOR_RESTART_FAILED')
-    write_json(RUNTIME / 'MONITOR_LAUNCH.json', dict(opened_at=now(), pid=process.pid, path=str(script),
+    write_json(RUNTIME / 'MONITOR_LAUNCH.json', dict(opened_at=now(), pid=pid, path=str(script),
         restarted_by_watchdog=os.getpid()))
-    return process.pid
+    return pid
 
 
 def _tail(path, limit=256 * 1024):
@@ -132,6 +144,9 @@ def inspect():
         except Exception as error:
             warnings.append('MONITOR_RESTART_FAILED:' + repr(error))
     disk = shutil.disk_usage(ROOT)
+    from .campaign_run import RESULT_STORAGE_ROOT
+    result_disk=shutil.disk_usage(RESULT_STORAGE_ROOT if RESULT_STORAGE_ROOT.exists() else RESULT_STORAGE_ROOT.anchor)
+    if result_disk.free < 1024 ** 3:fatal.append('RESULT_DISK_FREE_BELOW_1_GIB')
     if disk.free < 1024 ** 3:
         fatal.append('DISK_FREE_BELOW_1_GIB')
     elif disk.free < 5 * 1024 ** 3:
@@ -153,7 +168,8 @@ def inspect():
         artifact_readback_status='PASS' if not checkpoint_errors else 'FAIL', checkpoint_consistency='PASS' if not checkpoint_errors else 'FAIL',
         state_consistency='PASS' if progress['scientific_commit'] == state['scientific_commit'] else 'FAIL',
         memory=dict(host_total_bytes=host.total, host_available_bytes=host.available,
-            campaign_snapshot=memory, OOM_indicator=False), disk=dict(free_bytes=disk.free, total_bytes=disk.total),
+            campaign_snapshot=memory, OOM_indicator=False), disk=dict(free_bytes=disk.free, total_bytes=disk.total,
+                result_volume=str(RESULT_STORAGE_ROOT),result_free_bytes=result_disk.free,result_total_bytes=result_disk.total),
         fatal=fatal, warnings=warnings, next_check_not_before_epoch=time.time() + INTERVAL_SECONDS)
     if result['state_consistency'] == 'FAIL':
         result['fatal'].append('CAMPAIGN_STATE_PROGRESS_COMMIT_MISMATCH')
