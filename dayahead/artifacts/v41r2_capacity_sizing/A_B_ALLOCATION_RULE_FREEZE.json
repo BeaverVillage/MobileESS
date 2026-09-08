@@ -1,0 +1,62 @@
+{
+  "rules": [
+    "LEGACY_SHAPE_SCALE",
+    "GENERALIZED_MINIMUM_PLUS_WEIGHTED_RESIDUAL"
+  ],
+  "weights_source": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v22s_r1_final_operating_scale\\V22SR1_PRIMARY_SITE_WEIGHTS.csv",
+    "bytes": 2842,
+    "sha256": "1fb7931dcc86b190af7e9cc0e18b3466897ea66a35a79e53e452b36524a6e63b"
+  },
+  "B_formula": "32 GPU/site + Hamilton((C_total - 384)/4 nodes, V22SR1 weights)*4",
+  "B_not_historical_identity": true,
+  "allocations": {
+    "B75": [
+      184,
+      56,
+      384,
+      56,
+      560,
+      204,
+      144,
+      220,
+      64,
+      460,
+      120,
+      484
+    ],
+    "B80": [
+      172,
+      56,
+      360,
+      56,
+      524,
+      188,
+      136,
+      208,
+      60,
+      428,
+      112,
+      452
+    ],
+    "B85": [
+      164,
+      52,
+      336,
+      52,
+      488,
+      180,
+      132,
+      196,
+      56,
+      404,
+      108,
+      424
+    ]
+  },
+  "selection_prohibited": [
+    "B1/B2/B3 objective",
+    "May realized site-assignment fitting"
+  ],
+  "rule_frozen_before_B_replay": true
+}

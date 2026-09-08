@@ -1,0 +1,2201 @@
+{
+  "case": 2,
+  "GPU_idle_W": 104.1606964512843,
+  "GPU_active_swing_W": 547.7239090195797,
+  "GPU_full_W": 651.884605470864,
+  "equation": "P_IT_i_kW=(C_i*104.1606964512843 + reserved_active_GPU_i*547.7239090195797)/1000",
+  "rack_architecture_change_required": false,
+  "rack_logical_limit_refreeze_required": true,
+  "physical_rack_count_authority": null,
+  "power_authority_change_required": true,
+  "power_parameters_change_required": false,
+  "B0_rematerialization_required": true,
+  "electrical_coefficients": {
+    "classification": "A_CONDITIONAL_EXACT_NUMERICAL_EQUIVALENCE",
+    "regeneration_required": "NO",
+    "reason": "Current AC generator takes immutable exogenous anchor_control, background/forecasts, topology/ratings and generation method. V41R1 rematerialized B0 and installed GPU counts are not numerical arguments. Capacity-dependent C1 GPU-to-PCC lookup tables are built after coefficients in planning_context. Keeping frozen anchor and coefficients unchanged is exact for those arrays; new operating-point accuracy is not certified by this algebraic fact.",
+    "required_actions": "Rebuild all 31-day GPU-to-PCC tables, H4 capacity fields and context identities; recertify coefficient equivalence under updated dependency manifests. Existing context certificates cannot be adopted unchanged.",
+    "conditional_full_regeneration": "If AC anchor is recentered to resized installed load/B0, regenerate all 31 days. No partial-day recentering equivalence has been established. Future Fresh validation needed before claiming physical safety.",
+    "days": [
+      {
+        "day": "2025-05-01",
+        "anchor_input": {
+          "SHA": "102faf95795b347a44f69f2030974fe13a8d763abc8a0b97fe4a362309b421c0",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 13988266,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-01\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-01.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-01.npz",
+            "sha256": "f70f50f5aab93570b80af5cbb69c32cfa4bd4c794427013d69af8828b954a2a0"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14555197,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250501\\kernel\\electrical\\2025-05-01\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-01.npz",
+            "sha256": "80442b0578a87c27642f49dfe1a868d4fca5f13dc884067544c87b82e9517e06"
+          },
+          "planning_coefficients": {
+            "bytes": 28497976,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "ae639237c737b074f585c28f4ce46b7e49f6f8f2ebdf0f64b9345778995bf451"
+          },
+          "transformer_coefficients": {
+            "bytes": 4461232,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "30fd9b7e510c532cd5125e0db930642843b764d377c4389e65170f79f6ed8cef"
+          },
+          "voltage": {
+            "bytes": 14002547,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250501\\kernel\\electrical\\2025-05-01\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-01.npz",
+            "sha256": "1e22788fc00570253541532f16f5f94f2bcdfb33a75b0b3be8a8beca1db9178a"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-02",
+        "anchor_input": {
+          "SHA": "b58a52e6575b7665c159285028daf08e855017e7bf65bbc1d007aa5b2f2575d8",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14004630,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-02\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-02.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-02.npz",
+            "sha256": "f3bdd7129e3113bf064c4c69a5431c7b6c025113f9ecbf18e5dcd4e4fb6f9f3c"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14553630,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250502\\kernel\\electrical\\2025-05-02\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-02.npz",
+            "sha256": "da1c6814ba245de8a69ce5c4aab0553d27d2479235985706bf3ad6d3bf23c01a"
+          },
+          "planning_coefficients": {
+            "bytes": 28485989,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250502\\kernel\\electrical\\2025-05-02\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "7cad8c9d9362578058ee3d3ee4ae312251c54d372228967cfb002ee837ebfcf0"
+          },
+          "transformer_coefficients": {
+            "bytes": 4461169,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250502\\kernel\\electrical\\2025-05-02\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "a308a1516ec98d62478339f73b7e05a4616c1894b215861317c6e9480ebe8029"
+          },
+          "voltage": {
+            "bytes": 13989438,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250502\\kernel\\electrical\\2025-05-02\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-02.npz",
+            "sha256": "69d2a68d04b3e416bd02b31b05649b2907ad06c3cdabefc61d529bc0a6b454f2"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-03",
+        "anchor_input": {
+          "SHA": "2293639ba5863a16e315cd71368031345fab9a5e31ae3617784c1e30c02601a2",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 13970970,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-03\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-03.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-03.npz",
+            "sha256": "6a562d66dd05fdca64007252dc94441dc30cd172cbb13f9e33d4be42bf46192e"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14537388,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250503\\kernel\\electrical\\2025-05-03\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-03.npz",
+            "sha256": "c062713dd4f9d4d66ef22a92223574c18a4ea1e5ae8f577142210f7c70b42787"
+          },
+          "planning_coefficients": {
+            "bytes": 28458321,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250503\\kernel\\electrical\\2025-05-03\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "f0135acf279678c405d76d77c9717b1b094f609dee967900f03192cac66664b4"
+          },
+          "transformer_coefficients": {
+            "bytes": 4453599,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250503\\kernel\\electrical\\2025-05-03\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "f5c30636430fb98548d2284fef2974f5e5594d8685f428f0b0a1b8cd26f00fcc"
+          },
+          "voltage": {
+            "bytes": 13977064,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250503\\kernel\\electrical\\2025-05-03\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-03.npz",
+            "sha256": "4c28409d908a8cff447dc3ccd9f9b320c0462c0b5080e24af03b5ed3daa23b67"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-04",
+        "anchor_input": {
+          "SHA": "5100bafdaafcbeabb9db8bd218f2036bfd6e91241cde415a4ba455ef1d6c360c",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 13995030,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-04\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-04.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-04.npz",
+            "sha256": "6a35dd33506e74275fbf2b494d4385cd3507abe5e4093c83e939b8c17849cc16"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14538586,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250504\\kernel\\electrical\\2025-05-04\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-04.npz",
+            "sha256": "da264385db3fa87791effa674ddd302a9001d23372a5eedcad87ba119d7ca021"
+          },
+          "planning_coefficients": {
+            "bytes": 28451173,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250504\\kernel\\electrical\\2025-05-04\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "d55a616c9fea714ad7dc4756aa6e764d2ced720ad84bb32f68e7ce6a6e345f35"
+          },
+          "transformer_coefficients": {
+            "bytes": 4452192,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250504\\kernel\\electrical\\2025-05-04\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "687d318faf7d57c10288d37cbf64dbf7a92ddb72bba13c25e8d4e2022a5c3b18"
+          },
+          "voltage": {
+            "bytes": 13964938,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250504\\kernel\\electrical\\2025-05-04\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-04.npz",
+            "sha256": "23b534c50ffbf4749dcd46768e39f722b0dec6dce2201ac88779a93860073185"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-05",
+        "anchor_input": {
+          "SHA": "4907e90693e9caa88c1c1ae4498357b241151397b5deb912b2ea9d5d772e0b1c",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14000958,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-05\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-05.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-05.npz",
+            "sha256": "40fab68201a084f77706d78a5f7cbaef18fef12aeb80fbfb7c4179bfffc2f01e"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14553248,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250505\\kernel\\electrical\\2025-05-05\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-05.npz",
+            "sha256": "b43fc5074a7b74dd8e7f2e7604c9ed4891cf5ecd18b548925cf27e6818a6d1f2"
+          },
+          "planning_coefficients": {
+            "bytes": 28469686,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250505\\kernel\\electrical\\2025-05-05\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "852626c51adde8e5e791d9c3ca6980a567db7d89a2e7be1c115e757cb4350d9d"
+          },
+          "transformer_coefficients": {
+            "bytes": 4458453,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250505\\kernel\\electrical\\2025-05-05\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "0352508d964227735887b0b4c113bc6a47c9b471e68ed930be207a45c6d679b0"
+          },
+          "voltage": {
+            "bytes": 13969882,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250505\\kernel\\electrical\\2025-05-05\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-05.npz",
+            "sha256": "e1d89bac06a68c9388dd12bd3f049e291d7b53714d6ee07d3e91b652e36bc1b3"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-06",
+        "anchor_input": {
+          "SHA": "c4410976039912d49b41f12888b65219d5cec526176d2af238f20e83e77b0f19",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14007577,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-06\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-06.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-06.npz",
+            "sha256": "d250e6e80007413cc93b6d074180eb4ee9355ead399d1cc6005d7192140776e5"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14552239,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250506\\kernel\\electrical\\2025-05-06\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-06.npz",
+            "sha256": "7b8426fd286ae0f0efe92081e82c6eec6977a23865bfbce2d4c234b08543ce42"
+          },
+          "planning_coefficients": {
+            "bytes": 28475014,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250506\\kernel\\electrical\\2025-05-06\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "d7cadcbe5e99fb924c2042deac062dc4e4179a7a0440cfd4b6ecf0953a4d7595"
+          },
+          "transformer_coefficients": {
+            "bytes": 4458532,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250506\\kernel\\electrical\\2025-05-06\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "93274288790c84291c79c2986ac86445ba88e5a72912dcd2a75dc0da6fd19d4a"
+          },
+          "voltage": {
+            "bytes": 13979150,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250506\\kernel\\electrical\\2025-05-06\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-06.npz",
+            "sha256": "851861dd5998aaf85b5f6ac951ad031c0b77a02a8a785edd29e3f7225252b850"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-07",
+        "anchor_input": {
+          "SHA": "947f33ff0adb27c38ab3ca790d116f9ac8314840007b19660203f6986629ec85",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14033647,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-07\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-07.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-07.npz",
+            "sha256": "33d356f8dbb5a15724ee7c66aaee7c3499efb60ece22883d4561ec7e027c9239"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14550844,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250507\\kernel\\electrical\\2025-05-07\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-07.npz",
+            "sha256": "1088a7b5ee1820e2bfdb1ec70fba2dcbe0ce9d9d7806526b5bc2079b6fbcd1c6"
+          },
+          "planning_coefficients": {
+            "bytes": 28488897,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250507\\kernel\\electrical\\2025-05-07\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "a5dab36a0f6c6503686a961f644666cfb7fa3658b0c12467db0ad1251af1c8d3"
+          },
+          "transformer_coefficients": {
+            "bytes": 4460228,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250507\\kernel\\electrical\\2025-05-07\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "3eca91fd3472085483425f68f5a9f690888ba0ff81a75a702eb5b58fe4a0fa1a"
+          },
+          "voltage": {
+            "bytes": 13997795,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250507\\kernel\\electrical\\2025-05-07\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-07.npz",
+            "sha256": "b43d3cd23af237a7be8f564f7fa48fbd9a4fe220bf0344382400f0a0811bf82a"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-08",
+        "anchor_input": {
+          "SHA": "a4e7c607c7f2929983c6cf9a3c69bb3a3d3f2250bd499aa32879f2a071f02473",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14021835,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-08\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-08.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-08.npz",
+            "sha256": "d4f86f5f177b28793b9d81f76dd063f36881ed9c42381dc1846e4088e44ebff7"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14549862,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250508\\kernel\\electrical\\2025-05-08\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-08.npz",
+            "sha256": "957b94808b0466a57adcc77b88a6cee7696c76ee6d906386a4afb92fd249441d"
+          },
+          "planning_coefficients": {
+            "bytes": 28492568,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250508\\kernel\\electrical\\2025-05-08\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "77138556426e63b05855b613b4bf166252c610758da4fc08715b8629149c8d73"
+          },
+          "transformer_coefficients": {
+            "bytes": 4461906,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250508\\kernel\\electrical\\2025-05-08\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "a3fb04dd3d4179367c0183bb6b924d01ab4f7341af541c7d4dac807424331c82"
+          },
+          "voltage": {
+            "bytes": 14002259,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250508\\kernel\\electrical\\2025-05-08\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-08.npz",
+            "sha256": "2dfcec962c62fb39247a721f09a7fefd77f1d580bb59fa010dad58c4a305dd8f"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-09",
+        "anchor_input": {
+          "SHA": "fe6760a16f0a7c4df0f039da0c84c610346f496243c8c27d63a3d646c62e69ce",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 13991996,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-09\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-09.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-09.npz",
+            "sha256": "48283a8d5a591037ebf4649474ecb0a0fdbbcb670d5a1c64b49e05b0827f2425"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14554030,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250509\\kernel\\electrical\\2025-05-09\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-09.npz",
+            "sha256": "ca3a42a66c4fa299ea41c25d2c6a8cc8b316bde67bc75eef31cf004a0aea88a6"
+          },
+          "planning_coefficients": {
+            "bytes": 28496042,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250509\\kernel\\electrical\\2025-05-09\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "caada54be6e274edbe47e8ee454b5db6a97b80f170b49c57c855adb1fa7dae26"
+          },
+          "transformer_coefficients": {
+            "bytes": 4462083,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250509\\kernel\\electrical\\2025-05-09\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "c95f81456b1baa387a26721b31a1ffcb170953854404648c5d107465b5d91876"
+          },
+          "voltage": {
+            "bytes": 14000947,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250509\\kernel\\electrical\\2025-05-09\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-09.npz",
+            "sha256": "22260cf370f50bcb34f2e2edb1f25728667f4526065627fea43455716cc7bd00"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-10",
+        "anchor_input": {
+          "SHA": "2fcb947faabd58bc35ff7b91776e740b361bd76b7234ca82ea4741413d3450b1",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 13986558,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-10\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-10.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-10.npz",
+            "sha256": "290253f2b334d0a7fd669185b29666c159ba20c1a5ad52a59ab001cf59e34674"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14532703,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250510\\kernel\\electrical\\2025-05-10\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-10.npz",
+            "sha256": "9fb8363976944bcf8b59976ce7df29162f5da26b5495fe90cade0453fda73ee8"
+          },
+          "planning_coefficients": {
+            "bytes": 28453139,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250510\\kernel\\electrical\\2025-05-10\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "52d933cb1bd877c566dad778bbf34d99be56a38c772ff684ca85be7f3a2e132a"
+          },
+          "transformer_coefficients": {
+            "bytes": 4455372,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250510\\kernel\\electrical\\2025-05-10\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "90b5eff888755313312d387b6d3de329edbb038269e94c9455f1a1ae6ed04e81"
+          },
+          "voltage": {
+            "bytes": 13975129,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250510\\kernel\\electrical\\2025-05-10\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-10.npz",
+            "sha256": "11b9c181d0bb929ea104b699631596e6df02bd1907f28c361080385968d7ee8c"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-11",
+        "anchor_input": {
+          "SHA": "992b372aeb3117f25755a85f511a2ad323b1877647bfcf09b6266b2a74283092",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14014741,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-11\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-11.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-11.npz",
+            "sha256": "b90dbf5738db1dc1492dc8682d3578d29bf19ec528d7fbf3022d1f3f71feeb0f"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14536344,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250511\\kernel\\electrical\\2025-05-11\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-11.npz",
+            "sha256": "f226b251f8a7ed815b705fd9ab6d5f421051824790216007821712d777169495"
+          },
+          "planning_coefficients": {
+            "bytes": 28465544,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250511\\kernel\\electrical\\2025-05-11\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "126d43b6a954a9ae3787ced6a7c100d5a6ce2632414af9328ee807d42f7fddcb"
+          },
+          "transformer_coefficients": {
+            "bytes": 4453405,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250511\\kernel\\electrical\\2025-05-11\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "6e7a7963a3355d1864a08b13ad00b24d08dae7bb1ff6578c051258c99bee9d58"
+          },
+          "voltage": {
+            "bytes": 13986788,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250511\\kernel\\electrical\\2025-05-11\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-11.npz",
+            "sha256": "225712df86399b97985089ad14373a2bd901ce5ad79a97edd5ae162c3b661b4b"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-12",
+        "anchor_input": {
+          "SHA": "f3bed3e3a00c91e418f5dbe7925149fc7a9a8f74c4f62fb1e3d34e0d2a9af546",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 13988481,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-12\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-12.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-12.npz",
+            "sha256": "1b7994301b62a434d58a1f13c0ddb7e2944fa46dd28bddac64702d8d5d4045ef"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14554270,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250512\\kernel\\electrical\\2025-05-12\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-12.npz",
+            "sha256": "3658ec31aa5116bcfbd52b8eb57cb8b1c2cd4db86698ddf4e324b2a59e78db31"
+          },
+          "planning_coefficients": {
+            "bytes": 28498337,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250512\\kernel\\electrical\\2025-05-12\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "97a83ecdf97fda4287cfa65d8a8d40727887c2971856f78b67e87a0541749ee8"
+          },
+          "transformer_coefficients": {
+            "bytes": 4460958,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250512\\kernel\\electrical\\2025-05-12\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "5e7b7461a6c780e7ab3b53ec39ad7b25504678295b34f499f94ba5c2b778efd4"
+          },
+          "voltage": {
+            "bytes": 14005125,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250512\\kernel\\electrical\\2025-05-12\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-12.npz",
+            "sha256": "62b1bd97e288d67af793697636b12b81e05292e1817606eee2401365f4e2fce6"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-13",
+        "anchor_input": {
+          "SHA": "784def04456f3c0721b25d0c78f1765051ac9c8ac4be0d2988b79d97f9c812a1",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 13994417,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-13\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-13.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-13.npz",
+            "sha256": "1918f3ce6e27ea74515d711dd455d850f70a81b4ca09715ee2e3c760a0048f6e"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14551936,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250513\\kernel\\electrical\\2025-05-13\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-13.npz",
+            "sha256": "782d899fb11b73e2322cfa91d6e8b6cf24151954445d163423d2137d01b767f0"
+          },
+          "planning_coefficients": {
+            "bytes": 28496918,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250513\\kernel\\electrical\\2025-05-13\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "98053d158d834f601c371688de5ca024657f0b21d050481517d47209431620ab"
+          },
+          "transformer_coefficients": {
+            "bytes": 4461725,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250513\\kernel\\electrical\\2025-05-13\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "c42fd0347527b43966383e0771371c4659cf6516248b3a390c5cb08dad098862"
+          },
+          "voltage": {
+            "bytes": 14005603,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250513\\kernel\\electrical\\2025-05-13\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-13.npz",
+            "sha256": "238eaac8c4dda8ec440f84d8b4857823e6ef65770691378390014be9549dc6f4"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-14",
+        "anchor_input": {
+          "SHA": "bf209b789caf78ae973241116cfae7eb992acca0c9ccaf29f9ad4b6cc7598265",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 13994620,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-14\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-14.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-14.npz",
+            "sha256": "3786cac322c9489fb17d66e280362fcd6246dac2ba766973a9f89477ab002155"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14553866,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250514\\kernel\\electrical\\2025-05-14\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-14.npz",
+            "sha256": "312812d942b8875be294d1359f726f2891a7d06172296f117ccc2826571d63ea"
+          },
+          "planning_coefficients": {
+            "bytes": 28501508,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250514\\kernel\\electrical\\2025-05-14\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "efbb138df069cef419aa32720200367dc2b3c7d39e62104c0749123f782db1c9"
+          },
+          "transformer_coefficients": {
+            "bytes": 4462235,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250514\\kernel\\electrical\\2025-05-14\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "28c800a6ddf191819f0a58c017524aea71a77b95d0ccbe5016579a7bee521be6"
+          },
+          "voltage": {
+            "bytes": 14008979,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250514\\kernel\\electrical\\2025-05-14\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-14.npz",
+            "sha256": "afad5518a1dbb4c7c8860feeb2daf67e028e9ca4015bc7185ba264411ab1d40b"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-15",
+        "anchor_input": {
+          "SHA": "89ad7811a032dfc111c7cefff4c8ac27707136f5e37fab0ff77057c09472d55c",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14019447,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-15\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-15.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-15.npz",
+            "sha256": "80ca673750dca717638b5b0436f4cf82b6be3940a3f2836703bb537a5aa8088e"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14550309,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250515\\kernel\\electrical\\2025-05-15\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-15.npz",
+            "sha256": "9defc769829c3b2c199b1360268f80974e9372bdae9d4981b6ba3d19a72297a2"
+          },
+          "planning_coefficients": {
+            "bytes": 28492529,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250515\\kernel\\electrical\\2025-05-15\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "a190113f5e966083c799cc622e83c67bb7e253324bf14b514b9cea63aa7535ed"
+          },
+          "transformer_coefficients": {
+            "bytes": 4461998,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250515\\kernel\\electrical\\2025-05-15\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "95b11eacd71b371813efe7410af73d6df07548c91320b7f0d2440fc9a57d9ffc"
+          },
+          "voltage": {
+            "bytes": 14000723,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250515\\kernel\\electrical\\2025-05-15\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-15.npz",
+            "sha256": "53f0c6f10a978098c0bcdcde1d05a2df5b01559b52e51eb4f47d74ef33b1e769"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-16",
+        "anchor_input": {
+          "SHA": "7080b74fcf654e8e0e16f1975606c7f8d9563ff3ca10ecdbbc97e3affa13c487",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14008798,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-16\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-16.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-16.npz",
+            "sha256": "a0a2a7a96d648cb2214371e5b70c1567d8d6452d1ee03b2958484993f20eee72"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14550473,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250516\\kernel\\electrical\\2025-05-16\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-16.npz",
+            "sha256": "272df7c3234104191f6d87528cd3718cd77f1911e995da61a3c9efedc5b79a4c"
+          },
+          "planning_coefficients": {
+            "bytes": 28478616,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250516\\kernel\\electrical\\2025-05-16\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "8b02d7ed3ea5f01baad81d30bfa1c04981e03dfebbad648fc57d4a74a2b43c6e"
+          },
+          "transformer_coefficients": {
+            "bytes": 4461623,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250516\\kernel\\electrical\\2025-05-16\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "d01b9103ae89af8bab2ee21b4763ed4af62f0b749104940c85c503db2efcb1b0"
+          },
+          "voltage": {
+            "bytes": 13983505,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250516\\kernel\\electrical\\2025-05-16\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-16.npz",
+            "sha256": "d1c47f8ec62ae6e2672214b193afcb75fc352520a0fd54a28f2bab99a7637f9d"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-17",
+        "anchor_input": {
+          "SHA": "81cc940f2650c25cd9bfd72c769f777c425eb13b6f01a6295088b8d9c6270b89",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14034675,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-17\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-17.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-17.npz",
+            "sha256": "870a578dbe5ae1aa0f6b59434815520d45a70595e13e582f22a16436555e4b10"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14527968,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250517\\kernel\\electrical\\2025-05-17\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-17.npz",
+            "sha256": "ec3066a61138dbaf8aaf563fdef304fd74038b2996ae2aadd6933855eeb77469"
+          },
+          "planning_coefficients": {
+            "bytes": 28502382,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250517\\kernel\\electrical\\2025-05-17\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "f36a3e9b07b887ab0cb9855fa0fd3477c164ef167c6ff02149d5072589f1cadc"
+          },
+          "transformer_coefficients": {
+            "bytes": 4460315,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250517\\kernel\\electrical\\2025-05-17\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "047311758f222b84fbe9dd5570ac90f8eee7d2623101e8dfcc0586bbb501cfd9"
+          },
+          "voltage": {
+            "bytes": 14040497,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250517\\kernel\\electrical\\2025-05-17\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-17.npz",
+            "sha256": "b9f7f08aaab941950389563069571311b9f0a294b873231f7adc1df93428b728"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-18",
+        "anchor_input": {
+          "SHA": "58f827b8f1a9a28dd7f7cf2b623ae45deb10f091172b2b9daf55c60ddccaf59a",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14007913,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-18\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-18.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-18.npz",
+            "sha256": "0a382dd6e6efb3ab3f2a261aea2f74c89ad37e68c380fd64cb255386867e0517"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14528527,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250518\\kernel\\electrical\\2025-05-18\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-18.npz",
+            "sha256": "d4e795dc440164d15e408cc30e121da06962d675be4cb2654eb05799c51aa33a"
+          },
+          "planning_coefficients": {
+            "bytes": 28497301,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250518\\kernel\\electrical\\2025-05-18\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "c19e848e6dc3dd7993ea143aa21721143e89d49e6e167659cd0139eca1186908"
+          },
+          "transformer_coefficients": {
+            "bytes": 4457961,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250518\\kernel\\electrical\\2025-05-18\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "8c9dafd4be165f321b29226951dfe1b8c981f6ef88bd41f6a350233b114485e4"
+          },
+          "voltage": {
+            "bytes": 14034980,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250518\\kernel\\electrical\\2025-05-18\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-18.npz",
+            "sha256": "a809766752b63993e3c51b6308f344484355d45a0d4103d4d3bd950a3ccb4dee"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-19",
+        "anchor_input": {
+          "SHA": "5e78279ef8a84e911b7935367c340fbb1918492f1d54805cbcdf4339c5a6aa1b",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14032889,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-19\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-19.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-19.npz",
+            "sha256": "79663888f229e8af4339a7ed10ff413930558ead415ee612060055bb7950a2d8"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14552977,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250519\\kernel\\electrical\\2025-05-19\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-19.npz",
+            "sha256": "8aaa8808151627e8e871def51099c21db66e1433a25be93954cb4a1bc9f1550d"
+          },
+          "planning_coefficients": {
+            "bytes": 28507532,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250519\\kernel\\electrical\\2025-05-19\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "9e251b3674eead994769eb1881d4ac6cf0670c4d3427bfc366630cf7b91d9f28"
+          },
+          "transformer_coefficients": {
+            "bytes": 4463649,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250519\\kernel\\electrical\\2025-05-19\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "8883882bbc3026a6304125892c36011ce787bf76d999fc2aa97c19a0b1c3fc23"
+          },
+          "voltage": {
+            "bytes": 14016710,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250519\\kernel\\electrical\\2025-05-19\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-19.npz",
+            "sha256": "255ac987571262eceab41a3beaa42fe4360fc37c8f1269fdcebaaaafdbe79d8f"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-20",
+        "anchor_input": {
+          "SHA": "fd3b657f667b26539831698a42a174993d0ba4b806fee98b778484ef2f45c815",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14028021,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-20\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-20.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-20.npz",
+            "sha256": "539bb97db6a82ff92e03dd29d554899e6f4df3aa213f1663d43add82ee5e487b"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14552755,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250520\\kernel\\electrical\\2025-05-20\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-20.npz",
+            "sha256": "0f3a3d9aa2b730bd27d39ff0af57c31e48aa8e607eb1ee14b5617eccb14bfa79"
+          },
+          "planning_coefficients": {
+            "bytes": 28513206,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250520\\kernel\\electrical\\2025-05-20\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "b9d33d55ef2d3921f03ff9d53f581a9dfabcfc8f2996edbbaf4c15b17ffa3ddf"
+          },
+          "transformer_coefficients": {
+            "bytes": 4463992,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250520\\kernel\\electrical\\2025-05-20\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "48394ae7cf152f5ae22a616f7b260d2d016f085b7cbc8d5f10ae6d25c263d33a"
+          },
+          "voltage": {
+            "bytes": 14025111,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250520\\kernel\\electrical\\2025-05-20\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-20.npz",
+            "sha256": "e3985bd9fc3e4eeffbed714ee07a8d9e8c5ca6da6034522afb8d96fb8d7606e3"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-21",
+        "anchor_input": {
+          "SHA": "258657c01b712ba089a090fdb6dcc75b350cfc10224b8bedee2fbe14ef093697",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14038629,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-21\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-21.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-21.npz",
+            "sha256": "4bf799526961f6a10d0c3d709a7505b18247ea5a8f39362a35c2f5c3a9bbe6b8"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14552307,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250521\\kernel\\electrical\\2025-05-21\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-21.npz",
+            "sha256": "ef1dba06030c4fc6a7dca94ca30075c66bfe9089243ca02ba1ad0b7eca18db1c"
+          },
+          "planning_coefficients": {
+            "bytes": 28503982,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250521\\kernel\\electrical\\2025-05-21\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "9181b33f36425722a2ef8ab77d1965c0b0cfbdfc4a89c1a481b14c2ba67cff5c"
+          },
+          "transformer_coefficients": {
+            "bytes": 4463760,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250521\\kernel\\electrical\\2025-05-21\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "2439353928f8adc34c50a00a5d618752af824b3018116bd47e6453bb846ba552"
+          },
+          "voltage": {
+            "bytes": 14013643,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250521\\kernel\\electrical\\2025-05-21\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-21.npz",
+            "sha256": "4a7683ad39db6777a572d2521e6ce5178ee660f5edc7dac37ff793a6ad00e3b5"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-22",
+        "anchor_input": {
+          "SHA": "c3b0361dbb4568593b1ae0879c761a20ec0a5f26c28bf0c3d942ba2b873ae748",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14026209,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-22\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-22.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-22.npz",
+            "sha256": "5187ee07009f5c2361c8ad77ce753e2378c6e8800e122c13f23fd5d3060581a9"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14548350,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250522\\kernel\\electrical\\2025-05-22\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-22.npz",
+            "sha256": "27ad6ea764c415b15971bee768bd40fa67bc7c099210f8b358de202505748bc4"
+          },
+          "planning_coefficients": {
+            "bytes": 28506895,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250522\\kernel\\electrical\\2025-05-22\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "659c2d90145b1668cca5e66442836783797e8159408b44cfeea304ffc5a460d9"
+          },
+          "transformer_coefficients": {
+            "bytes": 4463917,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250522\\kernel\\electrical\\2025-05-22\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "df39c1ea1c2e038014e92cb2beef16ae8bffe5220596bf4d41ce8139c116d155"
+          },
+          "voltage": {
+            "bytes": 14020988,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250522\\kernel\\electrical\\2025-05-22\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-22.npz",
+            "sha256": "930733d9733545e3a7a5371212d7055ae2954bd5b4389d05406892021cb12bab"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-23",
+        "anchor_input": {
+          "SHA": "3a78d6484a6a530186705722af5ad8451b4446d7a42715dcabc9535f41647669",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14040694,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-23\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-23.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-23.npz",
+            "sha256": "643a28e915e8feabf8e3543f6565899f9462c9b1e542d9ef9dae943271bdf675"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14550780,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250523\\kernel\\electrical\\2025-05-23\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-23.npz",
+            "sha256": "d7125316d4bb4b87bf4f86585f97135945f7f4c3b75f25b77cde811261cbb24f"
+          },
+          "planning_coefficients": {
+            "bytes": 28521915,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250523\\kernel\\electrical\\2025-05-23\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "6dcb03330aef5d9a8219d0a2c5fa2f9db6b218baffb910e6abcd3e666dc4fc7d"
+          },
+          "transformer_coefficients": {
+            "bytes": 4465601,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250523\\kernel\\electrical\\2025-05-23\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "a8367029a65f4713b529034ae89b86934d5d70f658731cf785284bf447c8f20d"
+          },
+          "voltage": {
+            "bytes": 14037447,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250523\\kernel\\electrical\\2025-05-23\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-23.npz",
+            "sha256": "3008e02d1918f367691060fe775195734a1eb29a10ff03fdc94db5ae395e0bd4"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-24",
+        "anchor_input": {
+          "SHA": "ea6f139779b09d70b1f040c1b37a18ec707f05335bed70d4b6c01cc12fe015bc",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 13995434,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-24\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-24.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-24.npz",
+            "sha256": "45b0da6b9e8bb1ae7783e8557bad5319215f790c40e9ba09772ddec2104fd2ca"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14529066,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250524\\kernel\\electrical\\2025-05-24\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-24.npz",
+            "sha256": "9b620dcb78295431706dcce8a16ef6797a2788eac14693eff0a48d38d15cdd54"
+          },
+          "planning_coefficients": {
+            "bytes": 28459932,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250524\\kernel\\electrical\\2025-05-24\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "1a9a76de997c49a0fe1eaef19f48c9a4c0052819bc46fdb0ba82a6c65e2df9ed"
+          },
+          "transformer_coefficients": {
+            "bytes": 4455942,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250524\\kernel\\electrical\\2025-05-24\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "8b11a9f52959933c3332acfcc778e9169c0a8fd54a6a1851107684c4e9d36e8e"
+          },
+          "voltage": {
+            "bytes": 13988711,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250524\\kernel\\electrical\\2025-05-24\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-24.npz",
+            "sha256": "effaae31e802a712b97d77319e5a1513fe0ae9cb936ac2324febba8352d68fb1"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-25",
+        "anchor_input": {
+          "SHA": "82c179a813cee1cc763057dff85a44ef675252faec0345b56f3fc6de4e5e6bfc",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 13993674,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-25\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-25.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-25.npz",
+            "sha256": "df12b54b403f46365a4dcd227533c5db0ce7a401feb7686dfbf1ce6463ebbb6d"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14532442,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250525\\kernel\\electrical\\2025-05-25\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-25.npz",
+            "sha256": "914b9500a59598f62592aa69ef39cf78081f1d15a0e54c92fcb7f808e944e7ad"
+          },
+          "planning_coefficients": {
+            "bytes": 28474420,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250525\\kernel\\electrical\\2025-05-25\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "c889e47f20d9a339141336ee70c6854215366a592291a0a9239df6dbe11140d3"
+          },
+          "transformer_coefficients": {
+            "bytes": 4455760,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250525\\kernel\\electrical\\2025-05-25\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "5cb0a8d9a5bdebee71cbf1bb4596ab9f84ada7e79db421142bbd209b54a6d75d"
+          },
+          "voltage": {
+            "bytes": 14002580,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250525\\kernel\\electrical\\2025-05-25\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-25.npz",
+            "sha256": "ff56d09f69f3430a8adae0b82991191a0e223c1ca04c62a2d719c540d0b8553f"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-26",
+        "anchor_input": {
+          "SHA": "ed28330ba76a71744aea14ec84ec2fc3af91712b438caf3f60ff739645fd24d7",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14000126,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-26\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-26.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-26.npz",
+            "sha256": "53c5c8c53a7ef81047dccf29f99eceb527f387887d1348f252b3be75ec916cd4"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14552564,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250526\\kernel\\electrical\\2025-05-26\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-26.npz",
+            "sha256": "c5e303b2083cb33a6004781a84520ce9033fef36277891373e063fd355e7cf5e"
+          },
+          "planning_coefficients": {
+            "bytes": 28491541,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250526\\kernel\\electrical\\2025-05-26\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "cfefb4f50ba2dbac144d37a8966f6a2325d564bd7176c028a9aebd2a0693e2d9"
+          },
+          "transformer_coefficients": {
+            "bytes": 4460852,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250526\\kernel\\electrical\\2025-05-26\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "6e918bd42045d668c61caf0e176d39137795a5f689d57d7203d01b45f4ebcb6d"
+          },
+          "voltage": {
+            "bytes": 13999818,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250526\\kernel\\electrical\\2025-05-26\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-26.npz",
+            "sha256": "3063e8fce5565187a9bec22c3beb6a891d265ae66fd08ef11b747367725d36f5"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-27",
+        "anchor_input": {
+          "SHA": "aff033b58dd00509e23c29681131f6b6efa4ece3bad12b23cb61b674c7454e91",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14012847,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-27\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-27.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-27.npz",
+            "sha256": "d7321261b67ea8e1615a4d79bb95a2cfb313880c7f480592ee3c0431b4eca67d"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14550524,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250527\\kernel\\electrical\\2025-05-27\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-27.npz",
+            "sha256": "1f2715fe6e05852bec68fa67ff9e703c1194034794dbefba4297faccb36549c1"
+          },
+          "planning_coefficients": {
+            "bytes": 28505734,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250527\\kernel\\electrical\\2025-05-27\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "776698d6e31051d3be9c7b9e30d076d98bbd64617559c27123ec0c4f7aa5127f"
+          },
+          "transformer_coefficients": {
+            "bytes": 4462774,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250527\\kernel\\electrical\\2025-05-27\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "07f42fe1230eaf3fde0396963a8a96bc0ccff9c86249835d2fe999d4a481f544"
+          },
+          "voltage": {
+            "bytes": 14018168,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250527\\kernel\\electrical\\2025-05-27\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-27.npz",
+            "sha256": "c44298fd5d71f10bd0fae591030b2f6b1495805f34cb45a92d868b72d254b816"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-28",
+        "anchor_input": {
+          "SHA": "14ecd6198962f4f699dcb082f35370eded681db01b543ea36849fafb6bbbf35d",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14027150,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-28\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-28.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-28.npz",
+            "sha256": "91ab2738a8326ae0a122dbd96784b725f5bbab784f432b8106979430dce25ba2"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14547759,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250528\\kernel\\electrical\\2025-05-28\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-28.npz",
+            "sha256": "83e113c2567ae0060f1c95c0db1630aabb243a053fbda5cf74995786963f9835"
+          },
+          "planning_coefficients": {
+            "bytes": 28511291,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250528\\kernel\\electrical\\2025-05-28\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "44486a2eb1393e27a360e76090385df914b46cda7cba6b9f4fcfb0f4b3ce77e2"
+          },
+          "transformer_coefficients": {
+            "bytes": 4463315,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250528\\kernel\\electrical\\2025-05-28\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "1575d821948c2347f14cfd14b371d7f11028a1cb69b8ab15cef923a2dc3a261c"
+          },
+          "voltage": {
+            "bytes": 14029130,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250528\\kernel\\electrical\\2025-05-28\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-28.npz",
+            "sha256": "76d105ab817e1fa10e818faf6ea26db519b9343acf3313786722f340714e662b"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-29",
+        "anchor_input": {
+          "SHA": "5f59d77de4e4b9fe5f064c08d1a0b8a057bcb2f5bd210906b6f77a7bd9e681b6",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14010293,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-29\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-29.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-29.npz",
+            "sha256": "ac706401c5db01faa361b0b1d29221a3c089a7ea1d39134cc37a71b9a643fc70"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14550004,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250529\\kernel\\electrical\\2025-05-29\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-29.npz",
+            "sha256": "f2e6a09837a8746a1ed007ddd94d40b53787b9f71729f106fdff72750a809f05"
+          },
+          "planning_coefficients": {
+            "bytes": 28499419,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250529\\kernel\\electrical\\2025-05-29\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "ec2d28e17c149e12da2b7af03dd48bd0314b7106564f7287058cb293cb30ff8c"
+          },
+          "transformer_coefficients": {
+            "bytes": 4462742,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250529\\kernel\\electrical\\2025-05-29\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "59d8a232d93441a9a9018429b616851f0974f5d2a897f85b4a920c5f70adf6b5"
+          },
+          "voltage": {
+            "bytes": 14010526,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250529\\kernel\\electrical\\2025-05-29\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-29.npz",
+            "sha256": "072a328df30efae84bd8305cb5226b266658dba41e9a6c3da13dc219f9d050e0"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-30",
+        "anchor_input": {
+          "SHA": "eab1dead3961086fa571c84b933b1d2ff278fe5762c5276d4766426cb18bb3a1",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14020815,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-30\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-30.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-30.npz",
+            "sha256": "f5f316a9feb3da567959759c0da043a2367fde344e40a600f45d8fa08f2e0c14"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14549468,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250530\\kernel\\electrical\\2025-05-30\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-30.npz",
+            "sha256": "f62bc008ef3a8e9645fb53dfea3f58f2fae66c55ca8426295d86edd4364a7c0c"
+          },
+          "planning_coefficients": {
+            "bytes": 28501886,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250530\\kernel\\electrical\\2025-05-30\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "59578b7870baadeadcbbc0aa780875c714aa1dad30e60184ac551b724483f7b7"
+          },
+          "transformer_coefficients": {
+            "bytes": 4463032,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250530\\kernel\\electrical\\2025-05-30\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "c32d25487b080b08fbd4396d6639c251950457707817ee1fd12f92f2178097db"
+          },
+          "voltage": {
+            "bytes": 14014842,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250530\\kernel\\electrical\\2025-05-30\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-30.npz",
+            "sha256": "7a643bff5ba290f546521b7fe787f84f33f9944381638408ad681879c68bb178"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      },
+      {
+        "day": "2025-05-31",
+        "anchor_input": {
+          "SHA": "7ad1fed3a9f11579989774f17b6fb80bf46675ce96073d48f9cd343034ba197d",
+          "role": "EXOGENOUS_INPUT_ONLY_NOT_HISTORICAL_AC_OUTPUT",
+          "source_container": {
+            "bytes": 14022861,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\electrical\\2025-05-31\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-31.npz",
+            "relative_path": "D1_AC_ANCHOR_SENSITIVITY_2025-05-31.npz",
+            "sha256": "718205d845427c907adcc273be15bbf08ef16accf2c0f59a89ab6eceef0b8338"
+          }
+        },
+        "generation_input_keys": [
+          "AC_anchor_input",
+          "AIDC_power_C1",
+          "OpenDSS_master",
+          "PCC_mapping",
+          "PV",
+          "V41_authority",
+          "V41_generation_entrypoint",
+          "V41_generation_source",
+          "alpha_grid",
+          "axes",
+          "background_mapping",
+          "current_generation",
+          "day",
+          "demand",
+          "feeder_manifest",
+          "generation_source",
+          "line_ratings",
+          "native_allocation_authority",
+          "native_controls",
+          "native_mapper",
+          "service_PCC_mapping",
+          "transformer_generation",
+          "transformer_ratings",
+          "voltage_generation",
+          "weather"
+        ],
+        "outputs": {
+          "current": {
+            "bytes": 14528588,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250531\\kernel\\electrical\\2025-05-31\\data\\D1_AC_ANCHOR_CURRENT_SENSITIVITY_2025-05-31.npz",
+            "sha256": "44212c8f25d09f9b2a3ddfbd37ac422c192e76cbf99a0b29ca33a00dd0993e8d"
+          },
+          "planning_coefficients": {
+            "bytes": 28484778,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250531\\kernel\\electrical\\2025-05-31\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+            "sha256": "71a5d53b4cb64a9572ba19e26260cbdad5120d467132ee580c432c8869d9281e"
+          },
+          "transformer_coefficients": {
+            "bytes": 4459259,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250531\\kernel\\electrical\\2025-05-31\\V40I_TRANSFORMER_COEFFICIENTS.npz",
+            "sha256": "ba66b079ec52df193a994733d43b0e557a62637b51fe68ae175a25bb461c0386"
+          },
+          "voltage": {
+            "bytes": 14020263,
+            "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250531\\kernel\\electrical\\2025-05-31\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-31.npz",
+            "sha256": "bf8b5470ae7dbeae91a1245bd9f2c0f838a172896d56b65ab51061abb300842d"
+          }
+        },
+        "capacity_in_numeric_generation_input": false,
+        "reference_B0_in_numeric_generation_input": false,
+        "capacity_in_context_dependency_copies": true
+      }
+    ],
+    "thermal_coefficients_unchanged": true,
+    "numerical_generation_source": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v40e\\electrical.py",
+      "bytes": 20271,
+      "sha256": "15a4d2936fd7a5e1c1d4502913f98038e5da781ce2660a5c98055ede73911882",
+      "field": null,
+      "creating_commit": "67458be58fa5923fa27c566b1d9ff77d9d10ec0c",
+      "github": "https://github.com/BeaverVillage/MobileESS/blob/67458be58fa5923fa27c566b1d9ff77d9d10ec0c/dayahead/v40e/electrical.py",
+      "locations": [
+        {
+          "line": 41,
+          "text": "def upstream(repo,day):"
+        },
+        {
+          "line": 50,
+          "text": "control=np.asarray(z['anchor_control']).copy();plan=control[:,:12];recorded=str(z['plan_sha256'])"
+        },
+        {
+          "line": 206,
+          "text": "def planning_context(repo,day):"
+        },
+        {
+          "line": 224,
+          "text": "coefficients=tuple(coeff);attach_context(coefficients,e.legacy_context)"
+        },
+        {
+          "line": 225,
+          "text": "capacity,_=_load_capacity(repo);c1path=repo/'dayahead/artifacts/v24t_thermal_aware_aidc/V24T_C1_QUASISTATIC_MODEL.json';c1=load_c1(c1path)"
+        },
+        {
+          "line": 228,
+          "text": "it=np.array([float(site_it_power_kw(cap,g)) for g in range(cap+1)])"
+        }
+      ]
+    },
+    "slot_coefficients_source": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v28r2\\electrical_subproblem.py",
+      "bytes": 18609,
+      "sha256": "7fe0aa865f849ff1ffc49f3d49519e0df2931a1c1f8cff1ae7f5416ca1e22221",
+      "field": null,
+      "creating_commit": "c72af3069ff8d6e814549e403610ea88143a0ed9",
+      "github": "https://github.com/BeaverVillage/MobileESS/blob/c72af3069ff8d6e814549e403610ea88143a0ed9/dayahead/v28r2/electrical_subproblem.py",
+      "locations": [
+        {
+          "line": 151,
+          "text": "def slot_coefficients(context: object, voltage: object, current: object, slot: int) -> SlotCoefficients:"
+        },
+        {
+          "line": 169,
+          "text": "binding.factories[slot].data.transformer_limit_kva.get((row.branch_id, row.phase))"
+        }
+      ]
+    }
+  },
+  "power_source": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v39a\\power.py",
+    "bytes": 4101,
+    "sha256": "7b5899b0b0ae15a1d1515e49b6664cef9d9c968d968cabc1bfe40a5c21ae77c5",
+    "field": null,
+    "creating_commit": "d6583b5f7587bb0e73a0925a3a90386be3ea9d32",
+    "github": "https://github.com/BeaverVillage/MobileESS/blob/d6583b5f7587bb0e73a0925a3a90386be3ea9d32/dayahead/v39a/power.py",
+    "locations": [
+      {
+        "line": 27,
+        "text": "def site_it_power_kw(site_capacity_gpu: int, active_gpu: int) -> Decimal:"
+      },
+      {
+        "line": 35,
+        "text": "Decimal(capacity) * IDLE_W_PER_GPU"
+      },
+      {
+        "line": 36,
+        "text": "+ Decimal(active) * CENTER_SWING_W_PER_GPU"
+      },
+      {
+        "line": 40,
+        "text": "def aggregate_it_power_kw(active_gpu: int) -> Decimal:"
+      }
+    ]
+  },
+  "parameters_source": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v39a\\contracts.py",
+    "bytes": 2050,
+    "sha256": "2e69721fc48495d19bba97d08b1f12d140dfb36d580369fe0d60f062287a1446",
+    "field": null,
+    "creating_commit": "d6583b5f7587bb0e73a0925a3a90386be3ea9d32",
+    "github": "https://github.com/BeaverVillage/MobileESS/blob/d6583b5f7587bb0e73a0925a3a90386be3ea9d32/dayahead/v39a/contracts.py",
+    "locations": [
+      {
+        "line": 45,
+        "text": "FULL_ACTIVE_IT_KW = Decimal(\"406.775993813819\")"
+      },
+      {
+        "line": 46,
+        "text": "C_REF_W_PER_GPU = Decimal(\"651.884605470864\")"
+      },
+      {
+        "line": 47,
+        "text": "CENTER_SWING_W_PER_GPU = Decimal(\"547.7239090195797\")"
+      },
+      {
+        "line": 48,
+        "text": "IDLE_W_PER_GPU = C_REF_W_PER_GPU - CENTER_SWING_W_PER_GPU"
+      }
+    ]
+  },
+  "H4_source": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v41\\reserve.py",
+    "bytes": 6519,
+    "sha256": "f0b6fd207321599f8903ac842025907a0f12b10b9aa41cf7aca79344c8e090ba",
+    "field": null,
+    "creating_commit": "e3deed627b87743d2b96e71536e44be6184120f2",
+    "github": "https://github.com/BeaverVillage/MobileESS/blob/e3deed627b87743d2b96e71536e44be6184120f2/dayahead/v41/reserve.py",
+    "locations": [
+      {
+        "line": 36,
+        "text": "def cap_reserve(raw, historical_pool, capacity_gpu):"
+      },
+      {
+        "line": 44,
+        "text": "physical = windows(capacity_gpu.sum(axis=1))"
+      },
+      {
+        "line": 45,
+        "text": "actionable = np.minimum(raw, np.minimum(historical, physical))"
+      },
+      {
+        "line": 98,
+        "text": "headroom = DT_HOURS * gp.quicksum(float(cap[t, i]) - known_load[t, s]"
+      }
+    ]
+  },
+  "candidate_results": {
+    "B75": {
+      "installed_idle_IT_delta_kW": 240.8195301953693,
+      "full_active_IT_kW": 1913.933201662457
+    },
+    "B80": {
+      "installed_idle_IT_delta_kW": 221.653962048333,
+      "full_active_IT_kW": 1793.9864342558176
+    },
+    "B85": {
+      "installed_idle_IT_delta_kW": 204.9882506161275,
+      "full_active_IT_kW": 1689.6848973804797
+    },
+    "A75": {
+      "installed_idle_IT_delta_kW": 240.8195301953693,
+      "full_active_IT_kW": 1913.933201662457
+    },
+    "A80": {
+      "installed_idle_IT_delta_kW": 221.653962048333,
+      "full_active_IT_kW": 1793.9864342558176
+    },
+    "A85": {
+      "installed_idle_IT_delta_kW": 204.9882506161275,
+      "full_active_IT_kW": 1689.6848973804797
+    }
+  },
+  "frozen_transformer_rating_values_kVA": [
+    50.0,
+    250.0,
+    500.0,
+    1666.6666666666667,
+    2000.0
+  ]
+}

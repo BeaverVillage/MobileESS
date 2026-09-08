@@ -1,0 +1,634 @@
+{
+  "total": 624,
+  "vector": [
+    64,
+    32,
+    64,
+    32,
+    80,
+    64,
+    32,
+    64,
+    32,
+    64,
+    32,
+    64
+  ],
+  "semantics": "SYNTHETIC_H100_EQUIVALENT_SITE_COMPUTE_CAPACITY",
+  "case": "A",
+  "decision": "Preserve frozen V39C engineering heterogeneity through one common multiplier. The exact historical allocator is fixed-total and not a scalable general apportioner; extending its one-pass rank loop beyond 12 blocks loses total capacity. This permitted CASE A fallback retains its service floors/ranks and 4-GPU-node architecture without fitting May geography.",
+  "source": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v39c_aidc_gpu_capacity_refreeze\\V39C_H100_EQUIVALENT_SITE_CAPACITY_AUTHORITY.json",
+    "bytes": 5384,
+    "sha256": "bef9175ce8bcbbfcbdde6d66d41f7f10da18998859dec5000ec9fbed44fe0c9e",
+    "field": "canonical_GPU_vector; site_table[*].synthetic_H100_equivalent_GPU_capacity",
+    "creating_commit": "7741844618c7661301be6ecc84b98f003ffb844b",
+    "github": "https://github.com/BeaverVillage/MobileESS/blob/7741844618c7661301be6ecc84b98f003ffb844b/dayahead/artifacts/v39c_aidc_gpu_capacity_refreeze/V39C_H100_EQUIVALENT_SITE_CAPACITY_AUTHORITY.json"
+  },
+  "rack_source": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v39d_independent_daily_temporal_first_migration\\V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json",
+    "bytes": 26531,
+    "sha256": "f302163fdc48a95aa27bb5b71893ad04b4fcb70b9682399d2d87e881b1f3d3ec",
+    "field": "logical_Rack_pools",
+    "creating_commit": "9ff503ae643a7bed756b03d1a005f3f398438145",
+    "github": "https://github.com/BeaverVillage/MobileESS/blob/9ff503ae643a7bed756b03d1a005f3f398438145/dayahead/artifacts/v39d_independent_daily_temporal_first_migration/V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json"
+  },
+  "upstream_rule_commit": "3cd14441fba0d574678339fc7d206e05496a4887",
+  "weights": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v22s_r1_final_operating_scale\\V22SR1_PRIMARY_SITE_WEIGHTS.csv",
+    "bytes": 2842,
+    "sha256": "1fb7931dcc86b190af7e9cc0e18b3466897ea66a35a79e53e452b36524a6e63b",
+    "field": "capacity_weight",
+    "creating_commit": "b207f61cae7986074b7e4b44697d26961a786cf2",
+    "github": "https://github.com/BeaverVillage/MobileESS/blob/b207f61cae7986074b7e4b44697d26961a786cf2/dayahead/artifacts/v22s_r1_final_operating_scale/V22SR1_PRIMARY_SITE_WEIGHTS.csv"
+  },
+  "rows": [
+    {
+      "site": "AIDC01",
+      "GPU": 64,
+      "equivalent_H100_nodes": 16,
+      "GPU_per_node": 4,
+      "physical_rack_count": null,
+      "physical_GPU_per_rack": null,
+      "logical_pool_count": 4,
+      "logical_pool_GPU_limits": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "scheduling_ceiling_GPU": 64,
+      "site_IT_idle_kW": 6.666284572882195,
+      "site_IT_full_active_kW": 41.7206147501353,
+      "other_site_IT_ceiling": "No separate site IT inequality in current scheduler; power lookup range follows 0..C_GPU.",
+      "PCC_ceiling": "Dedicated AIDC transformer phase limits: 500 kVA per phase, 208.179183602 A current rating. Shared feeder and voltage constraints additionally apply. No independent P and Q box ceiling.",
+      "source_field": "site_table[0].synthetic_H100_equivalent_GPU_capacity",
+      "source_line": 75,
+      "source_SHA256": "bef9175ce8bcbbfcbdde6d66d41f7f10da18998859dec5000ec9fbed44fe0c9e",
+      "creating_commit": "7741844618c7661301be6ecc84b98f003ffb844b",
+      "PCC_current_rating_A_per_phase": 208.17918360202853,
+      "PCC_apparent_limit_kVA_per_phase": 500.0,
+      "PCC_limit_source": {
+        "bytes": 28497976,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+        "sha256": "ae639237c737b074f585c28f4ce46b7e49f6f8f2ebdf0f64b9345778995bf451"
+      },
+      "PCC_limit_field": "branch_limits[:, branch_names==transformer.idc_idcXX_tx::phase]; transformer ratings subset",
+      "PCC_limits_31day_invariant": true,
+      "rack_architecture_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v39d_independent_daily_temporal_first_migration\\V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json",
+        "bytes": 26531,
+        "sha256": "f302163fdc48a95aa27bb5b71893ad04b4fcb70b9682399d2d87e881b1f3d3ec",
+        "field": "logical_Rack_pools",
+        "creating_commit": "9ff503ae643a7bed756b03d1a005f3f398438145",
+        "github": "https://github.com/BeaverVillage/MobileESS/blob/9ff503ae643a7bed756b03d1a005f3f398438145/dayahead/artifacts/v39d_independent_daily_temporal_first_migration/V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json"
+      }
+    },
+    {
+      "site": "AIDC02",
+      "GPU": 32,
+      "equivalent_H100_nodes": 8,
+      "GPU_per_node": 4,
+      "physical_rack_count": null,
+      "physical_GPU_per_rack": null,
+      "logical_pool_count": 4,
+      "logical_pool_GPU_limits": [
+        32,
+        32,
+        32,
+        32
+      ],
+      "scheduling_ceiling_GPU": 32,
+      "site_IT_idle_kW": 3.3331422864410976,
+      "site_IT_full_active_kW": 20.86030737506765,
+      "other_site_IT_ceiling": "No separate site IT inequality in current scheduler; power lookup range follows 0..C_GPU.",
+      "PCC_ceiling": "Dedicated AIDC transformer phase limits: 500 kVA per phase, 208.179183602 A current rating. Shared feeder and voltage constraints additionally apply. No independent P and Q box ceiling.",
+      "source_field": "site_table[1].synthetic_H100_equivalent_GPU_capacity",
+      "source_line": 83,
+      "source_SHA256": "bef9175ce8bcbbfcbdde6d66d41f7f10da18998859dec5000ec9fbed44fe0c9e",
+      "creating_commit": "7741844618c7661301be6ecc84b98f003ffb844b",
+      "PCC_current_rating_A_per_phase": 208.17918360202853,
+      "PCC_apparent_limit_kVA_per_phase": 500.0,
+      "PCC_limit_source": {
+        "bytes": 28497976,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+        "sha256": "ae639237c737b074f585c28f4ce46b7e49f6f8f2ebdf0f64b9345778995bf451"
+      },
+      "PCC_limit_field": "branch_limits[:, branch_names==transformer.idc_idcXX_tx::phase]; transformer ratings subset",
+      "PCC_limits_31day_invariant": true,
+      "rack_architecture_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v39d_independent_daily_temporal_first_migration\\V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json",
+        "bytes": 26531,
+        "sha256": "f302163fdc48a95aa27bb5b71893ad04b4fcb70b9682399d2d87e881b1f3d3ec",
+        "field": "logical_Rack_pools",
+        "creating_commit": "9ff503ae643a7bed756b03d1a005f3f398438145",
+        "github": "https://github.com/BeaverVillage/MobileESS/blob/9ff503ae643a7bed756b03d1a005f3f398438145/dayahead/artifacts/v39d_independent_daily_temporal_first_migration/V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json"
+      }
+    },
+    {
+      "site": "AIDC03",
+      "GPU": 64,
+      "equivalent_H100_nodes": 16,
+      "GPU_per_node": 4,
+      "physical_rack_count": null,
+      "physical_GPU_per_rack": null,
+      "logical_pool_count": 4,
+      "logical_pool_GPU_limits": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "scheduling_ceiling_GPU": 64,
+      "site_IT_idle_kW": 6.666284572882195,
+      "site_IT_full_active_kW": 41.7206147501353,
+      "other_site_IT_ceiling": "No separate site IT inequality in current scheduler; power lookup range follows 0..C_GPU.",
+      "PCC_ceiling": "Dedicated AIDC transformer phase limits: 500 kVA per phase, 208.179183602 A current rating. Shared feeder and voltage constraints additionally apply. No independent P and Q box ceiling.",
+      "source_field": "site_table[2].synthetic_H100_equivalent_GPU_capacity",
+      "source_line": 91,
+      "source_SHA256": "bef9175ce8bcbbfcbdde6d66d41f7f10da18998859dec5000ec9fbed44fe0c9e",
+      "creating_commit": "7741844618c7661301be6ecc84b98f003ffb844b",
+      "PCC_current_rating_A_per_phase": 208.17918360202853,
+      "PCC_apparent_limit_kVA_per_phase": 500.0,
+      "PCC_limit_source": {
+        "bytes": 28497976,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+        "sha256": "ae639237c737b074f585c28f4ce46b7e49f6f8f2ebdf0f64b9345778995bf451"
+      },
+      "PCC_limit_field": "branch_limits[:, branch_names==transformer.idc_idcXX_tx::phase]; transformer ratings subset",
+      "PCC_limits_31day_invariant": true,
+      "rack_architecture_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v39d_independent_daily_temporal_first_migration\\V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json",
+        "bytes": 26531,
+        "sha256": "f302163fdc48a95aa27bb5b71893ad04b4fcb70b9682399d2d87e881b1f3d3ec",
+        "field": "logical_Rack_pools",
+        "creating_commit": "9ff503ae643a7bed756b03d1a005f3f398438145",
+        "github": "https://github.com/BeaverVillage/MobileESS/blob/9ff503ae643a7bed756b03d1a005f3f398438145/dayahead/artifacts/v39d_independent_daily_temporal_first_migration/V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json"
+      }
+    },
+    {
+      "site": "AIDC04",
+      "GPU": 32,
+      "equivalent_H100_nodes": 8,
+      "GPU_per_node": 4,
+      "physical_rack_count": null,
+      "physical_GPU_per_rack": null,
+      "logical_pool_count": 4,
+      "logical_pool_GPU_limits": [
+        32,
+        32,
+        32,
+        32
+      ],
+      "scheduling_ceiling_GPU": 32,
+      "site_IT_idle_kW": 3.3331422864410976,
+      "site_IT_full_active_kW": 20.86030737506765,
+      "other_site_IT_ceiling": "No separate site IT inequality in current scheduler; power lookup range follows 0..C_GPU.",
+      "PCC_ceiling": "Dedicated AIDC transformer phase limits: 500 kVA per phase, 208.179183602 A current rating. Shared feeder and voltage constraints additionally apply. No independent P and Q box ceiling.",
+      "source_field": "site_table[3].synthetic_H100_equivalent_GPU_capacity",
+      "source_line": 99,
+      "source_SHA256": "bef9175ce8bcbbfcbdde6d66d41f7f10da18998859dec5000ec9fbed44fe0c9e",
+      "creating_commit": "7741844618c7661301be6ecc84b98f003ffb844b",
+      "PCC_current_rating_A_per_phase": 208.17918360202853,
+      "PCC_apparent_limit_kVA_per_phase": 500.0,
+      "PCC_limit_source": {
+        "bytes": 28497976,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+        "sha256": "ae639237c737b074f585c28f4ce46b7e49f6f8f2ebdf0f64b9345778995bf451"
+      },
+      "PCC_limit_field": "branch_limits[:, branch_names==transformer.idc_idcXX_tx::phase]; transformer ratings subset",
+      "PCC_limits_31day_invariant": true,
+      "rack_architecture_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v39d_independent_daily_temporal_first_migration\\V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json",
+        "bytes": 26531,
+        "sha256": "f302163fdc48a95aa27bb5b71893ad04b4fcb70b9682399d2d87e881b1f3d3ec",
+        "field": "logical_Rack_pools",
+        "creating_commit": "9ff503ae643a7bed756b03d1a005f3f398438145",
+        "github": "https://github.com/BeaverVillage/MobileESS/blob/9ff503ae643a7bed756b03d1a005f3f398438145/dayahead/artifacts/v39d_independent_daily_temporal_first_migration/V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json"
+      }
+    },
+    {
+      "site": "AIDC05",
+      "GPU": 80,
+      "equivalent_H100_nodes": 20,
+      "GPU_per_node": 4,
+      "physical_rack_count": null,
+      "physical_GPU_per_rack": null,
+      "logical_pool_count": 4,
+      "logical_pool_GPU_limits": [
+        80,
+        80,
+        80,
+        80
+      ],
+      "scheduling_ceiling_GPU": 80,
+      "site_IT_idle_kW": 8.332855716102744,
+      "site_IT_full_active_kW": 52.15076843766912,
+      "other_site_IT_ceiling": "No separate site IT inequality in current scheduler; power lookup range follows 0..C_GPU.",
+      "PCC_ceiling": "Dedicated AIDC transformer phase limits: 500 kVA per phase, 208.179183602 A current rating. Shared feeder and voltage constraints additionally apply. No independent P and Q box ceiling.",
+      "source_field": "site_table[4].synthetic_H100_equivalent_GPU_capacity",
+      "source_line": 107,
+      "source_SHA256": "bef9175ce8bcbbfcbdde6d66d41f7f10da18998859dec5000ec9fbed44fe0c9e",
+      "creating_commit": "7741844618c7661301be6ecc84b98f003ffb844b",
+      "PCC_current_rating_A_per_phase": 208.17918360202853,
+      "PCC_apparent_limit_kVA_per_phase": 500.0,
+      "PCC_limit_source": {
+        "bytes": 28497976,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+        "sha256": "ae639237c737b074f585c28f4ce46b7e49f6f8f2ebdf0f64b9345778995bf451"
+      },
+      "PCC_limit_field": "branch_limits[:, branch_names==transformer.idc_idcXX_tx::phase]; transformer ratings subset",
+      "PCC_limits_31day_invariant": true,
+      "rack_architecture_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v39d_independent_daily_temporal_first_migration\\V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json",
+        "bytes": 26531,
+        "sha256": "f302163fdc48a95aa27bb5b71893ad04b4fcb70b9682399d2d87e881b1f3d3ec",
+        "field": "logical_Rack_pools",
+        "creating_commit": "9ff503ae643a7bed756b03d1a005f3f398438145",
+        "github": "https://github.com/BeaverVillage/MobileESS/blob/9ff503ae643a7bed756b03d1a005f3f398438145/dayahead/artifacts/v39d_independent_daily_temporal_first_migration/V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json"
+      }
+    },
+    {
+      "site": "AIDC06",
+      "GPU": 64,
+      "equivalent_H100_nodes": 16,
+      "GPU_per_node": 4,
+      "physical_rack_count": null,
+      "physical_GPU_per_rack": null,
+      "logical_pool_count": 4,
+      "logical_pool_GPU_limits": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "scheduling_ceiling_GPU": 64,
+      "site_IT_idle_kW": 6.666284572882195,
+      "site_IT_full_active_kW": 41.7206147501353,
+      "other_site_IT_ceiling": "No separate site IT inequality in current scheduler; power lookup range follows 0..C_GPU.",
+      "PCC_ceiling": "Dedicated AIDC transformer phase limits: 500 kVA per phase, 208.179183602 A current rating. Shared feeder and voltage constraints additionally apply. No independent P and Q box ceiling.",
+      "source_field": "site_table[5].synthetic_H100_equivalent_GPU_capacity",
+      "source_line": 115,
+      "source_SHA256": "bef9175ce8bcbbfcbdde6d66d41f7f10da18998859dec5000ec9fbed44fe0c9e",
+      "creating_commit": "7741844618c7661301be6ecc84b98f003ffb844b",
+      "PCC_current_rating_A_per_phase": 208.17918360202853,
+      "PCC_apparent_limit_kVA_per_phase": 500.0,
+      "PCC_limit_source": {
+        "bytes": 28497976,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+        "sha256": "ae639237c737b074f585c28f4ce46b7e49f6f8f2ebdf0f64b9345778995bf451"
+      },
+      "PCC_limit_field": "branch_limits[:, branch_names==transformer.idc_idcXX_tx::phase]; transformer ratings subset",
+      "PCC_limits_31day_invariant": true,
+      "rack_architecture_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v39d_independent_daily_temporal_first_migration\\V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json",
+        "bytes": 26531,
+        "sha256": "f302163fdc48a95aa27bb5b71893ad04b4fcb70b9682399d2d87e881b1f3d3ec",
+        "field": "logical_Rack_pools",
+        "creating_commit": "9ff503ae643a7bed756b03d1a005f3f398438145",
+        "github": "https://github.com/BeaverVillage/MobileESS/blob/9ff503ae643a7bed756b03d1a005f3f398438145/dayahead/artifacts/v39d_independent_daily_temporal_first_migration/V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json"
+      }
+    },
+    {
+      "site": "AIDC07",
+      "GPU": 32,
+      "equivalent_H100_nodes": 8,
+      "GPU_per_node": 4,
+      "physical_rack_count": null,
+      "physical_GPU_per_rack": null,
+      "logical_pool_count": 4,
+      "logical_pool_GPU_limits": [
+        32,
+        32,
+        32,
+        32
+      ],
+      "scheduling_ceiling_GPU": 32,
+      "site_IT_idle_kW": 3.3331422864410976,
+      "site_IT_full_active_kW": 20.86030737506765,
+      "other_site_IT_ceiling": "No separate site IT inequality in current scheduler; power lookup range follows 0..C_GPU.",
+      "PCC_ceiling": "Dedicated AIDC transformer phase limits: 500 kVA per phase, 208.179183602 A current rating. Shared feeder and voltage constraints additionally apply. No independent P and Q box ceiling.",
+      "source_field": "site_table[6].synthetic_H100_equivalent_GPU_capacity",
+      "source_line": 123,
+      "source_SHA256": "bef9175ce8bcbbfcbdde6d66d41f7f10da18998859dec5000ec9fbed44fe0c9e",
+      "creating_commit": "7741844618c7661301be6ecc84b98f003ffb844b",
+      "PCC_current_rating_A_per_phase": 208.17918360202853,
+      "PCC_apparent_limit_kVA_per_phase": 500.0,
+      "PCC_limit_source": {
+        "bytes": 28497976,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+        "sha256": "ae639237c737b074f585c28f4ce46b7e49f6f8f2ebdf0f64b9345778995bf451"
+      },
+      "PCC_limit_field": "branch_limits[:, branch_names==transformer.idc_idcXX_tx::phase]; transformer ratings subset",
+      "PCC_limits_31day_invariant": true,
+      "rack_architecture_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v39d_independent_daily_temporal_first_migration\\V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json",
+        "bytes": 26531,
+        "sha256": "f302163fdc48a95aa27bb5b71893ad04b4fcb70b9682399d2d87e881b1f3d3ec",
+        "field": "logical_Rack_pools",
+        "creating_commit": "9ff503ae643a7bed756b03d1a005f3f398438145",
+        "github": "https://github.com/BeaverVillage/MobileESS/blob/9ff503ae643a7bed756b03d1a005f3f398438145/dayahead/artifacts/v39d_independent_daily_temporal_first_migration/V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json"
+      }
+    },
+    {
+      "site": "AIDC08",
+      "GPU": 64,
+      "equivalent_H100_nodes": 16,
+      "GPU_per_node": 4,
+      "physical_rack_count": null,
+      "physical_GPU_per_rack": null,
+      "logical_pool_count": 4,
+      "logical_pool_GPU_limits": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "scheduling_ceiling_GPU": 64,
+      "site_IT_idle_kW": 6.666284572882195,
+      "site_IT_full_active_kW": 41.7206147501353,
+      "other_site_IT_ceiling": "No separate site IT inequality in current scheduler; power lookup range follows 0..C_GPU.",
+      "PCC_ceiling": "Dedicated AIDC transformer phase limits: 500 kVA per phase, 208.179183602 A current rating. Shared feeder and voltage constraints additionally apply. No independent P and Q box ceiling.",
+      "source_field": "site_table[7].synthetic_H100_equivalent_GPU_capacity",
+      "source_line": 131,
+      "source_SHA256": "bef9175ce8bcbbfcbdde6d66d41f7f10da18998859dec5000ec9fbed44fe0c9e",
+      "creating_commit": "7741844618c7661301be6ecc84b98f003ffb844b",
+      "PCC_current_rating_A_per_phase": 208.17918360202853,
+      "PCC_apparent_limit_kVA_per_phase": 500.0,
+      "PCC_limit_source": {
+        "bytes": 28497976,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+        "sha256": "ae639237c737b074f585c28f4ce46b7e49f6f8f2ebdf0f64b9345778995bf451"
+      },
+      "PCC_limit_field": "branch_limits[:, branch_names==transformer.idc_idcXX_tx::phase]; transformer ratings subset",
+      "PCC_limits_31day_invariant": true,
+      "rack_architecture_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v39d_independent_daily_temporal_first_migration\\V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json",
+        "bytes": 26531,
+        "sha256": "f302163fdc48a95aa27bb5b71893ad04b4fcb70b9682399d2d87e881b1f3d3ec",
+        "field": "logical_Rack_pools",
+        "creating_commit": "9ff503ae643a7bed756b03d1a005f3f398438145",
+        "github": "https://github.com/BeaverVillage/MobileESS/blob/9ff503ae643a7bed756b03d1a005f3f398438145/dayahead/artifacts/v39d_independent_daily_temporal_first_migration/V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json"
+      }
+    },
+    {
+      "site": "AIDC09",
+      "GPU": 32,
+      "equivalent_H100_nodes": 8,
+      "GPU_per_node": 4,
+      "physical_rack_count": null,
+      "physical_GPU_per_rack": null,
+      "logical_pool_count": 4,
+      "logical_pool_GPU_limits": [
+        32,
+        32,
+        32,
+        32
+      ],
+      "scheduling_ceiling_GPU": 32,
+      "site_IT_idle_kW": 3.3331422864410976,
+      "site_IT_full_active_kW": 20.86030737506765,
+      "other_site_IT_ceiling": "No separate site IT inequality in current scheduler; power lookup range follows 0..C_GPU.",
+      "PCC_ceiling": "Dedicated AIDC transformer phase limits: 500 kVA per phase, 208.179183602 A current rating. Shared feeder and voltage constraints additionally apply. No independent P and Q box ceiling.",
+      "source_field": "site_table[8].synthetic_H100_equivalent_GPU_capacity",
+      "source_line": 139,
+      "source_SHA256": "bef9175ce8bcbbfcbdde6d66d41f7f10da18998859dec5000ec9fbed44fe0c9e",
+      "creating_commit": "7741844618c7661301be6ecc84b98f003ffb844b",
+      "PCC_current_rating_A_per_phase": 208.17918360202853,
+      "PCC_apparent_limit_kVA_per_phase": 500.0,
+      "PCC_limit_source": {
+        "bytes": 28497976,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+        "sha256": "ae639237c737b074f585c28f4ce46b7e49f6f8f2ebdf0f64b9345778995bf451"
+      },
+      "PCC_limit_field": "branch_limits[:, branch_names==transformer.idc_idcXX_tx::phase]; transformer ratings subset",
+      "PCC_limits_31day_invariant": true,
+      "rack_architecture_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v39d_independent_daily_temporal_first_migration\\V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json",
+        "bytes": 26531,
+        "sha256": "f302163fdc48a95aa27bb5b71893ad04b4fcb70b9682399d2d87e881b1f3d3ec",
+        "field": "logical_Rack_pools",
+        "creating_commit": "9ff503ae643a7bed756b03d1a005f3f398438145",
+        "github": "https://github.com/BeaverVillage/MobileESS/blob/9ff503ae643a7bed756b03d1a005f3f398438145/dayahead/artifacts/v39d_independent_daily_temporal_first_migration/V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json"
+      }
+    },
+    {
+      "site": "AIDC10",
+      "GPU": 64,
+      "equivalent_H100_nodes": 16,
+      "GPU_per_node": 4,
+      "physical_rack_count": null,
+      "physical_GPU_per_rack": null,
+      "logical_pool_count": 4,
+      "logical_pool_GPU_limits": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "scheduling_ceiling_GPU": 64,
+      "site_IT_idle_kW": 6.666284572882195,
+      "site_IT_full_active_kW": 41.7206147501353,
+      "other_site_IT_ceiling": "No separate site IT inequality in current scheduler; power lookup range follows 0..C_GPU.",
+      "PCC_ceiling": "Dedicated AIDC transformer phase limits: 500 kVA per phase, 208.179183602 A current rating. Shared feeder and voltage constraints additionally apply. No independent P and Q box ceiling.",
+      "source_field": "site_table[9].synthetic_H100_equivalent_GPU_capacity",
+      "source_line": 147,
+      "source_SHA256": "bef9175ce8bcbbfcbdde6d66d41f7f10da18998859dec5000ec9fbed44fe0c9e",
+      "creating_commit": "7741844618c7661301be6ecc84b98f003ffb844b",
+      "PCC_current_rating_A_per_phase": 208.17918360202853,
+      "PCC_apparent_limit_kVA_per_phase": 500.0,
+      "PCC_limit_source": {
+        "bytes": 28497976,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+        "sha256": "ae639237c737b074f585c28f4ce46b7e49f6f8f2ebdf0f64b9345778995bf451"
+      },
+      "PCC_limit_field": "branch_limits[:, branch_names==transformer.idc_idcXX_tx::phase]; transformer ratings subset",
+      "PCC_limits_31day_invariant": true,
+      "rack_architecture_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v39d_independent_daily_temporal_first_migration\\V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json",
+        "bytes": 26531,
+        "sha256": "f302163fdc48a95aa27bb5b71893ad04b4fcb70b9682399d2d87e881b1f3d3ec",
+        "field": "logical_Rack_pools",
+        "creating_commit": "9ff503ae643a7bed756b03d1a005f3f398438145",
+        "github": "https://github.com/BeaverVillage/MobileESS/blob/9ff503ae643a7bed756b03d1a005f3f398438145/dayahead/artifacts/v39d_independent_daily_temporal_first_migration/V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json"
+      }
+    },
+    {
+      "site": "AIDC11",
+      "GPU": 32,
+      "equivalent_H100_nodes": 8,
+      "GPU_per_node": 4,
+      "physical_rack_count": null,
+      "physical_GPU_per_rack": null,
+      "logical_pool_count": 4,
+      "logical_pool_GPU_limits": [
+        32,
+        32,
+        32,
+        32
+      ],
+      "scheduling_ceiling_GPU": 32,
+      "site_IT_idle_kW": 3.3331422864410976,
+      "site_IT_full_active_kW": 20.86030737506765,
+      "other_site_IT_ceiling": "No separate site IT inequality in current scheduler; power lookup range follows 0..C_GPU.",
+      "PCC_ceiling": "Dedicated AIDC transformer phase limits: 500 kVA per phase, 208.179183602 A current rating. Shared feeder and voltage constraints additionally apply. No independent P and Q box ceiling.",
+      "source_field": "site_table[10].synthetic_H100_equivalent_GPU_capacity",
+      "source_line": 155,
+      "source_SHA256": "bef9175ce8bcbbfcbdde6d66d41f7f10da18998859dec5000ec9fbed44fe0c9e",
+      "creating_commit": "7741844618c7661301be6ecc84b98f003ffb844b",
+      "PCC_current_rating_A_per_phase": 208.17918360202853,
+      "PCC_apparent_limit_kVA_per_phase": 500.0,
+      "PCC_limit_source": {
+        "bytes": 28497976,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+        "sha256": "ae639237c737b074f585c28f4ce46b7e49f6f8f2ebdf0f64b9345778995bf451"
+      },
+      "PCC_limit_field": "branch_limits[:, branch_names==transformer.idc_idcXX_tx::phase]; transformer ratings subset",
+      "PCC_limits_31day_invariant": true,
+      "rack_architecture_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v39d_independent_daily_temporal_first_migration\\V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json",
+        "bytes": 26531,
+        "sha256": "f302163fdc48a95aa27bb5b71893ad04b4fcb70b9682399d2d87e881b1f3d3ec",
+        "field": "logical_Rack_pools",
+        "creating_commit": "9ff503ae643a7bed756b03d1a005f3f398438145",
+        "github": "https://github.com/BeaverVillage/MobileESS/blob/9ff503ae643a7bed756b03d1a005f3f398438145/dayahead/artifacts/v39d_independent_daily_temporal_first_migration/V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json"
+      }
+    },
+    {
+      "site": "AIDC12",
+      "GPU": 64,
+      "equivalent_H100_nodes": 16,
+      "GPU_per_node": 4,
+      "physical_rack_count": null,
+      "physical_GPU_per_rack": null,
+      "logical_pool_count": 4,
+      "logical_pool_GPU_limits": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "scheduling_ceiling_GPU": 64,
+      "site_IT_idle_kW": 6.666284572882195,
+      "site_IT_full_active_kW": 41.7206147501353,
+      "other_site_IT_ceiling": "No separate site IT inequality in current scheduler; power lookup range follows 0..C_GPU.",
+      "PCC_ceiling": "Dedicated AIDC transformer phase limits: 500 kVA per phase, 208.179183602 A current rating. Shared feeder and voltage constraints additionally apply. No independent P and Q box ceiling.",
+      "source_field": "site_table[11].synthetic_H100_equivalent_GPU_capacity",
+      "source_line": 163,
+      "source_SHA256": "bef9175ce8bcbbfcbdde6d66d41f7f10da18998859dec5000ec9fbed44fe0c9e",
+      "creating_commit": "7741844618c7661301be6ecc84b98f003ffb844b",
+      "PCC_current_rating_A_per_phase": 208.17918360202853,
+      "PCC_apparent_limit_kVA_per_phase": 500.0,
+      "PCC_limit_source": {
+        "bytes": 28497976,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_migration\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+        "sha256": "ae639237c737b074f585c28f4ce46b7e49f6f8f2ebdf0f64b9345778995bf451"
+      },
+      "PCC_limit_field": "branch_limits[:, branch_names==transformer.idc_idcXX_tx::phase]; transformer ratings subset",
+      "PCC_limits_31day_invariant": true,
+      "rack_architecture_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v39d_independent_daily_temporal_first_migration\\V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json",
+        "bytes": 26531,
+        "sha256": "f302163fdc48a95aa27bb5b71893ad04b4fcb70b9682399d2d87e881b1f3d3ec",
+        "field": "logical_Rack_pools",
+        "creating_commit": "9ff503ae643a7bed756b03d1a005f3f398438145",
+        "github": "https://github.com/BeaverVillage/MobileESS/blob/9ff503ae643a7bed756b03d1a005f3f398438145/dayahead/artifacts/v39d_independent_daily_temporal_first_migration/V39D_SYNTHETIC_LOGICAL_RACK_COMPATIBILITY_AUTHORITY.json"
+      }
+    }
+  ],
+  "rack_semantics": "48 nonadditive logical pools, four/site; each envelope equals entire site capacity. No physical racks/GPU-per-rack authority available.",
+  "single_gang_split_allowed": false,
+  "exact_allocator": {
+    "source": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v39c\\freeze.py",
+      "bytes": 16260,
+      "sha256": "b33b70ac2fc975cc66a7d24de64025ea3a28867627c2ad0cb8931e4dc13d5c62",
+      "field": null,
+      "creating_commit": "3cd14441fba0d574678339fc7d206e05496a4887",
+      "github": "https://github.com/BeaverVillage/MobileESS/blob/3cd14441fba0d574678339fc7d206e05496a4887/dayahead/v39c/freeze.py",
+      "locations": [
+        {
+          "line": 105,
+          "text": "def construct_capacity(weights: Mapping[str, float]) -> dict[str, Any]:"
+        },
+        {
+          "line": 111,
+          "text": "nodes = {site: MINIMUM_NODES_PER_SITE for site in sorted(weights)}"
+        },
+        {
+          "line": 112,
+          "text": "base_nodes = len(nodes) * MINIMUM_NODES_PER_SITE"
+        },
+        {
+          "line": 113,
+          "text": "remaining_nodes = NODE_TOTAL - base_nodes"
+        },
+        {
+          "line": 114,
+          "text": "full_blocks, residual_nodes = divmod(remaining_nodes, EXTRA_BLOCK_NODES)"
+        },
+        {
+          "line": 115,
+          "text": "for site in order[:full_blocks]:"
+        },
+        {
+          "line": 117,
+          "text": "nodes[order[0]] += residual_nodes"
+        },
+        {
+          "line": 138,
+          "text": "if nodes != EXPECTED_NODE_CAPACITY or gpu != EXPECTED_GPU_CAPACITY:"
+        },
+        {
+          "line": 140,
+          "text": "if sum(nodes.values()) != NODE_TOTAL or sum(gpu.values()) != GPU_TOTAL:"
+        }
+      ]
+    },
+    "formula": "base 8 nodes/site; divmod((156 - 12*8),8) -> 7 blocks,4 residual nodes; add one 8-node block to top seven facility weights; add residual four nodes to highest-weight site.",
+    "reconstructed_vector": [
+      64,
+      32,
+      64,
+      32,
+      80,
+      64,
+      32,
+      64,
+      32,
+      64,
+      32,
+      64
+    ],
+    "scalable_domain": "One-pass numeric rule conserves total only for fewer than 13 full residual blocks; hard-coded NODE_TOTAL and EXPECTED_NODE_CAPACITY assertions additionally restrict actual production function to 624.",
+    "decision": "Historical one-pass allocator is not scaled. A and newly generalized B are independently specified, deterministic, and compared.",
+    "latest_user_preference": "Explicit A/B comparison for each 75/80/85 total; B minimum32 plus Hamilton residual nodes."
+  },
+  "rack_compatibility_source": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v38\\authority.py",
+    "bytes": 27719,
+    "sha256": "43c18de41730df48694f4d1c0682e47ae7b7cd7deb4b3277230f091308f4e35b",
+    "field": null,
+    "creating_commit": "cf7762d82f485d9f7f463bb6e5119f2e5d197a13",
+    "github": "https://github.com/BeaverVillage/MobileESS/blob/cf7762d82f485d9f7f463bb6e5119f2e5d197a13/dayahead/v38/authority.py",
+    "locations": [
+      {
+        "line": 64,
+        "text": "class RackPool:"
+      },
+      {
+        "line": 71,
+        "text": "class CapacityAuthority:"
+      },
+      {
+        "line": 81,
+        "text": "def eligible_racks(self, aidc_id: str, gpu_gang: int) -> tuple[RackPool, ...]:"
+      },
+      {
+        "line": 85,
+        "text": "and row.historical_gpu_capacity + 1e-9 >= gpu_gang"
+      }
+    ]
+  },
+  "resizing_decision": "Compare A common-alpha frozen shape against user-authorized B minimum-plus-weighted-residual; recommend B as generalized allocation philosophy, without promoting a tested capacity."
+}
