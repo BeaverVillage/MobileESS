@@ -1,0 +1,16 @@
+# V41R1 F&O EARLY-STOP CORRECTION
+
+The measured ~22 minutes required to reach 100% raw-candidate coverage shows that raw candidate coverage cannot be a prerequisite for early stopping under the 30-minute policy-day hard cap.
+
+1. Keep the full authoritative candidate universe unchanged. No migration/relocation candidate pruning is allowed.
+2. Raw candidate coverage remains an AUDIT METRIC only. Do NOT require 100% of the ~3.85M raw candidates to be opened before an objective stage may early-stop.
+3. A NORMAL SWEEP is one deterministic round through electrical-critical, IDC block, RUNNING migration, PENDING relocation, and low-visit/broad coverage families. Every opened job retains its complete authoritative feasible destination set.
+4. P1 initial exploration uses approximately 6-8 minutes. Material independently recomputed P1 improvement is accepted, the critical branch/phase/time is recomputed, and exploration restarts; continued improvements may use approximately 15 minutes as P1 soft maximum. Without material improvement run exactly one approximately 2-3 minute overlap/diversification pass, then early-stop and lock P1 if still no improvement.
+5. 100% raw coverage is not required. Unopened candidates remain authoritative: NOT_VISITED_WITHIN_COMPUTE_BUDGET, not PRUNED.
+6. Apply the same principle to P2-P5 with shorter budgets.
+7. Immediate valid objective-floor termination: P2 at mathematical lower bound (e.g. zero), P3 migration count zero, P4 reference deviation zero, or any independently valid lower bound.
+8. For P1, a valid available global/LP lower bound sufficiently certifying the incumbent allows termination without unnecessary F&O cycling.
+9. Thirty minutes remains an absolute hard cap, not expected runtime.
+10. Preserve neighborhood-family sweep coverage and raw candidate coverage separately.
+
+Rerun May-04 B1 and compare runtime, P1-P5, physical feasibility, and raw coverage against the pre-early-stop evidence. Do not change the scientific feasible set.

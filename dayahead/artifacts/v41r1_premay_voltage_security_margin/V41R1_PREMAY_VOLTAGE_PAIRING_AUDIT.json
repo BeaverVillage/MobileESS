@@ -1,0 +1,171 @@
+{
+  "status": "V41R1_PREMAY_VOLTAGE_MARGIN_AUTHORITY_INSUFFICIENT",
+  "eligible_policy_days": [],
+  "N_preMay_policy_days": 0,
+  "eligible_element_rows": 0,
+  "historical_Actual_candidate_count": 51,
+  "candidate_rows": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v41r1_premay_voltage_security_margin\\V41R1_HISTORICAL_ACTUAL_CANDIDATE_ROWS.json",
+    "sha256": "151e4bc4121a2e5435fc3e8737d099b7005912805e84371cd5cd88791eee7f58",
+    "bytes": 108727
+  },
+  "corrected_April": {
+    "source_revision": "V40E_CORRECTED_APRIL_JOINT_AUTHORITY",
+    "days": [
+      "2025-04-01",
+      "2025-04-02",
+      "2025-04-04",
+      "2025-04-05",
+      "2025-04-07",
+      "2025-04-08",
+      "2025-04-11",
+      "2025-04-17"
+    ],
+    "policy_labels": [
+      "B2",
+      "B3",
+      "FRESH_ONLY"
+    ],
+    "state_rows": 326,
+    "sensitivity_rows": 125836,
+    "sensitivity_schema": [
+      "day",
+      "case",
+      "slot",
+      "timestamp",
+      "service",
+      "source_service",
+      "target_service",
+      "source_PCC",
+      "target_PCC",
+      "phase",
+      "target_bus_phase_key",
+      "target_is_selectable_MESS_PCC",
+      "perturbed_vehicle_id",
+      "calibration_state_id",
+      "probe_kind",
+      "P_at_source_PCC_kW",
+      "Q_at_source_PCC_kvar",
+      "P_at_PCC_kW",
+      "Q_at_PCC_kvar",
+      "selection_reasons",
+      "delta_P_kW",
+      "delta_Q_kvar",
+      "Fresh_base_voltage_pu",
+      "saved_Fresh_voltage_pu",
+      "saved_Planning_voltage_pu",
+      "Fresh_replay_abs_error_pu",
+      "old_H_P_pu_squared_per_kW",
+      "Fresh_H_P_pu_squared_per_kW",
+      "old_dV_dP_pu_per_kW",
+      "Fresh_dV_dP_pu_per_kW",
+      "old_H_Q_pu_squared_per_kvar",
+      "Fresh_H_Q_pu_squared_per_kvar",
+      "old_dV_dQ_pu_per_kvar",
+      "Fresh_dV_dQ_pu_per_kvar",
+      "Fresh_to_old_H_P_ratio",
+      "Fresh_to_old_H_Q_ratio",
+      "P_sign_match",
+      "Q_sign_match"
+    ],
+    "corrected_mapper_match": true,
+    "compatibility_status": "REJECTED_NO_REALIZED_ACTUAL",
+    "reason": "Frozen April Fresh calibration/probe states and derivatives, not paired 96-slot realized Actual policy-days. saved_Planning fields are not promoted to current corrected authority.",
+    "sources": [
+      {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40e_background_mapping_fix\\april_joint_authority\\V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+        "sha256": "a2fbc32eda0767f6ec87df11d462df179705a698220b69de307d14730842237f",
+        "bytes": 853486
+      },
+      {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40e_background_mapping_fix\\april_joint_authority\\FROZEN_CALIBRATION_STATES.parquet",
+        "sha256": "0fba7277ca043d20ca53e4ab4035b671cd31db8cbc3587038c6b66fabb5cbf09",
+        "bytes": 14255
+      },
+      {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40e_background_mapping_fix\\april_joint_authority\\V40E_CORRECTED_APRIL_FULL_BUS_PHASE_SENSITIVITY.parquet",
+        "sha256": "b316bc7316bdd42cfaba2f05e6386ed2d1151cf4f0c34119564b15b101112c53",
+        "bytes": 12700794
+      }
+    ]
+  },
+  "v40a_Apr01_identity_only": {
+    "source": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v40a_bounded_iterative_aidc_mess_coopt\\days\\2025-04-01\\ACTUAL_FIXED_REPLAY.json",
+      "sha256": "c503529d1f3bf7727633074a2f4790f9e78b32e17f2713d2ab2190a9154abcde",
+      "bytes": 713
+    },
+    "reason": "EXISTING_FIXED_DECISION_REPLAY_IDENTITY_GATE",
+    "actual_voltage_rows": 0
+  },
+  "earlier_stage7_H0": {
+    "reason": "Single controller-transition Fresh summaries, no current corrected 96-slot frozen-policy Planning-Actual pairs",
+    "sources": [
+      {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\stage7\\r13_zero_burnin\\RESTART\\evidence\\W02_2025-01-13\\FRESH_EXACT_OPENDSS.json",
+        "sha256": "5b7b0ecc30160e21377a70b9134c596a6e3bbecd32e5363db7b1c98089277c1d",
+        "bytes": 816
+      },
+      {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\stage7\\r13_zero_burnin\\RESTART\\evidence\\W10_2025-03-10\\FRESH_EXACT_OPENDSS.json",
+        "sha256": "d907b57b3b5808d9c0d303c8021f1c54b5d445ce3cdc5e302babe101d0d39b3b",
+        "bytes": 816
+      }
+    ]
+  },
+  "search_scope": [
+    {
+      "root": "C:/Users/kjw39/OneDrive/문서/ChatGPT/Mobile ESS 2",
+      "file_count": 314835,
+      "errors": "",
+      "includes_gitignored": true
+    },
+    {
+      "root": "C:/Users/kjw39/OneDrive/문서/ChatGPT/Mobile ESS",
+      "file_count": 1339,
+      "errors": "",
+      "includes_gitignored": true
+    },
+    {
+      "root": "C:/codex_mobileess_workspace",
+      "file_count": 365188,
+      "errors": "",
+      "includes_gitignored": true
+    }
+  ],
+  "search_inventories": [
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_premay_voltage_security_margin\\discovery\\original2_complete_inventory.json",
+      "sha256": "ceb377aa0a1bddf5de68b99c8a43289db5e1ad27ce2dcd5a64501f6c110ff029",
+      "bytes": 56985428
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_premay_voltage_security_margin\\discovery\\original_complete_inventory.json",
+      "sha256": "80b8d5b432ed121fe031ceca45bca8b5796bcc5192bb12af382d0bfe4a23d43e",
+      "bytes": 156688
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\frozen_artifacts\\v41r1_premay_voltage_security_margin\\discovery\\workspace_complete_inventory.json",
+      "sha256": "e798e44f40d9c0db4d87118fc756a10c82a50ffa81f340e2aad8f15b8b78990f",
+      "bytes": 64971417
+    }
+  ],
+  "element_fields_null_reason": "Compatibility rejected before numerical pairing; no voltage residual inferred",
+  "tables": {
+    "V41R1_PREMAY_VOLTAGE_ELEMENT_RESIDUALS.parquet": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v41r1_premay_voltage_security_margin\\V41R1_PREMAY_VOLTAGE_ELEMENT_RESIDUALS.parquet",
+      "sha256": "8149fa6062b0fde361489ff377d8ab626f9ddb4aa313cc812656092911b56da0",
+      "bytes": 5501,
+      "rows": 0,
+      "status": "EMPTY_NO_ELIGIBLE_AUTHORITY"
+    },
+    "V41R1_PREMAY_VOLTAGE_DAILY_MAX.parquet": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\artifacts\\v41r1_premay_voltage_security_margin\\V41R1_PREMAY_VOLTAGE_DAILY_MAX.parquet",
+      "sha256": "8ff83e88650d6e108fdba42c4ae5cdf1a54b532c9243085ca59c6d537c3470c0",
+      "bytes": 2837,
+      "rows": 0,
+      "status": "EMPTY_NO_ELIGIBLE_AUTHORITY"
+    }
+  },
+  "missing_authority": "At least one pre-May complete policy-day pair of current constrained Planning voltage and frozen-policy realized three-phase Actual with matching bus/phase/96 slots, topology, corrected mapper, ratings and source-generation provenance"
+}

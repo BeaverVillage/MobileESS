@@ -1,0 +1,70 @@
+
+Gurobi 13.0.2 (win64) logging started Mon Sep  7 17:51:49 2026
+
+Set parameter LogFile to value "C:\codex_mobileess_workspace\MobileESS_v41r1_premay_voltage_security_margin\dayahead\artifacts\v41r1_first_improvement\early_P2_REPLAY.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 4 threads
+
+Non-default parameters:
+TimeLimit  60
+FeasibilityTol  1e-09
+IntFeasTol  1e-09
+MIPGap  0.03
+MIPGapAbs  0
+OptimalityTol  1e-09
+Method  1
+NodefileStart  0.5
+LogToConsole  0
+Seed  20260905
+Threads  4
+
+Optimize a model with 746775 rows, 965530 columns and 6693925 nonzeros (Min)
+Model fingerprint: 0x1cc1c4ff
+Model has 81 linear objective coefficients
+Model has 5247 simple general constraints
+  1023 MAX, 3072 INDICATOR, 1152 PWL
+Variable types: 137074 continuous, 828456 integer (407440 binary)
+Coefficient statistics:
+  Matrix range     [1e-13, 1e+03]
+  Objective range  [1e-02, 1e-02]
+  Bounds range     [5e-01, 1e+02]
+  RHS range        [5e-09, 2e+03]
+  PWLCon x range   [1e+00, 8e+01]
+  PWLCon y range   [9e+00, 6e+01]
+  GenCon rhs range [3e+01, 3e+01]
+  GenCon coe range [1e+00, 1e+02]
+  GenCon const rng [2e+01, 1e+02]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+Loaded user MIP start with objective 1604.76
+MIP start from previous solve produced solution with objective 1604.76 (0.77s)
+MIP start from previous solve produced solution with objective 1604.76 (0.88s)
+MIP start from previous solve did not produce a new incumbent solution
+
+Presolve removed 732293 rows and 911334 columns
+Presolve time: 0.66s
+Presolved: 14482 rows, 54196 columns, 180961 nonzeros
+Presolved model has 1418 SOS constraint(s)
+Variable types: 35183 continuous, 19013 integer (11839 binary)
+Performing another presolve...
+Presolve removed 12079 rows and 22038 columns
+Presolve time: 1.72s
+
+Root relaxation: interrupted, 5281 iterations, 0.10 seconds (0.17 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0          -    0      1604.76194 1576.06258  1.79%     -    3s
+
+Explored 1 nodes (5281 simplex iterations) in 3.85 seconds (5.73 work units)
+Thread count was 4 (of 16 available processors)
+
+Solution count 1: 1604.76 
+
+Optimal solution found (tolerance 3.00e-02)
+Best objective 1.604761937778e+03, best bound 1.576062583819e+03, gap 1.7884%

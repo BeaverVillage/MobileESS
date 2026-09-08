@@ -1,0 +1,863 @@
+# ============================================================
+# V41R1 PENDING-TO-RUNNING MIGRATION ELIGIBILITY REVISION
+#
+# FINAL SIMPLIFIED TERMINAL FLEXIBILITY RULE
+#
+# Purpose:
+# Recover useful flexibility from PENDING jobs that become RUNNING
+# during the operating day, including cross-midnight jobs,
+# WITHOUT extending the 24-h horizon and WITHOUT introducing
+# terminal-residual / spill / service-neutrality formulations.
+# ============================================================
+
+
+# 0. THIS INSTRUCTION SUPERSEDES THE RECENT TERMINAL EXPERIMENTS
+
+Supersede and DO NOT finalize the recently discussed:
+
+- per-job terminal residual <= reference rule
+- aggregate terminal spill budget
+- daily flexible-service neutrality
+- extended 36/48/72-h tail horizon
+- post-H grid simulation
+- voltage security-margin revision
+
+These are NOT part of the final V41R1 formulation.
+
+If partial code for those terminal formulations has already been written,
+back out ONLY those scientific-semantic changes.
+
+Preserve generally useful:
+- tests
+- persistence infrastructure
+- manifests
+- diagnostics
+
+only if they remain semantically valid.
+
+Do not delete historical evidence.
+
+
+# 1. KEEP THE EXISTING 24-HOUR INDEPENDENT-DAY CONTRACT
+
+Scientific optimization horizon:
+
+D 00:00 <= t < D 24:00
+
+96 x 15-minute slots only.
+
+Each operating day remains independent.
+
+Day D+1 starts from its own authoritative snapshot.
+
+Do NOT:
+- propagate Day-D optimized terminal state to D+1
+- create post-H optimization
+- create D+1 grid decisions
+- run D+1 OpenDSS for Day-D optimization
+- introduce rolling-horizon state coupling
+
+
+# 2. DO NOT CHANGE EXISTING FLEXIBILITY FOR NORMAL JOBS
+
+This revision must NOT reduce or redesign the existing flexibility
+already available to jobs that are currently handled correctly.
+
+Preserve all currently-authorized:
+- PENDING temporal shifting
+- PENDING spatial/site assignment
+- existing migration decisions
+- RUNNING continuity rules
+- B0/B1/B2/B3 policy semantics
+
+The new change is narrowly scoped to the cohort that was previously
+made too rigid because of the post-H/cross-midnight freeze.
+
+
+# 3. TARGET COHORT
+
+Focus on jobs satisfying all of the following:
+
+A) PENDING at the authoritative D-1 issue time
+
+B) their frozen/planned execution starts inside Day D:
+   D00 <= planned_start < D24
+
+C) after planned start they become RUNNING during Day D
+
+D) they were previously prevented from useful migration because their
+   planned completion extends beyond H / 24:00 or because post-H
+   terminal freeze propagated into their site/migration authority
+
+
+These jobs are:
+
+ISSUE_PENDING_TO_DAYD_RUNNING
+
+
+Cross-midnight completion alone must NOT make their RUNNING phase
+ineligible for migration.
+
+
+# 4. IMPORTANT: DO NOT UNLOCK START TIME JUST FOR THIS COHORT
+
+For the newly targeted post-H-frozen cohort:
+
+Do NOT introduce new start-time flexibility merely because this
+revision exists.
+
+Preserve the existing authoritative planned/start decision.
+
+This revision is NOT:
+
+"move the cross-midnight job start later"
+
+
+It is:
+
+"once that job has started and is RUNNING, allow the existing
+checkpoint-based RUNNING migration mechanism to operate."
+
+
+Do not add terminal spill accounting.
+
+
+# 5. INITIAL SITE REMAINS THE DAY-AHEAD SITE
+
+At the job's planned start:
+
+ACTUAL/PLANNING INITIAL SITE
+=
+existing Day-Ahead assigned site
+
+
+Do not change the initial site using this new eligibility rule alone.
+
+After the job becomes RUNNING, its execution site may change only through
+the already-authoritative migration state machine.
+
+
+# 6. REUSE EXISTING RUNNING MIGRATION PHYSICS EXACTLY
+
+Do NOT invent a new migration model.
+
+Reuse the existing authoritative RUNNING migration machinery:
+
+RUNNING at source
+-> checkpoint
+-> pause / checkpoint state
+-> WAN transfer
+-> destination-ready
+-> restart at destination
+-> RUNNING at destination
+
+
+Reuse all existing authority for:
+
+- checkpoint timing/cadence
+- migration eligibility
+- transfer volume
+- WAN path
+- WAN capacity
+- transfer latency
+- restart delay
+- GPU requirement
+- rack requirement
+- source/destination active segments
+- pause interval
+- service accounting
+- migration count
+- migration penalty / lexicographic stage
+- segment persistence
+
+
+No simplified "instant site swap" is allowed.
+
+
+# 7. MIGRATION MAY OCCUR ONLY AFTER THE JOB IS RUNNING
+
+For an issue-time PENDING job j:
+
+migration_time_j
+>
+or equal to the first authoritative migration checkpoint after
+its planned start.
+
+
+No migration before job execution starts.
+
+Do NOT treat a PENDING job as already RUNNING at D00 if its planned
+start occurs later.
+
+
+# 8. CROSS-MIDNIGHT JOBS ARE MIGRATION-ELIGIBLE IN-DAY
+
+If:
+
+planned_start_j + planned_duration_j > H
+
+this MUST NOT automatically imply:
+
+MIGRATION_ELIGIBLE = FALSE
+
+
+Instead:
+
+if the job becomes RUNNING during Day D and reaches a valid checkpoint
+before H, it may use the existing RUNNING migration mechanism.
+
+
+This is the central scientific change.
+
+
+# 9. NO MIGRATION INITIATION AFTER 24:00
+
+All new migration decisions created by Day-D optimization must be
+fully owned by the Day-D horizon.
+
+Require:
+
+checkpoint_time < H
+
+
+Prefer the stronger existing physical condition:
+
+restart_time < H
+
+so that the migration actually produces a valid in-day destination
+execution segment.
+
+
+Do NOT create a migration whose useful destination execution exists
+only outside the modeled 24-h horizon.
+
+
+# 10. REQUIRE USEFUL IN-DAY DESTINATION SERVICE
+
+A migration should be eligible only if, after checkpoint/transfer/restart,
+the job has a positive execution interval remaining inside Day D.
+
+Require at least the existing minimum meaningful execution granularity
+after restart.
+
+Reuse the existing slot/timing convention.
+
+Do not invent a new threshold.
+
+
+# 11. NO POST-H SERVICE OPTIMIZATION
+
+If the job continues after 24:00:
+
+do not optimize its post-H service.
+
+do not simulate its post-H grid load.
+
+do not create D+1 decisions.
+
+
+The migration is evaluated only for its physically modeled effect
+within Day D.
+
+
+# 12. PRESERVE SERVICE CONSERVATION INSIDE THE EXISTING MIGRATION CONTRACT
+
+Migration pause/transfer time must NOT be counted as computation.
+
+Reuse the existing migration segment accounting exactly.
+
+For every migrated job, persist/reconstruct:
+
+source RUNNING segment
+checkpoint/pause interval
+WAN transfer interval
+destination RUNNING segment
+
+
+No duplicated service.
+No lost in-day service caused by implementation error.
+
+
+# 13. POLICY SEMANTICS MUST NOT BE BROADENED
+
+Do NOT enable migration in a policy that is defined as no-migration
+or otherwise migration-disabled.
+
+Audit the current B0/B1/B2/B3 policy registry.
+
+Apply the new PENDING->RUNNING migration eligibility ONLY in policies
+and AIDC stages where RUNNING migration is already scientifically
+authorized.
+
+
+For example:
+
+if B0 is migration-disabled:
+B0 remains migration-disabled.
+
+Do not change an ablation definition.
+
+
+# 14. B1 / MIGRATION-CAPABLE POLICY
+
+For the migration-capable AIDC policy:
+
+jobs that were PENDING at issue time but become RUNNING during Day D
+must enter the same eligible RUNNING migration pool as jobs that were
+already RUNNING, subject to the same checkpoint/WAN/rack/capacity rules.
+
+
+Do NOT use a separate easier migration model for them.
+
+
+# 15. STAGE OWNERSHIP
+
+Audit exactly which current stage owns new migration decisions.
+
+Do NOT blindly enable migration in A1 if the frozen architecture says
+A1 cannot create new migration.
+
+Use the currently-authoritative migration-decision stage.
+
+The scientific requirement is:
+
+PENDING->RUNNING jobs must become eligible at the SAME legitimate
+migration-decision layer used for existing RUNNING migration.
+
+
+Do NOT change the closed:
+
+A0 -> M1 -> A1 -> MF -> Joint Freeze -> Fresh
+
+architecture beyond this eligibility extension.
+
+
+# 16. DO NOT REOPEN CLOSED MESS / WAN / TERMINAL DESIGN
+
+This revision is local.
+
+Do NOT redesign:
+
+- MESS routing
+- WAN topology
+- terminal state machinery
+- checkpoint mechanics
+- MF
+- A1 feedback count
+- mobility optimization
+
+Reuse existing validated implementations.
+
+
+# 17. CAPACITY REMAINS HARD
+
+At all in-day execution times require existing:
+
+GPU capacity
+rack capacity
+WAN capacity
+electrical constraints
+
+
+Migration cannot create:
+
+65/64 GPU occupancy
+rack overbooking
+WAN overbooking
+
+
+Do not clip or relax physical capacity.
+
+
+# 18. ELECTRICAL VALUE OF DESTINATIONS
+
+Do NOT hard-code AIDC01 or any particular destination.
+
+Let the existing optimizer choose among physically feasible destinations.
+
+However persist the critical-line sensitivity of:
+
+source IDC
+destination IDC
+
+for every selected migration.
+
+
+For the May-1 critical branch:
+
+line.l10 / phase A
+
+the current diagnostic shows materially different electrical sensitivity
+between some IDCs.
+
+Use the authoritative coefficient matrix.
+
+Do NOT manually route jobs based on that observation.
+
+
+# 19. MIGRATION MUST NOT BE SELECTED USING ACTUAL
+
+All new migration decisions are Day-Ahead decisions.
+
+Use only Day-Ahead-authorized data.
+
+Do NOT use:
+- realized runtime
+- Actual voltage
+- Actual current
+- Actual traffic
+- Actual May outcome
+
+to select migration.
+
+
+Actual replays the frozen migration decision under the existing
+Actual contract.
+
+
+# 20. ML SEMANTICS REMAIN UNCHANGED
+
+Runtime ML remains Day-Ahead only:
+
+Rolling Track-P LightGBM Q90
+-> scalar seconds
+-> ceil(seconds/900) once
+
+
+Future workload remains the frozen H4 interface.
+
+No ML rerun in Actual.
+
+No new migration-specific ML.
+
+
+# 21. ACTUAL REPLAY
+
+After Day-Ahead freeze:
+
+Actual must replay the selected migration decision.
+
+Use:
+- realized runtime
+- existing rack/GPU Actual dispatch
+- frozen checkpoint/migration authority
+- existing Actual travel/WAN/service semantics
+
+
+Do NOT re-optimize migration after Actual data are opened.
+
+
+If realized execution makes a frozen migration physically unavailable,
+follow the existing authoritative Actual migration/fallback semantics.
+
+Do not invent a new repair rule in this revision.
+
+
+# 22. MAY-1 PRE-SOLVE ELIGIBILITY AUDIT
+
+Before rerunning May-1, report exact counts.
+
+At minimum:
+
+ISSUE_PENDING_TOTAL
+
+ISSUE_PENDING_STARTING_IN_DAY_D
+
+REFERENCE_CROSS_MIDNIGHT_PENDING
+
+PENDING_TO_RUNNING_TOTAL
+
+PENDING_TO_RUNNING_WITH_VALID_CHECKPOINT_BEFORE_H
+
+PENDING_TO_RUNNING_MIGRATION_ELIGIBLE
+
+PENDING_TO_RUNNING_MIGRATION_INELIGIBLE
+
+
+Break down ineligibility reasons:
+
+- no in-day checkpoint
+- insufficient destination GPU
+- insufficient rack capacity
+- WAN infeasible
+- migration class not allowed
+- no useful post-restart in-day service
+- policy disables migration
+- other existing-authority reason
+
+
+Do NOT assume all 300 are eligible.
+
+
+# 23. MAY-1 18:00 CRITICAL COHORT AUDIT
+
+For the known May-1 critical time:
+
+18:00 AEST
+line.l10 / phase A
+
+
+The earlier diagnostic identified 156 relevant cross-midnight PENDING
+jobs starting at the critical time.
+
+
+For those 156 report:
+
+- how many become RUNNING at 18:00
+- how many have a valid in-day migration checkpoint
+- earliest valid checkpoint distribution
+- migration-eligible count
+- feasible destination count per job
+- number with at least one destination having different critical-line
+  sensitivity
+- number with AIDC01 or any zero/low-sensitivity destination physically
+  feasible
+- total GPU mass potentially relocatable after each checkpoint
+
+
+This is diagnostic only.
+
+Do not manually force those migrations.
+
+
+# 24. IMPORTANT LIMITATION
+
+Migration cannot remove a job from the critical line BEFORE the migration
+takes effect.
+
+Therefore if a job starts at exactly 18:00 and the first valid checkpoint
+is 18:30:
+
+its 18:00-18:30 source-site load remains.
+
+
+Report this honestly.
+
+
+Do not claim that RUNNING migration can reduce the exact 18:00 first
+instant if the migration occurs later.
+
+
+But it may reduce:
+- later critical slots
+- sustained peak loading
+- subsequent voltage/current stress
+- overall rho_max
+
+depending on the time profile.
+
+
+# 25. OBJECTIVE REMAINS UNCHANGED
+
+Preserve the current lexicographic objective exactly:
+
+P1 rho_max
+
+P2 mean H4 reserve shortfall
+
+P3 migration count
+
+P4 reference schedule deviation
+
+P5 tie-break
+
+
+Do NOT add a new migration reward.
+
+Do NOT reduce migration penalty to make results look better.
+
+The larger feasible migration set alone is the scientific change.
+
+
+# 26. MIGRATION COUNT OBJECTIVE
+
+Because migration remains secondary:
+
+the optimizer should use a new migration only when consistent with
+the lexicographic hierarchy.
+
+
+Verify that the primary rho optimum is not intentionally sacrificed
+to reduce migration count.
+
+
+Persist the same primary-lock evidence as current V41.
+
+
+# 27. PERSISTENCE
+
+Additive only.
+
+For every PENDING->RUNNING migration candidate persist:
+
+job_id
+issue_state = PENDING
+planned_start
+planned_end
+cross_midnight flag
+
+initial_site
+
+first_valid_checkpoint
+all_valid_checkpoints
+
+migration_eligible
+ineligibility_reason
+
+feasible_destination_IDCs
+feasible_destination_count
+
+GPU_request
+
+selected_migration
+selected_checkpoint
+selected_destination
+
+source_segment
+pause_segment
+WAN_transfer_segment
+destination_segment
+
+restart_time
+
+source critical-line sensitivity
+destination critical-line sensitivity
+sensitivity_delta
+
+
+Do not replace existing job/migration artifacts.
+
+
+# 28. SELECTED MIGRATION AUDIT
+
+For every selected migration report:
+
+job
+GPU count
+
+source
+destination
+
+checkpoint time
+restart time
+
+planned runtime
+
+source in-day service
+destination in-day service
+pause duration
+
+WAN path
+WAN transfer duration
+
+critical branch/phase
+source sensitivity
+destination sensitivity
+
+estimated planning rho contribution before/after
+
+
+Use existing authoritative coefficient calculations.
+
+
+# 29. OLD VS NEW MAY-1 COMPARISON
+
+Preserve the current V41 May-1 result.
+
+After this revision compare:
+
+OLD:
+post-H-frozen migration eligibility
+
+NEW:
+PENDING->RUNNING migration eligibility
+
+
+Report B0/B1:
+
+rho_max
+Fresh rho
+Actual rho
+
+critical line/phase/slot
+
+critical-slot GPU
+AIDC kW
+
+migration count
+
+PENDING->RUNNING migration count
+
+already-RUNNING migration count
+
+start changes
+site changes
+
+Vmin/Vmax
+voltage violation count
+
+
+Clearly isolate the contribution of the eligibility expansion.
+
+
+# 30. NO VOLTAGE-MARGIN REVISION
+
+Per latest user decision:
+
+NEW VOLTAGE SECURITY MARGIN = NONE
+
+
+Do not derive or apply one.
+
+Keep the existing physical voltage/current limits and raw Fresh/Actual
+verification.
+
+
+# 31. BACK OUT UNFINISHED TERMINAL-RESIDUAL FORMULATION
+
+If terminal.py or related files currently contain partial implementation
+of the abandoned:
+
+per-job residual
+service neutrality
+spill budget
+extended horizon
+
+remove those scientific rules before final execution.
+
+
+Add regression tests proving they are not active.
+
+
+# 32. P0 REGRESSION
+
+Re-run P0-01 through P0-07.
+
+Pay special attention to:
+
+P0-05 B1 generation identity
+
+P0-06 migration segments
+
+P0-07 terminal/pre-day classification
+
+
+The expanded migration eligibility must not reintroduce old defects.
+
+
+# 33. TESTS
+
+Add explicit tests for:
+
+- 96-slot Day-D horizon unchanged
+- no post-H decision variables
+- issue-time PENDING job correctly transitions to RUNNING eligibility
+- no migration before planned start
+- migration only at valid checkpoint
+- cross-midnight alone does not disable migration
+- policy-disabled migration remains disabled
+- existing RUNNING migration unchanged
+- PENDING->RUNNING uses identical migration state machine
+- source/pause/WAN/destination service accounting exact
+- GPU/rack/WAN capacity hard
+- no Actual data used in Day-Ahead migration selection
+- no Actual migration reoptimization
+- objective hierarchy unchanged
+- no voltage margin
+- abandoned terminal residual/service-neutrality logic unreachable
+- persistence read-back/hash PASS
+
+
+# 34. MAY-1 RERUN
+
+Because migration eligibility changes the feasible set:
+
+freeze the revised scientific formulation first.
+
+Then rerun the May-1 pilot consistently:
+
+B0 Day-Ahead
+-> B0 Actual
+
+B1 Day-Ahead
+-> B1 Actual
+
+
+If B0 policy semantics are mathematically unchanged, still verify exact
+equivalence under the new scientific commit.
+
+If exact equivalence cannot be proven, rerun B0 fully.
+
+
+Then run:
+
+B0-in-B1 feasibility
+objective identity
+Fresh
+Actual
+P0 closure
+complete persistence audit
+
+
+# 35. FULL-MAY GATE
+
+Do NOT launch the detached full-May campaign yet.
+
+First report May-1 results under this revision.
+
+
+Full-May requires:
+
+- B0 PASS
+- B1 PASS
+- migration-state-machine regression PASS
+- P0-01..P0-07 PASS
+- background-load duplication PASS
+- Fresh PASS
+- Actual persistence PASS
+- no mixed scientific semantics
+
+
+# 36. FINAL PRE-CAMPAIGN REPORT
+
+Before asking for full-May launch approval, report:
+
+1. exact scientific commit SHA
+
+2. number of issue-time PENDING jobs
+
+3. number becoming RUNNING during Day D
+
+4. number newly migration-eligible
+
+5. cross-midnight newly migration-eligible count
+
+6. among the 18:00 cohort of 156:
+   exact eligible count
+
+7. selected new PENDING->RUNNING migrations
+
+8. source/destination IDC pairs
+
+9. migration checkpoint times
+
+10. old vs new B1 rho_max
+
+11. old vs new critical-slot GPU/AIDC kW
+
+12. old vs new Fresh rho
+
+13. old vs new Actual rho
+
+14. voltage/current violations
+
+15. objective vector
+
+16. P0-01..P0-07 results
+
+17. regression test count
+
+18. full-May readiness PASS/FAIL
+
+
+Do not launch full May until these are reviewed.

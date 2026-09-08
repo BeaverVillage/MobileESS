@@ -1,0 +1,516 @@
+# ============================================================
+# V41 AMENDMENT — CLOSE THE LEGACY 72 ACTUAL-REPLAY CASES
+# + CONTINUE V41
+#
+# IMPORTANT:
+#
+# Do NOT stop V41 because of the legacy 72 unresolved
+# policy-day Actual cases.
+#
+# Those 72 cases were unresolved under an OLD authority
+# contract that attempted to require historical observed
+# B0/B1/B2/B3 execution records for counterfactual policies.
+#
+# V41 explicitly defines counterfactual Actual replay.
+# Therefore the old 72-case authority gap is now resolved
+# BY DEFINITION OF THE V41 ACTUAL-REPLAY CONTRACT.
+#
+# Preserve the old V40I result as historical evidence.
+# Do NOT rewrite the old artifact.
+# ============================================================
+
+
+# 1. WHAT THE LEGACY 72 CASES ARE
+
+The legacy 72 are:
+
+72 POLICY-DAY counterfactual Actual-replay cases.
+
+They are NOT:
+
+- 72 jobs
+- 72 missing raw-data files
+- 72 missing electrical cases
+
+
+The old investigation had 122 cases total:
+
+PRE_DAY_COMPLETE = 50
+OLD_CONTRACT_UNRESOLVED = 72
+
+
+The 72 were unresolved because the previous contract asked for
+historically observed policy-specific:
+
+- admission
+- start/end
+- site
+- related AIDC execution authority
+
+for B0/B1/B2/B3 counterfactual policies.
+
+
+Such historical policy-specific execution records cannot exist
+for policies that were not actually deployed.
+
+
+V41 must NOT continue requiring that impossible authority.
+
+
+
+# 2. NEW V41 ACTUAL AUTHORITY
+
+Freeze the following definition:
+
+
+V41_COUNTERFACTUAL_ACTUAL_REPLAY_V1
+
+
+For every target day d and policy p:
+
+ACTUAL(p,d)
+=
+REPLAY(
+    FROZEN_DAYAHEAD_DECISION(p,d),
+    REALIZED_EXOGENOUS_OUTCOMES(d)
+)
+
+
+Actual is NOT a second optimization.
+
+
+Actual is NOT historical recovery of an observed B0/B1/B2/B3
+policy execution.
+
+
+The frozen Day-Ahead policy decision itself is the authority
+for policy-dependent counterfactual variables.
+
+
+
+# 3. AIDC POLICY-DEPENDENT VARIABLES
+
+For a PENDING job selected/scheduled in Day-Ahead:
+
+freeze from Day-Ahead:
+
+- job admission / selection
+- assigned IDC/site
+- scheduled start
+- rack decision where applicable
+- migration decision where applicable
+
+
+Do NOT search for historical observed B0/B1/B2/B3 versions
+of those fields.
+
+
+They are COUNTERFACTUAL POLICY DECISIONS.
+
+
+
+# 4. RUNTIME IN ACTUAL
+
+Day-Ahead:
+
+known PENDING job duration
+=
+V41 frozen Rolling Q90 prediction
+
+
+Actual:
+
+replace the predicted runtime with the authoritative realized
+runtime for that same historical job.
+
+
+Subject to the existing terminal/service semantics:
+
+actual completion is derived from the frozen policy start and
+realized runtime.
+
+
+Conceptually:
+
+actual_end
+=
+frozen_DA_start
++
+realized_runtime
+
+
+Use the exact existing slot/time discretization contract.
+
+
+Do NOT re-optimize the start time after seeing actual runtime.
+
+
+Do NOT change the selected site after seeing actual runtime.
+
+
+
+# 5. RUNNING JOBS
+
+Preserve the already-closed RUNNING authority.
+
+
+Do NOT reopen:
+
+RUNNING site
+RUNNING start
+RUNNING migration
+terminal-service contract
+
+
+No new RUNNING migration may be created in Actual.
+
+
+
+# 6. FUTURE UNSEEN WORKLOAD
+
+Day-Ahead uses:
+
+H4 R85_B2 raw forecast
++
+V41 actionable cap
+
+
+Actual evaluation uses the authoritative realized arriving
+GPU-service work [GPUh].
+
+
+Actual realized future workload is used to SCORE the frozen
+Day-Ahead reserve/headroom decision.
+
+
+Do NOT synthesize historical future jobs merely to create
+policy-specific Actual execution records.
+
+
+Do NOT rerun AIDC scheduling using realized future workload.
+
+
+
+# 7. MESS ACTUAL REPLAY
+
+Preserve the existing Actual mobility definition.
+
+
+Freeze the route selected in Day-Ahead.
+
+
+Actual travel time:
+
+use realized SUMO link-entry / travel outcomes according to the
+existing authority.
+
+
+Actual mobility energy:
+
+derive from realized travel time using the existing deterministic
+mobility-energy contract.
+
+
+No:
+
+- Actual rerouting
+- vehicle substitution
+- second M1 search
+
+
+
+# 8. GRID ACTUAL REPLAY
+
+Use:
+
+frozen Day-Ahead command / policy decision
+
++
+
+realized authoritative:
+
+- load/demand
+- PV
+- weather
+- other already-authorized Actual exogenous inputs
+
+
+Then execute the existing Actual/Fresh OpenDSS verification.
+
+
+Do NOT re-optimize the Day-Ahead decision using realized grid data.
+
+
+
+# 9. COUNTERFACTUAL SEMANTICS
+
+For B0/B1/B2/B3:
+
+
+policy-dependent variables
+=
+frozen counterfactual Day-Ahead decisions
+
+
+policy-independent realized variables
+=
+historical Actual data
+
+
+This is the correct counterfactual replay boundary.
+
+
+Do NOT require:
+
+"historically observed B1 site"
+
+or:
+
+"historically observed B2 start"
+
+because such records are conceptually undefined for
+counterfactual policies.
+
+
+
+# 10. LEGACY 72 CLOSURE CLASSIFICATION
+
+Create:
+
+V41_LEGACY_72_ACTUAL_REPLAY_CLOSURE.json
+
+
+Record:
+
+legacy_total_cases = 122
+
+legacy_pre_day_complete = 50
+
+legacy_old_contract_unresolved = 72
+
+
+For the 72 cases set:
+
+old_status =
+OLD_CONTRACT_COUNTERFACTUAL_AUTHORITY_UNRESOLVED
+
+
+new_V41_status =
+DEFINED_BY_COUNTERFACTUAL_ACTUAL_REPLAY
+
+
+resolution_type =
+SEMANTIC_AUTHORITY_CLOSURE
+
+
+historical_observed_policy_execution_required =
+FALSE
+
+
+actual_reoptimization_allowed =
+FALSE
+
+
+Do NOT write:
+
+"historical missing data recovered"
+
+because that is not what happened.
+
+
+
+# 11. CASE-LEVEL AUDIT
+
+Where the exact legacy 72-case registry is available,
+materialize a case-level table containing:
+
+target_day
+policy
+legacy_reason
+V41_DA_decision_authority
+realized_runtime_available
+realized_workload_available
+realized_grid_inputs_available
+realized_traffic_available
+V41_actual_replay_status
+
+
+Expected successful classification:
+
+DEFINED_BY_COUNTERFACTUAL_REPLAY
+
+
+A case may still fail for a REAL missing realized exogenous input,
+but not merely because a historical policy-specific B0/B1/B2/B3
+execution record does not exist.
+
+
+
+# 12. MAY CAMPAIGN
+
+The legacy 72 set is NOT a reason to block:
+
+May 1 B0/B1 pilot
+
+or:
+
+full May B0/B1/B2/B3 campaign.
+
+
+For May, use the newly authorized V41 counterfactual replay
+semantics consistently for all policy-days.
+
+
+
+# 13. ALSO RESOLVE THE GPUh PENALTY AUTHORITY GAP
+
+A reusable scalar GPUh shortage penalty coefficient was confirmed
+not to exist.
+
+
+Do NOT invent a lambda.
+
+
+Do NOT stop V41 because of this.
+
+
+Use the previously authorized lexicographic amendment:
+
+
+P1:
+minimize rho_max
+
+
+P2:
+minimize mean H4 actionable-reserve shortfall
+
+
+P3:
+minimize migration count
+
+
+P4:
+minimize existing reference-schedule deviation
+
+
+P5:
+existing tie-break
+
+
+where:
+
+mean_H4_shortfall
+=
+mean_k(xi[k])
+
+
+and:
+
+H_available[k] + xi[k]
+>=
+H4_ACTIONABLE_RESERVE[k]
+
+
+rho_max remains primary.
+
+
+Reuse the current lexicographic/sequential optimization machinery.
+
+
+No weighted-sum coefficient.
+
+
+
+# 14. V41 ACTUAL PIPELINE ORDER
+
+For every policy-day:
+
+
+D-1 inputs available
+        |
+        v
+ML snapshot
+        |
+        v
+A0
+        |
+        v
+M1
+        |
+        v
+A1
+        |
+        v
+MF
+        |
+        v
+JOINT FREEZE
+        |
+        v
+DAY-AHEAD DECISION HASH / RECEIPT
+        |
+        v
+OPEN REALIZED ACTUAL INPUTS
+        |
+        v
+COUNTERFACTUAL ACTUAL REPLAY
+        |
+        v
+ACTUAL FRESH OPENDSS
+        |
+        v
+ACTUAL RESULT
+
+
+No Actual information may cross above the Day-Ahead freeze boundary.
+
+
+
+# 15. CONTINUE ORIGINAL V41 WORK
+
+Do NOT terminate after writing blocker artifacts.
+
+
+Continue with:
+
+1. implement Rolling Q90 adapter
+2. implement H4 R85_B2 adapter
+3. implement historical/physical actionable cap
+4. implement H4 reserve constraint
+5. implement lexicographic H4-shortfall objective stage
+6. implement V41 Actual-replay semantics
+7. close/audit the legacy 72 cases
+8. run tests
+
+then:
+
+9. May 1 B0 Day-Ahead
+10. freeze
+11. May 1 B0 Actual
+
+12. May 1 B1 Day-Ahead
+13. freeze
+14. May 1 B1 Actual
+
+15. B0-in-B1 nesting audit
+16. objective-vector identity audit
+
+17. repair genuine local defects if found
+18. rerun affected May-1 pilot cases
+
+19. final V41 interface freeze
+
+20. audit all May 31 days x B0/B1/B2/B3 = 124 policy-days
+
+21. detached-process smoke test
+
+22. launch full May:
+    B0/B1/B2/B3
+    Day-Ahead + Actual
+
+23. verify PID + heartbeat
+
+24. return control to the user
+
+
+Do NOT reintroduce the old 72-case blocker.

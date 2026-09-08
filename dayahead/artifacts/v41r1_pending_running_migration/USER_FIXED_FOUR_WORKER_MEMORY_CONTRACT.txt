@@ -1,0 +1,638 @@
+# ============================================================
+# V41R1 FIXED 4-DAY PARALLELISM + MEMORY-EFFICIENT EXACT MODEL
+#
+# IMPORTANT CORRECTION:
+# Full-May parallelism is FIXED at 4 target days.
+#
+# Do NOT dynamically reduce to 3/2/1 days because of memory.
+# Instead reduce model memory consumption through exact,
+# mathematically equivalent implementation improvements.
+# ============================================================
+
+
+# 1. FIXED CAMPAIGN PARALLELISM
+
+For the full May campaign use exactly:
+
+PARALLEL_DAY_WORKERS = 4
+
+SOLVER_THREADS_PER_DAY = 4
+
+
+Target execution:
+
+4 concurrent target days
+x
+4 solver threads per active day
+=
+16 solver threads maximum.
+
+
+Do NOT implement adaptive reduction to:
+
+3 days
+2 days
+1 day
+
+as a normal memory-management strategy.
+
+
+The final campaign architecture must be designed to sustain four
+concurrent day workers on the 32-GB host.
+
+
+# 2. HOST MEMORY CONTRACT
+
+Host physical RAM:
+
+32 GB
+
+
+Do not assume:
+
+4 x 8 GB = 32 GB
+
+is safe, because the host also requires memory for:
+
+- Windows
+- Python
+- model construction
+- NumPy/pandas/scipy sparse objects
+- OpenDSS
+- campaign manager
+- monitoring UI
+- filesystem/cache
+- serialization/persistence
+
+
+Therefore the scientific MILP implementation must be made materially
+more memory efficient before the four-day campaign begins.
+
+
+Do NOT solve the problem by reducing scientific flexibility.
+
+
+# 3. REMOVE THE ARBITRARY 8-GB FAILURE AS A MODEL LIMIT
+
+The previous B1 termination at the configured 8-GB cap is an
+infrastructure/model-representation failure.
+
+It is NOT:
+
+- a B1 scientific failure
+- an infeasible result
+- permission to prune candidates
+
+
+Preserve the failed attempt as evidence.
+
+
+The final implementation should be sufficiently memory-efficient that
+four simultaneous day workers can execute safely on the 32-GB host.
+
+
+# 4. PRIMARY MEMORY FIX — EVENT/STATE RECURRENCE
+
+The current major memory issue was identified as repeated expansion of
+the same job decision into every occupied time slot.
+
+Replace redundant dense/repeated occupancy construction with an EXACT
+event/state recurrence.
+
+
+For IDC i and slot t, conceptually:
+
+GPU_OCC[i,t]
+=
+GPU_OCC[i,t-1]
++
+START_GPU[i,t]
++
+MIGRATION_RESTART_GPU[i,t]
+-
+COMPLETION_GPU[i,t]
+-
+MIGRATION_DEPARTURE_GPU[i,t]
+
+
+Use the exact V41R1 segment semantics.
+
+
+The recurrence must account correctly for:
+
+- initial execution
+- completion
+- PENDING pre-start site reassignment
+- RUNNING first-checkpoint migration
+- source compute segment
+- checkpoint/pause
+- WAN transfer
+- destination restart
+- destination compute segment
+
+
+Do NOT omit migration events.
+
+
+# 5. USE SPARSE EVENT COEFFICIENTS
+
+Avoid materializing job x site x time dense occupancy matrices where
+the majority of coefficients are zero.
+
+
+Build sparse matrices directly from nonzero events.
+
+
+Prefer:
+
+- CSR/CSC sparse structures
+- integer/index arrays
+- shared coefficient templates
+- immutable reused coefficient blocks
+
+
+Avoid:
+
+- dense NumPy expansion
+- pandas DataFrame copies of full optimization matrices
+- repeated Python dictionaries for every zero coefficient
+- duplicating identical coefficient matrices across P1-P5
+- copying the whole model for every lexicographic stage
+
+
+# 6. REUSE ONE MODEL ACROSS P1-P5 WHERE POSSIBLE
+
+The lexicographic objective remains:
+
+P1 rho_max
+P2 mean H4 shortfall
+P3 migration count
+P4 reference deviation
+P5 tie-break
+
+
+Do NOT construct five independent million-variable models if the
+existing Gurobi formulation can safely reuse one model.
+
+
+Prefer:
+
+build scientific constraints once
+
+solve P1
+
+add/fix P1 optimum
+
+change objective to P2
+
+solve
+
+add/fix P2 optimum
+
+...
+
+through P5
+
+
+Reuse the same variables and constraint matrix.
+
+
+Do NOT alter the lexicographic semantics.
+
+
+# 7. DO NOT DUPLICATE B0 REFERENCE DATA INSIDE B1
+
+Where B1 requires B0/reference constants, keep them as immutable
+parameters/arrays.
+
+
+Do not create redundant decision variables merely to replicate the
+B0 schedule.
+
+
+Reference schedule values should remain coefficients/constants unless
+a variable is scientifically required.
+
+
+# 8. FACTORIZE SITE / MIGRATION DECISIONS
+
+Under the FINAL V41R1 semantics:
+
+PENDING:
+- one pre-start initial-site decision
+
+RUNNING:
+- one migration opportunity at the first valid checkpoint
+- STAY or one destination
+- maximum one RUNNING migration per job
+
+
+Exploit this structure.
+
+
+Do NOT enumerate unnecessary Cartesian products of:
+
+job
+x initial site
+x checkpoint
+x destination
+x every slot
+
+
+The checkpoint is deterministic under the final one-shot contract.
+
+
+Use factorized variables such as conceptually:
+
+initial_site[j,i]
+
+migrate[j]
+
+destination[j,k]
+
+
+with exact linking constraints.
+
+
+No scientific candidate pruning.
+
+
+# 9. NO ALL-CHECKPOINT DIMENSION
+
+The final V41R1 migration semantics has exactly one migration
+opportunity:
+
+FIRST_VALID_CHECKPOINT_j
+
+
+Therefore do NOT retain variables for all later checkpoint candidates.
+
+
+Remove superseded all-valid-checkpoint model structures from the active
+scientific formulation.
+
+
+This is NOT heuristic pruning.
+
+It is the final user-authorized scientific migration contract.
+
+
+# 10. REMOVE SUPERSEDED TERMINAL FORMULATION OBJECTS
+
+Ensure memory is not being consumed by abandoned scientific structures:
+
+- per-job terminal residual
+- daily service neutrality
+- aggregate spill
+- extended post-H horizon
+- all-checkpoint migration model
+- new voltage-margin model
+
+
+These must be unreachable from the final model build.
+
+
+# 11. SHARE COMMON DAILY DATA ACROSS POLICIES / PROCESSES WHEN SAFE
+
+For each target day, common immutable scientific inputs include:
+
+- ML snapshot
+- runtime table
+- H4 table
+- electrical coefficients
+- topology
+- capacity arrays
+- demand/PV
+- traffic authority
+
+
+Avoid four unnecessary in-memory copies inside one day worker where
+possible.
+
+
+Use memory-mapped/read-only/shared representations if supported and
+safe.
+
+
+Do not modify scientific values.
+
+
+# 12. AVOID LARGE PANDAS OBJECTS IN MODEL BUILD
+
+Pandas is allowed for persistence and audit output.
+
+For MILP matrix construction, prefer compact:
+
+- NumPy arrays
+- scipy sparse matrices
+- integer index arrays
+
+where mathematically identical.
+
+
+Release temporary pandas/intermediate objects before Gurobi solve.
+
+
+Explicitly:
+
+del temporary large objects
+gc.collect()
+
+at safe non-scientific boundaries if useful.
+
+
+# 13. RELEASE BUILD-TIME MEMORY BEFORE OPTIMIZATION
+
+After the Gurobi model is constructed:
+
+free:
+
+- explicit enumeration diagnostics
+- temporary coefficient builders
+- duplicate sparse matrices
+- candidate-generation DataFrames
+- transient join results
+
+
+Do NOT keep audit-generation intermediates alive throughout the solve.
+
+
+Persist necessary audit evidence to disk first.
+
+
+# 14. Gurobi NODE MEMORY / DISK SPILL
+
+If supported by the installed Gurobi version, configure node-file
+offloading so branch-and-bound nodes do not consume all physical RAM.
+
+
+Use a fast local SSD directory under the campaign workspace.
+
+
+For example, use the installed-version equivalent of:
+
+NodefileStart
+NodefileDir
+
+
+Choose a conservative node-memory threshold suitable for four
+simultaneous workers.
+
+
+This is an operational memory optimization only.
+
+
+Do NOT change:
+
+- MIPGap requirement
+- feasibility tolerance
+- objective
+- candidate set
+- scientific constraints
+
+
+Record exact Gurobi memory-related parameters in the execution receipt.
+
+
+# 15. DO NOT USE A HARD 8-GB KILL IF IT PREVENTS VALID SOLVING
+
+Do not retain the previous hard 8-GB termination mechanism if it
+prematurely kills the exact sparse model.
+
+
+Instead design the model and solver settings so four workers coexist
+within physical RAM.
+
+
+If a Gurobi memory safeguard is needed, it must be chosen for the
+four-worker 32-GB host as an infrastructure protection mechanism,
+not as a scientific criterion.
+
+
+Do not silently terminate a valid optimization at 8 GB.
+
+
+# 16. PRESOLVE / SPARSITY
+
+Allow existing Gurobi presolve to remove redundant variables and
+constraints.
+
+
+Use only mathematically safe presolve/sparse model construction.
+
+
+Do not manually prune feasible alternatives based on:
+
+- destination sensitivity
+- objective score
+- route distance
+- candidate ranking
+- top-K selection
+
+
+# 17. MEMORY PROFILING IS MANDATORY
+
+Instrument the May-1 B1 build/solve and report:
+
+HOST_RAM_GB
+
+RAM_AVAILABLE_BEFORE_BUILD
+
+PEAK_PYTHON_BUILD_RAM_GB
+
+RAM_AFTER_MODEL_BUILD_GB
+
+PEAK_GUROBI_SOLVE_RAM_GB
+
+PEAK_TOTAL_WORKER_RAM_GB
+
+
+Also report:
+
+original variables
+binary variables
+continuous variables
+constraints
+matrix nonzeros
+
+presolved variables
+presolved binaries
+presolved constraints
+presolved nonzeros
+
+
+# 18. BEFORE / AFTER REFORMULATION COMPARISON
+
+Compare the failed memory-heavy formulation against the new exact
+sparse formulation.
+
+
+Report:
+
+variables reduction
+constraints reduction
+nonzero reduction
+peak build RAM reduction
+estimated solve RAM reduction
+
+
+The main success metric is not merely variable count.
+
+
+MATRIX NONZEROS and PEAK RAM are critical.
+
+
+# 19. EXACT SCIENTIFIC EQUIVALENCE GATE
+
+Before using the new recurrence/factorized formulation for May-1 B1,
+prove equivalence on deterministic reduced cases.
+
+
+Require:
+
+- same feasible decisions both directions
+- same P1-P5 objective vector
+- same rho_max
+- same pre-start site selection
+- same stay/migrate decision
+- same destination
+- same migration count
+- same GPU occupancy every slot
+- same rack occupancy every slot
+- same WAN occupancy
+- same AIDC P/Q
+- same deterministic tie-break
+
+
+No lost feasible decisions.
+No new feasible decisions.
+
+
+# 20. 4-WORKER MEMORY STRESS TEST
+
+Before launching the full May campaign, perform a controlled
+four-worker infrastructure stress test.
+
+
+Use four representative model-build/solver processes with:
+
+4 threads each
+
+
+Verify simultaneously:
+
+- no OOM
+- no Windows paging collapse
+- no worker termination
+- no corrupted artifacts
+- monitor remains responsive
+- heartbeat remains responsive
+
+
+Do not use scientific candidate pruning for this test.
+
+
+# 21. FOUR-DAY CONCURRENCY IS FIXED AFTER VALIDATION
+
+Once the memory-safe formulation passes the four-worker stress test:
+
+FULL MAY:
+
+PARALLEL_DAY_WORKERS = 4
+SOLVER_THREADS_PER_DAY = 4
+
+
+Keep four day workers active whenever at least four unfinished days
+remain.
+
+
+When one day finishes:
+
+immediately admit the next pending day.
+
+
+Do NOT intentionally throttle to fewer than four due to ordinary
+memory usage after the validated memory-safe configuration is frozen.
+
+
+# 22. FAILURE HANDLING
+
+If an implementation memory defect appears during full May:
+
+pause admission of new work,
+
+preserve PASS/checkpoints,
+
+repair the memory implementation,
+
+prove scientific equivalence,
+
+resume affected workers.
+
+
+Do NOT permanently reduce parallelism instead of repairing a proven
+memory implementation defect.
+
+
+Do NOT restart PASS days unnecessarily.
+
+
+# 23. DO NOT TERMINATE CODEX
+
+Stopping a failed diagnostic subprocess is allowed.
+
+
+Do NOT voluntarily terminate the Codex task.
+
+
+After the memory reformulation:
+
+complete May-1 B1,
+
+Fresh,
+
+Actual,
+
+all audits,
+
+then launch full May with fixed four-day concurrency after the final
+gate passes.
+
+
+# 24. REPORT BEFORE MAY-1 B1 RESUME
+
+Before resuming the scientific B1 solve, report:
+
+1. old peak RAM before failure
+2. old matrix nonzeros
+3. new variable count
+4. new binary count
+5. new constraint count
+6. new matrix nonzeros
+7. predicted RAM
+8. equivalence test result
+9. memory-related Gurobi settings
+10. confirmation that no candidate/flexibility was removed
+
+
+Then resume B1.
+
+
+# 25. REPORT BEFORE FULL MAY
+
+Before launching the full campaign report:
+
+1. measured peak RAM of May-1 B1
+2. measured peak RAM of B0/B1/Fresh/Actual worker
+3. four-worker stress-test peak total RAM
+4. available host RAM under four workers
+5. PAGEFILE/paging status
+6. 4 x 4 configuration PASS
+7. exact final scientific commit
+8. exact solver configuration
+9. monitor path
+10. detached runner path
+
+
+Full May launch is authorized only after the FIXED four-day execution
+configuration passes this memory test.

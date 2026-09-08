@@ -1,0 +1,47 @@
+{
+  "status": "AUTHORIZED",
+  "authority": {
+    "path": "C:\\Users\\kjw39\\.codex\\attachments\\3aad41f2-039d-4276-ae58-bd0ce45feb3f\\pasted-text.txt",
+    "sha256": "c591d0bcea507d0f22dee356b2ffd9881836fb46de0c52c246feda724187a8a3",
+    "bytes": 5955
+  },
+  "old_hierarchy": [
+    "MIN_RHO_MAX",
+    "MIN_MIGRATIONS",
+    "MIN_COMPLETE_REFERENCE_DEVIATION",
+    "STABLE_TIE"
+  ],
+  "new_hierarchy": [
+    "MIN_RHO_MAX",
+    "MIN_MEAN_H4_SHORTFALL",
+    "MIN_MIGRATIONS",
+    "MIN_COMPLETE_REFERENCE_DEVIATION",
+    "STABLE_TIE"
+  ],
+  "scalar_lambda": null,
+  "reason": "No semantically valid existing scalar GPUh shortage coefficient; explicit user amendment inserts sequential priority P2.",
+  "mean_shortfall": "sum(xi[k]) / 81",
+  "window_slots": 16,
+  "stored_diagnostics": [
+    "sum_xi_GPUh",
+    "mean_xi_GPUh"
+  ],
+  "implementation": "Existing sequential solve mechanism; insert P2 after P1 lock; lock P2 before existing lower priorities.",
+  "P1_lock": "Existing exact primary value lock retained; no intentional degradation allowance added.",
+  "P2_lock_tolerance": {
+    "B1_A0": 1e-09,
+    "A1": 1e-08
+  },
+  "tolerance_source": "Existing model.Params.FeasibilityTol in respective inherited solvers",
+  "policies": [
+    "B0",
+    "B1",
+    "B2",
+    "B3"
+  ],
+  "objective_report": "vector, never artificial scalar",
+  "same_snapshot_A0_A1": true,
+  "same_snapshot_B0_B3": true,
+  "M1_MF_route_PQ_unchanged": true,
+  "old_coefficient_gap_blocks_V41": false
+}

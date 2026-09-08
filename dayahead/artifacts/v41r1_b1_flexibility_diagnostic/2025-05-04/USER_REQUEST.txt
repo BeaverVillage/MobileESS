@@ -1,0 +1,930 @@
+# ============================================================
+# V41R1 MAY-04 B1 FLEXIBILITY-ACTIVATION / LOCAL-BASIN DIAGNOSTIC
+#
+# PURPOSE
+#
+# May-04 B1 currently returns EXACTLY the B0 decision/objective:
+#
+# P1 = 0.5383475197
+# P2 = 1604.7619377782 GPUh
+# P3 = 0
+# P4 = 0
+# P5 = 957282143
+#
+# GPU / IT / PCC / QCC trajectories are also identical.
+#
+# Both:
+# - the older F&O run with 100% raw-candidate coverage
+# - the new early-stop F&O run
+#
+# returned the same B0-equivalent incumbent.
+#
+# Therefore DO NOT yet interpret this as a scientific result that
+# "migration has no value."
+#
+# Diagnose whether:
+#
+# A) the F&O search is trapped in the B0 local basin
+# B) B1-exclusive variables are visited but remain effectively fixed
+# C) site/migration decisions are not correctly linked to AIDC/Grid
+# D) the B1 candidate universe is nominally large but physically unusable
+# E) May-04 genuinely has no better B1-feasible solution
+#
+# DO NOT start Full May until this diagnostic is closed.
+# ============================================================
+
+
+# ============================================================
+# 0. DIAGNOSTIC ONLY — DO NOT CHANGE SCIENCE
+# ============================================================
+
+This task is DIAGNOSTIC.
+
+Do NOT modify:
+
+- B0/B1/B2/B3 scientific policy definitions
+- Q90 runtime
+- H4 R85_B2
+- planned-start authority
+- PENDING relocation authority
+- first-valid-checkpoint RUNNING migration authority
+- GPU/rack/WAN constraints
+- electrical coefficients
+- corrected background mapper
+- lexicographic P1-P5
+- Fresh OpenDSS
+- Actual replay
+- candidate universe
+- destination universe
+
+
+Do NOT:
+
+- add permanent cross-region constraints
+- prune same-region destinations
+- force migration in production
+- retune electrical sensitivities
+- use Actual outcomes
+- change optimization weights
+- relax constraints
+
+
+Any forced decision below is a DIAGNOSTIC PROBE ONLY.
+
+
+# ============================================================
+# 1. PRESERVE CURRENT MAY-04 EVIDENCE
+# ============================================================
+
+Preserve and hash:
+
+- current B0 result
+- pre-early-stop B1 result
+- early-stop B1 result
+- candidate manifest
+- F&O visit history
+- MPS
+- electrical coefficients
+- objective ledgers
+- Fresh / Actual outputs
+
+
+Do not overwrite them.
+
+
+Create a separate diagnostic root, e.g.:
+
+artifacts/v41r1_b1_flexibility_diagnostic/2025-05-04/
+
+
+# ============================================================
+# 2. FIRST QUESTION:
+# WERE B1-EXCLUSIVE VARIABLES ACTUALLY FREE?
+# ============================================================
+
+Select representative B1-exclusive decisions from:
+
+A) PENDING pre-start relocation
+
+B) D00/RUNNING first-valid-checkpoint migration
+
+
+For every selected decision inspect the ACTUAL Gurobi model state,
+not just candidate scheduler metadata.
+
+
+Record:
+
+- variable name
+- variable type
+- LB
+- UB
+- Start
+- incumbent value
+- whether explicitly fixed by F&O
+- whether implicitly fixed by constraints
+- source job
+- source IDC
+- destination IDC
+- decision type
+
+
+For each F&O neighborhood distinguish:
+
+CANDIDATE_VISITED
+
+from
+
+VARIABLE_ACTUALLY_FREE
+
+
+A candidate counts as ACTUALLY FREE only if the relevant B1 decision
+has a non-singleton admissible domain in that subproblem.
+
+
+Produce:
+
+B1_VARIABLE_ACTIVATION_AUDIT.json
+
+
+Report:
+
+- visited candidate count
+- actually-free candidate count
+- visited-but-fixed count
+- reason distribution
+- representative evidence
+
+
+If a large fraction of "visited" candidates are not actually free,
+STOP and classify:
+
+B1_FO_UNFIXING_DEFECT
+
+
+Repair only the implementation defect,
+rerun relevant regressions,
+then repeat this diagnostic.
+
+
+# ============================================================
+# 3. VERIFY B1 HAS REAL ALTERNATIVE DECISIONS
+# ============================================================
+
+Do not infer flexibility from the 3.8M candidate count.
+
+
+Compute the number of job-level decisions for which:
+
+- B0 decision is feasible
+AND
+- at least one different B1 decision is also model-feasible
+
+
+Report separately:
+
+PENDING jobs with >=1 alternative initial site
+
+RUNNING jobs with >=1 alternative STAY/migrate decision
+
+total alternative destination arcs
+
+
+Create:
+
+B1_EFFECTIVE_ALTERNATIVE_SET.json
+
+
+Distinguish:
+
+NOMINAL_CANDIDATE
+
+from
+
+MODEL-FEASIBLE_ALTERNATIVE
+
+
+# ============================================================
+# 4. SINGLE FORCED-CHANGE LINKAGE TEST
+# ============================================================
+
+Select several deterministic representative alternatives.
+
+
+At minimum include:
+
+- one feasible PENDING relocation
+- one feasible RUNNING migration, if one exists
+- preferably alternatives whose destination has a different
+  electrical sensitivity to the current P1-critical branch
+
+
+For each probe:
+
+force ONE B1 alternative decision in a diagnostic copy of the model.
+
+
+Do not require it to improve P1.
+
+
+The purpose is to verify propagation.
+
+
+After forcing the decision, recompute and compare against B0:
+
+- job selected site
+- execution site trajectory
+- rack occupancy
+- GPU occupancy
+- site IT load
+- site PCC P
+- site PCC Q
+- relevant electrical injection vector
+- Planning line loading
+- Planning voltage
+- P1
+- P2
+- P3
+- P4
+- P5
+
+
+Expected causal chain:
+
+JOB DECISION
+->
+SITE EXECUTION
+->
+GPU/RACK
+->
+IT LOAD
+->
+PCC P/Q
+->
+GRID INJECTION
+->
+LINE/VOLTAGE RESULT
+
+
+If the site/job decision changes but downstream AIDC P/Q does not:
+
+classify:
+
+AIDC_DECISION_TO_POWER_LINK_DEFECT
+
+
+If AIDC P/Q changes but Planning Grid result does not respond where the
+electrical coefficient says it should:
+
+classify:
+
+AIDC_POWER_TO_GRID_LINK_DEFECT
+
+
+Persist each forced probe as:
+
+FORCED_CHANGE_PROBE_*.json
+
+
+# ============================================================
+# 5. ELECTRICAL RESPONSIVENESS TEST
+# ============================================================
+
+Using the current May-04 B0/B1 incumbent, identify:
+
+- P1 critical branch
+- phase
+- time
+- current rho_max
+- near-binding branch/phase/time set
+
+
+For every IDC compute the Planning electrical effect on that critical
+quantity for a standardized small injection perturbation using the
+current certified coefficient authority.
+
+
+Produce a site table:
+
+IDC
+critical-branch sensitivity to P
+critical-branch sensitivity to Q
+electrical region/group
+
+
+Do not use the grouping to prune anything.
+
+
+This is diagnostic only.
+
+
+Determine whether the IDC sites actually have materially different
+electrical effects on the May-04 P1 bottleneck.
+
+
+If all usable IDCs have essentially identical effect on the critical
+branch:
+
+record that physical fact explicitly.
+
+
+# ============================================================
+# 6. SINGLE-MOVE BENEFIT SCAN
+# ============================================================
+
+Perform a deterministic diagnostic scan of feasible B1-exclusive
+single changes.
+
+
+Do NOT run the full production F&O.
+
+
+For each selected/tractable feasible alternative:
+
+- apply the single relocation or migration
+- retain all hard constraints
+- independently materialize
+- recompute P1-P5
+
+
+The purpose is to answer:
+
+DOES ANY SINGLE B1 MOVE PRODUCE:
+
+P1_new < P1_B0 - tolerance ?
+
+
+Also report:
+
+- best single-move P1 change
+- best P2 change subject to unchanged P1
+- number of feasible single moves with negative P1 delta
+- number with zero P1 delta
+- number with positive P1 delta
+
+
+If at least one individually feasible move improves P1,
+but production F&O never finds it:
+
+classify:
+
+FO_NEIGHBORHOOD_SEARCH_DEFECT_OR_PRIORITY_DEFECT
+
+
+# ============================================================
+# 7. NON-B0 SOLUTION EXISTENCE TEST
+# ============================================================
+
+Run a small diagnostic optimization under the ORIGINAL B1 feasible set
+plus a temporary diagnostic constraint requiring a different decision
+from B0.
+
+
+Conceptually require:
+
+at least one B1-exclusive decision differs from B0.
+
+
+Do NOT make this a production constraint.
+
+
+First solve only for FEASIBILITY.
+
+
+Question:
+
+Does a physically valid B1 solution different from B0 exist?
+
+
+If NO:
+
+investigate candidate/model-feasibility mismatch.
+
+
+If YES:
+
+record one concrete non-B0 feasible solution and its P1-P5 vector.
+
+
+Then test:
+
+P1 <= P1_B0 + numerical_tolerance
+
+
+while requiring at least one B1-exclusive decision to differ.
+
+
+Question:
+
+Does a non-B0 solution exist with P1 no worse than B0?
+
+
+Then, if feasible, test additionally:
+
+P2 <= P2_B0 + numerical_tolerance
+
+
+under the same P1 lock.
+
+
+This separates:
+
+"all alternatives are worse"
+
+from
+
+"F&O failed to leave B0."
+
+
+# ============================================================
+# 8. COUPLED-MOVE / LOCAL-BASIN TEST
+# ============================================================
+
+This is the most important diagnostic.
+
+
+The current F&O may be trapped because a beneficial move requires
+multiple simultaneous changes.
+
+
+Example:
+
+JOB A:
+destination IDC is electrically favorable but currently GPU-full.
+
+JOB B:
+must first leave that destination IDC to create capacity.
+
+
+Neither change may be attractive/feasible alone,
+but the coupled pair may improve P1.
+
+
+Construct a deterministic small coupled neighborhood around the current
+May-04 P1 bottleneck.
+
+
+Include:
+
+1. jobs contributing to the current critical electrical interval
+
+2. jobs occupying GPU/rack capacity at electrically favorable
+   destination IDCs
+
+3. relevant first-checkpoint migration variables
+
+4. relevant PENDING initial-site decisions
+
+
+FREE these decisions SIMULTANEOUSLY.
+
+
+Keep all other scientific constraints exactly unchanged.
+
+
+Do not prune destinations.
+
+
+For each opened job allow its complete authoritative destination set.
+
+
+Solve this smaller coupled MILP significantly more strongly than one
+normal F&O neighborhood, but keep it diagnostic and finite.
+
+
+Persist:
+
+COUPLED_ESCAPE_TEST.json
+
+
+Record:
+
+- number of jobs opened
+- number of free discrete variables
+- source IDC set
+- destination IDC set
+- electrical regions represented
+- starting P1-P5
+- best P1-P5
+- changed job IDs
+- capacity-release moves
+- critical-load moves
+- runtime
+- bound/gap if available
+
+
+# ============================================================
+# 9. CROSS-ELECTRICAL-REGION ESCAPE PROBE
+# ============================================================
+
+If the coupled test above still returns B0, run ONE additional
+diagnostic escape probe.
+
+
+Define electrical regions from current May-04 critical-line
+sensitivities.
+
+
+Do NOT define region merely by geography.
+
+
+In this diagnostic subproblem only, require at least one opened
+decision to cross between materially different electrical regions.
+
+
+This is a SEARCH PROBE ONLY.
+
+
+The temporary cross-region condition must NOT become part of the final
+B1 scientific model.
+
+
+After obtaining a candidate:
+
+REMOVE the diagnostic escape constraint.
+
+Then independently validate the resulting job-level solution against
+the ORIGINAL B1 model.
+
+
+Accept it as diagnostic evidence only if it is feasible under the
+original model.
+
+
+If the resulting original-B1-feasible solution has:
+
+P1 < P1_B0 - tolerance
+
+then classify:
+
+CONFIRMED_FO_LOCAL_BASIN_ESCAPE
+
+
+This proves that B1 improvement exists and the previous F&O failed to
+discover it.
+
+
+# ============================================================
+# 10. CAPACITY-RELEASE PAIR/TRIPLE PROBES
+# ============================================================
+
+Explicitly test small coordinated structures such as:
+
+capacity-release job
++
+critical-load relocation job
+
+
+and, where needed:
+
+capacity-release job 1
++
+capacity-release job 2
++
+critical-load relocation/migration job
+
+
+Do not enumerate the entire combinatorial universe blindly.
+
+
+Use May-04 critical electrical sensitivities and physical GPU/rack
+occupancy only to PRIORITIZE diagnostic probes.
+
+
+Do not permanently remove any candidate.
+
+
+Question to answer:
+
+Does a feasible multi-job exchange exist that improves P1 but cannot
+be reached through monotonically improving single moves?
+
+
+If YES:
+
+the production F&O requires a stronger overlapping/coupled
+diversification neighborhood.
+
+
+# ============================================================
+# 11. CHECK ACCEPTANCE RULE FOR LOCAL-OPTIMUM TRAP
+# ============================================================
+
+Audit the production F&O acceptance rule.
+
+
+Determine whether it requires every intermediate incumbent to be
+strictly lexicographically improved.
+
+
+If so, test whether May-04 requires a temporary:
+
+equal-P1 move
+
+or even an intermediate locally non-improving move
+
+to reach a later better P1 solution.
+
+
+Do NOT change the production acceptance rule yet.
+
+
+Just diagnose.
+
+
+Report:
+
+- whether equal-objective moves are rejected
+- whether neutral capacity-release moves exist
+- whether a better coupled solution requires such neutral moves
+
+
+If the better solution requires neutral restructuring first,
+record:
+
+MONOTONIC_INCUMBENT_ACCEPTANCE_LOCAL_TRAP
+
+
+# ============================================================
+# 12. VERIFY P3=0 SEMANTICS
+# ============================================================
+
+P3=0 in the final B1 result means no RUNNING migration was selected.
+
+
+Do not confuse:
+
+MIGRATION CANDIDATES
+
+with
+
+SELECTED MIGRATIONS.
+
+
+Report explicitly:
+
+- number of eligible RUNNING migration jobs
+- number of migration arcs
+- number selected in final B1
+- number of PENDING pre-start relocations selected
+- number of jobs whose initial IDC differs from B0
+- number of jobs whose RUNNING site changes after checkpoint
+
+
+This must remove ambiguity about "hundreds of migrations."
+
+
+# ============================================================
+# 13. PENDING RELOCATION VS RUNNING MIGRATION
+# ============================================================
+
+Diagnose them separately.
+
+
+It is possible that:
+
+RUNNING migration has no useful value
+
+while
+
+PENDING pre-start relocation has value
+
+
+or vice versa.
+
+
+Produce independent tests for:
+
+A) pre-start placement flexibility only
+
+B) first-checkpoint migration flexibility only
+
+C) both jointly enabled
+
+
+Compare P1/P2 against B0.
+
+
+Do not change the final B1 policy yet.
+
+
+This is an ablation-style DIAGNOSTIC only.
+
+
+# ============================================================
+# 14. DO NOT USE ACTUAL TO PICK THE BETTER DECISION
+# ============================================================
+
+All diagnostic search must use Day-Ahead-authorized information only.
+
+
+Actual replay may be executed afterward ONLY to verify the selected
+diagnostic solution.
+
+
+Do not use Actual P1/P2 or realized runtime to choose relocation or
+migration decisions.
+
+
+No future leakage.
+
+
+# ============================================================
+# 15. DIAGNOSTIC DECISION TREE
+# ============================================================
+
+At the end classify May-04 into EXACTLY one primary root cause,
+with secondary findings if needed.
+
+
+CASE A
+B1 variables were not actually free.
+
+Label:
+IMPLEMENTATION_DEFECT_FO_VARIABLE_ACTIVATION
+
+
+CASE B
+job/site decisions change but AIDC/Grid trajectories do not.
+
+Label:
+IMPLEMENTATION_DEFECT_DECISION_POWER_GRID_LINK
+
+
+CASE C
+alternative B1 solutions exist and a coupled/escape diagnostic finds
+P1 or lexicographic improvement over B0, while production F&O did not.
+
+Label:
+COMPUTATIONAL_LOCAL_BASIN
+
+
+CASE D
+candidate manifest contains many nominal candidates but few/no
+model-feasible alternatives.
+
+Label:
+CANDIDATE_MODEL_FEASIBILITY_MISMATCH
+
+
+CASE E
+B1 flexibility is correctly active, linkage is correct, alternative
+solutions exist, coupled diagnostics are performed, but no B1-feasible
+solution improves the B0 lexicographic vector within the diagnostic
+evidence.
+
+Label:
+MAY04_NO_OBSERVED_B1_VALUE
+
+
+Important:
+
+CASE E is NOT a proof of global optimality unless a global bound proves
+it.
+
+
+Use wording:
+
+NO OBSERVED IMPROVEMENT
+
+not:
+
+NO POSSIBLE IMPROVEMENT
+
+
+# ============================================================
+# 16. REQUIRED FINAL REPORT
+# ============================================================
+
+Create:
+
+V41R1_MAY04_B1_FLEXIBILITY_DIAGNOSTIC.md
+
+and machine-readable:
+
+V41R1_MAY04_B1_FLEXIBILITY_DIAGNOSTIC.json
+
+
+The report must include:
+
+1. B0 P1-P5
+2. production B1 P1-P5
+3. actual selected relocation count
+4. actual selected migration count
+5. nominal candidate count
+6. actually-free variable count
+7. model-feasible alternative count
+8. forced-change propagation results
+9. electrical sensitivity differences among IDC sites
+10. best single-move result
+11. existence of any non-B0 feasible solution
+12. coupled-move result
+13. cross-electrical-region escape result
+14. neutral/equal-objective restructuring result
+15. final primary diagnosis
+16. whether the production F&O must be changed
+17. whether the scientific B1 model must be changed
+18. exact evidence paths/hashes
+
+
+# ============================================================
+# 17. IF COMPUTATIONAL_LOCAL_BASIN IS CONFIRMED
+# ============================================================
+
+Do NOT immediately start Full May.
+
+
+First report the evidence.
+
+
+Likely next repair would be algorithmic only:
+
+- stronger overlapping neighborhood
+- coupled source/destination capacity-release neighborhood
+- electrical-region diversification
+- local-branching / larger escape neighborhood
+
+
+while preserving the exact B1 scientific feasible set.
+
+
+Do NOT implement a permanent rule forcing cross-region migration.
+
+
+# ============================================================
+# 18. IF AN IMPLEMENTATION DEFECT IS CONFIRMED
+# ============================================================
+
+Repair the defect immediately.
+
+
+Then:
+
+- add targeted regression
+- run all relevant existing regression suites
+- invalidate only artifacts affected by the defect
+- preserve unaffected PASS evidence
+- rerun May-04 diagnostic
+- rerun May-04 B1 acceptance
+
+
+Do not start Full May until the defect is closed.
+
+
+# ============================================================
+# 19. IF NO OBSERVED B1 VALUE IS CONFIRMED
+# ============================================================
+
+If all activation/linkage/coupled tests are correct and no improvement
+is observed:
+
+preserve that result.
+
+
+Do NOT artificially force migration merely to make B1 different from
+B0.
+
+
+A zero-flexibility-use result is scientifically valid if the model
+actually determines that STAY/B0 placement is best under the available
+evidence.
+
+
+But report it as:
+
+MAY04_NO_OBSERVED_B1_VALUE
+
+not as globally proven optimality.
+
+
+# ============================================================
+# 20. STOP CONDITION
+# ============================================================
+
+Do NOT start Full May as part of this prompt.
+
+
+Stop after:
+
+- diagnostic is complete
+- root cause is classified
+- required regression/repair is complete if an implementation defect
+  is found
+- May-04 diagnostic artifacts are frozen
+
+
+Return a concise summary containing:
+
+ROOT CAUSE
+B1 VARIABLES ACTUALLY FREE? YES/NO
+ALTERNATIVE B1 SOLUTIONS EXIST? YES/NO
+FORCED MOVE CHANGES PCC/GRID? YES/NO
+BEST SINGLE-MOVE ΔP1
+BEST COUPLED-MOVE ΔP1
+CROSS-REGION ESCAPE ΔP1
+SELECTED PRESTART RELOCATIONS
+SELECTED RUNNING MIGRATIONS
+PRODUCTION F&O CHANGE REQUIRED? YES/NO
+SCIENTIFIC MODEL CHANGE REQUIRED? YES/NO
+
+Proceed.

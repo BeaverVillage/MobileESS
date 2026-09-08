@@ -1,0 +1,1065 @@
+# ============================================================
+# V41 INDEPENDENT-DAY TERMINAL-RESIDUAL REVISION
+#
+# 24-HOUR HARD HORIZON
+# + CROSS-MIDNIGHT FLEXIBILITY
+# + PER-JOB NO-INCREASE TERMINAL RESIDUAL
+#
+# Purpose:
+# Remove the overly conservative rule that freezes a PENDING job's
+# start/site merely because its planned service crosses 24:00,
+# while preserving strict independent-day evaluation and preventing
+# end-of-horizon workload dumping.
+# ============================================================
+
+
+# 0. REVISION / SCIENTIFIC BOUNDARY
+
+This is a scientific formulation change because it changes the
+AIDC feasible set.
+
+Do NOT silently patch previously frozen May-1 results.
+
+Preserve all existing V41 May-1 artifacts and classifications.
+
+If the previously requested voltage-security-margin revision has NOT
+yet been scientifically frozen, integrate this terminal-residual
+revision into the SAME next pre-May scientific revision so that
+May-1 is rerun only once under one coherent formulation.
+
+If that voltage revision has already been frozen/committed, create
+the next scientific revision.
+
+Do NOT mix policy-days produced under different terminal semantics
+inside one campaign.
+
+
+
+# 1. FUNDAMENTAL DAILY EXPERIMENT CONTRACT
+
+Each operating day remains scientifically INDEPENDENT.
+
+For every target day D:
+
+- initialize from D's own authoritative Day-Ahead snapshot
+- optimize only D 00:00 <= t < D 24:00
+- evaluate only that day's scientific horizon
+- do NOT inherit optimized state from D-1
+- do NOT pass terminal state into D+1
+- do NOT use D+1 optimized state as D's terminal condition
+
+Require explicitly:
+
+STATE_0(D+1)
+comes from the authoritative D+1 snapshot,
+
+NOT from
+
+STATE_H(D).
+
+
+This remains:
+
+INDEPENDENT_DAILY_COUNTERFACTUAL_EVALUATION
+
+not:
+
+CONTINUOUS_MONTHLY_SIMULATION
+not:
+ROLLING-HORIZON STATE PROPAGATION.
+
+
+
+# 2. HARD 24-HOUR OPTIMIZATION HORIZON
+
+The scientific scheduling/grid horizon remains exactly:
+
+H = 24 h
+  = 96 x 15-min slots.
+
+
+Do NOT extend optimization to:
+
+36 h
+48 h
+72 h
+or any post-midnight tail.
+
+
+Do NOT create decision variables after slot 95.
+
+Do NOT create D+1:
+
+- job scheduling decisions
+- AIDC power decisions
+- MESS decisions
+- demand/PV optimization inputs
+- OpenDSS evaluations
+- voltage/current constraints
+- rack optimization
+
+for the purpose of Day D optimization.
+
+
+
+# 3. FULL JOB DURATION IS STILL PRESERVED
+
+Do NOT truncate the actual/planned service duration itself.
+
+For a PENDING job j:
+
+DURATION_j
+=
+the authoritative Day-Ahead planned duration
+
+using the currently frozen runtime interface:
+
+Rolling Track-P LightGBM Q90 seconds
+-> ceil(seconds / 900) exactly once.
+
+
+Let:
+
+d_j = planned duration in 15-min slots
+s_j = optimized start slot
+H   = 96
+
+
+The full planned service identity remains:
+
+FULL_SERVICE_j = d_j
+
+
+Do NOT replace an 11-hour job with a 4-hour job.
+
+
+
+# 4. IN-DAY SERVICE ACCOUNTING
+
+For the 24-hour optimization, only the overlap with [0,H) contributes
+to Day-D AIDC occupancy/power/grid quantities.
+
+
+Define:
+
+IN_DAY_SLOTS_j(s_j)
+=
+max(
+    0,
+    min(d_j, H - s_j)
+)
+
+
+for jobs starting within Day D.
+
+
+Equivalently:
+
+IN_DAY_END_j
+=
+min(s_j + d_j, H)
+
+
+A job scheduled:
+
+20:00 -> planned duration 11 h
+
+therefore contributes only:
+
+20:00 -> 24:00
+
+to Day-D AIDC/grid calculation.
+
+
+But its full duration remains 11 h in the job ledger.
+
+
+
+# 5. TERMINAL RESIDUAL ACCOUNTING
+
+Define a scalar terminal residual for every relevant PENDING job:
+
+TERMINAL_REMAINING_SLOTS_j(s_j)
+=
+max(
+    0,
+    s_j + d_j - H
+)
+
+
+This is NOT a post-H simulation.
+
+It is only an accounting quantity describing how much planned
+service lies beyond the independent daily horizon.
+
+
+Require exact identity:
+
+d_j
+=
+IN_DAY_SLOTS_j
++
+TERMINAL_REMAINING_SLOTS_j
+
+
+for every selected PENDING job.
+
+
+
+# 6. USE THE EXISTING AUTHORITATIVE REFERENCE SCHEDULE
+
+Do NOT invent a new baseline or tune a reference from May results.
+
+Use the already-authoritative COMMON reference start schedule that
+currently underlies the scheduling/reference-deviation formulation.
+
+For each PENDING job j:
+
+s_ref_j = authoritative reference start
+
+Define:
+
+TERMINAL_REF_j
+=
+max(
+    0,
+    s_ref_j + d_j - H
+)
+
+
+The reference must be common and frozen before B0/B1/B2/B3 policy
+comparison.
+
+Do NOT use different reference starts for different policies.
+
+
+
+# 7. CORE ANTI-DUMPING TERMINAL CONSTRAINT
+
+For each movable PENDING job j enforce:
+
+TERMINAL_REMAINING_SLOTS_j
+<=
+TERMINAL_REF_j
+
+
+Therefore a policy may NOT push more of the SAME job beyond midnight
+than the frozen reference schedule did.
+
+
+This is a PER-JOB constraint.
+
+Do NOT use an aggregate spill budget.
+
+Do NOT allow:
+
+Job A increases terminal spill
+and
+Job B decreases terminal spill
+
+as an accounting offset.
+
+
+Each job is responsible only for its own terminal residual.
+
+
+
+# 8. INTERPRETATION OF THE TERMINAL CONSTRAINT
+
+Example:
+
+reference:
+start = 18:00
+duration = 11 h
+
+then:
+
+reference in-day service = 6 h
+reference terminal residual = 5 h
+
+
+Alternative start = 16:00:
+
+terminal residual = 3 h
+
+3 <= 5
+PASS
+
+
+Alternative start = 17:00:
+
+terminal residual = 4 h
+
+4 <= 5
+PASS
+
+
+Alternative start = 20:00:
+
+terminal residual = 7 h
+
+7 > 5
+FAIL
+
+
+Therefore:
+
+cross-midnight jobs CAN move,
+
+but they cannot exploit the horizon by pushing additional service
+outside Day D.
+
+
+
+# 9. REMOVE THE CURRENT CROSS-MIDNIGHT FREEZE
+
+Locate the existing logic that freezes PENDING job start/site solely
+because:
+
+s_j + d_j > H
+
+
+Remove that freeze where it is scientifically owned by the AIDC
+scheduling formulation.
+
+
+A job MUST NOT be frozen merely because its planned completion
+crosses 24:00.
+
+
+Replace the old semantic:
+
+CROSS_MIDNIGHT
+=> FREEZE START/SITE
+
+
+with:
+
+CROSS_MIDNIGHT
+=> ALLOW NORMAL IN-DAY FLEXIBILITY
+   SUBJECT TO
+   PER-JOB TERMINAL RESIDUAL <= REFERENCE TERMINAL RESIDUAL
+
+
+
+# 10. PRESERVE ALL EXISTING JOB FLEXIBILITY LIMITS
+
+This amendment does NOT give unrestricted scheduling freedom.
+
+Continue to enforce all already-authoritative:
+
+- earliest start
+- latest start
+- release/availability time
+- SLA/deadline constraints
+- admission rules
+- site capacity
+- rack capacity
+- migration feasibility
+- WAN constraints
+- service constraints
+- RUNNING-job rules
+
+
+Do NOT widen a job's allowed start window merely because this
+terminal amendment exists.
+
+
+
+# 11. RUNNING JOBS REMAIN FROZEN
+
+RUNNING jobs are NOT newly made flexible by this amendment.
+
+Preserve existing RUNNING authority for:
+
+- site
+- already-established execution
+- start
+- service continuity
+- migration authority
+
+
+The new terminal-residual flexibility applies to PENDING jobs whose
+start/site decisions are already allowed to vary under the policy.
+
+
+
+# 12. CROSS-MIDNIGHT PENDING JOBS MAY TIME-SHIFT
+
+For eligible PENDING jobs:
+
+crossing 24:00 is NOT by itself a reason to prevent time shifting.
+
+
+Allow their start to change within the existing authorized time window
+as long as:
+
+TERMINAL_NEW_j <= TERMINAL_REF_j
+
+
+This should reopen temporal flexibility that the old post-H freeze
+removed.
+
+
+
+# 13. CROSS-MIDNIGHT PENDING JOBS MAY USE EXISTING SITE/MIGRATION FLEXIBILITY
+
+Do NOT disable site reassignment or already-authorized migration
+solely because a job crosses the horizon.
+
+
+However:
+
+- reuse all existing migration/WAN/segment rules
+- do not invent a new migration type
+- do not create migration events after H
+- do not reopen previously closed migration semantics
+- do not alter MESS routing authority
+
+
+This amendment only removes the artificial
+"completion-after-H => freeze"
+restriction.
+
+
+
+# 14. NO POST-H POWER OR GRID MODEL
+
+After t = H:
+
+scientific power contribution = NOT MODELED
+grid state = NOT MODELED
+OpenDSS = NOT RUN
+voltage/current = NOT EVALUATED
+MESS = NOT OPTIMIZED
+
+
+Do NOT fabricate D+1 demand or PV.
+
+
+Do NOT use May Actual D+1 data to evaluate Day-D terminal service.
+
+
+
+# 15. WHY POST-H GPU CAPACITY DOES NOT REQUIRE A NEW HORIZON
+
+Within the Day-D selected cohort, no new Day-D scheduling start is
+created after H.
+
+Therefore the terminal residual is an accounting boundary only.
+
+
+Do NOT construct an extended post-H MILP merely to check the residual.
+
+
+The research claim must remain restricted to the 24-hour
+independent-day operating horizon.
+
+
+Do NOT claim physical optimization of the next day.
+
+
+
+# 16. DAY-D GPU / RACK CAPACITY REMAINS HARD
+
+For every in-horizon slot:
+
+GPU_OCCUPANCY[i,t]
+<= GPU_CAPACITY[i,t]
+
+RACK_OCCUPANCY[r,t]
+<= RACK_CAPACITY[r,t]
+
+
+No capacity relaxation.
+
+No clipping.
+
+No extra GPU creation.
+
+
+
+# 17. GRID CONSTRAINTS REMAIN HARD INSIDE 24H
+
+For t = 0..95 preserve the existing:
+
+- voltage constraints
+- branch/phase current constraints
+- rho constraints
+- corrected background-load mapper
+- Fresh OpenDSS verification
+
+
+If the voltage-security-margin revision is active,
+apply the frozen planning security margin exactly as separately
+specified.
+
+
+This terminal amendment must not modify that voltage-margin value.
+
+
+
+# 18. OBJECTIVE REMAINS UNCHANGED
+
+Do NOT add a spill penalty.
+
+Do NOT add a terminal cost coefficient.
+
+Do NOT change the lexicographic hierarchy.
+
+
+Preserve:
+
+P1 = rho_max
+P2 = mean H4 reserve shortfall
+P3 = migration count
+P4 = reference schedule deviation
+P5 = existing tie-break
+
+
+The terminal residual is a HARD CONSTRAINT,
+not an objective term.
+
+
+
+# 19. NO TUNABLE TERMINAL PARAMETER
+
+The rule is exactly:
+
+TERMINAL_NEW_j <= TERMINAL_REF_j
+
+
+Tolerance:
+
+only the existing solver numerical feasibility tolerance.
+
+
+Do NOT introduce:
+
+alpha
+lambda
+spill penalty
+terminal multiplier
+percentage allowance
+extra SLA factor
+
+for this revision.
+
+
+
+# 20. POLICY FAIRNESS
+
+Use the exact same terminal contract for:
+
+B0
+B1
+B2
+B3
+
+
+Use the same:
+
+reference schedule
+duration inputs
+H = 96
+
+for a given target day.
+
+
+No policy-specific terminal relaxation.
+
+
+
+# 21. AIDC STAGE OWNERSHIP AUDIT
+
+Identify every current optimization stage that owns PENDING job
+start/site decisions.
+
+
+Apply this terminal rule wherever that AIDC scheduling authority
+legitimately exists.
+
+
+Do NOT mechanically add it to:
+
+MESS-only P/Q recourse
+Fresh OpenDSS
+Actual replay
+
+because those layers do not own Day-Ahead job timing.
+
+
+Document exact implementation paths.
+
+
+
+# 22. B3 ARCHITECTURE MUST REMAIN CLOSED
+
+Preserve the currently frozen architecture:
+
+A0
+-> M1
+-> A1
+-> MF
+-> Joint Freeze
+-> Fresh OpenDSS
+
+
+Do NOT reintroduce:
+
+event-triggered control
+rolling MPC
+extra feedback rounds
+new route search
+local repair
+
+
+The terminal amendment changes only AIDC horizon-boundary scheduling
+semantics.
+
+
+
+# 23. ACTUAL SEMANTICS REMAIN UNCHANGED
+
+Actual does NOT use the terminal constraint to re-optimize.
+
+
+Actual continues to use:
+
+- frozen Day-Ahead site
+- frozen planned release/start authority
+- realized runtime
+- within-site rack/GPU execution dispatch
+- execution delay when physical GPU/rack unavailable
+- no global rescheduling
+
+
+Do NOT rerun ML in Actual.
+
+Do NOT create cross-day Actual optimization.
+
+
+
+# 24. PERSISTENCE — JOB LEVEL
+
+Additive persistence only.
+
+For every selected PENDING job persist:
+
+job_id
+
+REFERENCE_START_SLOT
+OPTIMIZED_START_SLOT
+
+PLANNED_DURATION_SECONDS
+PLANNED_DURATION_SLOTS
+
+REFERENCE_IN_DAY_SLOTS
+REFERENCE_TERMINAL_REMAINING_SLOTS
+
+OPTIMIZED_IN_DAY_SLOTS
+OPTIMIZED_TERMINAL_REMAINING_SLOTS
+
+TERMINAL_RESIDUAL_DELTA_SLOTS
+
+TERMINAL_CONSTRAINT_BINDING
+
+CROSS_MIDNIGHT_REFERENCE
+CROSS_MIDNIGHT_OPTIMIZED
+
+SITE_REFERENCE
+SITE_OPTIMIZED
+
+START_CHANGED
+SITE_CHANGED
+MIGRATION_CHANGED
+
+
+Do NOT overwrite existing job-decision files;
+extend schema or add a dedicated auditable terminal table.
+
+
+
+# 25. DAILY TERMINAL SUMMARY
+
+For every policy-day report:
+
+N_SELECTED_PENDING
+
+N_REFERENCE_CROSS_MIDNIGHT
+
+N_OPTIMIZED_CROSS_MIDNIGHT
+
+N_CROSS_MIDNIGHT_START_CHANGED
+
+N_CROSS_MIDNIGHT_SITE_CHANGED
+
+N_CROSS_MIDNIGHT_MIGRATION_CHANGED
+
+N_TERMINAL_CONSTRAINT_BINDING
+
+TOTAL_REFERENCE_TERMINAL_GPUh
+TOTAL_OPTIMIZED_TERMINAL_GPUh
+
+MAX_JOB_TERMINAL_DELTA
+
+TERMINAL_CONSTRAINT_VIOLATIONS
+
+
+Note:
+
+TOTAL terminal GPUh is diagnostic only.
+
+It is NOT an aggregate constraint.
+
+
+
+# 26. MAY-1 FLEXIBILITY DIAGNOSTIC
+
+Before re-optimizing May-1, reproduce the existing diagnosis:
+
+critical time:
+2025-05-01 18:00 AEST
+
+critical branch-phase:
+line.l10 / A
+
+
+Old evidence:
+
+B0 peak GPU = 583
+B1 peak GPU = 576
+
+old minimum under frozen post-H semantics = 576
+
+post-H frozen PENDING jobs starting exactly at peak = 156
+
+
+Preserve this evidence unchanged.
+
+
+Then calculate under the NEW terminal-residual semantics:
+
+- how many of those 156 jobs become legally movable
+- their allowed earlier start ranges
+- how many may change site
+- which terminal constraints bind
+- new theoretical minimum peak occupancy under job-window constraints
+
+
+This diagnostic must NOT use Actual outcomes.
+
+
+
+# 27. REMOVE ONLY THE ARTIFICIAL PART OF THE OLD 576 LOWER BOUND
+
+The old 576-GPU lower bound was valid under the old frozen post-H
+contract.
+
+
+Do NOT call it wrong.
+
+
+Classify it as:
+
+VALID_UNDER_SUPERSEDED_POST_H_FREEZE_SEMANTICS
+
+
+Then construct a NEW lower-bound diagnostic under:
+
+PER_JOB_TERMINAL_RESIDUAL_SEMANTICS
+
+
+Do not assume the new minimum in advance.
+
+
+
+# 28. MAY-1 RERUN REQUIREMENT
+
+Because this changes the feasible set, any Day-Ahead solution produced
+under the old post-H freeze is not the final solution for this revision.
+
+
+Preserve old V41 May-1 results.
+
+
+Under the new frozen scientific revision rerun from scratch:
+
+B0 Day-Ahead
+-> freeze
+-> B0 Actual
+
+B1 Day-Ahead
+-> freeze
+-> B1 Actual
+
+
+Then rerun:
+
+B0-in-B1 feasibility
+common objective identity
+lexicographic comparison
+Fresh AC validation
+Actual validation
+P0 closure
+persistence audit
+
+
+If voltage-margin work is being integrated into the same revision,
+use that same frozen formulation for this rerun.
+
+
+
+# 29. MAY-1 COMPARISON TABLE
+
+Report old vs new:
+
+OLD POST-H FREEZE:
+B0/B1 rho_max
+peak GPU
+AIDC kW
+critical branch P/Q
+start changes
+site changes
+migrations
+
+
+NEW TERMINAL-RESIDUAL:
+same metrics
+
+
+Also report:
+
+newly flexible cross-midnight jobs
+terminal constraint binding count
+peak GPU reduction attributable to restored flexibility
+
+
+
+# 30. PRIMARY QUESTION TO ANSWER
+
+After May-1 rerun, explicitly determine:
+
+Was the previous small B1 improvement mainly caused by the
+cross-midnight freeze?
+
+
+Quantify:
+
+old B1 primary gain
+new B1 primary gain
+
+and decompose the new improvement into:
+
+- temporal shifting
+- spatial/site shifting
+- migration
+- terminal-boundary flexibility
+
+
+Do not infer attribution without saved decision-delta evidence.
+
+
+
+# 31. NO END-OF-HORIZON DUMPING AUDIT
+
+Create an explicit audit proving that no job increased its own
+terminal residual.
+
+
+Require for every eligible job:
+
+OPTIMIZED_TERMINAL_REMAINING_SLOTS
+<=
+REFERENCE_TERMINAL_REMAINING_SLOTS
+
+
+Report:
+
+max positive violation = 0
+
+violating jobs = 0
+
+
+Also verify:
+
+no new start >= H
+no post-H decision variable
+no D+1 grid optimization
+no cross-day state propagation
+
+
+
+# 32. INDEPENDENT-DAY AUDIT
+
+For May-1 and every later policy-day prove:
+
+Day D initial snapshot hash
+is independent of
+Day D-1 optimized terminal artifact.
+
+
+For every D > first day:
+
+source_of_initial_state =
+AUTHORITATIVE_DAY_D_SNAPSHOT
+
+
+not:
+
+PREVIOUS_POLICY_DAY_TERMINAL_STATE
+
+
+Create:
+
+INDEPENDENT_DAY_TERMINAL_BOUNDARY_AUDIT.json
+
+
+
+# 33. REGRESSION TESTS
+
+Add explicit tests for:
+
+- H exactly 96 slots
+- zero Day-Ahead decision variables after H
+- zero D+1 OpenDSS calls for Day-D optimization
+- zero D+1 demand/PV scientific reads for Day-D terminal handling
+- full duration preserved
+- in-day + terminal = full duration
+- per-job terminal residual never exceeds reference
+- no aggregate spill-offset logic
+- cross-midnight PENDING start no longer automatically frozen
+- cross-midnight PENDING site no longer automatically frozen
+- existing start windows unchanged
+- RUNNING semantics unchanged
+- migration semantics unchanged
+- objective hierarchy unchanged
+- ML interface unchanged
+- B3 architecture unchanged
+- Actual semantics unchanged
+- independent-day reset exact
+- old May-1 artifacts byte unchanged
+- persistence/hash read-back PASS
+
+
+
+# 34. P0 / LEGACY REGRESSION
+
+Re-run P0-01 through P0-07 after this formulation change.
+
+
+Pay special attention to:
+
+P0-06 migration segments
+P0-07 PRE_DAY_COMPLETE / terminal semantics
+
+
+Do NOT mark them PASS merely because they passed under the previous
+post-H freeze.
+
+
+They must pass under the new terminal-residual formulation.
+
+
+
+# 35. SCIENTIFIC CLAIM BOUNDARY
+
+Paper-facing interpretation:
+
+"Jobs whose predicted execution extends beyond the 24-h scheduling
+horizon are not automatically frozen. The optimization accounts only
+for their in-day service, while a per-job terminal-residual constraint
+prevents the scheduler from shifting additional service beyond the
+daily horizon relative to the common reference schedule."
+
+
+Also state:
+
+"Each operating day is evaluated independently from its own
+authoritative initial snapshot."
+
+
+Do NOT claim:
+
+- next-day optimization
+- continuous inter-day state propagation
+- post-H grid feasibility
+- 48/72-hour co-optimization
+
+
+
+# 36. FULL MAY LAUNCH GATE
+
+Do NOT launch full May until the revised May-1 pilot passes.
+
+
+Required:
+
+- revised B0 Day-Ahead PASS
+- revised B0 Actual PASS
+- revised B1 Day-Ahead PASS
+- revised B1 Actual PASS
+- Fresh AC PASS
+- terminal no-dumping audit PASS
+- independent-day audit PASS
+- B0-in-B1 PASS
+- P0-01..P0-07 PASS
+- background-load duplication PASS
+- GPU/rack Actual PASS
+- complete persistence PASS
+- voltage margin gate PASS if that revision is active
+
+
+
+# 37. FULL MAY PROPAGATION
+
+After May-1 passes and one scientific commit is frozen:
+
+propagate to:
+
+31 days x B0-B3 = 124 policy-day units
+
+
+For all 124 units require:
+
+H = 96
+
+same terminal semantics
+
+same reference-schedule contract
+
+no per-policy relaxation
+
+independent daily initialization
+
+zero post-H optimization
+
+
+Produce a 124/124 propagation audit.
+
+
+
+# 38. FINAL REPORT BEFORE FULL MAY
+
+Before detached launch report:
+
+1. scientific revision / commit SHA
+2. exact old post-H freeze path removed
+3. exact new terminal constraint implementation path
+4. May-1 reference cross-midnight PENDING count
+5. May-1 newly flexible job count
+6. May-1 terminal-binding job count
+7. old vs new B0/B1 peak GPU
+8. old vs new B0/B1 rho_max
+9. old vs new AIDC critical-slot kW
+10. start/site/migration change counts
+11. max terminal residual violation
+12. number of post-H decision variables = 0
+13. D+1 scientific reads caused by Day-D terminal handling = 0
+14. independent-day reset audit
+15. P0-01..P0-07 result
+16. regression test count
+17. full-May launch gate PASS/FAIL
+
+
+Do not launch full May unless all mandatory gates PASS.

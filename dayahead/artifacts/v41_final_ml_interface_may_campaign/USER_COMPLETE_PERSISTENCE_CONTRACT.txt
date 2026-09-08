@@ -1,0 +1,972 @@
+# ============================================================
+# V41 COMPLETE SCIENTIFIC DATA PERSISTENCE CONTRACT
+#
+# Continue current work.
+# Do NOT restart completed V41 work.
+#
+# The previous persistence instruction covered ML.
+# Extend persistence to the ENTIRE scientific chain:
+#
+# ML
+# -> AIDC optimization
+# -> MESS
+# -> feeder/grid
+# -> objective
+# -> Joint Freeze
+# -> Actual replay
+#
+# Final summary metrics alone are NOT sufficient.
+# The May campaign must remain fully auditable after Codex exits.
+# ============================================================
+
+
+# 1. GENERAL RULE
+
+For every:
+
+target day
+policy B0/B1/B2/B3
+
+persist enough information to reconstruct:
+
+- inputs
+- decisions
+- state trajectories
+- objective values
+- physical outcomes
+- Day-Ahead vs Actual differences
+
+at the authoritative temporal resolution.
+
+
+Use:
+
+15-min x 96 slots
+
+for daily time-series quantities unless the native authority is
+different and already frozen.
+
+
+H4 remains:
+
+81 rolling 4-hour windows/day.
+
+
+Never store only aggregate summary statistics.
+
+
+
+# 2. UNIT DIRECTORY CONTRACT
+
+For every policy-day create a durable structure similar to:
+
+YYYY-MM-DD/Bx/
+
+    authority/
+    ml/
+    aidc/
+    mess/
+    grid/
+    optimization/
+    dayahead/
+    actual/
+    audit/
+    manifest/
+
+
+Exact names may follow existing infrastructure,
+but the scientific contents below are mandatory.
+
+
+
+# 3. AUTHORITY MANIFEST
+
+Persist for every policy-day:
+
+target_day
+policy
+issue_time
+
+scientific_commit
+interface_freeze_commit
+
+ML_snapshot_hash
+input_manifest_hash
+
+dataset/source identities
+day-slice hashes
+
+optimization configuration identity
+electrical configuration identity
+
+policy registry identity
+
+solver/environment identity
+
+
+External source files do NOT need to be duplicated in full.
+
+Instead persist:
+
+- authoritative source path/id
+- SHA256
+- materialized daily slice SHA256
+- row count
+- time range
+- units
+
+
+
+# 4. AIDC — JOB-LEVEL DECISIONS
+
+Persist job-level Day-Ahead decisions.
+
+At minimum where authoritative fields exist:
+
+job_id
+
+job_state:
+PENDING / RUNNING / other existing state
+
+GPU request
+node/core/memory request
+
+fixed/flexible workload class
+if already authoritative
+
+admitted / selected
+
+assigned IDC
+assigned rack if used
+
+scheduled start slot
+scheduled end slot
+
+runtime authority
+runtime seconds
+duration slots
+
+migration decision
+migration source/destination
+if applicable
+
+SLA/debt variables
+
+service variables
+
+job power contribution
+if explicitly represented
+
+
+For Actual replay also persist:
+
+realized runtime
+
+frozen DA start
+derived Actual completion
+
+realized service outcome
+
+Actual SLA/debt outcome
+
+
+Never infer or invent fields not present in the authoritative formulation.
+
+
+
+# 5. AIDC — SITE/SLOT TIME SERIES
+
+For every IDC and all 96 slots persist, where defined:
+
+target_day
+policy
+slot
+timestamp
+IDC_id
+
+GPU capacity
+
+known scheduled GPU occupancy
+
+fixed workload occupancy
+
+flexible workload occupancy
+
+available GPU capacity
+
+future-work headroom
+
+H4 actionable reserve contribution
+
+reserve-shortfall contribution
+
+IT load / power
+
+facility/PCC load if authoritative
+
+PUE if actually used
+
+migration traffic/load contribution if represented
+
+SLA/debt state if time-indexed
+
+
+Units must be explicit.
+
+
+
+# 6. H4 RESERVE
+
+Persist the already-requested 81-row H4 table and connect it to
+the optimization result.
+
+For every H4 window:
+
+window_start
+window_end
+
+RAW_R85_B2_GPUh
+
+HIST_CAP_GPUh
+PHYS_CAP_GPUh
+ACTIONABLE_H4_GPUh
+
+available_headroom_GPUh
+
+reserve_shortfall_xi_GPUh
+
+constraint_slack_GPUh
+
+hist_cap_binding
+phys_cap_binding
+
+service_level = 0.85
+
+snapshot_hash
+
+
+After Actual:
+
+ACTUAL_H4_GPUh
+
+RAW_COVERED
+ACTIONABLE_COVERED
+
+RAW_UNDER_GPUh
+RAW_OVER_GPUh
+
+ACTIONABLE_UNDER_GPUh
+ACTIONABLE_OVER_GPUh
+
+
+
+# 7. MESS — DISCRETE DECISIONS
+
+For every MESS unit persist:
+
+vehicle_id
+
+selected route
+
+route node/edge sequence
+using existing authoritative representation
+
+origin
+destination
+
+departure slot/time
+arrival slot/time
+
+IDC/station/location assignment
+
+route/discrete state hash
+
+mobility availability state
+
+charging/discharging location
+
+any frozen binary decisions
+
+
+Preserve M1 route/discrete authority.
+
+
+
+# 8. MESS — 15-MIN TRAJECTORY
+
+For every MESS and every applicable slot persist:
+
+vehicle_id
+slot
+timestamp
+
+location/state
+
+P
+Q
+
+charge power
+discharge power
+where separately represented
+
+SoC
+
+mobility energy
+
+station connection state
+
+travel state
+
+route segment / edge
+if authoritative
+
+electrical bus connection
+
+power availability bounds
+
+
+For Actual replay additionally persist:
+
+realized travel time
+
+realized mobility energy
+
+realized arrival time
+
+frozen Day-Ahead route
+
+
+Actual must NOT reroute.
+
+
+
+# 9. M1 / A1 / MF STATE TRANSITIONS
+
+Persist stage-specific snapshots so that the following can be
+reconstructed:
+
+A0 output
+
+M1 input
+M1 output
+
+A1 input
+A1 output
+
+MF input
+MF output
+
+Joint Freeze
+
+
+For each transition explicitly record:
+
+what changed
+
+what was frozen
+
+what was allowed to change
+
+
+Especially verify and store:
+
+M1 route/discrete result
+
+A1 consumes frozen M1 grid/PQ authority
+
+RUNNING site/start/end/migration frozen as registered
+
+MF route/discrete state fixed
+
+MF P/Q/SoC recourse only
+
+
+Do not merely save the final solution.
+
+
+
+# 10. GRID — BUS/PHASE VOLTAGE
+
+For every evaluated slot persist bus-phase quantities.
+
+At minimum:
+
+target_day
+policy
+stage
+slot
+timestamp
+
+bus
+phase
+
+voltage magnitude pu
+
+voltage angle
+if authoritative/available
+
+voltage lower margin
+
+voltage upper margin
+
+violation flag
+
+
+Must allow reconstruction of:
+
+Vmin
+Vmax
+critical bus
+critical phase
+critical slot
+
+
+
+# 11. GRID — LINE/PHASE CURRENT
+
+Persist ALL authoritative line/phase electrical quantities,
+not only rho_max.
+
+For every line/phase/slot where applicable:
+
+line_id
+from_bus
+to_bus
+phase
+slot
+timestamp
+
+current magnitude
+
+current limit
+
+loading ratio / rho
+if used
+
+P flow
+Q flow
+if available
+
+thermal margin
+
+violation flag
+
+
+Must allow reconstruction of:
+
+maximum line current
+
+critical line
+
+critical phase
+
+critical slot
+
+rho_max
+
+
+Do NOT save only the critical line.
+
+
+
+# 12. GRID — FEEDER/SYSTEM QUANTITIES
+
+Persist where authoritative:
+
+feeder-head P
+feeder-head Q
+
+total load
+
+AIDC load
+
+MESS P
+MESS Q
+
+PV
+
+losses P/Q
+
+voltage extrema
+
+line-current extrema
+
+rho_max
+
+number of voltage violations
+
+number of line-current violations
+
+
+For Actual use realized exogenous inputs according to the V41
+counterfactual replay contract.
+
+
+
+# 13. OBJECTIVE — LEXICOGRAPHIC LEDGER
+
+Persist the complete objective vector.
+
+Authoritative V41 ordering:
+
+P1:
+rho_max
+
+P2:
+mean_H4_shortfall_GPUh
+
+P3:
+migration_count
+
+P4:
+reference_schedule_deviation
+
+P5:
+existing tie-break
+
+
+For EVERY optimization stage persist:
+
+objective stage name
+
+objective value
+
+best value
+
+solver tolerance
+
+freeze bound added for subsequent stage
+
+solver status
+
+solve time
+
+MIP gap if applicable
+
+node count / iteration information if available
+
+
+Final authoritative vector:
+
+[
+    rho_max,
+    mean_H4_shortfall_GPUh,
+    migration_count,
+    reference_schedule_deviation,
+    tie_break
+]
+
+
+Do NOT collapse this into an artificial scalar.
+
+
+
+# 14. OBJECTIVE COMPONENT TRACE
+
+For B0/B1 comparison specifically persist:
+
+same-input B0 objective vector
+
+B0 injected into B1 objective vector
+
+optimized B1 objective vector
+
+
+Also persist every common objective component used by the evaluators.
+
+
+This must make it possible to diagnose:
+
+"Why is B1 better/worse than B0?"
+
+without rerunning the solver.
+
+
+
+# 15. CRITICAL PHYSICAL EVENT TABLE
+
+Create a compact diagnostic table per policy-day containing at least:
+
+critical rho slot
+critical line
+critical phase
+rho_max
+
+minimum-voltage slot
+minimum-voltage bus
+minimum-voltage phase
+Vmin
+
+maximum-voltage slot
+maximum-voltage bus
+maximum-voltage phase
+Vmax
+
+maximum line-current slot
+line
+phase
+current
+
+H4 maximum-shortfall window
+
+maximum AIDC-load slot
+
+maximum MESS discharge slot
+
+
+This is a diagnostic index only.
+
+The underlying complete trajectories must still be stored.
+
+
+
+# 16. DAY-AHEAD DECISION FREEZE
+
+Before Actual data are opened persist:
+
+Day-Ahead decision artifact
+
+decision SHA256
+
+ML snapshot SHA256
+
+AIDC decision SHA256
+
+MESS route/discrete SHA256
+
+grid/PQ command SHA256
+
+Joint Freeze receipt
+
+
+Actual evaluation must reference these exact hashes.
+
+
+
+# 17. ACTUAL REALIZED INPUTS
+
+After Day-Ahead freeze, persist the realized daily slices used for:
+
+job runtime
+
+future workload arrivals
+
+traffic/travel
+
+demand/load
+
+PV
+
+weather
+
+other authoritative exogenous Actual inputs
+
+
+For each:
+
+source authority
+row count
+time range
+unit
+SHA256
+
+
+No realized input may appear in the Day-Ahead input manifest.
+
+
+
+# 18. ACTUAL REPLAY RESULTS
+
+Persist complete Actual trajectories using the frozen Day-Ahead
+decision.
+
+For each policy-day store:
+
+Day-Ahead value
+Actual value
+delta
+
+
+for key quantities including:
+
+AIDC power
+
+GPU occupancy
+
+future-work headroom
+
+reserve shortfall
+
+SLA/debt
+
+MESS SoC
+
+MESS P/Q
+
+travel time
+
+critical line current/loading
+
+Vmin/Vmax
+
+rho_max
+
+feeder P/Q
+
+objective-related physical metrics
+
+
+Actual is replay/evaluation, NOT a second Day-Ahead optimization.
+
+
+
+# 19. DAY-AHEAD VS ACTUAL TABLE
+
+Create a policy-day comparison table.
+
+At minimum:
+
+metric
+dayahead
+actual
+delta
+relative_delta_if_meaningful
+unit
+
+
+Do not calculate meaningless percentage change for quantities where
+the denominator is zero or where percentage is physically inappropriate.
+
+
+
+# 20. B0-B3 COMMON INPUT IDENTITY
+
+For the same target day require B0/B1/B2/B3 to share identical:
+
+ML snapshot hash
+
+runtime prediction table hash
+
+H4 raw table hash
+
+H4 cap table hash
+
+exogenous Day-Ahead input hash
+
+electrical base-data hash
+
+
+Only policy decisions may differ.
+
+
+
+# 21. PERSISTENCE FORMAT
+
+Prefer:
+
+Parquet:
+large row-level/time-series tables
+
+JSON:
+contracts, manifests, hashes, solver/objective ledgers
+
+CSV:
+compact human-readable summary tables
+
+
+Do NOT store large scientific trajectories only in console logs.
+
+
+
+# 22. ATOMICITY
+
+All scientific files must be:
+
+write temporary
+flush/close
+atomic rename
+
+
+Then:
+
+re-open
+validate schema
+validate row count
+validate hash
+
+
+Campaign COMPLETE state may be written only after required persistence
+files pass read-back validation.
+
+
+
+# 23. REQUIRED PER-UNIT MANIFEST
+
+Every Bx/day unit must end with a manifest listing:
+
+relative path
+artifact type
+row count
+SHA256
+schema/version
+stage
+unit
+
+
+No orphan scientific output.
+
+
+
+# 24. MAY-1 PILOT READ-BACK AUDIT
+
+Before accepting May-1 B0/B1 pilot require successful read-back of:
+
+ML
+
+runtime predictions
+
+H4
+
+AIDC job decisions
+
+AIDC site trajectories
+
+MESS discrete decisions
+
+MESS trajectories
+
+grid bus-phase voltages
+
+grid line-phase currents
+
+objective ledger
+
+stage transition ledger
+
+Day-Ahead freeze receipt
+
+Actual realized inputs
+
+Actual replay results
+
+Day-Ahead-vs-Actual comparison
+
+
+If the solver succeeds but these artifacts are missing:
+
+PILOT = FAIL
+
+
+Do NOT advance to full May.
+
+
+
+# 25. EXPECTED TEMPORAL COVERAGE
+
+For standard daily 15-min trajectories require:
+
+96/96 slots
+
+
+For H4 require:
+
+81/81 windows
+
+
+For topology-indexed electrical tables require:
+
+all applicable authoritative elements/phases
+x
+all evaluated slots
+
+
+No missing critical slot may be silently dropped.
+
+
+
+# 26. FULL MAY PROPAGATION
+
+Before detached full-May launch verify that the persistence contract
+is active for all:
+
+31 days
+x
+4 policies
+=
+124 policy-day units
+
+
+Propagation audit must state:
+
+124 / 124 configured for complete scientific persistence.
+
+
+
+# 27. CAMPAIGN AGGREGATION
+
+Do NOT wait until the end of May to create the only summary.
+
+
+Each completed unit is authoritative independently.
+
+
+Campaign aggregator may later construct:
+
+daily policy summary
+monthly policy summary
+B0-B3 comparison
+Day-Ahead-vs-Actual comparison
+
+
+from the persisted unit artifacts.
+
+
+The monthly summary must be reproducible without rerunning optimization.
+
+
+
+# 28. PROTECTED ARCHITECTURE
+
+This persistence work MUST NOT alter:
+
+policy semantics
+
+ML model outputs
+
+A0/M1/A1/MF scientific behavior
+
+MESS route semantics
+
+migration/WAN/terminal authority
+
+Fresh/OpenDSS behavior
+
+
+Persistence is observational only.
+
+
+
+# 29. FINAL TEST ASSERTIONS
+
+Add tests that verify at least:
+
+- runtime row-level persistence
+- 81 H4 rows
+- 96-slot AIDC coverage
+- 96-slot MESS state where applicable
+- complete bus-phase voltage coverage
+- complete line-phase current coverage
+- objective vector persistence
+- lexicographic freeze ledger
+- A0/M1/A1/MF stage snapshots
+- DA freeze hashes
+- Actual source hashes
+- DA/Actual separation
+- B0-B3 common-input hashes
+- per-unit manifest completeness
+- read-back equality
+- no summary-only scientific output
+
+
+Report exact persisted file paths and row counts for May-1 B0/B1
+before proceeding to the full campaign.

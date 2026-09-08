@@ -1,0 +1,321 @@
+# ============================================================
+# V41 AMENDMENT — H4 RESERVE OBJECTIVE AUTHORITY
+#
+# Continue the current V41 work.
+# Do NOT restart or discard completed authority audits.
+#
+# The current authoritative AIDC objective was confirmed as:
+#
+#   rho_max
+#     ->
+#   migration count
+#     ->
+#   reference-schedule deviation
+#     ->
+#   tie-break
+#
+# No existing semantically valid scalar GPUh
+# service-shortfall penalty coefficient exists.
+#
+# Therefore DO NOT invent a lambda and DO NOT stop V41 solely
+# because such a coefficient is absent.
+#
+# Resolve this authority gap using the existing lexicographic
+# optimization structure as follows.
+# ============================================================
+
+
+# 1. NEW FROZEN LEXICOGRAPHIC ORDER
+
+Use exactly:
+
+P1:
+minimize rho_max
+
+P2:
+minimize normalized H4 future-work reserve shortfall
+
+P3:
+minimize migration count
+
+P4:
+minimize existing reference-schedule deviation
+
+P5:
+existing tie-break
+
+
+Formally:
+
+mean_H4_shortfall
+=
+(1 / |K|)
+*
+sum_{k in K} xi[k]
+
+
+where:
+
+xi[k] >= 0
+
+and:
+
+H_available[k] + xi[k]
+>=
+H4_ACTIONABLE_RESERVE[k]
+
+
+Do NOT introduce:
+
+- a scalar penalty lambda
+- weighted-sum tuning
+- penalty search
+- different coefficients by policy
+- different coefficients by day
+
+
+
+# 2. PHYSICAL PRIORITY
+
+rho_max MUST remain primary.
+
+The H4 reserve objective may only use degrees of freedom
+remaining among solutions that preserve the primary
+rho_max optimum within the existing solver tolerance.
+
+Therefore H4 workload reserve must NOT intentionally worsen
+the primary electrical loading objective.
+
+
+# 3. IMPLEMENTATION
+
+Reuse the EXISTING lexicographic / sequential optimization
+machinery already used for:
+
+rho_max
+migration count
+schedule deviation
+tie-break.
+
+
+If the implementation uses sequential solves:
+
+Stage 1:
+solve minimum rho_max
+
+freeze:
+
+rho_max <= rho_max_star + existing_tolerance
+
+
+Stage 2:
+solve minimum mean_H4_shortfall
+
+freeze:
+
+mean_H4_shortfall
+<=
+mean_H4_shortfall_star
++
+existing_tolerance
+
+
+Then execute the previously existing migration,
+schedule-deviation, and tie-break stages unchanged.
+
+
+If the implementation uses native multiobjective priorities,
+insert H4 shortfall as the priority immediately below rho_max.
+
+
+Do NOT emulate lexicographic priority using an arbitrary
+large numerical coefficient.
+
+
+# 4. WHY MEAN SHORTFALL
+
+H4 windows overlap.
+
+Therefore use:
+
+mean_H4_shortfall
+
+rather than an unnormalized raw sum for reporting and
+lexicographic comparison.
+
+This avoids objective magnitude depending trivially on the
+number of overlapping windows.
+
+Store both:
+
+sum_xi_GPUh
+mean_xi_GPUh
+
+for diagnostics.
+
+
+# 5. B0/B1/B2/B3 CONSISTENCY
+
+Apply the exact same objective hierarchy to:
+
+B0
+B1
+B2
+B3
+
+
+The exact same daily ML snapshot and H4 actionable reserve
+must also be shared by all four policies.
+
+
+No policy-specific reserve priority.
+
+
+# 6. B0 -> B1 NESTING
+
+After this amendment the May-1 nesting audit remains
+mandatory.
+
+
+The B0 decision injected into B1 must remain feasible.
+
+
+When evaluating the exact same injected B0 decision:
+
+rho_max
+mean_H4_shortfall
+migration count
+schedule deviation
+all common objective components
+
+must match between the B0 and B1 evaluators within the
+existing numerical tolerance.
+
+
+For independently optimized B0/B1 solutions compare
+lexicographically, not only by one scalar number.
+
+
+Expected relation:
+
+B1 optimal objective vector
+must be lexicographically no worse than
+the injected/optimal B0 objective vector.
+
+
+# 7. REPORT OBJECTIVE AS A VECTOR
+
+Do not collapse the new hierarchy into an artificial scalar.
+
+
+Report:
+
+OBJECTIVE_VECTOR = [
+    rho_max,
+    mean_H4_shortfall_GPUh,
+    migration_count,
+    reference_schedule_deviation,
+    tie_break
+]
+
+
+This vector is the authoritative B0/B1 comparison.
+
+
+# 8. A0 / A1
+
+Apply the H4 reserve constraint and the same lexicographic
+reserve stage wherever the authoritative AIDC optimization
+is solved in A0 and A1.
+
+
+A0 and A1 must use the SAME frozen ML snapshot.
+
+
+Do NOT rerun ML at A1.
+
+
+# 9. M1 / MF / CLOSED AUTHORITIES
+
+Still unchanged:
+
+M1 route/PQ logic
+MF fixed-route recourse
+MESS mobility
+migration contract
+WAN
+Rack authority
+terminal contract
+Fresh/OpenDSS architecture
+
+
+No event trigger.
+No rolling MPC.
+No local repair.
+No second route search.
+
+
+# 10. NEW AUDIT ARTIFACT
+
+Create:
+
+V41_H4_LEXICOGRAPHIC_OBJECTIVE_AUTHORITY.json
+
+
+Record:
+
+old hierarchy
+new hierarchy
+reason no scalar coefficient was used
+mean-shortfall definition
+solver tolerance
+implementation mechanism
+B0-B3 consistency
+
+
+Also update:
+
+V41_OPERATIONAL_SELECTION_RATIONALE.md
+V41_RESERVE_INTERFACE_CONTRACT.json
+
+
+Do NOT modify inherited S5R1/R6R1 scientific artifacts.
+
+
+# 11. MAY EXECUTION AUTHORITY
+
+After implementing this amendment:
+
+run all V41 integration/unit tests.
+
+Then continue the ORIGINAL requested sequence:
+
+1. May 1 B0 Day-Ahead
+2. freeze
+3. May 1 B0 Actual
+4. May 1 B1 Day-Ahead
+5. freeze
+6. May 1 B1 Actual
+7. B0-in-B1 nesting audit
+8. lexicographic objective-identity audit
+9. inspect cap/headroom/shortfall
+10. repair genuine integration defects if any
+11. freeze final interface
+12. verify all 31 days x B0-B3 propagation
+13. detached-process smoke test
+14. launch full May B0/B1/B2/B3 Day-Ahead+Actual campaign
+
+
+Do NOT launch full May unless May-1 pilot and all audits pass.
+
+
+# 12. FINAL INTERPRETATION
+
+The scientific meaning is:
+
+"The primary grid-loading objective remains unchanged.
+Among electrically equivalent solutions, the scheduler
+preferentially preserves actionable four-hour GPU-service
+headroom for forecast future workload."
+
+Do NOT describe this as a newly tuned penalty function.

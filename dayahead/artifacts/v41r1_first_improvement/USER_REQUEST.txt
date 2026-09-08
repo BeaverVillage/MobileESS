@@ -1,0 +1,975 @@
+# ============================================================
+# V41R1 F&O FIRST-IMPROVEMENT / CRITICAL-LINE SEARCH REVISION
+#
+# ROOT CAUSE EVIDENCE
+#
+# May-04 diagnostic found a valid ORIGINAL-B1-feasible alternative with:
+#
+#   P1 unchanged
+#   P2 improved by approximately 0.0988 GPUh
+#
+# The candidate passed:
+#
+# - original full-model row validation
+# - job-state validation
+# - GPU validation
+# - AIDC power validation
+# - PCC propagation
+# - Planning Grid propagation
+#
+# Therefore the previous B1 == B0 result is NOT acceptable as evidence
+# that B1 flexibility has no value.
+#
+# The production F&O missed a lexicographically better B1-feasible
+# solution.
+#
+# Fix the SEARCH CONTRACT.
+#
+# Do NOT change the scientific B1 feasible set.
+# Do NOT start Full May until May-04 acceptance passes.
+# ============================================================
+
+
+# ============================================================
+# 0. PRESERVE SCIENCE / CANDIDATES / PHYSICS
+# ============================================================
+
+Do NOT change:
+
+- B0/B1/B2/B3 policy definitions
+- Q90 runtime authority
+- H4 R85_B2 authority
+- PENDING pre-start relocation authority
+- fixed final planned-start semantics
+- first-valid-checkpoint RUNNING migration
+- max one RUNNING migration/job/day
+- complete relocation candidate set
+- complete migration candidate set
+- complete destination sets
+- GPU constraints
+- rack constraints
+- WAN constraints
+- electrical constraints
+- MESS model
+- P1-P5 lexicographic order
+- Fresh OpenDSS
+- Actual replay
+- corrected background-load mapper
+- certified 31-day electrical coefficients
+
+
+No:
+
+- top-K filtering
+- sensitivity pruning
+- forced production migration
+- permanent cross-region constraints
+- GPU/rack/WAN relaxation
+- voltage/current relaxation
+- weighted objective replacement
+
+
+This revision changes the computational search strategy only.
+
+
+# ============================================================
+# 1. PRESERVE THE DIAGNOSTIC COUNTEREXAMPLE
+# ============================================================
+
+Freeze the independently validated May-04 single-change counterexample
+that preserves P1 and improves P2 by ~0.0988 GPUh.
+
+Persist:
+
+KNOWN_B1_P2_IMPROVING_COUNTEREXAMPLE.json
+
+including:
+
+- job ID
+- original decision
+- changed decision
+- source IDC
+- destination IDC
+- P1 before/after
+- P2 before/after
+- P3-P5 before/after
+- complete constraint audit
+- PCC changes
+- Planning electrical changes
+- artifact SHA
+
+
+This becomes a regression oracle.
+
+Any production F&O implementation that returns B0 unchanged on the
+same May-04 search state while this valid improvement is reachable must
+be investigated.
+
+
+# ============================================================
+# 2. REPLAY WHY THE OLD F&O MISSED IT
+# ============================================================
+
+Before changing production behavior, replay the exact historical P2
+F&O neighborhood/subproblem in which the known improving decision was
+eligible.
+
+Record:
+
+- was the job included?
+- was the exact alternative destination included?
+- actual LB/UB
+- P1 lock
+- P2 incumbent
+- MIPGap
+- TimeLimit
+- SolutionLimit
+- incumbent returned by Gurobi
+- best bound
+- termination reason
+- F&O acceptance/rejection result
+
+
+Determine explicitly whether the improvement was missed because of:
+
+A) 3% MIP-gap termination
+B) neighborhood composition
+C) time limit
+D) acceptance logic
+E) another search implementation issue
+
+
+Persist:
+
+OLD_FO_MISSED_IMPROVEMENT_REPLAY.json
+
+
+Do not merely infer the cause.
+
+
+# ============================================================
+# 3. REMOVE PERCENTAGE-GAP TERMINATION FROM F&O NEIGHBORHOODS
+# ============================================================
+
+The production F&O neighborhood search must NOT use:
+
+MIPGap = 3%
+
+as its acceptance/termination principle.
+
+
+Also do NOT replace this with:
+
+MIPGap = 0%
+
+for every neighborhood.
+
+
+The objective of an F&O neighborhood is NOT:
+
+"prove the neighborhood optimum."
+
+
+The objective is:
+
+"find one independently valid lexicographic improvement over the
+current incumbent."
+
+
+Global/strong MILP gap remains useful only for separate
+solution-quality certification.
+
+
+# ============================================================
+# 4. IMPLEMENT FIRST-IMPROVEMENT FEASIBILITY SEARCH
+# ============================================================
+
+For every F&O objective stage Pk:
+
+let Jk_inc be the independently recomputed currently accepted
+incumbent objective.
+
+
+Construct an IMPROVEMENT CONSTRAINT.
+
+
+For P1:
+
+    P1 <= P1_inc - EPS_P1_IMPROVEMENT
+
+
+For P2 under the accepted P1 lock:
+
+    P1 <= P1_locked + EPS_P1_LOCK
+    P2 <= P2_inc - EPS_P2_IMPROVEMENT
+
+
+For P3:
+
+    preserve P1/P2 locks
+    P3 <= P3_inc - 1
+
+
+For P4:
+
+    preserve P1/P2/P3 locks
+    require a genuine P4 improvement according to its exact domain
+
+
+For integer P5:
+
+    preserve P1-P4 locks
+    P5 <= P5_inc - 1
+
+
+Then search for ANY feasible solution satisfying the improvement
+constraint.
+
+
+The neighborhood does NOT need to prove optimality.
+
+
+Use a first-feasible/improved-solution strategy where supported,
+e.g. SolutionLimit=1 or equivalent deterministic behavior.
+
+
+As soon as one candidate satisfying the improvement requirement is
+found:
+
+STOP that neighborhood search
+
+and independently validate the candidate.
+
+
+# ============================================================
+# 5. NUMERICAL IMPROVEMENT TOLERANCE
+# ============================================================
+
+Do NOT use percentage-based improvement thresholds.
+
+
+We already observed ~1e-10 numerical objective noise.
+
+
+Derive EPS_P1_IMPROVEMENT and EPS_P2_IMPROVEMENT from the validated
+independent recomputation noise floor.
+
+
+Requirements:
+
+- must reject floating-point noise
+- must be substantially smaller than scientifically valid observed
+  improvements such as 0.0988 GPUh
+- must not be tuned using favorable B1 outcomes
+- must be deterministic and frozen
+- must be recorded in the compute contract
+
+
+Do not silently change the hard feasibility tolerance.
+
+
+Maintain separate concepts:
+
+OBJECTIVE_IMPROVEMENT_TOLERANCE
+
+and
+
+PHYSICAL_FEASIBILITY_TOLERANCE
+
+
+# ============================================================
+# 6. INDEPENDENT VALIDATION BEFORE INCUMBENT ACCEPTANCE
+# ============================================================
+
+A Gurobi solution is NOT automatically accepted.
+
+
+For every proposed improvement:
+
+1. materialize the full job-level decision
+2. recompute GPU/rack/WAN trajectories
+3. recompute AIDC IT/PCC P/Q
+4. recompute Planning electrical quantities
+5. recompute P1-P5 independently
+6. validate all original constraints
+7. read back persisted artifacts
+
+
+Accept only if:
+
+- all hard constraints PASS
+- higher-priority objective locks PASS
+- the active objective improves by more than the validated numerical
+  tolerance
+
+
+If the candidate fails:
+
+record it as REJECTED_PROPOSAL
+
+retain the previous validated incumbent
+
+continue search
+
+
+Do not terminate the entire policy-day because one proposal fails.
+
+
+# ============================================================
+# 7. P1 NEIGHBORHOOD ORDER — START FROM MAXIMUM LINE LOADING
+# ============================================================
+
+P1 is:
+
+minimize maximum line loading rho_max.
+
+
+Therefore the P1 F&O search order must begin from the CURRENT
+incumbent's most critical electrical state.
+
+
+At the beginning of every P1 search cycle compute:
+
+(l*, phase*, t*)
+=
+argmax over all line/phase/time of rho
+
+
+Record:
+
+- critical line
+- critical phase
+- critical time
+- rho_max
+- near-binding line/phase/time set
+
+
+The FIRST P1 neighborhoods must be based on this current bottleneck.
+
+
+Do not use a stale bottleneck from the previous incumbent.
+
+
+# ============================================================
+# 8. NEAR-BINDING ELECTRICAL SET
+# ============================================================
+
+Do not optimize only one isolated line/phase/time point.
+
+
+Include a deterministic near-binding set around the current rho_max so
+that reducing the top constraint does not blindly create the next
+bottleneck.
+
+
+Use electrical sensitivity only to:
+
+PRIORITIZE neighborhood order.
+
+
+Do NOT use it to:
+
+DELETE candidates
+DELETE destinations
+or redefine the scientific feasible set.
+
+
+For every opened job:
+
+all authoritative feasible destinations remain available.
+
+
+# ============================================================
+# 9. ELECTRICAL-CRITICAL JOB NEIGHBORHOOD
+# ============================================================
+
+For the current critical line/phase/time, identify jobs whose
+placement/execution/migration decisions can alter AIDC P/Q during the
+relevant critical interval.
+
+
+Prioritize:
+
+- jobs active around t*
+- PENDING jobs whose initial placement affects t*
+- RUNNING jobs whose first checkpoint can affect t*
+- jobs at IDC sites with materially different sensitivity to the
+  critical line
+
+
+Again:
+
+this determines SEARCH ORDER only.
+
+
+No candidate pruning.
+
+
+# ============================================================
+# 10. ALL-IDC-FULL CONDITION — COUPLED CAPACITY RELEASE
+# ============================================================
+
+May-04 diagnostic found that all 12 IDC sites are GPU-full at the P1
+critical time.
+
+
+Therefore single-job relocation neighborhoods can be structurally
+insufficient.
+
+
+The production P1 F&O must support a coupled neighborhood containing
+simultaneously:
+
+A) critical-load jobs we may want to move into an electrically
+   favorable IDC
+
+and
+
+B) jobs currently occupying GPU/rack capacity at that destination that
+   may be moved elsewhere to create capacity.
+
+
+Conceptually allow:
+
+capacity-release move
++
+critical-load relocation/migration
+
+
+inside ONE neighborhood.
+
+
+Where needed allow pair/triple or small multi-job exchanges.
+
+
+Do NOT require a non-improving intermediate incumbent to be accepted.
+
+
+The coupled subproblem should directly search for the final improved
+feasible combination.
+
+
+# ============================================================
+# 11. CROSS-ELECTRICAL-REGION SEARCH IS A NEIGHBORHOOD PRIORITY
+# ============================================================
+
+Electrical regions may be formed for computational search using the
+certified critical-line sensitivities.
+
+
+This grouping is for SEARCH/DIVERSIFICATION only.
+
+
+Do NOT permanently prohibit same-region movement.
+
+
+Do NOT force cross-region migration in the final scientific model.
+
+
+When normal critical neighborhoods stagnate, prioritize a coupled
+neighborhood containing source/destination IDCs with materially
+different electrical sensitivities.
+
+
+Every candidate solution must then be validated under the ORIGINAL B1
+model with no temporary search-only restriction.
+
+
+# ============================================================
+# 12. P1 FIRST-IMPROVEMENT LOOP
+# ============================================================
+
+Production logic:
+
+
+CURRENT_INCUMBENT = verified seed
+
+
+while P1 compute budget remains:
+
+
+    recompute current rho_max
+    recompute critical line/phase/time
+
+
+    run critical electrical neighborhood
+    with:
+
+        P1 <= P1_inc - EPS_P1_IMPROVEMENT
+
+
+    if valid improved solution found:
+
+        accept
+        CURRENT_INCUMBENT = improved solution
+
+        recompute critical line/phase/time
+
+        restart P1 search around new bottleneck
+
+        continue
+
+
+    else:
+
+        run IDC/coupled-capacity neighborhood
+
+
+    if improvement found:
+
+        accept
+        recompute bottleneck
+        continue
+
+
+    else:
+
+        run one deterministic overlap/diversification/escape sweep
+
+
+    if still no improvement:
+
+        terminate P1 early
+
+
+Do not continue merely to consume unused time.
+
+
+# ============================================================
+# 13. P2 FIRST-IMPROVEMENT LOOP
+# ============================================================
+
+After P1 terminates:
+
+lock:
+
+P1 <= P1_ACCEPTED + EPS_P1_LOCK
+
+
+Then search P2.
+
+
+For every P2 neighborhood impose:
+
+P2 <= P2_inc - EPS_P2_IMPROVEMENT
+
+
+The already discovered ~0.0988 GPUh May-04 improvement MUST be
+detectable under this contract when its decision is inside the
+neighborhood.
+
+
+Prioritize:
+
+- H4 reserve-stress IDC/time blocks
+- jobs contributing to P2
+- relevant relocation/migration decisions
+
+
+but preserve all candidates.
+
+
+As soon as a valid P2 improvement is found:
+
+accept it
+update P2 incumbent
+restart relevant P2 search
+
+
+No need to prove the neighborhood P2 optimum.
+
+
+# ============================================================
+# 14. P3/P4 LOWER-BOUND SHORTCUTS REMAIN
+# ============================================================
+
+Keep the validated mathematical floor shortcuts.
+
+
+If:
+
+P3 = 0
+
+then:
+
+STOP P3 immediately.
+
+
+If:
+
+P4 = 0
+
+and zero is independently established as the valid lower bound,
+
+then:
+
+STOP P4 immediately.
+
+
+Do not spend F&O runtime proving an already attained mathematical
+lower bound.
+
+
+# ============================================================
+# 15. P5 REMAINS ACTIVE
+# ============================================================
+
+Previous audit established that P5 can affect real site selection and
+is not purely a post-processing job-ID ordering.
+
+
+Therefore retain P5.
+
+
+But use the same first-improvement principle and remaining bounded
+compute.
+
+
+Do not demand zero-gap global proof.
+
+
+# ============================================================
+# 16. F&O TIME CONTRACT
+# ============================================================
+
+Keep:
+
+POLICY_DAY_TOTAL_OPTIMIZATION_HARD_CAP = 30 minutes
+
+
+But this remains a MAXIMUM.
+
+
+Do not intentionally consume all 30 minutes.
+
+
+Retain the corrected early-stop behavior:
+
+- no material improvement in normal search
+- one coupled/overlap/diversification search
+- still no improvement
+-> terminate current objective
+
+
+If objective keeps materially improving:
+
+continue while its stage guard/shared hard cap permits.
+
+
+# ============================================================
+# 17. 3% GAP ROLE AFTER THIS REVISION
+# ============================================================
+
+3% must NOT control F&O first-improvement discovery.
+
+
+If a short global MILP pass is retained, its gap may be recorded as:
+
+SOLUTION_QUALITY_CERTIFICATE
+
+
+It must not cause a valid 0.0988-GPUh lexicographic improvement to be
+ignored.
+
+
+Separate clearly:
+
+F&O SEARCH:
+    improvement-feasibility / first-improvement
+
+
+GLOBAL CERTIFICATION:
+    best bound / MIP gap
+
+
+These are different purposes.
+
+
+# ============================================================
+# 18. MAY-04 REGRESSION — KNOWN P2 IMPROVEMENT
+# ============================================================
+
+Add a mandatory regression reproducing the validated May-04
+counterexample.
+
+
+Under the same P1 lock, the revised F&O must demonstrate that it can
+identify and accept a P2-improving feasible decision.
+
+
+Require:
+
+P1_new <= P1_B0 + tolerance
+
+and
+
+P2_new < P2_B0 - objective_tolerance
+
+
+It does NOT need to find exactly the same job if an equally valid or
+better B1 solution is found.
+
+
+But returning the unchanged B0 solution without exhausting the
+relevant improvement-feasibility search is NOT acceptable.
+
+
+# ============================================================
+# 19. MAY-04 P1 COUPLED-MOVE DIAGNOSTIC
+# ============================================================
+
+Continue the currently requested pair/triple/coupled scan for May-04.
+
+
+Because all IDCs are GPU-full at the critical P1 time, explicitly test:
+
+- capacity-release + critical-load relocation
+- capacity-release + RUNNING migration
+- small pair/triple exchanges
+
+
+Report:
+
+BEST_SINGLE_MOVE_DELTA_P1
+BEST_PAIR_DELTA_P1
+BEST_TRIPLE_DELTA_P1
+BEST_COUPLED_NEIGHBORHOOD_DELTA_P1
+
+
+If a P1-improving coupled solution is found under the original B1
+model:
+
+add it as another regression oracle for the production F&O.
+
+
+# ============================================================
+# 20. DO NOT REQUIRE MONOTONIC INTERMEDIATE MOVES
+# ============================================================
+
+The production algorithm may require a coupled final change where one
+component move alone is neutral or worse.
+
+
+Do NOT require each component of a coupled neighborhood to become a
+separately accepted incumbent.
+
+
+The entire neighborhood solution is judged as one candidate.
+
+
+Example:
+
+AIDC01 -> AIDC07
+alone may not improve P1
+
+and
+
+AIDC05 -> AIDC01
+alone may be infeasible
+
+
+but together they may be:
+
+
+GPU feasible
+
+and
+
+P1 improving.
+
+
+The coupled final solution should be discoverable directly.
+
+
+# ============================================================
+# 21. REQUIRED ACCEPTANCE TEST
+# ============================================================
+
+After implementation, rerun:
+
+2025-05-04 B1
+
+
+Do NOT start Full May yet.
+
+
+Acceptance requires:
+
+
+A.
+verified seed accepted
+
+
+B.
+complete candidate universe unchanged
+
+
+C.
+known validated P2 improvement is discoverable
+
+
+D.
+production B1 is lexicographically better than B0 if the known
+counterexample remains valid
+
+
+E.
+P1 search begins from current maximum line-loading
+line/phase/time
+
+
+F.
+critical bottleneck is recomputed after every accepted P1 improvement
+
+
+G.
+coupled capacity-release neighborhood is active
+
+
+H.
+no permanent cross-region constraint exists
+
+
+I.
+no 3% F&O search-gap hides small improvements
+
+
+J.
+no 0%-gap proof is required for every neighborhood
+
+
+K.
+all accepted candidates pass independent full-model validation
+
+
+L.
+optimization respects the 30-minute hard cap
+
+
+M.
+Fresh OpenDSS PASS
+
+
+N.
+Actual replay PASS
+
+
+O.
+all persistence/hash/readback PASS
+
+
+# ============================================================
+# 22. BEFORE / AFTER REPORT
+# ============================================================
+
+Create:
+
+V41R1_MAY04_FIRST_IMPROVEMENT_ACCEPTANCE.md
+
+and JSON equivalent.
+
+
+Compare:
+
+
+OLD production F&O:
+P1-P5
+runtime
+candidate coverage
+selected relocation count
+selected migration count
+
+
+NEW first-improvement F&O:
+P1-P5
+runtime
+candidate coverage
+selected relocation count
+selected migration count
+
+
+Also report:
+
+known single P2 counterexample result
+best coupled P1 result
+number of accepted improvements by stage
+number of rejected proposals
+first improvement time
+final Fresh rho
+final Actual rho
+
+
+# ============================================================
+# 23. ROOT-CAUSE CLOSURE
+# ============================================================
+
+At the end state explicitly:
+
+
+OLD F&O missed known lexicographic improvement because:
+
+<exact replay-supported cause>
+
+
+Do not simply write:
+
+"3% was probably too large."
+
+
+Use the replay evidence to determine the actual cause.
+
+
+Then classify whether the root problem was:
+
+- termination rule
+- neighborhood composition
+- acceptance logic
+- combined computational issue
+
+
+# ============================================================
+# 24. FULL MAY REMAINS ON HOLD
+# ============================================================
+
+Do NOT launch the 31-day campaign in this task.
+
+
+Stop after:
+
+- old miss replay complete
+- first-improvement search implemented
+- coupled P1 search implemented/tested
+- regressions PASS
+- May-04 B1 rerun PASS
+- Fresh/Actual PASS
+- evidence frozen
+
+
+Return a concise final summary:
+
+ROOT CAUSE
+
+KNOWN P2 IMPROVEMENT RECOVERED? YES/NO
+
+OLD B0 P1/P2
+
+NEW B1 P1/P2
+
+BEST P1 IMPROVEMENT
+
+BEST P2 IMPROVEMENT
+
+SELECTED PRESTART RELOCATIONS
+
+SELECTED RUNNING MIGRATIONS
+
+MAY04 OPTIMIZATION RUNTIME
+
+FRESH PASS? YES/NO
+
+ACTUAL PASS? YES/NO
+
+FULL MAY READY? YES/NO
+
+
+Proceed.

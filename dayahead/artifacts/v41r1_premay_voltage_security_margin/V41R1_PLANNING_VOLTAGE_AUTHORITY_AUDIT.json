@@ -1,0 +1,124 @@
+{
+  "identified_before_any_margin_computation": true,
+  "margin_computations": 0,
+  "PLANNING_VOLTAGE_QUANTITY": "sqrt(voltage_constant + voltage_matrix.T @ frozen_controls)",
+  "PLANNING_VOLTAGE_SOURCE": "V41 corrected V40E/V40I affine voltage-squared coefficients; grid_archive.planning PLANNING_BUS_PHASES.parquet",
+  "ACTUAL_VOLTAGE_SOURCE": "Authoritative realized three-phase OpenDSS voltage_pu array; V41 grid_archive.persist BUS_PHASE_VOLTAGES.parquet, stage=Actual",
+  "CUT_IMPLEMENTATION_PATH": "v40a.grid.add_grid: v_squared variable upper bound; M1 v35r3.algorithm and v34.integrated_mess use v34.correction.bind_squared_voltage_bounds for the same affine quantity",
+  "UNIT": "pu",
+  "Fresh_is_not_the_planning_authority": true,
+  "existing_upper_squared": 1.1025,
+  "existing_lower_squared": 0.9025,
+  "legitimate_future_tightening": "Existing squared upper bound would be (1.05 - EPSILON_V_UP)**2 after eligible pre-May authority and freeze; not implemented at this stop boundary",
+  "stage_ownership": {
+    "B0": "Fixed reference, grid.evaluate_grid feasibility gate",
+    "A0_B1": "v40g.optimizer -> v40a.grid.add_grid",
+    "A1_B3": "v40h.feedback.solve_feedback -> v40a.grid.add_grid",
+    "MF_B3": "v40h.recourse.solve_fixed_route -> v40a.grid.add_grid",
+    "M1_B2_B3": "v40h.mobility -> beam_driver -> v35r3.algorithm restricted/full voltage constraints / v34.integrated_mess",
+    "Fresh_Actual": "Measured verification, physical limits unchanged; no new optimization authority"
+  },
+  "source_files": [
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v40a\\grid.py",
+      "sha256": "b5545a5ca9cffcd768dc9e504080e33870994a1e7ad502649f9074ce88f60613",
+      "bytes": 6250
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\grid_lp.py",
+      "sha256": "f18d0e01e8e985ba3232d250882492538dc854c37640501b166bd09877c3112e",
+      "bytes": 16359
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v40e\\electrical.py",
+      "sha256": "15a4d2936fd7a5e1c1d4502913f98038e5da781ce2660a5c98055ede73911882",
+      "bytes": 20271
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v40e\\mapping.py",
+      "sha256": "6ba0e0903f61f7f08d4548cd108912e6ea351760ff71377df8c13d4065cde403",
+      "bytes": 7314
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v40g\\optimizer.py",
+      "sha256": "d451c9b195a6e5cd67a748b8164cde8f8433b85ab27c520a500c7b6d762819bb",
+      "bytes": 15454
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v40h\\feedback.py",
+      "sha256": "640addbf144daa6e965025f6c1d1cbddc4a107d400dfd179fb7ecd489f11cf52",
+      "bytes": 10460
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v40h\\recourse.py",
+      "sha256": "7533277ff86ecae10de0763168340dc08a35291609f7825bc96101cbdabc6449",
+      "bytes": 8131
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v40h\\mobility.py",
+      "sha256": "283d48533df77c6c1cf9295b7b31dbb81627f9fd0cb413b9975b4c1c6a08f949",
+      "bytes": 5787
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v40h\\beam_driver.py",
+      "sha256": "15c83f22bc44d303a38926bb5fb804f2f8876a8dbd104178b7216c7880dc475f",
+      "bytes": 48890
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v35r3\\algorithm.py",
+      "sha256": "7fd8bae196dbb524b2166d701ba3442c87afe310f85c3faa46b174885b487c89",
+      "bytes": 53093
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v34\\integrated_mess.py",
+      "sha256": "fb92793b9bc8cada5fb09bbf5c3c866cc644e18a052ee1fa97494d09bfa6ea32",
+      "bytes": 52534
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v34\\correction.py",
+      "sha256": "1ddb0c032c715c33c9ef99256f09c056ecd6cee80c91b72a85f9e5dce6fb4fe0",
+      "bytes": 10417
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v28r2\\electrical_subproblem.py",
+      "sha256": "7fe0aa865f849ff1ffc49f3d49519e0df2931a1c1f8cff1ae7f5416ca1e22221",
+      "bytes": 18609
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v41\\grid_archive.py",
+      "sha256": "f9430bc709755037b1eebea02786c9b0b27e067477e0328014953bc8320d1088",
+      "bytes": 9414
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v41\\execution.py",
+      "sha256": "7cb369e2ba6d80a64c32bb6f3d9d4746d28217caa58f5bbbcc4d0f99fb9b70c3",
+      "bytes": 29345
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v41\\electrical.py",
+      "sha256": "25776881bab893e3e6ff96a0c4cf3fae2eef5c24d1985088418742bd6e74bcc7",
+      "bytes": 8117
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v41\\actual_dispatch.py",
+      "sha256": "fd9ac75005714999a41ef37ea8ceae70bbe7d9d27d4eeda2193ac182a483ac20",
+      "bytes": 17405
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v41\\objectives.py",
+      "sha256": "86e54c2b2ce987dae1dca84b3a433471e2bd72192d439ff6a2efdd306ae00e75",
+      "bytes": 2927
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v41\\scalars.py",
+      "sha256": "b5ebf4dc2cd112fbb16f17c36580a0a3dfec65deb5e817f619bf03f2df825d7b",
+      "bytes": 3064
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r1_premay_voltage_security_margin\\dayahead\\v41\\snapshot.py",
+      "sha256": "bcd56925bb25f26aecbb9967edc8340fa7b43b210a0efd569023687ce39d1179",
+      "bytes": 4695
+    }
+  ],
+  "base_implementation_commit": "110035d6c1999adf590e36c6ff16dc80cc46369b"
+}

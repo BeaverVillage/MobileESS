@@ -1,0 +1,177 @@
+{
+  "status": "RESOLVED_BY_EXPLICIT_LEXICOGRAPHIC_AMENDMENT",
+  "reason_code": "NO_SEMANTICALLY_VALID_EXISTING_GPUH_SHORTFALL_COEFFICIENT",
+  "request_section": 17,
+  "existing_hierarchy": [
+    "MIN_RHO_MAX",
+    "MIN_MIGRATIONS",
+    "MIN_COMPLETE_REFERENCE_DEVIATION",
+    "STABLE_TIE"
+  ],
+  "source_evidence": {
+    "dayahead/v40g/optimizer.py": {
+      "source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41_final_ml_interface_may_campaign\\dayahead\\v40g\\optimizer.py",
+        "sha256": "876982c9ad0747ee6f15dbdc4d9c8284fa8c091eb786103adc50374baacdc3d3",
+        "bytes": 12770
+      },
+      "objective_calls": [
+        {
+          "line": 129,
+          "expression": "model.setObjective(rho,GRB.MINIMIZE)"
+        },
+        {
+          "line": 145,
+          "expression": "model.setObjective(migration,GRB.MINIMIZE)"
+        },
+        {
+          "line": 147,
+          "expression": "model.setObjective(dev,GRB.MINIMIZE)"
+        },
+        {
+          "line": 149,
+          "expression": "model.setObjective(tie,GRB.MINIMIZE)"
+        }
+      ]
+    },
+    "dayahead/v40h/feedback.py": {
+      "source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41_final_ml_interface_may_campaign\\dayahead\\v40h\\feedback.py",
+        "sha256": "b1deaa3145a0ec9033888a7e7f26f9952f0af4f842e6da6d670dd4633637a0b6",
+        "bytes": 7274
+      },
+      "objective_calls": [
+        {
+          "line": 68,
+          "expression": "model.setObjective(rho,GRB.MINIMIZE)"
+        },
+        {
+          "line": 86,
+          "expression": "model.setObjective(deviation,GRB.MINIMIZE)"
+        },
+        {
+          "line": 91,
+          "expression": "model.setObjective(tie,GRB.MINIMIZE)"
+        }
+      ]
+    },
+    "dayahead/v40f/optimizer.py": {
+      "source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41_final_ml_interface_may_campaign\\dayahead\\v40f\\optimizer.py",
+        "sha256": "0a32c60735f66f71e6f4041f253883e7d3a3a9f8d44e92a4c590ba336730ffea",
+        "bytes": 13193
+      },
+      "objective_calls": [
+        {
+          "line": 92,
+          "expression": "model.setObjective(rho,GRB.MINIMIZE)"
+        },
+        {
+          "line": 132,
+          "expression": "model.setObjective(deviation,GRB.MINIMIZE)"
+        },
+        {
+          "line": 136,
+          "expression": "model.setObjective(tie,GRB.MINIMIZE)"
+        }
+      ]
+    },
+    "dayahead/v40a/feedback.py": {
+      "source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41_final_ml_interface_may_campaign\\dayahead\\v40a\\feedback.py",
+        "sha256": "ffd37db339b9c0b79676229806d4a6125f894826256d177d1a817ae254e703e2",
+        "bytes": 7311
+      },
+      "objective_calls": [
+        {
+          "line": 83,
+          "expression": "model.setObjective(rho,GRB.MINIMIZE)"
+        },
+        {
+          "line": 94,
+          "expression": "model.setObjective(deviation,GRB.MINIMIZE)"
+        },
+        {
+          "line": 99,
+          "expression": "model.setObjective(tie,GRB.MINIMIZE)"
+        }
+      ]
+    },
+    "dayahead/v28r2/variable_registry.py": {
+      "source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41_final_ml_interface_may_campaign\\dayahead\\v28r2\\variable_registry.py",
+        "sha256": "fe78bb870b8d263db17756dc23dc10a04f4f0878bb058e221fefaace6e9bb453",
+        "bytes": 12529
+      },
+      "objective_calls": [
+        {
+          "line": 259,
+          "expression": "model.setObjective(eta, GRB.MINIMIZE)"
+        }
+      ]
+    },
+    "dayahead/v33x/headroom_stage1.py": {
+      "source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41_final_ml_interface_may_campaign\\dayahead\\v33x\\headroom_stage1.py",
+        "sha256": "dc4bd0bb0d84eb7272b49468356c608b5d04ea4df53b8f78aa2b0cbc08943341",
+        "bytes": 10023
+      },
+      "objective_calls": [
+        {
+          "line": 140,
+          "expression": "model.setObjective(registry.eta, GRB.MINIMIZE)"
+        },
+        {
+          "line": 152,
+          "expression": "model.setObjective(leverage_expression, GRB.MAXIMIZE)"
+        },
+        {
+          "line": 169,
+          "expression": "model.setObjective(gp.quicksum(deviation.values()), GRB.MINIMIZE)"
+        }
+      ]
+    }
+  },
+  "current_producer": "dayahead/v40h/b1.py:produce_joint_b1 -> dayahead/v40g/optimizer.py:solve",
+  "current_feedback": "dayahead/v40h/pipeline.py:b3 -> dayahead/v40h/feedback.py:solve_feedback",
+  "coefficient": null,
+  "unit": null,
+  "semantically_valid_existing_coefficient_found": false,
+  "rejected_substitutes": [
+    {
+      "term": "rho_max coefficient 1",
+      "unit": "dimensionless loading ratio",
+      "reason": "Not GPUh debt or unmet service."
+    },
+    {
+      "term": "migration count",
+      "unit": "job migration count",
+      "reason": "Separate lexicographic priority; not service shortfall."
+    },
+    {
+      "term": "complete reference deviation",
+      "unit": "GPU-slots symmetric interval/site difference",
+      "reason": "Charges relocation/time deviation, including fully served jobs; not GPUh debt."
+    },
+    {
+      "term": "stable tie",
+      "unit": "arbitrary deterministic index",
+      "reason": "Ordering only."
+    },
+    {
+      "term": "V28R2 terminal backlog",
+      "unit": "node-hours",
+      "reason": "Hard equality to reference; model minimizes eta. No backlog penalty to reuse."
+    },
+    {
+      "term": "V33X leverage_expression",
+      "unit": "electrical sensitivity weighted headroom",
+      "reason": "Legacy different formulation; not GPUh unmet service and not current objective."
+    }
+  ],
+  "new_coefficient_created": false,
+  "optimizer_changed": false,
+  "required_to_continue": "Existing approved source file/variable, value and unit with valid GPUh service-shortfall semantics; otherwise a new explicit scientific objective decision is required.",
+  "blocking": false,
+  "resolution_authority": "V41_H4_LEXICOGRAPHIC_OBJECTIVE_AUTHORITY.json"
+}

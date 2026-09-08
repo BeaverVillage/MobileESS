@@ -1,0 +1,393 @@
+# ============================================================
+# V41R1 ADDENDUM — PENDING PRE-START RELOCATION
+#
+# Extend spatial flexibility to jobs that are PENDING at D00.
+#
+# Core rule:
+# PENDING jobs may be relocated/reassigned to another feasible IDC
+# BEFORE execution starts, but their planned start time must remain
+# unchanged.
+#
+# After execution starts, the existing RUNNING migration mechanism
+# remains available.
+# ============================================================
+
+
+# 1. TARGET STATE
+
+For every job that is:
+
+STATE_AT_D00 = PENDING
+
+and has:
+
+D00 <= PLANNED_START < D24
+
+allow spatial relocation before the job starts.
+
+
+# 2. START TIME MUST NOT CHANGE
+
+This addendum does NOT introduce new temporal shifting.
+
+Require exactly:
+
+NEW_PLANNED_START_j
+=
+REFERENCE_PLANNED_START_j
+
+
+Do NOT:
+- delay the job
+- advance the job
+- change its runtime
+- change its admission status
+
+
+Only the execution site may change before start.
+
+
+# 3. DEFINE PENDING PRE-START RELOCATION
+
+For a PENDING job:
+
+PENDING at original site/placement
+        |
+        | pre-start relocation / site reassignment
+        v
+PENDING at destination IDC
+        |
+        | wait until original planned start
+        v
+RUNNING at destination IDC
+
+
+This is the intended new spatial flexibility.
+
+
+# 4. DO NOT MODEL THIS AS RUNNING CHECKPOINT MIGRATION
+
+A PENDING job has not started computation yet.
+
+Therefore pre-start relocation must NOT require:
+
+- checkpoint
+- execution pause
+- restart from checkpoint
+
+
+Do not reuse RUNNING checkpoint semantics before execution begins.
+
+
+Use terminology such as:
+
+PENDING_PRESTART_RELOCATION
+or
+PRESTART_SITE_RELOCATION
+
+
+Do not call the first placement of a never-started job a
+checkpoint migration in paper-facing outputs.
+
+
+# 5. DAY-D BOUNDARY
+
+The relocation must belong entirely to the Day-D decision horizon.
+
+Require:
+
+D00 <= relocation/staging action
+
+and
+
+relocation completion <= PLANNED_START_j
+
+and
+
+PLANNED_START_j < D24
+
+
+Do NOT create a relocation whose completion occurs after the
+job's planned start.
+
+Do NOT create any new relocation decision after D24.
+
+
+# 6. DESTINATION FEASIBILITY
+
+A destination IDC is eligible only if all existing authoritative
+constraints are satisfied.
+
+At minimum reuse existing:
+
+- IDC eligibility
+- GPU capacity
+- rack compatibility/capacity
+- workload/site compatibility
+- WAN authority if pre-start data transfer is actually represented
+- policy restrictions
+- electrical/site assignment constraints
+
+
+Do NOT invent new destination capacity or new site compatibility.
+
+
+# 7. WAN / DATA TRANSFER SEMANTICS
+
+Do not invent checkpoint-transfer traffic for a PENDING job.
+
+If the existing authoritative formulation already represents
+pre-start workload/data staging between IDCs, reuse it exactly.
+
+If no authoritative pre-start transfer payload exists, treat this as
+pre-start site reassignment/placement and do NOT fabricate WAN traffic.
+
+Document which case applies.
+
+
+# 8. PENDING RELOCATION IS SEPARATE FROM RUNNING MIGRATION
+
+Keep these two mechanisms separate:
+
+A) PENDING PRE-START RELOCATION
+   - before execution
+   - no checkpoint
+   - planned start unchanged
+
+B) RUNNING MIGRATION
+   - after execution starts
+   - existing checkpoint/pause/WAN/restart mechanism
+
+
+A job may use both sequentially if feasible:
+
+PENDING relocation
+-> original planned start
+-> RUNNING
+-> later valid checkpoint
+-> RUNNING migration
+
+
+# 9. AFTER START, EXISTING RUNNING MIGRATION REMAINS ENABLED
+
+Once the job reaches:
+
+t = PLANNED_START_j
+
+its state becomes RUNNING.
+
+From that point onward, it must enter the same existing RUNNING
+migration candidate set as any other RUNNING job.
+
+Therefore:
+
+PENDING@D00
+-> pre-start relocation allowed
+-> RUNNING at planned start
+-> checkpoint-based migration allowed afterward
+
+
+Cross-midnight completion must NOT disable this behavior.
+
+
+# 10. CROSS-MIDNIGHT JOBS
+
+If:
+
+PLANNED_START_j + PLANNED_DURATION_j > D24
+
+the job may still:
+
+- use PENDING pre-start relocation before planned start
+- start at the unchanged planned start
+- use RUNNING migration at valid checkpoints before D24
+
+
+Do NOT freeze its site merely because its completion extends beyond
+midnight.
+
+
+# 11. POLICY DEFINITIONS MUST BE PRESERVED
+
+Only policies that already allow spatial flexibility/migration may
+use these mechanisms.
+
+Do NOT enable relocation/migration in an explicit no-migration or
+fixed-site ablation policy.
+
+Audit B0/B1/B2/B3 policy semantics before applying the new candidate
+set.
+
+
+# 12. OBJECTIVE MUST NOT CHANGE
+
+Do NOT add:
+
+- relocation reward
+- relocation penalty coefficient
+- new objective stage
+
+
+Preserve the existing lexicographic objective exactly.
+
+PENDING pre-start relocation should be treated under the existing
+site-assignment/reference-deviation semantics.
+
+RUNNING migration remains counted under the existing migration-count
+objective.
+
+
+Do NOT incorrectly count simple PENDING pre-start site reassignment
+as a RUNNING migration.
+
+
+# 13. ELECTRICAL OPTIMIZATION
+
+Let the optimizer choose the destination using the existing electrical
+model.
+
+Do NOT hard-code AIDC01 or any other IDC.
+
+Persist for each selected relocation:
+
+source/reference IDC
+destination IDC
+
+critical-line sensitivity at source
+critical-line sensitivity at destination
+sensitivity difference
+
+
+This is for diagnosis only; destination choice remains optimization-driven.
+
+
+# 14. MAY-1 AUDIT
+
+Before rerunning May-1, report:
+
+N_PENDING_AT_D00
+
+N_PENDING_STARTING_WITHIN_DAY
+
+N_PENDING_PRESTART_RELOCATION_ELIGIBLE
+
+N_PENDING_PRESTART_RELOCATION_INELIGIBLE
+
+
+For the known cross-midnight cohort also report:
+
+N_CROSS_MIDNIGHT_PENDING
+
+N_CROSS_MIDNIGHT_PRESTART_RELOCATION_ELIGIBLE
+
+
+For the 18:00 cohort report:
+
+- total jobs
+- relocation-eligible jobs
+- feasible destination count per job
+- total GPU represented
+- jobs with at least one lower critical-line-sensitivity destination
+
+
+Do not force relocation based on this audit.
+
+
+# 15. PERSISTENCE
+
+For every PENDING relocation candidate persist:
+
+job_id
+state_at_D00
+reference_site
+selected_initial_site
+
+planned_start
+planned_duration
+
+prestart_relocation_eligible
+ineligibility_reason
+
+feasible_destinations
+selected_prestart_relocation
+
+relocation/staging start if authoritative
+relocation/staging completion if authoritative
+
+planned_start_unchanged = true
+
+cross_midnight
+
+source_line_sensitivity
+destination_line_sensitivity
+
+
+Separately persist later RUNNING migration fields if the same job
+migrates after execution starts.
+
+
+# 16. NO ACTUAL REOPTIMIZATION
+
+PENDING pre-start relocation is a Day-Ahead decision.
+
+Actual must replay the frozen initial site/relocation decision.
+
+Do NOT use Actual runtime, voltage, current, workload, or rack outcome
+to choose a different pre-start destination.
+
+
+After the job starts, use only the existing frozen RUNNING migration
+authority and Actual replay semantics.
+
+
+# 17. REGRESSION TESTS
+
+Add tests proving:
+
+- PENDING site can change before start
+- planned start remains exactly unchanged
+- no checkpoint required before start
+- no restart required before start
+- first placement/pre-start relocation is not counted as RUNNING migration
+- relocation completes before planned start where timing is modeled
+- no post-D24 relocation decision
+- after start the job enters RUNNING migration eligibility
+- cross-midnight completion does not disable either mechanism
+- no-migration policies remain unchanged
+- objective hierarchy unchanged
+- GPU/rack/WAN constraints unchanged
+- Actual does not re-optimize relocation
+- persistence/hash/read-back PASS
+
+
+# 18. MAY-1 RERUN OUTPUT
+
+After implementation, rerun May-1 B0/B1 under one frozen scientific
+commit and report separately:
+
+PENDING pre-start relocations
+RUNNING migrations
+PENDING->RUNNING migrations after start
+
+
+Then report old vs revised:
+
+rho_max
+Fresh rho
+Actual rho
+
+critical line/phase/slot
+critical-slot AIDC kW
+critical-slot GPU
+
+site changes
+migration count
+
+Vmin/Vmax
+voltage/current violations
+
+full lexicographic objective vector
+
+
+Do NOT launch full May until the revised May-1 result and regressions
+are reviewed.

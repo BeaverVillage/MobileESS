@@ -1,0 +1,976 @@
+# ============================================================
+# V41R1 FINAL ONE-SHOT MIGRATION SEMANTICS
+#
+# PENDING:
+#   one pre-start site relocation / initial-placement decision
+#
+# RUNNING:
+#   one and only one migration opportunity at the FIRST valid
+#   checkpoint after the job becomes RUNNING
+#
+# No repeated checkpoint decisions.
+# No multiple migrations per job.
+# ============================================================
+
+
+# 0. USER-AUTHORIZED SCIENTIFIC REVISION
+
+The previous authority audit found that the inherited/current
+higher-level contract could be interpreted as allowing migration at
+all authoritative valid checkpoints.
+
+For V41R1, the user is now explicitly choosing a SIMPLIFIED NEW
+scientific migration contract:
+
+ONE migration opportunity per job,
+at the FIRST valid RUNNING checkpoint only.
+
+This is a deliberate V41R1 scientific revision.
+
+Do NOT claim that the earlier all-valid-checkpoint interpretation
+was wrong.
+
+Instead record it as:
+
+SUPERSEDED_IN_V41R1_BY_ONE_SHOT_FIRST_CHECKPOINT_MIGRATION
+
+
+The May-1 scientific rerun must use only this final V41R1 contract.
+
+
+
+# 1. KEEP THE 24-HOUR INDEPENDENT-DAY STRUCTURE
+
+Optimization horizon remains exactly:
+
+D00 <= t < D24
+
+96 x 15-minute slots.
+
+
+Each operating day starts from its own authoritative snapshot.
+
+Do NOT:
+
+- extend the horizon
+- optimize D+1
+- propagate Day-D optimized state into D+1
+- introduce rolling MPC
+- introduce repeated migration decisions through time
+
+
+
+# 2. THREE DISTINCT JOB STATES / ACTIONS
+
+Keep these concepts strictly separate:
+
+A) PENDING PRE-START RELOCATION
+
+B) PENDING -> RUNNING transition
+
+C) RUNNING CHECKPOINT MIGRATION
+
+
+Do not collapse these into one generic "migration" variable.
+
+
+
+# 3. PENDING JOB — PRE-START SITE RELOCATION
+
+For a job that is PENDING at D00 and starts during Day D:
+
+D00 <= planned_start_j < D24
+
+
+allow ONE pre-start site-selection / relocation decision.
+
+
+The job may choose a feasible initial execution IDC before it starts.
+
+
+This is:
+
+PENDING_PRESTART_RELOCATION
+
+or paper-facing:
+
+PRE-START SITE REASSIGNMENT
+
+
+It is NOT RUNNING migration.
+
+
+
+# 4. PENDING RELOCATION DOES NOT CHANGE START TIME
+
+For this V41R1 revision:
+
+optimized_start_j
+=
+authoritative planned_start_j
+
+
+Do NOT change:
+
+- planned start
+- runtime
+- admission
+- job identity
+
+
+Only the initial execution site may change.
+
+
+Therefore:
+
+PENDING at D00
+-> choose feasible initial IDC
+-> remain PENDING
+-> start at the original planned start time
+
+
+
+# 5. NO CHECKPOINT SEMANTICS WHILE PENDING
+
+A PENDING job has not executed computation.
+
+Therefore pre-start relocation must NOT require:
+
+- checkpoint
+- pause
+- restart from checkpoint
+
+
+Do not fabricate checkpoint state before the job starts.
+
+
+If authoritative pre-start WAN/data staging already exists, reuse it.
+
+If no such authority exists, treat pre-start relocation as an
+initial placement/site reassignment without fabricating WAN payload.
+
+
+
+# 6. PENDING JOB BECOMES RUNNING AT PLANNED START
+
+At:
+
+t = planned_start_j
+
+
+the job transitions:
+
+PENDING
+->
+RUNNING
+
+
+at its selected initial IDC.
+
+
+From this point onward it becomes eligible for the RUNNING migration
+rule below.
+
+
+
+# 7. RUNNING MIGRATION — EXACTLY ONE OPPORTUNITY
+
+Every RUNNING migration-capable job receives exactly ONE migration
+opportunity during Day D.
+
+
+This applies to BOTH:
+
+SET A:
+jobs already RUNNING at D00
+
+SET B:
+jobs PENDING at D00 that start and become RUNNING during Day D
+
+
+
+# 8. MIGRATION OPPORTUNITY TIME = FIRST VALID CHECKPOINT
+
+For each RUNNING job j define:
+
+FIRST_VALID_CHECKPOINT_j
+
+
+as the earliest checkpoint boundary satisfying the existing
+authoritative checkpoint mechanics after the job is RUNNING.
+
+
+For a D00 RUNNING job:
+
+FIRST_VALID_CHECKPOINT_j
+=
+first valid checkpoint at or after D00
+
+
+For a PENDING->RUNNING job:
+
+FIRST_VALID_CHECKPOINT_j
+=
+first valid checkpoint after its planned execution start
+
+
+Use the existing checkpoint cadence/authority.
+
+Do NOT expose later checkpoints as alternative migration decisions.
+
+
+
+# 9. ONE-SHOT DECISION AT THAT CHECKPOINT
+
+At FIRST_VALID_CHECKPOINT_j the Day-Ahead optimizer chooses exactly one
+of:
+
+A) STAY at the current IDC
+
+or
+
+B) MIGRATE once to one feasible destination IDC
+
+
+Conceptually:
+
+migrate_j in {0,1}
+
+
+If:
+
+migrate_j = 0
+
+then the job remains at its current IDC for the rest of the Day-D
+modeled horizon.
+
+
+It does NOT receive another migration opportunity at a later checkpoint.
+
+
+If:
+
+migrate_j = 1
+
+then it performs one checkpoint-based migration and cannot migrate
+again during Day D.
+
+
+
+# 10. MAXIMUM ONE RUNNING MIGRATION PER JOB
+
+Enforce:
+
+N_RUNNING_MIGRATIONS_j <= 1
+
+
+for every job.
+
+
+After the one-shot first-checkpoint decision:
+
+ADDITIONAL_RUNNING_MIGRATION_j = 0
+
+
+No:
+
+IDC05 -> IDC01 -> IDC08
+
+multi-hop job migration within one Day-D optimization.
+
+
+Only:
+
+source
+-> destination
+
+at most once.
+
+
+
+# 11. PENDING JOB MAY THEREFORE HAVE TWO SPATIAL DECISIONS
+
+A PENDING-at-D00 job may legitimately experience:
+
+1. PRE-START SITE REASSIGNMENT
+
+and later
+
+2. ONE RUNNING MIGRATION AT ITS FIRST VALID CHECKPOINT
+
+
+Example:
+
+D00:
+PENDING / reference AIDC05
+
+Day-Ahead pre-start relocation:
+initial execution site = AIDC03
+
+18:00:
+job starts at AIDC03
+
+18:30:
+first valid checkpoint
+
+decision:
+STAY at AIDC03
+
+or
+
+MIGRATE AIDC03 -> AIDC01
+
+
+If it migrates:
+
+no further migration opportunity later that day.
+
+
+
+# 12. PRE-START RELOCATION IS NOT COUNTED AS RUNNING MIGRATION
+
+Keep objective accounting separate.
+
+PENDING pre-start site reassignment:
+
+- is spatial placement flexibility
+- is NOT a checkpoint migration
+- must NOT increment RUNNING migration count
+
+
+RUNNING checkpoint migration:
+
+- increments the existing migration count exactly once
+- uses the existing migration objective semantics
+
+
+
+# 13. D00 RUNNING JOBS
+
+Jobs already RUNNING at D00:
+
+- have no pre-start relocation
+- retain their current site at D00
+- receive exactly one migration opportunity at their first valid
+  Day-D checkpoint
+- may migrate once or stay
+
+
+Do not alter their established pre-D00 execution state.
+
+
+
+# 14. CROSS-MIDNIGHT JOBS
+
+If a job's planned completion is after D24:
+
+planned_start_j + duration_j > D24
+
+
+this does NOT disable:
+
+- pre-start relocation if the job is PENDING
+- its first-checkpoint RUNNING migration
+
+
+Cross-midnight completion alone is NOT an exclusion criterion.
+
+
+The only relevant migration timing condition is that the first valid
+checkpoint and meaningful migration execution belong to Day D under
+the existing timing contract.
+
+
+
+# 15. MIGRATION MUST HAVE AN IN-DAY EFFECT
+
+Do not create a migration whose useful effect exists only beyond D24.
+
+
+Require the existing valid:
+
+checkpoint
+-> pause
+-> WAN transfer
+-> restart
+
+sequence.
+
+
+Use the existing timing authority to require a meaningful destination
+execution segment before D24.
+
+
+Do not invent a new minimum-duration threshold.
+
+
+
+# 16. REUSE EXISTING RUNNING MIGRATION PHYSICS EXACTLY
+
+The single RUNNING migration must reuse the existing state machine:
+
+RUNNING at source
+-> checkpoint
+-> pause
+-> WAN transfer
+-> destination ready
+-> restart
+-> RUNNING at destination
+
+
+Reuse existing:
+
+- checkpoint duration
+- checkpoint cadence
+- migration payload
+- WAN path
+- WAN capacity
+- transfer duration
+- restart delay
+- source segment
+- pause segment
+- destination segment
+- rack feasibility
+- GPU feasibility
+- service accounting
+
+
+Do NOT implement an instantaneous site switch.
+
+
+
+# 17. WAN PATH / DESTINATION CHOICE
+
+At the single first-checkpoint opportunity, allow the optimizer to
+choose among ALL authoritative physically feasible destination IDCs
+and WAN paths.
+
+
+Do NOT prune by:
+
+- electrical sensitivity
+- top-K destinations
+- distance
+- heuristic score
+- expected rho improvement
+
+
+Hard infeasibility pruning is allowed only when mathematically
+proven from authoritative constraints.
+
+
+
+# 18. POLICY SEMANTICS REMAIN UNCHANGED
+
+Audit B0/B1/B2/B3.
+
+Policies that prohibit migration remain migration-disabled.
+
+Policies that allow migration may use this new one-shot candidate set.
+
+
+Do not accidentally enable migration in a no-migration or fixed-site
+ablation.
+
+
+
+# 19. OBJECTIVE REMAINS UNCHANGED
+
+Preserve the current lexicographic objective:
+
+P1:
+rho_max
+
+P2:
+mean H4 reserve shortfall
+
+P3:
+RUNNING migration count
+
+P4:
+reference schedule deviation
+
+P5:
+existing deterministic tie-break
+
+
+Do NOT:
+
+- add migration reward
+- introduce relocation penalty
+- change objective coefficients
+- reduce P3 to encourage migration
+
+
+The scientific change is the feasible spatial decision set only.
+
+
+
+# 20. CHECKPOINT DIMENSION IS NOW DETERMINISTIC
+
+Because each job has only:
+
+FIRST_VALID_CHECKPOINT_j
+
+
+the MILP does NOT need a decision dimension over:
+
+all checkpoints.
+
+
+Do NOT create variables for:
+
+job x checkpoint1
+job x checkpoint2
+job x checkpoint3
+...
+
+
+The checkpoint time is a deterministic parameter derived from the
+job's RUNNING start state and existing checkpoint authority.
+
+
+
+# 21. EXPECTED MODEL COMPRESSION
+
+The previous all-valid-checkpoint explicit candidate explosion is no
+longer the V41R1 reference problem.
+
+
+Construct the new explicit reference feasible set under:
+
+- one initial site decision for eligible PENDING jobs
+- one deterministic first checkpoint
+- stay or one destination choice
+
+
+Then derive the compressed formulation against THIS final semantics.
+
+
+Do not compare against the superseded 4.25M all-checkpoint combination
+set as the final scientific reference.
+
+
+
+# 22. EXACT COMPRESSION STILL REQUIRED
+
+Compression may be used, but it must preserve exactly:
+
+- all PENDING pre-start feasible initial sites
+- all D00 RUNNING candidates
+- all PENDING->RUNNING candidates
+- each job's deterministic first valid checkpoint
+- all feasible destinations
+- all authoritative WAN paths
+- stay option
+- one-migration maximum
+
+
+No heuristic pruning.
+
+
+
+# 23. NEW EXPLICIT/COMPRESSED EQUIVALENCE GATE
+
+Rebuild the deterministic reduced-instance tests under the FINAL
+one-shot semantics.
+
+
+Require:
+
+1. explicit feasible decision -> compressed representable
+
+2. compressed decision -> explicit valid
+
+3. same P1-P5 objective vector
+
+4. same optimal rho_max
+
+5. same migration count at frozen P1/P2 optimum
+
+6. same initial site
+
+7. same stay/migrate decision
+
+8. same destination
+
+9. same GPU/rack/WAN occupancy
+
+10. same final deterministic tie-break result
+
+
+Withdraw equivalence claims based on the superseded all-valid-checkpoint
+or first-legacy-checkpoint formulations.
+
+
+
+# 24. ACTUAL REPLAY REMAINS THE LATEST AUTHORIZED RULE
+
+Day-Ahead freezes:
+
+- initial site
+- stay/migrate decision
+- first-checkpoint execution-progress offset
+- destination
+- WAN path
+- payload
+- ordering
+
+
+Actual does NOT re-optimize.
+
+
+If Actual rack/GPU contention delays execution:
+
+ACTUAL_CHECKPOINT
+=
+ACTUAL_EXECUTION_START
++
+DA_CHECKPOINT_PROGRESS_OFFSET
+
+
+Then propagate the same frozen:
+
+checkpoint
+-> WAN
+-> restart
+
+
+timing forward.
+
+
+
+# 25. ACTUAL WAN CONTENTION
+
+If shifted Actual WAN timing encounters capacity contention:
+
+- keep the same frozen WAN path
+- keep the same destination
+- queue deterministically under the existing ordering
+- use earliest capacity-feasible execution time
+
+
+Do NOT reroute.
+
+Do NOT choose another destination.
+
+Do NOT cancel solely because the original absolute timestamp passed.
+
+
+
+# 26. D24 ACTUAL CARRY-OUT
+
+If realized execution delay causes the frozen migration to extend
+beyond D24:
+
+do NOT fail the entire policy-day solely for that reason.
+
+
+Record:
+
+MIGRATION_CARRY_OUT = true
+
+MIGRATION_COMPLETED_WITHIN_HORIZON = false
+
+
+Evaluate the Day-D realized portion only.
+
+Do not propagate this state into the next independent operating day.
+
+
+
+# 27. MAY-1 CANDIDATE AUDIT
+
+Before May-1 rerun report:
+
+N_RUNNING_AT_D00
+
+N_PENDING_AT_D00
+
+N_PENDING_STARTING_WITHIN_DAY
+
+N_PENDING_PRESTART_RELOCATION_ELIGIBLE
+
+N_PENDING_TO_RUNNING
+
+N_PENDING_TO_RUNNING_WITH_FIRST_VALID_CHECKPOINT
+
+N_RUNNING_AT_D00_WITH_FIRST_VALID_CHECKPOINT
+
+
+For each population report:
+
+STAY option count
+
+migration-capable count
+
+feasible destination count distribution
+
+
+
+# 28. CURRENT EXPECTED MAY-1 COUNTS
+
+Reconcile against the already observed preflight values:
+
+D00 RUNNING = 425
+
+D00 PENDING = 1,180
+
+PENDING starting during Day D = 672
+
+structurally pre-start relocatable = 672
+
+previous structurally checkpoint/restart-capable count = 660
+
+
+Do not assume the final migration-eligible count is exactly 660.
+
+Recompute it under the new FIRST-VALID-CHECKPOINT-only semantics and
+hard GPU/rack/WAN feasibility.
+
+
+
+# 29. 18:00 CRITICAL COHORT AUDIT
+
+For the May-1 18:00 AEST cohort report:
+
+total relevant jobs
+
+PENDING pre-start relocation eligible
+
+first valid checkpoint time
+
+RUNNING migration eligible
+
+feasible destination count
+
+GPU represented
+
+
+Also report which jobs have:
+
+source critical-line sensitivity
+>
+at least one destination sensitivity
+
+
+using authoritative coefficients.
+
+
+Do not manually force a lower-sensitivity destination.
+
+
+
+# 30. PERSISTENCE — PRE-START
+
+For each eligible PENDING job persist:
+
+job_id
+state_at_D00
+
+reference_initial_site
+optimized_initial_site
+
+planned_start
+
+prestart_relocation_eligible
+prestart_relocation_selected
+
+feasible_initial_sites
+
+planned_start_unchanged = true
+
+
+Do not count this as migration.
+
+
+
+# 31. PERSISTENCE — RUNNING MIGRATION
+
+For each job that becomes RUNNING persist:
+
+job_id
+
+running_entry_time
+
+FIRST_VALID_CHECKPOINT
+
+migration_opportunity_count = 1
+
+stay_or_migrate
+
+source_IDC
+
+destination_IDC if migrated
+
+WAN_path
+
+checkpoint
+pause
+WAN_start
+WAN_end
+restart
+
+additional_migration_opportunities = 0
+
+running_migration_count in {0,1}
+
+
+
+# 32. ABANDONED LOGIC MUST BE INACTIVE
+
+Verify that none of the following remains scientifically active:
+
+- all-valid-checkpoint choice
+- repeated migration at later checkpoints
+- multiple migrations per job
+- per-job terminal residual
+- daily service neutrality
+- spill budget
+- extended post-H horizon
+- new voltage margin
+
+
+Add regression tests for their absence.
+
+
+
+# 33. REGRESSION TESTS
+
+At minimum test:
+
+- PENDING pre-start relocation allowed
+- PENDING start time unchanged
+- PENDING first placement not counted as migration
+- PENDING becomes RUNNING at planned start
+- first valid checkpoint exact
+- one migration opportunity only
+- stay removes all later migration opportunities
+- migrate removes all later migration opportunities
+- migration count <=1 per job
+- D00 RUNNING gets one first-checkpoint opportunity
+- cross-midnight completion does not disable migration
+- migration-disabled policy remains disabled
+- source/pause/WAN/destination segment accounting exact
+- GPU/rack/WAN capacity hard
+- Actual checkpoint delay propagation exact
+- Actual no reoptimization
+- D24 carry-out semantics
+- P1-P5 objective hierarchy unchanged
+- compression equivalence
+- persistence/read-back/hash PASS
+
+
+
+# 34. P0 REGRESSION
+
+Re-run P0-01 through P0-07.
+
+Pay particular attention to:
+
+P0-05 B1 generation identity
+
+P0-06 source/pause/destination migration segments
+
+P0-07 day-boundary / PRE_DAY_COMPLETE semantics
+
+
+Old PASS is not sufficient after changing migration semantics.
+
+
+
+# 35. SCIENTIFIC FREEZE
+
+Do not scientifically freeze commit 94d2b2a as the final model if it
+contains the superseded checkpoint semantics.
+
+
+Implement this final one-shot rule.
+
+Run:
+
+- full regression
+- explicit/compressed equivalence
+- candidate audit
+- persistence audit
+
+
+Then create ONE clean scientific freeze commit.
+
+
+
+# 36. MAY-1 RERUN
+
+Only after the final scientific freeze:
+
+B0 Day-Ahead
+-> B0 Actual
+
+B1 Day-Ahead
+-> B1 Actual
+
+
+Then verify:
+
+B0-in-B1 feasibility
+
+P1-P5 objective identity
+
+Fresh OpenDSS
+
+Actual replay
+
+P0-01..P0-07
+
+background-load no-double-count
+
+complete persistence
+
+
+
+# 37. FINAL REPORT BEFORE FULL MAY
+
+Report:
+
+1. final scientific commit SHA
+
+2. model variable/constraint counts
+
+3. reduction relative to superseded all-checkpoint enumeration
+
+4. D00 RUNNING count
+
+5. D00 PENDING count
+
+6. PENDING pre-start relocation eligible count
+
+7. PENDING->RUNNING first-checkpoint eligible count
+
+8. RUNNING@D00 first-checkpoint eligible count
+
+9. selected pre-start relocations
+
+10. selected RUNNING migrations
+
+11. confirmation that each job had exactly one migration opportunity
+
+12. old vs new B1 rho_max
+
+13. critical GPU/AIDC load
+
+14. Fresh rho
+
+15. Actual rho
+
+16. voltage/current results
+
+17. full P1-P5 objective vector
+
+18. P0-01..P0-07
+
+19. regression test count
+
+20. full-May readiness PASS/FAIL
+
+
+Do NOT launch full May before these results are reviewed.
