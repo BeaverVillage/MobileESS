@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="8" time="28.623" timestamp="2026-09-07T20:51:04.771044+09:00" hostname="JaewonKim"><testcase classname="tests.dayahead.test_capacity_rebase_acceptance_outputs" name="test_regenerated_coefficient_dependency_and_mapper" time="0.002" /><testcase classname="tests.dayahead.test_capacity_rebase_acceptance_outputs" name="test_full_candidates_seed_and_lexicographic_incumbent" time="0.001" /><testcase classname="tests.dayahead.test_capacity_rebase_acceptance_outputs" name="test_actual_full_axis_physics_and_persistence[dayahead-B0]" time="0.700" /><testcase classname="tests.dayahead.test_capacity_rebase_acceptance_outputs" name="test_actual_full_axis_physics_and_persistence[dayahead-B1]" time="12.724" /><testcase classname="tests.dayahead.test_capacity_rebase_acceptance_outputs" name="test_actual_full_axis_physics_and_persistence[actual-B0]" time="2.837"><failure message="assert (96 == 96 and not True)">policy = 'B0', stage = 'actual'
+
+    @pytest.mark.parametrize('policy',['B0','B1'])
+    @pytest.mark.parametrize('stage',['dayahead','actual'])
+    def test_actual_full_axis_physics_and_persistence(policy,stage):
+        from dayahead.v41.campaign import verify_receipt
+        from dayahead.v41.scientific_archive import verify_manifest
+        root=RUNTIME/DAY/policy/stage
+        verify_receipt(root/(stage.upper()+'_RECEIPT.json'));verify_manifest(root/'SCIENTIFIC_MANIFEST.json')
+        a=read(root/('FRESH_RESULT.json' if stage=='dayahead' else 'ACTUAL_RESULT.json'))
+&gt;       v=a['summary'];assert v['convergence_count']==96 and not v['physical_violation']
+E       assert (96 == 96 and not True)
+
+tests\dayahead\test_capacity_rebase_acceptance_outputs.py:31: AssertionError</failure></testcase><testcase classname="tests.dayahead.test_capacity_rebase_acceptance_outputs" name="test_actual_full_axis_physics_and_persistence[actual-B1]" time="9.574"><failure message="assert (96 == 96 and not True)">policy = 'B1', stage = 'actual'
+
+    @pytest.mark.parametrize('policy',['B0','B1'])
+    @pytest.mark.parametrize('stage',['dayahead','actual'])
+    def test_actual_full_axis_physics_and_persistence(policy,stage):
+        from dayahead.v41.campaign import verify_receipt
+        from dayahead.v41.scientific_archive import verify_manifest
+        root=RUNTIME/DAY/policy/stage
+        verify_receipt(root/(stage.upper()+'_RECEIPT.json'));verify_manifest(root/'SCIENTIFIC_MANIFEST.json')
+        a=read(root/('FRESH_RESULT.json' if stage=='dayahead' else 'ACTUAL_RESULT.json'))
+&gt;       v=a['summary'];assert v['convergence_count']==96 and not v['physical_violation']
+E       assert (96 == 96 and not True)
+
+tests\dayahead\test_capacity_rebase_acceptance_outputs.py:31: AssertionError</failure></testcase><testcase classname="tests.dayahead.test_capacity_rebase_acceptance_outputs" name="test_every_policy_power_conserves_and_hashes_reopen" time="0.005" /><testcase classname="tests.dayahead.test_capacity_rebase_acceptance_outputs" name="test_no_full_may_outputs" time="0.001" /></testsuite></testsuites>

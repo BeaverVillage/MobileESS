@@ -1,0 +1,39 @@
+....FF..                                                                 [100%]
+================================== FAILURES ===================================
+__________ test_actual_full_axis_physics_and_persistence[actual-B0] ___________
+
+policy = 'B0', stage = 'actual'
+
+    @pytest.mark.parametrize('policy',['B0','B1'])
+    @pytest.mark.parametrize('stage',['dayahead','actual'])
+    def test_actual_full_axis_physics_and_persistence(policy,stage):
+        from dayahead.v41.campaign import verify_receipt
+        from dayahead.v41.scientific_archive import verify_manifest
+        root=RUNTIME/DAY/policy/stage
+        verify_receipt(root/(stage.upper()+'_RECEIPT.json'));verify_manifest(root/'SCIENTIFIC_MANIFEST.json')
+        a=read(root/('FRESH_RESULT.json' if stage=='dayahead' else 'ACTUAL_RESULT.json'))
+>       v=a['summary'];assert v['convergence_count']==96 and not v['physical_violation']
+E       assert (96 == 96 and not True)
+
+tests\dayahead\test_capacity_rebase_acceptance_outputs.py:31: AssertionError
+__________ test_actual_full_axis_physics_and_persistence[actual-B1] ___________
+
+policy = 'B1', stage = 'actual'
+
+    @pytest.mark.parametrize('policy',['B0','B1'])
+    @pytest.mark.parametrize('stage',['dayahead','actual'])
+    def test_actual_full_axis_physics_and_persistence(policy,stage):
+        from dayahead.v41.campaign import verify_receipt
+        from dayahead.v41.scientific_archive import verify_manifest
+        root=RUNTIME/DAY/policy/stage
+        verify_receipt(root/(stage.upper()+'_RECEIPT.json'));verify_manifest(root/'SCIENTIFIC_MANIFEST.json')
+        a=read(root/('FRESH_RESULT.json' if stage=='dayahead' else 'ACTUAL_RESULT.json'))
+>       v=a['summary'];assert v['convergence_count']==96 and not v['physical_violation']
+E       assert (96 == 96 and not True)
+
+tests\dayahead\test_capacity_rebase_acceptance_outputs.py:31: AssertionError
+- generated xml file: D:\codex_mobileess_workspace\MobileESS_v41r2_780gpu_capacity_rebase\acceptance_regressions.xml -
+=========================== short test summary info ===========================
+FAILED tests/dayahead/test_capacity_rebase_acceptance_outputs.py::test_actual_full_axis_physics_and_persistence[actual-B0]
+FAILED tests/dayahead/test_capacity_rebase_acceptance_outputs.py::test_actual_full_axis_physics_and_persistence[actual-B1]
+2 failed, 6 passed in 28.62s
