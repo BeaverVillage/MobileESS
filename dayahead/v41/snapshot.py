@@ -10,6 +10,12 @@ from .scalars import project
 
 
 def capacity_authority():
+    from dayahead.v41r2.authority import capacity,CAP,RACK
+    cap,_=capacity()
+    return cap,list(cap.aidc_ids),dict(source_variable='CapacityAuthority.site_capacity',files=[record(CAP),record(RACK)],rack_limits_added_to_capacity=False)
+
+
+def legacy_capacity_authority():
     from dayahead.v39d.evaluate import _load_capacity
     capacity, details = _load_capacity(SOURCE_REPO)
     sites = [s for s in capacity.aidc_ids if capacity.eligible_racks(s, 1)]
@@ -27,6 +33,12 @@ def capacity_authority():
 
 
 def create(day):
+    from dayahead.v41r2.authority import snapshot
+    return snapshot(day)
+
+
+def legacy_create_disabled(day):
+    raise RuntimeError('V41R2_NO_ML_RETRAINING_OR_PREDICTION')
     folder = RUNTIME / 'inputs' / day
     path = folder / f'V41_ML_SNAPSHOT_{day}.json'
     capacity, sites, authority = capacity_authority()

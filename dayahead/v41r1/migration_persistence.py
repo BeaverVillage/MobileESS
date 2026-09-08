@@ -18,7 +18,7 @@ RUNTIME_COLUMNS=dict(job_id='object',Q90_seconds='float64',Q90_duration_slots='i
     model_sha256='object',preprocessing_sha256='object',training_N='int64',training_membership_hash='object')
 
 
-def pre_solve(day,snapshot_path,capacity):
+def legacy_pre_solve(day,snapshot_path,capacity):
     snapshot=read(snapshot_path)
     if snapshot['PENDING_JOB_Q90_SECONDS']:
         from dayahead.v41.persistence import pre_solve as existing
@@ -91,3 +91,5 @@ def _empty_pending_pre_solve(day, snapshot_path, capacity):
     require(read(audit_path) == audit, 'PERSISTENCE_RECEIPT_READBACK_MISMATCH')
     return audit
 
+
+from dayahead.v41r3.authority import pre_solve

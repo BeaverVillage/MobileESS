@@ -3,7 +3,8 @@ from collections import Counter
 from pathlib import Path
 import numpy as np
 from .migration import active,target,pending_in_day,state_at_d00,checkpoints,authoritative_checkpoint_boundaries,placement_sites,BEGIN,END,CONTRACT
-from dayahead.v40g.domain import options,segments
+from dayahead.v40g.domain import segments
+from dayahead.v41.frozen_candidates import options
 from dayahead.v40g_segments.canonical import planning_power,import_frozen
 from dayahead.v40a.grid import evaluate_grid,controls_from_trajectory
 from dayahead.v41.scientific_archive import document,scalar_frame
@@ -22,7 +23,12 @@ def persist(output,day,policy,reference,selected,context):
     t=grid['critical_slot'];c=context.coefficients[t];branch=grid['critical_line'];k=c.branch_names.index(branch)
     sensitivities={s:float(c.current_matrix[i,k]) for i,s in enumerate(context.capacity.aidc_ids)}
     def stamp(slot):return None if slot is None else (issue_time(day)+pd.Timedelta(seconds=slot*900)).isoformat()
-    rows=[];placements=[];before=0;explicit_count=0;enabled=policy in ('B1','B3')
+    from dayahead.v41r3.authority import OLD_RUN,DAY
+    from dayahead.paper_analysis.storage import read
+    assert day==DAY
+    historical=read(OLD_RUN/DAY/'B1/dayahead/authority/migration_before_solve/MIGRATION_ELIGIBILITY_SUMMARY.json')
+    # Frozen historical count is metadata; do not enumerate the obsolete domain.
+    rows=[];placements=[];before=historical['N_TOTAL_MIGRATION_CANDIDATES_BEFORE'];explicit_count=0;enabled=policy in ('B1','B3')
     for ref in sorted(reference,key=lambda r:r['job_uid']):
         uid=ref['job_uid'];job=selected[uid];state=state_at_d00(ref);start=ref['r1_reference_start']
         cp=checkpoints(ref,context.elapsed);opts=options(ref,context.capacity,context.wan,context.elapsed)
@@ -31,8 +37,6 @@ def persist(output,day,policy,reference,selected,context):
         moves=[o for o in opts if o.migrated];destinations=sorted({o.site for o in moves})
         initial=job['compute_segments'][0]['site'] if job.get('compute_segments') else job['AIDC_site']
         feasible_places=placement_sites(ref,context.capacity)
-        old={key:value for key,value in ref.items() if not key.startswith('r1_') and key!='v41r1_migration_contract'}
-        before+=any(o.migrated for o in options(old,context.capacity,context.wan,context.elapsed))
         selected_migration=bool(job.get('migration_selected'));event=job.get('migration_events',[None])[0] if selected_migration else None
         reason=None
         if not target(ref):reason='OUTSIDE_D00_RUNNING_OR_SELECTED_DAYD_START'
@@ -100,7 +104,8 @@ def persist(output,day,policy,reference,selected,context):
                 sensitivity_difference=sensitivities[initial]-sensitivities[ref['r1_reference_site']],
                 feasible_destination_sensitivities={s:sensitivities[s] for s in destinations},
                 has_lower_sensitivity_destination=any(sensitivities[s]<sensitivities[ref['r1_reference_site']] for s in destinations)))
-    assert all(r['planned_start_unchanged'] for r in placements)
+    from dayahead.v41.temporal_restore import validate as validate_temporal
+    for ref in reference:validate_temporal(ref,selected[ref['job_uid']])
     assert all(r['running_migration_count']<=r['migration_opportunity_count']<=1 and
         r['additional_migration_opportunities']==0 for r in rows)
     frames=dict(migration_candidates=scalar_frame(rows),prestart_relocation_candidates=scalar_frame(placements))

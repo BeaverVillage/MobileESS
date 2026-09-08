@@ -84,6 +84,9 @@ def _write_parquet(path: Path, frame: pd.DataFrame) -> None:
 
 
 def _load_capacity(repo: Path) -> tuple[CapacityAuthority, dict[str, Any]]:
+    from dayahead.v41r2.authority import ROOT as rebase_root,capacity as rebased_capacity
+    if Path(repo).resolve()==rebase_root.resolve():
+        return rebased_capacity()
     authority_path = (
         repo / V39C_ARTIFACT_ROOT
         / "V39C_H100_EQUIVALENT_SITE_CAPACITY_AUTHORITY.json"

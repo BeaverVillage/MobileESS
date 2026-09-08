@@ -1,7 +1,8 @@
 """Independent evaluator for the existing B1 choices and five V41 priorities."""
 from collections import defaultdict
 import numpy as np
-from dayahead.v40g.domain import options, Option, deviation
+from dayahead.v40g.domain import Option, deviation
+from dayahead.v41.frozen_candidates import options
 from dayahead.v40g_segments.canonical import import_frozen, planning_power
 from dayahead.v40a.grid import evaluate_grid, controls_from_trajectory
 from .reserve import require, diagnostics, OBJECTIVE_HIERARCHY

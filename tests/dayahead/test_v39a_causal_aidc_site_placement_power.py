@@ -177,7 +177,8 @@ def test_site_power_formula_and_full_active_anchor_conserve() -> None:
         (site_it_power_kw(cap, cap) for cap in SITE_CAPACITY.values()), Decimal(0)
     )
     assert abs(site_sum - FULL_ACTIVE_IT_KW) <= Decimal("2e-12")
-    assert aggregate_it_power_kw(624) == FULL_ACTIVE_IT_KW
+    # Historical 624 is explicit; the installed-capacity aggregate is derived.
+    assert abs(aggregate_it_power_kw(624, installed_gpu=624) - FULL_ACTIVE_IT_KW) <= Decimal('2e-12')
     assert C_REF_W_PER_GPU - CENTER_SWING_W_PER_GPU == IDLE_W_PER_GPU
 
 

@@ -1,9 +1,24 @@
 import json
 import numpy as np
 import gurobipy as gp
+import pytest
 from dayahead.v41r1.bounded_solver import BoundedLex,PolicyBudget
 from dayahead.v41r1.early_stop import IMPROVEMENT_EPS,IMPROVEMENT_NOISE
 from dayahead.v41r1.feasible_seed import row_audit
+
+@pytest.fixture(autouse=True)
+def synthetic_model_ordering(monkeypatch):
+    """These fixtures have no feeder; exercise acceptance with their fixed order.
+
+    Production ranking remains mandatory and is checked by the separate cached
+    feeder ranking regression. Do not install a production fallback here.
+    """
+    from dayahead.v41 import physics_ranking
+    def ordered(engine, groups, anchors):
+        assert engine.context is None
+        return groups, anchors
+    monkeypatch.setattr(physics_ranking, 'reorder', ordered)
+    monkeypatch.setattr(physics_ranking, 'record_acceptance', lambda *args: None)
 
 def engine(tmp_path,delta=.0987654321):
     m=gp.Model();m.Params.OutputFlag=0;m.Params.Threads=1

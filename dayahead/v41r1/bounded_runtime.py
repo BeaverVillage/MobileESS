@@ -20,6 +20,13 @@ def activate(context,policy,output):
         total=float(os.environ.get('V41_FO_ACCEPTANCE_SECONDS','1800'))
     context.v41_bounded_compute=dict(total_seconds=total,fix_and_optimize=True)
     context.v41_policy_budget=PolicyBudget(total);context.v41_policy=policy
+    if policy=='B1':
+        from dayahead.v41r3.authority import OUT as V3OUT
+        ranking=read(V3OUT/'V41R3_FO_PHYSICS_RANKING_AUDIT.json')
+        if ranking['status']!='PASS':raise RuntimeError('PHYSICS_RANKING_GATE_FAILED')
+        context.v41_policy_budget.charge(ranking['charged_preprocessing_seconds'],'B0_ONLY_PHYSICS_RANKING_PREPROCESSING')
+        interrupted=read(V3OUT/'INTERRUPTED_RANKING_PREPARATION.json')
+        context.v41_policy_budget.charge(interrupted['conservative_charged_upper_bound_seconds'],'USER_STEERED_INTERRUPTED_PREPROCESSING_UPPER_BOUND')
     context.v41_a1_output=Path(output)/'A1';context.v41_mf_output=Path(output)/'MF'
     write_json(Path(output)/'POLICY_DAY_COMPUTE_START.json',dict(contract=CONTRACT,compute_control_version=VERSION,policy=policy,day=context.day,
         total_optimization_seconds=total,shared_across='A0/M1/A1/MF and all objective stages',
