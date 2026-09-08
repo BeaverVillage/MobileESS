@@ -1,0 +1,1205 @@
+# ============================================================
+# V41R2 780-GPU CAPACITY REBASE
+# + Q90 REFERENCE REMATERIALIZATION
+# + POWER / ELECTRICAL AUTHORITY REBINDING
+# + MAY-04 B0/B1 ACCEPTANCE PILOT
+# ============================================================
+
+PURPOSE
+
+The current synthetic compute-capacity authority is:
+
+TOTAL = 624 GPU
+
+PER-SITE:
+AIDC01 64
+AIDC02 32
+AIDC03 64
+AIDC04 32
+AIDC05 80
+AIDC06 64
+AIDC07 32
+AIDC08 64
+AIDC09 32
+AIDC10 64
+AIDC11 32
+AIDC12 64
+
+May-04 showed near-saturated operation:
+- mean reserved-slot occupancy ~97.9%
+- all 12 AIDCs full at the P1 critical slot
+
+The user now authorizes a deterministic +25% compute-capacity rebase
+to provide nominal scheduling headroom.
+
+NEW TOTAL:
+
+    780 GPU
+
+NEW PER-SITE VECTOR:
+
+AIDC01 = 80
+AIDC02 = 40
+AIDC03 = 80
+AIDC04 = 40
+AIDC05 = 100
+AIDC06 = 80
+AIDC07 = 40
+AIDC08 = 80
+AIDC09 = 40
+AIDC10 = 80
+AIDC11 = 40
+AIDC12 = 80
+
+VECTOR:
+
+[80,40,80,40,100,80,40,80,40,80,40,80]
+
+This is exactly:
+
+    1.25 × current V39C site-capacity vector
+
+and preserves:
+
+- site heterogeneity
+- 4-GPU-node integer granularity
+- relative V39C capacity shape
+
+This task APPLYs the new capacity authority and performs the
+necessary downstream scientific re-materialization.
+
+Do NOT start Full May.
+
+Stop after the new May-04 B0/B1 pilot passes all required gates.
+
+
+# ============================================================
+# 0. CREATE A NEW REVISION / PRESERVE V41R1
+# ============================================================
+
+Do NOT overwrite V41R1 frozen evidence.
+
+Create an isolated V41R2 / 780-GPU capacity-rebase namespace using the
+repository's normal versioning conventions.
+
+Preserve immutably:
+
+- old 624-GPU authority
+- old May-04 B0 result
+- old May-04 B1 first-improvement result
+- old Fresh evidence
+- old Actual evidence
+- old F&O diagnostics
+- old candidate manifests
+- old electrical coefficients
+- old hashes / certificates
+
+
+Record the transition as:
+
+V41R1_624GPU
+    -> V41R2_780GPU_CAPACITY_REBASE
+
+
+The old results remain historical comparison evidence only.
+
+
+# ============================================================
+# 1. FREEZE THE NEW GPU CAPACITY AUTHORITY
+# ============================================================
+
+Apply exactly:
+
+{
+  "AIDC01": 80,
+  "AIDC02": 40,
+  "AIDC03": 80,
+  "AIDC04": 40,
+  "AIDC05": 100,
+  "AIDC06": 80,
+  "AIDC07": 40,
+  "AIDC08": 80,
+  "AIDC09": 40,
+  "AIDC10": 80,
+  "AIDC11": 40,
+  "AIDC12": 80
+}
+
+Require:
+
+sum = 780
+
+all capacities divisible by 4
+
+Do NOT:
+- equalize the 12 sites
+- re-fit site capacity from May B1 results
+- independently resize sites
+- change V22SR1 spatial locations
+- change AIDC electrical hosts
+
+
+Create:
+
+V41R2_780GPU_CAPACITY_AUTHORITY.json
+
+Include:
+
+- old vector
+- new vector
+- scale factor = 1.25
+- old total = 624
+- new total = 780
+- 4-GPU node equivalents
+- source authority
+- code/config locations changed
+- SHA-256
+
+
+# ============================================================
+# 2. RACK / GANG SEMANTICS MUST NOT BE REDEFINED
+# ============================================================
+
+Current Rack objects are non-additive logical compatibility pools.
+
+Do NOT manufacture additional physical Rack capacity by summing the
+logical Rack labels.
+
+Keep:
+
+- Rack compatibility semantics
+- gang indivisibility
+- GPU-type compatibility
+- logical Rack label structure
+
+unchanged unless an existing code path directly derives a compatibility
+ceiling from site GPU capacity.
+
+If such dependency exists:
+
+update only the necessary capacity-dependent field while preserving
+the same logical compatibility semantics.
+
+Produce a rack/capacity dependency receipt.
+
+
+# ============================================================
+# 3. MACHINE-LEARNING MODELS REMAIN FROZEN
+# ============================================================
+
+NO ML retraining.
+
+NO ML recalibration.
+
+NO hyperparameter change.
+
+NO model reselection.
+
+
+Keep exactly the frozen authorities for:
+
+- Runtime Q90 LightGBM
+- H4 R85_B2 workload forecast
+- traffic ML
+- Safe ETA
+- all other currently frozen prediction models
+
+
+Record:
+
+ML_RETRAIN_COUNT = 0
+ML_RECALIBRATION_COUNT = 0
+ML_MODEL_CHANGE_COUNT = 0
+
+
+The capacity rebase occurs downstream of frozen prediction.
+
+
+# ============================================================
+# 4. AUDIT CAPACITY-DEPENDENT ML POSTPROCESSING
+# ============================================================
+
+Although ML weights remain unchanged, inspect whether any
+post-processing uses:
+
+- total GPU capacity = 624
+- per-site capacity vector
+- H4 physical cap
+- scheduler-resource cap
+- normalization based on 624
+
+
+Especially inspect the final H4 interface:
+
+    min(raw H4 forecast,
+        causal historical Q99 cap,
+        physical capacity cap)
+
+If physical cap depends on the old 624 authority:
+
+- update only that physical-cap layer to 780
+- preserve raw forecast bytes where possible
+- preserve model SHA
+- preserve R85_B2 semantics
+- generate a new post-processing/materialization SHA
+
+
+Do not refit H4 from May outcomes.
+
+
+# ============================================================
+# 5. REMATERIALIZE THE Q90-CONSISTENT B0 REFERENCE
+# ============================================================
+
+The old B0 schedule was materialized under the old 624-GPU capacity.
+
+It must NOT be reused as the new reference.
+
+
+Rebuild B0 using:
+
+- final frozen Q90 runtime
+- D-1 18:00 causal state
+- existing RUNNING residual authority
+- existing PENDING membership
+- existing service-tier / FIFO authority
+- existing deterministic reference-placement semantics
+- new 780-GPU site vector
+- gang indivisibility
+- existing Rack compatibility
+- no grid objective
+- no B1 relocation optimization
+- no RUNNING migration optimization
+- no new temporal-shifting optimization
+- no Actual information
+
+
+Important:
+
+This is deterministic B0/reference rematerialization,
+NOT a new flexibility policy.
+
+
+The new reference start/site schedule becomes the V41R2 reference
+authority.
+
+
+After it is materialized:
+
+    V41R2 reference start = FIXED
+
+for the subsequent B1 optimization.
+
+
+B1 may use only the already-authorized spatial/migration flexibility.
+
+Do NOT introduce the proposed new time-shifting model in this task.
+
+
+# ============================================================
+# 6. UNASSIGNED / QUEUE ACCOUNTING DURING REMATERIALIZATION
+# ============================================================
+
+Do not carry old 624-induced UNASSIGNED classifications blindly into
+V41R2.
+
+Run the deterministic 780-GPU reference scheduler from the authoritative
+D-1 state.
+
+Record separately:
+
+- D00 RUNNING
+- causally visible PENDING
+- started during D-day
+- still queued at H
+- true cross-H service
+- UNASSIGNED after 780 rematerialization
+- capacity-induced delay
+- natural/reference delay
+
+
+Do NOT invent sites for cases the actual scheduler leaves UNASSIGNED.
+
+
+Persist before/after queue statistics:
+
+624 vs 780.
+
+
+# ============================================================
+# 7. REFERENCE-SCHEDULE COMPARISON
+# ============================================================
+
+Create a deterministic audit:
+
+V41R1_624GPU_B0
+vs
+V41R2_780GPU_B0
+
+
+Report:
+
+- job count
+- RUNNING count
+- PENDING count
+- changed start count
+- changed initial-site count
+- mean/P50/P90/P95 capacity waiting
+- D-day starts
+- D24 carry-out
+- UNASSIGNED count
+- GPU-hours scheduled
+- per-site GPU occupancy
+- aggregate occupancy
+- FULL fraction
+- 12/12 simultaneous FULL fraction
+- destination headroom
+
+
+This is a resource-scheduling audit.
+
+Do not use P1/P2 to tune the capacity.
+
+
+# ============================================================
+# 8. AIDC POWER AUTHORITY — CRITICAL REBINDING
+# ============================================================
+
+The existing site power formulation depends explicitly on installed
+site capacity C_s.
+
+Trace the exact current authority before changing anything.
+
+
+Current V17/V41 lineage includes an equivalent per-GPU formulation of
+the form:
+
+    P_IT,s,t
+      =
+    [C_s * p_idle_eq
+     + N_s,t * d_CENTER] / 1000
+
+
+and historical derived quantities around:
+
+    c_ref
+    d_CENTER
+    p_idle_eq = c_ref - d_CENTER
+
+
+DO NOT blindly keep the old aggregate 624-GPU full-active anchor
+constant while increasing C_s to 780.
+
+
+That can destroy the per-GPU physical interpretation.
+
+
+First prove the intended authority.
+
+
+Expected authority-preserving interpretation, if confirmed by source:
+
+- c_ref W/GPU remains frozen
+- d_CENTER W/GPU remains frozen
+- p_idle_eq W/GPU remains frozen
+- aggregate full-active IT anchor becomes a DERIVED quantity that
+  scales with installed equivalent GPU count
+
+
+Conceptually, if source confirms:
+
+    P_full_active,new
+      =
+    780 * c_ref / 1000
+
+
+NOT:
+
+    old 624-GPU aggregate anchor held fixed at 780 capacity
+
+
+But do not adopt this merely from this prompt.
+
+Trace the actual V35R3J/V39C/V41 source authority and prove it.
+
+
+Create:
+
+V41R2_AIDC_POWER_CAPACITY_REBASE_AUDIT.md
+V41R2_AIDC_POWER_CAPACITY_REBASE_AUDIT.json
+
+
+The report must state exactly:
+
+- which quantities remain frozen per GPU
+- which aggregate quantities scale with capacity
+- which quantities are newly derived
+- whether any formula became invalid
+- before/after full-active power
+- before/after idle/base IT power
+- no measured-facility claim
+
+
+# ============================================================
+# 9. RECOMPUTE SITE-RESOLVED AIDC IT TRAJECTORIES
+# ============================================================
+
+Using:
+
+- new capacity vector
+- new B0 occupancy trajectory
+- frozen per-GPU power authority
+- frozen CENTER scenario
+
+recompute all required:
+
+P_IT[AIDC, slot]
+
+
+for the reference B0 trajectory.
+
+
+Then recompute the corresponding B1 power mapping when B1 is later
+solved.
+
+
+Persist:
+
+- site × 96 IT P
+- aggregate IT P
+- capacity component
+- active occupancy component
+- before/after comparison
+- conservation residual
+
+
+Require exact or numerical-tolerance conservation according to the
+current power contract.
+
+
+# ============================================================
+# 10. RECOMPUTE C1 / PCC INPUTS
+# ============================================================
+
+The capacity change affects AIDC IT load.
+
+Therefore recompute the capacity-dependent IT→PCC trajectory using
+the SAME frozen:
+
+- C1 thermal/PUE model
+- GFS Day-Ahead weather
+- PF authority
+- site electrical host
+- PCC mapping
+
+
+Do NOT:
+
+- refit C1
+- change PUE model
+- change weather
+- change PF
+- change transformer rating
+- change electrical host
+
+
+Persist site-resolved:
+
+- IT kW
+- PCC kW
+- PCC kvar
+- thermal/PUE quantities
+- exact source/config SHA
+
+
+# ============================================================
+# 11. AUDIT AIDC PCC TRANSFORMER CAPABILITY
+# ============================================================
+
+AIDC PCC transformer authority remains unchanged unless an independent
+physical infeasibility proves otherwise.
+
+Do NOT automatically increase transformer ratings because GPU
+capacity increased.
+
+
+Check new maximum site PCC kVA against the existing AIDC PCC transformer
+hard limit.
+
+
+Report for every AIDC:
+
+- max P
+- max Q
+- max kVA
+- transformer rating
+- utilization
+- violation count
+
+
+If the new 780-GPU installation itself makes the existing 1500-kVA
+synthetic site interface infeasible:
+
+FAIL-CLOSE and report the exact affected site/time.
+
+Do not silently increase the transformer.
+
+
+# ============================================================
+# 12. ELECTRICAL-COEFFICIENT DEPENDENCY AUDIT
+# ============================================================
+
+Now determine whether the existing certified electrical coefficients
+can remain valid.
+
+
+Audit separately:
+
+A) C1 IT->PCC affine coefficients
+
+B) Planning voltage coefficients
+
+C) Planning phase-line current coefficients
+
+D) transformer-current/kVA coefficients
+
+E) any coefficient generated around an AIDC operating-point anchor
+
+
+For every coefficient artifact trace its dependency graph and hashes.
+
+
+If the coefficient depends only on:
+
+- topology
+- phase mapping
+- fixed device ratings
+
+and is mathematically independent of the changed AIDC operating point,
+it may be reused only after exact dependency proof and numerical
+equivalence.
+
+
+If it depends on:
+
+- AIDC baseline P/Q
+- reference schedule
+- site IT/PCC trajectory
+- operating-point linearization
+- capacity-dependent anchor
+
+then it MUST be regenerated.
+
+
+Do not reuse old coefficients merely because the filename exists.
+
+
+Create:
+
+V41R2_ELECTRICAL_COEFFICIENT_DEPENDENCY_AUDIT.json
+
+
+Classification for each family:
+
+UNCHANGED_REUSABLE
+
+REGENERATE_REQUIRED
+
+PARTIAL_REGEN_REQUIRED
+
+
+with exact evidence.
+
+
+# ============================================================
+# 13. ELECTRICAL COEFFICIENT REGENERATION
+# ============================================================
+
+If regeneration is required for May-04 acceptance:
+
+regenerate the required May-04 coefficient authority using the
+corrected no-duplicate background-load mapper and the new 780-GPU
+B0/PCC operating point.
+
+
+Do NOT reintroduce the historical native-load duplicate-mapping defect.
+
+
+Require:
+
+- shared bus-phase duplicate = 0
+- P conservation PASS
+- Q conservation PASS
+- readback PASS
+- source hash PASS
+- capacity-authority SHA included
+- AIDC/PCC trajectory SHA included
+
+
+For this task:
+
+only generate the minimum coefficient scope required to complete the
+May-04 acceptance pilot.
+
+
+Do NOT automatically launch the remaining 30-day heavy regeneration
+unless it is trivial/static and the repository's authority explicitly
+requires a single all-May build.
+
+
+Full 31-day coefficient generation belongs after May-04 PASS if
+expensive.
+
+
+# ============================================================
+# 14. REBUILD MAY-04 B0 UNDER V41R2
+# ============================================================
+
+Now run the new May-04 B0 using the fully rebound V41R2 authority.
+
+
+B0 must use:
+
+- 780 GPU vector
+- new Q90-consistent reference
+- new capacity-dependent H4 cap if applicable
+- new AIDC IT/PCC trajectory
+- valid electrical coefficients
+- corrected background mapper
+- unchanged grid constraints
+- MESS OFF
+- no grid-aware workload optimization
+
+
+Persist full B0 evidence.
+
+
+This becomes the ONLY valid V41R2 May-04 B0 comparator.
+
+
+# ============================================================
+# 15. B1 SCIENTIFIC MODEL REMAINS UNCHANGED EXCEPT CAPACITY
+# ============================================================
+
+Run May-04 B1 using the current accepted V41R1 scientific semantics
+rebased onto the new 780-GPU reference.
+
+
+Keep:
+
+- P1-P5 lexicographic objective
+- P1 primary maximum phase-line loading
+- P2 H4 reserve shortfall
+- P3 migration count
+- P4 reference deviation
+- P5 deterministic tie-break
+- pre-start relocation authority
+- first-valid-checkpoint RUNNING migration authority
+- max one RUNNING migration/job/day
+- full candidate universe
+- GPU hard limits = NEW 780 site vector
+- Rack hard compatibility
+- WAN constraints
+- grid constraints
+- Fresh OpenDSS
+- Actual fixed replay
+
+
+Do NOT enable new explicit time shifting in this task.
+
+
+The new V41R2 B0 reference schedule is the reference for P4.
+
+
+# ============================================================
+# 16. KEEP THE FIXED F&O SEARCH REPAIRS
+# ============================================================
+
+Retain the already accepted computational repairs:
+
+- first-improvement feasibility search
+- no 3% MIPGap as F&O discovery criterion
+- no zero-gap proof required for every neighborhood
+- current maximum line-phase-time first for P1
+- recompute bottleneck after accepted P1 improvement
+- critical electrical neighborhood
+- capacity-release coupled neighborhood
+- pair/triple exchange capability
+- no candidate pruning
+- complete candidate destination sets
+- independent candidate validation
+- P3/P4 mathematical-floor shortcuts
+- bounded 30-minute policy-day optimization hard cap
+
+
+Do NOT revert to the earlier defective F&O implementation.
+
+
+# ============================================================
+# 17. CRITICAL-LINE SEARCH UNDER THE NEW HEADROOM
+# ============================================================
+
+The new capacity may eliminate the previous 12/12-FULL bottleneck.
+
+
+For new May-04 B1 record:
+
+- initial P1 critical line
+- phase
+- slot
+- aggregate GPU occupancy
+- per-site GPU occupancy
+- number of AIDCs with positive GPU headroom
+- number of AIDCs able to accept empirical P50/P90 job gang sizes
+
+
+Then allow the existing F&O to naturally choose:
+
+- direct pre-start relocation
+- capacity-balanced exchange if still needed
+- first-checkpoint RUNNING migration
+
+
+Do NOT force migration.
+
+Do NOT force cross-region movement.
+
+
+# ============================================================
+# 18. WAN / LONG-WAIT ISSUE — OBSERVE BUT DO NOT RETUNE
+# ============================================================
+
+The prior V41R1 result used long WAN waiting in some accepted
+migrations.
+
+
+Do NOT change WAN semantics in this task.
+
+
+But explicitly report for the new May-04 B1:
+
+- migration count
+- WAN wait mean/P95/max
+- jobs shifted beyond D24 because of WAN
+- GPUh shifted beyond D24
+- whether the new GPU headroom materially reduces long WAN waiting
+
+
+This is an audit only.
+
+
+If a scientific-contract problem remains, report it separately.
+
+Do not redesign WAN in this task.
+
+
+# ============================================================
+# 19. MAY-04 B0 VS B1 ACCEPTANCE
+# ============================================================
+
+Compare the NEW V41R2 May-04 B0 and B1 only.
+
+
+Report P1-P5:
+
+B0
+B1
+absolute difference
+relative difference where meaningful
+
+
+B1 incumbent preservation requirement:
+
+B1 must never accept a lexicographically worse solution than the
+verified B0/reference seed when the B0 decision is feasible in B1.
+
+
+A B1 result equal to B0 is allowed scientifically if no improvement is
+found.
+
+But search correctness must be verified using the fixed F&O logic.
+
+
+Do NOT require any preselected minimum percentage improvement.
+
+
+Do NOT tune capacity or algorithm because of the observed B1 benefit.
+
+
+# ============================================================
+# 20. FRESH OPENDSS REVALIDATION
+# ============================================================
+
+Run Fresh three-phase OpenDSS for:
+
+- new May-04 B0
+- new May-04 B1
+
+
+Require:
+
+0.95 <= |V| <= 1.05 pu
+
+phase-line current loading <= 1.0
+
+transformer phase-current loading <= 1.0
+
+transformer kVA loading <= 1.0
+
+convergence PASS
+
+
+Persist:
+
+- all bus-phase voltage
+- all branch-phase current/loading
+- transformers
+- losses
+- taps
+- capacitor states
+- PCC trajectories
+- exact joint/input hashes
+
+
+# ============================================================
+# 21. ACTUAL FIXED-DECISION REPLAY
+# ============================================================
+
+Run Actual replay for the new May-04 B0/B1.
+
+
+Do NOT rerun ML in Actual.
+
+
+Do NOT reoptimize.
+
+
+Use:
+
+- frozen DA decisions
+- realized runtime/exogenous authority
+- deterministic same-site physical GPU dispatch where required
+- current fixed migration replay semantics
+- exact WAN path
+- fixed destination
+- fixed route
+- no rerouting
+
+
+Persist:
+
+- realized P1/P2
+- GPU/rack capacity audit
+- migration replay
+- WAN replay
+- AIDC IT/PCC
+- grid AC state
+- DA-vs-Actual comparison
+
+
+# ============================================================
+# 22. REQUIRED PERSISTENCE
+# ============================================================
+
+Persist all current required science outputs, including:
+
+AIDC
+- job-level decisions
+- start/end
+- initial/final site
+- relocation
+- migration
+- GPU
+- Rack
+- H4
+- runtime
+- queue state
+
+MESS
+- route
+- location
+- P/Q
+- SoC
+
+GRID
+- all bus-phase voltages
+- all branch-phase currents/loading
+- transformer quantities
+
+OBJECTIVE
+- P1-P5 ledgers
+
+STAGES
+- B0/reference
+- B1 accepted stages
+- Fresh
+- Actual
+
+AUTHORITY
+- capacity SHA
+- ML SHA
+- power SHA
+- PCC SHA
+- coefficient SHA
+- DA freeze SHA
+- Actual source SHA
+
+
+Atomic writes + readback verification required.
+
+
+# ============================================================
+# 23. REGRESSION TESTS
+# ============================================================
+
+Run all relevant existing regression suites.
+
+
+Add tests for:
+
+1.
+new total capacity == 780
+
+2.
+per-site vector exact
+
+3.
+all site capacities divisible by 4
+
+4.
+ML model hashes unchanged
+
+5.
+H4 raw forecast unchanged before physical-cap postprocessing
+
+6.
+new B0 is deterministically reproducible
+
+7.
+old 624 B0 cannot be reused as V41R2 B0
+
+8.
+power conservation under new C_s
+
+9.
+no negative/economically nonsensical equivalent idle coefficient
+
+10.
+PCC transformer hard limits
+
+11.
+electrical coefficient dependency correctness
+
+12.
+background-load duplicate mapping = 0
+
+13.
+B1 candidate universe preserved
+
+14.
+B1 seed feasible
+
+15.
+B1 never accepts lexicographically worse incumbent
+
+16.
+Fresh PASS
+
+17.
+Actual PASS
+
+18.
+persistence/readback/hash PASS
+
+
+# ============================================================
+# 24. REQUIRED BEFORE/AFTER REPORT
+# ============================================================
+
+Create:
+
+V41R2_780GPU_MAY04_ACCEPTANCE.md
+
+and JSON equivalent.
+
+
+Include four layers of comparison:
+
+
+A. CAPACITY
+
+624:
+[64,32,64,32,80,64,32,64,32,64,32,64]
+
+780:
+[80,40,80,40,100,80,40,80,40,80,40,80]
+
+
+B. REFERENCE SCHEDULING
+
+624 B0 vs 780 B0:
+
+- occupancy
+- FULL fraction
+- queue
+- D24 carry-out
+- UNASSIGNED
+- start changes
+
+
+C. POWER / ELECTRICAL
+
+- installed idle-equivalent IT
+- active IT
+- PCC P/Q
+- maximum transformer utilization
+- coefficient regeneration status
+
+
+D. SCIENCE
+
+new 780 B0 vs new 780 B1:
+
+- P1-P5
+- relocations
+- migrations
+- WAN delay
+- Fresh
+- Actual
+- optimization runtime
+
+
+# ============================================================
+# 25. HARD ACCEPTANCE GATE
+# ============================================================
+
+May-04 V41R2 is PASS only if all are true:
+
+
+CAPACITY
+[ ] vector exact
+[ ] total 780
+[ ] 4-GPU granularity PASS
+
+
+ML
+[ ] retraining 0
+[ ] recalibration 0
+[ ] frozen model hashes preserved
+
+
+B0
+[ ] new 780-GPU Q90 reference rematerialized
+[ ] old 624 result not reused
+
+
+POWER
+[ ] capacity-dependent IT authority correctly rebound
+[ ] no invalid fixed-aggregate-anchor behavior
+[ ] PCC trajectories regenerated
+
+
+GRID
+[ ] coefficient dependency audit complete
+[ ] required coefficients regenerated/revalidated
+[ ] duplicate mapping = 0
+
+
+B1
+[ ] full candidates preserved
+[ ] current first-improvement F&O retained
+[ ] 30-min hard cap respected
+[ ] no new time-shifting semantics
+
+
+PHYSICAL
+[ ] Fresh B0 PASS
+[ ] Fresh B1 PASS
+
+
+ACTUAL
+[ ] B0 PASS
+[ ] B1 PASS
+[ ] reoptimization = 0
+
+
+PERSISTENCE
+[ ] full required outputs present
+[ ] hashes/readback PASS
+
+
+# ============================================================
+# 26. FULL MAY REMAINS HOLD
+# ============================================================
+
+Do NOT start Full May in this task.
+
+
+Do NOT automatically generate all remaining policy-day optimization
+results.
+
+
+After May-04 PASS, stop and report whether the new capacity authority
+is scientifically and computationally ready for the 31-day campaign.
+
+
+# ============================================================
+# 27. FINAL RESPONSE FORMAT
+# ============================================================
+
+Return a concise final summary with:
+
+
+CAPACITY AUTHORITY APPLIED? YES/NO
+
+OLD TOTAL / VECTOR
+
+NEW TOTAL / VECTOR
+
+ML RETRAINED? YES/NO
+
+ML RECALIBRATED? YES/NO
+
+H4 CAP REMATERIALIZED? YES/NO/NOT REQUIRED
+
+NEW B0 REFERENCE REMATERIALIZED? YES/NO
+
+624->780 MAY04 MEAN OCCUPANCY
+
+624->780 MAY04 12/12 FULL FRACTION
+
+AIDC POWER AUTHORITY REBOUND? YES/NO
+
+PCC RECALCULATED? YES/NO
+
+ELECTRICAL COEFFICIENT STATUS
+REUSED / PARTIAL REGEN / FULL REGEN
+
+NEW B0 P1/P2
+
+NEW B1 P1/P2
+
+B1 VS B0 P1 CHANGE
+
+B1 VS B0 P2 CHANGE
+
+PRESTART RELOCATIONS
+
+RUNNING MIGRATIONS
+
+MAX WAN WAIT
+
+FRESH B0 PASS? YES/NO
+
+FRESH B1 PASS? YES/NO
+
+ACTUAL B0 PASS? YES/NO
+
+ACTUAL B1 PASS? YES/NO
+
+MAY04 V41R2 ACCEPTANCE PASS? YES/NO
+
+FULL MAY READY? YES/NO
+
+
+Proceed.
