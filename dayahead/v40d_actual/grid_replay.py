@@ -24,7 +24,8 @@ def replay(repo, day, case, context, power, exogenous, mess, identity, output):
     trajectory = FrozenTrajectory(day, "ACTUAL", case, power["PCC_P"], power["PCC_Q"],
         mess["p"],mess["q"],tuple(mess["ids"]),mess["locations"],identity)
     before = trajectory.immutable_sha256
-    with engine_binding_observer(power,mess,output) as engine_audit:
+    from dayahead.v41r3.native_actual import native_actual
+    with engine_binding_observer(power,mess,output) as engine_audit,native_actual(output):
         result = run_fresh_opendss(repo=SOURCE_DATA_REPOSITORY,context=actual,voltage=context.electrical.voltage,
                                   trajectory=trajectory,output=Path(output))
     rho_audit=rho_recalculation(result,output)
@@ -33,7 +34,7 @@ def replay(repo, day, case, context, power, exogenous, mess, identity, output):
     audit = {"status": "PASS", "trajectory_identity": before, "pcc_P_binding_bit_equal": np.array_equal(trajectory.pcc_p_kw,power["PCC_P"]),
         "pcc_Q_binding_bit_equal": np.array_equal(trajectory.pcc_q_kvar,power["PCC_Q"]),
         "OpenDSS_namespace": result.namespace, "OpenDSS_slots": result.summary["convergence_count"],
-        "Actual_AC_restoration_calls": 0, "native_control_rule": "INHERITED_APPLY_FROZEN_NATIVE_STATE_NO_NEW_CONTROL_POLICY",
+        "Actual_AC_restoration_calls": 0, "native_control_rule": "V41R3_NATIVE_REGCONTROL_D00_DA_INITIAL_SEQUENTIAL_ACTUAL",
         "actual_physical_violations_are_results_not_repaired": True,
         "engine_readback":engine_audit,"Actual_rho_recalculation":rho_audit,
         "AIDC_injection_mapping": "AIDC01..12 positive consumption -> Load.IDC_IDC01..12"}

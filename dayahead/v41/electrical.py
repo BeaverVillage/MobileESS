@@ -47,10 +47,20 @@ def identity(day):
     paths = [p for folder in folders for p in (ROOT / 'dayahead' / folder).glob('*.py')]
     paths += [ROOT / 'dayahead/v40h' / name for name in ('numerical_context.py', 'identity.py')]
     paths += [ROOT / 'dayahead/v41' / name for name in ('electrical.py', 'data.py', 'preflight.py', 'reserve.py', 'mapper_audit.py', 'persistence.py')]
+    paths += [ROOT/'dayahead/v41r2'/name for name in ('authority.py','reference.py','prepare.py')]
+    paths += [ROOT/'dayahead/v39a/power.py',ROOT/'dayahead/v39d/evaluate.py']
+    paths += list((ROOT/'dayahead/v41r3').glob('*.py'))
+    paths += [ROOT/'dayahead/mess_physics.py',ROOT/'dayahead/v28r2/electrical_context.py']
     source = manifest(paths, ROOT)
     values['V41_generation_source'] = source
     values['V41_generation_entrypoint'] = 'dayahead.v40i.electrical:generate_outputs'
     values['V41_authority'] = 'V41_USER_AUTHORIZED_NEW_GENERATION_NO_OLD_OUTPUT_ADOPTION'
+    from dayahead.v41r2.authority import CAP,OUT as REBASE_OUT
+    values['V41R2_capacity_authority']=record(CAP)
+    values['V41R2_B0_IT_PCC']=record(REBASE_OUT/'V41R2_B0_IT_PCC.npz')
+    values['AC_anchor_input']=dict(source=values['V41R2_B0_IT_PCC'],role='V41R2_780GPU_Q90_B0_PCC_PRE_AC_INPUT')
+    from dayahead.v41r3.authority import OUT as V3OUT
+    values['V41R3_authorities']={name:record(V3OUT/name) for name in ('V41R3_BACKGROUND_SCALE_AUTHORITY.json','V41R3_ACTUAL_NATIVE_CONTROL_AUTHORITY.json','V41R3_MESS_POWER_AUTHORITY.json')}
     verify_bound_files(values)
     return bind('V41_ELECTRICAL_GENERATION_V1', values, tuple(values))
 

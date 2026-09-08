@@ -37,13 +37,11 @@ def site_it_power_kw(site_capacity_gpu: int, active_gpu: int) -> Decimal:
     ) / Decimal(1000)
 
 
-def aggregate_it_power_kw(active_gpu: int) -> Decimal:
+def aggregate_it_power_kw(active_gpu: int, installed_gpu: int = 780) -> Decimal:
     active = int(active_gpu)
-    if not 0 <= active <= GPU_CAPACITY:
+    if not 0 <= active <= installed_gpu:
         raise ValueError("V39A_AGGREGATE_GPU_RANGE")
-    return FULL_ACTIVE_IT_KW - (
-        Decimal(GPU_CAPACITY - active) * CENTER_SWING_W_PER_GPU / Decimal(1000)
-    )
+    return (Decimal(installed_gpu)*IDLE_W_PER_GPU+Decimal(active)*CENTER_SWING_W_PER_GPU)/Decimal(1000)
 
 
 def validate_power_conservation(
@@ -56,7 +54,7 @@ def validate_power_conservation(
         (site_it_power_kw(site_capacity[site], site_active[site]) for site in site_capacity),
         Decimal(0),
     )
-    aggregate = aggregate_it_power_kw(total_active)
+    aggregate = aggregate_it_power_kw(total_active, sum(map(int,site_capacity.values())))
     error = abs(site_total - aggregate)
     return {
         "status": "PASS" if error <= POWER_TOLERANCE_KW else "FAIL",

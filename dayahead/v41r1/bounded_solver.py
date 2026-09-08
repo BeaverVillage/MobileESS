@@ -190,6 +190,14 @@ class BoundedLex:
 
     def _refresh_structure(self,priority):
         self.structure=current_structure(self,priority)
+        from dayahead.v41.physics_ranking import INSTANCE
+        if INSTANCE is not None and priority==0:
+            self.structure.update(critical_issue_slot=INSTANCE.tstar+24,
+                critical_branch=INSTANCE.line[INSTANCE.jstar]+'::'+INSTANCE.phase[INSTANCE.jstar],
+                critical_phase=INSTANCE.phase[INSTANCE.jstar],rho_max=float(INSTANCE.env.max()),
+                critical_site_sensitivity=dict(zip(INSTANCE.sites,map(float,INSTANCE.criticalS))),
+                near_binding_electrical_set=[dict(branch=r[1],phase=r[2],issue_slot=r[3]+24,loading=r[0]) for r in INSTANCE.active],
+                physics_priority_reference='FROZEN_NEW_V41R3_B0_ONLY')
         path=self.output/'bounded_checkpoints'/f'STRUCTURE_P{priority+1}_SWEEP_{self.control.sweep_id}.json'
         write_json(path,dict(**self.structure,incumbent=self.vector(),sweep_id=self.control.sweep_id))
         self.structure_ref=record(path)
@@ -265,8 +273,15 @@ class BoundedLex:
             rows=[buckets[k] for k in sorted(buckets) if k[0]==rank]
             for i in range(max(map(len,rows),default=0)):
                 interleaved.extend(row[i] for row in rows if i<len(row))
+        from dayahead.v41.physics_ranking import reorder
+        interleaved,anchors=reorder(self,interleaved,anchors)
         selected=[];count=0;target=max(25000,self.target_free) if coupled else self.target_free
-        for g in anchors+interleaved:
+        # Consume the NET-ranked existing bundle queue, then the unchanged
+        # complete direct-domain fallback. Repeated groups remain de-duplicated.
+        units=getattr(self,'v41_existing_anchor_search_units',[])
+        anchor_stream=[g for unit in units for g in unit['groups']] if units else anchors
+        self.v41_consumed_anchor_unit_order=[unit['kind'] for unit in units]
+        for g in anchor_stream+interleaved:
             if g in selected:continue
             size=len(self.decision_groups[g])
             if size>10000:raise RuntimeError('COMPLETE_JOB_BLOCK_EXCEEDS_MAX_FREE_DISCRETE:'+str(g))
@@ -279,6 +294,8 @@ class BoundedLex:
             coupled_capacity_release_active=coupled,capacity_occupant_groups=[g for g in capacity_release if g in selected],
             critical_load_groups=[g for g in critical_jobs if g in selected],WAN_coupling_groups=[g for g in wan_partners if g in selected],
             permanent_cross_region_constraint=False,
+            consumed_anchor_unit_order=getattr(self,'v41_consumed_anchor_unit_order',[]),
+            compound_net_effect_used_in_ordering=bool(units),
             sweep_id=self.control.sweep_id if self.control else None,
             sweep_mode=self.control.mode if self.control else 'NORMAL',overlap_groups=[g for g in anchors if g in selected],
             structure=getattr(self,'structure_ref',None))
@@ -404,6 +421,8 @@ class BoundedLex:
                             candidate_vector=new_vector,retained_vector=old_vector,physical_feasibility_tolerance=model.Params.FeasibilityTol))
                         data['candidate_rejection']=record(path)
                     self.values=old
+                from dayahead.v41.physics_ranking import record_acceptance
+                record_acceptance(self,rows,accepted)
                 for g in groups:self.visits[g]+=1;self.stage_counts[g]+=1
                 material=material_improvement(old_vector,self.vector(),priority,accepted)
                 self.previous_groups=list(groups)

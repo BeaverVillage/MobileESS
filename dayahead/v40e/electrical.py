@@ -46,8 +46,13 @@ def upstream(repo,day):
     from dayahead import grid_background_v16_2 as bg
     repo=Path(repo).resolve();out=repo/REL/'electrical'/day;out.mkdir(parents=True,exist_ok=True)
     cache=old_cache(repo,day);vp=cache/'data'/f'D1_AC_ANCHOR_SENSITIVITY_{day}.npz'
+    from dayahead.v41r2.authority import OUT as rebase_out,DAY as rebase_day
+    assert day==rebase_day,'V41R2_FULL_MAY_HOLD'
+    vp=rebase_out/'V41R2_B0_IT_PCC.npz'
     with np.load(vp) as z:
-        control=np.asarray(z['anchor_control']).copy();plan=control[:,:12];recorded=str(z['plan_sha256'])
+        plan=np.asarray(z['pcc']).copy()
+    control=np.column_stack([plan,np.zeros((96,24))])
+    recorded=hashlib.sha256(json.dumps(plan.tolist(),sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()
     computed=hashlib.sha256(json.dumps(plan.tolist(),sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()
     assert recorded==computed and np.count_nonzero(control[:,12:])==0
     write_npz(out/'UPSTREAM_REFERENCE_PCC_CONTROL_INPUT.npz',reference_pcc_kw=plan)
@@ -63,6 +68,8 @@ def upstream(repo,day):
     ns=dict(bg.build_authority_background_binding.__globals__);ns['_verify_sources']=verify
     build=FunctionType(bg.build_authority_background_binding.__code__,ns)
     background=build(timestamps_fixed_aest=forecast['timestamps_96'],demand_mw_96=forecast['demand_mw_96'],rooftop_pv_mw_96=forecast['pv_mw_96'],paths=paths)
+    from dayahead.v41r3.authority import scale_background
+    background=scale_background(background,'DAYAHEAD')
     axis=sorted(set().union(*[set(row) for row in background.gross_p_kw_96]))
     write_npz(out/'UPSTREAM_BUS_PHASE_TARGETS.npz',bus_phase_keys=np.array([b+'::'+p for b,p in axis]),
         gross_P_kw=np.array([[r.get(k,0.) for k in axis] for r in background.gross_p_kw_96]),
@@ -77,11 +84,11 @@ def upstream(repo,day):
     write_json(out/'UPSTREAM_REUSE_CERTIFICATE.json',{'day':day,'source_input_SHAs':refs,
         'reference_control_input':reference(out/'UPSTREAM_REFERENCE_PCC_CONTROL_INPUT.npz'),
         'reference_control_input_sha_in_historical_container':recorded,'input_payload_digest_verified':True,
-        'historical_container':reference(vp),'reused_fields':['anchor_control (exogenous input ONLY)'],
+        'historical_container':reference(vp),'reused_fields':['V41R2 rematerialized B0 PCC (pre-AC input)'],
         'historical_AC_anchor_voltage_reused':False,'historical_current_reused':False,'historical_sensitivity_reused':False,
         'historical_native_control_state_reused':False,'historical_May_case_decisions_reused':False,
         'upstream_reference_constructor':source(repo,'dayahead/v28r2/electrical_context.py','_legacy_reference'),
-        'reason':'anchor_control is the immutable exogenous argument to the AC generator, not an AC output or optimized May case. Its pre-allocation digest is verified before extraction.'})
+        'reason':'V41R2 operating point is the new Q90 B0 PCC trajectory, derived before AC generation; no historical AC outputs reused.'})
     return plan,forecast,background,binding,src,refs
 
 

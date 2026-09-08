@@ -4,6 +4,7 @@ import math
 import numpy as np
 from dayahead.paper_analysis.storage import digest
 from .contracts import ReplayError, ZERO_COUNTERS
+from dayahead.mess_physics import P_LIMIT_KW,PCS_KVA
 
 
 def traverse(links, departure_slot, link_ids, travel_seconds, energy_function, *, connection_delay_seconds):
@@ -34,7 +35,7 @@ def traverse(links, departure_slot, link_ids, travel_seconds, energy_function, *
 
 
 def project_command(p_cmd, q_cmd, energy, *, connected, travel_energy=0.0,
-                    e_min=440.0, e_max=1080.0, pcs_kva=700.0,
+                    e_min=440.0, e_max=1080.0, pcs_kva=PCS_KVA,
                     eta_charge=1.0, eta_discharge=1.0, dt_hours=.25):
     values = (p_cmd, q_cmd, energy, travel_energy, e_min, e_max, pcs_kva, eta_charge, eta_discharge, dt_hours)
     if not all(math.isfinite(v) for v in values) or travel_energy < 0:
@@ -52,6 +53,8 @@ def project_command(p_cmd, q_cmd, energy, *, connected, travel_energy=0.0,
         p = min(max(p_cmd, -charge_limit), discharge_limit)
         if p != p_cmd:
             reasons.append("BATTERY_ENERGY_SATURATION")
+        if abs(p_cmd)>P_LIMIT_KW+1e-9:
+            raise ReplayError('INVALID_FROZEN_ACTIVE_COMMAND_RATING')
         if abs(p) > pcs_kva:
             raise ReplayError("INVALID_FROZEN_ACTIVE_COMMAND_PCS")
         q_limit = math.sqrt(max(0, pcs_kva * pcs_kva - p * p))

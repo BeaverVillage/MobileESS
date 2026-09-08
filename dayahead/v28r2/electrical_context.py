@@ -156,6 +156,8 @@ def with_realized_background(
         rooftop_pv_mw_96=pv_mw_96,
         paths=portable_background_paths(repo, source),
     )
+    from dayahead.v41r3.authority import scale_background
+    background=scale_background(background,'ACTUAL')
     binding = build_full_grid_binding(
         assets=source / "opendss_assets",
         contract=source / "power_v70_p4f_contract",

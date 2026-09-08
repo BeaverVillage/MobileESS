@@ -14,16 +14,19 @@ from .reserve import require
 from .scalars import policy_inputs
 
 
-def build(day, snapshot_path, capacity):
+def build(day, snapshot_path, capacity, *, folder_override=None):
     snapshot = read(snapshot_path)
     values = policy_inputs(snapshot, 'B0', 'REFERENCE').payload()
     folder = RUNTIME / 'inputs' / day / 'common_q90_v3'
+    if folder_override is not None:folder=Path(folder_override)
     if (folder / 'COMMON_INPUT_RECEIPT.json').exists():
         seal = read(folder / 'COMMON_INPUT_RECEIPT.json')
         require(seal['status'] == 'PASS' and seal['generator'] == record(__file__), 'COMMON_GENERATOR_OR_STATUS_DRIFT')
         require(seal['snapshot'] == record(snapshot_path), 'COMMON_SNAPSHOT_DRIFT')
         require(seal.get('migration_contract_source')==record(Path(__file__).parents[1]/'v41r1/migration.py'),'COMMON_MIGRATION_CONTRACT_SOURCE_DRIFT')
-        require(seal.get('baseline_source')==record(Path(__file__).parents[1]/'v41r1/migration_baseline.py'),'COMMON_BASELINE_SOURCE_DRIFT')
+        require(seal.get('baseline_source')==record(Path(__file__).parents[1]/'v41r2/reference.py'),'COMMON_BASELINE_SOURCE_DRIFT')
+        from dayahead.v41r2.authority import CAP
+        require(seal.get('capacity_authority')==record(CAP),'V41R2_OLD_624_REFERENCE_FORBIDDEN')
         require(seal.get('admission_source')==record(Path(__file__).parents[1]/'v41r1/migration_admission.py'),'COMMON_ADMISSION_SOURCE_DRIFT')
         for entry in seal['files'].values():
             require(entry == record(entry['path']), 'COMMON_INPUT_DRIFT')
@@ -59,10 +62,9 @@ def build(day, snapshot_path, capacity):
             requested_gpus=job['requested_GPU'], duration_slots=slots))
     # Recompute the existing causal earliest-start domain with current scalar
     # durations. No old runtime prediction/RSP start is forwarded to A0 or A1.
-    earliest, _ = schedule(scheduling, 'V41_Q90_COMMON_SERVICE')
-    earliest = earliest.set_index('job_id')
-    from dayahead.v41r1.migration_baseline import materialize
+    from dayahead.v41r2.reference import materialize
     jobs, baseline = materialize(jobs, scheduling, capacity)
+    earliest=pd.DataFrame([dict(job_id=r['job_uid'],scheduled_start_slot=r['start_slot']) for r in jobs]).set_index('job_id')
     from dayahead.v41r1.migration import attach
     causal=pd.read_parquet(sp,columns=['id','state_at_issue','known_running_start'])
     elapsed={str(r.id):(issue_time(day)-pd.Timestamp(r.known_running_start)).total_seconds()
@@ -79,7 +81,8 @@ def build(day, snapshot_path, capacity):
         job['post_H_site'] = job['AIDC_site'] if job['end_slot'] > 120 else None
         job['terminal_class'] = 'IN_DAY_COMPLETE' if job['end_slot'] <= 120 else 'CROSS_BOUNDARY' if job['start_slot'] < 120 else 'POST_H_ONLY'
         job['common_terminal_obligation'] = {'must_complete_by_H': job['end_slot'] <= 120, 'postH_profile': tail(job)}
-        for field in ('job_uid', 'AIDC_site', 'migration_selected', 'state_at_issue', 'qos', 'requested_GPU'):
+        if job['state_at_issue']=='RUNNING':require(job['AIDC_site']==old['AIDC_site'],'RUNNING_SOURCE_CHANGED')
+        for field in ('job_uid', 'migration_selected', 'state_at_issue', 'qos', 'requested_GPU'):
             require(job.get(field) == old.get(field), 'B0_REFERENCE_GEOMETRY_CHANGED:' + field)
         from dayahead.v40a.feedback import authorized_options
         if (job['AIDC_site'], job['start_slot']) not in authorized_options(job, capacity):
@@ -104,10 +107,12 @@ def build(day, snapshot_path, capacity):
     seal = dict(day=day, status='FAIL' if failures else 'PASS', failures=failures, snapshot=record(snapshot_path),
         COMMON_DA_DURATION_SHA=digest(rows), job_count=len(jobs), policy_dependent_duration=False,
         generator=record(__file__),migration_contract_source=record(Path(__file__).parents[1]/'v41r1/migration.py'),
-        baseline_source=record(Path(__file__).parents[1]/'v41r1/migration_baseline.py'),
+        baseline_source=record(Path(__file__).parents[1]/'v41r2/reference.py'),
         admission_source=record(Path(__file__).parents[1]/'v41r1/migration_admission.py'),
         baseline_contract=baseline['contract'],
         files={name: record(folder / name) for name in ('COMMON_B0_REFERENCE_JOBS.json', 'COMMON_DA_SERVICE_AUTHORITY.json','Q90_BASELINE_MATERIALIZATION.json')})
+    from dayahead.v41r2.authority import CAP
+    seal['capacity_authority']=record(CAP)
     atomic_json(folder / 'COMMON_INPUT_RECEIPT.json', seal)
     require(not failures, 'V41_COMMON_REFERENCE_PREFLIGHT_FAILED')
     return jobs, seal

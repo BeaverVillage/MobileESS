@@ -11,7 +11,8 @@ from dayahead.v40a.invariants import BEGIN, H, digest
 from dayahead.grid_lp import LINE_POLYGON_FACES
 from dayahead.v28r2.electrical_subproblem import anchored_polygon_parameters
 from dayahead.paper_analysis.storage import write_json
-from .domain import Option, options, segments, deviation, materialize, audit
+from .domain import Option, segments, deviation, materialize, audit
+from dayahead.v41.frozen_candidates import options
 
 
 def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False, work_limits=(60,180,300), inject_reference=False, factorize=True, build_only=False, event_load=None, diagnostic_work_limit=None):
@@ -48,7 +49,7 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
     bounded = bool(getattr(context, 'v41_bounded_compute', None))
     candidate_writer=None;candidate_metadata={}
     if bounded:
-        from dayahead.v41r1.candidate_manifest import CandidateManifest
+        from dayahead.v41.frozen_candidates import CandidateManifest
         candidate_writer=CandidateManifest(output,getattr(context,'day',None),'B1')
     for uid,row in sorted(refs.items()):
         opts=options(row,context.capacity,wan,elapsed,temporal_only)

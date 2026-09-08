@@ -98,15 +98,21 @@ def compare_occupancy(replay, capacity):
 
 def check_it_power(capacity, occupancy, it):
     from dayahead.v39a.contracts import IDLE_W_PER_GPU, CENTER_SWING_W_PER_GPU, FULL_ACTIVE_IT_KW, POWER_TOLERANCE_KW
-    require_current_capacity(capacity)
+    from dayahead.v41r2.authority import capacity as rebound_capacity
+    rebound,_=rebound_capacity()
+    if dict(capacity)!=dict(rebound.site_capacity):
+        require_current_capacity(capacity)
+    vector=tuple(capacity[s] for s in SITES)
+    installed=sum(vector)
     occ, power = np.asarray(occupancy), np.asarray(it)
     if occ.shape != (96,12) or power.shape != (96,12) or not np.isfinite(power).all():
         raise ReplayError("IT_POWER_AXIS_OR_FINITE_FAIL")
-    if np.any(occ < 0) or np.any(occ > np.asarray(VECTOR)) or np.any(occ != np.floor(occ)):
+    if np.any(occ < 0) or np.any(occ > np.asarray(vector)) or np.any(occ != np.floor(occ)):
         raise ReplayError("IT_OCCUPANCY_CAPACITY_FAIL")
-    expected = np.asarray([[float((Decimal(VECTOR[i])*IDLE_W_PER_GPU + Decimal(int(occ[t,i]))*CENTER_SWING_W_PER_GPU)/1000)
+    expected = np.asarray([[float((Decimal(vector[i])*IDLE_W_PER_GPU + Decimal(int(occ[t,i]))*CENTER_SWING_W_PER_GPU)/1000)
                             for i in range(12)] for t in range(96)])
-    analytic = np.asarray([float(FULL_ACTIVE_IT_KW - Decimal(624-int(n))*CENTER_SWING_W_PER_GPU/1000) for n in occ.sum(axis=1)])
+    full=Decimal(installed)*(IDLE_W_PER_GPU+CENTER_SWING_W_PER_GPU)/1000
+    analytic = np.asarray([float(full - Decimal(installed-int(n))*CENTER_SWING_W_PER_GPU/1000) for n in occ.sum(axis=1)])
     error = float(np.max(np.abs(power-expected)))
     aggregate_error = float(np.max(np.abs(power.sum(axis=1)-analytic)))
     tolerance = float(POWER_TOLERANCE_KW)
@@ -116,8 +122,9 @@ def check_it_power(capacity, occupancy, it):
         "aggregate_analytic_max_error_kW": aggregate_error, "preregistered_tolerance_kW": str(POWER_TOLERANCE_KW),
         "tolerance_source": "dayahead.v39a.contracts.POWER_TOLERANCE_KW (unchanged)",
         "idle_W_per_GPU": str(IDLE_W_PER_GPU), "CENTER_W_per_GPU": str(CENTER_SWING_W_PER_GPU),
-        "full_active_anchor_kW": str(FULL_ACTIVE_IT_KW), "capacity_sum_GPU": 624,
-        "identity": "406.775993813819 - (624-N_total_ACT)*547.7239090195797/1000",
+        "full_active_anchor_kW": str(full), "capacity_sum_GPU": installed,
+        "identity": "C_total*c_ref/1000 - (C_total-N_total_ACT)*d_CENTER/1000",
+        "audit_source": reference(__file__),
         "rounded_prompt_constants_replaced_frozen_precision": False}
 
 

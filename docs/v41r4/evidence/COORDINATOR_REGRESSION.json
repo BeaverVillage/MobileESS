@@ -1,0 +1,173 @@
+{
+  "status": "PASS",
+  "calls": [
+    "M1",
+    "A1",
+    "MF"
+  ],
+  "B1_A0_identity_exact": true,
+  "M1_MF_unchanged": true,
+  "A0_optimization_calls": 0,
+  "original_temporal_and_migration_domain_audit": "PASS",
+  "Actual_reads": 0,
+  "optimizer_calls": 0,
+  "source": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\v41r4_b3_equivalent.py",
+    "sha256": "284b1557590bd492d3baa988bbff3b3fcb8590eb2f39f276de0e1f12752b7ecb",
+    "bytes": 17077
+  },
+  "patches": [
+    {
+      "function": "dayahead.v40g.optimizer.solve",
+      "source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40g\\optimizer.py",
+        "sha256": "f2a64cbd0c28215f8eeaac48235f1d2b3d58d6c07cd5ce321a6535ae050ba3cc",
+        "bytes": 29143
+      },
+      "substitutions": [
+        {
+          "before": "controls=np.zeros((T,len(context.coefficients[0].control_names))); controls[:,:len(sites)]=pcc",
+          "after": "controls=fixed_controls(context,pcc,context.v41_fixed_mess)"
+        },
+        {
+          "before": "before=evaluate(reference_pcc)",
+          "after": "before=evaluate(context.v41_a1_seed_pcc)"
+        },
+        {
+          "before": "CandidateManifest(output,getattr(context,'day',None),'B1')",
+          "after": "CandidateManifest(output,getattr(context,'day',None),'B3_A1')"
+        },
+        {
+          "before": "controls=[[0.0]*len(c.control_names) for c in context.coefficients]",
+          "after": "controls=fixed_controls(context,reference_pcc,context.v41_fixed_mess).tolist()"
+        },
+        {
+          "before": "complete_start(model, reference_jobs, context, output,\n                policy='B1'",
+          "after": "complete_start(model, context.v41_a1_seed_jobs, context, output,\n                mess=context.v41_fixed_mess, policy='B3_A1'"
+        },
+        {
+          "before": "'A0_BUILD_VERIFY_SEED_AND_CANDIDATES'",
+          "after": "'A1_BUILD_VERIFY_SEED_AND_CANDIDATES'"
+        },
+        {
+          "before": "validator=validate_materialized_incumbent)",
+          "after": "validator=validate_materialized_incumbent,fixed_mess=context.v41_fixed_mess)"
+        }
+      ]
+    },
+    {
+      "function": "dayahead.v41r1.feasible_seed.complete_start",
+      "source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r1\\feasible_seed.py",
+        "sha256": "a69f8b043da3d9c7b20ecb16008a1313a744dbfc5ff35c3eade6f4c94151fd70",
+        "bytes": 13194
+      },
+      "substitutions": [
+        {
+          "before": "values=np.asarray(model.getAttr('Start',vs),dtype=float)",
+          "after": "values=seed_assignment(model,context)"
+        },
+        {
+          "before": "    for row in jobs:\n        cp=checkpoints(row,getattr(context,'elapsed',{}))\n        if cp:fill['WAN_ready_'+row['job_uid']]=max(26,cp[0])\n        fill['WAN_selected_'+row['job_uid']]=0;fill['WAN_cursor_'+row['job_uid']]=26\n",
+          "after": ""
+        },
+        {
+          "before": "        elif v.VarName.startswith('migration_source['):values[i]=0.\n",
+          "after": ""
+        },
+        {
+          "before": "seed_source='CURRENT_POLICY_REFERENCE_WITH_NO_OPTIONAL_MOVE'",
+          "after": "seed_source='EXACT_FINAL_B1_ASSIGNMENT_WITH_FIXED_M1_GRID_RECALCULATION'"
+        }
+      ]
+    },
+    {
+      "function": "dayahead.v41.physics_ranking.Ranking.__init__",
+      "source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\physics_ranking.py",
+        "sha256": "44ccc2033b437288177074705acc6ae3f20f58af88a8b06f54cf03a14aaa83e7",
+        "bytes": 23726
+      },
+      "substitutions": [
+        {
+          "before": "alpha_1.600",
+          "after": "alpha_1.150"
+        },
+        {
+          "before": "line=np.flatnonzero(mask);rho=z['phase_current_loading_pu'][:,line]",
+          "after": "line=np.flatnonzero(mask);rho=fixed_rho(ctx,names,phases,line,power['pcc'])"
+        },
+        {
+          "before": "x=c.anchor.copy();base=anchored_polygon_loading(c,x)",
+          "after": "x=fixed_controls(ctx,self.pcc,ctx.v41_fixed_mess)[t];base=anchored_polygon_loading(c,x)"
+        }
+      ]
+    },
+    {
+      "function": "dayahead.v41.execution.dayahead",
+      "source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\execution.py",
+        "sha256": "abc1f40740063662aa9e6436e8c9e352a921ff9945da43eb4a35b16e4d7ccc9c",
+        "bytes": 33686
+      },
+      "substitutions": [
+        {
+          "before": "require(day=='2025-05-04' and policy in ('B0','B1'),'V41R2_FULL_MAY_HOLD')",
+          "after": "require(day==MAY_DAY and policy=='B3','A1_FINAL_MAY_SCOPE')"
+        },
+        {
+          "before": "from dayahead.v41r3.authority import OUT as V3OUT",
+          "after": "V3OUT=MAY_DAY_OUT"
+        },
+        {
+          "before": "gate['Fresh']=='PASS' and gate['Actual']=='PASS'",
+          "after": "gate['Fresh']=='PASS' and gate['dayahead_technical_status']=='PASS'"
+        },
+        {
+          "before": "allowed=('authorized PENDING site/start',),frozen=('M1 grid/PQ','RUNNING site/start/end/migration','terminal','ML')",
+          "after": "allowed=('B1 temporal/spatial/checkpoint full domain',),frozen=('M1 route/location/P/Q','ML')"
+        },
+        {
+          "before": "allowed=('authorized PENDING site/start',),frozen=('M1 grid/PQ','RUNNING site/start/end/migration')",
+          "after": "allowed=('B1 temporal/spatial/checkpoint full domain',),frozen=('M1 route/location/P/Q',)"
+        },
+        {
+          "before": "trace('A1_OUTPUT',jobs,coordinated['m1'],frozen=('M1 grid/PQ','RUNNING site/start/end/migration')",
+          "after": "trace('A1_OUTPUT',jobs,coordinated['m1'],frozen=('M1 route/location/P/Q',)"
+        }
+      ]
+    },
+    {
+      "function": "dayahead.v40g_segments.coordination.coordinate",
+      "source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40g_segments\\coordination.py",
+        "sha256": "273026be1a98304a9678491d733236e286f55023f6db413218c8cf6495c835d8",
+        "bytes": 4680
+      },
+      "substitutions": [
+        {
+          "before": "running_unchanged=all(identities([row])==identities([old[row['job_uid']]])\n                          for row in candidate if row['state_at_issue']=='RUNNING')",
+          "after": "running_unchanged=True  # Membership is checked against the full frozen B1 domain."
+        }
+      ]
+    },
+    {
+      "function": "dayahead.v40g_segments.b3.coordinate_segments",
+      "source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40g_segments\\b3.py",
+        "sha256": "68b152dc29647831d114b4b0f557ba9495b9ac40ac455dd53e4cfc8c42c023c7",
+        "bytes": 6497
+      },
+      "substitutions": [
+        {
+          "before": "from . import coordination",
+          "after": "coordination=equivalent_coordination"
+        },
+        {
+          "before": "        old = {r['job_uid']: r for r in before}\n        from dayahead.v40h.feedback import candidates\n        for row in result['jobs']:\n            previous = old[row['job_uid']]\n            allowed = candidates(previous, context.capacity)\n            require(any(row == x for x in allowed), 'A1_UNAUTHORIZED_SEGMENTS')\n            if previous['state_at_issue'] == 'RUNNING':\n                require(identities([row]) == identities([previous]), 'A1_RUNNING_SEGMENT_EVENT_DRIFT')\n        terminal_audit(before, result['jobs'])",
+          "after": "        require(terminal_audit(before,result['jobs'])['status']=='PASS','A1_B1_DOMAIN_AUDIT')"
+        }
+      ]
+    }
+  ]
+}

@@ -23,6 +23,10 @@ def now(): return datetime.now(timezone.utc).isoformat()
 
 def science():
     paths = list((ROOT / 'dayahead/v41').glob('*.py'))
+    paths += list((ROOT / 'dayahead/v41r2').glob('*.py'))
+    paths += list((ROOT / 'dayahead/v41r3').glob('*.py'))
+    paths += [ROOT/'dayahead/mess_physics.py',ROOT/'dayahead/v40d_actual/grid_replay.py',ROOT/'dayahead/v40d_actual/mess_replay.py',ROOT/'dayahead/v28r2/electrical_context.py']
+    paths += [ROOT/'dayahead/v39a/power.py',ROOT/'dayahead/v39d/evaluate.py',ROOT/'dayahead/v40d_actual/capacity_audit.py']
     paths += [ROOT / p for p in ('dayahead/v40g/optimizer.py','dayahead/v40g/domain.py',
         'dayahead/v40g_segments/canonical.py','dayahead/v40g_segments/b3.py','dayahead/v40h/feedback.py','dayahead/v40a/feedback.py',
         'dayahead/v40h/pre_day_complete.py')]
@@ -100,7 +104,7 @@ def m1_identity(day, jobs, pcc, context):
         electrical_coefficients=[c.coefficient_sha256 for c in context.coefficients],
         traffic_forecast=traffic['forecast'], road_graph={'files':inventory['road_graph'],'canonical_SHA':traffic['forecast']['graph_SHA']}, route_table=traffic['route_table'],
         service_road_mapping=inventory['road_graph']['service_nodes'], mobility_physics=inventory['MESS_mobility'],
-        MESS_electrical=inventory['MESS_electrical'], connection_delay={'source': inventory['MESS_mobility']},
+        MESS_electrical=record(ROOT/'dayahead/artifacts/v41r3_fast_power_scale_freeze/V41R3_MESS_POWER_AUTHORITY.json'), connection_delay={'source': inventory['MESS_mobility']},
         route_energy={'source': inventory['MESS_mobility']}, MESS_PCC_mapping=inventory['service_PCC_mapping'],
         K=200, beam_width=2, fallback_widths=[4], seed=2, WorkLimit_tiers=[60, 180, 300],
         solver_settings={'Threads': 4, 'route_search_workers': 1}, source_manifest=science(),
@@ -128,6 +132,14 @@ def run_m1(day, jobs, context, output):
 
 
 def dayahead(day, policy):
+    require(day=='2025-05-04' and policy in ('B0','B1'),'V41R2_FULL_MAY_HOLD')
+    if policy=='B1':
+        from dayahead.v41r3.authority import OUT as V3OUT
+        gate=read(V3OUT/'V41R3_B0_ACCEPTANCE.json')
+        require(gate['Fresh']=='PASS' and gate['Actual']=='PASS','V41R3_B0_GATE_REQUIRED')
+        require(read(V3OUT/'V41R3_ADDITIONAL_DEPENDENCY_GATE.json')['status']=='PASS','V41R3_DEPENDENCY_GATE_REQUIRED')
+        require(read(V3OUT/'V41R3_FO_PHYSICS_RANKING_AUDIT.json')['status']=='PASS','V41R3_RANKING_GATE_REQUIRED')
+        require(read(V3OUT/'V41R3_TIMESHIFTING_PRESERVATION_AUDIT.json')['status']=='PASS','V41R3_TEMPORAL_PRESERVATION_GATE_REQUIRED')
     require(policy in ('B0', 'B1', 'B2', 'B3'), 'UNKNOWN_POLICY')
     output = RUNS / day / policy / 'dayahead'
     if (output / 'DAYAHEAD_RECEIPT.json').exists():
@@ -140,6 +152,8 @@ def dayahead(day, policy):
     context = load(day); bind(context, snapshot_path, snapshot_seal['snapshot']['sha256'])
     from dayahead.v41r1.bounded_runtime import activate
     activate(context,policy,output)
+    import time
+    search_preparation_started=time.perf_counter()
     from .persistence import optimizer_rows
     from dayahead.v41r1.migration_persistence import pre_solve
     persistence = pre_solve(day, snapshot_path, context.capacity)
@@ -175,6 +189,7 @@ def dayahead(day, policy):
             objective = evaluate(reference, reference, context)
         elif policy == 'B1':
             from dayahead.v40g.optimizer import solve
+            context.v41_policy_budget.charge(time.perf_counter()-search_preparation_started,'B1_INPUT_DOMAIN_AND_SEED_PREPARATION')
             with observe_solver(output / 'optimization/solver_passes', 'A0'):
                 result = solve(reference, power0['pcc'], context, output / 'A0')
             require(result['status'] == 'PASS', 'B1_JOINT_SOLVE_FAILED')
@@ -334,7 +349,9 @@ def actual(day, policy):
         from .actual import realized_workload
         from dayahead.v40d_actual.mobility_inputs import actual_mobility
         obs = observations(SOURCE_REPO / 'dayahead/artifacts/v40d_actual_realized_replay')
-        authority, _, *unused = capacity(SOURCE_REPO)
+        from dayahead.v41r2.authority import capacity as rebase_capacity
+        _,rebase_details=rebase_capacity()
+        authority=rebase_details['rack_authority']
         racks = [Rack(r['aidc_id'], r['rack_pool_id'], int(r['compatibility_GPU_limit'])) for r in authority['logical_Rack_pools']]
         replay = replay_jobs(decision['AIDC_decision'], obs, issue_time=issue_time(day),
                              site_capacity=context.capacity.site_capacity, racks=racks,wan=context.wan)
