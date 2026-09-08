@@ -1,0 +1,2652 @@
+# ============================================================
+# V40S5R1 — CAUSAL ROLLING-ORIGIN / PREQUENTIAL
+#            UNCERTAINTY-AWARE RUNTIME EVALUATION
+#
+# PURPOSE
+#
+# V40S5 static direct-runtime experiment discovered a critical
+# data limitation:
+#
+#   At the initial model-fit cutoff, only a very small number of
+#   causally mature historical jobs were available
+#   (expected from the completed S5 audit: 421 positive-runtime
+#   jobs; independently verify exact final S5 values).
+#
+# V40S5R1 does NOT introduce a new model family.
+#
+# It asks:
+#
+#   If the EXACT SAME frozen direct quantile/UARP-style runtime
+#   model is updated each Day-Ahead issue using every job whose
+#   realized runtime has become causally known by that issue time,
+#   does runtime safety improve enough to replace the current RSP?
+#
+#
+# NEW:
+#
+#   static one-time training
+#       ->
+#   causal expanding-window / rolling-origin daily retraining
+#
+#
+# UNCHANGED:
+#
+#   feature contract
+#   request-state proxy assumption
+#   LightGBM family
+#   selected S5 LightGBM configuration
+#   Q50/Q90/Q95/Q99
+#   residual uncertainty model
+#   UARP coefficients 0.20 / 0.50
+#   runtime candidates
+#   safety gates
+#   efficiency gates
+#   evaluation panel
+#
+#
+# THIS IS THE FINAL RUNTIME-ML EXPERIMENT UNDER THE CURRENT
+# KESTREL AUTHORITY.
+#
+# If V40S5R1 fails:
+#
+#   CURRENT_RSP remains operational
+#
+#   and
+#
+#   NO further runtime model-family experiment is permitted
+#   without genuinely richer data / scheduler authority.
+#
+#
+# NO optimizer integration.
+# NO migration changes.
+# NO A0/A1/M1/MF changes.
+# ============================================================
+
+
+
+# ============================================================
+# 0. IDENTITY
+# ============================================================
+
+WORKING NAME:
+
+V40S5R1_ROLLING_ORIGIN_UNCERTAINTY_RUNTIME
+
+
+NEW BRANCH:
+
+codex/v40s5r1-rolling-origin-runtime
+
+
+NEW WORKTREE:
+
+C:\codex_mobileess_workspace\MobileESS_v40s5r1_rolling_origin_runtime
+
+
+SOURCE:
+
+dayahead/v40s5r1/
+
+
+ARTIFACTS:
+
+dayahead/artifacts/v40s5r1_rolling_origin_runtime/
+
+
+TESTS:
+
+tests/dayahead/test_v40s5r1_*.py
+
+
+
+# ============================================================
+# 1. DO NOT START UNTIL V40S5 IS COMPLETELY CLOSED
+# ============================================================
+
+Before creating V40S5R1, verify that V40S5 has completed:
+
+- final scientific commit
+- final receipt commit
+- final receipt verification
+- required artifacts
+- clean Git
+
+
+Resolve the exact V40S5 receipt commit from:
+
+V40S5_FINAL_COMMIT_RECEIPT.json
+
+
+Do NOT use an intermediate S5 commit.
+
+
+Verify final S5 classification exactly:
+
+V40S5_DIRECT_RUNTIME_SAFETY_FAIL
+
+
+Verify S5 records:
+
+SELECTED MODEL = NONE
+
+CURRENT RSP REPLACED = NO
+
+OPTIMIZER INTEGRATION = NO
+
+PRODUCTION READY = NO
+
+
+Verify the final S5 report records the historical training
+library limitation.
+
+Expected from the execution log, but DO NOT hard-code without
+verification:
+
+historical positive runtime jobs ~= 421
+
+HIST_FIT ~= 332
+
+HIST_TUNE ~= 89
+
+
+Create:
+
+V40S5R1_START_STATE.json
+V40S5R1_GIT_LINEAGE_AUDIT.json
+V40S5R1_S5_REFERENCE_FREEZE.json
+
+
+
+# ============================================================
+# 2. V40S5 IS IMMUTABLE SCIENTIFIC EVIDENCE
+# ============================================================
+
+Do NOT:
+
+- modify S5 source
+- modify S5 model files
+- modify S5 predictions
+- change S5 classification
+- rerun S5 to obtain a better result
+- change S5 hyperparameters
+- retune UARP coefficients
+- alter S5 feature set
+- alter S5 evaluation gates
+
+
+S5 remains the STATIC runtime experiment.
+
+S5R1 is a distinct prospective experiment testing:
+
+ROLLING-ORIGIN CAUSAL MODEL UPDATING.
+
+
+
+# ============================================================
+# 3. SCIENTIFIC INTERPRETATION OF S5 FAILURE
+# ============================================================
+
+Do NOT start S5R1 by assuming that S5 failed because the
+architecture is inherently invalid.
+
+Preserve the distinction:
+
+S5 PRIMARY EXPERIMENTAL RESULT:
+
+direct uncertainty-aware runtime candidates failed the frozen
+safety contract.
+
+
+S5 CRITICAL DATA LIMITATION:
+
+the initial causally mature training library was extremely
+small and temporally concentrated.
+
+
+V40S5R1 asks whether the STATIC-training protocol itself was a
+major source of the failure.
+
+
+
+# ============================================================
+# 4. NO NEW MODEL FAMILY
+# ============================================================
+
+V40S5R1 SHALL NOT add:
+
+- XGBoost
+- Random Forest
+- RSF
+- survival model
+- DeepSurv
+- neural network
+- Transformer
+- BODY / TAIL classifier
+- runtime thresholds u
+- eta
+- new robust-tail rule
+- application clustering
+- user-specific model
+
+
+Use ONLY the model family already frozen in S5.
+
+
+
+# ============================================================
+# 5. EXACT S5 MODEL SPECIFICATION MUST BE REUSED
+# ============================================================
+
+Read the final S5 artifacts and resolve the exact selected
+LightGBM configuration.
+
+
+Expected execution log suggests:
+
+L2
+
+but independently verify from:
+
+V40S5_HYPERPARAMETER_FREEZE.json
+and/or final S5 review.
+
+
+Use EXACTLY that frozen configuration for all daily fits.
+
+
+Do NOT perform hyperparameter selection in S5R1.
+
+
+Quantile heads remain exactly:
+
+Q50
+Q90
+Q95
+Q99
+
+
+No new quantile.
+
+
+No coefficient search.
+
+
+
+# ============================================================
+# 6. REQUEST-STATE PROXY ASSUMPTION REMAINS IDENTICAL
+# ============================================================
+
+Reuse exactly:
+
+D1_SCHEDULER_REQUEST_STATE_PROXY_V1
+
+
+Scientific interpretation remains:
+
+recorded Slurm request metadata are treated as proxies for
+scheduler-visible request states.
+
+
+Do NOT upgrade:
+
+HISTORICAL_D1_SNAPSHOT_PROVENANCE
+
+from:
+
+UNVERIFIED
+
+
+Do NOT upgrade:
+
+ORIGINAL_SUBMISSION_VALUE_PROVENANCE
+
+from:
+
+UNVERIFIED
+
+
+Request modification history remains:
+
+UNOBSERVED
+
+
+Paper-facing status remains:
+
+ASSUMPTION-BASED TRACE-DRIVEN RUNTIME MODEL
+
+
+
+# ============================================================
+# 7. FEATURE CONTRACT — EXACT S5 TRACK P
+# ============================================================
+
+Primary Track P must use EXACTLY the S5 feature set.
+
+
+Expected fields:
+
+requested_seconds
+num_gpus_req
+num_nodes_req
+num_cores_req
+requested_memory_mib
+partition
+qos
+submit_hour
+submit_dow
+
+
+Resolve exact names from S5 authority.
+
+
+No feature additions.
+
+
+No feature removals in primary Track P.
+
+
+Do NOT use:
+
+user ID
+account
+username
+job name
+application ID
+actual start
+actual end
+actual runtime
+future status
+reference_safe_sec
+K0
+migration
+electrical outcome
+
+
+
+# ============================================================
+# 8. PRIMARY CHANGE — DAILY CAUSAL TRAINING SET
+# ============================================================
+
+For every unique Day-Ahead issue time t_d:
+
+construct:
+
+D_train(d)
+=
+{
+    unique historical job j
+    such that
+    end_time_j < t_d
+}
+
+
+AND:
+
+runtime_j > 0
+
+AND:
+
+runtime is finite
+
+AND:
+
+all source/cohort eligibility rules from S5 are satisfied
+
+AND:
+
+the S5 request-state proxy feature vector can be constructed.
+
+
+Use STRICT:
+
+end_time < issue_time
+
+
+NOT:
+
+end_time <= issue_time
+
+
+The realized runtime label is causally available because the
+job has already ended before the Day-Ahead decision.
+
+
+
+# ============================================================
+# 9. ISSUE TIME
+# ============================================================
+
+Use the exact inherited S4/S5 issue contract:
+
+D-1 18:00 fixed AEST
+
+=
+
+08:00 UTC
+
+
+Do not use daylight-saving reinterpretation.
+
+Do not infer issue times from local machine timezone.
+
+
+Use exact issue timestamps stored in the frozen PENDING panel.
+
+
+
+# ============================================================
+# 10. ONE MODEL UPDATE PER UNIQUE ISSUE TIME
+# ============================================================
+
+Fit one complete runtime-model package per unique issue time.
+
+Do NOT refit separately for every job.
+
+
+For issue time t_d:
+
+1. build D_train(d)
+
+2. fit preprocessing on D_train(d)
+
+3. fit Q50/Q90/Q95/Q99
+
+4. construct causal residual evidence
+
+5. fit residual uncertainty model
+
+6. predict ALL PENDING job-issue rows for t_d
+
+7. freeze the predictions for that issue
+
+8. advance to the next issue time
+
+
+This is a PREQUENTIAL sequence.
+
+
+
+# ============================================================
+# 11. EXPANDING WINDOW ONLY
+# ============================================================
+
+Training is:
+
+EXPANDING WINDOW
+
+
+At issue d+1:
+
+D_train(d)
+subset of
+D_train(d+1)
+
+
+Never discard an old completed job merely because it is old.
+
+
+Do NOT test:
+
+- 7-day rolling window
+- 14-day rolling window
+- 30-day rolling window
+- exponential weighting
+- drift-adaptive weighting
+
+
+Those would be new training-policy candidates.
+
+
+V40S5R1 tests exactly ONE policy:
+
+ALL CAUSALLY MATURE HISTORICAL JOBS.
+
+
+
+# ============================================================
+# 12. TRAINING MEMBERSHIP IDENTITY
+# ============================================================
+
+For every issue time record:
+
+issue_time
+training_job_count
+training_job_uid_SHA256
+earliest_training_submit
+latest_training_end
+new_jobs_added_since_previous_issue
+
+
+Require:
+
+training_job_count(d+1)
+>=
+training_job_count(d)
+
+
+Require:
+
+new training jobs have:
+
+previous_issue <= end_time < current_issue
+
+or otherwise exactly explain their first eligibility.
+
+
+Create:
+
+V40S5R1_DAILY_TRAINING_LEDGER.parquet
+V40S5R1_DAILY_TRAINING_MEMBERSHIP_AUDIT.json
+
+
+
+# ============================================================
+# 13. CRITICAL LEAKAGE FIREWALL
+# ============================================================
+
+For each issue:
+
+NO training job may have:
+
+end_time >= issue_time
+
+
+NO evaluation PENDING row's actual:
+
+start
+end
+runtime
+
+may be used as predictor input at that issue.
+
+
+The evaluation label is opened only after its prediction has
+been written and hashed.
+
+
+Implement explicit sequence:
+
+FIT
+-> PREDICT
+-> HASH PREDICTION
+-> THEN SCORE
+
+
+Create:
+
+V40S5R1_PREQUENTIAL_LEAKAGE_AUDIT.json
+
+
+
+# ============================================================
+# 14. EVALUATION PANEL — EXACT S5/S4 PENDING PANEL
+# ============================================================
+
+Use the exact frozen PENDING issue panel.
+
+Expected:
+
+TRAIN:
+1,190 job-issue
+
+DEVELOPMENT:
+4,346
+
+CALIBRATION:
+2,634
+
+EXPOSED_EVALUATION:
+2,713
+
+
+Expected total:
+
+10,883 job-issue
+
+
+Expected unique jobs:
+
+7,603
+
+
+Independently verify exact identity and order.
+
+
+If mismatch:
+
+STOP:
+
+V40S5R1_PENDING_PANEL_IDENTITY_FAIL
+
+
+
+# ============================================================
+# 15. PREQUENTIAL USE OF EARLIER EVALUATION OUTCOMES
+# ============================================================
+
+This is IMPORTANT.
+
+
+At a later issue time, a job from an earlier TRAIN/DEV/CAL/
+EXPOSED date MAY enter the training set IF AND ONLY IF:
+
+its end_time is strictly earlier than the new issue time.
+
+
+This is NOT future leakage.
+
+It represents information that would actually be available to
+the scheduler by that later Day-Ahead decision.
+
+
+Therefore:
+
+earlier exposed-day outcomes may causally train a later
+exposed-day model once those jobs have completed.
+
+
+However:
+
+TRUE_CONFIRMATORY_AVAILABLE remains NO.
+
+
+This is a rolling-origin operational simulation,
+not an untouched static holdout.
+
+
+
+# ============================================================
+# 16. EXPOSED SEMANTICS
+# ============================================================
+
+EXPOSED_EVALUATION remains:
+
+EXPOSED PREQUENTIAL HISTORICAL EVIDENCE
+
+
+Do NOT call it:
+
+untouched holdout
+true confirmation
+prospective deployment validation
+
+
+No result from a future issue can affect an earlier issue.
+
+
+
+# ============================================================
+# 17. PREPROCESSING MUST ALSO ROLL CAUSALLY
+# ============================================================
+
+For each issue fit preprocessing ONLY from D_train(d).
+
+
+Continuous:
+
+use exact S5 transformations.
+
+
+Categorical vocabulary:
+
+fit only from D_train(d)
+
+
+unseen category:
+
+UNKNOWN
+
+
+Continuous imputation:
+
+training-set median at that issue
+
+
+No global preprocessing fitted using future rows.
+
+
+Create:
+
+V40S5R1_DAILY_PREPROCESSING_AUDIT.json
+
+
+
+# ============================================================
+# 18. DIRECT QUANTILE MODELS
+# ============================================================
+
+For every issue fit:
+
+Q50(T | X)
+
+Q90(T | X)
+
+Q95(T | X)
+
+Q99(T | X)
+
+
+Use exact frozen S5 LightGBM configuration.
+
+
+Use exact S5 target scale / transformations.
+
+Do not silently switch between raw-runtime and log-runtime
+unless S5's frozen contract requires it.
+
+
+
+# ============================================================
+# 19. QUANTILE MONOTONICITY
+# ============================================================
+
+Use the exact S5 deterministic quantile-rearrangement rule.
+
+
+Expected conceptual form:
+
+q50* = q50
+q90* = max(q90, q50*)
+q95* = max(q95, q90*)
+q99* = max(q99, q95*)
+
+
+Resolve exact S5 implementation.
+
+
+Audit daily raw crossing count and correction magnitude.
+
+
+Create:
+
+V40S5R1_QUANTILE_CROSSING_AUDIT.json
+
+
+
+# ============================================================
+# 20. RESIDUAL UNCERTAINTY MODEL — CAUSAL DAILY VERSION
+# ============================================================
+
+Do NOT use in-sample residuals.
+
+
+For every issue time t_d:
+
+construct residual-training evidence using ONLY D_train(d).
+
+
+Use chronological expanding cross-fitting.
+
+
+Use the exact S5 frozen residual methodology where possible.
+
+
+Minimum:
+
+5 temporal expanding folds
+
+if sample support permits.
+
+
+For each residual observation:
+
+the Q50 model generating its prediction must NOT have been
+trained on that same observation or on a later-ended job.
+
+
+Then:
+
+e_j =
+T_actual,j - Q50_OOF,j
+
+
+r2_j =
+e_j^2
+
+
+Fit:
+
+E[r2 | X]
+
+
+and define:
+
+sigma_j =
+sqrt(max(predicted_r2,0))
+
+
+No future residual.
+
+
+No CAL/EXPOSED residual pool imported globally.
+
+
+
+# ============================================================
+# 21. EARLY SUPPORT RULE FOR RESIDUAL CROSSFIT
+# ============================================================
+
+The initial library is expected to be small.
+
+
+Do NOT silently reduce from 5 folds to an arbitrary invalid
+method.
+
+
+Pre-register a deterministic support rule BEFORE execution.
+
+
+Recommended:
+
+if N_train >= 250:
+use 5 chronological expanding folds
+
+
+if 100 <= N_train < 250:
+use 3 chronological expanding folds
+
+
+if N_train < 100:
+uncertainty model = INSUFFICIENT_SUPPORT
+
+
+However the first issue is expected to have >400 historical
+jobs, so the 5-fold route should normally apply.
+
+
+Record actual route for every issue.
+
+
+Do NOT change the rule after observing accuracy.
+
+
+
+# ============================================================
+# 22. UARP-STYLE FORMULA — EXACTLY FROZEN
+# ============================================================
+
+Use exact S5 formula:
+
+M_j
+=
+max(
+    0.20 * Q99_j,
+    0.50 * sigma_j
+)
+
+
+T_UARP,j
+=
+Q99_j + M_j
+
+
+Coefficients remain:
+
+0.20
+0.50
+
+
+NO tuning.
+
+
+NO walltime cap.
+
+
+NO post-hoc multiplier.
+
+
+
+# ============================================================
+# 23. RUNTIME CANDIDATE REGISTRY — SAME AS S5
+# ============================================================
+
+Evaluate exactly:
+
+
+R0_CURRENT_RSP
+
+R1_RECORDED_REQUESTED_WALLTIME
+
+R2_Q90
+
+R3_Q95
+
+R4_Q99
+
+R5_UARP_STYLE
+
+
+R0/R1:
+read-only comparators
+
+
+R2-R5:
+eligible new runtime candidates
+
+
+Do NOT create R6 candidate.
+
+
+Do NOT create blended runtime.
+
+
+
+# ============================================================
+# 24. STATIC S5 REFERENCE — REQUIRED
+# ============================================================
+
+Also read the immutable STATIC S5 predictions/results as a
+separate comparator.
+
+
+Call:
+
+STATIC_S5_REFERENCE
+
+
+Do not refit the static S5 model.
+
+
+For every split/candidate where exact comparison is possible,
+report:
+
+rolling minus static coverage
+
+rolling minus static GPU coverage
+
+rolling minus static GPU underprediction
+
+rolling minus static overreservation
+
+
+This isolates the effect of:
+
+ROLLING TRAINING PROTOCOL
+
+from:
+
+MODEL ARCHITECTURE.
+
+
+
+# ============================================================
+# 25. PRIMARY EVALUATION UNIT
+# ============================================================
+
+Primary denominator:
+
+JOB-ISSUE
+
+
+because each Day-Ahead issue is a separate operational
+decision.
+
+
+Secondary diagnostic:
+
+UNIQUE JOB
+
+
+Use earliest eligible issue row per unique job within each
+reporting split.
+
+
+Do not select the model using unique-job metrics.
+
+
+
+# ============================================================
+# 26. PRIMARY METRICS — SAME S5 SEMANTICS
+# ============================================================
+
+For each candidate / split compute:
+
+
+overall coverage:
+
+mean(
+    T_actual <= T_candidate
+)
+
+
+GPU-weighted coverage:
+
+sum(
+    g_j * I[T_actual <= T_candidate]
+)
+/
+sum(g_j)
+
+
+under_sec:
+
+sum(
+    max(T_actual-T_candidate,0)
+)
+
+
+GPU_under_sec:
+
+sum(
+    g_j * max(T_actual-T_candidate,0)
+)
+
+
+over_sec:
+
+sum(
+    max(T_candidate-T_actual,0)
+)
+
+
+GPU_over_h:
+
+sum(
+    g_j * max(T_candidate-T_actual,0)
+) / 3600
+
+
+Also:
+
+MAE
+median AE
+P90 AE
+P95 AE
+P99 AE
+WAPE
+bias
+
+
+For Q50:
+
+MAE
+WAPE
+bias
+
+
+For Q90/Q95/Q99:
+
+pinball loss
+
+
+
+# ============================================================
+# 27. 15-MIN SCHEDULER METRICS
+# ============================================================
+
+Use:
+
+duration_slots =
+ceil(runtime_sec / 900)
+
+
+Exactly once.
+
+
+Report:
+
+completion-slot MAE
+
+signed slot error
+
+fraction >=1 slot early
+
+fraction >=4 slots early
+
+fraction >=8 slots early
+
+
+GPU-weighted versions too.
+
+
+
+# ============================================================
+# 28. DAILY METRICS — REQUIRED
+# ============================================================
+
+For each unique issue time and each candidate record:
+
+issue_time
+
+N_eval_jobs
+
+N_training_jobs
+
+new_training_jobs
+
+coverage
+
+GPU_coverage
+
+GPU_under_sec
+
+GPU_over_h
+
+MAE
+
+candidate median safe/runtime ratio
+
+
+Create:
+
+V40S5R1_DAILY_RUNTIME_RESULTS.parquet
+
+
+
+# ============================================================
+# 29. TRAINING-DATA MATURITY VS PERFORMANCE AUDIT
+# ============================================================
+
+This is a PRIMARY S5R1 scientific diagnostic.
+
+
+For every issue day relate:
+
+N_training_jobs
+
+to:
+
+coverage
+GPU coverage
+GPU underprediction
+MAE
+
+
+Report descriptively:
+
+- earliest issue
+- midpoint issue
+- latest issue
+- minimum N_train
+- median N_train
+- maximum N_train
+
+
+Also compute diagnostic-only:
+
+Spearman correlation:
+
+N_train vs daily coverage
+
+N_train vs daily GPU coverage
+
+N_train vs daily MAE
+
+
+Do NOT interpret correlation as causation.
+
+
+Create:
+
+V40S5R1_DATA_MATURITY_PERFORMANCE_AUDIT.json
+
+
+
+# ============================================================
+# 30. NO POST-HOC TRAINING-SIZE THRESHOLD
+# ============================================================
+
+Do NOT say after results:
+
+"use ML only after N_train > 3000"
+
+or similar.
+
+
+Training-size thresholds are NOT candidates in S5R1.
+
+
+The learning-curve relationship is descriptive only.
+
+
+
+# ============================================================
+# 31. TEMPORAL DRIFT AUDIT
+# ============================================================
+
+For every issue time or monthly aggregate report changes in:
+
+actual runtime
+
+requested runtime
+
+actual/request ratio
+
+GPU request
+
+partition
+
+QoS
+
+
+And training-library composition.
+
+
+Purpose:
+
+distinguish:
+
+insufficient historical quantity
+
+from:
+
+temporal distribution shift.
+
+
+No dynamic feature weighting.
+
+
+Create:
+
+V40S5R1_TEMPORAL_DRIFT_AUDIT.json
+
+
+
+# ============================================================
+# 32. WALLTIME IMPORTANCE — DIAGNOSTIC
+# ============================================================
+
+Continue S5's walltime analysis.
+
+
+For selected frozen model configuration report over time:
+
+requested_seconds grouped gain importance
+
+
+and periodically, not necessarily every day if expensive:
+
+permutation importance on causally available historical
+validation slices.
+
+
+Do NOT use feature importance to redesign the model.
+
+
+
+# ============================================================
+# 33. TRACK P-W — ONE FIXED SENSITIVITY ONLY
+# ============================================================
+
+Primary experiment:
+
+Track P
+
+
+Secondary sensitivity:
+
+Track P-W =
+remove requested_seconds only
+
+
+Use the SAME daily:
+
+training membership
+hyperparameters
+quantiles
+residual methodology
+candidate formula
+
+
+P-W is diagnostic only.
+
+
+It cannot become the selected operational model.
+
+
+Do not perform separate tuning.
+
+
+
+# ============================================================
+# 34. S5 SAFETY GATES REMAIN UNCHANGED
+# ============================================================
+
+For any new candidate R2-R5 to be SAFETY ELIGIBLE:
+
+
+On DEVELOPMENT and CALIBRATION prequential predictions:
+
+overall coverage >= 90%
+
+GPU-weighted coverage >= 90%
+
+
+For every major issue-day with N >= 100:
+
+coverage >= 88%
+
+GPU coverage >= 88%
+
+
+Also:
+
+GPU_under_sec(candidate)
+<
+GPU_under_sec(current RSP)
+
+
+No coverage upper gate.
+
+
+Coverage >99.5%:
+
+EXTREME_CONSERVATISM_WARNING
+
+
+but efficiency decides acceptability.
+
+
+
+# ============================================================
+# 35. EFFICIENCY GATE — SAME S5 PRINCIPLE
+# ============================================================
+
+Recorded requested walltime remains the high-conservatism
+anchor.
+
+
+Require on DEV and CAL:
+
+GPU_over_h(candidate)
+<
+GPU_over_h(requested walltime)
+
+
+Do NOT restore old:
+
+3x current RSP
+
+overreservation rule.
+
+
+
+# ============================================================
+# 36. CANDIDATE SELECTION — DEV + CAL ONLY
+# ============================================================
+
+Hyperparameters are already frozen from S5.
+
+
+Therefore S5R1 selection only chooses among:
+
+R2_Q90
+R3_Q95
+R4_Q99
+R5_UARP_STYLE
+
+
+using rolling-origin predictions.
+
+
+Selection hierarchy:
+
+1. pass all DEV safety gates
+
+2. pass all CAL safety gates
+
+3. pass efficiency vs requested walltime on DEV+CAL
+
+4. choose minimum CAL GPU_over_h
+
+
+Tie-break:
+
+1. lower CAL GPU_under_sec
+
+2. lower DEV+CAL GPU_over_h
+
+3. simpler candidate
+
+
+Simplicity:
+
+Q90
+Q95
+Q99
+UARP
+
+
+Do NOT use EXPOSED to select.
+
+
+
+# ============================================================
+# 37. SELECTION FREEZE
+# ============================================================
+
+After rolling DEV+CAL is complete:
+
+freeze:
+
+selected candidate or NONE
+
+exact daily model specification
+
+exact model config
+
+exact UARP coefficients
+
+training policy
+
+preprocessing policy
+
+all relevant code/data hashes
+
+
+Commit BEFORE running rolling EXPOSED evaluation.
+
+
+Create:
+
+V40S5R1_SELECTION_FREEZE.json
+V40S5R1_SELECTION_FREEZE_COMMIT_RECEIPT.json
+
+
+
+# ============================================================
+# 38. EXPOSED PREQUENTIAL EVALUATION
+# ============================================================
+
+After selection freeze:
+
+continue the causal daily rolling process through
+EXPOSED_EVALUATION.
+
+
+Important:
+
+At each exposed issue:
+
+training may include jobs from EARLIER exposed issues
+that have already ended.
+
+
+This is permitted and required for faithful prequential
+simulation.
+
+
+But candidate identity remains frozen.
+
+
+Do NOT:
+
+- switch Q95 to UARP mid-exposed
+- tune coefficients
+- change features
+- change training window
+- change preprocessing
+- change model config
+
+
+
+# ============================================================
+# 39. EXPOSED SUCCESS GATES
+# ============================================================
+
+Frozen candidate must satisfy:
+
+overall coverage >= 90%
+
+GPU coverage >= 90%
+
+
+Major issue-day N>=100:
+
+coverage >=88%
+
+GPU coverage >=88%
+
+
+Require:
+
+GPU_under_sec
+<
+current RSP
+
+
+Require:
+
+GPU_over_h
+<
+requested walltime
+
+
+If not:
+
+FINAL SCIENTIFIC STATUS = FAIL
+
+
+
+# ============================================================
+# 40. MONTHLY / TEMPORAL STABILITY
+# ============================================================
+
+Report exposed results separately by month/date block.
+
+
+For each supported month:
+
+coverage
+GPU coverage
+GPU underprediction
+GPU overreservation
+MAE
+N training jobs at start/end of month
+
+
+Do not hide a bad temporal block through pooling.
+
+
+
+# ============================================================
+# 41. STATIC VS ROLLING SCIENTIFIC TEST
+# ============================================================
+
+Required comparison:
+
+STATIC S5
+vs
+ROLLING S5R1
+
+
+For the same candidate architecture.
+
+
+Report whether rolling updating:
+
+- improves coverage
+- improves GPU coverage
+- reduces underprediction
+- changes overreservation
+
+
+Interpretation categories:
+
+
+ROLLING_UPDATE_MATERIALLY_IMPROVES_RUNTIME
+
+ROLLING_UPDATE_SMALL_EFFECT
+
+ROLLING_UPDATE_NO_GENERALIZATION_RECOVERY
+
+ROLLING_UPDATE_DEGRADES_RUNTIME
+
+
+Do not define "materially" post hoc.
+
+
+Pre-register a descriptive threshold:
+
+coverage improvement >= 10 percentage points
+OR
+GPU coverage improvement >= 10 percentage points
+
+as:
+
+MATERIAL_IMPROVEMENT_DIAGNOSTIC
+
+
+This is diagnostic only,
+not the safety gate.
+
+
+
+# ============================================================
+# 42. DATA-SUFFICIENCY INTERPRETATION
+# ============================================================
+
+If performance improves strongly as N_train grows:
+
+state:
+
+the static S5 failure was materially associated with limited
+initial historical maturity.
+
+
+Do NOT state:
+
+sample count was proven to be the sole cause.
+
+
+If performance remains poor even after large expansion:
+
+state:
+
+expanding causal historical evidence did not recover the
+required runtime reliability under the available feature and
+model contract.
+
+
+
+# ============================================================
+# 43. RUNNING / PENDING SCOPE
+# ============================================================
+
+Primary runtime redesign remains:
+
+PENDING jobs only.
+
+
+RUNNING runtime redesign:
+
+NO
+
+
+RUNNING migration:
+
+NO
+
+
+Do not create remaining-runtime model.
+
+
+
+# ============================================================
+# 44. OPTIMIZER FIREWALL
+# ============================================================
+
+Optimizer integration:
+
+0
+
+
+Gurobi calls:
+
+0
+
+
+OpenDSS calls:
+
+0
+
+
+Fresh calls:
+
+0
+
+
+Do NOT modify:
+
+dayahead/v37/aidc_materializer.py
+
+dayahead/v40a/initial.py
+
+
+No runtime adapter is connected to operational scheduling.
+
+
+
+# ============================================================
+# 45. SYSTEM HARD FREEZE
+# ============================================================
+
+Absolutely no modifications to:
+
+A0
+M1
+A1
+MF
+
+RUNNING jobs
+migration
+WAN
+Rack
+terminal
+MESS route
+MESS P/Q
+Fresh
+AC restoration
+
+
+NO:
+
+event trigger
+local repair
+rolling MPC
+second route search
+
+
+NOTE:
+
+"rolling-origin ML retraining" in S5R1 is NOT rolling MPC.
+
+Do not confuse or couple the two concepts.
+
+
+Current optimization architecture remains:
+
+A0
+-> M1 route+P/Q
+-> A1 feedback
+-> MF fixed-route P/Q
+-> Joint Freeze
+-> Fresh OpenDSS
+
+
+
+# ============================================================
+# 46. CURRENT HOLDS
+# ============================================================
+
+Keep:
+
+production q =
+5576.44921875 s
+
+
+PF =
+0.95
+
+
+Q control =
+NO
+
+
+electrical =
+HOLD
+
+
+electrical B0-B3 =
+NO
+
+
+FULL_MAY =
+NO
+
+
+optimizer integration =
+NO
+
+
+
+# ============================================================
+# 47. MAY / SHADOW FIREWALL
+# ============================================================
+
+Preserve S5/S4 source firewall.
+
+
+Apr-24–30 shadow:
+
+SEALED
+
+
+scientific rows read:
+
+0
+
+
+May scientific rows:
+
+0
+
+
+No May:
+
+runtime outcome
+feature fitting
+training
+candidate selection
+calibration
+sensitivity
+
+
+Git path/index metadata discovery may be nonzero but must be
+disclosed separately.
+
+
+
+# ============================================================
+# 48. PREREGISTRATION — BEFORE ANY ROLLING FIT
+# ============================================================
+
+Before performing ANY S5R1 rolling fit freeze:
+
+- exact S5 receipt lineage
+- exact S5 selected LGB config
+- exact feature contract
+- exact proxy assumption
+- exact evaluation panel
+
+- expanding-window training rule
+- strict end < issue eligibility
+- daily one-fit-package rule
+
+- preprocessing rule
+- residual crossfit rule
+- early support rule
+
+- Q50/Q90/Q95/Q99
+- UARP .20/.50
+- candidate registry
+
+- static S5 comparator
+- P-W sensitivity
+
+- primary metrics
+- daily metrics
+- maturity-performance diagnostic
+
+- safety gates
+- efficiency gate
+- DEV+CAL selection
+- exposed prequential rule
+
+- optimizer firewall
+- May firewall
+- final stop rule
+
+
+Create:
+
+V40S5R1_PREREGISTRATION.json
+
+
+COMMIT BEFORE FIRST ROLLING MODEL FIT.
+
+
+Create:
+
+V40S5R1_PREREGISTRATION_COMMIT_RECEIPT.json
+
+
+
+# ============================================================
+# 49. REPRODUCIBILITY
+# ============================================================
+
+CPU only.
+
+threads = 1
+
+same frozen seed family as S5 unless the S5 contract requires
+an exact seed.
+
+
+For a predetermined subset of issue dates:
+
+first TRAIN issue
+
+first DEV issue
+
+first CAL issue
+
+first EXPOSED issue
+
+last EXPOSED issue
+
+
+rebuild the full daily model package once independently.
+
+
+Compare:
+
+Q50
+Q90
+Q95
+Q99
+sigma
+UARP
+
+
+max difference
+
+mean difference
+
+
+Do not choose the better repeat.
+
+
+
+# ============================================================
+# 50. MODEL CACHE — OPTIONAL BUT STRICT
+# ============================================================
+
+If two consecutive issue times have IDENTICAL training job UID
+hash and identical preprocessing training state:
+
+the previous fitted package MAY be reused.
+
+
+Only if exact membership identity is proven.
+
+
+Record:
+
+CACHE_REUSE = YES/NO
+
+
+Do not reuse merely for speed when new labels have matured.
+
+
+
+# ============================================================
+# 51. PROTECTED SCOPE
+# ============================================================
+
+Protect all inherited:
+
+S3
+S4
+S5
+
+
+source / artifacts / tests.
+
+
+Inventory exact base at S5 receipt.
+
+
+Allowed changes ONLY:
+
+dayahead/v40s5r1/**
+
+dayahead/artifacts/v40s5r1_rolling_origin_runtime/**
+
+tests/dayahead/test_v40s5r1_*.py
+
+
+Create:
+
+V40S5R1_PROTECTED_SCOPE_START.json
+V40S5R1_PROTECTED_SCOPE_END.json
+V40S5R1_PROTECTED_SCOPE_DIFF.json
+
+
+
+# ============================================================
+# 52. FINAL CLASSIFICATIONS
+# ============================================================
+
+Allowed primary final classifications:
+
+
+V40S5R1_BASE_AUTHORITY_FAIL
+
+
+V40S5R1_PREQUENTIAL_CAUSALITY_FAIL
+
+
+V40S5R1_ROLLING_DIRECT_RUNTIME_SAFETY_FAIL
+
+
+V40S5R1_RUNTIME_EFFICIENCY_FAIL
+
+
+V40S5R1_ROLLING_UNCERTAINTY_RUNTIME_PREVALIDATED
+
+
+V40S5R1_EXISTING_RSP_REMAINS_SELECTED
+
+
+
+Maximum positive claim:
+
+PREVALIDATED
+
+
+Never:
+
+PRODUCTION_READY
+
+
+
+# ============================================================
+# 53. FINAL FAILURE STOP RULE
+# ============================================================
+
+If S5R1 fails:
+
+DO NOT create:
+
+S5R2
+S6 runtime
+new quantile
+new UARP coefficient
+new tree family
+Transformer
+neural network
+survival model
+BODY/tail revival
+user-specific runtime model
+
+
+Required conclusion:
+
+CURRENT_RSP_REMAINS_OPERATIONAL
+
+
+FURTHER_RUNTIME_MODEL_WORK =
+DEFER_UNTIL_RICHER_AUTHORITY_OR_DATA
+
+
+Possible required richer evidence:
+
+verified historical scheduler-state snapshots
+
+longer pre-study workload history
+
+application/job semantics
+
+authorized user/application historical context
+
+complete cluster backlog rather than complete-case extract
+
+censoring / status history
+
+progress/checkpoint signals
+
+
+
+# ============================================================
+# 54. ADAPTER PROPOSAL — SUCCESS ONLY
+# ============================================================
+
+If S5R1 passes all exposed gates:
+
+create proposal only.
+
+
+Fields:
+
+issue_time
+job_uid
+
+runtime_q50_sec
+runtime_q90_sec
+runtime_q95_sec
+runtime_q99_sec
+
+runtime_sigma_sec
+
+runtime_candidate_name
+runtime_safe_sec
+runtime_safe_slots_15min
+
+training_job_count
+training_library_hash
+
+request_state_assumption_id
+
+model_config_id
+model_package_hash
+
+
+proposal_only =
+TRUE
+
+
+optimizer_use_allowed =
+FALSE
+
+
+No integration.
+
+
+If S5R1 fails:
+
+recommended_rows = []
+
+
+
+# ============================================================
+# 55. REQUIRED ARTIFACTS
+# ============================================================
+
+At minimum:
+
+V40S5R1_START_STATE.json
+V40S5R1_GIT_LINEAGE_AUDIT.json
+V40S5R1_S5_REFERENCE_FREEZE.json
+
+V40S5R1_PREREGISTRATION.json
+V40S5R1_PREREGISTRATION_COMMIT_RECEIPT.json
+
+V40S5R1_PENDING_PANEL_IDENTITY_AUDIT.json
+
+V40S5R1_DAILY_TRAINING_LEDGER.parquet
+V40S5R1_DAILY_TRAINING_MEMBERSHIP_AUDIT.json
+
+V40S5R1_PREQUENTIAL_LEAKAGE_AUDIT.json
+V40S5R1_DAILY_PREPROCESSING_AUDIT.json
+
+V40S5R1_DAILY_MODEL_LEDGER.parquet
+
+V40S5R1_QUANTILE_CROSSING_AUDIT.json
+
+V40S5R1_RESIDUAL_CROSSFIT_AUDIT.json
+
+V40S5R1_DAILY_RUNTIME_RESULTS.parquet
+
+V40S5R1_TRACK_P_RESULTS.csv
+V40S5R1_TRACK_PW_RESULTS.csv
+
+V40S5R1_STATIC_S5_COMPARISON.json
+
+V40S5R1_DATA_MATURITY_PERFORMANCE_AUDIT.json
+V40S5R1_TEMPORAL_DRIFT_AUDIT.json
+V40S5R1_WALLTIME_DEPENDENCE_ANALYSIS.json
+
+V40S5R1_DAILY_SAFETY_AUDIT.json
+V40S5R1_GPU_UNDERPREDICTION_AUDIT.json
+V40S5R1_OVERRESERVATION_AUDIT.json
+
+V40S5R1_UNIQUE_JOB_SENSITIVITY.json
+
+V40S5R1_SELECTION_FREEZE.json
+V40S5R1_SELECTION_FREEZE_COMMIT_RECEIPT.json
+
+V40S5R1_EXPOSED_RESULTS.json
+
+V40S5R1_RUNTIME_ADAPTER_PROPOSAL.json
+
+V40S5R1_MAY_FIREWALL.json
+
+V40S5R1_PROTECTED_SCOPE_START.json
+V40S5R1_PROTECTED_SCOPE_END.json
+V40S5R1_PROTECTED_SCOPE_DIFF.json
+
+V40S5R1_COMPUTE_LEDGER.json
+V40S5R1_REPRODUCIBILITY_AUDIT.json
+
+V40S5R1_TEST_REPORT.json
+V40S5R1_FINAL_REVIEW.md
+V40S5R1_FINAL_COMMIT_RECEIPT.json
+
+
+
+# ============================================================
+# 56. MINIMUM TESTS
+# ============================================================
+
+At minimum verify:
+
+
+1. final S5 scientific commit exact
+
+2. final S5 receipt commit exact
+
+3. S5 classification exact
+
+4. S5 worktree closed/clean
+
+
+5. new isolated S5R1 worktree
+
+
+6. S3/S4/S5 protected
+
+
+7. exact PENDING panel identity
+
+
+8. issue timestamps exact fixed AEST
+
+
+9. one training membership per unique issue
+
+
+10. every training job end < issue
+
+
+11. no training job end == issue
+
+
+12. expanding membership monotonic
+
+
+13. new completed jobs enter only after completion
+
+
+14. evaluation label unread before prediction hash
+
+
+15. FIT->PREDICT->HASH->SCORE order
+
+
+16. no actual start predictor
+
+
+17. no actual end predictor
+
+
+18. no actual runtime predictor
+
+
+19. feature contract exact S5 Track P
+
+
+20. preprocessing issue-local only
+
+
+21. unseen category -> UNKNOWN
+
+
+22. no future preprocessing
+
+
+23. frozen S5 LGB config exact
+
+
+24. no hyperparameter tuning
+
+
+25. Q50 model exact family
+
+
+26. Q90 exact
+
+
+27. Q95 exact
+
+
+28. Q99 exact
+
+
+29. quantile repair exact
+
+
+30. residual prediction OOF
+
+
+31. residual fold time ordering exact
+
+
+32. sigma finite/nonnegative
+
+
+33. UARP exact:
+
+q99 + max(.2*q99,.5*sigma)
+
+
+34. UARP coefficients unchanged
+
+
+35. no requested-walltime cap
+
+
+36. actual>requested rows retained
+
+
+37. R0 current RSP exact
+
+
+38. R1 requested walltime exact
+
+
+39. R2 Q90 exact
+
+
+40. R3 Q95 exact
+
+
+41. R4 Q99 exact
+
+
+42. R5 UARP exact
+
+
+43. duration slots ceil(sec/900) once
+
+
+44. job-issue denominator exact
+
+
+45. coverage exact
+
+
+46. GPU coverage exact
+
+
+47. GPU underprediction exact
+
+
+48. GPU overreservation exact
+
+
+49. daily metrics exact
+
+
+50. N_train ledger exact
+
+
+51. static S5 comparison read-only
+
+
+52. P-W removes only requested_seconds
+
+
+53. P-W does not become primary selected model
+
+
+54. safety gates unchanged
+
+
+55. efficiency gate unchanged
+
+
+56. DEV/CAL selection only
+
+
+57. selection freeze before exposed
+
+
+58. earlier exposed outcomes may train later exposed only
+    after end < later issue
+
+
+59. no later exposed outcome affects earlier issue
+
+
+60. no exposed candidate reselection
+
+
+61. no exposed hyperparameter change
+
+
+62. no exposed coefficient change
+
+
+63. May scientific reads 0
+
+
+64. shadow rows read 0
+
+
+65. optimizer calls 0
+
+
+66. Gurobi calls 0
+
+
+67. OpenDSS calls 0
+
+
+68. Fresh calls 0
+
+
+69. A0 unchanged
+
+
+70. A1 unchanged
+
+
+71. M1 unchanged
+
+
+72. MF unchanged
+
+
+73. migration unchanged
+
+
+74. WAN unchanged
+
+
+75. terminal unchanged
+
+
+76. event trigger absent
+
+
+77. local repair absent
+
+
+78. rolling MPC absent
+
+
+79. production q unchanged
+
+
+80. PF=.95
+
+
+81. Q control NO
+
+
+82. electrical HOLD
+
+
+83. FULL_MAY NO
+
+
+84. adapter proposal_only
+
+
+85. optimizer_use_allowed false
+
+
+86. same-seed reproducibility
+
+
+87. required artifacts present
+
+
+88. final Git clean
+
+
+
+# ============================================================
+# 57. FINAL RESPONSE FORMAT
+# ============================================================
+
+Report in Korean.
+
+
+Begin exactly:
+
+
+FINAL CLASSIFICATION:
+
+SELECTED MODEL:
+
+SELECTED CANDIDATE:
+
+S5 STATIC RESULT:
+
+S5R1 ROLLING RESULT:
+
+INITIAL HISTORICAL TRAINING JOBS:
+
+FINAL HISTORICAL TRAINING JOBS:
+
+ROLLING UPDATE MATERIAL IMPROVEMENT:
+
+DEV SAFETY:
+
+CAL SAFETY:
+
+EXPOSED SAFETY:
+
+EFFICIENCY VS REQUESTED WALLTIME:
+
+CURRENT RSP REPLACED:
+
+OPTIMIZER INTEGRATION:
+
+PRODUCTION READY:
+
+
+
+Then report:
+
+
+1. Git lineage
+
+2. S5 preservation
+
+3. S5 failure reference
+
+
+4. PENDING panel identity
+
+
+5. first issue training N
+
+6. last issue training N
+
+7. daily training-growth table
+
+
+8. exact training eligibility
+
+9. leakage audit
+
+
+10. frozen S5 LightGBM config
+
+11. feature contract
+
+12. preprocessing contract
+
+
+13. Q50 rolling performance
+
+14. Q90 rolling performance
+
+15. Q95 rolling performance
+
+16. Q99 rolling performance
+
+
+17. residual crossfit
+
+18. sigma
+
+19. UARP margin
+
+
+20. static S5 comparator
+
+21. current RSP
+
+22. requested walltime
+
+
+23. rolling Q90
+
+24. rolling Q95
+
+25. rolling Q99
+
+26. rolling UARP
+
+
+27. DEV table
+
+28. CAL table
+
+
+29. selected candidate or NONE
+
+30. selection freeze commit
+
+
+31. exposed results
+
+
+32. static vs rolling coverage delta
+
+33. static vs rolling GPU coverage delta
+
+34. underprediction delta
+
+35. overreservation delta
+
+
+36. N_train vs coverage
+
+37. N_train vs GPU coverage
+
+38. N_train vs MAE
+
+
+39. temporal drift
+
+
+40. P vs P-W
+
+41. walltime importance
+
+
+42. 15-min completion-slot error
+
+
+43. unique-job sensitivity
+
+
+44. May firewall
+
+45. optimizer/Gurobi/OpenDSS/Fresh calls
+
+
+46. A0/A1/M1/MF unchanged
+
+47. migration/WAN/terminal unchanged
+
+
+48. tests
+
+49. reproducibility
+
+50. protected scope
+
+
+51. scientific commit
+
+52. receipt commit
+
+
+
+# ============================================================
+# 58. FINAL SCIENTIFIC INTERPRETATION
+# ============================================================
+
+If rolling S5R1 succeeds:
+
+Do NOT say:
+
+"runtime prediction is solved."
+
+
+State:
+
+"Under the explicit scheduler-visible request-state proxy
+assumption, causal expanding-window model updates recovered
+sufficient runtime reliability and efficiency for
+prevalidated PENDING-job duration estimation."
+
+
+If rolling strongly improves but still fails safety:
+
+state:
+
+"Daily causal model updating materially improved runtime
+prediction relative to the static S5 model, but the
+predefined reliability-efficiency requirements were still
+not satisfied."
+
+
+If rolling provides little improvement:
+
+state:
+
+"Expanding the causally mature historical training library
+did not recover sufficient runtime reliability under the
+available request-state proxy features."
+
+
+If S5R1 fails:
+
+CURRENT_RSP_REMAINS_OPERATIONAL
+
+
+and:
+
+FURTHER_RUNTIME_MODEL_WORK =
+DEFER_UNTIL_RICHER_AUTHORITY_OR_DATA
+
+
+Do not create another runtime experiment.

@@ -1,0 +1,200 @@
+{
+  "timestamp": "2026-09-06T16:44:19.927698+00:00",
+  "selected_candidate": "R5_UARP_STYLE",
+  "selected_model": "R5_UARP_STYLE",
+  "track": "P",
+  "config_id": "L2",
+  "config": {
+    "num_leaves": 31,
+    "learning_rate": 0.02,
+    "n_estimators": 800,
+    "min_child_samples": 100
+  },
+  "fixed_parameters": {
+    "n_jobs": 1,
+    "random_state": 4005,
+    "deterministic": true,
+    "force_col_wise": true,
+    "verbosity": -1,
+    "subsample": 1.0,
+    "subsample_freq": 0,
+    "colsample_bytree": 1.0,
+    "reg_alpha": 0.0,
+    "reg_lambda": 1.0,
+    "device_type": "cpu",
+    "max_depth": -1,
+    "max_bin": 255,
+    "min_child_weight": 0.001,
+    "min_split_gain": 0.0,
+    "data_random_seed": 4005,
+    "feature_fraction_seed": 4005,
+    "bagging_seed": 4005
+  },
+  "UARP_coefficients": [
+    0.2,
+    0.5
+  ],
+  "selection_roles": [
+    "DEVELOPMENT",
+    "CALIBRATION"
+  ],
+  "gates": {
+    "TRAIN": {
+      "R2_Q90": {
+        "checks": {
+          "coverage": false,
+          "GPU_coverage": false,
+          "major_days": false,
+          "GPU_under_below_RSP": false
+        },
+        "safety": false,
+        "efficiency": true,
+        "eligible": false
+      },
+      "R3_Q95": {
+        "checks": {
+          "coverage": false,
+          "GPU_coverage": false,
+          "major_days": false,
+          "GPU_under_below_RSP": false
+        },
+        "safety": false,
+        "efficiency": true,
+        "eligible": false
+      },
+      "R4_Q99": {
+        "checks": {
+          "coverage": false,
+          "GPU_coverage": false,
+          "major_days": false,
+          "GPU_under_below_RSP": false
+        },
+        "safety": false,
+        "efficiency": true,
+        "eligible": false
+      },
+      "R5_UARP_STYLE": {
+        "checks": {
+          "coverage": false,
+          "GPU_coverage": false,
+          "major_days": false,
+          "GPU_under_below_RSP": false
+        },
+        "safety": false,
+        "efficiency": true,
+        "eligible": false
+      }
+    },
+    "DEVELOPMENT": {
+      "R2_Q90": {
+        "checks": {
+          "coverage": false,
+          "GPU_coverage": false,
+          "major_days": false,
+          "GPU_under_below_RSP": true
+        },
+        "safety": false,
+        "efficiency": true,
+        "eligible": false
+      },
+      "R3_Q95": {
+        "checks": {
+          "coverage": false,
+          "GPU_coverage": false,
+          "major_days": false,
+          "GPU_under_below_RSP": true
+        },
+        "safety": false,
+        "efficiency": true,
+        "eligible": false
+      },
+      "R4_Q99": {
+        "checks": {
+          "coverage": true,
+          "GPU_coverage": true,
+          "major_days": false,
+          "GPU_under_below_RSP": true
+        },
+        "safety": false,
+        "efficiency": true,
+        "eligible": false
+      },
+      "R5_UARP_STYLE": {
+        "checks": {
+          "coverage": true,
+          "GPU_coverage": true,
+          "major_days": true,
+          "GPU_under_below_RSP": true
+        },
+        "safety": true,
+        "efficiency": true,
+        "eligible": true
+      }
+    },
+    "CALIBRATION": {
+      "R2_Q90": {
+        "checks": {
+          "coverage": false,
+          "GPU_coverage": false,
+          "major_days": false,
+          "GPU_under_below_RSP": true
+        },
+        "safety": false,
+        "efficiency": true,
+        "eligible": false
+      },
+      "R3_Q95": {
+        "checks": {
+          "coverage": false,
+          "GPU_coverage": true,
+          "major_days": false,
+          "GPU_under_below_RSP": true
+        },
+        "safety": false,
+        "efficiency": true,
+        "eligible": false
+      },
+      "R4_Q99": {
+        "checks": {
+          "coverage": false,
+          "GPU_coverage": true,
+          "major_days": false,
+          "GPU_under_below_RSP": true
+        },
+        "safety": false,
+        "efficiency": true,
+        "eligible": false
+      },
+      "R5_UARP_STYLE": {
+        "checks": {
+          "coverage": true,
+          "GPU_coverage": true,
+          "major_days": true,
+          "GPU_under_below_RSP": true
+        },
+        "safety": true,
+        "efficiency": true,
+        "eligible": true
+      }
+    }
+  },
+  "training_policy": "ALL_CAUSALLY_MATURE_EXPANDING_HISTORY",
+  "preprocessing_policy": "Exact S5 transformation, per-origin historical-only fit",
+  "residual_policy": {
+    "method": "Exact S5 chronological expanding OOF squared residuals",
+    "OOF_Q50_config": "L0",
+    "OOF_config_reason": "Auxiliary median fixed before tuning so HIST_TUNE labels cannot affect any OOF prediction through hyperparameter selection.",
+    "final_config": "L2",
+    "support_rule": {
+      "N>=250": 5,
+      "100<=N<250": 3,
+      "N<100": "INSUFFICIENT_SUPPORT_STOP"
+    },
+    "fold_boundaries": "N/(folds+1) row-count boundaries sorted end_time,job_uid; entire boundary timestamp belongs to validation; no equal timestamp split",
+    "insufficient_distinct_boundary_timestamps": "STOP; do not silently change folds",
+    "warmup": "First chronological block excluded from residual targets",
+    "sigma": "sqrt(max(predicted_r2,0))"
+  },
+  "preregistration_SHA256": "26975294c6db6840d63a8e42703f99fde84e65150b0fc835c6e2587c3408e3be",
+  "EXPOSED_started": false
+}

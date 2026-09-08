@@ -1,0 +1,231 @@
+{
+  "issue_time": "2025-03-22 08:00:00+00:00",
+  "diagnostic_only": true,
+  "feature_selection": false,
+  "preprocessing": {
+    "track": "P",
+    "cutoff": "2025-03-20T07:31:31+00:00",
+    "columns": [
+      "requested_seconds",
+      "num_gpus_req",
+      "num_nodes_req",
+      "num_cores_req",
+      "requested_memory_mib",
+      "partition",
+      "qos",
+      "submit_hour",
+      "submit_dow"
+    ],
+    "medians": {
+      "requested_seconds": 86400.0,
+      "num_gpus_req": 1.0,
+      "num_nodes_req": 1.0,
+      "num_cores_req": 8.0,
+      "requested_memory_mib": 81920.0
+    },
+    "vocab": {
+      "partition": [
+        "__UNKNOWN__",
+        "debug-gpu",
+        "gpu-h100",
+        "gpu-h100-stdby",
+        "gpu-h100l",
+        "gpu-h100s",
+        "project_3"
+      ],
+      "qos": [
+        "__UNKNOWN__",
+        "high",
+        "normal",
+        "standby"
+      ]
+    },
+    "groups": [
+      "requested_seconds",
+      "requested_seconds",
+      "num_gpus_req",
+      "num_gpus_req",
+      "num_nodes_req",
+      "num_nodes_req",
+      "num_cores_req",
+      "num_cores_req",
+      "requested_memory_mib",
+      "requested_memory_mib",
+      "partition",
+      "partition",
+      "partition",
+      "partition",
+      "partition",
+      "partition",
+      "partition",
+      "qos",
+      "qos",
+      "qos",
+      "qos",
+      "submit_hour",
+      "submit_dow"
+    ],
+    "fit_ids_sha256": "e9ca13fac56dccb222c451ce3b25c9aa8eb64e53e9d38606ac10c5f2591b7284",
+    "fit_N": 10628,
+    "max_fit_end": "2025-03-20T07:27:44+00:00"
+  },
+  "reports": {
+    "Q50": {
+      "base_loss": 7036.981467077495,
+      "walltime_mean_loss_increase": 3449.388274593086,
+      "replicates": [
+        3412.387891895166,
+        3605.446251658427,
+        3330.330680225664
+      ],
+      "loss": "raw pinball",
+      "validation_N": 2657,
+      "validation_ids": "6f363c779dd359f0f8241286446075c635308e05609235cd5e76c6a99c861308",
+      "max_train_end": "2025-03-20 07:27:44+00:00",
+      "min_validation_end": "2025-03-20 07:31:31+00:00",
+      "max_validation_end": "2025-03-22 07:57:39+00:00",
+      "validation_overlap": 0,
+      "all_before_issue": true
+    },
+    "Q90": {
+      "base_loss": 5683.880388001734,
+      "walltime_mean_loss_increase": 4280.736370717419,
+      "replicates": [
+        4335.742657784139,
+        4287.101140656793,
+        4219.365313711326
+      ],
+      "loss": "raw pinball",
+      "validation_N": 2657,
+      "validation_ids": "6f363c779dd359f0f8241286446075c635308e05609235cd5e76c6a99c861308",
+      "max_train_end": "2025-03-20 07:27:44+00:00",
+      "min_validation_end": "2025-03-20 07:31:31+00:00",
+      "max_validation_end": "2025-03-22 07:57:39+00:00",
+      "validation_overlap": 0,
+      "all_before_issue": true
+    },
+    "Q95": {
+      "base_loss": 5784.144715636659,
+      "walltime_mean_loss_increase": 3223.7247925640277,
+      "replicates": [
+        3298.707334131099,
+        3047.7024027926345,
+        3324.7646407683496
+      ],
+      "loss": "raw pinball",
+      "validation_N": 2657,
+      "validation_ids": "6f363c779dd359f0f8241286446075c635308e05609235cd5e76c6a99c861308",
+      "max_train_end": "2025-03-20 07:27:44+00:00",
+      "min_validation_end": "2025-03-20 07:31:31+00:00",
+      "max_validation_end": "2025-03-22 07:57:39+00:00",
+      "validation_overlap": 0,
+      "all_before_issue": true
+    },
+    "Q99": {
+      "base_loss": 2661.046751710836,
+      "walltime_mean_loss_increase": 4110.05984961785,
+      "replicates": [
+        4252.908722294178,
+        3934.68448042064,
+        4142.586346138733
+      ],
+      "loss": "raw pinball",
+      "validation_N": 2657,
+      "validation_ids": "6f363c779dd359f0f8241286446075c635308e05609235cd5e76c6a99c861308",
+      "max_train_end": "2025-03-20 07:27:44+00:00",
+      "min_validation_end": "2025-03-20 07:31:31+00:00",
+      "max_validation_end": "2025-03-22 07:57:39+00:00",
+      "validation_overlap": 0,
+      "all_before_issue": true
+    },
+    "RESIDUAL": {
+      "base_loss": 6.0510984750161674e+19,
+      "walltime_mean_loss_increase": 1.5599000655248955e+19,
+      "replicates": [
+        1.6468074617983894e+19,
+        1.5838283587771318e+19,
+        1.4490643759991652e+19
+      ],
+      "loss": "MSE of historical OOF squared error",
+      "validation_N": 2657,
+      "validation_ids": "6f363c779dd359f0f8241286446075c635308e05609235cd5e76c6a99c861308",
+      "max_train_end": "2025-03-20 07:27:44+00:00",
+      "min_validation_end": "2025-03-20 07:31:31+00:00",
+      "max_validation_end": "2025-03-22 07:57:39+00:00",
+      "validation_overlap": 0,
+      "all_before_issue": true
+    }
+  },
+  "fit_records": [
+    {
+      "name": "Q50.txt.gz",
+      "config_id": "L2",
+      "alpha": 0.5,
+      "N": 10628,
+      "fit_ids_sha256": "e9ca13fac56dccb222c451ce3b25c9aa8eb64e53e9d38606ac10c5f2591b7284",
+      "max_training_end": "2025-03-20 07:27:44+00:00",
+      "preprocessing_fit_ids": "e9ca13fac56dccb222c451ce3b25c9aa8eb64e53e9d38606ac10c5f2591b7284",
+      "model_text_SHA256": "aa19fe29bd13333e8b99acd25ba3a49bb71b103e84cb4ea14b0b84a783ce8142",
+      "compressed_SHA256": "cfd2cdd9ac49ffe19a427514606bef8f43718a8a9aa532e472fc15c2a9502597",
+      "num_trees": 800,
+      "fit_seconds": 0.5531211000052281,
+      "seconds": 0.7473953000153415
+    },
+    {
+      "name": "Q90.txt.gz",
+      "config_id": "L2",
+      "alpha": 0.9,
+      "N": 10628,
+      "fit_ids_sha256": "e9ca13fac56dccb222c451ce3b25c9aa8eb64e53e9d38606ac10c5f2591b7284",
+      "max_training_end": "2025-03-20 07:27:44+00:00",
+      "preprocessing_fit_ids": "e9ca13fac56dccb222c451ce3b25c9aa8eb64e53e9d38606ac10c5f2591b7284",
+      "model_text_SHA256": "ba7ae25720c96e6afc8214cc2cb4ab63acccbef0b8cda0d876eaa642855c8942",
+      "compressed_SHA256": "cc08d263d4027dab7cc25324271bf60e214025fa861a494cdb3a3638afbd9a16",
+      "num_trees": 800,
+      "fit_seconds": 0.5249607000150718,
+      "seconds": 0.677941700007068
+    },
+    {
+      "name": "Q95.txt.gz",
+      "config_id": "L2",
+      "alpha": 0.95,
+      "N": 10628,
+      "fit_ids_sha256": "e9ca13fac56dccb222c451ce3b25c9aa8eb64e53e9d38606ac10c5f2591b7284",
+      "max_training_end": "2025-03-20 07:27:44+00:00",
+      "preprocessing_fit_ids": "e9ca13fac56dccb222c451ce3b25c9aa8eb64e53e9d38606ac10c5f2591b7284",
+      "model_text_SHA256": "94e3229705337bab22938c074e14256993e2b8f8314e1704d4ce86c107d98ea3",
+      "compressed_SHA256": "bd7126fc9e5520008c2cbdde8881cb063be34056a4d722dd26573a16b17cf382",
+      "num_trees": 800,
+      "fit_seconds": 0.5150156999879982,
+      "seconds": 0.6572576999897137
+    },
+    {
+      "name": "Q99.txt.gz",
+      "config_id": "L2",
+      "alpha": 0.99,
+      "N": 10628,
+      "fit_ids_sha256": "e9ca13fac56dccb222c451ce3b25c9aa8eb64e53e9d38606ac10c5f2591b7284",
+      "max_training_end": "2025-03-20 07:27:44+00:00",
+      "preprocessing_fit_ids": "e9ca13fac56dccb222c451ce3b25c9aa8eb64e53e9d38606ac10c5f2591b7284",
+      "model_text_SHA256": "e99f6d56ab2d9e8924468154a48c14e9d5952cbe2bcc4334c92ea44b7c09ce1d",
+      "compressed_SHA256": "fb0ecb1fef74dec63c55a6e9a9aba04571125514b22061d60401152f95c7b340",
+      "num_trees": 800,
+      "fit_seconds": 0.4750889000133611,
+      "seconds": 0.6127949999936391
+    },
+    {
+      "name": "RESIDUAL.txt.gz",
+      "config_id": "L2",
+      "alpha": null,
+      "N": 8414,
+      "fit_ids_sha256": "f906fb3b34f586d87e8bf613ec4bedd775980036b48860a3f42790d079d0dc82",
+      "max_training_end": "2025-03-20 07:27:44+00:00",
+      "preprocessing_fit_ids": "e9ca13fac56dccb222c451ce3b25c9aa8eb64e53e9d38606ac10c5f2591b7284",
+      "model_text_SHA256": "3876f0286971960347b054365be7bd59f940866c14f3a775aac298b43440a19c",
+      "compressed_SHA256": "65eb4b1d676d977ac913419c634a34ec8f9baf0c70719aba4f5de7f5e9fcbeb1",
+      "num_trees": 800,
+      "fit_seconds": 0.32526080001844093,
+      "seconds": 0.45001860000775196
+    }
+  ]
+}
