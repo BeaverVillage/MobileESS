@@ -1,0 +1,352 @@
+{
+  "working_name": "V40R6_MULTI_HORIZON_CUMULATIVE_GPUWORK",
+  "base": "528716aa36b02bbe0ebff3cf9639984c6b2c535e",
+  "created_at_UTC": "2026-09-06T16:30:48.846063+00:00",
+  "before_any_R6_fit": true,
+  "target": "Frozen native DeltaW15 sum; no target transform until training; no label clipping/smoothing/winsorization",
+  "horizons": {
+    "H1": 4,
+    "H4": 16,
+    "H8": 32,
+    "H24": 96
+  },
+  "within_day": true,
+  "primary": [
+    "H4",
+    "H24"
+  ],
+  "secondary": [
+    "H1",
+    "H8"
+  ],
+  "issue_time": "Exact R5 D-1 18:00 fixed AEST (UTC+10)",
+  "split": "Exact R5 roles plus original stage maturity; CAL calendar first15/last14 with 15/11 eligible days",
+  "feature_contract": {
+    "feature_names": [
+      "history_submit_count_12_mean",
+      "history_submit_count_12_std",
+      "history_submit_count_12_max",
+      "history_mature_GPUh_12_mean",
+      "history_mature_GPUh_12_std",
+      "history_mature_GPUh_12_max",
+      "history_mature_mask_12_mean",
+      "history_mature_mask_12_std",
+      "history_mature_mask_12_max",
+      "history_maturity_age_hours_12_mean",
+      "history_maturity_age_hours_12_std",
+      "history_maturity_age_hours_12_max",
+      "history_submit_count_48_mean",
+      "history_submit_count_48_std",
+      "history_submit_count_48_max",
+      "history_mature_GPUh_48_mean",
+      "history_mature_GPUh_48_std",
+      "history_mature_GPUh_48_max",
+      "history_mature_mask_48_mean",
+      "history_mature_mask_48_std",
+      "history_mature_mask_48_max",
+      "history_maturity_age_hours_48_mean",
+      "history_maturity_age_hours_48_std",
+      "history_maturity_age_hours_48_max",
+      "history_submit_count_336_mean",
+      "history_submit_count_336_std",
+      "history_submit_count_336_max",
+      "history_mature_GPUh_336_mean",
+      "history_mature_GPUh_336_std",
+      "history_mature_GPUh_336_max",
+      "history_mature_mask_336_mean",
+      "history_mature_mask_336_std",
+      "history_mature_mask_336_max",
+      "history_maturity_age_hours_336_mean",
+      "history_maturity_age_hours_336_std",
+      "history_maturity_age_hours_336_max",
+      "history_submit_count_last",
+      "history_mature_GPUh_last",
+      "history_mature_mask_last",
+      "history_maturity_age_hours_last",
+      "slot15_fraction",
+      "minute_of_day",
+      "hour_sin",
+      "hour_cos",
+      "weekday_sin",
+      "weekday_cos",
+      "weekend",
+      "child15_position",
+      "lead_hours",
+      "seasonal15_7d_GPUh",
+      "seasonal15_7d_count",
+      "seasonal15_7d_mature",
+      "seasonal15_14d_GPUh",
+      "seasonal15_14d_count",
+      "seasonal15_14d_mature",
+      "seasonal15_21d_GPUh",
+      "seasonal15_21d_count",
+      "seasonal15_21d_mature",
+      "seasonal15_28d_GPUh",
+      "seasonal15_28d_count",
+      "seasonal15_28d_mature",
+      "window_start_slot",
+      "horizon_hours",
+      "cumulative_lag_7d_GPUh",
+      "cumulative_lag_7d_mature",
+      "cumulative_lag_14d_GPUh",
+      "cumulative_lag_14d_mature",
+      "cumulative_lag_21d_GPUh",
+      "cumulative_lag_21d_mature",
+      "cumulative_lag_28d_GPUh",
+      "cumulative_lag_28d_mature"
+    ],
+    "feature_count": 71,
+    "inherited_R5_features": 61,
+    "inherited_alignment": "Exact R5 vector at cumulative window start; no averages of future features",
+    "additional_context": [
+      "window_start_slot",
+      "horizon_hours"
+    ],
+    "cumulative_lags_days": [
+      7,
+      14,
+      21,
+      28
+    ],
+    "lag_rule": "Sum exact R5 historical seasonal15 GPUh only when every member bin is mature and latest raw availability < current issue time",
+    "unavailable_lag": "0 with mature=0; not an observed zero or missing-GPU replacement",
+    "strict_derived_maturity": true,
+    "inherited_availability_rule": "R5 available_at <= issue retained; deterministic computations at issue allowed",
+    "future_realized_features": [],
+    "burst_classifier_outputs": [],
+    "external_inputs_added": [],
+    "data_SHA256": "e3463e17ad27ac27c963a523ce9f9db0b33f3d540188036b87a80b3da80520ff",
+    "R5_contract_SHA256": "e93f03a7b6421b78c310ef85043e61aa0bee095b54f5f9370d8565bcdde00d68",
+    "features_SHA256": "8971fbf2cd37aaf6502bd2699a2dd6baec9a352761bb1464a96d588d9fa73100",
+    "maturity_proof_SHA256": "17470eb2b55b6f9128aaa77b22e4d96000c2ff4248396cec6310848b63d5d1cd",
+    "source_authority_limit": "Logical event-time reconstruction; real telemetry ingestion delays and mutable request version timestamps not certified"
+  },
+  "families": [
+    "B0",
+    "B1",
+    "B2"
+  ],
+  "B0": {
+    "central_only": true,
+    "weekly_lags": [
+      7,
+      14,
+      21,
+      28
+    ],
+    "fallback": [
+      "mature_TRAIN_same_window_median",
+      "mature_TRAIN_horizon_median",
+      "zero_no_history"
+    ]
+  },
+  "B1": {
+    "source": "TRAIN only AND target full-day available_at < issue_time",
+    "quantiles": [
+      0.5,
+      0.9
+    ],
+    "hierarchy": [
+      "horizon_start_weekday",
+      "horizon_start",
+      "horizon",
+      "global_TRAIN_horizon"
+    ],
+    "support_thresholds": [
+      8,
+      20,
+      50,
+      1
+    ],
+    "quantile_method": "linear",
+    "global_fallback": "Still conditions on horizon; no duration mixing"
+  },
+  "B2": {
+    "configs": {
+      "L0": {
+        "num_leaves": 15,
+        "learning_rate": 0.03,
+        "n_estimators": 400,
+        "min_child_samples": 50
+      },
+      "L1": {
+        "num_leaves": 31,
+        "learning_rate": 0.03,
+        "n_estimators": 600,
+        "min_child_samples": 50
+      },
+      "L2": {
+        "num_leaves": 31,
+        "learning_rate": 0.02,
+        "n_estimators": 800,
+        "min_child_samples": 100
+      }
+    },
+    "quantiles": [
+      0.5,
+      0.9
+    ],
+    "target_transform": "log1p",
+    "inverse": "expm1",
+    "negative_epsilon_tolerance": 1e-10,
+    "large_prediction_clipping": false,
+    "CPU": true,
+    "threads": 1,
+    "seed": 20260907,
+    "deterministic": true,
+    "force_col_wise": true,
+    "fit_scope": "TRAIN only; no refit with DEV/CAL",
+    "common_config_selection": "DEVELOPMENT only",
+    "score": "Mean of eight per-H/quantile pinball means normalized by TRAIN mean GPUh of that horizon",
+    "tie_break": [
+      "mean normalized Q90 pinball",
+      "mean Q50 MAE",
+      "L0 before L1 before L2"
+    ],
+    "skill_gate": "Per horizon DEV Q50 MAE <= B1 and positive Q90 pinball <= B1; at least one strict improvement"
+  },
+  "crossing_repair": "Q90=max(raw Q90,raw Q50)",
+  "calibration": {
+    "name": "HORIZON_SPECIFIC_LOG_RESIDUAL_UPPER_CALIBRATION",
+    "scope": "CAL_FIT only",
+    "delta": "max(0, quantile(log1p(y)-log1p(repaired Q90), .90, method=linear))",
+    "upper": "expm1(log1p(repaired Q90)+delta_H)",
+    "one_delta_per_horizon": true,
+    "guaranteed_conformal_validity": false
+  },
+  "candidates": {
+    "U0": "B1 seasonal Q90",
+    "U1": "B2 repaired raw Q90",
+    "U2": "B2 calibrated U90"
+  },
+  "metrics": {
+    "positive": "y>0; coverage/pinball/MAE/WAPE/under/over",
+    "overall_coverage": "DIAGNOSTIC_ONLY_NO_UPPER_GATE",
+    "day_coverage": "Positive windows only, average equally over calendar days having >=1 positive window",
+    "overlap": "Pooled window sums reuse atomic work and are not distinct GPUh totals; cluster reporting mandatory"
+  },
+  "gates": {
+    "positive_coverage": [
+      0.9,
+      0.975
+    ],
+    "mean_day_coverage_min": 0.88,
+    "minimum_positive_days": 5,
+    "monthly_support_min_positive_days": 5,
+    "supported_month_mean_day_coverage_min": 0.88,
+    "catastrophic_month": "Supported month positive pooled coverage <.80 OR mean day positive coverage <.80",
+    "positive_upper_WAPE_strict_max": 3.0,
+    "over_GPUh": "Strictly below TRAIN unconditional per-horizon Q95 anchor over_GPUh on same evaluated rows",
+    "secondary": "Same gates; failure does not invalidate primary"
+  },
+  "selection": {
+    "scope": "CAL_SELECT only",
+    "hierarchy": [
+      "U1",
+      "U2",
+      "U0",
+      "NONE"
+    ],
+    "B2_requires_DEV_skill": true,
+    "all_horizons_frozen": true
+  },
+  "exposed": {
+    "only_after_selection_freeze_commit": true,
+    "same_safety_efficiency_gates": true,
+    "additional_under_GPUh": "B2 strictly lower than B1; selected B1 equals same B1 baseline",
+    "no_reselection_recalibration_refit": true,
+    "NONE": "Remains NONE; all three preregistered candidates reported as diagnostics",
+    "TRUE_CONFIRMATORY_AVAILABLE": "NO",
+    "only_historical_diagnostic_evidence": true
+  },
+  "classification_precedence": [
+    "primary fail => SAFETY_FAIL",
+    "both primary select B1 and pass => SEASONAL_BASELINE_REMAINS_SELECTED",
+    "all four selected pass => FULL_PREVALIDATED",
+    "only primary pass => PRIMARY_PREVALIDATED"
+  ],
+  "15min_shape": {
+    "source": "Frozen R5 DEV-selected full-target B3 selected_q.npy column Q50",
+    "purpose": "SHAPE_ONLY",
+    "new_model_fit": false,
+    "new_R6_family": false,
+    "safety_claim": false
+  },
+  "bootstrap": {
+    "only_if_primary_exposed_pass": true,
+    "unit": "calendar day",
+    "draws": 1000,
+    "seed": 20260907,
+    "comparison": "selected minus B1"
+  },
+  "interface": {
+    "only_if_primary_success": true,
+    "rows": "Historical EXPOSED day, all horizons window_start_slot=0",
+    "secondary_NONE_upper": null,
+    "optimizer_use_allowed": false,
+    "synthetic_jobs": false
+  },
+  "physical_semantics": "GPUh service-work mass; no instantaneous occupancy/count/IT/PCC power inference; future backlog equation proposal only",
+  "reproducibility": "Independent same-seed final8 refit once before selection freeze; compare CAL and later EXPOSED outputs; no replicate selection",
+  "optimizer_firewall": {
+    "optimizer_calls": 0,
+    "Gurobi_calls": 0,
+    "OpenDSS_calls": 0,
+    "Fresh_calls": 0
+  },
+  "May_firewall": {
+    "scientific_reads": 0,
+    "Apr24_30_shadow_scientific_reads": 0,
+    "shadow": "SEALED",
+    "metadata": "NONZERO disclosed"
+  },
+  "system_sequence": "A0 -> M1 route+P/Q -> A1 feedback -> MF fixed-route P/Q -> Joint Freeze -> Fresh OpenDSS",
+  "system_changes": false,
+  "holds": {
+    "production_q_seconds": 5576.44921875,
+    "PF": 0.95,
+    "Q_control": "NO",
+    "electrical": "HOLD",
+    "electrical_B0_B3": "NO",
+    "FULL_MAY": "NO",
+    "optimizer_integration": "NO",
+    "production_ready": "NO"
+  },
+  "frozen_hashes": {
+    "dayahead/v40r6/common.py": "4bc2598f38aeb3069114a2f6c1eebb43d94a7d5c99cbdde62e201a1e51b566bf",
+    "dayahead/v40r6/evaluate.py": "0ccf4a1b3eca1641cd74a3b51f51fce9136f961a84d0bb25c77213bc3b4bd77b",
+    "dayahead/v40r6/metrics.py": "0039572ac5a34dea4036b3d101789c7fe917532d56a3b1ea34bfa22e19464d90",
+    "dayahead/v40r6/models.py": "773e2b4556c9922bbb744294059dd12702fef478252e8f6224738a8410077744",
+    "dayahead/v40r6/phase0.py": "d06265779822b9aa44778c236932659f38c0438df4a14511969147bb3d718bbe",
+    "dayahead/v40r6/preregister.py": "b52a48975b577bd4ab0171fcf3bd8b40ed0c912182a0ff29ac221c0117a63d19",
+    "dayahead/v40r6/train.py": "f2ca83de98a8655bd15b0ed1f45c75380520441d897b18edde0774ab055ec3cd",
+    "dayahead/v40r6/__init__.py": "30fd3b8835924c74424534aaa4576fac1531739e77a844fae4a6acc1342f3bcd",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_CUMULATIVE_TARGET.parquet": "091025b3da865e88099d68e2993e841660ee8baa2a07064099e6b777d85774a8",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_CUMULATIVE_TARGET_AUDIT.json": "dd5e499926ae1ab9c0ca4272093145a4f4a06ee1033720de91d5bc0d1390ae40",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_CUMULATIVE_TARGET_IDENTITY_AUDIT.json": "89e8a9377649e8adb3e142bf8618adf50542b92de9c968b270d69370d9eaab82",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_HORIZON_DISTRIBUTION_AUDIT.json": "ebff9fd03228ed9a087eba4a6808175bd5c8ee1d0a921e2392b6824317e4c6a4",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_ZERO_INFLATION_AUDIT.json": "396f363ff3e20c18d09c37030ff244bc54682a0fdd83f3a692672da0ef6ea25e",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_EVALUATION_GATE_FEASIBILITY_AUDIT.json": "170a34469de9f57923c48a3778914cb7e46da8169035a891dddcd930113d4184",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_TEMPORAL_SPLIT_CONTRACT.json": "b7e151031a960b7d1d9a65d4fd54e9d2fda230865ac731e270ab8ff8b5385827",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_CAL_SUBSPLIT_CONTRACT.json": "15e94930c29b07a0ebefd672b7adedd39c8334cb0061ef53395946b1ddc602ee",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_FEATURE_AUTHORITY_AUDIT.json": "1ab5ee57e316ee4237a52f299d32b7c3340a795a4aa1d4316cb9d89212ed3c4d",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_FEATURE_CONTRACT.json": "6a072e36cd783ede71ab1716d2c7e9f535e5827194430f57ed2f4d4c7ae32193",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_FEATURE_MATURITY_PROOF.parquet": "17470eb2b55b6f9128aaa77b22e4d96000c2ff4248396cec6310848b63d5d1cd",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/features.npz": "8971fbf2cd37aaf6502bd2699a2dd6baec9a352761bb1464a96d588d9fa73100",
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_R5_TARGET_AUTHORITY_FREEZE.json": "a64f70143166b341d66746ca0121fd17fa90f97a961c3d5133b8e1d7c0b83825",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/data.npz": "e3463e17ad27ac27c963a523ce9f9db0b33f3d540188036b87a80b3da80520ff",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/feature_availability.npz": "f51e0808ca9725533eb30105109e6a0261408952684bafdb9c38ff12df772ce7",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/seasonal_maturity_proof.parquet": "4c1496a3298893b00e19f700f6631003d226aebb0646e030a9b2793fb3a67c2e",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_15MIN_TARGET_RECONSTRUCTION.parquet": "be18f53ab8efc082f85dc519c5cb1efe0cc859cc3e8f58ddd99354196968a443",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_TEMPORAL_SPLIT_CONTRACT.json": "b7e151031a960b7d1d9a65d4fd54e9d2fda230865ac731e270ab8ff8b5385827",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/inputs/V40R3_LABEL_MATURITY_LEDGER.parquet": "64fb7614531f7aabbc6c76741299c7023b23421906485c341087d4c6d42140ed",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/inputs/causal_dataset.npz": "d434299f0ca9131a234239aaddfc0c9bd248fc93e6ba2aedcc06f1fa9a7eed36",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B3/selected_q.npy": "a9504b8f4d5d7605e516e8b407fd49246cadc563e7c9864e5d7feb9cecb72045"
+  },
+  "runtime": {
+    "Python": "3.11.7",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "lightgbm": "4.6.0"
+  }
+}

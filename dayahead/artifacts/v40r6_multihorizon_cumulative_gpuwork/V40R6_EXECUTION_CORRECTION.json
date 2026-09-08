@@ -1,0 +1,37 @@
+{
+  "time_UTC": "2026-09-06T16:32:55.943967+00:00",
+  "stage": "One first L0 H1 Q50 fit completed; no hyperparameter scores/CAL/EXPOSED predictions evaluated",
+  "problem": "Implementation raised on substantive negative inverse predictions, an unrequested whole-experiment stop not specified by the user protocol",
+  "correction": "Keep expm1 outputs unchanged, including substantive negatives; clip ONLY numerical negative epsilon per original contract; record invalid-sign diagnostics",
+  "scientific_contract_changed": false,
+  "target_transform_changed": false,
+  "model_config_changed": false,
+  "coverage_efficiency_skill_gates_changed": false,
+  "source_changes": {
+    "dayahead/v40r6/common.py": {
+      "preregistered_SHA256": "4bc2598f38aeb3069114a2f6c1eebb43d94a7d5c99cbdde62e201a1e51b566bf",
+      "corrected_SHA256": "294b282e5977754664fd4798bf0acfdea18676dc7bc767dec71cf01d420de55c"
+    },
+    "dayahead/v40r6/models.py": {
+      "preregistered_SHA256": "773e2b4556c9922bbb744294059dd12702fef478252e8f6224738a8410077744",
+      "corrected_SHA256": "47221639b5f6afe4b31f5a97623611d07e50d046607b971dea2cf07f805485e7"
+    },
+    "dayahead/v40r6/train.py": {
+      "preregistered_SHA256": "f2ca83de98a8655bd15b0ed1f45c75380520441d897b18edde0774ab055ec3cd",
+      "corrected_SHA256": "659537a2da8ede0cd86f04de86c31e00b174720099c884320ebcbfb3d88cc6fe"
+    }
+  },
+  "preserved_partial_models": {
+    "dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/fits/L0/H1_Q50.txt": "7a4fafa579bb517509e0b0126843bc1d6d8f8c326a0f4df284017fcb9a7f7cc0"
+  },
+  "original_model_file_time_UTC": "2026-09-06T16:31:16.723883+00:00",
+  "resumption_rule": "Reuse exactly the existing model bytes; no refit; execute remaining registered fits once",
+  "observed_first_model": {
+    "N": 5394,
+    "negative_count": 95,
+    "min_GPUh": -0.22820953549350254,
+    "min_negative_abs_GPUh": 0.007519123190518416
+  },
+  "interpretation": "Raw negative quantiles are a model defect disclosed quantitatively; do not fabricate nonnegative values or infer whole-primary failure from secondary H1",
+  "initial_prefit_test_restart": "One prefit validation run stopped for repeated NPZ decompression; fixed before preregistration; 79 prefit checks then passed"
+}
