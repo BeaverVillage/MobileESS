@@ -1,0 +1,56 @@
+{
+  "assumption_id": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+  "tracks": {
+    "C": {
+      "role": "STRICT_PROVENANCE_REFERENCE",
+      "features": [
+        "submit_hour",
+        "submit_dow"
+      ],
+      "retrain": false
+    },
+    "P": {
+      "role": "ASSUMPTION_BASED_OPERATIONAL_PROXY",
+      "features": [
+        "requested_seconds",
+        "num_gpus_req",
+        "num_nodes_req",
+        "num_cores_req",
+        "requested_memory_mib",
+        "partition",
+        "qos",
+        "submit_hour",
+        "submit_dow"
+      ]
+    },
+    "PW": {
+      "role": "WALLTIME_DEPENDENCE_SENSITIVITY",
+      "features": [
+        "num_gpus_req",
+        "num_nodes_req",
+        "num_cores_req",
+        "requested_memory_mib",
+        "partition",
+        "qos",
+        "submit_hour",
+        "submit_dow"
+      ]
+    }
+  },
+  "requested_GPU_dual_role": "Predictor in both P and P-W, independently frozen evaluation weight in all tracks; recorded request, not measured allocation",
+  "forbidden_predictors": [
+    "job_id",
+    "job_issue_uid",
+    "user",
+    "account",
+    "job_name",
+    "start_time",
+    "end_time",
+    "runtime_seconds",
+    "K0",
+    "reference_safe_sec",
+    "support counts"
+  ],
+  "walltime": "Predictive covariate; new model quantiles never clipped to walltime",
+  "proxy_values_frozen_at_issue_by_assumption": true
+}
