@@ -1,0 +1,182 @@
+{
+  "classification": "V40R5_BODY_FORECAST_INSUFFICIENT",
+  "selected_model": null,
+  "frozen_rejected_diagnostic_pipeline": {
+    "id": "PB1_BC0_C3_R0",
+    "body": "PB1",
+    "body_calibration": "BC0",
+    "classifier": "C3",
+    "envelope": "R0",
+    "eta": 0.01638961397111416,
+    "all_CAL_pass": false,
+    "CAL_gate": {
+      "coverage": {
+        "overall": {
+          "N": 2496,
+          "value": 0.9591346153846154,
+          "gate": "FAIL"
+        },
+        "positive": {
+          "N": 1301,
+          "value": 0.921598770176787,
+          "gate": "PASS"
+        },
+        "burst": {
+          "N": 151,
+          "value": 0.8344370860927153,
+          "gate": "FAIL"
+        }
+      },
+      "temporal": [
+        {
+          "month": "2024-11",
+          "metrics": {
+            "N": 2496,
+            "primary": 1.1131411874892572,
+            "Q90_style_pinball_mean": 150.21235272626205,
+            "point_q50": {
+              "N": 2496,
+              "MAE": 99.33075822014878,
+              "RMSE": 1309.621991913283,
+              "WAPE": 0.9974027175599647,
+              "bias": -98.06706780777346
+            },
+            "point_positive_q50": {
+              "N": 1301,
+              "MAE": 189.98101911686288,
+              "RMSE": 1813.9668942783214,
+              "WAPE": 0.9943281281821339,
+              "bias": -188.73148954239454
+            },
+            "safe_point": {
+              "N": 2496,
+              "MAE": 1065.3039538669836,
+              "RMSE": 1763.513934108392,
+              "WAPE": 10.696959105651668,
+              "bias": 956.0990605180742
+            },
+            "positive_safe_point": {
+              "N": 1301,
+              "MAE": 1288.771094852188,
+              "RMSE": 2181.764323434725,
+              "WAPE": 6.745207265212906,
+              "bias": 1079.258862877647
+            },
+            "coverage": {
+              "overall": {
+                "N": 2496,
+                "value": 0.9591346153846154,
+                "error_from_90": 0.0591346153846154
+              },
+              "positive": {
+                "N": 1301,
+                "value": 0.921598770176787,
+                "error_from_90": 0.02159877017678702
+              },
+              "burst": {
+                "N": 151,
+                "value": 0.8344370860927153,
+                "error_from_90": 0.06556291390728475
+              }
+            },
+            "overprediction_GPUh": 2522710.961952552,
+            "underprediction_GPUh": 136287.7068994388,
+            "missed_burst_GPUh": 132965.12874805383,
+            "captured_burst_GPUh": 82337.43902972396,
+            "captured_burst_fraction": 0.3824266467397995,
+            "mean_burst_shortfall_GPUh": 880.5637665434028,
+            "negative_outputs": 0
+          },
+          "burst_gate": "FAIL",
+          "catastrophic_safe_WAPE": true
+        }
+      ],
+      "primary_better_than_ZERO": false,
+      "all_pass": false,
+      "WAPE_gate_semantics": "Monthly selected-safe envelope WAPE <=2.0, not body Q50 WAPE"
+    },
+    "CAL_metrics": {
+      "N": 2496,
+      "primary": 1.1131411874892572,
+      "Q90_style_pinball_mean": 150.21235272626205,
+      "point_q50": {
+        "N": 2496,
+        "MAE": 99.33075822014878,
+        "RMSE": 1309.621991913283,
+        "WAPE": 0.9974027175599647,
+        "bias": -98.06706780777346
+      },
+      "point_positive_q50": {
+        "N": 1301,
+        "MAE": 189.98101911686288,
+        "RMSE": 1813.9668942783214,
+        "WAPE": 0.9943281281821339,
+        "bias": -188.73148954239454
+      },
+      "safe_point": {
+        "N": 2496,
+        "MAE": 1065.3039538669836,
+        "RMSE": 1763.513934108392,
+        "WAPE": 10.696959105651668,
+        "bias": 956.0990605180742
+      },
+      "positive_safe_point": {
+        "N": 1301,
+        "MAE": 1288.771094852188,
+        "RMSE": 2181.764323434725,
+        "WAPE": 6.745207265212906,
+        "bias": 1079.258862877647
+      },
+      "coverage": {
+        "overall": {
+          "N": 2496,
+          "value": 0.9591346153846154,
+          "error_from_90": 0.0591346153846154
+        },
+        "positive": {
+          "N": 1301,
+          "value": 0.921598770176787,
+          "error_from_90": 0.02159877017678702
+        },
+        "burst": {
+          "N": 151,
+          "value": 0.8344370860927153,
+          "error_from_90": 0.06556291390728475
+        }
+      },
+      "overprediction_GPUh": 2522710.961952552,
+      "underprediction_GPUh": 136287.7068994388,
+      "missed_burst_GPUh": 132965.12874805383,
+      "captured_burst_GPUh": 82337.43902972396,
+      "captured_burst_fraction": 0.3824266467397995,
+      "mean_burst_shortfall_GPUh": 880.5637665434028,
+      "negative_outputs": 0
+    },
+    "rank": [
+      true,
+      false,
+      false,
+      true,
+      true,
+      1.1131411874892572,
+      132965.12874805383,
+      2522710.961952552,
+      3,
+      0,
+      "BC0"
+    ]
+  },
+  "body_model": "PB1",
+  "classifier": "C3",
+  "burst_threshold_GPUh": 240.44105555555552,
+  "eta": 0.01638961397111416,
+  "envelope": "R0",
+  "all_mandatory_PASS": false,
+  "strongest_baseline": "B3",
+  "superiority": false,
+  "TRUE_CONFIRMATORY_AVAILABLE": "NO",
+  "optimizer_integration": false,
+  "PRODUCTION_READY": false,
+  "selection_commit": "2917efa8a3b56b2bc0b897574009eb96df3cd526",
+  "no_post_evaluation_tuning": true
+}

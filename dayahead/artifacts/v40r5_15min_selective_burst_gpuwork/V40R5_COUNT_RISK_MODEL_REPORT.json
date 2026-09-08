@@ -1,0 +1,218 @@
+{
+  "auxiliary_for_classifier": "N1",
+  "comparison": [
+    {
+      "N": 5568,
+      "MAE": 10.686108117816092,
+      "RMSE": 46.86199278079255,
+      "WAPE": 1.608375682543115,
+      "bias": -0.32338062739463624,
+      "role": "DEVELOPMENT",
+      "model": "N0",
+      "large_count_N": 37,
+      "N_high": 180.84999999999945,
+      "P90_coverage": 0.7934626436781609,
+      "large_count_recall_using_P90": 0.05405405405405406,
+      "large_count_PR_AUC": 0.007825085825158881,
+      "large_count_ROC_AUC": 0.5166946009469965,
+      "probability_Brier": 0.008237797333971904
+    },
+    {
+      "N": 5568,
+      "MAE": 11.804730143555865,
+      "RMSE": 41.139454910682744,
+      "WAPE": 1.7767404833032128,
+      "bias": 2.162239286551101,
+      "role": "DEVELOPMENT",
+      "model": "N1",
+      "large_count_N": 37,
+      "N_high": 180.84999999999945,
+      "P90_coverage": 0.9583333333333334,
+      "large_count_recall_using_P90": 0.0,
+      "large_count_PR_AUC": 0.013261310294964052,
+      "large_count_ROC_AUC": 0.6735525074885047,
+      "probability_Brier": 0.006687310774007144,
+      "mean_NB_log_likelihood": -2.0564192058116286
+    },
+    {
+      "N": 2496,
+      "MAE": 11.573417467948717,
+      "RMSE": 75.67423024486341,
+      "WAPE": 1.5585244132721878,
+      "bias": -0.9720552884615387,
+      "role": "CALIBRATION",
+      "model": "N0",
+      "large_count_N": 15,
+      "N_high": 180.84999999999945,
+      "P90_coverage": 0.7704326923076923,
+      "large_count_recall_using_P90": 0.0,
+      "large_count_PR_AUC": 0.006009615384615385,
+      "large_count_ROC_AUC": 0.48851269649334944,
+      "probability_Brier": 0.007665041844729344
+    },
+    {
+      "N": 2496,
+      "MAE": 10.219133404507586,
+      "RMSE": 71.78536585098091,
+      "WAPE": 1.3761509024899343,
+      "bias": -1.3697379622539654,
+      "role": "CALIBRATION",
+      "model": "N1",
+      "large_count_N": 15,
+      "N_high": 180.84999999999945,
+      "P90_coverage": 0.9647435897435898,
+      "large_count_recall_using_P90": 0.0,
+      "large_count_PR_AUC": 0.01177198892173078,
+      "large_count_ROC_AUC": 0.608652425097407,
+      "probability_Brier": 0.006029489019256083,
+      "mean_NB_log_likelihood": -2.2025829166026143
+    },
+    {
+      "N": 8448,
+      "MAE": 29.229817708333332,
+      "RMSE": 104.45995863093154,
+      "WAPE": 1.7105040765293047,
+      "bias": -0.12458570075757668,
+      "role": "EXPOSED_EVALUATION",
+      "model": "N0",
+      "large_count_N": 175,
+      "N_high": 180.84999999999945,
+      "P90_coverage": 0.779592803030303,
+      "large_count_recall_using_P90": 0.06285714285714286,
+      "large_count_PR_AUC": 0.02116082338360564,
+      "large_count_ROC_AUC": 0.500033154323013,
+      "probability_Brier": 0.02555174137205387
+    },
+    {
+      "N": 8448,
+      "MAE": 22.69590168218446,
+      "RMSE": 93.95904700110869,
+      "WAPE": 1.3281448668363385,
+      "bias": -5.966551539827333,
+      "role": "EXPOSED_EVALUATION",
+      "model": "N1",
+      "large_count_N": 175,
+      "N_high": 180.84999999999945,
+      "P90_coverage": 0.9343039772727273,
+      "large_count_recall_using_P90": 0.04,
+      "large_count_PR_AUC": 0.033697341213717896,
+      "large_count_ROC_AUC": 0.5104225449396488,
+      "probability_Brier": 0.020621749626746448,
+      "mean_NB_log_likelihood": -2.8914386194635058
+    }
+  ],
+  "TRAIN_stack_audit": {
+    "folds": [
+      {
+        "fold": 0,
+        "first_day": "2024-03-15",
+        "last_day": "2024-04-17",
+        "prediction_rows": 3264,
+        "training_rows": 0,
+        "fit_label_cutoff": "2024-03-14 08:00:00+00:00",
+        "method": "N0 causal mature seasonal warm-up",
+        "max_training_label_available_at": null
+      },
+      {
+        "fold": 1,
+        "first_day": "2024-04-18",
+        "last_day": "2024-05-21",
+        "prediction_rows": 3264,
+        "training_rows": 3072,
+        "fit_label_cutoff": "2024-04-17 08:00:00+00:00",
+        "method": "N1 past-mature expanding fold",
+        "max_training_label_available_at": "2024-04-16 14:00:00+00:00"
+      },
+      {
+        "fold": 2,
+        "first_day": "2024-05-22",
+        "last_day": "2024-06-23",
+        "prediction_rows": 3168,
+        "training_rows": 6432,
+        "fit_label_cutoff": "2024-05-21 08:00:00+00:00",
+        "method": "N1 past-mature expanding fold",
+        "max_training_label_available_at": "2024-05-20 20:47:55+00:00"
+      },
+      {
+        "fold": 3,
+        "first_day": "2024-06-24",
+        "last_day": "2024-07-26",
+        "prediction_rows": 3168,
+        "training_rows": 9408,
+        "fit_label_cutoff": "2024-06-23 08:00:00+00:00",
+        "method": "N1 past-mature expanding fold",
+        "max_training_label_available_at": "2024-06-22 23:52:07+00:00"
+      },
+      {
+        "fold": 4,
+        "first_day": "2024-07-27",
+        "last_day": "2024-08-28",
+        "prediction_rows": 3168,
+        "training_rows": 12480,
+        "fit_label_cutoff": "2024-07-26 08:00:00+00:00",
+        "method": "N1 past-mature expanding fold",
+        "max_training_label_available_at": "2024-07-25 06:23:39+00:00"
+      }
+    ],
+    "runs": [
+      {
+        "candidate": "N1",
+        "tag": "full",
+        "dispersion_r": 0.25574634387085865,
+        "fit_rows": 16032,
+        "fit_time_seconds": 0.6719999999913853,
+        "prediction_time_seconds": 1.2660000000032596,
+        "device": "cpu",
+        "seed": 20260907,
+        "threads": 4
+      },
+      {
+        "candidate": "N1",
+        "tag": "fold_1",
+        "dispersion_r": 0.42858052505761024,
+        "fit_rows": 3072,
+        "fit_time_seconds": 0.1870000000053551,
+        "prediction_time_seconds": 1.2820000000065193,
+        "device": "cpu",
+        "seed": 20260907,
+        "threads": 4
+      },
+      {
+        "candidate": "N1",
+        "tag": "fold_2",
+        "dispersion_r": 0.48741106365853476,
+        "fit_rows": 6432,
+        "fit_time_seconds": 0.375,
+        "prediction_time_seconds": 1.2809999999881256,
+        "device": "cpu",
+        "seed": 20260907,
+        "threads": 4
+      },
+      {
+        "candidate": "N1",
+        "tag": "fold_3",
+        "dispersion_r": 0.3426812040567651,
+        "fit_rows": 9408,
+        "fit_time_seconds": 0.375,
+        "prediction_time_seconds": 1.2660000000032596,
+        "device": "cpu",
+        "seed": 20260907,
+        "threads": 4
+      },
+      {
+        "candidate": "N1",
+        "tag": "fold_4",
+        "dispersion_r": 0.2779581528484951,
+        "fit_rows": 12480,
+        "fit_time_seconds": 0.4840000000258442,
+        "prediction_time_seconds": 1.2030000000086147,
+        "device": "cpu",
+        "seed": 20260907,
+        "threads": 4
+      }
+    ],
+    "TRAIN_classifier_count_features": "Causal expanding-fold prediction; N0 warm-up when fewer than10 mature days",
+    "future_realized_N_input": false
+  },
+  "future_realized_N_predictor": false
+}

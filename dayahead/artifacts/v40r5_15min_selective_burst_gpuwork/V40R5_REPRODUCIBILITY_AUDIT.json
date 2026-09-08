@@ -1,0 +1,122 @@
+{
+  "role": "Independent same-seed rebuild of CAL-selected candidate, or frozen rejected diagnostic pipeline if selected_model NONE",
+  "pipeline": "PB1_BC0_C3_R0",
+  "seed": 20260907,
+  "independent_rebuilds": 1,
+  "differences": {
+    "count_full": {
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "count_crossfit": {
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "body_raw": {
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "burst_probability": {
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "selected_safe": {
+      "max": 0.0,
+      "mean": 0.0
+    }
+  },
+  "CAL_primary_original": 1.1131411874892572,
+  "CAL_primary_repeat": 1.1131411874892572,
+  "all_comparisons_pass": true,
+  "no_better_repeat_selection": true,
+  "runs": [
+    {
+      "candidate": "N1",
+      "tag": "full",
+      "dispersion_r": 0.25574634387085865,
+      "fit_rows": 16032,
+      "fit_time_seconds": 0.28200000000651926,
+      "prediction_time_seconds": 0.5150000000139698,
+      "device": "cpu",
+      "seed": 20260907,
+      "threads": 4
+    },
+    {
+      "candidate": "N1",
+      "tag": "fold_1",
+      "dispersion_r": 0.42858052505761024,
+      "fit_rows": 3072,
+      "fit_time_seconds": 0.09400000001187436,
+      "prediction_time_seconds": 0.5150000000139698,
+      "device": "cpu",
+      "seed": 20260907,
+      "threads": 4
+    },
+    {
+      "candidate": "N1",
+      "tag": "fold_2",
+      "dispersion_r": 0.48741106365853476,
+      "fit_rows": 6432,
+      "fit_time_seconds": 0.1720000000204891,
+      "prediction_time_seconds": 0.514999999984866,
+      "device": "cpu",
+      "seed": 20260907,
+      "threads": 4
+    },
+    {
+      "candidate": "N1",
+      "tag": "fold_3",
+      "dispersion_r": 0.3426812040567651,
+      "fit_rows": 9408,
+      "fit_time_seconds": 0.20300000000861473,
+      "prediction_time_seconds": 0.514999999984866,
+      "device": "cpu",
+      "seed": 20260907,
+      "threads": 4
+    },
+    {
+      "candidate": "N1",
+      "tag": "fold_4",
+      "dispersion_r": 0.2779581528484951,
+      "fit_rows": 12480,
+      "fit_time_seconds": 0.25,
+      "prediction_time_seconds": 0.5,
+      "device": "cpu",
+      "seed": 20260907,
+      "threads": 4
+    },
+    {
+      "candidate": "PB1",
+      "trial": 0,
+      "tag": "repeat",
+      "device": "cpu",
+      "seed": 20260907,
+      "threads": 4,
+      "fit_rows": 15638,
+      "fit_positive_rows": 7470,
+      "fit_time_seconds": 1.7030000000086147,
+      "prediction_time_seconds": 0.5160000000032596,
+      "scenario_time_seconds": 0.0,
+      "body_training_excludes_bursts": true,
+      "objective": "binary +9 conditional quantile heads",
+      "rounds": 300,
+      "early_stopping": "None; fixed 300 rounds",
+      "deterministic": true
+    },
+    {
+      "candidate": "C3",
+      "trial": 0,
+      "tag": "repeat",
+      "fit_time_seconds": 0.4220000000204891,
+      "prediction_time_seconds": 0.0159999999741558,
+      "fit_rows": 16032,
+      "device": "cpu",
+      "seed": 20260907,
+      "threads": 4,
+      "class_weight": "None",
+      "probability_calibration": "None; natural-frequency loss",
+      "early_stopping": "None; fixed registered iteration/round cap"
+    }
+  ],
+  "parameters": "LightGBM model bytes checked in final artifact audit; sklearn/XGB prediction equality is primary repetition evidence"
+}

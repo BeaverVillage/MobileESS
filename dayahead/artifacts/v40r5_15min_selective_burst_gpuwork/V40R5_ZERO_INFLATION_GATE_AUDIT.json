@@ -1,0 +1,1339 @@
+{
+  "audit_type": "USER_REQUESTED_POST_RESULT_INTERPRETATION_ONLY",
+  "amendment_request_SHA256": "a251961f9cee63eff49f1019850a018e6d70dc2521a3b2122ee8e551d07facd6",
+  "preregistration_commit": "9e77df9e3d607c2b1ef3ee9a6f18fe21b653634e",
+  "PRIMARY_RESULT": "NO REGISTERED COMBINATION PASSED THE FROZEN SAFETY GATES",
+  "IMPORTANT_METHODOLOGICAL_FINDING": "BODY_GATE_STRUCTURAL_INCOMPATIBILITY_DUE_TO_ZERO_INFLATION",
+  "BODY_GATE_STRUCTURAL_INCOMPATIBILITY": "YES",
+  "decision_basis": "Actual CAL oracle BODY population; corroborated by mature TRAIN BODY population",
+  "identity": "C_overall = p_zero + (1-p_zero) * C_positive (nonnegative Q90; coverage y<=Q90)",
+  "continuous_incompatibility_condition": "p_zero > 0.5 when positive lower=0.90 and overall upper=0.95",
+  "whole_mature_TRAIN_target_reference": {
+    "N": 16032,
+    "zero_N": 8168,
+    "positive_N": 7864,
+    "p_zero": 0.5094810379241517,
+    "overall_min_given_positive_90": 0.9509481037924152,
+    "overall_min_on_empirical_coverage_grid": 0.9509730538922155,
+    "positive_coverage_upper_allowed_by_overall_95": 0.8980671414038657,
+    "continuous_bounds_incompatible": true,
+    "required_positive_covered_min_integer": 7078,
+    "allowed_positive_covered_max_integer": 7062,
+    "empirical_bounds_incompatible": true,
+    "BODY_GATE_STRUCTURAL_INCOMPATIBILITY": "YES"
+  },
+  "actual_BODY_populations": {
+    "TRAIN": {
+      "N": 15638,
+      "zero_N": 8168,
+      "positive_N": 7470,
+      "p_zero": 0.522317431896662,
+      "overall_min_given_positive_90": 0.9522317431896662,
+      "overall_min_on_empirical_coverage_grid": 0.9522317431896662,
+      "positive_coverage_upper_allowed_by_overall_95": 0.8953279785809906,
+      "continuous_bounds_incompatible": true,
+      "required_positive_covered_min_integer": 6723,
+      "allowed_positive_covered_max_integer": 6688,
+      "empirical_bounds_incompatible": true,
+      "BODY_GATE_STRUCTURAL_INCOMPATIBILITY": "YES"
+    },
+    "DEVELOPMENT": {
+      "N": 5317,
+      "zero_N": 3158,
+      "positive_N": 2159,
+      "p_zero": 0.5939439533571563,
+      "overall_min_given_positive_90": 0.9593943953357156,
+      "overall_min_on_empirical_coverage_grid": 0.9595636637201429,
+      "positive_coverage_upper_allowed_by_overall_95": 0.8768642890226955,
+      "continuous_bounds_incompatible": true,
+      "required_positive_covered_min_integer": 1944,
+      "allowed_positive_covered_max_integer": 1893,
+      "empirical_bounds_incompatible": true,
+      "BODY_GATE_STRUCTURAL_INCOMPATIBILITY": "YES"
+    },
+    "CALIBRATION": {
+      "N": 2345,
+      "zero_N": 1195,
+      "positive_N": 1150,
+      "p_zero": 0.509594882729211,
+      "overall_min_given_positive_90": 0.9509594882729211,
+      "overall_min_on_empirical_coverage_grid": 0.9509594882729211,
+      "positive_coverage_upper_allowed_by_overall_95": 0.8980434782608695,
+      "continuous_bounds_incompatible": true,
+      "required_positive_covered_min_integer": 1035,
+      "allowed_positive_covered_max_integer": 1032,
+      "empirical_bounds_incompatible": true,
+      "BODY_GATE_STRUCTURAL_INCOMPATIBILITY": "YES"
+    },
+    "EXPOSED_EVALUATION": {
+      "N": 8030,
+      "zero_N": 3856,
+      "positive_N": 4174,
+      "p_zero": 0.48019925280199255,
+      "overall_min_given_positive_90": 0.9480199252801993,
+      "overall_min_on_empirical_coverage_grid": 0.9480697384806974,
+      "positive_coverage_upper_allowed_by_overall_95": 0.9038092956396739,
+      "continuous_bounds_incompatible": false,
+      "required_positive_covered_min_integer": 3757,
+      "allowed_positive_covered_max_integer": 3772,
+      "empirical_bounds_incompatible": false,
+      "BODY_GATE_STRUCTURAL_INCOMPATIBILITY": "NO"
+    }
+  },
+  "TRAIN_resolution_zero_fraction_comparison": {
+    "source": "Consecutive original-event 15min target sums; same mature TRAIN days",
+    "whole_target_30min_zero_fraction": 0.4086826347305389,
+    "whole_target_15min_zero_fraction": 0.5094810379241517,
+    "zero_fraction_increased": true
+  },
+  "denominator_warning": "Whole TRAIN target zero fraction is not the BODY-only zero fraction; gate calculations use the latter.",
+  "candidates": {
+    "PB1_TRIAL_0_BC0": {
+      "trial": 0,
+      "calibration": "BC0",
+      "DEV_selected_trial": true,
+      "scope": "Executed frozen BODY option",
+      "prediction_source": "fits/PB1/trial_0_q.npy",
+      "roles": {
+        "CALIBRATION": {
+          "BODY_N": 2345,
+          "zero_N": 1195,
+          "positive_BODY_N": 1150,
+          "overall_coverage": 0.8665245202558636,
+          "zero_only_coverage": 1.0,
+          "positive_BODY_coverage": 0.7278260869565217,
+          "positive_Q90_pinball_mean_GPUh": 17.156804987520772,
+          "positive_Q90_pinball_sum_GPUh": 19730.325735648887,
+          "positive_Q90_normalized_pinball": 0.592989759610739,
+          "positive_Q50_point": {
+            "N": 1150,
+            "MAE": 28.109646865313067,
+            "RMSE": 55.88976445981253,
+            "WAPE": 0.9715522645113109,
+            "bias": -26.6960486249798
+          },
+          "positive_Q90_point": {
+            "N": 1150,
+            "MAE": 40.909376366064905,
+            "RMSE": 53.9988937746715,
+            "WAPE": 1.4139486503916703,
+            "bias": 8.2447079887792
+          },
+          "underprediction_GPUh": 18782.18431693928,
+          "overprediction_GPUh": 51946.2160933052,
+          "positive_only_underprediction_GPUh": 18782.184316939278,
+          "positive_only_overprediction_GPUh": 28263.59850403536,
+          "coverage_identity_abs_error": 0.0,
+          "positive_BODY_band_PASS": false,
+          "frozen_BODY_gate_PASS": false,
+          "frozen_BODY_failure_reasons": [
+            "OVERALL_COVERAGE_BELOW_90",
+            "POSITIVE_BODY_COVERAGE_BELOW_90",
+            "MONTHLY_OVERALL_BELOW_88:2024-11"
+          ],
+          "fails_only_overall_upper_95_within_BODY_gate": false,
+          "OVERCONSERVATIVE_BODY_WARNING": false,
+          "monthly_frozen_BODY_checks": [
+            {
+              "month": "2024-11",
+              "N": 2345,
+              "coverage": 0.8665245202558636,
+              "gate": "FAIL",
+              "metrics": {
+                "N": 2345,
+                "primary": 0.592989759610739,
+                "Q90_style_pinball_mean": 9.423704688518495,
+                "point_q50": {
+                  "N": 2345,
+                  "MAE": 14.11102794949375,
+                  "RMSE": 39.16529595484905,
+                  "WAPE": 0.9945220979053797,
+                  "bias": -12.765965574530476
+                },
+                "point_positive_q50": {
+                  "N": 1150,
+                  "MAE": 28.109646865313067,
+                  "RMSE": 55.88976445981253,
+                  "WAPE": 0.9715522645113109,
+                  "bias": -26.6960486249798
+                },
+                "safe_point": {
+                  "N": 2345,
+                  "MAE": 30.16136478048805,
+                  "RMSE": 42.28519221590086,
+                  "WAPE": 2.1257235039532723,
+                  "bias": 14.142444254313824
+                },
+                "positive_safe_point": {
+                  "N": 1150,
+                  "MAE": 40.909376366064905,
+                  "RMSE": 53.9988937746715,
+                  "WAPE": 1.4139486503916703,
+                  "bias": 8.2447079887792
+                },
+                "coverage": {
+                  "overall": {
+                    "N": 2345,
+                    "value": 0.8665245202558636,
+                    "error_from_90": 0.03347547974413645
+                  },
+                  "positive": {
+                    "N": 1150,
+                    "value": 0.7278260869565217,
+                    "error_from_90": 0.1721739130434783
+                  },
+                  "burst": {
+                    "N": 0,
+                    "value": null,
+                    "error_from_90": null
+                  }
+                },
+                "overprediction_GPUh": 51946.2160933052,
+                "underprediction_GPUh": 18782.18431693928,
+                "missed_burst_GPUh": 0.0,
+                "captured_burst_GPUh": 0.0,
+                "captured_burst_fraction": null,
+                "mean_burst_shortfall_GPUh": null,
+                "negative_outputs": 0
+              }
+            }
+          ]
+        },
+        "EXPOSED_EVALUATION": {
+          "BODY_N": 8030,
+          "zero_N": 3856,
+          "positive_BODY_N": 4174,
+          "overall_coverage": 0.8679950186799502,
+          "zero_only_coverage": 1.0,
+          "positive_BODY_coverage": 0.7460469573550551,
+          "positive_Q90_pinball_mean_GPUh": 16.070564430334844,
+          "positive_Q90_pinball_sum_GPUh": 67078.53593221764,
+          "positive_Q90_normalized_pinball": 0.5054465654829047,
+          "positive_Q50_point": {
+            "N": 4174,
+            "MAE": 30.74209777605471,
+            "RMSE": 57.866767295487165,
+            "WAPE": 0.9668912255076741,
+            "bias": -28.875413918937145
+          },
+          "positive_Q90_point": {
+            "N": 4174,
+            "MAE": 43.35548968506159,
+            "RMSE": 55.025710799959334,
+            "WAPE": 1.3636038392515433,
+            "bias": 14.017951030489886
+          },
+          "underprediction_GPUh": 61227.44317209115,
+          "overprediction_GPUh": 213142.7086774914,
+          "positive_only_underprediction_GPUh": 61227.44317209115,
+          "positive_only_overprediction_GPUh": 119738.37077335594,
+          "coverage_identity_abs_error": 0.0,
+          "positive_BODY_band_PASS": false,
+          "frozen_BODY_gate_PASS": false,
+          "frozen_BODY_failure_reasons": [
+            "OVERALL_COVERAGE_BELOW_90",
+            "POSITIVE_BODY_COVERAGE_BELOW_90",
+            "MONTHLY_OVERALL_BELOW_88:2025-01",
+            "MONTHLY_OVERALL_BELOW_88:2025-02"
+          ],
+          "fails_only_overall_upper_95_within_BODY_gate": false,
+          "OVERCONSERVATIVE_BODY_WARNING": false,
+          "monthly_frozen_BODY_checks": [
+            {
+              "month": "2024-12",
+              "N": 2864,
+              "coverage": 0.9158519553072626,
+              "gate": "PASS",
+              "metrics": {
+                "N": 2864,
+                "primary": 0.5666678789914459,
+                "Q90_style_pinball_mean": 7.009419016622154,
+                "point_q50": {
+                  "N": 2864,
+                  "MAE": 10.636957560055368,
+                  "RMSE": 32.94983211461245,
+                  "WAPE": 1.0515754070359749,
+                  "bias": -8.135231784540586
+                },
+                "point_positive_q50": {
+                  "N": 1164,
+                  "MAE": 24.34946082549442,
+                  "RMSE": 51.39644531827623,
+                  "WAPE": 0.9783456311955931,
+                  "bias": -21.83915625605439
+                },
+                "safe_point": {
+                  "N": 2864,
+                  "MAE": 28.980611893382356,
+                  "RMSE": 39.84146700958678,
+                  "WAPE": 2.8650390467268667,
+                  "bias": 18.702217325172562
+                },
+                "positive_safe_point": {
+                  "N": 1164,
+                  "MAE": 39.875405913018966,
+                  "RMSE": 51.32089475538373,
+                  "WAPE": 1.6021680909791105,
+                  "bias": 14.585610343128199
+                },
+                "coverage": {
+                  "overall": {
+                    "N": 2864,
+                    "value": 0.9158519553072626,
+                    "error_from_90": 0.015851955307262577
+                  },
+                  "positive": {
+                    "N": 1164,
+                    "value": 0.7929553264604811,
+                    "error_from_90": 0.10704467353951896
+                  },
+                  "burst": {
+                    "N": 0,
+                    "value": null,
+                    "error_from_90": null
+                  }
+                },
+                "overprediction_GPUh": 68281.81144097065,
+                "underprediction_GPUh": 14718.661021676431,
+                "missed_burst_GPUh": 0.0,
+                "captured_burst_GPUh": 0.0,
+                "captured_burst_fraction": null,
+                "mean_burst_shortfall_GPUh": null,
+                "negative_outputs": 0
+              }
+            },
+            {
+              "month": "2025-01",
+              "N": 2793,
+              "coverage": 0.8517722878625135,
+              "gate": "FAIL",
+              "metrics": {
+                "N": 2793,
+                "primary": 0.4988687094526207,
+                "Q90_style_pinball_mean": 10.337348645437723,
+                "point_q50": {
+                  "N": 2793,
+                  "MAE": 18.0704934314895,
+                  "RMSE": 44.01461088712398,
+                  "WAPE": 0.9825401321334597,
+                  "bias": -16.60576804784727
+                },
+                "point_positive_q50": {
+                  "N": 1604,
+                  "MAE": 30.84096799568066,
+                  "RMSE": 58.054180200689906,
+                  "WAPE": 0.9630342116823131,
+                  "bias": -29.539828956805373
+                },
+                "safe_point": {
+                  "N": 2793,
+                  "MAE": 37.05114637809392,
+                  "RMSE": 48.617001210013754,
+                  "WAPE": 2.0145680247220485,
+                  "bias": 20.47056135902309
+                },
+                "positive_safe_point": {
+                  "N": 1604,
+                  "MAE": 44.27643268415084,
+                  "RMSE": 56.36284273144515,
+                  "WAPE": 1.3825674814116724,
+                  "bias": 15.40512722388599
+                },
+                "coverage": {
+                  "overall": {
+                    "N": 2793,
+                    "value": 0.8517722878625135,
+                    "error_from_90": 0.048227712137486556
+                  },
+                  "positive": {
+                    "N": 1604,
+                    "value": 0.7418952618453866,
+                    "error_from_90": 0.15810473815461346
+                  },
+                  "burst": {
+                    "N": 0,
+                    "value": null,
+                    "error_from_90": null
+                  }
+                },
+                "overprediction_GPUh": 80329.0648548839,
+                "underprediction_GPUh": 23154.786979132412,
+                "missed_burst_GPUh": 0.0,
+                "captured_burst_GPUh": 0.0,
+                "captured_burst_fraction": null,
+                "mean_burst_shortfall_GPUh": null,
+                "negative_outputs": 0
+              }
+            },
+            {
+              "month": "2025-02",
+              "N": 2373,
+              "coverage": 0.8293299620733249,
+              "gate": "FAIL",
+              "metrics": {
+                "N": 2373,
+                "primary": 0.4780339206151912,
+                "Q90_style_pinball_mean": 11.576813692506432,
+                "point_q50": {
+                  "N": 2373,
+                  "MAE": 21.82090683131428,
+                  "RMSE": 48.19281951256583,
+                  "WAPE": 0.9886860324544223,
+                  "bias": -19.573591786547322
+                },
+                "point_positive_q50": {
+                  "N": 1406,
+                  "MAE": 35.92164370647587,
+                  "RMSE": 62.522503208860655,
+                  "WAPE": 0.9643382366500504,
+                  "bias": -33.94261320688514
+                },
+                "safe_point": {
+                  "N": 2373,
+                  "MAE": 37.03574696709616,
+                  "RMSE": 47.96890689363259,
+                  "WAPE": 1.6780570125223697,
+                  "bias": 17.35264947760411
+                },
+                "positive_safe_point": {
+                  "N": 1406,
+                  "MAE": 45.185948390693504,
+                  "RMSE": 56.42777213953521,
+                  "WAPE": 1.2130440953231225,
+                  "bias": 11.965471617887932
+                },
+                "coverage": {
+                  "overall": {
+                    "N": 2373,
+                    "value": 0.8293299620733249,
+                    "error_from_90": 0.07067003792667514
+                  },
+                  "positive": {
+                    "N": 1406,
+                    "value": 0.7119487908961594,
+                    "error_from_90": 0.18805120910384066
+                  },
+                  "burst": {
+                    "N": 0,
+                    "value": null,
+                    "error_from_90": null
+                  }
+                },
+                "overprediction_GPUh": 64531.83238163687,
+                "underprediction_GPUh": 23353.995171282317,
+                "missed_burst_GPUh": 0.0,
+                "captured_burst_GPUh": 0.0,
+                "captured_burst_fraction": null,
+                "mean_burst_shortfall_GPUh": null,
+                "negative_outputs": 0
+              }
+            }
+          ]
+        }
+      }
+    },
+    "PB1_TRIAL_1_BC0": {
+      "trial": 1,
+      "calibration": "BC0",
+      "DEV_selected_trial": false,
+      "scope": "Raw registered tuning trial; post-result diagnostic only",
+      "prediction_source": "fits/PB1/trial_1_q.npy",
+      "roles": {
+        "CALIBRATION": {
+          "BODY_N": 2345,
+          "zero_N": 1195,
+          "positive_BODY_N": 1150,
+          "overall_coverage": 0.8562899786780384,
+          "zero_only_coverage": 1.0,
+          "positive_BODY_coverage": 0.7069565217391305,
+          "positive_Q90_pinball_mean_GPUh": 17.98054222440723,
+          "positive_Q90_pinball_sum_GPUh": 20677.623558068313,
+          "positive_Q90_normalized_pinball": 0.6214605469420054,
+          "positive_Q50_point": {
+            "N": 1150,
+            "MAE": 28.058575097409996,
+            "RMSE": 55.73048053735352,
+            "WAPE": 0.9697870736500891,
+            "bias": -26.47684533884717
+          },
+          "positive_Q90_point": {
+            "N": 1150,
+            "MAE": 39.043924498071675,
+            "RMSE": 53.618801661259226,
+            "WAPE": 1.3494731343750628,
+            "bias": 3.8535500615715264
+          },
+          "underprediction_GPUh": 20234.465300987584,
+          "overprediction_GPUh": 45463.525462812104,
+          "positive_only_underprediction_GPUh": 20234.465300987587,
+          "positive_only_overprediction_GPUh": 24666.047871794843,
+          "coverage_identity_abs_error": 1.1102230246251565e-16,
+          "positive_BODY_band_PASS": false,
+          "frozen_BODY_gate_PASS": false,
+          "frozen_BODY_failure_reasons": [
+            "OVERALL_COVERAGE_BELOW_90",
+            "POSITIVE_BODY_COVERAGE_BELOW_90",
+            "MONTHLY_OVERALL_BELOW_88:2024-11"
+          ],
+          "fails_only_overall_upper_95_within_BODY_gate": false,
+          "OVERCONSERVATIVE_BODY_WARNING": false,
+          "monthly_frozen_BODY_checks": [
+            {
+              "month": "2024-11",
+              "N": 2345,
+              "coverage": 0.8562899786780384,
+              "gate": "FAIL",
+              "metrics": {
+                "N": 2345,
+                "primary": 0.6214605469420054,
+                "Q90_style_pinball_mean": 9.704635956149271,
+                "point_q50": {
+                  "N": 2345,
+                  "MAE": 14.162362337416932,
+                  "RMSE": 39.066895232496314,
+                  "WAPE": 0.998140061341834,
+                  "bias": -12.582086917037543
+                },
+                "point_positive_q50": {
+                  "N": 1150,
+                  "MAE": 28.058575097409996,
+                  "RMSE": 55.73048053735352,
+                  "WAPE": 0.9697870736500891,
+                  "bias": -26.47684533884717
+                },
+                "safe_point": {
+                  "N": 2345,
+                  "MAE": 28.016200752153388,
+                  "RMSE": 41.211955801138345,
+                  "WAPE": 1.974535862808597,
+                  "bias": 10.758661049818558
+                },
+                "positive_safe_point": {
+                  "N": 1150,
+                  "MAE": 39.043924498071675,
+                  "RMSE": 53.618801661259226,
+                  "WAPE": 1.3494731343750628,
+                  "bias": 3.8535500615715264
+                },
+                "coverage": {
+                  "overall": {
+                    "N": 2345,
+                    "value": 0.8562899786780384,
+                    "error_from_90": 0.04371002132196167
+                  },
+                  "positive": {
+                    "N": 1150,
+                    "value": 0.7069565217391305,
+                    "error_from_90": 0.19304347826086954
+                  },
+                  "burst": {
+                    "N": 0,
+                    "value": null,
+                    "error_from_90": null
+                  }
+                },
+                "overprediction_GPUh": 45463.525462812104,
+                "underprediction_GPUh": 20234.465300987584,
+                "missed_burst_GPUh": 0.0,
+                "captured_burst_GPUh": 0.0,
+                "captured_burst_fraction": null,
+                "mean_burst_shortfall_GPUh": null,
+                "negative_outputs": 0
+              }
+            }
+          ]
+        },
+        "EXPOSED_EVALUATION": {
+          "BODY_N": 8030,
+          "zero_N": 3856,
+          "positive_BODY_N": 4174,
+          "overall_coverage": 0.8605230386052304,
+          "zero_only_coverage": 1.0,
+          "positive_BODY_coverage": 0.7316722568279828,
+          "positive_Q90_pinball_mean_GPUh": 16.30783855162124,
+          "positive_Q90_pinball_sum_GPUh": 68068.91811446706,
+          "positive_Q90_normalized_pinball": 0.5129092398775765,
+          "positive_Q50_point": {
+            "N": 4174,
+            "MAE": 30.661434421642678,
+            "RMSE": 57.574267175437356,
+            "WAPE": 0.9643542259128789,
+            "bias": -28.2701555400546
+          },
+          "positive_Q90_point": {
+            "N": 4174,
+            "MAE": 43.53297651110049,
+            "RMSE": 55.74740786672184,
+            "WAPE": 1.3691861015938969,
+            "bias": 13.646624259822513
+          },
+          "underprediction_GPUh": 62372.817148417154,
+          "overprediction_GPUh": 214262.19760391716,
+          "positive_only_underprediction_GPUh": 62372.817148417154,
+          "positive_only_overprediction_GPUh": 119333.82680891632,
+          "coverage_identity_abs_error": 1.1102230246251565e-16,
+          "positive_BODY_band_PASS": false,
+          "frozen_BODY_gate_PASS": false,
+          "frozen_BODY_failure_reasons": [
+            "OVERALL_COVERAGE_BELOW_90",
+            "POSITIVE_BODY_COVERAGE_BELOW_90",
+            "MONTHLY_OVERALL_BELOW_88:2025-01",
+            "MONTHLY_OVERALL_BELOW_88:2025-02"
+          ],
+          "fails_only_overall_upper_95_within_BODY_gate": false,
+          "OVERCONSERVATIVE_BODY_WARNING": false,
+          "monthly_frozen_BODY_checks": [
+            {
+              "month": "2024-12",
+              "N": 2864,
+              "coverage": 0.9095670391061452,
+              "gate": "PASS",
+              "metrics": {
+                "N": 2864,
+                "primary": 0.5652042942041855,
+                "Q90_style_pinball_mean": 7.066667008117467,
+                "point_q50": {
+                  "N": 2864,
+                  "MAE": 11.057549388568399,
+                  "RMSE": 32.882936658068886,
+                  "WAPE": 1.0931553438522588,
+                  "bias": -7.406582347089891
+                },
+                "point_positive_q50": {
+                  "N": 1164,
+                  "MAE": 24.48960059688097,
+                  "RMSE": 51.09880169459774,
+                  "WAPE": 0.9839763568233749,
+                  "bias": -20.941046560271392
+                },
+                "safe_point": {
+                  "N": 2864,
+                  "MAE": 29.90162016542924,
+                  "RMSE": 41.28256379783234,
+                  "WAPE": 2.956090425196046,
+                  "bias": 19.710357686492877
+                },
+                "positive_safe_point": {
+                  "N": 1164,
+                  "MAE": 40.36869046101664,
+                  "RMSE": 52.24524313063007,
+                  "WAPE": 1.6219879459618753,
+                  "bias": 15.293281749956734
+                },
+                "coverage": {
+                  "overall": {
+                    "N": 2864,
+                    "value": 0.9095670391061452,
+                    "error_from_90": 0.009567039106145203
+                  },
+                  "positive": {
+                    "N": 1164,
+                    "value": 0.7774914089347079,
+                    "error_from_90": 0.1225085910652921
+                  },
+                  "burst": {
+                    "N": 0,
+                    "value": null,
+                    "error_from_90": null
+                  }
+                },
+                "overprediction_GPUh": 71044.35228395247,
+                "underprediction_GPUh": 14593.887869836868,
+                "missed_burst_GPUh": 0.0,
+                "captured_burst_GPUh": 0.0,
+                "captured_burst_fraction": null,
+                "mean_burst_shortfall_GPUh": null,
+                "negative_outputs": 0
+              }
+            },
+            {
+              "month": "2025-01",
+              "N": 2793,
+              "coverage": 0.8378088077336198,
+              "gate": "FAIL",
+              "metrics": {
+                "N": 2793,
+                "primary": 0.5096869745372294,
+                "Q90_style_pinball_mean": 10.501756899621123,
+                "point_q50": {
+                  "N": 2793,
+                  "MAE": 18.07132558911676,
+                  "RMSE": 43.85871217372153,
+                  "WAPE": 0.9825853787266501,
+                  "bias": -16.308041834835755
+                },
+                "point_positive_q50": {
+                  "N": 1604,
+                  "MAE": 30.747645823411432,
+                  "RMSE": 57.8385635485937,
+                  "WAPE": 0.9601201512476223,
+                  "bias": -29.1161778767752
+                },
+                "safe_point": {
+                  "N": 2793,
+                  "MAE": 36.43268343241109,
+                  "RMSE": 48.68931265719977,
+                  "WAPE": 1.9809405719535513,
+                  "bias": 19.286462041461053
+                },
+                "positive_safe_point": {
+                  "N": 1604,
+                  "MAE": 43.80125261472923,
+                  "RMSE": 56.50300636050483,
+                  "WAPE": 1.3677295987736604,
+                  "bias": 13.945020479490175
+                },
+                "coverage": {
+                  "overall": {
+                    "N": 2793,
+                    "value": 0.8378088077336198,
+                    "error_from_90": 0.06219119226638026
+                  },
+                  "positive": {
+                    "N": 1604,
+                    "value": 0.7175810473815462,
+                    "error_from_90": 0.18241895261845387
+                  },
+                  "burst": {
+                    "N": 0,
+                    "value": null,
+                    "error_from_90": null
+                  }
+                },
+                "overprediction_GPUh": 77811.78665426245,
+                "underprediction_GPUh": 23944.69817246172,
+                "missed_burst_GPUh": 0.0,
+                "captured_burst_GPUh": 0.0,
+                "captured_burst_fraction": null,
+                "mean_burst_shortfall_GPUh": null,
+                "negative_outputs": 0
+              }
+            },
+            {
+              "month": "2025-02",
+              "N": 2373,
+              "coverage": 0.8280657395701644,
+              "gate": "FAIL",
+              "metrics": {
+                "N": 2373,
+                "primary": 0.48714294944178,
+                "Q90_style_pinball_mean": 11.795791766572663,
+                "point_q50": {
+                  "N": 2373,
+                  "MAE": 21.798033311975317,
+                  "RMSE": 47.92304583618972,
+                  "WAPE": 0.9876496534781346,
+                  "bias": -19.111199723886347
+                },
+                "point_positive_q50": {
+                  "N": 1406,
+                  "MAE": 35.67262324353852,
+                  "RMSE": 62.149691544334736,
+                  "WAPE": 0.9576531318123925,
+                  "bias": -33.37261857303313
+                },
+                "safe_point": {
+                  "N": 2373,
+                  "MAE": 37.606527506034894,
+                  "RMSE": 49.243533457353564,
+                  "WAPE": 1.7039185750508203,
+                  "bias": 17.518679966111957
+                },
+                "positive_safe_point": {
+                  "N": 1406,
+                  "MAE": 45.84657117118379,
+                  "RMSE": 57.655217169523745,
+                  "WAPE": 1.2307789131514617,
+                  "bias": 11.94297073573776
+                },
+                "coverage": {
+                  "overall": {
+                    "N": 2373,
+                    "value": 0.8280657395701644,
+                    "error_from_90": 0.07193426042983564
+                  },
+                  "positive": {
+                    "N": 1406,
+                    "value": 0.7098150782361309,
+                    "error_from_90": 0.19018492176386914
+                  },
+                  "burst": {
+                    "N": 0,
+                    "value": null,
+                    "error_from_90": null
+                  }
+                },
+                "overprediction_GPUh": 65406.05866570224,
+                "underprediction_GPUh": 23834.23110611856,
+                "missed_burst_GPUh": 0.0,
+                "captured_burst_GPUh": 0.0,
+                "captured_burst_fraction": null,
+                "mean_burst_shortfall_GPUh": null,
+                "negative_outputs": 0
+              }
+            }
+          ]
+        }
+      }
+    },
+    "PB1_TRIAL_0_BC1": {
+      "trial": 0,
+      "calibration": "BC1",
+      "DEV_selected_trial": true,
+      "scope": "Existing frozen CAL log-ratio calibration; no score recalculated",
+      "prediction_source": "frozen_pipeline_predictions.npz:body_BC1",
+      "roles": {
+        "CALIBRATION": {
+          "BODY_N": 2345,
+          "zero_N": 1195,
+          "positive_BODY_N": 1150,
+          "overall_coverage": 0.9513859275053305,
+          "zero_only_coverage": 1.0,
+          "positive_BODY_coverage": 0.9008695652173913,
+          "positive_Q90_pinball_mean_GPUh": 15.591471287194127,
+          "positive_Q90_pinball_sum_GPUh": 17930.191980273245,
+          "positive_Q90_normalized_pinball": 0.5388872122342057,
+          "positive_Q50_point": {
+            "N": 1150,
+            "MAE": 29.309231009842872,
+            "RMSE": 52.783995269231326,
+            "WAPE": 1.0130134289889037,
+            "bias": -17.097971915529243
+          },
+          "positive_Q90_point": {
+            "N": 1150,
+            "MAE": 121.03433145081867,
+            "RMSE": 143.83350376959845,
+            "WAPE": 4.18330331106939,
+            "bias": 112.314236095538
+          },
+          "underprediction_GPUh": 5014.054829286377,
+          "overprediction_GPUh": 229082.5962892,
+          "positive_only_underprediction_GPUh": 5014.054829286377,
+          "positive_only_overprediction_GPUh": 134175.4263391551,
+          "coverage_identity_abs_error": 0.0,
+          "positive_BODY_band_PASS": true,
+          "frozen_BODY_gate_PASS": false,
+          "frozen_BODY_failure_reasons": [
+            "OVERALL_COVERAGE_ABOVE_95"
+          ],
+          "fails_only_overall_upper_95_within_BODY_gate": true,
+          "OVERCONSERVATIVE_BODY_WARNING": false,
+          "monthly_frozen_BODY_checks": [
+            {
+              "month": "2024-11",
+              "N": 2345,
+              "coverage": 0.9513859275053305,
+              "gate": "PASS",
+              "metrics": {
+                "N": 2345,
+                "primary": 0.5388872122342057,
+                "Q90_style_pinball_mean": 11.69335137538496,
+                "point_q50": {
+                  "N": 2345,
+                  "MAE": 17.176941518188986,
+                  "RMSE": 37.561429633129755,
+                  "WAPE": 1.2106026559801546,
+                  "bias": -5.581388274637423
+                },
+                "point_positive_q50": {
+                  "N": 1150,
+                  "MAE": 29.309231009842872,
+                  "RMSE": 52.783995269231326,
+                  "WAPE": 1.0130134289889037,
+                  "bias": -17.097971915529243
+                },
+                "safe_point": {
+                  "N": 2345,
+                  "MAE": 99.82799621257413,
+                  "RMSE": 124.1724511512316,
+                  "WAPE": 7.035713385188312,
+                  "bias": 95.55161682725527
+                },
+                "positive_safe_point": {
+                  "N": 1150,
+                  "MAE": 121.03433145081867,
+                  "RMSE": 143.83350376959845,
+                  "WAPE": 4.18330331106939,
+                  "bias": 112.314236095538
+                },
+                "coverage": {
+                  "overall": {
+                    "N": 2345,
+                    "value": 0.9513859275053305,
+                    "error_from_90": 0.05138592750533044
+                  },
+                  "positive": {
+                    "N": 1150,
+                    "value": 0.9008695652173913,
+                    "error_from_90": 0.0008695652173912327
+                  },
+                  "burst": {
+                    "N": 0,
+                    "value": null,
+                    "error_from_90": null
+                  }
+                },
+                "overprediction_GPUh": 229082.5962892,
+                "underprediction_GPUh": 5014.054829286377,
+                "missed_burst_GPUh": 0.0,
+                "captured_burst_GPUh": 0.0,
+                "captured_burst_fraction": null,
+                "mean_burst_shortfall_GPUh": null,
+                "negative_outputs": 0
+              }
+            }
+          ]
+        },
+        "EXPOSED_EVALUATION": {
+          "BODY_N": 8030,
+          "zero_N": 3856,
+          "positive_BODY_N": 4174,
+          "overall_coverage": 0.9694894146948941,
+          "zero_only_coverage": 1.0,
+          "positive_BODY_coverage": 0.9413033061811212,
+          "positive_Q90_pinball_mean_GPUh": 16.305292491272862,
+          "positive_Q90_pinball_sum_GPUh": 68058.29085857293,
+          "positive_Q90_normalized_pinball": 0.512829161952238,
+          "positive_Q50_point": {
+            "N": 4174,
+            "MAE": 31.924532539891285,
+            "RMSE": 55.04104579986235,
+            "WAPE": 1.0040808085418982,
+            "bias": -17.2528410511322
+          },
+          "positive_Q90_point": {
+            "N": 4174,
+            "MAE": 140.37516137921182,
+            "RMSE": 159.93156491700228,
+            "WAPE": 4.415037412394902,
+            "bias": 134.7057204958326
+          },
+          "underprediction_GPUh": 11832.123123612408,
+          "overprediction_GPUh": 946228.6510919312,
+          "positive_only_underprediction_GPUh": 11832.123123612408,
+          "positive_only_overprediction_GPUh": 574093.8004732176,
+          "coverage_identity_abs_error": 1.1102230246251565e-16,
+          "positive_BODY_band_PASS": true,
+          "frozen_BODY_gate_PASS": false,
+          "frozen_BODY_failure_reasons": [
+            "OVERALL_COVERAGE_ABOVE_95"
+          ],
+          "fails_only_overall_upper_95_within_BODY_gate": true,
+          "OVERCONSERVATIVE_BODY_WARNING": false,
+          "monthly_frozen_BODY_checks": [
+            {
+              "month": "2024-12",
+              "N": 2864,
+              "coverage": 0.9759078212290503,
+              "gate": "PASS",
+              "metrics": {
+                "N": 2864,
+                "primary": 0.6203150030166514,
+                "Q90_style_pinball_mean": 11.458866427501373,
+                "point_q50": {
+                  "N": 2864,
+                  "MAE": 16.258768582925647,
+                  "RMSE": 36.19925052282324,
+                  "WAPE": 1.60735070098416,
+                  "bias": 0.7017959261604396
+                },
+                "point_positive_q50": {
+                  "N": 1164,
+                  "MAE": 28.44619358799233,
+                  "RMSE": 51.971173235881956,
+                  "WAPE": 1.1429497113060323,
+                  "bias": -9.831443601849212
+                },
+                "safe_point": {
+                  "N": 2864,
+                  "MAE": 106.04461393350186,
+                  "RMSE": 132.53591272391128,
+                  "WAPE": 10.483628183293662,
+                  "bias": 103.9086013481239
+                },
+                "positive_safe_point": {
+                  "N": 1164,
+                  "MAE": 133.36402650293843,
+                  "RMSE": 152.30968445366884,
+                  "WAPE": 5.358480568538576,
+                  "bias": 128.1084079079878
+                },
+                "coverage": {
+                  "overall": {
+                    "N": 2864,
+                    "value": 0.9759078212290503,
+                    "error_from_90": 0.07590782122905027
+                  },
+                  "positive": {
+                    "N": 1164,
+                    "value": 0.9407216494845361,
+                    "error_from_90": 0.04072164948453605
+                  },
+                  "burst": {
+                    "N": 0,
+                    "value": null,
+                    "error_from_90": null
+                  }
+                },
+                "overprediction_GPUh": 300653.00428328814,
+                "underprediction_GPUh": 3058.7700222612557,
+                "missed_burst_GPUh": 0.0,
+                "captured_burst_GPUh": 0.0,
+                "captured_burst_fraction": null,
+                "mean_burst_shortfall_GPUh": null,
+                "negative_outputs": 0
+              }
+            },
+            {
+              "month": "2025-01",
+              "N": 2793,
+              "coverage": 0.9638381668456857,
+              "gate": "PASS",
+              "metrics": {
+                "N": 2793,
+                "primary": 0.5150582821695786,
+                "Q90_style_pinball_mean": 13.999536609865377,
+                "point_q50": {
+                  "N": 2793,
+                  "MAE": 20.326390026191138,
+                  "RMSE": 41.39752661469873,
+                  "WAPE": 1.1051991478731793,
+                  "bias": -8.34458528656849
+                },
+                "point_positive_q50": {
+                  "N": 1604,
+                  "MAE": 30.718499135933374,
+                  "RMSE": 53.98969296347337,
+                  "WAPE": 0.9592100223177356,
+                  "bias": -19.20546224096041
+                },
+                "safe_point": {
+                  "N": 2793,
+                  "MAE": 126.0050062045976,
+                  "RMSE": 150.35214639457436,
+                  "WAPE": 6.8512227358441224,
+                  "bias": 122.50741623108358
+                },
+                "positive_safe_point": {
+                  "N": 1604,
+                  "MAE": 140.58531168163972,
+                  "RMSE": 161.740928701583,
+                  "WAPE": 4.389890253392878,
+                  "bias": 134.4950568212752
+                },
+                "coverage": {
+                  "overall": {
+                    "N": 2793,
+                    "value": 0.9638381668456857,
+                    "error_from_90": 0.06383816684568566
+                  },
+                  "positive": {
+                    "N": 1604,
+                    "value": 0.9370324189526185,
+                    "error_from_90": 0.03703241895261844
+                  },
+                  "burst": {
+                    "N": 0,
+                    "value": null,
+                    "error_from_90": null
+                  }
+                },
+                "overprediction_GPUh": 347047.5979314288,
+                "underprediction_GPUh": 4884.384398012362,
+                "missed_burst_GPUh": 0.0,
+                "captured_burst_GPUh": 0.0,
+                "captured_burst_fraction": null,
+                "mean_burst_shortfall_GPUh": null,
+                "negative_outputs": 0
+              }
+            },
+            {
+              "month": "2025-02",
+              "N": 2373,
+              "coverage": 0.9683944374209861,
+              "gate": "PASS",
+              "metrics": {
+                "N": 2373,
+                "primary": 0.45118774650927285,
+                "Q90_style_pinball_mean": 14.055152431827363,
+                "point_q50": {
+                  "N": 2373,
+                  "MAE": 24.775955466815656,
+                  "RMSE": 46.37855445134099,
+                  "WAPE": 1.12257667841745,
+                  "bias": -9.203460307065008
+                },
+                "point_positive_q50": {
+                  "N": 1406,
+                  "MAE": 36.18005467357468,
+                  "RMSE": 58.58548861956775,
+                  "WAPE": 0.971275435247624,
+                  "bias": -21.169272233551084
+                },
+                "safe_point": {
+                  "N": 2373,
+                  "MAE": 127.44079965467891,
+                  "RMSE": 148.9533980796668,
+                  "WAPE": 5.774230170974726,
+                  "bias": 124.16311848878021
+                },
+                "positive_safe_point": {
+                  "N": 1406,
+                  "MAE": 145.9397985846797,
+                  "RMSE": 163.9645199412525,
+                  "WAPE": 3.917842100272325,
+                  "bias": 140.40783741350077
+                },
+                "coverage": {
+                  "overall": {
+                    "N": 2373,
+                    "value": 0.9683944374209861,
+                    "error_from_90": 0.06839443742098605
+                  },
+                  "positive": {
+                    "N": 1406,
+                    "value": 0.9466571834992887,
+                    "error_from_90": 0.04665718349928871
+                  },
+                  "burst": {
+                    "N": 0,
+                    "value": null,
+                    "error_from_90": null
+                  }
+                },
+                "overprediction_GPUh": 298528.04887721426,
+                "underprediction_GPUh": 3888.9687033387904,
+                "missed_burst_GPUh": 0.0,
+                "captured_burst_GPUh": 0.0,
+                "captured_burst_fraction": null,
+                "mean_burst_shortfall_GPUh": null,
+                "negative_outputs": 0
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "questions_A_B_C": {
+    "CALIBRATION": {
+      "A_positive_BODY_coverage_in_90_to_95": [
+        "PB1_TRIAL_0_BC1"
+      ],
+      "B_only_overall_upper_95_failure_within_BODY_gate": [
+        "PB1_TRIAL_0_BC1"
+      ],
+      "C_positive_BODY_coverage_also_fails": [
+        "PB1_TRIAL_0_BC0",
+        "PB1_TRIAL_1_BC0"
+      ]
+    },
+    "EXPOSED_EVALUATION": {
+      "A_positive_BODY_coverage_in_90_to_95": [
+        "PB1_TRIAL_0_BC1"
+      ],
+      "B_only_overall_upper_95_failure_within_BODY_gate": [
+        "PB1_TRIAL_0_BC1"
+      ],
+      "C_positive_BODY_coverage_also_fails": [
+        "PB1_TRIAL_0_BC0",
+        "PB1_TRIAL_1_BC0"
+      ]
+    }
+  },
+  "candidate_completeness": {
+    "registered_PB1_trials": 2,
+    "saved_raw_trials_reported": 2,
+    "existing_BC1_options_reported": 1,
+    "unselected_trial_BC1": "NOT_APPLIED_NO_NEW_CALIBRATION",
+    "optional_PB2": "NOT_IMPLEMENTED_NO_NEW_MODEL",
+    "B0_B3": "Full-target benchmarks, not registered BODY model candidates"
+  },
+  "metric_semantics": {
+    "positive_WAPE_MAE": "Both Q50 point forecast and Q90 reservation reported explicitly",
+    "under_over_GPUh": "Sums relative to Q90 over all oracle BODY intervals; positive-only sums also reported"
+  },
+  "scientific_status": "FAIL",
+  "classification": "V40R5_BODY_FORECAST_INSUFFICIENT",
+  "selected_model": null,
+  "diagnostic_pipeline": "PB1_BC0_C3_R0",
+  "interpretation": "Evaluation contract incompatibility is separate from poor forecast quality; raw positive undercoverage and burst/hybrid failures remain independently observable.",
+  "only_BODY_gate_claim": "A/B answers never imply that a complete hybrid pipeline passes; detector and envelope gates are unchanged.",
+  "amendment_actions": {
+    "model_fits": 0,
+    "new_calibrations": 0,
+    "new_thresholds": 0,
+    "new_eta": 0,
+    "gate_changes": 0,
+    "reselection": 0,
+    "winner_promotions": 0,
+    "new_revision_created": false
+  },
+  "immutable_input_result_SHA256": {
+    "dayahead/v40r5/common.py": "738061de3040b9fa1bf2568fb719a57c14358552d11bac1caf478700dbab3684",
+    "dayahead/v40r5/evaluate.py": "f5103518c0002e025e1e431641de29357b61e3a03e8c0f66d1b25362213f5f38",
+    "dayahead/v40r5/initialize.py": "59ce7db19bc169befc2b67b27a7636157124a2dffffa5d35d5b76352e0670e74",
+    "dayahead/v40r5/metrics.py": "5060e325bbb9031b937915259db5609241ce8c50519f9837de2ed4482aaa5991",
+    "dayahead/v40r5/models.py": "4aeaa7c2fd69a6e54ee6b4aecc3df5b29218b6a9ba7ca243a4bbf8d59142f5b0",
+    "dayahead/v40r5/phase0.py": "9559d464b3d348f24a44e7414442870fdc6ffe4d8a3cb06aed6608f06a235cfc",
+    "dayahead/v40r5/train.py": "0568224209a13dbb28588f3dc7271396f2a2d7fab6e8090f1c4141a61f10df2c",
+    "dayahead/v40r5/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/data.npz": "e3463e17ad27ac27c963a523ce9f9db0b33f3d540188036b87a80b3da80520ff",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/feature_availability.npz": "f51e0808ca9725533eb30105109e6a0261408952684bafdb9c38ff12df772ce7",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/seasonal_maturity_proof.parquet": "4c1496a3298893b00e19f700f6631003d226aebb0646e030a9b2793fb3a67c2e",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_15MIN_TARGET_RECONSTRUCTION.parquet": "be18f53ab8efc082f85dc519c5cb1efe0cc859cc3e8f58ddd99354196968a443",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/inputs/arrival_bins_with_maturity.parquet": "8490022e066830a166d9ca05e15e56cd4ea4ee3f794b477db62b2a9982f9805b",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/inputs/causal_dataset.npz": "d434299f0ca9131a234239aaddfc0c9bd248fc93e6ba2aedcc06f1fa9a7eed36",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/inputs/feature_available_at_proofs.parquet": "a061210bbbe59f76d7833d58449a4047ae61f235dd9e726d05a5e35587947563",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/inputs/GPU_related_candidates_preMay.parquet": "9a08c3179e80dc82bb6255e5fec629c93f9f36333ab46215914bcb073d3673b0",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/inputs/V40R3_LABEL_MATURITY_LEDGER.parquet": "64fb7614531f7aabbc6c76741299c7023b23421906485c341087d4c6d42140ed",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_BURST_THRESHOLD_FREEZE.json": "f2b61c1421f985759e3438915251b247d5b1e81f8790243de6085e80d75f1293",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_PHASE0_PLAN.json": "9c1195a51b5c92950773f0ac7a25ed553111b0f1ec6ecbadb4f1531ba706579a",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_15MIN_COUNT_DIAGNOSTIC.json": "0bb2cc8053879be20eadd5cbfdecefa13fd08b867aec4532da618cf61e870038",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_15MIN_SEVERITY_DIAGNOSTIC.json": "221a71164c6f167162ca8fe728cf5268ded07975de066536680bbff86ff16181",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_FEATURE_AUTHORITY_AUDIT.json": "b49414eded499813fc09df9a7506f8b7510eb7077fed3322d8cbf09794a3c92e",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_TEMPORAL_SPLIT_CONTRACT.json": "b7e151031a960b7d1d9a65d4fd54e9d2fda230865ac731e270ab8ff8b5385827",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B0/result.json": "9b09cd3e0109a9c208d8dae5796b7ab59aca412ac67a04bdda879938b1829544",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B0/selected_q.npy": "bdb6f31a2cf37f26336d007c85cdcf468cbed5680ec036b70b4802f8496b0ea3",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B0/trial_0_q.npy": "bdb6f31a2cf37f26336d007c85cdcf468cbed5680ec036b70b4802f8496b0ea3",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B0/trial_0_start.json": "453e79627ed17c652a7db3643a24ce0f3298a862892a9bf4001944de937dc4e5",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B1/result.json": "46e64f512f14530e5040362163af02b39f19e8a0fb00e4db9c7c5de74ed9007b",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B1/selected_q.npy": "9189a242d57542480f1fcc701584b76b440c8f04e010ad41a3736aeb7faa5a85",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B1/trial_0_q.npy": "9189a242d57542480f1fcc701584b76b440c8f04e010ad41a3736aeb7faa5a85",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B1/trial_0_start.json": "407e019af5667764b6d2fdb28ce987a7de036b8e770a3180b58066ed0fe053e1",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/result.json": "af90566afc19dbcdb30362cb11bf064adb8344082993a212b1d4cfab1b502c8f",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/selected_q.npy": "93281ce4014508bb9e5e4e09a6d4890c5d475452cab17c5399517663d86546e8",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_0_head0.txt": "610adff4a56a9c1805bd519d8b1dd412b2dea5d441d9ecde58ac2e05256373e2",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_0_head1.txt": "d50f065ef9d93705078dd8d0953806eb02312addf3a105bd3c6bb8d09938485b",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_0_head2.txt": "4d260a602fad51038e6dc63eb604e480b400f4d1145cd33e633798d16cb64bfd",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_0_head3.txt": "31a88c428f84f9eb4f1749bdf2a2a02f994e0d1e71f0df829dc1933d2d9fee62",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_0_head4.txt": "d0699950c75d4764f07c57eec4243fdb3d6705a693c108b8f2e70791cfec9a29",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_0_head5.txt": "635de1ff89c20e98a71a596ad3f1059bb63fab7d408bc6c33d03169dbc61f00a",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_0_head6.txt": "34a0277f0586d613b3358d9e3a097f43699512261d6591920c456c5baaa07e81",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_0_head7.txt": "4decdfcc1cb7a56c0fd3381a36a030ee519bf026398b76bee4879dfdb2595078",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_0_head8.txt": "c90b2eba3983521e5fc1b70effd53ec57238aa7ea8e6f8fa51f1dbbecf9d04aa",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_0_head9.txt": "206d2d20f855cabb78b103a68ced4f186f68139186641aaaf950fad26930bd15",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_0_q.npy": "ccfbb79e7c97870296dee08c0a3c6d0336660886db51feb1b3aaef70d2d2682c",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_0_start.json": "fb24690b07a52bb465019f62bcc5c89e9a7f89b8ae61f4b425a24a8ae2011f92",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_1_head0.txt": "ee143d660d6aca13c4e393942718ed0bc7637cb4a0a64ba66c36b00f7bc3e10f",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_1_head1.txt": "64710a2c5211153ffcbc738c4b8aaae08f5f4571130b744f21fd51484ab6cde4",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_1_head2.txt": "556c214444bf47131c743c16ae0fc951140e1eb7f617ffe6a87d065ce86ae02b",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_1_head3.txt": "684a99deeb2b88c9fac9803bb172542a32d4a310967d05be17fc50dc17185f53",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_1_head4.txt": "86b42d1467ea0d27468fb231155ab75747a560e61c85196c0ee7ddbbe6f53669",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_1_head5.txt": "6c20f59c695f7a48588c9ebb729b1182cfa3eaaae5a65aaacb129334d3187cf3",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_1_head6.txt": "c574bd505e12ea33695eb6eb61cffec256228f516e0d4ace8cf45b0aa782aa13",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_1_head7.txt": "8073e2f8b100be347c68bf2f12afd8a1aac4fb846285d76cacb6845ca81c0f0f",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_1_head8.txt": "8cd253aad999c2348b2ab805f765b47c30b01ddfc41e7ea2c340e6166397f698",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_1_head9.txt": "aa8806894c98a3146251acc8d08a0b9129cb9d1f83cce937386d2ced055c840a",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_1_q.npy": "93281ce4014508bb9e5e4e09a6d4890c5d475452cab17c5399517663d86546e8",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B2/trial_1_start.json": "97e1dcfe2f3710267682ddc15386a660640816ad3ba3e2748034fb7f00b51481",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B3/result.json": "2c36ac5fb0f1b21b0315562032c9e028388844c14e830d285b8be42e931d2497",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B3/selected_q.npy": "a9504b8f4d5d7605e516e8b407fd49246cadc563e7c9864e5d7feb9cecb72045",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B3/trial_0_distribution.npz": "62230a394672129c2cbfe67625d2c3fcba4f8fc78b8d026c37335b193923d417",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B3/trial_0_head0.txt": "23b22eea1d4ad3d64e4d0d4d920dc38c561916d72150cdf0f5a5d4b1aa3a09ac",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B3/trial_0_q.npy": "a9504b8f4d5d7605e516e8b407fd49246cadc563e7c9864e5d7feb9cecb72045",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B3/trial_0_start.json": "5d5acd6e3034c79c98886191c5e6669dc198b1fada411cc409894c010ec02321",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B3/trial_1_distribution.npz": "ee62f5d4fde714d351ebc9c1e61a3816168e924f0eda49f36b60771f6d877a9c",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B3/trial_1_head0.txt": "556d4d17e6461ff7dbe351f6fc8919e3858dddf176530e5e03972e244c8a9ebf",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B3/trial_1_q.npy": "dc02b77913168383b5fa103cf7f475a54e2e782e0e6cb6c34dd30f2dbb05a8fa",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/B3/trial_1_start.json": "5353b8fc402f56f76e04a7293819fc22471209345838c31d5e009cab14f71e58",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C0/result.json": "ef7a6a8a449c20c5f954410bb973c3f93d104714903565382545a7ca561fbb7d",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C0/selected_prob.npy": "30de8966b876cfa3fbee5c07f9d323b8e7c9a5d2faf54bb536da7124f623d28c",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C0/trial_0_model.pkl": "3ed6ae8850273af76b4954cfc1649c22f129431b8f252a4c8643b2428e042d00",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C0/trial_0_prob.npy": "30de8966b876cfa3fbee5c07f9d323b8e7c9a5d2faf54bb536da7124f623d28c",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C0/trial_0_start.json": "4df7777e28b6214f454a96f186b43d582b2108ee3ad47d29a1b3693126146425",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C1/result.json": "74d09c10d72a589404997b1904dbac1ba8b618d48edd9f0ea1effc3b68c8259b",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C1/selected_prob.npy": "def9985c34d49efdca212c2f7be0bd17fb829b925518f2ab0f6d0b17527fc905",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C1/trial_0_model.pkl": "f5eb111b031d86160884e4927d7f69472f93aa55559819f19a815c6b69131298",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C1/trial_0_prob.npy": "def9985c34d49efdca212c2f7be0bd17fb829b925518f2ab0f6d0b17527fc905",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C1/trial_0_start.json": "eb53fdd47032a631e2c5defeb6b8a658c35403ba7cb8dae766d6597a2bfd1ee4",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C1/trial_1_model.pkl": "9ca18f785976fa93ef09ba7a4150daa504c190e97815335d58c18f16f82a36d3",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C1/trial_1_prob.npy": "3f80207f7a8db1bf9c3ced0fac2b1f71addbfb3ee2962afbd41d022837dfe51f",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C1/trial_1_start.json": "9a0115995edaffe419ab4354289fc37505b1493dc499bf5162c6ec1ab4f1f232",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C2/result.json": "7253d7ebac196afdd46dbd22a8a4fae333ae77bdb19360c0956ef7e7799ed851",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C2/selected_prob.npy": "b0203bc08ace78e1bf0c482c4b2ad52ead1fbd8d1c32acb4a1e8afa8d1b56f95",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C2/trial_0_model.pkl": "2e45d9ae63380adabca0d9e999a9b5902f8a31af0d33c7ad4989156bf1db7fb5",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C2/trial_0_prob.npy": "b0203bc08ace78e1bf0c482c4b2ad52ead1fbd8d1c32acb4a1e8afa8d1b56f95",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C2/trial_0_start.json": "1c7fae723307c7b77686c411bdfffeb72ec9c72d4455fb0a3a687984838bf7f9",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C2/trial_1_model.pkl": "9bac3fcb3f397976b0e7c7eff578f46cd1eec2653ccf84f111b89d7ca1f224af",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C2/trial_1_prob.npy": "6a8c4b9bc8deb49130ffa1c7df15cd1db712f97bfc47c8a4e3f9d5a499306988",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C2/trial_1_start.json": "e9f2bc646845518bd2dd5c23601f19757edf97316c42c70daf74538e129c179e",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C3/result.json": "1d75f52825ebf3d93a986c2f09af56396fb14e0c1877b7a71cb46a641b7b7694",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C3/selected_prob.npy": "cef8016b3ecddb12fb5ea8309fc918f210168917f9c00f162738a3335d0aefcf",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C3/trial_0_model.pkl": "a1ddd827e3058b048371ab54c12da77456d24e1c6b06e4a16b32099dd01db3d0",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C3/trial_0_prob.npy": "cef8016b3ecddb12fb5ea8309fc918f210168917f9c00f162738a3335d0aefcf",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C3/trial_0_start.json": "3cc597fecbeeb2ac63493cb800ef1ecda31f334d379510ad564abb4348cc9fb2",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C3/trial_1_model.pkl": "60152d5c5317b6045534c54b0cba5739f35edaad6c64e81da033a615a88a33a7",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C3/trial_1_prob.npy": "c32be9bd4f216823df9a518b00df04ddf944d0a6ef9f6c85aff81b3c2ea09858",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/C3/trial_1_start.json": "329d24eefd32ddb2a65ff87ea2198d31403dded4fdec2599f42a66eb87b74de1",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/N1/audit.json": "014ef3d20e7e8de12356483dcedb9af2224d745ca23b2f9e146b853063173060",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/N1/fold_1_count.txt": "57acb3db10e8cfcf9c218d9fdca4e3f4d09d5773e92617fd1b6608dbee10a5dc",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/N1/fold_2_count.txt": "ad1572dab699c8c9e3451381b95d1623dcd3389afea12029152f0900ef9f9c5c",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/N1/fold_3_count.txt": "1ae5176c14db7f0bca1516e0f6f90787065d9f89e39331a396c0186680993d65",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/N1/fold_4_count.txt": "a87d1615dd431f282fd0afef26d8f768ea5d4450cf56f00234990baa1c75927e",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/N1/full_count.txt": "aea89474e0813c38792ef8dc7ede2bac750f75593805ebf0d5ebae8c3ad58b0a",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/N1/predictions.npz": "064839b98e9198cc93ad2617a0cd3685f66a18d30c586831d43d0e362ea4dfe6",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/result.json": "4268f568e61d3ba7209c23d43010205da8c4c5aada86c896fe9d2bc45ad926bf",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/selected_q.npy": "4b1eb3d4747b36732d198db3fb6cc078c46a25786e8383a3a61ced224eeb1377",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_0_head0.txt": "144c79d3e8079e858ee4bcc470b89b5128d779d2989d259d5f114031cb318740",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_0_head1.txt": "10b41ee7325caba4d3530de761b9500955b16a42223532420e5312162ac94f39",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_0_head2.txt": "e18b6ba4b954a310244baf3d45862f3ed6b3a6969eb19204a3937d0ab3660ed8",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_0_head3.txt": "7e965f662f879c01d4dff137feac98614037e584f8d8dc3cab83696a0c4e5ef7",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_0_head4.txt": "0d0c03167135189ce79f7aff921340649fb6e08c483410c37e673f5910c1da8b",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_0_head5.txt": "5832aac8902851de5e11a9244320610f6962ab384475f5dd9764463502d28655",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_0_head6.txt": "30786d5b240c74b81cb3faa3c7601306999843379fd2c114e74488e8fd4f1d54",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_0_head7.txt": "89a66f093e7cd044fa21153396ab3570c80b0888c7512591f3f75d10599dad73",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_0_head8.txt": "8ad78c862124bf558f7f7e81f3a8d50449d8e43be68e219a258d1f7395292a5f",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_0_head9.txt": "436f29f1a212f662bea5b6bf4ddcb7e8af73e92774c0dbae6108729c03fa830e",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_0_q.npy": "4b1eb3d4747b36732d198db3fb6cc078c46a25786e8383a3a61ced224eeb1377",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_0_start.json": "3fdb2462572bcf8e8c01737c3222980fce1d05d9cd5b1f3a689012b423889302",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_1_head0.txt": "4c8de354e4e70948c5810f02ce9189b192c3aad9c339c371071b3b03a134217f",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_1_head1.txt": "704366caf3fde4af1616661292cb36eabb7fd3df0a393ca04a3b98d0ef6192d2",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_1_head2.txt": "cc280aae79989744f7ed6b7d47792db1a685684d1bdfb31724f8b7ad835f3d4e",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_1_head3.txt": "407a12f4f1e4625dcfae0672df980d32eeeac99bf730ac08a79af0c46bc91c5b",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_1_head4.txt": "56b0790ee68f82ca91dd28d428d2586fc1cd0b2a7cae33816c9e01c0876827bb",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_1_head5.txt": "c639bab6cbe2429a45af8599df5a864f958b28b3b4fde7a9bcdbbc3e141e8ab9",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_1_head6.txt": "87e55ac85f845680f0934fa18041eb5601678d3ff312ab058522e4e94cf0a5ce",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_1_head7.txt": "565e4224dd2fbac295aa451cfcf63dcbd32dfd1e6084e426f2d0be4b74c5218a",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_1_head8.txt": "91906d827107cbbe42655f5d891ae422bdd1eeb9eb2f170ec036d1cebf04b1a4",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_1_head9.txt": "52d1a6bc26e66e189671e4d09826a7d33aa27bf4f927202a013a1eb68ceffca5",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_1_q.npy": "1e9aadb0b87a1ee545bb550f3801f4ce5939cc9a47b89fba8224177a4c3dc0fc",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/fits/PB1/trial_1_start.json": "0b4b49c48a3135ec9459a96d2f0a11f21da8a8b7117c23b6a99342d0b3c5ffa1",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/frozen_pipeline_predictions.npz": "8096bdc96d9c8661b2d38826357f946cd3ae3b60b8d3dce2528e71d57a6bf936",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_CAL_SELECTION_FREEZE.json": "03515707f1a1454bb0f2a6ed69010465939139a2ace5574d10f0f779d361d9b5",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_BODY_MODEL_REPORT.json": "e82e604f8f5634e38d39afa52966261c5bf1f02cacfd3f6231f19cf85e172cc8",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_MODEL_SELECTION.json": "9dcb4fe53fc8f92eedb94fab836bdcecf74101cc83e0681be3b1a59b22e80f23",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_MODEL_FREEZE.json": "4b4b5c60a641d98e939d5e3ed14c99f31ba698420f50b3297ccc1ec4924862da",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_HYBRID_METRICS.json": "b5596d21a533e4b55cd973cb03e183cdb75d4997bec528e9ecff79724fc8463f",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_ETA_SELECTION.json": "57c649838f9cbefa382d12708951d6787d7ab3533c60251ae55cb75f8e8c2990",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_ROBUST_ENVELOPE_R0.json": "99f7062bbc3a86694c4b2d484c1017cdf718b202b5071ba0956e8efbd064b3bd",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_ROBUST_ENVELOPE_R1.json": "30f8f5322a50df84daccdaa63e5f67cb8455dd22827dcd4fcf35b4ba08290ce7",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_ROBUST_ENVELOPE_R2.json": "2743ed3e6f6f8ee331905e2eceea3048c89c4ad2ad3ab633d438e31e832ca2c9"
+  },
+  "all_immutable_inputs_and_results_unchanged": true,
+  "NEXT_RECOMMENDED_REVISION": "V40R5R1_ZERO_INFLATION_AWARE_GATE_CORRECTION",
+  "holds": {
+    "production_q": "UNCHANGED",
+    "PF": 0.95,
+    "Q_control": false,
+    "electrical": "HOLD",
+    "electrical_B0_B3": false,
+    "FULL_MAY": false,
+    "optimizer": false,
+    "V40S2": false,
+    "A0": false,
+    "A1": false,
+    "M1": false,
+    "MF": false,
+    "migration": false,
+    "WAN": false,
+    "terminal": false,
+    "event_trigger": false,
+    "local_repair": false,
+    "rolling_MPC": false,
+    "second_route_search": false,
+    "Gurobi": false,
+    "OpenDSS": false
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "PR_HEAD": "a2a21c904535125c66668a294f91d73a66f5d4a7",
+  "source": "dayahead/input_contract.py",
+  "source_SHA256": "073bb95ebea6c0f33786846364e2ff8b41f99c6a95949550cb01c41a3d8b9f75",
+  "SLOT_MINUTES": 15,
+  "SLOT_HOURS": 0.25,
+  "SLOTS_PER_DAY": 96,
+  "fixed_AEST_UTC_offset_hours": 10,
+  "AEMO_function": "def pwc_30_to_15(values: Sequence[float]) -> tuple[float, ...]:\n    if len(values) != 48:\n        raise InputContractError(\"the AEMO Day-Ahead trajectory must contain 48 half-hours\")\n    return tuple(float(value) for value in values for _ in range(2))\n\n\n",
+  "optimizer_imports_or_calls": 0
+}

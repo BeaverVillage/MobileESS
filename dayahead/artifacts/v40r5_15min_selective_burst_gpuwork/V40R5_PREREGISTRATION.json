@@ -1,0 +1,382 @@
+{
+  "identity": "V40R5_15MIN_SELECTIVE_BURST_GPUWORK",
+  "BASE": "ff1fec3a7d8f80b3c2af496758747fafc04bad7b",
+  "target": "Exogenous arriving GPUh, original submit-event 15min x96",
+  "cohort": {
+    "status": "PASS",
+    "raw_recovered_jobs_parent_provenance": 4728595,
+    "raw_recovered_recounted": false,
+    "GPU_candidates": 790173,
+    "GPU_authorized": 550123,
+    "service_validity_exclusions": 1784,
+    "eligible_jobs": 548339,
+    "missing_GPU_excluded": 240050,
+    "target_contributors": 545553,
+    "target_days": 349,
+    "intervals": 33504,
+    "total_GPUh": 1904541.7783333336,
+    "unit": "GPUh",
+    "label": "authorized gpus_requested * exact (end-start) /3600 seconds",
+    "allocation": "Entire service demand assigned by original submit timestamp",
+    "half_split": false,
+    "F30": false,
+    "missing_GPU_imputed": false,
+    "target_kind": "Exogenous arriving GPU-service demand; not execution occupancy or FLOPs",
+    "tolerance_GPUh": 1e-07
+  },
+  "feature_authority": {
+    "shape": [
+      33504,
+      61
+    ],
+    "names": [
+      "history_submit_count_12_mean",
+      "history_submit_count_12_std",
+      "history_submit_count_12_max",
+      "history_mature_GPUh_12_mean",
+      "history_mature_GPUh_12_std",
+      "history_mature_GPUh_12_max",
+      "history_mature_mask_12_mean",
+      "history_mature_mask_12_std",
+      "history_mature_mask_12_max",
+      "history_maturity_age_hours_12_mean",
+      "history_maturity_age_hours_12_std",
+      "history_maturity_age_hours_12_max",
+      "history_submit_count_48_mean",
+      "history_submit_count_48_std",
+      "history_submit_count_48_max",
+      "history_mature_GPUh_48_mean",
+      "history_mature_GPUh_48_std",
+      "history_mature_GPUh_48_max",
+      "history_mature_mask_48_mean",
+      "history_mature_mask_48_std",
+      "history_mature_mask_48_max",
+      "history_maturity_age_hours_48_mean",
+      "history_maturity_age_hours_48_std",
+      "history_maturity_age_hours_48_max",
+      "history_submit_count_336_mean",
+      "history_submit_count_336_std",
+      "history_submit_count_336_max",
+      "history_mature_GPUh_336_mean",
+      "history_mature_GPUh_336_std",
+      "history_mature_GPUh_336_max",
+      "history_mature_mask_336_mean",
+      "history_mature_mask_336_std",
+      "history_mature_mask_336_max",
+      "history_maturity_age_hours_336_mean",
+      "history_maturity_age_hours_336_std",
+      "history_maturity_age_hours_336_max",
+      "history_submit_count_last",
+      "history_mature_GPUh_last",
+      "history_mature_mask_last",
+      "history_maturity_age_hours_last",
+      "slot15_fraction",
+      "minute_of_day",
+      "hour_sin",
+      "hour_cos",
+      "weekday_sin",
+      "weekday_cos",
+      "weekend",
+      "child15_position",
+      "lead_hours",
+      "seasonal15_7d_GPUh",
+      "seasonal15_7d_count",
+      "seasonal15_7d_mature",
+      "seasonal15_14d_GPUh",
+      "seasonal15_14d_count",
+      "seasonal15_14d_mature",
+      "seasonal15_21d_GPUh",
+      "seasonal15_21d_count",
+      "seasonal15_21d_mature",
+      "seasonal15_28d_GPUh",
+      "seasonal15_28d_count",
+      "seasonal15_28d_mature"
+    ],
+    "SHA256": "e3463e17ad27ac27c963a523ce9f9db0b33f3d540188036b87a80b3da80520ff",
+    "target_resolution": "15min x96",
+    "history": "36 summaries +4 last values of frozen native 30min causal history",
+    "calendar": "9 pure 15min/calendar features",
+    "seasonal": "4lags x3 values directly reconstructed at 15min with conservative parent maturity",
+    "normalization": "Models using linear classifiers fit scalers on TRAIN only"
+  },
+  "split": {
+    "roles": {
+      "TRAIN": {
+        "start": "2024-03-15",
+        "end": "2024-08-30",
+        "eligible_days": 167
+      },
+      "DEVELOPMENT": {
+        "start": "2024-09-01",
+        "end": "2024-10-30",
+        "eligible_days": 58
+      },
+      "CALIBRATION": {
+        "start": "2024-11-01",
+        "end": "2024-11-29",
+        "eligible_days": 26
+      },
+      "EXPOSED_EVALUATION": {
+        "start": "2024-12-01",
+        "end": "2025-02-26",
+        "eligible_days": 88
+      }
+    },
+    "purged_days": [],
+    "maturity_ledger_SHA256": "64fb7614531f7aabbc6c76741299c7023b23421906485c341087d4c6d42140ed",
+    "same_parent_rows": true
+  },
+  "burst_threshold_GPUh": 240.44105555555552,
+  "burst_operator": ">",
+  "N_high": 180.84999999999945,
+  "baseline_registry": {
+    "B0": "ZERO no fit",
+    "B1": "Empirical causal 7/14/21/28-day same 15min mature lags",
+    "B2": "Hurdle LightGBM binary occurrence +9 conditional quantiles",
+    "B3": "LightGBM Tweedie powers1.3/1.7, TRAIN Pearson dispersion"
+  },
+  "body_registry": {
+    "PB1": "Hurdle LightGBM trained only on TRAIN y<=u_B, positive heads only0<y<=u_B; output support clipped[0,u_B]",
+    "PB2": "NOT_EXECUTED optional comparator, compact registry"
+  },
+  "classifier_registry": {
+    "C0": "Constant TRAIN burst base rate",
+    "C1": "Standardized logistic regression C .1/1.",
+    "C2": "LightGBM binary natural-frequency loss",
+    "C3": "XGBoost binary hist CPU natural-frequency loss"
+  },
+  "tuning_budget": {
+    "B0": 1,
+    "B1": 1,
+    "B2": 2,
+    "B3": 2,
+    "PB1": 2,
+    "N0": 1,
+    "N1": 1,
+    "C0": 1,
+    "C1": 2,
+    "C2": 2,
+    "C3": 2,
+    "extra_models_after_results": false
+  },
+  "tree_parameters": {
+    "rounds": 300,
+    "learning_rates": [
+      0.03,
+      0.08
+    ],
+    "max_depth": 4,
+    "LightGBM_num_leaves": 15,
+    "LightGBM_min_child_samples": 30,
+    "max_bin": 127,
+    "L2": 1.0,
+    "seed": 20260907,
+    "threads": 4,
+    "early_stopping": "None, fixed rounds",
+    "LightGBM_deterministic": true,
+    "force_col_wise": true
+  },
+  "XGBoost_parameters": {
+    "tree_method": "hist",
+    "device": "cpu",
+    "min_child_weight": 5,
+    "subsample": 1.0,
+    "colsample_bytree": 1.0,
+    "eval_metric": "logloss",
+    "rounds": 300,
+    "seed": 20260907
+  },
+  "linear_parameters": {
+    "C": [
+      0.1,
+      1.0
+    ],
+    "max_iter": 1000,
+    "solver": "lbfgs",
+    "class_weight": null,
+    "scaler_TRAIN_only": true
+  },
+  "count_auxiliary": {
+    "N0": "Mature seasonal empirical mean/P90/exceedance rate",
+    "N1": "LightGBM Poisson mean LR.05 +conditional NB r fitted by TRAIN likelihood, log r bounds[-7,7]",
+    "classifier_predictors": "N1 log1p predicted mean and predicted P(N>N_high), never realized N",
+    "TRAIN_stack": "5 chronological expanding folds; train only labels mature before first destination origin; N0 warm-up if fewer than10 mature days",
+    "support_models_not_search": "Up to4 N1 crossfit fits +1 final model; same fold construction in independent repeat"
+  },
+  "development_selection": {
+    "baseline_and_body_trials": "Safety first then primary; body uses oracle BODY diagnostics; no eta from DEV",
+    "classifier_trials": "Highest DEV PR-AUC, then Brier, then simpler trial",
+    "baseline_comparator": "Strongest DEVELOPMENT raw 15min B0-B3 pipeline fixed before CAL hybrid selection; no R4 weights reused"
+  },
+  "body_calibration": {
+    "BC0": "none",
+    "BC1": "Positive oracle BODY CAL log1p(y)-log1p(raw Q90), finite-sample90% order statistic, transform both Q50/Q90 and clip[0,u_B]",
+    "global_additive_GPUh": false,
+    "calibration_window": "November CAL only; no provisional DEV body calibration",
+    "methods_selected_on": "CAL only"
+  },
+  "eta_rule": {
+    "source": "CAL only",
+    "candidate_thresholds": "All unique CAL probabilities, largest satisfying both burst recall>=.9 and GPUh-weighted recall>=.9; inclusive p>=eta",
+    "tie": "Same threshold is unique; across pipelines hierarchy below",
+    "sensitivity": ".95 recall and GPUh-weighted recall, report only never switch"
+  },
+  "robust_envelopes": {
+    "R0": "CAL burst empirical Q90",
+    "R1": "CAL burst empirical Q95",
+    "R2": "CAL burst conditional Q90; time-of-day 4fixed6h blocks x predicted risk>=TRAIN-crossfit risk Q75; fallback count risk ->time ->global",
+    "minimum_group_burst_N": 30,
+    "minimum_global_CAL_burst_N": 30,
+    "new_Q99_after_results": false,
+    "selected_safe": "body_Q90 if p<eta else robust upper; robust output is NOT body Q90"
+  },
+  "body_gates": {
+    "pooled_overall": [
+      0.9,
+      0.95
+    ],
+    "pooled_positive": [
+      0.9,
+      0.95
+    ],
+    "pooled_min_N": 100,
+    "monthly_lower": 0.88,
+    "monthly_min_N": 100,
+    "overconservative_warning_above": 0.975
+  },
+  "detector_gates": {
+    "recall_min": 0.9,
+    "GPUh_weighted_recall_min": 0.9,
+    "captured_fraction_min": 0.8,
+    "ECE_max": 0.05,
+    "ECE": "10 equal-width probability bins, include1inlast",
+    "minimum_burst_N": 30
+  },
+  "hybrid_gates": {
+    "overall": [
+      0.9,
+      0.95
+    ],
+    "positive": [
+      0.9,
+      0.95
+    ],
+    "burst": [
+      0.9,
+      0.975
+    ],
+    "pooled_nonburst_min_N": 100,
+    "pooled_burst_min_N": 30,
+    "monthly_burst_min_N": 100,
+    "monthly_burst_lower": 0.9,
+    "positive_primary_max_exclusive": 0.9,
+    "monthly_catastrophic": "Selected-safe envelope WAPE>2.0; evaluate all months, not just Q50 WAPE"
+  },
+  "primary": "Sum positive-interval 0.9-pinball / sum positive actual GPUh; hybrid envelope scored with Q90-style loss, not claimed universally calibrated Q90",
+  "selection_hierarchy": [
+    "causal and target authority",
+    "body safety",
+    "detector safety",
+    "CAL positive coverage",
+    "CAL burst coverage",
+    "all hybrid coverage and temporal gates",
+    "lower positive primary",
+    "lower missed burst GPUh",
+    "lower overreservation",
+    "simpler classifier/envelope/calibration"
+  ],
+  "no_CAL_safe_combination": "selected_model NONE; freeze best rejected diagnostic pipeline using same hierarchy; permit final exposed diagnostics only; no promotion or retuning",
+  "stop_rules": [
+    "Target reproduction mismatch >1e-7: STOP all fitting",
+    "Feature causality failure: STOP fitting",
+    "BODY failure: stop selective promotion, retain registered diagnostics",
+    "Detector failure: stop selective promotion",
+    "Any mandatory safety failure: no bootstrap"
+  ],
+  "Tweedie_simulation": {
+    "M": 10000,
+    "seed": 20260907,
+    "per_day_seed": "seed+7919*day_index",
+    "device": "CPU numpy float64",
+    "exact_law": "Compound Poisson-Gamma; sum Gamma jump severities using reproductive closure; no count cap",
+    "cumulative": "Sum nonnegative increments within each scenario before quantiles"
+  },
+  "hybrid_cumulative_and_secondary": "Deterministic sums of selected-safe envelope increments at15/30/60min; reserve curves NOT true cumulative/coarser Q90; scenario cumulative quantiles reported only for Tweedie",
+  "superiority": {
+    "enabled_only_if": "CAL selection frozen and all body/detector/hybrid exposed safety and calibration gates pass",
+    "bootstrap": "5000paired circular7day blocks",
+    "CI": "95% percentile, lower>0",
+    "comparator": "DEVELOPMENT-frozen 15min baseline",
+    "numeric": "Must beat every executed safety-eligible baseline",
+    "no_safety": "NOT_EXECUTED_SAFETY_FAIL"
+  },
+  "reproducibility": "One independent same-seed count-crossfit +body+chosen classifier rebuild; same eta/cal/envelope rules, no repeat selection; if NONE repeat frozen rejected diagnostic pipeline and label it",
+  "TRAIN_body_gate_feasibility": {
+    "zero_fraction": 0.522317431896662,
+    "minimum_overall_at_positive_90": 0.9522317431896662,
+    "simultaneous_bands_feasible": false,
+    "identity": "Nonnegative Q90 covers all zeros: overall=z+(1-z)*positive; no gate relaxation"
+  },
+  "frameworks": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "scipy": "1.14.1",
+    "lightgbm": "4.6.0",
+    "xgboost": "3.0.5",
+    "scikit-learn": "1.5.2",
+    "torch": "2.8.0+cu128"
+  },
+  "Python": "3.11.7",
+  "compute": "CPU compact trees and logistic models, no new neural model; GPU hardware/CUDA recorded in ledger",
+  "holds": {
+    "production_q": "UNCHANGED",
+    "PF": 0.95,
+    "Q_control": false,
+    "electrical": "HOLD",
+    "electrical_B0_B3": false,
+    "FULL_MAY": false,
+    "optimizer": false,
+    "V40S2": false,
+    "A0": false,
+    "A1": false,
+    "M1": false,
+    "MF": false,
+    "migration": false,
+    "WAN": false,
+    "terminal": false,
+    "event_trigger": false,
+    "local_repair": false,
+    "rolling_MPC": false,
+    "second_route_search": false,
+    "Gurobi": false,
+    "OpenDSS": false
+  },
+  "May_scientific_reads": 0,
+  "May_metadata": "NONZERO: user protocol, git index/path metadata, source/provenance; no payload",
+  "TRUE_CONFIRMATORY_AVAILABLE": "NO",
+  "frozen_hashes": {
+    "dayahead/v40r5/common.py": "738061de3040b9fa1bf2568fb719a57c14358552d11bac1caf478700dbab3684",
+    "dayahead/v40r5/evaluate.py": "f5103518c0002e025e1e431641de29357b61e3a03e8c0f66d1b25362213f5f38",
+    "dayahead/v40r5/initialize.py": "59ce7db19bc169befc2b67b27a7636157124a2dffffa5d35d5b76352e0670e74",
+    "dayahead/v40r5/metrics.py": "5060e325bbb9031b937915259db5609241ce8c50519f9837de2ed4482aaa5991",
+    "dayahead/v40r5/models.py": "4aeaa7c2fd69a6e54ee6b4aecc3df5b29218b6a9ba7ca243a4bbf8d59142f5b0",
+    "dayahead/v40r5/phase0.py": "9559d464b3d348f24a44e7414442870fdc6ffe4d8a3cb06aed6608f06a235cfc",
+    "dayahead/v40r5/train.py": "0568224209a13dbb28588f3dc7271396f2a2d7fab6e8090f1c4141a61f10df2c",
+    "dayahead/v40r5/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/data.npz": "e3463e17ad27ac27c963a523ce9f9db0b33f3d540188036b87a80b3da80520ff",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/feature_availability.npz": "f51e0808ca9725533eb30105109e6a0261408952684bafdb9c38ff12df772ce7",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/seasonal_maturity_proof.parquet": "4c1496a3298893b00e19f700f6631003d226aebb0646e030a9b2793fb3a67c2e",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_15MIN_TARGET_RECONSTRUCTION.parquet": "be18f53ab8efc082f85dc519c5cb1efe0cc859cc3e8f58ddd99354196968a443",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/inputs/arrival_bins_with_maturity.parquet": "8490022e066830a166d9ca05e15e56cd4ea4ee3f794b477db62b2a9982f9805b",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/inputs/causal_dataset.npz": "d434299f0ca9131a234239aaddfc0c9bd248fc93e6ba2aedcc06f1fa9a7eed36",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/inputs/feature_available_at_proofs.parquet": "a061210bbbe59f76d7833d58449a4047ae61f235dd9e726d05a5e35587947563",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/inputs/GPU_related_candidates_preMay.parquet": "9a08c3179e80dc82bb6255e5fec629c93f9f36333ab46215914bcb073d3673b0",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/inputs/V40R3_LABEL_MATURITY_LEDGER.parquet": "64fb7614531f7aabbc6c76741299c7023b23421906485c341087d4c6d42140ed",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_BURST_THRESHOLD_FREEZE.json": "f2b61c1421f985759e3438915251b247d5b1e81f8790243de6085e80d75f1293",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_PHASE0_PLAN.json": "9c1195a51b5c92950773f0ac7a25ed553111b0f1ec6ecbadb4f1531ba706579a",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_15MIN_COUNT_DIAGNOSTIC.json": "0bb2cc8053879be20eadd5cbfdecefa13fd08b867aec4532da618cf61e870038",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_15MIN_SEVERITY_DIAGNOSTIC.json": "221a71164c6f167162ca8fe728cf5268ded07975de066536680bbff86ff16181",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_FEATURE_AUTHORITY_AUDIT.json": "b49414eded499813fc09df9a7506f8b7510eb7077fed3322d8cbf09794a3c92e",
+    "dayahead/artifacts/v40r5_15min_selective_burst_gpuwork/V40R5_TEMPORAL_SPLIT_CONTRACT.json": "b7e151031a960b7d1d9a65d4fd54e9d2fda230865ac731e270ab8ff8b5385827"
+  }
+}
