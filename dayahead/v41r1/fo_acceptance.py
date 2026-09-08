@@ -99,7 +99,8 @@ def full(tag):
     made=subprocess.run(['cmd.exe','/d','/c','mklink','/J',str(unit),str(target)],capture_output=True,text=True)
     if made.returncode or unit.resolve()!=target.resolve():raise RuntimeError('ACCEPTANCE_STORAGE_JUNCTION')
     write_json(root/'STORAGE.json',dict(logical=str(unit),physical=str(target),created_before_generation=True))
-    os.environ['V41_FO_ACCEPTANCE']='1';os.environ['V41_FO_ACCEPTANCE_SECONDS']='1800'
+    os.environ['V41_FO_ACCEPTANCE']='1';os.environ.setdefault('V41_FO_ACCEPTANCE_SECONDS','1800')
+    cap=float(os.environ['V41_FO_ACCEPTANCE_SECONDS'])
     source=execution.science();started=time.perf_counter();stop=threading.Event();samples=[]
     def sample():
         p=psutil.Process()
@@ -108,7 +109,7 @@ def full(tag):
                 available=psutil.virtual_memory().available))
     thread=threading.Thread(target=sample,daemon=True);thread.start()
     write_json(root/'ACCEPTANCE_STARTED.json',dict(day='2025-05-04',policy='B1',source=source,
-        source_commit=execution.commit(),working_tree_validation=True,total_optimization_budget_seconds=1800))
+        source_commit=execution.commit(),working_tree_validation=True,total_optimization_budget_seconds=cap))
     write_json(RUNTIME/'F_AND_O_ACCEPTANCE_PROGRESS.json',dict(status='RUNNING',day='2025-05-04',policy='B1',pid=os.getpid(),folder=str(root)))
     try:
         execution.dayahead('2025-05-04','B1');print('DAYAHEAD_AND_FRESH_PASS',flush=True)
@@ -120,7 +121,11 @@ def full(tag):
         candidates=read(a0/'V41R1_FULL_CANDIDATE_MANIFEST.json')
         assert source==execution.science() and seed['status']=='PASS' and compute['optimization_seconds']<=1805
         assert candidates['top_K_pruning']==candidates['sensitivity_pruning']==candidates['hard_infeasible_removals']==0
-        from .early_gate import acceptance_checks,compare
+        from .early_stop import VERSION
+        if VERSION.startswith('V41R1_FIRST_IMPROVEMENT_CRITICAL_SEARCH_'):
+            from .first_gate import acceptance_checks,compare
+        else:
+            from .early_gate import acceptance_checks,compare
         early=acceptance_checks(root,seed,compute,solver,candidates,coverage)
         write_json(root/'EARLY_STOP_ACCEPTANCE_GATE.json',early)
         refs={name:record(path) for name,path in dict(early_stop=root/'EARLY_STOP_ACCEPTANCE_GATE.json',seed=a0/'POLICY_FEASIBLE_SEED_AUDIT.json',

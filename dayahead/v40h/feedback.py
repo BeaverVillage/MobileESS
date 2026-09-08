@@ -116,6 +116,7 @@ def solve_feedback(a0, m1, context, *, tolerance=1e-6, work_limit=60.0):
                 reserve_check=diagnostics(context.v41_ml_snapshot,context.capacity,power['gpu'])
                 return dict(status='PASS' if physical['status']==grid['status']==term['status']=='PASS' else 'FAIL',
                     physical=physical,grid=grid,terminal=term,job_decision_SHA=digest(rows),
+                    materialized_jobs=rows,materialized_power=power,
                     canonical_auxiliary_values={'rho_max':grid['rho_max'],
                         **{f'V41_H4_shortfall_GPUh[{k}]':v for k,v in enumerate(reserve_check['xi_GPUh'])}})
             context.v41_policy_budget.charge(time.perf_counter()-started,'A1_BUILD_VERIFY_SEED_AND_CANDIDATES')

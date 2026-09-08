@@ -9,12 +9,13 @@ import hashlib
 import math
 import time
 import re
+import os
 import numpy as np
 from gurobipy import GRB
 from .early_stop import write_compute_json as write_json
 from dayahead.v41.preflight import record
 from .feasible_seed import row_audit
-from .early_stop import VERSION, FAMILIES, GUARDS, STAGES, TOLERANCES, FamilySweep, material_improvement, objective_floor, current_structure, neighborhood_time_limit
+from .early_stop import VERSION, FAMILIES, GUARDS, STAGES, TOLERANCES, IMPROVEMENT_EPS, IMPROVEMENT_NOISE, FamilySweep, material_improvement, objective_floor, current_structure, neighborhood_time_limit
 
 TOTAL_SECONDS=1800.
 NOMINAL_SECONDS=GUARDS
@@ -66,8 +67,27 @@ class BoundedLex:
             if match:self.decision_groups.setdefault(int(match[1]),[]).append(i)
         self.visits={g:0 for g in self.decision_groups};self.stage_counts=dict(self.visits);self.target_free=5000
         self.control=None;self.structure={};self.previous_groups=[];self.production_verified=False
-        self.minimum_solve_seconds=min(5.,self.budget.total/100.)
+        self.incumbent_jobs=[];self.accepted_improvements=[];self.rejected_proposals=0
+        self.minimum_solve_seconds=5. if context is not None and model.NumVars>100000 else min(5.,self.budget.total/100.)
         self.exploration_scale=self.budget.remaining/TOTAL_SECONDS
+        recovery=os.environ.get('V41_FO_RECOVERY_PLAN')
+        if recovery and context is not None and model.ModelName=='V40G_JOINT_AIDC':
+            from dayahead.paper_analysis.storage import read
+            plan=read(recovery);ref=plan['checkpoint']
+            if record(ref['path'])!=ref:raise RuntimeError('RECOVERY_CHECKPOINT_HASH_DRIFT')
+            names=plan['seed_variable_names']
+            if record(names['path'])!=names:raise RuntimeError('RECOVERY_VARIABLE_AXIS_HASH_DRIFT')
+            with np.load(names['path']) as z:
+                if z['names'].tolist()!=self.names:raise RuntimeError('RECOVERY_VARIABLE_AXIS_CHANGED')
+            with np.load(ref['path']) as z:self.values=z['values'].copy()
+            if read(self.output/'V41R1_FULL_CANDIDATE_MANIFEST.json')['candidate_set_SHA']!=plan['candidate_set_SHA']:
+                raise RuntimeError('RECOVERY_AUTHORITATIVE_CANDIDATES_CHANGED')
+            recovered=row_audit(model,self.values)
+            if recovered['status']!='PASS':raise RuntimeError('RECOVERY_SEED_NOT_ORIGINAL_MODEL_FEASIBLE')
+            if any(abs(a-b)>t for a,b,t in zip(self.vector(),plan['best_vector'],TOLERANCES)):
+                raise RuntimeError('RECOVERY_OBJECTIVE_VECTOR_CHANGED')
+            write_json(self.output/'RECOVERED_SEED_AUDIT.json',dict(status='PASS',plan=record(recovery),
+                original_model_audit=recovered,objective_vector=self.vector(),full_authoritative_candidates_preserved=True))
         self.history=[];self.initial_vector=self.vector();self.overhead_reserve=min(30.,self.budget.total*.02);self._persist_incumbent('SEED')
         self.budget.charge(time.perf_counter()-initialized,'F_AND_O_INITIALIZE_CHECKPOINT')
 
@@ -87,24 +107,50 @@ class BoundedLex:
         return record(path)
 
     def _solve(self,seconds,label):
-        model=self.model;model.update();model.setAttr('Start',self.vars,self.values.tolist())
-        model._v41_bound_scope='FIXED_NEIGHBORHOOD_ONLY_NOT_GLOBAL'
-        model.Params.WorkLimit=GRB.INFINITY;model.Params.SolutionLimit=GRB.MAXINT
+        model=self.model;model.update()
+        # Discard automatic previous-solve incumbents before tightening the
+        # active improvement cut. Only the independently accepted start is
+        # supplied; a stale solver incumbent is not a discovery certificate.
+        model.reset(0);model.setAttr('Start',self.vars,self.values.tolist())
+        model._v41_bound_scope='IMPROVEMENT_FEASIBILITY_NO_OBJECTIVE_CERTIFICATE'
+        model.Params.WorkLimit=GRB.INFINITY;model.Params.SolutionLimit=1
+        model.Params.MIPFocus=1
+        # The search objective is constant. No percentage gap on P1-P5 can
+        # terminate discovery; SolutionLimit=1 ends at the first feasible point.
+        model.Params.MIPGap=1e-4;model.Params.MIPGapAbs=0.
         model.Params.TimeLimit=max(0.,min(seconds,self.budget.remaining));first=[]
+        objective=model.getObjective();spec=self.search_spec
+        scale=1000. if spec['priority']==0 else 1.
+        cut=model.addConstr(scale*objective<=scale*spec['rhs'],name='FO_TEMPORARY_ACTIVE_OBJECTIVE_IMPROVEMENT')
+        higher=[]
+        for k in range(spec['priority']):
+            factor=1000. if k==0 else 1.
+            higher.append(model.addConstr(factor*self.expressions[k]<=factor*(self.vector()[k]+TOLERANCES[k]),
+                name=f'FO_TEMPORARY_CURRENT_INCUMBENT_LOCK_P{k+1}'))
+        model.setObjective(0.,GRB.MINIMIZE);model.update()
         def cb(m,where):
             if where==GRB.Callback.MIPSOL:first.append(float(m.cbGet(GRB.Callback.RUNTIME)))
-        started=time.perf_counter();model.optimize(cb);elapsed=time.perf_counter()-started
+        started=time.perf_counter()
+        try:
+            model.optimize(cb)
+            elapsed=time.perf_counter()-started
+            candidate=np.asarray(model.getAttr('X',self.vars)) if model.SolCount else None
+            data=dict(status=int(model.Status),runtime_seconds=elapsed,solver_runtime_seconds=float(model.Runtime),
+                node_count=float(model.NodeCount),work=float(model.Work),solution_count=int(model.SolCount),
+                first_incumbent_seconds=min(first) if first else None,raw_bound=None,raw_incumbent=None,
+                neighborhood_gap=None,search='FIRST_IMPROVEMENT_FEASIBILITY',constant_objective=0.,
+                SolutionLimit=1,MIPFocus=1,percentage_gap_on_P1_P5=False,improvement_constraint=dict(spec),
+                original_hard_feasibility_tolerance=float(model.Params.FeasibilityTol),
+                original_integrality_tolerance=float(model.Params.IntFeasTol),
+                termination='FIRST_FEASIBLE_PROPOSAL' if model.SolCount else 'NO_IMPROVEMENT_PROPOSAL_WITHIN_SEARCH_LIMIT')
+        finally:
+            # Revalidate on original rows and higher locks, after removing the
+            # search-only cut. A no-improvement subproblem can be infeasible;
+            # that says nothing about the retained original-model incumbent.
+            model.remove([cut]+higher);model.setObjective(objective,GRB.MINIMIZE);model.update()
         self.budget.charge(elapsed,label)
-        data=dict(status=int(model.Status),runtime_seconds=elapsed,solver_runtime_seconds=float(model.Runtime),
-            node_count=float(model.NodeCount),work=float(model.Work),solution_count=int(model.SolCount),
-            first_incumbent_seconds=min(first) if first else None,raw_bound=finite(model.ObjBound),
-            raw_incumbent=finite(model.ObjVal) if model.SolCount else None,
-            neighborhood_gap=finite(model.MIPGap) if model.IsMIP and model.SolCount else None)
-        if model.Status in (GRB.INFEASIBLE,GRB.INF_OR_UNBD):raise RuntimeError('VERIFIED_INCUMBENT_BUT_SOLVER_INFEASIBLE')
-        if not model.SolCount:
-            write_json(self.output/'MIPSTART_NO_INCUMBENT_DEFECT.json',dict(solver=data,retained_seed=row_audit(model,self.values)))
-            raise RuntimeError('VERIFIED_SEED_MIPSTART_NOT_ACCEPTED')
-        candidate=np.asarray(model.getAttr('X',self.vars));audit=row_audit(model,candidate)
+        if candidate is None:return self.values.copy(),data
+        audit=row_audit(model,candidate)
         if audit['status']!='PASS':
             # A solver incumbent can exceed its own numerical tolerance. Reject
             # that proposal, preserving both evidence and the verified incumbent.
@@ -121,8 +167,26 @@ class BoundedLex:
                 variable_names_source=str(self.output/'POLICY_FEASIBLE_SEED.npz'),
                 physical_constraints_relaxed=False,incumbent_modified=False))
             data['candidate_rejection']=record(receipt)
+            self.rejected_proposals+=1
             return self.values.copy(),data
         return candidate,data
+
+    def _semantic(self):
+        from dayahead.paper_analysis.storage import read
+        checked=self.validator() if self.validator else dict(status='PASS',scope='MODEL_ONLY_TEST')
+        rows=checked.pop('materialized_jobs',None);power=checked.pop('materialized_power',None)
+        if rows is not None:
+            folder=self.output/'bounded_checkpoints'/f'PROPOSAL_{self.index}_{self.iteration+1}'
+            folder.mkdir(parents=True,exist_ok=True)
+            path=folder/'JOBS.json';write_json(path,rows)
+            if read(path)!=rows:raise RuntimeError('PROPOSAL_JOB_READBACK')
+            checked['persisted_jobs']=record(path)
+            if power is not None:
+                path=folder/'POWER.npz';np.savez_compressed(path,**power)
+                with np.load(path) as z:
+                    if not all(np.array_equal(z[k],v) for k,v in power.items()):raise RuntimeError('PROPOSAL_POWER_READBACK')
+                checked['persisted_power']=record(path)
+        return checked,rows
 
     def _refresh_structure(self,priority):
         self.structure=current_structure(self,priority)
@@ -140,9 +204,32 @@ class BoundedLex:
         site_block=site_blocks[(self.iteration//5)%len(site_blocks)] if site_blocks else []
         near_slots={r['issue_slot'] for r in self.structure.get('near_binding_electrical_set',[])} or {critical}
         stress=self.structure.get('reserve_stress',[])
+        effects=self.structure.get('current_job_effects',{})
+        sensitivity=self.structure.get('critical_site_sensitivity',{})
         # Reuse a complete prior block as an overlap anchor, then favor low-visit
         # and different-source blocks. Entire job domains are always opened.
         anchors=self.previous_groups[:1] if diversify else []
+        coupled=bool(stage==0 and effects and family in ('ELECTRICAL_CRITICAL_WINDOW','IDC_BLOCK'))
+        capacity_release=[];critical_jobs=[];wan_partners=[]
+        if coupled:
+            uidgroup={u:g for g,m in self.metadata.items() for u in m.get('members',[]) if g in self.decision_groups}
+            rows=[(u,r) for u,r in effects.items() if u in uidgroup]
+            def critical_score(item):
+                u,r=item
+                return max((r['requested_GPU']*sensitivity.get(s,0.) for s,a,b in r['segments'] if any(a<=t<b for t in near_slots)),default=0.)
+            active=sorted((x for x in rows if any(a<=critical<b for s,a,b in x[1]['segments'])),key=lambda x:(-critical_score(x),x[0]))
+            per_site={}
+            for u,r in active:
+                s=next(s for s,a,b in r['segments'] if a<=critical<b)
+                if per_site.get(s,0)>=2:continue
+                per_site[s]=per_site.get(s,0)+1;capacity_release.append(uidgroup[u])
+            critical_jobs=[uidgroup[u] for u,r in active[:4]]
+            # The UID-serial WAN clock is a genuine coupling. Late small jobs
+            # can make different restart times feasible for critical jobs.
+            late=sorted((x for x in rows if x[1].get('checkpoint') is not None and self.metadata[uidgroup[x[0]]].get('can_migrate')),
+                key=lambda x:(-x[1]['checkpoint'],x[1]['requested_GPU'],x[0]))
+            wan_partners=[uidgroup[u] for u,r in late[:4]]
+            anchors=wan_partners+critical_jobs+capacity_release+anchors
         def priority(g):
             meta=self.metadata.get(g,{})
             lo=meta.get('earliest_effect',0);hi=meta.get('latest_effect',120)
@@ -155,7 +242,13 @@ class BoundedLex:
             elif family=='RUNNING_MIGRATION_BLOCK':score=not meta.get('can_migrate',False)
             elif family=='PENDING_RELOCATION_BLOCK':score=not meta.get('can_relocate',False)
             else:score=0
-            return (self.visits[g],score,g) if diversify or family=='COVERAGE' else (score,self.visits[g],g)
+            visits=self.stage_counts[g] if stage==1 else self.visits[g]
+            if stage==1 and effects and family=='ELECTRICAL_CRITICAL_WINDOW':
+                rows=[effects[u] for u in meta.get('members',[]) if u in effects]
+                # Prioritize short checkpoint-enabled jobs in reserve-stressed
+                # intervals; remaining families still rotate every full domain.
+                score=(not meta.get('can_migrate'),min((r['end']-r['start'] for r in rows),default=10**9),score)
+            return (visits,score,g) if diversify or family=='COVERAGE' else (score,visits,g)
         # Low-visit rotation remains complete; during diversification explicit
         # overlap is allowed before 100% raw coverage, per corrected contract.
         available=[g for g in groups if self.visits[g]==cycle] if self.control is None else groups
@@ -172,17 +265,20 @@ class BoundedLex:
             rows=[buckets[k] for k in sorted(buckets) if k[0]==rank]
             for i in range(max(map(len,rows),default=0)):
                 interleaved.extend(row[i] for row in rows if i<len(row))
-        selected=[];count=0
+        selected=[];count=0;target=max(25000,self.target_free) if coupled else self.target_free
         for g in anchors+interleaved:
             if g in selected:continue
             size=len(self.decision_groups[g])
             if size>10000:raise RuntimeError('COMPLETE_JOB_BLOCK_EXCEEDS_MAX_FREE_DISCRETE:'+str(g))
-            if selected and count+size>self.target_free:continue
+            if selected and count+size>target:continue
             selected.append(g);count+=size
-            if count>=self.target_free:break
+            if count>=target:break
         return selected,dict(family=family,cycle=cycle,critical_issue_slot=critical,critical_window_halfwidth_slots=2,
-            IDC_partition=site_blocks,current_IDC_block=site_block,target_free_discrete=self.target_free,
-            MIN_FREE_DISCRETE=2000,MAX_FREE_DISCRETE=10000,complete_job_domains_opened=True,
+            IDC_partition=site_blocks,current_IDC_block=site_block,target_free_discrete=target,
+            MIN_FREE_DISCRETE=2000,MAX_FREE_DISCRETE=25000 if coupled else 10000,complete_job_domains_opened=True,
+            coupled_capacity_release_active=coupled,capacity_occupant_groups=[g for g in capacity_release if g in selected],
+            critical_load_groups=[g for g in critical_jobs if g in selected],WAN_coupling_groups=[g for g in wan_partners if g in selected],
+            permanent_cross_region_constraint=False,
             sweep_id=self.control.sweep_id if self.control else None,
             sweep_mode=self.control.mode if self.control else 'NORMAL',overlap_groups=[g for g in anchors if g in selected],
             structure=getattr(self,'structure_ref',None))
@@ -236,7 +332,7 @@ class BoundedLex:
         priority=STAGES.get(label,stage_index)
         deadline=float(self.deadlines[min(priority if self.context is not None else stage_index,len(self.deadlines)-1)])
         allocated=max(0.,deadline-self.budget.used);start_used=self.budget.used
-        target=.03 if priority<2 else 0.;model.Params.MIPGap=target;model.Params.MIPGapAbs=0.
+        target=None
         starting_vector=self.vector();before=self.value(objective);bound=None;global_status=None;calls=[]
         decision_ids=sorted(i for ids in self.decision_groups.values() for i in ids)
         decision_vars=[self.vars[i] for i in decision_ids]
@@ -246,8 +342,9 @@ class BoundedLex:
         self.control=FamilySweep(priority,self.budget.used,self.exploration_scale)
         stage_setup=time.perf_counter()
         if self.validator is not None and self.context is not None:
-            checked=self.validator()
+            checked,rows=self._semantic()
             if checked['status']!='PASS':raise RuntimeError('STAGE_START_INDEPENDENT_VALIDATION_FAILED')
+            if rows is not None:self.incumbent_jobs=rows
             self.production_verified=len(self.expressions)==5
         floor=objective_floor(priority,self.vector(),production_verified=self.production_verified)
         if floor:self.control.reason='OBJECTIVE_PROVEN_OPTIMAL'
@@ -266,30 +363,46 @@ class BoundedLex:
                 limit=neighborhood_time_limit(deadline-self.budget.used,family_remaining,self.overhead_reserve,self.minimum_solve_seconds)
                 if not limit:break
                 self.live(label,'SOLVING',start_used)
+                self.search_spec=dict(priority=priority,incumbent=old_vector[priority],
+                    absolute_improvement=IMPROVEMENT_EPS[priority],rhs=old_vector[priority]-IMPROVEMENT_EPS[priority],
+                    independent_noise_tolerance=IMPROVEMENT_NOISE[priority])
                 candidate,data=self._solve(limit,label+':F_AND_O');calls.append(data)
                 self.values=candidate;accepted=False;semantic=None;canonical_pass=True
-                if self.validator is not None:
-                    semantic=self.validator()
-                    if semantic['status']!='PASS':raise RuntimeError('F_AND_O_JOB_MATERIALIZATION_FAILED')
+                rows=None
+                proposal=bool(data['solution_count'] and not data.get('candidate_rejection'))
+                if self.validator is not None and proposal:
+                    try:semantic,rows=self._semantic()
+                    except Exception as error:semantic=dict(status='FAIL',reason=repr(error))
                     names_to_index={n:i for i,n in enumerate(self.names)}
                     for name,value in semantic.get('canonical_auxiliary_values',{}).items():
                         self.values[names_to_index[name]]=value
                     canonical_audit=row_audit(model,self.values)
-                    canonical_pass=canonical_audit['status']=='PASS'
+                    canonical_pass=canonical_audit['status']=='PASS' and semantic['status']=='PASS'
                     semantic['canonical_model_substitution']=canonical_audit
                 new_vector=self.vector()
-                tolerances=[1e-10,1e-9,0.,0.,0.][:len(old_vector)]
-                comparison=0
-                for a,b,tol in zip(new_vector,old_vector,tolerances):
-                    if a<b-tol:comparison=-1;break
-                    if a>b+tol:comparison=1;break
-                if comparison<0 and canonical_pass and not data.get('candidate_rejection'):
+                independently_recomputed=(semantic or {}).get('independent_objective_vector')
+                if independently_recomputed is not None:
+                    canonical_pass=canonical_pass and all(abs(a-b)<=tol for a,b,tol in zip(new_vector,independently_recomputed,TOLERANCES))
+                locks_pass=all(new_vector[k]<=old_vector[k]+TOLERANCES[k] for k in range(min(priority,len(new_vector))))
+                improves=old_vector[priority]-new_vector[priority]>IMPROVEMENT_NOISE[priority]
+                cut_pass=new_vector[priority]<=self.search_spec['rhs']+IMPROVEMENT_NOISE[priority]
+                if proposal and improves and cut_pass and locks_pass and canonical_pass:
                     # Hard rows have already passed; independently materialize
                     # job-level GPU/rack/WAN/electrical state before acceptance.
                     semantic=semantic or {'status':'PASS','scope':'MODEL_ONLY_TEST'}
                     if semantic['status']!='PASS':raise RuntimeError('F_AND_O_JOB_MATERIALIZATION_FAILED')
                     accepted=True
+                    if rows is not None:self.incumbent_jobs=rows
+                    self.accepted_improvements.append(dict(stage=label,iteration=self.iteration+1,
+                        policy_day_seconds=self.budget.used,before=old_vector,after=new_vector))
                 else:
+                    if proposal:
+                        self.rejected_proposals+=1
+                        path=self.output/'bounded_checkpoints'/f'REJECTED_SEMANTIC_{self.index}_{self.iteration+1}.json'
+                        write_json(path,dict(status='REJECTED_PROPOSAL',semantic=semantic,locks_pass=locks_pass,
+                            active_objective_improves=improves,improvement_constraint_pass=cut_pass,original_model_pass=canonical_pass,
+                            candidate_vector=new_vector,retained_vector=old_vector,physical_feasibility_tolerance=model.Params.FeasibilityTol))
+                        data['candidate_rejection']=record(path)
                     self.values=old
                 for g in groups:self.visits[g]+=1;self.stage_counts[g]+=1
                 material=material_improvement(old_vector,self.vector(),priority,accepted)
@@ -307,6 +420,7 @@ class BoundedLex:
                     incumbent_before=old_vector,incumbent_after=self.vector(),accepted=accepted,
                     higher_priority_locks=[dict(name=c.ConstrName,rhs=c.RHS) for c in model.getConstrs() if 'LOCK' in c.ConstrName or 'EXACT_CAP' in c.ConstrName],
                     solve_runtime=data['runtime_seconds'],solver_status=data['status'],neighborhood_MIP_gap=data['neighborhood_gap'],
+                    first_improvement_search=data.get('improvement_constraint'),percentage_gap_on_P1_P5=False,
                     bound_scope='NEIGHBORHOOD_ONLY_NOT_GLOBAL',memory_RSS_bytes=memory.rss,
                     changed_groups=[g for g in groups if any(abs(old[i]-self.values[i])>.5 for i in self.decision_groups[g])],
                     changed_job_ids=[u for g in groups if any(abs(old[i]-self.values[i])>.5 for i in self.decision_groups[g]) for u in self.metadata.get(g,{}).get('members',[])],
@@ -358,6 +472,9 @@ class BoundedLex:
             starting_objective=before,starting_objective_vector=starting_vector,
             minimum_neighborhood_solver_seconds=self.minimum_solve_seconds,exploration_scale_from_remaining_component_budget=self.exploration_scale,
             final_objective=incumbent,neighborhoods_solved=stage_visits,
+            search_method='FIRST_IMPROVEMENT_FEASIBILITY',percentage_gap_controls_discovery=False,
+            absolute_improvement_epsilon=IMPROVEMENT_EPS[priority],objective_noise_tolerance=IMPROVEMENT_NOISE[priority],
+            rejected_proposals=self.rejected_proposals,accepted_improvements=list(self.accepted_improvements),
             consecutive_no_improvement_diagnostic=consecutive_no_improvement,
             objective_floor_certificate=floor,**self.control.metrics(),**self.stage_coverage())
         self.budget.charge(time.perf_counter()-final_started,label+':FINAL_AUDIT_AND_CHECKPOINT')

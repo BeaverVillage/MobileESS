@@ -10,13 +10,18 @@ import time
 from pathlib import Path
 from dayahead.paper_analysis.storage import write_json as _canonical_write_json
 
-VERSION = 'V41R1_FAMILY_SWEEP_EARLY_STOP_V2'
+VERSION = 'V41R1_FIRST_IMPROVEMENT_CRITICAL_SEARCH_V4'
 FAMILIES = ('ELECTRICAL_CRITICAL_WINDOW', 'IDC_BLOCK',
             'RUNNING_MIGRATION_BLOCK', 'PENDING_RELOCATION_BLOCK', 'COVERAGE')
 GUARDS = (900., 480., 180., 120., 120.)
 NORMAL_SECONDS = (420., 180., 45., 45., 30.)
 DIVERSIFICATION_SECONDS = (150., 90., 30., 30., 0.)
 TOLERANCES = (1e-10, 1e-9, 0., 0., 0.)
+# Absolute discovery increments, frozen from the independent recomputation
+# noise envelope (1e-10), with deterministic 100x/1000x safety factors.
+# These never replace hard feasibility or higher-priority lock tolerances.
+IMPROVEMENT_EPS = (1e-8, 1e-7, 1., 1., 1.)
+IMPROVEMENT_NOISE = (1e-9, 1e-8, 0., 0., 0.)
 STAGES = {
     'PRIMARY_MIN_RHO': 0, 'rho_max': 0,
     'V41_SECONDARY_MIN_MEAN_H4_SHORTFALL': 1, 'V41_mean_H4_shortfall_GPUh': 1,
@@ -32,7 +37,7 @@ def material_improvement(before, after, priority, accepted):
     # isclose prevents subtraction rounding at exactly the established
     # tolerance from spuriously resetting stagnation. No feasibility change.
     delta = float(before[priority]) - float(after[priority])
-    tol = TOLERANCES[priority]
+    tol = IMPROVEMENT_NOISE[priority]
     return bool(accepted and delta > tol and not math.isclose(delta, tol, rel_tol=1e-6, abs_tol=0.))
 
 
@@ -145,6 +150,19 @@ def current_structure(engine, priority):
                     result['near_binding_electrical_set'].append(dict(branch=n, phase=n.rsplit('::',1)[-1], issue_slot=t+24, loading=float(loads[k])))
         result['near_binding_threshold']=threshold
         result['near_binding_scope']='PRIORITIZATION_ONLY; ALL_CANDIDATES_RETAINED'
+        # Measure the certified fixed-PF AIDC load direction at the incumbent
+        # bottleneck. This is ordering metadata, never a destination filter.
+        t=grid['critical_slot'];c=ctx.coefficients[t];k=c.branch_names.index(grid['critical_line'])
+        original=anchored_polygon_loading(c,controls[t])[k];sensitivity={}
+        for j,s in enumerate(sites):
+            perturb=controls[t].copy();perturb[j]+=1.
+            sensitivity[s]=float(anchored_polygon_loading(c,perturb)[k]-original)
+        result['critical_site_sensitivity']=sensitivity
+        ordered=sorted(sites,key=lambda s:(sensitivity[s],s));gaps=np.diff([sensitivity[s] for s in ordered])
+        split=int(np.argmax(gaps))+1 if len(gaps) else 0
+        result['electrical_regions']={s:int(s in ordered[split:]) for s in sites}
+        result['critical_GPU']={s:float(engine.values[names[f'GPU[{t},{s}]']]) for s in sites}
+        result['all_IDCs_GPU_full']=all(result['critical_GPU'][s]>=ctx.capacity.site_capacity[s] for s in sites)
     if priority==1:
         from dayahead.v41.reserve import diagnostics
         gpu=np.asarray([[engine.values[names[f'GPU[{t},{s}]']] for s in sites] for t in range(96)])
@@ -156,6 +174,11 @@ def current_structure(engine, priority):
                 result['reserve_stress'].append(dict(site=s,start=k+24,end=k+40,shortfall_GPUh=xi,
                     occupancy_GPUh=float(.25*gpu[k:k+16,sites.index(s)].sum())))
         result['reserve_stress'].sort(key=lambda r:(-r['shortfall_GPUh'],-r['occupancy_GPUh'],r['start'],r['site']))
+    from dayahead.v40g.domain import segments
+    rows=getattr(engine,'incumbent_jobs',[]) or []
+    result['current_job_effects']={r['job_uid']:dict(requested_GPU=r['requested_GPU'],
+        checkpoint=r.get('r1_first_valid_checkpoint'),segments=list(segments(r)),
+        start=r['start_slot'],end=r['end_slot'],initial_site=r.get('initial_AIDC',r['AIDC_site'])) for r in rows}
     return result
 
 

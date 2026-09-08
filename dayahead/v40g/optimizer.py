@@ -247,6 +247,7 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
         # Factored decisions reconstruct an Option from route and arrival;
         # the multi-million-column reference enumeration is no longer needed.
         decode=[(tuple(groups[key]),() if i in factors else key[2]) for i,key in enumerate(keys)]
+        independent_rank_weights=[original_ranks[key[:6]]+1 for key in keys] if bounded else []
         neighborhood_metadata={i:dict(members=list(members),**{k:v for k,v in candidate_metadata[members[0]].items() if k!='job_id'})
             for i,(members,_) in enumerate(decode)} if bounded else {}
         del groups,keys,uid_options,load,wan_active,migration_groups,original_groups,original_ranks
@@ -269,7 +270,7 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
             def validate_materialized_incumbent():
                 from dayahead.v41r1.feasible_seed import job_audit
                 from dayahead.v41.preflight import record
-                selected_rows=[]
+                selected_rows=[];independent_dev=0;independent_tie=0
                 for group,(uids,choices) in enumerate(decode):
                     if group in factors:
                         from dayahead.v41r1.migration_factor import selected as select_factor
@@ -277,13 +278,28 @@ def solve(reference_jobs, reference_pcc, context, output, *, temporal_only=False
                     else:
                         selected_options=[opt for k,opt in enumerate(choices) for _ in range(int(round(solution_value(variables[group,k]))))]
                     if len(selected_options)!=len(uids):raise RuntimeError('F_AND_O_DISAGGREGATION_COUNT')
-                    selected_rows.extend(materialize(refs[u],o,context.capacity,wan) for u,o in zip(sorted(uids),selected_options))
+                    for u,o in zip(sorted(uids),selected_options):
+                        selected_rows.append(materialize(refs[u],o,context.capacity,wan))
+                        independent_dev+=deviation(refs[u],o)
+                        if group in factors:
+                            if o in factors[group]['stay']:
+                                option_index=int(factors[group]['stay'][o].VarName.rsplit(',',1)[1][:-1])
+                            else:
+                                from bisect import bisect_left
+                                authoritative=options(refs[u],context.capacity,wan,elapsed,temporal_only)
+                                option_index=bisect_left(authoritative,o)
+                                assert authoritative[option_index]==o
+                        else:option_index=choices.index(o)
+                        independent_tie+=independent_rank_weights[group]*(option_index+1)
                 state=audit(reference_jobs,selected_rows,context.capacity,wan)
                 physical,power=job_audit(selected_rows,context);grid=evaluate(power['pcc'])
                 from dayahead.v41.reserve import diagnostics
                 reserve_check=diagnostics(context.v41_ml_snapshot,context.capacity,power['gpu'])
                 return dict(status='PASS' if state['status']==physical['status']==grid['status']=='PASS' else 'FAIL',
                     job_decision_SHA=digest(selected_rows),service=state,physical=physical,grid=grid,reserve=reserve_check,
+                    materialized_jobs=selected_rows,materialized_power=power,
+                    independent_objective_vector=[grid['rho_max'],reserve_check['mean_xi_GPUh'],
+                        sum(bool(r.get('migration_selected')) for r in selected_rows),independent_dev,independent_tie],
                     canonical_auxiliary_values={'rho_max':grid['rho_max'],
                         **{f'V41_H4_shortfall_GPUh[{k}]':v for k,v in enumerate(reserve_check['xi_GPUh'])}})
             policy_budget=getattr(context,'v41_policy_budget',None) or PolicyBudget(config.get('total_seconds',1800))
