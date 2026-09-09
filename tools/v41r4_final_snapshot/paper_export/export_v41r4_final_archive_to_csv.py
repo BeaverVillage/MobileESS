@@ -327,7 +327,7 @@ def authority(s,tables,method,ml_days):
         grid_model=NA,grid_slots_per_day=len(dt_manifest),grid_interval_min=interval,voltage_lower_pu=method['hard_limits']['Vmin'],voltage_upper_pu=method['hard_limits']['Vmax'],
         traffic_links=NA,traffic_slots_per_day=NA,traffic_interval_min=NA,traffic_model_id=NA,runtime_model_id=ml['runtime_model_id'],H4_model_id=ml['H4_model_id'],
         source_archive_filename=Path(s.info['source_archive']).name,source_archive_size_bytes=s.info['source_archive_size_bytes'],source_archive_SHA256=s.info['source_archive_SHA256'],
-        MESS_operating_Emax_kWh_per_unit=int(energy[2]) if energy else NA,repository_commit_SHA=physics_record['scientific_commit'],method_SHA=s.info.get('method_SHA',NA),
+        MESS_operating_Emax_kWh_per_unit=int(energy[2]) if energy else NA,repository_commit_SHA=physics_record['scientific_commit'],method_SHA=rule['actual_method']['sha256'],
         grid_timestamp_timezone=str(timestamps.dt.tz),MESS_nominal_capacity_definition='energy_after/SoC_after from archived EXECUTION; verified all nonzero cells')
     tables['00_experiment_authority']=[row]
     s.missing.append(dict(fields=['grid_model','traffic_links','traffic_slots_per_day','traffic_interval_min','traffic_model_id'],reason='No complete final grid/traffic model identification or full traffic graph authority is established by the packaged final result index. External provenance targets intentionally not read.'))

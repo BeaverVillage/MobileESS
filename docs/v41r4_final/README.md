@@ -27,15 +27,19 @@ The monitor displays the revised acceptance/Actual namespaces. The first detache
 
 The operation created a new archive at the requested destination. Original scientific files were not moved, deleted or rewritten. The archive, extracted raw files, CSV data and large logs are **not in Git, Git LFS, PR attachments or release assets**. Only small catalogs, audit summaries and source code are included.
 
-## Paper export remains FAIL_CLOSED
+## Paper CSV projection and scientific limitations
 
-The archive-only exporter produced all eleven requested CSV tables: 86,880,540 bytes, a 99.357602% reduction versus the archive. Main result tables each contain all 124 completed units; MESS time series has 47,616 rows, grid projections 43,392 rows, AIDC decisions 188,036 rows, and paired comparisons 31 rows. Each CSV is below 500 MB and was read back and hash-checked. External workspace result reads were zero, and the archive hash and modification time were unchanged.
+The current paper-data selection is the existing V41R4 campaign's `MobileESS_V41R4_Paper_CSV_Export_corrected_20260909_112635` folder. This is a metadata correction of the same 31-day, 124-policy-day result; no campaign rerun produced it. The `00_experiment_authority.csv` method_SHA cell now uses the archived frozen Actual method. The other ten result CSVs are byte-identical. All eleven CSVs total 86,880,591 bytes and remain local.
 
-The campaign's completed AC acceptance is distinct from the additional paper-export invariant. The requested rule that optimized remaining compute service must not exceed the same-day B0 reference fails for **619 job-policy-day records across 60 policy-days**: B1=306 and B3=313. All are checkpoint-migrated jobs. No adverse records were removed to obtain a passing export.
+The initial export's FAIL_CLOSED receipt remains in `evidence/paper_export/` as history. The subsequent independent archive audit classifies the corrected **CSV projection as valid, with a scientific terminal-service limitation**. This does not turn its 619 flagged records into passing terminal checks: the exporter retains the original additional-invariant gate, so running the exporter alone can still report FAIL_CLOSED. The independent audit classification is a separate finding.
 
-For example, May01 B1 job 8571256 has reference segment [0,188), and optimized segments [0,26) and [28,190). At the archived issue-time boundary 120 (D-day midnight end), remaining compute service changes from 68 to 70 slots. The exporter therefore reports `V41R4_FINAL_ARCHIVE_PAPER_CSV_EXPORT_FAIL_CLOSED`. This PR does not repair or reoptimize those scientific results.
+The 619 job-policy-day records (B1=306, B3=313; 297 unique job UIDs) preserve total planned compute service but defer additional service beyond the D-day horizon. Extra post-horizon service totals 15,897 GPUh for B1 and 16,020.5 GPUh for B3 across independent daily experiments. These sums are not a continuously propagated monthly backlog. Grid improvements combine service deferral, location changes and MESS control; their causal shares are not identified. They must not be described as improvements under equal D-day service.
 
-Missing full-link traffic validation and unbound feeder peak data are marked NOT_AVAILABLE. Historical feeder tables are not used where their voltage/loading trajectory differs from final Actual. Runtime/H4 metrics and selected-route metrics are scoped to archived matched predictions/labels. Planning P1, final Fresh line loading and final Actual line loading remain separate; transformer loading is never merged into line rho.
+Job-level completion deadline authority could not be established for any of the 677 selected migrations. Requested-walltime reference completion is not an established migration deadline. Deadline compliance, violations and slack therefore remain NOT_AVAILABLE; neither zero violations nor universal deadline compliance is supported. See [the CSV audit](evidence/posthoc/CSV_REAUDIT_REPORT.md), [the deadline audit](evidence/posthoc/DEADLINE_AUDIT_REPORT.md) and [its authority evidence](evidence/posthoc/DEADLINE_AUTHORITY_EVIDENCE.md).
+
+Planning P1, Fresh line loading and Actual line loading remain separate metrics. Missing full-link traffic validation and unbound feeder peak data remain NOT_AVAILABLE. Transformer loading is not merged into line rho.
+
+The later V41R5 experiment was stopped and removed from active local execution paths at the user's request. This PR retains V41R4 as the paper-result authority and includes no V41R5 code or result data. Local V41R5 files were isolated because deletion was blocked; they were not reported as deleted.
 
 ## Review and reproduction
 
@@ -50,4 +54,10 @@ Missing full-link traffic validation and unbound feeder peak data are marked NOT
 
 Validation for this PR is static/source/hash and small projection-fixture checks only. No Gurobi, OpenDSS, SUMO, ML training, campaign restart or full archive re-export is required or performed for PR preparation.
 
-Run `python tools/v41r4_final_snapshot/verify_snapshot.py` from the repository root (Python and numpy required). The check passed for all 62 copied-file hashes and 42 Python source parses, plus external-path rejection, unsafe-archive rejection, terminal-residual failure/passing controls, and CSV precision/Unicode/missing-value/boolean round trips. This engineering validation does not change the paper export's FAIL_CLOSED status.
+Run `python tools/v41r4_final_snapshot/verify_snapshot.py` from the repository root (Python and numpy required). The check passed for all 77 copied-file hashes and 54 Python source parses, plus external-path rejection, unsafe-archive rejection, terminal-residual failure/passing controls, and CSV precision/Unicode/missing-value/boolean round trips. This engineering validation does not change the historical terminal-invariant failures or establish deadline compliance.
+
+### Post-hoc audit provenance
+
+`POSTHOC_SOURCE_SNAPSHOT.json` binds the additional report and script bytes. `evidence/posthoc/CORRECTED_EXPORT_INDEX.json` and `DEADLINE_AUDIT_INDEX.json` are compact catalogs linked by SHA256 to their full local manifests. `LOCAL_CSV_COMPARISON.json` records the ten identical result CSVs and the single metadata correction. The original `PAPER_EXPORT_INDEX.json` records the historical export and is retained unchanged.
+
+The captured `tools/v41r4_final_snapshot/posthoc/` scripts use original local paths, audit caches and archived data. They are review snapshots, not a self-contained clean-clone audit pipeline. Their original completed-run manifests describe archive-wide checks; PR preparation only verifies copied hashes, syntax, the delivered CSV comparison and small fixtures, without rerunning archive-wide audits or optimizers.

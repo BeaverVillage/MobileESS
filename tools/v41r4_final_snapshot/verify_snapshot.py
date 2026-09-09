@@ -17,8 +17,11 @@ import export_v41r4_final_archive_to_csv as export
 
 def main():
     manifest = json.loads((ROOT / 'docs/v41r4_final/SOURCE_SNAPSHOT.json').read_text(encoding='utf-8-sig'))
+    posthoc = json.loads((ROOT / 'docs/v41r4_final/POSTHOC_SOURCE_SNAPSHOT.json').read_text(encoding='utf-8-sig'))
+    records = manifest['files'] + posthoc['files']
+    assert len({record['path'] for record in records}) == len(records)
     python_count = 0
-    for record in manifest['files']:
+    for record in records:
         path = ROOT / record['path']
         data = path.read_bytes()
         assert len(data) == record['bytes'], record['path']
@@ -84,13 +87,15 @@ def main():
         assert restored[0]['valid'] == 'TRUE' and restored[1]['valid'] == 'FALSE'
         assert metadata['parts'][0]['SHA256'] == hashlib.sha256((root / 'fixture.csv').read_bytes()).hexdigest()
 
-    print(json.dumps(dict(status='PASS', copied_files_verified=len(manifest['files']),
+    print(json.dumps(dict(status='PASS', copied_files_verified=len(records),
                           python_sources_parsed=python_count,
                           fixtures=['external_path_rejection', 'archive_traversal_rejection',
                                     'terminal_residual_fail_closed', 'unchanged_terminal_pass',
                                     'CSV_precision_unicode_missing_boolean_roundtrip'],
                           campaign_data_read=False, campaign_reexecuted=False,
-                          paper_export_status='FAIL_CLOSED (unchanged)'), indent=2))
+                          exporter_terminal_gate='FAIL_CLOSED (unchanged)',
+                          independent_projection_classification='VALID_WITH_SCIENTIFIC_TERMINAL_LIMITATION',
+                          deadline_compliance='NOT_AVAILABLE'), indent=2))
 
 
 if __name__ == '__main__':
