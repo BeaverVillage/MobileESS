@@ -1,0 +1,64 @@
+{
+  "version": "V41R4_POST_DA_LOCAL_THEN_FULL_PQ_V1",
+  "frozen_at": 1788911637.7170067,
+  "primary": "Unchanged Primary Fresh. Hash-valid primary PASS is no-op; accepted final commands remain byte-identical.",
+  "local": "Existing local fixed-discrete restoration first. Existing successful local result may be reused only with matching original decision, local helper/margin hashes and a clean exact replay. Otherwise invoke original helper unchanged. Fallback only on solver INFEASIBLE (status 3). Other failures remain failures.",
+  "fallback": "Full physical P/Q domain, frozen AIDC and all mobility fields, eta .95, 300kW,400kVA,16 faces, energy 440..1080kWh, E0=ET=760kWh. No local P/Q radius and no primary-objective improvement lock.",
+  "deviation": "sum over all vehicle-slots of ((P-P_original)/300)^2+((Q-Q_original)/400)^2",
+  "search": "Generate seed 1 by full-physical minimum normalized P/Q squared effort; seed 2 by minimum deviation to original under frozen affine grid rows. Each solve deterministic Threads=1 Seed=20260909 WorkLimit=20 MIPGap=1e-6, no wall-time stop. Validate both with clean 96-slot exact AC. For each passing seed, 16 deterministic bisection steps toward original, projecting each interpolated target onto full physical domain by squared deviation; exact validate every candidate. Select minimum original-deviation among all exact passing candidates, digest tie-break. No seed reads forensic witness. Candidate-set minimum only, no global AC optimum claim.",
+  "acceptance": "Clean sequential 96-slot exact OpenDSS, convergence96, V .95..1.05 and line/transformer current/kVA <=1, inherited tolerance1e-9, physical battery audit. Repeat accepted fallback using independent clean replay.",
+  "actual": "Exact dependency/hash reuse only; changed final PQ/dependencies rerun sealed current causal Q-only Actual V2, eta .95. New restored prior-invalid unit gets NEW Actual. This closure never calls DA optimizer/route search.",
+  "DA_execution_scope": "EXISTING_DA_REUSE=123. NEW_REQUIRED_DA_EXECUTION=2025-05-31 B3 only, current frozen B3 M1/A1(1800s)/MF method. Explicit user correction authorizes first execution; existing May31 B0/B1/B2 unchanged.",
+  "code": [
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\restoration_revision_v1.py",
+      "sha256": "6a40f3e1047721d4a98f98a743a51b7f51452bcbba9ceea30e088c732a271c43",
+      "bytes": 19941
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\selective_actual_revision_v1.py",
+      "sha256": "870abf7ac6ab4cb34a128c714a9bf71c934492b908a79a0ba619df79cc05face",
+      "bytes": 5133
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\mission_ac_cut_restore.py",
+      "sha256": "958cb649e19050894a2fd1e5d867850104d1e0980185baf7a75a32d8480b1268",
+      "bytes": 7380
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40h\\recourse.py",
+      "sha256": "77700ed75bc5aa3c1953e8006719e67f5474aac03e7415c21a805fd81118e874",
+      "bytes": 9612
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37r3\\restoration.py",
+      "sha256": "5dd67c9ddd1ac5c0f89656a09ac5b4820ebec8ff9df644f7b5ba99ebf8698db0",
+      "bytes": 23474
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v34\\integrated_mess.py",
+      "sha256": "fb92793b9bc8cada5fb09bbf5c3c866cc644e18a052ee1fa97494d09bfa6ea32",
+      "bytes": 52534
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\mess_physics.py",
+      "sha256": "2859bf8124060468d7379f74c9bc0b0f1e6df2e5b4a19774ef00269c1d97cbe3",
+      "bytes": 3874
+    }
+  ],
+  "local_margin": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\audit\\mission\\AC_CUT_MARGIN_AUTHORITY.json",
+    "sha256": "e6c5b20c409d79e958f19fb65b285577ceeb7fa689354b026a4735fd96c452d1",
+    "bytes": 3581
+  },
+  "actual_method": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_actual_eta95_qsafe_robust_v2_perf1\\METHOD_FREEZE.json",
+    "sha256": "710a50cd439a9bb42cc8e6ea77b47eb1a5536c37cef894456a0859aeae9db368",
+    "bytes": 7388
+  },
+  "actual_implementation": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_actual_eta95_qsafe_robust_v2_perf1\\EXECUTION_BINDING.json",
+    "sha256": "a9f3b828611c47ae995d9995827fbd6edfc52a409a2ed6aba86be4ad124321f8",
+    "bytes": 1521
+  }
+}
