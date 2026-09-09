@@ -74,11 +74,35 @@ The 6,209 unmatched/unavailable pairs are separately reported from 46,544 total
 pairs. H4 raw/actionable coverage, raw-forecast MAE, mean/P90 actionable shortfall
 and cap activations use 2,511 windows (31 x 81). Selected-route ETA MAE, SafeETA
 coverage and margin use 72 deduplicated B2/B3 route observations. Full-link Q50
-MAE/WAPE, Q90 coverage and quantile crossings remain NOT_AVAILABLE. Selected-route
-operational performance is not full traffic-model validation. No ML metric was
-changed and no training or inference regeneration was performed.
+MAE/WAPE, Q90 coverage and quantile crossings remain NOT_AVAILABLE in the
+preserved CSV export. The subsequent production provenance recovery below
+establishes their PR19 held-out validation attribution separately. No CSV metric
+was changed and no training or inference regeneration was performed.
 
-Planning P1, Fresh line loading and Actual line loading remain separate metrics. Missing full-link traffic validation and unbound feeder peak data remain NOT_AVAILABLE. Transformer loading is not merged into line rho.
+Planning P1, Fresh line loading and Actual line loading remain separate metrics. Unbound feeder peak data remains NOT_AVAILABLE. Transformer loading is not merged into line rho.
+
+### Traffic production provenance recovered
+
+**V41R4_TRAFFIC_FULL_LINK_PROVENANCE_RECOVERY_PASS**. The expanded read-only
+audit follows all 62 final B2/B3 M1 receipts to SHA-verified external execution
+identities, 31 shared forecast and route-cache pairs, the transitive inventory,
+and the exact PR19 frozen checkpoint. File and canonical hashes both verify.
+All 95 final departures exactly match cached quantiles, Safe ETA and route links.
+The loaded checkpoint's effective graph_smoothing_weight is **0.0**.
+
+PR19 held-out Q50 MAE **28.778100967407227 s**, WAPE **4.140258207917213%**,
+Q90 coverage **0.8831677945135705**, and **zero crossings** can now be attributed
+to the exact production predictor. These are prior held-out 2024 validation
+scores, not newly measured May full-link errors. The selected-route operational
+metrics retain their separate N=72 scope. All eleven corrected CSVs are unchanged.
+`VALIDATION_ONLY_RERUN_REQUIRED = NO`; every scientific reexecution count is zero.
+
+See the [recovery report](evidence/traffic_provenance/TRAFFIC_PROVENANCE_RECOVERY_REPORT.md),
+[machine-readable decision](evidence/traffic_provenance/TRAFFIC_PROVENANCE_RECOVERY.json),
+and [62 policy-day bindings](evidence/traffic_provenance/TRAFFIC_PRODUCTION_DAY_BINDINGS.csv).
+The earlier archive-only PARTIAL and final-re-audit availability records remain
+historical evidence for their narrower source scope. External workspace evidence
+is used only for Traffic provenance.
 
 The later V41R5 experiment was stopped and removed from active local execution paths at the user's request. This PR retains V41R4 as the paper-result authority and includes no V41R5 code or result data. Local V41R5 files were isolated because deletion was blocked; they were not reported as deleted.
 
