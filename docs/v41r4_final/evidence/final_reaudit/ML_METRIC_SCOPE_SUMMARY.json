@@ -1,0 +1,210 @@
+{
+  "source": "07_ml_performance.csv",
+  "sha256": "30eae97ef4fd4374badb60efd81d209816d71351b5afc96c868e051647c2a557",
+  "rows": 22,
+  "review_scope": "Static availability/scoping; stored numbers unchanged; no model execution.",
+  "runtime_population": "40,335 matched pending job-day pairs; 6,209 unmatched/unavailable out of 46,544; repeated UIDs across days retained.",
+  "H4_population": "2,511 windows = 31 independent days x 81 windows; raw forecast MAE, actionable reserve shortfalls.",
+  "traffic_population": "72 deduplicated final selected B2/B3 route observations; operational performance only.",
+  "full_link_validation": "NOT_AVAILABLE",
+  "metrics": [
+    {
+      "domain": "H4",
+      "metric": "H4_MAE_GPUh",
+      "value": "2359.4323150004084",
+      "unit": "GPUh",
+      "evaluation_scope": "31 days x 81 archived H4 windows, policy-independent realized labels; raw R85_B2 forecast for MAE",
+      "N": "2511",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.H4"
+    },
+    {
+      "domain": "H4",
+      "metric": "H4_P90_shortfall_GPUh",
+      "value": "1882.3397222222275",
+      "unit": "GPUh",
+      "evaluation_scope": "31 days x 81 archived H4 windows, policy-independent realized labels; raw R85_B2 forecast for MAE",
+      "N": "2511",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.H4"
+    },
+    {
+      "domain": "H4",
+      "metric": "H4_actionable_capped_coverage",
+      "value": "0.8144165671047392",
+      "unit": "fraction",
+      "evaluation_scope": "31 days x 81 archived H4 windows, policy-independent realized labels; raw R85_B2 forecast for MAE",
+      "N": "2511",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.H4"
+    },
+    {
+      "domain": "H4",
+      "metric": "H4_historical_cap_activation_count",
+      "value": "0",
+      "unit": "windows",
+      "evaluation_scope": "31 days x 81 archived H4 windows, policy-independent realized labels; raw R85_B2 forecast for MAE",
+      "N": "2511",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.H4"
+    },
+    {
+      "domain": "H4",
+      "metric": "H4_mean_shortfall_GPUh",
+      "value": "1067.245893345481",
+      "unit": "GPUh",
+      "evaluation_scope": "31 days x 81 archived H4 windows, policy-independent realized labels; raw R85_B2 forecast for MAE",
+      "N": "2511",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.H4"
+    },
+    {
+      "domain": "H4",
+      "metric": "H4_physical_cap_activation_count",
+      "value": "517",
+      "unit": "windows",
+      "evaluation_scope": "31 days x 81 archived H4 windows, policy-independent realized labels; raw R85_B2 forecast for MAE",
+      "N": "2511",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.H4"
+    },
+    {
+      "domain": "H4",
+      "metric": "H4_raw_coverage",
+      "value": "0.8299482277976902",
+      "unit": "fraction",
+      "evaluation_scope": "31 days x 81 archived H4 windows, policy-independent realized labels; raw R85_B2 forecast for MAE",
+      "N": "2511",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.H4"
+    },
+    {
+      "domain": "runtime",
+      "metric": "runtime_MAE_s",
+      "value": "23900.51443270743",
+      "unit": "s",
+      "evaluation_scope": "31-day unique (day, pending job_uid) prediction-label pairs; B0 label authority; repeated jobs across issue days retained",
+      "N": "40335",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.runtime"
+    },
+    {
+      "domain": "runtime",
+      "metric": "runtime_Q90_empirical_coverage",
+      "value": "0.9121854468823603",
+      "unit": "fraction",
+      "evaluation_scope": "31-day unique (day, pending job_uid) prediction-label pairs; B0 label authority; repeated jobs across issue days retained",
+      "N": "40335",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.runtime"
+    },
+    {
+      "domain": "runtime",
+      "metric": "runtime_mean_underprediction_s",
+      "value": "6071.121736459265",
+      "unit": "s",
+      "evaluation_scope": "31-day unique (day, pending job_uid) prediction-label pairs; B0 label authority; repeated jobs across issue days retained",
+      "N": "40335",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.runtime"
+    },
+    {
+      "domain": "runtime",
+      "metric": "runtime_median_AE_s",
+      "value": "6170.46038313998",
+      "unit": "s",
+      "evaluation_scope": "31-day unique (day, pending job_uid) prediction-label pairs; B0 label authority; repeated jobs across issue days retained",
+      "N": "40335",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.runtime"
+    },
+    {
+      "domain": "runtime",
+      "metric": "runtime_pinball_loss_Q90",
+      "value": "2816.5577170387105",
+      "unit": "s",
+      "evaluation_scope": "31-day unique (day, pending job_uid) prediction-label pairs; B0 label authority; repeated jobs across issue days retained",
+      "N": "40335",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.runtime"
+    },
+    {
+      "domain": "runtime",
+      "metric": "runtime_reservation_15min_coverage",
+      "value": "0.9177885211354903",
+      "unit": "fraction",
+      "evaluation_scope": "31-day unique (day, pending job_uid) prediction-label pairs; B0 label authority; repeated jobs across issue days retained",
+      "N": "40335",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.runtime"
+    },
+    {
+      "domain": "runtime",
+      "metric": "runtime_underprediction_rate",
+      "value": "0.08781455311763976",
+      "unit": "fraction",
+      "evaluation_scope": "31-day unique (day, pending job_uid) prediction-label pairs; B0 label authority; repeated jobs across issue days retained",
+      "N": "40335",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.runtime"
+    },
+    {
+      "domain": "runtime",
+      "metric": "runtime_unmatched_or_unavailable_label_count",
+      "value": "6209",
+      "unit": "job-day pairs",
+      "evaluation_scope": "31-day unique (day, pending job_uid) prediction-label pairs; B0 label authority; repeated jobs across issue days retained",
+      "N": "46544",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.runtime"
+    },
+    {
+      "domain": "traffic",
+      "metric": "SafeETA_coverage",
+      "value": "0.9444444444444444",
+      "unit": "fraction",
+      "evaluation_scope": "Final selected B2/B3 routes, deduplicated day/departure/route/label; not full-link ML validation",
+      "N": "72",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.traffic_routes"
+    },
+    {
+      "domain": "traffic",
+      "metric": "SafeETA_mean_margin_s",
+      "value": "142.59338453682616",
+      "unit": "s",
+      "evaluation_scope": "Final selected B2/B3 routes, deduplicated day/departure/route/label; not full-link ML validation",
+      "N": "72",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.traffic_routes"
+    },
+    {
+      "domain": "traffic",
+      "metric": "link_Q50_MAE_s",
+      "value": "NOT_AVAILABLE",
+      "unit": "s",
+      "evaluation_scope": "Full link prediction-label validation not packaged with a bound authority",
+      "N": "NOT_AVAILABLE",
+      "source_inside_archive": "NOT_AVAILABLE"
+    },
+    {
+      "domain": "traffic",
+      "metric": "link_Q50_WAPE_pct",
+      "value": "NOT_AVAILABLE",
+      "unit": "pct",
+      "evaluation_scope": "Full link prediction-label validation not packaged with a bound authority",
+      "N": "NOT_AVAILABLE",
+      "source_inside_archive": "NOT_AVAILABLE"
+    },
+    {
+      "domain": "traffic",
+      "metric": "link_Q90_empirical_coverage",
+      "value": "NOT_AVAILABLE",
+      "unit": "fraction",
+      "evaluation_scope": "Full link prediction-label validation not packaged with a bound authority",
+      "N": "NOT_AVAILABLE",
+      "source_inside_archive": "NOT_AVAILABLE"
+    },
+    {
+      "domain": "traffic",
+      "metric": "quantile_crossings",
+      "value": "NOT_AVAILABLE",
+      "unit": "count",
+      "evaluation_scope": "Full link prediction-label validation not packaged with a bound authority",
+      "N": "NOT_AVAILABLE",
+      "source_inside_archive": "NOT_AVAILABLE"
+    },
+    {
+      "domain": "traffic",
+      "metric": "route_ETA_MAE_s",
+      "value": "52.6455134707414",
+      "unit": "s",
+      "evaluation_scope": "Final selected B2/B3 routes, deduplicated day/departure/route/label; not full-link ML validation",
+      "N": "72",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.traffic_routes"
+    }
+  ]
+}

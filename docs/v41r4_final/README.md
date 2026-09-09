@@ -29,6 +29,13 @@ The operation created a new archive at the requested destination. Original scien
 
 ## Paper CSV projection and scientific limitations
 
+Final integrated status: **PAPER_DATA_PROJECTION_PASS_WITH_COMPUTE_DEFERRAL_LIMITATION**.
+The physical campaign is **PASS_124_OF_124**, May31 B2 is **RESOLVED**, and the
+corrected paper projection is **PASS_AFTER_METADATA_CORRECTION**. The consolidated
+[final authority report](evidence/final_reaudit/FINAL_PAPER_DATA_AUTHORITY.md) and
+[machine-readable authority](evidence/final_reaudit/FINAL_PAPER_DATA_AUTHORITY.json)
+bind these separate findings to the unchanged raw archive and all eleven CSVs.
+
 The current paper-data selection is the existing V41R4 campaign's `MobileESS_V41R4_Paper_CSV_Export_corrected_20260909_112635` folder. This is a metadata correction of the same 31-day, 124-policy-day result; no campaign rerun produced it. The `00_experiment_authority.csv` method_SHA cell now uses the archived frozen Actual method. The other ten result CSVs are byte-identical. All eleven CSVs total 86,880,591 bytes and remain local.
 
 The initial export's FAIL_CLOSED receipt remains in `evidence/paper_export/` as history. The subsequent independent archive audit classifies the corrected **CSV projection as valid, with a scientific terminal-service limitation**. This does not turn its 619 flagged records into passing terminal checks: the exporter retains the original additional-invariant gate, so running the exporter alone can still report FAIL_CLOSED. The independent audit classification is a separate finding.
@@ -36,6 +43,40 @@ The initial export's FAIL_CLOSED receipt remains in `evidence/paper_export/` as 
 The 619 job-policy-day records (B1=306, B3=313; 297 unique job UIDs) preserve total planned compute service but defer additional service beyond the D-day horizon. Extra post-horizon service totals 15,897 GPUh for B1 and 16,020.5 GPUh for B3 across independent daily experiments. These sums are not a continuously propagated monthly backlog. Grid improvements combine service deferral, location changes and MESS control; their causal shares are not identified. They must not be described as improvements under equal D-day service.
 
 Job-level completion deadline authority could not be established for any of the 677 selected migrations. Requested-walltime reference completion is not an established migration deadline. Deadline compliance, violations and slack therefore remain NOT_AVAILABLE; neither zero violations nor universal deadline compliance is supported. See [the CSV audit](evidence/posthoc/CSV_REAUDIT_REPORT.md), [the deadline audit](evidence/posthoc/DEADLINE_AUDIT_REPORT.md) and [its authority evidence](evidence/posthoc/DEADLINE_AUTHORITY_EVIDENCE.md).
+
+The workload trace does not provide an explicit job-level completion-deadline authority for the migratable jobs considered in this study. Accordingly, checkpoint-migratable jobs are modeled as best-effort, latency-tolerant batch workloads.
+
+Checkpoint migration preserves total planned compute service, while checkpoint-to-transfer waiting, WAN transfer, and restart can defer part of that service beyond the D-day evaluation horizon.
+
+The paper-facing term is **migration-induced post-horizon compute-service deferral**.
+Report grid flexibility benefit versus compute-service deferral as a trade-off.
+B1 and B3 extra service is respectively 3.17798% and 3.20267% of B0 scheduled
+D-day GPUh over the 31 episodes; the maximum daily ratio is 17.4087%.
+P1 percent-improvement correlations (Pearson/Spearman, N=31) are
+0.372677/0.379829 for B1 and 0.109618/0.077024 for B3. These associations do not
+identify a causal contribution. The historical `terminal_residual_violation_jobs`
+field and RW diagnostic fields retain their original schema. They denote the
+additional export invariant or RW comparisons, not established job-deadline
+violations; physical voltage/current violation fields retain their physical meaning.
+
+Each operating day is evaluated as an independent day-ahead episode; post-horizon compute service is therefore recorded as terminal carry-out and is not propagated as next-day backlog.
+
+The May evaluation is not a continuous month-long workload simulation. No
+service-neutral, deadline-compliant or SLA-preserving migration claim is made.
+
+### ML metric availability
+
+The [ML metric scope summary](evidence/final_reaudit/ML_METRIC_SCOPE_SUMMARY.json)
+preserves all 22 stored rows and their original numeric strings and populations.
+Runtime Q90 coverage, 15-minute reservation coverage, pinball loss, MAE, median
+absolute error and underprediction rate use 40,335 matched pending job-day pairs.
+The 6,209 unmatched/unavailable pairs are separately reported from 46,544 total
+pairs. H4 raw/actionable coverage, raw-forecast MAE, mean/P90 actionable shortfall
+and cap activations use 2,511 windows (31 x 81). Selected-route ETA MAE, SafeETA
+coverage and margin use 72 deduplicated B2/B3 route observations. Full-link Q50
+MAE/WAPE, Q90 coverage and quantile crossings remain NOT_AVAILABLE. Selected-route
+operational performance is not full traffic-model validation. No ML metric was
+changed and no training or inference regeneration was performed.
 
 Planning P1, Fresh line loading and Actual line loading remain separate metrics. Missing full-link traffic validation and unbound feeder peak data remain NOT_AVAILABLE. Transformer loading is not merged into line rho.
 
@@ -48,6 +89,7 @@ The later V41R5 experiment was stopped and removed from active local execution p
 - `evidence/forensic_existence/`: diagnostic existence result, distinct from production.
 - `PAPER_EXPORT_INDEX.json`: CSV names, counts, sizes and hashes; availability and failed-validation summary.
 - `evidence/paper_export/`: delivered report, archive intake and independent failed-invariant confirmation.
+- `evidence/final_reaudit/`: final integrated authority, raw-member bindings, terminal/deadline interpretation and ML metric scope; historical receipts remain intact.
 - `tools/v41r4_final_snapshot/runtime/`: byte-preserved operational source for review, including historical coordinator helpers. These scripts depend on the original frozen environment and are **not clean-clone launchers**.
 - `tools/v41r4_final_snapshot/packaging/`: exact archive builder used for local delivery.
 - `tools/v41r4_final_snapshot/paper_export/`: archive-only exporter and intake helper. Requires Python, numpy, pandas and pyarrow. Pass `--archive` and `--output`; the caller supplies the local archive. Existing exported results are retained in new timestamped output directories on rerun.
@@ -60,4 +102,17 @@ Run `python tools/v41r4_final_snapshot/verify_snapshot.py` from the repository r
 
 `POSTHOC_SOURCE_SNAPSHOT.json` binds the additional report and script bytes. `evidence/posthoc/CORRECTED_EXPORT_INDEX.json` and `DEADLINE_AUDIT_INDEX.json` are compact catalogs linked by SHA256 to their full local manifests. `LOCAL_CSV_COMPARISON.json` records the ten identical result CSVs and the single metadata correction. The original `PAPER_EXPORT_INDEX.json` records the historical export and is retained unchanged.
 
-The captured `tools/v41r4_final_snapshot/posthoc/` scripts use original local paths, audit caches and archived data. They are review snapshots, not a self-contained clean-clone audit pipeline. Their original completed-run manifests describe archive-wide checks; PR preparation only verifies copied hashes, syntax, the delivered CSV comparison and small fixtures, without rerunning archive-wide audits or optimizers.
+The captured `tools/v41r4_final_snapshot/posthoc/` scripts use original local paths, audit caches and archived data. They are review snapshots, not a self-contained clean-clone audit pipeline. Their original completed-run manifests describe archive-wide checks. The earlier snapshot preparation verified copied hashes, syntax, the delivered CSV comparison and small fixtures. The subsequent final integration below adds direct archive reads without invoking those historical audit scripts or optimizers.
+
+### Final integration audit
+
+The subsequent `tools/v41r4_final_snapshot/audit_final_authority.py` performs a
+read-only streaming hash of the final tar.gz and directly reads selected archived
+JSON authorities without extraction. It cross-checks all 188,036 CSV job records
+against final frozen compute segments, all 677 migration audit rows, 62 daily
+boundary audits, May31 B2 acceptance, the 31-day paired denominator and retained
+negative results. It verifies the existing deadline search through its local
+manifest hash and frozen-source bindings; it does not repeat that broad search.
+The resulting evidence distinguishes current static checks from the original
+campaign's execution counts. All scientific reexecution counts for this final
+integration are zero. The archive and both CSV deliveries remain read-only.
