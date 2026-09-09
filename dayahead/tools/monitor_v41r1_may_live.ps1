@@ -115,6 +115,8 @@ do {
             $actualRoot=[string]$actualAuthority.namespace
             $progress=Read-LiveJson $actualAuthority.dispatcher_state
         }
+        $displayCap=if($progress.day_workers){[int]$progress.day_workers}else{4}
+        $lines[0]=('  V41R4  5월 캠페인                         공통 최대 {0} 워커 · DA/Fresh + Actual' -f $displayCap)
         $units=@($state.units.PSObject.Properties | ForEach-Object {$_.Value})
         $reuseIndex=$null;$reusePath=Join-Path $out 'REUSED_RESULTS_INDEX.json'
         if(Test-Path -LiteralPath $reusePath){$reuseIndex=Read-LiveJson $reusePath}
@@ -198,7 +200,7 @@ do {
         $lines.Add('  B3: B1 재사용(A0) → M1 → A1 → MF → Fresh → Actual · MF는 고정 경로 P/Q·SoC 조정')
         $lines.Add('  무개선 조기 종료 없음 · 30분 종료 후 최선해 반환 · 일회성 준비·계수 생성 제외')
         $daComplete=@($units | Where-Object {$dp=Join-Path $out ($_.day+'\PHASE_'+$_.policy+'_DA.json');(Test-Path -LiteralPath $dp) -and (Get-PhaseStatus $dp) -eq 'PASS'}).Count
-        $lines.Add(('  Day-Ahead/Fresh 완료 {0}/124 · 빈 워커는 완료된 결정의 Actual 재생 우선' -f $daComplete))
+        $lines.Add(('  Day-Ahead/Fresh 완료 {0}/124 · 배정 순서는 아래 자원 운영 모드에 따름' -f $daComplete))
         if($actualRoot){$lines.Add(('  Actual: Robust V2 · η=0.95 · P 고정 / Q-only · 새 버전 완료 {0}/124 · 과거 Actual 별도 보존' -f $done))}
         if($actualRoot){
             $splitPath=Join-Path $actualRoot 'TEMPORARY_RESOURCE_POLICY.json'
@@ -207,9 +209,10 @@ do {
                 if($split.status -eq 'ACTIVE'){
                     $nd=@($progress.active | Where-Object {$_.kind -eq 'DA_FRESH'}).Count
                     $na=@($progress.active | Where-Object {$_.kind -in @('ACTUAL_ONLY','DIAGNOSTIC_ONLY')}).Count
-                    $lines.Add(('  임시 2+2: 현재 DA/Fresh {0} · Actual/감사 {1} · 진행 중 DA는 완료 경계에서 전환' -f $nd,$na))
+                    $lines.Add(('  임시 DA/Fresh {0} + Actual {1}: 현재 {2} + {3} · 밀린 Actual 완료 후 정상 4워커 복귀' -f $split.MAX_DA_FRESH_WORKERS,$split.MAX_ACTUAL_WORKERS,$nd,$na))
                 }
             }
+            if($progress.resource_mode -eq 'NORMAL_4'){$lines.Add('  정상 4워커 · 날짜/정책별 DA/Fresh → 해당 Actual · 전역 Actual 우선 배정 없음')}
             $holdPath=Join-Path $actualRoot 'ACTUAL_DISPATCH_HOLD.json'
             if((Test-Path -LiteralPath $holdPath) -and (Read-LiveJson $holdPath).status -eq 'HOLD'){$lines.Add('  본 Actual 배정 보류 · May12 경량 검색 + 선택 Q 96개 검증 후 재개')}
         }
@@ -265,7 +268,7 @@ do {
         }
         $lines.Add('워커   날짜       정책   현재 단계          일 진행률   세부 진행')
         $lines.Add('--------------------------------------------------------------------------------------------')
-        for($i=0;$i -lt 4;$i++) {
+        for($i=0;$i -lt [Math]::Max($displayCap,$active.Count);$i++) {
             if($i -ge $active.Count){$lines.Add(('{0}      대기' -f ($i+1)));continue}
             $u=$active[$i];$stage=[string]$u.phase;$detail='진행 중';$fo=$null;$b3Phase=$null
             $dayUnits=@($units | Where-Object {$_.day -eq $u.day})

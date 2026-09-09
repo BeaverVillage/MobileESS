@@ -38,7 +38,11 @@ The reduced gate passed all 96 selected points. Lightweight search took **922.18
 
 ## Resource and output preservation
 
-The temporary allocation is two DA/Fresh workers plus at most two Actual/audit workers under the common cap of four. Existing expensive solves finish at policy-day boundaries; the coordinator adopts their PIDs without terminating those workers. Eligible Actual work takes priority. Production Actual stays held until the current gate passes, and old heavy Actual stays disabled. A free audit slot may remain idle while the single required day test runs.
+The current allocation is **four total day workers**, following chronological date/policy DA/Fresh then its Actual. There is no global Actual-first priority. The earlier 2+2 allocation and subsequent temporary Actual8 + DA2 burst are historical resource configurations. `CAPTURE_STATUS.json` is the initial deployment snapshot, not the current resource setting.
+
+The burst exit condition originally counted pending Actual policies on dates occupied by DA workers. Date-exclusive scheduling prevented these units from being dispatched, leaving burst reservations idle. The operational adapter now distinguishes dispatchable backlog from pending units on occupied dates. It returns to normal4 when dispatchable backlog and active Actual both drain, and normal4 remains sticky when later DA results generate new Actual work. The missed transition was applied without preempting any day worker; four retained workers completed normally and four subsequent live workers were verified.
+
+`evidence/resource_restore/` records the deployed adapter authority, restoration receipt, regression checks and process verification. The adapter has a separate operational SHA; scientific and performance seals are unchanged. The monitor displays the active common cap and normal pipeline mode. Synchronous report publication and date scanning can still delay backfill; this correction does not claim to remove those delays.
 
 B0/B1 use the common Actual binding and require exact historical regression verification when an original Actual result exists. B2/B3 preserve original Actual, eta95 baseline and Q-corrected trajectories separately. Versioned reports distinguish the 17 development dates (May01–16, May18), 14 holdout dates, and 31-day total with explicit completed-pair denominators. P/SoC identity, interventions, unresolved slots, PCS use, violations and runtime are included.
 
@@ -55,10 +59,11 @@ B0/B1 use the common Actual binding and require exact historical regression veri
 - `../perf1_overlay/` within the snapshot: deployed performance worker, dispatcher/report overlays and final implementation seals. The remaining code is byte-identical to the base snapshot.
 - `SOURCE_SNAPSHOT.json`: original paths, copied paths, sizes and SHA256 values.
 
-Run only the data-free snapshot check in a PR checkout:
+Run the data-free snapshot and resource-policy checks in a PR checkout:
 
 ```powershell
 python tools/v41r4_actual_snapshot/verify_snapshot.py
+python tools/v41r4_actual_snapshot/test_resource_policy.py
 ```
 
 It checks copied bytes, scientific bindings, evidence scope, syntax and the frozen PCS Q-interval endpoints/maximality/disconnection/active-rating contract. It invokes neither OpenDSS nor campaign workers. Live physics evidence is preserved separately under `evidence/`; monitoring render verification is recorded in `VALIDATION.json`.

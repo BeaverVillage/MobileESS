@@ -48,6 +48,13 @@ def main():
         path=overlay/name if (overlay/name).exists() else SNAP/name
         if name=='cached_engine.py':path=SNAP/'acceleration_audit/cached_engine.py'
         assert sha(path)==h,('DEPLOYED_IMPLEMENTATION_DRIFT',name)
+    resource=read(DOC/'evidence/resource_restore/RESOURCE_BURST_AUTHORITY.json')
+    assert sha(overlay/'burst_resource_dispatcher.py')==resource['dispatcher_adapter_SHA']
+    assert sha(overlay/'PERFORMANCE_FREEZE.json')==resource['unchanged_performance_freeze_SHA']
+    restored=read(DOC/'evidence/resource_restore/FOUR_LIVE_WORKERS_VERIFIED.json')
+    assert restored['status']=='PASS' and restored['mode']=='NORMAL_4'
+    assert restored['cap']==4 and not restored['Actual_priority']
+    assert len(restored['live'])==len({r['day'] for r in restored['live']})==4
     # Exercise the actual frozen Q-bound function without importing its host runtime.
     tree=ast.parse((SNAP/'frozen_code/qsafe.py').read_text())
     node=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='q_bounds')
