@@ -78,6 +78,19 @@ function Get-B3MonitorPhase([string]$Folder) {
     if(Test-Path -LiteralPath (Join-Path $stages 'M1_INPUT.json')){return 'M1'}
     return 'A0'
 }
+function Get-PhaseStatus([string]$Path) {
+    # Phase result payloads can be several MB. Read the root status header only;
+    # a nested result's status must never be mistaken for the phase status.
+    $share=[IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete
+    $stream=[IO.File]::Open($Path,[IO.FileMode]::Open,[IO.FileAccess]::Read,$share)
+    $reader=New-Object IO.StreamReader($stream)
+    try{
+        $buffer=New-Object char[] 512;$count=$reader.Read($buffer,0,512)
+        $header=New-Object string($buffer,0,$count)
+        if($header -match '^\s*\{\s*"status"\s*:\s*"([^"]+)"'){return $Matches[1]}
+    }finally{$reader.Dispose()}
+    return (Read-LiveJson $Path).status
+}
 try {
     $Host.UI.RawUI.WindowTitle='V41R4 5월 실행 현황 · alpha 1.15 · Codex 독립 실행'
     if(-not $Once){
@@ -90,11 +103,20 @@ do {
     $refreshDeadline=$refreshClock.ElapsedMilliseconds+5000
     $refreshSequence++
     $lines=New-Object 'System.Collections.Generic.List[string]'
-    $lines.Add('  V41R4  5월 캠페인                         4 day × 4 threads · Codex 독립 실행')
+    $lines.Add('  V41R4  5월 캠페인                         공통 최대 4 워커 · DA/Fresh + Actual')
     $lines.Add('')
     try {
         $state=Read-LiveJson (Join-Path $runtime 'campaign_state.json')
         $progress=Read-LiveJson (Join-Path $runtime 'campaign_progress.json')
+        $actualAuthority=$null;$actualRoot=$null
+        $authorityPath=Join-Path $out 'ACTUAL_EXECUTION_METHOD_CURRENT.json'
+        if(Test-Path -LiteralPath $authorityPath){
+            $actualAuthority=Read-LiveJson $authorityPath
+            $actualRoot=[string]$actualAuthority.namespace
+            $progress=Read-LiveJson $actualAuthority.dispatcher_state
+        }
+        $displayCap=if($progress.day_workers){[int]$progress.day_workers}else{4}
+        $lines[0]=('  V41R4  5월 캠페인                         공통 최대 {0} 워커 · DA/Fresh + Actual' -f $displayCap)
         $units=@($state.units.PSObject.Properties | ForEach-Object {$_.Value})
         $reuseIndex=$null;$reusePath=Join-Path $out 'REUSED_RESULTS_INDEX.json'
         if(Test-Path -LiteralPath $reusePath){$reuseIndex=Read-LiveJson $reusePath}
@@ -102,6 +124,36 @@ do {
         # the supervisor heartbeat is stale. This never changes run state.
         foreach($unit in $units){
             $unitRoot=Join-Path $runtime ($unit.day+'\'+$unit.policy)
+            if($actualRoot){
+                # Historical Actual receipts cannot complete or hide a V2 worker.
+                $newFolder=Join-Path $actualRoot ('replays\'+$unit.day+'\'+$unit.policy)
+                $newReceipt=Join-Path $newFolder 'CANDIDATE_RECEIPT.json'
+                $unit.status='WAITING';$unit.phase='queued';$unit.worker_pid=$null
+                $daReceipt=Join-Path $out ($unit.day+'\PHASE_'+$unit.policy+'_DA.json')
+                if((Test-Path -LiteralPath $daReceipt) -and (Get-PhaseStatus $daReceipt) -eq 'PASS'){$unit.status='DA_COMPLETE';$unit.phase='Robust V2 Actual 대기'}
+                if(Test-Path -LiteralPath $newReceipt){
+                    $nr=Read-LiveJson $newReceipt
+                    if($nr.status -eq 'COMPLETE' -and $nr.method_SHA -eq $actualAuthority.method_SHA){$unit.status='COMPLETE';$unit.phase='Robust V2 Actual 완료'}
+                }
+                $running=$progress.active | Where-Object {$_.day -eq $unit.day -and ($_.policy -eq $unit.policy -or ($unit.policy -eq 'B0' -and $_.phase -in @('electrical','domain')))} | Select-Object -First 1
+                if($running){
+                    $unit.worker_pid=$running.worker_pid
+                    $unit.status=if(Get-Process -Id $unit.worker_pid -ErrorAction SilentlyContinue){'RUNNING'}else{'INTERRUPTED'}
+                    $unit.phase=switch -Regex ([string]$running.phase){
+                        '_ETA95_QSAFE_AC$' {'actual_v2';break}
+                        '_DA$' {'dayahead';break}
+                        '^electrical$' {'ELECTRICAL_GENERATION';break}
+                        '^domain$' {'DOMAIN_PREPARATION';break}
+                        default {[string]$running.phase}
+                    }
+                    $unit | Add-Member -NotePropertyName active_record -NotePropertyValue $running -Force
+                }
+                elseif($unit.status -ne 'COMPLETE'){
+                    $problem=$progress.errors | Where-Object {$_.day -eq $unit.day -and $_.phase.StartsWith($unit.policy)} | Select-Object -Last 1
+                    if($problem){$unit.status='FAILED';$unit | Add-Member -NotePropertyName error -NotePropertyValue $problem.error -Force}
+                }
+                continue
+            }
             $phaseReceipt=Join-Path $out ($unit.day+'\PHASE_'+$unit.policy+'_AC.json')
             $phaseValue=$null
             if(Test-Path -LiteralPath $phaseReceipt){$phaseValue=Read-LiveJson $phaseReceipt}
@@ -128,7 +180,7 @@ do {
         foreach($unit in $units){
             if($unit.status -eq 'WAITING'){
                 $daPhase=Join-Path $out ($unit.day+'\PHASE_'+$unit.policy+'_DA.json')
-                if((Test-Path -LiteralPath $daPhase) -and (Read-LiveJson $daPhase).status -eq 'PASS'){$unit.status='DA_COMPLETE';$unit.phase='Day-Ahead 재사용 완료'}
+                if((Test-Path -LiteralPath $daPhase) -and (Get-PhaseStatus $daPhase) -eq 'PASS'){$unit.status='DA_COMPLETE';$unit.phase='Day-Ahead 재사용 완료'}
             }
         }
         $days=@($units | Group-Object day)
@@ -147,8 +199,23 @@ do {
         $lines.Add('  B1 / A1 각각 F&O 루프 30분 · 후보·랭킹·계산·풀이 포함 · B1은 날짜별 B0에서 시작')
         $lines.Add('  B3: B1 재사용(A0) → M1 → A1 → MF → Fresh → Actual · MF는 고정 경로 P/Q·SoC 조정')
         $lines.Add('  무개선 조기 종료 없음 · 30분 종료 후 최선해 반환 · 일회성 준비·계수 생성 제외')
-        $daComplete=@($units | Where-Object {$_.status -in @('DA_COMPLETE','COMPLETE')}).Count
-        $lines.Add(('  Day-Ahead 동결 {0}/124 · 날짜별 4정책 동결 후 Actual · 불리한 Actual도 보존' -f $daComplete))
+        $daComplete=@($units | Where-Object {$dp=Join-Path $out ($_.day+'\PHASE_'+$_.policy+'_DA.json');(Test-Path -LiteralPath $dp) -and (Get-PhaseStatus $dp) -eq 'PASS'}).Count
+        $lines.Add(('  Day-Ahead/Fresh 완료 {0}/124 · 배정 순서는 아래 자원 운영 모드에 따름' -f $daComplete))
+        if($actualRoot){$lines.Add(('  Actual: Robust V2 · η=0.95 · P 고정 / Q-only · 새 버전 완료 {0}/124 · 과거 Actual 별도 보존' -f $done))}
+        if($actualRoot){
+            $splitPath=Join-Path $actualRoot 'TEMPORARY_RESOURCE_POLICY.json'
+            if(Test-Path -LiteralPath $splitPath){
+                $split=Read-LiveJson $splitPath
+                if($split.status -eq 'ACTIVE'){
+                    $nd=@($progress.active | Where-Object {$_.kind -eq 'DA_FRESH'}).Count
+                    $na=@($progress.active | Where-Object {$_.kind -in @('ACTUAL_ONLY','DIAGNOSTIC_ONLY')}).Count
+                    $lines.Add(('  임시 DA/Fresh {0} + Actual {1}: 현재 {2} + {3} · 밀린 Actual 완료 후 정상 4워커 복귀' -f $split.MAX_DA_FRESH_WORKERS,$split.MAX_ACTUAL_WORKERS,$nd,$na))
+                }
+            }
+            if($progress.resource_mode -eq 'NORMAL_4'){$lines.Add('  정상 4워커 · 날짜/정책별 DA/Fresh → 해당 Actual · 전역 Actual 우선 배정 없음')}
+            $holdPath=Join-Path $actualRoot 'ACTUAL_DISPATCH_HOLD.json'
+            if((Test-Path -LiteralPath $holdPath) -and (Read-LiveJson $holdPath).status -eq 'HOLD'){$lines.Add('  본 Actual 배정 보류 · May12 경량 검색 + 선택 Q 96개 검증 후 재개')}
+        }
         $lines.Add('')
         $active=@($units | Where-Object {$_.status -match 'RUNNING'} | Sort-Object day,policy)
         $prepFile=Join-Path $runtime 'BASELINE_PREPARATION_PROGRESS.json'
@@ -195,9 +262,13 @@ do {
                 if(Test-Path -LiteralPath (Join-Path $runtime 'USER_FULL_MAY_HOLD.json')){$lines.Add('May-04 B1 수락 검증: 완료 후 종료 / 5월 전체 실행 보류')}else{$lines.Add('May-04 B1 수락 검증: 완료 후 월간 4개 워커 재개')}
             }
         }
+        foreach($auditWorker in @($progress.active | Where-Object {$_.kind -eq 'DIAGNOSTIC_ONLY'})){
+            $auditPolicy=if($auditWorker.phase -match 'FINAL_96_GATE_(B[0-3])_'){$Matches[1]}elseif($auditWorker.phase -eq 'LIGHTWEIGHT_SEARCH_SELECTED_Q_GATE'){'B3'}else{'감사'}
+            $active+=@([pscustomobject]@{day=$auditWorker.day;policy=$auditPolicy;phase='actual_equivalence_audit';worker_pid=$auditWorker.worker_pid;active_record=$auditWorker})
+        }
         $lines.Add('워커   날짜       정책   현재 단계          일 진행률   세부 진행')
         $lines.Add('--------------------------------------------------------------------------------------------')
-        for($i=0;$i -lt 4;$i++) {
+        for($i=0;$i -lt [Math]::Max($displayCap,$active.Count);$i++) {
             if($i -ge $active.Count){$lines.Add(('{0}      대기' -f ($i+1)));continue}
             $u=$active[$i];$stage=[string]$u.phase;$detail='진행 중';$fo=$null;$b3Phase=$null
             $dayUnits=@($units | Where-Object {$_.day -eq $u.day})
@@ -215,6 +286,32 @@ do {
             }
             elseif($stage -eq 'DOMAIN_PREPARATION'){$stage='후보 준비';$detail='기존 공간·시간·migration 도메인 / SHA 봉인'}
             elseif($stage -eq 'CERTIFIED_REUSE'){$stage='검증 결과 재사용';$detail='May-04 계수·B0·최종 B1 / 중복 실행 없음'}
+            elseif($stage -eq 'actual_equivalence_audit'){
+                $stage=if($u.active_record.phase -eq 'LIGHTWEIGHT_SEARCH_SELECTED_Q_GATE'){'Actual 경량 검증'}else{'Actual 동등성 감사'};$detail=[string]$u.active_record.phase
+                $auditDir=Split-Path -Parent $u.active_record.diagnostic_result
+                $auditProgress=Join-Path $auditDir 'PROGRESS.json'
+                if($u.active_record.phase -eq 'EXACT_FULL_SEARCH_AUDIT'){$auditProgress=Join-Path $auditDir 'FULL_SEARCH_PROGRESS.json'}
+                if(Test-Path -LiteralPath $auditProgress){
+                    $ap=Read-LiveJson $auditProgress
+                    $detail=if($null -ne $ap.slots_complete){'{0} · {1}/96 슬롯 완료 · 슬롯 {2} / 후보 {3}' -f $(if($ap.phase){$ap.phase}else{$ap.mode}),$ap.slots_complete,$ap.slot,$ap.trial}else{'{0} · Q 후보 {1}' -f $ap.mode,$ap.trials}
+                }
+            }
+            elseif($stage -eq 'actual_v2'){
+                $stage='Actual Robust V2'
+                $af=Join-Path $actualRoot ('replays\'+$u.day+'\'+$u.policy)
+                $elapsed=[Math]::Max(0,([DateTimeOffset]::UtcNow.ToUnixTimeSeconds()-[double]$u.active_record.started_at)/60)
+                if($u.policy -in @('B0','B1')){$detail='공통 binding 회귀 검증 / Exact OpenDSS'}
+                else{
+                    $qp=Join-Path $af 'ETA95_QSAFE_ACTUAL\PROGRESS.json'
+                    if(Test-Path -LiteralPath $qp){
+                        $q=Read-LiveJson $qp
+                        $detail=if($q.slots_complete -lt 96){'QSAFE 슬롯 {0} 평가 · {0}/96 완료 · Q개입 {1} · 미해결 {2}' -f $q.slots_complete,$q.interventions,$q.infeasible}else{'96/96 완료 · 연속 재생 / P·SoC 동일성 감사'}
+                    }elseif(Test-Path -LiteralPath (Join-Path $af 'ETA95_QSAFE_ACTUAL')){$detail='QSAFE 슬롯 0 평가 · 0/96 완료 / robust Q 탐색'}
+                    elseif(Test-Path -LiteralPath (Join-Path $af 'ETA95_ACTUAL')){$detail='ETA95 기준 궤적 / Exact OpenDSS 재생'}
+                    else{$detail='η=0.95 입력 / 동결 결정 SHA 검증'}
+                }
+                $detail+=(' · {0:N1}분' -f $elapsed)
+            }
             elseif($stage -eq 'actual'){$stage='Actual';$detail='고정 결정 재생 / OpenDSS 평가'}
             elseif($stage -eq 'dayahead'){
                 $stage='Day-Ahead'
@@ -268,7 +365,7 @@ do {
                     }
                 }
             }
-            $lines.Add(('{0}      {1}      {2}    {3,-18} {4,5:N0}%      {5}' -f ($i+1),$u.day.Substring(5),$u.policy,$stage,$dayPct,(Get-MonitorText $detail 52)))
+            $lines.Add(('{0}      {1}      {2}    {3,-18} {4,5:N0}%      {5}' -f ($i+1),$u.day.Substring(5),$u.policy,$stage,$dayPct,(Get-MonitorText ($stage+' · '+$detail) 90)))
             if($showDetails -and $fo -and $fo.compute_control_version){
                 $reason=if($fo.termination_reason){$fo.termination_reason}else{'SEARCHING'}
                 $lines.Add(('       Sweep {0} {1} / 단계 {2:N1}분 / 전체 {3:N1}분 / 남음 {4:N1}분' -f $fo.STAGE_SWEEP_ID,$fo.sweep_mode,($fo.stage_runtime_seconds/60),($fo.budget_used_seconds/60),($fo.remaining_seconds/60)))
@@ -292,9 +389,9 @@ do {
                 $p1='-';$p2='-';$fg='-';$ag='-';$voltageText='-'
                 if(Test-Path -LiteralPath $objective){$v=(Read-LiveJson $objective).OBJECTIVE_VECTOR;$p1='{0:N6}' -f $v[0];$p2='{0:N2}' -f $v[1]}
                 $daProof=Join-Path $out ($chosen+'\PHASE_'+$policy+'_DA.json')
-                if((Test-Path -LiteralPath $daProof) -and (Read-LiveJson $daProof).status -eq 'PASS'){$fg='PASS'}
+                if((Test-Path -LiteralPath $daProof) -and (Get-PhaseStatus $daProof) -eq 'PASS'){$fg='PASS'}
                 $accept=Join-Path $out ($chosen+'\'+$policy+'_ACCEPTANCE.json')
-                if(Test-Path -LiteralPath $accept){
+                if(-not $actualRoot -and (Test-Path -LiteralPath $accept)){
                     $a=Read-LiveJson $accept
                     if($a.classification -eq 'REUSED_CERTIFIED_RESULT_NO_REPLAY'){$fg=$a.evidence.Fresh;$ag=$a.evidence.Actual;$s=$a.evidence.actual}
                     else{$fg=$a.Fresh;$ag=if($a.Actual_physical_outcome -eq 'WITH_VIOLATIONS'){'위반 있음'}else{'유효 재생'};$s=$a.Actual_summary}
@@ -303,10 +400,28 @@ do {
                 $retainedRow=$reuseIndex.rows | Where-Object {$_.day -eq $chosen -and $_.policy -eq $policy} | Select-Object -First 1
                 $displayStatus=$unit.status
                 if($retainedRow -and $unit.status -eq 'DA_COMPLETE'){$displayStatus='재사용 DA'}
-                if($retainedRow -and $retainedRow.stages.AC -and $ag -eq '-'){
+                if(-not $actualRoot -and $retainedRow -and $retainedRow.stages.AC -and $ag -eq '-'){
                     $rg=$retainedRow.stages.AC
                     $ag=if($rg.grid.physical_outcome -eq 'WITH_VIOLATIONS'){'기존 위반'}else{'기존 결과'}
                     $voltageText='{0:N6} / {1:N6}' -f $rg.Vmax,$rg.rho_max
+                }
+                if($actualRoot){
+                    $af=Join-Path $actualRoot ('replays\'+$chosen+'\'+$policy)
+                    $receipt=Join-Path $af 'CANDIDATE_RECEIPT.json'
+                    $ag=if($unit.status -eq 'RUNNING' -and $unit.phase -eq 'actual_v2'){'V2 실행 중'}elseif($unit.status -eq 'FAILED'){'실행 오류'}else{'V2 대기'}
+                    if(Test-Path -LiteralPath $receipt){
+                        $nr=Read-LiveJson $receipt
+                        if($nr.status -eq 'COMPLETE' -and $nr.method_SHA -eq $actualAuthority.method_SHA){
+                            $completed=Read-LiveJson (Join-Path $af 'COMPLETE.json')
+                            $s=if($policy -in @('B0','B1')){$completed.summary}else{$completed.ETA95_QSAFE_ACTUAL}
+                            $ag=if($completed.ROBUST_Q_ONLY_UNRESOLVED_slots -gt 0){'UNRESOLVED'}elseif($s.physical_violation){'위반 있음'}else{'V2 PASS'}
+                            $voltageText='{0:N6} / {1:N6}' -f $s.Vmax_pu,$s.rho_max_AC
+                        }
+                    }
+                    elseif($unit.phase -eq 'actual_v2'){
+                        $qp=Join-Path $af 'ETA95_QSAFE_ACTUAL\PROGRESS.json'
+                        if(Test-Path -LiteralPath $qp){$q=Read-LiveJson $qp;$voltageText='{0}/96 완료 · 최종값 감사 대기' -f $q.slots_complete}
+                    }
                 }
                 $lines.Add(('  {0,-5} {1,-12} {2,11} {3,12}    {4,-8}  {5,-8}  {6}' -f $policy,$displayStatus,$p1,$p2,$fg,$ag,$voltageText))
                 $detailPath=Join-Path $out ($chosen+'\'+$policy+'_DAYAHEAD_SUMMARY.json')
@@ -315,7 +430,8 @@ do {
                     $lines.Add(('        P3/P4/P5 [{0}] · 시간 {1} / 공간 {2} / checkpoint {3} · MESS 운행 {4}' -f (($ds.OBJECTIVE_VECTOR[2..4]) -join ', '),@($ds.temporal_shifts).Count,@($ds.spatial_relocations).Count,@($ds.checkpoint_migrations).Count,$ds.MESS.movement_count))
                 }
             }
-            $lines.Add(('  [O] 날짜 결과 폴더: {0}' -f (Join-Path $runtime $chosen)))
+            $resultFolder=if($actualRoot){Join-Path $actualRoot ('replays\'+$chosen)}else{Join-Path $runtime $chosen}
+            $lines.Add(('  [O] 날짜 Actual 결과 폴더: {0}' -f $resultFolder))
         }
     } catch {
         $lines.Add(('  상태를 읽지 못했습니다: {0}' -f (Get-MonitorText $_.Exception.Message 110)))
@@ -339,7 +455,7 @@ do {
             if($key -eq 0x44){$showDetails=-not $showDetails}
             elseif($key -eq 39){$selectedDay=1+($selectedDay%31);$showDetails=$true}
             elseif($key -eq 37){$selectedDay=1+(($selectedDay+29)%31);$showDetails=$true}
-            elseif($key -eq 0x4f){$folder=Join-Path $runtime ('2025-05-{0:D2}' -f $selectedDay);if(Test-Path -LiteralPath $folder){Invoke-Item -LiteralPath $folder}}
+            elseif($key -eq 0x4f){$folder=if($actualRoot){Join-Path $actualRoot ('replays\2025-05-{0:D2}' -f $selectedDay)}else{Join-Path $runtime ('2025-05-{0:D2}' -f $selectedDay)};if(Test-Path -LiteralPath $folder){Invoke-Item -LiteralPath $folder}}
             elseif($key -eq 0x52){$reuseFolder=Join-Path $runtime 'reused_results';if(Test-Path -LiteralPath $reuseFolder){Invoke-Item -LiteralPath $reuseFolder}}
             elseif($key -eq 0x51){$quit=$true}
             if($key -ne 0){break}

@@ -23,9 +23,11 @@ search-budget contract. Full May is still running; this is not a completed
   incumbent. A candidate validated after the deadline cannot replace it.
   Noninterruptible work beyond the deadline is reported separately.
 - Existing M1/MF budget and lexicographic objective/constraint rules remain.
-- DA uses nominal D-1 information; Actual is fixed-decision realized replay with
-  sequential native RegControl. No Actual optimization, robust S0/S1/S2,
-  quantile grid margin, or forecast-error correction.
+- DA uses nominal D-1 information. The later [Actual authority](../v41r4_actual/README.md)
+  freezes DA discrete decisions and active-power schedules, and permits causal
+  connected-MESS Q-only corrective AC-feasibility control with sequential native
+  RegControl. Scheduling optimization, robust S0/S1/S2, quantile grid margins,
+  and forecast-error correction are not introduced.
 
 ## Code and operation
 

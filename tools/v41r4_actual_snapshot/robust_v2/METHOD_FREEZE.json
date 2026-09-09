@@ -1,0 +1,199 @@
+{
+  "status": "FROZEN_FINAL_ACTUAL_ROBUST_SEARCH",
+  "version": "V41R4_ACTUAL_ETA95_QSAFE_ROBUST_V2",
+  "frozen_at": 1788872884.7398827,
+  "description": "Day-Ahead discrete decisions and active-power schedules are frozen. D-day operation permits causal Q-only corrective AC-feasibility control using a deterministic robust search and exact OpenDSS validation.",
+  "paper_facing_wording": "minimum-deviation feasible correction found by the prescribed deterministic search.",
+  "eta_charge": 0.95,
+  "eta_discharge": 0.95,
+  "alpha_BG": 1.15,
+  "active_power_limit_kw": 300,
+  "pcs_kva": 400,
+  "pcs_inner_polygon_faces": 16,
+  "objective": "sum_m (Q_m-Q_m_DA)^2",
+  "hard_limits": {
+    "Vmin": 0.95,
+    "Vmax": 1.05,
+    "line": 1,
+    "transformer_phase_current": 1,
+    "transformer_kVA": 1
+  },
+  "inherited_hard_comparison_tolerance": 1e-09,
+  "PCS_audit_tolerance": 1e-09,
+  "preventive_threshold": null,
+  "P_fallback": false,
+  "failure": "ROBUST_Q_ONLY_UNRESOLVED",
+  "search": {
+    "domain": "Full Cartesian product of connected-MESS Q intervals from |P|<=300, exact 400-kVA circle, and all 16 inner polygon faces; disconnected Q=0",
+    "coarse_grid": {
+      "levels": 5,
+      "unit_coordinates": [
+        0,
+        0.25,
+        0.5,
+        0.75,
+        1
+      ],
+      "order": "Cartesian lexicographic in sorted MESS ID order; all endpoints and corners included"
+    },
+    "screening_prepoints": [
+      "frozen physical DA Q",
+      "maximum absorption",
+      "maximum injection",
+      "zero clipped to domain"
+    ],
+    "Sobol": {
+      "points": 256,
+      "scramble": true,
+      "seed": 120530,
+      "same_rule_every_slot": true
+    },
+    "multistart": {
+      "max_starts": 8,
+      "initial_seeds": [
+        "frozen physical DA Q",
+        "maximum absorption",
+        "zero clipped to domain"
+      ],
+      "remaining_seeds": "Candidate ranking by (sum positive constraint deficits squared, sum squared deviation from DA Q, lexicographic Q); first distinct native final-tap signatures, skipping duplicate Q starts",
+      "solver": "Powell in [0,1]^d",
+      "objective": "sum(max(-g_i(Q),0)^2)",
+      "maxiter": 20,
+      "maxfev": 140,
+      "xtol": 1e-05,
+      "ftol": 1e-12
+    },
+    "progressive_refinement": {
+      "unit_radii": [
+        0.125,
+        0.03125,
+        0.0078125
+      ],
+      "max_centers": 4,
+      "center_rule": "Same feasibility-penalty/deviation/lexicographic ranking; Euclidean separation >0.15 in unit coordinates",
+      "trials": "At each center, +/- axis points in variable order, then all +/- radius corners in lexicographic order; clip to full box"
+    },
+    "local_refinement": {
+      "max_starts": 4,
+      "start_rule": "Best exact-feasible candidates by squared DA-Q deviation, or lowest-penalty points if none feasible; unit-coordinate separation >0.025",
+      "solver": "SLSQP",
+      "objective": "0.5*sum(((Q-Q_DA)/400)^2)",
+      "maxiter": 75,
+      "ftol": 1e-10,
+      "finite_difference_step_kvar": 0.25,
+      "derivative": "Bound-aware central difference of exact AC constraints; analytic objective gradient"
+    },
+    "constraints_vector": "20*(V-.95), 20*(1.05-V), 1-all phase-current loadings, 1-finite transformer kVA loadings",
+    "stopping": {
+      "unique_exact_Q_trial_cap": 5000,
+      "wall_time_stop": false,
+      "run_all_prescribed_stages_unless_cap_reached": true,
+      "cached_identical_Q_points_do_not_consume_budget": true,
+      "one_uncached_final_validation_outside_search_cap": true
+    },
+    "selection": "Among all exact AC-feasible tested candidates, minimum sum((Q-Q_DA)^2), with lexicographic Q tie-break; validate selected Q in one additional clean-prefix exact OpenDSS replay",
+    "failure": "ROBUST_Q_ONLY_UNRESOLVED; retain original physically executable Q, fixed P; propagate only that final native state",
+    "no_global_optimality_claim": true
+  },
+  "development_days": [
+    "2025-05-01",
+    "2025-05-02",
+    "2025-05-03",
+    "2025-05-04",
+    "2025-05-05",
+    "2025-05-06",
+    "2025-05-07",
+    "2025-05-08",
+    "2025-05-09",
+    "2025-05-10",
+    "2025-05-11",
+    "2025-05-12",
+    "2025-05-13",
+    "2025-05-14",
+    "2025-05-15",
+    "2025-05-16",
+    "2025-05-18"
+  ],
+  "holdout_days": [
+    "2025-05-17",
+    "2025-05-19",
+    "2025-05-20",
+    "2025-05-21",
+    "2025-05-22",
+    "2025-05-23",
+    "2025-05-24",
+    "2025-05-25",
+    "2025-05-26",
+    "2025-05-27",
+    "2025-05-28",
+    "2025-05-29",
+    "2025-05-30",
+    "2025-05-31"
+  ],
+  "all_days": [
+    "2025-05-01",
+    "2025-05-02",
+    "2025-05-03",
+    "2025-05-04",
+    "2025-05-05",
+    "2025-05-06",
+    "2025-05-07",
+    "2025-05-08",
+    "2025-05-09",
+    "2025-05-10",
+    "2025-05-11",
+    "2025-05-12",
+    "2025-05-13",
+    "2025-05-14",
+    "2025-05-15",
+    "2025-05-16",
+    "2025-05-17",
+    "2025-05-18",
+    "2025-05-19",
+    "2025-05-20",
+    "2025-05-21",
+    "2025-05-22",
+    "2025-05-23",
+    "2025-05-24",
+    "2025-05-25",
+    "2025-05-26",
+    "2025-05-27",
+    "2025-05-28",
+    "2025-05-29",
+    "2025-05-30",
+    "2025-05-31"
+  ],
+  "pre_freeze_Actual_holdout_results_are_final_evidence": false,
+  "all_Actual_policy_days_require_new_post_freeze_execution": true,
+  "holdout_tuning_allowed": false,
+  "method_basis": "May12 B3 slot30 forensic Q_ONLY_SEARCH_FAILURE_FEASIBLE_POINT_FOUND only; no later May results used to select these rules",
+  "numerical_method_files": [
+    {
+      "name": "common.py",
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_actual_eta95_qsafe_robust_v2\\frozen_code\\common.py",
+      "source": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_actual_eta95_qsafe_v1\\frozen_code\\common.py",
+      "sha256": "5a69ed37fa5df0b3a43cffbb12a898e5a182c75cb283a97461b74bca174498b0"
+    },
+    {
+      "name": "worker.py",
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_actual_eta95_qsafe_robust_v2\\frozen_code\\worker.py",
+      "source": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_actual_eta95_qsafe_v1\\frozen_code\\worker.py",
+      "sha256": "275cd78735cb1a25f5c498e5087e9752cb0db941b281aacd1ba0bc8f789c0313"
+    },
+    {
+      "name": "qsafe.py",
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_actual_eta95_qsafe_robust_v2\\frozen_code\\qsafe.py",
+      "source": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_actual_eta95_qsafe_v1\\frozen_code\\qsafe.py",
+      "sha256": "68bc70e893dee454405cf99dc3fb99e96dd64da31fb4c7eb59abd68757e79819"
+    }
+  ],
+  "efficiency_authority_SHA": "c5dafb107dd4ed7349ebd2914384f7d21943227f7fb72c3162e422bc28febe0e",
+  "common_maximum_concurrent_day_workers": 4,
+  "dispatch_priority": [
+    "eligible new robust Actual-only replay",
+    "next missing DA/Fresh work"
+  ],
+  "DA_Fresh_reruns_allowed": false,
+  "trials": "Every trial reconstructs the exact approved causal prefix; identical slot-start native state; failed trial states discarded",
+  "no_future_Actual_information": true
+}
