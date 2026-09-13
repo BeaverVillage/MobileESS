@@ -1,0 +1,262 @@
+{
+  "status": "PASS",
+  "generated_at": "2026-09-11T03:49:42.035514+00:00",
+  "source_archive_sha256": "1d57950fd073ead32bcb68a8d65c06ad6023f3d556acc672eae911651438f6d3",
+  "extraction_method": "Two read-only gzip/tar sequential streaming passes; member listing plus selective content-addressed copies; no full extraction",
+  "reference_rule": "B0 preQ daily argmax, branch_kinds=line, 96 slots; first exact maximum in slot-major archived branch-phase order",
+  "orientation": "Archived topology from_bus/to_bus; no instantaneous flow claim",
+  "unchanged_tolerance_pu": 1e-12,
+  "SD_ddof": 1,
+  "CSV_files": {
+    "01_B0_reference_critical_points.csv": {
+      "rows": 31,
+      "sha256": "9d4abdfee8898cb5dc1f7907e671578ff6c0a1dbffc1c952bbe4baa57777ca19",
+      "bytes": 10707,
+      "columns": [
+        "date",
+        "slot",
+        "timestamp",
+        "line",
+        "phase",
+        "sending_bus",
+        "receiving_bus",
+        "B0_rho",
+        "B0_Vsend_pu",
+        "B0_Vrecv_pu",
+        "B0_signed_voltage_change_pu",
+        "B0_abs_line_voltage_difference_pu",
+        "B0_receiving_voltage_deviation_abs_pu",
+        "reference_selection_state",
+        "exact_tie_count",
+        "source_npz_member"
+      ]
+    },
+    "02_policy_comparison_at_B0_critical_points_preQ.csv": {
+      "rows": 124,
+      "sha256": "0472fff97316bc547d700db548b7c787d1f1078b1f00baba77ea914ebd5e16ae",
+      "bytes": 101817,
+      "columns": [
+        "date",
+        "policy",
+        "reference_policy",
+        "slot",
+        "timestamp",
+        "line",
+        "phase",
+        "sending_bus",
+        "receiving_bus",
+        "rho",
+        "phase_current_A",
+        "line_rating_A",
+        "sending_voltage_pu",
+        "receiving_voltage_pu",
+        "signed_voltage_change_pu",
+        "abs_line_voltage_difference_pu",
+        "sending_voltage_deviation_abs_pu",
+        "receiving_voltage_deviation_abs_pu",
+        "source_state",
+        "source_trajectory",
+        "Q_control_interpretation",
+        "source_npz_member",
+        "source_npz_sha256",
+        "source_voltage_array",
+        "source_voltage_slot",
+        "source_sending_node_index",
+        "source_receiving_node_index",
+        "source_current_array",
+        "source_branch_index",
+        "topology_source_member",
+        "topology_resolution",
+        "endpoint_orientation",
+        "reference_selection_state",
+        "reference_exact_tie_count",
+        "rho_change_vs_B0",
+        "rho_reduction_pct_vs_B0",
+        "abs_line_voltage_difference_change_vs_B0",
+        "abs_line_voltage_difference_status_vs_B0",
+        "receiving_voltage_deviation_change_vs_B0",
+        "receiving_voltage_deviation_status_vs_B0"
+      ]
+    },
+    "03_policy_aggregate_at_B0_critical_points_preQ.csv": {
+      "rows": 4,
+      "sha256": "10db2421d45174b1a083210ebcb1e7ac74027edba8b821bccd4fcb605c79b847",
+      "bytes": 1664,
+      "columns": [
+        "policy",
+        "N_days",
+        "mean_rho",
+        "SD_rho",
+        "mean_rho_reduction_pct_vs_B0",
+        "median_rho_reduction_pct_vs_B0",
+        "mean_abs_line_voltage_difference_pu",
+        "SD_abs_line_voltage_difference_pu",
+        "mean_abs_line_voltage_difference_change_vs_B0",
+        "median_abs_line_voltage_difference_change_vs_B0",
+        "abs_line_voltage_difference_improved_days",
+        "abs_line_voltage_difference_unchanged_days",
+        "abs_line_voltage_difference_worsened_days",
+        "mean_receiving_voltage_deviation_abs_pu",
+        "SD_receiving_voltage_deviation_abs_pu",
+        "mean_receiving_voltage_deviation_change_vs_B0",
+        "median_receiving_voltage_deviation_change_vs_B0",
+        "receiving_voltage_deviation_improved_days",
+        "receiving_voltage_deviation_unchanged_days",
+        "receiving_voltage_deviation_worsened_days"
+      ]
+    },
+    "04_daily_paired_changes_preQ.csv": {
+      "rows": 31,
+      "sha256": "d7c0c2e2feb85399bdc0b866bdedb7f8b24a09040a4a785c28bc474d76e1da7f",
+      "bytes": 8504,
+      "columns": [
+        "date",
+        "B1_rho_change_vs_B0",
+        "B1_rho_reduction_pct_vs_B0",
+        "B1_abs_line_voltage_difference_change_vs_B0",
+        "B1_receiving_voltage_deviation_change_vs_B0",
+        "B2_rho_change_vs_B0",
+        "B2_rho_reduction_pct_vs_B0",
+        "B2_abs_line_voltage_difference_change_vs_B0",
+        "B2_receiving_voltage_deviation_change_vs_B0",
+        "B3_rho_change_vs_B0",
+        "B3_rho_reduction_pct_vs_B0",
+        "B3_abs_line_voltage_difference_change_vs_B0",
+        "B3_receiving_voltage_deviation_change_vs_B0"
+      ]
+    },
+    "05_policy_comparison_at_B0_critical_points_postQ.csv": {
+      "rows": 124,
+      "sha256": "36cf8a80663c1ac8107dd1f5f5342b4ef24f761cded68c287bd4619b76a9d598",
+      "bytes": 102992,
+      "columns": [
+        "date",
+        "policy",
+        "reference_policy",
+        "slot",
+        "timestamp",
+        "line",
+        "phase",
+        "sending_bus",
+        "receiving_bus",
+        "rho",
+        "phase_current_A",
+        "line_rating_A",
+        "sending_voltage_pu",
+        "receiving_voltage_pu",
+        "signed_voltage_change_pu",
+        "abs_line_voltage_difference_pu",
+        "sending_voltage_deviation_abs_pu",
+        "receiving_voltage_deviation_abs_pu",
+        "source_state",
+        "source_trajectory",
+        "Q_control_interpretation",
+        "source_npz_member",
+        "source_npz_sha256",
+        "source_voltage_array",
+        "source_voltage_slot",
+        "source_sending_node_index",
+        "source_receiving_node_index",
+        "source_current_array",
+        "source_branch_index",
+        "topology_source_member",
+        "topology_resolution",
+        "endpoint_orientation",
+        "reference_selection_state",
+        "reference_exact_tie_count",
+        "rho_change_vs_B0",
+        "rho_reduction_pct_vs_B0",
+        "abs_line_voltage_difference_change_vs_B0",
+        "abs_line_voltage_difference_status_vs_B0",
+        "receiving_voltage_deviation_change_vs_B0",
+        "receiving_voltage_deviation_status_vs_B0"
+      ]
+    }
+  },
+  "scripts_used": {
+    "extract_critical_line_voltage_analysis.py": "ddecf5315f938fc8280dd73bdb8ec0ba6494afe4ce2f9afce9ed9887a0583945",
+    "verify_critical_line_voltage_outputs.py": "13677ee256827561d6a3d5bb36d581f27b4a9d078cca9d7a54521af8beb3cc64"
+  },
+  "dependency_versions": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "numpy": "2.3.5",
+    "pandas": "3.0.1",
+    "pyarrow": "25.0.1"
+  },
+  "scientific_results_rerun_count": 0,
+  "execution_counts": {
+    "Gurobi": 0,
+    "DA_optimization": 0,
+    "AIDC_rescheduling": 0,
+    "MESS_routing_search": 0,
+    "SUMO": 0,
+    "ML_training": 0,
+    "ML_inference": 0,
+    "OpenDSS": 0
+  },
+  "topology_missing_file_resolution": {
+    "date": "2025-05-31",
+    "policy": "B2",
+    "missing": "Own DA BRANCH_PHASE_CURRENTS.parquet",
+    "resolution": "Same-day B0 archived topology after exact electrical certificate and base-data hash identity, full final array-axis agreement and recorded current/rating consistency checks",
+    "voltage_reconstructed": false
+  },
+  "independent_verification": {
+    "status": "PASS",
+    "checked_saved_row_raw_values_and_formulas": 2976,
+    "row_counts": {
+      "01_B0_reference_critical_points.csv": 31,
+      "02_policy_comparison_at_B0_critical_points_preQ.csv": 124,
+      "03_policy_aggregate_at_B0_critical_points_preQ.csv": 4,
+      "04_daily_paired_changes_preQ.csv": 31,
+      "05_policy_comparison_at_B0_critical_points_postQ.csv": 124
+    },
+    "primary_validation_check_count": 33001,
+    "primary_failed_checks": 0,
+    "line_loading_reduced_days": {
+      "preQ": {
+        "B0": 0,
+        "B1": 22,
+        "B2": 31,
+        "B3": 31
+      },
+      "postQ": {
+        "B0": 0,
+        "B1": 22,
+        "B2": 31,
+        "B3": 31
+      }
+    },
+    "B3_preQ_abs_voltage_difference_reduction_ratio_of_means_pct": 12.373344990103403,
+    "B3_preQ_receiving_deviation_increase_ratio_of_means_pct": 42.95143139293635,
+    "scientific_rerun_count": 0
+  },
+  "selected_evidence_totals": {
+    "selected_member_count": 1551,
+    "selected_member_bytes": 497596885,
+    "unique_cached_file_count": 1502
+  },
+  "local_output_directory": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\결과 데이터\\V41R4_CriticalLine_Voltage_Analysis_20260911_124012",
+  "publication_scope": "Catalog, aggregate summaries, reports and byte-identical source snapshots only. CSVs, raw archive, selected raw arrays, dependency packages and full check/inventory logs remain local.",
+  "original_manifest_sha256": "9b31a6906111421005c5de21b5b0f5dfad61644f57eb9d67a98d2a2e3fe51603",
+  "original_support_file_sha256": {
+    "README.md": "88ad69557872647ccb84eeee3907daf1f8bb496f9fa7d64e8c894e21a8bbd092",
+    "VALIDATION_REPORT.md": "54a4cac4dc02ade4dea75cebab5b98229811b778f8368a73acbcf293632f7fcf",
+    "VALIDATION_DETAILS.json": "df6c69f40eafeacbf580f9427c44b4846b11c021edc44767eb6fcc9b0ac876d5",
+    "INDEPENDENT_VERIFICATION.json": "bd466042ef30f9f1a89e265d118507476417fd235327687243b612b36e2be0ac",
+    "selected_raw_index.json": "897fd8ec175bdf05dfe74a97313eb43ef062a322f91bc725b3d4cace1f23c0f8",
+    "archive_member_inventory.jsonl": "24e50f65fa5c8cb713378c75afda00f8067be6d7991d30923d8e2dc9f150f5f2"
+  },
+  "original_repository_read_only_head": {
+    "repository": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v41r4_final_results_pr",
+    "HEAD": "3140307a664a366d231227db2ed69d99ea123f59"
+  },
+  "raw_archive_bytes": 13524418762,
+  "published_report_normalization": {
+    "method": "CRLF to LF only; original local file hashes remain recorded separately",
+    "published_sha256": {
+      "ORIGINAL_VALIDATION_REPORT.md": "87f4536a4b8511ecdb4324d1ffc212c737b0fb1dcd7a301557dbf147957a405c",
+      "ORIGINAL_INDEPENDENT_VERIFICATION.json": "f1d54e41a9b6dd092d3b628209ba5f59d93b45f6ec6fa0e07b57002c3460d9b1"
+    }
+  }
+}
