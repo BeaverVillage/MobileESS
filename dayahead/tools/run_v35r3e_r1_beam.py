@@ -237,9 +237,27 @@ def _solve_item(
             item.model.Params.NumericFocus = 3
             item.model.Params.OptimalityTol = 1e-8
             repair = {"numeric_retry": True, "attempts": 2, "signature": str(exc)}
-            dispatch, evaluation = solve_fixed_candidate_certified(
-                item, max_separation_rounds=50,
-            )
+            try:
+                dispatch, evaluation = solve_fixed_candidate_certified(
+                    item, max_separation_rounds=50,
+                )
+            except RuntimeError as retry_exc:
+                if "CERTIFICATE_STALLED" not in str(retry_exc):
+                    raise
+                # Tighter parameters alone can retain the uncertified incumbent.
+                # Clear only the solution; preserve all model and separation rows.
+                item.model.Params.FeasibilityTol = 1e-9
+                item.model.Params.OptimalityTol = 1e-9
+                item.model.Params.IntFeasTol = 1e-9
+                item.model.reset()
+                repair.update(
+                    attempts=3, strict_numeric_retry=True,
+                    strict_signature=str(retry_exc), solution_reset=True,
+                    strict_solver_tolerance=1e-9,
+                )
+                dispatch, evaluation = solve_fixed_candidate_certified(
+                    item, max_separation_rounds=50,
+                )
         row = _row(case, candidate, dispatch, evaluation, time.perf_counter() - started)
         cuts = {
             "line": set(item.added_line_states),
