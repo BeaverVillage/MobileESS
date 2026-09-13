@@ -1,0 +1,60 @@
+{
+  "date": "2025-05-21",
+  "source_pu": 1.04,
+  "Vreg_V": 123.5,
+  "alpha8500": 0.5,
+  "CAPBank3": "OFF",
+  "AIDC": 12,
+  "MESS_service_locations": 24,
+  "PCC_transformers": 36,
+  "AIDC_GPUs": 780,
+  "MESS_units": 4,
+  "MESS_P_kW": 300,
+  "MESS_PCS_kVA": 400,
+  "MESS_energy_kWh": 1200,
+  "B1_search_seconds": 14400,
+  "B3_A1_search_seconds": 14400,
+  "checkpoints_seconds": [
+    1800,
+    3600,
+    7200,
+    14400
+  ],
+  "stage_order": [
+    "FINAL_B1_REUSE_AS_A0",
+    "B3_M1_FULL_MESS_SEARCH",
+    "B3_A1_FIXED_M1_14400_SECONDS",
+    "B3_MF_FIXED_ROUTE_PQ",
+    "CLEAN_96_SLOT_EXACT_AC"
+  ],
+  "AIDC_stage_order": [
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5"
+  ],
+  "hard_voltage": [
+    0.95,
+    1.05
+  ],
+  "hard_line_current": 1.0,
+  "hard_transformer_current": 1.0,
+  "hard_transformer_kVA": 1.0,
+  "stagnation_early_stop": false,
+  "objective_floor_early_stop": false,
+  "stopped_production_reuse": false,
+  "per_policy_exact_96_slot_validation": true,
+  "automatic_restart": false,
+  "electrical_solver_equivalence": "All full logical rows remain authoritative; only interval-proven redundant materialized rows are omitted; AIDC domains and objectives byte-identical",
+  "MESS_search": "Original K 200/400/800/FULL, beam 2/4, seed 2; original route/power/energy model. IEEE8500 numerical matrices and service PCC mapping only.",
+  "B0_B1_B2_rerun": false,
+  "B2_required_closure_gate": {
+    "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_B2_physical_closure_20260912_r2\\B2_RESTORED_ACCEPTANCE.json",
+    "sha256": "ff69950333149f36f8ae7d2a750d4e8e8c0f8ee5cded5ed75792f8fd185a3ddb",
+    "bytes": 278409
+  },
+  "final_selection_semantics_unchanged": true,
+  "diagnostic_candidate_input": false,
+  "failure_policy": "Fail closed on failed exact gate or any exception; preserve all checkpoints; never select another beam candidate to repair a failed final selection."
+}

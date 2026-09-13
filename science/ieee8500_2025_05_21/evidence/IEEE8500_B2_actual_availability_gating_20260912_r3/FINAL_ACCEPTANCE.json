@@ -1,0 +1,229 @@
+{
+  "status": "PASS",
+  "policy": "B2",
+  "date": "2025-05-21",
+  "rule": {
+    "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_B2_actual_availability_gating_20260912_r3\\RULE_FREEZE.json",
+    "sha256": "3f1e93011c10aa3c8029862f4a4eb14f779090632a9dd1b2f19e3eaa25f9ec04",
+    "bytes": 445888
+  },
+  "regression": {
+    "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_B2_actual_availability_gating_20260912_r3\\IEEE123_REGRESSION_GATE.json",
+    "sha256": "d281aa80b9413b5e6f98041bdc3077ec3616bd132ed38ee08f96d18184d6be1d",
+    "bytes": 32022
+  },
+  "mobility": {
+    "total_moves": 23,
+    "departure_shift_count": 0,
+    "maximum_departure_shift_slots": 0,
+    "consecutive_move_pairs": 19,
+    "arrival_requires_departure_delay_count": 0,
+    "previous_unnecessary_ready_based_shifts_removed": 4,
+    "departures_before_previous_connection_ready_but_after_arrival": 1,
+    "physically_unavailable_vehicle_slots": 57,
+    "DA_command_ineligible_vehicle_slots": 63,
+    "missed_nonzero_PQ_vehicle_slots": 0,
+    "missed_nonzero_P_vehicle_slots": 0,
+    "missed_nonzero_Q_vehicle_slots": 0,
+    "availability_curtailed_active_abs_kWh": 0,
+    "availability_curtailed_reactive_abs_kvarh": 0,
+    "availability_curtailed_discharge_kWh": 0,
+    "availability_curtailed_charge_kWh": 0,
+    "availability_curtailed_active_signed_kWh": 0,
+    "availability_curtailed_reactive_signed_kvarh": 0,
+    "total_baseline_P_command_execution_abs_difference_kWh": 0.0,
+    "total_baseline_Q_command_execution_abs_difference_kvarh": 0.0,
+    "count_definition": "Vehicle-slots; missed requires nonzero frozen P or Q. Planned transit zero commands are counted unavailable but not missed energy.",
+    "battery_audit": {
+      "status": "PASS",
+      "independent_max_error": 0.0,
+      "route_order_vehicle_destination_identity": "PASS",
+      "causal_departure_and_SUMO_entries": "PASS",
+      "battery_physical_audit": "PASS",
+      "vehicles": [
+        {
+          "mess_id": "MESS01",
+          "initial_energy_kWh": 760.0,
+          "actual_travel_energy_kWh": 24.917796457220835,
+          "charged_AC_kWh": 175.2086774561192,
+          "discharged_AC_kWh": 134.67568172277953,
+          "final_energy_kWh": 759.7665716284299,
+          "final_SoC": 0.6331388096903583,
+          "min_energy_kWh": 758.2819307437396,
+          "max_energy_kWh": 924.8012201018605,
+          "terminal_energy_deviation_from_760_kWh": -0.2334283715700849,
+          "terminal_compensation": 0
+        },
+        {
+          "mess_id": "MESS02",
+          "initial_energy_kWh": 760.0,
+          "actual_travel_energy_kWh": 44.99493704700917,
+          "charged_AC_kWh": 299.1888072589362,
+          "discharged_AC_kWh": 226.94972296963573,
+          "final_energy_kWh": 760.3399846177823,
+          "final_SoC": 0.6336166538481519,
+          "min_energy_kWh": 722.6316106559699,
+          "max_energy_kWh": 911.3370470587421,
+          "terminal_energy_deviation_from_760_kWh": 0.3399846177823065,
+          "terminal_compensation": 0
+        },
+        {
+          "mess_id": "MESS03",
+          "initial_energy_kWh": 760.0,
+          "actual_travel_energy_kWh": 200.74905978475587,
+          "charged_AC_kWh": 836.6049821760681,
+          "discharged_AC_kWh": 561.6027306162316,
+          "final_energy_kWh": 762.8649042127914,
+          "final_SoC": 0.6357207535106595,
+          "min_energy_kWh": 460.5939116216182,
+          "max_energy_kWh": 770.9958392180431,
+          "terminal_energy_deviation_from_760_kWh": 2.86490421279143,
+          "terminal_compensation": 0
+        },
+        {
+          "mess_id": "MESS04",
+          "initial_energy_kWh": 760.0,
+          "actual_travel_energy_kWh": 225.29823032351274,
+          "charged_AC_kWh": 768.1346459549176,
+          "discharged_AC_kWh": 473.9199063296304,
+          "final_energy_kWh": 765.5666240393125,
+          "final_SoC": 0.6379721866994271,
+          "min_energy_kWh": 616.5977013638717,
+          "max_energy_kWh": 1049.8754065256505,
+          "terminal_energy_deviation_from_760_kWh": 5.566624039312501,
+          "terminal_compensation": 0
+        }
+      ],
+      "original_PQ_clock_verified": true,
+      "executed_P_unchanged_by_QSAFE": false,
+      "forbidden_counters": {
+        "actual_rerouting": 0,
+        "route_search": 0,
+        "destination_change": 0,
+        "vehicle_substitution": 0,
+        "visit_order_change": 0,
+        "DA_reoptimization": 0,
+        "MESS_optimization": 0,
+        "command_time_shifting": 0,
+        "missed_energy_catch_up": 0
+      }
+    },
+    "forbidden_counters": {
+      "actual_rerouting": 0,
+      "route_search": 0,
+      "destination_change": 0,
+      "vehicle_substitution": 0,
+      "visit_order_change": 0,
+      "DA_reoptimization": 0,
+      "MESS_optimization": 0,
+      "command_time_shifting": 0,
+      "missed_energy_catch_up": 0
+    }
+  },
+  "summary": {
+    "Vmin_pu": 0.9600945905864189,
+    "Vmax_pu": 1.0496804416457592,
+    "max_phase_line_loading_pu": 0.9076065509538066,
+    "max_transformer_phase_current_pu": 0.8346641970517626,
+    "max_transformer_winding_kva_pu": 0.8451283826692875,
+    "voltage_violations": 0,
+    "line_violations": 0,
+    "transformer_current_violations": 0,
+    "transformer_kVA_violations": 0,
+    "converged_slots": 96,
+    "controls_settled_slots": 96,
+    "AC_feasible": true
+  },
+  "QSAFE_intervention_slots": 1,
+  "QSAFE_unresolved_slots": 0,
+  "independent_AC_replay": {
+    "status": "PASS",
+    "max_errors": {
+      "v": 0.0,
+      "line": 0.0,
+      "tx": 0.0,
+      "kva": 0.0
+    },
+    "taps_identical": true
+  },
+  "independent_battery_identity_audit": {
+    "status": "PASS",
+    "independent_max_error": 0.0,
+    "route_order_vehicle_destination_identity": "PASS",
+    "causal_departure_and_SUMO_entries": "PASS",
+    "battery_physical_audit": "PASS",
+    "vehicles": [
+      {
+        "mess_id": "MESS01",
+        "initial_energy_kWh": 760.0,
+        "actual_travel_energy_kWh": 24.917796457220835,
+        "charged_AC_kWh": 175.2086774561192,
+        "discharged_AC_kWh": 134.67568172277953,
+        "final_energy_kWh": 759.7665716284299,
+        "final_SoC": 0.6331388096903583,
+        "min_energy_kWh": 758.2819307437396,
+        "max_energy_kWh": 924.8012201018605,
+        "terminal_energy_deviation_from_760_kWh": -0.2334283715700849,
+        "terminal_compensation": 0
+      },
+      {
+        "mess_id": "MESS02",
+        "initial_energy_kWh": 760.0,
+        "actual_travel_energy_kWh": 44.99493704700917,
+        "charged_AC_kWh": 299.1888072589362,
+        "discharged_AC_kWh": 226.94972296963573,
+        "final_energy_kWh": 760.3399846177823,
+        "final_SoC": 0.6336166538481519,
+        "min_energy_kWh": 722.6316106559699,
+        "max_energy_kWh": 911.3370470587421,
+        "terminal_energy_deviation_from_760_kWh": 0.3399846177823065,
+        "terminal_compensation": 0
+      },
+      {
+        "mess_id": "MESS03",
+        "initial_energy_kWh": 760.0,
+        "actual_travel_energy_kWh": 200.74905978475587,
+        "charged_AC_kWh": 836.6049821760681,
+        "discharged_AC_kWh": 561.6027306162316,
+        "final_energy_kWh": 762.8649042127914,
+        "final_SoC": 0.6357207535106595,
+        "min_energy_kWh": 460.5939116216182,
+        "max_energy_kWh": 770.9958392180431,
+        "terminal_energy_deviation_from_760_kWh": 2.86490421279143,
+        "terminal_compensation": 0
+      },
+      {
+        "mess_id": "MESS04",
+        "initial_energy_kWh": 760.0,
+        "actual_travel_energy_kWh": 225.29823032351274,
+        "charged_AC_kWh": 768.1346459549176,
+        "discharged_AC_kWh": 473.9199063296304,
+        "final_energy_kWh": 765.5666240393125,
+        "final_SoC": 0.6379721866994271,
+        "min_energy_kWh": 616.5977013638717,
+        "max_energy_kWh": 1049.8754065256505,
+        "terminal_energy_deviation_from_760_kWh": 5.566624039312501,
+        "terminal_compensation": 0
+      }
+    ],
+    "original_PQ_clock_verified": true,
+    "executed_P_unchanged_by_QSAFE": true,
+    "forbidden_counters": {
+      "actual_rerouting": 0,
+      "route_search": 0,
+      "destination_change": 0,
+      "vehicle_substitution": 0,
+      "visit_order_change": 0,
+      "DA_reoptimization": 0,
+      "MESS_optimization": 0,
+      "command_time_shifting": 0,
+      "missed_energy_catch_up": 0
+    }
+  },
+  "executed_P_unchanged_by_QSAFE": true,
+  "all_original_frozen_SHA_and_mtime_preserved": true,
+  "frozen_source_files_verified": 1319,
+  "runtime_s": 8386.457779884338,
+  "new_B2_Actual_result_only": true,
+  "completed_at": "2026-09-12T11:51:04.407392+00:00"
+}

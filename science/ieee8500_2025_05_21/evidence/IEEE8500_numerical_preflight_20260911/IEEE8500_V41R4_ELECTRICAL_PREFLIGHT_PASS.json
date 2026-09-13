@@ -1,0 +1,184 @@
+{
+  "status": "IEEE8500_V41R4_ELECTRICAL_PREFLIGHT_PASS",
+  "issued_utc": "2026-09-11T10:53:34.443312+00:00",
+  "scope": "Numerical electrical preflight only; not an optimization result or production launch authorization",
+  "production_optimization_started": false,
+  "B1_search_started": false,
+  "Gurobi_optimization_calls": 0,
+  "old_stopped_coefficients_reused": false,
+  "settings": {
+    "selected_date": "2025-05-21",
+    "source_pu": 1.04,
+    "all_Vreg_V": 123.5,
+    "alpha8500": 0.5,
+    "CAPBank3": "OFF"
+  },
+  "controls": {
+    "total": 60,
+    "AIDC_P_fixed_PF_Q": 12,
+    "MESS_P": 24,
+    "MESS_Q": 24,
+    "independent_AIDC_Q": 0
+  },
+  "reference_jobs": 708,
+  "candidate_universe": 1341947,
+  "candidate_stream_SHA256": "878116c6e5d9204b8b02cf651ca669c23f1afab1f2cd03920f8620cc5fc82397",
+  "fresh_coefficient_generation": {
+    "wall_seconds": 268.8508002999879,
+    "slots": 96,
+    "signed_derivative_solves": 11520,
+    "step_kw_or_kvar": 1.0,
+    "voltage_axes": 8639,
+    "line_phase_terminal_axes": 12312,
+    "transformer_phase_terminal_axes": 3777,
+    "transformer_winding_axes": 3629
+  },
+  "signed_exact_validation": {
+    "status": "PASS",
+    "signed_tests": 600,
+    "controls": 60,
+    "AIDC_sites": 12,
+    "MESS_sites": 24,
+    "AIDC_independent_Q_variables": 0,
+    "maximum_absolute_error": {
+      "voltage": 2.3064493817503973e-05,
+      "line": 0.000678402298051016,
+      "tx": 2.0882484035311677e-05,
+      "winding": 1.752127200935205e-05
+    },
+    "thresholds": {
+      "voltage": 0.001,
+      "loading": 0.005
+    },
+    "failed_cases": [],
+    "wall_seconds": 39.04501560001518,
+    "old_coefficients_used": false,
+    "optimizer_runs": 0
+  },
+  "B0_metrics": {
+    "Vmin_pu": 0.9722875483187227,
+    "Vmax_pu": 1.0411672619770387,
+    "max_phase_line_loading_pu": 0.8487691403696187,
+    "max_transformer_phase_current_pu": 0.2245640292277877,
+    "max_transformer_winding_kva_pu": 0.22946762719182826
+  },
+  "B0_authority_max_metric_difference": 2.7755575615628914e-17,
+  "P1_witness": {
+    "status": "PASS",
+    "optimizer_P1": 0.8487691403696187,
+    "exact_AC_max_line_loading": 0.8487691403696187,
+    "absolute_difference": 0.0,
+    "optimizer_branch": "line.tpx21459660c0::t2_node1",
+    "physical_axis": 11422,
+    "physical_label": "Line.tpx21459660c0|t2|sx3101194c.1.2|node1",
+    "slot_zero_based": 31,
+    "slot_one_based": 32,
+    "time_start": "07:45",
+    "line_element": "Line.tpx21459660c0",
+    "terminal": "t2",
+    "bus_connection": "sx3101194c.1.2",
+    "conductor": "node1",
+    "native_primary_phase": "C",
+    "phase_resolution": "Frozen native load/secondary-to-primary topology inventory; not inferred from spelling"
+  },
+  "full_logical_seed_model": {
+    "core_variables": 368425,
+    "core_linear_rows": 5558,
+    "core_general_rows": 2607,
+    "electrical_linear_rows": 31945536,
+    "total_linear_rows": 31951094,
+    "monolithic_resident": false,
+    "all_rows_validated": true,
+    "residual_extrema": {
+      "linear": 1.1102230246251565e-16,
+      "bounds": 0.0,
+      "integrality": 0.0,
+      "general": 0.0
+    }
+  },
+  "all_existing_authorities_unchanged": true,
+  "required_evidence": [
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_numerical_preflight_20260911\\B0_REPLAY\\SUMMARY.json",
+      "sha256": "270b75ec9adc0cd6ef683b621a61920180ad4cab2da063ffecf16ee16a4b47b2",
+      "bytes": 894
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_numerical_preflight_20260911\\SIGNED_PERTURBATION_VALIDATION.json",
+      "sha256": "7c49ac48667e90bf1b00f27fe5a701b9b0b957b8429014c1e5b0adeb8e5fc33f",
+      "bytes": 522
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_numerical_preflight_20260911\\FULL_MODEL_SEED_COMPLETE.json",
+      "sha256": "c8a08308fbe3cf5b0eb17a40e11e6faa6acbf0454a46ba1add5736c5c975d0e7",
+      "bytes": 2012
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_numerical_preflight_20260911\\FULL_LOGICAL_B1_SEED_AUDIT.json",
+      "sha256": "842c7d408b606022e2b9b136269ac63b3f66ead47f0e8c26215807bd0362651b",
+      "bytes": 31244
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_numerical_preflight_20260911\\NON_ELECTRICAL_IDENTITY_IN_FULL_MODEL.json",
+      "sha256": "c93ff1030f653c40bf5abc6cf45852aec0a6b78619b2c97fcac6189cec556971",
+      "bytes": 1234
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_numerical_preflight_20260911\\ALL_60_CONTROL_COLUMN_BINDING_AUDIT.json",
+      "sha256": "7e6f97d61a2a0e3e59f98a84b02c102846e8741d9ea9c4db4f0cc985cd406cfa",
+      "bytes": 63029
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_numerical_preflight_20260911\\MESS_24_SERVICE_PCC_COLUMN_BINDING.json",
+      "sha256": "391d50bdb7b3bdb7340cc58247ecc85b836976138e202e8fd59c918c2d6d442e",
+      "bytes": 12148
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_numerical_preflight_20260911\\P1_EXACT_B0_WITNESS_BINDING.json",
+      "sha256": "32f1d4d86411b84b279959a30a50cb5619f2741a7487c8f6ccb67dc5b0bef775",
+      "bytes": 8576
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_numerical_preflight_20260911\\IMMUTABLE_AUTHORITIES_VERIFIED.json",
+      "sha256": "dcafba31f4fc0e201019c7bef24b194607ea0858f1770dc1aed8757f9151e1b7",
+      "bytes": 1596
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_numerical_preflight_20260911\\full_model\\core\\POLICY_FEASIBLE_SEED_AUDIT.json",
+      "sha256": "f62c630fa833cfc0d9f79afdf4db1cba291e1e916b87609f2f663b2043b3c461",
+      "bytes": 10350
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_numerical_preflight_20260911\\FULL_PRECISION_ELECTRICAL_ROW_AUDIT.json",
+      "sha256": "a7b9d0c1d0b0d4e8aaa7613a4c1d7384b0ec887e82168667df3046a98c0b4f2f",
+      "bytes": 90175
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_numerical_preflight_20260911\\export_recovery\\SHARED_MODEL_SEED_IDENTITY.json",
+      "sha256": "ffed04440385c688ca64c4ff0f1ae765ee83741c9771d973cdbc3b3b8cd644e5",
+      "bytes": 1018
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_numerical_preflight_20260911\\export_recovery\\core\\MODEL_PERSISTENCE.json",
+      "sha256": "9b6912f2fcc0bad605ac760a5badb679231e288b57b9589dcf4932fd667e2aa1",
+      "bytes": 264
+    }
+  ],
+  "full_joint_model": {
+    "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_numerical_preflight_20260911\\FULL_JOINT_MODEL_COMPONENT_MANIFEST.json",
+    "sha256": "c17baf966562701926567a8354e23c17d8dd66d827e1a17696da3e30a84af258",
+    "bytes": 34918
+  },
+  "binding_gate": {
+    "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_v41r4_binding_reconstruction_20260911\\IEEE8500_V41R4_AIDC_BINDING_PASS.json",
+    "sha256": "9a927eea7dcdd7f444c669ba7ea56cb87d29e44810b6807c43d6db19ceb891ea",
+    "bytes": 5129
+  },
+  "stress_authority": {
+    "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_stress_calibration_20260911\\IEEE8500_STRESS_CALIBRATED_B0_AUTHORITY.json",
+    "sha256": "83d72b85e8804b09fdddbfe83b3cb57ed960283a54d575b82eafdcea7086f7f3",
+    "bytes": 4041
+  },
+  "electrical_difference_classification": "AUTHORIZED_ELECTRICAL_DIFFERENCE",
+  "numerical_scope": "Local coefficients about each chronological B0 accepted tap/cap state; signed validation at +/-10 kW/kvar for all 60 controls over five slots. Not a certificate for arbitrary future optimized trajectories; final policy trajectories require exact 96-slot AC validation."
+}
