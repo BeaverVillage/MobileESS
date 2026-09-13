@@ -1,0 +1,6 @@
+Build only the explicitly authorized source-grid compatibility stage here.
+All five prior IEEE8500 workspaces, including the failed fixed-compatibility screen, are immutable.
+Retain FEEDER_REG A/B/C and VREG2/3/4 Vreg=125 V, PT ratio=60, band=2 V, original tap limits, CAPBank3 OFF, all controlled capacitor banks/CapControls and all topology/PCC/resource/hard-limit authorities.
+The only additional production parameter permitted is Vsource pu on [1.050,1.045,1.040,1.035,1.030].
+Freeze rule, code and input hashes before any simulation. Evaluate all 105 source-alpha combinations, each with a fresh OpenDSS context and 96 chronological B0 snapshots. Independent source workers may run concurrently; control chronology inside each case must remain sequential. Selection is lexicographic maximum (source_pu, alpha), subject to every hard criterion and convergence/control settling.
+Verify a selected feasible pair in a separate clean 96-slot process before final authority. If no feasible pair or verification fails, stop without tuning. Do not run or read B1/B2/B3. Do not claim canonical reproduction. All writes and runtime output stay here; disable Python bytecode writes for immutable imports.

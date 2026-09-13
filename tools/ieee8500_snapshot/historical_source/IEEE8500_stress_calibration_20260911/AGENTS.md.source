@@ -1,0 +1,8 @@
+This directory is the separately authorized B0-only stress calibration stage.
+All prior IEEE8500 evidence, including (source_pu=1.045, alpha8500=0.25), remains immutable and retains its voltage-feasible compatibility authority role.
+Evaluate exactly source [1.0450,1.0425,1.0400,1.0375,1.0350] x all-regulator Vreg [125.0,124.5,124.0,123.5] x alpha [0.40,0.45,0.50,0.55,0.60]. Freeze rule, executable code and input SHA before any simulation.
+Only source pu, the common forward Vreg for all twelve native RegControls, and background/PV alpha vary. Preserve PT ratio, band, tap limits, topology, impedance, every line/transformer rating, 12 AIDC + 24 MESS PCCs, physical 24-service-location mapping, AIDC/MESS/GPU/power/energy scales, selected date, temporal profiles, controlled capacitors/CapControls, and CAPBank3 OFF.
+Each of 100 cases is a fresh context with 96 sequential B0 AC snapshots and chronological native control-state carry. Five isolated source worker processes may run concurrently. No early stopping, tuning, grid refinement or operational B1/B2/B3 reads/runs.
+Among hard-feasible cases minimize (abs(max line phase loading-0.85), abs(Vreg-125), abs(source-1.05), -alpha), using unrounded computed doubles. Target 0.85 is a preregistered stressed-feasible baseline, not an IEEE123 reproduction target.
+Require separate clean 96-slot scalar-API independent replay before IEEE8500_STRESS_CALIBRATED_B0_AUTHORITY. If no case is feasible, or replay fails, stop without tuning. Do not claim canonical IEEE8500 reproduction. No B1/B2/B3 in this task even after calibration.
+All outputs remain here. Import immutable helpers read-only and disable Python bytecode writes.

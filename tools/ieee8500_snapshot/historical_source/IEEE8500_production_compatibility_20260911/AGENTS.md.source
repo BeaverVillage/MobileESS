@@ -1,0 +1,7 @@
+Build only the user-authorized IEEE8500 operating-point compatibility adaptation in this new directory.
+All previous source/PCC/topology, original failed alpha screen, and voltage-control forensic evidence are immutable.
+Only production changes: FEEDER_REGA/B/C RegControl Vreg 126.5 ->125.0 V and uncontrolled Capacitor.CAPBank3 Enabled=no. Keep source pu=1.05, PTRatio=60, band=2, tap limits, all other caps/controls, all ratings, mapping and AIDC/MESS scales.
+This is an adapted reduced-load study model, not canonical IEEE8500 reproduction.
+Freeze rule, executable code, source/PCC/topology and exogenous input hashes before execution. Screen all 21 existing alphas chronologically for 96 slots each using B0 only; choose the largest feasible alpha on the exact grid.
+If none is feasible, stop with selected_alpha=null. No extra tuning and no B1/B2/B3 execution in this task, even if an alpha becomes feasible.
+Imports from old scripts are read-only with bytecode disabled; all runtime data/output must stay here.

@@ -1,0 +1,6 @@
+Construct only a forecast-based one-day IEEE8500 B0 operating point.
+All IEEE8500 source, selection evidence, AIDC/STA hosts and PCC overlay are immutable.
+Select and freeze the date using only May 31-day V41R4 B0 DAYAHEAD Fresh phase-line maxima. Do not read B1/B2/B3 result payloads or run their optimization.
+Use causal D-1 forecasts, never Actual inputs, for construction. Preserve native bus/phase/base P/Q/PF and all network definitions. Preserve V41R4 AIDC/MESS scales.
+Evaluate alpha=1 first; only on hard-limit failure screen 0.95,0.90,...,0.00. Never relax physical limits or change mappings to force feasibility.
+Write all new inputs, runtime output and evidence under this directory only.
