@@ -1,0 +1,5 @@
+Run only B0 voltage-control compatibility forensics in this separate directory.
+Preserve all previous IEEE8500 source/topology/PCC and NO_FEASIBLE_ALPHA_ON_FROZEN_GRID files byte-for-byte and preserve their mtimes.
+Never change AIDC/MESS scales, 24 locations, production control settings, alpha authority, or hard limits. Never read or execute B1/B2/B3 or Actual inputs.
+Counterfactuals are isolated diagnostics, never production candidates. Conclude only root-cause classification, with no recommended/frozen production parameter.
+Original helper modules may be imported read-only with sys.dont_write_bytecode=True. Every output and DSS DataPath must be inside this forensic directory.

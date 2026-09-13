@@ -1,0 +1,52 @@
+{
+  "study": "OUTCOME_CONDITIONED_EXPLORATORY_SCREENING_NOT_CONFIRMATORY_COMPARISON",
+  "date": "2025-05-06",
+  "background_alpha_grid": [
+    0.6,
+    0.65,
+    0.7
+  ],
+  "AIDC_scale_grid": [
+    1.0,
+    1.25,
+    1.5
+  ],
+  "source_pu": 1.04,
+  "all_Vreg_V": 123.5,
+  "CAPBank3": "OFF",
+  "MESS_units": 4,
+  "MESS_P_kW": 300,
+  "MESS_PCS_kVA": 400,
+  "MESS_energy_kWh": 1200,
+  "AIDC_count": 12,
+  "AIDC_PCC_kVA": 1500,
+  "MESS_service_PCC_kVA": 750,
+  "service_locations": 24,
+  "voltage_limits": [
+    0.95,
+    1.05
+  ],
+  "line_current_limit": 1.0,
+  "transformer_phase_current_limit": 1.0,
+  "transformer_winding_kVA_limit": 1.0,
+  "comparison_scope": "DAY_AHEAD_EXACT_AC_PENDING_USER_SCOPE_REPLY",
+  "alpha_selection": "feasible only; prefer loading[.83,.88], then abs(loading-.855), then lower alpha; no feasible -> STOP",
+  "AIDC_scale_definition": "external multiplier on all12 sites PCC P and fixed-PF Q; preserve original unscaled workload/GPU/PUE/C1/candidate/P1-P5 semantics; scale electrical control binding consistently",
+  "AIDC_scale_selection": "among exact-feasible B0 and B1, minimize B1_AC-B0_AC, then lower AIDC multiplier; no improvement -> stop before B2/B3",
+  "PV_mode": "fixed",
+  "PV_alpha_fixed": 0.5,
+  "PV_ratio": 0.11558581225966133,
+  "PV_definition": "PV(t)=PV_alpha*May06_B0_exogenous_peak_PV_to_gross_ratio*native_base_P_i*normalized_D1_PV(t); P/Q native load=alpha*normalized_D1_demand*native P/Q",
+  "B1_search_loop_seconds": 14400,
+  "B3_A1_search_loop_seconds": 14400,
+  "checkpoint_seconds": [
+    1800,
+    3600,
+    7200,
+    14400
+  ],
+  "read_May06_IEEE123_policy_performance": false,
+  "May21_results_modified": false,
+  "Actual_inputs_used": false,
+  "no_additional_tuning": true
+}
