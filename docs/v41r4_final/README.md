@@ -101,10 +101,37 @@ See the [recovery report](evidence/traffic_provenance/TRAFFIC_PROVENANCE_RECOVER
 [machine-readable decision](evidence/traffic_provenance/TRAFFIC_PROVENANCE_RECOVERY.json),
 and [62 policy-day bindings](evidence/traffic_provenance/TRAFFIC_PRODUCTION_DAY_BINDINGS.csv).
 The earlier archive-only PARTIAL and final-re-audit availability records remain
-historical evidence for their narrower source scope. External workspace evidence
-is used only for Traffic provenance.
+historical evidence for their narrower source scope. That recovery used external workspace evidence for Traffic provenance; the
+subsequent dataset audit below extends the documented source scope.
 
 The later V41R5 experiment was stopped and removed from active local execution paths at the user's request. This PR retains V41R4 as the paper-result authority and includes no V41R5 code or result data. Local V41R5 files were isolated because deletion was blocked; they were not reported as deleted.
+
+## External dataset provenance
+
+The [dataset audit](evidence/dataset_provenance/FINAL_DATASET_PROVENANCE_AUDIT.md)
+separates final production inputs from parameter/validation sources, historical
+sources, unused downloads and unresolved candidates. Its 72 rows comprise
+15 production, 29 parameter/validation, 11 historical, 13 downloaded-only
+(including one administrative log) and four unresolved entries. The
+[paper source table](evidence/dataset_provenance/PAPER_DATA_SOURCE_TABLE.csv)
+contains 43 citation-required rows, not 43 unique datasets or DOIs.
+
+Usage requires code, receipt, model, source-hash or final transitive-artifact
+binding; folder presence alone is insufficient. Four unresolved groups remain:
+2024 AEMO archive subsets, exact scheduler-document bindings, extra weather
+cache copies and SCATS periods outside the explicit label binding. The unused
+dataset export contains 12 rows and excludes the administrative log.
+
+Traffic full-link labels are observation-anchored calibrated simulation, not
+measured five-minute full-link traces. H100 secondary bounds and B200 historical
+screening remain separate. IEEE 123-node and Abilene are test-system benchmarks;
+Jemena patterns do not establish a measured Melbourne network topology.
+
+The snapshot includes compact inventory and hash evidence. Large local search
+inventories remain local and are indexed in its manifest. Unreadable/reparse
+entries and the top-level-only historical WSL results scan are explicit audit
+limits. All eleven corrected scientific CSVs remain unchanged; no scientific
+recalculation, training, OpenDSS, SUMO or optimization was run for this audit.
 
 ## Review and reproduction
 
