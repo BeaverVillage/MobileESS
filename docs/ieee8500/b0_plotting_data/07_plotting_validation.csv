@@ -1,0 +1,35 @@
+﻿check,expected,observed,status,notes
+FINAL_B0_CONTROLS_MATCH_PLANNING_BASELINE,0,0,PASS,
+STORED_ACTIVE_PHASE_RATINGS,all finite and > 0,12312,PASS,AXES.json records actual d.Lines.NormAmps; no inferred thermal rating.
+PLANNING_VS_STORED_B0_AC_ANCHORS,0,0,PASS,All 96 slots; normalized complex currents compared.
+CRITICAL_PLANNING_WITNESS,frozen slot / axis / peak,31 / 11422 / 0.8487691403696187,PASS,
+FINAL_ACCEPTED_AC_EXTREMA_MATCH_96_SLOTS,0,0,PASS,
+FINAL_B0_ACCEPTED_STATUS,PASS,PASS,PASS,
+DUPLICATED_BUS_COORDINATE_KEYS,0,0,PASS,
+PHASE_SUFFIX_REMOVAL_KEY_COLLISIONS,0,0,PASS,
+ACTIVE_MODEL_BUS_COORDINATES,all 4912 buses,4912,PASS,
+NAN_OR_NONFINITE_COORDINATES,0,0,PASS,
+SOURCE_SUBSTATION_COORDINATE,sourcebus and hvmv_sub_hsb,TRUE,PASS,
+SUBSTATION_ON_LEFT,x_plot left of extent midpoint,1658034.03980939,PASS,
+STATIC_BRANCH_DEFINITION_COVERAGE,4930,4930,PASS,
+B0_RESULT_LINES,3698,3698,PASS,Stored active planning line domain.
+TOPOLOGY_LINES,3703,3703,PASS,Includes five explicitly disabled native tie lines.
+MATCHED_LINES,3698,3698,PASS,
+UNMATCHED_RESULT_LINES,0,0,PASS,
+UNMATCHED_TOPOLOGY_LINES,5,5,PASS,Exactly the five source-disabled tie lines. User explicitly excludes these from the scientific loading gate.
+ACTIVE_SCIENTIFIC_LINES,3698,3698,PASS,
+INACTIVE_TIE_LINES,5,5,PASS,
+ACTIVE_RESULT_MATCHED_LINES,3698,3698,PASS,
+ACTIVE_LINE_LOADING_COVERAGE,1,1,PASS,Required gate: ACTIVE_RESULT_MATCHED_LINES / ACTIVE_SCIENTIFIC_LINES = 100%.
+ACTIVE_TOPOLOGY_JOIN_COVERAGE,1,1,PASS,
+DISABLED_LINE_EXCLUSIONS_MATCH_SOURCE,exact five disabled ties,5,PASS,
+LINE_COORDINATE_MAPPING_RATIO,1,1,PASS,
+COORDINATE_MISSING_BRANCHES,0,0,PASS,
+DUPLICATED_LINE_ELEMENT_ID,0,0,PASS,
+PLOTTED_ACTIVE_LINES_VS_SCIENTIFIC_RESULT_LINES,3698,3698,PASS,plot_enabled excludes source-disabled ties. Full topology retained.
+TOPOLOGY_COORDINATE_AND_B0_MODEL_AUTHORITY,same frozen native + PCC model,verified,PASS,"Release, preflight, native source manifest and archive per-member SHA256 checks. No public variant fallback."
+PHASE_TO_LINE_MAX_AGGREGATION,absolute error <= 1e-12,0,PASS,All 3698 lines with available phases. Five disabled lines have empty phase sets; no zero fill.
+ALL_ACTIVE_LINE_LOADING_AVAILABLE,3698,3698,PASS,User-corrected active scientific metric domain. Inactive ties are separately preserved with NA.
+INACTIVE_TIE_PRESERVATION,5,5,PASS,"All five retained in 01 and 05; disabled tie loading is NA, not zero."
+CRITICAL_PHASE_MAPPING,C,C,PASS,
+B3_TEMPLATE_DATA_ROWS,0,0,PASS,Header only. Future constants: policy=B3; reference_critical_policy=B0.
