@@ -1,0 +1,31 @@
+check,expected,observed,status,evidence
+road_geometry_coverage,509/509,509/509,PASS,Frozen physical edge catalog + exact lane shapes
+unresolved_road_geometry_count,0,0,PASS,See manifest unresolved_road_geometries
+zero_length_road_geometry_count,0,0,PASS,Sum of original projected segment lengths; gap lengths excluded
+reversed_road_geometry_count,0,0,PASS,First edge.from / last edge.to exactly equal frozen node junction IDs; no orientation repair
+physical_edge_junction_order_breaks,0,0,PASS,Consecutive edge.to == next edge.from in source_position order
+parallel_directed_edges_preserved,509,509,PASS,"377 ordered pairs; 96 parallel pairs; keyed by road_edge_id, not endpoints"
+endpoint_junction_footprint_tolerance,509 within source-derived tolerance,509/509,PASS,road_geometry_endpoint_validation.csv; junction polygon radius from anchor + 5 m; no snap
+max_start_offset_m,Reported; not zero by assumption,48.60766286624564,INFO,Lane endpoints stop at junction footprints
+max_end_offset_m,Reported; not zero by assumption,47.21113964158929,INFO,Lane centerline offset and stop lines
+source_junction_coordinate_match,<= 0.1 m,0.0,PASS,Inverse original SUMO netOffset/PROJ at all 48 frozen junction IDs
+source_shape_gap_handling,No fabricated connector,49741 discontinuities; max 110.221375 m,PASS,MultiLineString parts and CSV part_index split every nonidentical boundary coordinate
+projection_roundtrip_error_m,< 1e-6,3.9755835067133e-09,PASS,pyproj existing local PROJ; always_xy=True; no grid download
+road_nodes_within_plot_extent,48,48,PASS,Padded complete network bbox from source vertices
+aidc_locations_within_plot_extent,12,12,PASS,Padded complete network bbox from source vertices
+mess_service_locations_within_plot_extent,24,24,PASS,Padded complete network bbox from source vertices
+road_nodes_within_original_study_boundary,48,48,PASS,Original explicit study_area.txt bounds; not a newly inferred administrative polygon
+aidc_locations_within_original_study_boundary,12,12,PASS,Original explicit study_area.txt bounds; not a newly inferred administrative polygon
+mess_service_locations_within_original_study_boundary,24,24,PASS,Original explicit study_area.txt bounds; not a newly inferred administrative polygon
+road_geometries_outside_original_study_boundary,0,0,PASS,Full list in manifest; source geometry retained without snapping or truncation
+road_vertices_within_plot_extent,219849,219849,PASS,All materialized road vertices and resource/node coordinates included
+longitude_latitude_range_errors,0,0,PASS,"Longitude first, latitude second; Melbourne-specific geographic bounds also tested"
+longitude_latitude_axis_order,"Melbourne lon ~145, lat ~-38",True,PASS,Source OSM lon/lat attributes vs transformed SUMO vertices and 48 anchors
+boundary_availability,Existing metropolitan or study-area source,SOURCE_STUDY_AREA_BOUNDING_POLYGON,PASS,"Fallback is exact original source study rectangle, not metro shape reconstruction"
+metropolitan_outline_completeness,All relation member geometry,UNRESOLVED,UNRESOLVED,Missing OSM relation members listed in manifest; no new data requested/downloaded
+coastline_availability,Source OSM natural=coastline,17,PASS,Original OSM tile ways; preserved source notes about coarse shape
+land_context_polygon_availability,Complete authoritative land polygon,UNRESOLVED,UNRESOLVED,"UNRESOLVED: local Mainland Australia relation is not a complete land polygon. No coastline closure, land-side inference, polygonization or bbox land fill was fabricated."
+CRS_CONSISTENCY,EPSG:4326 all available layers,EPSG:4326,PASS,"Source netOffset removed, exact PROJ inverse; OSM already WGS84 lon/lat. UNRESOLVED land has zero features."
+available_layers_overlay,Common geographic coordinates,Road+anchors+source study bounds+coastline,PASS,No assertion of geographic coordinates for IEEE123
+scientific_execution_count,0,0,PASS,"XML/CSV/JSON parsing, hashing, coordinate reprojection and plotting-only geometry extraction only"
+original_plotting_package_unchanged,7/7 identical,7/7 identical,PASS,All six CSVs and original PLOTTING_DATA_AUDIT.md SHA256 before/after
