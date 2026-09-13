@@ -1,0 +1,761 @@
+{
+  "status": "V41R4_FINAL_ARCHIVE_PAPER_CSV_EXPORT_FAIL_CLOSED",
+  "export_timestamp": "2026-09-09T02:00:09.585716+00:00",
+  "source_archive": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\결과 데이터\\V41R4_May2025_31days_124policies_raw_20260909_102655.tar.gz",
+  "source_archive_size_bytes": 13524418762,
+  "source_archive_SHA256": "1d57950fd073ead32bcb68a8d65c06ad6023f3d556acc672eae911651438f6d3",
+  "archive_file_count": 69297,
+  "detected_days": 31,
+  "detected_policy_days": 124,
+  "CSV_files": [
+    {
+      "table": "00_experiment_authority",
+      "row_count": 1,
+      "part_count": 1,
+      "columns": [
+        "campaign_version",
+        "evaluation_month",
+        "expected_days",
+        "expected_policies",
+        "expected_policy_days",
+        "completed_policy_days",
+        "alpha_BG",
+        "AIDC_equivalent_GPU",
+        "AIDC_site_count",
+        "MESS_count",
+        "MESS_Pmax_kW_per_unit",
+        "MESS_Smax_kVA_per_unit",
+        "MESS_Emax_kWh_per_unit",
+        "MESS_Emin_kWh_per_unit",
+        "MESS_initial_kWh_per_unit",
+        "MESS_terminal_kWh_per_unit",
+        "eta_charge",
+        "eta_discharge",
+        "PCS_polygon_faces",
+        "grid_model",
+        "grid_slots_per_day",
+        "grid_interval_min",
+        "voltage_lower_pu",
+        "voltage_upper_pu",
+        "traffic_links",
+        "traffic_slots_per_day",
+        "traffic_interval_min",
+        "traffic_model_id",
+        "runtime_model_id",
+        "H4_model_id",
+        "source_archive_filename",
+        "source_archive_size_bytes",
+        "source_archive_SHA256",
+        "MESS_nominal_capacity_definition",
+        "MESS_operating_Emax_kWh_per_unit",
+        "grid_timestamp_timezone",
+        "method_SHA",
+        "repository_commit_SHA"
+      ],
+      "parts": [
+        {
+          "filename": "00_experiment_authority.csv",
+          "row_count": 1,
+          "byte_size": 1217,
+          "SHA256": "cd2830a4f2f177780a6da00ecccae58c702b51990f1fdcb173daee21bd46c8ff",
+          "first_key": {},
+          "last_key": {}
+        }
+      ]
+    },
+    {
+      "table": "01_policy_day_summary",
+      "row_count": 124,
+      "part_count": 1,
+      "columns": [
+        "day",
+        "policy",
+        "completion_status",
+        "P1_rho_planning",
+        "P2_H4_shortfall_GPUh",
+        "P3_migrations",
+        "P4_reference_deviation",
+        "P5_stable_tie",
+        "DA_rho_max",
+        "DA_Vmin_pu",
+        "DA_Vmax_pu",
+        "DA_tx_current_max_pu",
+        "DA_tx_kVA_max_pu",
+        "DA_voltage_violation_count",
+        "DA_line_violation_count",
+        "DA_tx_current_violation_count",
+        "DA_tx_kVA_violation_count",
+        "DA_converged_slots",
+        "DA_physical_outcome",
+        "DA_critical_line",
+        "DA_critical_line_phase",
+        "DA_critical_line_slot",
+        "DA_critical_line_rho",
+        "DA_Vmax_bus",
+        "DA_Vmax_phase",
+        "DA_Vmax_slot",
+        "DA_Vmin_bus",
+        "DA_Vmin_phase",
+        "DA_Vmin_slot",
+        "DA_critical_tx_current_asset",
+        "DA_critical_tx_current_phase",
+        "DA_critical_tx_current_slot",
+        "DA_critical_tx_current_rho",
+        "DA_critical_tx_kVA_asset",
+        "DA_critical_tx_kVA_phase",
+        "DA_critical_tx_kVA_slot",
+        "DA_critical_tx_kVA_rho",
+        "AIDC_selected_job_count",
+        "AIDC_eligible_job_count",
+        "temporal_shift_count",
+        "spatial_relocation_count",
+        "checkpoint_migration_count",
+        "MESS_vehicle_count",
+        "MESS_dispatch_slots",
+        "MESS_move_count",
+        "MESS_abs_P_energy_kWh",
+        "optimization_runtime_s",
+        "DA_physically_feasible",
+        "final_site_change_count",
+        "full_PQ_fallback",
+        "primary_fresh_status",
+        "restoration_status",
+        "terminal_residual_violation_jobs"
+      ],
+      "parts": [
+        {
+          "filename": "01_policy_day_summary.csv",
+          "row_count": 124,
+          "byte_size": 53583,
+          "SHA256": "3f0255668ecc000fd29e705d8706106cb50cc0135aef16d4f3ea73b890f0f1a3",
+          "first_key": {
+            "day": "2025-05-01",
+            "policy": "B0"
+          },
+          "last_key": {
+            "day": "2025-05-31",
+            "policy": "B3"
+          }
+        }
+      ]
+    },
+    {
+      "table": "02_actual_summary",
+      "row_count": 124,
+      "part_count": 1,
+      "columns": [
+        "day",
+        "policy",
+        "completion_status",
+        "actual_method",
+        "Actual_rho_max",
+        "Actual_Vmin_pu",
+        "Actual_Vmax_pu",
+        "Actual_tx_current_max_pu",
+        "Actual_tx_kVA_max_pu",
+        "Actual_voltage_violation_cells",
+        "Actual_line_violation_cells",
+        "Actual_tx_current_violation_cells",
+        "Actual_tx_kVA_violation_cells",
+        "Actual_voltage_violation_day",
+        "Actual_line_violation_day",
+        "Actual_tx_current_violation_day",
+        "Actual_tx_kVA_violation_day",
+        "Actual_physically_feasible",
+        "Actual_converged_slots",
+        "Actual_H4_shortfall_mean_GPUh",
+        "Actual_H4_shortfall_max_GPUh",
+        "execution_rate",
+        "Actual_optimizer_calls",
+        "decision_SHA",
+        "development_or_holdout",
+        "final_frozen_method_evidence",
+        "AIDC_decision_SHA",
+        "GPU_weighted_delay_seconds",
+        "GPU_weighted_mean_delay_seconds",
+        "P90_start_delay_seconds",
+        "P95_delayed_job_seconds",
+        "P95_start_delay_seconds",
+        "P99_start_delay_seconds",
+        "SLA_debt_authority",
+        "assigned_PENDING_jobs",
+        "contention_added_GPU_weighted_lateness_seconds",
+        "contention_added_completion_lateness_job_seconds",
+        "contention_caused_RW_deadline_misses",
+        "delay_population",
+        "delayed_jobs",
+        "delayed_over_15min_fraction",
+        "delayed_over_15min_jobs",
+        "delayed_over_1h_fraction",
+        "delayed_over_1h_jobs",
+        "delayed_over_4h_fraction",
+        "delayed_over_4h_jobs",
+        "execution_COMPLETION_RATE",
+        "execution_N_ACTUAL_COMPLETED_JOBS",
+        "execution_N_ACTUAL_STARTED_JOBS",
+        "execution_N_DA_SELECTED_JOBS",
+        "execution_N_DELAYED_JOBS",
+        "execution_N_EVENTUALLY_COMPLETED_JOBS",
+        "execution_N_EVENTUALLY_STARTED_JOBS",
+        "execution_N_NOT_COMPLETED_BY_HORIZON",
+        "execution_N_NOT_STARTED_BY_HORIZON",
+        "execution_RUNNING_counted_as_continuing_execution",
+        "execution_START_EXECUTION_RATE",
+        "execution_cross_day_state_carried",
+        "execution_horizon",
+        "execution_unselected_jobs_in_denominator",
+        "max_start_delay_seconds",
+        "mean_assigned_PENDING_delay_seconds",
+        "mean_delayed_job_seconds",
+        "mean_start_delay_seconds",
+        "median_start_delay_seconds",
+        "total_start_delay_seconds"
+      ],
+      "parts": [
+        {
+          "filename": "02_actual_summary.csv",
+          "row_count": 124,
+          "byte_size": 118644,
+          "SHA256": "838f6846da70d6834da16b533ae35f90c05357c5cba2f3b56895ca2275762615",
+          "first_key": {
+            "day": "2025-05-01",
+            "policy": "B0"
+          },
+          "last_key": {
+            "day": "2025-05-31",
+            "policy": "B3"
+          }
+        }
+      ]
+    },
+    {
+      "table": "03_q_correction_summary",
+      "row_count": 124,
+      "part_count": 1,
+      "columns": [
+        "day",
+        "policy",
+        "development_or_holdout",
+        "Q_intervention_slots",
+        "Q_intervention_rate",
+        "Q_unresolved_slots",
+        "Q_unresolved_day",
+        "sum_abs_delta_Q_kvar",
+        "mean_abs_delta_Q_all_vehicle_slots_kvar",
+        "mean_abs_delta_Q_changed_vehicle_slots_kvar",
+        "max_abs_delta_Q_kvar",
+        "changed_Q_vehicle_slots",
+        "maximum_PCS_norm_utilization",
+        "maximum_PCS_polygon_utilization",
+        "Q_runtime_s",
+        "Q_search_runtime_s",
+        "P_EXEC_identity",
+        "SoC_energy_identity",
+        "AIDC_decision_identity",
+        "route_location_identity",
+        "preQ_rho_max",
+        "preQ_Vmin_pu",
+        "preQ_Vmax_pu",
+        "preQ_voltage_violation_cells",
+        "preQ_line_violation_cells",
+        "preQ_tx_current_violation_cells",
+        "preQ_tx_kVA_violation_cells",
+        "preQ_physically_feasible",
+        "postQ_rho_max",
+        "postQ_Vmin_pu",
+        "postQ_Vmax_pu",
+        "postQ_voltage_violation_cells",
+        "postQ_line_violation_cells",
+        "postQ_tx_current_violation_cells",
+        "postQ_tx_kVA_violation_cells",
+        "postQ_physically_feasible",
+        "Q_delta_rho",
+        "Q_delta_voltage_cells",
+        "global_optimum_proven",
+        "control_common_binding",
+        "final_method_SHA",
+        "paper_facing_interpretation",
+        "postQ_converged_slots",
+        "postQ_tx_current_max_pu",
+        "postQ_tx_kVA_max_pu",
+        "preQ_converged_slots",
+        "preQ_tx_current_max_pu",
+        "preQ_tx_kVA_max_pu"
+      ],
+      "parts": [
+        {
+          "filename": "03_q_correction_summary.csv",
+          "row_count": 124,
+          "byte_size": 69565,
+          "SHA256": "42acb4bf288b70d98a3bb6a9997e26ade1eaed64e20a1c3646e80d1bcc4c2196",
+          "first_key": {
+            "day": "2025-05-01",
+            "policy": "B0"
+          },
+          "last_key": {
+            "day": "2025-05-31",
+            "policy": "B3"
+          }
+        }
+      ]
+    },
+    {
+      "table": "04_mess_timeseries",
+      "row_count": 47616,
+      "part_count": 1,
+      "columns": [
+        "day",
+        "policy",
+        "slot",
+        "timestamp",
+        "mess_id",
+        "location_service_id",
+        "connected",
+        "moving",
+        "origin_service_id",
+        "destination_service_id",
+        "departure_slot",
+        "arrival_slot",
+        "P_DA_kW",
+        "Q_DA_kvar",
+        "P_Actual_kW",
+        "Q_Actual_kvar",
+        "delta_Q_kvar",
+        "SoC_kWh",
+        "SoC_pct",
+        "PCS_norm_utilization",
+        "PCS_polygon_utilization",
+        "Q_intervention",
+        "Q_intervention_status",
+        "regulator_taps_start",
+        "regulator_taps_final",
+        "reg1a_tap_final",
+        "reg1a_tap_start",
+        "reg2a_tap_final",
+        "reg2a_tap_start",
+        "reg3a_tap_final",
+        "reg3a_tap_start",
+        "reg3c_tap_final",
+        "reg3c_tap_start",
+        "reg4a_tap_final",
+        "reg4a_tap_start",
+        "reg4b_tap_final",
+        "reg4b_tap_start",
+        "reg4c_tap_final",
+        "reg4c_tap_start"
+      ],
+      "parts": [
+        {
+          "filename": "04_mess_timeseries.csv",
+          "row_count": 47616,
+          "byte_size": 29786368,
+          "SHA256": "dce66e191330783cda1e0b6a7b3c4ca27c2ee2d149e2c0c82a2fa9c3e51cc621",
+          "first_key": {
+            "day": "2025-05-01",
+            "policy": "B0",
+            "slot": "0",
+            "mess_id": "MESS01"
+          },
+          "last_key": {
+            "day": "2025-05-31",
+            "policy": "B3",
+            "slot": "95",
+            "mess_id": "MESS04"
+          }
+        }
+      ]
+    },
+    {
+      "table": "05_grid_timeseries",
+      "row_count": 43392,
+      "part_count": 1,
+      "columns": [
+        "day",
+        "policy",
+        "trajectory",
+        "slot",
+        "timestamp",
+        "rho_line_max",
+        "critical_line",
+        "critical_line_phase",
+        "Vmin_pu",
+        "Vmin_bus",
+        "Vmin_phase",
+        "Vmax_pu",
+        "Vmax_bus",
+        "Vmax_phase",
+        "tx_current_max_pu",
+        "tx_current_asset",
+        "tx_current_phase",
+        "tx_kVA_max_pu",
+        "tx_kVA_asset",
+        "tx_kVA_phase",
+        "voltage_violation_count",
+        "line_violation_count",
+        "tx_current_violation_count",
+        "tx_kVA_violation_count",
+        "converged",
+        "regulator_taps",
+        "capacitor_states"
+      ],
+      "parts": [
+        {
+          "filename": "05_grid_timeseries.csv",
+          "row_count": 43392,
+          "byte_size": 15898027,
+          "SHA256": "b8694c7293e1adfc1b16ede8316e68e1b7ecf81a85aa0a759019bf06fc59401a",
+          "first_key": {
+            "day": "2025-05-01",
+            "policy": "B0",
+            "trajectory": "DAYAHEAD_FRESH",
+            "slot": "0"
+          },
+          "last_key": {
+            "day": "2025-05-31",
+            "policy": "B3",
+            "trajectory": "ETA95_QSAFE_ACTUAL",
+            "slot": "95"
+          }
+        }
+      ]
+    },
+    {
+      "table": "06_aidc_decisions",
+      "row_count": 188036,
+      "part_count": 1,
+      "columns": [
+        "day",
+        "policy",
+        "job_uid",
+        "requested_GPU",
+        "reference_site",
+        "optimized_site",
+        "reference_start_slot",
+        "optimized_start_slot",
+        "start_shift_slots",
+        "safe_duration_seconds",
+        "safe_duration_slots",
+        "time_shifted",
+        "site_changed",
+        "checkpoint_migrated",
+        "reference_terminal_remaining_slots",
+        "optimized_terminal_remaining_slots",
+        "terminal_residual_delta_slots",
+        "cross_midnight_reference",
+        "cross_midnight_optimized",
+        "terminal_constraint_binding",
+        "eligible_standby",
+        "final_site_changed",
+        "initial_site",
+        "initial_site_changed",
+        "optimized_end_slot",
+        "reference_end_slot",
+        "selected",
+        "state_at_issue",
+        "terminal_definition",
+        "terminal_invariant_pass"
+      ],
+      "parts": [
+        {
+          "filename": "06_aidc_decisions.csv",
+          "row_count": 188036,
+          "byte_size": 40896823,
+          "SHA256": "bde2c3fc182622bcfbd8176492b3638dc92256cda99b8dbce7c6dcb899d43853",
+          "first_key": {
+            "day": "2025-05-01",
+            "policy": "B0",
+            "job_uid": "8206515"
+          },
+          "last_key": {
+            "day": "2025-05-31",
+            "policy": "B3",
+            "job_uid": "9183387"
+          }
+        }
+      ]
+    },
+    {
+      "table": "07_ml_performance",
+      "row_count": 22,
+      "part_count": 1,
+      "columns": [
+        "domain",
+        "metric",
+        "value",
+        "unit",
+        "evaluation_scope",
+        "N",
+        "source_inside_archive"
+      ],
+      "parts": [
+        {
+          "filename": "07_ml_performance.csv",
+          "row_count": 22,
+          "byte_size": 4514,
+          "SHA256": "30eae97ef4fd4374badb60efd81d209816d71351b5afc96c868e051647c2a557",
+          "first_key": {
+            "domain": "H4",
+            "metric": "H4_MAE_GPUh"
+          },
+          "last_key": {
+            "domain": "traffic",
+            "metric": "route_ETA_MAE_s"
+          }
+        }
+      ]
+    },
+    {
+      "table": "08_policy_aggregate_statistics",
+      "row_count": 4,
+      "part_count": 1,
+      "columns": [
+        "policy",
+        "N_days",
+        "P1_mean",
+        "P1_median",
+        "P1_P90",
+        "P1_min",
+        "P1_max",
+        "DA_rho_mean",
+        "DA_rho_median",
+        "DA_rho_P90",
+        "DA_rho_min",
+        "DA_rho_max",
+        "Actual_rho_mean",
+        "Actual_rho_median",
+        "Actual_rho_P90",
+        "Actual_rho_min",
+        "Actual_rho_max",
+        "Vmin_global",
+        "Vmax_global",
+        "voltage_violation_days",
+        "thermal_violation_days",
+        "temporal_shift_total",
+        "spatial_relocation_total",
+        "checkpoint_migration_total",
+        "MESS_dispatch_slots_total",
+        "MESS_moves_total",
+        "MESS_abs_P_energy_kWh_total",
+        "optimization_runtime_mean_s",
+        "optimization_runtime_median_s",
+        "optimization_runtime_max_s",
+        "Actual_H4_shortfall_mean_GPUh",
+        "terminal_residual_violation_jobs"
+      ],
+      "parts": [
+        {
+          "filename": "08_policy_aggregate_statistics.csv",
+          "row_count": 4,
+          "byte_size": 2224,
+          "SHA256": "5f68e10c33e1f6f676a7a5884deb1beaf1d8d6155658c54405718c2902c1aaa5",
+          "first_key": {
+            "policy": "B0"
+          },
+          "last_key": {
+            "policy": "B3"
+          }
+        }
+      ]
+    },
+    {
+      "table": "09_paired_policy_comparisons",
+      "row_count": 31,
+      "part_count": 1,
+      "columns": [
+        "day",
+        "B0_Actual_rho",
+        "B0_DA_rho",
+        "B0_P1",
+        "B1_Actual_rho",
+        "B1_DA_rho",
+        "B1_P1",
+        "B1_improvement_pct_vs_B0",
+        "B1_improvement_pct_vs_B0_Actual_rho",
+        "B1_improvement_pct_vs_B0_DA_rho",
+        "B1_minus_B0_Actual_rho",
+        "B1_minus_B0_DA_rho",
+        "B1_minus_B0_P1",
+        "B2_Actual_rho",
+        "B2_DA_rho",
+        "B2_P1",
+        "B2_improvement_pct_vs_B0",
+        "B2_improvement_pct_vs_B0_Actual_rho",
+        "B2_improvement_pct_vs_B0_DA_rho",
+        "B2_minus_B0_Actual_rho",
+        "B2_minus_B0_DA_rho",
+        "B2_minus_B0_P1",
+        "B3_Actual_rho",
+        "B3_DA_rho",
+        "B3_P1",
+        "B3_improvement_pct_vs_B0",
+        "B3_improvement_pct_vs_B0_Actual_rho",
+        "B3_improvement_pct_vs_B0_DA_rho",
+        "B3_incremental_improvement_pct_vs_B2",
+        "B3_incremental_improvement_pct_vs_B2_Actual_rho",
+        "B3_incremental_improvement_pct_vs_B2_DA_rho",
+        "B3_minus_B0_Actual_rho",
+        "B3_minus_B0_DA_rho",
+        "B3_minus_B0_P1",
+        "B3_minus_B2_Actual_rho",
+        "B3_minus_B2_DA_rho",
+        "B3_minus_B2_P1"
+      ],
+      "parts": [
+        {
+          "filename": "09_paired_policy_comparisons.csv",
+          "row_count": 31,
+          "byte_size": 22824,
+          "SHA256": "e72b541352bcdcdec668d255be7d9148d4a8e598b5367be9aa5c3b875094f8d7",
+          "first_key": {
+            "day": "2025-05-01"
+          },
+          "last_key": {
+            "day": "2025-05-31"
+          }
+        }
+      ]
+    },
+    {
+      "table": "10_mess_utilization_statistics",
+      "row_count": 124,
+      "part_count": 1,
+      "columns": [
+        "day",
+        "policy",
+        "MESS_nameplate_total_P_kW",
+        "MESS_nameplate_total_S_kVA",
+        "MESS_nameplate_total_E_kWh",
+        "max_simultaneous_abs_P_kW",
+        "max_net_discharge_P_kW",
+        "max_net_charge_P_kW",
+        "max_simultaneous_apparent_power_kVA",
+        "P_nameplate_utilization_max",
+        "S_nameplate_utilization_max",
+        "mean_connected_MESS",
+        "max_connected_MESS",
+        "total_discharge_energy_kWh",
+        "total_charge_energy_kWh",
+        "absolute_P_energy_kWh",
+        "max_unit_P_utilization",
+        "max_unit_PCS_utilization",
+        "B0_feeder_peak_kW",
+        "MESS_nameplate_to_B0_peak_ratio",
+        "MESS_actual_max_P_to_B0_peak_ratio",
+        "trajectory"
+      ],
+      "parts": [
+        {
+          "filename": "10_mess_utilization_statistics.csv",
+          "row_count": 124,
+          "byte_size": 26751,
+          "SHA256": "7861d491a6ebf23e4a3e314e57585b4f0fa7de8b251f827a715306b55a8ca197",
+          "first_key": {
+            "day": "2025-05-01",
+            "policy": "B0",
+            "trajectory": "ETA95_QSAFE_ACTUAL"
+          },
+          "last_key": {
+            "day": "2025-05-31",
+            "policy": "B3",
+            "trajectory": "ETA95_QSAFE_ACTUAL"
+          }
+        }
+      ]
+    }
+  ],
+  "total_CSV_bytes": 86880540,
+  "reduction_pct_vs_archive": 99.35760241139448,
+  "NOT_AVAILABLE_metrics": [
+    {
+      "fields": [
+        "grid_model",
+        "traffic_links",
+        "traffic_slots_per_day",
+        "traffic_interval_min",
+        "traffic_model_id"
+      ],
+      "reason": "No complete final grid/traffic model identification or full traffic graph authority is established by the packaged final result index. External provenance targets intentionally not read."
+    },
+    {
+      "fields": [
+        "link_Q50_MAE_s",
+        "link_Q50_WAPE_pct",
+        "link_Q90_empirical_coverage",
+        "quantile_crossings"
+      ],
+      "reason": "The archive lacks an identified full-link validation authority with frozen quantile predictions and matched realized labels. Selected-route metrics are separately scoped."
+    },
+    {
+      "fields": [
+        "B0_feeder_peak_kW",
+        "MESS_nameplate_to_B0_peak_ratio",
+        "MESS_actual_max_P_to_B0_peak_ratio"
+      ],
+      "reason": "Historical FEEDER_SYSTEM_96 tables do not match the final Actual voltage/loading trajectory, or are absent. Final NPZ arrays do not provide source-terminal active power.",
+      "unavailable_days": [
+        "2025-05-21",
+        "2025-05-22",
+        "2025-05-23",
+        "2025-05-24",
+        "2025-05-25",
+        "2025-05-26",
+        "2025-05-27",
+        "2025-05-28",
+        "2025-05-29",
+        "2025-05-30",
+        "2025-05-31"
+      ]
+    },
+    {
+      "fields": [
+        "Q_runtime_s"
+      ],
+      "reason": "No separately identified end-to-end Q-only wall-clock authority; recorded search_runtime_seconds is exported separately without relabeling total replay time."
+    },
+    {
+      "fields": [
+        "mean_abs_delta_Q_changed_vehicle_slots_kvar"
+      ],
+      "reason": "NaN when the changed-vehicle-slot denominator is zero; it is not replaced by zero."
+    },
+    {
+      "fields": [
+        "origin_service_id",
+        "destination_service_id",
+        "departure_slot",
+        "arrival_slot"
+      ],
+      "reason": "NOT_AVAILABLE denotes no associated move in that slot; no arrival is inferred from another scenario."
+    }
+  ],
+  "external_workspace_read_count": 0,
+  "raw_archive_unchanged": true,
+  "exporter_scripts_SHA256": {
+    "archive_intake.py": "ebbbb9a23f5acbce1d079ccbcaa8918aaf50df9a6c130f5520f1edcdec65c6d9",
+    "export_v41r4_final_archive_to_csv.py": "ff6965ba246f6bf32a9a7a28e73f5ba9a80d057f84e7e59c5874c33783fe59b5"
+  },
+  "validation": {
+    "status": "FAIL",
+    "failure_counts": {
+      "AIDC_TERMINAL_RESIDUAL_INCREASE": 619
+    },
+    "checks": [
+      "archive completeness and file hashes",
+      "124 final acceptance/Actual bindings",
+      "P1-P5 vector length 5",
+      "separate planning P1 and exact Fresh rho",
+      "96-slot final Fresh/Actual convergence",
+      "array extrema and violation counts equal persisted summaries",
+      "terminal remaining compute service invariant",
+      "Q-only P/SoC and frozen AIDC/route identities",
+      "all 31 paired dates",
+      "CSV schema/row count round trip",
+      "500MB limit",
+      "archive/source SHA unchanged"
+    ]
+  },
+  "full_manifest_local": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\결과 데이터\\MobileESS_V41R4_Paper_CSV_Export\\MANIFEST.json",
+    "sha256": "6c316958db7d335aa316676a4750ab38e69b20dfe65eb6e99ebe840c50c47501"
+  }
+}

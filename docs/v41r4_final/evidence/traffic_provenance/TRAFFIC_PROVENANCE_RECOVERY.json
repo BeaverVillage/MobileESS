@@ -1,0 +1,202 @@
+{
+  "status": "V41R4_TRAFFIC_FULL_LINK_PROVENANCE_RECOVERY_PASS",
+  "FINAL_TRAFFIC_PROVENANCE_RECOVERY": "PASS",
+  "VALIDATION_ONLY_RERUN_REQUIRED": "NO",
+  "production_model_id": "DA-RQSTG-DIRECT-288-V1",
+  "checkpoint": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v35r3e_r1_beam\\dayahead\\artifacts\\v33m3_causal_dayahead_traffic\\V33M3_FINAL_MODEL.npz",
+    "sha256": "3da2ced5322dd2bf6d02a665043ce182db60cc82b671d9ac92d7eebd3963520b",
+    "bytes": 3496011
+  },
+  "model_authority": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v35r3e_r1_beam\\dayahead\\artifacts\\v33m3_causal_dayahead_traffic\\V33M3_FINAL_MODEL_AUTHORITY.json",
+    "sha256": "7544a33649acc8b790871e22da37c3be78644f5e184ac3ce8a56578e2c035854",
+    "bytes": 2607
+  },
+  "model_SHA": "93a30f54be207f6579a51af32ab6f84fbbb2608ffead3da6332886847a6163e6",
+  "data_SHA": "c2e532212eba796b652bdd283a8127c2343b9305146d387975f4c69c2a848183",
+  "graph_SHA": "658fb2e56867a50597e9a21899748d8171439deda852e7db4f3339a99f71dd3d",
+  "normalization_SHA": "1572bb955df254e71ef0dc81b2264885f676f9cfad854f497155c795c2d417c2",
+  "Safe_ETA_calibration": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v35r3e_r1_beam\\dayahead\\artifacts\\v33m3_causal_dayahead_traffic\\V33M3_SAFE_ETA_CALIBRATION.json",
+    "sha256": "353f124bdda33b1fd408f4f810b762f433bbe25d8c5c13b191fe1b0d6e36ff99",
+    "bytes": 607
+  },
+  "graph_smoothing_weight_effective": 0.0,
+  "PR19_exact_checkpoint_match": true,
+  "inventory": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40h_production_integrity\\CURRENT_TRANSITIVE_INPUT_INVENTORY.json",
+    "sha256": "ba220f2280ff5e8cd8b6b9d3a3396ff9aa9fc41d0abeb51533b032d94ab5fa94",
+    "bytes": 1966710
+  },
+  "workspace_roots": [
+    {
+      "path": "C:/codex_mobileess_workspace/MobileESS_v41r3_scale_rebalance",
+      "HEAD": "53cf2ff8386a8fe0562454cfeec4f0dd8ec186e3",
+      "role": "Traffic provenance only; external optimization results excluded"
+    },
+    {
+      "path": "C:/codex_mobileess_workspace/MobileESS_v40a_bounded_iterative_coopt",
+      "HEAD": "e24492aa2e3404548cd4efc9f23e8168c0839b3b",
+      "role": "Traffic provenance only; external optimization results excluded"
+    },
+    {
+      "path": "C:/codex_mobileess_workspace/MobileESS_v35r3e_r1_beam",
+      "HEAD": "a5c46a5c8b06e97e9e13a2078cb801fe51b240a9",
+      "role": "Traffic provenance only; external optimization results excluded"
+    }
+  ],
+  "coverage": {
+    "days": 31,
+    "B2_B3_policy_days": 62,
+    "shared_forecasts": 31,
+    "forecast_file_SHA_verified": 31,
+    "forecast_canonical_SHA_verified": 31,
+    "route_cache_file_SHA_verified": 31,
+    "route_cache_canonical_SHA_verified": 31,
+    "archived_M1_external_receipt_SHA_verified": 62,
+    "final_committed_departures_exact_numeric_and_path_matches": 95
+  },
+  "semantics": {
+    "output_shape": [
+      288,
+      509,
+      3
+    ],
+    "quantiles": [
+      "Q10",
+      "Q50",
+      "Q90"
+    ],
+    "issue": "D-1 18:00 fixed AEST UTC+10",
+    "max_input_timestamp": "D-1 17:55 fixed AEST",
+    "causality_pass_all_31": true,
+    "future_actual_read_count_all_31": 0,
+    "data_binding": "PR19 aggregate data SHA exact match in all 31 metadata records; frozen checkpoint parameter SHA also verified",
+    "forecast_generation_receipt": "Persisted per-day NPZ metadata, bound by canonical and file SHA in archived M1 identities; transitive inventory binds checkpoint/authority/calibration file hashes. No new receipt was asserted to be historical."
+  },
+  "provenance_chain_complete": true,
+  "full_link_PR19_metric_binding_allowed": true,
+  "validation_metric_scope": "PR19 held-out 2024 validation of the exact V41R4 production predictor; not a newly computed May 2025 full-link score",
+  "bound_prior_validation_metrics": {
+    "Q50_MAE_s": 28.778100967407227,
+    "Q50_WAPE_pct": 4.140258207917213,
+    "Q90_empirical_coverage": 0.8831677945135705,
+    "quantile_crossings": 0,
+    "evaluation_dates": [
+      "2024-01-16",
+      "2024-02-14",
+      "2024-03-15"
+    ],
+    "N": 439776
+  },
+  "selected_route_operational_metrics_unchanged": [
+    {
+      "domain": "traffic",
+      "metric": "SafeETA_coverage",
+      "value": "0.9444444444444444",
+      "unit": "fraction",
+      "evaluation_scope": "Final selected B2/B3 routes, deduplicated day/departure/route/label; not full-link ML validation",
+      "N": "72",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.traffic_routes"
+    },
+    {
+      "domain": "traffic",
+      "metric": "SafeETA_mean_margin_s",
+      "value": "142.59338453682616",
+      "unit": "s",
+      "evaluation_scope": "Final selected B2/B3 routes, deduplicated day/departure/route/label; not full-link ML validation",
+      "N": "72",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.traffic_routes"
+    },
+    {
+      "domain": "traffic",
+      "metric": "route_ETA_MAE_s",
+      "value": "52.6455134707414",
+      "unit": "s",
+      "evaluation_scope": "Final selected B2/B3 routes, deduplicated day/departure/route/label; not full-link ML validation",
+      "N": "72",
+      "source_inside_archive": "MANIFEST.json: metric_source_groups.traffic_routes"
+    }
+  ],
+  "corrected_11_CSVs_unchanged": [
+    {
+      "filename": "00_experiment_authority.csv",
+      "sha256": "d682c408b83770efb7d2d6cfa6920b9d8dae5b3cc92ef15c9107c7349d8936b0",
+      "bytes": 1268
+    },
+    {
+      "filename": "01_policy_day_summary.csv",
+      "sha256": "3f0255668ecc000fd29e705d8706106cb50cc0135aef16d4f3ea73b890f0f1a3",
+      "bytes": 53583
+    },
+    {
+      "filename": "02_actual_summary.csv",
+      "sha256": "838f6846da70d6834da16b533ae35f90c05357c5cba2f3b56895ca2275762615",
+      "bytes": 118644
+    },
+    {
+      "filename": "03_q_correction_summary.csv",
+      "sha256": "42acb4bf288b70d98a3bb6a9997e26ade1eaed64e20a1c3646e80d1bcc4c2196",
+      "bytes": 69565
+    },
+    {
+      "filename": "04_mess_timeseries.csv",
+      "sha256": "dce66e191330783cda1e0b6a7b3c4ca27c2ee2d149e2c0c82a2fa9c3e51cc621",
+      "bytes": 29786368
+    },
+    {
+      "filename": "05_grid_timeseries.csv",
+      "sha256": "b8694c7293e1adfc1b16ede8316e68e1b7ecf81a85aa0a759019bf06fc59401a",
+      "bytes": 15898027
+    },
+    {
+      "filename": "06_aidc_decisions.csv",
+      "sha256": "bde2c3fc182622bcfbd8176492b3638dc92256cda99b8dbce7c6dcb899d43853",
+      "bytes": 40896823
+    },
+    {
+      "filename": "07_ml_performance.csv",
+      "sha256": "30eae97ef4fd4374badb60efd81d209816d71351b5afc96c868e051647c2a557",
+      "bytes": 4514
+    },
+    {
+      "filename": "08_policy_aggregate_statistics.csv",
+      "sha256": "5f68e10c33e1f6f676a7a5884deb1beaf1d8d6155658c54405718c2902c1aaa5",
+      "bytes": 2224
+    },
+    {
+      "filename": "09_paired_policy_comparisons.csv",
+      "sha256": "e72b541352bcdcdec668d255be7d9148d4a8e598b5367be9aa5c3b875094f8d7",
+      "bytes": 22824
+    },
+    {
+      "filename": "10_mess_utilization_statistics.csv",
+      "sha256": "7861d491a6ebf23e4a3e314e57585b4f0fa7de8b251f827a715306b55a8ca197",
+      "bytes": 26751
+    }
+  ],
+  "new_paper_CSV_exports": 0,
+  "external_result_contamination_count": 0,
+  "scientific_reexecution_counts": {
+    "Traffic_training": 0,
+    "Traffic_inference": 0,
+    "validation_only_inference": 0,
+    "SUMO": 0,
+    "SCATS_preprocessing": 0,
+    "Safe_ETA_recalibration": 0,
+    "Dijkstra": 0,
+    "MESS_optimization": 0,
+    "Gurobi": 0,
+    "OpenDSS": 0,
+    "Actual_replay": 0,
+    "AIDC_optimization": 0,
+    "B0_B1_B2_B3_rerun": 0
+  },
+  "scientific_reexecution_count": 0,
+  "raw_archive_repeated_scan": false,
+  "archive_member_verification": "Previously verified archive mirror; every final/M1/package JSON used here rehashed against the immutable archive member index",
+  "archive_SHA": "1d57950fd073ead32bcb68a8d65c06ad6023f3d556acc672eae911651438f6d3",
+  "PR42_small_evidence_integration_authorized": true,
+  "PR42_base_head": "23e20665eb1e0864b54fb0589756c2267cf0baa0"
+}
