@@ -1,5 +1,11 @@
 # V41R4 May completion, restoration and local paper-data export
 
+The subsequent [critical-line voltage analysis](critical_line_voltage/README.md)
+compares B0–B3 at fixed B0 pre-Q line/phase/time references. B3 reduces local
+endpoint-voltage differences on all 31 dates, while receiving-end deviation
+from 1 pu increases on average. Primary pre-Q and secondary post-Q results
+are reported separately; the existing service-deferral limitations below remain.
+
 May31 B2 was physically feasible with its frozen AIDC plan and MESS mobility decisions, but its restricted local restoration model was infeasible. The versioned post-DA closure now tries the original local correction first and invokes a deterministic full-physical P/Q fallback only on local-model infeasibility. The completed May campaign contains 31 days × B0/B1/B2/B3 = 124 accepted policy-days.
 
 This is a review snapshot stacked on PR #41 (Actual acceleration), which in turn uses PR #39 (May loop budgets). PR #40 separately records the alpha_BG=1.15 background screen. Earlier work is referenced through those PRs; this PR records the subsequent restoration, campaign completion, monitoring handoff, local archive creation and paper CSV projection.
