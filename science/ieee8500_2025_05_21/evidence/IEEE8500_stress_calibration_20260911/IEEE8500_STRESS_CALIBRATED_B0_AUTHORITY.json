@@ -1,0 +1,90 @@
+{
+  "status": "IEEE8500_STRESS_CALIBRATED_B0_AUTHORITY",
+  "final_authority_valid": true,
+  "source_pu": 1.04,
+  "all_regulator_Vreg_V": 123.5,
+  "alpha8500": 0.5,
+  "target_max_phase_line_loading_pu": 0.85,
+  "target_interpretation": "A priori stressed-but-feasible large-feeder B0 baseline; not a target to exactly reproduce IEEE123 results",
+  "selected_date": "2025-05-21",
+  "selection_rule": "Discard physically infeasible cases, then ascending lexicographic key [abs(max_phase_line_loading_pu-0.85),abs(Vreg_V-125),abs(source_pu-1.05),-alpha]. Use unrounded double-precision metrics with no target/tie rounding. All four key components are frozen. No grid refinement.",
+  "selected_summary": {
+    "source_pu": 1.04,
+    "alpha": 0.5,
+    "feasible": true,
+    "converged_slots": 96,
+    "control_complete_slots": 96,
+    "solver_error_slots": 0,
+    "Vmin_pu": 0.9722875483187227,
+    "Vmax_pu": 1.0411672619770387,
+    "max_phase_line_loading_pu": 0.8487691403696187,
+    "max_transformer_phase_current_pu": 0.2245640292277877,
+    "max_transformer_winding_kva_pu": 0.22946762719182823,
+    "undervoltage_nodes": 0,
+    "overvoltage_nodes": 0,
+    "line_violations": 0,
+    "transformer_current_violations": 0,
+    "transformer_kva_violations": 0,
+    "explicit_snapshot_solves": 96,
+    "fresh_engine_contexts": 1,
+    "elapsed_seconds": 10.893700300017372,
+    "vreg_V": 123.5,
+    "target_line_loading_pu": 0.85,
+    "target_absolute_error_pu": 0.0012308596303812758,
+    "lexicographic_key": [
+      0.0012308596303812758,
+      1.5,
+      0.010000000000000009,
+      -0.5
+    ]
+  },
+  "lexicographic_rank": 1,
+  "feasible_case_count": 51,
+  "canonical_IEEE8500_reproduction": false,
+  "prior_voltage_feasible_compatibility_authority": {
+    "role": "Immutable voltage-feasible compatibility authority",
+    "source_pu": 1.045,
+    "alpha8500": 0.25,
+    "authority": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\IEEE8500_source_grid_compatibility_20260911\\FINAL_OPERATING_POINT_AUTHORITY.json",
+      "sha256": "06307ff47cc57b6031ad86fd1a4c728e12b7a15bfb8e390865a46e120f8ee6d6",
+      "bytes": 2534,
+      "mtime_ns": 1789100673517864000
+    },
+    "evidence_manifest": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\IEEE8500_source_grid_compatibility_20260911\\SOURCE_GRID_EVIDENCE_FREEZE_MANIFEST.json",
+      "sha256": "aa070828da04a7cb8914ec7699006cdd9c56f48e330004a409b0d6ea005b214e",
+      "bytes": 138461,
+      "mtime_ns": 1789100675923017100
+    },
+    "replacement_or_modification": false
+  },
+  "rule_sha256": "8b7967b925269dad17c5dcf9c8e000234e9d320216d0800caf07340a2ac4a7da",
+  "pre_execution_manifest_sha256": "445e57d71fa2e1410a61b4f93eaedfc976822fd5e4e2b6b58c58c535767ffe16",
+  "independent_replay_verification_sha256": "cfbee6f82c795f8c1a719fd1ab4cd5e03f74bf3c42153617acbdc032d736640a",
+  "screen_cases": 100,
+  "screen_slots": 9600,
+  "independent_replay_slots": 96,
+  "unchanged_physical_limits": {
+    "voltage_min_pu": 0.95,
+    "voltage_max_pu": 1.05,
+    "phase_line_current_pu": 1.0,
+    "transformer_phase_current_pu": 1.0,
+    "transformer_winding_total_kva_pu": 1.0,
+    "floating_point_boundary_tolerance": 1e-09
+  },
+  "B1_B2_B3_reads_or_runs": 0,
+  "additional_tuning": 0,
+  "selected_overlay": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\IEEE8500_stress_calibration_20260911\\overlays\\Source_1.0400_Vreg_123.5.dss",
+    "sha256": "38fa8754ec9af5ab817f2a0cc2b8e1107d74bf74e11d2704eaa8f3be8af6760d",
+    "bytes": 286,
+    "mtime_ns": 1789103723960757500
+  },
+  "selected_phase_arrays": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\IEEE8500_stress_calibration_20260911\\screen\\source_1.0400\\vreg_123.5\\alpha_0.50\\B0_ALL_PHASE_ARRAYS.npz",
+    "sha256": "41668fff35e070360d096ba06334b8e0c89809ba584465867d46c56eb073a1e6",
+    "bytes": 19380925,
+    "mtime_ns": 1789104186916498000
+  }
+}
