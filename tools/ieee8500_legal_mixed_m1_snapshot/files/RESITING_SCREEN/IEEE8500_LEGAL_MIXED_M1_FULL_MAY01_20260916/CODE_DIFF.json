@@ -1,0 +1,156 @@
+[
+  {
+    "module": "dayahead.mess_physics",
+    "source": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\mess_physics.py",
+    "source_sha256": "2859bf8124060468d7379f74c9bc0b0f1e6df2e5b4a19774ef00269c1d97cbe3",
+    "override": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\RESITING_SCREEN\\IEEE8500_LEGAL_MIXED_M1_FULL_MAY01_20260916\\overrides\\dayahead\\mess_physics.py",
+    "override_sha256": "b748e0ed45083e4495099bfa6b0ae8e88671a716e82cdce6f7262932f800f628",
+    "changes": [
+      [
+        "range(1, 5)",
+        "range(1, 7)"
+      ]
+    ],
+    "diff": "--- C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\mess_physics.py\n+++ C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_PREFLIGHT_20260913\\overrides\\dayahead\\mess_physics.py\n@@ -9,7 +9,7 @@\n \n \n DT_HOURS = 0.25\n-MESS_IDS = tuple(f\"MESS{index:02d}\" for index in range(1, 5))\n+MESS_IDS = tuple(f\"MESS{index:02d}\" for index in range(1, 7))\n CAPACITY_KWH = 1200.0\n E_MIN_KWH = 440.0\n E_MAX_KWH = 1080.0\n"
+  },
+  {
+    "module": "dayahead.v35.contracts",
+    "source": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v35\\contracts.py",
+    "source_sha256": "fd78857af4fc122a70584e96b3fccc722f01f1e2d5ad393ac585d0f96bfad981",
+    "override": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\RESITING_SCREEN\\IEEE8500_LEGAL_MIXED_M1_FULL_MAY01_20260916\\overrides\\dayahead\\v35\\contracts.py",
+    "override_sha256": "41294d8022ba0d976143a3838ae0db3bffca69f196cad2cbfc53ca408240a0a7",
+    "changes": [
+      [
+        "(\"MESS01\", \"MESS02\", \"MESS03\", \"MESS04\")",
+        "('MESS01', 'MESS02', 'MESS03', 'MESS04', 'MESS05', 'MESS06')"
+      ]
+    ],
+    "diff": "--- C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v35\\contracts.py\n+++ C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_PREFLIGHT_20260913\\overrides\\dayahead\\v35\\contracts.py\n@@ -11,7 +11,7 @@\n V34_CHECKPOINT_HEAD = \"916de691834b3c1098fa2431fe21e4e3193542fb\"\n SLOTS = 96\n RESOLUTION_MINUTES = 15\n-MESS_IDS = (\"MESS01\", \"MESS02\", \"MESS03\", \"MESS04\")\n+MESS_IDS = ('MESS01', 'MESS02', 'MESS03', 'MESS04', 'MESS05', 'MESS06')\n MESS_ORDER = MESS_IDS\n WORK_LIMIT_TIERS = (60.0, 180.0, 300.0)\n SOLVER_SEED = 20260828\n"
+  },
+  {
+    "module": "dayahead.v37.contracts",
+    "source": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\contracts.py",
+    "source_sha256": "28f536726f1ba7e31b3fb465bc90188c1fd47934587c62c65095678070aebe8b",
+    "override": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\RESITING_SCREEN\\IEEE8500_LEGAL_MIXED_M1_FULL_MAY01_20260916\\overrides\\dayahead\\v37\\contracts.py",
+    "override_sha256": "774478d3ab8dfcb30c80a4d5d9d202205d4368383ef2944d9d4752ff9e0ae474",
+    "changes": [
+      [
+        "(\"MESS01\", \"MESS02\", \"MESS03\", \"MESS04\")",
+        "('MESS01', 'MESS02', 'MESS03', 'MESS04', 'MESS05', 'MESS06')"
+      ]
+    ],
+    "diff": "--- C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\contracts.py\n+++ C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_PREFLIGHT_20260913\\overrides\\dayahead\\v37\\contracts.py\n@@ -34,7 +34,7 @@\n BEAM_WIDTH = 2\n BEAM_WIDTH_FALLBACK = 4\n SEED_WIDTH = 2\n-MESS_ORDER = (\"MESS01\", \"MESS02\", \"MESS03\", \"MESS04\")\n+MESS_ORDER = ('MESS01', 'MESS02', 'MESS03', 'MESS04', 'MESS05', 'MESS06')\n \n ARTIFACT_ROOT = Path(\"dayahead/artifacts/v37_may_r4a_per_day_final\")\n STATUS_ROOT = ARTIFACT_ROOT / \"status\"\n"
+  },
+  {
+    "module": "dayahead.v35.execution",
+    "source": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v35\\execution.py",
+    "source_sha256": "dd50172ebc176a638421174c620694bd0f6180d6f714739dc485706ebf90c1da",
+    "override": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\RESITING_SCREEN\\IEEE8500_LEGAL_MIXED_M1_FULL_MAY01_20260916\\overrides\\dayahead\\v35\\execution.py",
+    "override_sha256": "b6dfde6f654ad4031a483b2b715ac7933cea3ef6559d14e50aa0d8b65556c7c1",
+    "changes": [
+      [
+        "(\"STA01\", \"STA12\", \"STA08\", \"STA06\")",
+        "('STA01', 'STA12', 'STA08', 'STA06', 'STA03', 'STA10')"
+      ],
+      [
+        "[E_INITIAL_KWH / CAPACITY_KWH] * 4",
+        "[E_INITIAL_KWH / CAPACITY_KWH] * len(MESS_IDS)"
+      ],
+      [
+        "(96, 4)",
+        "(96, len(MESS_IDS))"
+      ],
+      [
+        "\"terminal_SoC\": (4,)",
+        "\"terminal_SoC\": (len(MESS_IDS),)"
+      ]
+    ],
+    "diff": "--- C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v35\\execution.py\n+++ C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_PREFLIGHT_20260913\\overrides\\dayahead\\v35\\execution.py\n@@ -87,7 +87,7 @@\n # the frozen physical road-distance graph over the 12 station-class nodes.\n # Seed STA01 and lexical tie-breaking are fixed; no electrical or April\n # objective value participates in this selection.\n-MESS_INITIAL = dict(zip(MESS_IDS, (\"STA01\", \"STA12\", \"STA08\", \"STA06\"), strict=True))\n+MESS_INITIAL = dict(zip(MESS_IDS, ('STA01', 'STA12', 'STA08', 'STA06', 'STA03', 'STA10'), strict=True))\n COMMON_RHO_CURRENT_MODEL = \"ANCHOR_GRADIENT_MATCHED_16_FACE_APPARENT_POWER_EPIGRAPH_V1\"\n \n \n@@ -539,7 +539,7 @@\n             \"DA_commitments\": [], \"actual_replays\": [], \"route_identity\": \"PASS\",\n             \"actual_MESS_optimizer_calls\": 0, \"actual_MESS_reroute_calls\": 0,\n             \"actual_route_change_count\": 0,\n-            \"terminal_SoC\": [E_INITIAL_KWH / CAPACITY_KWH] * 4,\n+            \"terminal_SoC\": [E_INITIAL_KWH / CAPACITY_KWH] * len(MESS_IDS),\n         }, availability\n     commitments = trajectory.planned_move_commitments()\n     ledger = CausalityLedger(bundle.issue_time)\n@@ -840,7 +840,7 @@\n             mess_record = atomic_npz(\n                 case_root / \"DAYAHEAD_MESS.npz\",\n                 {\"P_kw\": p, \"Q_kvar\": q, \"energy_kwh\": energy, \"locations\": locations, \"modes\": modes},\n-                {\"P_kw\": (96, 4), \"Q_kvar\": (96, 4), \"energy_kwh\": (96, 4), \"locations\": (96, 4), \"modes\": (96, 4)},\n+                {\"P_kw\": (96, len(MESS_IDS)), \"Q_kvar\": (96, len(MESS_IDS)), \"energy_kwh\": (96, len(MESS_IDS)), \"locations\": (96, len(MESS_IDS)), \"modes\": (96, len(MESS_IDS))},\n                 require_finite=(\"P_kw\", \"Q_kvar\", \"energy_kwh\"),\n             )\n             planning_record = atomic_npz(\n@@ -881,7 +881,7 @@\n             actual_mess_record = atomic_npz(\n                 case_root / \"ACTUAL_MESS.npz\",\n                 {\"PQ_availability\": mess_availability, \"terminal_SoC\": np.asarray(actual_mess[\"terminal_SoC\"])},\n-                {\"PQ_availability\": (96, 4), \"terminal_SoC\": (4,)},\n+                {\"PQ_availability\": (96, len(MESS_IDS)), \"terminal_SoC\": (len(MESS_IDS),)},\n                 require_finite=(\"terminal_SoC\",),\n             )\n             trajectory_path = case_root / \"MESS_TRAJECTORY.json\"\n"
+  },
+  {
+    "module": "dayahead.v28r2.trajectory",
+    "source": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\trajectory.py",
+    "source_sha256": "e87e06b14d94ad7b958fedb7169341065212086c4f1cf81a4b030be155340355",
+    "override": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\RESITING_SCREEN\\IEEE8500_LEGAL_MIXED_M1_FULL_MAY01_20260916\\overrides\\dayahead\\v28r2\\trajectory.py",
+    "override_sha256": "12b4eafc12e5b2ceb5c9df53105ce9a564bf4c3950b362cc0c01264f303f512d",
+    "changes": [
+      [
+        "(96, 4)",
+        "(96, len(self.mess_ids))"
+      ],
+      [
+        "len(self.mess_ids) != 4",
+        "not self.mess_ids or len(set(self.mess_ids)) != len(self.mess_ids)"
+      ]
+    ],
+    "diff": "--- C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\trajectory.py\n+++ C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_PREFLIGHT_20260913\\overrides\\dayahead\\v28r2\\trajectory.py\n@@ -29,12 +29,12 @@\n         expected = {\n             \"pcc_p\": (self.pcc_p_kw, (96, 12)),\n             \"pcc_q\": (self.pcc_q_kvar, (96, 12)),\n-            \"mess_p\": (self.mess_p_kw, (96, 4)),\n-            \"mess_q\": (self.mess_q_kvar, (96, 4)),\n+            \"mess_p\": (self.mess_p_kw, (96, len(self.mess_ids))),\n+            \"mess_q\": (self.mess_q_kvar, (96, len(self.mess_ids))),\n         }\n         if any(np.asarray(array).shape != shape or not np.isfinite(array).all() for array, shape in expected.values()):\n             raise ValueError(\"V28R2_OPENDSS_TRAJECTORY_SHAPE_OR_FINITE\")\n-        if len(self.mess_ids) != 4 or np.asarray(self.mess_locations_96x4).shape != (96, 4):\n+        if not self.mess_ids or len(set(self.mess_ids)) != len(self.mess_ids) or np.asarray(self.mess_locations_96x4).shape != (96, len(self.mess_ids)):\n             raise ValueError(\"V28R2_OPENDSS_MESS_AXIS\")\n         if len(self.source_schedule_sha256) != 64:\n             raise ValueError(\"V28R2_OPENDSS_SCHEDULE_SHA\")\n"
+  },
+  {
+    "module": "dayahead.v37.runner",
+    "source": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\runner.py",
+    "source_sha256": "0ba664e373d69666453d8eaa0429f2701cf5a67217f34b04c01061375f1ef07c",
+    "override": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\RESITING_SCREEN\\IEEE8500_LEGAL_MIXED_M1_FULL_MAY01_20260916\\overrides\\dayahead\\v37\\runner.py",
+    "override_sha256": "6ad0a97f9f0af6a8b8a63a9e8a5751c5b262fc87e080c9f423388771abf81d3a",
+    "changes": [
+      [
+        "mess_index == 4",
+        "mess_index == len(MESS_ORDER)"
+      ],
+      [
+        "range(1, 5)",
+        "range(1, len(MESS_ORDER)+1)"
+      ]
+    ],
+    "diff": "--- C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\runner.py\n+++ C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_PREFLIGHT_20260913\\overrides\\dayahead\\v37\\runner.py\n@@ -584,7 +584,7 @@\n         ):\n             return\n         mess_index = int(payload.get(\"mess_index\", 1))\n-        final_full = event == \"FULL_MILP\" and mess_index == 4\n+        final_full = event == \"FULL_MILP\" and mess_index == len(MESS_ORDER)\n         units = BEAM_PROGRESS_BASE[case] + mess_index - 1 + int(final_full)\n         stage = f\"{case}_FINAL_FULL\" if final_full else f\"{case}_MESS{mess_index:02d}\"\n         write_status(\n@@ -751,7 +751,7 @@\n             root = _beam_root(\n                 repo, execution_fingerprint_sha256, day, case, width,\n             )\n-            count = sum((root / f\"STAGE_{index}.json\").is_file() for index in range(1, 5))\n+            count = sum((root / f\"STAGE_{index}.json\").is_file() for index in range(1, len(MESS_ORDER)+1))\n             if count >= completed:\n                 completed, current_width = count, width\n         stage = min(4, completed + 1)\n"
+  },
+  {
+    "module": "dayahead.v35.campaign",
+    "source": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v35\\campaign.py",
+    "source_sha256": "723ec96450b93d65e377033c30f0d757db13939461e7833ff12b4fda757a9bcc",
+    "override": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\RESITING_SCREEN\\IEEE8500_LEGAL_MIXED_M1_FULL_MAY01_20260916\\overrides\\dayahead\\v35\\campaign.py",
+    "override_sha256": "20b29e316c0ad6bccd5bee5117c80966105ce0f9e82aca7cd36e3b083f79c36c",
+    "changes": [
+      [
+        "[\"MESS01\", \"MESS02\", \"MESS03\", \"MESS04\"]",
+        "['MESS01', 'MESS02', 'MESS03', 'MESS04', 'MESS05', 'MESS06']"
+      ]
+    ],
+    "diff": "--- C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v35\\campaign.py\n+++ C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_PREFLIGHT_20260913\\overrides\\dayahead\\v35\\campaign.py\n@@ -513,7 +513,7 @@\n         \"selected_correction_family\": correction[\"correction\"][\"family\"],\n         \"correction_numeric_SHA\": correction[\"correction_sha256\"],\n         \"correction_file_SHA\": sha256_file(artifact_root / \"V35_SELECTED_AC_CORRECTION.json\"),\n-        \"MESS_vehicle_order\": [\"MESS01\", \"MESS02\", \"MESS03\", \"MESS04\"],\n+        \"MESS_vehicle_order\": ['MESS01', 'MESS02', 'MESS03', 'MESS04', 'MESS05', 'MESS06'],\n         \"MESS_WorkLimit_policy\": [60, 180, 300], \"solver_seed\": 20260828,\n         \"Actual_AIDC_firewall\": \"FROZEN_ZERO_GRID_FEEDBACK\",\n         \"Actual_MESS_firewall\": \"FROZEN_ROUTE_DESTINATION_DEPARTURE_NO_OPTIMIZATION_NO_REROUTE\",\n"
+  },
+  {
+    "module": "dayahead.v36.certification",
+    "source": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v36\\certification.py",
+    "source_sha256": "c1bba2c3b05bb8fef785802b604f78021a873e5426d4143dd798fc58f091c3ea",
+    "override": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\RESITING_SCREEN\\IEEE8500_LEGAL_MIXED_M1_FULL_MAY01_20260916\\overrides\\dayahead\\v36\\certification.py",
+    "override_sha256": "63d60930c026e5d0b3a52181dd4426318c4416ade6624676931ee772b915cd37",
+    "changes": [
+      [
+        "(\"MESS01\", \"MESS02\", \"MESS03\", \"MESS04\")",
+        "('MESS01', 'MESS02', 'MESS03', 'MESS04', 'MESS05', 'MESS06')"
+      ],
+      [
+        "[\"MESS01\", \"MESS02\", \"MESS03\", \"MESS04\"]",
+        "['MESS01', 'MESS02', 'MESS03', 'MESS04', 'MESS05', 'MESS06']"
+      ],
+      [
+        "range(1, 5)",
+        "range(1, 7)"
+      ]
+    ],
+    "diff": "--- C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v36\\certification.py\n+++ C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_PREFLIGHT_20260913\\overrides\\dayahead\\v36\\certification.py\n@@ -176,7 +176,7 @@\n         search_rows: list[dict[str, Any]] = []\n         solver_rows: list[dict[str, Any]] = []\n         state_sha = {f\"{case}-ROOT\": canonical_sha256({\"case\": case, \"root\": True})}\n-        for stage_index in range(1, 5):\n+        for stage_index in range(1, 7):\n             stage = _read_json(cache_root / f\"STAGE_{stage_index}.json\")\n             retained_ids = {row[\"beam_state_id\"] for row in stage[\"retained_states\"]}\n             for state in (*stage[\"retained_states\"], *stage[\"pruned_states\"]):\n@@ -367,7 +367,7 @@\n \n def _relocations(frame: pd.DataFrame) -> dict[str, int]:\n     counts = Counter(str(value) for value in frame[\"vehicle_id\"])\n-    return {vehicle: int(counts.get(vehicle, 0)) for vehicle in (\"MESS01\", \"MESS02\", \"MESS03\", \"MESS04\")}\n+    return {vehicle: int(counts.get(vehicle, 0)) for vehicle in ('MESS01', 'MESS02', 'MESS03', 'MESS04', 'MESS05', 'MESS06')}\n \n \n def _case_metrics(repo: Path, case: str) -> dict[str, Any]:\n@@ -604,7 +604,7 @@\n         **_authority_header(repo),\n         \"artifact_id\": \"V36_APR1_20_CAMPAIGN_CONTRACT_V1\",\n         \"dates\": list(CALIBRATION_DATES), \"date_parallelism\": 4,\n-        \"within_date_MESS_sequence\": [\"MESS01\", \"MESS02\", \"MESS03\", \"MESS04\"],\n+        \"within_date_MESS_sequence\": ['MESS01', 'MESS02', 'MESS03', 'MESS04', 'MESS05', 'MESS06'],\n         \"within_beam_branch_parallelism\": \"DISABLED\", \"execution_status\": \"NOT_STARTED\",\n     })\n     compute = _read_json(repo / RAW_ROOT / PASS_ID / APR01 / \"summary/COMPUTE_SUMMARY.json\")\n"
+  },
+  {
+    "module": "dayahead.v40a.contracts",
+    "source": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40a\\contracts.py",
+    "source_sha256": "866f890f53bc622df5402161dc102476aac3378b5478f8b0a7244b1ce1f0e0e9",
+    "override": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\RESITING_SCREEN\\IEEE8500_LEGAL_MIXED_M1_FULL_MAY01_20260916\\overrides\\dayahead\\v40a\\contracts.py",
+    "override_sha256": "05f796c5e11132e0df0092df7a6ab12e0f17a607f254b16cea058f34001fac57",
+    "changes": [
+      [
+        "INHERITED_FOUR_VEHICLE_ADAPTIVE_BEAM_WITH_K_FALLBACK",
+        "INHERITED_SIX_VEHICLE_ADAPTIVE_BEAM_WITH_K_FALLBACK"
+      ]
+    ],
+    "diff": "--- C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40a\\contracts.py\n+++ C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_PREFLIGHT_20260913\\overrides\\dayahead\\v40a\\contracts.py\n@@ -8,7 +8,7 @@\n \n CONTRACTS={\n  'V40A_METHOD_CONTRACT.json':{'method':METHOD,'paper_name':'Bounded Iterative AIDC–MESS Co-Optimization','sequence':SEQUENCE,\n-  'feedback_rounds':1,'full_fleet_search_campaign_calls':1,'internal_fleet_search':'INHERITED_FOUR_VEHICLE_ADAPTIVE_BEAM_WITH_K_FALLBACK',\n+  'feedback_rounds':1,'full_fleet_search_campaign_calls':1,'internal_fleet_search':'INHERITED_SIX_VEHICLE_ADAPTIVE_BEAM_WITH_K_FALLBACK',\n   'global_joint_optimality_claim':False,'convergence_claim':False,'monolithic_claim':False,'tolerance':TOLERANCE,\n   'J':'rho_max over all inherited Planning line/phase/time rows','Fresh_inside_loop':False,'Actual_inside_loop':False,\n   'development_day':DEVELOPMENT_DAY,'May_result_based_tuning':0,'full_May_launch':False},\n"
+  }
+]

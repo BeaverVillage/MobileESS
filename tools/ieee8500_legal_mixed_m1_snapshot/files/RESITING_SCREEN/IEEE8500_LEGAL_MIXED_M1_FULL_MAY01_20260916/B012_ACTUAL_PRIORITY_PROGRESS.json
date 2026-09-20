@@ -1,0 +1,176 @@
+{
+  "updated_unix": 1789630242.462357,
+  "rows": [
+    {
+      "policy": "B0",
+      "Fresh": {
+        "Vmin_pu": 0.9510135168113889,
+        "Vmax_pu": 1.0417380031799024,
+        "max_phase_line_loading_pu": 0.9834285677838648,
+        "max_transformer_phase_current_pu": 0.2831852439806992,
+        "max_transformer_winding_kva_pu": 0.2876886804261979
+      },
+      "Actual_final": {
+        "Vmin_pu": 0.9527158061202823,
+        "Vmax_pu": 1.041068074617069,
+        "max_phase_line_loading_pu": 0.9815501233047021,
+        "max_transformer_phase_current_pu": 0.27629267156318954,
+        "max_transformer_winding_kva_pu": 0.28061702369002867,
+        "voltage_violations": 0,
+        "line_violations": 0,
+        "transformer_current_violations": 0,
+        "transformer_kVA_violations": 0,
+        "converged_slots": 96,
+        "controls_settled_slots": 96,
+        "AC_feasible": true
+      },
+      "Actual_before_QSAFE": {
+        "validation_scope": "REALIZED_OPERATION_AC",
+        "Vmin_pu": 0.9527158061202823,
+        "Vmax_pu": 1.041068074617069,
+        "max_phase_line_loading_pu": 0.9815501233047021,
+        "max_transformer_phase_current_pu": 0.27629267156318954,
+        "max_transformer_winding_kva_pu": 0.28061702369002867,
+        "voltage_violations": 0,
+        "line_violations": 0,
+        "transformer_current_violations": 0,
+        "transformer_kVA_violations": 0,
+        "converged_slots": 96,
+        "controls_settled_slots": 96,
+        "AC_feasible": true
+      }
+    },
+    {
+      "policy": "B1",
+      "Fresh": {
+        "Vmin_pu": 0.9523386139777336,
+        "Vmax_pu": 1.0412323604397373,
+        "max_phase_line_loading_pu": 0.9817357673991524,
+        "max_transformer_phase_current_pu": 0.28205082204604065,
+        "max_transformer_winding_kva_pu": 0.28663593494771583
+      },
+      "Actual_final": {
+        "Vmin_pu": 0.9542782693267013,
+        "Vmax_pu": 1.0413236559168855,
+        "max_phase_line_loading_pu": 0.9800703763390655,
+        "max_transformer_phase_current_pu": 0.2753854681345212,
+        "max_transformer_winding_kva_pu": 0.27984481496183417,
+        "voltage_violations": 0,
+        "line_violations": 0,
+        "transformer_current_violations": 0,
+        "transformer_kVA_violations": 0,
+        "converged_slots": 96,
+        "controls_settled_slots": 96,
+        "AC_feasible": true
+      },
+      "Actual_before_QSAFE": {
+        "validation_scope": "REALIZED_OPERATION_AC",
+        "Vmin_pu": 0.9542782693267013,
+        "Vmax_pu": 1.0413236559168855,
+        "max_phase_line_loading_pu": 0.9800703763390655,
+        "max_transformer_phase_current_pu": 0.2753854681345212,
+        "max_transformer_winding_kva_pu": 0.27984481496183417,
+        "voltage_violations": 0,
+        "line_violations": 0,
+        "transformer_current_violations": 0,
+        "transformer_kVA_violations": 0,
+        "converged_slots": 96,
+        "controls_settled_slots": 96,
+        "AC_feasible": true
+      }
+    },
+    {
+      "policy": "B2",
+      "Fresh": {
+        "Vmin_pu": 0.9500291317173774,
+        "Vmax_pu": 1.0419076306516994,
+        "max_phase_line_loading_pu": 0.9908030235623484,
+        "max_transformer_phase_current_pu": 0.5502837049151355,
+        "max_transformer_winding_kva_pu": 0.5462771562928552
+      },
+      "Actual_final": null,
+      "Actual_before_QSAFE": {
+        "validation_scope": "REALIZED_OPERATION_AC",
+        "Vmin_pu": 0.9516531140875533,
+        "Vmax_pu": 1.0410922655291335,
+        "max_phase_line_loading_pu": 1.014294076389173,
+        "max_transformer_phase_current_pu": 0.5495965591668703,
+        "max_transformer_winding_kva_pu": 0.5464342112897915,
+        "voltage_violations": 0,
+        "line_violations": 6,
+        "transformer_current_violations": 0,
+        "transformer_kVA_violations": 0,
+        "converged_slots": 96,
+        "controls_settled_slots": 96,
+        "AC_feasible": false
+      }
+    }
+  ],
+  "B3": "PAUSED_USER",
+  "actual_root": "Actual_B012",
+  "B2_status": "QSAFE_RUNNING_AFTER_NONCONVERGENCE_ERROR_HANDLING_FIX",
+  "B2_DA_slot75": 0.8949734708713765,
+  "new_bottleneck": {
+    "slot": 32,
+    "line": "Line.tpx226308719b0",
+    "rho": 0.9908030235623484,
+    "STA08_P_kW": 12.8698,
+    "STA08_Q_kvar": -14.8514
+  },
+  "counterfactual": {
+    "diagnostic_only": true,
+    "original_prefix_preserved": true,
+    "only_slot32_PQ_changed": true,
+    "production_decision_unchanged": true,
+    "not_a_feasible_96slot_schedule": true,
+    "results": [
+      {
+        "mode": "unchanged",
+        "slot": 32,
+        "maximum_line": 0.9908030235623484,
+        "critical_line": "Line.tpx226308719b0|t2|sx3027670b.1.2|node1",
+        "STA08_line": 0.9908030235623484,
+        "Vmin": 0.9691517679427926,
+        "Vmax": 1.0399999865417215,
+        "converged": true,
+        "settled": true
+      },
+      {
+        "mode": "zero_STA08_PQ",
+        "slot": 32,
+        "maximum_line": 0.9158558197559983,
+        "critical_line": "Line.tpx260595c0|t2|sx2767340c.1.2|node2",
+        "STA08_line": 0.7400209420723866,
+        "Vmin": 0.9684156838578782,
+        "Vmax": 1.0399999866713256,
+        "converged": true,
+        "settled": true
+      },
+      {
+        "mode": "zero_STA08_Q",
+        "slot": 32,
+        "maximum_line": 0.9163357481798596,
+        "critical_line": "Line.tpx260595c0|t2|sx2767340c.1.2|node2",
+        "STA08_line": 0.18258781747340677,
+        "Vmin": 0.9686624294805359,
+        "Vmax": 1.0399999864574336,
+        "converged": true,
+        "settled": true
+      },
+      {
+        "mode": "zero_STA08_P",
+        "slot": 32,
+        "maximum_line": 1.2481680396734471,
+        "critical_line": "Line.tpx226308719b0|t2|sx3027670b.1.2|node1",
+        "STA08_line": 1.2481680396734471,
+        "Vmin": 0.9606264491231017,
+        "Vmax": 1.0399999867565317,
+        "converged": true,
+        "settled": true
+      }
+    ]
+  },
+  "cause": "Old peak relieved but a new STA08 branch peak dominates; affine objective is not exact AC maximum. Restoration passed hard constraints without any policy-ordering gate.",
+  "infrastructure_and_scales_unchanged": true,
+  "B0_DA_peak": 0.9834285677838648
+}
