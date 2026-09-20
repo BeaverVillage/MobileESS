@@ -1,0 +1,162 @@
+[
+  {
+    "name": "01_DAILY_1R_VS_2R_SUMMARY.csv",
+    "rows": 31,
+    "columns": [
+      "date",
+      "B3_1R_DA_rho_max",
+      "B3_2R_DA_rho_max",
+      "DA_delta_1R_minus_2R",
+      "B3_1R_Fresh_rho_max",
+      "B3_2R_Fresh_rho_max",
+      "Fresh_delta_1R_minus_2R",
+      "B3_1R_Actual_rho_max",
+      "B3_2R_Actual_rho_max",
+      "Actual_delta_1R_minus_2R",
+      "1R_Actual_Vmin",
+      "2R_Actual_Vmin",
+      "1R_Actual_Vmax",
+      "2R_Actual_Vmax",
+      "1R_critical_line",
+      "2R_critical_line",
+      "1R_critical_slot",
+      "2R_critical_slot",
+      "1R_feasible",
+      "2R_feasible",
+      "2R_incremental_runtime_s",
+      "1R_critical_phase",
+      "2R_critical_phase"
+    ],
+    "artifact_cell_roundtrip": "PASS"
+  },
+  {
+    "name": "02_2ROUND_STAGE_SUMMARY.csv",
+    "rows": 31,
+    "columns": [
+      "date",
+      "A1_2_rho",
+      "M1_2_rho",
+      "A2_2_rho",
+      "M2_2_rho",
+      "A1_2_runtime_s",
+      "M1_2_runtime_s",
+      "A2_2_runtime_s",
+      "M2_2_runtime_s",
+      "A1_2_job_decision_changes",
+      "M1_2_route_changes",
+      "A2_2_job_decision_changes",
+      "M2_2_PQ_changes",
+      "A1_2_P1",
+      "A1_2_P2",
+      "A1_2_P3",
+      "A1_2_P4",
+      "A1_2_P5",
+      "A2_2_P1",
+      "A2_2_P2",
+      "A2_2_P3",
+      "A2_2_P4",
+      "A2_2_P5",
+      "A2_candidate_accepted",
+      "M2_candidate_accepted"
+    ],
+    "artifact_cell_roundtrip": "PASS"
+  },
+  {
+    "name": "03_ACTUAL_LINE_LOADING_TIMESERIES.csv",
+    "rows": 2976,
+    "columns": [
+      "date",
+      "slot",
+      "timestamp_AEST",
+      "B3_1R_actual_rho_max",
+      "B3_2R_actual_rho_max",
+      "B3_1R_critical_line",
+      "B3_2R_critical_line",
+      "B0_actual_rho_max",
+      "B1_actual_rho_max",
+      "B2_actual_rho_max",
+      "B3_1R_critical_phase",
+      "B3_2R_critical_phase"
+    ],
+    "artifact_cell_roundtrip": "PASS"
+  },
+  {
+    "name": "04_ACTUAL_VOLTAGE_TIMESERIES.csv",
+    "rows": 2976,
+    "columns": [
+      "date",
+      "slot",
+      "timestamp_AEST",
+      "1R_Vmin",
+      "1R_Vmax",
+      "2R_Vmin",
+      "2R_Vmax"
+    ],
+    "artifact_cell_roundtrip": "PASS"
+  },
+  {
+    "name": "05_MESS_2ROUND_TRAJECTORY.csv",
+    "rows": 11904,
+    "columns": [
+      "date",
+      "slot",
+      "timestamp_AEST",
+      "MESS_id",
+      "station_or_location",
+      "connected",
+      "DA_P_kW",
+      "DA_Q_kvar",
+      "Actual_P_kW",
+      "Actual_Q_kvar",
+      "SOC_kWh",
+      "DA_SOC_kWh",
+      "route_or_leg",
+      "DA_station_or_location",
+      "DA_mode"
+    ],
+    "artifact_cell_roundtrip": "PASS"
+  },
+  {
+    "name": "06_AIDC_2ROUND_TRAJECTORY.csv",
+    "rows": 35712,
+    "columns": [
+      "date",
+      "slot",
+      "timestamp_AEST",
+      "AIDC_id",
+      "IT_power_kW",
+      "GPU_or_workload_quantity",
+      "flexible_workload",
+      "fixed_workload",
+      "stage"
+    ],
+    "artifact_cell_roundtrip": "PASS"
+  },
+  {
+    "name": "07_ROUND2_DECISION_CHANGES.csv",
+    "rows": 44,
+    "columns": [
+      "date",
+      "decision_type",
+      "entity_id",
+      "before_1R",
+      "after_2R",
+      "delta",
+      "slot",
+      "timestamp_AEST"
+    ],
+    "artifact_cell_roundtrip": "PASS"
+  },
+  {
+    "name": "08_PAPER_AGGREGATE_METRICS.csv",
+    "rows": 19,
+    "columns": [
+      "metric",
+      "B3_1R",
+      "B3_2R",
+      "absolute_change",
+      "relative_change_percent"
+    ],
+    "artifact_cell_roundtrip": "PASS"
+  }
+]
