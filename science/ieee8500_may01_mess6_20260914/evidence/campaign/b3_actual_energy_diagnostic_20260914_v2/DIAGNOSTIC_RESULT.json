@@ -1,0 +1,29 @@
+{
+  "status": "REPRODUCED",
+  "error": "ReplayError('ACTUAL_TRAVEL_ENERGY_BOUND_FAILURE')",
+  "traceback": "Traceback (most recent call last):\n  File \"D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_B2B3_20260913\\diagnose_b3_actual_energy.py\", line 24, in <module>\n    binding.replay_fleet(SOURCE_REPO,dict(day='2025-05-01',case='B3',final_PQ_source=str(H/'actual_B3/B3/FROZEN_MESS_COMMANDS.json')))\n  File \"D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_B2B3_20260913\\actual_binding.py\", line 32, in replay_fleet\n    result=gating.replay(commands,moves,energies,initial,project_command,capacity_kwh=1200.,e_min=440.,e_max=1080.,pcs_kva=400.,eta_charge=.95,eta_discharge=.95,dt_hours=.25)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_B2B3_20260913\\diagnose_b3_actual_energy.py\", line 19, in capture\n    return original(commands,moves,initial_energy,initial_locations,traced,**kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_B2B3_20260913\\availability_gating.py\", line 73, in replay\n    projected = project_command(0. if blocked_nonzero else c['p_kw'],\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_B2B3_20260913\\diagnose_b3_actual_energy.py\", line 15, in traced\n    row=project_command(*args,**kw);history.append(dict(**context,result=row));return row\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\mess_replay.py\", line 45, in project_command\n    raise ReplayError(\"ACTUAL_TRAVEL_ENERGY_BOUND_FAILURE\")\ndayahead.v40d_actual.contracts.ReplayError: ACTUAL_TRAVEL_ENERGY_BOUND_FAILURE\n",
+  "scheduling_optimization_calls": 0,
+  "AC_calls": 0,
+  "source_records": [
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_B2B3_20260913\\B3\\FINAL_AUTHORITY.json",
+      "sha256": "2bfcd0bbb8b60456b248a184217421fea0c0bd18fbcfa2510806d96edd866ed8",
+      "bytes": 2628167
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_B2B3_20260913\\availability_gating.py",
+      "sha256": "dc492e2d1858f1d9ed8e1799ee3bbf9d582db16cf1ccf08f3d922be067f3f846",
+      "bytes": 5921
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_B2B3_20260913\\actual_binding.py",
+      "sha256": "ef8c060f5a7118b4802192609a71e9749659039d757a385e52d08e63cb8d4584",
+      "bytes": 3400
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\mess_replay.py",
+      "sha256": "de2999f98aa7823e81970d93099821331bfc8f517802a2e86cf30079481a0ac8",
+      "bytes": 6637
+    }
+  ]
+}

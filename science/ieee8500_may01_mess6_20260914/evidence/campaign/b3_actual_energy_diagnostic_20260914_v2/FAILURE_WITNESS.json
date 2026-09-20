@@ -1,0 +1,1698 @@
+{
+  "error": "ReplayError('ACTUAL_TRAVEL_ENERGY_BOUND_FAILURE')",
+  "vehicle": "MESS06",
+  "slot": 32,
+  "command": {
+    "mess_id": "MESS06",
+    "slot": 32,
+    "service_id": null,
+    "p_kw": 0.0,
+    "q_kvar": 0.0,
+    "departure_slot": 32,
+    "origin_service_id": "STA10",
+    "destination_service_id": "IDC09",
+    "route_link_ids": [
+      "RL_24_39_01",
+      "RL_39_21_03",
+      "RL_21_09_02"
+    ],
+    "connection_ready_slot": 34,
+    "mode": "TRANSIT",
+    "battery_energy_kwh": 450.92167222093497,
+    "soc_fraction": 0.37576806018411246
+  },
+  "starting": [
+    {
+      "route_link_ids": [
+        "RL_24_39_01",
+        "RL_39_21_03",
+        "RL_21_09_02"
+      ],
+      "route_SHA": "c721e0124825019a079ebef91e0ecc984fac93ff3566d4a5b71bd9cb3a2f227c",
+      "departure_slot": 32,
+      "actual_eta_seconds": 843.1839967809238,
+      "actual_arrival_slot": 32.93687110753436,
+      "actual_connection_ready_slot": 34,
+      "actual_travel_energy_kWh": 10.922985413328822,
+      "link_entries": [
+        {
+          "link_id": "RL_24_39_01",
+          "entry_step5": 96,
+          "travel_seconds": 563.2245995794992
+        },
+        {
+          "link_id": "RL_39_21_03",
+          "entry_step5": 97,
+          "travel_seconds": 175.53717567262217
+        },
+        {
+          "link_id": "RL_21_09_02",
+          "entry_step5": 98,
+          "travel_seconds": 104.42222152880238
+        }
+      ],
+      "mess_id": "MESS06",
+      "origin_service_id": "STA10",
+      "destination_service_id": "IDC09",
+      "frozen_route_SHA": "c721e0124825019a079ebef91e0ecc984fac93ff3566d4a5b71bd9cb3a2f227c",
+      "physics_contract_SHA": "c58710f5ca3f5fe0bd6bbced65293e0b5548e882a816a3e0d3648166569a42e0",
+      "route_origin_destination_identity": "PASS",
+      "frozen_command_source": {
+        "path": "D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_B2B3_20260913\\actual_B3\\B3\\FROZEN_MESS_COMMANDS.json",
+        "sha256": "e832db9d7aad04cd64299c0983140630ea5e98847cbe989a1969574f22e40e55"
+      },
+      "actual_traffic_source": {
+        "bytes": 10751770,
+        "exists": true,
+        "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_sumo\\research_pipeline\\08_production_5min_validated_stage25f\\year=2025\\date=2025-05-01\\link_tt_5min_24h.parquet",
+        "sha256": "f03eb5fe9779d77b6676ec323ac1ec6a5191bee730159d12a262db87fcfbd7bc"
+      },
+      "route_graph_SHA": "658fb2e56867a50597e9a21899748d8171439deda852e7db4f3339a99f71dd3d",
+      "planned_departure_slot": 32,
+      "actual_departure_slot": 32,
+      "planned_connection_ready_slot": 34,
+      "departure_shift_slots": 0,
+      "frozen_visit_order": 0
+    }
+  ],
+  "location": "STA10",
+  "physical": false,
+  "allowed": false,
+  "p_cmd": 0.0,
+  "q_cmd": 0.0,
+  "energy_before": 450.9216722210126,
+  "projection": {
+    "connected": false,
+    "travel_energy": 10.922985413328822,
+    "e_min": 440.0,
+    "e_max": 1080.0,
+    "pcs_kva": 400.0,
+    "eta_charge": 0.95,
+    "eta_discharge": 0.95,
+    "dt_hours": 0.25
+  },
+  "available_energy": 439.9986868076838,
+  "energy_shortfall": 0.0013131923162177372,
+  "prior_vehicle_rows": [
+    {
+      "vehicle": "MESS06",
+      "slot": 0,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 0,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 760.0,
+        "soc_fraction": 0.6333333333333333
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 760.0,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 760.0,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 760.0
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 1,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 1,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 760.0,
+        "soc_fraction": 0.6333333333333333
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 760.0,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 760.0,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 760.0
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 2,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 2,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 760.0,
+        "soc_fraction": 0.6333333333333333
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 760.0,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 760.0,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 760.0
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 3,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 3,
+        "service_id": "STA10",
+        "p_kw": 300.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 760.0,
+        "soc_fraction": 0.6333333333333333
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 300.0,
+      "q_cmd": 0.0,
+      "energy_before": 760.0,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 300.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 300.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 760.0,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 681.0526315789474
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 4,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 4,
+        "service_id": "STA10",
+        "p_kw": 300.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 681.0526315790526,
+        "soc_fraction": 0.5675438596492105
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 300.0,
+      "q_cmd": 0.0,
+      "energy_before": 681.0526315789474,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 300.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 300.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 681.0526315789474,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 602.1052631578948
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 5,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 5,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 602.105263158,
+        "soc_fraction": 0.501754385965
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 602.1052631578948,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 602.1052631578948,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 602.1052631578948
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 6,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 6,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 602.105263158,
+        "soc_fraction": 0.501754385965
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 602.1052631578948,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 602.1052631578948,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 602.1052631578948
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 7,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 7,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 602.105263158,
+        "soc_fraction": 0.501754385965
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 602.1052631578948,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 602.1052631578948,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 602.1052631578948
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 8,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 8,
+        "service_id": "STA10",
+        "p_kw": 300.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 602.105263158,
+        "soc_fraction": 0.501754385965
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 300.0,
+      "q_cmd": 0.0,
+      "energy_before": 602.1052631578948,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 300.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 300.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 602.1052631578948,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 523.1578947368422
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 9,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 9,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 523.157894737,
+        "soc_fraction": 0.43596491228083334
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 523.1578947368422,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 523.1578947368422,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 523.1578947368422
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 10,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 10,
+        "service_id": "STA10",
+        "p_kw": 16.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 523.157894737,
+        "soc_fraction": 0.43596491228083334
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 16.0,
+      "q_cmd": 0.0,
+      "energy_before": 523.1578947368422,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 16.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 16.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 523.1578947368422,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 518.9473684210527
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 11,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 11,
+        "service_id": "STA10",
+        "p_kw": 300.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 518.947368421,
+        "soc_fraction": 0.4324561403508333
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 300.0,
+      "q_cmd": 0.0,
+      "energy_before": 518.9473684210527,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 300.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 300.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 518.9473684210527,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 12,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 12,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 13,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 13,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 14,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 14,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 15,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 15,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 16,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 16,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 112.47801316,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 112.47801316,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 112.47801316,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 112.47801316,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 17,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 17,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 18,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 18,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 19,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 19,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 20,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 20,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 46.18349178,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 46.18349178,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 46.18349178,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 46.18349178,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 21,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 21,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 45.63517326,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 45.63517326,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 45.63517326,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 45.63517326,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 22,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 22,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 23,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 23,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 24,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 24,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 25,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 25,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 26,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 26,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 151.323887202,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 151.323887202,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 151.323887202,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 151.323887202,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 27,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 27,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 89.774946442,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 89.774946442,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 89.774946442,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 89.774946442,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 28,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 28,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 29,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 29,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 440.0000000000001
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 30,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 30,
+        "service_id": "STA10",
+        "p_kw": -45.985988299,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 440.0,
+        "soc_fraction": 0.36666666666666664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": -45.985988299,
+      "q_cmd": 0.0,
+      "energy_before": 440.0000000000001,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": -45.985988299,
+        "Q_CMD": 0.0,
+        "P_EXEC": -45.985988299,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 440.0000000000001,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 450.9216722210126
+      }
+    },
+    {
+      "vehicle": "MESS06",
+      "slot": 31,
+      "command": {
+        "mess_id": "MESS06",
+        "slot": 31,
+        "service_id": "STA10",
+        "p_kw": 0.0,
+        "q_kvar": 0.0,
+        "departure_slot": null,
+        "origin_service_id": null,
+        "destination_service_id": null,
+        "route_link_ids": [],
+        "connection_ready_slot": null,
+        "mode": "CONNECTED",
+        "battery_energy_kwh": 450.921672221,
+        "soc_fraction": 0.37576806018416664
+      },
+      "starting": [],
+      "location": "STA10",
+      "physical": true,
+      "allowed": true,
+      "p_cmd": 0.0,
+      "q_cmd": 0.0,
+      "energy_before": 450.9216722210126,
+      "projection": {
+        "connected": true,
+        "travel_energy": 0,
+        "e_min": 440.0,
+        "e_max": 1080.0,
+        "pcs_kva": 400.0,
+        "eta_charge": 0.95,
+        "eta_discharge": 0.95,
+        "dt_hours": 0.25
+      },
+      "result": {
+        "P_CMD": 0.0,
+        "Q_CMD": 0.0,
+        "P_EXEC": 0.0,
+        "Q_EXEC": 0.0,
+        "P_CURTAILED": 0.0,
+        "Q_CURTAILED": 0.0,
+        "curtailment_reason": [
+          "EXECUTED"
+        ],
+        "energy_before_kWh": 450.9216722210126,
+        "travel_energy_kWh": 0,
+        "energy_after_kWh": 450.9216722210126
+      }
+    }
+  ]
+}
