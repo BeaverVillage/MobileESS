@@ -1,0 +1,68 @@
+{
+  "status": "FROZEN_BEFORE_SEARCH",
+  "version": "QSAFE_V2_LEGACY_EXACT_DEVIATION_SHELL_V1",
+  "date": "2025-05-01",
+  "slot_zero_based": 43,
+  "slot_one_based": 44,
+  "connected": 6,
+  "evaluator": "Original full chronological clean OpenDSS context 0..t for every trial; checkpoint evaluator prohibited",
+  "Q1": "Complete first feasible deviation shell; exact floating objective equality; lexicographic tie-break",
+  "Q2": {
+    "name": "existing local_refinement SLSQP",
+    "rule": {
+      "max_starts": 4,
+      "start_rule": "Best exact-feasible candidates by squared DA-Q deviation, or lowest-penalty points if none feasible; unit-coordinate separation >0.025",
+      "solver": "SLSQP",
+      "objective": "0.5*sum(((Q-Q_DA)/400)^2)",
+      "maxiter": 75,
+      "ftol": 1e-10,
+      "finite_difference_step_kvar": 0.25,
+      "derivative": "Bound-aware central difference of exact AC constraints; analytic objective gradient"
+    }
+  },
+  "no_global_candidate_or_time_cap": true,
+  "workers": 4,
+  "physical_semantics_unchanged": true,
+  "files": [
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_B2B3_20260913\\B2\\FINAL_AUTHORITY.json",
+      "sha256": "b879a8bb06fb84c077344d668fa92f08bab659a09744b378a591e240bf75c688"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_B2B3_20260913\\actual_B2\\B2\\ACTUAL_INPUTS.npz",
+      "sha256": "0ce45dc7232e043e7183a8842d2f2ef27e1319cac5de65eeba1ab575a89deeea"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_B2B3_20260913\\actual_B2\\B2\\ACTUAL_MESS_AUDIT.json",
+      "sha256": "7002f5a55af3231ba6ab7972524cc7c7a7d08f9da83caca77c1a75389478f469"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_B2B3_20260913\\actual_B2\\B2\\ACTUAL_MESS_TIMESERIES.parquet",
+      "sha256": "c66801a20f5897bf5c41e9953a050a6115e8d10e4f5ee6049702f736b7d501e1"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_B2B3_20260913\\electrical_engine.py",
+      "sha256": "32029bf9cac7c099ec12995636fbe3e82b154fec73c1f22d18d0e182215664f3"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_QSAFE_V2_LEGACY_SHELL_20260913\\shared\\qsafe_shell.py",
+      "sha256": "04448962bf46b33a15c6350aecd7ac3bd6efe763d1e910e924c5f682a0f39865"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_QSAFE_V2_LEGACY_SHELL_20260913\\legacy_slot.py",
+      "sha256": "23763c590dab706c6064add6e74608c47dec63b5153b0f454446fecd9fcf7722"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_QSAFE_V2_LEGACY_SHELL_20260913\\slot_runner.py",
+      "sha256": "4ef8306d63d8f13aa42ca211fe362e923dd45ad1cf732c3c302f8bd3cc33410b"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_actual_eta95_qsafe_robust_v2\\METHOD_FREEZE.json",
+      "sha256": "710a50cd439a9bb42cc8e6ea77b47eb1a5536c37cef894456a0859aeae9db368"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_actual_eta95_qsafe_robust_v2\\frozen_code\\qsafe.py",
+      "sha256": "68bc70e893dee454405cf99dc3fb99e96dd64da31fb4c7eb59abd68757e79819"
+    }
+  ]
+}

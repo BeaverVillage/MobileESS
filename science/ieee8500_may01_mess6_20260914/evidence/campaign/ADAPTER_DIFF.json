@@ -1,0 +1,8 @@
+{
+  "seed_scope_diff": "--- \n+++ \n@@ -76,7 +76,7 @@\n     assert bundle['candidate_stream_sha256']==EXPECTED\n     assert bundle['binding_gate_sha256']==sha(HOME/'IEEE8500_V41R4_AIDC_BINDING_PASS.json')\n     allowed=Path(ctx.new_production_root).resolve()\n-    assert allowed!=HOME.resolve() and 'IEEE8500_production_20260911' not in allowed.parts\n+    assert allowed==HOME.resolve() and read(HOME/'PRODUCTION_AUTHORIZATION.json')['authorized'] is True\n     paths=[]\n     for key in ('assignment','variable_names'):\n         r=bundle[key];p=Path(r['path']).resolve();assert p.is_relative_to(allowed) and sha(p)==r['sha256'];paths.append(p)\n",
+  "fixed_M1_electrical_rows_diff": "--- \n+++ \n@@ -102,7 +102,7 @@\n \n def run(ctx,role):\n     folder=P/role;ctx.v41_policy=role;grid8500.CTX=ctx\n-    ctx.production_electrical_rows=P.parent/'IEEE8500_MAY01_AIDC2X_HOST_REMAP_20260912'/'B1_electrical_rows'\n+    ctx.production_electrical_rows=P/'B3_A1_electrical_rows'\n     old=(grid.add_grid,grid.evaluate_grid,migration_memory.Path,feasible_seed.Path)\n     grid.add_grid=grid8500.add_grid;grid.evaluate_grid=evaluate_grid;migration_memory.Path=ASCIIPath;feasible_seed.Path=ASCIIPath\n     state(status='RUNNING',stage=role+':MODEL_BUILD',search_started=False,search_stopped=False,checkpoints={})\n",
+  "fleet_overrides": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_MESS6_PREFLIGHT_20260913\\CODE_DIFF.json",
+    "sha256": "54e6b2e7ab606cfc6db2efee0b7e24fba57cbfd717dd3ade519132e4868646bf"
+  }
+}
