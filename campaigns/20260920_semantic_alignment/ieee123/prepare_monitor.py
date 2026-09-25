@@ -16,7 +16,6 @@ s=s.replace(anchor,anchor+"\n        $tm=$progress.telemetry\n        if($tm){$l
 (target/'monitor_v39e_may_campaign.ps1').write_bytes((source/'monitor_v39e_may_campaign.ps1').read_bytes())
 (target/'TEMPLATE_ADAPTATION.diff').write_text(''.join(difflib.unified_diff(original.splitlines(True),s.splitlines(True),fromfile=str(source/name),tofile=str(target/name))),encoding='utf-8')
 import runpy
-runpy.run_path(str(OUT/'upgrade_actual_monitor.py'),run_name='__main__')
 
 if (OUT/'ACTIVE_SCOPE.json').exists():
  scope=json.loads((OUT/'ACTIVE_SCOPE.json').read_text(encoding='utf-8'))
@@ -69,3 +68,5 @@ s=s.replace('Actual 1 worker × 4 threads','동시 3 dates × 4 threads/date (�
 s=s.replace("$dayPct=100.0*(@($dayUnits | Where-Object {$_.status -eq 'COMPLETE'}).Count)/4","$dayPct=100.0*(@($dayUnits | Where-Object {$_.status -eq 'COMPLETE'}).Count)/5")
 (target/name).write_text(s,encoding='utf-8-sig')
 (target/'TEMPLATE_ADAPTATION.diff').write_text(''.join(difflib.unified_diff(original.splitlines(True),s.splitlines(True),fromfile=str(source/name),tofile=str(target/name))),encoding='utf-8')
+
+runpy.run_path(str(OUT/'upgrade_actual_monitor.py'),run_name='__main__')

@@ -31,3 +31,7 @@ SOURCE_MANIFEST.json records byte sizes, SHA256 and local provenance for every c
 - Recorded B0 physical-scale audit: PASS. Old Actual results are not promoted to the new controller result set.
 
 Full new B2/M2 integration, final Fresh validation and IEEE8500 Actual completion remain production gates. This draft does not certify their completion or policy ordering. Do not run copied launchers without restoring their frozen dependencies and independent writable namespaces. Absolute local paths in source/evidence are provenance and existing deployment bindings, not portable defaults.
+
+## PowerShell monitor follow-up
+
+The upper summary now displays only overall completion percentage/count and FAIL presence. Per-policy Actual line-loading results remain in the lower date-detail table. The monitor upgrade runs after template generation so regeneration preserves this layout. This update changes display code only. Python and PowerShell syntax checks passed; source hashes were refreshed.

@@ -25,23 +25,20 @@ function Get-CurrentActualMetric([string]$Date,[string]$Policy) {
 }
 '''
  s=s.replace('function Get-B3MonitorPhase',function+'\nfunction Get-B3MonitorPhase',1)
- anchor="        $lines.Add('  Day-Ahead/Fresh: 기존 최종 authority 동결 · Planning 재실행 없음')"
- addition=r'''
-        $metricDate='2025-05-{0:D2}' -f $selectedDay
-        $lines.Add(('  Actual 최대선로부하율 | {0} | ←/→ 날짜 선택 | 확정=96-slot 독립 검증 완료' -f $metricDate))
-        foreach($mp in @('B0','B1','B2','B3_1R','B3_2R')){
-            $mm=Get-CurrentActualMetric $metricDate $mp
-            $lines.Add(('    {0,-6} {1,-30} {2}' -f $mp,$mm.text,$mm.status))
-        }
-        foreach($ma in $progress.active){
-            $mm=Get-CurrentActualMetric $ma.day $ma.policy
-            $lines.Add(('    진행 {0} {1,-6} Actual ρmax {2}' -f $ma.day,$ma.policy,$mm.text))
-        }
-'''
- assert s.count(anchor)==1;s=s.replace(anchor,anchor+addition)
  anchor="                $lines.Add(('  {0,-5} {1,-12} {2,11} {3,12}    {4,-8}  {5,-8}  {6}' -f $policy,$displayStatus,$p1,$p2,$fg,$ag,$voltageText))"
  replacement="                $mm=Get-CurrentActualMetric $chosen $policy; $ag=$mm.status; $voltageText=$mm.text; $fg='FROZEN'\n"+anchor
  assert s.count(anchor)==1;s=s.replace(anchor,replacement)
 s=s.replace('Actual: Robust V2 · η=0.95 · P 고정 / Q-only','Actual: Q-first → 최소 P 보정 → 인과적 에너지 회복 · η=0.95')
 s=s.replace('Actual Vmax / ρmax','Actual 최대선로부하율 (%)')
+# Compact header: retain detailed policy results only in the lower table.
+start=s.find("        $lines.Add(('  [{0}]")
+if start >= 0:
+ end=s.index("        $active=@($units | Where-Object",start)
+ s=s[:start]+r'''
+        $failState=if($fails -gt 0 -or $progress.status -match 'FAIL|ERROR|STOP'){'있음'}else{'없음'}
+        $lines.Clear()
+        $lines.Add(('  전체 진행률 {0:N1}% ({1}/155 완료)  |  FAIL: {2}' -f $percent,$done,$failState))
+        $lines.Add('')
+'''+s[end:]
+
 p.write_text(s,encoding='utf-8-sig')

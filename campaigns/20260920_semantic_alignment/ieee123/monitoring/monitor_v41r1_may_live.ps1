@@ -233,43 +233,10 @@ do {
         $done=@($units | Where-Object {$_.status -eq 'COMPLETE'}).Count
         $filled=[Math]::Min(24,[int][Math]::Floor($percent*24/100))
         $bar=('■'*$filled)+('·'*(24-$filled))
-        $lines.Add(('  [{0}] {1,5:N1}%     {2}/155 정책 완료 · {3}/31일 완료 · FAIL {4}일' -f $bar,$percent,$done,$complete,$fails))
-        $alive=$null -ne (Get-Process -Id $progress.supervisor_pid -ErrorAction SilentlyContinue)
-        $age=[DateTimeOffset]::UtcNow.ToUnixTimeSeconds()-[double]$progress.updated_at
-        $liveness=if($alive -and $age -lt 30){'정상'}elseif($progress.status -eq 'COMPLETE'){'완료'}elseif($alive){'상태 갱신 지연 · 워커와 완료 파일 직접 확인'}else{'supervisor 종료 · 완료 파일 직접 확인'}
-        $lines.Add(('  상태 {0} · 연결 {1} · 갱신 {2:N0}초 전' -f $progress.status,$liveness,$age))
-        $lines.Add('  α_BG 1.15 고정 · AIDC 780 GPU · MESS 4 × 300 kW / 400 kVA / 1200 kWh')
-        $lines.Add('  Planning/Fresh 동결 · Actual만 재실행 · solver 4 threads')
-        $lines.Add('  Q-first → 최소 P 보정 → 인과적 에너지 회복 · 경로/AIDC 고정')
-        $lines.Add('  2025-05-01 ~ 05-31 · 155 distinct replays / 248 round-policy rows')
-        $daComplete=@($units | Where-Object {$dp=Join-Path $out ($_.day+'\PHASE_'+$_.policy+'_DA.json');(Test-Path -LiteralPath $dp) -and (Get-PhaseStatus $dp) -eq 'PASS'}).Count
-        $lines.Add('  Day-Ahead/Fresh: 기존 최종 authority 동결 · Planning 재실행 없음')
-        $metricDate='2025-05-{0:D2}' -f $selectedDay
-        $lines.Add(('  Actual 최대선로부하율 | {0} | ←/→ 날짜 선택 | 확정=96-slot 독립 검증 완료' -f $metricDate))
-        foreach($mp in @('B0','B1','B2','B3_1R','B3_2R')){
-            $mm=Get-CurrentActualMetric $metricDate $mp
-            $lines.Add(('    {0,-6} {1,-30} {2}' -f $mp,$mm.text,$mm.status))
-        }
-        foreach($ma in $progress.active){
-            $mm=Get-CurrentActualMetric $ma.day $ma.policy
-            $lines.Add(('    진행 {0} {1,-6} Actual ρmax {2}' -f $ma.day,$ma.policy,$mm.text))
-        }
 
-        if($actualRoot){$lines.Add(('  Actual: Q-first → 최소 P 보정 → 인과적 에너지 회복 · η=0.95 · 새 버전 완료 {0}/155 · 과거 Actual 별도 보존' -f $done))}
-        if($actualRoot){
-            $splitPath=Join-Path $actualRoot 'TEMPORARY_RESOURCE_POLICY.json'
-            if(Test-Path -LiteralPath $splitPath){
-                $split=Read-LiveJson $splitPath
-                if($split.status -eq 'ACTIVE'){
-                    $nd=@($progress.active | Where-Object {$_.kind -eq 'DA_FRESH'}).Count
-                    $na=@($progress.active | Where-Object {$_.kind -in @('ACTUAL_ONLY','DIAGNOSTIC_ONLY')}).Count
-                    $lines.Add(('  임시 DA/Fresh {0} + Actual {1}: 현재 {2} + {3} · 밀린 Actual 완료 후 정상 4워커 복귀' -f $split.MAX_DA_FRESH_WORKERS,$split.MAX_ACTUAL_WORKERS,$nd,$na))
-                }
-            }
-            if($progress.resource_mode -eq 'NORMAL_4'){$lines.Add('  정상 4워커 · 날짜/정책별 DA/Fresh → 해당 Actual · 전역 Actual 우선 배정 없음')}
-            $holdPath=Join-Path $actualRoot 'ACTUAL_DISPATCH_HOLD.json'
-            if((Test-Path -LiteralPath $holdPath) -and (Read-LiveJson $holdPath).status -eq 'HOLD'){$lines.Add('  본 Actual 배정 보류 · May12 경량 검색 + 선택 Q 96개 검증 후 재개')}
-        }
+        $failState=if($fails -gt 0 -or $progress.status -match 'FAIL|ERROR|STOP'){'있음'}else{'없음'}
+        $lines.Clear()
+        $lines.Add(('  전체 진행률 {0:N1}% ({1}/155 완료)  |  FAIL: {2}' -f $percent,$done,$failState))
         $lines.Add('')
         $active=@($units | Where-Object {$_.status -match 'RUNNING'} | Sort-Object day,policy)
         $prepFile=Join-Path $runtime 'BASELINE_PREPARATION_PROGRESS.json'
