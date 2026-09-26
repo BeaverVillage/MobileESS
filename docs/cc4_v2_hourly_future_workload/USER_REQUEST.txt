@@ -1,0 +1,791 @@
+# Task: CC4-v2 — D−1 18:00 Next-Day Hourly Future Workload Forecast
+
+현재 MobileESS 연구의 CC4 workload-reserve forecasting 구조를 재검토한다.
+
+이번 작업의 목적은 기존 production CC4를 즉시 교체하는 것이 아니다.
+
+**먼저 새로운 forecast target/interface를 독립 offline experiment로 구현하고, 아직 제출되지 않은 future workload의 Q90 예측 성능이 실질적으로 90% 수준에 도달할 수 있는지 검증한다.**
+
+작업은 fail-closed로 수행한다.
+
+---
+
+# 0. Repository / authority 확인
+
+Repository:
+
+`BeaverVillage/MobileESS`
+
+먼저 현재 repository, branch, worktree, Git status를 확인한다.
+
+관련 authority를 반드시 읽고 현재 상태를 복원한다.
+
+주요 참조:
+
+- PR #42
+  `codex/v41r4-may-final-restoration-paper-export`
+- PR #57
+  `codex/cc4-physical-cap-oracle-audit`
+- PR #59
+  `codex/cc4-replacement-ml-offline-20260924`
+- 필요 시 PR #61의 CC4 forensic 자료
+
+특히 PR #57과 #59의 다음 내용을 정확히 이해한 뒤 시작한다.
+
+현재 frozen CC4:
+
+- H4 = 4-hour rolling window
+- target = 해당 4시간 동안 submit된 job들의 **전체 lifetime GPU-work**
+- physical cap = 780 GPU × 4 h = 3120 GPU·h
+- current actionable coverage ≈ 81.4417%
+- physical-cap oracle ceiling ≈ 85.9419%
+
+따라서 현재 target + cap interface에서는 90% actionable coverage가 구조적으로 불가능하다.
+
+또한 PR #59에서는 기존 H4 target을 유지한 상태에서 LightGBM/TFT/DeepAR를 비교했으나 production replacement를 정당화할 만큼 안정적인 우위가 없었다.
+
+이 사실을 변경하거나 재해석하지 않는다.
+
+---
+
+# 1. New scientific definition
+
+CC4-v2에서 ML과 optimizer의 역할을 분리한다.
+
+## ML의 역할
+
+ML은 **headroom이나 reserve 자체를 예측하지 않는다.**
+
+ML이 예측해야 하는 것은:
+
+> D−1 18:00 시점에서 아직 submit되지 않았지만 다음날 새롭게 도착할 Job들이 만들어낼 future GPU-work arrival.
+
+즉:
+
+[
+\hat W\_{D,h}^{q},
+\qquad q\in{0.5,0.9}
+]
+
+where
+
+[
+h=0,\ldots,23
+]
+
+and each bin represents one local-clock hour of day D.
+
+Prediction issue time:
+
+[
+D-1;18{:}00
+]
+
+Target day:
+
+[
+D;00{:}00 \sim D;24{:}00
+]
+
+Hence lead time differs by target hour and is approximately 6–29 h.
+
+---
+
+# 2. New target definition
+
+For each target day D and hour h:
+
+\sum\_{j:
+submit_j\in[D,h,h+1)}
+GPU_j \times runtime_j
+]
+
+Unit:
+
+[
+[\mathrm{GPU\cdot h}]
+]
+
+Important:
+
+This is **arrival workload**, not workload that must be fully executed inside that same hour.
+
+Example:
+
+A future job submitted at 14:20 requests 4 GPUs and has a required runtime of 2.5 h.
+
+It contributes:
+
+[
+4\times2.5=10;\mathrm{GPU\cdot h}
+]
+
+to the 14:00–15:00 arrival bin.
+
+Its processing may occur after 15:00.
+
+This distinction must be explicitly documented.
+
+Use the same job eligibility / workload-accounting population as the frozen CC4 authority wherever scientifically applicable.
+
+Do not silently broaden or shrink the workload population.
+
+If a difference from the frozen CC4 job population is unavoidable, stop promotion and document:
+
+- exact population difference;
+- affected job count;
+- affected GPU-h;
+- scientific reason.
+
+---
+
+# 3. Remove forecast-side physical cap
+
+The new forecast output must NOT be clipped by:
+
+- 780 × H physical capacity;
+- historical cap;
+- scheduler headroom;
+- any optimizer-derived capacity.
+
+Do NOT use:
+
+\min(\hat W,C\_{phys},C\_{hist})
+]
+
+for model evaluation.
+
+The forecast layer must output its probabilistic estimate directly:
+
+[
+\boxed{
+\hat W\_{D,h}^{50},
+\hat W\_{D,h}^{90}
+}
+]
+
+Physical feasibility remains a later optimizer responsibility.
+
+This experiment does NOT modify the optimizer yet.
+
+---
+
+# 4. Strict causal information boundary
+
+At issue time
+
+[
+D-1;18{:}00
+]
+
+only information causally available by that timestamp may be used.
+
+Forbidden as model inputs:
+
+- jobs submitted after issue time;
+- future realized arrival counts;
+- future runtime values unavailable at issue time;
+- future queue state;
+- future Actual values;
+- future workload summaries constructed using target-day jobs;
+- any feature whose timestamp maturity is later than the issue timestamp.
+
+Future observations may only be used as supervised labels.
+
+All features must carry an explicit maturity audit.
+
+Reuse the causal feature logic from the existing CC4 offline experiment wherever possible.
+
+Preserve existing 71-feature LightGBM lineage if valid, but adapt features appropriately for hourly target rows.
+
+Add only causal features such as:
+
+- target hour of day;
+- lead time;
+- weekday / calendar variables;
+- historical arrival workload lags;
+- historical workload profile statistics;
+- historical burst indicators;
+- existing causal system/context variables already authorized in CC4.
+
+Do not introduce future leakage to improve coverage.
+
+---
+
+# 5. Dataset structure
+
+Construct a long-form dataset.
+
+One row represents:
+
+[
+(issue\ day,\ target\ hour)
+]
+
+Example:
+
+```text
+issue_time = 2025-04-30 18:00
+target_day = 2025-05-01
+target_hour = 14
+lead_hours ≈ 20
+target_GPUh = ...
+```
+
+There should be up to 24 rows per eligible target day.
+
+For every target day validate:
+
+[
+\sum\_{h=0}^{23}W\_{D,h}^{new}
+]
+
+against a direct reconstruction from raw Job authority.
+
+The difference must be zero within numerical serialization tolerance.
+
+Also report:
+
+- zero-workload hours;
+- positive hours;
+- burst hours;
+- daily totals;
+- hour-of-day distribution;
+- day-of-week distribution;
+- maximum hourly workload;
+- Q50/Q90 empirical target distributions.
+
+---
+
+# 6. Exact chronological data splits and evaluation protocolThe new CC4-v2 experiment must preserve the established chronological split philosophy from PR #59.Do not randomly split hourly rows.A single target day and its 24 hourly targets belong to the same day-level membership and must never be divided across TRAIN / DEVELOPMENT / CALIBRATION / EVALUATION.Use the following frozen historical periods as the reference authority.TRAINCalendar authority:2024-03-15 through 2024-08-30Original eligible membership:2024-03-15 through 2024-08-28 N = 167 daysOriginal excluded tail days:2024-08-29 2024-08-30Purpose\:fit model parameters;estimate training-only statistics;derive burst thresholds where required;fit scalers/encoders using TRAIN only.Do not use DEVELOPMENT, CALIBRATION, Dec–Feb, or May labels for ordinary fixed-model fitting.PURGE / temporal isolationPreserve the original temporal-isolation philosophy around split boundaries.The historical ledger contains purge boundary dates including:2024-08-31 2024-10-31 2024-11-30Do not silently eliminate temporal purge/maturity boundaries merely because the new target is hourly.Reconstruct the correct D−1 18:00 maturity boundary for the new target.If the new issue-time definition changes which days are causally eligible, document the exact changed day membership.DEVELOPMENTCalendar authority:2024-09-01 through 2024-10-30Original eligible membership:2024-09-01 through 2024-10-29 N = 58 daysHistorical excluded/boundary dates include:2024-10-28 2024-10-30Use DEVELOPMENT only for\:comparing LightGBM / TFT / DeepAR candidate families;selecting architecture/hyperparameters;choosing registered refit cadence if required;deciding the candidate model before exposed historical evaluation.Do NOT select a model from Dec–Feb or May performance.All hyperparameter/model-family decisions must be frozen after DEVELOPMENT.CALIBRATIONCalendar authority:2024-11-01 through 2024-11-29Original eligible membership:2024-11-01 through 2024-11-27 N = 26 daysHistorical excluded/boundary dates include:2024-11-26 2024-11-28 2024-11-29Use this period only for probabilistic calibration where scientifically appropriate.For Q90, use causal finite-sample / residual calibration.Do NOT use Dec–Feb or May labels to tune calibration magnitude.Do NOT multiply predictions by an arbitrary factor until 90% coverage is obtained.EXPOSED EVALUATION — Dec–FebUse:2024-12-01 through 2025-02-26 N = 88 daysThis is an exposed historical evaluation population.Use it to test\:Q90 coverage;calibration error;Q90 pinball loss;Q50 pinball loss;positive-workload behavior;burst behavior;lead-time robustness;hour-of-day robustness;requirement ratio / overprediction.Do not modify model architecture, hyperparameters, target definition, or calibration after inspecting this evaluation in order to improve the reported score.MAY HISTORICAL EVALUATIONUse:2025-05-01 through 2025-05-31 N = 31 daysThis is the final paper-relevant historical comparison period.May is NOT an untouched holdout.Required label\:NO_UNTOUCHED_CONFIRMATION = TRUEMay must not be used for\:model-family selection;hyperparameter selection;target redesign;Q90 scaling;calibration-factor tuning;feature selection;exclusion-rule tuning.May is used only after the candidate configuration has been frozen.Day-level grouping requirementThe new CC4-v2 produces up to 24 hourly rows per target day.However, those 24 rows are correlated observations from the same operating day.Therefore\:split unit = target day statistical comparison unit = target dayNever randomly split hourly samples.Never allow some hours of one day into TRAIN and other hours into validation/evaluation.For statistical uncertainty, use paired day-level or day-block resampling.D−1 18:00 maturity re-auditThe new issue time is\:D-1 18:00 local modeled timeTherefore, before copying the historical memberships blindly, recompute causal eligibility for every day.For every feature and every target day verify\:feature_available_at <= D-1 18:00For any training label used by an issue\:label_matured_at < issue_timeIf the new hourly target causes a historical split day to become causally invalid\:exclude it fail-closed;do not replace it with a later evaluation day merely to preserve N;record the exact membership difference;report the changed N;report whether comparison with PR #59 remains exact or only approximate.Create\:SPLIT_MEMBERSHIP_DIFF.csvwith at least\:date original_role cc4_v2_role original_eligible cc4_v2_eligible reasonFixed experiment chronologyThe scientific workflow must follow this order\:TRAIN   ↓ DEVELOPMENT model selection   ↓ freeze model architecture/hyperparameters   ↓ CALIBRATION   ↓ freeze calibration rule   ↓ Dec–Feb exposed evaluation   ↓ May 2025 historical evaluationNo information may flow backward.In particular\:May → tuning = FORBIDDEN Dec-Feb → architecture reselection = FORBIDDEN Evaluation → target redefinition = FORBIDDENIf a problem is discovered after exposure to evaluation results and fixing it would change scientific results, preserve the original result and start a clearly versioned new experiment rather than silently overwriting it.Required split verification outputsGenerate at minimum\:DATA_SPLITS_AND_MATURITY.json TRAIN_MEMBERSHIP.csv DEVELOPMENT_MEMBERSHIP.csv CALIBRATION_MEMBERSHIP.csv EXPOSED_EVALUATION_MEMBERSHIP.csv MAY_HISTORICAL_MEMBERSHIP.csv SPLIT_MEMBERSHIP_DIFF.csv LEAKAGE_AUDIT.jsonEach must include exact dates and counts.Final report must state explicitly\:TRAIN_DAYS = DEVELOPMENT_DAYS = CALIBRATION_DAYS = EXPOSED_EVALUATION_DAYS = MAY_HISTORICAL_DAY
+
+---
+
+# 7. Mandatory baseline models
+
+At minimum implement:
+
+## B0 — Seasonal / historical baseline
+
+Simple causal seasonal quantile baseline.
+
+This is a diagnostic baseline only.
+
+## B1 — LightGBM Quantile
+
+This is the primary baseline.
+
+Train Q50 and Q90.
+
+Use causal chronological training.
+
+Preferred implementation:
+
+- long-form hourly samples;
+- target-hour and lead-time features;
+- LightGBM quantile objective;
+- direct original-unit evaluation;
+- log1p may be used if justified and inverted exactly.
+
+Use the existing PR #59 LightGBM settings as the initial reference rather than arbitrary new hyperparameter tuning.
+
+---
+
+# 8. Candidate advanced models
+
+After the baseline pipeline is validated, evaluate:
+
+## B2 — TFT
+
+Adapt the existing PR #59 TFT implementation to produce a 24-step next-day workload profile.
+
+Output Q50/Q90.
+
+## B3 — DeepAR or equivalent probabilistic recurrent model
+
+Adapt the existing implementation to the new hourly target.
+
+Three seeds:
+
+```text
+20260924
+20260925
+20260926
+```
+
+Do not run multiple GPU training jobs concurrently.
+
+Do not expand architecture search excessively.
+
+The purpose is target/interface evaluation, not unlimited neural hyperparameter search.
+
+If GPU/VRAM failure occurs, preserve the failure evidence and continue with feasible registered experiments without silently reducing the evaluation population.
+
+---
+
+# 9. Calibration
+
+Q90 means nominal 90% probabilistic coverage.
+
+Use only causal calibration.
+
+A valid approach is:
+
+- chronological expanding calibration;
+- mature labels only;
+- finite-sample one-sided residual correction.
+
+Calibration must not use future labels.
+
+Do NOT simply multiply predictions by a post-hoc arbitrary factor until coverage exceeds 90%.
+
+Do NOT tune a scale using May results.
+
+Do NOT cap predictions afterward.
+
+---
+
+# 10. Metrics
+
+The primary success criterion is NOT merely “coverage > 90%”.
+
+A trivial huge prediction is not considered a successful model.
+
+For each model report:
+
+## Probabilistic forecast quality
+
+### Q90 empirical coverage
+
+[
+Coverage=
+\frac{
+\#{W^{actual}\le\hat W^{90}}
+}{
+N
+}
+]
+
+Nominal target:
+
+[
+90%
+]
+
+Interpretation:
+
+- approximately 90% = calibrated;
+- very low coverage = underprediction;
+- extreme overcoverage such as 98–100% is overconservative and NOT automatically a success.
+
+Report calibration error:
+
+[
+|Coverage-0.90|
+]
+
+### Q90 pinball loss
+
+Primary sharpness/accuracy metric.
+
+### Q50 pinball loss
+
+### MAE / RMSE for Q50 or median prediction
+
+### Mean prediction-to-realized requirement ratio
+
+[
+\frac{\sum \hat W^{90}}
+{\sum W^{actual}}
+]
+
+### Excess reserve proxy
+
+[
+\sum_h
+\max(\hat W_h^{90}-W_h^{actual},0)
+]
+
+normalized by total realized GPU-work.
+
+---
+
+# 11. Stratified metrics
+
+Report separately by:
+
+### Lead time
+
+At least:
+
+- 6–11 h
+- 12–17 h
+- 18–23 h
+- 24–29 h
+
+### Hour of day
+
+24 hourly bins.
+
+### Workload regime
+
+- zero workload;
+- positive workload;
+- burst workload.
+
+Define burst threshold using TRAIN only.
+
+Do not choose the burst threshold from May.
+
+Also report:
+
+- positive-only Q90 coverage;
+- burst Q90 coverage;
+- positive Q90 pinball;
+- burst Q90 pinball.
+
+---
+
+# 12. Statistical comparison
+
+Use day-level dependence.
+
+Do not treat 24 hourly rows from a day as 24 independent statistical samples.
+
+Use paired day-block bootstrap or an equivalent paired day-level uncertainty procedure.
+
+For candidate vs LightGBM report:
+
+- Δ Q90 pinball;
+- Δ calibration error;
+- Δ requirement ratio;
+- 95% CI.
+
+Do not declare a model superior if the improvement is within uncertainty.
+
+---
+
+# 13. Selection rule
+
+Select a model only after all registered experiments are complete.
+
+Priority:
+
+1. no leakage / authority integrity PASS;
+2. Q90 calibration close to 90%;
+3. lower Q90 pinball;
+4. reasonable prediction requirement / sharpness;
+5. robustness across development, Dec–Feb, and May;
+6. positive/burst behavior;
+7. computational practicality.
+
+Do not select purely because overall coverage exceeds 90%.
+
+A candidate with 99% coverage and massive overprediction is not a valid success.
+
+Target operating range for nominal Q90 should be approximately:
+
+[
+0.88\sim0.92
+]
+
+with lower pinball loss preferred.
+
+A value slightly outside this range may still be scientifically acceptable but must be flagged and explained.
+
+---
+
+# 14. Explicit 90% goal
+
+The research goal is:
+
+[
+\boxed{
+\text{well-calibrated Q90 future-workload forecast}
+}
+]
+
+not the previous physical-cap-clipped actionable coverage.
+
+The desired model should demonstrate that the new target/interface can support approximately 90% forecast coverage without the former 85.94% artificial ceiling.
+
+However:
+
+**Do NOT claim 90% operational reserve adequacy from this experiment.**
+
+Forecast coverage and operational reserve adequacy are different quantities.
+
+The optimizer has not yet been modified.
+
+---
+
+# 15. No optimizer changes in this task
+
+Do NOT modify:
+
+- CC4 production optimization;
+- P2 objective;
+- AIDC scheduler;
+- MESS optimization;
+- IEEE123 Planning;
+- Fresh;
+- Actual;
+- OpenDSS;
+- Gurobi production execution.
+
+Do NOT run:
+
+- IEEE123 production campaign;
+- IEEE8500 campaign;
+- Actual replay;
+- grid optimization.
+
+This task is forecast-only.
+
+Required flags:
+
+```text
+OPTIMIZER_CHANGED = FALSE
+GRID_CAMPAIGN_EXECUTIONS = 0
+PRODUCTION_MODEL_PROMOTED = FALSE
+```
+
+---
+
+# 16. Future optimizer interface — documentation only
+
+Document the intended future interface, but do not implement it yet.
+
+Conceptually:
+
+C_h-L_h^{known}(\mathbf x)
+]
+
+where headroom is optimizer-dependent.
+
+Future workload service could later satisfy:
+
+[
+0\le S_h^{future}\le H_h(\mathbf x)\Delta t
+]
+
+and:
+
+S_h^{future}
+]
+
+with deadline-aware/cumulative reserve constraints to be designed in a later stage.
+
+Clearly state:
+
+```text
+ML predicts future workload.
+Optimizer determines headroom.
+```
+
+Do not implement this coupling during the present task.
+
+---
+
+# 17. Required audits
+
+Before training:
+
+## Target reconstruction audit
+
+Verify hourly targets directly from raw job authority.
+
+## Population audit
+
+Compare job IDs / counts / GPU-h against frozen CC4 population.
+
+## Leakage audit
+
+For every feature class verify:
+
+[
+feature_maturity\le issue_time
+]
+
+## Split audit
+
+Verify chronological membership.
+
+## Unit audit
+
+Confirm all target values are GPU·h.
+
+## No-cap audit
+
+Verify model prediction output is never clipped by physical/historical capacity during forecast evaluation.
+
+---
+
+# 18. Required outputs
+
+Create an isolated directory such as:
+
+```text
+docs/cc4_v2_hourly_future_workload/
+```
+
+or an equivalent clearly isolated experiment namespace.
+
+Include at minimum:
+
+```text
+README.md
+TARGET_DEFINITION.md
+EXPERIMENT_PROTOCOL.json
+DATA_SPLITS_AND_MATURITY.json
+TARGET_RECONSTRUCTION_AUDIT.json
+POPULATION_COMPARISON.json
+LEAKAGE_AUDIT.json
+MODEL_METRICS.csv
+DAY_METRICS.csv
+HOUR_OF_DAY_METRICS.csv
+LEAD_TIME_METRICS.csv
+BURST_METRICS.csv
+PAIRED_DAY_BLOCK_UNCERTAINTY.csv
+FINAL_SELECTION_FREEZE.json
+FINAL_REVIEW_KO.md
+SOURCE_MANIFEST.json
+VALIDATION.json
+```
+
+Store prediction rows in parquet/csv as appropriate, with:
+
+```text
+target_day
+target_hour
+issue_time
+lead_hours
+actual_GPUh
+Q50
+Q90
+model
+seed
+split
+```
+
+Preserve exact hashes of relevant source authorities.
+
+---
+
+# 19. Final report requirements
+
+`FINAL_REVIEW_KO.md` must answer explicitly:
+
+1. 기존 H4 CC4 target이 정확히 무엇이었는가?
+2. 왜 기존 3120 GPU·h physical cap과 target이 구조적으로 맞지 않았는가?
+3. 왜 기존 구조에서 90% actionable coverage가 불가능했는가?
+4. 새 CC4-v2 target은 무엇인가?
+5. D−1 18:00에서 어떤 future workload를 예측하는가?
+6. Q50/Q90 coverage는 얼마인가?
+7. LightGBM/TFT/DeepAR 중 어떤 모델이 가장 우수한가?
+8. 그 우위는 day-block uncertainty에서도 유지되는가?
+9. 90% coverage가 과도한 overprediction으로 만들어진 것은 아닌가?
+10. positive/burst workload에서 성능은 어떤가?
+11. Dec–Feb와 May에서 결과가 일관적인가?
+12. 새 모델을 production에 올릴 근거가 충분한가?
+13. 다음 단계에서 optimizer/P2를 어떻게 연결해야 하는가?
+
+At the end include a strict decision:
+
+```text
+CC4_V2_FORECAST_TARGET_VALID = TRUE/FALSE
+Q90_90PCT_CALIBRATION_SUPPORTED = TRUE/FALSE
+MODEL_REPLACEMENT_SUPPORTED = TRUE/FALSE
+OPTIMIZER_INTEGRATION_READY = TRUE/FALSE
+PRODUCTION_MODEL_PROMOTED = FALSE
+```
+
+`OPTIMIZER_INTEGRATION_READY` may only be TRUE if target reconstruction, leakage, calibration, robustness and prediction-sharpness checks all pass.
+
+Do not set it TRUE solely because May coverage exceeds 90%.
+
+---
+
+# 20. Git discipline
+
+Do not modify existing frozen evidence or historical outputs.
+
+Do not overwrite PR #42/#57/#59 authorities.
+
+Create a new branch, preferably:
+
+```text
+codex/cc4-v2-hourly-future-workload
+```
+
+Base it on the most appropriate existing CC4 offline branch, preferably the PR #59 branch if its experiment infrastructure can be reused safely.
+
+Preserve provenance to PR #57/#59.
+
+Do not alter unrelated files.
+
+After completion:
+
+- run all validation/tests;
+- ensure git diff is scoped;
+- commit results;
+- report commit SHA;
+- if authenticated, push the branch and create a Draft PR;
+- otherwise leave a clean committed branch and report exact next commands.
+
+---
+
+# 21. Scientific fail-closed rules
+
+Never manipulate the evaluation to force the desired 90%.
+
+Do not:
+
+- enlarge Q90 by arbitrary scale after inspecting May;
+- redefine target after seeing model results;
+- delete difficult workload hours;
+- exclude zero or burst hours from primary results;
+- cap labels;
+- cap predictions;
+- change train/test membership to improve results;
+- use future information;
+- silently change job eligibility;
+- claim operational reserve performance before optimizer integration.
+
+If 90% cannot be achieved with acceptable sharpness and calibration, report that result exactly.
+
+The purpose is to determine whether the new target/interface is scientifically better, not to manufacture a positive result.
+
+---
+
+# Final objective
+
+Determine whether:
+
+[
+\boxed{
+\text{D−1 18:00}
+\rightarrow
+\text{next-day hourly probabilistic future GPU-work arrival forecast}
+}
+]
+
+provides a better CC4 forecast interface than the current H4 lifetime-workload + physical-cap formulation.
+
+The preferred final architecture should satisfy:
+
+[
+\boxed{
+\text{ML predicts unknown future workload}
+}
+]
+
+while the later co-optimizer will satisfy:
+
+[
+\boxed{
+\text{optimizer determines how much computing headroom to reserve}
+}
+]
+
+Complete the offline experiment, validate all evidence, and give the final evidence-based verdict without changing production optimization.

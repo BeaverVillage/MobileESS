@@ -1,0 +1,14 @@
+[LightGBM] [Fatal] Model file C:\Users\kjw39\OneDrive\문서\ChatGPT\Mobile ESS 2\cc4_v2_hourly_future_workload_pr\docs\cc4_v2_hourly_future_workload\fits\LGBM_20260924\Q50.txt is not available for writes
+Traceback (most recent call last):
+  File "D:\ChatGPT\Mobile ESS 2\cc4_v2_hourly_future_workload_pr\docs\cc4_v2_hourly_future_workload\run.py", line 215, in <module>
+    if phase=='train':train()
+                      ^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\cc4_v2_hourly_future_workload_pr\docs\cc4_v2_hourly_future_workload\run.py", line 101, in train
+    tree_fit(z,tr,seed,folder)
+  File "D:\ChatGPT\Mobile ESS 2\cc4_v2_hourly_future_workload_pr\docs\cc4_v2_hourly_future_workload\run.py", line 52, in tree_fit
+    m.booster_.save_model(str(folder/f'Q{int(100*tau)}.txt'))
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\site-packages\lightgbm\basic.py", line 4480, in save_model
+    _safe_call(
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\site-packages\lightgbm\basic.py", line 313, in _safe_call
+    raise LightGBMError(_LIB.LGBM_GetLastError().decode("utf-8"))
+lightgbm.basic.LightGBMError: Model file C:\Users\kjw39\OneDrive\����\ChatGPT\Mobile ESS 2\cc4_v2_hourly_future_workload_pr\docs\cc4_v2_hourly_future_workload\fits\LGBM_20260924\Q50.txt is not available for writes
