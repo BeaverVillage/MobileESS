@@ -2,7 +2,7 @@ import os,sys,json,hashlib
 from pathlib import Path
 from types import FunctionType
 OUT=Path(__file__).absolute().parent
-EXT=OUT.parent/'B3_2ROUND_EXTENSION'
+EXT=OUT.parents[1]/'B3_2ROUND_EXTENSION'
 SOURCE=Path(r'C:\codex_mobileess_workspace\MobileESS_v41r3_scale_rebalance')
 sys.dont_write_bytecode=True
 for key in ('OMP_NUM_THREADS','OPENBLAS_NUM_THREADS','MKL_NUM_THREADS'):os.environ[key]='4'

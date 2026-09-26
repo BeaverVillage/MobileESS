@@ -10,6 +10,9 @@ def main(day,policy):
  if (OUT/'ACTIVE_SCOPE.json').exists():
   scope=read(OUT/'ACTIVE_SCOPE.json');assert day in scope['days'] and scope['threads']==4,'OUTSIDE_CURRENT_USER_SCOPE'
  round1='--round1' in sys.argv
+ prefix_only='--preflight-through-slot' in sys.argv
+ through_slot=int(sys.argv[sys.argv.index('--preflight-through-slot')+1]) if prefix_only else 95
+ assert 0<=through_slot<96
  manifest=OUT/('ROUND1_INPUT_AUTHORITY.json' if round1 else 'INPUT_AUTHORITY.json')
  started=time.time();controller_start_sha=sha(OUT/'actual_controller.py')
  if '--case-id' in sys.argv:
@@ -18,7 +21,23 @@ def main(day,policy):
   case=next(c for c in read(scoped)['cases'] if c['case_id']==key)
   round1=case['round']=='1R'
  else:case=next(c for c in read(manifest)['cases'] if (c['day'],c['policy'])==(day,policy))
- folder=OUT/('replays_1round' if round1 else 'replays')/day/policy;folder.mkdir(parents=True,exist_ok=True)
+ folder=(OUT/'diagnostics'/f'{day}_{policy}_{case.get("round", "COMMON")}_THROUGH_{through_slot}' if prefix_only else OUT/('replays_1round' if round1 else 'replays')/day/policy);folder.mkdir(parents=True,exist_ok=True)
+ da_exact_file=Path(case['dayahead'])/'fresh/OPENDSS_PHASE_ARRAYS.npz'
+ if not da_exact_file.exists():
+  restoration_parent=read(Path(case['dayahead'])/'RESTORATION_PARENT.json')
+  restored=Path(restoration_parent['rule']['path']).parent/day/policy
+  accepted=read(restored/'ACCEPTANCE.json')
+  assert accepted['status']=='PASS' and accepted['new_joint']['sha256']==case['decision_sha256'],'RESTORED_DA_IDENTITY_MISMATCH'
+  da_exact_file=restored/'accepted_fresh/OPENDSS_PHASE_ARRAYS.npz'
+ assert da_exact_file.exists(),'MISSING_FROZEN_DA_EXACT'
+ da_arrays=arrays(da_exact_file);da_line_mask=da_arrays['branch_kinds']=='line'
+ assert da_line_mask.any() and len(da_arrays['voltage_pu'])==96 and len(da_arrays['phase_current_loading_pu'])==96
+ da_exact=[dict(rho=float(da_arrays['phase_current_loading_pu'][t,da_line_mask].max()),
+                vmin=float(da_arrays['voltage_pu'][t].min()),vmax=float(da_arrays['voltage_pu'][t].max())) for t in range(96)]
+ da_summary=read(da_exact_file.with_name('OPENDSS_SUMMARY.json'))
+ assert abs(max(x['rho'] for x in da_exact)-da_summary['rho_max_AC'])<1e-10,'DA_EXACT_REFERENCE_MISMATCH'
+ save(folder/'DA_EXACT_REFERENCE.json',dict(source=str(da_exact_file),SHA256=sha(da_exact_file),
+  slots=96,max_rho=max(x['rho'] for x in da_exact),Vmin=min(x['vmin'] for x in da_exact),Vmax=max(x['vmax'] for x in da_exact)))
  ci=Path(case['common_inputs']);saved=read(ci/'ACTUAL_MESS_AUDIT.json');ready=read(ci/'READY.json')
  source_snapshot=read(ci/'DA_FRESH_INPUT_SNAPSHOT.json')
  assert all(sha(p)==h for p,h in source_snapshot.items()),'DA_FRESH_AUTHORITY_DRIFT'
@@ -41,8 +60,32 @@ def main(day,policy):
  connected=values('connected').astype(bool);locations=values('actual_service_id').astype(object)
  locations[pd.isna(locations)]='TRANSIT_UNAVAILABLE';locations=locations.astype(str)
  commands={(r['mess_id'],r['slot']):r for r in saved['frozen_commands']}
- pda=np.array([[commands[mid,t]['p_kw'] for mid in ids] for t in range(96)])
- qda=np.array([[commands[mid,t]['q_kvar'] for mid in ids] for t in range(96)])
+ pcommand=np.array([[commands[mid,t]['p_kw'] for mid in ids] for t in range(96)])
+ qcommand=np.array([[commands[mid,t]['q_kvar'] for mid in ids] for t in range(96)])
+ pexec=values('P_EXEC').astype(float);qbaseline=values('Q_EXEC').astype(float)
+ travel_slots=values('travel_energy_kWh').astype(float)
+ authority_energy=values('energy_after_kWh').astype(float)
+ assert np.array_equal(pcommand,values('P_CMD')) and np.array_equal(qcommand,values('Q_CMD')),'FROZEN_COMMAND_DRIFT'
+ # Import the original memoryless actuator result; independent source replay
+ # below proves availability, travel, efficiency, saturation and SOC parity.
+ from dayahead.v40d_actual.mess_replay import project_command
+ actuator_max_error=0.;actuator_saturation=0;missed_commands=0
+ for j,mid in enumerate(ids):
+  before=float(saved['initial_energy'][mid])
+  for t in range(96):
+   row=project_command(float(pcommand[t,j]),float(qcommand[t,j]),before,
+    connected=bool(connected[t,j]),travel_energy=float(travel_slots[t,j]),
+    e_min=a.energy_min_kwh,e_max=a.energy_max_kwh,pcs_kva=a.pcs_kva,
+    eta_charge=a.charge_efficiency,eta_discharge=a.discharge_efficiency,dt_hours=a.interval_hours)
+   actuator_max_error=max(actuator_max_error,abs(row['P_EXEC']-pexec[t,j]),abs(row['Q_EXEC']-qbaseline[t,j]),abs(row['energy_after_kWh']-authority_energy[t,j]))
+   actuator_saturation+=int('BATTERY_ENERGY_SATURATION' in row['curtailment_reason'])
+   missed_commands+=int(not connected[t,j] and (pcommand[t,j]!=0 or qcommand[t,j]!=0))
+   before=row['energy_after_kWh']
+ assert actuator_max_error<1e-9,'ORIGINAL_ACTUATOR_PARITY_FAILED'
+ with np.load(Path(case['old_grid'])/'EXECUTION.npz') as old_execution:
+  assert np.max(np.abs(old_execution['P_EXEC']-pexec))<1e-9,'OLD_ACTUAL_P_EXEC_DRIFT'
+  assert np.max(np.abs(old_execution['energy_after']-authority_energy))<1e-9,'OLD_ACTUAL_SOC_DRIFT'
+ save(folder/'P_SOC_EXECUTION_PARITY.json',dict(status='PASS',maximum_absolute_error=actuator_max_error,battery_saturation_count=actuator_saturation,missed_command_count=missed_commands,original_actuator_source=sha(Path(SOURCE)/'dayahead/v40d_actual/mess_replay.py')))
  power=arrays(ci/'ACTUAL_AIDC_POWER.npz');ef=pd.read_parquet(ci/'authority/ACTUAL_EXOGENOUS_96.parquet').sort_values('slot')
  exo=dict(timestamps=[t.tz_convert('Etc/GMT-10').isoformat() for t in ef.timestamp],demand_mw=ef.demand_MW.to_numpy(),pv_mw=ef.PV_MW.to_numpy())
  from dayahead.v28r2.electrical_context import source_root,with_realized_background
@@ -55,7 +98,7 @@ def main(day,policy):
  from dayahead.v40e.mapping import corrected_mapping,NativeAllocation
  from dayahead.v40d_actual.grid_replay import replay
  from dayahead.v28r2 import opendss_backend as backend
- tr=FrozenTrajectory(day,'ACTUAL',policy,power['PCC_P'].copy(),power['PCC_Q'].copy(),np.zeros_like(pda),np.zeros_like(qda),tuple(ids),locations.copy(),ready['identity'])
+ tr=FrozenTrajectory(day,'ACTUAL',policy,power['PCC_P'].copy(),power['PCC_Q'].copy(),np.zeros_like(pexec),np.zeros_like(qbaseline),tuple(ids),locations.copy(),ready['identity'])
  old_alloc=NativeAllocation.allocate;allocation_cache={}
  def allocate(self,p,q):
   key=(id(p),id(q))
@@ -63,25 +106,15 @@ def main(day,policy):
   return allocation_cache[key][2]
  NativeAllocation.allocate=allocate
  control=Controller(limits,[saved['initial_energy'][mid] for mid in ids],robust_search.correct_slot)
- # Travel physics/route/availability are immutable. Reserve known DA safe
- # energy at departure; reveal realized energy only when arrival is observed.
- da_commands=read(Path(case['dayahead'])/'FROZEN_MESS_COMMANDS.json')['MESS_trajectory']
- da_by={(r['mess_id'],r['slot']):r for r in da_commands};reservations={};travel_evidence=[]
+ travel_evidence=[]
  events=[];rows=[];physical_energy=[];trial_failures=[]
  with corrected_mapping():
   engine=cached_engine.CachedPrefixEngine(actual,ctx.electrical.voltage,tr,folder)
   line_mask=np.array([not b.branch_id.startswith('transformer.') for b in engine.branches])
-  for t in range(96):
-   travel=np.zeros(len(ids))
-   for move in saved['moves']:
-    mid=move['mess_id'];j=ids.index(mid);dep=move['departure_slot'];key=(mid,dep)
-    if dep==t:
-     reserve=float(da_by[mid,dep].get('energy_safe_kwh',0.));reservations[key]=reserve;travel[j]+=reserve
-     travel_evidence.append(dict(slot=t,vehicle=mid,kind='FROZEN_FORECAST_TRAVEL_RESERVATION',kwh=reserve,Actual_traffic_reads=0))
-    if move['actual_connection_ready_slot']==t:
-     assert max(e['entry_step5'] for e in move['link_entries'])<=t*3
-     realized=float(move['actual_travel_energy_kWh']);travel[j]+=realized-reservations.pop(key)
-     travel_evidence.append(dict(slot=t,vehicle=mid,kind='OBSERVED_ARRIVAL_ENERGY_SETTLEMENT',actual_trip_kwh=realized,max_traffic_step_observed=max(e['entry_step5'] for e in move['link_entries'])))
+  for t in range(through_slot+1):
+   travel=travel_slots[t]
+   for j,mid in enumerate(ids):
+    if travel[j]:travel_evidence.append(dict(slot=t,vehicle=mid,kind='ORIGINAL_ACTUAL_TRAVEL_ENERGY_AT_FROZEN_DEPARTURE',kwh=float(travel[j])))
    template=None
    def evaluate(p,q):
     nonlocal template
@@ -97,12 +130,27 @@ def main(day,policy):
      else:r={**template,'converged':False}
      r={**r,'v':np.full_like(r['v'],.90),'ipu':np.full_like(r['ipu'],2.)}
     if r['converged']:template=r
+    r['line_rho']=float(np.max(r['ipu'][line_mask]))
     return r
-   p,q,r,event=control.step(slot=t,p_da=pda[t],q_da=qda[t],connected=connected[t],travel_energy=travel,evaluate=evaluate,allow_correct=policy in ('B2','B3'))
+   p,q,r,event=control.step(slot=t,p_da=pexec[t],q_da=qbaseline[t],connected=connected[t],travel_energy=travel,evaluate=evaluate,
+    da_exact=da_exact[t],allow_correct=policy in ('B2','B3'))
+   assert event['trigger']!='NONE' or event['exact_trials']==1,'NO_EVENT_Q_SEARCH'
    tr.mess_p_kw[t]=p;tr.mess_q_kvar[t]=q;engine.accepted_taps.append(r['taps']);rows.append(r);events.append(event)
    physical_energy.append(control.energy.copy())
-   save(folder/'PROGRESS.json',dict(status='RUNNING',day=day,policy=policy,stage='Q_FIRST_MINIMAL_P_CAUSAL_RECOVERY',slots_complete=t+1,pid=os.getpid(),elapsed_seconds=time.time()-started,Q_interventions=sum(e['Q_intervention'] for e in events),P_interventions=sum(e['P_intervention'] for e in events),exact_rho_so_far=max(float(row['ipu'][line_mask].max()) for row in rows),rho_scope='ACCEPTED_ACTUAL_PREFIX; final requires independent 96-slot verification',updated_at=time.time()))
+   assert np.array_equal(p,pexec[t]),'FROZEN_ACTUATOR_P_CHANGED'
+   assert np.max(np.abs(control.energy-authority_energy[t]))<1e-9,'SOC_PARITY_DRIFT'
+   event['P_CMD']=pcommand[t].tolist();event['Q_CMD']=qcommand[t].tolist()
+   save(folder/'PROGRESS.json',dict(status='RUNNING',day=day,policy=policy,stage='PERFORMANCE_AWARE_Q_ONLY',slots_complete=t+1,pid=os.getpid(),elapsed_seconds=time.time()-started,Q_interventions=sum(e['Q_intervention'] for e in events),P_interventions=0,exact_rho_so_far=max(float(row['ipu'][line_mask].max()) for row in rows),rho_scope='ACCEPTED_ACTUAL_PREFIX; final requires independent 96-slot verification',updated_at=time.time()))
    if t%8==0:print('SLOT',day,policy,t,'AC',event['AC_PASS'],'P',event['P_intervention'],flush=True)
+  if prefix_only:
+   save(folder/'EVENTS.json',events)
+   summary=dict(status='PREFIX_COMPLETE',case_id=case.get('case_id'),slots_complete=len(events),AC_PASS=all(e['AC_PASS'] for e in events),
+    failed_slots=[e['slot'] for e in events if not e['AC_PASS']],P_EXEC_exact=bool(np.array_equal(tr.mess_p_kw[:len(events)],pexec[:len(events)])),
+    SOC_max_error=float(np.max(np.abs(np.asarray(physical_energy)-authority_energy[:len(events)]))),runtime_seconds=time.time()-started,
+    controller_SHA=sha(OUT/'actual_controller.py'))
+   save(folder/'PREFLIGHT_COMPLETE.json',summary)
+   print('PREFIX_COMPLETE',json.dumps(summary),flush=True)
+   return
   result=engine.result(rows,time.time()-started)
  # Independent uninterrupted replay of the accepted P/Q trajectory.
  verify=folder/'CONTINUOUS_VERIFICATION';verify.mkdir(exist_ok=True)
@@ -114,6 +162,7 @@ def main(day,policy):
  regression=dict(Vmax_absolute_difference=float(np.max(np.abs(validation.voltage_pu-zold['voltage_pu']))),current_loading_max_absolute_difference=float(np.max(np.abs(validation.phase_current_loading_pu-zold['phase_current_loading_pu']))))
  if policy in ('B0','B1'):assert max(regression.values())<1e-9,'B0_B1_REGRESSION_FAILED'
  assert np.array_equal(tr.pcc_p_kw,power['PCC_P']) and np.array_equal(tr.mess_locations_96x4,locations)
+ assert np.array_equal(tr.mess_p_kw,pexec),'FROZEN_ACTUATOR_P_CHANGED'
  assert all(sha(p)==h for p,h in source_snapshot.items())
  # Independent SOC recurrence from persisted execution and causal reservations.
  e=np.array([saved['initial_energy'][mid] for mid in ids],float);error=0.
@@ -126,12 +175,12 @@ def main(day,policy):
  old=read(Path(case['old_grid'])/'OPENDSS_SUMMARY.json')
  summary=dict(status='COMPLETE',day=day,policy=policy,old_Actual_rho=old['rho_max_AC'],new_Actual_rho=validation.summary['rho_max_AC'],
   Q_interventions=sum(e['Q_intervention'] for e in events),P_interventions=sum(e['P_intervention'] for e in events),
-  max_abs_delta_P_DA=float(np.max(np.abs(tr.mess_p_kw-pda))),max_abs_corrective_delta_P=float(np.max(np.abs([e['corrective_delta_P'] for e in events]))),
+   max_abs_delta_P_DA=float(np.max(np.abs(tr.mess_p_kw-pcommand))),max_abs_corrective_delta_P=float(np.max(np.abs([e['corrective_delta_P'] for e in events]))),
   energy_recovery_kwh=float(sum(np.sum(np.maximum(-np.array(e['recovery_P']),0))*a.charge_efficiency*a.interval_hours for e in events)),
   final_energy_deviation_from_causal_baseline=events[-1]['energy_deviation_kwh'],terminal_energy_kwh=e.tolist(),
   AC_PASS=not validation.summary['physical_violation'],summary=validation.summary,regression=regression,controller_SHA=sha(OUT/'actual_controller.py'),
   runtime_seconds=time.time()-started,threads=4,independent_energy_audit_error=error,continuous_replay_max_error=max(v_error,i_error),
-  Planning_Fresh_preserved=True,Planning_optimizer_calls=0,future_Actual_exposure=0,outstanding_travel_reservations=str(reservations))
+   Planning_Fresh_preserved=True,Planning_optimizer_calls=0,future_Actual_exposure=0,outstanding_travel_reservations='none',original_Actual_P_SOC_parity=True,actuator_saturation_count=actuator_saturation)
  assert sha(OUT/'actual_controller.py')==controller_start_sha,'CONTROLLER_CHANGED_DURING_EXECUTION'
  summary.update(case_id=case.get('case_id'),round=case.get('round','1R' if round1 else '2R' if policy=='B3' else 'COMMON'),input_common_directory=str(ci),decision_sha256=case['decision_sha256'])
  save(folder/'COMPLETE.json',summary);env.save_audit(folder/'IO_AUDIT.json')

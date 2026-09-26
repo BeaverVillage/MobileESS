@@ -1,25 +1,15 @@
-"""Q-first, current-slot minimum-P correction, causal energy recovery.
-
-Pure controller: no filesystem, global mutable state, feeder imports or future
-Actual arrays. Each campaign constructs its own instance and exact evaluator.
-P minimization is local exact-AC constrained search; no global claim is made.
-"""
+"""Causal event-triggered Q repair with frozen physical P and SOC execution."""
 from dataclasses import dataclass
+
 import numpy as np
-from scipy.optimize import minimize
 
-REVISION = 'QFIRST_MINP_CAUSAL_V1_20260920'
+REVISION = "Q_ONLY_EVENT_TRIGGERED_MINIMAL_REPAIR_V3_20260920"
 TOL = 1e-9
-
-
-def ac_constraints(r):
-    return np.r_[20*(r['v']-.95),20*(1.05-r['v']),1-r['ipu'],
-                 1-r['kva'][np.isfinite(r['kva'])]]
-
-
-def ac_feasible(r):
-    return bool(r['converged'] and r.get('settled',True)
-                and np.min(ac_constraints(r)) >= -TOL)
+IMPROVEMENT_TOL = 1e-6
+DEVIATION_TOL = 1e-9
+EVENT_RHO_PU = 0.02
+EVENT_VMIN_PU = 0.005
+EVENT_VMAX_PU = 0.005
 
 
 @dataclass(frozen=True)
@@ -34,141 +24,207 @@ class Limits:
     faces: int = 16
 
 
-def energy_next(e,p,a):
-    return e+a.eta_c*np.maximum(-p,0)*a.dt-np.maximum(p,0)*a.dt/a.eta_d
+def energy_next(e, p, a):
+    return e + a.eta_c * np.maximum(-p, 0) * a.dt - np.maximum(p, 0) * a.dt / a.eta_d
 
 
-def q_bounds(p,connected,a):
-    h=np.sqrt(np.maximum(0,a.smax*a.smax-p*p))
-    lo=-h;hi=h.copy();ap=a.smax*np.cos(np.pi/a.faces)
-    for k in range(a.faces):
-        co=np.cos(2*np.pi*k/a.faces);si=np.sin(2*np.pi*k/a.faces)
-        if si>1e-12:hi=np.minimum(hi,(ap-co*p)/si)
-        elif si < -1e-12:lo=np.maximum(lo,(ap-co*p)/si)
-        else:assert np.all(co*p<=ap+1e-7)
-    return np.where(connected,lo,0.),np.where(connected,hi,0.)
+def q_bounds(p, connected, a):
+    assert np.all(np.abs(p) <= a.pmax + 1e-8)
+    assert np.all(np.abs(p) <= a.smax + 1e-8)
+    headroom = np.sqrt(np.maximum(0.0, a.smax * a.smax - p * p))
+    return np.where(connected, -headroom, 0.0), np.where(connected, headroom, 0.0)
+
+
+def ac_feasible(r):
+    if not r["converged"] or not r.get("settled", True):
+        return False
+    v = np.asarray(r["v"])
+    current = np.asarray(r["ipu"] if "ipu" in r else r["line"])
+    tx = np.asarray(r.get("tx", []))
+    kva = np.asarray(r["kva"])
+    return bool(
+        np.all(np.isfinite(v))
+        and np.min(v) >= 0.95 - TOL
+        and np.max(v) <= 1.05 + TOL
+        and np.max(current) <= 1 + TOL
+        and (tx.size == 0 or np.max(tx) <= 1 + TOL)
+        and np.max(kva[np.isfinite(kva)], initial=0) <= 1 + TOL
+    )
+
+
+def line_rho(r):
+    if "line_rho" in r:
+        return float(r["line_rho"])
+    return float(np.max(r["line"] if "line" in r else r["ipu"]))
+
+
+def state_values(r):
+    return dict(rho=line_rho(r), vmin=float(np.min(r["v"])), vmax=float(np.max(r["v"])))
+
+
+def deviation(state, da):
+    # Fixed, dimensionless L1 distance, normalized by the event thresholds.
+    return (abs(state["rho"] - da["rho"]) / EVENT_RHO_PU
+            + abs(state["vmin"] - da["vmin"]) / EVENT_VMIN_PU
+            + abs(state["vmax"] - da["vmax"]) / EVENT_VMAX_PU)
 
 
 class Controller:
-    def __init__(self,limits,initial_energy,q_corrector):
-        self.a=limits;self.energy=np.array(initial_energy,dtype=float)
-        self.shadow=self.energy.copy();self.q_corrector=q_corrector;self.slot=0
+    def __init__(self, limits, initial_energy, q_corrector=None):
+        self.a = limits
+        self.energy = np.asarray(initial_energy, dtype=float)
+        self.slot = 0
+        self.q_corrector = q_corrector
 
-    def p_bounds(self,e,connected,p_da):
-        a=self.a;cap=min(a.pmax,a.smax*np.cos(np.pi/a.faces))
-        lo=np.maximum(-cap,-np.maximum(0,a.emax-e)/(a.eta_c*a.dt))
-        hi=np.minimum(cap,np.maximum(0,e-a.emin)*a.eta_d/a.dt)
-        # Preserve the frozen charge/discharge commitment. A zero DA command
-        # is not permission to introduce a new charge/discharge commitment.
-        lo=np.where(p_da<0,lo,0.);hi=np.where(p_da>0,hi,0.)
-        return np.where(connected,lo,0.),np.where(connected,hi,0.)
+    def step(self, *, slot, p_da, q_da, connected, travel_energy, evaluate,
+             da_exact, allow_correct=True):
+        assert slot == self.slot, "NONCAUSAL_OR_OUT_OF_ORDER_SLOT"
+        a = self.a
+        p = np.asarray(p_da, dtype=float).copy()
+        q_da = np.asarray(q_da, dtype=float)
+        connected = np.asarray(connected, dtype=bool)
+        travel = np.asarray(travel_energy, dtype=float)
+        assert p.shape == q_da.shape == connected.shape == travel.shape == self.energy.shape
+        if np.any((~connected) & (np.abs(p) > 1e-9)):
+            raise RuntimeError("FROZEN_P_DISCONNECTED")
+        if np.any((~connected) & (np.abs(q_da) > 1e-9)):
+            raise RuntimeError("FROZEN_Q_DISCONNECTED")
+        lo, hi = q_bounds(p, connected, a)
+        capable = bool(np.all(q_da >= lo - 1e-8) and np.all(q_da <= hi + 1e-8))
+        before = self.energy.copy()
+        available = before - travel
+        after = energy_next(available, p, a)
+        if (np.any(available < a.emin - 1e-7) or np.any(after < a.emin - 1e-7)
+                or np.any(after > a.emax + 1e-7)):
+            raise RuntimeError("FROZEN_P_ENERGY_BOUND_FAILURE")
 
-    def _minimal_p(self,evaluate,p0,q0,q_da,lo,hi,connected):
-        a=self.a;idx=np.flatnonzero(connected);n=len(idx);cache={};runs=[]
-        if not n:return None,{'status':'NO_CONNECTED_P_VARIABLE'}
-        def unpack(x):
-            p=p0.copy();q=q0.copy();p[idx]=x[:n]*a.pmax;q[idx]=x[n:2*n]*a.smax
-            return p,q
-        def ev(x):
-            p,q=unpack(x);key=np.r_[p,q].tobytes()
-            if key not in cache:cache[key]=(p,q,evaluate(p,q))
-            return cache[key][2]
-        def cons(x):
-            p,q=unpack(x);r=ev(x)
-            g=ac_constraints(r) if r['converged'] else np.full_like(ac_constraints(r),-10.)
-            pcs=[1-(p[idx]**2+q[idx]**2)/a.smax**2]
-            for k in range(a.faces):
-                theta=2*np.pi*k/a.faces
-                pcs.append(np.cos(np.pi/a.faces)-(p[idx]*np.cos(theta)+q[idx]*np.sin(theta))/a.smax)
-            delta=(p[idx]-p0[idx])/a.pmax;u=x[2*n:]
-            return np.r_[g,*pcs,u-delta,u+delta]
-        bounds=list(zip(lo[idx]/a.pmax,hi[idx]/a.pmax))+[(-1.,1.)]*n+[(0.,2.)]*n
-        def point(p,q):return np.r_[p[idx]/a.pmax,q[idx]/a.smax,np.abs(p[idx]-p0[idx])/a.pmax]
-        def obj(x):return float(np.sum(x[2*n:]))
-        seeds=[point(p0,q0)]
-        neutral=np.clip(np.zeros_like(p0),lo,hi)
-        lq,hq=q_bounds(neutral,connected,a);seeds.append(point(neutral,np.clip(q_da,lq,hq)))
-        for seed in seeds:
-            res=minimize(obj,seed,method='SLSQP',bounds=bounds,
-                         constraints=[{'type':'ineq','fun':cons}],
-                         options={'maxiter':100,'ftol':1e-11,'disp':False})
-            ev(res.x);runs.append({'success':bool(res.success),'message':str(res.message),'iterations':int(res.nit)})
-        def valid(p,q,r):
-            if not ac_feasible(r) or np.any(p<lo-1e-7) or np.any(p>hi+1e-7):return False
-            lq,hq=q_bounds(p,connected,a)
-            return bool(np.all(q>=lq-1e-7) and np.all(q<=hq+1e-7))
-        choices=[v for v in cache.values() if valid(*v)]
-        proof={'solver_runs':runs,'unique_trials':len(cache),'global_minimum_proven':False,
-               'objective':'lexicographic total absolute delta P, then squared delta Q to frozen DA',
-               'optimality':'Best exact-feasible candidate from local constrained searches'}
-        if not choices:return None,{**proof,'status':'MINIMAL_P_SEARCH_UNRESOLVED'}
-        best=min(choices,key=lambda v:(float(np.abs(v[0]-p0).sum()),float(np.square(v[1]-q_da).sum())))
-        bound=float(np.abs(best[0]-p0).sum())/a.pmax+1e-8
-        res=minimize(lambda x:float(np.square(unpack(x)[1]-q_da).sum()/a.smax**2),
-                     point(best[0],best[1]),method='SLSQP',bounds=bounds,
-                     constraints=[{'type':'ineq','fun':cons},{'type':'ineq','fun':lambda x:bound-obj(x)}],
-                     options={'maxiter':60,'ftol':1e-11,'disp':False})
-        r=ev(res.x);p,q=unpack(res.x)
-        if valid(p,q,r) and np.abs(p-p0).sum()/a.pmax<=bound+1e-8:best=(p,q,r)
-        return best,{**proof,'status':'P_CORRECTED','sum_absolute_delta_P_kw':float(np.abs(best[0]-p0).sum())}
+        da = {key: float(da_exact[key]) for key in ("rho", "vmin", "vmax")}
+        baseline = evaluate(p, q_da)
+        base = state_values(baseline)
+        base_pass = ac_feasible(baseline) and capable
+        base_dev = deviation(base, da)
+        material = (abs(base["rho"] - da["rho"]) >= EVENT_RHO_PU
+                    or abs(base["vmin"] - da["vmin"]) >= EVENT_VMIN_PU
+                    or abs(base["vmax"] - da["vmax"]) >= EVENT_VMAX_PU)
+        trigger = "AC_FAIL" if not base_pass else "MATERIAL_DA_DEVIATION" if material else "NONE"
+        trials = 1
+        chosen = None
+        candidates = []
+        seen = {q_da.tobytes()}
 
-    def step(self,*,slot,p_da,q_da,connected,travel_energy,evaluate,allow_correct=True):
-        assert slot==self.slot,'NONCAUSAL_OR_OUT_OF_ORDER_SLOT'
-        a=self.a;p_da=np.asarray(p_da,dtype=float);q_da=np.asarray(q_da,dtype=float)
-        connected=np.asarray(connected,dtype=bool);travel=np.asarray(travel_energy,dtype=float)
-        before=self.energy.copy();available=before-travel;shadow_available=self.shadow-travel
-        if np.any(available<a.emin-1e-7):raise RuntimeError('CAUSAL_DEPARTURE_ENERGY_INFEASIBLE')
-        lo,hi=self.p_bounds(available,connected,p_da)
-        p0=np.clip(p_da,lo,hi);ql,qh=q_bounds(p0,connected,a);q0=np.clip(q_da,ql,qh)
-        sl,sh=self.p_bounds(shadow_available,connected,p_da)
-        self.shadow=energy_next(shadow_available,np.clip(p_da,sl,sh),a)
-        baseline=evaluate(p0,q0);p=p0.copy();q=q0.copy();r=baseline
-        event={'slot':slot,'status':'UNCHANGED','Q_search':None,'P_search':None,
-               'current_actual_slot_exposed':slot,'future_actual_rows_exposed':0,
-               'baseline_feasible':ac_feasible(baseline),'energy_before_kwh':before.tolist(),
-               'travel_energy_kwh':travel.tolist(),'baseline_P_EXEC':p0.tolist()}
-        if allow_correct and not ac_feasible(r):
-            q,r,proof=self.q_corrector(lambda v:evaluate(p0,v),q0,ql,qh,q_da=q_da)
-            event['Q_search']=proof;event['status']=proof['status']
-            if not ac_feasible(r):
-                # First P domain: only reduce existing charging toward zero.
-                clo=p0.copy();chi=np.where(p0<0,0.,p0)
-                best,proof=self._minimal_p(evaluate,p0,q,q_da,clo,chi,connected)
-                event['P_search']={'charging_curtailment':proof}
-                if best is None:
-                    best,proof=self._minimal_p(evaluate,p0,q,q_da,lo,hi,connected)
-                    event['P_search']['remaining_physical_domain']=proof
-                if best is not None:p,q,r=best;event['status']='P_CORRECTED'
-                else:p,q,r=p0,q0,baseline;event['status']='HARD_LIMIT_UNRESOLVED'
-        recovery=np.zeros_like(p)
-        # Repay only accumulated energy deviation, within this slot's frozen
-        # commitment and exact headroom. The controller receives no future data.
-        if allow_correct and ac_feasible(r):
-            debt=self.shadow-energy_next(available,p,a)
-            target=p.copy()
-            charging=(p_da<0)&connected&(debt>1e-8)
-            target[charging]=np.maximum(lo[charging],p[charging]-debt[charging]/(a.eta_c*a.dt))
-            excess=(p_da>0)&connected&(debt < -1e-8)
-            target[excess]=np.minimum(hi[excess],p[excess]-debt[excess]*a.eta_d/a.dt)
-            if np.max(np.abs(target-p))>1e-7:
-                original=p.copy();lower=0.;upper=1.;chosen=(p.copy(),q.copy(),r)
-                for it in range(22):
-                    frac=1. if it==0 else (lower+upper)/2
-                    trial=original+frac*(target-original);lq,hq=q_bounds(trial,connected,a)
-                    tq=np.clip(q,lq,hq);tr=evaluate(trial,tq)
-                    if ac_feasible(tr):lower=frac;chosen=(trial,tq,tr)
-                    else:upper=frac
-                    if lower==1. or (upper-lower)*np.max(np.abs(target-original))<1e-6:break
-                p,q,r=chosen;recovery=p-original
-        # Commit selected state even if the last diagnostic trial was rejected.
-        r=evaluate(p,q);self.energy=energy_next(available,p,a)
-        assert np.all(self.energy>=a.emin-1e-7) and np.all(self.energy<=a.emax+1e-7)
-        assert np.all(np.hypot(p,q)<=a.smax+1e-7)
-        assert np.all(p[~connected]==0) and np.all(q[~connected]==0)
-        event.update(P_EXEC=p.tolist(),Q_EXEC=q.tolist(),delta_P_DA=(p-p_da).tolist(),
-                     corrective_delta_P=(p-p0-recovery).tolist(),recovery_P=recovery.tolist(),
-                     energy_after_kwh=self.energy.tolist(),energy_deviation_kwh=(self.energy-self.shadow).tolist(),
-                     AC_PASS=ac_feasible(r),P_intervention=bool(np.max(np.abs(p-p0))>1e-6),
-                     Q_intervention=bool(np.max(np.abs(q-q0))>1e-6))
-        self.slot+=1
-        return p,q,r,event
+        def try_q(value):
+            nonlocal trials
+            value = np.clip(np.asarray(value, dtype=float), lo, hi)
+            key = value.tobytes()
+            if key in seen:
+                return
+            seen.add(key)
+            result = evaluate(p, value)
+            trials += 1
+            if not ac_feasible(result):
+                return
+            state = state_values(result)
+            dev = deviation(state, da)
+            delta = float(np.abs(value - q_da).sum())
+            item = (delta, dev, state["rho"], value.copy(), result)
+            candidates.append(item)
+            return item
+
+        if allow_correct and trigger != "NONE":
+            # Screen small Q steps first. Stop at the first magnitude with an
+            # acceptable repair; no current-slot rho minimization.
+            scale = a.smax / 800.0
+            radii = ((1, 2, 4, 8, 16) if trigger == "MATERIAL_DA_DEVIATION"
+                     else (1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 800))
+            promising_directions = None
+            for radius in radii:
+                count_before = len(candidates)
+                first_radius_directions = set()
+                for j in np.flatnonzero(connected):
+                    for sign in (-1., 1.):
+                        if (trigger == "MATERIAL_DA_DEVIATION" and promising_directions is not None
+                                and (j, sign) not in promising_directions):
+                            continue
+                        trial = q_da.copy()
+                        trial[j] += sign * radius * scale
+                        item = try_q(trial)
+                        if (trigger == "MATERIAL_DA_DEVIATION" and radius == 1 and item is not None
+                                and item[2] < base["rho"] - IMPROVEMENT_TOL):
+                            first_radius_directions.add((j, sign))
+                new = candidates[count_before:]
+                if trigger == "MATERIAL_DA_DEVIATION":
+                    preferred = [c for c in new if c[2] < base["rho"] - IMPROVEMENT_TOL
+                                 and c[1] < base_dev - DEVIATION_TOL]
+                else:
+                    preferred = [c for c in new if c[1] < base_dev - DEVIATION_TOL]
+                if preferred:
+                    chosen = min(preferred, key=lambda c: (c[0], c[1], c[2]))
+                    break
+                if trigger == "MATERIAL_DA_DEVIATION" and radius == 1:
+                    promising_directions = first_radius_directions
+                    if not promising_directions:
+                        break
+
+            if trigger == "AC_FAIL" and chosen is None and self.q_corrector is not None:
+                # Inherited IEEE123 Q safety search is a fallback for difficult
+                # AC failures. Stop after 16 feasible exact trials.
+                class SufficientFeasibleSamples(Exception):
+                    pass
+
+                def safety_evaluate(value):
+                    nonlocal trials
+                    value = np.asarray(value, dtype=float).copy()
+                    result = evaluate(p, value)
+                    trials += 1
+                    if ac_feasible(result):
+                        state = state_values(result)
+                        candidates.append((float(np.abs(value - q_da).sum()), deviation(state, da),
+                                           state["rho"], value.copy(), result))
+                        if len(candidates) >= 16:
+                            raise SufficientFeasibleSamples
+                    return result
+
+                try:
+                    self.q_corrector(safety_evaluate, np.clip(q_da, lo, hi), lo, hi, q_da=q_da)
+                except SufficientFeasibleSamples:
+                    pass
+
+            if trigger == "AC_FAIL" and chosen is None and candidates:
+                preferred = [c for c in candidates if c[1] < base_dev - DEVIATION_TOL]
+                chosen = (min(preferred, key=lambda c: (c[0], c[1], c[2])) if preferred
+                          else min(candidates, key=lambda c: (c[1], c[0], c[2])))
+
+        if chosen is not None:
+            _, expected_dev, expected_rho, q, _ = chosen
+            result = evaluate(p, q)
+            trials += 1
+            if (not ac_feasible(result) or abs(line_rho(result) - expected_rho) > 1e-9
+                    or abs(deviation(state_values(result), da) - expected_dev) > 1e-9):
+                raise RuntimeError("SELECTED_Q_EXACT_REVALIDATION_MISMATCH")
+            status = "Q_RESTORED" if trigger == "AC_FAIL" else "Q_MATERIAL_REPAIRED"
+        else:
+            q, result = q_da.copy(), baseline
+            status = "UNCHANGED" if base_pass else "Q_ONLY_UNRESOLVED"
+        assert np.array_equal(p, p_da), "P_DA_DRIFT"
+        if chosen is not None:
+            assert np.all(np.hypot(p, q) <= a.smax + 1e-7)
+        self.energy = after
+        self.slot += 1
+        accepted = state_values(result)
+        event = dict(
+            slot=slot, status=status, trigger=trigger, event_triggered=bool(allow_correct and trigger != "NONE"),
+            exact_trials=trials, baseline_AC_PASS=base_pass, AC_PASS=ac_feasible(result),
+            DA_exact=da, baseline_rho=base["rho"], accepted_rho=accepted["rho"],
+            baseline_Vmin=base["vmin"], baseline_Vmax=base["vmax"],
+            accepted_Vmin=accepted["vmin"], accepted_Vmax=accepted["vmax"],
+            baseline_deviation=base_dev, accepted_deviation=deviation(accepted, da),
+            P_EXEC=p.tolist(), Q_DA=q_da.tolist(), Q_EXEC=q.tolist(),
+            corrective_delta_P=np.zeros_like(p).tolist(), recovery_P=np.zeros_like(p).tolist(),
+            energy_before_kwh=before.tolist(), travel_energy_kwh=travel.tolist(),
+            energy_after_kwh=after.tolist(), energy_deviation_kwh=np.zeros_like(p).tolist(),
+            P_intervention=False, Q_intervention=bool(np.max(np.abs(q - q_da)) > 1e-6),
+            max_abs_delta_Q=float(np.max(np.abs(q - q_da))),
+            current_actual_slot_exposed=slot, future_actual_rows_exposed=0,
+            global_optimality_claimed=False,
+        )
+        return p, q, result, event
