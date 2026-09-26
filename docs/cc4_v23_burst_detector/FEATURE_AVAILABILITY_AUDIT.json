@@ -1,0 +1,874 @@
+{
+  "PASS": true,
+  "purpose": "Fixed burst-detector feature development; raw LightGBM baseline remains unchanged",
+  "rows": 10632,
+  "days": 443,
+  "shape": [
+    443,
+    24,
+    163
+  ],
+  "dtype": "float32",
+  "inherited_feature_count": 71,
+  "new_feature_count": 92,
+  "feature_names": [
+    "history_submit_count_12_mean",
+    "history_submit_count_12_std",
+    "history_submit_count_12_max",
+    "history_mature_GPUh_12_mean",
+    "history_mature_GPUh_12_std",
+    "history_mature_GPUh_12_max",
+    "history_mature_mask_12_mean",
+    "history_mature_mask_12_std",
+    "history_mature_mask_12_max",
+    "history_maturity_age_hours_12_mean",
+    "history_maturity_age_hours_12_std",
+    "history_maturity_age_hours_12_max",
+    "history_submit_count_48_mean",
+    "history_submit_count_48_std",
+    "history_submit_count_48_max",
+    "history_mature_GPUh_48_mean",
+    "history_mature_GPUh_48_std",
+    "history_mature_GPUh_48_max",
+    "history_mature_mask_48_mean",
+    "history_mature_mask_48_std",
+    "history_mature_mask_48_max",
+    "history_maturity_age_hours_48_mean",
+    "history_maturity_age_hours_48_std",
+    "history_maturity_age_hours_48_max",
+    "history_submit_count_336_mean",
+    "history_submit_count_336_std",
+    "history_submit_count_336_max",
+    "history_mature_GPUh_336_mean",
+    "history_mature_GPUh_336_std",
+    "history_mature_GPUh_336_max",
+    "history_mature_mask_336_mean",
+    "history_mature_mask_336_std",
+    "history_mature_mask_336_max",
+    "history_maturity_age_hours_336_mean",
+    "history_maturity_age_hours_336_std",
+    "history_maturity_age_hours_336_max",
+    "history_submit_count_last",
+    "history_mature_GPUh_last",
+    "history_mature_mask_last",
+    "history_maturity_age_hours_last",
+    "slot15_fraction",
+    "minute_of_day",
+    "hour_sin",
+    "hour_cos",
+    "weekday_sin",
+    "weekday_cos",
+    "weekend",
+    "target_hour",
+    "lead_hours",
+    "seasonal15_7d_GPUh",
+    "seasonal15_7d_count",
+    "seasonal15_7d_mature",
+    "seasonal15_14d_GPUh",
+    "seasonal15_14d_count",
+    "seasonal15_14d_mature",
+    "seasonal15_21d_GPUh",
+    "seasonal15_21d_count",
+    "seasonal15_21d_mature",
+    "seasonal15_28d_GPUh",
+    "seasonal15_28d_count",
+    "seasonal15_28d_mature",
+    "window_start_slot",
+    "horizon_hours",
+    "cumulative_lag_7d_GPUh",
+    "cumulative_lag_7d_mature",
+    "cumulative_lag_14d_GPUh",
+    "cumulative_lag_14d_mature",
+    "cumulative_lag_21d_GPUh",
+    "cumulative_lag_21d_mature",
+    "cumulative_lag_28d_GPUh",
+    "cumulative_lag_28d_mature",
+    "burst_work_168h_sum",
+    "burst_work_168h_mean",
+    "burst_work_168h_maximum",
+    "burst_work_168h_variance",
+    "burst_work_168h_mature_hours",
+    "burst_work_168h_mature_fraction",
+    "burst_work_168h_missing",
+    "burst_arrivals_168h_mean",
+    "burst_arrivals_168h_maximum",
+    "burst_arrivals_168h_variance",
+    "burst_work_6h_sum",
+    "burst_work_6h_mean",
+    "burst_work_6h_maximum",
+    "burst_work_6h_variance",
+    "burst_work_6h_mature_hours",
+    "burst_work_6h_mature_fraction",
+    "burst_work_6h_missing",
+    "burst_arrivals_6h_sum",
+    "burst_arrivals_6h_mean",
+    "burst_arrivals_6h_maximum",
+    "burst_arrivals_6h_variance",
+    "burst_count_6h",
+    "burst_frequency_6h",
+    "burst_work_6h_previous_mature_fraction",
+    "burst_work_6h_acceleration",
+    "burst_work_6h_acceleration_valid",
+    "burst_arrivals_6h_acceleration",
+    "burst_work_6h_to_168h_ratio",
+    "burst_work_6h_ratio_valid",
+    "burst_work_6h_denominator_observed_zero",
+    "burst_arrivals_6h_to_168h_ratio",
+    "burst_arrivals_6h_ratio_valid",
+    "burst_work_12h_sum",
+    "burst_work_12h_mean",
+    "burst_work_12h_maximum",
+    "burst_work_12h_variance",
+    "burst_work_12h_mature_hours",
+    "burst_work_12h_mature_fraction",
+    "burst_work_12h_missing",
+    "burst_arrivals_12h_sum",
+    "burst_arrivals_12h_mean",
+    "burst_arrivals_12h_maximum",
+    "burst_arrivals_12h_variance",
+    "burst_count_12h",
+    "burst_frequency_12h",
+    "burst_work_12h_previous_mature_fraction",
+    "burst_work_12h_acceleration",
+    "burst_work_12h_acceleration_valid",
+    "burst_arrivals_12h_acceleration",
+    "burst_work_12h_to_168h_ratio",
+    "burst_work_12h_ratio_valid",
+    "burst_work_12h_denominator_observed_zero",
+    "burst_arrivals_12h_to_168h_ratio",
+    "burst_arrivals_12h_ratio_valid",
+    "burst_work_24h_sum",
+    "burst_work_24h_mean",
+    "burst_work_24h_maximum",
+    "burst_work_24h_variance",
+    "burst_work_24h_mature_hours",
+    "burst_work_24h_mature_fraction",
+    "burst_work_24h_missing",
+    "burst_arrivals_24h_sum",
+    "burst_arrivals_24h_mean",
+    "burst_arrivals_24h_maximum",
+    "burst_arrivals_24h_variance",
+    "burst_count_24h",
+    "burst_frequency_24h",
+    "burst_work_24h_previous_mature_fraction",
+    "burst_work_24h_acceleration",
+    "burst_work_24h_acceleration_valid",
+    "burst_arrivals_24h_acceleration",
+    "burst_work_24h_to_168h_ratio",
+    "burst_work_24h_ratio_valid",
+    "burst_work_24h_denominator_observed_zero",
+    "burst_arrivals_24h_to_168h_ratio",
+    "burst_arrivals_24h_ratio_valid",
+    "burst_time_since_recent_burst_hours",
+    "burst_recent_burst_seen",
+    "burst_time_since_last_observed_burst_hours",
+    "burst_historical_burst_seen",
+    "burst_global_frequency",
+    "burst_global_support_hours",
+    "burst_global_missing",
+    "burst_target_hour_frequency",
+    "burst_target_hour_support_hours",
+    "burst_target_hour_missing",
+    "burst_target_weekday_frequency",
+    "burst_target_weekday_support_hours",
+    "burst_target_weekday_missing",
+    "burst_target_hour_weekday_frequency",
+    "burst_target_hour_weekday_support_hours",
+    "burst_target_hour_weekday_missing"
+  ],
+  "existing_71_features_exactly_preserved": true,
+  "extended_array_sha256": "7a61d187217eda541cb891ed0716064f71f6c03ed19c485cac2f1a00a4ddad75",
+  "feature_names_sha256": "07ac99013b6ddb16afbb62f3f9d0485a7fe6d79131a5fe8cdda5b319c6d3cc2c",
+  "source_sha256": {
+    "DATA.npz": "214462b56a126e3d5cc368bb2ac61d3e7302210a6a6445ef1f683d1e45d4fb05",
+    "DAY_LEDGER.csv": "97ca07ba1e0c41091abd7d34e2e26f41b7d20b3adb3aff58e7265951be4fd010",
+    "FEATURE_CONTRACT.json": "7e9c487f7b1afe41baf1718742b8c97c7989d911a2348022fcf4f91d1759b4eb",
+    "FEATURE_MATURITY_PROOF.parquet": "ae86941edfc4f918ddf5666a0e75066c382ca935ec312224e5a40a09edc6139a",
+    "TARGET_RECONSTRUCTION_AUDIT.json": "5e01024d114aec5d43b1e96d30e1ad45d1f106c6d59896b68733c91e23f6aefc",
+    "prepare.py": "02399fb186915c3a42f4270b5bdf33ac1db5b44d7d67a5701566b0c9edbf0982"
+  },
+  "feature_module_sha256": "65df2b62c7d127727d683045616f2f44044056b1286066a6badbef6c684711d9",
+  "modeled_clock": "Etc/GMT-10",
+  "issue_rule": "D-1 18:00 fixed UTC+10; all recent windows end exactly at issue",
+  "burst_threshold": 860.3532222222221,
+  "threshold_source": "Unchanged PR63/64/67 TRAIN positive-hour empirical95th percentile; fixed supplied constant, never recomputed from evaluation",
+  "past_columns": [
+    "all_job_submit_count",
+    "maturity_gated_GPUh",
+    "mature_mask",
+    "maturity_age_hours",
+    "hour_sin",
+    "hour_cos",
+    "weekday_sin",
+    "weekday_cos"
+  ],
+  "past_workload_precision": "Inherited float32 half-hour GPUh; complete-hour sums computed in float64 then features stored float32",
+  "recent_windows_hours": [
+    6,
+    12,
+    24
+  ],
+  "corresponding_halfhour_bins": [
+    12,
+    24,
+    48
+  ],
+  "recent_workload_rule": "Only mature_mask==1 and maturity_age_hours>0; both half-hour bins must qualify for an hourly workload; unavailable hours omitted with explicit support/missing flags",
+  "counts_rule": "All-job submit counts, including CPU jobs, observable in completed half-hour arrival bins; these are not GPU-only counts",
+  "acceleration_rule": "Current-window mean minus immediately preceding disjoint equal-duration window mean; workload valid only with support in both",
+  "ratio_rule": "Recent observed mean divided by 168h observed mean only with positive denominator and positive workload support; no epsilon, explicit validity/zero-denominator flags",
+  "history_rule": "Committed hourly target labels used only when whole-day maturity<issue AND arrival-day end<issue; exclude PURGE days; exact row indices preserved",
+  "historical_rate_rule": "Unsmoothed empirical global/hour/weekday/hour+weekday burst fractions plus exact support and missingness; all conditioning calendar values known at issue",
+  "unseen_last_burst": "Numeric age placeholder0 with separate seen flag; history truncated at committed dataset start plus seven-day recent snapshot",
+  "new_feature_availability": "Conservative issue_time upper bound for every added feature; exact support/masks and stricter workload cutoffs in FEATURE_MEMBERSHIP.json",
+  "new_feature_hour_availability_checks": 978144,
+  "ingestion_provenance": "Logical event-time/as-of reconstruction only; actual telemetry ingestion latency and mutable request versions unverified",
+  "model_fitting_performed": false,
+  "comparison_metrics_accessed": false,
+  "feature_specification": [
+    {
+      "name": "burst_work_168h_sum",
+      "family": "recent_workload",
+      "definition": "Mature complete-hour GPUh sum in [issue-168h, issue).",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_168h_mean",
+      "family": "recent_workload",
+      "definition": "Mature complete-hour GPUh mean in [issue-168h, issue).",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_168h_maximum",
+      "family": "recent_workload",
+      "definition": "Mature complete-hour GPUh maximum in [issue-168h, issue).",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_168h_variance",
+      "family": "recent_workload",
+      "definition": "Mature complete-hour GPUh variance in [issue-168h, issue).",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_168h_mature_hours",
+      "family": "recent_support",
+      "definition": "Number of complete hours with both half-hour workloads strictly mature.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_168h_mature_fraction",
+      "family": "recent_support",
+      "definition": "Mature complete-hour support divided by 168.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_168h_missing",
+      "family": "recent_support",
+      "definition": "1 when no complete-hour workload is observable.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_168h_mean",
+      "family": "recent_arrivals",
+      "definition": "All-job arrivals per clock hour over 168 observed hours.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_168h_maximum",
+      "family": "recent_arrivals",
+      "definition": "Maximum observed all-job hourly arrivals in seven days.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_168h_variance",
+      "family": "recent_arrivals",
+      "definition": "Population variance of all-job hourly arrivals in seven days.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_6h_sum",
+      "family": "recent_workload",
+      "definition": "sum of observable complete-hour GPUh in [issue-6h, issue); unobserved hours omitted, not counted as zero.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_6h_mean",
+      "family": "recent_workload",
+      "definition": "mean of observable complete-hour GPUh in [issue-6h, issue); unobserved hours omitted, not counted as zero.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_6h_maximum",
+      "family": "recent_workload",
+      "definition": "maximum of observable complete-hour GPUh in [issue-6h, issue); unobserved hours omitted, not counted as zero.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_6h_variance",
+      "family": "recent_workload",
+      "definition": "variance of observable complete-hour GPUh in [issue-6h, issue); unobserved hours omitted, not counted as zero.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_6h_mature_hours",
+      "family": "recent_support",
+      "definition": "Complete-hour workload support in the last 6 hours.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_6h_mature_fraction",
+      "family": "recent_support",
+      "definition": "Observable complete-hour workload fraction in the last 6 hours.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_6h_missing",
+      "family": "recent_support",
+      "definition": "1 when current workload-window statistics are unavailable; their numeric placeholder is zero.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_6h_sum",
+      "family": "recent_arrivals",
+      "definition": "sum of observed all-job hourly submit counts in [issue-6h, issue).",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_6h_mean",
+      "family": "recent_arrivals",
+      "definition": "mean of observed all-job hourly submit counts in [issue-6h, issue).",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_6h_maximum",
+      "family": "recent_arrivals",
+      "definition": "maximum of observed all-job hourly submit counts in [issue-6h, issue).",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_6h_variance",
+      "family": "recent_arrivals",
+      "definition": "variance of observed all-job hourly submit counts in [issue-6h, issue).",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_count_6h",
+      "family": "recent_bursts",
+      "definition": "Strictly mature complete hours above the fixed TRAIN burst threshold in the last 6 hours; workload support is explicit.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_frequency_6h",
+      "family": "recent_bursts",
+      "definition": "Observed burst count divided by mature hourly support; zero placeholder if unavailable.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_6h_previous_mature_fraction",
+      "family": "acceleration_support",
+      "definition": "Mature support fraction of preceding [12h,6h) window.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_6h_acceleration",
+      "family": "acceleration",
+      "definition": "Difference between observed current-window and preceding-window mean hourly GPUh; no inferred workloads.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_6h_acceleration_valid",
+      "family": "acceleration_support",
+      "definition": "Both disjoint workload windows have positive observed support.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_6h_acceleration",
+      "family": "acceleration",
+      "definition": "Difference between current and preceding all-job arrival rates; both count windows fully observable.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_6h_to_168h_ratio",
+      "family": "relative_level",
+      "definition": "Current observed hourly GPUh mean divided by seven-day observed mean; no epsilon or inferred denominator.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_6h_ratio_valid",
+      "family": "relative_support",
+      "definition": "Current and long-term workloads observed and long-term mean strictly positive.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_6h_denominator_observed_zero",
+      "family": "relative_support",
+      "definition": "Separates an observed zero long-term denominator from unavailable workload support.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_6h_to_168h_ratio",
+      "family": "relative_level",
+      "definition": "Observed current all-job arrival rate divided by observed seven-day arrival rate.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_6h_ratio_valid",
+      "family": "relative_support",
+      "definition": "Seven-day all-job arrival denominator is positive; all count windows are observable.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_12h_sum",
+      "family": "recent_workload",
+      "definition": "sum of observable complete-hour GPUh in [issue-12h, issue); unobserved hours omitted, not counted as zero.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_12h_mean",
+      "family": "recent_workload",
+      "definition": "mean of observable complete-hour GPUh in [issue-12h, issue); unobserved hours omitted, not counted as zero.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_12h_maximum",
+      "family": "recent_workload",
+      "definition": "maximum of observable complete-hour GPUh in [issue-12h, issue); unobserved hours omitted, not counted as zero.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_12h_variance",
+      "family": "recent_workload",
+      "definition": "variance of observable complete-hour GPUh in [issue-12h, issue); unobserved hours omitted, not counted as zero.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_12h_mature_hours",
+      "family": "recent_support",
+      "definition": "Complete-hour workload support in the last 12 hours.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_12h_mature_fraction",
+      "family": "recent_support",
+      "definition": "Observable complete-hour workload fraction in the last 12 hours.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_12h_missing",
+      "family": "recent_support",
+      "definition": "1 when current workload-window statistics are unavailable; their numeric placeholder is zero.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_12h_sum",
+      "family": "recent_arrivals",
+      "definition": "sum of observed all-job hourly submit counts in [issue-12h, issue).",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_12h_mean",
+      "family": "recent_arrivals",
+      "definition": "mean of observed all-job hourly submit counts in [issue-12h, issue).",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_12h_maximum",
+      "family": "recent_arrivals",
+      "definition": "maximum of observed all-job hourly submit counts in [issue-12h, issue).",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_12h_variance",
+      "family": "recent_arrivals",
+      "definition": "variance of observed all-job hourly submit counts in [issue-12h, issue).",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_count_12h",
+      "family": "recent_bursts",
+      "definition": "Strictly mature complete hours above the fixed TRAIN burst threshold in the last 12 hours; workload support is explicit.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_frequency_12h",
+      "family": "recent_bursts",
+      "definition": "Observed burst count divided by mature hourly support; zero placeholder if unavailable.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_12h_previous_mature_fraction",
+      "family": "acceleration_support",
+      "definition": "Mature support fraction of preceding [24h,12h) window.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_12h_acceleration",
+      "family": "acceleration",
+      "definition": "Difference between observed current-window and preceding-window mean hourly GPUh; no inferred workloads.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_12h_acceleration_valid",
+      "family": "acceleration_support",
+      "definition": "Both disjoint workload windows have positive observed support.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_12h_acceleration",
+      "family": "acceleration",
+      "definition": "Difference between current and preceding all-job arrival rates; both count windows fully observable.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_12h_to_168h_ratio",
+      "family": "relative_level",
+      "definition": "Current observed hourly GPUh mean divided by seven-day observed mean; no epsilon or inferred denominator.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_12h_ratio_valid",
+      "family": "relative_support",
+      "definition": "Current and long-term workloads observed and long-term mean strictly positive.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_12h_denominator_observed_zero",
+      "family": "relative_support",
+      "definition": "Separates an observed zero long-term denominator from unavailable workload support.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_12h_to_168h_ratio",
+      "family": "relative_level",
+      "definition": "Observed current all-job arrival rate divided by observed seven-day arrival rate.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_12h_ratio_valid",
+      "family": "relative_support",
+      "definition": "Seven-day all-job arrival denominator is positive; all count windows are observable.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_24h_sum",
+      "family": "recent_workload",
+      "definition": "sum of observable complete-hour GPUh in [issue-24h, issue); unobserved hours omitted, not counted as zero.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_24h_mean",
+      "family": "recent_workload",
+      "definition": "mean of observable complete-hour GPUh in [issue-24h, issue); unobserved hours omitted, not counted as zero.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_24h_maximum",
+      "family": "recent_workload",
+      "definition": "maximum of observable complete-hour GPUh in [issue-24h, issue); unobserved hours omitted, not counted as zero.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_24h_variance",
+      "family": "recent_workload",
+      "definition": "variance of observable complete-hour GPUh in [issue-24h, issue); unobserved hours omitted, not counted as zero.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_24h_mature_hours",
+      "family": "recent_support",
+      "definition": "Complete-hour workload support in the last 24 hours.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_24h_mature_fraction",
+      "family": "recent_support",
+      "definition": "Observable complete-hour workload fraction in the last 24 hours.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_24h_missing",
+      "family": "recent_support",
+      "definition": "1 when current workload-window statistics are unavailable; their numeric placeholder is zero.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_24h_sum",
+      "family": "recent_arrivals",
+      "definition": "sum of observed all-job hourly submit counts in [issue-24h, issue).",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_24h_mean",
+      "family": "recent_arrivals",
+      "definition": "mean of observed all-job hourly submit counts in [issue-24h, issue).",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_24h_maximum",
+      "family": "recent_arrivals",
+      "definition": "maximum of observed all-job hourly submit counts in [issue-24h, issue).",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_24h_variance",
+      "family": "recent_arrivals",
+      "definition": "variance of observed all-job hourly submit counts in [issue-24h, issue).",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_count_24h",
+      "family": "recent_bursts",
+      "definition": "Strictly mature complete hours above the fixed TRAIN burst threshold in the last 24 hours; workload support is explicit.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_frequency_24h",
+      "family": "recent_bursts",
+      "definition": "Observed burst count divided by mature hourly support; zero placeholder if unavailable.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_24h_previous_mature_fraction",
+      "family": "acceleration_support",
+      "definition": "Mature support fraction of preceding [48h,24h) window.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_24h_acceleration",
+      "family": "acceleration",
+      "definition": "Difference between observed current-window and preceding-window mean hourly GPUh; no inferred workloads.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_24h_acceleration_valid",
+      "family": "acceleration_support",
+      "definition": "Both disjoint workload windows have positive observed support.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_24h_acceleration",
+      "family": "acceleration",
+      "definition": "Difference between current and preceding all-job arrival rates; both count windows fully observable.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_24h_to_168h_ratio",
+      "family": "relative_level",
+      "definition": "Current observed hourly GPUh mean divided by seven-day observed mean; no epsilon or inferred denominator.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_24h_ratio_valid",
+      "family": "relative_support",
+      "definition": "Current and long-term workloads observed and long-term mean strictly positive.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_work_24h_denominator_observed_zero",
+      "family": "relative_support",
+      "definition": "Separates an observed zero long-term denominator from unavailable workload support.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_24h_to_168h_ratio",
+      "family": "relative_level",
+      "definition": "Observed current all-job arrival rate divided by observed seven-day arrival rate.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_arrivals_24h_ratio_valid",
+      "family": "relative_support",
+      "definition": "Seven-day all-job arrival denominator is positive; all count windows are observable.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_time_since_recent_burst_hours",
+      "family": "burst_recency",
+      "definition": "Hours since end of the latest observable burst arrival-hour within seven days; zero placeholder when unseen.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_recent_burst_seen",
+      "family": "burst_recency_support",
+      "definition": "At least one fully mature burst hour observed in the seven-day snapshot.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_time_since_last_observed_burst_hours",
+      "family": "burst_recency",
+      "definition": "Hours since the newest burst arrival-hour among recent mature half-hour pairs and strictly mature historical whole-day labels; dataset-start truncation applies.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_historical_burst_seen",
+      "family": "burst_recency_support",
+      "definition": "At least one burst is observable in either causal source; unknown age has a separate flag.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_global_frequency",
+      "family": "historical_frequency",
+      "definition": "All hours from earlier full-day labels mature strictly before issue, excluding historical PURGE days. Unsmoothed empirical rate; zero placeholder if no support.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_global_support_hours",
+      "family": "historical_frequency_support",
+      "definition": "Exact number of strictly mature label hours contributing to this frequency.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_global_missing",
+      "family": "historical_frequency_support",
+      "definition": "1 when no eligible causal historical label supports this frequency.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_target_hour_frequency",
+      "family": "historical_frequency",
+      "definition": "Earlier fully mature observations at the known target hour-of-day. Unsmoothed empirical rate; zero placeholder if no support.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_target_hour_support_hours",
+      "family": "historical_frequency_support",
+      "definition": "Exact number of strictly mature label hours contributing to this frequency.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_target_hour_missing",
+      "family": "historical_frequency_support",
+      "definition": "1 when no eligible causal historical label supports this frequency.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_target_weekday_frequency",
+      "family": "historical_frequency",
+      "definition": "Earlier fully mature observations on the known target weekday, all 24 hours. Unsmoothed empirical rate; zero placeholder if no support.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_target_weekday_support_hours",
+      "family": "historical_frequency_support",
+      "definition": "Exact number of strictly mature label hours contributing to this frequency.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_target_weekday_missing",
+      "family": "historical_frequency_support",
+      "definition": "1 when no eligible causal historical label supports this frequency.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_target_hour_weekday_frequency",
+      "family": "historical_frequency",
+      "definition": "Earlier fully mature observations sharing the known target hour and weekday. Unsmoothed empirical rate; zero placeholder if no support.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_target_hour_weekday_support_hours",
+      "family": "historical_frequency_support",
+      "definition": "Exact number of strictly mature label hours contributing to this frequency.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    },
+    {
+      "name": "burst_target_hour_weekday_missing",
+      "family": "historical_frequency_support",
+      "definition": "1 when no eligible causal historical label supports this frequency.",
+      "feature_available_time": "issue_time (conservative upper bound)",
+      "target_hours": "0..23"
+    }
+  ]
+}
