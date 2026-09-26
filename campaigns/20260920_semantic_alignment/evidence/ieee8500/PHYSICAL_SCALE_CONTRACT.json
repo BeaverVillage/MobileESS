@@ -1,0 +1,22 @@
+{
+  "status": "FROZEN_AND_B0_96_SLOT_AUDITED",
+  "day": "2025-05-01",
+  "phases": ["DA", "Fresh", "Actual"],
+  "background_scale": 0.45,
+  "AIDC_scale": 2.10,
+  "MESS_scale": 2.00,
+  "PV_scale": 0.50,
+  "Actual_changes_allowed": "Temporal realized demand, PV, weather and causal job execution through the unchanged physical power law; no physical scale changes",
+  "BG_formula": "0.45 * normalized_profile[slot] * native_load_kW_or_kvar",
+  "PV_formula": "0.50 * normalized_profile[slot] * frozen_PV_ratio * native_load_kW",
+  "AIDC_formula": "2.10 * original_base_factor_2 * unchanged_C1(normalized_IT, slot_weather)",
+  "profile_denominators": "The same frozen forecast peaks in both DA and Actual; no normalization to the realized peak",
+  "MESS": {
+    "Pmax_kW": 600, "Smax_kVA": 800, "capacity_kWh": 2400,
+    "Emin_kWh": 880, "Emax_kWh": 2160, "initial_E_kWh": 1520, "terminal_E_kWh": 1520,
+    "eta_charge": 0.95, "eta_discharge": 0.95
+  },
+  "audit": "scale_audit/PHYSICAL_SCALE_AUDIT.json",
+  "gate": "Any physical scale mismatch invalidates that Actual result. Preserve original files and rerun in the new namespace after fixing the mismatch.",
+  "does_not_authorize_legacy_Q_only_Actual": true
+}

@@ -1,0 +1,137 @@
+{
+  "status": "PASS",
+  "scales": {
+    "BG": 0.45,
+    "AIDC": 2.1,
+    "MESS": 2.0,
+    "PV": 0.5
+  },
+  "slots_per_phase": 96,
+  "phases": [
+    "DA",
+    "Fresh",
+    "Actual"
+  ],
+  "max_errors": {
+    "DA_IT": 5.684341886080802e-14,
+    "DA_AIDC_P": 1.1368683772161603e-13,
+    "Actual_IT": 5.684341886080802e-14,
+    "Actual_AIDC_P": 1.1368683772161603e-13,
+    "Actual_demand_profile": 0.0,
+    "Actual_PV_profile": 0.0,
+    "Actual_AIDC_input_binding": 0.0,
+    "B0_MESS_P": 0.0,
+    "B0_MESS_Q": 0.0,
+    "B0_MESS_initial_E": 0.0,
+    "OpenDSS_all_element_readback": 1.1368683772161603e-13
+  },
+  "MESS_rating": {
+    "active_power_limit_kw": {
+      "scale": 2.0,
+      "base": 300,
+      "expected": 600,
+      "actual": 600.0,
+      "PASS": true
+    },
+    "pcs_kva": {
+      "scale": 2.0,
+      "base": 400,
+      "expected": 800,
+      "actual": 800.0,
+      "PASS": true
+    },
+    "capacity_kwh": {
+      "scale": 2.0,
+      "base": 1200,
+      "expected": 2400,
+      "actual": 2400.0,
+      "PASS": true
+    },
+    "energy_min_kwh": {
+      "scale": 2.0,
+      "base": 440,
+      "expected": 880,
+      "actual": 880.0,
+      "PASS": true
+    },
+    "energy_max_kwh": {
+      "scale": 2.0,
+      "base": 1080,
+      "expected": 2160,
+      "actual": 2160.0,
+      "PASS": true
+    },
+    "initial_energy_kwh": {
+      "scale": 2.0,
+      "base": 760,
+      "expected": 1520,
+      "actual": 1520.0,
+      "PASS": true
+    },
+    "terminal_energy_kwh": {
+      "scale": 2.0,
+      "base": 760,
+      "expected": 1520,
+      "actual": 1520.0,
+      "PASS": true
+    }
+  },
+  "unchanged_efficiency": {
+    "charge": 0.95,
+    "discharge": 0.95
+  },
+  "normalization": "Both forecast and realized BG/PV divide by the same frozen forecast peak; AIDC follows the same idle/dynamic/C1 law using causal execution and weather",
+  "prior_Actual_B0": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_FINAL_MAY01_PRODUCTION_20260918_STAGING\\production\\Actual\\B0",
+  "prior_Actual_disposition": "PHYSICAL_SCALE_MATCHES; old controller result is superseded for new Q-first campaign",
+  "details": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_ALIGNED_MAY01_20260920\\production\\scale_audit\\B0_SCALE_DECOMPOSITION_BY_ELEMENT.csv",
+  "slot_summary": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_ALIGNED_MAY01_20260920\\production\\scale_audit\\B0_SCALE_DECOMPOSITION_96_SLOTS.csv",
+  "per_phase_metrics": {
+    "DA": {
+      "rho": 0.8996518400994494,
+      "Vmin": 0.9535531871678895,
+      "Vmax": 1.0403443712992246
+    },
+    "Actual": {
+      "rho": 0.8450751463755313,
+      "Vmin": 0.9601639801376155,
+      "Vmax": 1.041826807774761
+    },
+    "Fresh": {
+      "rho": 0.8996518400994494,
+      "Vmin": 0.9535531871678895,
+      "Vmax": 1.0403443712992246
+    }
+  },
+  "sources": [
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_ALIGNED_MAY01_20260920\\production\\electrical_engine.py",
+      "sha256": "fc3fac3baaa688b3d8a12833b119629f8c4eeaf355439bfe8699dcb7fbef5d60",
+      "bytes": 7613
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_ALIGNED_MAY01_20260920\\production\\frozen_binding.py",
+      "sha256": "e2afee3c0ae87fdc53eb49d52e3288b331f9a542b127f3381cbd494cbb6f4100",
+      "bytes": 4972
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_ALIGNED_MAY01_20260920\\production\\actual_power_binding.py",
+      "sha256": "b066de0b440e9c834b57f209a939083592b2adebf0877e155b46139ae9548d75",
+      "bytes": 2564
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_FINAL_MAY01_PRODUCTION_20260918_STAGING\\production\\Actual\\B0\\ACTUAL_INPUTS.npz",
+      "sha256": "20bb5743bb87940ff988a72c6210eef50a7fe93cb14dc1d90d0582d4224c98b4",
+      "bytes": 14014
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_FINAL_MAY01_PRODUCTION_20260918_STAGING\\production\\Actual\\B0\\ACTUAL_AIDC_POWER.npz",
+      "sha256": "d26cb98218304283a98af656345b940ca395bda13f306fd83053524870494a6c",
+      "bytes": 14466
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\IEEE8500_ALIGNED_MAY01_20260920\\production\\MAY01_B0_AIDC_POWER.npz",
+      "sha256": "a2cb4a818eea456ae044ea9c9ff4355b08c3d986abea962073b3eec3efafd65b",
+      "bytes": 4312
+    }
+  ]
+}
