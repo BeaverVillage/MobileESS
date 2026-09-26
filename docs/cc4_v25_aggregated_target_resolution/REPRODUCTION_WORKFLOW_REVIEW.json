@@ -1,0 +1,70 @@
+{
+  "time": "2026-09-26T17:18:13.905861+00:00",
+  "PASS": true,
+  "review_kind": "Read-only static workflow/dependency closure and current prepared-artifact hash checks; no full fresh-run execution",
+  "findings_resolved": [
+    {
+      "finding": "Raw preparation did not produce TARGET_SCHEMA.json required by preparation receipt",
+      "resolution": "Delivery finalizer now generates schema from TARGETS arrays and saved membership Parquet before preparation tests/receipt"
+    },
+    {
+      "finding": "README attributed all artifact-byte checks to registration",
+      "resolution": "README now distinguishes registration semantic comparisons and subsequent model-stage guard digest checks"
+    }
+  ],
+  "fresh_raw_workflow": {
+    "closed": true,
+    "requires_external_exact_files": [
+      "raw archive",
+      "SHA-pinned raw_work.parquet"
+    ],
+    "source_path_authority": "PR63 SOURCE_MANIFEST.json absolute paths and SHA; missing/mismatched inputs fail closed",
+    "sequence": "prepare_targets with redirected log -> finalize_preparation/schema/tests/receipt -> run_tests -> register -> development -> select -> evaluation -> verify -> independent/uncertainty audits -> report"
+  },
+  "model_only_workflow": {
+    "closed": true,
+    "prepared_artifact_count": 13,
+    "copy_PREPARATION_RECEIPT": true,
+    "start_at": "run_tests",
+    "external_raw_archive_required": false,
+    "external_raw_work_required": false,
+    "reason": "Saved-target test replays committed RAW_TARGET_JOB_MEMBERSHIP and parent DATA/DAY_LEDGER. prepare_targets import has no top-level raw read; register/model stages use prepared artifacts and relative parent files. Original external paths remain provenance strings, not opened in this route.",
+    "original_checkpoints_required": false,
+    "full_checkpoint_replay": "Uses newly regenerated local models after training"
+  },
+  "parent_chain": [
+    "cc4_v2_hourly_future_workload",
+    "cc4_v21_causal_refit_hurdle",
+    "cc4_v22_burst_tail",
+    "cc4_v23_burst_detector",
+    "cc4_v24_request_state_burst"
+  ],
+  "relative_parent_source_files_present": 1583,
+  "core_frozen_hashes_unchanged": true,
+  "prepared_artifact_byte_checks_PASS": true,
+  "new_evaluation_metrics_read": false,
+  "May_results_used": false,
+  "model_executions": 0,
+  "writes_during_review": [
+    "REPRODUCTION_WORKFLOW_REVIEW.json"
+  ],
+  "limitations": [
+    "No end-to-end raw rebuild or model refit was executed during this bounded review.",
+    "Raw-source route requires two external exact files at recorded paths; it is not repository-only.",
+    "Model-only route verifies saved preparation and refits from it; it does not independently reacquire or reaudit the raw archive.",
+    "Fresh timestamp/log/schema metadata receipts may differ in bytes; mathematical targets/features and pinned dependencies are checked.",
+    "Independent saved-model replay requires locally regenerated model checkpoints, which are not included in Git."
+  ],
+  "reviewed_file_sha256": {
+    "README.md": "e658dc59ad19410e4046a8b1144fb30733986226fcdf7c0f1c5d54ec0b1d2b07",
+    "delivery_tools/finalize_preparation.py": "203dc48cd8a84b4a439b6f7fdd0b27773c2a1ae2e394b5d86e16a6fd6d72301b",
+    "prepare_targets.py": "54e546ac5a8e53a069bbc97b89d4baa294d93ce877634bba3f55d51177968f63",
+    "test_prepare_targets.py": "e48eb065fc18316758b62bb0f8321d9b22aa5a0c220dac4068cc83ccfb42976e",
+    "study.py": "fe79101a1d65971c20f50b9bbf5d9d3c2db5a1af8e87c2832ce3d6dfcb0299c1",
+    "test_contract.py": "e195fcd1dea357f1ccd422e6f952316bb51a8e28dba0399ddf04c53261a1b45c",
+    "delivery.py": "8ae5e9de6a19662cd92ff7e32c80393c7a2d415b1d17233f0136187a12199aa3",
+    "delivery_tools/run_tests.py": "6bdebce01f8b7319ddfa8adb0273b71954779dfaaef687c3416d95cf000ad444",
+    "delivery_tools/independent_audit.py": "874b9287d92def6cd130af12d29d0e6f1ce33c5ffdbb9ea87e339c6bda1d32e1",
+    "delivery_tools/uncertainty_audit.py": "0079b82fb5ca04d069c82b35a4de60a64da1430d08008644367c94bd37472d60"
+  }
+}
