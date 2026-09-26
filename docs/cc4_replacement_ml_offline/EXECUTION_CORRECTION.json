@@ -1,0 +1,15 @@
+{
+  "type": "post-run dtype bug correction",
+  "selection_changed": false,
+  "fitting_calls": 0,
+  "affected_models": [
+    "TRIVIAL_CAP"
+  ],
+  "affected_rows": 58056,
+  "max_correction_GPUh": 1.0,
+  "reason": "np.full physical capacity constant was integer, copied calibration array truncated expm1 results; preserve float64 with zero-delta identity",
+  "old_predictions_sha256": "76db73e3e56cd83ba406855be60c5177a277a056d4eb0ab6f11eb96dd006b92b",
+  "frozen_code_unchanged": true,
+  "time": "2026-09-24 09:20:34.557150+00:00",
+  "new_predictions_sha256": "ae9fb65934f1eddd7a5e4ad17583a81063e401b958db750d3e89cdd4db3ac40b"
+}
