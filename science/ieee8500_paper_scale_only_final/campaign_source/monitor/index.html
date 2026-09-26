@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IEEE8500 · 5월 1일 캠페인 모니터</title>
+  <style>
+    :root{font-family:Segoe UI,Arial,sans-serif;color-scheme:dark;background:#0a1020;color:#eef3ff}
+    *{box-sizing:border-box}body{margin:0}main{max-width:1500px;margin:auto;padding:24px}
+    h1{font-size:1.65rem;margin:0 0 5px}h2{font-size:1.08rem;margin:0}h3{font-size:.96rem;margin:0 0 10px}
+    p{margin:7px 0}.sub,.muted{color:#aab9d3}.small{font-size:.82rem}.mono,code,pre{font-family:Consolas,monospace}
+    .top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px}
+    .top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .badge{display:inline-flex;align-items:center;border:1px solid #405373;border-radius:999px;padding:5px 10px;font-size:.82rem;font-weight:600}
+    .good{color:#86eac5;border-color:#28785e}.warn{color:#ffd38a;border-color:#a46e27}.bad{color:#ff9caa;border-color:#a34759}
+    button,select{background:#23375b;color:#f0f5ff;border:1px solid #506a96;border-radius:8px;padding:8px 10px;font:inherit}
+    button{cursor:pointer}button:hover{background:#315080}button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid #83b6ff;outline-offset:2px}
+    .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}
+    .card{grid-column:span 12;background:#151f34;border:1px solid #2b3d5e;border-radius:13px;padding:17px;min-width:0}
+    .half{grid-column:span 6}.third{grid-column:span 4}.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+    .large{font-size:1.45rem;font-weight:700;line-height:1.3;word-break:break-word}
+    .statrow{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px}.stat{min-width:120px}.stat b{display:block;font-size:1.12rem;margin-top:4px}
+    .progress{height:13px;background:#263756;border:1px solid #415579;border-radius:999px;overflow:hidden;margin:14px 0 7px}
+    .progress>div{height:100%;width:0;background:linear-gradient(90deg,#4d87de,#75d8cf);transition:width .3s}
+    .timeline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+    .step{border:1px solid #40516e;border-radius:10px;padding:12px;background:#1c2941}.step.active{border-color:#e1a94a;background:#342b24}.step.done{border-color:#3aa882;background:#18382f}
+    .step .name{font-weight:700;font-size:1.04rem}.step .gates{font-size:.8rem;color:#c2cde0;margin-top:6px}
+    .tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+    th,td{padding:10px 9px;border-bottom:1px solid #30405d;text-align:left;white-space:nowrap;font-size:.83rem}
+    th{color:#bdd3fa;font-weight:600}td.wrap{white-space:normal;overflow-wrap:anywhere}
+    details{border-top:1px solid #30405d;margin-top:13px;padding-top:10px}summary{cursor:pointer;color:#a9cbff;font-weight:600}
+    details[open] summary{margin-bottom:12px}.detailgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+    .detailitem{background:#101a2d;border:1px solid #263857;border-radius:8px;padding:9px;overflow-wrap:anywhere}
+    .detailitem span{display:block;color:#9eb1d0;font-size:.77rem;margin-bottom:4px}.detailitem b{font-size:.9rem}
+    .policy{border-top:1px solid #30405d;padding:9px 0}.policy:first-child{border-top:0}
+    .policy summary{display:flex;justify-content:space-between;gap:12px;align-items:center}.policy .status{font-size:.82rem}
+    .note{background:#14263b;border-left:3px solid #72b8e7;padding:9px 11px;margin-top:13px;font-size:.83rem;color:#c8d9ee}
+    .logtools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.logtools select{max-width:100%;min-width:280px}
+    pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:460px;overflow:auto;background:#0b1425;border:1px solid #2c3d5b;border-radius:8px;padding:13px;font-size:.78rem;line-height:1.45;color:#dce8fb}
+    .hash{word-break:break-all}.heartbeat{height:8px;width:8px;border-radius:50%;background:#68d5ae;display:inline-block;margin-right:6px}
+    .heartbeat.stale{background:#e9a658}.errorline{color:#ff9caa}
+    @media(max-width:900px){.half,.third{grid-column:span 12}.timeline{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:600px){main{padding:14px}.top{display:block}.top-actions{justify-content:flex-start;margin-top:13px}.timeline{grid-template-columns:1fr}.large{font-size:1.2rem}}
+  </style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div>
+      <h1>IEEE8500 · 5월 1일 production</h1>
+      <div class="sub">Paper PCC · BG 0.552 · AIDC 2.40 · MESS 2.00 · 600 kW / 800 kVA / 2400 kWh</div>
+      <div class="sub">논문 MILP 종료조건 복원 · TimeLimit 600초/호출 · WorkLimit 60→180→300 · 최종 exact AC 필수</div>
+    </div>
+    <div class="top-actions">
+      <span id="identity" class="badge">연결 중</span>
+      <span id="clock" class="small muted">—</span>
+      <button id="refreshButton" type="button">지금 갱신</button>
+    </div>
+  </header>
+  <div class="grid">
+    <section class="card half" aria-labelledby="phaseTitle">
+      <div class="card-head"><h2 id="phaseTitle">현재 작업</h2><span id="phaseStatus" class="badge">대기</span></div>
+      <div id="phaseName" class="large">상태 확인 중</div>
+      <p id="phaseDetail" class="muted"></p>
+      <div class="progress" role="progressbar" aria-label="후보 탐색 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressOuter"><div id="progressBar"></div></div>
+      <div id="progressLabel" class="small muted">—</div>
+      <div class="statrow">
+        <div class="stat"><span class="small muted">작업 상태 갱신</span><b id="phaseAge">—</b></div>
+        <div class="stat"><span class="small muted">Worker PID</span><b id="workerPid">—</b></div>
+      </div>
+    </section>
+    <section class="card half" aria-labelledby="mipTitle">
+      <div class="card-head"><h2 id="mipTitle">최근 통합 MILP</h2><span id="mipFreshness" class="badge">기록 없음</span></div>
+      <div id="mipHeadline" class="large">—</div>
+      <p id="mipMeta" class="small muted">현재 후보 탐색과 별도의 solve 기록입니다.</p>
+      <div class="statrow">
+        <div class="stat"><span class="small muted">Incumbent</span><b id="mipInc">—</b></div>
+        <div class="stat"><span class="small muted">Best bound</span><b id="mipBound">—</b></div>
+        <div class="stat"><span class="small muted">MIP gap</span><b id="mipGap">—</b></div>
+        <div class="stat"><span class="small muted">탐색 노드</span><b id="mipNodes">—</b></div>
+      </div>
+      <details><summary>모델 규모와 separation 세부사항</summary><div id="mipDetails" class="detailgrid"></div></details>
+    </section>
+    <section class="card" aria-labelledby="flowTitle">
+      <div class="card-head"><h2 id="flowTitle">캠페인 순서</h2><span class="small muted">각 정책의 Actual 완료 후 다음 정책</span></div>
+      <div id="timeline" class="timeline"></div>
+    </section>
+    <section class="card" aria-labelledby="closureTitle">
+      <div class="card-head"><h2 id="closureTitle">B2 AC 복구 진행</h2><span id="closureStatus" class="badge">대기</span></div>
+      <div id="closureDetails" class="detailgrid"></div>
+      <div class="note">6대의 경로 탐색 결과를 보존한 후 수행하는 복구 단계입니다. 아래 중간 AC 값은 최종 production 결과가 아닙니다. DA·Fresh·Actual 검증을 모두 통과해야 완료됩니다.</div>
+    </section>
+    <section class="card" aria-labelledby="resultsTitle">
+      <div class="card-head"><h2 id="resultsTitle">정책별 검증 결과</h2><span class="small muted">ρ = 최대 line-phase loading (pu)</span></div>
+      <div class="tablewrap"><table><thead><tr><th>정책</th><th>DA exact ρ</th><th>Fresh ρ</th><th>Actual ρ</th><th>Vmin / Vmax (DA)</th><th>최종 게이트</th></tr></thead><tbody id="resultRows"></tbody></table></div>
+      <div id="policyDetails">
+        <details class="policy" id="policy-B0"><summary><span>B0 세부사항</span><span class="status"></span></summary><div class="detailgrid"></div></details>
+        <details class="policy" id="policy-B2"><summary><span>B2 세부사항</span><span class="status"></span></summary><div class="detailgrid"></div></details>
+        <details class="policy" id="policy-B3"><summary><span>B3 세부사항</span><span class="status"></span></summary><div class="detailgrid"></div></details>
+        <details class="policy" id="policy-B1"><summary><span>B1 세부사항</span><span class="status"></span></summary><div class="detailgrid"></div></details>
+      </div>
+    </section>
+    <section class="card half" aria-labelledby="stagesTitle">
+      <div class="card-head"><h2 id="stagesTitle">MESS 단계 기록</h2><span id="stageCount" class="small muted"></span></div>
+      <div class="tablewrap"><table><thead><tr><th>단계</th><th>후보</th><th>유지</th><th>목적값</th><th>restricted 시간</th></tr></thead><tbody id="beamRows"></tbody></table></div>
+      <details><summary>계수 생성 · preflight</summary><div id="preflightDetails" class="detailgrid"></div></details>
+    </section>
+    <section class="card half" aria-labelledby="historyTitle">
+      <div class="card-head"><h2 id="historyTitle">통합 MIP 호출 기록</h2><span id="callCount" class="small muted"></span></div>
+      <div class="tablewrap"><table><thead><tr><th>호출</th><th>반복 완료</th><th>행</th><th>추가 행</th><th>closure</th></tr></thead><tbody id="callRows"></tbody></table></div>
+      <div class="note">MILP의 목표 gap은 0.1%입니다. 논문 기준에 따라 time/work limit에서 feasible incumbent를 채택할 수 있으며, full separation과 최종 exact AC 검증은 별도로 통과해야 합니다.</div>
+    </section>
+    <section class="card" aria-labelledby="logTitle">
+      <div class="card-head"><h2 id="logTitle">실행 로그</h2><span id="logAge" class="small muted"></span></div>
+      <div class="logtools"><label for="logSelect" class="small">파일 선택</label><select id="logSelect"></select><button id="logReload" type="button">로그 갱신</button></div>
+      <pre id="logText">로그를 불러오는 중…</pre>
+    </section>
+    <section class="card" aria-labelledby="authorityTitle">
+      <h2 id="authorityTitle">고정된 입력 authority</h2>
+      <div id="authority" class="detailgrid" style="margin-top:13px"></div>
+      <details><summary>원본 경로와 SHA256</summary><div id="authorityPath" class="small mono hash"></div></details>
+    </section>
+  </div>
+</main>
+<script>
+if(location.hostname==='127.0.0.1'&&location.port==='63426'){
+  location.replace('http://127.0.0.1:64285'+location.pathname+location.search);
+}
+const $=id=>document.getElementById(id);
+const esc=x=>String(x??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=(x,n=6)=>x==null||!Number.isFinite(Number(x))?'—':Number(x).toFixed(n);
+const integer=x=>x==null?'—':Number(x).toLocaleString('ko-KR');
+const percent=x=>x==null?'—':(Number(x)*100).toFixed(3)+'%';
+const stamp=x=>x?new Date(Number(x)*1000).toLocaleString('ko-KR',{hour12:false}):'—';
+const age=(x,now)=>{if(!x)return '—';const s=Math.max(0,Math.floor(now-x));return s<60?`${s}초 전`:s<3600?`${Math.floor(s/60)}분 전`:`${Math.floor(s/3600)}시간 ${Math.floor(s%3600/60)}분 전`};
+const item=(name,value)=>`<div class="detailitem"><span>${esc(name)}</span><b>${esc(value)}</b></div>`;
+const gate=x=>x===true?'PASS':x===false?'FAIL':'대기';
+const stageNames={B0:'기준 운영',B2:'MESS 최적화',B3:'공동 최적화',B1:'AIDC 최적화'};
+let snapshot=null,logName='',refreshBusy=false;
+function render(d){
+  d.order=d.campaign?.order||['B0','B2','B1','B3'];
+  d.results=[...(d.results||[])].sort((a,b)=>d.order.indexOf(a.policy)-d.order.indexOf(b.policy));
+  snapshot=d;
+  const now=d.now||Date.now()/1000, p={...(d.phase||{})}, mp=d.live?.MESS_progress||{}, sh=d.solver_history||{}, calls=sh.calls||[], c=calls.at(-1)||{}, m=c.model||{};
+  if(d.campaign?.status==='FAILED'&&(d.campaign.recorded_unix||0)>(d.live?.updated_unix||0)){
+    Object.assign(p,{status:'FAILED',stage:d.campaign.stage,event:'FAILURE',updated_unix:d.campaign.recorded_unix});
+  }
+  $('identity').textContent=d.correct_candidate?'PAPER PCC · 고정 후보':'입력 authority 확인 필요';
+  $('identity').className='badge '+(d.correct_candidate?'good':'bad');
+  $('clock').innerHTML='<span class="heartbeat"></span>5초 자동 갱신 · '+esc(stamp(now));
+  $('phaseName').textContent=`${p.policy||'캠페인'} · ${p.event==='CANDIDATE_SEARCH'?'MESS 후보 탐색':p.event==='FAILURE'?'작업 중단 · 원인 분석 중':p.stage||'상태 확인'}`;
+  $('phaseStatus').textContent=p.status||'대기';
+  $('phaseStatus').className='badge '+(p.status==='RUNNING'?'warn':['FAIL','FAILED'].includes(p.status)?'bad':'good');
+  const hasCandidate=p.event==='CANDIDATE_SEARCH'&&p.candidate_total>0;
+  $('phaseDetail').textContent=p.event==='FAILURE'?(d.campaign?.error||'실패 기록 확인 중'):hasCandidate?`MESS ${p.mess_index??'—'}/6 · parent ${p.parent_index??'—'}/${p.parent_total??'—'} · ${p.search_level||'후보 탐색'}`:(p.stage||'정책 실행 대기');
+  const hasActual=p.actual_slots!=null;
+  if(hasActual)$('phaseDetail').textContent=`Actual AC · Q 보정 ${p.actual_interventions??0}개 slot · 미해결 ${p.actual_unresolved??0}개 slot`;
+  if(p.q_evaluation){const q=p.q_evaluation;$('phaseDetail').textContent=`${q.slot+1}번째 slot Q 평가 ${integer(q.logical_Q_evaluations)}회 · 캐시 재사용 ${integer(q.cache_hits)}회 · 새 전기 평가 ${integer(q.physical_cache_misses)}회 · 최종 재검증 ${integer(q.final_clean_revalidations)}회`}
+  const fraction=hasActual?Math.min(1,p.actual_slots/96):hasCandidate?Math.min(1,p.candidate_done/p.candidate_total):0;
+  $('progressBar').style.width=(fraction*100).toFixed(1)+'%';
+  $('progressOuter').setAttribute('aria-valuenow',Math.round(fraction*100));
+  $('progressLabel').textContent=hasActual?`${integer(p.actual_slots)} / 96 Actual slots · ${(fraction*100).toFixed(1)}%`:hasCandidate?`${integer(p.candidate_done)} / ${integer(p.candidate_total)} 후보 · ${(fraction*100).toFixed(1)}%`:'진행률은 후보 탐색 및 Actual 단계에서 표시됩니다.';
+  $('phaseAge').textContent=age(p.updated_unix,now);
+  $('workerPid').textContent=integer(p.worker_pid);
+  const solveIsLive=p.event!=='CANDIDATE_SEARCH'&&c.progress_unix&&now-c.progress_unix<30;
+  $('mipFreshness').textContent=!c.call?'기록 없음':solveIsLive?'실시간 solve':`최근 기록 · ${age(c.progress_unix||c.updated_unix,now)}`;
+  $('mipFreshness').className='badge '+(solveIsLive?'good':'warn');
+  $('mipHeadline').textContent=c.call?`${c.call} · 반복 ${c.iteration??'—'}`:'통합 MIP 기록 대기';
+  $('mipMeta').textContent=c.call?`마지막 갱신 ${stamp(c.progress_unix||c.updated_unix)} · ${integer(m.rows)}행 / ${integer(m.columns)}열`:'모델 생성 후 기록됩니다.';
+  $('mipInc').textContent=num(c.incumbent);$('mipBound').textContent=num(c.best_bound);
+  $('mipGap').textContent=percent(c.mip_gap);$('mipNodes').textContent=integer(c.explored_nodes);
+  $('mipDetails').innerHTML=[
+    item('행 / 열',`${integer(m.rows)} / ${integer(m.columns)}`),item('이진 변수',integer(m.binaries)),
+    item('비영 계수',integer(m.nonzeros)),item('2차 제약',integer(m.quadratic_constraints)),
+    item('모델 build',c.build_seconds==null?'—':num(c.build_seconds,1)+'초'),
+    item('restricted solve',c.solve_seconds==null?'—':num(c.solve_seconds,1)+'초'),
+    item('마지막 추가 행',integer(c.new_rows)),item('마지막 최대 위반',num(c.max_violation)),
+    item('검사한 원래 행',integer(c.checked_rows||c.closure_checked_rows)),item('full separation',c.closure||'미완료')
+  ].join('');
+  const cl=d.B2_closure||{},clLive=cl.live||{},clAudit=cl.entry_audit||{},clAC=cl.latest_AC?.metrics||{};
+  const clNames={FRESH:'96-slot exact AC 확인',GENERATE_CUTS:'위반 지점의 P/Q 민감도 계산',SOLVE_CUT_MODEL:'고정 경로 P/Q 복구 모델',FULL_PHYSICAL_PQ_FALLBACK:'전체 P/Q 복구 · 경로 고정',COMPLETE:'로컬 AC 복구 통과'};
+  $('closureStatus').textContent=cl.acceptance?.status==='PASS'?'최종 AC 복구 PASS':clNames[clLive.stage]||clLive.stage||'대기';
+  $('closureDetails').innerHTML=[
+    item('복구 반복',clLive.round??'—'),
+    item('민감도 계산 진행',`${cl.derivative_slot_count??0}개 slot 시작 · 최근 ${cl.latest_derivative_slot||'—'}`),
+    item('진입 전 전기 행 검사',integer(clAudit.full_rows_checked)),
+    item('진입 최대 잔여 오차',clAudit.maximum_residual==null?'—':Number(clAudit.maximum_residual).toExponential(4)),
+    item('전체 P/Q 후보 검증',`${cl.fallback_candidates??0}개 완료 · AC PASS ${cl.fallback_pass_count??0}개`),
+    item('최근 검증 후보',cl.latest_candidate||'—'),
+    item('최근 중간 exact AC',cl.latest_AC?.status||'—'),
+    item('중간 Vmin / Vmax',`${num(clAC.Vmin_pu)} / ${num(clAC.Vmax_pu)}`),
+    item('중간 변압기 I / kVA',`${num(clAC.max_transformer_phase_current_pu)} / ${num(clAC.max_transformer_winding_kva_pu)}`),
+    item('최종 승인',cl.acceptance?.status||'아직 미승인')
+  ].join('');
+  const byPolicy=Object.fromEntries((d.results||[]).map(r=>[r.policy,r]));
+  $('timeline').innerHTML=(d.order||[]).map((name,i)=>{const x=byPolicy[name]||{},state=x.actual_complete?'done':p.policy===name?'active':'';return `<div class="step ${state}"><div class="name">${i+1}. ${esc(name)} <span class="small muted">${esc(stageNames[name]||'')}</span></div><div class="gates">DA ${gate(x.DA_PASS)} · Fresh ${gate(x.Fresh_PASS)} · Actual ${gate(x.Actual_PASS)}</div></div>`}).join('');
+  $('resultRows').innerHTML=(d.results||[]).map(x=>`<tr><td><b>${esc(x.policy)}</b></td><td>${num(x.DA_exact)}</td><td>${num(x.Fresh)}</td><td>${num(x.Actual)}</td><td>${num(x.Vmin)} / ${num(x.Vmax)}</td><td class="${x.Actual_PASS===true?'good':x.DA_PASS===false||x.Actual_PASS===false?'bad':'muted'}">${x.actual_complete?'Actual '+gate(x.Actual_PASS):x.DA_PASS===false?'DA FAIL':p.policy===x.policy?'진행 중':'대기'}</td></tr>`).join('');
+  for(const x of d.results||[]){
+    const box=$('policy-'+x.policy);if(!box)continue;
+    box.querySelector('.status').textContent=x.actual_complete?'Actual '+gate(x.Actual_PASS):x.complete?'Actual 대기':x.DA_exact!=null?'DA 완료':p.policy===x.policy?'계산 중':'대기';
+    const da=x.DA_metrics||{},fr=x.Fresh_metrics||{},ac=x.Actual_metrics||{};
+    box.querySelector('.detailgrid').innerHTML=[
+      item('DA AC / 96 slots',`${gate(x.DA_PASS)} · ${x.DA_slots||0}/96`),
+      item('DA Vmin / Vmax',`${num(da.Vmin_pu)} / ${num(da.Vmax_pu)}`),
+      item('DA 최대 line ρ',num(x.DA_exact)),
+      item('DA 변압기 I / kVA',`${num(x.transformer_current)} / ${num(x.transformer_kva)}`),
+      item('DA 병목 slot / line',`${x.critical_slot??'—'} / ${x.critical_line??'—'}`),
+      item('Fresh AC / slots',`${gate(x.Fresh_PASS)} · ${x.Fresh_slots||0}/96`),
+      item('Fresh ρ / Vmin / Vmax',`${num(x.Fresh)} / ${num(fr.Vmin_pu)} / ${num(fr.Vmax_pu)}`),
+      item('Actual AC / converged slots',`${gate(x.Actual_PASS)} · ${ac.converged_slots??'—'}/96`),
+      item('Actual ρ / Vmin / Vmax',`${num(x.Actual)} / ${num(ac.Vmin_pu)} / ${num(ac.Vmax_pu)}`),
+      item('Actual Q 개입 slot',x.actual_Q_intervention_slots??'—'),
+      item('Actual 실행 시간',x.actual_runtime_s==null?'—':num(x.actual_runtime_s,1)+'초'),
+      item('증거 파일',Object.values(x.sources||{}).join(' · '))
+    ].join('');
+  }
+  const stages=d.beam_stages||[];$('stageCount').textContent=`${stages.length}개 완료`;
+  $('beamRows').innerHTML=stages.length?stages.map(x=>`<tr><td>${esc(x.mess_id)}</td><td>${integer(x.candidates)}</td><td>${integer(x.retained)}</td><td>${num(x.best_objective)}</td><td>${num(x.restricted_seconds,1)}초</td></tr>`).join(''):'<tr><td colspan="5" class="muted">아직 완료된 MESS 단계가 없습니다.</td></tr>';
+  $('preflightDetails').innerHTML=[
+    item('전기 계수 slot',`${d.coefficients?.slots_complete??'—'}/96`),
+    item('B2 preflight',d.B2_preflight?.status||'—'),
+    item('Preflight 요약',d.B2_preflight?.summary||'—'),
+    item('Sparse benchmark closure',d.B2_active?.benchmark_pass?'PASS':'—')
+  ].join('');
+  $('callCount').textContent=`총 ${integer(sh.total_calls)}회 · 최근 ${calls.length}회 표시`;
+  $('callRows').innerHTML=calls.length?calls.slice().reverse().map(x=>`<tr><td>${esc(x.call)}</td><td>${integer(x.iterations_finished)}</td><td>${integer(x.model?.rows)}</td><td>${integer(x.new_rows)}</td><td class="${x.closure==='PASS'?'good':'muted'}">${esc(x.closure||'미완료')}</td></tr>`).join(''):'<tr><td colspan="5" class="muted">기록 없음</td></tr>';
+  const f=d.freeze||{};
+  $('authority').innerHTML=[
+    item('Paper PCC 구성',f.PAPER_PCC_CONFIG_USED===true?'사용':'확인 필요'),
+    item('BG / AIDC / MESS',`${f.BG_SCALE??'—'} / ${f.AIDC_ABSOLUTE_SCALE??'—'} / ${f.MESS_SCALE??'—'}`),
+    item('PCC re-siting',f.RESITING_USED===false?'없음':'확인 필요'),
+    item('Feeder 변경',f.FEEDER_MODIFIED===false?'없음':'확인 필요'),
+    item('AIDC 이중 scaling',f.AIDC_DOUBLE_SCALING===false?'없음':'확인 필요'),
+    item('B2 search domain 변경',f.B2_SEARCH_DOMAIN_CHANGED===false?'없음':'확인 필요')
+  ].join('');
+  $('authorityPath').textContent=`작업 경로: ${d.run}\nPaper overlay SHA256: ${d.paper_overlay_sha256||'—'}\nAIDC array multiplier: ${f.AIDC_array_multiplier||'—'}`;
+  updateLogList(d);
+}
+function updateLogList(d){
+  const logs=d.recent_logs||[],choices=logs.map(x=>x.name);
+  const previous=$('logSelect').value||logName;
+  const signature=choices.join('|');
+  if($('logSelect').dataset.signature!==signature){
+    $('logSelect').innerHTML=choices.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join('');
+    $('logSelect').dataset.signature=signature;
+    $('logSelect').value=choices.includes(previous)?previous:(d.latest_log||'');
+  }
+  if(!logName||!choices.includes(logName)){logName=$('logSelect').value;loadLog(d)}
+  else if(logName===d.latest_log){$('logText').textContent=d.log_tail||'로그 대기 중'}
+  const selected=logs.find(x=>x.name===logName);
+  $('logAge').textContent=selected?`마지막 기록 ${age(selected.updated_unix,d.now)} · ${integer(selected.bytes)} bytes`:'로그 없음';
+}
+async function loadLog(d){
+  logName=$('logSelect').value;
+  if(!logName){$('logText').textContent='로그 없음';return}
+  if(d&&logName===d.latest_log){$('logText').textContent=d.log_tail||'로그 대기 중';return}
+  try{const r=await fetch('/api/log?name='+encodeURIComponent(logName),{cache:'no-store'});if(!r.ok)throw Error(r.status);const x=await r.json();if(x.name===logName)$('logText').textContent=x.text||'내용 없음'}catch(e){$('logText').textContent='로그 읽기 실패: '+e}
+}
+async function refresh(){
+  if(refreshBusy)return;refreshBusy=true;
+  try{const r=await fetch('/api/status',{cache:'no-store'});if(!r.ok)throw Error(r.status);render(await r.json())}
+  catch(e){$('identity').textContent='모니터 연결 오류';$('identity').className='badge bad';$('phaseDetail').textContent=String(e)}
+  finally{refreshBusy=false}
+}
+$('refreshButton').addEventListener('click',refresh);
+$('logReload').addEventListener('click',()=>loadLog());
+$('logSelect').addEventListener('change',()=>loadLog());
+refresh();setInterval(refresh,5000);
+</script>
+</body>
+</html>
