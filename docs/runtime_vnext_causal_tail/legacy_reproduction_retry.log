@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "D:\ChatGPT\Mobile ESS 2\runtime_vnext_causal_tail_pr\docs\runtime_vnext_causal_tail\reproduce.py", line 53, in <module>
+    p=argparse.ArgumentParser();p.add_argument('which',choices=['modern','legacy']);a=p.parse_args();(ROOT/'baseline').mkdir(exist_ok=True)
+    ^^^^^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\runtime_vnext_causal_tail_pr\docs\runtime_vnext_causal_tail\reproduce.py", line 45, in legacy
+    delta=abs(got.point_runtime_seconds.to_numpy()-ref.point_runtime_seconds.to_numpy())
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\runtime_vnext_causal_tail_pr\docs\runtime_vnext_causal_tail\common.py", line 29, in require
+    if not c:raise AssertionError(m)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: LEGACY_PREDICTION_DRIFT

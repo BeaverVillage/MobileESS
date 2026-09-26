@@ -1,0 +1,78 @@
+{
+  "time": "2026-09-26T12:26:09.559153+00:00",
+  "PASS": true,
+  "N": 245,
+  "max_difference": 0.0,
+  "seconds": 263.0561247000005,
+  "source_sha256": "2a8cf4ac8f86a30d0a7dcf999e2064316b556194f8bbc291f09cc85a2d7e101f",
+  "reference_sha256": "7d11dbd0150c925e1a1987476b7f8a0a253b5e454d5fab8e32d3590b040f3d2a",
+  "entries": [
+    {
+      "split_time": "2025-03-22T14:00:00Z",
+      "split_end_time": "2025-03-22T20:00:00Z",
+      "split_epoch": 1742652000,
+      "day_key": "2025-03-22",
+      "refresh_preprocessing": true,
+      "train_row_count": 1276600,
+      "test_row_count": 245,
+      "status": "ok",
+      "reason": null,
+      "preprocessing_refit": true,
+      "train_rows_supervised": 1276600,
+      "test_rows_supervised": 245,
+      "feature_info": {
+        "numeric_columns": [
+          "num_cores_req",
+          "num_gpus_req",
+          "num_nodes_req",
+          "requested_memory_mib",
+          "requested_seconds"
+        ],
+        "categorical_columns": [
+          "account",
+          "partition",
+          "qos",
+          "user"
+        ],
+        "one_hot_min_frequency": 2,
+        "one_hot_handle_unknown": "infrequent_if_exist",
+        "svd_components": 130,
+        "svd_coverage": 0.950479456023421,
+        "feature_count": 135
+      },
+      "metrics": {
+        "mae": 23883.485913825523,
+        "rmse": 52971.17991846991
+      },
+      "cache_reused": false
+    }
+  ],
+  "adapter": {
+    "same_training_rows": true,
+    "same_query_rows": true,
+    "exact_query_key_correspondence": true,
+    "same_feature_policy": true,
+    "same_routing": true,
+    "same_preprocessing": true,
+    "feature_order": [
+      "num_cores_req",
+      "num_gpus_req",
+      "num_nodes_req",
+      "requested_memory_mib",
+      "requested_seconds",
+      "account",
+      "partition",
+      "qos",
+      "user"
+    ],
+    "prediction_max_abs_difference": 0.0,
+    "prediction_tolerance": 1e-09,
+    "PASS": true,
+    "window": "2025-03-22T14:00:00Z",
+    "rows": 245
+  },
+  "pooled_correction_seconds": 5576.44921875,
+  "pooled_correction_available_no_earlier_than": "2025-04-01T08:00:00Z",
+  "calibration_reestimated": false,
+  "raw_source_all_jobs": true
+}

@@ -1,0 +1,178 @@
+{
+  "time": "2026-09-26T12:27:27.530359+00:00",
+  "version": "runtime-vNext-v1",
+  "policies": [
+    [
+      "120",
+      0.05,
+      "current_decay"
+    ],
+    [
+      "120",
+      0.049510512897138946,
+      "14"
+    ],
+    [
+      "120",
+      0.023104906018664842,
+      "30"
+    ],
+    [
+      "120",
+      0.011552453009332421,
+      "60"
+    ],
+    [
+      "120",
+      0.0,
+      "none"
+    ],
+    [
+      "180",
+      0.049510512897138946,
+      "14"
+    ],
+    [
+      "180",
+      0.023104906018664842,
+      "30"
+    ],
+    [
+      "180",
+      0.011552453009332421,
+      "60"
+    ],
+    [
+      "180",
+      0.0,
+      "none"
+    ],
+    [
+      "expanding",
+      0.049510512897138946,
+      "14"
+    ],
+    [
+      "expanding",
+      0.023104906018664842,
+      "30"
+    ],
+    [
+      "expanding",
+      0.011552453009332421,
+      "60"
+    ],
+    [
+      "expanding",
+      0.0,
+      "none"
+    ]
+  ],
+  "policy_validation_origins": [
+    "2025-03-22T08:00:00Z",
+    "2025-03-26T08:00:00Z",
+    "2025-03-30T08:00:00Z"
+  ],
+  "policy_objective": "mean per-origin Pending point MAE; fixed three chronological origins within unchanged DEVELOPMENT, not chosen by outcomes",
+  "reference_population": "PR27 all-job exact reproduction; PR42 positive-GPU exact prediction replay; common-cohort arms use all raw positive-GPU completed history",
+  "population_bridge": "Temporal effect is identified within the common GPU cohort, not all-job PR27 production. Production-wide MoE refit superiority remains unsupported.",
+  "training": "end_time < issue_time, start >= submit, runtime >0; every eligible GPU job within policy window; no sampling",
+  "cadence": "refit at every scored issue; Stage A predefined three-origin validation",
+  "model_family": [
+    "MOE_POOLED",
+    "MULTI_QUANTILE",
+    "MULTI_QUANTILE_HIERARCHICAL"
+  ],
+  "quantiles": [
+    0.5,
+    0.9,
+    0.95,
+    0.99
+  ],
+  "moe": "pinned MoE recipe; pooled positive residual causal empirical quantiles from prior issue predictions, minimum100 unique completed Jobs; no use of future frozen pooled scalar",
+  "hierarchy": [
+    "hardware",
+    "standby_state",
+    "requested_walltime_bucket",
+    "GPU_bucket"
+  ],
+  "min_group_jobs": 100,
+  "min_group_issues": 5,
+  "calibration": "expanding chronological out-of-sample residuals; latest prior observation per Job/state; finite-sample signed quantile residual; causal parent backoff",
+  "pending": "total runtime",
+  "running": "remaining runtime with elapsed_seconds as an explicit feature",
+  "running_landmarks_hours": [
+    0.5,
+    1.5,
+    3.0,
+    6.0,
+    12.0
+  ],
+  "landmark_assignment": "one job-hash-selected landmark independent of duration; retain only historical Jobs surviving assigned landmark; all completed before fit issue",
+  "long_job": "total runtime >4 hours, Q90 remaining/total underprediction as appropriate",
+  "slot_proxy": "GPU-weighted positive difference in ceil(actual/900) and ceil(predicted/900), both censored at 96 slots; runtime-origin occupancy proxy, not optimizer/actual-grid output",
+  "model_selection": "DEVELOPMENT/CALIBRATION equally weighted day-mean Q90 pinball; prefer aggregate coverage/long-job/overreserve gates in both, otherwise best pinball as research candidate only; final subgroup/missed-slot gates never cause evaluation reselection",
+  "calibration_model_selection_before_evaluation": true,
+  "feature_version_provenance": "UNVERIFIED; event time availability only",
+  "gates": {
+    "Q90": [
+      0.9,
+      0.95
+    ],
+    "GPU_Q90": [
+      0.9,
+      0.95
+    ],
+    "major_min": 0.88,
+    "long_under_max": 0.15,
+    "long_under_target": 0.1,
+    "missed_slots_reduction": 0.5,
+    "overreserve_below_walltime": true
+  },
+  "major_group": "at least100 Job-issue rows and at least1% of total GPU weight, hardware/state/walltime/GPU subgroups",
+  "uncertainty": {
+    "unit": "issue day",
+    "paired": true,
+    "draws": 2000,
+    "block_days": [
+      1,
+      7
+    ],
+    "seed": 20260926
+  },
+  "LGBM": {
+    "n_jobs": 1,
+    "random_state": 4005,
+    "deterministic": true,
+    "force_col_wise": true,
+    "verbosity": -1,
+    "subsample": 1.0,
+    "subsample_freq": 0,
+    "colsample_bytree": 1.0,
+    "reg_alpha": 0.0,
+    "reg_lambda": 1.0,
+    "device_type": "cpu",
+    "max_depth": -1,
+    "max_bin": 255,
+    "min_child_weight": 0.001,
+    "min_split_gain": 0.0,
+    "data_random_seed": 4005,
+    "feature_fraction_seed": 4005,
+    "bagging_seed": 4005,
+    "num_leaves": 31,
+    "learning_rate": 0.02,
+    "n_estimators": 800,
+    "min_child_samples": 100
+  },
+  "MOE_threads": 4,
+  "thread_only_change": "exact reproduction uses original1; common-cohort study uses4 consistently across all MoE arms",
+  "optional_survival": "not evaluated; no verified censoring mechanism or historical request-state/version log; no censoring claim",
+  "evaluation": [
+    "EXPOSED_EVALUATION",
+    "MAY_HISTORICAL"
+  ],
+  "evaluation_adaptation": "mature earlier evaluation labels may enter later fixed refits/residuals; never tuning",
+  "optimizer_executions": 0,
+  "grid_executions": 0,
+  "promotion": false
+}
