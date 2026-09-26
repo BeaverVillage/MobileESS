@@ -1,0 +1,118 @@
+{
+  "time": "2026-09-26T17:13:04.635945+00:00",
+  "PASS": true,
+  "audit_source_sha256": "6c40a212b19587e1814141e15a8b0e26f8fdaa2a4cd6eaba38e68807f1e83b73",
+  "scientific_source_sha256": {
+    "study.py": "d0875d5d0764d672a38823f67e22f349e0e3a0f664e4c0b8d950c957c999d2d5",
+    "test_contract.py": "d5372d6095bc3bbc0466377f57f0b0a82dd995527007c2a703f1a6176f94a5e6"
+  },
+  "evaluation_complete_sha256": "4a4cab860637dc030942f3a908bd888b90a254b3972c71ef9e60a92c034b0003",
+  "freeze_sequence_and_all_linked_hashes_PASS": true,
+  "sources": {
+    "issues": 59,
+    "raw_forecasts": 13828,
+    "exact_frozen_PR71_R2_Q90": true,
+    "training_and_preprocessing_strictly_mature": true,
+    "model_prediction_replay_performed": false,
+    "new_model_fits": 0
+  },
+  "calibration": {
+    "issues": 59,
+    "exact_memberships": true,
+    "filter_maturity_before_latest_Job_dedup": true,
+    "residual_uses_source_issue": true,
+    "global_and_GPU_inverse_ECDF_exact": true,
+    "support_minimum_distinct_Jobs": 100,
+    "fallback_issues": 1,
+    "fallback_queries_per_arm": 482,
+    "repeated_forecasts_removed_across_pools": 70930,
+    "predictions_checked": 41484,
+    "raw_R1_bit_exact": true,
+    "all_fallback_queries_retained": true,
+    "finite_nonnegative_additive_corrections": true
+  },
+  "predictions": {
+    "rows": 198269,
+    "R0_May_only": true,
+    "Pending_queries_per_arm": 40419,
+    "Pending_R0_every_column_bit_exact": true,
+    "total_runtime_gt_4h_definition": true
+  },
+  "metrics": {
+    "development_calibration_rows": 6,
+    "model_rows": 11,
+    "elapsed_rows": 35,
+    "GPU_bucket_rows": 21,
+    "all_direct_metrics_recomputed": true,
+    "missed_slots_definition": "15-minute GPU-slot deficit, capped at 96 slots per forecast; scheduling proxy",
+    "requested_reference": "max(requested_seconds-elapsed_seconds,0), including Pending elapsed zero",
+    "long_cohort": "actual total runtime strictly greater than 4 hours"
+  },
+  "uncertainty": {
+    "rows": 330,
+    "paired_comparisons_and_blocks": 30,
+    "draws": 2000,
+    "seed": 20260927,
+    "block_lengths": [
+      1,
+      7
+    ],
+    "nonfinite_draws": 0,
+    "nonlinear_ratios_recomputed_each_draw": true,
+    "finite_draw_null_handling_checked": true
+  },
+  "selection": {
+    "selected_running": "R1",
+    "options": [
+      {
+        "arm": "R2",
+        "safety_pass": false,
+        "pinball_margin_pass": true,
+        "eligible": false,
+        "reserve_preferred_pass": false,
+        "mean_role_reserve_ratio": 1.219126143473249
+      },
+      {
+        "arm": "R3",
+        "safety_pass": false,
+        "pinball_margin_pass": false,
+        "eligible": false,
+        "reserve_preferred_pass": false,
+        "mean_role_reserve_ratio": 1.2268076481993067
+      }
+    ],
+    "reserve_is_preference_not_hard_gate": true,
+    "positive_correction_cannot_reduce_pointwise_reserve_or_overreserve": true
+  },
+  "verdict": {
+    "final_verdict_sha256": "876862646d41144b4fa7246948e62efeca4fb2f925af43369de23648362ffe14",
+    "RUNTIME_CALIBRATION_SUPPORTED": false,
+    "report_source_sha256": "e23e51ee8441db6132bcc7029f128b1b477db9dae62439077668a712cc44080d",
+    "all_calibrator_diagnostics_recomputed": true,
+    "registered_reason": "DEV/CAL retained raw R1; post-freeze diagnostic arms cannot replace the selection",
+    "reserve_preference_not_used_as_hard_support_gate": true,
+    "production_flags_false": true
+  },
+  "maximum_numeric_roundtrip_error": 5.820766091346741e-11,
+  "numeric_rtol": 5e-11,
+  "numeric_atol": 1e-07,
+  "proxy_boundary": "User-authorized D1_SCHEDULER_REQUEST_STATE_PROXY_V1 offline archive experiment",
+  "request_provenance": "UNVERIFIED/UNOBSERVED",
+  "historical_request_exactness_claimed": false,
+  "historical_census_completeness": "UNVERIFIED",
+  "outcome_independent_archive_inclusion_claimed": false,
+  "May": "Previously exposed historical diagnostic, not untouched confirmation",
+  "finite_sample_or_temporal_coverage_guarantee": false,
+  "production_readiness": false,
+  "model_training_during_review": 0,
+  "scientific_imports_during_review": 0,
+  "scientific_files_modified": false,
+  "limitations": [
+    "Empirical weighted/unweighted residual quantiles have no formal coverage guarantee under temporal dependence.",
+    "Source prediction bytes and membership maturity are verified; models are not refitted or prediction-replayed.",
+    "Causal ordering is conditional on the supplied archive and authorized request proxies; historical census completeness is unverified.",
+    "Missed GPU slots are a scheduling proxy, not realized scheduler throughput.",
+    "Nonnegative correction cannot reduce inherited reserve or overreserve; reserve remains a preference and separately reported cost.",
+    "The registered DEV/CAL decision retained raw R1; this study supports no calibrator or production promotion."
+  ]
+}

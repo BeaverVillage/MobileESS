@@ -1,0 +1,68 @@
+{
+  "selected_running": "R1",
+  "Pending": "R0 exact",
+  "RUNTIME_CALIBRATION_SUPPORTED": false,
+  "PRODUCTION_REPLACEMENT_SUPPORTED": false,
+  "OPTIMIZER_INTEGRATION_READY": false,
+  "PRODUCTION_PROMOTED": false,
+  "TEMPORAL_POLICY_CHANGED": false,
+  "NEW_MODEL_SEARCHED": false,
+  "model_training_executions": 0,
+  "calibrator_diagnostics": [
+    {
+      "arm": "R2",
+      "preselected": false,
+      "both_evaluation_safety_pass": false,
+      "both_evaluation_pinball_margin_pass": true,
+      "reserve_preferred_pass": false,
+      "robust_missed_reduction": false,
+      "missed_proof": [
+        {
+          "role": "EXPOSED_EVALUATION",
+          "reference": "R1",
+          "CI95_high_negative": true
+        },
+        {
+          "role": "MAY_HISTORICAL",
+          "reference": "R1",
+          "CI95_high_negative": false
+        },
+        {
+          "role": "MAY_HISTORICAL",
+          "reference": "R0",
+          "CI95_high_negative": true
+        }
+      ]
+    },
+    {
+      "arm": "R3",
+      "preselected": false,
+      "both_evaluation_safety_pass": false,
+      "both_evaluation_pinball_margin_pass": true,
+      "reserve_preferred_pass": false,
+      "robust_missed_reduction": false,
+      "missed_proof": [
+        {
+          "role": "EXPOSED_EVALUATION",
+          "reference": "R1",
+          "CI95_high_negative": true
+        },
+        {
+          "role": "MAY_HISTORICAL",
+          "reference": "R1",
+          "CI95_high_negative": false
+        },
+        {
+          "role": "MAY_HISTORICAL",
+          "reference": "R0",
+          "CI95_high_negative": true
+        }
+      ]
+    }
+  ],
+  "reserve_preferred_not_hard_support_gate": true,
+  "rule_source_sha256": "82313d91f70a911cff08487f346e06f9705b201d83ed8aef3578ff43a24cce2b",
+  "May": "already exposed historical diagnostic",
+  "proxy": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1; UNVERIFIED/UNOBSERVED",
+  "production_disposition": "unchanged R0; no integration or promotion"
+}
