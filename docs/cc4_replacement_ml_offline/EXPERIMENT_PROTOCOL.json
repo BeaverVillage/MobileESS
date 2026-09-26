@@ -1,0 +1,77 @@
+{
+  "frozen_at": "2026-09-24T09:00:06.200959+00:00",
+  "scope": "forecast only; no optimizer/grid execution",
+  "threads": 1,
+  "training_workers": 1,
+  "dataloader_workers": 0,
+  "gpu_concurrent_jobs": 1,
+  "seeds": [
+    20260924,
+    20260925,
+    20260926
+  ],
+  "horizons_hours": [
+    4,
+    1,
+    2,
+    8
+  ],
+  "fixed_training": "exact original eligible TRAIN membership, 167 days; frozen stage mask",
+  "development": "58 original eligible days; chronological OOS; first 20 eligible mature residual days warmup before calibrated development score",
+  "families": {
+    "F0": "frozen L0 H4 Q50/Q90 + original 85% expanding correction, historical only",
+    "F1": "L0 LightGBM original log1p and 71 features, 90% expanding correction",
+    "F2": "small TFT-based gated variable selection, LSTM history/known decoder, causal attention; direct window quantiles; log1p target",
+    "F3": "DeepAR-based history encoder + autoregressive LSTM decoder, hurdle lognormal window distribution; zero mass explicit",
+    "seasonal": "TRAIN same slot weekday if >=8 days, same slot if >=20, pooled fallback empirical quantiles",
+    "trivial": [
+      "physical capacity 780*H",
+      "TRAIN target maximum constant"
+    ]
+  },
+  "neural_search": {
+    "hidden": 16,
+    "learning_rates": [
+      0.001,
+      0.0003
+    ],
+    "dropout": 0.1,
+    "max_epochs": 40,
+    "patience": 7,
+    "batch_days": 16,
+    "gradient_clip": 1.0,
+    "weight_decay": 0.0001,
+    "trials_per_family": 2,
+    "search_seed": 20260924,
+    "selected_config_repeat_seeds": 3,
+    "early_stop": "minimum all-window original-unit raw Q90 pinball on eligible development; no positive-only mismatch for TFT",
+    "samples_deepar": 128,
+    "selection": "mean chronological calibrated development Q90 pinball; tie smaller mean requirement; fixed rules; no May reselection"
+  },
+  "postprocessing": {
+    "repair": "nonnegative; Q90=max(Q50,Q90)",
+    "calibration": "log1p residual; one-sided finite-sample order statistic ceil(0.9*(n+1)); positive correction only; expanding chronological OOS; full-day maturity strictly before issue",
+    "budget": "exactly one 90% calibration rule all new models; no scale/cap/quantile search",
+    "caps": "same causal historical 99% finite-sample quantile and 780*H physical-cap scenario; May H4 exact frozen caps",
+    "actual_secured_reserve": "not computed; optimizer not run"
+  },
+  "expanding_refit": {
+    "families": "LightGBM plus best neural family by H4 development mean score (at most 2 total)",
+    "cadence_candidates_days": [
+      28,
+      56
+    ],
+    "choose_on_development": "paired same-day calibrated Q90 pinball averaged over both families; tie 56",
+    "cutoff": "scheduled issue; only full-day mature labels and operating dates before cutoff; frozen architecture, epochs, scaler and learning rate",
+    "membership": "save day IDs/ranges/count for every issue; never fit on an immature label"
+  },
+  "horizon_selection": "LightGBM plus best neural H4 development family; direct sums of common 15min targets; H1=93 H2=89 H4=81 H8=65; compare relative to same-H LightGBM; no cross-H raw-loss winner",
+  "uncertainty": "paired moving 7-day blocks, 1000 bootstrap draws, seeds averaged within day; windows not independent",
+  "burst": "TRAIN positive target Q95 separately for each horizon; threshold frozen",
+  "evaluation": "Dec-Feb and May historical exposed; no unused holdout claim; NO_UNTOUCHED_CONFIRMATION",
+  "stop_rule": "complete finite registered comparisons, no tuning on historical evaluation, report failures/OOM without population reduction",
+  "NEW_MODEL_AUTO_DEPLOYED": false,
+  "OPTIMIZER_CHANGED": false,
+  "GRID_CAMPAIGN_EXECUTIONS": 0,
+  "EXISTING_PRODUCTION_MODIFIED": false
+}

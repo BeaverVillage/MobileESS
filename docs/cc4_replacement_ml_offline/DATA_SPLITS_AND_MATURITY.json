@@ -1,0 +1,71 @@
+{
+  "original_ledger_sha256": "64fb7614531f7aabbc6c76741299c7023b23421906485c341087d4c6d42140ed",
+  "membership_file": "DAY_LEDGER.parquet",
+  "periods": [
+    {
+      "role": "CALIBRATION",
+      "calendar_start": "2024-11-01",
+      "calendar_end": "2024-11-29",
+      "eligible_start": "2024-11-01",
+      "eligible_end": "2024-11-27",
+      "N_eligible": 26,
+      "excluded_days": "2024-11-26;2024-11-28;2024-11-29"
+    },
+    {
+      "role": "DEVELOPMENT",
+      "calendar_start": "2024-09-01",
+      "calendar_end": "2024-10-30",
+      "eligible_start": "2024-09-01",
+      "eligible_end": "2024-10-29",
+      "N_eligible": 58,
+      "excluded_days": "2024-10-28;2024-10-30"
+    },
+    {
+      "role": "EXPOSED_EVALUATION",
+      "calendar_start": "2024-12-01",
+      "calendar_end": "2025-02-26",
+      "eligible_start": "2024-12-01",
+      "eligible_end": "2025-02-26",
+      "N_eligible": 88,
+      "excluded_days": ""
+    },
+    {
+      "role": "PURGE",
+      "calendar_start": "2024-08-31",
+      "calendar_end": "2024-11-30",
+      "eligible_start": null,
+      "eligible_end": null,
+      "N_eligible": 0,
+      "excluded_days": "2024-08-31;2024-10-31;2024-11-30"
+    },
+    {
+      "role": "TRAIN",
+      "calendar_start": "2024-03-15",
+      "calendar_end": "2024-08-30",
+      "eligible_start": "2024-03-15",
+      "eligible_end": "2024-08-28",
+      "N_eligible": 167,
+      "excluded_days": "2024-08-29;2024-08-30"
+    }
+  ],
+  "original_raw_target_max_error_GPUh": 2.0554580260068178e-10,
+  "original_feature_max_errors": {
+    "H1": 0.0,
+    "H4": 0.0,
+    "H8": 0.0
+  },
+  "windows_per_day": {
+    "H1": 93,
+    "H2": 89,
+    "H4": 81,
+    "H8": 65
+  },
+  "available_days": [
+    "2024-03-15",
+    "2025-05-31"
+  ],
+  "full_day_maturity": "max(target_end,target_label_available_at) < issue",
+  "historical_membership_preserved": true,
+  "synthetic_12site_augmentation": false,
+  "NO_UNTOUCHED_CONFIRMATION": true
+}

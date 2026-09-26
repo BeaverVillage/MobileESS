@@ -1,0 +1,389 @@
+# CC4 REPLACEMENT — GITHUB-VERIFIED, FORECAST-ONLY MODEL COMPARISON
+
+이번 작업은 CC4 대체 머신러닝 모델의 학습·추론·평가 실험입니다.
+보고서만 작성하지 말고, 원본 재현과 데이터 검증 후 실제 모델 비교를 수행하세요.
+
+기존 IEEE123/IEEE8500 production, 진행 중인 CC4 ablation,
+원본 predictor, frozen ML snapshot 및 논문 결과는 변경하지 마세요.
+
+이번에는 Gurobi/OpenDSS/B1/B2/B3/Actual 캠페인을 실행하지 않습니다.
+새 모델의 production 자동 교체도 금지합니다.
+
+진행 상황과 최종 보고는 한국어로 작성하세요.
+
+
+## 1. GitHub와 로컬 실행 authority를 먼저 연결
+
+Repository:
+BeaverVillage/MobileESS
+
+확인된 GitHub 기준:
+
+[A] 최종 V41R4 계열 코드
+PR #42
+ref = 04f9c738ad80786b3860638304043b06129c04ef
+
+관련 파일:
+dayahead/v41/workload.py
+dayahead/v41/data.py
+dayahead/v41/reserve.py
+dayahead/v41/snapshot.py
+dayahead/v41r2/authority.py
+dayahead/v40r6/common.py
+dayahead/v40r6/models.py
+
+[B] 기존 다중 집계창 연구
+PR #33
+ref = 2d6e22e2b448454bb4a860a07f38c20ad3ef834d
+
+관련 파일:
+dayahead/artifacts/v40r6_multihorizon_cumulative_gpuwork/V40R6_FINAL_REVIEW.md
+dayahead/v40r6/
+
+[C] 기존 85% 잔차보정 연구
+PR #34
+ref = 4309a4e5ea2c7893f79bcc7e747ca7d13fc5de42
+
+관련 파일:
+dayahead/artifacts/v40r6r1_risk_calibrated_rolling_gpuwork/V40R6R1_FINAL_REVIEW.md
+dayahead/v40r6r1/
+
+[D] 이전 신경망 비교 연구
+ref = 43710c96c36f7e66257885a56ef6df697b3c53bb
+
+관련 파일:
+dayahead/artifacts/v40r3_causal_gpuwork_arrival_ml/V40R3_FINAL_REVIEW.md
+dayahead/artifacts/v40r3_causal_gpuwork_arrival_ml/V40R3_TRAINING_RUN_LEDGER.json
+dayahead/v40r3/
+
+main만 검색해서 코드가 없다고 판단하지 마세요.
+관련 PR branch와 고정 commit을 확인하세요.
+
+GitHub 코드는 이력 확인용이며, 현재 논문 CC4의 최종 입력·모델은
+로컬 frozen ML_SNAPSHOT / H4_AUTHORITY / model hash에 연결해 확인하세요.
+GitHub source와 로컬 실행본이 다르면 차이를 기록하고 임의 혼합하지 마세요.
+
+기존 실험의 NONE / FAIL / NO_MODEL_PROMOTED 판정을 보존하세요.
+이번 새 실험은 과거 실패 판정을 수정하는 작업이 아닙니다.
+
+
+## 2. 별도 실행 공간과 자원
+
+새 namespace:
+CC4_REPLACEMENT_ML_OFFLINE_<timestamp>
+
+실행 중인 production worktree를 checkout/reset/edit하지 마세요.
+필요한 코드는 독립 경로에 복사하거나 별도 worktree에서 사용하세요.
+
+기존 캠페인을 중단·재시작하거나 worker/thread 수를 변경하지 마세요.
+
+ML 실행은 우선:
+- training worker = 1
+- CPU/BLAS/PyTorch CPU threads = 1
+- DataLoader workers = 0
+- GPU는 가용성이 확인될 때 한 작업만 사용
+
+GPU/CPU/RAM 상태를 확인하고 기존 캠페인을 방해하지 않도록 실행하세요.
+모델마다 환경·seed·시간·GPU peak memory를 기록하세요.
+학습 오류/OOM 때문에 target이나 평가 표본을 몰래 줄이지 마세요.
+
+
+## 3. 기존 모델과 학습 이력 복원
+
+현재 CC4가 아래 구조와 일치하는지 실제 파일로 확인하세요.
+
+- R6 L0 H4 LightGBM Q50/Q90
+- log1p(target_GPUh) 학습
+- num_leaves=15
+- learning_rate=0.03
+- n_estimators=400
+- min_child_samples=50
+- 71개 입력 특징
+- 고정 base trees
+- 성숙한 OOS 잔차의 expanding one-sided 85% calibration
+- historical/physical cap을 통한 actionable reserve 생성
+
+모델 파일, feature ordering, target, 전처리, calibration membership,
+모델 SHA와 최종 May snapshot 사이의 연결을 기록하세요.
+
+기존 학습기간은 다음 기록과 대조하세요.
+
+TRAIN:
+2024-03-15 ~ 2024-08-30
+성숙 적격 167일
+
+DEVELOPMENT:
+2024-09-01 ~ 2024-10-30
+성숙 적격 58일
+
+CALIBRATION:
+2024-11-01 ~ 2024-11-29
+성숙 적격 26일
+
+EXPOSED_EVALUATION:
+2024-12-01 ~ 2025-02-26
+88일
+
+R6의 CAL_FIT/CAL_SELECT 구분과 R6R1의 rolling calibration 구분도
+각각 보존하세요. 같은 calibration 방식으로 취급하지 마세요.
+
+이 날짜들은 기존 결과 재현 기준입니다.
+실제 membership는 maturity ledger와 모델 학습 receipt로 검증하고,
+날짜 문자열만으로 재구성하지 마세요.
+
+과거 TFT/DeepAR/N-HiTS/CMABF 학습도 확인하세요.
+특히 TFT/DeepAR/CMABF의 best epoch=1이 다음 중 무엇과 관련되는지
+training/validation curves와 코드로 진단하세요.
+
+- 실제 과적합 또는 분포변화
+- 학습률/정규화/target transform
+- maturity mask 처리
+- decoder 입력과 issue-time 경계
+- loss와 early-stopping metric의 불일치
+- 구현 오류 또는 비정상 gradient
+
+best epoch=1이라는 이유만으로 무조건 epochs를 늘리지 마세요.
+과거 모델과 동일한 실험을 반복할 경우에는 재현이라고 표기하세요.
+
+
+## 4. Target와 데이터 인과성
+
+기존 target의 공통 기준:
+
+w_j = gpus_requested_j × (observed_end_j - observed_start_j) / 3600
+Y_window = sum(w_j for jobs whose submit_time is inside the window)
+
+이는:
+- 신규 유입 작업의 전체 lifetime GPU-work
+- 실제 GPU 점유량이나 전력부하가 아님
+- 여유용량 자체가 아님
+- window 안에서 반드시 완료해야 하는 작업량도 아님
+
+기존 cohort/단위/zero/missing 처리와 GPU 수량 authority를 유지하세요.
+GPU 결측을 0 또는 nodes×4로 임의 대체하지 마세요.
+12개 synthetic AIDC 배분을 12개의 독립 실측 학습시계열처럼 늘리지 마세요.
+
+모든 예측은 D−1 18:00 fixed AEST, UTC+10 기준입니다.
+다음날 00시까지의 6시간 lead gap도 유지하세요.
+
+미래 Job의 GPU request/runtime/count/partition/QoS를
+해당 issue의 predictor에 넣지 마세요.
+현재 미완료 Job의 최종 runtime도 사용할 수 없습니다.
+
+feature에는 issue까지 관측된 제출 정보와
+성숙한 과거 GPU-work 및 maturity mask/age만 사용하세요.
+
+원래 full-day maturity 규칙:
+max(target_day_end, target_label_available_at) < issue_time
+
+를 기본으로 유지하세요.
+새로운 maturity 규칙을 시험하려면 별도 실험으로 분리하고
+기존 baseline에 조용히 적용하지 마세요.
+
+raw archive의 partition 월과 submit 월이 다를 수 있으므로
+파일명 월만 보고 자료를 누락시키지 마세요.
+
+
+## 5. 먼저 공정한 H4 모델 교체 실험
+
+첫 번째 실험은 target/horizon/interface를 바꾸지 않고
+기존 H4, 81개 window/day에서 모델 차이만 평가합니다.
+
+필수 비교군:
+
+F0: 기존 frozen CC4 — 기존 85% 보정 그대로, 역사적 reference
+F1: 동일 데이터의 LightGBM Q90 + 90% 보정 — 공정한 nominal-90 기준
+F2: 소형 TFT 기반 대체 후보
+F3: DeepAR 기반 대체 후보
+
+기존 seasonal empirical quantile도 값싼 기준으로 포함하세요.
+
+TFT/DeepAR를 처음 시험하는 모델 또는 자동으로 우수한 모델이라고
+표현하지 마세요. 이전 R3 구현·결과와 이번 변경점을 명시하세요.
+
+새 모델을 개발한다는 요청을 cap/quantile 변경만으로 대체하지 마세요.
+최소한 신경망 대체 후보의 실제 학습과 검증을 수행하세요.
+
+1차 비교에서는 학습기간·target·사용 가능한 정보·nominal coverage를 맞춥니다.
+신경망이 raw sequence를 쓰고 tree가 요약 특징만 쓰는 경우,
+그 차이를 명시하고 동일한 정보원/성숙 경계를 보장하세요.
+
+처음부터 큰 모델이나 무제한 hyperparameter sweep을 실행하지 마세요.
+모델별 소수의 설정을 development에서 비교하고,
+선택 설정은 최소 3개 고정 seed로 반복 평가하세요.
+좋은 seed만 골라 보고하지 마세요.
+
+모든 후보의 postprocessing/calibration 계산 예산과 선택 규칙을
+실행 전에 EXPERIMENT_PROTOCOL.json에 기록하세요.
+
+
+## 6. 최근 학습자료 반영은 별도 축으로 비교
+
+모델 구조 효과와 최근 자료를 더 쓴 효과를 섞지 마세요.
+
+먼저 동일한 기존 학습기간에서 모델을 비교한 뒤,
+개발기간에서 유망한 최대 두 계열에 대해서만 다음을 추가 비교하세요.
+
+A: fixed training
+B: causal expanding refit
+
+B에서는 각 refit cutoff 이전에 정답이 완전히 성숙한 자료만 사용합니다.
+새 신경망에만 최근 자료를 주지 말고,
+동일 갱신 규칙의 LightGBM comparator를 함께 둡니다.
+
+refit cadence와 학습 설정은 development에서 확정하세요.
+실제 각 issue의 training membership/date range/N을 저장하세요.
+
+현재 raw 데이터의 가용 기간을 먼저 확인하고,
+존재하지 않는 학습기간이나 새로운 holdout을 임의로 가정하지 마세요.
+
+
+## 7. 시간창 실험은 분리해서 수행
+
+H4 모델 비교 이후, 유망한 최대 두 모델과 LightGBM 기준에 대해:
+
+H = 1, 2, 4, 8 hours
+
+를 비교하세요.
+기존 H1/H4/H8/H24 연구는 historical reference로 보존합니다.
+
+공통 15분 submit-bin GPU-work에서 각 합계 target을 생성하고,
+같은 issue와 같은 날짜 split을 사용하세요.
+
+15분 stride, 하루 안에서 완결되는 window라면:
+H1 = 93 windows/day
+H2 = 89
+H4 = 81
+H8 = 65
+
+가 되는지 검증하세요.
+정시 시작 24개 H1만 별도 평가한다면 다른 표본이라고 표시하세요.
+
+각 horizon은 그 horizon의 기준모델과 비교합니다.
+긴 창의 raw loss와 짧은 창의 raw loss를 그대로 비교해 우승자를 고르거나,
+zero 비율이 높아 coverage가 높아진 것을 성능 개선으로 해석하지 마세요.
+
+1시간 Q90 네 개를 합쳐 4시간 Q90이라고 하지 마세요.
+합계 target을 직접 예측하거나,
+시간적 의존성을 보존한 예측 경로 표본에서 합계 분위수를 계산하세요.
+
+이번 작업에서는 기존 P2/reserve optimizer를 변경하지 않습니다.
+새 시간창의 optimizer 연결은 결과 확인 후 별도 검토합니다.
+
+
+## 8. 90% 목표와 calibration
+
+주목표:
+uncapped one-sided predictive coverage ≈ 90%
+
+현재 May의 기존 H4 target/cap 조건에서는
+physical-cap oracle coverage=85.9418558343%입니다.
+따라서 actionable coverage >=90%를 성공조건으로 요구하지 마세요.
+
+다음을 반드시 분리하세요.
+- raw model quantile
+- calibrated uncapped forecast
+- historical/physical cap 적용 후 값
+- 실제 확보된 reserve
+
+기존 85% CC4보다 90% 후보가 coverage가 높다는 이유만으로
+모델 성능이 개선됐다고 하지 마세요.
+동일한 90% 보정 기준의 LightGBM과 비교해야 합니다.
+
+Calibration에는 chronological out-of-sample residual만 사용하세요.
+TRAIN fitted residual, 아직 성숙하지 않은 label,
+미래 평가기간 residual을 미리 사용하지 마세요.
+
+상시 capacity cap 또는 큰 상수를 예측하는 trivial baseline도 포함해,
+단순 과대예측으로 coverage만 높이는 후보를 구분하세요.
+
+0값이 많은 target에서는 전체 coverage와 양수 coverage의 관계를 확인해
+동시에 달성 불가능한 gate를 만들지 마세요.
+과거 R5의 zero-inflation gate 문제를 반복하지 마세요.
+
+
+## 9. 평가기간과 May 사용
+
+기존 2024-12~2025-02 평가와 May 2025는
+이미 노출된 역사적 비교 구간입니다.
+새 실험에서 untouched holdout으로 재명명하지 마세요.
+
+모델·집계창·보정·refit 규칙 선택은 개발 구간에서 끝내세요.
+May는 설정 동결 후 기존 CC4와의 historical comparison으로 평가하며,
+May 결과를 보고 재선정하지 마세요.
+
+진짜 미사용 기간이 있다면 데이터 completeness와 label maturity,
+이전 노출 여부를 확인한 뒤 코드·설정 동결 후 한 번 평가하세요.
+없으면 NO_UNTOUCHED_CONFIRMATION으로 명시하고,
+새 학습과 역사적 비교 자체는 진행하세요.
+
+겹치는 window를 random train/test split하지 마세요.
+불확실성은 day/block 단위로 계산하고,
+2,511개 window를 독립 표본 2,511개처럼 취급하지 마세요.
+
+
+## 10. 반드시 보고할 지표
+
+같은 target와 평가 population에서:
+
+- N_days / N_windows / N_positive / N_zero
+- Q50 MAE, WAPE
+- Q90 pinball loss
+- raw/calibrated uncapped coverage
+- positive-target coverage
+- TRAIN에서 정의한 burst subset의 coverage와 miss 규모
+- mean/P90 underprediction GPUh
+- mean/P90 overprediction GPUh
+- mean forecast requirement
+- day/lead/time-band별 calibration
+- cap 적용 후 actionable coverage와 cap activation
+- training/inference runtime
+- parameter count, GPU peak memory
+- seed별 결과와 paired day-block uncertainty
+
+주요 score는 원 단위 GPU·h에서 보고하고,
+log-space score는 별도 표시하세요.
+
+확률경로가 없는 Q50/Q90 두 숫자만으로 CRPS를 만들어내지 마세요.
+겹치는 window의 GPUh 합계를 고유 작업량 총합이라고 부르지 마세요.
+
+더 큰 예측 요구량 때문에 reserve shortfall이 커진 경우와
+예측 자체가 나빠진 경우를 구분하세요.
+모델마다 다른 예측 요구량에 대한 shortfall만으로 우열을 판정하지 마세요.
+
+
+## 11. 산출물과 종료조건
+
+저장:
+SOURCE_AND_MODEL_LINEAGE.json
+ORIGINAL_TRAINING_PERIODS.csv
+OLD_MODEL_REPRODUCTION_REPORT_KO.md
+PREVIOUS_FAILURE_DIAGNOSIS_KO.md
+EXPERIMENT_PROTOCOL.json
+DATA_SPLITS_AND_MATURITY.json
+TRAINING_RUN_LEDGER.csv
+PREDICTIONS.parquet
+MODEL_METRICS.csv
+HORIZON_COMPARISON.csv
+REFIT_COMPARISON.csv
+FINAL_REVIEW_KO.md
+
+최종 보고에는 다음 질문에 답하세요.
+
+1. 기존 CC4는 정확히 무엇을, 언제, 어떤 특징으로 학습했는가?
+2. 과거 TFT/DeepAR의 실패와 이번 결과는 어떻게 다른가?
+3. 새 모델 자체의 이득인가, 최근 자료/refit/calibration의 이득인가?
+4. 과대예측을 늘리는 것 외에 Q90 pinball과 burst 대응이 개선됐는가?
+5. 4시간보다 다른 집계창이 실제로 유리한가?
+6. 여유용량 확보용 후속 통합을 검토할 후보가 있는가?
+7. 없으면 어떤 한계가 남았는가?
+
+90%를 달성하거나 기존 모델을 이길 때까지 설정을 무한히 바꾸지 마세요.
+실행 전에 정한 비교를 완료하고, 실패 결과도 그대로 보고하세요.
+
+NEW_MODEL_AUTO_DEPLOYED = FALSE
+OPTIMIZER_CHANGED = FALSE
+GRID_CAMPAIGN_EXECUTIONS = 0
+EXISTING_PRODUCTION_MODIFIED = FALSE
+
+로 종료하세요.
