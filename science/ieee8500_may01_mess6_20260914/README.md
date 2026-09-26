@@ -36,6 +36,16 @@ AC feasibility, six-MESS B2 stage timings, realized and day-ahead time series,
 same-time B0/B3 heatmap and summary, flexibility actions, the B3 energy exception,
 paper key values, validation checks, and a source/output SHA256 manifest.
 
+The `timeseries_heatmap` directory contains a separate archive-direct extraction
+of B0 and B3 realized-operation line loading for all 96 May-1 slots. It includes
+the long policy/slot/physical-line table, daily maxima, B0-ranked common stress
+windows, loading-duration summaries, source-member audit, manifest, and the exact
+read-only extraction script. Values below 0.40 and signed B0-minus-B3 differences
+are retained without clipping. The extraction is marked `PARTIAL` because the raw
+archive contains only the 36-bus PCC coordinate overlay, not the base-feeder
+coordinate or disabled-line inventory authorities; unavailable fields remain
+blank and the disabled count remains unknown.
+
 * `rho` is maximum recorded line terminal-phase current divided by original
   line NormAmps. Transformer current and winding-kVA gates remain separate.
 * The heatmap uses **realized AC at B0's peak, 2025-05-01 18:15**, held fixed for

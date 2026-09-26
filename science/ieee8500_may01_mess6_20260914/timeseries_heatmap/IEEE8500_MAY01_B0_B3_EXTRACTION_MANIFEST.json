@@ -1,0 +1,369 @@
+{
+  "status": "PARTIAL",
+  "raw_archive": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\결과 데이터\\IEEE8500_MAY01_MESS6_RAW_RESULTS_20260914_151641.tar.gz",
+  "output_folder": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\결과 데이터\\IEEE8500_MAY01_B0_B3_TIMESERIES_HEATMAP_DATA_20260920",
+  "zip": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\결과 데이터\\IEEE8500_MAY01_B0_B3_TIMESERIES_HEATMAP_DATA_20260920.zip",
+  "date": "2025-05-01",
+  "slot_count_per_policy": 96,
+  "slot_minutes": 15,
+  "scope": "REALIZED_OPERATION_AC/FINAL_ACTUAL",
+  "source_authority": {
+    "B0": {
+      "arrays": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/actual/B0/FINAL_ACTUAL/OPENDSS_PHASE_ARRAYS.npz",
+      "summary": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/actual/B0/FINAL_ACTUAL/AC_SUMMARY.json",
+      "slot_extrema": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/actual/B0/FINAL_ACTUAL/SLOT_EXTREMA.json",
+      "axes_ratings": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/AXES.json",
+      "coordinates": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/PCC_BusCoordinates.dss"
+    },
+    "B3": {
+      "arrays": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/actual_B3_energy_exception_20260914/B3/FINAL_ACTUAL/OPENDSS_PHASE_ARRAYS.npz",
+      "summary": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/actual_B3_energy_exception_20260914/B3/FINAL_ACTUAL/AC_SUMMARY.json",
+      "slot_extrema": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/actual_B3_energy_exception_20260914/B3/FINAL_ACTUAL/SLOT_EXTREMA.json",
+      "axes_ratings": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/AXES.json",
+      "coordinates": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/PCC_BusCoordinates.dss"
+    }
+  },
+  "counts": {
+    "archive_members_scanned": 14117,
+    "active_lines": 3698,
+    "disabled_lines": null,
+    "line_phase_axes": 12312,
+    "B0_line_slot_rows": 355008,
+    "B3_line_slot_rows": 355008,
+    "coordinate_complete_lines": 0,
+    "coordinate_endpoint_fields_present": 0
+  },
+  "system_results": {
+    "B0": {
+      "daily_rho_max": 0.8537462147791017,
+      "critical_slot": 73,
+      "critical_timestamp": "2025-05-01T18:15",
+      "critical_line": "Line.tpx21459660c0",
+      "critical_phase": "1",
+      "critical_terminal": "t2"
+    },
+    "B3": {
+      "daily_rho_max": 0.8420708410184574,
+      "critical_slot": 74,
+      "critical_timestamp": "2025-05-01T18:30",
+      "critical_line": "Line.tpx21459660c0",
+      "critical_phase": "1",
+      "critical_terminal": "t2"
+    }
+  },
+  "validation": {
+    "source_summary_abs_diff": {
+      "B0": 0.0,
+      "B3": 0.0
+    },
+    "slot_extrema_max_abs_diff": {
+      "B0": 0.0,
+      "B3": 0.0
+    },
+    "slot_witness_mismatches": {
+      "B0": 0,
+      "B3": 0
+    },
+    "slot_completeness": true,
+    "topology_axes_identical": true,
+    "rating_axes_identical": true,
+    "active_loading_finite_and_nonnegative": true,
+    "duplicate_policy_slot_element_rows": 0,
+    "from_to_bus_missing": 0,
+    "coordinate_complete_lines": 0,
+    "coordinate_incomplete_lines": 3698,
+    "coordinate_endpoint_count": 0,
+    "coordinate_possible_endpoint_count": 7396,
+    "rating_variation_within_line_count": 0,
+    "disabled_line_count": null,
+    "disabled_inventory_available": false,
+    "raw_current_ampere_array_available": false,
+    "timestamps_authoritative_in_source": false
+  },
+  "limitations": [
+    "Base feeder coordinates are absent from archive; incomplete x/y fields are blank.",
+    "Disabled-line inventory is absent; disabled count is unknown.",
+    "No independent raw ampere-current array is present; current_A is reconstructed from loading and rating.",
+    "Timestamps are inferred from archived date/slot index and task-stated 15-minute resolution."
+  ],
+  "scientific_execution_count": 0,
+  "git_modification_count": 0,
+  "source_members": [
+    {
+      "policy": "B0",
+      "scope": "REALIZED_OPERATION_AC",
+      "artifact_role": "completion",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/actual/B0/COMPLETE.json",
+      "sha256_if_available": "e8ef3151286ed98a98e9e759520675f11a2c8c9ee93e5042d9088d549835c836",
+      "bytes": 1629,
+      "used_for_final_extraction": true
+    },
+    {
+      "policy": "B0",
+      "scope": "REALIZED_OPERATION_AC/CONTINUOUS_VERIFICATION",
+      "artifact_role": "official_summary",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/actual/B0/CONTINUOUS_VERIFICATION/AC_SUMMARY.json",
+      "sha256_if_available": "",
+      "bytes": 501,
+      "used_for_final_extraction": false
+    },
+    {
+      "policy": "B0",
+      "scope": "REALIZED_OPERATION_AC/CONTINUOUS_VERIFICATION",
+      "artifact_role": "phase_arrays",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/actual/B0/CONTINUOUS_VERIFICATION/OPENDSS_PHASE_ARRAYS.npz",
+      "sha256_if_available": "",
+      "bytes": 19400717,
+      "used_for_final_extraction": false
+    },
+    {
+      "policy": "B0",
+      "scope": "REALIZED_OPERATION_AC/CONTINUOUS_VERIFICATION",
+      "artifact_role": "slot_extrema",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/actual/B0/CONTINUOUS_VERIFICATION/SLOT_EXTREMA.json",
+      "sha256_if_available": "",
+      "bytes": 29851,
+      "used_for_final_extraction": false
+    },
+    {
+      "policy": "B0",
+      "scope": "REALIZED_OPERATION_AC/ETA95_ACTUAL",
+      "artifact_role": "official_summary",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/actual/B0/ETA95_ACTUAL/AC_SUMMARY.json",
+      "sha256_if_available": "",
+      "bytes": 501,
+      "used_for_final_extraction": false
+    },
+    {
+      "policy": "B0",
+      "scope": "REALIZED_OPERATION_AC/ETA95_ACTUAL",
+      "artifact_role": "phase_arrays",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/actual/B0/ETA95_ACTUAL/OPENDSS_PHASE_ARRAYS.npz",
+      "sha256_if_available": "",
+      "bytes": 19400717,
+      "used_for_final_extraction": false
+    },
+    {
+      "policy": "B0",
+      "scope": "REALIZED_OPERATION_AC/ETA95_ACTUAL",
+      "artifact_role": "slot_extrema",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/actual/B0/ETA95_ACTUAL/SLOT_EXTREMA.json",
+      "sha256_if_available": "",
+      "bytes": 29851,
+      "used_for_final_extraction": false
+    },
+    {
+      "policy": "B0",
+      "scope": "REALIZED_OPERATION_AC/FINAL_ACTUAL",
+      "artifact_role": "official_summary",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/actual/B0/FINAL_ACTUAL/AC_SUMMARY.json",
+      "sha256_if_available": "cb8b797d491af5e5ff0364828e0c3a7c0dffbd3456ea3f01f3266b5acd0442c0",
+      "bytes": 501,
+      "used_for_final_extraction": true
+    },
+    {
+      "policy": "B0",
+      "scope": "REALIZED_OPERATION_AC/FINAL_ACTUAL",
+      "artifact_role": "phase_arrays",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/actual/B0/FINAL_ACTUAL/OPENDSS_PHASE_ARRAYS.npz",
+      "sha256_if_available": "c0dc558f12c9f217c87f18cf0545ea8e6610d8085f0ab1fc88c4690645c30a12",
+      "bytes": 19400717,
+      "used_for_final_extraction": true
+    },
+    {
+      "policy": "B0",
+      "scope": "REALIZED_OPERATION_AC/FINAL_ACTUAL",
+      "artifact_role": "slot_extrema",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/actual/B0/FINAL_ACTUAL/SLOT_EXTREMA.json",
+      "sha256_if_available": "f03012106d9902a1b1883fe89041c38e214c87691072d10ddcb06195309222ab",
+      "bytes": 29851,
+      "used_for_final_extraction": true
+    },
+    {
+      "policy": "B0",
+      "scope": "REALIZED_OPERATION_AC",
+      "artifact_role": "axes_and_ratings",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/AXES.json",
+      "sha256_if_available": "c4633676a2a23fc13690d04a357a7a381d2000241ae7946d63e5aea35f4b2938",
+      "bytes": 1384831,
+      "used_for_final_extraction": true
+    },
+    {
+      "policy": "B0",
+      "scope": "SOURCE_OVERLAY",
+      "artifact_role": "pcc_coordinates",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/PCC_BusCoordinates.dss",
+      "sha256_if_available": "2d1dddf9e5dfca19937dbd34b588352fffc9f37e87f35f60eacd57e97d0b366a",
+      "bytes": 2682,
+      "used_for_final_extraction": true
+    },
+    {
+      "policy": "B0",
+      "scope": "SOURCE_REFERENCE",
+      "artifact_role": "master_reference",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_AIDC2X_HOST_REMAP_FULL4H_20260913/PCC_Master.dss",
+      "sha256_if_available": "363626286c28093ace5b05a7b9a64c702c85afb31cac9992fb82e21daf68bb90",
+      "bytes": 439,
+      "used_for_final_extraction": true
+    },
+    {
+      "policy": "B3",
+      "scope": "REALIZED_OPERATION_AC",
+      "artifact_role": "completion",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/actual_B3_energy_exception_20260914/B3/COMPLETE.json",
+      "sha256_if_available": "48dbabe4ddaa123b053d7880075dc734c0160e5335afdbc0728044fce9b354e5",
+      "bytes": 2149,
+      "used_for_final_extraction": true
+    },
+    {
+      "policy": "B3",
+      "scope": "REALIZED_OPERATION_AC/CONTINUOUS_VERIFICATION",
+      "artifact_role": "official_summary",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/actual_B3_energy_exception_20260914/B3/CONTINUOUS_VERIFICATION/AC_SUMMARY.json",
+      "sha256_if_available": "",
+      "bytes": 499,
+      "used_for_final_extraction": false
+    },
+    {
+      "policy": "B3",
+      "scope": "REALIZED_OPERATION_AC/CONTINUOUS_VERIFICATION",
+      "artifact_role": "phase_arrays",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/actual_B3_energy_exception_20260914/B3/CONTINUOUS_VERIFICATION/OPENDSS_PHASE_ARRAYS.npz",
+      "sha256_if_available": "",
+      "bytes": 19405587,
+      "used_for_final_extraction": false
+    },
+    {
+      "policy": "B3",
+      "scope": "REALIZED_OPERATION_AC/CONTINUOUS_VERIFICATION",
+      "artifact_role": "slot_extrema",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/actual_B3_energy_exception_20260914/B3/CONTINUOUS_VERIFICATION/SLOT_EXTREMA.json",
+      "sha256_if_available": "",
+      "bytes": 30858,
+      "used_for_final_extraction": false
+    },
+    {
+      "policy": "B3",
+      "scope": "REALIZED_OPERATION_AC/ETA95_ACTUAL",
+      "artifact_role": "official_summary",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/actual_B3_energy_exception_20260914/B3/ETA95_ACTUAL/AC_SUMMARY.json",
+      "sha256_if_available": "",
+      "bytes": 499,
+      "used_for_final_extraction": false
+    },
+    {
+      "policy": "B3",
+      "scope": "REALIZED_OPERATION_AC/ETA95_ACTUAL",
+      "artifact_role": "phase_arrays",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/actual_B3_energy_exception_20260914/B3/ETA95_ACTUAL/OPENDSS_PHASE_ARRAYS.npz",
+      "sha256_if_available": "",
+      "bytes": 19405587,
+      "used_for_final_extraction": false
+    },
+    {
+      "policy": "B3",
+      "scope": "REALIZED_OPERATION_AC/ETA95_ACTUAL",
+      "artifact_role": "slot_extrema",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/actual_B3_energy_exception_20260914/B3/ETA95_ACTUAL/SLOT_EXTREMA.json",
+      "sha256_if_available": "",
+      "bytes": 30858,
+      "used_for_final_extraction": false
+    },
+    {
+      "policy": "B3",
+      "scope": "REALIZED_OPERATION_AC/FINAL_ACTUAL",
+      "artifact_role": "official_summary",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/actual_B3_energy_exception_20260914/B3/FINAL_ACTUAL/AC_SUMMARY.json",
+      "sha256_if_available": "6b735231f90705c73654c55ed9a18c23bcd87cce7af5e0719df65e9f879d0894",
+      "bytes": 499,
+      "used_for_final_extraction": true
+    },
+    {
+      "policy": "B3",
+      "scope": "REALIZED_OPERATION_AC/FINAL_ACTUAL",
+      "artifact_role": "phase_arrays",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/actual_B3_energy_exception_20260914/B3/FINAL_ACTUAL/OPENDSS_PHASE_ARRAYS.npz",
+      "sha256_if_available": "99c974cfbf5026bf7604844b9a6747f62172d6bf456c722de142b190571a2cd1",
+      "bytes": 19405587,
+      "used_for_final_extraction": true
+    },
+    {
+      "policy": "B3",
+      "scope": "REALIZED_OPERATION_AC/FINAL_ACTUAL",
+      "artifact_role": "slot_extrema",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/actual_B3_energy_exception_20260914/B3/FINAL_ACTUAL/SLOT_EXTREMA.json",
+      "sha256_if_available": "1644858e64639cd262699e034972af7897670062a37332264d5c5c34b7b756d7",
+      "bytes": 30858,
+      "used_for_final_extraction": true
+    },
+    {
+      "policy": "B3",
+      "scope": "REALIZED_OPERATION_AC",
+      "artifact_role": "axes_and_ratings",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/AXES.json",
+      "sha256_if_available": "c4633676a2a23fc13690d04a357a7a381d2000241ae7946d63e5aea35f4b2938",
+      "bytes": 1384831,
+      "used_for_final_extraction": true
+    },
+    {
+      "policy": "B3",
+      "scope": "SOURCE_OVERLAY",
+      "artifact_role": "pcc_coordinates",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/PCC_BusCoordinates.dss",
+      "sha256_if_available": "2d1dddf9e5dfca19937dbd34b588352fffc9f37e87f35f60eacd57e97d0b366a",
+      "bytes": 2682,
+      "used_for_final_extraction": true
+    },
+    {
+      "policy": "B3",
+      "scope": "SOURCE_REFERENCE",
+      "artifact_role": "master_reference",
+      "archive_member_path": "independent_screening/IEEE8500_MAY01_MESS6_B2B3_20260913/PCC_Master.dss",
+      "sha256_if_available": "363626286c28093ace5b05a7b9a64c702c85afb31cac9992fb82e21daf68bb90",
+      "bytes": 439,
+      "used_for_final_extraction": true
+    }
+  ],
+  "output_files": {
+    "00_ARCHIVE_MEMBER_AUDIT.csv": {
+      "bytes": 5586,
+      "sha256": "0128644ca3ea53344ddc500ece4827e4b376499991ada62fa391e1aac906371e"
+    },
+    "01_B0_B3_LINE_LOADING_96SLOT_LONG.csv": {
+      "bytes": 89895495,
+      "sha256": "07c5e7a1f3e35538cc5200af78c39c1b447c4d299cb4244f4deadb27b002e8ff"
+    },
+    "02_IEEE8500_LINE_TOPOLOGY.csv": {
+      "bytes": 265167,
+      "sha256": "85ffa78abb9b009264d60cbb593f4bdb1519c8d83c94854acc917becf0022ce3"
+    },
+    "03_B0_B3_SYSTEM_RHO_96SLOT.csv": {
+      "bytes": 12517,
+      "sha256": "8a37a29bb0c2b182a9172d7a6596e51c43734b4aa8de7cfd52ffdd32ba7a9329"
+    },
+    "04_B0_B3_DAILY_MAX_BY_LINE.csv": {
+      "bytes": 645285,
+      "sha256": "1173a3c631162858dd7d51caf0575e7f241d031355307258963e715e9b10b96d"
+    },
+    "05_B0_STRESS_SLOT_RANKING.csv": {
+      "bytes": 8110,
+      "sha256": "58097f8e835dbc5135c11a5a8eed7b7abe4329e70c5d53fbbd86fe7b70672b9b"
+    },
+    "06_B0_B3_STRESS_WINDOW_MEAN_BY_LINE.csv": {
+      "bytes": 1093789,
+      "sha256": "86cf20cb051e25079149eb78f318c71f0deddbd02a174f4ae2746b42eda8d4e7"
+    },
+    "07_B0_B3_LOADING_DURATION_BY_LINE.csv": {
+      "bytes": 451394,
+      "sha256": "da12d394443c4ef6f4ed9b958b57c73b0ec1f434aee7b5738cb72ad80cab9ecf"
+    },
+    "IEEE8500_MAY01_B0_B3_EXTRACTION_AUDIT.md": {
+      "bytes": 3959,
+      "sha256": "c58e64b629b8d211237cfe0f77292eac7da985cf3bb5061807d6830961085e4d"
+    },
+    "extract_ieee8500_may01_b0_b3_timeseries.py": {
+      "bytes": 24665,
+      "sha256": "a0021368bdb1ca3f462d31f3f92ecfd659d45de6166901a331ae8e6ab93d846e"
+    }
+  }
+}
