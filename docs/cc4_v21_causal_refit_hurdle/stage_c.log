@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "D:\ChatGPT\Mobile ESS 2\cc4_v21_causal_refit_hurdle_pr\docs\cc4_v21_causal_refit_hurdle\experiment.py", line 327, in <module>
+    if __name__=='__main__':
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\cc4_v21_causal_refit_hurdle_pr\docs\cc4_v21_causal_refit_hurdle\experiment.py", line 279, in stage_c
+    c,_=calibration(q,window,'2024-11-29')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\cc4_v21_causal_refit_hurdle_pr\docs\cc4_v21_causal_refit_hurdle\experiment.py", line 263, in calibration
+    if window!='expanding':pool=pool[(pd.to_datetime(DAYS[pool])>=pd.Timestamp(str(DAYS[i]))-pd.Timedelta(days=int(window)))]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "timestamps.pyx", line 1865, in pandas._libs.tslibs.timestamps.Timestamp.__new__
+  File "conversion.pyx", line 364, in pandas._libs.tslibs.conversion.convert_to_tsobject
+TypeError: Expected unicode, got numpy.str_

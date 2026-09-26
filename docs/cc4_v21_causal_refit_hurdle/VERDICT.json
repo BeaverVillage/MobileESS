@@ -1,0 +1,36 @@
+{
+  "target_interface_valid": true,
+  "temporal_refit_improvement_supported": true,
+  "new_model_superior_to_baseline": false,
+  "improvement_statistically_robust": false,
+  "production_replacement_supported": false,
+  "optimizer_integration_ready": false,
+  "quality_gates_pass": false,
+  "gates": [
+    {
+      "split": "EXPOSED_EVALUATION",
+      "overall": true,
+      "positive": true,
+      "burst": false,
+      "requirement": false,
+      "target_1_8": false,
+      "preferred_5pct": true,
+      "robust": true
+    },
+    {
+      "split": "MAY_HISTORICAL",
+      "overall": false,
+      "positive": true,
+      "burst": false,
+      "requirement": false,
+      "target_1_8": false,
+      "preferred_5pct": false,
+      "robust": false
+    }
+  ],
+  "selection": "DEEPAR",
+  "policy": "weighted",
+  "cadence": 1,
+  "calibration": "expanding",
+  "production_reason": "offline exposed historical evidence, ingestion latency unverified, no promotion/integration authorized"
+}

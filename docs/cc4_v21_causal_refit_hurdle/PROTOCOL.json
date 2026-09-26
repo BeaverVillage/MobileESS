@@ -1,0 +1,101 @@
+{
+  "registered_at": "2026-09-26T12:05:20.946158+00:00",
+  "version": "CC4-v2.1-v1",
+  "target": "PR63 unchanged hourly arrival GPUh",
+  "temporal_policies": [
+    "fixed",
+    "rolling90",
+    "rolling180",
+    "expanding",
+    "weighted"
+  ],
+  "cadences_days": [
+    1,
+    7,
+    28
+  ],
+  "weighted_half_life_days": 30,
+  "temporal_selection": "DEVELOPMENT raw Q90 pinball, tie calibration error then requirement ratio; fixed is reference, best causal refit advances to Stage B",
+  "architecture": [
+    "LGBM",
+    "HURDLE",
+    "BURST_EXPERT",
+    "TFT",
+    "DEEPAR"
+  ],
+  "positive_quantile_grid": [
+    0.01,
+    0.05,
+    0.1,
+    0.25,
+    0.5,
+    0.7,
+    0.8,
+    0.9,
+    0.95,
+    0.99
+  ],
+  "hurdle": "q=0 when tau<=1-p_positive; otherwise interpolate Qpositive((tau-1+p_positive)/p_positive)",
+  "burst_expert": "causal classifier P(W>TRAIN-positive-Q95 | W>0); mixture of body/tail conditional quantile CDFs, then unconditional zero-mass inversion",
+  "minimum_expert_rows": 100,
+  "sparse_expert": "back off to pooled positive quantile model; no exclusions",
+  "neural": {
+    "source": "PR63 compact TFT/DeepAR",
+    "seeds": [
+      20260924,
+      20260925,
+      20260926
+    ],
+    "lr": 0.001,
+    "TFT_epochs": 8,
+    "DEEPAR_epochs": 18,
+    "epochs_source": "PR63 selected-epoch median; no new architecture/epoch search",
+    "concurrent_GPU_jobs": 1
+  },
+  "model_selection": "DEVELOPMENT raw Q90 pinball; research candidate only until all success gates evaluated",
+  "calibration_windows_days": [
+    28,
+    56,
+    "expanding"
+  ],
+  "calibration": "per-hour signed original-unit residual finite-sample rank ceil(.9*(n_days+1)); min20 mature days; no scale/cap",
+  "calibration_selection": "DEVELOPMENT warmup-eligible and CALIBRATION equally weighted: band 88..92 first, then pinball; freeze before exposed predictions",
+  "residual_sources": "chronological OOS predictions at historical issues; only full-day matured labels strictly before current issue",
+  "evaluation_update": "prequential: earlier evaluation labels enter only after maturity, with all rules fixed; not used for tuning",
+  "history": "all available days since 2024-03-15; omit historical PURGE dates; formerly immature days may enter only after maturity",
+  "May_history": "include mature Mar-Apr and earlier mature May days under fixed policy; no May selection or tuning",
+  "units": "split and statistical unit: target day",
+  "bootstrap": {
+    "draws": 2000,
+    "block_days": 7,
+    "paired": true,
+    "seed": 20260926
+  },
+  "gates": {
+    "overall": [
+      0.88,
+      0.92
+    ],
+    "positive_min": 0.85,
+    "burst_min": 0.7,
+    "requirement_max_exclusive": 2.0,
+    "requirement_target": 1.8,
+    "preferred_pinball_improvement": 0.05,
+    "robust": "paired 95% upper delta <0 in both Dec-Feb and May"
+  },
+  "parameters": {
+    "num_leaves": 15,
+    "learning_rate": 0.03,
+    "n_estimators": 400,
+    "min_child_samples": 50,
+    "n_jobs": 1,
+    "deterministic": true,
+    "force_col_wise": true,
+    "random_state": 20260924,
+    "verbosity": -1
+  },
+  "NO_UNTOUCHED_CONFIRMATION": true,
+  "OPTIMIZER_CHANGED": false,
+  "GRID_CAMPAIGN_EXECUTIONS": 0,
+  "PRODUCTION_MODEL_PROMOTED": false
+}
