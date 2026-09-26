@@ -1,0 +1,49 @@
+{
+  "time": "2026-09-26T17:07:25.396819+00:00",
+  "code": {
+    "study.py": "d0875d5d0764d672a38823f67e22f349e0e3a0f664e4c0b8d950c957c999d2d5",
+    "test_contract.py": "d5372d6095bc3bbc0466377f57f0b0a82dd995527007c2a703f1a6176f94a5e6"
+  },
+  "source_forecasts_sha256": "932018c10466f2f033cd85b2290ac9f3589acdfb0a1f131c24c3a5a075a5fc7b",
+  "base_PR": 71,
+  "R0": "current frozen production Q90; authoritative May only, Running total-minus-elapsed transport",
+  "R1": "exact PR71 R2 raw elapsed-conditioned Q90",
+  "R2": "global empirical one-sided residual Q90 correction",
+  "R3": "GPU-weighted empirical one-sided residual Q90 correction",
+  "Pending": "exact R0 unchanged in all arms; unavailable DEV/CAL/April is not replayed backwards",
+  "base_model_policy": "frozen PR71 R2; no model/feature/temporal changes or fits; no Q95/AFT/selector search",
+  "calibration_history": "expanding available frozen OOS forecast history; separate from unchanged base training temporal policy",
+  "eligibility": "source forecast issue < current issue AND job_end < current issue AND valid finite remaining outcome; filter before dedup",
+  "residual": "job_end - SOURCE forecast issue - SOURCE raw Q90, in seconds; never end-currentissue for historical residual",
+  "dedup": "latest eligible source forecast per Job; stable tie-break by job_issue_id; one Job one residual per calibration pool",
+  "minimum_distinct_mature_Jobs": 100,
+  "fallback": "if support<100, delta=0 on every current query, retain all fallback rows in metrics",
+  "quantile": "inverse empirical CDF at .90: first residual with cumulative positive weight >= .90*total; no interpolation; unweighted rank ceil(.90*N), NOT conformal ceil(.90*(N+1))",
+  "global_weights": "1 per distinct Job",
+  "GPU_weights": "source requested GPU count, finite and strictly positive; user-authorized proxy",
+  "correction": "max(0, empirical residual quantile); bound=rawQ90+correction; no scaling/capping",
+  "finite_sample_coverage_guarantee": false,
+  "selection": "R2/R3 must BOTH DEV and CAL meet coverage>=.90,GPUcoverage>=.90,longtotal>4hunder<=.15 and Q90pinball<=1.02*raw. Prefer overreserve<=requested-overreserve in BOTH roles; then lowest mean role reserved/requested ratio, then arm ID. If none retain raw R1. R0 unavailable beforeevaluation.",
+  "pinball_ratio_limit": 1.02,
+  "support_verdict": "True only if preselected R2/R3 meets same hard safety/pinball gates in BOTH diagnostic roles and paired7issue missed-slot delta upper95CI<0 vs rawR1 in BOTH roles, plus vsR0 onMay. Reserve is PREFERRED and reported separately, not a hard calibration-support gate. OtherwiseFalse.",
+  "reserve_algebra": "nonnegative correction implies pointwise overreserve/reserve cannot decrease from raw for ANY fixedcohort; calibration is not a mechanism for reducing inherited reserve excess",
+  "scope_correction": "Before registration or DEV metrics, proposal clarified to honor user reserve PREFERRED hierarchy; no reserve hardgate added to calibration-support verdict",
+  "uncertainty": {
+    "draws": 2000,
+    "seed": 20260927,
+    "blocks": [
+      1,
+      7
+    ],
+    "unit": "paired observed-issue-day circularblocks; all nonlinear ratios recomputed per draw"
+  },
+  "May": "already-exposed historical diagnostic, never untouched confirmation",
+  "request_proxy": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1; UNVERIFIED/UNOBSERVED; no historical exactness/immutability/census claim",
+  "TEMPORAL_POLICY_CHANGED": false,
+  "NEW_MODEL_SEARCHED": false,
+  "PRODUCTION_REPLACEMENT_SUPPORTED": false,
+  "OPTIMIZER_INTEGRATION_READY": false,
+  "PRODUCTION_PROMOTED": false,
+  "optimizer_executions": 0,
+  "grid_executions": 0
+}
