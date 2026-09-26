@@ -1,0 +1,44 @@
+{
+  "time": "2026-09-26T16:29:32.909443+00:00",
+  "review": "independent pre-registration scientific review",
+  "PASS": true,
+  "blockers": [],
+  "checks": {
+    "fixed_gate_boundary": true,
+    "AP_and_precision_increment_enforced": true,
+    "all_mandatory_NaN_rejected": true,
+    "strict_maturity_synthetic": true,
+    "Q50_and_outside_gate_unchanged": true,
+    "C2_new_tail_and_sparse_fallback": true,
+    "paired_1day_7day_ratio_AP_checks": true
+  },
+  "source_sha256": {
+    "study.py": "924b5bc6bf53ec7d0d0ee79a2a388e76d6851c1bb424da7cfa52cb8f53403320",
+    "test_contract.py": "81e27eeadb7d46f593dd8e52c4f91333852d977b0bcf2f915587113531c82c0d"
+  },
+  "user_authorized_proxy_boundary": "V40S4 D1_SCHEDULER_REQUEST_STATE_PROXY_V1; archived request fields authorized for offline proxy experiments despite unavailable request-version history",
+  "request_version_provenance": "UNVERIFIED",
+  "request_revision_history": "UNOBSERVED",
+  "historical_value_equality_claimed": false,
+  "request_immutability_claimed": false,
+  "production_readiness_fail_closed": true,
+  "findings": [
+    {
+      "severity": "nonblocking numerical edge",
+      "location": "study.py criteria()",
+      "description": "Literal AP=.21 versus baseline AP=.20 is conservatively rejected at the inclusive +.01 boundary because baseline+.01 is 0.21000000000000002.",
+      "observed_feasible": false,
+      "observed_normalized_deficit": 1.1102230246251565e-16,
+      "effect": "No gate is lowered. Current study outcome impact was not assessed in this pre-registration review."
+    }
+  ],
+  "limitations": [
+    "Request-feature contents and reconstruction are separately reviewed by the feature agent.",
+    "No new study outcomes were evaluated, no model training was performed, and no source files were changed.",
+    "Inherited bootstrap assigns precision=0 when no hour is gated, and fails closed on undefined denominator-dependent bootstrap metrics.",
+    "Freeze sequence reviewed structurally: registered code/features guarded before fitting; DEV/CAL selection precedes evaluation entry guarded by FINAL_SELECTION_FREEZE."
+  ],
+  "newly_written_artifacts": [
+    "PREFLIGHT_REVIEW.json"
+  ]
+}

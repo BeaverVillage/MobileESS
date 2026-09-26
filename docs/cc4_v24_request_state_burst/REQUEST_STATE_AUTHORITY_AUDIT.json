@@ -1,0 +1,1725 @@
+{
+  "time": "2026-09-26T16:21:59.992661+00:00",
+  "PASS": true,
+  "REQUEST_STATE_AUTHORITY_VERIFIED": false,
+  "status": "BLOCKED_AUTHORITY",
+  "performance_stop_rule": "NOT_EVALUABLE",
+  "feature_matrix_created": false,
+  "model_fitting_performed": false,
+  "threshold_changed": false,
+  "target_changed": false,
+  "columns": [
+    "account_hash",
+    "array_pos",
+    "array_range",
+    "avg_mem_eff",
+    "consumed_energy_joules",
+    "consumed_energy_raw_joules",
+    "consumed_energy_raw_watt_hours",
+    "cpu_eff",
+    "cpu_energy_tdp_estimated_max_watt_hours",
+    "cpu_energy_tdp_estimated_used_watt_hours",
+    "cpu_used",
+    "day",
+    "day_of_week",
+    "end_time",
+    "gpu_nodes_occupied",
+    "gpus_requested",
+    "hour",
+    "id",
+    "job_id",
+    "job_type_hash",
+    "jobs_shared",
+    "max_mem_eff",
+    "memory_req",
+    "min_mem_eff",
+    "minute",
+    "name_hash",
+    "nodelist",
+    "nodes_req",
+    "nodes_shared",
+    "nodes_used",
+    "partition",
+    "processors_req",
+    "processors_used",
+    "python_job",
+    "qos",
+    "queue_wait",
+    "reframe_job",
+    "shared_job_count",
+    "start_time",
+    "state",
+    "state_simple",
+    "submit_line_hash",
+    "submit_script_hash",
+    "submit_time",
+    "user_hash",
+    "wallclock_req",
+    "wallclock_used",
+    "work_dir_hash"
+  ],
+  "field_assessment": {
+    "submit_time": {
+      "present_partitions": 29,
+      "arrow_types": [
+        "timestamp[us, tz=-06:00]",
+        "timestamp[us, tz=-07:00]",
+        "timestamp[us, tz=UTC]"
+      ],
+      "submission_time_value_proven": false,
+      "feature_available_time": null
+    },
+    "gpus_requested": {
+      "present_partitions": 29,
+      "arrow_types": [
+        "double",
+        "null"
+      ],
+      "submission_time_value_proven": false,
+      "feature_available_time": null
+    },
+    "wallclock_req": {
+      "present_partitions": 29,
+      "arrow_types": [
+        "duration[ns]"
+      ],
+      "submission_time_value_proven": false,
+      "feature_available_time": null
+    },
+    "partition": {
+      "present_partitions": 29,
+      "arrow_types": [
+        "string"
+      ],
+      "submission_time_value_proven": false,
+      "feature_available_time": null
+    },
+    "qos": {
+      "present_partitions": 29,
+      "arrow_types": [
+        "string"
+      ],
+      "submission_time_value_proven": false,
+      "feature_available_time": null
+    }
+  },
+  "missing_authority": [
+    "request_version_id",
+    "request_effective_at",
+    "request_observed_at",
+    "original_submission_event_or_requeue_identity",
+    "complete_request_change_history",
+    "collector_capture_provenance"
+  ],
+  "source_provenance_column_candidates": [],
+  "findings": [
+    "The archive is a parent-job accounting extract collected periodically with sacct, not a declared immutable submission-event log.",
+    "Requested GPU/walltime/partition/QoS columns exist, but their original submission values and subsequent version histories are not established.",
+    "No row-level request version, effective timestamp, or collector observation timestamp is supplied in the audited raw schemas.",
+    "The datacard excludes raw Slurm JSONB and job-step tables and states the internal loading/preprocessing functions are unavailable.",
+    "An issue_time on a retrospective generated snapshot does not establish when the scheduler originally exposed each request value.",
+    "Previously frozen request-state proxies explicitly do not verify original submission provenance; their labels and hashes cannot repair missing acquisition/version authority.",
+    "All-job submit-count features inherited from PR69 retain their previous event-time proxy limitation; they are not new proof of request-state availability."
+  ],
+  "next_required_authority": "Authenticated original submission events plus complete request changes with per-version effective and observed times, or independently validated immutable submission fields with capture provenance; no submit-time imputation of unknown availability.",
+  "raw_archive": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+    "sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+    "bytes": 731139558
+  },
+  "datacard": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\datacard.md",
+    "sha256": "0139b75b80cd3029e0af54e22fc0dbad3080e92a8a7a602f1bd62cd7a36f62e9",
+    "url": "https://data.nlr.gov/submissions/302"
+  },
+  "sourcehashes": [
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+      "sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+      "bytes": 731139558,
+      "purpose": "Exact inherited accounting archive; hash verified"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\datacard.md",
+      "sha256": "0139b75b80cd3029e0af54e22fc0dbad3080e92a8a7a602f1bd62cd7a36f62e9",
+      "bytes": 14860,
+      "purpose": "NLR dataset datacard; periodic accounting collection and omitted internal/raw sources"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\cc4_v24_request_state_pr\\docs\\cc4_v2_hourly_future_workload\\SOURCE_MANIFEST.json",
+      "sha256": "cb21a22b74f499640a52bbf190506ce8ed65e3dcfc772fdca56d0699aa087597",
+      "bytes": 4142,
+      "purpose": "PR63 immutable raw-source authority"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\cc4_v24_request_state_pr\\docs\\cc4_v2_hourly_future_workload\\FEATURE_CONTRACT.json",
+      "sha256": "7e9c487f7b1afe41baf1718742b8c97c7989d911a2348022fcf4f91d1759b4eb",
+      "bytes": 2838,
+      "purpose": "Existing logical event-time limitation"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-01\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "8d74fcf0bc305bff983bff9607fe7d5120c8a61618631cfc6d6fdda81c71423a",
+      "bytes": 44108,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-01\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "e70d43d1d3718cfa6dedfb10ec75da423ff2561785f3bdab81852de9502eb5bb",
+      "bytes": 139904,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-02\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "1eee69c3b53c537b060569ea600967dd4d5ecd223c8805bfd05297033baeeb8d",
+      "bytes": 43594,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-02\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "57aa5d679709572e8d4c735c1dfdae1a88332897249f80bb5effe6b739906f44",
+      "bytes": 139275,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-03\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "15209a5482d9807cb329851b78ad966509f0313c7402c668f18f48888d966f9e",
+      "bytes": 45149,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-03\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "27cbfbb190f9959dc2dad1afdb252f564205620d0fe5885ecd7fbbb0ed5516bc",
+      "bytes": 147004,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-04\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "46da5da4faa335020f01081773a5fdd6e377f03f7b350d4b35077c56cf579711",
+      "bytes": 36882,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-04\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "619997a25cb9d99d4e519a14f43029335d1ae2c5d31f9543612b41a0334db1e0",
+      "bytes": 123050,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-05\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "c05e6726dfd018a0e9aaf715fbbb2bfbbb6665f10ddcd87ccf9d98af2ebfd467",
+      "bytes": 35218,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-05\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "1e27182e76a1f62f63624092471dbece859ce91e63095913171ba7b4eb06d238",
+      "bytes": 98322,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-06\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "6e7b5ca1a1e0466ecafe81e8d0800109d75014681ccad919b20d73f8f867adf9",
+      "bytes": 52445,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-06\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "91463d8015500c8194a00e938005f0515f12c0dc323a4ca7cff70493966c06e2",
+      "bytes": 160135,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-07\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "4698decfc8f358c0552e3af2003e2c8fe743481f63bc5b54049354afe8fb81b8",
+      "bytes": 91697,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-07\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "b4ba1fcadbb0a55d7800fbaa16e08841c4e361c5b695df6e92810e29006aa1b9",
+      "bytes": 388588,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-08\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "0ddab1cab8d43fd4ceaf67ed8bf5ad5f45cd285987c3be575310fb2c7b386d8e",
+      "bytes": 63127,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-08\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "75fbcb7ca4571651eddc380dd3eaa525172c9c94123de4e0c4407061d387d59f",
+      "bytes": 275431,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-09\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "40219c20596c463a6061615e16378836c71211639b52db1b3cb5e6c19e4a4c7d",
+      "bytes": 50951,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-09\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "75a167d375f606b66a6a10c36cae2027ef15865abc41bf62c801829c891b1dd9",
+      "bytes": 208069,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-10\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "acc0b071fa607f222292fa37cd33043ee52c9a85f18491445250661c31a1e264",
+      "bytes": 57376,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-10\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "68bb75347d49ad1ad771d14a0d89959001678c51bc7621e7fcda254cc371c1de",
+      "bytes": 233486,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-11\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "f7082c4ba81ffca1b6aa9ff2741becadc19bf915cbd3784a6a09d17f8d6db9ff",
+      "bytes": 68824,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-11\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "96bab9136e78b9d1adc0d82cadafd6ccef555dbe07c33d2981259208f054eb1b",
+      "bytes": 235328,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-12\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "4c2cadff68f55d069acf52071f500d4d068973a886d1c3b11da5d04f439f14d6",
+      "bytes": 61106,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-12\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "3f9a3e00859029cddce9855594372e084f29648ec58dd25a4ed0671223219097",
+      "bytes": 198446,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-13\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "5679218427e56751cb12ffe471659dc43a123a05b2fe4f5c0a1d40191e01c27b",
+      "bytes": 58279,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-13\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "713fd51e89479bd8423e04841df8ce8cf44dbb01bdc3e93adc5f97ef711d0c41",
+      "bytes": 184673,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-14\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "addd5c17d5bf0062880aad28a389c66534712f310303b7db900708954ceb332a",
+      "bytes": 47768,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-14\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "67e9336f1ebaccf6f423e0775588e176867120e66d43dae900ee26a5194ffb5f",
+      "bytes": 165694,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-15\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "565e745816a48c7f205772ec6dd2e7d28ea338590883f4a8bc5ed54cca1de90c",
+      "bytes": 47435,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-15\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "4a273c44a063ac4f0b89540be7dcca8766fdc51a6c82ad46f1d5e5e959a24c01",
+      "bytes": 159670,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-16\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "b26916b9cef6cc808b8f426a5c1eec6d01bcf0c5aa162106d550a318870473e8",
+      "bytes": 41187,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-16\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "8a81dc45a604604126ffc0fd5f7246f2e4eb49bb559e5c89b62fc6b189eac07b",
+      "bytes": 138653,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-17\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "00ae0a87ff8582569081b502c1da48a52187cd2f72b4b934cb9e9ceac6ada071",
+      "bytes": 41191,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-17\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "a27e90b7e478215411d7b097f12ed5de8ec1d6c671da768006ced4e726ab82c0",
+      "bytes": 165123,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-18\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "131c5ec07191415f225e9cae978db40658a01dba4ac8452b1b87624b72ca0230",
+      "bytes": 41530,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-18\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "0eea1604124167d60e5b9f68986c5836b5e8511c578d885b808a902cf8c1285c",
+      "bytes": 143566,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-19\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "c5c785c3e9fc86985164cc80158b9911a22e5a7f211dd16eb7e0c4cff88e192b",
+      "bytes": 40263,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-19\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "9cb6c33160032199c016ca1a365e891f59df4085b35417872d97e9aba1dd1345",
+      "bytes": 141682,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-20\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "d5ff452b53cfae7438626eae5d48e068c6f1859033cbd2e29ec6f6a9ab5620d3",
+      "bytes": 38026,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-20\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "d3f15cf1134d0009c6f5dcf1e0042d153f579c9b9c3ba93b383f8566b9d47bdb",
+      "bytes": 131148,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-21\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "5d800d4e2e1c88fd352fb5cb21285358f237826509c5b3e4a15cdea179507835",
+      "bytes": 31874,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-21\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "7248bf646a10f8fd9042c1432b064b32a5abc8d766308c675ad4280b41ad7043",
+      "bytes": 107964,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-22\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "873cdf358fefa1db31df1c37a5ed060dbba70817c8bb4bcc37c6327d8ea4959d",
+      "bytes": 31408,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-22\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "ad4836feb9120e8f1d1f026b5207d06e772a6aac06c930a69045995683241ed0",
+      "bytes": 107045,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-23\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "feafb5b81666f8ed742ccb955a908ab901e936cfff80d3c3386397e66bd0d3f8",
+      "bytes": 30714,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-23\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "b69bf998c2b9139c9442745efe2be6e9b85cd4a4702871fea894a1042cd90cc2",
+      "bytes": 102756,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-24\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "12a677e2ac5576487c87b16d468ee41864afdabf35d08956de6c74956f2a72ed",
+      "bytes": 27036,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-24\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "e1be48023b62f6c22c7f82ab49927a6a201493b458f1a1d6e45c5acd72cd5bc2",
+      "bytes": 105175,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-25\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "27ae90af52bde7706a7a5e0467359326f3ab0c183e1cb5a86360115f90cdc683",
+      "bytes": 27497,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-25\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "32a5cabebc52b5ef0a908c322aaeb0b2c046d8b729b428448387d7a3d9dd147e",
+      "bytes": 101897,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-26\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "962e43f5e1b25611c6996a273a8b3c107c92b5e89dbf9a5bc9c84d4b6425754e",
+      "bytes": 26355,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-26\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "9a29f8bb2bfde2c979640cb0e09d43b227b7eebe1cccc9bf830318f412ae162b",
+      "bytes": 96631,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-27\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "8e92d33d87d00a13d1187db7b5138d124dd86dc6e0f1dae2ad6c9634780fc584",
+      "bytes": 24872,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-27\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "e875f57a9d5101cc097e4c6f50f45581790f5fb55a12e04b76ec31f2a198b9fb",
+      "bytes": 87674,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-28\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "427ef2e0a2f5412e41a08af36b0f252f9d0be2e6d9ea5a4e0e69ddc36d2fcd27",
+      "bytes": 23646,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-28\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "909e75b1f4a8d799ec76e26ac7b1079b992ba44ae7d65fb7403d6cd9aed9e6f4",
+      "bytes": 87147,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-29\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "23fbacc3dc875b622d17155b77339ac4413873eaa8020422705cfb09765e06c8",
+      "bytes": 25010,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-29\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "513e22ed01286b92a3b6e2f9edb0cbb828f0174a03f97a805c75860e50ed477c",
+      "bytes": 84955,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-30\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "37ddb004f09e17d3b871972e66a41cf6050563c9a7c4bd3fc004657552cd2a24",
+      "bytes": 24738,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-30\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "2d33952e43fcc4e374f072c7b1619c6ba5b43284ca5e4e4ae611a595f42ba83d",
+      "bytes": 87553,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-31\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "18d5020a82c9ce217e3a68b28656db5229fecc2c505d61d1c5dcce8938c52cb3",
+      "bytes": 25043,
+      "purpose": "Frozen retrospective Pending feature table; schema inspected only"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-31\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "4186f83fa14391742c5b99687c1eda24bb2feda213065b8f00420f4c023c8adb",
+      "bytes": 86174,
+      "purpose": "Frozen ML snapshot provenance fields only; no prediction or outcome arrays inspected"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext_causal_tail_pr\\docs\\runtime_vnext_causal_tail\\PROTOCOL.json",
+      "sha256": "d05012304229ca20e839038b8d0e22da62cc3a9f1790504ae8f4ddc5d3c3e2ca",
+      "bytes": 5282,
+      "purpose": "Runtime-vNext explicit unverified request-version provenance"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext_causal_tail_pr\\docs\\runtime_vnext_causal_tail\\README.md",
+      "sha256": "4c5a05b3ad71d8f64761e5d7376bb636b42254a06590de434b4d0661b1eb695e",
+      "bytes": 8406,
+      "purpose": "Runtime authority limitations reviewed; no model execution"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext_causal_tail_pr\\docs\\runtime_vnext_causal_tail\\INTERPRETATION_CONTRACT.md",
+      "sha256": "68a71adaf062c33316f32545e4556c80edc8d3e6bae15e67b4a76cde5ac69335",
+      "bytes": 2966,
+      "purpose": "Runtime authority limitations reviewed; no model execution"
+    }
+  ],
+  "partition_count": 29,
+  "total_schema_rows": 10559977,
+  "partition_schema_inventory": "REQUEST_STATE_SCHEMA_INVENTORY.json",
+  "historical_snapshot_count": 31,
+  "historical_snapshot_inventory": [
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-01\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "e70d43d1d3718cfa6dedfb10ec75da423ff2561785f3bdab81852de9502eb5bb",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-04-30T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-01\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "8d74fcf0bc305bff983bff9607fe7d5120c8a61618631cfc6d6fdda81c71423a",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-02\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "57aa5d679709572e8d4c735c1dfdae1a88332897249f80bb5effe6b739906f44",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-01T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-02\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "1eee69c3b53c537b060569ea600967dd4d5ecd223c8805bfd05297033baeeb8d",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-03\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "27cbfbb190f9959dc2dad1afdb252f564205620d0fe5885ecd7fbbb0ed5516bc",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-02T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-03\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "15209a5482d9807cb329851b78ad966509f0313c7402c668f18f48888d966f9e",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-04\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "619997a25cb9d99d4e519a14f43029335d1ae2c5d31f9543612b41a0334db1e0",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-03T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-04\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "46da5da4faa335020f01081773a5fdd6e377f03f7b350d4b35077c56cf579711",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-05\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "1e27182e76a1f62f63624092471dbece859ce91e63095913171ba7b4eb06d238",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-04T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-05\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "c05e6726dfd018a0e9aaf715fbbb2bfbbb6665f10ddcd87ccf9d98af2ebfd467",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-06\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "91463d8015500c8194a00e938005f0515f12c0dc323a4ca7cff70493966c06e2",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-05T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-06\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "6e7b5ca1a1e0466ecafe81e8d0800109d75014681ccad919b20d73f8f867adf9",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-07\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "b4ba1fcadbb0a55d7800fbaa16e08841c4e361c5b695df6e92810e29006aa1b9",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-06T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-07\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "4698decfc8f358c0552e3af2003e2c8fe743481f63bc5b54049354afe8fb81b8",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-08\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "75fbcb7ca4571651eddc380dd3eaa525172c9c94123de4e0c4407061d387d59f",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-07T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-08\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "0ddab1cab8d43fd4ceaf67ed8bf5ad5f45cd285987c3be575310fb2c7b386d8e",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-09\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "75a167d375f606b66a6a10c36cae2027ef15865abc41bf62c801829c891b1dd9",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-08T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-09\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "40219c20596c463a6061615e16378836c71211639b52db1b3cb5e6c19e4a4c7d",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-10\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "68bb75347d49ad1ad771d14a0d89959001678c51bc7621e7fcda254cc371c1de",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-09T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-10\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "acc0b071fa607f222292fa37cd33043ee52c9a85f18491445250661c31a1e264",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-11\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "96bab9136e78b9d1adc0d82cadafd6ccef555dbe07c33d2981259208f054eb1b",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-10T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-11\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "f7082c4ba81ffca1b6aa9ff2741becadc19bf915cbd3784a6a09d17f8d6db9ff",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-12\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "3f9a3e00859029cddce9855594372e084f29648ec58dd25a4ed0671223219097",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-11T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-12\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "4c2cadff68f55d069acf52071f500d4d068973a886d1c3b11da5d04f439f14d6",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-13\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "713fd51e89479bd8423e04841df8ce8cf44dbb01bdc3e93adc5f97ef711d0c41",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-12T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-13\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "5679218427e56751cb12ffe471659dc43a123a05b2fe4f5c0a1d40191e01c27b",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-14\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "67e9336f1ebaccf6f423e0775588e176867120e66d43dae900ee26a5194ffb5f",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-13T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-14\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "addd5c17d5bf0062880aad28a389c66534712f310303b7db900708954ceb332a",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-15\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "4a273c44a063ac4f0b89540be7dcca8766fdc51a6c82ad46f1d5e5e959a24c01",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-14T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-15\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "565e745816a48c7f205772ec6dd2e7d28ea338590883f4a8bc5ed54cca1de90c",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-16\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "8a81dc45a604604126ffc0fd5f7246f2e4eb49bb559e5c89b62fc6b189eac07b",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-15T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-16\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "b26916b9cef6cc808b8f426a5c1eec6d01bcf0c5aa162106d550a318870473e8",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-17\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "a27e90b7e478215411d7b097f12ed5de8ec1d6c671da768006ced4e726ab82c0",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-16T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-17\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "00ae0a87ff8582569081b502c1da48a52187cd2f72b4b934cb9e9ceac6ada071",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-18\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "0eea1604124167d60e5b9f68986c5836b5e8511c578d885b808a902cf8c1285c",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-17T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-18\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "131c5ec07191415f225e9cae978db40658a01dba4ac8452b1b87624b72ca0230",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-19\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "9cb6c33160032199c016ca1a365e891f59df4085b35417872d97e9aba1dd1345",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-18T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-19\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "c5c785c3e9fc86985164cc80158b9911a22e5a7f211dd16eb7e0c4cff88e192b",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-20\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "d3f15cf1134d0009c6f5dcf1e0042d153f579c9b9c3ba93b383f8566b9d47bdb",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-19T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-20\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "d5ff452b53cfae7438626eae5d48e068c6f1859033cbd2e29ec6f6a9ab5620d3",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-21\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "7248bf646a10f8fd9042c1432b064b32a5abc8d766308c675ad4280b41ad7043",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-20T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-21\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "5d800d4e2e1c88fd352fb5cb21285358f237826509c5b3e4a15cdea179507835",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-22\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "ad4836feb9120e8f1d1f026b5207d06e772a6aac06c930a69045995683241ed0",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-21T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-22\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "873cdf358fefa1db31df1c37a5ed060dbba70817c8bb4bcc37c6327d8ea4959d",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-23\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "b69bf998c2b9139c9442745efe2be6e9b85cd4a4702871fea894a1042cd90cc2",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-22T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-23\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "feafb5b81666f8ed742ccb955a908ab901e936cfff80d3c3386397e66bd0d3f8",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-24\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "e1be48023b62f6c22c7f82ab49927a6a201493b458f1a1d6e45c5acd72cd5bc2",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-23T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-24\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "12a677e2ac5576487c87b16d468ee41864afdabf35d08956de6c74956f2a72ed",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-25\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "32a5cabebc52b5ef0a908c322aaeb0b2c046d8b729b428448387d7a3d9dd147e",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-24T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-25\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "27ae90af52bde7706a7a5e0467359326f3ab0c183e1cb5a86360115f90cdc683",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-26\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "9a29f8bb2bfde2c979640cb0e09d43b227b7eebe1cccc9bf830318f412ae162b",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-25T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-26\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "962e43f5e1b25611c6996a273a8b3c107c92b5e89dbf9a5bc9c84d4b6425754e",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-27\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "e875f57a9d5101cc097e4c6f50f45581790f5fb55a12e04b76ec31f2a198b9fb",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-26T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-27\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "8e92d33d87d00a13d1187db7b5138d124dd86dc6e0f1dae2ad6c9634780fc584",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-28\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "909e75b1f4a8d799ec76e26ac7b1079b992ba44ae7d65fb7403d6cd9aed9e6f4",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-27T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-28\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "427ef2e0a2f5412e41a08af36b0f252f9d0be2e6d9ea5a4e0e69ddc36d2fcd27",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-29\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "513e22ed01286b92a3b6e2f9edb0cbb828f0174a03f97a805c75860e50ed477c",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-28T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-29\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "23fbacc3dc875b622d17155b77339ac4413873eaa8020422705cfb09765e06c8",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-30\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "2d33952e43fcc4e374f072c7b1619c6ba5b43284ca5e4e4ae611a595f42ba83d",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-29T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-30\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "37ddb004f09e17d3b871972e66a41cf6050563c9a7c4bd3fc004657552cd2a24",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\CC4_FORENSIC_20260922\\evidence\\V41R4_May2025_raw\\frozen_artifacts\\v41r4_may\\loop_wall_v4\\2025-05-31\\B0\\dayahead\\ml\\ML_SNAPSHOT.json",
+      "sha256": "4186f83fa14391742c5b99687c1eda24bb2feda213065b8f00420f4c023c8adb",
+      "schema": "V41_ML_SNAPSHOT_V1",
+      "issue_time": "2025-05-30T08:00:00+00:00",
+      "original_submission_provenance_verified": false,
+      "provenance_assumption": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+      "pending_feature_source": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-31\\V37_R4A_D1_SNAPSHOT.parquet",
+        "sha256": "18d5020a82c9ce217e3a68b28656db5229fecc2c505d61d1c5dcce8938c52cb3",
+        "columns": {
+          "id": "string",
+          "job_id": "int64",
+          "account_hash": "string",
+          "partition": "string",
+          "submit_time": "timestamp[us, tz=UTC]",
+          "nodes_req": "int64",
+          "processors_req": "int64",
+          "memory_req": "string",
+          "wallclock_req": "duration[ns]",
+          "qos": "string",
+          "gpus_requested": "double",
+          "user_hash": "string",
+          "source_member": "string",
+          "wallclock_seconds": "double",
+          "state_at_issue": "string",
+          "known_running_start": "timestamp[ns, tz=UTC]",
+          "operating_day": "string",
+          "issue_time_fixed_AEST": "string"
+        },
+        "missing_authority_columns": [
+          "request_version_id",
+          "request_effective_at",
+          "request_observed_at"
+        ]
+      }
+    }
+  ],
+  "historical_snapshots_with_verified_original_submission": 0,
+  "runtime_authority_declarations": {
+    "feature_version_provenance": "UNVERIFIED; event time availability only",
+    "optional_survival": "not evaluated; no verified censoring mechanism or historical request-state/version log; no censoring claim"
+  },
+  "primary_documentation": [
+    {
+      "url": "https://slurm.schedmd.com/scontrol.html",
+      "section": "JOBS - SPECIFICATIONS FOR UPDATE COMMAND / TimeLimit",
+      "finding": "Official Slurm documentation permits changing a job time limit; this establishes mutability risk, not that any particular archived job was changed."
+    },
+    {
+      "url": "https://slurm.schedmd.com/sacct.html",
+      "section": "Submit",
+      "finding": "Official sacct documentation says requeue resets Submit and obtaining the original requires duplicate records; the extract provides no certified original-event reconstruction."
+    }
+  ],
+  "documentation_scope": "Online command documentation consulted as a general risk explanation, not proof of the historical cluster version or actual per-job changes.",
+  "inspected_data_scope": "All raw Parquet schemas/footers and narrow stored provenance metadata; no raw request/outcome row values used for feature/model decisions.",
+  "script_sha256": "fc18f0bfd0fad2d681d103a4869fd5846bfe1e3c82e7fc1e6be5a6562e946dea",
+  "partition_schema_inventory_sha256": "987f444fac1b4834b48778e55038355802ab75d600ef578fb79e0f286ac2b5d6"
+}

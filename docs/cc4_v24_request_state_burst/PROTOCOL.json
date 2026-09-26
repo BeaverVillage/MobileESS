@@ -1,0 +1,92 @@
+{
+  "time": "2026-09-26T16:35:52.456967+00:00",
+  "study": "CC4-v2.4 Request-state Burst Forecast",
+  "May": "exposed historical diagnostic; no untouched confirmation",
+  "user_authorized_boundary": "Use archive request fields only as assumption-based scheduler-visible proxy under V40S4 D1_SCHEDULER_REQUEST_STATE_PROXY_V1; missing request-version authority does not stop offline experiment",
+  "provenance": {
+    "request_values_at_historical_issue": "UNVERIFIED",
+    "revision_history": "UNOBSERVED",
+    "original_submission_immutability": "NOT_CLAIMED",
+    "code_model_authority_is_not_historical_snapshot": true,
+    "production_readiness_fail_closed": true
+  },
+  "fixed_base": "raw PR64 expanding + 30-day recency weighting + daily refit LightGBM, same predictions and training membership",
+  "target": "unchanged next-day 24 hourly future lifetime GPU-work arrivals at D-1 18:00 modeled UTC+10",
+  "burst_threshold": {
+    "value": 860.3532222222221,
+    "definition": "unchanged TRAIN positive-hour Q95"
+  },
+  "detector": {
+    "features": "unchanged71 plus registered request-state features",
+    "parameters": {
+      "num_leaves": 15,
+      "learning_rate": 0.03,
+      "n_estimators": 400,
+      "min_child_samples": 50,
+      "n_jobs": 1,
+      "deterministic": true,
+      "force_col_wise": true,
+      "random_state": 20260924,
+      "verbosity": -1
+    },
+    "class_weight": "alpha=causal recency-weighted negative/positive mass; sample weights unchanged",
+    "score": "inverse class-prior odds q/(alpha-(alpha-1)*q), not a probability calibration guarantee",
+    "gate": 0.01,
+    "gate_selection": "fixed0.01 for both C1/C2; no threshold search; equal to priorC2 and higher than priorC1"
+  },
+  "reference_detector": "PR69 D1_BASE71_BALANCED at matched fixed0.01 gate; old0.0025 only contextual reference",
+  "C1": "same expanding mature earlier OOS high-risk C0 finite-rank Q90 residual correction; min50hours/10days else0",
+  "C2": {
+    "model": "burst-only log1p multi-quantile LightGBM on registered request features",
+    "parameters": {
+      "num_leaves": 15,
+      "learning_rate": 0.03,
+      "n_estimators": 400,
+      "min_child_samples": 50,
+      "n_jobs": 1,
+      "deterministic": true,
+      "force_col_wise": true,
+      "random_state": 20260924,
+      "verbosity": -1
+    },
+    "conditional_quantiles": [
+      0.5,
+      0.75,
+      0.9
+    ],
+    "support": "50bursthours/10days elseC0",
+    "operational_bound": "max(C0Q90, conditional-tail quantile) only inside gate; Q50 unchanged; no unconditional-quantile guarantee"
+  },
+  "selection": {
+    "hard": "separatelyDEV/CAL: AP>=oldAP+.01, precision>=oldPrecision+.01, recall>=.60, burstcoverage>=.60, positivecoverage>=.85, ratio<2, pinball<=1.02*C0",
+    "meaningful_AP_precision_absolute_increment": 0.01,
+    "pinball_noninferiority_margin": 0.02,
+    "inclusive_comparison_absolute_tolerance": 1e-12,
+    "strict_ratio_threshold_uses_no_tolerance": true,
+    "preferred": "overall88..92 then detector/burst70% then lowest ratio then pinball",
+    "fallback": "no feasible challenger =>retainC0; per-family minimum summed normalized deficits research candidate only",
+    "no_evaluation_reselection": true
+  },
+  "bootstrap": {
+    "draws": 2000,
+    "block_observed_days": [
+      1,
+      7
+    ],
+    "seed": 20260927,
+    "paired": true,
+    "fixed_forecast_conditional": true
+  },
+  "execution": {
+    "independent_issue_workers": 4,
+    "model_threads": 1,
+    "deterministic": true
+  },
+  "superiority_rule": "DEV/CAL selected challenger plus hard gates in both diagnostic roles plus 7day CI AP/precision delta low>=.01, burst delta low>0, pinball2pctmargin high<=0; historical proxy scope only",
+  "stop_rule": "If no frozen candidate meets meaningful ranking/precision and final forecast criteria, halt further hourly burst development; cumulative/3h/6h future research proposal only; no target change",
+  "evaluation_updates": "earlier mature labels can enter only the frozen prequential refit/residual rules, never tuning",
+  "TEMPORAL_POLICY_CHANGED": false,
+  "BASE_MODEL_CHANGED": false,
+  "PRODUCTION_PROMOTED": false,
+  "optimizer_or_production_executions": 0
+}

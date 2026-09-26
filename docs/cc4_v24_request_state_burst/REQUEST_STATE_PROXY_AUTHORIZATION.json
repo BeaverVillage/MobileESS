@@ -1,0 +1,30 @@
+{
+  "experiment_status": "AUTHORIZED_OFFLINE_PROXY",
+  "proxy_id": "D1_SCHEDULER_REQUEST_STATE_PROXY_V1",
+  "authorization": "User explicitly instructed continuing the offline experiment using the inherited V40S4 D1 scheduler request-state proxy despite absent certified request-version history.",
+  "REQUEST_STATE_AUTHORITY_VERIFIED": false,
+  "request_version_provenance": "UNVERIFIED",
+  "request_change_history": "UNOBSERVED",
+  "availability_assumption": "For submitted archive rows only, requested GPU, walltime, partition and QoS are assumed scheduler-visible request proxies at their recorded submit_time. Actual version/effective/observed times are not certified.",
+  "no_claims": [
+    "historically exact request state",
+    "immutable requests",
+    "zero request changes",
+    "authenticated ingestion at submit time"
+  ],
+  "production_readiness": "FAIL_CLOSED",
+  "production_promoted": false,
+  "authority_audit_preserved_sha256": "df2705cec9890158ca6cd15f62f746eb712b0fac4ca216a0b39d6da0cb1ec7d2",
+  "original_audit_source_sha256": "fc18f0bfd0fad2d681d103a4869fd5846bfe1e3c82e7fc1e6be5a6562e946dea",
+  "feature_constants": {
+    "windows_hours": [
+      6,
+      12,
+      24
+    ],
+    "long_reference_hours": 168,
+    "large_GPU_inclusive": 4,
+    "long_walltime_seconds_exclusive": 14400,
+    "category_vocabulary": "TRAIN eligible arrival days only"
+  }
+}
