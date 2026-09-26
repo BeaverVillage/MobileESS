@@ -1,0 +1,58 @@
+{
+  "ABLATION_ONLY_CC4_P2": true,
+  "OTHER_MODEL_CHANGES": false,
+  "WITH_CC4_REUSED_FROZEN_AUTHORITY": true,
+  "NO_CC4_NEW_RUN": true,
+  "DATES": 31,
+  "WORKERS": 4,
+  "THREADS_PER_WORKER": 4,
+  "feeder": "IEEE123",
+  "policy": "B3_NO_CC4_P2",
+  "status": "STOPPED_BY_USER",
+  "coordination": [
+    "A1",
+    "M1",
+    "A2",
+    "M2"
+  ],
+  "internal_stage_names": {
+    "A1": "B1/A0",
+    "A2": "B3/A1",
+    "M2": "B3/MF"
+  },
+  "internal_B1": "A1 intermediate within the sole B3_NO_CC4_P2 policy; no independent B1 campaign",
+  "AIDC_search_seconds": 1320,
+  "stage_budget_rule": "User supersedes redistribution: remove P2 480s only; preserve P1/P3/P4/P5 900/180/120/120; total1320s",
+  "stage_seconds": [
+    900,
+    180,
+    120,
+    120
+  ],
+  "objective_vector_compatibility": "5-slot storage with inactive zero at index 1; four actual optimization stages; no reserve variables/rows/locks",
+  "interpretation": "Paired ablation differences only; reserve shortfall is decision-facing; no electrical infeasibility/SLA/delay causal claim",
+  "historical_lineage": "Two missing historical April sensitivity files documented in original recovery contract; original final operating coefficients must hash-match",
+  "TOTAL_AIDC_BUDGET_MATCHED": false,
+  "P1_BUDGET_UNCHANGED": true,
+  "MESS_short_cache_root": "D:\\c5",
+  "shared_writable_files": false,
+  "ACTUAL_NUMERICAL_BOUNDARY_REPAIR": true,
+  "ACTUAL_NUMERICAL_BOUNDARY_REPAIR_USER_AUTHORIZED": true,
+  "ACTUAL_FROZEN_BITWISE_EXECUTION_UNCHANGED": false,
+  "ACTUAL_NUMERICAL_REPAIR_SCOPE": "Project initial Q only when within existing outer 1e-7 kvar acceptance onto unchanged exact Q bounds; Q_DA reference, P, constraints, limits and solver tolerances unchanged. Explicit exception to frozen execution; original numerical source bytes remain sealed.",
+  "WORKER_CONFIGURATION_HISTORY": [
+    {
+      "workers": 4,
+      "threads_per_worker": 4,
+      "scope": "Entire fresh 1320s campaign"
+    }
+  ],
+  "REMAINING_PRIORITY_BUDGETS_UNCHANGED": true,
+  "P2_BUDGET_REDISTRIBUTED": false,
+  "WITH_CC4_AIDC_BUDGET_SECONDS": 1800,
+  "NO_CC4_AIDC_BUDGET_SECONDS": 1320,
+  "FRESH_31_DAY_RESTART": true,
+  "OLD_NO_CC4_RESULTS_REUSED": false,
+  "superseded_namespace": "D:\\ChatGPT\\Mobile ESS 2\\IEEE123_CC4_ABLATION_20260923",
+  "stopped_at": "2026-09-23T02:25:27.100201+00:00"
+}

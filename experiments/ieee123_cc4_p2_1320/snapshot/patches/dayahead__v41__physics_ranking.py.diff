@@ -1,0 +1,11 @@
+--- D:\codex_mobileess_workspace\MobileESS_v41r3_scale_rebalance\dayahead\v41\physics_ranking.py
++++ D:\ChatGPT\Mobile ESS 2\IEEE123_CC4_P2_1320_20260923\original_source\dayahead\v41\physics_ranking.py
+@@ -279,7 +279,7 @@
+     from dayahead.v41.objectives import evaluate
+     b0objective=evaluate(jobs,jobs,ctx)
+     prior=read(OUT/'V41R3_B0_ACCEPTANCE.json')['OBJECTIVE_VECTOR']
+-    assert b0objective['OBJECTIVE_VECTOR'][:4]==prior[:4]
++    assert [b0objective['OBJECTIVE_VECTOR'][i] for i in (0,2,3)]==[prior[i] for i in (0,2,3)]
+     write_json(OUT/'V41R3_B0_RESTORED_OBJECTIVE.json',native(b0objective))
+     audit['B0_restored_objective']=record(OUT/'V41R3_B0_RESTORED_OBJECTIVE.json')
+     audit['charged_preprocessing_seconds']=time.perf_counter()-started

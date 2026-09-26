@@ -1,0 +1,35 @@
+--- D:\codex_mobileess_workspace\MobileESS_v41r3_scale_rebalance\v41r4_loop_runtime.py
++++ D:\ChatGPT\Mobile ESS 2\IEEE123_CC4_P2_1320_20260923\original_source\v41r4_loop_runtime.py
+@@ -73,14 +73,14 @@
+     def activate(ctx,method,out):
+         value=original_activate(ctx,method,out)
+         if method=='B1':
+-            previous=ctx.v41_policy_budget;ctx.v41_policy_budget=LoopBudget(1800.)
++            previous=ctx.v41_policy_budget;ctx.v41_policy_budget=LoopBudget(1320.)
+             for row in previous.calls:ctx.v41_policy_budget.charge(row['seconds'],row['stage'])
+         p=Path(out)/'POLICY_DAY_COMPUTE_START.json';r=read(p)
+         if method in ('B1','B3'):
+-            r.update(search_budget_contract=VERSION,actual_AIDC_search_budget_seconds=1800,
++            r.update(search_budget_contract=VERSION,actual_AIDC_search_budget_seconds=1320,
+                 AIDC_budget_basis='Continuous F&O loop wall clock from first stage entry',
+                 loop_ranking_validation_persistence_overhead_charged=True,one_time_model_preparation_excluded=True,
+-                stage_stop='Original P1-P5 wall-clock allocations; repeat all no-improvement sweeps until deadline',
++                stage_stop='Original P1/P3/P4/P5 wall-clock allocations; P2 omitted; repeat all no-improvement sweeps until deadline',
+                 automatic_repeat_after_stagnation=False,May_authority=record(MAY_OUT/'MAY_CAMPAIGN_RELEASE_V4.json'))
+             write_json(p,r)
+         return value
+@@ -99,11 +99,11 @@
+         if policy not in ('B1','B3'):return
+         budget=ctx.v41_policy_budget if policy=='B1' else ctx.v41_a1_budget
+         assert isinstance(budget,LoopBudget)
+-        assert budget.used==1800. and budget.loop_stopped is not None, 'AIDC_SEARCH_LOOP_ENDED_BEFORE_1800_SECONDS'
+-        assert len(budget.stages)==5, 'LEXICOGRAPHIC_STAGE_COUNT_CHANGED'
++        assert budget.used==1320. and budget.loop_stopped is not None, 'AIDC_SEARCH_LOOP_ENDED_BEFORE_1320_SECONDS'
++        assert len(budget.stages)==4, 'LEXICOGRAPHIC_STAGE_COUNT_CHANGED'
+         report=budget.report();p=Path(out)/'POLICY_DAY_COMPUTE_REPORT.json';value=read(p)
+         value.update(AIDC_search=report,AIDC_search_loop_wall_seconds=budget.used,
+-            effective_search_budget_seconds=1800,search_budget_contract=VERSION,
++            effective_search_budget_seconds=1320,search_budget_contract=VERSION,
+             optimization_seconds_semantics='B1: continuous loop wall clock; B3: original M1/MF budget plus independent A1 loop wall clock',
+             per_stage_termination=[dict(stage=s['stage'],reason=s['termination_reason'],
+                 complete_no_improvement_sweeps_after_last_material=s.get('complete_no_improvement_sweeps_after_last_material',0)) for s in budget.stages],

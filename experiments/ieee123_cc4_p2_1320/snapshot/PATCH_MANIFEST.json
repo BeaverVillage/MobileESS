@@ -1,0 +1,165 @@
+{
+  "dayahead/v40g/optimizer.py": {
+    "original_sha256": "f2a64cbd0c28215f8eeaac48235f1d2b3d58d6c07cd5ce321a6535ae050ba3cc",
+    "ablation_sha256": "64b59d5dd757d4df255eae2001663dbfb18ba62dfb98454fa142ac13d5a94de5",
+    "substitutions": [
+      [
+        "reserve_mean, reserve_xi = add_constraints(model, context, gpu_variables)",
+        "reserve_mean, reserve_xi = None, []  # CC4 interface absent: no xi variables, no reserve rows"
+      ],
+      [
+        "independent_objective_vector=[grid['rho_max'],reserve_check['mean_xi_GPUh'],",
+        "independent_objective_vector=[grid['rho_max'],0.0,"
+      ],
+      [
+        "**{f'V41_H4_shortfall_GPUh[{k}]':v for k,v in enumerate(reserve_check['xi_GPUh'])}",
+        "**{}"
+      ],
+      [
+        "        if engine is not None:\n            value.update(compute_contract",
+        "        if reserve_mean is None:\n            from dayahead.v41.reserve import diagnostics\n            value.update(OBJECTIVE_VECTOR=[grid['rho_max'],0.0,secondary,tertiary,float(solution_value(tie))],\n                objective_hierarchy=['MIN_RHO_MAX','MIN_MIGRATIONS','MIN_COMPLETE_REFERENCE_DEVIATION','STABLE_TIE'],\n                reserve_diagnostics=diagnostics(context.v41_ml_snapshot,context.capacity,gpu),CC4_OPTIMIZATION_ENABLED=False)\n        if engine is not None:\n            value.update(compute_contract"
+      ]
+    ]
+  },
+  "dayahead/v41/objectives.py": {
+    "original_sha256": "a5f385a0893796e67b3995dd13ce9aef7f02c4f965944b95c7746bc276a2fd85",
+    "ablation_sha256": "c60764317091ad38a348aba047e064354a0c8bd86234eb75dddccdf50b332897",
+    "substitutions": [
+      [
+        "[grid['rho_max'], reserve['mean_xi_GPUh'], migration, dev, tie]",
+        "[grid['rho_max'], 0.0, migration, dev, tie]"
+      ]
+    ]
+  },
+  "dayahead/v41/reserve.py": {
+    "original_sha256": "f0b6fd207321599f8903ac842025907a0f12b10b9aa41cf7aca79344c8e090ba",
+    "ablation_sha256": "a115317a8773c9624cf337ebbf33c5d3cf79ceeebeb14cf9ffdbfabc52ae6db3",
+    "substitutions": [
+      [
+        "    for a, b, tol in zip(left, right, tolerances):",
+        "    for i, (a, b, tol) in enumerate(zip(left, right, tolerances)):\n        if i == 1: continue  # P2 excluded from decision comparison"
+      ]
+    ]
+  },
+  "v41r4_loop_runtime.py": {
+    "original_sha256": "ff8228fe4a0f7f8e4514ab46e26fb57e9e74ba6bfac6c8f3dd94b284566a8c10",
+    "ablation_sha256": "e6b36d8eda955ae3999b95beafae3ef019a2b0b6d58f39ece5162de9ebcde79a",
+    "substitutions": [
+      [
+        "len(budget.stages)==5",
+        "len(budget.stages)==4"
+      ]
+    ],
+    "1320_restart_substitutions": [
+      [
+        "LoopBudget(1800.)",
+        "LoopBudget(1320.)"
+      ],
+      [
+        "actual_AIDC_search_budget_seconds=1800",
+        "actual_AIDC_search_budget_seconds=1320"
+      ],
+      [
+        "budget.used==1800.",
+        "budget.used==1320."
+      ],
+      [
+        "AIDC_SEARCH_LOOP_ENDED_BEFORE_1800_SECONDS",
+        "AIDC_SEARCH_LOOP_ENDED_BEFORE_1320_SECONDS"
+      ],
+      [
+        "effective_search_budget_seconds=1800",
+        "effective_search_budget_seconds=1320"
+      ],
+      [
+        "Original P1-P5 wall-clock allocations",
+        "Original P1/P3/P4/P5 wall-clock allocations; P2 omitted"
+      ]
+    ]
+  },
+  "v41r4_loop_budget.py": {
+    "original_sha256": "68ae5b101db061979f04024bf5a33b2bcea819f14b56400dd8ff3a7194e9e28c",
+    "ablation_sha256": "82530cbe1a6f12156214fe7eaeb412184e4c980f9539488aeb71db77ccc0f5b9",
+    "substitutions": [
+      [
+        "self.initial_vector,expected,core.TOLERANCES",
+        "self.initial_vector,[expected[0],0.0,*expected[2:]],core.TOLERANCES"
+      ]
+    ],
+    "1320_restart_substitutions": [
+      [
+        "V41R4_FIXED_1800_SECOND_SEARCH_LOOP_WALL_CLOCK_V1",
+        "IEEE123_CC4_P2_REMOVED_FIXED_1320_SECOND_SEARCH_LOOP_WALL_CLOCK_V1"
+      ],
+      [
+        "def __init__(self,total=1800.,clock=None):",
+        "def __init__(self,total=1320.,clock=None):"
+      ],
+      [
+        "        self.overhead_reserve=0.",
+        "        self.overhead_reserve=0.\n        self.exploration_scale=1.0  # Preserve original per-family timings; only P2 time is removed."
+      ]
+    ]
+  },
+  "dayahead/v41r1/early_stop.py": {
+    "original_sha256": "c0b859de243c4c11cc94f5fe8726a7edcd1e93cb328570aef5a0a1a0e99570bd",
+    "ablation_sha256": "05b665a44d3040ca131924b593d85634cdac6f47c87e35a32a5d82e2e5747d39",
+    "substitutions": [
+      [
+        "GUARDS = (900., 480., 180., 120., 120.)",
+        "GUARDS = (900., 0., 180., 120., 120.)"
+      ]
+    ],
+    "1320_restart_substitutions": [
+      [
+        "GUARDS = (900., 0., 386., 257., 257.)",
+        "GUARDS = (900., 0., 180., 120., 120.)"
+      ]
+    ]
+  },
+  "dayahead/v41/physics_ranking.py": {
+    "original_sha256": "44ccc2033b437288177074705acc6ae3f20f58af88a8b06f54cf03a14aaa83e7",
+    "ablation_sha256": "ec5f99908a497226b4486de1890166e71431ed3b78c0395b9e23b8646d82cb53",
+    "substitutions": [
+      [
+        "b0objective['OBJECTIVE_VECTOR'][:4]==prior[:4]",
+        "[b0objective['OBJECTIVE_VECTOR'][i] for i in (0,2,3)]==[prior[i] for i in (0,2,3)]"
+      ]
+    ]
+  },
+  "dayahead/v41r1/bounded_solver.py": {
+    "original_sha256": "db57efc8da824fb6777bdf5ca7a7181030d6d4104a084c0cf107cea738b79d13",
+    "ablation_sha256": "0471cd1c58ebdeab6d04e88ce750ba1a3509fb2d0122cad026573eedc0238dbc",
+    "purpose": "Remove inactive P2 temporary lock; original P1/P3/P4/P5 tolerances unchanged"
+  },
+  "v41r4_b3_equivalent.py": {
+    "original_sha256": "284b1557590bd492d3baa988bbff3b3fcb8590eb2f39f276de0e1f12752b7ecb",
+    "ablation_sha256": "4dd506df7d392966f467087f8b93ff04462a1e2b0e036f3ea30806622d2fb859",
+    "1320_restart_substitutions": [
+      [
+        "budget=PolicyBudget(1800)",
+        "budget=PolicyBudget(1320)"
+      ],
+      [
+        "A1_budget_seconds=1800",
+        "A1_budget_seconds=1320"
+      ],
+      [
+        "A1_own_budget_seconds=1800",
+        "A1_own_budget_seconds=1320"
+      ],
+      [
+        "total_optimization_seconds=3600",
+        "total_optimization_seconds=3120"
+      ],
+      [
+        "A1 has independent 1800s",
+        "A1 has independent 1320s"
+      ],
+      [
+        "A1 independent 1800s",
+        "A1 independent 1320s"
+      ]
+    ]
+  }
+}

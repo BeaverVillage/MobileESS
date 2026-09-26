@@ -1,0 +1,126 @@
+{
+  "changed_files": {
+    "original_source/dayahead/v41r1/early_stop.py": [
+      [
+        "GUARDS = (900., 0., 386., 257., 257.)",
+        "GUARDS = (900., 0., 180., 120., 120.)"
+      ]
+    ],
+    "original_source/v41r4_loop_budget.py": [
+      [
+        "V41R4_FIXED_1800_SECOND_SEARCH_LOOP_WALL_CLOCK_V1",
+        "IEEE123_CC4_P2_REMOVED_FIXED_1320_SECOND_SEARCH_LOOP_WALL_CLOCK_V1"
+      ],
+      [
+        "def __init__(self,total=1800.,clock=None):",
+        "def __init__(self,total=1320.,clock=None):"
+      ],
+      [
+        "        self.overhead_reserve=0.",
+        "        self.overhead_reserve=0.\n        self.exploration_scale=1.0  # Preserve original per-family timings; only P2 time is removed."
+      ]
+    ],
+    "original_source/v41r4_loop_runtime.py": [
+      [
+        "LoopBudget(1800.)",
+        "LoopBudget(1320.)"
+      ],
+      [
+        "actual_AIDC_search_budget_seconds=1800",
+        "actual_AIDC_search_budget_seconds=1320"
+      ],
+      [
+        "budget.used==1800.",
+        "budget.used==1320."
+      ],
+      [
+        "AIDC_SEARCH_LOOP_ENDED_BEFORE_1800_SECONDS",
+        "AIDC_SEARCH_LOOP_ENDED_BEFORE_1320_SECONDS"
+      ],
+      [
+        "effective_search_budget_seconds=1800",
+        "effective_search_budget_seconds=1320"
+      ],
+      [
+        "Original P1-P5 wall-clock allocations",
+        "Original P1/P3/P4/P5 wall-clock allocations; P2 omitted"
+      ]
+    ],
+    "original_source/v41r4_b3_equivalent.py": [
+      [
+        "budget=PolicyBudget(1800)",
+        "budget=PolicyBudget(1320)"
+      ],
+      [
+        "A1_budget_seconds=1800",
+        "A1_budget_seconds=1320"
+      ],
+      [
+        "A1_own_budget_seconds=1800",
+        "A1_own_budget_seconds=1320"
+      ],
+      [
+        "total_optimization_seconds=3600",
+        "total_optimization_seconds=3120"
+      ],
+      [
+        "A1 has independent 1800s",
+        "A1 has independent 1320s"
+      ],
+      [
+        "A1 independent 1800s",
+        "A1 independent 1320s"
+      ]
+    ],
+    "worker.py": [
+      [
+        "D:/c4",
+        "D:/c5"
+      ],
+      [
+        "(900.,0.,386.,257.,257.)",
+        "(900.,0.,180.,120.,120.)"
+      ]
+    ],
+    "runtime_environment.py": [
+      [
+        "D:/c4",
+        "D:/c5"
+      ]
+    ],
+    "campaign.py": [
+      [
+        "budget=[900,386,257,257]",
+        "budget=[900,180,120,120]"
+      ]
+    ],
+    "monitor.ps1": [
+      [
+        "P3 386 / P4 257 / P5 257",
+        "P3 180 / P4 120 / P5 120"
+      ],
+      [
+        "/1800s",
+        "/1320s"
+      ],
+      [
+        "CC4/P2 ABLATION | 4 workers",
+        "CC4/P2 ABLATION 1320s | 4 workers"
+      ]
+    ],
+    "report.py": [
+      [
+        "TOTAL_AIDC_BUDGET_MATCHED=True,P1_BUDGET_UNCHANGED=True",
+        "TOTAL_AIDC_BUDGET_MATCHED=False,P1_BUDGET_UNCHANGED=True,REMAINING_PRIORITY_BUDGETS_UNCHANGED=True,P2_BUDGET_REDISTRIBUTED=False,NO_CC4_AIDC_BUDGET_SECONDS=1320"
+      ],
+      [
+        "P3/P4/P5 386/257/257 seconds. Total 1800 seconds.",
+        "P3/P4/P5 180/120/120 seconds unchanged from original. P2 480 seconds omitted, not redistributed. NO_CC4 total 1320 seconds; WITH_CC4 frozen total 1800 seconds."
+      ]
+    ]
+  },
+  "source_namespace": "D:\\ChatGPT\\Mobile ESS 2\\IEEE123_CC4_ABLATION_20260923",
+  "baseline_only_reused": true,
+  "NO_CC4_cases_copied": 0,
+  "checked_at": "2026-09-23T10:16:34.463354+09:00"
+}

@@ -1,0 +1,12 @@
+--- D:\codex_mobileess_workspace\MobileESS_v41r3_scale_rebalance\dayahead\v41\reserve.py
++++ D:\ChatGPT\Mobile ESS 2\IEEE123_CC4_P2_1320_20260923\original_source\dayahead\v41\reserve.py
+@@ -120,7 +120,8 @@
+     require(len(left) == len(right) == len(tolerances) == 5, 'OBJECTIVE_VECTOR_AXIS')
+     require(all(math.isfinite(float(v)) for v in (*left, *right, *tolerances)) and min(tolerances) >= 0,
+             'NONFINITE_OBJECTIVE_VECTOR')
+-    for a, b, tol in zip(left, right, tolerances):
++    for i, (a, b, tol) in enumerate(zip(left, right, tolerances)):
++        if i == 1: continue  # P2 excluded from decision comparison
+         if a < b - tol:
+             return -1
+         if a > b + tol:

@@ -1,0 +1,29 @@
+--- D:\codex_mobileess_workspace\MobileESS_v41r3_scale_rebalance\v41r4_loop_budget.py
++++ D:\ChatGPT\Mobile ESS 2\IEEE123_CC4_P2_1320_20260923\original_source\v41r4_loop_budget.py
+@@ -7,11 +7,11 @@
+ from dayahead.v41r1.early_stop import write_compute_json as write_json
+ from v41r4_search_budget import adapted,OriginalBudget,OriginalBoundedLex
+ 
+-VERSION='V41R4_FIXED_1800_SECOND_SEARCH_LOOP_WALL_CLOCK_V1'
++VERSION='IEEE123_CC4_P2_REMOVED_FIXED_1320_SECOND_SEARCH_LOOP_WALL_CLOCK_V1'
+ 
+ 
+ class LoopBudget(OriginalBudget):
+-    def __init__(self,total=1800.,clock=None):
++    def __init__(self,total=1320.,clock=None):
+         self.clock=clock or time.perf_counter
+         self.loop_started=None;self.loop_stopped=None
+         self.loop_started_unix=None
+@@ -128,10 +128,11 @@
+         assert isinstance(self.budget,LoopBudget)
+         # Retain the original P1 -> P5 allocation and exact priority locks.
+         self.overhead_reserve=0.
++        self.exploration_scale=1.0  # Preserve original per-family timings; only P2 time is removed.
+         if self.context is not None and self.output.name=='A0':
+             from v41r4_loop_runtime import MAY_OUT
+             expected=read(MAY_OUT/self.context.day/'B0_DAYAHEAD_SUMMARY.json')['OBJECTIVE_VECTOR']
+-            assert all(abs(a-b)<=t for a,b,t in zip(self.initial_vector,expected,core.TOLERANCES)), 'B1_INITIAL_INCUMBENT_NOT_SAME_DAY_B0'
++            assert all(abs(a-b)<=t for a,b,t in zip(self.initial_vector,[expected[0],0.0,*expected[2:]],core.TOLERANCES)), 'B1_INITIAL_INCUMBENT_NOT_SAME_DAY_B0'
+             assert not (self.output/'RECOVERED_SEED_AUDIT.json').exists(), 'PREVIOUS_B1_SEED_FORBIDDEN'
+             write_json(self.output/'B0_COLD_START_VERIFICATION.json',dict(status='PASS',initial_vector=self.initial_vector,
+                 B0_vector=expected,previous_B1_seed_used=False,checked_before_search_timer=True))
