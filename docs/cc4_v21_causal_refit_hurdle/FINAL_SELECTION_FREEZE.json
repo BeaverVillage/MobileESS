@@ -1,0 +1,105 @@
+{
+  "time": "2026-09-26T12:39:45.414150+00:00",
+  "temporal": {
+    "policy": "weighted",
+    "cadence": 1,
+    "tag": "LGBM_weighted_c1_s20260924",
+    "N_hours": 1392,
+    "actual_GPUh": 329015.0525,
+    "Q50_coverage": 0.5380747126436781,
+    "Q90_coverage": 0.8139367816091954,
+    "calibration_error": 0.08606321839080466,
+    "Q90_pinball": 161.10387108456047,
+    "Q50_pinball": 114.77089779669039,
+    "Q50_MAE": 229.54179559338078,
+    "Q50_RMSE": 829.4089687161985,
+    "requirement_ratio": 1.0985330576738896,
+    "excess_reserve_proxy": 0.770279535398802,
+    "Q90_sum_GPUh": 361433.91164356034,
+    "positive_coverage": 0.7247608926673751,
+    "burst_coverage": 0.0,
+    "N_days": 58
+  },
+  "model": "DEEPAR",
+  "calibration_window": "expanding",
+  "runs": [
+    {
+      "family": "LGBM",
+      "seed": 20260924,
+      "tag": "LGBM_weighted_c1_s20260924",
+      "policy": "weighted",
+      "cadence": 1
+    },
+    {
+      "family": "HURDLE",
+      "seed": 20260924,
+      "tag": "HURDLE_weighted_c1_s20260924",
+      "policy": "weighted",
+      "cadence": 1
+    },
+    {
+      "family": "BURST_EXPERT",
+      "seed": 20260924,
+      "tag": "BURST_EXPERT_weighted_c1_s20260924",
+      "policy": "weighted",
+      "cadence": 1
+    },
+    {
+      "family": "TFT",
+      "seed": 20260924,
+      "tag": "TFT_weighted_c1_s20260924",
+      "policy": "weighted",
+      "cadence": 1
+    },
+    {
+      "family": "TFT",
+      "seed": 20260925,
+      "tag": "TFT_weighted_c1_s20260925",
+      "policy": "weighted",
+      "cadence": 1
+    },
+    {
+      "family": "TFT",
+      "seed": 20260926,
+      "tag": "TFT_weighted_c1_s20260926",
+      "policy": "weighted",
+      "cadence": 1
+    },
+    {
+      "family": "DEEPAR",
+      "seed": 20260924,
+      "tag": "DEEPAR_weighted_c1_s20260924",
+      "policy": "weighted",
+      "cadence": 1
+    },
+    {
+      "family": "DEEPAR",
+      "seed": 20260925,
+      "tag": "DEEPAR_weighted_c1_s20260925",
+      "policy": "weighted",
+      "cadence": 1
+    },
+    {
+      "family": "DEEPAR",
+      "seed": 20260926,
+      "tag": "DEEPAR_weighted_c1_s20260926",
+      "policy": "weighted",
+      "cadence": 1
+    }
+  ],
+  "evaluation_accessed": false,
+  "architecture_reselection": false,
+  "code_hashes": {
+    "cache_locks.py": "538b32e3cd063fcdd17409dd95915679c78908e36010c2a1409d4fee6f3367a7",
+    "common.py": "387c1773962184a60b84faf4905b3f2579a41c97727d883f91546a1aea718088",
+    "experiment.py": "ceaceecb8c1bcf12144adb5a54edf224c58ba303dcd286238a87197fa4676a47",
+    "neural.py": "eb5bdd387e6e26a31014309eed0f325609e663f7f2df5473471a965474e5a98e",
+    "parallel_phases.py": "58c0089e29f729362ead4ec2476fc064e7aeeb51ad34508dcca913db3605ab67",
+    "report.py": "8cbb7841d71003956b8ee1bb2fd3cb8e98e2cdf6d2d2bdb2edda661eaa807400",
+    "reuse_components.py": "f312815c21bab80d497db3845b107b95ab2d9b993e13b0375ce4fcf2b0030914",
+    "test_contract.py": "a1d46d1096f1cd1e25bc5a33693d1174e98f8f9827caffa55b23202ec9a28786",
+    "verify.py": "eb06e9fdfad68183a65f7086c303839c4ef004020ad5fb9eb0d1c4b4d59037b8"
+  },
+  "protocol_sha256": "a2a4f2c4c90af8791de1e3714e616ee48999acd57d859a0b4de4badff3a9d514",
+  "PRODUCTION_MODEL_PROMOTED": false
+}
