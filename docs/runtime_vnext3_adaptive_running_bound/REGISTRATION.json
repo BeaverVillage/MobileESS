@@ -1,0 +1,83 @@
+{
+  "time": "2026-09-26T15:53:01.217754+00:00",
+  "version": "Runtime-vNext3-v1",
+  "base_PR": 66,
+  "code_hashes": {
+    "study.py": "52f0efd2536df5fe843953a35a92f3c8d47e08bb730787df4b096714f31979be",
+    "test_contract.py": "ee2c8ad1f931e1298d95c97755ffe14101ee4884144bab3533ab18ee3eac2a7c"
+  },
+  "underlying_runtime": {
+    "temporal_policy": "PR65 180-day,14-day half-life,original issue refits",
+    "model": "fixed MULTI_QUANTILE Q90/Q95",
+    "new_training_executions": 0
+  },
+  "pending": "all arms use exact latest frozen production R0 Q90; May only. R0 unavailable DEV/CAL/April, no backward replay or fabricated Pending baseline.",
+  "running": "R0 naive frozen total-minus-elapsed; R1 exact Q90; R2 exact Q95; R3 Q95 iff risk_probability >= frozen threshold, Q90 otherwise",
+  "selector": {
+    "family": "single fixed standardized logistic regression; no model-family search",
+    "C": 1.0,
+    "solver": "lbfgs",
+    "max_iter": 5000,
+    "class_weight": null,
+    "seed": 20260927,
+    "target": "historical elapsed-conditioned Q90 underprediction: actual_remaining_seconds > Q90",
+    "training": "prior Running OOS issue < current issue AND job_end_time < current issue AND valid label; latest observation per Job; expanding selector history",
+    "minimum_unique_jobs": 100,
+    "minimum_each_class": 10,
+    "insufficient_support": "probability=0, selects Q90 for every registered positive threshold",
+    "features": [
+      "log_spread",
+      "normalized_spread",
+      "log_elapsed_hours",
+      "elapsed_over_requested",
+      "log_remaining_requested_hours",
+      "log_gpu_count",
+      "hardware_H100",
+      "hardware_A100",
+      "hardware_HPE",
+      "hardware_OTHER",
+      "standby",
+      "elapsed_lt1",
+      "elapsed_1to2",
+      "elapsed_2to4",
+      "elapsed_4to8",
+      "elapsed_gt8"
+    ],
+    "standardization": "training-only mean/std; fixed feature schema, no fitted categories",
+    "thresholds": [
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9
+    ]
+  },
+  "selection": "DEVELOPMENT/CALIBRATION Running only. Safety means coverage>=.90,GPUcoverage>=.90,long-total-runtime>4h-under<=.15 separately in BOTH roles. Reserve preferred means overreservedGPUh<=requested-overreservedGPUh in BOTH. Among safety-passing candidates prefer reserve-passing, then lowest average(role total reservedGPUh/requestedGPUh), then highest threshold. If none safety-passing choose lowest mean normalized safety deficit then reserve ratio then highest threshold as research-only candidate. All selection metrics must be finite.",
+  "safety_deficit": "mean across DEV/CAL of max(.9-cov,0)/.9 + max(.9-GPUcov,0)/.9 + max(longunder-.15,0)/.15",
+  "R0_comparison": "current R0 not available in DEV/CAL; missed-slot advantage cannot be selected there. May diagnostic only; no reselection.",
+  "long_job": "actual total runtime >4h; remaining underprediction for Running",
+  "slot_metric": "GPU-weighted positive ceil(actual/900)-ceil(bound/900), each truncated to96 slots; runtime-origin occupancy proxy, not actual dispatch",
+  "reserve": "requested reference=max(requested_seconds-elapsed_seconds,0); total reserve and overreserve both reported",
+  "bootstrap": {
+    "paired": true,
+    "draws": 2000,
+    "seed": 20260927,
+    "blocks": [
+      1,
+      7
+    ],
+    "unit": "observed issue-days; circular chronological blocks; all ratios recomputed each draw"
+  },
+  "feature_authority": "issue event-time only; request-version and ingestion provenance UNVERIFIED",
+  "exposure": "post-May-exposure development; May diagnostic historical, never untouched confirmation",
+  "TEMPORAL_POLICY_CHANGED": false,
+  "NEW_ARCHITECTURE_SEARCHED": false,
+  "PRODUCTION_PROMOTED": false,
+  "flags_scope": "underlying runtime model/policy unchanged; newly trained risk selector explicitly disclosed",
+  "optimizer_executions": 0,
+  "grid_executions": 0
+}
