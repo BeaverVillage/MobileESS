@@ -1,0 +1,57 @@
+{
+  "time": "2026-09-26T15:36:27.236457+00:00",
+  "version": "runtime-vNext2-q90-q95-v1",
+  "base_PR": 65,
+  "code_hashes": {
+    "study.py": "4d4b55fd9c32b3c0cf4f4cc33b9a523eb82e3b19c2d1e05a5dcc24404b9657f6",
+    "test_contract.py": "1f3c703150c45412b43b93efdb74307ea6903b408d044c2eb4bf6ecca26138c3"
+  },
+  "temporal_policy": {
+    "window_days": 180,
+    "half_life_days": 14,
+    "rate": 0.049510512897138946,
+    "cadence": "unchanged: every inherited issue"
+  },
+  "architecture": "unchanged PR65 MULTI_QUANTILE LightGBM; reuse exact frozen predictions",
+  "models": {
+    "R0": "current frozen PR42 production Q90; May only; Running total-minus-elapsed naive transport",
+    "R1": "MULTI_QUANTILE Q90",
+    "R2": "MULTI_QUANTILE Q95"
+  },
+  "features": "unchanged; Running explicitly conditioned on elapsed; no new features",
+  "selection_roles": [
+    "DEVELOPMENT",
+    "CALIBRATION"
+  ],
+  "selection_unit": "separate Pending and Running",
+  "selection_rule": "candidate must have coverage >=0.90 AND overreserved_GPUh < requested_overreserved_GPUh in BOTH DEVELOPMENT and CALIBRATION. Among eligible candidates prefer those with GPU_coverage >=0.90 AND long_under <=0.15 in BOTH roles; then choose lower quantile. If none eligible retain R0 with no candidate adoption. Missing metrics fail closed.",
+  "selection_current_baseline": "R0 unavailable in DEV/CAL; never replay May-trained models backwards; missed-slot superiority vs R0 cannot enter selection",
+  "evaluation_roles": [
+    "EXPOSED_EVALUATION",
+    "MAY_HISTORICAL"
+  ],
+  "exposure": "post-May-exposure follow-up model development; May historical diagnostic, not untouched confirmation",
+  "long_job": "actual total runtime >4h; underprediction uses total for Pending and remaining for Running",
+  "slots": "sum GPU * max(min(ceil(actual/900),96)-min(ceil(bound/900),96),0); 24h runtime-origin occupancy proxy",
+  "reserve": "bound*GPU/3600; overreserve=max(bound-actual,0)*GPU/3600; walltime reference=max(requested-elapsed,0)",
+  "losses": "both tau=.90 and tau=.95 pinball for every bound; Q95 never renamed Q90",
+  "no_scaling": true,
+  "no_capping": true,
+  "no_exclusions": "retain all inherited Job-issues; only inherited invalid labels unscorable",
+  "uncertainty": {
+    "paired": true,
+    "draws": 2000,
+    "seed": 20260927,
+    "blocks": [
+      1,
+      7
+    ],
+    "unit": "observed issue days, circular blocks in chronological order"
+  },
+  "target_authority": "offline event-time proxy only; request-version/ingestion provenance remains UNVERIFIED",
+  "TEMPORAL_POLICY_CHANGED": false,
+  "NEW_ARCHITECTURE_SEARCHED": false,
+  "PRODUCTION_PROMOTED": false,
+  "optimizer_executions": 0,
+  "grid_executions": 0
+}

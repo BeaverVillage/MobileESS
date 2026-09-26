@@ -1,0 +1,58 @@
+{
+  "time": "2026-09-26T15:39:35.209772+00:00",
+  "TEMPORAL_POLICY_CHANGED": false,
+  "NEW_ARCHITECTURE_SEARCHED": false,
+  "PRODUCTION_REPLACEMENT_SUPPORTED": false,
+  "OPTIMIZER_INTEGRATION_READY": false,
+  "PRODUCTION_PROMOTED": false,
+  "selected_by_state": {
+    "PENDING": "R0",
+    "RUNNING": "R0"
+  },
+  "historical_May_gates": [
+    {
+      "role": "MAY_HISTORICAL",
+      "state": "PENDING",
+      "arm": "R1",
+      "coverage": false,
+      "GPU_coverage_preferred": false,
+      "long_under_preferred": false,
+      "missed_slots_decreased": false,
+      "overreserve_below_walltime": true
+    },
+    {
+      "role": "MAY_HISTORICAL",
+      "state": "RUNNING",
+      "arm": "R1",
+      "coverage": false,
+      "GPU_coverage_preferred": false,
+      "long_under_preferred": false,
+      "missed_slots_decreased": true,
+      "overreserve_below_walltime": false
+    },
+    {
+      "role": "MAY_HISTORICAL",
+      "state": "PENDING",
+      "arm": "R2",
+      "coverage": true,
+      "GPU_coverage_preferred": true,
+      "long_under_preferred": false,
+      "missed_slots_decreased": false,
+      "overreserve_below_walltime": true
+    },
+    {
+      "role": "MAY_HISTORICAL",
+      "state": "RUNNING",
+      "arm": "R2",
+      "coverage": true,
+      "GPU_coverage_preferred": false,
+      "long_under_preferred": true,
+      "missed_slots_decreased": true,
+      "overreserve_below_walltime": false
+    }
+  ],
+  "reason": "Neither quantile eligible in both DEVELOPMENT and CALIBRATION; retain R0. May is exposed diagnostic, request-version and ingestion authority UNVERIFIED.",
+  "target_interface_valid": "offline event-time proxy only",
+  "optimizer_executions": 0,
+  "grid_executions": 0
+}
