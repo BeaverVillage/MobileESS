@@ -1,0 +1,144 @@
+{
+  "arrays": {
+    "days": {
+      "shape": [
+        443
+      ],
+      "dtype": "<U10"
+    },
+    "y_H1": {
+      "shape": [
+        443,
+        24
+      ],
+      "dtype": "float64"
+    },
+    "X_H1": {
+      "shape": [
+        443,
+        24,
+        71
+      ],
+      "dtype": "float32"
+    },
+    "span_H1": {
+      "shape": [
+        24
+      ],
+      "dtype": "int32"
+    },
+    "end_hour_H1": {
+      "shape": [
+        24
+      ],
+      "dtype": "int32"
+    },
+    "y_H3": {
+      "shape": [
+        443,
+        8
+      ],
+      "dtype": "float64"
+    },
+    "X_H3": {
+      "shape": [
+        443,
+        8,
+        71
+      ],
+      "dtype": "float32"
+    },
+    "span_H3": {
+      "shape": [
+        8
+      ],
+      "dtype": "int32"
+    },
+    "end_hour_H3": {
+      "shape": [
+        8
+      ],
+      "dtype": "int32"
+    },
+    "y_H6": {
+      "shape": [
+        443,
+        4
+      ],
+      "dtype": "float64"
+    },
+    "X_H6": {
+      "shape": [
+        443,
+        4,
+        71
+      ],
+      "dtype": "float32"
+    },
+    "span_H6": {
+      "shape": [
+        4
+      ],
+      "dtype": "int32"
+    },
+    "end_hour_H6": {
+      "shape": [
+        4
+      ],
+      "dtype": "int32"
+    },
+    "y_CUM": {
+      "shape": [
+        443,
+        24
+      ],
+      "dtype": "float64"
+    },
+    "X_CUM": {
+      "shape": [
+        443,
+        24,
+        71
+      ],
+      "dtype": "float32"
+    },
+    "span_CUM": {
+      "shape": [
+        24
+      ],
+      "dtype": "int32"
+    },
+    "end_hour_CUM": {
+      "shape": [
+        24
+      ],
+      "dtype": "int32"
+    }
+  },
+  "raw_target_job_columns": {
+    "id": "string",
+    "submit_time": "timestamp[ns, tz=UTC]",
+    "start_time": "timestamp[ns, tz=UTC]",
+    "end_time": "timestamp[ns, tz=UTC]",
+    "gpus_requested": "double",
+    "archive_member_index": "int16",
+    "archive_row_index": "int32",
+    "work_GPUh": "double",
+    "pinned_raw_work_row_index": "int32",
+    "day_index": "int32",
+    "hour": "int8"
+  },
+  "membership_key": [
+    "archive_member_index",
+    "archive_row_index"
+  ],
+  "independent_identifier": "id and pinned_raw_work_row_index",
+  "work_GPUh_definition": "gpus_requested * (end_time-start_time).total_seconds()/3600",
+  "timestamps": "UTC nanosecond normalized; target-day clock fixed UTC+10",
+  "label_use_only": [
+    "start_time",
+    "end_time",
+    "work_GPUh"
+  ],
+  "features": "X arrays are unchanged endpoint slices of base71; no raw completion values used to add or modify features"
+}
