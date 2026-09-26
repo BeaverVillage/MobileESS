@@ -1,0 +1,10 @@
+--- D:\codex_mobileess_workspace\MobileESS_v41r3_scale_rebalance\dayahead\v41r1\bounded_solver.py
++++ D:\ChatGPT\Mobile ESS 2\IEEE123_CC4_P2_1320_20260923\original_source\dayahead\v41r1\bounded_solver.py
+@@ -124,6 +124,7 @@
+         cut=model.addConstr(scale*objective<=scale*spec['rhs'],name='FO_TEMPORARY_ACTIVE_OBJECTIVE_IMPROVEMENT')
+         higher=[]
+         for k in range(spec['priority']):
++            if k == 1: continue  # No removed CC4/P2 lock
+             factor=1000. if k==0 else 1.
+             higher.append(model.addConstr(factor*self.expressions[k]<=factor*(self.vector()[k]+TOLERANCES[k]),
+                 name=f'FO_TEMPORARY_CURRENT_INCUMBENT_LOCK_P{k+1}'))

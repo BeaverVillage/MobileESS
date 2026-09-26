@@ -1,0 +1,49 @@
+--- D:\codex_mobileess_workspace\MobileESS_v41r3_scale_rebalance\v41r4_b3_equivalent.py
++++ D:\ChatGPT\Mobile ESS 2\IEEE123_CC4_P2_1320_20260923\original_source\v41r4_b3_equivalent.py
+@@ -193,7 +193,7 @@
+         from dayahead.v40a.invariants import digest
+         from dayahead.v41r1.bounded_solver import PolicyBudget
+         out=ctx.v41_a1_output;out.mkdir(parents=True,exist_ok=True)
+-        outer=ctx.v41_policy_budget;budget=PolicyBudget(1800)
++        outer=ctx.v41_policy_budget;budget=PolicyBudget(1320)
+         ctx.v41_policy_budget=budget;ctx.v41_fixed_mess=tuple(deepcopy(mess.slots))
+         before=time.perf_counter()
+         frozen=digest(mess);ctx.v41_a1_seed_jobs=deepcopy(current)
+@@ -231,7 +231,7 @@
+                 COMPOUND_NET_EFFECT_USED_IN_A1='YES',A0_final_B1_reuse='YES',
+                 structure=structural,compound_consumption=used,seed_checkpoint=ctx.v41_a1_seed_checkpoint,
+                 seed_objective_vector=before_vector,final_objective_vector=after_vector,
+-                M1_before_SHA=frozen,M1_after_SHA=digest(mess),A1_budget_seconds=1800,
++                M1_before_SHA=frozen,M1_after_SHA=digest(mess),A1_budget_seconds=1320,
+                 A1_optimization_seconds=budget.used,outer_budget_unchanged_seconds=outer.total,
+                 Actual_reads=0,patches=PATCHES,source=science())
+             write_json(out/'V41R4_A1_B1_EQUIVALENCE_AUDIT.json',audit)
+@@ -247,9 +247,9 @@
+     def activate(ctx,method,out):
+         result=old_activate(ctx,method,out)
+         p=Path(out)/'POLICY_DAY_COMPUTE_START.json';r=read(p)
+-        r.update(total_optimization_seconds=3600,A1_own_budget_seconds=1800,
++        r.update(total_optimization_seconds=3120,A1_own_budget_seconds=1320,
+             M1_MF_original_budget_seconds=1800,
+-            shared_across='M1/MF share original 1800s; A1 has independent 1800s',
++            shared_across='M1/MF share original 1800s; A1 has independent 1320s',
+             May_authority=record(MAY_OUT/'MAY_CAMPAIGN_RELEASE_V2.json'))
+         write_json(p,r)
+         return result
+@@ -263,7 +263,7 @@
+             optimization_seconds=outer['optimization_seconds']+a.used,
+             remaining_seconds=outer['remaining_seconds']+a.remaining,
+             TOTAL_UNUSED_BUDGET_SECONDS=outer['remaining_seconds']+a.remaining,
+-            budget_contract='M1/MF original shared 1800s; A1 independent 1800s',
++            budget_contract='M1/MF original shared 1800s; A1 independent 1320s',
+             M1_MF_original_budget=outer,A1=dict(total_budget_seconds=a.total,optimization_seconds=a.used,
+                 remaining_seconds=a.remaining,calls=a.calls,stages=a.stages))
+         r['calls']=outer['calls']+a.calls;r['stages']=outer['stages']+a.stages
+@@ -271,6 +271,6 @@
+         write_json(p,r)
+     bounded_runtime.finish=finish
+     write_json(MAY_OUT/day/'RUN_BINDINGS_B3_A1_EQUIVALENT.json',dict(status='BOUND',
+-        source=science(),patches=PATCHES,A1_own_budget_seconds=1800,original_M1_MF_budget_seconds=1800,
++        source=science(),patches=PATCHES,A1_own_budget_seconds=1320,original_M1_MF_budget_seconds=1800,
+         Actual_optimizer_calls_allowed=0,alpha_BG=1.15))
+     return execution

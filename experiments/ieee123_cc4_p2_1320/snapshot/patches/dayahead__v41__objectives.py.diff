@@ -1,0 +1,11 @@
+--- D:\codex_mobileess_workspace\MobileESS_v41r3_scale_rebalance\dayahead\v41\objectives.py
++++ D:\ChatGPT\Mobile ESS 2\IEEE123_CC4_P2_1320_20260923\original_source\dayahead\v41\objectives.py
+@@ -39,7 +39,7 @@
+     controls = controls_from_trajectory(context.coefficients, power['pcc'], ())
+     grid = evaluate_grid(context.coefficients, controls, context.nodes)
+     reserve = diagnostics(context.v41_ml_snapshot, context.capacity, power['gpu'])
+-    return dict(OBJECTIVE_VECTOR=[grid['rho_max'], reserve['mean_xi_GPUh'], migration, dev, tie],
++    return dict(OBJECTIVE_VECTOR=[grid['rho_max'], 0.0, migration, dev, tie],
+         objective_hierarchy=list(OBJECTIVE_HIERARCHY), grid=grid, reserve_diagnostics=reserve,
+         job_objective_components=components,
+         active_weighted_sum=False, scalar_penalty_coefficient=None,

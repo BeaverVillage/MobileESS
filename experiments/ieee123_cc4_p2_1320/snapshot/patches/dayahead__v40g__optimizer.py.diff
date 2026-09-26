@@ -1,0 +1,36 @@
+--- D:\codex_mobileess_workspace\MobileESS_v41r3_scale_rebalance\dayahead\v40g\optimizer.py
++++ D:\ChatGPT\Mobile ESS 2\IEEE123_CC4_P2_1320_20260923\original_source\dayahead\v40g\optimizer.py
+@@ -216,7 +216,7 @@
+         reserve_mean = None
+         if hasattr(context, 'v41_ml_snapshot'):
+             from dayahead.v41.reserve import add_constraints
+-            reserve_mean, reserve_xi = add_constraints(model, context, gpu_variables)
++            reserve_mean, reserve_xi = None, []  # CC4 interface absent: no xi variables, no reserve rows
+         model.setObjective(rho,GRB.MINIMIZE);model.update()
+         if getattr(context, 'v41_bounded_seed_audit', False) or bounded:
+             from dayahead.v41r1.feasible_seed import complete_start
+@@ -299,10 +299,10 @@
+                 return dict(status='PASS' if state['status']==physical['status']==grid['status']=='PASS' else 'FAIL',
+                     job_decision_SHA=digest(selected_rows),service=state,physical=physical,grid=grid,reserve=reserve_check,
+                     materialized_jobs=selected_rows,materialized_power=power,
+-                    independent_objective_vector=[grid['rho_max'],reserve_check['mean_xi_GPUh'],
++                    independent_objective_vector=[grid['rho_max'],0.0,
+                         sum(bool(r.get('migration_selected')) for r in selected_rows),independent_dev,independent_tie],
+                     canonical_auxiliary_values={'rho_max':grid['rho_max'],
+-                        **{f'V41_H4_shortfall_GPUh[{k}]':v for k,v in enumerate(reserve_check['xi_GPUh'])}})
++                        **{}})
+             policy_budget=getattr(context,'v41_policy_budget',None) or PolicyBudget(config.get('total_seconds',1800))
+             policy_budget.charge(time.perf_counter()-started,'A0_BUILD_VERIFY_SEED_AND_CANDIDATES')
+             engine=BoundedLex(model,seed_values,output,
+@@ -379,6 +379,11 @@
+                 lexicographic_semantics='All accepted incumbents frozen without relative degradation; bounded stages when enabled',
+                 OBJECTIVE_VECTOR=[grid['rho_max'], reserve_report['mean_xi_GPUh'], secondary,
+                                   tertiary, float(solution_value(tie))])
++        if reserve_mean is None:
++            from dayahead.v41.reserve import diagnostics
++            value.update(OBJECTIVE_VECTOR=[grid['rho_max'],0.0,secondary,tertiary,float(solution_value(tie))],
++                objective_hierarchy=['MIN_RHO_MAX','MIN_MIGRATIONS','MIN_COMPLETE_REFERENCE_DEVIATION','STABLE_TIE'],
++                reserve_diagnostics=diagnostics(context.v41_ml_snapshot,context.capacity,gpu),CC4_OPTIMIZATION_ENABLED=False)
+         if engine is not None:
+             value.update(compute_contract='V41R1_BOUNDED_COMPUTE_30MIN_V1',
+                 optimization_seconds=engine.budget.used,optimization_budget_seconds=engine.budget.total,
