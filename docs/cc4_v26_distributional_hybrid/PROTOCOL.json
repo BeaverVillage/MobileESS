@@ -1,0 +1,46 @@
+{
+  "time": "2026-09-27T02:12:38.554333+00:00",
+  "version": "CC4-v2.6",
+  "parameters": {
+    "num_leaves": 15,
+    "learning_rate": 0.03,
+    "n_estimators": 400,
+    "min_child_samples": 50,
+    "n_jobs": 1,
+    "deterministic": true,
+    "force_col_wise": true,
+    "random_state": 20260924,
+    "verbosity": -1
+  },
+  "target": "Unchanged D-1 18:00 future hourly full-lifetime arrival GPUh; modeled UTC+10 clock",
+  "temporal": "Exact PR64 expanding history, 30-day decay, daily refit, full-day AV<issue and ISS<issue; non-PURGE",
+  "population": "Exact frozen PR63/64 split, eligible evaluation population, 71 X features and existing neural past input; no exclusions",
+  "B0": "Exact raw PR64 weighted daily LightGBM quantiles",
+  "B1": "Hurdle lognormal: binary LightGBM occurrence p and L2 LightGBM positive log(y) mean mu. No Tweedie claim. CDF=(1-p)+p*Phi((log(y)-mu)/sigma), atom1-p at0; Q_tau=0 for tau<=1-p, else exp(mu+sigma*Phi_inverse((tau-1+p)/p)). No scaling/cap/quantile interpolation.",
+  "dispersion": "One sigma frozen from TRAIN-only prior OOS positive log residuals, daily causal fits with >=60 mature days, each scored TRAIN day mature before first DEV issue. sigma=sqrt(recency-weighted mean squared residual), zero bias adjustment. Fixed-location Gaussian likelihood variance estimate, not tuned for coverage. No DEV/CAL/evaluation dispersion updates.",
+  "B2": "Same B0 outside P_B1(Y>unchanged TRAIN burst threshold)>=gate; inside use both B1 quantiles directly, no global uplift/max envelope. Gate in [.1,.2,.3] selected DEV only, then frozen.",
+  "B3": "Convex quantile average (1-w)*B0+w*B5, same w for Q50/Q90, w in [.25,.5,.75] selected DEV only. Not a mixture-CDF quantile. Ordering inherited without cap.",
+  "B4_B5": "Exact PR64 compact TFT and DeepAR architecture/settings, all3 seeds; arithmetic mean of predictions for primary scoring (unlike prior metric-average report), individual seed metrics separately. DeepAR128-path sample quantiles retain Monte Carlo error; no resampling, seed selection or retraining.",
+  "parameter_selection": "B2 gate and B3 weight: lowest DEV Q90 pinball among candidates with ratio<2; ties calibration error then ratio then numeric parameter. If none satisfy ratio, lowest-loss research config still frozen; no CAL retune.",
+  "selection": "Eligibility requires DEV and CAL separately coverage88..92, ratio<2, Q90 pinball<=B0, burst coverage>B0. Positive coverage reported, no new hard gate. 5% pinball improvement and ratio<1.8 preferred. Primary among eligible by mean normalized-to-B0 loss, calibration error, ratio, arm; otherwise B0. No evaluation reranking.",
+  "support": "Only DEV/CAL-eligible frozen arms can be supported. BOTH Dec-Feb and May must pass same point gates and 7-day paired95% CI upper(delta pinball)<0, lower(delta burst coverage)>0. Separate mathematical implementation validity from empirical distributional support. Report 5% improvement preference. Hybrid/ensemble flags apply B2/B3 respectively. No promotion regardless evidence.",
+  "burst_threshold": 860.3532222222221,
+  "bootstrap": {
+    "draws": 2000,
+    "blocks": [
+      1,
+      7
+    ],
+    "seed": 20260928,
+    "unit": "Entire paired observed target day including all24 hours. Recompute ratios in each draw. Any nonfinite draw => entire affected CI unavailable, never dropped/resampled; unadjusted exploratory per-contrast CI."
+  },
+  "NO_UNTOUCHED_CONFIRMATION": true,
+  "May": "exposed diagnostic; no tuning. Earlier mature evaluation labels allowed only in frozen expanding daily refit, never dispersion/selection.",
+  "provenance": "V40S4 D1_SCHEDULER_REQUEST_STATE_PROXY_V1; request/ingestion UNVERIFIED/UNOBSERVED; no historical exactness/immutability assertion",
+  "mathematical_sources": [
+    "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.lognorm.html",
+    "https://lightgbm.readthedocs.io/en/v4.6.0/Parameters.html"
+  ],
+  "PRODUCTION_PROMOTED": false,
+  "optimizer_executions": 0
+}
