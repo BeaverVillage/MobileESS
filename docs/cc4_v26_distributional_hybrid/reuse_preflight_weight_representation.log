@@ -1,0 +1,23 @@
+Traceback (most recent call last):
+  File "D:\ChatGPT\Mobile ESS 2\cc4_v26_distributional_hybrid_pr\docs\cc4_v26_distributional_hybrid\audit.py", line 148, in <module>
+    p=argparse.ArgumentParser();p.add_argument('stage',choices=['reuse','final']);args=p.parse_args();globals()[args.stage]()
+                                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\cc4_v26_distributional_hybrid_pr\docs\cc4_v26_distributional_hybrid\audit.py", line 40, in reuse
+    np.testing.assert_array_equal(m['weights'],weights(tr,i));assert m['policy']=='weighted' and m['cadence']==1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\site-packages\numpy\testing\_private\utils.py", line 920, in assert_array_equal
+    assert_array_compare(operator.__eq__, x, y, err_msg=err_msg,
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\site-packages\numpy\testing\_private\utils.py", line 797, in assert_array_compare
+    raise AssertionError(msg)
+AssertionError: 
+Arrays are not equal
+
+Mismatched elements: 167 / 167 (100%)
+ x: array("Index([0.019991846721035395, 0.020459133987108954, 0.020937343575271182,\n        0.02142673078269894, 0.021927556873857727, 0.022440089219980416,\n       0.022964601441806228, 0.023501373555655986,  0.02405069212292175,\n       0.024612850403050605,\n       ...\n         0.7520439537809918,   0.7696221479334963,   0.7876112128976197,\n         0.8060207523233376,   0.8248605943353025,   0.8441407967796914,\n         0.8638716525936915,   0.8840636953004919,   0.9047277046327152,\n         0.9258747122872905],\n      dtype='float64', length=167)",
+      dtype='<U542')
+ y: array([0.019992, 0.020459, 0.020937, 0.021427, 0.021928, 0.02244 ,
+       0.022965, 0.023501, 0.024051, 0.024613, 0.025188, 0.025777,
+       0.026379, 0.026996, 0.027627, 0.028273, 0.028934, 0.02961 ,...
