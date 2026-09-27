@@ -1,0 +1,63 @@
+{
+  "schema": "V42_ELIGIBILITY_OFFLINE_V1",
+  "frozen_at": "2026-09-27T02:12:26.849662+00:00",
+  "training_cutoff": "2025-01-01 00:00:00+00:00",
+  "minimum_shift_slots": 1,
+  "slot_seconds": 900,
+  "minimum_cohort_N": 100,
+  "cohort_dimensions": [
+    "qos",
+    "partition",
+    "workload_class",
+    "protected",
+    "gpu_bucket",
+    "wall_bucket",
+    "requested_nodes"
+  ],
+  "cohort_backoff": "NONE; unseen/sparse non-standby cohorts fail closed",
+  "historical_tolerance": "median completed-history queue seconds, floor to slots; a proxy assumption, not an SLA",
+  "training_population": "valid positive GPU jobs completed strictly before 2025-01-01; full raw submit partitions before 2025 only",
+  "rules": {
+    "R0": "Exact frozen eligible_standby gate and restored terminal bounds; zero-width gate is reported separately from movable jobs",
+    "R1": "PENDING, not protected, frozen in-day admitted reference, S>=1, standby OR cohort N>=100 and median queue>=900s; original terminal bounds",
+    "R2": "R1; cap latest start at RSP_start + min(S, floor(cohort median/900)); sparse/unknown cohort has zero budget, including standby"
+  },
+  "physical_screen": "For new options, full site occupancy including reference tails with all other jobs fixed. Enumerate each compatible site/start; reject violating options. At least one safe witness required for actionable temporal membership. Alternatives are not a simultaneously executable schedule.",
+  "spatial": "Frozen manifest can_relocate OR can_migrate unchanged; no new migration or shifted-start migration products. Protected temporal membership unchanged; legacy protected spatial rights not broadened.",
+  "metrics": {
+    "primary": "day-D GPUh of temporal-flexible jobs / all admitted baseline day-D GPUh; gate/domain/actionable distinguished",
+    "jobs": "job-day records / all frozen reference job-day records, including unadmitted and post-day records",
+    "full_service": "separate safe-duration GPUh over all reference job-day records, not distinct physical job execution",
+    "energy": "exact frozen C1 marginal PCC energy at original reference occupancy, P(total)-P(total-flex); fixed idle stays in denominator; also dynamic IT numerator reported",
+    "union": "temporal OR frozen spatial membership is separately reported, not labeled temporal share"
+  },
+  "evaluation_period": "All available V41R4 frozen domain days (May 01-31); ALL_AVAILABLE equals MAY. Full raw-trace eligibility outside authority coverage is unavailable, never synthesized.",
+  "sources": [
+    {
+      "url": "https://arxiv.org/abs/2106.11750",
+      "use": "delay-tolerant workload and daily-service preservation motivation; no numeric Kestrel latency threshold"
+    },
+    {
+      "url": "https://natlabrockies.github.io/HPC/Documentation/Slurm/batch_jobs/",
+      "use": "standby idle-node QoS semantics; does not certify normal-job deadlines"
+    }
+  ],
+  "threshold_rationale": "900 s is one existing decision slot. Median requires at least half the mature cohort to have waited a slot. N=100 is a preregistered support heuristic, not a statistical guarantee. No 15/30/60-minute sweep.",
+  "target_share_used": false,
+  "registration_inputs": {
+    "TRAIN_MEMBERSHIP.csv": "3d23ab55027de5a8d1cd01e830ea15741fa06cef7aace3fa4830067107d6265e",
+    "COHORT_LATENCY_STATISTICS.csv": "30826dc5a1abfde6ca87ca43e9f410f46df71444e396fc26604756e7d3ea90fe",
+    "TRAIN_AUDIT.json": "c1a7c97dfeaa37733e7164b090607b28afcc30033bc0fede4aebdc9201ee6f99"
+  },
+  "forbidden_runs": [
+    "ML",
+    "CC4",
+    "runtime fit/predict",
+    "traffic",
+    "optimizer",
+    "MESS",
+    "OpenDSS",
+    "Actual replay",
+    "A1-M1-A2-M2"
+  ]
+}
