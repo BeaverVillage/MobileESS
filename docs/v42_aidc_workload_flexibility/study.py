@@ -154,7 +154,9 @@ def evaluate():
         cap=read(authority('capacity'));rack=read(authority('rack'));caps=cap['site_capacity'];sites=list(caps)
         assert rack['effective_Rack_deliverability_by_AIDC']==caps
         for entry in a['sources']:
-            assert sha(entry['path'])==entry['sha256'];SOURCES[str(Path(entry['path']).resolve())]={'sha256':entry['sha256'],'bytes':entry['bytes']}
+            source=Path(entry['path'])
+            if not source.exists():source=WORK/'v41r4_final_results_pr'/source.relative_to(AUTH)
+            assert sha(source)==entry['sha256'];SOURCES[str(source.resolve())]={'sha256':entry['sha256'],'bytes':entry['bytes']}
         ledger=tracked_table(LEDGER/day/'V37_R4A_JOB_LEDGER.parquet',columns=['job_id','workload_class','protected','requested_nodes','qos','partition','RW_scheduled_completion']).set_index('job_id')
         meta={r['job_id']:r for r in base['jobs']};fullmeta={r['job_id']:r for r in combined['jobs']}
         assert set(ledger.index)==set(meta)=={r['job_uid'] for r in jobs}
