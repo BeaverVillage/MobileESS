@@ -1,0 +1,1051 @@
+Repository: BeaverVillage/MobileESS
+
+NEW INDEPENDENT RUNTIME-ML DEVELOPMENT TASK
+
+Suggested branch/worktree:
+codex/runtime-vnext6-preapril-callable-total-runtime
+
+This task is independent from:
+- V42 integration
+- CC4 PR #76
+- MESS
+- IEEE/OpenDSS
+- event-policy trust-region work
+
+Do NOT modify those branches/artifacts.
+
+============================================================
+0. PRIMARY OBJECTIVE
+============================================================
+
+Develop ONE production-candidate TOTAL-RUNTIME ML PACKAGE that can be:
+
+1. trained and selected using only causal PRE-APRIL data,
+2. serialized/persisted,
+3. loaded without retraining,
+4. called for a newly submitted job,
+5. used by both D-1 known jobs and D-day newly arriving unknown jobs,
+6. integrated later into V42 through a stable inference interface.
+
+Do NOT create a separate remaining-runtime ML model in this task.
+
+For a running job, V42 will initially use:
+
+remaining_runtime_proxy
+=
+max(predicted_total_runtime - observed_elapsed_runtime, 0)
+
+If the job is still RUNNING after predicted_total_runtime:
+
+state = OVERRUN
+
+and V42 will handle that operationally.
+
+This task must quantify whether that simple design is adequate.
+
+============================================================
+1. CURRENT BLOCKER TO RESOLVE
+============================================================
+
+The V42 runtime/temporal forensic found:
+
+NO_AUTHORIZED_SERIALIZED_PREMAY_TOTAL_RUNTIME_PROVIDER_FOR_NEW_SUBMISSION
+
+Current April V42 cannot load an approved frozen runtime model and call:
+
+model.predict(new_job)
+
+without retraining.
+
+Resolve THIS blocker.
+
+Required final deliverable:
+
+"A causally trained, pre-April frozen and persisted total-runtime model for
+newly submitted jobs, callable at submission time without refitting."
+
+============================================================
+2. PRESERVE ALL EXISTING RUNTIME EVIDENCE
+============================================================
+
+Before development, inventory and preserve all relevant previous runtime work:
+
+- V35R3D runtime model
+- V40I runtime forensic
+- V40J runtime redesign
+- V40K central runtime
+- V40S3/S4/S5 families
+- V40S5R1 rolling-origin runtime
+- Runtime-vNext / vNext2 / vNext3 / vNext4 / vNext5
+- PR #65/#66/#68/#71/#72 if present
+- existing frozen predictions
+- existing model files
+- preprocessing artifacts
+- calibration artifacts
+- previous failure gates
+
+Do NOT rewrite negative results.
+
+Create:
+
+RUNTIME_LINEAGE_AUDIT.md
+RUNTIME_EXISTING_MODEL_INVENTORY.json
+
+Explicitly distinguish:
+
+- research model exists
+- serialized model exists
+- callable model exists
+- optimizer_use_allowed
+- production promoted
+- training cutoff
+- target semantics
+
+============================================================
+3. ONE RUNTIME MODEL PACKAGE, NOT TWO
+============================================================
+
+The user does NOT want two independent ML systems unless evidence later
+requires it.
+
+Primary design:
+
+TOTAL-RUNTIME MODEL PACKAGE
+
+At submission / pre-start:
+
+x_j -> total runtime distribution / quantiles
+
+Primary scheduling estimate:
+
+T_plan_j = predicted Q90 total runtime
+
+Optional outputs for diagnostics:
+
+Q50
+Q90
+Q95
+
+These may be separate quantile boosters internally but are ONE runtime
+prediction package/interface.
+
+Do NOT call Q50/Q90/Q95 separate runtime systems.
+
+============================================================
+4. RUNNING-JOB SEMANTICS
+============================================================
+
+Do NOT train a separate remaining-runtime model in this task.
+
+Given frozen total-runtime prediction T_hat_j
+and causal observed elapsed execution e_j:
+
+if:
+
+e_j < T_hat_j
+
+then:
+
+R_proxy_j = T_hat_j - e_j
+
+If:
+
+e_j >= T_hat_j
+
+and the real job is still RUNNING:
+
+OVERRUN = TRUE
+
+R_proxy_j must NOT become a fake negative runtime.
+
+The job continues executing.
+
+Requested walltime may remain as a hard maximum request envelope if
+source-backed, but:
+
+requested_walltime - elapsed
+
+must NOT be called expected remaining runtime.
+
+============================================================
+5. IMPORTANT QUANTILE CAVEAT
+============================================================
+
+Document explicitly:
+
+Q90(T | x) - elapsed
+
+is a fixed submit-time residual proxy.
+
+It is NOT mathematically identical to:
+
+Q90(T - elapsed | T > elapsed, x)
+
+because survival to the checkpoint provides additional information.
+
+Do not hide this distinction.
+
+However, do NOT build a second remaining-runtime model unless the diagnostics
+in this task demonstrate that the simple proxy is operationally inadequate.
+
+============================================================
+6. TARGET DEFINITION
+============================================================
+
+Primary target:
+
+actual executed runtime
+
+T_j =
+max(0, end_time_j - start_time_j)
+
+using historical completed jobs for labels.
+
+Future actual start/end/runtime are LABEL ONLY.
+
+At inference they are forbidden.
+
+Do not predict queue waiting time as runtime.
+
+Do not predict submit-to-end duration as runtime.
+
+Do not confuse:
+- requested walltime
+- queue latency
+- actual execution runtime
+
+============================================================
+7. SUBMISSION-TIME FEATURE CONTRACT
+============================================================
+
+Only use features causally available when the job is submitted or available
+from immutable request metadata.
+
+Audit possible features such as:
+
+- requested GPUs
+- requested nodes
+- requested cores
+- requested memory
+- requested walltime
+- QoS
+- partition
+- account
+- user/anonymized user category where scientifically permissible
+- submission hour
+- weekday
+- recent historical runtime/request statistics available before issue
+
+Do NOT use:
+
+- future start
+- future end
+- realized runtime
+- future queue duration
+- later state
+- later resource utilization
+- future completion status
+
+Create row-level feature availability proof.
+
+============================================================
+8. REQUESTED WALLTIME ROLE
+============================================================
+
+Requested walltime is NOT actual runtime.
+
+Use it as:
+
+- a predictor feature,
+- and, if scheduler semantics support it, an upper request cap.
+
+Do not make:
+
+T_plan = requested_walltime
+
+unless evaluating it explicitly as the W0 baseline.
+
+If applying an upper cap:
+
+T_predicted <= requested_walltime
+
+audit whether the cap causes Q90 undercoverage.
+
+The previous runtime lineage already showed that walltime caps can affect
+coverage; measure this explicitly.
+
+============================================================
+9. BASELINES
+============================================================
+
+At minimum compare:
+
+W0:
+requested walltime directly used as scheduling duration
+
+B0:
+best reproducible previous frozen runtime baseline
+
+M1:
+direct LightGBM quantile runtime model
+
+M2:
+LightGBM quantile model on log1p(runtime)
+
+M3:
+walltime-relative / residual formulation if scientifically valid, e.g.
+predict runtime relative to requested walltime
+
+Do NOT add deep neural models initially.
+
+Do NOT run TFT/DeepAR for runtime unless the tree-based candidates fail and
+a separate protocol justifies them.
+
+============================================================
+10. QUANTILES
+============================================================
+
+Train/evaluate:
+
+Q50
+Q90
+
+Q95 may be included as diagnostic.
+
+Primary V42 scheduling candidate:
+
+Q90
+
+because V42 needs a conservative but not absurdly inflated reservation.
+
+Do NOT automatically select Q95 merely because coverage is higher.
+
+============================================================
+11. WHY Q90 IS PRIMARY
+============================================================
+
+The scheduling trade-off is:
+
+underprediction
+-> runtime overrun
+-> unexpected GPU occupancy / downstream conflicts
+
+overprediction
+-> inflated reservation
+-> artificial queueing
+-> jobs pushed beyond the D-day electrical horizon
+
+Therefore evaluate calibration AND sharpness.
+
+The model must not solve underprediction by simply recreating walltime-scale
+reservations.
+
+============================================================
+12. PRE-APRIL CHRONOLOGY
+============================================================
+
+CRITICAL:
+
+The final callable model must be frozen BEFORE April evaluation.
+
+Do NOT use April or May to:
+- choose features
+- choose architecture
+- choose quantile
+- tune hyperparameters
+- calibrate margins
+- select backend
+
+Reuse the strongest existing chronological runtime split if scientifically
+valid.
+
+Otherwise define a new chronological split entirely before April:
+
+TRAIN
+DEVELOPMENT
+CALIBRATION
+
+Freeze:
+- target
+- features
+- model family
+- hyperparameters
+- calibration
+- selected quantile
+- backend
+
+BEFORE opening April.
+
+April is locked post-freeze evaluation.
+
+May must NOT be used for this model-development task.
+
+============================================================
+13. MATURITY / CAUSAL TRAINING
+============================================================
+
+A historical job label may enter fitting only after its end/runtime would
+have been known.
+
+For every training/refit cutoff:
+
+end_time < training_cutoff
+
+or the exact established maturity rule must hold.
+
+No incomplete future job may contribute its eventual runtime.
+
+Create:
+
+RUNTIME_LABEL_MATURITY_AUDIT.parquet
+
+with:
+- job id
+- submit
+- start
+- end
+- label available time
+- fit cutoff
+- eligible_for_fit
+
+============================================================
+14. FIXED PRE-APRIL PROVIDER
+============================================================
+
+The final selected model must be trained once after model selection/calibration
+is frozen and then PERSISTED.
+
+Do not reproduce the old behavior:
+
+_fit_predict(...)
+-> predictions
+-> discard model state
+
+Required inference pattern:
+
+load frozen bundle
+-> build causal features for new job
+-> predict Q50/Q90
+-> return result
+
+NO REFIT.
+
+NO ONLINE TRAINING.
+
+NO DAILY RETRAIN IN V42.
+
+============================================================
+15. REQUIRED SERIALIZED BUNDLE
+============================================================
+
+Produce a self-contained runtime-provider bundle containing at minimum:
+
+runtime_Q50 model
+runtime_Q90 model
+optional runtime_Q95 model
+
+preprocessing definition
+categorical mappings
+feature order
+feature types
+missing-value rules
+
+training cutoff
+training membership digest
+development/calibration membership
+model hyperparameters
+backend
+software versions
+random seed
+
+target definition
+quantile semantics
+walltime cap semantics
+unit = seconds
+
+source hashes
+model hashes
+preprocessing hashes
+
+inference example
+inference tests
+
+Suggested artifacts:
+
+RUNTIME_PROVIDER/
+    Q50.*
+    Q90.*
+    Q95.*            # optional
+    preprocessing.json
+    feature_contract.json
+    runtime_contract.json
+    model_manifest.json
+    source_manifest.json
+
+============================================================
+16. STABLE PROVIDER API
+============================================================
+
+Create a clean interface, e.g.
+
+provider.predict_total(job, event_time)
+
+return:
+
+{
+    q50_seconds,
+    q90_seconds,
+    q95_seconds_optional,
+    planned_runtime_seconds,
+    requested_walltime_seconds,
+    model_version,
+    feature_timestamp,
+    feature_receipt,
+    fallback_reason
+}
+
+Primary:
+
+planned_runtime_seconds = q90_seconds
+
+unless the final frozen protocol says otherwise.
+
+The interface must work on a NEW job not present in training data.
+
+============================================================
+17. NO JOB-ID LOOKUP CHEATING
+============================================================
+
+Critical test:
+
+take an eligible historical job,
+remove its identity from any lookup cache,
+provide only causal request features,
+and require the persisted provider to generate the prediction.
+
+A provider that merely retrieves a previously cached historical prediction
+does NOT satisfy the V42 blocker.
+
+Required:
+
+NEW_JOB_CALLABLE_TEST = PASS
+
+============================================================
+18. MODEL SELECTION METRICS
+============================================================
+
+For each candidate report:
+
+Q50:
+- MAE
+- RMSE
+- median AE
+- WAPE where appropriate
+
+Q90:
+- empirical coverage
+- calibration error from 0.90
+- pinball loss
+- mean predicted/actual runtime ratio
+- total predicted/actual runtime ratio
+
+Operational:
+- underprediction rate
+- GPU-weighted underprediction rate
+- overprediction rate
+- predicted reservation GPUh / actual GPUh
+- runtime-overrun job fraction
+- GPU-weighted overrun fraction
+- overrun GPUh
+- excess reservation GPUh
+
+============================================================
+19. STRATIFIED METRICS
+============================================================
+
+Runtime errors are heterogeneous.
+
+Report by at least:
+
+requested runtime/walltime bucket:
+<15m
+15–30m
+30–60m
+1–2h
+2–4h
+>4h
+
+requested GPU:
+1
+2
+4
+8
+16+
+or source-backed equivalent bins
+
+QoS
+
+partition if sufficient support
+
+long-job cohort
+
+large-GPU cohort
+
+Do not approve a model that has acceptable global coverage but severe
+undercoverage in long/high-GPU jobs that dominate service energy.
+
+============================================================
+20. PRIMARY GATE
+============================================================
+
+Pre-register before evaluation.
+
+Recommended primary Q90 gate:
+
+overall empirical coverage near nominal 0.90
+
+Use a tolerance band such as:
+
+0.88 <= Q90 coverage <= 0.92
+
+AND require GPU-weighted coverage / underprediction behavior to be acceptable.
+
+Do not use coverage alone.
+
+Also require:
+
+- pinball no worse than baseline
+- reservation inflation materially below requested-walltime W0
+- no catastrophic long-job failure
+- no catastrophic high-GPU failure
+
+Use uncertainty intervals where sample support permits.
+
+If no candidate satisfies the gate:
+do NOT promote a model.
+
+============================================================
+21. VERY IMPORTANT COMPARISON TO WALLTIME
+============================================================
+
+The V42 forensic found an April late cohort where:
+
+requested_runtime / actual_runtime median ≈ 10.22
+
+and 93.59% of admitted jobs had start >= H under the walltime-driven reference
+queue.
+
+This is POST-FREEZE evaluation evidence only.
+
+Do NOT use those April values to tune the model.
+
+After the provider is frozen, use April to measure:
+
+W0 requested-walltime scheduling duration
+
+vs
+
+ML-Q90 scheduling duration
+
+Report:
+
+- requested/actual ratio
+- Q90/actual ratio
+- reservation GPUh
+- queue delay
+- jobs start < H
+- jobs start >= H
+- fraction recovered into D-day
+- runtime overruns
+- GPUh overruns
+
+This is the critical V42 integration diagnostic.
+
+============================================================
+22. RUNNING / REMAINING-RUNTIME DIAGNOSTIC
+============================================================
+
+Do NOT train a separate remaining-runtime model.
+
+Using frozen total Q90 prediction:
+
+R_proxy(e) =
+max(Q90_total - elapsed, 0)
+
+Construct retrospective checkpoint samples every 30 minutes.
+
+Measure:
+
+- proxy remaining-runtime MAE
+- classification accuracy for:
+  remaining > 15 min
+  remaining > 30 min
+  remaining > 60 min
+
+- overrun frequency:
+  elapsed >= predicted total while still RUNNING
+
+- overrun duration distribution
+- GPU-weighted overrun fraction
+
+This tells us whether simple subtraction is sufficient.
+
+============================================================
+23. OVERRUN CONTRACT
+============================================================
+
+Define and test:
+
+if job still RUNNING and:
+
+elapsed >= planned_runtime
+
+then:
+
+OVERRUN = TRUE
+
+Operational semantics:
+
+- do not terminate the job
+- do not free its GPU
+- continue current GPU occupancy
+- extend reservation one control interval at a time
+- no future actual end is read
+- do not use requested walltime as expected remaining runtime
+
+For the initial V42 design:
+
+OVERRUN migration recommendation = STAY
+
+unless a later task introduces an explicitly validated survival model.
+
+============================================================
+24. DO NOT DEVELOP SURVIVAL MODEL UNLESS NEEDED
+============================================================
+
+First evaluate:
+
+TOTAL-Q90 minus elapsed
+
+If checkpoint diagnostics are adequate,
+STOP there.
+
+Only if the registered diagnostic demonstrates material failure, e.g.
+
+- high overrun fraction
+- poor migration-duration classification
+- severe long-job failure
+
+may you open a separately registered exploratory survival/AFT challenger.
+
+Do not silently expand this task into a second runtime ML system.
+
+If explored, it remains a challenger and must not replace the total model
+without separate gates.
+
+============================================================
+25. BACKEND BENCHMARK BEFORE LARGE TRAINING
+============================================================
+
+The CC4 study found CPU 4-process faster than GPU for its workload, but runtime
+data is different and may be much larger.
+
+Therefore benchmark runtime training independently.
+
+Compare:
+
+A. CPU single
+B. CPU multiprocess / parallel candidate fits
+C. NVIDIA RTX 4060 GPU if supported
+
+Use the same representative training subset/configuration.
+
+Measure:
+
+- wall-clock
+- fit time
+- CPU utilization
+- GPU utilization
+- RAM
+- VRAM
+- prediction differences
+- metric differences
+
+============================================================
+26. BACKEND SELECTION
+============================================================
+
+Do NOT assume GPU is faster.
+
+If GPU is materially faster AND numerically/scientifically equivalent within
+a pre-registered tolerance:
+use GPU for large offline training.
+
+If CPU multiprocess is faster or more reproducible:
+use CPU multiprocess.
+
+Inference must also be benchmarked on CPU because V42 online control should
+not require a GPU.
+
+Required:
+
+TRAIN_BACKEND_BENCHMARK.csv
+TRAIN_BACKEND_SELECTION.json
+
+============================================================
+27. CPU PARALLELIZATION
+============================================================
+
+If tree-model candidates are independent:
+
+keep each fit at controlled thread count
+and parallelize candidate/fold/quantile fits at process level where safe.
+
+Do not oversubscribe:
+
+N_processes × n_jobs_per_fit
+
+beyond the available CPU.
+
+Benchmark 4 workers first.
+
+============================================================
+28. ONLINE INFERENCE LATENCY
+============================================================
+
+For the final persisted provider measure CPU-only inference:
+
+single job:
+P50
+P95
+P99
+max
+
+batch:
+10
+100
+1000 jobs
+
+throughput jobs/s
+
+Also measure preprocessing latency.
+
+The online system must perform inference only.
+
+No fitting.
+
+============================================================
+29. APRIL LOCKED EVALUATION
+============================================================
+
+Only after:
+
+MODEL_SELECTION_FREEZE
+PROVIDER_BUNDLE_FREEZE
+
+open April.
+
+Do NOT alter model after seeing April.
+
+April evaluation must include:
+
+A. pure runtime metrics
+B. V42-style reservation/queue replay
+C. start>=H reduction
+D. overrun behavior
+
+Do not change:
+- V42 trust
+- epsilon
+- AIDC mapping
+- event policy
+- CC4
+
+This study is Runtime ML only.
+
+============================================================
+30. V42 INTEGRATION READINESS
+============================================================
+
+A Runtime model is integration-ready only if ALL are true:
+
+- causal pre-April training
+- target/feature leakage zero
+- development/calibration gates pass
+- persisted model state exists
+- preprocessing state exists
+- new-job callable test passes
+- no online refit
+- CPU inference latency acceptable
+- April locked evaluation completed
+- walltime reservation materially improved without unacceptable overrun
+- bundle hash frozen
+
+Only then:
+
+RUNTIME_PROVIDER_READY_FOR_V42 = TRUE
+
+This does NOT mean V42 as a whole is ready.
+
+============================================================
+31. REQUIRED OUTPUTS
+============================================================
+
+Create a new namespace, e.g.
+
+docs/runtime_vnext6_callable_total/
+
+Required:
+
+RUNTIME_EXISTING_MODEL_INVENTORY.json
+RUNTIME_LINEAGE_AUDIT.md
+
+EXPERIMENT_PROTOCOL.json
+DATA_SPLIT_AND_MATURITY.json
+FEATURE_CONTRACT.json
+FEATURE_CAUSALITY_AUDIT.json
+
+TRAIN_BACKEND_BENCHMARK.csv
+TRAIN_BACKEND_SELECTION.json
+
+MODEL_COMPARISON.csv
+STRATIFIED_METRICS.csv
+GPU_WEIGHTED_METRICS.csv
+PAIRED_UNCERTAINTY.csv
+
+MODEL_SELECTION_FREEZE.json
+
+RUNTIME_PROVIDER/
+    ...
+
+NEW_JOB_CALLABLE_TEST.json
+PROVIDER_REPRODUCIBILITY_TEST.json
+INFERENCE_LATENCY.json
+
+CHECKPOINT_SUBTRACTION_DIAGNOSTIC.csv
+OVERRUN_AUDIT.csv
+
+APRIL_LOCKED_RUNTIME_METRICS.csv
+APRIL_WALLTIME_VS_ML_QUEUE_REPLAY.csv
+
+FINAL_REVIEW_KO.md
+FINAL_VERDICT.json
+DELIVERY_MANIFEST.json
+
+============================================================
+32. REQUIRED FINAL QUESTIONS
+============================================================
+
+Answer explicitly:
+
+1. What exactly was wrong with requested walltime as a scheduling duration?
+2. Can the existing runtime baseline be reproduced?
+3. Which total-runtime model is selected?
+4. What are its Q50/Q90 semantics?
+5. Is Q90 approximately calibrated?
+6. Does it remain calibrated for high-GPU jobs?
+7. Does it remain calibrated for >4h jobs?
+8. How much reservation inflation remains?
+9. How much smaller is it than walltime reservation?
+10. How often does predicted runtime underrun actual runtime?
+11. What is GPU-weighted overrun?
+12. Is total-Q90 minus elapsed adequate at 30-min checkpoints?
+13. How often do jobs enter OVERRUN?
+14. Is a separate remaining-runtime model actually necessary?
+15. Was survival/AFT development avoided unless justified?
+16. Is the provider callable for a completely new job?
+17. Does it require online retraining?
+18. CPU or GPU was faster for this runtime task?
+19. What is CPU inference latency?
+20. After freeze, how much does April start>=H change from the walltime
+    reference?
+21. Is the provider ready to hand to V42?
+
+============================================================
+33. FINAL FLAGS
+============================================================
+
+TOTAL_RUNTIME_MODEL_SELECTED = TRUE/FALSE
+TOTAL_RUNTIME_Q90_GATE_PASS = TRUE/FALSE
+
+HIGH_GPU_RUNTIME_GATE_PASS = TRUE/FALSE
+LONG_JOB_RUNTIME_GATE_PASS = TRUE/FALSE
+
+REQUESTED_WALLTIME_DIRECT_SCHEDULING_REJECTED = TRUE/FALSE
+
+PRE_APRIL_CAUSAL_TRAINING = TRUE/FALSE
+APRIL_USED_FOR_SELECTION = FALSE
+MAY_USED_FOR_SELECTION = FALSE
+
+SERIALIZED_MODEL_PRESENT = TRUE/FALSE
+SERIALIZED_PREPROCESSING_PRESENT = TRUE/FALSE
+NEW_JOB_CALLABLE = TRUE/FALSE
+ONLINE_REFIT_REQUIRED = FALSE
+
+CHECKPOINT_SUBTRACTION_BASELINE_VALIDATED = TRUE/FALSE
+SEPARATE_REMAINING_RUNTIME_MODEL_NEEDED = TRUE/FALSE/INCONCLUSIVE
+OVERRUN_CONTRACT_VALIDATED = TRUE/FALSE
+
+SELECTED_TRAIN_BACKEND =
+CPU_SINGLE / CPU_MULTIPROCESS / GPU
+
+CPU_INFERENCE_READY = TRUE/FALSE
+
+APRIL_WALLTIME_BASELINE_REPRODUCED = TRUE/FALSE
+APRIL_ML_QUEUE_REPLAY_COMPLETED = TRUE/FALSE
+
+RUNTIME_PROVIDER_READY_FOR_V42 = TRUE/FALSE
+OPTIMIZER_INTEGRATION_PERFORMED = FALSE
+
+============================================================
+34. STOP / FAIL-CLOSED RULES
+============================================================
+
+Do not promote if:
+
+- April or May leaks into selection
+- future start/end/runtime enters inference features
+- callable preprocessing cannot be serialized
+- new-job inference depends on historical prediction lookup
+- Q90 achieves coverage only by walltime-scale inflation
+- high-GPU or long-job strata collapse
+- model needs online refitting
+- April is used to repair model after exposure
+
+Preserve negative results.
+
+============================================================
+35. MOST IMPORTANT DESIGN PRINCIPLE
+============================================================
+
+Keep the architecture simple:
+
+ONE total-runtime ML package.
+
+D-1 known PENDING:
+    total-runtime Q90 -> scheduling duration
+
+D-1 known RUNNING:
+    same frozen total-runtime prediction
+    minus causal elapsed
+    -> remaining proxy / OVERUN if exceeded
+
+D-day unknown at submit:
+    total-runtime Q90 -> scheduling duration
+
+D-day unknown while RUNNING:
+    same total prediction
+    minus observed elapsed
+
+No second remaining-runtime ML unless evidence proves it is necessary.
+
+Runtime is an EXOGENOUS prediction.
+
+Runtime is NEVER an optimization variable.
+
+The later V42 controller decides:
+- start
+- site
+- migration
+
+using the frozen runtime estimate.

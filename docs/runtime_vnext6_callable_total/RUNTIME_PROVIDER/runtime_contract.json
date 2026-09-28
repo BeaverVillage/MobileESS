@@ -1,0 +1,21 @@
+{
+  "model_version": "runtime-vnext6-strict-constant-v1",
+  "unit": "seconds",
+  "target": "max(0,end-start) seconds; no queue wait; completed-by-event-time records; missing/negative time order excluded, zero retained",
+  "family": "M2",
+  "inverse_transform": "expm1",
+  "Q90_signed_calibration_delta_seconds": -313.9891952723701,
+  "quantiles": [
+    0.5,
+    0.9
+  ],
+  "planned": "Q90",
+  "walltime_cap": false,
+  "Q90_semantics": "Unconditional frozen total execution runtime quantile, global residual adjustment. No claim of conditional calibration for a particular job.",
+  "remaining": "max(Q90-elapsed,0) fixed submit-time residual, NOT Q90(T-elapsed | T>elapsed,x)",
+  "overrun": "While still running and elapsed>=planned: STAY, retain GPU, extend current reservation one interval; never inspect future end.",
+  "optimizer_use_allowed": false,
+  "production_promoted": false,
+  "strict_feature_availability": true,
+  "informative_job_features": 0
+}

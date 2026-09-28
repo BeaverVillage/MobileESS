@@ -1,0 +1,59 @@
+{
+  "selected": "CPU_SINGLE",
+  "benchmark": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext6_callable_total\\TRAIN_BACKEND_BENCHMARK.csv",
+    "bytes": 577,
+    "sha256": "5aba7a7b7084adab3ebf9cb637e5dd58a68e3c36cb2dddd70a106c21babac28c"
+  },
+  "params": {
+    "n_jobs": 1,
+    "random_state": 4005,
+    "deterministic": true,
+    "force_col_wise": true,
+    "verbosity": -1,
+    "num_leaves": 31,
+    "learning_rate": 0.02,
+    "n_estimators": 800,
+    "min_child_samples": 100,
+    "reg_lambda": 1,
+    "max_bin": 255
+  },
+  "workload": "Strict constant-input model. No informative tree splits; process startup can dominate. Not transferable to full-feature runtime or CC4.",
+  "CPU_utilization": "system aggregate, RAM process-tree sum (may double-count shared pages); GPU/VRAM whole device incl display; sampling ~0.1s plus nvidia-smi latency",
+  "versions": {
+    "python": "3.11.7",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "lightgbm": "4.6.0"
+  },
+  "results": [
+    {
+      "family": "M1",
+      "tau": 0.5,
+      "fit_seconds": 0.1013068999745883,
+      "prediction": 1733.0,
+      "trees": 1
+    },
+    {
+      "family": "M1",
+      "tau": 0.9,
+      "fit_seconds": 0.06083060003584251,
+      "prediction": 70654.1015625,
+      "trees": 1
+    },
+    {
+      "family": "M2",
+      "tau": 0.5,
+      "fit_seconds": 0.11668370000552386,
+      "prediction": 1732.9999865730845,
+      "trees": 1
+    },
+    {
+      "family": "M2",
+      "tau": 0.9,
+      "fit_seconds": 0.06057210004655644,
+      "prediction": 70654.09423304682,
+      "trees": 1
+    }
+  ]
+}

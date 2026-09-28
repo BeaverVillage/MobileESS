@@ -1,0 +1,51 @@
+{
+  "device": "CPU",
+  "num_threads": 1,
+  "warmup": 100,
+  "single_calls": 1000,
+  "single": {
+    "p50_ms": 0.0474,
+    "p95_ms": 0.06493499999999996,
+    "p99_ms": 0.10966199999999994,
+    "max_ms": 0.2433
+  },
+  "preprocessing_single": {
+    "p50_ms": 0.0013,
+    "p95_ms": 0.0018049999999999954,
+    "p99_ms": 0.0032049999999999956,
+    "max_ms": 0.0053
+  },
+  "preprocessing_batch1000_ms": 0.0164,
+  "batch": [
+    {
+      "N": 10,
+      "repetitions": 100,
+      "p50_ms": 0.042749999999999996,
+      "p95_ms": 0.052794999999999995,
+      "p99_ms": 0.07183200000000012,
+      "max_ms": 0.0948,
+      "throughput_jobs_per_second": 223898.97678167612
+    },
+    {
+      "N": 100,
+      "repetitions": 100,
+      "p50_ms": 0.0573,
+      "p95_ms": 0.067165,
+      "p99_ms": 0.11630000000000051,
+      "max_ms": 0.2153,
+      "throughput_jobs_per_second": 1641928.2805727045
+    },
+    {
+      "N": 1000,
+      "repetitions": 100,
+      "p50_ms": 0.1962,
+      "p95_ms": 0.22633999999999993,
+      "p99_ms": 0.251114,
+      "max_ms": 0.2525,
+      "throughput_jobs_per_second": 4997676.080622511
+    }
+  ],
+  "CPU_INFERENCE_READY": true,
+  "includes": "single: API validation+constant preprocessing+two booster inference+receipt; batch: preprocessing+two boosters, no per-row receipts",
+  "load_excluded": true
+}

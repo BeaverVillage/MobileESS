@@ -1,0 +1,101 @@
+{
+  "training_cutoff": "2025-03-14T08:00:00Z",
+  "logical_freeze_cutoff": "2025-03-31T08:00:00Z",
+  "membership": {
+    "CAL_FIT": {
+      "total": 5936,
+      "mature": 5438,
+      "unresolved": 498,
+      "zero": 2,
+      "membership": "ad35429efbecafbfd5bc988dee82e2f644f00c1b949c9a974e93eba9706352d3",
+      "mature_membership": "9d7b1352aa251ff481be5cbaab83529f047e4205e4baa9ce7086b4e77f3b3840"
+    },
+    "CAL_VALID": {
+      "total": 14636,
+      "mature": 14623,
+      "unresolved": 13,
+      "zero": 622,
+      "membership": "51988d250cef458bfed0bd60c7c36f43a7c8072654b75ce7042f5e15296af944",
+      "mature_membership": "612fe56c46ef20090d1cd87e1c990f24559a2df223771b1d62c572eaf0203f3a"
+    },
+    "DEV": {
+      "total": 11981,
+      "mature": 11486,
+      "unresolved": 495,
+      "zero": 33,
+      "membership": "d0cfa0b3f5de7d5ae06e6820b16b68886133118a6f58b8108327bb139798854d",
+      "mature_membership": "a1f82522cc1618dbee4334380ac385d16bf5ca74e21254f0c94b97ab5061645a"
+    },
+    "TRAIN": {
+      "total": 222182,
+      "mature": 222182,
+      "unresolved": 0,
+      "zero": 111,
+      "membership": "a388843e1ca8fc2fee6c43f822f79700eac14030bdda6ae6808236e151880c52",
+      "mature_membership": "a388843e1ca8fc2fee6c43f822f79700eac14030bdda6ae6808236e151880c52"
+    },
+    "UNUSED": {
+      "total": 19145,
+      "mature": 18566,
+      "unresolved": 579,
+      "zero": 534,
+      "membership": "7352f49cbda651f3d1f9a20752f5738e919d354183001214cac2a9a19e7a8019",
+      "mature_membership": "e40595064678606a4beddb12c72b91b02ae094479840d28f6761616dc379c16c"
+    }
+  },
+  "hyperparameters": {
+    "n_jobs": 1,
+    "random_state": 4005,
+    "deterministic": true,
+    "force_col_wise": true,
+    "verbosity": -1,
+    "num_leaves": 31,
+    "learning_rate": 0.02,
+    "n_estimators": 800,
+    "min_child_samples": 100,
+    "reg_lambda": 1,
+    "max_bin": 255
+  },
+  "seed": 4005,
+  "backend": "CPU_SINGLE",
+  "software": {
+    "python": "3.11.7",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "lightgbm": "4.6.0"
+  },
+  "target": "max(0,end-start) seconds; no queue wait; completed-by-event-time records; missing/negative time order excluded, zero retained",
+  "unit": "seconds",
+  "files": [
+    {
+      "relative": "feature_contract.json",
+      "sha256": "be7a4752f966ac4daaf8a28ace18603a9f4153e38a3f77dc58805b9f813c4098",
+      "bytes": 1524
+    },
+    {
+      "relative": "preprocessing.json",
+      "sha256": "6bbe0c1cc842a5c2bb94da054438bd8de3ccc8346acf947f47ea4f0200550281",
+      "bytes": 252
+    },
+    {
+      "relative": "Q50.txt",
+      "sha256": "65550302dac143f5422ea96250cc71bd2598413ecf86fdea93f7fa72323c76c5",
+      "bytes": 3203
+    },
+    {
+      "relative": "Q90.txt",
+      "sha256": "6b24b95b036dd845539551bd304be1ded5e0e91ed72666f6208433bd054a36c9",
+      "bytes": 3203
+    },
+    {
+      "relative": "runtime_contract.json",
+      "sha256": "96e53c5e886f57839c4ab6e6a37212fb8e76bd3418e83d674e734494e2a2654d",
+      "bytes": 959
+    },
+    {
+      "relative": "source_manifest.json",
+      "sha256": "8e102cbd351f91db70b869d7d94f4cf6745d7352e0752972d708c866c91891dd",
+      "bytes": 2055
+    }
+  ]
+}

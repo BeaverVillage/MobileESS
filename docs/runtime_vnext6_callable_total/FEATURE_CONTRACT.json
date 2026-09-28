@@ -1,0 +1,45 @@
+{
+  "version": "strict-empty-request-subset-v1",
+  "input_predictors": [],
+  "internal_feature_order": [
+    "constant_bias"
+  ],
+  "internal_feature_types": [
+    "float64"
+  ],
+  "constant_bias": 1.0,
+  "availability": "Constructed constant is independent of every job field, ID, timestamp and outcome; available at all times.",
+  "categorical_mappings": {},
+  "missing_rules": "No request feature consumed; missing event_time invalid; request metadata optional echo only.",
+  "excluded_request_fields": [
+    "requested_seconds",
+    "num_gpus_req",
+    "num_nodes_req",
+    "num_cores_req",
+    "requested_memory_mib",
+    "qos",
+    "partition",
+    "account",
+    "user"
+  ],
+  "excluded_clock_fields": [
+    "submit_hour",
+    "submit_dow"
+  ],
+  "forbidden": [
+    "start_time",
+    "end_time",
+    "runtime_seconds",
+    "queue_wait",
+    "state",
+    "utilization",
+    "completion_status"
+  ],
+  "immutable_job_specific_feature_count": 0,
+  "SUBMISSION_TIME_FEATURES_STRICTLY_VERIFIED": true,
+  "verification_scope": "Only the deterministic constant input; NOT certification of archive requests or initial submit timestamp.",
+  "IMMUTABLE_FEATURE_ONLY_MODEL_TRAINABLE": true,
+  "M3": "NOT_SCIENTIFICALLY_VALID_STRICT_ARM: walltime-relative inverse transform requires unverified requested_seconds",
+  "baseline_B0": "Existing full-feature frozen research model, excluded from production selection",
+  "walltime_cap": "No cap in production candidate. Archive walltime cap only retrospective research diagnostic."
+}

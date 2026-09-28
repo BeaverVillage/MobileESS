@@ -1,0 +1,48 @@
+{
+  "PASS": true,
+  "NEW_JOB_CALLABLE_TEST": "PASS",
+  "tests": [
+    "new_id_and_unseen_metadata_ignored",
+    "no_fit_calls",
+    "reject_truth_fields",
+    "reject_naive_timestamp",
+    "reject_future_submission",
+    "default_unapproved_use_blocked",
+    "overrun_boundary",
+    "overrun_keep_occupancy_extend_interval",
+    "completed_release",
+    "fresh_process_detached_bundle_no_cache",
+    "tampering_rejected",
+    "eligible_historical_job_identity_removed"
+  ],
+  "historical_test_job_id": "7487946",
+  "identity_sent_to_provider": false,
+  "lookup_files_in_bundle": 0,
+  "job_feature_count": 0,
+  "cache_independence": "Fresh detached process + bundle only, empty feature map. Constant model necessarily predicts same values for all IDs.",
+  "no_online_fit": true,
+  "result": {
+    "q50_seconds": 114.99999023949903,
+    "q90_seconds": 55987.0,
+    "planned_runtime_seconds": 55987.0,
+    "requested_walltime_seconds": null,
+    "model_version": "runtime-vnext6-strict-constant-v1",
+    "feature_timestamp": "2025-03-30T00:00:00+00:00",
+    "feature_receipt": {
+      "feature_order": [
+        "constant_bias"
+      ],
+      "values": [
+        1.0
+      ],
+      "job_fields_consumed": [],
+      "job_id_used": false,
+      "request_version_sensitive_fields_consumed": [],
+      "source": "DETERMINISTIC_CONSTANT",
+      "bundle_sha256": "510190f0af1f6f63fb81f31bc9572049050a9c922b9a90a3aff34f877b6586e9",
+      "request_metadata_echo_verified": false
+    },
+    "fallback_reason": "RESEARCH_ONLY_GATES_NOT_PASSED",
+    "optimizer_use_allowed": false
+  }
+}
