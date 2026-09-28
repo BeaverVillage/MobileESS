@@ -27,6 +27,7 @@ python -X utf8 eligibility_audit.py
 python -X utf8 experiment.py register
 python -X utf8 supplement.py
 python -X utf8 placement_audit.py
+python -X utf8 maturity_audit.py
 python -X utf8 experiment.py development
 python -X utf8 experiment.py freeze
 python -X utf8 experiment.py evaluation
@@ -45,3 +46,7 @@ python -X utf8 delivery.py seal
 `A0_ANCHOR.json`은 모델 재현 직후의 immutable receipt라 raw 타깃 재구성이 pending으로 남아 있다. 최종 `A0_VERIFIED.json`이 후속 원시 재구성 성공을 연결하며 이전 receipt를 덮어쓰지 않는다. `A0_PREDICTIONS.npz`의 수치 배열은 원본과 비트 단위로 같지만 새 zip container·실행시각·소요시간까지 같은 파일 바이트라고 주장하지 않는다. 원본 baseline 파일 자체는 변경 없이 보존한다.
 
 보고 지표의 `actual_integrated_quantity`, `daily_integrated_quantity_MAE` 단위는 T0/T2/T3에서 GPUh, T1에서 requested GPU다. 원시 단위가 다른 타깃끼리 절대 loss를 비교하지 않는다. 타깃별 F0 대비 비율과 TRAIN 평균으로 정규화한 진단을 사용한다. 실험 CSV는 음성 결과·0 target·hard day를 포함한다. Q90 합은 joint daily Q90이 아니다.
+
+피크 시각은 등록된 earliest-maximum 규칙을 보존하되, 0 부하일에는 의미 있는 피크 시각이 없으므로 `peak_timing_positive_days_MAE_hours`도 추가 보고한다. 0 부하일은 coverage/loss/bootstrap 표본에서 제거하지 않는다. 피크 시각 조건부 지표는 같은 resample 안에서 양수 부하일 분모로 계산한다. LEAD_GROUP_METRICS의 적분·피크 지표는 해당 6시간 그룹 안에서 계산한 값이며 전체 일 지표는 ARM_METRICS에 있다.
+
+DEVELOPMENT/CALIBRATION의 보정은 과거에 성숙한 OOS 잔차가 최소 20일 쌓이기 전에는 offset 0으로 raw 예측을 유지한다. 해당 warmup 날짜도 기본 지표에서 제외하지 않으며 `calibration_support_days`와 `calibration_warmup_days`로 명시한다. 평가 기간에는 네 타깃 모두 26개 성숙 CAL 날짜의 고정 offset을 사용한다. Top-10%/5% 슬롯 지표는 하루 슬롯 수에 비율을 곱한 뒤 올림한 개수를 사용하고, 동률은 stable rank로 고정한다.

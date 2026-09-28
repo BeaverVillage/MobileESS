@@ -1,0 +1,15 @@
+C:\Users\kjw39\OneDrive\문서\ChatGPT\Mobile ESS 2\cc4_v27_target_feature_sharpness_pr\docs\cc4_v27_target_feature_sharpness\prepare.py:20: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+  d=pd.concat(parts,ignore_index=True);assert d.id.is_unique and d.submit_time.notna().all()
+Traceback (most recent call last):
+  File "C:\Users\kjw39\OneDrive\문서\ChatGPT\Mobile ESS 2\cc4_v27_target_feature_sharpness_pr\docs\cc4_v27_target_feature_sharpness\prepare.py", line 143, in <module>
+    if __name__=='__main__':prepare()
+                            ^^^^^^^^^
+  File "C:\Users\kjw39\OneDrive\문서\ChatGPT\Mobile ESS 2\cc4_v27_target_feature_sharpness_pr\docs\cc4_v27_target_feature_sharpness\prepare.py", line 52, in prepare
+    start=np.array([pd.Timestamp(day,tz=TZ).tz_convert('UTC').value for day in DAYS]);issue=start-6*H
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\OneDrive\문서\ChatGPT\Mobile ESS 2\cc4_v27_target_feature_sharpness_pr\docs\cc4_v27_target_feature_sharpness\prepare.py", line 52, in <listcomp>
+    start=np.array([pd.Timestamp(day,tz=TZ).tz_convert('UTC').value for day in DAYS]);issue=start-6*H
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "timestamps.pyx", line 1865, in pandas._libs.tslibs.timestamps.Timestamp.__new__
+  File "conversion.pyx", line 364, in pandas._libs.tslibs.conversion.convert_to_tsobject
+TypeError: Expected unicode, got numpy.str_

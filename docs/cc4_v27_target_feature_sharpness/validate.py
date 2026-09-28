@@ -9,6 +9,8 @@ def main():
     from experiment import guard,predictions,calibrate
     guard();z=np.load(ROOT/'TARGETS.npz');groups=read(ROOT/'FEATURE_GROUPS.json');proof=pd.read_parquet(ROOT/'FEATURE_CAUSAL_AVAILABILITY.parquet')
     assert proof.valid.all()
+    for t in ['T0','T1','T2','T3']:
+        assert (pd.to_datetime(z['maturity_'+t].max(1)[TRAIN],utc=True)<ISS.iloc[DEV[0]]).all()
     receipts=[];cost=[]
     for p in (ROOT/'runs').glob('*/*/*.npz'):
         model=p.parent.parent.name;arm=p.parent.name;t=arm[:2];i=int(np.searchsorted(DAYS,p.stem));r=np.load(p)
@@ -20,6 +22,7 @@ def main():
         assert r['q'].shape==(z[t].shape[1],2) and np.isfinite(r['q']).all()
         receipts.append(dict(path=str(p.relative_to(ROOT)),sha256=sha(p),training_days=len(tr),latest_label_maturity_ns=int(r['latest_maturity_ns']),issue_ns=int(r['issue_ns']),PASS=True))
         cost.append(dict(model=model,arm=arm,day=DAYS[i],seconds=float(r['seconds']),training_days=len(tr),features=len(groups[arm])))
+    assert len(receipts)==273*(19+2),len(receipts)
     csv('REFIT_LEAKAGE_PROOF.csv',receipts);csv('COMPUTATIONAL_COST.csv',cost)
     pred=pd.read_parquet(ROOT/'PREDICTIONS.parquet')
     assert not pred.duplicated(['arm','day_index','slot']).any()
@@ -34,11 +37,19 @@ def main():
     freeze=read(ROOT/'FEATURE_SELECTION_FREEZE.json');targetfreeze=read(ROOT/'TARGET_SELECTION_FREEZE.json');s2=read(ROOT/'STAGE2_SELECTION_FREEZE.json')
     assert freeze['selection_roles']==['DEVELOPMENT'] and not freeze['May_used'] and not targetfreeze['evaluation_used']
     assert s2['selection_roles']==['DEVELOPMENT'] and not s2['evaluation_used']
+    assert s2['stage1_target_freeze_sha256']==sha(ROOT/'TARGET_SELECTION_FREEZE.json')
+    assert read(ROOT/'STAGE2_MODEL_PROTOCOL.json')['freeze_sha256']==sha(ROOT/'TARGET_SELECTION_FREEZE.json')
+    if (ROOT/'SELECTION_PROTOCOL_AMENDMENT.json').exists():
+        assert freeze['selection_amendment_sha256']==s2['selection_amendment_sha256']==sha(ROOT/'SELECTION_PROTOCOL_AMENDMENT.json')
     from experiment import choose_development
     dev=pd.read_csv(ROOT/'DEVELOPMENT_CALIBRATION_METRICS.csv')
     for t in ['T0','T1','T2','T3']:
         row,in_band=choose_development(dev[dev.target.eq(t)&dev.role.eq('DEVELOPMENT')&dev.variant.eq('RAW')&~dev.arm.str.endswith('F3')])
         assert row.arm==freeze['per_target'][t] and in_band==freeze['development_nominal_band_met'][t]
+    dev2=pd.read_csv(ROOT/'STAGE2_DEVELOPMENT_METRICS.csv')
+    for arm in freeze['candidates']:
+        row,in_band=choose_development(dev2[dev2.arm.eq(arm)&dev2.role.eq('DEVELOPMENT')&dev2.variant.eq('RAW')])
+        assert row.model==s2['selected'][arm] and in_band==s2['development_nominal_band_met'][arm]
     for r in read(ROOT/'A0_REFIT_RECEIPTS.json'):
         i=int(np.searchsorted(DAYS,r['day']));tr=member(i)
         np.testing.assert_array_equal(r['training_days'],tr);np.testing.assert_array_equal(r['weights'],weights(tr,i))
@@ -47,6 +58,11 @@ def main():
     # code-enforced phase gates are the primary chronology mechanism.
     firstfreeze=pd.Timestamp(targetfreeze['time']).timestamp()
     for p in (ROOT/'runs/M1').glob('*/*.npz'):assert p.stat().st_mtime>=firstfreeze
+    secondfreeze=pd.Timestamp(s2['time']).timestamp()
+    for p in (ROOT/'runs/M0').glob('*/*.npz'):
+        if p.stem>='2024-12-01':assert p.stat().st_mtime>=firstfreeze
+    for p in (ROOT/'runs/M1').glob('*/*.npz'):
+        if p.stem>='2024-12-01':assert p.stat().st_mtime>=secondfreeze
     status=subprocess.check_output(['git','status','--porcelain','--untracked-files=all'],cwd=ROOT.parent.parent,text=True,encoding='utf-8')
     prefix='docs/'+ROOT.name+'/'
     assert all(prefix in line for line in status.splitlines()),status

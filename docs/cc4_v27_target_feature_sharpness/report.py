@@ -2,14 +2,23 @@
 from core import *
 from experiment import predictions,calibrate,TARGETS,FEATURES
 ROLES=['DEVELOPMENT','CALIBRATION','EXPOSED_EVALUATION','OOS_EXTENSION','MAY_HISTORICAL']
+registered_metrics=metrics
+def metrics(y,q,burst,dt=1):
+    out=registered_metrics(y,q,burst,dt)
+    if np.ndim(y)==2:
+        y=np.asarray(y);q=np.asarray(q);positive=y.max(1)>0
+        timing=abs(y.argmax(1)-q[...,0].argmax(1))*dt
+        out.update(all_zero_days=int((~positive).sum()),positive_load_days=int(positive.sum()),flat_Q50_days=int((np.ptp(q[...,0],axis=1)==0).sum()),peak_timing_positive_days_MAE_hours=np.mean(timing[positive]) if positive.any() else np.nan)
+    return out
 def daystats(y,q,dt,burst):
     r=y-q[...,1];e=y-q[...,0]
-    return np.column_stack([np.maximum(.9*r,-.1*r).mean(1),(r<=0).mean(1),q[...,1].sum(1),y.sum(1),abs(e).mean(1),abs(y.max(1)-q[...,0].max(1)),abs(y.argmax(1)-q[...,0].argmax(1))*dt,((r<=0)&(y>burst)).sum(1),(y>burst).sum(1),((r<=0)&(y>0)).sum(1),(y>0).sum(1)])
+    timing=abs(y.argmax(1)-q[...,0].argmax(1))*dt;positive_day=y.max(1)>0
+    return np.column_stack([np.maximum(.9*r,-.1*r).mean(1),(r<=0).mean(1),q[...,1].sum(1),y.sum(1),abs(e).mean(1),abs(y.max(1)-q[...,0].max(1)),timing,((r<=0)&(y>burst)).sum(1),(y>burst).sum(1),((r<=0)&(y>0)).sum(1),(y>0).sum(1),timing*positive_day,positive_day])
 def paired(a,b,seed=20260928):
-    out=[];names=['Q90_pinball','Q90_coverage','requirement_ratio','Q50_MAE','peak_magnitude_MAE','peak_timing_MAE_hours','burst_coverage','positive_coverage'];rng=np.random.default_rng(seed);n=len(a)
+    out=[];names=['Q90_pinball','Q90_coverage','requirement_ratio','Q50_MAE','peak_magnitude_MAE','peak_timing_MAE_hours','burst_coverage','positive_coverage','peak_timing_positive_days_MAE_hours'];rng=np.random.default_rng(seed);n=len(a)
     def score(s):
         with np.errstate(divide='ignore',invalid='ignore'):
-            return np.stack([s[...,0],s[...,1],s[...,2]/s[...,3],s[...,4],s[...,5],s[...,6],s[...,7]/s[...,8],s[...,9]/s[...,10]],axis=-1)
+            return np.stack([s[...,0],s[...,1],s[...,2]/s[...,3],s[...,4],s[...,5],s[...,6],s[...,7]/s[...,8],s[...,9]/s[...,10],s[...,11]/s[...,12]],axis=-1)
     point=score(a.mean(0))-score(b.mean(0))
     for block in [1,7]:
         starts=rng.integers(0,n,(2000,int(np.ceil(n/block))));ix=((starts[...,None]+np.arange(block))%n).reshape(2000,-1)[:,:n]
@@ -20,7 +29,7 @@ def paired(a,b,seed=20260928):
     return out
 def main():
     assert (ROOT/'STAGE2_SELECTION_FREEZE.json').exists()
-    z=np.load(ROOT/'TARGETS.npz');allmetrics=[];hour=[];lead=[];strata=[];frames=[];uncertainty=[];importance=[];resolution=[]
+    z=np.load(ROOT/'TARGETS.npz');allmetrics=[];hour=[];lead=[];strata=[];frames=[];uncertainty=[];importance=[];resolution=[];stability=[]
     qs={};qcals={};bursts={};dayrows=[]
     for t in TARGETS:
         y=z[t];dt=.25 if t=='T3' else 1;n=y.shape[1];burst=np.quantile(y[TRAIN][y[TRAIN]>0],.95);bursts[t]=burst
@@ -31,7 +40,9 @@ def main():
             for variant,p in [('RAW',q),('CALIBRATED',qc)]:
                 for role in ROLES:
                     ids=role_ids(role);m=metrics(y[ids],p[ids],burst,dt);m['Q90_pinball_per_TRAIN_mean']=m['Q90_pinball']/y[TRAIN].mean()
-                    allmetrics.append(dict(arm=arm,target=t,features=f,model='M0',variant=variant,role=role,**m))
+                    allmetrics.append(dict(arm=arm,target=t,features=f,model='M0',variant=variant,role=role,calibration_support_days=int(avail[ids].sum()),calibration_warmup_days=int((~avail[ids]).sum()),**m))
+                    yy=y[ids];qq=p[ids,:,1];mean_q=qq.mean();mean_y=yy.mean()
+                    stability.append(dict(arm=arm,target=t,role=role,variant=variant,native_slots=n,Q90_daily_total_variation_over_mean=np.mean(abs(np.diff(qq,axis=1)).sum(1))/mean_q if mean_q else np.nan,actual_daily_total_variation_over_mean=np.mean(abs(np.diff(yy,axis=1)).sum(1))/mean_y if mean_y else np.nan,slot_coverage_std=np.std((yy<=qq).mean(0)),slot_coverage_min=np.min((yy<=qq).mean(0)),slot_coverage_max=np.max((yy<=qq).mean(0)),interpretation='Descriptive marginal roughness/heterogeneity, not proof of stochastic instability or a joint trajectory quantile'))
                     for j in range(n):hour.append(dict(arm=arm,target=t,variant=variant,role=role,slot=j,target_hour=j*dt,**metrics(y[ids,j],p[ids,j],burst,dt)))
                     for group,slots in enumerate(np.array_split(np.arange(n),4)):
                         lead.append(dict(arm=arm,target=t,variant=variant,role=role,lead_group=f'{6+6*group}..{12+6*group}',**metrics(y[ids][:,slots],p[ids][:,slots],burst,dt)))
@@ -80,7 +91,18 @@ def main():
             dominates=g[((g[cols]<=r[cols]).all(axis=1))&((g[cols]<r[cols]).any(axis=1))]
             pareto.append(dict(target=t,role=role,variant=var,arm=r.arm,dominated=len(dominates)>0,dominated_by=';'.join(dominates.arm),**{c:r[c] for c in cols}))
     csv('ARM_METRICS.csv',allmetrics);csv('HOUR_SLOT_METRICS.csv',hour);csv('LEAD_GROUP_METRICS.csv',lead);csv('STRATIFIED_METRICS.csv',strata);csv('DAY_METRICS.csv',dayrows)
-    csv('FEATURE_ABLATION.csv',relative);csv('PARETO_FRONT.csv',pareto);csv('FEATURE_IMPORTANCE.csv',importance);csv('RESOLUTION_COMPARISON.csv',resolution)
+    csv('FEATURE_ABLATION.csv',relative);csv('PARETO_FRONT.csv',pareto);csv('FEATURE_IMPORTANCE.csv',importance);csv('RESOLUTION_COMPARISON.csv',resolution);csv('QUANTILE_STABILITY.csv',stability)
+    fi=pd.DataFrame(importance);base_names=set(read(BASE/'FEATURE_CONTRACT.json')['feature_names'])
+    def feature_group(name):
+        if name in base_names:return 'F0'
+        if name.startswith(('same_clock','latest_same_clock')):return 'F1'
+        if name.startswith(('recent_','hours_since_','last_submit_','arrival_')):return 'F2'
+        if name.startswith(('weekday_','month_','calendar_quarter_')):return 'F4'
+        return 'T3_deterministic_shape'
+    fi['group']=fi.feature.map(feature_group)
+    fg=fi.groupby(['arm','group']).agg(gain=('gain','sum'),split=('split','sum'),features=('feature','size')).reset_index()
+    fg['gain_fraction']=fg.gain/fg.groupby('arm').gain.transform('sum')
+    csv('FEATURE_GROUP_IMPORTANCE.csv',fg)
     pd.concat(frames,ignore_index=True).to_parquet(ROOT/'PREDICTIONS.parquet',index=False)
     stage2=[];s2frames=[];s2lead=[];s2hour=[];s2=read(ROOT/'STAGE2_SELECTION_FREEZE.json')
     for arm in read(ROOT/'FEATURE_SELECTION_FREEZE.json')['candidates']:
@@ -89,7 +111,7 @@ def main():
             q=predictions(arm,model);assert np.isfinite(q[OOS]).all();qc,avail,r=calibrate(arm,q);assert r==s2['calibrations'][arm+'_'+model]
             for variant,p in [('RAW',q),('CALIBRATED',qc)]:
                 for role in ROLES:
-                    ids=role_ids(role);stage2.append(dict(arm=arm,target=t,model=model,variant=variant,role=role,**metrics(y[ids],p[ids],bursts[t],dt)))
+                    ids=role_ids(role);stage2.append(dict(arm=arm,target=t,model=model,variant=variant,role=role,calibration_support_days=int(avail[ids].sum()),calibration_warmup_days=int((~avail[ids]).sum()),**metrics(y[ids],p[ids],bursts[t],dt)))
                     for group,slots in enumerate(np.array_split(np.arange(y.shape[1]),4)):
                         s2lead.append(dict(arm=arm,target=t,model=model,variant=variant,role=role,lead_group=f'{6+6*group}..{12+6*group}',**metrics(y[ids][:,slots],p[ids][:,slots],bursts[t],dt)))
                     for j in range(y.shape[1]):
