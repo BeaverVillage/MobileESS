@@ -1,0 +1,19 @@
+[LightGBM] [Fatal] Could not open C:\Users\kjw39\OneDrive\문서\ChatGPT\Mobile ESS 2\runtime_vnext6_callable_total_pr\docs\runtime_vnext6_callable_total\RUNTIME_PROVIDER\Q50.txt
+Traceback (most recent call last):
+  File "C:\Users\kjw39\OneDrive\����\ChatGPT\Mobile ESS 2\runtime_vnext6_callable_total_pr\docs\runtime_vnext6_callable_total\package_test.py", line 69, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "C:\Users\kjw39\OneDrive\����\ChatGPT\Mobile ESS 2\runtime_vnext6_callable_total_pr\docs\runtime_vnext6_callable_total\package_test.py", line 17, in main
+    p=RuntimeProvider(allow_research=True)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\OneDrive\����\ChatGPT\Mobile ESS 2\runtime_vnext6_callable_total_pr\docs\runtime_vnext6_callable_total\RUNTIME_PROVIDER\provider.py", line 22, in __init__
+    self.boosters=[lgb.Booster(model_file=str(self.root/f'Q{q}.txt')) for q in [50,90]]
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\OneDrive\����\ChatGPT\Mobile ESS 2\runtime_vnext6_callable_total_pr\docs\runtime_vnext6_callable_total\RUNTIME_PROVIDER\provider.py", line 22, in <listcomp>
+    self.boosters=[lgb.Booster(model_file=str(self.root/f'Q{q}.txt')) for q in [50,90]]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\site-packages\lightgbm\basic.py", line 3697, in __init__
+    _safe_call(
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\site-packages\lightgbm\basic.py", line 313, in _safe_call
+    raise LightGBMError(_LIB.LGBM_GetLastError().decode("utf-8"))
+lightgbm.basic.LightGBMError: Could not open C:\Users\kjw39\OneDrive\����\ChatGPT\Mobile ESS 2\runtime_vnext6_callable_total_pr\docs\runtime_vnext6_callable_total\RUNTIME_PROVIDER\Q50.txt

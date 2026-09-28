@@ -1,0 +1,145 @@
+{
+  "proof": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext6_callable_total\\ROW_FEATURE_AVAILABILITY_PROOF.parquet",
+    "bytes": 1373899,
+    "sha256": "3b26a914d6c8284e33772fcdf5d19fae9b90e7db8f9600d1f7581f7f2ca3f1e3"
+  },
+  "rows": 273880,
+  "new_model_feature_fields": [
+    "constant_bias"
+  ],
+  "job_fields_used": 0,
+  "leakage_feature_count": 0,
+  "request_version_authority": {
+    "time": "2026-09-28T10:38:26.861135+00:00",
+    "fields": [
+      {
+        "field": "requested_seconds",
+        "exists_at_submission_in_scheduler": true,
+        "mutable_after_submit": "DOCUMENTED_SCHEDULER_CAPABILITY",
+        "archived_value_initial_or_final": "UNKNOWN_PERIODIC_SACCT_DATABASE_EXTRACT",
+        "revision_history_found": false,
+        "immutable_source_evidence": false,
+        "production_feature": false,
+        "status": "REQUEST_VERSION_UNVERIFIED"
+      },
+      {
+        "field": "num_gpus_req",
+        "exists_at_submission_in_scheduler": true,
+        "mutable_after_submit": "DOCUMENTED_SCHEDULER_CAPABILITY",
+        "archived_value_initial_or_final": "UNKNOWN_PERIODIC_SACCT_DATABASE_EXTRACT",
+        "revision_history_found": false,
+        "immutable_source_evidence": false,
+        "production_feature": false,
+        "status": "REQUEST_VERSION_UNVERIFIED"
+      },
+      {
+        "field": "num_nodes_req",
+        "exists_at_submission_in_scheduler": true,
+        "mutable_after_submit": "DOCUMENTED_SCHEDULER_CAPABILITY",
+        "archived_value_initial_or_final": "UNKNOWN_PERIODIC_SACCT_DATABASE_EXTRACT",
+        "revision_history_found": false,
+        "immutable_source_evidence": false,
+        "production_feature": false,
+        "status": "REQUEST_VERSION_UNVERIFIED"
+      },
+      {
+        "field": "num_cores_req",
+        "exists_at_submission_in_scheduler": true,
+        "mutable_after_submit": "DOCUMENTED_SCHEDULER_CAPABILITY",
+        "archived_value_initial_or_final": "UNKNOWN_PERIODIC_SACCT_DATABASE_EXTRACT",
+        "revision_history_found": false,
+        "immutable_source_evidence": false,
+        "production_feature": false,
+        "status": "REQUEST_VERSION_UNVERIFIED"
+      },
+      {
+        "field": "requested_memory_mib",
+        "exists_at_submission_in_scheduler": true,
+        "mutable_after_submit": "NOT_CERTIFIED_IMMUTABLE",
+        "archived_value_initial_or_final": "UNKNOWN_PERIODIC_SACCT_DATABASE_EXTRACT",
+        "revision_history_found": false,
+        "immutable_source_evidence": false,
+        "production_feature": false,
+        "status": "REQUEST_VERSION_UNVERIFIED"
+      },
+      {
+        "field": "qos",
+        "exists_at_submission_in_scheduler": true,
+        "mutable_after_submit": "DOCUMENTED_SCHEDULER_CAPABILITY",
+        "archived_value_initial_or_final": "UNKNOWN_PERIODIC_SACCT_DATABASE_EXTRACT",
+        "revision_history_found": false,
+        "immutable_source_evidence": false,
+        "production_feature": false,
+        "status": "REQUEST_VERSION_UNVERIFIED"
+      },
+      {
+        "field": "partition",
+        "exists_at_submission_in_scheduler": true,
+        "mutable_after_submit": "DOCUMENTED_SCHEDULER_CAPABILITY",
+        "archived_value_initial_or_final": "UNKNOWN_PERIODIC_SACCT_DATABASE_EXTRACT",
+        "revision_history_found": false,
+        "immutable_source_evidence": false,
+        "production_feature": false,
+        "status": "REQUEST_VERSION_UNVERIFIED"
+      },
+      {
+        "field": "account",
+        "exists_at_submission_in_scheduler": true,
+        "mutable_after_submit": "DOCUMENTED_SCHEDULER_CAPABILITY",
+        "archived_value_initial_or_final": "UNKNOWN_PERIODIC_SACCT_DATABASE_EXTRACT",
+        "revision_history_found": false,
+        "immutable_source_evidence": false,
+        "production_feature": false,
+        "status": "REQUEST_VERSION_UNVERIFIED"
+      },
+      {
+        "field": "user",
+        "exists_at_submission_in_scheduler": true,
+        "mutable_after_submit": "NOT_CERTIFIED_IMMUTABLE",
+        "archived_value_initial_or_final": "UNKNOWN_PERIODIC_SACCT_DATABASE_EXTRACT",
+        "revision_history_found": false,
+        "immutable_source_evidence": false,
+        "production_feature": false,
+        "status": "REQUEST_VERSION_UNVERIFIED"
+      }
+    ],
+    "REQUEST_VERSION_AUTHORITY_FOUND": false,
+    "MUTABLE_REQUEST_FEATURE_COUNT": 7,
+    "UNVERIFIED_REQUEST_FEATURE_COUNT": 9,
+    "count_definition": "7 documented mutable capabilities, not 7 observed modified jobs; 9 unverified normalized request fields; memory/user not certified immutable",
+    "ingestion": "Periodic sacct -> PostgreSQL load_slurm; triggers update derived columns. Internal load/update functions not public. Raw Slurm JSONB and job_steps excluded. Dataset release version is not request revision history.",
+    "clock": "sacct Submit resets on requeue; duplicates option needed for original. Attempt history absent. submit_hour/weekday excluded too.",
+    "searched_scope": [
+      "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data",
+      "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR_scheduler_authority",
+      "official NLR dataset302 current catalog and local datacard",
+      "SchedMD sacct/scontrol documentation"
+    ],
+    "search_limit": "No claim that private NLR logs do not exist. No authenticated internal scheduler source available. No contact messages sent.",
+    "source_files": [
+      {
+        "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\datacard.md",
+        "bytes": 14860,
+        "sha256": "0139b75b80cd3029e0af54e22fc0dbad3080e92a8a7a602f1bd62cd7a36f62e9"
+      },
+      {
+        "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR_scheduler_authority\\07_hpc-oda-commons\\docs\\how-to\\ingest-slurmctld.md",
+        "bytes": 1935,
+        "sha256": "326161a14b6dea05e1a04b90a13485c42c38ef95c83d5bca0b0e8b4cbad108e7"
+      },
+      {
+        "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR_scheduler_authority\\07_hpc-oda-commons\\tests\\unit\\test_slurmctld_parser.py",
+        "bytes": 1875,
+        "sha256": "972afb5b2d01b74b17bc4f9b8381c0391f2fab281f25b4ba95ece3b5d09c1cf8"
+      }
+    ],
+    "urls": [
+      "https://data.nlr.gov/submissions/302",
+      "https://slurm.schedmd.com/sacct.html",
+      "https://slurm.schedmd.com/scontrol.html"
+    ],
+    "user_amendment": "Exclude unverified request features; do not upgrade archive proxy; continue immutable subset baseline and full-feature research comparator."
+  },
+  "strict_scope": "Featureless unconditional model. Not a claim all historical request fields verified or historical ingestion certified."
+}
