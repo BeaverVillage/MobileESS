@@ -1,0 +1,667 @@
+Repository: BeaverVillage/MobileESS
+
+NEW RUNTIME-ML FORENSIC TASK:
+RUNTIME FEATURE AUTHORITY RECOVERY BEFORE ANY NEW MODEL TRAINING
+
+Suggested branch/worktree:
+codex/runtime-vnext7-feature-authority-recovery
+
+This task follows Runtime-vNext6 / PR #77.
+
+IMPORTANT:
+DO NOT train or select a new production runtime model yet.
+
+The immediate goal is to recover and prove a source-backed set of
+JOB-SPECIFIC FEATURES that were actually available at job submission time.
+
+Only AFTER this feature authority is frozen may a later task retrain Runtime ML.
+
+============================================================
+0. WHY THIS TASK EXISTS
+============================================================
+
+Runtime-vNext6 failed primarily because all informative request fields were
+excluded under the strict causal feature policy.
+
+The selected strict model therefore had:
+
+job-specific feature count = 0
+
+and effectively predicted the same unconditional runtime distribution for
+every job.
+
+This produced:
+
+- Q90 around 15.55 h for every job
+- April overall Q90 coverage 95.67%
+- >4 h job coverage only 77.66%
+- April reservation/actual GPUh about 4.136×
+- only 3.85% reservation reduction relative to walltime
+- April-2 start>=H worsening from 2190/2340 to 2340/2340
+- checkpoint subtraction diagnostic failure
+
+Do NOT attempt to fix these outcomes by:
+- changing quantile
+- increasing model complexity
+- adding neural models
+- adding survival models
+- tuning on April
+
+First recover informative causal features.
+
+============================================================
+1. PRIMARY SCIENTIFIC QUESTION
+============================================================
+
+Determine:
+
+"Which Kestrel job/request fields can be proven to represent information
+available at the ORIGINAL job submission time, rather than a later or final
+scheduler/accounting state?"
+
+The final output must classify every candidate feature as:
+
+A. VERIFIED_SUBMISSION_TIME
+B. VERIFIED_IMMUTABLE
+C. OBSERVABLE_AT_SUBMIT_BUT_MUTABLE_WITH_VERSION_HISTORY
+D. PRESENT_IN_ARCHIVE_BUT_VERSION_UNRESOLVED
+E. POST_SUBMISSION
+F. OUTCOME / LABEL ONLY
+G. UNSUPPORTED / UNKNOWN
+
+Only categories A/B, or C with a reconstructable correct historical version,
+may be candidates for production Runtime ML.
+
+============================================================
+2. CURRENT EXCLUDED FEATURES TO RE-AUDIT
+============================================================
+
+Runtime-vNext6 excluded at least:
+
+- requested_seconds
+- num_gpus_req
+- num_nodes_req
+- num_cores_req
+- requested_memory_mib
+- qos
+- partition
+- account
+- user
+
+and clock features based on:
+
+- submit_hour
+- submit_day_of_week
+
+because original request/version authority was not proven.
+
+Audit each field independently.
+
+Do NOT treat all fields as equally mutable merely because Slurm permits some
+fields to be changed.
+
+For each field determine:
+
+1. semantic meaning in Kestrel/NLR archive
+2. original upstream source
+3. collection path
+4. whether the field exists at submission
+5. whether Slurm permits it to change after submission
+6. whether Kestrel actually records revisions
+7. whether archive value is:
+   - original request
+   - latest request
+   - final state
+   - unknown
+8. whether requeue changes it
+9. whether duplicate job records preserve older values
+10. whether a historical submission-time value can be reconstructed
+
+============================================================
+3. TRACE THE NLR / KESTREL INGESTION PIPELINE
+============================================================
+
+Trace the actual data lineage as far upstream as available.
+
+Inspect all local/repository sources related to:
+
+- NLR scheduler authority
+- hpc-oda-commons
+- jobs_parquet ingestion
+- load_slurm
+- PostgreSQL import/update path
+- sacct collection
+- sacct JSON/JSONB parsers
+- Slurm job records
+- job_step records
+- normalization code
+- anonymization code
+- dataset manifests
+- raw archive schema
+
+Search commit/history/worktrees if needed.
+
+For each relevant field build:
+
+raw Slurm field
+    ->
+collection field
+    ->
+database field
+    ->
+normalized field
+    ->
+published parquet field
+
+Record exact code/file/function where possible.
+
+Create:
+
+REQUEST_FIELD_LINEAGE.csv
+
+with:
+
+normalized_feature
+raw_field
+source_system
+collection_method
+database_column
+normalization_code
+published_field
+submission_time_semantics
+revision_semantics
+authority_status
+
+============================================================
+4. SEARCH FOR ORIGINAL REQUEST / REVISION EVIDENCE
+============================================================
+
+Search all available local data and repository evidence for:
+
+- original submit record
+- job submission attempt
+- revision history
+- update timestamps
+- effective timestamps
+- duplicate job/accounting records
+- requeue records
+- sacct duplicates
+- slurmctld event logs
+- scheduler event logs
+- raw JSON / JSONB
+- request snapshots
+- request history tables
+- database update functions
+- archival snapshots
+
+Do not assume absence from one folder means absence everywhere.
+
+Explicitly distinguish:
+
+NOT_FOUND_IN_SEARCHED_AUTHORITY
+
+from
+
+DOES_NOT_EXIST.
+
+============================================================
+5. REQUEUE / DUPLICATE FORENSIC
+============================================================
+
+This is critical.
+
+For jobs that appear to have:
+
+- duplicate records
+- multiple submit times
+- requeue/restart states
+- repeated job identifiers
+- same logical job with multiple accounting entries
+
+determine whether earlier records expose original request values.
+
+Build a sample and aggregate audit:
+
+job identifier
+record count
+submit timestamps
+requested walltime values
+GPU values
+QoS
+partition
+account
+state
+requeue indicator if available
+
+Quantify:
+
+- jobs with >1 record
+- jobs whose submit timestamp changes
+- jobs whose requested fields change
+- jobs where earliest record can be identified
+- jobs where initial request can be reconstructed
+
+Do not deduplicate before this audit.
+
+============================================================
+6. DETERMINE WHETHER SUBMIT TIME ITSELF IS TRUSTWORTHY
+============================================================
+
+Audit:
+
+submit_time
+
+separately.
+
+Determine whether the published submit timestamp is:
+
+- original job submission
+- last requeue submission
+- accounting insertion time
+- some transformed timestamp
+- unresolved
+
+If original submit cannot be reconstructed for all jobs,
+evaluate whether a valid cohort exists where it CAN be reconstructed.
+
+Do not use submit hour/day features until this is resolved.
+
+============================================================
+7. SEARCH FOR ADDITIONAL IMMUTABLE FEATURES
+============================================================
+
+Do not limit the audit to the previous nine fields.
+
+Inspect whether Kestrel contains additional fields that may be informative and
+more naturally immutable at submission, including if available:
+
+- job name or anonymized job-name token
+- command / submit line
+- submit script
+- executable/application identifier
+- workflow identifier
+- script hash
+- job type
+- container/image identifier
+- resource shape descriptor
+- project/category
+- scheduler class
+- dependency declaration
+- array-job metadata
+
+Do NOT use them merely because they exist.
+
+For each candidate verify:
+
+- generated before execution?
+- available to scheduler at submission?
+- immutable or versioned?
+- anonymization preserves category consistency?
+- enough historical support?
+- no target/runtime leakage?
+
+============================================================
+8. WORKFLOW / SCRIPT IDENTITY AUDIT
+============================================================
+
+If anonymized command/script/job-name information exists, test whether a
+stable historical identity can be created WITHOUT exposing sensitive
+information.
+
+Examples:
+
+workflow_hash
+script_hash
+job_name_hash
+application_class
+
+Only use existing anonymized/stable identifiers or deterministic hashes of
+authorized fields.
+
+Do NOT attempt to deanonymize users or recover sensitive source content.
+
+For each candidate identity report:
+
+- unique count
+- recurrence count distribution
+- fraction seen >=2/5/10 times
+- runtime within-group CV
+- median within-group sample count
+- whether identity is available at submission
+- whether the identifier changes after execution
+
+This is diagnostic only.
+
+============================================================
+9. FEATURE PREDICTIVENESS DIAGNOSTIC — NO MODEL SELECTION
+============================================================
+
+After authority classification, perform simple diagnostics ONLY on features
+classified as submission-time valid.
+
+Do not launch a large ML search.
+
+For numeric fields report association with log-runtime:
+
+- Spearman correlation
+- mutual information if appropriate
+- bucketed runtime distribution
+
+For categorical fields report:
+
+- support count
+- between-group runtime variance
+- within-group runtime variance
+- unseen-category rate under chronological split
+
+For walltime specifically report:
+
+actual_runtime / requested_walltime
+
+and
+
+requested_walltime / actual_runtime
+
+by bucket.
+
+The purpose is to determine whether the recovered feature is useful enough to
+justify another ML development stage.
+
+============================================================
+10. LONG-JOB ROOT-CAUSE ANALYSIS
+============================================================
+
+Explicitly investigate why >4 h jobs are difficult.
+
+For historical pre-April jobs, compare short vs long jobs using only
+descriptive data after labels mature.
+
+Report distributions of:
+
+- requested walltime
+- requested GPUs
+- requested nodes
+- requested cores
+- memory
+- QoS
+- partition
+- account/user or authorized anonymized grouping
+- workflow/script/job-name identifiers if valid
+
+Quantify which submission-time attributes distinguish:
+
+runtime <= 4 h
+
+vs
+
+runtime > 4 h
+
+Do NOT train a classifier merely to obtain a favorable result.
+
+The goal is to identify whether long-job undercoverage was caused primarily by:
+
+A. no informative feature
+B. feature version loss
+C. rare long-job support
+D. heavy-tailed runtime within identical request class
+E. distribution shift
+F. combination of the above
+
+============================================================
+11. COHORT SUPPORT AUDIT
+============================================================
+
+For every candidate categorical/group feature report chronological support in:
+
+TRAIN
+DEV
+CAL
+
+especially for:
+
+- >4 h jobs
+- >=16 GPU jobs
+- rare QoS
+- rare partitions
+- rare workflows/users
+
+Do not propose a feature that creates tiny strata with no validation support.
+
+============================================================
+12. STRICT VS RESEARCH FEATURE SETS
+============================================================
+
+Create two clearly separated sets.
+
+STRICT_CAUSAL_SET:
+only source-backed submission-time features.
+
+RESEARCH_PROXY_SET:
+archive request descriptors whose original-version semantics remain unresolved
+but which may be useful for retrospective research comparison.
+
+Do not mix these sets.
+
+A future production candidate may use STRICT_CAUSAL_SET only.
+
+Research comparators may use RESEARCH_PROXY_SET only if clearly labeled.
+
+============================================================
+13. DO NOT MAKE THIS LOGIC ERROR
+============================================================
+
+Slurm allowing a field to be modified is NOT proof that every Kestrel record
+contains a modified/final value.
+
+Likewise:
+
+no observed modification
+
+is NOT proof that the archive value is the original request.
+
+For each field distinguish:
+
+scheduler capability
+vs
+observed Kestrel behavior
+vs
+published dataset semantics
+vs
+provenance authority.
+
+============================================================
+14. EXTERNAL DOCUMENTATION
+============================================================
+
+If network access is available, consult authoritative sources only where
+needed, especially:
+
+- NLR Kestrel dataset documentation
+- NLR dataset submission metadata
+- hpc-oda-commons documentation/source
+- official SchedMD Slurm documentation
+
+Use external documentation to understand semantics.
+
+Do NOT use general web pages to invent missing Kestrel provenance.
+
+Record URLs/citations/source dates in:
+
+EXTERNAL_AUTHORITY_SOURCES.md
+
+============================================================
+15. DO NOT USE APRIL/MAY TO SELECT FEATURES
+============================================================
+
+Feature authority is a provenance question.
+
+Do not use April or May model performance to decide whether a field is
+"causally valid."
+
+April/May can only be opened later for frozen evaluation.
+
+Feature authority must be determined from:
+
+- source lineage
+- request semantics
+- historical version/revision evidence
+
+not predictive usefulness.
+
+============================================================
+16. NO RUNTIME MODEL TRAINING IN THIS TASK
+============================================================
+
+Do NOT train:
+
+- new LightGBM
+- XGBoost
+- TFT
+- DeepAR
+- survival model
+- AFT model
+- remaining-runtime model
+
+except trivial descriptive diagnostics that do not produce a selected model.
+
+The final output of this task is a FROZEN FEATURE CONTRACT,
+not a new predictor.
+
+============================================================
+17. FEATURE AUTHORITY DECISION TABLE
+============================================================
+
+Required final table:
+
+feature
+exists_in_archive
+available_at_submission_semantically
+can_change_after_submit
+change_observed_in_kestrel
+original_version_reconstructable
+source_backed
+strict_runtime_ml_allowed
+research_only
+reason
+
+For every previously excluded feature and every newly discovered candidate.
+
+============================================================
+18. REQUIRED ARTIFACTS
+============================================================
+
+Create:
+
+docs/runtime_vnext7_feature_authority_recovery/
+
+with at least:
+
+REQUEST_FIELD_LINEAGE.csv
+REQUEST_VERSION_FORENSIC.md
+REQUEUE_DUPLICATE_AUDIT.csv
+REQUEUE_DUPLICATE_SUMMARY.json
+
+SUBMIT_TIME_AUTHORITY_AUDIT.json
+
+ADDITIONAL_FEATURE_INVENTORY.csv
+WORKFLOW_IDENTITY_AUDIT.csv
+
+FEATURE_AUTHORITY_DECISION.csv
+STRICT_CAUSAL_FEATURE_CONTRACT.json
+RESEARCH_PROXY_FEATURE_CONTRACT.json
+
+LONG_JOB_FEATURE_DIAGNOSTIC.csv
+LONG_JOB_ROOT_CAUSE_AUDIT.md
+COHORT_SUPPORT_AUDIT.csv
+
+EXTERNAL_AUTHORITY_SOURCES.md
+SOURCE_MANIFEST.json
+
+FINAL_REVIEW_KO.md
+FINAL_VERDICT.json
+
+============================================================
+19. REQUIRED FINAL QUESTIONS
+============================================================
+
+The Korean final report must directly answer:
+
+1. 왜 Runtime-vNext6에서 9개 피처를 제외했는가?
+2. 그 판단이 너무 보수적이었는가, 아니면 실제 provenance 문제가 있는가?
+3. requested walltime의 최초 제출값을 복원할 수 있는가?
+4. requested GPU의 최초 제출값을 복원할 수 있는가?
+5. QoS/partition/account의 최초 제출값을 복원할 수 있는가?
+6. submit_time은 최초 제출시각인가, requeue 후 시각일 수 있는가?
+7. duplicate/requeue 기록으로 original request를 복원할 수 있는 job 비율은?
+8. 기존 9개 중 production feature로 되살릴 수 있는 것은 무엇인가?
+9. 새로 찾은 immutable submission-time feature가 있는가?
+10. workflow/script/job-name identity를 안전하게 사용할 수 있는가?
+11. long job과 short job을 구분하는 가장 강한 submission-time 정보는 무엇인가?
+12. >4 h long-job support가 충분한가?
+13. >=16 GPU validation support가 충분한가?
+14. STRICT_CAUSAL_SET에 최종적으로 몇 개 feature가 남는가?
+15. 다음 Runtime ML 재학습을 진행할 근거가 생겼는가?
+16. 아직 막는 provenance blocker는 무엇인가?
+
+============================================================
+20. FINAL FLAGS
+============================================================
+
+REQUEST_VERSION_AUTHORITY_FOUND = TRUE/FALSE/PARTIAL
+
+ORIGINAL_SUBMIT_TIME_RECOVERABLE = TRUE/FALSE/PARTIAL
+
+REQUESTED_WALLTIME_INITIAL_VALUE_RECOVERABLE = TRUE/FALSE/PARTIAL
+REQUESTED_GPU_INITIAL_VALUE_RECOVERABLE = TRUE/FALSE/PARTIAL
+QOS_INITIAL_VALUE_RECOVERABLE = TRUE/FALSE/PARTIAL
+PARTITION_INITIAL_VALUE_RECOVERABLE = TRUE/FALSE/PARTIAL
+
+DUPLICATE_HISTORY_AVAILABLE = TRUE/FALSE
+REQUEUE_HISTORY_AVAILABLE = TRUE/FALSE
+
+STRICT_CAUSAL_JOB_FEATURE_COUNT = integer
+NEW_IMMUTABLE_FEATURE_COUNT = integer
+
+WORKFLOW_IDENTITY_SUPPORTED = TRUE/FALSE/PARTIAL
+
+LONG_JOB_FEATURE_SEPARABILITY =
+STRONG / MODERATE / WEAK / INCONCLUSIVE
+
+HIGH_GPU_SUPPORT_SUFFICIENT = TRUE/FALSE
+
+RUNTIME_FEATURE_AUTHORITY_RECOVERED =
+TRUE / PARTIAL / FALSE
+
+NEXT_RUNTIME_ML_RETRAIN_AUTHORIZED =
+TRUE only if a useful source-backed feature set exists.
+
+============================================================
+21. STOP CONDITIONS
+============================================================
+
+Stop rather than guessing if:
+
+- original request version cannot be reconstructed,
+- request fields are only final accounting values,
+- source code cannot establish publication semantics,
+- duplicate/requeue identities are ambiguous,
+- a proposed feature requires future execution information,
+- a workflow identifier risks deanonymization,
+- no informative strict feature remains.
+
+Do not loosen the causal standard simply to obtain a usable model.
+
+============================================================
+22. MOST IMPORTANT OUTPUT
+============================================================
+
+The most important result is NOT a prediction score.
+
+It is a trustworthy answer to:
+
+"At the exact moment a new Kestrel job is submitted, what job-specific
+information can the V42 controller legitimately know?"
+
+Freeze that information set.
+
+Only then should Runtime ML be retrained.
