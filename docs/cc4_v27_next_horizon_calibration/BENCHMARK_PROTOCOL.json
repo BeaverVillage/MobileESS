@@ -1,0 +1,73 @@
+{
+  "time": "2026-09-28 08:50:10.496354+00:00",
+  "current_delivery_sha256": "6cd9d59cd384a9cc335e51109431c3ed98da3956ae440bf66ba557863dac9562",
+  "batch": [
+    {
+      "arm": "T2_F0",
+      "day": "2024-09-15",
+      "model": "M0"
+    },
+    {
+      "arm": "T2_F0",
+      "day": "2024-09-15",
+      "model": "M1"
+    },
+    {
+      "arm": "T3_F2",
+      "day": "2024-09-15",
+      "model": "M0"
+    },
+    {
+      "arm": "T3_F2",
+      "day": "2024-09-15",
+      "model": "M1"
+    },
+    {
+      "arm": "T2_F0",
+      "day": "2024-10-15",
+      "model": "M0"
+    },
+    {
+      "arm": "T2_F0",
+      "day": "2024-10-15",
+      "model": "M1"
+    },
+    {
+      "arm": "T3_F2",
+      "day": "2024-10-15",
+      "model": "M0"
+    },
+    {
+      "arm": "T3_F2",
+      "day": "2024-10-15",
+      "model": "M1"
+    }
+  ],
+  "backends": [
+    "CPU_SINGLE",
+    "CPU_MULTIPROCESS_4",
+    "GPU"
+  ],
+  "CPU_n_jobs": 1,
+  "GPU_policy": "Installed build only; device_type=gpu, double precision requested; no rebuild. Existing deterministic/force_col_wise flags retained and recorded, without claiming GPU determinism.",
+  "parameters": {
+    "num_leaves": 15,
+    "learning_rate": 0.03,
+    "n_estimators": 400,
+    "min_child_samples": 50,
+    "n_jobs": 1,
+    "deterministic": true,
+    "force_col_wise": true,
+    "random_state": 20260924,
+    "verbosity": -1
+  },
+  "prediction_tolerance": {
+    "atol": 1e-08,
+    "rtol": 1e-08
+  },
+  "metric_absolute_tolerance": 1e-06,
+  "minimum_speedup_to_change": 0.1,
+  "selection": "Fastest equivalent CPU backend; GPU requires supported batch, prediction/metric equivalence and >=10% speedup versus fastest equivalent CPU.",
+  "telemetry": "0.5s target polling; nvidia-smi overhead included in wall time for every backend. GPU utilization/VRAM and CPU are system/device-wide; process-tree RSS may double-count shared pages. Single pass, fixed order; no claims about thermal limits or run-to-run variance.",
+  "code_sha256": "1633336199c80bc2fb2dc8aa897af4a84a717ca72e693973bad613a4944b36af"
+}
