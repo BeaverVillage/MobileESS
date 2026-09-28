@@ -1,0 +1,72 @@
+{
+  "name": "M2_F2_MINUS_scheduler",
+  "kind": "M2",
+  "columns": [
+    "num_gpus_req",
+    "num_nodes_req",
+    "num_cores_req",
+    "requested_memory_mib",
+    "log_gpu",
+    "log_nodes",
+    "log_cores",
+    "log_memory",
+    "gpu_per_node",
+    "cores_per_node",
+    "cores_per_gpu",
+    "memory_per_gpu",
+    "memory_per_node",
+    "num_gpus_req_missing_or_invalid",
+    "num_nodes_req_missing_or_invalid",
+    "num_cores_req_missing_or_invalid",
+    "requested_memory_mib_missing_or_invalid",
+    "gpu_nodes_inconsistent",
+    "requested_seconds",
+    "log_walltime",
+    "requested_gpu_time",
+    "log_requested_gpu_time",
+    "requested_seconds_missing_or_invalid",
+    "account",
+    "is_array_descriptor",
+    "log_array_index",
+    "array_index_missing_or_invalid"
+  ],
+  "categorical_features": [
+    "account"
+  ],
+  "long_upper": 864032.0,
+  "params": {
+    "n_estimators": 400,
+    "learning_rate": 0.04,
+    "num_leaves": 31,
+    "max_depth": 8,
+    "min_child_samples": 150,
+    "max_bin": 127,
+    "reg_lambda": 2.0,
+    "random_state": 4008,
+    "deterministic": true,
+    "force_col_wise": true,
+    "n_jobs": 4,
+    "verbosity": -1
+  },
+  "fit_seconds": 4.256512699997984,
+  "fits": [
+    {
+      "key": "Q50",
+      "N": 222182,
+      "seconds": 2.2198021999793127,
+      "trees": 400,
+      "features": 27,
+      "objective": "quantile",
+      "alpha": 0.5
+    },
+    {
+      "key": "Q90",
+      "N": 222182,
+      "seconds": 2.0354988999897614,
+      "trees": 400,
+      "features": 27,
+      "objective": "quantile",
+      "alpha": 0.9
+    }
+  ]
+}

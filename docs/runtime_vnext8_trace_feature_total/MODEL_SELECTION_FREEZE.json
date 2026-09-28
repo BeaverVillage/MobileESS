@@ -1,0 +1,313 @@
+{
+  "time": "2026-09-28T12:29:21.696004+00:00",
+  "selected_diagnostic_candidate": "M3_F2",
+  "selected_qualified_model": false,
+  "calibration": "NONE",
+  "delta_seconds": 0,
+  "selection_rationale": "Preregistered lexicographic failed-gates/pinball/reservation/complexity ranking; if no eligible model, one frozen diagnostic candidate only",
+  "gate_results": {
+    "DEV_raw": {
+      "PASS": false,
+      "checks": {
+        "calibration": false,
+        "GPU_calibration": false,
+        "sharp_pinball": true,
+        "reservation": true,
+        "long": false,
+        "job_specific": true,
+        "Q50": false
+      },
+      "failed_checks": 4,
+      "high_GPU_gate": "INSUFFICIENT_SUPPORT",
+      "high_GPU_N": 89,
+      "long_N": 2580,
+      "long_coverage": 0.7593023255813953,
+      "metrics": {
+        "N": 11486,
+        "Q50_MAE": 14012.371795747922,
+        "Q90_coverage": 0.8491206686400836,
+        "Q90_pinball": 4504.22826880972,
+        "underprediction_rate": 0.1508793313599164,
+        "total_prediction_actual_ratio": 2.9375071310443404,
+        "mean_prediction_actual_positive_ratio": 309.1079284631848,
+        "zero_runtime_N": 33,
+        "GPU_Q50_MAE": 13239.928977562613,
+        "GPU_Q90_coverage": 0.8686178699641005,
+        "GPU_Q90_pinball": 4521.091446348048,
+        "GPU_underprediction_rate": 0.1313821300358995,
+        "reservation_GPUh": 241870.5,
+        "continuous_prediction_GPUh": 239427.54745107927,
+        "actual_GPUh": 78784.31916666667,
+        "W0_reservation_GPUh": 487942.5,
+        "reservation_to_actual_ratio": 3.070033511215953,
+        "reservation_to_W0_ratio": 0.4956946771392121,
+        "overrun_GPUh": 9123.179962657752,
+        "prediction_unique_Q90": 327
+      }
+    },
+    "CAL_VALID": {
+      "PASS": false,
+      "checks": {
+        "calibration": false,
+        "GPU_calibration": false,
+        "sharp_pinball": true,
+        "reservation": true,
+        "long": false,
+        "job_specific": true,
+        "Q50": true
+      },
+      "failed_checks": 3,
+      "high_GPU_gate": "INSUFFICIENT_SUPPORT",
+      "high_GPU_N": 6,
+      "long_N": 312,
+      "long_coverage": 0.7532051282051282,
+      "metrics": {
+        "N": 14623,
+        "Q50_MAE": 1445.970488302086,
+        "Q90_coverage": 0.9924092183546468,
+        "Q90_pinball": 1290.7003771797204,
+        "underprediction_rate": 0.0075907816453532105,
+        "total_prediction_actual_ratio": 9.447682272068127,
+        "mean_prediction_actual_positive_ratio": 1844.4625913780126,
+        "zero_runtime_N": 622,
+        "GPU_Q50_MAE": 2861.5036104805413,
+        "GPU_Q90_coverage": 0.984921398780879,
+        "GPU_Q90_pinball": 1773.3204226698663,
+        "GPU_underprediction_rate": 0.01507860121912095,
+        "reservation_GPUh": 69409.5,
+        "continuous_prediction_GPUh": 66319.36090406652,
+        "actual_GPUh": 12321.404166666667,
+        "W0_reservation_GPUh": 113444.25,
+        "reservation_to_actual_ratio": 5.633245940245582,
+        "reservation_to_W0_ratio": 0.6118379732776231,
+        "overrun_GPUh": 2277.2039894016434,
+        "prediction_unique_Q90": 66
+      }
+    },
+    "score": [
+      7,
+      0.8044503536214096,
+      0.5537663252084176,
+      29
+    ]
+  },
+  "all_candidates": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext8_trace_feature_total\\PRELIMINARY_SELECTION.json",
+    "bytes": 67749,
+    "sha256": "80362f958b8acf27195e719608d7fde26a0e905012acf6e4d88a6d7ba60ff0db"
+  },
+  "no_gate_relaxation": true,
+  "train_membership": {
+    "roles": {
+      "TRAIN": {
+        "N": 222182,
+        "membership": "a388843e1ca8fc2fee6c43f822f79700eac14030bdda6ae6808236e151880c52",
+        "unresolved": 0,
+        "zero": 111,
+        "cutoff": "2025-03-14T08:00:00Z"
+      },
+      "DEV": {
+        "N": 11486,
+        "membership": "a1f82522cc1618dbee4334380ac385d16bf5ca74e21254f0c94b97ab5061645a",
+        "unresolved": 495,
+        "zero": 33,
+        "cutoff": "2025-03-23T00:00:00Z"
+      },
+      "CAL_FIT": {
+        "N": 5438,
+        "membership": "9d7b1352aa251ff481be5cbaab83529f047e4205e4baa9ce7086b4e77f3b3840",
+        "unresolved": 498,
+        "zero": 2,
+        "cutoff": "2025-03-27T00:00:00Z"
+      },
+      "CAL_VALID": {
+        "N": 14623,
+        "membership": "612fe56c46ef20090d1cd87e1c990f24559a2df223771b1d62c572eaf0203f3a",
+        "unresolved": 13,
+        "zero": 622,
+        "cutoff": "2025-03-31T08:00:00Z"
+      }
+    },
+    "exact_vNext6_mature_membership": true,
+    "source": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext6_callable_total\\PREAPRIL_JOBS.parquet",
+      "bytes": 6601347,
+      "sha256": "add27c4078d8651f5149fe8f2b7758113d4df6b901db8c380f58c624c53ead27"
+    },
+    "raw_cache": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext7_feature_authority_recovery\\.local\\GPU_PREAPRIL.parquet",
+      "bytes": 26095718,
+      "sha256": "06040b8ece6268d5422d4326f265d52372a42ccf22b737eb56e0a5740d956d57"
+    },
+    "data": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext8_trace_feature_total\\PREAPRIL_JOBS.parquet",
+      "bytes": 9495942,
+      "sha256": "a0ed23ba9f0a8f82656ff241a21b636362293d70237b5f4ca0d1c350ab448488"
+    },
+    "boundary": "Same v6 pre-April logical freeze March31T08Z; v7 wider descriptive cohort not used as training membership",
+    "censorship": "Excluded when no valid start/end before role cutoff; no unknown end converted to zero",
+    "April_payload_read": false,
+    "May_payload_read": false
+  },
+  "protocol": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext8_trace_feature_total\\EXPERIMENT_PROTOCOL.json",
+    "bytes": 6058,
+    "sha256": "6da388e9e66ce7f49f2878a333f1dff35515a3e7872bc5f6252a977da496ed96"
+  },
+  "model_metadata": {
+    "name": "M3_F2",
+    "kind": "M3",
+    "columns": [
+      "num_gpus_req",
+      "num_nodes_req",
+      "num_cores_req",
+      "requested_memory_mib",
+      "log_gpu",
+      "log_nodes",
+      "log_cores",
+      "log_memory",
+      "gpu_per_node",
+      "cores_per_node",
+      "cores_per_gpu",
+      "memory_per_gpu",
+      "memory_per_node",
+      "num_gpus_req_missing_or_invalid",
+      "num_nodes_req_missing_or_invalid",
+      "num_cores_req_missing_or_invalid",
+      "requested_memory_mib_missing_or_invalid",
+      "gpu_nodes_inconsistent",
+      "requested_seconds",
+      "log_walltime",
+      "requested_gpu_time",
+      "log_requested_gpu_time",
+      "requested_seconds_missing_or_invalid",
+      "qos",
+      "partition",
+      "account",
+      "is_array_descriptor",
+      "log_array_index",
+      "array_index_missing_or_invalid"
+    ],
+    "categorical_features": [
+      "qos",
+      "partition",
+      "account"
+    ],
+    "long_upper": 864032.0,
+    "params": {
+      "n_estimators": 400,
+      "learning_rate": 0.04,
+      "num_leaves": 31,
+      "max_depth": 8,
+      "min_child_samples": 150,
+      "max_bin": 127,
+      "reg_lambda": 2.0,
+      "random_state": 4008,
+      "deterministic": true,
+      "force_col_wise": true,
+      "n_jobs": 4,
+      "verbosity": -1
+    },
+    "fit_seconds": 4.427539800002705,
+    "fits": [
+      {
+        "key": "Q50",
+        "N": 222182,
+        "seconds": 2.2944863999728113,
+        "trees": 400,
+        "features": 29,
+        "objective": "quantile",
+        "alpha": 0.5
+      },
+      {
+        "key": "Q90",
+        "N": 222182,
+        "seconds": 2.130368100013584,
+        "trees": 400,
+        "features": 29,
+        "objective": "quantile",
+        "alpha": 0.9
+      }
+    ]
+  },
+  "compute": {
+    "recommended": "CPU_4_THREADS",
+    "production_backend": "CPU inference always",
+    "selected_development_training_backend": "CPU_4_THREADS",
+    "selected_original_bytes_retained": true,
+    "reason": "Benchmark equivalent refits do not replace selected predictor; future repeat fits can use measured recommendation.",
+    "measurements": [
+      {
+        "backend": "CPU_SINGLE",
+        "status": "MEASURED",
+        "fit_seconds": 11.775764899968635,
+        "max_absolute_prediction_difference_seconds": 0.0,
+        "relative_pinball_difference": 0.0,
+        "coverage_difference": 0.0,
+        "numerically_equivalent": true,
+        "threads": 1,
+        "N": 222182,
+        "error": ""
+      },
+      {
+        "backend": "CPU_4_THREADS",
+        "status": "MEASURED",
+        "fit_seconds": 4.431045999983326,
+        "max_absolute_prediction_difference_seconds": 0.0,
+        "relative_pinball_difference": 0.0,
+        "coverage_difference": 0.0,
+        "numerically_equivalent": true,
+        "threads": 4,
+        "N": 222182,
+        "error": ""
+      },
+      {
+        "backend": "RTX4060_OpenCL_GPU",
+        "status": "MEASURED",
+        "fit_seconds": 6.6700617000460625,
+        "max_absolute_prediction_difference_seconds": 0.0,
+        "relative_pinball_difference": 0.0,
+        "coverage_difference": 0.0,
+        "numerically_equivalent": true,
+        "threads": 4,
+        "N": 222182,
+        "error": ""
+      }
+    ]
+  },
+  "no_further_fit_or_selection": true,
+  "April_opened": false,
+  "May_opened": false,
+  "source_code": [
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext8_trace_feature_total\\features8.py",
+      "bytes": 3729,
+      "sha256": "3e74265f90893e4ca8d421cb37f1a324c3a2b35f967f9419d64297f902749edb"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext8_trace_feature_total\\model8.py",
+      "bytes": 2738,
+      "sha256": "095bad594d2e548387ba2280976cc1dcb8114a5cc8cdb13ccd08337c81163083"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext8_trace_feature_total\\train8.py",
+      "bytes": 9546,
+      "sha256": "7898bf6965a21b02d97895798e0dba2cc66842e8548933805aa7bf44ed861d55"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext8_trace_feature_total\\metrics8.py",
+      "bytes": 4688,
+      "sha256": "4f33e6d4a1167685cd464c263c7b863b989dfde51b5aa1c248f0361623c7d155"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext8_trace_feature_total\\provider_source.py",
+      "bytes": 3692,
+      "sha256": "4b59cd30e9eae068cbea22c2e68f80331b0110f43635f41068e1296827b32932"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext8_trace_feature_total\\benchmark_selected8.py",
+      "bytes": 4980,
+      "sha256": "7a58f420fe54b570b79e9fbc2a1045a6873bbcce7d269a6b0f92e1e5946b09c4"
+    }
+  ]
+}

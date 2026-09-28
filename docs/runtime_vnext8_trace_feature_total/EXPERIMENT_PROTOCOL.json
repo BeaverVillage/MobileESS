@@ -1,0 +1,152 @@
+{
+  "logical_freeze_cutoff": "2025-03-31T08:00:00Z",
+  "TRAIN": {
+    "end_after": "2024-09-15T08:00:00Z",
+    "end_before": "2025-03-14T08:00:00Z"
+  },
+  "DEV": {
+    "submit_from": "2025-03-15T00:00:00Z",
+    "submit_before": "2025-03-22T00:00:00Z",
+    "mature_before": "2025-03-23T00:00:00Z"
+  },
+  "CAL_FIT": {
+    "submit_from": "2025-03-23T00:00:00Z",
+    "submit_before": "2025-03-26T00:00:00Z",
+    "mature_before": "2025-03-27T00:00:00Z"
+  },
+  "CAL_VALID": {
+    "submit_from": "2025-03-27T00:00:00Z",
+    "submit_before": "2025-03-30T00:00:00Z",
+    "mature_before": "2025-03-31T08:00:00Z"
+  },
+  "APRIL": {
+    "submit_from": "2025-04-01T00:00:00Z",
+    "submit_before": "2025-05-01T00:00:00Z",
+    "mature_before": "2025-05-01T00:00:00Z"
+  },
+  "version": "runtime-vnext8-preapril-preregistered-v1",
+  "registered_at": "2026-09-28T12:17:37.374872+00:00",
+  "base": "88616b3bed56458b67d925c5108b7f6ecf2dbed3",
+  "target": "end_time-start_time seconds; execution interval excluding queue; invalid time orders excluded; zero allowed",
+  "STRICT_CAUSAL_FEATURE_COUNT": 0,
+  "REQUEST_VERSION_AUTHORITY_FOUND": false,
+  "STRICT_CAUSAL_RUNTIME_PROVIDER_READY": false,
+  "provenance_mode": "Kestrel_trace_proxy",
+  "research_authorization": "User Runtime-vNext8 request; PR78 unchanged",
+  "features": "F0 resources+shape; F1 adds duration+qos/partition; F2 adds supported account/user/array/identity; F3 deterministic positive stable DEV group permutation pruning",
+  "identity_screen": {
+    "train_min_count": 20,
+    "max_train_cardinality": 5000,
+    "DEV_unseen_max": 0.25,
+    "CAL_FIT_unseen_max": 0.25,
+    "CAL_VALID_unseen_max": 0.25,
+    "min_rows_in_supported_train_categories": 0.8
+  },
+  "identity_exclusions": "G class job_type/python/reframe: generation time unknown; clock features excluded; no raw job IDs; no future fields",
+  "lgbm": {
+    "n_estimators": 400,
+    "learning_rate": 0.04,
+    "num_leaves": 31,
+    "max_depth": 8,
+    "min_child_samples": 150,
+    "max_bin": 127,
+    "reg_lambda": 2.0,
+    "random_state": 4008,
+    "deterministic": true,
+    "force_col_wise": true,
+    "n_jobs": 4,
+    "verbosity": -1
+  },
+  "family_grid": [
+    "M1 raw Q50/Q90 x F0/F1/F2",
+    "M2 log1p Q50/Q90 x F0/F1/F2",
+    "M3 log((T+1)/(walltime+1)) x F1/F2",
+    "M4 F1/F2 probability(T>4h)+short/long conditional quantile CDF mixture"
+  ],
+  "M4": {
+    "quantile_grid": [
+      0.05,
+      0.25,
+      0.5,
+      0.75,
+      0.9,
+      0.99
+    ],
+    "regime_boundary_seconds": 14400,
+    "short_bounds": [
+      0,
+      14400
+    ],
+    "long_upper": "maximum TRAIN runtime",
+    "distribution": "Monotone conditional quantile knots, piecewise-linear CDF; mixture inverse via deterministic bisection; classifier probabilities not trained on DEV/CAL"
+  },
+  "M5": "Only pre-April two best distinct families if DEV error correlation<0.95 and each wins >=20% of DEV paired pinball rows. Equal quantile average heuristic, calibrated/evaluated explicitly.",
+  "F3": "Best M1/M2/M3 F2 by DEV Q90 pinball; group permutation on DEV first/second chronological halves, one fixed seed; retain positive importance in both halves, otherwise drop group; evaluate one reduced family. No F3 if no group removed.",
+  "calibration": "NONE or signed additive residual rank ceil(.9*(n+1)) fitted on CAL_FIT, after monotone raw Q50/Q90. Q50 unchanged. Choose using CAL_VALID gates and score; calibration is not tuned on April. No arbitrary multiplier.",
+  "selection": "For each candidate/calibration compare DEV raw and CAL_VALID candidate: minimize number of failed predictive gate checks, then average Q90 pinball / B0, then average rounded reservation / W0, then feature count. Failed candidate remains diagnostic-only. At most two compact depth/leaf configurations: base only unless pre-April clear capacity diagnosis is documented before any extension.",
+  "gates": {
+    "coverage": [
+      0.88,
+      0.92
+    ],
+    "gpu_coverage": [
+      0.88,
+      0.94
+    ],
+    "long_gt4h_coverage_min": 0.85,
+    "pinball_to_B0_max": 1.0,
+    "reservation_to_W0_max": 0.8,
+    "min_stratum_N": 100,
+    "highGPU_coverage_min": 0.85,
+    "highGPU_insufficient": "INSUFFICIENT_SUPPORT; no high-GPU guarantee, separate from aggregate research readiness",
+    "Q50_MAE_to_B0_max": 1.0,
+    "CPU_p99_ms_max": 50,
+    "CPU_max_ms_max": 200,
+    "queue": "same admitted count, W0 exact, V8 in-day starts>=W0, no capacity violation; never gate on prediction-only occupancy without causal overrun stress"
+  },
+  "reservation": "ceil(prediction_seconds/900)*GPU*0.25 hours; also report continuous duration metrics; never confuse with unrounded vNext6 metric",
+  "uncertainty": {
+    "unit": "UTC submission day paired block bootstrap",
+    "draws": 1000,
+    "seed": 800928,
+    "interval": 0.95,
+    "min_days": 3,
+    "metrics": [
+      "pinball_difference",
+      "MAE_difference",
+      "rounded_reservation_ratio_difference",
+      "long_underprediction_difference"
+    ]
+  },
+  "benchmark": {
+    "compare": [
+      "CPU_SINGLE",
+      "CPU_4_THREADS",
+      "RTX4060_OpenCL_GPU"
+    ],
+    "selected_workload": "same TRAIN, selected feature set/family, every booster; prediction on DEV",
+    "equivalence_max_abs_seconds": 0.1,
+    "equivalence_relative_pinball": 0.001,
+    "equivalence_coverage": 0.001,
+    "GPU_min_speedup": 1.2
+  },
+  "checkpoint": {
+    "interval_seconds": 1800,
+    "thresholds_seconds": [
+      900,
+      1800,
+      3600,
+      7200,
+      14400
+    ],
+    "max_MAE_seconds": 3600,
+    "min_accuracy": 0.8,
+    "max_overrun_fraction": 0.15,
+    "scope": "every actual running checkpoint on mature April jobs, actual runtime isolated in evaluation only; no remaining fit"
+  },
+  "preapril_only_until_freeze": true,
+  "May_payload_allowed": false,
+  "April_open_once_after_three_freezes": true,
+  "final_model": "reuse selected serialized TRAIN boosters, never absorb DEV/CAL or refit after April",
+  "historical_limit": "retrospective as-of event-time maturity; archive ingest timing and original submit versions unverified"
+}

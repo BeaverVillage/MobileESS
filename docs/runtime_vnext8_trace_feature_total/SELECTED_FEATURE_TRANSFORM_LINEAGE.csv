@@ -1,0 +1,30 @@
+feature,raw_source,exact_transform,implementation,no_outcome_input,original_version_verified
+num_gpus_req,gpus_requested,numeric parsing or TRAIN-only category map0UNKNOWN,features8.py::engineer,True,False
+num_nodes_req,nodes_req,numeric parsing or TRAIN-only category map0UNKNOWN,features8.py::engineer,True,False
+num_cores_req,processors_req,numeric parsing or TRAIN-only category map0UNKNOWN,features8.py::engineer,True,False
+requested_memory_mib,memory_req,numeric parsing or TRAIN-only category map0UNKNOWN,features8.py::engineer,True,False
+log_gpu,derived from log1p(num_gpus_req),log1p(num_gpus_req),features8.py::engineer,True,False
+log_nodes,derived from log1p(num_nodes_req),log1p(num_nodes_req),features8.py::engineer,True,False
+log_cores,derived from log1p(num_cores_req),log1p(num_cores_req),features8.py::engineer,True,False
+log_memory,derived from log1p(requested_memory_mib),log1p(requested_memory_mib),features8.py::engineer,True,False
+gpu_per_node,derived from num_gpus_req / num_nodes_req,num_gpus_req / num_nodes_req,features8.py::engineer,True,False
+cores_per_node,derived from num_cores_req / num_nodes_req,num_cores_req / num_nodes_req,features8.py::engineer,True,False
+cores_per_gpu,derived from num_cores_req / num_gpus_req,num_cores_req / num_gpus_req,features8.py::engineer,True,False
+memory_per_gpu,derived from requested_memory_mib / num_gpus_req,requested_memory_mib / num_gpus_req,features8.py::engineer,True,False
+memory_per_node,derived from requested_memory_mib / num_nodes_req,requested_memory_mib / num_nodes_req,features8.py::engineer,True,False
+num_gpus_req_missing_or_invalid,derived from is missing/nonfinite/nonpositive (counts also noninteger); array index allows zero,is missing/nonfinite/nonpositive (counts also noninteger); array index allows zero,features8.py::engineer,True,False
+num_nodes_req_missing_or_invalid,derived from is missing/nonfinite/nonpositive (counts also noninteger); array index allows zero,is missing/nonfinite/nonpositive (counts also noninteger); array index allows zero,features8.py::engineer,True,False
+num_cores_req_missing_or_invalid,derived from is missing/nonfinite/nonpositive (counts also noninteger); array index allows zero,is missing/nonfinite/nonpositive (counts also noninteger); array index allows zero,features8.py::engineer,True,False
+requested_memory_mib_missing_or_invalid,derived from is missing/nonfinite/nonpositive (counts also noninteger); array index allows zero,is missing/nonfinite/nonpositive (counts also noninteger); array index allows zero,features8.py::engineer,True,False
+gpu_nodes_inconsistent,derived from gpus_requested > 4*nodes_req,gpus_requested > 4*nodes_req,features8.py::engineer,True,False
+requested_seconds,wallclock_req,numeric parsing or TRAIN-only category map0UNKNOWN,features8.py::engineer,True,False
+log_walltime,derived from log1p(requested_seconds),log1p(requested_seconds),features8.py::engineer,True,False
+requested_gpu_time,derived from num_gpus_req * requested_seconds,num_gpus_req * requested_seconds,features8.py::engineer,True,False
+log_requested_gpu_time,derived from log1p(num_gpus_req * requested_seconds),log1p(num_gpus_req * requested_seconds),features8.py::engineer,True,False
+requested_seconds_missing_or_invalid,derived from is missing/nonfinite/nonpositive (counts also noninteger); array index allows zero,is missing/nonfinite/nonpositive (counts also noninteger); array index allows zero,features8.py::engineer,True,False
+qos,qos,numeric parsing or TRAIN-only category map0UNKNOWN,features8.py::engineer,True,False
+partition,partition,numeric parsing or TRAIN-only category map0UNKNOWN,features8.py::engineer,True,False
+account,account_hash,numeric parsing or TRAIN-only category map0UNKNOWN,features8.py::engineer,True,False
+is_array_descriptor,derived from array_pos valid/nonmissing indicator (not certified original membership),array_pos valid/nonmissing indicator (not certified original membership),features8.py::engineer,True,False
+log_array_index,derived from log1p(array_pos) if nonnegative integer,log1p(array_pos) if nonnegative integer,features8.py::engineer,True,False
+array_index_missing_or_invalid,derived from is missing/nonfinite/nonpositive (counts also noninteger); array index allows zero,is missing/nonfinite/nonpositive (counts also noninteger); array index allows zero,features8.py::engineer,True,False

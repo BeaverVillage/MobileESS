@@ -1,0 +1,45 @@
+{
+  "recommended": "CPU_4_THREADS",
+  "production_backend": "CPU inference always",
+  "selected_development_training_backend": "CPU_4_THREADS",
+  "selected_original_bytes_retained": true,
+  "reason": "Benchmark equivalent refits do not replace selected predictor; future repeat fits can use measured recommendation.",
+  "measurements": [
+    {
+      "backend": "CPU_SINGLE",
+      "status": "MEASURED",
+      "fit_seconds": 11.775764899968635,
+      "max_absolute_prediction_difference_seconds": 0.0,
+      "relative_pinball_difference": 0.0,
+      "coverage_difference": 0.0,
+      "numerically_equivalent": true,
+      "threads": 1,
+      "N": 222182,
+      "error": ""
+    },
+    {
+      "backend": "CPU_4_THREADS",
+      "status": "MEASURED",
+      "fit_seconds": 4.431045999983326,
+      "max_absolute_prediction_difference_seconds": 0.0,
+      "relative_pinball_difference": 0.0,
+      "coverage_difference": 0.0,
+      "numerically_equivalent": true,
+      "threads": 4,
+      "N": 222182,
+      "error": ""
+    },
+    {
+      "backend": "RTX4060_OpenCL_GPU",
+      "status": "MEASURED",
+      "fit_seconds": 6.6700617000460625,
+      "max_absolute_prediction_difference_seconds": 0.0,
+      "relative_pinball_difference": 0.0,
+      "coverage_difference": 0.0,
+      "numerically_equivalent": true,
+      "threads": 4,
+      "N": 222182,
+      "error": ""
+    }
+  ]
+}
