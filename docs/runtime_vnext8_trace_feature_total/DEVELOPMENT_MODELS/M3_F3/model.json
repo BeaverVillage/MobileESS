@@ -1,0 +1,63 @@
+{
+  "name": "M3_F3",
+  "kind": "M3",
+  "columns": [
+    "num_gpus_req",
+    "num_nodes_req",
+    "num_cores_req",
+    "requested_memory_mib",
+    "num_gpus_req_missing_or_invalid",
+    "num_nodes_req_missing_or_invalid",
+    "num_cores_req_missing_or_invalid",
+    "requested_memory_mib_missing_or_invalid",
+    "requested_seconds",
+    "log_walltime",
+    "requested_gpu_time",
+    "log_requested_gpu_time",
+    "requested_seconds_missing_or_invalid",
+    "qos",
+    "partition",
+    "account"
+  ],
+  "categorical_features": [
+    "qos",
+    "partition",
+    "account"
+  ],
+  "long_upper": 864032.0,
+  "params": {
+    "n_estimators": 400,
+    "learning_rate": 0.04,
+    "num_leaves": 31,
+    "max_depth": 8,
+    "min_child_samples": 150,
+    "max_bin": 127,
+    "reg_lambda": 2.0,
+    "random_state": 4008,
+    "deterministic": true,
+    "force_col_wise": true,
+    "n_jobs": 4,
+    "verbosity": -1
+  },
+  "fit_seconds": 3.7682877000188455,
+  "fits": [
+    {
+      "key": "Q50",
+      "N": 222182,
+      "seconds": 1.9217404999653809,
+      "trees": 400,
+      "features": 16,
+      "objective": "quantile",
+      "alpha": 0.5
+    },
+    {
+      "key": "Q90",
+      "N": 222182,
+      "seconds": 1.8441485000075772,
+      "trees": 400,
+      "features": 16,
+      "objective": "quantile",
+      "alpha": 0.9
+    }
+  ]
+}

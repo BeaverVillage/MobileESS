@@ -1,0 +1,1049 @@
+Repository: BeaverVillage/MobileESS
+
+NEW RUNTIME ML DEVELOPMENT TASK
+Runtime-vNext8:
+Kestrel Trace-Descriptor Job-Specific Total Runtime Prediction
+
+Suggested branch:
+codex/runtime-vnext8-trace-feature-total-runtime
+
+Base:
+Runtime-vNext7 / PR #78 scientific evidence must be preserved.
+
+============================================================
+0. PRIMARY DECISION
+============================================================
+
+Runtime prediction development is RE-OPENED as a research model.
+
+Important distinction:
+
+STRICT_CAUSAL_FEATURE_SET:
+    remains EMPTY
+
+because PR #78 could not prove that archived request descriptors are the
+immutable ORIGINAL submission versions.
+
+RESEARCH_TRACE_FEATURE_SET:
+    may use job/request descriptors actually present in the public Kestrel
+    trace, provided:
+
+    1. they are not future execution outcomes,
+    2. they are not constructed using actual runtime/end/completion,
+    3. their provenance limitation is explicitly retained,
+    4. they are frozen before April evaluation.
+
+Do NOT rewrite PR #78.
+
+Keep:
+
+    REQUEST_VERSION_AUTHORITY_FOUND = FALSE
+    STRICT_CAUSAL_RUNTIME_PROVIDER_READY = FALSE
+
+These flags may remain FALSE even if the new research runtime model performs
+well.
+
+Add a separate research flag:
+
+    TRACE_DESCRIPTOR_RUNTIME_MODEL_VALIDATED
+
+============================================================
+1. SCIENTIFIC GOAL
+============================================================
+
+Develop ONE job-specific TOTAL runtime prediction package suitable for the
+V42 research experiment.
+
+For job j:
+
+    T_j = actual execution runtime
+
+Primary outputs:
+
+    Q50(T_j | x_j)
+    Q90(T_j | x_j)
+
+The model must distinguish short and long jobs.
+
+Do NOT return to the vNext6 featureless behavior where all jobs receive nearly
+the same Q90.
+
+The primary problem to solve is:
+
+    good overall calibration
+    +
+    sharp reservation
+    +
+    long-job protection
+
+simultaneously.
+
+============================================================
+2. TARGET DEFINITION
+============================================================
+
+Audit the exact Kestrel runtime label lineage first.
+
+Primary candidate:
+
+    total_runtime_seconds = end_time - start_time
+
+where start/end correspond to actual execution interval.
+
+Explicitly verify whether existing normalized `runtime_seconds` is exactly
+equivalent.
+
+Do NOT use:
+
+    queue_wait = start - submit
+
+as runtime.
+
+Do NOT use requested walltime as target.
+
+Do NOT redefine runtime to include queueing.
+
+Create:
+
+    RUNTIME_TARGET_AUTHORITY_AUDIT.json
+
+Required flags:
+
+    TARGET_IS_EXECUTION_RUNTIME = TRUE/FALSE
+    QUEUE_WAIT_INCLUDED_IN_TARGET = FALSE
+    REQUESTED_WALLTIME_USED_AS_LABEL = FALSE
+
+If target semantics cannot be proven, stop before training.
+
+============================================================
+3. TEMPORAL SPLIT / NO FUTURE LEAKAGE
+============================================================
+
+Use chronological, pre-April development only.
+
+Preserve the previously established pre-April data boundary.
+
+Recommended structure:
+
+TRAIN:
+    historical training period already authorized in Runtime-vNext6/vNext7
+
+DEV:
+    pre-April development period
+
+CAL:
+    pre-April calibration/selection validation period
+
+APRIL:
+    LOCKED final evaluation only
+
+MAY:
+    DO NOT use for model selection, tuning, calibration, threshold choice,
+    feature selection, or architecture selection.
+
+Do not create random train/test splits across time.
+
+For each training example, the runtime label may be used only when it is
+mature under the corresponding historical cutoff.
+
+Audit unresolved/right-censored jobs separately.
+
+Do NOT silently convert jobs whose end is unknown into short jobs.
+
+============================================================
+4. FEATURE CONTRACT — RESEARCH TRACE DESCRIPTORS
+============================================================
+
+Create a new explicit contract:
+
+    RESEARCH_TRACE_RUNTIME_FEATURE_CONTRACT.json
+
+This contract is NOT the strict causal contract from PR #78.
+
+Start from raw/archive Kestrel descriptors and audit their actual normalized
+mapping.
+
+Candidate base fields include, if present and numerically valid:
+
+RESOURCE REQUEST:
+- requested_seconds / requested walltime
+- num_gpus_req
+- num_nodes_req
+- num_cores_req
+- requested_memory_mib
+
+SCHEDULER DESCRIPTORS:
+- qos
+- partition
+- account
+- anonymized user token
+
+STRUCTURAL / JOB DESCRIPTORS:
+- array metadata
+- job-name token
+- submitline token
+- script token
+- workdir token
+- any stable anonymized workflow/job-type descriptor found in PR #78
+
+Do NOT use any field merely because it exists.
+
+For every feature record:
+
+- archive field
+- normalized field
+- missing rate
+- cardinality
+- unseen-category rate
+- whether future/outcome-derived
+- PR #78 provenance class
+- use in F0/F1/F2
+- exact transform
+
+============================================================
+5. FORBIDDEN FEATURES
+============================================================
+
+Never use as prediction input:
+
+- actual start time if it is unknown at scheduling/inference time
+- actual end time
+- actual runtime
+- completion status
+- realized queue wait
+- realized utilization
+- future scheduler state
+- future checkpoint information
+- D-day actual completion
+- May outcomes
+
+Do not derive proxy leakage features from them.
+
+Absolute timestamps should be treated carefully.
+
+If submit timestamp provenance remains unresolved from PR #78,
+do NOT use submit_hour / submit_dow in the primary model.
+
+They may remain a research diagnostic arm only if clearly isolated.
+
+============================================================
+6. FEATURE ENGINEERING
+============================================================
+
+Engineer physically meaningful workload descriptors.
+
+At minimum evaluate:
+
+    log_walltime = log1p(requested_seconds)
+
+    log_gpu = log1p(num_gpus_req)
+
+    log_nodes = log1p(num_nodes_req)
+
+    log_cores = log1p(num_cores_req)
+
+    log_memory = log1p(requested_memory_mib)
+
+    gpu_per_node = GPU / nodes
+
+    cores_per_node = cores / nodes
+
+    cores_per_gpu = cores / GPU
+
+    memory_per_gpu = memory / GPU
+
+    memory_per_node = memory / nodes
+
+    requested_gpu_time =
+        requested_GPU * requested_seconds
+
+    log_requested_gpu_time =
+        log1p(requested_GPU * requested_seconds)
+
+Handle zero/missing denominators explicitly.
+
+Do not impute impossible physical values silently.
+
+Keep missingness indicators where appropriate.
+
+============================================================
+7. FEATURE ABLATION SETS
+============================================================
+
+Use feature families so we can determine what actually improves runtime
+prediction.
+
+F0 — RESOURCE ONLY
+    GPU
+    nodes
+    cores
+    memory
+    engineered resource-shape features
+
+F1 — RESOURCE + REQUESTED DURATION + SCHEDULER
+    F0
+    + requested walltime
+    + QoS
+    + partition
+
+F2 — EXTENDED TRACE DESCRIPTORS
+    F1
+    + account
+    + anonymized user
+    + stable workflow/job/script/name descriptors that pass support screening
+
+F3 — REDUCED ROBUST SET
+    selected only from pre-April evidence after feature importance/stability
+    audit; no April information.
+
+Do not automatically treat F2 as superior.
+
+High-cardinality identity features must pass support/unseen-category checks.
+
+PR #78 observed very high unseen rates for some script identity fields;
+do not force them into the selected model.
+
+============================================================
+8. BASELINES
+============================================================
+
+Reproduce existing baselines before new model selection.
+
+W0:
+    requested walltime directly used as scheduling duration
+
+B0:
+    best previous full-feature Runtime research model
+    from the existing frozen lineage
+
+Bconst:
+    Runtime-vNext6 featureless baseline
+
+Reproduce exact frozen outputs where possible.
+
+Do NOT modify these baselines.
+
+Report:
+
+    reproduction maximum absolute prediction error
+    feature lineage
+    model hash
+
+============================================================
+9. PRIMARY MODEL FAMILY
+============================================================
+
+Keep the first search compact and interpretable.
+
+Use LightGBM Quantile as primary family unless reproduction shows a technical
+reason not to.
+
+Compare:
+
+M1 — RAW-RUNTIME QUANTILE
+    LightGBM quantile directly on runtime_seconds
+    Q50 + Q90
+
+M2 — LOG-RUNTIME QUANTILE
+    target:
+        y = log1p(runtime_seconds)
+
+    Train Q50/Q90 in log space.
+
+    Back-transform:
+        runtime = expm1(y_hat)
+
+M3 — WALLTIME-RELATIVE QUANTILE
+    only as RESEARCH TRACE model
+
+    Example target:
+        y = log(runtime / requested_walltime)
+
+    or another mathematically justified normalized target.
+
+    Then reconstruct predicted runtime using requested walltime.
+
+    This model MUST NOT interpret walltime as actual runtime.
+
+M4 — LONG-TAIL MIXTURE / TWO-STAGE MODEL
+
+    Stage 1:
+        predict probability that runtime > 4 h
+
+    Stage 2:
+        separate or conditioned quantile regressors for short/medium/long
+        runtime regimes
+
+    The final Q50/Q90 must remain deterministic and callable for a new job.
+
+M5 — SMALL ENSEMBLE
+    only if M1–M4 show complementary error patterns on DEV/CAL.
+
+Do NOT add TFT, DeepAR, Transformer, neural survival, or large neural models
+in this task unless all compact models fail for a clearly diagnosed reason.
+
+============================================================
+10. LONG-TAIL MODELING IS A PRIMARY REQUIREMENT
+============================================================
+
+The previous model failure showed that overall Q90 coverage alone can hide
+poor long-job behavior.
+
+Evaluate at minimum:
+
+T <= 15 min
+15 min < T <= 30 min
+30 min < T <= 1 h
+1 h < T <= 2 h
+2 h < T <= 4 h
+T > 4 h
+
+Also report:
+
+T > 8 h
+T > 12 h
+T > 24 h
+
+if support is adequate.
+
+For every bucket report:
+
+- N
+- Q50 MAE
+- Q90 coverage
+- Q90 pinball
+- underprediction rate
+- predicted/actual runtime ratio
+- GPU-weighted metrics where GPU descriptor is available
+
+Long-job performance is not optional.
+
+============================================================
+11. HIGH-GPU STRATA
+============================================================
+
+PR #78 showed limited validation support for >=16 GPU jobs.
+
+Do NOT claim a strong high-GPU guarantee if support is inadequate.
+
+Report separate strata:
+
+1 GPU
+2–4 GPU
+5–8 GPU
+9–15 GPU
+>=16 GPU
+
+or data-supported equivalents.
+
+If any stratum has insufficient DEV/CAL support:
+
+    HIGH_GPU_RUNTIME_GATE = INSUFFICIENT_SUPPORT
+
+not PASS.
+
+============================================================
+12. MODEL SELECTION METRICS
+============================================================
+
+Do NOT select using one metric.
+
+Primary Q90 requirements:
+
+A. calibration:
+    overall Q90 coverage should be close to nominal 90%.
+
+Use a preregistered tolerance band such as:
+
+    0.88 <= coverage <= 0.92
+
+unless existing frozen project authority specifies a different band.
+
+B. sharpness:
+    Q90 pinball loss must not materially degrade relative to B0.
+
+C. reservation efficiency:
+    predicted reserved GPUh / actual GPUh must be substantially below W0.
+
+D. long-job safety:
+    >4 h coverage must not collapse as in vNext6.
+
+E. GPU-weighted underprediction:
+    must be explicitly reported.
+
+F. stability:
+    results should be consistent between DEV and CAL.
+
+Do NOT obtain nominal coverage simply by multiplying all predictions by an
+arbitrary factor.
+
+============================================================
+13. RESERVATION RATIO
+============================================================
+
+For scheduling, compute:
+
+    reservation GPUh =
+        ceil(predicted_runtime / 900 s)
+        * requested_GPU
+        * 0.25 h
+
+Compare against realized GPUh.
+
+Report:
+
+    reservation_to_actual_ratio
+
+for:
+
+- W0
+- B0
+- every new challenger
+
+The selected model should meaningfully improve on walltime reservation.
+
+Do not accept a model that reaches Q90 coverage by returning walltime-scale
+durations.
+
+Target is not an arbitrary fixed ratio alone.
+
+Selection must use calibration + sharpness + queue utility jointly.
+
+============================================================
+14. CALIBRATION
+============================================================
+
+If raw Q90 is close but not calibrated, evaluate pre-April calibration methods.
+
+Allowed examples:
+
+- additive residual conformal calibration
+- multiplicative calibration if justified
+- group-aware calibration only when DEV/CAL support is sufficient
+
+Calibration parameters must be selected and frozen before April.
+
+Do not calibrate separately on tiny strata.
+
+Do not use April to adjust Q90.
+
+Report before/after:
+
+    coverage
+    pinball
+    reservation ratio
+
+A calibration method that improves coverage but destroys sharpness/reservation
+must be rejected.
+
+============================================================
+15. UNCERTAINTY / STATISTICAL COMPARISON
+============================================================
+
+Use paired pre-April comparisons.
+
+For selected challenger vs B0 report confidence intervals or bootstrap
+uncertainty for at least:
+
+- pinball loss difference
+- MAE difference
+- reservation ratio difference
+- long-job underprediction difference
+
+Do not call tiny numerical differences an improvement.
+
+============================================================
+16. MODEL COMPLEXITY / PRUNING
+============================================================
+
+Tune LightGBM conservatively.
+
+Audit:
+
+- number of features
+- number of trees
+- max depth / num leaves
+- min data in leaf
+- learning rate
+- training time
+- inference time
+
+Use pre-April validation to remove obviously useless or unstable feature
+families.
+
+Do NOT perform huge unrestricted hyperparameter search.
+
+Goal:
+
+    strong, stable, reproducible predictor
+
+not maximum tuning complexity.
+
+============================================================
+17. NEW-JOB CALLABLE PROVIDER
+============================================================
+
+The selected research model must be serialized.
+
+Create one provider package containing:
+
+- Q50 model
+- Q90 model
+- preprocessing
+- categorical mappings
+- engineered-feature transforms
+- feature contract
+- model hashes
+- training cutoff
+- version metadata
+
+Stable API:
+
+    predict_total(job_record, event_time=None)
+
+returns at least:
+
+    q50_seconds
+    q90_seconds
+    model_version
+    feature_contract_version
+    provenance_mode = "Kestrel_trace_proxy"
+
+Must work for a completely new job ID.
+
+No lookup cache.
+
+No retraining.
+
+No hidden access to actual runtime.
+
+CPU-only inference must work.
+
+============================================================
+18. UNSEEN CATEGORY HANDLING
+============================================================
+
+For QoS/partition/account/user/workflow categories:
+
+- define explicit UNKNOWN bucket
+- freeze encoding pre-April
+- never refit category mappings on April/May
+
+Report:
+
+    DEV unseen rate
+    CAL unseen rate
+    April unseen rate after freeze
+
+If a high-cardinality feature has unacceptable unseen rate or overfits,
+remove it rather than leaking future mapping information.
+
+============================================================
+19. RUNNING JOB REMAINING-RUNTIME DIAGNOSTIC
+============================================================
+
+First build the best TOTAL runtime model.
+
+Then test:
+
+    R_proxy(e) =
+        max(Q90_total - elapsed, 0)
+
+at every causally valid 30-min checkpoint.
+
+Do NOT train a separate remaining-runtime model yet.
+
+Compare against vNext6 subtraction baseline.
+
+Report:
+
+- remaining-runtime MAE
+- >15 min remaining classification
+- >30 min
+- >60 min
+- >2 h
+- >4 h
+- overrun frequency
+- long-running cohort metrics
+
+Important:
+
+If total-runtime model becomes good but subtraction is still poor,
+THEN and only then set:
+
+    REMAINING_RUNTIME_MODEL_RESEARCH_NEEDED = TRUE
+
+and recommend survival/AFT as a later challenger.
+
+Do not build it in the same task unless explicitly required by a later task.
+
+============================================================
+20. OVERRUN CONTRACT
+============================================================
+
+Preserve the existing safe semantics.
+
+If:
+
+    elapsed >= planned predicted runtime
+
+but the job is still observed RUNNING:
+
+    state = OVERRUN
+
+Then:
+
+- never force completion
+- GPU remains occupied
+- extend reservation one control interval at a time
+- do not invent actual future completion
+- migration defaults STAY during overrun in the current V42 contract
+
+Test this contract with the new predictor.
+
+============================================================
+21. PRE-APRIL FREEZE
+============================================================
+
+Before opening April:
+
+Freeze:
+
+- target definition
+- train/dev/cal membership
+- feature set
+- feature transforms
+- categorical maps
+- model family
+- hyperparameters
+- calibration
+- Q50/Q90 models
+- selection rationale
+- provider bytes
+- all gates
+
+Generate:
+
+    MODEL_SELECTION_FREEZE.json
+    FEATURE_CONTRACT_FREEZE.json
+    PROVIDER_BUNDLE_FREEZE.json
+
+Only after hashes are frozen may April be evaluated.
+
+============================================================
+22. LOCKED APRIL EVALUATION
+============================================================
+
+After freeze, open April ONCE for final evaluation.
+
+Compare:
+
+W0 = requested-walltime duration
+B0 = prior best frozen Runtime model
+V8 = newly selected Runtime-vNext8 model
+
+Report:
+
+- Q50 MAE
+- Q90 coverage
+- Q90 pinball
+- reservation/actual GPUh ratio
+- total predicted/actual runtime ratio
+- >4 h coverage
+- GPU-weighted overrun
+- unseen categories
+- inference latency
+
+Do NOT modify the model after April.
+
+May remains unopened for model development.
+
+============================================================
+23. APRIL 2 QUEUE REPLAY
+============================================================
+
+This is a mandatory operational test.
+
+Reproduce the same April 2 queue replay used in vNext6.
+
+Compare:
+
+W0
+B0
+V8
+
+Report:
+
+- admitted jobs
+- start < H
+- start >= H
+- recovered in-day starts
+- lost in-day starts
+- average queue wait
+- P50/P95 queue wait
+- reserved GPUh
+- realized GPUh
+- overrun extensions
+- capacity violations
+
+The vNext6 failure was:
+
+    W0 in-day starts: 150
+    V6 in-day starts: 0
+
+The new model must not repeat this pathological result.
+
+Do not tune using April replay.
+
+============================================================
+24. V42 RUNTIME PROVIDER STATUS
+============================================================
+
+Keep TWO separate judgments.
+
+STRICT_CAUSAL_RUNTIME_PROVIDER_READY:
+    MUST remain FALSE unless original submit-version authority is later
+    recovered.
+
+TRACE_DESCRIPTOR_RUNTIME_MODEL_VALIDATED:
+    may become TRUE if predictive and operational gates pass.
+
+V42_RESEARCH_RUNTIME_PROVIDER_READY:
+    may become TRUE only if:
+
+    1. trace feature contract is explicit,
+    2. no outcome/future leakage exists,
+    3. model is frozen pre-April,
+    4. Q90 calibration is acceptable,
+    5. long-job performance is acceptable,
+    6. reservation is materially sharper than W0,
+    7. April queue replay improves or at minimum does not reproduce the
+       vNext6 collapse,
+    8. capacity safety is preserved,
+    9. provider is callable without refit.
+
+Do NOT call this production-certified.
+
+============================================================
+25. PAPER-FACING INTERPRETATION
+============================================================
+
+Prepare wording but do not rewrite the paper yet.
+
+Correct interpretation:
+
+    "Runtime prediction was trained using anonymized job request descriptors
+     contained in the Kestrel workload trace."
+
+Required limitation:
+
+    "The public trace does not provide sufficient request-version provenance
+     to verify that every archived descriptor exactly corresponds to the
+     immutable initial submission value."
+
+Do NOT claim:
+
+    "all features are verified original scheduler inputs"
+
+unless future provenance evidence changes the result.
+
+============================================================
+26. REQUIRED ABLATIONS
+============================================================
+
+At minimum compare:
+
+F0 resource only
+F1 + walltime/QoS/partition
+F2 + account/user/workflow descriptors
+F3 reduced robust set if selected
+
+For the selected model, report incremental effect of:
+
+- requested walltime
+- resource shape
+- scheduler categorical descriptors
+- identity/workflow descriptors
+
+This is required so the final paper can explain WHY the model works.
+
+Do not use post-April feature importance to select the model.
+
+============================================================
+27. REQUIRED COMPUTE BENCHMARK
+============================================================
+
+For the selected model benchmark:
+
+TRAIN:
+- CPU single
+- CPU 4 threads/processes if implementation supports it
+- RTX 4060 GPU if available
+
+INFERENCE:
+- CPU only is mandatory
+- single job latency
+- batch 10/100/1000
+
+Do not assume GPU is faster.
+
+Select backend based on measured runtime and numerical equivalence.
+
+============================================================
+28. REQUIRED ARTIFACTS
+============================================================
+
+Create:
+
+docs/runtime_vnext8_trace_feature_total/
+
+Required:
+
+RUNTIME_TARGET_AUTHORITY_AUDIT.json
+
+RAW_FEATURE_INVENTORY.csv
+RESEARCH_TRACE_RUNTIME_FEATURE_CONTRACT.json
+FEATURE_ENGINEERING_SPEC.md
+
+FEATURE_SET_ABLATION.csv
+MODEL_COMPARISON.csv
+STRATIFIED_RUNTIME_METRICS.csv
+LONG_JOB_METRICS.csv
+GPU_WEIGHTED_METRICS.csv
+
+CALIBRATION_COMPARISON.csv
+PAIRED_UNCERTAINTY.csv
+
+MODEL_SELECTION_FREEZE.json
+FEATURE_CONTRACT_FREEZE.json
+PROVIDER_BUNDLE_FREEZE.json
+
+CHECKPOINT_SUBTRACTION_DIAGNOSTIC.csv
+OVERRUN_DIAGNOSTIC.csv
+
+APRIL_LOCKED_RUNTIME_METRICS.csv
+APRIL_WALLTIME_VS_RUNTIME_QUEUE_REPLAY.csv
+
+COMPUTE_BACKEND_BENCHMARK.csv
+INFERENCE_LATENCY.json
+
+RUNTIME_PROVIDER/
+
+SOURCE_MANIFEST.json
+DELIVERY_MANIFEST.json
+
+FINAL_REVIEW_KO.md
+FINAL_VERDICT.json
+
+============================================================
+29. REQUIRED FINAL QUESTIONS
+============================================================
+
+FINAL_REVIEW_KO.md must directly answer:
+
+1. 어떤 Kestrel raw/archive feature를 사용했는가?
+2. 어떤 feature를 제외했고 왜 제외했는가?
+3. strict causal feature=0과 research trace feature 사용은 어떻게 다른가?
+4. Runtime target은 정확히 무엇인가?
+5. 가장 좋은 feature family는 무엇인가?
+6. requested walltime은 얼마나 유용했는가?
+7. GPU/nodes/cores/memory shape는 얼마나 기여했는가?
+8. QoS/partition/account/user는 도움이 되었는가?
+9. workflow/script identity는 unseen-category 문제 때문에 쓸 수 있었는가?
+10. raw vs log-runtime target 중 무엇이 나았는가?
+11. walltime-relative target은 효과가 있었는가?
+12. long-tail mixture는 효과가 있었는가?
+13. 최종 Q50/Q90 성능은?
+14. 전체 Q90 coverage는?
+15. >4 h Q90 coverage는?
+16. GPU-weighted long-job 성능은?
+17. reservation/actual GPUh ratio는?
+18. W0보다 얼마나 reservation을 줄였는가?
+19. B0보다 실제로 개선됐는가?
+20. 개선 차이의 uncertainty는?
+21. April 2 start<H는 W0/B0/V8 각각 몇 개인가?
+22. vNext6의 150->0 악화는 해소됐는가?
+23. checkpoint total-minus-elapsed는 이제 충분한가?
+24. 별도 remaining/survival model이 필요한가?
+25. overrun semantics는 안전한가?
+26. CPU/GPU 어느 backend가 적합한가?
+27. 새 job inference가 재학습 없이 가능한가?
+28. April/May tuning은 있었는가?
+29. V42 research provider로 사용할 수 있는가?
+30. 논문에서 어떤 provenance limitation을 반드시 밝혀야 하는가?
+
+============================================================
+30. FINAL FLAGS
+============================================================
+
+STRICT_CAUSAL_FEATURE_COUNT = 0
+REQUEST_VERSION_AUTHORITY_FOUND = FALSE
+
+RESEARCH_TRACE_FEATURE_COUNT = integer
+OUTCOME_LEAKAGE_FOUND = TRUE/FALSE
+
+TARGET_RUNTIME_AUTHORITY_PASS = TRUE/FALSE
+
+TOTAL_RUNTIME_MODEL_SELECTED = TRUE/FALSE
+Q50_MODEL_VALIDATED = TRUE/FALSE
+Q90_MODEL_VALIDATED = TRUE/FALSE
+
+OVERALL_Q90_CALIBRATION_PASS = TRUE/FALSE
+LONG_JOB_Q90_GATE_PASS = TRUE/FALSE
+HIGH_GPU_GATE = PASS/FAIL/INSUFFICIENT_SUPPORT
+
+RESERVATION_SHARPNESS_PASS = TRUE/FALSE
+APRIL_QUEUE_REPLAY_COMPLETED = TRUE/FALSE
+APRIL_QUEUE_REPLAY_IMPROVED = TRUE/FALSE
+
+CHECKPOINT_SUBTRACTION_VALIDATED = TRUE/FALSE
+REMAINING_RUNTIME_MODEL_RESEARCH_NEEDED = TRUE/FALSE/INCONCLUSIVE
+
+TRACE_DESCRIPTOR_RUNTIME_MODEL_VALIDATED = TRUE/FALSE
+V42_RESEARCH_RUNTIME_PROVIDER_READY = TRUE/FALSE
+
+STRICT_CAUSAL_RUNTIME_PROVIDER_READY = FALSE
+
+APRIL_USED_FOR_SELECTION = FALSE
+MAY_USED_FOR_SELECTION = FALSE
+
+ONLINE_REFIT_REQUIRED = FALSE
+NEW_JOB_CALLABLE = TRUE/FALSE
+
+============================================================
+31. STOP / FAIL-CLOSED RULES
+============================================================
+
+Stop or reject a candidate if:
+
+- target uses future outcome as predictor,
+- April/May influences feature/model selection,
+- a model reaches coverage only by walltime-scale overreservation,
+- >4 h coverage collapses,
+- category encoding is refit on April,
+- model only works by job-ID lookup,
+- selected provider cannot infer a completely unseen job,
+- provider silently uses actual start/end/runtime,
+- queue replay causes severe deterioration,
+- no valid callable model beats the meaningful baselines.
+
+Negative result is acceptable.
+
+Do not lower gates after seeing April.
+
+============================================================
+32. MOST IMPORTANT PRINCIPLE
+============================================================
+
+Do NOT interpret PR #78 as:
+
+    "Kestrel has no usable Runtime features."
+
+Interpret it as:
+
+    "Kestrel public trace descriptors are usable for trace-based research,
+     but their immutable original-submission version is not proven."
+
+Therefore develop the strongest scientifically transparent
+job-specific Runtime predictor from those trace descriptors,
+while preserving that provenance limitation explicitly.
