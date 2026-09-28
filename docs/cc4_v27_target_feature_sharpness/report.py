@@ -2,12 +2,14 @@
 from core import *
 from experiment import predictions,calibrate,TARGETS,FEATURES
 ROLES=['DEVELOPMENT','CALIBRATION','EXPOSED_EVALUATION','OOS_EXTENSION','MAY_HISTORICAL']
-def daystats(y,q,dt):
+def daystats(y,q,dt,burst):
     r=y-q[...,1];e=y-q[...,0]
-    return np.column_stack([np.maximum(.9*r,-.1*r).mean(1),(r<=0).mean(1),q[...,1].sum(1),y.sum(1),abs(e).mean(1),abs(y.max(1)-q[...,0].max(1)),abs(y.argmax(1)-q[...,0].argmax(1))*dt])
+    return np.column_stack([np.maximum(.9*r,-.1*r).mean(1),(r<=0).mean(1),q[...,1].sum(1),y.sum(1),abs(e).mean(1),abs(y.max(1)-q[...,0].max(1)),abs(y.argmax(1)-q[...,0].argmax(1))*dt,((r<=0)&(y>burst)).sum(1),(y>burst).sum(1),((r<=0)&(y>0)).sum(1),(y>0).sum(1)])
 def paired(a,b,seed=20260928):
-    out=[];names=['Q90_pinball','Q90_coverage','requirement_ratio','Q50_MAE','peak_magnitude_MAE','peak_timing_MAE_hours'];rng=np.random.default_rng(seed);n=len(a)
-    def score(s):return np.stack([s[...,0],s[...,1],s[...,2]/s[...,3],s[...,4],s[...,5],s[...,6]],axis=-1)
+    out=[];names=['Q90_pinball','Q90_coverage','requirement_ratio','Q50_MAE','peak_magnitude_MAE','peak_timing_MAE_hours','burst_coverage','positive_coverage'];rng=np.random.default_rng(seed);n=len(a)
+    def score(s):
+        with np.errstate(divide='ignore',invalid='ignore'):
+            return np.stack([s[...,0],s[...,1],s[...,2]/s[...,3],s[...,4],s[...,5],s[...,6],s[...,7]/s[...,8],s[...,9]/s[...,10]],axis=-1)
     point=score(a.mean(0))-score(b.mean(0))
     for block in [1,7]:
         starts=rng.integers(0,n,(2000,int(np.ceil(n/block))));ix=((starts[...,None]+np.arange(block))%n).reshape(2000,-1)[:,:n]
@@ -55,7 +57,7 @@ def main():
             for role in ROLES[2:]:
                 ids=role_ids(role)
                 for variant,source in [('RAW',qs),('CALIBRATED',qcals)]:
-                    a=daystats(y[ids],source[t+'_'+f][ids],dt);b=daystats(y[ids],source[t+'_F0'][ids],dt)
+                    a=daystats(y[ids],source[t+'_'+f][ids],dt,burst);b=daystats(y[ids],source[t+'_F0'][ids],dt,burst)
                     for row in paired(a,b):uncertainty.append(dict(contrast=t+'_'+f+' minus '+t+'_F0',target=t,role=role,variant=variant,**row))
     # Resolution ablation uses common hourly labels; aggregated marginal Q90 is
     # a reserve proxy, not a recalculated hourly or joint daily quantile.
@@ -67,7 +69,7 @@ def main():
                 m=metrics(z['T2'][ids],p,bursts['T2'])
                 resolution.append(dict(arm=t+'_'+f,role=role,common_resolution='hourly occupancy',Q90_semantics='mean of four marginal15min quantiles reserve proxy' if t=='T3' else 'hourly marginal quantile',**m))
             if role in ROLES[2:]:
-                a=daystats(z['T2'][ids],qs['T3_'+f][ids].reshape(-1,24,4,2).mean(2),1);b=daystats(z['T2'][ids],qs['T2_'+f][ids],1)
+                a=daystats(z['T2'][ids],qs['T3_'+f][ids].reshape(-1,24,4,2).mean(2),1,bursts['T2']);b=daystats(z['T2'][ids],qs['T2_'+f][ids],1,bursts['T2'])
                 for row in paired(a,b):uncertainty.append(dict(contrast='T3_'+f+' hourly aggregate minus T2_'+f,target='COMMON_HOURLY',role=role,variant='RAW',**row))
     mf=pd.DataFrame(allmetrics)
     relative=[];pareto=[]
@@ -80,7 +82,7 @@ def main():
     csv('ARM_METRICS.csv',allmetrics);csv('HOUR_SLOT_METRICS.csv',hour);csv('LEAD_GROUP_METRICS.csv',lead);csv('STRATIFIED_METRICS.csv',strata);csv('DAY_METRICS.csv',dayrows)
     csv('FEATURE_ABLATION.csv',relative);csv('PARETO_FRONT.csv',pareto);csv('FEATURE_IMPORTANCE.csv',importance);csv('RESOLUTION_COMPARISON.csv',resolution)
     pd.concat(frames,ignore_index=True).to_parquet(ROOT/'PREDICTIONS.parquet',index=False)
-    stage2=[];s2frames=[];s2=read(ROOT/'STAGE2_SELECTION_FREEZE.json')
+    stage2=[];s2frames=[];s2lead=[];s2hour=[];s2=read(ROOT/'STAGE2_SELECTION_FREEZE.json')
     for arm in read(ROOT/'FEATURE_SELECTION_FREEZE.json')['candidates']:
         t=arm[:2];y=z[t];dt=.25 if t=='T3' else 1
         for model in ['M0','M1']:
@@ -88,11 +90,15 @@ def main():
             for variant,p in [('RAW',q),('CALIBRATED',qc)]:
                 for role in ROLES:
                     ids=role_ids(role);stage2.append(dict(arm=arm,target=t,model=model,variant=variant,role=role,**metrics(y[ids],p[ids],bursts[t],dt)))
+                    for group,slots in enumerate(np.array_split(np.arange(y.shape[1]),4)):
+                        s2lead.append(dict(arm=arm,target=t,model=model,variant=variant,role=role,lead_group=f'{6+6*group}..{12+6*group}',**metrics(y[ids][:,slots],p[ids][:,slots],bursts[t],dt)))
+                    for j in range(y.shape[1]):
+                        s2hour.append(dict(arm=arm,target=t,model=model,variant=variant,role=role,slot=j,target_hour=j*dt,**metrics(y[ids,j],p[ids,j],bursts[t],dt)))
                     if model=='M1' and role in ROLES[2:]:
                         source=qs if variant=='RAW' else qcals
-                        for row in paired(daystats(y[ids],p[ids],dt),daystats(y[ids],source[arm][ids],dt)):uncertainty.append(dict(contrast=arm+' M1 minus M0',target=t,role=role,variant=variant,**row))
+                        for row in paired(daystats(y[ids],p[ids],dt,bursts[t]),daystats(y[ids],source[arm][ids],dt,bursts[t])):uncertainty.append(dict(contrast=arm+' M1 minus M0',target=t,role=role,variant=variant,**row))
             n=y.shape[1];s2frames.append(pd.DataFrame(dict(arm=arm,model=model,target_day=np.repeat(DAYS[OOS],n),slot=np.tile(np.arange(n),len(OOS)),y=y[OOS].ravel(),raw_Q50=q[OOS,:,0].ravel(),raw_Q90=q[OOS,:,1].ravel(),calibrated_Q90=qc[OOS,:,1].ravel())))
-    csv('STAGE2_MODEL_METRICS.csv',stage2);csv('PAIRED_UNCERTAINTY.csv',uncertainty)
+    csv('STAGE2_MODEL_METRICS.csv',stage2);csv('STAGE2_LEAD_GROUP_METRICS.csv',s2lead);csv('STAGE2_HOUR_SLOT_METRICS.csv',s2hour);csv('PAIRED_UNCERTAINTY.csv',uncertainty)
     pd.concat(s2frames,ignore_index=True).to_parquet(ROOT/'STAGE2_PREDICTIONS.parquet',index=False)
     print('REPORT_METRICS_COMPLETE',flush=True)
 if __name__=='__main__':main()

@@ -37,8 +37,39 @@ class Contracts(unittest.TestCase):
             self.assertTrue(np.isfinite(z[t]).all());self.assertTrue((z[t]>=0).all())
             end=np.array([(pd.Timestamp(str(x),tz=TZ)+pd.Timedelta(days=1)).value for x in DAYS])
             self.assertTrue((z['maturity_'+t].max(1)>=end).all())
+    def test_native_lag_values_and_latest_age(self):
+        z=np.load(ROOT/'TARGETS.npz');x=np.load(ROOT/'FEATURES.npz');groups=read(ROOT/'FEATURE_GROUPS.json')
+        for t in ['T0','T1','T2','T3']:
+            a=x[t+'_F1'];names=groups[t+'_F1'];ages=[]
+            for lag in [1,2,3,7,14,21,28]:
+                k=names.index(f'same_clock_{lag}d_value');mask=a[...,k+1].astype(bool)
+                expected=np.zeros_like(z[t],dtype=np.float32);expected[lag:]=z[t][:-lag]
+                np.testing.assert_array_equal(a[...,k][mask],expected[mask])
+                self.assertFalse(mask[:lag].any())
+                ages.append(np.where(mask,lag*24,np.inf))
+            k=names.index('latest_same_clock_value');minimum=np.min(ages,axis=0)
+            np.testing.assert_array_equal(a[...,k+1]>0,np.isfinite(minimum))
+            np.testing.assert_array_equal(a[...,k+2][np.isfinite(minimum)],minimum[np.isfinite(minimum)])
+    def test_recency_window_identities(self):
+        z=np.load(ROOT/'FEATURES.npz');names=read(ROOT/'FEATURE_GROUPS.json')['T0_F2'];a=z['T0_F2'];x=a[:,0]
+        count=[]
+        for minutes in [15,30,60,180,360,720,1440]:
+            count.append(x[:,names.index(f'recent_{minutes}min_count')])
+            pos=x[:,names.index(f'recent_{minutes}min_positive_arrival_fraction')]
+            zero=x[:,names.index(f'recent_{minutes}min_zero_arrival_fraction')]
+            np.testing.assert_allclose(pos+zero,1,rtol=1e-7)
+        self.assertTrue((np.diff(np.array(count),axis=0)>=0).all())
+        start=names.index('recent_15min_count')
+        np.testing.assert_array_equal(a[...,start:],np.repeat(x[:,None,start:],24,axis=1))
     def test_frozen_roles(self):
         self.assertEqual(len(role_ids('OOS_EXTENSION')),63)
         self.assertFalse(L.loc[L.split.eq('OOS_EXTENSION'),'eligible'].any())
         self.assertEqual(len(DEV),58);self.assertEqual(len(CAL),26)
+    def test_nominal_band_precedes_score_and_inflation(self):
+        from experiment import choose_development
+        f=pd.DataFrame([dict(arm='inflated',model='M0',Q90_coverage=.94,Q90_pinball=1.,calibration_error=.04,requirement_ratio=7.),dict(arm='nominal',model='M0',Q90_coverage=.9,Q90_pinball=2.,calibration_error=0.,requirement_ratio=1.3)])
+        row,eligible=choose_development(f)
+        self.assertEqual(row.arm,'nominal');self.assertTrue(eligible)
+        row,eligible=choose_development(f.iloc[:1])
+        self.assertFalse(eligible)
 if __name__=='__main__':unittest.main(verbosity=2)
