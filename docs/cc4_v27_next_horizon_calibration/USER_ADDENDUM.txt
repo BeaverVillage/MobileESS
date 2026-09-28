@@ -1,0 +1,325 @@
+CC4-v2.7 ADDENDUM — COMPLETE CURRENT RUN UNCHANGED, THEN ACCELERATE NEXT ML STAGE
+
+IMPORTANT:
+Do NOT modify, interrupt, restart, accelerate, prune, or change the currently
+running CC4-v2.7 target/feature experiment.
+
+The current experiment has already frozen its protocol and candidate selection
+rules and is well into the full evaluation.
+
+Finish the current run exactly as registered.
+
+DO NOT change during the current run:
+- LightGBM parameters
+- n_jobs
+- CPU/GPU device
+- target definitions
+- feature definitions
+- daily-refit cadence
+- selected research candidates
+- calibration method
+- evaluation membership
+- May diagnostic rules
+- number of arms already registered
+
+Preserve all current outputs and finish the full evaluation.
+
+============================================================
+1. AFTER CURRENT CC4-v2.7 COMPLETES
+============================================================
+
+Do NOT repeat another exhaustive 24-arm experiment.
+
+The current experiment has already established useful information about
+target/feature mapping.
+
+After final verification, use its frozen results to reduce the next-stage
+search space.
+
+At minimum retain the research candidates already frozen by the current study:
+
+- T2 + F0
+- T3 + F2
+
+Also retain T0 + F0 only as the historical baseline.
+
+Do not promote either research candidate unless final multi-period evidence
+supports it.
+
+============================================================
+2. NEXT SCIENTIFIC QUESTION
+============================================================
+
+The next ML study should NOT ask again:
+
+"Which of 24 target-feature combinations is best?"
+
+That question has already been investigated.
+
+The next question is:
+
+"Given the best operationally aligned target-feature candidates, can
+horizon-aware probabilistic modeling achieve approximately nominal Q90
+coverage without excessive reserve inflation?"
+
+Focus on:
+
+- Q90 calibration
+- sharpness
+- lead-time heterogeneity
+- burst/tail behavior
+- distribution shift
+
+============================================================
+3. NEXT MODEL STAGE
+============================================================
+
+Compare only a small number of model structures.
+
+M0:
+current pooled LightGBM quantile baseline
+
+M1:
+lead-group LightGBM quantile
+
+For the 24-hour hourly formulation, use registered groups such as:
+
+6–11 h
+12–17 h
+18–23 h
+24–29 h
+
+For T3 15-min output, construct equivalent lead-time groups rather than
+creating 96 separately tuned models initially.
+
+M2:
+best LightGBM + horizon/group-specific calibration
+
+M3:
+best LightGBM + locally/adaptively scaled conformal correction
+
+Only after these simpler models are evaluated should TFT/DeepAR be reopened.
+
+Do NOT start another broad TFT/DeepAR hyperparameter search immediately.
+
+============================================================
+4. COMPUTATIONAL ACCELERATION — BENCHMARK FIRST
+============================================================
+
+Before launching the next expensive experiment, benchmark the training
+backend.
+
+The current lineage uses CPU LightGBM with approximately:
+
+n_jobs = 1
+deterministic = True
+force_col_wise = True
+
+This is acceptable for scientific reproducibility, but the current experiment
+performs thousands of independent fits.
+
+Benchmark at least:
+
+A. Current single-process CPU baseline
+
+B. CPU process-level parallelism
+   - keep each individual LightGBM fit at n_jobs=1
+   - execute independent fit tasks concurrently
+   - test 4 workers
+   - optionally test 6/8 workers if RAM/thermal limits allow
+
+C. LightGBM GPU training on the available NVIDIA GPU
+   - only if the installed LightGBM build supports GPU training
+   - do not silently rebuild/change the scientific environment
+   - record exact environment and backend
+
+Use an identical representative batch of model fits.
+
+Measure:
+
+- total wall-clock time
+- mean fit time
+- P95 fit time
+- CPU utilization
+- GPU utilization
+- peak RAM
+- peak VRAM
+- prediction numerical differences
+- Q50/Q90 metric differences
+
+Do not select a faster backend if it materially changes the experiment's
+numerical/scientific result.
+
+============================================================
+5. PREFERRED PARALLELIZATION STRATEGY
+============================================================
+
+Because each individual LightGBM fit is relatively small and thousands of
+fits are independent, prioritize:
+
+process-level parallelism
+
+before assuming GPU is faster.
+
+Preferred initial benchmark:
+
+4 parallel CPU workers
+×
+LightGBM n_jobs=1 per worker
+
+This avoids oversubscribing CPU threads and preserves deterministic
+single-model behavior as much as possible.
+
+If GPU is materially faster and prediction differences are negligible,
+freeze GPU as the next-stage backend.
+
+If CPU multiprocess is faster, use that instead.
+
+Do not decide based on hardware intuition alone.
+Measure it.
+
+============================================================
+6. AVOID THE CURRENT COMPUTATIONAL EXPLOSION
+============================================================
+
+For the next study, use a staged funnel.
+
+STAGE A — CHEAP DEVELOPMENT SCREEN
+- historical baseline T0F0
+- T2F0
+- T3F2
+- M0 vs M1
+- DEVELOPMENT/CALIBRATION only
+
+Reject clearly inferior structures here.
+
+STAGE B — CALIBRATION STUDY
+Only surviving target/model combinations:
+- raw quantile
+- horizon-specific calibration
+- adaptive/local conformal
+
+STAGE C — EXPENSIVE FULL DAILY REFIT
+Only 1–2 frozen finalists:
+- exposed evaluation
+- OOS extension
+- May historical diagnostic
+
+Do not perform thousands of full-period daily refits for every speculative arm.
+
+============================================================
+7. SCIENTIFIC GATES
+============================================================
+
+Do not optimize only for coverage.
+
+For Q90 evaluate simultaneously:
+
+- empirical coverage near 0.90
+- Q90 pinball
+- requirement ratio
+- excess reserve
+- positive coverage
+- burst coverage
+- lead-group coverage
+
+A model with:
+
+coverage = 0.94
+requirement ratio ≈ 2.5
+
+must NOT automatically beat:
+
+coverage ≈ 0.90
+with much sharper reserve.
+
+The target is:
+
+approximately calibrated AND sharp.
+
+============================================================
+8. IMPORTANT RESULT FROM CURRENT STUDY
+============================================================
+
+The current CC4-v2.7 study has already shown that target semantics matter.
+
+Preserve and explicitly report evidence such as:
+
+- T0 is substantially more burst-concentrated than occupancy-based targets
+- post-issue/pre-D00 jobs contribute nontrivially to next-day unknown execution
+- T0 lifetime GPUh is temporally misaligned with D-day execution workload
+
+However:
+
+do NOT conclude that target correction alone solves forecasting.
+
+The current development evidence also shows that all 24 raw arms failed the
+registered 88–92% Q90 coverage band.
+
+Therefore the next study must distinguish:
+
+TARGET ALIGNMENT improvement
+
+from
+
+PROBABILISTIC FORECAST CALIBRATION improvement.
+
+============================================================
+9. NO CURRENT-RUN CONTAMINATION
+============================================================
+
+Do not use partial current-run evaluation results to:
+
+- modify current candidate selection
+- change calibration
+- change features
+- change target
+- prune difficult dates
+- retune parameters
+
+Complete and freeze the current run first.
+
+Only then create a new protocol for the next study.
+
+============================================================
+10. REQUIRED NEXT-STAGE OUTPUTS
+============================================================
+
+After current CC4-v2.7 completion, create:
+
+COMPUTE_BACKEND_BENCHMARK.csv
+COMPUTE_BACKEND_SELECTION.json
+
+NEXT_STAGE_PROTOCOL.json
+LEAD_GROUP_DEFINITION.json
+MODEL_STAGE_A_METRICS.csv
+MODEL_STAGE_B_CALIBRATION_METRICS.csv
+FINALIST_FREEZE.json
+
+FULL_OOS_METRICS.csv
+LEAD_TIME_METRICS.csv
+BURST_METRICS.csv
+PAIRED_UNCERTAINTY.csv
+
+NEXT_STAGE_FINAL_REVIEW_KO.md
+
+============================================================
+11. FINAL COMPUTE FLAGS
+============================================================
+
+CURRENT_V27_RUN_COMPLETED_UNCHANGED = TRUE/FALSE
+CURRENT_V27_DEVICE_CHANGED_MIDRUN = FALSE
+
+CPU_MULTIPROCESS_BENCHMARKED = TRUE/FALSE
+GPU_LIGHTGBM_BENCHMARKED = TRUE/FALSE/UNAVAILABLE
+
+SELECTED_BACKEND =
+CPU_SINGLE / CPU_MULTIPROCESS / GPU
+
+PREDICTION_EQUIVALENCE_VERIFIED = TRUE/FALSE
+
+NEXT_STAGE_SEARCH_SPACE_REDUCED = TRUE/FALSE
+FULL_DAILY_REFIT_LIMITED_TO_FINALISTS = TRUE/FALSE
+
+Do not start the next large experiment until the current CC4-v2.7 final
+review is complete and the compute backend benchmark is frozen.

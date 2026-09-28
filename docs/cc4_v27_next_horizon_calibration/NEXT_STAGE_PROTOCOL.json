@@ -1,0 +1,58 @@
+{
+  "time": "2026-09-28 08:54:38.825551+00:00",
+  "scientific_question": "Given frozen occupancy candidates, can horizon-aware calibration reach nominal Q90 without excessive reserve?",
+  "current_v27_delivery_sha256": "6cd9d59cd384a9cc335e51109431c3ed98da3956ae440bf66ba557863dac9562",
+  "current_review_sha256": "55f60380fad1ab85029c715efe7144551f08649aa1274b7e3fca6b49bcd0dbf8",
+  "backend_selection_sha256": "bc15e62cb8b975b8bcb37cb17490135f54114f39ef42b9bebea808c3f097e76a",
+  "candidates": [
+    "T2_F0",
+    "T3_F2"
+  ],
+  "historical_reference": "T0_F0 M0 only",
+  "parameters": {
+    "num_leaves": 15,
+    "learning_rate": 0.03,
+    "n_estimators": 400,
+    "min_child_samples": 50,
+    "n_jobs": 1,
+    "deterministic": true,
+    "force_col_wise": true,
+    "random_state": 20260924,
+    "verbosity": -1
+  },
+  "stage_A": "Reuse frozen DEV/CAL M0/M1 daily predictions. Select on DEV only: prefer raw coverage88..92, then pinball/calibration error/ratio. Reject a structure if raw pinball, Q50 MAE, and calibration error are all worse than selected. No full-period rerun for rejected structures.",
+  "stage_B": {
+    "methods": [
+      "RAW",
+      "LEGACY_SLOT",
+      "HORIZON_ADD",
+      "HORIZON_LOCAL_SCALE"
+    ],
+    "selection_role": "CALIBRATION",
+    "selection": "Prefer CAL coverage88..92, then Q90 pinball, requirement ratio, method. If no candidate in band, closest to .90 then pinball, ratio; research fallback only.",
+    "DEV_CAL_bank": "Most recent 26 eligible, strictly prior and label-matured DEV/CAL days, at least20; earlier warmup uses raw and remains scored.",
+    "evaluation_bank": "All26 eligible CAL days matured before first evaluation. Fixed thereafter, no evaluation/May residual updates.",
+    "LEGACY_SLOT": "Exact current v2.7 calibrate() reference, including its expanding DEV/CAL bank; evaluate separately from new rolling-bank methods.",
+    "HORIZON_ADD": "Pooled signed residuals within each fixed 6h lead group, finite rank ceil(.9*(N+1)), no cap. Pooled correlated slots imply empirical correction, not guaranteed exchangeable conformal coverage.",
+    "HORIZON_LOCAL_SCALE": "Same group correction on (y-rawQ90)/s; s=max(rawQ90-rawQ50,0.05*TRAIN mean). Apply rawQ90+s*group coefficient. Scale depends only on model predictions and frozen TRAIN statistic; no future outcomes.",
+    "support": "Q90=max(Q50,0,corrected Q90); no upper clipping, label cap, new power model, or synthetic jobs."
+  },
+  "stage_C": "At most two frozen finalists, one per retained target. Reuse the exact matching immutable daily-fit cache because only Q90 postprocessing changes; audit all546 finalist daily refits and backend benchmark equivalence. No redundant re-fit of identical models, no speculative full-period arms. Report new_fit_count=0 and reused counts explicitly.",
+  "selection_uses_May": false,
+  "selection_uses_evaluation": false,
+  "statistical_gate": "Both EXPOSED and EXT: final coverage88..92, ratio no worse than legacy slot, paired7day raw pinball improvement versus legacy CI high<0; Q50 held exactly fixed. Also report final-vs-raw, all metrics and May diagnostic. Exploratory dependent data, no untouched confirmation.",
+  "bootstrap": {
+    "draws": 2000,
+    "blocks": [
+      1,
+      7
+    ],
+    "seed": 20260928
+  },
+  "neural_search": "DEFERRED; no TFT/DeepAR",
+  "code": {
+    "common.py": "1ec4a9b62e3de5579e3c9837efc49f6f6022d19400103b781c35ae86173fdf04",
+    "study.py": "befc1b2d68ecc24f52a20ee42141a883cbac06dad085249d855d12141b0fff35"
+  },
+  "baseline_cache_source": "v2.7 CPU deterministic n_jobs1; acceleration benchmark governs needed new fits. Equivalent cached fits require no backend rerun."
+}

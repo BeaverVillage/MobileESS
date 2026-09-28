@@ -1,0 +1,1150 @@
+Repository: BeaverVillage/MobileESS
+
+NEW INDEPENDENT ML TASK:
+CC4-v2.7 — TARGET / FEATURE MAPPING AUDIT AND SHARPNESS REDESIGN
+
+This is a NEW ML-development branch and must remain completely separate
+from the ongoing V42 integration/policy/checkpoint work.
+
+Create a separate branch/worktree, e.g.
+
+codex/cc4-v27-target-feature-sharpness
+
+Base it on the latest frozen CC4-v2.6 evidence / PR #74 lineage after
+verifying the exact source hashes.
+
+DO NOT MODIFY:
+- V42 integration worktree
+- V42 event-policy work
+- V42 checkpoint work
+- optimizer
+- MESS
+- IEEE123/8500
+- OpenDSS campaign
+- previous CC4 negative results
+- previous runtime ML results
+
+The purpose of this task is NOT to immediately search for a more complex
+neural model.
+
+PRIMARY SCIENTIFIC QUESTION:
+
+"Is the current CC4 forecast limited because the target definition and
+causal feature-to-target temporal mapping are not sufficiently aligned with
+the actual D-day unknown electrical workload?"
+
+============================================================
+0. PRESERVE CURRENT BASELINE EXACTLY
+============================================================
+
+The current CC4 baseline must remain reproducible byte-for-byte.
+
+Current baseline concept:
+
+Issue:
+D-1 18:00, frozen UTC+10 modeled clock
+
+Current target:
+24 hourly bins of day D
+
+For each hour:
+sum full realized lifetime GPUh of eligible jobs whose SUBMIT timestamp falls
+inside that hour.
+
+Current B0:
+causal daily-refit LightGBM quantile model, Q50/Q90.
+
+Current feature contract:
+71 causal features.
+
+Current baseline must be reproduced before any new experiment.
+
+Create an immutable anchor:
+
+A0 = T0 + F0 + B0
+
+and verify its known metrics against the frozen CC4-v2.6 result.
+
+Do not overwrite old artifacts.
+
+============================================================
+1. FIRST AUDIT THE CURRENT TARGET SEMANTICS
+============================================================
+
+Before fitting any new model, independently reconstruct and audit exactly what
+the current CC4 target means.
+
+Important:
+
+A job submitted at 14:20,
+using 4 GPUs,
+with realized runtime 2.5 h,
+
+currently contributes:
+
+10 GPUh
+
+entirely to the 14:00 submit-hour target.
+
+It is NOT spread over its actual execution interval.
+
+Audit how much artificial temporal concentration / burstiness this mapping
+creates.
+
+For the existing T0 target report:
+
+- zero fraction
+- positive fraction
+- mean / median
+- P90 / P95 / P99
+- coefficient of variation
+- skewness
+- max / positive median
+- top-1% mass share
+- top-5% mass share
+- number of jobs contributing > X% of hourly target mass
+- contribution of long-runtime jobs to burst slots
+- contribution of large-GPU jobs to burst slots
+
+Do not assume this target is wrong.
+Test it.
+
+============================================================
+2. AUDIT THE D-1 18:00 POPULATION BOUNDARY
+============================================================
+
+Issue time is:
+
+D-1 18:00.
+
+A job submitted at:
+
+D-1 18:01
+
+is UNKNOWN at issue time.
+
+If it executes during day D, it contributes to D-day electrical workload.
+
+Audit whether the current target excludes such jobs merely because their
+submit calendar date is D-1 rather than D.
+
+Quantify, across all available historical target days:
+
+- number of post-issue / pre-D00 submissions
+- their requested GPUs
+- realized GPUh
+- D-day execution-overlap GPUh
+- fraction of D-day unknown active GPU occupancy attributable to these jobs
+- fraction of D-day unknown peak occupancy attributable to these jobs
+
+This is a diagnostic only.
+Do not rewrite the baseline before quantifying the effect.
+
+============================================================
+3. DEFINE FOUR PRIMARY TARGET ARMS
+============================================================
+
+Build and preserve the following target definitions.
+
+------------------------------------------------------------
+T0 — CURRENT_SUBMIT_LIFETIME_GPUH_HOURLY
+------------------------------------------------------------
+
+Exact existing CC4 target.
+
+24 values/day.
+
+For each D-day hour h:
+
+sum:
+requested_GPU *
+realized total runtime hours
+
+for eligible jobs submitted in that D-day hour.
+
+This is the exact baseline.
+
+------------------------------------------------------------
+T1 — SUBMIT_REQUESTED_GPU_HOURLY
+------------------------------------------------------------
+
+Use the SAME submit-hour population as T0.
+
+For each hour:
+
+sum requested_GPU
+
+of jobs submitted in that hour.
+
+Purpose:
+
+isolate whether multiplying by full realized runtime is the major source of
+burstiness / unpredictability.
+
+Do NOT claim T1 is the final operational target.
+
+It is a diagnostic target.
+
+------------------------------------------------------------
+T2 — UNKNOWN_ACTIVE_GPU_OCCUPANCY_HOURLY
+------------------------------------------------------------
+
+This target is based on actual execution overlap, not submit-hour lifetime mass.
+
+Unknown-job population:
+
+jobs with:
+
+submit_time > D-1 18:00 issue
+
+that have actual execution overlap with day D.
+
+Exclude jobs already submitted by issue:
+those are D-1 KNOWN jobs and belong to the known-job optimizer population.
+
+For each D-day hour h:
+
+GPUh_unknown(h)
+=
+sum over future-submitted jobs j of
+
+requested_GPU_j
+*
+overlap_hours(
+    [actual_start_j, actual_end_j),
+    hour_h
+)
+
+Training/evaluation labels may use historical realized start/end.
+
+Those fields are LABEL-ONLY.
+
+They must never enter forecast features at their historical issue.
+
+Also store:
+
+average_active_GPU(h) = GPUh_unknown(h) / 1 h
+
+which is numerically equal but semantically useful.
+
+------------------------------------------------------------
+T3 — UNKNOWN_ACTIVE_GPU_OCCUPANCY_15MIN
+------------------------------------------------------------
+
+Same unknown-job population as T2.
+
+Use the native 15-minute electrical resolution.
+
+96 values/day.
+
+For each 15-min slot t:
+
+GPUh_unknown(t)
+=
+sum_j requested_GPU_j
+*
+overlap_hours(
+    [actual_start_j, actual_end_j),
+    slot_t
+)
+
+Also store:
+
+average_active_GPU(t)
+=
+GPUh_unknown(t) / 0.25 h
+
+Use average_active_GPU as the primary T3 prediction target,
+because active GPU occupancy maps naturally to instantaneous IT/PCC power.
+
+Preserve GPUh-per-slot for exact daily mass conservation.
+
+Verify:
+
+sum_t GPUh_unknown(t)
+
+exactly equals day-D future-submitted execution-overlap GPUh
+within numerical tolerance.
+
+============================================================
+4. OPTIONAL TARGET DIAGNOSTIC — DO NOT USE AS PRIMARY
+============================================================
+
+Optionally construct:
+
+T4_DIAGNOSTIC_POST_ISSUE_30H_ARRIVAL_MASS
+
+covering the entire issue-to-end-of-D interval:
+
+D-1 18:00 -> D+1 00:00
+
+to visualize the missing six-hour population.
+
+This is diagnostic only.
+
+Do not use T4 for production selection unless separately justified.
+
+============================================================
+5. OPERATIONAL ALIGNMENT AUDIT
+============================================================
+
+For T0/T1/T2/T3, quantify how well each target aligns with the actual unknown
+D-day electrical workload.
+
+Construct a common reference using:
+
+historical future-submitted active GPU occupancy
+and, where authorized,
+the inherited deterministic GPU -> IT/PCC mapping.
+
+Do not invent a new power model.
+
+Compare target series with:
+
+- unknown active GPU trajectory
+- unknown PCC incremental power trajectory if source-backed
+- daily peak magnitude
+- peak timing
+- high-load slots
+
+For hourly comparisons, aggregate T3 to hourly first.
+
+Report:
+
+- Pearson correlation
+- Spearman correlation
+- peak-time error relation
+- top-10% slot overlap
+- top-5% slot overlap
+
+This is important:
+
+If T0 is poorly aligned with actual electrical workload but T2/T3 are strongly
+aligned, explicitly report that.
+
+============================================================
+6. CURRENT FEATURE CONTRACT F0
+============================================================
+
+F0 = EXACT CURRENT 71 FEATURES.
+
+Do not alter them.
+
+Use the exact current feature matrix as the common baseline feature set for
+ALL target arms.
+
+This gives a clean test:
+
+same predictors,
+different target semantics.
+
+All existing feature-maturity and leakage audits must still pass.
+
+============================================================
+7. FEATURE SET F1 — DIRECT CAUSAL SAME-CLOCK LAGS
+============================================================
+
+Add explicit recent same-clock information.
+
+Current CC4 contains strong 7/14/21/28-day seasonal features but does not
+explicitly expose the most recent causally available same-clock value with
+short daily lags.
+
+For each target timestamp tau:
+
+consider same-clock historical candidates:
+
+tau - 1 day
+tau - 2 days
+tau - 3 days
+tau - 7 days
+tau - 14 days
+tau - 21 days
+tau - 28 days
+
+BUT:
+
+a lag may only be used if the relevant historical information is actually
+observable / mature at the D-1 18:00 issue.
+
+Do NOT blindly use lag-24h.
+
+Example:
+
+Issue:
+D-1 18:00
+
+Target:
+D 10:00
+
+D-1 10:00 is already historical and may be eligible.
+
+Target:
+D 21:00
+
+D-1 21:00 is FUTURE relative to issue,
+therefore it is forbidden.
+
+The latest eligible same-clock candidate may instead be D-2 21:00.
+
+For every same-clock feature store:
+
+- value
+- availability mask
+- actual lag age
+- maturity status
+
+No backward filling from future observations.
+
+Apply target-native historical values where appropriate:
+T0 history for T0,
+T1 history for T1,
+T2 history for T2,
+T3 history for T3.
+
+============================================================
+8. FEATURE SET F2 — FINE RECENCY / ARRIVAL DYNAMICS
+============================================================
+
+Add issue-time causal activity features over windows:
+
+15 min
+30 min
+1 h
+3 h
+6 h
+12 h
+24 h
+
+Use only raw information observable by issue.
+
+Candidate features:
+
+- submission count
+- sum requested_GPU
+- mean requested_GPU
+- max requested_GPU
+- count of 1-GPU jobs
+- count of 2-4 GPU jobs
+- count of >4 GPU jobs where valid
+- positive-arrival fraction
+- zero-arrival fraction
+- time since last submission
+- mean recent interarrival time
+- short-vs-long arrival intensity ratio
+
+Examples:
+
+arrival_acceleration_1h_vs_6h
+=
+rate_1h - rate_6h
+
+arrival_ratio_1h_to_24h
+
+Do not use realized future runtime/end fields.
+
+============================================================
+9. FEATURE SET F3 — ISSUE-TIME SYSTEM STATE
+============================================================
+
+Add only source-backed quantities observable at D-1 18:00.
+
+Candidate aggregate features:
+
+- known RUNNING job count
+- known PENDING job count
+- currently active GPU count
+- queued requested GPU count
+- aggregate GPU utilization
+- number of large current jobs
+- known workload remaining proxy if already causally authorized
+
+Only include these if the historical causal snapshot can prove availability.
+
+Do not reconstruct these from future realized outcomes.
+
+If an exact historical issue-time feature is unavailable:
+record NOT_AVAILABLE and exclude it.
+
+Do not fabricate it.
+
+============================================================
+10. FEATURE SET F4 — CALENDAR / REGIME
+============================================================
+
+Audit whether the current calendar representation is too weak.
+
+Current known features include cyclical hour / weekday / weekend information.
+
+Add, only when known deterministically at issue:
+
+- explicit day-of-week category
+- month
+- season
+- public holiday indicator
+- day-before-holiday
+- day-after-holiday
+
+If a source-backed holiday calendar is used,
+freeze and hash the calendar source.
+
+Do not infer holidays from future workload.
+
+============================================================
+11. FEATURE SET F5 — COMBINED VALIDATED SHARP SET
+============================================================
+
+F5 =
+
+F0
++
+all leakage-safe F1
++
+all leakage-safe F2
++
+all source-backed F3
++
+F4
+
+Do not include any feature that fails causal availability verification.
+
+============================================================
+12. REQUIRED FEATURE ABLATION MATRIX
+============================================================
+
+Run the following feature arms:
+
+F0 = current71
+F1 = F0 + same-clock
+F2 = F0 + fine recency
+F3 = F0 + issue-state
+F4 = F0 + calendar/regime
+F5 = all validated additions
+
+against:
+
+T0
+T1
+T2
+T3
+
+Primary matrix:
+
+4 targets × 6 feature sets = 24 arms.
+
+Use the SAME model family and the SAME fixed hyperparameters for this stage.
+
+Do not tune a separate architecture for each arm.
+
+============================================================
+13. MODEL FOR TARGET/FEATURE EXPERIMENT
+============================================================
+
+For this stage use only:
+
+LightGBM Quantile
+
+with the exact existing B0 hyperparameter family unless a technical shape
+change is required for T3.
+
+Q50 and Q90.
+
+No TFT.
+No DeepAR.
+No ensemble.
+No distributional hybrid.
+No conformal redesign yet.
+
+We are testing:
+
+TARGET + FEATURE INFORMATION,
+
+not model architecture.
+
+For T0/F0:
+
+must reproduce B0 exactly.
+
+For T3:
+
+a pooled 96-slot LightGBM is acceptable for the first comparison.
+
+Include:
+
+target_slot
+target_time-of-day
+lead_time_minutes/hours
+
+as causal deterministic features.
+
+Do not build 96 independently tuned models yet.
+
+============================================================
+14. REPORT RAW MODEL AND CALIBRATED MODEL SEPARATELY
+============================================================
+
+Do not allow calibration to hide a weak target/feature mapping.
+
+For every arm report:
+
+RAW Q50/Q90 performance
+
+and separately:
+
+causally calibrated Q90 performance
+using a frozen procedure derived only from pre-evaluation data.
+
+Target/feature comparison must explicitly show whether improvement exists
+before calibration.
+
+============================================================
+15. SPLIT / CHRONOLOGY
+============================================================
+
+Reuse the exact frozen target-day role structure from the existing CC4
+DAY_LEDGER for apples-to-apples comparison.
+
+Do not silently redesign historical roles after seeing results.
+
+Selection/tuning must not use May.
+
+Preserve exact:
+
+TRAIN
+DEVELOPMENT
+CALIBRATION
+PURGE
+
+membership semantics from the frozen baseline.
+
+After target/feature definition and selection are frozen:
+
+evaluate separately on:
+
+EXPOSED_EVALUATION
+OOS_EXTENSION through April
+MAY_HISTORICAL
+
+May remains exposed historical diagnostic.
+
+It cannot:
+- select target
+- select feature set
+- tune thresholds
+- tune hyperparameters
+- choose calibration
+- choose model
+
+============================================================
+16. DAILY CAUSAL REFIT
+============================================================
+
+Preserve the current causal expanding/daily-refit philosophy for B0 comparison.
+
+At forecast issue I:
+
+training labels must satisfy the currently registered maturity rules.
+
+Earlier historical labels may enter later refits only after maturity.
+
+Never use a future label before it would have been available.
+
+For T2/T3, create an explicit label-maturity contract.
+
+Historical realized start/end may construct labels,
+but a label cannot enter a causal refit until its required historical outcome
+is mature under the registered rule.
+
+============================================================
+17. TARGET-SPECIFIC LEAKAGE AUDIT
+============================================================
+
+For every target separately prove:
+
+T0:
+existing leakage contract unchanged
+
+T1:
+future submit values are label only
+
+T2/T3:
+actual start/end are label construction only
+
+At inference issue:
+zero feature reads from:
+
+- future submit events
+- future start
+- future end
+- future completion
+- future D-day execution occupancy
+- future policy decisions
+
+Create row-level proof.
+
+============================================================
+18. DO NOT ASSUME 15-MIN IS BETTER
+============================================================
+
+Explicitly test this.
+
+Compare:
+
+T2 hourly active occupancy
+
+vs
+
+T3 15-min active occupancy.
+
+The 15-min target may:
+
+- localize peaks better,
+but also
+- increase variance,
+- increase sparsity,
+- increase marginal-quantile instability.
+
+Report both.
+
+Do not promote T3 merely because it matches the optimizer resolution.
+
+============================================================
+19. DISTRIBUTION / PREDICTABILITY DIAGNOSTICS
+============================================================
+
+For every target calculate:
+
+- zero fraction
+- positive fraction
+- mean
+- median
+- standard deviation
+- CV
+- skewness
+- P90/P95/P99
+- max
+- max/positive median
+- burst frequency
+- burst mass share
+- autocorrelation
+- same-clock lag correlations:
+  1d,2d,3d,7d,14d,21d,28d
+- weekday/hour conditional variance
+- month/regime conditional variance
+
+This should directly answer:
+
+"Was the old target intrinsically harder / more bursty because lifetime GPUh
+was collapsed into submit hour?"
+
+============================================================
+20. FEATURE GROUP DIAGNOSTICS
+============================================================
+
+Do not rely only on LightGBM gain importance.
+
+For each feature group use group-level ablation.
+
+Report improvement from:
+
+F0 -> F1
+F0 -> F2
+F0 -> F3
+F0 -> F4
+F0 -> F5
+
+for each target.
+
+Also report:
+
+- LightGBM gain importance
+- split importance
+- optional SHAP summary if computationally reasonable
+
+But do not select based solely on SHAP.
+
+============================================================
+21. PRIMARY METRICS
+============================================================
+
+For Q90:
+
+- empirical coverage
+- calibration error from 0.90
+- Q90 pinball loss
+- requirement ratio
+- excess reserve proxy
+- positive-only coverage
+- burst coverage
+
+For Q50:
+
+- MAE
+- RMSE
+- WAPE where defined
+- pinball
+
+For T2/T3 also report:
+
+- peak magnitude error
+- peak timing error
+- top-10% load slot coverage
+- top-5% load slot coverage
+- daily integrated GPUh error
+
+For T3:
+
+convert predictions back to GPUh using 0.25 h when computing daily mass.
+
+============================================================
+22. IMPORTANT: 90% COVERAGE SEMANTICS
+============================================================
+
+Do not use:
+
+"coverage > 90% = automatically better."
+
+Q90's nominal calibration target is 90%.
+
+Use a development calibration band around nominal, consistent with the
+existing experimental philosophy.
+
+A model with:
+
+94% coverage
+and huge reserve inflation
+
+must not beat a model with:
+
+approximately 90% coverage
+and substantially sharper forecasts.
+
+Primary interpretation:
+
+calibration + sharpness.
+
+============================================================
+23. REQUIREMENT RATIO ACROSS DIFFERENT TARGETS
+============================================================
+
+Do NOT demand the old 1.408 ratio from every new target.
+
+T0, T1, T2 and T3 have different distributions and semantics.
+
+For each target define its own F0 baseline.
+
+Compare feature/model sharpness RELATIVE TO THAT TARGET'S BASELINE.
+
+Do not call marginal 15-min Q90 sums a "joint daily Q90".
+
+The integrated ratio is a reserve/sharpness proxy only.
+
+============================================================
+24. PARETO ANALYSIS
+============================================================
+
+For every target/feature arm plot/report:
+
+x-axis:
+calibration error or coverage
+
+y-axis:
+pinball / requirement ratio
+
+Identify Pareto-dominated arms.
+
+Do not force a winner if multiple non-dominated arms remain.
+
+============================================================
+25. FOUR CRITICAL COMPARISONS
+============================================================
+
+Regardless of all 24 arms, explicitly highlight:
+
+A:
+T0 + F0
+current baseline
+
+B:
+T0 + F5
+same target, improved features
+
+C:
+T3 + F0
+new active-occupancy target, legacy features
+
+D:
+T3 + F5
+new target + improved features
+
+This isolates:
+
+feature effect,
+target effect,
+combined effect.
+
+Also include T2 hourly as the resolution ablation against T3.
+
+============================================================
+26. TARGET SELECTION PRINCIPLE
+============================================================
+
+Do not choose a target only because it is numerically easiest to forecast.
+
+The selected operational target must satisfy BOTH:
+
+1. forecastability
+2. relevance to V42 planning
+
+Prefer targets that represent the unknown workload quantity actually needed
+by the optimizer.
+
+Explicitly distinguish:
+
+arrival workload prediction
+
+from
+
+electrical execution occupancy prediction.
+
+If T2/T3 are substantially better aligned with the electrical interface,
+state that.
+
+If T0 is more forecastable but operationally less relevant,
+do not hide that tradeoff.
+
+============================================================
+27. AFTER TARGET/FEATURE FREEZE — ONLY THEN MODEL DEVELOPMENT
+============================================================
+
+Do NOT start this stage until the target/feature audit is frozen.
+
+After selecting one or at most two target-feature candidates,
+run a SECOND-STAGE architecture study.
+
+Candidate model forms:
+
+M0:
+current pooled LightGBM
+
+M1:
+lead-group LightGBM
+
+Suggested lead groups for hourly target:
+
+6–11 h
+12–17 h
+18–23 h
+24–29 h
+
+For 15-min target construct comparable lead groups.
+
+M2:
+target-hour / target-period specific LightGBM
+ONLY if support is sufficient.
+
+M3:
+adaptive/local conformal correction of the best LightGBM
+ONLY after target/feature selection.
+
+M4:
+TFT/DeepAR challenger
+ONLY after the simpler models are fully evaluated.
+
+Do not mix Stage 1 and Stage 2 selection.
+
+============================================================
+28. WHY LEAD-GROUP MODELING MUST BE TESTED
+============================================================
+
+The current pooled model predicts all next-day hours using one model plus
+target_hour / lead_hours features.
+
+Audit whether conditional distributions differ materially by lead horizon.
+
+Report performance by:
+
+6–11 h
+12–17 h
+18–23 h
+24–29 h
+
+and individual target hour/slot.
+
+If calibration differs strongly across horizon,
+test separate lead-group models.
+
+============================================================
+29. STATISTICAL UNCERTAINTY
+============================================================
+
+Use paired target-day bootstrap / circular block bootstrap consistent with
+existing CC4 practice.
+
+Compare arms on identical target days.
+
+For key contrasts report confidence intervals for:
+
+- delta pinball
+- delta coverage
+- delta requirement ratio
+- delta Q50 MAE
+- delta peak error where applicable
+
+Do not claim superiority from tiny point differences with CI containing zero.
+
+============================================================
+30. REQUIRED OUTPUT DIRECTORY
+============================================================
+
+Create a new namespace, for example:
+
+docs/cc4_v27_target_feature_sharpness/
+
+Required artifacts:
+
+TARGET_DEFINITIONS.md
+TARGET_POPULATION_AUDIT.json
+TARGET_BOUNDARY_AUDIT.csv
+TARGET_DISTRIBUTION.csv
+TARGET_OPERATIONAL_ALIGNMENT.csv
+
+FEATURE_CONTRACT.json
+FEATURE_CAUSAL_AVAILABILITY.parquet
+FEATURE_GROUPS.json
+FEATURE_LEAKAGE_AUDIT.json
+
+ARM_REGISTRATION.json
+ARM_METRICS.csv
+HOUR_SLOT_METRICS.csv
+LEAD_GROUP_METRICS.csv
+STRATIFIED_METRICS.csv
+PARETO_FRONT.csv
+PAIRED_UNCERTAINTY.csv
+
+PREDICTIONS.parquet
+
+TARGET_SELECTION_FREEZE.json
+FEATURE_SELECTION_FREEZE.json
+
+STAGE2_MODEL_PROTOCOL.json
+STAGE2_MODEL_METRICS.csv
+STAGE2_SELECTION_FREEZE.json
+
+FINAL_REVIEW_KO.md
+FINAL_VERDICT.json
+SOURCE_MANIFEST.json
+DELIVERY_MANIFEST.json
+
+============================================================
+31. REQUIRED FINAL QUESTIONS
+============================================================
+
+The final review must explicitly answer:
+
+1. Was T0 reconstructed exactly?
+2. How much D-day unknown active workload comes from jobs submitted after
+   issue but before D00?
+3. Does collapsing full lifetime GPUh into submit hour materially increase
+   burstiness?
+4. Is T1 easier to predict when runtime multiplication is removed?
+5. Is T2 easier/more stable than T0?
+6. Is T3 more accurate or merely noisier than T2?
+7. Which target aligns best with D-day unknown electrical occupancy?
+8. Does explicit 1/2/3-day causal same-clock information improve B0?
+9. Does fine issue-time recency improve burst prediction?
+10. Do issue-time RUNNING/PENDING state features add information?
+11. Do holiday/regime features matter?
+12. Which feature group gives the largest robust improvement?
+13. Does F5 outperform F0 on multiple OOS periods?
+14. Does performance differ materially by lead horizon?
+15. Is pooled LightGBM still appropriate?
+16. Does a lead-group model help?
+17. Can nominal Q90 coverage approach 90% without large reserve inflation?
+18. What is the best target-specific requirement ratio?
+19. Are improvements statistically supported?
+20. Should CC4's operational target be changed before V42 integration?
+
+============================================================
+32. FINAL FLAGS
+============================================================
+
+CURRENT_TARGET_REPRODUCED = TRUE/FALSE
+POST_ISSUE_PRE_D00_BOUNDARY_AUDITED = TRUE/FALSE
+
+T0_VALID = TRUE/FALSE
+T1_VALID = TRUE/FALSE
+T2_VALID = TRUE/FALSE
+T3_VALID = TRUE/FALSE
+
+TARGET_MAPPING_IS_MAJOR_BOTTLENECK = TRUE/FALSE/INCONCLUSIVE
+FEATURE_MAPPING_IS_MAJOR_BOTTLENECK = TRUE/FALSE/INCONCLUSIVE
+
+SAME_CLOCK_FEATURE_SUPPORTED = TRUE/FALSE
+FINE_RECENCY_FEATURE_SUPPORTED = TRUE/FALSE
+ISSUE_STATE_FEATURE_SUPPORTED = TRUE/FALSE
+CALENDAR_REGIME_FEATURE_SUPPORTED = TRUE/FALSE
+
+HOURLY_ACTIVE_OCCUPANCY_SUPPORTED = TRUE/FALSE
+FIFTEEN_MIN_ACTIVE_OCCUPANCY_SUPPORTED = TRUE/FALSE
+
+TARGET_FEATURE_REDIRECTION_SUPPORTED = TRUE/FALSE
+
+Q90_CALIBRATION_NEAR_NOMINAL = TRUE/FALSE
+SHARPNESS_IMPROVEMENT_SUPPORTED = TRUE/FALSE
+
+STAGE2_MODEL_SEARCH_AUTHORIZED = TRUE/FALSE
+
+CC4_V27_REPLACEMENT_SUPPORTED = TRUE/FALSE
+CC4_V27_OPTIMIZER_INTEGRATION_READY = TRUE/FALSE
+
+Do not set the final two TRUE merely because one development metric improves.
+
+============================================================
+33. GIT / SCIENTIFIC DISCIPLINE
+============================================================
+
+This task must remain separate from V42.
+
+Do not merge into V42.
+
+Do not overwrite PR #64/#67/#69/#70/#73/#74 evidence.
+
+Do not hide negative results.
+
+Do not use May to redesign target or features.
+
+Do not silently remove hard days/bursts.
+
+Do not exclude zero targets to improve coverage.
+
+Do not cap labels/predictions unless a pre-registered physical authority
+requires it.
+
+Do not create synthetic future jobs.
+
+No optimizer runs are needed in Stage 1.
+
+If target/feature redesign fails:
+preserve the failure and report it.
+
+If it succeeds:
+freeze the new interface first, then propose a separate V42 integration task.
+
+============================================================
+34. MOST IMPORTANT SCIENTIFIC GOAL
+============================================================
+
+We are trying to determine whether the previous CC4 difficulty came mainly
+from:
+
+A. model architecture,
+
+B. poor feature-to-target temporal mapping,
+
+C. an operationally misaligned target,
+
+D. genuine irreducible burst/distribution-shift uncertainty.
+
+The experiment must separate these explanations rather than simply search
+for a better score.

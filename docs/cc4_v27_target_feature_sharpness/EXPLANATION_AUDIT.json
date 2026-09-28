@@ -1,0 +1,26 @@
+{
+  "explanations": [
+    {
+      "explanation": "A. 모델 구조",
+      "finding": "M0/M1의 고정 비교만 수행. 구조 일반의 한계나 신경 모델의 우열은 식별하지 않음",
+      "evidence": "STAGE2_MODEL_METRICS.csv; M1-minus-M0 paired CI"
+    },
+    {
+      "explanation": "B. 특징 시간 매핑",
+      "finding": "다기간 지지 조합: 없음. 사용 불가 상태·공휴일과 보수적 지연 성숙의 한계는 남음",
+      "evidence": "FEATURE_ABLATION.csv; SUPPORT_GATES.json"
+    },
+    {
+      "explanation": "C. 운영 타깃 불일치",
+      "finding": "입증됨. T0는 도착 수명량, T2/T3는 발행 후 미지 실행 점유량. 서로 다른 운영 질문에 답함",
+      "evidence": "TARGET_OPERATIONAL_ALIGNMENT.csv; LIFETIME_PLACEMENT_AUDIT.json; TARGET_BOUNDARY_AUDIT.csv"
+    },
+    {
+      "explanation": "D. 본질적 예측 불확실성",
+      "finding": "식별 불가. 관측 특징·모델·표본 조건에서 남은 오차가 이론적으로 불가약임을 증명하지 않음",
+      "evidence": "기간별 오차·CI·SOURCE/FEATURE provenance limits"
+    }
+  ],
+  "no_causal_fraction_attribution": true,
+  "no_irreducibility_proof": true
+}
