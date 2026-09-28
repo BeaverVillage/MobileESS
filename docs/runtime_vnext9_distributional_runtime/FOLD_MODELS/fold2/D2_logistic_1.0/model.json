@@ -1,0 +1,150 @@
+{
+  "kind": "D2",
+  "arm": "D2_logistic_1.0",
+  "columns": [
+    "num_gpus_req",
+    "num_nodes_req",
+    "num_cores_req",
+    "requested_memory_mib",
+    "log_gpu",
+    "log_nodes",
+    "log_cores",
+    "log_memory",
+    "gpu_per_node",
+    "cores_per_node",
+    "cores_per_gpu",
+    "memory_per_gpu",
+    "memory_per_node",
+    "num_gpus_req_missing_or_invalid",
+    "num_nodes_req_missing_or_invalid",
+    "num_cores_req_missing_or_invalid",
+    "requested_memory_mib_missing_or_invalid",
+    "gpu_nodes_inconsistent",
+    "requested_seconds",
+    "log_walltime",
+    "requested_gpu_time",
+    "log_requested_gpu_time",
+    "requested_seconds_missing_or_invalid",
+    "qos",
+    "partition",
+    "account",
+    "is_array_descriptor",
+    "log_array_index",
+    "array_index_missing_or_invalid"
+  ],
+  "categoricals": [
+    "qos",
+    "partition",
+    "account"
+  ],
+  "provenance_mode": "Kestrel_trace_proxy",
+  "noise": "logistic",
+  "scale": 1.0,
+  "time_shift": 1.0,
+  "xgboost_config": {
+    "learner": {
+      "generic_param": {
+        "device": "cpu",
+        "fail_on_invalid_gpu_id": "0",
+        "n_jobs": "4",
+        "nthread": "4",
+        "random_state": "4009",
+        "seed": "4009",
+        "seed_per_iteration": "0",
+        "validate_parameters": "1"
+      },
+      "gradient_booster": {
+        "gbtree_model_param": {
+          "num_parallel_tree": "1",
+          "num_trees": "300"
+        },
+        "gbtree_train_param": {
+          "process_type": "default",
+          "tree_method": "hist",
+          "updater": "grow_quantile_histmaker",
+          "updater_seq": "grow_quantile_histmaker"
+        },
+        "name": "gbtree",
+        "specified_updater": false,
+        "tree_train_param": {
+          "alpha": "0",
+          "cache_opt": "1",
+          "colsample_bylevel": "1",
+          "colsample_bynode": "1",
+          "colsample_bytree": "1",
+          "eta": "0.0500000007",
+          "gamma": "0",
+          "grow_policy": "depthwise",
+          "interaction_constraints": "",
+          "lambda": "2",
+          "learning_rate": "0.0500000007",
+          "max_bin": "127",
+          "max_cat_threshold": "64",
+          "max_cat_to_onehot": "4",
+          "max_delta_step": "0",
+          "max_depth": "6",
+          "max_leaves": "0",
+          "min_child_weight": "100",
+          "min_split_loss": "0",
+          "monotone_constraints": "()",
+          "refresh_leaf": "1",
+          "reg_alpha": "0",
+          "reg_lambda": "2",
+          "sampling_method": "uniform",
+          "sketch_ratio": "2",
+          "sparse_threshold": "0.20000000000000001",
+          "subsample": "1"
+        },
+        "updater": [
+          {
+            "hist_train_param": {
+              "debug_synchronize": "0",
+              "extmem_single_page": "0",
+              "max_cached_hist_node": "18446744073709551615"
+            },
+            "name": "grow_quantile_histmaker"
+          }
+        ]
+      },
+      "learner_model_param": {
+        "base_score": "5E-1",
+        "boost_from_average": "1",
+        "num_class": "0",
+        "num_feature": "29",
+        "num_target": "1"
+      },
+      "learner_train_param": {
+        "booster": "gbtree",
+        "disable_default_eval_metric": "0",
+        "multi_strategy": "one_output_per_tree",
+        "objective": "survival:aft"
+      },
+      "metrics": [
+        {
+          "aft_loss_param": {
+            "aft_loss_distribution": "logistic",
+            "aft_loss_distribution_scale": "1"
+          },
+          "name": "aft-nloglik"
+        }
+      ],
+      "objective": {
+        "aft_loss_param": {
+          "aft_loss_distribution": "logistic",
+          "aft_loss_distribution_scale": "1"
+        },
+        "name": "survival:aft"
+      }
+    },
+    "version": [
+      3,
+      0,
+      5
+    ]
+  },
+  "censored_count": 309,
+  "training_seconds": 11.41082579997601,
+  "threads": 4,
+  "device": "cpu",
+  "TRAIN_N": 392695
+}

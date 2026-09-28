@@ -1,0 +1,79 @@
+{
+  "time": "2026-09-28T14:34:54.471752+00:00",
+  "D1": {
+    "n_estimators": 300,
+    "learning_rate": 0.05,
+    "num_leaves": 31,
+    "max_depth": 8,
+    "min_child_samples": 200,
+    "reg_lambda": 2,
+    "max_bin": 127,
+    "random_state": 4009,
+    "n_jobs": 4,
+    "verbosity": -1,
+    "deterministic": true,
+    "force_col_wise": true
+  },
+  "D3": "LightGBM log1p Q50/Q70/Q80/Q90/Q95 with same D1 tree settings and exact TRAIN only. Comparative reference, not full-distribution provider.",
+  "D2_grid": "3 noise distributions x2 fixed scales; same300trees/depth6. One designated D2normal1.0 exact-only ablation isolates censoring contribution; no large search.",
+  "calibration_modes": [
+    "NONE",
+    "STATIC14",
+    "ROLLING14",
+    "ROLLING28"
+  ],
+  "calibration": "One additive signed residual-order-statistic algorithm, ceil(.9*(n+1)); min200 matured out-of-training residuals otherwise0; rolling uses only end<UTC prediction day and end>=day-window. Base model never refit.",
+  "full_distribution_calibration": "Tcal=max(0,Tbase+delta); conditional survival and quantiles computed from this same shifted distribution, including mass at0",
+  "gates": {
+    "pooled_coverage": [
+      0.88,
+      0.92
+    ],
+    "min_fold_coverage": 0.8,
+    "max_fold_coverage": 0.97,
+    "max_coverage_std": 0.06,
+    "long_gt4h_min": 0.85,
+    "per_fold_long_min_N": 100,
+    "pinball_relative_to_causal_D3_max": 1.02,
+    "pinball_relative_to_time_eligible_B0_max": 1.02,
+    "reservation_to_W0_max": 0.8,
+    "queue_start_ltH_at_least_W0": true,
+    "capacity_violations": 0,
+    "high_GPU_min_N": 100,
+    "high_GPU_coverage_min": 0.85
+  },
+  "selection": "Reject safety/stability/long/pinball/reservation/queue gate failures first. Among eligible D1/D2 select lowest pooled rounded reservation, then pinball. If none pass, preserve one diagnostic D1/D2 by fewest failed gates then reservation; no promotion.",
+  "queue": {
+    "days": [
+      "2024-11-05",
+      "2024-12-03",
+      "2025-01-07",
+      "2025-02-04",
+      "2025-03-04"
+    ],
+    "capacity_GPU": 780,
+    "slot_seconds": 900,
+    "horizon_slots": 96,
+    "drain_slots": 1920,
+    "background": "Empty common research background; same-day arriving jobs only; NOT historical full V42 state reconstruction",
+    "forecast": "same submit/tier/id ordering, aggregate-capacity first-fit reservation ledger",
+    "causal": "Separate current-slot dispatch with actual completion observer and retained overruns, no future end to dispatcher; missing duration stays occupied to drain horizon",
+    "validity": "positive integer GPU,nodes; GPU<=4nodes and GPU<=780; walltimepositive",
+    "gate": "forecast in-day starts>=W0 on each fold; all causal stress capacity violations0; horizon exhaustion fails"
+  },
+  "distribution_scores": "Quantile calibration .5/.7/.8/.9/.95; 72h truncated Brier integral on exact mature evaluation cohort and known-status censored observations; censor-aware grid survival likelihood for D1/D2. Brier observed-only labelled conditional/administratively censored, not unbiased IPCW population IBS; no unsupported CRPS claim.",
+  "benchmark": "Selected final TRAIN CPU1/CPU4/explicit GPU identity with actual logs; before April. CPU inference mandatory. Backend recommendation only; selected CPU4 bytes retained.",
+  "conditional_remaining": "logS(e+r)-logS(e); solve S(T)=S(e)*(1-q), return T-e >=0; SAME distribution, no separate remaining fit",
+  "remaining_gates": {
+    "Q90_coverage": [
+      0.88,
+      0.92
+    ],
+    "Q50_MAE_vs_Bconst_max": 1.0,
+    "long_running_coverage_min": 0.85
+  },
+  "April_pristine": false,
+  "APRIL_STATUS": "EXPOSED_REGRESSION_ONLY",
+  "April_not_used_for_any_selection": true,
+  "May_payload_allowed": false
+}

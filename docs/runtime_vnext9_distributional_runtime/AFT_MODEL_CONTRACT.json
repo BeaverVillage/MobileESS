@@ -1,0 +1,26 @@
+{
+  "time": "2026-09-28T14:34:51.562935+00:00",
+  "distributions": [
+    "normal",
+    "logistic",
+    "extreme"
+  ],
+  "scales": [
+    1.0,
+    1.5
+  ],
+  "rounds": 300,
+  "max_depth": 6,
+  "learning_rate": 0.05,
+  "min_child_weight": 100,
+  "reg_lambda": 2,
+  "max_bin": 127,
+  "objective": "survival:aft",
+  "tree_method": "hist",
+  "categoricals": "frozen TRAIN codes, XGBoost feature_types categorical for account/qos/partition",
+  "time_variable": "U=T+1 seconds, exact invertible shift handles observed0; prediction T=max(U-1,0), no queue",
+  "exact_bounds": "runtime lower=upper=T; library lower=upper=T+1",
+  "censored_bounds": "runtime lower=elapsed;upper=inf; library lower=elapsed+1;upper=inf",
+  "distribution_formulas": "logU=mu+sigma Z; normal ZPhi, logistic ZCDFsigmoid, extreme ZCDF1-exp(-exp z); output margin mu, never mistake exp(mu) for all quantiles",
+  "source": "https://xgboost.readthedocs.io/en/release_3.0.0/tutorials/aft_survival_analysis.html"
+}
