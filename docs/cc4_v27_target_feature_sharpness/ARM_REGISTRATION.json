@@ -1,0 +1,183 @@
+{
+  "time": "2026-09-28 05:48:55.922856+00:00",
+  "arms": [
+    {
+      "arm": "T0_F0",
+      "target": "T0",
+      "features": "F0",
+      "alias": null
+    },
+    {
+      "arm": "T0_F1",
+      "target": "T0",
+      "features": "F1",
+      "alias": null
+    },
+    {
+      "arm": "T0_F2",
+      "target": "T0",
+      "features": "F2",
+      "alias": null
+    },
+    {
+      "arm": "T0_F3",
+      "target": "T0",
+      "features": "F3",
+      "alias": "T0_F0"
+    },
+    {
+      "arm": "T0_F4",
+      "target": "T0",
+      "features": "F4",
+      "alias": null
+    },
+    {
+      "arm": "T0_F5",
+      "target": "T0",
+      "features": "F5",
+      "alias": null
+    },
+    {
+      "arm": "T1_F0",
+      "target": "T1",
+      "features": "F0",
+      "alias": null
+    },
+    {
+      "arm": "T1_F1",
+      "target": "T1",
+      "features": "F1",
+      "alias": null
+    },
+    {
+      "arm": "T1_F2",
+      "target": "T1",
+      "features": "F2",
+      "alias": null
+    },
+    {
+      "arm": "T1_F3",
+      "target": "T1",
+      "features": "F3",
+      "alias": "T1_F0"
+    },
+    {
+      "arm": "T1_F4",
+      "target": "T1",
+      "features": "F4",
+      "alias": null
+    },
+    {
+      "arm": "T1_F5",
+      "target": "T1",
+      "features": "F5",
+      "alias": null
+    },
+    {
+      "arm": "T2_F0",
+      "target": "T2",
+      "features": "F0",
+      "alias": null
+    },
+    {
+      "arm": "T2_F1",
+      "target": "T2",
+      "features": "F1",
+      "alias": null
+    },
+    {
+      "arm": "T2_F2",
+      "target": "T2",
+      "features": "F2",
+      "alias": null
+    },
+    {
+      "arm": "T2_F3",
+      "target": "T2",
+      "features": "F3",
+      "alias": "T2_F0"
+    },
+    {
+      "arm": "T2_F4",
+      "target": "T2",
+      "features": "F4",
+      "alias": null
+    },
+    {
+      "arm": "T2_F5",
+      "target": "T2",
+      "features": "F5",
+      "alias": null
+    },
+    {
+      "arm": "T3_F0",
+      "target": "T3",
+      "features": "F0",
+      "alias": null
+    },
+    {
+      "arm": "T3_F1",
+      "target": "T3",
+      "features": "F1",
+      "alias": null
+    },
+    {
+      "arm": "T3_F2",
+      "target": "T3",
+      "features": "F2",
+      "alias": null
+    },
+    {
+      "arm": "T3_F3",
+      "target": "T3",
+      "features": "F3",
+      "alias": "T3_F0"
+    },
+    {
+      "arm": "T3_F4",
+      "target": "T3",
+      "features": "F4",
+      "alias": null
+    },
+    {
+      "arm": "T3_F5",
+      "target": "T3",
+      "features": "F5",
+      "alias": null
+    }
+  ],
+  "model": "LightGBM log1p quantile Q50/Q90",
+  "parameters": {
+    "num_leaves": 15,
+    "learning_rate": 0.03,
+    "n_estimators": 400,
+    "min_child_samples": 50,
+    "n_jobs": 1,
+    "deterministic": true,
+    "force_col_wise": true,
+    "random_state": 20260924,
+    "verbosity": -1
+  },
+  "refit": "Daily expanding non-PURGE, label_matured_at strictly < issue; exact inherited 30-day weight formula",
+  "calibration": "Signed per-slot finite-rank residual Q90 correction, ceil(.9*(n+1)), min20 mature OOS days. DEV/CAL reporting uses earlier mature DEV/CAL residues only. Before Dec1 freeze final offset from eligible mature CAL days only. Evaluation including May never updates offset. Q90=max(Q50,0,rawQ90+offset), no upper cap.",
+  "feature_selection": "Per target: lowest DEVELOPMENT raw Q90 pinball; ties absolute calibration error then target-relative requirement ratio, then arm. CAL/evaluation never rerank. F3 is explicit unavailable-state alias, not independent evidence.",
+  "target_selection": "T2 and T3 are the two research candidates because exact occupancy alignment is definitional; choose their feature arm by DEV only. No automatic operational winner. T0/T1 remain arrival diagnostics. T2 vs T3 compared on hourly aggregation and TRAIN-mean-normalized loss; no cross-unit score ranking.",
+  "stage2": "After Stage1 target and feature freeze only: M0 pooled vs M1 four fixed 6h lead groups, unchanged parameters. Select per candidate on DEVELOPMENT raw pinball. No neural/tuning stage in this registered comparison; M2 requires >=100 mature training DAYS per individual period before first DEV issue and DEV evidence justifying additional splitting; M3/M4 deferred pending simple-model support.",
+  "support": "Nominal band .88..92; per-target feature support requires raw Q90 pinball CI upper<0 and Q50 MAE non-inferior in EXPOSED and OOS_EXTENSION, with target-relative ratio no worse and calibrated coverage in band; May diagnostics cannot select or overturn frozen configuration. CIs unadjusted exploratory, not untouched confirmation.",
+  "bootstrap": {
+    "draws": 2000,
+    "blocks": [
+      1,
+      7
+    ],
+    "seed": 20260928,
+    "unit": "paired whole target day circular blocks",
+    "nonfinite": "entire affected CI unavailable; no draw removal"
+  },
+  "burst": "TRAIN positive target Q95; no new label caps",
+  "ties": "Peak timing uses earliest maximum; top-load overlap uses stable rank ties; all-zero days retained",
+  "extension": "Frozen OOS_EXTENSION eligible=False retained in original ledger; all63 extension dates scored separately on explicit requested extension basis",
+  "source_causality": "Logical event-time only; unresolved submission/request version and ingestion provenance retained; no optimizer integration readiness",
+  "May": "exposed diagnostic only; no selection",
+  "optimizer_runs": 0
+}
