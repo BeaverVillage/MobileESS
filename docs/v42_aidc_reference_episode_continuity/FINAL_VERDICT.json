@@ -1,0 +1,71 @@
+{
+  "RAW_KESTREL_NATIVE_AIDC_LOCATION": false,
+  "REFERENCE_PLACEMENT_SYNTHETIC": true,
+  "EXECUTION_EPISODE_CONTINUITY_IMPLEMENTED": true,
+  "PERMANENT_UID_HOME_MAPPING_USED": false,
+  "PREVIOUS_POLICY_DAY_OUTPUT_USED": false,
+  "REFERENCE_PLACEMENT_GRID_BLIND": true,
+  "REFERENCE_PLACEMENT_POLICY_OUTPUT_BLIND": true,
+  "REFERENCE_PLACEMENT_FUTURE_OUTCOME_BLIND": true,
+  "N_CROSS_DAY_CONTINUING_EPISODES": 35271,
+  "N_UNEXPLAINED_REFERENCE_SITE_CHANGES": 0,
+  "APR1_PENDING_TO_APR2_RUNNING_COMPARABLE": 104,
+  "APR1_PENDING_TO_APR2_RUNNING_UNEXPLAINED_SITE_CHANGE": 0,
+  "RUNNING_INITIAL_SITE_MUTATION_OPTIONS": 0,
+  "SITE_CAPACITY_VIOLATIONS": 321,
+  "RACK_COMPATIBILITY_VIOLATIONS": 0,
+  "GANG_SPLITTING_EVENTS": 0,
+  "SPATIAL_TEMPORAL_ELIGIBILITY_DECOUPLED": true,
+  "REFERENCE_RULE_IDENTICAL_ACROSS_POLICIES": true,
+  "POLICY_IDENTITY_CONTAMINATION_COUNT": 0,
+  "DAILY_WORKER_ORDER_INVARIANT": true,
+  "ELECTRICAL_KERNEL_CHANGED": false,
+  "RUNTIME_MODEL_CHANGED": false,
+  "CC4_CHANGED": false,
+  "MESS_CHANGED": false,
+  "V42_PROBLEM4_REFERENCE_PLACEMENT_READY": false,
+  "gates": {
+    "episode_identity_source_backed_or_fail_closed": true,
+    "continuing_reference_preserved": true,
+    "running_initial_immutable": true,
+    "initial_vs_migration_distinct": true,
+    "no_gang_splitting": true,
+    "full_reference_resource_state_ready": false,
+    "grid_blind": true,
+    "future_outcome_blind": true,
+    "no_policy_identity_contamination": true,
+    "independent_workers": true,
+    "no_permanent_uid_home": true,
+    "old_forensic_preserved": true,
+    "runtime_CC4_MESS_kernel_unchanged": true,
+    "tests_pass": true
+  },
+  "blockers": [
+    {
+      "kind": "SITE_CAPACITY_VIOLATIONS",
+      "count": 321,
+      "evidence": "REFERENCE_CAPACITY_RACK_AUDIT.csv"
+    },
+    {
+      "kind": "REFERENCE_START_STATE_CONFLICT",
+      "count": 28025,
+      "evidence": "REFERENCE_CAPACITY_RACK_AUDIT.csv"
+    },
+    {
+      "kind": "OVERSIZE_PRESERVED_COUNT",
+      "count": 126,
+      "evidence": "REFERENCE_CAPACITY_RACK_AUDIT.csv"
+    },
+    {
+      "kind": "UNASSIGNED_BY_CONTINUITY_CONFLICT",
+      "count": 57125,
+      "evidence": "REFERENCE_CAPACITY_RACK_AUDIT.csv"
+    }
+  ],
+  "status": "IMPLEMENTED_TESTED_FAIL_CLOSED_RESOURCE_AUTHORITY_BLOCKED",
+  "native_V42_binding": false,
+  "May_policy_effect_evaluation": false,
+  "unknown_control_activated": false,
+  "count_caveat": "Zero unexplained changes does not hide missing assignments. See assigned continuation edges, unassigned rows and day-ready flags.",
+  "required_external_resolution": "A source-backed reconciliation of continuing pending reference reservations with subsequent causal execution snapshots, and feasible whole-gang native state authority. No invented requeue/temporal/runtime/capacity relaxation."
+}

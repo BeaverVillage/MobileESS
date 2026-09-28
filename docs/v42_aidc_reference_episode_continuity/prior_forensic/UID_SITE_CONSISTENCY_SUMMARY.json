@@ -1,0 +1,55 @@
+{
+  "SAME_UID_SAME_REFERENCE_SITE": "FALSE",
+  "DATE_DEPENDENT_REFERENCE_MAPPING": true,
+  "stage_metrics": {
+    "APRIL_CAUSAL_REFERENCE": {
+      "UID": 801,
+      "N_MULTI_DAY_UID": 113,
+      "N_UID_SINGLE_REFERENCE_SITE": 26,
+      "N_UID_MULTIPLE_REFERENCE_SITES": 87,
+      "MAX_DISTINCT_SITES_PER_UID": 2,
+      "policy_dependent_UID": 0,
+      "date_dependent_UID": 87
+    },
+    "DDAY_UNKNOWN_REFERENCE": {
+      "UID": 2340,
+      "N_MULTI_DAY_UID": 0,
+      "N_UID_SINGLE_REFERENCE_SITE": 0,
+      "N_UID_MULTIPLE_REFERENCE_SITES": 0,
+      "MAX_DISTINCT_SITES_PER_UID": 2,
+      "policy_dependent_UID": 1586,
+      "date_dependent_UID": 0
+    },
+    "HISTORICAL_RUNNING_INITIALIZER": {
+      "UID": 49115,
+      "N_MULTI_DAY_UID": 5661,
+      "N_UID_SINGLE_REFERENCE_SITE": 5130,
+      "N_UID_MULTIPLE_REFERENCE_SITES": 531,
+      "MAX_DISTINCT_SITES_PER_UID": 3,
+      "policy_dependent_UID": 0,
+      "date_dependent_UID": 531
+    }
+  },
+  "comparison_rule": "Compare same stage/UID across valid assigned days; policy cases separately. Missing mapping is not another site.",
+  "identity_hash_collisions": 0,
+  "deterministic_reproduction_days": 412,
+  "policy_reference_comparisons": [
+    {
+      "policy": "P1_MAXIMUM_MINIMUM_HEADROOM",
+      "common_admitted": 2340,
+      "different_reference_sites": 1586,
+      "reason": "Policy commits change later occupancy. This is sequential endogenous reference remapping, not checkpoint migration."
+    },
+    {
+      "policy": "P2_GRID_RESPONSE_POLICY",
+      "common_admitted": 2340,
+      "different_reference_sites": 0,
+      "reason": "Policy commits change later occupancy. This is sequential endogenous reference remapping, not checkpoint migration."
+    }
+  ],
+  "initial_mapping_classes": {
+    "STABLE_HOME_PREFERENCE": 51169,
+    "DETERMINISTIC_CAPACITY_REPAIR": 4272,
+    "UNRESOLVED_INITIAL_STATE_FAILURE": 1839
+  }
+}

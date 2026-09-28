@@ -1,0 +1,64 @@
+{
+  "REFERENCE_SITE_GRID_RESULT_READS": 0,
+  "REFERENCE_SITE_MAY_RESULT_READS": 0,
+  "REFERENCE_SITE_FUTURE_ACTUAL_READS": 0,
+  "count_definition": "Number of such input dependencies in audited current reference creation paths, not hardware file-read instrumentation or a claim about every research branch",
+  "proof": [
+    {
+      "function": "build_common_initial_state",
+      "inputs": [
+        "UID/GPU of issue-time RUNNING",
+        "frozen site cap",
+        "V22 IT-equivalent capacity prior"
+      ],
+      "excludes": [
+        "grid",
+        "RW/RSP future schedule",
+        "future runtime",
+        "prior-day results"
+      ]
+    },
+    {
+      "function": "V41R2 reference.materialize",
+      "inputs": [
+        "causal known jobs + requested safe durations",
+        "tier/FIFO priorities",
+        "initial site",
+        "capacity/rack compatibility"
+      ],
+      "excludes": [
+        "electrical sensitivities",
+        "Actual",
+        "solver objectives"
+      ]
+    },
+    {
+      "function": "V42 prefix replay reference=feasible[0]",
+      "inputs": [
+        "observed submission/request",
+        "capacity occupancy from known reference and earlier committed actions"
+      ],
+      "excludes": [
+        "future arrivals",
+        "future start/end",
+        "current candidate electrical score"
+      ]
+    },
+    {
+      "function": "V22SR1 weights",
+      "inputs": [
+        "declared facility IT-equivalent MW divided by total"
+      ],
+      "excludes": [
+        "voltage/line-loading results"
+      ]
+    }
+  ],
+  "qualification": "P1/P2 reference is history-dependent via prior policy commits. P1 uses headroom; P2 scoring code uses grid kernel but current bounded P2 has zero scored candidates/actions. Do not claim all possible adaptive-policy references are independent of past electrical decisions.",
+  "raw_scanner_censoring": "start/end columns compared with issue time only to determine already observed state; future timestamps excluded from placement features. Raw scanner does read accounting columns; zero means future actual value used in placement decisions, not zero scanner bytes.",
+  "V38_reads_May_planned_RW_RSP_schedules": true,
+  "V38_reads_May_outcomes": false,
+  "V38_cross_date_information": "Global May schedule-set mapping attempt was not a causal per-day mapper and failed. It is not the current pre-May reference input.",
+  "historical_freeze_claim_limit": "This audits dataflow, not an independent proof that all earlier engineering authority choices were preregistered before research exposure.",
+  "no_new_May_evaluation": true
+}
