@@ -1,0 +1,159 @@
+{
+  "time": "2026-09-29T02:16:36.770144+00:00",
+  "before_forensic": true,
+  "before_training": true,
+  "April_status": "EXPOSED_REGRESSION_ONLY",
+  "May_allowed": false,
+  "stage_order": [
+    "A forensic complete before any new training",
+    "B15 base window/target cells",
+    "B selected base window/target: L1/L2 tail experts and fixed risk gates",
+    "C direct raw/log remaining, no-total-feature, no-elapsed ablation",
+    "final fit and six freezes",
+    "April once"
+  ],
+  "learner": {
+    "n_estimators": 300,
+    "learning_rate": 0.05,
+    "num_leaves": 31,
+    "max_depth": 8,
+    "min_child_samples": 200,
+    "reg_lambda": 2,
+    "max_bin": 127,
+    "random_state": 4011,
+    "n_jobs": 4,
+    "verbosity": -1,
+    "deterministic": true,
+    "force_col_wise": true
+  },
+  "backend": "CPU4 across all folds and final; no GPU trial needed, CPU inference1",
+  "total": {
+    "windows": {
+      "EXPANDING": null,
+      "D180": 180,
+      "D90": 90,
+      "D60": 60,
+      "D30": 30
+    },
+    "window_key": "submit_time within latest D days before TRAIN cutoff; exact completion known before same cutoff",
+    "targets": [
+      "RAW",
+      "LOG",
+      "REL"
+    ],
+    "relative": "log((T+1)/(requested_seconds+1)); V8 exact transform; missing walltime uses TRAIN-median walltime denominator",
+    "raw_features": [
+      "num_gpus_req",
+      "num_nodes_req",
+      "num_cores_req",
+      "requested_memory_mib",
+      "requested_seconds",
+      "array_index",
+      "qos",
+      "partition",
+      "account"
+    ],
+    "engineered_count": 29,
+    "mappings": "fit only to each window TRAIN descriptor support; deterministic category sort; unknown0",
+    "support_min": {
+      "completed": 5000,
+      "long4": 200,
+      "long12": 100
+    },
+    "censoring": "direct quantiles trained on exact completed labels only; report censored exclusions and maturity-selection limitation",
+    "selection": "First select one of15 base models, then compare5 unique gated candidates on selected base. No exhaustive target/window/weight interactions. Eligibility first; if none, fewest failed gates then rank; diagnostic only.",
+    "ranking": [
+      "Q90_pinball",
+      "reservation_actual_GPUh",
+      "Q50_MAE",
+      "coverage_std"
+    ],
+    "tail": {
+      "classifier": "binary T>14400, same CPU4 params/window",
+      "threshold": 0.5,
+      "smooth_alpha": "raw predicted p_long4, alpha=p",
+      "weights": {
+        "L0": "1",
+        "L1": "2 if T>4h else1",
+        "L2": "4 if T>12h else2 if T>4h else1"
+      },
+      "max_weight": 4,
+      "gates": [
+        "GATE0 base only",
+        "GATE1 p>=.5 hard tail",
+        "GATE2 (1-p)*base+p*tail"
+      ],
+      "L3": false,
+      "classifier_meaningful": {
+        "ROC_AUC_min": 0.65,
+        "PR_AUC_prevalence_lift_min": 1.5,
+        "min_supported_fold_AUC": 0.55
+      },
+      "classifier_validation": "meaningful discrimination plus pooled Brier skill>0 and recall_at_fixed_threshold>=.50; raw probability bins10, no probability recalibration"
+    },
+    "order_repair": "Q50=max(Q50,0);Q90=max(Q90,Q50,0); no walltime cap or global multiplier"
+  },
+  "total_gates": {
+    "pooled_coverage": [
+      0.88,
+      0.92
+    ],
+    "min_fold": 0.85,
+    "pooled_long4": 0.85,
+    "min_fold_long4": 0.8,
+    "pooled_long12": 0.8,
+    "min_fold_long12": 0.7,
+    "support_N": 100,
+    "reservation_to_W0_max": 0.8,
+    "queue_starts_relative_W0_min": 0.95,
+    "queue_capacity_violations": 0,
+    "queue_horizon_exhaustion": 0,
+    "queue_extensions_max": "max(2*W0, W0+1000) per fold",
+    "future_outcome_leakage": 0
+  },
+  "remaining": {
+    "window": "selected TOTAL window, no new window search",
+    "models": [
+      "R3_RAW",
+      "R4_LOG"
+    ],
+    "diagnostic_ablation": "R3_NO_ELAPSED same TRAIN rows/window/params, not eligible",
+    "features": "same29 + elapsed_seconds,elapsed_hours,log_elapsed,elapsed_walltime_ratio,walltime_minus_elapsed,checkpoint_index",
+    "total_prediction_features": false,
+    "OOF_TOTAL_PREDICTION_LEAKAGE": 0,
+    "checkpoint_seconds": 1800,
+    "checkpoint": "start+1800*k strictly before observed completion; no postcompletion rows",
+    "train": "completed labels known before TRAIN cutoff only; every checkpoint, unit row weight; censored remaining targets not fabricated",
+    "split": "Episode identity assigned by inherited submit-time role before checkpoint expansion; disjoint within each fold. Earlier VALID can causally enter later expanding TRAIN after completion, not within-fold leakage.",
+    "selection": "eligible first, then remaining Q90 pinball,Q50 MAE,fold std; if none, fewest failed gates then rank; raw/log only",
+    "gates": {
+      "pooled_coverage": [
+        0.88,
+        0.92
+      ],
+      "min_fold": 0.85,
+      "max_fold": 0.95,
+      "min_supported_elapsed_bin": 0.8,
+      "max_supported_elapsed_bin": 0.97,
+      "elapsed_support": 1000,
+      "long_elapsed_gt12": 0.85,
+      "pinball_ratio_vs_total_minus_elapsed_max": 1.0,
+      "Q50_MAE_ratio_vs_total_minus_elapsed_max": 1.05
+    },
+    "classification": "remaining Q90>threshold, as V9/V10; not a0.5 probability classifier",
+    "optional_R4": true
+  },
+  "overrun": "RUNNING retains GPU; recompute at each30min checkpoint/control extension; extend exactly900s when expired; STAY; never terminate",
+  "queue": "V9 empty-background bounded preApril forecast ledger and separately labeled causal stress; remaining calls receive only request descriptors and observed elapsed, completion observer isolated",
+  "final_fit": "same final V9 TRAIN cutoff2025-03-17T08Z, available2025-03-31T08Z; no CAL outcome adaptation, all frozen through April",
+  "forensic": {
+    "PSI": "TRAIN decile edges, probabilities epsilon1e-6 only descriptive metric",
+    "KS": 0.1,
+    "JS_divergence": 0.1,
+    "total_variation": 0.1,
+    "label_tail_abs_change": 0.05,
+    "rare_category_train_count": 100,
+    "conditional": "exact raw descriptor cells with TRAIN>=50 VALID>=30; report common-support mass, weighted within-cell KS and prevalence changes; no proof solely from marginals",
+    "recency": "Compare recent30d TRAIN label CDF distance to VALID vs expanding; descriptive only, model family/window set unchanged"
+  }
+}
