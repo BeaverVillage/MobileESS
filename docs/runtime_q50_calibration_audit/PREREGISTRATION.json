@@ -1,0 +1,50 @@
+{
+  "time": "2026-09-29T15:42:52.444373+00:00",
+  "base": "efc04829a4bfadfcf5a03998592c93ba86554701",
+  "candidates": [
+    "V9_D1_ROLLING14",
+    "V9_D2_NORMAL_1P5_NONE",
+    "V9_D2_EXTREME_1P0_NONE",
+    "V9_D3_ROLLING14",
+    "V13_EXPANDING_S4",
+    "V9_D2_NORMAL_1P0_NONE"
+  ],
+  "primary_question": "V9_D2_EXTREME_1P0_NONE",
+  "phase": "Before computing new Q50 coverage. PR94 raw MAE/time/Q90 and ratio medians already known.",
+  "population": "Exactly PR94 230237 VALID jobs; all six frozen Q50/Q90 arrays; no CAL or inference, no training.",
+  "primary_metrics": [
+    "Q50 MAE hours",
+    "P(actual<=Q50)",
+    "sum(Q50 seconds)/sum(actual seconds)"
+  ],
+  "coverage_target": 0.5,
+  "calibration_error": "abs(coverage-.50), descriptive only; no numerical PASS threshold",
+  "temporal": "Five original chronological folds; population standard deviation ddof=0. Worst median calibration is largest abs(C50-.50), not automatically smallest coverage. Report min and max too.",
+  "bucket_intervals": "(0,900],(900,3600],(3600,14400],(14400,43200],(43200,86400],(86400,infinity); cumulative actual>4h,>12h,>24h. Exact-zero rows separately.",
+  "bucket_interpretation": "Actual-runtime strata are outcome-conditioned diagnostics, not predictor inputs or conditional-median calibration tests. Do not require each outcome stratum to have 50% coverage.",
+  "zero_handling": "1290 zero-runtime rows included in global/fold MAE, coverage and aggregate sums. Excluded from per-job division. Zero-only aggregate ratio undefined/null.",
+  "ratios": "T>0 only; Q10/Q25/median/Q75/Q90/Q95 linear empirical quantiles. Mean diagnostic only, not primary.",
+  "pareto_views": {
+    "core": [
+      "min Q50 MAE",
+      "min abs(pooled C50-.50)",
+      "min abs(time ratio-1)"
+    ],
+    "stability_additions": [
+      "min maximum fold abs(C50-.50)",
+      "min std fold C50"
+    ],
+    "reason": "Distance from time ratio1 characterizes balanced time totals, not a scaling target; low ratios are not automatically preferred."
+  },
+  "decision": "Qualitative comparative review of error, median calibration, time burden, temporal behavior and tail underprediction. Only primary candidate or NONE; no automatic Pareto promotion, no post-hoc numerical PASS threshold. Reserve feasibility is untested.",
+  "architecture": "Planning: total-Q50 nominal plus separately designed reserve. Actual: observed RUNNING gang stays occupied until completion; capacity check before PENDING start; no duplicate reserve. Same provider after known or D-day job submits; no individual predictor before unknown submission.",
+  "boundaries": [
+    "PR94 NONE/alpha-null remains unchanged",
+    "no reserve/headroom design",
+    "no new model or conditional remaining",
+    "no GPU weighting",
+    "no pinball decision",
+    "no April/May",
+    "no CC4/V42/canary/OpenDSS execution"
+  ]
+}
