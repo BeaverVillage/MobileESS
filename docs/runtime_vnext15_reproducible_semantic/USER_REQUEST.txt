@@ -1,0 +1,1494 @@
+Repository: BeaverVillage/MobileESS
+
+NEW V42 / RUNTIME / CC4 DEVELOPMENT TASK
+
+V42 Reproducible Submission-Semantic Integration
+Runtime-vNext15 + CC4 Semantic Augmentation
+
+Suggested branch:
+codex/v42-reproducible-submission-semantic
+
+BASE:
+Runtime-vNext14R2 Draft PR #88
+
+base commit:
+ce72e7f890f2bb1f330aa8c66910fc43a74ea06f
+
+
+============================================================
+0. DECISION — STOP PRIVATE RADDiT PROVENANCE RECOVERY
+============================================================
+
+Runtime-vNext14R2 is closed.
+
+Do NOT spend additional work trying to recover:
+
+- private RADDiT exporter
+- hidden timestamp stripping code
+- private encrypted embedding transformation
+- exact original int8 coordinate transform
+- deleted/private execution manifests
+- exact distributed-vector generation environment
+
+V14R2 evidence remains preserved.
+
+The project decision is now:
+
+    Do NOT depend on the distributed RADDiT embedding representation
+    for V42 deployment.
+
+Instead:
+
+    adopt the publicly documented RADDiT submission-information concept
+
+and construct our own:
+
+    deterministic
+    reproducible
+    submission-time-only
+    future-callable
+
+semantic representation.
+
+This new representation must be usable by the same code for:
+
+1. historical Kestrel training/replay
+2. D-1 already-submitted jobs
+3. D-day newly arriving jobs
+4. future V42 inference
+
+The new representation is:
+
+    RADDiT-derived / RADDiT-inspired open semantic representation
+
+NOT:
+
+    the original RADDiT distributed embedding.
+
+Do not claim otherwise in paper-facing text.
+
+
+============================================================
+1. SCIENTIFIC MOTIVATION
+============================================================
+
+V13 showed that request descriptors plus observable current workload state
+were not sufficient for robust per-job Q90 Runtime forecasting.
+
+Best S4:
+
+    pooled Q90 = 91.84%
+    min-fold = 70.70%
+    >4h = 69.72%
+    >12h = 64.25%
+    >24h = 46.88%
+
+V14–V14R2 then identified richer submission-side semantic information
+associated with the RADDiT methodology.
+
+Public RADDiT semantic input family:
+
+    user
+    account
+    partition
+    job_type
+    name
+    qos
+    submit_line
+    script
+
+The new hypothesis is:
+
+    Reproducible submission-side workload identity/composition information
+    may improve Runtime temporal robustness and CC4 future-workload prediction.
+
+This is a predictive hypothesis.
+
+Do NOT claim causal effects or hidden-variable proof.
+
+
+============================================================
+2. IMPORTANT ARCHITECTURAL CHANGE
+============================================================
+
+We no longer require:
+
+    Kestrel
+      ↔ RADDiT historic
+      ↔ distributed embedding
+
+crosswalk for the new V42 semantic representation.
+
+Instead, build directly from ORIGINAL KESTREL submission records.
+
+Pipeline:
+
+Original Kestrel submission record
+        ↓
+Canonical SubmissionSemanticRecord
+        ↓
+Deterministic open semantic transformer
+        ↓
+SEM32 representation
+        ↓
+Runtime ML / CC4 semantic-state aggregation
+        ↓
+V42
+
+The same transformation code must be callable for a new job.
+
+This removes dependence on private RADDiT vector provenance.
+
+
+============================================================
+3. RAW DATA ROOTS
+============================================================
+
+Use:
+
+ROOT_A =
+C:\Users\kjw39\OneDrive\Desktop\4-2\Mobile ESS\raw데이터
+
+ROOT_B =
+C:\Users\kjw39\OneDrive\Desktop\4-2\Mobile ESS\raw데이터\데이터 센터
+
+Primary historical authority:
+
+original Kestrel archive
+
+Do not use Eagle/Azure/Alibaba/BurstGPT to fill Kestrel job features.
+
+RADDiT repository may be consulted for methodology and field definitions,
+but distributed RADDiT vectors are NOT the production representation.
+
+
+============================================================
+4. PRESERVE V6–V14R2
+============================================================
+
+Before work:
+
+- verify base commit
+- verify V6–V14R2 tracked-file hashes
+- verify manifests
+- verify working tree
+
+Do not modify prior evidence.
+
+New research outputs:
+
+docs/runtime_vnext15_reproducible_semantic/
+
+Shared V42 semantic implementation should be placed in the appropriate
+production/research module only after its interface contract is frozen.
+
+Do not alter optimizer physics or electrical models in this task.
+
+
+============================================================
+5. FIRST TASK — AUDIT THE ORIGINAL KESTREL SEMANTIC FIELDS
+============================================================
+
+Do NOT assume all public RADDiT fields are semantically preserved in the
+anonymous Kestrel archive.
+
+Inspect the original Kestrel schema/content for:
+
+- user
+- account
+- partition
+- qos
+- job_type
+- name
+- submit_line
+- script
+- modules
+- conda_envs
+- workdir
+- reservation
+- array metadata
+- dependency metadata
+
+For every candidate field classify:
+
+A. STRUCTURED_SEMANTIC
+    meaningful standardized category
+
+B. STABLE_ANON_IDENTITY
+    anonymized token but stable repeated identity
+
+C. OPAQUE_UNSTABLE_TOKEN
+    cannot safely carry historical/future identity
+
+D. FREE_TEXT_SEMANTIC
+    actual usable semantic text
+
+E. MISSING
+
+Also report:
+
+- missing rate
+- unique count
+- repetition rate
+- TRAIN→VALID unseen rate by fold
+- observation time
+- whether known at job SUBMIT
+- whether mutable after submit
+- whether usable by future V42
+
+Create:
+
+KESTREL_SUBMISSION_SEMANTIC_FIELD_AUDIT.csv
+
+Do not call an opaque token "semantic text".
+
+
+============================================================
+6. SUBMISSION-TIME CAUSAL CONTRACT
+============================================================
+
+A semantic field is allowed only if it is available at:
+
+    event_time = job submission
+
+or earlier.
+
+Forbidden:
+
+- actual runtime
+- start time if prediction occurs at submit
+- end time
+- final state
+- actual energy
+- realized power
+- later scheduler decisions
+- post-submit mutation not observable at prediction time
+
+Create:
+
+SUBMISSION_SEMANTIC_AUTHORITY.json
+
+
+============================================================
+7. CANONICAL V42 INPUT INTERFACE
+============================================================
+
+Introduce a backward-compatible semantic payload.
+
+Conceptually:
+
+SubmissionSemanticPayload(
+    user,
+    account,
+    partition,
+    qos,
+    job_type,
+    name,
+    submit_line,
+    script,
+    modules,
+    conda_envs
+)
+
+Only fields proven available are populated.
+
+Fields may be Optional.
+
+Do not require all fields.
+
+Extend the V42 arrival/runtime request interface so a future job can provide
+the same semantic concepts.
+
+Important:
+
+Do NOT expose raw strings to the optimizer.
+
+The semantic adapter processes them before optimization.
+
+Conceptual flow:
+
+Job Arrival
+    ↓
+SubmissionSemanticPayload
+    ↓
+SemanticFeatureAdapter
+    ↓
+fixed-dimensional numeric representation
+    ↓
+RuntimeProvider / CC4 state
+    ↓
+scheduler / optimizer
+
+
+============================================================
+8. PRIVACY / STORAGE CONTRACT
+============================================================
+
+Raw semantic strings must not be written to:
+
+- optimizer artifacts
+- paper result CSVs
+- public manifests
+- logs
+
+unless they are already anonymous source tokens.
+
+For future real input:
+
+use ephemeral processing where possible.
+
+Persist only:
+
+- sanitized category
+- stable irreversible token if needed
+- numeric semantic vector
+- feature version
+
+Document the privacy boundary.
+
+
+============================================================
+9. DO NOT USE THE PRIVATE RADDiT EMBEDDING AS THE MAIN INPUT
+============================================================
+
+Set:
+
+RADDIT_DISTRIBUTED_VECTOR_USED_FOR_V42 = FALSE
+PRIVATE_RADDIT_EXPORT_REQUIRED = FALSE
+PRIVATE_RADDIT_VECTOR_TRANSFORM_REQUIRED = FALSE
+
+The historical encrypted embedding chunks may remain as archived research
+evidence but are NOT required by V42.
+
+Do not perform another provenance search.
+
+
+============================================================
+10. OPEN REPRODUCIBLE SEMANTIC REPRESENTATION
+============================================================
+
+Primary representation name:
+
+SEM_COOCCUR32_V1
+
+Design goal:
+
+- deterministic
+- CPU-callable
+- no private model
+- no remote API
+- no future information
+- train/replay/inference same implementation
+- capable of using anonymized categorical identities and structured metadata
+
+Use FIELD-PREFIXED TOKENS.
+
+Examples:
+
+user=<value>
+account=<value>
+partition=<value>
+qos=<value>
+job_type=<value>
+name=<value>
+script=<value>
+submit_line=<value>
+module=<value>
+conda=<value>
+
+Do not use numeric suffix magnitude as a meaningful continuous feature.
+
+For example:
+
+script_0000123
+
+must be treated as one categorical token,
+not as number 123.
+
+
+============================================================
+11. PRIMARY SEMANTIC TRANSFORM
+============================================================
+
+Use this frozen structure:
+
+Stage A:
+    canonical token set
+
+Stage B:
+    sklearn FeatureHasher
+
+Frozen parameters:
+
+    n_features = 262144
+    input_type = "string"
+    alternate_sign = False
+
+Use binary token presence where appropriate.
+
+Stage C:
+    TruncatedSVD
+
+    n_components = 32
+    random_state = 1401
+
+SVD must be fit using TRAIN only for each temporal fold.
+
+VALID/CAL/test/new jobs are transform-only.
+
+Output:
+
+    sem_00 ... sem_31
+
+Call this:
+
+    SEM_COOCCUR32_V1
+
+Reason:
+
+This captures submission-field co-occurrence/workload identity
+without requiring RADDiT's private embedding coordinates.
+
+
+============================================================
+12. IMPORTANT OPAQUE-TOKEN RULE
+============================================================
+
+If fields such as:
+
+script_012345
+name_034522
+user_000123
+
+are anonymized IDs:
+
+their identity/co-occurrence may be used.
+
+But:
+
+- do not claim linguistic semantics
+- do not use character n-grams of the numeric ID
+- do not use numeric ordering
+- do not infer similarity from ID closeness
+
+The representation can learn:
+
+    "these categorical identities frequently co-occur"
+
+but must NOT claim:
+
+    "script_100 is semantically close to script_101."
+
+
+============================================================
+13. OPTIONAL TEXT CHANNEL
+============================================================
+
+Create a second text-semantic channel ONLY IF the historical Kestrel archive
+actually contains non-anonymized semantic text.
+
+If >95% of script/name/submit-line values are opaque identifiers:
+
+TEXT_SEMANTIC_CHANNEL_AVAILABLE = FALSE
+
+Do not download a large LLM.
+
+Do not use Linq-Embed-Mistral merely to embed opaque tokens.
+
+If meaningful text exists:
+
+freeze a lightweight open encoder separately and document exact revision.
+
+But SEM_COOCCUR32_V1 remains the primary representation.
+
+
+============================================================
+14. TRAIN-ONLY RECURRENCE FEATURES
+============================================================
+
+Also generate low-cost structured recurrence features.
+
+For each allowed identity field:
+
+- train_frequency
+- log1p_train_frequency
+- seen_in_train
+- combinations where reasonable:
+    user-account
+    account-partition
+    user-script
+    account-job_type
+
+Use TRAIN only.
+
+No VALID frequency leakage.
+
+No target/runtime-based encoding.
+
+No mean-target encoding.
+
+No CatBoost target statistics.
+
+Name family:
+
+SEM_RECURRENCE_V1
+
+
+============================================================
+15. HISTORICAL/FUTURE PARITY TEST
+============================================================
+
+Build one implementation:
+
+SemanticFeatureAdapter
+
+The exact same adapter must transform:
+
+A.
+historical Kestrel row at submission
+
+B.
+V42 replayed submission event
+
+C.
+synthetic new unseen job
+
+Test:
+
+historical direct transform
+==
+replayed event transform
+
+bit-for-bit or deterministic numeric tolerance.
+
+Create:
+
+SEMANTIC_ADAPTER_PARITY_AUDIT.json
+
+
+============================================================
+16. V42 SEMANTIC INPUT GAP
+============================================================
+
+Current V14R2 found V42 has only:
+
+partition
+qos
+
+from the original eight RADDiT-style fields.
+
+Modify the interface to SUPPORT the additional submission-side fields that
+are scientifically available:
+
+candidate:
+
+- user
+- account
+- job_type
+- name
+- submit_line
+- script
+- modules
+- conda_envs
+
+Do not fabricate them.
+
+Historical replay obtains them from Kestrel only when the SUBMIT event occurs.
+
+D-day unknown jobs:
+
+before arrival:
+    unavailable
+
+at arrival:
+    available
+
+This distinction is essential.
+
+
+============================================================
+17. D-1 / ACTUAL SEMANTIC AVAILABILITY
+============================================================
+
+At D-1 issue time:
+
+For jobs already submitted:
+    semantic record may be known.
+
+For future D-day unknown jobs:
+    individual semantic record is NOT known.
+
+Do not leak future job semantic information into D-1 planning.
+
+At actual D-day submit event:
+
+the new job semantic payload becomes observable and can be used by the
+lightweight actual-arrival handler.
+
+
+============================================================
+18. RUNTIME-vNEXT15 EXPERIMENT
+============================================================
+
+Now evaluate whether the reproducible semantic information improves Runtime.
+
+Do NOT search a new model zoo.
+
+Reuse exact V13 hazard framework.
+
+Primary Runtime arms:
+
+R0:
+    exact V13 EXPANDING_S4 baseline
+    reuse/reproduce existing prediction
+
+R1:
+    R0
+    + SEM_RECURRENCE_V1
+
+R2:
+    R0
+    + SEM_COOCCUR32_V1
+    + SEM_RECURRENCE_V1
+
+If TEXT_SEMANTIC_CHANNEL_AVAILABLE = TRUE:
+
+R3:
+    R2 + reproducible text semantic channel
+
+Otherwise:
+    R3 = NOT_APPLICABLE
+
+No RADDiT distributed encrypted vector arm as production candidate.
+
+
+============================================================
+19. EXACT TEMPORAL FOLDS
+============================================================
+
+Use the exact existing five pre-April temporal folds.
+
+No random split.
+
+No new validation period.
+
+No April model selection.
+
+No May.
+
+All fold-role memberships must match frozen prior files.
+
+
+============================================================
+20. RUNTIME COMPUTE-SAVING
+============================================================
+
+Do not refit R0 if exact stored predictions can be verified and reused.
+
+New fits should be limited to semantic challengers.
+
+Do not perform large grouped ablations unless a semantic challenger shows
+material benefit.
+
+Material benefit trigger:
+
+min-fold improvement >= 5 percentage points
+
+OR
+
+>4h Q90 improvement >= 5 percentage points
+
+without >5% Q90 pinball degradation.
+
+If not reached:
+
+skip broad ablation.
+
+
+============================================================
+21. RUNTIME SAFETY METRICS
+============================================================
+
+For every Runtime arm report:
+
+- pooled Q90
+- min-fold Q90
+- fold std
+- >4h
+- >8h
+- >12h
+- >24h
+- Q90 pinball
+- Q50 MAE
+- proper interval score
+- reservation/actual GPUh
+- W0-relative reservation
+- short-job overreservation
+- median Q90/runtime
+- P90 Q90/runtime
+
+Keep current Runtime promotion gates unchanged.
+
+Do not lower them after seeing results.
+
+
+============================================================
+22. RUNTIME INTERPRETATION
+============================================================
+
+Main contrasts:
+
+R1 - R0:
+    contribution of recurrence/identity information
+
+R2 - R0:
+    contribution of reproducible latent submission composition
+
+R2 - R1:
+    incremental value of SEM_COOCCUR32
+
+Use wording:
+
+    predictive contribution
+
+not:
+
+    causal effect
+
+
+============================================================
+23. CC4 SEMANTIC AUGMENTATION — IMPORTANT DIFFERENCE
+============================================================
+
+CC4 predicts future workload before future jobs have arrived.
+
+Therefore:
+
+DO NOT give CC4 the semantic vector of a future unsubmitted job.
+
+Instead create a semantic STATE from jobs observed before CC4 issue time.
+
+At issue time t0, only use submissions with:
+
+    submit_time < t0
+
+Create recent-window semantic summaries.
+
+
+============================================================
+24. CC4 SEMANTIC STATE
+============================================================
+
+Using SEM_COOCCUR32 representations of already observed jobs, build:
+
+windows:
+
+    1h
+    6h
+    24h
+    72h
+
+Candidate features:
+
+- semantic centroid per window
+- semantic centroid change:
+      1h vs 24h
+      6h vs 72h
+- arrival count per window
+- semantic dispersion
+- recurrence fraction
+- known-account fraction
+- known-script-family fraction
+
+Avoid creating hundreds of arbitrary features.
+
+Keep semantic-state dimensionality compact.
+
+
+============================================================
+25. SEMANTIC ARCHETYPE FOR CC4
+============================================================
+
+Fit:
+
+KMeans K=8
+
+on TRAIN-only SEM_COOCCUR32.
+
+Frozen:
+
+    K = 8
+    random_state = 1401
+
+Do not tune K on validation.
+
+For each observed job:
+
+    semantic_cluster ∈ {0,...,7}
+
+At each CC4 issue time calculate causal past-only:
+
+- cluster arrival counts
+- cluster fractions
+- 1h / 6h / 24h cluster composition
+- cluster-composition change
+- entropy
+
+No future job membership.
+
+
+============================================================
+26. CC4 EXPERIMENT ARMS
+============================================================
+
+Reuse the current frozen CC4 model/interface as baseline.
+
+Do not replace model family initially.
+
+C0:
+    exact current frozen CC4
+
+C1:
+    C0 + causal recent semantic-state features
+
+C2:
+    C1 + K=8 semantic composition features
+
+Optional C3 only if C2 shows material improvement:
+    class-conditioned future workload decomposition
+
+Do not automatically create C3.
+
+
+============================================================
+27. CC4 TARGET REMAINS UNCHANGED
+============================================================
+
+Do NOT change the CC4 target merely to make semantic information fit.
+
+Keep the currently frozen future-demand target and temporal horizon.
+
+Do not use headroom as ML target.
+
+Optimizer determines headroom.
+
+Semantic features improve information input,
+not the mathematical meaning of the target.
+
+
+============================================================
+28. CC4 METRICS
+============================================================
+
+Use the current frozen CC4 evaluation contract.
+
+At minimum report:
+
+- hourly Q90 coverage
+- daily Q90 coverage
+- Q90 pinball
+- requirement ratio
+- burst coverage
+- WAPE / current frozen point metric
+- fold/period stability
+
+The user's objective remains:
+
+raise Q90 reliability toward/above 90%
+
+without obtaining it through excessive requirement inflation.
+
+Do not optimize coverage alone.
+
+
+============================================================
+29. CC4 NO-FUTURE-LEAKAGE AUDIT
+============================================================
+
+For random issue times:
+
+perturb all future job semantic fields.
+
+CC4 feature vector must remain identical.
+
+Also perturb one past job semantic field.
+
+At least the appropriate historical semantic-state feature must change.
+
+Required:
+
+CC4_SEMANTIC_FUTURE_PERTURBATION_PASS = TRUE
+
+Create:
+
+CC4_SEMANTIC_CAUSALITY_AUDIT.json
+
+
+============================================================
+30. RUNTIME NO-FUTURE-LEAKAGE AUDIT
+============================================================
+
+At job submission prediction:
+
+allowed semantic information is the current submitted job payload plus
+past observed system state.
+
+Perturb:
+
+- actual runtime
+- end time
+- future state
+- later queue events
+
+prediction features must not change.
+
+Perturb current job submission semantic field:
+
+semantic representation should change when appropriate.
+
+Create:
+
+RUNTIME_SEMANTIC_CAUSALITY_AUDIT.json
+
+
+============================================================
+31. V42 INTEGRATION DESIGN
+============================================================
+
+The V42 architecture should support:
+
+D-1 PLANNING:
+
+historical semantic state
+        ↓
+CC4
+        ↓
+future workload distribution
+        ↓
+optimizer chooses reserve/headroom/scheduling
+
+
+D-DAY ACTUAL ARRIVAL:
+
+new job arrives
+        ↓
+submission semantic payload becomes known
+        ↓
+SemanticFeatureAdapter
+        ↓
+Runtime Q50/Q90
+        ↓
+delay budget / start-site candidates
+        ↓
+existing lightweight response policy/kernel
+
+Do NOT perform online MILP simply because semantic information is added.
+
+
+============================================================
+32. RUNNING JOBS
+============================================================
+
+A RUNNING job keeps the semantic representation generated at its submission.
+
+Do not recompute semantics from future job outcome.
+
+At checkpoint:
+
+Runtime remaining model may later consume:
+
+- stored semantic representation
+- elapsed time
+- causal current state
+
+only after total Runtime validation authorizes the remaining stage.
+
+
+============================================================
+33. BACKWARD COMPATIBILITY
+============================================================
+
+Existing callers without semantic payload must continue to work.
+
+Semantic-enabled interface should support:
+
+semantic_payload = None
+
+and explicit provenance such as:
+
+semantic_feature_version = "SEM_COOCCUR32_V1"
+
+Do not silently change old predictions.
+
+
+============================================================
+34. V42 FEATURE FLAG
+============================================================
+
+Add an explicit research flag:
+
+ENABLE_SUBMISSION_SEMANTICS
+
+Default in legacy regression:
+    FALSE
+
+New V42 semantic experiment:
+    TRUE
+
+The flag controls feature availability only.
+
+Do not use it to bypass model validation.
+
+
+============================================================
+35. MODEL BUNDLE
+============================================================
+
+If a semantic Runtime arm is selected, bundle:
+
+- canonicalization config
+- FeatureHasher config
+- trained fold/final SVD32
+- recurrence maps
+- field whitelist
+- missing-value policy
+- feature ordering
+- semantic version
+- Runtime model
+- provenance manifest
+
+No external online service required.
+
+
+============================================================
+36. FUTURE JOB CALLABILITY TEST
+============================================================
+
+Construct synthetic unseen submission examples including:
+
+A.
+all-known categories
+
+B.
+new user/name/script
+
+C.
+missing optional fields
+
+D.
+new account
+
+E.
+Unicode / unusual command text if accepted
+
+Provider must return finite features and predictions.
+
+No training/refit allowed at inference.
+
+
+============================================================
+37. SEMANTIC REPRESENTATION MISSING POLICY
+============================================================
+
+Missing optional field:
+
+token = <FIELD_MISSING>
+
+Never use future imputation.
+
+If all semantic fields except required partition/qos are missing:
+
+representation remains valid,
+but provider reports:
+
+semantic_support_level = MINIMAL
+
+Other possible:
+
+PARTIAL
+FULL
+
+Do not reject job solely because optional semantic text is unavailable.
+
+
+============================================================
+38. VERY IMPORTANT PAPER TERMINOLOGY
+============================================================
+
+If this approach is used in the paper, call it something like:
+
+"reproducible submission-semantic representation inspired by RADDiT"
+
+or:
+
+"submission-metadata latent representation"
+
+Do NOT say:
+
+"we use the RADDiT embedding"
+
+unless the actual RADDiT distributed embedding is used.
+
+Do NOT claim access to private scripts or private embeddings.
+
+
+============================================================
+39. RETROSPECTIVE RADDiT EMBEDDINGS
+============================================================
+
+The existing RADDiT distributed embeddings may be retained only as:
+
+- methodological reference
+- optional non-production diagnostic
+- evidence motivating submission semantic modeling
+
+Do NOT require their crosswalk for the new V42 pathway.
+
+Do NOT spend compute reconstructing their private encryption.
+
+
+============================================================
+40. PROMOTION LOGIC — RUNTIME
+============================================================
+
+If R1/R2/R3 fails Runtime safety gates:
+
+do not select it as RuntimeProvider.
+
+Keep semantic interface implementation available for research,
+but Runtime production/research selection remains previous status.
+
+If one arm passes all Runtime gates:
+
+freeze it before:
+- remaining Runtime study
+- April evaluation
+
+Then proceed under the existing gate structure.
+
+
+============================================================
+41. PROMOTION LOGIC — CC4
+============================================================
+
+CC4 semantic features are selected only if they improve the frozen CC4
+evaluation without unacceptable requirement inflation.
+
+Do not select an arm merely because coverage exceeds 90%.
+
+Evaluate coverage + sharpness/requirement jointly.
+
+Keep current baseline if semantic information is not beneficial.
+
+
+============================================================
+42. V42 INTEGRATION GATE
+============================================================
+
+Separate:
+
+SEMANTIC_INTERFACE_READY
+
+from:
+
+RUNTIME_SEMANTIC_MODEL_SELECTED
+
+and:
+
+CC4_SEMANTIC_MODEL_SELECTED
+
+V42 may contain the backward-compatible semantic interface even if a
+particular model is not selected.
+
+But V42 policy execution must use only validated selected models.
+
+
+============================================================
+43. OPTIONAL RADDiT-STYLE FIELD EXPANSION
+============================================================
+
+If the Kestrel raw archive proves additional submit-time fields such as:
+
+modules
+conda_envs
+
+are reproducible and useful:
+
+they may be included in SEM_COOCCUR32_V1.
+
+Record them explicitly.
+
+Do not expand after seeing VALID performance.
+
+Field whitelist must be frozen before model evaluation.
+
+
+============================================================
+44. PRE-REGISTRATION BEFORE TRAINING
+============================================================
+
+Before looking at new validation metrics freeze:
+
+- allowed field whitelist
+- field classification
+- hasher configuration
+- SVD dimensions
+- recurrence features
+- KMeans K
+- Runtime arms
+- CC4 arms
+- evaluation periods
+- promotion gates
+
+Write:
+
+PREREGISTRATION.json
+
+Only after this file is created and hash-bound may new model training begin.
+
+
+============================================================
+45. COMPUTE-SAVING ORDER
+============================================================
+
+Execute:
+
+A.
+source/field audit
+
+B.
+SemanticFeatureAdapter
+
+C.
+parity + causality tests
+
+D.
+freeze preregistration
+
+E.
+Runtime R1/R2 experiment
+
+F.
+only then CC4 C1/C2 experiment
+
+G.
+only if relevant gates improve:
+    further diagnostics
+
+Do not launch Runtime and CC4 heavy training simultaneously if it risks
+memory contention.
+
+Reuse existing baseline outputs wherever legitimate.
+
+
+============================================================
+46. FAILURE INTERPRETATION
+============================================================
+
+If SEM_COOCCUR32 does not improve Runtime:
+
+allowed conclusion:
+
+    The tested reproducible submission-identity/co-occurrence representation
+    did not provide sufficient incremental predictive information under the
+    frozen Runtime architecture.
+
+Not allowed:
+
+    RADDiT semantics are useless.
+
+because this is not the private RADDiT embedding.
+
+
+If CC4 semantic state fails:
+
+allowed conclusion:
+
+    Recent observed submission-semantic composition did not improve the
+    evaluated future-workload forecast under this representation.
+
+Do not generalize beyond that.
+
+
+============================================================
+47. REQUIRED ARTIFACTS
+============================================================
+
+Create:
+
+docs/runtime_vnext15_reproducible_semantic/
+
+README.md
+PREREGISTRATION.json
+
+KESTREL_SUBMISSION_SEMANTIC_FIELD_AUDIT.csv
+SUBMISSION_SEMANTIC_AUTHORITY.json
+SEMANTIC_FIELD_WHITELIST.json
+
+SEMANTIC_REPRESENTATION_SPEC.md
+SEMANTIC_ADAPTER_PARITY_AUDIT.json
+SEMANTIC_PRIVACY_CONTRACT.md
+
+RUNTIME_SEMANTIC_CAUSALITY_AUDIT.json
+RUNTIME_MODEL_COMPARISON.csv
+RUNTIME_FOLD_METRICS.csv
+RUNTIME_LONG_TAIL_METRICS.csv
+RUNTIME_SHARPNESS_METRICS.csv
+
+CC4_SEMANTIC_CAUSALITY_AUDIT.json
+CC4_MODEL_COMPARISON.csv
+CC4_FOLD_METRICS.csv
+CC4_BURST_METRICS.csv
+
+V42_SEMANTIC_INTERFACE_AUDIT.json
+NEW_JOB_CALLABILITY_TEST.json
+
+FINAL_SELECTION_FREEZE.json
+FINAL_VERDICT.json
+FINAL_REVIEW_KO.md
+
+SOURCE_MANIFEST.json
+LOCAL_EVIDENCE_MANIFEST.json
+DELIVERY_MANIFEST.json
+VERIFICATION.json
+
+
+============================================================
+48. REQUIRED FINAL FLAGS
+============================================================
+
+PRIVATE_RADDIT_EXPORT_REQUIRED = FALSE
+RADDIT_DISTRIBUTED_VECTOR_USED_FOR_V42 = FALSE
+
+REPRODUCIBLE_SEMANTIC_PIPELINE_IMPLEMENTED = TRUE/FALSE
+
+SEMANTIC_REPRESENTATION =
+    SEM_COOCCUR32_V1 / NONE
+
+TEXT_SEMANTIC_CHANNEL_AVAILABLE = TRUE/FALSE
+
+SEMANTIC_INTERFACE_READY = TRUE/FALSE
+NEW_JOB_SEMANTIC_CALLABLE = TRUE/FALSE
+
+RUNTIME_SEMANTIC_EXPERIMENT_RUN = TRUE/FALSE
+RUNTIME_SEMANTIC_MODEL_SELECTED = TRUE/FALSE
+SELECTED_RUNTIME_ARM = R0/R1/R2/R3/NONE
+
+CC4_SEMANTIC_EXPERIMENT_RUN = TRUE/FALSE
+CC4_SEMANTIC_MODEL_SELECTED = TRUE/FALSE
+SELECTED_CC4_ARM = C0/C1/C2/C3/NONE
+
+RUNTIME_FUTURE_LEAKAGE_COUNT = 0
+CC4_FUTURE_LEAKAGE_COUNT = 0
+
+V42_SUBMISSION_INTERFACE_EXTENDED = TRUE/FALSE
+
+V42_RUNTIME_USES_SEMANTICS = TRUE/FALSE
+V42_CC4_USES_SEMANTICS = TRUE/FALSE
+
+APRIL_USED_FOR_SELECTION = FALSE
+MAY_PAYLOAD_OPENED = FALSE
+
+V42_OPTIMIZER_CHANGED = FALSE
+MESS_PHYSICS_CHANGED = FALSE
+OPENDSS_EXECUTED_FOR_SELECTION = FALSE
+
+
+============================================================
+49. FINAL REVIEW QUESTIONS
+============================================================
+
+FINAL_REVIEW_KO.md must answer:
+
+1. 왜 private RADDiT vector 복구를 중단했는가?
+2. 새 representation은 RADDiT와 어떤 관계인가?
+3. Original Kestrel에서 어떤 submission field가 존재하는가?
+4. 각 field는 semantic/category/opaque/missing 중 무엇인가?
+5. 실제 free text는 존재하는가?
+6. 어떤 field가 submit 시점에 관측 가능한가?
+7. V42 interface에 어떤 field를 추가했는가?
+8. 미래정보가 들어가는 field는 없는가?
+9. SEM_COOCCUR32는 어떻게 생성되는가?
+10. 왜 anonymized ID의 숫자 크기를 사용하지 않는가?
+11. SVD는 TRAIN only인가?
+12. recurrence feature도 TRAIN only인가?
+13. historical row와 replay event의 semantic vector가 동일한가?
+14. unseen future job도 transform 가능한가?
+15. raw semantic 문자열이 optimizer에 전달되는가?
+16. privacy boundary는 무엇인가?
+17. R0 baseline은 정확히 재현됐는가?
+18. R1 결과는?
+19. R2 결과는?
+20. R3은 실행됐는가?
+21. Runtime pooled Q90은?
+22. Runtime min-fold는?
+23. >4h/>12h/>24h는?
+24. pinball은?
+25. reservation ratio는?
+26. 어떤 semantic family가 Runtime을 개선했는가?
+27. improvement가 temporal fold 전반에서 유지되는가?
+28. CC4에서 미래 job semantic을 직접 사용했는가? 반드시 NO.
+29. CC4 semantic state는 어떤 과거 window를 사용하는가?
+30. future perturbation test를 통과했는가?
+31. C0 baseline은?
+32. C1 결과는?
+33. C2 결과는?
+34. hourly Q90 coverage는?
+35. daily Q90 coverage는?
+36. requirement ratio는?
+37. burst coverage는?
+38. semantic feature가 coverage만 올리고 reserve를 과다하게 만들지는 않았는가?
+39. Runtime semantic model이 선택됐는가?
+40. CC4 semantic model이 선택됐는가?
+41. V42에서 실제 어떤 시점에 semantic 정보가 사용되는가?
+42. D-1 unknown job의 semantic을 미리 읽는가? 반드시 NO.
+43. D-day 도착 시 semantic을 사용할 수 있는가?
+44. RUNNING job은 어떤 semantic state를 유지하는가?
+45. online refit이 필요한가?
+46. private RADDiT exporter가 필요한가? 반드시 NO.
+47. private encrypted vector가 필요한가? 반드시 NO.
+48. April을 selection에 썼는가? 반드시 NO.
+49. May를 열었는가? 반드시 NO.
+50. 최종적으로 V42에 어떤 semantic 기능이 실제 활성화됐는가?
+
+
+============================================================
+50. GIT / DELIVERY
+============================================================
+
+After completion:
+
+- run all tests
+- verify V6–V14R2 prior hashes
+- verify new local evidence
+- git diff --check
+- verify no raw sensitive semantic text is accidentally committed
+- commit
+- push
+- create Draft PR
+
+Suggested title:
+
+V42: reproducible submission-semantic Runtime and CC4 integration
+
+
+============================================================
+51. MOST IMPORTANT PRINCIPLE
+============================================================
+
+Do not spend further time reproducing a private RADDiT representation.
+
+The goal is not:
+
+    "reproduce their hidden vector exactly."
+
+The goal is:
+
+    "use the same scientifically relevant submission-side information
+     through a representation we completely control and can execute
+     identically for historical and future V42 jobs."
+
+Historical training and future inference must share exactly the same
+SemanticFeatureAdapter.
+
+That is the deployment contract.
