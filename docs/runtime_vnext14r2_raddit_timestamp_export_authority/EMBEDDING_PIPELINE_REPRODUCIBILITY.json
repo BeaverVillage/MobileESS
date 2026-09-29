@@ -1,0 +1,47 @@
+{
+  "PUBLIC_LLM_PIPELINE_REPRODUCIBLE": false,
+  "DISTRIBUTED_VECTOR_TRANSFORM_REPRODUCIBLE": false,
+  "model_name": "Linq-AI-Research/Linq-Embed-Mistral",
+  "model_revision": null,
+  "tokenizer_revision": null,
+  "transformers_version": null,
+  "quanto_version": null,
+  "requirements": "Package names only, no version pins in inspected requirements",
+  "qint8": "Public code: QuantizedModelForCausalLM.quantize(model, weights=qint8, exclude=lm_head); this quantizes model weights, not a proven distributed vector encryption/int8 export",
+  "pooling": "last non-padding token",
+  "normalization": "L2 dim=1",
+  "max_length": 2048,
+  "truncation": true,
+  "batch_size": 2,
+  "public_output": "embeddings_{batch_number}.npy",
+  "distributed_output": "enc_embedding_int8 in 40000-row Parquet chunks",
+  "distributed_transform": "UNRESOLVED",
+  "model_downloaded": false,
+  "reembedding_rows": 0,
+  "public_render_outcome_free": true,
+  "source": [
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\RADDiT\\energy_aware_scheduling\\scripts\\embed_job_scripts.py",
+      "bytes": 2474,
+      "sha256": "48793a3f1df8b71f620ca4d9e89a24f2eb22167c9886a113401982d37fcb7a64"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\RADDiT\\energy_aware_scheduling\\scripts\\prep_for_embedding.py",
+      "bytes": 945,
+      "sha256": "50ec2463bc7c71801ead31619a60dea3261ccbf12ce74deadbab1a5a114af497"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\RADDiT\\energy_aware_scheduling\\requirements.txt",
+      "bytes": 149,
+      "sha256": "e72d2ac69399916742a4ff305c8b94c5b3cbfc84f80408358440991e035c338c"
+    }
+  ],
+  "current_public_model_metadata": {
+    "id": "Linq-AI-Research/Linq-Embed-Mistral",
+    "sha": "0c1a0b0589177079acc552433cad51d7c9132379",
+    "lastModified": "2024-06-05T12:50:34.000Z",
+    "library_name": "sentence-transformers",
+    "pipeline_tag": "feature-extraction"
+  },
+  "current_head_proves_historical_resolved_revision": false
+}

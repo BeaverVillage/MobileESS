@@ -1,0 +1,26 @@
+[
+  {
+    "rule": "observed raw-member start_time envelope",
+    "boundary": {
+      "min": "2024-04-19 08:52:44",
+      "max": "2025-03-10 03:45:50"
+    },
+    "raw_membership_equal": false
+  },
+  {
+    "rule": "observed raw-member end_time envelope",
+    "boundary": {
+      "min": "2024-04-23 00:01:25",
+      "max": "2025-03-10 04:19:04"
+    },
+    "raw_membership_equal": true
+  },
+  {
+    "rule": "end calendar date >= first observed member end date",
+    "boundary": {
+      "first_end_date": "2024-04-23",
+      "note": "Diagnostic cutoff derived once from member envelope, no threshold search. Not a source-backed export rule."
+    },
+    "raw_membership_equal": true
+  }
+]

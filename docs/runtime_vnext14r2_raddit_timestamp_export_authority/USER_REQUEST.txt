@@ -1,0 +1,1334 @@
+Repository: BeaverVillage/MobileESS
+
+NEW FORENSIC TASK
+Runtime-vNext14R2:
+RADDiT Timestamp / Export Provenance Recovery
+
+Suggested branch:
+codex/runtime-vnext14r2-raddit-timestamp-export-authority
+
+BASE:
+Runtime-vNext14R1 Draft PR #87
+base commit:
+604aaefd8c6a23a68a34544411125c934144cb2e
+
+============================================================
+0. PURPOSE
+============================================================
+
+Runtime-vNext14R1 ended with:
+
+STOPPED_LEVEL1_TIMESTAMP_AUTHORITY_UNRESOLVED
+
+NEW_ML_FITS = 0
+
+The previous result did NOT show that RADDiT semantic information is useless.
+
+Important V14R1 findings:
+
+RADDiT historic rows:
+    2,557,884
+
+Distributed embedding rows:
+    1,780,972
+
+Difference:
+    776,912
+
+EKEY2:
+    submit_time
+    + end_time
+    + wallclock_used_sec
+    + avg_power_per_node
+
+Raw-representation exact candidate results:
+
+    unique 1:1 candidates = 1,775,514
+    ambiguous rows = 5,458
+    unmatched embedding keys = 0
+
+Unique-candidate shared-field contradictions:
+    0
+
+EKEY2 unique rate:
+    99.69353814%
+
+However:
+
+historic timestamps are timezone-aware (-06:00 in observed records)
+while distributed embedding timestamps are timezone-naive.
+
+Therefore V14R1 correctly refused to interpret raw wall-clock equality as
+proven physical-instant identity.
+
+The direct blocker is:
+
+    SOURCE-BACKED TIMESTAMP / EXPORT AUTHORITY NOT PROVEN
+
+This task attempts to recover that authority.
+
+============================================================
+1. ABSOLUTE RULE: NO NEW ML
+============================================================
+
+NEW_ML_FITS = 0
+
+Do NOT run:
+
+- V9 / V13 runtime training
+- J2 / J3 / J4 / J5
+- SVD32
+- semantic kNN runtime prediction
+- LightGBM/XGBoost training
+- calibration
+- remaining runtime training
+- queue replay
+- provider generation
+- April evaluation
+- May runtime evaluation
+- V42
+- CC4
+- MESS
+- optimizer
+- OpenDSS
+
+Do NOT decode the 4096-D embedding vectors unless a final low-cost
+integrity check absolutely requires it.
+
+The task is provenance recovery only.
+
+============================================================
+2. INPUT LOCATIONS
+============================================================
+
+RAW_ROOT_A =
+C:\Users\kjw39\OneDrive\Desktop\4-2\Mobile ESS\raw데이터
+
+RAW_ROOT_B =
+C:\Users\kjw39\OneDrive\Desktop\4-2\Mobile ESS\raw데이터\데이터 센터
+
+RADDIT_REPO =
+C:\Users\kjw39\OneDrive\Desktop\4-2\Mobile ESS\raw데이터\데이터 센터\RADDiT
+
+V14 evidence:
+
+docs/runtime_vnext14_multisource_information_recovery/
+
+V14R1 evidence:
+
+docs/runtime_vnext14r1_raddit_crosswalk_recovery/
+
+Reuse frozen V14/V14R1 projections and ledgers when hashes match.
+
+Do NOT repeat expensive source scans unnecessarily.
+
+New outputs only under:
+
+docs/runtime_vnext14r2_raddit_timestamp_export_authority/
+
+Large local artifacts:
+
+docs/runtime_vnext14r2_raddit_timestamp_export_authority/.local/
+
+============================================================
+3. PRESERVE PRIOR EVIDENCE
+============================================================
+
+Before any new analysis:
+
+- verify base commit
+- verify clean/new isolated branch
+- verify all V6–V14R1 tracked scientific file hashes
+- verify delivery manifests
+- verify V14/V14R1 local evidence hashes used as inputs
+- verify raw source size/mtime fingerprints
+
+Do NOT alter any prior evidence.
+
+============================================================
+4. CORE QUESTIONS
+============================================================
+
+V14R2 must answer only these four primary questions:
+
+Q1.
+What timezone / absolute-time semantics did RADDiT historic timestamps have
+before the distributed embedding export?
+
+Q2.
+When and how were timezone-aware historic timestamps converted into
+timezone-naive timestamps in distributed embedding Parquets?
+
+Q3.
+What exact subset/export rule reduced:
+
+    2,557,884 historic rows
+
+to:
+
+    1,780,972 distributed embedding rows?
+
+Q4.
+Can the distributed embedding row be deterministically mapped back to the
+correct historic row with source-backed authority?
+
+If Q1–Q4 are solved, Level 1 may be approved.
+
+Do NOT automatically continue to Kestrel F0–F2 or runtime ML in this task
+unless explicitly authorized by the success rule below.
+
+============================================================
+5. TARGETED RADDiT GIT FORENSIC
+============================================================
+
+Perform deep Git provenance analysis of the local RADDiT repository.
+
+Inspect:
+
+- all commits
+- all branches
+- tags
+- reachable/unreachable objects where practical
+- deleted files
+- renamed files
+- Git LFS history
+- notebooks
+- scripts
+- README
+- generated artifacts metadata
+- .gitattributes
+- commit messages
+
+At minimum run targeted searches equivalent to:
+
+git log --all --oneline --decorate
+git log --all --full-history --stat
+
+git log --all -S "encrypted_embeddings"
+git log --all -S "enc_embedding_int8"
+git log --all -S "job_strings"
+git log --all -S "historic_job_trace"
+git log --all -S "submit_time"
+git log --all -S "FixedOffset"
+git log --all -S "tz_localize"
+git log --all -S "tz_convert"
+git log --all -S "timezone"
+git log --all -S "to_parquet"
+git log --all -S "40000"
+git log --all -S "4096"
+
+Also use:
+
+git grep
+git show
+git diff <historical revisions>
+
+when needed.
+
+Create:
+
+RADDIT_GIT_LINEAGE_SEARCH.md
+
+Record:
+
+- command/search
+- file/commit
+- evidence
+- interpretation
+- confidence
+- whether it resolves Q1/Q2/Q3/Q4
+
+============================================================
+6. SEARCH FOR EMBEDDING EXPORT SCRIPT
+============================================================
+
+V14R1 confirmed public generation:
+
+historic trace
+    ↓
+job string batches of 4096
+    ↓
+embedding model
+
+But distributed Parquet export:
+
+45 chunks
+first 44 × 40,000 rows
+last = 20,972 rows
+
+was not explained.
+
+Search specifically for code that:
+
+- loads .npy embedding batches
+- concatenates embeddings
+- joins metadata
+- quantizes int8
+- encrypts/transforms vectors
+- filters rows
+- drops missing values
+- slices 40,000-row chunks
+- removes timezone
+- writes encrypted_embeddings/chunk_*.parquet
+
+Search terms:
+
+enc_embedding_int8
+embedding_int8
+astype("int8")
+astype(np.int8)
+quantize
+scale
+encrypt
+encrypted
+chunk_000
+40000
+to_parquet
+write_parquet
+concat
+merge
+join
+dropna
+notna
+script
+avg_power_per_node
+wallclock_used_sec
+submit_time
+end_time
+
+Create:
+
+EMBEDDING_EXPORT_PIPELINE_FORENSIC.md
+
+============================================================
+7. SEARCH PYTHON / NOTEBOOK OUTPUT HISTORY
+============================================================
+
+Do not inspect only source cells.
+
+Inspect notebook outputs and stored execution examples for:
+
+- dataframe dtypes
+- timestamp rendering
+- timezone-aware vs naive differences
+- row counts
+- filtering counts
+- embedding chunk generation
+- conversion functions
+
+Search Jupyter notebooks as JSON/text.
+
+Create:
+
+NOTEBOOK_PROVENANCE_EVIDENCE.csv
+
+Columns:
+
+notebook
+cell_index
+execution_count
+relevant_code_or_output
+authority_type
+supports_timezone
+supports_subset
+supports_export
+notes
+
+============================================================
+8. GIT LFS FORENSIC
+============================================================
+
+Inspect Git LFS pointers and historical object IDs for:
+
+historic_job_trace.parquet
+encrypted_embeddings/chunk_*.parquet
+
+Determine whether:
+
+- older versions existed
+- row counts changed
+- file OIDs changed between commits
+- export chunks were replaced
+- historic trace was replaced
+- timestamps/schema changed
+
+Create:
+
+LFS_VERSION_LINEAGE.csv
+
+Columns:
+
+path
+commit
+lfs_oid
+size
+first_seen
+last_seen
+schema_if_available
+row_count_if_available
+notes
+
+Do NOT download every historical multi-GB LFS object automatically.
+
+Only retrieve a historical object if:
+- it is strongly relevant to Q1–Q4
+- expected size is reasonable or uniquely necessary
+- current evidence cannot resolve the question otherwise
+
+Document any large historical download before performing it.
+
+============================================================
+9. FILESYSTEM METADATA / LOCAL ARTIFACT SEARCH
+============================================================
+
+Search both raw roots for possible forgotten intermediate files.
+
+Specifically search filenames/content related to:
+
+job_strings
+embeddings_*.npy
+historic_job_trace
+encrypted_embeddings
+crosswalk
+row_id
+source_row
+mapping
+manifest
+metadata
+export
+subset
+filter
+timezone
+int8
+Linq
+Mistral
+
+Do not classify filename matches as evidence until content supports them.
+
+Create:
+
+LOCAL_INTERMEDIATE_ARTIFACT_SEARCH.csv
+
+============================================================
+10. HISTORIC TIMESTAMP SEMANTICS
+============================================================
+
+Establish the historic trace timezone semantics from source-backed evidence.
+
+Known observed example:
+
+submit_time:
+    2024-12-17 20:40:46-06:00
+
+Possible interpretations include:
+- America/Denver local wall time with fixed offset stored per row
+- explicit UTC-converted representation with offset
+- another source representation
+
+Do not assume.
+
+Search:
+
+- source code
+- datacard
+- data catalog description
+- paper methods
+- preprocessing code
+- Parquet timezone metadata
+
+Required output:
+
+HISTORIC_TIMESTAMP_AUTHORITY.json
+
+Fields:
+
+stored_arrow_type
+stored_timezone
+source_timezone_claim
+DST_handling_claim
+absolute_instant_interpretation
+evidence_source
+authority_status
+
+============================================================
+11. EMBEDDING TIMESTAMP SEMANTICS
+============================================================
+
+Inspect Parquet Arrow metadata/footer of every embedding chunk.
+
+For:
+
+submit_time
+end_time
+
+record:
+
+- physical/logical type
+- timezone metadata
+- precision
+- statistics min/max if available
+- consistency across all 45 chunks
+
+Do not infer timezone from matching rate alone.
+
+Create:
+
+EMBEDDING_TIMESTAMP_SCHEMA_AUDIT.csv
+
+Required flag:
+
+EMBEDDING_TIMESTAMP_TIMEZONE_METADATA_PRESENT = TRUE/FALSE
+
+============================================================
+12. DIRECT TRANSFORMATION HYPOTHESIS TESTS
+============================================================
+
+Test only source-justified transformations.
+
+Hypothesis T0:
+    embedding naive timestamp equals historic displayed local wall-clock
+    with timezone metadata stripped.
+
+Hypothesis T1:
+    embedding naive timestamp equals historic UTC wall-clock after tz removal.
+
+Do NOT test arbitrary offsets.
+
+These two hypotheses are allowed because they correspond to common explicit
+serialization operations:
+
+T0 example:
+    tz_localize(None)
+
+T1 example:
+    tz_convert("UTC").tz_localize(None)
+
+For T0 and T1 report:
+
+- EKEY0 exact matches
+- EKEY1 exact matches
+- EKEY2 exact matches
+- unique 1:1
+- ambiguous
+- holdout contradictions
+- ordering behavior
+
+But:
+
+MATCH RATE IS NOT AUTHORITY.
+
+Even if T0 gives 99.69%, do not choose T0 solely because it matches better.
+
+A transformation is approved only with source/code/document support.
+
+============================================================
+13. DST DISCRIMINATION TEST
+============================================================
+
+Use daylight-saving transitions as a diagnostic, NOT as a fitted rule.
+
+Because historic records contain explicit offsets, inspect dates around:
+
+- DST start
+- DST end
+
+Determine whether embedding naive values track:
+
+A.
+local displayed wall time
+
+or
+
+B.
+absolute UTC wall time.
+
+This can strongly discriminate T0 vs T1.
+
+Do not alter timestamps.
+
+Create:
+
+DST_TIMESTAMP_DIAGNOSTIC.csv
+
+Columns:
+
+date
+historic_timestamp
+historic_offset
+historic_utc
+embedding_naive
+matches_local_wall_clock
+matches_utc_wall_clock
+notes
+
+This is supporting evidence, not by itself source authority.
+
+============================================================
+14. EXTERNAL OFFICIAL SOURCE SEARCH
+============================================================
+
+If local Git/source does not resolve Q1/Q2/Q3:
+
+perform targeted public research.
+
+Priority:
+
+1. NatLabRockies / NLR RADDiT GitHub
+2. NLR Data Catalog
+3. OSTI / DOE publication
+4. RADDiT paper / supplementary materials
+5. NREL/NLR Software Record SWR-23-34
+6. authors' companion repositories
+7. GitHub issues / PRs / forks
+
+Search for:
+
+RADDiT
+historic_job_trace
+encrypted_embeddings
+Kestrel embedding
+timezone
+America/Denver
+embedding export
+job scripts
+semantic search
+int8
+Linq-Embed-Mistral
+job trace anonymization
+row mapping
+
+Create:
+
+PUBLIC_EXPORT_AUTHORITY_SEARCH.md
+
+Every source entry must include:
+
+URL
+publication/revision date
+exact supported claim
+whether primary/official
+whether it resolves a blocker
+
+Do not treat third-party summaries as source authority when first-party
+material exists.
+
+============================================================
+15. PAPER / SUPPLEMENT SEARCH
+============================================================
+
+Find the RADDiT-associated paper or technical publication if publicly
+available.
+
+Extract only relevant methodological facts:
+
+- job trace source
+- filtering population
+- CPU/GPU restrictions
+- semantic population
+- power-availability filtering
+- embedding generation
+- timestamp treatment
+- prediction period
+- runtime evaluation population
+
+Do NOT use reported model performance to tune anything.
+
+Create:
+
+RADDIT_PAPER_METHOD_LINEAGE.md
+
+============================================================
+16. SUBSET FILTER RECOVERY
+============================================================
+
+Need to explain:
+
+2,557,884
+    →
+1,780,972
+
+difference:
+776,912
+
+First derive candidate exclusion signatures descriptively.
+
+Allowed diagnostics on historic rows:
+
+- missing avg_power_per_node
+- missing wallclock_used_sec
+- missing script
+- missing submit_line
+- missing name
+- missing job_type
+- missing user/account/qos/partition
+- invalid time ordering
+- null end
+- date range
+- CPU/GPU categories if directly available
+- power-data availability
+
+For each candidate rule calculate count.
+
+BUT:
+
+Do NOT declare a rule authoritative merely because:
+
+excluded_count == 776,912.
+
+Need one of:
+
+- source code
+- documented method
+- export manifest
+- exact row membership reconstruction plus independent validation
+
+Create:
+
+SUBSET_FILTER_CANDIDATES.csv
+
+Columns:
+
+rule
+historic_kept
+historic_removed
+equals_embedding_count
+source_support
+membership_exact_match
+status
+
+============================================================
+17. MEMBERSHIP RECONSTRUCTION
+============================================================
+
+The 1,780,972 embedding metadata rows already give a raw EKEY2 subset.
+
+Use the 1,775,514 unique raw candidates to inspect what differentiates
+matched historic rows from the remaining historic rows.
+
+Do not use the outcome to fabricate a filter.
+
+Use this only to identify source-code search hypotheses.
+
+Examples:
+
+- power availability
+- script availability
+- date restriction
+- completed status
+- particular partitions
+- resource type
+
+Report descriptive enrichment only.
+
+============================================================
+18. AMBIGUOUS 5,458 ROWS
+============================================================
+
+Investigate the 5,458 EKEY2 ambiguous embedding rows.
+
+Do not resolve them using row order.
+
+Test unused exact fields shared between embedding/historic.
+
+If start_time is present and identical across many duplicates, inspect other
+available shared metadata.
+
+If the distributed embedding payload lacks enough fields:
+
+keep them ambiguous.
+
+Required:
+
+AMBIGUOUS_MAPPING_FORENSIC.csv
+
+Report:
+
+- ambiguous group count
+- rows/group distribution
+- whether exact disambiguation becomes possible
+- unresolved count
+
+Do not use fuzzy methods.
+
+============================================================
+19. REPLAY / DETERMINISM
+============================================================
+
+Any approved transformation or mapping must reproduce identically in:
+
+- continuous run
+- fresh process
+- shuffled chunk read order followed by canonical filename sorting
+
+Required:
+
+TIMESTAMP_TRANSFORM_REPLAY_IDENTICAL = TRUE/FALSE
+MAPPING_REPLAY_IDENTICAL = TRUE/FALSE
+
+============================================================
+20. LEVEL-1 APPROVAL RULE
+============================================================
+
+Set:
+
+EMBEDDING_TO_RADDIT_MAPPING_PROVEN = TRUE
+
+only if ALL hold:
+
+1. timestamp transformation semantics are source-backed
+2. exact mapping remains deterministic
+3. unique mappings have zero holdout contradictions
+4. ambiguous mappings remain explicitly ambiguous
+5. no fuzzy matching used
+6. no learned time offset used
+7. export/subset provenance is at least sufficient to explain why the
+   distributed population is a selected historic subset
+
+Important:
+
+You do NOT need to map all 2,557,884 historic rows.
+
+A scientifically valid 1,780,972-row selected subset is acceptable.
+
+============================================================
+21. EXPORT PROVENANCE LEVELS
+============================================================
+
+Classify:
+
+PROVEN
+    source code / manifest directly explains the export and membership
+
+STRONGLY_SUPPORTED
+    timestamp transform is source-backed and exact membership is independently
+    reconstructed with no contradictions, but original export script is missing
+
+PARTIAL
+    metadata strongly agrees but at least one key lineage step is unresolved
+
+UNPROVEN
+    identity itself cannot be established
+
+Do not collapse these categories.
+
+============================================================
+22. CONDITIONAL LEVEL-2 AUTHORIZATION
+============================================================
+
+If and only if:
+
+EMBEDDING_TO_RADDIT_MAPPING_PROVEN = TRUE
+
+then V14R2 MAY execute the already preregistered Kestrel F0–F2 exact
+physical fingerprint audit from V14R1.
+
+This is NOT ML.
+
+If Level1 remains FALSE:
+
+do NOT execute F0–F2.
+
+============================================================
+23. KESTREL F0–F2 IF AUTHORIZED
+============================================================
+
+Use no RADDiT job_id.
+
+Use source-backed comparable fields only.
+
+F0:
+    submit_time
+    + start_time
+    + end_time
+
+F1:
+    F0
+    + runtime
+
+F2:
+    F1
+    + requested_walltime
+    + requested_nodes
+    + requested_processors
+
+Before running:
+
+verify units and timestamp semantics.
+
+Report:
+
+- RADDiT rows tested
+- Kestrel rows tested
+- exact matches
+- unique 1:1
+- ambiguous
+- unmatched
+- duplicate key rates
+- holdout contradictions
+
+============================================================
+24. NEGATIVE CONTROLS IF LEVEL2 RUNS
+============================================================
+
+Only after valid F0–F2 matching.
+
+Run preregistered controls:
+
+NC1:
+    RADDiT submit timestamp +1 second
+
+NC2:
+    requested walltime permuted within date
+
+NC3:
+    runtime permuted within date
+    fixed seed from V14R1 registration
+
+Do not tune controls.
+
+============================================================
+25. END-TO-END V13 SUPPORT IF LEVEL2 PASSES
+============================================================
+
+If:
+
+RADDIT_TO_KESTREL_MAPPING_PROVEN = TRUE
+
+then construct:
+
+embedding
+    →
+RADDiT historic
+    →
+Kestrel raw
+    →
+V13 GPU job
+
+Calculate:
+
+overall support
+fold support
+>4h
+>12h
+>24h
+GPU strata
+walltime strata
+QoS/partition where authorized
+
+Still do NOT train semantic ML.
+
+============================================================
+26. NEW-JOB DEPLOYMENT FORENSIC
+============================================================
+
+V14R1 found V42 submission contract has only 2 of 8 RADDiT semantic inputs.
+
+Required RADDiT public inputs:
+
+- user
+- account
+- partition
+- job_type
+- name
+- qos
+- submit_line
+- script
+
+Current known V42 contract:
+    partition
+    qos
+
+Missing:
+    user
+    account
+    job_type
+    name
+    submit_line
+    script
+
+Re-audit actual V42 submission/event interface.
+
+Do not change V42.
+
+Create:
+
+NEW_JOB_SEMANTIC_INPUT_GAP.csv
+
+For each field:
+
+required_by_raddit
+available_in_v42
+available_in_raw_arrival_event
+privacy/sanitization_issue
+could_be_added_without_future_info
+authority
+notes
+
+============================================================
+27. EMBEDDING MODEL REPRODUCIBILITY
+============================================================
+
+Investigate exact model identity:
+
+Linq-AI-Research/Linq-Embed-Mistral
+
+Determine:
+
+- model revision/commit used
+- tokenizer revision
+- transformers version
+- quanto version
+- qint8 behavior
+- pooling
+- normalization
+- max_length
+- truncation
+- encrypted/int8 transform
+
+Public source alone may not pin revision.
+
+Set:
+
+PUBLIC_LLM_PIPELINE_REPRODUCIBLE = TRUE/FALSE
+
+Set separately:
+
+DISTRIBUTED_VECTOR_TRANSFORM_REPRODUCIBLE = TRUE/FALSE
+
+Do not run massive re-embedding.
+
+A tiny 1–10 row diagnostic is allowed ONLY if the exact revision/transform is
+already proven and a numerical reproduction test materially helps.
+
+Otherwise do not download another large model.
+
+============================================================
+28. COMPUTE-SAVING RULE
+============================================================
+
+This task is provenance-first.
+
+No repeated multi-million-row joins unless required.
+
+Reuse V14R1:
+- EKEY projections
+- unique-candidate ledger
+- historic projections
+- raw manifests
+
+Expected expensive operations:
+minimal.
+
+If the authority search fails:
+
+finalize immediately.
+
+Do not spend hours generating redundant diagnostics.
+
+============================================================
+29. STOP CONDITIONS
+============================================================
+
+STOP with:
+
+STOPPED_TIMESTAMP_EXPORT_AUTHORITY_UNRESOLVED
+
+if after local + targeted official public search:
+
+- timestamp stripping semantics remain unproven
+
+OR
+
+- exact distributed subset/export lineage remains too weak to approve Level1.
+
+STOP with:
+
+STOPPED_LEVEL2_KESTREL_IDENTITY_FAILURE
+
+if Level1 passes but F0–F2 cannot establish unique exact Kestrel physical
+identity.
+
+STOP with:
+
+STOPPED_NEW_JOB_CALLABILITY_FAILURE
+
+only if historical crosswalk succeeds but next semantic ML cannot be
+scientifically deployed because required submit-time inputs / representation
+cannot be generated.
+
+Do not proceed to ML.
+
+============================================================
+30. SUCCESS STATES
+============================================================
+
+Possible final states:
+
+A.
+LEVEL1_RECOVERED_LEVEL2_NOT_RUN
+    only if user/task stops before Level2
+
+B.
+LEVEL1_RECOVERED_LEVEL2_FAILED
+
+C.
+END_TO_END_CROSSWALK_RECOVERED
+
+D.
+END_TO_END_CROSSWALK_AND_NEW_JOB_SEMANTIC_PIPELINE_READY
+
+E.
+STOPPED_TIMESTAMP_EXPORT_AUTHORITY_UNRESOLVED
+
+No Runtime model is considered validated in any of these states.
+
+============================================================
+31. REQUIRED ARTIFACTS
+============================================================
+
+Create:
+
+docs/runtime_vnext14r2_raddit_timestamp_export_authority/
+
+README.md
+PREREGISTRATION.json
+V14R1_BASE_VERIFICATION.json
+
+RADDIT_GIT_LINEAGE_SEARCH.md
+EMBEDDING_EXPORT_PIPELINE_FORENSIC.md
+NOTEBOOK_PROVENANCE_EVIDENCE.csv
+LFS_VERSION_LINEAGE.csv
+LOCAL_INTERMEDIATE_ARTIFACT_SEARCH.csv
+
+HISTORIC_TIMESTAMP_AUTHORITY.json
+EMBEDDING_TIMESTAMP_SCHEMA_AUDIT.csv
+TIMESTAMP_TRANSFORMATION_TESTS.csv
+DST_TIMESTAMP_DIAGNOSTIC.csv
+
+PUBLIC_EXPORT_AUTHORITY_SEARCH.md
+RADDIT_PAPER_METHOD_LINEAGE.md
+
+SUBSET_FILTER_CANDIDATES.csv
+SUBSET_FILTER_FORENSIC.md
+AMBIGUOUS_MAPPING_FORENSIC.csv
+
+LEVEL1_MAPPING_AUDIT.json
+
+If Level1 passes:
+    RADDIT_KESTREL_FINGERPRINT_AUDIT.csv
+    NEGATIVE_CONTROL_MATCH_AUDIT.csv
+    LEVEL2_MAPPING_AUDIT.json
+
+If Level2 passes:
+    SEMANTIC_SUPPORT_COVERAGE.csv
+    SEMANTIC_JOIN_SELECTION_BIAS.csv
+    SEMANTIC_JOIN_SELECTION_BIAS_KO.md
+
+NEW_JOB_SEMANTIC_INPUT_GAP.csv
+EMBEDDING_PIPELINE_REPRODUCIBILITY.json
+
+FINAL_VERDICT.json
+FINAL_REVIEW_KO.md
+
+SOURCE_MANIFEST.json
+LOCAL_EVIDENCE_MANIFEST.json
+DELIVERY_MANIFEST.json
+VERIFICATION.json
+
+============================================================
+32. FINAL REPORT QUESTIONS
+============================================================
+
+FINAL_REVIEW_KO.md must answer:
+
+1. V14R1의 정확한 blocker는 무엇이었는가?
+2. V14R2에서 새로 조사한 범위는 무엇인가?
+3. Historic timestamp의 저장 timezone은 무엇인가?
+4. Embedding timestamp Arrow type은 무엇인가?
+5. Embedding timestamp에 timezone metadata가 있는가?
+6. T0(local wall-clock strip)은 몇 행을 exact match시키는가?
+7. T1(UTC strip)은 몇 행을 exact match시키는가?
+8. 어느 transformation이 source-backed인가?
+9. DST 구간은 어떤 표현을 지지하는가?
+10. 임의 offset fitting을 했는가? 반드시 NO.
+11. embedding export script를 찾았는가?
+12. int8/encrypted transform code를 찾았는가?
+13. 40,000-row chunking code를 찾았는가?
+14. 누락 776,912행의 exact subset rule을 찾았는가?
+15. 단순 count matching이 아니라 source authority가 있는가?
+16. embedding 1,780,972행의 historic membership을 재구성할 수 있는가?
+17. 1,775,514 unique candidate는 승인 mapping으로 승격됐는가?
+18. 5,458 ambiguous rows는 줄었는가?
+19. ambiguous rows를 row order로 해결했는가? 반드시 NO.
+20. embedding order relation은?
+21. Level1 mapping은 승인됐는가?
+22. Level1 provenance grade는 PROVEN/STRONGLY_SUPPORTED/PARTIAL/UNPROVEN 중 무엇인가?
+23. Kestrel F0–F2를 실행했는가?
+24. 실행했다면 F0 match는?
+25. F1 match는?
+26. F2 match는?
+27. unique 1:1 physical matches는?
+28. holdout contradictions는?
+29. negative controls는 얼마나 collapse했는가?
+30. end-to-end Kestrel mapping은 증명됐는가?
+31. V13 621,583 GPU jobs 중 몇 개가 semantic-linked인가?
+32. fold별 support는?
+33. >4h support는?
+34. >12h support는?
+35. >24h support는?
+36. joined/unjoined selection bias는?
+37. RADDiT semantic text input은 outcome-free인가?
+38. distributed export provenance는 어느 수준인가?
+39. V42는 8개 semantic 입력 중 몇 개를 현재 제공하는가?
+40. 빠진 semantic submit-time field는 무엇인가?
+41. 그 필드들을 미래정보 없이 추가할 수 있는가?
+42. 정확한 Linq embedding revision을 확인했는가?
+43. distributed encrypted/int8 transform을 재현할 수 있는가?
+44. historical semantic crosswalk은 가능한가?
+45. new-job semantic generation도 가능한가?
+46. 다음 semantic Runtime ML을 시작할 authority가 생겼는가?
+47. NEW_ML_FITS가 0인가?
+48. April 평가를 했는가? 반드시 NO.
+49. May payload를 열었는가? 반드시 NO.
+50. 최종적으로 무엇이 확인된 사실이고 무엇이 여전히 가설인가?
+
+============================================================
+33. FINAL FLAGS
+============================================================
+
+NEW_ML_FITS = 0
+
+V14R1_BASE_VERIFIED = TRUE/FALSE
+
+HISTORIC_TIMESTAMP_AUTHORITY_RESOLVED = TRUE/FALSE
+EMBEDDING_TIMESTAMP_AUTHORITY_RESOLVED = TRUE/FALSE
+
+TIMESTAMP_TRANSFORMATION =
+    LOCAL_WALLCLOCK_STRIP /
+    UTC_STRIP /
+    OTHER_SOURCE_BACKED /
+    UNRESOLVED
+
+LEARNED_TIME_OFFSET_USED = FALSE
+ARBITRARY_OFFSET_SEARCH_USED = FALSE
+
+EMBEDDING_EXPORT_SCRIPT_FOUND = TRUE/FALSE
+EMBEDDING_SUBSET_FILTER_AUTHORITY_FOUND = TRUE/FALSE
+EMBEDDING_VECTOR_TRANSFORM_AUTHORITY_FOUND = TRUE/FALSE
+
+EMBEDDING_TO_RADDIT_MAPPING_PROVEN = TRUE/FALSE
+EMBEDDING_TO_RADDIT_MATCHED_ROWS = integer/null
+EMBEDDING_TO_RADDIT_AMBIGUOUS_ROWS = integer/null
+EMBEDDING_TO_RADDIT_UNMATCHED_ROWS = integer/null
+
+EMBEDDING_PROVENANCE_GRADE =
+    PROVEN /
+    STRONGLY_SUPPORTED /
+    PARTIAL /
+    UNPROVEN
+
+LEVEL2_FINGERPRINT_RUN = TRUE/FALSE
+
+RADDIT_TO_KESTREL_MAPPING_PROVEN = TRUE/FALSE
+RADDIT_TO_KESTREL_UNIQUE_MATCHES = integer/null
+RADDIT_TO_KESTREL_AMBIGUOUS = integer/null
+
+NEGATIVE_CONTROLS_RUN = TRUE/FALSE
+
+END_TO_END_CROSSWALK_PROVEN = TRUE/FALSE
+
+V13_SEMANTIC_MAPPED_JOBS = integer/null
+V13_SEMANTIC_JOIN_RATE = fraction/null
+
+GT4H_SEMANTIC_JOIN_RATE = fraction/null
+GT12H_SEMANTIC_JOIN_RATE = fraction/null
+GT24H_SEMANTIC_JOIN_RATE = fraction/null
+
+PUBLIC_LLM_PIPELINE_REPRODUCIBLE = TRUE/FALSE
+DISTRIBUTED_VECTOR_TRANSFORM_REPRODUCIBLE = TRUE/FALSE
+
+NEW_JOB_SEMANTIC_INPUT_AVAILABLE = TRUE/FALSE
+NEW_JOB_EMBEDDING_PIPELINE_REPRODUCIBLE = TRUE/FALSE
+
+NEXT_SEMANTIC_RUNTIME_ML_AUTHORIZED = TRUE/FALSE
+
+APRIL_RUNTIME_EVALUATED = FALSE
+MAY_PAYLOAD_OPENED = FALSE
+
+V42_CHANGED = FALSE
+CC4_CHANGED = FALSE
+MESS_CHANGED = FALSE
+OPTIMIZER_CHANGED = FALSE
+OPENDSS_EXECUTED = FALSE
+
+============================================================
+34. NEXT_SEMANTIC_RUNTIME_ML_AUTHORIZED
+============================================================
+
+Set TRUE only if:
+
+1. Level1 embedding→historic identity is proven
+2. Level2 historic→Kestrel identity is proven
+3. mapping is deterministic
+4. false-match controls support identity specificity
+5. mapped V13 population has scientifically useful temporal/tail support
+6. public semantic input is outcome-free
+7. joined/unjoined bias is characterized
+8. future-job semantic inputs can be obtained at submission
+9. the same embedding representation can be reproduced for a new job
+
+If historical semantic linkage succeeds but 8/9 fail:
+
+NEXT_SEMANTIC_RUNTIME_ML_AUTHORIZED = FALSE
+
+and report:
+
+RETROSPECTIVE_SEMANTIC_STUDY_POSSIBLE = TRUE
+
+separately.
+
+============================================================
+35. COMMIT / PR
+============================================================
+
+After finalization:
+
+- verify V6–V14R1 hashes
+- verify V14R2 evidence
+- ensure only V14R2 directory changed
+- tests
+- git diff --check
+- commit
+- push
+- create Draft PR
+
+Suggested PR title:
+
+Runtime-vNext14R2: RADDiT timestamp/export authority recovery
+
+Final answer in Korean.
+
+============================================================
+36. MOST IMPORTANT PRINCIPLE
+============================================================
+
+V14R1 already showed:
+
+    99.6935% of distributed embedding rows have a unique,
+    contradiction-free raw metadata candidate in historic_job_trace.
+
+This is strong evidence.
+
+But it is NOT yet source authority.
+
+V14R2 must determine whether the timestamp stripping and export/subset process
+are documented strongly enough to promote those raw candidates to an approved
+historical mapping.
+
+Do not lower the standard merely because the match rate is high.
+
+If authority is recovered:
+    proceed only to exact Kestrel fingerprint forensic.
+
+If authority is not recovered:
+    stop quickly and report exactly which original export artifact is missing.
