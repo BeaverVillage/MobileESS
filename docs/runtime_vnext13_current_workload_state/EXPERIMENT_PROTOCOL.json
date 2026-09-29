@@ -1,0 +1,81 @@
+{
+  "time": "2026-09-29T04:23:32.053251+00:00",
+  "arms": [
+    "EXPANDING_S0",
+    "EXPANDING_S1",
+    "EXPANDING_S2",
+    "EXPANDING_S3",
+    "EXPANDING_S4",
+    "D90_S4"
+  ],
+  "learner": {
+    "n_estimators": 300,
+    "learning_rate": 0.05,
+    "num_leaves": 31,
+    "max_depth": 8,
+    "min_child_samples": 200,
+    "reg_lambda": 2,
+    "max_bin": 127,
+    "random_state": 4009,
+    "n_jobs": 4,
+    "verbosity": -1,
+    "deterministic": true,
+    "force_col_wise": true
+  },
+  "ranking": [
+    "Q90_pinball",
+    "reservation_actual_GPUh",
+    "Q50_MAE",
+    "coverage_std",
+    "inference_seconds"
+  ],
+  "S0": "frozen V9 booster, same membership, full VALID parameter parity",
+  "S5": "not included",
+  "D90": "S4 only; 90 days before fit cutoff; static category maps refitted on D90 TRAIN",
+  "state_vocabulary": "shared earliest first-fold TRAIN prefix, usable only after its last submit; frozen for all arms",
+  "C1": {
+    "eligibility": "any C0 min-fold>=.80 AND pooled gt4h>=.80",
+    "max_challengers": 1,
+    "select": "best eligible C0 by primary ranking",
+    "method": "existing V9 causal rolling14 additive shift; proper distribution support must still pass; no new calibration family"
+  },
+  "gates": {
+    "A_pooled_Q90": [
+      0.88,
+      0.92
+    ],
+    "B_min_fold": 0.85,
+    "C_gt4h": 0.85,
+    "D_gt12h": 0.8,
+    "E_gt24h": 0.7,
+    "support_N": 100,
+    "F_reservation_to_W0_max": 0.8,
+    "G_finite_proper_NLL": true,
+    "H_zero_support": 0,
+    "I_future_reads": 0
+  },
+  "sharpness": {
+    "runtime_ratio": "Q90/runtime over positive exact runtime only; median and P90; zero runtime reported separately",
+    "short_job": "0<runtime<=3600 seconds; ratio of summed slot-rounded Q90 GPUh to actual GPUh",
+    "slot_seconds": 900
+  },
+  "diagnostic_anchor": "best S1/S2/S3/S4 including D90 by primary ranking; not provider selection",
+  "ablation": "remove arrival/pending/running/composition/interaction separately; remove interactions depending on removed parent; absent group NOT_APPLICABLE; exact identical primary arm may be reused with proof",
+  "forensic": "descriptive before-VALID snapshot vs preceding14d snapshot and next VALID; N=5 cannot establish tracking: INCONCLUSIVE unless repeatable model evidence",
+  "Stage_C": "only if all TOTAL gates pass; no failed-model provider",
+  "remaining_gates": {
+    "pooled_Q90": [
+      0.88,
+      0.92
+    ],
+    "min_fold": 0.85,
+    "min_supported_age_stratum": 0.85,
+    "gt24h": 0.8,
+    "support_N": 100,
+    "Q90_pinball": "less than crude max(totalQ90-elapsed,0), tie conditional A",
+    "episode_roles": "inherit TOTAL split; no cross-role checkpoint",
+    "OOF": "not included"
+  },
+  "April": "only after TOTAL and remaining gates and frozen provider; EXPOSED_REGRESSION_ONLY",
+  "May": "SEALED"
+}

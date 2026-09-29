@@ -1,0 +1,1295 @@
+Repository: BeaverVillage/MobileESS
+
+NEW RUNTIME ML DEVELOPMENT TASK
+Runtime-vNext13:
+Causal Current-Workload-State-Aware Runtime Prediction
+
+Suggested branch:
+codex/runtime-vnext13-current-workload-state
+
+Base:
+Runtime-vNext12 / PR #84
+head commit:
+c3b040a4f047838b1b0ed80c221d6e9f125995f3
+
+IMPORTANT:
+Preserve all Runtime-vNext6 through vNext12 scientific artifacts byte-identically.
+
+Do NOT modify:
+- V42 AIDC
+- Problem 4 reference placement
+- CC4
+- MESS
+- electrical kernel
+- trust / epsilon
+- A1/M1/A2/M2 optimization
+- May data
+
+This task is Runtime ML only.
+
+============================================================
+0. WHY V13 EXISTS
+============================================================
+
+Runtime-vNext12 tested the hypothesis:
+
+    job descriptors
+    + recent completed-job runtime regime
+        ->
+    better temporal runtime prediction
+
+The hypothesis was NOT supported.
+
+V12 results:
+
+R0 static baseline:
+    pooled Q90 = 91.74%
+    min fold = 66.47%
+    >4h = 71.07%
+
+R2 with global + cohort completed-runtime regime:
+    pooled Q90 = 89.16%
+    min fold = 52.04%
+    >4h = 51.97%
+
+Recent completed-runtime history did not consistently predict the next
+workload regime.
+
+Important V12 forensic finding:
+
+    recent completed jobs may react too slowly to a newly arriving
+    workload wave.
+
+Example conceptual situation:
+
+At time t:
+    hundreds of large jobs may have just been submitted,
+    but none has completed yet.
+
+Therefore:
+    completed-runtime features still describe the previous regime,
+    while the current workload composition has already changed.
+
+V13 tests a different hypothesis:
+
+    The runtime regime may be better represented by CURRENT observable
+    submission / queue / running state than by recently completed runtimes.
+
+============================================================
+1. V13 PRIMARY HYPOTHESIS
+============================================================
+
+Test:
+
+    P(T_j | job descriptors,
+             current causal workload state)
+
+instead of only:
+
+    P(T_j | job descriptors)
+
+or V12:
+
+    P(T_j | job descriptors,
+             recent completed-runtime statistics)
+
+The "current workload state" must describe only information that would
+already be observable at the prediction timestamp.
+
+No future event may be used.
+
+============================================================
+2. ARCHITECTURE ANCHOR
+============================================================
+
+Use the V9-style job-specific hazard runtime distribution as the architecture
+anchor.
+
+Preserve V10 numerical fixes required for:
+
+- positive probability support
+- monotone CDF
+- stable log-survival calculations
+- zero-support observed interval = 0
+- finite valid interval likelihood
+
+Do NOT:
+- redesign the hazard tail grid again
+- add a new model zoo
+- add TFT / DeepAR / Transformer
+- reuse V10 static global calibration as primary
+- reuse V11 tail classifier / tail expert as primary
+- reuse V12 completed-runtime regime as primary state
+
+The scientific experiment is about CURRENT STATE FEATURES.
+
+============================================================
+3. PROVENANCE CONTRACT
+============================================================
+
+Preserve:
+
+STRICT_CAUSAL_FEATURE_COUNT = 0
+REQUEST_VERSION_AUTHORITY_FOUND = FALSE
+STRICT_CAUSAL_RUNTIME_PROVIDER_READY = FALSE
+
+Static request features remain research-only:
+
+    provenance_mode = "Kestrel_trace_proxy"
+
+Do not claim archived requested walltime/GPU/QoS/etc. are proven immutable
+original-submit values.
+
+The new current-state engine has a separate causality requirement:
+
+    no future event information may be consumed.
+
+============================================================
+4. CRITICAL IMPLEMENTATION RULE:
+EVENT-SOURCED CAUSAL STATE
+============================================================
+
+Do NOT reconstruct current state by directly asking future-aware questions such
+as:
+
+    end_time > t
+    start_time > t
+
+from the complete archive row.
+
+Even if logically equivalent retrospectively, this can accidentally expose
+future timestamps.
+
+Instead construct a chronological EVENT STREAM.
+
+Events may include, when supported:
+
+SUBMIT event
+START event
+END event
+
+At replay timestamp t:
+
+- events with timestamp < t have been processed
+- events with timestamp >= t have NOT been processed
+
+The current state must be derived only from processed events.
+
+For prediction of job j at its prediction event time:
+
+    process all strictly earlier events
+    do NOT process j's own future START or END
+
+Define exact same-timestamp ordering explicitly.
+
+============================================================
+5. SAME-TIMESTAMP EVENT ORDER
+============================================================
+
+Freeze a deterministic order before model evaluation.
+
+Conservative proposed order at identical timestamps:
+
+1. END events strictly before the prediction event only
+2. prior START events
+3. prior SUBMIT events
+4. prediction event for current job
+5. no simultaneous/future event belonging to the current job
+
+Alternatively use stable source event sequence if source authority provides it.
+
+Do NOT invent ordering after observing performance.
+
+Required:
+
+SAME_TIMESTAMP_EVENT_CONTRACT.json
+
+============================================================
+6. CURRENT STATE CATEGORIES
+============================================================
+
+Build four main classes of causal state features.
+
+A. ARRIVAL PRESSURE
+B. REQUESTED WORKLOAD COMPOSITION
+C. CURRENT PENDING / QUEUE STATE
+D. CURRENT RUNNING STATE
+
+Do not initially add unrelated completed-runtime statistics.
+
+V12 completed-regime features may remain as diagnostic comparators only.
+
+============================================================
+7. ARRIVAL PRESSURE FEATURES
+============================================================
+
+At prediction time t construct, using already observed submissions only:
+
+Windows:
+
+    15 min
+    1 h
+    6 h
+    24 h
+
+Candidate features:
+
+- submit_count
+- submitted_requested_GPU_sum
+- submitted_requested_nodes_sum
+- submitted_requested_cores_sum
+- submitted_requested_memory_sum
+
+- requested_GPU_time_sum
+    = requested_GPU * requested_walltime
+  where both research proxy values are valid
+
+- mean / median requested GPU
+- mean / median requested walltime
+- Q75 / Q90 requested walltime
+
+- high_GPU submission fraction
+- long_requested_walltime fraction
+- array-job fraction
+
+Do not use actual runtime.
+
+============================================================
+8. BURST / CAMPAIGN FEATURES
+============================================================
+
+A workload wave may appear as a burst.
+
+Construct causal descriptors such as:
+
+- submissions in last 5/15/60 min
+- inter-arrival time of current job
+- time since previous submit
+- number of jobs sharing same submit timestamp
+- recent array-job submission count
+- recent large-GPU submit count
+
+If stable anonymized account is used:
+
+- same-account submissions in last 1h / 6h
+
+If partition/QoS is present:
+
+- same-partition recent submits
+- same-QoS recent submits
+
+Do NOT use job IDs as predictive lookup keys.
+
+============================================================
+9. CURRENT PENDING / QUEUE STATE
+============================================================
+
+Using the event-sourced state machine, at time t:
+
+PENDING =
+    SUBMIT observed
+    but START event not yet observed
+
+Construct:
+
+- pending_job_count
+- pending_requested_GPU_sum
+- pending_nodes_sum
+- pending_requested_GPU_time_sum
+- pending_walltime_q50/q90
+- pending_GPU_q50/q90
+
+Composition:
+
+- pending QoS shares
+- pending partition shares
+- pending GPU-size bucket shares
+- pending walltime-bucket shares
+
+Age:
+
+- pending_age_q50
+- pending_age_q90
+- maximum pending age
+
+Pending age may be computed from the observed archive submit timestamp under the
+existing Kestrel_trace_proxy limitation.
+
+Do not read future START timestamp.
+
+============================================================
+10. CURRENT RUNNING STATE
+============================================================
+
+RUNNING =
+    START event already observed
+    and END event has not yet been observed in the event stream
+
+Construct:
+
+- running_job_count
+- running_requested_GPU_sum
+- running_nodes_sum
+- running_cores_sum
+- running_memory_sum
+
+Execution age:
+- running_elapsed_q50
+- running_elapsed_q90
+- max running elapsed
+
+Composition:
+- running QoS shares
+- running partition shares
+- running GPU-size bucket shares
+
+Important:
+
+running elapsed must be:
+
+    prediction_time - observed_start_time
+
+for jobs whose START event was already processed.
+
+Do NOT read their future end time.
+
+============================================================
+11. DO NOT NORMALIZE BY MODELED 780-GPU AIDC CAPACITY
+============================================================
+
+Current Kestrel workload state is not automatically the same physical system as
+the modeled 12-AIDC 780-GPU layer.
+
+Therefore do NOT create misleading features such as:
+
+    current_GPU / 780
+
+unless an explicit scientific authority proves the denominators are the same
+physical capacity.
+
+Use raw counts/sums and internally normalized TRAIN statistics instead.
+
+============================================================
+12. CURRENT COMPOSITION FEATURES
+============================================================
+
+Represent workload composition without excessive one-hot explosion.
+
+For QoS / partition:
+
+- top supported category shares
+- OTHER share
+- entropy
+- concentration / Herfindahl index if useful
+
+For account:
+high cardinality must be controlled.
+
+Allowed account-state features:
+
+- current job account recent submission count
+- current job account pending count
+- current job account running count
+
+Avoid full account-share vector if support is unstable.
+
+============================================================
+13. STATIC JOB × CURRENT STATE INTERACTIONS
+============================================================
+
+Test a LIMITED set of physically interpretable interactions.
+
+Examples:
+
+current job GPU
+    ×
+recent submitted GPU pressure
+
+current requested walltime
+    ×
+pending long-walltime fraction
+
+job partition
+    ×
+same-partition pending count
+
+job QoS
+    ×
+same-QoS recent arrival count
+
+Do not create all Cartesian feature crosses.
+
+Predeclare the interaction family before validation.
+
+============================================================
+14. CURRENT-STATE CAUSALITY AUDIT
+============================================================
+
+Before model training perform strict replay tests.
+
+Required checks:
+
+1. Randomly choose at least 1000 prediction events.
+
+2. Perturb every future:
+   - START
+   - END
+   - future SUBMIT
+   timestamp/value.
+
+3. Current-state features at the prediction event MUST NOT change.
+
+4. Perturb an already observed past event:
+   appropriate state features SHOULD change.
+
+Required flags:
+
+FUTURE_SUBMIT_READS = 0
+FUTURE_START_READS = 0
+FUTURE_END_READS = 0
+CURRENT_JOB_FUTURE_EVENT_READS = 0
+
+============================================================
+15. FULL REPLAY DETERMINISM
+============================================================
+
+Replay the pre-April event stream using:
+
+A. one continuous chronological process
+B. chunked replay with saved/restored state
+C. fresh process restart
+D. multi-process materialization if practical
+
+For every prediction row:
+
+state-feature hash must match.
+
+Required:
+
+CURRENT_STATE_REPLAY_DETERMINISTIC = TRUE
+
+============================================================
+16. STATE VALIDITY FORENSIC
+============================================================
+
+Before ML, report descriptive relations.
+
+For each original five temporal folds, compare:
+
+- arrival pressure before VALID
+- pending pressure
+- running pressure
+- workload composition
+
+against the subsequent runtime distribution.
+
+Important question:
+
+Do fold1 / fold4 extreme runtime shifts coincide with observable changes in
+current submitted / pending / running workload?
+
+Report:
+
+CURRENT_STATE_TRACKS_FOLD1 = TRUE/FALSE/INCONCLUSIVE
+CURRENT_STATE_TRACKS_FOLD4 = TRUE/FALSE/INCONCLUSIVE
+
+Do not redesign features after seeing VALID.
+
+============================================================
+17. FEATURE SETS
+============================================================
+
+Use a small predeclared hierarchy.
+
+S0:
+    Static V9 features only
+
+S1:
+    S0 + arrival-pressure features
+
+S2:
+    S1 + pending-state features
+
+S3:
+    S2 + running-state features
+
+S4:
+    S3 + composition / limited job×state interaction features
+
+Optional comparator:
+
+S5:
+    S4 + ONLY the few V12 completed-regime groups that had positive grouped
+    ablation evidence
+
+Do NOT include all 232 V12 features again.
+
+If S5 is used, predeclare exactly which groups before training.
+
+============================================================
+18. TRAINING WINDOW
+============================================================
+
+Use EXPANDING as primary.
+
+V11/V12 showed shorter windows were not consistently better.
+
+Allow exactly one challenger:
+
+D90 + best predeclared state set
+
+Do not repeat:
+D30
+D60
+D180
+
+unless an implementation error invalidated V11.
+
+============================================================
+19. MODEL FAMILY
+============================================================
+
+Primary learner:
+
+V9-style hazard boosting.
+
+Same hazard grid anchor.
+
+Same basic hyperparameter family.
+
+No broad retuning.
+
+The experiment should isolate whether current-state features solve temporal
+failure.
+
+Compare:
+
+EXPANDING_S0
+EXPANDING_S1
+EXPANDING_S2
+EXPANDING_S3
+EXPANDING_S4
+D90_S4
+
+Maximum six primary raw-hazard candidates.
+
+============================================================
+20. PRIMARY CALIBRATION
+============================================================
+
+Initially evaluate RAW hazard only.
+
+Call this:
+
+C0
+
+Do not allow calibration to obscure whether state features themselves help.
+
+Only if at least one C0 candidate reaches:
+
+    min-fold coverage >= 0.80
+    and
+    >4h coverage >= 0.80
+
+may evaluate ONE existing causal calibration challenger:
+
+    C1 = V9-style causal rolling14
+
+Do not test static calibration.
+
+Do not add new calibration families.
+
+============================================================
+21. PRIMARY SUCCESS TEST
+============================================================
+
+The key comparison is:
+
+S0 vs S1/S2/S3/S4
+
+on:
+
+1. min-fold Q90 coverage
+2. >4h coverage
+3. pooled Q90
+4. coverage std
+
+Current-state hypothesis is supported only if temporal robustness improves,
+not merely pooled average.
+
+============================================================
+22. TOTAL RUNTIME PASS GATES
+============================================================
+
+Required pre-April gates:
+
+A.
+    0.88 <= pooled Q90 coverage <= 0.92
+
+B.
+    minimum supported fold Q90 >= 0.85
+
+C.
+    pooled >4h Q90 coverage >= 0.85
+
+D.
+    >12h Q90 coverage >= 0.80 when supported
+
+E.
+    >24h must not show catastrophic undercoverage
+    predeclared diagnostic:
+        coverage >= 0.70 if N >= 100
+
+F.
+    reservation materially lower than W0
+
+G.
+    finite valid proper distribution score
+
+H.
+    zero-support observed interval count = 0
+
+I.
+    future-state reads = 0
+
+Only a candidate passing ALL required gates may authorize Stage C.
+
+============================================================
+23. SHARPNESS / EFFICIENCY METRICS
+============================================================
+
+Do not judge only coverage.
+
+For every candidate report:
+
+- Q50 MAE
+- Q90 pinball
+- reservation / actual GPUh
+- median Q90 / actual runtime
+- P90 Q90 / actual runtime
+- short-job reservation inflation
+
+Coverage achieved through huge reservation is NOT sufficient.
+
+============================================================
+24. TEMPORAL METRICS
+============================================================
+
+For each fold report:
+
+- Q90 coverage
+- >4h coverage
+- >12h coverage
+- >24h coverage
+- Q90 pinball
+- Q50 MAE
+- reservation ratio
+
+Report:
+
+min
+max
+std
+
+Do not hide a bad period behind pooled coverage.
+
+============================================================
+25. STATE FEATURE ABLATION
+============================================================
+
+For the best state-aware candidate, run grouped ablation only:
+
+A.
+remove arrival-pressure group
+
+B.
+remove pending-state group
+
+C.
+remove running-state group
+
+D.
+remove composition group
+
+E.
+remove job×state interaction group
+
+Do not run hundreds of single-feature ablations.
+
+============================================================
+26. FEATURE IMPORTANCE CAUTION
+============================================================
+
+Report model importance only as descriptive diagnostics.
+
+Do not interpret tree feature importance as causal importance.
+
+Especially do not claim:
+
+    queue pressure causes runtime
+
+without evidence.
+
+Use wording such as:
+
+    "predictively associated with"
+
+============================================================
+27. STOP RULE AFTER STAGE B
+============================================================
+
+If no TOTAL candidate passes all required gates:
+
+- stop V13 at Stage B
+- do not train new remaining model
+- do not build final Runtime provider
+- do not evaluate April
+- do not open May
+
+Preserve negative result.
+
+============================================================
+28. STAGE C — ONLY IF TOTAL PASSES
+============================================================
+
+If and only if TOTAL_RUNTIME_MODEL_VALIDATED=TRUE:
+
+Compare remaining runtime methods.
+
+REM_A:
+    conditional remaining from selected V13 total distribution
+
+REM_B:
+    direct elapsed-aware remaining quantile model
+
+Inputs for REM_B:
+
+static job descriptors
++
+current workload state at checkpoint time
++
+elapsed_seconds
++
+log1p(elapsed_seconds)
++
+checkpoint age bucket
+
+Optional:
+strictly OOF total Q50/Q90 predictions.
+
+============================================================
+29. CHECKPOINT STATE RECONSTRUCTION
+============================================================
+
+At checkpoint time:
+
+update event-sourced cluster state only through events observed before
+checkpoint time.
+
+The current running job obviously remains active.
+
+Do not read:
+- future job ends
+- future queue departures
+- later submissions
+
+State features may legitimately differ from those at original job submission.
+
+============================================================
+30. REMAINING LABEL / SPLIT SAFETY
+============================================================
+
+Target:
+
+    remaining = actual_runtime - elapsed
+
+for historical completed jobs only where the label is causally valid for the
+fold evaluation.
+
+All checkpoint rows from one execution episode belong to one role within a
+fold.
+
+Required:
+
+CHECKPOINT_EPISODE_CROSS_SPLIT_LEAKAGE = 0
+
+If OOF total predictions are used:
+
+OOF_TOTAL_PREDICTION_LEAKAGE = 0
+
+============================================================
+31. REMAINING PASS GATES
+============================================================
+
+Require:
+
+    0.88 <= pooled remaining Q90 <= 0.92
+
+plus:
+
+- stable temporal folds
+- stable elapsed-age strata
+- no long-running collapse
+- competitive Q90 pinball
+- better than crude total-Q90-minus-elapsed
+
+Elapsed strata:
+
+0.5–1 h
+1–2 h
+2–4 h
+4–8 h
+8–12 h
+12–24 h
+>24 h
+
+============================================================
+32. OVERRUN CONTRACT
+============================================================
+
+Preserve current V42 safety:
+
+If observed RUNNING:
+- never force completion
+- GPU remains occupied
+- 900-s extension as needed
+- refresh remaining prediction at later checkpoint
+- current migration fallback remains STAY
+
+No change to V42 migration behavior.
+
+============================================================
+33. RESOURCE / QUEUE REPLAY
+============================================================
+
+If TOTAL passes:
+
+Forecast reservation replay:
+    use TOTAL Q90 for NEW/PENDING jobs.
+
+Causal current-slot stress:
+    once RUNNING, use selected REMAINING predictor if Stage C validated.
+
+Keep these two evaluations separate.
+
+Report:
+- start<H
+- start>=H
+- reserved GPUh
+- actual GPUh
+- queue wait
+- overrun extension
+- capacity violation
+
+============================================================
+34. APRIL CONTRACT
+============================================================
+
+April is already exposed.
+
+APRIL_STATUS =
+    EXPOSED_REGRESSION_ONLY
+
+Only evaluate April IF:
+
+1. TOTAL passes
+2. Stage C, if required, passes
+3. provider bundle is frozen
+
+Do not use April for selection/tuning.
+
+If V13 stops at Stage B:
+    APRIL = NOT_RUN_GATE_FAILED
+
+============================================================
+35. MAY CONTRACT
+============================================================
+
+May remains completely sealed.
+
+Required:
+
+MAY_PAYLOAD_OPENED = FALSE
+MAY_USED_FOR_SELECTION = FALSE
+MAY_USED_FOR_EVALUATION = FALSE
+
+Do not compute descriptive May results.
+
+============================================================
+36. PRIOR APRIL2 VALUES
+============================================================
+
+If V13 reaches exposed April regression, preserve existing comparison:
+
+W0 = 150 start<H
+B0 = 47
+V8 = 111
+V9 = 127
+V10 = 91
+V11 = NOT_RUN
+V12 = NOT_RUN
+
+Add V13 only if authorized.
+
+Do not fabricate a V13 number if stopped earlier.
+
+============================================================
+37. PROVIDER STATE ARCHITECTURE
+============================================================
+
+If validated, provider must contain:
+
+A. frozen ML model parameters
+
+B. causal workload-state engine
+
+API:
+
+predict_total(
+    job_record,
+    event_time
+)
+
+returns:
+
+- q50_total_seconds
+- q90_total_seconds
+- current_state_summary
+- state_support_metadata
+- model_version
+- provenance_mode="Kestrel_trace_proxy"
+
+The workload-state engine may evolve over time as observable events occur.
+
+This is NOT online model refitting.
+
+============================================================
+38. MODEL REFIT VS STATE UPDATE
+============================================================
+
+Explicit distinction:
+
+MODEL REFIT:
+    changing ML booster/model parameters
+    -> NOT required online
+
+STATE UPDATE:
+    applying observed submit/start/end events
+    to current workload-state summaries
+    -> required if selected model uses state features
+
+Required:
+
+ONLINE_MODEL_REFIT_REQUIRED = FALSE
+CAUSAL_CURRENT_STATE_UPDATE_REQUIRED = TRUE/FALSE
+
+============================================================
+39. EXTERNAL CALLABILITY
+============================================================
+
+If provider is built:
+
+Must support a completely new job ID.
+
+Tests:
+
+- unseen ID
+- unknown category
+- process restart with state restore
+- chronological event replay
+- forbidden future/outcome keys rejected
+- event-time reversal rejected
+- duplicate event handling deterministic
+
+============================================================
+40. CHECKPOINT / RESUME STATE
+============================================================
+
+Current-state engine must be serializable.
+
+Persist at least:
+
+- latest processed event timestamp
+- active PENDING identities/state
+- active RUNNING identities/state
+- rolling arrival buffers
+- category counters
+- deterministic schema/version
+
+Fresh-process reload must reproduce predictions exactly.
+
+============================================================
+41. REQUIRED STAGE-A ARTIFACTS
+============================================================
+
+Create:
+
+docs/runtime_vnext13_current_workload_state/
+
+CURRENT_STATE_EVENT_CONTRACT.md
+SAME_TIMESTAMP_EVENT_CONTRACT.json
+
+CURRENT_STATE_FEATURE_SPEC.md
+CURRENT_STATE_FEATURE_CONTRACT.json
+
+CURRENT_STATE_CAUSALITY_AUDIT.json
+CURRENT_STATE_REPLAY_AUDIT.json
+
+FOLD_CURRENT_STATE_SUMMARY.csv
+FOLD_WORKLOAD_PRESSURE.csv
+FOLD_COMPOSITION_SHIFT.csv
+FOLD1_STATE_FORENSIC.md
+FOLD4_STATE_FORENSIC.md
+
+============================================================
+42. REQUIRED TOTAL MODEL ARTIFACTS
+============================================================
+
+V9_ANCHOR_REPRODUCTION.json
+
+TOTAL_MODEL_COMPARISON.csv
+TOTAL_FOLD_METRICS.csv
+TOTAL_LONG_TAIL_METRICS.csv
+TOTAL_DISTRIBUTIONAL_METRICS.csv
+TOTAL_GPU_WEIGHTED_METRICS.csv
+
+CURRENT_STATE_FEATURE_ABLATION.csv
+TEMPORAL_ROBUSTNESS_COMPARISON.csv
+
+TOTAL_MODEL_SELECTION_FREEZE.json
+
+============================================================
+43. REQUIRED STAGE-C ARTIFACTS IF RUN
+============================================================
+
+CHECKPOINT_SAMPLE_AUDIT.json
+CHECKPOINT_STATE_CAUSALITY_AUDIT.json
+CHECKPOINT_EPISODE_SPLIT_AUDIT.json
+
+REMAINING_MODEL_COMPARISON.csv
+REMAINING_FOLD_METRICS.csv
+REMAINING_ELAPSED_STRATA.csv
+REMAINING_LONG_RUNNING_METRICS.csv
+
+OOF_TOTAL_FEATURE_AUDIT.json
+
+REMAINING_MODEL_SELECTION_FREEZE.json
+
+============================================================
+44. REQUIRED SYSTEM / FINAL ARTIFACTS
+============================================================
+
+PREAPRIL_FORECAST_REPLAY.csv
+PREAPRIL_CAUSAL_STRESS_REPLAY.csv
+
+PROVIDER_BUNDLE_FREEZE.json
+
+APRIL_EXPOSED_TOTAL_METRICS.csv
+APRIL_EXPOSED_REMAINING_METRICS.csv
+APRIL2_EXPOSED_QUEUE_REGRESSION.csv
+
+RUNTIME_PROVIDER/
+
+SOURCE_MANIFEST.json
+DELIVERY_MANIFEST.json
+
+FINAL_REVIEW_KO.md
+FINAL_VERDICT.json
+
+If a stage is not run:
+
+write explicit:
+
+    NOT_RUN_GATE_FAILED
+
+Do not write 0 as a placeholder.
+
+============================================================
+45. REQUIRED FINAL KOREAN QUESTIONS
+============================================================
+
+FINAL_REVIEW_KO.md must answer directly:
+
+1. V12 completed-runtime regime feature는 왜 실패했는가?
+2. current workload state는 completed regime과 무엇이 다른가?
+3. event-sourced causal state를 어떻게 만들었는가?
+4. 미래 START/END를 읽지 않았는가?
+5. same-timestamp event order는 어떻게 정의했는가?
+6. arrival-pressure feature에는 무엇이 들어가는가?
+7. PENDING state를 어떻게 정의했는가?
+8. RUNNING state를 어떻게 정의했는가?
+9. 현재 running GPU는 미래 end 없이 어떻게 계산했는가?
+10. Fold1에서 current state가 runtime shift를 설명하는 신호가 있었는가?
+11. Fold4에서는 어떠한가?
+12. S0 static baseline coverage는?
+13. S1 arrival features 추가 결과는?
+14. S2 pending state 추가 결과는?
+15. S3 running state 추가 결과는?
+16. S4 composition/interactions 추가 결과는?
+17. 어떤 state family가 min-fold를 개선했는가?
+18. pooled Q90 coverage는?
+19. min-fold coverage는?
+20. >4h coverage는?
+21. >12h/>24h coverage는?
+22. reservation/actual GPUh는?
+23. pinball과 Q50 MAE는?
+24. state feature를 추가했는데 short-job overreservation은 늘었는가?
+25. current-state feature가 실제 temporal robustness를 개선했는가?
+26. D90이 EXPANDING보다 나았는가?
+27. C1 rolling14 보정까지 실행했는가? 실행 조건은 충족했는가?
+28. TOTAL 모든 안전 gate를 통과했는가?
+29. TOTAL 실패 시 Stage C가 중단됐는가?
+30. Stage C를 실행했다면 REM_A vs REM_B 중 무엇이 나았는가?
+31. remaining Q90 coverage는?
+32. checkpoint state도 미래정보 없이 재구성했는가?
+33. overrun은 감소했는가?
+34. provider current-state engine은 restart 후 동일한가?
+35. online ML refit이 필요한가?
+36. April을 평가했는가? 이유는?
+37. April을 보고 재튜닝했는가? 반드시 NO.
+38. May를 열었는가? 반드시 NO.
+39. V42 research provider로 승격 가능한가?
+40. strict causal provider가 여전히 FALSE인 이유는?
+41. current-state 가설도 실패한다면 무엇을 의미하는가?
+
+============================================================
+46. FINAL FLAGS
+============================================================
+
+STRICT_CAUSAL_FEATURE_COUNT = 0
+REQUEST_VERSION_AUTHORITY_FOUND = FALSE
+STRICT_CAUSAL_RUNTIME_PROVIDER_READY = FALSE
+
+CURRENT_STATE_CAUSALITY_PASS = TRUE/FALSE
+CURRENT_STATE_REPLAY_DETERMINISTIC = TRUE/FALSE
+
+FUTURE_SUBMIT_READS = integer
+FUTURE_START_READS = integer
+FUTURE_END_READS = integer
+CURRENT_JOB_FUTURE_EVENT_READS = integer
+
+CURRENT_STATE_FEATURE_COUNT = integer
+
+SELECTED_STATE_SET =
+    S0 / S1 / S2 / S3 / S4 / S5 / NONE
+
+TOTAL_RUNTIME_MODEL_VALIDATED = TRUE/FALSE
+
+TOTAL_OVERALL_Q90_GATE_PASS = TRUE/FALSE
+TOTAL_MIN_FOLD_GATE_PASS = TRUE/FALSE
+TOTAL_GT4H_GATE_PASS = TRUE/FALSE
+TOTAL_GT12H_GATE_PASS = TRUE/FALSE
+TOTAL_GT24H_DIAGNOSTIC_PASS = TRUE/FALSE
+TOTAL_RESERVATION_GATE_PASS = TRUE/FALSE
+
+C1_ROLLING14_EVALUATED = TRUE/FALSE
+
+STAGE_C_AUTHORIZED = TRUE/FALSE
+
+REMAINING_MODEL_RUN = TRUE/FALSE
+REMAINING_RUNTIME_MODEL_VALIDATED = TRUE/FALSE
+
+CHECKPOINT_EPISODE_CROSS_SPLIT_LEAKAGE = integer
+OOF_TOTAL_PREDICTION_LEAKAGE = integer
+
+CAUSAL_CURRENT_STATE_UPDATE_REQUIRED = TRUE/FALSE
+ONLINE_MODEL_REFIT_REQUIRED = FALSE
+
+V42_RESEARCH_RUNTIME_PROVIDER_READY = TRUE/FALSE
+
+APRIL_USED_FOR_SELECTION = FALSE
+APRIL_STATUS = "EXPOSED_REGRESSION_ONLY"
+APRIL_MODEL_CHANGED_AFTER_EVALUATION = FALSE
+
+MAY_PAYLOAD_OPENED = FALSE
+MAY_USED_FOR_SELECTION = FALSE
+MAY_USED_FOR_EVALUATION = FALSE
+
+============================================================
+47. PASS CONDITIONS
+============================================================
+
+V42_RESEARCH_RUNTIME_PROVIDER_READY may be TRUE only if:
+
+1. current-state causality audit passes
+2. future SUBMIT/START/END reads = 0
+3. replay is deterministic
+4. pooled Q90 = 88–92%
+5. min-fold Q90 >=85%
+6. >4h Q90 >=85%
+7. >12h tail >=80% when adequately supported
+8. >24h is not catastrophically undercovered
+9. reservation materially below W0
+10. finite proper distribution score
+11. zero-support observed intervals = 0
+12. queue/resource replay acceptable
+13. Stage C if required is validated
+14. checkpoint leakage = 0
+15. unseen-job provider works without model refit
+16. overrun safety contract preserved
+17. April never influences selection
+18. May remains unopened
+19. provenance limitation remains explicit
+
+If any required condition fails:
+
+    V42_RESEARCH_RUNTIME_PROVIDER_READY = FALSE
+
+Do not lower thresholds.
+
+============================================================
+48. SCIENTIFIC STOP RULE
+============================================================
+
+If current-state-aware models also fail:
+
+    min-fold <85%
+or
+    >4h <85%
+
+after valid causal implementation,
+
+do NOT automatically start V14 with another arbitrary feature/model family.
+
+Instead conclude:
+
+    the tested observable Kestrel request/history/current-state feature sets
+    are insufficient to establish stable per-job Q90 runtime prediction under
+    the observed temporal distribution shifts.
+
+Preserve that negative conclusion and identify which unobserved information
+would plausibly be required next.
+
+Possible missing information may include:
+- application/workflow identity
+- scheduler internal state
+- requeue/preemption history
+- actual hardware/node state
+- data/input size
+- application phase
+- user/application campaign context
+
+Do not claim any of these is definitively causal without evidence.
+
+============================================================
+49. MOST IMPORTANT PRINCIPLE
+============================================================
+
+V12 asked:
+
+    "What happened recently?"
+
+using completed jobs.
+
+V13 asks:
+
+    "What is happening RIGHT NOW?"
+
+using already observed submission/start/end events.
+
+The purpose is to test whether an incoming workload wave is visible before its
+jobs have completed.
+
+If even this state does not solve temporal collapse,
+the next scientific conclusion should be about observability limits,
+not another uncontrolled model search.
