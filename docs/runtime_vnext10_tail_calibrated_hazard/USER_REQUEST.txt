@@ -1,0 +1,1175 @@
+Repository: BeaverVillage/MobileESS
+
+NEW RUNTIME ML DEVELOPMENT TASK
+Runtime-vNext10:
+Tail-Aware Hazard Runtime Model with Proper Monotone Distribution Calibration
+
+Suggested branch:
+codex/runtime-vnext10-tail-calibrated-hazard
+
+Base:
+Runtime-vNext9 / PR #81, commit 06f0c668.
+
+IMPORTANT:
+Preserve all Runtime-vNext6/v7/v8/v9 scientific artifacts byte-identically.
+
+Do NOT modify:
+- V42 AIDC
+- Problem 4 reference placement
+- CC4
+- MESS
+- electrical kernel
+- trust region / epsilon
+- optimization solver
+
+This task is Runtime ML only.
+
+============================================================
+0. CURRENT SCIENTIFIC STATE
+============================================================
+
+Runtime-vNext9 produced a useful but NON-PROMOTED diagnostic model:
+
+Selected:
+    D1 hazard + ROLLING14 calibration
+
+Pre-April:
+    pooled Q90 coverage = 90.93%
+    min fold coverage = 80.90%
+    >4h coverage = 82.82%
+    >8h coverage = 81.75%
+    >12h coverage = 80.80%
+    >24h coverage = 59.61%
+    reservation/actual GPUh = 4.0864
+
+April EXPOSED regression:
+    total Q90 coverage = 82.56%
+    >4h coverage = 81.23%
+    reservation/actual GPUh = 2.9770
+    April2 start<H = 127
+
+Conditional remaining:
+    Q90 coverage = 93.02%
+    overrun checkpoint fraction = 13.20%
+
+Problem:
+1. long-tail coverage is still insufficient,
+2. one temporal fold collapses to 80.90%,
+3. V9 additive rolling shift creates zero-support regions and infinite
+   proper log score,
+4. remaining Q90 is slightly overconservative.
+
+Do NOT reinterpret V9 as a passed provider.
+
+============================================================
+1. PRIMARY GOAL
+============================================================
+
+Keep the successful V9 architecture:
+
+    job features
+        ->
+    full total-runtime distribution
+        ->
+    total Q50/Q90
+
+and for RUNNING jobs:
+
+    same frozen total-runtime distribution
+        +
+    observed elapsed time
+        ->
+    conditional remaining Q50/Q90
+
+Do NOT return to:
+    single unconditional Q90
+    total-Q90-minus-elapsed as the primary method
+    featureless Runtime model
+    requested walltime as runtime
+
+V10 must improve:
+
+A. long-tail runtime coverage
+B. temporal fold stability
+C. full-distribution calibration
+D. remaining-runtime calibration
+
+while avoiding walltime-scale reservation inflation.
+
+============================================================
+2. APRIL / MAY RULE
+============================================================
+
+April has already been exposed in V8/V9.
+
+Therefore:
+
+    APRIL_STATUS = EXPOSED_REGRESSION_ONLY
+
+April MUST NOT affect:
+- feature choice
+- tail-bin choice
+- calibration family
+- risk-group definition
+- model hyperparameters
+- thresholds
+- pass/fail criteria
+- model selection
+
+April may only be evaluated AFTER V10 is completely frozen.
+
+May must remain unopened.
+
+Required:
+
+APRIL_USED_FOR_SELECTION = FALSE
+APRIL_MODEL_CHANGED_AFTER_EVALUATION = FALSE
+MAY_PAYLOAD_OPENED = FALSE
+MAY_USED_FOR_SELECTION = FALSE
+
+============================================================
+3. PRESERVE FEATURE / PROVENANCE CONTRACT
+============================================================
+
+Preserve:
+
+STRICT_CAUSAL_FEATURE_COUNT = 0
+REQUEST_VERSION_AUTHORITY_FOUND = FALSE
+STRICT_CAUSAL_RUNTIME_PROVIDER_READY = FALSE
+
+Continue using the explicit:
+
+    provenance_mode = Kestrel_trace_proxy
+
+research feature contract.
+
+Use the supported V9 feature family.
+
+Do NOT reopen a broad feature search.
+
+Keep:
+- requested walltime
+- GPU
+- nodes
+- cores
+- memory
+- QoS
+- partition
+- account
+- array descriptors
+- previously frozen robust engineered features
+
+Continue excluding high-unseen / unsupported identity features unless the
+existing frozen pre-April evidence already justifies them.
+
+Do NOT use April to reconsider feature support.
+
+============================================================
+4. KEEP THE SAME RUNTIME TARGET
+============================================================
+
+Target:
+
+    T = end_time - start_time
+
+Queue waiting is NOT runtime.
+
+Requested walltime is NOT runtime.
+
+Actual end/runtime/state/queue wait must never be predictors.
+
+Preserve the V9 right-censoring contract.
+
+At each historical cutoff:
+- completed execution -> exact runtime
+- started but unresolved -> right censored
+- not started -> no runtime information
+
+Required:
+
+FUTURE_END_USED_BEFORE_FOLD_CUTOFF = 0
+
+============================================================
+5. KEEP THE FIVE TEMPORAL FOLDS
+============================================================
+
+Do NOT redesign temporal validation merely because V9 failed.
+
+Reuse the exact V9 five-fold chronological expanding contract unless a genuine
+implementation error is found.
+
+The existing folds are scientific evidence and should remain comparable.
+
+For every V10 arm report:
+
+- fold Q90 coverage
+- fold >4h coverage
+- fold >12h coverage
+- Q90 pinball
+- Q50 MAE
+- reservation/actual GPUh
+- long-tail sample N
+- censored N
+
+Do not hide bad folds behind pooled statistics.
+
+============================================================
+6. V10 MODEL FAMILY — DO NOT START ANOTHER LARGE SEARCH
+============================================================
+
+Runtime-vNext10 is a focused refinement of the V9 D1 hazard model.
+
+Primary models:
+
+T0:
+    Frozen V9 D1__ROLLING14
+    reproduction baseline only
+
+T1:
+    V9 hazard learner
+    + improved long-tail time grid
+    + NO additive calibration
+
+T2:
+    T1
+    + pooled monotone probability calibration
+
+T3:
+    T1
+    + tail-risk-conditioned monotone probability calibration
+
+Optional T4:
+    T1
+    + source-backed parametric tail continuation
+
+T4 may be implemented ONLY if T1–T3 demonstrate that remaining error is
+specifically caused by terminal-bin extrapolation.
+
+Do NOT add:
+- TFT
+- DeepAR
+- Transformer
+- large neural survival networks
+- another broad LightGBM model search
+- separate remaining-runtime model
+
+============================================================
+7. LONG-TAIL TIME GRID
+============================================================
+
+V9 tail resolution must be investigated.
+
+The goal is to avoid an overly coarse hazard representation for jobs lasting
+many hours/days.
+
+Compare only a SMALL set of predeclared tail grids.
+
+G0:
+    exact frozen V9 grid
+
+G1 candidate:
+
+    0–4 h:
+        15-min intervals
+
+    4–24 h:
+        1-h intervals
+
+    24–72 h:
+        3-h intervals
+
+    72 h–7 d:
+        6-h intervals
+
+    >7 d:
+        12-h intervals until a TRAIN-supported tail endpoint
+
+G2:
+    support-adaptive tail grid
+
+For G2:
+- use TRAIN ONLY,
+- construct boundaries from long-runtime TRAIN support,
+- enforce a minimum number of events per tail interval,
+- impose reasonable minimum/maximum interval widths,
+- freeze the boundaries before VALID evaluation.
+
+Do NOT choose tail boundaries using validation or April coverage.
+
+The final grid must be identical for Q50/Q90/distribution/remaining inference.
+
+============================================================
+8. TERMINAL TAIL HANDLING
+============================================================
+
+Audit exactly what happens beyond the final hazard interval.
+
+V9 used last-rate extrapolation.
+
+Compare, using TRAIN/pre-April folds only:
+
+A. last-hazard-rate continuation
+B. exponential continuation fitted only to TRAIN tail
+C. parametric tail continuation only if adequate tail support exists
+
+Never truncate runtime at the last bin.
+
+Never force survival probability to zero at an arbitrary finite endpoint.
+
+Required artifact:
+
+TAIL_EXTRAPOLATION_AUDIT.json
+
+Report:
+- max observed training runtime
+- tail support N
+- censoring in tail
+- chosen continuation
+- reason
+- >24h effect
+
+============================================================
+9. REMOVE ADDITIVE TIME-SHIFT CALIBRATION
+============================================================
+
+V9 ROLLING14 additive time shift produced zero-support regions and an infinite
+proper log score.
+
+Do NOT use additive seconds-shift calibration as the V10 primary approach.
+
+Instead calibrate the predicted probabilities/distribution itself.
+
+Concept:
+
+    raw CDF:
+        F_hat(t)
+
+    calibrated:
+        F_cal(t) = g(F_hat(t))
+
+where g is monotone.
+
+The SAME monotone mapping must be applied over the whole CDF so that:
+
+    t1 < t2
+        =>
+    F_cal(t1) <= F_cal(t2)
+
+is always preserved.
+
+Also require:
+
+    0 < F_cal(t) < 1
+
+for finite interior times where the model has nonzero support.
+
+No calibrated distribution may become non-monotonic.
+
+============================================================
+10. MONOTONE CALIBRATION CANDIDATES
+============================================================
+
+Compare a compact set:
+
+C0:
+    no calibration
+
+C1:
+    monotone isotonic probability calibration
+
+C2:
+    monotone logistic / Platt-style calibration
+
+C3:
+    beta-style calibration ONLY if monotonicity can be formally enforced
+
+If C3 cannot guarantee monotonicity, do not use it.
+
+Calibration must be learned only from the causal CAL portion immediately
+preceding each validation block.
+
+For final pre-April provider:
+- use the corresponding latest valid pre-April calibration state,
+- freeze it before April regression.
+
+Do not calibrate to April.
+
+============================================================
+11. CALIBRATION TRAINING DATA
+============================================================
+
+Fit probability calibration using fixed runtime landmark points.
+
+Example landmark set:
+
+15 min
+30 min
+1 h
+2 h
+4 h
+8 h
+12 h
+24 h
+48 h
+72 h
+7 d
+
+Modify only if TRAIN support requires it.
+
+For each job/landmark pair:
+
+prediction:
+    F_hat(t | x)
+
+target:
+    I(T <= t)
+
+For censored observations:
+do not construct a binary label when event status at that landmark is unknown.
+
+No future end may be read to resolve a historical censored label.
+
+Use weighting so extremely short-duration landmarks do not dominate the fit.
+
+Freeze exact landmark set before evaluation.
+
+============================================================
+12. PROPER DISTRIBUTION SCORE MUST BE REAL
+============================================================
+
+V10 must resolve the V9 infinite-log-score problem.
+
+Do not report a numerically clipped pseudo-NLL as if it were the exact proper
+score.
+
+Design the predictive distribution so valid observed durations receive
+nonzero model probability/density.
+
+Report:
+
+- exact finite log score where mathematically defined,
+- Brier / integrated Brier where correctly implementable,
+- Q50/Q90 pinball,
+- calibration curve.
+
+If a score is numerically approximated:
+label it explicitly.
+
+Required:
+
+ZERO_SUPPORT_OBSERVED_INTERVAL_COUNT
+
+Primary target:
+
+    ZERO_SUPPORT_OBSERVED_INTERVAL_COUNT = 0
+
+============================================================
+13. TAIL-RISK SCORE
+============================================================
+
+From the RAW T1 hazard distribution compute BEFORE calibration:
+
+    p4_j = P(T > 4 h | x_j)
+
+Optionally also:
+
+    p12_j = P(T > 12 h | x_j)
+
+These are MODEL PREDICTIONS, not actual future labels.
+
+They may be used to construct a tail-risk calibration strategy.
+
+Do NOT feed:
+
+    actual T>4h
+
+into inference.
+
+============================================================
+14. TAIL-RISK-CONDITIONED CALIBRATION
+============================================================
+
+T3 may use different calibration maps for predicted tail-risk strata.
+
+Example:
+
+LOW
+MID
+HIGH
+
+based on p4_j.
+
+Important:
+
+Risk-group boundaries must be determined from TRAIN predictions only.
+
+Preferred:
+    fixed TRAIN quantiles / support-based boundaries
+
+Do not choose boundaries to maximize VALID coverage.
+
+Each calibration group must meet preregistered minimum support.
+
+Audit:
+- total N
+- completed events
+- >4h event N
+- >12h event N
+
+If support is insufficient:
+fall back to pooled calibration.
+
+Maximum:
+    3 risk groups
+
+Do not create many tiny groups.
+
+============================================================
+15. WHY RISK-CONDITIONED CALIBRATION IS ALLOWED
+============================================================
+
+The purpose is NOT:
+
+    "identify the actual long jobs."
+
+The purpose is:
+
+    jobs whose MODEL PREDICTS higher long-runtime risk
+        receive a different probability-calibration mapping.
+
+This uses only x and frozen model predictions.
+
+It must remain callable before the job completes.
+
+Required:
+
+ACTUAL_LONG_LABEL_USED_AT_INFERENCE = FALSE
+
+============================================================
+16. TEMPORAL ADAPTATION
+============================================================
+
+V9 showed temporal drift.
+
+Allow one causal rolling calibration mode for T2/T3.
+
+Compare:
+
+STATIC
+vs
+ROLLING14
+vs
+ROLLING28
+
+ONLY within the existing pre-April temporal folds.
+
+Do not add more window searches.
+
+At prediction date D:
+
+calibration state may use only jobs whose outcome necessary for calibration
+was causally known before D.
+
+Required:
+
+FUTURE_CALIBRATION_RESIDUAL_READS = 0
+FUTURE_CALIBRATION_EVENT_READS = 0
+
+No model booster refit online.
+
+============================================================
+17. MODEL SELECTION — SAFETY FIRST
+============================================================
+
+Do NOT select by pooled Q90 coverage alone.
+
+Eligibility gates are evaluated BEFORE sharpness ranking.
+
+Gate A — pooled total Q90
+
+    0.88 <= coverage <= 0.92
+
+Gate B — temporal collapse
+
+Require:
+
+    min fold Q90 coverage >= 0.85
+
+when fold support is adequate.
+
+Also report max and std.
+
+Gate C — >4h protection
+
+Require pooled:
+
+    >4h Q90 coverage >= 0.85
+
+and no supported fold catastrophically below the target.
+
+Gate D — >12h tail
+
+Use predeclared diagnostic target:
+
+    >12h coverage >= 0.80
+
+when support is adequate.
+
+Do not fabricate PASS with tiny strata.
+
+Gate E — proper distribution validity
+
+    zero-support observed interval count = 0
+
+or scientifically justified equivalent.
+
+Gate F — reservation
+
+Must be meaningfully lower than W0.
+
+Do NOT require an arbitrary fixed 3.0 ratio solely for PASS.
+
+Among SAFETY-ELIGIBLE candidates, select the sharpest using:
+
+1. Q90 pinball
+2. reservation/actual GPUh
+3. Q50 MAE
+4. temporal stability
+
+with ordering frozen before evaluation.
+
+============================================================
+18. DO NOT OVERCALIBRATE
+============================================================
+
+Reject a candidate if nominal Q90 is achieved only by making nearly all jobs
+extremely long.
+
+Report simultaneously:
+
+- Q90 coverage
+- Q90 pinball
+- reservation/actual GPUh
+- median Q90/actual ratio
+- P90 Q90/actual ratio
+- queue impact
+
+Calibration that improves coverage while reverting toward W0-scale reservation
+is not a successful solution.
+
+============================================================
+19. CONDITIONAL REMAINING DISTRIBUTION
+============================================================
+
+Keep V9's mathematically coherent approach.
+
+For RUNNING job with elapsed e:
+
+    S_R(r | e,x)
+       =
+    S_T(e+r | x) / S_T(e | x)
+
+using the SAME calibrated total-runtime distribution.
+
+Compute:
+
+    remaining Q50
+    remaining Q90
+
+Do NOT build a separate remaining model in V10.
+
+============================================================
+20. REMAINING-RUNTIME GATES
+============================================================
+
+Evaluate every causally valid 30-min checkpoint.
+
+Report:
+
+- Q50 MAE
+- Q90 coverage
+- Q90 pinball if mathematically applicable
+- >15m classification
+- >30m
+- >1h
+- >2h
+- >4h
+- overrun checkpoint fraction
+- long-running job cohort
+
+Target remaining Q90:
+
+    0.88 <= coverage <= 0.92
+
+V9:
+    93.02%
+
+Therefore V10 should remove unnecessary conservatism while keeping the
+improved overrun behavior.
+
+Do NOT independently rescale remaining predictions.
+
+Any improvement must arise from the same calibrated total distribution.
+
+============================================================
+21. OVERRUN SEMANTICS
+============================================================
+
+Preserve:
+
+if job is observed RUNNING:
+    it remains occupying GPU.
+
+Never force completion because predicted Q90 expired.
+
+If elapsed exceeds the prior planned envelope:
+    OVERRUN
+
+Then:
+- GPU remains occupied,
+- reservation extends by one 900-s control interval,
+- conditional remaining distribution is updated from observed elapsed,
+- current V42 migration fallback remains STAY.
+
+Do not change this contract.
+
+============================================================
+22. PRE-APRIL QUEUE REPLAY
+============================================================
+
+Use the same bounded pre-April replay methodology as V9.
+
+Compare:
+
+W0
+B0
+V8
+V9
+T1
+T2
+T3
+selected V10
+
+Report per fold:
+
+- start<H
+- start>=H
+- reservation GPUh
+- actual GPUh
+- queue wait
+- capacity violations
+- overrun extensions
+
+Queue performance is a secondary gate after predictive safety.
+
+============================================================
+23. FINAL PRE-APRIL MODEL FREEZE
+============================================================
+
+Before any April regression freeze:
+
+- feature contract
+- five temporal folds
+- hazard learner
+- hazard grid
+- tail continuation
+- calibration family
+- calibration landmarks
+- risk groups
+- rolling window
+- all hyperparameters
+- Q50/Q90 extraction
+- remaining inference
+- eligibility gates
+- provider bytes
+
+Required:
+
+MODEL_SELECTION_FREEZE.json
+TAIL_GRID_FREEZE.json
+TAIL_CONTINUATION_FREEZE.json
+CALIBRATION_FREEZE.json
+RISK_GROUP_FREEZE.json
+PROVIDER_BUNDLE_FREEZE.json
+
+Only then may April be evaluated.
+
+============================================================
+24. APRIL EXPOSED REGRESSION
+============================================================
+
+After freeze, evaluate April ONCE as:
+
+    EXPOSED_REGRESSION_ONLY
+
+Compare:
+
+W0
+B0
+Bconst
+V8
+V9
+V10
+
+Report:
+
+- Q50 MAE
+- Q90 coverage
+- >4h coverage
+- >8h
+- >12h
+- >24h
+- Q90 pinball
+- proper distribution score
+- reservation/actual GPUh
+- overrun
+
+Do NOT change anything afterward.
+
+If April fails:
+preserve the negative result.
+
+============================================================
+25. APRIL2 QUEUE REGRESSION
+============================================================
+
+Reproduce the exact known April2 reservation replay.
+
+Known values:
+
+W0 start<H = 150
+B0 start<H = 47
+V8 start<H = 111
+V9 start<H = 127
+
+Add V10.
+
+Report:
+- start<H
+- start>=H
+- queue wait
+- reservation GPUh
+- actual GPUh
+- overrun extensions
+- capacity violations
+
+This is descriptive only.
+
+Do not use it to change V10.
+
+============================================================
+26. MAY MUST REMAIN SEALED
+============================================================
+
+Do NOT open May.
+
+Required:
+
+MAY_PAYLOAD_OPENED = FALSE
+MAY_USED_FOR_SELECTION = FALSE
+MAY_USED_FOR_EVALUATION = FALSE
+
+Do not even run a descriptive V10 May table in this task.
+
+============================================================
+27. PROVIDER API
+============================================================
+
+Selected V10 diagnostic/provider package must expose:
+
+predict_total(job_record, event_time=None)
+
+returns:
+- q50_total_seconds
+- q90_total_seconds
+- selected_tail_risk
+- distribution_metadata
+- model_version
+- calibration_version
+- provenance_mode="Kestrel_trace_proxy"
+
+and:
+
+predict_remaining(
+    job_record,
+    elapsed_seconds,
+    event_time=None
+)
+
+returns:
+- q50_remaining_seconds
+- q90_remaining_seconds
+- survival_probability_at_elapsed
+- model_version
+- calibration_version
+
+Requirements:
+
+- completely unseen job ID works
+- no lookup cache
+- no model retraining
+- unknown category handled
+- outcome keys rejected
+- CPU-only inference works
+
+============================================================
+28. COMPUTE BACKEND
+============================================================
+
+V9 showed:
+
+CPU4 training ~45.68s
+GPU training ~23.67s
+
+but GPU predictions differed from frozen CPU predictions.
+
+For V10:
+
+benchmark CPU4 and RTX4060.
+
+If GPU and CPU predictions are not numerically equivalent within a
+predeclared tolerance:
+- use one backend consistently for model selection/freeze,
+- do not mix GPU-trained and CPU-trained models within folds,
+- keep CPU inference support.
+
+Record exact GPU identity.
+
+Do not optimize backend after April.
+
+============================================================
+29. REQUIRED ABLATIONS
+============================================================
+
+Keep ablations focused.
+
+A1:
+V9 grid vs new tail grid
+
+A2:
+new grid + no calibration
+vs pooled calibration
+
+A3:
+pooled calibration
+vs risk-conditioned calibration
+
+A4:
+STATIC vs ROLLING14 vs ROLLING28
+
+A5:
+chosen tail continuation vs V9 last-rate continuation
+
+No new broad feature ablation is needed.
+
+The purpose is to identify whether the improvement comes from:
+
+- tail representation
+- proper calibration
+- risk conditioning
+- temporal calibration
+
+============================================================
+30. REQUIRED ARTIFACTS
+============================================================
+
+Create:
+
+docs/runtime_vnext10_tail_calibrated_hazard/
+
+Required:
+
+V9_REPRODUCTION.json
+
+TAIL_GRID_CANDIDATES.json
+TAIL_GRID_COMPARISON.csv
+TAIL_EXTRAPOLATION_AUDIT.json
+
+CALIBRATION_LANDMARK_CONTRACT.json
+CALIBRATION_COMPARISON.csv
+MONOTONICITY_AUDIT.json
+ZERO_SUPPORT_AUDIT.json
+
+TAIL_RISK_AUDIT.csv
+RISK_GROUP_SUPPORT.csv
+RISK_GROUP_CALIBRATION.csv
+
+FOLD_LEVEL_METRICS.csv
+LONG_TAIL_METRICS.csv
+DISTRIBUTIONAL_METRICS.csv
+GPU_WEIGHTED_METRICS.csv
+
+PREAPRIL_QUEUE_REPLAY.csv
+CONDITIONAL_REMAINING_DIAGNOSTIC.csv
+OVERRUN_DIAGNOSTIC.csv
+
+MODEL_SELECTION_FREEZE.json
+TAIL_GRID_FREEZE.json
+TAIL_CONTINUATION_FREEZE.json
+CALIBRATION_FREEZE.json
+RISK_GROUP_FREEZE.json
+PROVIDER_BUNDLE_FREEZE.json
+
+APRIL_EXPOSED_RUNTIME_METRICS.csv
+APRIL2_EXPOSED_QUEUE_REGRESSION.csv
+
+COMPUTE_BACKEND_BENCHMARK.csv
+INFERENCE_LATENCY.json
+
+RUNTIME_PROVIDER/
+
+SOURCE_MANIFEST.json
+DELIVERY_MANIFEST.json
+
+FINAL_REVIEW_KO.md
+FINAL_VERDICT.json
+
+============================================================
+31. REQUIRED FINAL KOREAN QUESTIONS
+============================================================
+
+FINAL_REVIEW_KO.md must answer:
+
+1. V9에서 정확히 무엇이 실패했는가?
+2. V10에서 왜 hazard framework를 유지했는가?
+3. V9 tail grid가 긴 작업을 표현하기에 충분했는가?
+4. 새 tail grid는 어떻게 정했는가?
+5. VALID/April을 보고 grid를 바꿨는가?
+6. >24h tail extrapolation은 어떻게 처리했는가?
+7. additive seconds calibration을 왜 제거했는가?
+8. calibrated CDF는 모든 job에서 monotone한가?
+9. 관측 runtime에 zero probability/support를 주는 경우가 남았는가?
+10. 어떤 calibration 방식이 가장 안정적이었는가?
+11. rolling14/28이 static보다 나았는가?
+12. tail-risk group은 actual long label 없이 어떻게 정의했는가?
+13. risk group별 support는 충분했는가?
+14. 5 fold 전체 Q90 coverage는?
+15. 최저 fold coverage는?
+16. fold4 80.90% collapse는 개선됐는가?
+17. pooled >4h coverage는 85%를 넘었는가?
+18. >8h/>12h/>24h coverage는?
+19. reservation/actual GPUh는 V9/W0/B0 대비 어떤가?
+20. coverage 향상이 과도한 reservation 때문은 아닌가?
+21. proper distribution score는 finite하고 유효한가?
+22. pre-April queue utility는?
+23. conditional remaining Q90 coverage는?
+24. V9의 93.02% overcoverage는 개선됐는가?
+25. overrun checkpoint fraction은?
+26. 별도 remaining model이 필요한가?
+27. April exposed regression 결과는?
+28. April2 start<H는 W0/B0/V8/V9/V10 각각 얼마인가?
+29. April 결과를 보고 어떠한 재튜닝도 했는가?
+30. May를 열었는가?
+31. V42 research Runtime provider로 승격 가능한가?
+32. 여전히 남는 provenance limitation은 무엇인가?
+
+============================================================
+32. FINAL FLAGS
+============================================================
+
+STRICT_CAUSAL_FEATURE_COUNT = 0
+REQUEST_VERSION_AUTHORITY_FOUND = FALSE
+
+V9_REPRODUCED = TRUE/FALSE
+
+TAIL_GRID_REFINED = TRUE/FALSE
+TAIL_CONTINUATION_VALIDATED = TRUE/FALSE
+
+MONOTONE_DISTRIBUTION_CALIBRATION = TRUE/FALSE
+ZERO_SUPPORT_OBSERVED_INTERVAL_COUNT = integer
+
+TAIL_RISK_CALIBRATION_USED = TRUE/FALSE
+ACTUAL_LONG_LABEL_USED_AT_INFERENCE = FALSE
+
+FUTURE_CALIBRATION_RESIDUAL_READS = 0
+FUTURE_CALIBRATION_EVENT_READS = 0
+
+OVERALL_Q90_GATE_PASS = TRUE/FALSE
+TEMPORAL_STABILITY_GATE_PASS = TRUE/FALSE
+LONG_GT4H_GATE_PASS = TRUE/FALSE
+LONG_GT12H_DIAGNOSTIC_PASS = TRUE/FALSE
+
+PROPER_DISTRIBUTION_SCORE_VALID = TRUE/FALSE
+RESERVATION_SHARPNESS_PASS = TRUE/FALSE
+PREAPRIL_QUEUE_GATE_PASS = TRUE/FALSE
+
+CONDITIONAL_REMAINING_GATE_PASS = TRUE/FALSE
+OVERRUN_CONTRACT_PASS = TRUE/FALSE
+
+TRACE_DESCRIPTOR_RUNTIME_MODEL_VALIDATED = TRUE/FALSE
+V42_RESEARCH_RUNTIME_PROVIDER_READY = TRUE/FALSE
+STRICT_CAUSAL_RUNTIME_PROVIDER_READY = FALSE
+
+APRIL_USED_FOR_SELECTION = FALSE
+APRIL_STATUS = "EXPOSED_REGRESSION_ONLY"
+APRIL_MODEL_CHANGED_AFTER_EVALUATION = FALSE
+
+MAY_PAYLOAD_OPENED = FALSE
+MAY_USED_FOR_SELECTION = FALSE
+MAY_USED_FOR_EVALUATION = FALSE
+
+NEW_JOB_CALLABLE = TRUE/FALSE
+ONLINE_MODEL_REFIT_REQUIRED = FALSE
+
+============================================================
+33. V42 RESEARCH PROVIDER PASS GATE
+============================================================
+
+Set:
+
+V42_RESEARCH_RUNTIME_PROVIDER_READY = TRUE
+
+ONLY IF all of the following pass pre-April:
+
+1. total Q90 pooled coverage within 88–92%
+2. minimum supported fold coverage >=85%
+3. pooled >4h Q90 coverage >=85%
+4. >12h diagnostic tail is not catastrophically undercovered
+5. calibrated distribution is monotone
+6. zero-support observed intervals = 0
+7. proper distribution score is scientifically valid
+8. reservation is materially sharper than W0
+9. no severe pre-April queue deterioration
+10. conditional remaining predictions are coherent and acceptably calibrated
+11. provider is callable for a new job without refit
+12. no future outcome leakage
+13. no April selection/tuning
+14. May remains unopened
+
+If any required gate fails:
+
+    V42_RESEARCH_RUNTIME_PROVIDER_READY = FALSE
+
+Do NOT lower a threshold after seeing results.
+
+============================================================
+34. MOST IMPORTANT PRINCIPLE
+============================================================
+
+V10 is NOT a new model zoo.
+
+It is a surgical repair of V9:
+
+    V9 hazard runtime distribution
+        +
+    better long-tail representation
+        +
+    proper monotone probability calibration
+        +
+    optional model-predicted tail-risk calibration
+
+The target is one coherent job-specific runtime distribution that gives:
+
+BEFORE execution:
+    accurate total Q50/Q90
+
+AFTER execution starts:
+    accurate conditional remaining Q50/Q90
+
+while preserving useful queue capacity and avoiding both:
+
+    short-job overreservation
+
+and
+
+    long-job underprediction.

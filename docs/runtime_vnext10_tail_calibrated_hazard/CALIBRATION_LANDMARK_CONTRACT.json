@@ -1,0 +1,43 @@
+{
+  "time": "2026-09-29T01:17:11.445356+00:00",
+  "seconds": [
+    900,
+    1800,
+    3600,
+    7200,
+    14400,
+    28800,
+    43200,
+    86400,
+    172800,
+    259200,
+    604800
+  ],
+  "weights": "Equal total weight per landmark among known statuses; one group fit reweights landmarks within its own support",
+  "known_event": "Completion observed strictly before prediction UTC day; exact status at every landmark",
+  "known_censor": "For still-running observation at cutoff, status0 only at landmark strictly below elapsed observed; otherwise unknown and excluded",
+  "CAL_source": "Out-of-training submissions starting at base TRAIN cutoff; historical CAL plus prior VALID observations for rolling within preApril only",
+  "calibration_families": [
+    "C0_NONE",
+    "C1_ISOTONIC",
+    "C2_LOGISTIC"
+  ],
+  "C3": "omitted to keep focused comparison",
+  "strict_monotone": "g(p)=0.01*p+0.99*g_fitted(p); endpoint preserving continuous piecewise-linear isotonic or logistic(a*logit(p)+b), a in[.05,20], b in[-20,20]",
+  "logistic_fit_conditioning": "Fit logit inputs clipped to[-30,30]; inference function uses exact log-domain logits with no probability clipping",
+  "windows": [
+    "STATIC",
+    "ROLLING14",
+    "ROLLING28"
+  ],
+  "risk_boundaries": "33.333/66.667 percentiles of raw TRAIN p4 predictions; tied edges collapse groups",
+  "maximum_groups": 3,
+  "group_minimum": {
+    "total": 500,
+    "completed": 200,
+    "long_gt4h": 100,
+    "long_gt12h": 50
+  },
+  "insufficient_group": "pooled same-state map; insufficient pooled support500 falls back identity",
+  "April": "final maps from latest preApril state are immutable throughout exposed regression; no April observations enter calibration"
+}

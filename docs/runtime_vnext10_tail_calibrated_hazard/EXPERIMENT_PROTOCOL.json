@@ -1,0 +1,79 @@
+{
+  "time": "2026-09-29T01:17:11.446352+00:00",
+  "base": "06f0c6684aa577744ffc494bc87268b638675e43",
+  "learner": {
+    "n_estimators": 300,
+    "learning_rate": 0.05,
+    "num_leaves": 31,
+    "max_depth": 8,
+    "min_child_samples": 200,
+    "reg_lambda": 2,
+    "max_bin": 127,
+    "random_state": 4009,
+    "n_jobs": 4,
+    "verbosity": -1,
+    "deterministic": true,
+    "force_col_wise": true
+  },
+  "backend": "CPU4 consistently for all selection/freeze; GPU benchmark only",
+  "backend_tolerance": {
+    "max_absolute_quantile_seconds": 0.1,
+    "max_relative_quantile_error": 1e-06
+  },
+  "no_backend_change_after_April": true,
+  "stages": [
+    "T0 reproduce frozen V9",
+    "T1 three TRAIN-frozen grids x two continuation methods, same learner settings",
+    "Choose one raw grid/continuation with safety-first gate count then pinball/reservation/MAE/std",
+    "T2/T3: chosen raw learner x C1/C2 x STATIC/ROLLING14/ROLLING28; include T1 no calibration",
+    "Evaluate preApril remaining for all thirteen finalists, then freeze one"
+  ],
+  "gates": {
+    "pooled_coverage": [
+      0.88,
+      0.92
+    ],
+    "min_fold_coverage": 0.85,
+    "support_N": 100,
+    "pooled_long_gt4h": 0.85,
+    "min_supported_fold_long_gt4h": 0.8,
+    "pooled_long_gt12h": 0.8,
+    "min_supported_fold_long_gt12h": 0.7,
+    "zero_support_count": 0,
+    "proper_score_finite": true,
+    "reservation_to_W0_max": 0.8,
+    "queue_starts_relative_W0_per_fold_min": 0.95,
+    "queue_capacity_violations": 0,
+    "queue_horizon_exhaustion": 0,
+    "remaining_coverage": [
+      0.88,
+      0.92
+    ]
+  },
+  "selection": "Eligibility before ranking; eligible rank Q90 pinball, reservation/actual GPUh, Q50 MAE, coverage std. If none eligible, diagnostic candidate fewest failed gates then same rank; never promote",
+  "score": "Exact proper log probability of common observed one-second cell [max(0,T-.5),T+.5]; zero-duration first half-cell; right censor log survival at observed elapsed. Stable analytic interval probabilities, no score floor. Brier known-status landmark integral explicitly not IPCW population IBS.",
+  "tailrisk": "Raw pre-calibration p4, optional p12 diagnostic; no actual-long inference keys",
+  "queue": {
+    "days": [
+      "2024-11-05",
+      "2024-12-03",
+      "2025-01-07",
+      "2025-02-04",
+      "2025-03-04"
+    ],
+    "capacity_GPU": 780,
+    "slot_seconds": 900,
+    "horizon_slots": 96,
+    "drain_slots": 1920,
+    "background": "Empty common research background; same-day arriving jobs only; NOT historical full V42 state reconstruction",
+    "forecast": "same submit/tier/id ordering, aggregate-capacity first-fit reservation ledger",
+    "causal": "Separate current-slot dispatch with actual completion observer and retained overruns, no future end to dispatcher; missing duration stays occupied to drain horizon",
+    "validity": "positive integer GPU,nodes; GPU<=4nodes and GPU<=780; walltimepositive",
+    "gate": "forecast in-day starts>=W0 on each fold; all causal stress capacity violations0; horizon exhaustion fails"
+  },
+  "April_queue": "Exact frozen V9 issue/site ledger; frozen preApril calibration only",
+  "conditional": "Same calibrated full survival; ratio S(e+r)/S(e), no separate fit or remaining rescale",
+  "April_status": "EXPOSED_REGRESSION_ONLY",
+  "April_calibration_updates": false,
+  "May_payload_allowed": false
+}
