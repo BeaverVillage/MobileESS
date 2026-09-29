@@ -1,0 +1,734 @@
+Repository:
+BeaverVillage/MobileESS
+
+BASE:
+Draft PR #92
+commit:
+f60a6a43f08caf3d7fe3b338b7a9e47476a8f284
+
+NEW TASK:
+Final Runtime Selection Using
+Duration-Based Q50–Q90 Calibration
+
+Suggested branch:
+codex/runtime-final-duration-calibration
+
+IMPORTANT CORRECTION TO PRIOR INSTRUCTION:
+
+The primary Runtime ratio MUST be measured in RUNTIME SECONDS,
+not GPUh.
+
+Do NOT use GPU-weighted reservation/actual ratios to select the Runtime model.
+
+GPUh is a downstream scheduler/resource metric and may be reported later
+when the selected Runtime interface is integrated into V42.
+
+============================================================
+0. PURPOSE
+============================================================
+
+Do NOT train a new Runtime ML architecture.
+
+Use existing frozen Runtime candidate predictions and determine:
+
+1. which model has the best job-runtime predictive behavior;
+2. how conservative Q50 and Q90 are in TIME;
+3. whether Q50 and Q90 can be combined/calibrated into a practical
+   operational duration;
+4. whether the resulting predicted/actual runtime ratio can enter the
+   1.x range without unacceptable underprediction.
+
+Primary units:
+
+    seconds
+    hours
+    dimensionless time ratio
+
+NOT:
+
+    GPUh
+
+============================================================
+1. PRIMARY RUNTIME RATIO — EXACT DEFINITION
+============================================================
+
+For each job j:
+
+    T_j     = realized runtime in seconds
+    Q50_j   = frozen predicted median runtime in seconds
+    Q90_j   = frozen predicted upper-quantile runtime in seconds
+
+Define:
+
+    TIME_RATIO_Q50 =
+        sum_j Q50_j
+        /
+        sum_j T_j
+
+    TIME_RATIO_Q90 =
+        sum_j Q90_j
+        /
+        sum_j T_j
+
+These are aggregate runtime-duration ratios.
+
+DO NOT multiply by requested GPUs.
+
+DO NOT call these GPU reservation ratios.
+
+Interpretation example:
+
+    TIME_RATIO_Q90 = 2.0
+
+means:
+
+    the sum of predicted Q90 runtimes is twice the sum of realized runtimes.
+
+It does NOT mean every individual job is predicted as exactly 2x longer.
+
+============================================================
+2. ALSO REPORT PER-JOB RATIO DISTRIBUTION
+============================================================
+
+For jobs with T_j > 0 calculate:
+
+    r50_j = Q50_j / T_j
+    r90_j = Q90_j / T_j
+
+Report:
+
+    median
+    Q25
+    Q75
+    Q90
+    mean only as a diagnostic
+
+for both r50 and r90.
+
+The aggregate ratio and median job-level ratio must be kept separate.
+
+Do NOT allow zero-runtime rows to create infinite ratios.
+Report zero-runtime rows separately.
+
+============================================================
+3. GPUH MUST NOT DRIVE MODEL SELECTION
+============================================================
+
+The following are NOT primary Runtime model-selection metrics:
+
+    reservation/actual GPUh
+    GPU-weighted coverage
+    GPU-weighted underprediction
+
+They may be retained only as:
+
+    DOWNSTREAM_OPERATIONAL_DIAGNOSTIC
+
+in supplementary evidence.
+
+Do not use them to choose the final Runtime model in this task.
+
+The Runtime predictor predicts TIME.
+
+============================================================
+4. CANDIDATE SET
+============================================================
+
+No retraining.
+
+Compare frozen predictions for:
+
+A.
+V9_D1_ROLLING14
+
+B.
+V9_D2_NORMAL_1P5_NONE
+
+C.
+V9_D2_EXTREME_1P0_NONE
+
+D.
+V9_D3_ROLLING14
+
+E.
+V13_EXPANDING_S4
+
+Low-ratio diagnostic:
+
+F.
+V9_D2_NORMAL_1P0_NONE
+
+Optional references only if exact population alignment is trivial:
+
+    V15_R2
+    R16-C
+
+Do not expand the model family beyond this set.
+
+============================================================
+5. COMMON POPULATION
+============================================================
+
+Verify exact common membership across all primary candidates:
+
+    same job
+    same fold
+    same prediction timestamp
+    same realized runtime label
+
+If not identical, build the exact common intersection.
+
+All final model-selection metrics must be recomputed on the same population.
+
+Create:
+
+    COMMON_RUNTIME_POPULATION_AUDIT.json
+    COMMON_RUNTIME_MEMBERSHIP.csv
+
+============================================================
+6. REPRODUCE RAW MODEL PERFORMANCE
+============================================================
+
+For every candidate report:
+
+    Q50 MAE [seconds]
+    Q50 MAE [hours]
+
+    Q90 coverage [%]
+
+    min-fold Q90 coverage [%]
+
+    >4h Q90 coverage [%]
+    >12h Q90 coverage [%]
+    >24h Q90 coverage [%]
+
+    TIME_RATIO_Q50
+    TIME_RATIO_Q90
+
+Pinball may be retained in supplementary evidence for provenance,
+but it is NOT required in the paper-facing comparison.
+
+============================================================
+7. IMPORTANT — Q50 MAE AND Q90 COVERAGE HAVE DIFFERENT ROLES
+============================================================
+
+Q50 MAE:
+
+    point/median runtime accuracy
+
+Q90 coverage:
+
+    upper-bound reliability
+
+Do NOT use Q90 MAE as the primary accuracy metric.
+
+A good upper quantile is intentionally above many realized runtimes,
+so Q90 MAE can penalize useful conservatism.
+
+============================================================
+8. OPERATIONAL DURATION — Q50/Q90 CALIBRATION
+============================================================
+
+Do NOT automatically hard-reserve every job to Q90.
+
+Construct an operational duration:
+
+    T_op_j(alpha)
+        =
+        Q50_j
+        +
+        alpha * (Q90_j - Q50_j)
+
+with:
+
+    0 <= alpha <= 1
+
+Interpretation:
+
+    alpha = 0 -> pure Q50
+    alpha = 1 -> pure Q90
+
+This is a scheduling-duration calibration,
+NOT a new ML model.
+
+Do not call T_op a Q90 unless alpha=1.
+
+Call it:
+
+    CALIBRATED_OPERATIONAL_RUNTIME
+
+============================================================
+9. ALPHA MUST BE CHOSEN CAUSALLY
+============================================================
+
+For every temporal fold:
+
+    use TRAIN/CAL only to choose alpha.
+
+VALID must remain untouched until alpha is frozen.
+
+Primary alpha grid:
+
+    0.00
+    0.05
+    0.10
+    ...
+    1.00
+
+Freeze this grid before evaluation.
+
+No continuous post-result tuning.
+
+No May.
+
+No April-based tuning.
+
+============================================================
+10. ALPHA SELECTION RULE
+============================================================
+
+The purpose is NOT to force a 1.x ratio.
+
+For each candidate on CAL:
+
+find alpha values whose empirical operational-duration coverage is
+closest to the nominal 90% reliability reference.
+
+Primary selection:
+
+    among alpha values with CAL coverage >= 0.90,
+    choose the alpha with the lowest TIME_RATIO_OP.
+
+If no alpha achieves CAL coverage >= 0.90:
+
+    choose the alpha with the highest CAL coverage,
+    and mark:
+
+        CAL_90PCT_UNATTAINABLE = TRUE
+
+Do NOT lower the target to 85%.
+
+Do NOT select alpha based on VALID.
+
+============================================================
+11. OPERATIONAL TIME RATIO
+============================================================
+
+After alpha is frozen, evaluate on VALID:
+
+    TIME_RATIO_OP =
+        sum_j T_op_j
+        /
+        sum_j T_j
+
+Again:
+
+    NO GPU WEIGHTING.
+
+Also compute:
+
+    T_OP_COVERAGE =
+        fraction(T_j <= T_op_j)
+
+    min-fold T_OP_COVERAGE
+
+    >4h T_OP_COVERAGE
+    >12h T_OP_COVERAGE
+    >24h T_OP_COVERAGE
+
+============================================================
+12. TEST WHETHER 1.x IS ACTUALLY POSSIBLE
+============================================================
+
+For every candidate report:
+
+    TIME_RATIO_Q50
+    TIME_RATIO_OP
+    TIME_RATIO_Q90
+
+This directly answers whether 1.x is possible.
+
+Classify descriptively:
+
+    BELOW_1P2
+    BELOW_1P5
+    BELOW_2P0
+    ABOVE_2P0
+
+Do NOT tune toward these thresholds.
+
+If:
+
+    TIME_RATIO_Q50 > 2
+
+then a nonnegative Q50-Q90 interpolation cannot reach below 2.
+
+State that explicitly.
+
+============================================================
+13. WHY THIS IS BETTER THAN GPUH FOR FINAL RUNTIME SELECTION
+============================================================
+
+The Runtime model predicts:
+
+    runtime seconds
+
+Therefore intrinsic model conservatism should first be measured by:
+
+    predicted runtime seconds
+    /
+    realized runtime seconds
+
+GPUh additionally weights jobs by requested GPU count and answers a
+different downstream question.
+
+That downstream effect will be measured only after the Runtime model is
+integrated with the V42 scheduler.
+
+Do not conflate the two.
+
+============================================================
+14. V9 FULL-DISTRIBUTION LIMITATION
+============================================================
+
+V9 D1+ROLLING14 previously had zero-support intervals after its rolling
+distribution shift.
+
+Do not claim that this was repaired.
+
+This study uses only:
+
+    frozen Q50
+    frozen Q90
+
+and the derived operational duration.
+
+No density/log-likelihood/full CDF is passed to the scheduler.
+
+Required flag:
+
+    V9_FULL_DISTRIBUTION_PROMOTED = FALSE
+
+============================================================
+15. SUBMISSION-TIME FEATURE ASSUMPTION
+============================================================
+
+For this research case study, treat scheduler/request metadata used by the
+frozen Runtime models as observable at job submission.
+
+This is a modeling assumption authorized by the user.
+
+Do not claim immutable historical initial-submit provenance unless proven.
+
+Do not reject a model solely because the historical archive lacks the
+original version receipt.
+
+============================================================
+16. DO NOT RETRAIN RADDIT OR OTHER MODELS
+============================================================
+
+No:
+
+    RADDiT retraining
+    new feature search
+    CatBoost
+    TFT
+    DeepAR
+    new hazard model
+    new external telemetry
+    CC4 work
+
+This is a final selection/post-processing study.
+
+============================================================
+17. PAPER-FACING PRIMARY METRICS
+============================================================
+
+Final Runtime table should use simple reviewer-friendly metrics:
+
+    Model
+
+    Q50 MAE [h]
+
+    Raw Q90 Coverage [%]
+
+    >12h Raw Q90 Coverage [%]
+
+    Q50 Time Ratio [x]
+
+    Q90 Time Ratio [x]
+
+    Selected Alpha
+
+    Operational Coverage [%]
+
+    Operational Time Ratio [x]
+
+Do not use Pinball in the main paper-facing table.
+
+Pinball may remain in supplementary provenance files.
+
+GPUh ratio must NOT appear in this main Runtime ML table.
+
+============================================================
+18. FINAL MODEL SELECTION
+============================================================
+
+Do NOT automatically choose V9 D1+ROLLING14.
+
+After applying the identical alpha-calibration contract to every model,
+compare:
+
+    Q50 MAE
+    operational coverage
+    min-fold operational coverage
+    >12h operational coverage
+    operational time ratio
+
+Build the Pareto frontier.
+
+Primary operational preference:
+
+    retain approximately nominal reliability while minimizing
+    TIME_RATIO_OP.
+
+A candidate that achieves low ratio only through serious undercoverage
+must not be preferred.
+
+Do not lower a threshold after seeing results.
+
+============================================================
+19. V13 / V9 COMPARISON
+============================================================
+
+Explicitly determine whether V9 D1+ROLLING14 remains preferable to V13
+after duration calibration.
+
+The comparison must answer:
+
+    Does V9's stronger long-tail reliability remain useful?
+
+    Can V9's large raw Q90 time ratio be reduced materially by alpha < 1?
+
+    Does V13 achieve a materially lower operational time ratio?
+
+    Does V13's lower ratio come at the cost of long-runtime undercoverage?
+
+============================================================
+20. D2 CANDIDATES
+============================================================
+
+Explicitly compare:
+
+    D2_NORMAL_1P5_NONE
+
+because it historically had strong Q50 MAE,
+
+and:
+
+    D2_EXTREME_1P0_NONE
+
+because it historically had strong long-runtime coverage.
+
+Do not assume the previously selected V9 D1 remains optimal under the new
+operational-duration interface.
+
+============================================================
+21. NEGATIVE CONTROL
+============================================================
+
+Keep:
+
+    D2_NORMAL_1P0_NONE
+
+because its raw hard-Q90 ratio was historically low but its coverage was
+weak.
+
+This tests whether apparent sharpness is simply underprediction.
+
+============================================================
+22. NO V42 EXECUTION IN THIS TASK
+============================================================
+
+Do not run:
+
+    PR #93 May-01 canary
+    A1/M1/A2/M2
+    OpenDSS
+    IEEE123
+    IEEE8500
+
+This task ends when the Runtime model and duration interface are selected.
+
+============================================================
+23. REQUIRED OUTPUT DIRECTORY
+============================================================
+
+Create:
+
+docs/runtime_final_duration_calibration/
+
+Required:
+
+README.md
+PREREGISTRATION.json
+
+CANDIDATE_SOURCE_AUDIT.json
+
+COMMON_RUNTIME_POPULATION_AUDIT.json
+COMMON_RUNTIME_MEMBERSHIP.csv
+
+RAW_RUNTIME_METRICS.csv
+RUNTIME_TIME_RATIO_METRICS.csv
+PER_JOB_RATIO_DISTRIBUTION.csv
+
+ALPHA_CALIBRATION_GRID.csv
+ALPHA_SELECTION_BY_FOLD.csv
+OPERATIONAL_DURATION_FOLD_METRICS.csv
+
+LONG_RUNTIME_OPERATIONAL_METRICS.csv
+
+FINAL_RUNTIME_MODEL_COMPARISON.csv
+RUNTIME_PARETO_FRONTIER.csv
+
+FINAL_SELECTION_FREEZE.json
+FINAL_FLAGS.json
+FINAL_VERDICT.json
+FINAL_REVIEW_KO.md
+
+SOURCE_MANIFEST.json
+LOCAL_EVIDENCE_MANIFEST.json
+DELIVERY_MANIFEST.json
+VERIFICATION.json
+
+============================================================
+24. FINAL FLAGS
+============================================================
+
+NO_NEW_RUNTIME_TRAINING = TRUE/FALSE
+
+RUNTIME_RATIO_UNIT = "seconds"
+
+GPU_WEIGHTED_RATIO_USED_FOR_SELECTION = FALSE
+
+GPUH_RATIO_USED_FOR_SELECTION = FALSE
+
+QUANTILE_ONLY_INTERFACE = TRUE/FALSE
+
+V9_FULL_DISTRIBUTION_PROMOTED = FALSE
+
+SELECTED_RUNTIME_MODEL =
+    candidate / NONE
+
+SELECTED_ALPHA =
+    number/null
+
+SELECTED_Q50_MAE_HOURS =
+    number/null
+
+SELECTED_RAW_Q90_COVERAGE =
+    number/null
+
+SELECTED_GT12H_RAW_Q90_COVERAGE =
+    number/null
+
+SELECTED_Q50_TIME_RATIO =
+    number/null
+
+SELECTED_Q90_TIME_RATIO =
+    number/null
+
+SELECTED_OPERATIONAL_COVERAGE =
+    number/null
+
+SELECTED_MIN_FOLD_OPERATIONAL_COVERAGE =
+    number/null
+
+SELECTED_OPERATIONAL_TIME_RATIO =
+    number/null
+
+OPERATIONAL_RATIO_BELOW_1P2 =
+    TRUE/FALSE
+
+OPERATIONAL_RATIO_BELOW_1P5 =
+    TRUE/FALSE
+
+OPERATIONAL_RATIO_BELOW_2P0 =
+    TRUE/FALSE
+
+MAY_RUNTIME_LABELS_OPENED = FALSE
+CC4_CHANGED = FALSE
+V42_CHANGED = FALSE
+OPENDSS_RUN = FALSE
+
+============================================================
+25. FINAL_REVIEW_KO MUST ANSWER
+============================================================
+
+At minimum answer:
+
+1. Runtime model output unit is what?
+2. Why is primary ratio measured in seconds?
+3. Was GPUh used for Runtime model selection? Must be NO.
+4. What is aggregate Q50 time ratio for each candidate?
+5. What is aggregate Q90 time ratio for each candidate?
+6. What is median per-job Q50/actual ratio?
+7. What is median per-job Q90/actual ratio?
+8. What is Q50 MAE in hours?
+9. What is raw Q90 coverage?
+10. What is >12h raw Q90 coverage?
+11. What is operational duration formula?
+12. Was a new ML model trained? NO.
+13. What alpha grid was used?
+14. Was alpha selected from VALID? Must be NO.
+15. Was May used? Must be NO.
+16. Was the nominal target changed to 85%? Must be NO.
+17. Which alpha was selected for each model?
+18. What is VALID operational coverage?
+19. What is min-fold operational coverage?
+20. What is >12h operational coverage?
+21. What is operational time ratio?
+22. Does any model achieve <1.2x?
+23. Does any model achieve <1.5x?
+24. Does any model achieve <2.0x?
+25. Is exact 1.0x possible under the measured Q50 floor?
+26. Which model has the best Q50 MAE?
+27. Which model has the strongest >12h coverage?
+28. Which model has the lowest operational time ratio?
+29. Are these the same model?
+30. Does V9 D1 remain on the Pareto frontier?
+31. Does D2 normal1.5 beat V9 after calibration?
+32. Does D2 extreme1.0 beat V9 after calibration?
+33. Does D3 rolling14 remain competitive?
+34. Does V13 retain any advantage?
+35. Is D2 normal1.0 merely underpredicting?
+36. Was V9 zero-support repaired? NO.
+37. Why can V9 quantiles still be evaluated?
+38. Is full distribution used by the scheduler? NO.
+39. Is submission metadata treated as observable? YES, as study assumption.
+40. Is that assumption caused by RADDiT? NO.
+41. Was RADDiT retrained? NO.
+42. Was CC4 changed? NO.
+43. Was V42 run? NO.
+44. Was GPU weighting used anywhere in primary selection? NO.
+45. Are GPUh metrics kept only as optional downstream diagnostics?
+46. What exact model is selected?
+47. What exact alpha is selected?
+48. What exact duration formula should V42 use?
+49. What limitation should be disclosed in the paper?
+50. Is Runtime ML selection now frozen?
+
+============================================================
+26. CENTRAL SCIENTIFIC QUESTION
+============================================================
+
+The final question is:
+
+    Can an existing Runtime model provide a useful scheduling duration
+    with a near-nominal reliability / sharpness trade-off when its
+    Q50 and Q90 are calibrated in the SAME TIME UNIT as the target?
+
+Do not mix this question with GPU resource weighting.
+
+Runtime model selection first.
+Scheduler resource impact later.
