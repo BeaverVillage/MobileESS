@@ -1,0 +1,63 @@
+{
+  "time": "2026-09-29T10:51:37.630985+00:00",
+  "classification": "RESEARCH_PROXY_CROSSWALK",
+  "PRODUCTION_AUTHORITY_CROSSWALK": false,
+  "embedding_rows": 1780972,
+  "unique_EKEY2_candidates": 1775514,
+  "ambiguous_EKEY2_excluded": 5458,
+  "EKEY2_unmatched": 0,
+  "EKEY2_holdout_conflicts": 0,
+  "historic_rows": 2557884,
+  "historic_to_Kestrel_status": {
+    "RESEARCH_PROXY_CROSSWALK": 2069804,
+    "AMBIGUOUS": 488080
+  },
+  "unique_embedding_to_Kestrel_status": {
+    "RESEARCH_PROXY_CROSSWALK": 1504846,
+    "AMBIGUOUS": 270668
+  },
+  "historic_mapping_rate": 0.8091860303281931,
+  "holdout_conflicts": {
+    "start": 0,
+    "qos": 0
+  },
+  "partition_holdout": "NOT_COMPARABLE_DIFFERENT_UNMAPPED_NAMESPACES",
+  "partition_lexical_inequality_not_conflict": 2069804,
+  "audit_correction": "Before ML: removed invalid cross-namespace partition equality check; first attempt and ledgers preserved. No inferred token mapping, key relaxation, timezone shift or fuzzy match.",
+  "keys": [
+    "submit_time_display_us",
+    "end_time_display_us",
+    "wallclock_used_sec",
+    "wallclock_req_sec",
+    "nodes_req",
+    "processors_req"
+  ],
+  "timezone_policy": "Historic literal fixed -06 display; original Kestrel projected to fixed -06. Exact only; no inferred shift or fuzzy recovery.",
+  "upstream_export_proven": false,
+  "duplicates_excluded": true,
+  "May_payload": false,
+  "source_ledgers": [
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext14r1_raddit_crosswalk_recovery\\.local\\EKEY2_NEGATIVE_FORENSIC_LEDGER.parquet",
+      "bytes": 19221001,
+      "sha256": "0489927c2d2404da64adec44d445f55bb7cb2b11a543c839c482eeae77a6f281"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext16_raddit_rich_metadata\\.local\\KESTREL_RICH_PROJECTION.parquet",
+      "bytes": 305880452,
+      "sha256": "ad4ebc01254d6394dc989f8db6c605f56520307d8c866e473875b8d7a5d29a5d"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext16_raddit_rich_metadata\\.local\\EMBEDDING_KESTREL_PROXY.parquet",
+      "bytes": 26410147,
+      "sha256": "b199fda4d1371c078410b56c5e6ecefb4cf4e99caeb8f91e4bfaf6b7ae533811"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext16_raddit_rich_metadata\\.local\\HISTORIC_KESTREL_PROXY.parquet",
+      "bytes": 21059892,
+      "sha256": "fc575208f009988b0881e388c297e8fe1ce6320e0d1c4f60cc9c7c1e513fbbf2"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "time": "2026-09-29T10:37:14.603641+00:00",
+  "before_new_model_metrics": true,
+  "preApril_cutoff": "2025-04-01T00:00:00Z",
+  "native_folds": [
+    {
+      "fold": 1,
+      "valid_from": "2024-09-01",
+      "valid_to": "2024-11-01"
+    },
+    {
+      "fold": 2,
+      "valid_from": "2024-11-01",
+      "valid_to": "2025-01-01"
+    },
+    {
+      "fold": 3,
+      "valid_from": "2025-01-01",
+      "valid_to": "2025-03-11"
+    }
+  ],
+  "native_fit": "All strictly earlier submissions whose end precedes VALID start; no CAL search; nonnegative finite wallclock_used_sec and end>=start>=submit",
+  "crosswalk": "Reuse and independently check exact T0 EKEY2 unique ledger; extend historic to Kestrel with exact displayed submit/start/end, wallclock used/requested, nodes, processors; never fuzzy. Quarantine all duplicate keys and holdout conflicts.",
+  "diagnostic_only": true,
+  "May_decoding": false,
+  "source_authority_not_reopened": true
+}
