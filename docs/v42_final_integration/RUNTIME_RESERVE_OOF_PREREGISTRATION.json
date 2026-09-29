@@ -1,0 +1,23 @@
+{
+  "authority": "Explicit user clarification",
+  "supersedes_original_reserve_role_requirement": true,
+  "original_Runtime_folds_unchanged": true,
+  "kernel_and_gamma_folds": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "validation_holdout_fold": 5,
+  "gamma_refit_after_fold5": false,
+  "kernel": "Pooled exact completed OOF residual survival, full observed lag support plus minimum96 slots",
+  "right_censored_policy": "Do not use unobserved duration in survival. Include observed overrun occupancy until each fold cutoff in system concurrency.",
+  "sample_scope": "Each fold submission cohort evaluated on that fold interval; no invented historical sites or unrelated carry-in jobs",
+  "coverage_scope": "OOF submission-cohort system-wide control-boundary concurrency; not a full-cluster reliability guarantee",
+  "grid": "UTC 900-second boundaries",
+  "nominal_end_mapping": "ceil(actual historical start + stored Q50) to control boundary",
+  "scale": "Single empirical Q90 O/max(H,1e-12), higher order statistic, no search",
+  "labels_preMay_only": true,
+  "March31_snapshot_retrospective_inference": false,
+  "May_gamma": "identical fold1-4 frozen scale"
+}

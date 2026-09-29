@@ -1,0 +1,31 @@
+{
+  "rule": "CONDITIONAL_WAIT_RESIDUAL_Q50",
+  "formula": "Q50(W-age | W>age, same cohort); floor(seconds/900)",
+  "minimum_conditional_N": 100,
+  "PENDING_only": true,
+  "protected_fail_closed": true,
+  "standby_shortcut": false,
+  "runtime_duration_criterion": false,
+  "TRAIN_source": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext9_distributional_runtime\\.local\\fold1\\TRAIN.parquet",
+    "sha256": "ff12ac92b5a8a881310e2d31e71eba6c0f9abc877676aac0f950f666418bdbf1",
+    "bytes": 10283822
+  },
+  "TRAIN_cutoff": "2024-10-18T00:00:00+00:00",
+  "cohort_dimensions": [
+    "qos",
+    "partition",
+    "workload_class",
+    "protected",
+    "gpu_bucket",
+    "wall_bucket",
+    "requested_nodes"
+  ],
+  "May_outcomes_used": false,
+  "old_T2_status": "SUPERSEDED_IN_NEW_INTERFACE_ONLY",
+  "admitted_jobs": 1605,
+  "TS_jobs": 0,
+  "TS_job_share": 0.0,
+  "GPUh_share_status": "REQUIRES_APPROVED_Q50_MAY_SERVICE_BINDING",
+  "no_target_share": true
+}
