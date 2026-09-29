@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "D:\ChatGPT\Mobile ESS 2\runtime_vnext6_callable_total_pr\docs\runtime_vnext14_multisource_information_recovery\join14.py", line 101, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\runtime_vnext6_callable_total_pr\docs\runtime_vnext14_multisource_information_recovery\join14.py", line 51, in main
+    proof=gpu[['id','job_id','submit_time']].merge(k[['id','job_id','submit_time']].drop_duplicates(),on=['id','job_id','submit_time'],how='left',indicator=True)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\runtime_vnext_exact_environment\Lib\site-packages\pandas\core\frame.py", line 10832, in merge
+    return merge(
+           ^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\runtime_vnext_exact_environment\Lib\site-packages\pandas\core\reshape\merge.py", line 170, in merge
+    op = _MergeOperation(
+         ^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\runtime_vnext_exact_environment\Lib\site-packages\pandas\core\reshape\merge.py", line 807, in __init__
+    self._maybe_coerce_merge_keys()
+  File "D:\ChatGPT\Mobile ESS 2\runtime_vnext_exact_environment\Lib\site-packages\pandas\core\reshape\merge.py", line 1512, in _maybe_coerce_merge_keys
+    raise ValueError(msg)
+ValueError: You are trying to merge on datetime64[ns, UTC] and object columns for key 'submit_time'. If you wish to proceed you should use pd.concat

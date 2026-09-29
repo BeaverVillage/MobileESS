@@ -1,0 +1,125 @@
+{
+  "time": "2026-09-29T06:35:54.180204+00:00",
+  "base": "0002f946aa0f8089eb5fbf18758b50e78d80bf16",
+  "user_request": {
+    "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext14_multisource_information_recovery\\USER_REQUEST.txt",
+    "bytes": 37374,
+    "sha256": "467eadd54b80032b0087bc4049ea87c6d4530c7fb954f1a899bbd346360d2727"
+  },
+  "purpose": "Information recovery; no new ML until source identity, exact join, embedding alignment/provenance and baseline parity pass.",
+  "data_boundary": {
+    "selection": "pre-2025-04-01 only; original V13 population/roles unchanged",
+    "monolithic_sources": "Read submission/index timestamp first; gather permitted row positions; decode outcome payload only from fully permitted row groups or point-selected rows. Never summarize post-April outcomes.",
+    "May_payload_opened": false,
+    "April": "EXPOSED_REGRESSION_ONLY; no evaluation without complete gates and frozen callable provider"
+  },
+  "arms": [
+    "J0_STATIC",
+    "J1_CURRENT_STATE",
+    "J2_STATIC_SEMANTIC",
+    "J3_CURRENT_STATE_SEMANTIC",
+    "J4_CURRENT_STATE_SEMANTIC_NN",
+    "J5_ALL_AUTHORIZED"
+  ],
+  "backend": {
+    "n_estimators": 300,
+    "learning_rate": 0.05,
+    "num_leaves": 31,
+    "max_depth": 8,
+    "min_child_samples": 200,
+    "reg_lambda": 2,
+    "max_bin": 127,
+    "random_state": 4009,
+    "n_jobs": 4,
+    "verbosity": -1,
+    "deterministic": true,
+    "force_col_wise": true
+  },
+  "reducer": {
+    "primary": "SEM_SVD32",
+    "components": 32,
+    "TRAIN_only": true,
+    "random_state": 4009,
+    "dimension_search": false,
+    "geometry_decision": "Document normalization and any required IncrementalPCA32 alternative before challenger VALID metrics."
+  },
+  "semantic_neighbors": {
+    "k": 10,
+    "metric": "cosine",
+    "candidate_gate": "neighbor_end_time < prediction time",
+    "fields": [
+      "mean_runtime",
+      "q50_runtime",
+      "q90_runtime",
+      "gt4h_fraction",
+      "gt12h_fraction",
+      "mean_runtime_walltime_ratio",
+      "mean_similarity",
+      "min_similarity",
+      "support_count"
+    ]
+  },
+  "exact_join_keys": [
+    [
+      "job_id"
+    ],
+    [
+      "job_id",
+      "submit_time"
+    ],
+    [
+      "job_id",
+      "submit_time",
+      "start_time"
+    ],
+    [
+      "job_id",
+      "submit_time",
+      "start_time",
+      "end_time"
+    ]
+  ],
+  "join_policy": "Exact only; exclude ambiguous; timestamp transformation requires independent authority; outcome fields only corroborate identity and never become current-job inputs.",
+  "populations": [
+    "COMMON_JOINED_POPULATION for paired comparison",
+    "FULL_V13_POPULATION for coverage diagnostic"
+  ],
+  "C1": {
+    "eligibility": "any C0 min-fold>=.80 AND pooled gt4h>=.80",
+    "max_challengers": 1,
+    "select": "best eligible C0 by primary ranking",
+    "method": "existing V9 causal rolling14 additive shift; proper distribution support must still pass; no new calibration family"
+  },
+  "total_gates": {
+    "A_pooled_Q90": [
+      0.88,
+      0.92
+    ],
+    "B_min_fold": 0.85,
+    "C_gt4h": 0.85,
+    "D_gt12h": 0.8,
+    "E_gt24h": 0.7,
+    "support_N": 100,
+    "F_reservation_to_W0_max": 0.8,
+    "G_finite_proper_NLL": true,
+    "H_zero_support": 0,
+    "I_future_reads": 0,
+    "J_inference_callable": true
+  },
+  "grouped_ablation_trigger": "Paired min-fold or >4h coverage gain >=0.05 with pinball degradation <=5%; otherwise skip.",
+  "authority_failure_action": "STOP scientific model work immediately; preserve forensic findings and deliver explicit NOT_RUN artifacts. Do not replace failed semantics with a model-family search.",
+  "new_job_callability": "Historical embedding lookup is not a callable future provider.",
+  "stage_G": "Missing-information gap analysis on failure; external discovery only after local missing-authority search.",
+  "training_started": false,
+  "challenger_VALID_metrics_seen": false,
+  "original_V13_folds": {
+    "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext13_current_workload_state\\TEMPORAL_FOLD_CONTRACT.json",
+    "bytes": 17784,
+    "sha256": "55704ceacf1214d4ff214ffd29b663d4379cac95b4d4c1eef3efa4c4e647dda2"
+  },
+  "immutable_prior_receipt": {
+    "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext14_multisource_information_recovery\\BASE_PRESERVATION_RECEIPT.json",
+    "bytes": 485510,
+    "sha256": "0fe26d9150d1ee1a2f79bb47602280ab5dc51f9bb5fda80137396fc9fa9ca6dc"
+  }
+}

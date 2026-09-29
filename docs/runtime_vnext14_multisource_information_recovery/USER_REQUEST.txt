@@ -1,0 +1,1505 @@
+Repository: BeaverVillage/MobileESS
+
+NEW RUNTIME ML RESEARCH TASK
+Runtime-vNext14:
+Multisource Information Recovery for Stable Per-Job Runtime Forecasting
+
+Suggested branch:
+codex/runtime-vnext14-multisource-information-recovery
+
+BASE:
+Runtime-vNext13 Draft PR #85
+base commit:
+0002f946aa0f8089eb5fbf18758b50e78d80bf16
+
+============================================================
+0. HIGH-LEVEL PURPOSE
+============================================================
+
+Runtime-vNext13 is complete and frozen.
+
+V13 result:
+
+EXPANDING_S4:
+    pooled Q90 = 91.84%
+    min-fold = 70.70%
+    >4h = 69.72%
+    >12h = 64.25%
+    >24h = 46.88%
+    Q90 pinball = 4752.76 s
+
+No TOTAL candidate passed all safety gates.
+
+Do NOT reopen or reinterpret V13.
+
+The main scientific question for V14 is NOT:
+
+    "Which model should we try next?"
+
+The new question is:
+
+    "Which currently missing or unused observable information is required
+     to make per-job runtime prediction temporally robust?"
+
+V14 therefore focuses on INFORMATION RECOVERY.
+
+The intended progression is:
+
+    RAW DATA INVENTORY
+        ↓
+    SOURCE / SYSTEM IDENTIFICATION
+        ↓
+    JOB-LEVEL OR TIME-LEVEL JOINABILITY
+        ↓
+    PREDICTION-TIME AVAILABILITY
+        ↓
+    OUTCOME-LEAKAGE AUDIT
+        ↓
+    INFORMATION-FAMILY ABLATION
+        ↓
+    ONLY THEN RUNTIME ML
+
+============================================================
+1. RAW DATA ROOTS — MUST AUDIT BOTH
+============================================================
+
+The user's raw datasets are stored under:
+
+ROOT_A =
+C:\Users\kjw39\OneDrive\Desktop\4-2\Mobile ESS\raw데이터
+
+ROOT_B =
+C:\Users\kjw39\OneDrive\Desktop\4-2\Mobile ESS\raw데이터\데이터 센터
+
+RADDiT repository/data are expected under:
+
+C:\Users\kjw39\OneDrive\Desktop\4-2\Mobile ESS\raw데이터\데이터 센터\RADDiT
+
+Do NOT assume only the datasets named in this instruction exist.
+
+Perform a complete source inventory of BOTH roots.
+
+Do not delete, rename, move, overwrite, or modify any raw data.
+
+All new outputs must be written only under:
+
+docs/runtime_vnext14_multisource_information_recovery/
+
+and if large local artifacts are required:
+
+docs/runtime_vnext14_multisource_information_recovery/.local/
+
+or an explicitly documented sibling local-artifact directory.
+
+============================================================
+2. PRESERVE ALL PRIOR SCIENTIFIC EVIDENCE
+============================================================
+
+V6–V13 scientific evidence must remain byte-identical.
+
+Before work:
+
+- hash all tracked V6–V13 scientific files
+- hash existing manifests
+- record base commit
+- confirm PR #85 base
+- confirm working tree status
+
+Do NOT modify:
+
+- V42
+- CC4
+- MESS
+- response kernel
+- trust region
+- A1/M1/A2/M2
+- optimizer
+- OpenDSS
+- IEEE123 / IEEE8500
+- April policy results
+- May runtime evaluation
+
+V14 is Runtime-ML research only.
+
+============================================================
+3. V14 STAGE A — FULL RAW-DATA INVENTORY FIRST
+============================================================
+
+Before any new ML fit, recursively inventory the two raw-data roots.
+
+Do this efficiently:
+
+FIRST PASS:
+- path
+- filename
+- extension
+- size
+- directory
+- archive/file type
+
+SECOND PASS only for candidate datasets:
+- schema
+- columns
+- row count if inexpensive
+- timestamp columns
+- approximate data period
+- source system
+- granularity
+- candidate join keys
+
+Do NOT hash every multi-GB file during initial discovery.
+
+Hash selected scientific input files after inclusion decisions.
+
+Required output:
+
+RAW_SOURCE_INVENTORY.csv
+
+Columns:
+
+source_id
+root
+relative_path
+filename
+extension
+size_bytes
+source_system
+source_category
+data_granularity
+schema_available
+timestamp_columns
+job_identifier_columns
+candidate_runtime_relevance
+record_content_inspected
+notes
+
+Also create:
+
+RAW_SOURCE_GROUPS.csv
+
+Group duplicate/copy datasets together, e.g.:
+
+- duplicate Kestrel archives
+- duplicate PUE files
+- copied catalog metadata
+- same dataset in multiple Drive folders
+
+Do not count duplicates as independent information.
+
+============================================================
+4. SOURCE CLASSIFICATION
+============================================================
+
+Every discovered source must be classified into one of:
+
+A. SAME_KESTREL_JOB_LEVEL
+B. SAME_KESTREL_SYSTEM_TIME_LEVEL
+C. SAME_FACILITY_TIME_LEVEL
+D. KESTREL_AUXILIARY_NO_TEMPORAL_OVERLAP
+E. OTHER_HPC_SYSTEM
+F. OTHER_DATACENTER_WORKLOAD
+G. GRID / TRAFFIC / WEATHER / NON_RUNTIME
+H. UNKNOWN_REQUIRES_FORENSIC
+
+Create:
+
+RAW_SOURCE_DECISION_MATRIX.csv
+
+with:
+
+source_id
+system_identity
+period_start
+period_end
+job_level_join_possible
+time_level_join_possible
+prediction_time_observable_candidate
+outcome_risk
+direct_runtime_feature_candidate
+external_validation_candidate
+include_in_v14_ml
+reason
+
+IMPORTANT:
+
+"Data exists" is NOT sufficient for inclusion.
+
+============================================================
+5. KNOWN HIGH-PRIORITY DATASETS
+============================================================
+
+At minimum inspect and classify:
+
+A. Original Kestrel Jobs archive
+    esif.hpc.kestrel.job-anon.zip
+    or equivalent local copies.
+
+B. RADDiT
+    data/historic_job_trace.parquet
+    data/encrypted_embeddings/chunk_000.parquet
+    ...
+    data/encrypted_embeddings/chunk_044.parquet
+
+C. NLR facility PUE / IT power
+    esif.influx.buildingData.PUE.combined.parquet
+
+D. NLR outside/facility weather if present
+    esif.influx.buildingData.outside.combined.parquet
+
+E. Generative AI workload power-profile dataset
+    dataset.zip
+    or its extracted contents
+
+F. Eagle jobs / energy / node telemetry
+
+G. Any Alibaba / Azure / BurstGPT / other workload data
+
+H. Any currently unused Kestrel-related artifacts found in the roots.
+
+Do NOT assume all are suitable for direct features.
+
+============================================================
+6. MAY / APRIL DATA BOUNDARY
+============================================================
+
+Runtime-vNext14 model selection remains PRE-APRIL ONLY.
+
+May remains unopened for runtime model evaluation.
+
+Required:
+
+MAY_PAYLOAD_OPENED = FALSE
+MAY_USED_FOR_SELECTION = FALSE
+MAY_USED_FOR_EVALUATION = FALSE
+
+Raw-source inventory may inspect:
+
+- filename
+- path
+- size
+- schema metadata
+
+but must NOT decode or summarize May runtime labels/outcomes.
+
+If a monolithic source contains post-April records:
+
+filter to the permitted pre-April population immediately.
+
+Do not compute post-April descriptive runtime statistics.
+
+April status remains:
+
+EXPOSED_REGRESSION_ONLY
+
+Do NOT evaluate April unless the full pre-April TOTAL/remaining/provider gates
+are passed and the final bundle is frozen.
+
+============================================================
+7. STAGE B — RADDiT ↔ KESTREL JOIN FORENSIC
+============================================================
+
+This is the highest-priority V14 investigation.
+
+Do NOT train a new runtime model before this stage is complete.
+
+The objective is to determine whether:
+
+    RADDiT rows
+        ↕
+    original Kestrel jobs
+        ↕
+    RADDiT embedding rows
+
+refer to the same physical/historical jobs.
+
+============================================================
+8. KESTREL ↔ RADDiT HISTORIC TRACE JOIN
+============================================================
+
+Inspect schemas independently.
+
+Potential fields may include:
+
+job_id
+submit_time
+start_time
+end_time
+wallclock_used_sec
+requested walltime
+nodes
+partition
+QoS
+account
+job_type
+name
+submit_line
+script/workdir token
+
+Do NOT assume job_id alone is globally unique.
+
+Previous Kestrel forensics found repeated numerical IDs / array-related
+ambiguities.
+
+Therefore test a hierarchy of join keys.
+
+Examples:
+
+JKEY0:
+    job_id only
+
+JKEY1:
+    job_id + submit_time
+
+JKEY2:
+    job_id + submit_time + start_time
+
+JKEY3:
+    job_id + submit_time + start_time + end_time
+
+JKEY4:
+    source-backed array/attempt identifier if authority exists
+
+Use exact joins only.
+
+Do NOT use approximate timestamp matching to inflate join rate.
+
+If timestamps differ systematically because of timezone representation,
+prove the transformation before applying it.
+
+Create:
+
+RADDIT_KESTREL_JOIN_SUMMARY.json
+
+Report:
+
+- Kestrel candidate jobs
+- RADDiT historic jobs
+- unique IDs
+- duplicate IDs
+- exact matched jobs
+- ambiguous matches
+- timestamp-consistent matches
+- runtime-consistent matches
+- unmatched Kestrel jobs
+- unmatched RADDiT jobs
+- join rate by fold
+- >4h join rate
+- >12h join rate
+- >24h join rate
+- GPU-size-stratified join rate
+
+Create large local ledger if needed:
+
+.local/RADDIT_KESTREL_JOIN_LEDGER.parquet
+
+Git only summary / hashes if the ledger is too large.
+
+============================================================
+9. RADDiT EMBEDDING ROW ALIGNMENT
+============================================================
+
+Do NOT assume that concatenating chunk_000...044 automatically gives
+historic_job_trace row order.
+
+Prove it.
+
+Inspect RADDiT source code:
+
+- embedding generation
+- prep_for_embedding
+- quickstart_embedding
+- semantic_search
+- chunk generation
+- row_id assignment
+- job string construction
+
+Determine exactly how embedding row i maps to job row j.
+
+If embedding parquet contains shared columns such as:
+
+submit_time
+end_time
+wallclock_used_sec
+avg_power_per_node
+row_id
+
+use these to verify alignment.
+
+Required invariants:
+
+- total embedding row count
+- historic trace row count
+- global ordering
+- chunk boundaries
+- row offsets
+- shared-field exact consistency
+- duplicate ambiguity
+
+Create:
+
+RADDIT_EMBEDDING_ALIGNMENT_AUDIT.json
+
+Required flags:
+
+RADDIT_EMBEDDING_ROW_MAPPING_PROVEN = TRUE/FALSE
+RADDIT_EMBEDDING_JOB_JOIN_RATE = fraction
+RADDIT_EMBEDDING_AMBIGUOUS_ROWS = integer
+RADDIT_EMBEDDING_MISSING_ROWS = integer
+
+If row mapping cannot be proven:
+
+DO NOT use embeddings for ML.
+
+Stop semantic modeling and preserve negative forensic result.
+
+============================================================
+10. EMBEDDING PROVENANCE / LEAKAGE AUDIT
+============================================================
+
+Inspect how RADDiT embeddings were generated.
+
+Determine whether embedding input contains ONLY information that could
+conceptually exist at submit time, such as:
+
+- account/user token
+- partition
+- QoS
+- job type
+- name
+- submit line
+- script
+- other request metadata
+
+and whether it includes any outcome field such as:
+
+- actual runtime
+- start/end
+- final state
+- power result
+- consumed energy
+- future scheduler state
+
+Required:
+
+RADDIT_EMBEDDING_OUTCOME_INPUT_FOUND = TRUE/FALSE
+
+If outcome information was used to generate the embedding:
+
+the embeddings MUST NOT be used as submission-time runtime inputs.
+
+If exact historical publication/ingestion timing is not provable but
+construction is outcome-free:
+
+mark provenance as:
+
+RADDIT_SEMANTIC_PROXY
+
+Do not call it strict production causal authority.
+
+============================================================
+11. NEW SEMANTIC INFORMATION HYPOTHESIS
+============================================================
+
+V14 hypothesis H_semantic:
+
+Jobs with similar resource requests can have very different runtimes because
+the existing Kestrel request descriptors do not fully represent
+application/workflow identity.
+
+RADDiT semantic vectors may contain additional information about:
+
+- application type
+- workflow
+- command/script family
+- job-name semantics
+- submit-line semantics
+- software stack
+- computational pattern
+
+This is a hypothesis.
+
+Do NOT claim hidden-variable causality from performance improvement.
+
+============================================================
+12. SEMANTIC FEATURE REPRESENTATION
+============================================================
+
+Do NOT feed arbitrary raw 4096-dimensional vectors directly into the hazard
+model without a frozen preprocessing contract.
+
+Use exactly one primary dimensionality-reduction configuration:
+
+SEM_SVD32
+
+Procedure for each temporal fold:
+
+1. use only TRAIN-mapped embedding rows
+2. convert embedding vector to float32
+3. normalize if required by documented embedding semantics
+4. fit 32-component TruncatedSVD / equivalent deterministic linear reducer
+   on TRAIN only
+5. transform TRAIN / VALID
+6. never fit reducer using VALID
+7. save reducer and hash
+
+No search over:
+8/16/32/64/128 dimensions.
+
+32 is frozen before evaluation.
+
+If SVD is numerically inappropriate for the dense normalized embedding,
+use IncrementalPCA32, but choose based on implementation/data geometry
+BEFORE any VALID metric is inspected.
+
+Document the decision.
+
+============================================================
+13. CAUSAL SEMANTIC-NEIGHBOR FEATURE
+============================================================
+
+Also evaluate one predeclared semantic-neighbor context family if and only if
+embedding alignment/provenance passes.
+
+Use cosine similarity.
+
+Frozen k:
+
+    k = 10
+
+At prediction event t, candidate neighbors must satisfy:
+
+    neighbor_end_time < t
+
+No future completed job may enter neighbor runtime summaries.
+
+Generate only compact features:
+
+- semantic_nn_mean_runtime
+- semantic_nn_q50_runtime
+- semantic_nn_q90_runtime
+- semantic_nn_gt4h_fraction
+- semantic_nn_gt12h_fraction
+- semantic_nn_mean_runtime_walltime_ratio
+- semantic_nn_mean_similarity
+- semantic_nn_min_similarity
+- semantic_nn_support_count
+
+No current job actual runtime enters the search.
+
+If fewer than 10 causal historical neighbors exist:
+use available support and record support count.
+
+Do not fill no-support with future neighbors.
+
+============================================================
+14. STAGE C — UNUSED KESTREL RAW FIELD FORENSIC
+============================================================
+
+Audit whether previous V8–V13 omitted useful Kestrel information.
+
+At minimum inspect:
+
+- job name token
+- submit_line token
+- script token
+- workdir token
+- job_type
+- array metadata
+- array parent/task identity
+- account recurrence
+- user recurrence if anonymized and permitted
+- node list
+- nodes used
+- GPU node occupancy
+- request shape
+- resource ratios
+- state-transition descriptors
+- requeue indicators
+- restart / attempt evidence
+- dependency information
+- reservation
+- scheduler flags
+- any currently unused fields in the datacard/schema
+
+Do not automatically put high-cardinality tokens into the model.
+
+For each field report:
+
+- TRAIN cardinality
+- VALID unseen rate by fold
+- missing rate
+- apparent mutability
+- submit-time authority
+- outcome leakage risk
+- direct-use / semantic-use / exclude decision
+
+Create:
+
+KESTREL_UNUSED_FIELD_AUDIT.csv
+
+============================================================
+15. REQUEUE / ATTEMPT / JOB-STEP FORENSIC
+============================================================
+
+Search all local Kestrel/RADDiT sources and source documentation for:
+
+- original submit revision
+- requeue events
+- restart attempts
+- preemption
+- job steps
+- step duration
+- dependency DAG
+- scheduler event logs
+- revision history
+- sacct state history
+
+Create:
+
+KERNEL_MISSING_EVENT_AUTHORITY.md
+
+For every item:
+
+FOUND
+PARTIAL
+NOT_FOUND_IN_SEARCHED_LOCAL_AUTHORITY
+
+Do not use "does not exist" unless proven.
+
+============================================================
+16. STAGE D — FACILITY IT POWER / PUE
+============================================================
+
+Inspect PUE / facility power data.
+
+First answer:
+
+- Is this the same facility relevant to Kestrel?
+- What is the timestamp timezone?
+- What is the sampling interval?
+- What is the date range?
+- Does it overlap the 5 pre-April folds?
+- Is IT power observed contemporaneously or reconstructed later?
+
+If scientifically joinable, use only BACKWARD as-of temporal joins.
+
+At job prediction time t:
+
+allowed:
+    latest observation timestamp <= t
+
+forbidden:
+    nearest observation if it is after t
+    centered interpolation
+    future hourly average
+    target-period average
+
+Candidate compact features:
+
+- IT_power_current
+- PUE_current
+- IT_power_lag15m_mean
+- IT_power_lag1h_mean
+- IT_power_lag6h_mean
+- IT_power_1h_delta
+- PUE_lag1h_mean
+
+Do not use outside weather in primary runtime model unless a causal
+mechanism / incremental authority is justified.
+
+Outside weather is primarily PUE/power context, not automatically runtime.
+
+Required:
+
+FACILITY_STATE_AUTHORITY_AUDIT.json
+
+============================================================
+17. GENAI POWER PROFILE DATASET
+============================================================
+
+Inspect the Kestrel Generative-AI workload power dataset.
+
+Determine:
+
+- system
+- period
+- Slurm/job identifiers
+- workload type
+- train/inference identity
+- node count
+- GPU type
+- timestamps
+- overlap with V14 runtime population
+
+Attempt exact join by authorized ID only.
+
+If the dataset is 2026-only and V14 folds are 2024–2025:
+
+do NOT use it as a per-job historical feature.
+
+It may be used only for:
+
+- workload taxonomy insight
+- external methodological evidence
+- power-model research
+- future source-discovery discussion
+
+Create:
+
+GENAI_DATASET_JOINABILITY_AUDIT.json
+
+============================================================
+18. EAGLE / OTHER HPC DATA
+============================================================
+
+Eagle is a different HPC system.
+
+Do NOT attach Eagle telemetry directly to Kestrel jobs.
+
+Use Eagle only as:
+
+- external evidence that richer telemetry exists
+- external-method validation
+- future observability study
+
+Same rule for unrelated Alibaba / Azure / BurstGPT data.
+
+Different-system data must not be silently used to fill Kestrel features.
+
+============================================================
+19. STAGE E — INFORMATION SOURCE SELECTION
+============================================================
+
+Before model fitting create:
+
+AUTHORIZED_FEATURE_FAMILIES.json
+
+Possible families:
+
+STATIC_V13
+CURRENT_STATE_V13
+RADDIT_SEMANTIC_SVD
+RADDIT_SEMANTIC_NEIGHBOR
+KESTREL_NEW_STATIC
+FACILITY_CURRENT_STATE
+
+For every feature:
+
+name
+source
+event_time_semantics
+strict/proxy authority
+train-time availability
+inference-time availability
+outcome leakage risk
+allowed TRUE/FALSE
+reason
+
+============================================================
+20. EXACT V13 BASELINE REPRODUCTION
+============================================================
+
+Before any V14 model:
+
+reproduce exactly:
+
+EXPANDING_S0
+EXPANDING_S4
+
+Expected:
+
+S0:
+    pooled 91.74%
+    min-fold 66.47%
+    >4h 71.07%
+    >12h 65.56%
+    >24h 59.58%
+    pinball 4923.74 s
+
+S4:
+    pooled 91.84%
+    min-fold 70.70%
+    >4h 69.72%
+    >12h 64.25%
+    >24h 46.88%
+    pinball 4752.76 s
+
+Predictions must be bit-identical or within the existing strict deterministic
+tolerance defined by V13.
+
+If baseline reproduction fails:
+
+STOP model comparison.
+
+Do not proceed with V14 ML until resolved.
+
+============================================================
+21. V14 PRIMARY MODEL ARMS
+============================================================
+
+Keep the V9/V13 hazard architecture fixed.
+
+The purpose is INFORMATION comparison, not model-family comparison.
+
+Primary arms:
+
+J0_STATIC
+    exact V13 S0
+
+J1_CURRENT_STATE
+    exact V13 S4
+
+J2_STATIC_SEMANTIC
+    S0
+    + RADDiT SEM_SVD32
+
+J3_CURRENT_STATE_SEMANTIC
+    S4
+    + RADDiT SEM_SVD32
+
+J4_CURRENT_STATE_SEMANTIC_NN
+    J3
+    + causal semantic k=10 neighbor summary
+
+J5_ALL_AUTHORIZED
+    J4
+    + newly authorized Kestrel raw fields
+    + facility state if authority passes
+
+If a source family fails authority or joinability:
+J5 simply excludes that family and reports the exact composition.
+
+Do NOT invent a feature to preserve the arm name.
+
+============================================================
+22. MISSING EMBEDDING POPULATION
+============================================================
+
+If only a subset of Kestrel jobs has RADDiT embeddings:
+
+Do NOT drop unmatched jobs silently.
+
+Report:
+
+- matched fraction
+- unmatched fraction
+- runtime distribution difference
+- >4h/>12h/>24h difference
+- fold-specific match rate
+- GPU / QoS / partition match bias
+
+Primary evaluation should remain on the SAME population where scientifically
+possible.
+
+Required two views if join is incomplete:
+
+A. COMMON_JOINED_POPULATION
+    exact paired model comparison
+
+B. FULL_V13_POPULATION
+    deployment/population coverage diagnostic
+
+Do not claim full-population superiority from joined-only results.
+
+============================================================
+23. TEMPORAL FOLDS
+============================================================
+
+Use the exact V13 five pre-April blocked folds.
+
+No random split.
+
+No new validation dates.
+
+No April selection.
+
+No May.
+
+Fold membership must be byte-identical to V13.
+
+============================================================
+24. MODEL BACKEND
+============================================================
+
+Reuse V13 CPU backend and deterministic settings unless a strong technical
+reason prevents it.
+
+Do NOT start:
+
+- TFT
+- DeepAR
+- Transformer
+- new AFT model zoo
+- new tail classifiers
+
+The scientific question is new information content.
+
+============================================================
+25. CALIBRATION
+============================================================
+
+Evaluate C0 raw hazard first.
+
+C1 rolling14 may be evaluated only under the same predeclared condition:
+
+    min-fold >= 0.80
+    AND
+    pooled >4h coverage >= 0.80
+
+No static calibration.
+
+No post-hoc multiplier.
+
+No May calibration.
+
+============================================================
+26. TOTAL RUNTIME SAFETY GATES
+============================================================
+
+Required:
+
+A.
+    0.88 <= pooled Q90 <= 0.92
+
+B.
+    min supported fold >= 0.85
+
+C.
+    >4h Q90 coverage >= 0.85
+
+D.
+    >12h coverage >= 0.80 where supported
+
+E.
+    >24h coverage >= 0.70 if N >= 100
+
+F.
+    reservation materially below W0
+
+G.
+    finite proper distribution score
+
+H.
+    zero-support observed intervals = 0
+
+I.
+    no future/outcome leakage
+
+J.
+    semantic/facility feature callable at inference time
+
+Do not lower gates.
+
+============================================================
+27. EFFICIENCY / SHARPNESS
+============================================================
+
+For every arm report:
+
+- Q90 coverage
+- min fold
+- fold std
+- >4h / >8h / >12h / >24h coverage
+- Q90 pinball
+- Q50 MAE
+- reservation / actual GPUh
+- W0-relative reservation
+- short-job reservation inflation
+- median Q90 / actual
+- P90 Q90 / actual
+- proper interval NLL
+
+High coverage obtained by huge reservations is not success.
+
+============================================================
+28. SOURCE-FAMILY CONTRIBUTION
+============================================================
+
+The main scientific contrasts are:
+
+J2 - J0:
+    value of semantic information without current state
+
+J3 - J1:
+    value of semantic information with current state
+
+J4 - J3:
+    value of causal semantic-neighbor historical outcomes
+
+J5 - J4:
+    value of additional authorized telemetry/raw fields
+
+Use paired fold/job comparisons.
+
+Do not describe these as causal treatment effects.
+
+Use wording:
+
+"predictive contribution under the frozen model/feature context"
+
+============================================================
+29. COMPUTE-SAVING RULE
+============================================================
+
+Do not repeat V13's long diagnostic search.
+
+Run all five folds for the six primary arms only.
+
+Grouped ablation is authorized ONLY IF:
+
+- one V14 challenger materially improves min-fold by >=5 percentage points
+  OR
+- materially improves >4h coverage by >=5 percentage points
+
+relative to its paired baseline,
+
+without >5% pinball degradation.
+
+This rule is frozen BEFORE results.
+
+If no primary arm meets that trigger:
+
+skip broad diagnostic ablations.
+
+Do not spend hours proving an already-failed gate multiple ways.
+
+============================================================
+30. STAGE F — REMAINING MODEL ONLY IF TOTAL PASSES
+============================================================
+
+If and only if TOTAL_RUNTIME_MODEL_VALIDATED=TRUE:
+
+authorize remaining-runtime study.
+
+Use the same V13/V11 safe structure:
+
+REM_A:
+    conditional remaining from selected total distribution
+
+REM_B:
+    direct elapsed-aware remaining model
+
+Allowed additional inputs:
+
+- elapsed
+- selected semantic representation
+- causal current state at checkpoint
+- semantic neighbor context at checkpoint if correctly time-gated
+
+All checkpoint rows from one episode remain in the same fold role.
+
+No future END.
+
+============================================================
+31. PROVIDER API IF V14 PASSES
+============================================================
+
+If V14 total + remaining pass:
+
+RuntimeProvider must expose:
+
+predict_total(job_record, event_time, context_state=None)
+
+predict_remaining(
+    job_record,
+    elapsed_seconds,
+    event_time,
+    context_state=None
+)
+
+If RADDiT semantic vector is required:
+
+provider must define exactly how a NEW future job obtains its semantic input.
+
+This is critical.
+
+A historical precomputed embedding lookup is NOT a callable future provider.
+
+Before provider promotion answer:
+
+Can a new submitted job generate the same semantic representation using only
+information available at submission?
+
+If NO:
+
+V14_RESEARCH_MODEL may exist,
+but
+
+V42_RESEARCH_RUNTIME_PROVIDER_READY = FALSE
+
+Do not hide this deployment gap.
+
+============================================================
+32. VERY IMPORTANT: HISTORICAL EMBEDDING VS NEW JOB
+============================================================
+
+The distributed RADDiT embeddings may exist only for historical jobs.
+
+Therefore separate:
+
+RETROSPECTIVE_INFORMATION_VALUE
+
+from:
+
+ONLINE_CALLABILITY
+
+If embedding generation requires job script / metadata that V42 can receive at
+submission:
+
+document the proposed inference pipeline.
+
+If the modeled V42 input does NOT receive those fields:
+
+do not claim production callability.
+
+Required flags:
+
+RADDIT_HISTORICAL_SEMANTIC_VALUE_SUPPORTED = TRUE/FALSE
+RADDIT_NEW_JOB_SEMANTIC_CALLABLE = TRUE/FALSE
+
+============================================================
+33. STAGE G — IF V14 STILL FAILS
+============================================================
+
+If all V14 primary arms fail:
+
+DO NOT automatically create Runtime-vNext15.
+
+Instead perform a Missing-Information Gap Analysis.
+
+Search all LOCAL raw data and documentation for each candidate:
+
+1. application/workflow identity
+2. original script / command information
+3. input dataset size
+4. iteration / epoch count
+5. job-step records
+6. requeue history
+7. preemption
+8. retry / restart attempt
+9. scheduler internal priority
+10. reservation
+11. job dependency / DAG
+12. assigned hardware
+13. GPU model
+14. GPU utilization
+15. GPU memory utilization
+16. CPU utilization
+17. node power
+18. filesystem I/O
+19. network I/O
+20. node contention
+21. application phase
+22. checkpoint/restart behavior
+23. queue topology/state
+24. job revision history
+
+For each item classify:
+
+AVAILABLE_AND_JOINABLE
+AVAILABLE_NOT_JOINABLE
+AVAILABLE_POST_START_ONLY
+AVAILABLE_OTHER_SYSTEM_ONLY
+NOT_FOUND_IN_LOCAL_RAW
+AUTHORITY_UNCLEAR
+
+Create:
+
+MISSING_INFORMATION_GAP_ANALYSIS.csv
+MISSING_INFORMATION_GAP_ANALYSIS_KO.md
+
+============================================================
+34. EXTERNAL PUBLIC-SOURCE DISCOVERY AFTER LOCAL SEARCH
+============================================================
+
+Only if a key item is NOT_FOUND_IN_LOCAL_RAW:
+
+search source documentation / public NLR-NREL companion data / repository docs
+for additional authority.
+
+Search specifically for:
+
+- Kestrel slurmctld logs
+- sacct revision history
+- job-step logs
+- Kestrel GPU telemetry
+- node telemetry
+- requeue/preemption history
+- scheduler event stream
+- performance counters
+- filesystem metrics
+- application/workflow metadata
+
+For each external candidate:
+
+URL/source
+system
+period
+join key
+available fields
+public accessibility
+direct V14 joinability
+future research value
+
+Do not download unrelated multi-GB datasets automatically.
+
+Create:
+
+EXTERNAL_MISSING_SOURCE_DISCOVERY.md
+
+============================================================
+35. DO NOT CONFUSE INFORMATION ABSENCE WITH RANDOMNESS
+============================================================
+
+If V14 fails, the allowed conclusion is:
+
+"The tested observable request, current-state, semantic, and available
+telemetry information was insufficient to establish stable per-job Q90
+runtime prediction under the evaluated temporal shifts."
+
+Do NOT conclude:
+
+- runtime is random
+- runtime has no pattern
+- ML cannot predict runtime
+- hidden variables definitely cause the shift
+- Kestrel runtime prediction is impossible
+
+============================================================
+36. REQUIRED V14 ARTIFACTS
+============================================================
+
+Create:
+
+docs/runtime_vnext14_multisource_information_recovery/
+
+README.md
+PREREGISTRATION.json
+
+RAW_SOURCE_INVENTORY.csv
+RAW_SOURCE_GROUPS.csv
+RAW_SOURCE_DECISION_MATRIX.csv
+
+RADDIT_KESTREL_JOIN_SUMMARY.json
+RADDIT_EMBEDDING_ALIGNMENT_AUDIT.json
+RADDIT_EMBEDDING_PROVENANCE_AUDIT.md
+
+KESTREL_UNUSED_FIELD_AUDIT.csv
+KERNEL_MISSING_EVENT_AUTHORITY.md
+
+FACILITY_STATE_AUTHORITY_AUDIT.json
+GENAI_DATASET_JOINABILITY_AUDIT.json
+
+AUTHORIZED_FEATURE_FAMILIES.json
+FEATURE_CONTRACT.json
+
+V13_BASELINE_REPRODUCTION.json
+
+MODEL_COMPARISON.csv
+FOLD_METRICS.csv
+LONG_TAIL_METRICS.csv
+SHARPNESS_METRICS.csv
+PROPER_SCORE_METRICS.csv
+
+SEMANTIC_SUPPORT_METRICS.csv
+JOINED_POPULATION_BIAS_AUDIT.csv
+
+SOURCE_FAMILY_CONTRASTS.csv
+
+MISSING_INFORMATION_GAP_ANALYSIS.csv
+MISSING_INFORMATION_GAP_ANALYSIS_KO.md
+
+EXTERNAL_MISSING_SOURCE_DISCOVERY.md
+    only if Stage G is triggered
+
+FINAL_SELECTION_FREEZE.json
+FINAL_VERDICT.json
+FINAL_REVIEW_KO.md
+
+SOURCE_MANIFEST.json
+LOCAL_EVIDENCE_MANIFEST.json
+DELIVERY_MANIFEST.json
+VERIFICATION.json
+
+Large row-level ledgers remain local and are bound by hashes.
+
+============================================================
+37. REQUIRED FINAL KOREAN REPORT QUESTIONS
+============================================================
+
+FINAL_REVIEW_KO.md must answer:
+
+1. V13은 정확히 왜 실패했는가?
+2. V14에서 새롭게 검사한 raw-data root는 무엇인가?
+3. 전체 raw source는 몇 개의 dataset family로 분류됐는가?
+4. Kestrel과 직접 job-level join 가능한 source는 무엇인가?
+5. RADDiT historic trace와 Kestrel join rate는?
+6. Fold별 RADDiT join rate는?
+7. Long-job에서 join bias가 있는가?
+8. RADDiT embedding row mapping은 증명됐는가?
+9. Embedding 생성에 actual runtime/end/power가 들어갔는가?
+10. Embedding은 submission-time semantic proxy로 방어 가능한가?
+11. New future job에서 embedding을 만들 수 있는가?
+12. SVD32는 TRAIN only로 fit됐는가?
+13. Semantic kNN은 end<t만 사용했는가?
+14. Kestrel unused raw field 중 새로 usable한 것이 있었는가?
+15. requeue/attempt authority를 찾았는가?
+16. job-step authority를 찾았는가?
+17. PUE/IT-power는 같은 facility인가?
+18. PUE/IT-power 시간 범위가 folds와 겹치는가?
+19. Facility feature는 backward-asof만 사용했는가?
+20. GenAI dataset은 direct join 가능한가?
+21. Eagle을 Kestrel feature로 쓰지 않은 이유는?
+22. J0 S0 reproduction은 정확한가?
+23. J1 S4 reproduction은 정확한가?
+24. J2 semantic-only incremental result는?
+25. J3 semantic+state result는?
+26. J4 semantic-neighbor result는?
+27. J5 all-authorized result는?
+28. 어느 정보 family가 min-fold를 가장 개선했는가?
+29. 어느 정보 family가 >4h를 가장 개선했는가?
+30. pooled Q90는?
+31. min-fold는?
+32. >4h/>12h/>24h는?
+33. pinball은?
+34. reservation ratio는?
+35. short-job overreservation은?
+36. semantic improvement가 joined-subset bias 때문은 아닌가?
+37. C1을 실행했는가?
+38. TOTAL all-gate pass 후보가 있는가?
+39. Stage C가 실행됐는가?
+40. Remaining model은 통과했는가?
+41. Provider는 new job에 callable한가?
+42. April을 평가했는가?
+43. April로 tuning했는가? 반드시 NO.
+44. May를 열었는가? 반드시 NO.
+45. V42 research provider로 승격 가능한가?
+46. strict causal provider인가?
+47. V14도 실패했다면 다음으로 빠진 정보는 무엇인가?
+48. 그 정보가 local raw에 있는가?
+49. public source에서 추가로 찾은 후보는 무엇인가?
+50. 최종적으로 무엇이 "알려진 한계"이고 무엇이 "미검증 가설"인가?
+
+============================================================
+38. FINAL FLAGS
+============================================================
+
+RAW_SOURCE_INVENTORY_COMPLETE = TRUE/FALSE
+
+RADDIT_HISTORIC_TRACE_FOUND = TRUE/FALSE
+RADDIT_EMBEDDINGS_FOUND = TRUE/FALSE
+
+RADDIT_KESTREL_JOIN_PROVEN = TRUE/FALSE
+RADDIT_KESTREL_JOIN_RATE = fraction
+
+RADDIT_EMBEDDING_ROW_MAPPING_PROVEN = TRUE/FALSE
+RADDIT_EMBEDDING_OUTCOME_INPUT_FOUND = TRUE/FALSE
+
+RADDIT_HISTORICAL_SEMANTIC_VALUE_SUPPORTED = TRUE/FALSE
+RADDIT_NEW_JOB_SEMANTIC_CALLABLE = TRUE/FALSE
+
+FACILITY_STATE_JOIN_AUTHORIZED = TRUE/FALSE
+GENAI_DIRECT_JOB_JOIN_AUTHORIZED = TRUE/FALSE
+EAGLE_USED_AS_KESTREL_FEATURE = FALSE
+
+V13_S0_REPRODUCED = TRUE/FALSE
+V13_S4_REPRODUCED = TRUE/FALSE
+
+SELECTED_V14_ARM =
+    J0/J1/J2/J3/J4/J5/NONE
+
+TOTAL_RUNTIME_MODEL_VALIDATED = TRUE/FALSE
+
+TOTAL_OVERALL_Q90_GATE_PASS = TRUE/FALSE
+TOTAL_MIN_FOLD_GATE_PASS = TRUE/FALSE
+TOTAL_GT4H_GATE_PASS = TRUE/FALSE
+TOTAL_GT12H_GATE_PASS = TRUE/FALSE
+TOTAL_GT24H_GATE_PASS = TRUE/FALSE
+
+C1_ROLLING14_EVALUATED = TRUE/FALSE
+
+STAGE_C_AUTHORIZED = TRUE/FALSE
+REMAINING_MODEL_RUN = TRUE/FALSE
+REMAINING_RUNTIME_MODEL_VALIDATED = TRUE/FALSE
+
+V42_RESEARCH_RUNTIME_PROVIDER_READY = TRUE/FALSE
+STRICT_CAUSAL_RUNTIME_PROVIDER_READY = FALSE
+REQUEST_VERSION_AUTHORITY_FOUND = FALSE
+
+APRIL_USED_FOR_SELECTION = FALSE
+APRIL_MODEL_CHANGED_AFTER_EVALUATION = FALSE
+
+MAY_PAYLOAD_OPENED = FALSE
+MAY_USED_FOR_SELECTION = FALSE
+MAY_USED_FOR_EVALUATION = FALSE
+
+MISSING_INFORMATION_GAP_ANALYSIS_RUN = TRUE/FALSE
+
+============================================================
+39. STOP CONDITIONS
+============================================================
+
+STOP immediately if:
+
+- V13 baseline reproduction fails
+- RADDiT job mapping cannot be proven
+- embedding row mapping cannot be proven
+- embedding generation uses runtime/outcome information
+- semantic mapping requires future information
+- timestamp/timezone mapping is ambiguous and unresolved
+- joined population is too biased for claimed full-population evaluation
+- facility data system identity cannot be established
+- May would need to be opened for selection
+- April would need to be used for tuning
+- prior scientific evidence would need modification
+
+Fail closed.
+
+Do not workaround a source-authority failure by inventing an approximate join.
+
+============================================================
+40. GIT / DELIVERY
+============================================================
+
+After completion:
+
+- run all V14 tests
+- verify all V6–V13 prior hashes
+- verify V14 local evidence hashes
+- ensure git diff is V14-only
+- commit
+- push
+- create Draft PR
+
+Suggested PR title:
+
+Runtime-vNext14: multisource runtime information-recovery forensic
+
+The Draft PR must remain scientifically honest if the result is negative.
+
+Negative joinability or negative predictive result is a valid outcome.
+
+============================================================
+41. MOST IMPORTANT SCIENTIFIC PRINCIPLE
+============================================================
+
+V8–V13 largely asked:
+
+    "Can we model runtime better using the same observable scheduler/request
+     information in different ways?"
+
+V14 asks:
+
+    "Are we missing information about WHAT the job actually is and WHAT
+     system state it is executing within?"
+
+Do not expand model complexity until the information question is answered.
+
+If richer semantic/telemetry information improves temporal and long-runtime
+robustness:
+
+report exactly which information family supplied the gain.
+
+If it does not:
+
+identify the remaining observability gap before proposing another model.
