@@ -1,0 +1,57 @@
+{
+  "time": "2026-09-29T14:59:39.636609+00:00",
+  "SELECTED_RUNTIME_MODEL": "NONE",
+  "SELECTED_RUNTIME_INTERFACE": "NONE",
+  "SELECTED_ALPHA": null,
+  "rationale": "No primary candidate reached nominal 90% operational coverage on every fold.",
+  "alpha_scope": "Five independent CAL-frozen alphas per candidate; no untested average alpha, no final provider fit.",
+  "frontier": [
+    "V9_D1_ROLLING14",
+    "V9_D2_NORMAL_1P5_NONE",
+    "V9_D2_EXTREME_1P0_NONE",
+    "V9_D3_ROLLING14",
+    "V13_EXPANDING_S4"
+  ],
+  "primary_rule": {
+    "eligibility": "Primary A-E only. Pooled AND every fold operational coverage >=.90. This conservative nominal-reference rule prevents pooled success hiding a temporal collapse; it is a new duration-interface rule, not historical provider gates.",
+    "pareto": [
+      "min Q50_MAE_hours",
+      "max OP_coverage",
+      "max min_fold_OP_coverage",
+      "max GT12H_OP_coverage",
+      "min TIME_RATIO_OP"
+    ],
+    "preference": [
+      "minimum TIME_RATIO_OP",
+      "minimum Q50_MAE_hours",
+      "maximum GT12H_OP_coverage",
+      "candidate name"
+    ],
+    "none_allowed": true,
+    "alpha_reporting": "Report five fold-specific CAL-frozen alphas, never average and misrepresent as tested fixed alpha. If NONE, selected alpha and all selected metrics null; no final deployment calibration.",
+    "descriptive_bands": "BELOW_1P2 / BELOW_1P5 / BELOW_2P0 / ABOVE_2P0 (exact 2: AT_2P0). Bands are measured sharpness, not proof of acceptable reliability.",
+    "feasibility": "TIME_RATIO_Q50 is exact nonnegative interpolation floor. Floor>threshold proves impossible, otherwise not ruled out, not proven. Supported deployment requires the reliability rule too."
+  },
+  "evidence": [
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_final_duration_calibration\\ALPHA_FREEZE.json",
+      "bytes": 944,
+      "sha256": "4e67d2081523013639417c89a0527928e03ff38f43d5efe8ac3530f0bc35a23b"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_final_duration_calibration\\FINAL_RUNTIME_MODEL_COMPARISON.csv",
+      "bytes": 3581,
+      "sha256": "41aa6ab831ff30ea8fa6c15b426947eaa308ec94727ff54d9037b6f4ed14f6a0"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_final_duration_calibration\\OPERATIONAL_DURATION_FOLD_METRICS.csv",
+      "bytes": 9388,
+      "sha256": "129f8418a97e0a20b00cf827b47145d4fa696364edced1f621ab30924bc8551d"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_final_duration_calibration\\RUNTIME_PARETO_FRONTIER.csv",
+      "bytes": 1033,
+      "sha256": "ef118db9604c94e70ed685afcd6542f8c31832d46d0e432ef74146babbd36866"
+    }
+  ]
+}
