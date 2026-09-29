@@ -1,0 +1,40 @@
+{
+  "rule": "T2_CONSERVATIVE_Q25",
+  "status": "FROZEN_BY_EXPLICIT_USER_DECISION",
+  "frozen_at": "2026-09-29T12:50:51.947012+00:00",
+  "statistical_freeze": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_job_capability_pr\\docs\\v42_job_capability_joint_flexibility\\TRAIN_COHORT_LATENCY_STATISTICS.csv",
+    "sha256": "e28aa7cffbfc639721e3fe881e35ce9b66ad698d1bfb60c585d81bc0a67e6176",
+    "bytes": 55940,
+    "period": "TRAIN before 2025-01-01",
+    "units": "seconds,count",
+    "role": "Unmodified PR90 TRAIN Q25 statistics",
+    "authority_status": "FROZEN_SOURCE_REUSED"
+  },
+  "train_membership": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_flexibility_pr\\docs\\v42_aidc_workload_flexibility\\TRAIN_MEMBERSHIP.csv.gz",
+    "sha256": "0783273c06d8a5e7ecf804b18221d7ac66c0c8ab432162490c0afef282bd343e",
+    "bytes": 5798314,
+    "period": "before 2025-01-01",
+    "units": "historical queue observations",
+    "role": "PR75 TRAIN membership",
+    "authority_status": "FROZEN_SOURCE_REUSED"
+  },
+  "cohort_dimensions": [
+    "qos",
+    "partition",
+    "workload_class",
+    "protected",
+    "gpu_bucket",
+    "wall_bucket",
+    "requested_nodes"
+  ],
+  "minimum_N": 100,
+  "minimum_Q25_seconds": 900,
+  "delay_budget_seconds": "floor(Q25/900)*900",
+  "protected_and_RUNNING_timeshift": false,
+  "standby_exception": false,
+  "semantic": "TRACE_DERIVED_CONSERVATIVE_DELAY_PROXY",
+  "SLA": false,
+  "May_outcomes_used": false
+}

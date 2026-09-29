@@ -1,0 +1,157 @@
+{
+  "status": "INFEASIBLE",
+  "solver_status": 3,
+  "scope": "NATIVE_A1_NECESSARY_RESOURCE_PROJECTION_NOT_FULL_MILP_TIMING",
+  "full_A1_infeasible_proven": true,
+  "certificate_method": "CONTINUOUS_SUPERSET_PLUS_INDEPENDENT_TOP_120_GANG_LOWER_BOUND",
+  "solver_runtime_seconds": 0.012000083923339844,
+  "total_worker_seconds": 0.7871138999980758,
+  "model_size": {
+    "binary": 0,
+    "integer": 0,
+    "continuous": 1605,
+    "linear_constraints": 97,
+    "quadratic_constraints": 0,
+    "SOS": 0,
+    "general_constraints": 0,
+    "quadratic_objective_terms": 0,
+    "nonzeros": 62024,
+    "constraint_families": {
+      "NECESSARY_ONE_ACTIVE_TRANSFER_PER_SLOT": 1,
+      "KNOWN_PLUS_C0_NOMINAL_CAPACITY": 96
+    }
+  },
+  "full_A1_model_size": null,
+  "full_A1_MIP_gap": null,
+  "objective": null,
+  "best_bound": null,
+  "nodes": 0.0,
+  "MIPGap_parameter": 0.001,
+  "TimeLimit_parameter": 595.1851892000013,
+  "incumbent_available": false,
+  "scientific_schedule_accepted": false,
+  "service_was_shortened_in_accepted_schedule": false,
+  "number_violated_necessary_rows": 28,
+  "worst_row": {
+    "slot_issue_origin": 35,
+    "slot_Dday": 11,
+    "active_known_jobs": 614,
+    "known_reference_GPU": 780,
+    "deliberately_overgenerous_migration_removal_GPU": 286,
+    "known_GPU_lower_bound": 494,
+    "C0_Q50_equivalent_GPU": 742.6725825123947,
+    "nominal_support_hours": 1,
+    "capacity_GPU": 780,
+    "necessary_total_GPU_lower_bound": 1236.6725825123947,
+    "excess_GPU": 456.6725825123947,
+    "max_total_migrations_loose_upper_bound": 120,
+    "physical_schedule": false
+  },
+  "gap_at_60s": null,
+  "gap_at_180s": null,
+  "gap_at_300s": null,
+  "first_incumbent_seconds": null,
+  "root_relaxation_seconds": null,
+  "presolve_removed_rows": 61,
+  "presolve_removed_columns": 0,
+  "IIS_constraints": [
+    "NECESSARY_ONE_ACTIVE_TRANSFER_PER_SLOT",
+    "KNOWN_PLUS_C0_NOMINAL_CAPACITY[33]",
+    "KNOWN_PLUS_C0_NOMINAL_CAPACITY[35]"
+  ],
+  "supervisor": {
+    "stage": "A1",
+    "budget_seconds": 600,
+    "total_wall_seconds": 5.062000000001717,
+    "cleanup_overhead_seconds": 0.0,
+    "timeout_reason": "COMPLETED",
+    "validated_incumbent_exists": false,
+    "status": "FAIL_CLOSED_NO_VALIDATED_INCUMBENT",
+    "exit_code": 0,
+    "request_sha256": "0733624a39886d9b16bb1931c40f24dd040d4cb19aaa6bff9946a4032dbd0064",
+    "external_process_tree": true
+  },
+  "evidence": [
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V42_MAY01_NATIVE_LOCAL\\canary\\A1_io_retry\\capacity_lower_bounds.json",
+      "sha256": "65e3bcc9ae94db586c0079b305637440a6496aa1500ef187d53c6b40a34da46b",
+      "bytes": 41254,
+      "period": "2025-05-01",
+      "units": "metadata",
+      "role": "Native A1 resource-projection diagnostic",
+      "authority_status": "FROZEN_SOURCE_REUSED"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V42_MAY01_NATIVE_LOCAL\\canary\\A1_io_retry\\model_build.json",
+      "sha256": "c1888609546940eadce4586fecd2d5f600eb60e4c27150ed772e59bc3e4a2b0a",
+      "bytes": 468,
+      "period": "2025-05-01",
+      "units": "metadata",
+      "role": "Native A1 resource-projection diagnostic",
+      "authority_status": "FROZEN_SOURCE_REUSED"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V42_MAY01_NATIVE_LOCAL\\canary\\A1_io_retry\\NATIVE_RESOURCE_PROJECTION.ilp",
+      "sha256": "b046aee60707a6eda184d0a18bee6fcb09a1943fbe28cb382bd0744708bdc847",
+      "bytes": 109790,
+      "period": "2025-05-01",
+      "units": "metadata",
+      "role": "Native A1 resource-projection diagnostic",
+      "authority_status": "FROZEN_SOURCE_REUSED"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V42_MAY01_NATIVE_LOCAL\\canary\\A1_io_retry\\NATIVE_RESOURCE_PROJECTION.lp",
+      "sha256": "e4afa854431db102ff565d6b7fa9709b82e95b183f62e2130362edcf28e3693c",
+      "bytes": 1992649,
+      "period": "2025-05-01",
+      "units": "metadata",
+      "role": "Native A1 resource-projection diagnostic",
+      "authority_status": "FROZEN_SOURCE_REUSED"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V42_MAY01_NATIVE_LOCAL\\canary\\A1_io_retry\\projection_result.json",
+      "sha256": "f630ae3539f63fe7881c2b4a7532c73a62bc0bba1772ceff3f97d234a7a8d3c9",
+      "bytes": 1758,
+      "period": "2025-05-01",
+      "units": "metadata",
+      "role": "Native A1 resource-projection diagnostic",
+      "authority_status": "FROZEN_SOURCE_REUSED"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V42_MAY01_NATIVE_LOCAL\\canary\\A1_io_retry\\request.json",
+      "sha256": "d9f2cf1fcf2cdd6d302f15151dde9c0196d033685b356d879eefa310e7d77c46",
+      "bytes": 39128,
+      "period": "2025-05-01",
+      "units": "metadata",
+      "role": "Native A1 resource-projection diagnostic",
+      "authority_status": "FROZEN_SOURCE_REUSED"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V42_MAY01_NATIVE_LOCAL\\canary\\A1_io_retry\\stage_receipt.json",
+      "sha256": "52b3185720ed741c67f070601384fd9683d006a87ad670e6bf47c757bfc198c0",
+      "bytes": 384,
+      "period": "2025-05-01",
+      "units": "metadata",
+      "role": "Native A1 resource-projection diagnostic",
+      "authority_status": "FROZEN_SOURCE_REUSED"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V42_MAY01_NATIVE_LOCAL\\canary\\A1_io_retry\\start.json",
+      "sha256": "4b17579631c2f0fe4043523022de2ac6afd5193fa7db6f1b43f06c6ef72f23c9",
+      "bytes": 25,
+      "period": "2025-05-01",
+      "units": "metadata",
+      "role": "Native A1 resource-projection diagnostic",
+      "authority_status": "FROZEN_SOURCE_REUSED"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V42_MAY01_NATIVE_LOCAL\\canary\\A1_io_retry\\worker.log",
+      "sha256": "82e37bd9c61b2cb729848a6c7bbde4a448bbc5d31c85e72369e8052d97df6730",
+      "bytes": 135,
+      "period": "2025-05-01",
+      "units": "metadata",
+      "role": "Native A1 resource-projection diagnostic",
+      "authority_status": "FROZEN_SOURCE_REUSED"
+    }
+  ]
+}
