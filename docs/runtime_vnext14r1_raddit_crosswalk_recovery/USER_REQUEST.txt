@@ -1,0 +1,1252 @@
+Repository: BeaverVillage/MobileESS
+
+NEW FORENSIC TASK
+Runtime-vNext14R1:
+RADDiT–Kestrel Source Crosswalk Recovery and Embedding Lineage Audit
+
+Suggested branch:
+codex/runtime-vnext14r1-raddit-crosswalk-recovery
+
+BASE:
+Runtime-vNext14 Draft PR #86
+base commit:
+dbe906d6b211fcbb71d8b4c1c17a33ce492452ea
+
+============================================================
+0. PURPOSE
+============================================================
+
+Runtime-vNext14 ended correctly with:
+
+STOPPED_SOURCE_AUTHORITY_FAILURE
+
+NOT because semantic Runtime ML failed.
+
+No semantic challenger was trained.
+
+Known V14 facts:
+
+- original Kestrel pre-April rows:
+    6,326,884
+
+- V13 GPU job population:
+    621,583
+
+- RADDiT historic_job_trace rows:
+    2,557,884
+
+- distributed RADDiT embedding rows:
+    1,780,972
+
+- original Kestrel ↔ RADDiT
+  job_id + submit_time exact match:
+    0
+
+- V13 authorized RADDiT join:
+    0%
+
+The main scientific blocker is:
+
+    We have not yet proven the physical-record lineage
+
+        Kestrel raw job
+            ↕
+        RADDiT historic_job_trace row
+            ↕
+        RADDiT distributed embedding row.
+
+V14R1 must attempt to recover this lineage WITHOUT training any new ML model.
+
+============================================================
+1. NO ML IN THIS TASK
+============================================================
+
+NEW_ML_FITS = 0
+
+Do NOT run:
+
+- V9/V13 hazard training
+- SVD32 fitting
+- semantic kNN runtime prediction
+- J2/J3/J4/J5
+- calibration
+- remaining-runtime model
+- queue replay
+- provider
+- April evaluation
+- May evaluation
+- optimizer
+- V42
+- CC4
+- MESS
+- OpenDSS
+
+The only objective is source identity / crosswalk / provenance recovery.
+
+If the crosswalk is recovered successfully:
+
+STOP and deliver a frozen crosswalk-ready result.
+
+Do NOT continue automatically into Runtime ML.
+
+============================================================
+2. RAW / REPOSITORY LOCATIONS
+============================================================
+
+Primary raw roots:
+
+ROOT_A =
+C:\Users\kjw39\OneDrive\Desktop\4-2\Mobile ESS\raw데이터
+
+ROOT_B =
+C:\Users\kjw39\OneDrive\Desktop\4-2\Mobile ESS\raw데이터\데이터 센터
+
+RADDiT local clone:
+
+C:\Users\kjw39\OneDrive\Desktop\4-2\Mobile ESS\raw데이터\데이터 센터\RADDiT
+
+Existing V14 evidence:
+
+docs/runtime_vnext14_multisource_information_recovery/
+
+Reuse verified V14 local projections whenever possible.
+
+Do NOT repeat expensive full scans if an input projection is already bound
+by V14 manifests and its hash still matches.
+
+============================================================
+3. PRESERVE ALL PRIOR EVIDENCE
+============================================================
+
+Before new work:
+
+- verify V6–V14 tracked scientific hashes
+- verify manifests
+- verify base commit
+- verify raw source size/mtime where V14 already froze them
+
+Do not alter:
+
+- V6–V14 evidence
+- RADDiT raw/LFS files
+- original Kestrel archive
+- V13 local evidence
+- V42 or any production path
+
+Write all new output under:
+
+docs/runtime_vnext14r1_raddit_crosswalk_recovery/
+
+Large ledgers may be stored in:
+
+docs/runtime_vnext14r1_raddit_crosswalk_recovery/.local/
+
+and must be hash-bound in manifests.
+
+============================================================
+4. IMPORTANT PUBLIC RADDiT LINEAGE CLUES
+============================================================
+
+Inspect and verify the local RADDiT code/history yourself.
+
+Current public-source hypothesis:
+
+A.
+energy_aware_scheduling/scripts/prep_for_embedding.py
+
+appears to:
+
+    df = pd.read_parquet('../data/historic_job_trace.parquet')
+
+then creates semantic strings using:
+
+- user
+- account
+- partition
+- job_type
+- name
+- qos
+- submit_line
+- script
+
+and slices rows sequentially in 4096-row batches.
+
+B.
+embed_job_scripts.py
+
+appears to embed those sequential job-string batches.
+
+C.
+semantic_search.py
+
+loads sorted distributed embedding chunks and creates:
+
+    row_id = 0,1,2,...
+
+as a NEW positional search-database ID.
+
+Therefore:
+
+RADDiT job_id / semantic_search row_id must NOT automatically be interpreted
+as original Slurm job ID.
+
+Treat the above as hypotheses to verify from actual checked-out source and
+Git history.
+
+============================================================
+5. PERFORMANCE / COMPUTE REQUIREMENT
+============================================================
+
+This task must be much faster than V13.
+
+Use projected / streaming processing.
+
+Preferred:
+
+- Polars lazy scan
+- PyArrow projected columns
+- DuckDB
+- Parquet footer metadata
+
+Avoid:
+
+- loading 4096-D embedding vectors into RAM during crosswalk work
+- repeatedly scanning all 6.3M Kestrel rows
+- repeatedly unpacking raw ZIPs
+- pandas object-heavy full-table joins if avoidable
+
+For embedding work:
+
+READ ONLY shared metadata columns first.
+
+Do NOT read `enc_embedding_int8` unless required for a final verification.
+
+============================================================
+6. FIRST QUESTION:
+EMBEDDING → RADDiT HISTORIC TRACE
+============================================================
+
+Before connecting to Kestrel, recover:
+
+    distributed embedding row
+        ↕
+    RADDiT historic_job_trace row
+
+The distributed embedding chunks reportedly contain metadata such as:
+
+- submit_time
+- end_time
+- wallclock_used_sec
+- avg_power_per_node
+- enc_embedding_int8
+
+Confirm the actual schema.
+
+The historic trace contains 2,557,884 rows.
+
+The distributed embedding chunks contain 1,780,972 rows.
+
+Difference:
+
+    776,912 rows
+
+The key forensic question is:
+
+    Which 1,780,972 historic rows became distributed embeddings,
+    and why were the other 776,912 rows excluded?
+
+============================================================
+7. EMBEDDING → HISTORIC EXACT RECORD LINKAGE
+============================================================
+
+Do NOT assume positional equality.
+
+Build exact fingerprints using shared payload fields.
+
+Predeclare hierarchy before measuring match rates.
+
+Suggested:
+
+EKEY0 =
+    submit_time
+    + end_time
+
+EKEY1 =
+    submit_time
+    + end_time
+    + wallclock_used_sec
+
+EKEY2 =
+    submit_time
+    + end_time
+    + wallclock_used_sec
+    + avg_power_per_node
+
+If more exact shared fields exist, add them only if they are clearly source
+fields rather than outcomes generated after embedding.
+
+For every EKEY report separately:
+
+- unique keys in historic
+- unique keys in embedding
+- exact matches
+- unique 1:1 matches
+- 1:many
+- many:1
+- many:many
+- historic unmatched
+- embedding unmatched
+- contradiction count
+
+Do not choose the key based only on highest coverage.
+
+Prefer the smallest key that is unique and contradiction-free.
+
+============================================================
+8. FLOAT / TIMESTAMP RULES
+============================================================
+
+No fuzzy matching.
+
+No nearest timestamp.
+
+No learned time offset.
+
+No tolerance fitted to maximize match count.
+
+Canonicalization is allowed only when source semantics justify it.
+
+Predeclare:
+
+TIMESTAMP_CANONICALIZATION:
+
+- parse stored timestamp
+- preserve recorded timezone/offset
+- convert to UTC epoch
+- retain original precision
+
+If one dataset is second-resolution and another has microseconds:
+
+only truncate/floor if:
+- documentation/source code proves the original data resolution, OR
+- every nonzero subsecond component is demonstrably serialization-only.
+
+Record the proof.
+
+FLOAT_CANONICALIZATION:
+
+For:
+    wallclock_used_sec
+    avg_power_per_node
+
+first test exact binary/numeric equality.
+
+If serialization representation differs:
+report the difference distribution first.
+
+Do NOT adopt a tolerance based on observed matching performance.
+
+============================================================
+9. EMBEDDING SUBSET FILTER FORENSIC
+============================================================
+
+Search for the missing 776,912-row selection rule.
+
+Inspect:
+
+- current files
+- Git history
+- deleted files
+- all branches
+- tags
+- notebooks
+- historical commits
+- Git LFS pointer history
+- scripts
+- README
+- experiment notebooks
+
+Use searches such as:
+
+git log --all --full-history
+git log -S "enc_embedding_int8" --all
+git log -S "job_strings_" --all
+git log -S "encrypted_embeddings" --all
+git log -S "wallclock_used_sec" --all
+
+Search for likely filters:
+
+- null script
+- missing script
+- power availability
+- completed jobs
+- valid runtime
+- date restriction
+- CPU-exclusive
+- usable semantic text
+- embedding failure
+- token length
+- source extraction criteria
+
+Do not infer a filter merely because it reproduces the count.
+
+Need source/code/document authority where possible.
+
+Create:
+
+EMBEDDING_SUBSET_FILTER_FORENSIC.md
+
+============================================================
+10. EMBEDDING ROW ORDER TEST
+============================================================
+
+The public prep code suggests initial row-order preservation.
+
+Test whether distributed chunk concatenation corresponds to:
+
+A.
+a direct prefix of historic trace
+
+B.
+a row-order-preserving filtered subset
+
+C.
+a reordered subset
+
+D.
+unknown / nonrecoverable
+
+If exact metadata linkage recovers historic row indices:
+
+analyze:
+
+    historic_row_index sequence
+
+Report:
+
+- monotonicity
+- inversions
+- skipped rows
+- chunk boundary continuity
+- source-index gaps
+- duplicate source indices
+
+Required classification:
+
+EMBEDDING_ORDER_RELATION =
+    FULL_ORDER_PRESERVED
+    FILTERED_ORDER_PRESERVED
+    REORDERED_BUT_EXACT_MAPPING_PROVEN
+    UNPROVEN
+
+============================================================
+11. REQUIRED EMBEDDING MAPPING STANDARD
+============================================================
+
+Set:
+
+EMBEDDING_TO_RADDIT_MAPPING_PROVEN = TRUE
+
+only if matched embedding rows have:
+
+- exact record linkage
+- unique source row assignment
+- zero conflicting shared fields
+- deterministic replay
+- same mapping after process restart
+
+Do not require all historic rows to have embeddings.
+
+A valid subset mapping is allowed.
+
+But missing rows must remain explicitly missing.
+
+============================================================
+12. SECOND QUESTION:
+RADDiT HISTORIC TRACE → ORIGINAL KESTREL
+============================================================
+
+The V14 failure used job_id + submit_time.
+
+That is not sufficient if RADDiT job_id is positional.
+
+Now explicitly EXCLUDE RADDiT job_id from the primary linkage key.
+
+Construct crosswalk from physical/shared record attributes.
+
+First discover exact field-name mappings from:
+
+- Kestrel datacard
+- Kestrel raw schema
+- RADDiT schema
+- RADDiT preprocessing code
+
+Create:
+
+FIELD_LINEAGE_MAP.csv
+
+Columns:
+
+canonical_concept
+kestrel_field
+raddit_field
+unit_kestrel
+unit_raddit
+time_semantics
+availability_semantics
+exactly_comparable
+reason
+
+============================================================
+13. KESTREL ↔ RADDiT EXACT FINGERPRINTS
+============================================================
+
+Predeclare a hierarchy.
+
+Use only genuinely shared physical/request records.
+
+Candidate concepts:
+
+- submit_time
+- start_time
+- end_time
+- actual runtime
+- requested walltime
+- requested nodes
+- requested processors/cores
+- requested memory
+- QoS
+- partition
+- account token
+- user token
+- job name token
+- script token
+- submit-line token
+- job type
+
+Not every field must exist or share anonymization authority.
+
+Do not force categorical comparison if anonymization mappings differ.
+
+Suggested hierarchy:
+
+F0:
+    submit_time
+    + start_time
+    + end_time
+
+F1:
+    F0
+    + actual_runtime
+
+F2:
+    F1
+    + requested_walltime
+    + requested_nodes
+    + requested_processors
+
+F3:
+    F2
+    + requested_memory
+
+F4:
+    F3
+    + QoS
+    + partition
+    if exact token lineage is supported
+
+Additional categorical tokens may be used as HOLDOUT VALIDATION fields rather
+than join keys.
+
+============================================================
+14. IMPORTANT: RECORD LINKAGE VALIDATION
+============================================================
+
+A high match count alone is NOT enough.
+
+For every fingerprint report:
+
+- matched row count
+- unique 1:1 matches
+- ambiguous matches
+- duplicate key rate Kestrel
+- duplicate key rate RADDiT
+- contradictions on unused shared fields
+
+For matched pairs, validate fields NOT USED IN THE KEY.
+
+Examples:
+
+if F2 is used:
+
+validate:
+- memory
+- QoS
+- partition
+- account
+- runtime arithmetic
+- request shape
+- sanitized semantic tokens where comparable
+
+This protects against accidental collisions.
+
+============================================================
+15. FALSE-MATCH / NEGATIVE-CONTROL AUDIT
+============================================================
+
+Run fixed diagnostic negative controls.
+
+Do NOT tune them.
+
+Examples:
+
+NC1:
+    shift RADDiT submit timestamp by +1 second
+
+NC2:
+    permute requested walltime within a fixed date
+
+NC3:
+    permute runtime within a fixed date
+
+The exact crosswalk should collapse sharply under these controls.
+
+Report:
+
+TRUE_EXACT_MATCHES
+NEGATIVE_CONTROL_MATCHES
+
+Do not use negative controls to derive a matching threshold.
+
+============================================================
+16. TIMEZONE FORENSIC
+============================================================
+
+V14 observed mixed timezone representation.
+
+Do NOT fit arbitrary time shifts.
+
+Allowed transformations must come from:
+
+- stored timezone offset
+- source code
+- datacard
+- documented America/Denver / UTC semantics
+- standard DST conversion
+
+Test separately:
+
+RAW_REPRESENTATION_MATCH
+UTC_CANONICAL_MATCH
+
+If both sources represent the same instant differently:
+
+document it.
+
+Do not try ±1h, ±6h, ±7h searches merely because they increase matches.
+
+============================================================
+17. ORIGINAL KESTREL POPULATION SCOPE
+============================================================
+
+Use pre-April rows only for the V13 linkage result.
+
+May runtime payload remains unopened.
+
+Do not decode May outcomes.
+
+The physical crosswalk may use source metadata needed for provenance,
+but final V13 semantic-support statistics must be pre-April only.
+
+============================================================
+18. END-TO-END CROSSWALK
+============================================================
+
+If both mappings are proven:
+
+    embedding row
+        →
+    RADDiT historic row
+        →
+    original Kestrel row
+        →
+    V13 GPU job
+
+construct an end-to-end ledger.
+
+Required local artifact:
+
+.local/RADDIT_KESTREL_EMBEDDING_CROSSWALK.parquet
+
+Suggested fields:
+
+embedding_chunk
+embedding_row_in_chunk
+embedding_global_row
+raddit_historic_row
+raddit_job_id_positional
+kestrel_source_member
+kestrel_source_row
+kestrel_job_identity
+v13_row_id
+temporal_fold
+runtime_seconds
+gt4h
+gt12h
+gt24h
+gpu_request
+match_key_family
+match_unique
+holdout_consistency_pass
+
+Do NOT include 4096-D vector payload in the crosswalk ledger.
+
+============================================================
+19. V13 POPULATION COVERAGE
+============================================================
+
+If end-to-end linkage exists, calculate:
+
+overall:
+    V13 semantic join rate
+
+by fold:
+    TRAIN / VALID / CAL where applicable
+
+by runtime:
+    <=4h
+    >4h
+    >12h
+    >24h
+
+by:
+    GPU bucket
+    requested walltime bucket
+    QoS
+    partition
+    S0 error strata if available
+
+Report:
+
+SEMANTIC_SUPPORT_COVERAGE.csv
+
+This is coverage only.
+
+Do NOT train a semantic model.
+
+============================================================
+20. JOIN BIAS AUDIT
+============================================================
+
+Compare matched vs unmatched V13 jobs.
+
+Metrics:
+
+- runtime distribution
+- requested walltime
+- GPU
+- QoS
+- partition
+- long-job fraction
+- temporal fold distribution
+- S0/S4 prediction error distribution
+
+Purpose:
+
+determine whether embedding availability is selective.
+
+Do not claim causality.
+
+Create:
+
+SEMANTIC_JOIN_SELECTION_BIAS.csv
+SEMANTIC_JOIN_SELECTION_BIAS_KO.md
+
+============================================================
+21. RADDiT SEMANTIC INPUT PROVENANCE
+============================================================
+
+Verify public generation path.
+
+Expected candidate semantic inputs:
+
+- user
+- account
+- partition
+- job_type
+- name
+- qos
+- submit_line
+- script
+
+Check whether actual embedding generation used:
+
+- runtime
+- end time
+- actual power
+- final state
+- consumed energy
+- future scheduler result
+
+Set:
+
+RADDIT_PUBLIC_EMBEDDING_INPUT_OUTCOME_FREE = TRUE/FALSE
+
+But distinguish:
+
+public code provenance
+
+from:
+
+distributed chunk production provenance.
+
+If the exact distributed export transformation is not proven:
+
+set:
+
+DISTRIBUTED_EMBEDDING_EXPORT_PROVENANCE =
+    PARTIAL / UNPROVEN / PROVEN
+
+============================================================
+22. NEW-JOB CALLABILITY
+============================================================
+
+Do not confuse historical embedding linkage with deployment.
+
+Determine:
+
+Can V42 receive at job submission time the semantic inputs required by RADDiT?
+
+Specifically inspect whether future V42 submission record has:
+
+- script
+- submit line
+- job name
+- account
+- user
+- partition
+- QoS
+- job type
+
+Then determine whether the exact same embedding representation can be
+generated for a new job.
+
+Need separate flags:
+
+HISTORICAL_EMBEDDING_CROSSWALK_PROVEN
+NEW_JOB_SEMANTIC_INPUT_AVAILABLE
+NEW_JOB_EMBEDDING_PIPELINE_REPRODUCIBLE
+
+No ML in this task.
+
+============================================================
+23. TARGETED GIT / PUBLIC LINEAGE SEARCH
+============================================================
+
+If a local crosswalk or export rule remains missing, conduct a TARGETED
+source search.
+
+Search:
+
+- RADDiT Git history
+- GitHub issues / PRs
+- NLR/NREL RADDiT documentation
+- companion paper artifacts
+- NLR data catalog
+- NREL/NLR software record
+- related repositories
+- archived/deleted source where accessible
+
+Search terms:
+
+historic_job_trace
+original job id
+slurm id
+source row
+row_id
+crosswalk
+embedding export
+encrypted_embeddings
+job_strings
+subset
+filter
+sanitized
+anonymized
+mapping
+manifest
+
+Record:
+
+source URL
+commit/version/date
+claim
+evidence strength
+relevance
+
+Create:
+
+PUBLIC_CROSSWALK_AUTHORITY_SEARCH.md
+
+Do not claim exhaustive internet search.
+
+============================================================
+24. NO APPROXIMATE MATCH FALLBACK
+============================================================
+
+Forbidden:
+
+- nearest submit timestamp
+- ±N second matching
+- learned time shift
+- row-number substitution
+- matching only on runtime
+- fuzzy string matching
+- nearest resource vector
+- semantic similarity used to establish identity
+- manually pairing samples
+
+Identity must be based on exact source-backed record evidence.
+
+============================================================
+25. COMPUTE STOP CONDITIONS
+============================================================
+
+Stop immediately if:
+
+A.
+embedding → historic cannot be proven after exact shared-field + lineage audit
+
+OR
+
+B.
+historic → Kestrel has zero unique exact physical-record matches after
+authorized canonicalization
+
+OR
+
+C.
+match collisions/contradictions make identity ambiguous
+
+OR
+
+D.
+proving identity would require fuzzy matching.
+
+Do not waste compute after an authority failure.
+
+============================================================
+26. SUCCESS CONDITIONS
+============================================================
+
+Crosswalk recovery success has TWO independent levels.
+
+LEVEL 1:
+EMBEDDING_TO_RADDIT_MAPPING_PROVEN = TRUE
+
+LEVEL 2:
+RADDIT_TO_KESTREL_MAPPING_PROVEN = TRUE
+
+End-to-end success:
+
+END_TO_END_CROSSWALK_PROVEN =
+    LEVEL1 AND LEVEL2
+
+This does NOT mean Runtime ML success.
+
+============================================================
+27. OPTIONAL RESEARCH-READINESS CLASSIFICATION
+============================================================
+
+If end-to-end mapping is proven, classify coverage.
+
+Do not invent a hard performance threshold.
+
+Use:
+
+A. BROAD_SUPPORT
+    mapping exists across all five folds and long-job strata with substantial
+    support.
+
+B. PARTIAL_SUPPORT
+    mapping is scientifically valid but selective/incomplete.
+
+C. SPARSE_SUPPORT
+    mapping is valid but too sparse for robust V13-like five-fold evaluation.
+
+D. NO_SUPPORT
+
+Report actual counts/fractions.
+
+Do not decide ML success here.
+
+============================================================
+28. REQUIRED ARTIFACTS
+============================================================
+
+Create:
+
+docs/runtime_vnext14r1_raddit_crosswalk_recovery/
+
+README.md
+PREREGISTRATION.json
+
+V14_BASE_VERIFICATION.json
+
+FIELD_LINEAGE_MAP.csv
+TIMEZONE_AND_UNIT_CANONICALIZATION.md
+
+EMBEDDING_SCHEMA_AUDIT.json
+EMBEDDING_HISTORIC_KEY_AUDIT.csv
+EMBEDDING_SUBSET_FILTER_FORENSIC.md
+EMBEDDING_ORDER_AUDIT.json
+
+RADDIT_KESTREL_FINGERPRINT_AUDIT.csv
+RADDIT_KESTREL_MATCH_CONSISTENCY.csv
+NEGATIVE_CONTROL_MATCH_AUDIT.csv
+
+PUBLIC_CROSSWALK_AUTHORITY_SEARCH.md
+
+CROSSWALK_RECOVERY_SUMMARY.json
+
+SEMANTIC_SUPPORT_COVERAGE.csv
+SEMANTIC_JOIN_SELECTION_BIAS.csv
+SEMANTIC_JOIN_SELECTION_BIAS_KO.md
+
+NEW_JOB_SEMANTIC_CALLABILITY_AUDIT.json
+
+FINAL_VERDICT.json
+FINAL_REVIEW_KO.md
+
+SOURCE_MANIFEST.json
+LOCAL_EVIDENCE_MANIFEST.json
+DELIVERY_MANIFEST.json
+VERIFICATION.json
+
+If mapping succeeds:
+
+.local/RADDIT_EMBEDDING_TO_HISTORIC.parquet
+.local/RADDIT_HISTORIC_TO_KESTREL.parquet
+.local/RADDIT_KESTREL_EMBEDDING_CROSSWALK.parquet
+
+If mapping fails:
+
+do NOT create fake empty "successful crosswalk" files.
+
+Create explicit negative forensic ledgers instead.
+
+============================================================
+29. FINAL REPORT QUESTIONS
+============================================================
+
+FINAL_REVIEW_KO.md must answer:
+
+1. V14는 왜 중단됐는가?
+2. 이번 V14R1에서 무엇을 새로 조사했는가?
+3. RADDiT job_id는 원 Slurm ID인가?
+4. public prep_for_embedding은 어떤 순서로 row를 처리하는가?
+5. embedding 생성 문자열에는 어떤 정보가 들어가는가?
+6. 실제 runtime/end/power가 embedding text에 들어가는가?
+7. distributed embedding chunk 총 행수는?
+8. historic trace와 왜 행수가 다른가?
+9. embedding→historic exact match는 몇 개인가?
+10. 어떤 exact key가 가장 강한가?
+11. unique 1:1 비율은?
+12. ambiguous match는?
+13. embedding row order 관계는 무엇인가?
+14. 누락 776,912행의 filter를 찾았는가?
+15. filter authority는 code/document로 입증됐는가?
+16. RADDiT historic→Kestrel field lineage는?
+17. job_id를 제외한 physical fingerprint match는 몇 개인가?
+18. 가장 강한 exact fingerprint는 무엇인가?
+19. Kestrel/RADDiT 양쪽에서 key collision은 얼마인가?
+20. unused holdout field contradiction은 몇 개인가?
+21. negative control에서는 match가 얼마나 남는가?
+22. timezone 차이는 어떻게 처리했는가?
+23. 임의 시간 offset fitting을 했는가? 반드시 NO.
+24. approximate/fuzzy matching을 했는가? 반드시 NO.
+25. end-to-end embedding→Kestrel mapping은 입증됐는가?
+26. V13 GPU621,583건 중 semantic mapping 가능한 수는?
+27. 전체 join rate는?
+28. fold별 join rate는?
+29. >4h join rate는?
+30. >12h join rate는?
+31. >24h join rate는?
+32. matched/unmatched population bias가 있는가?
+33. public embedding-generation provenance는 outcome-free인가?
+34. distributed embedding export provenance는 완전히 입증됐는가?
+35. new future job에서 semantic input을 받을 수 있는가?
+36. same embedding pipeline을 재현할 수 있는가?
+37. semantic Runtime ML을 다음 단계에서 실행할 scientific authority가 생겼는가?
+38. authority가 생겼다면 broad/partial/sparse 중 무엇인가?
+39. authority가 실패했다면 정확한 blocker는 무엇인가?
+40. 다음에 필요한 외부/원본 자료는 무엇인가?
+41. V14/J2–J5 ML은 이번 task에서 실행했는가? 반드시 NO.
+42. April을 평가했는가? 반드시 NO.
+43. May를 열었는가? 반드시 NO.
+44. 기존 V6–V14 evidence가 보존됐는가?
+45. 최종적으로 무엇이 확인된 사실이고 무엇이 여전히 가설인가?
+
+============================================================
+30. FINAL FLAGS
+============================================================
+
+NEW_ML_FITS = 0
+
+V14_BASE_VERIFIED = TRUE/FALSE
+
+EMBEDDING_TOTAL_ROWS = integer
+RADDIT_HISTORIC_TOTAL_ROWS = integer
+
+EMBEDDING_TO_RADDIT_MAPPING_PROVEN = TRUE/FALSE
+EMBEDDING_TO_RADDIT_MATCHED_ROWS = integer
+EMBEDDING_TO_RADDIT_AMBIGUOUS_ROWS = integer
+EMBEDDING_TO_RADDIT_UNMATCHED_ROWS = integer
+
+EMBEDDING_ORDER_RELATION =
+    FULL_ORDER_PRESERVED /
+    FILTERED_ORDER_PRESERVED /
+    REORDERED_BUT_EXACT_MAPPING_PROVEN /
+    UNPROVEN
+
+EMBEDDING_SUBSET_FILTER_AUTHORITY_FOUND = TRUE/FALSE
+
+RADDIT_TO_KESTREL_MAPPING_PROVEN = TRUE/FALSE
+RADDIT_TO_KESTREL_MATCHED_ROWS = integer
+RADDIT_TO_KESTREL_AMBIGUOUS_ROWS = integer
+
+END_TO_END_CROSSWALK_PROVEN = TRUE/FALSE
+
+V13_SEMANTIC_MAPPED_JOBS = integer
+V13_SEMANTIC_JOIN_RATE = fraction
+
+V13_GT4H_SEMANTIC_JOIN_RATE = fraction/null
+V13_GT12H_SEMANTIC_JOIN_RATE = fraction/null
+V13_GT24H_SEMANTIC_JOIN_RATE = fraction/null
+
+SEMANTIC_SUPPORT_CLASS =
+    BROAD_SUPPORT /
+    PARTIAL_SUPPORT /
+    SPARSE_SUPPORT /
+    NO_SUPPORT
+
+RADDIT_PUBLIC_EMBEDDING_INPUT_OUTCOME_FREE = TRUE/FALSE
+
+DISTRIBUTED_EMBEDDING_EXPORT_PROVENANCE =
+    PROVEN /
+    PARTIAL /
+    UNPROVEN
+
+HISTORICAL_EMBEDDING_CROSSWALK_PROVEN = TRUE/FALSE
+
+NEW_JOB_SEMANTIC_INPUT_AVAILABLE = TRUE/FALSE
+NEW_JOB_EMBEDDING_PIPELINE_REPRODUCIBLE = TRUE/FALSE
+
+NEXT_SEMANTIC_RUNTIME_ML_AUTHORIZED = TRUE/FALSE
+
+APPROXIMATE_MATCHING_USED = FALSE
+LEARNED_TIME_OFFSET_USED = FALSE
+FUZZY_MATCHING_USED = FALSE
+
+APRIL_RUNTIME_EVALUATED = FALSE
+MAY_PAYLOAD_OPENED = FALSE
+
+V42_CHANGED = FALSE
+CC4_CHANGED = FALSE
+MESS_CHANGED = FALSE
+OPTIMIZER_CHANGED = FALSE
+OPENDSS_EXECUTED = FALSE
+
+============================================================
+31. NEXT_SEMANTIC_RUNTIME_ML_AUTHORIZED RULE
+============================================================
+
+Set TRUE only if:
+
+1. embedding→RADDiT mapping is proven
+2. RADDiT→Kestrel mapping is proven
+3. end-to-end crosswalk has unique exact matches
+4. no outcome leakage in public semantic input
+5. mapping replay is deterministic
+6. mapped V13 population has enough actual support to permit a scientifically
+   meaningful paired temporal experiment
+7. joined-population selection bias is explicitly characterized
+
+This flag means:
+
+"semantic Runtime ML may be studied next"
+
+NOT:
+
+"semantic Runtime model is validated."
+
+============================================================
+32. IF CROSSWALK SUCCEEDS
+============================================================
+
+DO NOT TRAIN.
+
+Freeze the crosswalk.
+
+Commit / push / Draft PR.
+
+Suggested Draft PR title:
+
+Runtime-vNext14R1: RADDiT–Kestrel semantic crosswalk recovery
+
+Final answer in Korean must state:
+
+- exact mappings found
+- matched counts
+- V13 coverage
+- tail coverage
+- selection bias
+- embedding lineage
+- new-job callability
+- whether next semantic ML is scientifically authorized
+
+============================================================
+33. IF CROSSWALK FAILS
+============================================================
+
+Still commit/push a negative forensic result.
+
+Do not start another model.
+
+State the exact missing authority:
+
+examples:
+
+- historic export mapping missing
+- embedding subset filter missing
+- no physical-record fingerprint matches
+- anonymization incompatible
+- timestamp semantics unresolved
+- new-job semantic generation unavailable
+
+Suggested Draft PR title:
+
+Runtime-vNext14R1: RADDiT source-crosswalk forensic
+
+Do not call semantic information useless.
+
+============================================================
+34. MOST IMPORTANT PRINCIPLE
+============================================================
+
+The previous failure was:
+
+    identifier authority failure.
+
+Do NOT repeat the same test with only job_id.
+
+The central new test is:
+
+    Can the SAME historical physical job be proven by a unique,
+    exact, multi-field record fingerprint?
+
+and independently:
+
+    Can each distributed embedding vector be proven to belong to a specific
+    RADDiT historic row?
+
+Only after both are proven should semantic Runtime ML resume.
