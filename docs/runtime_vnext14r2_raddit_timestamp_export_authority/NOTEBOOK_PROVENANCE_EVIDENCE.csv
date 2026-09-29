@@ -1,0 +1,148 @@
+notebook,cell_index,execution_count,relevant_code_or_output,authority_type,supports_timezone,supports_subset,supports_export,notes,commit
+energy_aware_scheduling/notebooks/analyze_sim_results.ipynb,0,1,"import warnings
+warnings.filterwarnings('ignore')
+",SOURCE_CELL,False,True,False,"blob c3391090ff61a0a70c0134b02f733bb5aebd924f; 21 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/analyze_sim_results.ipynb,12,10,"    # Build event-based power changes
+    power_changes = pd.concat([
+        pd.DataFrame({",SOURCE_CELL,False,False,False,"blob c3391090ff61a0a70c0134b02f733bb5aebd924f; 21 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/analyze_sim_results.ipynb,15,12,"    # Merge and sort events
+    events = pd.concat([arrivals, departures], ignore_index=True)
+    events.sort_values(by=['time', 'order'], inplace=True)",SOURCE_CELL,False,False,False,"blob c3391090ff61a0a70c0134b02f733bb5aebd924f; 21 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/analyze_sim_results.ipynb,27,19,"# Remove trials without an objective value and sort by trial number.
+df_trials = df_trials.dropna(subset=[""value""])
+df_trials.sort_values(by=""number"", inplace=True)",SOURCE_CELL,False,True,False,"blob c3391090ff61a0a70c0134b02f733bb5aebd924f; 21 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/baseline_model_results.ipynb,1,2,"
+    combined_df = pd.concat(df_list, ignore_index=True)
+    return combined_df, df_list",SOURCE_CELL,False,False,False,"blob 2ea0de492bb7fddbe105d8c20592bb22229cae7d; 6 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/semantic_search_results.ipynb,1,,"
+    combined_df = pd.concat(df_list, ignore_index=True)
+    return combined_df, df_list",SOURCE_CELL,False,False,False,"blob 749384254d27e2f1c73b89c841427cac68e97c14; 21 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/validate_datasets.ipynb,3,3,a2_df = load_and_describe_data('../data/historic_job_trace.parquet'),SOURCE_CELL,False,False,False,"blob eccc13f03792c4a9d4b90852f7e75fefba6637dd; 6 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/validate_datasets.ipynb,3,3,"Shape: (2557884, 20)
+dtypes: submit_time           datetime64[us, pytz.FixedOffset(-360)]
+start_time            datetime64[us, pytz.FixedOffset(-360)]
+end_time              datetime64[us, pytz.FixedOffset(-360)]
+nodes_req                                              int64",STORED_OUTPUT_TEXT,True,True,False,"blob eccc13f03792c4a9d4b90852f7e75fefba6637dd; 6 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/validate_datasets.ipynb,3,3,"    <tr>
+      <th>submit_time</th>
+      <td>2024-12-17 20:40:46-06:00</td>
+      <th>end_time</th>
+      <td>2024-12-17 20:53:54-06:00</td>",STORED_OUTPUT_text/html,True,False,False,"blob eccc13f03792c4a9d4b90852f7e75fefba6637dd; 6 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/validate_datasets.ipynb,3,3,"                                      2115517                       1192044  \
+submit_time         2024-12-17 20:40:46-06:00     2024-07-17 18:42:38-06:00
+start_time          2024-12-17 20:41:25-06:00     2024-07-17 19:38:53-06:00
+end_time            2024-12-17 20:53:54-06:00     2024-07-17 19:43:49-06:00
+nodes_req                                   1                             1
+                                      2440874
+submit_time         2025-02-14 10:22:06-06:00
+start_time          2025-02-14 10:22:44-06:00
+end_time            2025-02-14 10:28:29-06:00
+nodes_req                                   1",STORED_OUTPUT_text/plain,True,False,False,"blob eccc13f03792c4a9d4b90852f7e75fefba6637dd; 6 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/validate_datasets.ipynb,10,,# A8 Encrypted Embeddings,SOURCE_CELL,False,False,False,"blob eccc13f03792c4a9d4b90852f7e75fefba6637dd; 6 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/validate_datasets.ipynb,11,7,"sample_chunk = 0
+a8_sample_df = load_and_describe_data(f'../data/encrypted_embeddings/chunk_{sample_chunk:03}.parquet')",SOURCE_CELL,False,False,False,"blob eccc13f03792c4a9d4b90852f7e75fefba6637dd; 6 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/validate_datasets.ipynb,11,7,"Shape: (40000, 6)
+dtypes: submit_time           datetime64[us]
+start_time            datetime64[us]
+end_time              datetime64[us]
+avg_power_per_node           float64
+wallclock_used_sec           float64
+enc_embedding_int8            object
+dtype: object",STORED_OUTPUT_TEXT,True,True,True,"blob eccc13f03792c4a9d4b90852f7e75fefba6637dd; 6 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/validate_datasets.ipynb,11,7,"    <tr>
+      <th>submit_time</th>
+      <td>2024-04-26 15:54:57</td>
+      <th>end_time</th>
+      <td>2024-04-28 07:12:33</td>
+      <th>enc_embedding_int8</th>
+      <td>[11, -1, 0, -3, 7, 9, 5, -2, -3, -4, -4, 0, 5,...</td>",STORED_OUTPUT_text/html,False,False,True,"blob eccc13f03792c4a9d4b90852f7e75fefba6637dd; 6 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/validate_datasets.ipynb,11,7,"                                                                32291  \
+submit_time                                       2024-04-26 15:54:57
+start_time                                        2024-04-27 19:49:50
+end_time                                          2024-04-28 07:12:33
+avg_power_per_node                                         776.490858
+wallclock_used_sec                                            40963.0
+enc_embedding_int8  [11, -1, 0, -3, 7, 9, 5, -2, -3, -4, -4, 0, 5,...
+
+                                                                37157  \
+submit_time                                       2024-04-29 12:08:04
+start_time                                        2024-04-29 12:25:59
+end_time                                          2024-04-29 12:27:31
+avg_power_per_node                                         660.728261
+wallclock_used_sec                                               92.0
+enc_embedding_int8  [5, 5, 3, -9, 1, 2, 0, -2, 0, 0, -6, 3, -3, -6...
+                                                                38677
+submit_time                                       2024-04-29 12:08:11
+start_time                                        2024-04-29 13:05:11
+end_time                                          2024-04-29 13:05:24
+avg_power_per_node                                         500.846154
+wallclock_used_sec                                               13.0
+enc_embedding_int8  [7, 1, 4, -7, 2, 3, 2, 0, 0, -1, -8, 1, -1, -6...",STORED_OUTPUT_text/plain,False,False,True,"blob eccc13f03792c4a9d4b90852f7e75fefba6637dd; 6 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/validate_datasets.ipynb,17,11,"Shape: (161266, 7)
+dtypes: submit                 datetime64[ns]
+start                  datetime64[ns]
+end                    datetime64[ns]
+nodes                           int64",STORED_OUTPUT_TEXT,True,True,False,"blob eccc13f03792c4a9d4b90852f7e75fefba6637dd; 6 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/validate_datasets.ipynb,19,12,"Shape: (161266, 7)
+dtypes: submit                 datetime64[ns]
+start                  datetime64[ns]
+end                    datetime64[ns]
+nodes                           int64",STORED_OUTPUT_TEXT,True,True,False,"blob eccc13f03792c4a9d4b90852f7e75fefba6637dd; 6 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/validate_datasets.ipynb,21,13,"Shape: (161266, 7)
+dtypes: submit                 datetime64[ns]
+start                  datetime64[ns]
+end                    datetime64[ns]
+nodes                           int64",STORED_OUTPUT_TEXT,True,True,False,"blob eccc13f03792c4a9d4b90852f7e75fefba6637dd; 6 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+energy_aware_scheduling/notebooks/validate_datasets.ipynb,23,14,"Shape: (161266, 7)
+dtypes: submit                 datetime64[ns]
+start                  datetime64[ns]
+end                    datetime64[ns]
+nodes                           int64",STORED_OUTPUT_TEXT,True,True,False,"blob eccc13f03792c4a9d4b90852f7e75fefba6637dd; 6 historical references; keyword support is a lead, not export authority",ae1bf132addb41b469f3ef25a7626fe5ab06bc81
+notebooks/baseline_model_results.ipynb,1,,"
+    combined_df = pd.concat(df_list, ignore_index=True)
+    return combined_df, df_list",SOURCE_CELL,False,False,False,"blob d205782b643a97322ecd2f27174c5c1b2bac2ea6; 15 historical references; keyword support is a lead, not export authority",937b79191e33039056be246cf309ddcb93ac4601
+notebooks/validate_datasets.ipynb,3,6,a2_df = load_and_describe_data('../data/historic_job_trace.parquet'),SOURCE_CELL,False,False,False,"blob 2fa936bebdc51feca1aaf53a72efcc94c7fa6765; 6 historical references; keyword support is a lead, not export authority",937b79191e33039056be246cf309ddcb93ac4601
+notebooks/validate_datasets.ipynb,3,6,"Shape: (2557884, 20)
+dtypes: submit_time           datetime64[us, pytz.FixedOffset(-360)]
+start_time            datetime64[us, pytz.FixedOffset(-360)]
+end_time              datetime64[us, pytz.FixedOffset(-360)]
+nodes_req                                              int64",STORED_OUTPUT_TEXT,True,True,False,"blob 2fa936bebdc51feca1aaf53a72efcc94c7fa6765; 6 historical references; keyword support is a lead, not export authority",937b79191e33039056be246cf309ddcb93ac4601
+notebooks/validate_datasets.ipynb,3,6,"    <tr>
+      <th>submit_time</th>
+      <td>2024-08-14 16:05:21-06:00</td>
+      <th>end_time</th>
+      <td>2024-08-15 05:51:48-06:00</td>",STORED_OUTPUT_text/html,True,False,False,"blob 2fa936bebdc51feca1aaf53a72efcc94c7fa6765; 6 historical references; keyword support is a lead, not export authority",937b79191e33039056be246cf309ddcb93ac4601
+notebooks/validate_datasets.ipynb,3,6,"                                                              1424879  \
+submit_time                                 2024-08-14 16:05:21-06:00
+start_time                                  2024-08-15 05:39:36-06:00
+end_time                                    2024-08-15 05:51:48-06:00
+nodes_req                                                           1
+                                                              2334124  \
+submit_time                                 2025-01-31 21:07:22-06:00
+start_time                                  2025-02-01 00:18:52-06:00
+end_time                                    2025-02-01 00:37:39-06:00
+                                      19426
+submit_time         2023-12-19 16:58:12-06:00
+start_time          2023-12-19 17:02:58-06:00
+end_time            2023-12-19 17:03:05-06:00
+nodes_req                                   1",STORED_OUTPUT_text/plain,True,False,False,"blob 2fa936bebdc51feca1aaf53a72efcc94c7fa6765; 6 historical references; keyword support is a lead, not export authority",937b79191e33039056be246cf309ddcb93ac4601
+notebooks/validate_datasets.ipynb,11,11,"Shape: (161266, 7)
+dtypes: submit                 datetime64[ns]
+start                  datetime64[ns]
+end                    datetime64[ns]
+nodes                           int64",STORED_OUTPUT_TEXT,True,True,False,"blob 2fa936bebdc51feca1aaf53a72efcc94c7fa6765; 6 historical references; keyword support is a lead, not export authority",937b79191e33039056be246cf309ddcb93ac4601
+notebooks/validate_datasets.ipynb,13,12,"Shape: (161266, 7)
+dtypes: submit                 datetime64[ns]
+start                  datetime64[ns]
+end                    datetime64[ns]
+nodes                           int64",STORED_OUTPUT_TEXT,True,True,False,"blob 2fa936bebdc51feca1aaf53a72efcc94c7fa6765; 6 historical references; keyword support is a lead, not export authority",937b79191e33039056be246cf309ddcb93ac4601
+notebooks/validate_datasets.ipynb,15,13,"Shape: (161266, 7)
+dtypes: submit                 datetime64[ns]
+start                  datetime64[ns]
+end                    datetime64[ns]
+nodes                           int64",STORED_OUTPUT_TEXT,True,True,False,"blob 2fa936bebdc51feca1aaf53a72efcc94c7fa6765; 6 historical references; keyword support is a lead, not export authority",937b79191e33039056be246cf309ddcb93ac4601
+notebooks/validate_datasets.ipynb,17,14,"Shape: (161266, 7)
+dtypes: submit                 datetime64[ns]
+start                  datetime64[ns]
+end                    datetime64[ns]
+nodes                           int64",STORED_OUTPUT_TEXT,True,True,False,"blob 2fa936bebdc51feca1aaf53a72efcc94c7fa6765; 6 historical references; keyword support is a lead, not export authority",937b79191e33039056be246cf309ddcb93ac4601

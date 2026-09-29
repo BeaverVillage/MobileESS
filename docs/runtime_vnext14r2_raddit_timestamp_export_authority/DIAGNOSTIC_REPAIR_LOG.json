@@ -1,0 +1,6 @@
+{
+  "issue": "Initial calendar-date diagnostic used Timestamp.value (nanoseconds) against cached microseconds",
+  "repair": "Explicit datetime64[us] conversion. Same predeclared observed date boundary; no threshold search.",
+  "independent_verification": "verify.py compares datetime-valued original historic end_time directly against fixed-offset 2024-04-23 and checks exact member mask",
+  "prior_namespaces_modified": false
+}
