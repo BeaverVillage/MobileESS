@@ -1,0 +1,112 @@
+{
+  "time": "2026-09-29T15:45:45.449270+00:00",
+  "status": "COMPLETED_DESCRIPTIVE_AUDIT",
+  "PRIMARY_NOMINAL_RUNTIME_CANDIDATE": "NONE",
+  "decision_type": "Qualitative comparative judgment, no invented numerical PASS threshold",
+  "rationale": "D2 extreme is a useful comparative research reference and is non-dominated on the preregistered core axes, but its 1.347x pooled total is not sufficient evidence for a stable nominal provider. Median coverage changes direction across folds, short-job overprediction is large, and >12h actual jobs nearly always overrun Q50. The separate reserve needed to make that acceptable has not been evaluated. No numerical PASS cutoff is introduced.",
+  "audited_primary_candidate": "V9_D2_EXTREME_1P0_NONE",
+  "audited_primary_metrics": {
+    "N": 230237,
+    "zero_runtime_N": 1290,
+    "actual_seconds": 2681009990.0,
+    "predicted_Q50_seconds": 3612031673.595391,
+    "Q50_MAE_seconds": 16080.615690530405,
+    "Q50_MAE_hours": 4.466837691814002,
+    "Q50_coverage": 0.6523625655303014,
+    "Q50_calibration_error": 0.15236256553030136,
+    "Q50_underprediction_fraction": 0.34763743446969864,
+    "Q50_over_or_equal_fraction": 0.6523625655303014,
+    "Q50_time_ratio": 1.3472652795282538,
+    "Raw_Q90_coverage": 0.9421335406559328,
+    "Q50_per_job_ratio_median": 4.001178697087975,
+    "min_fold_Q50_coverage": 0.4063854768786127,
+    "max_fold_Q50_coverage": 0.7782896364086075,
+    "fold_coverage_std": 0.16021824544048754,
+    "max_fold_calibration_error": 0.2782896364086075,
+    "worst_calibration_fold": 5,
+    "time_ratio_distance_from_one": 0.3472652795282538,
+    "GT4H_Q50_coverage": 0.14619943313578976,
+    "GT12H_Q50_coverage": 0.024925050547305306,
+    "GT24H_Q50_coverage": 0.0043969849246231155,
+    "GT12H_Raw_Q90_coverage": 0.8678449417834484,
+    "pareto_core": true,
+    "pareto_with_stability": true,
+    "primary_nominal_candidate": false
+  },
+  "core_pareto": [
+    "V9_D2_NORMAL_1P5_NONE",
+    "V9_D2_EXTREME_1P0_NONE",
+    "V9_D2_NORMAL_1P0_NONE"
+  ],
+  "stability_pareto": [
+    "V9_D1_ROLLING14",
+    "V9_D2_NORMAL_1P5_NONE",
+    "V9_D2_EXTREME_1P0_NONE",
+    "V9_D3_ROLLING14",
+    "V13_EXPANDING_S4",
+    "V9_D2_NORMAL_1P0_NONE"
+  ],
+  "interpretation": "Q50 targets about 50% coverage, not 90%. Pooled >50% is conservative in aggregate; it does not establish conditional calibration. Outcome-stratified coverage describes error burden and need not itself equal50%.",
+  "next_step": "Evidence is available for a separately preregistered Planning-overrun-reserve design study with comparative frozen nominal baselines. This audit does not approve provider deployment, capacity headroom, or a remaining-runtime model.",
+  "prior_result": "PR94 NONE and alpha null remain unchanged under its distinct Q50-Q90 scalar-duration criterion.",
+  "architecture": {
+    "Planning": "Q50 total nominal duration plus a separately designed overrun reserve; unimplemented here",
+    "Actual": "Observed RUNNING job retains its full physical GPU gang until completion; current capacity checked before PENDING start; no duplicate runtime reserve",
+    "D_day": "After submission and metadata availability, same Runtime provider concept as known jobs; no per-job Runtime ML before an unknown job submits",
+    "Running": "Elapsed time is observed; current physical occupancy cannot be reduced by a predicted remaining duration. Remaining inference unchanged."
+  },
+  "evidence": [
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_q50_calibration_audit\\PREREGISTRATION.json",
+      "bytes": 2905,
+      "sha256": "ce0f70bcdcba91016c9a0c532e030dac310f58a00c403aa1c62ccb0b90db4c9b"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_q50_calibration_audit\\FINAL_Q50_COMPARISON.csv",
+      "bytes": 3060,
+      "sha256": "e70ac02b09720b1e4124804389660f27a123bc6bc12565723c3b2b6319aedded"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_q50_calibration_audit\\Q50_FOLD_METRICS.csv",
+      "bytes": 7102,
+      "sha256": "5b22aec6c29698cf1b8b574a540145e5c59518a81c26f63a4a5f63de3582fd40"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_q50_calibration_audit\\Q50_RUNTIME_BUCKET_METRICS.csv",
+      "bytes": 52234,
+      "sha256": "2ad6301c026247674624d4ed7790a5a4bf903b6e9b1e448f9f4cc0738f4cf943"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_q50_calibration_audit\\Q50_LONG_RUNTIME_METRICS.csv",
+      "bytes": 22979,
+      "sha256": "15dd4cd6e933de074faf890bca464cdd06c9963dafd2b62662cb1c42bd56805a"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_q50_calibration_audit\\Q50_RATIO_DISTRIBUTION.csv",
+      "bytes": 5892,
+      "sha256": "fc69fb3915bc2aa4c77953f3ebfaec63704466377066debc8656b6b7ba5c810c"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_q50_calibration_audit\\CROSS_VERSION_Q50_COMPARISON.csv",
+      "bytes": 46779,
+      "sha256": "f9c32691e75f1d5e8be9c15e61c008a2d50290d2d01c31cd24c3ccab113b7849"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_q50_calibration_audit\\CROSS_VERSION_PREREGISTRATION.json",
+      "bytes": 140262,
+      "sha256": "ba4a478de4acba4f22bef9fc46ba9afd060d6acbf9a80d32dda115c89557c3be"
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_q50_calibration_audit\\CROSS_VERSION_REVIEW_KO.md",
+      "bytes": 4410,
+      "sha256": "129e3ca9094ccd71ea7f7d2fc3b73d85f9fb5773866ebf22725c74b558fa7b3a"
+    }
+  ],
+  "cross_version_extension": {
+    "variants": 100,
+    "unique_Q50_arrays": 87,
+    "primary_core_dominated_by": "V10::T3_ISOTONIC_ROLLING14_calibrated",
+    "no_other_model_automatically_promoted": true,
+    "interpretation": "NONE addresses the requested D2 extreme nomination. V10 provides stronger research comparators; no claim all100 models are unusable."
+  }
+}

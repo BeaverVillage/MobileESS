@@ -1,0 +1,757 @@
+Repository:
+BeaverVillage/MobileESS
+
+BASE:
+Draft PR #94
+commit:
+efc04829a4bfadfcf5a03998592c93ba86554701
+
+NEW TASK:
+Frozen Runtime Q50 Calibration Audit for Nominal V42 Scheduling
+
+Suggested branch:
+codex/runtime-q50-calibration-audit
+
+============================================================
+0. PURPOSE
+============================================================
+
+Do NOT train any new Runtime ML model.
+
+PR #94 established that no Q50-Q90 scalar interpolation satisfied the
+previous preregistered 90% reliability criterion with an acceptable
+runtime time ratio.
+
+However, the intended V42 Runtime interface has now changed:
+
+    Q50 = nominal individual-job runtime used in Planning
+
+    Planning = separately protects against runtime overrun using
+               pooled runtime-overrun reserve/headroom
+
+    Actual = does NOT add a duplicate overrun reserve;
+             an observed RUNNING job keeps occupying its actual GPU gang
+             until it physically completes
+
+Therefore we need to characterize Q50 itself correctly.
+
+Primary question:
+
+    Is V9_D2_EXTREME_1P0_NONE Q50 a defensible nominal Runtime predictor?
+
+In particular calculate its empirical Q50 coverage and temporal stability.
+
+This is a frozen-prediction audit only.
+
+============================================================
+1. DO NOT CHANGE PR #94 NEGATIVE RESULT
+============================================================
+
+PR #94 remains scientifically valid:
+
+    SELECTED_RUNTIME_MODEL = NONE
+    SELECTED_ALPHA = null
+
+under the Q50 + alpha*(Q90-Q50) operational-duration selection rule.
+
+Do NOT rewrite that result.
+
+This new task answers a DIFFERENT question:
+
+    whether a frozen Q50 prediction can serve as a NOMINAL duration
+    inside a closed-loop planning/actual architecture with separately
+    modeled Planning reserve.
+
+Do not retroactively mark PR #94 as PASS.
+
+============================================================
+2. PRIMARY CANDIDATE
+============================================================
+
+Primary candidate:
+
+    V9_D2_EXTREME_1P0_NONE
+
+Known frozen metrics from PR #94:
+
+    Q50 MAE = 16080.6157 s
+            = 4.46684 h
+
+    aggregate Q50 time ratio
+        sum(Q50) / sum(actual runtime)
+        = 1.3472652795
+
+    raw Q90 coverage = 94.2134%
+
+    >12h raw Q90 coverage = 86.7845%
+
+These values must be reproduced exactly from the same frozen VALID
+population before computing new metrics.
+
+============================================================
+3. COMPARISON CANDIDATES
+============================================================
+
+For context, calculate the same Q50 metrics for all six PR #94 candidates:
+
+    V9_D1_ROLLING14
+    V9_D2_NORMAL_1P5_NONE
+    V9_D2_EXTREME_1P0_NONE
+    V9_D3_ROLLING14
+    V13_EXPANDING_S4
+    V9_D2_NORMAL_1P0_NONE
+
+Do NOT retrain any of them.
+
+Use the exact same frozen predictions and exact common population already
+established in PR #94.
+
+============================================================
+4. POPULATION
+============================================================
+
+Use the exact PR #94 common VALID population:
+
+    N = 230,237 jobs
+
+with identical:
+
+    job membership
+    fold membership
+    actual runtime labels
+    Q50/Q90 frozen predictions
+
+Do not open a new population.
+
+Do not use:
+    April for selection
+    May
+    CC4
+    V42 optimizer outcomes
+
+Reverify the membership/hash against PR #94.
+
+============================================================
+5. PRIMARY NEW METRIC: Q50 COVERAGE
+============================================================
+
+For each model define empirical Q50 coverage as:
+
+    C50 =
+        (1/N) * sum_j I(T_actual_j <= Q50_j)
+
+where:
+
+    T_actual_j = realized runtime
+    Q50_j      = frozen predicted median runtime
+
+Use <= consistently.
+
+A calibrated conditional median should have empirical coverage near 0.50,
+although exact finite-sample pooled coverage need not equal exactly 50%.
+
+Report:
+
+    pooled Q50 coverage
+    fold-1 Q50 coverage
+    fold-2 Q50 coverage
+    fold-3 Q50 coverage
+    fold-4 Q50 coverage
+    fold-5 Q50 coverage
+
+Also report:
+
+    min-fold Q50 coverage
+    max-fold Q50 coverage
+    std across fold coverages
+
+============================================================
+6. Q50 CALIBRATION ERROR
+============================================================
+
+Calculate:
+
+    Q50_CALIBRATION_ERROR =
+        abs(Q50_coverage - 0.50)
+
+for pooled and each fold.
+
+This is descriptive only.
+
+Do NOT invent a new PASS threshold after seeing the results.
+
+Do NOT require Q50 coverage = 90%.
+
+Q50 is a median forecast.
+
+============================================================
+7. UNDERPREDICTION / OVERPREDICTION FREQUENCY
+============================================================
+
+For each model report:
+
+    underprediction fraction
+        P(T_actual > Q50)
+
+    over-or-equal fraction
+        P(T_actual <= Q50)
+
+These are complements under the chosen <= convention.
+
+For the primary D2 extreme candidate explicitly state:
+
+    how often actual runtime exceeds Q50
+
+because this is the event that Planning overrun reserve must protect.
+
+============================================================
+8. RUNTIME-STRATIFIED Q50 COVERAGE
+============================================================
+
+Heavy-tail behavior is central.
+
+Using ACTUAL runtime to define evaluation strata only, calculate Q50
+coverage for:
+
+    0 < T <= 15 min
+    15 min < T <= 1 h
+    1 h < T <= 4 h
+    4 h < T <= 12 h
+    12 h < T <= 24 h
+    T > 24 h
+
+For each bucket report:
+
+    N
+    Q50 coverage
+    Q50 MAE [h]
+    aggregate Q50 time ratio within that bucket
+
+This is diagnostic evaluation only.
+Actual runtime must not be used as an input to the frozen predictor.
+
+============================================================
+9. LONG-RUNTIME Q50 COVERAGE
+============================================================
+
+Also calculate cumulative tail metrics:
+
+    >4h Q50 coverage
+    >12h Q50 coverage
+    >24h Q50 coverage
+
+for every candidate.
+
+These are important because the intended closed-loop architecture will
+need Planning reserve mainly when Q50 underpredicts long jobs.
+
+============================================================
+10. RETAIN EXISTING Q50 TIME RATIO
+============================================================
+
+For every candidate reproduce:
+
+    TIME_RATIO_Q50 =
+        sum_j Q50_j / sum_j T_actual_j
+
+NO GPU weighting.
+
+For D2 extreme this should reproduce approximately:
+
+    1.3472652795
+
+Do not confuse this aggregate ratio with median(Q50_j/T_j).
+
+Keep both separate.
+
+============================================================
+11. PER-JOB Q50 RATIO DISTRIBUTION
+============================================================
+
+PR #94 already showed that aggregate time ratio and per-job ratio can be
+very different.
+
+For T_actual > 0 calculate:
+
+    r_j = Q50_j / T_actual_j
+
+Report:
+
+    Q10
+    Q25
+    median
+    Q75
+    Q90
+    Q95
+
+Do NOT use mean per-job ratio as the primary statistic because extremely
+short runtimes can make the ratio explode.
+
+Still preserve mean as diagnostic only if already available.
+
+For D2 extreme verify the previously reported median approximately:
+
+    4.00118
+
+Explain in FINAL_REVIEW_KO that:
+
+    aggregate ratio = sum(Q50)/sum(T)
+
+is NOT equal to:
+
+    median(Q50/T)
+
+and that the difference is caused by the highly heterogeneous/heavy-tailed
+runtime population.
+
+============================================================
+12. ZERO-RUNTIME ROWS
+============================================================
+
+PR #94 contained:
+
+    zero_runtime_N = 1,290
+
+Preserve the exact PR #94 handling.
+
+For:
+
+    MAE
+    coverage
+    aggregate time ratio
+
+follow the same population contract as PR #94.
+
+For per-job ratios:
+
+    Q50 / T_actual
+
+exclude T_actual = 0 to avoid infinite division.
+
+Report the excluded count explicitly.
+
+Do not silently change population semantics.
+
+============================================================
+13. FOLD STABILITY IS CRITICAL
+============================================================
+
+For D2 extreme the existing Q50 time ratio varied materially across folds.
+
+Reproduce fold-wise Q50 time ratios:
+
+approximately:
+
+    fold 1: 0.549
+    fold 2: 0.854
+    fold 3: 2.739
+    fold 4: 0.646
+    fold 5: 1.239
+
+Then place fold-wise Q50 coverage alongside these values.
+
+We need to know whether:
+
+    a low/high Q50 time ratio corresponds to systematic
+    under-/overcoverage in the same temporal fold.
+
+Create a compact fold table:
+
+    fold
+    N
+    Q50_MAE_h
+    Q50_coverage
+    Q50_calibration_error
+    Q50_time_ratio
+    >12h_Q50_coverage
+
+============================================================
+14. PRIMARY INTERPRETATION RULE
+============================================================
+
+Do NOT select D2 extreme merely because:
+
+    Q50 time ratio = 1.347x
+
+The evidence must distinguish three properties:
+
+A. point error:
+       Q50 MAE
+
+B. median calibration:
+       Q50 coverage
+
+C. aggregate temporal burden:
+       Q50 time ratio
+
+A model may look good in one and poor in another.
+
+============================================================
+15. PAPER-FACING METRICS
+============================================================
+
+For the final Runtime ML table, evaluate whether these three main metrics
+are sufficient:
+
+    Q50 MAE [h]
+    Q50 Coverage [%]
+    Q50 Time Ratio [x]
+
+Secondary/supporting metrics:
+
+    Q90 Coverage [%]
+    >12h Q90 Coverage [%]
+
+Do NOT use Pinball in the main table.
+
+Do NOT use GPUh ratio in the Runtime ML table.
+
+============================================================
+16. IMPORTANT INTERPRETATION OF Q50 COVERAGE
+============================================================
+
+Do not call 50% coverage "bad."
+
+For a correctly calibrated median:
+
+    Q50 coverage ~= 50%
+
+is expected.
+
+Likewise:
+
+    Q50 coverage >> 50%
+
+means the nominal median prediction is conservative / high.
+
+    Q50 coverage << 50%
+
+means it is systematically low / underpredictive.
+
+The desired Planning robustness does NOT come from forcing Q50 coverage
+to 90%.
+
+Planning robustness will be supplied separately by runtime-overrun reserve.
+
+============================================================
+17. NO RESERVE DESIGN YET
+============================================================
+
+Do NOT implement the Planning runtime-overrun reserve in this task.
+
+Do NOT calculate GPU headroom.
+
+Do NOT modify:
+
+    A1
+    M1
+    A2
+    M2
+    P2
+    CC4
+    May-01 canary
+    OpenDSS
+
+First characterize Q50 correctly.
+
+The next task will use this result to design the Planning reserve.
+
+============================================================
+18. NO ACTUAL RESERVE
+============================================================
+
+Document the intended architecture but do not implement it:
+
+PLANNING:
+    Q50 nominal duration
+    + separate runtime-overrun reserve
+
+ACTUAL:
+    no duplicate runtime reserve
+
+    if a job is observed RUNNING:
+        its full GPU gang remains physical occupancy
+        until actual completion
+
+    before starting a PENDING job:
+        check current physical capacity
+
+This applies equally after submission to:
+
+    originally-known jobs
+    D-day jobs that were unknown at D-1
+
+Once an unknown job submits and its metadata exists, it uses the same
+Runtime Q50 provider.
+
+============================================================
+19. RUNNING-JOB SEMANTICS
+============================================================
+
+Do not yet invent a new conditional-remaining model.
+
+For this audit we evaluate TOTAL runtime Q50 only.
+
+Final integration semantics to be handled later:
+
+PENDING:
+    use total Q50 nominal runtime
+
+RUNNING:
+    elapsed time is observed
+    physical GPU occupancy is truth
+    remaining planning representation must not reduce current occupancy
+
+This Q50 audit does not redesign remaining-runtime inference.
+
+============================================================
+20. REQUIRED OUTPUT DIRECTORY
+============================================================
+
+Create:
+
+docs/runtime_q50_calibration_audit/
+
+Required:
+
+README.md
+PREREGISTRATION.json
+
+SOURCE_AUDIT.json
+COMMON_POPULATION_RECHECK.json
+
+Q50_POOLED_METRICS.csv
+Q50_FOLD_METRICS.csv
+Q50_RUNTIME_BUCKET_METRICS.csv
+Q50_LONG_RUNTIME_METRICS.csv
+Q50_RATIO_DISTRIBUTION.csv
+
+FINAL_Q50_COMPARISON.csv
+FINAL_FLAGS.json
+FINAL_VERDICT.json
+FINAL_REVIEW_KO.md
+
+SOURCE_MANIFEST.json
+LOCAL_EVIDENCE_MANIFEST.json
+VERIFICATION.json
+
+============================================================
+21. FINAL_Q50_COMPARISON REQUIRED COLUMNS
+============================================================
+
+Model
+
+N
+
+Q50_MAE_hours
+
+Q50_coverage
+
+Q50_calibration_error
+
+Q50_underprediction_fraction
+
+Q50_time_ratio
+
+Q50_per_job_ratio_median
+
+GT4H_Q50_coverage
+
+GT12H_Q50_coverage
+
+GT24H_Q50_coverage
+
+min_fold_Q50_coverage
+
+max_fold_Q50_coverage
+
+fold_coverage_std
+
+Raw_Q90_coverage
+
+GT12H_Raw_Q90_coverage
+
+primary_nominal_candidate
+
+============================================================
+22. PRIMARY NOMINAL CANDIDATE DECISION
+============================================================
+
+This task may identify a NOMINAL candidate.
+
+It must NOT claim that the complete Runtime uncertainty problem is solved.
+
+Primary comparison should ask whether:
+
+    V9_D2_EXTREME_1P0_NONE
+
+is a defensible nominal Q50 provider considering:
+
+    Q50 MAE
+    Q50 empirical calibration
+    aggregate Q50 time ratio
+    temporal fold stability
+    long-runtime underprediction
+
+If the evidence is acceptable relative to other existing candidates:
+
+    PRIMARY_NOMINAL_RUNTIME_CANDIDATE =
+        V9_D2_EXTREME_1P0_NONE
+
+Otherwise:
+
+    PRIMARY_NOMINAL_RUNTIME_CANDIDATE =
+        NONE
+
+Do not invent a post-hoc numerical PASS threshold.
+
+Use the full comparative evidence and report trade-offs.
+
+============================================================
+23. FINAL_FLAGS
+============================================================
+
+NO_NEW_RUNTIME_TRAINING = TRUE/FALSE
+
+COMMON_POPULATION_REUSED = TRUE/FALSE
+
+COMMON_POPULATION_N = integer/null
+
+RUNTIME_TARGET_UNIT = "seconds"
+
+GPU_WEIGHTING_USED = FALSE
+
+PINBALL_USED_FOR_PRIMARY_DECISION = FALSE
+
+Q50_COVERAGE_COMPUTED = TRUE/FALSE
+
+Q50_COVERAGE_TARGET = 0.50
+
+Q50_USED_AS_NOMINAL_NOT_ROBUST_BOUND = TRUE/FALSE
+
+PLANNING_RESERVE_IMPLEMENTED = FALSE
+
+ACTUAL_RUNTIME_RESERVE_IMPLEMENTED = FALSE
+
+CC4_CHANGED = FALSE
+V42_CHANGED = FALSE
+MAY_OPENED = FALSE
+OPENDSS_RUN = FALSE
+
+PRIMARY_NOMINAL_RUNTIME_CANDIDATE =
+    model / NONE
+
+PRIMARY_Q50_MAE_HOURS =
+    number/null
+
+PRIMARY_Q50_COVERAGE =
+    number/null
+
+PRIMARY_Q50_TIME_RATIO =
+    number/null
+
+PRIMARY_GT12H_Q50_COVERAGE =
+    number/null
+
+============================================================
+24. FINAL_REVIEW_KO MUST ANSWER
+============================================================
+
+At minimum answer:
+
+1. Q50 coverage 정의는 무엇인가?
+2. 왜 Q50 coverage 목표는 90%가 아니라 약 50%인가?
+3. 동일한 230,237 jobs를 사용했는가?
+4. zero-runtime 1,290건은 어떻게 처리했는가?
+5. D2 extreme의 Q50 MAE는?
+6. D2 extreme의 pooled Q50 coverage는?
+7. D2 extreme의 Q50 calibration error는?
+8. actual runtime이 Q50를 초과한 job 비율은?
+9. D2 extreme의 aggregate Q50 time ratio는?
+10. 왜 1.347x와 median per-job ratio 4.001x가 다른가?
+11. fold별 Q50 coverage는?
+12. fold별 Q50 time ratio는?
+13. worst Q50 coverage fold는?
+14. fold coverage std는?
+15. >4h Q50 coverage는?
+16. >12h Q50 coverage는?
+17. >24h Q50 coverage는?
+18. 0–15min job에서 Q50 coverage는?
+19. 15min–1h에서는?
+20. 1–4h에서는?
+21. 4–12h에서는?
+22. 12–24h에서는?
+23. >24h에서는?
+24. short jobs를 심하게 overpredict하는가?
+25. long jobs를 심하게 underpredict하는가?
+26. aggregate ratio가 이를 숨기고 있는가?
+27. D2 normal1.5와 비교하면?
+28. D1 rolling14와 비교하면?
+29. D3 rolling14와 비교하면?
+30. V13과 비교하면?
+31. normal1.0 diagnostic control과 비교하면?
+32. Q50 MAE 최선 모델은?
+33. Q50 coverage가 50%에 가장 가까운 모델은?
+34. Q50 time ratio가 1에 가장 가까운 모델은?
+35. 위 세 모델이 동일한가?
+36. D2 extreme은 Pareto 관점에서 nominal 후보로 합리적인가?
+37. Q90는 optimizer nominal duration으로 쓰는가? NO.
+38. Q90는 어떤 보조 정보로 남는가?
+39. Planning runtime reserve를 이번에 구현했는가? NO.
+40. Actual에 duplicate reserve를 둘 계획인가? NO.
+41. Actual RUNNING job은 어떻게 처리되는가?
+42. known job과 D-day submitted job은 같은 Runtime provider를 쓰는가?
+43. D-day submission 전 unknown에 individual Runtime ML을 쓰는가? NO.
+44. GPUh를 Runtime ML 선택에 사용했는가? NO.
+45. Pinball을 main table에 쓰는가? NO.
+46. May를 사용했는가? NO.
+47. 새 ML을 학습했는가? NO.
+48. PR #94 NONE 판정을 변경했는가? NO.
+49. PRIMARY_NOMINAL_RUNTIME_CANDIDATE는?
+50. 다음 V42 Planning-reserve 설계로 넘어갈 수 있는가?
+
+============================================================
+25. VERIFICATION
+============================================================
+
+At minimum verify programmatically:
+
+- exact N = 230,237
+- same membership/hash as PR #94
+- exact reproduction of existing Q50 MAE
+- exact reproduction of existing Q50 time ratio
+- exact reproduction of raw Q90 coverage
+- Q50 coverage + underprediction fraction = 1
+- all coverages in [0,1]
+- all ratios finite where defined
+- T=0 excluded only from per-job division metrics
+- no GPU columns used in primary calculations
+- no fitting/training calls
+- no April/May selection data opened
+- no CC4/V42/OpenDSS execution
+
+============================================================
+26. DELIVERY
+============================================================
+
+After successful verification:
+
+1. git diff --check
+2. commit
+3. push
+4. create Draft PR
+
+Suggested PR title:
+
+Runtime: frozen Q50 calibration audit for nominal V42 scheduling
+
+The PR description must clearly say:
+
+    This does not supersede PR #94's NONE result under the
+    Q50-Q90 scalar-duration criterion.
+
+    It evaluates a different intended interface:
+    Q50 nominal duration + separately designed Planning overrun reserve
+    + observed Actual RUNNING occupancy.
+
+Proceed without asking ordinary confirmation.
