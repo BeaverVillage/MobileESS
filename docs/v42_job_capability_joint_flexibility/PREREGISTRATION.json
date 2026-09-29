@@ -1,0 +1,29 @@
+{
+  "schema": "V42_JOB_CAPABILITY_PREREGISTRATION_V1",
+  "registered_before_new_population_classification": true,
+  "training_cutoff_utc": "2025-01-01T00:00:00Z",
+  "training_population": "Reuse PR75 persisted 439534 completed pre-cutoff GPU jobs; do not expand membership or refit ML. Recompute Q25 from their observed queue labels.",
+  "cohort_dimensions": ["qos", "partition", "workload_class", "protected", "gpu_bucket", "wall_bucket", "requested_nodes"],
+  "workload_class": "PR75 frozen QoS-derived operational class only; no semantic model. Optional future semantic class is not consumed.",
+  "slot_seconds": 900,
+  "minimum_cohort_N": 100,
+  "cohort_backoff": "NONE",
+  "rules": {
+    "T0_CURRENT": "Reproduce frozen R0 gate and bounds as historical audit only; future V42 temporal options require finalized service provider.",
+    "T1_COHORT_MEDIAN": "PR75 R1 candidate: standby or supported nonprotected cohort median >=900s. Standby uses authorized service window; nonstandby median budget is not imposed by PR75 R1.",
+    "T2_CONSERVATIVE_Q25": "Standby retains scheduler candidate plus authorized service window. Other nonprotected cohorts require N>=100 and Q25>=900s; budget=floor(Q25/900) slots. No observed current-job queue label."
+  },
+  "proxy_is_SLA": false,
+  "target_share_used": false,
+  "historical_validation": "Inventory entire existing pre-May episode ledger 2024-03-15..2025-04-30. Preserve null executable masks if final service/native authority absent; no selection of only successful days.",
+  "historical_R0_reproduction": "Read immutable PR75 published May audit tables only; no new May policy/evaluation run or tuning.",
+  "synthetic_scope": "Ten A-J cases and bounded exact MILP; synthetic percentages never population estimates.",
+  "checkpoint": "1800s physical cadence, 900s control grid, ceil mapping; causal elapsed for carry-in; exact boundary included",
+  "prescreen": "Hard infeasibility and exact duplicate removal only. No fixed-other-movable-job occupancy screen, topK, grid-benefit ranking or arbitrary dominance.",
+  "objective": "rho=max critical LINE normalized load; transformer separate hard limit. Retain optional service/reserve shortfall before intervention. Lex migration, shift slots, initial-site changes, MESS movement, deterministic final tie.",
+  "epsilon_rho": 1e-7,
+  "epsilon_source": "Inherited v42/blocks.py NO_REGRET_TOLERANCE=1e-7; synthetic solver comparison only, no production trust/epsilon change",
+  "native_binding": false,
+  "full_campaign_allowed": false,
+  "runtime_CC4_ML_allowed": false
+}
