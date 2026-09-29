@@ -1,0 +1,20 @@
+{
+  "time": "2026-09-29T10:52:10.106983+00:00",
+  "family": "LightGBM quantile with label-free TRAIN-only categorical encoding",
+  "catboost_installed": false,
+  "environment": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext_exact_environment\\Scripts\\python.exe",
+  "versions": {
+    "numpy": "2.4.6",
+    "pandas": "2.2.3",
+    "scipy": "1.17.1",
+    "scikit-learn": "1.5.2",
+    "lightgbm": "4.6.0",
+    "pyarrow": "18.1.0"
+  },
+  "reason": "CatBoost is absent from frozen environment. Ordered target statistics based on submission order alone do not certify outcome completion before each query. Use explicitly authorized LightGBM fallback; no target categorical encoding.",
+  "same_information_architecture_comparison": "H0/H1 in gated Kestrel bridge; no CatBoost-superiority claim",
+  "sources": [
+    "https://catboost.ai/docs/en/references/training-parameters/common",
+    "https://catboost.ai/docs/en/concepts/algorithm-main-stages_cat-to-numberic"
+  ]
+}

@@ -1,0 +1,1344 @@
+Repository: BeaverVillage/MobileESS
+
+BASE:
+Draft PR #89
+commit c84588e02727eb5311ba25f6a3ed43ff229cfe07
+
+NEW TASK:
+Runtime-vNext16 / CC4-vNext — Full RADDiT Information-Value Study
+and Deployable Rich Submission-Metadata Runtime Model
+
+Suggested branch:
+codex/runtime-vnext16-raddit-rich-metadata
+
+============================================================
+0. PURPOSE
+============================================================
+
+PR #89 established a reproducible semantic interface but the actual new
+information was intentionally narrow:
+
+    user
+    submit_line
+
+represented through recurrence/co-occurrence/SVD.
+
+The experiment FAILED to improve Runtime robustness or CC4 sufficiently.
+
+This does NOT establish that RADDiT/workflow semantics are useless.
+
+The final PR #89 review explicitly states that actual workflow/application
+meaning, script content, and richer telemetry were not evaluated.
+
+This task must test the information value of RADDiT MUCH MORE COMPLETELY.
+
+Primary scientific question:
+
+    Does richer submission-time workload identity / workflow metadata
+    materially improve causal per-job runtime prediction,
+    especially the long-runtime Q90 tail?
+
+Secondary question:
+
+    Does richer historical workload-composition information improve CC4
+    after the Runtime study is frozen?
+
+Do NOT modify:
+- V42 workload-flexibility branch
+- AIDC/MESS optimizer
+- OpenDSS
+- IEEE123/8500
+- final workload capability rules
+
+This is a separate ML study.
+
+============================================================
+1. START FROM PR #89 — PRESERVE EVERYTHING
+============================================================
+
+Preserve all V6–V15 evidence and hashes.
+
+Baseline Runtime:
+
+    R0 = exact V13 EXPANDING_S4
+
+Known metrics:
+
+    pooled Q90 = 91.84%
+    min-fold = 70.70%
+    >4h = 69.72%
+    >12h = 64.25%
+    >24h = 46.88%
+    Q90 pinball = 4752.7617 s
+
+PR #89 semantic arms:
+
+    R1 recurrence
+    R2 recurrence + SEM_COOCCUR32
+
+were not selected.
+
+Do not silently redefine R0.
+
+CC4 baseline remains:
+
+    C0 = frozen T0/B0
+         hourly submitted-GPUh LightGBM
+
+T2_F0 and T3_F2 remain research candidates, NOT C0.
+
+============================================================
+2. IMPORTANT INTERPRETATION OF PR #89
+============================================================
+
+PR #89 did NOT test "full RADDiT semantics."
+
+It tested mainly:
+
+    user
+    submit_line
+
+as stable anonymous identities.
+
+The original Kestrel/RADDiT-related inventories indicate additional candidate
+information including:
+
+    user
+    account
+    partition
+    qos
+    job_type
+    name
+    submit_line
+    script
+    modules
+    conda_envs
+    workdir
+    array metadata
+
+and standard submission/request information such as:
+
+    requested nodes
+    requested processors
+    requested memory
+    requested walltime
+    requested GPU/resource information
+
+Audit all of these again from source.
+
+Do not assume every field is operationally usable merely because it exists.
+
+============================================================
+3. THREE DIFFERENT INFORMATION CLASSES
+============================================================
+
+Every candidate feature MUST be placed in exactly one of:
+
+A. DEPLOYABLE_SUBMISSION_TIME
+    observable for a future V42 job at or immediately after submission
+
+B. HISTORICAL_DIAGNOSTIC_ONLY
+    useful to test whether information exists, but cannot currently be
+    reproduced for a future V42 job with the same semantics
+
+C. FORBIDDEN_OUTCOME_OR_FUTURE
+    actual runtime
+    end time
+    future queue delay
+    future start result
+    realized future power
+    future scheduler state
+    post-completion information
+
+Only class A may enter a production-candidate Runtime model.
+
+Class B may be used ONLY in explicitly labelled information-value upper-bound
+experiments.
+
+Class C must never enter predictors.
+
+Create:
+
+RADDIT_FIELD_AUTHORITY_AUDIT.csv
+RADDIT_INFORMATION_CLASSIFICATION.md
+
+============================================================
+4. RADDIT DATASET — USE THE ACTUAL AVAILABLE FIELDS
+============================================================
+
+Audit:
+
+historic_job_trace.parquet
+
+Known schema includes approximately:
+
+submit_time
+start_time
+end_time
+nodes_req
+processors_req
+qos
+wallclock_used_sec
+avg_power_per_node
+wallclock_req_sec
+memory_req_raw
+modules
+conda_envs
+user
+name
+account
+partition
+script
+submit_line
+job_type
+job_id
+
+Do not infer schema from memory.
+Inspect the actual downloaded file.
+
+Record:
+- dtype
+- non-null fraction
+- cardinality
+- recurrence
+- first/last timestamp
+- TRAIN/VALID unseen rate
+- per-fold coverage
+- exact semantics
+- whether value is anonymized token or meaningful text
+- whether it is available by submission time
+- whether the value can be generated for a new V42 job
+
+============================================================
+5. DO NOT CONFUSE ANONYMIZED IDENTITY WITH LANGUAGE SEMANTICS
+============================================================
+
+Fields such as:
+
+    user_...
+    name_...
+    script_...
+    job_type_...
+    account_...
+
+may be stable anonymized identities.
+
+Do NOT apply:
+- numeric suffix magnitude
+- string edit distance
+- character similarity
+- fake linguistic meaning
+
+unless source evidence proves such semantics.
+
+Treat stable anonymous values as categorical identities.
+
+Example:
+
+    script_0001234
+
+means "same anonymous script identity",
+NOT "script number 1234 is close to script number 1235".
+
+============================================================
+6. MODULES / CONDA / SOFTWARE STACK
+============================================================
+
+Explicitly test:
+
+    modules
+    conda_envs
+
+These may encode strong workflow/application identity.
+
+Audit whether values:
+- recur
+- are anonymized but stable
+- are present at submission
+- are available in the original Kestrel source or only in RADDiT export
+- can be captured in a future V42 deployment
+
+If deployable:
+    allow them in production-candidate models.
+
+If RADDiT-only:
+    use them in diagnostic upper-bound arms only.
+
+Do not silently fill missing Kestrel values from another system.
+
+============================================================
+7. RADDIT ↔ KESTREL CROSSWALK
+============================================================
+
+Preserve the V14R1/V14R2 findings.
+
+Known evidence includes:
+- 1,780,972 RADDiT embedding rows
+- 1,775,514 unique EKEY2 raw candidates
+- 5,458 ambiguous rows
+- displayed-end-date >= 2024-04-23 exactly reconstructs distributed subset
+  membership
+- strict private exporter/timezone provenance remained unresolved
+
+Do NOT claim strict source provenance is solved.
+
+However, for a RESEARCH-PROXY experiment, construct the strongest
+predeclared crosswalk that is scientifically supportable.
+
+Primary research-proxy mapping:
+
+    exact T0/displayed-local-wallclock representation
+    + exact shared metadata key
+    + unique EKEY2 candidate only
+
+Exclude ALL ambiguous mappings.
+
+Report:
+    matched count
+    unmatched count
+    ambiguous count
+    mapping rate
+    holdout conflicts
+    fold distribution
+    runtime strata distribution
+
+Label this:
+
+    RESEARCH_PROXY_CROSSWALK
+
+NOT:
+
+    PRODUCTION_AUTHORITY_CROSSWALK
+
+============================================================
+8. FIRST IMPORTANT EXPERIMENT — RADDIT-NATIVE INFORMATION VALUE
+============================================================
+
+Before forcing RADDiT fields into V42, answer:
+
+    "Do these richer fields contain useful runtime information at all?"
+
+Use RADDiT historic_job_trace directly.
+
+Create chronological expanding folds that preserve causality.
+
+Predict:
+
+    wallclock_used_sec
+
+using ONLY submission-time candidate fields.
+
+Do not use:
+    start_time
+    end_time
+    avg_power_per_node if it is realized outcome telemetry
+    actual runtime-derived values
+    future queue information
+
+Evaluate the same important tail metrics:
+
+    pooled Q90 coverage
+    minimum-fold Q90 coverage
+    >4h Q90 coverage
+    >8h Q90 coverage
+    >12h Q90 coverage
+    >24h Q90 coverage
+    Q90 pinball
+    Q50 MAE
+    reservation/actual ratio
+    short-job overreservation
+
+This experiment answers whether rich RADDiT metadata has runtime signal
+independently of the V42 crosswalk problem.
+
+============================================================
+9. RADDIT-NATIVE MODEL ARMS
+============================================================
+
+Keep the model search LIMITED and preregistered.
+
+Do NOT launch another huge architecture sweep.
+
+Use these arms:
+
+D0:
+    request/resource-only baseline
+
+D1:
+    D0
+    + full stable categorical identities:
+      user/account/partition/qos/job_type/name/script/submit_line
+      where source-valid
+
+D2:
+    D1
+    + modules
+    + conda_envs
+    + other source-valid software/workflow metadata
+
+D3:
+    D2
+    + recurrence/co-occurrence features
+
+D4:
+    D2
+    + causal historical-neighbor runtime statistics
+      described below
+
+Do not create D5+ unless a preregistered trigger is met.
+
+============================================================
+10. PURPOSE-BUILT HIGH-CARDINALITY MODEL
+============================================================
+
+PR #89 compressed anonymous identity into SVD32.
+That may be a poor inductive bias for high-cardinality categorical identity.
+
+Test ONE purpose-built categorical model:
+
+    CatBoost quantile
+
+or, if CatBoost cannot satisfy the environment/reproducibility contract:
+
+    LightGBM with leakage-safe TRAIN-only categorical encoding.
+
+Prefer CatBoost if available because:
+- high-cardinality categorical identities are central
+- ordered target statistics can be handled internally
+- direct quantile loss is available
+
+Train Q50 and Q90.
+
+Use fixed random seeds.
+
+No validation-dependent hyperparameter sweep.
+
+Use a compact preregistered parameter set.
+
+============================================================
+11. KEEP V13 HAZARD MODEL AS A SECOND MODEL FAMILY
+============================================================
+
+Do not abandon the existing V13 hazard architecture.
+
+Create paired arms:
+
+H0:
+    exact V13/R0-style observable features
+
+H1:
+    H0 + full approved rich metadata
+
+H2:
+    H1 + modules/conda if deployable
+
+This isolates:
+
+    information gain
+
+from:
+
+    model-family gain.
+
+Do not claim CatBoost superiority unless evaluated on the exact same folds.
+
+============================================================
+12. RADDIT-STYLE CAUSAL NEAREST-NEIGHBOR FEATURES
+============================================================
+
+RADDiT's core idea uses similarity to historical jobs.
+
+Implement a fully reproducible, causal version.
+
+For query job j at submit time t_j:
+
+eligible neighbors i must satisfy:
+
+    end_time_i < submit_time_j
+
+This is stricter than merely submit_time_i < submit_time_j.
+
+The target outcome of every neighbor must already be known.
+
+Construct similarity using ONLY approved submission metadata.
+
+Possible representation:
+
+    field-prefixed categorical token hashing
+    +
+    modules/conda multi-hot tokens
+    +
+    resource-request normalized features
+
+Use deterministic nearest-neighbor search.
+
+For k in a small preregistered set, e.g.
+
+    k = 16, 64
+
+do not tune after seeing validation.
+
+Neighbor-derived Runtime features:
+
+    neighbor_runtime_Q50
+    neighbor_runtime_Q75
+    neighbor_runtime_Q90
+    neighbor_runtime_mean_log
+    neighbor_long4h_fraction
+    neighbor_long12h_fraction
+    neighbor_support_count
+    nearest_similarity
+    mean_similarity
+
+All statistics must come from completed historical neighbors only.
+
+============================================================
+13. IMPORTANT — NO TARGET LEAKAGE THROUGH REPEATED IDENTITIES
+============================================================
+
+A repeated user/script/job name is allowed as identity.
+
+But any historical target statistic attached to it must satisfy event-time
+causality.
+
+For a job submitted at t:
+
+    only earlier jobs whose runtime outcome was already complete by t
+    may contribute target-derived recurrence/neighbor statistics.
+
+Do not compute global per-script mean runtime over the full dataset.
+
+Do not precompute target encoding using validation rows.
+
+============================================================
+14. PUBLIC RADDIT DISTRIBUTED EMBEDDING — DIAGNOSTIC ONLY
+============================================================
+
+The downloaded RADDiT encrypted/int8 embedding may be used ONLY as an
+explicitly labelled historical diagnostic IF its row mapping passes the
+research-proxy crosswalk.
+
+Purpose:
+
+    determine whether the original distributed RADDiT representation
+    contains predictive runtime information that our reproducible
+    representation misses.
+
+Name the arm:
+
+    D_EMB_DIAGNOSTIC_ONLY
+
+Restrictions:
+
+- never production-selectable
+- never V42 provider-selectable
+- no claim that the vector can be regenerated for a new V42 job
+- ambiguous rows excluded
+- future neighbors forbidden
+- no April/May selection
+- report mapping limitations beside every result
+
+If the vector cannot be consumed without an unverified private transform,
+do NOT reverse-engineer or invent the transform.
+
+Record NOT_RUN if necessary.
+
+============================================================
+15. VERY IMPORTANT DIAGNOSTIC LOGIC
+============================================================
+
+Interpret outcomes as follows.
+
+Case A:
+Rich native RADDiT metadata strongly improves tail prediction.
+
+Conclusion:
+    missing workflow/application information mattered.
+
+Then proceed to deployable Kestrel/V42 feature bridge.
+
+Case B:
+RADDiT distributed embedding improves but deployable metadata does not.
+
+Conclusion:
+    richer latent semantic information may matter, but current V42 cannot
+    reproduce it.
+
+Do NOT promote.
+
+Case C:
+Neither rich metadata nor distributed embedding improves robustly.
+
+Conclusion:
+    current RADDiT information is insufficient for the runtime safety target.
+
+Then stop additional semantic model search.
+
+Case D:
+Only modules/conda or a small subset improves.
+
+Then reduce to that minimal source-backed feature set.
+
+============================================================
+16. KESTREL/V42 DEPLOYABLE BRIDGE
+============================================================
+
+Only after the RADDiT-native information-value experiment is frozen:
+
+identify which useful RADDiT fields can be generated from the ORIGINAL
+Kestrel source and future V42 submission event.
+
+Do not require:
+- private RADDiT exporter
+- private LLM
+- unavailable source text
+
+For every retained feature create an exact future capture rule.
+
+Example:
+
+    account
+    partition
+    qos
+    job_name token
+    submit command identity
+    script identity/hash
+    loaded modules
+    conda environment
+    resource request
+
+but only where actual source authority exists.
+
+============================================================
+17. V42 SUBMISSION PAYLOAD V2
+============================================================
+
+Extend the existing PR #89 semantic interface rather than replacing it.
+
+Conceptual:
+
+SubmissionSemanticPayloadV2(
+    user,
+    account,
+    partition,
+    qos,
+    job_type,
+    name,
+    submit_line,
+    script,
+    modules,
+    conda_envs,
+    workdir,
+    ...
+)
+
+Only source-authorized fields may be populated.
+
+Support:
+
+    MINIMAL
+    PARTIAL
+    FULL
+
+Do not require all fields for inference.
+
+Missing field:
+    explicit FIELD_MISSING
+
+Do not silently impute another user's/workflow's identity.
+
+============================================================
+18. PRIVACY BOUNDARY
+============================================================
+
+Raw strings must not enter optimizer artifacts.
+
+At submission boundary:
+
+raw submission metadata
+        ↓
+sanitized/pseudonymized numeric/categorical adapter
+        ↓
+Runtime model
+        ↓
+Q50/Q90 only
+
+Persist:
+- feature version
+- bundle digest
+- pseudonym/category state where allowed
+- numeric features
+
+Do not write raw script/name/command text to optimizer logs.
+
+============================================================
+19. RUNTIME V16 DEPLOYABLE ARMS
+============================================================
+
+After the RADDiT-native stage identifies useful information, evaluate on the
+EXACT existing five pre-April Runtime folds.
+
+Use:
+
+R0:
+    exact V13 S4
+
+R15:
+    best PR #89 semantic arm, diagnostic reference only
+
+R16-A:
+    R0 + approved rich categorical metadata
+
+R16-B:
+    purpose-built categorical quantile model using approved rich metadata
+
+R16-C:
+    best approved model
+    + causal historical-neighbor features
+
+At most these three new deployable challengers.
+
+Do not perform broad architecture search.
+
+============================================================
+20. RUNTIME GATES — DO NOT LOWER
+============================================================
+
+Keep the current safety gates.
+
+Required at minimum:
+
+1. pooled Q90 within accepted nominal band
+2. minimum fold >= 85%
+3. >4h coverage >= 85%
+4. >12h coverage >= 80%
+5. >24h >= 70% when support is sufficient
+6. finite proper score
+7. zero invalid-support predictions
+8. materially improved reservation vs requested-walltime baseline
+9. no future/outcome leakage
+10. reproducible unseen-job inference
+
+Do not lower gates after seeing results.
+
+============================================================
+21. PERFORMANCE IMPROVEMENT MUST BE ROBUST
+============================================================
+
+Do not select on pooled coverage alone.
+
+Require improvement over R0 to be supported by:
+
+- min-fold
+- >4h tail
+- >12h tail
+- pinball
+- reservation ratio
+
+Primary target remains:
+
+    robust long-runtime Q90
+
+A 0.5% pinball improvement with worse min-fold/tail coverage is not enough.
+
+============================================================
+22. FEATURE ABLATION — ONLY AFTER A MATERIAL WIN
+============================================================
+
+Do not launch exhaustive ablation automatically.
+
+Run grouped ablation only if a candidate achieves at least one of:
+
+    +5 percentage points min-fold coverage
+
+or
+
+    +5 percentage points >4h coverage
+
+without >5% Q90 pinball degradation.
+
+Then ablate groups:
+
+A resource request
+B scheduler/QoS
+C user/account identity
+D job/script/workflow identity
+E modules/conda stack
+F causal neighbor statistics
+
+Purpose:
+identify which INFORMATION source caused the gain.
+
+============================================================
+23. REMAINING-RUNTIME MODEL
+============================================================
+
+Do NOT develop a new remaining-runtime model unless TOTAL runtime passes all
+required gates.
+
+If total runtime fails:
+
+    REMAINING_STAGE = NOT_RUN_TOTAL_GATE_FAILURE
+
+Do not spend compute on remaining prediction prematurely.
+
+============================================================
+24. CC4 — SECONDARY AND GATED
+============================================================
+
+Do not immediately rerun CC4 using every rich feature.
+
+First freeze Runtime results.
+
+Run CC4 rich-semantic experiment ONLY if:
+
+A. Runtime demonstrates material information value
+
+OR
+
+B. RADDiT-native metadata shows strong temporal/workload-class structure even
+   if Runtime final gate narrowly fails.
+
+CC4 never sees individual future unsubmitted job semantics.
+
+At issue time t0, only:
+
+    submit_time < t0
+
+jobs contribute.
+
+============================================================
+25. CC4 RICH HISTORICAL STATE
+============================================================
+
+If CC4 stage is authorized, construct past-only state from approved rich
+metadata.
+
+Possible state groups:
+
+- account composition
+- partition composition
+- qos composition
+- job_type composition
+- script/workflow recurrence
+- module/conda composition
+- causal workload-class counts
+- 1h/6h/24h/72h changes
+- entropy
+- concentration
+- arrival rate per class
+- runtime-class composition only from already-completed past jobs
+
+Avoid huge dense one-hot features.
+
+Use compact top-K or hashed aggregate representations.
+
+============================================================
+26. CC4 BASELINE MUST REMAIN C0
+============================================================
+
+C0 remains:
+
+    frozen T0/B0 hourly submitted-GPUh LightGBM
+
+Do NOT promote T2_F0 or T3_F2.
+
+CC4 candidates:
+
+C0:
+    frozen baseline
+
+C3:
+    C0 + best approved rich past-state information
+
+C4:
+    C3 + compact class composition if justified
+
+Do not rerun C1/C2 blindly unless required as a reference.
+
+============================================================
+27. CC4 SELECTION
+============================================================
+
+Retain the existing frozen evaluation contract:
+
+- hourly Q90 coverage
+- daily requirement coverage
+- Q90 pinball
+- requirement ratio
+- burst coverage
+- WAPE/current point metric
+- temporal stability
+
+Do not select on coverage alone.
+
+May remains sealed.
+
+============================================================
+28. APRIL / MAY FIREWALL
+============================================================
+
+Do NOT use April for model selection.
+
+Do NOT use May for model development.
+
+Stage sequence:
+
+A. data/authority audit
+B. RADDiT-native information-value experiment
+C. freeze representation/model family
+D. Kestrel five-fold deployable experiment
+E. selection freeze
+F. only then, if all gates pass, Stage C/provider work
+G. April only after selection freeze
+H. May remains unopened unless separately authorized later
+
+============================================================
+29. COMPUTE CONTROL
+============================================================
+
+This study must avoid another uncontrolled model sweep.
+
+Max major model families:
+
+    V13 hazard
+    CatBoost quantile
+    causal kNN-derived features
+
+No TFT.
+No DeepAR.
+No large LLM download.
+No transformer retraining.
+No AutoML.
+No broad hyperparameter search.
+
+Use CPU/GPU only where reproducibility is proven.
+
+============================================================
+30. FIRST STAGE STOP CONDITIONS
+============================================================
+
+After RADDiT-native D0–D4 evaluation:
+
+STOP the entire rich-semantic program if ALL of the following are true:
+
+- min-fold improvement < 3 pp
+- >4h improvement < 3 pp
+- >12h improvement < 3 pp
+- pinball improvement < 3%
+- no consistent improvement across temporal folds
+
+If this stop fires:
+
+do NOT spend more compute on CC4 or provider integration.
+
+Conclude:
+
+    RICH_RADDIT_METADATA_INFORMATION_VALUE_NOT_SUPPORTED
+
+This does not mean runtime is fundamentally unpredictable.
+
+============================================================
+31. SUCCESS CONDITION
+============================================================
+
+A meaningful information-value success is:
+
+at least one rich-metadata arm shows BOTH:
+
+    >= +5 pp min-fold Q90 coverage
+
+AND
+
+    >= +5 pp >4h Q90 coverage
+
+with:
+
+    Q90 pinball degradation <= 5%
+
+Preferably also improvement in >12h.
+
+This does not automatically mean production promotion.
+
+It authorizes the deployable bridge stage.
+
+============================================================
+32. REQUIRED AUDITS
+============================================================
+
+Create:
+
+RADDIT_FULL_SCHEMA_AUDIT.csv
+RADDIT_FIELD_AUTHORITY_AUDIT.csv
+RADDIT_ANONYMIZATION_SEMANTICS_AUDIT.md
+RADDIT_Kestrel_RESEARCH_PROXY_CROSSWALK.csv
+RADDIT_CROSSWALK_SUMMARY.json
+
+RADDIT_NATIVE_MODEL_COMPARISON.csv
+RADDIT_NATIVE_FOLD_METRICS.csv
+RADDIT_NATIVE_TAIL_METRICS.csv
+RADDIT_INFORMATION_VALUE_VERDICT.json
+
+CAUSAL_NEIGHBOR_AUDIT.json
+NEIGHBOR_TEMPORAL_LEAKAGE_AUDIT.json
+
+V42_DEPLOYABLE_FIELD_BRIDGE.csv
+V42_SEMANTIC_PAYLOAD_V2_SPEC.md
+
+RUNTIME_V16_MODEL_COMPARISON.csv
+RUNTIME_V16_FOLD_METRICS.csv
+RUNTIME_V16_TAIL_METRICS.csv
+RUNTIME_V16_SELECTION_FREEZE.json
+
+============================================================
+33. NEGATIVE CONTROLS
+============================================================
+
+Run at least these controls:
+
+A.
+Shuffle rich identity fields within training time blocks.
+
+B.
+Replace user/account/script identity with random stable IDs preserving
+cardinality.
+
+C.
+Future-poisoning test:
+modify future job metadata and confirm current prediction unchanged.
+
+D.
+Outcome-key rejection:
+runtime/end/start/future queue fields must be rejected by provider.
+
+E.
+Neighbor leakage:
+force a candidate neighbor whose end_time is after query submission and verify
+it is excluded.
+
+If real rich metadata beats these controls, information value is more credible.
+
+============================================================
+34. IMPORTANT COMPARISON — IDENTITY VS REAL WORKFLOW STACK
+============================================================
+
+Explicitly compare:
+
+IDENTITY_ONLY:
+    user/account/name/script token identities
+
+versus
+
+SOFTWARE_STACK:
+    modules/conda/workflow metadata
+
+versus
+
+RESOURCE_ONLY:
+    nodes/processors/memory/GPU/walltime request
+
+versus
+
+FULL:
+    all approved submission-time information
+
+This answers whether gains come from:
+
+    "who submits"
+
+or
+
+    "what workload/application is being run."
+
+============================================================
+35. NO UNJUSTIFIED CROSS-SYSTEM TELEMETRY
+============================================================
+
+Do not insert Eagle/Alibaba/other-system telemetry directly as Kestrel job
+features.
+
+Those systems may be used only for:
+- methodology reference
+- external diagnostic
+- separately justified transfer study
+
+unless an exact job-level join and transfer authority exists.
+
+============================================================
+36. POWER FIELD
+============================================================
+
+avg_power_per_node is a realized historical quantity.
+
+Do NOT use actual future avg_power_per_node as a Runtime submission feature.
+
+If a submission-time power predictor exists using causal inputs:
+
+    predicted_power
+
+may be evaluated as an optional derived feature only after its own causality
+and OOS contract is verified.
+
+Do not use ground-truth power.
+
+============================================================
+37. WALLCLOCK REQUEST
+============================================================
+
+Audit wallclock_req_sec carefully.
+
+If the historical initial requested walltime version at submission is not
+source-authorized, do NOT silently use a mutable final snapshot as production
+truth.
+
+It may remain:
+- research comparator
+- proxy
+- or excluded
+
+depending on source authority.
+
+Preserve the distinction.
+
+============================================================
+38. RESULT INTERPRETATION
+============================================================
+
+Do not say:
+
+    "RADDiT solved Runtime"
+
+unless a deployable V42-compatible model passes all gates.
+
+Allowed interpretations:
+
+1.
+"Full RADDiT metadata contains predictive information."
+
+2.
+"That information can/cannot be reproduced at the V42 submission boundary."
+
+3.
+"A deployable rich-metadata model does/does not pass the runtime safety gates."
+
+These are separate conclusions.
+
+============================================================
+39. REQUIRED FINAL OUTPUT DIRECTORY
+============================================================
+
+Create:
+
+docs/runtime_vnext16_raddit_rich_metadata/
+
+Required:
+
+README.md
+PREREGISTRATION.json
+
+RADDIT_FULL_SCHEMA_AUDIT.csv
+RADDIT_FIELD_AUTHORITY_AUDIT.csv
+RADDIT_INFORMATION_CLASSIFICATION.md
+RADDIT_ANONYMIZATION_SEMANTICS_AUDIT.md
+
+RADDIT_CROSSWALK_SUMMARY.json
+RADDIT_NATIVE_MODEL_COMPARISON.csv
+RADDIT_NATIVE_FOLD_METRICS.csv
+RADDIT_NATIVE_TAIL_METRICS.csv
+
+CAUSAL_NEIGHBOR_SPEC.md
+CAUSAL_NEIGHBOR_AUDIT.json
+NEIGHBOR_TEMPORAL_LEAKAGE_AUDIT.json
+
+RADDIT_INFORMATION_VALUE_VERDICT.json
+
+V42_DEPLOYABLE_FIELD_BRIDGE.csv
+V42_SEMANTIC_PAYLOAD_V2_SPEC.md
+
+RUNTIME_V16_MODEL_COMPARISON.csv
+RUNTIME_V16_FOLD_METRICS.csv
+RUNTIME_V16_TAIL_METRICS.csv
+RUNTIME_V16_SELECTION_FREEZE.json
+
+CC4_RICH_MODEL_COMPARISON.csv
+CC4_RICH_SELECTION_FREEZE.json
+or explicit NOT_RUN files if gated off
+
+FINAL_FLAGS.json
+FINAL_REVIEW_KO.md
+SOURCE_MANIFEST.json
+LOCAL_EVIDENCE_MANIFEST.json
+DELIVERY_MANIFEST.json
+VERIFICATION.json
+
+Large row-level/model artifacts remain .local and SHA-bound.
+
+============================================================
+40. REQUIRED FINAL FLAGS
+============================================================
+
+FULL_RADDIT_SCHEMA_AUDITED = TRUE/FALSE
+
+RADDIT_NATIVE_INFORMATION_VALUE_TESTED = TRUE/FALSE
+
+RADDIT_RESEARCH_PROXY_CROSSWALK_USED = TRUE/FALSE
+
+RADDIT_PRIVATE_EXPORTER_REQUIRED = FALSE
+
+RADDIT_PRIVATE_VECTOR_REQUIRED_FOR_PRODUCTION = FALSE
+
+RADDIT_DISTRIBUTED_VECTOR_DIAGNOSTIC_RUN =
+    TRUE/FALSE/NOT_POSSIBLE
+
+REAL_FREE_TEXT_AVAILABLE = TRUE/FALSE
+
+MODULES_AVAILABLE = TRUE/FALSE
+CONDA_ENVS_AVAILABLE = TRUE/FALSE
+
+DEPLOYABLE_RICH_FIELDS = [exact list]
+
+RADDIT_NATIVE_INFORMATION_VALUE_SUPPORTED = TRUE/FALSE
+
+CAUSAL_NEIGHBOR_FEATURES_IMPLEMENTED = TRUE/FALSE
+
+RUNTIME_RICH_MODEL_SELECTED =
+    arm name / NONE
+
+RUNTIME_TOTAL_GATE_PASS = TRUE/FALSE
+
+RUNTIME_PROVIDER_READY_FOR_V42 = TRUE/FALSE
+
+CC4_RICH_STAGE_RUN = TRUE/FALSE
+CC4_RICH_MODEL_SELECTED =
+    C0 / challenger / NOT_RUN
+
+APRIL_USED_FOR_SELECTION = FALSE
+MAY_PAYLOAD_OPENED = FALSE
+
+OPTIMIZER_CHANGED = FALSE
+MESS_CHANGED = FALSE
+OPENDSS_RUN = FALSE
+FLEXIBILITY_BRANCH_CHANGED = FALSE
+
+============================================================
+41. FINAL_REVIEW_KO MUST ANSWER
+============================================================
+
+At minimum answer:
+
+1. PR #89 actually used which new semantic fields?
+2. Why was PR #89 not a full RADDiT test?
+3. What fields exist in historic_job_trace?
+4. Which are anonymized identities?
+5. Which contain actual workflow/software-stack information?
+6. Which are available at submission time?
+7. Which can be reproduced for a future V42 job?
+8. Which are diagnostic-only?
+9. Which are forbidden future/outcome fields?
+10. How much of RADDiT maps to Kestrel under the research proxy?
+11. How many ambiguous rows were excluded?
+12. Did any mapping conflict with holdout fields?
+13. Does rich RADDiT metadata improve Runtime on RADDiT-native folds?
+14. Does user/account identity help?
+15. Does script/job identity help?
+16. Do modules/conda help?
+17. Do resource request fields help?
+18. Do causal historical neighbors help?
+19. Is improvement stable across time?
+20. Does >4h improve?
+21. Does >12h improve?
+22. Does >24h improve?
+23. What happens to pinball?
+24. What happens to reservation ratio?
+25. Does a randomized-identity negative control match the improvement?
+26. Did any target-derived encoding use future outcomes?
+27. Were only completed historical neighbors used?
+28. Did public RADDiT distributed embedding have diagnostic value?
+29. Can that vector be generated for future V42 jobs?
+30. Which useful fields survive the V42 deployability filter?
+31. Does the deployable model retain the RADDiT-native improvement?
+32. Is CatBoost better than the same-information V13 hazard model?
+33. Is model gain actually information gain or architecture gain?
+34. Does R0 remain the baseline?
+35. Did any gate change after seeing results?
+36. Did Runtime pass min-fold 85%?
+37. Did >4h pass 85%?
+38. Did >12h pass 80%?
+39. Did >24h pass 70% where applicable?
+40. Is the provider callable for unseen jobs?
+41. Are raw strings kept out of optimizer logs?
+42. Is online refit required?
+43. Was remaining-runtime modeling run prematurely?
+44. Was CC4 gated on Runtime/information-value evidence?
+45. Did CC4 use future unsubmitted semantic information? Must be NO.
+46. Did C0 remain T0/B0?
+47. Was April used for model selection? Must be NO.
+48. Was May opened? Must be NO.
+49. Was optimizer/MESS/OpenDSS changed? Must be NO.
+50. What exact scientific conclusion is justified?
+
+============================================================
+42. MOST IMPORTANT SCIENTIFIC PRINCIPLE
+============================================================
+
+This experiment must separate three questions:
+
+A.
+Does RADDiT contain runtime-predictive workload information?
+
+B.
+Can that information be reproduced causally at a future V42 submission?
+
+C.
+Does a deployable model using that information meet the Runtime safety gates?
+
+Do not collapse A, B, and C into one verdict.
+
+The purpose is NOT to force a successful model.
+
+The purpose is to determine whether the information missing from V6–V15
+is actually present in the richer RADDiT workload metadata.
+
+============================================================
+43. EXECUTION ORDER
+============================================================
+
+Proceed in this exact order:
+
+1. source/schema audit
+2. field authority classification
+3. research-proxy crosswalk
+4. RADDiT-native D0–D4 experiment
+5. information-value freeze
+6. only if justified: V42 deployable field bridge
+7. Runtime R16 deployable evaluation
+8. selection freeze
+9. only if justified: CC4 rich-state experiment
+10. final verification
+11. commit
+12. push
+13. create Draft PR
+
+Do not ask for confirmation between ordinary stages.
+
+Fail closed only at the explicitly defined scientific stop conditions.
+
+============================================================
+44. DELIVERY
+============================================================
+
+After completion:
+
+- run focused tests
+- verify all V6–V15 tracked evidence hashes
+- verify PR #89 baseline reproduction
+- verify no May content was interpreted
+- git diff --check
+- clean worktree
+- commit
+- push
+- create Draft PR
+
+Suggested PR title:
+
+Runtime-vNext16: full RADDiT metadata information-value and deployable runtime study
