@@ -1,0 +1,38 @@
+{
+  "RUNTIME_PROVIDER_STATUS": "UNPROMOTED",
+  "RUNTIME_PROVIDER_READY": false,
+  "runtime_interface": [
+    "predict_total(job,event_time)",
+    "predict_remaining(job,elapsed_seconds,event_time)"
+  ],
+  "outputs": [
+    "q50_seconds",
+    "q90_seconds",
+    "model_version",
+    "provenance"
+  ],
+  "causal_feature_whitelist": true,
+  "requires": [
+    "persisted_model_and_preprocessing_hash",
+    "training_cutoff",
+    "frozen_at",
+    "optimizer_use_allowed",
+    "causal_per_feature_observed_at"
+  ],
+  "absent_provider_behavior": "OBSERVED_JOB_RECORDED_PHYSICAL_WORKLOAD_UNRESOLVED_NO_ACTION_NO_FIX_COERCION",
+  "APRIL_UNKNOWN_TOTAL_RUNTIME_MODEL_AVAILABLE": false,
+  "RUNTIME_MODEL_RETRAIN_REQUIRED": true,
+  "RUNTIME_MODEL_RETRAIN_ALLOWED_IN_THIS_TASK": false,
+  "DDAY_UNKNOWN_ML_RUNTIME_BOUND": false,
+  "FUTURE_ACTUAL_RUNTIME_DECISION_READS": 0,
+  "external_dependency": "A causally trained, pre-April frozen and persisted total-runtime model for newly submitted jobs, callable at submission time without refitting.",
+  "CC4_PROVIDER_STATUS": "CURRENT_FROZEN_BASELINE_PRESERVED_FINAL_NATIVE_BINDING_PENDING",
+  "CC4_PROVIDER_READY": false,
+  "CC4_INTERFACE_IMPLEMENTED": true,
+  "CC4_NEW_MODEL_PROMOTED": false,
+  "CC4_semantics": "SAME_HOUR_Q50_NOMINAL_Q90_UNCERTAINTY_NO_BACKLOG_SHIFT",
+  "SEMANTIC_ML_MERGED": false,
+  "ML_retraining": false,
+  "ML_branch_waited": false,
+  "ML_branch_merged": false
+}
