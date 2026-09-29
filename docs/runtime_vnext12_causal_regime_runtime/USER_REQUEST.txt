@@ -1,0 +1,1255 @@
+Repository: BeaverVillage/MobileESS
+
+NEW RUNTIME ML DEVELOPMENT TASK
+Runtime-vNext12:
+Causal Regime-Aware Job-Specific Runtime Distribution
+
+Suggested branch:
+codex/runtime-vnext12-causal-regime-runtime
+
+Base:
+Runtime-vNext11 / PR #83
+commit: dcc15226263998a90c5aa3fdc5ec53b4cd2afd17
+
+IMPORTANT:
+Preserve all Runtime-vNext6 through vNext11 scientific artifacts byte-identically.
+
+Do NOT modify:
+- V42 AIDC
+- Problem 4 reference placement
+- CC4
+- MESS
+- electrical kernel
+- trust region / epsilon
+- A1/M1/A2/M2 optimizer
+- May data
+
+This task is Runtime ML only.
+
+============================================================
+0. WHY V12 EXISTS
+============================================================
+
+Runtime-vNext11 established that the main remaining problem is not simply
+model size, tail-bin resolution, or training-window length.
+
+Observed pre-April temporal drift was large.
+
+Examples:
+
+Fold 1:
+    TRAIN runtime median = 56 s
+    VALID runtime median = 3624 s
+
+    TRAIN P(T>4h) = 3.99%
+    VALID P(T>4h) = 44.31%
+
+Fold 4:
+    TRAIN runtime median = 74 s
+    CAL median = 25 s
+    VALID median = 673 s
+
+    TRAIN P(T>4h) = 9.00%
+    VALID P(T>4h) = 22.73%
+
+The relation between archived request descriptors and realized runtime also
+changed materially over time.
+
+Simple training-window changes:
+    expanding
+    180 d
+    90 d
+    60 d
+    30 d
+
+did NOT solve the temporal generalization problem.
+
+The working hypothesis for V12 is:
+
+    request/job descriptors alone do not fully describe the current workload
+    regime.
+
+Therefore V12 must add CAUSAL RECENT-REGIME CONTEXT that can be computed using
+only jobs whose outcomes were already observable before prediction time.
+
+============================================================
+1. PRIMARY ARCHITECTURE
+============================================================
+
+Return to the V9-style full runtime distribution as the primary architecture.
+
+Input:
+
+    static job/request descriptors x_j
+        +
+    causal recent-regime context r(t)
+
+Output:
+
+    full total-runtime distribution
+        F(T | x_j, r(t))
+
+From the same distribution derive:
+
+    Q50_total
+    Q90_total
+
+For RUNNING jobs, only if TOTAL passes required gates, later evaluate:
+
+    conditional remaining distribution
+
+        S(e+r | x,regime) / S(e | x,regime)
+
+and optionally the already-scaffolded direct elapsed-aware remaining model.
+
+Do NOT start Stage C unless the TOTAL model first passes the registered gates.
+
+============================================================
+2. KEEP WHAT WORKED FROM V9/V10
+============================================================
+
+Preserve these architectural properties:
+
+FROM V9:
+- job-specific hazard/runtime distribution
+- total Q50/Q90
+- conditional survival mathematics
+- chronological validation
+
+FROM V10:
+- monotone CDF
+- positive support
+- zero-support observed interval count = 0
+- finite valid distribution score
+- log-space survival calculations
+
+Do NOT reuse:
+- V9 additive-seconds calibration
+- V10 static global calibration as the primary solution
+- V11 tail classifier / tail expert as the primary architecture
+
+Those remain baselines / negative evidence.
+
+============================================================
+3. FEATURE AUTHORITY REMAINS UNCHANGED
+============================================================
+
+Preserve:
+
+STRICT_CAUSAL_FEATURE_COUNT = 0
+REQUEST_VERSION_AUTHORITY_FOUND = FALSE
+STRICT_CAUSAL_RUNTIME_PROVIDER_READY = FALSE
+
+Static research features remain:
+
+    provenance_mode = "Kestrel_trace_proxy"
+
+Use the same supported archived descriptors:
+
+- requested walltime
+- requested GPU
+- nodes
+- cores
+- memory
+- QoS
+- partition
+- account
+- array descriptors
+- frozen engineered resource-shape features
+
+Do NOT claim these are proven immutable initial-submit values.
+
+============================================================
+4. NEW FEATURE CLASS: CAUSAL REGIME FEATURES
+============================================================
+
+The new feature family must characterize the CURRENT historical runtime /
+workload environment at prediction time t.
+
+Every regime feature MUST be calculated only from jobs whose required outcome
+was fully known before t.
+
+For example:
+
+    job end_time < t
+
+for completed-runtime statistics.
+
+Never include a job whose runtime completes at or after prediction time.
+
+Never use future jobs.
+
+Never use the current job's eventual outcome.
+
+============================================================
+5. GLOBAL RECENT-RUNTIME FEATURES
+============================================================
+
+Construct causal rolling features over fixed windows:
+
+    7 days
+    14 days
+    30 days
+
+For each window calculate, where support exists:
+
+Runtime distribution:
+- recent_runtime_q25
+- recent_runtime_q50
+- recent_runtime_q75
+- recent_runtime_q90
+- recent_runtime_q95
+
+Long-runtime prevalence:
+- recent_gt1h_rate
+- recent_gt4h_rate
+- recent_gt8h_rate
+- recent_gt12h_rate
+- recent_gt24h_rate
+
+Volume/support:
+- recent_completed_job_count
+- recent_total_GPUh
+- recent_mean_requested_GPU
+- recent_high_GPU_fraction
+
+Requested-duration relation:
+- recent_median_runtime_to_walltime_ratio
+- recent_q75_runtime_to_walltime_ratio
+- recent_q90_runtime_to_walltime_ratio
+
+Use only completed jobs whose end is known before t.
+
+============================================================
+6. COHORT-SPECIFIC RECENT FEATURES
+============================================================
+
+Global regime may be insufficient.
+
+Construct hierarchical recent statistics for selected causal cohorts.
+
+Candidate cohort levels:
+
+LEVEL 0:
+    GLOBAL
+
+LEVEL 1:
+    partition
+
+LEVEL 2:
+    QoS
+
+LEVEL 3:
+    requested-walltime bucket
+
+LEVEL 4:
+    GPU-size bucket
+
+LEVEL 5:
+    partition × QoS
+
+LEVEL 6:
+    partition × walltime bucket
+
+Do NOT create a combinatorial explosion of all feature crosses.
+
+Limit to these predeclared cohort families unless Stage-A support audit shows
+a listed level is unusable.
+
+For each supported cohort compute selected recent statistics such as:
+
+- cohort_recent_N
+- cohort_runtime_q50
+- cohort_runtime_q90
+- cohort_gt4h_rate
+- cohort_gt12h_rate
+- cohort_runtime_walltime_ratio_q50
+
+Use 14 d and 30 d as primary cohort windows.
+
+7 d may be used only when minimum support passes.
+
+============================================================
+7. HIERARCHICAL FALLBACK
+============================================================
+
+Cohort features MUST fail gracefully when support is insufficient.
+
+Example:
+
+partition×QoS 14d N < minimum
+        ->
+partition 14d
+        ->
+global 14d
+        ->
+global 30d
+        ->
+frozen TRAIN prior
+
+Do NOT fill sparse cohorts with zero.
+
+Record:
+
+- exact support N
+- fallback level
+- age of newest observation
+- age of oldest observation
+
+Possible useful features:
+
+    regime_support_N
+    regime_fallback_depth
+
+============================================================
+8. MINIMUM SUPPORT RULES
+============================================================
+
+Freeze support rules BEFORE validation.
+
+Example starting rules:
+
+global rolling statistics:
+    N >= 200
+
+single-category cohort:
+    N >= 100
+
+two-category cohort:
+    N >= 200
+
+tail prevalence:
+    at least 20 observed >4h events where required
+
+These are starting proposed contracts.
+If source support requires adjustment, the adjustment must be made from TRAIN
+statistics only before VALID model evaluation.
+
+Create:
+
+REGIME_SUPPORT_CONTRACT.json
+
+============================================================
+9. PRECOMPUTE FEATURES CAUSALLY
+============================================================
+
+Regime features must be materialized with an event-time-safe engine.
+
+For every prediction row at time t:
+
+    only records with end_time < t
+
+may contribute to outcome-based regime statistics.
+
+Important:
+Do NOT implement rolling features by computing the full-data rolling statistic
+and shifting carelessly.
+
+Perform an explicit causality audit.
+
+Required:
+
+FUTURE_JOB_READS = 0
+FUTURE_END_READS = 0
+CURRENT_JOB_OUTCOME_READS = 0
+
+============================================================
+10. SAME-TIMESTAMP RULE
+============================================================
+
+If another job completes exactly at the prediction timestamp:
+
+define a deterministic rule.
+
+Preferred conservative rule:
+
+    completion must satisfy end_time < prediction_time
+
+not <=.
+
+This prevents ambiguous simultaneous information ordering.
+
+Freeze the rule.
+
+============================================================
+11. STAGE A — REGIME FEATURE FORENSIC
+============================================================
+
+Before model training, verify whether the new causal regime variables track the
+drifts found in V11.
+
+For each fold compare VALID runtime distribution against the latest causal
+regime snapshot.
+
+Report association of:
+
+- recent q50/q90
+- recent >4h rate
+- recent >12h rate
+- recent runtime/walltime ratio
+
+with subsequent VALID behavior.
+
+This is descriptive.
+
+Do NOT use VALID to redesign the window list.
+
+Required questions:
+
+DO_RECENT_Q90_TRACK_FUTURE_Q90
+DO_RECENT_LONG_RATE_TRACK_FUTURE_LONG_RATE
+DO_COHORT_REGIME_FEATURES_ADD_SIGNAL
+
+============================================================
+12. MODEL ARMS — KEEP SEARCH SMALL
+============================================================
+
+Compare only the following.
+
+R0:
+    exact frozen V9 hazard architecture without new regime features,
+    reproduced causally on the V12 folds.
+
+R1:
+    V9 hazard + GLOBAL regime features
+
+R2:
+    V9 hazard + GLOBAL + supported cohort regime features
+
+R3:
+    R2 + regime-change / trend features
+
+No broad new architecture search.
+
+Do NOT add:
+- TFT
+- DeepAR
+- Transformer
+- neural survival models
+- tail expert
+- another large quantile search
+
+============================================================
+13. REGIME TREND FEATURES
+============================================================
+
+R3 may include causal trend information such as:
+
+    q90_7d - q90_30d
+    gt4h_rate_7d - gt4h_rate_30d
+    median_runtime_7d / median_runtime_30d
+    runtime_walltime_ratio_14d - ratio_30d
+
+Handle undefined ratios safely.
+
+The idea is to describe:
+
+    "is the workload currently moving toward longer or shorter runtimes?"
+
+Do not infer trends from future data.
+
+============================================================
+14. TEMPORAL FEATURE ITSELF
+============================================================
+
+Do NOT use arbitrary absolute date identifiers as a shortcut.
+
+Do not give the model:
+
+    "February 2025"
+
+merely so it memorizes a period.
+
+Any time-dependent information must represent observable recent operating
+history rather than calendar identity.
+
+submit-hour/day-of-week remain excluded from the primary model unless already
+scientifically authorized elsewhere.
+
+============================================================
+15. TRAINING WINDOWS
+============================================================
+
+Do NOT repeat the full V11 5-window grid.
+
+Primary training remains:
+
+    EXPANDING
+
+because V11 showed no recency window consistently improved generalization.
+
+One challenger is allowed:
+
+    D90
+
+to test whether regime features plus limited recency are complementary.
+
+Therefore only compare:
+
+    EXPANDING + R0/R1/R2/R3
+    D90 + R2
+
+No D30/D60/D180 sweep again.
+
+============================================================
+16. HAZARD GRID
+============================================================
+
+Use the V9 hazard grid as the anchor.
+
+Also use the V10 numerical support corrections needed for:
+- positive support
+- monotone CDF
+- stable log survival
+
+Do NOT redesign tail bins again in V12.
+
+Tail-grid refinement was already tested and did not explain the failure.
+
+Required:
+
+TAIL_GRID_CHANGED_FROM_V9 = FALSE
+
+except for numerical corrections strictly required to preserve V10 support
+behavior.
+
+============================================================
+17. CALIBRATION
+============================================================
+
+Do NOT apply the V10 static global probability calibration.
+
+Primary candidates:
+
+C0:
+    raw regime-aware hazard
+
+C1:
+    causal rolling14 calibration only if it preserves support and monotonicity
+
+Maximum two calibration states.
+
+Do not test another large calibration family.
+
+Any rolling calibration uses only outcomes known before each prediction time.
+
+Required:
+
+FUTURE_CALIBRATION_READS = 0
+
+============================================================
+18. FIVE TEMPORAL FOLDS
+============================================================
+
+Reuse the exact V9/V10/V11 five chronological folds.
+
+Do not modify the folds.
+
+This is essential for direct comparison.
+
+Report for each arm:
+
+- Q50 MAE
+- Q90 coverage
+- Q90 pinball
+- >4h coverage
+- >8h
+- >12h
+- >24h
+- reservation / actual GPUh
+- proper distribution score
+- zero-support count
+
+============================================================
+19. PRIMARY V12 HYPOTHESIS TEST
+============================================================
+
+The primary success question is:
+
+    Does adding strictly causal recent-regime information reduce
+    temporal fold collapse?
+
+Compare:
+
+R0 vs R1 vs R2 vs R3.
+
+Primary diagnostic:
+
+    minimum fold Q90 coverage
+
+Secondary:
+    coverage std
+
+The desired change is NOT merely better pooled coverage.
+
+We specifically want fold1/fold4-type failure to improve.
+
+============================================================
+20. TOTAL RUNTIME GATES
+============================================================
+
+A candidate may pass TOTAL only if:
+
+Gate A:
+    0.88 <= pooled Q90 coverage <= 0.92
+
+Gate B:
+    min supported fold Q90 coverage >= 0.85
+
+Gate C:
+    pooled >4h Q90 coverage >= 0.85
+
+Gate D:
+    >12h Q90 coverage >= 0.80 when supported
+
+Gate E:
+    no catastrophic >24h undercoverage
+
+Do not require a rigid >24h threshold if support is limited, but explicitly
+report it.
+
+Gate F:
+    reservation materially lower than W0
+
+Gate G:
+    finite valid proper distribution score
+
+Gate H:
+    zero-support observed intervals = 0
+
+Gate I:
+    no future leakage
+
+Only candidates passing all required gates may proceed to Stage C.
+
+============================================================
+21. MODEL SELECTION
+============================================================
+
+Among candidates passing required safety gates:
+
+rank by:
+
+1. Q90 pinball
+2. reservation/actual GPUh
+3. Q50 MAE
+4. temporal coverage std
+5. inference cost
+
+Do NOT pick a failed candidate just to continue Stage C.
+
+If no TOTAL candidate passes:
+
+    stop V12 after Stage B
+
+and preserve a negative result.
+
+============================================================
+22. REGIME FEATURE ABLATION
+============================================================
+
+For the best pre-April R2/R3 candidate, perform focused group ablation:
+
+A. remove global recent runtime distribution
+B. remove recent long-rate features
+C. remove runtime/walltime ratio history
+D. remove cohort-specific recent features
+E. remove trend features
+
+Do not retrain dozens of single-feature ablations.
+
+Report which regime-family actually provides temporal robustness.
+
+============================================================
+23. DRIFT DETECTION DIAGNOSTIC
+============================================================
+
+Optionally compute a causal regime-shift score at prediction time based on
+distance between:
+
+    recent 14d descriptors
+and
+    model training historical distribution
+
+Examples:
+- PSI
+- standardized distance
+- categorical TV
+
+This score may be an input feature ONLY if its definition is frozen from TRAIN.
+
+Do not use VALID-derived threshold.
+
+Do not create fallback behavior based on April.
+
+============================================================
+24. STAGE C ENTRY RULE
+============================================================
+
+Only if:
+
+TOTAL_RUNTIME_MODEL_VALIDATED = TRUE
+
+continue to Stage C.
+
+Otherwise:
+
+- do not train new remaining model,
+- do not create final provider,
+- do not evaluate April,
+- do not open May.
+
+This preserves the V11 stop philosophy.
+
+============================================================
+25. STAGE C — REMAINING MODEL COMPARISON
+============================================================
+
+If TOTAL passes, compare two approaches.
+
+REM_A:
+    conditional remaining from selected V12 total distribution
+
+        S(e+r | x,regime) / S(e | x,regime)
+
+REM_B:
+    direct elapsed-aware remaining quantile model
+
+Inputs:
+- static request descriptors
+- same causal regime features available at checkpoint time
+- elapsed_seconds
+- log1p(elapsed)
+- checkpoint age bucket
+- optional strictly OOF total Q50/Q90
+
+Outputs:
+- Q50_remaining
+- Q90_remaining
+
+============================================================
+26. REMAINING SAMPLE LEAKAGE
+============================================================
+
+All checkpoints from one execution episode must remain in one fold role.
+
+Required:
+
+CHECKPOINT_EPISODE_CROSS_SPLIT_LEAKAGE = 0
+
+If OOF total predictions are used as remaining features:
+
+OOF_TOTAL_PREDICTION_LEAKAGE = 0
+
+Do not use final total model predictions on its own training rows to create
+training features for remaining model.
+
+============================================================
+27. REMAINING REGIME FEATURES
+============================================================
+
+At checkpoint time t_cp, regime features must be recomputed using:
+
+    only jobs whose required outcomes are known before t_cp.
+
+Do NOT reuse the original job submission-time regime state if newer causal
+history is legitimately available.
+
+This allows the RUNNING model to know the current cluster/workload regime.
+
+============================================================
+28. REMAINING GATES
+============================================================
+
+Require:
+
+0.88 <= pooled Q90 coverage <= 0.92
+
+and temporal stability.
+
+Report elapsed strata:
+
+0.5–1h
+1–2h
+2–4h
+4–8h
+8–12h
+12–24h
+>24h
+
+Also report actual remaining strata.
+
+Select between REM_A and REM_B only using pre-April folds.
+
+============================================================
+29. OVERRUN CONTRACT
+============================================================
+
+Preserve:
+
+- observed RUNNING job is never force-completed
+- GPU occupancy remains
+- 900-s extension when needed
+- updated remaining prediction at later checkpoint
+- migration fallback STAY during OVERRUN
+
+No change to V42 migration semantics.
+
+============================================================
+30. PRE-APRIL RESOURCE / QUEUE REPLAY
+============================================================
+
+For TOTAL-passed candidate:
+
+Use total Q90 for NEW/PENDING reservation.
+
+For causal execution stress:
+
+use selected remaining method after the job becomes RUNNING.
+
+Keep metrics separate:
+
+FORECAST_RESERVATION
+vs
+CAUSAL_CURRENT_SLOT_STRESS
+
+Report:
+- start<H
+- start>=H
+- reservation GPUh
+- actual GPUh
+- queue wait
+- overrun extensions
+- capacity violations
+
+============================================================
+31. FREEZE BEFORE APRIL
+============================================================
+
+If V12 reaches provider stage, freeze:
+
+REGIME:
+- rolling windows
+- support rules
+- cohort hierarchy
+- fallback hierarchy
+- exact feature definitions
+
+MODEL:
+- hazard architecture
+- feature set
+- training window
+- calibration state
+- hyperparameters
+
+REMAINING:
+- conditional/direct selection
+- checkpoint features
+- OOF contract
+
+SYSTEM:
+- provider bytes
+- all pass/fail gates
+
+Required:
+
+REGIME_FEATURE_CONTRACT_FREEZE.json
+REGIME_SUPPORT_FREEZE.json
+TOTAL_MODEL_SELECTION_FREEZE.json
+REMAINING_MODEL_SELECTION_FREEZE.json
+PROVIDER_BUNDLE_FREEZE.json
+
+============================================================
+32. APRIL EXPOSED REGRESSION
+============================================================
+
+ONLY IF V12 TOTAL and required remaining/provider gates pass pre-April.
+
+April remains:
+
+    EXPOSED_REGRESSION_ONLY
+
+Evaluate without retraining.
+
+Report:
+
+TOTAL:
+- Q90 coverage
+- >4h
+- >8h
+- >12h
+- >24h
+- pinball
+- reservation ratio
+
+REMAINING:
+- Q90 coverage
+- elapsed strata
+- pinball
+- overrun fraction
+
+QUEUE:
+- April2 start<H
+- start>=H
+- reserved GPUh
+- queue wait
+- overrun
+- capacity violations
+
+Do not change V12 after seeing April.
+
+============================================================
+33. MAY REMAINS SEALED
+============================================================
+
+May must not be opened.
+
+Required:
+
+MAY_PAYLOAD_OPENED = FALSE
+MAY_USED_FOR_SELECTION = FALSE
+MAY_USED_FOR_EVALUATION = FALSE
+
+============================================================
+34. APRIL BASELINE HISTORY
+============================================================
+
+If Stage D is reached, preserve known prior April2 values:
+
+W0  start<H = 150
+B0  = 47
+V8  = 111
+V9  = 127
+V10 = 91
+
+V11 = NOT_RUN
+
+Add V12 only if the pre-April gate authorized April evaluation.
+
+Do not fabricate a V12 number if the task stops earlier.
+
+============================================================
+35. PROVIDER API
+============================================================
+
+If validated, build ONE provider package.
+
+predict_total(job_record, event_time)
+
+Must:
+- construct static trace features
+- construct causal regime features as-of event_time
+- return Q50/Q90 total
+- return regime metadata/support/fallback level
+
+Outputs:
+    q50_total_seconds
+    q90_total_seconds
+    regime_support
+    regime_fallback_level
+    model_version
+    provenance_mode="Kestrel_trace_proxy"
+
+predict_remaining(job_record, elapsed_seconds, event_time)
+
+Outputs:
+    q50_remaining_seconds
+    q90_remaining_seconds
+    regime_support
+    model_version
+
+Provider must NOT require online model fitting.
+
+Regime summary state may be updated causally from newly completed jobs,
+but booster/model parameters remain frozen.
+
+============================================================
+36. LIVE REGIME STATE VS MODEL REFIT
+============================================================
+
+Important distinction:
+
+Updating rolling summary statistics from completed jobs is allowed.
+
+Retraining the model online is NOT required.
+
+Therefore:
+
+ONLINE_MODEL_REFIT_REQUIRED = FALSE
+
+but:
+
+CAUSAL_REGIME_STATE_UPDATE_REQUIRED = TRUE
+
+if the selected model uses rolling regime features.
+
+This is a feature-state update, not ML retraining.
+
+============================================================
+37. DETERMINISTIC REPRODUCIBILITY
+============================================================
+
+Given:
+- same historical event stream
+- same event timestamp
+- same model bundle
+
+regime features and predictions must be deterministic.
+
+Test:
+- chronological replay
+- chunked replay
+- process restart / restored state
+
+Required hashes must match.
+
+============================================================
+38. REQUIRED ARTIFACTS — STAGE A
+============================================================
+
+Create:
+
+docs/runtime_vnext12_causal_regime_runtime/
+
+REGIME_FEATURE_SPEC.md
+REGIME_SUPPORT_CONTRACT.json
+
+REGIME_CAUSALITY_AUDIT.json
+REGIME_STATE_REPLAY_AUDIT.json
+
+GLOBAL_REGIME_FEATURES.csv
+COHORT_REGIME_SUPPORT.csv
+REGIME_FALLBACK_AUDIT.csv
+
+REGIME_FOLD_ASSOCIATION.csv
+REGIME_SHIFT_DIAGNOSTIC.csv
+
+============================================================
+39. REQUIRED ARTIFACTS — TOTAL
+============================================================
+
+V9_CAUSAL_REPRODUCTION.json
+
+TOTAL_MODEL_COMPARISON.csv
+TOTAL_FOLD_METRICS.csv
+TOTAL_LONG_TAIL_METRICS.csv
+TOTAL_DISTRIBUTIONAL_METRICS.csv
+TOTAL_GPU_WEIGHTED_METRICS.csv
+
+REGIME_FEATURE_ABLATION.csv
+TEMPORAL_ROBUSTNESS_COMPARISON.csv
+
+PREAPRIL_TOTAL_QUEUE_REPLAY.csv
+
+============================================================
+40. REQUIRED ARTIFACTS — REMAINING IF RUN
+============================================================
+
+CHECKPOINT_SAMPLE_AUDIT.json
+CHECKPOINT_EPISODE_SPLIT_AUDIT.json
+
+REMAINING_MODEL_COMPARISON.csv
+REMAINING_FOLD_METRICS.csv
+REMAINING_ELAPSED_STRATA.csv
+REMAINING_LONG_RUNNING_METRICS.csv
+
+OOF_TOTAL_FEATURE_AUDIT.json
+PREAPRIL_CAUSAL_STRESS_REPLAY.csv
+
+============================================================
+41. REQUIRED FREEZES / FINAL OUTPUTS
+============================================================
+
+REGIME_FEATURE_CONTRACT_FREEZE.json
+REGIME_SUPPORT_FREEZE.json
+TOTAL_MODEL_SELECTION_FREEZE.json
+REMAINING_MODEL_SELECTION_FREEZE.json
+PROVIDER_BUNDLE_FREEZE.json
+
+APRIL_EXPOSED_TOTAL_METRICS.csv
+APRIL_EXPOSED_REMAINING_METRICS.csv
+APRIL2_EXPOSED_QUEUE_REGRESSION.csv
+
+RUNTIME_PROVIDER/
+
+SOURCE_MANIFEST.json
+DELIVERY_MANIFEST.json
+
+FINAL_REVIEW_KO.md
+FINAL_VERDICT.json
+
+If a stage is not authorized to run, its artifact must explicitly say:
+
+    NOT_RUN_GATE_FAILED
+
+Do not invent zero values.
+
+============================================================
+42. REQUIRED FINAL KOREAN QUESTIONS
+============================================================
+
+FINAL_REVIEW_KO.md must answer:
+
+1. V11까지 반복 실패한 가장 중요한 원인은 무엇인가?
+2. request descriptor만으로 설명되지 않는 temporal drift 증거는 무엇인가?
+3. regime feature는 정확히 무엇인가?
+4. regime feature는 미래정보를 읽지 않는가?
+5. 같은 timestamp의 완료 job은 어떻게 처리하는가?
+6. 7/14/30일 global runtime 통계는 어떻게 계산했는가?
+7. cohort-specific 통계에는 무엇을 사용했는가?
+8. sparse cohort는 어떻게 fallback했는가?
+9. regime feature가 fold1을 개선했는가?
+10. regime feature가 fold4를 개선했는가?
+11. min-fold coverage가 V9/V10/V11보다 좋아졌는가?
+12. pooled Q90 coverage는?
+13. >4h coverage는?
+14. >8h/>12h/>24h coverage는?
+15. 최근 long-job 비율이 실제 미래 long-job 비율과 연관되는가?
+16. recent runtime/walltime ratio가 도움이 되었는가?
+17. global regime vs cohort regime 중 무엇이 기여했는가?
+18. trend feature는 도움이 되었는가?
+19. EXPANDING과 D90 중 무엇이 나았는가?
+20. V9 hazard anchor를 유지한 것이 타당했는가?
+21. proper distribution score와 zero-support는 정상인가?
+22. reservation/actual GPUh는?
+23. pre-April queue utility는?
+24. TOTAL 모든 안전 gate를 통과했는가?
+25. TOTAL 실패 시 Stage C가 중단됐는가?
+26. Stage C를 실행했다면 conditional vs direct remaining 중 무엇이 나았는가?
+27. remaining Q90 coverage는?
+28. elapsed-age strata에서 안정적인가?
+29. regime state를 checkpoint 시점에도 causal하게 업데이트했는가?
+30. overrun은 감소했는가?
+31. provider는 새 job에 재학습 없이 호출 가능한가?
+32. regime state update와 model refit의 차이는 무엇인가?
+33. April을 평가했는가? 평가 조건은 무엇인가?
+34. April 결과를 보고 재튜닝했는가? 반드시 NO.
+35. May를 열었는가? 반드시 NO.
+36. V42 research Runtime provider로 승격 가능한가?
+37. strict causal provider가 여전히 FALSE인 이유는?
+
+============================================================
+43. FINAL FLAGS
+============================================================
+
+STRICT_CAUSAL_FEATURE_COUNT = 0
+REQUEST_VERSION_AUTHORITY_FOUND = FALSE
+STRICT_CAUSAL_RUNTIME_PROVIDER_READY = FALSE
+
+REGIME_CAUSALITY_PASS = TRUE/FALSE
+REGIME_REPLAY_DETERMINISTIC = TRUE/FALSE
+
+GLOBAL_REGIME_FEATURES_READY = TRUE/FALSE
+COHORT_REGIME_FEATURES_READY = TRUE/FALSE
+
+FUTURE_JOB_READS = integer
+FUTURE_END_READS = integer
+CURRENT_JOB_OUTCOME_READS = integer
+
+V9_CAUSAL_REPRODUCED = TRUE/FALSE
+
+SELECTED_REGIME_MODEL =
+    R0 / R1 / R2 / R3 / NONE
+
+TOTAL_RUNTIME_MODEL_VALIDATED = TRUE/FALSE
+
+TOTAL_OVERALL_Q90_GATE_PASS = TRUE/FALSE
+TOTAL_MIN_FOLD_GATE_PASS = TRUE/FALSE
+TOTAL_GT4H_GATE_PASS = TRUE/FALSE
+TOTAL_GT12H_GATE_PASS = TRUE/FALSE
+TOTAL_RESERVATION_GATE_PASS = TRUE/FALSE
+
+STAGE_C_AUTHORIZED = TRUE/FALSE
+
+REMAINING_MODEL_RUN = TRUE/FALSE
+REMAINING_RUNTIME_MODEL_VALIDATED = TRUE/FALSE
+REMAINING_Q90_GATE_PASS = TRUE/FALSE
+
+CHECKPOINT_EPISODE_CROSS_SPLIT_LEAKAGE = integer
+OOF_TOTAL_PREDICTION_LEAKAGE = integer
+
+CAUSAL_REGIME_STATE_UPDATE_REQUIRED = TRUE/FALSE
+ONLINE_MODEL_REFIT_REQUIRED = FALSE
+
+V42_RESEARCH_RUNTIME_PROVIDER_READY = TRUE/FALSE
+
+APRIL_USED_FOR_SELECTION = FALSE
+APRIL_STATUS = "EXPOSED_REGRESSION_ONLY"
+APRIL_MODEL_CHANGED_AFTER_EVALUATION = FALSE
+
+MAY_PAYLOAD_OPENED = FALSE
+MAY_USED_FOR_SELECTION = FALSE
+MAY_USED_FOR_EVALUATION = FALSE
+
+============================================================
+44. PASS REQUIREMENT
+============================================================
+
+V42_RESEARCH_RUNTIME_PROVIDER_READY may be TRUE only if:
+
+1. regime features pass strict causality audit
+2. future reads = 0
+3. total pooled Q90 = 88–92%
+4. minimum fold Q90 >= 85%
+5. pooled >4h Q90 >= 85%
+6. >12h tail acceptably protected
+7. reservation materially below W0
+8. proper distribution remains valid
+9. zero-support remains zero
+10. pre-April queue replay is acceptable
+11. Stage C, if required, passes remaining calibration
+12. episode/checkpoint leakage = 0
+13. new-job callable provider works without model refit
+14. overrun safety contract is preserved
+15. April never influences selection
+16. May remains unopened
+17. provenance limitation remains explicit
+
+If any required gate fails:
+
+    V42_RESEARCH_RUNTIME_PROVIDER_READY = FALSE
+
+Do not lower thresholds.
+
+============================================================
+45. STOP CONDITIONS
+============================================================
+
+Stop before Stage C if:
+
+- regime features fail causal audit,
+- future-completion leakage is found,
+- regime state cannot be reproduced deterministically,
+- no TOTAL candidate passes safety gates,
+- min-fold remains <85%,
+- >4h remains <85%.
+
+Stop before April if:
+- provider is not frozen,
+- Stage C is required but not validated,
+- any future/outcome leakage remains unresolved.
+
+Do not use April or May to rescue a failed pre-April model.
+
+============================================================
+46. MOST IMPORTANT PRINCIPLE
+============================================================
+
+The V12 hypothesis is:
+
+    Runtime is determined not only by job/request descriptors,
+    but also by the current workload regime.
+
+Therefore model:
+
+    P(T | job descriptors, causal recent workload state)
+
+instead of only:
+
+    P(T | job descriptors).
+
+The new regime state must describe only the past that was genuinely observable
+at prediction time.
+
+If this does NOT improve temporal robustness,
+preserve the negative result rather than adding another model zoo.

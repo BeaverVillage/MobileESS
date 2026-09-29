@@ -1,0 +1,66 @@
+{
+  "time": "2026-09-29T02:50:43.926326+00:00",
+  "arms": [
+    "EXPANDING_R0",
+    "EXPANDING_R1",
+    "EXPANDING_R2",
+    "EXPANDING_R3",
+    "D90_R2"
+  ],
+  "calibration_states": [
+    "C0"
+  ],
+  "C1": "Optional rolling14 state not included; no calibration search",
+  "learner": {
+    "n_estimators": 300,
+    "learning_rate": 0.05,
+    "num_leaves": 31,
+    "max_depth": 8,
+    "min_child_samples": 200,
+    "reg_lambda": 2,
+    "max_bin": 127,
+    "random_state": 4009,
+    "n_jobs": 4,
+    "verbosity": -1,
+    "deterministic": true,
+    "force_col_wise": true
+  },
+  "grid": {
+    "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext9_distributional_runtime\\HAZARD_BIN_CONTRACT.json",
+    "bytes": 2380,
+    "sha256": "35921acb7d5fc0740cbc2d03835ae15f61a895fbd38bfe917defb7475fe1a1bc"
+  },
+  "R0": "Frozen V9 D1 boosters reused with all-row parameter parity; exact same folds; V10 log-space scoring",
+  "prediction_time": "submit_time for TOTAL; completed outcomes visible strictly before each submission",
+  "observation_cutoff": "Inherited fold labels including right censoring; no April/May source read",
+  "tail_continuation": "LAST_RATE with positive hazard clipping1e-7..1-1e-7, unchanged V9 edges",
+  "gates": {
+    "A_pooled_Q90": [
+      0.88,
+      0.92
+    ],
+    "B_min_supported_fold_Q90": 0.85,
+    "C_gt4h": 0.85,
+    "D_gt12h": 0.8,
+    "E_gt24h_min_if_supported": 0.7,
+    "tail_support_N": 100,
+    "fold_support_N": 100,
+    "F_reservation_to_W0_max": 0.8,
+    "G_finite_NLL": true,
+    "H_zero_support": 0,
+    "I_future_reads": 0
+  },
+  "gate_E": "Catastrophic means <70% with>=100 exact >24h events; otherwise report only",
+  "gate_F": "Materially lower means at least20% lower slot-rounded GPUh than requested walltime W0",
+  "ranking": [
+    "Q90_pinball",
+    "reservation_actual_GPUh",
+    "Q50_MAE",
+    "coverage_std",
+    "inference_seconds"
+  ],
+  "ablation": "Five grouped removals from best R2/R3 by same rank; failed models diagnostic only; removing a family removes derived trends depending on it",
+  "stage_C": "Only if TOTAL all gates pass; failed candidates never promoted",
+  "April_allowed": false,
+  "May_allowed": false
+}

@@ -1,0 +1,33 @@
+{
+  "time": "2026-09-29T02:50:43.925327+00:00",
+  "global_windows_days": [
+    7,
+    14,
+    30
+  ],
+  "cohort_windows_days": [
+    14,
+    30
+  ],
+  "cohort_families": [
+    "partition",
+    "qos",
+    "walltime",
+    "gpu",
+    "partition_qos",
+    "partition_walltime"
+  ],
+  "global_min_N": 200,
+  "single_min_N": 100,
+  "cross_min_N": 200,
+  "min_gt4h_events": 20,
+  "ratio_min_valid_walltime_N": "same as source minimum N",
+  "high_GPU_threshold": 16,
+  "frozen_before_VALID": true,
+  "adjusted_from_VALID": false,
+  "support": "One source supplies all family statistics; N, tail events and valid ratio support must all pass",
+  "same_timestamp_rule": "end_time < prediction_time; window lower bound inclusive",
+  "prior": "Frozen earliest TRAIN prefix reaching N200 and20 >4h; unavailable until last prefix completion +1ns",
+  "cold_start": "NaN statistics, fallback_depth=-1; no zero-imputed runtime or tail rates",
+  "fallback": "cross -> partition same window -> global same window -> global30 if distinct -> available frozen TRAIN prior; single -> global same window -> global30 -> prior"
+}
