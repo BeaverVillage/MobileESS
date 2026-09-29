@@ -1,0 +1,488 @@
+{
+  "PASS": true,
+  "solver": "scipy.optimize.milp/HiGHS",
+  "scope": "TEN_SMALL_SYNTHETIC_CASES",
+  "full_native_campaign": false,
+  "canaries": [
+    {
+      "case": "A",
+      "PASS": true,
+      "capabilities": {
+        "can_timeshift": false,
+        "can_prestart_place": false,
+        "can_checkpoint_migrate": false,
+        "FLEX": false,
+        "FIX": true,
+        "timeshift_reason": "NO_WITNESSED_ALTERNATIVE",
+        "prestart_reason": "NO_WITNESSED_MULTISITE_START",
+        "migration_reason": "NO_WITNESSED_CHECKPOINT_MOVE"
+      },
+      "options": 1,
+      "selected": "STAY",
+      "rho": 0.54,
+      "passes": [
+        {
+          "objective": "rho_max",
+          "value": 0.54,
+          "gap": 0.0
+        },
+        {
+          "objective": "migration_count",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "shift_slots",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "prestart_changes",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "tie:A",
+          "value": 0.0,
+          "gap": 0.0
+        }
+      ],
+      "binary_variables": 0,
+      "full_service_GPUh": 6.0,
+      "elapsed_seconds": 0.0,
+      "post_H_GPUh": 0.0
+    },
+    {
+      "case": "B",
+      "PASS": true,
+      "capabilities": {
+        "can_timeshift": true,
+        "can_prestart_place": false,
+        "can_checkpoint_migrate": false,
+        "FLEX": true,
+        "FIX": false,
+        "timeshift_reason": "WITNESSED_ALTERNATIVE",
+        "prestart_reason": "NO_WITNESSED_MULTISITE_START",
+        "migration_reason": "NO_WITNESSED_CHECKPOINT_MOVE"
+      },
+      "options": 2,
+      "selected": "STAY",
+      "rho": 0.54,
+      "passes": [
+        {
+          "objective": "rho_max",
+          "value": 0.54,
+          "gap": 0.0
+        },
+        {
+          "objective": "migration_count",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "shift_slots",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "prestart_changes",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "tie:B",
+          "value": 0.0,
+          "gap": 0.0
+        }
+      ],
+      "binary_variables": 2,
+      "full_service_GPUh": 6.0,
+      "elapsed_seconds": 0.0,
+      "post_H_GPUh": 0.0
+    },
+    {
+      "case": "C",
+      "PASS": true,
+      "capabilities": {
+        "can_timeshift": false,
+        "can_prestart_place": true,
+        "can_checkpoint_migrate": false,
+        "FLEX": true,
+        "FIX": false,
+        "timeshift_reason": "NO_WITNESSED_ALTERNATIVE",
+        "prestart_reason": "WITNESSED_MULTISITE_START",
+        "migration_reason": "NO_WITNESSED_CHECKPOINT_MOVE"
+      },
+      "options": 2,
+      "selected": "STAY",
+      "rho": 0.54,
+      "passes": [
+        {
+          "objective": "rho_max",
+          "value": 0.54,
+          "gap": 0.0
+        },
+        {
+          "objective": "migration_count",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "shift_slots",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "prestart_changes",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "tie:C",
+          "value": 0.0,
+          "gap": 0.0
+        }
+      ],
+      "binary_variables": 2,
+      "full_service_GPUh": 6.0,
+      "elapsed_seconds": 0.0,
+      "post_H_GPUh": 0.0
+    },
+    {
+      "case": "D",
+      "PASS": true,
+      "capabilities": {
+        "can_timeshift": true,
+        "can_prestart_place": true,
+        "can_checkpoint_migrate": false,
+        "FLEX": true,
+        "FIX": false,
+        "timeshift_reason": "WITNESSED_ALTERNATIVE",
+        "prestart_reason": "WITNESSED_MULTISITE_START",
+        "migration_reason": "NO_WITNESSED_CHECKPOINT_MOVE"
+      },
+      "options": 4,
+      "selected": "STAY",
+      "rho": 0.54,
+      "passes": [
+        {
+          "objective": "rho_max",
+          "value": 0.54,
+          "gap": 0.0
+        },
+        {
+          "objective": "migration_count",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "shift_slots",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "prestart_changes",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "tie:D",
+          "value": 0.0,
+          "gap": 0.0
+        }
+      ],
+      "binary_variables": 4,
+      "full_service_GPUh": 6.0,
+      "elapsed_seconds": 0.015000000001236913,
+      "post_H_GPUh": 0.0
+    },
+    {
+      "case": "E",
+      "PASS": true,
+      "capabilities": {
+        "can_timeshift": false,
+        "can_prestart_place": false,
+        "can_checkpoint_migrate": true,
+        "FLEX": true,
+        "FIX": false,
+        "timeshift_reason": "NO_WITNESSED_ALTERNATIVE",
+        "prestart_reason": "NO_WITNESSED_MULTISITE_START",
+        "migration_reason": "WITNESSED_CHECKPOINT_MOVE"
+      },
+      "options": 19,
+      "selected": "STAY",
+      "rho": 0.54,
+      "passes": [
+        {
+          "objective": "rho_max",
+          "value": 0.54,
+          "gap": 0.0
+        },
+        {
+          "objective": "migration_count",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "shift_slots",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "prestart_changes",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "tie:E",
+          "value": 18.0,
+          "gap": 0.0
+        }
+      ],
+      "binary_variables": 19,
+      "full_service_GPUh": 6.0,
+      "elapsed_seconds": 0.0,
+      "post_H_GPUh": 0.0
+    },
+    {
+      "case": "F",
+      "PASS": true,
+      "capabilities": {
+        "can_timeshift": true,
+        "can_prestart_place": true,
+        "can_checkpoint_migrate": true,
+        "FLEX": true,
+        "FIX": false,
+        "timeshift_reason": "WITNESSED_ALTERNATIVE",
+        "prestart_reason": "WITNESSED_MULTISITE_START",
+        "migration_reason": "WITNESSED_CHECKPOINT_MOVE"
+      },
+      "options": 40,
+      "selected": "STAY",
+      "rho": 0.54,
+      "passes": [
+        {
+          "objective": "rho_max",
+          "value": 0.54,
+          "gap": 0.0
+        },
+        {
+          "objective": "migration_count",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "shift_slots",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "prestart_changes",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "tie:F",
+          "value": 10.0,
+          "gap": 0.0
+        }
+      ],
+      "binary_variables": 40,
+      "full_service_GPUh": 6.0,
+      "elapsed_seconds": 0.0,
+      "post_H_GPUh": 0.0
+    },
+    {
+      "case": "G",
+      "PASS": true,
+      "capabilities": {
+        "can_timeshift": false,
+        "can_prestart_place": true,
+        "can_checkpoint_migrate": false,
+        "FLEX": true,
+        "FIX": false,
+        "timeshift_reason": "NO_WITNESSED_ALTERNATIVE",
+        "prestart_reason": "WITNESSED_MULTISITE_START",
+        "migration_reason": "NO_WITNESSED_CHECKPOINT_MOVE"
+      },
+      "options": 2,
+      "selected": "STAY",
+      "rho": 0.54,
+      "passes": [
+        {
+          "objective": "rho_max",
+          "value": 0.54,
+          "gap": 0.0
+        },
+        {
+          "objective": "migration_count",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "shift_slots",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "prestart_changes",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "tie:G",
+          "value": 0.0,
+          "gap": 0.0
+        }
+      ],
+      "binary_variables": 2,
+      "full_service_GPUh": 6.0,
+      "elapsed_seconds": 0.0,
+      "post_H_GPUh": 0.0
+    },
+    {
+      "case": "H",
+      "PASS": true,
+      "capabilities": {
+        "can_timeshift": false,
+        "can_prestart_place": false,
+        "can_checkpoint_migrate": false,
+        "FLEX": false,
+        "FIX": true,
+        "timeshift_reason": "NO_WITNESSED_ALTERNATIVE",
+        "prestart_reason": "NO_WITNESSED_MULTISITE_START",
+        "migration_reason": "NO_WITNESSED_CHECKPOINT_MOVE"
+      },
+      "options": 1,
+      "selected": "STAY",
+      "rho": 0.54,
+      "passes": [
+        {
+          "objective": "rho_max",
+          "value": 0.54,
+          "gap": 0.0
+        },
+        {
+          "objective": "migration_count",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "shift_slots",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "prestart_changes",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "tie:H",
+          "value": 0.0,
+          "gap": 0.0
+        }
+      ],
+      "binary_variables": 0,
+      "full_service_GPUh": 6.0,
+      "elapsed_seconds": 0.014999999999417923,
+      "post_H_GPUh": 0.0
+    },
+    {
+      "case": "I",
+      "PASS": true,
+      "capabilities": {
+        "can_timeshift": true,
+        "can_prestart_place": true,
+        "can_checkpoint_migrate": false,
+        "FLEX": true,
+        "FIX": false,
+        "timeshift_reason": "WITNESSED_ALTERNATIVE",
+        "prestart_reason": "WITNESSED_MULTISITE_START",
+        "migration_reason": "NO_WITNESSED_CHECKPOINT_MOVE"
+      },
+      "options": 4,
+      "selected": "STAY",
+      "rho": 0.54,
+      "passes": [
+        {
+          "objective": "rho_max",
+          "value": 0.54,
+          "gap": 0.0
+        },
+        {
+          "objective": "migration_count",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "shift_slots",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "prestart_changes",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "tie:I",
+          "value": 0.0,
+          "gap": 0.0
+        }
+      ],
+      "binary_variables": 4,
+      "full_service_GPUh": 6.0,
+      "elapsed_seconds": 0.0,
+      "post_H_GPUh": 4.0
+    },
+    {
+      "case": "J",
+      "PASS": true,
+      "capabilities": {
+        "can_timeshift": false,
+        "can_prestart_place": false,
+        "can_checkpoint_migrate": false,
+        "FLEX": false,
+        "FIX": true,
+        "timeshift_reason": "NO_WITNESSED_ALTERNATIVE",
+        "prestart_reason": "NO_WITNESSED_MULTISITE_START",
+        "migration_reason": "NO_WITNESSED_CHECKPOINT_MOVE"
+      },
+      "options": 1,
+      "selected": "STAY",
+      "rho": 0.54,
+      "passes": [
+        {
+          "objective": "rho_max",
+          "value": 0.54,
+          "gap": 0.0
+        },
+        {
+          "objective": "migration_count",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "shift_slots",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "prestart_changes",
+          "value": 0.0,
+          "gap": 0.0
+        },
+        {
+          "objective": "tie:J",
+          "value": 0.0,
+          "gap": 0.0
+        }
+      ],
+      "binary_variables": 0,
+      "full_service_GPUh": 6.0,
+      "elapsed_seconds": 0.0,
+      "post_H_GPUh": 0.0
+    }
+  ]
+}
