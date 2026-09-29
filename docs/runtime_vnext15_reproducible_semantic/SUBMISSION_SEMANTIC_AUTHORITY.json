@@ -1,0 +1,39 @@
+{
+  "time": "2026-09-29T09:05:35.007717+00:00",
+  "allowed_historical_fields": [
+    "user",
+    "submit_line"
+  ],
+  "source": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR Kestrel Jobs\\datacard.md",
+    "bytes": 14860,
+    "sha256": "0139b75b80cd3029e0af54e22fc0dbad3080e92a8a7a602f1bd62cd7a36f62e9"
+  },
+  "basis": "Datacard User=identity of submitting user and SubmitLine=original submission command; field-level immutable submission concepts, not later mutable job settings.",
+  "excluded_mutable": [
+    "account",
+    "partition",
+    "qos",
+    "name",
+    "reservation",
+    "dependency"
+  ],
+  "excluded_derivation_or_capture_unproven": [
+    "job_type",
+    "script",
+    "modules",
+    "conda_envs",
+    "workdir",
+    "array_pos",
+    "array_range"
+  ],
+  "collection": "Periodic sacct snapshot, no ingestion time or field revision log. Event-time research replay is not attestation of historical ingestion latency.",
+  "existing_R0_features": "Exact frozen V13 trace-proxy baseline retained, not recertified by semantic audit.",
+  "future": "Future real input requires accepted-submit immutable payload receipt and same identity namespace; no attempt to recover source hash algorithm. Unknown namespaces cannot pretend to match archive IDs.",
+  "field_mutation_sources": [
+    "https://slurm.schedmd.com/scontrol.html",
+    "https://slurm.schedmd.com/sacct.html"
+  ],
+  "raw_string_storage": false,
+  "PRIVATE_RADDIT_EXPORT_REQUIRED": false
+}

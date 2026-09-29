@@ -1,0 +1,11 @@
+# SEM_COOCCUR32_V1
+
+Interface frozen before production implementation. Historical source audit permits submitting user and original submit command identity. Mutable account/name/partition/qos snapshots and unproven script/job_type derivation are excluded from the new semantic family; the exact R0 baseline is preserved with its prior trace-proxy limitations. The interface accepts ten optional concepts for future submit-attested payloads but this model whitelist stays two fields.
+
+Canonicalization: Unicode NFC and outer whitespace strip; categorical whole values only. Field + explicit identity namespace + value is SHA256-pseudonymized; no numeric suffixes or character ngrams. A missing value produces a field-prefixed missing token. Deduplicate and sort tokens; FeatureHasher(string,262144,alternate_sign=False), float64; TruncatedSVD(32,random_state=1401,randomized,n_iter=5,n_oversamples=10), TRAIN only. Output float32 sem_00..sem_31. Recurrence: count/log1p(count)/seen for each allowed field plus user-submit_line pair, TRAIN only, no target encoding.
+
+All Runtime fold roles are unchanged. Each fold has its own TRAIN-fitted transformer. CC4 has one transformer and K=8 archetype fitted only on submissions before the first DEVELOPMENT issue using frozen TRAIN dates. Future and CAL/VALID rows only transform. Hash spaces cannot make source anonymous identifiers match future raw names: identity namespaces remain separate; an unseen namespace is valid but unrecognized.
+
+CC4 state uses strictly submit < issue, 1/6/24/72h windows, 32D centroids, count, mean squared dispersion and recurrence fraction; centroid changes are scalar L2 distances. C2 adds 8-cluster counts/fractions at 1/6/24h, entropy and 1h-minus-24h fractions. Unavailable account/script-family fractions are omitted explicitly. No future rows determine state or denominators.
+
+Legacy semantics flag defaults FALSE. Raw payload is handled at the arrival/runtime boundary; policy Arrival carries only fixed numeric features. A running job retains its submission vector. Model promotion is independently gated; the feature flag cannot authorize a provider. Missing optional fields never reject an otherwise valid job.

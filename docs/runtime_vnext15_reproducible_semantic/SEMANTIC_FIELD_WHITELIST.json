@@ -1,0 +1,49 @@
+{
+  "version": "SEM_COOCCUR32_V1",
+  "historical_whitelist": [
+    "user",
+    "submit_line"
+  ],
+  "interface_fields": [
+    "user",
+    "account",
+    "partition",
+    "qos",
+    "job_type",
+    "name",
+    "submit_line",
+    "script",
+    "modules",
+    "conda_envs"
+  ],
+  "recurrence_fields": [
+    "user",
+    "submit_line"
+  ],
+  "recurrence_combinations": [
+    [
+      "user",
+      "submit_line"
+    ]
+  ],
+  "excluded_reason": "Mutable final snapshot fields and unproven derived/captured fields are not approved original-submit observations",
+  "TEXT_SEMANTIC_CHANNEL_AVAILABLE": false,
+  "feature_hasher": {
+    "n_features": 262144,
+    "input_type": "string",
+    "alternate_sign": false
+  },
+  "svd": {
+    "n_components": 32,
+    "random_state": 1401,
+    "algorithm": "randomized",
+    "n_iter": 5,
+    "n_oversamples": 10
+  },
+  "kmeans": {
+    "n_clusters": 8,
+    "random_state": 1401,
+    "n_init": 10
+  },
+  "privacy": "NFC normalization, namespace-separated SHA256 pseudonyms, no raw token persistence; hashes are not an anonymity guarantee"
+}
