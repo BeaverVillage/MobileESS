@@ -1,0 +1,7 @@
+V42's latest joint MESS block imposed both an exact PCS circle and an inner 16-face polygon. This stacked successor to #90 removes the redundant quadratic rows while retaining route decisions, joint P/Q, transit connection, travel energy, SOC and terminal energy. It adds native solver adapters for PR90 joint AIDC options, exact service/tail accounting, grid/P2 binding, strict unpromoted providers, and bounded Actual P/Q proposals with Fresh AC acceptance gates.
+
+PR79 source reconciliation finds 321 conflicting continuing-resource intervals and no duplicate episode-day records. The conflicts cannot be legally repaired by deleting a stale reservation, moving jobs or shortening service. Final native reference/windows/kernel/security/provider bindings remain blocked. The preregistered Apr01 native canary and Fresh AC were therefore **not run**; native performance fields are null.
+
+Validation: 188 tests pass. The same bounded synthetic MESS instance passes both circle and polygon physics with zero quadratic/general/SOS rows in the MILP; A2/M2 warm starts are observed accepted under external supervision. No native speedup claim. No ML training/merge, May evaluation, full IEEE campaign or sensitivity sweep.
+
+Review: `docs/v42_native_integration_mess_milp/FINAL_REVIEW_KO.md`, `FINAL_FLAGS.json`, `NATIVE_GATE_EVIDENCE.json` and the reproducible source/measurement audits. This PR remains draft until native authority and Fresh AC gates are satisfied.
