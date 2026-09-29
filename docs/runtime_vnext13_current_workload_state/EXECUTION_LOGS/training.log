@@ -1,0 +1,27 @@
+Traceback (most recent call last):
+  File "C:\Users\kjw39\OneDrive\����\ChatGPT\Mobile ESS 2\runtime_vnext6_callable_total_pr\docs\runtime_vnext13_current_workload_state\train13.py", line 191, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "C:\Users\kjw39\OneDrive\����\ChatGPT\Mobile ESS 2\runtime_vnext6_callable_total_pr\docs\runtime_vnext13_current_workload_state\train13.py", line 175, in main
+    launch('ablation')
+  File "C:\Users\kjw39\OneDrive\����\ChatGPT\Mobile ESS 2\runtime_vnext6_callable_total_pr\docs\runtime_vnext13_current_workload_state\train13.py", line 129, in launch
+    list(pool.map(run,[0,1]))
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\_base.py", line 619, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\_base.py", line 317, in _result_or_cancel
+    return fut.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\_base.py", line 456, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\_base.py", line 401, in __get_result
+    raise self._exception
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\OneDrive\����\ChatGPT\Mobile ESS 2\runtime_vnext6_callable_total_pr\docs\runtime_vnext13_current_workload_state\train13.py", line 127, in run
+    subprocess.run([sys.executable,'-B',str(ROOT/'train13.py'),'worker',str(slot),phase],stdout=log,stderr=subprocess.STDOUT,check=True)
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['C:\\Users\\kjw39\\OneDrive\\����\\ChatGPT\\Mobile ESS 2\\runtime_vnext_exact_environment\\Scripts\\python.exe', '-B', 'D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext13_current_workload_state\\train13.py', 'worker', '0', 'ablation']' returned non-zero exit status 1.

@@ -1,0 +1,15 @@
+{
+  "time": "2026-09-29T04:23:32.053251+00:00",
+  "prediction": "process only event_time<t; exclude ALL simultaneous events",
+  "later_dispatch_order": [
+    "SUBMIT",
+    "START",
+    "END"
+  ],
+  "within_type": "stable job_id order after source canonical sorting",
+  "reason": "No source sequence authority; handles zero-wait/zero-runtime episodes without leaking simultaneous events",
+  "duplicate": "idempotent phase transition; repeated/earlier phase ignored",
+  "late_event": "reject timestamp earlier than latest query/event",
+  "future": "reject event_time>=asof",
+  "rolling_lower_bound": "inclusive"
+}
