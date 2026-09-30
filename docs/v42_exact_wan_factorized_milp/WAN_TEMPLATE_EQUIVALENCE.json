@@ -1,0 +1,1919 @@
+{
+  "PASS": true,
+  "method": "Exact fixed assignments and exhaustive complete Gurobi integer solution pool; all bounded old physical Options, individual and competing-job fixtures",
+  "factor_source_sha256": "92e8c2d8f05dd553cfbd215efd5adf826029f1781419f103ed4ac3c4989cbc47",
+  "old_to_new": 1106,
+  "new_to_old": 1106,
+  "zero_failure": true,
+  "profiles": [
+    "bytes_per_link_slot",
+    "active_slots",
+    "end",
+    "restart",
+    "remaining_payload"
+  ],
+  "limitation": "Standalone all pair/start feasible and infeasible contracts are tested separately in pytest. These records include complete job path feasibility.",
+  "standalone_all_pairs_starts_PASS": true,
+  "standalone_combinations": 200,
+  "standalone_cases": [
+    {
+      "case": "single_slot",
+      "combinations": 10,
+      "feasible": 8,
+      "PASS": true
+    },
+    {
+      "case": "zero_rate",
+      "combinations": 10,
+      "feasible": 7,
+      "PASS": true
+    },
+    {
+      "case": "multiple_zero",
+      "combinations": 10,
+      "feasible": 7,
+      "PASS": true
+    },
+    {
+      "case": "final_partial",
+      "combinations": 10,
+      "feasible": 7,
+      "PASS": true
+    },
+    {
+      "case": "two_destinations",
+      "combinations": 20,
+      "feasible": 13,
+      "PASS": true
+    },
+    {
+      "case": "different_bottlenecks",
+      "combinations": 20,
+      "feasible": 13,
+      "PASS": true
+    },
+    {
+      "case": "same_path_different_start",
+      "combinations": 10,
+      "feasible": 8,
+      "PASS": true
+    },
+    {
+      "case": "checkpoint_equal_start",
+      "combinations": 10,
+      "feasible": 8,
+      "PASS": true
+    },
+    {
+      "case": "long_checkpoint_wait",
+      "combinations": 10,
+      "feasible": 8,
+      "PASS": true
+    },
+    {
+      "case": "restart_near_horizon",
+      "combinations": 10,
+      "feasible": 7,
+      "PASS": true
+    },
+    {
+      "case": "post_H",
+      "combinations": 10,
+      "feasible": 8,
+      "PASS": true
+    },
+    {
+      "case": "fixed_WAN",
+      "combinations": 10,
+      "feasible": 8,
+      "PASS": true
+    },
+    {
+      "case": "fixed_active",
+      "combinations": 10,
+      "feasible": 7,
+      "PASS": true
+    },
+    {
+      "case": "two_jobs_same_link",
+      "combinations": 10,
+      "feasible": 8,
+      "PASS": true
+    },
+    {
+      "case": "two_paths_shared_link",
+      "combinations": 20,
+      "feasible": 13,
+      "PASS": true
+    },
+    {
+      "case": "two_disjoint_paths",
+      "combinations": 20,
+      "feasible": 13,
+      "PASS": true
+    }
+  ],
+  "standalone_rows": [
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 6,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 7,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 6,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 7,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_TRANSFER_IMPOSSIBLE",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 6,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 7,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_TRANSFER_IMPOSSIBLE",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 6,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 7,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_TRANSFER_IMPOSSIBLE",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 6,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 7,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_TRANSFER_IMPOSSIBLE",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 6,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 7,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_TRANSFER_IMPOSSIBLE",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_TRANSFER_IMPOSSIBLE",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 6,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 7,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_TRANSFER_IMPOSSIBLE",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 6,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 7,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_TRANSFER_IMPOSSIBLE",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_TRANSFER_IMPOSSIBLE",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 6,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 7,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 6,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 7,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 6,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 7,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 6,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 7,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_TRANSFER_IMPOSSIBLE",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 6,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 7,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 6,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 7,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 2,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "IMMUTABLE_ACTIVE_TRANSFERS",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 6,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 7,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 6,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 7,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 6,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 7,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_TRANSFER_IMPOSSIBLE",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 6,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 7,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_TRANSFER_IMPOSSIBLE",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_TRANSFER_IMPOSSIBLE",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 6,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 7,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "B",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_TRANSFER_IMPOSSIBLE",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 0,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 1,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 2,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 3,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 4,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 5,
+      "legacy_feasible": true,
+      "new_feasible": true,
+      "legacy_reason": "",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 6,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 7,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_RESTART",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 8,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_TRANSFER_IMPOSSIBLE",
+      "PASS": true
+    },
+    {
+      "source": "A",
+      "destination": "C",
+      "start": 9,
+      "legacy_feasible": false,
+      "new_feasible": false,
+      "legacy_reason": "WAN_TRANSFER_IMPOSSIBLE",
+      "PASS": true
+    }
+  ],
+  "standalone_scope": "All authorized source-reference destination/start combinations in sixteen bounded authorities; infeasible starts included; compute suffix transparent"
+}
