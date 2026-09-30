@@ -19,7 +19,7 @@ def source_freeze():
 
 def optimize(m,units,levels,controls,bindings,data,start_receipt):
     if (LOCAL/'PRIMARY_STARTED.json').exists():raise ValueError('NO_PRIMARY_RETRY')
-    phases=[];telemetry=[];spent=0.;first=[None];primary_cert=None;targets=[60,300,600,1800,3600];next_target=[0];latest={};begin_all=perf_counter();peak=[psutil.Process().memory_info().rss]
+    phases=[];telemetry=[];spent=0.;first=[None];primary_cert=None;targets=[60,300,600,1200,1800,3600];next_target=[0];latest={};begin_all=perf_counter();peak=[psutil.Process().memory_info().rss]
     m.Params.Threads=1;m.Params.Seed=20260929;m.Params.MIPGap=.005;m.Params.OutputFlag=1;m.Params.LogFile=str(LOCAL/'A1_GUROBI.log')
     atomic(LOCAL/'PRIMARY_STARTED.json',dict(started_monotonic=monotonic(),budget=3600,exactly_one_primary=True))
     for name,expr in levels:
@@ -64,6 +64,7 @@ def optimize(m,units,levels,controls,bindings,data,start_receipt):
     accepted=bool(primary_cert and primary_cert['PASS'] and phases[0]['gap'] is not None and phases[0]['gap']<=.005)
     start_receipt['accepted_by_Gurobi']=True if re.search(r'Loaded user MIP start|User MIP start produced solution',log) else False if start_receipt['available'] else None;dump('MIP_START_RECEIPT.json',start_receipt)
     receipt=dict(passes=phases,optimization_wall_seconds=spent,total_protocol_wall_seconds=perf_counter()-begin_all,first_incumbent_seconds=first[0],peak_observed_RSS_bytes=peak[0],lex_complete=len(phases)==len(levels) and phases[-1]['status']==gp.GRB.OPTIMAL,P1_A1_ACCEPTED=accepted,settings=read(OUT/'PREREGISTRATION.json')['solver'],MIP_start=start_receipt,root_relaxation=dict(objective_rounded=float(root[1]),iterations=int(root[2]),seconds=float(root[3])) if root else None,presolve=dict(seconds=float(presolve[1]),rows=int(presolve[2]),columns=int(presolve[3]),nonzeros=int(presolve[4])) if presolve else None,globality='P1 bounds cover the complete original PR102 physical integer feasible set; later bounds apply only under inherited scientific lexicographic locks; no restricted columns',build_and_validation_excluded=True,exactly_one_primary=True,latest_callback=latest)
+    receipt['cuts_log_sections']=[s.strip() for s in re.findall(r'Cutting planes:\s*\n(.*?)(?:\n\s*\n|\nExplored)',log,re.S)]
     if m.SolCount:
         receipt['final_incumbent_P1_rho']=dense_value(levels[0][1],np.asarray(m.getAttr('X')))
         receipt['original_P1_global_gap']=(abs(receipt['final_incumbent_P1_rho']-phases[0]['best_bound'])/abs(receipt['final_incumbent_P1_rho'])) if phases[0]['best_bound'] is not None and receipt['final_incumbent_P1_rho'] else (0 if receipt['final_incumbent_P1_rho']==phases[0]['best_bound']==0 else None)

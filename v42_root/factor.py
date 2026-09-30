@@ -26,15 +26,21 @@ def authority(j,g,r):
     if units>1e8:raise ValueError('EXACT_BYTE_QUANTUM_NUMERIC_RANGE_UNSUPPORTED')
     return pairs,float(quantum),units,{key:float(min(B,Fraction(x))/quantum) for key,x in rates.items()}
 
-def add_job(m,j,g,r,*,compress=False,optional=False):
+def add_job(m,j,g,r,*,compress=False,optional=False,eliminate_depart=None,eliminate_arrive=None,share_links=None,eliminate_f0=None,eliminate_state=None,byte_scale=1.):
+    depart=compress if eliminate_depart is None else eliminate_depart
+    arrive=compress if eliminate_arrive is None else eliminate_arrive
+    link=compress if share_links is None else share_links
+    f0_removed=compress if eliminate_f0 is None else eliminate_f0
+    state_removed=compress if eliminate_state is None else eliminate_state
     if g.fixed:return compact_job(m,j,g)
     if not g.events['w']:
         if optional:raise ValueError('OPTIONAL_TRACK_REQUIRES_MIGRATION_DOMAIN')
-        if compress:
-            v=stay(m,j,g,1,compress=True);m.addConstr(gp.quicksum(v['y'].values())==1);return v
+        if f0_removed or state_removed:
+            starts=tuple((k,s) for k,s in g.events['y'] if (k,s+j.service_slots) in g.events['f0'])
+            v=stay(m,j,g,1,starts=starts,eliminate_f0=f0_removed,eliminate_state=state_removed);m.addConstr(gp.quicksum(v['y'].values())==1);return v
         return compact_job(m,j,g)
     pairs,quantum,B,rates=authority(j,g,r);H=r.control_end
-    v={n:{key:m.addVar(vtype=gp.GRB.BINARY,name=f'{n}[{j.uid},{i}]') for i,key in enumerate(keys)} for n,keys in g.events.items() if n!='w' and not (optional and compress and n=='f0')}
+    v={n:{key:m.addVar(vtype=gp.GRB.BINARY,name=f'{n}[{j.uid},{i}]') for i,key in enumerate(keys)} for n,keys in g.events.items() if n!='w' and not (optional and f0_removed and n=='f0')}
     v.setdefault('f0',{})
     v.update({n:{key:m.addVar(lb=0,ub=1,name=f'{n}[{j.uid},{i}]') for i,key in enumerate(keys)} for n,keys in g.states.items()})
     v['w']={}
@@ -89,14 +95,18 @@ def add_job(m,j,g,r,*,compress=False,optional=False):
         m.addConstr(after==before-sent);m.addConstr(after<=B*(a-f));m.addConstr(after>=a-f)
     m.addConstr(v['wan_active'][last]==v['wan_final'].get(last,0))
     departure_keys=sorted({(k,t) for k,d,t in g.events['w']})
-    v['depart']={key:(v['h'].get((key[0],key[1]-1),0)-v['h'].get(key,0)+q.get(key,0)) if compress else m.addVar(lb=0,ub=1) for key in departure_keys}
+    v['depart']={key:(v['h'].get((key[0],key[1]-1),0)-v['h'].get(key,0)+q.get(key,0)) if depart else m.addVar(lb=0,ub=1) for key in departure_keys}
+    if depart:
+        for x in v['depart'].values():m.addConstr(x>=0,name='depart_projection_lower_bound')
     for t in starts:
         m.addConstr(gp.quicksum(v['depart'].get((k,t),0) for k in sources)==v['wan_start'][t])
         for k in sources:
             if (k,t) in v['depart']:m.addConstr(v['depart'][k,t]<=src[k])
     arrival_keys=sorted({(d,tr.restart) for (k,d,t),tr in g.transfers.items() if tr.feasible and tr.restart<H})
     restart_times=sorted({R for d,R in arrival_keys})
-    v['arrive']={key:(v['r1'].get(key,0)-v['r1'].get((key[0],key[1]-1),0)+f1.get(key,0)) if compress else m.addVar(lb=0,ub=1) for key in arrival_keys}
+    v['arrive']={key:(v['r1'].get(key,0)-v['r1'].get((key[0],key[1]-1),0)+f1.get(key,0)) if arrive else m.addVar(lb=0,ub=1) for key in arrival_keys}
+    if arrive:
+        for x in v['arrive'].values():m.addConstr(x>=0,name='arrive_projection_lower_bound')
     for R in restart_times:
         m.addConstr(gp.quicksum(v['arrive'].get((d,R),0) for d in dests)==v['wan_final'][R-1-r.restart_slots])
         for d in dests:
@@ -111,7 +121,7 @@ def add_job(m,j,g,r,*,compress=False,optional=False):
         for k in sites:
             times=[t for site,t in active if site==k]+[t for site,t in enter if site==k]+[t for site,t in leave if site==k]
             for t in range(min(times),max(times)+1):
-                if compress and ((n=='h' and (k,t) in v['depart']) or (n=='r1' and (k,t) in v['arrive'])):continue
+                if (depart and n=='h' and (k,t) in v['depart']) or (arrive and n=='r1' and (k,t) in v['arrive']):continue
                 m.addConstr(gp.LinExpr(active.get((k,t),0))-active.get((k,t-1),0)-enter.get((k,t),0)+gp.quicksum(leave.get((k,t),[]))==0)
     # Unique destination entry plus nonnegative unit balances and one exit
     # already force all post-run occupancy/finish to that destination.
@@ -121,39 +131,42 @@ def add_job(m,j,g,r,*,compress=False,optional=False):
     links=sorted({l for l,t in link_keys})
     representatives={};groups={}
     for l in links:
-        incidence=tuple(p for p in pairs if l in r.paths[p]) if compress else (l,)
+        incidence=tuple(p for p in pairs if l in r.paths[p]) if link else (l,)
         rep=representatives.setdefault(incidence,l);groups[l]=rep
     unique=sorted(set(groups.values()))
-    universal={l for l in unique if compress and all(l in r.paths[p] for p in pairs)}
+    universal={l for l in unique if link and all(l in r.paths[p] for p in pairs)}
     members={l:selected if l in universal else m.addVar(lb=0,ub=1) for l in unique}
     v['link_selected']={l:members[groups[l]] for l in links}
-    flow={(l,t):quantum*v['sent'][t] if l in universal else m.addVar(lb=0,ub=B*quantum) for l,t in sorted({(groups[l],t) for l,t in link_keys})}
+    if byte_scale<=0 or byte_scale!=2.**round(__import__('math').log2(byte_scale)):raise ValueError('BYTE_SCALE_MUST_BE_EXACT_POWER_OF_TWO')
+    flow={(l,t):quantum*v['sent'][t] if l in universal else byte_scale*m.addVar(lb=0,ub=B*quantum/byte_scale,name=f'link_bytes_scaled[{j.uid},{l},{t}]') if byte_scale!=1 else m.addVar(lb=0,ub=B*quantum) for l,t in sorted({(groups[l],t) for l,t in link_keys})}
     v['link_bytes']={key:flow[groups[key[0]],key[1]] for key in link_keys}
     for l in unique:
         if l in universal:continue # sent is zero without migration; this fixed link is always on the selected path
         member=v['link_selected'][l]
         m.addConstr(member==gp.quicksum(x for p,x in v['pair'].items() if l in r.paths[p]))
         for t in (slot for link,slot in flow if link==l):
-            u=flow[l,t];sent=quantum*v['sent'][t]
-            m.addConstr(u<=sent);m.addConstr(u<=B*quantum*member);m.addConstr(u>=sent-B*quantum*(1-member))
+            u=flow[l,t]/byte_scale;sent=quantum*v['sent'][t]/byte_scale
+            m.addConstr(u<=sent);m.addConstr(u<=B*quantum/byte_scale*member);m.addConstr(u>=sent-B*quantum/byte_scale*(1-member))
     return v
 
-def stay(m,j,g,N,*,compress=False,starts=None):
+def stay(m,j,g,N,*,compress=False,starts=None,eliminate_f0=None,eliminate_state=None):
     """Exact integer histogram of fixed-duration, nonmigrating paths."""
+    f0_removed=compress if eliminate_f0 is None else eliminate_f0
+    state_removed=compress if eliminate_state is None else eliminate_state
     keys=tuple(g.events['y'] if starts is None else starts)
     typ=gp.GRB.BINARY if N==1 else gp.GRB.INTEGER
     y={key:m.addVar(lb=0,ub=N,vtype=typ,name=f'Y[{j.uid},{i}]') for i,key in enumerate(keys)}
     v=dict(y=y,q={},w={},f0={},f1={},r0={},h={},r1={})
     for k,s in keys:
         key=k,s+j.service_slots
-        if compress:v['f0'][key]=y[k,s]
+        if f0_removed:v['f0'][key]=y[k,s]
         else:
             x=m.addVar(lb=0,ub=N,vtype=typ,name=f'F0_count[{j.uid},{k},{key[1]}]');v['f0'][key]=x
             m.addConstr(x==y[k,s],name='fixed_duration_count_finish')
     states=sorted({(k,t) for k,s in keys for t in range(s,s+j.service_slots)})
     for k,t in states:
         expr=gp.quicksum(x for (site,s),x in y.items() if site==k and s<=t<s+j.service_slots)
-        if compress:v['r0'][k,t]=expr
+        if state_removed:v['r0'][k,t]=expr
         else:
             x=m.addVar(lb=0,ub=N,name=f'R0_count[{j.uid},{k},{t}]');v['r0'][k,t]=x
             m.addConstr(x==expr,name='fixed_duration_count_occupancy')

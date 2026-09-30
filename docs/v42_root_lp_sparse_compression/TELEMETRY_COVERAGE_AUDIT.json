@@ -1,0 +1,58 @@
+{
+  "callbacks": "RAW_CALLBACK_TELEMETRY.csv",
+  "requested_targets": [
+    60,
+    300,
+    600,
+    1200,
+    1800,
+    3600
+  ],
+  "delayed_callback_targets": [
+    1200,
+    1800
+  ],
+  "reason": "Gurobi did not publish MIP progress callbacks while solving the second root LP; first available callbacks for these targets occurred near termination",
+  "native_log_reconstruction": [
+    {
+      "elapsed_optimize_seconds": 1203.9999659000023,
+      "objective_level": "reserve_shortfall",
+      "phase": "ROOT_LP_SIMPLEX",
+      "simplex_iterations": 315844,
+      "simplex_objective": 1.9032081,
+      "simplex_primal_infeasibility": 15696.13,
+      "simplex_dual_infeasibility": 0.0,
+      "capture_kind": "reconstructed_native_log",
+      "source": "A1_GUROBI.log",
+      "time_precision": "native seconds rounded; offset is measured prior optimize-call wall",
+      "RSS_bytes": null,
+      "incumbent": null,
+      "best_bound": null,
+      "gap": null,
+      "nodes": null,
+      "target_seconds": 1200,
+      "checkpoint_delay_seconds": 3.9999659000022803
+    },
+    {
+      "elapsed_optimize_seconds": 1805.9999659000023,
+      "objective_level": "reserve_shortfall",
+      "phase": "ROOT_LP_SIMPLEX",
+      "simplex_iterations": 368674,
+      "simplex_objective": 2.330047,
+      "simplex_primal_infeasibility": 18111.3,
+      "simplex_dual_infeasibility": 0.0,
+      "capture_kind": "reconstructed_native_log",
+      "source": "A1_GUROBI.log",
+      "time_precision": "native seconds rounded; offset is measured prior optimize-call wall",
+      "RSS_bytes": null,
+      "incumbent": null,
+      "best_bound": null,
+      "gap": null,
+      "nodes": null,
+      "target_seconds": 1800,
+      "checkpoint_delay_seconds": 5.99996590000228
+    }
+  ],
+  "no_intermediate_simplex_objective_claimed_as_UB_or_LB": true,
+  "unavailable_RSS_incumbent_bound_fields_are_null": true
+}
