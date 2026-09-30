@@ -1,0 +1,108 @@
+{
+  "families": {
+    "pair": {
+      "type": "binary",
+      "index": "job,source,destination",
+      "role": "unique migration source/destination"
+    },
+    "wan_start": {
+      "type": "binary",
+      "index": "job,time",
+      "role": "unique start during slot time"
+    },
+    "wan_active": {
+      "type": "binary",
+      "index": "job,time",
+      "role": "active including zero-rate waiting slots"
+    },
+    "wan_final": {
+      "type": "binary",
+      "index": "job,time",
+      "role": "last active slot; end = time+1"
+    },
+    "remaining": {
+      "type": "continuous",
+      "index": "job,boundary",
+      "role": "exact residual before possible payload injection, authority quantum units"
+    },
+    "sent": {
+      "type": "continuous",
+      "index": "job,slot",
+      "role": "exact nominal maximal send in quantum units"
+    },
+    "depart": {
+      "type": "continuous",
+      "index": "job,source,time",
+      "role": "conditionally integral unique source departure"
+    },
+    "arrive": {
+      "type": "continuous",
+      "index": "job,destination,restart_boundary",
+      "role": "conditionally integral unique destination restart entry"
+    },
+    "link_bytes": {
+      "type": "continuous",
+      "index": "job,link,slot",
+      "role": "physical bytes on selected path"
+    },
+    "tie_rank": {
+      "type": "continuous",
+      "index": "job",
+      "role": "exact original global w event rank lookup; no pair/time product variable"
+    },
+    "migration_selected": {
+      "type": "continuous",
+      "index": "job",
+      "role": "conditionally integral unique-pair total for sparse selected-rate identity"
+    },
+    "source_selected": {
+      "type": "continuous",
+      "index": "job,source",
+      "role": "unique-pair projection, conditionally integral, sparse routing coefficient reuse"
+    },
+    "destination_selected": {
+      "type": "continuous",
+      "index": "job,destination",
+      "role": "unique-pair projection, conditionally integral, sparse routing coefficient reuse"
+    },
+    "link_selected": {
+      "type": "continuous",
+      "index": "job,link",
+      "role": "unique-pair projection, conditionally integral, sparse routing coefficient reuse"
+    }
+  },
+  "joint_pair_time_binaries": 0,
+  "joint_checkpoint_time_binaries": 0,
+  "binary_count_measurement": "Full selected-model receipt will provide actual counts",
+  "quadratic_constraints": 0,
+  "quadratic_objective": 0,
+  "SOS": 0,
+  "general_constraints": 0,
+  "sparse_timing_support": true,
+  "measured_family_counts": {
+    "y": 569882,
+    "q": 590221,
+    "w": 0,
+    "f0": 569882,
+    "f1": 743661,
+    "r0": 963168,
+    "h": 615840,
+    "r1": 1136855,
+    "pair": 136246,
+    "wan_start": 62936,
+    "wan_active": 62936,
+    "wan_final": 60602,
+    "remaining": 64058,
+    "sent": 62936,
+    "migration_selected": 1122,
+    "source_selected": 12386,
+    "destination_selected": 13366,
+    "depart": 628226,
+    "arrive": 717987,
+    "link_selected": 16438,
+    "link_bytes": 872182,
+    "tie_rank": 1122
+  },
+  "total_binaries": 2796366,
+  "total_continuous": 5124335
+}

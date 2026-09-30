@@ -1,0 +1,10 @@
+# Exact support and fixed point
+For fixed source k and start time tau, sweep all physical compatible checkpoints c <= tau. Let u_max=max(c-s). Every such prefix is authorized and fits immutable source occupancy. R is fixed by inherited Generator.transfer(k,d,G,tau). The shortest remaining duration is rem_min=D-u_max>0.
+
+At this fixed R, [R,R+rem) fits immutable GPU authority monotonically in rem: a longer interval contains every slot of the shorter interval. The completion bound R+rem<=L is monotone too. Therefore existence of ANY compatible full physical path is equivalent to full destination fit and completion feasibility for rem_min, together with transfer and static site authority. This is an exact existential proof, not objective screening. The original one-slot test is upgraded to full rem_min fit.
+
+For the remaining event and state projections, vector timestamp/restart tables are grouped by source/destination and queried with one duration mask per remaining service value and checkpoint lower bound. No complete (s,c,d,tau) Option records are created. Query timestamps are immediately projected into y,q,w,f0,f1 and source/wait/destination interval unions. Compatibility retains only starts with a complete migration continuation. STAY paths independently project full immutable fits, including post-H service.
+
+Every retained component occurs on at least one COMPLETE local physical path. Every old physical path projects into these unions. Removing components absent from all complete paths cannot destroy any such path, so applying the complete-path projection operator again is a fixed point. The second pass is executed and its hash must be identical. State holes remain implicit zero in PR99 balance equations. No paths cross a removed state slot, since its removal proves no complete path uses that slot.
+
+This is local physical support, not a test of global electrical or competing-job feasibility. Global resource/grid rows still solve the full joint MILP. Receipts report NumPy array footprint and full support-process RSS separately; RSS includes frozen inputs and both graph caches. Zero w removal is accepted.

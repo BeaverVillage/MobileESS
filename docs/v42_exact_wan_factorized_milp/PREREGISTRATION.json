@@ -1,0 +1,73 @@
+{
+  "base": "3309cd230cd8235201f5578d392241fa98e059bc",
+  "production": "one joint exact monolithic MILP",
+  "formulations": [
+    "F0 original compact",
+    "F1 exact complete-path support pruning",
+    "F2 factorized deterministic WAN",
+    "F3 optional proven aggregation"
+  ],
+  "selection": {
+    "eligibility": "all exactness gates PASS",
+    "order": [
+      "binary count",
+      "nonzeros",
+      "build wall",
+      "F1 before F2 before F3"
+    ],
+    "effectively_tied_binary_tolerance": 0
+  },
+  "solver": {
+    "Seed": 20260929,
+    "Threads": 1,
+    "MIPGap": 0.005,
+    "TimeLimit": 3600
+  },
+  "budget": {
+    "seconds": 3600,
+    "timer": "immediately before first model.optimize()",
+    "excludes": [
+      "preparation",
+      "screening",
+      "build",
+      "validation"
+    ],
+    "includes": [
+      "presolve",
+      "root",
+      "cuts",
+      "heuristics",
+      "branch-and-bound"
+    ],
+    "lexicographic": "unchanged seven levels; optimize wall cumulative across levels; no lock after unsuccessful level; no claim about later levels if uncompleted"
+  },
+  "supports": "complete physical path projections, exact duration masks, deterministic idempotent fixed point",
+  "dynamics": "exact selected nominal bottleneck; no residual-rate throttling; finite payload/rate bounds; integer authority-derived byte quantum",
+  "objectives": [
+    "rho",
+    "reserve_shortfall",
+    "CC4_reference_deviation",
+    "migration_count",
+    "shift_slots",
+    "prestart_changes",
+    "physical_event_tie"
+  ],
+  "validation_tolerances": {
+    "scientific_absolute": 3e-06,
+    "scientific_relative": 1e-07,
+    "physical": 1e-05
+  },
+  "no_dw": true,
+  "no_scientific_change": true,
+  "no_mess_execution": true,
+  "created_utc": "2026-09-30T09:14:45.076273+00:00",
+  "bounded_oracle_solver": {
+    "MIPGap": 0,
+    "OptimalityTol": 1e-09,
+    "FeasibilityTol": 1e-09,
+    "IntFeasTol": 1e-09,
+    "TimeLimit_per_level": 90
+  },
+  "sparse_rate_identity": "common_rate[t]*migration_selected + sum(pair_rate-common_rate)*pair; migration_selected=sum pair is continuous and conditionally integral",
+  "factorized_support_projection": "exact unions of legacy transfer active, final, restart and positive link-time supports; omitted states implicit zero"
+}
