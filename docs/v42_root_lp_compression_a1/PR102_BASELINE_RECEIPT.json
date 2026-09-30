@@ -1,0 +1,117 @@
+{
+  "base": "cd7e40762097b6c20303bd2238edf7ffeba87aa4",
+  "PR102_BASE_PRESERVED": true,
+  "model": {
+    "formulation": "F2",
+    "integers": 0,
+    "quadratic_constraints": 0,
+    "quadratic_objective": 0,
+    "SOS": 0,
+    "general_constraints": 0,
+    "all_jobs_complete": true,
+    "jobs_complete": 1499,
+    "family_counts": {
+      "y": 569882,
+      "q": 590221,
+      "w": 0,
+      "f0": 569882,
+      "f1": 743661,
+      "r0": 963168,
+      "h": 615840,
+      "r1": 1136855,
+      "pair": 136246,
+      "wan_start": 62936,
+      "wan_active": 62936,
+      "wan_final": 60602,
+      "remaining": 64058,
+      "sent": 62936,
+      "migration_selected": 1122,
+      "source_selected": 12386,
+      "destination_selected": 13366,
+      "depart": 628226,
+      "arrive": 717987,
+      "link_selected": 16438,
+      "link_bytes": 872182,
+      "tie_rank": 1122
+    },
+    "other_continuous": 18649,
+    "binaries": 2796366,
+    "continuous": 5124335,
+    "constraints": 9358534,
+    "nonzeros": 100455768,
+    "data_prep_seconds": 4.095934000011766,
+    "graph_seconds": 123.1949498999893,
+    "grid_seconds": 47.20738999999594,
+    "model_build_seconds": 331.1238250999886,
+    "peak_observed_RSS_bytes": 7166742528,
+    "optimizer_called": false,
+    "COMPLETE_OPTION_ENUMERATION_IN_COMPACT_MODEL": false,
+    "eligible": true
+  },
+  "presolved": {
+    "rows": 7533647,
+    "columns": 7247816,
+    "nonzeros": 46376330
+  },
+  "root": {
+    "objective": 0.6716023396111563,
+    "iterations": 457124,
+    "seconds": 1557.9
+  },
+  "optimization": {
+    "passes": [
+      {
+        "level": "rho",
+        "status": 9,
+        "incumbent": null,
+        "best_bound": 0.6716023396111563,
+        "gap": null,
+        "nodes": 1.0,
+        "solve_seconds": 3600.6349999904633
+      }
+    ],
+    "optimization_wall_seconds": 3600.6734204999957,
+    "first_incumbent_seconds": null,
+    "events": {
+      "presolve_rows_removed": 1824921,
+      "presolve_columns_removed": 672919,
+      "last_presolve_seconds": 119.64875159999065
+    },
+    "optimizer_called": true,
+    "lex_complete": false,
+    "globality": "complete original PR99 physical MILP; P1 global bound on original full problem; subsequent levels use unchanged inherited lexicographic locks",
+    "settings": {
+      "Seed": 20260929,
+      "Threads": 1,
+      "MIPGap": 0.005,
+      "TimeLimit": 3600
+    },
+    "native_status": "TIME_LIMIT",
+    "solution_count": 0,
+    "measured_native_presolve": {
+      "seconds": 109.93,
+      "rows": 7533647,
+      "columns": 7247816,
+      "nonzeros": 46376330,
+      "source": "verbatim Gurobi log; callback removal counters are separate observations"
+    },
+    "measured_root_relaxation": {
+      "objective_rounded_in_log": 0.6716023,
+      "iterations": 457124,
+      "seconds": 1557.9,
+      "source": "Gurobi root-relaxation summary"
+    },
+    "telemetry_limitations": "No SIMPLEX callback journal. Target snapshots can occur later than requested during root simplex/cuts. Actual elapsed and observation source are retained; stale callback bounds are explicitly dated. Intermediate simplex objective is not an incumbent or an updated global bound.",
+    "time_limit_accounting": {
+      "native_TimeLimit_seconds": 3600,
+      "native_Runtime_seconds": 3600.6349999904633,
+      "measured_optimize_only_wall_seconds": 3600.6734204999957,
+      "supervisor_return_publication_grace_seconds": 5,
+      "external_hard_wall_triggered": false,
+      "termination_overrun_seconds": 0.6734204999957001,
+      "build_validation_excluded": true
+    },
+    "scientific_levels_completed": 0,
+    "deterministic_tie_completed": false
+  }
+}

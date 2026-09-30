@@ -1,0 +1,1 @@
+Unfinished checkpoint. No selected full formulation, no complete validated MIP start, no production A1. F2 LP finished before migration; F2A/B/C model statistics currently describe real bounded subsets, not full-May models. Scientific development paused until migration gates pass.
