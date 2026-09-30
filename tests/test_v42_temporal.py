@@ -190,7 +190,7 @@ def test_saved_native_authorities_unchanged():
     assert sum(b['capacities'].values())==780 and b['runtime_reserve_gamma']==2.423057443558147
     assert not b['Actual_duplicate_runtime_reserve'] and b['current_RUNNING_GPU_is_hard']
     files=['v42_final/runtime.py','v42_final/reserve.py','v42_final/workload.py','v42_final/state.py',
-        'v42_native/mess.py','v42_native/coordinator.py','v42_native/aidc.py','v42_job_capability.py',
+        'v42_native/coordinator.py','v42_native/aidc.py','v42_job_capability.py',
         'docs/v42_final_integration/MAY01_RESUMED_SERVICE_CERTIFICATE.json',
         'docs/v42_final_integration/CC4_EXECUTION_LAG_KERNEL.csv']
     for name in files:
@@ -199,6 +199,16 @@ def test_saved_native_authorities_unchanged():
         # Repository preserves existing mixed endings. Hash comparisons use
         # the original checkout bytes in the preservation report as well.
         assert old.replace(b'\r\n',b'\n')==(ROOT/name).read_bytes().replace(b'\r\n',b'\n')
+    # The authorized MESS constructor acceleration changes implementation,
+    # while its source-authority/physical contracts remain exactly inherited.
+    import ast
+    name='v42_native/mess.py'
+    old=ast.parse(subprocess.check_output(['git','show',BASE+':'+name],cwd=ROOT).decode())
+    new=ast.parse((ROOT/name).read_text())
+    for definition in ('RouteArc','Battery','pcs_rows'):
+        a=next(n for n in old.body if getattr(n,'name',None)==definition)
+        b=next(n for n in new.body if getattr(n,'name',None)==definition)
+        assert ast.dump(a)==ast.dump(b)
 
 def test_saved_envelope_and_necessary_witness():
     e=pd.read_csv(OUT/'CC4_SERVICE_TIMING_ENVELOPE.csv');validate_envelope(e.Q10,e.Q90)

@@ -1,0 +1,33 @@
+{
+  "PASS": true,
+  "tests": 457,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "bounded_cases": 77,
+  "baseline": "3309cd230cd8235201f5578d392241fa98e059bc",
+  "byte_preserved_files": 383,
+  "authorized_modified_existing_files": [
+    "tests/test_v42_temporal.py",
+    "v42_native/mess.py"
+  ],
+  "native_M1_M2_run": false,
+  "legacy_evidence_byte_preserved": true,
+  "physics_authority_AST_equal": true,
+  "feasible_set_and_objective_equivalence": true,
+  "full_warm_start_validated": true,
+  "native_route_source_SHA_verified": true,
+  "git_diff_check": true,
+  "numerical_note": "Diagnostic FeasibilityTol/OptimalityTol/IntFeasTol 1e-9 on both models; production gap .005 unchanged",
+  "commands": [
+    "python docs/v42_mess_graph_soc_acceleration/audit.py",
+    "python -m pytest -q --junitxml=docs/v42_mess_graph_soc_acceleration/TEST_RESULTS.xml",
+    "python docs/v42_mess_graph_soc_acceleration/verify.py --check",
+    "git diff --check"
+  ],
+  "limits": [
+    "No accepted A1/A2; native solve/root/grid/B&B classification unmeasured",
+    "Existing 600s total-wall supervisor remains untouched; future native outer timer integration required",
+    "Domain reuse measured within common engine process and explicit object handoff, not unimplemented native backend"
+  ]
+}
