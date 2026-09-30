@@ -1,3 +1,5 @@
-# Canonical Ubuntu V42 migration
+# Cancelled Ubuntu V42 migration — historical evidence
 
-Canonical distro Ubuntu-MobileESS-D (WSL2), Linux worktrees under /home/jaewon/mobileess_worktrees. Scientific WIP checkpoint a88879f is pushed. PR102 exact SHA and full model structure/tests verified, GPU smoke and full-May continuous diagnostic complete. IEEE preservation and Windows per-path cleanup/post-restart validation are tracked in separate receipts; no pending gate is claimed complete. No production A1 was run. Full-May GPU diagnostic is slower than historical CPU reference and has numerical warnings, so GPU is not selected for future production A1.
+The user cancelled this migration. The canonical V42 runtime is **WINDOWS** at `D:\ChatGPT\Mobile ESS 2\v42_root_lp_compression_pr`. These files retain the historical migration evidence; their Linux launch tools and path maps are inactive. The rollback receipts are in `../v42_ubuntu_migration_rollback/`.
+
+Scientific WIP checkpoint a88879f and migration evidence bbbf0ac are pushed. Windows tests and the unchanged PR102 full model structure pass. The full-May GPU diagnostic took 1938.77 seconds, compared with the historical CPU root reference of 1557.90 seconds, and showed numerical warnings. GPU is not selected for production. No production A1 was run.
