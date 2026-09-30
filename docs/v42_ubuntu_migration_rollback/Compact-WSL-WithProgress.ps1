@@ -62,7 +62,9 @@ $process.StartInfo.RedirectStandardOutput = $true
 $process.StartInfo.RedirectStandardError = $true
 $process.StartInfo.StandardOutputEncoding = [Text.Encoding]::GetEncoding([Globalization.CultureInfo]::CurrentCulture.TextInfo.OEMCodePage)
 $process.StartInfo.StandardErrorEncoding = $process.StartInfo.StandardOutputEncoding
-$script:buffer = New-Object char[] 1024
+$script:buffer = New-Object byte[] 4096
+$script:characters = New-Object char[] 8192
+$script:decoder = $null
 $script:output = New-Object Text.StringBuilder
 $script:lastPercentage = $null
 $script:finished = $false
@@ -81,7 +83,14 @@ $timer.Add_Tick({
         if ($script:readTask -and $script:readTask.IsCompleted) {
             $count = $script:readTask.Result
             if ($count -gt 0) {
-                $chunk = [string]::new($script:buffer,0,$count).Replace([string][char]0,'')
+                if (-not $script:decoder) {
+                    $encoding = $process.StartInfo.StandardOutputEncoding
+                    if (($count -ge 2 -and $script:buffer[0] -eq 255 -and $script:buffer[1] -eq 254) -or ($count -ge 4 -and $script:buffer[1] -eq 0 -and $script:buffer[3] -eq 0)) { $encoding = [Text.Encoding]::Unicode }
+                    if ($count -ge 3 -and $script:buffer[0] -eq 239 -and $script:buffer[1] -eq 187 -and $script:buffer[2] -eq 191) { $encoding = [Text.Encoding]::UTF8 }
+                    $script:decoder = $encoding.GetDecoder()
+                }
+                $characterCount = $script:decoder.GetChars($script:buffer,0,$count,$script:characters,0,$false)
+                $chunk = [string]::new($script:characters,0,$characterCount).Replace([string][char]0,'')
                 [void]$script:output.Append($chunk)
                 [IO.File]::AppendAllText($stdoutPath,$chunk,[Text.Encoding]::UTF8)
                 $matches = [regex]::Matches($script:output.ToString(),'(?i)(\d{1,3})\s*(?:퍼센트|percent|%)')
@@ -95,7 +104,7 @@ $timer.Add_Tick({
                         Save-Progress 'COMPACTING'
                     }
                 }
-                $script:readTask = $process.StandardOutput.ReadAsync($script:buffer,0,$script:buffer.Length)
+                $script:readTask = $process.StandardOutput.BaseStream.ReadAsync($script:buffer,0,$script:buffer.Length)
             } else { $script:eof = $true;$script:readTask = $null }
         }
         $elapsed = (Get-Date)-$script:started
@@ -122,6 +131,6 @@ $timer.Add_Tick({
 })
 $form.Add_FormClosing({param($sender,$eventArgs) if (-not $script:finished) {$eventArgs.Cancel=$true}})
 $form.Add_Shown({
-    [void]$process.Start();$script:readTask=$process.StandardOutput.ReadAsync($script:buffer,0,$script:buffer.Length);$script:errorTask=$process.StandardError.ReadToEndAsync();Save-Progress 'COMPACTING';$timer.Start()
+    [void]$process.Start();$script:readTask=$process.StandardOutput.BaseStream.ReadAsync($script:buffer,0,$script:buffer.Length);$script:errorTask=$process.StandardError.ReadToEndAsync();Save-Progress 'COMPACTING';$timer.Start()
 })
 [void]$form.ShowDialog()
