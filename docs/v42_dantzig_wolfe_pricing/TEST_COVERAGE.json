@@ -1,0 +1,182 @@
+{
+  "PASS": true,
+  "requirements": [
+    {
+      "number": 1,
+      "requirement": "column physical signature deterministic",
+      "evidence": "test_physical_profiles_and_registry"
+    },
+    {
+      "number": 2,
+      "requirement": "full service",
+      "evidence": "test_physical_profiles_and_registry"
+    },
+    {
+      "number": 3,
+      "requirement": "GPU profile",
+      "evidence": "test_physical_profiles_and_registry"
+    },
+    {
+      "number": 4,
+      "requirement": "WAN profile",
+      "evidence": "test_physical_profiles_and_registry"
+    },
+    {
+      "number": 5,
+      "requirement": "active transfer",
+      "evidence": "test_physical_profiles_and_registry"
+    },
+    {
+      "number": 6,
+      "requirement": "Runtime risk",
+      "evidence": "test_physical_profiles_and_registry"
+    },
+    {
+      "number": 7,
+      "requirement": "invalid site",
+      "evidence": "test_invalid_columns_rejected"
+    },
+    {
+      "number": 8,
+      "requirement": "invalid start",
+      "evidence": "test_invalid_columns_rejected"
+    },
+    {
+      "number": 9,
+      "requirement": "invalid checkpoint",
+      "evidence": "test_invalid_columns_rejected"
+    },
+    {
+      "number": 10,
+      "requirement": "transfer before checkpoint",
+      "evidence": "test_invalid_columns_rejected"
+    },
+    {
+      "number": 11,
+      "requirement": "checkpoint waiting",
+      "evidence": "test_wait_zero_rate_restart_carryout"
+    },
+    {
+      "number": 12,
+      "requirement": "deterministic WAN timing",
+      "evidence": "test_wait_zero_rate_restart_carryout / exhaustive old membership"
+    },
+    {
+      "number": 13,
+      "requirement": "restart",
+      "evidence": "test_invalid_columns_rejected / test_wait_zero_rate_restart_carryout"
+    },
+    {
+      "number": 14,
+      "requirement": "no compute during wait/WAN/restart",
+      "evidence": "test_physical_profiles_and_registry"
+    },
+    {
+      "number": 15,
+      "requirement": "no free site switch",
+      "evidence": "test_invalid_columns_rejected / inherited validate"
+    },
+    {
+      "number": 16,
+      "requirement": "one migration",
+      "evidence": "test_invalid_columns_rejected / inherited validate"
+    },
+    {
+      "number": 17,
+      "requirement": "carryout",
+      "evidence": "test_wait_zero_rate_restart_carryout / real 157-slot pricing"
+    },
+    {
+      "number": 18,
+      "requirement": "fixed jobs constant",
+      "evidence": "test_fixed_constants_and_convexity"
+    },
+    {
+      "number": 19,
+      "requirement": "convexity",
+      "evidence": "test_duplicate_insertion_all_jobs_and_lock_rc / full-column equality"
+    },
+    {
+      "number": 20,
+      "requirement": "GPU coupling",
+      "evidence": "test_physical_profiles_and_registry / full-column equality"
+    },
+    {
+      "number": 21,
+      "requirement": "WAN coupling",
+      "evidence": "test_physical_profiles_and_registry / exhaustive dual vectors"
+    },
+    {
+      "number": 22,
+      "requirement": "Runtime coupling",
+      "evidence": "test_physical_profiles_and_registry / native full-column equality"
+    },
+    {
+      "number": 23,
+      "requirement": "grid unchanged",
+      "evidence": "native full-column/binary versus PR99 compact"
+    },
+    {
+      "number": 24,
+      "requirement": "CC4 unchanged",
+      "evidence": "all six objective equality / native and PR97 synthetic binder"
+    },
+    {
+      "number": 25,
+      "requirement": "manual RC = Gurobi",
+      "evidence": "91 REDUCED_COST_SIGN_AUDIT rows, locks up to 5"
+    },
+    {
+      "number": 26,
+      "requirement": "synthetic exhaustive",
+      "evidence": "PRICING_EXHAUSTIVE_SYNTHETIC_AUDIT"
+    },
+    {
+      "number": 27,
+      "requirement": "real exhaustive",
+      "evidence": "PRICING_REAL_SUBSET_AUDIT"
+    },
+    {
+      "number": 28,
+      "requirement": "CG = full-column LP",
+      "evidence": "FULL_COLUMN_MASTER_EQUIVALENCE"
+    },
+    {
+      "number": 29,
+      "requirement": "integer master = compact",
+      "evidence": "SMALL_INTEGER_EQUIVALENCE"
+    },
+    {
+      "number": 30,
+      "requirement": "duplicate insertion impossible",
+      "evidence": "test_duplicate_insertion_all_jobs_and_lock_rc"
+    },
+    {
+      "number": 31,
+      "requirement": "all jobs each convergence",
+      "evidence": "test_duplicate_insertion_all_jobs_and_lock_rc / CG all_jobs_priced receipts"
+    },
+    {
+      "number": 32,
+      "requirement": "no heuristic truncation",
+      "evidence": "test_exact_pricing_no_complete_domain_dependency / DP proof"
+    },
+    {
+      "number": 33,
+      "requirement": "no full PR99 events",
+      "evidence": "continuous Master size; no add_job production call"
+    },
+    {
+      "number": 34,
+      "requirement": "Phase-I not physical",
+      "evidence": "test_positive_artificial_never_accepted / LP validator always false"
+    },
+    {
+      "number": 35,
+      "requirement": "deterministic repeated run",
+      "evidence": "synthetic compare_masters repeated CG / every seeded pricing repeated / template cache equality"
+    }
+  ],
+  "pytest_passed": 308,
+  "scope": "Bounded mathematical gates and repository tests; full May convergence is separately measured, never implied by tests."
+}

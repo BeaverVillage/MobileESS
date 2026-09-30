@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "one_column": "one complete physically valid inherited Option",
+  "required": ["job_id", "start_slot", "initial_site", "migrated", "checkpoint", "physical_checkpoint_seconds", "destination", "transfer_start", "transfer_end", "restart_end", "final_site", "completion_slot", "segments", "GPU", "WAN", "ACTIVE", "RISK", "intervention_coefficients", "canonical_signature"],
+  "profiles": {"GPU": "[site,slot,whole-gang GPU]", "WAN": "[link,slot,bytes]", "ACTIVE": "[slot,1]", "RISK": "[site,slot,frozen gamma90 exposure]"},
+  "intervention_coefficients": ["migration_count", "shift_slots", "prestart_changes", "deterministic_tie"],
+  "signature": "SHA256 of job_id and complete sorted canonical Option JSON",
+  "nonmigration_fields": "Inherited -1 numeric sentinel / empty destination",
+  "master_coefficients": "Canonical sparse row-key/coefficient map; signs match implemented orientations"
+}

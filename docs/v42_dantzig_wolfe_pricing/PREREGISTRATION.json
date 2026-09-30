@@ -1,0 +1,42 @@
+{
+  "base": "3309cd230cd8235201f5578d392241fa98e059bc",
+  "utc": "2026-09-30T07:33:13.200621+00:00",
+  "RC_TOL": 1e-07,
+  "PHASE1_TOL": 1e-09,
+  "external_seconds": 600,
+  "workers": 1,
+  "threads": 1,
+  "pricing": "Exact DAG labels (source, completed service, time); checkpoint prefix minimum propagated through WAIT; all feasible deterministic WAN arcs evaluated. One reconstructed Option per pricing call; no complete-domain production import.",
+  "phase1": "Elasticize every original nonconvexity global row. Equality two nonnegative artificial variables; <= negative artificial; >= positive artificial. Unit cost / max(1,abs(original RHS),max abs original row coefficient). Convexity remains exact. Fix every artificial to zero only after complete exact pricing and objective <=1e-9.",
+  "levels": [
+    "PHASE_I",
+    "rho",
+    "reserve_shortfall",
+    "CC4_reference_deviation",
+    "migration_count",
+    "shift_slots",
+    "prestart_changes",
+    "deterministic_tie"
+  ],
+  "locks": {
+    "rho": 1e-07,
+    "other": 1e-08
+  },
+  "initial": "One reference STAY if valid; otherwise exact zero-dual pricing. True PR99 graph singletons are constants.",
+  "coefficient_registry": "GPU and risk balances: negative profiles; WAN/active: positive profiles; convexity: +1; intervention metric balances: negative metrics. Prior locks act on metric variables, so direct column coefficient is zero; balance dual propagates lock value.",
+  "gates": [
+    "exhaustive synthetic pricing",
+    "bounded real exhaustive pricing",
+    "manual RC versus cloned Gurobi RC",
+    "CG versus full-column LP",
+    "binary full-column versus compact MILP"
+  ],
+  "forbidden": [
+    "full option enumeration on May",
+    "global PR99 job event/state model",
+    "heuristic pricing",
+    "branch-and-price",
+    "pipeline advancement"
+  ],
+  "relocation": "D workspace; legacy files untouched. Existing exact historical source paths remain accessible; record resolved source hashes."
+}
