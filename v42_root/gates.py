@@ -28,8 +28,21 @@ def model(jobs,bounds,r,kind,bundle=None,raw=None,native_grid=False):
     m.Params.OptimalityTol=1e-9;m.Params.FeasibilityTol=1e-9;m.Params.IntFeasTol=1e-9;m.Params.TimeLimit=90
     f=ExactFactory(r,max(b.latest_completion for b in bounds.values()));graphs={u:f.graph(j,bounds[u]) for u,j in jobs.items()}
     classes=classes_for(jobs,bounds,r,raw,bundle)
-    if kind=='F2':units=[dict(id=u,uid=u,members=[u],v=original_job(m,j,graphs[u],r),optional=False,stay_count=False) for u,j in sorted(jobs.items())]
+    if kind in ('F2','F2-BASE'):units=[dict(id=u,uid=u,members=[u],v=original_job(m,j,graphs[u],r),optional=False,stay_count=False) for u,j in sorted(jobs.items())]
     else:units=local_units(m,jobs,bounds,r,graphs,classes,kind)
+    from v42_sparse.config import settings
+    if kind in ('F2','F2-BASE') or settings(kind)['tie']:
+        rank=0
+        for unit in units:
+            u=unit['uid'];j=jobs[u];g=f.original.graph(j,bounds[u])
+            if not g.fixed:
+                _,rank=factor.tie_expression(m,j,g,graphs[u],unit['v'],rank)
+                local=0;lookup={}
+                for family in ('y','q','w','f0','f1'):
+                    for key in g.events[family]:
+                        local+=1
+                        if family=='w':lookup[key]=local
+                unit['tie_local_lookup']=lookup
     use=defaultdict(gp.LinExpr);metrics=[gp.LinExpr() for _ in range(3)];finishes=[]
     for unit in units:
         u=unit['uid'];j=jobs[u];v=unit['v']
@@ -38,6 +51,11 @@ def model(jobs,bounds,r,kind,bundle=None,raw=None,native_grid=False):
         for n in ('f0','f1'):finishes.extend((u,k,t,x) for (k,t),x in v[n].items())
     add_resources(m,use,r)
     data=(bundle,jobs,bounds,r,raw,graphs,graphs,dict(classes=classes))
+    if kind not in ('F2','F2-BASE'):
+        from v42_sparse.config import settings
+        if settings(kind)['runtime']:
+            from v42_sparse.runtime import factor_finishes
+            finishes=factor_finishes(m,finishes,jobs,raw,bundle,classes)
     return m,units,data,use,metrics,finishes
 
 def canonical(plans,jobs,classes):
@@ -60,7 +78,10 @@ def fixed_assignment(unit,options,jobs,data):
         selected=sorted(options[u] for u in unit['members'] if options[u].migrated);lane=int(unit['id'].split('_LANE_')[-1])
         if lane>=len(selected):return {n:{} for n in unit['v']}
         return mapping(j,g,r,selected[lane])
-    return mapping(j,g,r,options[uid])
+    a=mapping(j,g,r,options[uid])
+    if 'tie_rank' in unit['v']:
+        o=options[uid];a['tie_rank']={'w':unit['tie_local_lookup'][o.initial_site,o.destination,o.transfer_start] if o.migrated else 0}
+    return a
 
 def physical_sets(label,jobs,bounds,r,kinds=('F2A','F2B','F2C')):
     domains={u:build_domain(j,bounds[u],r)[0] for u,j in sorted(jobs.items())};us=sorted(jobs);classes=classes_for(jobs,bounds,r);expected=set();original=[]
@@ -71,6 +92,22 @@ def physical_sets(label,jobs,bounds,r,kinds=('F2A','F2B','F2C')):
         if all(n<=resource_limit(k,r)+1e-9 for k,n in used.items()):
             original.append(plans);expected.add(canonical(plans,us,classes))
     records=[];decompositions=[]
+    def quantities(selected,data,use,metrics,finishes,pool=False):
+        pool=pool and m.NumIntVars>0
+        from v42_sparse.canonical import option
+        from v42_sparse.runtime import coefficient_vector
+        expected=defaultdict(float);risk=defaultdict(float);actual=defaultdict(float);cost=[0.,0.,0.]
+        for u,row in selected.items():
+            o=option(row);j=jobs[u]
+            for key,n in resources_used(j,o).items():expected[key]+=n
+            for key,n in coefficient_vector(j,data[4][u] if data[4] else None,o.segments[-1][0],o.segments[-1][2],data[0]):risk[key]+=n
+            for i,n in enumerate((int(o.migrated),o.start-j.reference_start,int(o.initial_site!=j.reference_site))):cost[i]+=n
+        for u,k,t,x in finishes:
+            for key,n in coefficient_vector(jobs[u],data[4][u] if data[4] else None,k,t,data[0]):actual[key]+=n*value(x,pool)
+        for want,got in [(expected,{key:value(x,pool) for key,x in use.items()}),(risk,actual)]:
+            for key in set(want)|set(got):
+                if abs(want.get(key,0)-got.get(key,0))>max(1e-5,abs(want.get(key,0))*1e-9):raise ValueError('PHYSICAL_AGGREGATE_QUANTITY_MISMATCH:'+str(key))
+        if any(abs(n-value(x,pool))>1e-5 for n,x in zip(cost,metrics)):raise ValueError('SCIENTIFIC_COST_MAPPING_MISMATCH')
     for kind in kinds:
         m,units,data,use,metrics,finishes=model(jobs,bounds,r,kind)
         # Forward test EVERY original individual assignment, including UID permutations.
@@ -83,7 +120,8 @@ def physical_sets(label,jobs,bounds,r,kinds=('F2A','F2B','F2C')):
             m.optimize()
             if m.Status!=gp.GRB.OPTIMAL:raise ValueError('FORWARD:'+label+':'+kind+':'+str(index))
             recovered=reconstruct(units,data)
-            expected_plan=canonical(plans,us,classes) if kind in ('F2B','F2C') else plans
+            quantities(recovered,data,use,metrics,finishes)
+            expected_plan=canonical(plans,us,classes) if any(u['stay_count'] or u.get('canonical_post_tie') for u in units) else plans
             if tuple(recovered[u] for u in us)!=tuple(asdict(o) for o in expected_plan):raise ValueError('FORWARD_DECOMPOSITION')
             if reconstruct(units,data)!=recovered:raise ValueError('NONDETERMINISTIC_DECOMPOSITION')
             m.remove(temporary);m.update()
@@ -93,6 +131,7 @@ def physical_sets(label,jobs,bounds,r,kinds=('F2A','F2B','F2C')):
         from v42_job_capability import Option
         for index in range(m.SolCount):
             m.Params.SolutionNumber=index;recovered=reconstruct(units,data,pool=True)
+            quantities(recovered,data,use,metrics,finishes,pool=True)
             def option(value):
                 d=dict(value);d['segments']=tuple(tuple(x) for x in d['segments']);d['wan']=tuple(tuple(x) for x in d['wan']);return Option(**d)
             plans=tuple(option(recovered[u]) for u in us);sig=canonical(plans,us,classes)
@@ -102,9 +141,9 @@ def physical_sets(label,jobs,bounds,r,kinds=('F2A','F2B','F2C')):
         records.append(dict(formulation=kind,original_individual_paths=len(original),canonical_physical_sets=len(expected),reverse_pool_paths=m.SolCount,PASS=True));m.dispose()
     return records,decompositions
 
-def scientific(label,jobs,bounds,r,bundle=None,raw=None,native_grid=False):
+def scientific(label,jobs,bounds,r,bundle=None,raw=None,native_grid=False,kinds=('F2','F2A','F2B','F2C')):
     rows=[]
-    for kind in ('F2','F2A','F2B','F2C'):
+    for kind in kinds:
         m,units,data,use,metrics,finishes=model(jobs,bounds,r,kind,bundle,raw,native_grid)
         levels=objectives(m,jobs,r,use,metrics,finishes,bundle,raw,native_grid);row=solve_levels(m,levels);row['formulation']=kind
         if row['status']=='OPTIMAL':reconstruct(units,data)

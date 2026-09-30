@@ -1,0 +1,39 @@
+{
+  "bounded_projection": [
+    {
+      "family": "retained",
+      "columns": 140,
+      "rows": 247,
+      "nonzeros": 751,
+      "max_density": 32,
+      "p99_density": 17.239999999999952
+    },
+    {
+      "family": "r0",
+      "columns": 126,
+      "rows": 275,
+      "nonzeros": 877,
+      "max_density": 32,
+      "p99_density": 15.559999999999945
+    },
+    {
+      "family": "h",
+      "columns": 130,
+      "rows": 267,
+      "nonzeros": 847,
+      "max_density": 32,
+      "p99_density": 16.03999999999985
+    },
+    {
+      "family": "r1",
+      "columns": 122,
+      "rows": 283,
+      "nonzeros": 1029,
+      "max_density": 36,
+      "p99_density": 15.080000000000041
+    }
+  ],
+  "selection": "retain sparse migration recurrences; histogram compression only for certified nonmigration paths",
+  "full_cumulative_projection_selected": false,
+  "reason": "projection removes state columns but expands downstream rows; no timing-based admission without structural and clean LP evidence"
+}

@@ -37,5 +37,8 @@ def certificate(m,units,data,controls,bindings,levels,dense,solver_max_violation
     for i in m._root_reserve_row_indices:
         c=constraints[i];lhs=dense_value(m.getRow(c),dense);v=lhs-c.RHS if c.Sense=='<' else c.RHS-lhs if c.Sense=='>' else abs(lhs-c.RHS);linear_vio=max(linear_vio,v)
     cert.update(independent_known_GPU_max_violation=known_vio,independent_Runtime_binding_max_violation=risk_vio,independent_reserve_headroom_max_violation=linear_vio,solver_max_violation=float(solver_max_violation),P1_rho=rho,validation_seconds=time.perf_counter()-start,artificial_physical_slack=0)
+    cert['model_defined_scientific_objective_snapshot']={name:dense_value(expr,dense) for name,expr in levels[:6]}
+    cert['artificial_scientific_slack']=0
+    cert['reserve_shortfall_semantics']='P2 is the inherited model-defined reserve shortfall quantity, not an introduced feasibility-relaxation slack; unoptimized level snapshots are not claimed lexicographic optima'
     cert['PASS']=cert['PASS'] and max(known_vio,risk_vio,linear_vio,solver_max_violation)<=1e-5
     return cert,selected,control_values,global_values

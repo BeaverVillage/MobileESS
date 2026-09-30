@@ -5,10 +5,19 @@ from .common import *
 from v42_boundary.boundaries import load_native
 from v42_exact.support import ExactFactory
 def scientific_signature(j,b,resource_identity,raw,bundle,scientific_costs=None):
-    return dict(job={k:v for k,v in asdict(j).items() if k!='uid'},boundary=asdict(b),physical_resource_identity=resource_identity,runtime_completion_offset=raw['risk_nominal_completion_issue_slot']-raw['reference_end'],runtime_gamma=bundle['runtime_reserve_gamma'],runtime_kernel=bundle['runtime_survival_kernel'],grid_power_interface='identical frozen native per-site/per-time coefficients for identical GPU/site domains',objectives=dict(migration=1,shift_reference=j.reference_start,placement_reference=j.reference_site,**(scientific_costs or {})))
+    provider={k:raw.get(k) for k in ('runtime_authority','V10_Q50_total_seconds','exact_service_seconds','nominal_remaining_seconds','nominal_slots','duration_authority','overrun_uncertainty','synthetic_completion')}
+    return dict(job={k:v for k,v in asdict(j).items() if k!='uid'},boundary=asdict(b),physical_resource_identity=resource_identity,runtime_provider_semantics=provider,runtime_completion_offset=raw['risk_nominal_completion_issue_slot']-raw['reference_end'],runtime_gamma=bundle['runtime_reserve_gamma'],runtime_kernel=bundle['runtime_survival_kernel'],grid_power_interface='identical frozen native per-site/per-time coefficients for identical GPU/site domains',objectives=dict(migration=1,shift_reference=j.reference_start,placement_reference=j.reference_site,**(scientific_costs or {})))
 def prepare():
     if (LOCAL/'DATA.pkl').exists():
-        with (LOCAL/'DATA.pkl').open('rb') as f:return pickle.load(f)
+        with (LOCAL/'DATA.pkl').open('rb') as f:data=pickle.load(f)
+        bundle,jobs,bounds,r,raw,graphs,old,prep=data
+        factory=ExactFactory(r,max(b.latest_completion for b in bounds.values()));verified=defaultdict(list)
+        for u,j in sorted(jobs.items()):verified[digest(scientific_signature(j,bounds[u],factory.original.cache.identity,raw[u],bundle))].append(u)
+        # Keep checkpoint labels/order only where the newly verified complete
+        # semantic class has exactly the same members. Never trust cached grouping.
+        labels={tuple(us):g for g,us in prep['classes'].items()}
+        classes={labels.get(tuple(us),g):us for g,us in verified.items()}
+        return (*data[:-1],dict(prep,classes=classes,cached_classes_independently_reverified=True))
     start=perf_counter();bundle,jobs,bounds,seconds,r,raw=load_native();load=perf_counter()-start
     factory=ExactFactory(r,max(b.latest_completion for b in bounds.values()));graphs={};old={};classes=defaultdict(list);rows=[];t=perf_counter()
     for uid,j in sorted(jobs.items()):

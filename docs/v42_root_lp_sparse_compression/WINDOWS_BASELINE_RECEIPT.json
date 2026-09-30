@@ -1,0 +1,125 @@
+{
+  "canonical": "WINDOWS",
+  "validation": {
+    "WINDOWS_V42_VALIDATION.json": {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_root_lp_compression_pr\\docs\\v42_ubuntu_migration_rollback\\WINDOWS_V42_VALIDATION.json",
+      "sha256": "82d623b58cca67991a6e6ba3be7b44296b37a03dca10d12edcf139b9d317f679",
+      "receipt": {
+        "PASS": true,
+        "imports": true,
+        "Runtime_provider": true,
+        "native_grid": true,
+        "Gurobi_license": true,
+        "Gurobi_version": [
+          13,
+          0,
+          2
+        ],
+        "tests": {
+          "PR102": "........................................................................ [ 21%]\n........................................................................ [ 42%]\n........................................................................ [ 63%]\n........................................................................ [ 84%]\n.....................................................                    [100%]\n============================== warnings summary ===============================\ntests/test_v42_final.py::test_provider_one_live_call_same_known_unknown\n  D:\\ChatGPT\\Mobile ESS 2\\v42_root_lp_compression_pr\\v42_final\\inference\\calibration.py:51: RuntimeWarning: invalid value encountered in log1p\n    out = np.where(u >= hy[-2], np.log1p(np.expm1(target) / last), out)\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n341 passed, 1 warning in 3.64s\n",
+          "WIP": "........................................................................ [ 18%]\n........................................................................ [ 36%]\n........................................................................ [ 54%]\n........................................................................ [ 73%]\n........................................................................ [ 91%]\n.................................                                        [100%]\n============================== warnings summary ===============================\ntests/test_v42_final.py::test_provider_one_live_call_same_known_unknown\n  D:\\ChatGPT\\Mobile ESS 2\\v42_root_lp_compression_pr\\v42_final\\inference\\calibration.py:51: RuntimeWarning: invalid value encountered in log1p\n    out = np.where(u >= hy[-2], np.log1p(np.expm1(target) / last), out)\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n393 passed, 1 warning in 4.30s\n"
+        },
+        "bounded_equivalence": true,
+        "full_build": true,
+        "classes": {
+          "jobs": 1499,
+          "class_count": 117,
+          "singleton_classes": 20,
+          "non_singleton_classes": 97,
+          "jobs_covered_by_non_singletons": 1479,
+          "max_class_size": 75
+        },
+        "python": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "canonical_runtime": "WINDOWS",
+        "production_A1": false
+      }
+    },
+    "ROOT_LP_WIP_WINDOWS_RESTORE.json": {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_root_lp_compression_pr\\docs\\v42_ubuntu_migration_rollback\\ROOT_LP_WIP_WINDOWS_RESTORE.json",
+      "sha256": "8833baf76f076308e8512329e76ef63de116bbaee3cd52b6c11234cb63741447",
+      "receipt": {
+        "PASS": true,
+        "root_LP_WIP_restored_on_Windows": true,
+        "classes": {
+          "jobs": 1499,
+          "class_count": 117,
+          "singleton_classes": 20,
+          "non_singleton_classes": 97,
+          "jobs_covered_by_non_singletons": 1479,
+          "max_class_size": 75
+        },
+        "bounded_cases": 35,
+        "bounded_equivalence_PASS": true,
+        "Runtime": {
+          "family": "Runtime_completion_risk",
+          "rows": 1152,
+          "nonzeros": 34923402,
+          "average_nonzeros_per_row": 30315.453125,
+          "maximum_nonzeros_per_row": 77795
+        },
+        "tie": {
+          "family": "tie",
+          "rows": 273614,
+          "nonzeros": 14503274,
+          "average_nonzeros_per_row": 53.006330085448845,
+          "maximum_nonzeros_per_row": 133
+        },
+        "MIP_start_physical_precheck": true,
+        "global_MIP_start_complete": false,
+        "production_A1": false,
+        "scientific_source_unchanged": true
+      }
+    },
+    "MIGRATION_PATH_REVERT_AUDIT.json": {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_root_lp_compression_pr\\docs\\v42_ubuntu_migration_rollback\\MIGRATION_PATH_REVERT_AUDIT.json",
+      "sha256": "ed52edc2ad1c50b1eabd4f986a00ec045cc59d8864d208288e18ab599ac89795",
+      "receipt": {
+        "PASS": true,
+        "scientific_source_unchanged_from_a88879fd": true,
+        "production_MOBILEESS_PATH_MAP_unset": true,
+        "migration_sitecustomize_inactive": true,
+        "migration_specific_Linux_dependencies": 0,
+        "immutable_original_input_hashes_PASS": true,
+        "original_input_files": 65,
+        "preexisting_UNC_authorities": [
+          "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\processed\\power_v70_3ph\\runtime_arrays\\bus_ids.npy",
+          "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\processed\\power_v70_3ph\\runtime_arrays\\load_archetype_cluster_id.npy",
+          "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\processed\\power_v70_3ph\\runtime_arrays\\pv_capacity_kw.npy",
+          "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\integrated_rebuild\\current\\02_power_preprocess\\jemena_mvar\\jemena_q_over_p_lookup.csv.gz",
+          "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\integrated_rebuild\\current\\02_power_preprocess\\jemena_feeders\\jemena_cluster_residual_lookup.csv.gz"
+        ],
+        "note": "Original Windows behavior uses five pre-existing Linux/UNC array authorities; these are retained. No migrated mobileess_data/research/worktree path is used.",
+        "frozen_input_contents_changed": false
+      }
+    },
+    "IEEE8500_WINDOWS_AUTHORITY_RECEIPT.json": {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_root_lp_compression_pr\\docs\\v42_ubuntu_migration_rollback\\IEEE8500_WINDOWS_AUTHORITY_RECEIPT.json",
+      "sha256": "7f70c265d428cbc58c8b92eddb8ddc6f70a10ef3911d2c19943f668b4aa25a21",
+      "receipt": {
+        "PASS": true,
+        "originals_retained": true,
+        "Windows_original_files_checked": 96847,
+        "Linux_original_or_Git_backed_reference_files_checked": 11,
+        "total_manifest_files": 96858,
+        "manifest_status": "Copy stage had finished before cancellation; overall migration ABORTED_BY_USER_ROLLBACK",
+        "copied_logical_bytes": 81605755580,
+        "size_checks_PASS": true,
+        "Windows_IEEE8500_files_deleted": 0,
+        "missing": [],
+        "full_initial_hash_receipt": "ABORTED_MIGRATION_EVIDENCE.zip/Ubuntu_evidence/IEEE8500_FILE_MANIFEST.csv",
+        "source_authority": "Existing Windows sources; pre-existing Linux references or Git-backed source also retained independently of copied object store"
+      }
+    }
+  },
+  "IEEE8500_read_scope": "sealed rollback receipt only; no research/data changes",
+  "production_gpu": false,
+  "compaction_at_source_resume": {
+    "status": "COMPACTING",
+    "percentage": 13,
+    "actual_percentage_source": "DiskPart stdout",
+    "elapsed_seconds": 853.8078787999999,
+    "verified_vhd_path": "D:\\WSL\\Ubuntu-MobileESS-D\\ext4.vhdx",
+    "pid": 28696,
+    "updated": "2026-09-30T15:18:39.8353669Z"
+  }
+}

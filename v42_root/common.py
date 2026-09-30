@@ -1,8 +1,8 @@
 from pathlib import Path
 import hashlib,json,csv,pickle,time,os,sys
 ROOT=Path(__file__).absolute().parents[1]
-OUT=ROOT/'docs/v42_root_lp_compression_a1'
-LOCAL=ROOT.parent/'V42_ROOT_LP_LOCAL'
+OUT=ROOT/os.environ.get('V42_ROOT_OUTPUT','docs/v42_root_lp_compression_a1')
+LOCAL=ROOT.parent/os.environ.get('V42_ROOT_LOCAL','V42_ROOT_LP_LOCAL')
 BASE='cd7e40762097b6c20303bd2238edf7ffeba87aa4'
 from v42_exact.common import atomic,clean,digest
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
@@ -14,7 +14,7 @@ def table(n,rows):
 class Context:
     folder=LOCAL
     def check(self):pass
-    def progress(self,d):atomic(LOCAL/'build_progress.json',d)
+    def progress(self,d):atomic(self.folder/'build_progress.json',d)
 def frozen():
     for row in read(OUT/'LEGACY_PRESERVATION_AUDIT.json')['files']:
         if sha(ROOT/row['path'])!=row['sha256']:raise ValueError('PR102_DRIFT:'+row['path'])

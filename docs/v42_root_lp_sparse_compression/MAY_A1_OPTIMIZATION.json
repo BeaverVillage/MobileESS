@@ -1,0 +1,109 @@
+{
+  "passes": [
+    {
+      "level": "rho",
+      "status": 2,
+      "incumbent": 0.6715924043100266,
+      "best_bound": 0.6715924043100266,
+      "gap": 0.0,
+      "nodes": 1.0,
+      "native_Runtime_seconds": 330.99699997901917,
+      "optimize_call_wall_seconds": 330.9999659000023
+    },
+    {
+      "level": "reserve_shortfall",
+      "status": 9,
+      "incumbent": 768.1501457253178,
+      "best_bound": 0.0,
+      "gap": 1.0,
+      "nodes": 1.0,
+      "native_Runtime_seconds": 3270.322000026703,
+      "optimize_call_wall_seconds": 3270.324746400016
+    }
+  ],
+  "optimization_wall_seconds": 3601.3247123000183,
+  "total_protocol_wall_seconds": 3621.5303971000103,
+  "first_incumbent_seconds": 0.48979759999201633,
+  "peak_observed_RSS_bytes": 22728273920,
+  "lex_complete": false,
+  "P1_A1_ACCEPTED": true,
+  "settings": {
+    "Seed": 20260929,
+    "Threads": 1,
+    "MIPGap": 0.005,
+    "TimeLimit": 3600
+  },
+  "MIP_start": {
+    "available": true,
+    "validated": true,
+    "type": "COMPLETE_VALIDATED_MIP_START",
+    "authority": "frozen native reference-start/reference-site/Q50 plan; continuous native control/CC4 completion validated separately",
+    "feasibility_attempt_RUN": false,
+    "source_completion_LP_seconds": 14.845148899999913,
+    "source_completion_total_seconds": 54.450219799997285,
+    "physical_certificate": {
+      "PASS": true,
+      "jobs": 1499,
+      "old_validator_PASS": true,
+      "deterministic_WAN_PASS": true,
+      "full_service_and_carryout_PASS": true,
+      "rack_gang_PASS": true,
+      "physical_capacity_max_violation": 0,
+      "grid_max_violation": 0,
+      "CC4_max_violation": 4.547473508864641e-13,
+      "Runtime_max_violation": 8.526512829121202e-14,
+      "failed": [],
+      "limitation": "Native reserve anonymous site headroom is additionally checked by independent linear residual evaluation; no Actual AC run is executed.",
+      "independent_known_GPU_max_violation": 0.0,
+      "independent_Runtime_binding_max_violation": 1.0658141036401503e-13,
+      "independent_reserve_headroom_max_violation": 0.0,
+      "solver_max_violation": 2.2737367544323206e-12,
+      "P1_rho": 1.0,
+      "validation_seconds": 13.649260799997137,
+      "artificial_physical_slack": 0,
+      "model_defined_scientific_objective_snapshot": {
+        "rho": 1.0,
+        "reserve_shortfall": 89222.98158002966,
+        "CC4_reference_deviation": 2.220848440294755,
+        "migration_count": 0.0,
+        "shift_slots": 0.0,
+        "prestart_changes": 0.0
+      },
+      "artificial_scientific_slack": 0,
+      "reserve_shortfall_semantics": "P2 is the inherited model-defined reserve shortfall quantity, not an introduced feasibility-relaxation slack; unoptimized level snapshots are not claimed lexicographic optima"
+    },
+    "partial": false,
+    "artificial_physical_slack": 0,
+    "frozen_before_primary_A1": true,
+    "accepted_by_Gurobi": true
+  },
+  "root_relaxation": {
+    "objective_rounded": 0.6715926,
+    "iterations": 42486,
+    "seconds": 86.83
+  },
+  "presolve": {
+    "seconds": 71.72,
+    "rows": 7239919,
+    "columns": 6658595,
+    "nonzeros": 31459420
+  },
+  "globality": "P1 bounds cover the complete original PR102 physical integer feasible set; later bounds apply only under inherited scientific lexicographic locks; no restricted columns",
+  "build_and_validation_excluded": true,
+  "exactly_one_primary": true,
+  "latest_callback": {
+    "elapsed_optimize_seconds": 3601.093843499999,
+    "objective_level": "reserve_shortfall",
+    "first_incumbent_seconds": 0.48979759999201633,
+    "RSS_bytes": 13473263616,
+    "phase": "MIP",
+    "incumbent": 768.1501457253178,
+    "best_bound": 0.0,
+    "gap": 1.0,
+    "nodes": 1.0,
+    "root_status": "ROOT"
+  },
+  "cuts_log_sections": [],
+  "final_incumbent_P1_rho": 0.6715925043100266,
+  "original_P1_global_gap": 1.488998154470192e-07
+}
