@@ -1,0 +1,53 @@
+{
+  "BASE_PR": 109,
+  "BASE_HEAD": "6dabb39e3ae6bb36c4ac47725c0e11d5bbc1b812",
+  "PRODUCTION_BASE": "M1-F3",
+  "F3_LB": 0.5718494602017812,
+  "S2_LB": 0.5722125039436496,
+  "existing_UB": 0.6696147314213984,
+  "physical_tolerance": 1e-05,
+  "objective_tolerance": 1e-07,
+  "state_priority_mass": 1e-06,
+  "K": 6,
+  "selection": "descending incumbent rho[t] minus diagnostic root rho[t]; lower index first",
+  "E2_slots": "first three frozen slots",
+  "E2_pairs": "all six unordered pairs",
+  "oracle": {
+    "Method": 2,
+    "Threads": 1,
+    "initial_workers": 2,
+    "max_workers": 4,
+    "grid": "only original P1 line faces at selected time; all voltage and transformer grid rows dropped; full horizon native MESS physics retained"
+  },
+  "E1_install_violation": 1e-05,
+  "E2_install_violation": 1e-05,
+  "noncut_tolerance": 1e-07,
+  "beta_default": 0.5722125039436496,
+  "material_gain": 0.001,
+  "bands": [
+    0.6,
+    0.62,
+    0.65,
+    0.6662666577642914
+  ],
+  "MIP": {
+    "Method": 2,
+    "Threads": 1,
+    "Heuristics": 0,
+    "MIPFocus": 3,
+    "Seed": 20260929,
+    "MIPGap": 0.005,
+    "GPU": false
+  },
+  "canary": {
+    "seconds": 600,
+    "max_runs": 1
+  },
+  "production": {
+    "seconds": 1800,
+    "max_runs": 1,
+    "cumulative_budget": true
+  },
+  "A1_optimize_calls": 0,
+  "STOP_before_A2": true
+}
