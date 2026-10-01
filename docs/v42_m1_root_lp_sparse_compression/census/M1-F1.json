@@ -1,0 +1,457 @@
+{
+  "stats": {
+    "binary": 208312,
+    "integer": 0,
+    "continuous": 31823,
+    "linear_constraints": 877952,
+    "quadratic_constraints": 0,
+    "SOS": 0,
+    "general_constraints": 0,
+    "quadratic_objective_terms": 0,
+    "nonzeros": 25222123,
+    "constraint_families": {
+      "flow": 9216,
+      "terminal_location": 4,
+      "initial_SOC": 4,
+      "terminal_SOC": 4,
+      "connected_Pch": 8942,
+      "connected_Pdis": 8942,
+      "no_simultaneous_charge": 8942,
+      "no_simultaneous_discharge": 8942,
+      "connected_Qmax": 8942,
+      "connected_Qmin": 8942,
+      "PCS16": 143072,
+      "energy_balance": 384,
+      "injection_P_binding": 2304,
+      "injection_Q_binding": 2304,
+      "voltage_lower": 37056,
+      "voltage_upper": 37056,
+      "transformer_current": 4608,
+      "transformer_kVA": 184320,
+      "line_thermal_face": 403968
+    },
+    "candidate": "M1-F1",
+    "columns": 240135,
+    "rows": 877952,
+    "grid_nonzeros": 23962681,
+    "voltage_nonzeros": 3557376,
+    "line_nonzeros": 19677488,
+    "transformer_nonzeros": 696383,
+    "PCS_nonzeros": 518636,
+    "max_row_density": 602,
+    "P99_row_density": 49.0,
+    "build_seconds": 23.949087899993174,
+    "census_total_seconds": 28.748971399996663,
+    "peak_RSS_bytes": 2043629568
+  },
+  "variables": [
+    {
+      "family": "Pch",
+      "columns": 8942,
+      "type_counts": "{\"C\": 8942}",
+      "coefficient_occurrences": 160956,
+      "constraints_touched": 145719
+    },
+    {
+      "family": "Pdis",
+      "columns": 8942,
+      "type_counts": "{\"C\": 8942}",
+      "coefficient_occurrences": 160956,
+      "constraints_touched": 145719
+    },
+    {
+      "family": "Q",
+      "columns": 8942,
+      "type_counts": "{\"C\": 8942}",
+      "coefficient_occurrences": 152014,
+      "constraints_touched": 145335
+    },
+    {
+      "family": "SOC",
+      "columns": 388,
+      "type_counts": "{\"C\": 388}",
+      "coefficient_occurrences": 776,
+      "constraints_touched": 392
+    },
+    {
+      "family": "arc",
+      "columns": 207928,
+      "type_counts": "{\"B\": 207928}",
+      "coefficient_occurrences": 793682,
+      "constraints_touched": 188162
+    },
+    {
+      "family": "charge_mode",
+      "columns": 384,
+      "type_counts": "{\"B\": 384}",
+      "coefficient_occurrences": 17884,
+      "constraints_touched": 17884
+    },
+    {
+      "family": "injection_P",
+      "columns": 2304,
+      "type_counts": "{\"C\": 2304}",
+      "coefficient_occurrences": 11763407,
+      "constraints_touched": 588288
+    },
+    {
+      "family": "injection_Q",
+      "columns": 2304,
+      "type_counts": "{\"C\": 2304}",
+      "coefficient_occurrences": 11768480,
+      "constraints_touched": 588288
+    },
+    {
+      "family": "rho_max",
+      "columns": 1,
+      "type_counts": "{\"C\": 1}",
+      "coefficient_occurrences": 403968,
+      "constraints_touched": 403968
+    }
+  ],
+  "rows": [
+    {
+      "family": "PCS16",
+      "rows": 143072,
+      "nonzeros": 518636,
+      "mean": 3.625,
+      "median": 4.0,
+      "P95": 4.0,
+      "P99": 4.0,
+      "maximum": 4,
+      "maximum_row": "PCS16",
+      "maximum_row_index": 2314
+    },
+    {
+      "family": "connected_Pch",
+      "rows": 8942,
+      "nonzeros": 17884,
+      "mean": 2.0,
+      "median": 2.0,
+      "P95": 2.0,
+      "P99": 2.0,
+      "maximum": 2,
+      "maximum_row": "connected_Pch",
+      "maximum_row_index": 2307
+    },
+    {
+      "family": "connected_Pdis",
+      "rows": 8942,
+      "nonzeros": 17884,
+      "mean": 2.0,
+      "median": 2.0,
+      "P95": 2.0,
+      "P99": 2.0,
+      "maximum": 2,
+      "maximum_row": "connected_Pdis",
+      "maximum_row_index": 2308
+    },
+    {
+      "family": "connected_Qmax",
+      "rows": 8942,
+      "nonzeros": 17884,
+      "mean": 2.0,
+      "median": 2.0,
+      "P95": 2.0,
+      "P99": 2.0,
+      "maximum": 2,
+      "maximum_row": "connected_Qmax",
+      "maximum_row_index": 2311
+    },
+    {
+      "family": "connected_Qmin",
+      "rows": 8942,
+      "nonzeros": 17884,
+      "mean": 2.0,
+      "median": 2.0,
+      "P95": 2.0,
+      "P99": 2.0,
+      "maximum": 2,
+      "maximum_row": "connected_Qmin",
+      "maximum_row_index": 2312
+    },
+    {
+      "family": "energy_balance",
+      "rows": 384,
+      "nonzeros": 217638,
+      "mean": 566.765625,
+      "median": 602.0,
+      "P95": 602.0,
+      "P99": 602.0,
+      "maximum": 602,
+      "maximum_row": "energy_balance",
+      "maximum_row_index": 3389
+    },
+    {
+      "family": "flow",
+      "rows": 9216,
+      "nonzeros": 415760,
+      "mean": 45.11284722222222,
+      "median": 48.0,
+      "P95": 50.0,
+      "P99": 51.0,
+      "maximum": 52,
+      "maximum_row": "flow",
+      "maximum_row_index": 86
+    },
+    {
+      "family": "initial_SOC",
+      "rows": 4,
+      "nonzeros": 4,
+      "mean": 1.0,
+      "median": 1.0,
+      "P95": 1.0,
+      "P99": 1.0,
+      "maximum": 1,
+      "maximum_row": "initial_SOC",
+      "maximum_row_index": 2305
+    },
+    {
+      "family": "injection_P_binding",
+      "rows": 2304,
+      "nonzeros": 20188,
+      "mean": 8.762152777777779,
+      "median": 9.0,
+      "P95": 9.0,
+      "P99": 9.0,
+      "maximum": 9,
+      "maximum_row": "injection_P_binding",
+      "maximum_row_index": 206344
+    },
+    {
+      "family": "injection_Q_binding",
+      "rows": 2304,
+      "nonzeros": 11246,
+      "mean": 4.881076388888889,
+      "median": 5.0,
+      "P95": 5.0,
+      "P99": 5.0,
+      "maximum": 5,
+      "maximum_row": "injection_Q_binding",
+      "maximum_row_index": 206345
+    },
+    {
+      "family": "line_thermal_face",
+      "rows": 403968,
+      "nonzeros": 19677488,
+      "mean": 48.71051172370089,
+      "median": 49.0,
+      "P95": 49.0,
+      "P99": 49.0,
+      "maximum": 49,
+      "maximum_row": "line_thermal_face",
+      "maximum_row_index": 211767
+    },
+    {
+      "family": "no_simultaneous_charge",
+      "rows": 8942,
+      "nonzeros": 17884,
+      "mean": 2.0,
+      "median": 2.0,
+      "P95": 2.0,
+      "P99": 2.0,
+      "maximum": 2,
+      "maximum_row": "no_simultaneous_charge",
+      "maximum_row_index": 2309
+    },
+    {
+      "family": "no_simultaneous_discharge",
+      "rows": 8942,
+      "nonzeros": 17884,
+      "mean": 2.0,
+      "median": 2.0,
+      "P95": 2.0,
+      "P99": 2.0,
+      "maximum": 2,
+      "maximum_row": "no_simultaneous_discharge",
+      "maximum_row_index": 2310
+    },
+    {
+      "family": "terminal_SOC",
+      "rows": 4,
+      "nonzeros": 4,
+      "mean": 1.0,
+      "median": 1.0,
+      "P95": 1.0,
+      "P99": 1.0,
+      "maximum": 1,
+      "maximum_row": "terminal_SOC",
+      "maximum_row_index": 2306
+    },
+    {
+      "family": "terminal_location",
+      "rows": 4,
+      "nonzeros": 96,
+      "mean": 24.0,
+      "median": 24.0,
+      "P95": 24.0,
+      "P99": 24.0,
+      "maximum": 24,
+      "maximum_row": "terminal_location",
+      "maximum_row_index": 2304
+    },
+    {
+      "family": "transformer_current",
+      "rows": 4608,
+      "nonzeros": 220607,
+      "mean": 47.874782986111114,
+      "median": 48.0,
+      "P95": 48.0,
+      "P99": 48.0,
+      "maximum": 48,
+      "maximum_row": "transformer_current",
+      "maximum_row_index": 211716
+    },
+    {
+      "family": "transformer_kVA",
+      "rows": 184320,
+      "nonzeros": 475776,
+      "mean": 2.58125,
+      "median": 1.5,
+      "P95": 2.449999999895226,
+      "P99": 48.0,
+      "maximum": 48,
+      "maximum_row": "transformer_kVA",
+      "maximum_row_index": 211718
+    },
+    {
+      "family": "voltage_lower",
+      "rows": 37056,
+      "nonzeros": 1778688,
+      "mean": 48.0,
+      "median": 48.0,
+      "P95": 48.0,
+      "P99": 48.0,
+      "maximum": 48,
+      "maximum_row": "voltage_lower",
+      "maximum_row_index": 210944
+    },
+    {
+      "family": "voltage_upper",
+      "rows": 37056,
+      "nonzeros": 1778688,
+      "mean": 48.0,
+      "median": 48.0,
+      "P95": 48.0,
+      "P99": 48.0,
+      "maximum": 48,
+      "maximum_row": "voltage_upper",
+      "maximum_row_index": 210945
+    }
+  ],
+  "start": {
+    "PASS": true,
+    "matrix_max_violation": 8.363199022198842e-12,
+    "variables": 240135,
+    "rho": 0.6696147314213984,
+    "physical_projection_unchanged": true,
+    "integer_LP_domains_unchanged": true
+  },
+  "numerical": {
+    "matrix": {
+      "min_abs": 1.0006451962467139e-13,
+      "max_abs": 400.0,
+      "ratio": 3997420879052299.5
+    },
+    "RHS": {
+      "min_abs": 7.414683712663166e-08,
+      "max_abs": 2861.8000752715643
+    },
+    "bounds": {
+      "min_abs": 1.0,
+      "max_abs": 1080.0
+    },
+    "objective": {
+      "min_abs": 1.0,
+      "max_abs": 1.0
+    },
+    "matrix_family_extremes": {
+      "PCS16": {
+        "min_abs": 0.38268343236508967,
+        "max_abs": 392.3141121612922
+      },
+      "connected_Pch": {
+        "min_abs": 1.0,
+        "max_abs": 300.0
+      },
+      "connected_Pdis": {
+        "min_abs": 1.0,
+        "max_abs": 300.0
+      },
+      "connected_Qmax": {
+        "min_abs": 1.0,
+        "max_abs": 400.0
+      },
+      "connected_Qmin": {
+        "min_abs": 1.0,
+        "max_abs": 400.0
+      },
+      "energy_balance": {
+        "min_abs": 0.2375,
+        "max_abs": 81.81198369618818
+      },
+      "flow": {
+        "min_abs": 1.0,
+        "max_abs": 1.0
+      },
+      "initial_SOC": {
+        "min_abs": 1.0,
+        "max_abs": 1.0
+      },
+      "injection_P_binding": {
+        "min_abs": 1.0,
+        "max_abs": 1.0
+      },
+      "injection_Q_binding": {
+        "min_abs": 1.0,
+        "max_abs": 1.0
+      },
+      "line_thermal_face": {
+        "min_abs": 1.0006451962467139e-13,
+        "max_abs": 1.0
+      },
+      "no_simultaneous_charge": {
+        "min_abs": 1.0,
+        "max_abs": 300.0
+      },
+      "no_simultaneous_discharge": {
+        "min_abs": 1.0,
+        "max_abs": 300.0
+      },
+      "terminal_SOC": {
+        "min_abs": 1.0,
+        "max_abs": 1.0
+      },
+      "terminal_location": {
+        "min_abs": 1.0,
+        "max_abs": 1.0
+      },
+      "transformer_current": {
+        "min_abs": 1.3925111064239105e-13,
+        "max_abs": 0.00021038210417922976
+      },
+      "transformer_kVA": {
+        "min_abs": 0.12756114412169656,
+        "max_abs": 0.3333333333333333
+      },
+      "voltage_lower": {
+        "min_abs": 3.446798402251261e-13,
+        "max_abs": 0.00026191718396652574
+      },
+      "voltage_upper": {
+        "min_abs": 3.446798402251261e-13,
+        "max_abs": 0.00026191718396652574
+      }
+    },
+    "coefficient_deletion": false,
+    "rounding": false,
+    "clipping": false
+  },
+  "factor_cost_audit_receipt": {
+    "path": "M1-F1.factor_cost.csv.gz",
+    "sha256": "81e0ed658a309c0bdd589fc43949da0ae6b00922b580ceca3be0aafa7bbf7e2f",
+    "rows": 78432,
+    "all_selected_strictly_reduce_cost": true,
+    "full_proposals_preserved": true
+  }
+}

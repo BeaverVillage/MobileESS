@@ -1,0 +1,17 @@
+# Exact physical and LP projection
+
+Work over the real coefficients supplied by the unchanged native response authority. Let z be every original arc, charge mode, SOC, Pch, Pdis, Q and rho variable, with the original bounds and integrality. D(z) denotes all unchanged route, travel, individual connection, PCS16, efficiency, initial and terminal SOC constraints. Every native grid row is affine in z, with the fixed A1 AIDC anchor as a constant.
+
+For each site/time define P(s,t) = sum_m(Pdis(m,s,t) - Pch(m,s,t)) and Q(s,t) = sum_m Q(m,s,t). Add unrestricted real auxiliaries yP,yQ and the equalities yP=P and yQ=Q. Replace only occurrences of these expressions in grid rows. These are identities, without any inequality relaxation, rounding, pruning or new physical restriction.
+
+For every selected line define Lp = p0 + wp*x, Lq = q0 + wq*x and D = correction*(x-anchor). The original current correction is retained exactly: ap = branch_limit*cos(pi/16); the active anchor face defines grad, correction = current_matrix.T-grad, and bias = current_constant + current_matrix.T*anchor - max(anchor_faces). Each original face becomes (cos(f)*Lp + sin(f)*Lq)/ap + D + bias <= rho. D is not discarded. Transformer kVA uses its original p and q affine responses, its original rating*cos(pi/16) and all 16 faces. One-use transformer current expressions remain original rows. Every selected voltage response is v = v0 + wv*x; lower and upper inequalities retain the squared robust limits. FCRA places those same inequalities on v's variable bounds.
+
+Old to new: for any z satisfying the original formulation, assign yP/yQ and each response auxiliary its displayed affine value. All binding equalities hold by substitution. Every downstream face or voltage bound evaluates to its original row, so the extension is feasible and has identical P1, movement energy and movement count.
+
+New to old: for any extended feasible point, the equalities uniquely force the displayed affine values of all auxiliaries. Substituting them into each downstream row or bound gives exactly the corresponding original inequality. D(z), original bounds and original integrality are unchanged. Deleting the auxiliaries therefore gives an original feasible point.
+
+Thus the projection of the extended feasible set equals the original feasible set. The map is unique in the auxiliary coordinates. The same proof applies after relaxing original binary variables to continuous variables with their original bounds: the LP projection and mathematical optimum are identical. No stronger or weaker relaxation is asserted. No tolerance is part of this algebraic proof. Numerical tests separately use the inherited 1e-5 feasibility tolerance and inherited objective lock tolerances to assess floating point implementations.
+
+The fixed AIDC terms are floats in every control row, inherited from PR106. LinExpr constants absorb their weighted contributions before Gurobi moves constants to RHS. There are zero AIDC decision columns. Folding does not change AIDC power, PF semantics, CC4/Runtime state or the accepted anchor bytes.
+
+Gurobi's native handling of floating point coefficients (including its built-in very-small-coefficient handling, which is also present in F0) is reported in raw logs. This implementation explicitly deletes, clips and rounds no supplied coefficient. Mathematical projection equality and finite-precision residual checks are distinct claims.

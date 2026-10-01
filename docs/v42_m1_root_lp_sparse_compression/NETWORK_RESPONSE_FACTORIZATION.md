@@ -1,0 +1,7 @@
+# Selective network responses
+
+F2 binds a line's two flow components and its original affine current-correction expression once, then all 16 faces reference those three responses and rho. F3 also binds transformer P/Q only when total binding plus downstream occurrences are smaller than the original face occurrences. Transformer current is used once and remains unfactored. F4 binds useful voltage expressions once plus two short bound rows. FCRA uses those identical lower/upper values as response variable bounds, eliminating the two short rows.
+
+The cost gate counts the supplied nonzero site-injection coefficients in every original downstream face, then compares against all proposed binding and downstream occurrences. A proposal is selected only when new < old. The gate is conservative for floating point trigonometric near-zeros; full Gurobi matrix census measures the actual retained occurrences. No input coefficients are rounded or clipped for this comparison. Each candidate census records every accepted and rejected response proposal, including one-use transformer current proposals.
+
+Continuous column count is allowed to increase. Route/SOC/PCS stay individual, so network factoring cannot grant an aggregated site capability that violates any individual unit constraint. All response auxiliaries are unrestricted except FCRA voltage bounds, which are exactly the original voltage inequalities. See the two-direction projection proof.
