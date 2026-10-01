@@ -1,0 +1,81 @@
+{
+  "BASE_PR": 113,
+  "BASE_HEAD": "c554832083498179ddb936379772ed7715cd3192",
+  "created_UTC": "2026-10-01T15:14:06Z",
+  "threshold": 0.5732125039436496,
+  "threshold_not_relaxed": true,
+  "B3_window": [
+    58,
+    95
+  ],
+  "B3_restored_binaries": 85744,
+  "threads": 4,
+  "threads_reason": "1 if observed independent heavy solver else 4. No thread performance superiority attribution.",
+  "direct_seconds": 1800.0,
+  "candidate_seconds": 240.0,
+  "candidate_count": 2,
+  "root_sources": [
+    "BASE",
+    "S3"
+  ],
+  "primary_strategies": 1,
+  "fallbacks": 0,
+  "settings": {
+    "Method": 1,
+    "NodeMethod": 1,
+    "Seed": 20260929,
+    "MIPFocus": 1,
+    "Heuristics": 0.2,
+    "DegenMoves": 0,
+    "CutPasses": 1,
+    "FeasibilityTol": 1e-07,
+    "IntFeasTol": 1e-07,
+    "OptimalityTol": 1e-07,
+    "NumericFocus": 1,
+    "DualReductions": 0,
+    "InfUnbdInfo": 1,
+    "SoftMemLimit": 12.0,
+    "SolutionLimit": 1
+  },
+  "strategy_rationale": "Pure feasibility hard threshold, dual simplex Method1 avoids inherited slow barrier/crossover; MIPFocus1/Heuristics0.2 seek a witness. NumericFocus1 and tighter feasibility/integrality tolerances audit inherited warnings. Joint strategy; no parameter sweep.",
+  "witness_policy": "Two complete root-nearest paths, one per BASE F3 and S3 source; fix only B3 route binaries to each path. Modes remain original B3 binaries; P/Q/SOC/outside variables free. Failed/INFEASIBLE restricted candidates cannot prove full B3 infeasibility. Exact duplicate fixed B3 route masks are skipped with evidence, count never expanded.",
+  "direct_solve_mandatory": true,
+  "direct_start": "Validated witness if one exists; otherwise W1 B3 route plus rounded root mode partial seed, all continuous/outside variables undefined. Original complete start violates threshold and is never misrepresented as feasible here.",
+  "safety": {
+    "matrix_tolerance": 1e-06,
+    "integer_tolerance": 1e-07,
+    "rho_recomputation_tolerance": 1e-07,
+    "threshold_acceptance_margin": 1e-06,
+    "rule": "No threshold epsilon relaxation. Accept only rho AND independently recomputed P1 <= T-1e-6. Reject ambiguous boundary point, retain raw result; no second optimization."
+  },
+  "early_stop": "Stop candidate search on independently validated safe witness; run mandatory exact direct solve once, stopping at first native solution. Never continue after certificate. Unsafe first solution retained as numerical-borderline INCONCLUSIVE, no retune.",
+  "INFEASIBLE_authority": "Only exact unrestricted direct model status3. Floating-point solver proof at registered tolerances, not an exact rational proof. INF_OR_UNBD/Numeric/interruption/time limit without validated point are inconclusive.",
+  "IIS": "Availability reported; expensive full-MIP IIS not automatically computed. Farkas dual is LP-only, not a complete MIP infeasibility proof.",
+  "B1_optimize_calls": 0,
+  "B2_optimize_calls": 0,
+  "production": false,
+  "P2": false,
+  "downstream": false,
+  "new_cuts": false,
+  "scope": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    8,
+    13
+  ],
+  "excluded_new_work": [
+    7,
+    9,
+    10,
+    11,
+    12
+  ],
+  "causal_closure": "Diagnosis only iff threshold scientific classification remains inconclusive; no expanded-window solve",
+  "decomposition": "Design/exactness proof/bounded fixture proposal only iff inconclusive with computational bottleneck",
+  "official_parameters": "https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html",
+  "official_tolerances": "https://docs.gurobi.com/projects/optimizer/en/current/concepts/numericguide/tolerances_scaling.html"
+}
