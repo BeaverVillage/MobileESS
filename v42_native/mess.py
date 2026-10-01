@@ -7,12 +7,29 @@ from dataclasses import dataclass,asdict
 from collections import defaultdict
 from math import isfinite,cos,sin,pi,hypot
 from time import perf_counter
+from types import MappingProxyType
 import gurobipy as gp
 from gurobipy import GRB
 from .contracts import require,digest
 from .solver import optimize,size
 
 FACES=16
+
+
+@dataclass(frozen=True)
+class StrengtheningContext:
+    x:object
+    stay:object
+    arcs:tuple
+    charge_mode:object
+    charge:object
+    discharge:object
+    reactive:object
+    energy:object
+    sites:tuple
+    initial_sites:object
+    battery:object
+    horizon:int
 
 
 @dataclass(frozen=True)
@@ -58,7 +75,7 @@ def pcs_rows(model,p,q,connected,S,mode='MILP'):
 
 
 def solve(stage,deadline,sites,initial_sites,routes,battery,horizon,grid_builder,
-          incumbent=None,*,mode='MILP',diagnostic=False,progress=None):
+          incumbent=None,*,mode='MILP',diagnostic=False,progress=None,strengthening_hook=None):
     require(stage in ('M1','M2') and stage==deadline.stage,'MESS_STAGE')
     require(mode=='MILP' or diagnostic,'DIAGNOSTIC_CIRCLE_NOT_PRODUCTION')
     battery.validate();deadline.check();started=perf_counter()
@@ -73,7 +90,7 @@ def solve(stage,deadline,sites,initial_sites,routes,battery,horizon,grid_builder
         incoming[d,e].append(k);outgoing[s,t].append(k);by_time[t].append(k)
         if r is None:stay[s,t]=k
     model=gp.Model('V42_NATIVE_'+stage);model.Params.OutputFlag=0
-    x={};charge={};discharge={};reactive={};energy={};removed=[]
+    x={};charge={};discharge={};reactive={};energy={};removed=[];charge_mode={}
     try:
         for m,origin in sorted(initial_sites.items()):
             require(origin in sites,'INITIAL_SITE');reachable={(origin,0)}
@@ -93,6 +110,7 @@ def solve(stage,deadline,sites,initial_sites,routes,battery,horizon,grid_builder
             model.addConstr(energy[m,0]==battery.initial,name='initial_SOC');model.addConstr(energy[m,horizon]==battery.terminal,name='terminal_SOC')
             for t in range(horizon):
                 direction=model.addVar(vtype=GRB.BINARY,name=f'charge_mode[{m},{t}]')
+                charge_mode[m,t]=direction
                 for s in sites:
                     key=m,s,t;connected=x[m,stay[s,t]]
                     if isinstance(connected,float):
@@ -114,6 +132,11 @@ def solve(stage,deadline,sites,initial_sites,routes,battery,horizon,grid_builder
         q={(s,t):gp.quicksum(reactive[m,s,t] for m in initial_sites) for s in sites for t in range(horizon)}
         primary=grid_builder(model,p,q)
         require([name for name,_ in primary]==['rho','reserve_shortfall'],'GRID_PRIMARY_AND_P2_CONTRACT')
+        if strengthening_hook is not None:
+            strengthening_hook(model,StrengtheningContext(
+                MappingProxyType(x),MappingProxyType(stay),tuple(arcs),MappingProxyType(charge_mode),
+                MappingProxyType(charge),MappingProxyType(discharge),MappingProxyType(reactive),
+                MappingProxyType(energy),tuple(sites),MappingProxyType(dict(initial_sites)),battery,horizon))
         movement=gp.quicksum(a[-1].energy_kwh*x[m,k] for m in initial_sites for k,a in enumerate(arcs) if a[-1] is not None)
         count=gp.quicksum(x[m,k] for m in initial_sites for k,a in enumerate(arcs) if a[-1] is not None)
         tie=gp.quicksum((k+1)*x[m,k] for m in initial_sites for k in range(len(arcs)))
