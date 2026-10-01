@@ -1,0 +1,61 @@
+{
+  "PASS": true,
+  "states": 600,
+  "slot_upper": {
+    "41": 0.4432689579221842,
+    "44": 0.41015862111269963,
+    "43": 0.4151182938731254,
+    "40": 0.4414376732128251,
+    "42": 0.4179645524790672,
+    "46": 0.37307916672851094
+  },
+  "full_matrix_checks": [
+    {
+      "time": 41,
+      "states": 100,
+      "matrix_max_violation": 1.1368683772161603e-13,
+      "PASS": true
+    },
+    {
+      "time": 44,
+      "states": 100,
+      "matrix_max_violation": 1.1368683772161603e-13,
+      "PASS": true
+    },
+    {
+      "time": 43,
+      "states": 100,
+      "matrix_max_violation": 1.1368683772161603e-13,
+      "PASS": true
+    },
+    {
+      "time": 40,
+      "states": 100,
+      "matrix_max_violation": 1.1368683772161603e-13,
+      "PASS": true
+    },
+    {
+      "time": 42,
+      "states": 100,
+      "matrix_max_violation": 1.1368683772161603e-13,
+      "PASS": true
+    },
+    {
+      "time": 46,
+      "states": 100,
+      "matrix_max_violation": 1.1368683772161603e-13,
+      "PASS": true
+    }
+  ],
+  "integer_paths_independently_validated": true,
+  "zero_P_Q_at_selected_slot": true,
+  "all_reachable_single_states_covered": true,
+  "all_pair_states_covered": true,
+  "pair_proof": "Different units have disjoint MESS rows; combine their validated single-state witnesses. All selected-slot P/Q are zero, so every retained grid row is identical to the single-state case.",
+  "beta_upper_proof": "Every O1 optimum <= constructed feasible upper < inherited global default. Therefore max(default, certified O1 lower bound)=default for every state and pair, even if solved later.",
+  "beta_coefficients_use_upper_bounds": false,
+  "stopping_rule": "No further O1 conditional solve can change any beta or E1/E2 root-precheck decision; remaining reachable states retain certified global default.",
+  "priority_remaining_stopped": true,
+  "not_a_full_M1_feasibility_certificate": true,
+  "other_time_grid_rows_dropped": true
+}

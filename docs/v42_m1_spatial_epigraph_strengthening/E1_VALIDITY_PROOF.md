@@ -1,0 +1,5 @@
+# E1 integer physical validity
+
+For every original integer plan, the full time-expanded route path crosses each time cut once. Thus the connected-site stay indicators and transit indicator form exactly one state a*. With a certified full-objective conditional lower bound beta[a] for each reachable state, sum_a beta[a]*y[a]=beta[a*] <= conditional integer optimum <= that plan's original rho. Therefore rho >= sum_a beta[a]*y[a] removes no original physical integer solution. Original P1/P2, all physical/grid constraints and objective order remain unchanged. Conditional O1 is valid by projection and removal of constraints; the inherited S2 global bound is valid on the original physical integer projection by PR109's constructive certificate.
+
+No E1 row is installed: all beta equal the global default and none violates the preregistered certified S3 point by 1e-5. Unreachable states arise only from exact route authority; all reachable states remain represented. No empirical coefficient or witness upper objective is used as a lower bound.

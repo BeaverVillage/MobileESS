@@ -1,0 +1,7 @@
+# E2 integer physical validity
+
+For a pair of units at one frozen time, nonnegative continuous w[a,b] has marginals sum_b w[a,b]=y_m[a] and sum_a w[a,b]=y_n[b]. At integer states a*,b*, these equalities force the unique cell w[a*,b*]=1 and every other cell zero. The inequality rho >= sum beta2[a,b]*w[a,b] becomes rho >= beta2[a*,b*], valid by the conditional full-objective lower-bound definition. Every original integer physical point extends into this unique w; projecting w recovers the original physical set. No new binary, physical constraint, scientific objective or policy is required.
+
+For a fractional frozen root, the tiny transportation LP computes the minimum possible epigraph RHS over all such extensions. If this value is at most rho, some extension preserves the root and the proposed pair cannot cut it. Every one of the six unordered pairs is evaluated at each of the first three frozen slots. Raw canonical state marginals are used with the inherited numerical tolerance and their solver residuals are reported; no mass clipping or silent normalization is performed.
+
+No E2 row or w column is installed. All 11250 beta2 coefficients use only the inherited global certified lower bound. Universal full-O1 feasible witnesses prove no uncomputed conditional LP can increase these coefficients. E2 conditional LP solve count is zero; transportation precheck count is 18 (36 actual calls including a documented canonical-transit recheck). This exact early stopping does not claim that all conditional LPs were solved.
