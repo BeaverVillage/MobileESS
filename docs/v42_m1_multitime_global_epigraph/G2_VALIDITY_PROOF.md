@@ -1,0 +1,11 @@
+# G2 validity and separation
+
+For each unordered pair at frozen slots 41,44,43, nonnegative joint w has row/column sums equal to the two y marginals. At integer y only the selected joint cell can be positive, with mass one. Its beta2 lower-bounds original conditional global P1. Extending an original integer plan with this one cell proves validity without deleting original rows or paths.
+
+All 11,250 beta2 coefficients equal default; every coupling has total mass one. All 18 exact-marginal transportation prechecks pass and return the constant default RHS (maximum root violation -5.145727288713431e-9). No w column, linking row or G2 epigraph cut is installed. One conditional G2 LP was solved. Two independent original unit lifts in each inactive-pair W7 witness certify every remaining cell.
+
+## Complete coefficient classification and stopping proof
+
+For each of six unordered pairs of units, the saved full W7 feasible upper point keeps the pair inactive in the window and achieves rho <=0.3441896824355414. Every one of 600 G1 states and 4,952 G3 reachable pairs has a complete original route path, validated for continuity, crossing-time state, travel energy, all unit physical matrix rows/bounds and initial/terminal SOC. Charging to repay travel energy occurs only outside the window. Window Pch/Pdis/Q stays exactly zero. The `W7_COMPLETE_PATH_LIFT_AUDIT.csv` covers all 5,552 lifts; changes to all retained grid/auxiliary row activities are exactly zero. Combine two independent single-unit lifts with the corresponding inactive-pair point to cover all 11,250 G2 cells. There are no cross-unit native physical rows.
+
+Thus every conditioned W7 LP has a feasible point strictly below default; all effective coefficients are default, including every unsolved priority or other reachable cell. This is a complete upper-certificate stopping proof, not extrapolation from the four conditional solves. All states remain present. Upper objectives are never cut coefficients or full-M1 incumbents. Four sign-feasible dual certificates are independently revalidated; the other LPs are accurately labeled upper witnesses. Tiny marginal transport LPs are separate from the ten real W7 LP calls.

@@ -1,0 +1,15 @@
+# G3 validity, exact support and separate gain sources
+
+Freeze (40,43), (43,46), (40,46), (41,44). For each unit and pair, exact DAG dynamic programming enumerates crossing-arc state pairs occurring on some original initial-to-terminal route. Prefixes extend through original stay arcs; states use the native departure/transit/arrival convention. Counts per unit are 200,205,625,208, totaling 4,952 cells across four units. No root mass or oracle result filters support.
+
+Joint v>=0 has time-one/time-two state marginals, supported on reachable pairs. An original integer route extends with one active cell; gamma lower-bounds that conditional global P1, hence rho>=sum gamma*v preserves it. There is no trajectory master, D-W, CG or branch-and-price.
+
+The pure route network is directed, acyclic, single-commodity unit flow with integral supply; its node-arc incidence is totally unimodular and every feasible flow decomposes into initial-to-terminal paths. Pair states on these paths induce a reachable joint distribution with the exact two time marginals. Therefore pair-support projection is already implied for all pure feasible route flows. This does not assert integrality of joint grid/SOC/PQ relaxation.
+
+All 16 inherited-root marginal feasibility tests pass; marginal-hull violations: zero. All 16 support-restricted transportation prechecks pass. Uniform gamma yields maximum violation -5.1457271776911284e-9. Route-projection gain is zero and epigraph useful violation is false, reported separately. One conditional G3 LP was solved; all remaining pairs are certified by complete reachable route lifts. G3 blocks installed: zero.
+
+## Complete coefficient classification and stopping proof
+
+For each of six unordered pairs of units, the saved full W7 feasible upper point keeps the pair inactive in the window and achieves rho <=0.3441896824355414. Every one of 600 G1 states and 4,952 G3 reachable pairs has a complete original route path, validated for continuity, crossing-time state, travel energy, all unit physical matrix rows/bounds and initial/terminal SOC. Charging to repay travel energy occurs only outside the window. Window Pch/Pdis/Q stays exactly zero. The `W7_COMPLETE_PATH_LIFT_AUDIT.csv` covers all 5,552 lifts; changes to all retained grid/auxiliary row activities are exactly zero. Combine two independent single-unit lifts with the corresponding inactive-pair point to cover all 11,250 G2 cells. There are no cross-unit native physical rows.
+
+Thus every conditioned W7 LP has a feasible point strictly below default; all effective coefficients are default, including every unsolved priority or other reachable cell. This is a complete upper-certificate stopping proof, not extrapolation from the four conditional solves. All states remain present. Upper objectives are never cut coefficients or full-M1 incumbents. Four sign-feasible dual certificates are independently revalidated; the other LPs are accurately labeled upper witnesses. Tiny marginal transport LPs are separate from the ten real W7 LP calls.
