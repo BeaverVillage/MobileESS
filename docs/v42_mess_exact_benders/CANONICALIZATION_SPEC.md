@@ -1,0 +1,5 @@
+# Exact canonical recourse
+
+Stored original sparse rows C z (sense) d are partitioned in original column order into x and y. Every < row keeps sign, every > row is negated, every equality becomes both directions. Thus A y <= b - B x. Every original finite y upper bound gives +y <= upper; every finite lower bound gives -y <= -lower. Canonical LP variables are free: bounds are explicit rows. Finite means strictly within Gurobi infinity. No new physical bound is invented. Original x bounds and all y-free rows also occur in the discrete master; those rows remain in recourse for fixed-assignment census. Every original row and coefficient has indexed provenance. Original grid and PCS16 coefficients are preserved as stored, including tiny coefficients. Conversion involves only sign and duplication.
+
+An initial state/anchor adapter rebuilds the native model with explicit inputs. M2 receives a fresh AIDC anchor, initial sites, and battery state. Warm starts set Start only, never LB/UB. The native constructor's original reachability authority is preserved; no additional pruning occurs.

@@ -1,0 +1,108 @@
+{
+  "created_UTC": "2026-10-01T16:13:19.353335+00:00",
+  "exact_base": "964b2c65964ff38089dab53c4e2fa03149d729f7",
+  "branch": "codex/v42-mess-exact-benders-decomposition",
+  "seed": 20260929,
+  "threads": 4,
+  "preserved_problems": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    8,
+    13
+  ],
+  "excluded_new_work": [
+    7,
+    9,
+    10,
+    11,
+    12
+  ],
+  "outer": "A1 -> M1 -> A2 -> M2",
+  "inner": "Joint route/mode/P/Q/SOC/grid feasible set",
+  "planning_voltage": [
+    0.955,
+    1.045
+  ],
+  "eventual_fresh_AC": [
+    0.95,
+    1.05
+  ],
+  "actual_PQ_repair": false,
+  "tolerances": {
+    "primal": 1e-07,
+    "integer": 1e-07,
+    "dual_stationarity": 1e-07,
+    "fixture_optimum": 1e-07,
+    "source_tightness": 1e-07,
+    "strict_Farkas_margin": 1e-08,
+    "physical": 1e-06,
+    "threshold_safety_margin": 1e-06
+  },
+  "certificates": "Exact rational arithmetic on stored IEEE doubles; finite-bound support correction and outward affine rounding. Unbounded residual support or lost strict margin: STOP, NO CUT.",
+  "LP": {
+    "Method": 1,
+    "FeasibilityTol": 1e-07,
+    "OptimalityTol": 1e-07,
+    "InfUnbdInfo": 1,
+    "DualReductions": 0,
+    "NumericFocus": 1,
+    "SoftMemLimit": 12
+  },
+  "master": {
+    "MIPGap": 0,
+    "IntFeasTol": 1e-07
+  },
+  "fixtures": "12 physical fixtures A-L, exhaustive all bit assignments; native fixed-x LP and canonical fixed-x LP separately; monolithic MILP and Benders P1; all infeasible assignments excluded by verified rays or discrete-only rows",
+  "budgets": {
+    "B3_decomposition_wall": 1800,
+    "full_M1_canary_wall": 600,
+    "production_P1_wall": 1800,
+    "production_P1_max_runs": 1,
+    "production_P2_wall": 1800
+  },
+  "B3_gate": "Fixtures PASS; exact matrix and full B3 partition; no invalid/uncertifiable cut; witness/proof OR >=2 terminal recourse solves and >=2 valid cuts within 1800s. Iterations with stalled first LP do not pass.",
+  "production_gate": "Canary exact, no numerical contradiction, >=2 terminal LP solves, valid finite LB, independently validated original UB, gap <=0.005 OR gap decreases by >=0.001 absolute from inherited 0.03224989640084286",
+  "P1_acceptance": "Original physical/grid/mode/integer validated UB and valid global LB, gap<=0.005, no numerical contradiction",
+  "P2": {
+    "gate": "Production P1 acceptance only",
+    "order": [
+      "movement_energy",
+      "movement_count"
+    ],
+    "inherited_P1_lock_tolerance": 1e-07,
+    "component_lock_tolerance": 1e-08
+  },
+  "A2_RUN": false,
+  "M2_RUN": false,
+  "downstream_automatic": false,
+  "forbidden": [
+    "route pruning",
+    "Top-K",
+    "Hamming restriction",
+    "trajectory pool",
+    "physics relaxation",
+    "cut aging",
+    "cut deletion",
+    "aggregation",
+    "DW/CG"
+  ],
+  "unsafe_statuses": [
+    "TIME_LIMIT",
+    "NUMERIC",
+    "INTERRUPTED",
+    "INF_OR_UNBD"
+  ],
+  "immediate_stop": [
+    "not LP",
+    "invalid cut",
+    "fixture optimum mismatch",
+    "feasible assignment removed",
+    "uncertifiable ray",
+    "physics drift",
+    "route restriction"
+  ]
+}
