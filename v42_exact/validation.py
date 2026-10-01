@@ -1,3 +1,4 @@
+from v42_native.voltage import PLANNING_LOWER_SQUARED, PLANNING_UPPER_SQUARED
 """Independent incumbent checks against frozen physical and grid authority."""
 from collections import defaultdict
 import math,re
@@ -39,7 +40,7 @@ def check(selected,data,controls,bindings_values,primary_rho):
     angles=2*np.pi*np.arange(16)/16;cos=np.cos(angles);sin=np.sin(angles)
     for c,x in zip(coeff,controls):
         x=np.asarray(x);volt=c.voltage_constant+c.voltage_matrix.T@x
-        grid_vio=max(grid_vio,float(np.max(.95**2-volt)),float(np.max(volt-1.05**2)))
+        grid_vio=max(grid_vio,float(np.max(PLANNING_LOWER_SQUARED-volt)),float(np.max(volt-PLANNING_UPPER_SQUARED)))
         p=c.flow_p_constant+c.flow_p_matrix@x;q=c.flow_q_constant+c.flow_q_matrix@x
         ap=np.asarray(c.branch_limits)*math.cos(math.pi/16)
         pa=c.flow_p_constant+c.flow_p_matrix@c.anchor;qa=c.flow_q_constant+c.flow_q_matrix@c.anchor

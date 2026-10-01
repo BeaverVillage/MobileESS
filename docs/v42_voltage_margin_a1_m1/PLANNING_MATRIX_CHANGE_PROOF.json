@@ -1,0 +1,30 @@
+{
+  "PASS": true,
+  "add_grid_AST_identical": true,
+  "all_nonvoltage_equations_exactly_preserved": true,
+  "changed_only_Planning_voltage_RHS": {
+    "lower_before": 0.9025,
+    "lower_after": 0.912025,
+    "upper_before": 1.1025,
+    "upper_after": 1.092025
+  },
+  "constructors": [
+    {
+      "path": "v42_boundary/model.py",
+      "function": "planning_grid",
+      "voltage_authority_arguments_only": true
+    },
+    {
+      "path": "v42_compact/native.py",
+      "function": "grid",
+      "voltage_authority_arguments_only": true
+    },
+    {
+      "path": "v42_temporal/native.py",
+      "function": "grid_binding",
+      "voltage_authority_arguments_only": true
+    }
+  ],
+  "coefficient_generation_unchanged": true,
+  "domain_and_RHS_numerical_census": "F2-CRA_MODEL_STATS.json; PHYSICAL_DOMAIN_REGRESSION.json"
+}

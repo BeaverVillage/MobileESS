@@ -101,5 +101,6 @@ def test_WAN_residual_min_cannot_be_aggregated_by_sum():
 def test_frozen_authorities_and_no_DW_import():
     import sys,hashlib
     d=json.loads((OUT/'LEGACY_PRESERVATION_AUDIT.json').read_text())
-    assert all(hashlib.sha256((ROOT/r['path']).read_bytes()).hexdigest()==r['sha256'] for r in d['files'])
+    from v42_voltage.preservation import assert_legacy
+    assert_legacy(d['files'])
     assert not any(n=='v42_dw' or n.startswith('v42_dw.') for n in sys.modules)

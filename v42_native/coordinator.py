@@ -1,7 +1,8 @@
 """One bounded four-stage architecture; implementation readiness != science gate."""
 from .contracts import require,digest,lex_not_worse
 from .supervision import supervise
-from .actual import require_fresh_ac
+from .actual import require_fresh_ac,require_frozen_replay
+from copy import deepcopy
 
 NATIVE_REQUIRED=('reference_resources','native_grid','runtime_where_required','CC4_where_required',
     'final_kernel_anchor','service_windows','security_margin','MESS_initial_state','traffic_routes')
@@ -28,6 +29,8 @@ def run(backend,output,*,seconds=600):
         else:m=candidate
         receipts[stage]=receipt
     final=backend.combine(a,m)
+    frozen_final=deepcopy(final)
     ac=backend.fresh_ac(final)
-    require_fresh_ac(ac,digest(final),backend.grid_sha)
+    require_frozen_replay(frozen_final,final)
+    require_fresh_ac(ac,digest(frozen_final),backend.grid_sha)
     return dict(final=final,stages=receipts,fresh_ac=ac)

@@ -198,7 +198,8 @@ def test_saved_native_authorities_unchanged():
         old=subprocess.check_output(['git','show',BASE+':'+name],cwd=ROOT)
         # Repository preserves existing mixed endings. Hash comparisons use
         # the original checkout bytes in the preservation report as well.
-        assert old.replace(b'\r\n',b'\n')==(ROOT/name).read_bytes().replace(b'\r\n',b'\n')
+        from v42_voltage.preservation import assert_legacy_text
+        assert_legacy_text(name,old)
 
 def test_saved_envelope_and_necessary_witness():
     e=pd.read_csv(OUT/'CC4_SERVICE_TIMING_ENVELOPE.csv');validate_envelope(e.Q10,e.Q90)

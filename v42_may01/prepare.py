@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from .state import physical_occupancy,cohort_key,t2,DIMS,RULE
 from v42_native.contracts import require,digest
+from v42_native.voltage import PLANNING_LOWER_PU,PLANNING_UPPER_PU
 from v42_job_capability import Job,checkpoint_records
 
 ROOT=Path(__file__).resolve().parents[1];WORK=ROOT.parent
@@ -249,7 +250,7 @@ def main():
     dump('MAY01_NATIVE_INPUT_BUNDLE.json',bundle)
     dump('MAY01_GRID_BINDING_AUDIT.json',dict(status='BOUND_FROZEN_NUMERIC_COEFFICIENTS' if not missing else 'PARTIAL_TRANSITIVE_INPUT_AUDIT',
         network='IEEE123',day=DAY,slots=96,controls=60,branch_phases=len(coefficients[0].branch_names),
-        voltage_lower=.95,voltage_upper=1.05,rho_upper=1,alpha_BG=1.15,coefficient_sha=cert['outputs']['planning_coefficients']['sha256'],
+        voltage_lower=PLANNING_LOWER_PU,voltage_upper=PLANNING_UPPER_PU,rho_upper=1,alpha_BG=1.15,coefficient_sha=cert['outputs']['planning_coefficients']['sha256'],
         post_H_electrical_claim=False,synthetic_coefficients=False,stale_response_kernel_used=False,
         hard_constraints=['voltage','line thermal','transformer current','transformer kVA'],missing_transitive=missing,
         actual_full_A1_grid_rows_built=False,source_binding_is_not_executed_grid_model=True))

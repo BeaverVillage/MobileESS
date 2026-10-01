@@ -1,0 +1,63 @@
+{
+  "PASS": true,
+  "authority_sha256": "a165f0011167c5595dc5619746a1665c55c184f8e8a7a5160cc42dae6a57e517",
+  "source_paths": [
+    {
+      "path": "v42_boundary/model.py",
+      "sha256": "2ac66721dbc860d5eab43d9bca7ed24c98001d37d130adba3d3ea54ddac6a9df",
+      "central_authority": true,
+      "old_Planning_band": false
+    },
+    {
+      "path": "v42_compact/native.py",
+      "sha256": "4b2aea1b7936c2c5249fc098386fa4404e0612b8225988c854d0a119d3561d47",
+      "central_authority": true,
+      "old_Planning_band": false
+    },
+    {
+      "path": "v42_temporal/native.py",
+      "sha256": "161bb314b8416a398f596a07ac456607a9ff40d318b06b8f50591a72a4a63663",
+      "central_authority": true,
+      "old_Planning_band": false
+    },
+    {
+      "path": "v42_native/grid.py",
+      "sha256": "3ebddfe78b05ab126c95881db23b7392b490cd325005b7b9ddbf0c679971f409",
+      "central_authority": true,
+      "old_Planning_band": false
+    },
+    {
+      "path": "v42_native/canary.py",
+      "sha256": "cc256c99cfc034003f64deffc017dd690cf166326d9385c609615b7a9825d0a7",
+      "central_authority": true,
+      "old_Planning_band": false
+    },
+    {
+      "path": "v42_exact/validation.py",
+      "sha256": "9a7adc7cd90f3baafd2590d3ce796531b99b11d3efa9b1046e2e32fcd2f0c523",
+      "central_authority": true,
+      "old_Planning_band": false
+    },
+    {
+      "path": "v42_voltage/grid.py",
+      "sha256": "28afca3eaa3794fea0656cf8444ce63140b9a699f00d726740dee7b19285e4cd",
+      "central_authority": true,
+      "old_Planning_band": false
+    },
+    {
+      "path": "v42_may01/prepare.py",
+      "sha256": "79d4514e964e5259b849a8282aa0e07fdd2d88fbfedf137f724e587dcbaa1387",
+      "central_authority": true,
+      "old_Planning_band": false
+    }
+  ],
+  "active_stage_paths": {
+    "A1": "root.native -> compact.grid -> boundary.planning_grid -> native.add_grid",
+    "M1": "voltage.m1 -> voltage.grid.frozen_grid -> native.add_grid",
+    "A2": "compact.grid with fixed MESS P/Q -> native.add_grid",
+    "M2": "voltage.grid.frozen_grid -> native.add_grid (future accepted A2 handoff required)"
+  },
+  "historical_receipts_unchanged": true,
+  "historical_bands_are_not_active_authority": true,
+  "coefficients_phase_PQ_signs_line_transformer_ratings_topology_PCC_unchanged": true
+}

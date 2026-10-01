@@ -1,0 +1,43 @@
+{
+  "base": "bd88de5f5b79df7584519ae0e457ce67d3826b61",
+  "Planning_voltage": {
+    "stages": [
+      "A1",
+      "M1",
+      "A2",
+      "M2"
+    ],
+    "lower_pu": 0.955,
+    "upper_pu": 1.045,
+    "lower_squared": 0.912025,
+    "upper_squared": 1.092025,
+    "Actual_lower_pu": 0.95,
+    "Actual_upper_pu": 1.05,
+    "fallback_allowed": false
+  },
+  "solver": {
+    "Threads": 1,
+    "Seed": 20260929,
+    "MIPGap": 0.005,
+    "GPU": false,
+    "A1_optimize_seconds": 3600,
+    "M1_optimize_seconds": 1800,
+    "build_excluded": true
+  },
+  "science_groups": [
+    "MAX_LINE_LOADING",
+    "MIN_INTERVENTION"
+  ],
+  "A1_tuple": [
+    "migration_count",
+    "absolute_shift",
+    "prestart_relocation"
+  ],
+  "M1_tuple": [
+    "movement_energy",
+    "movement_count"
+  ],
+  "one_M1": true,
+  "STOP_before_A2": true,
+  "Problem13_final_validated": false
+}
