@@ -1,0 +1,57 @@
+{
+  "base_head": "f8dcd7e4545108aa5ab684ab97fe2dcd99fdbca8",
+  "revision": 2,
+  "supersedes_original_CP0_CP1_sequence": true,
+  "CP0_status": "INTERRUPTED partial, preserved",
+  "CP1_RUN": false,
+  "primary_goal": "Accelerate exact global-bound proof and reach solver-certified P1 gap <=0.005, not force root exit",
+  "interpretation": "ROOT_LOOP_POLICY_EFFECT",
+  "pure_cut_ablation": false,
+  "individual_internal_causal_claim": false,
+  "formulation": "M1-F3",
+  "formulation_changed": false,
+  "Method": 2,
+  "Threads": 1,
+  "Seed": 20260929,
+  "MIPGap": 0.005,
+  "CutPasses": "AUTO",
+  "Cuts": "AUTO",
+  "individual_cut_families": "AUTO",
+  "Heuristics": 0,
+  "MIPFocus": 3,
+  "DegenMoves": "AUTO",
+  "primary": {
+    "label": "PROOF_AUTO",
+    "TimeLimit": 600,
+    "NodeLimit": null
+  },
+  "conditional": {
+    "label": "PROOF_DG0",
+    "DegenMoves": 0,
+    "TimeLimit": 600,
+    "max_calls": 1,
+    "gate": "Primary root relaxation completed, P1 not certified, post-LP root delay >=120s",
+    "only_changed_parameter": "DegenMoves",
+    "complete_internal_isolation": false
+  },
+  "production": {
+    "max_calls": 1,
+    "TimeLimit": 1800,
+    "cumulative_optimize_only": true,
+    "gate": "Selected canary improves solver-certified global BestBd over PR107 by >=1e-4 OR reaches certified P1 gap <=0.005",
+    "branch_entry_not_gate": true,
+    "primal_improvement_not_gate": true
+  },
+  "acceptance": {
+    "P1": "solver-certified relative gap <=0.005",
+    "P2": "inherited movement energy then count quality remains required for full M1 acceptance",
+    "physical": "independent native P/Q/route/SOC/PCS plus robust grid and fixed AIDC identity"
+  },
+  "P1_lock": 1e-07,
+  "P2_energy_lock": 1e-08,
+  "baseline_reused": true,
+  "A1_optimize_calls": 0,
+  "STOP_before_A2": true,
+  "heuristic_and_probing_isolation": false,
+  "preregistered_before_new_primary": true
+}
