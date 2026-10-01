@@ -3,6 +3,8 @@ from time import perf_counter
 import numpy as np
 import gurobipy as gp
 from .certificates import create,verify,Uncertifiable
+from .canonical import digest_arrays
+from .independent import verify as independent_verify
 
 def relative_gap(upper,lower):
     if upper is None or lower is None:return None
@@ -59,7 +61,7 @@ class Recourse:
 
 def solve(can,*,env,seconds=60,threads=1,feasibility=False,known=(),warm_start=None,
           validate=None,progress=None,log_dir=None,movement=None,count=None,accepted_p1=None,
-          initial_lower=0.,initial_upper=None,target_gap=.005):
+          initial_lower=0.,initial_upper=None,target_gap=.005,warm_start_is_hint=False):
     """P1 or threshold feasibility; P2 supplies movement/count and locked can.
 
     No callback lazy heuristic: every master candidate gets an independent LP.
@@ -76,15 +78,24 @@ def solve(can,*,env,seconds=60,threads=1,feasibility=False,known=(),warm_start=N
     theta=None if feasibility or p2 else master.addVar(lb=initial_lower,name='theta')
     if warm_start is not None:
         z=np.asarray(warm_start)
-        if len(z)!=len(can.names) or not np.isfinite(z).all():raise ValueError('WARM_START_AXIS')
-        if np.max(abs(z[can.xi]-np.rint(z[can.xi])),initial=0)>1e-7:raise ValueError('WARM_START_BINARY')
-        if can.residual(z[can.xi],z[can.yi])>1e-6:raise ValueError('WARM_START_NOT_FEASIBLE')
-        x.Start=z[can.xi]
-        if theta is not None:theta.Start=float(can.c@z[can.yi]+can.objective_constant)
+        if len(z)!=len(can.names):raise ValueError('WARM_START_AXIS')
+        if not warm_start_is_hint and not np.isfinite(z).all():raise ValueError('WARM_START_AXIS')
+        present=np.isfinite(z[can.xi]);xv=z[can.xi][present]
+        if np.max(abs(xv-np.rint(xv)),initial=0)>1e-7:raise ValueError('WARM_START_BINARY')
+        if np.any(xv<can.xlower[present]) or np.any(xv>can.xupper[present]):raise ValueError('WARM_START_BOUNDS')
+        if not warm_start_is_hint and can.residual(z[can.xi],z[can.yi])>1e-6:raise ValueError('WARM_START_NOT_FEASIBLE')
+        x.Start=np.where(present,z[can.xi],gp.GRB.UNDEFINED)
+        if theta is not None and np.isfinite(z[can.yi]).all():theta.Start=float(can.c@z[can.yi]+can.objective_constant)
     objectives=[('movement_energy',movement),('movement_count',count)] if p2 else [('feasibility',None)] if feasibility else [('rho',None)]
     lp=Recourse(can,env,threads,not(feasibility or p2),None if log_dir is None else log_dir/'recourse.log')
     cuts=[];hashes=set();logs=[];history=[];upper=initial_upper;lower=initial_lower
-    best=None;levels=[];status='TIME_LIMIT';master_time=0.;recourse_time=0.;iteration=0
+    best=None;levels=[];status='TIME_LIMIT';master_time=0.;recourse_time=0.;iteration=0;mr=None
+    if initial_upper is not None:
+        if warm_start is None or warm_start_is_hint:raise ValueError('INITIAL_UB_REQUIRES_VALIDATED_COMPLETE_POINT')
+        check=validate(z) if validate else dict(PASS=can.residual(z[can.xi],z[can.yi])<=1e-7)
+        if not check.get('PASS') or abs(float(can.c@z[can.yi]+can.objective_constant)-initial_upper)>1e-7:
+            raise ValueError('INITIAL_UB_NOT_VALIDATED')
+        best=z.copy()
     try:
         for level,coeff in objectives:
             master.setObjective(coeff@x if p2 else 0. if feasibility else theta)
@@ -95,6 +106,7 @@ def solve(can,*,env,seconds=60,threads=1,feasibility=False,known=(),warm_start=N
                 mr=dict(iteration=iteration,level=level,master_status=master.Status,master_seconds=master.Runtime,
                     wall_seconds=perf_counter()-started,recourse_status=None,cut_id=None,lower=None,upper=upper)
                 if master.Status==gp.GRB.INFEASIBLE:
+                    if initial_upper is not None:raise Uncertifiable('GLOBAL_BOUND_CONTRADICTION')
                     status='MASTER_INFEASIBLE';history.append(mr);break
                 if master.Status in [gp.GRB.NUMERIC,gp.GRB.INTERRUPTED,gp.GRB.INF_OR_UNBD]:
                     status='UNSAFE_MASTER_STATUS';history.append(mr);break
@@ -108,6 +120,7 @@ def solve(can,*,env,seconds=60,threads=1,feasibility=False,known=(),warm_start=N
                 if np.max(abs(xv-np.rint(xv)),initial=0)>1e-7:raise Uncertifiable('MASTER_NOT_INTEGER')
                 # Candidate snapping is representational only, checked in recourse.
                 xv=np.rint(xv)
+                mr['source_x_hash']=digest_arrays(xv)
                 for cut in cuts:
                     value=cut['record']['intercept']+float(cut['coefficients']@xv)
                     if cut['record']['type']=='optimality':value=float(theta.X)-value
@@ -115,6 +128,12 @@ def solve(can,*,env,seconds=60,threads=1,feasibility=False,known=(),warm_start=N
                 remaining=seconds-(perf_counter()-started)
                 if remaining<=0:history.append(mr);break
                 rr,y,w=lp.solve(xv,remaining);recourse_time+=rr['seconds'];rr.update(iteration=iteration,level=level)
+                rr['source_x_hash']=digest_arrays(xv)
+                if w is not None:
+                    rr.update(dual_ray_hash=digest_arrays(w),multiplier_min=float(w.min()),multiplier_max=float(w.max()))
+                    if log_dir is not None:
+                        np.savez_compressed(log_dir/('iteration_'+str(iteration)+'_certificate_input.npz'),
+                            source_x=xv,multipliers=w,status=np.array(rr['status']))
                 logs.append(rr);mr['recourse_status']=rr['status']
                 if rr['status'] not in [gp.GRB.OPTIMAL,gp.GRB.INFEASIBLE]:
                     status='RECOURSE_NONTERMINAL_NO_CUT';history.append(mr);break
@@ -143,6 +162,7 @@ def solve(can,*,env,seconds=60,threads=1,feasibility=False,known=(),warm_start=N
                     cut=create(can,w,xv,'optimality',rr['status'],iteration,value)
                 else:cut=create(can,w,xv,'feasibility',rr['status'],iteration)
                 audit=verify(can,cut,known);cut['record']['independent_validation']=audit
+                cut['record']['independent_COO_validation']=independent_verify(can,cut,known)
                 # verify ignores only its runtime annotation when called again.
                 if cut['record']['cut_hash'] in hashes:raise Uncertifiable('DUPLICATE_CUT_WITH_UNRESOLVED_SOURCE')
                 hashes.add(cut['record']['cut_hash']);cuts.append(cut)
@@ -154,7 +174,10 @@ def solve(can,*,env,seconds=60,threads=1,feasibility=False,known=(),warm_start=N
                 if progress:progress(mr,rr,cuts)
             if not level_complete:break
     except Uncertifiable as e:
-        status='STOP_UNCERTIFIABLE';history.append(dict(iteration=iteration,reason=str(e)))
+        status='STOP_UNCERTIFIABLE'
+        failure=dict(mr or {},iteration=iteration,reason=str(e))
+        if history and history[-1] is mr:history[-1]=failure
+        else:history.append(failure)
     finally:
         lp.close();master.dispose()
     result=dict(status=status,iterations=iteration,recourse_calls=len(logs),

@@ -1,0 +1,8 @@
+{
+  "first_check": "Actual matrix coefficients/objective/RHS passed; free-bound sentinel equality assertion failed",
+  "cause": "Gurobi returns IEEE infinities for free variable bounds, while input uses GRB.INFINITY=1e100",
+  "correction": "Recognize lower<=-GRB.INFINITY and upper>=GRB.INFINITY; preserve unchanged model",
+  "physics_changed": false,
+  "optimization_calls": 0,
+  "final_actual_solver_matrix_PASS": true
+}

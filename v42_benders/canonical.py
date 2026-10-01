@@ -44,12 +44,13 @@ class Canonical:
 
 def from_model(model, master_mask=None):
     model.update()
+    if model.ModelSense!=gp.GRB.MINIMIZE:raise ValueError('MINIMIZATION_AUTHORITY_REQUIRED')
     if model.NumQConstrs or model.NumSOS or model.NumGenConstrs or isinstance(model.getObjective(),gp.QuadExpr):
         raise ValueError('RECOURSE_NOT_LP')
     types=np.asarray(model.getAttr('VType'))
     if np.any(~np.isin(types,['B','C'])): raise ValueError('UNSUPPORTED_DISCRETE_TYPE')
     mask=(types=='B') if master_mask is None else np.asarray(master_mask,dtype=bool)
-    if len(mask)!=model.NumVars or np.any(mask & (types!='B')): raise ValueError('PARTITION_AUTHORITY')
+    if mask.shape!=(model.NumVars,) or np.any(mask & (types!='B')): raise ValueError('PARTITION_AUTHORITY')
     # An explicitly selected partial mask means omitted original binaries are relaxed.
     xi=np.flatnonzero(mask);yi=np.flatnonzero(~mask)
     C=model.getA().tocsr();d=np.asarray(model.getAttr('RHS'));sense=np.asarray(model.getAttr('Sense'))
@@ -80,7 +81,8 @@ def matrix_audit(model,can):
     equal=diff.nnz==0 or np.all(diff.data==0)
     b=np.asarray(model.getAttr('RHS'))[can.source_rows]*can.signs
     bound=can.A[n:]
-    return dict(PASS=bool(equal and np.array_equal(b,can.b[:n]) and bound.nnz==len(can.bound_columns)
+    expected_bound_rhs=np.where(can.bound_signs<0,-can.lower[can.bound_columns],can.upper[can.bound_columns])
+    return dict(PASS=bool(equal and np.array_equal(b,can.b[:n]) and np.array_equal(can.b[n:],expected_bound_rhs) and bound.nnz==len(can.bound_columns)
             and np.array_equal(bound.data,can.bound_signs) and np.array_equal(bound.indices,can.bound_columns)),
         original_rows=model.NumConstrs,original_columns=model.NumVars,original_nonzeros=model.NumNZs,
         canonical_rows=can.A.shape[0],master_columns=len(can.xi),recourse_columns=len(can.yi),
