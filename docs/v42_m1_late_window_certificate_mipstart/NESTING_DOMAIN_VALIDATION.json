@@ -1,0 +1,23 @@
+{
+  "PASS": true,
+  "counts": {
+    "B1": 67316,
+    "B2": 67436,
+    "B3": 85744
+  },
+  "strictly_nested": true,
+  "original_integer_start_feasible_in_every_subset": true,
+  "restored_domains_exactly_match_PR112": true,
+  "independent_rule": "Enumerate occupancy at each slot, including arrival-to-connect interval, plus departures from window nodes",
+  "feasible_set_relation": "F_original_integer subset F_B3 subset F_B2 subset F_B1 subset F_F3",
+  "optimum_relation": "opt_F3 <= opt_B1 <= opt_B2 <= opt_B3 <= opt_original_integer",
+  "upper_transfer": "Every independently validated B3 feasible point is feasible in B2/B1; an original integer point is feasible in every partial model.",
+  "lower_transfer": "A weaker relaxation lower bound is valid for every stronger model; a B3 lower bound cannot be transferred to B1/B2.",
+  "S2_warning": "S2 is a certified original-integer LB, not automatically a lower bound on a partial F3-subset optimum.",
+  "full96_rows_retained": true,
+  "terminal_SOC_retained": true,
+  "route_graph_no_pruning": true,
+  "custom_cuts": false,
+  "optimize_calls": 0,
+  "axis_sha256": "a9cbb95eefe793249ba1dd853f25dc9fc256425bc1cd9b945037ee00fb2fbfa1"
+}

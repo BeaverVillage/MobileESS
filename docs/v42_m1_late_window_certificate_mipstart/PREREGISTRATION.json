@@ -1,0 +1,98 @@
+{
+  "BASE_PR": 112,
+  "BASE_HEAD": "c90525c330c2f8aa9971030b87cf154ecf1b284f",
+  "created_utc": "2026-10-01T13:49:34Z",
+  "scope": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    8,
+    13
+  ],
+  "excluded": [
+    7,
+    9,
+    10,
+    11,
+    12
+  ],
+  "model": "Exact original sparse F3 rows/bounds/objective; binary-subset relaxation only",
+  "windows": {
+    "B1": [
+      66,
+      95
+    ],
+    "B2": [
+      66,
+      95
+    ],
+    "B3": [
+      58,
+      95
+    ]
+  },
+  "reference_LB": 0.5722125039436496,
+  "F3_LB": 0.5718494602017812,
+  "validated_start_UB": 0.5912812634331275,
+  "physical_tolerance": 1e-05,
+  "objective_tolerance": 1e-07,
+  "strategy_candidates": 1,
+  "solver": {
+    "Method": 2,
+    "NodeMethod": 1,
+    "Threads": 4,
+    "Seed": 20260929,
+    "MIPFocus": 1,
+    "Heuristics": 0.1,
+    "DegenMoves": 0,
+    "CutPasses": 1,
+    "MIPGap": 0.0,
+    "MIPGapAbs": 0.0005,
+    "TimeLimit": 1800.0
+  },
+  "GPU": false,
+  "custom_cuts": false,
+  "parameter_sweep": false,
+  "strategy_rationale": "Inherited arms spent 278-503s in root barrier/crossover, then stayed at the root during degenerate moves/cut passes. Keep Method=2; four threads support parallel barrier/root helpers, DegenMoves=0 and CutPasses=1 avoid repeated root-only work; MIPFocus=1/Heuristics=0.1 seek the partial feasible upper needed for a negative certificate. This is a preregistered joint strategy, not an attribution comparison of individual parameter effects.",
+  "comparison_to_PR112": {
+    "Threads": "1 -> 4; one solve at this setting, no sweep",
+    "MIPFocus": "3 -> 1",
+    "Heuristics": "0 -> 0.1",
+    "DegenMoves": "-1 -> 0",
+    "CutPasses": "-1 -> 1",
+    "MIPGap": "0.005 -> 0",
+    "MIPGapAbs": "default -> 0.0005",
+    "TimeLimit": "600 -> 1800 optimize-only, with certificate-driven early stop"
+  },
+  "stops": {
+    "positive": "BestBd >= S2+0.001+1e-7",
+    "negative": "feasible partial objective <= S2+0.001-1e-7",
+    "tight": "MIPGapAbs=0.0005",
+    "timeout": "INCONCLUSIVE unless a separately validated certificate exists"
+  },
+  "native_acceptance_probe": {
+    "TimeLimit": 30,
+    "SolutionLimit": 1,
+    "Heuristics": 0,
+    "complete_original_binary_model": true,
+    "production": false
+  },
+  "certificates": "Never use S2 as a lower bound on the weaker partial optimum. Partial interval LB=max(inherited F3 LP LB, this arm BestBd); S2 is an original-M1 reference/global LB. Nonmaterial iff validated partial upper-S2<=0.001. Every partial BestBd is a valid original-M1 LB.",
+  "inclusion": "F_original_integer subset F_B3 subset F_B2 subset F_B1 subset F_F3. Stronger feasible uppers transfer to weaker models; weaker lower bounds transfer to stronger models, after exact unchanged-row/domain checks.",
+  "production": {
+    "max_runs": 1,
+    "TimeLimit": 1800,
+    "MIPGap": 0.005,
+    "gate": "native start accepted AND all B1/B2/B3 have positive material or negative nonmaterial certificates AND case != E; original full domain/physics only"
+  },
+  "P2_gate": "Only independently accepted production P1 with global implied gap<=0.005; original MIN_INTERVENTION movement-energy then movement-count tuple and P1 lock",
+  "A1_S1_S2_S3_optimize_calls": 0,
+  "terminal_counterfactual_rerun": false,
+  "no_new_remedy": true,
+  "downstream": false,
+  "official_parameters": "https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html",
+  "official_MIP_start": "https://docs.gurobi.com/projects/examples/en/current/overview/starts.html"
+}

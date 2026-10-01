@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "created_utc": "2026-10-01T14:06:15Z",
+  "base_commit": "c90525c330c2f8aa9971030b87cf154ecf1b284f",
+  "original_preregistration_sha256": "d7f8107f465db6d6b983b826243f25dc78b86f07194ca6ecd9686b15ecfe744b",
+  "human_correction_sha256": "4d843129dfcc3fc7d8bd82c4b6160012819a9c3fb933f731e751e799757a63bb",
+  "before_any_new_optimization": true,
+  "optimization_markers_at_correction": [],
+  "existing_prepare_files_preserved": [
+    {
+      "path": "MIP_START_EXACT.npz",
+      "sha256": "81bb020f77f4648e235daa7d6d539df8a9691974cce161f8b3c51583e991e11c"
+    },
+    {
+      "path": "MIP_START_GRID_VALIDATION.json",
+      "sha256": "6fa70785e31b9ed117dc30202e40caecf65d260ab56ba5d0e751646e24fe02a3"
+    },
+    {
+      "path": "MIP_START_PHYSICAL_VALIDATION.json",
+      "sha256": "52430afe6b1f75d40815a25ceef320c799bec131d241b71a3c45bb40564c4964"
+    },
+    {
+      "path": "MIP_START_RECOMPUTED_P1.csv",
+      "sha256": "2ddae1d6aaa10bfdb39606540f51e1b4a25d52ff749f3197565c04b3b2a10e72"
+    }
+  ],
+  "history": "PR112 already ran R_ROUTE_ONLY/R_ACTIVE/R_BUFFER once each for 600 seconds; results remain computationally inconclusive. Unconditional repetition is superseded by independently verified nesting and B3-first execution.",
+  "policy": {
+    "primary": "B3",
+    "B3_window": [
+      58,
+      95
+    ],
+    "active_window": [
+      66,
+      95
+    ],
+    "B2_gate": "RUN only if B3 certified material",
+    "B1_gate": "RUN only if B2 certified material",
+    "B3_nonmaterial": "STOP new solves; transfer validated B3 feasible upper to B2/B1 through exact nesting",
+    "inconclusive": "STOP, report insufficient certificate; do not run weaker arms",
+    "native_start": "Use complete validated original-integer point directly in B3; record acceptance there, no separate full-MIP acceptance optimization",
+    "primary_settings": "Original preregistered single joint strategy retained",
+    "fallbacks": 0,
+    "production": "Not executed in this sequential certificate PR; later decision after certificate report",
+    "P2": false,
+    "downstream": false,
+    "custom_cuts": false
+  },
+  "attribution": "Use optimum intervals to bound incremental effects, never subtract time-limited bounds as exact optima. Tight/OPTIMAL high optimum can be material; nonmateriality requires upper-S2<=0.001.",
+  "thread_caveat": "4-thread certificate validity is mathematical and solver-evidence based; no claim of performance superiority over inherited Threads=1 arms."
+}

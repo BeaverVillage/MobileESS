@@ -1,0 +1,36 @@
+{
+  "optimize_calls": 0,
+  "attempts": [
+    {
+      "attempt": 1,
+      "result": "PREPARATION_ASSERTION",
+      "location": "compare native default fingerprint",
+      "cause": "Inherited default identity also includes retained Start metadata; compare restored retained metadata before replacing with the new complete Start."
+    },
+    {
+      "attempt": 2,
+      "result": "PREPARATION_ASSERTION",
+      "location": "native ConstrName versus MPS ConstrName literal comparison",
+      "observed": "Native default identity, exact matrix sparsity/coefficient data, and variable axis comparisons passed. Duplicate native row names are serialized as distinct MPS aliases; use row-index mapping and exact RHS/sense checks."
+    }
+  ],
+  "preserved_prepare_outputs": [
+    {
+      "path": "MIP_START_EXACT.npz",
+      "sha256": "81bb020f77f4648e235daa7d6d539df8a9691974cce161f8b3c51583e991e11c"
+    },
+    {
+      "path": "MIP_START_GRID_VALIDATION.json",
+      "sha256": "6fa70785e31b9ed117dc30202e40caecf65d260ab56ba5d0e751646e24fe02a3"
+    },
+    {
+      "path": "MIP_START_PHYSICAL_VALIDATION.json",
+      "sha256": "52430afe6b1f75d40815a25ceef320c799bec131d241b71a3c45bb40564c4964"
+    },
+    {
+      "path": "MIP_START_RECOMPUTED_P1.csv",
+      "sha256": "2ddae1d6aaa10bfdb39606540f51e1b4a25d52ff749f3197565c04b3b2a10e72"
+    }
+  ],
+  "scientific_optimizations_retried": 0
+}
