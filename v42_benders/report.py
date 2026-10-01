@@ -130,7 +130,7 @@ The sequential baseline has no asynchronous recourse, no aggregation and no cut 
     ('Exact base와 bytes는?','PR114 exact 964b2c65964ff38089dab53c4e2fa03149d729f7에서 새 branch를 생성했다. Inherited 1,533 tracked file SHA와 Git diff를 검증한다.'),
     ]
     text='# V42 exact MESS Benders 검토\n\n'+''.join(f'{i}. **Q. {q}**\n\n   A. {a}\n\n' for i,(q,a) in enumerate(qa,1))
-    (OUT/'FINAL_REVIEW_KO.md').write_text(text,encoding='utf8')
+    (OUT/'FINAL_REVIEW_KO.md').write_text(text.rstrip()+'\n',encoding='utf8')
     (OUT/'README.md').write_text('''# Exact joint MESS Benders validation
 
 Read FINAL_VERDICT.json and FINAL_REVIEW_KO.md first. Canonicalization and both cut derivations were committed before cut code. All original finite bounds and both equality directions remain explicit. Exact rational bound-compensated certificates are weaker, globally valid cuts on the stored linear model; no uncertified numerical ray is accepted.

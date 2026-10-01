@@ -255,4 +255,3 @@
 64. **Q. Exact base와 bytes는?**
 
    A. PR114 exact 964b2c65964ff38089dab53c4e2fa03149d729f7에서 새 branch를 생성했다. Inherited 1,533 tracked file SHA와 Git diff를 검증한다.
-

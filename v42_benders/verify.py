@@ -36,7 +36,7 @@ def run():
         'PR113/114 warnings를 원문 receipt/hash와 함께 보존한다. 첫 B3 LP는 INFEASIBLE이었으나 ray sign 검증에 실패했다. Kappa=5.11554e15 warning이 있었다. Cut은 0개다. V1 rejected raw ray vector/hash/minimum은 저장되지 않아 복구할 수 없다. 이 한계를 REJECTED_B3_RAY_AUDIT에 명시했으며 V2는 검증 전에 입력을 저장한다. 추가 full optimize는 하지 않았다.')
     text=text.replace('Inherited 643 tests를 full suite에서 보존한다. Original 44 bounded-check receipt와 bytes도 검증한다. 새 bounded fixture와 adapter tests는 별도다.',
         '전체 708 tests PASS: inherited 643 + new 65. Inherited log1p warning 1개를 보존한다. Original 44 bounded-check receipt와 bytes를 검증했고 무단 재실행/수정하지 않았다.')
-    review.write_text(text,encoding='utf8')
+    review.write_text(text.rstrip()+'\n',encoding='utf8')
     nextp=OUT/'NEXT_MODIFICATIONS.md';nexttext=nextp.read_text(encoding='utf8')
     if 'Observed blocker' not in nexttext:
         nexttext+='\nObserved blocker: the first B3 recourse ended INFEASIBLE at 1433.581 seconds, with very big Kappa=5.11554e15. Its Farkas multiplier sign failed strict certification, so no cut was added. V1 did not retain the rejected raw vector/hash/magnitude. The exact executed source is archived; V2 now stores certificate inputs before verification. No second full run was performed. A separately preregistered experiment may examine the archived future multipliers and prove any reconstruction with sign, exact support, stationarity and margin checks. Do not silently flip/clamp an uncertified ray or treat this single-candidate infeasibility as a global B3 proof.\n'
