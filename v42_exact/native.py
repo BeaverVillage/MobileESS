@@ -6,6 +6,7 @@ from .common import *
 from . import factor
 from v42_compact.formulation import add_job,intervention
 from v42_compact.native import grid,completion_risk
+from v42_native.voltage import Stage
 from v42_final.reserve import risk_exposure
 def build(context,data,formulation):
     bundle,jobs,bounds,r,raw,graphs,original,prep=data;started=perf_counter()
@@ -24,7 +25,7 @@ def build(context,data,formulation):
             riskrows[site,t]=m.addConstr(risk[site,t]==fixedrisk[site,t])
     wanrows={(l,t):m.addConstr(gp.LinExpr()<=rate-r.fixed_wan.get((l,t),0)) for (l,t),rate in r.wan_capacities.items()}
     active={t:m.addConstr(gp.LinExpr()<=r.max_active_transfers-r.fixed_transfers.get(t,0)) for t in range(r.control_end)}
-    primary,timing,controls=grid(m,bundle,known,risk);m.update();grid_seconds=perf_counter()-started
+    primary,timing,controls=grid(m,bundle,known,risk,stage=Stage.A1);m.update();grid_seconds=perf_counter()-started
     other_cont=m.NumVars-m.NumIntVars;allvars={};counts=Counter();metrics=[gp.LinExpr() for _ in range(3)];tie=gp.LinExpr();rank=0
     fixed_add_gpu=defaultdict(float);fixed_add_risk=defaultdict(float)
     import psutil

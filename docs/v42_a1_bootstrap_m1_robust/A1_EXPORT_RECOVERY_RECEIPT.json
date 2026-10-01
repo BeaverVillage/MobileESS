@@ -1,0 +1,75 @@
+{
+  "PASS": true,
+  "reason": "Export numeric conversion of LinExpr failed after all four A1 solves and independent validation completed",
+  "optimize_calls": 0,
+  "scientific_rerun": false,
+  "structural_rebuild_only": true,
+  "model_before": {
+    "columns": 7449002,
+    "rows": 9126514,
+    "nonzeros": 53621850,
+    "binaries": 2223230,
+    "integers": 41685,
+    "fingerprint": "0x3c09031"
+  },
+  "model_rebuilt": {
+    "columns": 7449002,
+    "rows": 9126514,
+    "nonzeros": 53621850,
+    "binaries": 2223230,
+    "integers": 41685,
+    "fingerprint": "0x3c09031"
+  },
+  "dense_sha256": "e60e4ca92a5b4d2e623f4356dc519d38bf6da8382d8da4ba5208dc7ea00713fe",
+  "selected_plan_unchanged": true,
+  "electrical_controls_unchanged": true,
+  "independent_validation": {
+    "PASS": true,
+    "jobs": 1499,
+    "old_validator_PASS": true,
+    "deterministic_WAN_PASS": true,
+    "full_service_and_carryout_PASS": true,
+    "rack_gang_PASS": true,
+    "physical_capacity_max_violation": 0,
+    "grid_max_violation": 8.071441559565073e-08,
+    "CC4_max_violation": 2.0617108020815067e-10,
+    "Runtime_max_violation": 0,
+    "failed": [],
+    "limitation": "Native reserve anonymous site headroom is additionally checked by independent linear residual evaluation; no Actual AC run is executed.",
+    "independent_known_GPU_max_violation": 0.0,
+    "independent_Runtime_binding_max_violation": 1.0658141036401503e-13,
+    "independent_reserve_headroom_max_violation": 0.0,
+    "solver_max_violation": 8.071441545253605e-08,
+    "P1_rho": 0.6715925043100266,
+    "validation_seconds": 9.503020500007551,
+    "artificial_physical_slack": 0,
+    "artificial_scientific_slack": 0,
+    "reserve_shortfall_semantics": "Unoptimized soft reliability auxiliary; not an objective, a zero-shortfall hard constraint, or an electrical certificate",
+    "scientific_objective_snapshot": {
+      "MAX_LINE_LOADING": 0.6715925043100266,
+      "MIN_INTERVENTION": {
+        "migration_count": 0.0,
+        "shift_magnitude": 387,
+        "prestart_relocation": 221.0
+      }
+    },
+    "report_only_metrics": {
+      "raw_reserve_shortfall": 89833.0,
+      "CC4_reference_deviation": 2.4843577673160966
+    }
+  },
+  "changed_executed_source": "v42_bootstrap/handoff.py",
+  "change_scope": "Numeric export evaluation only; no objective, candidate, model, solver or physical authority change",
+  "prior_export_build_interruption": {
+    "optimize_calls": 0,
+    "progress": {
+      "phase": "CLASS_UNITS",
+      "formulation": "F2-CRA",
+      "classes_complete": 49,
+      "classes_required": 117,
+      "seconds": 61.94340550000197
+    },
+    "phase": "STRUCTURAL_BUILD",
+    "reason": "Serializer audit identified NumPy arrays in preserved CC4 timing state before export"
+  }
+}

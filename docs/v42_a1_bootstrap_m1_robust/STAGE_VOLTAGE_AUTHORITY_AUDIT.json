@@ -1,0 +1,126 @@
+{
+  "PASS": true,
+  "stage_paths": {
+    "A1": "v42_root.native -> compact.grid(stage=Stage.A1) -> boundary.planning_grid(stage=Stage.A1)",
+    "M1": "v42_bootstrap.m1 -> frozen_grid(stage=Stage.M1)",
+    "A2": "compact.grid or temporal.grid_binding(stage=Stage.A2, fixed MESS P/Q)",
+    "M2": "v42_native.mess.solve(M2) -> frozen_grid(stage=Stage.M2, accepted A2 anchor)",
+    "Actual": "PR105 byte-identical actual.py frozen replay, physical 0.95–1.05"
+  },
+  "authorities": {
+    "A1": {
+      "kind": "A1_BOOTSTRAP",
+      "lower_pu": 0.95,
+      "upper_pu": 1.05,
+      "lower_squared": 0.9025,
+      "upper_squared": 1.1025,
+      "stage": "A1",
+      "fallback_allowed": false,
+      "stages": [
+        "A1"
+      ],
+      "Actual_lower_pu": 0.95,
+      "Actual_upper_pu": 1.05
+    },
+    "M1": {
+      "kind": "ROBUST_PLANNING",
+      "lower_pu": 0.955,
+      "upper_pu": 1.045,
+      "lower_squared": 0.912025,
+      "upper_squared": 1.092025,
+      "stage": "M1",
+      "fallback_allowed": false,
+      "stages": [
+        "M1",
+        "A2",
+        "M2"
+      ],
+      "Actual_lower_pu": 0.95,
+      "Actual_upper_pu": 1.05
+    },
+    "A2": {
+      "kind": "ROBUST_PLANNING",
+      "lower_pu": 0.955,
+      "upper_pu": 1.045,
+      "lower_squared": 0.912025,
+      "upper_squared": 1.092025,
+      "stage": "A2",
+      "fallback_allowed": false,
+      "stages": [
+        "M1",
+        "A2",
+        "M2"
+      ],
+      "Actual_lower_pu": 0.95,
+      "Actual_upper_pu": 1.05
+    },
+    "M2": {
+      "kind": "ROBUST_PLANNING",
+      "lower_pu": 0.955,
+      "upper_pu": 1.045,
+      "lower_squared": 0.912025,
+      "upper_squared": 1.092025,
+      "stage": "M2",
+      "fallback_allowed": false,
+      "stages": [
+        "M1",
+        "A2",
+        "M2"
+      ],
+      "Actual_lower_pu": 0.95,
+      "Actual_upper_pu": 1.05
+    },
+    "Actual": {
+      "kind": "ACTUAL_PHYSICAL",
+      "lower_pu": 0.95,
+      "upper_pu": 1.05,
+      "lower_squared": 0.9025,
+      "upper_squared": 1.1025,
+      "stage": "Actual",
+      "fallback_allowed": false,
+      "stages": [
+        "Actual"
+      ],
+      "Actual_lower_pu": 0.95,
+      "Actual_upper_pu": 1.05
+    }
+  },
+  "sources": [
+    {
+      "path": "v42_native/voltage.py",
+      "sha256": "d034ec5816b3b6d55e78a3877305be19b269a586f5f354e922566b16fa763751"
+    },
+    {
+      "path": "v42_native/grid.py",
+      "sha256": "1d5c353c1e767cae54520f04ad101e34a95da3d1976d9b449e366400fe78112d"
+    },
+    {
+      "path": "v42_boundary/model.py",
+      "sha256": "b987923d3493d22ccce03a237140a72639d9655c40ffe41047e5d653a73ce251"
+    },
+    {
+      "path": "v42_compact/native.py",
+      "sha256": "d68e1e360816ed321bd68d6aa7dd74526efb88bbe7876064b40e83d063d83d21"
+    },
+    {
+      "path": "v42_temporal/native.py",
+      "sha256": "9e93c03217bad5dff2c318a91d760c85d875a05b6b42cc5d5464107000546212"
+    },
+    {
+      "path": "v42_bootstrap/grid.py",
+      "sha256": "1e14b10ccaf6f6c8b1d45997279567e683c8ce920529af0de3c3d6cc127b6923"
+    },
+    {
+      "path": "v42_bootstrap/a1.py",
+      "sha256": "9d25dad5c179b561f5a19768bf2813236a2c35dd5205793d7e86703bdfd71217"
+    },
+    {
+      "path": "v42_bootstrap/m1.py",
+      "sha256": "31279b85f8a69c41d80e0f19feda3cd2c9d7cd6026f1e8a4c5b046034363bae4"
+    }
+  ],
+  "arbitrary_stage_string_parsing": false,
+  "stage_enum_required": true,
+  "global_Planning_alias_is_robust_compatibility_only": true,
+  "A1_final_robust_acceptance": false
+}

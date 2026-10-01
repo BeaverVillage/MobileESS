@@ -8,7 +8,7 @@ from dataclasses import replace,asdict
 from time import perf_counter
 import sys
 import numpy as np
-from v42_native.voltage import PLANNING_LOWER_SQUARED, PLANNING_UPPER_SQUARED
+from v42_native.voltage import Stage,voltage_for
 import gurobipy as gp
 from .common import *
 from .service import bind_forecast,objective_order
@@ -81,7 +81,10 @@ def load_power(bundle):
                   for s,cap in bundle['capacities'].items() for t in range(96)}
     return cert,coefficients,idle,swing
 
-def grid_binding(model,bundle,known,domains,z,raw,*,mess_p=None,mess_q=None):
+def grid_binding(model,bundle,known,domains,z,raw,*,stage=Stage.A1,mess_p=None,mess_q=None):
+    require(stage in (Stage.A1,Stage.A2),"AIDC_GRID_STAGE")
+    require(stage!=Stage.A1 or (mess_p is None and mess_q is None),"BOOTSTRAP_MESS_MUST_BE_ZERO")
+    require(stage!=Stage.A2 or (mess_p is not None and mess_q is not None),"A2_ACCEPTED_MESS_ANCHOR_REQUIRED")
     e=pd.read_csv(OUT/'CC4_SERVICE_TIMING_ENVELOPE.csv');k=pd.read_csv(OLD/'CC4_EXECUTION_LAG_KERNEL.csv').kappa.to_numpy()
     day=pd.Timestamp('2025-05-01T00:00:00+10:00').timestamp()
     book=ForecastBook(tuple(bundle['C0_Q50']),tuple(bundle['C0_Q90']),day)
@@ -103,7 +106,7 @@ def grid_binding(model,bundle,known,domains,z,raw,*,mess_p=None,mess_q=None):
     reserve=bind_headroom(model,known,anon,arrival_target,risk,caps,range(24,120))
     cert,power,idle,swing=load_power(bundle);coeff=native_coefficients(cert)
     ga=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),
-        digest(bundle['capacities']),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),PLANNING_LOWER_SQUARED,PLANNING_UPPER_SQUARED,True)
+        digest(bundle['capacities']),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),voltage_for(stage).lower_squared,voltage_for(stage).upper_squared,True,stage=stage)
     controls=[]
     for t,c in enumerate(coeff):
         row=[]
@@ -138,7 +141,7 @@ def solve_a1(context,bundle,ledger):
         for key in sorted(set(use)|{('GPU',s,t) for s,t in resources.fixed_gpu}):
             m.addConstr(use[key]<=resource_limit(key,resources),name='resource_'+key[0])
         known={(s,t):use['GPU',s,t]+resources.fixed_gpu.get((s,t),0) for s in resources.capacities for t in range(120)}
-        primary,timing,controls=grid_binding(m,bundle,known,domains,z,raw)
+        primary,timing,controls=grid_binding(m,bundle,known,domains,z,raw,stage=Stage.A1)
         later=[('migration_count',gp.quicksum(int(o.migrated)*z[u,i] for u,opts in domains.items() for i,o in enumerate(opts))),
             ('shift_slots',gp.quicksum((o.start-jobs[u].reference_start)*z[u,i] for u,opts in domains.items() for i,o in enumerate(opts))),
             ('prestart_changes',gp.quicksum(int(o.initial_site!=jobs[u].reference_site)*z[u,i] for u,opts in domains.items() for i,o in enumerate(opts))),

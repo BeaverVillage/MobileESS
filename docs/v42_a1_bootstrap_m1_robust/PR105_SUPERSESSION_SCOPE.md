@@ -1,0 +1,1 @@
+PR105 certificate remains valid, byte-identical, for A1 + zero MESS P/Q + 0.955–1.045. The explicitly authorized architecture changes A1 to 0.95–1.05 bootstrap. M1/A2/M2 retain 0.955–1.045, Actual retains 0.95–1.05 and no repair. A1 is provisional, not final robust Planning. Problem 13 remains unvalidated.

@@ -4,6 +4,7 @@ import gurobipy as gp
 from .common import *
 from .native import reconstruct
 from v42_exact.validation import check
+from v42_native.voltage import Stage
 from v42_compact.native import completion_risk
 from v42_final.reserve import risk_exposure
 from collections import defaultdict
@@ -21,7 +22,7 @@ def certificate(m,units,data,controls,bindings,levels,dense,solver_max_violation
     selected=reconstruct(numeric_units(),data)
     control_values=[[dense_value(x,dense) for x in row] for row in controls]
     names=m.getAttr('VarName');global_values={name:float(dense[i]) for i,name in enumerate(names) if name.startswith(('CC4_','RT_reserve[','RT_shortfall[','rho_max'))};del names
-    rho=dense_value(levels[0][1],dense);cert=check(selected,data,control_values,global_values,rho)
+    rho=dense_value(levels[0][1],dense);cert=check(selected,data,control_values,global_values,rho,stage=Stage.A1)
     known_vio=max(abs(dense_value(x,dense)-(r.fixed_gpu.get((k,t),0)+sum(jobs[u].gpu for u,o in selected.items() for site,a,b in o['segments'] if site==k and a<=t<b))) for (k,t),x in bindings['known'].items())
     expected=defaultdict(float)
     for u,o in selected.items():

@@ -1,0 +1,238 @@
+{
+  "mode": "replay",
+  "A1_BOOTSTRAP_ACCEPTED": true,
+  "FINAL_ROBUST_PLANNING_ACCEPTED": false,
+  "voltage_band": [
+    0.95,
+    1.05
+  ],
+  "scientific_objective_count": 2,
+  "scientific_groups": [
+    "MAX_LINE_LOADING",
+    "MIN_INTERVENTION"
+  ],
+  "passes": [
+    {
+      "scientific_group": "MAX_LINE_LOADING",
+      "component": "rho",
+      "status": 2,
+      "incumbent": 0.6715924043100266,
+      "bound": 0.6715924043100266,
+      "relative_gap": 0.0,
+      "solver_gap": 0.0,
+      "integer_exact_certificate": null,
+      "native_runtime_seconds": 340.6709997653961,
+      "optimize_wall_seconds": 340.6758389000024,
+      "nodes": 1.0,
+      "first_incumbent_seconds": 0.5639370999997482,
+      "presolve_seconds": 73.1,
+      "presolved": {
+        "rows": 7239919,
+        "columns": 6658595,
+        "nonzeros": 31459420
+      },
+      "root": {
+        "objective_rounded": 0.6715926,
+        "iterations": 42486,
+        "seconds": 84.78
+      },
+      "start_messages": [
+        "Loaded user MIP start with objective 1"
+      ],
+      "warnings": [
+        "Warning: Model contains large matrix coefficient range"
+      ]
+    },
+    {
+      "scientific_group": "MIN_INTERVENTION",
+      "component": "migration_count",
+      "status": 2,
+      "incumbent": 0.0,
+      "bound": 0.0,
+      "relative_gap": null,
+      "solver_gap": 0.0,
+      "integer_exact_certificate": true,
+      "native_runtime_seconds": 384.6289999485016,
+      "optimize_wall_seconds": 384.6322175000096,
+      "nodes": 1.0,
+      "first_incumbent_seconds": 5.737288600008469,
+      "presolve_seconds": 362.83,
+      "presolved": {
+        "rows": 7206110,
+        "columns": 6633236,
+        "nonzeros": 31507444
+      },
+      "root": {
+        "objective_rounded": 0.0,
+        "iterations": 2443,
+        "seconds": 0.16
+      },
+      "start_messages": [
+        "User MIP start did not produce a new incumbent solution",
+        "User MIP start violates constraint current_margin_A1_P1_lock by 0.328407496",
+        "Processing MIP start from previous solve: 0 nodes explored in subMIP, total elapsed time 5s",
+        "MIP start from previous solve produced solution with objective 1 (5.76s)",
+        "MIP start from previous solve produced solution with objective 1 (6.72s)",
+        "Loaded MIP start from previous solve with objective 1",
+        "Processed MIP start in 6.76 seconds (11.92 work units)"
+      ],
+      "warnings": [
+        "Warning: Model contains large matrix coefficient range"
+      ]
+    },
+    {
+      "scientific_group": "MIN_INTERVENTION",
+      "component": "shift_magnitude",
+      "status": 2,
+      "incumbent": 387.0,
+      "bound": 386.0,
+      "relative_gap": 0.002583979328165375,
+      "solver_gap": 0.002583979328165375,
+      "integer_exact_certificate": false,
+      "native_runtime_seconds": 17.825999975204468,
+      "optimize_wall_seconds": 17.828883000009228,
+      "nodes": 618.0,
+      "first_incumbent_seconds": 5.46281799999997,
+      "presolve_seconds": 5.17,
+      "presolved": {
+        "rows": 10092,
+        "columns": 50220,
+        "nonzeros": 887996
+      },
+      "root": {
+        "objective_rounded": 380.1914,
+        "iterations": 3174,
+        "seconds": 0.26
+      },
+      "start_messages": [
+        "User MIP start did not produce a new incumbent solution",
+        "User MIP start violates constraint current_margin_A1_P1_lock by 0.328407496",
+        "Processing MIP start from previous solve: 0 nodes explored in subMIP, total elapsed time 5s",
+        "MIP start from previous solve produced solution with objective 24553 (5.49s)",
+        "MIP start from previous solve produced solution with objective 24553 (6.33s)",
+        "Loaded MIP start from previous solve with objective 24553",
+        "Processed MIP start in 6.37 seconds (11.97 work units)"
+      ],
+      "warnings": [
+        "Warning: Model contains large matrix coefficient range"
+      ]
+    },
+    {
+      "scientific_group": "MIN_INTERVENTION",
+      "component": "prestart_relocation",
+      "status": 2,
+      "incumbent": 221.0,
+      "bound": 220.0,
+      "relative_gap": 0.004524886877828055,
+      "solver_gap": 0.004524886877828055,
+      "integer_exact_certificate": false,
+      "native_runtime_seconds": 19.651000022888184,
+      "optimize_wall_seconds": 19.653907599975355,
+      "nodes": 1.0,
+      "first_incumbent_seconds": 5.880607899976894,
+      "presolve_seconds": 5.45,
+      "presolved": {
+        "rows": 10092,
+        "columns": 50220,
+        "nonzeros": 929744
+      },
+      "root": {
+        "objective_rounded": 166.8268,
+        "iterations": 3015,
+        "seconds": 0.25
+      },
+      "start_messages": [
+        "User MIP start did not produce a new incumbent solution",
+        "User MIP start violates constraint current_margin_A1_P1_lock by 0.328407496",
+        "Processing MIP start from previous solve: 0 nodes explored in subMIP, total elapsed time 5s",
+        "MIP start from previous solve produced solution with objective 1281 (5.90s)",
+        "MIP start from previous solve produced solution with objective 1281 (6.79s)",
+        "Loaded MIP start from previous solve with objective 1281",
+        "Processed MIP start in 6.83 seconds (12.04 work units)"
+      ],
+      "warnings": [
+        "Warning: Model contains large matrix coefficient range"
+      ]
+    }
+  ],
+  "total_optimize_seconds": 762.7908469999966,
+  "complete": true,
+  "physical_PASS": true,
+  "peak_RSS_bytes": 21708627968,
+  "settings": {
+    "Threads": 1,
+    "Seed": 20260929,
+    "MIPGap": 0.005,
+    "GPU": false,
+    "A1_optimize_seconds": 3600,
+    "M1_optimize_seconds": 1800,
+    "build_excluded": true
+  },
+  "start": {
+    "available": true,
+    "validated": true,
+    "type": "COMPLETE_VALIDATED_MIP_START",
+    "authority": "PR103 native reference plan",
+    "feasibility_attempt_RUN": false,
+    "source_completion_LP_seconds": 12.757815399992978,
+    "source_completion_total_seconds": 53.5422600999882,
+    "physical_certificate": {
+      "PASS": true,
+      "jobs": 1499,
+      "old_validator_PASS": true,
+      "deterministic_WAN_PASS": true,
+      "full_service_and_carryout_PASS": true,
+      "rack_gang_PASS": true,
+      "physical_capacity_max_violation": 0,
+      "grid_max_violation": 0,
+      "CC4_max_violation": 4.547473508864641e-13,
+      "Runtime_max_violation": 8.526512829121202e-14,
+      "failed": [],
+      "limitation": "Native reserve anonymous site headroom is additionally checked by independent linear residual evaluation; no Actual AC run is executed.",
+      "independent_known_GPU_max_violation": 0.0,
+      "independent_Runtime_binding_max_violation": 1.0658141036401503e-13,
+      "independent_reserve_headroom_max_violation": 0.0,
+      "solver_max_violation": 2.2737367544323206e-12,
+      "P1_rho": 1.0,
+      "validation_seconds": 14.768423300003633,
+      "artificial_physical_slack": 0,
+      "artificial_scientific_slack": 0,
+      "reserve_shortfall_semantics": "Unoptimized soft reliability auxiliary; not an objective, a zero-shortfall hard constraint, or an electrical certificate",
+      "scientific_objective_snapshot": {
+        "MAX_LINE_LOADING": 1.0,
+        "MIN_INTERVENTION": {
+          "migration_count": 0.0,
+          "shift_magnitude": 0,
+          "prestart_relocation": 0.0
+        }
+      },
+      "report_only_metrics": {
+        "raw_reserve_shortfall": 89222.98158002966,
+        "CC4_reference_deviation": 2.220848440294755
+      }
+    },
+    "partial": false,
+    "artificial_physical_slack": 0,
+    "frozen_before_primary_A1": true,
+    "accepted_by_Gurobi": null,
+    "source_plan_sha256": "ae61e0914c84ef8907b70e2cd627b04062585d9a71a0ee83602addce3f7233bb"
+  },
+  "P1_lock": 0.6715925043100266,
+  "P1_lock_tolerance": 1e-07,
+  "P1_replayed": true,
+  "reserve_optimized": false,
+  "CC4_deviation_optimized": false,
+  "deterministic_rank_optimized": false,
+  "reporting": {
+    "total_minimum_shortfall_for_selected_upstream": 76745.90404808165,
+    "symmetric_CC4_component": 72827.40430057196,
+    "symmetric_Runtime_component": 3918.4997475095793,
+    "raw_solver_total_shortfall": 89833.0,
+    "raw_solver_CC4_shortfall": 75662.0,
+    "raw_solver_Runtime_shortfall": 14171.0,
+    "optimized": false,
+    "component_split_scientific": false,
+    "note": "Raw unoptimized auxiliaries may exceed minimum shortfall; conditional minimum and proportional split are reporting only, never an electrical certificate or a solution selection criterion"
+  },
+  "CC4_deviation": 2.4843577673160966
+}

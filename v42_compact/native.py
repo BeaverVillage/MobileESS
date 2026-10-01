@@ -2,7 +2,7 @@
 from collections import Counter,defaultdict
 from time import perf_counter
 from dataclasses import asdict
-from v42_native.voltage import PLANNING_LOWER_SQUARED, PLANNING_UPPER_SQUARED
+from v42_native.voltage import Stage,voltage_for
 import gurobipy as gp
 from .common import *
 from .graph import GraphFactory,reconstruct
@@ -16,8 +16,11 @@ def completion_risk(j,row,site,end,bundle):
     adjusted=int(row['risk_nominal_completion_issue_slot']+end-row['reference_end'])
     return {key:bundle['runtime_reserve_gamma']*x for key,x in risk_exposure(j.gpu,adjusted,site,bundle['runtime_survival_kernel'],range(24,120)).items()}
 
-def grid(m,bundle,known,risk,mess_p=None,mess_q=None):
-    if mess_p is None and mess_q is None:return frozen_a1_grid(m,bundle,known,risk)
+def grid(m,bundle,known,risk,mess_p=None,mess_q=None,*,stage=Stage.A1):
+    require(stage in (Stage.A1,Stage.A2),"AIDC_GRID_STAGE")
+    require(stage!=Stage.A1 or (mess_p is None and mess_q is None),"BOOTSTRAP_MESS_MUST_BE_ZERO")
+    require(stage!=Stage.A2 or (mess_p is not None and mess_q is not None),"A2_ACCEPTED_MESS_ANCHOR_REQUIRED")
+    if mess_p is None and mess_q is None:return frozen_a1_grid(m,bundle,known,risk,stage=stage)
     # Exact same CC4/reserve/power/grid functions; A2 accepts fixed M1 anchors.
     from v42_temporal.service import bind_forecast
     from v42_final.workload import ForecastBook
@@ -36,7 +39,7 @@ def grid(m,bundle,known,risk,mess_p=None,mess_q=None):
         m.addConstr(gp.quicksum(target[s,t+24] for s in caps)==timing['reserve']['gpu'][t])
     reserve=bind_headroom(m,known,anon,target,risk,caps,range(24,120))
     cert,power,idle,swing=load_power(bundle);coeff=native_coefficients(cert)
-    authority=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),digest(caps),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),PLANNING_LOWER_SQUARED,PLANNING_UPPER_SQUARED,True)
+    authority=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),digest(caps),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),voltage_for(stage).lower_squared,voltage_for(stage).upper_squared,True,stage=stage)
     controls=[]
     for t,c in enumerate(coeff):
         row=[]
@@ -65,7 +68,7 @@ def prepare(context):
     atomic(context.folder/'graph_index.json',result)
     return bundle,jobs,bounds,r,raw,graphs,result
 
-def build(context,data,*,mess_p=None,mess_q=None):
+def build(context,data,*,stage=Stage.A1,mess_p=None,mess_q=None):
     bundle,jobs,bounds,r,raw,graphs,prep=data;started=perf_counter()
     m=gp.Model('V42_COMPACT_STATE_AIDC');m.Params.OutputFlag=0
     tail=max(b.latest_completion for b in bounds.values());known={};risk={};gpurows={};riskrows={}
@@ -82,7 +85,7 @@ def build(context,data,*,mess_p=None,mess_q=None):
             riskrows[site,t]=m.addConstr(risk[site,t]==fixedrisk[site,t])
     wanrows={(l,t):m.addConstr(gp.LinExpr()<=rate-r.fixed_wan.get((l,t),0)) for (l,t),rate in r.wan_capacities.items()}
     active={t:m.addConstr(gp.LinExpr()<=r.max_active_transfers-r.fixed_transfers.get(t,0)) for t in range(r.control_end)}
-    primary,timing,controls=grid(m,bundle,known,risk,mess_p,mess_q);m.update();grid_seconds=perf_counter()-started
+    primary,timing,controls=grid(m,bundle,known,risk,mess_p,mess_q,stage=stage);m.update();grid_seconds=perf_counter()-started
     other_cont=m.NumVars-m.NumIntVars;allvars={};counts=Counter();metrics=[gp.LinExpr() for _ in range(3)];tie=gp.LinExpr();rank=0
     fixed_add_gpu=defaultdict(float);fixed_add_risk=defaultdict(float)
     import psutil
