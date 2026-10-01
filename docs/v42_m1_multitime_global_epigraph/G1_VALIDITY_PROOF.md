@@ -1,0 +1,11 @@
+# G1 validity and separation
+
+For each frozen m,t the crossing-arc state masses y[a] sum to one. An integer original route selects exactly one site or TRANSIT. Each effective beta[a] lower-bounds original conditional global P1, so rho >= sum beta[a]*y[a] preserves every integer feasible plan. At fractional root points this is a strengthening candidate, not an assumed original LP inequality.
+
+All 600 coefficients equal default. The 24 root prechecks have maximum violation -5.145727399735733e-9, below nonviolation tolerance 1e-7 and installation threshold 1e-5. G1 cuts installed: zero. Two conditional G1 LPs were solved; the universal proof covers every other priority/state. W7 retains a strictly richer grid constraint set than O1 at a contained conditioned slot, but no matched raw comparison was made and effective beta did not increase over PR110.
+
+## Complete coefficient classification and stopping proof
+
+For each of six unordered pairs of units, the saved full W7 feasible upper point keeps the pair inactive in the window and achieves rho <=0.3441896824355414. Every one of 600 G1 states and 4,952 G3 reachable pairs has a complete original route path, validated for continuity, crossing-time state, travel energy, all unit physical matrix rows/bounds and initial/terminal SOC. Charging to repay travel energy occurs only outside the window. Window Pch/Pdis/Q stays exactly zero. The `W7_COMPLETE_PATH_LIFT_AUDIT.csv` covers all 5,552 lifts; changes to all retained grid/auxiliary row activities are exactly zero. Combine two independent single-unit lifts with the corresponding inactive-pair point to cover all 11,250 G2 cells. There are no cross-unit native physical rows.
+
+Thus every conditioned W7 LP has a feasible point strictly below default; all effective coefficients are default, including every unsolved priority or other reachable cell. This is a complete upper-certificate stopping proof, not extrapolation from the four conditional solves. All states remain present. Upper objectives are never cut coefficients or full-M1 incumbents. Four sign-feasible dual certificates are independently revalidated; the other LPs are accurately labeled upper witnesses. Tiny marginal transport LPs are separate from the ten real W7 LP calls.

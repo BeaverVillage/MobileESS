@@ -1,0 +1,84 @@
+{
+  "BASE_PR": 110,
+  "BASE_HEAD": "90efccb2dbcc1ab4557cedcf04ef479a225d4e47",
+  "WINDOW": [
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "critical": [
+    41,
+    44,
+    43,
+    40,
+    42,
+    46
+  ],
+  "G3_TIME_PAIRS": [
+    [
+      40,
+      43
+    ],
+    [
+      43,
+      46
+    ],
+    [
+      40,
+      46
+    ],
+    [
+      41,
+      44
+    ]
+  ],
+  "PRODUCTION_BASE": "M1-F3",
+  "F3_LB": 0.5718494602017812,
+  "S2_REFERENCE_LB": 0.5722125039436496,
+  "UB": 0.6696147314213984,
+  "default_beta": 0.5722125039436496,
+  "physical_tolerance": 1e-05,
+  "nonviolation_tolerance": 1e-07,
+  "useful_violation": 1e-05,
+  "material_gain": 0.001,
+  "bands": [
+    0.6,
+    0.62,
+    0.65,
+    0.6662666577642914
+  ],
+  "LP": {
+    "Method": 2,
+    "Threads": 1
+  },
+  "workers": {
+    "initial": 2,
+    "max": 4
+  },
+  "solve_order": "MESS id, time, state id; root-positive >1e-6 or incumbent states first",
+  "stopping": "Complete enumeration, exact reachability, or valid upper/lower certificate proving classification cannot change",
+  "auxiliary_certificate_strategy": "Try window-idle unit witnesses for a universal conditional upper certificate; their feasible objectives are NEVER lower coefficients",
+  "MIP": {
+    "Method": 2,
+    "Threads": 1,
+    "Heuristics": 0,
+    "MIPFocus": 3,
+    "Seed": 20260929,
+    "MIPGap": 0.005,
+    "GPU": false
+  },
+  "canary_seconds": 600,
+  "production_seconds": 1800,
+  "max_canaries": 1,
+  "max_production": 1,
+  "A1_OPTIMIZE_CALLS_THIS_TASK": 0,
+  "S0_OPTIMIZE_CALLS": 0,
+  "S1_OPTIMIZE_CALLS": 0,
+  "S2_OPTIMIZE_CALLS": 0,
+  "S3_OPTIMIZE_CALLS": 0,
+  "STOP_before_A2": true
+}
