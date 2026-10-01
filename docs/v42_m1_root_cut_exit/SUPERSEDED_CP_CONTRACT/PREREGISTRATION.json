@@ -1,0 +1,54 @@
+{
+  "base_head": "f8dcd7e4545108aa5ab684ab97fe2dcd99fdbca8",
+  "preregistered_before_canaries": true,
+  "formulation": "M1-F3",
+  "formulation_changed": false,
+  "Method": 2,
+  "Threads": 1,
+  "Seed": 20260929,
+  "MIPGap": 0.005,
+  "GPU": false,
+  "primary": [
+    {
+      "name": "CP0",
+      "CutPasses": 0,
+      "TimeLimit": 600
+    },
+    {
+      "name": "CP1",
+      "CutPasses": 1,
+      "TimeLimit": 600
+    }
+  ],
+  "NodeLimit": null,
+  "conditional_H0": {
+    "name": "CP0_H0",
+    "CutPasses": 0,
+    "Heuristics": 0,
+    "TimeLimit": 300,
+    "only_if_both_root_stuck": true,
+    "production_eligible": false
+  },
+  "production": {
+    "max_calls": 1,
+    "TimeLimit": 1800,
+    "cumulative_optimize_only": true
+  },
+  "production_gate": {
+    "first_non_root_node_max_seconds": 450,
+    "bound_gain_min": 0.0001,
+    "material_gap_reduction_absolute": 0.001
+  },
+  "selection": "quality, higher final bound, smaller gap, earlier non-root node, tree progress, work/wall",
+  "H0_gate": "Neither primary reaches a confirmed non-root node within 450s and both spend >=80% of their actual wall at root.",
+  "telemetry": "MIPNODE_NODCNT>0 confirms leaving root; sparse observations are carried forward only with their timestamp/age. Missing phase evidence remains null; FINAL state is recorded separately from 600s observations.",
+  "P1_lock": 1e-07,
+  "P2_energy_lock": 1e-08,
+  "STOP_before_A2": true,
+  "diagnostic_interpretation": "ROOT_LOOP_POLICY_EFFECT",
+  "operational_root_loop_policy_comparison": true,
+  "pure_cut_ablation": false,
+  "individual_cut_causal_attribution": false,
+  "H0_complete_isolation": false,
+  "H0_limits": "Heuristics=0 leaves node probing and other internal root processing uncontrolled. The goal is useful B&B/global-bound progress and P1 quality, not attribution to an internal routine."
+}
