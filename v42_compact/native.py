@@ -2,6 +2,7 @@
 from collections import Counter,defaultdict
 from time import perf_counter
 from dataclasses import asdict
+from v42_native.voltage import PLANNING_LOWER_SQUARED, PLANNING_UPPER_SQUARED
 import gurobipy as gp
 from .common import *
 from .graph import GraphFactory,reconstruct
@@ -35,7 +36,7 @@ def grid(m,bundle,known,risk,mess_p=None,mess_q=None):
         m.addConstr(gp.quicksum(target[s,t+24] for s in caps)==timing['reserve']['gpu'][t])
     reserve=bind_headroom(m,known,anon,target,risk,caps,range(24,120))
     cert,power,idle,swing=load_power(bundle);coeff=native_coefficients(cert)
-    authority=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),digest(caps),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),.95**2,1.05**2,True)
+    authority=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),digest(caps),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),PLANNING_LOWER_SQUARED,PLANNING_UPPER_SQUARED,True)
     controls=[]
     for t,c in enumerate(coeff):
         row=[]

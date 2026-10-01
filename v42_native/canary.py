@@ -4,6 +4,7 @@ from .aidc import solve as solve_aidc
 from .service import boundary
 from .contracts import Deadline
 from v42_job_capability import Job,Resources
+from v42_native.voltage import PLANNING_LOWER_SQUARED, PLANNING_UPPER_SQUARED
 import gurobipy as gp
 
 
@@ -20,8 +21,8 @@ def mess_grid(model,p,q):
         base=.9 if site=='B' and t>=4 else .7 if site=='A' and t<4 else .4
         model.addConstr(base-.02*p[site,t]-.01*q[site,t]<=rho,name='line_thermal')
         model.addConstr(.1+.01*p[site,t]<=1,name='transformer_current')
-        model.addConstr(1+.001*q[site,t]>=.95**2,name='voltage_lower')
-        model.addConstr(1+.001*q[site,t]<=1.05**2,name='voltage_upper')
+        model.addConstr(1+.001*q[site,t]>=PLANNING_LOWER_SQUARED,name='voltage_lower')
+        model.addConstr(1+.001*q[site,t]<=PLANNING_UPPER_SQUARED,name='voltage_upper')
     return [('rho',rho),('reserve_shortfall',gp.LinExpr(0))]
 
 

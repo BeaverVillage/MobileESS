@@ -51,7 +51,8 @@ def test_no_product_binary_and_pure_milp():
     m.dispose()
 
 def test_pr99_bytes_preserved():
-    for row in read(OUT/'LEGACY_PRESERVATION_AUDIT.json')['files']:assert sha(ROOT/row['path'])==row['sha256']
+    from v42_voltage.preservation import assert_legacy
+    assert_legacy(read(OUT/'LEGACY_PRESERVATION_AUDIT.json')['files'])
 
 def test_no_dw_production_import():
     from v42_exact import native

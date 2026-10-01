@@ -25,7 +25,7 @@ def test_native_grid_anchor_and_separate_hard_security(voltage,tx_current,tx_pow
         flow_q_constant=np.zeros(2),flow_p_matrix=np.zeros((2,1)),flow_q_matrix=np.zeros((2,1)),
         anchor=np.zeros(1),current_matrix=np.zeros((1,2)),current_constant=np.array([.6,tx_current]),
         branch_names=('line.test::a','transformer.main::a'),transformer_ratings=(None,2.))
-    authority=GridAuthority(*(['b'*64]*4),.95**2,1.05**2,True)
+    authority=GridAuthority(*(['b'*64]*4),.912025,1.092025,True)
     m=gp.Model();m.Params.OutputFlag=0
     try:
         rho=add_grid(m,[c],[[0.]],authority);m.setObjective(rho);m.optimize()
@@ -134,19 +134,10 @@ def test_event_namespace_and_cadence():
     with pytest.raises(ValueError):event_due(2,'M1',2,threshold=1)
 
 
-def test_repair_p_and_q_with_energy_compensation_no_discrete_actions():
-    _,_,b,_=fixture()
-    plan=dict(P=[1.,-1.],Q=[0.,0.],connected=[1,1],charge_mode=[0,1],mobility_kwh=[0.,0.],
-        initial_kwh=10,terminal_kwh=10,unit='kW_kvar_kWh',causal_inputs_verified=True)
-    def grid(m,p,q):
-        rho=m.addVar(lb=0);m.addConstr(.8-.1*p[0]-.01*q[0]<=rho);return rho
-    result,receipt=repair_pq(plan,b,grid,max_delta_kw=2,max_delta_kvar=2)
-    assert result is not None and receipt['model_size']['integer']==receipt['model_size']['binary']==0
-    v=result['values'];assert abs(v['P[0]']-1)>1e-5 and v['Q[0]']>0
-    assert v['SOC[2]']==pytest.approx(10) and v['SOC[1]']==pytest.approx(10-.25*v['P[0]']/.95)
-    assert [row['level'] for row in receipt['passes']]==['rho','P_change','Q_change']
-    with pytest.raises(ValueError):repair_pq(dict(plan,mobility_kwh=[-.1,0]),b,grid,max_delta_kw=2,max_delta_kvar=2)
-    with pytest.raises(ValueError):repair_pq(plan,b,grid,max_delta_kw=2,max_delta_kvar=2,policy_id=PAPER_POLICIES[2])
+def test_actual_local_pq_repair_removed_fail_fast():
+    for policy in PAPER_POLICIES:
+        with pytest.raises(ValueError,match='ACTUAL_LOCAL_PQ_REPAIR_REMOVED_IN_V42'):
+            repair_pq({},None,None,policy_id=policy,max_delta_kw=2,max_delta_kvar=2)
 
 
 def test_final_fresh_ac_gate_rejects_stub_stale_and_violation():

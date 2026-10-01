@@ -8,6 +8,7 @@ from dataclasses import asdict
 from collections import defaultdict
 from time import perf_counter
 import numpy as np
+from v42_native.voltage import PLANNING_LOWER_SQUARED, PLANNING_UPPER_SQUARED
 import gurobipy as gp
 from .common import *
 from v42_temporal.native import load_power
@@ -34,7 +35,7 @@ def planning_grid(m,bundle,known,risk):
     reserve=bind_headroom(m,known,anon,target,risk,caps,range(24,120))
     cert,power,idle,swing=load_power(bundle);coeff=native_coefficients(cert)
     authority=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),
-        digest(caps),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),.95**2,1.05**2,True)
+        digest(caps),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),PLANNING_LOWER_SQUARED,PLANNING_UPPER_SQUARED,True)
     controls=[]
     for t,c in enumerate(coeff):
         row=[]
