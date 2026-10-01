@@ -1,0 +1,12 @@
+expression,PR103_role,final_V42_role,decision
+rho,P1,P1 MAX_LINE_LOADING,KEEP
+reserve_shortfall,historical P2,soft reliability/reporting,REMOVE_FROM_OBJECTIVE
+CC4_reference_deviation,historical P3,frozen CC4 timing report,REMOVE_FROM_OBJECTIVE
+migration_count,historical P4,P2 MIN_INTERVENTION component 1,KEEP
+shift_slots,historical P5,P2 shift magnitude component 2,KEEP
+prestart_changes,historical P6,P2 relocation component 3,KEEP
+deterministic UID/event rank,already excluded in F2-CRA,canonical reconstruction,REPORT_ONLY
+MESS movement_kwh,historical after reserve,P2 MESS component 1,KEEP
+MESS movement_count,historical after movement energy,P2 MESS component 2,KEEP
+MESS tie,historical objective,canonical reporting only,REMOVE_FROM_OBJECTIVE
+voltage/transformer/SOC/PCS,physical rows,unchanged physical rows,HARD_CONSTRAINT

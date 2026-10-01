@@ -1,0 +1,3 @@
+# One intervention objective family
+
+AIDC minimizes checkpoint migrations, then absolute start-slot displacement, then pre-start site changes. MESS minimizes existing movement kWh, then movement count. Use sequential exact locks, no numerical weights, no reserve/CC4/rank objectives. All subpasses are components of P2. P1 scalar lock uses the exact PR103 accepted value plus 1e-7. Component locks retain 1e-8. MIPGap=.005; report zero gaps as degenerate and integer-bound certificates separately. Canonical class reconstruction is deterministic for a fixed complete trajectory multiset, not a claim that independent solves choose identical multisets.
