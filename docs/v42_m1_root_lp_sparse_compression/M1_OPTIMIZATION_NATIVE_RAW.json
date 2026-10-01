@@ -1,0 +1,113 @@
+{
+  "candidate": "M1-F3",
+  "mode": "production",
+  "passes": [
+    {
+      "group": "MAX_LINE_LOADING",
+      "component": "rho",
+      "status": 9,
+      "incumbent": 0.6696147314213984,
+      "bound": 0.5718494710510547,
+      "relative_gap": 0.1460022544050313,
+      "quality_PASS": false,
+      "solve_wall_seconds": 1800.2430481000047,
+      "native_runtime_seconds": 1800.2420001029968,
+      "iterations": 269858.0,
+      "barrier_iterations": 49,
+      "nodes": 1.0,
+      "first_incumbent_seconds": 0.05214699998032302,
+      "presolve_seconds": 12.88,
+      "presolved": {
+        "rows": 580752,
+        "columns": 280207,
+        "nonzeros": 6663515
+      },
+      "root": {
+        "status": "objective 5.718495e-01",
+        "objective_rounded": 0.5718495,
+        "iterations": 160578,
+        "seconds": 180.04,
+        "LP_complete": true
+      },
+      "warnings": [
+        "Warning: Model contains large matrix coefficient range"
+      ],
+      "cut_report": [
+        "Cover: 1",
+        "MIR: 1818",
+        "Flow cover: 440"
+      ],
+      "MIP_start_accepted": true,
+      "root_processing_wall_seconds": 1787.3630481000046,
+      "root_processing_complete": false
+    }
+  ],
+  "complete": false,
+  "total_optimize_seconds": 1800.2430481000047,
+  "settings": {
+    "Threads": 1,
+    "Method": 2,
+    "Seed": 20260929,
+    "MIPGap": 0.005,
+    "TimeLimit": 1800,
+    "NodeLimit": null,
+    "GPU": false,
+    "optimize_only": true
+  },
+  "peak_RSS_bytes": 2754473984,
+  "A1_optimize_calls": 0,
+  "scientific_groups": [
+    "MAX_LINE_LOADING",
+    "MIN_INTERVENTION"
+  ],
+  "reserve_optimized": false,
+  "CC4_optimized": false,
+  "tie_optimized": false,
+  "model_build_seconds": 21.398028099996736,
+  "model_size_before_solve": {
+    "binary": 208312,
+    "integer": 0,
+    "continuous": 108431,
+    "linear_constraints": 954560,
+    "quadratic_constraints": 0,
+    "SOS": 0,
+    "general_constraints": 0,
+    "quadratic_objective_terms": 0,
+    "nonzeros": 8282350,
+    "constraint_families": {
+      "flow": 9216,
+      "terminal_location": 4,
+      "initial_SOC": 4,
+      "terminal_SOC": 4,
+      "connected_Pch": 8942,
+      "connected_Pdis": 8942,
+      "no_simultaneous_charge": 8942,
+      "no_simultaneous_discharge": 8942,
+      "connected_Qmax": 8942,
+      "connected_Qmin": 8942,
+      "PCS16": 143072,
+      "energy_balance": 384,
+      "injection_P_binding": 2304,
+      "injection_Q_binding": 2304,
+      "voltage_lower": 37056,
+      "voltage_upper": 37056,
+      "transformer_current": 4608,
+      "response_transformer_P_binding": 576,
+      "response_transformer_Q_binding": 576,
+      "transformer_kVA": 184320,
+      "response_line_P_binding": 25152,
+      "response_line_Q_binding": 25152,
+      "response_line_correction_binding": 25152,
+      "line_thermal_face": 403968
+    }
+  },
+  "route_variable_count": 207928,
+  "route_move_arcs": 51322,
+  "reachability_removed": 6576,
+  "zero_unreachable_PQ_columns": 274,
+  "PCS_mode": "MILP",
+  "physical_PASS": true,
+  "robust_grid_PASS": true,
+  "accepted": false,
+  "zero_objective_quality_policy": "UB=LB=0 is exact optimum and gap certificate; every nonzero case uses inherited relative_gap unchanged"
+}

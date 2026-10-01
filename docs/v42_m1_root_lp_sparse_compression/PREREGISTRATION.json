@@ -1,0 +1,38 @@
+{
+  "base_head": "0360f9db7a27068dc53665b263a93adfd870250f",
+  "science_unchanged": true,
+  "A1_optimize_calls": 0,
+  "candidates": [
+    "M1-F0",
+    "M1-F1",
+    "M1-F2",
+    "M1-F3",
+    "M1-F4",
+    "M1-FCRA"
+  ],
+  "order": "baseline census, implementation, bounded equivalence, full structural census, <=3 LPs, root canary, freeze, one production",
+  "LP": {
+    "Threads": 1,
+    "Method": 1,
+    "Seed": 20260929,
+    "TimeLimit": 600
+  },
+  "canary": {
+    "Threads": 1,
+    "NodeLimit": 1,
+    "TimeLimit": 600
+  },
+  "extra_CPU_diagnostic": "exactly one Threads=4 Method=2 only if selected root >300s",
+  "production": {
+    "Seed": 20260929,
+    "MIPGap": 0.005,
+    "TimeLimit": 1800,
+    "optimize_only": true,
+    "GPU": false
+  },
+  "physical_tolerance": 1e-05,
+  "objective_tolerance": 1e-07,
+  "component_lock_tolerance": 1e-08,
+  "scaling": "not selected without demonstrated benefit",
+  "STOP_before_A2": true
+}

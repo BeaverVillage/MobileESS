@@ -1,0 +1,10 @@
+{
+  "investigated": true,
+  "selected": false,
+  "physical_units": "kW/kvar/kVA/kWh",
+  "exact_possible_mapping": "y_MW=y_kW/1000; original y=1000*y_MW; every substituted coefficient becomes 1000*a, equality expressed in MW divides its full original equality by 1000; all bounds and extraction inverse-transformed",
+  "reason": "Original-unit exact compressed formulations were measured. MW injection scaling would multiply downstream injection coefficients by 1000 and divide all binding terms by 1000, with exact inverse reporting. This could increase very small grid coefficients, but does not by itself eliminate the overall large coefficient range. No empirical warning reduction or LP improvement from a scaling variant was demonstrated; its selection gate remains unsatisfied.",
+  "coefficient_clipping": false,
+  "coefficient_deletion": false,
+  "physical_reporting_unchanged": true
+}
