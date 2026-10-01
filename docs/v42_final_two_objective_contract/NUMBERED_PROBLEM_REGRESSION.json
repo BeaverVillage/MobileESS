@@ -1,0 +1,97 @@
+{
+  "PASS": true,
+  "checks": [
+    {
+      "problem": 1,
+      "title": "Runtime/service duration",
+      "PASS": true,
+      "decision": "Causal Q50 provider, nominal slots, empirical planning-only gamma; no ML/provider changes",
+      "unchanged_sources": {
+        "v42_final/runtime.py": "86f578f315c39dd0c4e858df5d0ee04a79f16bc2c3d033af4beac7fe9ebd5e2a",
+        "v42_final/reserve.py": "44ad22dc6071cd0523e29711e255dc1bbeb46245269aa2b918b310787980668b",
+        "v42_root/data.py": "8bff2f2968e79c16266be12d7560bda093939d5e75a13e8db8cb27538058867e"
+      },
+      "evidence": "raw-byte PR103 seal and 440 inherited behavioral tests"
+    },
+    {
+      "problem": 2,
+      "title": "Midnight/carryover",
+      "PASS": true,
+      "decision": "D24 is electrical horizon, not service deadline; complete tail retained",
+      "unchanged_sources": {
+        "v42_native/service.py": "588145b6e307dbec9fcf187bf91eeab15817f57c05a3743c5cdf21e684ae5cd1",
+        "v42_boundary/generator.py": "ca1e89cd6c899a72b14d0877df4f2c068d67c6153f9e9eab9a021027a32d8579"
+      },
+      "evidence": "raw-byte PR103 seal and 440 inherited behavioral tests"
+    },
+    {
+      "problem": 3,
+      "title": "Known/unknown causality",
+      "PASS": true,
+      "decision": "Frozen D-1 known authority and anonymous future CC4; no Actual full reoptimization or unknown action expansion",
+      "unchanged_sources": {
+        "v42_native/actual.py": "6f41278afc1f679e9ca18edc0f371d3a99be8acee3d426bfcc4c387cab624061",
+        "v42_native/providers.py": "2ba5c39a6e9218461f67e79dd708271141a2b3492bd6f97d4407561e5198dfcd"
+      },
+      "evidence": "raw-byte PR103 seal and 440 inherited behavioral tests"
+    },
+    {
+      "problem": 4,
+      "title": "Site/episode/power",
+      "PASS": true,
+      "decision": "Episode site, rack/gang, authorized checkpoints, GPU-power/PUE/PF/PCC authority retained",
+      "unchanged_sources": {
+        "v42_temporal/native.py": "19679eba53274a0846fe99b846bf798c1950495dba789d3adba5e7034a44e339",
+        "v42_may01/prepare.py": "3df540b0abda2e8317f3c1c64629aa41a3338f8f33b3d4dc382496ad9695dbcd",
+        "v42_job_capability.py": "0f72fce6ed40883293028f280aaec8f8582b1cd290d558451e0dc75a98669255"
+      },
+      "evidence": "raw-byte PR103 seal and 440 inherited behavioral tests"
+    },
+    {
+      "problem": 5,
+      "title": "Planning/Actual response",
+      "PASS": true,
+      "decision": "Grid/kernel/Q repair/Actual and Fresh AC gates retained; no campaign Actual run",
+      "unchanged_sources": {
+        "v42_native/actual.py": "6f41278afc1f679e9ca18edc0f371d3a99be8acee3d426bfcc4c387cab624061",
+        "v42_native/grid.py": "42773f8d076098c2d44cc4a9991a9f0b4a1d999b0dc62e0b679c507b3edc6471"
+      },
+      "evidence": "raw-byte PR103 seal and 440 inherited behavioral tests"
+    },
+    {
+      "problem": 6,
+      "title": "Joint architecture/computability",
+      "PASS": true,
+      "decision": "A1→M1→A2→M2 unchanged; full F2-CRA physical MILP, exact aggregation/Runtime/WAN, no DW or restriction",
+      "unchanged_sources": {
+        "v42_native/coordinator.py": "144bf6f2a6b2ac86461e34cf6b9a1de859728dc70a99778aa28b21e5b00ea9b0",
+        "v42_root/native.py": "d4c41c1b636a103460aba5250a4c792f5082f4d796bd37e6bc3dc06ed02bf737",
+        "v42_root/factor.py": "c47fb0519855330a111a89accd9603eacef2211cd75665c5a9b7abc23d41120f"
+      },
+      "evidence": "raw-byte PR103 seal and 440 inherited behavioral tests"
+    },
+    {
+      "problem": 8,
+      "title": "Flexibility masks",
+      "PASS": true,
+      "decision": "Independent timeshift/prestart/checkpoint capability flags and joint start/site remain; max one migration",
+      "unchanged_sources": {
+        "v42_exact/support.py": "9ce10402a03dde3990872e024e97119d5393150817c0aef82e409895f723466a",
+        "v42_job_capability.py": "0f72fce6ed40883293028f280aaec8f8582b1cd290d558451e0dc75a98669255"
+      },
+      "evidence": "raw-byte PR103 seal and 440 inherited behavioral tests"
+    },
+    {
+      "problem": 10,
+      "title": "Scalability",
+      "PASS": true,
+      "decision": "Exact compression and validated full start preserved; Threads=1, no GPU or unaudited case parallelism",
+      "unchanged_sources": {
+        "v42_sparse/config.py": "421af1acf2c51ee8e6a4c18b553dc461a42e71b69fd2e42d9c3c8ad023e64209",
+        "v42_sparse/runtime.py": "486134656713cb32160c305774ca3b727b902553db68f1f931a703466194e700",
+        "v42_root/start.py": "28c2f394f1128179be7db9877afd82e2f59af717f579f4f78f8ee25b1121860b"
+      },
+      "evidence": "raw-byte PR103 seal and 440 inherited behavioral tests"
+    }
+  ]
+}

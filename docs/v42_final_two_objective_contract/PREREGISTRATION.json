@@ -1,0 +1,43 @@
+{
+  "base": "9f437c8ea745e9590d43ea866639f03265e4dfa7",
+  "scientific_groups": [
+    "MAX_LINE_LOADING",
+    "MIN_INTERVENTION"
+  ],
+  "AIDC_P2_components": [
+    "migration_count",
+    "shift_magnitude",
+    "prestart_relocation"
+  ],
+  "MESS_P2_components": [
+    "movement_energy",
+    "movement_count"
+  ],
+  "solver": {
+    "Threads": 1,
+    "Seed": 20260929,
+    "MIPGap": 0.005,
+    "TimeLimit": 3600
+  },
+  "cumulative_optimize_only_budget_seconds": 3600,
+  "diagnostic_budget_seconds": 3600,
+  "diagnostic_P1_lock": 0.6715925043100266,
+  "P1_epsilon": 1e-07,
+  "component_epsilon": 1e-08,
+  "scalar_lock_authority": "exact certified PR103 value; production replays P1 and verifies agreement",
+  "acceptance": "P1 accepted + all ordered P2 components certified at MIPGap .005 where meaningful (exact integer bound certificate reported) + independent physical PASS",
+  "source_start": "PR103 reference plan for replay; PR103 certified P1 physical plan for locked P2 diagnostic; inherited complete-start validation on separate copy",
+  "physical_domain": "unchanged F2-CRA variables, bounds, all constraints; objective-only change",
+  "reserve": "report only; no zero-shortfall hardening; raw auxiliary and conditional minimum both reported",
+  "CC4": "frozen temporal interface; deviation reporting only",
+  "rank": "canonical reconstruction only",
+  "production_retries": 0,
+  "native_return_grace_seconds": 5,
+  "GPU": false,
+  "M1": false,
+  "A2": false,
+  "M2": false,
+  "FRESH_AC": false,
+  "IEEE8500": false,
+  "workers": "no campaign parallelism without case independence/RAM/license audit; isolated canonical worker here"
+}

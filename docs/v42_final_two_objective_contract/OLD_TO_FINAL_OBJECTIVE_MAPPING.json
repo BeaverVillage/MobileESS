@@ -1,0 +1,73 @@
+{
+  "scientific_groups": 2,
+  "mapping": [
+    {
+      "expression": "rho",
+      "PR103_role": "P1",
+      "final_V42_role": "P1 MAX_LINE_LOADING",
+      "decision": "KEEP"
+    },
+    {
+      "expression": "reserve_shortfall",
+      "PR103_role": "historical P2",
+      "final_V42_role": "soft reliability/reporting",
+      "decision": "REMOVE_FROM_OBJECTIVE"
+    },
+    {
+      "expression": "CC4_reference_deviation",
+      "PR103_role": "historical P3",
+      "final_V42_role": "frozen CC4 timing report",
+      "decision": "REMOVE_FROM_OBJECTIVE"
+    },
+    {
+      "expression": "migration_count",
+      "PR103_role": "historical P4",
+      "final_V42_role": "P2 MIN_INTERVENTION component 1",
+      "decision": "KEEP"
+    },
+    {
+      "expression": "shift_slots",
+      "PR103_role": "historical P5",
+      "final_V42_role": "P2 shift magnitude component 2",
+      "decision": "KEEP"
+    },
+    {
+      "expression": "prestart_changes",
+      "PR103_role": "historical P6",
+      "final_V42_role": "P2 relocation component 3",
+      "decision": "KEEP"
+    },
+    {
+      "expression": "deterministic UID/event rank",
+      "PR103_role": "already excluded in F2-CRA",
+      "final_V42_role": "canonical reconstruction",
+      "decision": "REPORT_ONLY"
+    },
+    {
+      "expression": "MESS movement_kwh",
+      "PR103_role": "historical after reserve",
+      "final_V42_role": "P2 MESS component 1",
+      "decision": "KEEP"
+    },
+    {
+      "expression": "MESS movement_count",
+      "PR103_role": "historical after movement energy",
+      "final_V42_role": "P2 MESS component 2",
+      "decision": "KEEP"
+    },
+    {
+      "expression": "MESS tie",
+      "PR103_role": "historical objective",
+      "final_V42_role": "canonical reporting only",
+      "decision": "REMOVE_FROM_OBJECTIVE"
+    },
+    {
+      "expression": "voltage/transformer/SOC/PCS",
+      "PR103_role": "physical rows",
+      "final_V42_role": "unchanged physical rows",
+      "decision": "HARD_CONSTRAINT"
+    }
+  ],
+  "no_arbitrary_weights": true,
+  "legacy_entrypoints": "historical preserved sources; final commands are v42_two.production and v42_two.mess.solve"
+}

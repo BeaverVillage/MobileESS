@@ -1,0 +1,11 @@
+# Final V42 two-objective contract
+
+Scientific groups are P1 MAX_LINE_LOADING and P2 MIN_INTERVENTION. The ordered intervention subpasses all belong to P2. PR103 source and physical rows remain immutable. Historical six-level commands are not final-contract entry points.
+
+Corrected full-May replay completed in **1103.875 s optimize-only** (3600-s budget), using Threads=1 and MIPGap=.005. P1 UB=LB=0.6715924043100266; its production native fingerprint matches PR103 (`0x5942689c`). Final P2 is migration **0/0**, shift **387/386** (0.2584%), prestart relocation **221/220** (0.4525%), shown as incumbent/bound. The last two are certified within the requested gap, not claimed exact integer optima. Independent complete-job/native-grid validation PASS; 452 tests PASS. Peak sampled RSS was 22,800,445,440 bytes.
+
+Reserve is reporting only: fixed-upstream minimum total shortfall 76,745.9040 GPU-slots; raw unoptimized auxiliary total 89,833. Component allocation is non-unique proportional reporting. Actual fixed-timing CC4 deviation is 2.3392690; unoptimized deviation auxiliary is 2.4843578. Neither metric selected the plan. No zero-shortfall hardening was introduced.
+
+Reproduction commands are `py -3.11 -m pytest tests v42_two/test_contract.py contract_tests -q`, and the preregistered single-run commands `py -3.11 -m v42_two.production diagnostic`, then `py -3.11 -m v42_two.production replay`. They require the sealed Windows native input authorities and the immutable DATA cache whose SHA is in PHYSICAL_DOMAIN_REGRESSION.json. Private runs use separate `V42_TWO_LOCAL/diagnostic` and `/replay` directories and fail closed on existing STARTED markers. Setup is a preregistration initializer at the exact PR103 base, not an instruction to overwrite committed evidence or retry completed runs.
+
+Final MESS configuration is `v42_two.mess.solve`: unchanged native route/P/Q/SOC builder, P1 followed by P2 movement energy → movement count, no reserve/rank/PQ/SOC penalty. Synthetic MESS tests validate this adapter; no native M1 campaign was run. STOP before M1/A2/M2/Fresh AC/IEEE8500. Outer-case concurrency remains subject to independent-state, RAM, and license audits before a future campaign.

@@ -1,0 +1,29 @@
+{
+  "PASS": true,
+  "checks": [
+    {
+      "problem": 1,
+      "title": "Runtime/service duration",
+      "PASS": true,
+      "decision": "Causal Q50 provider, nominal slots, empirical planning-only gamma; no ML/provider changes",
+      "unchanged_sources": {
+        "v42_final/runtime.py": "86f578f315c39dd0c4e858df5d0ee04a79f16bc2c3d033af4beac7fe9ebd5e2a",
+        "v42_final/reserve.py": "44ad22dc6071cd0523e29711e255dc1bbeb46245269aa2b918b310787980668b",
+        "v42_root/data.py": "8bff2f2968e79c16266be12d7560bda093939d5e75a13e8db8cb27538058867e"
+      },
+      "evidence": "raw-byte PR103 seal and 440 inherited behavioral tests"
+    },
+    {
+      "problem": 3,
+      "title": "Known/unknown causality",
+      "PASS": true,
+      "decision": "Frozen D-1 known authority and anonymous future CC4; no Actual full reoptimization or unknown action expansion",
+      "unchanged_sources": {
+        "v42_native/actual.py": "6f41278afc1f679e9ca18edc0f371d3a99be8acee3d426bfcc4c387cab624061",
+        "v42_native/providers.py": "2ba5c39a6e9218461f67e79dd708271141a2b3492bd6f97d4407561e5198dfcd"
+      },
+      "evidence": "raw-byte PR103 seal and 440 inherited behavioral tests"
+    }
+  ],
+  "new_authority": false
+}
