@@ -1,0 +1,58 @@
+{
+  "base_head": "c9233bd9d3977984e6de31e1d2924f10d1287a84",
+  "base_PR": 108,
+  "formulation": "M1-F3",
+  "expected_identity": {
+    "binary": 208312,
+    "continuous": 108431,
+    "rows": 954560,
+    "columns": 316743,
+    "nonzeros": 8282350,
+    "fingerprint": "0x9cfd10ec"
+  },
+  "UB": 0.6696147314213984,
+  "expected_root_LB": 0.571849460049452,
+  "physical_tolerance": 1e-05,
+  "objective_tolerance": 1e-07,
+  "fractionality_tolerance": 1e-05,
+  "LP": {
+    "Method": 2,
+    "Threads": 1
+  },
+  "MIP": {
+    "Method": 2,
+    "Threads": 1,
+    "Heuristics": 0,
+    "MIPFocus": 3,
+    "CutPasses": -1,
+    "DegenMoves": -1,
+    "Seed": 20260929,
+    "MIPGap": 0.005,
+    "GPU": false
+  },
+  "candidate_gates": {
+    "S1": "any H1/H2/H3 violation > tolerance at baseline optimum",
+    "S2": "fixed-root arc-energy LP certified INFEASIBLE",
+    "S3": "both gates"
+  },
+  "gain_categories": {
+    "material": 0.001,
+    "strong": 0.01,
+    "very_strong_LB": 0.62,
+    "target_region_LB": 0.65
+  },
+  "canary": {
+    "max_runs": 1,
+    "seconds": 600,
+    "gate": "selected delta_LB >= .001"
+  },
+  "production": {
+    "max_runs": 1,
+    "seconds": 1800,
+    "cumulative_optimize_only": true,
+    "gate": "canary BestBd - PR108 LB >= .005 OR gap <= .12 OR certified gap <= .005"
+  },
+  "A1_optimize_calls": 0,
+  "no_solver_search": true,
+  "STOP_before_A2": true
+}

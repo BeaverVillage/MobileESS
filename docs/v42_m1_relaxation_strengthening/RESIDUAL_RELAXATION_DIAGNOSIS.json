@@ -1,0 +1,92 @@
+{
+  "baseline": {
+    "candidate": "S0",
+    "solution_kind": "optimal basic point",
+    "point_specific_fractionality": true,
+    "rho": 0.5718494602017812,
+    "fractional_stay": 6766,
+    "fractional_travel": 1604,
+    "fractional_charge_mode": 311,
+    "maximum_sites": 24,
+    "multiple_site_slot_fraction": 0.9791666666666666,
+    "multiple_reactive_site_slot_fraction": 0.9791666666666666,
+    "maximum_reactive_sites": 24,
+    "simultaneous_aggregate_charge_discharge_slots": 310,
+    "maximum_Pch": 181.87220770104966,
+    "maximum_Pdis": 171.59739755753859,
+    "total_Pch_kWh": 8368.863041186194,
+    "total_Pdis_kWh": 6672.440161463246,
+    "maximum_mode_hull_residual": 286.4553991202763,
+    "Q_diagnostic_only": true,
+    "no_Q_penalty": true
+  },
+  "selected_root": {
+    "candidate": "S2",
+    "solution_kind": "optimal basic point",
+    "point_specific_fractionality": true,
+    "rho": 0.5722125039436496,
+    "fractional_stay": 6586,
+    "fractional_travel": 5609,
+    "fractional_charge_mode": 293,
+    "maximum_sites": 24,
+    "multiple_site_slot_fraction": 0.9817708333333334,
+    "multiple_reactive_site_slot_fraction": 0.9817708333333334,
+    "maximum_reactive_sites": 24,
+    "simultaneous_aggregate_charge_discharge_slots": 293,
+    "maximum_Pch": 184.17824326623537,
+    "maximum_Pdis": 142.9674899693976,
+    "total_Pch_kWh": 5021.174536211343,
+    "total_Pdis_kWh": 3202.2596930387394,
+    "maximum_mode_hull_residual": 288.27130062863375,
+    "Q_diagnostic_only": true,
+    "no_Q_penalty": true
+  },
+  "ranking": [
+    {
+      "rank": 1,
+      "mechanism": "fractional route/location with distributed reactive support",
+      "measured": {
+        "candidate": "S2",
+        "solution_kind": "optimal basic point",
+        "point_specific_fractionality": true,
+        "rho": 0.5722125039436496,
+        "fractional_stay": 6586,
+        "fractional_travel": 5609,
+        "fractional_charge_mode": 293,
+        "maximum_sites": 24,
+        "multiple_site_slot_fraction": 0.9817708333333334,
+        "multiple_reactive_site_slot_fraction": 0.9817708333333334,
+        "maximum_reactive_sites": 24,
+        "simultaneous_aggregate_charge_discharge_slots": 293,
+        "maximum_Pch": 184.17824326623537,
+        "maximum_Pdis": 142.9674899693976,
+        "total_Pch_kWh": 5021.174536211343,
+        "total_Pdis_kWh": 3202.2596930387394,
+        "maximum_mode_hull_residual": 288.27130062863375,
+        "Q_diagnostic_only": true,
+        "no_Q_penalty": true
+      },
+      "classification": "measured remaining fractionality; causal bound contribution not isolated",
+      "next_question": "Can physical integer trajectories realize the spatial and temporal reactive support of this LP point?"
+    },
+    {
+      "rank": 2,
+      "mechanism": "grid feasibility of averaged route/dispatch trajectories",
+      "classification": "untested hypothesis",
+      "next_question": "Even with path-consistent energy, which averaged voltage/thermal requirements cannot be met by individual integer trajectories?"
+    },
+    {
+      "rank": 3,
+      "mechanism": "mode disjunction and arc-energy pooling",
+      "classification": "tested exactly in this task",
+      "root_gain": 0.0003630437418684629,
+      "next_question": "Evaluate measured root bound gain; a violated point alone does not measure its effect on the optimal face",
+      "conclusion": "Tested mode-disjunction and route-energy-pooling mechanisms do not materially explain the current root gap."
+    }
+  ],
+  "material_root_gain": false,
+  "additional_strengthening_families_built": false,
+  "remaining_implied_gap": 0.1454601025144593,
+  "interpretation": "LP diagnostics, not a MIP or physical-invalidity certificate",
+  "optimal_face_note": "Fractionality describes the saved point. Interior and basic optima can differ on the same optimal face; counts do not measure causal bound contributions."
+}
