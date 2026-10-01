@@ -6,6 +6,7 @@ import gurobipy as gp,numpy as np,psutil
 from .common import *
 from . import factor
 from v42_compact.native import grid,completion_risk
+from v42_native.voltage import Stage
 from v42_compact.formulation import intervention
 from v42_final.reserve import risk_exposure
 from v42_boundary.generator import Generator
@@ -74,7 +75,7 @@ def build(context,data,kind):
     byte_scale=2.**20 if cfg['scale_wan'] else 1.
     wanrows={(l,t):m.addConstr(gp.LinExpr()<=(rate-r.fixed_wan.get((l,t),0))/byte_scale,name='physical_WAN') for (l,t),rate in r.wan_capacities.items()}
     active={t:m.addConstr(gp.LinExpr()<=r.max_active_transfers-r.fixed_transfers.get(t,0),name='physical_ACTIVE') for t in range(r.control_end)}
-    primary,timing,controls=grid(m,bundle,known,risk);m.update();grid_seconds=perf_counter()-started;global_vars=m.NumVars
+    primary,timing,controls=grid(m,bundle,known,risk,stage=Stage.A1);m.update();grid_seconds=perf_counter()-started;global_vars=m.NumVars
     classes=prep['classes'];units=local_units(m,jobs,bounds,r,graphs,classes,kind,context)
     metrics=[gp.LinExpr() for _ in range(3)];finish_groups=defaultdict(list);representative={};runtime_vectors={};tie=gp.LinExpr();rank=0
     process=psutil.Process();peak=process.memory_info().rss

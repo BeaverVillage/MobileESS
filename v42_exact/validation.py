@@ -1,4 +1,4 @@
-from v42_native.voltage import PLANNING_LOWER_SQUARED, PLANNING_UPPER_SQUARED
+from v42_native.voltage import Stage,voltage_for
 """Independent incumbent checks against frozen physical and grid authority."""
 from collections import defaultdict
 import math,re
@@ -15,7 +15,8 @@ def snapshot(bindings,m):
     names=('CC4_','RT_reserve[','RT_shortfall[','rho_max')
     return {x.VarName:x.X for x in m.getVars() if x.VarName.startswith(names)}
 
-def check(selected,data,controls,bindings_values,primary_rho):
+def check(selected,data,controls,bindings_values,primary_rho,*,stage=Stage.A1):
+    voltage=voltage_for(stage)
     bundle,jobs,bounds,r,raw,graphs,original,prep=data
     used=defaultdict(float);runtime=defaultdict(float);cache=Generator(r,max(b.latest_completion for b in bounds.values()));failed=[]
     if set(selected)!=set(jobs):raise ValueError('MISSING_SELECTED_JOBS')
@@ -40,7 +41,7 @@ def check(selected,data,controls,bindings_values,primary_rho):
     angles=2*np.pi*np.arange(16)/16;cos=np.cos(angles);sin=np.sin(angles)
     for c,x in zip(coeff,controls):
         x=np.asarray(x);volt=c.voltage_constant+c.voltage_matrix.T@x
-        grid_vio=max(grid_vio,float(np.max(PLANNING_LOWER_SQUARED-volt)),float(np.max(volt-PLANNING_UPPER_SQUARED)))
+        grid_vio=max(grid_vio,float(np.max(voltage.lower_squared-volt)),float(np.max(volt-voltage.upper_squared)))
         p=c.flow_p_constant+c.flow_p_matrix@x;q=c.flow_q_constant+c.flow_q_matrix@x
         ap=np.asarray(c.branch_limits)*math.cos(math.pi/16)
         pa=c.flow_p_constant+c.flow_p_matrix@c.anchor;qa=c.flow_q_constant+c.flow_q_matrix@c.anchor

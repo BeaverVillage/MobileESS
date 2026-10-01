@@ -1,0 +1,108 @@
+{
+  "base": "7ec7006eda9fb5ca7a1952c48391949844aef223",
+  "stage_voltages": {
+    "A1": {
+      "kind": "A1_BOOTSTRAP",
+      "lower_pu": 0.95,
+      "upper_pu": 1.05,
+      "lower_squared": 0.9025,
+      "upper_squared": 1.1025,
+      "stage": "A1",
+      "fallback_allowed": false,
+      "stages": [
+        "A1"
+      ],
+      "Actual_lower_pu": 0.95,
+      "Actual_upper_pu": 1.05
+    },
+    "M1": {
+      "kind": "ROBUST_PLANNING",
+      "lower_pu": 0.955,
+      "upper_pu": 1.045,
+      "lower_squared": 0.912025,
+      "upper_squared": 1.092025,
+      "stage": "M1",
+      "fallback_allowed": false,
+      "stages": [
+        "M1",
+        "A2",
+        "M2"
+      ],
+      "Actual_lower_pu": 0.95,
+      "Actual_upper_pu": 1.05
+    },
+    "A2": {
+      "kind": "ROBUST_PLANNING",
+      "lower_pu": 0.955,
+      "upper_pu": 1.045,
+      "lower_squared": 0.912025,
+      "upper_squared": 1.092025,
+      "stage": "A2",
+      "fallback_allowed": false,
+      "stages": [
+        "M1",
+        "A2",
+        "M2"
+      ],
+      "Actual_lower_pu": 0.95,
+      "Actual_upper_pu": 1.05
+    },
+    "M2": {
+      "kind": "ROBUST_PLANNING",
+      "lower_pu": 0.955,
+      "upper_pu": 1.045,
+      "lower_squared": 0.912025,
+      "upper_squared": 1.092025,
+      "stage": "M2",
+      "fallback_allowed": false,
+      "stages": [
+        "M1",
+        "A2",
+        "M2"
+      ],
+      "Actual_lower_pu": 0.95,
+      "Actual_upper_pu": 1.05
+    },
+    "Actual": {
+      "kind": "ACTUAL_PHYSICAL",
+      "lower_pu": 0.95,
+      "upper_pu": 1.05,
+      "lower_squared": 0.9025,
+      "upper_squared": 1.1025,
+      "stage": "Actual",
+      "fallback_allowed": false,
+      "stages": [
+        "Actual"
+      ],
+      "Actual_lower_pu": 0.95,
+      "Actual_upper_pu": 1.05
+    }
+  },
+  "solver": {
+    "Threads": 1,
+    "Seed": 20260929,
+    "MIPGap": 0.005,
+    "GPU": false,
+    "A1_optimize_seconds": 3600,
+    "M1_optimize_seconds": 1800,
+    "build_excluded": true
+  },
+  "objectives": [
+    "MAX_LINE_LOADING",
+    "MIN_INTERVENTION"
+  ],
+  "A1_P2": [
+    "migration_count",
+    "absolute_shift",
+    "prestart_relocation"
+  ],
+  "M1_P2": [
+    "movement_energy",
+    "movement_count"
+  ],
+  "one_M1": true,
+  "preflight_required": true,
+  "STOP_before_A2": true,
+  "FINAL_ROBUST_PLANNING_ACCEPTED": false,
+  "PROBLEM13_FINAL_VALIDATED": false
+}

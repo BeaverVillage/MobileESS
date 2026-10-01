@@ -8,7 +8,7 @@ from dataclasses import asdict
 from collections import defaultdict
 from time import perf_counter
 import numpy as np
-from v42_native.voltage import PLANNING_LOWER_SQUARED, PLANNING_UPPER_SQUARED
+from v42_native.voltage import Stage,voltage_for
 import gurobipy as gp
 from .common import *
 from v42_temporal.native import load_power
@@ -21,7 +21,8 @@ from v42_native.supervision import atomic
 from v42_may01.prepare import native_coefficients
 from v42_job_capability import validate,resources_used,resource_limit
 
-def planning_grid(m,bundle,known,risk):
+def planning_grid(m,bundle,known,risk,*,stage=Stage.A1):
+    require(stage==Stage.A1,"BOOTSTRAP_GRID_STAGE")
     e=pd.read_csv(PR97/'CC4_SERVICE_TIMING_ENVELOPE.csv');k=pd.read_csv(OLD/'CC4_EXECUTION_LAG_KERNEL.csv').kappa.to_numpy()
     day=pd.Timestamp('2025-05-01T00:00:00+10:00').timestamp();book=ForecastBook(tuple(bundle['C0_Q50']),tuple(bundle['C0_Q90']),day)
     timing=bind_forecast(m,book,pd.Timestamp(bundle['issue_time']).timestamp(),k,e.Q10,e.Q90)
@@ -35,7 +36,7 @@ def planning_grid(m,bundle,known,risk):
     reserve=bind_headroom(m,known,anon,target,risk,caps,range(24,120))
     cert,power,idle,swing=load_power(bundle);coeff=native_coefficients(cert)
     authority=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),
-        digest(caps),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),PLANNING_LOWER_SQUARED,PLANNING_UPPER_SQUARED,True)
+        digest(caps),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),voltage_for(stage).lower_squared,voltage_for(stage).upper_squared,True,stage=stage)
     controls=[]
     for t,c in enumerate(coeff):
         row=[]
@@ -72,7 +73,7 @@ def solve(context):
         choose={u:m.addConstr(gp.LinExpr()==1,name=f'choose_one[{u}]') for u in jobs}
         costs={n:m.addVar(lb=0,name=n) for n in ('migration_count','shift_slots','prestart_changes','tie')}
         costrows={n:m.addConstr(v==0,name=n+'_balance') for n,v in costs.items()}
-        primary,timing,controls=planning_grid(m,bundle,known,risk)
+        primary,timing,controls=planning_grid(m,bundle,known,risk,stage=Stage.A1)
         obj=objective_order(primary,timing['deviation'],list(costs.items()));m.update();basevars=m.NumVars
         prepared=perf_counter();nvars=0;completed=0;lastreport=0
         atomic(context.folder/'build_phase.json',dict(phase='MODEL_CONSTRUCTION',domain_complete=True,

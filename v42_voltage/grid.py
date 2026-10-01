@@ -31,7 +31,7 @@ def frozen_grid(model,bundle,anchor,p,q):
         controls.append(row)
     ga=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),
                      digest(bundle['capacities']),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),
-                     digest(bundle['battery']),PLANNING_LOWER_SQUARED,PLANNING_UPPER_SQUARED,True)
+                     digest(bundle['battery']),PLANNING_LOWER_SQUARED,PLANNING_UPPER_SQUARED,True,stage=Stage.M1)
     rho=add_grid(model,coeff,controls,ga)
     # Legacy constructor interface only. No AIDC/CC4 variable or reserve objective.
     return [('rho',rho),('reserve_shortfall',0.)],controls

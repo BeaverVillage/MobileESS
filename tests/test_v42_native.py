@@ -18,6 +18,7 @@ from v42_job_capability import build_domain
 def test_native_grid_anchor_and_separate_hard_security(voltage,tx_current,tx_power,feasible):
     from types import SimpleNamespace
     import numpy as np
+    from v42_native.voltage import Stage
     from v42_native.grid import GridAuthority,add_grid
     c=SimpleNamespace(slot=0,control_names=('P',),coefficient_sha256='a'*64,
         voltage_constant=np.array([voltage]),voltage_matrix=np.zeros((1,1)),
@@ -25,7 +26,7 @@ def test_native_grid_anchor_and_separate_hard_security(voltage,tx_current,tx_pow
         flow_q_constant=np.zeros(2),flow_p_matrix=np.zeros((2,1)),flow_q_matrix=np.zeros((2,1)),
         anchor=np.zeros(1),current_matrix=np.zeros((1,2)),current_constant=np.array([.6,tx_current]),
         branch_names=('line.test::a','transformer.main::a'),transformer_ratings=(None,2.))
-    authority=GridAuthority(*(['b'*64]*4),.912025,1.092025,True)
+    authority=GridAuthority(*(['b'*64]*4),.912025,1.092025,True,stage=Stage.M1)
     m=gp.Model();m.Params.OutputFlag=0
     try:
         rho=add_grid(m,[c],[[0.]],authority);m.setObjective(rho);m.optimize()

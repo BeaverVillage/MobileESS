@@ -16,15 +16,16 @@ def test_exact_squared_authority_and_all_planning_paths():
     root=Path(__file__).resolve().parents[1]
     for f in ('v42_boundary/model.py','v42_compact/native.py','v42_temporal/native.py','v42_exact/validation.py','v42_native/canary.py','v42_voltage/grid.py'):
         s=(root/f).read_text(encoding='utf8')
-        assert 'PLANNING_LOWER_SQUARED' in s and 'PLANNING_UPPER_SQUARED' in s
+        assert ('voltage_for' in s or 'PLANNING_LOWER_SQUARED' in s) and ('voltage_for' in s or 'PLANNING_UPPER_SQUARED' in s)
         assert '.95**2' not in s and '1.05**2' not in s
-    assert authority()['stages']==['A1','M1','A2','M2']
+    assert authority()['stages']==['M1','A2','M2']
+    assert authority(Stage.A1)['lower_pu']==.95 and authority(Stage.A1)['upper_pu']==1.05
 
 
 @pytest.mark.parametrize('lo,hi',[(.95**2,1.05**2),(.955,1.045),(.912025,1.05**2)])
 def test_grid_rejects_unsquared_old_and_mixed_authorities(lo,hi):
     with pytest.raises(ValueError,match='PLANNING_VOLTAGE_AUTHORITY_MISMATCH'):
-        GridAuthority(*['a'*64]*4,lo,hi,True).validate()
+        GridAuthority(*['a'*64]*4,lo,hi,True,stage=Stage.M1).validate()
 
 
 def test_removed_repair_never_builds_or_optimizes(monkeypatch):

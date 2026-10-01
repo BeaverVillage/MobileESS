@@ -8,7 +8,7 @@ import math,re
 import numpy as np
 import gurobipy as gp
 from .contracts import require
-from .voltage import require_planning
+from .voltage import require_planning,Stage
 
 
 @dataclass(frozen=True)
@@ -20,10 +20,11 @@ class GridAuthority:
     voltage_lower_squared:float
     voltage_upper_squared:float
     frozen:bool=False
+    stage:Stage|None=None
 
     def validate(self):
         require(self.frozen and all(len(s)==64 for s in (self.topology_sha,self.mapping_sha,self.service_sha,self.pq_sha)),'GRID_FREEZE_MISSING')
-        require_planning(self.voltage_lower_squared,self.voltage_upper_squared)
+        require_planning(self.voltage_lower_squared,self.voltage_upper_squared,self.stage)
 
 
 def add_grid(model,coefficients,controls,authority):
