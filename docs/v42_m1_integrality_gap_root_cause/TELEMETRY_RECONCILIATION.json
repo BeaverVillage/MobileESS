@@ -1,0 +1,63 @@
+{
+  "PASS": true,
+  "checks": [
+    {
+      "name": "P_FIXED_ALL",
+      "root_seconds": null,
+      "presolve_seconds": 1.72,
+      "log_sha256": "6d64ed697d10dc10a836d70cef0464853799707a1cbfb7243fa98aa240fd4f49",
+      "optimize_calls": 0
+    },
+    {
+      "name": "P_FIXED_ROUTE",
+      "root_seconds": 0.67,
+      "presolve_seconds": 1.34,
+      "log_sha256": "144b99bb43a030f90c633929d9cf59234361c4de0ec7a9f4d7a615d7fdae8aed",
+      "optimize_calls": 0
+    },
+    {
+      "name": "P_LATE_ROUTE_NEIGHBORHOOD",
+      "root_seconds": 31.92,
+      "presolve_seconds": 16.51,
+      "log_sha256": "0f8bedf89c1e4134edfdc9bf0592eb915f9b4bd2c46b92fb6509fcac7112c11b",
+      "optimize_calls": 0
+    },
+    {
+      "name": "R_ACTIVE",
+      "root_seconds": 314.19,
+      "presolve_seconds": 18.13,
+      "log_sha256": "69797ac4db48934657eddc008c9951da8374516e633f45ead4e3d58af985e565",
+      "optimize_calls": 0
+    },
+    {
+      "name": "R_BUFFER",
+      "root_seconds": 278.3,
+      "presolve_seconds": 17.68,
+      "log_sha256": "8ec6626dea26bb805d51d25266239033df3d780ba93a21dfb50621dc3246be88",
+      "optimize_calls": 0
+    },
+    {
+      "name": "R_ROUTE_ONLY",
+      "root_seconds": 503.22,
+      "presolve_seconds": 31.9,
+      "log_sha256": "4bf278de3a0660a4fd1453b83332a66de3c4d55ec6c566bc7ec51e54ce04bd71",
+      "optimize_calls": 0
+    },
+    {
+      "name": "TERM_RELAX",
+      "root_seconds": null,
+      "presolve_seconds": 4.78,
+      "log_sha256": "902ba79d4e411c919f7508a844d8b663503b2063c551d5781ed794175488fd70",
+      "optimize_calls": 0
+    }
+  ],
+  "optimization_retries": 0,
+  "unsupported_POLLING_query_arms": [
+    "R_ROUTE_ONLY",
+    "R_ACTIVE"
+  ],
+  "fix": "Return before cbGet on POLLING. Old driver stops only between completed R_ACTIVE and not-yet-started R_BUFFER; no arm optimization is interrupted or retried.",
+  "official_callback_reference": "https://docs.gurobi.com/projects/optimizer/en/current/reference/numericcodes/callbacks.html",
+  "model_or_solver_policy_changes": false,
+  "results_authority": "Saved solver final status/ObjBound/X and raw logs plus independent matrix/domain checks"
+}
