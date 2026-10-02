@@ -1,0 +1,106 @@
+{
+  "base": "4cee7ad048d43db6a0049eebecdd44d59f3cc567",
+  "created_UTC": "2026-10-02T01:22:14Z",
+  "master_threads": 1,
+  "Seed": 20260929,
+  "Method": 1,
+  "InfUnbdInfo": 1,
+  "DualReductions": 0,
+  "NumericFocus": 1,
+  "FeasibilityTol": 1e-07,
+  "OptimalityTol": 1e-07,
+  "IntFeasTol": 1e-07,
+  "recourse_thread_policy": "4 if no independent heavy solve immediately before candidate evaluation, otherwise 1; unchanged within its native/Phase-I pair",
+  "pilot_max_candidate_recourse_evaluations": 2,
+  "per_candidate_recourse_wall_seconds": 1800,
+  "budget_interpretation": "Native and any Phase-I fallback share 1800 seconds per persisted candidate, including template build and substitution. Finish terminal raw persistence/validation even at deadline, but no new optimize after deadline. Report audit overhead separately.",
+  "pilot_master_seconds": 60,
+  "pilot_stop": "witness/proof; otherwise at most recourse0/recourse1, require valid cut and distinct persisted x1",
+  "full_B3_wall_seconds": 1800,
+  "full_restart": "zero-cut clean deterministic restart; no pilot cuts reused",
+  "canary_wall_seconds": 600,
+  "production_wall_seconds": 1800,
+  "full_M1_gate": "certified B3 witness/proof OR full B3 valid cuts>=2 and distinct persisted candidates>=3, no numerical contradiction or invalid cut",
+  "production_gate": "valid original UB and finite certified global LB, valid cuts, no numerical ambiguity, LB>=inherited LB+1e-4 or certified gap<=.005",
+  "threshold": 0.5732125039436496,
+  "witness_guard": 1e-06,
+  "master_binaries_B3": 85744,
+  "continuous_B3": 230999,
+  "master_binaries_full": 208312,
+  "route_full": 207928,
+  "mode_full": 384,
+  "continuous_full": 108431,
+  "original_UB": 0.5912812634331275,
+  "inherited_original_LB": 0.5722125039436496,
+  "initial_master_theta_floor": "inherited S2 only for original full M1; never for zero-objective B3",
+  "historical_same_x": "NOT_AVAILABLE",
+  "speedup_causal_claim": false,
+  "parameter_sweep": false,
+  "known_fixture_survival": "Replay all inherited fixture certificates against all 49 feasible fixture assignments; their 7-bit axes differ from full-scale 85744-bit axis and cannot be used as full-scale points. Full-scale cuts use independent exact global proof and source separation; never embed or truncate fixture bits.",
+  "cut_aging": false,
+  "cut_deletion": false,
+  "cut_aggregation": false,
+  "scientific_changes": false,
+  "Actual_P_correction": false,
+  "Actual_Q_correction": false,
+  "P2_A2_M2": "separate user approval even after accepted production P1",
+  "native_source_hashes": [
+    {
+      "path": "v42_benders_v2/__init__.py",
+      "sha256": "d60f37a3f63d29cb9d7b2e60fa4b323dbb7bdfe33b014ac08cdf534305eedf90"
+    },
+    {
+      "path": "v42_benders_v2/adversarial.py",
+      "sha256": "589af4e37f43e7a1926d03dbbaadef981053284313f849d72e5a4499386d0471"
+    },
+    {
+      "path": "v42_benders_v2/certificates.py",
+      "sha256": "79c0f18d74e111f3669c834460d67443fbfc3965527590a820d6c4dc0cc7c451"
+    },
+    {
+      "path": "v42_benders_v2/common.py",
+      "sha256": "8715995d04d40ff311886ee0ddff2d661fd182f92ab01b5304b95e6e4f6f800d"
+    },
+    {
+      "path": "v42_benders_v2/engine.py",
+      "sha256": "4075e35df69514f51a61f9a59bbec709d215ef4682b90a95415bbb51fb23eb66"
+    },
+    {
+      "path": "v42_benders_v2/fixtures.py",
+      "sha256": "1105e709a6a520da8b8c95638bc7cadc3c628004aa4f29265ca52b526b5528e6"
+    },
+    {
+      "path": "v42_benders_v2/gates.py",
+      "sha256": "80e5eb21def8ac037255cddd31ecf18d1f87f5b02d7d67515b4803a9195233a3"
+    },
+    {
+      "path": "v42_benders_v2/independent.py",
+      "sha256": "168e5d169771de42f3215c8fb80a0e940c92f66298173ccededb01721b799f25"
+    },
+    {
+      "path": "v42_benders_v2/model_audit.py",
+      "sha256": "1858f370d85cc0016b71de49d7aec252261f91968ff0249d2dbd2ba65bc0a43b"
+    },
+    {
+      "path": "v42_benders_v2/prepare.py",
+      "sha256": "854a33a17a53367bb8c5a939c56512cea23c21ee02653d4e6c0df734d4e409c6"
+    },
+    {
+      "path": "v42_benders_v2/recourse.py",
+      "sha256": "b520cd1eb2cf0e54c311c0ae2824e8c3ff6eee389343c2ef2f816d6896da2164"
+    },
+    {
+      "path": "v42_benders_v2/report.py",
+      "sha256": "c4fbb303006125e15aa968219588f0242c8ea3d7ef8b5b20a9ec4e7ce89a791c"
+    },
+    {
+      "path": "v42_benders_v2/representation.py",
+      "sha256": "26ac6b4a5b4dbb02ca45b97cb861731198a5fc3e039df8050d4090b6c9b67221"
+    },
+    {
+      "path": "v42_benders_v2/verification.py",
+      "sha256": "27d345648e3f969d5d319f55d6126698a5eaf779e38f91faedca1a2d07a84b5c"
+    }
+  ],
+  "fixture_receipt_sha256": "19c10dae49c621b4676a8af1ccc60f44c81e2bddef7fcd207698a64af4a55ec0"
+}
