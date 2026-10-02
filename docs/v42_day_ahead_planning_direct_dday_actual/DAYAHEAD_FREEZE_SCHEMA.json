@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "V42 immutable final Day-Ahead Planning freeze",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "plan", "DAYAHEAD_PLAN_SHA", "POLICY_SHA", "GRID_SHA"],
+  "properties": {
+    "schema_version": {"const": "V42_DAYAHEAD_PLANNING_FREEZE_V1"},
+    "DAYAHEAD_PLAN_SHA": {"$ref": "#/$defs/sha"},
+    "POLICY_SHA": {"$ref": "#/$defs/sha"},
+    "GRID_SHA": {"$ref": "#/$defs/sha"},
+    "plan": {
+      "type": "object",
+      "required": ["aidc_schedule", "known_job_actions", "unknown_arrival_policy", "mess_route", "movement", "charge_mode", "P", "Q", "SOC", "aidc_electrical_footprint", "grid_anchor", "input_authority_hashes"],
+      "properties": {
+        "aidc_schedule": {"$ref": "#/$defs/schedule"},
+        "known_job_actions": {"$ref": "#/$defs/schedule"},
+        "unknown_arrival_policy": {
+          "type": "object",
+          "required": ["interface", "authority_sha"],
+          "properties": {
+            "interface": {"const": "v42_native.actual.unknown_arrival"},
+            "authority_sha": {"$ref": "#/$defs/sha"}
+          }
+        },
+        "mess_route": {"$ref": "#/$defs/schedule"},
+        "movement": {"$ref": "#/$defs/schedule"},
+        "charge_mode": {"$ref": "#/$defs/schedule"},
+        "P": {"$ref": "#/$defs/schedule"},
+        "Q": {"$ref": "#/$defs/schedule"},
+        "SOC": {"$ref": "#/$defs/schedule"},
+        "aidc_electrical_footprint": {"$ref": "#/$defs/schedule"},
+        "grid_anchor": {
+          "type": "object", "required": ["grid_sha"],
+          "properties": {"grid_sha": {"$ref": "#/$defs/sha"}}
+        },
+        "input_authority_hashes": {
+          "type": "object", "minProperties": 1,
+          "additionalProperties": {"$ref": "#/$defs/sha"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "schedule": {"type": ["object", "array"]}
+  },
+  "description": "Cross-field digest equality, backend grid identity, finite JSON and exclusive publication are enforced by v42_native.planning; JSON Schema cannot express SHA computation. Native physical shape/feasibility remains the independent stage validator authority."
+}

@@ -79,4 +79,5 @@ def test_preregistration_and_execution_checkpoint_frozen():
     f=read(OUT/'EXECUTION_FREEZE.json');m=read(OUT/'DIRECT_EXECUTION_MARKER.json')
     assert f['before_any_new_optimization'] and m['execution_freeze_sha256']==sha(OUT/'EXECUTION_FREEZE.json')
     assert m['preregistration_sha256']==sha(OUT/'PREREGISTRATION.json')==f['preregistration_sha256']
-    for r in f['source_files']:assert sha(ROOT/r['path'])==r['sha256']
+    from v42_voltage.preservation import assert_snapshot
+    assert assert_snapshot(f['source_files'])

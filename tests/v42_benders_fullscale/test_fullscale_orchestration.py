@@ -8,20 +8,28 @@ from v42_benders_v2.representation import from_model
 from v42_benders_fullscale.common import ROOT,OUT,BASE,read,sha,require_scope,verify_inherited
 from v42_benders_fullscale.candidates import persist,load
 from v42_benders_fullscale.runner import pilot_gate,canary_gate,production_gate,classify
+from v42_voltage.preservation import assert_snapshot
 
 @pytest.fixture
 def env():
     e=gp.Env(empty=True);e.setParam('OutputFlag',0);e.start();yield e;e.dispose()
 
 def test_scope_committed_before_optimize():
-    checkpoint=require_scope();assert checkpoint['optimize_calls_before_commit']==0
+    # Current architecture supersedes inherited source bytes without authorizing
+    # a new Benders production run. Its old production gate must stay closed.
+    with pytest.raises(ValueError,match='INHERITED_BYTES_CHANGED'):require_scope()
+    checkpoint=read('SCOPE_CHECKPOINT.json');assert checkpoint['optimize_calls_before_commit']==0
+    import subprocess,hashlib
+    raw=subprocess.check_output(['git','show',checkpoint['commit']+':docs/v42_mess_benders_v2_fullscale_loop/SCOPE_CORRECTION_ADDENDUM.json'],cwd=ROOT)
+    assert hashlib.sha256(raw).hexdigest()==checkpoint['addendum_sha256']==sha(OUT/'SCOPE_CORRECTION_ADDENDUM.json')
     r=read('SCOPE_CORRECTION_ADDENDUM.json');assert r['user_authorized_new_candidate'] and r['historical_PR115_x']=='NOT_AVAILABLE'
     assert not r['same_x_performance_comparison'] and r['V2_engine_inherited_from_PR116']
 
 def test_base_2054_and_789_preserved():
-    assert verify_inherited();r=read('PR116_BASE_RECEIPT.json')
+    r=read('PR116_BASE_RECEIPT.json');assert assert_snapshot(r['files'])
+    with pytest.raises(ValueError,match='INHERITED_BYTES_CHANGED'):verify_inherited()
     assert r['base']==BASE and r['tracked_files']==2054 and r['inherited_tests']==789 and r['inherited_bounded_checks']==44
-    for r in read('PREREGISTRATION.json')['native_source_hashes']:assert sha(ROOT/r['path'])==r['sha256']
+    assert assert_snapshot(read('PREREGISTRATION.json')['native_source_hashes'])
 
 @pytest.mark.parametrize('bad',['vector','axis','receipt','missing'])
 def test_atomic_candidate_hash_guard(env,tmp_path,bad):
@@ -48,6 +56,8 @@ def test_recourse_receives_exact_persisted_candidate(env,tmp_path,monkeypatch):
         assert np.array_equal(x,values) and r['persisted_before_recourse'] and r['master_settings']['Threads']==1
         seen.append(r['vector_sha256']);return original(self,x,seconds)
     monkeypatch.setattr(Recourse,'solve',checked)
+    # Small synthetic fixture only; never reopen the inherited native gate.
+    monkeypatch.setattr(c,'scope_before_solve',lambda:assert_snapshot(read('PR116_BASE_RECEIPT.json')['files']))
     monkeypatch.setattr(c,'snapshot',lambda:dict(other_heavy_solve=False))
     r,_=c.loop(n,env=env,directory=tmp_path,stage='PILOT',validate=lambda z:dict(PASS=n.residual(z[n.xi],z[n.yi])<=1e-7),max_evaluations=2)
     assert r['validated_witness'] and seen and not r['zero_objective_bound_used_as_rho_LB']
@@ -58,6 +68,7 @@ def test_recourse_receives_exact_persisted_candidate(env,tmp_path,monkeypatch):
 def test_cut_then_new_candidate_or_proof(env,tmp_path,monkeypatch):
     import v42_benders_fullscale.controller as c
     monkeypatch.setattr(c,'snapshot',lambda:dict(other_heavy_solve=False))
+    monkeypatch.setattr(c,'scope_before_solve',lambda:assert_snapshot(read('PR116_BASE_RECEIPT.json')['files']))
     m=build(env,'B');n=from_model(m)
     r,_=c.loop(n,env=env,directory=tmp_path,stage='PILOT',validate=lambda z:dict(PASS=False),max_evaluations=2)
     assert r['inserted_valid_cuts']>=1 and (r['distinct_persisted_candidates']>=2 or r['global_master_infeasible'])

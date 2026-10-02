@@ -1,0 +1,2502 @@
+{
+  "PASS": true,
+  "baseline_sha": "e2d4779685fff6d0cf022c649733b2ca41fdfc08",
+  "baseline_coordinator_calls": [
+    "from .actual import require_fresh_ac,require_frozen_replay",
+    "ac=backend.fresh_ac(final)",
+    "require_fresh_ac(ac,digest(frozen_final),backend.grid_sha)",
+    "return dict(final=final,stages=receipts,fresh_ac=ac)"
+  ],
+  "planning_fresh_ac_calls": 0,
+  "actual_fresh_ac_calls": 1,
+  "call_sites": [
+    {
+      "path": "v42_native/actual.py",
+      "line": 165,
+      "call": "require_fresh_ac"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 128,
+      "call": "fresh_ac"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 138,
+      "call": "require_fresh_ac"
+    }
+  ],
+  "kernel_contract_sites": [
+    {
+      "path": "v42_native/actual.py",
+      "line": 174,
+      "call": "require_kernel"
+    }
+  ],
+  "repository_text_hits": [
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/A1_BOOTSTRAP_VOLTAGE_REPORT.json",
+      "line": 22,
+      "text": "  \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/ACTUAL_NO_REPAIR_REGRESSION.json",
+      "line": 16,
+      "text": "  \"Fresh_AC_evaluate_only\": true,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/ACTUAL_NO_REPAIR_REGRESSION.json",
+      "line": 19,
+      "text": "  \"Fresh_AC_RUN\": false",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/FINAL_FLAGS.json",
+      "line": 55,
+      "text": "  \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/FINAL_REVIEW_KO.md",
+      "line": 199,
+      "text": "먼저 M1 P1/P2 quality를 충족하는 accepted M1이 필요하다. 이어 A2 robust 재최적화·독립 검증, M2 full joint robust 최적화·검증, 최종 계획 동결, frozen Actual replay 및 독립 Fresh OpenDSS physical/line/transformer 검증이 남았다. Problem13=false.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/FINAL_VERDICT.json",
+      "line": 64,
+      "text": "    \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/FUTURE_A2_M2_CONTRACT_AUDIT.json",
+      "line": 33,
+      "text": "  \"Fresh_AC_evaluate_only\": true,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 143,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 617,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 1385,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 1667,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 2957,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 3155,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/M1_PREFLIGHT.json",
+      "line": 19,
+      "text": "    \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\cache\\\\v37_may_locked_final\\\\traffic\\\\shared\\\\traffic\\\\2025-05-01\\\\ROUTE_TABLE.json.gz\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/M1_ROBUST_VOLTAGE_REPORT.json",
+      "line": 22,
+      "text": "  \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/PIPELINE_STATUS.json",
+      "line": 8,
+      "text": "  \"Fresh_AC\": \"NOT_RUN\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_a1_bootstrap_m1_robust/VERIFICATION.json",
+      "line": 27,
+      "text": "    \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_compact_aidc_state_flow/FINAL_FLAGS.json",
+      "line": 25,
+      "text": "  \"FRESH_AC_PASS\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_compact_aidc_state_flow/FINAL_REVIEW_KO.md",
+      "line": 99,
+      "text": "49. freeze하지 않았으며 FINAL_RESPONSE_KERNEL_AUTHORITY.json은 생성하지 않았다.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_compact_aidc_state_flow/PR98_BYTE_SNAPSHOT.json",
+      "line": 99,
+      "text": "    \"relative\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_compact_aidc_state_flow/PR98_BYTE_SNAPSHOT.json",
+      "line": 100,
+      "text": "    \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\v42_ts_cc4_temporal_pr\\\\docs\\\\v42_final_integration\\\\FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_compact_aidc_state_flow/PR98_BYTE_SNAPSHOT.json",
+      "line": 603,
+      "text": "    \"relative\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_compact_aidc_state_flow/PR98_BYTE_SNAPSHOT.json",
+      "line": 604,
+      "text": "    \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\v42_ts_cc4_temporal_pr\\\\docs\\\\v42_may01_native_canary\\\\FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_compact_aidc_state_flow/PR98_BYTE_SNAPSHOT.json",
+      "line": 885,
+      "text": "    \"relative\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_compact_aidc_state_flow/PR98_BYTE_SNAPSHOT.json",
+      "line": 886,
+      "text": "    \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\v42_ts_cc4_temporal_pr\\\\docs\\\\v42_native_integration_mess_milp\\\\FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_compact_aidc_state_flow/PR98_BYTE_SNAPSHOT.json",
+      "line": 1173,
+      "text": "    \"relative\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_compact_aidc_state_flow/PR98_BYTE_SNAPSHOT.json",
+      "line": 1174,
+      "text": "    \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\v42_ts_cc4_temporal_pr\\\\docs\\\\v42_ts_boundary_a1_acceleration\\\\FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_compact_aidc_state_flow/PR98_BYTE_SNAPSHOT.json",
+      "line": 1371,
+      "text": "    \"relative\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_compact_aidc_state_flow/PR98_BYTE_SNAPSHOT.json",
+      "line": 1372,
+      "text": "    \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\v42_ts_cc4_temporal_pr\\\\docs\\\\v42_ts_cc4_temporal_refinement\\\\FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_compact_aidc_state_flow/PREREGISTRATION.json",
+      "line": 27,
+      "text": "  \"stage_order\": [\"A1\",\"M1\",\"A2\",\"M2\",\"Fresh_AC\",\"response_kernel\"],",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_compact_aidc_state_flow/VERIFICATION.json",
+      "line": 18,
+      "text": "  \"no_final_response_kernel\": true,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_exact_wan_factorized_milp/FINAL_FLAGS.json",
+      "line": 25,
+      "text": "  \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_exact_wan_factorized_milp/FINAL_VERDICT.json",
+      "line": 76,
+      "text": "    \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_exact_wan_factorized_milp/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 85,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_exact_wan_factorized_milp/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 225,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_exact_wan_factorized_milp/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 561,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_exact_wan_factorized_milp/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 749,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_exact_wan_factorized_milp/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 941,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_exact_wan_factorized_milp/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 1073,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_integration/DELIVERY_MANIFEST.json",
+      "line": 64,
+      "text": "      \"relative\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_integration/FINAL_FLAGS.json",
+      "line": 32,
+      "text": "  \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_integration/FINAL_FLAGS.json",
+      "line": 33,
+      "text": "  \"FINAL_RESPONSE_KERNEL_FROZEN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_integration/FINAL_REVIEW_KO.md",
+      "line": 97,
+      "text": "47. Accepted final plan이 없으므로 Fresh AC/OpenDSS 미실행이다. Vmin/Vmax/loading/new violations는 null이며 stale AC를 재사용하지 않았다.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_integration/FINAL_REVIEW_KO.md",
+      "line": 99,
+      "text": "48. Final response kernel은 생성·동결하지 않았다. `FINAL_RESPONSE_KERNEL_AUTHORITY.json`도 만들지 않았다.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_integration/FINAL_VERDICT.json",
+      "line": 18,
+      "text": "  \"Fresh_AC_run\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_integration/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 268,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_integration/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 550,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_integration/MAY01_FINAL_NATIVE_INPUT_BUNDLE.json",
+      "line": 86168,
+      "text": "    \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\cache\\\\v37_may_locked_final\\\\traffic\\\\shared\\\\traffic\\\\2025-05-01\\\\ROUTE_TABLE.json.gz\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_integration/MAY01_RUNTIME_INFERENCE_AUDIT.json",
+      "line": 14,
+      "text": "    \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v37_r4a_per_day_aidc\\\\days\\\\2025-05-01\\\\V37_R4A_D1_SNAPSHOT.parquet\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_integration/SOURCE_MANIFEST.json",
+      "line": 180,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v37_r4a_per_day_aidc\\\\days\\\\2025-05-01\\\\V37_R4A_D1_SNAPSHOT.parquet\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_integration/SOURCE_MANIFEST.json",
+      "line": 185,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\cache\\\\v37_may_locked_final\\\\traffic\\\\shared\\\\traffic\\\\2025-05-01\\\\ROUTE_TABLE.json.gz\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_integration/VERIFICATION.json",
+      "line": 38,
+      "text": "  \"Fresh_AC_PASS\": false",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_two_objective_contract/FINAL_FLAGS.json",
+      "line": 21,
+      "text": "  \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_two_objective_contract/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 86,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_two_objective_contract/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 402,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_two_objective_contract/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 738,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_two_objective_contract/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 926,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_two_objective_contract/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 1786,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_two_objective_contract/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 1918,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_two_objective_contract/PREREGISTRATION.json",
+      "line": 40,
+      "text": "  \"FRESH_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_final_two_objective_contract/finalize_receipts.py",
+      "line": 51,
+      "text": "        THREADS=1,GPU_USED=False,M1_RUN=False,A2_RUN=False,M2_RUN=False,FRESH_AC_RUN=False,IEEE8500_RUN=False,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_job_capability_joint_flexibility/EXISTING_FLEXIBILITY_IMPLEMENTATION_AUDIT.md",
+      "line": 15,
+      "text": "- `dayahead/v41r1/migration.py`: initial placement independently available to admitted in-day PENDING, fixed starts in V4; one first-checkpoint migration, full destination remaining work.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_job_capability_joint_flexibility/P1_P5_CURRENT_OBJECTIVE_AUDIT.md",
+      "line": 5,
+      "text": "`dayahead/v40a/grid.py:add_grid/evaluate_grid` defines rho from non-transformer phase-line loading. Transformer phase current and kVA/polygon rows are separate hard limits. Voltage is hard. This definition is preserved in the proposed interface: **MAX_LINE_LOADING**, transformer excluded from primary and separately constrained.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_job_capability_joint_flexibility/reproduce.py",
+      "line": 47,
+      "text": "        'dayahead/v41/objectives.py','dayahead/v40a/grid.py','pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json']]",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_b3_threshold_certificate/FINAL_FLAGS.json",
+      "line": 31,
+      "text": "  \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_b3_threshold_certificate/FINAL_FLAGS.json",
+      "line": 65,
+      "text": "  \"FRESH_AC_ACCEPTANCE_VOLTAGE\": [",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_b3_threshold_certificate/FINAL_VERDICT.json",
+      "line": 31,
+      "text": "  \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_b3_threshold_certificate/FINAL_VERDICT.json",
+      "line": 65,
+      "text": "  \"FRESH_AC_ACCEPTANCE_VOLTAGE\": [",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_b3_threshold_certificate/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 366,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_b3_threshold_certificate/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 682,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_b3_threshold_certificate/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 3242,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_b3_threshold_certificate/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 3430,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_b3_threshold_certificate/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 4290,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_b3_threshold_certificate/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 4422,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_integrality_gap_root_cause/BEST_VALIDATED_M1_PLAN_RECEIPT.json",
+      "line": 43,
+      "text": "      \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_integrality_gap_root_cause/FINAL_FLAGS.json",
+      "line": 151,
+      "text": "  \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_integrality_gap_root_cause/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 366,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_integrality_gap_root_cause/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 682,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_integrality_gap_root_cause/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 2702,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_integrality_gap_root_cause/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 2890,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_integrality_gap_root_cause/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 3750,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_integrality_gap_root_cause/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 3882,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_integrality_gap_root_cause/P_FIXED_ALL_OPTIMIZATION.json",
+      "line": 107,
+      "text": "      \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_integrality_gap_root_cause/P_FIXED_ROUTE_OPTIMIZATION.json",
+      "line": 109,
+      "text": "      \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_integrality_gap_root_cause/P_LATE_ROUTE_NEIGHBORHOOD_OPTIMIZATION.json",
+      "line": 110,
+      "text": "      \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_integrality_gap_root_cause/R_ACTIVE_OPTIMIZATION.json",
+      "line": 107,
+      "text": "      \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_integrality_gap_root_cause/R_BUFFER_OPTIMIZATION.json",
+      "line": 108,
+      "text": "      \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_integrality_gap_root_cause/R_ROUTE_ONLY_OPTIMIZATION.json",
+      "line": 107,
+      "text": "      \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_late_window_certificate_mipstart/FINAL_FLAGS.json",
+      "line": 29,
+      "text": "  \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_late_window_certificate_mipstart/FINAL_FLAGS.json",
+      "line": 31,
+      "text": "  \"FINAL_RESPONSE_KERNEL_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_late_window_certificate_mipstart/FINAL_FLAGS.json",
+      "line": 48,
+      "text": "  \"ACTUAL_FRESH_ACCEPTANCE_VOLTAGE\": [",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_late_window_certificate_mipstart/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 366,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_late_window_certificate_mipstart/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 682,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_late_window_certificate_mipstart/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 3042,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_late_window_certificate_mipstart/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 3230,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_late_window_certificate_mipstart/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 4090,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_late_window_certificate_mipstart/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 4222,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_late_window_certificate_mipstart/MIP_START_GRID_VALIDATION.json",
+      "line": 24,
+      "text": "    \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_late_window_certificate_mipstart/MIP_START_NATIVE_ACCEPTANCE.json",
+      "line": 61,
+      "text": "      \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_late_window_certificate_mipstart/prepare_before_scope_correction/MIP_START_GRID_VALIDATION.json",
+      "line": 24,
+      "text": "    \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_relaxation_strengthening/FINAL_FLAGS.json",
+      "line": 71,
+      "text": "  \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_relaxation_strengthening/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 365,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_relaxation_strengthening/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 681,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_relaxation_strengthening/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 1897,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_relaxation_strengthening/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 2085,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_relaxation_strengthening/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 2945,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_relaxation_strengthening/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 3077,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_relaxation_strengthening/M1_ROBUST_VOLTAGE_REPORT.json",
+      "line": 25,
+      "text": "    \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_relaxation_strengthening/PR108_MIP_START_RECEIPT.json",
+      "line": 38,
+      "text": "      \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_relaxation_strengthening/PR108_MIP_START_RECEIPT.json",
+      "line": 86,
+      "text": "    \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_cut_exit/CP0_ROBUST_VOLTAGE_REPORT.json",
+      "line": 22,
+      "text": "  \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_cut_exit/FINAL_FLAGS.json",
+      "line": 75,
+      "text": "  \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_cut_exit/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 366,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_cut_exit/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 682,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_cut_exit/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 1590,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_cut_exit/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 1778,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_cut_exit/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 2638,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_cut_exit/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 2770,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_cut_exit/M1_ROBUST_VOLTAGE_REPORT.json",
+      "line": 22,
+      "text": "  \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_cut_exit/PR107_MIP_START_VALIDATION.json",
+      "line": 37,
+      "text": "    \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_cut_exit/PROOF_AUTO_ROBUST_VOLTAGE_REPORT.json",
+      "line": 22,
+      "text": "  \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_cut_exit/PROOF_DG0_ROBUST_VOLTAGE_REPORT.json",
+      "line": 22,
+      "text": "  \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_lp_sparse_compression/FINAL_FLAGS.json",
+      "line": 61,
+      "text": "  \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_lp_sparse_compression/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 366,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_lp_sparse_compression/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 682,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_lp_sparse_compression/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 1194,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_lp_sparse_compression/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 1382,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_lp_sparse_compression/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 2242,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_lp_sparse_compression/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 2374,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_lp_sparse_compression/M1_ROBUST_VOLTAGE_NATIVE_AUX_REPORT.json",
+      "line": 22,
+      "text": "  \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_lp_sparse_compression/M1_ROBUST_VOLTAGE_REPORT.json",
+      "line": 22,
+      "text": "  \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_root_lp_sparse_compression/PR106_M1_INCUMBENT_RECEIPT.json",
+      "line": 35,
+      "text": "    \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_spatial_epigraph_strengthening/FINAL_FLAGS.json",
+      "line": 76,
+      "text": "  \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_spatial_epigraph_strengthening/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 365,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_spatial_epigraph_strengthening/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 681,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_spatial_epigraph_strengthening/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 2261,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_spatial_epigraph_strengthening/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 2449,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_spatial_epigraph_strengthening/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 3309,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_spatial_epigraph_strengthening/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 3441,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_m1_spatial_epigraph_strengthening/M1_ROBUST_VOLTAGE_REPORT.json",
+      "line": 27,
+      "text": "    \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/DELIVERY_MANIFEST.json",
+      "line": 35,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/EXACT_SOURCE_PATH_RECOVERY.json",
+      "line": 4,
+      "text": "      \"original\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\MobileESS_v28r2_heavy_backend\\\\dayahead\\\\artifacts\\\\v16_2\\\\Generated_ThreePhase_PCC_v4.dss\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/EXACT_SOURCE_PATH_RECOVERY.json",
+      "line": 6,
+      "text": "        \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v35r3e_r1_beam\\\\dayahead\\\\artifacts\\\\v16_2\\\\Generated_ThreePhase_PCC_v4.dss\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/EXACT_SOURCE_PATH_RECOVERY.json",
+      "line": 17,
+      "text": "      \"original\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\MobileESS_v28r2_heavy_backend\\\\dayahead\\\\artifacts\\\\v16_2\\\\Generated_ThreePhase_PCC_v4.dss\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/EXACT_SOURCE_PATH_RECOVERY.json",
+      "line": 19,
+      "text": "        \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v35r3e_r1_beam\\\\dayahead\\\\artifacts\\\\v16_2\\\\Generated_ThreePhase_PCC_v4.dss\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/EXACT_SOURCE_PATH_RECOVERY.json",
+      "line": 30,
+      "text": "      \"original\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\MobileESS_v28r2_heavy_backend\\\\dayahead\\\\artifacts\\\\v16_2\\\\Generated_ThreePhase_PCC_v4.dss\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/EXACT_SOURCE_PATH_RECOVERY.json",
+      "line": 32,
+      "text": "        \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v35r3e_r1_beam\\\\dayahead\\\\artifacts\\\\v16_2\\\\Generated_ThreePhase_PCC_v4.dss\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/EXACT_SOURCE_PATH_RECOVERY.json",
+      "line": 56,
+      "text": "      \"original\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\v28r2\\\\opendss_backend.py\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/EXACT_SOURCE_PATH_RECOVERY.json",
+      "line": 58,
+      "text": "        \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v41r2_780gpu_capacity_rebase\\\\dayahead\\\\v28r2\\\\opendss_backend.py\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/EXACT_SOURCE_PATH_RECOVERY.json",
+      "line": 82,
+      "text": "      \"original\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\grid_background_v16_2.py\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/EXACT_SOURCE_PATH_RECOVERY.json",
+      "line": 84,
+      "text": "        \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v41r2_780gpu_capacity_rebase\\\\dayahead\\\\grid_background_v16_2.py\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/EXACT_SOURCE_PATH_RECOVERY.json",
+      "line": 121,
+      "text": "      \"original\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\v39a\\\\contracts.py\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/EXACT_SOURCE_PATH_RECOVERY.json",
+      "line": 123,
+      "text": "        \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v41r2_780gpu_capacity_rebase\\\\dayahead\\\\v39a\\\\contracts.py\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/EXACT_SOURCE_PATH_RECOVERY.json",
+      "line": 136,
+      "text": "        \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v41r2_780gpu_capacity_rebase\\\\dayahead\\\\artifacts\\\\v41r2_metadata_draft01\\\\original_source\\\\dayahead\\\\v39a\\\\power.py\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/FINAL_FLAGS.json",
+      "line": 33,
+      "text": "  \"FRESH_AC_MAY01_PASS\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/FINAL_REVIEW_KO.md",
+      "line": 95,
+      "text": "47. 아니오. 최종 accepted candidate가 없어 Fresh OpenDSS를 실행하지 않았다. PASS=false는 미검증을 뜻한다.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/FINAL_VERDICT.json",
+      "line": 31,
+      "text": "  \"Fresh_AC\": \"NOT_RUN_NO_FEASIBLE_FINAL_SCHEDULE\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_COMPUTATIONAL_VERDICT.json",
+      "line": 31,
+      "text": "  \"Fresh_AC\": \"NOT_RUN_NO_FEASIBLE_FINAL_SCHEDULE\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_BUNDLE.json",
+      "line": 64731,
+      "text": "    \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\cache\\\\v37_may_locked_final\\\\traffic\\\\shared\\\\traffic\\\\2025-05-01\\\\ROUTE_TABLE.json.gz\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 32,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v41r2_780gpu_capacity_rebase\\\\dayahead\\\\artifacts\\\\v41r2_780gpu_capacity_rebase\\\\V41R2_780GPU_CAPACITY_AUTHORITY.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 41,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v41r2_780gpu_capacity_rebase\\\\dayahead\\\\artifacts\\\\v41r2_780gpu_capacity_rebase\\\\V41R2_LOGICAL_RACK_AUTHORITY.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 77,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v37_r4a_per_day_aidc\\\\days\\\\2025-05-01\\\\V37_R4A_D1_SNAPSHOT.parquet\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 140,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\IEEE123Master.dss\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 149,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v35r3e_r1_beam\\\\dayahead\\\\artifacts\\\\v16_2\\\\Generated_ThreePhase_PCC_v4.dss\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 185,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\Generated_Planning_Line_Ratings_u080.dss\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 194,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\Generated_ThreePhase_PCC_v3.dss\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 203,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\IEEE123Loads.DSS\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 212,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\IEEE123Regulators.DSS\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 221,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\IEEELineCodes.DSS\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 230,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\tmp_env_1.npz\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 239,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\tmp_env_3.npz\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 248,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\tmp_env_5.npz\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 311,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\power_v70_p4f_contract\\\\opendss_runtime_adapter.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 383,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v41r2_780gpu_capacity_rebase\\\\dayahead\\\\v28r2\\\\opendss_backend.py\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 473,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v41r2_780gpu_capacity_rebase\\\\dayahead\\\\grid_background_v16_2.py\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 482,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v24t_thermal_aware_aidc\\\\V24T_C1_QUASISTATIC_MODEL.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 509,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v41r2_780gpu_capacity_rebase\\\\dayahead\\\\v39a\\\\contracts.py\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 518,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v41r2_780gpu_capacity_rebase\\\\dayahead\\\\artifacts\\\\v41r2_metadata_draft01\\\\original_source\\\\dayahead\\\\v39a\\\\power.py\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 527,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\cache\\\\v37_may_locked_final\\\\traffic\\\\shared\\\\traffic\\\\2025-05-01\\\\ROUTE_TABLE.json.gz\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/MAY01_NATIVE_INPUT_MANIFEST.json",
+      "line": 536,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\cache\\\\v37_may_locked_final\\\\traffic\\\\shared\\\\traffic\\\\2025-05-01\\\\TRAFFIC_FORECAST.npz\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 31,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v41r2_780gpu_capacity_rebase\\\\dayahead\\\\artifacts\\\\v41r2_780gpu_capacity_rebase\\\\V41R2_780GPU_CAPACITY_AUTHORITY.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 40,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v41r2_780gpu_capacity_rebase\\\\dayahead\\\\artifacts\\\\v41r2_780gpu_capacity_rebase\\\\V41R2_LOGICAL_RACK_AUTHORITY.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 76,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v37_r4a_per_day_aidc\\\\days\\\\2025-05-01\\\\V37_R4A_D1_SNAPSHOT.parquet\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 139,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\IEEE123Master.dss\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 148,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v35r3e_r1_beam\\\\dayahead\\\\artifacts\\\\v16_2\\\\Generated_ThreePhase_PCC_v4.dss\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 184,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\Generated_Planning_Line_Ratings_u080.dss\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 193,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\Generated_ThreePhase_PCC_v3.dss\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 202,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\IEEE123Loads.DSS\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 211,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\IEEE123Regulators.DSS\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 220,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\IEEELineCodes.DSS\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 229,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\tmp_env_1.npz\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 238,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\tmp_env_3.npz\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 247,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\opendss_assets\\\\tmp_env_5.npz\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 310,
+      "text": "      \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\문서\\\\ChatGPT\\\\Mobile ESS 2\\\\tmp\\\\c12_exact_sources_repo_cleanup\\\\c12_exact_sources\\\\v2038_parent\\\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\\\reference\\\\power_v70_p4f_contract\\\\opendss_runtime_adapter.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 382,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v41r2_780gpu_capacity_rebase\\\\dayahead\\\\v28r2\\\\opendss_backend.py\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 472,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v41r2_780gpu_capacity_rebase\\\\dayahead\\\\grid_background_v16_2.py\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 481,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\artifacts\\\\v24t_thermal_aware_aidc\\\\V24T_C1_QUASISTATIC_MODEL.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 508,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v41r2_780gpu_capacity_rebase\\\\dayahead\\\\v39a\\\\contracts.py\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 517,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v41r2_780gpu_capacity_rebase\\\\dayahead\\\\artifacts\\\\v41r2_metadata_draft01\\\\original_source\\\\dayahead\\\\v39a\\\\power.py\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 526,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\cache\\\\v37_may_locked_final\\\\traffic\\\\shared\\\\traffic\\\\2025-05-01\\\\ROUTE_TABLE.json.gz\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/SOURCE_MANIFEST.json",
+      "line": 535,
+      "text": "      \"path\": \"C:\\\\codex_mobileess_workspace\\\\MobileESS_v40a_bounded_iterative_coopt\\\\dayahead\\\\cache\\\\v37_may_locked_final\\\\traffic\\\\shared\\\\traffic\\\\2025-05-01\\\\TRAFFIC_FORECAST.npz\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_may01_native_canary/VERIFICATION.json",
+      "line": 14,
+      "text": "  \"Fresh_AC_executed\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_benders_v2_fullscale_loop/PR116_BASE_RECEIPT.json",
+      "line": 367,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_benders_v2_fullscale_loop/PR116_BASE_RECEIPT.json",
+      "line": 683,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_benders_v2_fullscale_loop/PR116_BASE_RECEIPT.json",
+      "line": 3463,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_benders_v2_fullscale_loop/PR116_BASE_RECEIPT.json",
+      "line": 5595,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_benders_v2_fullscale_loop/PR116_BASE_RECEIPT.json",
+      "line": 6455,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_benders_v2_fullscale_loop/PR116_BASE_RECEIPT.json",
+      "line": 6587,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_benders_v2_native_recourse/PR115_BASE_RECEIPT.json",
+      "line": 367,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_benders_v2_native_recourse/PR115_BASE_RECEIPT.json",
+      "line": 683,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_benders_v2_native_recourse/PR115_BASE_RECEIPT.json",
+      "line": 3463,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_benders_v2_native_recourse/PR115_BASE_RECEIPT.json",
+      "line": 3899,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_benders_v2_native_recourse/PR115_BASE_RECEIPT.json",
+      "line": 4759,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_benders_v2_native_recourse/PR115_BASE_RECEIPT.json",
+      "line": 4891,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_exact_benders/FINAL_FLAGS.json",
+      "line": 15,
+      "text": "  \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_exact_benders/PR114_BASE_RECEIPT.json",
+      "line": 367,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_exact_benders/PR114_BASE_RECEIPT.json",
+      "line": 683,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_exact_benders/PR114_BASE_RECEIPT.json",
+      "line": 3463,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_exact_benders/PR114_BASE_RECEIPT.json",
+      "line": 3651,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_exact_benders/PR114_BASE_RECEIPT.json",
+      "line": 4511,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_exact_benders/PR114_BASE_RECEIPT.json",
+      "line": 4643,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_exact_benders/PREREGISTRATION.json",
+      "line": 30,
+      "text": "  \"eventual_fresh_AC\": [",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_mess_exact_benders/WARM_START_MAPPING.json",
+      "line": 45,
+      "text": "      \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/DELIVERY_MANIFEST.json",
+      "line": 52,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/EVENT_ACTUAL_CONTROL_CONTRACT.md",
+      "line": 14,
+      "text": "KernelAnchor requires exact service/reference/PQ/grid identities. Prior April prefix evidence failed active scoring; do not reuse its old zero-MESS kernel or call a protocol test an active-policy pass. Regeneration must follow final service/reference/PQ/grid freeze. Unknown temporal/migration authority stays missing, existing known-job R0/checkpoint semantics remain unchanged. No future actual run",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/EVENT_ACTUAL_CONTROL_CONTRACT.md",
+      "line": 16,
+      "text": "Accepted Actual output requires fresh exact OpenDSS convergence, hard voltage/line current/transformer current and kVA checks, with matching schedule and grid hash. `require_fresh_ac` is a validation boundary, not an OpenDSS producer. The historical native producer is identified in the source audit; it was not run against an unbound model.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/FINAL_FLAGS.json",
+      "line": 37,
+      "text": "  \"FRESH_AC_CANARY_PASS\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/FINAL_REVIEW_KO.md",
+      "line": 5,
+      "text": "1. 최신 local generic V42 canonical/checkpoint_planning/blocks/joint_mobility, V40A grid, V41 Fresh OpenDSS 및 PR90/79/75를 SHA로 추적했다. NATIVE_SOURCE_AUTHORITY_AUDIT 참조.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/FINAL_REVIEW_KO.md",
+      "line": 63,
+      "text": "30. 미실행. OpenDSS 설치와 receipt rejection unit test는 Fresh AC PASS가 아니다. FRESH_AC_CANARY_PASS=false.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/FINAL_VERDICT.json",
+      "line": 4,
+      "text": "  \"fresh_AC_status\": \"NOT_RUN_NO_ACCEPTED_NATIVE_CANARY\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json",
+      "line": 5,
+      "text": "  \"OpenDSS_installed\": true,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/LOCAL_REPAIR_PQ_CONTRACT.md",
+      "line": 9,
+      "text": "Output is PROPOSAL_REQUIRES_FRESH_AC, never an automatically executed dispatch. Native current-state adapter, margin/trigger/reserve authorities and Fresh validation remain required. Unit tests demonstrate P/Q changes with compensating SOC on synthetic data only.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/NATIVE_SOURCE_AUTHORITY_AUDIT.md",
+      "line": 14,
+      "text": "| Fresh AC | same historical tree `dayahead/v41/execution.py` and `dayahead/v28r2/opendss_backend.py` | Fresh OpenDSS, corrected physical mapping/readback, convergence/voltage/line/transformer validation. New coordinator requires a matching real receipt; validator tests do not invoke OpenDSS. |",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/NATIVE_SOURCE_AUTHORITY_AUDIT.md",
+      "line": 15,
+      "text": "| Checkpoint/WAN | `dayahead/v41r1/migration.py`, `migration_admission.py`, `terminal.py`, `dayahead/v40g/domain.py`, PR90 checkpoint generator | Modeled payload/prestaging/rack/path assumptions, one migration/episode, 900 s controls, 1800 s physical checkpoint phase from elapsed; not measured Kestrel capability. |",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/NATIVE_SOURCE_AUTHORITY_AUDIT.md",
+      "line": 16,
+      "text": "| Snapshots | `dayahead/v37/aidc_materializer.py`, PR79 causal ledger | Causal observed membership and requested-remaining baseline are historical inputs; independent snapshots do not prove counterfactual sequential execution. |",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/OBJECTIVE_NATIVE_BINDING.md",
+      "line": 9,
+      "text": "A1→M1→A2→M2 is retained with explicit state handoff. A2 starts from mapped A1 values; M2 starts from mapped M1 values. M2 no-regret compares candidate and M1 under the same fixed A2 state. No monolithic AIDC+MESS model. Final backend composition and matching Fresh OpenDSS must pass before an operating schedule is accepted.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/README.md",
+      "line": 4,
+      "text": "The implementation advances the native physical architecture, but **native scientific activation remains BLOCKED**. No native day or Fresh OpenDSS solve was run; native timing/gap cells are null. The preregistered day remains 2025-04-01, at most one day and 600 external wall seconds per block.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/VERIFICATION.json",
+      "line": 10,
+      "text": "  \"Fresh_AC_run\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/audit.py",
+      "line": 172,
+      "text": "    dump('FRESH_AC_CANARY_VALIDATION.json',dict(PASS=False,status='NOT_RUN_NO_ACCEPTED_NATIVE_CANARY',",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/audit.py",
+      "line": 173,
+      "text": "        accepted_native_schedules=0,OpenDSS_installed=True,reason='Final service/reference/PQ/grid anchor not frozen; stale April reference kernel prohibited',",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/verify_delivery.py",
+      "line": 13,
+      "text": "FRESH_AC_CANARY_VALIDATION.json FINAL_FLAGS.json FINAL_VERDICT.json FINAL_REVIEW_KO.md SOURCE_MANIFEST.json",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/verify_delivery.py",
+      "line": 29,
+      "text": "    for k in ('FULL_IEEE123_ROUND_RUN','IEEE8500_FULL_RUN','FLEX_SENSITIVITY_RUN','NEW_MAY_POLICY_EVALUATION','SEMANTIC_ML_MERGED','FRESH_AC_CANARY_PASS','V42_PHYSICAL_OPTIMIZER_READY'):",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/verify_delivery.py",
+      "line": 50,
+      "text": "        tests_passed=sum(int(s.attrib['tests']) for s in suites),native_canary_run=False,Fresh_AC_run=False,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/write_report.py",
+      "line": 34,
+      "text": "The implementation advances the native physical architecture, but **native scientific activation remains BLOCKED**. No native day or Fresh OpenDSS solve was run; native timing/gap cells are null. The preregistered day remains 2025-04-01, at most one day and 600 external wall seconds per block.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/write_report.py",
+      "line": 69,
+      "text": "| Fresh AC | same historical tree `dayahead/v41/execution.py` and `dayahead/v28r2/opendss_backend.py` | Fresh OpenDSS, corrected physical mapping/readback, convergence/voltage/line/transformer validation. New coordinator requires a matching real receipt; validator tests do not invoke OpenDSS. |",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/write_report.py",
+      "line": 70,
+      "text": "| Checkpoint/WAN | `dayahead/v41r1/migration.py`, `migration_admission.py`, `terminal.py`, `dayahead/v40g/domain.py`, PR90 checkpoint generator | Modeled payload/prestaging/rack/path assumptions, one migration/episode, 900 s controls, 1800 s physical checkpoint phase from elapsed; not measured Kestrel capability. |",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/write_report.py",
+      "line": 71,
+      "text": "| Snapshots | `dayahead/v37/aidc_materializer.py`, PR79 causal ledger | Causal observed membership and requested-remaining baseline are historical inputs; independent snapshots do not prove counterfactual sequential execution. |",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/write_report.py",
+      "line": 163,
+      "text": "A1→M1→A2→M2 is retained with explicit state handoff. A2 starts from mapped A1 values; M2 starts from mapped M1 values. M2 no-regret compares candidate and M1 under the same fixed A2 state. No monolithic AIDC+MESS model. Final backend composition and matching Fresh OpenDSS must pass before an operating schedule is accepted.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/write_report.py",
+      "line": 184,
+      "text": "KernelAnchor requires exact service/reference/PQ/grid identities. Prior April prefix evidence failed active scoring; do not reuse its old zero-MESS kernel or call a protocol test an active-policy pass. Regeneration must follow final service/reference/PQ/grid freeze. Unknown temporal/migration authority stays missing, existing known-job R0/checkpoint semantics remain unchanged. No future actual run",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/write_report.py",
+      "line": 186,
+      "text": "Accepted Actual output requires fresh exact OpenDSS convergence, hard voltage/line current/transformer current and kVA checks, with matching schedule and grid hash. `require_fresh_ac` is a validation boundary, not an OpenDSS producer. The historical native producer is identified in the source audit; it was not run against an unbound model.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/write_report.py",
+      "line": 197,
+      "text": "Output is PROPOSAL_REQUIRES_FRESH_AC, never an automatically executed dispatch. Native current-state adapter, margin/trigger/reserve authorities and Fresh validation remain required. Unit tests demonstrate P/Q changes with compensating SOC on synthetic data only.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/write_report.py",
+      "line": 211,
+      "text": "        FRESH_AC_CANARY_PASS=False,V42_NATIVE_BLOCK_RUNTIME_FEASIBLE=False,V42_PHYSICAL_OPTIMIZER_READY=False,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/write_report.py",
+      "line": 220,
+      "text": "        native_canary_status='NOT_RUN_SOURCE_GATE_FAILED',fresh_AC_status='NOT_RUN_NO_ACCEPTED_NATIVE_CANARY',",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/write_report.py",
+      "line": 231,
+      "text": "        '최신 local generic V42 canonical/checkpoint_planning/blocks/joint_mobility, V40A grid, V41 Fresh OpenDSS 및 PR90/79/75를 SHA로 추적했다. NATIVE_SOURCE_AUTHORITY_AUDIT 참조.',",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_native_integration_mess_milp/write_report.py",
+      "line": 260,
+      "text": "        '미실행. OpenDSS 설치와 receipt rejection unit test는 Fresh AC PASS가 아니다. FRESH_AC_CANARY_PASS=false.',",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_compression_a1/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 85,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_compression_a1/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 401,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_compression_a1/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 737,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_compression_a1/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 925,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_compression_a1/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 1117,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_compression_a1/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 1249,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_sparse_compression/FINAL_FLAGS.json",
+      "line": 53,
+      "text": "  \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_sparse_compression/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 85,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_sparse_compression/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 401,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_sparse_compression/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 737,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_sparse_compression/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 925,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_sparse_compression/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 1117,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_sparse_compression/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 1249,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_sparse_compression/WIP_PRESERVATION_MANIFEST.json",
+      "line": 85,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_sparse_compression/WIP_PRESERVATION_MANIFEST.json",
+      "line": 401,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_sparse_compression/WIP_PRESERVATION_MANIFEST.json",
+      "line": 737,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_sparse_compression/WIP_PRESERVATION_MANIFEST.json",
+      "line": 925,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_sparse_compression/WIP_PRESERVATION_MANIFEST.json",
+      "line": 1189,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_root_lp_sparse_compression/WIP_PRESERVATION_MANIFEST.json",
+      "line": 1321,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_boundary_a1_acceleration/FINAL_FLAGS.json",
+      "line": 32,
+      "text": "  \"FRESH_AC_PASS\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_boundary_a1_acceleration/FINAL_REVIEW_KO.md",
+      "line": 97,
+      "text": "48. freeze하지 않았다. FINAL_RESPONSE_KERNEL_AUTHORITY.json도 없다.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_boundary_a1_acceleration/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 16,
+      "text": "  \"FRESH_AC_NOT_RUN_preserved\": true",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_boundary_a1_acceleration/PR97_BYTE_SNAPSHOT.json",
+      "line": 99,
+      "text": "    \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\\\ubb38\\uc11c\\\\ChatGPT\\\\Mobile ESS 2\\\\v42_ts_cc4_temporal_pr\\\\docs\\\\v42_final_integration\\\\FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_boundary_a1_acceleration/PR97_BYTE_SNAPSHOT.json",
+      "line": 102,
+      "text": "    \"relative\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\"",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_boundary_a1_acceleration/PR97_BYTE_SNAPSHOT.json",
+      "line": 603,
+      "text": "    \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\\\ubb38\\uc11c\\\\ChatGPT\\\\Mobile ESS 2\\\\v42_ts_cc4_temporal_pr\\\\docs\\\\v42_may01_native_canary\\\\FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_boundary_a1_acceleration/PR97_BYTE_SNAPSHOT.json",
+      "line": 606,
+      "text": "    \"relative\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\"",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_boundary_a1_acceleration/PR97_BYTE_SNAPSHOT.json",
+      "line": 885,
+      "text": "    \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\\\ubb38\\uc11c\\\\ChatGPT\\\\Mobile ESS 2\\\\v42_ts_cc4_temporal_pr\\\\docs\\\\v42_native_integration_mess_milp\\\\FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_boundary_a1_acceleration/PR97_BYTE_SNAPSHOT.json",
+      "line": 888,
+      "text": "    \"relative\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\"",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_boundary_a1_acceleration/PR97_BYTE_SNAPSHOT.json",
+      "line": 1131,
+      "text": "    \"path\": \"C:\\\\Users\\\\kjw39\\\\OneDrive\\\\\\ubb38\\uc11c\\\\ChatGPT\\\\Mobile ESS 2\\\\v42_ts_cc4_temporal_pr\\\\docs\\\\v42_ts_cc4_temporal_refinement\\\\FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_boundary_a1_acceleration/PR97_BYTE_SNAPSHOT.json",
+      "line": 1134,
+      "text": "    \"relative\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\"",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_cc4_temporal_refinement/FINAL_FLAGS.json",
+      "line": 28,
+      "text": "  \"FRESH_AC_PASS\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_cc4_temporal_refinement/FINAL_FLAGS.json",
+      "line": 29,
+      "text": "  \"FINAL_RESPONSE_KERNEL_FROZEN\": false",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_cc4_temporal_refinement/FINAL_REVIEW_KO.md",
+      "line": 83,
+      "text": "41. Fresh OpenDSS AC는 NOT_RUN이다. accepted four-stage plan이 없다.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_cc4_temporal_refinement/FINAL_REVIEW_KO.md",
+      "line": 85,
+      "text": "42. 최종 response kernel을 만들거나 freeze하지 않았다. FINAL_RESPONSE_KERNEL_AUTHORITY.json은 없다.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_cc4_temporal_refinement/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 86,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_cc4_temporal_refinement/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 506,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_cc4_temporal_refinement/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 741,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_ts_cc4_temporal_refinement/VERIFICATION.json",
+      "line": 24,
+      "text": "  \"no_final_response_kernel\": true,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_voltage_margin_a1_m1/A1_VOLTAGE_MARGIN_REPORT.json",
+      "line": 277,
+      "text": "  \"Fresh_AC_RUN\": false",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_voltage_margin_a1_m1/ACTUAL_LOCAL_REPAIR_SUPERSESSION.json",
+      "line": 13,
+      "text": "  \"Fresh_AC_required\": true,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_voltage_margin_a1_m1/FINAL_FLAGS.json",
+      "line": 23,
+      "text": "  \"FRESH_AC_REQUIRED\": true,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_voltage_margin_a1_m1/FINAL_FLAGS.json",
+      "line": 58,
+      "text": "  \"FRESH_AC_RUN\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_voltage_margin_a1_m1/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 137,
+      "text": "      \"path\": \"docs/v42_compact_aidc_state_flow/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_voltage_margin_a1_m1/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 611,
+      "text": "      \"path\": \"docs/v42_final_integration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_voltage_margin_a1_m1/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 1379,
+      "text": "      \"path\": \"docs/v42_may01_native_canary/FRESH_AC_MAY01_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_voltage_margin_a1_m1/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 1661,
+      "text": "      \"path\": \"docs/v42_native_integration_mess_milp/FRESH_AC_CANARY_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_voltage_margin_a1_m1/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 2951,
+      "text": "      \"path\": \"docs/v42_ts_boundary_a1_acceleration/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_voltage_margin_a1_m1/LEGACY_PRESERVATION_AUDIT.json",
+      "line": 3149,
+      "text": "      \"path\": \"docs/v42_ts_cc4_temporal_refinement/FRESH_AC_VALIDATION.json\",",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_voltage_margin_a1_m1/PIPELINE_STATUS.json",
+      "line": 9,
+      "text": "  \"Fresh_AC\": false,",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_voltage_margin_a1_m1/PROBLEM13_PLANNING_ROBUSTNESS_CONTRACT.md",
+      "line": 3,
+      "text": "MESS route, movement, charging, discharging, Q and SOC remain joint native MILP decisions. Actual local P, Q and P/Q repair are removed. The frozen route/movement/P/Q is replayed as-is. Fresh OpenDSS must independently pass convergence, 0.95–1.05 physical voltage, line current, transformer current and kVA. A failure remains FAIL; no rescue, emergency full reoptimization or margin fallback.",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "docs/v42_voltage_margin_a1_m1/VOLTAGE_MARGIN_OPERABILITY_REPORT.json",
+      "line": 278,
+      "text": "    \"Fresh_AC_RUN\": false",
+      "classification": "PRESERVED_PRIOR_EVIDENCE_OR_REPORT"
+    },
+    {
+      "path": "v42_benders/preregister.py",
+      "line": 20,
+      "text": "        planning_voltage=[.955,1.045], eventual_fresh_AC=[.95,1.05], actual_PQ_repair=False,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_benders/report.py",
+      "line": 35,
+      "text": "        A1_RUN=False,A2_RUN=False,M2_RUN=False,ACTUAL_RUN=False,FRESH_AC_RUN=False,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_bootstrap/grid.py",
+      "line": 35,
+      "text": "    ga=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_bootstrap/grid.py",
+      "line": 77,
+      "text": "                Fresh_AC=False,voltage_fallback=False)",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_bootstrap/report.py",
+      "line": 56,
+      "text": "         immutable_replay=True,Fresh_AC_evaluate_only=True,failed_AC_fallback=False,Actual_RUN=False,Fresh_AC_RUN=False))",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_bootstrap/report.py",
+      "line": 62,
+      "text": "         RUN=False,validated_production_A2=False,validated_production_M2=False,Actual_PQ_frozen=True,Fresh_AC_evaluate_only=True,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_bootstrap/report.py",
+      "line": 188,
+      "text": "         A1_RUN=arun,M1_RUN=mrun,A2_RUN=False,M2_RUN=False,ACTUAL_RUN=False,FRESH_AC_RUN=False,IEEE8500_RUN=False)",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_bootstrap/report.py",
+      "line": 190,
+      "text": "    dump('PIPELINE_STATUS.json',dict(status=stopped,A1='A1_BOOTSTRAP_ACCEPTED' if aok else 'NOT_ACCEPTED',M1=stopped,A2='NOT_RUN',M2='NOT_RUN',Actual='NOT_RUN',Fresh_AC='NOT_RUN',Problem13=False))",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_bootstrap/report.py",
+      "line": 241,
+      "text": "      '먼저 M1 P1/P2 quality를 충족하는 accepted M1이 필요하다. 이어 A2 robust 재최적화·독립 검증, M2 full joint robust 최적화·검증, 최종 계획 동결, frozen Actual replay 및 독립 Fresh OpenDSS physical/line/transformer 검증이 남았다. Problem13=false.'",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_bootstrap/verify.py",
+      "line": 22,
+      "text": "    assert not any(f[k] for k in ('A2_RUN','M2_RUN','ACTUAL_RUN','FRESH_AC_RUN','IEEE8500_RUN','PROBLEM13_FINAL_VALIDATED','ACTUAL_LOCAL_PQ_REPAIR_ENABLED','ACTUAL_Q_CORRECTION_ENABLED','ACTUAL_P_CORRECTION_ENABLED'))",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_bootstrap/verify.py",
+      "line": 87,
+      "text": "         hash_handoff_PASS=bool(a['complete']),production_runs=dict(A1=f['A1_RUN'],M1=f['M1_RUN'],A2=False,M2=False,Actual=False,Fresh_AC=False,IEEE8500=False),",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_boundary/model.py",
+      "line": 38,
+      "text": "    authority=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_boundary/report.py",
+      "line": 75,
+      "text": "    dump('FRESH_AC_VALIDATION.json',dict(status='NOT_RUN',PASS=None,reason='NO_ACCEPTED_M2',stale_AC_reused=False,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_boundary/report.py",
+      "line": 85,
+      "text": "        ACCEPTED_NATIVE_PLAN=False,M1_RUN=False,A2_RUN=False,M2_RUN=False,FRESH_AC_PASS=False,RESPONSE_KERNEL_FROZEN=False)",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_boundary/report.py",
+      "line": 130,
+      "text": "        generation_timeout_preserved=True,M1_A2_M2_NOT_RUN_preserved=True,FRESH_AC_NOT_RUN_preserved=True))",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_boundary/report.py",
+      "line": 152,
+      "text": "        accepted_plan=False,no_response_kernel=not (OUT/'FINAL_RESPONSE_KERNEL_AUTHORITY.json').exists(),",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_boundary/report.py",
+      "line": 230,
+      "text": "        'freeze하지 않았다. FINAL_RESPONSE_KERNEL_AUTHORITY.json도 없다.',",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_boundary/verify.py",
+      "line": 12,
+      "text": "    require(not (OUT/'FINAL_RESPONSE_KERNEL_AUTHORITY.json').exists(),'NO_UNACCEPTED_RESPONSE_KERNEL')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_certificate/report.py",
+      "line": 98,
+      "text": "        PROBLEM13_FINAL_VALIDATED=False,A2_ALLOWED=False,A2_RUN=False,M2_RUN=False,ACTUAL_RUN=False,FRESH_AC_RUN=False,IEEE8500_RUN=False,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_certificate/report.py",
+      "line": 99,
+      "text": "        FINAL_RESPONSE_KERNEL_RUN=False,MAY_FULL_CAMPAIGN_RUN=False,SENSITIVITY_CAMPAIGN_RUN=False,NEW_ML_TRAINING=False,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_certificate/report.py",
+      "line": 102,
+      "text": "        TERMINAL_SOC_EQUALITY_RETAINED=True,PCS16_RETAINED=True,PLANNING_VOLTAGE=[.955,1.045],ACTUAL_FRESH_ACCEPTANCE_VOLTAGE=[.95,1.05],",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_certificate/verify.py",
+      "line": 104,
+      "text": "    assert not any(flags[k] for k in ['PRODUCTION_M1_RUN','PRODUCTION_M1_P1_ACCEPTED','P2_RUN','M1_ACCEPTED','PROBLEM13_FINAL_VALIDATED','A2_ALLOWED','A2_RUN','M2_RUN','ACTUAL_RUN','FRESH_AC_RUN','IEEE8500_RUN','ACTUAL_P_CORRECTION_ENABLED','ACTUAL_Q_CORRECTION_ENABLED','EXCLUDED_PROBLEMS_NEW_WORK'])",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_compact/native.py",
+      "line": 42,
+      "text": "    authority=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),digest(caps),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),voltage_for(stage).lower_squared,voltage_for(stage).upper_squared,True,stage=stage)",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_compact/report.py",
+      "line": 88,
+      "text": "    dump('FRESH_AC_VALIDATION.json',dict(status='NOT_RUN',PASS=None,reason='NO_ACCEPTED_M2',stale_AC_reused=False,response_kernel_created=False))",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_compact/report.py",
+      "line": 94,
+      "text": "        COMPACT_BUILD_COMPLETE=complete is not None,A1_OPTIMIZER_CALLED=optimizer_called,ACCEPTED_FOUR_STAGE_PLAN=False,FRESH_AC_PASS=False,RESPONSE_KERNEL_FROZEN=False,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_compact/report.py",
+      "line": 120,
+      "text": "        no_final_response_kernel=not (OUT/'FINAL_RESPONSE_KERNEL_AUTHORITY.json').exists(),",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_compact/report.py",
+      "line": 172,
+      "text": "        'freeze하지 않았으며 FINAL_RESPONSE_KERNEL_AUTHORITY.json은 생성하지 않았다.',",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_compact/verify.py",
+      "line": 11,
+      "text": "    require(not (OUT/'FINAL_RESPONSE_KERNEL_AUTHORITY.json').exists(),'NO_UNACCEPTED_KERNEL')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_cut_exit/proof_report.py",
+      "line": 53,
+      "text": "    flags=dict(BASE_PR=107,BASE_HEAD=BASE,SELECTED_FORMULATION='M1-F3',FORMULATION_CHANGED_THIS_TASK=False,SCIENTIFIC_PHYSICS_CHANGED=False,CANDIDATE_DOMAIN_CHANGED=False,A1_RERUN=False,A1_ANCHOR_REUSED=True,A1_OPTIMIZE_CALLS=0,METHOD=2,THREADS=1,GPU_USED=False,BASELINE_CUTPASSES='AUTO',BASELINE_REUSED=True,BASELINE_RERUN=False,CP0_RUN=True,CP0_PARTIAL=True,CP0_INTERRUPTED_AT_USER_REQUEST=True,CP1",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_cut_exit/proof_verify.py",
+      "line": 42,
+      "text": "    assert not any(flags[k] for k in ['FORMULATION_CHANGED_THIS_TASK','SCIENTIFIC_PHYSICS_CHANGED','CANDIDATE_DOMAIN_CHANGED','A1_RERUN','GPU_USED','BASELINE_RERUN','CP1_RUN','ACTUAL_P_CORRECTION_ENABLED','ACTUAL_Q_CORRECTION_ENABLED','ACTUAL_LOCAL_REPAIR_ENABLED','PROBLEM13_FINAL_VALIDATED','A2_RUN','M2_RUN','ACTUAL_RUN','FRESH_AC_RUN','IEEE8500_RUN','HEURISTIC_IMPROVEMENT_ACCEPTANCE_BASIS','FIRS",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_cut_exit/report.py",
+      "line": 47,
+      "text": "    flags=dict(BASE_PR=107,BASE_HEAD=BASE,SELECTED_FORMULATION='M1-F3',FORMULATION_CHANGED_THIS_TASK=False,SCIENTIFIC_PHYSICS_CHANGED=False,CANDIDATE_DOMAIN_CHANGED=False,A1_RERUN=False,A1_OPTIMIZE_CALLS=0,A1_ANCHOR_REUSED=True,METHOD=2,THREADS=1,GPU_USED=False,BASELINE_CUTPASSES='AUTO',BASELINE_REUSED=True,BASELINE_RERUN=False,CP0_RUN=True,CP1_RUN=True,SELECTED_CUTPASSES=policy['CutPasses'],PRODU",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_cut_exit/verify.py",
+      "line": 35,
+      "text": "    assert not any(flags[k] for k in ['FORMULATION_CHANGED_THIS_TASK','SCIENTIFIC_PHYSICS_CHANGED','CANDIDATE_DOMAIN_CHANGED','A1_RERUN','GPU_USED','BASELINE_RERUN','ACTUAL_P_CORRECTION_ENABLED','ACTUAL_Q_CORRECTION_ENABLED','ACTUAL_LOCAL_REPAIR_ENABLED','PROBLEM13_FINAL_VALIDATED','A2_RUN','M2_RUN','ACTUAL_RUN','FRESH_AC_RUN','IEEE8500_RUN'])",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_epigraph/report.py",
+      "line": 44,
+      "text": "        ACTUAL_Q_CORRECTION_ENABLED=False,ACTUAL_P_CORRECTION_ENABLED=False,A2_RUN=False,M2_RUN=False,ACTUAL_RUN=False,FRESH_AC_RUN=False,IEEE8500_RUN=False,PROBLEM13_FINAL_VALIDATED=False,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_exact/report.py",
+      "line": 22,
+      "text": "        M1_RUN=False,A2_RUN=False,M2_RUN=False,FRESH_AC_RUN=False)",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_final/gates.py",
+      "line": 17,
+      "text": "def require_kernel(plan, fresh_ac, upstream):",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_final/gates.py",
+      "line": 19,
+      "text": "    require(fresh_ac.get('PASS') is True and fresh_ac.get('plan_sha')==plan.get('sha256')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_final/gates.py",
+      "line": 21,
+      "text": "            and fresh_ac.get('execution_layer')=='DDAY_ACTUAL','FRESH_AC_FINAL_PLAN_REQUIRED')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_final/native_inputs.py",
+      "line": 18,
+      "text": "    snapshot=Path('C:/codex_mobileess_workspace/MobileESS_v40a_bounded_iterative_coopt/dayahead/artifacts/v37_r4a_per_day_aidc/days/2025-05-01/V37_R4A_D1_SNAPSHOT.parquet')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_final/report.py",
+      "line": 22,
+      "text": "    dump('FRESH_AC_VALIDATION.json',dict(status='NOT_RUN_NO_ACCEPTED_FINAL_PLAN',RUN=False,PASS=False,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_final/report.py",
+      "line": 35,
+      "text": "        A1_RUN=False,M1_RUN=False,A2_RUN=False,M2_RUN=False,FRESH_AC_RUN=False,FINAL_RESPONSE_KERNEL_FROZEN=False,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_final/report.py",
+      "line": 45,
+      "text": "        A1_M1_A2_M2_run=False,Fresh_AC_run=False,final_kernel_created=False,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_final/verify.py",
+      "line": 61,
+      "text": "    require(not (OUT/'FINAL_RESPONSE_KERNEL_AUTHORITY.json').exists(),'UNVALIDATED_FINAL_KERNEL')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_final/verify.py",
+      "line": 75,
+      "text": "        native_A1_M1_A2_M2_executed=False,Fresh_AC_PASS=False))",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_forensic/report.py",
+      "line": 129,
+      "text": "        A2_RUN=False,M2_RUN=False,ACTUAL_RUN=False,FRESH_AC_RUN=False,IEEE8500_RUN=False,ACTUAL_P_CORRECTION_ENABLED=False,ACTUAL_Q_CORRECTION_ENABLED=False,PROBLEM13_FINAL_VALIDATED=False)",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_forensic/verify.py",
+      "line": 29,
+      "text": "    assert not any(flags[k] for k in ['M1_ACCEPTED','PRODUCTION_M1_RUN','A2_RUN','M2_RUN','ACTUAL_RUN','FRESH_AC_RUN','IEEE8500_RUN','PROBLEM13_FINAL_VALIDATED','SCIENTIFIC_PHYSICS_CHANGED'])",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_m1_sparse/report.py",
+      "line": 30,
+      "text": "    flags=dict(BASE_PR=106,BASE_HEAD='0360f9db7a27068dc53665b263a93adfd870250f',SCIENTIFIC_PHYSICS_CHANGED=False,CANDIDATE_DOMAIN_CHANGED=False,A1_RERUN=False,A1_ANCHOR_REUSED=True,A1_OPTIMIZE_CALLS_THIS_TASK=0,ACTUAL_Q_CORRECTION_ENABLED=False,ACTUAL_P_CORRECTION_ENABLED=False,ACTUAL_LOCAL_REPAIR_ENABLED=False,M1_ROBUST_VOLTAGE_MIN=.955,M1_ROBUST_VOLTAGE_MAX=1.045,BASELINE_NONZEROS=138620454,BASE",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_m1_sparse/verify.py",
+      "line": 18,
+      "text": "    assert not any(f[k] for k in ['SCIENTIFIC_PHYSICS_CHANGED','CANDIDATE_DOMAIN_CHANGED','A1_RERUN','ACTUAL_Q_CORRECTION_ENABLED','ACTUAL_P_CORRECTION_ENABLED','GPU_USED','A2_RUN','M2_RUN','ACTUAL_RUN','FRESH_AC_RUN','IEEE8500_RUN','PROBLEM13_FINAL_VALIDATED'])",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_may01/prepare.py",
+      "line": 79,
+      "text": "    snapshot_path=Path('C:/codex_mobileess_workspace/MobileESS_v40a_bounded_iterative_coopt')/f'dayahead/artifacts/v37_r4a_per_day_aidc/days/{DAY}/V37_R4A_D1_SNAPSHOT.parquet'",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_may01/prepare.py",
+      "line": 182,
+      "text": "    caproot=Path('C:/codex_mobileess_workspace/MobileESS_v41r2_780gpu_capacity_rebase/dayahead/artifacts/v41r2_780gpu_capacity_rebase')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_may01/prepare.py",
+      "line": 193,
+      "text": "    physical_keys=('OpenDSS_master','PCC_mapping','service_PCC_mapping','weather','demand','PV','feeder_manifest','line_ratings','transformer_ratings','native_controls','background_mapping','AIDC_power_C1')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_may01/prepare.py",
+      "line": 212,
+      "text": "    traffic=Path('C:/codex_mobileess_workspace/MobileESS_v40a_bounded_iterative_coopt/dayahead/cache/v37_may_locked_final/traffic/shared/traffic')/DAY",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_may01/prepare.py",
+      "line": 218,
+      "text": "    for p in ('dayahead/mess_physics.py','dayahead/v33m/mess_mobility_milp.py','dayahead/v35/execution.py','pfr/slow_fast.py','dayahead/v38/authority.py','pfr/contracts/IDC_MIGRATION_AUTHORITY_V1.json'):",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_may01/report.py",
+      "line": 48,
+      "text": "        Fresh_AC='NOT_RUN_NO_FEASIBLE_FINAL_SCHEDULE',response_kernel='NOT_AUTHORIZED_NO_ACCEPTED_FRESH_VALID_ANCHOR',",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_may01/report.py",
+      "line": 68,
+      "text": "        RUNTIME_FEASIBILITY_VERDICT='NOT_ESTABLISHED_UPSTREAM_INFEASIBLE',FRESH_AC_MAY01_PASS=False,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_may01/report.py",
+      "line": 181,
+      "text": "        '아니오. 최종 accepted candidate가 없어 Fresh OpenDSS를 실행하지 않았다. PASS=false는 미검증을 뜻한다.',",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_may01/run.py",
+      "line": 59,
+      "text": "    dump('FRESH_AC_MAY01_VALIDATION.json',dict(PASS=False,status='NOT_RUN_NO_FEASIBLE_FINAL_PLANNING_CANDIDATE',",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_may01/verify.py",
+      "line": 16,
+      "text": "MAY01_NATIVE_COMPUTATIONAL_VERDICT.json FRESH_AC_MAY01_VALIDATION.json FINAL_FLAGS.json",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_may01/verify.py",
+      "line": 57,
+      "text": "                'MESS_NATIVE_MILP_BOUND','FRESH_AC_MAY01_PASS','ALL_BLOCKS_TARGET_GAP_0P1_PERCENT','V42_NATIVE_BLOCK_RUNTIME_FEASIBLE',",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_may01/verify.py",
+      "line": 90,
+      "text": "        full_A1_MILP_executed=False,full_four_block_canary_completed=False,Fresh_AC_executed=False,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 17,
+      "text": "class KernelAnchor:",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 48,
+      "text": "def require_fresh_ac(receipt,schedule_sha,grid_sha):",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 49,
+      "text": "    require(receipt.get('PASS',True) is True,'FRESH_AC_REPORTED_FAIL')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 51,
+      "text": "    require(receipt.get('engine')=='OpenDSS' and receipt.get('fresh_run') is True and receipt.get('synthetic') is False,'FRESH_OPENDSS_REQUIRED')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 52,
+      "text": "    require(receipt.get('schedule_sha')==schedule_sha and receipt.get('grid_sha')==grid_sha,'FRESH_AC_IDENTITY')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 54,
+      "text": "        ('voltage_violations','line_current_violations','transformer_current_violations','transformer_kVA_violations')),'FRESH_AC_PHYSICS')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 76,
+      "text": "    def fresh_ac(self, physical_arrays: dict) -> dict: ...",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 79,
+      "text": "def run_dday_actual(frozen_day_ahead_plan, realized_inputs, backend: ActualBackend,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 82,
+      "text": "    \"\"\"Replay realized physics and call Fresh OpenDSS once; never rescue FAIL.",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 128,
+      "text": "        ac=backend.fresh_ac(physical)",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 131,
+      "text": "        require(isinstance(ac,dict),'FRESH_AC_RECEIPT_REQUIRED')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 135,
+      "text": "                ac.get('policy_sha')==frozen.policy_sha,'FRESH_AC_ACTUAL_INPUT_IDENTITY')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 138,
+      "text": "        require_fresh_ac(ac,frozen.plan_sha,frozen.grid_sha)",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 146,
+      "text": "                  fresh_ac=deepcopy(ac),fresh_ac_calls=1,global_MILP_calls=0,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 154,
+      "text": "    from v42_final.gates import require_kernel",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 163,
+      "text": "            'DDAY_ACTUAL_FRESH_AC_REQUIRED_BEFORE_KERNEL')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 164,
+      "text": "    ac=actual_result['fresh_ac']",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 165,
+      "text": "    require_fresh_ac(ac,frozen_plan.plan_sha,frozen_plan.grid_sha)",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/actual.py",
+      "line": 174,
+      "text": "    return require_kernel(dict(stage=plan.get('stage'),accepted_native_plan=plan.get('accepted_native_plan'),",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_native/coordinator.py",
+      "line": 31,
+      "text": "    frozen=freeze_day_ahead_plan(final,output,grid_sha=backend.grid_sha)",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_relaxation/report.py",
+      "line": 104,
+      "text": "        A2_RUN=False,M2_RUN=False,ACTUAL_RUN=False,FRESH_AC_RUN=False,IEEE8500_RUN=False,PROBLEM13_FINAL_VALIDATED=False)",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_relaxation/report.py",
+      "line": 182,
+      "text": "    assert flags['A1_OPTIMIZE_CALLS_THIS_TASK']==0 and not any(flags[k] for k in ['A2_RUN','M2_RUN','ACTUAL_RUN','FRESH_AC_RUN','IEEE8500_RUN'])",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_sparse/report.py",
+      "line": 16,
+      "text": "    flags=dict(CANONICAL_RUNTIME='WINDOWS',GPU_USED_FOR_PRODUCTION=False,PR102_PHYSICAL_SET_PRESERVED=True,SIX_SCIENTIFIC_OBJECTIVES_PRESERVED=True,BASELINE_RUNTIME_NONZEROS=base_runtime,NEW_RUNTIME_NONZEROS=new_runtime,NEW_RUNTIME_COMPLETION_ROW_NONZEROS=f.get('Runtime_completion_risk',0),NEW_RUNTIME_COUNT_DEFINITION_NONZEROS=f.get('Runtime_count_definition',0),RUNTIME_NONZERO_REDUCTION=base_runt",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_temporal/native.py",
+      "line": 74,
+      "text": "    from dayahead.v39a.contracts import IDLE_W_PER_GPU,CENTER_SWING_W_PER_GPU",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_temporal/native.py",
+      "line": 76,
+      "text": "    require(sha(Path(sys.modules['dayahead.v39a.contracts'].__file__))==sha(paths['contracts.py']),'POWER_IMPORT_IDENTITY')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_temporal/native.py",
+      "line": 108,
+      "text": "    ga=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_temporal/report.py",
+      "line": 33,
+      "text": "    dump('FRESH_AC_VALIDATION.json',dict(status='NOT_RUN',PASS=None,reason='NO_ACCEPTED_A1_M1_A2_M2_PLAN',",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_temporal/report.py",
+      "line": 42,
+      "text": "        FRESH_AC_PASS=False,FINAL_RESPONSE_KERNEL_FROZEN=False)",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_temporal/report.py",
+      "line": 89,
+      "text": "        no_final_response_kernel=not (OUT/'FINAL_RESPONSE_KERNEL_AUTHORITY.json').exists(),",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_temporal/report.py",
+      "line": 134,
+      "text": "        'Fresh OpenDSS AC는 NOT_RUN이다. accepted four-stage plan이 없다.',",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_temporal/report.py",
+      "line": 135,
+      "text": "        '최종 response kernel을 만들거나 freeze하지 않았다. FINAL_RESPONSE_KERNEL_AUTHORITY.json은 없다.',",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_temporal/verify.py",
+      "line": 16,
+      "text": "    require(not flags['FINAL_RESPONSE_KERNEL_FROZEN'] and not (OUT/'FINAL_RESPONSE_KERNEL_AUTHORITY.json').exists(),'NO_UNACCEPTED_KERNEL')",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_threshold/report.py",
+      "line": 76,
+      "text": "        A2_RUN=False,M2_RUN=False,ACTUAL_RUN=False,FRESH_AC_RUN=False,IEEE8500_RUN=False,MAY_CAMPAIGN_RUN=False,SENSITIVITY_CAMPAIGN_RUN=False,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_threshold/report.py",
+      "line": 83,
+      "text": "        PLANNING_VOLTAGE=[.955,1.045],FRESH_AC_ACCEPTANCE_VOLTAGE=[.95,1.05],MESS_P_DECISION_ON=True,MESS_Q_DECISION_ON=True,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_threshold/verify.py",
+      "line": 114,
+      "text": "    assert not any(f[x] for x in ['PRODUCTION_M1_RUN','P2_RUN','A2_ALLOWED','A2_RUN','M2_RUN','ACTUAL_RUN','FRESH_AC_RUN','IEEE8500_RUN','MAY_CAMPAIGN_RUN','SENSITIVITY_CAMPAIGN_RUN','M1_ACCEPTED','PROBLEM13_FINAL_VALIDATED','B0_WORK_TOUCHED','B1_COMPARISON_WORK_TOUCHED','EXCLUDED_PROBLEMS_NEW_WORK','ACTUAL_P_CORRECTION','ACTUAL_Q_CORRECTION'])",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_two/setup.py",
+      "line": 27,
+      "text": "        production_retries=0,native_return_grace_seconds=5,GPU=False,M1=False,A2=False,M2=False,FRESH_AC=False,IEEE8500=False,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_voltage/grid.py",
+      "line": 32,
+      "text": "    ga=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_voltage/grid.py",
+      "line": 73,
+      "text": "                Fresh_AC=False,voltage_fallback=False)",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_voltage/preservation.py",
+      "line": 17,
+      "text": "    successor=ROOT/'docs/v42_day_ahead_planning_direct_dday_actual/AUTHORIZED_ARCHITECTURE_SUPERSESSION.json'",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_voltage/report.py",
+      "line": 20,
+      "text": "MESS route, movement, charging, discharging, Q and SOC remain joint native MILP decisions. Actual local P, Q and P/Q repair are removed. The frozen route/movement/P/Q is replayed as-is. Fresh OpenDSS must independently pass convergence, 0.95–1.05 physical voltage, line current, transformer current and kVA. A failure remains FAIL; no rescue, emergency full reoptimization or margin fallback.",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_voltage/report.py",
+      "line": 26,
+      "text": "         emergency_full_reoptimization=False,Actual_voltage=[.95,1.05],Fresh_AC_required=True,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_voltage/report.py",
+      "line": 115,
+      "text": "               ACTUAL_LOCAL_P_REPAIR_ENABLED=False,ACTUAL_EMERGENCY_FULL_REOPTIMIZATION=False,FRESH_AC_REQUIRED=True,",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_voltage/report.py",
+      "line": 126,
+      "text": "               PROBLEM13_FINAL_VALIDATED=False,A2_RUN=False,M2_RUN=False,ACTUAL_RUN=False,FRESH_AC_RUN=False,IEEE8500_RUN=False)",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_voltage/report.py",
+      "line": 129,
+      "text": "         STOP='BEFORE_A2' if mrun else 'A1_NOT_ACCEPTED',A2=False,M2=False,Actual=False,Fresh_AC=False,IEEE8500=False))",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    },
+    {
+      "path": "v42_voltage/verify.py",
+      "line": 23,
+      "text": "    assert not any(flags[k] for k in ('M1_RUN','A2_RUN','M2_RUN','ACTUAL_RUN','FRESH_AC_RUN','IEEE8500_RUN','PROBLEM13_FINAL_VALIDATED'))",
+      "classification": "RUNTIME_CONTRACT_OR_SOURCE_REFERENCE"
+    }
+  ],
+  "direct_OpenDSS_engine_producer_in_this_checkout": false,
+  "external_historical_producer": "MobileESS_v41r3_scale_rebalance/dayahead/v41/execution.py + dayahead/v28r2/opendss_backend.py",
+  "final_kernel_audit": "No final response/event kernel generation call exists in this checkout. v42_final.gates.require_kernel is the legacy acceptance predicate; v42_native.actual.require_dday_kernel adds full Actual input and upstream identity checks. KernelAnchor validates an existing causal-policy anchor; it does not generate or freeze a final kernel. Report/verify modules only record absence/readiness.",
+  "old_report_statements": "Preserved prior evidence. Superseded operational statements are governed by ARCHITECTURE_BEFORE_AFTER.md."
+}

@@ -7,7 +7,9 @@ from v42_certificate.common import OUT,PRIOR,LOCAL,START_UB,OBJ_TOL,TOL,load_axi
 @pytest.fixture(scope='module')
 def native():
     assert read(OUT/'MIP_START_IMPORT_AUDIT.json')['PASS']
-    env=gp.Env(empty=True);env.setParam('OutputFlag',0);env.start();m=gp.read(str(LOCAL/'F3.mps'),env=env)
+    # Resolve the read-only historical fixture junction before the native API,
+    # which cannot open this workspace's Unicode path on Windows.
+    env=gp.Env(empty=True);env.setParam('OutputFlag',0);env.start();m=gp.read(str((LOCAL/'F3.mps').resolve()),env=env)
     names,v=load_start();axis=load_axis()
     yield m,names,v,axis
     m.dispose();env.dispose()

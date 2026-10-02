@@ -1,11 +1,10 @@
 """One bounded four-stage architecture; implementation readiness != science gate."""
-from .contracts import require,digest,lex_not_worse
+from .contracts import require,lex_not_worse
 from .supervision import supervise
-from .actual import require_fresh_ac,require_frozen_replay
-from copy import deepcopy
+from .planning import freeze_day_ahead_plan
 
 NATIVE_REQUIRED=('reference_resources','native_grid','runtime_where_required','CC4_where_required',
-    'final_kernel_anchor','service_windows','security_margin','MESS_initial_state','traffic_routes')
+    'frozen_policy_interface','service_windows','security_margin','MESS_initial_state','traffic_routes')
 
 
 def gate(receipts):
@@ -29,8 +28,7 @@ def run(backend,output,*,seconds=600):
         else:m=candidate
         receipts[stage]=receipt
     final=backend.combine(a,m)
-    frozen_final=deepcopy(final)
-    ac=backend.fresh_ac(final)
-    require_frozen_replay(frozen_final,final)
-    require_fresh_ac(ac,digest(frozen_final),backend.grid_sha)
-    return dict(final=final,stages=receipts,fresh_ac=ac)
+    frozen=freeze_day_ahead_plan(final,output,grid_sha=backend.grid_sha)
+    return dict(final=frozen.plan,frozen_plan=frozen,stages=receipts,
+                DAYAHEAD_PLAN_SHA=frozen.plan_sha,POLICY_SHA=frozen.policy_sha,
+                GRID_SHA=frozen.grid_sha,status='DAYAHEAD_PLANNING_FROZEN')

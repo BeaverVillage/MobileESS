@@ -1,0 +1,21 @@
+{
+  "execution_layer": "DDAY_ACTUAL",
+  "planning_fresh_ac_allowed": false,
+  "actual_fresh_ac_calls_per_run": 1,
+  "engine": "OpenDSS",
+  "fresh_run": true,
+  "synthetic": false,
+  "planning_voltage_pu": {"A1": [0.95, 1.05], "M1": [0.955, 1.045], "A2": [0.955, 1.045], "M2": [0.955, 1.045]},
+  "actual_voltage_pu": [0.95, 1.05],
+  "required_zero_violations": ["voltage_violations", "line_current_violations", "transformer_current_violations", "transformer_kVA_violations"],
+  "convergence_required": true,
+  "identity_bindings": ["schedule_sha", "grid_sha", "policy_sha", "realized_inputs_sha", "physical_arrays_sha", "execution_layer"],
+  "schedule_sha_meaning": "DAYAHEAD_PLAN_SHA of full immutable planning payload",
+  "full_reoptimization": false,
+  "local_P_repair": false,
+  "local_Q_repair": false,
+  "retry_or_rescue": false,
+  "failure_disposition": "Persist FAIL and raw receipt; never change the plan",
+  "final_kernel_timing": "Only after matching D-Day Actual Fresh AC PASS and existing native M2 acceptance; no producer activated",
+  "production_execution": "NOT_RUN"
+}
