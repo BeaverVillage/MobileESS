@@ -1,0 +1,65 @@
+{
+  "base_head": "e2d4779685fff6d0cf022c649733b2ca41fdfc08",
+  "recorded_UTC": "2026-10-02T02:33:49.629146+00:00",
+  "experiment": "April B0 voltage security margin calibration",
+  "status": "BLOCKED_BEFORE_DATE_AUTHORITY",
+  "target_year": null,
+  "frozen_date_window": [],
+  "exclusions": [],
+  "exclusion_rule": "Only source-backed missing/duplicate/nonfinite or causal-authority failures, fixed before any optimization or AC. Use all authoritative available April days; no outcome-dependent selection.",
+  "quantiles": [
+    0.9,
+    0.95,
+    0.975,
+    0.99
+  ],
+  "quantile_method": "linear interpolation, sorted samples, index (n-1)*q",
+  "aggregation": [
+    "pointwise",
+    "day_worst_directional_max"
+  ],
+  "IID_claim": false,
+  "primary": "S0 physical planning 0.95–1.05 unless authoritative B0 fixed definition requires otherwise",
+  "sensitivity": {
+    "S1": [
+      0.9525,
+      1.0475
+    ],
+    "S2": [
+      0.955,
+      1.045
+    ]
+  },
+  "voltage_definitions": {
+    "V_PLAN": "Planning surrogate",
+    "V_DA_AC": "frozen plan + DA forecast, offline Fresh OpenDSS diagnostic",
+    "V_DDAY_AC": "same frozen plan + realized D-Day inputs, Fresh OpenDSS"
+  },
+  "operational_chain": [
+    "Day-Ahead Planning",
+    "plan freeze",
+    "D-Day Actual",
+    "Fresh OpenDSS"
+  ],
+  "OFFLINE_CALIBRATION_DIAGNOSTIC_ONLY": true,
+  "DA_AC_operational_gate": false,
+  "residual_identity": "e_total = e_model + e_forecast",
+  "identity_absolute_tolerance": 1e-12,
+  "alignment": [
+    "date",
+    "node",
+    "phase",
+    "time"
+  ],
+  "dominance_metric": "daily and pooled RMSE, no causal attribution",
+  "no_plan_change_after_freeze": true,
+  "no_Actual_optimization_or_repair": true,
+  "physical_voltage_band": [
+    0.95,
+    1.05
+  ],
+  "physical_line_transformer_limits_required": true,
+  "MAY_USED_FOR_CALIBRATION": false,
+  "FINAL_MARGIN_ACCEPTED": false,
+  "candidate_selection": "Report all four quantiles at both aggregation levels; choose none in this PR."
+}
