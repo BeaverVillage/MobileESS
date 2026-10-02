@@ -1,0 +1,3 @@
+# Native bound recourse
+Keep every original row, sense and continuous bound. Partition columns by the exact original ordered xi/yi axes; outside B3 binaries retain native [0,1] bounds as continuous variables. No cleanup is enabled. The inverse map is the identity row axis and xi/yi column indices.
+For fixed x, each RHS is the correctly rounded exact rational expression b_i - sum_j B_ij*x_j, using stored IEEE source coefficients. Certificate calculations use the unrounded original expression. Solver FarkasProof is compared against the separately reconstructed rounded solver RHS; the scientific cut uses original b and B. No tolerance-based coefficient deletion or scientific RHS adjustment is permitted.

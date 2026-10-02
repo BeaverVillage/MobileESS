@@ -1,0 +1,4 @@
+# Next steps
+The blocking artifact is PR115's first B3 x vector with its original ordered axis and authentic provenance. Neither the raw master log nor a different feasible incumbent identifies those 85,744 bits. Do not rerun the master and describe its output as the historical same x.
+If an authentic archived x is recovered, verify exact bytes/axis/hash, then perform the preregistered isolated native recourse (Phase-I only after rejected native certificate). Otherwise a differently scoped benchmark using a new, explicitly labelled candidate requires a new user scope correction; the present same-x gate remains closed.
+Only isolated PASS authorizes full B3; only real B3 progress authorizes full M1 canary. Keep downstream P2/A2/M2 behind separate user approval. Investigate native FarkasProof discrepancies with the preserved raw vectors and original bounds without changing sign or weakening validators. No cause of full-scale Kappa has been identified.

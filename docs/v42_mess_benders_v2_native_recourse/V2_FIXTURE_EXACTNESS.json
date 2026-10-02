@@ -1,0 +1,765 @@
+{
+  "PASS": true,
+  "assignments": 1536,
+  "agreement": 1536,
+  "feasible": 49,
+  "infeasible": 1487,
+  "all_feasible_survive": true,
+  "paths": [
+    "original native LP",
+    "V1 canonical LP",
+    "V2 native LP",
+    "Phase-I",
+    "monolithic MILP",
+    "V2 Benders"
+  ],
+  "PhaseI_all_assignment_diagnostic": true,
+  "PhaseI_engine_fallback_only": true,
+  "cases": [
+    {
+      "case": "A",
+      "assignments": 128,
+      "feasible": 6,
+      "infeasible": 122,
+      "PASS": true,
+      "all_feasible_survive": true,
+      "all_infeasible_excluded": true,
+      "monolithic_optimum": 0.9215371775677416,
+      "enumeration_optimum": 0.9215371775677416,
+      "Benders_V2": {
+        "status": "ACCEPTED_P1",
+        "iterations": 4,
+        "seconds": 0.048701199993956834,
+        "lower": 0.9215371775677415,
+        "upper": 0.9215371775677416,
+        "gap": 1.2047512044553893e-16,
+        "valid_cuts": 3,
+        "feasibility_cuts": 0,
+        "optimality_cuts": 3,
+        "phase1_cuts": 0,
+        "fallback_calls": 0,
+        "progress": [
+          {
+            "iteration": 1,
+            "master_status": 2,
+            "master_seconds": 0.0,
+            "recourse_status": 2,
+            "cut_hash": "4b4a3b19bce26fd3e831a19c17f0566a3b52015705d0ec7451ef14e3a8a60e72",
+            "lower": 0.0,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 2,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 2,
+            "cut_hash": "0f47ce69948e832d59fbc0c8732fa138e72c3b3325b3ef8149df3973bbfa5bce",
+            "lower": 0.748,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 3,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 2,
+            "cut_hash": "dc32a9dcb8ca27b904dd8707ab843824dd7e6f8691926af2cb3e4187b1836f8c",
+            "lower": 0.7919371775677414,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 4,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": null,
+            "cut_hash": null
+          }
+        ],
+        "uncertified_cuts_used": 0
+      }
+    },
+    {
+      "case": "B",
+      "assignments": 128,
+      "feasible": 0,
+      "infeasible": 128,
+      "PASS": true,
+      "all_feasible_survive": true,
+      "all_infeasible_excluded": true,
+      "monolithic_optimum": null,
+      "enumeration_optimum": null,
+      "Benders_V2": {
+        "status": "MASTER_INFEASIBLE",
+        "iterations": 2,
+        "seconds": 0.02087149998988025,
+        "lower": 0.0,
+        "upper": null,
+        "gap": null,
+        "valid_cuts": 1,
+        "feasibility_cuts": 1,
+        "optimality_cuts": 0,
+        "phase1_cuts": 0,
+        "fallback_calls": 0,
+        "progress": [
+          {
+            "iteration": 1,
+            "master_status": 2,
+            "master_seconds": 0.0010001659393310547,
+            "recourse_status": 3,
+            "cut_hash": "dc135bdaac03fc721a9f3f54b7617cdc9dfb994da092cb17fc601785729833b6",
+            "lower": 0.0,
+            "upper": null
+          },
+          {
+            "iteration": 2,
+            "master_status": 3,
+            "master_seconds": 0.0,
+            "recourse_status": null,
+            "cut_hash": null
+          }
+        ],
+        "uncertified_cuts_used": 0
+      }
+    },
+    {
+      "case": "C",
+      "assignments": 128,
+      "feasible": 1,
+      "infeasible": 127,
+      "PASS": true,
+      "all_feasible_survive": true,
+      "all_infeasible_excluded": true,
+      "monolithic_optimum": 1.0223708335363118,
+      "enumeration_optimum": 1.0223708335363118,
+      "Benders_V2": {
+        "status": "ACCEPTED_P1",
+        "iterations": 5,
+        "seconds": 0.06642240000655875,
+        "lower": 1.0223708335363113,
+        "upper": 1.0223708335363115,
+        "gap": 2.1718597366182098e-16,
+        "valid_cuts": 4,
+        "feasibility_cuts": 3,
+        "optimality_cuts": 1,
+        "phase1_cuts": 2,
+        "fallback_calls": 2,
+        "progress": [
+          {
+            "iteration": 1,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 3,
+            "cut_hash": "469f4e49da2ecdd77de8f19e90075f0258d6ddcc7a7eae1a59ea59c346f3cd29",
+            "native_rejection": "NATIVE_PROOF_MISMATCH",
+            "lower": 0.0,
+            "upper": null
+          },
+          {
+            "iteration": 2,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 3,
+            "cut_hash": "9291a8517ac08dfbc8b8fbc9b8bf21f7a90a65204400c2ff3a6ebcc1e0d891d2",
+            "native_rejection": "NATIVE_PROOF_MISMATCH",
+            "lower": 0.0,
+            "upper": null
+          },
+          {
+            "iteration": 3,
+            "master_status": 2,
+            "master_seconds": 0.0010001659393310547,
+            "recourse_status": 3,
+            "cut_hash": "8f3a657261431db7febd305fd75ec0c705a8ba9f1e422fe7fc9b685f92c8d6c6",
+            "lower": 0.0,
+            "upper": null
+          },
+          {
+            "iteration": 4,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 2,
+            "cut_hash": "3f3ca4b40ba573b06802a8378997b9ae44894080e0fa565c6d63f79bd989d299",
+            "lower": 0.0,
+            "upper": 1.0223708335363115
+          },
+          {
+            "iteration": 5,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": null,
+            "cut_hash": null
+          }
+        ],
+        "uncertified_cuts_used": 0
+      }
+    },
+    {
+      "case": "D",
+      "assignments": 128,
+      "feasible": 4,
+      "infeasible": 124,
+      "PASS": true,
+      "all_feasible_survive": true,
+      "all_infeasible_excluded": true,
+      "monolithic_optimum": 0.9215371775677416,
+      "enumeration_optimum": 0.9215371775677416,
+      "Benders_V2": {
+        "status": "ACCEPTED_P1",
+        "iterations": 4,
+        "seconds": 0.04240750000462867,
+        "lower": 0.9215371775677415,
+        "upper": 0.9215371775677416,
+        "gap": 1.2047512044553893e-16,
+        "valid_cuts": 3,
+        "feasibility_cuts": 1,
+        "optimality_cuts": 2,
+        "phase1_cuts": 0,
+        "fallback_calls": 0,
+        "progress": [
+          {
+            "iteration": 1,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 2,
+            "cut_hash": "4b4a3b19bce26fd3e831a19c17f0566a3b52015705d0ec7451ef14e3a8a60e72",
+            "lower": 0.0,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 2,
+            "master_status": 2,
+            "master_seconds": 0.002000093460083008,
+            "recourse_status": 3,
+            "cut_hash": "50a3eced8c413bd14015c6c4cb9309cc982ba666e0abe43723940bf04ad236dd",
+            "lower": 0.748,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 3,
+            "master_status": 2,
+            "master_seconds": 0.002000093460083008,
+            "recourse_status": 2,
+            "cut_hash": "dc32a9dcb8ca27b904dd8707ab843824dd7e6f8691926af2cb3e4187b1836f8c",
+            "lower": 0.7919371775677413,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 4,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": null,
+            "cut_hash": null
+          }
+        ],
+        "uncertified_cuts_used": 0
+      }
+    },
+    {
+      "case": "E",
+      "assignments": 128,
+      "feasible": 4,
+      "infeasible": 124,
+      "PASS": true,
+      "all_feasible_survive": true,
+      "all_infeasible_excluded": true,
+      "monolithic_optimum": 0.9215371775677416,
+      "enumeration_optimum": 0.9215371775677416,
+      "Benders_V2": {
+        "status": "ACCEPTED_P1",
+        "iterations": 4,
+        "seconds": 0.040510799997719005,
+        "lower": 0.9215371775677415,
+        "upper": 0.9215371775677415,
+        "gap": 0.0,
+        "valid_cuts": 3,
+        "feasibility_cuts": 1,
+        "optimality_cuts": 2,
+        "phase1_cuts": 0,
+        "fallback_calls": 0,
+        "progress": [
+          {
+            "iteration": 1,
+            "master_status": 2,
+            "master_seconds": 0.0,
+            "recourse_status": 2,
+            "cut_hash": "4b4a3b19bce26fd3e831a19c17f0566a3b52015705d0ec7451ef14e3a8a60e72",
+            "lower": 0.0,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 2,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 3,
+            "cut_hash": "263b76064b25735d0514547b3d8e7eac26abdab90bff2135fffc5ef4cdbaf96e",
+            "lower": 0.748,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 3,
+            "master_status": 2,
+            "master_seconds": 0.0010001659393310547,
+            "recourse_status": 2,
+            "cut_hash": "d49baa134e20b852264fc788524b852cdfe046057f8e3b16882c0b3db1ec320b",
+            "lower": 0.7919371775677413,
+            "upper": 0.9215371775677415
+          },
+          {
+            "iteration": 4,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": null,
+            "cut_hash": null
+          }
+        ],
+        "uncertified_cuts_used": 0
+      }
+    },
+    {
+      "case": "F",
+      "assignments": 128,
+      "feasible": 4,
+      "infeasible": 124,
+      "PASS": true,
+      "all_feasible_survive": true,
+      "all_infeasible_excluded": true,
+      "monolithic_optimum": 0.9215371775677416,
+      "enumeration_optimum": 0.9215371775677416,
+      "Benders_V2": {
+        "status": "ACCEPTED_P1",
+        "iterations": 4,
+        "seconds": 0.05022960001952015,
+        "lower": 0.9215371775677415,
+        "upper": 0.9215371775677415,
+        "gap": 0.0,
+        "valid_cuts": 3,
+        "feasibility_cuts": 1,
+        "optimality_cuts": 2,
+        "phase1_cuts": 0,
+        "fallback_calls": 0,
+        "progress": [
+          {
+            "iteration": 1,
+            "master_status": 2,
+            "master_seconds": 0.0,
+            "recourse_status": 2,
+            "cut_hash": "4b4a3b19bce26fd3e831a19c17f0566a3b52015705d0ec7451ef14e3a8a60e72",
+            "lower": 0.0,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 2,
+            "master_status": 2,
+            "master_seconds": 0.002000093460083008,
+            "recourse_status": 3,
+            "cut_hash": "8ff820d49ebc279722b67339e34509f9312eb23925efb4c223d880494dcf8538",
+            "lower": 0.748,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 3,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 2,
+            "cut_hash": "d49baa134e20b852264fc788524b852cdfe046057f8e3b16882c0b3db1ec320b",
+            "lower": 0.7919371775677413,
+            "upper": 0.9215371775677415
+          },
+          {
+            "iteration": 4,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": null,
+            "cut_hash": null
+          }
+        ],
+        "uncertified_cuts_used": 0
+      }
+    },
+    {
+      "case": "G",
+      "assignments": 128,
+      "feasible": 4,
+      "infeasible": 124,
+      "PASS": true,
+      "all_feasible_survive": true,
+      "all_infeasible_excluded": true,
+      "monolithic_optimum": 0.9215371775677416,
+      "enumeration_optimum": 0.9215371775677416,
+      "Benders_V2": {
+        "status": "ACCEPTED_P1",
+        "iterations": 4,
+        "seconds": 0.042285799980163574,
+        "lower": 0.9215371775677415,
+        "upper": 0.9215371775677416,
+        "gap": 1.2047512044553893e-16,
+        "valid_cuts": 3,
+        "feasibility_cuts": 1,
+        "optimality_cuts": 2,
+        "phase1_cuts": 0,
+        "fallback_calls": 0,
+        "progress": [
+          {
+            "iteration": 1,
+            "master_status": 2,
+            "master_seconds": 0.0,
+            "recourse_status": 2,
+            "cut_hash": "4b4a3b19bce26fd3e831a19c17f0566a3b52015705d0ec7451ef14e3a8a60e72",
+            "lower": 0.0,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 2,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 3,
+            "cut_hash": "51d89610646fa23f3bf3bdb330e098e8120e57d2b6de8d0aa2f52e0ac5f019bf",
+            "lower": 0.748,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 3,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 2,
+            "cut_hash": "dc32a9dcb8ca27b904dd8707ab843824dd7e6f8691926af2cb3e4187b1836f8c",
+            "lower": 0.7919371775677413,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 4,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": null,
+            "cut_hash": null
+          }
+        ],
+        "uncertified_cuts_used": 0
+      }
+    },
+    {
+      "case": "H",
+      "assignments": 128,
+      "feasible": 6,
+      "infeasible": 122,
+      "PASS": true,
+      "all_feasible_survive": true,
+      "all_infeasible_excluded": true,
+      "monolithic_optimum": 0.9215371775677416,
+      "enumeration_optimum": 0.9215371775677416,
+      "Benders_V2": {
+        "status": "ACCEPTED_P1",
+        "iterations": 4,
+        "seconds": 0.04921340002329089,
+        "lower": 0.9215371775677415,
+        "upper": 0.9215371775677416,
+        "gap": 1.2047512044553893e-16,
+        "valid_cuts": 3,
+        "feasibility_cuts": 0,
+        "optimality_cuts": 3,
+        "phase1_cuts": 0,
+        "fallback_calls": 0,
+        "progress": [
+          {
+            "iteration": 1,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 2,
+            "cut_hash": "4b4a3b19bce26fd3e831a19c17f0566a3b52015705d0ec7451ef14e3a8a60e72",
+            "lower": 0.0,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 2,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 2,
+            "cut_hash": "0f47ce69948e832d59fbc0c8732fa138e72c3b3325b3ef8149df3973bbfa5bce",
+            "lower": 0.748,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 3,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 2,
+            "cut_hash": "dc32a9dcb8ca27b904dd8707ab843824dd7e6f8691926af2cb3e4187b1836f8c",
+            "lower": 0.7919371775677414,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 4,
+            "master_status": 2,
+            "master_seconds": 0.0,
+            "recourse_status": null,
+            "cut_hash": null
+          }
+        ],
+        "uncertified_cuts_used": 0
+      }
+    },
+    {
+      "case": "I",
+      "assignments": 128,
+      "feasible": 6,
+      "infeasible": 122,
+      "PASS": true,
+      "all_feasible_survive": true,
+      "all_infeasible_excluded": true,
+      "monolithic_optimum": 0.9215371775677416,
+      "enumeration_optimum": 0.9215371775677416,
+      "Benders_V2": {
+        "status": "ACCEPTED_P1",
+        "iterations": 4,
+        "seconds": 0.04013269999995828,
+        "lower": 0.9215371775677415,
+        "upper": 0.9215371775677416,
+        "gap": 1.2047512044553893e-16,
+        "valid_cuts": 3,
+        "feasibility_cuts": 0,
+        "optimality_cuts": 3,
+        "phase1_cuts": 0,
+        "fallback_calls": 0,
+        "progress": [
+          {
+            "iteration": 1,
+            "master_status": 2,
+            "master_seconds": 0.0,
+            "recourse_status": 2,
+            "cut_hash": "4b4a3b19bce26fd3e831a19c17f0566a3b52015705d0ec7451ef14e3a8a60e72",
+            "lower": 0.0,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 2,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 2,
+            "cut_hash": "0f47ce69948e832d59fbc0c8732fa138e72c3b3325b3ef8149df3973bbfa5bce",
+            "lower": 0.748,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 3,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 2,
+            "cut_hash": "dc32a9dcb8ca27b904dd8707ab843824dd7e6f8691926af2cb3e4187b1836f8c",
+            "lower": 0.7919371775677414,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 4,
+            "master_status": 2,
+            "master_seconds": 0.0010001659393310547,
+            "recourse_status": null,
+            "cut_hash": null
+          }
+        ],
+        "uncertified_cuts_used": 0
+      }
+    },
+    {
+      "case": "J",
+      "assignments": 128,
+      "feasible": 4,
+      "infeasible": 124,
+      "PASS": true,
+      "all_feasible_survive": true,
+      "all_infeasible_excluded": true,
+      "monolithic_optimum": 0.9215371775677416,
+      "enumeration_optimum": 0.9215371775677416,
+      "Benders_V2": {
+        "status": "ACCEPTED_P1",
+        "iterations": 4,
+        "seconds": 0.050981300009880215,
+        "lower": 0.9215371775677413,
+        "upper": 0.9215371775677416,
+        "gap": 2.4095024089107786e-16,
+        "valid_cuts": 3,
+        "feasibility_cuts": 1,
+        "optimality_cuts": 2,
+        "phase1_cuts": 1,
+        "fallback_calls": 1,
+        "progress": [
+          {
+            "iteration": 1,
+            "master_status": 2,
+            "master_seconds": 0.0,
+            "recourse_status": 2,
+            "cut_hash": "4b4a3b19bce26fd3e831a19c17f0566a3b52015705d0ec7451ef14e3a8a60e72",
+            "lower": 0.0,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 2,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 3,
+            "cut_hash": "8acbb0888dff0f48881349023a724161cec8982405e268d056eabdd5fa038422",
+            "native_rejection": "NATIVE_PROOF_MISMATCH",
+            "lower": 0.748,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 3,
+            "master_status": 2,
+            "master_seconds": 0.0010001659393310547,
+            "recourse_status": 2,
+            "cut_hash": "8d7c9c6c0fdda0a89f8c8974fc9e8dc9b626c5fd19fd8db254df856e4d60718d",
+            "lower": 0.7919371775677413,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 4,
+            "master_status": 2,
+            "master_seconds": 0.0010001659393310547,
+            "recourse_status": null,
+            "cut_hash": null
+          }
+        ],
+        "uncertified_cuts_used": 0
+      }
+    },
+    {
+      "case": "K",
+      "assignments": 128,
+      "feasible": 6,
+      "infeasible": 122,
+      "PASS": true,
+      "all_feasible_survive": true,
+      "all_infeasible_excluded": true,
+      "monolithic_optimum": 0.9215371775677416,
+      "enumeration_optimum": 0.9215371775677416,
+      "Benders_V2": {
+        "status": "ACCEPTED_P1",
+        "iterations": 4,
+        "seconds": 0.042269300000043586,
+        "lower": 0.9215371775677415,
+        "upper": 0.9215371775677416,
+        "gap": 1.2047512044553893e-16,
+        "valid_cuts": 3,
+        "feasibility_cuts": 0,
+        "optimality_cuts": 3,
+        "phase1_cuts": 0,
+        "fallback_calls": 0,
+        "progress": [
+          {
+            "iteration": 1,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 2,
+            "cut_hash": "ad51e9d2ad7aa45714cc25059db21d846db518f878c66cb9f7170e7fc23887a9",
+            "lower": 0.0,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 2,
+            "master_status": 2,
+            "master_seconds": 0.0010001659393310547,
+            "recourse_status": 2,
+            "cut_hash": "0f47ce69948e832d59fbc0c8732fa138e72c3b3325b3ef8149df3973bbfa5bce",
+            "lower": 0.748,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 3,
+            "master_status": 2,
+            "master_seconds": 0.0010001659393310547,
+            "recourse_status": 2,
+            "cut_hash": "9265607f739b5fc70a85ee5223625e40482857a4ac751c08b73f5291933dff58",
+            "lower": 0.7919371775677414,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 4,
+            "master_status": 2,
+            "master_seconds": 0.0,
+            "recourse_status": null,
+            "cut_hash": null
+          }
+        ],
+        "uncertified_cuts_used": 0
+      }
+    },
+    {
+      "case": "L",
+      "assignments": 128,
+      "feasible": 4,
+      "infeasible": 124,
+      "PASS": true,
+      "all_feasible_survive": true,
+      "all_infeasible_excluded": true,
+      "monolithic_optimum": 0.9215371775677416,
+      "enumeration_optimum": 0.9215371775677416,
+      "Benders_V2": {
+        "status": "ACCEPTED_P1",
+        "iterations": 6,
+        "seconds": 0.07857579999836162,
+        "lower": 0.9215371775677415,
+        "upper": 0.9215371775677416,
+        "gap": 1.2047512044553893e-16,
+        "valid_cuts": 5,
+        "feasibility_cuts": 2,
+        "optimality_cuts": 3,
+        "phase1_cuts": 1,
+        "fallback_calls": 1,
+        "progress": [
+          {
+            "iteration": 1,
+            "master_status": 2,
+            "master_seconds": 0.0,
+            "recourse_status": 2,
+            "cut_hash": "4b4a3b19bce26fd3e831a19c17f0566a3b52015705d0ec7451ef14e3a8a60e72",
+            "lower": 0.0,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 2,
+            "master_status": 2,
+            "master_seconds": 0.0010001659393310547,
+            "recourse_status": 3,
+            "cut_hash": "928ca05571d0d4ef07a496022eac13fb49f6aec845e3d5f41774103049c19b90",
+            "native_rejection": "NATIVE_PROOF_MISMATCH",
+            "lower": 0.748,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 3,
+            "master_status": 2,
+            "master_seconds": 0.002000093460083008,
+            "recourse_status": 2,
+            "cut_hash": "6a33ec8424881b5b847d12e60740240d7382d1f176f10334ac9691971b366b42",
+            "lower": 0.7919371775677415,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 4,
+            "master_status": 2,
+            "master_seconds": 0.0009999275207519531,
+            "recourse_status": 2,
+            "cut_hash": "d6a84d90dc0ceb82cfba0b8ef010730d1f4a67d18ee95a737ebaebba40a6f36e",
+            "lower": 0.7919371775677415,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 5,
+            "master_status": 2,
+            "master_seconds": 0.0019998550415039062,
+            "recourse_status": 3,
+            "cut_hash": "927dfda937bbe5cafb11347aa301c5dfcca92a87a1829fbc3992b9d08d7b26f1",
+            "lower": 0.8775999999999999,
+            "upper": 0.9215371775677416
+          },
+          {
+            "iteration": 6,
+            "master_status": 2,
+            "master_seconds": 0.0,
+            "recourse_status": null,
+            "cut_hash": null
+          }
+        ],
+        "uncertified_cuts_used": 0
+      }
+    }
+  ]
+}
