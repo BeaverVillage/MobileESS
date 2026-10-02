@@ -59,7 +59,7 @@ def main():
     ('voltage band 동일?','M1 Planning 0.955–1.045 p.u. 유지.'),('all96 grid 동일?','원 954,560 행 전체 보존. line, voltage, transformer current/kVA 포함.'),
     ('original→compact mapping?','Move x→f, 비terminal outgoing flow→z, terminal incoming flow→z, 나머지 물리 변수 identity.'),
     ('compact→original mapping?','Move x=f, stay x=z−sum outgoing f, 물리/charge-mode/SOC identity.'),
-    ('fixtures exact?',f"{fixtures['fixtures']}개 fixture PASS. {fixtures['path_comparisons']}개 original route-ID path 물리 feasibility/objective 비교. objective 최대 오차 {fixtures['maximum_objective_error']}."),
+    ('fixtures exact?',f"{fixtures['fixtures']}개 exhaustive fixture PASS. {fixtures['path_comparisons']}개 original route-ID path 물리 feasibility/objective 비교. objective 최대 오차 {fixtures['maximum_objective_error']}. 추가 2개 물리 feasible sequence fixture는 FEASIBLE_SEQUENCE_FIXTURES.json에 기록했다."),
     ('path census 동일?','Original과 compact의 모든 물리 feasible 경로 및 최적 경로 집합 동일. 19회 fractional movement 강제 probe 모두 infeasible.'),
     ('root LP objective 동일?',f"Gate={root.get('PASS')}; Original={f(ro.get('objective'))}, Compact={f(rc.get('objective'))}, difference={f(root.get('objective_difference'))}."),
     ('root relaxation이 강해졌는가?','동일 F3의 linear projection이므로 이 재표현 자체는 root feasible set을 강화하지 않는다.'),

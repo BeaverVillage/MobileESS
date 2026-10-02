@@ -100,3 +100,30 @@ def test_source_network_and_p2_authority_receipts():
     assert p['PASS'] and p['P2_status']=='NOT_RUN' and p['P2_optimize_calls']==0
     assert p['lexicographic_movement_contract']==['movement_energy_kwh','movement_count']
     assert all(p['vectors'][key]['compact_nonzero_coefficients']==198986 for key in ['movement_energy_kwh','movement_count'])
+
+def test_feasible_immediate_departure_and_three_move_physics():
+    from v42_monolithic.sequence_fixtures import run as extra
+    result=extra(write=False)
+    assert result['PASS'] and {r['movement_count'] for r in result['extra_fixtures']}=={2,3}
+
+def test_final_flags_prevent_hidden_downstream_or_production():
+    if not (OUT/'FINAL_FLAGS.json').exists():pytest.skip('Final evidence not yet written')
+    flags=read('FINAL_FLAGS.json');authorization=read('COMPACT_M1_PRODUCTION_AUTHORIZATION.json')
+    assert not flags['M1_ACCEPTED'] and not flags['Problem13_FINAL'] and not flags['production_1800_run']
+    assert all(flags[k]=='NOT_RUN' for k in ['P2','A2','M2','Actual','Fresh_AC'])
+    assert all(flags[k]==0 for k in ['Benders_master','Benders_recourse','Farkas_cuts','Phase_I'])
+    assert not authorization['production_1800_executed']
+    if authorization['COMPACT_M1_PRODUCTION_AUTHORIZED']:
+        assert flags['EXACTNESS_PASS'] and read('CANARY_COMPARISON.json')['promising']
+
+def test_final_root_and_canary_gate_correspondence():
+    if not (OUT/'FINAL_FLAGS.json').exists():pytest.skip('Final evidence not yet written')
+    root=read('ROOT_LP_EQUIVALENCE.json')
+    if root['PASS']:
+        a=read(root.get('selected_original_artifact','ROOT_LP_ORIGINAL.json'));b=read(root.get('selected_compact_artifact','ROOT_LP_COMPACT.json'))
+        assert a['terminal_optimal'] and b['terminal_optimal'] and abs(a['objective']-b['objective'])<=1e-8
+        assert a['settings']==b['settings'] and root['original_to_compact']['PASS'] and root['compact_to_original']['PASS']
+        for name in ['CANARY_ORIGINAL_600S.json','CANARY_COMPACT_600S.json']:
+            c=read(name);assert c['settings']['Heuristics']==0 and c['settings']['Threads']==4 and c['settings']['TimeLimit']==600
+    else:
+        assert read('CANARY_ORIGINAL_600S.json')['status']=='NOT_RUN' and read('CANARY_COMPACT_600S.json')['status']=='NOT_RUN'
