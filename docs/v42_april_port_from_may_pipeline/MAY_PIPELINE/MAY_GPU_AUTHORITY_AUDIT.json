@@ -1,0 +1,1142 @@
+{
+  "schema": "V42_MAY_GPU_AUTHORITY_AUDIT_V1",
+  "base": {
+    "repository": "BeaverVillage/MobileESS",
+    "pull_request": 121,
+    "exact_head": "c0783fadbbca282f2ce580c45fe82feaed71584c"
+  },
+  "status": "MAY_GPU_CONSTRUCTION_RULE_RESTORED",
+  "scope": "Code, schema and construction provenance restoration only; no May scientific rerun or value donation.",
+  "MAY_PIPELINE_USED_AS_BLUEPRINT": true,
+  "MAY_SCIENTIFIC_OUTCOMES_USED_FOR_APRIL": false,
+  "MAY_VALUES_COPIED_TO_APRIL": false,
+  "inspection_controls": {
+    "May_job_payloads_parsed": false,
+    "May_scientific_outcome_payloads_read": false,
+    "May_row_numeric_reproduction_performed": false,
+    "May_code_executed": false,
+    "optimizer_calls": 0,
+    "OpenDSS_calls": 0,
+    "external_raw_modified": false,
+    "current_runtime_service_authority": "V10::T3_ISOTONIC_ROLLING14_calibrated",
+    "historical_requested_walltime_service_fallback": false
+  },
+  "answers": [
+    {
+      "number": 1,
+      "question": "Where did May GPU_gang / requested GPU originate?",
+      "answer": "Direct raw Kestrel gpus_requested, copied into the V37 job ledger and temporal schedule, then frozen requested_GPU, COMMON_B0_REFERENCE_JOBS requested_GPU, May native known_population GPU_gang, current-Q50 native inherited GPU_gang, and canonical Job.gpu. Current-Q50 inference replaces service duration without recomputing the physical GPU quantity.",
+      "evidence": [
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 461,
+          "line_end": 469
+        },
+        {
+          "source": "dayahead/v40d_actual/inputs.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\inputs.py",
+          "sha256": "d37f290f01952edc51a69cd8a603038bfe8b7e396dd5d44ea626613372f0b1ee",
+          "line_start": 74,
+          "line_end": 89
+        },
+        {
+          "source": "dayahead/v41/common.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\common.py",
+          "sha256": "e21bde3188d1a246dbebfb50262c7722782ff2fa69b7e9b331ff2fba8a9d8a75",
+          "line_start": 59,
+          "line_end": 62
+        },
+        {
+          "source": "dayahead/v41/common.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\common.py",
+          "sha256": "e21bde3188d1a246dbebfb50262c7722782ff2fa69b7e9b331ff2fba8a9d8a75",
+          "line_start": 84,
+          "line_end": 94
+        },
+        {
+          "source": "v42_may01/prepare.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+          "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+          "line_start": 87,
+          "line_end": 113
+        },
+        {
+          "source": "v42_final/native_inputs.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native_inputs.py",
+          "sha256": "bf32fa885007f31265b09fd1511ea3c6543927a8efd5883cace9be8245e9a999",
+          "line_start": 40,
+          "line_end": 64
+        },
+        {
+          "source": "v42_final/native.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native.py",
+          "sha256": "6fddb5938544aef952f86cc72e836a46c657ed66a6a594f5d842346900beebba",
+          "line_start": 13,
+          "line_end": 30
+        },
+        {
+          "source": "v42_temporal/native.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_temporal\\native.py",
+          "sha256": "9e93c03217bad5dff2c318a91d760c85d875a05b6b42cc5d5464107000546212",
+          "line_start": 45,
+          "line_end": 49
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "question": "Was raw Kestrel gpus_requested used directly?",
+      "answer": "Yes at the upstream V37 construction boundary: float(raw[gpus_requested]) becomes requested_gpus. The final V42 bundle inherits the intermediate physical GPU quantity. Its snapshot gpus_requested also supplies the ML runtime feature num_gpus_req; that feature path is distinct from the inherited GPU_gang path.",
+      "evidence": [
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 69,
+          "line_end": 73
+        },
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 463,
+          "line_end": 469
+        },
+        {
+          "source": "v42_final/native_inputs.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native_inputs.py",
+          "sha256": "bf32fa885007f31265b09fd1511ea3c6543927a8efd5883cace9be8245e9a999",
+          "line_start": 19,
+          "line_end": 36
+        },
+        {
+          "source": "v42_final/native_inputs.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native_inputs.py",
+          "sha256": "bf32fa885007f31265b09fd1511ea3c6543927a8efd5883cace9be8245e9a999",
+          "line_start": 40,
+          "line_end": 52
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "question": "Did it come through a canonical intermediate table?",
+      "answer": "Yes: V37_R4A_JOB_LEDGER.parquet requested_gpus/requested_GPUs and serialized temporal schedule requested_gpus precede frozen/common requested_GPU and native GPU_gang. The ledger and snapshot schemas were inspected from footers only; May per-job values were not compared in this audit.",
+      "evidence": [
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 390,
+          "line_end": 412
+        },
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 559,
+          "line_end": 583
+        },
+        {
+          "source": "dayahead/v40d_actual/inputs.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\inputs.py",
+          "sha256": "d37f290f01952edc51a69cd8a603038bfe8b7e396dd5d44ea626613372f0b1ee",
+          "line_start": 50,
+          "line_end": 88
+        },
+        {
+          "source": "dayahead/v41/common.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\common.py",
+          "sha256": "e21bde3188d1a246dbebfb50262c7722782ff2fa69b7e9b331ff2fba8a9d8a75",
+          "line_start": 39,
+          "line_end": 43
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "question": "Was GPU inherited from a job-state ledger?",
+      "answer": "Yes. May prepare.job_ledger copies common requested_GPU into its job-state record GPU_gang; the May native bundle receives these records as known_population. Current-Q50 native_inputs uses dict(j, ...) without overriding GPU_gang. EpisodeLedger.submit also preserves an already supplied, positive whole-gang GPU request; it does not discover missing request quantities.",
+      "evidence": [
+        {
+          "source": "v42_may01/prepare.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+          "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+          "line_start": 108,
+          "line_end": 113
+        },
+        {
+          "source": "v42_may01/prepare.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+          "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+          "line_start": 186,
+          "line_end": 186
+        },
+        {
+          "source": "v42_may01/prepare.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+          "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+          "line_start": 243,
+          "line_end": 250
+        },
+        {
+          "source": "v42_final/native_inputs.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native_inputs.py",
+          "sha256": "bf32fa885007f31265b09fd1511ea3c6543927a8efd5883cace9be8245e9a999",
+          "line_start": 40,
+          "line_end": 52
+        },
+        {
+          "source": "v42_final/state.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\state.py",
+          "sha256": "0a7723650697869d4c7023a53d2ae9a8444c9859ccf1b11acf17338472ef0e36",
+          "line_start": 40,
+          "line_end": 60
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "question": "Was there request-version reconciliation?",
+      "answer": "No reconstruction of original request versions was found in this executed-construction code path. V37 rejects duplicate full ids, which is not request-version reconciliation. Current V42 explicitly retains the Kestrel trace-proxy limitation: study authorization does not establish original request-version history.",
+      "evidence": [
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 180,
+          "line_end": 191
+        },
+        {
+          "source": "v42_final/native_inputs.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native_inputs.py",
+          "sha256": "bf32fa885007f31265b09fd1511ea3c6543927a8efd5883cace9be8245e9a999",
+          "line_start": 68,
+          "line_end": 71
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "question": "Was GPU maintained as an immutable physical attribute from the submission snapshot?",
+      "answer": "The code copies the snapshot request quantity into jobs and preserves requested_GPU through common rematerialization; V42 canonical/physical state uses inherited GPU_gang, with RUNNING occupancy independent of Q50 expiry. Identity uses the full source id, source-ledger submit_time and exact UID-set checks, with timestamp normalization to UTC. The May V42 membership gate checks full snapshot UIDs, cutoff and state; it does not recheck raw gpus_requested equality per UID. This audit therefore restores the construction rule, not independent numeric verification of every May row or original request version.",
+      "evidence": [
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 180,
+          "line_end": 205
+        },
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 211,
+          "line_end": 254
+        },
+        {
+          "source": "dayahead/v40d_actual/inputs.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\inputs.py",
+          "sha256": "d37f290f01952edc51a69cd8a603038bfe8b7e396dd5d44ea626613372f0b1ee",
+          "line_start": 84,
+          "line_end": 91
+        },
+        {
+          "source": "dayahead/v41/common.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\common.py",
+          "sha256": "e21bde3188d1a246dbebfb50262c7722782ff2fa69b7e9b331ff2fba8a9d8a75",
+          "line_start": 84,
+          "line_end": 86
+        },
+        {
+          "source": "v42_may01/prepare.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+          "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+          "line_start": 79,
+          "line_end": 88
+        },
+        {
+          "source": "v42_temporal/native.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_temporal\\native.py",
+          "sha256": "9e93c03217bad5dff2c318a91d760c85d875a05b6b42cc5d5464107000546212",
+          "line_start": 57,
+          "line_end": 61
+        },
+        {
+          "source": "v42_final/state.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\state.py",
+          "sha256": "0a7723650697869d4c7023a53d2ae9a8444c9859ccf1b11acf17338472ef0e36",
+          "line_start": 46,
+          "line_end": 60
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "question": "Was missing raw GPU exactly derived from another source-backed relation?",
+      "answer": "No additional GPU relation was found. Raw archive reprojection in current-Q50 native_inputs recovers array_pos only from exact ids. No GPU-from-node, GRES/ReqTRES parsing, job-id stem matching or other missing-GPU derivation exists in this May construction path. GPUS_PER_NODE*nodes is an upper-bound validation, not a replacement quantity.",
+      "evidence": [
+        {
+          "source": "v42_final/native_inputs.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native_inputs.py",
+          "sha256": "bf32fa885007f31265b09fd1511ea3c6543927a8efd5883cace9be8245e9a999",
+          "line_start": 23,
+          "line_end": 35
+        },
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 113,
+          "line_end": 123
+        },
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 431,
+          "line_end": 435
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "question": "Was there fallback or imputation?",
+      "answer": "No physical GPU imputation is implemented. The historical V37 producer excludes incomplete resource rows and records UNKNOWN_GPU_REQUEST; historical Actual contributor construction similarly retains only positive finite requested-GPU contributors. Historical coverage_fallback_status is a duration fallback, not GPU recovery. Those exclusions and requested-walltime duration rules are superseded for this April task: retain every population row, leave unresolved GPU null, fail the known/Actual completeness gates, and use current frozen V42 Runtime service authority.",
+      "evidence": [
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 431,
+          "line_end": 435
+        },
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 486,
+          "line_end": 499
+        },
+        {
+          "source": "dayahead/v41/actual.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\actual.py",
+          "sha256": "82ad9b01a57fcbca33e9778a8741665626ca763025fa150470e4354551a70fe6",
+          "line_start": 148,
+          "line_end": 159
+        },
+        {
+          "source": "v42_final/native_inputs.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native_inputs.py",
+          "sha256": "bf32fa885007f31265b09fd1511ea3c6543927a8efd5883cace9be8245e9a999",
+          "line_start": 45,
+          "line_end": 52
+        }
+      ]
+    }
+  ],
+  "lineage": [
+    {
+      "stage": "raw source -> causal D1 snapshot",
+      "field_in": "gpus_requested",
+      "field_out": "gpus_requested",
+      "identity": "Exact full id string; job_id retained separately; source_member retained; source timestamp normalization to UTC; duplicate full id is an error.",
+      "causality": "Dday midnight fixed AEST minus 6 hours, i.e. D-1 18:00 AEST. submit_time <= cutoff; observed known_running_start retained only for RUNNING. Future pending start/end removed before downstream snapshot.",
+      "evidence": [
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 150,
+          "line_end": 205
+        },
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 211,
+          "line_end": 254
+        }
+      ]
+    },
+    {
+      "stage": "causal snapshot -> job ledger and serialized schedule",
+      "field_in": "gpus_requested",
+      "field_out": "requested_gpus / requested_GPUs",
+      "rule": "Direct float copy. Historical completeness test requires finite positive nodes, GPU and requested seconds, with GPU <= 4*nodes. This is a domain filter, not GPU derivation.",
+      "callers": [
+        "materialize_all -> snapshot_at_issue -> materialize_day -> _jobs_and_ledger; sources._materialize_kestrel reuses the same snapshot constructor."
+      ],
+      "snapshot_population": "Saved full causal snapshot is not itself GPU-completeness filtered: refresh verifies snapshot ids == job-ledger ids union exclusion ids.",
+      "evidence": [
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 113,
+          "line_end": 123
+        },
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 431,
+          "line_end": 469
+        },
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 559,
+          "line_end": 583
+        },
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 721,
+          "line_end": 735
+        },
+        {
+          "source": "dayahead/v37/aidc_materializer.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "line_start": 753,
+          "line_end": 757
+        },
+        {
+          "source": "dayahead/v37/sources.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\sources.py",
+          "sha256": "47e7af52494ad0b69454da3d73c4d7a3d3641143d1a86ee01c35b7231c7372e8",
+          "line_start": 165,
+          "line_end": 193
+        }
+      ]
+    },
+    {
+      "stage": "frozen temporal decision -> common reference",
+      "field_in": "temporal_schedule.requested_gpus",
+      "field_out": "requested_GPU",
+      "rule": "int conversion in frozen_jobs, exact selected UID population equal to V37 ledger, ledger submit_time joined by full UID. common.build asserts same ledger UIDs and retains requested_GPU through reference rematerialization. Historical int conversions do not independently establish whole-gang validity.",
+      "construction_receipt": "Actual common receipt generator, baseline, migration, admission and declared source-artifact SHA/size match their local bytes.",
+      "evidence": [
+        {
+          "source": "dayahead/v40d_actual/inputs.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\inputs.py",
+          "sha256": "d37f290f01952edc51a69cd8a603038bfe8b7e396dd5d44ea626613372f0b1ee",
+          "line_start": 45,
+          "line_end": 91
+        },
+        {
+          "source": "dayahead/v41/common.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\common.py",
+          "sha256": "e21bde3188d1a246dbebfb50262c7722782ff2fa69b7e9b331ff2fba8a9d8a75",
+          "line_start": 17,
+          "line_end": 43
+        },
+        {
+          "source": "dayahead/v41/common.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\common.py",
+          "sha256": "e21bde3188d1a246dbebfb50262c7722782ff2fa69b7e9b331ff2fba8a9d8a75",
+          "line_start": 59,
+          "line_end": 62
+        },
+        {
+          "source": "dayahead/v41/common.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\common.py",
+          "sha256": "e21bde3188d1a246dbebfb50262c7722782ff2fa69b7e9b331ff2fba8a9d8a75",
+          "line_start": 84,
+          "line_end": 116
+        }
+      ]
+    },
+    {
+      "stage": "common reference -> May native known population",
+      "field_in": "requested_GPU",
+      "field_out": "GPU_gang",
+      "rule": "prepare.job_ledger int(requested_GPU) direct copy; verifies common snapshot SHA, full exact snapshot/common UID-set equality, cutoff and state. This projection reads no raw GPU field for an independent GPU equality check.",
+      "evidence": [
+        {
+          "source": "v42_may01/prepare.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+          "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+          "line_start": 68,
+          "line_end": 88
+        },
+        {
+          "source": "v42_may01/prepare.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+          "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+          "line_start": 108,
+          "line_end": 113
+        },
+        {
+          "source": "v42_may01/prepare.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+          "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+          "line_start": 186,
+          "line_end": 186
+        },
+        {
+          "source": "v42_may01/prepare.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+          "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+          "line_start": 243,
+          "line_end": 250
+        }
+      ]
+    },
+    {
+      "stage": "old native -> current frozen Q50 native",
+      "field_in": "known_population.GPU_gang",
+      "field_out": "known_population.GPU_gang",
+      "rule": "dict(j, current service fields) inherits GPU untouched; snapshot.gpus_requested is separately a num_gpus_req ML feature. Raw reprojection reads id/array_pos only. Q50 is the current service authority; historical requested remaining is explicitly not the new nominal.",
+      "evidence": [
+        {
+          "source": "v42_final/native_inputs.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native_inputs.py",
+          "sha256": "bf32fa885007f31265b09fd1511ea3c6543927a8efd5883cace9be8245e9a999",
+          "line_start": 17,
+          "line_end": 36
+        },
+        {
+          "source": "v42_final/native_inputs.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native_inputs.py",
+          "sha256": "bf32fa885007f31265b09fd1511ea3c6543927a8efd5883cace9be8245e9a999",
+          "line_start": 40,
+          "line_end": 64
+        }
+      ]
+    },
+    {
+      "stage": "current native -> canonical scheduling / physical ledger",
+      "field_in": "GPU_gang",
+      "field_out": "GPU_gang / Job.gpu / physical gpu",
+      "rule": "Canonical copy; RUNNING Q50-expired boundary still retains full gang; EpisodeLedger requires provided whole positive GPU and retains physical occupancy until observed completion/control release.",
+      "evidence": [
+        {
+          "source": "v42_final/native.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native.py",
+          "sha256": "6fddb5938544aef952f86cc72e836a46c657ed66a6a594f5d842346900beebba",
+          "line_start": 13,
+          "line_end": 35
+        },
+        {
+          "source": "v42_temporal/native.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_temporal\\native.py",
+          "sha256": "9e93c03217bad5dff2c318a91d760c85d875a05b6b42cc5d5464107000546212",
+          "line_start": 45,
+          "line_end": 61
+        },
+        {
+          "source": "v42_final/state.py",
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\state.py",
+          "sha256": "0a7723650697869d4c7023a53d2ae9a8444c9859ccf1b11acf17338472ef0e36",
+          "line_start": 40,
+          "line_end": 60
+        }
+      ]
+    },
+    {
+      "stage": "historical Actual code comparison, construction code only",
+      "field_in": "requested_GPU and raw gpus_requested",
+      "field_out": "copied gang / requested-GPU weighted work",
+      "rule": "replay_jobs checks raw requested GPU matches frozen quantity; realized_workload positive/finite filter excludes unresolved contributors. Neither path derives GPU. This filter is not permissible as current April population authority.",
+      "evidence": [
+        {
+          "source": "dayahead/v41/actual.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\actual.py",
+          "sha256": "82ad9b01a57fcbca33e9778a8741665626ca763025fa150470e4354551a70fe6",
+          "line_start": 22,
+          "line_end": 34
+        },
+        {
+          "source": "dayahead/v41/actual.py",
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\actual.py",
+          "sha256": "82ad9b01a57fcbca33e9778a8741665626ca763025fa150470e4354551a70fe6",
+          "line_start": 148,
+          "line_end": 179
+        }
+      ]
+    }
+  ],
+  "code_sources": {
+    "v42_may01/prepare.py": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+      "bytes": 24242,
+      "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "v42_final/native_inputs.py": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native_inputs.py",
+      "bytes": 6825,
+      "sha256": "bf32fa885007f31265b09fd1511ea3c6543927a8efd5883cace9be8245e9a999",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "v42_final/native.py": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native.py",
+      "bytes": 2257,
+      "sha256": "6fddb5938544aef952f86cc72e836a46c657ed66a6a594f5d842346900beebba",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "v42_temporal/native.py": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_temporal\\native.py",
+      "bytes": 12576,
+      "sha256": "9e93c03217bad5dff2c318a91d760c85d875a05b6b42cc5d5464107000546212",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "v42_final/state.py": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\state.py",
+      "bytes": 5635,
+      "sha256": "0a7723650697869d4c7023a53d2ae9a8444c9859ccf1b11acf17338472ef0e36",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "v42_native/actual.py": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_native\\actual.py",
+      "bytes": 9906,
+      "sha256": "70b042aecaa89fc287d919534f90af8f55b12b3a688ead20be9ec3620bf165b9",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "v42_final/common.py": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\common.py",
+      "bytes": 1550,
+      "sha256": "2c8c2a1f6c66082c06b353a95c7b47d65b9a8d60bf2d0107d4a843b0dd608f7b",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "dayahead/v37/aidc_materializer.py": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+      "bytes": 45569,
+      "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "dayahead/v37/sources.py": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\sources.py",
+      "bytes": 12080,
+      "sha256": "47e7af52494ad0b69454da3d73c4d7a3d3641143d1a86ee01c35b7231c7372e8",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "dayahead/v40d_actual/inputs.py": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\inputs.py",
+      "bytes": 5526,
+      "sha256": "d37f290f01952edc51a69cd8a603038bfe8b7e396dd5d44ea626613372f0b1ee",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "dayahead/v40a/initial.py": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40a\\initial.py",
+      "bytes": 5734,
+      "sha256": "57509943279381ae3f0025a3379e3fa3977a4e00d2ac998b7e7c2fd1487e276e",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "dayahead/v40a/accepted_initial.py": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40a\\accepted_initial.py",
+      "bytes": 4282,
+      "sha256": "6d5f479d909cb299693dd962a861980b28c9591851efb7d2f3c80be0b474fe3d",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "dayahead/v41/common.py": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\common.py",
+      "bytes": 8467,
+      "sha256": "e21bde3188d1a246dbebfb50262c7722782ff2fa69b7e9b331ff2fba8a9d8a75",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "dayahead/v41/actual.py": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\actual.py",
+      "bytes": 11991,
+      "sha256": "82ad9b01a57fcbca33e9778a8741665626ca763025fa150470e4354551a70fe6",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "dayahead/v41r2/reference.py": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r2\\reference.py",
+      "bytes": 3979,
+      "sha256": "9b981c854575a6fe4777e52908be85d2f5edd927c655b8c417b57302c040c075",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "dayahead/v41r1/migration.py": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r1\\migration.py",
+      "bytes": 7742,
+      "sha256": "c8908d56662dcb3820d90412dc1fa4a1094b73c95638938ff5096a4bdad37aff",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "dayahead/v41r1/migration_admission.py": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r1\\migration_admission.py",
+      "bytes": 889,
+      "sha256": "966872c6279e1a99f5d286d080dfa216e7100ab07753543838948e1943c1792a",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    },
+    "v41r4_runtime.py": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\v41r4_runtime.py",
+      "bytes": 10411,
+      "sha256": "3c13e6be893ef96b6f05fdb52f2dba915d5797e3ccfc89484014bf115f074362",
+      "inspection": "SOURCE_CODE_READ_ONLY"
+    }
+  },
+  "construction_artifacts": {
+    "V37_D1_snapshot": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-01\\V37_R4A_D1_SNAPSHOT.parquet",
+      "bytes": 44108,
+      "sha256": "8d74fcf0bc305bff983bff9607fe7d5120c8a61618631cfc6d6fdda81c71423a",
+      "inspection": "SHA256_AND_PARQUET_FOOTER_SCHEMA_ONLY_NO_ROWS",
+      "schema": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "job_id",
+          "type": "int64"
+        },
+        {
+          "name": "account_hash",
+          "type": "string"
+        },
+        {
+          "name": "partition",
+          "type": "string"
+        },
+        {
+          "name": "submit_time",
+          "type": "timestamp[us, tz=UTC]"
+        },
+        {
+          "name": "nodes_req",
+          "type": "int64"
+        },
+        {
+          "name": "processors_req",
+          "type": "int64"
+        },
+        {
+          "name": "memory_req",
+          "type": "string"
+        },
+        {
+          "name": "wallclock_req",
+          "type": "duration[ns]"
+        },
+        {
+          "name": "qos",
+          "type": "string"
+        },
+        {
+          "name": "gpus_requested",
+          "type": "double"
+        },
+        {
+          "name": "user_hash",
+          "type": "string"
+        },
+        {
+          "name": "source_member",
+          "type": "string"
+        },
+        {
+          "name": "wallclock_seconds",
+          "type": "double"
+        },
+        {
+          "name": "state_at_issue",
+          "type": "string"
+        },
+        {
+          "name": "known_running_start",
+          "type": "timestamp[ns, tz=UTC]"
+        },
+        {
+          "name": "operating_day",
+          "type": "string"
+        },
+        {
+          "name": "issue_time_fixed_AEST",
+          "type": "string"
+        }
+      ]
+    },
+    "V37_job_ledger": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-01\\V37_R4A_JOB_LEDGER.parquet",
+      "bytes": 39340,
+      "sha256": "c4176c2d5d02d4d2d6661fe6a896917182bf4a8f025e3dadddbc55fec1aac201",
+      "inspection": "SHA256_AND_PARQUET_FOOTER_SCHEMA_ONLY_NO_ROWS",
+      "schema": [
+        {
+          "name": "job_id",
+          "type": "string"
+        },
+        {
+          "name": "state_at_issue",
+          "type": "string"
+        },
+        {
+          "name": "workload_class",
+          "type": "string"
+        },
+        {
+          "name": "protected",
+          "type": "bool"
+        },
+        {
+          "name": "qos",
+          "type": "string"
+        },
+        {
+          "name": "partition",
+          "type": "string"
+        },
+        {
+          "name": "submit_time",
+          "type": "string"
+        },
+        {
+          "name": "requested_nodes",
+          "type": "int64"
+        },
+        {
+          "name": "requested_gpus",
+          "type": "double"
+        },
+        {
+          "name": "requested_GPUs",
+          "type": "double"
+        },
+        {
+          "name": "requested_walltime_seconds",
+          "type": "double"
+        },
+        {
+          "name": "elapsed_seconds_at_issue",
+          "type": "double"
+        },
+        {
+          "name": "diagnostic_point_total_seconds",
+          "type": "double"
+        },
+        {
+          "name": "diagnostic_safe_total_seconds",
+          "type": "double"
+        },
+        {
+          "name": "RSP_duration_seconds",
+          "type": "double"
+        },
+        {
+          "name": "RSP_duration_slots",
+          "type": "int64"
+        },
+        {
+          "name": "RW_duration_slots",
+          "type": "int64"
+        },
+        {
+          "name": "duration_authority",
+          "type": "string"
+        },
+        {
+          "name": "safe_runtime_authority",
+          "type": "string"
+        },
+        {
+          "name": "RUNNING_ELAPSED_EXCEEDS_REQUESTED_WALLTIME",
+          "type": "bool"
+        },
+        {
+          "name": "q_selected_seconds",
+          "type": "double"
+        },
+        {
+          "name": "known_running_start",
+          "type": "string"
+        },
+        {
+          "name": "snapshot_operating_day",
+          "type": "string"
+        },
+        {
+          "name": "evaluation_operating_day",
+          "type": "string"
+        },
+        {
+          "name": "temporal_flexible",
+          "type": "bool"
+        },
+        {
+          "name": "PARTIAL_shared",
+          "type": "bool"
+        },
+        {
+          "name": "coverage_fallback_status",
+          "type": "string"
+        },
+        {
+          "name": "RW_scheduled_start",
+          "type": "int64"
+        },
+        {
+          "name": "RW_scheduled_completion",
+          "type": "int64"
+        },
+        {
+          "name": "RSP_scheduled_start",
+          "type": "int64"
+        },
+        {
+          "name": "RSP_scheduled_completion",
+          "type": "int64"
+        }
+      ]
+    },
+    "May_native_bundle": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\docs\\v42_may01_native_canary\\MAY01_NATIVE_INPUT_BUNDLE.json",
+      "bytes": 2726555,
+      "sha256": "6bd1eb8c5d01d902a2a03fe5924440b82e26b0e78bc5094eb2ecab30ed437582",
+      "inspection": "SHA256_ONLY_NO_JOB_OR_RESULT_PAYLOAD_PARSED"
+    },
+    "May_current_Q50_native_bundle": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\docs\\v42_final_integration\\MAY01_FINAL_NATIVE_INPUT_BUNDLE.json",
+      "bytes": 4104156,
+      "sha256": "f18b9dea2686b49de73b6d5d6ec7cc9e409c82e47b7f3bf7d29bdf5b1ba31170",
+      "inspection": "SHA256_ONLY_NO_JOB_OR_RESULT_PAYLOAD_PARSED"
+    },
+    "May_native_source_manifest": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\docs\\v42_may01_native_canary\\SOURCE_MANIFEST.json",
+      "bytes": 33757,
+      "sha256": "9fc91818ece4d89c9843de1c154d5bb3af7fa75d70d93833313e0112068b1778",
+      "inspection": "SHA256_ONLY_NO_JOB_OR_RESULT_PAYLOAD_PARSED"
+    },
+    "May_native_input_manifest": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\docs\\v42_may01_native_canary\\MAY01_NATIVE_INPUT_MANIFEST.json",
+      "bytes": 33310,
+      "sha256": "beddaf427d31f23de300ddc4ecde6188259f712fd65ecda1ce8f0f477c57571a",
+      "inspection": "SHA256_ONLY_NO_JOB_OR_RESULT_PAYLOAD_PARSED"
+    },
+    "common_input_receipt": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-01\\common_q90_v3\\COMMON_INPUT_RECEIPT.json",
+      "bytes": 2558,
+      "sha256": "2c0e1f8124ea6f621f16ac9aa60f31b74b1673eff1d764883ac34ed0de666d97",
+      "inspection": "CONSTRUCTION_PROVENANCE_METADATA_ONLY"
+    },
+    "COMMON_B0_REFERENCE_JOBS.json": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-01\\common_q90_v3\\COMMON_B0_REFERENCE_JOBS.json",
+      "bytes": 1632416,
+      "sha256": "60a75be104f8df41a93ac14f50a9ddd8ce330e3bd0c12cce2aa4e23e4b202ddb",
+      "inspection": "SHA256_ONLY_NO_JOB_OR_RESULT_PAYLOAD_PARSED"
+    },
+    "COMMON_DA_SERVICE_AUTHORITY.json": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-01\\common_q90_v3\\COMMON_DA_SERVICE_AUTHORITY.json",
+      "bytes": 812138,
+      "sha256": "d9f28919d5651b04468d250e120f3a881cc0f5305a33c83b54b0a3b032bbdca9",
+      "inspection": "SHA256_ONLY_NO_JOB_OR_RESULT_PAYLOAD_PARSED"
+    },
+    "Q90_BASELINE_MATERIALIZATION.json": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-01\\common_q90_v3\\Q90_BASELINE_MATERIALIZATION.json",
+      "bytes": 200597,
+      "sha256": "ea4ffe1aaa3571068232271c31b0f31355fe9e25d19099c9a3af1e029acfb8c1",
+      "inspection": "SHA256_ONLY_NO_JOB_OR_RESULT_PAYLOAD_PARSED"
+    },
+    "Kestrel_raw_source": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+      "bytes": 731139558,
+      "sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+      "inspection": "SHA256_ONLY_THIS_AUDIT_NO_MAY_ROW_PAYLOAD_PARSED"
+    }
+  },
+  "common_receipt_hash_matches": [
+    {
+      "receipt_field": "generator",
+      "declared": {
+        "bytes": 8467,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\common.py",
+        "sha256": "e21bde3188d1a246dbebfb50262c7722782ff2fa69b7e9b331ff2fba8a9d8a75"
+      },
+      "observed": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\common.py",
+        "bytes": 8467,
+        "sha256": "e21bde3188d1a246dbebfb50262c7722782ff2fa69b7e9b331ff2fba8a9d8a75",
+        "inspection": "SOURCE_CODE_READ_ONLY"
+      },
+      "sha256_and_bytes_match": true
+    },
+    {
+      "receipt_field": "baseline_source",
+      "declared": {
+        "bytes": 3979,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r2\\reference.py",
+        "sha256": "9b981c854575a6fe4777e52908be85d2f5edd927c655b8c417b57302c040c075"
+      },
+      "observed": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r2\\reference.py",
+        "bytes": 3979,
+        "sha256": "9b981c854575a6fe4777e52908be85d2f5edd927c655b8c417b57302c040c075",
+        "inspection": "SOURCE_CODE_READ_ONLY"
+      },
+      "sha256_and_bytes_match": true
+    },
+    {
+      "receipt_field": "migration_contract_source",
+      "declared": {
+        "bytes": 7742,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r1\\migration.py",
+        "sha256": "c8908d56662dcb3820d90412dc1fa4a1094b73c95638938ff5096a4bdad37aff"
+      },
+      "observed": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r1\\migration.py",
+        "bytes": 7742,
+        "sha256": "c8908d56662dcb3820d90412dc1fa4a1094b73c95638938ff5096a4bdad37aff",
+        "inspection": "SOURCE_CODE_READ_ONLY"
+      },
+      "sha256_and_bytes_match": true
+    },
+    {
+      "receipt_field": "admission_source",
+      "declared": {
+        "bytes": 889,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r1\\migration_admission.py",
+        "sha256": "966872c6279e1a99f5d286d080dfa216e7100ab07753543838948e1943c1792a"
+      },
+      "observed": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r1\\migration_admission.py",
+        "bytes": 889,
+        "sha256": "966872c6279e1a99f5d286d080dfa216e7100ab07753543838948e1943c1792a",
+        "inspection": "SOURCE_CODE_READ_ONLY"
+      },
+      "sha256_and_bytes_match": true
+    },
+    {
+      "receipt_field": "snapshot",
+      "declared": {
+        "bytes": 139904,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-01\\V41_ML_SNAPSHOT_2025-05-01.json",
+        "sha256": "e70d43d1d3718cfa6dedfb10ec75da423ff2561785f3bdab81852de9502eb5bb"
+      },
+      "observed": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-01\\V41_ML_SNAPSHOT_2025-05-01.json",
+        "bytes": 139904,
+        "sha256": "e70d43d1d3718cfa6dedfb10ec75da423ff2561785f3bdab81852de9502eb5bb",
+        "inspection": "SHA256_ONLY_NO_JOB_OR_RESULT_PAYLOAD_PARSED"
+      },
+      "sha256_and_bytes_match": true
+    },
+    {
+      "receipt_field": "files.COMMON_B0_REFERENCE_JOBS.json",
+      "declared": {
+        "bytes": 1632416,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-01\\common_q90_v3\\COMMON_B0_REFERENCE_JOBS.json",
+        "sha256": "60a75be104f8df41a93ac14f50a9ddd8ce330e3bd0c12cce2aa4e23e4b202ddb"
+      },
+      "observed": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-01\\common_q90_v3\\COMMON_B0_REFERENCE_JOBS.json",
+        "bytes": 1632416,
+        "sha256": "60a75be104f8df41a93ac14f50a9ddd8ce330e3bd0c12cce2aa4e23e4b202ddb",
+        "inspection": "SHA256_ONLY_NO_JOB_OR_RESULT_PAYLOAD_PARSED"
+      },
+      "sha256_and_bytes_match": true
+    },
+    {
+      "receipt_field": "files.COMMON_DA_SERVICE_AUTHORITY.json",
+      "declared": {
+        "bytes": 812138,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-01\\common_q90_v3\\COMMON_DA_SERVICE_AUTHORITY.json",
+        "sha256": "d9f28919d5651b04468d250e120f3a881cc0f5305a33c83b54b0a3b032bbdca9"
+      },
+      "observed": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-01\\common_q90_v3\\COMMON_DA_SERVICE_AUTHORITY.json",
+        "bytes": 812138,
+        "sha256": "d9f28919d5651b04468d250e120f3a881cc0f5305a33c83b54b0a3b032bbdca9",
+        "inspection": "SHA256_ONLY_NO_JOB_OR_RESULT_PAYLOAD_PARSED"
+      },
+      "sha256_and_bytes_match": true
+    },
+    {
+      "receipt_field": "files.Q90_BASELINE_MATERIALIZATION.json",
+      "declared": {
+        "bytes": 200597,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-01\\common_q90_v3\\Q90_BASELINE_MATERIALIZATION.json",
+        "sha256": "ea4ffe1aaa3571068232271c31b0f31355fe9e25d19099c9a3af1e029acfb8c1"
+      },
+      "observed": {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-01\\common_q90_v3\\Q90_BASELINE_MATERIALIZATION.json",
+        "bytes": 200597,
+        "sha256": "ea4ffe1aaa3571068232271c31b0f31355fe9e25d19099c9a3af1e029acfb8c1",
+        "inspection": "SHA256_ONLY_NO_JOB_OR_RESULT_PAYLOAD_PARSED"
+      },
+      "sha256_and_bytes_match": true
+    }
+  ],
+  "historical_missing_behavior": {
+    "snapshot_retains_all_causal_rows": true,
+    "job_ledger_rule": "EXCLUDE_MISSING_GPU_OR_INVALID_RESOURCE",
+    "snapshot_refresh_identity": "ledger_uid_set UNION exclusions_uid_set == full snapshot_uid_set",
+    "May_V42_full_population_assertion": "full snapshot UID set == common reference UID set",
+    "actual_May_exclusion_count": null,
+    "explanation": "Code proves historical exclusion behavior, not that the current May source population had excluded rows. No May row values/counts were inspected to reconcile that assertion."
+  },
+  "permissible_april_transformation_frozen": {
+    "contract": "EXACT_SOURCE_GPU_REQUEST_CANONICALIZATION_RETAIN_FAIL_CLOSED_V1",
+    "date_policy": "Same rule for every operating day/month; May quantities, outcomes and date-specific defaults prohibited.",
+    "source_quantity": "Source-backed GPU request only: direct gpus_requested where supplied, or an independently audited uniquely parsed scheduler request field with exact matching source identity. This May path supplies no additional recovery relation.",
+    "identity": [
+      "Exact full job_uid/raw id; preserve array-task suffixes and do not collapse to job_id stems.",
+      "Exact source submission instant normalized to UTC with full precision; UID alone is not authority to merge conflicting submissions.",
+      "Retain anonymized job_id/source_member and observed start identity as provenance/cross-check; no fuzzy matching."
+    ],
+    "quantity_validation": "Finite, positive, whole-number GPU gang with known request semantics. No int truncation, rounding, node multiplication, allocated-to-requested substitution or fixed GPU default.",
+    "conflicts": "Conflicting quantities for the same exact identity remain AMBIGUOUS_SOURCE_MATCH; no arbitrary choice or averaging. Different submission identity is not a match.",
+    "missing": "Retain the original row with GPU_gang=null, row identity/source provenance/status; fail KNOWN_GPU_AUTHORITY_COMPLETE or ACTUAL_GPU_AUTHORITY_COMPLETE. Never drop an unknown row or convert its GPU to zero.",
+    "immutable": "Bind one source-backed GPU request to the exact submission identity; known/Actual copies must agree; separate current runtime service inference and observed physical state from GPU quantity.",
+    "duration": "Current frozen V42 Q50 total/remaining-service authority only. Requested walltime may be a Runtime feature, never a restored service duration.",
+    "capacity": "Validate current V42 compatibility/facility authority; historical 4*nodes validation is not a demand derivation or replacement capacity authority.",
+    "population": "Keep all April causal known jobs and all Actual arrivals/physical state events, with independent known and Actual gates; no historical planning_eligible/population masking as a drop rule.",
+    "common_reference": "Use user-defined current V42 deterministic causal grid-independent common reference schedule; do not copy historical May/common requested-service geometry.",
+    "new_missing_GPU_derivation_discovered": false
+  },
+  "superseded_rules": [
+    {
+      "old": "EXCLUDE_MISSING_GPU",
+      "new": "RETAIN_FAIL_CLOSED",
+      "reason": "Explicit user prohibition of workload drop and imputation."
+    },
+    {
+      "old": "Historical Actual positive-only requested-GPU contributor population",
+      "new": "RETAIN_ALL_ACTUAL_POPULATION_AND_FAIL_UNRESOLVED_GPU",
+      "reason": "No observed physical arrival may disappear from current April authority."
+    },
+    {
+      "old": "REQUESTED_WALLTIME_FAIL_CLOSED / REQUESTED_REMAINING service",
+      "new": "CURRENT_FROZEN_V42_RUNTIME_SERVICE",
+      "reason": "GPU recovery does not change current Runtime/service authority."
+    },
+    {
+      "old": "Historical int(requested_gpus) conversion without whole-number proof",
+      "new": "REQUIRE_POSITIVE_WHOLE_SOURCE_REQUEST_BEFORE_CONVERSION",
+      "reason": "No fractional truncation or defaulting."
+    },
+    {
+      "old": "Historical geometry and planning_eligible masking",
+      "new": "CURRENT_COMMON_REFERENCE_ALL_ROWS_WITH_EXPLICIT_AUTHORITY_GATES",
+      "reason": "Current user-defined reference generation and no-drop fairness contract."
+    }
+  ],
+  "scientific_execution": {
+    "April_simulation": "NOT_RUN_BY_THIS_AUDIT",
+    "May": "NOT_RUN",
+    "B1": "NOT_RUN",
+    "B2": "NOT_RUN",
+    "B3": "NOT_RUN",
+    "M1_Benders": "NOT_RUN",
+    "V_PLAN": null,
+    "V_DA_AC": null,
+    "V_DDAY_AC": null,
+    "voltage_residuals": null,
+    "margin_candidates": null
+  },
+  "limitations": [
+    "This audit restores a source-backed construction rule and verifies metadata hashes, not numeric May job-by-job equality or any scientific PASS.",
+    "No original request-version history is established by a single Kestrel trace export or duplicate-id rejection.",
+    "May known/Actual quantities and outcomes are not April donors.",
+    "May pipeline contains no hidden source-backed missing-GPU derivation; an unresolved April raw request remains an authority failure after the exact rule is applied.",
+    "The generic V42 ActualBackend protocol receives source-backed physical state from its caller; it supplies no missing-GPU reconstruction and does not establish a successful native scientific backend run."
+  ],
+  "forensic_complete": true,
+  "forensic_complete_meaning": "Code/source construction chain restored, with explicit limitations; not numerical May reproduction or April executable PASS"
+}
