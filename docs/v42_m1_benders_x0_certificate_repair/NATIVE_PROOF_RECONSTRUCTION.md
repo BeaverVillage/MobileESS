@@ -1,0 +1,13 @@
+# Native proof and exact reconstruction
+
+Authority: [Gurobi FarkasDual/FarkasProof](https://docs.gurobi.com/projects/optimizer/en/current/reference/attributes/constraintlinear.html#farkasdual), accessed 2026-10-02.
+
+For original rows A y + B x (sense) b, native lambda has lambda>=0 on <= and lambda<=0 on >=. Let a=A^T lambda and h(x)=lambda^T(b-Bx). The lower support L(a)=sum(a_j*LB_j for a_j>0)+sum(a_j*UB_j for a_j<0) gives beta=L(a)-h(x)>0 and the globally valid cut lambda^T b-L(a)-lambda^T B x>=0.
+
+A free variable requires a_j=0 exactly. A lower-only variable requires a_j>=0; upper-only requires a_j<=0. Boxed variables admit either sign. Variable-bound multipliers are equivalently determined by these coefficients and their extremizing bounds. RC is an optimal-solution dual attribute, not an additional Farkas cancellation vector for truly free variables. PR117 saved no RC or basis at status INFEASIBLE. The official Farkas API does not supply a separate hidden multiplier that repairs nonzero free-column stationarity.
+
+All 1,589 failures are nonzero coefficients of truly free variables (1,584 injection P/Q, 5 response line P/Q). They are numerically small but exact IEEE-rational products are nonzero. Full native support is therefore unbounded, so the unmodified saved row vector has no finite reconstructed exact beta. A finite partial support sum is not a certificate. FarkasProof=42.159075966904695 is the solver's floating-point proof value; we cannot infer its internal rounding sequence. The observation establishes an exactness gap in the exported floating multipliers, not that an independent bound contribution was forgotten.
+
+The new derivation keeps every inequality multiplier unchanged and solves equality-multiplier stationarity exactly, in rational arithmetic. All 81,216 free columns have an acyclic defining-equality pivot of +1. Reverse triangular substitution changes 1,589 equality multipliers. This is a new explicitly derived rational certificate; the raw solver ray remains rejected. Every original matrix entry, physical row, bound and master domain is retained. No residual is clamped, sign-flipped, or deleted. Recompute the full A/B products and finite bound support independently from COO before accepting and again before inserting a cut.
+
+The completed ray's solver-RHS proof is 42.15907601900621, within about 5.21e-8 of the native proof. Global cut validity and strict source separation are checked on original exact b-Bx, independently of agreement with the floating proof scalar. The full rational certificate and each equality multiplier change are in OFFLINE_COMPLETED_CERTIFICATE.json. This offline audit does not authorize a master solve; fixtures and a frozen same-x isolated recourse must pass first.
