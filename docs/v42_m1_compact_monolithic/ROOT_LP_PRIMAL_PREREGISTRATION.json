@@ -1,0 +1,49 @@
+{
+  "utc": "2026-10-02T06:19:00Z",
+  "source_sha256": "53808ded76c744e4b5eba6b498fc802ad83c1bede48bb349e1fde5516920ebfe",
+  "policy": {
+    "Threads": 4,
+    "Seed": 20260929,
+    "Method": 2,
+    "NodeMethod": 1,
+    "NumericFocus": 1,
+    "FeasibilityTol": 1e-08,
+    "OptimalityTol": 1e-08,
+    "IntFeasTol": 1e-08,
+    "MIPFocus": 0,
+    "Heuristics": 0,
+    "MIPGap": 0.005,
+    "Crossover": 0,
+    "BarConvTol": 1e-11,
+    "PreDual": 0,
+    "TimeLimit": 1800
+  },
+  "reason": "Automatic dual presolve expanded both no-crossover root LPs; Original SUBOPTIMAL is not certified. Fix identical primal presolve PreDual=0 for both fresh LPs, preserve scientific matrix and all earlier evidence.",
+  "documentation": "https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#parameter-predual",
+  "activation": "Only prior pair has at least one nonoptimal/missing primal result. Any pair with both OPTIMAL and projection mismatch is a hard STOP.",
+  "pair": [
+    "ROOT_LP_PRIMAL_ORIGINAL",
+    "ROOT_LP_PRIMAL_COMPACT"
+  ],
+  "fresh": true,
+  "LP_only": true,
+  "previous_methods_attempted": "Dual simplex, barrier with crossover, then no-crossover with automatic dual presolve; all evidence retained.",
+  "objective_tolerance_unchanged": 1e-08,
+  "material_criteria_unchanged": true,
+  "canary_policy_unchanged": {
+    "Threads": 4,
+    "Seed": 20260929,
+    "Method": 1,
+    "NodeMethod": 1,
+    "NumericFocus": 1,
+    "FeasibilityTol": 1e-08,
+    "OptimalityTol": 1e-08,
+    "IntFeasTol": 1e-08,
+    "MIPFocus": 0,
+    "Heuristics": 0,
+    "MIPGap": 0.005
+  },
+  "primal_mapping_required": true,
+  "no_MIP_parameter_sweep": true,
+  "production": false
+}

@@ -93,7 +93,7 @@ def main():
     ('S2보다 낮은 F3 root를 어떻게 해석했는가?','양 arm 모두 같은 unstrengthened F3. S2는 별도 globally valid strengthening의 원 M1 LB이며 그대로 보존. 비교 대상 strengthening을 혼동하지 않는다.'),
     ('부모 branch와 evidence는 보존했는가?',f"PR120 exact head에서 sibling. inherited {preserve()}개 tracked 파일의 physical SHA 보존. 중단한 acceleration branch와 runner를 재개/혼합하지 않았다."),
     ('재현 시 어떤 파일이 필요한가?','PR120 sealed F3 MPS와 readonly physical input caches, compact sparse snapshot 및 Start/mapping maps가 local cache에 있다. MODEL_FREEZE와 EXECUTION_FREEZE로 SHA를 검증한다. optimizer source/policy는 code commit과 연결된다.'),
-    ('Root에서 모든 binary를 relax했는가?',f"예. Original arc/mode, compact z/selector/mode 모두 [0,1] continuous. Primary는 동일 Method=1/Threads=4. Primary terminal 결과 전 사전등록한 조건부 fallback은 동일 Method=2/Crossover=1/Threads=4이며, primary optimal mismatch는 bypass하지 않는다. 선택 pair는 {root.get('method',1)}; 모든 raw evidence와 등록을 보존한다."),
+    ('Root에서 모든 binary를 relax했는가?',f"예. Original arc/mode, compact z/selector/mode 모두 [0,1] continuous. Primary dual simplex는 양쪽 TIME_LIMIT. Barrier+crossover pilot은 실제 numerical failure 후 중단했고 compact는 미실행. 자동 dual presolve no-crossover pair 및 PreDual=0 primal-presolve pair는 별도 사전등록했다. 어느 pair라도 양쪽 OPTIMAL인데 objective/mapping이 불일치하면 hard STOP한다. 선택 pair: Method={root.get('method',1)}, Crossover={root.get('Crossover','default')}, PreDual={root.get('PreDual','default')}. MILP canary는 최초 Method=1 정책을 유지한다. 모든 raw evidence와 등록을 보존한다."),
     ('숫자를 기대값으로 강제했는가?','아니다. Actual reachable node 9,038개와 mode384개로 9,422개의 binary를 집계했다. 9,696 가정은 쓰지 않았다.'),
     ('수치 warning과 시간 측정은?','원 scientific matrix의 작은 coefficients를 바꾸지 않는다. Solver warning/Kappa/KappaExact, optimize wall/runtime, construct/build, presolve/root 및 peak memory를 별도로 기록했다.'),
     ]
@@ -102,7 +102,7 @@ def main():
     (OUT/'FINAL_REVIEW_KO.md').write_text(body,encoding='utf8',newline='\n')
     next_text=f'''# 다음 수정\n\n판정: {verdict}.\n\nFull domain과 모든 scientific rows를 보존한 채 integer dimension은 95.477% 감소했다. Connected expression의 outgoing-movement 치환으로 nnz는 53.074% 증가하므로 presolve, simplex factorization, branch 성능을 증거로 해석해야 한다. Root projection은 동일해야 하며 bound 자체 강화는 이 representation의 목표가 아니다.\n\n사전 material 기준은 gap 20% 또는 valid LB 0.001 개선이며 결과 후 변경하지 않는다. Promising이면 별도 사용자 승인 후 1800초 production을 실행할 수 있다. 미달이면 exact 보조 connected continuous variable와 sparse linking row를 사용하는 대안의 exact projection/계수/새 preregistration을 먼저 준비할 수 있으나 이번 결과를 바꿔 재실행하지 않는다. Root equivalence가 미인증이면 full MILP를 계속하지 않고 수치 종료 상태와 mapping 잔차를 확인한다.\n\nP2/A2/M2/Actual/Fresh AC는 NOT_RUN. M1_ACCEPTED 및 Problem13_FINAL은 false 유지. 중단한 Benders acceleration lane은 그대로 보존한다.\n'''
     (OUT/'NEXT_MODIFICATIONS.md').write_text(next_text,encoding='utf8',newline='\n')
-    resources=[read(p.name) for p in sorted(OUT.glob('RESOURCE_*.json'))]
+    resources=[read(p.name) for p in sorted(OUT.glob('RESOURCE_*.json')) if p.name!='RESOURCE_RECEIPT.json']
     dump('RESOURCE_RECEIPT.json',dict(RESOURCE_CONTENTION_ABSENCE_REQUIRED=False,independent_workloads_allowed=True,
         own_heavy_lane_sequential=True,receipts=resources,historical_PR120_absolute_speedup_claim=False,
         interpretation='Hardware/thread equality is recorded. Same-lane objective/bound/gap comparison is controlled by frozen settings. Any wall-time speedup remains conditional on concurrent workload snapshots.',
