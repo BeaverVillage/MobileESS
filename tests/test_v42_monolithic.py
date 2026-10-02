@@ -127,3 +127,11 @@ def test_final_root_and_canary_gate_correspondence():
             c=read(name);assert c['settings']['Heuristics']==0 and c['settings']['Threads']==4 and c['settings']['TimeLimit']==600
     else:
         assert read('CANARY_ORIGINAL_600S.json')['status']=='NOT_RUN' and read('CANARY_COMPACT_600S.json')['status']=='NOT_RUN'
+
+def test_contradictory_bound_cannot_create_negative_gap_acceptance():
+    from v42_monolithic.certificates import interval
+    rejected=interval(UB+.01,UB)
+    assert not rejected['PASS'] and not rejected['solver_bound_used'] and rejected['valid_retained_LB']==LB
+    assert rejected['valid_global_gap']>0
+    accepted=interval(UB-.001,UB)
+    assert accepted['PASS'] and accepted['solver_bound_used'] and accepted['valid_global_gap']<.005

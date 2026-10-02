@@ -10,15 +10,17 @@ def main():
         for name in ['CANARY_ORIGINAL_600S.json','CANARY_COMPACT_600S.json','CANARY_COMPARISON.json']:
             if not (OUT/name).exists():dump(name,dict(status='NOT_RUN',reason='Fresh root LP equivalence gate not certified; no MIP canary permitted'))
     native=maybe('ORIGINAL_NATIVE_NETWORK_AUDIT.json');p2=maybe('P2_OBJECTIVE_CONTRACT.json')
-    p1=bool(a.get('P1_CANARY_ACCEPTED',False) or b.get('P1_CANARY_ACCEPTED',False))
-    exact=bool(root.get('PASS') and native.get('PASS') and p2.get('PASS') and read('FIXTURE_PATH_CENSUS.json')['PASS'] and read('COMPACT_MODEL_STATS.json')['PASS'] and read('MIP_START_PHYSICAL_VALIDATION.json')['PASS'])
-    promising=bool(comp.get('promising',False) and exact)
+    cert=maybe('CANARY_CERTIFICATE_AUDIT.json')
+    p1=bool(cert.get('P1_ACCEPTED',False))
+    root_certificate=maybe('ROOT_CERTIFICATE_CONSISTENCY.json')
+    exact=bool(root.get('PASS') and root_certificate.get('PASS') and native.get('PASS') and p2.get('PASS') and read('FIXTURE_PATH_CENSUS.json')['PASS'] and read('COMPACT_MODEL_STATS.json')['PASS'] and read('MIP_START_PHYSICAL_VALIDATION.json')['PASS'])
+    promising=bool(comp.get('promising',False) and exact and cert.get('PASS'))
     authorization=dict(COMPACT_M1_PRODUCTION_AUTHORIZED=promising,production_1800_executed=False,
         separate_user_approval_required_for_actual_1800=True,gate='Exactness, same validated start accepted, equivalent root, >=80% binary reduction, frozen material improvement criterion',
         reason='All frozen gates and material improvement passed' if promising else 'No production eligibility: required gate or material improvement not demonstrated')
     dump('COMPACT_M1_PRODUCTION_AUTHORIZATION.json',authorization)
     validUB=min([UB]+[c['validated_UB'] for c in [a,b] if c.get('validated_UB') is not None])
-    validLB=max([LB]+[c['valid_LB'] for c in [a,b] if c.get('valid_LB') is not None])
+    validLB=max([LB]+[cert[k]['valid_retained_LB'] for k in ['original','compact'] if k in cert])
     flags=dict(EXACTNESS_PASS=exact,FORMAL_PATH_PROOF_PASS=True,FIXTURE_EXACTNESS_PASS=True,
         ORIGINAL_NETWORK_ASSUMPTIONS_PASS=bool(native.get('PASS')),P2_OBJECTIVE_MAPPING_PASS=bool(p2.get('PASS')),
         ROOT_LP_EQUIVALENCE_PASS=bool(root.get('PASS')),COMPACTNESS_PASS=read('BINARY_REDUCTION_REPORT.json')['PASS'],
@@ -27,7 +29,7 @@ def main():
         Problem13_FINAL=False,Benders_master=0,Benders_recourse=0,Farkas_cuts=0,Phase_I=0,production_1800_run=False,
         retained_valid_UB=validUB,retained_valid_LB=validLB,retained_global_gap=(validUB-validLB)/validUB)
     dump('FINAL_FLAGS.json',flags)
-    verdict='EXACT_COMPACT_PROMISING_FOR_SEPARATELY_APPROVED_PRODUCTION' if promising else 'EXACT_COMPACT_NO_MATERIAL_CANARY_GAIN' if exact and comp else 'STOP_ROOT_EQUIVALENCE_NOT_CERTIFIED'
+    verdict='EXACT_COMPACT_PROMISING_FOR_SEPARATELY_APPROVED_PRODUCTION' if promising else 'STOP_CANARY_BOUND_INCONSISTENT' if exact and cert and not cert.get('PASS') else 'EXACT_COMPACT_NO_MATERIAL_CANARY_GAIN' if exact and comp else 'STOP_CANARY_NOT_COMPLETED' if exact else 'STOP_ROOT_EQUIVALENCE_NOT_CERTIFIED'
     dump('FINAL_VERDICT.json',dict(verdict=verdict,exactness=exact,promising=promising,base=BASE,
         binary_reduction_percent=read('BINARY_REDUCTION_REPORT.json')['binary_reduction_percent'],
         inherited_2365_files_preserved=preserve(),root=root,canary_comparison=comp,
@@ -66,8 +68,8 @@ def main():
     ('root relaxation을 약화했는가?','증명상 아니다. 양방향 LP mapping과 fresh full root objective tolerance gate를 별도로 기록했다.'),
     ('original root seconds?',f(ro.get('wall_seconds'))),('compact root seconds?',f(rc.get('wall_seconds'))),
     ('original canary UB?',f(a.get('validated_UB'))),('compact canary UB?',f(b.get('validated_UB'))),
-    ('original canary LB?',f(a.get('valid_LB'))),('compact canary LB?',f(b.get('valid_LB'))),
-    ('original gap?',f(a.get('valid_global_gap'))),('compact gap?',f(b.get('valid_global_gap'))),
+    ('original canary LB?',f(cert.get('original',{}).get('valid_retained_LB'))),('compact canary LB?',f(cert.get('compact',{}).get('valid_retained_LB'))),
+    ('original gap?',f(cert.get('original',{}).get('valid_global_gap'))),('compact gap?',f(cert.get('compact',{}).get('valid_global_gap'))),
     ('processed nodes?',f"Original={f(a.get('nodes_processed'))}, Compact={f(b.get('nodes_processed'))}. Open nodes 및 iterations은 각 artifact에 기록."),
     ('branch structure?','Original은 reachable arc+mode, compact는 node+필요 selector+mode로 분기한다. 실제 선택된 branch variable family는 표준 callback에서 미수집/NA이며 추정하지 않았다.'),
     ('600s improvement?',f"relative gap reduction={f(comp.get('relative_gap_reduction'))}, valid LB delta={f(comp.get('valid_LB_improvement'))}. 기준은 실행 전 20% 또는 0.001로 고정."),
