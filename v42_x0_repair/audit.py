@@ -11,7 +11,7 @@ def run():
     paths=git('ls-files','-z').split('\0');files=[dict(path=p,sha256=sha(ROOT/p)) for p in paths if p]
     dump('PR117_BASE_RECEIPT.json',dict(base=BASE,files=files,tracked_files=len(files),inherited_tests=825,inherited_bounded_checks=44))
     x,xr=load_x0();n,raw=load_native();w={i:q(v) for i,v in enumerate(raw['multipliers']) if v};a=products(n.A,w)
-    rows=[];counts=Counter();families=Counter();partial=F(0);native_rc_available=raw['reduced_costs'] is not None
+    rows=[];counts=Counter({k:0 for k in ['A_FREE_EXACT_ZERO','B_FREE_NONZERO','C_ONE_SIDED_COMPATIBLE','D_ONE_SIDED_INCOMPATIBLE','FINITE_BOXED_SUPPORTED']});families=Counter();partial=F(0);native_rc_available=raw['reduced_costs'] is not None
     C=n.A.tocsc();provenance=OUT/'UNSUPPORTED_COEFFICIENT_PROVENANCE.jsonl.gz'
     with gzip.open(provenance,'wt',encoding='utf8') as f:
         for j in range(len(n.yi)):
