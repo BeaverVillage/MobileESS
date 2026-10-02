@@ -135,3 +135,16 @@ def test_contradictory_bound_cannot_create_negative_gap_acceptance():
     assert rejected['valid_global_gap']>0
     accepted=interval(UB-.001,UB)
     assert accepted['PASS'] and accepted['solver_bound_used'] and accepted['valid_global_gap']<.005
+
+
+@pytest.mark.parametrize('both_optimal,primary_pass',[(True,False),(False,True)])
+def test_primal_root_certification_cannot_bypass_an_optimal_pair(monkeypatch,both_optimal,primary_pass):
+    import v42_monolithic.primal_roots as s
+    from pathlib import Path
+    responses={'ROOT_LP_PRIMAL_PREREGISTRATION.json':dict(source_sha256=s.sha(Path(s.__file__)),policy=s.POLICY),
+        'ROOT_LP_INTERIOR_ORIGINAL.json':dict(terminal_optimal=both_optimal),
+        'ROOT_LP_INTERIOR_COMPACT.json':dict(terminal_optimal=both_optimal),
+        'ROOT_LP_EQUIVALENCE_PRIMARY.json':dict(PASS=primary_pass)}
+    monkeypatch.setattr(s,'read',lambda name:responses[name])
+    monkeypatch.setattr(s,'one',lambda *args:pytest.fail('An already optimal pair cannot trigger more solves'))
+    with pytest.raises(AssertionError):s.run()
