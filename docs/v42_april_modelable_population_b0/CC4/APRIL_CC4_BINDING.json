@@ -1,0 +1,23 @@
+{
+  "date_bound": true,
+  "days_bound": 30,
+  "interface_source": {"path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_integrated_pr\\docs\\v42_final\\AGGREGATE_BINDING.json", "sha256": "c96f38a7edfdd29b7e5ff3b3e86c3ea1cef4690ae5477717bb31b0b6753d935d", "bytes": 1302},
+  "source_interface": {"model": "LGBM_weighted_c1_s20260924", "prediction": {"path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\cc4_v26_distributional_hybrid_pr\\docs\\cc4_v21_causal_refit_hurdle\\predictions\\LGBM_weighted_c1_s20260924.npz", "sha256": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077", "bytes": 97990}, "ledger": {"path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V42_SCENARIO_REDESIGN_LOCAL\\DAY_LEDGER.csv", "sha256": "11ff65481817ebcb922cca1b4fe7aebeb574bffe4ed2cdc872680996c67563f5", "bytes": 103708}, "selection": {"path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\cc4_v26_distributional_hybrid_pr\\docs\\cc4_v26_distributional_hybrid\\FINAL_SELECTION_FREEZE.json", "sha256": "8ab325c0b2834c4bd454988afc4f026da2f62462b52a27e11bd4ab86ff4654de", "bytes": 934}},
+  "array_shape": [443, 24, 2],
+  "interpreted_prediction_indices": [382, 383, 384, 385, 386, 387, 388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411],
+  "model": "LGBM_weighted_c1_s20260924",
+  "units": "hourly arrival lifetime GPUh; TRAIN-only execution-lag convolution",
+  "kernel": {"path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_modelable_b0_pr\\docs\\v42_final_integration\\CC4_EXECUTION_LAG_KERNEL.csv", "sha256": "8f95ca664965bb5953e816178aa6439960aaf3357ad64325d60a6f55d24ea055", "bytes": 278863},
+  "causal_implementation": {"path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\cc4_v26_distributional_hybrid_pr\\docs\\cc4_v21_causal_refit_hurdle\\experiment.py", "sha256": "ceaceecb8c1bcf12144adb5a54edf224c58ba303dcd286238a87197fa4676a47", "bytes": 19925},
+  "causal_rule": "label_matured_at < refit_issue <= forecast_issue",
+  "per_fit_receipts_available": false,
+  "historical_ingestion_latency_certified": false,
+  "model_selection_retrospective": true,
+  "causal_implementation_rule_verified": true,
+  "new_fit_calls": 0,
+  "forecast_modifications": 0,
+  "May_prediction_rows_interpreted": [],
+  "May_outcomes_used": false,
+  "physical_modelability_target_refit": false,
+  "limitations": ["Current interface target is inherited CC4 hourly arrival population; no per-job modelability rescaling performed.", "Date and issue binding do not certify unexported historical fit/ingestion receipts."]
+}
