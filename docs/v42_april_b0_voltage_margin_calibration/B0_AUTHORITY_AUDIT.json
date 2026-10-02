@@ -1,0 +1,217 @@
+{
+  "base_head": "e2d4779685fff6d0cf022c649733b2ca41fdfc08",
+  "findings": [
+    {
+      "id": "A",
+      "subject": "Exact B0 definition",
+      "status": "NOT_ESTABLISHED",
+      "evidence": [
+        {
+          "path": "docs/v42_ts_cc4_temporal_refinement/CC4_SCHEDULABLE_SERVICE_CONTRACT.md",
+          "line": 3,
+          "excerpt": "This interface consumes the unchanged B0/C0 lifetime GPUh forecasts. It does not predict job identities or train a model. Individual TS applies only to already submitted eligible PENDING jobs; aggregate service timing applies to remaining anonymous forecast mass.",
+          "sha256": "e76fb6518e8533c62acb81e7d0c079636c159242b49dcd875f832ccd5eeb2d1a",
+          "base_git_blob": "2ca66969476e1f102de2b2abf3afdb25f8d03069"
+        },
+        {
+          "path": "docs/v42_ts_cc4_temporal_refinement/CC4_SCHEDULABLE_SERVICE_CONTRACT.md",
+          "line": 31,
+          "excerpt": "The new native adapter uses the original complete-option domain, exact service identity, WAN paths/payload/restart, and site/rack authorities. Only the permitted starts and the CC4 timing binding change. Native acceptance, Fresh AC and response-kernel freezing remain separate gates. A diagnostic LP witness is not an executable placement.",
+          "sha256": "e76fb6518e8533c62acb81e7d0c079636c159242b49dcd875f832ccd5eeb2d1a",
+          "base_git_blob": "2ca66969476e1f102de2b2abf3afdb25f8d03069"
+        },
+        {
+          "path": "v42_native/coordinator.py",
+          "line": 20,
+          "excerpt": "    for stage in ('A1','M1','A2','M2'):",
+          "sha256": "7db07df65a0a7daddac02ca3eb5f7731cc515fcc7788ee31c3fd6f1b1bb08696",
+          "base_git_blob": "0d5ec7c652869a0607531c7aa71490db8b1a29e4"
+        }
+      ],
+      "finding": "B0/C0 denotes inherited aggregate forecast authority here. It does not define the operational B0 Planning/Actual baseline. No complete B0 policy is present in the searched PR117 implementations."
+    },
+    {
+      "id": "B",
+      "subject": "April B0 planning schedule generation",
+      "status": "NOT_ESTABLISHED",
+      "evidence": [
+        {
+          "path": "v42_native/coordinator.py",
+          "line": 20,
+          "excerpt": "    for stage in ('A1','M1','A2','M2'):",
+          "sha256": "7db07df65a0a7daddac02ca3eb5f7731cc515fcc7788ee31c3fd6f1b1bb08696",
+          "base_git_blob": "0d5ec7c652869a0607531c7aa71490db8b1a29e4"
+        },
+        {
+          "path": "docs/v42_ts_cc4_temporal_refinement/CC4_SCHEDULABLE_SERVICE_CONTRACT.md",
+          "line": 31,
+          "excerpt": "The new native adapter uses the original complete-option domain, exact service identity, WAN paths/payload/restart, and site/rack authorities. Only the permitted starts and the CC4 timing binding change. Native acceptance, Fresh AC and response-kernel freezing remain separate gates. A diagnostic LP witness is not an executable placement.",
+          "sha256": "e76fb6518e8533c62acb81e7d0c079636c159242b49dcd875f832ccd5eeb2d1a",
+          "base_git_blob": "2ca66969476e1f102de2b2abf3afdb25f8d03069"
+        },
+        {
+          "path": "docs/v42_native_integration_mess_milp/NATIVE_SOURCE_AUTHORITY_AUDIT.md",
+          "line": 19,
+          "excerpt": "| Kernel/security | `V42_RESPONSE_KERNEL_LOCAL/regeneration_002/2025-04-01/{CAUSAL_REFERENCE,INPUT_FREEZE}.json`, `docs/v42_final/V42_VOLTAGE_SECURITY_MARGIN_CONTRACT.json` | Historical topology/weather/grid sources exist, but final service/reference/PQ anchor not matched; zero-MESS kernel stale. Security contract explicitly not frozen. |",
+          "sha256": "4c9f96e687275296e84f6a037b274d13ff8e87f9ca8d8cf838d0ec07cc60349e",
+          "base_git_blob": "87b5baaf6bd38c4bb9b6743ff1aa54a397450a1a"
+        }
+      ],
+      "finding": "Generic A1/M1/A2/M2 adapters and historical April source pointers are not an April B0 frozen-schedule producer. No authoritative April B0 policy binding or schedule artifact was located."
+    },
+    {
+      "id": "C",
+      "subject": "Known/unknown workload authority",
+      "status": "PARTIAL_GENERIC_ONLY",
+      "evidence": [
+        {
+          "path": "docs/v42_ts_cc4_temporal_refinement/CC4_SCHEDULABLE_SERVICE_CONTRACT.md",
+          "line": 3,
+          "excerpt": "This interface consumes the unchanged B0/C0 lifetime GPUh forecasts. It does not predict job identities or train a model. Individual TS applies only to already submitted eligible PENDING jobs; aggregate service timing applies to remaining anonymous forecast mass.",
+          "sha256": "e76fb6518e8533c62acb81e7d0c079636c159242b49dcd875f832ccd5eeb2d1a",
+          "base_git_blob": "2ca66969476e1f102de2b2abf3afdb25f8d03069"
+        },
+        {
+          "path": "docs/v42_native_integration_mess_milp/EVENT_ACTUAL_CONTROL_CONTRACT.md",
+          "line": 12,
+          "excerpt": "Unknown arrival observes submission features, checks causal runtime provider, then calls a frozen site-only policy. Temporal shift and migration remain disabled for unknown jobs. No online global A1/M1/A2/M2 call. Missing provider records the observed job as unresolved and returns no action; it neither drops physical workload nor fabricates FIX/reference service. Spatial action can be proposed only with source-backed placement/capacity/full-service certificates; no native provider means production handler readiness is false.",
+          "sha256": "6e5f51507d33e01f6cfde0ce49bad0207c9520ebdda07411c9edc8c59ac454a4",
+          "base_git_blob": "b3137cb5bb5f87e3592a367886781f97f494c431"
+        },
+        {
+          "path": "v42_native/providers.py",
+          "line": 22,
+          "excerpt": "        require(all(t<=event_time for t in self.observed_at.values()),'FUTURE_RUNTIME_FEATURE')",
+          "sha256": "2ba5c39a6e9218461f67e79dd708271141a2b3492bd6f97d4407561e5198dfcd",
+          "base_git_blob": "422244e50110b308a92b559e0c44424ba9f351f2"
+        }
+      ],
+      "finding": "Causal generic interfaces exist. No B0-specific known-job decision and realized-arrival policy has been frozen. Anonymous allocation cannot be promoted."
+    },
+    {
+      "id": "D",
+      "subject": "B0 MESS/AIDC decision authority",
+      "status": "NOT_ESTABLISHED",
+      "evidence": [
+        {
+          "path": "v42_native/mess.py",
+          "line": 46,
+          "excerpt": "    def validate(self,horizon):",
+          "sha256": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec",
+          "base_git_blob": "99f76d5f6ea1e466a2a08c7300069222cde4b5b3"
+        },
+        {
+          "path": "v42_native/coordinator.py",
+          "line": 20,
+          "excerpt": "    for stage in ('A1','M1','A2','M2'):",
+          "sha256": "7db07df65a0a7daddac02ca3eb5f7731cc515fcc7788ee31c3fd6f1b1bb08696",
+          "base_git_blob": "0d5ec7c652869a0607531c7aa71490db8b1a29e4"
+        },
+        {
+          "path": "docs/v42_ts_cc4_temporal_refinement/CC4_SCHEDULABLE_SERVICE_CONTRACT.md",
+          "line": 31,
+          "excerpt": "The new native adapter uses the original complete-option domain, exact service identity, WAN paths/payload/restart, and site/rack authorities. Only the permitted starts and the CC4 timing binding change. Native acceptance, Fresh AC and response-kernel freezing remain separate gates. A diagnostic LP witness is not an executable placement.",
+          "sha256": "e76fb6518e8533c62acb81e7d0c079636c159242b49dcd875f832ccd5eeb2d1a",
+          "base_git_blob": "2ca66969476e1f102de2b2abf3afdb25f8d03069"
+        }
+      ],
+      "finding": "Native device model code is not a B0 decision-policy receipt. Do not assume a zero-MESS or fixed CC4 B0 definition."
+    },
+    {
+      "id": "E",
+      "subject": "B0 D-Day frozen replay authority",
+      "status": "PARTIAL_GENERIC_ONLY",
+      "evidence": [
+        {
+          "path": "v42_native/actual.py",
+          "line": 58,
+          "excerpt": "def require_frozen_replay(frozen_plan, replay_plan):",
+          "sha256": "0482a60f5103893c0e77e19bccba14d442f328070e6edb07214525ed3beffb68",
+          "base_git_blob": "b78091501d295dc9e721ef26bf75d875433724b3"
+        },
+        {
+          "path": "docs/v42_native_integration_mess_milp/EVENT_ACTUAL_CONTROL_CONTRACT.md",
+          "line": 16,
+          "excerpt": "Accepted Actual output requires fresh exact OpenDSS convergence, hard voltage/line current/transformer current and kVA checks, with matching schedule and grid hash. `require_fresh_ac` is a validation boundary, not an OpenDSS producer. The historical native producer is identified in the source audit; it was not run against an unbound model.",
+          "sha256": "6e5f51507d33e01f6cfde0ce49bad0207c9520ebdda07411c9edc8c59ac454a4",
+          "base_git_blob": "b3137cb5bb5f87e3592a367886781f97f494c431"
+        },
+        {
+          "path": "docs/v42_native_integration_mess_milp/EVENT_ACTUAL_CONTROL_CONTRACT.md",
+          "line": 12,
+          "excerpt": "Unknown arrival observes submission features, checks causal runtime provider, then calls a frozen site-only policy. Temporal shift and migration remain disabled for unknown jobs. No online global A1/M1/A2/M2 call. Missing provider records the observed job as unresolved and returns no action; it neither drops physical workload nor fabricates FIX/reference service. Spatial action can be proposed only with source-backed placement/capacity/full-service certificates; no native provider means production handler readiness is false.",
+          "sha256": "6e5f51507d33e01f6cfde0ce49bad0207c9520ebdda07411c9edc8c59ac454a4",
+          "base_git_blob": "b3137cb5bb5f87e3592a367886781f97f494c431"
+        }
+      ],
+      "finding": "Immutable replay and Fresh AC validation are validators, not a B0 realized replay producer or a complete B0 schedule policy."
+    },
+    {
+      "id": "F",
+      "subject": "B0 Actual input mapping",
+      "status": "NOT_ESTABLISHED",
+      "evidence": [
+        {
+          "path": "docs/v42_native_integration_mess_milp/NATIVE_SOURCE_AUTHORITY_AUDIT.md",
+          "line": 19,
+          "excerpt": "| Kernel/security | `V42_RESPONSE_KERNEL_LOCAL/regeneration_002/2025-04-01/{CAUSAL_REFERENCE,INPUT_FREEZE}.json`, `docs/v42_final/V42_VOLTAGE_SECURITY_MARGIN_CONTRACT.json` | Historical topology/weather/grid sources exist, but final service/reference/PQ anchor not matched; zero-MESS kernel stale. Security contract explicitly not frozen. |",
+          "sha256": "4c9f96e687275296e84f6a037b274d13ff8e87f9ca8d8cf838d0ec07cc60349e",
+          "base_git_blob": "87b5baaf6bd38c4bb9b6743ff1aa54a397450a1a"
+        },
+        {
+          "path": "docs/v42_native_integration_mess_milp/EVENT_ACTUAL_CONTROL_CONTRACT.md",
+          "line": 12,
+          "excerpt": "Unknown arrival observes submission features, checks causal runtime provider, then calls a frozen site-only policy. Temporal shift and migration remain disabled for unknown jobs. No online global A1/M1/A2/M2 call. Missing provider records the observed job as unresolved and returns no action; it neither drops physical workload nor fabricates FIX/reference service. Spatial action can be proposed only with source-backed placement/capacity/full-service certificates; no native provider means production handler readiness is false.",
+          "sha256": "6e5f51507d33e01f6cfde0ce49bad0207c9520ebdda07411c9edc8c59ac454a4",
+          "base_git_blob": "b3137cb5bb5f87e3592a367886781f97f494c431"
+        },
+        {
+          "path": "docs/v42_native_integration_mess_milp/EVENT_ACTUAL_CONTROL_CONTRACT.md",
+          "line": 16,
+          "excerpt": "Accepted Actual output requires fresh exact OpenDSS convergence, hard voltage/line current/transformer current and kVA checks, with matching schedule and grid hash. `require_fresh_ac` is a validation boundary, not an OpenDSS producer. The historical native producer is identified in the source audit; it was not run against an unbound model.",
+          "sha256": "6e5f51507d33e01f6cfde0ce49bad0207c9520ebdda07411c9edc8c59ac454a4",
+          "base_git_blob": "b3137cb5bb5f87e3592a367886781f97f494c431"
+        }
+      ],
+      "finding": "Historical grid/weather pointers are present, but no April B0 forecast/Actual causal mapping is bound in the exact base. Target April year, timezone and complete paired source coverage are unverified."
+    },
+    {
+      "id": "G",
+      "subject": "Final B0 schedule SHA/provenance",
+      "status": "MISSING",
+      "evidence": [
+        {
+          "path": "v42_native/actual.py",
+          "line": 58,
+          "excerpt": "def require_frozen_replay(frozen_plan, replay_plan):",
+          "sha256": "0482a60f5103893c0e77e19bccba14d442f328070e6edb07214525ed3beffb68",
+          "base_git_blob": "b78091501d295dc9e721ef26bf75d875433724b3"
+        },
+        {
+          "path": "docs/v42_ts_cc4_temporal_refinement/CC4_SCHEDULABLE_SERVICE_CONTRACT.md",
+          "line": 31,
+          "excerpt": "The new native adapter uses the original complete-option domain, exact service identity, WAN paths/payload/restart, and site/rack authorities. Only the permitted starts and the CC4 timing binding change. Native acceptance, Fresh AC and response-kernel freezing remain separate gates. A diagnostic LP witness is not an executable placement.",
+          "sha256": "e76fb6518e8533c62acb81e7d0c079636c159242b49dcd875f832ccd5eeb2d1a",
+          "base_git_blob": "2ca66969476e1f102de2b2abf3afdb25f8d03069"
+        }
+      ],
+      "finding": "No April B0 authoritative final schedule was located or generated. Schedule SHA is null; neither a diagnostic LP nor a unit fixture substitutes for it."
+    }
+  ],
+  "criteria": {
+    "planning_policy": false,
+    "frozen_schedule_generation": false,
+    "dday_replay": false,
+    "causal_boundary": false,
+    "forecast_actual_mapping": false,
+    "no_anonymous_promotion": false,
+    "no_future_leakage": false
+  },
+  "criterion_evidence": {},
+  "scan_receipt": "B0_SOURCE_SEARCH.json",
+  "final_schedule_sha256": null,
+  "no_new_schedule_invented": true,
+  "no_anonymous_promotion_performed": true,
+  "no_future_data_used": true,
+  "qualification": "Generic causal safeguards are not evidence that an unbound B0 execution pipeline passes all authority gates."
+}
