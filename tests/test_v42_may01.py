@@ -115,9 +115,14 @@ def test_four_stage_handoff_and_MIP_start_mapping(monkeypatch,tmp_path):
         def preflight(self):return dict.fromkeys(coordinator.NATIVE_REQUIRED,True)
         def stage_payload(self,stage,a,m):return {'A':a,'M':m}
         def objective(self,a,m):return (1,)
-        def combine(self,a,m):return {'A':a,'M':m}
+        def combine(self,a,m):
+            return dict(A=a,M=m,aidc_schedule=a,known_job_actions=[],
+                unknown_arrival_policy=dict(interface='v42_native.actual.unknown_arrival',authority_sha='b'*64),
+                mess_route=[],movement=[],charge_mode=[],P=[],Q=[],SOC=[],aidc_electrical_footprint=[],
+                grid_anchor=dict(grid_sha=self.grid_sha),input_authority_hashes=dict(forecast='c'*64))
         def fresh_ac(self,final):return dict(engine='OpenDSS',fresh_run=True,synthetic=False,schedule_sha=digest(final),grid_sha=self.grid_sha,
             converged=True,voltage_violations=0,line_current_violations=0,transformer_current_violations=0,transformer_kVA_violations=0)
     monkeypatch.setattr(coordinator,'supervise',supervised)
-    coordinator.run(Backend(),tmp_path)
+    result=coordinator.run(Backend(),tmp_path)
+    assert result['frozen_plan'].verify() and 'fresh_ac' not in result
     assert called==['A1','M1','A2','M2']

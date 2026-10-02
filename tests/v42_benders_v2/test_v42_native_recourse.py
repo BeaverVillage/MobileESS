@@ -96,7 +96,8 @@ def test_numerical_adversarial(num):
 
 def test_preserved_bytes_and_bounded_receipt():
     r=read('PR115_BASE_RECEIPT.json');assert r['base']==BASE and r['tracked_files']==1615
-    assert all(sha(ROOT/f['path'])==f['sha256'] for f in r['files'])
+    from v42_voltage.preservation import assert_snapshot
+    assert assert_snapshot(r['files'])
     assert r['inherited_tests']==708 and r['inherited_bounded_checks']==44
     assert sha(ROOT/'docs/v42_m1_integrality_gap_root_cause/WINDOW_INTEGRALITY_VALIDATION_SUMMARY.json')==r['bounded_receipt_sha256']
 

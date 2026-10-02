@@ -6,12 +6,15 @@ from v42_threshold.routes import path_validation
 
 @pytest.fixture(scope='module')
 def native():
-    env=gp.Env(empty=True);env.setParam('OutputFlag',0);env.start();m=threshold_model(env)
-    yield m
-    m.dispose();env.dispose()
+    # Fixture-only path binding; retain the original production threshold code.
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr('v42_threshold.common.LOCAL',LOCAL.resolve())
+        env=gp.Env(empty=True);env.setParam('OutputFlag',0);env.start();m=threshold_model(env)
+        yield m
+        m.dispose();env.dispose()
 
 def test_threshold_only_matrix_delta(native):
-    env=gp.Env(empty=True);env.setParam('OutputFlag',0);env.start();base=gp.read(str(LOCAL/'F3.mps'),env=env)
+    env=gp.Env(empty=True);env.setParam('OutputFlag',0);env.start();base=gp.read(str((LOCAL/'F3.mps').resolve()),env=env)
     A=base.getA();B=native.getA()[:-1]
     assert np.array_equal(A.data,B.data) and np.array_equal(A.indices,B.indices) and np.array_equal(A.indptr,B.indptr)
     assert native.getAttr('RHS')[:-1]==base.getAttr('RHS') and native.getAttr('Sense')[:-1]==base.getAttr('Sense')

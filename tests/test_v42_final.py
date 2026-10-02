@@ -268,5 +268,7 @@ def test_canonical_stages_and_fresh_ac_before_kernel():
     upstream={k:'b'*64 for k in ('workload','placement','runtime','MESS_PQ','grid_anchor')}
     with pytest.raises(ValueError,match='FRESH_AC'):require_kernel(plan,{'PASS':False},upstream)
     with pytest.raises(ValueError,match='FRESH_AC'):require_kernel(plan,{'PASS':True,'plan_sha':'c'*64},upstream)
-    assert require_kernel(plan,{'PASS':True,'plan_sha':'a'*64},upstream)
+    with pytest.raises(ValueError,match='FRESH_AC'):
+        require_kernel(plan,{'PASS':True,'plan_sha':'a'*64},upstream)
+    assert require_kernel(plan,{'PASS':True,'plan_sha':'a'*64,'execution_layer':'DDAY_ACTUAL'},upstream)
     assert not (OUT/'FINAL_RESPONSE_KERNEL_AUTHORITY.json').exists()

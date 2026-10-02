@@ -17,7 +17,8 @@ def require_next(stage, receipts):
 def require_kernel(plan, fresh_ac, upstream):
     require(plan.get('stage')=='M2' and plan.get('accepted_native_plan') is True,'FINAL_NATIVE_M2_REQUIRED')
     require(fresh_ac.get('PASS') is True and fresh_ac.get('plan_sha')==plan.get('sha256')
-            and len(str(plan.get('sha256','')))==64,'FRESH_AC_FINAL_PLAN_REQUIRED')
+            and len(str(plan.get('sha256','')))==64
+            and fresh_ac.get('execution_layer')=='DDAY_ACTUAL','FRESH_AC_FINAL_PLAN_REQUIRED')
     require(set(upstream)=={'workload','placement','runtime','MESS_PQ','grid_anchor'}
             and all(isinstance(s,str) and len(s)==64 for s in upstream.values()),'KERNEL_UPSTREAM_SHA_BINDING')
     return True
