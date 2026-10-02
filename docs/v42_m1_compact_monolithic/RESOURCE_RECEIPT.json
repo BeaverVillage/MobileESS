@@ -1,0 +1,531 @@
+{
+  "RESOURCE_CONTENTION_ABSENCE_REQUIRED": false,
+  "independent_workloads_allowed": true,
+  "own_heavy_lane_sequential": true,
+  "receipts": [
+    {
+      "label": "CANARY_COMPACT_600S",
+      "utc": "2026-10-02T06:34:23Z",
+      "hardware": "Windows-10-10.0.26200-SP0",
+      "cpu": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+      "cpu_utilization_percent": 5.0,
+      "logical_cores": 16,
+      "available_logical_cores": 16,
+      "RAM": {
+        "total": 34049220608,
+        "used": 14133071872,
+        "free": 19916148736,
+        "percent": 41.5
+      },
+      "swap_pagefile": {
+        "total": 8934019072,
+        "used": 440758272,
+        "free": 8493260800,
+        "percent": 4.9,
+        "sin": 0,
+        "sout": 0
+      },
+      "python_solver_processes": [
+        {
+          "pid": 73936,
+          "ppid": 28696,
+          "name": "python.exe",
+          "command_line": [
+            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-m",
+            "v42_monolithic.experiment",
+            "canaries"
+          ],
+          "rss_bytes": 69406720,
+          "cpu_time_seconds": 583.484375
+        }
+      ],
+      "worker_pid": 73936,
+      "independent_workloads_allowed": true,
+      "RESOURCE_CONTENTION_ABSENCE_REQUIRED": false
+    },
+    {
+      "label": "CANARY_ORIGINAL_600S",
+      "utc": "2026-10-02T06:24:08Z",
+      "hardware": "Windows-10-10.0.26200-SP0",
+      "cpu": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+      "cpu_utilization_percent": 3.2,
+      "logical_cores": 16,
+      "available_logical_cores": 16,
+      "RAM": {
+        "total": 34049220608,
+        "used": 14755356672,
+        "free": 19293863936,
+        "percent": 43.3
+      },
+      "swap_pagefile": {
+        "total": 8934019072,
+        "used": 461312000,
+        "free": 8472707072,
+        "percent": 5.2,
+        "sin": 0,
+        "sout": 0
+      },
+      "python_solver_processes": [
+        {
+          "pid": 73936,
+          "ppid": 28696,
+          "name": "python.exe",
+          "command_line": [
+            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-m",
+            "v42_monolithic.experiment",
+            "canaries"
+          ],
+          "rss_bytes": 54243328,
+          "cpu_time_seconds": 5.828125
+        }
+      ],
+      "worker_pid": 73936,
+      "independent_workloads_allowed": true,
+      "RESOURCE_CONTENTION_ABSENCE_REQUIRED": false
+    },
+    {
+      "label": "FULL_BUILD",
+      "utc": "2026-10-02T04:44:50Z",
+      "hardware": "Windows-10-10.0.26200-SP0",
+      "cpu": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+      "cpu_utilization_percent": 5.3,
+      "logical_cores": 16,
+      "available_logical_cores": 16,
+      "RAM": {
+        "total": 34049220608,
+        "used": 16058454016,
+        "free": 17990766592,
+        "percent": 47.2
+      },
+      "swap_pagefile": {
+        "total": 8934019072,
+        "used": 470118400,
+        "free": 8463900672,
+        "percent": 5.3,
+        "sin": 0,
+        "sout": 0
+      },
+      "python_solver_processes": [
+        {
+          "pid": 72748,
+          "ppid": 10628,
+          "name": "python.exe",
+          "command_line": [
+            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-m",
+            "v42_monolithic.build"
+          ],
+          "rss_bytes": 53628928,
+          "cpu_time_seconds": 4.625
+        }
+      ],
+      "worker_pid": 72748,
+      "independent_workloads_allowed": true,
+      "RESOURCE_CONTENTION_ABSENCE_REQUIRED": false
+    },
+    {
+      "label": "ROOT_LP_BARRIER_ORIGINAL",
+      "utc": "2026-10-02T05:47:53Z",
+      "hardware": "Windows-10-10.0.26200-SP0",
+      "cpu": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+      "cpu_utilization_percent": 5.1,
+      "logical_cores": 16,
+      "available_logical_cores": 16,
+      "RAM": {
+        "total": 34049220608,
+        "used": 15391371264,
+        "free": 18657849344,
+        "percent": 45.2
+      },
+      "swap_pagefile": {
+        "total": 8934019072,
+        "used": 469008384,
+        "free": 8465010688,
+        "percent": 5.2,
+        "sin": 0,
+        "sout": 0
+      },
+      "python_solver_processes": [
+        {
+          "pid": 74668,
+          "ppid": 47576,
+          "name": "python.exe",
+          "command_line": [
+            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-m",
+            "v42_monolithic.secondary_roots",
+            "run"
+          ],
+          "rss_bytes": 54071296,
+          "cpu_time_seconds": 5.75
+        }
+      ],
+      "worker_pid": 74668,
+      "independent_workloads_allowed": true,
+      "RESOURCE_CONTENTION_ABSENCE_REQUIRED": false
+    },
+    {
+      "label": "ROOT_LP_COMPACT",
+      "utc": "2026-10-02T05:17:03Z",
+      "hardware": "Windows-10-10.0.26200-SP0",
+      "cpu": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+      "cpu_utilization_percent": 28.2,
+      "logical_cores": 16,
+      "available_logical_cores": 16,
+      "RAM": {
+        "total": 34049220608,
+        "used": 16396861440,
+        "free": 17652359168,
+        "percent": 48.2
+      },
+      "swap_pagefile": {
+        "total": 8934019072,
+        "used": 466718720,
+        "free": 8467300352,
+        "percent": 5.2,
+        "sin": 0,
+        "sout": 0
+      },
+      "python_solver_processes": [
+        {
+          "pid": 68980,
+          "ppid": 70744,
+          "name": "python.exe",
+          "command_line": [
+            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-m",
+            "v42_monolithic.experiment",
+            "roots"
+          ],
+          "rss_bytes": 66068480,
+          "cpu_time_seconds": 1704.203125
+        }
+      ],
+      "worker_pid": 68980,
+      "independent_workloads_allowed": true,
+      "RESOURCE_CONTENTION_ABSENCE_REQUIRED": false
+    },
+    {
+      "label": "ROOT_LP_INTERIOR_COMPACT",
+      "utc": "2026-10-02T06:13:58Z",
+      "hardware": "Windows-10-10.0.26200-SP0",
+      "cpu": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+      "cpu_utilization_percent": 4.1,
+      "logical_cores": 16,
+      "available_logical_cores": 16,
+      "RAM": {
+        "total": 34049220608,
+        "used": 14818971648,
+        "free": 19230248960,
+        "percent": 43.5
+      },
+      "swap_pagefile": {
+        "total": 8934019072,
+        "used": 461312000,
+        "free": 8472707072,
+        "percent": 5.2,
+        "sin": 0,
+        "sout": 0
+      },
+      "python_solver_processes": [
+        {
+          "pid": 38300,
+          "ppid": 73704,
+          "name": "python.exe",
+          "command_line": [
+            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-m",
+            "v42_monolithic.interior_roots",
+            "run"
+          ],
+          "rss_bytes": 74334208,
+          "cpu_time_seconds": 2078.46875
+        }
+      ],
+      "worker_pid": 38300,
+      "independent_workloads_allowed": true,
+      "RESOURCE_CONTENTION_ABSENCE_REQUIRED": false
+    },
+    {
+      "label": "ROOT_LP_INTERIOR_ORIGINAL",
+      "utc": "2026-10-02T06:04:55Z",
+      "hardware": "Windows-10-10.0.26200-SP0",
+      "cpu": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+      "cpu_utilization_percent": 7.4,
+      "logical_cores": 16,
+      "available_logical_cores": 16,
+      "RAM": {
+        "total": 34049220608,
+        "used": 15584374784,
+        "free": 18464845824,
+        "percent": 45.8
+      },
+      "swap_pagefile": {
+        "total": 8934019072,
+        "used": 454475776,
+        "free": 8479543296,
+        "percent": 5.1,
+        "sin": 0,
+        "sout": 0
+      },
+      "python_solver_processes": [
+        {
+          "pid": 38300,
+          "ppid": 73704,
+          "name": "python.exe",
+          "command_line": [
+            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-m",
+            "v42_monolithic.interior_roots",
+            "run"
+          ],
+          "rss_bytes": 54067200,
+          "cpu_time_seconds": 4.25
+        }
+      ],
+      "worker_pid": 38300,
+      "independent_workloads_allowed": true,
+      "RESOURCE_CONTENTION_ABSENCE_REQUIRED": false
+    },
+    {
+      "label": "ROOT_LP_ORIGINAL",
+      "utc": "2026-10-02T04:46:53Z",
+      "hardware": "Windows-10-10.0.26200-SP0",
+      "cpu": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+      "cpu_utilization_percent": 5.6,
+      "logical_cores": 16,
+      "available_logical_cores": 16,
+      "RAM": {
+        "total": 34049220608,
+        "used": 15765483520,
+        "free": 18283737088,
+        "percent": 46.3
+      },
+      "swap_pagefile": {
+        "total": 8934019072,
+        "used": 470118400,
+        "free": 8463900672,
+        "percent": 5.3,
+        "sin": 0,
+        "sout": 0
+      },
+      "python_solver_processes": [
+        {
+          "pid": 68980,
+          "ppid": 70744,
+          "name": "python.exe",
+          "command_line": [
+            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-m",
+            "v42_monolithic.experiment",
+            "roots"
+          ],
+          "rss_bytes": 53493760,
+          "cpu_time_seconds": 4.734375
+        }
+      ],
+      "worker_pid": 68980,
+      "independent_workloads_allowed": true,
+      "RESOURCE_CONTENTION_ABSENCE_REQUIRED": false
+    },
+    {
+      "label": "ROOT_LP_PRIMAL_COMPACT",
+      "utc": "2026-10-02T06:22:18Z",
+      "hardware": "Windows-10-10.0.26200-SP0",
+      "cpu": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+      "cpu_utilization_percent": 6.1,
+      "logical_cores": 16,
+      "available_logical_cores": 16,
+      "RAM": {
+        "total": 34049220608,
+        "used": 15562772480,
+        "free": 18486448128,
+        "percent": 45.7
+      },
+      "swap_pagefile": {
+        "total": 8934019072,
+        "used": 461312000,
+        "free": 8472707072,
+        "percent": 5.2,
+        "sin": 0,
+        "sout": 0
+      },
+      "python_solver_processes": [
+        {
+          "pid": 15644,
+          "ppid": 61952,
+          "name": "python.exe",
+          "command_line": [
+            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-m",
+            "v42_monolithic.primal_roots",
+            "run"
+          ],
+          "rss_bytes": 73216000,
+          "cpu_time_seconds": 222.265625
+        }
+      ],
+      "worker_pid": 15644,
+      "independent_workloads_allowed": true,
+      "RESOURCE_CONTENTION_ABSENCE_REQUIRED": false
+    },
+    {
+      "label": "ROOT_LP_PRIMAL_ORIGINAL",
+      "utc": "2026-10-02T06:21:11Z",
+      "hardware": "Windows-10-10.0.26200-SP0",
+      "cpu": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+      "cpu_utilization_percent": 9.9,
+      "logical_cores": 16,
+      "available_logical_cores": 16,
+      "RAM": {
+        "total": 34049220608,
+        "used": 14899859456,
+        "free": 19149361152,
+        "percent": 43.8
+      },
+      "swap_pagefile": {
+        "total": 8934019072,
+        "used": 461312000,
+        "free": 8472707072,
+        "percent": 5.2,
+        "sin": 0,
+        "sout": 0
+      },
+      "python_solver_processes": [
+        {
+          "pid": 15644,
+          "ppid": 61952,
+          "name": "python.exe",
+          "command_line": [
+            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-m",
+            "v42_monolithic.primal_roots",
+            "run"
+          ],
+          "rss_bytes": 54071296,
+          "cpu_time_seconds": 3.578125
+        }
+      ],
+      "worker_pid": 15644,
+      "independent_workloads_allowed": true,
+      "RESOURCE_CONTENTION_ABSENCE_REQUIRED": false
+    },
+    {
+      "label": "SOURCE_NETWORK_AUDIT",
+      "utc": "2026-10-02T05:05:09Z",
+      "hardware": "Windows-10-10.0.26200-SP0",
+      "cpu": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+      "cpu_utilization_percent": 13.3,
+      "logical_cores": 16,
+      "available_logical_cores": 16,
+      "RAM": {
+        "total": 34049220608,
+        "used": 17322475520,
+        "free": 16726745088,
+        "percent": 50.9
+      },
+      "swap_pagefile": {
+        "total": 8934019072,
+        "used": 465997824,
+        "free": 8468021248,
+        "percent": 5.2,
+        "sin": 0,
+        "sout": 0
+      },
+      "python_solver_processes": [
+        {
+          "pid": 62448,
+          "ppid": 22032,
+          "name": "python.exe",
+          "command_line": [
+            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-m",
+            "v42_monolithic.native_audit"
+          ],
+          "rss_bytes": 41701376,
+          "cpu_time_seconds": 5.265625
+        },
+        {
+          "pid": 68980,
+          "ppid": 70744,
+          "name": "python.exe",
+          "command_line": [
+            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-m",
+            "v42_monolithic.experiment",
+            "roots"
+          ],
+          "rss_bytes": 1314103296,
+          "cpu_time_seconds": 1045.6875
+        }
+      ],
+      "worker_pid": 62448,
+      "independent_workloads_allowed": true,
+      "RESOURCE_CONTENTION_ABSENCE_REQUIRED": false
+    }
+  ],
+  "historical_PR120_absolute_speedup_claim": false,
+  "interpretation": "Hardware/thread equality is recorded. Same-lane objective/bound/gap comparison is controlled by frozen settings. Any wall-time speedup remains conditional on concurrent workload snapshots.",
+  "observed_other_Python_processes": [
+    {
+      "label": "CANARY_COMPACT_600S",
+      "processes": []
+    },
+    {
+      "label": "CANARY_ORIGINAL_600S",
+      "processes": []
+    },
+    {
+      "label": "FULL_BUILD",
+      "processes": []
+    },
+    {
+      "label": "ROOT_LP_BARRIER_ORIGINAL",
+      "processes": []
+    },
+    {
+      "label": "ROOT_LP_COMPACT",
+      "processes": []
+    },
+    {
+      "label": "ROOT_LP_INTERIOR_COMPACT",
+      "processes": []
+    },
+    {
+      "label": "ROOT_LP_INTERIOR_ORIGINAL",
+      "processes": []
+    },
+    {
+      "label": "ROOT_LP_ORIGINAL",
+      "processes": []
+    },
+    {
+      "label": "ROOT_LP_PRIMAL_COMPACT",
+      "processes": []
+    },
+    {
+      "label": "ROOT_LP_PRIMAL_ORIGINAL",
+      "processes": []
+    },
+    {
+      "label": "SOURCE_NETWORK_AUDIT",
+      "processes": [
+        {
+          "pid": 68980,
+          "ppid": 70744,
+          "name": "python.exe",
+          "command_line": [
+            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-m",
+            "v42_monolithic.experiment",
+            "roots"
+          ],
+          "rss_bytes": 1314103296,
+          "cpu_time_seconds": 1045.6875
+        }
+      ]
+    }
+  ]
+}

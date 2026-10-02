@@ -1,0 +1,21 @@
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+CANARY_ORIGINAL_600S {'seconds': 23.944000005722046, 'nodes': 0.0, 'open_nodes': 0.0, 'UB': None, 'LB': 0.28222432055490354, 'simplex_iterations': 0.0}
+CANARY_ORIGINAL_600S {'seconds': 600.0089998245239, 'nodes': 0.0, 'open_nodes': 0.0, 'UB': None, 'LB': 0.28222432055490354, 'simplex_iterations': 121808.0}
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+CANARY_COMPACT_600S {'seconds': 26.54200005531311, 'nodes': 0.0, 'open_nodes': 0.0, 'UB': None, 'LB': 0.28222432055490354, 'simplex_iterations': 0.0}
+CANARY_COMPACT_600S {'seconds': 600.0090000629425, 'nodes': 0.0, 'open_nodes': 0.0, 'UB': None, 'LB': 0.28222432055490354, 'simplex_iterations': 85081.0}
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\kjw39\Documents\Codex\2026-10-02\m1-compact-monolithic\worktree\v42_monolithic\experiment.py", line 141, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "C:\Users\kjw39\Documents\Codex\2026-10-02\m1-compact-monolithic\worktree\v42_monolithic\experiment.py", line 139, in main
+    elif mode=='canaries':canaries()
+                          ^^^^^^^^^^
+  File "C:\Users\kjw39\Documents\Codex\2026-10-02\m1-compact-monolithic\worktree\v42_monolithic\experiment.py", line 122, in canaries
+    gap_improvement=(a['valid_global_gap']-b['valid_global_gap'])/a['valid_global_gap'] if a['valid_global_gap']>0 else 0.
+                                                                                           ~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'valid_global_gap'
