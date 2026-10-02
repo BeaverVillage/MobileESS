@@ -1,0 +1,1669 @@
+{
+  "base": "81118271a837648da13146fb6ffdc8e3de8d95ab",
+  "required_files": [
+    {
+      "file": "v42_final/state.py",
+      "sha256": "0a7723650697869d4c7023a53d2ae9a8444c9859ccf1b11acf17338472ef0e36",
+      "bytes": 5635,
+      "read_before_implementation_changes": true,
+      "definitions": [
+        "conditional_wait",
+        "planning_remaining",
+        "EpisodeLedger",
+        "legacy_unassigned",
+        "_time",
+        "submit",
+        "physical",
+        "start",
+        "observe_running",
+        "complete",
+        "migrate"
+      ]
+    },
+    {
+      "file": "v42_final/runtime.py",
+      "sha256": "86f578f315c39dd0c4e858df5d0ee04a79f16bc2c3d033af4beac7fe9ebd5e2a",
+      "bytes": 3224,
+      "read_before_implementation_changes": true,
+      "definitions": [
+        "timestamp",
+        "FrozenQ50",
+        "__init__",
+        "parameters",
+        "q50_parameters",
+        "predict_batch",
+        "predict_total"
+      ]
+    },
+    {
+      "file": "v42_final/reserve.py",
+      "sha256": "44ad22dc6071cd0523e29711e255dc1bbeb46245269aa2b918b310787980668b",
+      "bytes": 3350,
+      "read_before_implementation_changes": true,
+      "definitions": [
+        "survival",
+        "risk_exposure",
+        "calibrate",
+        "bind_headroom"
+      ]
+    },
+    {
+      "file": "v42_final/workload.py",
+      "sha256": "10320df9beaa0df89fd0d80b763595ee95fb57eb82f5a3d53ed9373d4517daed",
+      "bytes": 4374,
+      "read_before_implementation_changes": true,
+      "definitions": [
+        "execution_lag_kernel",
+        "profile",
+        "ForecastBook",
+        "__post_init__",
+        "submit",
+        "row",
+        "profiles"
+      ]
+    },
+    {
+      "file": "v42_april_b0_v2/reference.py",
+      "sha256": "4ef4c83a6d2d6dfa49cb7d17ce01fb29b136ab28cf06bd53315153c93743462c",
+      "bytes": 7758,
+      "read_before_implementation_changes": true,
+      "definitions": [
+        "build_reference",
+        "fits",
+        "assign"
+      ]
+    },
+    {
+      "file": "v42_april_port/builder.py",
+      "sha256": "99fa95d0d4cc9521e7861867b62dbe758f17d0e0a579b10da649e0cdad81fb48",
+      "bytes": 17191,
+      "read_before_implementation_changes": true,
+      "definitions": [
+        "timestamp",
+        "axis",
+        "value_or_none",
+        "immutable_request",
+        "request_features",
+        "predict_causal_batch",
+        "build_v42_day_input_bundle",
+        "freeze_common_reference",
+        "require_b0_physical_presence",
+        "construct"
+      ]
+    },
+    {
+      "file": "v42_modelable/cc4.py",
+      "sha256": "8911b6bf052bc138e17787708339f4527820eab1c3bdae6df20e8ced3c01a0c7",
+      "bytes": 4082,
+      "read_before_implementation_changes": true,
+      "definitions": [
+        "april_projection",
+        "bind"
+      ]
+    },
+    {
+      "file": "v42_modelable/power.py",
+      "sha256": "fc8abd5308cf34e2e8f204852948cfa976f4d79d181f034d3e18e81ba10b4511",
+      "bytes": 7483,
+      "read_before_implementation_changes": true,
+      "definitions": [
+        "known_occupancy",
+        "allocate_unknown",
+        "main"
+      ]
+    },
+    {
+      "file": "v42_modelable/execution.py",
+      "sha256": "89f8df6913e4cb15f161a6f4f3ed396250b3960db6e55118e787061a16924d46",
+      "bytes": 986,
+      "read_before_implementation_changes": true,
+      "definitions": [
+        "execution_guard",
+        "residuals",
+        "b0_sanity"
+      ]
+    },
+    {
+      "file": "v42_native/actual.py",
+      "sha256": "70b042aecaa89fc287d919534f90af8f55b12b3a688ead20be9ec3620bf165b9",
+      "bytes": 9906,
+      "read_before_implementation_changes": true,
+      "definitions": [
+        "KernelAnchor",
+        "event_due",
+        "unknown_arrival",
+        "require_fresh_ac",
+        "repair_pq",
+        "require_frozen_replay",
+        "ActualBackend",
+        "run_dday_actual",
+        "require_dday_kernel",
+        "require_same",
+        "reconstruct_physical",
+        "fresh_ac"
+      ]
+    },
+    {
+      "file": "tests/test_v42_final.py",
+      "sha256": "768cb6e48ce555bc0c6a0bcb409b0c567f293984e7a93a13e890d6d55c909965",
+      "bytes": 13992,
+      "read_before_implementation_changes": true,
+      "definitions": [
+        "ConstantProvider",
+        "ledger",
+        "book",
+        "provider",
+        "test_provider_reproduction_sealed_and_no_training_api",
+        "test_provider_one_live_call_same_known_unknown",
+        "test_runtime_availability_firewalls",
+        "test_runtime_rejects_outcome_or_state_features",
+        "test_pending_zero_and_running_past_q50_full_gang",
+        "test_q50_expired_planning_zero_future_nominal_but_hard_now",
+        "test_actual_completion_releases_at_next_control_boundary",
+        "test_exact_boundary_completion_can_release_current_control",
+        "test_preserve_overrun_and_reject_pending_start_without_capacity",
+        "test_running_site_requires_verified_one_time_receipt",
+        "test_no_future_completion_or_time_reversal",
+        "test_unknown_submission_depletes_forecast_without_physical_work",
+        "test_lag_exact_partial_slot_mass_and_normalization",
+        "test_gpu_hours_profile_full_tail_and_no_same_hour_binding",
+        "test_lag_invalid_sources_fail",
+        "test_depletion_q50_q90_identity_and_overforecast",
+        "test_depletion_duplicate_future_submission_and_closed_hour",
+        "test_survival_and_site_local_selected_exposure",
+        "test_reserve_scale_cal_only_and_unseen_support_fail",
+        "test_frozen_gamma_holdout_not_retuned_or_retrospective",
+        "test_linear_reserve_headroom_separate_shortfalls_and_no_energy",
+        "test_timeshift_state_and_protected_failclosed",
+        "test_conditional_wait_is_strict_age_filtered_and_floored",
+        "test_legacy_44_source_authorized_external_only",
+        "test_canonical_native_view_uses_q50_mass_and_expired_running_truth",
+        "test_runtime_bundle_tampering_fails_before_model_load",
+        "test_resource_bound_against_exhaustive_complete_options",
+        "test_native_certificate_recomputed_independently_and_gate_stops",
+        "test_resource_bound_rejects_changed_timeshift_assumption",
+        "test_canonical_stages_and_fresh_ac_before_kernel",
+        "predict_total"
+      ]
+    },
+    {
+      "file": "tests/test_v42_native.py",
+      "sha256": "bfe967e85e0b08e6c7b4012a831bace575ad755504857f223e90c80c16444ab3",
+      "bytes": 9461,
+      "read_before_implementation_changes": true,
+      "definitions": [
+        "test_native_grid_anchor_and_separate_hard_security",
+        "test_external_wall_timeout_does_not_accept_raw_diagnostics",
+        "test_inner_polygon_radial_proof",
+        "test_polygon_connection_and_pq",
+        "test_mess_three_formulations_same_routes_service_and_safe_circle",
+        "test_m2_warm_start_applied_and_accepted",
+        "test_a2_warm_start_joint_options_and_fixed_constants",
+        "test_cross_midnight_exact_seconds_and_tail",
+        "test_snapshot_reconciliation_never_moves_site_or_invents_requeue",
+        "test_provider_missing_and_future_truth_rejected",
+        "test_unknown_handler_does_not_invoke_policy_with_unpromoted_provider",
+        "test_event_namespace_and_cadence",
+        "test_actual_local_pq_repair_removed_fail_fast",
+        "test_final_fresh_ac_gate_rejects_stub_stale_and_violation",
+        "test_native_gate_no_stub_or_ml_dependency",
+        "test_hidden_quadratic_callback_rejected",
+        "test_P2_only_uncertainty_not_known_service",
+        "test_completion_cannot_release_a_current_running_observation",
+        "forbidden",
+        "physics"
+      ]
+    },
+    {
+      "file": "tests/test_v42_may01.py",
+      "sha256": "a1a2aab4ea5bd4c55e001cc84f886d9c7711c584417ae5cbd0e9056d790fc2b5",
+      "bytes": 6965,
+      "read_before_implementation_changes": true,
+      "definitions": [
+        "test_causal_known_unknown_physical_occupancy",
+        "test_old_pending_plan_does_not_become_physical_occupancy",
+        "test_running_site_remaining_and_history_preserved",
+        "cohort",
+        "test_exact_T2_thresholds_and_floor",
+        "test_T2_authority_firewalls",
+        "test_T2_no_standby_shortcut_and_no_May_outcome_feature",
+        "test_known_gate_does_not_require_unknown_runtime_or_response_kernel",
+        "jobs_for_bound",
+        "test_necessary_bound_contains_all_migration_subsets",
+        "test_projection_never_promotes_feasible_relaxation",
+        "test_projection_infeasible_certificate_has_no_fabricated_incumbent",
+        "test_solver_diagnostic_files_preserved_under_unicode_path",
+        "test_four_stage_handoff_and_MIP_start_mapping",
+        "supervised",
+        "Backend",
+        "preflight",
+        "stage_payload",
+        "objective",
+        "combine",
+        "fresh_ac"
+      ]
+    },
+    {
+      "file": "docs/v42_final_integration/RUNTIME_RESERVE_CALIBRATION.json",
+      "sha256": "b37847d3337af35351a753b63e3d68775826692858189b0a9e50ac27a84dc17f",
+      "bytes": 4516,
+      "read_before_implementation_changes": true
+    },
+    {
+      "file": "docs/v42_final_integration/RUNTIME_OVERRUN_SURVIVAL_KERNEL.csv",
+      "sha256": "3c75f566d41c41fc19a7cc9a9ce042b6c41e6ad0bb96103039034b31a017bdb6",
+      "bytes": 40719,
+      "read_before_implementation_changes": true
+    },
+    {
+      "file": "docs/v42_may01_native_canary/MAY01_CC4_P2_BINDING.json",
+      "sha256": "073d54f9ded6a6dd6b8838358fa29baa1b3896fbce3aac11bf5f0af3049f25e7",
+      "bytes": 1799,
+      "read_before_implementation_changes": true
+    }
+  ],
+  "inherited_namespace": [
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\.gitattributes",
+      "sha256": "2cacd8c5b88d28a6324a5b106d17970ce30df8e32f9b76c87d00d4ca430747a8",
+      "bytes": 73
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250401\\EXECUTION_STATUS.json",
+      "sha256": "9916430665b2323086e12f34d7ee992e26a35cf602ffd8d3ca3bf39a30503b85",
+      "bytes": 493
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250402\\EXECUTION_STATUS.json",
+      "sha256": "329566994a230f58da94e94982370866079793edbc9b43451f62c610f5069d2a",
+      "bytes": 451
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250403\\EXECUTION_STATUS.json",
+      "sha256": "33337cc9df5d98aa26a375bd27c4a329785d49e10608fecdfca5a47946f928ca",
+      "bytes": 451
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250404\\EXECUTION_STATUS.json",
+      "sha256": "cec3841fbf89b82e37ee88f1ac15055dc2891779af6988c6d8540d859c755e3a",
+      "bytes": 493
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250405\\EXECUTION_STATUS.json",
+      "sha256": "f11d4614b85d6164e617778b72348e79837e1daded483ba7d92a5492bab4a7e9",
+      "bytes": 451
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250406\\EXECUTION_STATUS.json",
+      "sha256": "2980cdfbae379300cdceb6ab38cb3b3f82eeaace8ba709981c3989d5d4688aef",
+      "bytes": 451
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250407\\EXECUTION_STATUS.json",
+      "sha256": "8537cdb1d97d63915c0545780a55e323a7a7e21b8f1ba0fe853dd9398d80a0ec",
+      "bytes": 451
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250408\\EXECUTION_STATUS.json",
+      "sha256": "fad355d2438087d58fefca1328459a2fb413d01e4785ff3a5a7f781843b8bf6a",
+      "bytes": 451
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250409\\EXECUTION_STATUS.json",
+      "sha256": "c05f3fa67235e72b27aaeecb463bb100648b2bed6ef7bb1041a789d70cfcf336",
+      "bytes": 493
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250410\\EXECUTION_STATUS.json",
+      "sha256": "77b444b6f3ef587ca7fa44ea277b7d3bc0843e1cf1c3fcf899f6b229d5980905",
+      "bytes": 451
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250411\\EXECUTION_STATUS.json",
+      "sha256": "571feb02fcd5f97ee767b8eeeb3d47972d5aee32212d1239caae2a4bc4a7c3d4",
+      "bytes": 451
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250412\\EXECUTION_STATUS.json",
+      "sha256": "9932e7927b06ccb1fb2669055aa3ac43e26ab0ec781b5c723e4259f0c0bc1e50",
+      "bytes": 493
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250413\\EXECUTION_STATUS.json",
+      "sha256": "6f782dbcde6f88bb6ea64ee9fa543777b61f96d28745bf2e347d5efde00621e8",
+      "bytes": 493
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250414\\EXECUTION_STATUS.json",
+      "sha256": "16e07d890da918bdc7d01a8549933600a6317dffb3ea2b677fe708c09248e862",
+      "bytes": 493
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250415\\EXECUTION_STATUS.json",
+      "sha256": "1f583f60bcd5b4adee603e4c46289050f9984c422a578129157f93ab9cfdfb6c",
+      "bytes": 493
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250416\\EXECUTION_STATUS.json",
+      "sha256": "85e3d8498bcf150900dd4e1f91921dba509244356dc8c23d5bc3b4da7724d7e4",
+      "bytes": 493
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250417\\EXECUTION_STATUS.json",
+      "sha256": "96ffbd4d7dc6e289b98efa997d4b34d8acdaf3aa8586dc17db496765672da3e5",
+      "bytes": 533
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250418\\EXECUTION_STATUS.json",
+      "sha256": "06547a7c385637ab4d5851d76cda058b09a4d05d804c79b4f15e1f7e534029f7",
+      "bytes": 489
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250419\\EXECUTION_STATUS.json",
+      "sha256": "a449649ea975502e38462c06098d8a732cd864ab43eb01c1502275ad66202a78",
+      "bytes": 493
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250420\\EXECUTION_STATUS.json",
+      "sha256": "2261f91b52a322fd5d8f6ad9dbc50dcc19e38e314f30c98ad7ca7b03ce19b5e2",
+      "bytes": 493
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250421\\EXECUTION_STATUS.json",
+      "sha256": "3ee78b64e8d843be0cd384c7abccaad635894966bc1ff63d8afbaa467255bfe6",
+      "bytes": 451
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250422\\EXECUTION_STATUS.json",
+      "sha256": "9ee91b15fe22dafd90bdb1a725cfa5e5044a527a5a628b67629251411a50e579",
+      "bytes": 493
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250423\\EXECUTION_STATUS.json",
+      "sha256": "3e6a72da113169db6b1f69923d3e83885fa84b7aab78cca2de408a9579c7594b",
+      "bytes": 451
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250424\\EXECUTION_STATUS.json",
+      "sha256": "e37074afb587c5160048fa63441646e2e8752968efb605bb04ba8d6ce515f444",
+      "bytes": 493
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250425\\EXECUTION_STATUS.json",
+      "sha256": "fd3fffc1851bb5be459e0e8ecb473cf46b20776aa25e66a123d3d1c8b6955c76",
+      "bytes": 451
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250426\\EXECUTION_STATUS.json",
+      "sha256": "3c42b36513a2831e722acfac8b97e89bed9af4be6d76bf0092306004187bc29f",
+      "bytes": 451
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250427\\EXECUTION_STATUS.json",
+      "sha256": "cba84f7802be1dcb0812bf0ee224c64852da64cef0ecc0c8d7f07986369af648",
+      "bytes": 451
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250428\\EXECUTION_STATUS.json",
+      "sha256": "1992289cb723dc3d964ab2fc5eff8a35e8c679790b3daf8a0b020df56d776a3b",
+      "bytes": 451
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250429\\EXECUTION_STATUS.json",
+      "sha256": "37d36765e8a05f6df7dda2ad4fa47e9c9d8a212924bac8bbb84f5921a92f7d61",
+      "bytes": 493
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\B0\\DAY_20250430\\EXECUTION_STATUS.json",
+      "sha256": "9d386dfd666f9a4c3a2e7793313cb70d74422ac6ab79314bf3869ed1c81b57ef",
+      "bytes": 493
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUILD_LOG.txt",
+      "sha256": "56ed164307247efce78b7cc3d9945d71d23c917c1658002130d42a952d398a8f",
+      "bytes": 2717
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\APRIL_DAY_INPUT_GATE.csv",
+      "sha256": "2b5cd0e6a3207931701537674b7ded3cfbe3c06a64d31703eee2487740530eb5",
+      "bytes": 2614
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\APRIL_INPUT_MANIFEST.json",
+      "sha256": "8805342307fadcae6161fc247bd6bc07ba4384dd6ca23c87618214142feb4900",
+      "bytes": 19705
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\APRIL_POWER_CONSTRUCTION_GATE.json",
+      "sha256": "a41f54965995dd8de33852560da7917aaa094c7f8ed8ed8c81019dbcb45acc92",
+      "bytes": 15501
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250401\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "b9484ff3cb97c34118289faef7f7a4dc805316c453f0006f639d0f90baf2abdf",
+      "bytes": 6095546
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250401\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "e0e052bc2ae4c88559a85152b97d4cfad88b894ce20343a49a6207e606ecc02f",
+      "bytes": 196889
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250401\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "f87a221c0155b4618f5ba71acd5961671ccf2e211c1ac3833bba86a1a6cb79f9",
+      "bytes": 6624
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250401\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "ed807800a684955477dfd643c013029f5755ab8cc6757b8133a87061dee5c91e",
+      "bytes": 573754
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250401\\POWER_AUTHORITY.json",
+      "sha256": "7bd61a62263709d414925d42819f07b744cf27bbcc96a8efbfbb54356e1c4d25",
+      "bytes": 2383
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250401\\SOURCE_PROVENANCE.json",
+      "sha256": "05241b7af06de59fa351af5e23b4f48cea3edbf9409081aff7b8a0b073c43299",
+      "bytes": 5253
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250402\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "f45a9ca08f6c6decdb51ba4807fe570fc432e9ccac8513b644e4a3108ba30229",
+      "bytes": 2870947
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250402\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "a2b4f2c1b000b2203a272eef731bf1d7fc306eecf4299f48d7b7d84be978793f",
+      "bytes": 196693
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250402\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "d9d6e5f48bfd9f71702a4665693c42007c71024ca38491e543c816d8b62f33a4",
+      "bytes": 5911
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250402\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "19029e35c38d98f901f341ddd32e5ab2fc9d2abc9b48ce2e7c0c9d404843100b",
+      "bytes": 334663
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250402\\POWER_AUTHORITY.json",
+      "sha256": "bc6fca6874af41aa4fb15b621a41ebf8c9bf3d717753ee9edbbb631d33ff922b",
+      "bytes": 2235
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250402\\SOURCE_PROVENANCE.json",
+      "sha256": "09568e6d75806353f23fc0f17c3dd48ce39a3076b10f0cab80e32f08acb7c95a",
+      "bytes": 5254
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250403\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "dfd92274b70e3710a292d7663dfaa2576304366cbc4635caee6aeafa2f2b6149",
+      "bytes": 2418723
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250403\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "e13b3c944288809c3ff69962947e86ed1db59d49bdd76159817f8a59ebbe7ca3",
+      "bytes": 195163
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250403\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "18e0173a693c6b1dbf812841adbc99017353aa7177373e6875e89a8b15ca8be7",
+      "bytes": 5754
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250403\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "e781b356e64c20adebc827fcf0522678b04e167a4f3d68aade391ed31d1f9f42",
+      "bytes": 415041
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250403\\POWER_AUTHORITY.json",
+      "sha256": "01cfb4d365c58d7080045cb03f1a04bb3b853cdc83b7b72e50e6f63b65ee5bdc",
+      "bytes": 2235
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250403\\SOURCE_PROVENANCE.json",
+      "sha256": "2b0398b0565d6225a7fd4d294a4519ed2ed08778339dde56085ffe15ae935872",
+      "bytes": 5254
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250404\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "38185734124b6abd79cc9c1880a975fa89541426b44bb6bf999bfa720a176ab4",
+      "bytes": 829481
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250404\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "559a9c4772584c388a4244e9820567e3e6b75761165e06b174d25de480bf3912",
+      "bytes": 195258
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250404\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "c8dd047327aeb4479af9ed9554bee71fcee1d224ee132a33d377945916791158",
+      "bytes": 6182
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250404\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "edaedcd9e726c5c0d9c92bf3a9f6d475b66a775b3dcfdfff3498857aeef749a1",
+      "bytes": 960332
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250404\\POWER_AUTHORITY.json",
+      "sha256": "86fc2159fd586dd69ac1f9a90a8d40a5420a5d5892518cd49c22afc9191a561d",
+      "bytes": 2263
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250404\\SOURCE_PROVENANCE.json",
+      "sha256": "721615b7f554a019223478b2de8212cb7212ff15442af4e47a76a57111397850",
+      "bytes": 5254
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250405\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "8463a1b45cfdde63d31eaab7a0172bbf57ef9eff34341165b4398b201a6dd417",
+      "bytes": 3447367
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250405\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "c051c2ca74687eefcce11470c2e84dff5387e8249e884e51ea30f169812d7a0a",
+      "bytes": 194712
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250405\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "2b6963f407fd23d315afc536b6c5a7b335dbfbbe8a91e0dc04f711760df31e65",
+      "bytes": 6021
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250405\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "cfcd8847e6d0193ea2450c0100d22323066d645e73acaf5af331e2a2abd6ebbb",
+      "bytes": 541417
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250405\\POWER_AUTHORITY.json",
+      "sha256": "e38963517bf35864f05c44b0f7cf0900e0e753aab17bdd10740e7d54832d2687",
+      "bytes": 2235
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250405\\SOURCE_PROVENANCE.json",
+      "sha256": "1ce16572cf0ef6042154a63cc1b4400aa24820637c8097f43b1bb2ac1360cd50",
+      "bytes": 5254
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250406\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "1cfd7d248dd2bedf3be3e1b1b179ea93967b9516c46518003a9660152bbfedea",
+      "bytes": 5101926
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250406\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "ad1da8b532346d2318a277cfca0213a08dba6d8779deac3cebcbd2214a44d4bb",
+      "bytes": 194433
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250406\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "f7556fcfcaec090ae4e66f69a1a181ddb0b7ee1856a4ce325d9558eb634ee9fd",
+      "bytes": 5789
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250406\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "2e8c3d27cf122bd4e687bc39ddb00edc026bf66329783f1b935146c2c7e04d29",
+      "bytes": 482124
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250406\\POWER_AUTHORITY.json",
+      "sha256": "c9cfa760c44729f353ad610b224ea4ea818b3b187495177775698896c6fcfea0",
+      "bytes": 2235
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250406\\SOURCE_PROVENANCE.json",
+      "sha256": "e4ddf62189a0418c671dcb34cfd66273bc623a7015c1904d8c425d39bf6f9af3",
+      "bytes": 5254
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250407\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "f043300fc8334c4fbd2d83daee7dfb59b72f6822bd85536318d061dcf28a1dbe",
+      "bytes": 3011883
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250407\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "74c5572d4d5d11673e6864cbee34636a9ef58a63099d577c5e697c1c5cbfd6f3",
+      "bytes": 194808
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250407\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "4d3bb1b496f1f6dfdba525b12ddf90d3ac7faee7e648bdb77836085f291e6bd2",
+      "bytes": 5758
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250407\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "bad5654f143d372b8bc3967c8a29a9b4106d92c6c08eab81d52cde9ec060daaa",
+      "bytes": 1169595
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250407\\POWER_AUTHORITY.json",
+      "sha256": "23b1cbc9c1e8b3a1a877c5b97c5c858f4dacb78022f74c4cf27e200bcb2726b6",
+      "bytes": 2235
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250407\\SOURCE_PROVENANCE.json",
+      "sha256": "962e0eb09c1484bb3542816b94282c3aa47b9c867edf1b016b8ecd13429f1678",
+      "bytes": 5256
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250408\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "f5555de2274d969799e83fc5b21794c3f2ee6e60a5f79a08e6c440d0922f2fda",
+      "bytes": 1356264
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250408\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "e9e821c7f7ed248af58c928d157076a3dce6a53c06cc07d881389357c9c2f87e",
+      "bytes": 195535
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250408\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "c72be3e776b7a1158ecc516b0a619238aed51d828e2495e27354855e7c53964b",
+      "bytes": 5856
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250408\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "44a4969c95756acfc469cfc71a328f44a512533d9209e4063a0b0a7a1564833a",
+      "bytes": 481620
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250408\\POWER_AUTHORITY.json",
+      "sha256": "c9e742231dce9518165360da30fbcb851e03f0bed384bfc41d73c8831b568aa0",
+      "bytes": 2234
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250408\\SOURCE_PROVENANCE.json",
+      "sha256": "5c7cb9828d953861a925d7b8d183ce9ffdc9d552ec64056046d8ed475aa08eb7",
+      "bytes": 5254
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250409\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "7902cb11fdd993c5039d5b2cd344d5dec6d4370fbdc33519c53f9fe252cb481e",
+      "bytes": 2368767
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250409\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "6887e44b372491af0e1c1777f8d3bb68bd4ecda76f610dfff2b252b496e2096b",
+      "bytes": 196070
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250409\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "2f89a18b5e6d4bf0dd848481bf8768eb263eeba7b261f92c69bd84aedc1ab8bc",
+      "bytes": 5734
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250409\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "48aeab6809b9ddb50f2764f5b0c50fd3151285c1249dd044f04c4c9b81036630",
+      "bytes": 244554
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250409\\POWER_AUTHORITY.json",
+      "sha256": "97ffcaba1928dd253035d1c3da547e5207d25aabe8666823e8d5580c68c6c02e",
+      "bytes": 2252
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250409\\SOURCE_PROVENANCE.json",
+      "sha256": "15cee755fd972b22883adbdb6929f670ff33c8337dc766db508cde5ccc6d20e0",
+      "bytes": 5254
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250410\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "744b41774fd15a4c5d07624afbc684ead32c694651595b8060109e7b416eb152",
+      "bytes": 2939133
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250410\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "63b8dfdace8d434119c420afc4da49f2897ff9c9898ebbb2cba598a19eb64d3b",
+      "bytes": 196318
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250410\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "f06f04338712faae335b126cb42f81d1cd63fe77540c0d02b50ed4b17a2d689c",
+      "bytes": 5944
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250410\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "f8d6e164626ff854eadb00a5eae809289cdc1517b57b5356e8c4f72dc18bbc71",
+      "bytes": 312687
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250410\\POWER_AUTHORITY.json",
+      "sha256": "63d580cc7e3478f633687cbfa2fa72876af1dc6bc3de307b3f6bd686a612105b",
+      "bytes": 2235
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250410\\SOURCE_PROVENANCE.json",
+      "sha256": "ef662be796a89a4be4bb7cb4e05cc8b1ae43ab1faf56b79a9941072c70aa080d",
+      "bytes": 5254
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250411\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "ced9d407f4034f55bf2859700c125f965acfcf346a1523963c91ac5710ac39d0",
+      "bytes": 8309981
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250411\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "622544f5410d2fdab37ab54d9507622ae4a9c59dc755b2aa84f231d7dd807003",
+      "bytes": 197087
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250411\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "87cbbfc762e09f029f44eac89a09fd9c5ad908fa94be4866f4675cbfd2a440a6",
+      "bytes": 5870
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250411\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "d8035b734b760c5d6265ca336962a141284eaf6862433fd06a109b52a51700c8",
+      "bytes": 408509
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250411\\POWER_AUTHORITY.json",
+      "sha256": "94af2eb81de1a08515e960d80757deb989f5b9f293d10591c526e753a70aed6f",
+      "bytes": 2235
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250411\\SOURCE_PROVENANCE.json",
+      "sha256": "683ccf66145984777edf7a86f8c234ac8e503370169f86813c5d47294befe3a9",
+      "bytes": 5255
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250412\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "fc0c0ee46c6a57be416502c4cb559eb0fd9dd290594fef070a8923c053ee8c9d",
+      "bytes": 2659293
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250412\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "793a4f0c1cce7dd07752eaa8263f44093902ddf799f7c8b3966ed1e8ee08c7aa",
+      "bytes": 196054
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250412\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "8b59801c11884fa1eccf2c06c5a3fff6f07be850091c2243bf3a837cd3dceddc",
+      "bytes": 6011
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250412\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "f7b3558f2a50bf63eaf459210d74960a65b2de63e3cba6f72e7c08dca97d92bd",
+      "bytes": 423738
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250412\\POWER_AUTHORITY.json",
+      "sha256": "b3de96d730b35d59c2f65bc80df1ebcb1e8083ab5592b4cd680cabb2650f2144",
+      "bytes": 2266
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250412\\SOURCE_PROVENANCE.json",
+      "sha256": "a1439065651f440a96afa83ff9be696514c79d213ed3015b3a03f65a026abb2b",
+      "bytes": 5255
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250413\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "69b4e2e90929e1d54591ad9c9de4ac34675b67304143adf3ba5cdb438bfd6843",
+      "bytes": 1999204
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250413\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "0e210938f63d1dbbe19e47b0df299b1a6637d7366c7029823566c7cd7aa8e976",
+      "bytes": 197055
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250413\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "6c38306f83f8ce70285741219dfb00df05393bebbd38e7deb7232e276e27e683",
+      "bytes": 7001
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250413\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "82d6fce846604a33a9b2ea6d5158a1a8256be172338855a2b93967f675d38696",
+      "bytes": 985355
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250413\\POWER_AUTHORITY.json",
+      "sha256": "8d373da4b7d3d930a9ceaec0248ef71068cf317efb75a0900f05c0cc4b5bf8c9",
+      "bytes": 2443
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250413\\SOURCE_PROVENANCE.json",
+      "sha256": "d0d12a0fc31d61c7ff7d130b1438bcdac40309963ee4e3974b39af245f26bf50",
+      "bytes": 5256
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250414\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "44e4a6070a778a2bef4752db3197d01ed8104da5892fbe238a00568ee07028e3",
+      "bytes": 1310745
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250414\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "46e78bd1f46ec86db0ab1a123929b206be6611d785df932ab29b082bde65a0f8",
+      "bytes": 195314
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250414\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "19b283115c5357a88e9bd463efc88b042b84f0f9df313f867e4caf9e4e0c26f3",
+      "bytes": 6862
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250414\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "ee9c321d4e1f9427154cab7b0c3965afde5e771a80b401ea51af3fbe25a52c23",
+      "bytes": 1090926
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250414\\POWER_AUTHORITY.json",
+      "sha256": "9c86003406de9caab7151dffeab0419ececce464147660409bc04604fe8ff38d",
+      "bytes": 2426
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250414\\SOURCE_PROVENANCE.json",
+      "sha256": "fe22f160ec7d309406d15845a24b009bd1dcd200b0054b4c8642efc119f2cb42",
+      "bytes": 5256
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250415\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "d34ce015007dca4f50f4edc477da74d313f6656541f7362d3b8bc81da1b6e555",
+      "bytes": 1004944
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250415\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "ee928241b9e6d4861c579f28c0300e6340efaed6c6933634cc72a1216ce26952",
+      "bytes": 195021
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250415\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "edf46ab2c736bb4533ae799fa37eb6d04e8ea341080ee1b79fe5b809dc3c3e79",
+      "bytes": 6779
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250415\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "b86563a2075467804bbf08759cfe57d0073dc8b56be325d327508de44a9bd93d",
+      "bytes": 872600
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250415\\POWER_AUTHORITY.json",
+      "sha256": "7a96cea24fe6b1983c6d34f4b0b34bca048aca2c598f31a605bfced9ffcf63d5",
+      "bytes": 2483
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250415\\SOURCE_PROVENANCE.json",
+      "sha256": "9dbb8ef1d0352d0e5a7b2c776c05bfb1086537a8ba71d827362a83d24457688d",
+      "bytes": 5254
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250416\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "0e1e0bc21c0408788afed625b806eeb613679b81253c1301cbbe73b23f3510ec",
+      "bytes": 731257
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250416\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "59bd45cb766beba3d7dffec1f1f70d5bc80f417e41fefc2f5846bd360f68b732",
+      "bytes": 195282
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250416\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "47ae02ef9d10f54502092f1ba51c1345a2a4bbce9154c745bdea8179b64c3e2e",
+      "bytes": 6896
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250416\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "fbf16c77364e669ea5e28971802395266f39a6ee528e075645d714ed83bd0c98",
+      "bytes": 731731
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250416\\POWER_AUTHORITY.json",
+      "sha256": "6ff9b8029926ee7e464a67e210075938f78324b9945d4e40ade16a4907097ec1",
+      "bytes": 2471
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250416\\SOURCE_PROVENANCE.json",
+      "sha256": "df90466e51043e5bef11c440fca59f83d2025223f4a126ffd2e418a9708749c4",
+      "bytes": 5254
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250417\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "07e1a2c938401c147a07a469ef250c8769747a6895e13ce18976e7079dfa969a",
+      "bytes": 1007902
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250417\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "356febeb4dd3d38112fb371ba47865bc7277a91c11c5e06aa83a738a9c77ca57",
+      "bytes": 196045
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250417\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "ef4059be195a0f55707c805a98e6347866558fa0070bc33dca1cd5138caa5513",
+      "bytes": 6588
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250417\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "cf95b7d405311768f62c811ca6eab11d0a20a4b2b18880a6b54fdbfcf2057b6e",
+      "bytes": 635664
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250417\\POWER_AUTHORITY.json",
+      "sha256": "4df79d98d499faf950da1185a369abc1eec6a8349c59c1ff027f974d28ecadcf",
+      "bytes": 2415
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250417\\SOURCE_PROVENANCE.json",
+      "sha256": "2f6b21f26a308454c86f28a6ca0b7a5b471cbcaf8043cfffab9fcd6e166c8b33",
+      "bytes": 5254
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250418\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "acc144f3e1771b1a4cc1cede6b8663ad2fbae2b8e42927451bd9ff79884b0a68",
+      "bytes": 1375410
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250418\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "3d63589d416d3148630588d20171b3e35d023a2157179def76f9f379a9d50b71",
+      "bytes": 195119
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250418\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "dbca6d251bd79f70b1e4248c9592ea18c00e6abe7eec05c9482f2963f779caf5",
+      "bytes": 5778
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250418\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "f4479b11a06db1f47b4da4809fbfaf0d11d8d35e07a7da931f732e84a086c9ab",
+      "bytes": 494618
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250418\\POWER_AUTHORITY.json",
+      "sha256": "5428735ec2fe16f7c82c38b5bc297c2cba832a677fcbbe97b3944dd7a6b777f7",
+      "bytes": 2236
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250418\\SOURCE_PROVENANCE.json",
+      "sha256": "a35bc97cfff229c8f9459ae7ffb93d33e4491a38f766d1c080f0e1f8b6d459fa",
+      "bytes": 5253
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250419\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "73ea77f60707020ce5c26203ed03a549fa930182bfa98c85d69f059abe350cda",
+      "bytes": 697572
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250419\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "7cbc1f5ea4c354b4d23d6faf30ed482d55dcaabaf7c39c76842305ae657360d5",
+      "bytes": 196324
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250419\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "03f9aed74e81ce999d4e1ca909b88e2eca2e1bcdc7d532901b7382a560c409d6",
+      "bytes": 5853
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250419\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "60c7c50f89c00b42c11ffbce713f3b2c7cc773c46f0aa5b362fb42c9e065a1e6",
+      "bytes": 966770
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250419\\POWER_AUTHORITY.json",
+      "sha256": "df88da358305b15d1b8efeed72ec1fd2d93e48722f0485f8e27fbac2de51e54e",
+      "bytes": 2250
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250419\\SOURCE_PROVENANCE.json",
+      "sha256": "ad446a070cc8b259095cea47d1af12e6006e1921da7b1be3fc97cec672ac8248",
+      "bytes": 5257
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250420\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "e2c9e4c6833bbe3aa4e099988c22f1aec18ec046772ebc64f5396faa347d761e",
+      "bytes": 453325
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250420\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "5aef5281cba6c202f6dc68ac21ce43801cddbff157d25e186c2867b3cff33dfe",
+      "bytes": 196538
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250420\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "65003a984a382a3bbe4a406c54551dd2baafd152c06077bd1d241d6de8d3d0cc",
+      "bytes": 5876
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250420\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "f2f18c8cfcb2984775de3bb26dd02f6518c23df87d96fd9192794fdb9a7874bc",
+      "bytes": 874629
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250420\\POWER_AUTHORITY.json",
+      "sha256": "dd838bf32ac381ae96a02ad0d1091d81e99f5e27b4260913d471b34e90700443",
+      "bytes": 2251
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250420\\SOURCE_PROVENANCE.json",
+      "sha256": "0568145460a70e0c6545ef0d99494d194169c08f74a1a596122deecb12be7d0e",
+      "bytes": 5256
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250421\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "9a94b12b90ba51f69cc8f76c9672031e5a829729458fd33a0c91bcc94c29bcb0",
+      "bytes": 768789
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250421\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "fd81248e6acae53922f3884c84611242aadeba39eba8f57969ae3304ddea9b8d",
+      "bytes": 195394
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250421\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "f80ec833825e829aec9562fdc74158c162b79f52ef162b6d3de76244bc05b410",
+      "bytes": 5831
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250421\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "f6f4f38ffc2083f1675814b12ce9f736b13e9fd5db6fcfaa3c23364201addac7",
+      "bytes": 451513
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250421\\POWER_AUTHORITY.json",
+      "sha256": "1f6aa6b10d67189ad5d90acacb13825849cbb3b62d14513b6f4caa0d7e773c28",
+      "bytes": 2235
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250421\\SOURCE_PROVENANCE.json",
+      "sha256": "1c55718d0ea5a06373e1baf2d610f4ddd4f654723ae0464fd8409eb1acc5ace4",
+      "bytes": 5256
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250422\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "e4b1de83c99c06af086cc441b306aa70d7aa11a15dfa535ce96e8906fac0a2f7",
+      "bytes": 2043275
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250422\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "2b6ed8bda29f2aebf69f42cbf2cb57239c66f1b99050870ce95f6f5ccfc2d86a",
+      "bytes": 195123
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250422\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "49b366ebd26d0205ce300aa1cd9fa10278b9825ef80c8a514765b2c52422e2eb",
+      "bytes": 5826
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250422\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "6058bc246fff0cab2bbcb491cfed0f0b31e4e1b854e540c1fb63a56161a4e38d",
+      "bytes": 463565
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250422\\POWER_AUTHORITY.json",
+      "sha256": "8d3bddd702977a5663c384a7f8a6b8b8955982e2de68f70c36998386c7192382",
+      "bytes": 2252
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250422\\SOURCE_PROVENANCE.json",
+      "sha256": "363ad8d96c021eeac628585067dd161be400caf326b8ff4c8ac4deab322a00a3",
+      "bytes": 5254
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250423\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "0b4900d8ff1074777d0dd524c48f57c522125e38dc87a7e43969dcebbf12269f",
+      "bytes": 2678604
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250423\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "52bf0a6f7b457e65705869dd27a4cd23d5bf968f7f811fbd32591d6576b0832f",
+      "bytes": 194846
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250423\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "e9b68468fb5bd6ee14a04c3ae390d98159c8161685bbbdb69a11230e8f5eb4dd",
+      "bytes": 5736
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250423\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "a104e343defa9b56555de73d90594d1f66142f4e9becd84f864477c29796abca",
+      "bytes": 812853
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250423\\POWER_AUTHORITY.json",
+      "sha256": "3827878814f1a8b7c6d801154403a52cef67a2f82b222a99c3349f7cc11af578",
+      "bytes": 2235
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250423\\SOURCE_PROVENANCE.json",
+      "sha256": "2d2dc22d1b971fd94811069439f1cd9ae42e48c4151120ac5116ae9701c40d27",
+      "bytes": 5254
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250424\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "2bfe4d4c581fa7688797385d078396db3172e7296a803578376c0e338559e836",
+      "bytes": 2388245
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250424\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "131ebb61835b2ec273116a603bd2cab1c532d2dcfe20af1654eb59069f1c6a9b",
+      "bytes": 195752
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250424\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "40ad323b94d2c79692e8d2309561e06da187ca8f9e2fe2e5029bcfcb0158fa6b",
+      "bytes": 5824
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250424\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "cc1fd6d2188fdb10ce1b6a74769d76fe75a91e22da2b198bf42f5bab9af2f52d",
+      "bytes": 466403
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250424\\POWER_AUTHORITY.json",
+      "sha256": "c7565471a4be75ce98ad38686b61e289f6c13cec96f8609c0ca81db9a03b38f1",
+      "bytes": 2256
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250424\\SOURCE_PROVENANCE.json",
+      "sha256": "5d27bca16db930c557b99bec418c8b5ce584639c4378a6e97fefdfa3d1a8fac4",
+      "bytes": 5254
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250425\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "636b7d68ef13cc3ddd084a3df58b8b31a6d53f76514e7fe7a52b7688f6c5544c",
+      "bytes": 1749817
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250425\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "d2818d28cc870d73a6956f868088eec110654ee605bed27c340efa8ee941514f",
+      "bytes": 197209
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250425\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "c576af91f2c6218ac059d87b14892aa91c61c4823021e365e9ca41aa7e7a462e",
+      "bytes": 5808
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250425\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "2595c3ad62417ff56fc4a8786f2a02a6f07a665de87ce46bfb02523b535d1628",
+      "bytes": 1001828
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250425\\POWER_AUTHORITY.json",
+      "sha256": "13e40ac5eeeef9fb822d25d886512b53fcdd5c430a518b4a1cfa244c02ae7def",
+      "bytes": 2235
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250425\\SOURCE_PROVENANCE.json",
+      "sha256": "b6af3c3940518bc7c33dc3c0c2a77eeb6956b313d943639dd035d450fd66d9e7",
+      "bytes": 5256
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250426\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "f8b1715cf4a9b9951e454beabed685fa8ba57fa433e0c352b117dda58f6e9f2d",
+      "bytes": 545428
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250426\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "28bbb566cf2d5091679d97966fedb0d4812770e3cd5047439a95219246fa4eb6",
+      "bytes": 195408
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250426\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "7a0a571a45069510b46dc709a17f49cb2ce22fcf4c56473f53d708bde908abba",
+      "bytes": 5888
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250426\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "d891c7dd8843d1c8a7178119b5b4af072d5252eb90c77d7836150396786afc7e",
+      "bytes": 1358719
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250426\\POWER_AUTHORITY.json",
+      "sha256": "4701222ad303346c5fd3532b8e70098226832bdfb90af0a645b9cb12edf0de1d",
+      "bytes": 2235
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250426\\SOURCE_PROVENANCE.json",
+      "sha256": "d90c14db78b648eddd3ce4e0c5b11618dc552fe342c6d8e2a48790df014c858f",
+      "bytes": 5256
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250427\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "ff0cb5a5225af971b13fb187c69044537ca46cb25411025467fe731d7f54d001",
+      "bytes": 3299823
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250427\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "5fece4763384f6130e3e6eda71a2a7a6a833a906bb87f97dcc98723c3c633716",
+      "bytes": 196443
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250427\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "d5b37a5693c7e876145cb7b31ff5139f54a960469c45f11faba6c2d89c2a8a37",
+      "bytes": 5818
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250427\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "9ebe291e0e67d49dc2ee8e1e221ff3b27be372956cc2b130894cb1a17b0a01d2",
+      "bytes": 1144006
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250427\\POWER_AUTHORITY.json",
+      "sha256": "d13221a597af20fe8782c85f0b8f022ca13b9ac180733bc3c93e71a965ca3fc1",
+      "bytes": 2235
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250427\\SOURCE_PROVENANCE.json",
+      "sha256": "2af1168b10391346fc96a78f983dbbdc0efbd441ea57f4fbd77bc5027c20eea0",
+      "bytes": 5256
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250428\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "144aeea4d82af3c1852c49720272758ac61adc7e501d44881c70a24e4e571fd7",
+      "bytes": 941669
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250428\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "d711f11030b8d8bc6de821915fd933503f323b0a5fa07f957738612576529b92",
+      "bytes": 195137
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250428\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "56741f642ae43399eb787b2cca3bf97eea37e5b6ec3662dd9035fa36e4dafee2",
+      "bytes": 5841
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250428\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "e408ba10f1dbb8f07e87e0d5ad997c0394eded16c1ac25f7f35e2ce2308178b9",
+      "bytes": 1871574
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250428\\POWER_AUTHORITY.json",
+      "sha256": "ba935454b41890b1ce73815ceb7f88c23666d0b0bc72309e02a8ec2ba55bd2f9",
+      "bytes": 2235
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250428\\SOURCE_PROVENANCE.json",
+      "sha256": "c793e42c000d4f7563ce3574a4abadacbc3e443c7250d2672ab62efa007d144f",
+      "bytes": 5257
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250429\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "2972d4130e83c7ad19c1b10dd2deb0e089ef894da75ca2617d61232efd6f2882",
+      "bytes": 3756736
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250429\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "6d3191c00b111c6cee2bcdbf566dbce300f6678a7f0e0b2498615f1a842b4e41",
+      "bytes": 196931
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250429\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "d6993905959af3ec73ce53454aedba4e26aa16108244f53187b0a5c308a35b8e",
+      "bytes": 5926
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250429\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "6caa5b6781b40f5312f6f600b47eed71ba448c34971ae7947de5c98c940ca8b1",
+      "bytes": 1184752
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250429\\POWER_AUTHORITY.json",
+      "sha256": "e463bb31e15e26104c545ad684ec85071da9e7f04a7a90f547887db16e293bc5",
+      "bytes": 2260
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250429\\SOURCE_PROVENANCE.json",
+      "sha256": "f8f4eda20f9aff46c73144a195c3bda278d138dc7b000ccebaef52e4c971f07c",
+      "bytes": 5256
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250430\\ACTUAL_INPUT_BUNDLE.json",
+      "sha256": "5554347b448d12311cd32a460d66b1023e79d26afd8765da4fd91ae7fda8caef",
+      "bytes": 3259067
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250430\\C1_PLANNING_COEFFICIENTS.csv",
+      "sha256": "ae2ff7c9e247644105893b9bfc7179647af933a18848f8aee679e99f240d71e6",
+      "bytes": 194749
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250430\\FORECAST_OCCUPANCY_PREFLIGHT.csv",
+      "sha256": "f04fa017dcc2b900fa9a5ef4fca20474f5ca9301fef8a857c206e8c93d93e45c",
+      "bytes": 6786
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250430\\PLANNING_INPUT_BUNDLE.json",
+      "sha256": "20943a3c0a1275778036572452b240a2988e4bcab0e039e57fd22486f452cead",
+      "bytes": 1811387
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250430\\POWER_AUTHORITY.json",
+      "sha256": "d2edbe6921132e491c6485384eb7f4c54a0fe382abb1483534d2aae4b0620ffc",
+      "bytes": 2431
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\DAY_20250430\\SOURCE_PROVENANCE.json",
+      "sha256": "7a7c4e8dfecc5a47f6bac4204c557a380024f2d793c08910964f1b26b1b24974",
+      "bytes": 5257
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\BUNDLE\\FORECAST_POWER_ALLOCATION_RULE.json",
+      "sha256": "ebd9b3cfe6f3638e9c3077a09ac1d7ef39623ebec1ae335de57f47e9e9b3f2a5",
+      "bytes": 355
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CALIBRATION\\APRIL_B0_RESIDUALS.csv",
+      "sha256": "43dec6394d2fdcc643d1308760d5cf621c74c816d532477a6a7a642b62e22a16",
+      "bytes": 84
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CALIBRATION\\CANDIDATE_BANDS.json",
+      "sha256": "2b684109596ce59a7eb05f09c66df62fc58886e13072a2a633e0920cc0acdede",
+      "bytes": 369
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CALIBRATION\\CURRENT_005_COVERAGE.json",
+      "sha256": "06ad2fb3775a6ee9404aa9ac72ac9ef8c8b5c83cd885d80f1d42cd3642c8f15c",
+      "bytes": 260
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CALIBRATION\\DAY_WORST_QUANTILES.csv",
+      "sha256": "835ac948cfc77457d837515ba7d47c775390c20e651da9a4404305406a634417",
+      "bytes": 109
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CALIBRATION\\POINTWISE_QUANTILES.csv",
+      "sha256": "835ac948cfc77457d837515ba7d47c775390c20e651da9a4404305406a634417",
+      "bytes": 109
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\APRIL_CC4_BINDING.json",
+      "sha256": "6a65dae1d9ea424fa3d12626bf6ae8c12cb5f7116e8f30e0db8aaa2ac73768a7",
+      "bytes": 2666
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250401.json",
+      "sha256": "c24d98a04b3b869c8924cfb5f711b4137f9197f20b69ffd2e26b76919346f721",
+      "bytes": 5013
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250402.json",
+      "sha256": "39d6a01017eaf74b4b2d76f834c5c1a66455fa6215fd465c8c7455f80fc25694",
+      "bytes": 5009
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250403.json",
+      "sha256": "ec8c3e990ee82fe0f585eeb2b55dcf85f93741457818f6f254cfd3c5a9420c34",
+      "bytes": 4959
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250404.json",
+      "sha256": "8b5baad44217e54ecb64c4d55057f6752082d63003dc197cb846a45672ab12be",
+      "bytes": 5007
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250405.json",
+      "sha256": "2370df361eeb48a07bcb490c7de062243647ee314281c79263915e4d49c74070",
+      "bytes": 4969
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250406.json",
+      "sha256": "4dc04ed787d13c8d19667c2898e634b3251b778981d90e79f7520229dc5f7ce9",
+      "bytes": 4989
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250407.json",
+      "sha256": "9f2471d0f3b355409af82cb58577ddb621871fddcc99c4bcf1b15718f7108223",
+      "bytes": 5006
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250408.json",
+      "sha256": "98529d0a976dd294f2c3415f0ee95d9a9216ea3b7e0821b5e086af5fc3106727",
+      "bytes": 5104
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250409.json",
+      "sha256": "97468e5bdcf7d11aca86ddd25dbd9a128bb91a9e7c45801d1925752deaedd217",
+      "bytes": 5009
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250410.json",
+      "sha256": "f307a14bd2d71eaa42f2f018cb81ee53b44552b63eb7279ff3368e20aa2c730c",
+      "bytes": 5008
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250411.json",
+      "sha256": "e7846f94206ccf55cd019aab734ccee25e746e4de05794a728c25c2aecdc73f9",
+      "bytes": 5037
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250412.json",
+      "sha256": "94684d7437184352ab6e17853a5cc09f3c809bf6033be0bb1c1e828f41958b69",
+      "bytes": 5009
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250413.json",
+      "sha256": "83a41ba5256c9f2af1dba621294218ef2caed1af0838a27582a9df67fb5860a0",
+      "bytes": 4987
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250414.json",
+      "sha256": "52bccc59cd4d119473e6a169b02ae1c2fefec406522507af44b7aac344dd910d",
+      "bytes": 5032
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250415.json",
+      "sha256": "41e1da2b3de558b47f2276650595bff31930a72d951d54a2f329cae81207542d",
+      "bytes": 4992
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250416.json",
+      "sha256": "1e7ef475bef62034d44c85360373b01e8530e448e099b604ceb20ca10bdf3c56",
+      "bytes": 4983
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250417.json",
+      "sha256": "fdd158d9084fa5589b7f5611360aa8e2f4e328bb80420b6c11af0b481603c491",
+      "bytes": 5001
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250418.json",
+      "sha256": "9e08a353ce0ff8ca24d35afd3d83f576f3cefe7010e253bb2f0de5eebda5c083",
+      "bytes": 5003
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250419.json",
+      "sha256": "ddca4806f2f1f98c43f354e98e37012a9320d518b7f1f43270cc0f3cf8938600",
+      "bytes": 5003
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250420.json",
+      "sha256": "75e8178a495bc8c067124ef018caa4a48e1b3d370ea103ac48bcf397d97941ec",
+      "bytes": 5002
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250421.json",
+      "sha256": "c4a964cb26a453a3070388e728066bfb8f8bf13c8238b5e8dbea7352ecc54112",
+      "bytes": 5037
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250422.json",
+      "sha256": "dc44fc18bb0eb0dec5b9ebf77a8b721d5a41ee6f75d75f70805597df41ae2e98",
+      "bytes": 5007
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250423.json",
+      "sha256": "9a621cf32024a10ed701d9a122ffa1a7936fc51ffeb4b947ee0d8549ddba7a58",
+      "bytes": 4981
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250424.json",
+      "sha256": "f61f82e782def9d04bf3ed94b92e02cb24c7cd796412193406b35800deacf502",
+      "bytes": 4992
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250425.json",
+      "sha256": "2a6a0f5aec49acf2840f5b46780fccf12d829f39c07d10e982ec23983131d308",
+      "bytes": 5016
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250426.json",
+      "sha256": "a4f93a69df17b2b03e46d6aa6be1b899ee62d592b8397511e07dd2708588c6e5",
+      "bytes": 4984
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250427.json",
+      "sha256": "861474081cd899849c20c56b88e69189fd72e3e98434cb6b0cf31ef7fddee545",
+      "bytes": 5001
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250428.json",
+      "sha256": "264042f8b070229d56b504755e5447b52619d2e000fc18f80b8a3baa5be4decd",
+      "bytes": 5008
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250429.json",
+      "sha256": "45e1e94262e8b497cde90338a18bf3d4965fd922c03e2709b57d0ed0bfd50f66",
+      "bytes": 5016
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CC4\\DAY_20250430.json",
+      "sha256": "000f5d46bcbcc169a2c7b0b0cbfd1482423f845891a8b9731be216f6663a7b99",
+      "bytes": 5020
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\CHECKOUT_EOL_RECEIPT.json",
+      "sha256": "25335ac2167f4d9df0e583a083a71a6f03f9704bb3113bc02af2a46d5b67d14f",
+      "bytes": 5156
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\EVIDENCE_SHA256.json",
+      "sha256": "0e60fcd276e6ac4f81775db899f555e89ecfeabc6a91fb713ce79c74c9755f83",
+      "bytes": 107336
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\FINAL_FLAGS.json",
+      "sha256": "c1d69a24d51b3a9c46b8add92deb2e1a47a86f7312588e735337ff772e813fbb",
+      "bytes": 831
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\FINAL_REVIEW_KO.md",
+      "sha256": "8d353ff740f393f65333471c98366369cd385b61dcb5eddb8f74737fcae17e5f",
+      "bytes": 2026
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\FINAL_VERDICT.json",
+      "sha256": "9c3694bc5ddb82b615a29e9df70614799c060d60c61151ebb98142ebe8061f50",
+      "bytes": 1988
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\NEXT_MODIFICATIONS.md",
+      "sha256": "1a0557e067bff3f8634ee8c46ab2da551230a3acc002038b9ab64b3c987ad6af",
+      "bytes": 1711
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\POPULATION\\APRIL_MODELABILITY_BY_DAY.csv",
+      "sha256": "8e020da79cbc602eea408d019f69910bedee2c8b45aeeb9db757b52b35d1dbf8",
+      "bytes": 3749
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\POPULATION\\APRIL_MODELABILITY_SUMMARY.json",
+      "sha256": "0e709c55efa39ffdae285bdb310fc02f6598e898a68cccc2e6f896584d31f700",
+      "bytes": 866
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\POPULATION\\COMMON_FOUR_ARM_POPULATION_AUTHORITY.json",
+      "sha256": "00074724b2aa052a7e9acdae6d59f6b6e7c927c1d03669b66eec1dc14ec2f8e3",
+      "bytes": 24243
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\POPULATION\\FLEXIBILITY_CANDIDATES.csv",
+      "sha256": "34667ae2b5eb1306dd64477ef6228b3b565e65104df290eff68d15d3f9a16cce",
+      "bytes": 41116619
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\POPULATION\\MAY_RULE_COMPATIBILITY_AUDIT.json",
+      "sha256": "731acb102e4931317c4590225f8ed02f6375efd811d5b93fdb1dbdd93e522ace",
+      "bytes": 156435
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\POPULATION\\PHYSICAL_MEMBERSHIP.csv",
+      "sha256": "f3474808a6b8e70c75cb18ef334f8fe8a40daa31015f9c7bc68e856ae691cf42",
+      "bytes": 26695175
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\POPULATION\\REPRESENTATIVENESS_AUDIT.json",
+      "sha256": "70b5f79ad42d1823357114f9681afeecb694f0040ee382ca7f939a0613d01a57",
+      "bytes": 13099
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\POPULATION\\V42_FLEXIBILITY_ELIGIBILITY_AUTHORITY.json",
+      "sha256": "01cb6a798a1b1e40b1d638f501e5a4c843a770b99238d7a79a2bfc7787d85999",
+      "bytes": 951
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\POPULATION\\V42_FLEXIBILITY_ELIGIBILITY_RULE.md",
+      "sha256": "fe15ffde3152bdb23916d9638d4e61f95f0dc12f88f1bd86a3a919bdfa2d11bb",
+      "bytes": 854
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\POPULATION\\V42_PHYSICAL_MODELABILITY_AUTHORITY.json",
+      "sha256": "26a3c67b3afddeb48ce20c468a217fbef8d1b0ff6ea6b2f38785f45d89ece50d",
+      "bytes": 1478
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\POPULATION\\V42_PHYSICAL_MODELABILITY_RULE.md",
+      "sha256": "65addcecf4ec6f68273dc0a6a8e62c47ecdb2d71d326afddbb2c958ae3b30340",
+      "bytes": 1405
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\POPULATION\\V42_UNMODELABLE_WORKLOAD_LEDGER.csv",
+      "sha256": "bddaf8f13577806483cea5d605c0d85ae94e7412d2f4cad8a1d42d4f628a3690",
+      "bytes": 11152347
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\POWER_LOG.txt",
+      "sha256": "7d674f21b06baf45bb77fcf0f585a57f6c6a59ffd92b7fc0da342f5d2c1f1d3c",
+      "bytes": 2177
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\PR122_BASE_RECEIPT.json",
+      "sha256": "2b84fca11cf7384bc481dd748ee93d2c5bfa4e6bb3692e74f402c7461a6d3ef1",
+      "bytes": 181
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\PR_DESCRIPTION.md",
+      "sha256": "0857f83c5f7886a1404bea398a393952d53a463eb374d1c91011c91b81e6b779",
+      "bytes": 1791
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\PREREGISTRATION.json",
+      "sha256": "2144ec172129021d8fe6ac682860b8c9dba5bfb2e7591186d9ced9f3a726a17d",
+      "bytes": 841
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\REFERENCE\\CAUSAL_RELEASE_BLOCKERS.json",
+      "sha256": "54132ec30c25a6296aecd6a072aa47111b395b07e3edf0858d2b60f72138b2b3",
+      "bytes": 9755
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\REFERENCE\\V42_COMMON_REFERENCE_AUTHORITY.json",
+      "sha256": "821648585f2c6f30237f11b0a03743e9d98f9599bfe93f020d2e183998cfc570",
+      "bytes": 24717
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\REFERENCE\\V42_COMMON_REFERENCE_SCHEDULE.csv",
+      "sha256": "221c1f551c7d6a713027f548e44de5bda2f802f05ac49a634d6898d60201d924",
+      "bytes": 8906090
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\TEST_OUTPUT.txt",
+      "sha256": "437d796b2b72436e61931888aa0b7084f15c7fd2c9eb93ea5f71991bb170a676",
+      "bytes": 2054
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\TEST_RESULTS.xml",
+      "sha256": "b5d760c816385b2ed6c0e703024e1748bb44308f484246815a847b24acc07f91",
+      "bytes": 155312
+    },
+    {
+      "file": "docs\\v42_april_modelable_population_b0\\VERIFICATION.json",
+      "sha256": "d14f5a6236ee2e2b8139197fff085afb01581aecbaf6244a6625feb0c582cfd9",
+      "bytes": 797
+    }
+  ],
+  "code_changed_before_audit": false,
+  "PR124_imported": false
+}
