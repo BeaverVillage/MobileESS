@@ -1,0 +1,51 @@
+{
+  "rule": "V42_COMMON_FCFS_FIXED_SITE_TIEBREAK_V1",
+  "issue_origin": "D-1 18:00 fixed AEST; D-day slots are issue slots 24..119",
+  "running": "Source site first. Missing site: decreasing GPU gang then UID, first compatible capacity-feasible site. Start=0.",
+  "pending": "FCFS submit_time then UID; earliest capacity-feasible start, then ascending site. Fixed source site never relocated.",
+  "missing_GPU": "Retain row BLOCKED_GPU_REQUEST_AUTHORITY_MISSING. Do not infer gang from requested nodes.",
+  "q50_expired_running": "Hard occupancy retained indefinitely unless source-authorized causal release exists; no Q50 synthetic completion.",
+  "compatibility": "Current V42 frozen 780-GPU site vector; non-additive single-gang ceilings equal site capacities.",
+  "source": "docs/v42_job_capability_joint_flexibility/FLEXIBILITY_SOURCE_AUTHORITY.json",
+  "capacities": {
+    "AIDC01": 80,
+    "AIDC02": 40,
+    "AIDC03": 80,
+    "AIDC04": 40,
+    "AIDC05": 100,
+    "AIDC06": 80,
+    "AIDC07": 40,
+    "AIDC08": 80,
+    "AIDC09": 40,
+    "AIDC10": 80,
+    "AIDC11": 40,
+    "AIDC12": 80
+  },
+  "optimizer_calls": 0,
+  "grid_reads": 0,
+  "actual_reads": 0,
+  "May_reads": 0,
+  "rule_source": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_b0_calibration_v2_pr\\v42_april_b0_v2\\reference.py",
+    "sha256": "4ef4c83a6d2d6dfa49cb7d17ce01fb29b136ab28cf06bd53315153c93743462c",
+    "bytes": 7758
+  },
+  "runtime_source": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_b0_calibration_v2_pr\\v42_final\\runtime.py",
+    "sha256": "86f578f315c39dd0c4e858df5d0ee04a79f16bc2c3d033af4beac7fe9ebd5e2a",
+    "bytes": 3224
+  },
+  "runtime_integrity": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_b0_calibration_v2_pr\\v42_final\\runtime_bundle\\INTEGRITY.json",
+    "sha256": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+    "bytes": 4131
+  },
+  "shared_arms": [
+    "B0",
+    "B1",
+    "B2",
+    "B3"
+  ],
+  "old_mapping_required": false,
+  "input_gate_required": true
+}
