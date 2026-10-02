@@ -1,0 +1,61 @@
+{
+  "base": "c7d808a315e04aefc1bcfc537b84cc38d895a9ab",
+  "created_utc": "2026-10-02T09:46:40Z",
+  "solver": {
+    "Threads": 4,
+    "Seed": 20260929,
+    "Method": 1,
+    "NodeMethod": 1,
+    "NumericFocus": 1,
+    "FeasibilityTol": 1e-08,
+    "OptimalityTol": 1e-08,
+    "IntFeasTol": 1e-08,
+    "MIPFocus": 0,
+    "Heuristics": 0,
+    "MIPGap": 0.005
+  },
+  "Start_acceptance_seconds_max": 60,
+  "Start_acceptance_early_stop": "Callback terminate immediately after explicit loaded-MIP-start message; optimizer status and incumbent retained",
+  "canary_seconds_each": 600,
+  "order": [
+    "ACCEPT_ORIGINAL",
+    "ACCEPT_COMPACT",
+    "C0_ORIGINAL",
+    "C1_COMPACT"
+  ],
+  "immutable_primary": "All physical route/mode/node/movement/Pch/Pdis/Q/SOC/rho and frozen AIDC state; bitwise identity",
+  "reconstruction": "Source-defined deterministic equality substitution, auxiliary only; no rounding/clipping/RHS/matrix change or optimizer",
+  "inherited_UB": 0.5912812634331275,
+  "inherited_LB": 0.5722125039436496,
+  "inherited_gap": 0.03224989640084286,
+  "material_gate": {
+    "relative_global_gap_reduction_at_least": 0.2,
+    "OR_valid_LB_gain_at_least": 0.001,
+    "reference": "Inherited original-M1 UB/LB gap, as explicitly required by this follow-up; also report C0 vs C1 pair separately",
+    "no_node_speed_fallback": true
+  },
+  "reconstruction_gate": {
+    "rows_exceeding_1e8": 0,
+    "bound_violation_at_most": 1e-10,
+    "integer_fractionality": 0,
+    "target_max_row_violation": 1e-09
+  },
+  "Start_gate": "Both explicit Gurobi Start acceptance and incumbent objective equal inherited rho; reject STOP without parameter tuning or canaries",
+  "RESOURCE_CONTENTION_ABSENCE_REQUIRED": false,
+  "independent_workloads_allowed": true,
+  "heavy_lane_sequential": true,
+  "BLAS_OpenMP_process_limits": 1,
+  "production_1800_run": false,
+  "production_authorization_artifact_only": true,
+  "M1_ACCEPTED": false,
+  "PROBLEM13_FINAL_VALIDATED": false,
+  "P2": "NOT_RUN",
+  "A2": "NOT_RUN",
+  "M2": "NOT_RUN",
+  "Actual": "NOT_RUN",
+  "Fresh_AC": "NOT_RUN",
+  "Benders_calls": 0,
+  "no_parameter_sweep": true,
+  "no_root_LP_rerun": true,
+  "no_new_formulation": true
+}
