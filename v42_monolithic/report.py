@@ -96,6 +96,8 @@ def main():
     ('Root에서 모든 binary를 relax했는가?',f"예. Original arc/mode, compact z/selector/mode 모두 [0,1] continuous. Primary dual simplex는 양쪽 TIME_LIMIT. Barrier+crossover pilot은 실제 numerical failure 후 중단했고 compact는 미실행. 자동 dual presolve no-crossover pair 및 PreDual=0 primal-presolve pair는 별도 사전등록했다. 어느 pair라도 양쪽 OPTIMAL인데 objective/mapping이 불일치하면 hard STOP한다. 선택 pair: Method={root.get('method',1)}, Crossover={root.get('Crossover','default')}, PreDual={root.get('PreDual','default')}. MILP canary는 최초 Method=1 정책을 유지한다. 모든 raw evidence와 등록을 보존한다."),
     ('숫자를 기대값으로 강제했는가?','아니다. Actual reachable node 9,038개와 mode384개로 9,422개의 binary를 집계했다. 9,696 가정은 쓰지 않았다.'),
     ('수치 warning과 시간 측정은?','원 scientific matrix의 작은 coefficients를 바꾸지 않는다. Solver warning/Kappa/KappaExact, optimize wall/runtime, construct/build, presolve/root 및 peak memory를 별도로 기록했다.'),
+    ('Incumbent 없는 canary의 후처리는?','두 raw 600초 결과는 저장됐으나 frozen worker의 비교 단계에서 valid_global_gap 누락 KeyError가 발생했다. CANARY_WORKER_COMPLETION_RECEIPT와 console에 exit=1/traceback을 보존한다. 읽기 전용 certificates.canaries로 기존 valid UB/LB를 유지하고 안전하게 비교를 완성했다. Solver UB는 null이며 새로운 incumbent를 만들지 않았다. Missing-incumbent 회귀 테스트를 추가했다. Frozen optimizer source는 바꾸거나 재실행하지 않았다.'),
+    ('Start 잔차의 독립 감사 결과는?','Original/compact 모두 동일한 native equality 2개가 FeasibilityTol=1e-8을 넘었고 최대 위반은 3.0752360699604075e-8이었다. Integer fractionality와 bound 위반은 0이다. MIP_START_TOLERANCE_AUDIT.json에 행 번호/이름/RHS/잔차를 기록했다. Start/과학적 point/tolerance를 수정하지 않았으며 solver 거부의 확정 인과로 단정하지 않는다.'),
     ]
     assert len(answers)>=70
     body='# V42 M1 exact compact monolithic 최종 검토\n\n'+''.join(f'## {i}. {q}\n\n{ans}\n\n' for i,(q,ans) in enumerate(answers,1))

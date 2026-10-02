@@ -148,3 +148,18 @@ def test_primal_root_certification_cannot_bypass_an_optimal_pair(monkeypatch,bot
     monkeypatch.setattr(s,'read',lambda name:responses[name])
     monkeypatch.setattr(s,'one',lambda *args:pytest.fail('An already optimal pair cannot trigger more solves'))
     with pytest.raises(AssertionError):s.run()
+
+def test_no_incumbent_canary_completion_is_conservative(monkeypatch,tmp_path):
+    import v42_monolithic.certificates as c
+    raw=dict(status=9,BestBd=.28222432055490354,start_accepted=False,nodes_processed=1.)
+    responses={'CANARY_ORIGINAL_600S.json':raw,'CANARY_COMPACT_600S.json':raw,'ROOT_LP_EQUIVALENCE.json':dict(PASS=True)}
+    saved={}
+    monkeypatch.setattr(c,'OUT',tmp_path)
+    monkeypatch.setattr(c,'read',lambda name:responses[name])
+    monkeypatch.setattr(c,'dump',lambda name,value:saved.update({name:value}))
+    result=c.canaries()
+    assert result['PASS'] and not result['promising'] and not result['P1_ACCEPTED']
+    comp=saved['CANARY_COMPARISON.json']
+    assert comp['raw_original_solver_UB'] is None and comp['raw_compact_solver_UB'] is None
+    assert comp['original']['UB']==UB and comp['compact']['LB']==LB
+    assert comp['relative_gap_reduction']==0 and comp['original']['gap']>0
