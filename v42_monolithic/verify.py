@@ -1,10 +1,16 @@
 """Finalize reproducibility receipts without running an optimizer."""
-import json,re
+import json,re,importlib
 from .common import *
 from .experiment import check_freeze
 
 def main():
     check_freeze()
+    for module,receipt in [('secondary_roots','ROOT_LP_SECONDARY_PREREGISTRATION.json'),
+            ('interior_roots','ROOT_LP_INTERIOR_PREREGISTRATION.json'),('primal_roots','ROOT_LP_PRIMAL_PREREGISTRATION.json')]:
+        policy_module=importlib.import_module('v42_monolithic.'+module)
+        registration=read(receipt)
+        assert registration['source_sha256']==sha(Path(policy_module.__file__))
+        assert registration['policy']==policy_module.POLICY
     output=(OUT/'TEST_OUTPUT.txt').read_text(encoding='utf8')
     matches=re.findall(r'(\d+) passed(?:, (\d+) skipped)?(?:, (\d+) warnings?)? in ([\d.]+)s',output)
     assert len(matches)==1 and ' failed' not in output and ' error' not in output,matches
@@ -35,7 +41,7 @@ def main():
         test_command='python -m pytest -q',tests_passed=int(passed),tests_skipped=int(skipped or 0),
         warnings=int(warnings or 0),test_seconds=float(seconds),test_output_sha256=sha(OUT/'TEST_OUTPUT.txt'),
         warning_scope='Inherited v42_final/inference/calibration.py log1p RuntimeWarning; no new warning or regression.',
-        inherited_physical_files_preserved=preserve(),source_and_cache_freeze_PASS=True,
+        inherited_physical_files_preserved=preserve(),source_and_cache_freeze_PASS=True,root_preregistered_source_and_policy_hashes_PASS=True,
         QA_count=qas,required_outputs_PASS=True,all_evidence_json_parse_PASS=True,
         evidence_manifest_sha256=sha(OUT/'EVIDENCE_MANIFEST.json'),
         fresh_root_gate=root['PASS'],formal_and_fixture_exactness_PASS=True,

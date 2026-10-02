@@ -1,5 +1,5 @@
 """Evidence-only finalization, with no optimization or production entry point."""
-import json,sys
+import json,sys,re
 from .common import *
 
 def maybe(name):return read(name) if (OUT/name).exists() else {}
@@ -122,6 +122,18 @@ def main():
     diag+='Fresh paired barrier LPs with PreDual=0 and Crossover=0 retain primal presolve. [Gurobi documents PreDual=0 as forbidding presolve dualization](https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#parameter-predual). This is LP numerical certification only: the preregistered 600-second MILP Method=1 policy remains unchanged. It does not select MIP settings using canary outcomes.\n\n'
     diag+=f"Selected root objective difference: {root.get('objective_difference')}; equivalence gate: {root.get('PASS')}. The F3 objective is compared with F3, while the historical stronger S2 valid LB {LB} remains an external original-M1 certificate. Kappa is unavailable without a basis and is reported as null. Floating dual stationarity diagnostics are not exact rational dual certificates.\n"
     (OUT/'NUMERICAL_ROOT_DIAGNOSTICS.md').write_text(diag,encoding='utf8',newline='\n')
+    presolved={}
+    for arm,label in [('original','CANARY_ORIGINAL_600S'),('compact','CANARY_COMPACT_600S')]:
+        path=OUT/(label+'.log')
+        if path.exists():
+            log=path.read_text(encoding='utf8',errors='replace')
+            dims=re.findall(r'Presolved: (\d+) rows, (\d+) columns, (\d+) nonzeros',log)
+            types=re.findall(r'Variable types: (\d+) continuous, (\d+) integer \((\d+) binary\)',log)
+            presolved[arm]=dict(rows=None,columns=None,nnz=None,continuous=None,integer=None,binary=None,log_sha256=sha(path))
+            if dims:presolved[arm].update(zip(['rows','columns','nnz'],map(int,dims[-1])))
+            if types:presolved[arm].update(zip(['continuous','integer','binary'],map(int,types[-1])))
+    dump('CANARY_PRESOLVE_COMPARISON.json',dict(presolved=presolved,no_optimization=True,
+        interpretation='Raw log census only. Presolve integer dimension is reported separately from construction counts. Incomplete root simplex iterations are not branch-and-bound throughput or feasible objectives.'))
     resources=[read(p.name) for p in sorted(OUT.glob('RESOURCE_*.json')) if p.name!='RESOURCE_RECEIPT.json']
     dump('RESOURCE_RECEIPT.json',dict(RESOURCE_CONTENTION_ABSENCE_REQUIRED=False,independent_workloads_allowed=True,
         own_heavy_lane_sequential=True,receipts=resources,historical_PR120_absolute_speedup_claim=False,
