@@ -29,7 +29,7 @@ def main():
         Problem13_FINAL=False,Benders_master=0,Benders_recourse=0,Farkas_cuts=0,Phase_I=0,production_1800_run=False,
         retained_valid_UB=validUB,retained_valid_LB=validLB,retained_global_gap=(validUB-validLB)/validUB)
     dump('FINAL_FLAGS.json',flags)
-    verdict='EXACT_COMPACT_PROMISING_FOR_SEPARATELY_APPROVED_PRODUCTION' if promising else 'STOP_CANARY_BOUND_INCONSISTENT' if exact and cert and not cert.get('PASS') else 'EXACT_COMPACT_NO_MATERIAL_CANARY_GAIN' if exact and comp else 'STOP_CANARY_NOT_COMPLETED' if exact else 'STOP_ROOT_EQUIVALENCE_NOT_CERTIFIED'
+    verdict='EXACT_COMPACT_PROMISING_FOR_SEPARATELY_APPROVED_PRODUCTION' if promising else 'STOP_CANARY_BOUND_INCONSISTENT' if exact and cert and not cert.get('PASS') else 'STOP_CANARY_START_NOT_ACCEPTED' if exact and comp and not comp.get('same_MIP_start_accepted') else 'STOP_CANARY_NO_VALIDATED_INCUMBENT' if exact and comp and not comp.get('physical_validation_PASS') else 'EXACT_COMPACT_NO_MATERIAL_CANARY_GAIN' if exact and comp else 'STOP_CANARY_NOT_COMPLETED' if exact else 'STOP_ROOT_EQUIVALENCE_NOT_CERTIFIED'
     dump('FINAL_VERDICT.json',dict(verdict=verdict,exactness=exact,promising=promising,base=BASE,
         binary_reduction_percent=read('BINARY_REDUCTION_REPORT.json')['binary_reduction_percent'],
         inherited_2365_files_preserved=preserve(),root=root,canary_comparison=comp,
@@ -100,8 +100,28 @@ def main():
     assert len(answers)>=70
     body='# V42 M1 exact compact monolithic 최종 검토\n\n'+''.join(f'## {i}. {q}\n\n{ans}\n\n' for i,(q,ans) in enumerate(answers,1))
     (OUT/'FINAL_REVIEW_KO.md').write_text(body,encoding='utf8',newline='\n')
-    next_text=f'''# 다음 수정\n\n판정: {verdict}.\n\nFull domain과 모든 scientific rows를 보존한 채 integer dimension은 95.477% 감소했다. Connected expression의 outgoing-movement 치환으로 nnz는 53.074% 증가하므로 presolve, simplex factorization, branch 성능을 증거로 해석해야 한다. Root projection은 동일해야 하며 bound 자체 강화는 이 representation의 목표가 아니다.\n\n사전 material 기준은 gap 20% 또는 valid LB 0.001 개선이며 결과 후 변경하지 않는다. Promising이면 별도 사용자 승인 후 1800초 production을 실행할 수 있다. 미달이면 exact 보조 connected continuous variable와 sparse linking row를 사용하는 대안의 exact projection/계수/새 preregistration을 먼저 준비할 수 있으나 이번 결과를 바꿔 재실행하지 않는다. Root equivalence가 미인증이면 full MILP를 계속하지 않고 수치 종료 상태와 mapping 잔차를 확인한다.\n\nP2/A2/M2/Actual/Fresh AC는 NOT_RUN. M1_ACCEPTED 및 Problem13_FINAL은 false 유지. 중단한 Benders acceleration lane은 그대로 보존한다.\n'''
+    next_text=f'''# 다음 수정\n\n판정: {verdict}.\n\nFull domain과 모든 scientific rows를 보존한 채 integer dimension은 95.477% 감소했다. Connected expression의 outgoing-movement 치환으로 nnz는 53.074% 증가하므로 presolve, simplex factorization, branch 성능을 증거로 해석해야 한다. Root projection은 동일해야 하며 bound 자체 강화는 이 representation의 목표가 아니다.\n\n사전 material 기준은 gap 20% 또는 valid LB 0.001 개선이며 결과 후 변경하지 않는다. Promising이면 별도 사용자 승인 후 1800초 production을 실행할 수 있다. 미달이면 exact 보조 connected continuous variable와 sparse linking row를 사용하는 대안의 exact projection/계수/새 preregistration을 먼저 준비할 수 있으나 이번 결과를 바꿔 재실행하지 않는다. Root equivalence가 미인증이면 full MILP를 계속하지 않고 수치 종료 상태와 mapping 잔차를 확인한다.\n\nMIP start가 solver에서 채택되지 않았다면, 이는 compact 성능 열위를 확정하는 결과가 아니다. 원 physical point는 독립 검증 PASS이나 봉인된 F3 matrix 최대 잔차 3.0752360699604075e-8은 등록된 FeasibilityTol=1e-8보다 크다. Start 거부의 가능한 원인으로 기록한다; solver가 원인 행을 공개하지 않아 인과를 단정하지 않는다. 다음 별도 등록 실험에서는 scientific P/Q/SOC/rho를 바꾸지 않는 auxiliary consistency 재구성과 양 arm의 완전한 Start tolerance audit를 먼저 준비할 수 있다. 이번 paired canary의 tolerance/Start를 사후 수정하지 않는다. 실패한 Start 조건에서 post-root branching 개선을 입증했다고 주장하지 않는다.\n\nP2/A2/M2/Actual/Fresh AC는 NOT_RUN. M1_ACCEPTED 및 Problem13_FINAL은 false 유지. 중단한 Benders acceleration lane은 그대로 보존한다.\n'''
     (OUT/'NEXT_MODIFICATIONS.md').write_text(next_text,encoding='utf8',newline='\n')
+    attempts=[]
+    for prefix in ['ROOT_LP','ROOT_LP_BARRIER','ROOT_LP_INTERIOR','ROOT_LP_PRIMAL']:
+        for arm in ['ORIGINAL','COMPACT']:
+            name=f'{prefix}_{arm}.json';receipt=maybe(name)
+            if receipt:
+                attempts.append(dict(artifact=name,status=receipt.get('status'),terminal_optimal=receipt.get('terminal_optimal',False),
+                    objective=receipt.get('objective'),wall_seconds=receipt.get('wall_seconds'),settings=receipt.get('settings'),
+                    selected=name in [root.get('selected_original_artifact','ROOT_LP_ORIGINAL.json'),root.get('selected_compact_artifact','ROOT_LP_COMPACT.json')]))
+    dump('ROOT_NUMERICAL_ATTEMPTS.json',dict(attempts=attempts,selected_pair=root,
+        no_model_or_physics_changes_between_attempts=True,all_primal_starts_absent=True,
+        canary_policy_unchanged=read('PREREGISTRATION.json')['solver'],
+        no_nonoptimal_point_used_as_optimum=True,optimal_pair_mismatch_is_hard_STOP=True))
+    diag='# Full root LP numerical diagnostics\n\n'
+    diag+='All attempts use the identical sealed F3 on both arms. Formal exactness and exact-rational matrix substitution are independent of numerical termination. Failed or interrupted attempts are retained; no SUBOPTIMAL objective is a certificate.\n\n'
+    diag+='| Artifact | Raw status | OPTIMAL | Objective (raw; certified only if OPTIMAL) | Optimize wall seconds | Selected |\n|---|---|---|---|---|---|\n'
+    diag+=''.join(f"| {r['artifact']} | {r['status']} | {r['terminal_optimal']} | {f(r['objective'])} | {f(r['wall_seconds'])} | {r['selected']} |\n" for r in attempts)
+    diag+='\nPrimary dual simplex timed out. Crossover pilot was explicitly terminated after a dropped basis and repeated large infeasibilities; its compact arm was not run. The automatic-dual no-crossover Original ended SUBOPTIMAL, and its compact arm was explicitly discontinued because that pair could no longer satisfy the OPTIMAL gate. Neither interruption is represented as a Gurobi terminal numerical status.\n\n'
+    diag+='Fresh paired barrier LPs with PreDual=0 and Crossover=0 retain primal presolve. [Gurobi documents PreDual=0 as forbidding presolve dualization](https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#parameter-predual). This is LP numerical certification only: the preregistered 600-second MILP Method=1 policy remains unchanged. It does not select MIP settings using canary outcomes.\n\n'
+    diag+=f"Selected root objective difference: {root.get('objective_difference')}; equivalence gate: {root.get('PASS')}. The F3 objective is compared with F3, while the historical stronger S2 valid LB {LB} remains an external original-M1 certificate. Kappa is unavailable without a basis and is reported as null. Floating dual stationarity diagnostics are not exact rational dual certificates.\n"
+    (OUT/'NUMERICAL_ROOT_DIAGNOSTICS.md').write_text(diag,encoding='utf8',newline='\n')
     resources=[read(p.name) for p in sorted(OUT.glob('RESOURCE_*.json')) if p.name!='RESOURCE_RECEIPT.json']
     dump('RESOURCE_RECEIPT.json',dict(RESOURCE_CONTENTION_ABSENCE_REQUIRED=False,independent_workloads_allowed=True,
         own_heavy_lane_sequential=True,receipts=resources,historical_PR120_absolute_speedup_claim=False,
