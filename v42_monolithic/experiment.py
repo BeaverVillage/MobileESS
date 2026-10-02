@@ -47,6 +47,7 @@ def check_freeze():
     f=read('MODEL_FREEZE.json');assert sha(ROOT.parent/'THRESHOLD_LOCAL/F3.mps')==f['original_MPS_sha256']
     assert all(sha(LOCAL/p)==s for p,s in f['maps'].items())
     e=read('EXECUTION_FREEZE.json');assert all(sha(ROOT/p)==s for p,s in e['source_sha256'].items())
+    assert sha(OUT/'PREREGISTRATION.json')==e['preregistration_sha256']
     preserve()
 def run(label,root=False,compact=False):
     check_freeze();resource=snapshot(label)
