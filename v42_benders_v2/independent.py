@@ -1,9 +1,27 @@
 """COO rational replay. Does not call the generator or its product/support helpers."""
 from fractions import Fraction as F
 import math
+import gzip, hashlib, json
+from pathlib import Path
+from functools import lru_cache
 import numpy as np
 from v42_benders.certificates import Uncertifiable
 from v42_benders.canonical import digest_arrays
+
+@lru_cache(maxsize=128)
+def journal_hashes(path,mtime,size):
+    with gzip.open(path,'rb') as f:return tuple(hashlib.sha256(line.rstrip(b'\n')).hexdigest() for line in f)
+
+def persisted(raw):
+    p=raw.get('persistence',{});path=Path(p.get('journal',''))
+    if not path.is_file() or not p.get('persisted_before_validation'):raise Uncertifiable('RAW_NOT_PERSISTED')
+    payload={k:v for k,v in raw.items() if k!='persistence'}
+    try:h=hashlib.sha256(json.dumps(payload,sort_keys=True,allow_nan=False,separators=(',',':')).encode()).hexdigest()
+    except (ValueError,TypeError) as e:raise Uncertifiable('NONFINITE_OR_ALTERED_RAW') from e
+    st=path.stat();index=p.get('record',0)-1;hashes=journal_hashes(str(path),st.st_mtime_ns,st.st_size)
+    if h!=p.get('payload_sha256') or index<0 or index>=len(hashes) or hashes[index]!=h:raise Uncertifiable('RAW_PERSISTENCE_HASH')
+    from .common import sha
+    if sha(raw['axis_npz'])!=raw['axis_npz_sha256']:raise Uncertifiable('RAW_AXIS_HASH')
 
 def verify(n, cut, known=()):
     rec=cut['record'];raw=cut['raw'];w=np.asarray(raw['multipliers']);x=np.asarray(raw['source_x']);kind=rec['kind']
@@ -11,9 +29,33 @@ def verify(n, cut, known=()):
         if not math.isfinite(float(v)):raise Uncertifiable('NONFINITE_CERTIFICATE')
         return F.from_float(float(v))
     if w.shape!=n.b.shape or x.shape!=n.xlower.shape or not np.isfinite(w).all() or not np.isfinite(x).all():raise Uncertifiable('AXIS')
+    persisted(raw)
+    if raw['source_hash']!=n.source_hash or not np.array_equal(np.asarray(raw['solver_rhs']),n.rhs(x)):raise Uncertifiable('SOLVER_SOURCE_RHS')
+    if np.any(x<n.xlower) or np.any(x>n.xupper) or np.any(x!=np.rint(x)):raise Uncertifiable('SOURCE_MASTER_DOMAIN')
     if kind not in ['native_farkas','phase1','optimality']:raise Uncertifiable('KIND')
     farkas=kind=='native_farkas';phase=kind=='phase1'
     if raw['status']!=(3 if farkas else 2):raise Uncertifiable('STATUS')
+    if farkas and (raw['farkas_proof'] is None or not math.isfinite(raw['farkas_proof'])):raise Uncertifiable('NONFINITE_NATIVE_PROOF')
+    if not farkas:
+        if raw['objective'] is None or not math.isfinite(raw['objective']) or raw['primal'] is None:raise Uncertifiable('OPTIMAL_SOURCE')
+        primal=np.asarray(raw['primal'])
+        if not np.isfinite(primal).all() or len(primal)<len(n.yi):raise Uncertifiable('PRIMAL_AXIS')
+        y=primal[:len(n.yi)]
+        if not phase and n.residual(x,y)>1e-7:raise Uncertifiable('ORIGINAL_PRIMAL')
+        if phase:
+            rowmax=np.asarray(abs(__import__('scipy').sparse.hstack([n.A,n.B],format='csr')).max(axis=1).toarray()).ravel()
+            weights=np.exp2(-np.ceil(np.log2(np.maximum(1.,np.maximum(abs(n.b),rowmax)))))
+            if not np.array_equal(weights,np.asarray(raw['weights'])):raise Uncertifiable('NORMALIZATION')
+            r=n.A@y-np.asarray(raw['solver_rhs']);pos=len(n.yi);objective=0.
+            for i,s in enumerate(n.sense):
+                if s in ['<','=']:
+                    if pos>=len(primal) or primal[pos]<-1e-7:raise Uncertifiable('AUX_PRIMAL')
+                    r[i]-=primal[pos];objective+=weights[i]*primal[pos];pos+=1
+                if s in ['>','=']:
+                    if pos>=len(primal) or primal[pos]<-1e-7:raise Uncertifiable('AUX_PRIMAL')
+                    r[i]+=primal[pos];objective+=weights[i]*primal[pos];pos+=1
+            v=np.where(n.sense=='=',abs(r),np.where(n.sense=='<',r,-r))
+            if pos!=len(primal) or np.max(v,initial=0)>1e-7 or np.max(n.lower-y,initial=0)>1e-7 or np.max(y-n.upper,initial=0)>1e-7 or abs(objective-raw['objective'])>1e-7:raise Uncertifiable('PHASE1_PRIMAL_OR_OBJECTIVE')
     for i,s in enumerate(n.sense):
         if (s=='<' and w[i]*(1 if farkas else -1)<0) or (s=='>' and w[i]*(1 if farkas else -1)>0):raise Uncertifiable('SIGN')
     def product(matrix):

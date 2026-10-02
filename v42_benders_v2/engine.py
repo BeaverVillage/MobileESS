@@ -51,7 +51,8 @@ def solve(n,*,env,directory,seconds=60,threads=1,feasibility=False,known=(),vali
             if master.Status in [4,11,12]:raise Uncertifiable('UNSAFE_MASTER_STATUS')
             if not feasibility:
                 if np.isfinite(master.ObjBound) and abs(master.ObjBound)<1e90:lower=max(lower,float(master.ObjBound))
-                if upper is not None and relative_gap(upper,lower)<=target_gap:status='ACCEPTED_P1';break
+                if upper is not None and (relative_gap(upper,lower)<=target_gap or (target_gap==0 and abs(upper-lower)<=1e-7)):
+                    status='ACCEPTED_P1';break
             if not master.SolCount:break
             xv=np.asarray(x.X)
             if np.max(abs(xv-np.rint(xv)),initial=0)>1e-7:raise Uncertifiable('NONINTEGER_MASTER')

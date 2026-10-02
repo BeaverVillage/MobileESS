@@ -35,10 +35,17 @@ class Recourse:
         self.matrix=matrix;self.cost=c
         self.axis_hash=digest_arrays(n.rownames,n.sense,n.lower,n.upper,n.xi,n.yi)
         axis=self.directory/'axis.npz'
-        np.savez_compressed(axis,row_names=n.rownames,row_senses=n.sense,lower=n.lower,upper=n.upper,
+        axis_values=dict(row_names=n.rownames,row_senses=n.sense,lower=n.lower,upper=n.upper,
             original_names=n.names,xi=n.xi,yi=n.yi,weights=np.array([]) if self.weights is None else self.weights,
             auxiliary_source_rows=np.array(self.slack_columns),matrix_indptr=matrix.indptr,
             matrix_indices=matrix.indices,matrix_data=matrix.data,b=n.b,B_indptr=n.B.indptr,B_indices=n.B.indices,B_data=n.B.data)
+        if axis.exists():
+            with np.load(axis,allow_pickle=False) as old:
+                if set(old.files)!=set(axis_values) or any(not np.array_equal(old[k],v) for k,v in axis_values.items()):raise ValueError('RAW_AXIS_DIRECTORY_COLLISION')
+        else:np.savez_compressed(axis,**axis_values)
+        journal=self.directory/'raw_certificates.jsonl.gz'
+        if journal.exists():
+            with gzip.open(journal,'rb') as f:self.calls=sum(1 for _ in f)
         self.axis_sha=sha(axis);self.build_seconds=None
 
     def solve(self,x,seconds=60):

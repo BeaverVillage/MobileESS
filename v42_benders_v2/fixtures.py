@@ -10,17 +10,18 @@ from .representation import from_model,audit
 from .recourse import Recourse
 from .engine import certified,solve
 from .independent import verify
+from v42_benders.certificates import Uncertifiable
 
 def run():
     assert read('DERIVATION_FREEZE.json')['created_before_optimize']
     for r in read('DERIVATION_FREEZE.json')['files']:assert sha(OUT/r['path'])==r['sha256']
-    assert read('EXECUTION_FREEZE.json')['commit']==git('rev-parse','HEAD')
+    for r in read('EXECUTION_FREEZE_FINAL.json')['sources']:assert sha(ROOT/r['path'])==r['sha256']
     env=gp.Env(empty=True);env.setParam('OutputFlag',0);env.start()
-    census=[];cases=[];native_audits=[];phase_audits=[]
+    census=[];cases=[];native_audits=[];phase_audits=[];rejections=[]
     try:
         for case in CASES:
             m=build(env,case);n=from_model(m);assert audit(m,n)['PASS']
-            c=canonical(m);v1=V1(c,env);v2=Recourse(n,env,OUT/'RAW'/case/'native');phase=Recourse(n,env,OUT/'RAW'/case/'phase1',phase=True)
+            c=canonical(m);v1=V1(c,env);v2=Recourse(n,env,OUT/'RAW_FINAL'/case/'native');phase=Recourse(n,env,OUT/'RAW_FINAL'/case/'phase1',phase=True)
             original=m.copy();original.setAttr('VType',['C']*original.NumVars);original.update()
             feasible=[];cuts=[];pcuts=[];case_rows=[]
             for idx,bits in enumerate(itertools.product([0.,1.],repeat=7)):
@@ -37,7 +38,11 @@ def run():
                     feasible.append((x,r2['objective']));cut=certified(n,r2,'optimality')
                 else:
                     assert p['objective']>1e-8
-                    cut=certified(n,r2,'native_farkas');pcut=certified(n,p,'phase1');pcuts.append(pcut)
+                    pcut=certified(n,p,'phase1');pcuts.append(pcut)
+                    try:cut=certified(n,r2,'native_farkas')
+                    except Uncertifiable as e:
+                        rejections.append(dict(case=case,assignment=idx,reason=str(e),raw_persistence=r2['persistence'],fallback='validated Phase-I'))
+                        cut=pcut
                     phase_audits.append(dict(case=case,assignment=idx,**pcut['record'],independent_validation=pcut['independent_validation']))
                 cuts.append(cut);native_audits.append(dict(case=case,assignment=idx,**cut['record'],independent_validation=cut['independent_validation']))
                 case_rows.append(dict(case=case,assignment=idx,bits=''.join(map(str,map(int,bits))),
@@ -52,7 +57,7 @@ def run():
                 if all(cut['record']['intercept']+float(cut['coefficients']@x)>=-1e-8 for cut in cuts if cut['record']['type']=='feasibility'):survived.append(idx)
             assert survived==[r['assignment'] for r in case_rows if r['feasible']]
             m.optimize();mono=m.ObjVal if m.SolCount else None
-            result,best,bcuts=solve(n,env=env,directory=OUT/'RAW'/case/'loop',known=feasible,seconds=60,target_gap=0.)
+            result,best,bcuts=solve(n,env=env,directory=OUT/'RAW_FINAL'/case/'loop',known=feasible,seconds=60,target_gap=0.)
             optimum=min([o for _,o in feasible],default=None)
             exact=(optimum is None and m.Status==3 and result['status']=='MASTER_INFEASIBLE') or (optimum is not None and best is not None and abs(mono-optimum)<=1e-7 and abs(float(n.c@best[n.yi]+n.objective_constant)-optimum)<=1e-7)
             assert exact,(case,result,optimum)
@@ -70,7 +75,8 @@ def run():
         PhaseI_all_assignment_diagnostic=True,PhaseI_engine_fallback_only=True,cases=cases))
     dump('NATIVE_FARKAS_CERTIFICATE_AUDIT.json',dict(PASS=True,records=native_audits,
         native_Farkas_valid=sum(r['kind']=='native_farkas' for r in native_audits),optimality_valid=sum(r['kind']=='optimality' for r in native_audits),
-        full_scale_valid=0,raw_persisted_before_validation=True))
+        full_scale_valid=0,raw_persisted_before_validation=True,rejected_native=rejections,
+        no_cut_from_rejected_native=True))
     dump('PHASE1_CERTIFICATE_AUDIT.json',dict(PASS=True,diagnostic_cuts=len(phase_audits),records=phase_audits,
         all_feasible_zero=True,full_scale_fallback_used=False,production_artificial_slack=False))
 
