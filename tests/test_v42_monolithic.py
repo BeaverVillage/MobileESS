@@ -76,3 +76,27 @@ def test_full_census_and_mapping_when_prepared():
     assert f['continuous_movement_flows']+f['parallel_selector_binaries']+f['removed_stay_binaries']==f['route_binaries']
     assert b['PASS'] and b['binary_reduction_percent']>=80 and s['PASS'] and abs(s['compact_objective']-UB)<=1e-12
     assert read('MIP_START_PHYSICAL_VALIDATION.json')['PASS']
+
+def test_non_dag_is_rejected_before_build(models):
+    o,g,x,c,n=models;bad=list(g);a=bad[-1];bad[-1]=(a[0],a[1],a[2],a[1],a[4])
+    with pytest.raises(AssertionError,match='NOT_DAG_TIME_ORDER'):Compact(o,bad,{'M':'A'},4)
+
+@pytest.mark.parametrize('primary_pass,both_optimal',[(True,False),(False,True)])
+def test_root_fallback_cannot_bypass_pass_or_optimal_mismatch(monkeypatch,primary_pass,both_optimal):
+    import v42_monolithic.secondary_roots as s
+    from pathlib import Path
+    p=dict(source_sha256=s.sha(Path(s.__file__)),policy=s.POLICY)
+    responses={'ROOT_LP_SECONDARY_PREREGISTRATION.json':p,'ROOT_LP_ORIGINAL.json':dict(terminal_optimal=both_optimal),
+        'ROOT_LP_COMPACT.json':dict(terminal_optimal=both_optimal),'ROOT_LP_EQUIVALENCE.json':dict(PASS=primary_pass)}
+    monkeypatch.setattr(s,'read',lambda name:responses[name])
+    monkeypatch.setattr(s,'one',lambda *args:pytest.fail('Fallback must not start any solve'))
+    with pytest.raises(AssertionError,match='PRIMARY_PASSED|PRIMARY_OPTIMAL_MISMATCH'):s.run()
+
+def test_source_network_and_p2_authority_receipts():
+    if not (OUT/'ORIGINAL_NATIVE_NETWORK_AUDIT.json').exists():pytest.skip('Read-only native audit not completed')
+    n=read('ORIGINAL_NATIVE_NETWORK_AUDIT.json');p=read('P2_OBJECTIVE_CONTRACT.json')
+    assert n['PASS'] and n['audited_flow_and_terminal_rows']==9220 and n['audited_SOC_recurrence_rows']==384
+    assert n['route_energy_coefficient_max_absolute_error']==0 and n['movement_endpoint']=='connect' and n['travel_debit_time']=='depart'
+    assert p['PASS'] and p['P2_status']=='NOT_RUN' and p['P2_optimize_calls']==0
+    assert p['lexicographic_movement_contract']==['movement_energy_kwh','movement_count']
+    assert all(p['vectors'][key]['compact_nonzero_coefficients']==198986 for key in ['movement_energy_kwh','movement_count'])

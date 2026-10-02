@@ -6,6 +6,8 @@ import gurobipy as gp
 from .common import *
 
 def audit():
+    from .resources import snapshot
+    snapshot('SOURCE_NETWORK_AUDIT')
     graph,sites,initial,bundle,battery=graph_inputs()
     with gp.Env(params={'OutputFlag':0}) as env:
         m=original(env);A=m.getA().tocsr();rhs=np.array(m.getAttr('RHS'));sense=np.array(m.getAttr('Sense'));names=m.getAttr('VarName');axis={n:i for i,n in enumerate(names)}
@@ -55,6 +57,10 @@ def audit():
             audited_flow_and_terminal_rows=sum(expected.values()),audited_SOC_recurrence_rows=soc_rows,
             audited_initial_terminal_SOC_rows=initial_terminal_rows,route_energy_coefficient_max_absolute_error=energy_error,
             movement_endpoint='connect',travel_debit_time='depart',unit_reachable_arcs=len(arcs),
-            native_record_graph_size=len(graph),all_native_incidence_signatures_present=True)
+            native_record_graph_size=len(graph),all_native_incidence_signatures_present=True,
+            audit_source_sha256=sha(Path(__file__)),concurrency_note='Read-only source audit may overlap primary simplex LP; this is not a second heavy optimization. No canary or fallback LP overlaps this audit.')
         dump('ORIGINAL_NATIVE_NETWORK_AUDIT.json',result);m.dispose();return result
-if __name__=='__main__':print(audit(),flush=True)
+if __name__=='__main__':
+    print(audit(),flush=True)
+    from .objectives import audit as objective_audit
+    print(objective_audit(),flush=True)
