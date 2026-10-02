@@ -1,0 +1,423 @@
+{
+  "schema": "V42_MAY_BLUEPRINT_CURRENT_POWER_CONVERSION_AUDIT_V1",
+  "status": "CODE_AND_STATIC_AUTHORITY_IDENTIFIED",
+  "May_used_as_implementation_blueprint": true,
+  "May_scientific_outcomes_read": false,
+  "capacity": {
+    "site_GPU": [
+      80,
+      40,
+      80,
+      40,
+      100,
+      80,
+      40,
+      80,
+      40,
+      80,
+      40,
+      80
+    ],
+    "total_GPU": 780,
+    "GPU_gang": "positive whole immutable request; gang splitting prohibited",
+    "rack": "non-additive single-gang compatibility envelope",
+    "compatible_sites": "site capacity >= whole gang AND at least one site rack compatibility_GPU_limit >= gang",
+    "physical_facility_claim": "modeled static case-study authority; no measured rack census"
+  },
+  "IT": {
+    "c_ref_W_per_GPU": "651.884605470864",
+    "swing_W_per_active_GPU": "547.7239090195797",
+    "idle_W_per_installed_GPU": "104.1606964512843",
+    "formula": "P_IT_kW=(installed_site_capacity_GPU*idle_W_per_GPU + active_site_GPU*swing_W_per_GPU)/1000",
+    "population_GPU_authority_separate_from_power_model": true,
+    "extra_CPU_host_power": false,
+    "old_fixed_624_aggregate_formula_ported": false,
+    "installed_capacity_parameterized": true,
+    "constant_GPU_allocation_used": false
+  },
+  "PCC": {
+    "C1": "static frozen V24T parameters (SHA-bound)",
+    "planning": "weather-specific certified convex endpoint secant P_PCC=slope*P_IT+intercept",
+    "diagnostic_and_actual_physics": "recompute independent actual IT from execution; exact_c1_pcc_kw(P_IT,t_wb_c,rh_pct,params)",
+    "exact_formula": "P_IT + normalization/scale * (softplus(latent_cooling(P_IT*scale/1000,wetbulb,RH)) + softplus(other(P_IT*scale/1000)))",
+    "scale": "3.4987194698200215",
+    "default_normalization": "5.987971384940258",
+    "normalization_rule": "site exact_c1_pcc_kw default GFS constant retained for forecast and observed-weather calls; no implicit NOAA normalization switch",
+    "PUE": "derived P_PCC/P_IT; no additional constant PUE or 1.30 multiplier",
+    "C1_application_count": 1,
+    "PF_AIDC": 0.95,
+    "Q_formula": "Q_PCC_kvar=P_PCC_kW*tan(acos(0.95))",
+    "AIDC_positive_sign": "positive P/Q consumption"
+  },
+  "weather": {
+    "planning_and_offline_DA": "same D-1 GFS t_wb_c [C], rh_pct [%] forecast as frozen schedule",
+    "Dday": "realized NOAA t_wb_c, rh_pct, after freeze",
+    "resolution_seconds": 900,
+    "slots": 96,
+    "May_weather_values_copied_to_April": false
+  },
+  "grid": {
+    "network": "IEEE123 full node-phase and branch-phase axes",
+    "code": "v42_native.grid.add_grid: linear squared-voltage all-node rows, 16-face line/transformer kVA, current constraints",
+    "controls": "AIDC load kW, MESS P kW/Q kvar; B0 MESS P/Q exactly zero",
+    "B0_primary_voltage_pu": [
+      0.95,
+      1.05
+    ],
+    "B0_primary_voltage_squared": [
+      0.9025,
+      1.1025
+    ],
+    "alpha_BG": "1.15 frozen current May-linked authority; apply once to gross background P/Q; PV unchanged",
+    "load_PV": "AEMO D-1 forecast vs realized after freeze; separate date-bound 96-slot inputs",
+    "static_input_metadata_projection": {
+      "OpenDSS_master": {
+        "bytes": 17008,
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Master.dss",
+        "relative_path": "IEEE123Master.dss",
+        "sha256": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969"
+      },
+      "PCC_mapping": {
+        "bytes": 13785,
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\dayahead\\artifacts\\v16_2\\Generated_ThreePhase_PCC_v4.dss",
+        "relative_path": "Generated_ThreePhase_PCC_v4.dss",
+        "sha256": "ba13e3081df606c18d61f1e02300b23f7be00dc2d22bc4c8064d04f40beec719"
+      },
+      "service_PCC_mapping": {
+        "bytes": 6058,
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\service_node_electrical_mapping_v1.csv",
+        "relative_path": "service_node_electrical_mapping_v1.csv",
+        "sha256": "c3763567f6785f182ab151ca0390918017d4e24c2733f6d72d2304bba416322e"
+      },
+      "line_ratings": {
+        "bytes": 6038,
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\Generated_Planning_Line_Ratings_u080.dss",
+        "relative_path": "Generated_Planning_Line_Ratings_u080.dss",
+        "sha256": "46d492b5b62400d33646089b80105d713250d0790ed7baab85b002d48121f302"
+      },
+      "transformer_ratings": {
+        "feeder_manifest_SHA": "1daaf55467089a818b4ed1b00c6e3c17f9f5e18e183c1193c7356af98ad762d6",
+        "runtime_adapter": {
+          "bytes": 38747,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\opendss_runtime_adapter.json",
+          "relative_path": "opendss_runtime_adapter.json",
+          "sha256": "5637dc95ab3ea62611b278e0b5f1aefe49befd4bf90bafb7a478fe83e0c43036"
+        }
+      },
+      "native_allocation_authority": {
+        "bytes": 38747,
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\opendss_runtime_adapter.json",
+        "relative_path": "opendss_runtime_adapter.json",
+        "sha256": "5637dc95ab3ea62611b278e0b5f1aefe49befd4bf90bafb7a478fe83e0c43036"
+      }
+    },
+    "May_numerical_coefficients_as_April_donor": false,
+    "required_April_action": "regenerate date-bound planning coefficient/anchor from April schedule and forecast; reuse static raw topology/ratings only",
+    "historical_April_sensitivity_policy_promoted": false,
+    "Fresh_context": "compile_clean_engine creates OpenDSSDirect NewContext then Clear, Compile master and Redirect PCC/PV/assets",
+    "injection": "AIDC01..12 positive consumption maps Load.IDC_IDC01..12; MESS generator positive P discharge mapping retained with B0 zero"
+  },
+  "native_controls": {
+    "static_settings": "same frozen native physical regulator/capacitor authority",
+    "actual_regulator": "D00 exact initial state, then previous actual final state; no independent future DA slot resets",
+    "capacitors": "fixed frozen states; no capacitor-control optimization",
+    "operator_redispatch": false
+  },
+  "operational_chain": {
+    "authority": "PR118 Planning -> Freeze -> D-Day -> Fresh OpenDSS",
+    "offline_DA_AC": "diagnostic only; never a restored operational gate",
+    "actual_P_Q_repair": 0,
+    "actual_full_reoptimization": 0,
+    "actual_schedule_repair": 0,
+    "MESS_optimization": 0
+  },
+  "limitations": [
+    "Current v42_native.actual supplies a trusted backend Protocol, not a bound concrete April engine adapter.",
+    "May date-bound planning/anchor coefficient numerical payloads were not read or transplanted.",
+    "Historical V41 Actual dispatch can shift actual service starts by resource contention; current task forbids schedule repair and requires frozen reference replay, so do not silently copy that dispatcher.",
+    "Physical P/Q requires every active/service-relevant April job GPU authority; power equations do not recover missing GPU counts.",
+    "No physical-energy/Fresh-AC/voltage success claim follows from this forensic audit."
+  ],
+  "source_projection": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\e\\20250501\\V41_ELECTRICAL_CERTIFICATE.json",
+    "sha256": "c6b649edc1b2b3e2f324b0e41f939e397bdfcb26b64fff2c7be56d3d27424d35",
+    "access": "input metadata keys only; no certificate numerical output arrays"
+  },
+  "evidence": {
+    "current_binding": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_temporal\\native.py",
+      "sha256": "9e93c03217bad5dff2c318a91d760c85d875a05b6b42cc5d5464107000546212",
+      "bytes": 12576,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "load_power": {
+          "line": 64,
+          "end_line": 82
+        },
+        "grid_binding": {
+          "line": 84,
+          "end_line": 122
+        }
+      }
+    },
+    "native_power_and_certificate_source_binding": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+      "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+      "bytes": 24242,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "main": {
+          "line": 178,
+          "end_line": 260
+        },
+        "native_coefficients": {
+          "line": 158,
+          "end_line": 175
+        }
+      }
+    },
+    "power_C1": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\v28r2\\c1_affine.py",
+      "sha256": "912c870a2c062431cac60f2157f3b4399ad824119facdafbd7ac3f1788c40c13",
+      "bytes": 6122,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "load_c1": {
+          "line": 47,
+          "end_line": 57
+        },
+        "exact_c1_pcc_kw": {
+          "line": 68,
+          "end_line": 86
+        },
+        "endpoint_secant": {
+          "line": 125,
+          "end_line": 163
+        }
+      }
+    },
+    "power_per_GPU_constants": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\v39a\\contracts.py",
+      "sha256": "2e69721fc48495d19bba97d08b1f12d140dfb36d580369fe0d60f062287a1446",
+      "bytes": 2050,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY"
+    },
+    "power_per_site": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\artifacts\\v41r2_metadata_draft01\\original_source\\dayahead\\v39a\\power.py",
+      "sha256": "7b5899b0b0ae15a1d1515e49b6664cef9d9c968d968cabc1bfe40a5c21ae77c5",
+      "bytes": 4101,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "site_it_power_kw": {
+          "line": 27,
+          "end_line": 37
+        },
+        "site_pcc_power": {
+          "line": 81,
+          "end_line": 120
+        }
+      }
+    },
+    "PF_AIDC": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\v28r2\\formulation.py",
+      "sha256": "83967d66d490a1878f9ee76f9e7c06c171e61e047094c8d1e8ff69949f93deda",
+      "bytes": 11148,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY"
+    },
+    "normalization_constants": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\v28\\thermal.py",
+      "sha256": "079757208159a19f0b15419a2b1d6037143bae53a8bbddbf317565165d35e196",
+      "bytes": 4194,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY"
+    },
+    "C1_model": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v24t_thermal_aware_aidc\\V24T_C1_QUASISTATIC_MODEL.json",
+      "sha256": "02a19e6c2d8cb44ec6b90ff1a4c98f21d5e848cda2dc34f2aaf2f959f9e6579e",
+      "bytes": 1438,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY"
+    },
+    "current_capacity_authority": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\artifacts\\v41r2_780gpu_capacity_rebase\\V41R2_780GPU_CAPACITY_AUTHORITY.json",
+      "sha256": "f8200de1092ee0daac6c91798f0f5e24429b203cff4d66baca2eca387affb6e7",
+      "bytes": 1467,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY"
+    },
+    "current_rack_authority": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\artifacts\\v41r2_780gpu_capacity_rebase\\V41R2_LOGICAL_RACK_AUTHORITY.json",
+      "sha256": "83fe8999ab48818e39c8d065fb4d9f93bce2cce17b20fe4f3b11956fcb31596a",
+      "bytes": 10098,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY"
+    },
+    "current_static_classification": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\docs\\v42_job_capability_joint_flexibility\\FLEXIBILITY_SOURCE_AUTHORITY.json",
+      "sha256": "937b653b380e458cd41243de1a1ecbf9c0483adcacbc5e96e21d791bccbd4945",
+      "bytes": 2616,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY"
+    },
+    "capacity_parameterized_power": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r2\\authority.py",
+      "sha256": "641e3244a621b0aa560fce88df124c735bedb44e8a06ed4a07827856a6e2b431",
+      "bytes": 7620,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "aggregate_it": {
+          "line": 106,
+          "end_line": 109
+        }
+      }
+    },
+    "actual_power_reconstruction_blueprint": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\power_replay.py",
+      "sha256": "cbdcb9196f02d434d80f53d951bae7e43bc68ad44c5f05d3f419e5502fd0aaf2",
+      "bytes": 3241,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "power_from_execution": {
+          "line": 12,
+          "end_line": 46
+        }
+      }
+    },
+    "actual_power_adapter_blueprint": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\actual.py",
+      "sha256": "82ad9b01a57fcbca33e9778a8741665626ca763025fa150470e4354551a70fe6",
+      "bytes": 11991,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "power_from_execution": {
+          "line": 131,
+          "end_line": 135
+        }
+      }
+    },
+    "actual_exogenous_blueprint": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\exogenous.py",
+      "sha256": "5e46ec34e152da8e6c90b8074b3cf8e577db29c119e3c86a0107ecb9925499a3",
+      "bytes": 2670,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "load": {
+          "line": 9,
+          "end_line": 44
+        }
+      }
+    },
+    "background_scaling_blueprint": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\v41r4_electrical.py",
+      "sha256": "68306d036e7e364f2b208320e1db58ab906b0c721e5194c77e52377de263294c",
+      "bytes": 3312,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "configure": {
+          "line": 10,
+          "end_line": 62
+        }
+      }
+    },
+    "sequential_regulator_blueprint": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r3\\native_actual.py",
+      "sha256": "d22e5cb4d8c4aeed1b76e18b6725794086fe80868d31853554471ffc80e607a8",
+      "bytes": 2347,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "native_actual": {
+          "line": 9,
+          "end_line": 44
+        }
+      }
+    },
+    "FreshAC_mapping_blueprint": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\v28r2\\opendss_mapping.py",
+      "sha256": "7e25e9befd8f80dba8cf1bc8cdba574ad1d77083c3b100430bea63abdfe9af89",
+      "bytes": 7091,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "compile_clean_engine": {
+          "line": 87,
+          "end_line": 106
+        },
+        "aidc_injection_mapping": {
+          "line": 56,
+          "end_line": 59
+        },
+        "apply_trajectory_slot": {
+          "line": 123,
+          "end_line": 168
+        }
+      }
+    },
+    "FreshAC_blueprint": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\v28r2\\opendss_backend.py",
+      "sha256": "55ad4be7175088ea24dbb611313635736f182f4d945f6f9b416b2ddec2c29956",
+      "bytes": 6855,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "run_fresh_opendss": {
+          "line": 90,
+          "end_line": 154
+        }
+      }
+    },
+    "realized_grid_replay_blueprint": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\grid_replay.py",
+      "sha256": "26ef0f44d7693a51bcd6de3685b25fb8e77590d56f14813c3ceeda62b0d638f1",
+      "bytes": 2798,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "replay": {
+          "line": 10,
+          "end_line": 41
+        }
+      }
+    },
+    "current_planning_rows": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_native\\grid.py",
+      "sha256": "1d5c353c1e767cae54520f04ad101e34a95da3d1976d9b449e366400fe78112d",
+      "bytes": 3190,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "add_grid": {
+          "line": 30,
+          "end_line": 61
+        },
+        "GridAuthority": {
+          "line": 15,
+          "end_line": 27
+        }
+      }
+    },
+    "current_voltage_authority": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_native\\voltage.py",
+      "sha256": "d034ec5816b3b6d55e78a3877305be19b269a586f5f354e922566b16fa763751",
+      "bytes": 1920,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY"
+    },
+    "current_freeze": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_native\\planning.py",
+      "sha256": "5ea952c76d015df66f11eedeb9f86d5a41248d5e876e4a126cf61e72f3d701be",
+      "bytes": 3938,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "freeze_day_ahead_plan": {
+          "line": 84,
+          "end_line": 97
+        }
+      }
+    },
+    "current_Actual_boundary": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_native\\actual.py",
+      "sha256": "70b042aecaa89fc287d919534f90af8f55b12b3a688ead20be9ec3620bf165b9",
+      "bytes": 9906,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "run_dday_actual": {
+          "line": 79,
+          "end_line": 149
+        }
+      }
+    }
+  },
+  "May_optimization_calls": 0,
+  "May_OpenDSS_calls": 0,
+  "physical_execution_claim": false
+}

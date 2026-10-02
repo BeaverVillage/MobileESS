@@ -1,0 +1,311 @@
+{
+  "schema": "V42_MAY_BLUEPRINT_CURRENT_RUNTIME_AUTHORITY_V1",
+  "status": "SOURCE_CODE_RULES_IDENTIFIED",
+  "scope": "May construction logic and current V42 static Runtime authority only; no May scientific outcomes",
+  "MODEL": "V10::T3_ISOTONIC_ROLLING14_calibrated",
+  "ML_RUNTIME_USED": true,
+  "requested_walltime_service_authority": false,
+  "provider": {
+    "class": "v42_final.runtime.FrozenQ50",
+    "fitting_calls": 0,
+    "calibration_fitting_calls": 0,
+    "quantile": 0.5,
+    "units": "seconds",
+    "family": "ISOTONIC",
+    "mode": "ROLLING14",
+    "available_at": "2025-03-31 00:00:00+00:00",
+    "max_completion_used": "2025-03-30 23:59:45+00:00",
+    "payloads": [
+      {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\runtime_bundle\\calibration_state.json",
+        "sha256": "c4a555c2527837972d8862afeac008fc5ccc27750a96978634e2fbe3bd7bbf1f",
+        "bytes": 8575,
+        "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+        "expected_sha256": "c4a555c2527837972d8862afeac008fc5ccc27750a96978634e2fbe3bd7bbf1f"
+      },
+      {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\runtime_bundle\\preprocessing.json",
+        "sha256": "97ea2c192e46c07479958a7a777cf8380d0bba79c8e54fd1722735eaa7e59869",
+        "bytes": 3453,
+        "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+        "expected_sha256": "97ea2c192e46c07479958a7a777cf8380d0bba79c8e54fd1722735eaa7e59869"
+      },
+      {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\runtime_bundle\\model\\hazard.txt",
+        "sha256": "624ce2453f84dc6cc7925f87dd81ee9a633100dfe6a12e135f08139783b35987",
+        "bytes": 1105934,
+        "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+        "expected_sha256": "624ce2453f84dc6cc7925f87dd81ee9a633100dfe6a12e135f08139783b35987"
+      },
+      {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\runtime_bundle\\model\\model.json",
+        "sha256": "f7364f0b17656e9411d7d3b16e51b398de37fc7e40f8f8b22ec5ec9a23888bfa",
+        "bytes": 4151,
+        "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+        "expected_sha256": "f7364f0b17656e9411d7d3b16e51b398de37fc7e40f8f8b22ec5ec9a23888bfa"
+      }
+    ],
+    "integrity_verified": true,
+    "thread_count": 1
+  },
+  "request_features": {
+    "num_gpus_req": "raw.gpus_requested; ML feature missing handling does not establish physical GPU authority",
+    "num_nodes_req": "raw.nodes_req",
+    "num_cores_req": "raw.processors_req",
+    "requested_memory_mib": "memory_mib(raw.memory_req)",
+    "requested_seconds": "raw.wallclock_req total_seconds; feature only",
+    "array_index": "raw.array_pos exact known UID join",
+    "account": "raw.account_hash",
+    "qos": "raw.qos",
+    "partition": "raw.partition"
+  },
+  "causality": {
+    "known_submit_constraint": "each submit_time <= D-1 issue/event time",
+    "provider_constraint": "event_time >= frozen calibration day",
+    "prohibited_features": "start/end/runtime labels, elapsed/state and future scheduler fields prohibited as Runtime predictor features",
+    "request_version_history": "UNVERIFIED_Kestrel_proxy; current frozen inference does not certify original request revision chronology"
+  },
+  "service": {
+    "PENDING_nominal_remaining_seconds": "Q50_total_seconds",
+    "RUNNING_nominal_remaining_seconds": "max(Q50_total_seconds - causally observed elapsed_seconds, 0)",
+    "service_slots": "ceil(nominal_remaining_seconds / 900)",
+    "time_resolution_seconds": 900,
+    "state_time": "timezone-aware UTC instants; fixed AEST operational axis +10:00",
+    "requested_service_fallback": false,
+    "synthetic_completion": false,
+    "actual_runtime_reserve_GPU": 0
+  },
+  "physical_state": {
+    "PENDING_current_GPU": 0,
+    "RUNNING_current_GPU": "full immutable whole GPU_gang at observed/current site",
+    "Q50_expiry_releases_RUNNING": false,
+    "completion_release": "first 900-second control boundary at/after causally observed completion event",
+    "migration_site_change": "requires exact authorized episode/checkpoint/WAN receipt; B0 disabled",
+    "raw_elapsed_as_predictor_feature": false,
+    "raw_elapsed_as_state_remaining_authority": true
+  },
+  "May_rule_supersession": [
+    {
+      "old": "v42_may01.prepare.job_ledger safe_duration/requested_remaining service",
+      "current": "v42_final.native_inputs.main planning_remaining(FrozenQ50)",
+      "port": "current Q50 only"
+    },
+    {
+      "old": "pre-Q50 independent-day COMMON_B0_REFERENCE_JOBS start/site",
+      "current": "PR121 grid-blind deterministic common reference scheduler",
+      "port": "fresh April mapping; no historical reference donor"
+    },
+    {
+      "old": "native adapter filters planning_eligible and retains 44 historical UNASSIGNED outside admitted projection",
+      "current": "all current April workload retained; deterministic causal placement when source site absent",
+      "port": "do not reuse May admission/drop mask"
+    },
+    {
+      "old": "Q50-zero RUNNING resource.fixed_gpu at issue slot0 only in native_jobs",
+      "current": "PR121 B0 reference retains full gang until causal release authority",
+      "port": "do not infer physical completion from Q50 expiry"
+    },
+    {
+      "old": "v42_native.providers.UnpromotedRuntime interface",
+      "current": "frozen packaged V10 provider available 2025-03-31 UTC",
+      "port": "bind FrozenQ50; do not promote interface mock"
+    }
+  ],
+  "cc4": {
+    "authority": "current shared frozen CC4 predictions required in B0/B1/B2/B3; ML-off baseline forbidden",
+    "units": "GPUh per target submission hour",
+    "anonymous_profile": "execution-lag convolution, full support with GPUh conservation",
+    "actual_submission": "immutable GPU request * current Q50 seconds / 3600; consume matching observed submission hour",
+    "closed_submission_hour": "remaining anonymous Q50/Q90 mass zero; never revive expired cohort",
+    "anonymous_forecast_is_exact_job_request_authority": false,
+    "may_prediction_values_copied_to_april": false
+  },
+  "evidence": {
+    "frozen_provider": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\runtime.py",
+      "sha256": "86f578f315c39dd0c4e858df5d0ee04a79f16bc2c3d033af4beac7fe9ebd5e2a",
+      "bytes": 3224,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "FrozenQ50": {
+          "line": 15,
+          "end_line": 55
+        },
+        "predict_batch": {
+          "line": 48,
+          "end_line": 52
+        },
+        "parameters": {
+          "line": 29,
+          "end_line": 34
+        },
+        "q50_parameters": {
+          "line": 36,
+          "end_line": 46
+        }
+      }
+    },
+    "model_name": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\common.py",
+      "sha256": "2c8c2a1f6c66082c06b353a95c7b47d65b9a8d60bf2d0107d4a843b0dd608f7b",
+      "bytes": 1550,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY"
+    },
+    "current_service": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\state.py",
+      "sha256": "0a7723650697869d4c7023a53d2ae9a8444c9859ccf1b11acf17338472ef0e36",
+      "bytes": 5635,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "planning_remaining": {
+          "line": 19,
+          "end_line": 25
+        },
+        "EpisodeLedger": {
+          "line": 29,
+          "end_line": 87
+        },
+        "submit": {
+          "line": 38,
+          "end_line": 49
+        },
+        "physical": {
+          "line": 51,
+          "end_line": 60
+        },
+        "complete": {
+          "line": 73,
+          "end_line": 76
+        }
+      }
+    },
+    "may_current_binding": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native_inputs.py",
+      "sha256": "bf32fa885007f31265b09fd1511ea3c6543927a8efd5883cace9be8245e9a999",
+      "bytes": 6825,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "main": {
+          "line": 15,
+          "end_line": 81
+        },
+        "memory_mib": {
+          "line": 9,
+          "end_line": 12
+        }
+      }
+    },
+    "historical_native_binding": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+      "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+      "bytes": 24242,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "job_ledger": {
+          "line": 68,
+          "end_line": 155
+        },
+        "main": {
+          "line": 178,
+          "end_line": 260
+        }
+      }
+    },
+    "canonical_current_jobs": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native.py",
+      "sha256": "6fddb5938544aef952f86cc72e836a46c657ed66a6a594f5d842346900beebba",
+      "bytes": 2257,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "canonical_jobs": {
+          "line": 11,
+          "end_line": 36
+        }
+      }
+    },
+    "current_grid_resource_binding": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_temporal\\native.py",
+      "sha256": "9e93c03217bad5dff2c318a91d760c85d875a05b6b42cc5d5464107000546212",
+      "bytes": 12576,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "native_jobs": {
+          "line": 38,
+          "end_line": 62
+        },
+        "grid_binding": {
+          "line": 84,
+          "end_line": 122
+        }
+      }
+    },
+    "common_reference": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_april_b0_v2\\reference.py",
+      "sha256": "4ef4c83a6d2d6dfa49cb7d17ce01fb29b136ab28cf06bd53315153c93743462c",
+      "bytes": 7758,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY"
+    },
+    "feature_firewall": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\inference\\features.py",
+      "sha256": "a6e836e69d87abac9186cadd88ffc56a18792379b30dfd1cf29c1c99204ef206",
+      "bytes": 3011,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY"
+    },
+    "provider_integrity": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\runtime_bundle\\INTEGRITY.json",
+      "sha256": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+      "bytes": 4131,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY"
+    },
+    "calibration_state": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\runtime_bundle\\calibration_state.json",
+      "sha256": "c4a555c2527837972d8862afeac008fc5ccc27750a96978634e2fbe3bd7bbf1f",
+      "bytes": 8575,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY"
+    },
+    "cc4_mass_interface": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\workload.py",
+      "sha256": "10320df9beaa0df89fd0d80b763595ee95fb57eb82f5a3d53ed9373d4517daed",
+      "bytes": 4374,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "ForecastBook": {
+          "line": 42,
+          "end_line": 80
+        },
+        "profile": {
+          "line": 30,
+          "end_line": 38
+        },
+        "submit": {
+          "line": 54,
+          "end_line": 65
+        },
+        "row": {
+          "line": 67,
+          "end_line": 76
+        }
+      }
+    },
+    "pr118_actual": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_native\\actual.py",
+      "sha256": "70b042aecaa89fc287d919534f90af8f55b12b3a688ead20be9ec3620bf165b9",
+      "bytes": 9906,
+      "role": "IMPLEMENTATION_OR_STATIC_AUTHORITY",
+      "symbols": {
+        "unknown_arrival": {
+          "line": 33,
+          "end_line": 45
+        },
+        "run_dday_actual": {
+          "line": 79,
+          "end_line": 149
+        }
+      }
+    }
+  },
+  "May_outcomes_read": false,
+  "May_optimization_calls": 0,
+  "May_OpenDSS_calls": 0,
+  "current_physical_execution_claim": false
+}

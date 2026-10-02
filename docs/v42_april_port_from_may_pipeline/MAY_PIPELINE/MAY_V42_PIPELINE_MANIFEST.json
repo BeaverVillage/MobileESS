@@ -1,0 +1,1826 @@
+{
+  "schema": "V42_MAY_PIPELINE_FORENSIC_MANIFEST_V1",
+  "base": "c0783fadbbca282f2ce580c45fe82feaed71584c",
+  "lineage_forensic_complete": true,
+  "lineage_complete_meaning": "Every requested chain stage traced to code and input provenance, including explicit missing concrete current native Actual adapter; does not certify executable science.",
+  "May_bundle_schema": "V42_MAY01_IEEE123_NATIVE_INPUT_BUNDLE",
+  "current_day_builder_schema": "V42_DAY_INPUT_BUNDLE_V1",
+  "current_day_builder": "v42_april_port/builder.py::build_v42_day_input_bundle",
+  "pipeline_stages": [
+    {
+      "stage": "RAW_WORKLOAD_SOURCE",
+      "code": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "bytes": 45569,
+          "symbol": "load_state_source",
+          "start_line": 150,
+          "end_line": 208,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+          "bytes": 731139558,
+          "sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+          "read_scope": "PR121_IMMUTABLE_ARCHIVE_PROVENANCE",
+          "value_donor": false
+        }
+      ],
+      "authoritative_fields": [
+        "id",
+        "submit_time",
+        "start_time",
+        "end_time",
+        "gpus_requested",
+        "nodes_req",
+        "processors_req",
+        "memory_req",
+        "wallclock_req",
+        "partition",
+        "qos",
+        "account_hash"
+      ],
+      "derived_fields": [
+        "source_member",
+        "wallclock_seconds"
+      ],
+      "units": {
+        "gpus_requested": "requested GPU count, may be null",
+        "nodes_req": "requested nodes",
+        "wallclock_seconds": "seconds feature/old rule only"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "Scheduler events, not regularly sampled",
+      "causal_cutoff": "D-1 18:00 fixed AEST UTC+10; issue(day)=day 00:00 AEST minus six hours",
+      "April_action": "April March/April raw projection only; generic builder retains missing rows. Old member<=May cutoff not scientific authority.",
+      "status": "CODE_LINEAGE_RESOLVED"
+    },
+    {
+      "stage": "CANONICAL_JOB_IDENTITY",
+      "code": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "bytes": 45569,
+          "symbol": "load_state_source",
+          "start_line": 150,
+          "end_line": 208,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\data.py",
+          "sha256": "796fccf3179be61a1ed4f315e41dfc1142f6993de807a9503e3c9b0eed9dd8f4",
+          "bytes": 14153,
+          "symbol": "normalize",
+          "start_line": 43,
+          "end_line": 57,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+          "bytes": 731139558,
+          "sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+          "read_scope": "PR121_IMMUTABLE_ARCHIVE_PROVENANCE",
+          "value_donor": false
+        }
+      ],
+      "authoritative_fields": [
+        "raw id",
+        "submit_time"
+      ],
+      "derived_fields": [
+        "job_uid=str(raw.id)",
+        "job_id=str(raw.id)"
+      ],
+      "units": {
+        "job_uid": "opaque full source UID; raw numeric job_id is not the key"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "one row per UID/submission",
+      "causal_cutoff": "D-1 18:00 fixed AEST UTC+10; issue(day)=day 00:00 AEST minus six hours",
+      "April_action": "Exact UID plus normalized aware submission; reject duplicate or conflicting matches, never fuzzy/neighbor/May joins.",
+      "status": "CODE_LINEAGE_RESOLVED"
+    },
+    {
+      "stage": "D1_KNOWN_POPULATION",
+      "code": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "bytes": 45569,
+          "symbol": "snapshot_at_issue",
+          "start_line": 211,
+          "end_line": 257,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+          "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+          "bytes": 24242,
+          "symbol": "job_ledger",
+          "start_line": 68,
+          "end_line": 155,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-01\\V37_R4A_D1_SNAPSHOT.parquet",
+          "sha256": "8d74fcf0bc305bff983bff9607fe7d5120c8a61618631cfc6d6fdda81c71423a",
+          "bytes": 44108,
+          "period": "2025-05-01",
+          "units": "timestamps,GPU",
+          "role": "Causal issue snapshot membership; projected columns exclude future start/end",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        }
+      ],
+      "authoritative_fields": [
+        "submit_time<=issue",
+        "observed start<=issue if RUNNING",
+        "completion event before/at issue"
+      ],
+      "derived_fields": [
+        "state_at_issue",
+        "known_running_start",
+        "operating_day"
+      ],
+      "units": {
+        "state": "RUNNING/PENDING",
+        "known_running_start": "aware timestamp"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "event snapshot at issue",
+      "causal_cutoff": "D-1 18:00 fixed AEST UTC+10; issue(day)=day 00:00 AEST minus six hours",
+      "April_action": "Use current April snapshot; future starts/ends not inference fields. Retain every source-known row regardless of GPU completeness.",
+      "status": "CODE_LINEAGE_RESOLVED"
+    },
+    {
+      "stage": "GPU_REQUEST_AND_GANG",
+      "code": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "bytes": 45569,
+          "symbol": "_submission_complete",
+          "start_line": 113,
+          "end_line": 123,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+          "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+          "bytes": 45569,
+          "symbol": "_jobs_and_ledger",
+          "start_line": 417,
+          "end_line": 500,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\inputs.py",
+          "sha256": "d37f290f01952edc51a69cd8a603038bfe8b7e396dd5d44ea626613372f0b1ee",
+          "bytes": 5526,
+          "symbol": "frozen_jobs",
+          "start_line": 45,
+          "end_line": 91,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\common.py",
+          "sha256": "e21bde3188d1a246dbebfb50262c7722782ff2fa69b7e9b331ff2fba8a9d8a75",
+          "bytes": 8467,
+          "symbol": "build",
+          "start_line": 17,
+          "end_line": 118,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+          "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+          "bytes": 24242,
+          "symbol": "job_ledger",
+          "start_line": 68,
+          "end_line": 155,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native_inputs.py",
+          "sha256": "bf32fa885007f31265b09fd1511ea3c6543927a8efd5883cace9be8245e9a999",
+          "bytes": 6825,
+          "symbol": "main",
+          "start_line": 15,
+          "end_line": 81,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-01\\common_q90_v3\\COMMON_B0_REFERENCE_JOBS.json",
+          "sha256": "60a75be104f8df41a93ac14f50a9ddd8ce330e3bd0c12cce2aa4e23e4b202ddb",
+          "bytes": 1632416,
+          "period": "2025-05-01",
+          "units": "GPU,seconds,issue-origin 900s slots",
+          "role": "Authoritative known-job independent-day reference and exact service",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+          "bytes": 731139558,
+          "sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+          "read_scope": "PR121_IMMUTABLE_ARCHIVE_PROVENANCE",
+          "value_donor": false
+        }
+      ],
+      "authoritative_fields": [
+        "raw gpus_requested"
+      ],
+      "derived_fields": [
+        "requested_gpus",
+        "requested_GPU",
+        "GPU_gang=int(requested_GPU)"
+      ],
+      "units": {
+        "GPU_gang": "whole indivisible GPU count"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "job attribute",
+      "causal_cutoff": "D-1 18:00 fixed AEST UTC+10; issue(day)=day 00:00 AEST minus six hours",
+      "April_action": "Port exact direct raw mapping; supersede historical exclusion of missing request rows. No request-version reconciliation, immutable submission certification, node-count derivation, or GPU imputation was implemented in this producer.",
+      "status": "CODE_LINEAGE_RESOLVED"
+    },
+    {
+      "stage": "RUNTIME_AND_SERVICE",
+      "code": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native_inputs.py",
+          "sha256": "bf32fa885007f31265b09fd1511ea3c6543927a8efd5883cace9be8245e9a999",
+          "bytes": 6825,
+          "symbol": "memory_mib",
+          "start_line": 9,
+          "end_line": 12,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native_inputs.py",
+          "sha256": "bf32fa885007f31265b09fd1511ea3c6543927a8efd5883cace9be8245e9a999",
+          "bytes": 6825,
+          "symbol": "main",
+          "start_line": 15,
+          "end_line": 81,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\runtime.py",
+          "sha256": "86f578f315c39dd0c4e858df5d0ee04a79f16bc2c3d033af4beac7fe9ebd5e2a",
+          "bytes": 3224,
+          "symbol": "FrozenQ50",
+          "start_line": 15,
+          "end_line": 55,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\state.py",
+          "sha256": "0a7723650697869d4c7023a53d2ae9a8444c9859ccf1b11acf17338472ef0e36",
+          "bytes": 5635,
+          "symbol": "planning_remaining",
+          "start_line": 19,
+          "end_line": 25,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\runtime_bundle\\INTEGRITY.json",
+          "sha256": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+          "bytes": 4131
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\runtime_bundle\\calibration_state.json",
+          "sha256": "c4a555c2527837972d8862afeac008fc5ccc27750a96978634e2fbe3bd7bbf1f",
+          "bytes": 8575
+        }
+      ],
+      "authoritative_fields": [
+        "frozen V10::T3_ISOTONIC_ROLLING14_calibrated",
+        "submission request features only",
+        "observed causal elapsed RUNNING"
+      ],
+      "derived_fields": [
+        "Q50_total_seconds",
+        "nominal_remaining_seconds=max(Q50-elapsed,0)",
+        "service_slots=ceil(remaining/900)"
+      ],
+      "units": {
+        "Q50": "seconds",
+        "service_slots": "900 second slots"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "one frozen inference per submitted job",
+      "causal_cutoff": "D-1 18:00 fixed AEST UTC+10; issue(day)=day 00:00 AEST minus six hours; provider available_at<=event; max calibration completion strictly before provider availability",
+      "April_action": "Keep current FrozenQ50; supersede historical RollingQ90/requested_remaining/requested_walltime service. Requested walltime stays ML feature only.",
+      "status": "CODE_LINEAGE_RESOLVED"
+    },
+    {
+      "stage": "STATE_AND_RESIDUAL_SERVICE",
+      "code": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\state.py",
+          "sha256": "0a7723650697869d4c7023a53d2ae9a8444c9859ccf1b11acf17338472ef0e36",
+          "bytes": 5635,
+          "symbol": "planning_remaining",
+          "start_line": 19,
+          "end_line": 25,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\state.py",
+          "sha256": "0a7723650697869d4c7023a53d2ae9a8444c9859ccf1b11acf17338472ef0e36",
+          "bytes": 5635,
+          "symbol": "EpisodeLedger",
+          "start_line": 29,
+          "end_line": 87,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native.py",
+          "sha256": "6fddb5938544aef952f86cc72e836a46c657ed66a6a594f5d842346900beebba",
+          "bytes": 2257,
+          "symbol": "canonical_jobs",
+          "start_line": 11,
+          "end_line": 36,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-01\\V37_R4A_D1_SNAPSHOT.parquet",
+          "sha256": "8d74fcf0bc305bff983bff9607fe7d5120c8a61618631cfc6d6fdda81c71423a",
+          "bytes": 44108,
+          "period": "2025-05-01",
+          "units": "timestamps,GPU",
+          "role": "Causal issue snapshot membership; projected columns exclude future start/end",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        }
+      ],
+      "authoritative_fields": [
+        "observed RUNNING/PENDING",
+        "known_running_start",
+        "physical site if sourced"
+      ],
+      "derived_fields": [
+        "hard RUNNING gang occupancy",
+        "nominal remaining",
+        "overrun_uncertainty",
+        "control-boundary release only after observed completion"
+      ],
+      "units": {
+        "elapsed": "seconds",
+        "physical_GPU": "GPU count"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "900 second controls plus causal state events",
+      "causal_cutoff": "D-1 18:00 fixed AEST UTC+10; issue(day)=day 00:00 AEST minus six hours; Actual observed events only at event time",
+      "April_action": "Q50 expiry does not imply physical completion; keep expired RUNNING hard occupancy until source-authorized causal release.",
+      "status": "CODE_LINEAGE_RESOLVED"
+    },
+    {
+      "stage": "SITE_RACK_COMPATIBILITY",
+      "code": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r2\\reference.py",
+          "sha256": "9b981c854575a6fe4777e52908be85d2f5edd927c655b8c417b57302c040c075",
+          "bytes": 3979,
+          "symbol": "materialize",
+          "start_line": 12,
+          "end_line": 66,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+          "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+          "bytes": 24242,
+          "symbol": "job_ledger",
+          "start_line": 68,
+          "end_line": 155,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native.py",
+          "sha256": "6fddb5938544aef952f86cc72e836a46c657ed66a6a594f5d842346900beebba",
+          "bytes": 2257,
+          "symbol": "canonical_jobs",
+          "start_line": 11,
+          "end_line": 36,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\artifacts\\v41r2_780gpu_capacity_rebase\\V41R2_780GPU_CAPACITY_AUTHORITY.json",
+          "sha256": "f8200de1092ee0daac6c91798f0f5e24429b203cff4d66baca2eca387affb6e7",
+          "bytes": 1467,
+          "period": "static 780-GPU case study",
+          "units": "GPU",
+          "role": "V41R2 native whole-gang capacity",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\artifacts\\v41r2_780gpu_capacity_rebase\\V41R2_LOGICAL_RACK_AUTHORITY.json",
+          "sha256": "83fe8999ab48818e39c8d065fb4d9f93bce2cce17b20fe4f3b11956fcb31596a",
+          "bytes": 10098,
+          "period": "static 780-GPU case study",
+          "units": "GPU",
+          "role": "V41R2 native whole-gang capacity",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-01\\common_q90_v3\\COMMON_B0_REFERENCE_JOBS.json",
+          "sha256": "60a75be104f8df41a93ac14f50a9ddd8ce330e3bd0c12cce2aa4e23e4b202ddb",
+          "bytes": 1632416,
+          "period": "2025-05-01",
+          "units": "GPU,seconds,issue-origin 900s slots",
+          "role": "Authoritative known-job independent-day reference and exact service",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        }
+      ],
+      "authoritative_fields": [
+        "source physical RUNNING site when available",
+        "frozen rack compatibility limits"
+      ],
+      "derived_fields": [
+        "compatible_sites satisfying gang<=site cap and <=some rack compatibility ceiling"
+      ],
+      "units": {
+        "site": "AIDC01..AIDC12",
+        "rack ceiling": "GPU; not additive facility capacity"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "job/site plus fixed 900 second execution segments",
+      "causal_cutoff": "D-1 18:00 fixed AEST UTC+10; issue(day)=day 00:00 AEST minus six hours",
+      "April_action": "Do not copy historical May sites/reference start. PR121 common scheduler uses physical source site first; documented deterministic grid-blind fallback for missing site.",
+      "status": "CODE_LINEAGE_RESOLVED"
+    },
+    {
+      "stage": "FACILITY_CAPACITY",
+      "code": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native.py",
+          "sha256": "6fddb5938544aef952f86cc72e836a46c657ed66a6a594f5d842346900beebba",
+          "bytes": 2257,
+          "symbol": "canonical_jobs",
+          "start_line": 11,
+          "end_line": 36,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_temporal\\native.py",
+          "sha256": "9e93c03217bad5dff2c318a91d760c85d875a05b6b42cc5d5464107000546212",
+          "bytes": 12576,
+          "symbol": "native_jobs",
+          "start_line": 38,
+          "end_line": 62,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\artifacts\\v41r2_780gpu_capacity_rebase\\V41R2_780GPU_CAPACITY_AUTHORITY.json",
+          "sha256": "f8200de1092ee0daac6c91798f0f5e24429b203cff4d66baca2eca387affb6e7",
+          "bytes": 1467,
+          "period": "static 780-GPU case study",
+          "units": "GPU",
+          "role": "V41R2 native whole-gang capacity",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\artifacts\\v41r2_780gpu_capacity_rebase\\V41R2_LOGICAL_RACK_AUTHORITY.json",
+          "sha256": "83fe8999ab48818e39c8d065fb4d9f93bce2cce17b20fe4f3b11956fcb31596a",
+          "bytes": 10098,
+          "period": "static 780-GPU case study",
+          "units": "GPU",
+          "role": "V41R2 native whole-gang capacity",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\docs\\v42_job_capability_joint_flexibility\\FLEXIBILITY_SOURCE_AUTHORITY.json",
+          "sha256": "937b653b380e458cd41243de1a1ecbf9c0483adcacbc5e96e21d791bccbd4945",
+          "bytes": 2616
+        }
+      ],
+      "authoritative_fields": [
+        "current V42 site vector [80,40,80,40,100,80,40,80,40,80,40,80]",
+        "gang splitting false"
+      ],
+      "derived_fields": [
+        "site occupancy",
+        "whole-gang compatibility envelope"
+      ],
+      "units": {
+        "site capacity": "GPU; sum 780",
+        "rack aggregate contribution": "0"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "120 issue-origin slots; 96 operating day slots",
+      "causal_cutoff": "D-1 18:00 fixed AEST UTC+10; issue(day)=day 00:00 AEST minus six hours",
+      "April_action": "Retain current V42 780 GPU case-study vector and non-additive racks; old 624 GPU authorities are superseded.",
+      "status": "CODE_LINEAGE_RESOLVED"
+    },
+    {
+      "stage": "AIDC_IT_POWER",
+      "code": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_temporal\\native.py",
+          "sha256": "9e93c03217bad5dff2c318a91d760c85d875a05b6b42cc5d5464107000546212",
+          "bytes": 12576,
+          "symbol": "load_power",
+          "start_line": 64,
+          "end_line": 82,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_temporal\\native.py",
+          "sha256": "9e93c03217bad5dff2c318a91d760c85d875a05b6b42cc5d5464107000546212",
+          "bytes": 12576,
+          "symbol": "grid_binding",
+          "start_line": 84,
+          "end_line": 122,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v24t_thermal_aware_aidc\\V24T_C1_QUASISTATIC_MODEL.json",
+          "sha256": "02a19e6c2d8cb44ec6b90ff1a4c98f21d5e848cda2dc34f2aaf2f959f9e6579e",
+          "bytes": 1438,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "AIDC_power_C1",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\v28\\thermal.py",
+          "sha256": "079757208159a19f0b15419a2b1d6037143bae53a8bbddbf317565165d35e196",
+          "bytes": 4194,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "AIDC_power_C1",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\v28r2\\c1_affine.py",
+          "sha256": "912c870a2c062431cac60f2157f3b4399ad824119facdafbd7ac3f1788c40c13",
+          "bytes": 6122,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "AIDC_power_C1",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\v39a\\contracts.py",
+          "sha256": "2e69721fc48495d19bba97d08b1f12d140dfb36d580369fe0d60f062287a1446",
+          "bytes": 2050,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "AIDC_power_C1",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\artifacts\\v41r2_metadata_draft01\\original_source\\dayahead\\v39a\\power.py",
+          "sha256": "7b5899b0b0ae15a1d1515e49b6664cef9d9c968d968cabc1bfe40a5c21ae77c5",
+          "bytes": 4101,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "AIDC_power_C1",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        }
+      ],
+      "authoritative_fields": [
+        "source constants IDLE_W_PER_GPU and CENTER_SWING_W_PER_GPU",
+        "site capacity",
+        "occupied/nominal GPU"
+      ],
+      "derived_fields": [
+        "P_IT_kw=idle_kw_per_GPU*capacity+swing_kw_per_GPU*active_GPU"
+      ],
+      "units": {
+        "P_IT": "kW",
+        "energy": "kWh=sum kW*0.25h"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "96 x 12 site slots",
+      "causal_cutoff": "D-1 18:00 fixed AEST UTC+10; issue(day)=day 00:00 AEST minus six hours",
+      "April_action": "Current power conversion reparameterized by day/weather/capacity; do not read or copy May IT/PCC arrays. Reserve headroom is not electrical load.",
+      "status": "CODE_LINEAGE_RESOLVED"
+    },
+    {
+      "stage": "AIDC_PCC_POWER",
+      "code": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_temporal\\native.py",
+          "sha256": "9e93c03217bad5dff2c318a91d760c85d875a05b6b42cc5d5464107000546212",
+          "bytes": 12576,
+          "symbol": "load_power",
+          "start_line": 64,
+          "end_line": 82,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\c1_affine.py",
+          "sha256": "912c870a2c062431cac60f2157f3b4399ad824119facdafbd7ac3f1788c40c13",
+          "bytes": 6122,
+          "symbol": "endpoint_secant",
+          "start_line": 125,
+          "end_line": 163,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\c1_affine.py",
+          "sha256": "912c870a2c062431cac60f2157f3b4399ad824119facdafbd7ac3f1788c40c13",
+          "bytes": 6122,
+          "symbol": "exact_c1_pcc_kw",
+          "start_line": 68,
+          "end_line": 86,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\power_replay.py",
+          "sha256": "cbdcb9196f02d434d80f53d951bae7e43bc68ad44c5f05d3f419e5502fd0aaf2",
+          "bytes": 3241,
+          "symbol": "power_from_execution",
+          "start_line": 12,
+          "end_line": 46,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\may_2025\\days\\2025-05-01\\gfs_d1_weather.parquet",
+          "sha256": "314c71f7aa7a7f72170c0f52b8a92d614139564411464c5658e6584be452968c",
+          "bytes": 16749,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "weather",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v24t_thermal_aware_aidc\\V24T_C1_QUASISTATIC_MODEL.json",
+          "sha256": "02a19e6c2d8cb44ec6b90ff1a4c98f21d5e848cda2dc34f2aaf2f959f9e6579e",
+          "bytes": 1438,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "AIDC_power_C1",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\v28\\thermal.py",
+          "sha256": "079757208159a19f0b15419a2b1d6037143bae53a8bbddbf317565165d35e196",
+          "bytes": 4194,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "AIDC_power_C1",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\v28r2\\c1_affine.py",
+          "sha256": "912c870a2c062431cac60f2157f3b4399ad824119facdafbd7ac3f1788c40c13",
+          "bytes": 6122,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "AIDC_power_C1",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\v39a\\contracts.py",
+          "sha256": "2e69721fc48495d19bba97d08b1f12d140dfb36d580369fe0d60f062287a1446",
+          "bytes": 2050,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "AIDC_power_C1",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\artifacts\\v41r2_metadata_draft01\\original_source\\dayahead\\v39a\\power.py",
+          "sha256": "7b5899b0b0ae15a1d1515e49b6664cef9d9c968d968cabc1bfe40a5c21ae77c5",
+          "bytes": 4101,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "AIDC_power_C1",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        }
+      ],
+      "authoritative_fields": [
+        "C1 quasistatic parameters",
+        "t_wb_c",
+        "rh_pct",
+        "source PF"
+      ],
+      "derived_fields": [
+        "Planning endpoint secant P_PCC=slope*P_IT+intercept_kw",
+        "Actual exact C1(P_IT,realized weather)",
+        "Q_PCC=P_PCC*tan(acos(PF))"
+      ],
+      "units": {
+        "P_PCC": "kW positive consumption",
+        "Q_PCC": "kvar positive load"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "96 x 12 site slots",
+      "causal_cutoff": "D-1 18:00 fixed AEST UTC+10; issue(day)=day 00:00 AEST minus six hours for forecast weather; realized weather only Actual",
+      "April_action": "Current C1 semantics retained. Forecast and realized weather paths passed explicitly; no constant arbitrary PUE substitution.",
+      "status": "CODE_LINEAGE_RESOLVED"
+    },
+    {
+      "stage": "LOAD_PV_WEATHER",
+      "code": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\source_cache.py",
+          "sha256": "20dd3c1848ff3a86bff2b19c967f819f219fb32c386eb448af21623dfe3e73a0",
+          "bytes": 1041,
+          "symbol": "day_root",
+          "start_line": 30,
+          "end_line": 31,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\exogenous.py",
+          "sha256": "5e46ec34e152da8e6c90b8074b3cf8e577db29c119e3c86a0107ecb9925499a3",
+          "bytes": 2670,
+          "symbol": "load",
+          "start_line": 9,
+          "end_line": 44,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\tools\\audit_v40d_actual_replay.py",
+          "sha256": "99558057f12dc7e9f80372a7459210640ed89d22dfb679404cfa329aed2278e0",
+          "bytes": 28151,
+          "symbol": "aemo_audit",
+          "start_line": 164,
+          "end_line": 197,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\may_2025\\days\\2025-05-01\\gfs_d1_weather.parquet",
+          "sha256": "314c71f7aa7a7f72170c0f52b8a92d614139564411464c5658e6584be452968c",
+          "bytes": 16749,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "weather",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\may_2025\\days\\2025-05-01\\aemo_forecast.json",
+          "sha256": "93e07ffbfd7ccef05782b8b81fed5b40a1b418446ec6cb8da1e4ee09143b5637",
+          "bytes": 6466,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "PV",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        }
+      ],
+      "authoritative_fields": [
+        "aemo_forecast demand_mw_96/pv_mw_96/timestamps_96",
+        "gfs_d1_weather t_wb_c/rh_pct",
+        "realized AEMO VIC1 TOTALDEMAND/POWER",
+        "NOAA observed weather"
+      ],
+      "derived_fields": [
+        "5 minute dispatch sampled at exact quarter-hour ends",
+        "30 minute measured PV repeated twice, energy conserved",
+        "observed hourly weather interpolated to quarter-hour starts"
+      ],
+      "units": {
+        "raw regional load/PV": "MW",
+        "weather": "Celsius, percent"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "96 quarter-hour intervals; raw AEMO demand5min/PV30min/weather hourly",
+      "causal_cutoff": "Forecast issue<=D1 cutoff; actual files only Actual; interval-end date semantics may end next-day00:00",
+      "April_action": "Use each April date raw forecast/realized inputs and current raw provenance; same unit/axis semantics; never forecast-to-actual substitute.",
+      "status": "CODE_LINEAGE_RESOLVED"
+    },
+    {
+      "stage": "CC4_COMMON_FORECAST",
+      "code": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+          "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+          "bytes": 24242,
+          "symbol": "main",
+          "start_line": 178,
+          "end_line": 260,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\workload.py",
+          "sha256": "10320df9beaa0df89fd0d80b763595ee95fb57eb82f5a3d53ed9373d4517daed",
+          "bytes": 4374,
+          "symbol": "ForecastBook",
+          "start_line": 42,
+          "end_line": 80,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\workload.py",
+          "sha256": "10320df9beaa0df89fd0d80b763595ee95fb57eb82f5a3d53ed9373d4517daed",
+          "bytes": 4374,
+          "symbol": "profile",
+          "start_line": 30,
+          "end_line": 38,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_temporal\\native.py",
+          "sha256": "9e93c03217bad5dff2c318a91d760c85d875a05b6b42cc5d5464107000546212",
+          "bytes": 12576,
+          "symbol": "grid_binding",
+          "start_line": 84,
+          "end_line": 122,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_integrated_pr\\docs\\v42_final\\AGGREGATE_BINDING.json",
+          "sha256": "c96f38a7edfdd29b7e5ff3b3e86c3ea1cef4690ae5477717bb31b0b6753d935d",
+          "bytes": 1302,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "Prior V42 C0 adapter lineage",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\cc4_v26_distributional_hybrid_pr\\docs\\cc4_v21_causal_refit_hurdle\\predictions\\LGBM_weighted_c1_s20260924.npz",
+          "sha256": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+          "bytes": 97990,
+          "period": "2025-05-01",
+          "units": "GPUh per target hour",
+          "role": "C0 prediction",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V42_SCENARIO_REDESIGN_LOCAL\\DAY_LEDGER.csv",
+          "sha256": "11ff65481817ebcb922cca1b4fe7aebeb574bffe4ed2cdc872680996c67563f5",
+          "bytes": 103708,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "C0 ledger",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\cc4_v26_distributional_hybrid_pr\\docs\\cc4_v26_distributional_hybrid\\FINAL_SELECTION_FREEZE.json",
+          "sha256": "8ab325c0b2834c4bd454988afc4f026da2f62462b52a27e11bd4ab86ff4654de",
+          "bytes": 934,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "C0 selection",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        }
+      ],
+      "authoritative_fields": [
+        "common frozen C0 Q50/Q90 lifetime GPUh by target submission hour",
+        "pre-May execution-lag kernel"
+      ],
+      "derived_fields": [
+        "nominal_GPU convolution",
+        "uncertainty headroom=max(Q90-Q50,0)",
+        "causal explicit submission depletes only its same cohort"
+      ],
+      "units": {
+        "C0_Q50/C0_Q90": "GPUh per target hour",
+        "nominal_GPU": "GPU count"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "24 hourly cohorts -> 96+ quarter-hour lag slots",
+      "causal_cutoff": "Only target day/index/issue metadata projected; no actual labels; no individual future UID before submission",
+      "April_action": "Retain common ML in B0; April day-index binding required; no May C0 value donation. Anonymous forecast stays aggregate and cannot become reference job schedule.",
+      "status": "CODE_LINEAGE_RESOLVED"
+    },
+    {
+      "stage": "GRID_NETWORK_AND_PLANNING_INPUT",
+      "code": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\v41r4_electrical.py",
+          "sha256": "68306d036e7e364f2b208320e1db58ab906b0c721e5194c77e52377de263294c",
+          "bytes": 3312,
+          "symbol": "configure",
+          "start_line": 10,
+          "end_line": 62,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\electrical.py",
+          "sha256": "d9bae02cf0c983cbe032ddd990633cf1b23d6b19c6ebc19325fd76894678fb97",
+          "bytes": 9211,
+          "symbol": "identity",
+          "start_line": 41,
+          "end_line": 65,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40i\\electrical.py",
+          "sha256": "dc8df57722410a14a0e30592fe35918cb4dcb4c4b0b0afdfcb189c60c6c591e3",
+          "bytes": 30775,
+          "symbol": "generate_outputs",
+          "start_line": 182,
+          "end_line": 242,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\electrical.py",
+          "sha256": "e8f2afc6a94c563d518be1ba72e004977bb0fa91ebc5bb54b575b138aff3262e",
+          "bytes": 20897,
+          "symbol": "upstream",
+          "start_line": 41,
+          "end_line": 92,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+          "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+          "bytes": 24242,
+          "symbol": "native_coefficients",
+          "start_line": 158,
+          "end_line": 175,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_native\\grid.py",
+          "sha256": "1d5c353c1e767cae54520f04ad101e34a95da3d1976d9b449e366400fe78112d",
+          "bytes": 3190,
+          "symbol": "add_grid",
+          "start_line": 30,
+          "end_line": 61,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\e\\20250501\\V41_ELECTRICAL_CERTIFICATE.json",
+          "sha256": "c6b649edc1b2b3e2f324b0e41f939e397bdfcb26b64fff2c7be56d3d27424d35",
+          "bytes": 136903,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "Native IEEE123 frozen coefficient source",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\Generated_Planning_Line_Ratings_u080.dss",
+          "sha256": "46d492b5b62400d33646089b80105d713250d0790ed7baab85b002d48121f302",
+          "bytes": 6038,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "line_ratings",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\opendss_runtime_adapter.json",
+          "sha256": "5637dc95ab3ea62611b278e0b5f1aefe49befd4bf90bafb7a478fe83e0c43036",
+          "bytes": 38747,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "background_mapping",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\work\\Mobile_ESS_Integrated_Rebuild_20260731\\src\\build_power_v70_3ph.py",
+          "sha256": "aa81880e956e03a3195a316eae95687088772f5c2171abed7e215e1bab083a82",
+          "bytes": 26512,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "background_mapping",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\processed\\power_v70_3ph\\runtime_arrays\\bus_ids.npy",
+          "sha256": "7cad8bec82a1efd0bf55f3d566f1f2faff5b2be4bd058d957481a858fac771f4",
+          "bytes": 4320,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "background_mapping",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\processed\\power_v70_3ph\\runtime_arrays\\load_archetype_cluster_id.npy",
+          "sha256": "27cbb7e41785d14c79635de662093442561c54162614f14418a6b961f5691f92",
+          "bytes": 390,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "background_mapping",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\work\\power_side_p4f12_review_20260731_201553\\p4f1_artifact_cleanup\\p4f1_full_artifact_manifest.json",
+          "sha256": "7780cc3cd19a7f1dcf8e2d6a35d2872f7742bee200873b69a6c806df557624b5",
+          "bytes": 27179,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "background_mapping",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\processed\\power_v70_3ph\\runtime_arrays\\pv_capacity_kw.npy",
+          "sha256": "2d39c325249c12045bed10825bfaa345d708883e6d7eba2954f6c36181464636",
+          "bytes": 1700,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "background_mapping",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\integrated_rebuild\\current\\02_power_preprocess\\jemena_mvar\\jemena_q_over_p_lookup.csv.gz",
+          "sha256": "32143c7717e1cf37947d6d390bf7d7b518e7fbd852d719fa456e2b9a054f3e60",
+          "bytes": 56836,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "background_mapping",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\integrated_rebuild\\current\\02_power_preprocess\\jemena_feeders\\jemena_cluster_residual_lookup.csv.gz",
+          "sha256": "159242ca2c198954c32a145a1776bf5dbc15eb896666c83dc93a2c444ca5e1ae",
+          "bytes": 40466,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "background_mapping",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\pfr\\contracts\\FEEDER_ABSOLUTE_SCALE_CONTRACT_V2.json",
+          "sha256": "5fd67c25b7e3df89a19cba6bcaab348f2e0a3f72f85ac47e34c4b7935307e650",
+          "bytes": 2630,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "background_mapping",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\v40e\\mapping.py",
+          "sha256": "6ba0e0903f61f7f08d4548cd108912e6ea351760ff71377df8c13d4065cde403",
+          "bytes": 7314,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "background_mapping",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\grid_background_v16_2.py",
+          "sha256": "85d0e7f566ff90cc0124d5af7465e9586d1a34d9a396985aab4654f93302fb74",
+          "bytes": 10254,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "background_mapping",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        }
+      ],
+      "authoritative_fields": [
+        "IEEE123 topology/PCC/branch ratings",
+        "April forecast load/PV",
+        "same frozen reference P/Q",
+        "alpha_BG from current binding"
+      ],
+      "derived_fields": [
+        "bus-phase background P/Q/PV targets",
+        "per-day planning voltage/current/PQ coefficients",
+        "60 control axes (12 AIDC P,24 MESS P/Q controls plus mapping axes)"
+      ],
+      "units": {
+        "planning voltage": "squared pu in affine rows; output pu after sqrt",
+        "controls": "kW/kvar",
+        "branch rating": "A or kVA"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "96 slots x native node/branch phases",
+      "causal_cutoff": "D-1 18:00 fixed AEST UTC+10; issue(day)=day 00:00 AEST minus six hours",
+      "April_action": "Rebuild/bind April coefficients from raw current inputs after workload gate. Never copy May coefficient arrays or native tap/cap trajectories. Primary B0 band0.95-1.05.",
+      "status": "CODE_LINEAGE_RESOLVED"
+    },
+    {
+      "stage": "PLANNING_BUNDLE_AND_FREEZE",
+      "code": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+          "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+          "bytes": 24242,
+          "symbol": "main",
+          "start_line": 178,
+          "end_line": 260,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native_inputs.py",
+          "sha256": "bf32fa885007f31265b09fd1511ea3c6543927a8efd5883cace9be8245e9a999",
+          "bytes": 6825,
+          "symbol": "main",
+          "start_line": 15,
+          "end_line": 81,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native.py",
+          "sha256": "6fddb5938544aef952f86cc72e836a46c657ed66a6a594f5d842346900beebba",
+          "bytes": 2257,
+          "symbol": "canonical_jobs",
+          "start_line": 11,
+          "end_line": 36,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_native\\planning.py",
+          "sha256": "5ea952c76d015df66f11eedeb9f86d5a41248d5e876e4a126cf61e72f3d701be",
+          "bytes": 3938,
+          "symbol": "freeze_day_ahead_plan",
+          "start_line": 84,
+          "end_line": 97,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-01\\common_q90_v3\\COMMON_B0_REFERENCE_JOBS.json",
+          "sha256": "60a75be104f8df41a93ac14f50a9ddd8ce330e3bd0c12cce2aa4e23e4b202ddb",
+          "bytes": 1632416,
+          "period": "2025-05-01",
+          "units": "GPU,seconds,issue-origin 900s slots",
+          "role": "Authoritative known-job independent-day reference and exact service",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\docs\\v42_day_ahead_planning_direct_dday_actual\\DAYAHEAD_FREEZE_SCHEMA.json",
+          "sha256": "3e104b24d609845db1d79c574d59c3e74b21077cdb3e2a0833b95b7dbeca28b8",
+          "bytes": 2241
+        }
+      ],
+      "authoritative_fields": [
+        "known population",
+        "current runtime/gpu/capacity/reference",
+        "forecast inputs",
+        "frozen causal unknown-arrival policy",
+        "input authority hashes"
+      ],
+      "derived_fields": [
+        "detached canonical immutable plan",
+        "DAYAHEAD_PLAN_SHA",
+        "POLICY_SHA",
+        "GRID_SHA"
+      ],
+      "units": {
+        "plan": "JSON canonical payload with kW/kvar,slots,GPU,seconds"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "one freeze per day",
+      "causal_cutoff": "D-1 18:00 fixed AEST UTC+10; issue(day)=day 00:00 AEST minus six hours",
+      "April_action": "New builder schema V42_DAY_INPUT_BUNDLE_V1; reference only after bundle PASS; B0 flex off/MESSzero. DA FreshAC is offline diagnostic, never operational gate.",
+      "status": "CODE_LINEAGE_RESOLVED"
+    },
+    {
+      "stage": "ACTUAL_REALIZED_POPULATION",
+      "code": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\tools\\audit_v40d_actual_replay.py",
+          "sha256": "99558057f12dc7e9f80372a7459210640ed89d22dfb679404cfa329aed2278e0",
+          "bytes": 28151,
+          "symbol": "workload_audit",
+          "start_line": 221,
+          "end_line": 263,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\inputs.py",
+          "sha256": "d37f290f01952edc51a69cd8a603038bfe8b7e396dd5d44ea626613372f0b1ee",
+          "bytes": 5526,
+          "symbol": "observations",
+          "start_line": 94,
+          "end_line": 98,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\job_replay.py",
+          "sha256": "28a5b91b1d9dc6753aea7688c41a7ed67e9b8197edfa36ff6d1ed5ab1bdf4009",
+          "bytes": 10444,
+          "symbol": "replay_jobs",
+          "start_line": 67,
+          "end_line": 186,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\state.py",
+          "sha256": "0a7723650697869d4c7023a53d2ae9a8444c9859ccf1b11acf17338472ef0e36",
+          "bytes": 5635,
+          "symbol": "EpisodeLedger",
+          "start_line": 29,
+          "end_line": 87,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_native\\actual.py",
+          "sha256": "70b042aecaa89fc287d919534f90af8f55b12b3a688ead20be9ec3620bf165b9",
+          "bytes": 9906,
+          "symbol": "unknown_arrival",
+          "start_line": 33,
+          "end_line": 45,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\actual.py",
+          "sha256": "82ad9b01a57fcbca33e9778a8741665626ca763025fa150470e4354551a70fe6",
+          "bytes": 11991,
+          "symbol": "replay_jobs",
+          "start_line": 21,
+          "end_line": 119,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\actual.py",
+          "sha256": "82ad9b01a57fcbca33e9778a8741665626ca763025fa150470e4354551a70fe6",
+          "bytes": 11991,
+          "symbol": "realized_workload",
+          "start_line": 138,
+          "end_line": 179,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\actual_dispatch.py",
+          "sha256": "27c4a59e5e237cee45ed4e26ed03eab8368b5e18afea552963cd3377264e82d9",
+          "bytes": 19342,
+          "symbol": "replay_jobs",
+          "start_line": 18,
+          "end_line": 189,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\execution.py",
+          "sha256": "abc1f40740063662aa9e6436e8c9e352a921ff9945da43eb4a35b16e4d7ccc9c",
+          "bytes": 33686,
+          "symbol": "actual",
+          "start_line": 328,
+          "end_line": 452,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+          "bytes": 731139558,
+          "sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f",
+          "read_scope": "PR121_IMMUTABLE_ARCHIVE_PROVENANCE",
+          "value_donor": false
+        }
+      ],
+      "authoritative_fields": [
+        "historical source matches frozen known UID set to raw start/end/gpus_requested",
+        "current observed submissions/state events",
+        "Historical v41.actual.realized_workload separately selects D-Day submitted raw IDs for positive-GPU/valid-duration aggregate scoring"
+      ],
+      "derived_fields": [
+        "historical known-only Actual population (does not add unknown arrivals)",
+        "current causal explicit arrival state plus same immutable GPU request",
+        "Full-arrival historical GPUh/H4 aggregate score after physical grid replay; not individual AIDC site/IT/PCC reconstruction"
+      ],
+      "units": {
+        "UID": "opaque full raw id",
+        "arrival/start/end": "aware timestamps",
+        "GPU_gang": "integer request"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "events appearing causally; 900 second controls",
+      "causal_cutoff": "Actual only after freeze, each submission/start/completion observed at or before event time",
+      "April_action": "Supersede historical known-only physical replay, same-site capacity-delay dispatcher, and positive-only full-arrival scoring population. April retains every post-issue arrival and known observation; currentQ50 service, immutable GPU, and causal events; no future Planning identities, no omitted unknown physical rows.",
+      "status": "CODE_LINEAGE_RESOLVED"
+    },
+    {
+      "stage": "ACTUAL_PHYSICAL_BUNDLE",
+      "code": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_native\\actual.py",
+          "sha256": "70b042aecaa89fc287d919534f90af8f55b12b3a688ead20be9ec3620bf165b9",
+          "bytes": 9906,
+          "symbol": "ActualBackend",
+          "start_line": 69,
+          "end_line": 76,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_native\\actual.py",
+          "sha256": "70b042aecaa89fc287d919534f90af8f55b12b3a688ead20be9ec3620bf165b9",
+          "bytes": 9906,
+          "symbol": "run_dday_actual",
+          "start_line": 79,
+          "end_line": 149,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\grid_replay.py",
+          "sha256": "26ef0f44d7693a51bcd6de3685b25fb8e77590d56f14813c3ceeda62b0d638f1",
+          "bytes": 2798,
+          "symbol": "replay",
+          "start_line": 10,
+          "end_line": 41,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\execution.py",
+          "sha256": "abc1f40740063662aa9e6436e8c9e352a921ff9945da43eb4a35b16e4d7ccc9c",
+          "bytes": 33686,
+          "symbol": "actual",
+          "start_line": 328,
+          "end_line": 452,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\docs\\v42_day_ahead_planning_direct_dday_actual\\FRESH_AC_EXECUTION_AUTHORITY.json",
+          "sha256": "07e345407c0ba720664348df4ed22ea08fbdd44130a4fba260dd3e17b79126cf",
+          "bytes": 1085
+        }
+      ],
+      "authoritative_fields": [
+        "FrozenDayAheadPlan",
+        "realized_inputs load,pv,aidc_state",
+        "same immutable request",
+        "current causal physical events"
+      ],
+      "derived_fields": [
+        "physical schedule/load/pv/aidc_state/execution_controls",
+        "physical_arrays_sha",
+        "realized_inputs_sha",
+        "Historical v41.execution.actual replays only decision.AIDC_decision into PCC before computing separately filtered actual H4 score"
+      ],
+      "units": {
+        "physical inputs": "kW/kvar, aware events, GPU"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "96 site/node slots plus event state",
+      "causal_cutoff": "Post-freeze only; zero full reopt/P repair/Q repair/schedule repair",
+      "April_action": "Current repository defines Protocol and immutable orchestration, not a concrete native ActualBackend. April producer/adapter cannot be science-ready while GPU gate fails.",
+      "status": "CODE_LINEAGE_RESOLVED_CONCRETE_NATIVE_ADAPTER_NOT_PRESENT"
+    },
+    {
+      "stage": "OPENDSS_INPUT",
+      "code": [
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\opendss_mapping.py",
+          "sha256": "7e25e9befd8f80dba8cf1bc8cdba574ad1d77083c3b100430bea63abdfe9af89",
+          "bytes": 7091,
+          "symbol": "FeederAssets",
+          "start_line": 23,
+          "end_line": 53,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\opendss_mapping.py",
+          "sha256": "7e25e9befd8f80dba8cf1bc8cdba574ad1d77083c3b100430bea63abdfe9af89",
+          "bytes": 7091,
+          "symbol": "compile_clean_engine",
+          "start_line": 87,
+          "end_line": 106,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\opendss_mapping.py",
+          "sha256": "7e25e9befd8f80dba8cf1bc8cdba574ad1d77083c3b100430bea63abdfe9af89",
+          "bytes": 7091,
+          "symbol": "apply_trajectory_slot",
+          "start_line": 123,
+          "end_line": 168,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\opendss_backend.py",
+          "sha256": "55ad4be7175088ea24dbb611313635736f182f4d945f6f9b416b2ddec2c29956",
+          "bytes": 6855,
+          "symbol": "run_fresh_opendss",
+          "start_line": 90,
+          "end_line": 154,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r3\\native_actual.py",
+          "sha256": "d22e5cb4d8c4aeed1b76e18b6725794086fe80868d31853554471ffc80e607a8",
+          "bytes": 2347,
+          "symbol": "native_actual",
+          "start_line": 9,
+          "end_line": 44,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_native\\actual.py",
+          "sha256": "70b042aecaa89fc287d919534f90af8f55b12b3a688ead20be9ec3620bf165b9",
+          "bytes": 9906,
+          "symbol": "require_fresh_ac",
+          "start_line": 48,
+          "end_line": 55,
+          "read_scope": "SOURCE_CODE_ONLY",
+          "external_raw_copy_to_git": false
+        }
+      ],
+      "source_artifacts": [
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\Generated_Planning_Line_Ratings_u080.dss",
+          "sha256": "46d492b5b62400d33646089b80105d713250d0790ed7baab85b002d48121f302",
+          "bytes": 6038,
+          "period": "2025-05-01",
+          "units": "metadata",
+          "role": "line_ratings",
+          "authority_status": "FROZEN_SOURCE_REUSED",
+          "read_scope": "PERSISTED_INPUT_LINEAGE_METADATA_ONLY",
+          "value_donor": false
+        }
+      ],
+      "authoritative_fields": [
+        "IEEE123 native master SHA",
+        "runtime electrical adapter",
+        "AIDC01..12 dedicated Load.IDC_IDC01..12 consumption",
+        "same frozen schedule",
+        "forecast or actual background separately"
+      ],
+      "derived_fields": [
+        "independent NewContext compiled feeder",
+        "node-phase voltages and line/transformer checks",
+        "Actual sequential regulator states after D00"
+      ],
+      "units": {
+        "voltage": "pu",
+        "P": "kW",
+        "Q": "kvar",
+        "current": "A and pu",
+        "transformer loading": "kVA pu"
+      },
+      "timezone": "Raw Kestrel aware instant normalized to UTC; operating/control calendar fixed AEST UTC+10",
+      "temporal_resolution": "Fresh engine, 96 SolveSnap calls per trajectory",
+      "causal_cutoff": "DA diagnostic same forecast/frozen schedule; D-Day Actual realized causal inputs; no repair",
+      "April_action": "Construction code only traced, no May optimization/OpenDSS/output arrays read or run; April paths require fresh day-specific generation.",
+      "status": "CODE_LINEAGE_RESOLVED"
+    }
+  ],
+  "source_code": [
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v37\\aidc_materializer.py",
+      "sha256": "64dfd70b9b898cc3c0b870ed0770bb042831a90a64090bc0f55ba7017f1f1022",
+      "bytes": 45569
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\data.py",
+      "sha256": "796fccf3179be61a1ed4f315e41dfc1142f6993de807a9503e3c9b0eed9dd8f4",
+      "bytes": 14153
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_may01\\prepare.py",
+      "sha256": "4f299616c023c508cc03ae065bfabf6241aec8c1729fee6c1a64f87951dfcf44",
+      "bytes": 24242
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\inputs.py",
+      "sha256": "d37f290f01952edc51a69cd8a603038bfe8b7e396dd5d44ea626613372f0b1ee",
+      "bytes": 5526
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\common.py",
+      "sha256": "e21bde3188d1a246dbebfb50262c7722782ff2fa69b7e9b331ff2fba8a9d8a75",
+      "bytes": 8467
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native_inputs.py",
+      "sha256": "bf32fa885007f31265b09fd1511ea3c6543927a8efd5883cace9be8245e9a999",
+      "bytes": 6825
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\runtime.py",
+      "sha256": "86f578f315c39dd0c4e858df5d0ee04a79f16bc2c3d033af4beac7fe9ebd5e2a",
+      "bytes": 3224
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\state.py",
+      "sha256": "0a7723650697869d4c7023a53d2ae9a8444c9859ccf1b11acf17338472ef0e36",
+      "bytes": 5635
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\native.py",
+      "sha256": "6fddb5938544aef952f86cc72e836a46c657ed66a6a594f5d842346900beebba",
+      "bytes": 2257
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r2\\reference.py",
+      "sha256": "9b981c854575a6fe4777e52908be85d2f5edd927c655b8c417b57302c040c075",
+      "bytes": 3979
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_temporal\\native.py",
+      "sha256": "9e93c03217bad5dff2c318a91d760c85d875a05b6b42cc5d5464107000546212",
+      "bytes": 12576
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\c1_affine.py",
+      "sha256": "912c870a2c062431cac60f2157f3b4399ad824119facdafbd7ac3f1788c40c13",
+      "bytes": 6122
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\power_replay.py",
+      "sha256": "cbdcb9196f02d434d80f53d951bae7e43bc68ad44c5f05d3f419e5502fd0aaf2",
+      "bytes": 3241
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\source_cache.py",
+      "sha256": "20dd3c1848ff3a86bff2b19c967f819f219fb32c386eb448af21623dfe3e73a0",
+      "bytes": 1041
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\exogenous.py",
+      "sha256": "5e46ec34e152da8e6c90b8074b3cf8e577db29c119e3c86a0107ecb9925499a3",
+      "bytes": 2670
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\tools\\audit_v40d_actual_replay.py",
+      "sha256": "99558057f12dc7e9f80372a7459210640ed89d22dfb679404cfa329aed2278e0",
+      "bytes": 28151
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_final\\workload.py",
+      "sha256": "10320df9beaa0df89fd0d80b763595ee95fb57eb82f5a3d53ed9373d4517daed",
+      "bytes": 4374
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\v41r4_electrical.py",
+      "sha256": "68306d036e7e364f2b208320e1db58ab906b0c721e5194c77e52377de263294c",
+      "bytes": 3312
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\electrical.py",
+      "sha256": "d9bae02cf0c983cbe032ddd990633cf1b23d6b19c6ebc19325fd76894678fb97",
+      "bytes": 9211
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40i\\electrical.py",
+      "sha256": "dc8df57722410a14a0e30592fe35918cb4dcb4c4b0b0afdfcb189c60c6c591e3",
+      "bytes": 30775
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\electrical.py",
+      "sha256": "e8f2afc6a94c563d518be1ba72e004977bb0fa91ebc5bb54b575b138aff3262e",
+      "bytes": 20897
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_native\\grid.py",
+      "sha256": "1d5c353c1e767cae54520f04ad101e34a95da3d1976d9b449e366400fe78112d",
+      "bytes": 3190
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_native\\planning.py",
+      "sha256": "5ea952c76d015df66f11eedeb9f86d5a41248d5e876e4a126cf61e72f3d701be",
+      "bytes": 3938
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\job_replay.py",
+      "sha256": "28a5b91b1d9dc6753aea7688c41a7ed67e9b8197edfa36ff6d1ed5ab1bdf4009",
+      "bytes": 10444
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\v42_native\\actual.py",
+      "sha256": "70b042aecaa89fc287d919534f90af8f55b12b3a688ead20be9ec3620bf165b9",
+      "bytes": 9906
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40d_actual\\grid_replay.py",
+      "sha256": "26ef0f44d7693a51bcd6de3685b25fb8e77590d56f14813c3ceeda62b0d638f1",
+      "bytes": 2798
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\opendss_mapping.py",
+      "sha256": "7e25e9befd8f80dba8cf1bc8cdba574ad1d77083c3b100430bea63abdfe9af89",
+      "bytes": 7091
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\opendss_backend.py",
+      "sha256": "55ad4be7175088ea24dbb611313635736f182f4d945f6f9b416b2ddec2c29956",
+      "bytes": 6855
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r3\\native_actual.py",
+      "sha256": "d22e5cb4d8c4aeed1b76e18b6725794086fe80868d31853554471ffc80e607a8",
+      "bytes": 2347
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\actual.py",
+      "sha256": "82ad9b01a57fcbca33e9778a8741665626ca763025fa150470e4354551a70fe6",
+      "bytes": 11991
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\actual_dispatch.py",
+      "sha256": "27c4a59e5e237cee45ed4e26ed03eab8368b5e18afea552963cd3377264e82d9",
+      "bytes": 19342
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\execution.py",
+      "sha256": "abc1f40740063662aa9e6436e8c9e352a921ff9945da43eb4a35b16e4d7ccc9c",
+      "bytes": 33686
+    }
+  ],
+  "metadata_reads": [
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\docs\\v42_may01_native_canary\\MAY01_NATIVE_INPUT_MANIFEST.json",
+      "sha256": "beddaf427d31f23de300ddc4ecde6188259f712fd65ecda1ce8f0f477c57571a",
+      "bytes": 33310,
+      "read_scope": "INPUT_CONSTRUCTION_METADATA_ONLY"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\docs\\v42_may01_native_canary\\EXACT_SOURCE_PATH_RECOVERY.json",
+      "sha256": "f996d70b75cb4a4bd122c246d7f4475fad1746e29605e745b259cb5657caf7e2",
+      "bytes": 6756,
+      "read_scope": "INPUT_CONSTRUCTION_METADATA_ONLY"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\e\\20250501\\V41_ELECTRICAL_CERTIFICATE.json",
+      "sha256": "c6b649edc1b2b3e2f324b0e41f939e397bdfcb26b64fff2c7be56d3d27424d35",
+      "bytes": 136903,
+      "read_scope": "INPUT_CONSTRUCTION_METADATA_ONLY"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\audit\\2025-05-01\\INPUT_PREPARATION.json",
+      "sha256": "6587c84a02e638cee1e806b732ee4cb4d86f998ddf073db4486a3e64cbab2d11",
+      "bytes": 4881,
+      "read_scope": "INPUT_CONSTRUCTION_METADATA_ONLY"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_integrated_pr\\docs\\v42_final\\AGGREGATE_BINDING.json",
+      "sha256": "c96f38a7edfdd29b7e5ff3b3e86c3ea1cef4690ae5477717bb31b0b6753d935d",
+      "bytes": 1302,
+      "read_scope": "INPUT_CONSTRUCTION_METADATA_ONLY"
+    }
+  ],
+  "MAY_PIPELINE_USED_AS_BLUEPRINT": true,
+  "MAY_SCIENTIFIC_OUTCOMES_USED_FOR_APRIL": false,
+  "MAY_USED_FOR_MARGIN_CALIBRATION": false,
+  "May_job_value_donation": false,
+  "May_voltages_read": 0,
+  "May_Actual_result_reads": 0,
+  "May_policy_result_reads": 0,
+  "May_calibration_result_reads": 0,
+  "May_optimization_calls": 0,
+  "May_OpenDSS_calls": 0,
+  "scientific_bundle_PASS": false,
+  "unresolved_authority": [
+    "Exact GPU demand for current April rows missing raw request",
+    "Original request version history is unverified Kestrel request-state proxy",
+    "Current concrete per-day native Planning/Actual/OpenDSS adapter binding required after GPU gate"
+  ],
+  "rule_supersessions": [
+    "Historical missing-GPU workload exclusion is forbidden",
+    "Historical requested/rollingQ90 service is replaced by current frozen V10 Q50",
+    "Historical May reference timing/site is replaced by PR121 common scheduler",
+    "Historical known-only Actual is replaced by full observed post-issue population",
+    "Historical native coefficients/AC state are regenerated for April; no May array reuse"
+  ],
+  "historical_Actual_channels": {
+    "physical_replay": "v41.execution.actual -> v41.actual_dispatch.replay_jobs -> v41.actual.replay_jobs; frozen known decision UIDs only, observed residual duration, same-site contention delays",
+    "aggregate_arrival_score": "v41.actual.realized_workload scans D-Day submission IDs and filters positive request/valid observed duration; GPUh/H4 score computed after physical OpenDSS; no individual unknown arrival power reconstruction"
+  }
+}
