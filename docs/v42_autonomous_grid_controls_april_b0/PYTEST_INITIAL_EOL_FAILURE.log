@@ -1,0 +1,73 @@
+........................................................................ [  5%]
+........................................................................ [ 11%]
+........................................................................ [ 17%]
+........................................................................ [ 23%]
+........................................................................ [ 28%]
+........................................................................ [ 34%]
+........................................................................ [ 40%]
+.F...................................................................... [ 46%]
+........................................................................ [ 52%]
+........................................................................ [ 57%]
+........................................................................ [ 63%]
+........................................................................ [ 69%]
+........................................................................ [ 75%]
+........................................................................ [ 81%]
+........................................................................ [ 86%]
+........................................................................ [ 92%]
+........................................................................ [ 98%]
+...................                                                      [100%]
+================================== FAILURES ===================================
+__________________ test_frozen_authorities_and_no_DW_import ___________________
+
+    def test_frozen_authorities_and_no_DW_import():
+        import sys,hashlib
+        d=json.loads((OUT/'LEGACY_PRESERVATION_AUDIT.json').read_text())
+        from v42_voltage.preservation import assert_legacy
+>       assert_legacy(d['files'])
+
+tests\test_v42_root.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+v42_voltage\preservation.py:48: in assert_legacy
+    if actual!=row['sha256']:assert_authorized(row['path'],actual,row['sha256'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'docs/v42_ubuntu_gpu_migration/INTERRUPTED_PROCESS_RECEIPT.json'
+current_sha = '29b4de61d9d449f279d7c5bfa87693b9ca5460aa2ff0d2aad4efeebaf487ddc9'
+previous_sha = '712fa7ddb2a567da7e5ea770ffd8e32223c2e0e1582b1fd64782cce758a9e824'
+
+    def assert_authorized(path,current_sha,previous_sha=None):
+        successor=ROOT/'docs/v42_day_ahead_planning_direct_dday_actual/AUTHORIZED_ARCHITECTURE_SUPERSESSION.json'
+        if path in ARCHITECTURE_CHANGES and successor.is_file():
+            manifest=read(successor)
+            assert manifest['base_head']==ARCHITECTURE_BASE and not manifest['production_execution_authorized']
+            row=next(r for r in manifest['files'] if r['path']==path)
+            assert current_sha==row['current_sha256'],'UNSEALED_CURRENT_CHANGE:'+path
+            assert row['base_sha256']==hashlib.sha256(baseline_blobs()[path]).hexdigest(),'ARCHITECTURE_BASE_HASH:'+path
+            if previous_sha is not None:assert previous_sha in row['historical_sha256'],'BASELINE_HASH_MISMATCH:'+path
+            return
+        # PR108 successor explicitly authorizes only this optional native hook.
+        # Keep old evidence immutable and require the full default-model receipt.
+        successor=ROOT/'docs/v42_m1_relaxation_strengthening/AUTHORIZED_HOOK_SUPERSESSION.json'
+        if path=='v42_native/mess.py' and successor.is_file():
+            row=read(successor)
+            regression=read(ROOT/'docs/v42_m1_relaxation_strengthening/DEFAULT_PATH_REGRESSION.json')
+            assert row['base_head']=='c9233bd9d3977984e6de31e1d2924f10d1287a84'
+            assert row['path']==path and current_sha==row['current_sha256'],'UNSEALED_CURRENT_CHANGE:'+path
+            assert regression['PASS'] and regression['native_source_sha256']==current_sha,'DEFAULT_MODEL_REGRESSION_MISSING'
+            if previous_sha is not None:assert previous_sha in row['historical_sha256'],'BASELINE_HASH_MISMATCH:'+path
+            return
+        audit=read(ROOT/'docs/v42_a1_bootstrap_m1_robust/LEGACY_PRESERVATION_AUDIT.json')
+        changed={r['path']:r for r in audit['authorized_changes']}
+>       assert path in changed,'UNAUTHORIZED_LEGACY_CHANGE:'+path
+E       AssertionError: UNAUTHORIZED_LEGACY_CHANGE:docs/v42_ubuntu_gpu_migration/INTERRUPTED_PROCESS_RECEIPT.json
+
+v42_voltage\preservation.py:39: AssertionError
+============================== warnings summary ===============================
+tests/test_v42_final.py::test_provider_one_live_call_same_known_unknown
+  D:\ChatGPT\Mobile ESS 2\v42_autonomous_grid_controls_pr\v42_final\inference\calibration.py:51: RuntimeWarning: invalid value encountered in log1p
+    out = np.where(u >= hy[-2], np.log1p(np.expm1(target) / last), out)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_v42_root.py::test_frozen_authorities_and_no_DW_import - Ass...
+1 failed, 1242 passed, 1 warning in 90.07s (0:01:30)

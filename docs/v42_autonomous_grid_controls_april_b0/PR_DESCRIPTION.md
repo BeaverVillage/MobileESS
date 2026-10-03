@@ -1,0 +1,9 @@
+PR125 Actual forces Planning tap/cap state in every slot and disables native controls. The requested replacement requires source-backed autonomous regulators and capacitors, but both exact compiler paths contain seven enabled RegControls, four fixed-ON capacitor banks, and **zero CapControls**. There is no capacitor switching law/threshold/delay to enable without adding equipment/settings.
+
+This draft records the user's §25 STOP condition. It adds a reproducible read-only static source audit, complete redirect hashes, all 30 Planning freeze/Actual receipt audits, sequential Planning semantics, intended common April/May/all-arm contract, and explicit NOT_RUN/supersession flags. **It does not implement or activate the correction**, remove the preserved PR125 replay, or produce replacement voltage statistics. April diagnostics/full rerun and May scientific execution remain NOT_RUN. No ad-hoc controller or parameter tuning was introduced.
+
+Validation is recorded in TEST_RECEIPT.json and PYTEST_FULL.log. BASE_BYTE_PRESERVATION.json verifies all 3,560 exact PR125 base files; workload/capacity/physical-power/V_PLAN/old voltage evidence are unchanged. Audit tests do not claim the requested autonomous-control implementation regressions A–Q. The branch has no PR124 imports.
+
+Full pytest includes both `tests` and `contract_tests`. An inherited preservation test hashes Windows CRLF checkout bytes while the exact Git base stores LF. The test runner checks eight temporary EOL variants against those exact historical SHA values, restores original bytes in `finally`, and independently rehashes every base file afterward. No assertions or historical manifests are changed; the initial EOL failure log is retained.
+
+Blocked pending source-backed CapControl definitions/settings for the exact banks, or an explicit revised contract permitting source fixed-ON capacitors with autonomous regulators.
