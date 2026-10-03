@@ -1,4 +1,4 @@
-1. PR / SHA / pytest / clean: Draft PR 생성 후 delivery receipt에 연결. PR133 기준 c26c656265cc90dec39eb2937b76fbea1f2ed500. pytest 1,532 PASS / 1 warning, semantic 34 PASS; 최종 clean 확인 후 전달.
+1. PR / SHA / pytest / clean: [Draft PR #134](https://github.com/BeaverVillage/MobileESS/pull/134) / 코드·실험 검증 SHA 45cd67096de8c402199aeb5fefd5cc342d53aa9f / full 1,532 PASS, 1 warning / semantic 34 PASS / clean 확인. 최종 metadata commit의 HEAD는 PR head SHA와 최종 전달에서 확인한다.
 2. 1 worker / 1 thread: 준수. A1 → M1 build → full LP → reduced LP → M1 P1 → semantic → full pytest 순차. OS 지원 thread는 solver worker가 아니다.
 3. A1 rows/cols/binaries/nnz: 9,133,426 / 7,449,002 / 2,223,230 / 53,767,578; 96 steps, 1,499 jobs.
 4. A1 Method / Threads: 1 / 1. 한 실행, 4개 승인된 기존 P1/P2 순차 optimize; 재시도·sweep 0.
