@@ -1,0 +1,105 @@
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter Threads to value 1
+..............F............FFF...............                            [100%]
+================================== FAILURES ===================================
+_________________ test_11_previous_actual_values_cannot_feed __________________
+
+bounded = {'Actual_calls_for_campaign': 0, 'Fresh_AC_calls_for_campaign': 0, 'all_four_loops_completed': True, 'convergence': [{... True, 'loop': 3, ...}, {'EXACT_FIXED_POINT': True, 'STILL_EVOLVING': False, 'TWO_CYCLE': False, 'loop': 4, ...}], ...}
+
+    def test_11_previous_actual_values_cannot_feed(bounded):
+        assert all(h['Actual_values_included'] is False for h in bounded['handoffs'])
+        for group in ('B3_L2','B3_L3','B3_L4'):
+>           encoded=json.dumps(bounded['state_freezes'][group]['state']);assert '999999' not in encoded and '888' not in encoded and '777' not in encoded
+E           assert ('999999' not in '{"D1_source...6671e4ed7f"}'
+E             
+E             '999999' is contained here:
+E               6799999999999999}, "population_sha256": "e34a68c4f70477cda75a18c2b1acb46f045044592a997c79a031dc6671e4ed7f"}
+E             ?           ++++++)
+
+tests\v42_campaign\test_campaign_authority.py:46: AssertionError
+_____________________ test_raw_actual_reads_blocked[open] _____________________
+
+tmp_path = WindowsPath('C:/Users/Public/Documents/ESTsoft/CreatorTemp/pytest-of-kjw39/pytest-787/test_raw_actual_reads_blocked_0')
+reader = 'open'
+
+    @pytest.mark.parametrize('reader',['open','path','caught'])
+    def test_raw_actual_reads_blocked(tmp_path,reader):
+        entries,_=source_fixture(tmp_path/'D1');actual=tmp_path/'ACTUAL_L1.json';atomic(actual,{'load':999})
+>       guard=PlanningReads(entries,issue_time=ISSUE)
+
+tests\v42_campaign\test_campaign_authority.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <v42_campaign.firewall.PlanningReads object at 0x000002DD3F3D1150>
+entries = [{'available_at': '2025-04-30T11:00:00+10:00', 'key': 'D1', 'kind': 'D1_SOURCE', 'known_at_issue': True, ...}, {'avail...'available_at': '2025-04-30T11:00:00+10:00', 'key': 'Runtime_CC4', 'kind': 'RUNTIME_CC4', 'known_at_issue': True, ...}]
+
+    def __init__(self,entries,*,issue_time):
+        self.entries=entries;self.issue_time=datetime.fromisoformat(issue_time);self.allowed=set();self.attempts=[];self.loaded={};self.before={};self.after={};self.receipt=None
+        for entry in entries:
+            if entry['kind'] not in INPUT_KINDS or entry.get('producer_phase') not in ('D1','PLANNING'):raise PermissionError('ACTUAL_TO_PLANNING_PROVENANCE')
+            if entry.get('kind') in ('D1_SOURCE','FORECAST','RUNTIME_CC4'):
+                if not entry.get('known_at_issue') or datetime.fromisoformat(entry['available_at'])>self.issue_time:raise PermissionError('FUTURE_DDAY_INFORMATION')
+>           if forbidden_path(entry['path']):raise PermissionError('ACTUAL_TO_PLANNING_PATH')
+E           PermissionError: ACTUAL_TO_PLANNING_PATH
+
+v42_campaign\firewall.py:39: PermissionError
+_____________________ test_raw_actual_reads_blocked[path] _____________________
+
+tmp_path = WindowsPath('C:/Users/Public/Documents/ESTsoft/CreatorTemp/pytest-of-kjw39/pytest-787/test_raw_actual_reads_blocked_1')
+reader = 'path'
+
+    @pytest.mark.parametrize('reader',['open','path','caught'])
+    def test_raw_actual_reads_blocked(tmp_path,reader):
+        entries,_=source_fixture(tmp_path/'D1');actual=tmp_path/'ACTUAL_L1.json';atomic(actual,{'load':999})
+>       guard=PlanningReads(entries,issue_time=ISSUE)
+
+tests\v42_campaign\test_campaign_authority.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <v42_campaign.firewall.PlanningReads object at 0x000002DD3F3F49D0>
+entries = [{'available_at': '2025-04-30T11:00:00+10:00', 'key': 'D1', 'kind': 'D1_SOURCE', 'known_at_issue': True, ...}, {'avail...'available_at': '2025-04-30T11:00:00+10:00', 'key': 'Runtime_CC4', 'kind': 'RUNTIME_CC4', 'known_at_issue': True, ...}]
+
+    def __init__(self,entries,*,issue_time):
+        self.entries=entries;self.issue_time=datetime.fromisoformat(issue_time);self.allowed=set();self.attempts=[];self.loaded={};self.before={};self.after={};self.receipt=None
+        for entry in entries:
+            if entry['kind'] not in INPUT_KINDS or entry.get('producer_phase') not in ('D1','PLANNING'):raise PermissionError('ACTUAL_TO_PLANNING_PROVENANCE')
+            if entry.get('kind') in ('D1_SOURCE','FORECAST','RUNTIME_CC4'):
+                if not entry.get('known_at_issue') or datetime.fromisoformat(entry['available_at'])>self.issue_time:raise PermissionError('FUTURE_DDAY_INFORMATION')
+>           if forbidden_path(entry['path']):raise PermissionError('ACTUAL_TO_PLANNING_PATH')
+E           PermissionError: ACTUAL_TO_PLANNING_PATH
+
+v42_campaign\firewall.py:39: PermissionError
+____________________ test_raw_actual_reads_blocked[caught] ____________________
+
+tmp_path = WindowsPath('C:/Users/Public/Documents/ESTsoft/CreatorTemp/pytest-of-kjw39/pytest-787/test_raw_actual_reads_blocked_2')
+reader = 'caught'
+
+    @pytest.mark.parametrize('reader',['open','path','caught'])
+    def test_raw_actual_reads_blocked(tmp_path,reader):
+        entries,_=source_fixture(tmp_path/'D1');actual=tmp_path/'ACTUAL_L1.json';atomic(actual,{'load':999})
+>       guard=PlanningReads(entries,issue_time=ISSUE)
+
+tests\v42_campaign\test_campaign_authority.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <v42_campaign.firewall.PlanningReads object at 0x000002DD3F02A750>
+entries = [{'available_at': '2025-04-30T11:00:00+10:00', 'key': 'D1', 'kind': 'D1_SOURCE', 'known_at_issue': True, ...}, {'avail...'available_at': '2025-04-30T11:00:00+10:00', 'key': 'Runtime_CC4', 'kind': 'RUNTIME_CC4', 'known_at_issue': True, ...}]
+
+    def __init__(self,entries,*,issue_time):
+        self.entries=entries;self.issue_time=datetime.fromisoformat(issue_time);self.allowed=set();self.attempts=[];self.loaded={};self.before={};self.after={};self.receipt=None
+        for entry in entries:
+            if entry['kind'] not in INPUT_KINDS or entry.get('producer_phase') not in ('D1','PLANNING'):raise PermissionError('ACTUAL_TO_PLANNING_PROVENANCE')
+            if entry.get('kind') in ('D1_SOURCE','FORECAST','RUNTIME_CC4'):
+                if not entry.get('known_at_issue') or datetime.fromisoformat(entry['available_at'])>self.issue_time:raise PermissionError('FUTURE_DDAY_INFORMATION')
+>           if forbidden_path(entry['path']):raise PermissionError('ACTUAL_TO_PLANNING_PATH')
+E           PermissionError: ACTUAL_TO_PLANNING_PATH
+
+v42_campaign\firewall.py:39: PermissionError
+=========================== short test summary info ===========================
+FAILED tests/v42_campaign/test_campaign_authority.py::test_11_previous_actual_values_cannot_feed
+FAILED tests/v42_campaign/test_campaign_authority.py::test_raw_actual_reads_blocked[open]
+FAILED tests/v42_campaign/test_campaign_authority.py::test_raw_actual_reads_blocked[path]
+FAILED tests/v42_campaign/test_campaign_authority.py::test_raw_actual_reads_blocked[caught]
+4 failed, 41 passed in 2.07s

@@ -1,0 +1,18 @@
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter Threads to value 1
+Read MPS format model from file C:\Users\kjw39\Documents\Codex\2026-10-03\single-worker-single-thread-a1-m1\SINGLE_THREAD_LOCAL\REDUCED.mps
+Reading time = 8.31 seconds
+V42_NATIVE_M1_copy_copy: 886017 rows, 316743 columns, 8447855 nonzeros
+Set parameter Threads to value 1
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\kjw39\Documents\Codex\2026-10-03\m1-cutpass-loop-campaign-orchestrator\worktree\v42_campaign\postverify.py", line 74, in <module>
+    if __name__=='__main__':run()
+                            ^^^^^
+  File "C:\Users\kjw39\Documents\Codex\2026-10-03\m1-cutpass-loop-campaign-orchestrator\worktree\v42_campaign\postverify.py", line 62, in run
+    rows=np.asarray(m.getAttr('ConstrName'));assert np.array_equal(rows,expected),'ROW_NAMES_IDENTITY_FAILED'
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ROW_NAMES_IDENTITY_FAILED
