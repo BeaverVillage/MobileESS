@@ -1,0 +1,125 @@
+{
+  "NUMERICAL_AUDIT_PASS": true,
+  "PHYSICAL_AUDIT_PASS": true,
+  "numerical": {
+    "NUMERICAL_AUDIT_PASS": true,
+    "stage": "M1",
+    "tolerance": 1e-06,
+    "residuals": {
+      "original_full_row": 3.07292584711405e-08,
+      "original_variable_bound": 0.0,
+      "near_integer": 0.0
+    },
+    "residual_checks": {
+      "original_full_row": true,
+      "original_variable_bound": true,
+      "near_integer": true
+    },
+    "finite": true,
+    "validator": "v42_postsolve.contract.numerical_residuals",
+    "rounding_clipping_repair_calls": 0,
+    "full_unreduced_matrix_audit": {
+      "PASS": true,
+      "finite": true,
+      "max_constraint_violation": 3.07292584711405e-08,
+      "max_bound_violation": 0.0,
+      "max_integrality_violation": 0.0,
+      "objective": 0.6715884801665905
+    },
+    "objective": 0.6715884801665905,
+    "original_full_rows": 961472,
+    "original_variables": 316743
+  },
+  "physical": {
+    "PHYSICAL_AUDIT_PASS": true,
+    "independent_physical_audit": {
+      "PASS": true,
+      "MESS": {
+        "PASS": true,
+        "violations": [],
+        "max_exact_circle_ratio": 0.0,
+        "mobility_energy_kwh": 0.0
+      },
+      "supplement": {
+        "charge_mode_and_connection_PASS": true,
+        "charge_mode_and_connection_violations": []
+      },
+      "grid": {
+        "PASS": true,
+        "maximum_violations": {
+          "voltage": 3.07292584711405e-08,
+          "line_current": 0.0,
+          "transformer_current": 0.0,
+          "transformer_kVA": 0.0
+        },
+        "min_voltage_pu": 0.98202260217481,
+        "max_voltage_pu": 1.0500000146329802,
+        "transformer_current_authority_sha256": "0cffff2af474221a7a5693f3c2b7a83026bd1522de2d3f66032c1757b9735d51",
+        "voltage_band": [
+          0.95,
+          1.05
+        ],
+        "margin_pu": 0.0,
+        "all_transformer_phases_audited": true
+      },
+      "movement_count": 0,
+      "movement_energy": 0,
+      "route": []
+    },
+    "original_unit_grid_audit": {
+      "PASS": true,
+      "maximum_violations": {
+        "voltage": 3.07292584711405e-08,
+        "line_current": 0.0,
+        "transformer_current": 0.0,
+        "transformer_kVA": 0.0
+      },
+      "min_voltage_pu": 0.98202260217481,
+      "max_voltage_pu": 1.0500000146329802,
+      "transformer_current_authority_sha256": "0cffff2af474221a7a5693f3c2b7a83026bd1522de2d3f66032c1757b9735d51",
+      "voltage_band": [
+        0.95,
+        1.05
+      ],
+      "margin_pu": 0.0,
+      "all_transformer_phases_audited": true,
+      "original_units": {
+        "voltage_pu_max_violation": 1.4632980160911302e-08,
+        "transformer_current_A_max_violation": 0.0,
+        "transformer_kVA_max_violation": 0.0
+      }
+    },
+    "physical_limits_changed": false,
+    "A1_fixed_identity": true,
+    "repair_calls": 0,
+    "Fresh_AC": false
+  },
+  "candidate_sha256": "89245b8ae259e82822fcf3ea814f6c626cbda24f3268a9885f1114ad97854437",
+  "primary_semantics": {
+    "PASS": true,
+    "missing_stay_columns": [],
+    "valid_stay_path": true,
+    "movement": 0,
+    "Pch": 0.0,
+    "Pdis": 0.0,
+    "Q": 0.0,
+    "SOC": 760.0,
+    "initial_SOC": 760.0,
+    "terminal_SOC_required": 760.0,
+    "SOC_clipping": false,
+    "route_change_or_repair": false,
+    "all_primary_values_generated_from_new_A1_inputs": true,
+    "old_Start_reads": 0,
+    "independent_route_SOC_PCS_audit": {
+      "PASS": true,
+      "violations": [],
+      "max_exact_circle_ratio": 0.0,
+      "mobility_energy_kwh": 0.0
+    },
+    "charge_mode_and_connection": {
+      "charge_mode_and_connection_PASS": true,
+      "charge_mode_and_connection_violations": []
+    }
+  },
+  "no_repair": true
+}
