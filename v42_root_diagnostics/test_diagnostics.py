@@ -108,15 +108,29 @@ def test_J_K_M_projection_unique_and_only_defining_equalities_removed(original_a
     assert (d['sense'][removedrows]=='=').all() and (d['rhs'][removedrows]==0).all()
     assert (defining@E).nnz==0
     with c.np.load(c.OLD/'ORIGINAL_RECONSTRUCTED_START.npz') as z:x=z['values']
-    full=E@x[keep];audit=a.residual(A,d,full);assert audit['max_row_violation']<=1e-9 and audit['objective']==c.UB
+    raw=E@x[keep];full=a.reconstruct_kept_identity(E,keep,x[keep]);audit=a.residual(A,d,full);assert audit['max_row_violation']<=1e-9 and audit['objective']==c.UB
     from v42_exact_start.common import primary_mask
     mask=primary_mask(d['names']);assert c.np.array_equal(full[mask].view(c.np.uint64),x[mask].view(c.np.uint64))
+    assert c.np.array_equal(full[keep].view(c.np.uint64),x[keep].view(c.np.uint64))
+    differences=mask&(raw.view(c.np.uint64)!=x.view(c.np.uint64))
+    assert c.np.array_equal(raw[mask],x[mask]) and ((raw[differences]==0)&(x[differences]==0)).all()
 
-def test_L_terminal_aux_objective_equivalence():
+def test_L_aux_objective_gate_honestly_unmeasured_after_user_stop():
     r=c.read('AUX_ELIMINATION_DIAGNOSTIC.json')
-    assert r['objective_equivalence_PASS']
+    assert r['objective_equivalence_PASS'] is None and r['objective_equivalence_status']=='NOT_EVALUATED_USER_STOP'
+    assert not r['terminal_objectives'] and all(x['status']=='NOT_RUN' for x in r['arms'].values())
     for x in r['terminal_objectives']:assert abs(x-c.TARGET['original'])<=1e-8
     assert all(x['objective_mapping_difference']<=1e-12 for x in r['mappings'])
+
+def test_user_stop_preserves_interrupted_log_and_prevents_unrun_arm_claims():
+    stop=c.read('USER_STOP_RECEIPT.json');assert stop['completed_arm_count']==8 and stop['never_started_arm_count']==9
+    r=c.read(stop['interrupted_arm']+'.json');assert not r['terminal_optimal'] and not r['basis_available']
+    assert r['Gurobi_terminal_status'] is None and r['solver_runtime'] is None
+    assert c.sha(c.OUT/(r['label']+'.log'))==r['log_sha256']
+    for label in stop['never_started_arms']:
+        assert c.read(label+'.json')['status']=='NOT_RUN'
+        assert not (c.LOCAL/(label+'_OPTIMIZE_STARTED.json')).exists()
+    assert c.read('FINAL_VERDICT.json')['scaling']=='INCONCLUSIVE'
 
 def test_N_O_P_diagnostic_quarantine_tolerances_domains():
     for p in c.OUT.glob('*.json'):

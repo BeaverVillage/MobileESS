@@ -24,7 +24,7 @@ def run():
     methodlevel=min(method.values(),key=order.index)
     scalingmaterial=(scaled['terminal_optimal'] and (not roots['original'][1]['terminal_optimal'] or scaled['solver_runtime']<=.8*roots['original'][1]['solver_runtime']))
     exacts=[int(float(r['count_abs_a_gt_100']))+int(float(r['count_abs_a_lt_1e-12'])) for r in census if r['formulation']=='original'];concentration=max(exacts)/sum(exacts)
-    scaling='STRONGLY_SUPPORTED' if scalingmaterial and concentration>=.5 else 'NOT_SUPPORTED' if not scalingmaterial else 'WEAKLY_SUPPORTED'
+    scaling='INCONCLUSIVE' if scaled['status']=='NOT_RUN' else 'STRONGLY_SUPPORTED' if scalingmaterial and concentration>=.5 else 'NOT_SUPPORTED' if not scalingmaterial else 'WEAKLY_SUPPORTED'
     kappas=[float(b['Kappa']) for b in basis.values() if b['Kappa'] is not None]
     condition='STRONGLY_SUPPORTED' if any(x>=1e12 for x in kappas) else 'WEAKLY_SUPPORTED' if kappas else 'INCONCLUSIVE'
     deg=classify_degeneracy(basis);dupcount=sum(v['redundant_rows_relative_to_first_representative'] for v in duplicates.values())
@@ -51,9 +51,9 @@ def run():
     add('compact continuous expansion','WEAKLY_SUPPORTED',dict(original_continuous=108431,compact_continuous=307417,continuous_delta=198986,columns_delta=96,
         original_nnz=8282350,compact_nnz=12678118,nnz_delta=4395768,nnz_increase_fraction=4395768/8282350,Method1=roots['compact'][1]['solver_runtime'],Method2=roots['compact'][2]['solver_runtime']),
         'Most extra continuous variables are retyped inherited binaries; total columns increase by 96. More nnz is a measured structural burden, not an isolated proof of continuous-variable count causing delay.')
-    add('binary combinatorics','INCONCLUSIVE',dict(original_binaries=208312,compact_binaries=9422,binary_reduction_fraction=1-9422/208312,
+    add('binary combinatorics','NOT_SUPPORTED' if all(not roots[k][1]['terminal_optimal'] for k in roots) else 'INCONCLUSIVE',dict(original_binaries=208312,compact_binaries=9422,binary_reduction_fraction=1-9422/208312,
         root_LPs_all_continuous=True,first_branch_observed={k:v['first_branch_observed'] for k,v in timeline['MIP'].items()}),
-        'Persistent trouble in fully relaxed LP cannot be attributed to tree enumeration. Binary combinatorics after root has not been resolved by this bounded diagnostic.')
+        'NOT_SUPPORTED is scoped to the observed Method1 root bottleneck: every integer variable is already relaxed. Tree combinatorics after root remains INCONCLUSIVE in this bounded diagnostic.')
     add('MIP Start','NOT_SUPPORTED',dict(accepted={k:read(f'MIP_ROOT_METHOD2_{k.upper()}_300S.json')['Start_accepted'] for k in roots},primary_differences={k:read(f'MIP_ROOT_METHOD2_{k.upper()}_300S.json')['accepted_Start_primary_max_difference'] for k in roots},UB=UB),
         'PR126 Start accepted with exact primary identity; the remaining bottleneck occurs after incumbent acceptance. This does not claim Start quality is globally optimal.')
     dump('ROOT_CAUSE_CLASSIFICATION.json',dict(preregistered_rules_sha256=sha(OUT/'PREREGISTRATION.json'),causes=rows,certificate_update=False))
@@ -61,14 +61,15 @@ def run():
     flags=dict(M1_ACCEPTED=False,M1_ROOT_CAUSE_DIAGNOSED=enough,COMPACT_M1_PRODUCTION_AUTHORIZED=False,PRODUCTION_1800S='NOT_RUN',P2='NOT_RUN',A2='NOT_RUN',M2='NOT_RUN',Actual='NOT_RUN',Fresh_AC='NOT_RUN',PROBLEM13_FINAL_VALIDATED=False,Benders_calls=0,new_decompositions=0)
     dump('FINAL_FLAGS.json',flags)
     ranks=[dict(rank=1,cause='Method1 root-LP method sensitivity',classification=methodlevel),dict(rank=2,cause='Grid matrix/factorization burden',classification='STRONGLY_SUPPORTED',limit='Structural burden supported; exclusive causal mechanism remains unresolved'),dict(rank=3,cause='Degeneracy / conditioning mechanism',classification=deg if deg!='INCONCLUSIVE' else condition,limit='Measured basis evidence only; absence of basis leaves INCONCLUSIVE')]
-    verdict=dict(status='DIAGNOSED_WITH_EXPLICIT_LIMITATIONS' if enough else 'INCONCLUSIVE',ranked_causes=ranks,flags=flags,
+    verdict=dict(status='USER_STOPPED_PARTIAL_DIAGNOSIS',scientific_scope='Eight completed arms; basis acquisition interrupted; nine registered arms never started.',
+        stop_receipt=read('USER_STOP_RECEIPT.json'),ranked_causes=ranks,flags=flags,
         certificate=dict(UB=UB,LB=LB,gap=(UB-LB)/UB,unchanged=True,diagnostic_LP_objective_not_adopted=True),Method1=method,scaling=scaling,degeneracy=deg,conditioning=condition,
         compact=dict(binary_reduction_percent=100*(1-9422/208312),nnz_increase_percent=100*4395768/8282350,
-            total_columns_increase=96,continuous_retyping_delta=198986,
+            total_columns_increase=96,continuous_retyping_delta=198890,additional_continuous_columns=96,total_continuous_delta=198986,
             reason_binary_reduction_does_not_remove_root_pathology='Every tested root LP already has all integer variables relaxed. Compact retains the same grid-response block and adds 53.07% nnz through route expressions.',
             branching_advantage='INCONCLUSIVE unless comparative nonroot evidence proves it; neither binary count nor barrier-only speed proves faster branching',
             discard_compact_authorized=False,discard_reason='Root performance does not prove absence of downstream tree benefit; no production Compact adoption either.'),
-        direct_cause_sentence='현재 M1이 느린 가장 직접적인 원인은 같은 LP에서 확인한 Method=1의 진행 지연이며, 이를 만드는 구조적 원인은 큰 grid-response 행렬 부담으로 강하게 지지되지만 degeneracy·conditioning의 구체적 인과관계는 '+('basis 증거 범위에서만 지지된다.' if deg!='INCONCLUSIVE' else 'INCONCLUSIVE이다.'))
+        direct_cause_sentence='현재 M1이 느린 가장 직접적인 원인은 동일 LP에서 재현된 Method=1 root 풀이 지연이며, 이를 만드는 구조적 원인은 INCONCLUSIVE이다.')
     dump('FINAL_VERDICT.json',verdict)
     fix='''# Root cause to exact fix priorities
 
@@ -83,9 +84,22 @@ def run():
 No production fix is executed in this task. Priorities reflect measured structural and method evidence, with detailed phase and degeneracy limitations in ROOT_CAUSE_CLASSIFICATION.json. Physics-invalid isolation copies cannot certify any proposed fix.
 '''
     (OUT/'ROOT_CAUSE_TO_FIX_MAP.md').write_text(fix,encoding='utf8',newline='\n')
+    historical={};hardware=[]
+    for kind in ['original','compact']:
+        path=ROOT/'docs/v42_m1_compact_monolithic'/('ROOT_LP_PRIMAL_'+kind.upper()+'.json');h=json.loads(path.read_text(encoding='utf8'));oldlog=path.with_suffix('.log').read_text(encoding='utf8');newlog=(OUT/f'ROOT_LP_METHOD2_{kind.upper()}.log').read_text(encoding='utf8')
+        cpu=lambda s:next((x for x in s.splitlines() if x.startswith('CPU model:')),None)
+        assert cpu(oldlog)==cpu(newlog) and cpu(newlog) is not None
+        samecore=all(h['settings'][key]==roots[kind][2]['settings'][key] for key in ['Threads','Seed','Method','NumericFocus','FeasibilityTol','OptimalityTol','Crossover','PreDual','BarConvTol'])
+        assert samecore and h['terminal_optimal'] and h['fresh_no_start'];hardware.append(cpu(newlog))
+        historical[kind]=dict(receipt_path=path.relative_to(ROOT).as_posix(),receipt_sha256=sha(path),old_runtime=h['solver_runtime'],new_runtime=roots[kind][2]['solver_runtime'],
+            historical_to_current_runtime_ratio=h['solver_runtime']/roots[kind][2]['solver_runtime'],same_core_solver_policy=samecore,same_CPU_model=True,CPU_model=cpu(newlog),
+            objective_difference=abs(h['objective']-roots[kind][2]['objective']),historical_time_budget=h['settings']['TimeLimit'],current_time_budget=600,
+            historical_resource_snapshot_sha256=sha(path.parent/h['resource_receipt']),comparison_kind='INDICATIVE_HISTORICAL_COMPARISON',current_arm_order_comparison='SEQUENTIAL_SAME_LANE',
+            workload_difference='Snapshots preserved; no claim that historical concurrent workload is identically controlled.')
     dump('RESOURCE_RECEIPT.json',dict(sequential_heavy_lane=True,RESOURCE_CONTENTION_ABSENCE_REQUIRED=False,
         snapshots=[dict(file=p.name,sha256=sha(p),CPU_percent=read(p.name)['CPU_percent'],available_RAM_bytes=read(p.name)['RAM']['available'],active_Python_solver_processes=read(p.name)['active_Python_solver_processes']) for p in sorted(OUT.glob('RESOURCE_*.json')) if p.name!='RESOURCE_RECEIPT.json'],
-        same_hardware_as_PR126=True,Gurobi_Threads=4,BLAS_OpenMP_threads=1,concurrent_independent_work_allowed=True,
+        same_hardware_as_PR126=True,CPU_models=hardware,historical_Method2_LP_comparisons=historical,Gurobi_Threads=4,BLAS_OpenMP_threads=1,concurrent_independent_work_allowed=True,
+        concurrent_read_only_preflight=read('ROW_SCALING_TRANSPORT_PRECHECK.json'),concurrent_guard_cache_preparation='4.2 seconds of non-optimizing sparse-array preparation during Original Method0, disclosed; no concurrent heavy candidate solve',
         comparison_scope='New arms are sequential in one M1 lane. Historical wall-time comparisons are indicative because concurrent workloads may differ; controls/settings differences, including Start and Crossover, are disclosed. No claim of a controlled historical absolute speedup.'))
     return verdict
 
