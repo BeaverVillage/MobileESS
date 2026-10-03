@@ -1,0 +1,20 @@
+{
+  "PASS": true,
+  "scope": "All original integer primary feasible points; continuous P/Q/SOC and grid states unrestricted within original constraints.",
+  "premises": [
+    "Every route arc strictly increases time: stay t->t+1, travel depart<connect. The route graph is acyclic.",
+    "Binary nonnegative arc flow, unit source injection, conservation at all nonterminal nodes and terminal total one imply exactly one source-terminal path. No disconnected flow cycle is possible in a DAG.",
+    "At a slot the selected path traverses exactly one stay arc or is in transit; thus Y is 0 or 1 and at most one stay site is selected.",
+    "Connected nonnegative Pch/Pdis bounds force both to zero at every unselected site.",
+    "Binary d=0 forces every Pch=0; binary d=1 forces every Pdis=0. Each active power is at most Pmax."
+  ],
+  "derivation": {
+    "A1": "d=0 => C=0; d=1 => at most one active site and C<=Pmax. Thus C<=Pmax*d.",
+    "A2": "d=1 => D=0; d=0 => at most one active site and D<=Pmax. Thus D<=Pmax*(1-d).",
+    "A3": "Y=0 => C=D=0. Y=1 => exactly one active site and one direction; C+D<=Pmax."
+  },
+  "projected_equivalence": "Strengthened is original intersected with inequalities satisfied by every original integer feasible point, so both integer primary feasible sets are identical. Identity map in both directions, no auxiliary variables. All objective functions remain pointwise identical.",
+  "transit_P_Q_semantics_unchanged": true,
+  "physics_rating_objective_domain_unchanged": true,
+  "new_binaries": 0
+}

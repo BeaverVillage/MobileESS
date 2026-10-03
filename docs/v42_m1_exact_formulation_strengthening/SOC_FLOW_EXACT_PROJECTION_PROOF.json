@@ -1,0 +1,16 @@
+{
+  "PASS": true,
+  "auxiliary": "e_before[u,k]>=0 continuous, one per existing arc. e_after is a linear expression, not another column.",
+  "perspective_bounds": "Stay: minimum*x <= e_before,e_after <= maximum*x. Travel: e_before-cost*x=e_after; enforce e_before>=outward_down(minimum+cost)*x and e_before<=maximum*x. Outward rounding cannot exclude an original point; original scalar SOC bounds retained verbatim enforce exact primary integer bounds.",
+  "travel_arithmetic": "Travel cost at departure, exactly as original. All intermediate SOC boundaries use e_after until connect.",
+  "stay_arithmetic": "e_after=e_before+dt*eta_charge*Pch-dt/eta_discharge*Pdis at that stay site.",
+  "node_conservation": "Sum outgoing e_before minus sum incoming e_after is initial energy only at the unit source; zero at every other nonterminal node.",
+  "scalar_projection": "SOC[t]=sum outgoing e_before at site nodes plus e_after for earlier departing, unconnected movement arcs. At H use incoming e_after.",
+  "original_to_extended": "An original integer path defines e_before=SOC[depart] on selected arcs and zero on all other arcs. Connected powers vanish off path. Original energy balance, initial/terminal and bounds imply all new rows. Movement intermediate SOC is constant after departure. Thus every original primary point extends.",
+  "extended_to_original": "Every original constraint is retained verbatim, and original binary columns retain bounds/types. Projection therefore lies in original feasible set.",
+  "objective_equivalence": "All original P1/P2 coefficients and constants unchanged; every auxiliary objective coefficient is zero. Objective levels are identical on the common primary projection.",
+  "binary_semantics_identical": true,
+  "added_binaries": 0,
+  "no_route_pruning": true,
+  "no_changed_physics": true
+}

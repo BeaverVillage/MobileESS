@@ -1,0 +1,25 @@
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter Threads to value 1
+Read MPS format model from file C:\Users\kjw39\Documents\Codex\2026-10-03\single-worker-single-thread-a1-m1\SINGLE_THREAD_LOCAL\REDUCED.mps
+Reading time = 7.58 seconds
+V42_NATIVE_M1_copy_copy: 886017 rows, 316743 columns, 8447855 nonzeros
+Set parameter LogToConsole to value 0
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\kjw39\OneDrive\����\ChatGPT\Mobile ESS 2\work\m1-exact-formulation-strengthening\v42_strengthening\lp.py", line 75, in <module>
+    if __name__=='__main__':stage_A()
+                            ^^^^^^^^^
+  File "C:\Users\kjw39\OneDrive\����\ChatGPT\Mobile ESS 2\work\m1-exact-formulation-strengthening\v42_strengthening\lp.py", line 70, in stage_A
+    result=evaluate('CUT_A_ROOT',lambda m:add_A(m,sites,initial,battery.p_limit))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\OneDrive\����\ChatGPT\Mobile ESS 2\work\m1-exact-formulation-strengthening\v42_strengthening\lp.py", line 40, in evaluate
+    m.Params.LogFile=str(OUT/(label+'.log'))
+    ^^^^^^^^^^^^^^^^
+  File "src/gurobipy/param.pxi", line 287, in gurobipy._core.ParamClass.__setattr__
+  File "src/gurobipy/env.pxi", line 412, in gurobipy._core.Env.setParam
+  File "src/gurobipy/env.pxi", line 309, in gurobipy._core.Env.__setone
+gurobipy._exception.GurobiError: Unable to write file
+Warning: Failed to open log file 'C:\Users\kjw39\OneDrive\문서\ChatGPT\Mobile ESS 2\work\m1-exact-formulation-strengthening\docs\v42_m1_exact_formulation_strengthening\CUT_A_ROOT.log'

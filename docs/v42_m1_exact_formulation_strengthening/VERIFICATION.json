@@ -1,0 +1,133 @@
+{
+  "PASS": true,
+  "PASS_scope": "Identity, exact validity/projection, execution discipline and regressions. Material strengthening success is separately false.",
+  "base_exact_head": "37ffd404e7d0d598ddb84fec084e3ac332ed99c0",
+  "SEMANTIC": {
+    "PASS": true,
+    "exit_code": 0,
+    "passed": 108,
+    "runtime_seconds": 28.74,
+    "warnings": 0,
+    "native_exception_traces": 8,
+    "native_exception_traces_preserved": true,
+    "log_SHA": "a2e0b9a1781055c9de304792360a1bf19f478ceb733cfdb9b5cc1df0bb4baaea",
+    "one_process": true,
+    "Threads": 1,
+    "test_optimization_calls": 2,
+    "nonoverlapping": true
+  },
+  "FULL": {
+    "PASS": true,
+    "exit_code": 0,
+    "passed": 1628,
+    "runtime_seconds": 95.95,
+    "warnings": 1,
+    "native_exception_traces": 8,
+    "native_exception_traces_preserved": true,
+    "log_SHA": "7183a506eaf43919495cf135707f2811522249bd2f34b0141418482663f53ec6",
+    "one_process": true,
+    "Threads": 1,
+    "test_optimization_calls": 368,
+    "nonoverlapping": true
+  },
+  "required_regressions": {
+    "PR136_scientific_M1_identity": true,
+    "A1_freeze": true,
+    "NormalAmps": true,
+    "zero_margin": true,
+    "P1_P2_objectives_unchanged": true,
+    "integer_primary_projection_equivalent": true,
+    "A_exhaustive_fixtures": true,
+    "SOC_envelope_DP_exhaustive_route_test": true,
+    "SOC_flow_symbolic_and_native_projection": true,
+    "no_new_binary": true,
+    "no_route_domain_pruning": true,
+    "selected_root_objective_at_least_baseline": true,
+    "campaign_order": true,
+    "Actual_feedback_firewall": true,
+    "B3_four_loops": true,
+    "May_production_calls_zero": true
+  },
+  "original_tracked_bytes_preserved": true,
+  "source_assets_final_SHAs_preserved": true,
+  "cold_model_identity_PASS": true,
+  "compile_PASS": true,
+  "git_diff_check_PASS": true,
+  "scientific_LP_optimization_calls": 3,
+  "baseline_LP_optimization_calls": 0,
+  "MIP_canary_optimization_calls": 0,
+  "production_MIP_1800_calls": 0,
+  "campaign_optimizer_calls": 0,
+  "campaign_Actual_calls": 0,
+  "campaign_Fresh_AC_calls": 0,
+  "source_files": [
+    {
+      "path": "v42_strengthening/analysis.py",
+      "sha256": "a963dd49e1dafcd459681c3478a72533e31b30b9405934faacef17d67b351f50"
+    },
+    {
+      "path": "v42_strengthening/common.py",
+      "sha256": "89be26169b8624a80ec3ed36dc6f23fc49a5c5e35ae1b05b3f20effcae4aa87e"
+    },
+    {
+      "path": "v42_strengthening/cuts.py",
+      "sha256": "3b916718e760e08544824ff6445fe01d9b4a85bb80cadb2ca022d2ef62d86177"
+    },
+    {
+      "path": "v42_strengthening/envelopes.py",
+      "sha256": "6781587a1520957c72e950547d8e94f07f353d822cb706795a8f95f4a7095e44"
+    },
+    {
+      "path": "v42_strengthening/finalize.py",
+      "sha256": "bcba91bf3c8ef66ed6f6758829251626d72948a446b349a416944687dcbaea8d"
+    },
+    {
+      "path": "v42_strengthening/flow.py",
+      "sha256": "b916bd53bcb82d9f0b737f249634d0c55063533b23d70c8620e49309a5da6df9"
+    },
+    {
+      "path": "v42_strengthening/lp.py",
+      "sha256": "57a7131da3d11b91c08f8ec101c8b4594c86a727a437ba6234385c1c72b21805"
+    },
+    {
+      "path": "v42_strengthening/postprocess.py",
+      "sha256": "f2e35b15b17e8839b7a559b7bbd4f570c9683bc1b2a98a27d3c311a49237fd98"
+    },
+    {
+      "path": "v42_strengthening/preservation.py",
+      "sha256": "5375e1cd99180d1845161c4647e39eb95eb0c84dcb4f0225c4fcd9dd0ea09c53"
+    },
+    {
+      "path": "v42_strengthening/prototype.py",
+      "sha256": "b227e644cf253d0bd62b9980b9a2356e4e279fd349be5c783610995cff4592ab"
+    },
+    {
+      "path": "v42_strengthening/resources.py",
+      "sha256": "960599784b42c7f0c91cc0fc178fa8ecf6de9b35103609934ddfb80218bfba51"
+    },
+    {
+      "path": "v42_strengthening/selection.py",
+      "sha256": "7b0af2d4c63c11fac965f14e8df41c9769cad8ba5e089c80556fb824b16f0002"
+    },
+    {
+      "path": "v42_strengthening/testing.py",
+      "sha256": "1294e7f5802180c9d5b4272e4a71b24ac49356976d6f9c5c95a91255e1dc957a"
+    },
+    {
+      "path": "v42_strengthening/__init__.py",
+      "sha256": "afa8537e2f77c65c153ba85aca7c2d009b5f14bd2690a1369bb5ecc7aa58a60c"
+    },
+    {
+      "path": "tests/v42_strengthening/test_exact_strengthening.py",
+      "sha256": "0674e07bc13f1f5d50ef1b680ad6b6f955f563d8e9835b32dde01e14d4f3227f"
+    }
+  ],
+  "no_parameter_sweep": true,
+  "no_added_experiments": true,
+  "environment": {
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1"
+  }
+}
