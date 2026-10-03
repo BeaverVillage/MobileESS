@@ -1,4 +1,4 @@
-1. PR / SHA / tests / clean: Draft PR 게시 대기; scientific commit 첫 결과 commit 이후 기록. Semantic 108 PASS, full pytest 1628 PASS. git diff --check PASS. 최종 metadata commit 뒤 remote HEAD와 clean tree는 최종 응답에서 확인한다.
+1. PR / SHA / tests / clean: https://github.com/BeaverVillage/MobileESS/pull/137; scientific commit f438481d4fc631ae632cfcd5c436b0bd72b4cfc1. Semantic 108 PASS, full pytest 1628 PASS. git diff --check PASS. 최종 metadata commit 뒤 remote HEAD와 clean tree는 최종 응답에서 확인한다.
 2. Baseline M1 identity PASS: PR136 exact `37ffd404e7d0d598ddb84fec084e3ac332ed99c0`. Matrix/RHS/senses/bounds/types/objective/column names/native row names와 A1 freeze/NormalAmps/source SHA를 동결하고 최종 cold import로 재검사했다.
 3. Baseline root LB: 0.5687116103498322. 재사용 continuous primal objective는 0.5687116107773678로 reference와 4.28e-10 차이이며 모델/전수 row audit를 통과했다. Fresh baseline optimize=0.
 4. Total fractional binaries: 138,644/208,312. Fractionality mass 498.822150738; 모든 binary에 sum min(x,1-x)를 적용했다.
