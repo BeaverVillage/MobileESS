@@ -1,0 +1,57 @@
+{
+  "reason": "Correct A1 solver selection back to inherited automatic choice. Method=2 is M1-specific; no parameter sweep or speedup comparison.",
+  "worker_PID": 77356,
+  "worker_present": false,
+  "observed_after_stop_UTC": "2026-10-03T05:36:58.385896+00:00",
+  "partial_log_sha256": "2394c31c76daaf4e11ee71593e2944733d2519674b5490489a51a3636b1e699d",
+  "last_live": {
+    "component": "rho",
+    "runtime": 345.57999992370605,
+    "completed_passes": 0
+  },
+  "last_saved_pre_stop_resource": {
+    "utc": "2026-10-03T05:32:16.875901+00:00",
+    "CPU_utilization_percent": 44.3,
+    "logical_cores": 16,
+    "available_logical_cores": 16,
+    "RAM_used_bytes": 29518995456,
+    "RAM_free_bytes": 4530225152,
+    "swap_total_bytes": 21374541824,
+    "swap_used_bytes": 2863456256,
+    "swap_in_bytes": 0,
+    "swap_out_bytes": 0,
+    "active_Python_solver_processes": [
+      {
+        "pid": 66372,
+        "name": "python.exe",
+        "command_line": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-c",
+          "from v42_integrated.resources import snapshot; from v42_integrated.governance import write; a=snapshot(); write('A1_RESOURCE_CHECK_PRESOLVED.json',a); print(a['RAM_free_bytes'],a['swap_used_bytes'],a['CPU_utilization_percent']); print(a['active_Python_solver_processes'])"
+        ],
+        "cpu_percent": 0.0,
+        "RSS_bytes": 27541504
+      },
+      {
+        "pid": 77356,
+        "name": "python.exe",
+        "command_line": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-u",
+          "-m",
+          "v42_integrated.a1"
+        ],
+        "cpu_percent": 0.0,
+        "RSS_bytes": 18918957056
+      }
+    ],
+    "RESOURCE_CONTENTION_ABSENCE_REQUIRED": false,
+    "independent_parallel_work_allowed": true,
+    "integrated_heavy_lane": "SEQUENTIAL",
+    "BLAS_OpenMP_threads": 1
+  },
+  "terminal_solve": false,
+  "A1_accepted": false,
+  "M1_calls": 0,
+  "executed_a1_source_sha256": "7d338d1a1590f6bfcfc5242e76141239763beaf4e5a5994618394a8939e469fd"
+}

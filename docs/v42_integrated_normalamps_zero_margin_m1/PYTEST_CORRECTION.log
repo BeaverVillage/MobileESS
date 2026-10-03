@@ -1,0 +1,225 @@
+................................................................F....... [ 24%]
+..................................................................F..... [ 49%]
+..F....FF............................................................... [ 74%]
+.......F................................................................ [ 98%]
+...                                                                      [100%]
+================================== FAILURES ===================================
+__________________________ test_pr99_bytes_preserved __________________________
+
+    def test_pr99_bytes_preserved():
+        from v42_voltage.preservation import assert_legacy
+>       assert_legacy(read(OUT/'LEGACY_PRESERVATION_AUDIT.json')['files'])
+
+tests\test_v42_exact.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+v42_voltage\preservation.py:52: in assert_legacy
+    if actual!=row['sha256']:assert_authorized(row['path'],actual,row['sha256'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'README.md'
+current_sha = '3a995add43c012f76f94a7fc194177708de8a6acb4d86020ce1c864c69d5b2ef'
+previous_sha = '532527475735809aba79536502ced2790520f738f687532cad531b869f6986be'
+
+    def assert_authorized(path,current_sha,previous_sha=None):
+        from v42_integrated.supersession import assert_successor as integrated_successor
+        if integrated_successor(path,current_sha,previous_sha):return
+        from v42_thermal.supersession import assert_successor
+        if assert_successor(path,current_sha,previous_sha):return
+        successor=ROOT/'docs/v42_day_ahead_planning_direct_dday_actual/AUTHORIZED_ARCHITECTURE_SUPERSESSION.json'
+        if path in ARCHITECTURE_CHANGES and successor.is_file():
+            manifest=read(successor)
+            assert manifest['base_head']==ARCHITECTURE_BASE and not manifest['production_execution_authorized']
+            row=next(r for r in manifest['files'] if r['path']==path)
+>           assert current_sha==row['current_sha256'],'UNSEALED_CURRENT_CHANGE:'+path
+E           AssertionError: UNSEALED_CURRENT_CHANGE:README.md
+
+v42_voltage\preservation.py:26: AssertionError
+__________________ test_frozen_authorities_and_no_DW_import ___________________
+
+    def test_frozen_authorities_and_no_DW_import():
+        import sys,hashlib
+        d=json.loads((OUT/'LEGACY_PRESERVATION_AUDIT.json').read_text())
+        from v42_voltage.preservation import assert_legacy
+>       assert_legacy(d['files'])
+
+tests\test_v42_root.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+v42_voltage\preservation.py:52: in assert_legacy
+    if actual!=row['sha256']:assert_authorized(row['path'],actual,row['sha256'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'README.md'
+current_sha = '3a995add43c012f76f94a7fc194177708de8a6acb4d86020ce1c864c69d5b2ef'
+previous_sha = '532527475735809aba79536502ced2790520f738f687532cad531b869f6986be'
+
+    def assert_authorized(path,current_sha,previous_sha=None):
+        from v42_integrated.supersession import assert_successor as integrated_successor
+        if integrated_successor(path,current_sha,previous_sha):return
+        from v42_thermal.supersession import assert_successor
+        if assert_successor(path,current_sha,previous_sha):return
+        successor=ROOT/'docs/v42_day_ahead_planning_direct_dday_actual/AUTHORIZED_ARCHITECTURE_SUPERSESSION.json'
+        if path in ARCHITECTURE_CHANGES and successor.is_file():
+            manifest=read(successor)
+            assert manifest['base_head']==ARCHITECTURE_BASE and not manifest['production_execution_authorized']
+            row=next(r for r in manifest['files'] if r['path']==path)
+>           assert current_sha==row['current_sha256'],'UNSEALED_CURRENT_CHANGE:'+path
+E           AssertionError: UNSEALED_CURRENT_CHANGE:README.md
+
+v42_voltage\preservation.py:26: AssertionError
+______________________ test_base_2054_and_789_preserved _______________________
+
+    def test_base_2054_and_789_preserved():
+>       r=read('PR116_BASE_RECEIPT.json');assert assert_snapshot(r['files'])
+
+tests\v42_benders_fullscale\test_fullscale_orchestration.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+v42_voltage\preservation.py:92: in assert_snapshot
+    if current not in variants:assert_authorized(path,sha(ROOT/path),row['sha256'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'README.md'
+current_sha = '3a995add43c012f76f94a7fc194177708de8a6acb4d86020ce1c864c69d5b2ef'
+previous_sha = '532527475735809aba79536502ced2790520f738f687532cad531b869f6986be'
+
+    def assert_authorized(path,current_sha,previous_sha=None):
+        from v42_integrated.supersession import assert_successor as integrated_successor
+        if integrated_successor(path,current_sha,previous_sha):return
+        from v42_thermal.supersession import assert_successor
+        if assert_successor(path,current_sha,previous_sha):return
+        successor=ROOT/'docs/v42_day_ahead_planning_direct_dday_actual/AUTHORIZED_ARCHITECTURE_SUPERSESSION.json'
+        if path in ARCHITECTURE_CHANGES and successor.is_file():
+            manifest=read(successor)
+            assert manifest['base_head']==ARCHITECTURE_BASE and not manifest['production_execution_authorized']
+            row=next(r for r in manifest['files'] if r['path']==path)
+>           assert current_sha==row['current_sha256'],'UNSEALED_CURRENT_CHANGE:'+path
+E           AssertionError: UNSEALED_CURRENT_CHANGE:README.md
+
+v42_voltage\preservation.py:26: AssertionError
+______________ test_recourse_receives_exact_persisted_candidate _______________
+
+env = <gurobipy.Env, Parameter changes: LicenseID=2845475, OutputFlag=0>
+tmp_path = WindowsPath('C:/Users/Public/Documents/ESTsoft/CreatorTemp/pytest-of-kjw39/pytest-771/test_recourse_receives_exact_p0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001A18853E390>
+
+    def test_recourse_receives_exact_persisted_candidate(env,tmp_path,monkeypatch):
+        import v42_benders_fullscale.controller as c
+        from v42_benders_v2.recourse import Recourse
+        m=build(env,'A');n=from_model(m);seen=[];original=Recourse.solve
+        def checked(self,x,seconds):
+            index=len(seen);values,r=load(tmp_path,index,n)
+            assert np.array_equal(x,values) and r['persisted_before_recourse'] and r['master_settings']['Threads']==1
+            seen.append(r['vector_sha256']);return original(self,x,seconds)
+        monkeypatch.setattr(Recourse,'solve',checked)
+        # Small synthetic fixture only; never reopen the inherited native gate.
+        monkeypatch.setattr(c,'scope_before_solve',lambda:assert_snapshot(read('PR116_BASE_RECEIPT.json')['files']))
+        monkeypatch.setattr(c,'snapshot',lambda:dict(other_heavy_solve=False))
+>       r,_=c.loop(n,env=env,directory=tmp_path,stage='PILOT',validate=lambda z:dict(PASS=n.residual(z[n.xi],z[n.yi])<=1e-7),max_evaluations=2)
+
+tests\v42_benders_fullscale\test_fullscale_orchestration.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+v42_benders_fullscale\controller.py:50: in loop
+    scope_before_solve();feasibility=stage in ['PILOT','FULL_B3'];master=gp.Model(stage+'_EXACT_MASTER',env=env)
+tests\v42_benders_fullscale\test_fullscale_orchestration.py:60: in <lambda>
+    monkeypatch.setattr(c,'scope_before_solve',lambda:assert_snapshot(read('PR116_BASE_RECEIPT.json')['files']))
+v42_voltage\preservation.py:92: in assert_snapshot
+    if current not in variants:assert_authorized(path,sha(ROOT/path),row['sha256'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'README.md'
+current_sha = '3a995add43c012f76f94a7fc194177708de8a6acb4d86020ce1c864c69d5b2ef'
+previous_sha = '532527475735809aba79536502ced2790520f738f687532cad531b869f6986be'
+
+    def assert_authorized(path,current_sha,previous_sha=None):
+        from v42_integrated.supersession import assert_successor as integrated_successor
+        if integrated_successor(path,current_sha,previous_sha):return
+        from v42_thermal.supersession import assert_successor
+        if assert_successor(path,current_sha,previous_sha):return
+        successor=ROOT/'docs/v42_day_ahead_planning_direct_dday_actual/AUTHORIZED_ARCHITECTURE_SUPERSESSION.json'
+        if path in ARCHITECTURE_CHANGES and successor.is_file():
+            manifest=read(successor)
+            assert manifest['base_head']==ARCHITECTURE_BASE and not manifest['production_execution_authorized']
+            row=next(r for r in manifest['files'] if r['path']==path)
+>           assert current_sha==row['current_sha256'],'UNSEALED_CURRENT_CHANGE:'+path
+E           AssertionError: UNSEALED_CURRENT_CHANGE:README.md
+
+v42_voltage\preservation.py:26: AssertionError
+____________________ test_cut_then_new_candidate_or_proof _____________________
+
+env = <gurobipy.Env, Parameter changes: LicenseID=2845475, OutputFlag=0>
+tmp_path = WindowsPath('C:/Users/Public/Documents/ESTsoft/CreatorTemp/pytest-of-kjw39/pytest-771/test_cut_then_new_candidate_or0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001A1882ADBD0>
+
+    def test_cut_then_new_candidate_or_proof(env,tmp_path,monkeypatch):
+        import v42_benders_fullscale.controller as c
+        monkeypatch.setattr(c,'snapshot',lambda:dict(other_heavy_solve=False))
+        monkeypatch.setattr(c,'scope_before_solve',lambda:assert_snapshot(read('PR116_BASE_RECEIPT.json')['files']))
+        m=build(env,'B');n=from_model(m)
+>       r,_=c.loop(n,env=env,directory=tmp_path,stage='PILOT',validate=lambda z:dict(PASS=False),max_evaluations=2)
+
+tests\v42_benders_fullscale\test_fullscale_orchestration.py:73: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+v42_benders_fullscale\controller.py:50: in loop
+    scope_before_solve();feasibility=stage in ['PILOT','FULL_B3'];master=gp.Model(stage+'_EXACT_MASTER',env=env)
+tests\v42_benders_fullscale\test_fullscale_orchestration.py:71: in <lambda>
+    monkeypatch.setattr(c,'scope_before_solve',lambda:assert_snapshot(read('PR116_BASE_RECEIPT.json')['files']))
+v42_voltage\preservation.py:92: in assert_snapshot
+    if current not in variants:assert_authorized(path,sha(ROOT/path),row['sha256'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'README.md'
+current_sha = '3a995add43c012f76f94a7fc194177708de8a6acb4d86020ce1c864c69d5b2ef'
+previous_sha = '532527475735809aba79536502ced2790520f738f687532cad531b869f6986be'
+
+    def assert_authorized(path,current_sha,previous_sha=None):
+        from v42_integrated.supersession import assert_successor as integrated_successor
+        if integrated_successor(path,current_sha,previous_sha):return
+        from v42_thermal.supersession import assert_successor
+        if assert_successor(path,current_sha,previous_sha):return
+        successor=ROOT/'docs/v42_day_ahead_planning_direct_dday_actual/AUTHORIZED_ARCHITECTURE_SUPERSESSION.json'
+        if path in ARCHITECTURE_CHANGES and successor.is_file():
+            manifest=read(successor)
+            assert manifest['base_head']==ARCHITECTURE_BASE and not manifest['production_execution_authorized']
+            row=next(r for r in manifest['files'] if r['path']==path)
+>           assert current_sha==row['current_sha256'],'UNSEALED_CURRENT_CHANGE:'+path
+E           AssertionError: UNSEALED_CURRENT_CHANGE:README.md
+
+v42_voltage\preservation.py:26: AssertionError
+__________________ test_preserved_bytes_and_bounded_receipt ___________________
+
+    def test_preserved_bytes_and_bounded_receipt():
+        r=read('PR115_BASE_RECEIPT.json');assert r['base']==BASE and r['tracked_files']==1615
+        from v42_voltage.preservation import assert_snapshot
+>       assert assert_snapshot(r['files'])
+
+tests\v42_benders_v2\test_v42_native_recourse.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+v42_voltage\preservation.py:92: in assert_snapshot
+    if current not in variants:assert_authorized(path,sha(ROOT/path),row['sha256'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'README.md'
+current_sha = '3a995add43c012f76f94a7fc194177708de8a6acb4d86020ce1c864c69d5b2ef'
+previous_sha = '532527475735809aba79536502ced2790520f738f687532cad531b869f6986be'
+
+    def assert_authorized(path,current_sha,previous_sha=None):
+        from v42_integrated.supersession import assert_successor as integrated_successor
+        if integrated_successor(path,current_sha,previous_sha):return
+        from v42_thermal.supersession import assert_successor
+        if assert_successor(path,current_sha,previous_sha):return
+        successor=ROOT/'docs/v42_day_ahead_planning_direct_dday_actual/AUTHORIZED_ARCHITECTURE_SUPERSESSION.json'
+        if path in ARCHITECTURE_CHANGES and successor.is_file():
+            manifest=read(successor)
+            assert manifest['base_head']==ARCHITECTURE_BASE and not manifest['production_execution_authorized']
+            row=next(r for r in manifest['files'] if r['path']==path)
+>           assert current_sha==row['current_sha256'],'UNSEALED_CURRENT_CHANGE:'+path
+E           AssertionError: UNSEALED_CURRENT_CHANGE:README.md
+
+v42_voltage\preservation.py:26: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_v42_exact.py::test_pr99_bytes_preserved - AssertionError: U...
+FAILED tests/test_v42_root.py::test_frozen_authorities_and_no_DW_import - Ass...
+FAILED tests/v42_benders_fullscale/test_fullscale_orchestration.py::test_base_2054_and_789_preserved
+FAILED tests/v42_benders_fullscale/test_fullscale_orchestration.py::test_recourse_receives_exact_persisted_candidate
+FAILED tests/v42_benders_fullscale/test_fullscale_orchestration.py::test_cut_then_new_candidate_or_proof
+FAILED tests/v42_benders_v2/test_v42_native_recourse.py::test_preserved_bytes_and_bounded_receipt
+6 failed, 285 passed in 49.91s

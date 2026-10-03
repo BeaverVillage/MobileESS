@@ -1,0 +1,60 @@
+{
+  "reason": "Actual native Gurobi memory allocation failure, error 10001; not mere presence of another worker",
+  "heavy_retry_after_error": 0,
+  "M1_calls": 0,
+  "source_error": {
+    "status": "NATIVE_OUT_OF_MEMORY",
+    "error_code": 10001,
+    "error_message": "GurobiError: Out of memory",
+    "log_terminal_runtime_seconds": 518.37,
+    "last_callback_runtime_seconds": 494.46799993515015,
+    "scientific_UB": null,
+    "scientific_LB": null,
+    "scientific_gap": null,
+    "root_relaxation_log_objective_rounded": 0.6715917,
+    "root_relaxation_reported_seconds": 104.98,
+    "heuristic_log_proposal_rounded": 0.6715917,
+    "heuristic_proposal_not_retained": true,
+    "terminal_log_solution_count": 0,
+    "physical_feasibility_proven": false,
+    "infeasibility_proven": false,
+    "A1_ACCEPTED": false,
+    "M1_run": false,
+    "domain_shortened": false,
+    "constraints_relaxed": false,
+    "authority_SHA": "0cffff2af474221a7a5693f3c2b7a83026bd1522de2d3f66032c1757b9735d51",
+    "log_sha256": "e8fdc2e26db872963512c960d762f87a6f0a26955910b9a8caeca16db0f7cefb",
+    "observed_after_exit_UTC": "2026-10-03T05:51:59Z",
+    "termination_time_exact_not_observed": true
+  },
+  "after_stop": {
+    "utc": "2026-10-03T05:54:57.824556+00:00",
+    "CPU_utilization_percent": 6.2,
+    "logical_cores": 16,
+    "available_logical_cores": 16,
+    "RAM_used_bytes": 10788601856,
+    "RAM_free_bytes": 23260618752,
+    "swap_total_bytes": 8934019072,
+    "swap_used_bytes": 1604542464,
+    "swap_in_bytes": 0,
+    "swap_out_bytes": 0,
+    "active_Python_solver_processes": [
+      {
+        "pid": 53268,
+        "name": "python.exe",
+        "command_line": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-"
+        ],
+        "cpu_percent": 0.0,
+        "RSS_bytes": 28356608
+      }
+    ],
+    "RESOURCE_CONTENTION_ABSENCE_REQUIRED": false,
+    "independent_parallel_work_allowed": true,
+    "integrated_heavy_lane": "SEQUENTIAL",
+    "BLAS_OpenMP_threads": 1
+  },
+  "known_concurrent_work": "Full pytest and small semantic fixtures overlapped parts of A1; no candidate recourse comparison or speedup claim",
+  "RESOURCE_CONTENTION_ABSENCE_REQUIRED": false
+}

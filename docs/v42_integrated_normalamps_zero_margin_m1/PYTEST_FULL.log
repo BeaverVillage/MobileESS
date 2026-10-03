@@ -1,0 +1,355 @@
+.FFF........F.F.......F........F........................................ [  4%]
+........................................................................ [  9%]
+........................................................................ [ 14%]
+.........................................................F.............. [ 18%]
+........................................................................ [ 23%]
+........................................................................ [ 28%]
+........................................................................ [ 33%]
+........................................................................ [ 37%]
+..................F..................................................... [ 42%]
+........................................................................ [ 47%]
+........................................................................ [ 51%]
+........................................................................ [ 56%]
+........................................................................ [ 61%]
+..................................................F....FF............... [ 66%]
+.......................................................F................ [ 70%]
+........................................................................ [ 75%]
+........................................................................ [ 80%]
+........................................................................ [ 85%]
+........................................................................ [ 89%]
+........................................................................ [ 94%]
+.................F...................................................... [ 99%]
+............                                                             [100%]
+================================== FAILURES ===================================
+________________________ test_explicit_stage_bands[M1] ________________________
+
+stage = <Stage.M1: 'M1'>
+
+    @pytest.mark.parametrize('stage',list(Stage))
+    def test_explicit_stage_bands(stage):
+        v=voltage_for(stage)
+        expected=(.95,1.05) if stage in (Stage.A1,Stage.ACTUAL) else (.955,1.045)
+>       assert (v.lower_pu,v.upper_pu)==expected
+E       assert (0.95, 1.05) == (0.955, 1.045)
+E         
+E         At index 0 diff: 0.95 != 0.955
+E         Use -v to get more diff
+
+contract_tests\test_bootstrap_robust.py:12: AssertionError
+________________________ test_explicit_stage_bands[A2] ________________________
+
+stage = <Stage.A2: 'A2'>
+
+    @pytest.mark.parametrize('stage',list(Stage))
+    def test_explicit_stage_bands(stage):
+        v=voltage_for(stage)
+        expected=(.95,1.05) if stage in (Stage.A1,Stage.ACTUAL) else (.955,1.045)
+>       assert (v.lower_pu,v.upper_pu)==expected
+E       assert (0.95, 1.05) == (0.955, 1.045)
+E         
+E         At index 0 diff: 0.95 != 0.955
+E         Use -v to get more diff
+
+contract_tests\test_bootstrap_robust.py:12: AssertionError
+________________________ test_explicit_stage_bands[M2] ________________________
+
+stage = <Stage.M2: 'M2'>
+
+    @pytest.mark.parametrize('stage',list(Stage))
+    def test_explicit_stage_bands(stage):
+        v=voltage_for(stage)
+        expected=(.95,1.05) if stage in (Stage.A1,Stage.ACTUAL) else (.955,1.045)
+>       assert (v.lower_pu,v.upper_pu)==expected
+E       assert (0.95, 1.05) == (0.955, 1.045)
+E         
+E         At index 0 diff: 0.95 != 0.955
+E         Use -v to get more diff
+
+contract_tests\test_bootstrap_robust.py:12: AssertionError
+___________________ test_missing_and_wrong_stage_band_fail ____________________
+
+    def test_missing_and_wrong_stage_band_fail():
+        with pytest.raises(ValueError):GridAuthority(*['a'*64]*4,.9025,1.1025,True).validate()
+        for s in (Stage.M1,Stage.A2,Stage.M2):
+>           with pytest.raises(ValueError):require_planning(.9025,1.1025,s)
+E           Failed: DID NOT RAISE <class 'ValueError'>
+
+contract_tests\test_bootstrap_robust.py:25: Failed
+__________ test_voltage_necessary_condition_uses_full_mess_pq_bounds __________
+
+    def test_voltage_necessary_condition_uses_full_mess_pq_bounds():
+        from v42_bootstrap.preflight import voltage_intervals
+        c=SimpleNamespace(control_names=['aidc_load_kw[S]','mess_p_kw[S]','mess_q_kvar[S]'],voltage_constant=np.array([1.101]),voltage_matrix=np.array([[0.],[.001],[.001]]))
+        a=dict(controls=[[1,0,0]]*96);b=SimpleNamespace(p_limit=100,pcs_kva=120)
+        result=voltage_intervals([c]*96,a,['S'],{'U':'S'},[],b)
+        assert result['PASS'] and 'necessary, not sufficient' in result['bound_semantics']
+        c.voltage_matrix[:]=0
+        failed=voltage_intervals([c]*96,a,['S'],{'U':'S'},[],b)
+>       assert not failed['PASS'] and failed['impossible_count']==96
+E       assert (not True)
+
+contract_tests\test_bootstrap_robust.py:46: AssertionError
+____ test_grid_rejects_unsquared_old_and_mixed_authorities[0.9025-1.1025] _____
+
+lo = 0.9025, hi = 1.1025
+
+    @pytest.mark.parametrize('lo,hi',[(.95**2,1.05**2),(.955,1.045),(.912025,1.05**2)])
+    def test_grid_rejects_unsquared_old_and_mixed_authorities(lo,hi):
+>       with pytest.raises(ValueError,match='PLANNING_VOLTAGE_AUTHORITY_MISMATCH'):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+contract_tests\test_voltage_margin.py:27: Failed
+________ test_saved_interval_certificate_proves_full_box_contradiction ________
+
+    def test_saved_interval_certificate_proves_full_box_contradiction():
+        import json,numpy as np
+        root=Path(__file__).resolve().parents[1]
+        proof=json.loads((root/'docs/v42_voltage_margin_a1_m1/A1_INFEASIBILITY_DIAGNOSIS.json').read_text())
+        assert proof['independent_proof_PASS'] and len(proof['violations'])==145
+        for row in proof['violations']:
+            a=np.array(row['voltage_coefficients']);lb=np.array(row['controls_lower']);ub=np.array(row['controls_upper'])
+            lo=row['voltage_constant']+np.maximum(a,0)@lb+np.minimum(a,0)@ub
+            hi=row['voltage_constant']+np.maximum(a,0)@ub+np.minimum(a,0)@lb
+            assert lo==pytest.approx(row['minimum_squared'],abs=1e-12)
+            assert hi==pytest.approx(row['maximum_squared'],abs=1e-12)
+>           assert lo>PLANNING_UPPER_SQUARED+1e-8 or hi<PLANNING_LOWER_SQUARED-1e-8
+E           assert (1.0921266053279253 > (1.1025 + 1e-08) or 1.102694350247574 < (0.9025 - 1e-08))
+
+contract_tests\test_voltage_margin.py:127: AssertionError
+__________________________ test_pr99_bytes_preserved __________________________
+
+    def test_pr99_bytes_preserved():
+        from v42_voltage.preservation import assert_legacy
+>       assert_legacy(read(OUT/'LEGACY_PRESERVATION_AUDIT.json')['files'])
+
+tests\test_v42_exact.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+v42_voltage\preservation.py:50: in assert_legacy
+    if actual!=row['sha256']:assert_authorized(row['path'],actual,row['sha256'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'README.md'
+current_sha = '3a995add43c012f76f94a7fc194177708de8a6acb4d86020ce1c864c69d5b2ef'
+previous_sha = '532527475735809aba79536502ced2790520f738f687532cad531b869f6986be'
+
+    def assert_authorized(path,current_sha,previous_sha=None):
+        from v42_thermal.supersession import assert_successor
+        if assert_successor(path,current_sha,previous_sha):return
+        successor=ROOT/'docs/v42_day_ahead_planning_direct_dday_actual/AUTHORIZED_ARCHITECTURE_SUPERSESSION.json'
+        if path in ARCHITECTURE_CHANGES and successor.is_file():
+            manifest=read(successor)
+            assert manifest['base_head']==ARCHITECTURE_BASE and not manifest['production_execution_authorized']
+            row=next(r for r in manifest['files'] if r['path']==path)
+>           assert current_sha==row['current_sha256'],'UNSEALED_CURRENT_CHANGE:'+path
+E           AssertionError: UNSEALED_CURRENT_CHANGE:README.md
+
+v42_voltage\preservation.py:24: AssertionError
+__________________ test_frozen_authorities_and_no_DW_import ___________________
+
+    def test_frozen_authorities_and_no_DW_import():
+        import sys,hashlib
+        d=json.loads((OUT/'LEGACY_PRESERVATION_AUDIT.json').read_text())
+        from v42_voltage.preservation import assert_legacy
+>       assert_legacy(d['files'])
+
+tests\test_v42_root.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+v42_voltage\preservation.py:50: in assert_legacy
+    if actual!=row['sha256']:assert_authorized(row['path'],actual,row['sha256'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'README.md'
+current_sha = '3a995add43c012f76f94a7fc194177708de8a6acb4d86020ce1c864c69d5b2ef'
+previous_sha = '532527475735809aba79536502ced2790520f738f687532cad531b869f6986be'
+
+    def assert_authorized(path,current_sha,previous_sha=None):
+        from v42_thermal.supersession import assert_successor
+        if assert_successor(path,current_sha,previous_sha):return
+        successor=ROOT/'docs/v42_day_ahead_planning_direct_dday_actual/AUTHORIZED_ARCHITECTURE_SUPERSESSION.json'
+        if path in ARCHITECTURE_CHANGES and successor.is_file():
+            manifest=read(successor)
+            assert manifest['base_head']==ARCHITECTURE_BASE and not manifest['production_execution_authorized']
+            row=next(r for r in manifest['files'] if r['path']==path)
+>           assert current_sha==row['current_sha256'],'UNSEALED_CURRENT_CHANGE:'+path
+E           AssertionError: UNSEALED_CURRENT_CHANGE:README.md
+
+v42_voltage\preservation.py:24: AssertionError
+______________________ test_base_2054_and_789_preserved _______________________
+
+    def test_base_2054_and_789_preserved():
+>       r=read('PR116_BASE_RECEIPT.json');assert assert_snapshot(r['files'])
+
+tests\v42_benders_fullscale\test_fullscale_orchestration.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+v42_voltage\preservation.py:90: in assert_snapshot
+    if current not in variants:assert_authorized(path,sha(ROOT/path),row['sha256'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'README.md'
+current_sha = '3a995add43c012f76f94a7fc194177708de8a6acb4d86020ce1c864c69d5b2ef'
+previous_sha = '532527475735809aba79536502ced2790520f738f687532cad531b869f6986be'
+
+    def assert_authorized(path,current_sha,previous_sha=None):
+        from v42_thermal.supersession import assert_successor
+        if assert_successor(path,current_sha,previous_sha):return
+        successor=ROOT/'docs/v42_day_ahead_planning_direct_dday_actual/AUTHORIZED_ARCHITECTURE_SUPERSESSION.json'
+        if path in ARCHITECTURE_CHANGES and successor.is_file():
+            manifest=read(successor)
+            assert manifest['base_head']==ARCHITECTURE_BASE and not manifest['production_execution_authorized']
+            row=next(r for r in manifest['files'] if r['path']==path)
+>           assert current_sha==row['current_sha256'],'UNSEALED_CURRENT_CHANGE:'+path
+E           AssertionError: UNSEALED_CURRENT_CHANGE:README.md
+
+v42_voltage\preservation.py:24: AssertionError
+______________ test_recourse_receives_exact_persisted_candidate _______________
+
+env = <gurobipy.Env, Parameter changes: LicenseID=2845475, OutputFlag=0>
+tmp_path = WindowsPath('C:/Users/Public/Documents/ESTsoft/CreatorTemp/pytest-of-kjw39/pytest-770/test_recourse_receives_exact_p0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000253801F74D0>
+
+    def test_recourse_receives_exact_persisted_candidate(env,tmp_path,monkeypatch):
+        import v42_benders_fullscale.controller as c
+        from v42_benders_v2.recourse import Recourse
+        m=build(env,'A');n=from_model(m);seen=[];original=Recourse.solve
+        def checked(self,x,seconds):
+            index=len(seen);values,r=load(tmp_path,index,n)
+            assert np.array_equal(x,values) and r['persisted_before_recourse'] and r['master_settings']['Threads']==1
+            seen.append(r['vector_sha256']);return original(self,x,seconds)
+        monkeypatch.setattr(Recourse,'solve',checked)
+        # Small synthetic fixture only; never reopen the inherited native gate.
+        monkeypatch.setattr(c,'scope_before_solve',lambda:assert_snapshot(read('PR116_BASE_RECEIPT.json')['files']))
+        monkeypatch.setattr(c,'snapshot',lambda:dict(other_heavy_solve=False))
+>       r,_=c.loop(n,env=env,directory=tmp_path,stage='PILOT',validate=lambda z:dict(PASS=n.residual(z[n.xi],z[n.yi])<=1e-7),max_evaluations=2)
+
+tests\v42_benders_fullscale\test_fullscale_orchestration.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+v42_benders_fullscale\controller.py:50: in loop
+    scope_before_solve();feasibility=stage in ['PILOT','FULL_B3'];master=gp.Model(stage+'_EXACT_MASTER',env=env)
+tests\v42_benders_fullscale\test_fullscale_orchestration.py:60: in <lambda>
+    monkeypatch.setattr(c,'scope_before_solve',lambda:assert_snapshot(read('PR116_BASE_RECEIPT.json')['files']))
+v42_voltage\preservation.py:90: in assert_snapshot
+    if current not in variants:assert_authorized(path,sha(ROOT/path),row['sha256'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'README.md'
+current_sha = '3a995add43c012f76f94a7fc194177708de8a6acb4d86020ce1c864c69d5b2ef'
+previous_sha = '532527475735809aba79536502ced2790520f738f687532cad531b869f6986be'
+
+    def assert_authorized(path,current_sha,previous_sha=None):
+        from v42_thermal.supersession import assert_successor
+        if assert_successor(path,current_sha,previous_sha):return
+        successor=ROOT/'docs/v42_day_ahead_planning_direct_dday_actual/AUTHORIZED_ARCHITECTURE_SUPERSESSION.json'
+        if path in ARCHITECTURE_CHANGES and successor.is_file():
+            manifest=read(successor)
+            assert manifest['base_head']==ARCHITECTURE_BASE and not manifest['production_execution_authorized']
+            row=next(r for r in manifest['files'] if r['path']==path)
+>           assert current_sha==row['current_sha256'],'UNSEALED_CURRENT_CHANGE:'+path
+E           AssertionError: UNSEALED_CURRENT_CHANGE:README.md
+
+v42_voltage\preservation.py:24: AssertionError
+____________________ test_cut_then_new_candidate_or_proof _____________________
+
+env = <gurobipy.Env, Parameter changes: LicenseID=2845475, OutputFlag=0>
+tmp_path = WindowsPath('C:/Users/Public/Documents/ESTsoft/CreatorTemp/pytest-of-kjw39/pytest-770/test_cut_then_new_candidate_or0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000253D2EC09D0>
+
+    def test_cut_then_new_candidate_or_proof(env,tmp_path,monkeypatch):
+        import v42_benders_fullscale.controller as c
+        monkeypatch.setattr(c,'snapshot',lambda:dict(other_heavy_solve=False))
+        monkeypatch.setattr(c,'scope_before_solve',lambda:assert_snapshot(read('PR116_BASE_RECEIPT.json')['files']))
+        m=build(env,'B');n=from_model(m)
+>       r,_=c.loop(n,env=env,directory=tmp_path,stage='PILOT',validate=lambda z:dict(PASS=False),max_evaluations=2)
+
+tests\v42_benders_fullscale\test_fullscale_orchestration.py:73: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+v42_benders_fullscale\controller.py:50: in loop
+    scope_before_solve();feasibility=stage in ['PILOT','FULL_B3'];master=gp.Model(stage+'_EXACT_MASTER',env=env)
+tests\v42_benders_fullscale\test_fullscale_orchestration.py:71: in <lambda>
+    monkeypatch.setattr(c,'scope_before_solve',lambda:assert_snapshot(read('PR116_BASE_RECEIPT.json')['files']))
+v42_voltage\preservation.py:90: in assert_snapshot
+    if current not in variants:assert_authorized(path,sha(ROOT/path),row['sha256'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'README.md'
+current_sha = '3a995add43c012f76f94a7fc194177708de8a6acb4d86020ce1c864c69d5b2ef'
+previous_sha = '532527475735809aba79536502ced2790520f738f687532cad531b869f6986be'
+
+    def assert_authorized(path,current_sha,previous_sha=None):
+        from v42_thermal.supersession import assert_successor
+        if assert_successor(path,current_sha,previous_sha):return
+        successor=ROOT/'docs/v42_day_ahead_planning_direct_dday_actual/AUTHORIZED_ARCHITECTURE_SUPERSESSION.json'
+        if path in ARCHITECTURE_CHANGES and successor.is_file():
+            manifest=read(successor)
+            assert manifest['base_head']==ARCHITECTURE_BASE and not manifest['production_execution_authorized']
+            row=next(r for r in manifest['files'] if r['path']==path)
+>           assert current_sha==row['current_sha256'],'UNSEALED_CURRENT_CHANGE:'+path
+E           AssertionError: UNSEALED_CURRENT_CHANGE:README.md
+
+v42_voltage\preservation.py:24: AssertionError
+__________________ test_preserved_bytes_and_bounded_receipt ___________________
+
+    def test_preserved_bytes_and_bounded_receipt():
+        r=read('PR115_BASE_RECEIPT.json');assert r['base']==BASE and r['tracked_files']==1615
+        from v42_voltage.preservation import assert_snapshot
+>       assert assert_snapshot(r['files'])
+
+tests\v42_benders_v2\test_v42_native_recourse.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+v42_voltage\preservation.py:90: in assert_snapshot
+    if current not in variants:assert_authorized(path,sha(ROOT/path),row['sha256'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'README.md'
+current_sha = '3a995add43c012f76f94a7fc194177708de8a6acb4d86020ce1c864c69d5b2ef'
+previous_sha = '532527475735809aba79536502ced2790520f738f687532cad531b869f6986be'
+
+    def assert_authorized(path,current_sha,previous_sha=None):
+        from v42_thermal.supersession import assert_successor
+        if assert_successor(path,current_sha,previous_sha):return
+        successor=ROOT/'docs/v42_day_ahead_planning_direct_dday_actual/AUTHORIZED_ARCHITECTURE_SUPERSESSION.json'
+        if path in ARCHITECTURE_CHANGES and successor.is_file():
+            manifest=read(successor)
+            assert manifest['base_head']==ARCHITECTURE_BASE and not manifest['production_execution_authorized']
+            row=next(r for r in manifest['files'] if r['path']==path)
+>           assert current_sha==row['current_sha256'],'UNSEALED_CURRENT_CHANGE:'+path
+E           AssertionError: UNSEALED_CURRENT_CHANGE:README.md
+
+v42_voltage\preservation.py:24: AssertionError
+__________ test_independent_full_matrix_physical_and_grid_validator ___________
+
+native = <gurobi.Model MIP instance V42_NATIVE_M1: 954561 constrs, 316743 vars, Parameter changes: Username=(user-defined), LicenseID=2845475, OutputFlag=0>
+
+    def test_independent_full_matrix_physical_and_grid_validator(native):
+        from v42_threshold.validate import validate_point
+        result,_=validate_point(native,axis()['names'],full_start())
+        assert result['B3_feasible_PASS'] and result['physical']['full96'] and result['grid']['full96']
+        assert result['original_M1_UB_eligible'] and not result['threshold_certificate_PASS']
+>       assert result['grid']['no_Actual_PQ_repair'] and result['grid']['robust_grid']['voltage_band']==[.955,1.045]
+E       assert (True and [0.95, 1.05] == [0.955, 1.045]
+E         
+E         At index 0 diff: 0.95 != 0.955
+E         Use -v to get more diff)
+
+tests\v42_threshold\test_native.py:75: AssertionError
+============================== warnings summary ===============================
+tests/test_v42_final.py::test_provider_one_live_call_same_known_unknown
+  C:\Users\kjw39\Documents\Codex\2026-10-03\integrated-normalamps-zero-margin-m1\worktree\v42_final\inference\calibration.py:51: RuntimeWarning: invalid value encountered in log1p
+    out = np.where(u >= hy[-2], np.log1p(np.expm1(target) / last), out)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED contract_tests/test_bootstrap_robust.py::test_explicit_stage_bands[M1]
+FAILED contract_tests/test_bootstrap_robust.py::test_explicit_stage_bands[A2]
+FAILED contract_tests/test_bootstrap_robust.py::test_explicit_stage_bands[M2]
+FAILED contract_tests/test_bootstrap_robust.py::test_missing_and_wrong_stage_band_fail
+FAILED contract_tests/test_bootstrap_robust.py::test_voltage_necessary_condition_uses_full_mess_pq_bounds
+FAILED contract_tests/test_voltage_margin.py::test_grid_rejects_unsquared_old_and_mixed_authorities[0.9025-1.1025]
+FAILED contract_tests/test_voltage_margin.py::test_saved_interval_certificate_proves_full_box_contradiction
+FAILED tests/test_v42_exact.py::test_pr99_bytes_preserved - AssertionError: U...
+FAILED tests/test_v42_root.py::test_frozen_authorities_and_no_DW_import - Ass...
+FAILED tests/v42_benders_fullscale/test_fullscale_orchestration.py::test_base_2054_and_789_preserved
+FAILED tests/v42_benders_fullscale/test_fullscale_orchestration.py::test_recourse_receives_exact_persisted_candidate
+FAILED tests/v42_benders_fullscale/test_fullscale_orchestration.py::test_cut_then_new_candidate_or_proof
+FAILED tests/v42_benders_v2/test_v42_native_recourse.py::test_preserved_bytes_and_bounded_receipt
+FAILED tests/v42_threshold/test_native.py::test_independent_full_matrix_physical_and_grid_validator
+14 failed, 1510 passed, 1 warning in 81.03s (0:01:21)

@@ -1,0 +1,40 @@
+..........................F.                                             [100%]
+================================== FAILURES ===================================
+__________________ test_canonical_sparse_grid_MPS_transport ___________________
+
+tmp_path = WindowsPath('C:/Users/Public/Documents/ESTsoft/CreatorTemp/pytest-of-kjw39/pytest-774/test_canonical_sparse_grid_MPS0')
+thermal = {'Actual': [{'CTPrim_used': False, 'EmergAmps': 1040.89591801014, 'EmergHkVA': 7500.0, 'NormHkVA': 5500.0, ...}, {'CTP...ntrols': {'CapControl_AllNames_raw': [], 'CapControl_count': 0, 'RegControl_count': 7, 'capacitor_banks': 4, ...}, ...}
+
+    def test_canonical_sparse_grid_MPS_transport(tmp_path,thermal):
+        from v42_boundary.boundaries import load_native
+        from v42_bootstrap.grid import coefficients
+        from v42_native.grid import GridAuthority
+        from v42_m1_sparse.grid import add_compressed
+        from v42_integrated.matrix import arrays,column_identity
+        bundle,*_=load_native();_,coeff=coefficients(bundle);coefficient=coeff[0]
+        model=gp.Model();model.Params.OutputFlag=0
+        try:
+            x=model.addVars(len(coefficient.control_names),lb=-10000,ub=10000)
+            authority=GridAuthority(*(['b'*64]*4),.9025,1.1025,True,Stage.M1,NORMALAMPS)
+            builder=lambda m,cs,controls,a:add_compressed(m,cs,controls,a,'M1-F3',[],[])
+            rho=c.all_transformer_rows(builder)(model,[coefficient],[[x[i] for i in x]],authority)
+            model.setObjective(rho);model.update()
+            for i,row in enumerate(model.getConstrs()):row.ConstrName=f'R{i}'
+            model.update();A,d=arrays(model)
+            path=tmp_path/'canonical.mps';model.write(str(path));loaded=gp.read(str(path))
+            try:
+                B,e=arrays(loaded)
+>               assert column_identity(d)==column_identity(e)
+E               AssertionError: assert '8838747c3636...39bdf1b3b923d' == 'ea72d2aa3ca0...b3684b78260c4'
+E                 
+E                 - ea72d2aa3ca04d351f1f19d1da27f6a4d45aec3ecbcaf80d06fb3684b78260c4
+E                 + 8838747c36360a8b19f8b9ebcd3899a13114075025884d1236a39bdf1b3b923d
+
+tests\v42_integrated\test_semantics.py:154: AssertionError
+---------------------------- Captured stdout call -----------------------------
+Read MPS format model from file C:\Users\Public\Documents\ESTsoft\CreatorTemp\pytest-of-kjw39\pytest-774\test_canonical_sparse_grid_MPS0\canonical.mps
+Reading time = 0.05 seconds
+: 7818 rows, 859 columns, 91279 nonzeros
+=========================== short test summary info ===========================
+FAILED tests/v42_integrated/test_semantics.py::test_canonical_sparse_grid_MPS_transport
+1 failed, 27 passed in 22.74s

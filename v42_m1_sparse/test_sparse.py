@@ -32,7 +32,7 @@ def test_one_use_current_and_unprofitable_constant_faces_are_unfactored():
     m=gp.Model();m.Params.OutputFlag=0;bindings=[];cost=[]
     try:
         controls=[[0.]+[m.addVar(lb=-10,ub=10) for _ in range(6)] for c in coeff]
-        authority=GridAuthority(*(['c'*64]*4),.912025,1.092025,True,stage=Stage.M1)
+        authority=GridAuthority(*(['c'*64]*4),.9025,1.1025,True,stage=Stage.M1)
         add_compressed(m,coeff,controls,authority,'M1-FCRA',bindings,cost);m.update()
         assert all(r['new_occurrences']<r['old_occurrences'] for r in cost if r['selected'])
         assert not any(r['selected'] for r in cost if r['family']=='transformer_current')

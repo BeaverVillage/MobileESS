@@ -14,6 +14,8 @@ ARCHITECTURE_CHANGES={'.gitattributes','README.md','v42_native/coordinator.py','
 
 
 def assert_authorized(path,current_sha,previous_sha=None):
+    from v42_integrated.supersession import assert_successor as integrated_successor
+    if integrated_successor(path,current_sha,previous_sha):return
     from v42_thermal.supersession import assert_successor
     if assert_successor(path,current_sha,previous_sha):return
     successor=ROOT/'docs/v42_day_ahead_planning_direct_dday_actual/AUTHORIZED_ARCHITECTURE_SUPERSESSION.json'
