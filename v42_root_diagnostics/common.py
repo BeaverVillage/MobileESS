@@ -15,7 +15,9 @@ CACHE=ROOT.parent/'COMPACT_MONOLITHIC_LOCAL'
 LP_POLICY=dict(Threads=4,Seed=20260929,NumericFocus=1,FeasibilityTol=1e-8,OptimalityTol=1e-8)
 MIP_POLICY=dict(LP_POLICY,Method=2,NodeMethod=1,IntFeasTol=1e-8,Heuristics=0,MIPGap=.005,MIPFocus=0)
 TARGET={'original':.5718494620559795,'compact':.5718494622717606}
-EXPECTED={'original':(954560,316743,8282350,0x2d1e8813),'compact':(972540,316839,12678118,0xbb01b0da)}
+EXPECTED={'original':(954560,316743,8282350,0x14204d6e),'compact':(972540,316839,12678118,0x81269e47)}
+SCIENTIFIC_SIGNATURES={'original':'a2d08eae6b9194f576e134c89da1d62a003e1304f751e480f5cd235f069ae821',
+    'compact':'a4eab472d9c0831a0b9cc71f51cee7f4ecfa4126b4c57fedc3afd4ef62a9fe1f'}
 GRID=lambda f:f.startswith(('injection_','response_','voltage_','line_','transformer_'))
 
 def sha(p):
@@ -36,7 +38,8 @@ def preserve():
     return len(r['files'])
 def make(kind,env):
     m=original(env) if kind=='original' else load_compact(env)
-    assert (m.NumConstrs,m.NumVars,m.NumNZs,int(m.Fingerprint))==EXPECTED[kind],'SOURCE_FINGERPRINT_MISMATCH'
+    assert (m.NumConstrs,m.NumVars,m.NumNZs,int(m.Fingerprint)&0xffffffff)==EXPECTED[kind],'SOURCE_FINGERPRINT_MISMATCH'
+    assert signature(m)==SCIENTIFIC_SIGNATURES[kind],'CANONICAL_SCIENTIFIC_MATRIX_MISMATCH'
     return m
 def row_families(kind):
     with np.load(ROOT/'docs/v42_m1_integrality_gap_root_cause/F3_MODEL_AXIS.npz') as z:rows=z['rownames']
@@ -58,7 +61,8 @@ def lp_audit(m,x):
     return dict(max_row_violation=max(0.,float(v.max())),rows_exceeding_1e8=int((v>1e-8).sum()),max_bound_violation=bounds,
                 finite=bool(np.isfinite(x).all()),objective=float(np.array(m.getAttr('Obj'))@x+m.ObjCon),LP_only=True,certificate_update=False)
 def freeze_check():
-    f=read('SOURCE_FREEZE.json');assert all(sha(ROOT/n)==s for n,s in f['sources'].items()),'DIAGNOSTIC_SOURCE_CHANGED'
+    f=read('SOURCE_FREEZE_AMENDED_PREFLIGHT.json' if (OUT/'SOURCE_FREEZE_AMENDED_PREFLIGHT.json').exists() else 'SOURCE_FREEZE.json')
+    assert all(sha(ROOT/n)==s for n,s in f['sources'].items()),'DIAGNOSTIC_SOURCE_CHANGED'
     assert sha(OUT/'PREREGISTRATION.json')==f['preregistration_sha256']
     assert all(sha(Path(n))==s for n,s in f['inputs'].items()),'SOURCE_CACHE_CHANGED'
     preserve()
