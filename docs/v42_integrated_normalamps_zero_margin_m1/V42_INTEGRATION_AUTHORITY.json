@@ -1,0 +1,173 @@
+{
+  "schema": "V42_INTEGRATED_AUTHORITY_V1",
+  "canonical_base": "ac2819cbc7b4e86fce07b4b0ed62e0647e9c473a",
+  "solver_reference": "a16af252538774b2b2034a8722c31c0ffe5874a9",
+  "common_merge_base": "e2d4779685fff6d0cf022c649733b2ca41fdfc08",
+  "preserved_provisional_commit": "724dffea6ee4bf276d361b31ee3cf9b2588a7168",
+  "features": [
+    {
+      "feature": "A_operational_architecture",
+      "canonical_source_PR": 132,
+      "canonical_source_SHA": "ac2819cbc7b4e86fce07b4b0ed62e0647e9c473a",
+      "selected_status": "SELECTED",
+      "superseded_source": [
+        "old margin / nameplate thermal / old certificate / replay or repairs"
+      ],
+      "integration_rule": "D-1 A1 -> M1 -> A2 -> M2 -> Planning Freeze -> D-Day Actual -> Fresh OpenDSS; execution ends at M1 here"
+    },
+    {
+      "feature": "B_actual_operation",
+      "canonical_source_PR": 132,
+      "canonical_source_SHA": "ac2819cbc7b4e86fce07b4b0ed62e0647e9c473a",
+      "selected_status": "SELECTED",
+      "superseded_source": [
+        "old margin / nameplate thermal / old certificate / replay or repairs"
+      ],
+      "integration_rule": {
+        "full_reoptimization": false,
+        "P_repair": false,
+        "Q_repair": false,
+        "MESS_AIDC_schedule_repair": false,
+        "Planning_tap_replay": false,
+        "Actual_tap_replay": false,
+        "Planning_capacitor_replay": false
+      }
+    },
+    {
+      "feature": "C_grid_controls",
+      "canonical_source_PR": 132,
+      "canonical_source_SHA": "ac2819cbc7b4e86fce07b4b0ed62e0647e9c473a",
+      "selected_status": "SELECTED",
+      "superseded_source": [
+        "old margin / nameplate thermal / old certificate / replay or repairs"
+      ],
+      "integration_rule": {
+        "Planning_RegControls": "AUTONOMOUS",
+        "Actual_RegControls": "AUTONOMOUS",
+        "RegControls": 7,
+        "capacitors": 4,
+        "capacitors_fixed_ON": true,
+        "CapControls": 0
+      }
+    },
+    {
+      "feature": "D_voltage",
+      "canonical_source_PR": 132,
+      "canonical_source_SHA": "ac2819cbc7b4e86fce07b4b0ed62e0647e9c473a",
+      "selected_status": "SELECTED",
+      "superseded_source": [
+        "old margin / nameplate thermal / old certificate / replay or repairs"
+      ],
+      "integration_rule": {
+        "lower_pu": 0.95,
+        "upper_pu": 1.05,
+        "margin_pu": 0.0,
+        "voltage_constraints_retained": true
+      }
+    },
+    {
+      "feature": "E_transformer_current",
+      "canonical_source_PR": 132,
+      "canonical_source_SHA": "ac2819cbc7b4e86fce07b4b0ed62e0647e9c473a",
+      "selected_status": "SELECTED",
+      "superseded_source": [
+        "old margin / nameplate thermal / old certificate / replay or repairs"
+      ],
+      "integration_rule": {
+        "denominator": "compiled OpenDSS NormalAmps",
+        "transformers": 44,
+        "phases": 120,
+        "authority_SHA": "0cffff2af474221a7a5693f3c2b7a83026bd1522de2d3f66032c1757b9735d51",
+        "CTPrim_thermal_authority": false
+      }
+    },
+    {
+      "feature": "F_transformer_kVA",
+      "canonical_source_PR": 132,
+      "canonical_source_SHA": "ac2819cbc7b4e86fce07b4b0ed62e0647e9c473a",
+      "selected_status": "SELECTED",
+      "superseded_source": [
+        "old margin / nameplate thermal / old certificate / replay or repairs"
+      ],
+      "integration_rule": "Independently retain source kVA constraints"
+    },
+    {
+      "feature": "G_line_current",
+      "canonical_source_PR": 132,
+      "canonical_source_SHA": "ac2819cbc7b4e86fce07b4b0ed62e0647e9c473a",
+      "selected_status": "SELECTED",
+      "superseded_source": [
+        "old margin / nameplate thermal / old certificate / replay or repairs"
+      ],
+      "integration_rule": "Retain accepted PR132 line-current authority unchanged"
+    },
+    {
+      "feature": "H_Runtime_CC4_capacity",
+      "canonical_source_PR": 132,
+      "canonical_source_SHA": "ac2819cbc7b4e86fce07b4b0ed62e0647e9c473a",
+      "selected_status": "SELECTED",
+      "superseded_source": [
+        "old margin / nameplate thermal / old certificate / replay or repairs"
+      ],
+      "integration_rule": {
+        "source": "PR132 inherited",
+        "retraining": false,
+        "Runtime_refit": false,
+        "CC4_refit": false,
+        "queue_redesign": false
+      }
+    },
+    {
+      "feature": "I_objectives",
+      "canonical_source_PR": 132,
+      "canonical_source_SHA": "ac2819cbc7b4e86fce07b4b0ed62e0647e9c473a",
+      "selected_status": "SELECTED",
+      "superseded_source": [
+        "old margin / nameplate thermal / old certificate / replay or repairs"
+      ],
+      "integration_rule": {
+        "P1": "MIN MAX_LINE_LOADING",
+        "M_block_P2": [
+          "movement_energy",
+          "movement_count"
+        ],
+        "reserve_shortfall_objective": false,
+        "CC4_deviation_objective": false
+      }
+    },
+    {
+      "feature": "J_M1_decisions",
+      "canonical_source_PR": 132,
+      "canonical_source_SHA": "ac2819cbc7b4e86fce07b4b0ed62e0647e9c473a",
+      "selected_status": "SELECTED",
+      "superseded_source": [
+        "old margin / nameplate thermal / old certificate / replay or repairs"
+      ],
+      "integration_rule": {
+        "A1_AIDC": "new frozen solution",
+        "route": "decision",
+        "movement": "decision",
+        "P": "decision",
+        "Q": "decision",
+        "SOC": "decision",
+        "historical_route_fix": false
+      }
+    },
+    {
+      "feature": "K_solver_components",
+      "canonical_source_PR": 131,
+      "canonical_source_SHA": "a16af252538774b2b2034a8722c31c0ffe5874a9",
+      "selected_status": "SELECTED",
+      "superseded_source": [
+        "failed Benders authority",
+        "Compact M1 production"
+      ],
+      "integration_rule": "Original M1; exact sparse grid; optional exact Start mapping; diagnostic observation only. PR132 equations take precedence."
+    }
+  ],
+  "old_M1_certificate": "SUPERSEDED_REPORTING_ONLY",
+  "episode": "2025-05-01",
+  "horizon": 96,
+  "code_integration_started": false,
+  "downstream": "NOT_RUN"
+}

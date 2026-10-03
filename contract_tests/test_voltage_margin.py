@@ -22,7 +22,7 @@ def test_exact_squared_authority_and_all_planning_paths():
     assert authority(Stage.A1)['lower_pu']==.95 and authority(Stage.A1)['upper_pu']==1.05
 
 
-@pytest.mark.parametrize('lo,hi',[(.95**2,1.05**2),(.955,1.045),(.912025,1.05**2)])
+@pytest.mark.parametrize('lo,hi',[(.955**2,1.045**2),(.95,1.05),(.912025,1.05**2)])
 def test_grid_rejects_unsquared_old_and_mixed_authorities(lo,hi):
     with pytest.raises(ValueError,match='PLANNING_VOLTAGE_AUTHORITY_MISMATCH'):
         GridAuthority(*['a'*64]*4,lo,hi,True,stage=Stage.M1).validate()
@@ -124,4 +124,5 @@ def test_saved_interval_certificate_proves_full_box_contradiction():
         hi=row['voltage_constant']+np.maximum(a,0)@ub+np.minimum(a,0)@lb
         assert lo==pytest.approx(row['minimum_squared'],abs=1e-12)
         assert hi==pytest.approx(row['maximum_squared'],abs=1e-12)
-        assert lo>PLANNING_UPPER_SQUARED+1e-8 or hi<PLANNING_LOWER_SQUARED-1e-8
+        # Historical proof belongs to the superseded margin contract only.
+        assert lo>1.045**2+1e-8 or hi<.955**2-1e-8

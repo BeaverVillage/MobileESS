@@ -26,7 +26,7 @@ def test_native_grid_anchor_and_separate_hard_security(voltage,tx_current,tx_pow
         flow_q_constant=np.zeros(2),flow_p_matrix=np.zeros((2,1)),flow_q_matrix=np.zeros((2,1)),
         anchor=np.zeros(1),current_matrix=np.zeros((1,2)),current_constant=np.array([.6,tx_current]),
         branch_names=('line.test::a','transformer.main::a'),transformer_ratings=(None,2.))
-    authority=GridAuthority(*(['b'*64]*4),.912025,1.092025,True,stage=Stage.M1)
+    authority=GridAuthority(*(['b'*64]*4),.9025,1.1025,True,stage=Stage.M1)
     m=gp.Model();m.Params.OutputFlag=0
     try:
         rho=add_grid(m,[c],[[0.]],authority);m.setObjective(rho);m.optimize()

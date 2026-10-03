@@ -72,4 +72,4 @@ def test_independent_full_matrix_physical_and_grid_validator(native):
     result,_=validate_point(native,axis()['names'],full_start())
     assert result['B3_feasible_PASS'] and result['physical']['full96'] and result['grid']['full96']
     assert result['original_M1_UB_eligible'] and not result['threshold_certificate_PASS']
-    assert result['grid']['no_Actual_PQ_repair'] and result['grid']['robust_grid']['voltage_band']==[.955,1.045]
+    assert result['grid']['no_Actual_PQ_repair'] and result['grid']['robust_grid']['voltage_band']==[.95,1.05]

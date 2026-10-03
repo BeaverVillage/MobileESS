@@ -38,7 +38,7 @@ def fixture(case):
         voltage=np.array([1.,1.])
         vm=np.array([[.0001,.0002],[.001,.0011],[.0012,.0009],[.0008,.0013],[.002,.0019],[.0018,.0021],[.0022,.0017]])
         if case in ('lower_voltage_binding','upper_voltage_binding'):
-            voltage[:]=.912025 if case=='lower_voltage_binding' else 1.092025;vm[:]=0
+            voltage[:]=.9025 if case=='lower_voltage_binding' else 1.1025;vm[:]=0
         if case=='PR105_overvoltage':voltage[:]=1.1
         wp=np.array([[.01,.05,.04,.06,.03,.02,.04],[.02,.08,.09,.07,.03,.04,.02]])
         wq=np.array([[.02,.02,.03,.04,.05,.06,.04],[.03,.05,.04,.06,.07,.06,.08]])
@@ -52,7 +52,7 @@ def fixture(case):
 def compare_case(case,label):
     import v42_native.mess as native
     sites,H,initial,b,routes,coeff=fixture(case);patterns,arcs=route_patterns(sites,H,routes,initial);output=[]
-    authority=GridAuthority(*(['c'*64]*4),.912025,1.092025,True,stage=Stage.M1)
+    authority=GridAuthority(*(['c'*64]*4),.9025,1.1025,True,stage=Stage.M1)
     def builder(m,p,q):
         bindings=[];cost=[]
         if label!='M1-F0':

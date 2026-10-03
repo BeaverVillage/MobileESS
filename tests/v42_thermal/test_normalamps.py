@@ -95,7 +95,7 @@ def test_native_and_compressed_hard_rows_use_normalized_current():
     from v42_native.grid import GridAuthority,add_grid
     from v42_native.voltage import Stage
     from v42_m1_sparse.grid import add_compressed
-    old,c=small_response();authority=GridAuthority(*(['b'*64]*4),.912025,1.092025,True,Stage.M1,c.transformer_current_authority_sha256)
+    old,c=small_response();authority=GridAuthority(*(['b'*64]*4),.9025,1.1025,True,Stage.M1,c.transformer_current_authority_sha256)
     assert require_coefficient(c,authority)
     for compressed in (False,True):
         model=gp.Model();model.Params.OutputFlag=0

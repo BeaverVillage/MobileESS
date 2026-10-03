@@ -275,7 +275,7 @@ def test_kernel_does_not_mint_native_acceptance(tmp_path,accepted):
 def test_voltage_authorities_preserved():
     assert (voltage_for(Stage.A1).lower_pu,voltage_for(Stage.A1).upper_pu)==(.95,1.05)
     for s in (Stage.M1,Stage.A2,Stage.M2):
-        assert (voltage_for(s).lower_pu,voltage_for(s).upper_pu)==(.955,1.045)
+        assert (voltage_for(s).lower_pu,voltage_for(s).upper_pu)==(.95,1.05)
     assert (voltage_for(Stage.ACTUAL).lower_pu,voltage_for(Stage.ACTUAL).upper_pu)==(.95,1.05)
 
 

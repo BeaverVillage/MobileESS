@@ -32,7 +32,7 @@ def test_oracle_line_faces_are_original_affine_rows():
     from v42_native.grid import GridAuthority,add_grid
     from v42_native.voltage import Stage
     _,_,_,_,_,coeff=fixture('multiple_movement_choices');c=coeff[0]
-    authority=GridAuthority(*(['c'*64]*4),.912025,1.092025,True,stage=Stage.M1)
+    authority=GridAuthority(*(['c'*64]*4),.9025,1.1025,True,stage=Stage.M1)
     old=gp.Model();new=gp.Model();old.Params.OutputFlag=new.Params.OutputFlag=0
     x1=old.addVars(len(c.control_names),lb=-10,ub=10);x2=new.addVars(len(c.control_names),lb=-10,ub=10)
     add_grid(old,[c],[[x1[i] for i in x1]],authority);rho=new.addVar(lb=0,ub=1);add_slot_lines(new,c,[x2[i] for i in x2],rho)

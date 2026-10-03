@@ -8,7 +8,7 @@ from v42_native.grid import GridAuthority
 @pytest.mark.parametrize('stage',list(Stage))
 def test_explicit_stage_bands(stage):
     v=voltage_for(stage)
-    expected=(.95,1.05) if stage in (Stage.A1,Stage.ACTUAL) else (.955,1.045)
+    expected=(.95,1.05)
     assert (v.lower_pu,v.upper_pu)==expected
     assert v.lower_squared==pytest.approx(v.lower_pu**2,abs=1e-15)
     assert v.upper_squared==pytest.approx(v.upper_pu**2,abs=1e-15)
@@ -22,7 +22,8 @@ def test_stage_not_inferred_from_strings(bad):
 def test_missing_and_wrong_stage_band_fail():
     with pytest.raises(ValueError):GridAuthority(*['a'*64]*4,.9025,1.1025,True).validate()
     for s in (Stage.M1,Stage.A2,Stage.M2):
-        with pytest.raises(ValueError):require_planning(.9025,1.1025,s)
+        require_planning(.9025,1.1025,s)
+        with pytest.raises(ValueError):require_planning(.912025,1.092025,s)
     with pytest.raises(ValueError):require_planning(.912025,1.092025,Stage.A1)
     with pytest.raises(ValueError):require_planning(.9025,1.1025,Stage.ACTUAL)
 
@@ -42,6 +43,7 @@ def test_voltage_necessary_condition_uses_full_mess_pq_bounds():
     result=voltage_intervals([c]*96,a,['S'],{'U':'S'},[],b)
     assert result['PASS'] and 'necessary, not sufficient' in result['bound_semantics']
     c.voltage_matrix[:]=0
+    c.voltage_constant[:]=1.103 # Beyond the retained zero-margin physical band.
     failed=voltage_intervals([c]*96,a,['S'],{'U':'S'},[],b)
     assert not failed['PASS'] and failed['impossible_count']==96
     assert failed['strongest_contradiction']['required_upper_change_pu']>0
