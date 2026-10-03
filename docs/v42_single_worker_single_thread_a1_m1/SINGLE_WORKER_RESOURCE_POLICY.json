@@ -1,0 +1,88 @@
+{
+  "base": "c26c656265cc90dec39eb2937b76fbea1f2ed500",
+  "MAX_HEAVY_WORKERS": 1,
+  "Gurobi_Threads": 1,
+  "environment": {
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1"
+  },
+  "external_python_or_solver_start_gate": true,
+  "no_tests_during_heavy": true,
+  "no_parallel_pytest": true,
+  "no_parameter_sweep": true,
+  "A1": {
+    "Method": 1,
+    "Threads": 1,
+    "MIPGap": 0.005,
+    "Seed": 20260929,
+    "total_TimeLimit": 3600,
+    "default_parameters": [
+      "Cuts",
+      "Presolve",
+      "Heuristics",
+      "NumericFocus"
+    ],
+    "attempts": 1,
+    "lexicographic_execution": "PR133 explicit sequential P1 and three P2 calls with exact inherited locks; one A1 attempt and zero retries/sweeps",
+    "maximum_optimize_calls": 4
+  },
+  "M1_root_LP": {
+    "Method": 2,
+    "Threads": 1,
+    "Crossover": 0,
+    "TimeLimit": 300
+  },
+  "M1_P1": {
+    "Method": 2,
+    "Threads": 1,
+    "NodeMethod": 1,
+    "Crossover": 2,
+    "MIPFocus": 3,
+    "MIPGap": 0.005,
+    "TimeLimit": 1800,
+    "checkpoint": 600,
+    "attempts": 1
+  },
+  "M1_P2": [
+    "movement_energy",
+    "movement_count"
+  ],
+  "NormalAmps_authority": "0cffff2af474221a7a5693f3c2b7a83026bd1522de2d3f66032c1757b9735d51",
+  "initial_resource_snapshot": {
+    "UTC": "2026-10-03T06:18:49.978723+00:00",
+    "process_RSS": 27394048,
+    "system_RAM_total": 34049220608,
+    "system_RAM_used": 10525569024,
+    "system_RAM_free": 23523651584,
+    "swap_total": 8934019072,
+    "swap_used": 1378177024,
+    "CPU_utilization_percent": 20.7,
+    "logical_cores": 16,
+    "available_logical_cores": 16,
+    "process_thread_count": 4,
+    "heavy_processes": [
+      {
+        "pid": 35976,
+        "ppid": 73608,
+        "name": "python.exe",
+        "command_line": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m v42_single_thread.prepare",
+        "RSS": 28938240,
+        "thread_count": 4,
+        "self": true
+      }
+    ],
+    "label": "prepare",
+    "environment": {
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1"
+    },
+    "external_python_or_solver_candidates": [],
+    "PASS": true
+  },
+  "physics_changes": false,
+  "old_OOM_evidence_preserved": true
+}
