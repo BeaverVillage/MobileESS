@@ -1,6 +1,6 @@
 # V42 통합 결과
 
-1. Draft PR: 전달 단계에서 URL 기록. SHA는 PR의 현재 head 기준. 전체 pytest **1527 PASS, 기존 경고 1개**; semantic tests **29 PASS**. 최종 commit/push 후 clean tree를 별도로 확인한다.
+1. Draft PR: [#133](https://github.com/BeaverVillage/MobileESS/pull/133). 검증 코드/evidence commit: cfb1411eafb761d4e9168e621fccc84b7e4a83fd; 문서 전달 commit을 포함한 최종 SHA는 PR 현재 head 및 최종 채팅 보고 기준이다. 전체 pytest **1527 PASS, 기존 경고 1개**; semantic tests **29 PASS**. 최초 push 직후 clean tree를 확인했으며 최종 전달 commit 후 다시 확인한다.
 2. 기준: PR132 `ac2819cbc7b4e86fce07b4b0ed62e0647e9c473a`; M1 참고: PR131 `a16af252538774b2b2034a8722c31c0ffe5874a9`. PR132에서 분기하여 필요한 기능만 통합했으며 전체 merge/cherry-pick은 수행하지 않았다. 기존 PR131 duplicate 작업은 local commit `724dffea6ee4bf276d361b31ee3cf9b2588a7168`에 보존했다.
 3. 설명되지 않은 accepted feature 누락 없음. 통합/보존 검사 PASS는 코드 검증 범위다. 새 A1 수락과 새 M1의 전체 규모 검증은 완료되지 않았다.
 4. Planning voltage margin **0**, 전압 제약 **0.95–1.05 pu 유지**. 공통 Planning mapping과 새 A1/M1 builder에 적용했다.
