@@ -39,7 +39,8 @@ def grid(m,bundle,known,risk,mess_p=None,mess_q=None,*,stage=Stage.A1):
         m.addConstr(gp.quicksum(target[s,t+24] for s in caps)==timing['reserve']['gpu'][t])
     reserve=bind_headroom(m,known,anon,target,risk,caps,range(24,120))
     cert,power,idle,swing=load_power(bundle);coeff=native_coefficients(cert)
-    authority=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),digest(caps),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),voltage_for(stage).lower_squared,voltage_for(stage).upper_squared,True,stage=stage)
+    authority=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),digest(caps),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),voltage_for(stage).lower_squared,voltage_for(stage).upper_squared,True,stage=stage,
+        transformer_current_authority_sha256=getattr(coeff[0],'transformer_current_authority_sha256',None))
     controls=[]
     for t,c in enumerate(coeff):
         row=[]

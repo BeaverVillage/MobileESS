@@ -34,7 +34,8 @@ def frozen_grid(model,bundle,anchor,p,q,*,stage=Stage.M1):
         controls.append(row)
     ga=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),
                      digest(bundle['capacities']),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),
-                     digest(bundle['battery']),voltage.lower_squared,voltage.upper_squared,True,stage=stage)
+                     digest(bundle['battery']),voltage.lower_squared,voltage.upper_squared,True,stage=stage,
+                     transformer_current_authority_sha256=getattr(coeff[0],'transformer_current_authority_sha256',None))
     rho=add_grid(model,coeff,controls,ga)
     # Legacy constructor interface only. No AIDC/CC4 variable or reserve objective.
     return [('rho',rho),('reserve_shortfall',0.)],controls
@@ -46,6 +47,8 @@ def grid_report(bundle,controls,rho,tolerance=1e-5,*,stage=Stage.M1):
     lower_near=upper_near=lower_active=upper_active=0;grid_vio=0.;line_vio=tx_current_vio=tx_kva_vio=0.
     angles=2*np.pi*np.arange(16)/16;cos=np.cos(angles);sin=np.sin(angles)
     for c,x in zip(coeff,controls):
+        from v42_thermal.planning import require_coefficient
+        require_coefficient(c)
         x=np.asarray(x,dtype=float);volt=c.voltage_constant+c.voltage_matrix.T@x
         minimum=min(minimum,float(volt.min()));maximum=max(maximum,float(volt.max()))
         lo=volt-voltage.lower_squared;hi=voltage.upper_squared-volt
@@ -67,7 +70,8 @@ def grid_report(bundle,controls,rho,tolerance=1e-5,*,stage=Stage.M1):
             rating=c.transformer_ratings[k]
             if rating is not None:tx_kva_vio=max(tx_kva_vio,float(np.max(faces)-rating*math.cos(math.pi/16)))
     require(len(controls)==len(coeff),'GRID_CERTIFICATE_HORIZON')
-    return dict(PASS=max(grid_vio,line_vio,tx_current_vio,tx_kva_vio)<=tolerance,
+    from v42_thermal.authority import current_identity
+    return dict(PASS=max(grid_vio,line_vio,tx_current_vio,tx_kva_vio)<=tolerance,**current_identity(),
                 voltage_authority_sha256=authority_sha(stage),stage=stage.value,voltage_band=[voltage.lower_pu,voltage.upper_pu],min_voltage_pu=math.sqrt(max(0,minimum)),
                 max_voltage_pu=math.sqrt(max(0,maximum)),lower_active=lower_active,upper_active=upper_active,
                 lower_near_binding=lower_near,upper_near_binding=upper_near,active_tolerance_squared=1e-6,

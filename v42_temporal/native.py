@@ -106,7 +106,8 @@ def grid_binding(model,bundle,known,domains,z,raw,*,stage=Stage.A1,mess_p=None,m
     reserve=bind_headroom(model,known,anon,arrival_target,risk,caps,range(24,120))
     cert,power,idle,swing=load_power(bundle);coeff=native_coefficients(cert)
     ga=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),
-        digest(bundle['capacities']),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),voltage_for(stage).lower_squared,voltage_for(stage).upper_squared,True,stage=stage)
+        digest(bundle['capacities']),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),voltage_for(stage).lower_squared,voltage_for(stage).upper_squared,True,stage=stage,
+        transformer_current_authority_sha256=getattr(coeff[0],'transformer_current_authority_sha256',None))
     controls=[]
     for t,c in enumerate(coeff):
         row=[]

@@ -125,6 +125,8 @@ def run_day(day, *, diagnostic=False):
         no_controlmode_off=True,Actual_P_repair=0,Actual_Q_repair=0,Actual_global_reoptimization=0,
         MESS_PQ=0,workload_PQ_identity=True,control_iteration_max=max(r['control_iterations'] for r in control_logs),
         applied_PQ_logged=True,Actual_voltage=record(dest/'V_ACTUAL_AC.npz'),topology=topology)
+    from v42_thermal.authority import arm_contract
+    result.update(arm_contract('B0'))
     write(dest,'FRESH_ACTUAL_AC_RECEIPT.json',result)
     print(day,'Fresh autonomous PASS 96/96; voltage cells',result['voltage_violations'],flush=True)
     return result
