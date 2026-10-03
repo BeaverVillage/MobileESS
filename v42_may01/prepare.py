@@ -172,7 +172,10 @@ def native_coefficients(certificate):
     for t in range(96):coefficients.append(SimpleNamespace(**{f:p[f][t] for f in fields},slot=t,
         control_names=tuple(map(str,v['control_names'])),branch_names=tuple(branches),transformer_ratings=tuple(ratings),
         anchor=v['anchor_control'][t],coefficient_sha256=outputs['planning_coefficients']['sha256']))
-    return coefficients
+    from v42_thermal.planning import bind_coefficient
+    # Preserve every archived cache byte. Only normalized transformer-current
+    # constants/gradients change; voltage, line and transformer-kVA rows do not.
+    return [bind_coefficient(c,arrays['current']['rating_a']) for c in coefficients]
 
 
 def main():

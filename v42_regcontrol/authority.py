@@ -27,6 +27,7 @@ def source():
     from dayahead.v28r2.opendss_mapping import FeederAssets,compile_clean_engine,REGULATORS,CAPACITORS
     from dayahead.v40e.mapping import NativeAllocation
     from dayahead.v28r2.opendss_backend import _native_state,_voltage_vector,_branch_measurement
+    from v42_thermal.measurement import branch_measurement
     from dayahead.full_ieee123_g11_v16_1 import _oriented_branches
     from dayahead import grid_background_v16_2 as bg
     old = read(OLD/'ELECTRICAL_SOURCE_AUTHORITY.json')
@@ -37,7 +38,8 @@ def source():
     return dict(audit=audit,expected=expected,inventory=module.inventory,assets=assets,
         compile=compile_clean_engine,REGULATORS=REGULATORS,CAPACITORS=CAPACITORS,
         NativeAllocation=NativeAllocation,native_state=_native_state,voltage_vector=_voltage_vector,
-        branch_measurement=_branch_measurement,oriented_branches=_oriented_branches,bg=bg,paths=paths)
+        branch_measurement=branch_measurement,legacy_branch_measurement=_branch_measurement,
+        oriented_branches=_oriented_branches,bg=bg,paths=paths)
 
 
 def regulator_parameters(inventory):

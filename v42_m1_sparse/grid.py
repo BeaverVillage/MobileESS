@@ -23,6 +23,8 @@ def add_compressed(m,coefficients,controls,authority,label,bindings,cost):
     cos=np.cos(2*np.pi*np.arange(16)/16);sin=np.sin(2*np.pi*np.arange(16)/16)
     dominated=lambda n:re.fullmatch(r'transformer\.mess_(?:idc|sta)\d{2}_tx::[abc]',n.lower()) is not None
     for t,(c,x) in enumerate(zip(coefficients,controls)):
+        from v42_thermal.planning import require_coefficient
+        require_coefficient(c,authority)
         require(c.slot==t and len(x)==len(c.control_names) and len(c.coefficient_sha256)==64,'COEFFICIENT_IDENTITY')
         # Fixed AIDC controls are floats: their terms remain exact affine constants.
         variable=np.array([not isinstance(v,(float,int,np.floating)) for v in x])

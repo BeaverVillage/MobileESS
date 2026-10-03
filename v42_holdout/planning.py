@@ -5,6 +5,7 @@ import numpy as np
 from .common import *
 from v42_regcontrol.authority import source,compile_verified,assert_inventory
 from v42_regcontrol.runner import background
+from v42_thermal.authority import arm_contract
 
 def generate(day):
     require_may(day); dest=destination(day)
@@ -45,7 +46,7 @@ def generate(day):
         same_affine_equation_as_PR125=True,no_Actual_read=True,Actual_PQ_repair=0,optimizer_calls=0,
         source_parameter_integrity=True,source_before=before,source_after=after,
         native_RegControls_autonomous_per_slot=True,FD_tap_fixed_only_for_local_derivatives=True,
-        capacitors_fixed_ON=True,CapControl_count=0,freeze_before_Actual_truth=True))
+        capacitors_fixed_ON=True,CapControl_count=0,freeze_before_Actual_truth=True,**arm_contract('B0')))
     print(day,'Planning freeze; Vmin/Vmax',float(np.sqrt(v2).min()),float(np.sqrt(v2).max()),flush=True)
 
 def main():

@@ -21,6 +21,7 @@ class GridAuthority:
     voltage_upper_squared:float
     frozen:bool=False
     stage:Stage|None=None
+    transformer_current_authority_sha256:str|None=None
 
     def validate(self):
         require(self.frozen and all(len(s)==64 for s in (self.topology_sha,self.mapping_sha,self.service_sha,self.pq_sha)),'GRID_FREEZE_MISSING')
@@ -33,6 +34,8 @@ def add_grid(model,coefficients,controls,authority):
     def expr(base,w,x):return float(base)+gp.quicksum(float(w[k])*x[k] for k in np.flatnonzero(w))
     dominated=lambda name:re.fullmatch(r'transformer\.mess_(?:idc|sta)\d{2}_tx::[abc]',name.lower()) is not None
     for t,(c,x) in enumerate(zip(coefficients,controls)):
+        from v42_thermal.planning import require_coefficient
+        require_coefficient(c,authority)
         require(c.slot==t and len(x)==len(c.control_names) and len(c.coefficient_sha256)==64,'COEFFICIENT_IDENTITY')
         for n,b in enumerate(c.voltage_constant):
             v=expr(b,c.voltage_matrix[:,n],x)

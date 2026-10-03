@@ -36,7 +36,8 @@ def planning_grid(m,bundle,known,risk,*,stage=Stage.A1):
     reserve=bind_headroom(m,known,anon,target,risk,caps,range(24,120))
     cert,power,idle,swing=load_power(bundle);coeff=native_coefficients(cert)
     authority=GridAuthority(sha(Path(cert['input_identity']['identity']['inputs']['OpenDSS_master']['path'])),
-        digest(caps),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),voltage_for(stage).lower_squared,voltage_for(stage).upper_squared,True,stage=stage)
+        digest(caps),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),digest(bundle['battery']),voltage_for(stage).lower_squared,voltage_for(stage).upper_squared,True,stage=stage,
+        transformer_current_authority_sha256=getattr(coeff[0],'transformer_current_authority_sha256',None))
     controls=[]
     for t,c in enumerate(coeff):
         row=[]

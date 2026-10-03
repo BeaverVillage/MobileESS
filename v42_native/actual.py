@@ -46,6 +46,9 @@ def unknown_arrival(job,event_time,provider,anchor,current_anchor,site_policy,ph
 
 
 def require_fresh_ac(receipt,schedule_sha,grid_sha):
+    if 'transformer_current_contract' in receipt:
+        from v42_thermal.authority import require_certificate
+        require_certificate(receipt)
     require(receipt.get('PASS',True) is True,'FRESH_AC_REPORTED_FAIL')
     require(receipt.get('voltage_lower_pu',ACTUAL_LOWER_PU)==ACTUAL_LOWER_PU and receipt.get('voltage_upper_pu',ACTUAL_UPPER_PU)==ACTUAL_UPPER_PU,'ACTUAL_PHYSICAL_VOLTAGE_AUTHORITY')
     require(receipt.get('engine')=='OpenDSS' and receipt.get('fresh_run') is True and receipt.get('synthetic') is False,'FRESH_OPENDSS_REQUIRED')

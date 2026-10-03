@@ -25,6 +25,7 @@ def imports():
     from dayahead.v40e.mapping import NativeAllocation,corrected_mapping
     from dayahead.v28r2.opendss_mapping import FeederAssets,compile_clean_engine,_set_generator,_set_load,apply_frozen_native_state
     from dayahead.v28r2.opendss_backend import _voltage_vector,_branch_measurement,_native_state
+    from v42_thermal.measurement import branch_measurement as _branch_measurement
     return locals()
 
 
