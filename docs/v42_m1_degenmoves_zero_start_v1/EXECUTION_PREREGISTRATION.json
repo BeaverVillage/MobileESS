@@ -1,0 +1,29 @@
+{
+  "base": "52ef855a59144a7c561df44b81dc2ad265babdbd",
+  "one_P1_call": true,
+  "DegenMoves": 0,
+  "new_zero_action_Start_only_if_full_unreduced_rows_and_integrality_and_physics_PASS": true,
+  "Start_failure_no_repair_and_no_Start": true,
+  "preflight_optimize_calls": 0,
+  "no_new_LP_solves": true,
+  "no_old_UB_LB_gap": true,
+  "early_stop": "At 600 s, terminate if no first nonroot/branch, no incumbent, and root processing completion unobserved. A directly observed nonroot or model-feasible incumbent plus actual MIP_CUTCNT>0 allows continued same solve.",
+  "checkpoint_values": "Callback values carry their exact observation time. Stale last-MIP values are separated; unobservable exact-600 state remains NULL.",
+  "incumbent_validation": "Capture all MIPSOL points; check full raw rows inside MIPSOL only. Independently audit route/PQ/SOC/source grid for every point after terminal. Publish only fully validated scientific UB.",
+  "classification": "ACCEPTED: nonroot/branch <=600 with unchanged model. PARTIAL: valid incumbent or nonroot observed only after600. FAILED: correctness error or no incumbent/nonroot/branch.",
+  "callback_overhead": "Measure every handler call body wall and thread CPU; retain native Gurobi total calls/time and compare its reported time with PR134 66.91 s.",
+  "causal_claim": false,
+  "P2_order": [
+    "movement_energy",
+    "movement_count"
+  ],
+  "P2_P1_lock_slack": 0.0,
+  "P2_energy_lock_slack": 1e-08,
+  "P2_TimeLimit_each": 1800,
+  "downstream_NOT_RUN": [
+    "A2",
+    "M2",
+    "Actual",
+    "Fresh AC"
+  ]
+}

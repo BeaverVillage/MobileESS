@@ -1,0 +1,116 @@
+{
+  "PASS": true,
+  "A1": {
+    "prior_accepted": true,
+    "acceptance_reversed": false,
+    "saved_point_sha256": "7aef8451b6ba4dd430ae9b07466816191e02c3b9c35114345bde87c53ccbfa5c",
+    "numerical": {
+      "NUMERICAL_AUDIT_PASS": true,
+      "stage": "A1",
+      "tolerance": 1e-06,
+      "residuals": {
+        "solver_max_violation": 5.975753551989982e-07,
+        "independent_known_GPU_max_violation": 0.0,
+        "independent_Runtime_binding_max_violation": 1.0658141036401503e-13,
+        "independent_reserve_headroom_max_violation": 0.0
+      },
+      "residual_checks": {
+        "solver_max_violation": true,
+        "independent_known_GPU_max_violation": true,
+        "independent_Runtime_binding_max_violation": true,
+        "independent_reserve_headroom_max_violation": true
+      },
+      "finite": true,
+      "validator": "v42_postsolve.contract.numerical_residuals",
+      "rounding_clipping_repair_calls": 0
+    },
+    "physical": {
+      "PASS": true,
+      "jobs": 1499,
+      "old_validator_PASS": true,
+      "deterministic_WAN_PASS": true,
+      "full_service_and_carryout_PASS": true,
+      "rack_gang_PASS": true,
+      "physical_capacity_max_violation": 0,
+      "grid_max_violation": 5.975753550879759e-07,
+      "CC4_max_violation": 2.085016603814438e-10,
+      "Runtime_max_violation": 0,
+      "failed": [],
+      "limitation": "Native reserve anonymous site headroom is additionally checked by independent linear residual evaluation; no Actual AC run is executed.",
+      "all_phase_grid": {
+        "PASS": true,
+        "maximum_violations": {
+          "voltage": 3.07292584711405e-08,
+          "line_current": 5.975753550879759e-07,
+          "transformer_current": 0.0,
+          "transformer_kVA": 0.0
+        },
+        "min_voltage_pu": 0.98202260217481,
+        "max_voltage_pu": 1.0500000146329802,
+        "transformer_current_authority_sha256": "0cffff2af474221a7a5693f3c2b7a83026bd1522de2d3f66032c1757b9735d51",
+        "voltage_band": [
+          0.95,
+          1.05
+        ],
+        "margin_pu": 0.0,
+        "all_transformer_phases_audited": true
+      }
+    },
+    "raw_grid": {
+      "raw_minimum_maximum": {
+        "voltage_pu": {
+          "minimum": 0.98202260217481,
+          "maximum": 1.0500000146329802
+        },
+        "line_loading": {
+          "minimum": 0.0,
+          "maximum": 0.6715884801665905
+        },
+        "transformer_current_ratio": {
+          "minimum": 5.980371524193626e-07,
+          "maximum": 0.7105398524616909
+        },
+        "transformer_current_A": {
+          "minimum": 1.3694877476977907e-05,
+          "maximum": 542.371890141329
+        },
+        "transformer_apparent_kVA": {
+          "minimum": 0.0,
+          "maximum": 1253.3491400274982
+        },
+        "transformer_kVA_ratio": {
+          "minimum": 0.0,
+          "maximum": 0.7520094840164988
+        }
+      },
+      "actual_exceedance": {
+        "voltage_pu": 1.4632980160911302e-08,
+        "line_loading_above_rho": 5.975753550879759e-07,
+        "transformer_current_A": 0.0,
+        "transformer_kVA": 0.0
+      },
+      "physical_voltage_band": [
+        0.95,
+        1.05
+      ],
+      "physical_margin_pu": 0.0,
+      "physical_audit_tolerance": 1e-05,
+      "numerical_tolerance_added_to_ratings": false,
+      "values": "Frozen compiled Planning affine/current and polygon-flow model; not a Fresh AC calculation."
+    },
+    "original_A1_matrix_not_retained": true,
+    "full_A1_rows_recomputed": false,
+    "limitation": "A1 row/bound/integrality aggregate is the preserved native MaxVio evidence, not a new full A1 matrix audit. Fresh independent job/Runtime/CC4/grid semantics and raw saved bindings are rechecked. No A1 model is rebuilt."
+  },
+  "M1_history": {
+    "PR133": "NOT_RUN_A1_GATE_FAILED",
+    "PR134": "NO_INCUMBENT; no accepted same-authority M1 point to reevaluate",
+    "older_superseded_M1": "Different scientific authority; no transfer of historical numerical bounds or acceptance into this new certificate.",
+    "current_saved_points_reaudited": 2
+  },
+  "same_global_validator": true,
+  "unavailable_audits_not_claimed": true,
+  "new_optimize_calls": 0,
+  "A1_rebuild_calls": 0,
+  "downstream_runs": 0
+}
