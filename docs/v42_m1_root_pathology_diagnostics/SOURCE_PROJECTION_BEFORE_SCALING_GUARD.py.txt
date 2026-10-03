@@ -106,10 +106,6 @@ def variant_model(variant,original_model,env):
     freeze=read('PROTOTYPE_CACHE_FREEZE.json');assert all(sha(Path(p))==s for p,s in freeze['files'].items())
     if variant in ['row_scaled','aux_eliminated']:
         assert read('EXACT_ROW_SCALING_PROOF.json' if variant=='row_scaled' else 'AUXILIARY_ELIMINATION_PROOF.json')['PASS']
-        if variant=='row_scaled' and (OUT/'ROW_SCALING_TRANSPORT_SAFE_VALIDATION.json').exists():
-            guard=read('ROW_SCALING_TRANSPORT_SAFE_VALIDATION.json');assert guard['PASS'] and guard['explicit_user_approval']
-            assert all(sha(Path(p))==s for p,s in guard['cache_files'].items())
-            m=from_cache('ROW_SCALED_TRANSPORT_SAFE',env);assert signature(m)==guard['gurobi_scientific_signature'];return m
         return from_cache(variant.upper(),env)
     if variant.startswith('remove_'):
         allowed={'remove_voltage':['voltage_lower'],'remove_line':['line_thermal_face'],

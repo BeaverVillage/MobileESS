@@ -61,11 +61,9 @@ def lp_audit(m,x):
     return dict(max_row_violation=max(0.,float(v.max())),rows_exceeding_1e8=int((v>1e-8).sum()),max_bound_violation=bounds,
                 finite=bool(np.isfinite(x).all()),objective=float(np.array(m.getAttr('Obj'))@x+m.ObjCon),LP_only=True,certificate_update=False)
 def freeze_check():
-    f=read('SOURCE_FREEZE_AMENDED_SCALING_TRANSPORT.json' if (OUT/'SOURCE_FREEZE_AMENDED_SCALING_TRANSPORT.json').exists() else 'SOURCE_FREEZE_AMENDED_PREFLIGHT.json' if (OUT/'SOURCE_FREEZE_AMENDED_PREFLIGHT.json').exists() else 'SOURCE_FREEZE.json')
+    f=read('SOURCE_FREEZE_AMENDED_PREFLIGHT.json' if (OUT/'SOURCE_FREEZE_AMENDED_PREFLIGHT.json').exists() else 'SOURCE_FREEZE.json')
     assert all(sha(ROOT/n)==s for n,s in f['sources'].items()),'DIAGNOSTIC_SOURCE_CHANGED'
     assert sha(OUT/'PREREGISTRATION.json')==f['preregistration_sha256']
-    if 'row_transport_amendment_sha256' in f:assert sha(OUT/'PREREGISTRATION_AMENDMENT_ROW_TRANSPORT.json')==f['row_transport_amendment_sha256']
-    if 'row_transport_validation_sha256' in f:assert sha(OUT/'ROW_SCALING_TRANSPORT_SAFE_VALIDATION.json')==f['row_transport_validation_sha256']
     assert all(sha(Path(n))==s for n,s in f['inputs'].items()),'SOURCE_CACHE_CHANGED'
     preserve()
 def snapshot(label):
