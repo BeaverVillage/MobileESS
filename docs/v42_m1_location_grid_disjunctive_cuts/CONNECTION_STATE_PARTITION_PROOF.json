@@ -1,0 +1,19 @@
+{
+  "PASS": true,
+  "source": "Unmodified v42_native.mess.solve original flow and terminal_location equalities",
+  "proof": [
+    "Every arc strictly increases time. The time-expanded directed graph has no directed cycles.",
+    "Original binary nonnegative unit-flow with one origin supply and terminal sum 1 decomposes into exactly one origin-to-terminal path; no other positive path or circulation can occur.",
+    "A path crosses each time cut exactly once. It either uses a single stay arc [t,t+1) at one site, or a travel arc spanning that slot. Consequently sum_s original stay y[m,s,t] is exactly 1 or 0.",
+    "Missing original stay columns are fixed-zero unreachable states from the original constructor; no new pruning occurs."
+  ],
+  "y_definition": "Existing arc[m,site_index*96+t], no new variable",
+  "horizon": 96,
+  "site_count": 24,
+  "MESS_count": 4,
+  "stay_arcs_per_domain": 2304,
+  "all_arcs_strictly_forward": true,
+  "new_location_variables": 0,
+  "new_binary_variables": 0,
+  "native_source_SHA": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec"
+}

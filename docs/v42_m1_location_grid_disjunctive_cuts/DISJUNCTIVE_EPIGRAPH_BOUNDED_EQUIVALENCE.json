@@ -1,0 +1,38 @@
+{
+  "PASS": true,
+  "fixtures": [
+    {
+      "horizon": 3,
+      "arcs": 21,
+      "all_origin_terminal_paths": 5,
+      "all_real_power_box_projection_equal": true,
+      "original_optimum": "11/25",
+      "cut_optimum": "11/25"
+    },
+    {
+      "horizon": 4,
+      "arcs": 30,
+      "all_origin_terminal_paths": 11,
+      "all_real_power_box_projection_equal": true,
+      "original_optimum": "9/20",
+      "cut_optimum": "9/20"
+    },
+    {
+      "horizon": 5,
+      "arcs": 39,
+      "all_origin_terminal_paths": 21,
+      "all_real_power_box_projection_equal": true,
+      "original_optimum": "23/50",
+      "cut_optimum": "23/50"
+    }
+  ],
+  "cases": {
+    "computed": 51,
+    "transit": 100,
+    "uncomputed": 13
+  },
+  "arithmetic": "Exact Fraction",
+  "proof": "For every enumerated integer path, analytically minimize the original independent continuous P/Q boxes. Every added cut RHS is <= that path minimum, so every original real-valued feasible point remains feasible. Adding inequalities introduces no new points; projection and objective are identical.",
+  "scope": "Bounded time-expanded flow plus grid epigraph fixtures; real M1 arbitrary SOC/PCS/physics covered by general conditional-LP proof, not asserted to be enumerated by these toy boxes.",
+  "optimization_calls": 0
+}
