@@ -1,4 +1,4 @@
-1. Draft PR / SHA / pytest / clean: Draft PR 생성 후 연결; full 1566 PASS / semantic 68 PASS. Final HEAD 및 clean은 최종 Git 전달에서 확인한다.
+1. Draft PR / SHA / pytest / clean: https://github.com/BeaverVillage/MobileESS/pull/135 / 검증 commit 9d108b873164dac4f96d181f1dcbf217095291ce; full 1566 PASS / semantic 68 PASS. Final HEAD 및 clean은 최종 Git 전달에서 확인한다.
 2. PR134 model identity 동일 여부: True. Matrix/objective/bounds/vtypes/RHS/names exact 동일, A1 freeze/NormalAmps/source SHA 동일. Reduced 886,017행 / 316,743열 / 208,312 binaries / 8,447,855 nnz.
 3. 1 worker / Threads=1 준수: True. ENV thread pools=1. Solver FeasibilityTol/IntFeasTol/OptimalityTol=1e-8 유지; 전역 postsolve numerical tolerance=1e-6. 정정 후 optimize 0회.
 4. Zero-action MESS Start: PASS (재분류). Original strict 1e-8 FAIL 보존; numerical 1e-6 및 기존 physical/primary semantics로 재검증. Full unreduced max row residual 3.07292584711e-08. Route/PQ/SOC repair/clipping 0.
