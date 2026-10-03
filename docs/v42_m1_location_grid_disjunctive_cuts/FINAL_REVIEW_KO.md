@@ -1,4 +1,4 @@
-1. PR / SHA / tests / clean: Draft PR 게시 대기; scientific commit 결과 commit 이후 기록. Semantic 258 PASS, full pytest 1655 PASS; git diff --check PASS. 최종 metadata commit 뒤 remote HEAD와 clean tree는 최종 응답에서 확인한다.
+1. PR / SHA / tests / clean: https://github.com/BeaverVillage/MobileESS/pull/138; scientific commit b31fd89494734cb9d8f10f11948381ff696e8f45. Semantic 258 PASS, full pytest 1655 PASS; git diff --check PASS. 최종 metadata commit 뒤 remote HEAD와 clean tree는 최종 응답에서 확인한다.
 2. PR137 model identity PASS: exact head `94f8a38b7ef7b60cf5d7ffd91c86b109589fcaef`, original tracked 5,155개 파일 byte 보존. Matrix/indices/RHS/senses/bounds/types/objective/names 및 A1 freeze/NormalAmps/source SHA cold 재감사 PASS.
 3. Baseline LB: 0.5687116103498322. Basis acquisition 1회 objective 0.5687116103498316; 모든 원래 full rows 감사 PASS. 저장된 PR137 primal은 sensitivity와 separation에 그대로 사용했다.
 4. Split MESS/slot 수: 377; 최대 24 sites 동시 fractional occupancy.
