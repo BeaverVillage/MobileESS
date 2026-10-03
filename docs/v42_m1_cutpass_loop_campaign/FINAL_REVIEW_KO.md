@@ -1,4 +1,4 @@
-1. PR: Draft PR publication pending; scientific/code commit: pending; 최종 remote head는 PR metadata와 최종 응답에서 확인. Base=6795206a09e5f6ce1ad4de5c29a4c729bf79bd43. Semantic 117 PASS, full 1615 PASS / 1 warning; single pytest process. Commit/push 후 clean tree를 별도로 확인한다.
+1. PR: https://github.com/BeaverVillage/MobileESS/pull/136; scientific/code commit: 493296459ad7be8e1bad9d85b894bcea432cf512; 최종 remote head는 PR metadata와 최종 응답에서 확인. Base=6795206a09e5f6ce1ad4de5c29a4c729bf79bd43. Semantic 117 PASS, full 1615 PASS / 1 warning; single pytest process. Commit/push 후 clean tree를 별도로 확인한다.
 
 2. PR135 exact M1 model identity PASS: 886,017 rows / 316,743 columns / 208,312 binaries / 8,447,855 nnz; 모든 scientific arrays와 names/source SHA 일치.
 
