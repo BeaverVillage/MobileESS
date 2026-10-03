@@ -1,0 +1,444 @@
+{
+  "PASS": true,
+  "PASS_scope": "code, authority, preservation, tests and sequential execution; solve acceptance is separately flagged",
+  "base_exact_head": "c26c656265cc90dec39eb2937b76fbea1f2ed500",
+  "pytest": {
+    "PASS": true,
+    "semantic": {
+      "exit_code": 0,
+      "passed": 34,
+      "warnings": 0,
+      "runtime_seconds": 22.15,
+      "log_sha256": "f6cc29d9e3d96d115fde87db18ee08c28e37e3e4fc4ff8a5094ff439d2b25770",
+      "single_process": true,
+      "xdist_used": false,
+      "all_test_Gurobi_Threads_one": true,
+      "test_optimization_calls": 2,
+      "observed_calls_nonoverlapping": true,
+      "native_exception_trace_preserved": true,
+      "scientific_full_model_retries": 0
+    },
+    "full": {
+      "exit_code": 0,
+      "passed": 1532,
+      "warnings": 1,
+      "runtime_seconds": 110.09,
+      "log_sha256": "c25f44ed1d6077af7c13af9349bb31d7a3e8758c1ad796636737fbcacdb7713d",
+      "single_process": true,
+      "xdist_used": false,
+      "all_test_Gurobi_Threads_one": true,
+      "test_optimization_calls": 368,
+      "observed_calls_nonoverlapping": true,
+      "native_exception_trace_preserved": true,
+      "scientific_full_model_retries": 0
+    },
+    "native_trace_note": "Windows native exception traces were emitted during backend imports; both processes continued and returned exit 0. Raw logs are preserved without diagnosing an unproven cause.",
+    "compiler_and_diff_checks": "Recorded separately in POST_HEAVY_CHECKS.json"
+  },
+  "post_heavy_checks": {
+    "PASS": true,
+    "checked_after_heavy_terminal": true,
+    "compileall_exit": 0,
+    "cached_diff_check_exit": 0,
+    "source_compile_scope": [
+      "v42_single_thread",
+      "tests/v42_single_thread"
+    ],
+    "initial_cached_diff_check_exits": [
+      2,
+      2
+    ],
+    "initial_diff_check_reason": "Raw LP logs end with blank lines and raw A1 logs have trailing spaces. The log-specific whitespace attribute permits both without changing original log bytes.",
+    "post_test_reporting_only_change": "finalize.py records observed DegenMoves and includes namespace attributes in the SHA manifest; scientific executed sources unchanged",
+    "UTC": "2026-10-03T07:21:52.1906435Z"
+  },
+  "execution_order_audit": {
+    "PASS": true,
+    "scientific_heavy": {
+      "A1": {
+        "start": "2026-10-03T06:21:37.816869+00:00",
+        "end": "2026-10-03T06:56:57.876275+00:00",
+        "last_phase": "after_terminal_solve",
+        "observed_worker_PIDs": [
+          49016
+        ],
+        "OS_thread_count_range": [
+          2,
+          7
+        ]
+      },
+      "M1": {
+        "start": "2026-10-03T06:57:53.244404+00:00",
+        "end": "2026-10-03T07:15:25.521751+00:00",
+        "last_phase": "after_terminal_solve",
+        "observed_worker_PIDs": [
+          87652
+        ],
+        "OS_thread_count_range": [
+          3,
+          9
+        ]
+      }
+    },
+    "first_semantic_fixture_optimize_UTC": "2026-10-03T07:16:18.528093+00:00",
+    "full_pytest_preflight_UTC": "2026-10-03T07:16:49.799303+00:00",
+    "heavy_solver_parallel_test_calls": 0,
+    "each_stage_one_worker": true,
+    "solver_Threads": 1,
+    "environment": {
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1"
+    },
+    "OS_threads_include_telemetry_and_library_support": true,
+    "full_pytest_Gurobi_calls": 368,
+    "all_test_calls_sequential": true
+  },
+  "source_freeze_binding_audit": {
+    "PASS": true,
+    "source_drift": [],
+    "executed_source": [
+      {
+        "receipt": "A1_EXECUTED_SOURCE_RECEIPT.json",
+        "PASS": true,
+        "changed": []
+      },
+      {
+        "receipt": "M1_EXECUTED_SOURCE_RECEIPT.json",
+        "PASS": true,
+        "changed": []
+      }
+    ],
+    "accepted_A1_freeze_sha256": "d16ab0194a44a52c0e2d5277ad438bf4229e5c125967b8a995125da61f0fa0e0",
+    "new_model_identity": {
+      "full_MPS_sha256": "66c426469ddfd85de69946b67ea93b6d370fd28fa8815ec9b98736b62157753f",
+      "reduced_MPS_sha256": "f018f040e5f3a1d6e1315c3308f34c7279d965e808c4a4ac8039995f5886c397",
+      "matrix_sha256": "35bdc6e7c2664b763d3d0456b7296b7c8830d7c7c39a61a3cb32e699f8bb2024",
+      "data_sha256": "ba6eacea23b71db0b5c6d4e18d6370942906ce2790276127139dbc2ece1d2912",
+      "A1_freeze_sha256": "d16ab0194a44a52c0e2d5277ad438bf4229e5c125967b8a995125da61f0fa0e0",
+      "NormalAmps_authority": "0cffff2af474221a7a5693f3c2b7a83026bd1522de2d3f66032c1757b9735d51"
+    },
+    "future_actual_reads": 0,
+    "Runtime_refit": 0,
+    "CC4_refit": 0,
+    "original_sources_rechecked": true,
+    "cache_external_to_Git": true
+  },
+  "PR133_byte_preservation_PASS": true,
+  "authority_identity_PASS": true,
+  "single_worker_PASS": true,
+  "A1_result": {
+    "accepted": true,
+    "A1_ACCEPTED": true,
+    "source_regenerated": true,
+    "old_A1_freeze_reused": false,
+    "optimization_calls": 4,
+    "passes": [
+      {
+        "group": "MAX_LINE_LOADING",
+        "component": "rho",
+        "status": 2,
+        "objective": 0.6715877825912354,
+        "bound": 0.6715877825912354,
+        "runtime": 475.6089999675751,
+        "gap": 0.0
+      },
+      {
+        "group": "MIN_INTERVENTION",
+        "component": "migration_count",
+        "status": 2,
+        "objective": 0.0,
+        "bound": 0.0,
+        "runtime": 896.5829999446869,
+        "gap": 0.0
+      },
+      {
+        "group": "MIN_INTERVENTION",
+        "component": "shift_magnitude",
+        "status": 2,
+        "objective": 727.0,
+        "bound": 725.0,
+        "runtime": 21.319999933242798,
+        "gap": 0.002751031636863824
+      },
+      {
+        "group": "MIN_INTERVENTION",
+        "component": "prestart_relocation",
+        "status": 2,
+        "objective": 231.0,
+        "bound": 230.0,
+        "runtime": 194.9119999408722,
+        "gap": 0.004329004329004329
+      }
+    ],
+    "total_runtime": 1588.423999786377,
+    "first_incumbent": {
+      "component": "rho",
+      "solver_seconds": 471.28399991989136
+    },
+    "callback_errors": [],
+    "status": "ACCEPTED",
+    "terminal_solver_status": 2,
+    "objective": 0.6715877825912354,
+    "physical": {
+      "PASS": true,
+      "jobs": 1499,
+      "old_validator_PASS": true,
+      "deterministic_WAN_PASS": true,
+      "full_service_and_carryout_PASS": true,
+      "rack_gang_PASS": true,
+      "physical_capacity_max_violation": 0,
+      "grid_max_violation": 5.975753550879759e-07,
+      "CC4_max_violation": 2.085016603814438e-10,
+      "Runtime_max_violation": 0,
+      "failed": [],
+      "limitation": "Native reserve anonymous site headroom is additionally checked by independent linear residual evaluation; no Actual AC run is executed.",
+      "independent_known_GPU_max_violation": 0.0,
+      "independent_Runtime_binding_max_violation": 1.0658141036401503e-13,
+      "independent_reserve_headroom_max_violation": 0.0,
+      "solver_max_violation": 5.975753551989982e-07,
+      "P1_rho": 0.6715878825912354,
+      "validation_seconds": 12.167123100021854,
+      "artificial_physical_slack": 0,
+      "model_defined_scientific_objective_snapshot": {
+        "rho": 0.6715878825912354,
+        "reserve_shortfall": 89830.0,
+        "CC4_reference_deviation": 2.4103995715269106,
+        "migration_count": 0.0,
+        "shift_slots": 727.0,
+        "prestart_changes": 231.0
+      },
+      "artificial_scientific_slack": 0,
+      "reserve_shortfall_semantics": "P2 is the inherited model-defined reserve shortfall quantity, not an introduced feasibility-relaxation slack; unoptimized level snapshots are not claimed lexicographic optima",
+      "all_phase_grid": {
+        "PASS": true,
+        "maximum_violations": {
+          "voltage": 3.07292584711405e-08,
+          "line_current": 5.975753550879759e-07,
+          "transformer_current": 0.0,
+          "transformer_kVA": 0.0
+        },
+        "min_voltage_pu": 0.98202260217481,
+        "max_voltage_pu": 1.0500000146329802,
+        "transformer_current_authority_sha256": "0cffff2af474221a7a5693f3c2b7a83026bd1522de2d3f66032c1757b9735d51",
+        "voltage_band": [
+          0.95,
+          1.05
+        ],
+        "margin_pu": 0.0,
+        "all_transformer_phases_audited": true
+      }
+    },
+    "settings": {
+      "Method": 1,
+      "Threads": 1,
+      "MIPGap": 0.005,
+      "Seed": 20260929,
+      "total_TimeLimit": 3600,
+      "defaults": {
+        "Cuts": -1,
+        "Presolve": -1,
+        "Heuristics": 0.05,
+        "NumericFocus": 0
+      }
+    },
+    "single_attempt": true,
+    "parameter_sweep": false,
+    "events": [
+      {
+        "component": "rho",
+        "phase": "after_presolve",
+        "solver_seconds": 99.58500003814697,
+        "literal": "Presolve time: 92.67s"
+      },
+      {
+        "component": "rho",
+        "phase": "root_relaxation_completion",
+        "solver_seconds": 193.38499999046326,
+        "literal": "Root relaxation: objective 6.715878e-01, 43043 iterations, 79.85 seconds (117.01 work units)"
+      },
+      {
+        "component": "migration_count",
+        "phase": "after_presolve",
+        "solver_seconds": 804.4809999465942,
+        "literal": "Presolve time: 797.15s"
+      },
+      {
+        "component": "migration_count",
+        "phase": "root_relaxation_completion",
+        "solver_seconds": 833.7630000114441,
+        "literal": "Root relaxation: objective 0.000000e+00, 15580 iterations, 16.99 seconds (26.57 work units)"
+      },
+      {
+        "component": "shift_magnitude",
+        "phase": "after_presolve",
+        "solver_seconds": 12.608999967575073,
+        "literal": "Presolve time: 5.66s"
+      },
+      {
+        "component": "shift_magnitude",
+        "phase": "root_relaxation_completion",
+        "solver_seconds": 17.842999935150146,
+        "literal": "Root relaxation: objective 7.208070e+02, 3483 iterations, 0.19 seconds (0.50 work units)"
+      },
+      {
+        "component": "prestart_relocation",
+        "phase": "after_presolve",
+        "solver_seconds": 14.825999975204468,
+        "literal": "Presolve time: 7.65s"
+      },
+      {
+        "component": "prestart_relocation",
+        "phase": "root_relaxation_completion",
+        "solver_seconds": 20.96499991416931,
+        "literal": "Root relaxation: objective 1.789440e+02, 2925 iterations, 0.16 seconds (0.48 work units)"
+      }
+    ],
+    "resources": {
+      "status": "ACCEPTED",
+      "observed_peak_process_RSS": 22888587264,
+      "observed_minimum_system_free_RAM": 622862336,
+      "observed_maximum_swap_used": 2214539264,
+      "sample_count": 307,
+      "periodic_sample_seconds": 5,
+      "exact_peak_not_claimed": true,
+      "worker_processes": 1,
+      "Gurobi_Threads": 1,
+      "telemetry_support_thread_is_not_a_solver_worker": true,
+      "external_heavy_process_observations": [],
+      "telemetry_errors": [],
+      "sequential_policy_PASS": true
+    }
+  },
+  "M1_certificate": {
+    "schema": "NEW_INTEGRATED_M1_CERTIFICATE_V1",
+    "model_identity": {
+      "full_MPS_sha256": "66c426469ddfd85de69946b67ea93b6d370fd28fa8815ec9b98736b62157753f",
+      "reduced_MPS_sha256": "f018f040e5f3a1d6e1315c3308f34c7279d965e808c4a4ac8039995f5886c397",
+      "matrix_sha256": "35bdc6e7c2664b763d3d0456b7296b7c8830d7c7c39a61a3cb32e699f8bb2024",
+      "data_sha256": "ba6eacea23b71db0b5c6d4e18d6370942906ce2790276127139dbc2ece1d2912",
+      "A1_freeze_sha256": "d16ab0194a44a52c0e2d5277ad438bf4229e5c125967b8a995125da61f0fa0e0",
+      "NormalAmps_authority": "0cffff2af474221a7a5693f3c2b7a83026bd1522de2d3f66032c1757b9735d51"
+    },
+    "UB": null,
+    "LB": 0.5687116103498322,
+    "gap": null,
+    "valid_incumbent": false,
+    "valid_global_LB": true,
+    "M1_ACCEPTED": false,
+    "old_certificate": "SUPERSEDED_NOT_USED",
+    "P1": "MIN MAX_LINE_LOADING",
+    "P2_order": [
+      "movement_energy",
+      "movement_count"
+    ],
+    "P2_execution": "NOT_RUN: single P1 bound-oriented run",
+    "physical_PASS": false,
+    "authority_gates_PASS": true
+  },
+  "root_LP_gate": {
+    "PASS": true,
+    "objective_difference": 4.325609870292624e-10,
+    "full": {
+      "status": 2,
+      "objective": 0.5687116103448068,
+      "runtime": 152.44000005722046,
+      "barrier_iterations": 65,
+      "settings": {
+        "Threads": 1,
+        "Method": 2,
+        "Crossover": 0,
+        "TimeLimit": 300,
+        "FeasibilityTol": 1e-08,
+        "OptimalityTol": 1e-08,
+        "BarConvTol": 1e-11,
+        "PreDual": 0,
+        "Seed": 20260929
+      },
+      "all_full_rows_audit": {
+        "PASS": true,
+        "finite": true,
+        "max_constraint_violation": 2.743364575508167e-07,
+        "max_bound_violation": 0.0,
+        "max_integrality_violation": null,
+        "objective": 0.5687116103448068
+      },
+      "original_unit_grid_audit": {
+        "PASS": true,
+        "maximum_violations": {
+          "voltage": 1.0969003483296547e-13,
+          "line_current": 1.088671597315738e-09,
+          "transformer_current": 0.0,
+          "transformer_kVA": 0.0
+        },
+        "min_voltage_pu": 0.9813011979626272,
+        "max_voltage_pu": 1.0500000000000522,
+        "transformer_current_authority_sha256": "0cffff2af474221a7a5693f3c2b7a83026bd1522de2d3f66032c1757b9735d51",
+        "voltage_band": [
+          0.95,
+          1.05
+        ],
+        "margin_pu": 0.0,
+        "all_transformer_phases_audited": true,
+        "original_units": {
+          "voltage_pu_max_violation": 5.218048215738236e-14,
+          "transformer_current_A_max_violation": 0.0,
+          "transformer_kVA_max_violation": 0.0
+        }
+      }
+    },
+    "reduced": {
+      "status": 2,
+      "objective": 0.5687116107773678,
+      "runtime": 144.57599997520447,
+      "barrier_iterations": 60,
+      "settings": {
+        "Threads": 1,
+        "Method": 2,
+        "Crossover": 0,
+        "TimeLimit": 300,
+        "FeasibilityTol": 1e-08,
+        "OptimalityTol": 1e-08,
+        "BarConvTol": 1e-11,
+        "PreDual": 0,
+        "Seed": 20260929
+      },
+      "all_full_rows_audit": {
+        "PASS": true,
+        "finite": true,
+        "max_constraint_violation": 2.9868816309175372e-09,
+        "max_bound_violation": 0.0,
+        "max_integrality_violation": null,
+        "objective": 0.5687116107773678
+      },
+      "original_unit_grid_audit": {
+        "PASS": true,
+        "maximum_violations": {
+          "voltage": 0.0,
+          "line_current": 6.0277338675973624e-12,
+          "transformer_current": 0.0,
+          "transformer_kVA": 0.0
+        },
+        "min_voltage_pu": 0.9813011813220897,
+        "max_voltage_pu": 1.049999999999989,
+        "transformer_current_authority_sha256": "0cffff2af474221a7a5693f3c2b7a83026bd1522de2d3f66032c1757b9735d51",
+        "voltage_band": [
+          0.95,
+          1.05
+        ],
+        "margin_pu": 0.0,
+        "all_transformer_phases_audited": true,
+        "original_units": {
+          "voltage_pu_max_violation": 0.0,
+          "transformer_current_A_max_violation": 0.0,
+          "transformer_kVA_max_violation": 0.0
+        }
+      }
+    },
+    "scientific_model": "NEW NormalAmps + zero-margin M1",
+    "MIP_allowed": true
+  },
+  "old_bounds_used": false,
+  "downstream_calls": 0
+}

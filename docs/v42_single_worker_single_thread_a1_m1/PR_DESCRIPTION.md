@@ -1,0 +1,5 @@
+PR133의 full A1은 concurrent root에서 OOM으로 종료됐다. 동일 96-step / 1,499-job 모델과 NormalAmps·zero-margin 물리를 유지해 한 worker / Threads=1 / Method=1로 다시 생성·실행했으며, 승인된 기존 P1/P2 순차 locks를 유지한 한 실행에서 A1을 수락하고 freeze했다.
+
+새 freeze로 M1을 다시 생성했다. 독립 exact duplicate scan은 75,455행을 제거했으며, sequential full/reduced LP는 모두 OPTIMAL이고 목적값 차이 4.33e-10 및 full-row/original-unit audits를 통과했다. 과거 Start는 새 A1 불일치로 거부했다. 단일 M1 P1은 root relaxation/crossover를 마쳤지만 nonroot가 시작되지 않아 600초 checkpoint에서 중단됐다: 새 LB 0.5687116103498322, UB/gap NULL, M1_ACCEPTED=false, P2 NOT_RUN. 기록된 후속 병목은 post-crossover root DegenMoves이다. OOM 재발은 없으며 old UB/LB/gap과 downstream 실행은 사용하지 않았다.
+
+PR133의 4,756 tracked files는 byte/SHA로 보존하고 새 코드·artifact namespace만 추가한다. Heavy 종료 후 단일 pytest process에서 semantic 34 PASS, full 1,532 PASS / 1 inherited calibration warning. Tests의 Gurobi 호출도 Threads=1과 순차 실행을 기록했다. Backend imports가 출력한 Windows native exception traces를 원시 로그에 보존했으며 두 pytest의 exit code는 0이다. Compile/diff/source/model/freeze SHA 검증과 실행 순서 증거는 VERIFICATION 및 SHA256_MANIFEST에 기록한다. 관측 resource peaks는 sampling 수치이며 절대 또는 causal speedup은 주장하지 않는다.
