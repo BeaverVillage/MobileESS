@@ -1,0 +1,113 @@
+{
+  "prototype_scope": "Exact injection P/Q subset only, 4608 helpers. Remaining 76608 response helpers retained; no approximate full flattening.",
+  "exactness_proof_PASS": true,
+  "status": "NOT_RUN",
+  "reason": "USER_STOP",
+  "objective_equivalence_status": "NOT_EVALUATED_USER_STOP",
+  "objective_equivalence_PASS": null,
+  "terminal_objectives": [],
+  "arms": {
+    "AUX_REFERENCE_METHOD1_300S": {
+      "label": "AUX_REFERENCE_METHOD1_300S",
+      "status": "NOT_RUN",
+      "reason": "USER_STOP",
+      "formulation": "original",
+      "variant": null,
+      "settings": {
+        "Threads": 4,
+        "Seed": 20260929,
+        "NumericFocus": 1,
+        "FeasibilityTol": 1e-08,
+        "OptimalityTol": 1e-08,
+        "Method": 1,
+        "TimeLimit": 300
+      },
+      "diagnostic_only": true,
+      "certificate_update": false,
+      "terminal_optimal": false,
+      "objective": null,
+      "solver_runtime": null,
+      "optimize_calls": 0,
+      "NON_SCIENTIFIC_DIAGNOSTIC_ONLY": false
+    },
+    "AUX_ELIMINATED_METHOD1_300S": {
+      "label": "AUX_ELIMINATED_METHOD1_300S",
+      "status": "NOT_RUN",
+      "reason": "USER_STOP",
+      "formulation": "original",
+      "variant": "aux_eliminated",
+      "settings": {
+        "Threads": 4,
+        "Seed": 20260929,
+        "NumericFocus": 1,
+        "FeasibilityTol": 1e-08,
+        "OptimalityTol": 1e-08,
+        "Method": 1,
+        "TimeLimit": 300
+      },
+      "diagnostic_only": true,
+      "certificate_update": false,
+      "terminal_optimal": false,
+      "objective": null,
+      "solver_runtime": null,
+      "optimize_calls": 0,
+      "NON_SCIENTIFIC_DIAGNOSTIC_ONLY": false
+    },
+    "AUX_ELIMINATED_METHOD2_600S": {
+      "label": "AUX_ELIMINATED_METHOD2_600S",
+      "status": "NOT_RUN",
+      "reason": "USER_STOP",
+      "formulation": "original",
+      "variant": "aux_eliminated",
+      "settings": {
+        "Threads": 4,
+        "Seed": 20260929,
+        "NumericFocus": 1,
+        "FeasibilityTol": 1e-08,
+        "OptimalityTol": 1e-08,
+        "Method": 2,
+        "TimeLimit": 600,
+        "Crossover": 0,
+        "PreDual": 0,
+        "BarConvTol": 1e-11
+      },
+      "diagnostic_only": true,
+      "certificate_update": false,
+      "terminal_optimal": false,
+      "objective": null,
+      "solver_runtime": null,
+      "optimize_calls": 0,
+      "NON_SCIENTIFIC_DIAGNOSTIC_ONLY": false
+    }
+  },
+  "mappings": [
+    {
+      "label": "ROOT_LP_METHOD2_ORIGINAL",
+      "direction": "original_to_reduced",
+      "terminal_optimal": true,
+      "original_audit": {
+        "max_row_violation": 2.4722796659825337e-10,
+        "rows_exceeding_1e8": 0,
+        "max_bound_violation": 0.0,
+        "objective": 0.5718494620559795,
+        "finite": true,
+        "certificate_update": false
+      },
+      "reduced_audit": {
+        "max_row_violation": 2.4722796659825337e-10,
+        "rows_exceeding_1e8": 0,
+        "max_bound_violation": 0.0,
+        "objective": 0.5718494620559795,
+        "finite": true,
+        "certificate_update": false
+      },
+      "primary_roundtrip_max_difference": 0.0,
+      "removed_helpers_reconstruction_difference": 2.3669599613640457e-10,
+      "objective_mapping_difference": 0.0
+    }
+  ],
+  "removed_physical_constraints": 0,
+  "removed_primary_variables": 0,
+  "mapping_note": "Removed-helper reconstruction uses IEEE arithmetic; all retained coordinates are directly copied to preserve bits, including signed zero. Exact algebraic inverse is proved separately. Numerical residuals are measured and disclosed.",
+  "certificate_update": false
+}

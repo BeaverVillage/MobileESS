@@ -1,0 +1,100 @@
+{
+  "status": "USER_STOPPED_PARTIAL_DIAGNOSIS",
+  "scientific_scope": "Eight completed arms; basis acquisition interrupted; nine registered arms never started.",
+  "stop_receipt": {
+    "recorded_utc": "2026-10-03T04:41:40Z",
+    "instruction": "작업 중단하고 PR하고 정리한거 나한테줘.",
+    "worker_PID": 88568,
+    "worker_command_verified": "python -u -m v42_root_diagnostics.resume_lane",
+    "worker_terminated": true,
+    "exact_process_termination_time_not_captured": true,
+    "completed_arms": [
+      "MIP_ROOT_METHOD2_COMPACT_300S",
+      "MIP_ROOT_METHOD2_ORIGINAL_300S",
+      "ROOT_LP_METHOD0_COMPACT",
+      "ROOT_LP_METHOD0_ORIGINAL",
+      "ROOT_LP_METHOD1_COMPACT",
+      "ROOT_LP_METHOD1_ORIGINAL",
+      "ROOT_LP_METHOD2_COMPACT",
+      "ROOT_LP_METHOD2_ORIGINAL"
+    ],
+    "completed_arm_count": 8,
+    "interrupted_arm": "BASIS_ACQUISITION_ORIGINAL",
+    "never_started_arms": [
+      "ROW_SCALED_METHOD1_DIAGNOSTIC",
+      "AUX_REFERENCE_METHOD1_300S",
+      "AUX_ELIMINATED_METHOD1_300S",
+      "AUX_ELIMINATED_METHOD2_600S",
+      "ISOLATION_FULL_REFERENCE_120S",
+      "NON_SCIENTIFIC_REMOVE_VOLTAGE_LOWER_120S",
+      "NON_SCIENTIFIC_REMOVE_LINE_THERMAL_FACE_120S",
+      "NON_SCIENTIFIC_REMOVE_CORRECTION_BINDING_120S",
+      "NON_SCIENTIFIC_REMOVE_SOC_DYNAMICS_120S"
+    ],
+    "never_started_arm_count": 9,
+    "further_diagnostic_optimize_authorized": false,
+    "remaining_work": "Post-hoc evidence organization, required regression suite, integrity checks, commit/push/Draft PR.",
+    "interrupted_log_sha256": "58d21973e55d0c2c2b2107fa310378d3ad18910b2fd039e2eaa0fd750296bedf",
+    "certificate_unchanged": true
+  },
+  "ranked_causes": [
+    {
+      "rank": 1,
+      "cause": "Method1 root-LP method sensitivity",
+      "classification": "CONFIRMED"
+    },
+    {
+      "rank": 2,
+      "cause": "Grid matrix/factorization burden",
+      "classification": "STRONGLY_SUPPORTED",
+      "limit": "Structural burden supported; exclusive causal mechanism remains unresolved"
+    },
+    {
+      "rank": 3,
+      "cause": "Degeneracy / conditioning mechanism",
+      "classification": "INCONCLUSIVE",
+      "limit": "Measured basis evidence only; absence of basis leaves INCONCLUSIVE"
+    }
+  ],
+  "flags": {
+    "M1_ACCEPTED": false,
+    "M1_ROOT_CAUSE_DIAGNOSED": true,
+    "COMPACT_M1_PRODUCTION_AUTHORIZED": false,
+    "PRODUCTION_1800S": "NOT_RUN",
+    "P2": "NOT_RUN",
+    "A2": "NOT_RUN",
+    "M2": "NOT_RUN",
+    "Actual": "NOT_RUN",
+    "Fresh_AC": "NOT_RUN",
+    "PROBLEM13_FINAL_VALIDATED": false,
+    "Benders_calls": 0,
+    "new_decompositions": 0
+  },
+  "certificate": {
+    "UB": 0.5912812634331275,
+    "LB": 0.5722125039436496,
+    "gap": 0.03224989640084286,
+    "unchanged": true,
+    "diagnostic_LP_objective_not_adopted": true
+  },
+  "Method1": {
+    "original": "CONFIRMED",
+    "compact": "STRONGLY_SUPPORTED"
+  },
+  "scaling": "INCONCLUSIVE",
+  "degeneracy": "INCONCLUSIVE",
+  "conditioning": "INCONCLUSIVE",
+  "compact": {
+    "binary_reduction_percent": 95.47697684242866,
+    "nnz_increase_percent": 53.07392225636444,
+    "total_columns_increase": 96,
+    "continuous_retyping_delta": 198890,
+    "additional_continuous_columns": 96,
+    "total_continuous_delta": 198986,
+    "reason_binary_reduction_does_not_remove_root_pathology": "Every tested root LP already has all integer variables relaxed. Compact retains the same grid-response block and adds 53.07% nnz through route expressions.",
+    "branching_advantage": "INCONCLUSIVE unless comparative nonroot evidence proves it; neither binary count nor barrier-only speed proves faster branching",
+    "discard_compact_authorized": false,
+    "discard_reason": "Root performance does not prove absence of downstream tree benefit; no production Compact adoption either."
+  },
+  "direct_cause_sentence": "현재 M1이 느린 가장 직접적인 원인은 동일 LP에서 재현된 Method=1 root 풀이 지연이며, 이를 만드는 구조적 원인은 INCONCLUSIVE이다."
+}

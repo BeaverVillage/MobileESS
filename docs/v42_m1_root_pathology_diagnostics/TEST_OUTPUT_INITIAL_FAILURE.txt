@@ -1,0 +1,60 @@
+........................................................................ [  7%]
+........................................................................ [ 15%]
+........................................................................ [ 23%]
+........................................................................ [ 31%]
+........................................................................ [ 39%]
+........................................................................ [ 47%]
+........................................................................ [ 55%]
+........................................................................ [ 63%]
+........................................................................ [ 71%]
+........................................................................ [ 78%]
+........................................................................ [ 86%]
+........................................................................ [ 94%]
+.............................F..................                         [100%]
+================================== FAILURES ===================================
+______ test_J_K_M_projection_unique_and_only_defining_equalities_removed ______
+
+original_arrays = (<Compressed Sparse Row sparse matrix of dtype 'float64'
+	with 8282350 stored elements and shape (954560, 316743)>, {'...ine_correction[95,382]'], dtype='<U32'), 'objcon': array(-0.), 'objective': array([0., 0., 0., ..., 0., 0., 0.]), ...})
+
+    def test_J_K_M_projection_unique_and_only_defining_equalities_removed(original_arrays):
+        A,d=original_arrays;P,pd=a.cache_data('AUX_ELIMINATED');E=c.sparse.load_npz(c.LOCAL/'AUX_RECONSTRUCTION_E.npz')
+        with c.np.load(c.LOCAL/'AUX_MAP_AXES.npz') as z:keep=z['keep_columns'];rows=z['keep_rows'];removed=z['removed_columns']
+        allrows=c.row_families('original');removedrows=c.np.setdiff1d(c.np.arange(A.shape[0]),rows)
+        assert len(removed)==len(removedrows)==4608
+        assert set(map(c.family,d['names'][removed]))=={'injection_P','injection_Q'}
+        assert set(allrows[removedrows])=={'injection_P_binding','injection_Q_binding'}
+        assert (P-(A@E)[rows]).nnz==0 and (E[keep]-c.sparse.eye(len(keep),format='csr')).nnz==0
+        assert c.np.array_equal(d['objective'][keep],pd['objective']) and (d['objective'][removed]==0).all()
+        assert c.np.array_equal(d['rhs'][rows],pd['rhs']) and c.np.array_equal(d['sense'][rows],pd['sense'])
+        defining=A[removedrows]
+        assert (defining[:,removed]-c.sparse.eye(len(removed),format='csr')).nnz==0
+        assert (d['sense'][removedrows]=='=').all() and (d['rhs'][removedrows]==0).all()
+        assert (defining@E).nnz==0
+        with c.np.load(c.OLD/'ORIGINAL_RECONSTRUCTED_START.npz') as z:x=z['values']
+        full=E@x[keep];audit=a.residual(A,d,full);assert audit['max_row_violation']<=1e-9 and audit['objective']==c.UB
+        from v42_exact_start.common import primary_mask
+>       mask=primary_mask(d['names']);assert c.np.array_equal(full[mask].view(c.np.uint64),x[mask].view(c.np.uint64))
+E       AssertionError: assert False
+E        +  where False = <function array_equal at 0x000001D0F555EA30>(array([                  0,                   0,                   0, ...,\n                         0,                   0, 4603501007700613594],\n      dtype=uint64), array([                  0,                   0,                   0, ...,\n                         0,                   0, 4603501007700613594],\n      dtype=uint64))
+E        +    where <function array_equal at 0x000001D0F555EA30> = <module 'numpy' from 'C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\numpy\\__init__.py'>.array_equal
+E        +      where <module 'numpy' from 'C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\numpy\\__init__.py'> = c.np
+E        +    and   array([                  0,                   0,                   0, ...,\n                         0,                   0, 4603501007700613594],\n      dtype=uint64) = <built-in method view of numpy.ndarray object at 0x000001D0B0F6D770>(<class 'numpy.uint64'>)
+E        +      where <built-in method view of numpy.ndarray object at 0x000001D0B0F6D770> = array([0.        , 0.        , 0.        , ..., 0.        , 0.        ,\n       0.59128126]).view
+E        +      and   <class 'numpy.uint64'> = <module 'numpy' from 'C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\numpy\\__init__.py'>.uint64
+E        +        where <module 'numpy' from 'C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\numpy\\__init__.py'> = c.np
+E        +    and   array([                  0,                   0,                   0, ...,\n                         0,                   0, 4603501007700613594],\n      dtype=uint64) = <built-in method view of numpy.ndarray object at 0x000001D0B0F6C8D0>(<class 'numpy.uint64'>)
+E        +      where <built-in method view of numpy.ndarray object at 0x000001D0B0F6C8D0> = array([0.        , 0.        , 0.        , ..., 0.        , 0.        ,\n       0.59128126]).view
+E        +      and   <class 'numpy.uint64'> = <module 'numpy' from 'C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\numpy\\__init__.py'>.uint64
+E        +        where <module 'numpy' from 'C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\numpy\\__init__.py'> = c.np
+
+v42_root_diagnostics\test_diagnostics.py:113: AssertionError
+============================== warnings summary ===============================
+tests/test_v42_final.py::test_provider_one_live_call_same_known_unknown
+  C:\Users\kjw39\Documents\Codex\2026-10-03\m1-root-pathology-diagnostics\worktree\v42_final\inference\calibration.py:51: RuntimeWarning: invalid value encountered in log1p
+    out = np.where(u >= hy[-2], np.log1p(np.expm1(target) / last), out)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED v42_root_diagnostics/test_diagnostics.py::test_J_K_M_projection_unique_and_only_defining_equalities_removed
+1 failed, 911 passed, 1 warning in 178.94s (0:02:58)

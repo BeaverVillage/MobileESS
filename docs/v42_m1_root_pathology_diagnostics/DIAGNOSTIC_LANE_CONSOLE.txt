@@ -1,0 +1,10 @@
+PHASE census
+Traceback (most recent call last):
+  File "<stdin>", line 6, in <module>
+  File "C:\Users\kjw39\Documents\Codex\2026-10-03\m1-root-pathology-diagnostics\worktree\v42_root_diagnostics\census.py", line 70, in run
+    m=make(kind,env);names=np.array(m.getAttr('VarName'));rows=row_families(kind);A=m.getA().tocsr();A.sort_indices()
+      ^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\Documents\Codex\2026-10-03\m1-root-pathology-diagnostics\worktree\v42_root_diagnostics\common.py", line 39, in make
+    assert (m.NumConstrs,m.NumVars,m.NumNZs,int(m.Fingerprint))==EXPECTED[kind],'SOURCE_FINGERPRINT_MISMATCH'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: SOURCE_FINGERPRINT_MISMATCH

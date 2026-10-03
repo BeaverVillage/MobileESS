@@ -1,0 +1,152 @@
+{
+  "algebraic_proof": {
+    "PASS": true,
+    "scaling": "s_i=2**(-frexp(max_abs_coefficient).exponent); positive row multiplication only",
+    "exact_binary_roundtrip_all_coefficients_and_RHS": true,
+    "nonzero_coefficients_deleted": 0,
+    "senses_bounds_objective_types_unchanged": true,
+    "minimum_scaling_exponent": -9,
+    "maximum_scaling_exponent": 35,
+    "rows_scaled": 882862,
+    "feasible_set_mathematically_identical": true,
+    "point_mapping": "identity both directions",
+    "certificate_adoption": false,
+    "numerical_tolerance_note": "Absolute solver tolerance in scaled rows has a different original-unit interpretation. Diagnostic only; unscaled residuals are separately audited."
+  },
+  "approved_transport_guard": {
+    "PASS": true,
+    "explicit_user_approval": true,
+    "approval_text": "Transport guard 승인 후 진단 계속",
+    "utc": "2026-10-03T03:45:22Z",
+    "all_GP_coefficients_RHS_bounds_senses_types_objective_and_names_exact": true,
+    "coefficients_deleted": 0,
+    "solver_prototype_OPTIMIZE_calls": 0,
+    "cache_files": {
+      "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-03\\m1-root-pathology-diagnostics\\ROOT_DIAGNOSTICS_LOCAL\\ROW_SCALED_TRANSPORT_SAFE_A.npz": "8766dd1d4afce20e7041b997a306fbdf2772d05822cd43b99a6ac197c155cf08",
+      "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-03\\m1-root-pathology-diagnostics\\ROOT_DIAGNOSTICS_LOCAL\\ROW_SCALED_TRANSPORT_SAFE_DATA.npz": "d3aa59d1d662617d61c1373c37ce8fa64f8f1431125c09448634158ce405ce14",
+      "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-03\\m1-root-pathology-diagnostics\\ROOT_DIAGNOSTICS_LOCAL\\ROW_SCALING_TRANSPORT_SAFE.npz": "372cbd2a2aefc0caa1c5eabc280e8bc23ee04db0dd281d79502369428388f40d"
+    },
+    "gurobi_scientific_signature": "0eac860a07f018f7b0660f3e0f362288bccb0aaf135903456fbb232afa8899df",
+    "shape": [
+      954560,
+      316743,
+      8282350
+    ],
+    "preserved_initial_proof_sha256": "c88d74d9e08de4faec4a2f327d861368e64622738167a1d84565957f9b7e6814",
+    "preserved_initial_cache_freeze_sha256": "3a07941228a30f1be54e3c5b0a3e6cd9b8deca912bed971f5baec97d179c2df1",
+    "exact_positive_scaling_and_inverse_binary_roundtrip_PASS": true,
+    "formula": "Starting at the preregistered exponent, decrement only the exponent of rows whose scaled coefficient would be below the solver API retention threshold. Repeat until every original nonzero entry survives. Factors depend solely on frozen input coefficients and documented input transport, never observed solver performance.",
+    "modified_scaling_rows": 342,
+    "minimum_scaled_coefficient": 1.0006451962467139e-13,
+    "certificate_update": false
+  },
+  "point_mappings": [
+    {
+      "label": "ROOT_LP_METHOD2_ORIGINAL",
+      "terminal_optimal": true,
+      "original_units_audit": {
+        "max_row_violation": 2.4722796659825337e-10,
+        "rows_exceeding_1e8": 0,
+        "max_bound_violation": 0.0,
+        "objective": 0.5718494620559795,
+        "finite": true,
+        "certificate_update": false
+      },
+      "scaled_units_audit": {
+        "max_row_violation": 1.1834799806820229e-10,
+        "rows_exceeding_1e8": 0,
+        "max_bound_violation": 0.0,
+        "objective": 0.5718494620559795,
+        "finite": true,
+        "certificate_update": false
+      },
+      "identity_mapping": true
+    }
+  ],
+  "diagnostic": {
+    "label": "ROW_SCALED_METHOD1_DIAGNOSTIC",
+    "status": "NOT_RUN",
+    "reason": "USER_STOP",
+    "formulation": "original",
+    "variant": "row_scaled",
+    "settings": {
+      "Threads": 4,
+      "Seed": 20260929,
+      "NumericFocus": 1,
+      "FeasibilityTol": 1e-08,
+      "OptimalityTol": 1e-08,
+      "Method": 1,
+      "TimeLimit": 300
+    },
+    "diagnostic_only": true,
+    "certificate_update": false,
+    "terminal_optimal": false,
+    "objective": null,
+    "solver_runtime": null,
+    "optimize_calls": 0,
+    "NON_SCIENTIFIC_DIAGNOSTIC_ONLY": false
+  },
+  "native_reference": {
+    "label": "ROOT_LP_METHOD1_ORIGINAL",
+    "formulation": "original",
+    "method": 1,
+    "diagnostic_only": true,
+    "certificate_update": false,
+    "NON_SCIENTIFIC_DIAGNOSTIC_ONLY": false,
+    "variant": null,
+    "utc": "2026-10-03T03:56:09Z",
+    "status": 9,
+    "terminal_optimal": false,
+    "objective": null,
+    "raw_candidate_objective": null,
+    "raw_solver_BestBd": 0.0,
+    "solver_runtime": 600.0040001869202,
+    "wall_seconds": 600.0067464000313,
+    "simplex_iterations": 180417.0,
+    "barrier_iterations": 0.0,
+    "work_units": 889.1117465307401,
+    "presolve_seconds": 4.06,
+    "peak_worker_RSS_bytes": 1488007168,
+    "peak_solver_memory_GB": 1.912015759,
+    "settings": {
+      "Threads": 4,
+      "Seed": 20260929,
+      "NumericFocus": 1,
+      "FeasibilityTol": 1e-08,
+      "OptimalityTol": 1e-08,
+      "Method": 1,
+      "TimeLimit": 600.0
+    },
+    "Start_accepted": null,
+    "no_Start": true,
+    "initial_scientific_model_signature": "a2d08eae6b9194f576e134c89da1d62a003e1304f751e480f5cd235f069ae821",
+    "scientific_matrix_signature_before_relax": "d761128e30bc27538926cfb0eab1ef942200f9e959b433e9cad4a7cddee028e8",
+    "diagnostic_matrix_signature": "d761128e30bc27538926cfb0eab1ef942200f9e959b433e9cad4a7cddee028e8",
+    "integer_variables_after_relaxation": 0,
+    "events": {},
+    "callback_errors": [],
+    "first_branch_time": null,
+    "first_branch_observed": false,
+    "first_branch_note": "Exact branch event is not directly exposed; observed nonroot-node callback proves branching occurred and is a labeled time proxy.",
+    "root_processing_completion_time": null,
+    "crossover_completion_time": null,
+    "rows": 954560,
+    "columns": 316743,
+    "nnz": 8282350,
+    "warnings": [
+      "Warning: Model contains large matrix coefficient range"
+    ],
+    "solver_version": [
+      13,
+      0,
+      2
+    ],
+    "log_sha256": "7a080a67c969ae49671b38392d11a7de705798282a1b621b7858d5a0d72b3a18",
+    "basis_available": false,
+    "Kappa": null,
+    "KappaExact": null,
+    "KappaExact_reason": "Not requested on a 954k+ row basis: factorization cost may exceed the bounded diagnostic budget. Kappa estimate requested if a terminal optimal simplex basis exists."
+  },
+  "note": "Positive row scaling preserves the exact real feasible set; scaled tolerance residuals have different physical units. Only original-unit residuals assess physical consistency.",
+  "certificate_update": false
+}
