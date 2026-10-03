@@ -1,0 +1,19 @@
+{
+  "PASS": true,
+  "status": "EXACT_VALID_ENVELOPE",
+  "state_definition": "SOC at boundary t: at a site node (s,t), or transit along one selected movement arc depart<t<connect. Travel cost is deducted at departure in SOC[t+1], and SOC is constant until connect.",
+  "data_authority": "Frozen D-1 route and battery in exact PR136 DATA.pkl; no Actual inputs.",
+  "forward": "F(origin,0)={initial}. Stay: (F+[−dt*Pmax/eta_dis, dt*eta_ch*Pmax]) intersect battery bounds. Travel: (F−cost) intersect bounds. Union over incoming arcs; exact disjoint interval unions are retained.",
+  "backward": "B(s,H)={terminal} at every terminal site. Stay: (B+[−dt*eta_ch*Pmax, dt*Pmax/eta_dis]) intersect bounds. Travel: (B+cost) intersect bounds. Union over outgoing arcs.",
+  "inductive_proof": "DAG induction enumerates all possible energy values for battery/route subsystem. The two mode choices give touching continuous intervals for stay energy increments; Q=0 respects original PCS since Pmax<=pcs_kva*cos(pi/16). Travel subtracts its exact original energy once, and transit has no P/Q.",
+  "node_condition": "Exact reachable battery-route set at node is F(s,t) intersect B(s,t). Prefix and suffix concatenate at the same energy; mode choices are independent by slot. Grid feasibility may narrow this set and cannot expand it.",
+  "transit_condition": "Departure interval F(source,depart) intersect (B(destination,connect)+cost) intersect [minimum+cost,maximum]. Intermediate SOC is that interval minus cost.",
+  "partition_proof": "An integer route is one DAG path. At each boundary, either one outgoing site node or one earlier departing, not yet connected movement arc is active. State weights are nonnegative and sum to one. Terminal node weight is incoming flow.",
+  "inequalities": "For each time: sum_state lower(state)*weight(state) <= SOC[t] <= sum_state upper(state)*weight(state). Weights use original arc columns only.",
+  "integer_equivalence": "Every original integer point chooses exactly one state and its energy lies in that state interval; therefore both added rows are redundant on all original integer primary points. No objectives, columns, domains, or original rows change.",
+  "empty_state_policy": "Use original battery bounds; never remove/fix any arc.",
+  "arithmetic": "Exact Fraction.from_float of original coefficients; interval extrema converted outward to IEEE doubles.",
+  "grid_constraint_omission": "Safe outer envelope of the full scientific feasible set; exact battery-route reachability, not assertion of grid-feasible attainment of extrema.",
+  "new_binary_count": 0,
+  "transit_states_explicit": true
+}
