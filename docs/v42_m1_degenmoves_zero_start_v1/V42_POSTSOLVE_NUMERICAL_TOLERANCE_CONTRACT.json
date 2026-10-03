@@ -1,0 +1,30 @@
+{
+  "schema": "V42_GLOBAL_POSTSOLVE_NUMERICAL_V1",
+  "solver_FeasibilityTol": 1e-08,
+  "solver_IntFeasTol": 1e-08,
+  "solver_OptimalityTol": 1e-08,
+  "postsolve_numerical_audit_tol": 1e-06,
+  "physical_limits_changed": false,
+  "result_specific_threshold": false,
+  "applies_to": [
+    "A1",
+    "M1",
+    "A2",
+    "M2",
+    "B0",
+    "B1",
+    "B2",
+    "B3",
+    "B3_loop1",
+    "B3_loop2",
+    "B3_loop3",
+    "B3_loop4",
+    "Planning_freeze",
+    "reconstructed_certificate"
+  ],
+  "validator": "v42_postsolve.contract.audit_point / numerical_residuals",
+  "physical_audit_policy": "Inherited independent physical validator and its existing tolerance; numerical tolerance never added to a physical RHS or rating.",
+  "raw_solution_repair_allowed": false,
+  "legacy_frozen_experiment_sources_preserved": true,
+  "future_stage_authority": "All listed stages must use this common validator for post-solve numerical/certificate validation; historical scientific executions are not retroactively rewritten."
+}
