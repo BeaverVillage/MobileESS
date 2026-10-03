@@ -1,0 +1,18 @@
+{
+  "exact_base": "97ef9cc9b655d93a42b0b43d593aac01b951c6f3",
+  "H1": {"status": "NOT_SUPPORTED", "claim": "Unintended A-only/asymmetric AIDC PCC mapping", "ABC_connected_PCCs": 12, "PCC_count": 12, "upstream_transformers_ABC": true, "maximum_P_phase_spread_kW": 0.002547456375737, "maximum_Q_phase_spread_kvar": 0.002879673560856, "exact_zero_phase_spread": false, "interpretation": "Terminal P/Q is approximately balanced. Small nonzero deviations and unequal I are observed under unequal local voltages and finite nonlinear convergence; no missing/swapped phase is found."},
+  "H2": {"status": "STRONGLY_SUPPORTED", "claim": "Native feeder phase imbalance with balanced AIDC addition", "native_A_heavier_source_and_actual_CONFIRMED": true, "source_base_P_kW": {"A": 1400.0, "B": 952.5, "C": 1137.5}, "source_base_Q_kvar": {"A": 762.5, "B": 540.0, "C": 617.5}, "peak_native_P_kW": {"A": 1360.6032118781975, "B": 938.7331199775008, "C": 1117.8773716283192}, "peak_native_Q_kvar": {"A": 817.9649024373996, "B": 638.4025316138941, "C": 674.2636165640868}, "native_A_minus_B_P_kW": 421.8700919006967, "native_A_minus_C_P_kW": 242.72584024987827, "peak_AIDC_P_kW": {"A": 176.63659784362474, "B": 176.63726636822636, "C": 176.63917428446817}, "all_12_violation_slots_native_A_P_greater_than_B_and_C": true, "limitation": "Observational source-backed decomposition, no AIDC removal or load redistribution counterfactual. Balanced AIDC contributes absolute demand on all phases; native imbalance and network losses concentrate A-phase loading."},
+  "H3": {"status": "NOT_SUPPORTED", "claim": "Incorrect reg1a current measurement/denominator under frozen PR129 contract", "conductor_parent_winding_mapping_verified": true, "denominator_A": 693.9306120067617, "denominator_source": "5000 kVA three-phase winding nameplate / (sqrt(3)*4.16 kV)", "CTPrim_700_is_measurement_CT_not_thermal_limit": true, "source_NormalAmps_A": 763.323673207438, "source_EmergAmps_A": 1040.89591801014, "full_May_nameplate_current_violations": 12, "full_May_NormalAmps_exceedances": 0, "thermal_interpretation": "The 12 cells exceed the frozen 100% nameplate policy; none exceed OpenDSS NormalAmps. They must not be called source-NormalAmps thermal violations. No rating change is made."},
+  "most_direct_root_cause": "Native IEEE123 A-phase P/Q imbalance, amplified by downstream losses, combined with balanced AIDC demand crossing the frozen per-phase nameplate current limit.",
+  "PCC_mapping_fix_needed": false,
+  "exact_fix_proposal_required": false,
+  "physical_changes": 0,
+  "diagnostic_days": 4,
+  "primary_reproduction_slots": 384,
+  "additional_network_reproduction_slots": 384,
+  "detailed_violation_slots": 12,
+  "normal_control_slots": 8,
+  "PCC_terminal_samples": 240,
+  "reg1a_full_May_phase_peaks": {"A": {"day": "2025-05-21", "slot": 31, "phase": "A", "current_A": 730.9052641854221, "current_pu": 1.0532829241698016}, "B": {"day": "2025-05-21", "slot": 31, "phase": "B", "current_A": 509.6121732076567, "current_pu": 0.7343849145578419}, "C": {"day": "2025-05-21", "slot": 31, "phase": "C", "current_A": 598.6367677997462, "current_pu": 0.8626752551938334}},
+  "source_thermal_exceedance_distinguished": true
+}
