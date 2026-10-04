@@ -71,7 +71,8 @@ def verify():
 def flags():
  r=read(OUT/'DW_CONTINUATION_FINAL_RESULT.json');cp=read(OUT/'DW_CHECKPOINT_LATEST.json');last=cp['restart_state']['certs'][-1] if cp['restart_state']['certs'] else None
  ps=[read(OUT/n) for n in last['pricing_receipts']] if last else []
- neg={p['MESS']:p['rc_inc'] if p['native_status']==2 else None for p in ps}
+ neg={p['MESS']:p['rc_inc'] if p['native_status']==2 else None for p in ps} if last and last['dual_SHA']==cp['RMP']['dual_SHA'] else {}
+ write('DW_LAST_CERTIFIED_POINT_NEGATIVE_RC.json',dict(pricing=[dict(MESS=p['MESS'],status=p['native_status'],exact_RC=p['rc_inc'] if p['native_status']==2 else None) for p in ps],certified_point_SHA=last['dual_SHA'] if last else None,final_RMP_SHA=cp['RMP']['dual_SHA'],matches_final_RMP=bool(last and last['dual_SHA']==cp['RMP']['dual_SHA']),incumbent_never_LB=True))
  write('FINAL_FLAGS.json',dict(PR149_BASE_PRESERVED=True,ARC_LP_CERTIFIED_FLOOR=r['arc_floor'],DW_THRESHOLD=r['material_threshold'],DW_START_COLUMNS=1433,DW_FINAL_COLUMNS=r['retained_columns'],FOUR_WAY_PRICING=True,PRICING_THREADS=1,ADAPTIVE_DUAL_SMOOTHING=True,EARLY_STOP=True,PARALLEL_VALIDATION=True,INCREMENTAL_AUDIT=True,PERSISTENT_RMP_SELECTED=False,WARM_BASIS_SELECTED=False,NEW_AUTHORIZED_OPTIMIZE_SECONDS=1800,NEW_CONSUMED_OPTIMIZE_SECONDS=r['new_consumed_optimize'],HISTORICAL_PR149_OPTIMIZE_SECONDS=r['historical_PR149_optimize'],CUMULATIVE_OPTIMIZE_SECONDS=r['cumulative_optimize'],DW_NEW_DISCOVERY_ROUNDS=r['discovery_rounds'],DW_NEW_COLUMNS=r['new_discovery_columns'],DW_BEST_CERTIFIED_LB=r['best_certified_LB'],DW_BEST_RMP_UPPER=r['smallest_RMP_upper'],DW_FINAL_INTERVAL=r['final_interval'],DW_MATERIALITY=r['materiality'],DW_ROOT_OPTIMAL=r['DW_ROOT_OPTIMAL_CERTIFIED'],DW_CG_CONVERGED=r['DW_ROOT_OPTIMAL_CERTIFIED'],REMAINING_EXACT_NEGATIVE_RC=neg or None,BRANCH_AND_PRICE_RUN=False,B1_UNTOUCHED=True,B2_PRODUCTION_CALLS=0,B3_PRODUCTION_CALLS=0))
 
 def report(tests):
