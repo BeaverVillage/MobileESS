@@ -34,6 +34,13 @@ def wait_admission(exp,phase):
  while True:
   sample=exp.monitor.sample();processes,blocked=inspect_native(exp.pids)
   from .resources import resource_failures
+  observed_native=list(blocked);authorized=[]
+  permit=OUT/'USER_RESOURCE_ADMISSION_OVERRIDE.json'
+  if permit.exists() and read(permit)['B1_concurrency_authorized']:
+   for row in observed_native:
+    cmd=row.get('cmd',[])
+    if '-m' in cmd and cmd[cmd.index('-m')+1]=='v42_b1_production.worker':authorized.append(row)
+   blocked=[row for row in blocked if row not in authorized]
   failures=resource_failures(sample,exp.monitor.rows)
   if not blocked and not failures:break
   if STOP.exists():raise InterruptedError('USER_STOP_AT_WAIT_RESOURCE')
@@ -46,7 +53,7 @@ def wait_admission(exp,phase):
    events.append(event);exp.last_wait_heartbeat=time.perf_counter();write('DW_CONTINUATION_WAIT_RESOURCE.json',dict(status='WAIT_RESOURCE',events=events,optimization_budget_consumed_by_wait=0));print('WAIT_RESOURCE',phase,exp.spent(),len(blocked),failures,flush=True)
   exp.active_start=None;exp.cancel.clear();exp.monitor.failed.clear();time.sleep(2)
  exp.cancel.clear();exp.monitor.failed.clear();exp.wait_events=events
- write('DW_CONTINUATION_WAIT_RESOURCE.json',dict(status='ADMITTED',events=events,latest_processes=processes,wait_seconds=time.perf_counter()-start if waited else 0.,optimization_budget_consumed_by_wait=0,other_lane_kill_calls=0,other_lane_terminate_calls=0))
+ write('DW_CONTINUATION_WAIT_RESOURCE.json',dict(status='ADMITTED',events=events,latest_processes=processes,authorized_B1_native_reservations=authorized,B1_concurrency_authorized=bool(authorized),wait_seconds=time.perf_counter()-start if waited else 0.,optimization_budget_consumed_by_wait=0,other_lane_kill_calls=0,other_lane_terminate_calls=0))
  if getattr(exp,'runtime_suspended',False):
   exp.restore_models()
   if phase!='PRICING_MODEL_BUILD':exp.start_workers(4)
