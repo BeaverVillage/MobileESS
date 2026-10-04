@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DW immutable physical audit receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trajectory_SHA",
+    "authority",
+    "max_residual",
+    "true_RC",
+    "true_dual_SHA",
+    "iteration",
+    "timestamp",
+    "run_id",
+    "physical_residuals_json"
+  ],
+  "properties": {
+    "trajectory_SHA": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scientific_base_SHA",
+        "scientific_matrix_SHA",
+        "variable_axis_SHA",
+        "row_axis_SHA",
+        "validator_version_SHA",
+        "physical_semantics_SHA",
+        "numerical_tolerance_SHA"
+      ],
+      "properties": {
+        "scientific_base_SHA": {
+          "type": "string",
+          "pattern": "^([a-f0-9]{40}|[a-f0-9]{64})$"
+        },
+        "scientific_matrix_SHA": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "variable_axis_SHA": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "row_axis_SHA": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "validator_version_SHA": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "physical_semantics_SHA": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "numerical_tolerance_SHA": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "max_residual": {
+      "type": "number",
+      "minimum": 0
+    },
+    "true_RC": {
+      "type": "number"
+    },
+    "true_dual_SHA": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "iteration": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "timestamp": {
+      "type": "string"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "physical_residuals_json": {
+      "type": "string"
+    }
+  },
+  "description": "Cache key = SHA256(canonical JSON of trajectory_SHA + exact authority). RC/dual SHA are historical provenance; no current RC reuse. Finite numbers and complete passing physical/local/integrality report required."
+}
