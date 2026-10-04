@@ -1,4 +1,4 @@
-"""Fixed 4-way threshold CG: at most12 Discovery + one120s Certification."""
+"""Frozen four-way root continuation within one newly authorized grant."""
 from .common import *
 from .cg_reuse import Mechanics
 from .resources import Monitor
@@ -16,6 +16,7 @@ class Experiment(Mechanics):
         self.resume_checkpoint=read(OUT/'DW_CHECKPOINT_LATEST.json') if (OUT/'DW_CHECKPOINT_LATEST.json').exists() else None
         if self.resume_checkpoint:assert self.resume_checkpoint['type']!='TERMINAL','ONE_CONTINUATION_GRANT_ALREADY_FINISHED'
         if not (OUT/'CG_STARTED.json').exists():write('CG_STARTED.json',dict(preopt_commit=self.commit,new_grant=1800,historical_PR149=self.historical_optimize,explicit_user_authorized_new_task=True))
+        for directory in ('logs','columns','pricing_points','pricing_receipts','bound_certificates'):(OUT/directory).mkdir(parents=True,exist_ok=True)
         self.RMP_cap=300.;self.force_final_after_incomplete=False;self.wait_events=[];self.runtime_suspended=False
         self.begin=time.perf_counter();self.budget_carried=0.;self.wall_carried=0.;self.intervals=[];self.rmps=[];self.prices=[];self.columns=[];self.rounds=[];self.certs=[];self.canaries=[];self.capture_ledger=[];self.smoothing_rows=[];self.current_round=14;self.call=52;self.column_id=189;self.workers=4;self.context=mp.get_context('spawn');self.cancel=self.context.Event();self.processes=[];self.pipes=[];self.pids=[];self.monitor=Monitor(self.pids,self.cancel)
         self.floor=arc['L_arc_cert'];self.authority=read(ARC/'DW_MATERIAL_THRESHOLD_AUTHORITY.json');old=read(SCI/'DW_ACCELERATED_FINAL_RESULT.json');self.best_corr=old['best_corrected_LB'];self.bestU=old['smallest_RMP_upper'];self.bestL=max(self.floor,self.best_corr);self.materiality=decision(self.bestL,self.bestU,self.authority);self.converged=False;self.stop=None;self.accepted=[];self.uppers=[self.bestU]
