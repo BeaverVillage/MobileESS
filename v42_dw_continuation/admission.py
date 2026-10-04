@@ -4,7 +4,9 @@ import psutil,ast,re,time
 
 def nonheavy_binding(p):
  try:
-  command=' '.join(p.parent().cmdline());match=re.search(r"@'\s*\n(.*?)\n'@",command,re.S)
+  parent=p.parent()
+  if parent is None:return None
+  command=' '.join(parent.cmdline());match=re.search(r"@'\s*\n(.*?)\n'@",command,re.S)
   if not match:return None
   source=match.group(1);tree=ast.parse(source)
   forbidden={'optimize','Solve','solve','run_a1','build','prepare','run_day'}

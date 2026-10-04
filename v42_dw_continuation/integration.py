@@ -154,6 +154,9 @@ class Integration:
   row=self.authority_rmp();assert sha(OUT/row['point_file'])==row['point_SHA']
   with np.load(OUT/row['point_file']) as z:pi=z['pi'];alpha=z['alpha']
   self.previous_pi=pi.copy()
+  completed=[r for r in self.rmps if r['status']==2]
+  prior=OUT/completed[-2]['point_file'] if len(completed)>=2 else SCI/self.initial_rmp['point_file'].split('/')[-1] if completed else SCI/'RMP_POINT_0013.npz'
+  with np.load(prior) as z:self.last_true_pi=z['pi'].copy()
   return pi,alpha,row['dual_SHA'],row['point_file']
  def restore_run(self):
   self.resume_phase=None
@@ -180,6 +183,7 @@ class Integration:
     assert phase['true_dual_SHA']==cp['RMP']['dual_SHA'];self.resume_phase=phase
     with np.load(OUT/phase['search_file']) as z:self.smooth_pi=z['pi'];self.smooth_conv=z['alpha']
     self.smooth_weight=phase['alpha_next'];self.smoothing_rows=phase['smoothing_rows'];self.smooth_file=phase['search_file'];self.smooth_key=phase['search_key']
+  self.last_completed_dual()
   write('DW_RESUME_RECEIPT.json',dict(PASS=True,new_budget_conservative_debit=self.budget_carried,historical_PR149=self.historical_optimize,no_second_new_grant=True,completed_pricing_replayed=False))
  def resume_dual(self):
   cp=self.resume_checkpoint

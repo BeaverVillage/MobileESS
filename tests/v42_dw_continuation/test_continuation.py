@@ -32,3 +32,29 @@ def test_saved_pool_dual_and_smoothing_restored_exactly():
  cp=read(SCI/'DW_CHECKPOINT_LATEST.json');assert len(cp['pool'])==1433
  with np.load(SCI/cp['smooth_file']) as z:assert hashlib.sha256(z['pi'].tobytes()+z['alpha'].tobytes()).hexdigest()==cp['smooth_key']
  with np.load(SCI/cp['RMP']['point_file']) as z:assert hashlib.sha256(z['pi'].tobytes()+z['alpha'].tobytes()).hexdigest()==cp['RMP']['dual_SHA']
+
+
+def test_orphan_native_candidate_never_becomes_nonheavy():
+ from v42_dw_continuation.admission import nonheavy_binding
+ from types import SimpleNamespace
+ assert nonheavy_binding(SimpleNamespace(parent=lambda:None)) is None
+
+
+def test_interrupted_rmp_releases_idle_workers_and_has_no_point(monkeypatch):
+ from v42_dw_continuation import cg
+ from types import SimpleNamespace
+ events=[];outputs={}
+ class NativeStub:
+  Status=11
+  Params=SimpleNamespace()
+  def reset(self,n):events.append(('reset',n))
+  def setParam(self,k,v):setattr(self.Params,k,v)
+  def optimize(self,callback):events.append(('stub_native',self.Params.Threads))
+ model=NativeStub();e=cg.Experiment.__new__(cg.Experiment)
+ e.close_workers=lambda:events.append(('close_own_idle',4));e.resource_gate=lambda phase:events.append(('gate',phase));e.current_round=16;e.master=SimpleNamespace(model=model);e.persistent_selected=False;e.RMP_cap=300;e.remaining=lambda:1669;e.spent=lambda:130;e.monitor=SimpleNamespace(phase=None);e.active=[None];e.cancel=SimpleNamespace(is_set=lambda:False);e.rmps=[];e.intervals=[];e.debit_done=lambda:None;e.save=lambda:None
+ monkeypatch.setattr(cg,'write',lambda n,d:outputs.update({n:d}))
+ assert e.solve_master('RECOVER_RESOURCE_INTERRUPTED') is None
+ assert events[:2]==[('close_own_idle',4),('gate','RMP')]
+ assert events[-1]==('stub_native',1) and model.Params.LPWarmStart==0
+ assert e.rmps[-1]['status']==11 and e.rmps[-1]['objective'] is None and e.rmps[-1]['point_file'] is None
+ assert outputs['DW_INFLIGHT.json']['spent_before']==130

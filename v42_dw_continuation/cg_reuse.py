@@ -32,6 +32,7 @@ class Mechanics:
         self.processes=[];self.pipes=[];self.pids.clear()
 
     def pricing_round(self,kind,dual,cap):
+        if not self.processes:self.start_workers(4)
         self.resource_gate(kind);pi,alpha,key,file=dual;results=[];self.monitor.phase=kind;sample_start=len(self.monitor.rows);batch_start=time.perf_counter();write('DW_INFLIGHT.json',dict(kind=kind,spent_before=self.spent(),reserved_optimize_seconds=min(self.remaining(),cap*math.ceil(4/self.workers)+4),round=self.current_round,dual_SHA=key))
         phase=getattr(self,'resume_phase',None)
         if phase:

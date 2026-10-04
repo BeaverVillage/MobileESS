@@ -76,6 +76,7 @@ class Experiment(Mechanics):
         return file,key
 
     def solve_master(self,kind):
+        self.close_workers()  # Idle pricing native heaps are unnecessary for RMP.
         self.current_round+=1;self.resource_gate('RMP');rmp_begin=time.perf_counter();model=self.master.model;model.reset(0 if self.persistent_selected else 1)
         settings=dict(Threads=1,Method=2,Crossover=1,LPWarmStart=0,PreDual=0,BarConvTol=1e-11,Seed=20260929,FeasibilityTol=EPS,IntFeasTol=EPS,OptimalityTol=EPS,TimeLimit=min(self.RMP_cap,max(.001,self.remaining()-124)))
         for k,v in settings.items():model.setParam(k,v)
