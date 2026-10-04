@@ -1,7 +1,7 @@
 # Lane D May campaign 구현 검토
 
 1. Base SHA: `ce5d30fb9bcb91ab8395d1313e868d24f5fde517` (Draft PR #143 exact head).
-2. Branch: `codex/v42-may-campaign-orchestrator-prep`. 새 Draft PR URL 및 최종 local/remote SHA는 `PR_PUBLICATION.json`에 기록하고 최종 응답에서도 확인한다. Commit/push 후 clean tree와 remote SHA를 별도로 검증한다.
+2. Branch: `codex/v42-may-campaign-orchestrator-prep`. [Draft PR #146](https://github.com/BeaverVillage/MobileESS/pull/146), 구현 commit `2552359614dc0c0c9c571e7837d55dc159dca3a8`. 생성 시 local/remote/PR head 일치를 `PR_PUBLICATION.json`에 기록했다. 이후 publication 문서 commit을 포함한 최종 remote head는 GitHub PR metadata와 최종 응답에서 확인한다. Force push/merge/rebase 없이 push하며 마지막 clean tree를 별도로 검증한다.
 3. 날짜 authority: 기존 frozen `MAY_CAMPAIGN_DRY_RUN_PLAN.json`의 명시적 목록. 2025-05-01~2025-05-31, 31개 unique, 순서·월·연도 검증. 전체 목록은 `MAY_DATE_AUTHORITY_AUDIT.json`.
 4. DAG: B0 31일 → B1 31일 → B2 31일 → B3 L1 31일 → main-complete → B3 L2 31일 → L3 31일 → L4 31일. 각 day는 기존 arm별 Planning 뒤 Freeze→Actual→Fresh AC→Validation.
 5. 총 stage: `3×31×5 + 4×31×8 + 1 = 1,458`. 마지막 1은 main-complete coordinator gate. 역사적 1,458과 차이 0, science 변경 없음.
