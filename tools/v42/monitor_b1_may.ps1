@@ -229,8 +229,58 @@ function Get-B1Metrics {
     [pscustomobject]@{Loading=$rho;Source=$source;Gap=$gap;LoadingText=$loadingText;GapText=$gapText}
 }
 
+function Get-B1Progress {
+    param($Live)
+    $total=31
+    $processed=@($Live.day_rows | Where-Object { $_.status -in @('PASS','FAIL') }).Count
+    if (-not $Live.day_rows) { $processed=[int]$Live.PASS_days }
+    $percent=100.0*$processed/$total
+    $filled=[int][math]::Floor(20*$processed/$total)
+    $overall=('전체 진행  [{0}{1}] {2:N1}% · {3}/{4}일 처리' -f ('#'*$filled),('.'*(20-$filled)),$percent,$processed,$total)
+    $p=$Live.progress; $stage=[string]$Live.active.stage
+    $part=$null; $required=$null; $label=$null
+    if ($stage -eq 'A1' -and $p.phase -eq 'MODEL_BUILD') {
+        foreach ($pair in @(@('classes_complete','classes_required','작업 분류'),@('units_complete','units_required','제약 연결'),@('jobs_complete','jobs_required','작업 생성'))) {
+            if ($null -ne $p.($pair[0]) -and $p.($pair[1]) -gt 0) {
+                $part=[double]$p.($pair[0]); $required=[double]$p.($pair[1]); $label=$pair[2]; break
+            }
+        }
+    } elseif ($stage -eq 'FRESH_AC' -and $null -ne $p.OpenDSS_slot) {
+        $part=[double]$p.OpenDSS_slot; $required=96; $label='Fresh AC'
+    }
+    $stagePercent=$null
+    if ($required -gt 0) {
+        $stagePercent=100*$part/$required
+        $current=('현재 진행  {0} {1:N0}/{2:N0} · {3:N1}%' -f $label,$part,$required,$stagePercent)
+    } elseif ($stage -eq 'A1' -and $p.solver_status -eq 'OPTIMIZING') {
+        $phases=@('rho','migration_count','shift_magnitude','prestart_relocation')
+        $index=[array]::IndexOf($phases,[string]$p.phase)+1
+        $current=('현재 진행  최적화 {0}/4 · 경과 {1:N0}초 / 제한 1800초' -f $index,[double]$p.elapsed)
+    } else { $current='현재 진행  '+$(if ($Live.state -eq 'COMPLETE') {'완료'} elseif ($Live.state -eq 'WAIT_RESOURCE') {'대기 중'} else {'단계 준비 중'}) }
+    [pscustomobject]@{Percent=$percent;Processed=$processed;Total=$total;StagePercent=$stagePercent;OverallText=$overall;CurrentText=$current}
+}
+
+function Get-B1AttemptSummary {
+    param($Live,$Checkpoint)
+    if (-not $Live.active.day -or -not $Live.active.stage -or $Checkpoint.run_id -ne $Live.run_id) { return $null }
+    $row=$Checkpoint.stages.PSObject.Properties["$($Live.active.day)/$($Live.active.stage)"].Value
+    if (-not $row.request -or $row.attempts -le 1) { return $null }
+    $parent=Split-Path (Split-Path $row.request -Parent) -Parent
+    $prefix=[IO.Path]::GetFullPath($Root).TrimEnd('\')+'\'
+    if (-not [IO.Path]::GetFullPath($parent).StartsWith($prefix,[StringComparison]::OrdinalIgnoreCase)) { return $null }
+    $resourceStops=0; $infeasible=0
+    for ($attempt=1;$attempt -lt [int]$row.attempts;$attempt++) {
+        $folder=Join-Path $parent ([string]$attempt)
+        $cancel=Read-AtomicSnapshot (Join-Path $folder 'CANCEL.json') $null
+        if ($cancel.reason -eq 'RESOURCE_HARD_GUARD') { $resourceStops++; continue }
+        $solve=Read-AtomicSnapshot (Join-Path $folder 'o/A1_SOLVE_RESULT.json') $null
+        if (@($solve.passes | Where-Object status -eq 3).Count) { $infeasible++ }
+    }
+    [pscustomobject]@{Attempt=[int]$row.attempts;ResourceStops=$resourceStops;Infeasible=$infeasible}
+}
+
 function Get-CompactB1Lines {
-    param($Frame,$Metrics)
+    param($Frame,$Metrics,$Attempts=$null)
     $live=$Frame.Live; $resource=$Frame.Resource
     $labels=@{RUNNING='실행 중';WAIT_RESOURCE='자원 대기';FAIL='실패';COMPLETE='완료';DEAD='연결 끊김';STALE='갱신 지연';INFRASTRUCTURE_FAILURE='실행 오류';INTERRUPTING_RESOURCE_GUARD='자원 보호 중'}
     $state=$labels[[string]$Frame.State]; if (-not $state) { $state=$Frame.State }
@@ -243,11 +293,17 @@ function Get-CompactB1Lines {
     $lines=[Collections.Generic.List[string]]::new()
     $lines.Add('Mobile ESS | May 2025 · B1')
     $lines.Add(('상태  {0}     완료  {1}/31     실패  {2}' -f $state,$live.PASS_days,$Frame.View.Failed))
+    $progress=Get-B1Progress $live
+    $lines.Add($progress.OverallText)
     $lines.Add(('현재  {0}' -f $current))
+    $lines.Add($progress.CurrentText)
+    if ($Attempts) {
+        $lines.Add(('시도  {0}회차 · 메모리 보호 중단 {1}회 · 해 없음 {2}회' -f $Attempts.Attempt,$Attempts.ResourceStops,$Attempts.Infeasible))
+    }
     $lines.Add('')
     $lines.Add(('최대 선로 부하율  {0}     Gap  {1}' -f $Metrics.LoadingText,$Metrics.GapText))
     $lines.Add('')
-    $lines.Add(('RAM 여유  {0:N2} GiB     Commit  {1:N1}%' -f $resource.available_GiB,$resource.commit_percent))
+    $lines.Add(('RAM 여유  {0:N2} GiB     메모리 Commit  {1:N1}%' -f $resource.available_GiB,$resource.commit_percent))
     if ($Frame.State -eq 'WAIT_RESOURCE') {
         $reason=if (@($resource.foreign_heavy).Count) { '다른 대규모 계산 실행 중' }
             elseif ($resource.available_GiB -lt 1) { '가용 메모리 부족' }
@@ -285,10 +341,11 @@ do {
         }
         if ($freshFolder) { $fresh=Read-AtomicSnapshot (Join-Path $freshFolder 'FRESH_RESULT.json') $null }
         $metrics=Get-B1Metrics $live $solve $audit $fresh
-        if ($Json) { [pscustomobject]@{Frame=$frame;Metrics=$metrics} | ConvertTo-Json -Depth 20 }
+        $attempts=Get-B1AttemptSummary $live $checkpoint
+        if ($Json) { [pscustomobject]@{Frame=$frame;Metrics=$metrics;Progress=(Get-B1Progress $live);Attempts=$attempts} | ConvertTo-Json -Depth 20 }
         else {
             if (-not $Once) { Clear-Host }
-            $lines=Get-CompactB1Lines $frame $metrics
+            $lines=Get-CompactB1Lines $frame $metrics $attempts
             $color=if ($frame.State -eq 'FAIL') {'Red'} elseif ($frame.State -eq 'WAIT_RESOURCE') {'Yellow'} else {'Cyan'}
             for ($i=0;$i -lt $lines.Count;$i++) {
                 if ($i -eq 1) { Write-Host $lines[$i] -ForegroundColor $color }

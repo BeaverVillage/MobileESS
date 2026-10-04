@@ -43,7 +43,7 @@ def test_compact_screen_contains_only_core_values():
                      capture_output=True,text=True,encoding='utf-8')
     assert p.returncode==0 and not p.stderr,p.stderr
     lines=json.loads(p.stdout);text='\n'.join(lines)
-    assert len(lines)==7 and '3/31' in text and '84.00%' in text and 'Gap  1.20%' in text
+    assert len(lines)==9 and '3/31' in text and '9.7%' in text and '84.00%' in text and 'Gap  1.20%' in text
     for extra in ('node_count','pagefile','BestBd','MIPGap','PID','Threads','TimeLimit','155'):
         assert extra not in text
 
@@ -87,3 +87,54 @@ def test_frame_tracks_coordinator_replacement_and_rejects_stale_identity():
     rows=json.loads(result.stdout)
     assert [row['State'] for row in rows]==['RUNNING','RUNNING','DEAD','DEAD','STALE','DEAD']
     assert rows[1]['IdentityMatches'] is True and rows[4]['Orchestrator']=='ALIVE'
+
+
+def test_progress_uses_observed_work_and_keeps_solver_completion_unknown():
+    monitor=ROOT/'tools/v42/monitor_b1_may.ps1'
+    script=f"[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new(); . '{monitor}' -LibraryOnly; " + r'''
+    $live=[pscustomobject]@{state='RUNNING';PASS_days=1;day_rows=@([pscustomobject]@{status='PASS'},[pscustomobject]@{status='FAIL'},[pscustomobject]@{status='RUNNING'});active=[pscustomobject]@{stage='A1'};progress=[pscustomobject]@{phase='MODEL_BUILD';classes_complete=16;classes_required=55}}
+    $a=Get-B1Progress $live
+    $live.progress=[pscustomobject]@{phase='MODEL_BUILD';units_complete=641;units_required=644}
+    $b=Get-B1Progress $live
+    $live.progress=[pscustomobject]@{phase='rho';solver_status='OPTIMIZING';elapsed=900;gap=.01}
+    $c=Get-B1Progress $live
+    $live.active.stage='FRESH_AC';$live.progress=[pscustomobject]@{OpenDSS_slot=24}
+    $d=Get-B1Progress $live
+    @($a,$b,$c,$d)|ConvertTo-Json -Compress
+    '''
+    result=subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-Command',script],
+                          capture_output=True,text=True,encoding='utf-8')
+    assert result.returncode==0 and not result.stderr,result.stderr
+    a,b,c,d=json.loads(result.stdout)
+    assert a['Processed']==2 and abs(a['Percent']-200/31)<1e-9
+    assert abs(a['StagePercent']-1600/55)<1e-9 and '16/55' in a['CurrentText']
+    assert '641/644' in b['CurrentText']
+    assert c['StagePercent'] is None and '1/4' in c['CurrentText'] and '900' in c['CurrentText']
+    assert d['StagePercent']==25 and '24/96' in d['CurrentText']
+
+
+def test_attempt_summary_distinguishes_memory_interruptions_from_infeasible(tmp_path):
+    monitor=ROOT/'tools/v42/monitor_b1_may.ps1'
+    parent=tmp_path/'a'/'20250501'/'0'
+    for attempt in range(1,8):
+        folder=parent/str(attempt)
+        folder.mkdir(parents=True)
+        if attempt<=5:
+            (folder/'CANCEL.json').write_text(json.dumps({'reason':'RESOURCE_HARD_GUARD'}),encoding='utf-8')
+        if attempt==6:
+            (folder/'o').mkdir()
+            (folder/'o'/'A1_SOLVE_RESULT.json').write_text(json.dumps({'passes':[{'status':3}]}),encoding='utf-8')
+    script=f"[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new(); . '{monitor}' -LibraryOnly; $Root='{tmp_path}'; "
+    script+=r'''
+    $live=[pscustomobject]@{run_id='run';active=[pscustomobject]@{day='2025-05-01';stage='A1'}}
+    $checkpoint=[pscustomobject]@{run_id='run';stages=[pscustomobject]@{'2025-05-01/A1'=[pscustomobject]@{attempts=7;request=(Join-Path $Root 'a/20250501/0/7/request.json')}}}
+    $a=Get-B1AttemptSummary $live $checkpoint
+    $checkpoint.run_id='foreign';$b=Get-B1AttemptSummary $live $checkpoint
+    [pscustomobject]@{Good=$a;Foreign=$b}|ConvertTo-Json -Compress
+    '''
+    result=subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-Command',script],
+                          capture_output=True,text=True,encoding='utf-8')
+    assert result.returncode==0 and not result.stderr,result.stderr
+    value=json.loads(result.stdout)
+    assert value['Good']=={'Attempt':7,'ResourceStops':5,'Infeasible':1}
+    assert value['Foreign'] is None
